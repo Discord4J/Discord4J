@@ -17,10 +17,10 @@
 package discord4j.core.object.entity;
 
 import discord4j.core.ServiceMediator;
-import discord4j.core.object.presence.Presence;
 import discord4j.core.object.VoiceState;
 import discord4j.core.object.entity.bean.MemberBean;
 import discord4j.core.object.entity.bean.UserBean;
+import discord4j.core.object.presence.Presence;
 import discord4j.core.object.util.Snowflake;
 import discord4j.store.util.LongLongTuple2;
 import reactor.core.publisher.Flux;
@@ -165,5 +165,16 @@ public final class Member extends User {
         return getServiceMediator().getStoreHolder().getPresenceStore()
                 .find(LongLongTuple2.of(getGuildId().asLong(), getId().asLong()))
                 .map(Presence::new);
+    }
+
+    /**
+     * Requests to kick this member.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the member was kicked. If an
+     * error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Void> kick() {
+        return getServiceMediator().getRestClient().getGuildService()
+                .removeGuildMember(getGuildId().asLong(), getId().asLong());
     }
 }

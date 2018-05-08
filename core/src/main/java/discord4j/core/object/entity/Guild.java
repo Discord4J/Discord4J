@@ -17,6 +17,7 @@
 package discord4j.core.object.entity;
 
 import discord4j.common.json.response.GuildMemberResponse;
+import discord4j.common.json.response.PruneResponse;
 import discord4j.core.DiscordClient;
 import discord4j.core.ServiceMediator;
 import discord4j.core.object.presence.Presence;
@@ -634,6 +635,61 @@ public final class Guild implements Entity {
      */
     public Mono<Void> delete() {
         return serviceMediator.getRestClient().getGuildService().deleteGuild(getId().asLong());
+    }
+
+    /**
+     * Requests to kick the specified user from this guild.
+     *
+     * @param userId The ID of the user to kick from this guild.
+     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the specified user was kicked
+     * from this guild. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Void> kick(final Snowflake userId) {
+        return serviceMediator.getRestClient().getGuildService().removeGuildMember(getId().asLong(), userId.asLong());
+    }
+
+    /**
+     * Requests to retrieve the number of users that will be pruned. Users are pruned if they have not been seen within
+     * the past specified amount of days <i>and</i> are not assigned to any roles for this guild.
+     *
+     * @param days THe number of days since an user must have been seen to avoid being kicked.
+     * @return A {@link Mono} where, upon successful completion, emits the number of users that will be pruned. If an
+     * error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Integer> getPruneCount(final int days) {
+        final Map<String, Object> queryParams = new HashMap<>(1);
+        queryParams.put("days", days);
+
+        return serviceMediator.getRestClient().getGuildService()
+                .getGuildPruneCount(getId().asLong(), queryParams)
+                .map(PruneResponse::getPruned);
+    }
+
+    /**
+     * Requests to prune users. Users are pruned if they have not been seen within the past specified amount of days
+     * <i>and</i> are not assigned to any roles for this guild.
+     *
+     * @param days The number of days since an user must have been seen to avoid being kicked.
+     * @return A {@link Mono} where, upon successful completion, emits the number of users who were pruned. If an error
+     * is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Integer> prune(final int days) {
+        final Map<String, Object> queryParams = new HashMap<>(1);
+        queryParams.put("days", days);
+
+        return serviceMediator.getRestClient().getGuildService()
+                .beginGuildPrune(getId().asLong(), queryParams)
+                .map(PruneResponse::getPruned);
+    }
+
+    /**
+     * Requests to leave this guild.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating this guild has been left. If
+     * an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Void> leave() {
+        return serviceMediator.getRestClient().getUserService().leaveGuild(getId().asLong());
     }
 
     /** Automatically scan and delete messages sent in the server that contain explicit content. */

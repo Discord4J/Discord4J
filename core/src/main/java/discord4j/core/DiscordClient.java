@@ -19,6 +19,8 @@ package discord4j.core;
 import discord4j.common.json.payload.GatewayPayload;
 import discord4j.common.json.response.UserGuildResponse;
 import discord4j.core.event.EventDispatcher;
+import discord4j.core.object.Region;
+import discord4j.core.object.bean.RegionBean;
 import discord4j.core.object.entity.*;
 import discord4j.core.object.entity.bean.*;
 import discord4j.core.object.presence.Presence;
@@ -274,6 +276,18 @@ public final class DiscordClient {
                         .flatMap(serviceMediator.getRestClient().getGuildService()::getGuild)
                         .map(BaseGuildBean::new))
                 .map(bean -> new Guild(serviceMediator, bean));
+    }
+
+    /**
+     * Requests to retrieve the voice regions that are available.
+     *
+     * @return A {@link Flux} that continually emits the {@link Region regions} that are available. If an error is
+     * received, it is emitted through the {@code Flux}.
+     */
+    public Flux<Region> getRegions() {
+        return serviceMediator.getRestClient().getVoiceService().getVoiceRegions()
+                .map(RegionBean::new)
+                .map(bean -> new Region(serviceMediator, bean));
     }
 
     /**
