@@ -649,10 +649,21 @@ public final class Guild implements Entity {
     }
 
     /**
+     * Requests to kick the specified user from this guild.
+     *
+     * @param user The user to kick from this guild.
+     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the specified user was kicked
+     * from this guild. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Void> kick(final User user) {
+        return kick(user.getId());
+    }
+
+    /**
      * Requests to retrieve the number of users that will be pruned. Users are pruned if they have not been seen within
      * the past specified amount of days <i>and</i> are not assigned to any roles for this guild.
      *
-     * @param days THe number of days since an user must have been seen to avoid being kicked.
+     * @param days The number of days since an user must have been seen to avoid being kicked.
      * @return A {@link Mono} where, upon successful completion, emits the number of users that will be pruned. If an
      * error is received, it is emitted through the {@code Mono}.
      */
