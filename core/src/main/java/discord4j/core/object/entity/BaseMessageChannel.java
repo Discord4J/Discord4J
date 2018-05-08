@@ -16,11 +16,13 @@
  */
 package discord4j.core.object.entity;
 
+import discord4j.common.json.response.MessageResponse;
 import discord4j.core.ServiceMediator;
 import discord4j.core.object.entity.bean.MessageBean;
 import discord4j.core.object.entity.bean.MessageChannelBean;
 import discord4j.core.object.util.Snowflake;
 import discord4j.core.spec.MessageCreateSpec;
+import discord4j.core.util.PaginationUtil;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -28,8 +30,11 @@ import reactor.core.publisher.Mono;
 import javax.annotation.Nullable;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Comparator;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 /** An internal implementation of {@link MessageChannel} designed to streamline inheritance. */
 class BaseMessageChannel extends BaseChannel implements MessageChannel {
@@ -91,7 +96,17 @@ class BaseMessageChannel extends BaseChannel implements MessageChannel {
 
     @Override
     public final Flux<Message> getMessages(@Nullable final Snowflake startId, @Nullable final Snowflake endId) {
-        throw new UnsupportedOperationException("Not yet implemented...");
+        final long afterId = ((startId == null) ? Snowflake.of(getId().getTimestamp()) : startId).asLong();
+        final long beforeId = ((endId == null) ? Snowflake.of(Instant.now()) : endId).asLong();
+
+        final Function<Map<String, Object>, Flux<MessageResponse>> doRequest = params ->
+                getServiceMediator().getRestClient().getChannelService().getMessages(getId().asLong(), params);
+
+        return PaginationUtil.paginateAfter(doRequest, MessageResponse::getId, afterId, 100)
+                .takeWhile(messageResponse -> messageResponse.getId() < beforeId)
+                .map(MessageBean::new)
+                .map(bean -> new Message(getServiceMediator(), bean))
+                .sort(Comparator.comparing(Message::getId));
     }
 
     @Override
