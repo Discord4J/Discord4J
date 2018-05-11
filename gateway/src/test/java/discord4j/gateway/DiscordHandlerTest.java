@@ -29,7 +29,7 @@ import discord4j.gateway.payload.JacksonPayloadReader;
 import discord4j.gateway.payload.JacksonPayloadWriter;
 import discord4j.gateway.payload.PayloadReader;
 import discord4j.gateway.payload.PayloadWriter;
-import discord4j.gateway.websocket.WebSocketClient;
+import discord4j.websocket.WebSocketClient;
 import org.junit.Ignore;
 import org.junit.Test;
 import reactor.core.publisher.EmitterProcessor;

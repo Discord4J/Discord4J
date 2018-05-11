@@ -21,7 +21,7 @@ import discord4j.common.json.payload.Opcode;
 import discord4j.common.json.payload.PayloadData;
 import discord4j.gateway.payload.PayloadReader;
 import discord4j.gateway.payload.PayloadWriter;
-import discord4j.gateway.websocket.*;
+import discord4j.websocket.*;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -45,7 +45,7 @@ import java.util.logging.Level;
  * <p>
  * The handler also provides two methods to control the lifecycle and proper cleanup, like {@link #close()} and
  * {@link #error(Throwable)} which perform operations over both exchanges and the current
- * {@link discord4j.gateway.websocket.WebSocketSession}. It is required to use these methods to signal closure and
+ * {@link discord4j.websocket.WebSocketSession}. It is required to use these methods to signal closure and
  * errors in order to cleanly complete the session.
  * <p>
  * All payloads going through this handler are passed to the given {@link discord4j.gateway.payload.PayloadReader}
@@ -142,7 +142,7 @@ public class DiscordWebSocketHandler implements WebSocketHandler {
 
     /**
      * Initiates a close sequence that will terminate this session. It will notify all exchanges and the session
-     * completion {@link reactor.core.publisher.Mono} in {@link #handle(discord4j.gateway.websocket.WebSocketSession)}
+     * completion {@link reactor.core.publisher.Mono} in {@link #handle(discord4j.websocket.WebSocketSession)}
      * through a complete signal, dropping all future signals.
      */
     public void close() {
@@ -154,7 +154,7 @@ public class DiscordWebSocketHandler implements WebSocketHandler {
 
     /**
      * Initiates a close sequence with the given error. It will terminate this session with an error signal on the
-     * {@link #handle(discord4j.gateway.websocket.WebSocketSession)} method, while completing both exchanges through
+     * {@link #handle(discord4j.websocket.WebSocketSession)} method, while completing both exchanges through
      * normal complete signals.
      * <p>
      * The error can then be channeled downstream and acted upon accordingly.

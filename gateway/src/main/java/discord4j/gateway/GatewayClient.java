@@ -28,8 +28,8 @@ import discord4j.gateway.payload.PayloadWriter;
 import discord4j.gateway.retry.GatewayStateChange;
 import discord4j.gateway.retry.RetryContext;
 import discord4j.gateway.retry.RetryOptions;
-import discord4j.gateway.websocket.CloseException;
-import discord4j.gateway.websocket.WebSocketClient;
+import discord4j.websocket.CloseException;
+import discord4j.websocket.WebSocketClient;
 import reactor.core.Disposable;
 import reactor.core.publisher.EmitterProcessor;
 import reactor.core.publisher.Flux;
@@ -49,7 +49,7 @@ import java.util.function.Predicate;
 /**
  * Represents a Discord gateway (websocket) client, implementing its lifecycle.
  * <p>
- * This is the next component downstream from {@link discord4j.gateway.websocket.WebSocketHandler}, that keeps track of
+ * This is the next component downstream from {@link discord4j.websocket.WebSocketHandler}, that keeps track of
  * a single websocket session. It wraps an instance of {@link discord4j.gateway.DiscordWebSocketHandler} each time a
  * new connection to the gateway is made, therefore only one instance of this class is enough to handle the lifecycle
  * of Discord gateway operations, that could span multiple websocket sessions over time.
