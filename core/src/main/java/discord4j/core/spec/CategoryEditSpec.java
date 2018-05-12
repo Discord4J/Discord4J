@@ -17,8 +17,8 @@
 package discord4j.core.spec;
 
 import discord4j.common.json.OverwriteEntity;
-import discord4j.common.json.request.ChannelModifyRequest;
 import discord4j.core.object.PermissionOverwrite;
+import discord4j.rest.json.request.ChannelModifyRequest;
 
 import java.util.Set;
 

@@ -17,7 +17,7 @@
 package discord4j.core.spec;
 
 import discord4j.common.json.EmbedFieldEntity;
-import discord4j.common.json.request.*;
+import discord4j.rest.json.request.*;
 
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;

@@ -18,7 +18,7 @@ package discord4j.core.object.entity;
 
 import discord4j.core.DiscordClient;
 import discord4j.core.ServiceMediator;
-import discord4j.core.object.entity.bean.RoleBean;
+import discord4j.core.object.data.stored.RoleBean;
 import discord4j.core.object.util.PermissionSet;
 import discord4j.core.object.util.Snowflake;
 import discord4j.core.spec.RoleEditSpec;

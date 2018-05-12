@@ -16,14 +16,12 @@
  */
 package discord4j.core.event.dispatch;
 
-import discord4j.common.json.payload.dispatch.Ready;
-import discord4j.common.json.payload.dispatch.Resumed;
-import discord4j.core.event.domain.Event;
 import discord4j.core.event.domain.lifecycle.*;
+import discord4j.core.object.data.stored.UserBean;
 import discord4j.core.object.entity.User;
-import discord4j.core.object.entity.bean.UserBean;
+import discord4j.gateway.json.dispatch.Ready;
+import discord4j.gateway.json.dispatch.Resumed;
 import discord4j.gateway.retry.GatewayStateChange;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.Arrays;

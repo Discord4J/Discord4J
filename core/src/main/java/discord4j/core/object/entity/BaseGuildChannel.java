@@ -18,8 +18,8 @@ package discord4j.core.object.entity;
 
 import discord4j.core.ServiceMediator;
 import discord4j.core.object.PermissionOverwrite;
-import discord4j.core.object.bean.PermissionOverwriteBean;
-import discord4j.core.object.entity.bean.GuildChannelBean;
+import discord4j.core.object.data.stored.GuildChannelBean;
+import discord4j.core.object.data.stored.PermissionOverwriteBean;
 import discord4j.core.object.util.Snowflake;
 import reactor.core.publisher.Mono;
 
@@ -56,7 +56,8 @@ class BaseGuildChannel extends BaseChannel implements GuildChannel {
     public final Set<PermissionOverwrite> getPermissionOverwrites() {
         final PermissionOverwriteBean[] permissionOverwrites = getData().getPermissionOverwrites();
         return (permissionOverwrites == null) ? Collections.emptySet() : Arrays.stream(permissionOverwrites)
-                .map(bean -> new PermissionOverwrite(getServiceMediator(), bean, getGuildId().asLong(), getId().asLong()))
+                .map(bean ->
+                        new PermissionOverwrite(getServiceMediator(), bean, getGuildId().asLong(), getId().asLong()))
                 .collect(Collectors.toSet());
     }
 

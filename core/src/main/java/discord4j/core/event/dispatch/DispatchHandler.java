@@ -17,8 +17,8 @@
 
 package discord4j.core.event.dispatch;
 
-import discord4j.common.json.payload.dispatch.Dispatch;
 import discord4j.core.event.domain.Event;
+import discord4j.gateway.json.dispatch.Dispatch;
 import reactor.core.publisher.Mono;
 
 /**

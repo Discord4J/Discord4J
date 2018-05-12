@@ -16,12 +16,12 @@
  */
 package discord4j.gateway.payload;
 
-import discord4j.common.json.payload.GatewayPayload;
+import discord4j.gateway.json.GatewayPayload;
 import io.netty.buffer.ByteBuf;
 
 /**
  * Strategy for reading from a {@link io.netty.buffer.ByteBuf} and decoding its contents to a {@link
- * discord4j.common.json.payload.GatewayPayload}.
+ * discord4j.gateway.json.GatewayPayload}.
  */
 public interface PayloadReader {
 

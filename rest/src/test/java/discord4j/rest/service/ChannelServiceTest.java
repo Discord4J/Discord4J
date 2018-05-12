@@ -22,9 +22,9 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import discord4j.common.jackson.Possible;
 import discord4j.common.jackson.PossibleModule;
-import discord4j.common.json.request.*;
 import discord4j.rest.http.*;
 import discord4j.rest.http.client.SimpleHttpClient;
+import discord4j.rest.json.request.*;
 import discord4j.rest.request.Router;
 import discord4j.rest.route.Routes;
 import discord4j.rest.util.MultipartRequest;
@@ -178,7 +178,8 @@ public class ChannelServiceTest {
     @Test
     public void testGetReactions() throws UnsupportedEncodingException {
         String reaction = URLEncoder.encode("❤", "UTF-8");
-        getChannelService().getReactions(permanentChannel, permanentMessage, reaction, Collections.emptyMap()).then().block();
+        getChannelService().getReactions(permanentChannel, permanentMessage, reaction, Collections.emptyMap()).then()
+                .block();
     }
 
     @Test

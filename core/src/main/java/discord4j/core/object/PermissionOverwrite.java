@@ -18,7 +18,7 @@ package discord4j.core.object;
 
 import discord4j.core.DiscordClient;
 import discord4j.core.ServiceMediator;
-import discord4j.core.object.bean.PermissionOverwriteBean;
+import discord4j.core.object.data.stored.PermissionOverwriteBean;
 import discord4j.core.object.entity.*;
 import discord4j.core.object.util.PermissionSet;
 import discord4j.core.object.util.Snowflake;

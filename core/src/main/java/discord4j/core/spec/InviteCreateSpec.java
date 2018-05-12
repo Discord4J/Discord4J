@@ -16,9 +16,9 @@
  */
 package discord4j.core.spec;
 
-import discord4j.common.json.request.InviteCreateRequest;
+import discord4j.rest.json.request.InviteCreateRequest;
 
-public class InviteCreateSpec implements Spec<InviteCreateRequest>  {
+public class InviteCreateSpec implements Spec<InviteCreateRequest> {
 
     private int maxAge;
     private int maxUses;

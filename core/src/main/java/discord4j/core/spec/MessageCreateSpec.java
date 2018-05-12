@@ -16,8 +16,8 @@
  */
 package discord4j.core.spec;
 
-import discord4j.common.json.request.EmbedRequest;
-import discord4j.common.json.request.MessageCreateRequest;
+import discord4j.rest.json.request.EmbedRequest;
+import discord4j.rest.json.request.MessageCreateRequest;
 import discord4j.rest.util.MultipartRequest;
 
 import javax.annotation.Nullable;

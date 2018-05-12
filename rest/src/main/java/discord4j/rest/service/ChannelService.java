@@ -16,11 +16,11 @@
  */
 package discord4j.rest.service;
 
-import discord4j.common.json.request.*;
-import discord4j.common.json.response.ChannelResponse;
-import discord4j.common.json.response.InviteResponse;
-import discord4j.common.json.response.MessageResponse;
-import discord4j.common.json.response.UserResponse;
+import discord4j.common.json.MessageResponse;
+import discord4j.common.json.UserResponse;
+import discord4j.rest.json.request.*;
+import discord4j.rest.json.response.ChannelResponse;
+import discord4j.rest.json.response.InviteResponse;
 import discord4j.rest.request.Router;
 import discord4j.rest.route.Routes;
 import discord4j.rest.util.MultipartRequest;
@@ -87,7 +87,7 @@ public class ChannelService extends RestService {
     }
 
     public Flux<UserResponse> getReactions(long channelId, long messageId, String emoji,
-                                             Map<String, Object> queryParams) {
+                                           Map<String, Object> queryParams) {
         return Routes.REACTIONS_GET.newRequest(channelId, messageId, emoji)
                 .query(queryParams)
                 .exchange(getRouter())

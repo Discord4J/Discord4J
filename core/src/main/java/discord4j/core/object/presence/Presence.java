@@ -17,9 +17,8 @@
 package discord4j.core.object.presence;
 
 import discord4j.common.jackson.Possible;
-import discord4j.common.json.payload.StatusUpdate;
-import discord4j.common.json.request.GameRequest;
-import discord4j.core.object.bean.PresenceBean;
+import discord4j.core.object.data.stored.PresenceBean;
+import discord4j.gateway.json.StatusUpdate;
 
 import javax.annotation.Nullable;
 import java.util.Optional;
@@ -84,10 +83,10 @@ public final class Presence {
     }
 
     public StatusUpdate asStatusUpdate() {
-        final GameRequest game = getActivity()
+        final StatusUpdate.Game game = getActivity()
                 .map(activity -> {
                     Possible<String> url = activity.getStreamingUrl().map(Possible::of).orElse(Possible.absent());
-                    return new GameRequest(activity.getName(), activity.getType().getValue(), url);
+                    return new StatusUpdate.Game(activity.getName(), activity.getType().getValue(), url);
                 })
                 .orElse(null);
 

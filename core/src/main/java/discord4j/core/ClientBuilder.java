@@ -22,7 +22,6 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import discord4j.common.jackson.PossibleModule;
-import discord4j.common.json.payload.dispatch.Dispatch;
 import discord4j.core.event.EventDispatcher;
 import discord4j.core.event.dispatch.DispatchContext;
 import discord4j.core.event.dispatch.DispatchHandlers;
@@ -31,6 +30,7 @@ import discord4j.core.object.presence.Presence;
 import discord4j.core.util.VersionUtil;
 import discord4j.gateway.GatewayClient;
 import discord4j.gateway.IdentifyOptions;
+import discord4j.gateway.json.dispatch.Dispatch;
 import discord4j.gateway.payload.JacksonPayloadReader;
 import discord4j.gateway.payload.JacksonPayloadWriter;
 import discord4j.gateway.retry.RetryOptions;
@@ -199,7 +199,8 @@ public final class ClientBuilder {
 
         final StoreHolder storeHolder = new StoreHolder(storeService);
         final RestClient restClient = new RestClient(new Router(httpClient));
-        final ClientConfig config = new ClientConfig(token, identifyOptions.getShardIndex(), identifyOptions.getShardCount());
+        final ClientConfig config = new ClientConfig(token, identifyOptions.getShardIndex(),
+                identifyOptions.getShardCount());
         final EventDispatcher eventDispatcher = new EventDispatcher(eventProcessor, eventScheduler);
 
         final ServiceMediator serviceMediator = new ServiceMediator(gatewayClient, restClient, storeHolder,

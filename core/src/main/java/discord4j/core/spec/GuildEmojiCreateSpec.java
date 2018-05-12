@@ -16,9 +16,9 @@
  */
 package discord4j.core.spec;
 
-import discord4j.common.json.request.GuildEmojiCreateRequest;
 import discord4j.core.object.entity.Role;
 import discord4j.core.object.util.Snowflake;
+import discord4j.rest.json.request.GuildEmojiCreateRequest;
 
 import java.util.HashSet;
 import java.util.Set;

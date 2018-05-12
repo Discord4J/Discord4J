@@ -17,7 +17,7 @@
 
 package discord4j.gateway;
 
-import discord4j.common.json.payload.StatusUpdate;
+import discord4j.gateway.json.StatusUpdate;
 
 import javax.annotation.Nullable;
 

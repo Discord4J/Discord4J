@@ -26,7 +26,8 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 
 import java.io.IOException;
 
-public class UnsignedLongDeserializer extends StdDeserializer<Object> implements ContextualDeserializer { // <Long | long[]>
+public class UnsignedLongDeserializer extends StdDeserializer<Object> implements ContextualDeserializer { // <Long |
+    // long[]>
 
     public UnsignedLongDeserializer() {
         super(Object.class);
@@ -37,7 +38,7 @@ public class UnsignedLongDeserializer extends StdDeserializer<Object> implements
     }
 
     @Override
-    public JsonDeserializer<?> createContextual(DeserializationContext ctxt, BeanProperty property){
+    public JsonDeserializer<?> createContextual(DeserializationContext ctxt, BeanProperty property) {
         return new UnsignedLongDeserializer(property.getType());
     }
 

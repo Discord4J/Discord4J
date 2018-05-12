@@ -17,12 +17,12 @@
 package discord4j.core.event.dispatch;
 
 import discord4j.common.jackson.Possible;
-import discord4j.common.json.payload.dispatch.*;
 import discord4j.core.DiscordClient;
 import discord4j.core.event.domain.message.*;
+import discord4j.core.object.data.stored.MessageBean;
 import discord4j.core.object.entity.Message;
-import discord4j.core.object.entity.bean.MessageBean;
 import discord4j.core.util.ArrayUtil;
+import discord4j.gateway.json.dispatch.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 

@@ -16,9 +16,7 @@
  */
 package discord4j.core;
 
-import discord4j.core.object.bean.PresenceBean;
-import discord4j.core.object.bean.VoiceStateBean;
-import discord4j.core.object.entity.bean.*;
+import discord4j.core.object.data.stored.*;
 import discord4j.store.Store;
 import discord4j.store.primitive.LongObjStore;
 import discord4j.store.service.StoreService;

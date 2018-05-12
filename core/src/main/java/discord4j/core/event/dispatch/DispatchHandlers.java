@@ -16,17 +16,17 @@
  */
 package discord4j.core.event.dispatch;
 
-import discord4j.common.json.payload.dispatch.*;
 import discord4j.core.DiscordClient;
 import discord4j.core.ServiceMediator;
 import discord4j.core.event.domain.*;
 import discord4j.core.event.domain.channel.TypingStartEvent;
-import discord4j.core.object.presence.Presence;
 import discord4j.core.object.VoiceState;
-import discord4j.core.object.bean.PresenceBean;
-import discord4j.core.object.bean.VoiceStateBean;
+import discord4j.core.object.data.stored.PresenceBean;
+import discord4j.core.object.data.stored.UserBean;
+import discord4j.core.object.data.stored.VoiceStateBean;
 import discord4j.core.object.entity.User;
-import discord4j.core.object.entity.bean.UserBean;
+import discord4j.core.object.presence.Presence;
+import discord4j.gateway.json.dispatch.*;
 import discord4j.gateway.retry.GatewayStateChange;
 import discord4j.store.util.LongLongTuple2;
 import reactor.core.publisher.Mono;
@@ -36,7 +36,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Registry for {@link discord4j.common.json.payload.dispatch.Dispatch} to {@link discord4j.core.event.domain.Event}
+ * Registry for {@link discord4j.gateway.json.dispatch.Dispatch} to {@link discord4j.core.event.domain.Event}
  * mapping operations.
  */
 public abstract class DispatchHandlers {
@@ -87,7 +87,7 @@ public abstract class DispatchHandlers {
     }
 
     /**
-     * Process a {@link discord4j.common.json.payload.dispatch.Dispatch} object wrapped with its context to
+     * Process a {@link discord4j.gateway.json.dispatch.Dispatch} object wrapped with its context to
      * potentially obtain an {@link discord4j.core.event.domain.Event}.
      *
      * @param context the DispatchContext used with this Dispatch object
@@ -157,7 +157,8 @@ public abstract class DispatchHandlers {
         return Mono.just(new VoiceServerUpdateEvent(client, token, guildId, endpoint));
     }
 
-    private static Mono<VoiceStateUpdateEvent> voiceStateUpdateDispatch(DispatchContext<VoiceStateUpdateDispatch> context) {
+    private static Mono<VoiceStateUpdateEvent> voiceStateUpdateDispatch(DispatchContext<VoiceStateUpdateDispatch>
+                                                                                context) {
         ServiceMediator serviceMediator = context.getServiceMediator();
         DiscordClient client = serviceMediator.getClient();
 

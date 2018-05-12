@@ -16,7 +16,8 @@
  */
 package discord4j.rest.route;
 
-import discord4j.common.json.response.*;
+import discord4j.common.json.*;
+import discord4j.rest.json.response.*;
 
 /**
  * A collection of {@link Route} object definitions.
@@ -380,7 +381,7 @@ public abstract class Routes {
      * .com/developers/docs/resources/emoji#modify-guild-emoji</a>
      */
     public static final Route<GuildEmojiResponse> GUILD_EMOJI_MODIFY = Route.patch("/guilds/{guild.id}/emojis/" +
-                    "{emoji.id}", GuildEmojiResponse.class);
+            "{emoji.id}", GuildEmojiResponse.class);
 
     /**
      * Delete the given emoji. Returns 204 No Content on success. Fires a Guild Emojis Update Gateway event.

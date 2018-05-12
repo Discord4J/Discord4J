@@ -18,7 +18,7 @@ package discord4j.core.object.entity;
 
 import discord4j.core.DiscordClient;
 import discord4j.core.ServiceMediator;
-import discord4j.core.object.entity.bean.GuildEmojiBean;
+import discord4j.core.object.data.stored.GuildEmojiBean;
 import discord4j.core.object.util.Snowflake;
 import discord4j.core.spec.GuildEmojiEditSpec;
 import reactor.core.publisher.Flux;

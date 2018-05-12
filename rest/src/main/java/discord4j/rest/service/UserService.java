@@ -16,13 +16,13 @@
  */
 package discord4j.rest.service;
 
-import discord4j.common.json.request.DMCreateRequest;
-import discord4j.common.json.request.GroupDMCreateRequest;
-import discord4j.common.json.request.UserModifyRequest;
-import discord4j.common.json.response.ChannelResponse;
-import discord4j.common.json.response.ConnectionResponse;
-import discord4j.common.json.response.UserGuildResponse;
-import discord4j.common.json.response.UserResponse;
+import discord4j.common.json.UserResponse;
+import discord4j.rest.json.request.DMCreateRequest;
+import discord4j.rest.json.request.GroupDMCreateRequest;
+import discord4j.rest.json.request.UserModifyRequest;
+import discord4j.rest.json.response.ChannelResponse;
+import discord4j.rest.json.response.ConnectionResponse;
+import discord4j.rest.json.response.UserGuildResponse;
 import discord4j.rest.request.Router;
 import discord4j.rest.route.Routes;
 import reactor.core.publisher.Flux;

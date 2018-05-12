@@ -18,8 +18,8 @@ package discord4j.core.object.entity;
 
 import discord4j.core.ServiceMediator;
 import discord4j.core.object.VoiceState;
-import discord4j.core.object.entity.bean.MemberBean;
-import discord4j.core.object.entity.bean.UserBean;
+import discord4j.core.object.data.stored.MemberBean;
+import discord4j.core.object.data.stored.UserBean;
 import discord4j.core.object.presence.Presence;
 import discord4j.core.object.util.Snowflake;
 import discord4j.store.util.LongLongTuple2;
@@ -55,7 +55,8 @@ public final class Member extends User {
      * @param userData The user data as represented by Discord, must be non-null.
      * @param guildId The ID of the guild this user is associated to.
      */
-    public Member(final ServiceMediator serviceMediator, final MemberBean data, final UserBean userData, final long guildId) {
+    public Member(final ServiceMediator serviceMediator, final MemberBean data, final UserBean userData,
+                  final long guildId) {
         super(serviceMediator, userData);
         this.data = Objects.requireNonNull(data);
         this.guildId = guildId;

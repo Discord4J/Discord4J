@@ -17,7 +17,7 @@
 
 package discord4j.rest.util;
 
-import discord4j.common.json.request.MessageCreateRequest;
+import discord4j.rest.json.request.MessageCreateRequest;
 import reactor.ipc.netty.http.client.HttpClientRequest;
 
 import javax.annotation.Nullable;

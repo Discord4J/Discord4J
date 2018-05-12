@@ -17,9 +17,9 @@
 package discord4j.gateway;
 
 import discord4j.common.jackson.Possible;
-import discord4j.common.json.payload.*;
-import discord4j.common.json.payload.dispatch.Dispatch;
-import discord4j.common.json.payload.dispatch.Ready;
+import discord4j.gateway.json.*;
+import discord4j.gateway.json.dispatch.Dispatch;
+import discord4j.gateway.json.dispatch.Ready;
 import reactor.util.Logger;
 import reactor.util.Loggers;
 
@@ -29,8 +29,8 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- * Registry for operating on gateway {@link discord4j.common.json.payload.PayloadData} objects, handling each lifecycle
- * {@link discord4j.common.json.payload.Opcode}.
+ * Registry for operating on gateway {@link discord4j.gateway.json.PayloadData} objects, handling each lifecycle
+ * {@link discord4j.gateway.json.Opcode}.
  */
 public abstract class PayloadHandlers {
 
@@ -51,7 +51,7 @@ public abstract class PayloadHandlers {
     }
 
     /**
-     * Process a {@link discord4j.common.json.payload.PayloadData} object together with its context, reacting to it.
+     * Process a {@link discord4j.gateway.json.PayloadData} object together with its context, reacting to it.
      *
      * @param context the PayloadContext used with this PayloadData object
      * @param <T> the PayloadData type
