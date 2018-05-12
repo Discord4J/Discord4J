@@ -27,8 +27,7 @@ public class Ready implements Dispatch {
 
     @JsonProperty("v")
     private int version;
-    private UserResponse user;
-    @JsonProperty("private_channels")
+    private User user;
     private UnavailableGuildResponse[] guilds;
     @JsonProperty("session_id")
     private String sessionId;
@@ -40,6 +39,7 @@ public class Ready implements Dispatch {
     private Object user_settings;
     private Object[] relationships;
     private Object[] presences;
+    private Object[] private_channels;
 
     public int getVersion() {
         return version;
