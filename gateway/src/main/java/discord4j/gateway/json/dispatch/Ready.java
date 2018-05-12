@@ -16,30 +16,25 @@
  */
 package discord4j.gateway.json.dispatch;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import discord4j.gateway.json.response.UnavailableGuildResponse;
 import discord4j.common.json.UserResponse;
 
-import javax.annotation.Nullable;
 import java.util.Arrays;
 
+@JsonIgnoreProperties({"user_settings", "relationships", "presences", "private_channels"})
 public class Ready implements Dispatch {
 
     @JsonProperty("v")
     private int version;
-    private User user;
+    private UserResponse user;
     private UnavailableGuildResponse[] guilds;
     @JsonProperty("session_id")
     private String sessionId;
     @JsonProperty("_trace")
     private String[] trace;
     private int[] shard;
-
-    // FIXME
-    private Object user_settings;
-    private Object[] relationships;
-    private Object[] presences;
-    private Object[] private_channels;
 
     public int getVersion() {
         return version;
@@ -67,47 +62,13 @@ public class Ready implements Dispatch {
 
     @Override
     public String toString() {
-        return "Ready[" +
+        return "Ready{" +
                 "version=" + version +
                 ", user=" + user +
                 ", guilds=" + Arrays.toString(guilds) +
-                ", sessionId=" + sessionId +
+                ", sessionId='" + sessionId + '\'' +
                 ", trace=" + Arrays.toString(trace) +
                 ", shard=" + Arrays.toString(shard) +
-                ", user_settings=" + user_settings +
-                ", relationships=" + Arrays.toString(relationships) +
-                ", presences=" + Arrays.toString(presences) +
-                ']';
-    }
-
-    public static class User extends UserResponse {
-
-        private boolean verified;
-        @JsonProperty("mfa_enabled")
-        private boolean mfaEnabled;
-        @Nullable
-        private String email;
-
-        public boolean isVerified() {
-            return verified;
-        }
-
-        public boolean isMfaEnabled() {
-            return mfaEnabled;
-        }
-
-        @Nullable
-        public String getEmail() {
-            return email;
-        }
-
-        @Override
-        public String toString() {
-            return "User{" +
-                    "verified=" + verified +
-                    ", mfaEnabled=" + mfaEnabled +
-                    ", email='" + email + '\'' +
-                    "} " + super.toString();
-        }
+                '}';
     }
 }

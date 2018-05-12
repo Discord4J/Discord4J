@@ -16,10 +16,12 @@
  */
 package discord4j.common.json;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import discord4j.common.jackson.UnsignedJson;
 
 import javax.annotation.Nullable;
 
+@JsonIgnoreProperties(value = {"verified", "mfa_enabled", "flags", "email"})
 public class UserResponse {
 
     @UnsignedJson
