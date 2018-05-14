@@ -30,7 +30,7 @@ class MessageDispatchHandlers {
 
     static Mono<MessageCreateEvent> messageCreate(DispatchContext<MessageCreate> context) {
         DiscordClient client = context.getServiceMediator().getClient();
-        MessageBean bean = new MessageBean(context.getDispatch().getMessage());
+        MessageBean bean = new MessageBean(context.getDispatch());
         Message message = new Message(context.getServiceMediator(), bean);
 
         Mono<Void> saveMessage = context.getServiceMediator().getStoreHolder().getMessageStore()

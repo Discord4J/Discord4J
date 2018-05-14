@@ -19,6 +19,7 @@ package discord4j.core.object.data.stored;
 import discord4j.common.json.MessageResponse;
 import discord4j.common.json.ReactionResponse;
 import discord4j.common.json.UserResponse;
+import discord4j.gateway.json.dispatch.MessageCreate;
 
 import javax.annotation.Nullable;
 import java.io.Serializable;
@@ -76,6 +77,32 @@ public final class MessageBean implements Serializable {
         pinned = response.isPinned();
         webhookId = response.getWebhookId();
         type = response.getType();
+    }
+
+    public MessageBean(MessageCreate messageCreate) {
+        id = messageCreate.getId();
+        channelId = messageCreate.getChannelId();
+        author = messageCreate.getAuthor().getId();
+        content = messageCreate.getContent();
+        timestamp = messageCreate.getTimestamp();
+        editedTimestamp = messageCreate.getEditedTimestamp();
+        tts = messageCreate.isTts();
+        mentionEveryone = messageCreate.isMentionEveryone();
+
+        mentions = Arrays.stream(messageCreate.getMentions())
+                .mapToLong(MessageCreate.Mention::getId)
+                .toArray();
+
+        mentionRoles = messageCreate.getMentionRoles();
+
+        attachments = Arrays.stream(messageCreate.getAttachments())
+                .map(AttachmentBean::new)
+                .toArray(AttachmentBean[]::new);
+
+        this.reactions = null; // no reactions on message_create
+        pinned = messageCreate.isPinned();
+        webhookId = messageCreate.getWebhookId();
+        type = messageCreate.getType();
     }
 
     public MessageBean(MessageBean toCopy) {

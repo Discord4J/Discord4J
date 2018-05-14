@@ -66,7 +66,7 @@ public class GatewayClientTest {
 
         gatewayClient.dispatch().ofType(MessageCreate.class)
                 .subscribe(message -> {
-                    String content = message.getMessage().getContent();
+                    String content = message.getContent();
                     if ("!close".equals(content)) {
                         gatewayClient.close(false);
                     } else if ("!retry".equals(content)) {
