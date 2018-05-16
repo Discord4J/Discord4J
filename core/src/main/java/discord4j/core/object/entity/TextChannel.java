@@ -31,7 +31,6 @@ import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import javax.annotation.Nullable;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
@@ -133,13 +132,18 @@ public final class TextChannel extends BaseChannel implements GuildChannel, Mess
     }
 
     @Override
-    public Mono<Void> typeUntil(Publisher<Void> until) {
+    public Mono<Void> typeUntil(final Publisher<Void> until) {
         return messageChannel.typeUntil(until);
     }
 
     @Override
-    public Flux<Message> getMessages(@Nullable final Snowflake startId, @Nullable final Snowflake endId) {
-        return messageChannel.getMessages(startId, endId);
+    public Flux<Message> getMessagesBefore(final Snowflake messageId) {
+        return messageChannel.getMessagesBefore(messageId);
+    }
+
+    @Override
+    public Flux<Message> getMessagesAfter(final Snowflake messageId) {
+        return messageChannel.getMessagesAfter(messageId);
     }
 
     /**

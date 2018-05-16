@@ -22,10 +22,10 @@ import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import javax.annotation.Nullable;
 import java.time.Instant;
 import java.util.Optional;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 /** A Discord channel that can utilizes messages. */
 public interface MessageChannel extends Channel {
@@ -93,18 +93,36 @@ public interface MessageChannel extends Channel {
     Mono<Void> typeUntil(Publisher<Void> until);
 
     /**
-     * Requests to retrieve messages within the specified ID range.
+     * Requests to retrieve <i>all</i> messages <i>before</i> the specified ID.
+     * <p>
+     * The returned {@code Flux} will emit items in <i>reverse-</i>chronological order (newest to oldest). It is
+     * recommended to limit the emitted items by invoking either {@link Flux#takeWhile(Predicate)} (to retrieve IDs
+     * within a specified range) or {@link Flux#take(long)} (to retrieve a specific amount of IDs).
+     * <p>
+     * The following example will get <i>all</i> messages from {@code messageId} to {@code myOtherMessageId}:
+     * {@code getMessagesBefore(messageId).takeWhile(message -> message.getId().compareTo(myOtherMessageId) >= 0)}
      *
-     * @param startId The ID of the <i>earliest</i> message to retrieve (inclusive). To get messages <i>after</i> a
-     * specified time (also inclusive) use {@link Snowflake#of(Instant)}. If {@code null}, the default value is
-     * equivalent to {@code Snowflake.of(id.getTimestamp())} where {@code id} is {@link #getId()} for this channel.
-     *
-     * @param endId The ID of the <i>latest</i> message to retrieve (exclusive). To get messages <i>before</i> a
-     * specified time (also exclusive) use {@link Snowflake#of(Instant)}. If {@code null}, the default value is
-     * equivalent to {@code Snowflake.of(Instant.now())}.
-     *
-     * @return A {@link Flux} that continually emits {@link Message messages} within the specified ID range. If an error
-     * is received, it is emitted through the {@code Flux}.
+     * @param messageId The ID of the <i>newest</i> message to retrieve. Use {@link Snowflake#of(Instant)} to retrieve a
+     * time-based ID.
+     * @return A {@link Flux} that continually emits <i>all</i> {@link Message messages} <i>before</i> the specified ID.
+     * If an error is received, it is emitted through the {@code Flux}.
      */
-    Flux<Message> getMessages(@Nullable Snowflake startId, @Nullable Snowflake endId);
+    Flux<Message> getMessagesBefore(Snowflake messageId);
+
+    /**
+     * Requests to retrieve <i>all</i> messages <i>after</i> the specified ID.
+     * <p>
+     * The returned {@code Flux} will emit items in chronological order (oldest to newest). It is recommended to limit
+     * the emitted items by invoking either {@link Flux#takeWhile(Predicate)} (to retrieve IDs within a specified range)
+     * or {@link Flux#take(long)} (to retrieve a specific amount of IDs).
+     * <p>
+     * The following example will get <i>all</i> messages from {@code messageId} to {@code myOtherMessageId}:
+     * {@code getMessagesAfter(messageId).takeWhile(message -> message.getId().compareTo(myOtherMessageId) <= 0)}
+     *
+     * @param messageId The ID of the <i>oldest</i> message to retrieve. Use {@link Snowflake#of(Instant)} to retrieve a
+     * time-based ID.
+     * @return A {@link Flux} that continually emits <i>all</i> {@link Message messages} <i>after</i> the specified ID.
+     * If an error is received, it is emitted through the {@code Flux}.
+     */
+    Flux<Message> getMessagesAfter(Snowflake messageId);
 }

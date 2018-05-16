@@ -27,7 +27,6 @@ import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import javax.annotation.Nullable;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Map;
@@ -86,23 +85,29 @@ class BaseMessageChannel extends BaseChannel implements MessageChannel {
     }
 
     @Override
-    public final Mono<Void> typeUntil(Publisher<Void> until) {
-        return Flux.interval(Duration.ZERO, Duration.ofSeconds(10))
+    public final Mono<Void> typeUntil(final Publisher<Void> until) {
+        return Flux.interval(Duration.ZERO, Duration.ofSeconds(10L))
                 .flatMap(l -> type().flux())
                 .takeUntilOther(until)
                 .then();
     }
 
     @Override
-    public final Flux<Message> getMessages(@Nullable final Snowflake startId, @Nullable final Snowflake endId) {
-        final long afterId = ((startId == null) ? Snowflake.of(getId().getTimestamp()) : startId).asLong();
-        final long beforeId = ((endId == null) ? Snowflake.of(Instant.now()) : endId).asLong();
-
+    public final Flux<Message> getMessagesBefore(final Snowflake messageId) {
         final Function<Map<String, Object>, Flux<MessageResponse>> doRequest = params ->
                 getServiceMediator().getRestClient().getChannelService().getMessages(getId().asLong(), params);
 
-        return PaginationUtil.paginateAfter(doRequest, MessageResponse::getId, afterId, 100)
-                .takeWhile(messageResponse -> messageResponse.getId() < beforeId)
+        return PaginationUtil.paginateBefore(doRequest, MessageResponse::getId, messageId.asLong(), 100)
+                .map(MessageBean::new)
+                .map(bean -> new Message(getServiceMediator(), bean));
+    }
+
+    @Override
+    public final Flux<Message> getMessagesAfter(final Snowflake messageId) {
+        final Function<Map<String, Object>, Flux<MessageResponse>> doRequest = params ->
+                getServiceMediator().getRestClient().getChannelService().getMessages(getId().asLong(), params);
+
+        return PaginationUtil.paginateAfter(doRequest, MessageResponse::getId, messageId.asLong(), 100)
                 .map(MessageBean::new)
                 .map(bean -> new Message(getServiceMediator(), bean));
     }
