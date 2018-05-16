@@ -37,6 +37,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
@@ -242,14 +243,23 @@ public final class TextChannel extends BaseChannel implements GuildChannel, Mess
      * @return A {@link Flux} that continually emits {@link Snowflake message IDs} that were <b>not</b> bulk deleted
      * (typically if the ID was older than 2 weeks). If an error is received, it is emitted through the {@code Flux}.
      */
-    public Flux<Snowflake> bulkDeleteIds(final Publisher<Snowflake> messageIds) {
-        final Predicate<Snowflake> canBulkDelete = messageId -> // REST accepts 2 week old IDs
-                messageId.getTimestamp().isAfter(Instant.now().minus(Duration.ofDays(14L)));
+    public Flux<Snowflake> bulkDelete(final Publisher<Snowflake> messageIds) {
+        final AtomicReference<Flux<Snowflake>> ignoredMessageIds = new AtomicReference<>(Flux.empty());
+        final Instant timeLimit = Instant.now().minus(Duration.ofDays(14L));
 
-        final Flux<Snowflake> ignoredMessageIds = Flux.empty();
-        final Predicate<List<Snowflake>> filterMessageIdChunk = messageIdChunk -> {
+        final Predicate<Snowflake> filterMessageId = messageId -> {
+            if (timeLimit.isAfter(messageId.getTimestamp())) { // REST accepts 2 week old IDs
+                ignoredMessageIds.set(ignoredMessageIds.get().concatWithValues(messageId));
+                return false;
+            }
+
+            return true;
+        };
+
+        final Predicate<List<String>> filterMessageIdChunk = messageIdChunk -> {
             if (messageIdChunk.size() == 1) { // REST accepts 2 or more items
-                ignoredMessageIds.concatWithValues(messageIdChunk.remove(0));
+                final Snowflake messageId = Snowflake.of(messageIdChunk.get(0));
+                ignoredMessageIds.set(ignoredMessageIds.get().concatWithValues(messageId));
                 return false;
             }
 
@@ -257,29 +267,13 @@ public final class TextChannel extends BaseChannel implements GuildChannel, Mess
         };
 
         return Flux.defer(() -> messageIds).distinct()
+                .filter(filterMessageId)
+                .map(Snowflake::asString)
                 .buffer(100) // REST accepts 100 IDs
                 .filter(filterMessageIdChunk)
-                .map(Flux::fromIterable)
-                .flatMap(messageIdChunk -> messageIdChunk.filter(canBulkDelete)
-                        .map(Snowflake::asString)
-                        .collectList()
-                        .map(messageIdChunkList -> messageIdChunkList.toArray(new String[messageIdChunkList.size()]))
-                        .flatMap(messageIdChunkArray -> getServiceMediator().getRestClient().getChannelService()
-                                .bulkDeleteMessages(getId().asLong(), new BulkDeleteRequest(messageIdChunkArray)))
-                        .thenMany(ignoredMessageIds.concatWith(messageIdChunk.filter(canBulkDelete.negate()))))
-                .thenMany(ignoredMessageIds);
-    }
-
-    /**
-     * Requests to bulk delete the supplied messages.
-     *
-     * @param messages A {@link Publisher} to supply the message to bulk delete.
-     * @return A {@link Flux} that continually emits {@link Message messages} that were <b>not</b> bulk deleted
-     * (typically if its ID was older than 2 weeks). If an error is received, it is emitted through the {@code Flux}.
-     */
-    public Flux<Message> bulkDelete(final Publisher<Message> messages) {
-        final Flux<Message> messageFlux = Flux.from(messages).cache();
-        final Flux<Snowflake> ignoredMessageIds = bulkDeleteIds(messageFlux.map(Message::getId)).cache();
-        return messageFlux.filterWhen(message -> ignoredMessageIds.hasElement(message.getId()));
+                .map(messageIdChunk -> messageIdChunk.toArray(new String[messageIdChunk.size()]))
+                .flatMap(messageIdChunk -> getServiceMediator().getRestClient().getChannelService()
+                        .bulkDeleteMessages(getId().asLong(), new BulkDeleteRequest(messageIdChunk)))
+                .thenMany(ignoredMessageIds.get());
     }
 }
