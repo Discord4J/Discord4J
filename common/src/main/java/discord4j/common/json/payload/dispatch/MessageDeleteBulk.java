@@ -28,6 +28,9 @@ public class MessageDeleteBulk implements Dispatch {
     @JsonProperty("channel_id")
     @UnsignedJson
     private long channelId;
+    @JsonProperty("guild_id")
+    @UnsignedJson
+    private long guildId;
 
     public long[] getIds() {
         return ids;

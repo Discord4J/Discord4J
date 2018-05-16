@@ -30,7 +30,6 @@ import reactor.core.publisher.Mono;
 import javax.annotation.Nullable;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Comparator;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -105,8 +104,7 @@ class BaseMessageChannel extends BaseChannel implements MessageChannel {
         return PaginationUtil.paginateAfter(doRequest, MessageResponse::getId, afterId, 100)
                 .takeWhile(messageResponse -> messageResponse.getId() < beforeId)
                 .map(MessageBean::new)
-                .map(bean -> new Message(getServiceMediator(), bean))
-                .sort(Comparator.comparing(Message::getId));
+                .map(bean -> new Message(getServiceMediator(), bean));
     }
 
     @Override

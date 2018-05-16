@@ -93,7 +93,7 @@ public interface MessageChannel extends Channel {
     Mono<Void> typeUntil(Publisher<Void> until);
 
     /**
-     * Requests to retrieve messages within the specified ID range, sorted by {@link Snowflake#compareTo(Snowflake)}.
+     * Requests to retrieve messages within the specified ID range.
      *
      * @param startId The ID of the <i>earliest</i> message to retrieve (inclusive). To get messages <i>after</i> a
      * specified time (also inclusive) use {@link Snowflake#of(Instant)}. If {@code null}, the default value is
@@ -103,8 +103,8 @@ public interface MessageChannel extends Channel {
      * specified time (also exclusive) use {@link Snowflake#of(Instant)}. If {@code null}, the default value is
      * equivalent to {@code Snowflake.of(Instant.now())}.
      *
-     * @return A {@link Flux} that continually emits {@link Message messages} within the specified ID range, sorted by
-     * {@link Snowflake#compareTo(Snowflake)}. If an error is received, it is emitted through the {@code Flux}.
+     * @return A {@link Flux} that continually emits {@link Message messages} within the specified ID range. If an error
+     * is received, it is emitted through the {@code Flux}.
      */
     Flux<Message> getMessages(@Nullable Snowflake startId, @Nullable Snowflake endId);
 }

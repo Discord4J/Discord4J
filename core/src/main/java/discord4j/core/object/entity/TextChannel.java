@@ -16,6 +16,7 @@
  */
 package discord4j.core.object.entity;
 
+import discord4j.common.json.request.BulkDeleteRequest;
 import discord4j.core.ServiceMediator;
 import discord4j.core.object.ExtendedInvite;
 import discord4j.core.object.PermissionOverwrite;
@@ -31,10 +32,13 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import javax.annotation.Nullable;
+import java.time.Duration;
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 /** A Discord text channel. */
 public final class TextChannel extends BaseChannel implements GuildChannel, MessageChannel {
@@ -229,5 +233,32 @@ public final class TextChannel extends BaseChannel implements GuildChannel, Mess
                 .createChannelInvite(getId().asLong(), spec.asRequest())
                 .map(ExtendedInviteBean::new)
                 .map(bean -> new ExtendedInvite(getServiceMediator(), bean));
+    }
+
+    public Flux<Message> bulkDelete(final Publisher<Message> messages) {
+        final Predicate<Message> canBulkDelete = message -> // REST requires IDs newer than 2 weeks
+                message.getId().getTimestamp().isAfter(Instant.now().minus(Duration.ofDays(14L)));
+
+        final Flux<Message> ignoredMessages = Flux.empty();
+        final Consumer<List<Message>> processMessageChunk = messageChunk -> {
+            if (messageChunk.size() == 1) { // REST requires 2 or more items
+                ignoredMessages.concatWithValues(messageChunk.remove(0));
+            }
+        };
+
+        return Flux.defer(() -> messages).distinct(Message::getId)
+                .buffer(100) // REST only accepts at most 100 IDs
+                .doOnNext(processMessageChunk)
+                .filter(messageChunk -> !messageChunk.isEmpty())
+                .map(Flux::fromIterable)
+                .flatMap(messageChunk -> messageChunk.filter(canBulkDelete)
+                        .map(Message::getId)
+                        .map(Snowflake::asString)
+                        .collectList()
+                        .map(messageChunkList -> messageChunkList.toArray(new String[messageChunkList.size()]))
+                        .flatMap(messageChunkArray -> getServiceMediator().getRestClient().getChannelService()
+                                .bulkDeleteMessages(getId().asLong(), new BulkDeleteRequest(messageChunkArray)))
+                        .thenMany(ignoredMessages.concatWith(messageChunk.filter(canBulkDelete.negate()))))
+                .thenMany(ignoredMessages);
     }
 }
