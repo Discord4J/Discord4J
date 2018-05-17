@@ -18,28 +18,37 @@ package discord4j.core.util;
 
 import reactor.core.publisher.Flux;
 
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
+import java.util.function.LongFunction;
+import java.util.function.ToLongFunction;
 
 public final class PaginationUtil {
 
-    public static <T> Flux<T> paginateAfter(Function<Map<String, Object>, Flux<T>> tProducer,
-                                            Function<T, Long> keyExtractor, long startAt, int pageSize) {
-        return paginateWithQueryParams(tProducer, keyExtractor, startAt, pageSize, "after");
+    public static <T> Flux<T> paginateAfter(final Function<Map<String, Object>, Flux<T>> tProducer,
+                                            final ToLongFunction<T> keyExtractor, final long startAt,
+                                            final int pageSize) {
+
+        return paginateWithQueryParams(tProducer, keyExtractor, startAt, pageSize, "after", false);
     }
 
-    public static <T> Flux<T> paginateBefore(Function<Map<String, Object>, Flux<T>> tProducer,
-                                             Function<T, Long> keyExtractor, long startAt, int pageSize) {
-        return paginateWithQueryParams(tProducer, keyExtractor, startAt, pageSize, "before");
+    public static <T> Flux<T> paginateBefore(final Function<Map<String, Object>, Flux<T>> tProducer,
+                                             final ToLongFunction<T> keyExtractor, final long startAt,
+                                             final int pageSize) {
+
+        return paginateWithQueryParams(tProducer, keyExtractor, startAt, pageSize, "before", true);
     }
 
-    public static <T> Flux<T> paginateWithQueryParams(Function<Map<String, Object>, Flux<T>> tProducer,
-                                                      Function<T, Long> keyExtractor, long startAt, int pageSize,
-                                                      String queryKey) {
-        final Function<Long, Flux<T>> nextPage = id -> {
+    private static <T> Flux<T> paginateWithQueryParams(final Function<Map<String, Object>, Flux<T>> tProducer,
+                                                       final ToLongFunction<T> keyExtractor, final long startAt,
+                                                       final int pageSize, final String queryKey,
+                                                       final boolean reverse) {
+
+        final LongFunction<Flux<T>> nextPage = id -> {
             final Map<String, Object> parameters = new HashMap<>(2);
             parameters.put("limit", pageSize);
             parameters.put(queryKey, id);
@@ -47,19 +56,23 @@ public final class PaginationUtil {
             return tProducer.apply(parameters);
         };
 
-        return paginate(nextPage, keyExtractor, startAt);
+        return paginate(nextPage, keyExtractor, startAt, reverse);
     }
 
-    public static <K, T> Flux<T> paginate(Function<K, Flux<T>> nextPage, Function<T, K> keyExtractor, K startAt) {
-        Function<List<T>, K> updateLast = list ->
-                list.isEmpty() ? startAt : keyExtractor.apply(list.get(list.size() - 1));
+    private static <T> Flux<T> paginate(final LongFunction<Flux<T>> nextPage, final ToLongFunction<T> keyExtractor,
+                                        final long startAt, final boolean reverse) {
 
-        AtomicReference<K> previousStart = new AtomicReference<>(startAt);
+        final ToLongFunction<List<T>> updateLast = list ->
+                list.isEmpty() ? startAt : keyExtractor.applyAsLong(list.get(list.size() - 1));
+
+        final Comparator<T> comparator = Comparator.comparingLong(keyExtractor);
+        final AtomicLong previousStart = new AtomicLong(startAt);
 
         return Flux.defer(() -> nextPage.apply(previousStart.get()))
+                .sort(reverse ? comparator.reversed() : comparator)
                 .collectList()
-                .doOnNext(list -> previousStart.set(updateLast.apply(list)))
+                .doOnNext(list -> previousStart.set(updateLast.applyAsLong(list)))
                 .flatMapMany(Flux::fromIterable)
-                .repeat(() -> !previousStart.get().equals(startAt));
+                .repeat(() -> previousStart.get() != startAt);
     }
 }

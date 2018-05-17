@@ -30,7 +30,7 @@ public class PaginationUtilTest {
     @Test
     public void testAfter() {
         Function<Map<String, Object>, Flux<Long>> makeRequest = PageSource::getPage;
-        Flux<Long> actual = PaginationUtil.paginateAfter(makeRequest, Function.identity(), 0L, 100)
+        Flux<Long> actual = PaginationUtil.paginateAfter(makeRequest, box -> box, 0L, 100)
                 .limitRequest(300);
 
         Iterable<Long> expected = Stream.iterate(1L, it -> it + 1).limit(300).collect(Collectors.toList());
@@ -44,7 +44,7 @@ public class PaginationUtilTest {
     @Test
     public void testBefore() {
         Function<Map<String, Object>, Flux<Long>> makeRequest = PageSource::getPage;
-        Flux<Long> actual = PaginationUtil.paginateBefore(makeRequest, Function.identity(), 300L, 100)
+        Flux<Long> actual = PaginationUtil.paginateBefore(makeRequest, box -> box, 300L, 100)
                 .limitRequest(300);
 
         Iterable<Long> expected = Stream.iterate(299L, it -> it - 1).limit(300).collect(Collectors.toList());
