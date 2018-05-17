@@ -59,6 +59,10 @@ public class MessageCreate implements Dispatch {
     @Nullable
     @UnsignedJson
     private Long webhookId;
+    @Nullable
+    private Activity activity;
+    @Nullable
+    private Application application;
 
     public int getType() {
         return type;
@@ -135,6 +139,16 @@ public class MessageCreate implements Dispatch {
         return webhookId;
     }
 
+    @Nullable
+    public Activity getActivity() {
+        return activity;
+    }
+
+    @Nullable
+    public Application getApplication() {
+        return application;
+    }
+
     @Override
     public String toString() {
         return "MessageCreate{" +
@@ -156,7 +170,75 @@ public class MessageCreate implements Dispatch {
                 ", attachments=" + Arrays.toString(attachments) +
                 ", guildId=" + guildId +
                 ", webhookId=" + webhookId +
+                ", activity=" + activity +
+                ", application=" + application +
                 '}';
+    }
+
+    public static class Activity {
+        private int type;
+        @JsonProperty("party_id")
+        @Nullable
+        private String partyId;
+
+        public int getType() {
+            return type;
+        }
+
+        @Nullable
+        public String getPartyId() {
+            return partyId;
+        }
+
+        @Override
+        public String toString() {
+            return "Activity{" +
+                    "type=" + type +
+                    ", partyId='" + partyId + '\'' +
+                    '}';
+        }
+    }
+
+    public static class Application {
+
+        @UnsignedJson
+        private long id;
+        @JsonProperty("cover_image")
+        private String coverImage;
+        private String description;
+        private String icon;
+        private String name;
+
+        public long getId() {
+            return id;
+        }
+
+        public String getCoverImage() {
+            return coverImage;
+        }
+
+        public String getDescription() {
+            return description;
+        }
+
+        public String getIcon() {
+            return icon;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        @Override
+        public String toString() {
+            return "Application{" +
+                    "id=" + id +
+                    ", coverImage='" + coverImage + '\'' +
+                    ", description='" + description + '\'' +
+                    ", icon='" + icon + '\'' +
+                    ", name='" + name + '\'' +
+                    '}';
+        }
     }
 
     public static class Mention {
