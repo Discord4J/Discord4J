@@ -21,7 +21,7 @@ import discord4j.common.jackson.UnsignedJson;
 
 import javax.annotation.Nullable;
 
-@JsonIgnoreProperties(value = {"verified", "mfa_enabled", "flags", "email"})
+@JsonIgnoreProperties(value = {"verified", "mfa_enabled", "flags", "email", "token"})
 public class UserResponse {
 
     @UnsignedJson
