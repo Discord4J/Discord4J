@@ -54,10 +54,6 @@ public class VoiceChannelEditSpec implements Spec<ChannelModifyRequest> {
         return this;
     }
 
-    public VoiceChannelEditSpec setParent(@Nullable Category parent) {
-        return setParentId(parent == null ? null : parent.getId());
-    }
-
     public VoiceChannelEditSpec setBitrate(int bitrate) {
         requestBuilder.bitrate(bitrate);
         return this;

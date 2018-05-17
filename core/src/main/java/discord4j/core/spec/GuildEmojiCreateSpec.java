@@ -44,10 +44,6 @@ public class GuildEmojiCreateSpec implements Spec<GuildEmojiCreateRequest> {
         return this;
     }
 
-    public GuildEmojiCreateSpec addRole(Role role) {
-        return addRole(role.getId());
-    }
-
     @Override
     public GuildEmojiCreateRequest asRequest() {
         long[] roles = this.roles.stream().mapToLong(Snowflake::asLong).toArray();

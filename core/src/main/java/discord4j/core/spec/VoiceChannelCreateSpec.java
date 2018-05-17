@@ -61,11 +61,6 @@ public class VoiceChannelCreateSpec implements Spec<ChannelCreateRequest> {
         return this;
     }
 
-    public VoiceChannelCreateSpec setParent(@Nullable Category parent) {
-        setParentId(parent == null ? null : parent.getId());
-        return this;
-    }
-
     @Override
     public ChannelCreateRequest asRequest() {
         return requestBuilder.build();

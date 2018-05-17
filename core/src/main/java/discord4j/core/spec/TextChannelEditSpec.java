@@ -64,10 +64,6 @@ public class TextChannelEditSpec implements Spec<ChannelModifyRequest> {
         return this;
     }
 
-    public TextChannelEditSpec setParent(@Nullable Category parent) {
-        return setParentId(parent == null ? null : parent.getId());
-    }
-
     @Override
     public ChannelModifyRequest asRequest() {
         return requestBuilder.build();

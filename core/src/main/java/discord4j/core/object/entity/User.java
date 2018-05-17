@@ -110,17 +110,6 @@ public class User implements Entity {
     /**
      * Requests to retrieve this user as a {@link Member}.
      *
-     * @param guild The guild to associate this user as a {@link Member}.
-     * @return A {@link Mono} where, upon successful completion, emits this user as a {@link Member member}. If an error
-     * is received, it is emitted through the {@code Mono}.
-     */
-    public final Mono<Member> asMember(final Guild guild) {
-        return asMember(guild.getId());
-    }
-
-    /**
-     * Requests to retrieve this user as a {@link Member}.
-     *
      * @param guildId The ID of the guild to associate this user as a {@link Member}.
      * @return A {@link Mono} where, upon successful completion, emits this user as a {@link Member member}. If an error
      * is received, it is emitted through the {@code Mono}.

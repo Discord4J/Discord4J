@@ -56,11 +56,6 @@ public class TextChannelCreateSpec implements Spec<ChannelCreateRequest> {
         return this;
     }
 
-    public TextChannelCreateSpec setParent(@Nullable Category parent) {
-        setParentId(parent == null ? null : parent.getId());
-        return this;
-    }
-
     public TextChannelCreateSpec setNsfw(boolean nsfw) {
         requestBuilder.nsfw(nsfw);
         return this;

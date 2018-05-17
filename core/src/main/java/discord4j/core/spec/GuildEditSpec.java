@@ -54,10 +54,6 @@ public class GuildEditSpec implements Spec<GuildModifyRequest> {
         return this;
     }
 
-    public GuildEditSpec setAfkChannel(@Nullable VoiceChannel afkChannel) {
-        return setAfkChannelId(afkChannel == null ? null : afkChannel.getId());
-    }
-
     public GuildEditSpec setAfkTimeout(int afkTimeout) {
         requestBuilder.afkTimeout(afkTimeout);
         return this;
@@ -71,10 +67,6 @@ public class GuildEditSpec implements Spec<GuildModifyRequest> {
     public GuildEditSpec setOwnerId(Snowflake ownerId) {
         requestBuilder.ownerId(ownerId.asLong());
         return this;
-    }
-
-    public GuildEditSpec setOwner(Member member) {
-        return setOwnerId(member.getId());
     }
 
     public GuildEditSpec setSplash(@Nullable String splash) {
