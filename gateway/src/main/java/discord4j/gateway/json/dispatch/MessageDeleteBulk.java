@@ -28,6 +28,9 @@ public class MessageDeleteBulk implements Dispatch {
     @JsonProperty("channel_id")
     @UnsignedJson
     private long channelId;
+    @JsonProperty("guild_id")
+    @UnsignedJson
+    private long guildId;
 
     public long[] getIds() {
         return ids;
@@ -37,11 +40,16 @@ public class MessageDeleteBulk implements Dispatch {
         return channelId;
     }
 
+    public long getGuildId() {
+        return guildId;
+    }
+
     @Override
     public String toString() {
-        return "MessageDeleteBulk[" +
+        return "MessageDeleteBulk{" +
                 "ids=" + Arrays.toString(ids) +
                 ", channelId=" + channelId +
-                ']';
+                ", guildId=" + guildId +
+                '}';
     }
 }

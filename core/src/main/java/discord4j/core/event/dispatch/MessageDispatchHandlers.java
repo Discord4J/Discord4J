@@ -56,12 +56,13 @@ class MessageDispatchHandlers {
         DiscordClient client = context.getServiceMediator().getClient();
         long messageIds[] = context.getDispatch().getIds();
         long channelId = context.getDispatch().getChannelId();
+        long guildId = context.getDispatch().getGuildId();
 
         Mono<Void> deleteMessages = context.getServiceMediator().getStoreHolder().getMessageStore()
                 .delete(Flux.fromArray(ArrayUtil.toObject(context.getDispatch().getIds())));
 
         return deleteMessages
-                .thenReturn(new MessageBulkDeleteEvent(client, messageIds, channelId));
+                .thenReturn(new MessageBulkDeleteEvent(client, messageIds, channelId, guildId));
     }
 
     static Mono<ReactionAddEvent> messageReactionAdd(DispatchContext<MessageReactionAdd> context) {
