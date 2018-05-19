@@ -50,7 +50,7 @@ public final class VoiceStateBean implements Serializable {
     }
 
     public VoiceStateBean(final VoiceStateResponse response) {
-        this.guildId = guildId;
+        this.guildId = response.getGuildId();
         channelId = response.getChannelId();
         userId = response.getUserId();
         sessionId = response.getSessionId();

@@ -27,7 +27,7 @@ import javax.annotation.Nullable;
 
 public class PossibleDeserializer extends ReferenceTypeDeserializer<Possible<?>> {
 
-    PossibleDeserializer(JavaType fullType, ValueInstantiator vi, TypeDeserializer typeDeser,
+    PossibleDeserializer(JavaType fullType, @Nullable ValueInstantiator vi, TypeDeserializer typeDeser,
                          JsonDeserializer<?> deser) {
         super(fullType, vi, typeDeser, deser);
     }

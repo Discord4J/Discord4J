@@ -18,6 +18,8 @@ package discord4j.gateway.json;
 
 import discord4j.gateway.json.dispatch.Dispatch;
 
+import javax.annotation.Nullable;
+
 public final class Opcode<T extends PayloadData> {
 
     public static final Opcode<Dispatch> DISPATCH = newOp(0, Dispatch.class);
@@ -36,11 +38,12 @@ public final class Opcode<T extends PayloadData> {
     private final int rawOp;
     private final Class<T> payloadType;
 
-    private Opcode(int rawOp, Class<T> payloadType) {
+    private Opcode(int rawOp, @Nullable Class<T> payloadType) {
         this.rawOp = rawOp;
         this.payloadType = payloadType;
     }
 
+    @Nullable
     public static Opcode<?> forRaw(int rawOp) {
         switch (rawOp) {
             case 0: return DISPATCH;
@@ -59,7 +62,7 @@ public final class Opcode<T extends PayloadData> {
         }
     }
 
-    private static <T extends PayloadData> Opcode<T> newOp(int rawOp, Class<T> payloadType) {
+    private static <T extends PayloadData> Opcode<T> newOp(int rawOp, @Nullable Class<T> payloadType) {
         return new Opcode<>(rawOp, payloadType);
     }
 
@@ -67,6 +70,7 @@ public final class Opcode<T extends PayloadData> {
         return rawOp;
     }
 
+    @Nullable
     public Class<T> getPayloadType() {
         return payloadType;
     }

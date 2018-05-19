@@ -52,7 +52,7 @@ public class GatewayStateChange implements Dispatch {
     private final int currentAttempt;
     private final Duration backoff;
 
-    private GatewayStateChange(State state, int currentAttempt, Duration backoff) {
+    private GatewayStateChange(State state, int currentAttempt, @Nullable Duration backoff) {
         this.state = state;
         this.currentAttempt = currentAttempt;
         this.backoff = backoff;

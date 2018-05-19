@@ -15,6 +15,6 @@
  * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
 @NonNullApi
-package discord4j.rest.json.request;
+package discord4j.gateway.payload;
 
 import reactor.util.annotation.NonNullApi;

@@ -23,8 +23,11 @@ import com.fasterxml.jackson.databind.deser.Deserializers;
 import com.fasterxml.jackson.databind.jsontype.TypeDeserializer;
 import com.fasterxml.jackson.databind.type.ReferenceType;
 
+import javax.annotation.Nullable;
+
 public class PossibleDeserializers extends Deserializers.Base {
 
+    @Nullable
     @Override
     public JsonDeserializer<?> findReferenceDeserializer(ReferenceType refType, DeserializationConfig config,
                                                          BeanDescription beanDesc,
