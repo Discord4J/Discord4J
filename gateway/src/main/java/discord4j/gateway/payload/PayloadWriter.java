@@ -16,11 +16,11 @@
  */
 package discord4j.gateway.payload;
 
-import discord4j.common.json.payload.GatewayPayload;
+import discord4j.gateway.json.GatewayPayload;
 import io.netty.buffer.ByteBuf;
 
 /**
- * Strategy for encoding a {@link discord4j.common.json.payload.GatewayPayload} and writing its contents to a {@link
+ * Strategy for encoding a {@link discord4j.gateway.json.GatewayPayload} and writing its contents to a {@link
  * io.netty.buffer.ByteBuf}.
  */
 public interface PayloadWriter {

@@ -16,9 +16,9 @@
  */
 package discord4j.rest.service;
 
-import discord4j.common.json.request.GuildEmojiCreateRequest;
-import discord4j.common.json.request.GuildEmojiModifyRequest;
-import discord4j.common.json.response.GuildEmojiResponse;
+import discord4j.common.json.GuildEmojiResponse;
+import discord4j.rest.json.request.GuildEmojiCreateRequest;
+import discord4j.rest.json.request.GuildEmojiModifyRequest;
 import discord4j.rest.request.Router;
 import discord4j.rest.route.Routes;
 import reactor.core.publisher.Flux;

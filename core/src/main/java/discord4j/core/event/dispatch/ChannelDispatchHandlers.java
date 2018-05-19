@@ -16,25 +16,28 @@
  */
 package discord4j.core.event.dispatch;
 
-import discord4j.common.json.payload.dispatch.ChannelCreate;
-import discord4j.common.json.payload.dispatch.ChannelDelete;
-import discord4j.common.json.payload.dispatch.ChannelPinsUpdate;
-import discord4j.common.json.payload.dispatch.ChannelUpdate;
-import discord4j.common.json.response.ChannelResponse;
 import discord4j.core.DiscordClient;
 import discord4j.core.ServiceMediator;
 import discord4j.core.StoreHolder;
 import discord4j.core.event.domain.Event;
 import discord4j.core.event.domain.channel.*;
+import discord4j.core.object.data.PrivateChannelBean;
+import discord4j.core.object.data.stored.CategoryBean;
+import discord4j.core.object.data.stored.GuildBean;
+import discord4j.core.object.data.stored.TextChannelBean;
+import discord4j.core.object.data.stored.VoiceChannelBean;
 import discord4j.core.object.entity.*;
-import discord4j.core.object.entity.bean.*;
 import discord4j.core.util.ArrayUtil;
+import discord4j.gateway.json.dispatch.ChannelCreate;
+import discord4j.gateway.json.dispatch.ChannelDelete;
+import discord4j.gateway.json.dispatch.ChannelPinsUpdate;
+import discord4j.gateway.json.dispatch.ChannelUpdate;
+import discord4j.gateway.json.response.GatewayChannelResponse;
 import discord4j.store.primitive.LongObjStore;
 import reactor.core.publisher.Mono;
 
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
-import java.util.Objects;
 
 class ChannelDispatchHandlers {
 
@@ -55,13 +58,15 @@ class ChannelDispatchHandlers {
     private static Mono<TextChannelCreateEvent> textChannelCreate(DispatchContext<ChannelCreate> context) {
         ServiceMediator serviceMediator = context.getServiceMediator();
         DiscordClient client = serviceMediator.getClient();
-        TextChannelBean bean = new TextChannelBean(context.getDispatch().getChannel());
+        GatewayChannelResponse channel = context.getDispatch().getChannel();
+        long guildId = context.getDispatch().getGuildId();
+        TextChannelBean bean = new TextChannelBean(channel, guildId);
 
         Mono<TextChannelCreateEvent> saveChannel = serviceMediator.getStoreHolder().getTextChannelStore()
                 .save(bean.getId(), bean)
                 .thenReturn(new TextChannelCreateEvent(client, new TextChannel(serviceMediator, bean)));
 
-        return addChannelToGuild(serviceMediator.getStoreHolder().getGuildStore(), context.getDispatch().getChannel())
+        return addChannelToGuild(serviceMediator.getStoreHolder().getGuildStore(), channel, guildId)
                 .then(saveChannel);
     }
 
@@ -76,36 +81,38 @@ class ChannelDispatchHandlers {
     private static Mono<VoiceChannelCreateEvent> voiceChannelCreate(DispatchContext<ChannelCreate> context) {
         ServiceMediator serviceMediator = context.getServiceMediator();
         DiscordClient client = serviceMediator.getClient();
-        VoiceChannelBean bean = new VoiceChannelBean(context.getDispatch().getChannel());
+        GatewayChannelResponse channel = context.getDispatch().getChannel();
+        long guildId = context.getDispatch().getGuildId();
+        VoiceChannelBean bean = new VoiceChannelBean(channel, guildId);
 
         Mono<VoiceChannelCreateEvent> saveChannel = serviceMediator.getStoreHolder().getVoiceChannelStore()
                 .save(bean.getId(), bean)
                 .thenReturn(new VoiceChannelCreateEvent(client, new VoiceChannel(serviceMediator, bean)));
 
-        return addChannelToGuild(serviceMediator.getStoreHolder().getGuildStore(), context.getDispatch().getChannel())
+        return addChannelToGuild(serviceMediator.getStoreHolder().getGuildStore(), channel, guildId)
                 .then(saveChannel);
     }
 
     private static Mono<CategoryCreateEvent> categoryCreateEvent(DispatchContext<ChannelCreate> context) {
         ServiceMediator serviceMediator = context.getServiceMediator();
         DiscordClient client = serviceMediator.getClient();
-        CategoryBean bean = new CategoryBean(context.getDispatch().getChannel());
+        GatewayChannelResponse channel = context.getDispatch().getChannel();
+        long guildId = context.getDispatch().getGuildId();
+        CategoryBean bean = new CategoryBean(channel, guildId);
 
         Mono<CategoryCreateEvent> saveChannel = serviceMediator.getStoreHolder().getCategoryStore()
                 .save(bean.getId(), bean)
                 .thenReturn(new CategoryCreateEvent(client, new Category(serviceMediator, bean)));
 
-        return addChannelToGuild(serviceMediator.getStoreHolder().getGuildStore(), context.getDispatch().getChannel())
+        return addChannelToGuild(serviceMediator.getStoreHolder().getGuildStore(), channel, guildId)
                 .then(saveChannel);
     }
 
-    private static Mono<Void> addChannelToGuild(LongObjStore<GuildBean> guildStore, ChannelResponse channel) {
+    private static Mono<Void> addChannelToGuild(LongObjStore<GuildBean> guildStore, GatewayChannelResponse channel,
+                                                long guildId) {
         return guildStore
-                .find(Objects.requireNonNull(channel.getGuildId()))
-                .doOnNext(guild -> {
-
-                    guild.setChannels(ArrayUtil.add(guild.getChannels(), channel.getId()));
-                })
+                .find(guildId)
+                .doOnNext(guild -> guild.setChannels(ArrayUtil.add(guild.getChannels(), channel.getId())))
                 .flatMap(guild -> guildStore.save(guild.getId(), guild));
     }
 
@@ -126,13 +133,15 @@ class ChannelDispatchHandlers {
     private static Mono<TextChannelDeleteEvent> textChannelDelete(DispatchContext<ChannelDelete> context) {
         StoreHolder storeHolder = context.getServiceMediator().getStoreHolder();
         DiscordClient client = context.getServiceMediator().getClient();
-        TextChannelBean bean = new TextChannelBean(context.getDispatch().getChannel());
+        GatewayChannelResponse channel = context.getDispatch().getChannel();
+        long guildId = context.getDispatch().getGuildId();
+        TextChannelBean bean = new TextChannelBean(channel, guildId);
 
         Mono<TextChannelDeleteEvent> deleteChannel = storeHolder.getTextChannelStore()
                 .delete(bean.getId())
                 .thenReturn(new TextChannelDeleteEvent(client, new TextChannel(context.getServiceMediator(), bean)));
 
-        return removeChannelFromGuild(storeHolder.getGuildStore(), context.getDispatch().getChannel())
+        return removeChannelFromGuild(storeHolder.getGuildStore(), channel, guildId)
                 .then(deleteChannel);
     }
 
@@ -148,32 +157,37 @@ class ChannelDispatchHandlers {
     private static Mono<VoiceChannelDeleteEvent> voiceChannelDelete(DispatchContext<ChannelDelete> context) {
         StoreHolder storeHolder = context.getServiceMediator().getStoreHolder();
         DiscordClient client = context.getServiceMediator().getClient();
-        VoiceChannelBean bean = new VoiceChannelBean(context.getDispatch().getChannel());
+        GatewayChannelResponse channel = context.getDispatch().getChannel();
+        long guildId = context.getDispatch().getGuildId();
+        VoiceChannelBean bean = new VoiceChannelBean(channel, guildId);
 
         Mono<VoiceChannelDeleteEvent> deleteChannel = storeHolder.getVoiceChannelStore()
                 .delete(bean.getId())
                 .thenReturn(new VoiceChannelDeleteEvent(client, new VoiceChannel(context.getServiceMediator(), bean)));
 
-        return removeChannelFromGuild(storeHolder.getGuildStore(), context.getDispatch().getChannel())
+        return removeChannelFromGuild(storeHolder.getGuildStore(), channel, guildId)
                 .then(deleteChannel);
     }
 
     private static Mono<CategoryDeleteEvent> categoryDeleteEvent(DispatchContext<ChannelDelete> context) {
         StoreHolder storeHolder = context.getServiceMediator().getStoreHolder();
         DiscordClient client = context.getServiceMediator().getClient();
-        CategoryBean bean = new CategoryBean(context.getDispatch().getChannel());
+        GatewayChannelResponse channel = context.getDispatch().getChannel();
+        long guildId = context.getDispatch().getGuildId();
+        CategoryBean bean = new CategoryBean(channel, guildId);
 
         Mono<CategoryDeleteEvent> deleteChannel = storeHolder.getCategoryStore()
                 .delete(bean.getId())
                 .thenReturn(new CategoryDeleteEvent(client, new Category(context.getServiceMediator(), bean)));
 
-        return removeChannelFromGuild(storeHolder.getGuildStore(), context.getDispatch().getChannel())
+        return removeChannelFromGuild(storeHolder.getGuildStore(), channel, guildId)
                 .then(deleteChannel);
     }
 
-    private static Mono<Void> removeChannelFromGuild(LongObjStore<GuildBean> guildStore, ChannelResponse channel) {
+    private static Mono<Void> removeChannelFromGuild(LongObjStore<GuildBean> guildStore, GatewayChannelResponse channel,
+                                                     long guildId) {
         return guildStore
-                .find(Objects.requireNonNull(channel.getGuildId()))
+                .find(guildId)
                 .doOnNext(guild -> guild.setChannels(ArrayUtil.remove(guild.getChannels(), channel.getId())))
                 .flatMap(guild -> guildStore.save(guild.getId(), guild));
     }
@@ -181,7 +195,8 @@ class ChannelDispatchHandlers {
     static Mono<PinsUpdateEvent> channelPinsUpdate(DispatchContext<ChannelPinsUpdate> context) {
         long channelId = context.getDispatch().getChannelId();
         Instant timestamp = context.getDispatch().getLastPinTimestamp() == null ? null :
-                DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(context.getDispatch().getLastPinTimestamp(), Instant::from);
+                DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(context.getDispatch().getLastPinTimestamp(),
+                        Instant::from);
 
         return Mono.just(new PinsUpdateEvent(context.getServiceMediator().getClient(), channelId, timestamp));
     }
@@ -204,7 +219,9 @@ class ChannelDispatchHandlers {
     private static Mono<TextChannelUpdateEvent> textChannelUpdate(DispatchContext<ChannelUpdate> context) {
         ServiceMediator serviceMediator = context.getServiceMediator();
         DiscordClient client = serviceMediator.getClient();
-        TextChannelBean bean = new TextChannelBean(context.getDispatch().getChannel());
+        GatewayChannelResponse channel = context.getDispatch().getChannel();
+        long guildId = context.getDispatch().getGuildId();
+        TextChannelBean bean = new TextChannelBean(channel, guildId);
         TextChannel current = new TextChannel(context.getServiceMediator(), bean);
 
         Mono<Void> saveNew = serviceMediator.getStoreHolder().getTextChannelStore().save(bean.getId(), bean);
@@ -219,7 +236,9 @@ class ChannelDispatchHandlers {
     private static Mono<VoiceChannelUpdateEvent> voiceChannelUpdate(DispatchContext<ChannelUpdate> context) {
         ServiceMediator serviceMediator = context.getServiceMediator();
         DiscordClient client = serviceMediator.getClient();
-        VoiceChannelBean bean = new VoiceChannelBean(context.getDispatch().getChannel());
+        GatewayChannelResponse channel = context.getDispatch().getChannel();
+        long guildId = context.getDispatch().getGuildId();
+        VoiceChannelBean bean = new VoiceChannelBean(channel, guildId);
         VoiceChannel current = new VoiceChannel(context.getServiceMediator(), bean);
 
         Mono<Void> saveNew = serviceMediator.getStoreHolder().getVoiceChannelStore().save(bean.getId(), bean);
@@ -234,7 +253,9 @@ class ChannelDispatchHandlers {
     private static Mono<CategoryUpdateEvent> categoryUpdateEvent(DispatchContext<ChannelUpdate> context) {
         ServiceMediator serviceMediator = context.getServiceMediator();
         DiscordClient client = serviceMediator.getClient();
-        CategoryBean bean = new CategoryBean(context.getDispatch().getChannel());
+        GatewayChannelResponse channel = context.getDispatch().getChannel();
+        long guildId = context.getDispatch().getGuildId();
+        CategoryBean bean = new CategoryBean(channel, guildId);
         Category current = new Category(context.getServiceMediator(), bean);
 
         Mono<Void> saveNew = serviceMediator.getStoreHolder().getCategoryStore().save(bean.getId(), bean);

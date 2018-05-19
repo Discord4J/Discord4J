@@ -17,8 +17,8 @@
 package discord4j.core.spec;
 
 import discord4j.common.jackson.Possible;
-import discord4j.common.json.request.GuildEmojiModifyRequest;
 import discord4j.core.object.util.Snowflake;
+import discord4j.rest.json.request.GuildEmojiModifyRequest;
 
 import java.util.Set;
 

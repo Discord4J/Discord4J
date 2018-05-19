@@ -16,12 +16,9 @@
  */
 package discord4j.core.event.dispatch;
 
-import discord4j.common.json.payload.GatewayPayload;
-import discord4j.common.json.payload.RequestGuildMembers;
-import discord4j.common.json.payload.dispatch.*;
-import discord4j.common.json.response.GuildEmojiResponse;
-import discord4j.common.json.response.GuildMemberResponse;
-import discord4j.common.json.response.UserResponse;
+import discord4j.common.json.GuildEmojiResponse;
+import discord4j.common.json.GuildMemberResponse;
+import discord4j.common.json.UserResponse;
 import discord4j.core.DiscordClient;
 import discord4j.core.ServiceMediator;
 import discord4j.core.StoreHolder;
@@ -29,11 +26,13 @@ import discord4j.core.event.domain.guild.*;
 import discord4j.core.event.domain.role.RoleCreateEvent;
 import discord4j.core.event.domain.role.RoleDeleteEvent;
 import discord4j.core.event.domain.role.RoleUpdateEvent;
-import discord4j.core.object.bean.VoiceStateBean;
+import discord4j.core.object.data.stored.*;
 import discord4j.core.object.entity.*;
-import discord4j.core.object.entity.bean.*;
 import discord4j.core.util.ArrayUtil;
 import discord4j.core.util.EntityUtil;
+import discord4j.gateway.json.GatewayPayload;
+import discord4j.gateway.json.RequestGuildMembers;
+import discord4j.gateway.json.dispatch.*;
 import discord4j.store.util.LongLongTuple2;
 import discord4j.store.util.LongObjTuple2;
 import reactor.core.publisher.Flux;
@@ -66,22 +65,24 @@ class GuildDispatchHandlers {
     static Mono<GuildCreateEvent> guildCreate(DispatchContext<GuildCreate> context) {
         ServiceMediator serviceMediator = context.getServiceMediator();
 
-        GuildBean guildBean = new GuildBean(context.getDispatch().getGuild());
+        GuildBean guildBean = new GuildBean(context.getDispatch());
 
         Mono<Void> saveGuild = serviceMediator.getStoreHolder().getGuildStore().save(guildBean.getId(), guildBean);
         // TODO optimize to separate into three Publisher<Channel> and saveAll to limit store hits
-        Mono<Void> saveChannels = Flux.just(context.getDispatch().getGuild().getChannels()).flatMap(channel -> {
+        Mono<Void> saveChannels = Flux.just(context.getDispatch().getChannels()).flatMap(channel -> {
             switch (Channel.Type.of(channel.getType())) {
                 case GUILD_TEXT:
-                    TextChannelBean textChannelBean = new TextChannelBean(channel);
+                    TextChannelBean textChannelBean = new TextChannelBean(channel, guildBean.getId());
                     textChannelBean.setGuildId(guildBean.getId());
-                    return serviceMediator.getStoreHolder().getTextChannelStore().save(channel.getId(), textChannelBean);
+                    return serviceMediator.getStoreHolder().getTextChannelStore().save(channel.getId(),
+                            textChannelBean);
                 case GUILD_VOICE:
-                    VoiceChannelBean voiceChannelBean = new VoiceChannelBean(channel);
+                    VoiceChannelBean voiceChannelBean = new VoiceChannelBean(channel, guildBean.getId());
                     voiceChannelBean.setGuildId(guildBean.getId());
-                    return serviceMediator.getStoreHolder().getVoiceChannelStore().save(channel.getId(), voiceChannelBean);
+                    return serviceMediator.getStoreHolder().getVoiceChannelStore().save(channel.getId(),
+                            voiceChannelBean);
                 case GUILD_CATEGORY:
-                    CategoryBean categoryBean = new CategoryBean(channel);
+                    CategoryBean categoryBean = new CategoryBean(channel, guildBean.getId());
                     categoryBean.setGuildId(guildBean.getId());
                     return serviceMediator.getStoreHolder().getCategoryStore().save(channel.getId(), categoryBean);
                 default:
@@ -90,22 +91,22 @@ class GuildDispatchHandlers {
         }).then();
 
         Mono<Void> saveRoles = serviceMediator.getStoreHolder().getRoleStore()
-                .save(Flux.just(context.getDispatch().getGuild().getRoles())
+                .save(Flux.just(context.getDispatch().getRoles())
                         .map(role -> Tuples.of(role.getId(), new RoleBean(role))));
 
         Mono<Void> saveEmojis = serviceMediator.getStoreHolder().getGuildEmojiStore()
-                .save(Flux.just(context.getDispatch().getGuild().getEmojis())
+                .save(Flux.just(context.getDispatch().getEmojis())
                         .map(emoji -> Tuples.of(emoji.getId(), new GuildEmojiBean(emoji))));
 
         Mono<Void> saveMembers = serviceMediator.getStoreHolder().getMemberStore()
-                .save(Flux.just(context.getDispatch().getGuild().getMembers())
+                .save(Flux.just(context.getDispatch().getMembers())
                         .map(member -> Tuples.of(LongLongTuple2.of(guildBean.getId(), member.getUser().getId()),
                                 new MemberBean(member))));
 
         Mono<Void> saveVoiceStates = serviceMediator.getStoreHolder().getVoiceStateStore()
-                .save(Flux.just(context.getDispatch().getGuild().getVoiceStates())
+                .save(Flux.just(context.getDispatch().getVoiceStates())
                         .map(voiceState -> Tuples.of(LongLongTuple2.of(guildBean.getId(), voiceState.getUserId()),
-                                new VoiceStateBean(voiceState))));
+                                new VoiceStateBean(voiceState, guildBean.getId()))));
 
         Mono<Void> startMemberChunk = Mono.fromRunnable(() -> {
             context.getServiceMediator().getGatewayClient().sender()
@@ -217,7 +218,7 @@ class GuildDispatchHandlers {
         Mono<Void> saveUser = serviceMediator.getStoreHolder().getUserStore()
                 .save(response.getUser().getId(), userBean);
 
-        Member member = new Member(serviceMediator, bean,userBean, guildId);
+        Member member = new Member(serviceMediator, bean, userBean, guildId);
 
         return addMemberId
                 .then(saveMember)
@@ -349,12 +350,12 @@ class GuildDispatchHandlers {
         ServiceMediator serviceMediator = context.getServiceMediator();
         DiscordClient client = serviceMediator.getClient();
 
-        long guildId = context.getDispatch().getGuild().getId();
+        long guildId = context.getDispatch().getGuildId();
 
         Mono<GuildUpdateEvent> update = context.getServiceMediator().getStoreHolder().getGuildStore()
                 .find(guildId)
                 .flatMap(oldBean -> {
-                    GuildBean newBean = new GuildBean(oldBean, context.getDispatch().getGuild());
+                    GuildBean newBean = new GuildBean(oldBean, context.getDispatch());
 
                     Guild old = new Guild(context.getServiceMediator(), oldBean);
                     Guild current = new Guild(context.getServiceMediator(), newBean);
@@ -364,7 +365,7 @@ class GuildDispatchHandlers {
                             .thenReturn(new GuildUpdateEvent(client, current, old));
                 });
 
-        Guild current = new Guild(serviceMediator, new BaseGuildBean(context.getDispatch().getGuild()));
+        Guild current = new Guild(serviceMediator, new BaseGuildBean(context.getDispatch()));
 
         return update.defaultIfEmpty(new GuildUpdateEvent(client, current, null));
     }

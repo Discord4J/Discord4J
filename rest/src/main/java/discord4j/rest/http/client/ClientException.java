@@ -17,7 +17,7 @@
 
 package discord4j.rest.http.client;
 
-import discord4j.common.json.response.ErrorResponse;
+import discord4j.rest.json.response.ErrorResponse;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import reactor.core.publisher.Mono;

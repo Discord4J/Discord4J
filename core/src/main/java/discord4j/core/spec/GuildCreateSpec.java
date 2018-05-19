@@ -16,12 +16,12 @@
  */
 package discord4j.core.spec;
 
-import discord4j.common.json.request.GuildCreateRequest;
-import discord4j.common.json.request.PartialChannelRequest;
-import discord4j.common.json.request.RoleCreateRequest;
 import discord4j.core.object.Region;
 import discord4j.core.object.entity.Channel;
 import discord4j.core.object.entity.Guild;
+import discord4j.rest.json.request.GuildCreateRequest;
+import discord4j.rest.json.request.PartialChannelRequest;
+import discord4j.rest.json.request.RoleCreateRequest;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;

@@ -18,7 +18,7 @@ package discord4j.core.object;
 
 import discord4j.core.DiscordClient;
 import discord4j.core.ServiceMediator;
-import discord4j.core.object.bean.RegionBean;
+import discord4j.core.object.data.RegionBean;
 
 import java.util.Objects;
 

@@ -16,8 +16,8 @@
  */
 package discord4j.core.object.presence;
 
-import discord4j.core.object.bean.ActivityBean;
-import discord4j.core.object.bean.RichActivityBean;
+import discord4j.core.object.data.stored.ActivityBean;
+import discord4j.core.object.data.stored.RichActivityBean;
 import discord4j.core.object.util.Snowflake;
 import discord4j.core.util.EntityUtil;
 
@@ -146,7 +146,9 @@ public class Activity {
      * @return The party's current size, if present.
      */
     public OptionalInt getCurrentPartySize() {
-        if (richData == null) return OptionalInt.empty();
+        if (richData == null) {
+            return OptionalInt.empty();
+        }
 
         final Integer currentPartySize = richData.getCurrentPartySize();
         return (currentPartySize == null) ? OptionalInt.empty() : OptionalInt.of(currentPartySize);
@@ -158,7 +160,9 @@ public class Activity {
      * @return The party's max size, if present.
      */
     public OptionalInt getMaxPartySize() {
-        if (richData == null) return OptionalInt.empty();
+        if (richData == null) {
+            return OptionalInt.empty();
+        }
 
         final Integer maxPartySize = richData.getMaxPartySize();
         return (maxPartySize == null) ? OptionalInt.empty() : OptionalInt.of(maxPartySize);

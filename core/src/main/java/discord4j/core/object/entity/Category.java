@@ -17,7 +17,7 @@
 package discord4j.core.object.entity;
 
 import discord4j.core.ServiceMediator;
-import discord4j.core.object.entity.bean.CategoryBean;
+import discord4j.core.object.data.stored.CategoryBean;
 import discord4j.core.object.util.Snowflake;
 import discord4j.core.spec.CategoryEditSpec;
 import discord4j.core.util.EntityUtil;

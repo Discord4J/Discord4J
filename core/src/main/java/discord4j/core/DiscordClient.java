@@ -16,18 +16,20 @@
  */
 package discord4j.core;
 
-import discord4j.common.json.payload.GatewayPayload;
-import discord4j.common.json.response.UserGuildResponse;
 import discord4j.core.event.EventDispatcher;
 import discord4j.core.object.Region;
-import discord4j.core.object.bean.RegionBean;
+import discord4j.core.object.data.ApplicationInfoBean;
+import discord4j.core.object.data.RegionBean;
+import discord4j.core.object.data.WebhookBean;
+import discord4j.core.object.data.stored.*;
 import discord4j.core.object.entity.*;
-import discord4j.core.object.entity.bean.*;
 import discord4j.core.object.presence.Presence;
 import discord4j.core.object.util.Snowflake;
 import discord4j.core.spec.GuildCreateSpec;
 import discord4j.core.util.EntityUtil;
 import discord4j.core.util.PaginationUtil;
+import discord4j.gateway.json.GatewayPayload;
+import discord4j.rest.json.response.UserGuildResponse;
 import discord4j.rest.util.RouteUtils;
 import discord4j.store.util.LongLongTuple2;
 import reactor.core.publisher.Flux;
@@ -116,9 +118,12 @@ public final class DiscordClient {
      * supplied ID. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Channel> getChannelById(final Snowflake channelId) {
-        final Mono<CategoryBean> category = serviceMediator.getStoreHolder().getCategoryStore().find(channelId.asLong());
-        final Mono<TextChannelBean> textChannel = serviceMediator.getStoreHolder().getTextChannelStore().find(channelId.asLong());
-        final Mono<VoiceChannelBean> voiceChannel = serviceMediator.getStoreHolder().getVoiceChannelStore().find(channelId.asLong());
+        final Mono<CategoryBean> category = serviceMediator.getStoreHolder().getCategoryStore()
+                .find(channelId.asLong());
+        final Mono<TextChannelBean> textChannel = serviceMediator.getStoreHolder().getTextChannelStore()
+                .find(channelId.asLong());
+        final Mono<VoiceChannelBean> voiceChannel = serviceMediator.getStoreHolder().getVoiceChannelStore()
+                .find(channelId.asLong());
 
         final Mono<ChannelBean> rest = serviceMediator.getRestClient().getChannelService()
                 .getChannel(channelId.asLong())
@@ -324,7 +329,6 @@ public final class DiscordClient {
      * @param spec A {@link Consumer} that provides a "blank" {@link GuildCreateSpec} to be operated on. If some
      * properties need to be retrieved via blocking operations (such as retrieval from a database), then it is
      * recommended to build the spec externally and call {@link #createGuild(GuildCreateSpec)}.
-     *
      * @return A {@link Mono} where, upon successful completion, emits the created {@link Guild}. If an error is
      * received, it is emitted through the {@code Mono}.
      */

@@ -16,10 +16,10 @@
  */
 package discord4j.core.object.entity;
 
-import discord4j.common.json.response.MessageResponse;
+import discord4j.common.json.MessageResponse;
 import discord4j.core.ServiceMediator;
-import discord4j.core.object.entity.bean.MessageBean;
-import discord4j.core.object.entity.bean.MessageChannelBean;
+import discord4j.core.object.data.stored.MessageBean;
+import discord4j.core.object.data.stored.MessageChannelBean;
 import discord4j.core.object.util.Snowflake;
 import discord4j.core.spec.MessageCreateSpec;
 import discord4j.core.util.PaginationUtil;

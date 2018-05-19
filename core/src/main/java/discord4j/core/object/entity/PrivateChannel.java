@@ -17,7 +17,7 @@
 package discord4j.core.object.entity;
 
 import discord4j.core.ServiceMediator;
-import discord4j.core.object.entity.bean.PrivateChannelBean;
+import discord4j.core.object.data.PrivateChannelBean;
 import discord4j.core.object.util.Snowflake;
 import reactor.core.publisher.Flux;
 

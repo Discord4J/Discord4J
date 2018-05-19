@@ -16,19 +16,19 @@
  */
 package discord4j.core.object.entity;
 
-import discord4j.common.json.response.GuildMemberResponse;
-import discord4j.common.json.response.PruneResponse;
+import discord4j.common.json.GuildMemberResponse;
 import discord4j.core.DiscordClient;
 import discord4j.core.ServiceMediator;
+import discord4j.core.object.data.RegionBean;
+import discord4j.core.object.data.stored.*;
 import discord4j.core.object.presence.Presence;
 import discord4j.core.object.Region;
 import discord4j.core.object.VoiceState;
-import discord4j.core.object.bean.RegionBean;
-import discord4j.core.object.entity.bean.*;
 import discord4j.core.object.util.Snowflake;
 import discord4j.core.spec.*;
 import discord4j.core.util.EntityUtil;
 import discord4j.core.util.PaginationUtil;
+import discord4j.rest.json.response.PruneResponse;
 import discord4j.store.util.LongLongTuple2;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;

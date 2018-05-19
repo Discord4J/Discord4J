@@ -27,11 +27,13 @@ public class MessageBulkDeleteEvent extends MessageEvent {
 
     private final long[] messageIds;
     private final long channelId;
+    private final long guildId;
 
-    public MessageBulkDeleteEvent(DiscordClient client, long[] messageIds, long channelId) {
+    public MessageBulkDeleteEvent(DiscordClient client, long[] messageIds, long channelId, long guildId) {
         super(client);
         this.messageIds = messageIds;
         this.channelId = channelId;
+        this.guildId = guildId;
     }
 
     public Set<Snowflake> getMessageIds() {
@@ -42,5 +44,9 @@ public class MessageBulkDeleteEvent extends MessageEvent {
 
     public Snowflake getChannelId() {
         return Snowflake.of(channelId);
+    }
+
+    public Snowflake getGuildId() {
+        return Snowflake.of(guildId);
     }
 }

@@ -17,7 +17,7 @@
 package discord4j.core.object.entity;
 
 import discord4j.core.ServiceMediator;
-import discord4j.core.object.entity.bean.VoiceChannelBean;
+import discord4j.core.object.data.stored.VoiceChannelBean;
 import discord4j.core.spec.VoiceChannelEditSpec;
 import discord4j.core.util.EntityUtil;
 import reactor.core.publisher.Mono;

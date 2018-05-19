@@ -21,9 +21,9 @@ import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import discord4j.common.jackson.PossibleModule;
-import discord4j.common.json.payload.GatewayPayload;
-import discord4j.common.json.payload.dispatch.MessageCreate;
-import discord4j.common.json.payload.dispatch.Ready;
+import discord4j.gateway.json.GatewayPayload;
+import discord4j.gateway.json.dispatch.MessageCreate;
+import discord4j.gateway.json.dispatch.Ready;
 import discord4j.gateway.payload.JacksonPayloadReader;
 import discord4j.gateway.payload.JacksonPayloadWriter;
 import discord4j.gateway.payload.PayloadReader;
@@ -66,7 +66,7 @@ public class GatewayClientTest {
 
         gatewayClient.dispatch().ofType(MessageCreate.class)
                 .subscribe(message -> {
-                    String content = message.getMessage().getContent();
+                    String content = message.getContent();
                     if ("!close".equals(content)) {
                         gatewayClient.close(false);
                     } else if ("!retry".equals(content)) {

@@ -18,7 +18,7 @@ package discord4j.gateway.payload;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import discord4j.common.json.payload.GatewayPayload;
+import discord4j.gateway.json.GatewayPayload;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import reactor.core.Exceptions;

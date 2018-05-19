@@ -16,17 +16,17 @@
  */
 package discord4j.core.object.entity;
 
-import discord4j.common.json.request.BulkDeleteRequest;
 import discord4j.core.ServiceMediator;
 import discord4j.core.object.ExtendedInvite;
 import discord4j.core.object.PermissionOverwrite;
-import discord4j.core.object.bean.ExtendedInviteBean;
-import discord4j.core.object.entity.bean.TextChannelBean;
+import discord4j.core.object.data.ExtendedInviteBean;
+import discord4j.core.object.data.stored.TextChannelBean;
 import discord4j.core.object.util.Snowflake;
 import discord4j.core.spec.InviteCreateSpec;
 import discord4j.core.spec.MessageCreateSpec;
 import discord4j.core.spec.TextChannelEditSpec;
 import discord4j.core.util.EntityUtil;
+import discord4j.rest.json.request.BulkDeleteRequest;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;

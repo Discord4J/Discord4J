@@ -16,12 +16,12 @@
  */
 package discord4j.core.object;
 
-import discord4j.common.json.response.UserResponse;
+import discord4j.common.json.UserResponse;
 import discord4j.core.DiscordClient;
 import discord4j.core.ServiceMediator;
-import discord4j.core.object.bean.ReactionBean;
+import discord4j.core.object.data.stored.ReactionBean;
+import discord4j.core.object.data.stored.UserBean;
 import discord4j.core.object.entity.*;
-import discord4j.core.object.entity.bean.UserBean;
 import discord4j.core.object.util.Snowflake;
 import discord4j.core.util.PaginationUtil;
 import reactor.core.publisher.Flux;

@@ -39,7 +39,7 @@ public class ArrayUtil {
 
     public static long[] addAll(long[] array0, long[] array1) {
         long[] ret = new long[array0.length + array1.length];
-        System.arraycopy(array0, 0, ret, 0,array0.length);
+        System.arraycopy(array0, 0, ret, 0, array0.length);
         System.arraycopy(array1, 0, ret, array0.length, array1.length);
         return ret;
     }

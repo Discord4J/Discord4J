@@ -16,8 +16,8 @@
  */
 package discord4j.gateway;
 
-import discord4j.common.json.payload.GatewayPayload;
-import discord4j.common.json.payload.PayloadData;
+import discord4j.gateway.json.GatewayPayload;
+import discord4j.gateway.json.PayloadData;
 
 import javax.annotation.Nullable;
 
@@ -25,7 +25,7 @@ import javax.annotation.Nullable;
  * Represents gateway payload data enriched with context for processing through a
  * {@link discord4j.gateway.PayloadHandler} defined under {@link discord4j.gateway.PayloadHandlers}
  *
- * @param <T> the type of the {@link discord4j.common.json.payload.PayloadData}
+ * @param <T> the type of the {@link discord4j.gateway.json.PayloadData}
  */
 public class PayloadContext<T extends PayloadData> {
 

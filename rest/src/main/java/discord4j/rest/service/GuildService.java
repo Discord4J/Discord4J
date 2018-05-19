@@ -16,8 +16,11 @@
  */
 package discord4j.rest.service;
 
-import discord4j.common.json.request.*;
-import discord4j.common.json.response.*;
+import discord4j.common.json.GuildMemberResponse;
+import discord4j.common.json.RoleResponse;
+import discord4j.common.json.UserResponse;
+import discord4j.rest.json.request.*;
+import discord4j.rest.json.response.*;
 import discord4j.rest.request.Router;
 import discord4j.rest.route.Routes;
 import reactor.core.publisher.Flux;

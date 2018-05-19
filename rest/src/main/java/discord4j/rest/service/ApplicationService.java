@@ -16,7 +16,7 @@
  */
 package discord4j.rest.service;
 
-import discord4j.common.json.response.ApplicationInfoResponse;
+import discord4j.rest.json.response.ApplicationInfoResponse;
 import discord4j.rest.request.Router;
 import discord4j.rest.route.Routes;
 import reactor.core.publisher.Mono;

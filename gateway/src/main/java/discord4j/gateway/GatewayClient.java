@@ -17,12 +17,12 @@
 package discord4j.gateway;
 
 import discord4j.common.ResettableInterval;
-import discord4j.common.json.payload.GatewayPayload;
-import discord4j.common.json.payload.Heartbeat;
-import discord4j.common.json.payload.Opcode;
-import discord4j.common.json.payload.dispatch.Dispatch;
-import discord4j.common.json.payload.dispatch.Ready;
-import discord4j.common.json.payload.dispatch.Resumed;
+import discord4j.gateway.json.GatewayPayload;
+import discord4j.gateway.json.Heartbeat;
+import discord4j.gateway.json.Opcode;
+import discord4j.gateway.json.dispatch.Dispatch;
+import discord4j.gateway.json.dispatch.Ready;
+import discord4j.gateway.json.dispatch.Resumed;
 import discord4j.gateway.payload.PayloadReader;
 import discord4j.gateway.payload.PayloadWriter;
 import discord4j.gateway.retry.GatewayStateChange;
@@ -86,7 +86,7 @@ public class GatewayClient {
     private final FluxSink<GatewayPayload<?>> senderSink;
 
     public GatewayClient(PayloadReader payloadReader, PayloadWriter payloadWriter,
-            RetryOptions retryOptions, String token, IdentifyOptions identifyOptions) {
+                         RetryOptions retryOptions, String token, IdentifyOptions identifyOptions) {
         this.payloadReader = Objects.requireNonNull(payloadReader);
         this.payloadWriter = Objects.requireNonNull(payloadWriter);
         this.retryOptions = Objects.requireNonNull(retryOptions);
@@ -176,7 +176,7 @@ public class GatewayClient {
     }
 
     private PayloadContext<?> payloadContext(GatewayPayload<?> payload, DiscordWebSocketHandler handler,
-            GatewayClient client) {
+                                             GatewayClient client) {
         return new PayloadContext<>(payload, handler, client);
     }
 
@@ -276,8 +276,8 @@ public class GatewayClient {
     /**
      * Obtains the FluxSink to send Dispatch events towards GatewayClient's users.
      *
-     * @return a {@link reactor.core.publisher.FluxSink} for {@link discord4j.common.json.payload.dispatch.Dispatch}
-     *         objects
+     * @return a {@link reactor.core.publisher.FluxSink} for {@link discord4j.gateway.json.dispatch.Dispatch}
+     * objects
      */
     FluxSink<Dispatch> dispatchSink() {
         return dispatchSink;

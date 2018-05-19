@@ -18,7 +18,7 @@ package discord4j.core.object;
 
 import discord4j.core.DiscordClient;
 import discord4j.core.ServiceMediator;
-import discord4j.core.object.bean.InviteBean;
+import discord4j.core.object.data.InviteBean;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.TextChannel;
 import discord4j.core.object.util.Snowflake;

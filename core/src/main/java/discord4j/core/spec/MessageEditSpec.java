@@ -17,8 +17,8 @@
 package discord4j.core.spec;
 
 import discord4j.common.jackson.Possible;
-import discord4j.common.json.request.EmbedRequest;
-import discord4j.common.json.request.MessageEditRequest;
+import discord4j.rest.json.request.EmbedRequest;
+import discord4j.rest.json.request.MessageEditRequest;
 
 import javax.annotation.Nullable;
 

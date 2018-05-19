@@ -17,12 +17,12 @@
 package discord4j.core.event.dispatch;
 
 import discord4j.common.jackson.Possible;
-import discord4j.common.json.payload.dispatch.*;
 import discord4j.core.DiscordClient;
 import discord4j.core.event.domain.message.*;
+import discord4j.core.object.data.stored.MessageBean;
 import discord4j.core.object.entity.Message;
-import discord4j.core.object.entity.bean.MessageBean;
 import discord4j.core.util.ArrayUtil;
+import discord4j.gateway.json.dispatch.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -30,7 +30,7 @@ class MessageDispatchHandlers {
 
     static Mono<MessageCreateEvent> messageCreate(DispatchContext<MessageCreate> context) {
         DiscordClient client = context.getServiceMediator().getClient();
-        MessageBean bean = new MessageBean(context.getDispatch().getMessage());
+        MessageBean bean = new MessageBean(context.getDispatch());
         Message message = new Message(context.getServiceMediator(), bean);
 
         Mono<Void> saveMessage = context.getServiceMediator().getStoreHolder().getMessageStore()
@@ -56,12 +56,13 @@ class MessageDispatchHandlers {
         DiscordClient client = context.getServiceMediator().getClient();
         long messageIds[] = context.getDispatch().getIds();
         long channelId = context.getDispatch().getChannelId();
+        long guildId = context.getDispatch().getGuildId();
 
         Mono<Void> deleteMessages = context.getServiceMediator().getStoreHolder().getMessageStore()
                 .delete(Flux.fromArray(ArrayUtil.toObject(context.getDispatch().getIds())));
 
         return deleteMessages
-                .thenReturn(new MessageBulkDeleteEvent(client, messageIds, channelId));
+                .thenReturn(new MessageBulkDeleteEvent(client, messageIds, channelId, guildId));
     }
 
     static Mono<ReactionAddEvent> messageReactionAdd(DispatchContext<MessageReactionAdd> context) {

@@ -16,7 +16,7 @@
  */
 package discord4j.gateway;
 
-import discord4j.common.json.payload.PayloadData;
+import discord4j.gateway.json.PayloadData;
 
 /**
  * Handler for a gateway payload.
