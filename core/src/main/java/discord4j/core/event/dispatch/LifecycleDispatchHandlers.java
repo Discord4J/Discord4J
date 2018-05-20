@@ -42,14 +42,17 @@ class LifecycleDispatchHandlers {
         Mono<Void> saveUser = context.getServiceMediator().getStoreHolder().getUserStore()
                 .save(context.getDispatch().getUser().getId(), userBean);
 
-        return saveUser.thenReturn(
-                new ReadyEvent(context.getServiceMediator().getClient(), dispatch.getVersion(), self, guilds,
-                        dispatch.getSessionId(), dispatch.getTrace()));
+        Mono<Void> saveSelfId = Mono.fromRunnable(() ->
+                context.getServiceMediator().getStoreHolder().getSelfId().set(userBean.getId()));
+
+        return saveUser
+                .then(saveSelfId)
+                .thenReturn(new ReadyEvent(context.getServiceMediator().getClient(), dispatch.getVersion(), self,
+                        guilds, dispatch.getSessionId(), dispatch.getTrace()));
     }
 
     static Mono<ResumeEvent> resumed(DispatchContext<Resumed> context) {
-        return Mono.just(new ResumeEvent(context.getServiceMediator().getClient(),
-                context.getDispatch().getTrace()));
+        return Mono.just(new ResumeEvent(context.getServiceMediator().getClient(), context.getDispatch().getTrace()));
     }
 
     static Mono<? extends GatewayLifecycleEvent> gatewayStateChanged(DispatchContext<GatewayStateChange> context) {

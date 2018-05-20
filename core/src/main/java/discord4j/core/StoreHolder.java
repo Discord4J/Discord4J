@@ -22,6 +22,8 @@ import discord4j.store.primitive.LongObjStore;
 import discord4j.store.service.StoreService;
 import discord4j.store.util.LongLongTuple2;
 
+import java.util.concurrent.atomic.AtomicLong;
+
 /** Holder for {@link Store} instances for use in caching. */
 public final class StoreHolder {
 
@@ -36,6 +38,7 @@ public final class StoreHolder {
     private final LongObjStore<UserBean> userStore;
     private final LongObjStore<VoiceChannelBean> voiceChannelStore;
     private final Store<LongLongTuple2, VoiceStateBean> voiceStateStore;
+    private final AtomicLong selfId;
 
     StoreHolder(final StoreService service) {
         categoryStore = service.provideLongObjStore(CategoryBean.class);
@@ -49,6 +52,7 @@ public final class StoreHolder {
         userStore = service.provideLongObjStore(UserBean.class);
         voiceChannelStore = service.provideLongObjStore(VoiceChannelBean.class);
         voiceStateStore = service.provideGenericStore(LongLongTuple2.class, VoiceStateBean.class);
+        selfId = new AtomicLong();
     }
 
     public LongObjStore<CategoryBean> getCategoryStore() {
@@ -93,5 +97,9 @@ public final class StoreHolder {
 
     public Store<LongLongTuple2, VoiceStateBean> getVoiceStateStore() {
         return voiceStateStore;
+    }
+
+    public AtomicLong getSelfId() {
+        return selfId;
     }
 }

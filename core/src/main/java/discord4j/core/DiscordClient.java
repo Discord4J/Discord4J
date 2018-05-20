@@ -296,6 +296,23 @@ public final class DiscordClient {
     }
 
     /**
+     * Requests to retrieve the bot user.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits the bot {@link User user}. If an error is
+     * received, it is emitted through the {@code Mono}.
+     */
+    public Mono<User> getSelf() {
+        final long selfId = serviceMediator.getStoreHolder().getSelfId().get();
+        return Mono.just(selfId)
+                .filter(it -> it != 0)
+                .map(Snowflake::of)
+                .flatMap(this::getUserById)
+                .switchIfEmpty(serviceMediator.getRestClient().getUserService().getCurrentUser()
+                        .map(UserBean::new)
+                        .map(bean -> new User(serviceMediator, bean)));
+    }
+
+    /**
      * Logs in the client to the gateway.
      *
      * @return A {@link Mono} that completes (either successfully or with an error) when the client disconnects from the
