@@ -285,8 +285,34 @@ class GuildDispatchHandlers {
     }
 
     static Mono<MemberUpdateEvent> guildMemberUpdate(DispatchContext<GuildMemberUpdate> context) {
-        // TODO
-        return Mono.empty();
+        ServiceMediator serviceMediator = context.getServiceMediator();
+        DiscordClient client = serviceMediator.getClient();
+
+        long guildId = context.getDispatch().getGuildId();
+        long memberId = context.getDispatch().getUser().getId();
+
+        long[] currentRoles = context.getDispatch().getRoles();
+        String currentNick = context.getDispatch().getNick();
+
+        LongLongTuple2 key = LongLongTuple2.of(guildId, memberId);
+
+        Mono<MemberUpdateEvent> update = serviceMediator.getStoreHolder().getMemberStore()
+                .find(key)
+                .flatMap(bean -> {
+                    UserBean user = new UserBean(context.getDispatch().getUser());
+                    Member old = new Member(serviceMediator, new MemberBean(bean, context.getDispatch()), user,
+                            guildId);
+
+                    bean.setNick(currentNick);
+                    bean.setRoles(currentRoles);
+
+                    return serviceMediator.getStoreHolder().getMemberStore()
+                            .save(key, bean)
+                            .thenReturn(new MemberUpdateEvent(client, guildId, memberId, old, currentRoles,
+                                    currentNick));
+                });
+
+        return update.defaultIfEmpty(new MemberUpdateEvent(client, guildId, memberId, null, currentRoles, currentNick));
     }
 
     static Mono<RoleCreateEvent> guildRoleCreate(DispatchContext<GuildRoleCreate> context) {

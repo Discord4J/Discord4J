@@ -18,26 +18,57 @@ package discord4j.core.event.domain.guild;
 
 import discord4j.core.DiscordClient;
 import discord4j.core.object.entity.Member;
+import discord4j.core.object.util.Snowflake;
 
 import javax.annotation.Nullable;
+import java.util.Arrays;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class MemberUpdateEvent extends GuildEvent {
 
-    private final Member current;
+
+    private final long guildId;
+    private final long memberId;
+
+    @Nullable
     private final Member old;
 
-    public MemberUpdateEvent(DiscordClient client, Member current, @Nullable Member old) {
+    private final long[] currentRoles;
+    @Nullable
+    private final String currentNickname;
+
+    public MemberUpdateEvent(DiscordClient client, long guildId, long memberId, @Nullable Member old,
+                             long[] currentRoles, @Nullable String currentNickname) {
         super(client);
-        this.current = current;
+
+        this.guildId = guildId;
+        this.memberId = memberId;
         this.old = old;
+        this.currentRoles = currentRoles;
+        this.currentNickname = currentNickname;
     }
 
-    public Member getCurrent() {
-        return current;
+    public Snowflake getGuildId() {
+        return Snowflake.of(guildId);
+    }
+
+    public Snowflake getMemberId() {
+        return Snowflake.of(memberId);
     }
 
     public Optional<Member> getOld() {
         return Optional.ofNullable(old);
+    }
+
+    public Set<Snowflake> getCurrentRoles() {
+        return Arrays.stream(currentRoles)
+                .mapToObj(Snowflake::of)
+                .collect(Collectors.toSet());
+    }
+
+    public Optional<String> getCurrentNickname() {
+        return Optional.ofNullable(currentNickname);
     }
 }
