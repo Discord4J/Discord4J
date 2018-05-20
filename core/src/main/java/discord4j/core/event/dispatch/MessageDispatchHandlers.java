@@ -101,13 +101,13 @@ class MessageDispatchHandlers {
                             }
                         }
 
-                        ReactionBean existing = bean.getReactions()[i];
-                        if (existing == null) {
-                            ReactionBean r = new ReactionBean(1, me, emojiId, emojiName, emojiAnimated);
-                            bean.setReactions(ArrayUtil.add(bean.getReactions(), r));
-                        } else {
+                        if (i < bean.getReactions().length) {
+                            ReactionBean existing = bean.getReactions()[i];
                             existing.setMe(me);
                             existing.setCount(existing.getCount() + 1);
+                        } else {
+                            ReactionBean r = new ReactionBean(1, me, emojiId, emojiName, emojiAnimated);
+                            bean.setReactions(ArrayUtil.add(bean.getReactions(), r));
                         }
                     }
                 })
