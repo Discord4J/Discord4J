@@ -18,6 +18,18 @@ package discord4j.core.util;
 
 public class ArrayUtil {
 
+    public static <T> T[] remove(T[] array, T t) {
+        T[] ret = (T[]) new Object[array.length - 1];
+        for (int i = 0; i < array.length; i++) {
+            if (array[i].equals(t)) {
+                System.arraycopy(array, 0, ret, 0, i);
+                System.arraycopy(array, i + 1, ret, i, array.length - 1 - 1);
+                break;
+            }
+        }
+        return ret;
+    }
+
     public static long[] remove(long[] array, long l) {
         long[] ret = new long[array.length - 1];
         for (int i = 0; i < array.length; i++) {
@@ -27,6 +39,13 @@ public class ArrayUtil {
                 break;
             }
         }
+        return ret;
+    }
+
+    public static <T> T[] add(T[] array, T t) {
+        T[] ret = (T[]) new Object[array.length + 1];
+        System.arraycopy(array, 0, ret, 0, ret.length - 1);
+        ret[ret.length - 1] = t;
         return ret;
     }
 

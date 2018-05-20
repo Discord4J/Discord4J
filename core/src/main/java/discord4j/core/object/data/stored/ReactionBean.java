@@ -30,12 +30,22 @@ public final class ReactionBean implements Serializable {
     @Nullable
     private Long emojiId;
     private String emojiName;
+    private boolean emojiAnimated;
 
     public ReactionBean(final ReactionResponse response) {
         count = response.getCount();
         me = response.isMe();
         emojiId = response.getEmoji().getId();
         emojiName = response.getEmoji().getName();
+        emojiAnimated = response.getEmoji().getAnimated() != null && response.getEmoji().getAnimated();
+    }
+
+    public ReactionBean(int count, boolean me, @Nullable Long emojiId, String emojiName, boolean emojiAnimated) {
+        this.count = count;
+        this.me = me;
+        this.emojiId = emojiId;
+        this.emojiName = emojiName;
+        this.emojiAnimated = emojiAnimated;
     }
 
     public ReactionBean() {}
@@ -71,5 +81,13 @@ public final class ReactionBean implements Serializable {
 
     public void setEmojiName(final String emojiName) {
         this.emojiName = emojiName;
+    }
+
+    public boolean isEmojiAnimated() {
+        return emojiAnimated;
+    }
+
+    public void setEmojiAnimated(boolean emojiAnimated) {
+        this.emojiAnimated = emojiAnimated;
     }
 }
