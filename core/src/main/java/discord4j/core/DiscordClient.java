@@ -296,20 +296,6 @@ public final class DiscordClient {
     }
 
     /**
-     * Requests to retrieve the bot user's ID.
-     *
-     * @return A {@link Mono} where, upon successful completion, emits the {@link Snowflake ID} of the bot user. If an
-     * error is received, it is emitted through the {@code Mono}.
-     */
-    public Mono<Snowflake> getSelfId() {
-        final long selfId = serviceMediator.getStoreHolder().getSelfId().get();
-        return Mono.just(selfId)
-                .filter(it -> it != 0)
-                .map(Snowflake::of)
-                .switchIfEmpty(getApplicationInfo().map(ApplicationInfo::getId));
-    }
-
-    /**
      * Requests to retrieve the bot user.
      *
      * @return A {@link Mono} where, upon successful completion, emits the bot {@link User user}. If an error is
