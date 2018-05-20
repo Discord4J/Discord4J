@@ -16,9 +16,11 @@
  */
 package discord4j.core.object.entity;
 
+import discord4j.common.json.GuildEmojiResponse;
 import discord4j.core.DiscordClient;
 import discord4j.core.ServiceMediator;
 import discord4j.core.object.data.stored.GuildEmojiBean;
+import discord4j.core.object.data.stored.UserBean;
 import discord4j.core.object.util.Snowflake;
 import discord4j.core.spec.GuildEmojiEditSpec;
 import reactor.core.publisher.Flux;
@@ -106,7 +108,11 @@ public final class GuildEmoji implements Entity {
      * an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<User> getUser() {
-        throw new UnsupportedOperationException("Not yet implemented...");
+        return serviceMediator.getRestClient().getEmojiService()
+                .getGuildEmoji(getGuildId().asLong(), getId().asLong())
+                .map(GuildEmojiResponse::getUser)
+                .map(UserBean::new)
+                .map(bean -> new User(serviceMediator, bean));
     }
 
     /**
