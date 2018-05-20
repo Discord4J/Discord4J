@@ -16,14 +16,14 @@
  */
 package discord4j.core.util;
 
-import discord4j.common.json.response.ChannelResponse;
 import discord4j.core.ServiceMediator;
+import discord4j.core.object.data.PrivateChannelBean;
+import discord4j.core.object.data.stored.CategoryBean;
+import discord4j.core.object.data.stored.ChannelBean;
+import discord4j.core.object.data.stored.TextChannelBean;
+import discord4j.core.object.data.stored.VoiceChannelBean;
 import discord4j.core.object.entity.*;
 import discord4j.rest.json.response.ChannelResponse;
-
-import java.util.Map;
-import java.util.stream.Collector;
-import java.util.stream.Collectors;
 
 /** An utility class for entity processing. */
 public final class EntityUtil {

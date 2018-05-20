@@ -17,69 +17,56 @@
 package discord4j.core.object.audit;
 
 import discord4j.core.DiscordClient;
+import discord4j.core.ServiceMediator;
+import discord4j.core.object.data.AuditLogEntryBean;
 import discord4j.core.object.entity.Entity;
 import discord4j.core.object.util.Snowflake;
 
-import javax.annotation.Nullable;
-import java.util.Map;
 import java.util.Optional;
 
 public class AuditLogEntry implements Entity {
 
-    private final DiscordClient client;
-    private final long id;
-    private final long targetId;
-    private final long responsibleUserId;
-    private final String reason;
-    private final ActionType actionType;
-    private final Map<String, AuditLogChange<?>> changes;
-    private final Map<String, ?> options;
+    private final ServiceMediator serviceMediator;
+    private final AuditLogEntryBean data;
 
-    public AuditLogEntry(DiscordClient client, long id, long targetId, long responsibleUserId, @Nullable String reason,
-                         ActionType actionType, Map<String, AuditLogChange<?>> changes, Map<String, ?> options) {
-        this.client = client;
-        this.id = id;
-        this.targetId = targetId;
-        this.responsibleUserId = responsibleUserId;
-        this.reason = reason;
-        this.actionType = actionType;
-        this.changes = changes;
-        this.options = options;
+    public AuditLogEntry(final ServiceMediator serviceMediator, final AuditLogEntryBean data) {
+        this.serviceMediator = serviceMediator;
+        this.data = data;
     }
 
     public Optional<Snowflake> getTargetId() {
-        return targetId == 0 ? Optional.empty() : Optional.of(Snowflake.of(targetId));
+        return data.getTargetId() == 0 ? Optional.empty() : Optional.of(Snowflake.of(data.getTargetId()));
     }
 
     public Snowflake getResponsibleUserId() {
-        return Snowflake.of(responsibleUserId);
+        return Snowflake.of(data.getResponsibleUserId());
     }
 
     public Optional<String> getReason() {
-        return Optional.ofNullable(reason);
+        return Optional.ofNullable(data.getReason());
     }
 
     public ActionType getActionType() {
-        return actionType;
+        return ActionType.of(data.getActionType());
     }
 
     @SuppressWarnings("unchecked")
     public <T> Optional<AuditLogChange<T>> getChange(ChangeKey<T> changeKey) {
-        return Optional.ofNullable((AuditLogChange<T>) changes.get(changeKey.getName()));
+        return Optional.ofNullable((AuditLogChange<T>) data.getChanges().get(changeKey.getName()));
     }
 
     @SuppressWarnings("unchecked")
     public <T> Optional<T> getOption(OptionKey<T> optionKey) {
-        return Optional.ofNullable((T) options.get(optionKey.getField()));
+        return Optional.ofNullable((T) data.getOptions().get(optionKey.getField()));
     }
 
     @Override
     public Snowflake getId() {
-        return Snowflake.of(id);
+        return Snowflake.of(data.getId());
     }
 
     @Override
     public DiscordClient getClient() {
-        return client;
+        return serviceMediator.getClient();
     }
 }

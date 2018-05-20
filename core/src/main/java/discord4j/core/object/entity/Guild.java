@@ -16,36 +16,33 @@
  */
 package discord4j.core.object.entity;
 
-import discord4j.common.json.response.AuditLogChangeResponse;
-import discord4j.common.json.response.AuditLogEntryResponse;
-import discord4j.common.json.response.AuditLogResponse;
 import discord4j.common.json.GuildMemberResponse;
 import discord4j.core.DiscordClient;
 import discord4j.core.ServiceMediator;
+import discord4j.core.object.data.AuditLogEntryBean;
 import discord4j.core.object.data.RegionBean;
 import discord4j.core.object.data.stored.*;
 import discord4j.core.object.presence.Presence;
 import discord4j.core.object.Region;
 import discord4j.core.object.VoiceState;
 import discord4j.core.object.audit.*;
-import discord4j.core.object.bean.RegionBean;
-import discord4j.core.object.entity.bean.*;
 import discord4j.core.object.util.Snowflake;
 import discord4j.core.spec.*;
-import discord4j.core.util.AuditLogUtil;
 import discord4j.core.util.EntityUtil;
 import discord4j.core.util.PaginationUtil;
+import discord4j.rest.json.response.AuditLogResponse;
 import discord4j.rest.json.response.PruneResponse;
 import discord4j.store.util.LongLongTuple2;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.function.Tuples;
 
+import javax.annotation.Nullable;
 import java.time.Instant;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.stream.Collector;
+import java.util.function.ToLongFunction;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 
@@ -700,32 +697,35 @@ public final class Guild implements Entity {
         return serviceMediator.getRestClient().getUserService().leaveGuild(getId().asLong());
     }
 
-    public Flux<AuditLogEntry> getAuditLog(Snowflake responsibleUser, ActionType actionType) {
+    /**
+     * Requests to retrieve the audit log of this guild.
+     *
+     * @param responsibleUser The user for which to retrieve audit log entries. Null to request entries for all users.
+     * @param actionType The action type for which to retrieve audit log entries. Null to request entries for all
+     * action types.
+     * @return A {@link Flux} that continually emits entries of this guild's audit log. If an error is received, it is
+     * emitted through the {@code Flux}.
+     */
+    public Flux<AuditLogEntry> getAuditLog(@Nullable Snowflake responsibleUser, @Nullable ActionType actionType) {
         Function<Map<String, Object>, Flux<AuditLogResponse>> makeRequest = params -> {
-            params.put("user_id", responsibleUser.asString());
-            params.put("action_type", actionType.getValue());
+            if (responsibleUser != null) {
+                params.put("user_id", responsibleUser.asString());
+            }
+
+            if (actionType != null) {
+                params.put("action_type", actionType.getValue());
+            }
 
             return serviceMediator.getRestClient().getAuditLogService().getAuditLog(getId().asLong(), params).flux();
         };
 
-        Function<AuditLogResponse, Long> getLastEntryId = response ->
+        ToLongFunction<AuditLogResponse> getLastEntryId = response ->
                 response.getAuditLogEntries()[response.getAuditLogEntries().length - 1].getId();
 
         return PaginationUtil.paginateBefore(makeRequest, getLastEntryId, Long.MAX_VALUE, 100)
-                .flatMap(log -> Flux.fromArray(log.getAuditLogEntries()).map(entry -> {
-                    long targetId = entry.getTargetId() == null ? 0 : entry.getTargetId();
-
-                    Map<String, AuditLogChange<?>> changes = entry.getChanges() == null
-                            ? Collections.emptyMap()
-                            : Arrays.stream(entry.getChanges()).collect(AuditLogUtil.changeCollector());
-
-                    Map<String, ?> options = entry.getOptions() == null
-                            ? Collections.emptyMap()
-                            : AuditLogUtil.createOptionMap(entry.getOptions());
-
-                    return new AuditLogEntry(getClient(), entry.getId(), targetId, entry.getUserId(),
-                            entry.getReason(), ActionType.of(entry.getActionType()), changes, options);
-                }));
+                .flatMap(log -> Flux.fromArray(log.getAuditLogEntries())
+                        .map(AuditLogEntryBean::new)
+                        .map(bean -> new AuditLogEntry(serviceMediator, bean)));
     }
 
     /** Automatically scan and delete messages sent in the server that contain explicit content. */

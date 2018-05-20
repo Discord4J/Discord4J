@@ -16,10 +16,10 @@
  */
 package discord4j.core.util;
 
-import discord4j.common.json.response.AuditLogChangeResponse;
-import discord4j.common.json.response.AuditLogEntryOptionsResponse;
 import discord4j.core.object.audit.AuditLogChange;
 import discord4j.core.object.audit.OptionKey;
+import discord4j.rest.json.response.AuditLogChangeResponse;
+import discord4j.rest.json.response.AuditLogEntryOptionsResponse;
 
 import java.util.HashMap;
 import java.util.Map;
