@@ -85,11 +85,10 @@ class BaseMessageChannel extends BaseChannel implements MessageChannel {
     }
 
     @Override
-    public final Mono<Void> typeUntil(final Publisher<Void> until) {
+    public final Flux<Long> typeUntil(final Publisher<?> until) {
         return Flux.interval(Duration.ZERO, Duration.ofSeconds(10L))
-                .flatMap(l -> type().flux())
-                .takeUntilOther(until)
-                .then();
+                .flatMap(l -> type().thenReturn(l))
+                .takeUntilOther(until);
     }
 
     @Override

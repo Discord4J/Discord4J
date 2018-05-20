@@ -129,7 +129,7 @@ public final class TextChannel extends BaseChannel implements GuildChannel, Mess
     }
 
     @Override
-    public Mono<Void> typeUntil(final Publisher<Void> until) {
+    public Flux<Long> typeUntil(final Publisher<?> until) {
         return messageChannel.typeUntil(until);
     }
 
