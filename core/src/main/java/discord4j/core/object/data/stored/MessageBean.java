@@ -19,6 +19,7 @@ package discord4j.core.object.data.stored;
 import discord4j.common.json.MessageResponse;
 import discord4j.common.json.ReactionResponse;
 import discord4j.common.json.UserResponse;
+import discord4j.core.object.data.stored.embed.EmbedBean;
 import discord4j.gateway.json.dispatch.MessageCreate;
 
 import javax.annotation.Nullable;
@@ -42,6 +43,7 @@ public final class MessageBean implements Serializable {
     private long[] mentions;
     private long[] mentionRoles;
     private AttachmentBean[] attachments;
+    private EmbedBean[] embeds;
     @Nullable
     private ReactionBean[] reactions;
     private boolean pinned;
@@ -68,6 +70,10 @@ public final class MessageBean implements Serializable {
         attachments = Arrays.stream(response.getAttachments())
                 .map(AttachmentBean::new)
                 .toArray(AttachmentBean[]::new);
+
+        embeds = Arrays.stream(response.getEmbeds())
+                .map(EmbedBean::new)
+                .toArray(EmbedBean[]::new);
 
         final ReactionResponse[] reactions = response.getReactions();
         this.reactions = reactions == null ? null : Arrays.stream(reactions)
@@ -99,6 +105,10 @@ public final class MessageBean implements Serializable {
                 .map(AttachmentBean::new)
                 .toArray(AttachmentBean[]::new);
 
+        embeds = Arrays.stream(messageCreate.getEmbeds())
+                .map(EmbedBean::new)
+                .toArray(EmbedBean[]::new);
+
         this.reactions = null; // no reactions on message_create
         pinned = messageCreate.isPinned();
         webhookId = messageCreate.getWebhookId();
@@ -117,6 +127,7 @@ public final class MessageBean implements Serializable {
         mentions = toCopy.mentions;
         mentionRoles = toCopy.mentionRoles;
         attachments = toCopy.attachments;
+        embeds = toCopy.embeds;
         reactions = toCopy.reactions;
         pinned = toCopy.pinned;
         webhookId = toCopy.webhookId;
@@ -213,6 +224,14 @@ public final class MessageBean implements Serializable {
 
     public void setAttachments(final AttachmentBean[] attachments) {
         this.attachments = attachments;
+    }
+
+    public EmbedBean[] getEmbeds() {
+        return embeds;
+    }
+
+    public void setEmbeds(final EmbedBean[] embeds) {
+        this.embeds = embeds;
     }
 
     @Nullable

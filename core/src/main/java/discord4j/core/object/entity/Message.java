@@ -18,9 +18,10 @@ package discord4j.core.object.entity;
 
 import discord4j.core.DiscordClient;
 import discord4j.core.ServiceMediator;
+import discord4j.core.object.Embed;
+import discord4j.core.object.data.stored.MessageBean;
 import discord4j.core.object.data.stored.ReactionBean;
 import discord4j.core.object.reaction.Reaction;
-import discord4j.core.object.data.stored.MessageBean;
 import discord4j.core.object.reaction.ReactionEmoji;
 import discord4j.core.object.util.Snowflake;
 import discord4j.core.spec.MessageEditSpec;
@@ -28,9 +29,6 @@ import discord4j.core.util.EntityUtil;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -234,6 +232,17 @@ public final class Message implements Entity {
         return Arrays.stream(data.getAttachments())
                 .map(bean -> new Attachment(serviceMediator, bean))
                 .collect(Collectors.toSet());
+    }
+
+    /**
+     * Gets any embedded content.
+     *
+     * @return Any embedded content.
+     */
+    public List<Embed> getEmbeds() {
+        return Arrays.stream(data.getEmbeds())
+                .map(bean -> new Embed(serviceMediator, bean))
+                .collect(Collectors.toList());
     }
 
     /**
