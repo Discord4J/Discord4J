@@ -14,41 +14,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
-package discord4j.common.json;
+@NonNullApi
+package discord4j.core.object.reaction;
 
-import discord4j.common.jackson.UnsignedJson;
-
-import javax.annotation.Nullable;
-
-public class EmojiResponse {
-
-    private String name;
-    @Nullable
-    @UnsignedJson
-    private Long id;
-    @Nullable
-    private Boolean animated;
-
-    public String getName() {
-        return name;
-    }
-
-    @Nullable
-    public Long getId() {
-        return id;
-    }
-
-    @Nullable
-    public Boolean getAnimated() {
-        return animated;
-    }
-
-    @Override
-    public String toString() {
-        return "EmojiResponse{" +
-                "name='" + name + '\'' +
-                ", id=" + id +
-                ", animated=" + animated +
-                '}';
-    }
-}
+import reactor.util.annotation.NonNullApi;

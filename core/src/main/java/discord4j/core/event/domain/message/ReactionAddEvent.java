@@ -17,10 +17,10 @@
 package discord4j.core.event.domain.message;
 
 import discord4j.core.DiscordClient;
-import discord4j.core.object.entity.GuildEmoji;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.MessageChannel;
 import discord4j.core.object.entity.User;
+import discord4j.core.object.reaction.ReactionEmoji;
 import discord4j.core.object.util.Snowflake;
 import reactor.core.publisher.Mono;
 
@@ -29,9 +29,9 @@ public class ReactionAddEvent extends MessageEvent {
     private final long userId;
     private final long channelId;
     private final long messageId;
-    private final GuildEmoji emoji; // TODO need GuildEmoji | Unicode type
+    private final ReactionEmoji emoji;
 
-    public ReactionAddEvent(DiscordClient client, long userId, long channelId, long messageId, GuildEmoji emoji) {
+    public ReactionAddEvent(DiscordClient client, long userId, long channelId, long messageId, ReactionEmoji emoji) {
         super(client);
         this.userId = userId;
         this.channelId = channelId;
@@ -63,7 +63,7 @@ public class ReactionAddEvent extends MessageEvent {
         return getClient().getMessageById(getChannelId(), getMessageId());
     }
 
-    public GuildEmoji getEmoji() {
+    public ReactionEmoji getEmoji() {
         return emoji;
     }
 }

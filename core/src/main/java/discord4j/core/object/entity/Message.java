@@ -18,15 +18,19 @@ package discord4j.core.object.entity;
 
 import discord4j.core.DiscordClient;
 import discord4j.core.ServiceMediator;
-import discord4j.core.object.Reaction;
-import discord4j.core.object.data.stored.MessageBean;
 import discord4j.core.object.data.stored.ReactionBean;
+import discord4j.core.object.reaction.Reaction;
+import discord4j.core.object.data.stored.MessageBean;
+import discord4j.core.object.reaction.ReactionEmoji;
 import discord4j.core.object.util.Snowflake;
 import discord4j.core.spec.MessageEditSpec;
 import discord4j.core.util.EntityUtil;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -240,7 +244,7 @@ public final class Message implements Entity {
     public Set<Reaction> getReactions() {
         final ReactionBean[] reactions = data.getReactions();
         return (reactions == null) ? Collections.emptySet() : Arrays.stream(reactions)
-                .map(bean -> new Reaction(serviceMediator, bean, getChannelId().asLong(), getId().asLong()))
+                .map(bean -> new Reaction(serviceMediator, bean))
                 .collect(Collectors.toSet());
     }
 
@@ -321,6 +325,22 @@ public final class Message implements Entity {
     public Mono<Void> delete() {
         return serviceMediator.getRestClient().getChannelService()
                 .deleteMessage(getChannelId().asLong(), getId().asLong());
+    }
+
+    public Mono<Void> addReaction(ReactionEmoji emoji) {
+        return serviceMediator.getRestClient().getChannelService()
+                .createReaction(getChannelId().asLong(), getId().asLong(), EntityUtil.getEmojiString(emoji));
+    }
+
+    public Mono<Void> removeReaction(ReactionEmoji emoji, Snowflake userId) {
+        return serviceMediator.getRestClient().getChannelService()
+                .deleteReaction(getChannelId().asLong(), getId().asLong(), EntityUtil.getEmojiString(emoji),
+                        userId.asLong());
+    }
+
+    public Mono<Void> removeSelfReaction(ReactionEmoji emoji) {
+        return serviceMediator.getRestClient().getChannelService()
+                .deleteOwnReaction(getChannelId().asLong(), getId().asLong(), EntityUtil.getEmojiString(emoji));
     }
 
     /**

@@ -23,13 +23,31 @@ import discord4j.core.object.data.stored.ChannelBean;
 import discord4j.core.object.data.stored.TextChannelBean;
 import discord4j.core.object.data.stored.VoiceChannelBean;
 import discord4j.core.object.entity.*;
+import discord4j.core.object.reaction.ReactionEmoji;
 import discord4j.rest.json.response.ChannelResponse;
+
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 
 /** An utility class for entity processing. */
 public final class EntityUtil {
 
     /** The UNIX time that represents Discord's epoch (January 1, 2015). */
     public static final long DISCORD_EPOCH = 1420070400000L;
+
+    public static String getEmojiString(ReactionEmoji emoji) {
+        if (emoji instanceof ReactionEmoji.Unicode) {
+            try {
+                return URLEncoder.encode(((ReactionEmoji.Unicode) emoji).getRaw(), StandardCharsets.UTF_8.name());
+            } catch (UnsupportedEncodingException e) {
+                throw new AssertionError(); // UTF-8 is guaranteed to be supported.
+            }
+        } else {
+            ReactionEmoji.Custom custom = ((ReactionEmoji.Custom) emoji);
+            return custom.getName() + ":" + custom.getId().asString();
+        }
+    }
 
     /**
      * An utility that converts some instance of {@code ChannelResponse} to its associated {@code ChannelBean}
