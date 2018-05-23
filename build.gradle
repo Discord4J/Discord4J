@@ -29,6 +29,7 @@ allprojects {
     apply plugin: 'java'
     apply plugin: 'io.spring.dependency-management'
     apply plugin: 'maven-publish'
+    apply plugin: 'com.jfrog.bintray'
 
     group = artifact_group
     version = project_version
@@ -74,12 +75,46 @@ allprojects {
         archives javadocJar
         archives sourcesJar
     }
+
+    bintray {
+        user = project.hasProperty('bintrayUser') ? project.property('bintrayUser') : System.getenv('BINTRAY_USER')
+        key = project.hasProperty('bintrayKey') ? project.property('bintrayKey') : System.getenv('BINTRAY_KEY')
+        publications = ['maven']
+        dryRun = true
+        publish = true
+        pkg {
+            userOrg = 'austinv11'
+            repo = 'maven'
+            name = 'Discord4J'
+            websiteUrl = 'https://discord4j.com'
+            issueTrackerUrl = 'https://github.com/Discord4J/Discord4J/issues'
+            vcsUrl = 'https://github.com/Discord4J/Discord4J.git'
+            licenses = ['LGPL-3.0']
+            labels = ['discord', 'discord4j', 'd4j', 'reactor', 'nebula']
+            publicDownloadNumbers = true
+            attributes = [:]
+            version {
+                name = project.version
+                vcsTag = project.version
+                gpg {
+                    sign = true
+                }
+                if (project.hasProperty('sonatypeUsername') && project.hasProperty('sonatypePassword')) {
+                    def sonatypeUsername = project.property('sonatypeUsername')
+                    def sonatypePassword = project.property('sonatypePassword')
+                    mavenCentralSync {
+                        user = sonatypeUsername
+                        password = sonatypePassword
+                    }
+                }
+            }
+        }
+    }
 }
 
 subprojects {
     apply plugin: 'com.palantir.git-version'
     apply plugin: 'io.spring.dependency-management'
-    apply plugin: 'com.jfrog.bintray'
     apply plugin: 'com.jfrog.artifactory'
 
     archivesBaseName = 'discord4j-' + project.name
@@ -117,40 +152,6 @@ subprojects {
     project.getTasks().getByName(JavaPlugin.CLASSES_TASK_NAME).dependsOn writeGitProperties
 }
 
-bintray {
-    user = project.hasProperty('bintrayUser') ? project.property('bintrayUser') : System.getenv('BINTRAY_USER')
-    key = project.hasProperty('bintrayKey') ? project.property('bintrayKey') : System.getenv('BINTRAY_KEY')
-    publications = ['maven']
-    dryRun = false
-    publish = true
-    pkg {
-        userOrg = 'austinv11'
-        repo = 'maven'
-        websiteUrl = 'https://discord4j.com'
-        issueTrackerUrl = 'https://github.com/Discord4J/Discord4J/issues'
-        vcsUrl = 'https://github.com/Discord4J/Discord4J.git'
-        licenses = ['LGPL-3.0']
-        labels = ['discord', 'discord4j', 'd4j', 'reactor', 'nebula']
-        publicDownloadNumbers = true
-        attributes = [:]
-        version {
-            name = project.version
-            vcsTag = project.version
-            gpg {
-                sign = true
-            }
-            if (project.hasProperty('sonatypeUsername') && project.hasProperty('sonatypePassword')) {
-                def sonatypeUsername = project.property('sonatypeUsername')
-                def sonatypePassword = project.property('sonatypePassword')
-                mavenCentralSync {
-                    user = sonatypeUsername
-                    password = sonatypePassword
-                }
-            }
-        }
-    }
-}
-
 artifactory {
     contextUrl = 'https://oss.jfrog.org'
     resolve {
@@ -174,7 +175,12 @@ artifactory {
     }
 }
 
-artifactoryPublish.skip = true
+publishing {
+    publications {
+        maven(MavenPublication) {
+        }
+    }
+}
 
 bintrayUpload.dependsOn build
 artifactoryPublish.dependsOn build
