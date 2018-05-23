@@ -221,8 +221,6 @@ public final class Message implements Entity {
                         .flatMap(guildId -> getClient().getRoleById(guildId, roleId)));
     }
 
-    // TODO: getEmbeds()
-
     /**
      * Gets any attached files.
      *

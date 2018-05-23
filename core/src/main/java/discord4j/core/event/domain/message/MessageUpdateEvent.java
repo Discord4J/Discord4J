@@ -17,9 +17,11 @@
 package discord4j.core.event.domain.message;
 
 import discord4j.core.DiscordClient;
+import discord4j.core.object.Embed;
 import discord4j.core.object.entity.Message;
 
 import javax.annotation.Nullable;
+import java.util.List;
 import java.util.Optional;
 
 public class MessageUpdateEvent extends MessageEvent {
@@ -34,9 +36,12 @@ public class MessageUpdateEvent extends MessageEvent {
     private final boolean contentChanged;
     @Nullable
     private final String currentContent;
+    private final boolean embedsChanged;
+    private final List<Embed> currentEmbeds;
 
-    public MessageUpdateEvent(DiscordClient client, long messageId, long channelId, long guildId, @Nullable Message
-            old, boolean contentChanged, @Nullable String currentContent) {
+    public MessageUpdateEvent(DiscordClient client, long messageId, long channelId, long guildId,
+                              @Nullable Message old, boolean contentChanged, @Nullable String currentContent,
+                              boolean embedsChanged, List<Embed> currentEmbeds) {
         super(client);
         this.messageId = messageId;
         this.channelId = channelId;
@@ -44,6 +49,8 @@ public class MessageUpdateEvent extends MessageEvent {
         this.old = old;
         this.contentChanged = contentChanged;
         this.currentContent = currentContent;
+        this.embedsChanged = embedsChanged;
+        this.currentEmbeds = currentEmbeds;
     }
 
     public long getMessageId() {
@@ -68,5 +75,13 @@ public class MessageUpdateEvent extends MessageEvent {
 
     public Optional<String> getCurrentContent() {
         return Optional.ofNullable(currentContent);
+    }
+
+    public boolean isEmbedsChanged() {
+        return embedsChanged;
+    }
+
+    public List<Embed> getCurrentEmbeds() {
+        return currentEmbeds;
     }
 }

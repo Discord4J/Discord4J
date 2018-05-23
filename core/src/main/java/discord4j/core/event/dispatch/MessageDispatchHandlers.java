@@ -17,10 +17,13 @@
 package discord4j.core.event.dispatch;
 
 import discord4j.common.jackson.Possible;
+import discord4j.common.json.EmbedResponse;
 import discord4j.common.json.EmojiResponse;
 import discord4j.core.DiscordClient;
 import discord4j.core.event.domain.message.*;
+import discord4j.core.object.Embed;
 import discord4j.core.object.data.stored.MessageBean;
+import discord4j.core.object.data.stored.embed.EmbedBean;
 import discord4j.core.object.data.stored.ReactionBean;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.reaction.ReactionEmoji;
@@ -32,6 +35,8 @@ import reactor.core.publisher.Mono;
 import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.List;
+import java.util.stream.Collectors;
 
 class MessageDispatchHandlers {
 
@@ -186,24 +191,40 @@ class MessageDispatchHandlers {
         boolean contentChanged = content == null || !content.isAbsent();
         String currentContent = content == null || content.isAbsent() ? null : content.get();
 
+        Possible<EmbedResponse[]> embeds = context.getDispatch().getEmbeds();
+        boolean embedsChanged = embeds == null || !embeds.isAbsent();
+        EmbedResponse[] currentEmbeds = embeds == null || embeds.isAbsent() ? null : embeds.get();
+
+        EmbedBean[] embedBeans = currentEmbeds == null ? new EmbedBean[0] :
+                Arrays.stream(currentEmbeds)
+                        .map(EmbedBean::new)
+                        .toArray(EmbedBean[]::new);
+
+        List<Embed> embedList = Arrays.stream(embedBeans)
+                .map(bean -> new Embed(context.getServiceMediator(), bean))
+                .collect(Collectors.toList());
+
         Mono<MessageUpdateEvent> update = context.getServiceMediator().getStoreHolder().getMessageStore()
                 .find(messageId)
                 .flatMap(oldBean -> {
                     // updating the content and embed of the bean in the store
                     Message old = new Message(context.getServiceMediator(), oldBean);
                     MessageBean newBean = new MessageBean(oldBean);
-                    newBean.setContent(currentContent);
 
-                    // TODO embed
+                    newBean.setContent(currentContent);
+                    newBean.setEmbeds(embedBeans);
+
+                    MessageUpdateEvent event = new MessageUpdateEvent(client, messageId, channelId, guildId, old,
+                            contentChanged, currentContent, embedsChanged, embedList);
 
                     return context.getServiceMediator().getStoreHolder().getMessageStore()
                             .save(newBean.getId(), newBean)
-                            .thenReturn(new MessageUpdateEvent(client, messageId, channelId, guildId, old,
-                                    contentChanged, newBean.getContent()));
+                            .thenReturn(event);
                 });
 
-        return update
-                .defaultIfEmpty(new MessageUpdateEvent(client, messageId, channelId, guildId, null, contentChanged,
-                        currentContent));
+        MessageUpdateEvent event = new MessageUpdateEvent(client, messageId, channelId, guildId, null, contentChanged,
+                currentContent, embedsChanged, embedList);
+
+        return update.defaultIfEmpty(event);
     }
 }

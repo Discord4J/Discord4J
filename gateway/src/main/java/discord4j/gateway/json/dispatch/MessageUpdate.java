@@ -38,7 +38,7 @@ public class MessageUpdate implements Dispatch {
     @Nullable
     private Possible<String> content = Possible.absent();
     @Nullable
-    private Possible<EmbedResponse> embed = Possible.absent();
+    private Possible<EmbedResponse[]> embeds = Possible.absent();
 
     public long getId() {
         return id;
@@ -58,8 +58,8 @@ public class MessageUpdate implements Dispatch {
     }
 
     @Nullable
-    public Possible<EmbedResponse> getEmbed() {
-        return embed;
+    public Possible<EmbedResponse[]> getEmbeds() {
+        return embeds;
     }
 
     @Override
@@ -69,7 +69,7 @@ public class MessageUpdate implements Dispatch {
                 ", channelId=" + channelId +
                 ", guildId=" + guildId +
                 ", content=" + content +
-                ", embed=" + embed +
+                ", embeds=" + embeds +
                 '}';
     }
 }
