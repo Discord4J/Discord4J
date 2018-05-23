@@ -28,18 +28,12 @@ import discord4j.gateway.payload.PayloadWriter;
 import discord4j.gateway.retry.GatewayStateChange;
 import discord4j.gateway.retry.RetryContext;
 import discord4j.gateway.retry.RetryOptions;
-import discord4j.websocket.CloseException;
-import discord4j.websocket.WebSocketClient;
-import io.netty.channel.Channel;
-import io.netty.handler.ssl.SslHandler;
-import io.netty.util.concurrent.Future;
-import io.netty.util.concurrent.GenericFutureListener;
 import reactor.core.Disposable;
 import reactor.core.publisher.EmitterProcessor;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxSink;
 import reactor.core.publisher.Mono;
-import reactor.ipc.netty.http.client.HttpClient;
+import reactor.netty.http.client.HttpClient;
 import reactor.retry.Retry;
 import reactor.util.Logger;
 import reactor.util.Loggers;
@@ -54,10 +48,10 @@ import java.util.function.Predicate;
 /**
  * Represents a Discord gateway (websocket) client, implementing its lifecycle.
  * <p>
- * This is the next component downstream from {@link discord4j.websocket.WebSocketHandler}, that keeps track of
- * a single websocket session. It wraps an instance of {@link discord4j.gateway.DiscordWebSocketHandler} each time a
- * new connection to the gateway is made, therefore only one instance of this class is enough to handle the lifecycle
- * of Discord gateway operations, that could span multiple websocket sessions over time.
+ * This is the next component downstream from the websocket handler, that keeps track of a single websocket session.
+ * It wraps an instance of {@link discord4j.gateway.DiscordWebSocketHandler} each time a new connection to the
+ * gateway is made, therefore only one instance of this class is enough to handle the lifecycle of Discord gateway
+ * operations, that could span multiple websocket sessions over time.
  * <p>
  * It provides automatic reconnecting through a configurable retry policy, allows downstream consumers to receive
  * inbound events through {@link #dispatch()} and direct raw payloads through {@link #receiver()} and provides
@@ -68,8 +62,6 @@ public class GatewayClient {
     private static final Logger log = Loggers.getLogger(GatewayClient.class);
     private static final Predicate<? super Throwable> ABNORMAL_ERROR = t ->
             !(t instanceof CloseException) || ((CloseException) t).getCode() != 1000;
-
-    private final WebSocketClient webSocketClient = new WebSocketClient(createHttpClient());
 
     private final PayloadReader payloadReader;
     private final PayloadWriter payloadWriter;
@@ -105,23 +97,6 @@ public class GatewayClient {
         this.senderSink = sender.sink(FluxSink.OverflowStrategy.LATEST);
     }
 
-    private HttpClient createHttpClient() {
-        return HttpClient.create(
-                opt -> opt.afterChannelInit(channel -> {
-                    final SslHandler sslHandler = channel.pipeline().get(SslHandler.class);
-                    sslHandler.sslCloseFuture().addListener(
-                            (GenericFutureListener<Future<Channel>>) future -> {
-                                if (future.isSuccess()) {
-                                    final Channel c = future.getNow();
-                                    if (c.isActive()) {
-                                        log.debug("Closing channel due to SSL handler closing");
-                                        c.close();
-                                    }
-                                }
-                            });
-                }));
-    }
-
     /**
      * Establish a reconnecting gateway connection to the given URL.
      *
@@ -153,7 +128,11 @@ public class GatewayClient {
             });
 
             // Subscribe each inbound GatewayPayload to the receiver sink
-            Disposable inboundSub = handler.inbound().subscribe(receiverSink::next);
+            Disposable inboundSub = handler.inbound()
+                    .doOnError(t -> log.debug("Inbound encountered an error"))
+                    .doOnCancel(() -> log.debug("Inbound cancelled"))
+                    .doOnComplete(() -> log.debug("Inbound completed"))
+                    .subscribe(receiverSink::next);
 
             // Subscribe the receiver to process and transform the inbound payloads into Dispatch events
             Disposable receiverSub = receiver.map(this::updateSequence)
@@ -170,9 +149,15 @@ public class GatewayClient {
                     .map(GatewayPayload::heartbeat)
                     .subscribe(handler.outbound()::onNext);
 
-            return webSocketClient.execute(gatewayUrl, handler)
+            return HttpClient.create()
+                    .observe(handler)
+                    .websocket()
+                    .uri(gatewayUrl)
+                    .handle(handler::handle)
+                    .then()
                     .doOnCancel(() -> close(false))
                     .doOnTerminate(() -> {
+                        log.debug("Terminating websocket client, disposing subscriptions");
                         inboundSub.dispose();
                         receiverSub.dispose();
                         senderSub.dispose();
@@ -230,6 +215,7 @@ public class GatewayClient {
      */
     public void close(boolean reconnect) {
         if (reconnect) {
+            resumable.set(false);
             senderSink.next(new GatewayPayload<>(Opcode.RECONNECT, null, null, null));
         } else {
             senderSink.next(new GatewayPayload<>());
@@ -299,7 +285,7 @@ public class GatewayClient {
      * Obtains the FluxSink to send Dispatch events towards GatewayClient's users.
      *
      * @return a {@link reactor.core.publisher.FluxSink} for {@link discord4j.gateway.json.dispatch.Dispatch}
-     * objects
+     *         objects
      */
     FluxSink<Dispatch> dispatchSink() {
         return dispatchSink;

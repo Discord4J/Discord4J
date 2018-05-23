@@ -22,25 +22,19 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import discord4j.common.jackson.Possible;
 import discord4j.common.jackson.PossibleModule;
-import discord4j.rest.http.*;
-import discord4j.rest.http.client.SimpleHttpClient;
+import discord4j.rest.RestTests;
 import discord4j.rest.json.request.*;
 import discord4j.rest.request.Router;
-import discord4j.rest.route.Routes;
 import discord4j.rest.util.MultipartRequest;
-import io.netty.buffer.ByteBufInputStream;
-import io.netty.buffer.Unpooled;
 import org.junit.Test;
-import reactor.core.scheduler.Schedulers;
-import reactor.ipc.netty.http.client.HttpClientRequest;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.function.Consumer;
 
 public class ChannelServiceTest {
 
@@ -61,19 +55,7 @@ public class ChannelServiceTest {
 
         String token = System.getenv("token");
         ObjectMapper mapper = getMapper();
-
-        SimpleHttpClient httpClient = SimpleHttpClient.builder()
-                .baseUrl(Routes.BASE_URL)
-                .defaultHeader("Authorization", "Bot " + token)
-                .defaultHeader("Content-Type", "application/json")
-                .readerStrategy(new JacksonReaderStrategy<>(mapper))
-                .readerStrategy(new EmptyReaderStrategy())
-                .writerStrategy(new JacksonWriterStrategy(mapper))
-                .writerStrategy(new MultipartWriterStrategy(mapper))
-                .writerStrategy(new EmptyWriterStrategy())
-                .build();
-
-        Router router = new Router(httpClient, Schedulers.elastic());
+        Router router = RestTests.getRouter(token, mapper);
 
         return channelService = new ChannelService(router);
     }
@@ -125,10 +107,7 @@ public class ChannelServiceTest {
                 throw new NullPointerException();
             }
             byte[] bytes = readAllBytes(inputStream);
-            Consumer<HttpClientRequest.Form> formConsumer = form -> form.multipart(true)
-                    .file("file", "fileTest.txt", new ByteBufInputStream(Unpooled.wrappedBuffer(bytes)),
-                            "application/octet-stream");
-            MultipartRequest request = new MultipartRequest(req, formConsumer);
+            MultipartRequest request = new MultipartRequest(req, "fileTest.txt", new ByteArrayInputStream(bytes));
             getChannelService().createMessage(permanentChannel, request).block();
         }
     }

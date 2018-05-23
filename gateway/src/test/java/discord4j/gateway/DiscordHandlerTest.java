@@ -29,11 +29,13 @@ import discord4j.gateway.payload.JacksonPayloadReader;
 import discord4j.gateway.payload.JacksonPayloadWriter;
 import discord4j.gateway.payload.PayloadReader;
 import discord4j.gateway.payload.PayloadWriter;
-import discord4j.websocket.WebSocketClient;
+import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import reactor.core.publisher.EmitterProcessor;
 import reactor.core.publisher.Flux;
+import reactor.core.scheduler.Schedulers;
+import reactor.netty.http.client.HttpClient;
 import reactor.util.Logger;
 import reactor.util.Loggers;
 
@@ -47,11 +49,14 @@ public class DiscordHandlerTest {
 
     private String token;
 
+    @Before
+    public void initialize() {
+        token = System.getenv("token");
+    }
+
     @Test
     @Ignore("Example code not under CI")
-    public void testGatewayConnect() throws Exception {
-        WebSocketClient ws = new WebSocketClient();
-
+    public void testGatewayConnect() {
         ObjectMapper mapper = getMapper();
         PayloadReader reader = new JacksonPayloadReader(mapper);
         PayloadWriter writer = new JacksonPayloadWriter(mapper);
@@ -85,7 +90,13 @@ public class DiscordHandlerTest {
             log.info("Gateway received READY!");
         });
 
-        ws.execute(gatewayUrl, handler).block();
+        HttpClient.create()
+                .websocket()
+                .uri(gatewayUrl)
+                .handle(handler::handle)
+                .then()
+                .publishOn(Schedulers.elastic())
+                .block();
     }
 
     private ObjectMapper getMapper() {

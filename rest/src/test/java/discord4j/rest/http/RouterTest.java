@@ -22,7 +22,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import discord4j.common.jackson.PossibleModule;
 import discord4j.common.json.MessageResponse;
-import discord4j.rest.http.client.SimpleHttpClient;
+import discord4j.rest.RestTests;
 import discord4j.rest.json.request.MessageCreateRequest;
 import discord4j.rest.request.Router;
 import discord4j.rest.route.Routes;
@@ -49,16 +49,7 @@ public class RouterTest {
         String channelId = System.getenv("channel");
 
         ObjectMapper mapper = getMapper();
-
-        SimpleHttpClient httpClient = SimpleHttpClient.builder()
-                .baseUrl("https://discordapp.com/api/v6")
-                .defaultHeader("Authorization", "Bot " + token)
-                .defaultHeader("Content-Type", "application/json")
-                .readerStrategy(new JacksonReaderStrategy<>(mapper))
-                .writerStrategy(new JacksonWriterStrategy(mapper))
-                .build();
-
-        Router router = new Router(httpClient, Schedulers.elastic());
+        Router router = RestTests.getRouter(token, mapper);
 
         MessageCreateRequest body = new MessageCreateRequest("hello at" + Instant.now(), null, false, null);
 
@@ -77,16 +68,7 @@ public class RouterTest {
         String channelId = System.getenv("channel");
 
         ObjectMapper mapper = getMapper();
-
-        SimpleHttpClient httpClient = SimpleHttpClient.builder()
-                .baseUrl("https://discordapp.com/api/v6")
-                .defaultHeader("Authorization", "Bot " + token)
-                .defaultHeader("Content-Type", "application/json")
-                .readerStrategy(new JacksonReaderStrategy<>(mapper))
-                .writerStrategy(new JacksonWriterStrategy(mapper))
-                .build();
-
-        Router router = new Router(httpClient, Schedulers.elastic());
+        Router router = RestTests.getRouter(token, mapper);
 
         for (int i = 0; i < 10; i++) {
             final int a = i;
@@ -108,16 +90,7 @@ public class RouterTest {
         String channelId = System.getenv("channel");
 
         ObjectMapper mapper = getMapper();
-
-        SimpleHttpClient httpClient = SimpleHttpClient.builder()
-                .baseUrl("https://discordapp.com/api/v6")
-                .defaultHeader("Authorization", "Bot " + token)
-                .defaultHeader("Content-Type", "application/json")
-                .readerStrategy(new JacksonReaderStrategy<>(mapper))
-                .writerStrategy(new JacksonWriterStrategy(mapper))
-                .build();
-
-        Router router = new Router(httpClient, Schedulers.elastic());
+        Router router = RestTests.getRouter(token, mapper);
 
         MessageCreateRequest body = new MessageCreateRequest("hi", null, false, null);
 
@@ -137,16 +110,7 @@ public class RouterTest {
         String channelId = System.getenv("channel");
 
         ObjectMapper mapper = getMapper();
-
-        SimpleHttpClient httpClient = SimpleHttpClient.builder()
-                .baseUrl("https://discordapp.com/api/v6")
-                .defaultHeader("Authorization", "Bot " + token)
-                .defaultHeader("Content-Type", "application/json")
-                .readerStrategy(new JacksonReaderStrategy<>(mapper))
-                .writerStrategy(new JacksonWriterStrategy(mapper))
-                .build();
-
-        Router router = new Router(httpClient, Schedulers.elastic());
+        Router router = RestTests.getRouter(token, mapper);
         Scheduler thread = Schedulers.single();
 
         for (int i = 0; i < 6; i++) {
@@ -167,21 +131,12 @@ public class RouterTest {
     }
 
     @Test
-    public void testBlocking() throws Exception {
+    public void testBlocking() {
         String token = System.getenv("token");
         String channelId = System.getenv("channel");
 
         ObjectMapper mapper = getMapper();
-
-        SimpleHttpClient httpClient = SimpleHttpClient.builder()
-                .baseUrl("https://discordapp.com/api/v6")
-                .defaultHeader("Authorization", "Bot " + token)
-                .defaultHeader("Content-Type", "application/json")
-                .readerStrategy(new JacksonReaderStrategy<>(mapper))
-                .writerStrategy(new JacksonWriterStrategy(mapper))
-                .build();
-
-        Router router = new Router(httpClient, Schedulers.elastic());
+        Router router = RestTests.getRouter(token, mapper);
 
         MessageCreateRequest body0 = new MessageCreateRequest("hi 0 at" + Instant.now(), null, false, null);
 

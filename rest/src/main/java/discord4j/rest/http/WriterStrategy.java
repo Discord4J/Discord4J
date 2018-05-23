@@ -17,13 +17,13 @@
 package discord4j.rest.http;
 
 import reactor.core.publisher.Mono;
-import reactor.ipc.netty.http.client.HttpClientRequest;
+import reactor.netty.http.client.HttpClient;
 
 import javax.annotation.Nullable;
 
 /**
  * Strategy for encoding an object of type {@code <Req>} and writing the encoded stream of bytes to an {@link
- * reactor.ipc.netty.http.client.HttpClientRequest}.
+ * reactor.netty.http.client.HttpClientRequest}.
  *
  * @param <Req> the type of object in the body
  */
@@ -41,9 +41,9 @@ public interface WriterStrategy<Req> {
     /**
      * Write a given object to the output message.
      *
-     * @param request the request to write to
+     * @param sender the http request sender
      * @param body the object to write
      * @return indicates completion or error
      */
-    Mono<Void> write(HttpClientRequest request, @Nullable Req body);
+    Mono<HttpClient.ResponseReceiver<?>> write(HttpClient.RequestSender sender, @Nullable Req body);
 }

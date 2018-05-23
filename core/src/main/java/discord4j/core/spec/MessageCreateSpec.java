@@ -66,7 +66,10 @@ public class MessageCreateSpec implements Spec<MultipartRequest> {
     public MultipartRequest asRequest() {
         MessageCreateRequest json = new MessageCreateRequest(content, nonce, tts, embed);
 
-        return new MultipartRequest(json, file == null ? null : form ->
-                form.multipart(true).file("file", fileName, file, "application/octet-stream"));
+        if (file != null) {
+            return new MultipartRequest(json, fileName, file);
+        } else {
+            return new MultipartRequest(json);
+        }
     }
 }

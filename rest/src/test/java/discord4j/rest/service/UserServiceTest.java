@@ -22,17 +22,12 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import discord4j.common.jackson.Possible;
 import discord4j.common.jackson.PossibleModule;
-import discord4j.rest.http.EmptyReaderStrategy;
-import discord4j.rest.http.EmptyWriterStrategy;
-import discord4j.rest.http.JacksonReaderStrategy;
-import discord4j.rest.http.JacksonWriterStrategy;
+import discord4j.rest.RestTests;
 import discord4j.rest.http.client.ClientException;
-import discord4j.rest.http.client.SimpleHttpClient;
 import discord4j.rest.json.request.DMCreateRequest;
 import discord4j.rest.json.request.UserModifyRequest;
 import discord4j.rest.json.response.ErrorResponse;
 import discord4j.rest.request.Router;
-import discord4j.rest.route.Routes;
 import org.junit.Test;
 import reactor.core.scheduler.Schedulers;
 
@@ -52,18 +47,7 @@ public class UserServiceTest {
 
         String token = System.getenv("token");
         ObjectMapper mapper = getMapper();
-
-        SimpleHttpClient httpClient = SimpleHttpClient.builder()
-                .baseUrl(Routes.BASE_URL)
-                .defaultHeader("Authorization", "Bot " + token)
-                .defaultHeader("Content-Type", "application/json")
-                .readerStrategy(new JacksonReaderStrategy<>(mapper))
-                .readerStrategy(new EmptyReaderStrategy())
-                .writerStrategy(new JacksonWriterStrategy(mapper))
-                .writerStrategy(new EmptyWriterStrategy())
-                .build();
-
-        Router router = new Router(httpClient, Schedulers.elastic());
+        Router router = RestTests.getRouter(token, mapper);
 
         return userService = new UserService(router);
     }
