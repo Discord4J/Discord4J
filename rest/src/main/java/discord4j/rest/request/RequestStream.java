@@ -17,14 +17,15 @@
 package discord4j.rest.request;
 
 import discord4j.rest.http.client.ClientException;
-import discord4j.rest.http.client.ExchangeFilter;
-import discord4j.rest.http.client.SimpleHttpClient;
+import discord4j.rest.http.client.ClientRequest;
+import discord4j.rest.http.client.DiscordWebClient;
 import discord4j.rest.util.RouteUtils;
+import io.netty.handler.codec.http.DefaultHttpHeaders;
 import io.netty.handler.codec.http.HttpHeaders;
 import reactor.core.publisher.EmitterProcessor;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.MonoProcessor;
-import reactor.ipc.netty.http.client.HttpClientResponse;
+import reactor.netty.http.client.HttpClientResponse;
 import reactor.retry.BackoffDelay;
 import reactor.retry.Retry;
 import reactor.retry.RetryContext;
@@ -52,7 +53,7 @@ class RequestStream<T> {
 
     private final EmitterProcessor<Tuple2<MonoProcessor<T>, DiscordRequest<T>>> backing =
             EmitterProcessor.create(false);
-    private final SimpleHttpClient httpClient;
+    private final DiscordWebClient httpClient;
     private final GlobalRateLimiter globalRateLimiter;
     /**
      * The retry function used for reading and completing HTTP requests. The back off is determined by the ratelimit
@@ -89,7 +90,7 @@ class RequestStream<T> {
         return new BackoffDelay(Duration.ofMillis(delay));
     }).withApplicationContext(new AtomicLong());
 
-    RequestStream(SimpleHttpClient httpClient, GlobalRateLimiter globalRateLimiter) {
+    RequestStream(DiscordWebClient httpClient, GlobalRateLimiter globalRateLimiter) {
         this.httpClient = httpClient;
         this.globalRateLimiter = globalRateLimiter;
     }
@@ -134,18 +135,21 @@ class RequestStream<T> {
         public void accept(Tuple2<MonoProcessor<T>, DiscordRequest<T>> tuple) {
             MonoProcessor<T> callback = tuple.getT1();
             DiscordRequest<T> req = tuple.getT2();
-            ExchangeFilter exchangeFilter = ExchangeFilter.builder()
-                    .requestFilter(request -> Optional.ofNullable(req.getHeaders())
-                            .ifPresent(headers -> headers.forEach(
-                                    (key, values) -> values.forEach(value -> request.header(key, value)))))
-                    .responseFilter(rateLimitHandler)
-                    .build();
+            ClientRequest request = new ClientRequest(req.getRoute().getMethod(),
+                    RouteUtils.expandQuery(req.getCompleteUri(), req.getQueryParams()),
+                    Optional.ofNullable(req.getHeaders())
+                            .map(map -> map.entrySet().stream()
+                                    .reduce((HttpHeaders) new DefaultHttpHeaders(), (headers, entry) -> {
+                                        String key = entry.getKey();
+                                        entry.getValue().forEach(value -> headers.add(key, value));
+                                        return headers;
+                                    }, HttpHeaders::add))
+                            .orElse(new DefaultHttpHeaders()));
+            Class<T> responseType = req.getRoute().getResponseType();
 
             Mono.when(globalRateLimiter)
                     .materialize()
-                    .flatMap(e -> httpClient.exchange(req.getRoute().getMethod(),
-                            RouteUtils.expandQuery(req.getCompleteUri(), req.getQueryParams()), req.getBody(),
-                            req.getRoute().getResponseType(), exchangeFilter))
+                    .flatMap(e -> httpClient.exchange(request, req.getBody(), responseType, rateLimitHandler))
                     .retryWhen(retryFactory)
                     .materialize()
                     .subscribe(signal -> {

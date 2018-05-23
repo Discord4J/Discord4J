@@ -21,16 +21,27 @@ import discord4j.gateway.json.Opcode;
 import discord4j.gateway.json.PayloadData;
 import discord4j.gateway.payload.PayloadReader;
 import discord4j.gateway.payload.PayloadWriter;
-import discord4j.websocket.*;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.netty.handler.codec.http.websocketx.CloseWebSocketFrame;
+import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
+import io.netty.handler.codec.http.websocketx.WebSocketFrame;
+import io.netty.handler.ssl.SslCloseCompletionEvent;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.MonoProcessor;
 import reactor.core.publisher.UnicastProcessor;
+import reactor.netty.Connection;
+import reactor.netty.ConnectionObserver;
+import reactor.netty.NettyPipeline;
+import reactor.netty.http.websocket.WebsocketInbound;
+import reactor.netty.http.websocket.WebsocketOutbound;
 import reactor.util.Logger;
 import reactor.util.Loggers;
 
 import java.time.Duration;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 
 /**
@@ -44,9 +55,8 @@ import java.util.logging.Level;
  * the inbound exchange (subscribe), and "push" operations only on the outbound exchange (onNext, onError, onComplete).
  * <p>
  * The handler also provides two methods to control the lifecycle and proper cleanup, like {@link #close()} and
- * {@link #error(Throwable)} which perform operations over both exchanges and the current
- * {@link discord4j.websocket.WebSocketSession}. It is required to use these methods to signal closure and
- * errors in order to cleanly complete the session.
+ * {@link #error(Throwable)} which perform operations over both exchanges and the current session. It is required to
+ * use these methods to signal closure and errors in order to cleanly complete the session.
  * <p>
  * All payloads going through this handler are passed to the given {@link discord4j.gateway.payload.PayloadReader}
  * and {@link discord4j.gateway.payload.PayloadWriter}.
@@ -65,13 +75,13 @@ import java.util.logging.Level;
  * });
  * </pre>
  */
-public class DiscordWebSocketHandler implements WebSocketHandler {
+public class DiscordWebSocketHandler implements ConnectionObserver {
 
     private static final Logger log = Loggers.getLogger(DiscordWebSocketHandler.class);
-
-    private static final Logger closeLogger = Loggers.getLogger("discord4j.gateway.session.close");
     private static final Logger inboundLogger = Loggers.getLogger("discord4j.gateway.session.inbound");
     private static final Logger outboundLogger = Loggers.getLogger("discord4j.gateway.session.outbound");
+
+    private static final String CLOSE_HANDLER = "client.last.closeHandler";
 
     private final ZlibDecompressor decompressor = new ZlibDecompressor();
     private final UnicastProcessor<GatewayPayload<?>> inboundExchange = UnicastProcessor.create();
@@ -93,27 +103,41 @@ public class DiscordWebSocketHandler implements WebSocketHandler {
         this.writer = writer;
     }
 
-    @Override
-    public Mono<Void> handle(WebSocketSession session) {
-        session.replaceLoggingHandler();
+    public Mono<Void> handle(WebsocketInbound in, WebsocketOutbound out) {
+        AtomicReference<CloseStatus> reason = new AtomicReference<>();
+        in.withConnection(connection -> connection.addHandlerLast(CLOSE_HANDLER, new CloseHandlerAdapter(reason)));
 
-        // Listen to a custom handler's response to retrieve the actual close code and reason, or an error signal if
-        // the channel was closed abruptly.
-        session.closeFuture()
-                .log(closeLogger, Level.FINE, false)
-                .map(CloseException::new)
-                .subscribe(this::error, this::error);
+        out.options(NettyPipeline.SendOptions::flushOnEach)
+                .sendObject(outboundExchange.concatMap(this::limitRate)
+                        .log(outboundLogger, Level.FINE, false)
+                        .flatMap(this::toOutboundFrame))
+                .then()
+                .doOnError(t -> outboundLogger.debug("Sender encountered an error"))
+                .doOnSuccess(v -> outboundLogger.debug("Sender succeeded"))
+                .doOnCancel(() -> outboundLogger.debug("Sender cancelled"))
+                .doOnTerminate(() -> outboundLogger.debug("Sender terminated"))
+                .subscribe();
 
-        session.receive()
-                .map(WebSocketMessage::getPayload)
+        return in.aggregateFrames()
+                .receiveFrames()
+                .map(WebSocketFrame::content)
                 .compose(decompressor::completeMessages)
                 .map(reader::read)
                 .log(inboundLogger, Level.FINE, false)
-                .subscribe(inboundExchange::onNext, this::error);
-
-        return session.send(outboundExchange.concatMap(this::limitRate)
-                .log(outboundLogger, Level.FINE, false)
-                .flatMap(this::mapOutbound))
+                .doOnNext(inboundExchange::onNext)
+                .doOnError(t -> inboundLogger.debug("Receiver encountered an error: {}", t.toString()))
+                .doOnError(this::error)
+                .doOnComplete(() -> {
+                    inboundLogger.debug("Receiver completed");
+                    CloseStatus closeStatus = reason.get();
+                    if (closeStatus != null) {
+                        inboundLogger.debug("Forwarding close reason: {}", closeStatus);
+                        error(new CloseException(closeStatus));
+                    }
+                })
+                .doOnCancel(() -> inboundLogger.debug("Receiver cancelled"))
+                .doOnCancel(inboundExchange::cancel)
+                .doOnTerminate(() -> inboundLogger.debug("Receiver terminated"))
                 .then(completionNotifier);
     }
 
@@ -128,34 +152,37 @@ public class DiscordWebSocketHandler implements WebSocketHandler {
         }
     }
 
-    private Flux<WebSocketMessage> mapOutbound(GatewayPayload<?> payload) {
+    private Publisher<?> toOutboundFrame(GatewayPayload<? extends PayloadData> payload) {
+        // TODO: polish as reactor-netty outbound.sendClose(...) becomes stable
         if (payload.getOp() == null) {
-            // Gracefully close our gateway
-            return Flux.just(WebSocketMessage.close());
+            return Flux.just(new CloseWebSocketFrame(1000, "Logging off"));
         } else if (Opcode.RECONNECT.equals(payload.getOp())) {
             error(new RuntimeException("Reconnecting due to user action"));
             return Flux.empty();
         } else {
-            return Flux.just(writer.write(payload)).map(WebSocketMessage::fromText);
+            return Flux.just(writer.write(payload)).map(TextWebSocketFrame::new);
         }
     }
 
     /**
      * Initiates a close sequence that will terminate this session. It will notify all exchanges and the session
-     * completion {@link reactor.core.publisher.Mono} in {@link #handle(discord4j.websocket.WebSocketSession)}
+     * completion {@link reactor.core.publisher.Mono} in
+     * {@link #handle(reactor.netty.http.websocket.WebsocketInbound, reactor.netty.http.websocket.WebsocketOutbound)}
      * through a complete signal, dropping all future signals.
      */
     public void close() {
-        log.debug("Triggering close sequence");
+        log.debug("Triggering close sequence - signaling completion notifier");
         completionNotifier.onComplete();
+        log.debug("Preparing to complete outbound exchange after close");
         outboundExchange.onComplete();
+        log.debug("Preparing to complete inbound exchange after close");
         inboundExchange.onComplete();
     }
 
     /**
      * Initiates a close sequence with the given error. It will terminate this session with an error signal on the
-     * {@link #handle(discord4j.websocket.WebSocketSession)} method, while completing both exchanges through
-     * normal complete signals.
+     * {@link #handle(reactor.netty.http.websocket.WebsocketInbound, reactor.netty.http.websocket.WebsocketOutbound)}
+     * method, while completing both exchanges through normal complete signals.
      * <p>
      * The error can then be channeled downstream and acted upon accordingly.
      *
@@ -164,10 +191,24 @@ public class DiscordWebSocketHandler implements WebSocketHandler {
     public void error(Throwable error) {
         log.debug("Triggering error sequence ({})", error.toString());
         if (!completionNotifier.isTerminated()) {
-            completionNotifier.onError(new CloseException(new CloseStatus(1006, error.toString()), error));
+            if (error instanceof CloseException) {
+                log.debug("Signaling completion notifier as error with same CloseException");
+                completionNotifier.onError(error);
+            } else {
+                log.debug("Signaling completion notifier as error with wrapping CloseException");
+                completionNotifier.onError(new CloseException(new CloseStatus(1006, error.toString()), error));
+            }
         }
+        outboundExchange.onNext(new GatewayPayload<>());
+        log.debug("Preparing to complete outbound exchange after error");
         outboundExchange.onComplete();
+        log.debug("Preparing to complete inbound exchange after error");
         inboundExchange.onComplete();
+    }
+
+    @Override
+    public void onStateChange(Connection connection, State newState) {
+        log.debug("{} {}", newState, connection);
     }
 
     /**
@@ -189,5 +230,36 @@ public class DiscordWebSocketHandler implements WebSocketHandler {
      */
     public UnicastProcessor<GatewayPayload<?>> outbound() {
         return outboundExchange;
+    }
+
+    private static class CloseHandlerAdapter extends ChannelInboundHandlerAdapter {
+
+        private final AtomicReference<CloseStatus> closeStatus;
+
+        private CloseHandlerAdapter(AtomicReference<CloseStatus> closeStatus) {
+            this.closeStatus = closeStatus;
+        }
+
+        @Override
+        public void channelRead(ChannelHandlerContext ctx, Object msg) {
+            if (msg instanceof CloseWebSocketFrame && ((CloseWebSocketFrame) msg).isFinalFragment()) {
+                CloseWebSocketFrame close = (CloseWebSocketFrame) msg;
+                log.debug("Close status: {} {}", close.statusCode(), close.reasonText());
+                closeStatus.set(new CloseStatus(close.statusCode(), close.reasonText()));
+            }
+            ctx.fireChannelRead(msg);
+        }
+
+        @Override
+        public void userEventTriggered(ChannelHandlerContext ctx, Object evt) {
+            if (evt instanceof SslCloseCompletionEvent) {
+                SslCloseCompletionEvent closeEvent = (SslCloseCompletionEvent) evt;
+                if (!closeEvent.isSuccess()) {
+                    log.debug("Abnormal close status: {}", closeEvent.cause().toString());
+                    closeStatus.set(new CloseStatus(1006, closeEvent.cause().toString()));
+                }
+            }
+            ctx.fireUserEventTriggered(evt);
+        }
     }
 }

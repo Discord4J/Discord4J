@@ -35,17 +35,21 @@ import discord4j.gateway.payload.JacksonPayloadReader;
 import discord4j.gateway.payload.JacksonPayloadWriter;
 import discord4j.gateway.retry.RetryOptions;
 import discord4j.rest.RestClient;
-import discord4j.rest.http.*;
-import discord4j.rest.http.client.SimpleHttpClient;
+import discord4j.rest.http.client.DiscordWebClient;
+import discord4j.rest.http.ExchangeStrategies;
 import discord4j.rest.request.Router;
 import discord4j.rest.route.Routes;
 import discord4j.store.jdk.JdkStoreService;
 import discord4j.store.service.StoreService;
 import discord4j.store.service.StoreServiceLoader;
+import io.netty.handler.codec.http.DefaultHttpHeaders;
+import io.netty.handler.codec.http.HttpHeaderNames;
+import io.netty.handler.codec.http.HttpHeaders;
 import reactor.core.publisher.EmitterProcessor;
 import reactor.core.publisher.FluxProcessor;
 import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
+import reactor.netty.http.client.HttpClient;
 import reactor.util.Logger;
 import reactor.util.Loggers;
 
@@ -177,17 +181,13 @@ public final class DiscordClientBuilder {
         final String version = properties.getProperty(VersionUtil.APPLICATION_VERSION, "3");
         final String url = properties.getProperty(VersionUtil.APPLICATION_URL, "https://discord4j.com");
 
-        final SimpleHttpClient httpClient = SimpleHttpClient.builder()
-                .defaultHeader("content-type", "application/json")
-                .defaultHeader("authorization", "Bot " + token)
-                .defaultHeader("user-agent", "DiscordBot(" + url + ", " + version + ")")
-                .readerStrategy(new JacksonReaderStrategy<>(mapper))
-                .readerStrategy(new EmptyReaderStrategy())
-                .writerStrategy(new MultipartWriterStrategy(mapper))
-                .writerStrategy(new JacksonWriterStrategy(mapper))
-                .writerStrategy(new EmptyWriterStrategy())
-                .baseUrl(Routes.BASE_URL)
-                .build();
+        HttpHeaders defaultHeaders = new DefaultHttpHeaders();
+        defaultHeaders.add(HttpHeaderNames.CONTENT_TYPE, "application/json");
+        defaultHeaders.add(HttpHeaderNames.AUTHORIZATION, "Bot " + token);
+        defaultHeaders.add(HttpHeaderNames.USER_AGENT, "DiscordBot(" + url + ", " + version + ")");
+        HttpClient httpClient = HttpClient.create().baseUrl(Routes.BASE_URL).compress();
+        DiscordWebClient webClient = new DiscordWebClient(httpClient, defaultHeaders,
+                ExchangeStrategies.withJacksonDefaults(mapper));
 
         if (identifyOptions == null) {
             identifyOptions = new IdentifyOptions(shardIndex, shardCount,
@@ -208,7 +208,7 @@ public final class DiscordClientBuilder {
         }
 
         final StateHolder stateHolder = new StateHolder(storeService);
-        final RestClient restClient = new RestClient(new Router(httpClient, Schedulers.elastic())); // TODO parametrize
+        final RestClient restClient = new RestClient(new Router(webClient, Schedulers.elastic()));
         final ClientConfig config = new ClientConfig(token, identifyOptions.getShardIndex(),
                 identifyOptions.getShardCount());
         final EventDispatcher eventDispatcher = new EventDispatcher(eventProcessor, eventScheduler);

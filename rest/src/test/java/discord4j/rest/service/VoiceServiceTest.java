@@ -21,13 +21,8 @@ import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import discord4j.common.jackson.PossibleModule;
-import discord4j.rest.http.EmptyReaderStrategy;
-import discord4j.rest.http.EmptyWriterStrategy;
-import discord4j.rest.http.JacksonReaderStrategy;
-import discord4j.rest.http.JacksonWriterStrategy;
-import discord4j.rest.http.client.SimpleHttpClient;
+import discord4j.rest.RestTests;
 import discord4j.rest.request.Router;
-import discord4j.rest.route.Routes;
 import org.junit.Test;
 import reactor.core.scheduler.Schedulers;
 
@@ -43,18 +38,7 @@ public class VoiceServiceTest {
 
         String token = System.getenv("token");
         ObjectMapper mapper = getMapper();
-
-        SimpleHttpClient httpClient = SimpleHttpClient.builder()
-                .baseUrl(Routes.BASE_URL)
-                .defaultHeader("Authorization", "Bot " + token)
-                .defaultHeader("Content-Type", "application/json")
-                .readerStrategy(new JacksonReaderStrategy<>(mapper))
-                .readerStrategy(new EmptyReaderStrategy())
-                .writerStrategy(new JacksonWriterStrategy(mapper))
-                .writerStrategy(new EmptyWriterStrategy())
-                .build();
-
-        Router router = new Router(httpClient, Schedulers.elastic());
+        Router router = RestTests.getRouter(token, mapper);
 
         return voiceService = new VoiceService(router);
     }

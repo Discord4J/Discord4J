@@ -16,7 +16,7 @@
  */
 package discord4j.rest.request;
 
-import discord4j.rest.http.client.SimpleHttpClient;
+import discord4j.rest.http.client.DiscordWebClient;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.MonoProcessor;
 import reactor.core.scheduler.Scheduler;
@@ -31,12 +31,12 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class Router {
 
-    private final SimpleHttpClient httpClient;
+    private final DiscordWebClient httpClient;
     private final Scheduler scheduler;
     private final GlobalRateLimiter globalRateLimiter = new GlobalRateLimiter();
     private final Map<BucketKey, RequestStream<?>> streamMap = new ConcurrentHashMap<>();
 
-    public Router(SimpleHttpClient httpClient, Scheduler scheduler) {
+    public Router(DiscordWebClient httpClient, Scheduler scheduler) {
         this.httpClient = httpClient;
         this.scheduler = scheduler;
     }

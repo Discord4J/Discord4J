@@ -18,27 +18,24 @@
 package discord4j.rest.util;
 
 import discord4j.rest.json.request.MessageCreateRequest;
-import reactor.ipc.netty.http.client.HttpClientRequest;
 
 import javax.annotation.Nullable;
-import java.util.function.Consumer;
+import java.io.InputStream;
 
 public class MultipartRequest {
 
     private final MessageCreateRequest createRequest;
-    private final Consumer<HttpClientRequest.Form> formConsumer;
+    private final String fileName;
+    private final InputStream file;
 
     public MultipartRequest(MessageCreateRequest createRequest) {
-        this(createRequest, null);
+        this(createRequest, null, null);
     }
 
-    public MultipartRequest(@Nullable MessageCreateRequest createRequest,
-                            @Nullable Consumer<HttpClientRequest.Form> formConsumer) {
-        if (createRequest == null && formConsumer == null) {
-            throw new IllegalArgumentException("At least one of the parameters must be non-null");
-        }
+    public MultipartRequest(MessageCreateRequest createRequest, @Nullable String fileName, @Nullable InputStream file) {
         this.createRequest = createRequest;
-        this.formConsumer = formConsumer;
+        this.fileName = fileName;
+        this.file = file;
     }
 
     @Nullable
@@ -47,11 +44,12 @@ public class MultipartRequest {
     }
 
     @Nullable
-    public Consumer<HttpClientRequest.Form> getFormConsumer() {
-        return formConsumer;
+    public String getFileName() {
+        return fileName;
     }
 
-    public boolean hasFormConsumer() {
-        return formConsumer != null;
+    @Nullable
+    public InputStream getFile() {
+        return file;
     }
 }

@@ -22,18 +22,23 @@ import discord4j.rest.json.request.MessageCreateRequest;
 import discord4j.rest.util.MultipartRequest;
 import reactor.core.Exceptions;
 import reactor.core.publisher.Mono;
-import reactor.ipc.netty.http.client.HttpClientRequest;
+import reactor.netty.http.client.HttpClient;
+import reactor.netty.http.client.HttpClientForm;
+import reactor.util.Logger;
+import reactor.util.Loggers;
 
 import javax.annotation.Nullable;
-import java.util.function.Consumer;
+import java.util.Optional;
 
 /**
  * Write to a request from a {@code Consumer<HttpClientRequest.Form>} using reactor-netty's {@link
- * HttpClientRequest#sendForm(java.util.function.Consumer)}.
+ * reactor.netty.http.client.HttpClient.RequestSender#sendForm(java.util.function.BiConsumer)}.
  *
- * @see HttpClientRequest.Form
+ * @see HttpClientForm
  */
 public class MultipartWriterStrategy implements WriterStrategy<MultipartRequest> {
+
+    private static final Logger log = Loggers.getLogger(MultipartWriterStrategy.class);
 
     private final ObjectMapper objectMapper;
 
@@ -47,20 +52,24 @@ public class MultipartWriterStrategy implements WriterStrategy<MultipartRequest>
     }
 
     @Override
-    public Mono<Void> write(HttpClientRequest request, @Nullable MultipartRequest body) {
+    public Mono<HttpClient.ResponseReceiver<?>> write(HttpClient.RequestSender send, @Nullable MultipartRequest body) {
         if (body == null) {
             return Mono.empty(); // or .error() ?
         }
-        Consumer<HttpClientRequest.Form> formConsumer = body.getFormConsumer();
-        MessageCreateRequest createRequest = body.getCreateRequest();
-        if (createRequest != null) {
-            try {
-                String payload = objectMapper.writeValueAsString(createRequest);
-                formConsumer = formConsumer.andThen(form -> form.attr("payload_json", payload));
-            } catch (JsonProcessingException e) {
-                throw Exceptions.propagate(e);
+        final MessageCreateRequest createRequest = body.getCreateRequest();
+        return Mono.just(send.sendForm((request, form) -> {
+            if (body.getFile() != null) {
+                form.multipart(true).file("file", Optional.ofNullable(body.getFileName()).orElse("unknown"),
+                        body.getFile(), "application/octet-stream");
             }
-        }
-        return request.chunkedTransfer(false).sendForm(formConsumer).then();
+            if (createRequest != null) {
+                try {
+                    String payload = objectMapper.writeValueAsString(createRequest);
+                    form.attr("payload_json", payload);
+                } catch (JsonProcessingException e) {
+                    throw Exceptions.propagate(e);
+                }
+            }
+        }));
     }
 }

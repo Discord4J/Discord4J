@@ -17,7 +17,7 @@
 package discord4j.rest.http;
 
 import reactor.core.publisher.Mono;
-import reactor.ipc.netty.http.client.HttpClientResponse;
+import reactor.netty.ByteBufFlux;
 
 import javax.annotation.Nullable;
 
@@ -32,7 +32,7 @@ public class EmptyReaderStrategy implements ReaderStrategy<Void> {
     }
 
     @Override
-    public Mono<Void> read(HttpClientResponse response, Class<Void> responseType) {
+    public Mono<Void> read(ByteBufFlux content, Class<Void> responseType) {
         return Mono.empty();
     }
 }

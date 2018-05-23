@@ -22,20 +22,21 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import discord4j.common.jackson.PossibleModule;
-import discord4j.rest.http.*;
-import discord4j.rest.http.client.SimpleHttpClient;
+import discord4j.rest.RestTests;
 import discord4j.rest.json.request.*;
 import discord4j.rest.json.response.ChannelResponse;
 import discord4j.rest.json.response.GuildResponse;
 import discord4j.rest.request.Router;
-import discord4j.rest.route.Routes;
 import org.junit.Before;
 import org.junit.Test;
-import reactor.core.scheduler.Schedulers;
+import reactor.util.Logger;
+import reactor.util.Loggers;
 
 import java.util.Collections;
 
 public class GuildServiceTest {
+
+    private static final Logger log = Loggers.getLogger(GuildServiceTest.class);
 
     private static final long guild = Long.parseUnsignedLong(System.getenv("guild"));
     private static final long member = Long.parseUnsignedLong(System.getenv("member"));
@@ -50,19 +51,7 @@ public class GuildServiceTest {
     public void setup() {
         String token = System.getenv("token");
         ObjectMapper mapper = getMapper();
-
-        SimpleHttpClient httpClient = SimpleHttpClient.builder()
-                .baseUrl(Routes.BASE_URL)
-                .defaultHeader("Authorization", "Bot " + token)
-                .defaultHeader("Content-Type", "application/json")
-                .readerStrategy(new JacksonReaderStrategy<>(mapper))
-                .readerStrategy(new EmptyReaderStrategy())
-                .readerStrategy(new FallbackReaderStrategy())
-                .writerStrategy(new JacksonWriterStrategy(mapper))
-                .writerStrategy(new EmptyWriterStrategy())
-                .build();
-
-        Router router = new Router(httpClient, Schedulers.elastic());
+        Router router = RestTests.getRouter(token, mapper);
         guildService = new GuildService(router);
         channelService = new ChannelService(router);
     }

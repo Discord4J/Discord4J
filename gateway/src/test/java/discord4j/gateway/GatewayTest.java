@@ -17,27 +17,26 @@
 
 package discord4j.gateway;
 
-import discord4j.websocket.CloseStatus;
-import discord4j.websocket.WebSocketClient;
-import discord4j.websocket.WebSocketMessage;
-import io.netty.buffer.ByteBuf;
+import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
+import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import reactor.core.Exceptions;
 import reactor.core.publisher.EmitterProcessor;
+import reactor.core.scheduler.Schedulers;
+import reactor.netty.http.client.HttpClient;
 import reactor.util.Logger;
 import reactor.util.Loggers;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.zip.Inflater;
 import java.util.zip.InflaterOutputStream;
 
 public class GatewayTest {
 
-    public static final String gatewayUrl = "wss://gateway.discord.gg?v=6&encoding=json&compress=zlib-stream";
+    public static final String gatewayUrl = "wss://gateway.discord.gg/?v=6&encoding=json&compress=zlib-stream";
     private static final Logger log = Loggers.getLogger(GatewayTest.class);
 
     private String token;
@@ -51,43 +50,42 @@ public class GatewayTest {
 
     @Test
     @Ignore("Example code not under CI")
-    public void testGatewayConnect() throws URISyntaxException, InterruptedException {
+    public void testGatewayConnect() {
         EmitterProcessor<String> outboundExchange = EmitterProcessor.create();
         EmitterProcessor<String> inboundExchange = EmitterProcessor.create();
 
-        WebSocketClient client = new WebSocketClient();
+        HttpClient.create()
+                .websocket()
+                .uri(gatewayUrl)
+                .handle((inbound, outbound) -> {
+                    WebSocketMessageSubscriber subscriber =
+                            new WebSocketMessageSubscriber(inboundExchange, outboundExchange, token);
+                    inbound.aggregateFrames()
+                            .receiveFrames()
+                            .map(WebSocketFrame::content)
+                            .map(payload -> {
+                                byte[] bytes = new byte[payload.readableBytes()];
+                                payload.readBytes(bytes);
 
-        client.execute(gatewayUrl, session -> {
-            WebSocketMessageSubscriber subscriber = new WebSocketMessageSubscriber(inboundExchange, outboundExchange,
-                    token);
-            session.closeFuture().subscribe(subscriber::onClose);
+                                ByteArrayOutputStream out = new ByteArrayOutputStream(bytes.length * 2);
+                                try (InflaterOutputStream inflater = new InflaterOutputStream(out, zlibContext)) {
+                                    inflater.write(bytes);
+                                    return out.toString("UTF-8");
+                                } catch (IOException e) {
+                                    throw Exceptions.propagate(e);
+                                }
+                            })
+                            .log("session-inbound")
+                            .subscribe(subscriber::onNext, subscriber::onError, subscriber::onComplete);
 
-            session.receive()
-                    .map(message -> {
-                        if (WebSocketMessage.Type.BINARY.equals(message.getType())) {
-                            ByteBuf payload = message.getPayload();
-                            byte[] bytes = new byte[payload.readableBytes()];
-                            payload.readBytes(bytes);
-
-                            ByteArrayOutputStream out = new ByteArrayOutputStream(bytes.length * 2);
-                            try (InflaterOutputStream inflater = new InflaterOutputStream(out, zlibContext)) {
-                                inflater.write(bytes);
-                                return out.toString("UTF-8");
-                            } catch (IOException e) {
-                                throw Exceptions.propagate(e);
-                            }
-                        } else {
-                            return message.getPayloadAsText();
-                        }
-                    })
-                    .log("session-inbound")
-                    .subscribe(subscriber::onNext, subscriber::onError, subscriber::onComplete);
-
-            return session.send(outboundExchange
-                    .log("session-outbound")
-                    .doOnError(t -> log.info("outbound error", t))
-                    .map(WebSocketMessage::fromText));
-        }).block();
+                    return outbound.sendObject(outboundExchange
+                            .log("session-outbound")
+                            .doOnError(t -> log.info("outbound error", t))
+                            .map(TextWebSocketFrame::new));
+                })
+                .then()
+                .publishOn(Schedulers.elastic())
+                .block();
     }
 
     private static class WebSocketMessageSubscriber {
@@ -97,7 +95,7 @@ public class GatewayTest {
         private final String token;
 
         public WebSocketMessageSubscriber(EmitterProcessor<String> inboundExchange,
-                                          EmitterProcessor<String> outboundExchange, String token) {
+                EmitterProcessor<String> outboundExchange, String token) {
             this.inboundExchange = inboundExchange;
             this.outboundExchange = outboundExchange;
             this.token = token;

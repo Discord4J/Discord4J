@@ -21,12 +21,11 @@ import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import reactor.core.Exceptions;
 import reactor.core.publisher.Mono;
-import reactor.ipc.netty.http.client.HttpClientResponse;
+import reactor.netty.ByteBufFlux;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
 import java.lang.reflect.Type;
-import java.util.Objects;
 
 /**
  * Read a response into JSON and convert to an Object of type {@code <Res>} using Jackson 2.9.
@@ -52,10 +51,8 @@ public class JacksonReaderStrategy<Res> implements ReaderStrategy<Res> {
     }
 
     @Override
-    public Mono<Res> read(HttpClientResponse response, Class<Res> responseType) {
-        Objects.requireNonNull(response);
-        Objects.requireNonNull(responseType);
-        return response.receive().aggregate().asByteArray().map(bytes -> {
+    public Mono<Res> read(ByteBufFlux content, Class<Res> responseType) {
+        return content.aggregate().asByteArray().map(bytes -> {
             try {
                 return objectMapper.readValue(bytes, responseType);
             } catch (JsonProcessingException e) {

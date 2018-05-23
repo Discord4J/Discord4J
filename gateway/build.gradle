@@ -1,7 +1,6 @@
 dependencies {
     compile project(':common')
 
-    compile 'com.discord4j:websocket-client:0.7.8'
     compile "io.projectreactor.addons:reactor-extra"
 
     testCompile "junit:junit:$junit_version"
