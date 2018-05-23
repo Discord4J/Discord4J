@@ -21,6 +21,7 @@ import java.lang.reflect.Array;
 public class ArrayUtil {
 
     public static <T> T[] remove(T[] array, T t) {
+        @SuppressWarnings("unchecked")
         T[] ret = (T[]) Array.newInstance(array.getClass().getComponentType(), array.length - 1);
         for (int i = 0; i < array.length; i++) {
             if (array[i].equals(t)) {
@@ -49,6 +50,7 @@ public class ArrayUtil {
     }
 
     public static <T> T[] add(T[] array, T t) {
+        @SuppressWarnings("unchecked")
         T[] ret = (T[]) Array.newInstance(array.getClass().getComponentType(), array.length + 1);
         System.arraycopy(array, 0, ret, 0, ret.length - 1);
         ret[ret.length - 1] = t;

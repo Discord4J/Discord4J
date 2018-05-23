@@ -23,28 +23,69 @@ import javax.annotation.Nullable;
 import java.util.Objects;
 import java.util.Optional;
 
+/**
+ * An emoji used for {@link Reaction message reactions}.
+ */
 public abstract class ReactionEmoji {
 
+    /**
+     * Constructs a {@code ReactionEmoji} using information from a {@link GuildEmoji known guild emoji}.
+     *
+     * @param emoji The guild emoji from which to take information.
+     * @return A reaction emoji using information from the given guild emoji.
+     */
     public static Custom custom(GuildEmoji emoji) {
         return new Custom(emoji.getId().asLong(), emoji.getName(), emoji.isAnimated());
     }
 
+    /**
+     * Constructs a {@code ReactionEmoji} for a custom emoji using the given information.
+     *
+     * @param id The ID of the custom emoji.
+     * @param name The name of the custom emoji.
+     * @param isAnimated Whether the custom emoji is animated.
+     * @return A reaction emoji using the given information.
+     */
     public static Custom custom(Snowflake id, String name, boolean isAnimated) {
         return new Custom(id.asLong(), name, isAnimated);
     }
 
+    /**
+     * Constructs a {@code ReactionEmoji} for a unicode emoji.
+     *
+     * @param raw The raw unicode string for the emoji.
+     * @return A reaction emoji using the given information.
+     */
     public static Unicode unicode(String raw) {
         return new Unicode(raw);
     }
 
+    /**
+     * Constructs a {@code ReactionEmoji} for generic emoji information.
+     *
+     * @param id The ID of the custom emoji OR null if the emoji is a unicode emoji.
+     * @param name The name of the custom emoji OR the raw unicode string for the emoji.
+     * @param isAnimated Whether the emoji is animated OR false if the emoji is a unicode emoji.
+     * @return A reaction emoji using the given information.
+     */
     public static ReactionEmoji of(@Nullable Long id, String name, boolean isAnimated) {
         return id == null ? unicode(name) : custom(Snowflake.of(id), name, isAnimated);
     }
 
+    /**
+     * Gets this emoji as downcasted to {@link Custom a custom reaction emoji}.
+     *
+     * @return This emoji downcasted to a custom emoji, if possible.
+     */
     public Optional<Custom> asCustomEmoji() {
         return this instanceof Custom ? Optional.of((Custom) this) : Optional.empty();
     }
 
+    /**
+     * Gets this emoji downcasted to {@link Unicode a unicode reaction emoji}.
+     *
+     * @return This emoji downcasted to a unicode emoji, if possible.
+     */
     public Optional<Unicode> asUnicodeEmoji() {
         return this instanceof Custom ? Optional.of((Unicode) this) : Optional.empty();
     }
