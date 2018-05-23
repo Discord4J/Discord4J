@@ -2,7 +2,6 @@ plugins {
     id 'java'
     id 'maven-publish'
     id 'com.jfrog.bintray' version '1.8.0'
-    id 'com.jfrog.artifactory' version '4.4.4'
     id 'com.palantir.git-version' version '0.11.0'
     id 'io.spring.dependency-management' version '1.0.4.RELEASE' apply false
 }
@@ -80,7 +79,7 @@ allprojects {
         user = project.hasProperty('bintrayUser') ? project.property('bintrayUser') : System.getenv('BINTRAY_USER')
         key = project.hasProperty('bintrayKey') ? project.property('bintrayKey') : System.getenv('BINTRAY_KEY')
         publications = ['maven']
-        dryRun = true
+        dryRun = false
         publish = true
         pkg {
             userOrg = 'austinv11'
@@ -115,7 +114,6 @@ allprojects {
 subprojects {
     apply plugin: 'com.palantir.git-version'
     apply plugin: 'io.spring.dependency-management'
-    apply plugin: 'com.jfrog.artifactory'
 
     archivesBaseName = 'discord4j-' + project.name
 
@@ -152,29 +150,6 @@ subprojects {
     project.getTasks().getByName(JavaPlugin.CLASSES_TASK_NAME).dependsOn writeGitProperties
 }
 
-artifactory {
-    contextUrl = 'https://oss.jfrog.org'
-    resolve {
-        repository {
-            repoKey = 'jcenter'
-        }
-    }
-    publish {
-        repository {
-            repoKey = 'oss-snapshot-local'
-
-            username = project.hasProperty('bintrayUser') ? project.property('bintrayUser') : System.getenv('BINTRAY_USER')
-            password = project.hasProperty('bintrayKey') ? project.property('bintrayKey') : System.getenv('BINTRAY_KEY')
-        }
-        defaults {
-            publications 'maven'
-            publishArtifacts = true
-            properties = [:]
-            publishPom = true
-        }
-    }
-}
-
 publishing {
     publications {
         maven(MavenPublication) {
@@ -183,7 +158,6 @@ publishing {
 }
 
 bintrayUpload.dependsOn build
-artifactoryPublish.dependsOn build
 
 task wrapper(type: Wrapper) {
     gradleVersion = '4.7'
