@@ -143,6 +143,11 @@ public final class TextChannel extends BaseChannel implements GuildChannel, Mess
         return messageChannel.getMessagesAfter(messageId);
     }
 
+    @Override
+    public Flux<Message> getPinnedMessages() {
+        return messageChannel.getPinnedMessages();
+    }
+
     /**
      * Gets the channel topic.
      *

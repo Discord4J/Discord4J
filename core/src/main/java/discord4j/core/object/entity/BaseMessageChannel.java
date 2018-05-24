@@ -112,6 +112,13 @@ class BaseMessageChannel extends BaseChannel implements MessageChannel {
     }
 
     @Override
+    public Flux<Message> getPinnedMessages() {
+        return getServiceMediator().getRestClient().getChannelService().getPinnedMessages(getId().asLong())
+                .map(MessageBean::new)
+                .map(bean -> new Message(getServiceMediator(), bean));
+    }
+
+    @Override
     protected MessageChannelBean getData() {
         return (MessageChannelBean) super.getData();
     }

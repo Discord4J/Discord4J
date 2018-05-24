@@ -125,4 +125,12 @@ public interface MessageChannel extends Channel {
      * If an error is received, it is emitted through the {@code Flux}.
      */
     Flux<Message> getMessagesAfter(Snowflake messageId);
+
+    /**
+     * Requests to retrieve all the pinned messages for this channel.
+     *
+     * @return A {@link Flux} that continually emits all the pinned messages for this channel. If an error is received,
+     * it is emitted through the {@code Flux}.
+     */
+    Flux<Message> getPinnedMessages();
 }
