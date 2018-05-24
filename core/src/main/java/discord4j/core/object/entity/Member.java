@@ -178,4 +178,28 @@ public final class Member extends User {
         return getServiceMediator().getRestClient().getGuildService()
                 .removeGuildMember(getGuildId().asLong(), getId().asLong());
     }
+
+    /**
+     * Requests to add a role to this member.
+     *
+     * @param roleId The ID of the role to add to this member.
+     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the role was added to this
+     * member. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Void> addRole(final Snowflake roleId) {
+        return getServiceMediator().getRestClient().getGuildService()
+                .addGuildMemberRole(guildId, getId().asLong(), roleId.asLong());
+    }
+
+    /**
+     * Requests to remove a role from this member.
+     *
+     * @param roleId The ID of the role to remove from this member.
+     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the role was removed from
+     * this member. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Void> removeRole(final Snowflake roleId) {
+        return getServiceMediator().getRestClient().getGuildService()
+                .removeGuildMemberRole(guildId, getId().asLong(), roleId.asLong());
+    }
 }
