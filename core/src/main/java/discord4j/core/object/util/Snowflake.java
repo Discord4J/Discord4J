@@ -18,6 +18,7 @@ package discord4j.core.object.util;
 
 import discord4j.core.util.EntityUtil;
 
+import java.math.BigInteger;
 import java.time.Instant;
 
 /**
@@ -60,6 +61,16 @@ public final class Snowflake implements Comparable<Snowflake> {
         return of((timestamp.toEpochMilli() - EntityUtil.DISCORD_EPOCH) << 22);
     }
 
+    /**
+     * Constructs a {@code Snowflake} utilizing a BigInteger representing an <i>unsigned</i> ID.
+     *
+     * @param id The BigInteger representing an <i>unsigned</i> ID to construct a {@code Snowflake}. Must be non-null.
+     * @return A constructed {@code Snowflake} with an <i>unsigned</i> ID.
+     */
+    public static Snowflake of(final BigInteger id) {
+        return of(id.longValue());
+    }
+
     /** The <i>unsigned</i> ID. */
     private final long id;
 
@@ -97,6 +108,15 @@ public final class Snowflake implements Comparable<Snowflake> {
      */
     public Instant getTimestamp() {
         return Instant.ofEpochMilli(EntityUtil.DISCORD_EPOCH + (id >>> 22));
+    }
+
+    /**
+     * Gets the <i>unsigned</i> ID of this {@code Snowflake} as a BigInteger.
+     *
+     * @return The <i>unsigned</i> ID of this {@code Snowflake} as a BigInteger.
+     */
+    public BigInteger asBigInteger() {
+        return new BigInteger(asString());
     }
 
     /**
