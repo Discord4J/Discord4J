@@ -334,20 +334,53 @@ public final class Message implements Entity {
                 .deleteMessage(getChannelId().asLong(), getId().asLong());
     }
 
-    public Mono<Void> addReaction(ReactionEmoji emoji) {
+    /**
+     * Requests to add a reaction on this message.
+     *
+     * @param emoji The reaction to add on this message.
+     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the reaction was added on
+     * this message. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Void> addReaction(final ReactionEmoji emoji) {
         return serviceMediator.getRestClient().getChannelService()
                 .createReaction(getChannelId().asLong(), getId().asLong(), EntityUtil.getEmojiString(emoji));
     }
 
-    public Mono<Void> removeReaction(ReactionEmoji emoji, Snowflake userId) {
+    /**
+     * Requests to remove a reaction from a specified user on this message.
+     *
+     * @param emoji The reaction to remove on this message.
+     * @param userId The user to remove the reaction on this message.
+     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the reaction from the
+     * specified user was removed on this message. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Void> removeReaction(final ReactionEmoji emoji, final Snowflake userId) {
         return serviceMediator.getRestClient().getChannelService()
                 .deleteReaction(getChannelId().asLong(), getId().asLong(), EntityUtil.getEmojiString(emoji),
                         userId.asLong());
     }
 
-    public Mono<Void> removeSelfReaction(ReactionEmoji emoji) {
+    /**
+     * Requests to remove a reaction from the current user on this message.
+     *
+     * @param emoji The reaction to remove on this message.
+     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the reaction from the current
+     * user was removed on this message. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Void> removeSelfReaction(final ReactionEmoji emoji) {
         return serviceMediator.getRestClient().getChannelService()
                 .deleteOwnReaction(getChannelId().asLong(), getId().asLong(), EntityUtil.getEmojiString(emoji));
+    }
+
+    /**
+     * Requests to remove all the reactions on this message.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating all the reactions on this
+     * message were removed. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Void> removeAllReactions() {
+        return serviceMediator.getRestClient().getChannelService()
+                .deleteAllReactions(getChannelId().asLong(), getId().asLong());
     }
 
     /**
@@ -370,17 +403,6 @@ public final class Message implements Entity {
     public Mono<Void> unpin() {
         return serviceMediator.getRestClient().getChannelService()
                 .deletePinnedMessage(getChannelId().asLong(), getId().asLong());
-    }
-
-    /**
-     * Requests to delete all the reactions on this message.
-     *
-     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating all the reactions on this
-     * message has been deleted. If an error is received, it is emitted through the {@code Mono}.
-     */
-    public Mono<Void> deleteAllReactions() {
-        return serviceMediator.getRestClient().getChannelService()
-                .deleteAllReactions(getChannelId().asLong(), getId().asLong());
     }
 
     /** Represents the various types of messages. */
