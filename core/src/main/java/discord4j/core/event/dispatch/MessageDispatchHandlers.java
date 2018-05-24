@@ -18,13 +18,12 @@ package discord4j.core.event.dispatch;
 
 import discord4j.common.jackson.Possible;
 import discord4j.common.json.EmbedResponse;
-import discord4j.common.json.EmojiResponse;
 import discord4j.core.DiscordClient;
 import discord4j.core.event.domain.message.*;
 import discord4j.core.object.Embed;
 import discord4j.core.object.data.stored.MessageBean;
-import discord4j.core.object.data.stored.embed.EmbedBean;
 import discord4j.core.object.data.stored.ReactionBean;
+import discord4j.core.object.data.stored.embed.EmbedBean;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.reaction.ReactionEmoji;
 import discord4j.core.util.ArrayUtil;
@@ -32,10 +31,9 @@ import discord4j.gateway.json.dispatch.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import javax.annotation.Nullable;
 import java.util.Arrays;
-import java.util.Objects;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 class MessageDispatchHandlers {

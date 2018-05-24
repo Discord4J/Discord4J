@@ -18,8 +18,8 @@ package discord4j.gateway.json.dispatch;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import discord4j.gateway.json.response.UnavailableGuildResponse;
 import discord4j.common.json.UserResponse;
+import discord4j.gateway.json.response.UnavailableGuildResponse;
 
 import java.util.Arrays;
 
