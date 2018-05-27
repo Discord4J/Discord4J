@@ -19,6 +19,7 @@ package discord4j.store.service;
 import discord4j.store.Store;
 import discord4j.store.noop.NoOpStoreService;
 import discord4j.store.primitive.LongObjStore;
+import discord4j.store.util.StoreContext;
 import reactor.core.publisher.Mono;
 
 import java.io.Serializable;
@@ -27,24 +28,12 @@ import java.io.Serializable;
  * This represents a java service which provides stores. This can be loaded via
  * {@link discord4j.store.service.StoreServiceLoader} or it may be loaded manually.
  *
- * Additionally, some common config options can be expected to be retrieved via environment variables:
- * <ul>
- *     <li>{@link discord4j.store.service.StoreService#MESSAGE_CLASS_VAR}</li>
- * </ul>
- *
  * @see java.util.ServiceLoader
  * @see <a href="https://github.com/google/auto/tree/master/service">Google AutoService</a>
  * @see StoreServiceLoader
  * @see NoOpStoreService
  */
 public interface StoreService {
-
-    /**
-     * This environment variable corresponds with the fully qualified name of the message bean. This can
-     * be useful since indefinitely storing messages over a long period of time can lead to
-     * {@link java.lang.OutOfMemoryError}s.
-     */
-    String MESSAGE_CLASS_VAR = "discord4j.MESSAGE_CLASS";
 
     /**
      * This is used to check if this service can provide generic stores.
@@ -89,9 +78,10 @@ public interface StoreService {
     /**
      * This is a lifecycle method called to signal that a store should allocate any necessary resources.
      *
+     * @param context Some context about the environment which this service is being utilized in.
      * @return A mono, whose completion signals that resources have been allocated successfully.
      */
-    Mono<Void> init();
+    Mono<Void> init(StoreContext context);
 
     /**
      * This is a lifecycle method called to signal that a store should dispose of any resources due to

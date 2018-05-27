@@ -23,14 +23,12 @@ import javax.annotation.Nullable;
 
 public class IdentifyOptions {
 
-    @Nullable
-    private volatile Integer shardIndex;
+    private final int shardIndex;
+
+    private final int shardCount;
 
     @Nullable
-    private volatile Integer shardCount;
-
-    @Nullable
-    private volatile StatusUpdate initialStatus;
+    private final StatusUpdate initialStatus;
 
     @Nullable
     private volatile Integer resumeSequence;
@@ -38,31 +36,23 @@ public class IdentifyOptions {
     @Nullable
     private volatile String resumeSessionId;
 
-    @Nullable
-    public Integer getShardIndex() {
+    public IdentifyOptions(int shardIndex, int shardCount, @Nullable StatusUpdate initialStatus) {
+        this.shardIndex = shardIndex;
+        this.shardCount = shardCount;
+        this.initialStatus = initialStatus;
+    }
+
+    public int getShardIndex() {
         return shardIndex;
     }
 
-    public void setShardIndex(@Nullable Integer shardIndex) {
-        this.shardIndex = shardIndex;
-    }
-
-    @Nullable
-    public Integer getShardCount() {
+    public int getShardCount() {
         return shardCount;
-    }
-
-    public void setShardCount(@Nullable Integer shardCount) {
-        this.shardCount = shardCount;
     }
 
     @Nullable
     public StatusUpdate getInitialStatus() {
         return initialStatus;
-    }
-
-    public void setInitialStatus(@Nullable StatusUpdate initialStatus) {
-        this.initialStatus = initialStatus;
     }
 
     @Nullable

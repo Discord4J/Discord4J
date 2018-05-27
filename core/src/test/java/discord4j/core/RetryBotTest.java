@@ -61,7 +61,7 @@ public class RetryBotTest {
     @Test
     @Ignore("Example code excluded from CI")
     public void test() {
-        IdentifyOptions options = new IdentifyOptions();
+        IdentifyOptions options = new IdentifyOptions(shardIndex, shardCount, initialStatus);
         options.setShardIndex(shardId);
         options.setShardCount(shardCount);
 
@@ -112,7 +112,7 @@ public class RetryBotTest {
     @Test
     @Ignore("Example code excluded from CI")
     public void testNoCommands() {
-        IdentifyOptions options = new IdentifyOptions();
+        IdentifyOptions options = new IdentifyOptions(shardIndex, shardCount, initialStatus);
         options.setShardIndex(shardId);
         options.setShardCount(shardCount);
 

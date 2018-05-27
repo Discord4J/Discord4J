@@ -20,6 +20,7 @@ import discord4j.store.Store;
 import discord4j.store.noop.NoOpStoreService;
 import discord4j.store.primitive.ForwardingStoreService;
 import discord4j.store.primitive.LongObjStore;
+import discord4j.store.util.StoreContext;
 import reactor.core.publisher.Mono;
 
 import java.io.Serializable;
@@ -146,8 +147,8 @@ public class StoreServiceLoader {
         }
 
         @Override
-        public Mono<Void> init() {
-            return genericService.init().and(primitiveService.init());
+        public Mono<Void> init(StoreContext context) {
+            return genericService.init(context).and(primitiveService.init(context));
         }
 
         @Override

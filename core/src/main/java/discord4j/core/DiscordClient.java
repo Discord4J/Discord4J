@@ -32,6 +32,7 @@ import discord4j.gateway.json.GatewayPayload;
 import discord4j.rest.json.response.UserGuildResponse;
 import discord4j.rest.util.RouteUtils;
 import discord4j.store.util.LongLongTuple2;
+import discord4j.store.util.StoreContext;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -325,9 +326,13 @@ public final class DiscordClient {
         parameters.put("encoding", "json");
         parameters.put("v", 6);
 
-        return serviceMediator.getRestClient().getGatewayService().getGateway()
+        return serviceMediator.getStoreService()
+                .init(new StoreContext(serviceMediator.getClientConfig().getShardIndex(), MessageBean.class)) //Stores should be initialized before the gateway sends events
+                .then(serviceMediator.getRestClient().getGatewayService().getGateway())
                 .flatMap(response -> serviceMediator.getGatewayClient()
-                        .execute(RouteUtils.expandQuery(response.getUrl(), parameters)));
+                        .execute(RouteUtils.expandQuery(response.getUrl(), parameters)))
+                .then(serviceMediator.getStateHolder().invalidateStores())
+                .then(serviceMediator.getStoreService().dispose());
     }
 
     /** Logs out the client from the gateway. */

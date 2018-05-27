@@ -16,15 +16,13 @@
  */
 package discord4j.core;
 
-import javax.annotation.Nullable;
-
 public final class ClientConfig {
 
     private final String token;
-    private final Integer shardIndex;
-    private final Integer shardCount;
+    private final int shardIndex;
+    private final int shardCount;
 
-    ClientConfig(final String token, @Nullable final Integer shardIndex, @Nullable final Integer shardCount) {
+    ClientConfig(final String token, final int shardIndex, final int shardCount) {
         this.token = token;
         this.shardIndex = shardIndex;
         this.shardCount = shardCount;
@@ -34,13 +32,11 @@ public final class ClientConfig {
         return token;
     }
 
-    @Nullable
-    public Integer getShardIndex() {
+    public int getShardIndex() {
         return shardIndex;
     }
 
-    @Nullable
-    public Integer getShardCount() {
+    public int getShardCount() {
         return shardCount;
     }
 }

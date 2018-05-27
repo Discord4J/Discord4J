@@ -58,8 +58,8 @@ public final class ClientBuilder {
     private static final Logger log = Loggers.getLogger(ClientBuilder.class);
 
     private String token;
-    private Integer shardIndex;
-    private Integer shardCount;
+    private int shardIndex = 0;
+    private int shardCount = 1;
     private StoreService storeService;
     private FluxProcessor<Event, Event> eventProcessor;
     private Scheduler eventScheduler;
@@ -84,20 +84,20 @@ public final class ClientBuilder {
         return this;
     }
 
-    public Integer getShardIndex() {
+    public int getShardIndex() {
         return shardIndex;
     }
 
-    public ClientBuilder setShardIndex(final Integer shardIndex) {
+    public ClientBuilder setShardIndex(final int shardIndex) {
         this.shardIndex = shardIndex;
         return this;
     }
 
-    public Integer getShardCount() {
+    public int getShardCount() {
         return shardCount;
     }
 
-    public ClientBuilder setShardCount(final Integer shardCount) {
+    public ClientBuilder setShardCount(final int shardCount) {
         this.shardCount = shardCount;
         return this;
     }
@@ -178,19 +178,12 @@ public final class ClientBuilder {
                 .build();
 
         if (identifyOptions == null) {
-            identifyOptions = new IdentifyOptions();
+            identifyOptions = new IdentifyOptions(shardIndex, shardCount,
+                    initialPresence != null ? initialPresence.asStatusUpdate() : null);
         }
-        if (shardIndex != null) {
-            identifyOptions.setShardIndex(shardIndex);
-        }
-        if (shardCount != null) {
-            identifyOptions.setShardCount(shardCount);
-        }
-        if (identifyOptions.getShardIndex() == null ^ identifyOptions.getShardCount() == null) {
-            throw new IllegalArgumentException("Must set shardIndex and shardCount together");
-        }
-        if (initialPresence != null) {
-            identifyOptions.setInitialStatus(initialPresence.asStatusUpdate());
+
+        if (identifyOptions.getShardIndex() >= identifyOptions.getShardCount()) {
+            throw new IllegalArgumentException("The provided shard index is incompatible with the requested shard count!");
         }
 
         final GatewayClient gatewayClient = new GatewayClient(

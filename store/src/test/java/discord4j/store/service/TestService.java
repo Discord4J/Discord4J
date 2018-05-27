@@ -19,6 +19,7 @@ package discord4j.store.service;
 import com.google.auto.service.AutoService;
 import discord4j.store.Store;
 import discord4j.store.primitive.LongObjStore;
+import discord4j.store.util.StoreContext;
 import reactor.core.publisher.Mono;
 
 import java.io.Serializable;
@@ -48,7 +49,7 @@ public class TestService implements StoreService {
     }
 
     @Override
-    public Mono<Void> init() {
+    public Mono<Void> init(StoreContext context) {
         return Mono.empty();
     }
 

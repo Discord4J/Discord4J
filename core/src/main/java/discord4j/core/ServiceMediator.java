@@ -23,11 +23,6 @@ import discord4j.store.service.StoreService;
 
 public final class ServiceMediator {
 
-    static {
-        System.setProperty(discord4j.store.service.StoreService.MESSAGE_CLASS_VAR,
-                discord4j.core.object.data.stored.MessageBean.class.getCanonicalName());
-    }
-
     private final GatewayClient gatewayClient;
     private final RestClient restClient;
     private final StoreService storeService;
