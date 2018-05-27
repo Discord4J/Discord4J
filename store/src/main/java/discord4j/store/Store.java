@@ -48,14 +48,6 @@ public interface Store<K extends Comparable<K>, V extends Serializable> {
     /**
      * Stores key value pairs.
      *
-     * @param entries A mono providing the key value pairs.
-     * @return A mono which signals the completion of the storage of the pairs.
-     */
-    Mono<Void> save(Iterable<Tuple2<K, V>> entries);
-
-    /**
-     * Stores key value pairs.
-     *
      * @param entryStream A flux providing the key value pairs.
      * @return A mono which signals the completion of the storage of the pairs.
      */
@@ -68,38 +60,6 @@ public interface Store<K extends Comparable<K>, V extends Serializable> {
      * @return A mono, which may or may not contain an associated object.
      */
     Mono<V> find(K id);
-
-    /**
-     * Checks if a value is associated with the provided id.
-     *
-     * @param id The id to search with.
-     * @return A mono which provides true or false, depending on whether the id is associated with a value.
-     */
-    Mono<Boolean> exists(K id);
-
-    /**
-     * Checks if values are associated with all of the provided ids.
-     *
-     * @param ids A flux providing a stream of ids to search for.
-     * @return A mono which provides true or false, depending on whether all the ids a represented in the data source.
-     */
-    Mono<Boolean> exists(Publisher<K> ids);
-
-    /**
-     * Retrieves all stored values from the data source which have a provided id.
-     *
-     * @param ids A set of ids to find values for.
-     * @return A stream of id associated data objects from the data source.
-     */
-    Flux<V> findAll(Iterable<K> ids);
-
-    /**
-     * Retrieves all stored values from the data source which have a provided id.
-     *
-     * @param ids A stream of ids to find values for.
-     * @return A stream of id associated data objects from the data source.
-     */
-    Flux<V> findAll(Publisher<K> ids);
 
     /**
      * Retrieves all stored values with ids within a provided range.
@@ -134,14 +94,6 @@ public interface Store<K extends Comparable<K>, V extends Serializable> {
     Mono<Void> delete(Publisher<K> ids);
 
     /**
-     * Deletes a key value pair.
-     *
-     * @param entry The entry to delete.
-     * @return A mono which signals the completion of the deletion of the value.
-     */
-    Mono<Void> delete(Tuple2<K, V> entry);
-
-    /**
      * Deletes values within a range of ids.
      *
      * @param start The starting key (inclusive).
@@ -149,22 +101,6 @@ public interface Store<K extends Comparable<K>, V extends Serializable> {
      * @return A mono which signals the completion of the deletion of values.
      */
     Mono<Void> deleteInRange(K start, K end);
-
-    /**
-     * Deletes all provided entries.
-     *
-     * @param entries The entries to delete.
-     * @return A mono which signals the completion of the deletion of values.
-     */
-    Mono<Void> deleteAll(Iterable<Tuple2<K, V>> entries);
-
-    /**
-     * Deletes all provided entries.
-     *
-     * @param entries A stream of entries to delete.
-     * @return A mono which signals the completion of the deletion of values.
-     */
-    Mono<Void> deleteAll(Publisher<Tuple2<K, V>> entries);
 
     /**
      * Deletes all entries in the data source.

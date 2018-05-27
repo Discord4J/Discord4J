@@ -39,11 +39,6 @@ public class NoOpStore<K extends Comparable<K>, V extends Serializable> implemen
     }
 
     @Override
-    public Mono<Void> save(Iterable<Tuple2<K, V>> entries) {
-        return Mono.empty();
-    }
-
-    @Override
     public Mono<Void> save(Publisher<Tuple2<K, V>> entryStream) {
         return Mono.empty();
     }
@@ -51,26 +46,6 @@ public class NoOpStore<K extends Comparable<K>, V extends Serializable> implemen
     @Override
     public Mono<V> find(K id) {
         return Mono.empty();
-    }
-
-    @Override
-    public Mono<Boolean> exists(K id) {
-        return Mono.just(false);
-    }
-
-    @Override
-    public Mono<Boolean> exists(Publisher<K> ids) {
-        return Mono.just(false);
-    }
-
-    @Override
-    public Flux<V> findAll(Iterable<K> ids) {
-        return Flux.empty();
-    }
-
-    @Override
-    public Flux<V> findAll(Publisher<K> ids) {
-        return Flux.empty();
     }
 
     @Override
@@ -94,22 +69,7 @@ public class NoOpStore<K extends Comparable<K>, V extends Serializable> implemen
     }
 
     @Override
-    public Mono<Void> delete(Tuple2<K, V> entry) {
-        return Mono.empty();
-    }
-
-    @Override
     public Mono<Void> deleteInRange(K start, K end) {
-        return Mono.empty();
-    }
-
-    @Override
-    public Mono<Void> deleteAll(Iterable<Tuple2<K, V>> entries) {
-        return Mono.empty();
-    }
-
-    @Override
-    public Mono<Void> deleteAll(Publisher<Tuple2<K, V>> entries) {
         return Mono.empty();
     }
 

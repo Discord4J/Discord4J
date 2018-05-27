@@ -51,19 +51,6 @@ public interface LongObjStore<V extends Serializable> extends Store<Long, V> {
     Mono<Void> saveWithLong(long key, V value);
 
     @Override
-    default Mono<Void> save(Iterable<Tuple2<Long, V>> entries) {
-        return saveWithLong(new MappingIterable<>(LongObjTuple2::from, entries));
-    }
-
-    /**
-     * Stores key value pairs.
-     *
-     * @param entries A mono providing the key value pairs.
-     * @return A mono which signals the completion of the storage of the pairs.
-     */
-    Mono<Void> saveWithLong(Iterable<LongObjTuple2<V>> entries);
-
-    @Override
     default Mono<Void> save(Publisher<Tuple2<Long, V>> entryStream) {
         return saveWithLong(Flux.from(entryStream).map(LongObjTuple2::from));
     }
@@ -90,22 +77,6 @@ public interface LongObjStore<V extends Serializable> extends Store<Long, V> {
     Mono<V> find(long id);
 
     @Override
-    default Mono<Boolean> exists(Long id) {
-        return exists((long) id);
-    }
-
-    /**
-     * Checks if a value is associated with the provided id.
-     *
-     * @param id The id to search with.
-     * @return A mono which provides true or false, depending on whether the id is associated with a value.
-     */
-    Mono<Boolean> exists(long id);
-
-    @Override
-    Mono<Boolean> exists(Publisher<Long> ids); //No way around this q.q
-
-    @Override
     default Flux<V> findInRange(Long start, Long end) {
         return findInRange((long) start, (long) end);
     }
@@ -118,12 +89,6 @@ public interface LongObjStore<V extends Serializable> extends Store<Long, V> {
      * @return The stream of values with ids within the provided range.
      */
     Flux<V> findInRange(long start, long end);
-
-    @Override
-    Flux<V> findAll(Iterable<Long> ids); //No way around this q.q
-
-    @Override
-    Flux<V> findAll(Publisher<Long> ids); //No way around this q.q
 
     @Override
     default Mono<Void> delete(Long id) {
@@ -142,19 +107,6 @@ public interface LongObjStore<V extends Serializable> extends Store<Long, V> {
     Mono<Void> delete(Publisher<Long> ids); //No way around this q.q
 
     @Override
-    default Mono<Void> delete(Tuple2<Long, V> entry) {
-        return delete(LongObjTuple2.from(entry));
-    }
-
-    /**
-     * Deletes a key value pair.
-     *
-     * @param entry The entry to delete.
-     * @return A mono which signals the completion of the deletion of the value.
-     */
-    Mono<Void> delete(LongObjTuple2<V> entry);
-
-    @Override
     default Mono<Void> deleteInRange(Long start, Long end) {
         return deleteInRange((long) start, (long) end);
     }
@@ -167,32 +119,6 @@ public interface LongObjStore<V extends Serializable> extends Store<Long, V> {
      * @return A mono which signals the completion of the deletion of values.
      */
     Mono<Void> deleteInRange(long start, long end);
-
-    @Override
-    default Mono<Void> deleteAll(Iterable<Tuple2<Long, V>> entries) {
-        return deleteAllWithLongs(new MappingIterable<>(LongObjTuple2::from, entries));
-    }
-
-    /**
-     * Deletes all provided entries.
-     *
-     * @param entries The entries to delete.
-     * @return A mono which signals the completion of the deletion of values.
-     */
-    Mono<Void> deleteAllWithLongs(Iterable<LongObjTuple2<V>> entries);
-
-    @Override
-    default Mono<Void> deleteAll(Publisher<Tuple2<Long, V>> entries) {
-        return deleteAllWithLongs(Flux.from(entries).map(LongObjTuple2::from));
-    }
-
-    /**
-     * Deletes all provided entries.
-     *
-     * @param entries A stream of entries to delete.
-     * @return A mono which signals the completion of the deletion of values.
-     */
-    Mono<Void> deleteAllWithLongs(Publisher<LongObjTuple2<V>> entries);
 
     @Override
     default Flux<Tuple2<Long, V>> entries() {

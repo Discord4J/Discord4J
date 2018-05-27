@@ -39,11 +39,6 @@ public class NoOpLongObjStore<V extends Serializable> implements LongObjStore<V>
     }
 
     @Override
-    public Mono<Void> saveWithLong(Iterable<LongObjTuple2<V>> entries) {
-        return Mono.empty();
-    }
-
-    @Override
     public Mono<Void> saveWithLong(Publisher<LongObjTuple2<V>> entryStream) {
         return Mono.empty();
     }
@@ -54,27 +49,7 @@ public class NoOpLongObjStore<V extends Serializable> implements LongObjStore<V>
     }
 
     @Override
-    public Mono<Boolean> exists(long id) {
-        return Mono.just(false);
-    }
-
-    @Override
-    public Mono<Boolean> exists(Publisher<Long> ids) {
-        return Mono.just(false);
-    }
-
-    @Override
     public Flux<V> findInRange(long start, long end) {
-        return Flux.empty();
-    }
-
-    @Override
-    public Flux<V> findAll(Iterable<Long> ids) {
-        return Flux.empty();
-    }
-
-    @Override
-    public Flux<V> findAll(Publisher<Long> ids) {
         return Flux.empty();
     }
 
@@ -114,22 +89,7 @@ public class NoOpLongObjStore<V extends Serializable> implements LongObjStore<V>
     }
 
     @Override
-    public Mono<Void> delete(LongObjTuple2<V> entry) {
-        return Mono.empty();
-    }
-
-    @Override
     public Mono<Void> deleteInRange(long start, long end) {
-        return Mono.empty();
-    }
-
-    @Override
-    public Mono<Void> deleteAllWithLongs(Iterable<LongObjTuple2<V>> entries) {
-        return Mono.empty();
-    }
-
-    @Override
-    public Mono<Void> deleteAllWithLongs(Publisher<LongObjTuple2<V>> entries) {
         return Mono.empty();
     }
 }

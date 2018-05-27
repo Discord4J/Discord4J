@@ -65,16 +65,6 @@ public class ForwardingStore<V extends Serializable> implements LongObjStore<V> 
     }
 
     @Override
-    public Mono<Void> save(Iterable<Tuple2<Long, V>> entries) {
-        return toForward.save(entries);
-    }
-
-    @Override
-    public Mono<Void> saveWithLong(Iterable<LongObjTuple2<V>> entries) {
-        return this.save(new MappingIterable<>(LongObjTuple2::convert, entries));
-    }
-
-    @Override
     public Mono<Void> save(Publisher<Tuple2<Long, V>> entryStream) {
         return toForward.save(entryStream);
     }
@@ -95,21 +85,6 @@ public class ForwardingStore<V extends Serializable> implements LongObjStore<V> 
     }
 
     @Override
-    public Mono<Boolean> exists(Long id) {
-        return toForward.exists(id);
-    }
-
-    @Override
-    public Mono<Boolean> exists(long id) {
-        return this.exists((Long) id);
-    }
-
-    @Override
-    public Mono<Boolean> exists(Publisher<Long> ids) {
-        return toForward.exists(ids);
-    }
-
-    @Override
     public Flux<V> findInRange(Long start, Long end) {
         return toForward.findInRange(start, end);
     }
@@ -117,16 +92,6 @@ public class ForwardingStore<V extends Serializable> implements LongObjStore<V> 
     @Override
     public Flux<V> findInRange(long start, long end) {
         return this.findInRange((Long) start, (Long) end);
-    }
-
-    @Override
-    public Flux<V> findAll(Iterable<Long> ids) {
-        return toForward.findAll(ids);
-    }
-
-    @Override
-    public Flux<V> findAll(Publisher<Long> ids) {
-        return toForward.findAll(ids);
     }
 
     @Override
@@ -150,16 +115,6 @@ public class ForwardingStore<V extends Serializable> implements LongObjStore<V> 
     }
 
     @Override
-    public Mono<Void> delete(Tuple2<Long, V> entry) {
-        return toForward.delete(entry);
-    }
-
-    @Override
-    public Mono<Void> delete(LongObjTuple2<V> entry) {
-        return this.delete(LongObjTuple2.convert(entry));
-    }
-
-    @Override
     public Mono<Void> deleteInRange(Long start, Long end) {
         return toForward.deleteInRange(start, end);
     }
@@ -167,26 +122,6 @@ public class ForwardingStore<V extends Serializable> implements LongObjStore<V> 
     @Override
     public Mono<Void> deleteInRange(long start, long end) {
         return this.deleteInRange((Long) start, (Long) end);
-    }
-
-    @Override
-    public Mono<Void> deleteAll(Iterable<Tuple2<Long, V>> entries) {
-        return toForward.deleteAll(entries);
-    }
-
-    @Override
-    public Mono<Void> deleteAllWithLongs(Iterable<LongObjTuple2<V>> entries) {
-        return this.deleteAll(new MappingIterable<>(LongObjTuple2::convert, entries));
-    }
-
-    @Override
-    public Mono<Void> deleteAll(Publisher<Tuple2<Long, V>> entries) {
-        return toForward.deleteAll(entries);
-    }
-
-    @Override
-    public Mono<Void> deleteAllWithLongs(Publisher<LongObjTuple2<V>> entries) {
-        return this.deleteAll(Flux.from(entries).map(LongObjTuple2::convert));
     }
 
     @Override
