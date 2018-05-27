@@ -127,4 +127,9 @@ public class NoOpStore<K extends Comparable<K>, V extends Serializable> implemen
     public Flux<V> values() {
         return Flux.empty();
     }
+
+    @Override
+    public Mono<Void> invalidate() {
+        return Mono.empty();
+    }
 }

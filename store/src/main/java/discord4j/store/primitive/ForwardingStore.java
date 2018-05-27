@@ -210,6 +210,11 @@ public class ForwardingStore<V extends Serializable> implements LongObjStore<V> 
     }
 
     @Override
+    public Mono<Void> invalidate() {
+        return toForward.invalidate();
+    }
+
+    @Override
     public Flux<LongObjTuple2<V>> longObjEntries() {
         return this.entries().map(LongObjTuple2::from);
     }

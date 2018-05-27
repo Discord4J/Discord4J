@@ -114,9 +114,9 @@ public abstract class DispatchHandlers {
         PresenceBean bean = new PresenceBean(context.getDispatch());
         Presence current = new Presence(bean);
 
-        Mono<Void> saveNew = serviceMediator.getStoreHolder().getPresenceStore().save(key, bean);
+        Mono<Void> saveNew = serviceMediator.getStateHolder().getPresenceStore().save(key, bean);
 
-        return serviceMediator.getStoreHolder().getPresenceStore()
+        return serviceMediator.getStateHolder().getPresenceStore()
                 .find(key)
                 .flatMap(saveNew::thenReturn)
                 .map(old -> new PresenceUpdateEvent(client, guildId, userId, current, new Presence(old)))
@@ -139,9 +139,9 @@ public abstract class DispatchHandlers {
         UserBean bean = new UserBean(context.getDispatch().getUser());
         User current = new User(serviceMediator, bean);
 
-        Mono<Void> saveNew = serviceMediator.getStoreHolder().getUserStore().save(bean.getId(), bean);
+        Mono<Void> saveNew = serviceMediator.getStateHolder().getUserStore().save(bean.getId(), bean);
 
-        return serviceMediator.getStoreHolder().getUserStore()
+        return serviceMediator.getStateHolder().getUserStore()
                 .find(context.getDispatch().getUser().getId())
                 .flatMap(saveNew::thenReturn)
                 .map(old -> new UserUpdateEvent(client, current, new User(serviceMediator, old)))
@@ -169,9 +169,9 @@ public abstract class DispatchHandlers {
         VoiceStateBean bean = new VoiceStateBean(context.getDispatch().getVoiceState());
         VoiceState current = new VoiceState(serviceMediator, bean);
 
-        Mono<Void> saveNew = serviceMediator.getStoreHolder().getVoiceStateStore().save(key, bean);
+        Mono<Void> saveNew = serviceMediator.getStateHolder().getVoiceStateStore().save(key, bean);
 
-        return serviceMediator.getStoreHolder().getVoiceStateStore()
+        return serviceMediator.getStateHolder().getVoiceStateStore()
                 .find(key)
                 .flatMap(saveNew::thenReturn)
                 .map(old -> new VoiceStateUpdateEvent(client, current, new VoiceState(serviceMediator, old)))

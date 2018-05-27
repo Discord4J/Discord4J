@@ -18,7 +18,7 @@ package discord4j.core.event.dispatch;
 
 import discord4j.core.DiscordClient;
 import discord4j.core.ServiceMediator;
-import discord4j.core.StoreHolder;
+import discord4j.core.StateHolder;
 import discord4j.core.event.domain.Event;
 import discord4j.core.event.domain.channel.*;
 import discord4j.core.object.data.PrivateChannelBean;
@@ -62,11 +62,11 @@ class ChannelDispatchHandlers {
         long guildId = context.getDispatch().getGuildId();
         TextChannelBean bean = new TextChannelBean(channel, guildId);
 
-        Mono<TextChannelCreateEvent> saveChannel = serviceMediator.getStoreHolder().getTextChannelStore()
+        Mono<TextChannelCreateEvent> saveChannel = serviceMediator.getStateHolder().getTextChannelStore()
                 .save(bean.getId(), bean)
                 .thenReturn(new TextChannelCreateEvent(client, new TextChannel(serviceMediator, bean)));
 
-        return addChannelToGuild(serviceMediator.getStoreHolder().getGuildStore(), channel, guildId)
+        return addChannelToGuild(serviceMediator.getStateHolder().getGuildStore(), channel, guildId)
                 .then(saveChannel);
     }
 
@@ -85,11 +85,11 @@ class ChannelDispatchHandlers {
         long guildId = context.getDispatch().getGuildId();
         VoiceChannelBean bean = new VoiceChannelBean(channel, guildId);
 
-        Mono<VoiceChannelCreateEvent> saveChannel = serviceMediator.getStoreHolder().getVoiceChannelStore()
+        Mono<VoiceChannelCreateEvent> saveChannel = serviceMediator.getStateHolder().getVoiceChannelStore()
                 .save(bean.getId(), bean)
                 .thenReturn(new VoiceChannelCreateEvent(client, new VoiceChannel(serviceMediator, bean)));
 
-        return addChannelToGuild(serviceMediator.getStoreHolder().getGuildStore(), channel, guildId)
+        return addChannelToGuild(serviceMediator.getStateHolder().getGuildStore(), channel, guildId)
                 .then(saveChannel);
     }
 
@@ -100,11 +100,11 @@ class ChannelDispatchHandlers {
         long guildId = context.getDispatch().getGuildId();
         CategoryBean bean = new CategoryBean(channel, guildId);
 
-        Mono<CategoryCreateEvent> saveChannel = serviceMediator.getStoreHolder().getCategoryStore()
+        Mono<CategoryCreateEvent> saveChannel = serviceMediator.getStateHolder().getCategoryStore()
                 .save(bean.getId(), bean)
                 .thenReturn(new CategoryCreateEvent(client, new Category(serviceMediator, bean)));
 
-        return addChannelToGuild(serviceMediator.getStoreHolder().getGuildStore(), channel, guildId)
+        return addChannelToGuild(serviceMediator.getStateHolder().getGuildStore(), channel, guildId)
                 .then(saveChannel);
     }
 
@@ -131,17 +131,17 @@ class ChannelDispatchHandlers {
     }
 
     private static Mono<TextChannelDeleteEvent> textChannelDelete(DispatchContext<ChannelDelete> context) {
-        StoreHolder storeHolder = context.getServiceMediator().getStoreHolder();
+        StateHolder stateHolder = context.getServiceMediator().getStateHolder();
         DiscordClient client = context.getServiceMediator().getClient();
         GatewayChannelResponse channel = context.getDispatch().getChannel();
         long guildId = context.getDispatch().getGuildId();
         TextChannelBean bean = new TextChannelBean(channel, guildId);
 
-        Mono<TextChannelDeleteEvent> deleteChannel = storeHolder.getTextChannelStore()
+        Mono<TextChannelDeleteEvent> deleteChannel = stateHolder.getTextChannelStore()
                 .delete(bean.getId())
                 .thenReturn(new TextChannelDeleteEvent(client, new TextChannel(context.getServiceMediator(), bean)));
 
-        return removeChannelFromGuild(storeHolder.getGuildStore(), channel, guildId)
+        return removeChannelFromGuild(stateHolder.getGuildStore(), channel, guildId)
                 .then(deleteChannel);
     }
 
@@ -155,32 +155,32 @@ class ChannelDispatchHandlers {
     }
 
     private static Mono<VoiceChannelDeleteEvent> voiceChannelDelete(DispatchContext<ChannelDelete> context) {
-        StoreHolder storeHolder = context.getServiceMediator().getStoreHolder();
+        StateHolder stateHolder = context.getServiceMediator().getStateHolder();
         DiscordClient client = context.getServiceMediator().getClient();
         GatewayChannelResponse channel = context.getDispatch().getChannel();
         long guildId = context.getDispatch().getGuildId();
         VoiceChannelBean bean = new VoiceChannelBean(channel, guildId);
 
-        Mono<VoiceChannelDeleteEvent> deleteChannel = storeHolder.getVoiceChannelStore()
+        Mono<VoiceChannelDeleteEvent> deleteChannel = stateHolder.getVoiceChannelStore()
                 .delete(bean.getId())
                 .thenReturn(new VoiceChannelDeleteEvent(client, new VoiceChannel(context.getServiceMediator(), bean)));
 
-        return removeChannelFromGuild(storeHolder.getGuildStore(), channel, guildId)
+        return removeChannelFromGuild(stateHolder.getGuildStore(), channel, guildId)
                 .then(deleteChannel);
     }
 
     private static Mono<CategoryDeleteEvent> categoryDeleteEvent(DispatchContext<ChannelDelete> context) {
-        StoreHolder storeHolder = context.getServiceMediator().getStoreHolder();
+        StateHolder stateHolder = context.getServiceMediator().getStateHolder();
         DiscordClient client = context.getServiceMediator().getClient();
         GatewayChannelResponse channel = context.getDispatch().getChannel();
         long guildId = context.getDispatch().getGuildId();
         CategoryBean bean = new CategoryBean(channel, guildId);
 
-        Mono<CategoryDeleteEvent> deleteChannel = storeHolder.getCategoryStore()
+        Mono<CategoryDeleteEvent> deleteChannel = stateHolder.getCategoryStore()
                 .delete(bean.getId())
                 .thenReturn(new CategoryDeleteEvent(client, new Category(context.getServiceMediator(), bean)));
 
-        return removeChannelFromGuild(storeHolder.getGuildStore(), channel, guildId)
+        return removeChannelFromGuild(stateHolder.getGuildStore(), channel, guildId)
                 .then(deleteChannel);
     }
 
@@ -224,9 +224,9 @@ class ChannelDispatchHandlers {
         TextChannelBean bean = new TextChannelBean(channel, guildId);
         TextChannel current = new TextChannel(context.getServiceMediator(), bean);
 
-        Mono<Void> saveNew = serviceMediator.getStoreHolder().getTextChannelStore().save(bean.getId(), bean);
+        Mono<Void> saveNew = serviceMediator.getStateHolder().getTextChannelStore().save(bean.getId(), bean);
 
-        return serviceMediator.getStoreHolder().getTextChannelStore()
+        return serviceMediator.getStateHolder().getTextChannelStore()
                 .find(bean.getId())
                 .flatMap(saveNew::thenReturn)
                 .map(old -> new TextChannelUpdateEvent(client, current, new TextChannel(serviceMediator, old)))
@@ -241,9 +241,9 @@ class ChannelDispatchHandlers {
         VoiceChannelBean bean = new VoiceChannelBean(channel, guildId);
         VoiceChannel current = new VoiceChannel(context.getServiceMediator(), bean);
 
-        Mono<Void> saveNew = serviceMediator.getStoreHolder().getVoiceChannelStore().save(bean.getId(), bean);
+        Mono<Void> saveNew = serviceMediator.getStateHolder().getVoiceChannelStore().save(bean.getId(), bean);
 
-        return serviceMediator.getStoreHolder().getVoiceChannelStore()
+        return serviceMediator.getStateHolder().getVoiceChannelStore()
                 .find(bean.getId())
                 .flatMap(saveNew::thenReturn)
                 .map(old -> new VoiceChannelUpdateEvent(client, current, new VoiceChannel(serviceMediator, old)))
@@ -258,9 +258,9 @@ class ChannelDispatchHandlers {
         CategoryBean bean = new CategoryBean(channel, guildId);
         Category current = new Category(context.getServiceMediator(), bean);
 
-        Mono<Void> saveNew = serviceMediator.getStoreHolder().getCategoryStore().save(bean.getId(), bean);
+        Mono<Void> saveNew = serviceMediator.getStateHolder().getCategoryStore().save(bean.getId(), bean);
 
-        return serviceMediator.getStoreHolder().getCategoryStore()
+        return serviceMediator.getStateHolder().getCategoryStore()
                 .find(bean.getId())
                 .flatMap(saveNew::thenReturn)
                 .map(old -> new CategoryUpdateEvent(client, current, new Category(serviceMediator, old)))

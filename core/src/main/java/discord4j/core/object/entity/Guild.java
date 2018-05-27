@@ -384,7 +384,7 @@ public final class Guild implements Entity {
      * received, it is emitted through the {@code Flux}.
      */
     public Flux<VoiceState> getVoiceStates() {
-        return serviceMediator.getStoreHolder().getVoiceStateStore()
+        return serviceMediator.getStateHolder().getVoiceStateStore()
                 // With unsigned longs this gets everything in range 00..00 (inclusive) to 11..11 (exclusive)
                 .findInRange(LongLongTuple2.of(getId().asLong(), 0), LongLongTuple2.of(getId().asLong(), -1))
                 .map(bean -> new VoiceState(serviceMediator, bean));
@@ -444,7 +444,7 @@ public final class Guild implements Entity {
      * received, it is emitted through the {@code Flux}.
      */
     public Flux<Presence> getPresences() {
-        return serviceMediator.getStoreHolder().getPresenceStore()
+        return serviceMediator.getStateHolder().getPresenceStore()
                 // With unsigned longs this gets everything in range 00..00 (inclusive) to 11..11 (exclusive)
                 .findInRange(LongLongTuple2.of(getId().asLong(), 0), LongLongTuple2.of(getId().asLong(), -1))
                 .map(Presence::new);

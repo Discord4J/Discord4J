@@ -151,7 +151,7 @@ public final class Member extends User {
      * for this guild. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<VoiceState> getVoiceState() {
-        return getServiceMediator().getStoreHolder().getVoiceStateStore()
+        return getServiceMediator().getStateHolder().getVoiceStateStore()
                 .find(LongLongTuple2.of(getGuildId().asLong(), getId().asLong()))
                 .map(bean -> new VoiceState(getServiceMediator(), bean));
     }
@@ -163,7 +163,7 @@ public final class Member extends User {
      * this guild. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Presence> getPresence() {
-        return getServiceMediator().getStoreHolder().getPresenceStore()
+        return getServiceMediator().getStateHolder().getPresenceStore()
                 .find(LongLongTuple2.of(getGuildId().asLong(), getId().asLong()))
                 .map(Presence::new);
     }

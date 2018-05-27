@@ -197,13 +197,13 @@ public final class ClientBuilder {
                 new JacksonPayloadReader(mapper), new JacksonPayloadWriter(mapper),
                 retryOptions, token, identifyOptions);
 
-        final StoreHolder storeHolder = new StoreHolder(storeService);
+        final StateHolder stateHolder = new StateHolder(storeService);
         final RestClient restClient = new RestClient(new Router(httpClient));
         final ClientConfig config = new ClientConfig(token, identifyOptions.getShardIndex(),
                 identifyOptions.getShardCount());
         final EventDispatcher eventDispatcher = new EventDispatcher(eventProcessor, eventScheduler);
 
-        final ServiceMediator serviceMediator = new ServiceMediator(gatewayClient, restClient, storeHolder,
+        final ServiceMediator serviceMediator = new ServiceMediator(gatewayClient, restClient, stateHolder,
                 eventDispatcher, config);
 
         serviceMediator.getGatewayClient().dispatch()

@@ -39,11 +39,11 @@ class LifecycleDispatchHandlers {
                 .map(g -> new ReadyEvent.Guild(g.getId(), g.isUnavailable()))
                 .collect(Collectors.toSet());
 
-        Mono<Void> saveUser = context.getServiceMediator().getStoreHolder().getUserStore()
+        Mono<Void> saveUser = context.getServiceMediator().getStateHolder().getUserStore()
                 .save(context.getDispatch().getUser().getId(), userBean);
 
         Mono<Void> saveSelfId = Mono.fromRunnable(() ->
-                context.getServiceMediator().getStoreHolder().getSelfId().set(userBean.getId()));
+                context.getServiceMediator().getStateHolder().getSelfId().set(userBean.getId()));
 
         return saveUser
                 .then(saveSelfId)

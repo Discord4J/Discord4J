@@ -109,6 +109,11 @@ public class NoOpLongObjStore<V extends Serializable> implements LongObjStore<V>
     }
 
     @Override
+    public Mono<Void> invalidate() {
+        return Mono.empty();
+    }
+
+    @Override
     public Mono<Void> delete(LongObjTuple2<V> entry) {
         return Mono.empty();
     }

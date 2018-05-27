@@ -195,4 +195,12 @@ public interface Store<K extends Comparable<K>, V extends Serializable> {
     default Flux<Tuple2<K, V>> entries() {
         return keys().zipWith(values());
     }
+
+    /**
+     * Invalidates the contents of the store. Once this is invoked, there is no longer a guarantee that the
+     * data in the store is reliable.
+     *
+     * @return A mono which signals the completion of the invalidation of all values.
+     */
+    Mono<Void> invalidate();
 }

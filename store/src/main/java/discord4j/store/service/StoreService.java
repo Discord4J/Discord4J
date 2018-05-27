@@ -19,11 +19,18 @@ package discord4j.store.service;
 import discord4j.store.Store;
 import discord4j.store.noop.NoOpStoreService;
 import discord4j.store.primitive.LongObjStore;
+import reactor.core.publisher.Mono;
 
 import java.io.Serializable;
 
 /**
- * This represents a java service which provides stores.
+ * This represents a java service which provides stores. This can be loaded via
+ * {@link discord4j.store.service.StoreServiceLoader} or it may be loaded manually.
+ *
+ * Additionally, some common config options can be expected to be retrieved via environment variables:
+ * <ul>
+ *     <li>{@link discord4j.store.service.StoreService#MESSAGE_CLASS_VAR}</li>
+ * </ul>
  *
  * @see java.util.ServiceLoader
  * @see <a href="https://github.com/google/auto/tree/master/service">Google AutoService</a>
@@ -31,6 +38,13 @@ import java.io.Serializable;
  * @see NoOpStoreService
  */
 public interface StoreService {
+
+    /**
+     * This environment variable corresponds with the fully qualified name of the message bean. This can
+     * be useful since indefinitely storing messages over a long period of time can lead to
+     * {@link java.lang.OutOfMemoryError}s.
+     */
+    String MESSAGE_CLASS_VAR = "discord4j.MESSAGE_CLASS";
 
     /**
      * This is used to check if this service can provide generic stores.
@@ -49,7 +63,7 @@ public interface StoreService {
      * {@link Comparable} in order to allow for range operations.
      * @param <V> The value type, these follow
      * <a href="https://en.wikipedia.org/wiki/JavaBeans#JavaBean_conventions">JavaBean</a> conventions.
-     * @return A mono which provides a save instance.
+     * @return The instance of the store.
      */
     <K extends Comparable<K>, V extends Serializable> Store<K, V> provideGenericStore(Class<K> keyClass, Class<V>
             valueClass);
@@ -68,7 +82,22 @@ public interface StoreService {
      * @param valueClass The class of the values.
      * @param <V> The value type, these follow
      * <a href="https://en.wikipedia.org/wiki/JavaBeans#JavaBean_conventions">JavaBean</a> conventions.
-     * @return A mono which provides a save instance.
+     * @return The instance of the store.
      */
     <V extends Serializable> LongObjStore<V> provideLongObjStore(Class<V> valueClass);
+
+    /**
+     * This is a lifecycle method called to signal that a store should allocate any necessary resources.
+     *
+     * @return A mono, whose completion signals that resources have been allocated successfully.
+     */
+    Mono<Void> init();
+
+    /**
+     * This is a lifecycle method called to signal that a store should dispose of any resources due to
+     * an abrupt close (hard reconnect or disconnect).
+     *
+     * @return A mono, whose completion signals that resources have been released successfully.
+     */
+    Mono<Void> dispose();
 }

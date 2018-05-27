@@ -118,11 +118,11 @@ public final class DiscordClient {
      * supplied ID. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Channel> getChannelById(final Snowflake channelId) {
-        final Mono<CategoryBean> category = serviceMediator.getStoreHolder().getCategoryStore()
+        final Mono<CategoryBean> category = serviceMediator.getStateHolder().getCategoryStore()
                 .find(channelId.asLong());
-        final Mono<TextChannelBean> textChannel = serviceMediator.getStoreHolder().getTextChannelStore()
+        final Mono<TextChannelBean> textChannel = serviceMediator.getStateHolder().getTextChannelStore()
                 .find(channelId.asLong());
-        final Mono<VoiceChannelBean> voiceChannel = serviceMediator.getStoreHolder().getVoiceChannelStore()
+        final Mono<VoiceChannelBean> voiceChannel = serviceMediator.getStateHolder().getVoiceChannelStore()
                 .find(channelId.asLong());
 
         final Mono<ChannelBean> rest = serviceMediator.getRestClient().getChannelService()
@@ -144,7 +144,7 @@ public final class DiscordClient {
      * ID. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Guild> getGuildById(final Snowflake guildId) {
-        return serviceMediator.getStoreHolder().getGuildStore()
+        return serviceMediator.getStateHolder().getGuildStore()
                 .find(guildId.asLong())
                 .cast(BaseGuildBean.class)
                 .switchIfEmpty(serviceMediator.getRestClient().getGuildService()
@@ -162,7 +162,7 @@ public final class DiscordClient {
      * supplied IDs. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<GuildEmoji> getGuildEmojiById(final Snowflake guildId, final Snowflake emojiId) {
-        return serviceMediator.getStoreHolder().getGuildEmojiStore()
+        return serviceMediator.getStateHolder().getGuildEmojiStore()
                 .find(emojiId.asLong())
                 .switchIfEmpty(serviceMediator.getRestClient().getEmojiService()
                         .getGuildEmoji(guildId.asLong(), emojiId.asLong())
@@ -179,7 +179,7 @@ public final class DiscordClient {
      * IDs. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Member> getMemberById(final Snowflake guildId, final Snowflake userId) {
-        final Mono<MemberBean> member = serviceMediator.getStoreHolder().getMemberStore()
+        final Mono<MemberBean> member = serviceMediator.getStateHolder().getMemberStore()
                 .find(LongLongTuple2.of(guildId.asLong(), userId.asLong()))
                 .switchIfEmpty(serviceMediator.getRestClient().getGuildService()
                         .getGuildMember(guildId.asLong(), userId.asLong())
@@ -198,7 +198,7 @@ public final class DiscordClient {
      * supplied IDs. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Message> getMessageById(final Snowflake channelId, final Snowflake messageId) {
-        return serviceMediator.getStoreHolder().getMessageStore()
+        return serviceMediator.getStateHolder().getMessageStore()
                 .find(messageId.asLong())
                 .switchIfEmpty(serviceMediator.getRestClient().getChannelService()
                         .getMessage(channelId.asLong(), messageId.asLong())
@@ -215,7 +215,7 @@ public final class DiscordClient {
      * IDs. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Role> getRoleById(final Snowflake guildId, final Snowflake roleId) {
-        return serviceMediator.getStoreHolder().getRoleStore()
+        return serviceMediator.getStateHolder().getRoleStore()
                 .find(roleId.asLong())
                 .switchIfEmpty(serviceMediator.getRestClient().getGuildService()
                         .getGuildRoles(guildId.asLong())
@@ -273,7 +273,7 @@ public final class DiscordClient {
         final Function<Map<String, Object>, Flux<UserGuildResponse>> makeRequest = params ->
                 serviceMediator.getRestClient().getUserService().getCurrentUserGuilds(params);
 
-        return serviceMediator.getStoreHolder().getGuildStore()
+        return serviceMediator.getStateHolder().getGuildStore()
                 .values()
                 .cast(BaseGuildBean.class)
                 .switchIfEmpty(PaginationUtil.paginateAfter(makeRequest, UserGuildResponse::getId, 0L, 100)
@@ -302,7 +302,7 @@ public final class DiscordClient {
      * received, it is emitted through the {@code Mono}.
      */
     public Mono<User> getSelf() {
-        final long selfId = serviceMediator.getStoreHolder().getSelfId().get();
+        final long selfId = serviceMediator.getStateHolder().getSelfId().get();
         return Mono.just(selfId)
                 .filter(it -> it != 0)
                 .map(Snowflake::of)
@@ -400,7 +400,7 @@ public final class DiscordClient {
      * supplied ID. If an error is received, it is emitted through the {@code Mono}.
      */
     private Mono<UserBean> getUserBean(final Snowflake userId) {
-        return serviceMediator.getStoreHolder().getUserStore()
+        return serviceMediator.getStateHolder().getUserStore()
                 .find(userId.asLong())
                 .switchIfEmpty(serviceMediator.getRestClient().getUserService()
                         .getUser(userId.asLong())

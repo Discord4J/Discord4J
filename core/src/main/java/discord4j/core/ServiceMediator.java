@@ -19,21 +19,30 @@ package discord4j.core;
 import discord4j.core.event.EventDispatcher;
 import discord4j.gateway.GatewayClient;
 import discord4j.rest.RestClient;
+import discord4j.store.service.StoreService;
 
 public final class ServiceMediator {
 
+    static {
+        System.setProperty(discord4j.store.service.StoreService.MESSAGE_CLASS_VAR,
+                discord4j.core.object.data.stored.MessageBean.class.getCanonicalName());
+    }
+
     private final GatewayClient gatewayClient;
     private final RestClient restClient;
-    private final StoreHolder storeHolder;
+    private final StoreService storeService;
+    private final StateHolder stateHolder;
     private final EventDispatcher eventDispatcher;
     private final DiscordClient discordClient;
     private final ClientConfig clientConfig;
 
-    ServiceMediator(final GatewayClient gatewayClient, final RestClient restClient, final StoreHolder storeHolder,
-                    final EventDispatcher eventDispatcher, final ClientConfig clientConfig) {
+    ServiceMediator(final GatewayClient gatewayClient, final RestClient restClient, final StoreService storeService,
+                    final StateHolder stateHolder, final EventDispatcher eventDispatcher,
+                    final ClientConfig clientConfig) {
         this.gatewayClient = gatewayClient;
         this.restClient = restClient;
-        this.storeHolder = storeHolder;
+        this.storeService = storeService;
+        this.stateHolder = stateHolder;
         this.eventDispatcher = eventDispatcher;
         discordClient = new DiscordClient(this);
         this.clientConfig = clientConfig;
@@ -47,8 +56,12 @@ public final class ServiceMediator {
         return restClient;
     }
 
-    public StoreHolder getStoreHolder() {
-        return storeHolder;
+    public StoreService getStoreService() {
+        return storeService;
+    }
+
+    public StateHolder getStateHolder() {
+        return stateHolder;
     }
 
     public EventDispatcher getEventDispatcher() {

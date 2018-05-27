@@ -21,11 +21,12 @@ import discord4j.store.Store;
 import discord4j.store.primitive.LongObjStore;
 import discord4j.store.service.StoreService;
 import discord4j.store.util.LongLongTuple2;
+import reactor.core.publisher.Mono;
 
 import java.util.concurrent.atomic.AtomicLong;
 
-/** Holder for {@link Store} instances for use in caching. */
-public final class StoreHolder {
+/** Holder for various pieces of state for use in caching. */
+public final class StateHolder {
 
     private final LongObjStore<CategoryBean> categoryStore;
     private final LongObjStore<GuildBean> guildStore;
@@ -40,7 +41,7 @@ public final class StoreHolder {
     private final Store<LongLongTuple2, VoiceStateBean> voiceStateStore;
     private final AtomicLong selfId;
 
-    StoreHolder(final StoreService service) {
+    StateHolder(final StoreService service) {
         categoryStore = service.provideLongObjStore(CategoryBean.class);
         guildStore = service.provideLongObjStore(GuildBean.class);
         guildEmojiStore = service.provideLongObjStore(GuildEmojiBean.class);
@@ -101,5 +102,19 @@ public final class StoreHolder {
 
     public AtomicLong getSelfId() {
         return selfId;
+    }
+
+    public Mono<Void> invalidateStores() {
+        return categoryStore.invalidate()
+                .and(guildStore.invalidate())
+                .and(guildEmojiStore.invalidate())
+                .and(memberStore.invalidate())
+                .and(messageStore.invalidate())
+                .and(presenceStore.invalidate())
+                .and(roleStore.invalidate())
+                .and(textChannelStore.invalidate())
+                .and(userStore.invalidate())
+                .and(voiceChannelStore.invalidate())
+                .and(voiceStateStore.invalidate());
     }
 }

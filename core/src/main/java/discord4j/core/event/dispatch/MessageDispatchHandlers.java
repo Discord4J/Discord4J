@@ -43,7 +43,7 @@ class MessageDispatchHandlers {
         MessageBean bean = new MessageBean(context.getDispatch());
         Message message = new Message(context.getServiceMediator(), bean);
 
-        Mono<Void> saveMessage = context.getServiceMediator().getStoreHolder().getMessageStore()
+        Mono<Void> saveMessage = context.getServiceMediator().getStateHolder().getMessageStore()
                 .save(bean.getId(), bean);
 
         return saveMessage
@@ -55,7 +55,7 @@ class MessageDispatchHandlers {
         long messageId = context.getDispatch().getId();
         long channelId = context.getDispatch().getChannelId();
 
-        Mono<Void> deleteMessage = context.getServiceMediator().getStoreHolder().getMessageStore()
+        Mono<Void> deleteMessage = context.getServiceMediator().getStateHolder().getMessageStore()
                 .delete(context.getDispatch().getId());
 
         return deleteMessage
@@ -68,7 +68,7 @@ class MessageDispatchHandlers {
         long channelId = context.getDispatch().getChannelId();
         long guildId = context.getDispatch().getGuildId();
 
-        Mono<Void> deleteMessages = context.getServiceMediator().getStoreHolder().getMessageStore()
+        Mono<Void> deleteMessages = context.getServiceMediator().getStateHolder().getMessageStore()
                 .delete(Flux.fromArray(ArrayUtil.toObject(context.getDispatch().getIds())));
 
         return deleteMessages
@@ -87,10 +87,10 @@ class MessageDispatchHandlers {
         long channelId = context.getDispatch().getChannelId();
         long messageId = context.getDispatch().getMessageId();
 
-        Mono<Void> addToMessage = context.getServiceMediator().getStoreHolder().getMessageStore()
+        Mono<Void> addToMessage = context.getServiceMediator().getStateHolder().getMessageStore()
                 .find(messageId)
                 .doOnNext(bean -> {
-                    boolean me = context.getServiceMediator().getStoreHolder().getSelfId().get() == userId;
+                    boolean me = context.getServiceMediator().getStateHolder().getSelfId().get() == userId;
 
                     if (bean.getReactions() == null) {
                         ReactionBean r = new ReactionBean(1, me, emojiId, emojiName, emojiAnimated);
@@ -115,7 +115,7 @@ class MessageDispatchHandlers {
                     }
                 })
                 .flatMap(bean ->
-                        context.getServiceMediator().getStoreHolder().getMessageStore().save(bean.getId(), bean));
+                        context.getServiceMediator().getStateHolder().getMessageStore().save(bean.getId(), bean));
 
         ReactionEmoji emoji = ReactionEmoji.of(emojiId, emojiName, emojiAnimated);
         return addToMessage.thenReturn(new ReactionAddEvent(client, userId, channelId, messageId, emoji));
@@ -134,7 +134,7 @@ class MessageDispatchHandlers {
         long channelId = context.getDispatch().getChannelId();
         long messageId = context.getDispatch().getMessageId();
 
-        Mono<Void> removeFromMessage = context.getServiceMediator().getStoreHolder().getMessageStore()
+        Mono<Void> removeFromMessage = context.getServiceMediator().getStateHolder().getMessageStore()
                 .find(messageId)
                 .doOnNext(bean -> {
                     int i;
@@ -152,13 +152,13 @@ class MessageDispatchHandlers {
                     } else {
                         existing.setCount(existing.getCount() - 1);
 
-                        if (context.getServiceMediator().getStoreHolder().getSelfId().get() == userId) {
+                        if (context.getServiceMediator().getStateHolder().getSelfId().get() == userId) {
                             existing.setMe(false);
                         }
                     }
                 })
                 .flatMap(bean ->
-                        context.getServiceMediator().getStoreHolder().getMessageStore().save(bean.getId(), bean));
+                        context.getServiceMediator().getStateHolder().getMessageStore().save(bean.getId(), bean));
 
         ReactionEmoji emoji = ReactionEmoji.of(emojiId, emojiName, emojiAnimated);
         return removeFromMessage.thenReturn(new ReactionRemoveEvent(client, userId, channelId, messageId, emoji));
@@ -169,11 +169,11 @@ class MessageDispatchHandlers {
         long channelId = context.getDispatch().getChannelId();
         long messageId = context.getDispatch().getMessageId();
 
-        Mono<Void> removeAllFromMessage = context.getServiceMediator().getStoreHolder().getMessageStore()
+        Mono<Void> removeAllFromMessage = context.getServiceMediator().getStateHolder().getMessageStore()
                 .find(messageId)
                 .doOnNext(bean -> bean.setReactions(null))
                 .flatMap(bean ->
-                        context.getServiceMediator().getStoreHolder().getMessageStore().save(bean.getId(), bean));
+                        context.getServiceMediator().getStateHolder().getMessageStore().save(bean.getId(), bean));
 
         return removeAllFromMessage.thenReturn(new ReactionRemoveAllEvent(client, channelId, messageId));
     }
@@ -202,7 +202,7 @@ class MessageDispatchHandlers {
                 .map(bean -> new Embed(context.getServiceMediator(), bean))
                 .collect(Collectors.toList());
 
-        Mono<MessageUpdateEvent> update = context.getServiceMediator().getStoreHolder().getMessageStore()
+        Mono<MessageUpdateEvent> update = context.getServiceMediator().getStateHolder().getMessageStore()
                 .find(messageId)
                 .flatMap(oldBean -> {
                     // updating the content and embed of the bean in the store
@@ -215,7 +215,7 @@ class MessageDispatchHandlers {
                     MessageUpdateEvent event = new MessageUpdateEvent(client, messageId, channelId, guildId, old,
                             contentChanged, currentContent, embedsChanged, embedList);
 
-                    return context.getServiceMediator().getStoreHolder().getMessageStore()
+                    return context.getServiceMediator().getStateHolder().getMessageStore()
                             .save(newBean.getId(), newBean)
                             .thenReturn(event);
                 });
