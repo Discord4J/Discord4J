@@ -39,13 +39,17 @@ class LifecycleDispatchHandlers {
                 .map(g -> new ReadyEvent.Guild(g.getId(), g.isUnavailable()))
                 .collect(Collectors.toSet());
 
+        //FIXME: This should be placed on disconnects, not on ready
+        Mono<Void> invalidateStores = context.getServiceMediator().getStateHolder().invalidateStores();
+
         Mono<Void> saveUser = context.getServiceMediator().getStateHolder().getUserStore()
                 .save(context.getDispatch().getUser().getId(), userBean);
 
         Mono<Void> saveSelfId = Mono.fromRunnable(() ->
                 context.getServiceMediator().getStateHolder().getSelfId().set(userBean.getId()));
 
-        return saveUser
+        return invalidateStores
+                .then(saveUser)
                 .then(saveSelfId)
                 .thenReturn(new ReadyEvent(context.getServiceMediator().getClient(), dispatch.getVersion(), self,
                         guilds, dispatch.getSessionId(), dispatch.getTrace()));
