@@ -203,8 +203,8 @@ public final class ClientBuilder {
                 identifyOptions.getShardCount());
         final EventDispatcher eventDispatcher = new EventDispatcher(eventProcessor, eventScheduler);
 
-        final ServiceMediator serviceMediator = new ServiceMediator(gatewayClient, restClient, stateHolder,
-                eventDispatcher, config);
+        final ServiceMediator serviceMediator = new ServiceMediator(gatewayClient, restClient, storeService,
+                stateHolder, eventDispatcher, config);
 
         serviceMediator.getGatewayClient().dispatch()
                 .map(dispatch -> DispatchContext.of(dispatch, serviceMediator))

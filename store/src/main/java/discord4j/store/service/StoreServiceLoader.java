@@ -20,6 +20,7 @@ import discord4j.store.Store;
 import discord4j.store.noop.NoOpStoreService;
 import discord4j.store.primitive.ForwardingStoreService;
 import discord4j.store.primitive.LongObjStore;
+import reactor.core.publisher.Mono;
 
 import java.io.Serializable;
 import java.util.LinkedList;
@@ -142,6 +143,16 @@ public class StoreServiceLoader {
         @Override
         public <V extends Serializable> LongObjStore<V> provideLongObjStore(Class<V> valueClass) {
             return primitiveService.provideLongObjStore(valueClass);
+        }
+
+        @Override
+        public Mono<Void> init() {
+            return genericService.init().and(primitiveService.init());
+        }
+
+        @Override
+        public Mono<Void> dispose() {
+            return genericService.dispose().and(primitiveService.dispose());
         }
     }
 }

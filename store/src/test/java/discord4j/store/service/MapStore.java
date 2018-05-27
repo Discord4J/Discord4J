@@ -40,11 +40,6 @@ public class MapStore<K extends Comparable<K>, V extends Serializable> implement
     }
 
     @Override
-    public Mono<Void> save(Iterable<Tuple2<K, V>> entries) {
-        return Flux.fromIterable(entries).flatMap(tuple -> save(tuple.getT1(), tuple.getT2())).then();
-    }
-
-    @Override
     public Mono<Void> save(Publisher<Tuple2<K, V>> entryStream) {
         return Flux.from(entryStream).flatMap(tuple -> save(tuple.getT1(), tuple.getT2())).then();
     }
@@ -52,26 +47,6 @@ public class MapStore<K extends Comparable<K>, V extends Serializable> implement
     @Override
     public Mono<V> find(K id) {
         return Mono.defer(() -> Mono.just(map.get(id)));
-    }
-
-    @Override
-    public Mono<Boolean> exists(K id) {
-        return Mono.defer(() -> Mono.just(map.containsKey(id)));
-    }
-
-    @Override
-    public Mono<Boolean> exists(Publisher<K> ids) {
-        return Flux.from(ids).all(map::containsKey);
-    }
-
-    @Override
-    public Flux<V> findAll(Iterable<K> ids) {
-        return Flux.defer(() -> Flux.fromIterable(ids)).map(map::get);
-    }
-
-    @Override
-    public Flux<V> findAll(Publisher<K> ids) {
-        return Flux.from(ids).map(map::get);
     }
 
     @Override
@@ -101,30 +76,12 @@ public class MapStore<K extends Comparable<K>, V extends Serializable> implement
     }
 
     @Override
-    public Mono<Void> delete(Tuple2<K, V> entry) {
-        return Mono.defer(() -> {
-            map.remove(entry.getT1(), entry.getT2());
-            return Mono.empty();
-        });
-    }
-
-    @Override
     public Mono<Void> deleteInRange(K start, K end) {
         WithinRangePredicate<K> predicate = new WithinRangePredicate<>(start, end);
         return Flux.defer(() -> Flux.fromIterable(map.keySet()))
                 .filter(predicate)
                 .doOnNext(map::remove)
                 .then();
-    }
-
-    @Override
-    public Mono<Void> deleteAll(Iterable<Tuple2<K, V>> entries) {
-        return Flux.fromIterable(entries).doOnNext(entry -> map.remove(entry.getT1(), entry.getT2())).then();
-    }
-
-    @Override
-    public Mono<Void> deleteAll(Publisher<Tuple2<K, V>> entries) {
-        return Flux.from(entries).doOnNext(entry -> map.remove(entry.getT1(), entry.getT2())).then();
     }
 
     @Override
@@ -143,5 +100,10 @@ public class MapStore<K extends Comparable<K>, V extends Serializable> implement
     @Override
     public Flux<V> values() {
         return Flux.defer(() -> Flux.fromIterable(map.values()));
+    }
+
+    @Override
+    public Mono<Void> invalidate() {
+        return Mono.empty();
     }
 }

@@ -19,6 +19,7 @@ package discord4j.store.service;
 import com.google.auto.service.AutoService;
 import discord4j.store.Store;
 import discord4j.store.primitive.LongObjStore;
+import reactor.core.publisher.Mono;
 
 import java.io.Serializable;
 
@@ -44,5 +45,15 @@ public class TestService implements StoreService {
     @Override
     public <V extends Serializable> LongObjStore<V> provideLongObjStore(Class<V> valueClass) {
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Mono<Void> init() {
+        return Mono.empty();
+    }
+
+    @Override
+    public Mono<Void> dispose() {
+        return Mono.empty();
     }
 }
