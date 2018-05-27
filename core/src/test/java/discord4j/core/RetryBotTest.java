@@ -61,9 +61,7 @@ public class RetryBotTest {
     @Test
     @Ignore("Example code excluded from CI")
     public void test() {
-        IdentifyOptions options = new IdentifyOptions(shardIndex, shardCount, initialStatus);
-        options.setShardIndex(shardId);
-        options.setShardCount(shardCount);
+        IdentifyOptions options = new IdentifyOptions(shardId, shardCount, null);
 
         try {
             Path path = Paths.get("resume.dat");
@@ -112,9 +110,7 @@ public class RetryBotTest {
     @Test
     @Ignore("Example code excluded from CI")
     public void testNoCommands() {
-        IdentifyOptions options = new IdentifyOptions(shardIndex, shardCount, initialStatus);
-        options.setShardIndex(shardId);
-        options.setShardCount(shardCount);
+        IdentifyOptions options = new IdentifyOptions(shardId, shardCount, null);
 
         DiscordClient client = new ClientBuilder(token)
                 .setIdentifyOptions(options)
