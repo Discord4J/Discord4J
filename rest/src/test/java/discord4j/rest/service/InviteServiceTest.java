@@ -29,6 +29,7 @@ import discord4j.rest.http.client.SimpleHttpClient;
 import discord4j.rest.request.Router;
 import discord4j.rest.route.Routes;
 import org.junit.Test;
+import reactor.core.scheduler.Schedulers;
 
 public class InviteServiceTest {
 
@@ -55,7 +56,7 @@ public class InviteServiceTest {
                 .writerStrategy(new EmptyWriterStrategy())
                 .build();
 
-        Router router = new Router(httpClient);
+        Router router = new Router(httpClient, Schedulers.elastic());
 
         return inviteService = new InviteService(router);
     }

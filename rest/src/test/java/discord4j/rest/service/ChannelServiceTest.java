@@ -31,6 +31,7 @@ import discord4j.rest.util.MultipartRequest;
 import io.netty.buffer.ByteBufInputStream;
 import io.netty.buffer.Unpooled;
 import org.junit.Test;
+import reactor.core.scheduler.Schedulers;
 import reactor.ipc.netty.http.client.HttpClientRequest;
 
 import java.io.IOException;
@@ -72,7 +73,7 @@ public class ChannelServiceTest {
                 .writerStrategy(new EmptyWriterStrategy())
                 .build();
 
-        Router router = new Router(httpClient);
+        Router router = new Router(httpClient, Schedulers.elastic());
 
         return channelService = new ChannelService(router);
     }

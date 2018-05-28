@@ -58,7 +58,7 @@ public class RouterTest {
                 .writerStrategy(new JacksonWriterStrategy(mapper))
                 .build();
 
-        Router router = new Router(httpClient);
+        Router router = new Router(httpClient, Schedulers.elastic());
 
         MessageCreateRequest body = new MessageCreateRequest("hello at" + Instant.now(), null, false, null);
 
@@ -86,7 +86,7 @@ public class RouterTest {
                 .writerStrategy(new JacksonWriterStrategy(mapper))
                 .build();
 
-        Router router = new Router(httpClient);
+        Router router = new Router(httpClient, Schedulers.elastic());
 
         for (int i = 0; i < 10; i++) {
             final int a = i;
@@ -117,7 +117,7 @@ public class RouterTest {
                 .writerStrategy(new JacksonWriterStrategy(mapper))
                 .build();
 
-        Router router = new Router(httpClient);
+        Router router = new Router(httpClient, Schedulers.elastic());
 
         MessageCreateRequest body = new MessageCreateRequest("hi", null, false, null);
 
@@ -146,7 +146,7 @@ public class RouterTest {
                 .writerStrategy(new JacksonWriterStrategy(mapper))
                 .build();
 
-        Router router = new Router(httpClient);
+        Router router = new Router(httpClient, Schedulers.elastic());
         Scheduler thread = Schedulers.single();
 
         for (int i = 0; i < 6; i++) {
@@ -181,7 +181,7 @@ public class RouterTest {
                 .writerStrategy(new JacksonWriterStrategy(mapper))
                 .build();
 
-        Router router = new Router(httpClient);
+        Router router = new Router(httpClient, Schedulers.elastic());
 
         MessageCreateRequest body0 = new MessageCreateRequest("hi 0 at" + Instant.now(), null, false, null);
 

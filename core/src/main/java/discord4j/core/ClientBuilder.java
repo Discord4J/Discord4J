@@ -191,7 +191,7 @@ public final class ClientBuilder {
                 retryOptions, token, identifyOptions);
 
         final StateHolder stateHolder = new StateHolder(storeService);
-        final RestClient restClient = new RestClient(new Router(httpClient));
+        final RestClient restClient = new RestClient(new Router(httpClient, Schedulers.elastic())); // TODO parametrize
         final ClientConfig config = new ClientConfig(token, identifyOptions.getShardIndex(),
                 identifyOptions.getShardCount());
         final EventDispatcher eventDispatcher = new EventDispatcher(eventProcessor, eventScheduler);

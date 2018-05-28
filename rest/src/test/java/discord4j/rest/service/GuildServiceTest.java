@@ -31,6 +31,7 @@ import discord4j.rest.request.Router;
 import discord4j.rest.route.Routes;
 import org.junit.Before;
 import org.junit.Test;
+import reactor.core.scheduler.Schedulers;
 
 import java.util.Collections;
 
@@ -60,7 +61,7 @@ public class GuildServiceTest {
                 .writerStrategy(new EmptyWriterStrategy())
                 .build();
 
-        Router router = new Router(httpClient);
+        Router router = new Router(httpClient, Schedulers.elastic());
         guildService = new GuildService(router);
         channelService = new ChannelService(router);
     }

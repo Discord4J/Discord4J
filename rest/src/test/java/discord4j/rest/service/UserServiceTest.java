@@ -33,6 +33,7 @@ import discord4j.rest.json.request.UserModifyRequest;
 import discord4j.rest.request.Router;
 import discord4j.rest.route.Routes;
 import org.junit.Test;
+import reactor.core.scheduler.Schedulers;
 
 import java.util.Collections;
 
@@ -61,7 +62,7 @@ public class UserServiceTest {
                 .writerStrategy(new EmptyWriterStrategy())
                 .build();
 
-        Router router = new Router(httpClient);
+        Router router = new Router(httpClient, Schedulers.elastic());
 
         return userService = new UserService(router);
     }
