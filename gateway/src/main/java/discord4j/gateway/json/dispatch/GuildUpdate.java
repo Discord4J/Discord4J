@@ -72,7 +72,7 @@ public class GuildUpdate implements Dispatch {
     @Nullable
     @UnsignedJson
     private Long afkChannelId;
-    @JsonProperty
+    @JsonProperty("guild_id")
     @UnsignedJson
     private long guildId;
 
