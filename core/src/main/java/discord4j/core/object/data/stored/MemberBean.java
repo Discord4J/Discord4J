@@ -18,6 +18,7 @@ package discord4j.core.object.data.stored;
 
 import discord4j.common.json.GuildMemberResponse;
 import discord4j.gateway.json.dispatch.GuildMemberUpdate;
+import discord4j.gateway.json.dispatch.MessageCreate;
 
 import javax.annotation.Nullable;
 import java.io.Serializable;
@@ -37,10 +38,16 @@ public final class MemberBean implements Serializable {
         joinedAt = response.getJoinedAt();
     }
 
-    public MemberBean(MemberBean toCopy, GuildMemberUpdate update) {
-        this.nick = update.getNick();
-        this.roles = update.getRoles();
-        this.joinedAt = toCopy.getJoinedAt();
+    public MemberBean(final MessageCreate.MessageMember member) {
+        nick = member.getNick();
+        roles = member.getRoles();
+        joinedAt = member.getJoinedAt();
+    }
+
+    public MemberBean(final MemberBean toCopy, final GuildMemberUpdate update) {
+        nick = update.getNick();
+        roles = update.getRoles();
+        joinedAt = toCopy.getJoinedAt();
     }
 
     public MemberBean() {}

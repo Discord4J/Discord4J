@@ -21,9 +21,12 @@ import discord4j.common.json.EmbedResponse;
 import discord4j.core.DiscordClient;
 import discord4j.core.event.domain.message.*;
 import discord4j.core.object.Embed;
+import discord4j.core.object.data.stored.MemberBean;
 import discord4j.core.object.data.stored.MessageBean;
 import discord4j.core.object.data.stored.ReactionBean;
+import discord4j.core.object.data.stored.UserBean;
 import discord4j.core.object.data.stored.embed.EmbedBean;
+import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.reaction.ReactionEmoji;
 import discord4j.core.util.ArrayUtil;
@@ -40,14 +43,21 @@ class MessageDispatchHandlers {
 
     static Mono<MessageCreateEvent> messageCreate(DispatchContext<MessageCreate> context) {
         DiscordClient client = context.getServiceMediator().getClient();
+
         MessageBean bean = new MessageBean(context.getDispatch());
         Message message = new Message(context.getServiceMediator(), bean);
+
+        long guildId = context.getDispatch().getGuildId();
+
+        UserBean authorUser = new UserBean(context.getDispatch().getAuthor());
+        MemberBean authorMember = new MemberBean(context.getDispatch().getMember());
+        Member member = new Member(context.getServiceMediator(), authorMember, authorUser, guildId);
 
         Mono<Void> saveMessage = context.getServiceMediator().getStateHolder().getMessageStore()
                 .save(bean.getId(), bean);
 
         return saveMessage
-                .thenReturn(new MessageCreateEvent(client, message));
+                .thenReturn(new MessageCreateEvent(client, message, guildId, member));
     }
 
     static Mono<MessageDeleteEvent> messageDelete(DispatchContext<MessageDelete> context) {

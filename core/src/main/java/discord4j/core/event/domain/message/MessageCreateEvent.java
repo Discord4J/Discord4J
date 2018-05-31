@@ -17,18 +17,32 @@
 package discord4j.core.event.domain.message;
 
 import discord4j.core.DiscordClient;
+import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Message;
+import discord4j.core.object.util.Snowflake;
 
 public class MessageCreateEvent extends MessageEvent {
 
     private final Message message;
+    private final long guildId;
+    private final Member member;
 
-    public MessageCreateEvent(DiscordClient client, Message message) {
+    public MessageCreateEvent(DiscordClient client, Message message, long guildId, Member member) {
         super(client);
         this.message = message;
+        this.guildId = guildId;
+        this.member = member;
     }
 
     public Message getMessage() {
         return message;
+    }
+
+    public Snowflake getGuildId() {
+        return Snowflake.of(guildId);
+    }
+
+    public Member getMember() {
+        return member;
     }
 }
