@@ -38,6 +38,7 @@ public class MessageCreate implements Dispatch {
     private long[] mentionRoles;
     @JsonProperty("mention_everyone")
     private boolean mentionEveryone;
+    @Nullable
     private MessageMember member;
     @UnsignedJson
     private long id;
@@ -53,8 +54,9 @@ public class MessageCreate implements Dispatch {
     private UserResponse author;
     private AttachmentResponse[] attachments;
     @JsonProperty("guild_id")
+    @Nullable
     @UnsignedJson
-    private long guildId;
+    private Long guildId;
     @JsonProperty("webhook_id")
     @Nullable
     @UnsignedJson
@@ -96,6 +98,7 @@ public class MessageCreate implements Dispatch {
         return mentionEveryone;
     }
 
+    @Nullable
     public MessageMember getMember() {
         return member;
     }
@@ -130,7 +133,8 @@ public class MessageCreate implements Dispatch {
         return attachments;
     }
 
-    public long getGuildId() {
+    @Nullable
+    public Long getGuildId() {
         return guildId;
     }
 
@@ -250,6 +254,8 @@ public class MessageCreate implements Dispatch {
         @Nullable
         private String avatar;
         private MessageMember member;
+        @Nullable
+        private Boolean bot;
 
         public String getUsername() {
             return username;
@@ -268,6 +274,15 @@ public class MessageCreate implements Dispatch {
             return avatar;
         }
 
+        public MessageMember getMember() {
+            return member;
+        }
+
+        @Nullable
+        public Boolean getBot() {
+            return bot;
+        }
+
         @Override
         public String toString() {
             return "Mention{" +
@@ -276,11 +291,8 @@ public class MessageCreate implements Dispatch {
                     ", discriminator='" + discriminator + '\'' +
                     ", avatar='" + avatar + '\'' +
                     ", member=" + member +
+                    ", bot=" + bot +
                     '}';
-        }
-
-        public MessageMember getMember() {
-            return member;
         }
     }
 

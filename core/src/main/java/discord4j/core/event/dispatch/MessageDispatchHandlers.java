@@ -47,11 +47,15 @@ class MessageDispatchHandlers {
         MessageBean bean = new MessageBean(context.getDispatch());
         Message message = new Message(context.getServiceMediator(), bean);
 
-        long guildId = context.getDispatch().getGuildId();
+        Long guildId = context.getDispatch().getGuildId();
+        MessageCreate.MessageMember memberResponse = context.getDispatch().getMember();
+        Member member = null;
 
-        UserBean authorUser = new UserBean(context.getDispatch().getAuthor());
-        MemberBean authorMember = new MemberBean(context.getDispatch().getMember());
-        Member member = new Member(context.getServiceMediator(), authorMember, authorUser, guildId);
+        if (guildId != null && memberResponse != null) {
+            UserBean authorUser = new UserBean(context.getDispatch().getAuthor());
+            MemberBean authorMember = new MemberBean(context.getDispatch().getMember());
+            member = new Member(context.getServiceMediator(), authorMember, authorUser, guildId);
+        }
 
         Mono<Void> saveMessage = context.getServiceMediator().getStateHolder().getMessageStore()
                 .save(bean.getId(), bean);

@@ -21,13 +21,18 @@ import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.util.Snowflake;
 
+import javax.annotation.Nullable;
+import java.util.Optional;
+
 public class MessageCreateEvent extends MessageEvent {
 
     private final Message message;
-    private final long guildId;
+    @Nullable
+    private final Long guildId;
+    @Nullable
     private final Member member;
 
-    public MessageCreateEvent(DiscordClient client, Message message, long guildId, Member member) {
+    public MessageCreateEvent(DiscordClient client, Message message, @Nullable Long guildId, @Nullable Member member) {
         super(client);
         this.message = message;
         this.guildId = guildId;
@@ -38,11 +43,11 @@ public class MessageCreateEvent extends MessageEvent {
         return message;
     }
 
-    public Snowflake getGuildId() {
-        return Snowflake.of(guildId);
+    public Optional<Snowflake> getGuildId() {
+        return Optional.ofNullable(guildId).map(Snowflake::of);
     }
 
-    public Member getMember() {
-        return member;
+    public Optional<Member> getMember() {
+        return Optional.ofNullable(member);
     }
 }
