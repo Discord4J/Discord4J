@@ -21,7 +21,8 @@ import discord4j.common.jackson.UnsignedJson;
 
 import javax.annotation.Nullable;
 
-@JsonIgnoreProperties(value = {"verified", "mfa_enabled", "flags", "email", "token"})
+// FIXME: temporary solution to these many optional fields
+@JsonIgnoreProperties(value = {"verified", "mfa_enabled", "flags", "email", "token", "locale"})
 public class UserResponse {
 
     @UnsignedJson
