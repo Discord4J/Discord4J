@@ -22,6 +22,7 @@ import discord4j.rest.util.MultipartRequest;
 
 import javax.annotation.Nullable;
 import java.io.InputStream;
+import java.util.function.Consumer;
 
 public class MessageCreateSpec implements Spec<MultipartRequest> {
 
@@ -42,6 +43,12 @@ public class MessageCreateSpec implements Spec<MultipartRequest> {
     public MessageCreateSpec setNonce(String nonce) {
         this.nonce = nonce;
         return this;
+    }
+
+    public MessageCreateSpec setEmbed(Consumer<EmbedCreateSpec> spec) {
+        final EmbedCreateSpec mutatedSpec = new EmbedCreateSpec();
+        spec.accept(mutatedSpec);
+        return setEmbed(mutatedSpec);
     }
 
     public MessageCreateSpec setEmbed(EmbedCreateSpec embed) {
