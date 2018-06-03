@@ -154,7 +154,7 @@ public final class Member extends User {
      * for this guild. If an error is received, it is emitted through the {@code Mono}.
      *
      * @implNote If the underlying {@link ClientBuilder#getStoreService() store} does not save {@link VoiceStateBean}
-     * instances <ib>OR</ib> the bot is currently not logged in then the returned {@code Flux} will always be empty.
+     * instances <ib>OR</ib> the bot is currently not logged in then the returned {@code Mono} will always be empty.
      */
     public Mono<VoiceState> getVoiceState() {
         return getServiceMediator().getStateHolder().getVoiceStateStore()
@@ -169,7 +169,7 @@ public final class Member extends User {
      * this guild. If an error is received, it is emitted through the {@code Mono}.
      *
      * @implNote If the underlying {@link ClientBuilder#getStoreService() store} does not save {@link PresenceBean}
-     * instances <ib>OR</ib> the bot is currently not logged in then the returned {@code Flux} will always be empty.
+     * instances <ib>OR</ib> the bot is currently not logged in then the returned {@code Mono} will always be empty.
      */
     public Mono<Presence> getPresence() {
         return getServiceMediator().getStateHolder().getPresenceStore()
