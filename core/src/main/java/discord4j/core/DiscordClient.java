@@ -265,9 +265,9 @@ public final class DiscordClient {
     }
 
     /**
-     * Requests to retrieve the guilds the current user is in.
+     * Requests to retrieve the guilds the current client is in.
      *
-     * @return A {@link Flux} that continually emits the {@link Guild guilds} that the current user is in. If an error
+     * @return A {@link Flux} that continually emits the {@link Guild guilds} that the current client is in. If an error
      * is received, it is emitted through the {@code Flux}.
      */
     public Flux<Guild> getGuilds() {
@@ -279,6 +279,7 @@ public final class DiscordClient {
                 .cast(BaseGuildBean.class)
                 .switchIfEmpty(PaginationUtil.paginateAfter(makeRequest, UserGuildResponse::getId, 0L, 100)
                         .map(UserGuildResponse::getId)
+                        .filter(id -> (id >> 22) % getConfig().getShardCount() == getConfig().getShardIndex())
                         .flatMap(serviceMediator.getRestClient().getGuildService()::getGuild)
                         .map(BaseGuildBean::new))
                 .map(bean -> new Guild(serviceMediator, bean));
