@@ -16,10 +16,13 @@
  */
 package discord4j.core.object.entity;
 
+import discord4j.core.ClientBuilder;
 import discord4j.core.ServiceMediator;
 import discord4j.core.object.VoiceState;
 import discord4j.core.object.data.stored.MemberBean;
+import discord4j.core.object.data.stored.PresenceBean;
 import discord4j.core.object.data.stored.UserBean;
+import discord4j.core.object.data.stored.VoiceStateBean;
 import discord4j.core.object.presence.Presence;
 import discord4j.core.object.util.Snowflake;
 import discord4j.store.util.LongLongTuple2;
@@ -149,6 +152,9 @@ public final class Member extends User {
      *
      * @return A {@link Mono} where, upon successful completion, emits a {@link VoiceState voice state} for this user
      * for this guild. If an error is received, it is emitted through the {@code Mono}.
+     *
+     * @implNote If the underlying {@link ClientBuilder#getStoreService() store} does not save {@link VoiceStateBean}
+     * instances <ib>OR</ib> the bot is currently not logged in then the returned {@code Flux} will always be empty.
      */
     public Mono<VoiceState> getVoiceState() {
         return getServiceMediator().getStateHolder().getVoiceStateStore()
@@ -161,6 +167,9 @@ public final class Member extends User {
      *
      * @return A {@link Mono} where, upon successful completion, emits a {@link Presence presence} for this user for
      * this guild. If an error is received, it is emitted through the {@code Mono}.
+     *
+     * @implNote If the underlying {@link ClientBuilder#getStoreService() store} does not save {@link PresenceBean}
+     * instances <ib>OR</ib> the bot is currently not logged in then the returned {@code Flux} will always be empty.
      */
     public Mono<Presence> getPresence() {
         return getServiceMediator().getStateHolder().getPresenceStore()

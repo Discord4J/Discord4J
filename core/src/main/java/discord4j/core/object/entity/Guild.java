@@ -17,6 +17,7 @@
 package discord4j.core.object.entity;
 
 import discord4j.common.json.GuildMemberResponse;
+import discord4j.core.ClientBuilder;
 import discord4j.core.DiscordClient;
 import discord4j.core.ServiceMediator;
 import discord4j.core.object.Region;
@@ -382,6 +383,9 @@ public final class Guild implements Entity {
      *
      * @return A {@link Flux} that continually emits the {@link VoiceState voice states} of the guild. If an error is
      * received, it is emitted through the {@code Flux}.
+     *
+     * @implNote If the underlying {@link ClientBuilder#getStoreService() store} does not save {@link VoiceStateBean}
+     * instances <ib>OR</ib> the bot is currently not logged in then the returned {@code Flux} will always be empty.
      */
     public Flux<VoiceState> getVoiceStates() {
         return serviceMediator.getStateHolder().getVoiceStateStore()
@@ -442,6 +446,9 @@ public final class Guild implements Entity {
      *
      * @return A {@link Flux} that continually emits the {@link Presence presences} of the guild. If an error is
      * received, it is emitted through the {@code Flux}.
+     *
+     * @implNote If the underlying {@link ClientBuilder#getStoreService() store} does not save {@link PresenceBean}
+     * instances <ib>OR</ib> the bot is currently not logged in then the returned {@code Flux} will always be empty.
      */
     public Flux<Presence> getPresences() {
         return serviceMediator.getStateHolder().getPresenceStore()
