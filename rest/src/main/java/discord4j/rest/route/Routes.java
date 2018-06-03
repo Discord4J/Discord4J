@@ -541,13 +541,12 @@ public abstract class Routes {
             Void.class);
 
     /**
-     * Returns a list of user objects that are banned from this guild. Requires the 'BAN_MEMBERS' permission.
+     * Returns a list of ban objects for the users banned from this guild. Requires the 'BAN_MEMBERS' permission.
      *
      * @see <a href="https://discordapp.com/developers/docs/resources/guild#get-guild-bans">https://discordapp
      * .com/developers/docs/resources/guild#get-guild-bans</a>
      */
-    public static final Route<UserResponse[]> GUILD_BANS_GET = Route.get("/guilds/{guild.id}/bans",
-            UserResponse[].class);
+    public static final Route<BanResponse[]> GUILD_BANS_GET = Route.get("/guilds/{guild.id}/bans", BanResponse[].class);
 
     /**
      * Create a guild ban, and optionally delete previous messages sent by the banned user. Requires the 'BAN_MEMBERS'

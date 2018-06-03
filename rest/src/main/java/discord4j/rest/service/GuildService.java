@@ -119,7 +119,7 @@ public class GuildService extends RestService {
                 .exchange(getRouter());
     }
 
-    public Flux<UserResponse> getGuildBans(long guildId) {
+    public Flux<BanResponse> getGuildBans(long guildId) {
         return Routes.GUILD_BANS_GET.newRequest(guildId)
                 .exchange(getRouter())
                 .flatMapMany(Flux::fromArray);
