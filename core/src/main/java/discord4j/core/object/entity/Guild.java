@@ -385,7 +385,7 @@ public final class Guild implements Entity {
      * received, it is emitted through the {@code Flux}.
      *
      * @implNote If the underlying {@link ClientBuilder#getStoreService() store} does not save {@link VoiceStateBean}
-     * instances <ib>OR</ib> the bot is currently not logged in then the returned {@code Flux} will always be empty.
+     * instances <b>OR</b> the bot is currently not logged in then the returned {@code Flux} will always be empty.
      */
     public Flux<VoiceState> getVoiceStates() {
         return serviceMediator.getStateHolder().getVoiceStateStore()
@@ -448,7 +448,7 @@ public final class Guild implements Entity {
      * received, it is emitted through the {@code Flux}.
      *
      * @implNote If the underlying {@link ClientBuilder#getStoreService() store} does not save {@link PresenceBean}
-     * instances <ib>OR</ib> the bot is currently not logged in then the returned {@code Flux} will always be empty.
+     * instances <b>OR</b> the bot is currently not logged in then the returned {@code Flux} will always be empty.
      */
     public Flux<Presence> getPresences() {
         return serviceMediator.getStateHolder().getPresenceStore()
