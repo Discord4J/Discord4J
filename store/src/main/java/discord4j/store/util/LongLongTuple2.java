@@ -101,7 +101,7 @@ public class LongLongTuple2 implements Iterable<Long>, Serializable, Comparable<
      *
      * @param index The index of the object to retrieve. Starts at 0.
      * @return The object or throws {@link IndexOutOfBoundsException} if out of bounds.
-     * @throws IndexOutOfBoundsException
+     * @throws IndexOutOfBoundsException if the index is out of range.
      */
     public long get(int index) {
         switch (index) {

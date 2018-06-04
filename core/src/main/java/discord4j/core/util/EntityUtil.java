@@ -70,6 +70,7 @@ public final class EntityUtil {
      * An utility that converts some instance of {@code ChannelBean} to its associated {@code Channel}
      * {@link Channel.Type type}. That is to say, {@code bean.getType() == Channel#getType().getValue()}.
      *
+     * @param serviceMediator The ServiceMediator associated to this object, must be non-null.
      * @param bean The {@code ChannelBean} to convert.
      * @return The converted {@code Channel}.
      */
@@ -88,6 +89,8 @@ public final class EntityUtil {
      * in enum value constructs such as {@link Channel.Type#of(int)} when the value has not been properly supported.
      *
      * @param value The unknown Discord value.
+     * @param <T> The return type. Used to simulate bottom type.
+     * @return Diverging function, never returns.
      */
     public static <T> T throwUnsupportedDiscordValue(final Object value) {
         throw new UnsupportedOperationException("Unknown Value: " + value);

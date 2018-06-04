@@ -51,14 +51,25 @@ allprojects {
         maven { url 'https://jitpack.io' }
     }
 
+    tasks.withType(Javadoc) {
+        options.encoding = 'UTF-8'
+        options.addStringOption('encoding', 'UTF-8')
+        options.tags = ["apiNote:a:API Note:",
+                        "implSpec:a:Implementation Requirements:",
+                        "implNote:a:Implementation Note:"]
+    }
+
+    tasks.withType(JavaCompile) {
+        options.encoding = 'UTF-8'
+        options.incremental = true
+    }
+
     task downloadDependencies() {
         description 'Download all dependencies to the Gradle cache'
         doLast {
             configurations.findAll { it.canBeResolved }.files
         }
     }
-
-    javadoc.options.encoding = 'UTF-8'
 
     task javadocJar(type: Jar, dependsOn: javadoc) {
         classifier = 'javadoc'
