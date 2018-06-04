@@ -25,6 +25,7 @@ import discord4j.core.object.data.stored.UserBean;
 import discord4j.core.object.data.stored.VoiceStateBean;
 import discord4j.core.object.presence.Presence;
 import discord4j.core.object.util.Snowflake;
+import discord4j.core.spec.BanQuerySpec;
 import discord4j.store.util.LongLongTuple2;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -35,6 +36,7 @@ import java.util.Arrays;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 /**
@@ -186,6 +188,45 @@ public final class Member extends User {
     public Mono<Void> kick() {
         return getServiceMediator().getRestClient().getGuildService()
                 .removeGuildMember(getGuildId().asLong(), getId().asLong());
+    }
+
+    /**
+     * Requests to ban this user.
+     *
+     * @param spec A {@link Consumer} that provides a "blank" {@link BanQuerySpec} to be operated on. If some properties
+     * need to be retrieved via blocking operations (such as retrieval from a database), then it is recommended to build
+     * the spec externally and call {@link #ban(BanQuerySpec)}.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating this user was banned. If an
+     * error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Void> ban(final Consumer<BanQuerySpec> spec) {
+        final BanQuerySpec mutatedSpec = new BanQuerySpec();
+        spec.accept(mutatedSpec);
+        return ban(mutatedSpec);
+    }
+
+    /**
+     * Requests to ban this user.
+     *
+     * @param spec A configured {@link BanQuerySpec} to perform the request on.
+     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating this user was banned. If an
+     * error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Void> ban(final BanQuerySpec spec) {
+        return getServiceMediator().getRestClient().getGuildService()
+                .createGuildBan(getGuildId().asLong(), getId().asLong(), spec.asRequest());
+    }
+
+    /**
+     * Requests to unban this user.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating this user was unbanned. If an
+     * error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Void> unban() {
+        return getServiceMediator().getRestClient().getGuildService()
+                .removeGuildBan(getGuildId().asLong(), getId().asLong());
     }
 
     /**

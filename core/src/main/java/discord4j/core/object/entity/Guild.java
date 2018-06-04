@@ -20,11 +20,13 @@ import discord4j.common.json.GuildMemberResponse;
 import discord4j.core.ClientBuilder;
 import discord4j.core.DiscordClient;
 import discord4j.core.ServiceMediator;
+import discord4j.core.object.Ban;
 import discord4j.core.object.Region;
 import discord4j.core.object.VoiceState;
 import discord4j.core.object.audit.ActionType;
 import discord4j.core.object.audit.AuditLogEntry;
 import discord4j.core.object.data.AuditLogEntryBean;
+import discord4j.core.object.data.BanBean;
 import discord4j.core.object.data.RegionBean;
 import discord4j.core.object.data.stored.*;
 import discord4j.core.object.presence.Presence;
@@ -669,6 +671,75 @@ public final class Guild implements Entity {
      */
     public Mono<Void> kick(final Snowflake userId) {
         return serviceMediator.getRestClient().getGuildService().removeGuildMember(getId().asLong(), userId.asLong());
+    }
+
+    /**
+     * Requests to retrieve all the bans for this guild.
+     *
+     * @return A {@link Flux} that continually emits the {@link Ban bans} for this guild. If an error is received, it is
+     * emitted through the {@code Flux}.
+     */
+    public Flux<Ban> getBans() {
+        return serviceMediator.getRestClient().getGuildService()
+                .getGuildBans(getId().asLong())
+                .map(BanBean::new)
+                .map(bean -> new Ban(serviceMediator, bean));
+    }
+
+    /**
+     * Requests to retrieve the ban for the specified user for this guild.
+     *
+     * @param userId The ID of the user to retrieve the ban for this guild.
+     * @return A {@link Mono} where, upon successful completion, emits the {@link Ban ban} for the specified user for
+     * this guild. If an error is received, it is meitted through the {@code Mono}.
+     */
+    public Mono<Ban> getBan(final Snowflake userId) {
+        return serviceMediator.getRestClient().getGuildService()
+                .getGuildBan(getId().asLong(), userId.asLong())
+                .map(BanBean::new)
+                .map(bean -> new Ban(serviceMediator, bean));
+    }
+
+    /**
+     * Requests to ban the specified user.
+     *
+     * @param userId The ID of the user to ban.
+     * @param spec A {@link Consumer} that provides a "blank" {@link BanQuerySpec} to be operated on. If some properties
+     * need to be retrieved via blocking operations (such as retrieval from a database), then it is recommended to build
+     * the spec externally and call {@link #ban(Snowflake, BanQuerySpec)}.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the specified user was
+     * banned. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Void> ban(final Snowflake userId, final Consumer<BanQuerySpec> spec) {
+        final BanQuerySpec mutatedSpec = new BanQuerySpec();
+        spec.accept(mutatedSpec);
+        return ban(userId, mutatedSpec);
+    }
+
+    /**
+     * Requests to ban the specified user.
+     *
+     * @param userId The ID of the user to ban.
+     * @param spec A configured {@link BanQuerySpec} to perform the request on.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the specified user was
+     * banned. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Void> ban(final Snowflake userId, final BanQuerySpec spec) {
+        return serviceMediator.getRestClient().getGuildService()
+                .createGuildBan(getId().asLong(), userId.asLong(), spec.asRequest());
+    }
+
+    /**
+     * Requests to unban the specified user.
+     *
+     * @param userId The ID of the user to unban.
+     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the specified user was
+     * unbanned. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Void> unban(final Snowflake userId) {
+        return serviceMediator.getRestClient().getGuildService().removeGuildBan(getId().asLong(), userId.asLong());
     }
 
     /**
