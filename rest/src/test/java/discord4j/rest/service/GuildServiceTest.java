@@ -41,6 +41,7 @@ public class GuildServiceTest {
     private static final long member = Long.parseUnsignedLong(System.getenv("member"));
     private static final long permanentRole = Long.parseUnsignedLong(System.getenv("permanentRole"));
     private static final long trashCategory = Long.parseUnsignedLong(System.getenv("trashCategory"));
+    private static final long bannedUser = Long.parseUnsignedLong(System.getenv("bannedUser"));
 
     private GuildService guildService;
     private ChannelService channelService;
@@ -175,6 +176,11 @@ public class GuildServiceTest {
     @Test
     public void testGetGuildBans() {
         getGuildService().getGuildBans(guild).then().block();
+    }
+
+    @Test
+    public void testGetGuildBan() {
+        getGuildService().getGuildBan(guild, bannedUser).block();
     }
 
     @Test

@@ -125,6 +125,11 @@ public class GuildService extends RestService {
                 .flatMapMany(Flux::fromArray);
     }
 
+    public Mono<BanResponse> getGuildBan(long guildId, long userId) {
+        return Routes.GUILD_BAN_GET.newRequest(guildId, userId)
+                .exchange(getRouter());
+    }
+
     public Mono<Void> createGuildBan(long guildId, long userId, Map<String, Object> queryParams) {
         return Routes.GUILD_BAN_CREATE.newRequest(guildId, userId)
                 .query(queryParams)

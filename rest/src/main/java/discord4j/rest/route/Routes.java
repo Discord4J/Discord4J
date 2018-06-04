@@ -549,6 +549,16 @@ public abstract class Routes {
     public static final Route<BanResponse[]> GUILD_BANS_GET = Route.get("/guilds/{guild.id}/bans", BanResponse[].class);
 
     /**
+     * Returns a ban object for the given user or a 404 not found if the ban cannot be found. Requires the 'BAN_MEMBERS'
+     * permission.
+     *
+     * @see <a href="https://discordapp.com/developers/docs/resources/guild#get-guild-ban">https://discordapp
+     * .com/developers/docs/resources/guild#get-guild-ban</a>
+     */
+    public static final Route<BanResponse> GUILD_BAN_GET = Route.get("/guilds/{guild.id}/bans/{user.id}",
+            BanResponse.class);
+
+    /**
      * Create a guild ban, and optionally delete previous messages sent by the banned user. Requires the 'BAN_MEMBERS'
      * permission. Returns a 204 empty response on success. Fires a Guild Ban Add Gateway event.
      *
