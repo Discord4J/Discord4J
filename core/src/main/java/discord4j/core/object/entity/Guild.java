@@ -787,24 +787,31 @@ public final class Guild implements Entity {
     }
 
     /**
-     * Requests to retrieve the audit log of this guild.
+     * Requests to retrieve the audit log for this guild.
      *
-     * @param responsibleUser The user for which to retrieve audit log entries. Null to request entries for all users.
-     * @param actionType The action type for which to retrieve audit log entries. Null to request entries for all
-     * action types.
-     * @return A {@link Flux} that continually emits entries of this guild's audit log. If an error is received, it is
+     * @param spec A {@link Consumer} that provides a "blank" {@link AuditLogQuerySpec} to be operated on. If some
+     * properties need to be retrieved via blocking operations (such as retrieval from a database), then it is
+     * recommended to build the spec externally and call {@link #getAuditLog(AuditLogQuerySpec)}.
+     *
+     * @return A {@link Flux} that continually emits entries for this guild's audit log. If an error is received, it is
      * emitted through the {@code Flux}.
      */
-    public Flux<AuditLogEntry> getAuditLog(@Nullable Snowflake responsibleUser, @Nullable ActionType actionType) {
+    public Flux<AuditLogEntry> getAuditLog(final Consumer<AuditLogQuerySpec> spec) {
+        final AuditLogQuerySpec mutatedSpec = new AuditLogQuerySpec();
+        spec.accept(mutatedSpec);
+        return getAuditLog(mutatedSpec);
+    }
+
+    /**
+     * Requests to retrieve the audit log for this guild.
+     *
+     * @param spec A configured {@link AuditLogQuerySpec} to perform the request on.
+     * @return A {@link Flux} that continually emits entries for this guild's audit log. If an error is received, it is
+     * emitted through the {@code Flux}.
+     */
+    public Flux<AuditLogEntry> getAuditLog(final AuditLogQuerySpec spec) {
         Function<Map<String, Object>, Flux<AuditLogResponse>> makeRequest = params -> {
-            if (responsibleUser != null) {
-                params.put("user_id", responsibleUser.asString());
-            }
-
-            if (actionType != null) {
-                params.put("action_type", actionType.getValue());
-            }
-
+            params.putAll(spec.asRequest());
             return serviceMediator.getRestClient().getAuditLogService().getAuditLog(getId().asLong(), params).flux();
         };
 
