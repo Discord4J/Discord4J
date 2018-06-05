@@ -38,6 +38,8 @@ import reactor.core.publisher.Mono;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
+import java.util.OptionalLong;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -312,6 +314,17 @@ public final class DiscordClient {
                 .switchIfEmpty(serviceMediator.getRestClient().getUserService().getCurrentUser()
                         .map(UserBean::new)
                         .map(bean -> new User(serviceMediator, bean)));
+    }
+
+    /**
+     * Gets the bot user's ID. This may not be present if this client is not yet logged in.
+     *
+     * @return The bot user's ID.
+     */
+    public Optional<Snowflake> getSelfId() {
+        return Optional.of(serviceMediator.getStateHolder().getSelfId().get())
+                .filter(it -> it != 0)
+                .map(Snowflake::of);
     }
 
     /**
