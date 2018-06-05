@@ -41,8 +41,8 @@ In your `pom.xml` add (without the ellipses):
 
 <dependencies>
   <dependency>
-    <groupId>com.github.Discord4J.Discord4J</groupId>
-    <artifactId>Discord4J-core</artifactId>
+    <groupId>com.discord4j.discord4j</groupId>
+    <artifactId>discord4j-core</artifactId>
     <version>@VERSION@</version>
   </dependency>
 </dependencies>
@@ -57,14 +57,14 @@ repositories {
 }
 
 dependencies {
-  compile "com.github.Discord4J.Discord4J:Discord4J-core:@VERSION@"
+  compile "com.discord4j.discord4j:discord4j-core:@VERSION@"
 }
 ```
 ### With SBT
 In your `build.sbt` add (without the ellipses):
 ```sbt
 libraryDependencies ++= Seq(
-  "com.github.Discord4J.Discord4J" % "Discord4J-core" % "@VERSION@"
+  "com.discord4j.discord4j" % "discord4j-core" % "@VERSION@"
 )
 
 resolvers += "jitpack.io" at "https://jitpack.io"
