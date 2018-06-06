@@ -1,7 +1,11 @@
 .idea
+.classpath
+.project
+.settings
 *.jar
 out/
 .gradle
 !gradle-wrapper.jar
 build/
 logs/
+**/bin/
