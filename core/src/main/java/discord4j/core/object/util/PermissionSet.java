@@ -99,6 +99,15 @@ public final class PermissionSet extends AbstractSet<Permission> {
     public PermissionSet or(PermissionSet other) {
         return PermissionSet.of(this.rawValue | other.rawValue);
     }
+    
+    /**
+     * Performs a logical NOT of this permission set.
+     * 
+     * @return The new permission set with inverted permissions.
+     */
+    public PermissionSet inverse() {
+        return PermissionSet.of(~this.rawValue);
+    }
 
     /**
      * Gets this {@code PermissionSet} as an {@link EnumSet}.

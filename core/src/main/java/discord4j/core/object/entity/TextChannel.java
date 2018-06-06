@@ -21,6 +21,7 @@ import discord4j.core.object.ExtendedInvite;
 import discord4j.core.object.PermissionOverwrite;
 import discord4j.core.object.data.ExtendedInviteBean;
 import discord4j.core.object.data.stored.TextChannelBean;
+import discord4j.core.object.util.PermissionSet;
 import discord4j.core.object.util.Snowflake;
 import discord4j.core.spec.InviteCreateSpec;
 import discord4j.core.spec.MessageCreateSpec;
@@ -71,6 +72,11 @@ public final class TextChannel extends BaseChannel implements GuildChannel, Mess
     @Override
     public Set<PermissionOverwrite> getPermissionOverwrites() {
         return guildChannel.getPermissionOverwrites();
+    }
+    
+    @Override
+    public Mono<PermissionSet> getPermissions(Member member) {
+        return guildChannel.getPermissions(member);
     }
 
     @Override

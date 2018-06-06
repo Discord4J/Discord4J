@@ -16,18 +16,19 @@
  */
 package discord4j.core.object.entity;
 
-import discord4j.core.ServiceMediator;
-import discord4j.core.object.PermissionOverwrite;
-import discord4j.core.object.data.stored.GuildChannelBean;
-import discord4j.core.object.data.stored.PermissionOverwriteBean;
-import discord4j.core.object.util.Snowflake;
-import reactor.core.publisher.Mono;
-
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import discord4j.core.ServiceMediator;
+import discord4j.core.object.PermissionOverwrite;
+import discord4j.core.object.data.stored.GuildChannelBean;
+import discord4j.core.object.data.stored.PermissionOverwriteBean;
+import discord4j.core.object.util.PermissionSet;
+import discord4j.core.object.util.Snowflake;
+import reactor.core.publisher.Mono;
 
 /** An internal implementation of {@link GuildChannel} designed to streamline inheritance. */
 class BaseGuildChannel extends BaseChannel implements GuildChannel {
@@ -59,6 +60,24 @@ class BaseGuildChannel extends BaseChannel implements GuildChannel {
                 .map(bean ->
                         new PermissionOverwrite(getServiceMediator(), bean, getGuildId().asLong(), getId().asLong()))
                 .collect(Collectors.toSet());
+    }
+    
+    @Override
+    public Mono<PermissionSet> getPermissions(Member member) {
+        Set<PermissionOverwrite> effectiveOverwrites = getPermissionOverwrites().stream()
+                .filter(overwrite -> overwrite.getRoleId().map(member.getRoleIds()::contains).orElse(true))
+                .filter(overwrite -> overwrite.getUserId().map(member.getId()::equals).orElse(true))
+                .collect(Collectors.toSet());
+                
+        PermissionSet granted = effectiveOverwrites.stream().map(PermissionOverwrite::getAllowed)
+                .reduce(PermissionSet.none(), PermissionSet::or);
+        
+        PermissionSet revoked = effectiveOverwrites.stream().map(PermissionOverwrite::getDenied)
+                .reduce(PermissionSet.none(), PermissionSet::or);
+        
+        return member.getPermissions()
+                .map(perms -> perms.or(granted))
+                .map(perms -> perms.and(revoked.inverse()));
     }
 
     @Override
