@@ -41,6 +41,7 @@ import reactor.util.function.Tuples;
 
 import javax.annotation.Nullable;
 import java.time.Instant;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -355,7 +356,7 @@ public final class Guild implements Entity {
     public Optional<Instant> getJoinTime() {
         return getGatewayData()
                 .map(GuildBean::getJoinedAt)
-                .map(Instant::parse);
+                .map(timestamp -> DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(timestamp, Instant::from));
     }
 
     /**

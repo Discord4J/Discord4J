@@ -155,7 +155,8 @@ public final class Message implements Entity {
      * @return When this message was edited, if present.
      */
     public Optional<Instant> getEditedTimestamp() {
-        return Optional.ofNullable(data.getEditedTimestamp()).map(Instant::parse);
+        return Optional.ofNullable(data.getEditedTimestamp())
+                .map(timestamp -> DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(timestamp, Instant::from));
     }
 
     /**

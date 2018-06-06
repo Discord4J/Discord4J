@@ -22,6 +22,7 @@ import discord4j.core.object.data.stored.embed.*;
 import discord4j.core.util.EntityUtil;
 
 import java.time.Instant;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -96,7 +97,8 @@ public final class Embed implements DiscordObject {
      * @return The timestamp of the embed content, if present.
      */
     public Optional<Instant> getTimestamp() {
-        return Optional.ofNullable(data.getTimestamp()).map(Instant::parse);
+        return Optional.ofNullable(data.getTimestamp())
+                .map(timestamp -> DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(timestamp, Instant::from));
     }
 
     /**
