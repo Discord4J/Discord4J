@@ -22,17 +22,17 @@ job_definition: &job_definition
     # restore saved caches
     - restore_cache:
         keys:
-          - gradle-wrapper-{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}
+          - gradle-wrapper-{{ .Environment.cacheVersion }}-{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}
           - gradle-wrapper
 
     - restore_cache:
         keys:
-          - gradle-cache-{{ checksum "~/dependencies.gradle" }}
+          - gradle-cache-{{ .Environment.cacheVersion }}-{{ checksum "~/dependencies.gradle" }}
           - gradle-cache
 
     - restore_cache:
         keys:
-          - gradle-build-caches-{{ .Revision }}
+          - gradle-build-caches-{{ .Environment.cacheVersion }}-{{ .Revision }}
           - gradle-build-caches
 
     - run:
@@ -51,12 +51,12 @@ job_definition: &job_definition
     - save_cache:
         paths:
           - ~/.gradle/wrapper/
-        key: gradle-wrapper-{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}
+        key: gradle-wrapper-{{ .Environment.cacheVersion }}-{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}
 
     - save_cache:
         paths:
           - ~/.gradle/caches/
-        key: gradle-cache-{{ checksum "~/dependencies.gradle" }}
+        key: gradle-cache-{{ .Environment.cacheVersion }}-{{ checksum "~/dependencies.gradle" }}
 
     # build everything needed for publication
     - run:
@@ -76,7 +76,7 @@ job_definition: &job_definition
     - save_cache:
         paths:
           - ~/gradle-build-caches
-        key: gradle-build-caches-{{ .Revision }}
+        key: gradle-build-caches-{{ .Environment.cacheVersion }}-{{ .Revision }}
         when: always
 
     # reports
