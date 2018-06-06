@@ -1,11 +1,28 @@
+# IntelliJ
 .idea
+
+# Eclipse
 .classpath
 .project
 .settings
+
+# Netbeans
+nbproject/private/
+build/
+nbbuild/
+dist/
+nbdist/
+.nb-gradle/
+
+# Build artifacts
 *.jar
 out/
+build/
+**/bin/
+
+# Gradle
 .gradle
 !gradle-wrapper.jar
-build/
+
+# Misc
 logs/
-**/bin/
