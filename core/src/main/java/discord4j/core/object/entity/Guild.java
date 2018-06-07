@@ -352,6 +352,9 @@ public final class Guild implements Entity {
      * Gets when this guild was joined at, if present.
      *
      * @return When this guild was joined at, if present.
+     *
+     * @implNote If the underlying {@link ClientBuilder#getStoreService() store} does not save {@link GuildBean}
+     * instances <b>OR</b> the bot is currently not logged in then the returned {@code Optional} will always be empty.
      */
     public Optional<Instant> getJoinTime() {
         return getGatewayData()
@@ -363,6 +366,9 @@ public final class Guild implements Entity {
      * Gets whether this guild is considered large, if present.
      *
      * @return If present, {@code true} if the guild is considered large, {@code false} otherwise.
+     *
+     * @implNote If the underlying {@link ClientBuilder#getStoreService() store} does not save {@link GuildBean}
+     * instances <b>OR</b> the bot is currently not logged in then the returned {@code Optional} will always be empty.
      */
     public Optional<Boolean> isLarge() {
         return getGatewayData().map(GuildBean::getLarge);
@@ -372,6 +378,9 @@ public final class Guild implements Entity {
      * Gets the total number of members in the guild, if present.
      *
      * @return The total number of members in the guild, if present.
+     *
+     * @implNote If the underlying {@link ClientBuilder#getStoreService() store} does not save {@link GuildBean}
+     * instances <b>OR</b> the bot is currently not logged in then the returned {@code Optional} will always be empty.
      */
     public OptionalInt getMemberCount() {
         return getGatewayData()
