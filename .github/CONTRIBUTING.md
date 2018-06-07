@@ -1,7 +1,6 @@
 # Contributing to Discord4J
 Firstly, we appreciate your interest in contributing to Discord4J!
 
-
 In order to maintain the high-quality standards of the project, we have a few rules to follow when contributing.
 
 
@@ -16,7 +15,7 @@ Make sure to select and follow the appropriate issue template.
 * Feature Implementations
 * Improvements to documentation
 
-### Unwanted Changes
+### Discouraged Changes
 * Cosmetic Changes
 * Large changes to the project's structure
 
@@ -33,3 +32,5 @@ If you're unsure of whether a change is welcome, feel free to ask first in our [
 * This project uses space indents.
 * JavaDocs should be edited appropriately for your changes.
 * All new files should have the same LGPL 3 boilerplate header found in existing files.
+
+Finally, thanks again for contributing to Discord4J. When your changes are accepted, make sure to ask about the Contributor role in our [Discord server](https://discord.gg/NxGAeCY).

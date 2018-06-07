@@ -7,6 +7,7 @@ A reactive Java wrapper for the REST and Gateway components of the official [Dis
 Built with [Reactor](https://projectreactor.io/), [Netty](https://netty.io/), and a focus on flexibility, Discord4J provides an efficient, non-blocking interface for creating Discord bots.
 
 ## Installation
+### Gradle
 ```groovy
 repositories {
   maven { url  "https://jitpack.io" }
@@ -15,6 +16,23 @@ repositories {
 dependencies {
   implementation "com.discord4j.discord4j:discord4j-core:@VERSION@"
 }
+```
+### Maven
+```xml
+<repositories>
+  <repository>
+    <id>jitpack.io</id>
+    <url>https://jitpack.io</url>
+  </repository>
+</repositories>
+
+<dependencies>
+  <dependency>
+    <groupId>com.discord4j.discord4j</groupId>
+    <artifactId>discord4j-core</artifactId>
+    <version>@VERSION@</version>
+  </dependency>
+</dependencies>
 ```
 
 ## Quick Example
@@ -48,6 +66,9 @@ The `gateway` module provides a low-level WebSocket client for interacting with 
 
 ### [Store](./store/README.md)
 The `store` module provides a platform for the efficient caching of Discord gateway data.
+
+### [Common](./common/README.md)
+The `common` module contains base utilities and models useful for other modules.
 
 ## Useful Links
 * [Discord4J Site](https://discord4j.com)
