@@ -18,7 +18,11 @@ package discord4j.core.event.domain.message;
 
 import discord4j.core.DiscordClient;
 import discord4j.core.object.Embed;
+import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Message;
+import discord4j.core.object.entity.MessageChannel;
+import discord4j.core.object.util.Snowflake;
+import reactor.core.publisher.Mono;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -53,16 +57,29 @@ public class MessageUpdateEvent extends MessageEvent {
         this.currentEmbeds = currentEmbeds;
     }
 
-    public long getMessageId() {
-        return messageId;
+    public Snowflake getMessageId() {
+        return Snowflake.of(messageId);
     }
 
-    public long getChannelId() {
-        return channelId;
+    public Mono<Message> getMessage() {
+        return getClient().getMessageById(getChannelId(), getMessageId());
     }
 
-    public long getGuildId() {
-        return guildId;
+    public Snowflake getChannelId() {
+        return Snowflake.of(channelId);
+    }
+
+    public Mono<MessageChannel> getChannel() {
+        return getClient().getMessageChannelById(getChannelId());
+    }
+
+    // FIXME This should be Optional!
+    public Snowflake getGuildId() {
+        return Snowflake.of(guildId);
+    }
+
+    public Mono<Guild> getGuild() {
+        return getClient().getGuildById(getGuildId());
     }
 
     public Optional<Message> getOld() {

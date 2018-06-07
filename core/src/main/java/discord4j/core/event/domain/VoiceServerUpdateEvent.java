@@ -17,7 +17,9 @@
 package discord4j.core.event.domain;
 
 import discord4j.core.DiscordClient;
+import discord4j.core.object.entity.Guild;
 import discord4j.core.object.util.Snowflake;
+import reactor.core.publisher.Mono;
 
 public class VoiceServerUpdateEvent extends Event {
 
@@ -38,6 +40,10 @@ public class VoiceServerUpdateEvent extends Event {
 
     public Snowflake getGuildId() {
         return Snowflake.of(guildId);
+    }
+
+    public Mono<Guild> getGuild() {
+        return getClient().getGuildById(getGuildId());
     }
 
     public String getEndpoint() {

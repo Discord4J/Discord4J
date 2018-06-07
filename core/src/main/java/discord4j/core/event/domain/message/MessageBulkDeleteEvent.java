@@ -17,7 +17,10 @@
 package discord4j.core.event.domain.message;
 
 import discord4j.core.DiscordClient;
+import discord4j.core.object.entity.Guild;
+import discord4j.core.object.entity.MessageChannel;
 import discord4j.core.object.util.Snowflake;
+import reactor.core.publisher.Mono;
 
 import java.util.Arrays;
 import java.util.Set;
@@ -42,11 +45,21 @@ public class MessageBulkDeleteEvent extends MessageEvent {
                 .collect(Collectors.toSet());
     }
 
+    // TODO getOld
+
     public Snowflake getChannelId() {
         return Snowflake.of(channelId);
     }
 
+    public Mono<MessageChannel> getChannel() {
+        return getClient().getMessageChannelById(getChannelId());
+    }
+
     public Snowflake getGuildId() {
         return Snowflake.of(guildId);
+    }
+
+    public Mono<Guild> getGuild() {
+        return getClient().getGuildById(getGuildId());
     }
 }

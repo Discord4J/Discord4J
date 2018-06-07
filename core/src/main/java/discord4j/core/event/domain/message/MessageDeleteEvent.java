@@ -17,7 +17,9 @@
 package discord4j.core.event.domain.message;
 
 import discord4j.core.DiscordClient;
+import discord4j.core.object.entity.MessageChannel;
 import discord4j.core.object.util.Snowflake;
+import reactor.core.publisher.Mono;
 
 public class MessageDeleteEvent extends MessageEvent {
 
@@ -34,8 +36,14 @@ public class MessageDeleteEvent extends MessageEvent {
         return Snowflake.of(messageId);
     }
 
+    // TODO getOld
+
     public Snowflake getChannelId() {
         return Snowflake.of(channelId);
+    }
+
+    public Mono<MessageChannel> getChannel() {
+        return getClient().getMessageChannelById(getChannelId());
     }
 }
 

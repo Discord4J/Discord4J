@@ -43,4 +43,6 @@ public class RoleDeleteEvent extends RoleEvent {
     public Snowflake getRoleId() {
         return Snowflake.of(roleId);
     }
+
+    // TODO getOld
 }

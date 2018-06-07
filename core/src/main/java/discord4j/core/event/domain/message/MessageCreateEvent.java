@@ -17,9 +17,11 @@
 package discord4j.core.event.domain.message;
 
 import discord4j.core.DiscordClient;
+import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.util.Snowflake;
+import reactor.core.publisher.Mono;
 
 import javax.annotation.Nullable;
 import java.util.Optional;
@@ -45,6 +47,10 @@ public class MessageCreateEvent extends MessageEvent {
 
     public Optional<Snowflake> getGuildId() {
         return Optional.ofNullable(guildId).map(Snowflake::of);
+    }
+
+    public Mono<Guild> getGuild() {
+        return Mono.justOrEmpty(getGuildId()).flatMap(getClient()::getGuildById);
     }
 
     public Optional<Member> getMember() {

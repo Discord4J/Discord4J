@@ -17,8 +17,10 @@
 package discord4j.core.event.domain.guild;
 
 import discord4j.core.DiscordClient;
+import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.util.Snowflake;
+import reactor.core.publisher.Mono;
 
 import javax.annotation.Nullable;
 import java.util.Arrays;
@@ -54,8 +56,16 @@ public class MemberUpdateEvent extends GuildEvent {
         return Snowflake.of(guildId);
     }
 
+    public Mono<Guild> getGuild() {
+        return getClient().getGuildById(getGuildId());
+    }
+
     public Snowflake getMemberId() {
         return Snowflake.of(memberId);
+    }
+
+    public Mono<Member> getMember() {
+        return getClient().getMemberById(getGuildId(), getMemberId());
     }
 
     public Optional<Member> getOld() {
