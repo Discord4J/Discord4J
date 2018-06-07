@@ -16,14 +16,6 @@
  */
 package discord4j.core.object.entity;
 
-import java.time.Instant;
-import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import discord4j.core.ClientBuilder;
 import discord4j.core.ServiceMediator;
 import discord4j.core.object.VoiceState;
@@ -37,6 +29,14 @@ import discord4j.core.object.util.Snowflake;
 import discord4j.store.util.LongLongTuple2;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.time.Instant;
+import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * A Discord guild member.
@@ -185,10 +185,11 @@ public final class Member extends User {
      *         permissions for this member.
      */
     public Mono<PermissionSet> getPermissions() {
-        return getGuild().flatMapIterable(Guild::getRoleIds)
+        return getGuild()
+                .flatMapIterable(Guild::getRoleIds)
                 .filter(role -> getRoleIds().contains(role))
                 .flatMap(id -> getGuild().map(Guild::getClient).flatMap(client -> client.getRoleById(getGuildId(), id)))
-                .map(role -> role.getPermissions())
+                .map(Role::getPermissions)
                 .reduce(PermissionSet.none(), PermissionSet::or);
     }
 

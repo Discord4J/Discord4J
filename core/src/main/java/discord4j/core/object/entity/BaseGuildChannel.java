@@ -16,12 +16,6 @@
  */
 package discord4j.core.object.entity;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import discord4j.core.ServiceMediator;
 import discord4j.core.object.PermissionOverwrite;
 import discord4j.core.object.data.stored.GuildChannelBean;
@@ -29,6 +23,12 @@ import discord4j.core.object.data.stored.PermissionOverwriteBean;
 import discord4j.core.object.util.PermissionSet;
 import discord4j.core.object.util.Snowflake;
 import reactor.core.publisher.Mono;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /** An internal implementation of {@link GuildChannel} designed to streamline inheritance. */
 class BaseGuildChannel extends BaseChannel implements GuildChannel {

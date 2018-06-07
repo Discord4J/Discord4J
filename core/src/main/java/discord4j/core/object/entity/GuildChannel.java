@@ -50,10 +50,9 @@ public interface GuildChannel extends Channel {
     Set<PermissionOverwrite> getPermissionOverwrites();
     
     /**
-     * Utility to get all effective permissions for a user in this channel.
+     * Gets the given member's effective permissions in this channel.
      * 
-     * @param member
-     *            The {@link Member} in question.
+     * @param member The {@link Member} in question.
      * @return A {@link PermissionSet} representing all permissions this user has, considering channel permission
      *         overwrites.
      */
