@@ -1,2 +1,33 @@
 # Discord4J Core
-This module contains high level abstractions of the Discord API built on the other, lower level modules.
+The `core` module combines the other modules to form high-level abstractions for the entire Discord Bot API. This is the module most users will want when making bots.
+
+The main features of this module include the high-level `DiscordClient` and representations of Discord's entities. These wrap the behavior of the [rest](../rest/README.md) and [gateway](../gateway/README.md) to receive data and interact with Discord as well as the [store](../store/README.md) module to optioanlly and efficiently store this data.
+
+## Installation
+```groovy
+repositories {
+  maven { url  "https://jitpack.io" }
+}
+
+dependencies {
+  implementation "com.discord4j.discord4j:discord4j-core:@VERSION@"
+}
+```
+
+## Example Usage
+```java
+final DiscordClient client = new ClientBuilder("token").build();
+
+client.getEventDispatcher().on(ReadyEvent.class)
+        .subscribe(ready -> System.out.println("Logged in as " + ready.getSelf().getUsername()));
+
+client.getEventDispatcher().on(MessageCreateEvent.class)
+        .map(MessageCreateEvent::getMessage)
+        .filter(msg -> msg.getContent().map(content -> content.equals("!ping")).orElse(false))
+        .flatMap(Message::getChannel)
+        .flatMap(channel -> channel.createMessage(spec -> spec.setContent("Pong!")))
+        .subscribe();
+
+client.login().block();
+```
+
