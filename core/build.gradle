@@ -3,6 +3,8 @@ dependencies {
     compile project(':gateway')
     compile project(':store')
 
+    compile "com.github.Discord4J.Stores:stores-jdk:$jdkstores_version"
+
     testCompile "junit:junit:$junit_version"
     testCompile "ch.qos.logback:logback-classic:$logback_version"
     testCompile "io.projectreactor:reactor-test"
