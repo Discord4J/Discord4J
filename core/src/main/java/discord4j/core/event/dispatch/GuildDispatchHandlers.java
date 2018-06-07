@@ -348,11 +348,28 @@ class GuildDispatchHandlers {
         Mono<Void> deleteRole = serviceMediator.getStateHolder().getRoleStore()
                 .delete(context.getDispatch().getRoleId());
 
-        // TODO remove role from members
+        Mono<Void> removeRoleFromMembers = serviceMediator.getStateHolder().getGuildStore()
+                .find(guildId)
+                .flatMapMany(guild -> Flux.fromArray(ArrayUtil.toObject(guild.getMembers())))
+                .flatMap(memberId -> serviceMediator.getStateHolder().getMemberStore()
+                        .find(LongLongTuple2.of(guildId, memberId)).map(member -> Tuples.of(memberId, member)))
+                .doOnNext(t -> {
+                    MemberBean member = t.getT2();
+                    member.setRoles(ArrayUtil.remove(member.getRoles(), roleId));
+                })
+                .flatMap(t -> serviceMediator.getStateHolder().getMemberStore()
+                        .save(LongLongTuple2.of(guildId, t.getT1()), t.getT2()))
+                .then();
 
-        return removeRoleId
-                .then(deleteRole)
-                .thenReturn(new RoleDeleteEvent(context.getServiceMediator().getClient(), guildId, roleId));
+
+        return serviceMediator.getStateHolder().getRoleStore()
+                .find(roleId)
+                .flatMap(removeRoleId::thenReturn)
+                .flatMap(deleteRole::thenReturn)
+                .flatMap(removeRoleFromMembers::thenReturn)
+                .map(role -> new RoleDeleteEvent(serviceMediator.getClient(), guildId, roleId,
+                        new Role(serviceMediator, role, guildId)))
+                .defaultIfEmpty(new RoleDeleteEvent(serviceMediator.getClient(), guildId, roleId, null));
     }
 
     static Mono<RoleUpdateEvent> guildRoleUpdate(DispatchContext<GuildRoleUpdate> context) {

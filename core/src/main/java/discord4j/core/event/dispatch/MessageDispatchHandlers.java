@@ -19,6 +19,7 @@ package discord4j.core.event.dispatch;
 import discord4j.common.jackson.Possible;
 import discord4j.common.json.EmbedResponse;
 import discord4j.core.DiscordClient;
+import discord4j.core.ServiceMediator;
 import discord4j.core.event.domain.message.*;
 import discord4j.core.object.Embed;
 import discord4j.core.object.data.stored.MemberBean;
@@ -35,6 +36,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -65,15 +67,20 @@ class MessageDispatchHandlers {
     }
 
     static Mono<MessageDeleteEvent> messageDelete(DispatchContext<MessageDelete> context) {
-        DiscordClient client = context.getServiceMediator().getClient();
+        ServiceMediator serviceMediator = context.getServiceMediator();
+        DiscordClient client = serviceMediator.getClient();
         long messageId = context.getDispatch().getId();
         long channelId = context.getDispatch().getChannelId();
 
-        Mono<Void> deleteMessage = context.getServiceMediator().getStateHolder().getMessageStore()
+        Mono<Void> deleteMessage = serviceMediator.getStateHolder().getMessageStore()
                 .delete(context.getDispatch().getId());
 
-        return deleteMessage
-                .thenReturn(new MessageDeleteEvent(client, messageId, channelId));
+        return serviceMediator.getStateHolder().getMessageStore()
+                .find(messageId)
+                .flatMap(deleteMessage::thenReturn)
+                .map(messageBean -> new MessageDeleteEvent(client, messageId, channelId,
+                        new Message(serviceMediator, messageBean)))
+                .defaultIfEmpty(new MessageDeleteEvent(client, messageId, channelId, null));
     }
 
     static Mono<MessageBulkDeleteEvent> messageDeleteBulk(DispatchContext<MessageDeleteBulk> context) {
@@ -83,10 +90,17 @@ class MessageDispatchHandlers {
         long guildId = context.getDispatch().getGuildId();
 
         Mono<Void> deleteMessages = context.getServiceMediator().getStateHolder().getMessageStore()
-                .delete(Flux.fromArray(ArrayUtil.toObject(context.getDispatch().getIds())));
+                .delete(Flux.fromArray(ArrayUtil.toObject(messageIds)));
 
-        return deleteMessages
-                .thenReturn(new MessageBulkDeleteEvent(client, messageIds, channelId, guildId));
+        return Flux.fromArray(ArrayUtil.toObject(messageIds))
+                .flatMap(context.getServiceMediator().getStateHolder().getMessageStore()::find)
+                .map(messageBean -> new Message(context.getServiceMediator(), messageBean))
+                .collect(Collectors.toSet())
+                .flatMap(deleteMessages::thenReturn)
+                .map(messages -> new MessageBulkDeleteEvent(client, messageIds, channelId, guildId, messages))
+                .defaultIfEmpty(
+                        new MessageBulkDeleteEvent(client, messageIds, channelId, guildId, Collections.emptySet()));
+
     }
 
     static Mono<ReactionAddEvent> messageReactionAdd(DispatchContext<MessageReactionAdd> context) {

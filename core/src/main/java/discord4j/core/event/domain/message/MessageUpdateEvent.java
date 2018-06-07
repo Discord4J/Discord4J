@@ -32,7 +32,8 @@ public class MessageUpdateEvent extends MessageEvent {
 
     private final long messageId;
     private final long channelId;
-    private final long guildId;
+    @Nullable
+    private final Long guildId;
 
     @Nullable
     private final Message old;
@@ -43,7 +44,7 @@ public class MessageUpdateEvent extends MessageEvent {
     private final boolean embedsChanged;
     private final List<Embed> currentEmbeds;
 
-    public MessageUpdateEvent(DiscordClient client, long messageId, long channelId, long guildId,
+    public MessageUpdateEvent(DiscordClient client, long messageId, long channelId, @Nullable Long guildId,
                               @Nullable Message old, boolean contentChanged, @Nullable String currentContent,
                               boolean embedsChanged, List<Embed> currentEmbeds) {
         super(client);
@@ -73,13 +74,12 @@ public class MessageUpdateEvent extends MessageEvent {
         return getClient().getMessageChannelById(getChannelId());
     }
 
-    // FIXME This should be Optional!
-    public Snowflake getGuildId() {
-        return Snowflake.of(guildId);
+    public Optional<Snowflake> getGuildId() {
+        return Optional.ofNullable(guildId).map(Snowflake::of);
     }
 
     public Mono<Guild> getGuild() {
-        return getClient().getGuildById(getGuildId());
+        return Mono.justOrEmpty(getGuildId()).flatMap(getClient()::getGuildById);
     }
 
     public Optional<Message> getOld() {

@@ -18,6 +18,7 @@ package discord4j.core.event.domain.message;
 
 import discord4j.core.DiscordClient;
 import discord4j.core.object.entity.Guild;
+import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.MessageChannel;
 import discord4j.core.object.util.Snowflake;
 import reactor.core.publisher.Mono;
@@ -31,12 +32,15 @@ public class MessageBulkDeleteEvent extends MessageEvent {
     private final long[] messageIds;
     private final long channelId;
     private final long guildId;
+    private final Set<Message> messages;
 
-    public MessageBulkDeleteEvent(DiscordClient client, long[] messageIds, long channelId, long guildId) {
+    public MessageBulkDeleteEvent(DiscordClient client, long[] messageIds, long channelId, long guildId,
+                                  Set<Message> messages) {
         super(client);
         this.messageIds = messageIds;
         this.channelId = channelId;
         this.guildId = guildId;
+        this.messages = messages;
     }
 
     public Set<Snowflake> getMessageIds() {
@@ -45,7 +49,9 @@ public class MessageBulkDeleteEvent extends MessageEvent {
                 .collect(Collectors.toSet());
     }
 
-    // TODO getOld
+    public Set<Message> getMessages() {
+        return messages;
+    }
 
     public Snowflake getChannelId() {
         return Snowflake.of(channelId);

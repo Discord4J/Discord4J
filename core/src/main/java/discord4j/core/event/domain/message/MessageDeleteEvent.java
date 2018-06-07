@@ -17,26 +17,35 @@
 package discord4j.core.event.domain.message;
 
 import discord4j.core.DiscordClient;
+import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.MessageChannel;
 import discord4j.core.object.util.Snowflake;
 import reactor.core.publisher.Mono;
+
+import javax.annotation.Nullable;
+import java.util.Optional;
 
 public class MessageDeleteEvent extends MessageEvent {
 
     private final long messageId;
     private final long channelId;
+    @Nullable
+    private final Message message;
 
-    public MessageDeleteEvent(DiscordClient client, long messageId, long channelId) {
+    public MessageDeleteEvent(DiscordClient client, long messageId, long channelId, @Nullable Message message) {
         super(client);
         this.messageId = messageId;
         this.channelId = channelId;
+        this.message = message;
     }
 
     public Snowflake getMessageId() {
         return Snowflake.of(messageId);
     }
 
-    // TODO getOld
+    public Optional<Message> getMessage() {
+        return Optional.ofNullable(message);
+    }
 
     public Snowflake getChannelId() {
         return Snowflake.of(channelId);
