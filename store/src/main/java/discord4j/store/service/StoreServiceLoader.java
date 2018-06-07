@@ -24,9 +24,7 @@ import discord4j.store.util.StoreContext;
 import reactor.core.publisher.Mono;
 
 import java.io.Serializable;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.ServiceLoader;
+import java.util.*;
 
 /**
  * A factory-esque object which provides save objects from {@link StoreService}s.
@@ -35,7 +33,7 @@ import java.util.ServiceLoader;
  */
 public class StoreServiceLoader {
 
-    private final List<StoreService> services = new LinkedList<>();
+    private final List<StoreService> services = new ArrayList<>();
 
     private final StoreService generalService;
 
@@ -43,11 +41,29 @@ public class StoreServiceLoader {
      * Creates a reusable instance of the provider, service discovery occurs at this point!
      */
     public StoreServiceLoader() {
+        this(Collections.emptyMap());
+    }
+
+    /**
+     * Creates a reusable instance of the provider, service discovery occurs at this point!
+     *
+     * @param priorityOverrides Allows for manual overriding of {@link StoreService#priority()}.
+     */
+    @SuppressWarnings({"ComparatorCombinators", "Convert2Lambda"})
+    public StoreServiceLoader(Map<Class<? extends StoreService>, Short> priorityOverrides) {
         ServiceLoader<StoreService> serviceLoader = ServiceLoader.load(StoreService.class);
 
         serviceLoader.iterator().forEachRemaining(services::add);
 
-        services.add(new NoOpStoreService()); //No-op is lowest priority
+        services.add(new NoOpStoreService()); //No-op does not use discovery since it is always present
+
+        services.sort(new Comparator<StoreService>() {
+            @Override
+            public int compare(StoreService ss1, StoreService ss2) {
+                return Short.compare(priorityOverrides.getOrDefault(ss1.getClass(), ss1.priority()),
+                        priorityOverrides.getOrDefault(ss2.getClass(), ss2.priority()));
+            }
+        }.reversed());
 
         StoreService generic = getGenericStoreProvider();
         StoreService primitive = getLongObjStoreProvider();
@@ -123,6 +139,12 @@ public class StoreServiceLoader {
         private ComposedStoreService(StoreService genericService, StoreService primitiveService) {
             this.genericService = genericService;
             this.primitiveService = primitiveService;
+        }
+
+        @Override
+        public short priority() {
+            short p1 = genericService.priority(), p2 = primitiveService.priority();
+            return p1 > p2 ? p1 : p2;
         }
 
         @Override

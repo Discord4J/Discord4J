@@ -17,6 +17,7 @@
 package discord4j.store.service;
 
 import discord4j.store.Store;
+import discord4j.store.noop.NoOpStoreService;
 import discord4j.store.primitive.ForwardingStoreService;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
@@ -24,9 +25,7 @@ import reactor.core.publisher.Mono;
 import reactor.util.function.Tuple2;
 import reactor.util.function.Tuples;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 import static org.junit.Assert.*;
 
@@ -49,6 +48,16 @@ public class StoreTests {
         assertEquals(ForwardingStoreService.class, provider.getLongObjStoreProvider().getClass());
         assertEquals(TestService.class,
                 ((ForwardingStoreService) provider.getLongObjStoreProvider()).getOriginal().getClass());
+    }
+
+    @Test
+    public void testPriority() {
+        Map<Class<? extends StoreService>, Short> override = new HashMap<>();
+        override.put(TestService.class, Short.MIN_VALUE);
+        override.put(NoOpStoreService.class, Short.MAX_VALUE);
+        StoreServiceLoader overriden = new StoreServiceLoader(override);
+        assertEquals(TestService.class, provider.getGenericStoreProvider().getClass());
+        assertEquals(NoOpStoreService.class, overriden.getGenericStoreProvider().getClass());
     }
 
     @Test

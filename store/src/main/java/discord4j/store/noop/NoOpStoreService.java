@@ -34,6 +34,11 @@ import java.io.Serializable;
 public class NoOpStoreService implements StoreService {
 
     @Override
+    public short priority() {
+        return Short.MIN_VALUE;
+    }
+
+    @Override
     public boolean hasGenericStores() {
         return true;
     }
