@@ -26,6 +26,8 @@ A few things to remember when opening a pull request:
 * Use descriptive commit messages.
 * Follow the template!
 
+If you're unsure of whether a change is welcome, feel free to ask first in our [Discord server](https://discord.gg/NxGAeCY).
+
 ### Style Requirements
 * Make sure your IDE is respecting the [.editorconfig](../.editorconfig)
 * This project uses space indents.

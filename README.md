@@ -9,19 +9,17 @@ Built with [Reactor](https://projectreactor.io/), [Netty](https://netty.io/), an
 ## Installation
 ```groovy
 repositories {
-  maven {
-    url  "https://jitpack.io"
-  }
+  maven { url  "https://jitpack.io" }
 }
 
 dependencies {
-  compile "com.github.Discord4J.Discord4J:Discord4J-core:@VERSION@"
+  implementation "com.discord4j.discord4j:discord4j-core:@VERSION@"
 }
 ```
 
 ## Quick Example
 ```java
-DiscordClient client = new ClientBuilder("token").build();
+final DiscordClient client = new ClientBuilder("token").build();
 
 client.getEventDispatcher().on(ReadyEvent.class)
         .subscribe(ready -> System.out.println("Logged in as " + ready.getSelf().getUsername()));
@@ -36,7 +34,23 @@ client.getEventDispatcher().on(MessageCreateEvent.class)
 client.login().block();
 ```
 
+## Modules
+Discord4J is highly oriented towards customizability and fine-grained control. To achieve this, the project is divided into several "modules" which can be used separately depending on your use case.
+
+### [Core](./core/README.md)
+The `core` module combines the other modules to form high-level abstractions for the entire Discord Bot API. This is the module most users will want when making bots.
+
+### [Rest](./rest/README.md)
+The `rest` module provides a low-level HTTP client specifically for Discord which properly handles Discord's [ratelimiting system](https://discordapp.com/developers/docs/topics/rate-limits).
+
+### [Gateway](./gateway/README.md)
+The `gateway` module provides a low-level WebSocket client for interacting with the [Discord Gateway](https://discordapp.com/developers/docs/topics/gateway).
+
+### [Store](./store/README.md)
+The `store` module provides a platform for the efficient caching of Discord gateway data.
+
 ## Useful Links
-* [Discord4J Site](discord4j.com)
-* [Discord4J Wiki](http://discord4j.readthedocs.io/en/latest/)
+* [Discord4J Site](https://discord4j.com)
+* [Discord4J Wiki](https://github.com/Discord4J/Discord4J/wiki)
+* [Javadoc](https://jitpack.io/com/discord4j/discord4j/discord4j-core/v3-SNAPSHOT/javadoc/index.html)
 * [Reactor 3 Reference Guide](http://projectreactor.io/docs/core/release/reference/)
