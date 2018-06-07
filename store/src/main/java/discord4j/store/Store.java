@@ -31,8 +31,8 @@ import java.io.Serializable;
  * {@link Comparable} in order to allow for range operations.
  * @param <V> The value type, these follow
  * <a href="https://en.wikipedia.org/wiki/JavaBeans#JavaBean_conventions">JavaBean</a> conventions.
+ *
  * @see LongObjStore
- * @see discord4j.store.util.AbsentValue
  */
 public interface Store<K extends Comparable<K>, V extends Serializable> {
 
