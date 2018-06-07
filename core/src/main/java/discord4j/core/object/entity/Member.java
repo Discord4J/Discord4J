@@ -24,6 +24,7 @@ import discord4j.core.object.data.stored.PresenceBean;
 import discord4j.core.object.data.stored.UserBean;
 import discord4j.core.object.data.stored.VoiceStateBean;
 import discord4j.core.object.presence.Presence;
+import discord4j.core.object.util.Permission;
 import discord4j.core.object.util.PermissionSet;
 import discord4j.core.object.util.Snowflake;
 import discord4j.store.util.LongLongTuple2;
@@ -190,7 +191,8 @@ public final class Member extends User {
                 .filter(role -> getRoleIds().contains(role))
                 .flatMap(id -> getGuild().map(Guild::getClient).flatMap(client -> client.getRoleById(getGuildId(), id)))
                 .map(Role::getPermissions)
-                .reduce(PermissionSet.none(), PermissionSet::or);
+                .reduce(PermissionSet.none(), PermissionSet::or)
+                .map(p -> p.contains(Permission.ADMINISTRATOR) ? PermissionSet.all() : p); // ADMINISTRATOR grants all permissions implicitly
     }
 
     /**

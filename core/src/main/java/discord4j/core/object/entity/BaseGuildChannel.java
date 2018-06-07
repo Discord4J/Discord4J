@@ -20,14 +20,18 @@ import discord4j.core.ServiceMediator;
 import discord4j.core.object.PermissionOverwrite;
 import discord4j.core.object.data.stored.GuildChannelBean;
 import discord4j.core.object.data.stored.PermissionOverwriteBean;
+import discord4j.core.object.util.Permission;
 import discord4j.core.object.util.PermissionSet;
 import discord4j.core.object.util.Snowflake;
 import reactor.core.publisher.Mono;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /** An internal implementation of {@link GuildChannel} designed to streamline inheritance. */
@@ -63,21 +67,35 @@ class BaseGuildChannel extends BaseChannel implements GuildChannel {
     }
     
     @Override
-    public Mono<PermissionSet> getPermissions(Member member) {
-        Set<PermissionOverwrite> effectiveOverwrites = getPermissionOverwrites().stream()
-                .filter(overwrite -> overwrite.getRoleId().map(member.getRoleIds()::contains).orElse(true))
+    public final Mono<PermissionSet> getPermissions(Member member) {
+        Map<Snowflake, PermissionOverwrite> effectiveOverwrites = getPermissionOverwrites().stream()
+                .filter(overwrite -> overwrite.getRoleId().map(r -> r.equals(member.getGuildId()) || member.getRoleIds().contains(r)).orElse(true))
                 .filter(overwrite -> overwrite.getUserId().map(member.getId()::equals).orElse(true))
-                .collect(Collectors.toSet());
-                
-        PermissionSet granted = effectiveOverwrites.stream().map(PermissionOverwrite::getAllowed)
-                .reduce(PermissionSet.none(), PermissionSet::or);
-        
-        PermissionSet revoked = effectiveOverwrites.stream().map(PermissionOverwrite::getDenied)
-                .reduce(PermissionSet.none(), PermissionSet::or);
+                .collect(Collectors.toMap(
+                        overwrite -> (Snowflake) overwrite.getRoleId().orElseGet(overwrite.getUserId()::get), 
+                        Function.identity(),
+                        (id1, id2) -> id1, // impossible?
+                        LinkedHashMap::new));
         
         return member.getPermissions()
-                .map(perms -> perms.or(granted))
-                .map(perms -> perms.and(revoked.inverse()));
+                .filter(permissions -> !permissions.contains(Permission.ADMINISTRATOR))
+                .map(permissions -> applyOverwrites(permissions, effectiveOverwrites, Collections.singleton(member.getGuildId())))
+                .map(permissions -> applyOverwrites(permissions, effectiveOverwrites, member.getRoleIds()))
+                .map(permissions -> applyOverwrites(permissions, effectiveOverwrites, Collections.singleton(member.getId())))
+                .switchIfEmpty(Mono.just(PermissionSet.all()));
+   }
+    
+    private PermissionSet applyOverwrites(PermissionSet current, Map<Snowflake, PermissionOverwrite> overwrites, Iterable<Snowflake> ids) {
+        int allow = 0;
+        int deny = 0;
+        for (Snowflake id : ids) {
+            PermissionOverwrite overwrite = overwrites.get(id);
+            if (overwrite != null) {
+                allow |= overwrite.getAllowed().getRawValue();
+                deny |= overwrite.getDenied().getRawValue();
+            }
+        }
+        return PermissionSet.of((current.getRawValue() & ~deny) | allow);
     }
 
     @Override
