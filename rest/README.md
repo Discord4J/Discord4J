@@ -2,6 +2,7 @@
 The `rest` module provides a low-level HTTP client specifically for Discord which properly handles Discord's [ratelimiting system](https://discordapp.com/developers/docs/topics/rate-limits).
 
 ## Installation
+### Gradle
 ```groovy
 repositories {
   maven { url  "https://jitpack.io" }
@@ -10,6 +11,23 @@ repositories {
 dependencies {
   implementation "com.discord4j.discord4j:discord4j-rest:@VERSION@"
 }
+```
+### Maven
+```xml
+<repositories>
+  <repository>
+    <id>jitpack.io</id>
+    <url>https://jitpack.io</url>
+  </repository>
+</repositories>
+
+<dependencies>
+  <dependency>
+    <groupId>com.discord4j.discord4j</groupId>
+    <artifactId>discord4j-rest</artifactId>
+    <version>@VERSION@</version>
+  </dependency>
+</dependencies>
 ```
 
 ## Example Usage

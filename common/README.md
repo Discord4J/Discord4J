@@ -1,2 +1,2 @@
 # Discord4J Common
-This module contains a collection of common classes used in most other modules.
+The `common` module contains base utilities and models useful for other modules.
