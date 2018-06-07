@@ -64,10 +64,12 @@ public final class DiscordClientBuilder {
     private int shardIndex = 0;
     private int shardCount = 1;
     private StoreServiceLoader storeServiceLoader;
-    private @Nullable StoreService storeService = null;
+    @Nullable
+    private StoreService storeService = null;
     private FluxProcessor<Event, Event> eventProcessor;
     private Scheduler eventScheduler;
     private Presence initialPresence;
+    @Nullable
     private IdentifyOptions identifyOptions;
     private RetryOptions retryOptions;
 
@@ -75,7 +77,8 @@ public final class DiscordClientBuilder {
         this.token = Objects.requireNonNull(token);
         //Increase JDK store priority by default
         Map<Class<? extends StoreService>, Short> priority = new HashMap<>();
-        priority.put(JdkStoreService.class, (short) (Short.MIN_VALUE + 1)); // We want almost minimum priority, so that jdk can beat no-op but most implementations will beat jdk
+        // We want almost minimum priority, so that jdk can beat no-op but most implementations will beat jdk
+        priority.put(JdkStoreService.class, (short) (Short.MIN_VALUE + 1));
         storeServiceLoader = new StoreServiceLoader(priority);
         eventProcessor = EmitterProcessor.create(false);
         eventScheduler = Schedulers.elastic();
@@ -118,6 +121,7 @@ public final class DiscordClientBuilder {
         return this;
     }
 
+    @Nullable
     public StoreService getStoreService() {
         return storeService;
     }
@@ -154,6 +158,7 @@ public final class DiscordClientBuilder {
         return this;
     }
 
+    @Nullable
     public IdentifyOptions getIdentifyOptions() {
         return identifyOptions;
     }
