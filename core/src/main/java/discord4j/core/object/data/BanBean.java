@@ -24,6 +24,8 @@ import java.io.Serializable;
 
 public final class BanBean implements Serializable {
 
+    private static final long serialVersionUID = 9065440954064437695L;
+
     @Nullable
     private String reason;
     private UserBean user;
@@ -40,7 +42,15 @@ public final class BanBean implements Serializable {
         return reason;
     }
 
+    public void setReason(@Nullable final String reason) {
+        this.reason = reason;
+    }
+
     public UserBean getUser() {
         return user;
+    }
+
+    public void setUser(final UserBean user) {
+        this.user = user;
     }
 }
