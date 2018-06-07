@@ -39,6 +39,7 @@ import discord4j.rest.http.*;
 import discord4j.rest.http.client.SimpleHttpClient;
 import discord4j.rest.request.Router;
 import discord4j.rest.route.Routes;
+import discord4j.store.jdk.JdkStoreService;
 import discord4j.store.service.StoreService;
 import discord4j.store.service.StoreServiceLoader;
 import reactor.core.publisher.EmitterProcessor;
@@ -50,6 +51,8 @@ import reactor.util.Loggers;
 
 import javax.annotation.Nullable;
 import java.time.Duration;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Properties;
 
@@ -60,7 +63,8 @@ public final class DiscordClientBuilder {
     private String token;
     private int shardIndex = 0;
     private int shardCount = 1;
-    private StoreService storeService;
+    private StoreServiceLoader storeServiceLoader;
+    private @Nullable StoreService storeService = null;
     private FluxProcessor<Event, Event> eventProcessor;
     private Scheduler eventScheduler;
     private Presence initialPresence;
@@ -69,7 +73,10 @@ public final class DiscordClientBuilder {
 
     public DiscordClientBuilder(final String token) {
         this.token = Objects.requireNonNull(token);
-        storeService = new StoreServiceLoader().getStoreService();
+        //Increase JDK store priority by default
+        Map<Class<? extends StoreService>, Short> priority = new HashMap<>();
+        priority.put(JdkStoreService.class, (short) (Short.MIN_VALUE + 1)); // We want almost minimum priority, so that jdk can beat no-op but most implementations will beat jdk
+        storeServiceLoader = new StoreServiceLoader(priority);
         eventProcessor = EmitterProcessor.create(false);
         eventScheduler = Schedulers.elastic();
         retryOptions = new RetryOptions(Duration.ofSeconds(2), Duration.ofSeconds(120), Integer.MAX_VALUE);
@@ -99,6 +106,15 @@ public final class DiscordClientBuilder {
 
     public DiscordClientBuilder setShardCount(final int shardCount) {
         this.shardCount = shardCount;
+        return this;
+    }
+
+    public StoreServiceLoader getStoreServiceLoader() {
+        return storeServiceLoader;
+    }
+
+    public ClientBuilder setStoreServiceLoader(final StoreServiceLoader storeServiceLoader) {
+        this.storeServiceLoader = Objects.requireNonNull(storeServiceLoader);
         return this;
     }
 
@@ -163,7 +179,7 @@ public final class DiscordClientBuilder {
 
         final Properties properties = VersionUtil.getProperties();
         final String version = properties.getProperty(VersionUtil.APPLICATION_VERSION, "3");
-        final String url = properties.getProperty(VersionUtil.APPLICATION_URL, "http://discord4j.com");
+        final String url = properties.getProperty(VersionUtil.APPLICATION_URL, "https://discord4j.com");
 
         final SimpleHttpClient httpClient = SimpleHttpClient.builder()
                 .defaultHeader("content-type", "application/json")
@@ -189,6 +205,10 @@ public final class DiscordClientBuilder {
         final GatewayClient gatewayClient = new GatewayClient(
                 new JacksonPayloadReader(mapper), new JacksonPayloadWriter(mapper),
                 retryOptions, token, identifyOptions);
+
+        if (storeService == null) {
+            storeService = storeServiceLoader.getStoreService();
+        }
 
         final StateHolder stateHolder = new StateHolder(storeService);
         final RestClient restClient = new RestClient(new Router(httpClient, Schedulers.elastic())); // TODO parametrize
