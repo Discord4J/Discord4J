@@ -51,6 +51,11 @@ public class ForwardingStoreService implements StoreService {
     }
 
     @Override
+    public short priority() {
+        return toForward.priority();
+    }
+
+    @Override
     public boolean hasGenericStores() {
         return getOriginal().hasGenericStores();
     }
