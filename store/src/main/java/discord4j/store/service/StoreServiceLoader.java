@@ -20,6 +20,7 @@ import discord4j.store.Store;
 import discord4j.store.noop.NoOpStoreService;
 import discord4j.store.primitive.ForwardingStoreService;
 import discord4j.store.primitive.LongObjStore;
+import discord4j.store.util.Lazy;
 import discord4j.store.util.StoreContext;
 import reactor.core.publisher.Mono;
 
@@ -33,9 +34,7 @@ import java.util.*;
  */
 public class StoreServiceLoader {
 
-    private final List<StoreService> services = new ArrayList<>();
-
-    private final StoreService generalService;
+    private final Lazy<StoreService> generalService;
 
     /**
      * Creates a reusable instance of the provider, service discovery occurs at this point!
@@ -51,23 +50,33 @@ public class StoreServiceLoader {
      */
     @SuppressWarnings({"ComparatorCombinators", "Convert2Lambda"})
     public StoreServiceLoader(Map<Class<? extends StoreService>, Short> priorityOverrides) {
-        ServiceLoader<StoreService> serviceLoader = ServiceLoader.load(StoreService.class);
+        generalService = new Lazy<>(() -> {
+            List<StoreService> services = new ArrayList<>();
+            ServiceLoader<StoreService> serviceLoader = ServiceLoader.load(StoreService.class);
 
-        serviceLoader.iterator().forEachRemaining(services::add);
+            serviceLoader.iterator().forEachRemaining(services::add);
 
-        services.add(new NoOpStoreService()); //No-op does not use discovery since it is always present
+            services.add(new NoOpStoreService()); //No-op does not use discovery since it is always present
 
-        services.sort(new Comparator<StoreService>() {
-            @Override
-            public int compare(StoreService ss1, StoreService ss2) {
-                return Short.compare(priorityOverrides.getOrDefault(ss1.getClass(), ss1.priority()),
-                        priorityOverrides.getOrDefault(ss2.getClass(), ss2.priority()));
+            services.sort(new Comparator<StoreService>() {
+                @Override
+                public int compare(StoreService ss1, StoreService ss2) {
+                    return Short.compare(priorityOverrides.getOrDefault(ss1.getClass(), ss1.priority()),
+                            priorityOverrides.getOrDefault(ss2.getClass(), ss2.priority()));
+                }
+            }.reversed());
+
+            StoreService generic = services.stream().filter(StoreService::hasGenericStores).findFirst().get();
+
+            StoreService primitive = services.stream().filter(StoreService::hasLongObjStores).findFirst().get();
+            if (primitive instanceof NoOpStoreService) { //Fallback to boxed impl if one is present
+                if (!(generic instanceof NoOpStoreService)) {
+                    return new ForwardingStoreService(generic);
+                }
             }
-        }.reversed());
 
-        StoreService generic = getGenericStoreProvider();
-        StoreService primitive = getLongObjStoreProvider();
-        generalService = generic == primitive ? generic : new ComposedStoreService(generic, primitive);
+            return generic == primitive ? generic : new ComposedStoreService(generic, primitive);
+        });
     }
 
     /**
@@ -76,34 +85,7 @@ public class StoreServiceLoader {
      * @return The best {@link StoreService} implementation.
      */
     public StoreService getStoreService() {
-        return generalService;
-    }
-
-    /**
-     * Gets the service which will be used to provide generic stores.
-     *
-     * @return The generic store providing service.
-     */
-    StoreService getGenericStoreProvider() {
-        return services.stream().filter(StoreService::hasGenericStores).findFirst().get();
-    }
-
-    /**
-     * Gets the service which will be used to provide long-object stores.
-     *
-     * @return The long-object store providing service.
-     */
-    StoreService getLongObjStoreProvider() {
-        StoreService service = services.stream().filter(StoreService::hasLongObjStores).findFirst().get();
-
-        if (service instanceof NoOpStoreService) { //Fallback to boxed impl if one is present
-            StoreService backup = getGenericStoreProvider();
-            if (!(backup instanceof NoOpStoreService)) {
-                return new ForwardingStoreService(backup);
-            }
-        }
-
-        return service;
+        return generalService.get();
     }
 
     /**

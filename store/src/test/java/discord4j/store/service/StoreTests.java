@@ -40,14 +40,16 @@ public class StoreTests {
 
     @Test
     public void testServiceDiscovery() {
-        assertEquals(TestService.class, provider.getGenericStoreProvider().getClass());
+        assertTrue(provider.getStoreService() instanceof ForwardingStoreService);
+        assertEquals(TestService.class, ((ForwardingStoreService) provider.getStoreService()).getOriginal().getClass());
     }
 
     @Test
     public void testGenericFallback() {
-        assertEquals(ForwardingStoreService.class, provider.getLongObjStoreProvider().getClass());
+        assertTrue(provider.getStoreService() instanceof ForwardingStoreService);
+        assertTrue(provider.getStoreService().hasLongObjStores());
         assertEquals(TestService.class,
-                ((ForwardingStoreService) provider.getLongObjStoreProvider()).getOriginal().getClass());
+                ((ForwardingStoreService) provider.getStoreService()).getOriginal().getClass());
     }
 
     @Test
@@ -56,8 +58,8 @@ public class StoreTests {
         override.put(TestService.class, Short.MIN_VALUE);
         override.put(NoOpStoreService.class, Short.MAX_VALUE);
         StoreServiceLoader overriden = new StoreServiceLoader(override);
-        assertEquals(TestService.class, provider.getGenericStoreProvider().getClass());
-        assertEquals(NoOpStoreService.class, overriden.getGenericStoreProvider().getClass());
+        assertEquals(TestService.class, ((ForwardingStoreService) provider.getStoreService()).getOriginal().getClass());
+        assertEquals(NoOpStoreService.class, overriden.getStoreService().getClass());
     }
 
     @Test
