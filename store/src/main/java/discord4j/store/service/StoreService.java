@@ -38,7 +38,7 @@ public interface StoreService {
     /**
      * Returns an arbitrary priority for this service. This is used for automated service discovery in the case
      * that multiple services are present. Conventions: 0 = neutral priority,
-     * {@link Short#MIN_VALUE} = lowest priority, {@link Short#MAX_VALUE}.
+     * {@link Short#MAX_VALUE} = lowest priority, {@link Short#MIN_VALUE}.
      *
      * @return The priority of this service, 0 by default.
      */

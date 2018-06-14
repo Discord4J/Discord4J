@@ -35,7 +35,7 @@ public class NoOpStoreService implements StoreService {
 
     @Override
     public short priority() {
-        return Short.MIN_VALUE;
+        return Short.MAX_VALUE;
     }
 
     @Override
