@@ -64,7 +64,7 @@ public class StoreServiceLoader {
                     return Short.compare(priorityOverrides.getOrDefault(ss1.getClass(), ss1.priority()),
                             priorityOverrides.getOrDefault(ss2.getClass(), ss2.priority()));
                 }
-            }.reversed());
+            });
 
             StoreService generic = services.stream().filter(StoreService::hasGenericStores).findFirst().get();
 

@@ -78,7 +78,7 @@ public final class DiscordClientBuilder {
         //Increase JDK store priority by default
         Map<Class<? extends StoreService>, Short> priority = new HashMap<>();
         // We want almost minimum priority, so that jdk can beat no-op but most implementations will beat jdk
-        priority.put(JdkStoreService.class, (short) (Short.MIN_VALUE + 1));
+        priority.put(JdkStoreService.class, (short) (Short.MAX_VALUE - 1));
         storeServiceLoader = new StoreServiceLoader(priority);
         eventProcessor = EmitterProcessor.create(false);
         eventScheduler = Schedulers.elastic();
