@@ -16,6 +16,7 @@
  */
 package discord4j.rest.json.response;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import discord4j.common.jackson.UnsignedJson;
 import discord4j.common.json.GuildEmojiResponse;
@@ -24,6 +25,7 @@ import discord4j.common.json.RoleResponse;
 import javax.annotation.Nullable;
 import java.util.Arrays;
 
+@JsonIgnoreProperties(value = {"max_presences"}) // FIXME
 public class GuildResponse {
 
     @JsonProperty("mfa_level")
