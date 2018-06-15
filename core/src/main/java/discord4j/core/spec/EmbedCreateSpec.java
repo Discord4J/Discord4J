@@ -19,6 +19,7 @@ package discord4j.core.spec;
 import discord4j.common.json.EmbedFieldEntity;
 import discord4j.rest.json.request.*;
 
+import javax.annotation.Nullable;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -50,11 +51,11 @@ public class EmbedCreateSpec implements Spec<EmbedRequest> {
     }
 
     public EmbedCreateSpec setColor(final int color) {
-        requestBuilder.color(color);
+        requestBuilder.color(color & 0xFFFFFF);
         return this;
     }
 
-    public EmbedCreateSpec setFooter(String text, String iconUrl) {
+    public EmbedCreateSpec setFooter(String text, @Nullable String iconUrl) {
         requestBuilder.footer(new EmbedFooterRequest(text, iconUrl));
         return this;
     }
@@ -69,7 +70,7 @@ public class EmbedCreateSpec implements Spec<EmbedRequest> {
         return this;
     }
 
-    public EmbedCreateSpec setAuthor(String name, String url, String iconUrl) {
+    public EmbedCreateSpec setAuthor(String name, @Nullable String url, @Nullable String iconUrl) {
         requestBuilder.author(new EmbedAuthorRequest(name, url, iconUrl));
         return this;
     }

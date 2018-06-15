@@ -18,14 +18,18 @@ package discord4j.rest.json.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import javax.annotation.Nullable;
+
 public class EmbedAuthorRequest {
 
     private final String name;
+    @Nullable
     private final String url;
     @JsonProperty("icon_url")
+    @Nullable
     private final String iconUrl;
 
-    public EmbedAuthorRequest(String name, String url, String iconUrl) {
+    public EmbedAuthorRequest(String name, @Nullable String url, @Nullable String iconUrl) {
         this.name = name;
         this.url = url;
         this.iconUrl = iconUrl;
