@@ -132,10 +132,11 @@ public class SimpleHttpClient {
 
                     int responseStatus = response.status().code();
                     if (responseStatus >= 400 && responseStatus < 600) {
-                        return readerStrategy.map(SimpleHttpClient::<ErrorResponse>cast)
-                                .map(s -> s.read(response, ErrorResponse.class))
-                                .map(s -> Mono.<T>error(clientException(response, s)))
-                                .orElseThrow(() -> clientException(response, Mono.empty()));
+                        return Mono.justOrEmpty(readerStrategy)
+                                .map(SimpleHttpClient::<ErrorResponse>cast)
+                                .flatMap(s -> s.read(response, ErrorResponse.class))
+                                .flatMap(s -> Mono.<T>error(clientException(response, s)))
+                                .switchIfEmpty(Mono.error(clientException(response, null)));
                     } else {
                         return readerStrategy.map(SimpleHttpClient::<T>cast)
                                 .map(s -> s.read(response, responseType))
@@ -146,7 +147,7 @@ public class SimpleHttpClient {
                 });
     }
 
-    private ClientException clientException(HttpClientResponse response, Mono<ErrorResponse> errorResponse) {
+    private ClientException clientException(HttpClientResponse response, @Nullable ErrorResponse errorResponse) {
         return new ClientException(response.status(), response.responseHeaders(), errorResponse);
     }
 
