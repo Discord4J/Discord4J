@@ -189,7 +189,7 @@ public final class Member extends User {
         return getGuild()
                 .flatMapIterable(Guild::getRoleIds)
                 .filter(role -> getRoleIds().contains(role))
-                .flatMap(id -> getGuild().map(Guild::getClient).flatMap(client -> client.getRoleById(getGuildId(), id)))
+                .flatMap(id -> getClient().getRoleById(getGuildId(), id))
                 .map(Role::getPermissions)
                 .reduce(PermissionSet.none(), PermissionSet::or)
                 .map(p -> p.contains(Permission.ADMINISTRATOR) ? PermissionSet.all() : p); // ADMINISTRATOR grants all permissions implicitly
