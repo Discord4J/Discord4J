@@ -83,7 +83,7 @@ class BaseGuildChannel extends BaseChannel implements GuildChannel {
                 .map(permissions -> applyOverwrites(permissions, effectiveOverwrites, member.getRoleIds()))
                 .map(permissions -> applyOverwrites(permissions, effectiveOverwrites, Collections.singleton(member.getId())))
                 .switchIfEmpty(Mono.just(PermissionSet.all()));
-   }
+    }
     
     private PermissionSet applyOverwrites(PermissionSet current, Map<Snowflake, PermissionOverwrite> overwrites, Iterable<Snowflake> ids) {
         int allow = 0;
