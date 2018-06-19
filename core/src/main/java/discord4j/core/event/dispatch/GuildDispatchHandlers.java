@@ -167,26 +167,27 @@ class GuildDispatchHandlers {
     static Mono<EmojisUpdateEvent> guildEmojisUpdate(DispatchContext<GuildEmojisUpdate> context) {
         ServiceMediator serviceMediator = context.getServiceMediator();
 
-        long[] emojiIds = Arrays.stream(context.getDispatch().getEmojis())
-                .mapToLong(GuildEmojiResponse::getId)
-                .toArray();
-
-        Stream<LongObjTuple2<GuildEmojiBean>> emojiBeans = Arrays.stream(context.getDispatch().getEmojis())
-                .map(GuildEmojiBean::new)
-                .map(bean -> LongObjTuple2.of(bean.getId(), bean));
-
         Mono<Void> updateGuildBean = serviceMediator.getStateHolder().getGuildStore()
                 .find(context.getDispatch().getGuildId())
-                .doOnNext(guild -> guild.setEmojis(emojiIds))
+                .doOnNext(guild -> {
+                    long[] emojis = Arrays.stream(context.getDispatch().getEmojis())
+                            .mapToLong(GuildEmojiResponse::getId)
+                            .toArray();
+
+                    guild.setEmojis(emojis);
+                })
                 .flatMap(guild -> serviceMediator.getStateHolder().getGuildStore().save(guild.getId(), guild));
 
         Mono<Void> saveEmojis = serviceMediator.getStateHolder().getGuildEmojiStore()
-                .saveWithLong(Flux.fromStream(emojiBeans));
+                .saveWithLong(Flux.fromArray(context.getDispatch().getEmojis())
+                                      .map(GuildEmojiBean::new)
+                                      .map(bean -> LongObjTuple2.of(bean.getId(), bean)));
 
         DiscordClient client = context.getServiceMediator().getClient();
         long guildId = context.getDispatch().getGuildId();
-        Set<GuildEmoji> emojis = emojiBeans
-                .map(LongObjTuple2::getT2)
+
+        Set<GuildEmoji> emojis = Arrays.stream(context.getDispatch().getEmojis())
+                .map(GuildEmojiBean::new)
                 .map(bean -> new GuildEmoji(serviceMediator, bean, guildId))
                 .collect(Collectors.toSet());
 
