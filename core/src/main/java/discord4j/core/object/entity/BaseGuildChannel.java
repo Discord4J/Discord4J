@@ -68,24 +68,32 @@ class BaseGuildChannel extends BaseChannel implements GuildChannel {
     
     @Override
     public final Mono<PermissionSet> getPermissions(Member member) {
-        Map<Snowflake, PermissionOverwrite> effectiveOverwrites = getPermissionOverwrites().stream()
-                .filter(overwrite -> overwrite.getRoleId().map(r -> r.equals(member.getGuildId()) || member.getRoleIds().contains(r)).orElse(true))
-                .filter(overwrite -> overwrite.getUserId().map(member.getId()::equals).orElse(true))
+        return member.getPermissions()
+                .map(p -> getEffectivePermissions(p, getPermissionOverwrites(), member.getId(), member.getGuildId(), member.getRoleIds()));
+    }
+    
+    public static PermissionSet getEffectivePermissions(PermissionSet permissions, Set<PermissionOverwrite> overwrites, Snowflake member, Snowflake guild, Set<Snowflake> roles) {
+        if (permissions.contains(Permission.ADMINISTRATOR)) {
+            return PermissionSet.all();
+        }
+        
+        Map<Snowflake, PermissionOverwrite> effectiveOverwrites = overwrites.stream()
+                .filter(overwrite -> overwrite.getRoleId().map(r -> r.equals(guild) || roles.contains(r)).orElse(true))
+                .filter(overwrite -> overwrite.getUserId().map(member::equals).orElse(true))
                 .collect(Collectors.toMap(
                         overwrite -> (Snowflake) overwrite.getRoleId().orElseGet(overwrite.getUserId()::get), 
                         Function.identity(),
                         (id1, id2) -> id1, // impossible?
                         LinkedHashMap::new));
         
-        return member.getPermissions()
-                .filter(permissions -> !permissions.contains(Permission.ADMINISTRATOR))
-                .map(permissions -> applyOverwrites(permissions, effectiveOverwrites, Collections.singleton(member.getGuildId())))
-                .map(permissions -> applyOverwrites(permissions, effectiveOverwrites, member.getRoleIds()))
-                .map(permissions -> applyOverwrites(permissions, effectiveOverwrites, Collections.singleton(member.getId())))
-                .switchIfEmpty(Mono.just(PermissionSet.all()));
+        permissions = applyOverwrites(permissions, effectiveOverwrites, Collections.singleton(guild));
+        permissions = applyOverwrites(permissions, effectiveOverwrites, roles);
+        permissions = applyOverwrites(permissions, effectiveOverwrites, Collections.singleton(member));
+        
+        return permissions;
     }
     
-    private PermissionSet applyOverwrites(PermissionSet current, Map<Snowflake, PermissionOverwrite> overwrites, Iterable<Snowflake> ids) {
+    public static PermissionSet applyOverwrites(PermissionSet current, Map<Snowflake, PermissionOverwrite> overwrites, Iterable<Snowflake> ids) {
         int allow = 0;
         int deny = 0;
         for (Snowflake id : ids) {
