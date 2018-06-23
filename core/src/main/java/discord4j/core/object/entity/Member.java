@@ -16,7 +16,6 @@
  */
 package discord4j.core.object.entity;
 
-import discord4j.core.ClientBuilder;
 import discord4j.core.ServiceMediator;
 import discord4j.core.object.VoiceState;
 import discord4j.core.object.data.stored.MemberBean;
@@ -155,7 +154,7 @@ public final class Member extends User {
      * @return A {@link Mono} where, upon successful completion, emits a {@link VoiceState voice state} for this user
      * for this guild. If an error is received, it is emitted through the {@code Mono}.
      *
-     * @implNote If the underlying {@link ClientBuilder#getStoreService() store} does not save {@link VoiceStateBean}
+     * @implNote If the underlying {@link discord4j.core.DiscordClientBuilder#getStoreService() store} does not save {@link VoiceStateBean}
      * instances <b>OR</b> the bot is currently not logged in then the returned {@code Mono} will always be empty.
      */
     public Mono<VoiceState> getVoiceState() {
@@ -170,7 +169,7 @@ public final class Member extends User {
      * @return A {@link Mono} where, upon successful completion, emits a {@link Presence presence} for this user for
      * this guild. If an error is received, it is emitted through the {@code Mono}.
      *
-     * @implNote If the underlying {@link ClientBuilder#getStoreService() store} does not save {@link PresenceBean}
+     * @implNote If the underlying {@link discord4j.core.DiscordClientBuilder#getStoreService() store} does not save {@link PresenceBean}
      * instances <b>OR</b> the bot is currently not logged in then the returned {@code Mono} will always be empty.
      */
     public Mono<Presence> getPresence() {

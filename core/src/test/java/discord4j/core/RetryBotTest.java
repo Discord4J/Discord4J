@@ -93,7 +93,7 @@ public class RetryBotTest {
             }
         }));
 
-        DiscordClient client = new ClientBuilder(token)
+        DiscordClient client = new DiscordClientBuilder(token)
                 .setIdentifyOptions(options)
                 .setInitialPresence(Presence.doNotDisturb())
                 .build();
@@ -112,7 +112,7 @@ public class RetryBotTest {
     public void testNoCommands() {
         IdentifyOptions options = new IdentifyOptions(shardId, shardCount, null);
 
-        DiscordClient client = new ClientBuilder(token)
+        DiscordClient client = new DiscordClientBuilder(token)
                 .setIdentifyOptions(options)
                 .setInitialPresence(Presence.doNotDisturb())
                 .build();

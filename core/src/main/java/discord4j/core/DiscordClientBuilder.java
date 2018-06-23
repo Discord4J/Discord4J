@@ -53,9 +53,9 @@ import java.time.Duration;
 import java.util.Objects;
 import java.util.Properties;
 
-public final class ClientBuilder {
+public final class DiscordClientBuilder {
 
-    private static final Logger log = Loggers.getLogger(ClientBuilder.class);
+    private static final Logger log = Loggers.getLogger(DiscordClientBuilder.class);
 
     private String token;
     private int shardIndex = 0;
@@ -67,7 +67,7 @@ public final class ClientBuilder {
     private IdentifyOptions identifyOptions;
     private RetryOptions retryOptions;
 
-    public ClientBuilder(final String token) {
+    public DiscordClientBuilder(final String token) {
         this.token = Objects.requireNonNull(token);
         storeService = new StoreServiceLoader().getStoreService();
         eventProcessor = EmitterProcessor.create(false);
@@ -79,7 +79,7 @@ public final class ClientBuilder {
         return token;
     }
 
-    public ClientBuilder setToken(final String token) {
+    public DiscordClientBuilder setToken(final String token) {
         this.token = Objects.requireNonNull(token);
         return this;
     }
@@ -88,7 +88,7 @@ public final class ClientBuilder {
         return shardIndex;
     }
 
-    public ClientBuilder setShardIndex(final int shardIndex) {
+    public DiscordClientBuilder setShardIndex(final int shardIndex) {
         this.shardIndex = shardIndex;
         return this;
     }
@@ -97,7 +97,7 @@ public final class ClientBuilder {
         return shardCount;
     }
 
-    public ClientBuilder setShardCount(final int shardCount) {
+    public DiscordClientBuilder setShardCount(final int shardCount) {
         this.shardCount = shardCount;
         return this;
     }
@@ -106,7 +106,7 @@ public final class ClientBuilder {
         return storeService;
     }
 
-    public ClientBuilder setStoreService(final StoreService storeService) {
+    public DiscordClientBuilder setStoreService(final StoreService storeService) {
         this.storeService = Objects.requireNonNull(storeService);
         return this;
     }
@@ -115,7 +115,7 @@ public final class ClientBuilder {
         return eventProcessor;
     }
 
-    public ClientBuilder setEventProcessor(final FluxProcessor<Event, Event> eventProcessor) {
+    public DiscordClientBuilder setEventProcessor(final FluxProcessor<Event, Event> eventProcessor) {
         this.eventProcessor = Objects.requireNonNull(eventProcessor);
         return this;
     }
@@ -124,7 +124,7 @@ public final class ClientBuilder {
         return eventScheduler;
     }
 
-    public ClientBuilder setEventScheduler(final Scheduler eventScheduler) {
+    public DiscordClientBuilder setEventScheduler(final Scheduler eventScheduler) {
         this.eventScheduler = Objects.requireNonNull(eventScheduler);
         return this;
     }
@@ -133,7 +133,7 @@ public final class ClientBuilder {
         return initialPresence;
     }
 
-    public ClientBuilder setInitialPresence(@Nullable Presence initialPresence) {
+    public DiscordClientBuilder setInitialPresence(@Nullable Presence initialPresence) {
         this.initialPresence = initialPresence;
         return this;
     }
@@ -142,7 +142,7 @@ public final class ClientBuilder {
         return identifyOptions;
     }
 
-    public ClientBuilder setIdentifyOptions(IdentifyOptions identifyOptions) {
+    public DiscordClientBuilder setIdentifyOptions(IdentifyOptions identifyOptions) {
         this.identifyOptions = identifyOptions;
         return this;
     }

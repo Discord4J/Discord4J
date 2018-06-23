@@ -40,7 +40,7 @@ public class ExampleBot {
     @Test
     @Ignore("Example code excluded from CI")
     public void testLogBot() {
-        DiscordClient client = new ClientBuilder(token).build();
+        DiscordClient client = new DiscordClientBuilder(token).build();
         client.getEventDispatcher().on(MessageCreateEvent.class).subscribe(new MessageCreateListener());
         client.login().block();
     }

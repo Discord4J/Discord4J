@@ -17,13 +17,11 @@
 package discord4j.core.object.entity;
 
 import discord4j.common.json.GuildMemberResponse;
-import discord4j.core.ClientBuilder;
 import discord4j.core.DiscordClient;
 import discord4j.core.ServiceMediator;
 import discord4j.core.object.Ban;
 import discord4j.core.object.Region;
 import discord4j.core.object.VoiceState;
-import discord4j.core.object.audit.ActionType;
 import discord4j.core.object.audit.AuditLogEntry;
 import discord4j.core.object.data.AuditLogEntryBean;
 import discord4j.core.object.data.BanBean;
@@ -41,7 +39,6 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.function.Tuples;
 
-import javax.annotation.Nullable;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -355,7 +352,7 @@ public final class Guild implements Entity {
      *
      * @return When this guild was joined at, if present.
      *
-     * @implNote If the underlying {@link ClientBuilder#getStoreService() store} does not save {@link GuildBean}
+     * @implNote If the underlying {@link discord4j.core.DiscordClientBuilder#getStoreService() store} does not save {@link GuildBean}
      * instances <b>OR</b> the bot is currently not logged in then the returned {@code Optional} will always be empty.
      */
     public Optional<Instant> getJoinTime() {
@@ -369,7 +366,7 @@ public final class Guild implements Entity {
      *
      * @return If present, {@code true} if the guild is considered large, {@code false} otherwise.
      *
-     * @implNote If the underlying {@link ClientBuilder#getStoreService() store} does not save {@link GuildBean}
+     * @implNote If the underlying {@link discord4j.core.DiscordClientBuilder#getStoreService() store} does not save {@link GuildBean}
      * instances <b>OR</b> the bot is currently not logged in then the returned {@code Optional} will always be empty.
      */
     public Optional<Boolean> isLarge() {
@@ -381,7 +378,7 @@ public final class Guild implements Entity {
      *
      * @return The total number of members in the guild, if present.
      *
-     * @implNote If the underlying {@link ClientBuilder#getStoreService() store} does not save {@link GuildBean}
+     * @implNote If the underlying {@link discord4j.core.DiscordClientBuilder#getStoreService() store} does not save {@link GuildBean}
      * instances <b>OR</b> the bot is currently not logged in then the returned {@code Optional} will always be empty.
      */
     public OptionalInt getMemberCount() {
@@ -396,7 +393,7 @@ public final class Guild implements Entity {
      * @return A {@link Flux} that continually emits the {@link VoiceState voice states} of the guild. If an error is
      * received, it is emitted through the {@code Flux}.
      *
-     * @implNote If the underlying {@link ClientBuilder#getStoreService() store} does not save {@link VoiceStateBean}
+     * @implNote If the underlying {@link discord4j.core.DiscordClientBuilder#getStoreService() store} does not save {@link VoiceStateBean}
      * instances <b>OR</b> the bot is currently not logged in then the returned {@code Flux} will always be empty.
      */
     public Flux<VoiceState> getVoiceStates() {
@@ -459,7 +456,7 @@ public final class Guild implements Entity {
      * @return A {@link Flux} that continually emits the {@link Presence presences} of the guild. If an error is
      * received, it is emitted through the {@code Flux}.
      *
-     * @implNote If the underlying {@link ClientBuilder#getStoreService() store} does not save {@link PresenceBean}
+     * @implNote If the underlying {@link discord4j.core.DiscordClientBuilder#getStoreService() store} does not save {@link PresenceBean}
      * instances <b>OR</b> the bot is currently not logged in then the returned {@code Flux} will always be empty.
      */
     public Flux<Presence> getPresences() {
