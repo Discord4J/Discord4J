@@ -34,7 +34,7 @@ dependencies {
 
 ## Example Usage
 ```java
-final DiscordClient client = new ClientBuilder("token").build();
+final DiscordClient client = new DiscordClientBuilder("token").build();
 
 client.getEventDispatcher().on(ReadyEvent.class)
         .subscribe(ready -> System.out.println("Logged in as " + ready.getSelf().getUsername()));
