@@ -55,18 +55,6 @@ public interface CommandDispatcher {
     }
 
     /**
-     * Called to add command providers dynamically.
-     *
-     * @param providers The providers to add.
-     * @return A {@link discord4j.commands.CommandDispatcher} instance for chaining, this can be a new instance or
-     * the current instance.
-     */
-    default CommandDispatcher addCommandProviders(Publisher<? extends CommandProvider> providers) {
-        Flux.from(providers).subscribe(this::addCommandProvider);
-        return this;
-    }
-
-    /**
      * Called to drop a command provider dynamically.
      *
      * @param provider The provider to drop.
@@ -84,18 +72,6 @@ public interface CommandDispatcher {
      */
     default CommandDispatcher dropCommandProviders(Collection<? extends CommandProvider> providers) {
         providers.forEach(this::dropCommandProvider);
-        return this;
-    }
-
-    /**
-     * Called to drop command providers dynamically.
-     *
-     * @param providers The providers to drop.
-     * @return A {@link discord4j.commands.CommandDispatcher} instance for chaining, this can be a new instance or
-     * the current instance.
-     */
-    default CommandDispatcher dropCommandProviders(Publisher<? extends CommandProvider> providers) {
-        Flux.from(providers).subscribe(this::dropCommandProvider);
         return this;
     }
 }
