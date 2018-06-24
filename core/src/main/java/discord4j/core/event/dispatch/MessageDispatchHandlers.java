@@ -114,6 +114,7 @@ class MessageDispatchHandlers {
         long userId = context.getDispatch().getUserId();
         long channelId = context.getDispatch().getChannelId();
         long messageId = context.getDispatch().getMessageId();
+        long guildId = context.getDispatch().getGuildId();
 
         Mono<Void> addToMessage = context.getServiceMediator().getStateHolder().getMessageStore()
                 .find(messageId)
@@ -146,7 +147,7 @@ class MessageDispatchHandlers {
                         context.getServiceMediator().getStateHolder().getMessageStore().save(bean.getId(), bean));
 
         ReactionEmoji emoji = ReactionEmoji.of(emojiId, emojiName, emojiAnimated);
-        return addToMessage.thenReturn(new ReactionAddEvent(client, userId, channelId, messageId, emoji));
+        return addToMessage.thenReturn(new ReactionAddEvent(client, userId, channelId, messageId, guildId, emoji));
 
     }
 
@@ -161,6 +162,7 @@ class MessageDispatchHandlers {
         long userId = context.getDispatch().getUserId();
         long channelId = context.getDispatch().getChannelId();
         long messageId = context.getDispatch().getMessageId();
+        long guildId = context.getDispatch().getGuildId();
 
         Mono<Void> removeFromMessage = context.getServiceMediator().getStateHolder().getMessageStore()
                 .find(messageId)
@@ -189,13 +191,14 @@ class MessageDispatchHandlers {
                         context.getServiceMediator().getStateHolder().getMessageStore().save(bean.getId(), bean));
 
         ReactionEmoji emoji = ReactionEmoji.of(emojiId, emojiName, emojiAnimated);
-        return removeFromMessage.thenReturn(new ReactionRemoveEvent(client, userId, channelId, messageId, emoji));
+        return removeFromMessage.thenReturn(new ReactionRemoveEvent(client, userId, channelId, messageId, guildId, emoji));
     }
 
     static Mono<ReactionRemoveAllEvent> messageReactionRemoveAll(DispatchContext<MessageReactionRemoveAll> context) {
         DiscordClient client = context.getServiceMediator().getClient();
         long channelId = context.getDispatch().getChannelId();
         long messageId = context.getDispatch().getMessageId();
+        long guildId = context.getDispatch().getGuildId();
 
         Mono<Void> removeAllFromMessage = context.getServiceMediator().getStateHolder().getMessageStore()
                 .find(messageId)
@@ -203,7 +206,7 @@ class MessageDispatchHandlers {
                 .flatMap(bean ->
                         context.getServiceMediator().getStateHolder().getMessageStore().save(bean.getId(), bean));
 
-        return removeAllFromMessage.thenReturn(new ReactionRemoveAllEvent(client, channelId, messageId));
+        return removeAllFromMessage.thenReturn(new ReactionRemoveAllEvent(client, channelId, messageId, guildId));
     }
 
     static Mono<MessageUpdateEvent> messageUpdate(DispatchContext<MessageUpdate> context) {

@@ -17,6 +17,7 @@
 package discord4j.core.event.domain.message;
 
 import discord4j.core.DiscordClient;
+import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.MessageChannel;
 import discord4j.core.object.entity.User;
@@ -29,13 +30,15 @@ public class ReactionRemoveEvent extends MessageEvent {
     private final long userId;
     private final long channelId;
     private final long messageId;
+    private final long guildId;
     private final ReactionEmoji emoji;
 
-    public ReactionRemoveEvent(DiscordClient client, long userId, long channelId, long messageId, ReactionEmoji emoji) {
+    public ReactionRemoveEvent(DiscordClient client, long userId, long channelId, long messageId, long guildId, ReactionEmoji emoji) {
         super(client);
         this.userId = userId;
         this.channelId = channelId;
         this.messageId = messageId;
+        this.guildId = guildId;
         this.emoji = emoji;
     }
 
@@ -61,6 +64,14 @@ public class ReactionRemoveEvent extends MessageEvent {
 
     public Mono<Message> getMessage() {
         return getClient().getMessageById(getChannelId(), getMessageId());
+    }
+
+    public Snowflake getGuildId() {
+        return Snowflake.of(guildId);
+    }
+
+    public Mono<Guild> getGuild() {
+        return getClient().getGuildById(getGuildId());
     }
 
     public ReactionEmoji getEmoji() {

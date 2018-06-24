@@ -27,6 +27,9 @@ public class MessageReactionRemoveAll implements Dispatch {
     @JsonProperty("message_id")
     @UnsignedJson
     private long messageId;
+    @JsonProperty("guild_id")
+    @UnsignedJson
+    private long guildId;
 
     public long getChannelId() {
         return channelId;
@@ -36,11 +39,16 @@ public class MessageReactionRemoveAll implements Dispatch {
         return messageId;
     }
 
+    public long getGuildId() {
+        return guildId;
+    }
+
     @Override
     public String toString() {
-        return "MessageReactionRemoveAll[" +
+        return "MessageReactionRemoveAll{" +
                 "channelId=" + channelId +
                 ", messageId=" + messageId +
-                ']';
+                ", guildId=" + guildId +
+                '}';
     }
 }

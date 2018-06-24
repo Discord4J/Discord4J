@@ -17,6 +17,7 @@
 package discord4j.core.event.domain.message;
 
 import discord4j.core.DiscordClient;
+import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.MessageChannel;
 import discord4j.core.object.util.Snowflake;
@@ -26,11 +27,13 @@ public class ReactionRemoveAllEvent extends MessageEvent {
 
     private final long channelId;
     private final long messageId;
+    private final long guildId;
 
-    public ReactionRemoveAllEvent(DiscordClient client, long channelId, long messageId) {
+    public ReactionRemoveAllEvent(DiscordClient client, long channelId, long messageId, long guildId) {
         super(client);
         this.channelId = channelId;
         this.messageId = messageId;
+        this.guildId = guildId;
     }
 
     public Snowflake getChannelId() {
@@ -47,5 +50,13 @@ public class ReactionRemoveAllEvent extends MessageEvent {
 
     public Mono<Message> getMessage() {
         return getClient().getMessageById(getChannelId(), getMessageId());
+    }
+
+    public Snowflake getGuildId() {
+        return Snowflake.of(guildId);
+    }
+
+    public Mono<Guild> getGuild() {
+        return getClient().getGuildById(getGuildId());
     }
 }
