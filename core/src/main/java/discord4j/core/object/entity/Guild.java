@@ -369,8 +369,9 @@ public final class Guild implements Entity {
      *
      * @return When this guild was joined at, if present.
      *
-     * @implNote If the underlying {@link discord4j.core.DiscordClientBuilder#getStoreService() store} does not save {@link GuildBean}
-     * instances <b>OR</b> the bot is currently not logged in then the returned {@code Optional} will always be empty.
+     * @implNote If the underlying {@link discord4j.core.DiscordClientBuilder#getStoreService() store} does not save
+     * {@link GuildBean} instances <b>OR</b> the bot is currently not logged in then the returned {@code Optional} will
+     * always be empty.
      */
     public Optional<Instant> getJoinTime() {
         return getGatewayData()
@@ -383,8 +384,9 @@ public final class Guild implements Entity {
      *
      * @return If present, {@code true} if the guild is considered large, {@code false} otherwise.
      *
-     * @implNote If the underlying {@link discord4j.core.DiscordClientBuilder#getStoreService() store} does not save {@link GuildBean}
-     * instances <b>OR</b> the bot is currently not logged in then the returned {@code Optional} will always be empty.
+     * @implNote If the underlying {@link discord4j.core.DiscordClientBuilder#getStoreService() store} does not save
+     * {@link GuildBean} instances <b>OR</b> the bot is currently not logged in then the returned {@code Optional} will
+     * always be empty.
      */
     public Optional<Boolean> isLarge() {
         return getGatewayData().map(GuildBean::getLarge);
@@ -395,8 +397,9 @@ public final class Guild implements Entity {
      *
      * @return The total number of members in the guild, if present.
      *
-     * @implNote If the underlying {@link discord4j.core.DiscordClientBuilder#getStoreService() store} does not save {@link GuildBean}
-     * instances <b>OR</b> the bot is currently not logged in then the returned {@code Optional} will always be empty.
+     * @implNote If the underlying {@link discord4j.core.DiscordClientBuilder#getStoreService() store} does not save
+     * {@link GuildBean} instances <b>OR</b> the bot is currently not logged in then the returned {@code Optional} will
+     * always be empty.
      */
     public OptionalInt getMemberCount() {
         return getGatewayData()
@@ -410,8 +413,9 @@ public final class Guild implements Entity {
      * @return A {@link Flux} that continually emits the {@link VoiceState voice states} of the guild. If an error is
      * received, it is emitted through the {@code Flux}.
      *
-     * @implNote If the underlying {@link discord4j.core.DiscordClientBuilder#getStoreService() store} does not save {@link VoiceStateBean}
-     * instances <b>OR</b> the bot is currently not logged in then the returned {@code Flux} will always be empty.
+     * @implNote If the underlying {@link discord4j.core.DiscordClientBuilder#getStoreService() store} does not save
+     * {@link VoiceStateBean} instances <b>OR</b> the bot is currently not logged in then the returned {@code Flux} will
+     * always be empty.
      */
     public Flux<VoiceState> getVoiceStates() {
         return serviceMediator.getStateHolder().getVoiceStateStore()
@@ -473,8 +477,9 @@ public final class Guild implements Entity {
      * @return A {@link Flux} that continually emits the {@link Presence presences} of the guild. If an error is
      * received, it is emitted through the {@code Flux}.
      *
-     * @implNote If the underlying {@link discord4j.core.DiscordClientBuilder#getStoreService() store} does not save {@link PresenceBean}
-     * instances <b>OR</b> the bot is currently not logged in then the returned {@code Flux} will always be empty.
+     * @implNote If the underlying {@link discord4j.core.DiscordClientBuilder#getStoreService() store} does not save
+     * {@link PresenceBean} instances <b>OR</b> the bot is currently not logged in then the returned {@code Flux} will
+     * always be empty.
      */
     public Flux<Presence> getPresences() {
         return serviceMediator.getStateHolder().getPresenceStore()
