@@ -29,7 +29,7 @@ public final class Image {
     private static final String BASE_URL = "https://cdn.discordapp.com/";
 
     /** The {@link String#format(String, Object...) format} for URLs. */
-    private static final String URL_FORMAT = BASE_URL + "%s%s";
+    private static final String URL_FORMAT = BASE_URL + "%s.%s";
 
     /**
      * Constructs an {@code Image} utilizing a path and the {@link Format} the URL should represent.
@@ -49,7 +49,7 @@ public final class Image {
     private final Format format;
 
     /**
-     * Constructs a {@code Image} utilizing an URl and the {@link Format} the URL represents.
+     * Constructs an {@code Image} utilizing an URl and the {@link Format} the URL represents.
      *
      * @param url The URL of the image. Must be non-null.
      * @param format The {@link Format} the URL represents. Must be non-null.
@@ -128,16 +128,16 @@ public final class Image {
     public enum Format {
 
         /** Represents the Joint Photographic Experts Group format. */
-        JPEG(".jpeg"),
+        JPEG("jpeg"),
 
         /** Represents the Portable Network Graphics format. */
-        PNG(".png"),
+        PNG("png"),
 
         /** Represents the WebP format. */
-        WEB_P(".webp"),
+        WEB_P("webp"),
 
         /** Represents the Graphics Interchange Format format. */
-        GIF(".gif");
+        GIF("gif");
 
         /** The file extension associated with this format. */
         private final String extension;

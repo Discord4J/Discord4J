@@ -86,7 +86,7 @@ public class User implements Entity {
     /**
      * Gets if the user's avatar is animated.
      *
-     * @return {@code true} if the user's avatar is animated, {@code false} otherwise (or no avatar is set).
+     * @return {@code true} if the user's avatar is animated, {@code false} otherwise.
      */
     public final boolean hasAnimatedAvatar() {
         final String avatar = data.getAvatar();
@@ -101,15 +101,17 @@ public class User implements Entity {
      * @return The user's avatar, if present and in a supported format.
      */
     public final Optional<Image> getAvatar(final Image.Format format) {
+        final boolean animated = hasAnimatedAvatar();
         return Optional.ofNullable(data.getAvatar())
-                .filter(ignored -> (hasAnimatedAvatar() && format.equals(GIF)) || (format.equals(PNG) || format.equals(JPEG)))
+                .filter(ignored -> (animated && format.equals(GIF)) || !animated)
+                .filter(ignored -> (!animated && (format.equals(PNG) || format.equals(JPEG))) || animated)
                 .map(avatar -> Image.of(String.format(AVATAR_IMAGE_PATH, getId().asString(), avatar), format));
     }
 
     /**
-     * Gets the default {@link Image} for this user.
+     * Gets the default avatar for this user.
      *
-     * @return The default {@link Image} for this user.
+     * @return The default avatar for this user.
      */
     public final Image getDefaultAvatar() {
         return Image.of(String.format(DEFAULT_IMAGE_PATH, Integer.parseInt(getDiscriminator()) % 5), PNG);
