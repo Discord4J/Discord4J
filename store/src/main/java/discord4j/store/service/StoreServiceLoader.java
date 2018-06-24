@@ -49,7 +49,7 @@ public class StoreServiceLoader {
      * @param priorityOverrides Allows for manual overriding of {@link StoreService#priority()}.
      */
     @SuppressWarnings({"ComparatorCombinators", "Convert2Lambda"})
-    public StoreServiceLoader(Map<Class<? extends StoreService>, Short> priorityOverrides) {
+    public StoreServiceLoader(Map<Class<? extends StoreService>, Integer> priorityOverrides) {
         generalService = new Lazy<>(() -> {
             List<StoreService> services = new ArrayList<>();
             ServiceLoader<StoreService> serviceLoader = ServiceLoader.load(StoreService.class);
@@ -61,7 +61,7 @@ public class StoreServiceLoader {
             services.sort(new Comparator<StoreService>() {
                 @Override
                 public int compare(StoreService ss1, StoreService ss2) {
-                    return Short.compare(priorityOverrides.getOrDefault(ss1.getClass(), ss1.priority()),
+                    return Integer.compare(priorityOverrides.getOrDefault(ss1.getClass(), ss1.priority()),
                             priorityOverrides.getOrDefault(ss2.getClass(), ss2.priority()));
                 }
             });
@@ -124,8 +124,8 @@ public class StoreServiceLoader {
         }
 
         @Override
-        public short priority() {
-            short p1 = genericService.priority(), p2 = primitiveService.priority();
+        public int priority() {
+            int p1 = genericService.priority(), p2 = primitiveService.priority();
             return p1 > p2 ? p1 : p2;
         }
 

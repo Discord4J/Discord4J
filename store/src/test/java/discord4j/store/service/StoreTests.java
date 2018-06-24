@@ -54,9 +54,9 @@ public class StoreTests {
 
     @Test
     public void testPriority() {
-        Map<Class<? extends StoreService>, Short> override = new HashMap<>();
-        override.put(TestService.class, Short.MAX_VALUE);
-        override.put(NoOpStoreService.class, Short.MIN_VALUE);
+        Map<Class<? extends StoreService>, Integer> override = new HashMap<>();
+        override.put(TestService.class, Integer.MAX_VALUE);
+        override.put(NoOpStoreService.class, Integer.MIN_VALUE);
         StoreServiceLoader overriden = new StoreServiceLoader(override);
         assertEquals(TestService.class, ((ForwardingStoreService) provider.getStoreService()).getOriginal().getClass());
         assertEquals(NoOpStoreService.class, overriden.getStoreService().getClass());
