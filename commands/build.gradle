@@ -1,0 +1,5 @@
+dependencies {
+    compile project(":core")
+
+    testCompile "junit:junit:$junit_version"
+}
