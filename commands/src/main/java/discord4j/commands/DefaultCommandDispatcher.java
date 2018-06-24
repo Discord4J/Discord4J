@@ -2,8 +2,6 @@ package discord4j.commands;
 
 import discord4j.commands.exceptions.CommandException;
 import discord4j.core.event.domain.message.MessageCreateEvent;
-import org.reactivestreams.Publisher;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.*;
@@ -71,22 +69,10 @@ public final class DefaultCommandDispatcher implements CommandDispatcher {
     }
 
     @Override
-    public CommandDispatcher addCommandProviders(Publisher<? extends CommandProvider> providers) {
-        Flux.from(providers).collectList().subscribe(this::addCommandProviders);
-        return this;
-    }
-
-    @Override
     public CommandDispatcher dropCommandProviders(Collection<? extends CommandProvider> providers) {
         synchronized (lock) {
             this.providers.removeAll(providers);
         }
-        return this;
-    }
-
-    @Override
-    public CommandDispatcher dropCommandProviders(Publisher<? extends CommandProvider> providers) {
-        Flux.from(providers).collectList().subscribe(this::dropCommandProviders);
         return this;
     }
 }
