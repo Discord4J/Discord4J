@@ -30,11 +30,16 @@ import discord4j.gateway.retry.RetryContext;
 import discord4j.gateway.retry.RetryOptions;
 import discord4j.websocket.CloseException;
 import discord4j.websocket.WebSocketClient;
+import io.netty.channel.Channel;
+import io.netty.handler.ssl.SslHandler;
+import io.netty.util.concurrent.Future;
+import io.netty.util.concurrent.GenericFutureListener;
 import reactor.core.Disposable;
 import reactor.core.publisher.EmitterProcessor;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxSink;
 import reactor.core.publisher.Mono;
+import reactor.ipc.netty.http.client.HttpClient;
 import reactor.retry.Retry;
 import reactor.util.Logger;
 import reactor.util.Loggers;
@@ -64,7 +69,7 @@ public class GatewayClient {
     private static final Predicate<? super Throwable> ABNORMAL_ERROR = t ->
             !(t instanceof CloseException) || ((CloseException) t).getCode() != 1000;
 
-    private final WebSocketClient webSocketClient = new WebSocketClient();
+    private final WebSocketClient webSocketClient = new WebSocketClient(createHttpClient());
 
     private final PayloadReader payloadReader;
     private final PayloadWriter payloadWriter;
@@ -98,6 +103,23 @@ public class GatewayClient {
         this.dispatchSink = dispatch.sink(FluxSink.OverflowStrategy.LATEST);
         this.receiverSink = receiver.sink(FluxSink.OverflowStrategy.LATEST);
         this.senderSink = sender.sink(FluxSink.OverflowStrategy.LATEST);
+    }
+
+    private HttpClient createHttpClient() {
+        return HttpClient.create(
+                opt -> opt.afterChannelInit(channel -> {
+                    final SslHandler sslHandler = channel.pipeline().get(SslHandler.class);
+                    sslHandler.sslCloseFuture().addListener(
+                            (GenericFutureListener<Future<Channel>>) future -> {
+                                if (future.isSuccess()) {
+                                    final Channel c = future.getNow();
+                                    if (c.isActive()) {
+                                        log.debug("Closing channel due to SSL handler closing");
+                                        c.close();
+                                    }
+                                }
+                            });
+                }));
     }
 
     /**
