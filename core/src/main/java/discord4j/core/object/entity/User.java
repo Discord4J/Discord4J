@@ -19,13 +19,19 @@ package discord4j.core.object.entity;
 import discord4j.core.DiscordClient;
 import discord4j.core.ServiceMediator;
 import discord4j.core.object.data.stored.UserBean;
+import discord4j.core.object.util.Image;
 import discord4j.core.object.util.Snowflake;
 import discord4j.core.util.EntityUtil;
 import discord4j.rest.json.request.DMCreateRequest;
 import reactor.core.publisher.Mono;
 
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static discord4j.core.object.util.Image.Format.GIF;
+import static discord4j.core.object.util.Image.Format.JPEG;
+import static discord4j.core.object.util.Image.Format.PNG;
 
 /**
  * A Discord user.
@@ -33,6 +39,12 @@ import java.util.Optional;
  * @see <a href="https://discordapp.com/developers/docs/resources/user">Users Resource</a>
  */
 public class User implements Entity {
+
+    /** The path for default user avatar images for {@link Image}. */
+    private static final String DEFAULT_IMAGE_PATH = "embed/avatars/%d";
+
+    /** The path for user avatar images for {@link Image}. */
+    private static final String AVATAR_IMAGE_PATH = "avatars/%s/%s";
 
     /** The ServiceMediator associated to this object. */
     private final ServiceMediator serviceMediator;
@@ -75,12 +87,29 @@ public class User implements Entity {
     }
 
     /**
-     * Gets the user's avatar hash, if present.
+     * Gets the {@link Image images} for this user's avatar. May be empty if no avatar is set.
      *
-     * @return The user's avatar hash, if present.
+     * @return The {@link Image images} for this user's avatar. May be empty if no avatar is set.
      */
-    public final Optional<String> getAvatarHash() {
-        return Optional.ofNullable(data.getAvatar());
+    public final Set<Image> getAvatars() {
+        final String avatar = data.getAvatar();
+        if (avatar == null) {
+            return Collections.emptySet();
+        }
+
+        final String path = String.format(AVATAR_IMAGE_PATH, getId().asString(), avatar);
+        return avatar.startsWith("a_") // Prefix for when the avatar is animated
+                ? Stream.of(Image.of(path, GIF)).collect(Collectors.toSet())
+                : Image.of(path, PNG, JPEG);
+    }
+
+    /**
+     * Gets the default {@link Image} for this user.
+     *
+     * @return The default {@link Image} for this user.
+     */
+    public final Image getDefaultAvatar() {
+        return Image.of(String.format(DEFAULT_IMAGE_PATH, Integer.parseInt(getDiscriminator()) % 5), PNG);
     }
 
     /**

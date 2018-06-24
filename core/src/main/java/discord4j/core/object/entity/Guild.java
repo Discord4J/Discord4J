@@ -28,6 +28,7 @@ import discord4j.core.object.data.BanBean;
 import discord4j.core.object.data.RegionBean;
 import discord4j.core.object.data.stored.*;
 import discord4j.core.object.presence.Presence;
+import discord4j.core.object.util.Image;
 import discord4j.core.object.util.Snowflake;
 import discord4j.core.spec.*;
 import discord4j.core.util.EntityUtil;
@@ -48,12 +49,22 @@ import java.util.function.ToLongFunction;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 
+import static discord4j.core.object.util.Image.Format.JPEG;
+import static discord4j.core.object.util.Image.Format.PNG;
+import static discord4j.core.object.util.Image.Format.WEB_P;
+
 /**
  * A Discord guild.
  *
  * @see <a href="https://discordapp.com/developers/docs/resources/guild">Guild Resource</a>
  */
 public final class Guild implements Entity {
+
+    /** The path for guild icon images for {@link Image}. */
+    private static final String ICON_IMAGE_PATH = "icons/%s/%s";
+
+    /** The path for guild splash images for {@link Image}. */
+    private static final String SPLASH_IMAGE_PATH = "splashes/%s/%s";
 
     /** The ServiceMediator associated to this object. */
     private final ServiceMediator serviceMediator;
@@ -96,21 +107,27 @@ public final class Guild implements Entity {
     }
 
     /**
-     * Gets the icon hash, if present.
+     * Gets the {@link Image images} for this guild's icon. May be empty if no icon is set.
      *
-     * @return The icon hash, if present.
+     * @return The {@link Image images} for this guild's icon. May be empty if no icon is set.
      */
-    public Optional<String> getIconHash() {
-        return Optional.ofNullable(data.getIcon());
+    public Set<Image> getIcons() {
+        final String icon = data.getIcon();
+        return (icon == null)
+                ? Collections.emptySet()
+                : Image.of(String.format(ICON_IMAGE_PATH, getId().asString(), icon), PNG, JPEG, WEB_P);
     }
 
     /**
-     * Gets the splash hash, if present.
+     * Gets the {@link Image images} for this guild's splash. May be empty if no splash is set.
      *
-     * @return The splash hash, if present.
+     * @return The {@link Image images} for this guild's splash. May be empty if no splash is set.
      */
-    public Optional<String> getSplashHash() {
-        return Optional.ofNullable(data.getSplash());
+    public Set<Image> getSplashes() {
+        final String splash = data.getSplash();
+        return (splash == null)
+                ? Collections.emptySet()
+                : Image.of(String.format(SPLASH_IMAGE_PATH, getId().asString(), splash), PNG, JPEG, WEB_P);
     }
 
     /**
