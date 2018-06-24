@@ -20,6 +20,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import discord4j.common.jackson.UnsignedJson;
 import discord4j.common.json.EmojiResponse;
 
+import javax.annotation.Nullable;
+
 public class MessageReactionRemove implements Dispatch {
 
     @JsonProperty("user_id")
@@ -29,8 +31,9 @@ public class MessageReactionRemove implements Dispatch {
     @UnsignedJson
     private long channelId;
     @JsonProperty("guild_id")
+    @Nullable
     @UnsignedJson
-    private long guildId;
+    private Long guildId;
     @JsonProperty("message_id")
     @UnsignedJson
     private long messageId;
@@ -44,7 +47,8 @@ public class MessageReactionRemove implements Dispatch {
         return channelId;
     }
 
-    public long getGuildId() {
+    @Nullable
+    public Long getGuildId() {
         return guildId;
     }
 

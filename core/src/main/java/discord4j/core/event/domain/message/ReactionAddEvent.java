@@ -25,15 +25,20 @@ import discord4j.core.object.reaction.ReactionEmoji;
 import discord4j.core.object.util.Snowflake;
 import reactor.core.publisher.Mono;
 
+import javax.annotation.Nullable;
+import java.util.Optional;
+
 public class ReactionAddEvent extends MessageEvent {
 
     private final long userId;
     private final long channelId;
     private final long messageId;
-    private final long guildId;
+    @Nullable
+    private final Long guildId;
     private final ReactionEmoji emoji;
 
-    public ReactionAddEvent(DiscordClient client, long userId, long channelId, long messageId, long guildId, ReactionEmoji emoji) {
+    public ReactionAddEvent(DiscordClient client, long userId, long channelId, long messageId, @Nullable Long guildId,
+                            ReactionEmoji emoji) {
         super(client);
         this.userId = userId;
         this.channelId = channelId;
@@ -66,12 +71,12 @@ public class ReactionAddEvent extends MessageEvent {
         return getClient().getMessageById(getChannelId(), getMessageId());
     }
 
-    public Snowflake getGuildId() {
-        return Snowflake.of(guildId);
+    public Optional<Snowflake> getGuildId() {
+        return Optional.ofNullable(guildId).map(Snowflake::of);
     }
 
     public Mono<Guild> getGuild() {
-        return getClient().getGuildById(getGuildId());
+        return Mono.justOrEmpty(getGuildId()).flatMap(getClient()::getGuildById);
     }
 
     public ReactionEmoji getEmoji() {

@@ -23,13 +23,17 @@ import discord4j.core.object.entity.MessageChannel;
 import discord4j.core.object.util.Snowflake;
 import reactor.core.publisher.Mono;
 
+import javax.annotation.Nullable;
+import java.util.Optional;
+
 public class ReactionRemoveAllEvent extends MessageEvent {
 
     private final long channelId;
     private final long messageId;
-    private final long guildId;
+    @Nullable
+    private final Long guildId;
 
-    public ReactionRemoveAllEvent(DiscordClient client, long channelId, long messageId, long guildId) {
+    public ReactionRemoveAllEvent(DiscordClient client, long channelId, long messageId, @Nullable Long guildId) {
         super(client);
         this.channelId = channelId;
         this.messageId = messageId;
@@ -52,11 +56,11 @@ public class ReactionRemoveAllEvent extends MessageEvent {
         return getClient().getMessageById(getChannelId(), getMessageId());
     }
 
-    public Snowflake getGuildId() {
-        return Snowflake.of(guildId);
+    public Optional<Snowflake> getGuildId() {
+        return Optional.ofNullable(guildId).map(Snowflake::of);
     }
 
     public Mono<Guild> getGuild() {
-        return getClient().getGuildById(getGuildId());
+        return Mono.justOrEmpty(getGuildId()).flatMap(getClient()::getGuildById);
     }
 }
