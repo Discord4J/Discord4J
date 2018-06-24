@@ -8,7 +8,7 @@ import java.util.Optional;
 public abstract class CommandException extends RuntimeException {
 
     public CommandException() {
-        //Dummy constructor to prevent expensive stacktrace generation
+        super("Command Exception", null, false, false); //Prevents expensive stacktrace filling
     }
 
     /**
