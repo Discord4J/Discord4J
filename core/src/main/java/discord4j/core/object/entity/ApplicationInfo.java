@@ -23,14 +23,10 @@ import discord4j.core.object.util.Image;
 import discord4j.core.object.util.Snowflake;
 import reactor.core.publisher.Mono;
 
-import java.util.Collections;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 
-import static discord4j.core.object.util.Image.Format.JPEG;
-import static discord4j.core.object.util.Image.Format.PNG;
-import static discord4j.core.object.util.Image.Format.WEB_P;
+import static discord4j.core.object.util.Image.Format.*;
 
 /** Represents the Current (typically) Application Information. */
 public final class ApplicationInfo implements Entity {
@@ -75,15 +71,16 @@ public final class ApplicationInfo implements Entity {
     }
 
     /**
-     * Gets the {@link Image images} for this application's icon. May be empty if no icon is set.
+     * Gets the icon of the application, if present and in a supported format.
      *
-     * @return The {@link Image images} for this application's icon. May be empty if no icon is set.
+     * @param format The format for the {@link Image}. Supported format types are {@link Image.Format#PNG PNG},
+     * {@link Image.Format#JPEG JPEG}, and {@link Image.Format#WEB_P WebP}.
+     * @return The icon of the application, if present and in a supported format.
      */
-    public Set<Image> getIcons() {
-        final String icon = data.getIcon();
-        return (icon == null)
-                ? Collections.emptySet()
-                : Image.of(String.format(ICON_IMAGE_PATH, getId().asString(), icon), PNG, JPEG, WEB_P);
+    public Optional<Image> getIcon(final Image.Format format) {
+        return Optional.ofNullable(data.getIcon())
+                .filter(ignored -> format.equals(PNG) || format.equals(JPEG) || format.equals(WEB_P))
+                .map(icon -> Image.of(String.format(ICON_IMAGE_PATH, getId().asString(), icon), format));
     }
 
     /**

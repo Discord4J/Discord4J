@@ -25,13 +25,10 @@ import discord4j.core.util.EntityUtil;
 import discord4j.rest.json.request.DMCreateRequest;
 import reactor.core.publisher.Mono;
 
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.Objects;
+import java.util.Optional;
 
-import static discord4j.core.object.util.Image.Format.GIF;
-import static discord4j.core.object.util.Image.Format.JPEG;
-import static discord4j.core.object.util.Image.Format.PNG;
+import static discord4j.core.object.util.Image.Format.*;
 
 /**
  * A Discord user.
@@ -87,20 +84,26 @@ public class User implements Entity {
     }
 
     /**
-     * Gets the {@link Image images} for this user's avatar. May be empty if no avatar is set.
+     * Gets if the user's avatar is animated.
      *
-     * @return The {@link Image images} for this user's avatar. May be empty if no avatar is set.
+     * @return {@code true} if the user's avatar is animated, {@code false} otherwise (or no avatar is set).
      */
-    public final Set<Image> getAvatars() {
+    public final boolean hasAnimatedAvatar() {
         final String avatar = data.getAvatar();
-        if (avatar == null) {
-            return Collections.emptySet();
-        }
+        return (avatar != null) && avatar.startsWith("a_");
+    }
 
-        final String path = String.format(AVATAR_IMAGE_PATH, getId().asString(), avatar);
-        return avatar.startsWith("a_") // Prefix for when the avatar is animated
-                ? Stream.of(Image.of(path, GIF)).collect(Collectors.toSet())
-                : Image.of(path, PNG, JPEG);
+    /**
+     * Gets the user's avatar, if present and in a supported format.
+     *
+     * @param format The format for the {@link Image}. Supported format types are {@link Image.Format#GIF GIF} if
+     * {@link #hasAnimatedAvatar() animated}, otherwise {@link Image.Format#PNG PNG} or {@link Image.Format#JPEG JPEG}.
+     * @return The user's avatar, if present and in a supported format.
+     */
+    public final Optional<Image> getAvatar(final Image.Format format) {
+        return Optional.ofNullable(data.getAvatar())
+                .filter(ignored -> (hasAnimatedAvatar() && format.equals(GIF)) || (format.equals(PNG) || format.equals(JPEG)))
+                .map(avatar -> Image.of(String.format(AVATAR_IMAGE_PATH, getId().asString(), avatar), format));
     }
 
     /**

@@ -16,10 +16,7 @@
  */
 package discord4j.core.object.util;
 
-import java.util.Arrays;
 import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * Represents an image from Discord; specifically its URL.
@@ -43,17 +40,6 @@ public final class Image {
      */
     public static Image of(final String path, final Format format) {
         return new Image(String.format(URL_FORMAT, path, format.extension), format);
-    }
-
-    /**
-     * Constructs several {@code Image} instances utilizing a path and all the supported {@link Format formats}.
-     *
-     * @param path The path of the image; excluding the format. Must be non-null.
-     * @param formats The {@link Format formats} supported by the URL. Must be non-null.
-     * @return Several {@code Image} instances utilizing an URL and all the supported {@link Format formats}.
-     */
-    public static Set<Image> of(final String path, final Format...formats) {
-        return Arrays.stream(formats).map(format -> of(path, format)).collect(Collectors.toSet());
     }
 
     /** The URL of the image. */

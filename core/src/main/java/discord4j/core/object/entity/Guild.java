@@ -49,9 +49,7 @@ import java.util.function.ToLongFunction;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 
-import static discord4j.core.object.util.Image.Format.JPEG;
-import static discord4j.core.object.util.Image.Format.PNG;
-import static discord4j.core.object.util.Image.Format.WEB_P;
+import static discord4j.core.object.util.Image.Format.*;
 
 /**
  * A Discord guild.
@@ -107,27 +105,29 @@ public final class Guild implements Entity {
     }
 
     /**
-     * Gets the {@link Image images} for this guild's icon. May be empty if no icon is set.
+     * Gets the icon of the guild, if present and in a supported format.
      *
-     * @return The {@link Image images} for this guild's icon. May be empty if no icon is set.
+     * @param format The format for the {@link Image}. Supported format types are {@link Image.Format#PNG PNG},
+     * {@link Image.Format#JPEG JPEG}, and {@link Image.Format#WEB_P WebP}.
+     * @return The icon of the guild, if present and in a supported format.
      */
-    public Set<Image> getIcons() {
-        final String icon = data.getIcon();
-        return (icon == null)
-                ? Collections.emptySet()
-                : Image.of(String.format(ICON_IMAGE_PATH, getId().asString(), icon), PNG, JPEG, WEB_P);
+    public Optional<Image> getIcon(final Image.Format format) {
+        return Optional.ofNullable(data.getIcon())
+                .filter(ignored -> format.equals(PNG) || format.equals(JPEG) || format.equals(WEB_P))
+                .map(icon -> Image.of(String.format(ICON_IMAGE_PATH, getId().asString(), icon), format));
     }
 
     /**
-     * Gets the {@link Image images} for this guild's splash. May be empty if no splash is set.
+     * Gets the splash of the guild, if present and in a supported format.
      *
-     * @return The {@link Image images} for this guild's splash. May be empty if no splash is set.
+     * @param format The format for the {@link Image}. Supported format types are {@link Image.Format#PNG PNG},
+     * {@link Image.Format#JPEG JPEG}, and {@link Image.Format#WEB_P WebP}.
+     * @return The splash of the guild, if present and in a supported format.
      */
-    public Set<Image> getSplashes() {
-        final String splash = data.getSplash();
-        return (splash == null)
-                ? Collections.emptySet()
-                : Image.of(String.format(SPLASH_IMAGE_PATH, getId().asString(), splash), PNG, JPEG, WEB_P);
+    public Optional<Image> getSplash(final Image.Format format) {
+        return Optional.ofNullable(data.getSplash())
+                .filter(ignored -> format.equals(PNG) || format.equals(JPEG) || format.equals(WEB_P))
+                .map(splash -> Image.of(String.format(SPLASH_IMAGE_PATH, getId().asString(), splash), format));
     }
 
     /**
