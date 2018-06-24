@@ -51,7 +51,7 @@ public class ForwardingStoreService implements StoreService {
     }
 
     @Override
-    public short priority() {
+    public int priority() {
         return toForward.priority();
     }
 
