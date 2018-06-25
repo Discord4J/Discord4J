@@ -108,6 +108,11 @@ class GuildDispatchHandlers {
                         .map(voiceState -> Tuples.of(LongLongTuple2.of(guildBean.getId(), voiceState.getUserId()),
                                 new VoiceStateBean(voiceState, guildBean.getId()))));
 
+        Mono<Void> savePresences = serviceMediator.getStateHolder().getPresenceStore()
+                .save(Flux.just(context.getDispatch().getPresences())
+                        .map(presence -> Tuples.of(LongLongTuple2.of(guildBean.getId(), presence.getUser().getId()),
+                                new PresenceBean(presence))));
+
         Mono<Void> startMemberChunk = Mono.fromRunnable(() -> {
             context.getServiceMediator().getGatewayClient().sender()
                     .next(GatewayPayload.requestGuildMembers(new RequestGuildMembers(guildBean.getId(), "", 0)));
@@ -119,6 +124,7 @@ class GuildDispatchHandlers {
                 .then(saveEmojis)
                 .then(saveMembers)
                 .then(saveVoiceStates)
+                .then(savePresences)
                 .then(startMemberChunk) // TODO make optional
                 .thenReturn(new GuildCreateEvent(serviceMediator.getClient(), new Guild(serviceMediator, guildBean)));
     }
@@ -149,6 +155,8 @@ class GuildDispatchHandlers {
                     // TODO delete no longer visible users
                     Mono<Void> deleteVoiceStates = stateHolder.getVoiceStateStore()
                             .deleteInRange(LongLongTuple2.of(guild.getId(), 0), LongLongTuple2.of(guild.getId(), -1));
+                    Mono<Void> deletePresences = stateHolder.getPresenceStore()
+                            .deleteInRange(LongLongTuple2.of(guild.getId(), 0), LongLongTuple2.of(guild.getId(), -1));
 
                     return deleteTextChannels
                             .then(deleteVoiceChannels)
@@ -157,6 +165,7 @@ class GuildDispatchHandlers {
                             .then(deleteEmojis)
                             .then(deleteMembers)
                             .then(deleteVoiceStates)
+                            .then(deletePresences)
                             .thenReturn(guild);
                 })
                 .flatMap(deleteGuild::thenReturn)

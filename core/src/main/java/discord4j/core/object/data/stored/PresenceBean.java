@@ -16,6 +16,7 @@
  */
 package discord4j.core.object.data.stored;
 
+import discord4j.gateway.json.dispatch.GuildCreate;
 import discord4j.gateway.json.dispatch.PresenceUpdate;
 import discord4j.gateway.json.response.GameResponse;
 import discord4j.gateway.json.response.PresenceResponse;
@@ -60,6 +61,21 @@ public final class PresenceBean implements Serializable {
             activity = new ActivityBean(game);
         }
         status = update.getStatus();
+    }
+
+    public PresenceBean(final GuildCreate.Presence presence) {
+        final GameResponse game = presence.getGame();
+
+        if (game == null) {
+            activity = null;
+        } else if (game.getTimestamps() != null || game.getSessionId() != null || game.getApplicationId() != null ||
+                game.getDetails() != null || game.getSyncId() != null || game.getState() != null ||
+                game.getParty() != null || game.getAssets() != null) {
+            activity = new RichActivityBean(game);
+        } else {
+            activity = new ActivityBean(game);
+        }
+        status = presence.getStatus();
     }
 
     public PresenceBean() {}

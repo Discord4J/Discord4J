@@ -316,6 +316,10 @@ public class GuildCreate implements Dispatch {
         public static class User {
             @UnsignedJson
             private long id;
+
+            public long getId() {
+                return id;
+            }
         }
 
         public User getUser() {
