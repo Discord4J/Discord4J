@@ -51,13 +51,9 @@ public class EmbedCreateSpec implements Spec<EmbedRequest> {
         return this;
     }
 
-    public EmbedCreateSpec setColor(final int color) {
-        requestBuilder.color(color & 0xFFFFFF);
-        return this;
-    }
-
     public EmbedCreateSpec setColor(final Color color) {
-        return setColor(color.getRGB());
+        requestBuilder.color(color.getRGB() & 0xFFFFFF);
+        return this;
     }
 
     public EmbedCreateSpec setFooter(String text, @Nullable String iconUrl) {

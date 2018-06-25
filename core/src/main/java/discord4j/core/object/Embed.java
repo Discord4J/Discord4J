@@ -21,9 +21,11 @@ import discord4j.core.ServiceMediator;
 import discord4j.core.object.data.stored.embed.*;
 import discord4j.core.util.EntityUtil;
 
+import java.awt.*;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.List;
 import java.util.stream.Collectors;
 
 /**
@@ -102,13 +104,12 @@ public final class Embed implements DiscordObject {
     }
 
     /**
-     * Gets the color code of the embed, if present.
+     * Gets the color of the embed, if present.
      *
-     * @return The color code of the embed, if present.
+     * @return The color of the embed, if present.
      */
-    public OptionalInt getColor() {
-        final Integer color = data.getColor();
-        return (color == null) ? OptionalInt.empty() : OptionalInt.of(color);
+    public Optional<Color> getColor() {
+        return Optional.ofNullable(data.getColor()).map(color -> new Color(color, true));
     }
 
     /**
