@@ -50,7 +50,7 @@ class LifecycleDispatchHandlers {
 
         return invalidateStores
                 .then(saveUser)
-                .then(saveSelfId)
+                .and(saveSelfId)
                 .thenReturn(new ReadyEvent(context.getServiceMediator().getClient(), dispatch.getVersion(), self,
                         guilds, dispatch.getSessionId(), dispatch.getTrace()));
     }

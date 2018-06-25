@@ -119,13 +119,13 @@ class GuildDispatchHandlers {
         });
 
         return saveGuild
-                .then(saveChannels)
-                .then(saveRoles)
-                .then(saveEmojis)
-                .then(saveMembers)
-                .then(saveVoiceStates)
-                .then(savePresences)
-                .then(startMemberChunk) // TODO make optional
+                .and(saveChannels)
+                .and(saveRoles)
+                .and(saveEmojis)
+                .and(saveMembers)
+                .and(saveVoiceStates)
+                .and(savePresences)
+                .and(startMemberChunk) // TODO make optional
                 .thenReturn(new GuildCreateEvent(serviceMediator.getClient(), new Guild(serviceMediator, guildBean)));
     }
 
@@ -159,13 +159,13 @@ class GuildDispatchHandlers {
                             .deleteInRange(LongLongTuple2.of(guild.getId(), 0), LongLongTuple2.of(guild.getId(), -1));
 
                     return deleteTextChannels
-                            .then(deleteVoiceChannels)
-                            .then(deleteCategories)
-                            .then(deleteRoles)
-                            .then(deleteEmojis)
-                            .then(deleteMembers)
-                            .then(deleteVoiceStates)
-                            .then(deletePresences)
+                            .and(deleteVoiceChannels)
+                            .and(deleteCategories)
+                            .and(deleteRoles)
+                            .and(deleteEmojis)
+                            .and(deleteMembers)
+                            .and(deleteVoiceStates)
+                            .and(deletePresences)
                             .thenReturn(guild);
                 })
                 .flatMap(deleteGuild::thenReturn)
@@ -201,7 +201,7 @@ class GuildDispatchHandlers {
                 .collect(Collectors.toSet());
 
         return updateGuildBean
-                .then(saveEmojis)
+                .and(saveEmojis)
                 .thenReturn(new EmojisUpdateEvent(client, guildId, emojis));
     }
 
@@ -231,8 +231,8 @@ class GuildDispatchHandlers {
         Member member = new Member(serviceMediator, bean, userBean, guildId);
 
         return addMemberId
-                .then(saveMember)
-                .then(saveUser)
+                .and(saveMember)
+                .and(saveUser)
                 .thenReturn(new MemberJoinEvent(serviceMediator.getClient(), member, guildId));
     }
 
@@ -252,7 +252,7 @@ class GuildDispatchHandlers {
         User user = new User(serviceMediator, new UserBean(response));
 
         return removeMemberId
-                .then(deleteMember)
+                .and(deleteMember)
                 .thenReturn(new MemberLeaveEvent(serviceMediator.getClient(), user, guildId));
     }
 
@@ -289,8 +289,8 @@ class GuildDispatchHandlers {
                 .collect(Collectors.toSet());
 
         return addMemberIds
-                .then(saveMembers)
-                .then(saveUsers)
+                .and(saveMembers)
+                .and(saveUsers)
                 .thenReturn(new MemberChunkEvent(serviceMediator.getClient(), guildId, members));
     }
 
@@ -341,7 +341,7 @@ class GuildDispatchHandlers {
                 .save(bean.getId(), bean);
 
         return addRoleId
-                .then(saveRole)
+                .and(saveRole)
                 .thenReturn(new RoleCreateEvent(client, guildId, role));
     }
 
