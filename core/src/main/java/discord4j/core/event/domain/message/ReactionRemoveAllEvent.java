@@ -26,6 +26,17 @@ import reactor.core.publisher.Mono;
 import javax.annotation.Nullable;
 import java.util.Optional;
 
+/**
+ * Dispatched when all of the reactions on a message are removed.
+ * <p>
+ * {@link #guildId} may not be present if the message was in a private channel.
+ * <p>
+ * Corresponding {@link discord4j.core.event.domain.message.ReactionRemoveEvent reactions removes} are NOT dispatched
+ * for messages included in this event.
+ *
+ * @see <a href="https://discordapp.com/developers/docs/topics/gateway#message-reaction-remove-all">Message Reaction
+ * Remove All</a>
+ */
 public class ReactionRemoveAllEvent extends MessageEvent {
 
     private final long channelId;

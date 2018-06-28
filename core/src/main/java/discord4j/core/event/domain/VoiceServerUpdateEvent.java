@@ -21,6 +21,11 @@ import discord4j.core.object.entity.Guild;
 import discord4j.core.object.util.Snowflake;
 import reactor.core.publisher.Mono;
 
+/**
+ * Dispatched when initially connecting to a voice channel.
+ *
+ * @see <a href="https://discordapp.com/developers/docs/topics/gateway#voice-server-update">Voice Server Update</a>
+ */
 public class VoiceServerUpdateEvent extends Event {
 
     private final String token;

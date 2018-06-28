@@ -868,7 +868,7 @@ public final class Guild implements Entity {
     }
 
     /**
-     * Requests to retrieve the bot user's nickname in the guild.
+     * Requests to change the bot user's nickname in the guild.
      *
      * @param newNickname The new nickname.
      * @return A {@link Mono} where, upon successful completion, emits the bot user's new nickname in this guild. If an

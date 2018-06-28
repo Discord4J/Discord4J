@@ -22,6 +22,13 @@ import discord4j.core.object.entity.Guild;
 import javax.annotation.Nullable;
 import java.util.Optional;
 
+/**
+ * Dispatched when a guild is updated.
+ * <p>
+ * The old guild may not be present if guilds are not stored.
+ *
+ * @see <a href="https://discordapp.com/developers/docs/topics/gateway#guild-update">Guild Update</a>
+ */
 public class GuildUpdateEvent extends GuildEvent {
 
     private final Guild current;

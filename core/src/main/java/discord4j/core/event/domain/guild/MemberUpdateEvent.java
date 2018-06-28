@@ -28,8 +28,12 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * Dispatched when a user's nickname or roles change in a guild.
+ *
+ * @see <a href="https://discordapp.com/developers/docs/topics/gateway#guild-member-update">Guild Member Update</a>
+ */
 public class MemberUpdateEvent extends GuildEvent {
-
 
     private final long guildId;
     private final long memberId;

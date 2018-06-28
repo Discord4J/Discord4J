@@ -25,6 +25,11 @@ import javax.annotation.Nullable;
 import java.time.Instant;
 import java.util.Optional;
 
+/**
+ * Dispatched when a message is pinned or unpinned in a message channel.
+ *
+ * @see <a href="https://discordapp.com/developers/docs/topics/gateway#channel-pins-update">Channel Pins Update</a>
+ */
 public class PinsUpdateEvent extends ChannelEvent {
 
     private final long channelId;

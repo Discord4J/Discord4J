@@ -26,6 +26,13 @@ import reactor.core.publisher.Mono;
 import javax.annotation.Nullable;
 import java.util.Optional;
 
+/**
+ * Dispatched when a message is sent in a message channel.
+ * <p>
+ * {@link #guildId} and {@link #member} may not be present if the message was sent in a private channel.
+ *
+ * @see <a href="https://discordapp.com/developers/docs/topics/gateway#message-create">Message Create</a>
+ */
 public class MessageCreateEvent extends MessageEvent {
 
     private final Message message;

@@ -28,6 +28,14 @@ import reactor.core.publisher.Mono;
 import javax.annotation.Nullable;
 import java.util.Optional;
 
+/**
+ * Dispatched when a reaction is removed on a message.
+ * <p>
+ * {@link #guildId} may not be present if the message was in a private channel.
+ *
+ * @see <a href="https://discordapp.com/developers/docs/topics/gateway#message-reaction-remove">Message Reaction
+ * Remove</a>
+ */
 public class ReactionRemoveEvent extends MessageEvent {
 
     private final long userId;

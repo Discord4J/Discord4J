@@ -19,6 +19,11 @@ package discord4j.core.event.domain.channel;
 import discord4j.core.DiscordClient;
 import discord4j.core.object.entity.VoiceChannel;
 
+/**
+ * Dispatched when a {@link VoiceChannel} is deleted in a guild.
+ *
+ * @see <a href="https://discordapp.com/developers/docs/topics/gateway#channel-delete">Channel Delete</a>
+ */
 public class VoiceChannelDeleteEvent extends ChannelEvent {
 
     private final VoiceChannel channel;

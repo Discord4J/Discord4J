@@ -27,6 +27,13 @@ import reactor.core.publisher.Mono;
 import javax.annotation.Nullable;
 import java.util.Optional;
 
+/**
+ * Dispatched when a user's presence changes.
+ * <p>
+ * The old presence may not be present if presences are not stored.
+ *
+ * @see <a href="https://discordapp.com/developers/docs/topics/gateway#presence-update">Presence Update</a>
+ */
 public class PresenceUpdateEvent extends Event {
 
     private final long guildId;

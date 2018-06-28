@@ -18,6 +18,11 @@ package discord4j.core.event.domain.lifecycle;
 
 import discord4j.core.DiscordClient;
 
+/**
+ * Dispatched when the gateway connection is successfully resumed.
+ *
+ * @see <a href="https://discordapp.com/developers/docs/topics/gateway#resumed">Resumed</a>
+ */
 public class ResumeEvent extends GatewayLifecycleEvent {
 
     private final String[] trace;

@@ -22,6 +22,15 @@ import discord4j.core.object.VoiceState;
 import javax.annotation.Nullable;
 import java.util.Optional;
 
+/**
+ * Dispatched when a user's voice state changes.
+ * <p>
+ * This change can include the change of any property in {@link discord4j.core.object.VoiceState VoiceState}.
+ * <p>
+ * The old voice state may not be present if voice states are not stored.
+ *
+ * @see <a href="https://discordapp.com/developers/docs/topics/gateway#voice-state-update">Voice State Update</a>
+ */
 public class VoiceStateUpdateEvent extends Event {
 
     private final VoiceState current;

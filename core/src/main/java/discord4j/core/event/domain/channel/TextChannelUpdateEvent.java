@@ -22,6 +22,13 @@ import discord4j.core.object.entity.TextChannel;
 import javax.annotation.Nullable;
 import java.util.Optional;
 
+/**
+ * Dispatched when a {@link TextChannel} is updated in a guild.
+ * <p>
+ * The old text channel may not be present if text channels are not stored.
+ *
+ * @see <a href="https://discordapp.com/developers/docs/topics/gateway#channel-update">Channel Update</a>
+ */
 public class TextChannelUpdateEvent extends ChannelEvent {
 
     private final TextChannel current;

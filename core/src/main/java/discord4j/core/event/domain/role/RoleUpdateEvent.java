@@ -22,6 +22,13 @@ import discord4j.core.object.entity.Role;
 import javax.annotation.Nullable;
 import java.util.Optional;
 
+/**
+ * Dispatched when a role is updated in a guild.
+ * <p>
+ * The old role may not be present if messages are not stored.
+ *
+ * @see <a href="https://discordapp.com/developers/docs/topics/gateway#guild-role-update">Guild Role Update</a>
+ */
 public class RoleUpdateEvent extends RoleEvent {
 
     private final Role current;

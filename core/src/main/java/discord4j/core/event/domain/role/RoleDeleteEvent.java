@@ -25,6 +25,13 @@ import reactor.core.publisher.Mono;
 import javax.annotation.Nullable;
 import java.util.Optional;
 
+/**
+ * Dispatched when a role is deleted in a guild.
+ * <p>
+ * The deleted role may not be present if roles are not stored.
+ *
+ * @see <a href="https://discordapp.com/developers/docs/topics/gateway#guild-role-delete">Guild Role Delete</a>
+ */
 public class RoleDeleteEvent extends RoleEvent {
 
     private final long guildId;

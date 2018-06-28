@@ -24,6 +24,12 @@ import reactor.core.publisher.Mono;
 
 import java.util.Set;
 
+/**
+ * Dispatched when an emoji is added/deleted/or edited in a guild. The {@link #emojis} set includes ALL emojis of the
+ * guild.
+ *
+ * @see <a href="https://discordapp.com/developers/docs/topics/gateway#guild-emojis-update">Guild Emojis Update</a>
+ */
 public class EmojisUpdateEvent extends GuildEvent {
 
     private final long guildId;

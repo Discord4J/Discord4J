@@ -25,6 +25,13 @@ import reactor.core.publisher.Mono;
 import javax.annotation.Nullable;
 import java.util.Optional;
 
+/**
+ * Dispatched when a message is deleted.
+ * <p>
+ * The deleted message may not be present if messages are not stored.
+ *
+ * @see <a href="https://discordapp.com/developers/docs/topics/gateway#message-delete">Message Delete</a>
+ */
 public class MessageDeleteEvent extends MessageEvent {
 
     private final long messageId;

@@ -28,6 +28,13 @@ import reactor.core.publisher.Mono;
 import javax.annotation.Nullable;
 import java.util.Optional;
 
+/**
+ * Dispatched when a reaction is added to a message.
+ * <p>
+ * {@link #guildId} may not be present if the message was in a private channel.
+ *
+ * @see <a href="https://discordapp.com/developers/docs/topics/gateway#message-reaction-add">Message Reaction Add</a>
+ */
 public class ReactionAddEvent extends MessageEvent {
 
     private final long userId;

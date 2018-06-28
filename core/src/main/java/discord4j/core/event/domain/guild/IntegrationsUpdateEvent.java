@@ -21,6 +21,12 @@ import discord4j.core.object.entity.Guild;
 import discord4j.core.object.util.Snowflake;
 import reactor.core.publisher.Mono;
 
+/**
+ * Dispatched when guild integrations are updated.
+ *
+ * @see <a href="https://discordapp.com/developers/docs/topics/gateway#guild-integrations-update">Guild Integrations
+ * Update</a>
+ */
 public class IntegrationsUpdateEvent extends GuildEvent {
 
     private final long guildId;

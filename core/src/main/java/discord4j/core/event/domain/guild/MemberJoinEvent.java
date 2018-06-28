@@ -22,6 +22,11 @@ import discord4j.core.object.entity.Member;
 import discord4j.core.object.util.Snowflake;
 import reactor.core.publisher.Mono;
 
+/**
+ * Dispatched when a user joins a guild.
+ *
+ * @see <a href="https://discordapp.com/developers/docs/topics/gateway#guild-member-add">Guild Member Add</a>
+ */
 public class MemberJoinEvent extends GuildEvent {
 
     private final Member member;

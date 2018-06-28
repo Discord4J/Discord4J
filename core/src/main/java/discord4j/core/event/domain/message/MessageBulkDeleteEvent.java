@@ -27,6 +27,14 @@ import java.util.Arrays;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * Dispatched when multiple messages are deleted at once.
+ * <p>
+ * Corresponding {@link discord4j.core.event.domain.message.MessageDeleteEvent message deletes} are NOT dispatched for
+ * messages included in this event.
+ *
+ * @see <a href="https://discordapp.com/developers/docs/topics/gateway#message-delete-bulk">Message Delete Bulk</a>
+ */
 public class MessageBulkDeleteEvent extends MessageEvent {
 
     private final long[] messageIds;

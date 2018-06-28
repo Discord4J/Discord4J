@@ -28,6 +28,15 @@ import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Dispatched when a message is updated.
+ * <p>
+ * This event includes both normal message editing as well as the following behavior regarding embeds:
+ * When a message with a link is sent, it does not initially contain its embed. When Discord creates the embed, this
+ * event is fired with it added to the embeds list.
+ *
+ * @see <a href="https://discordapp.com/developers/docs/topics/gateway#message-update">Message Update</a>
+ */
 public class MessageUpdateEvent extends MessageEvent {
 
     private final long messageId;

@@ -22,22 +22,30 @@ import discord4j.core.object.entity.Category;
 import javax.annotation.Nullable;
 import java.util.Optional;
 
+/**
+ * Dispatched when a {@link Category} is updated in a guild.
+ * <p>
+ * The old category may not be present if categories are not stored.
+ *
+ * @see <a href="https://discordapp.com/developers/docs/topics/gateway#channel-update">Channel Update</a>
+ */
 public class CategoryUpdateEvent extends ChannelEvent {
 
-    private final Category old;
     private final Category current;
+    private final Category old;
 
-    public CategoryUpdateEvent(DiscordClient client, Category old, @Nullable Category current) {
+    public CategoryUpdateEvent(DiscordClient client, Category current, @Nullable Category old) {
         super(client);
-        this.old = old;
         this.current = current;
+        this.old = old;
     }
 
-    public Category getOld() {
-        return old;
+    public Category getCurrent() {
+        return current;
     }
 
-    public Optional<Category> getCurrent() {
-        return Optional.ofNullable(current);
+    public Optional<Category> getOld() {
+        return Optional.ofNullable(old);
     }
+
 }

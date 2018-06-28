@@ -22,6 +22,11 @@ import discord4j.core.object.entity.User;
 import discord4j.core.object.util.Snowflake;
 import reactor.core.publisher.Mono;
 
+/**
+ * Dispatched when a user is unbanned from a guild.
+ *
+ * @see <a href="https://discordapp.com/developers/docs/topics/gateway#guild-ban-remove">Guild Ban Remove</a>
+ */
 public class UnbanEvent extends GuildEvent {
 
     private final User user;

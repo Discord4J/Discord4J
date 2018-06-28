@@ -22,6 +22,13 @@ import discord4j.core.object.entity.TextChannel;
 import discord4j.core.object.util.Snowflake;
 import reactor.core.publisher.Mono;
 
+/**
+ * Dispatched when a webhook is updated in a guild.
+ * <p>
+ * Discord does not send any information about what was actually updated. This is simply a notification of SOME update.
+ *
+ * @see <a href="https://discordapp.com/developers/docs/topics/gateway#webhooks-update">Webhooks Update</a>
+ */
 public class WebhooksUpdateEvent extends Event {
 
     private final long guildId;

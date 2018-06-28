@@ -23,6 +23,11 @@ import discord4j.core.object.util.Snowflake;
 import java.util.Objects;
 import java.util.Set;
 
+/**
+ * Dispatched when an initial connection to the Discord gateway has been established.
+ *
+ * @see <a href="https://discordapp.com/developers/docs/topics/gateway#ready">Ready</a>
+ */
 public class ReadyEvent extends GatewayLifecycleEvent {
 
     private final int gatewayVersion;

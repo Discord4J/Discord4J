@@ -22,6 +22,11 @@ import discord4j.core.object.entity.User;
 import javax.annotation.Nullable;
 import java.util.Optional;
 
+/**
+ * Dispatched when a user is updated.
+ *
+ * @see <a href="https://discordapp.com/developers/docs/topics/gateway#user-update">User Update</a>
+ */
 public class UserUpdateEvent extends Event {
 
     private final User current;

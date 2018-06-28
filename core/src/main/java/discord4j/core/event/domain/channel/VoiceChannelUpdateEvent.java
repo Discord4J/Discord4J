@@ -22,6 +22,13 @@ import discord4j.core.object.entity.VoiceChannel;
 import javax.annotation.Nullable;
 import java.util.Optional;
 
+/**
+ * Dispatched when a {@link VoiceChannel} is deleted in a guild.
+ * <p>
+ * The old category may not be present if voice channels are not stored.
+ *
+ * @see <a href="https://discordapp.com/developers/docs/topics/gateway#channel-delete">Channel Delete</a>
+ */
 public class VoiceChannelUpdateEvent extends ChannelEvent {
 
     private final VoiceChannel current;

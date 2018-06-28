@@ -19,6 +19,11 @@ package discord4j.core.event.domain.channel;
 import discord4j.core.DiscordClient;
 import discord4j.core.object.entity.PrivateChannel;
 
+/**
+ * Dispatched when a {@link PrivateChannel} is created.
+ *
+ * @see <a href="https://discordapp.com/developers/docs/topics/gateway#channel-create">Channel Create</a>
+ */
 public class PrivateChannelCreateEvent extends ChannelEvent {
 
     private final PrivateChannel channel;

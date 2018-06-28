@@ -19,6 +19,9 @@ package discord4j.core.event.domain.channel;
 import discord4j.core.DiscordClient;
 import discord4j.core.object.entity.PrivateChannel;
 
+/**
+ * TODO what does this mean?
+ */
 public class PrivateChannelDeleteEvent extends ChannelEvent {
 
     private final PrivateChannel channel;
