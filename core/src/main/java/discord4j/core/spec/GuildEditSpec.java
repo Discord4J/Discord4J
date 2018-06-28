@@ -59,7 +59,7 @@ public class GuildEditSpec implements Spec<GuildModifyRequest> {
     }
 
     public GuildEditSpec setIcon(@Nullable Image icon) {
-        requestBuilder.icon(icon.getData());
+        requestBuilder.icon((icon == null) ? null : icon.getData());
         return this;
     }
 
