@@ -17,8 +17,10 @@
 package discord4j.core;
 
 import discord4j.core.event.EventDispatcher;
+import discord4j.core.object.Invite;
 import discord4j.core.object.Region;
 import discord4j.core.object.data.ApplicationInfoBean;
+import discord4j.core.object.data.InviteBean;
 import discord4j.core.object.data.RegionBean;
 import discord4j.core.object.data.WebhookBean;
 import discord4j.core.object.data.stored.*;
@@ -391,6 +393,20 @@ public final class DiscordClient {
     public Mono<Void> updatePresence(final Presence presence) {
         return Mono.fromRunnable(() -> serviceMediator.getGatewayClient().sender().next(
                 GatewayPayload.statusUpdate(presence.asStatusUpdate())));
+    }
+
+    /**
+     * Requests to retrieve an invite.
+     *
+     * @param inviteCode The code for the invite (e.g. "xdYkpp").
+     * @return A {@link Mono} where, upon successful completion, emits the {@link Invite} as represented by the
+     * supplied invite code. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Invite> getInvite(String inviteCode) {
+        return serviceMediator.getRestClient().getInviteService()
+                .getInvite(inviteCode)
+                .map(InviteBean::new)
+                .map(bean -> new Invite(serviceMediator, bean));
     }
 
     /**

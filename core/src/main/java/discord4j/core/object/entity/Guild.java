@@ -19,13 +19,9 @@ package discord4j.core.object.entity;
 import discord4j.common.json.GuildMemberResponse;
 import discord4j.core.DiscordClient;
 import discord4j.core.ServiceMediator;
-import discord4j.core.object.Ban;
-import discord4j.core.object.Region;
-import discord4j.core.object.VoiceState;
+import discord4j.core.object.*;
 import discord4j.core.object.audit.AuditLogEntry;
-import discord4j.core.object.data.AuditLogEntryBean;
-import discord4j.core.object.data.BanBean;
-import discord4j.core.object.data.RegionBean;
+import discord4j.core.object.data.*;
 import discord4j.core.object.data.stored.*;
 import discord4j.core.object.presence.Presence;
 import discord4j.core.object.util.Image;
@@ -33,6 +29,7 @@ import discord4j.core.object.util.Snowflake;
 import discord4j.core.spec.*;
 import discord4j.core.util.EntityUtil;
 import discord4j.core.util.PaginationUtil;
+import discord4j.rest.json.request.NicknameModifyRequest;
 import discord4j.rest.json.response.AuditLogResponse;
 import discord4j.rest.json.response.PruneResponse;
 import discord4j.store.util.LongLongTuple2;
@@ -40,6 +37,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.function.Tuples;
 
+import javax.annotation.Nullable;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -841,6 +839,44 @@ public final class Guild implements Entity {
                 .flatMap(log -> Flux.fromArray(log.getAuditLogEntries())
                         .map(AuditLogEntryBean::new)
                         .map(bean -> new AuditLogEntry(serviceMediator, bean)));
+    }
+
+    /**
+     * Requests to retrieve the webhooks of the guild.
+     *
+     * @return A {@link Flux} that continually emits the {@link Webhook webhooks} of the guild. If an error is
+     * received, it is emitted through the {@code Flux}.
+     */
+    public Flux<Webhook> getWebhooks() {
+        return serviceMediator.getRestClient().getWebhookService()
+                .getGuildWebhooks(getId().asLong())
+                .map(WebhookBean::new)
+                .map(bean -> new Webhook(serviceMediator, bean));
+    }
+
+    /**
+     * Requests to retrieve the invites of the guild.
+     *
+     * @return A {@link Flux} that continually emits the {@link ExtendedInvite invites} of the guild. If an error is
+     * received, it is emitted through the {@code Flux}.
+     */
+    public Flux<ExtendedInvite> getInvites() {
+        return serviceMediator.getRestClient().getGuildService()
+                .getGuildInvites(getId().asLong())
+                .map(ExtendedInviteBean::new)
+                .map(bean -> new ExtendedInvite(serviceMediator, bean));
+    }
+
+    /**
+     * Requests to retrieve the bot user's nickname in the guild.
+     *
+     * @param newNickname The new nickname.
+     * @return A {@link Mono} where, upon successful completion, emits the bot user's new nickname in this guild. If an
+     * error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<String> changeSelfNickname(@Nullable String newNickname) {
+        return serviceMediator.getRestClient().getGuildService()
+                .modifyOwnNickname(getId().asLong(), new NicknameModifyRequest(newNickname));
     }
 
     /** Automatically scan and delete messages sent in the server that contain explicit content. */

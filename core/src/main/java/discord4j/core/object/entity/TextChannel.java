@@ -20,11 +20,13 @@ import discord4j.core.ServiceMediator;
 import discord4j.core.object.ExtendedInvite;
 import discord4j.core.object.PermissionOverwrite;
 import discord4j.core.object.data.ExtendedInviteBean;
+import discord4j.core.object.data.WebhookBean;
 import discord4j.core.object.data.stored.TextChannelBean;
 import discord4j.core.object.util.Snowflake;
 import discord4j.core.spec.InviteCreateSpec;
 import discord4j.core.spec.MessageCreateSpec;
 import discord4j.core.spec.TextChannelEditSpec;
+import discord4j.core.spec.WebhookCreateSpec;
 import discord4j.core.util.EntityUtil;
 import discord4j.rest.json.request.BulkDeleteRequest;
 import org.reactivestreams.Publisher;
@@ -280,5 +282,47 @@ public final class TextChannel extends BaseChannel implements GuildChannel, Mess
                 .flatMap(messageIdChunk -> getServiceMediator().getRestClient().getChannelService()
                         .bulkDeleteMessages(getId().asLong(), new BulkDeleteRequest(messageIdChunk)))
                 .thenMany(Flux.fromIterable(ignoredMessageIds));
+    }
+
+    /**
+     * Requests to create a webhook.
+     *
+     * @param spec A {@link Consumer} that provides a "blank" {@link WebhookCreateSpec} to be operated on. If some
+     * properties need to be retrieved via blocking operations (such as retrieval from a database), then it is
+     * recommended to build the spec externally and call {@link #createWebhook(WebhookCreateSpec)}.
+     * @return A {@link Mono} where, upon successful completion, emits the created {@link Webhook}. If an error
+     * is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Webhook> createWebhook(final Consumer<WebhookCreateSpec> spec) {
+        final WebhookCreateSpec mutatedSpec = new WebhookCreateSpec();
+        spec.accept(mutatedSpec);
+        return createWebhook(mutatedSpec);
+    }
+
+    /**
+     * Requests to create a webhook.
+     *
+     * @param spec A configured {@link WebhookCreateSpec} to perform the request on.
+     * @return A {@link Mono} where, upon successful completion, emits the created {@link Webhook}. If an error
+     * is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Webhook> createWebhook(final WebhookCreateSpec spec) {
+        return getServiceMediator().getRestClient().getWebhookService()
+                .createWebhook(getId().asLong(), spec.asRequest())
+                .map(WebhookBean::new)
+                .map(bean -> new Webhook(getServiceMediator(), bean));
+    }
+
+    /**
+     * Requests to retrieve the webhooks of the channel.
+     *
+     * @return A {@link Flux} that continually emits the {@link Webhook webhooks} of the channel. If an error is
+     * received, it is emitted through the {@code Flux}.
+     */
+    public Flux<Webhook> getWebhooks() {
+        return getServiceMediator().getRestClient().getWebhookService()
+                .getChannelWebhooks(getId().asLong())
+                .map(WebhookBean::new)
+                .map(bean -> new Webhook(getServiceMediator(), bean));
     }
 }
