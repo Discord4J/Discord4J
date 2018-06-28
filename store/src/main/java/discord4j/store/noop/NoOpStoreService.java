@@ -51,7 +51,7 @@ public class NoOpStoreService implements StoreService {
 
     @Override
     public <V extends Serializable> LongObjStore<V> provideLongObjStore(Class<V> valueClass) {
-        return new NoOpLongObjStore<>();
+        return new NoOpLongObjStore<>(type);
     }
 
     @Override
