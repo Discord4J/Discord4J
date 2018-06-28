@@ -44,7 +44,6 @@ import java.util.Arrays;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
-import java.util.stream.Stream;
 
 class GuildDispatchHandlers {
 
@@ -134,6 +133,7 @@ class GuildDispatchHandlers {
         StateHolder stateHolder = context.getServiceMediator().getStateHolder();
 
         long guildId = context.getDispatch().getGuild().getId();
+        boolean unavailable = context.getDispatch().getGuild().isUnavailable();
 
         Mono<Void> deleteGuild = stateHolder.getGuildStore().delete(guildId);
 
@@ -169,8 +169,11 @@ class GuildDispatchHandlers {
                             .thenReturn(guild);
                 })
                 .flatMap(deleteGuild::thenReturn)
-                .map(guild -> new GuildDeleteEvent(client, guildId, new Guild(context.getServiceMediator(), guild)))
-                .switchIfEmpty(deleteGuild.thenReturn(new GuildDeleteEvent(client, guildId, null)));
+                .map(bean -> {
+                    Guild guild = new Guild(context.getServiceMediator(), bean);
+                    return new GuildDeleteEvent(client, guildId, guild, unavailable);
+                })
+                .switchIfEmpty(deleteGuild.thenReturn(new GuildDeleteEvent(client, guildId, null, unavailable)));
     }
 
     static Mono<EmojisUpdateEvent> guildEmojisUpdate(DispatchContext<GuildEmojisUpdate> context) {

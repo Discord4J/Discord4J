@@ -27,11 +27,13 @@ public class GuildDeleteEvent extends GuildEvent {
 
     private final long guildId;
     private final Guild guild;
+    private final boolean unavailable;
 
-    public GuildDeleteEvent(DiscordClient client, long guildId, @Nullable Guild guild) {
+    public GuildDeleteEvent(DiscordClient client, long guildId, @Nullable Guild guild, boolean unavailable) {
         super(client);
         this.guildId = guildId;
         this.guild = guild;
+        this.unavailable = unavailable;
     }
 
     public Snowflake getGuildId() {
@@ -40,5 +42,9 @@ public class GuildDeleteEvent extends GuildEvent {
 
     public Optional<Guild> getGuild() {
         return Optional.ofNullable(guild);
+    }
+
+    public boolean isUnavailable() {
+        return unavailable;
     }
 }
