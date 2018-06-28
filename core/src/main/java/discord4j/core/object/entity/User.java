@@ -22,6 +22,7 @@ import discord4j.core.object.data.stored.UserBean;
 import discord4j.core.object.util.Image;
 import discord4j.core.object.util.Snowflake;
 import discord4j.core.util.EntityUtil;
+import discord4j.core.util.ImageUtil;
 import discord4j.rest.json.request.DMCreateRequest;
 import reactor.core.publisher.Mono;
 
@@ -37,10 +38,10 @@ import static discord4j.core.object.util.Image.Format.*;
  */
 public class User implements Entity {
 
-    /** The path for default user avatar images for {@link Image}. */
+    /** The path for default user avatar image URLs. */
     private static final String DEFAULT_IMAGE_PATH = "embed/avatars/%d";
 
-    /** The path for user avatar images for {@link Image}. */
+    /** The path for user avatar image URLs. */
     private static final String AVATAR_IMAGE_PATH = "avatars/%s/%s";
 
     /** The ServiceMediator associated to this object. */
@@ -94,27 +95,27 @@ public class User implements Entity {
     }
 
     /**
-     * Gets the user's avatar, if present and in a supported format.
+     * Gets the user's avatar URL, if present and in a supported format.
      *
-     * @param format The format for the {@link Image}. Supported format types are {@link Image.Format#GIF GIF} if
+     * @param format The format for the URL. Supported format types are {@link Image.Format#GIF GIF} if
      * {@link #hasAnimatedAvatar() animated}, otherwise {@link Image.Format#PNG PNG} or {@link Image.Format#JPEG JPEG}.
-     * @return The user's avatar, if present and in a supported format.
+     * @return The user's avatar URL, if present and in a supported format.
      */
-    public final Optional<Image> getAvatar(final Image.Format format) {
+    public final Optional<String> getAvatarUrl(final Image.Format format) {
         final boolean animated = hasAnimatedAvatar();
         return Optional.ofNullable(data.getAvatar())
-                .filter(ignored -> (animated && format.equals(GIF)) || !animated)
-                .filter(ignored -> (!animated && (format.equals(PNG) || format.equals(JPEG))) || animated)
-                .map(avatar -> Image.of(String.format(AVATAR_IMAGE_PATH, getId().asString(), avatar), format));
+                .filter(ignored -> !animated || (format == GIF))
+                .filter(ignored -> (!animated && ((format == PNG) || (format == JPEG))) || animated)
+                .map(avatar -> ImageUtil.getUrl(String.format(AVATAR_IMAGE_PATH, getId().asString(), avatar), format));
     }
 
     /**
-     * Gets the default avatar for this user.
+     * Gets the default avatar URL for this user.
      *
-     * @return The default avatar for this user.
+     * @return The default avatar URL for this user.
      */
-    public final Image getDefaultAvatar() {
-        return Image.of(String.format(DEFAULT_IMAGE_PATH, Integer.parseInt(getDiscriminator()) % 5), PNG);
+    public final String getDefaultAvatarUrl() {
+        return ImageUtil.getUrl(String.format(DEFAULT_IMAGE_PATH, Integer.parseInt(getDiscriminator()) % 5), PNG);
     }
 
     /**

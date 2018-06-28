@@ -28,6 +28,7 @@ import discord4j.core.object.util.Image;
 import discord4j.core.object.util.Snowflake;
 import discord4j.core.spec.*;
 import discord4j.core.util.EntityUtil;
+import discord4j.core.util.ImageUtil;
 import discord4j.core.util.PaginationUtil;
 import discord4j.rest.json.request.NicknameModifyRequest;
 import discord4j.rest.json.response.AuditLogResponse;
@@ -56,10 +57,10 @@ import static discord4j.core.object.util.Image.Format.*;
  */
 public final class Guild implements Entity {
 
-    /** The path for guild icon images for {@link Image}. */
+    /** The path for guild icon image URLs. */
     private static final String ICON_IMAGE_PATH = "icons/%s/%s";
 
-    /** The path for guild splash images for {@link Image}. */
+    /** The path for guild splash image URLs. */
     private static final String SPLASH_IMAGE_PATH = "splashes/%s/%s";
 
     /** The ServiceMediator associated to this object. */
@@ -103,29 +104,29 @@ public final class Guild implements Entity {
     }
 
     /**
-     * Gets the icon of the guild, if present and in a supported format.
+     * Gets the icon URL of the guild, if present and in a supported format.
      *
-     * @param format The format for the {@link Image}. Supported format types are {@link Image.Format#PNG PNG},
+     * @param format The format for the URL. Supported format types are {@link Image.Format#PNG PNG},
      * {@link Image.Format#JPEG JPEG}, and {@link Image.Format#WEB_P WebP}.
-     * @return The icon of the guild, if present and in a supported format.
+     * @return The icon URL of the guild, if present and in a supported format.
      */
-    public Optional<Image> getIcon(final Image.Format format) {
+    public Optional<String> getIconUrl(final Image.Format format) {
         return Optional.ofNullable(data.getIcon())
-                .filter(ignored -> format.equals(PNG) || format.equals(JPEG) || format.equals(WEB_P))
-                .map(icon -> Image.of(String.format(ICON_IMAGE_PATH, getId().asString(), icon), format));
+                .filter(ignored -> (format == PNG) || (format == JPEG) || (format == WEB_P))
+                .map(icon -> ImageUtil.getUrl(String.format(ICON_IMAGE_PATH, getId().asString(), icon), format));
     }
 
     /**
-     * Gets the splash of the guild, if present and in a supported format.
+     * Gets the splash URL of the guild, if present and in a supported format.
      *
-     * @param format The format for the {@link Image}. Supported format types are {@link Image.Format#PNG PNG},
+     * @param format The format for the URL. Supported format types are {@link Image.Format#PNG PNG},
      * {@link Image.Format#JPEG JPEG}, and {@link Image.Format#WEB_P WebP}.
-     * @return The splash of the guild, if present and in a supported format.
+     * @return The splash URL of the guild, if present and in a supported format.
      */
-    public Optional<Image> getSplash(final Image.Format format) {
+    public Optional<String> getSplashUrl(final Image.Format format) {
         return Optional.ofNullable(data.getSplash())
-                .filter(ignored -> format.equals(PNG) || format.equals(JPEG) || format.equals(WEB_P))
-                .map(splash -> Image.of(String.format(SPLASH_IMAGE_PATH, getId().asString(), splash), format));
+                .filter(ignored -> (format == PNG) || (format == JPEG) || (format == WEB_P))
+                .map(splash -> ImageUtil.getUrl(String.format(SPLASH_IMAGE_PATH, getId().asString(), splash), format));
     }
 
     /**

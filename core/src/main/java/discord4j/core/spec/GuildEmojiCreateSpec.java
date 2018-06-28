@@ -16,6 +16,7 @@
  */
 package discord4j.core.spec;
 
+import discord4j.core.object.util.Image;
 import discord4j.core.object.util.Snowflake;
 import discord4j.rest.json.request.GuildEmojiCreateRequest;
 
@@ -33,8 +34,8 @@ public class GuildEmojiCreateSpec implements Spec<GuildEmojiCreateRequest> {
         return this;
     }
 
-    public GuildEmojiCreateSpec setImage(String image) {
-        this.image = image;
+    public GuildEmojiCreateSpec setImage(Image image) {
+        this.image = image.getData();
         return this;
     }
 

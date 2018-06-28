@@ -19,6 +19,7 @@ package discord4j.core.spec;
 import discord4j.core.object.Region;
 import discord4j.core.object.entity.Channel;
 import discord4j.core.object.entity.Guild;
+import discord4j.core.object.util.Image;
 import discord4j.rest.json.request.GuildCreateRequest;
 import discord4j.rest.json.request.PartialChannelRequest;
 import discord4j.rest.json.request.RoleCreateRequest;
@@ -48,8 +49,8 @@ public class GuildCreateSpec implements Spec<GuildCreateRequest> {
         return this;
     }
 
-    public GuildCreateSpec setIcon(@Nullable String icon) { // TODO icon class
-        this.icon = icon;
+    public GuildCreateSpec setIcon(@Nullable Image icon) {
+        this.icon = icon.getData();
         return this;
     }
 

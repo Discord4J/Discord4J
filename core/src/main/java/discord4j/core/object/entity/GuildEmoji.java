@@ -21,9 +21,9 @@ import discord4j.core.DiscordClient;
 import discord4j.core.ServiceMediator;
 import discord4j.core.object.data.stored.GuildEmojiBean;
 import discord4j.core.object.data.stored.UserBean;
-import discord4j.core.object.util.Image;
 import discord4j.core.object.util.Snowflake;
 import discord4j.core.spec.GuildEmojiEditSpec;
+import discord4j.core.util.ImageUtil;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -43,7 +43,7 @@ import static discord4j.core.object.util.Image.Format.PNG;
  */
 public final class GuildEmoji implements Entity {
 
-    /** The path for {@code GuildEmoji} images for {@link Image}. */
+    /** The path for {@code GuildEmoji} image URLs. */
     private static final String EMOJI_IMAGE_PATH = "emojis/%s";
 
     /** The ServiceMediator associated to this object. */
@@ -210,12 +210,12 @@ public final class GuildEmoji implements Entity {
     }
 
     /**
-     * Gets the {@link Image} for this guild emoji.
+     * Gets the URL for this guild emoji.
      *
-     * @return The {@link Image} for this guild emoji.
+     * @return The URL for this guild emoji.
      */
-    public Image getImage() {
+    public String getImageUrl() {
         final String path = String.format(EMOJI_IMAGE_PATH, getId().asString());
-        return isAnimated() ? Image.of(path, GIF) : Image.of(path, PNG);
+        return isAnimated() ? ImageUtil.getUrl(path, GIF) : ImageUtil.getUrl(path, PNG);
     }
 }

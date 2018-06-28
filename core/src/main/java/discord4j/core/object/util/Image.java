@@ -16,65 +16,63 @@
  */
 package discord4j.core.object.util;
 
+import java.util.Base64;
 import java.util.Objects;
 
 /**
- * Represents an image from Discord; specifically its URL.
+ * Represents a Discord image.
  *
  * @see <a href="https://discordapp.com/developers/docs/reference#image-formatting">Image Formatting</a>
  */
 public final class Image {
 
-    /** The base (beginning) String for all {@link #getUrl() URLs}. */
-    private static final String BASE_URL = "https://cdn.discordapp.com/";
-
-    /** The {@link String#format(String, Object...) format} for URLs. */
-    private static final String URL_FORMAT = BASE_URL + "%s.%s";
-
     /**
-     * Constructs an {@code Image} utilizing a path and the {@link Format} the URL should represent.
+     * Constructs an {@code Image} utilizing raw image data and the {@link Format} the image represents.
      *
-     * @param path The path of the image; excluding the extension. Must be non-null.
-     * @param format The {@link Format} the URL should represent. Must be non-null.
-     * @return A constructed {@code Image} with an URL and the {@link Format} the URL represents.
+     * @param image The raw image data. Must be non-null.
+     * @param format The {@link Format} the image represents. Must be non-null.
+     * @return A constructed {@code Image} with hashed raw image data and the {@link Format} the image represents.
      */
-    public static Image of(final String path, final Format format) {
-        return new Image(String.format(URL_FORMAT, path, format.extension), format);
+    public static Image ofRaw(final byte[] image, final Format format) {
+        return new Image(Base64.getEncoder().encodeToString(image), format);
     }
 
-    /** The URL of the image. */
-    private final String url;
+    /** The hash of the image. */
+    private final String hash;
 
-    /** The {@link Format} the URL represents. */
+    /** The format of the image. */
     private final Format format;
 
-    /**
-     * Constructs an {@code Image} utilizing an URl and the {@link Format} the URL represents.
-     *
-     * @param url The URL of the image. Must be non-null.
-     * @param format The {@link Format} the URL represents. Must be non-null.
-     */
-    private Image(final String url, final Format format) {
-        this.url = Objects.requireNonNull(url);
+    private Image(final String hash, final Format format) {
+        this.hash = Objects.requireNonNull(hash);
         this.format = Objects.requireNonNull(format);
     }
 
     /**
-     * Gets the URL of the image.
+     * Gets the hash of the image.
      *
-     * @return The URL of the image.
+     * @return The hash of the image.
      */
-    public String getUrl() {
-        return url;
+    public String getHash() {
+        return hash;
     }
 
     /**
-     * Gets the {@link Format} the URL represents.
+     * Gets the format of the image.
      *
-     * @return The {@link Format} the URL represents.
+     * @return The format of the image.
      */
     public Format getFormat() {
         return format;
+    }
+
+    /**
+     * Gets the data as it would be represented for a Discord request.
+     *
+     * @return The data as it would be represented for a Discord request.
+     */
+    public String getData() {
+        return String.format("data:image/%s;base64,%s", format.extension, hash);
     }
 
     /**
@@ -82,7 +80,7 @@ public final class Image {
      * The other object is considered equal if:
      * <ul>
      * <li>It is also a {@code Image} and;</li>
-     * <li>Both instances have equal {@link #getUrl() urls}.</li>
+     * <li>Both instances have equal {@link #getData()} data}.</li>
      * </ul>
      *
      * @param obj An object to be tested for equality.
@@ -90,38 +88,38 @@ public final class Image {
      */
     @Override
     public boolean equals(final Object obj) {
-        return (obj instanceof Image) && Objects.equals(url, ((Image) obj).url);
+        return (obj instanceof Image) && ((Image) obj).getData().equals(getData());
     }
 
     /**
-     * Gets the hash code value of the {@link #getUrl() url}.
+     * Gets the hash code value of the {@link #getData()} data}.
      *
-     * @return The hash code value of the {@link #getUrl() url}.
+     * @return The hash code value of the {@link #getData()} data}.
      */
     @Override
     public int hashCode() {
-        return url.hashCode();
+        return getData().hashCode();
     }
 
     /**
      * Gets the String represents of this {@code Image}.
      * <p>
      * The format returned by this method is unspecified and may vary between implementations; however, it is guaranteed
-     * to always be non-empty. This method is not suitable for obtaining the URL; use {@link #getUrl()} instead.
+     * to always be non-empty. This method is not suitable for obtaining the data; use {@link #getData()} instead.
      *
      * @return The String representation of this {@code Image}.
-     * @see #getUrl()
+     * @see #getData()
      */
     @Override
     public String toString() {
-        return "Image(" +
-                "url='" + url + '\'' +
+        return "Image{" +
+                "hash='" + hash + '\'' +
                 ", format=" + format +
-                ')';
+                '}';
     }
 
     /**
-     * The format of an image; usually associated with an URL. This enum represents all the types supported by Discord.
+     * The format of an image. This enum represents all the types supported by Discord.
      *
      * @see <a href="https://discordapp.com/developers/docs/reference#image-formatting-image-formats">Image Formats</a>
      */

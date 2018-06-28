@@ -21,6 +21,7 @@ import discord4j.core.ServiceMediator;
 import discord4j.core.object.data.ApplicationInfoBean;
 import discord4j.core.object.util.Image;
 import discord4j.core.object.util.Snowflake;
+import discord4j.core.util.ImageUtil;
 import reactor.core.publisher.Mono;
 
 import java.util.Objects;
@@ -31,7 +32,7 @@ import static discord4j.core.object.util.Image.Format.*;
 /** Represents the Current (typically) Application Information. */
 public final class ApplicationInfo implements Entity {
 
-    /** The path for application icon images for {@link Image}. */
+    /** The path for application icon image URLs. */
     private static final String ICON_IMAGE_PATH = "app-icons/%s/%s";
 
     /** The ServiceMediator associated to this object. */
@@ -71,16 +72,16 @@ public final class ApplicationInfo implements Entity {
     }
 
     /**
-     * Gets the icon of the application, if present and in a supported format.
+     * Gets the icon URL of the application, if present and in a supported format.
      *
-     * @param format The format for the {@link Image}. Supported format types are {@link Image.Format#PNG PNG},
+     * @param format The format for the URL. Supported format types are {@link Image.Format#PNG PNG},
      * {@link Image.Format#JPEG JPEG}, and {@link Image.Format#WEB_P WebP}.
-     * @return The icon of the application, if present and in a supported format.
+     * @return The icon URL of the application, if present and in a supported format.
      */
-    public Optional<Image> getIcon(final Image.Format format) {
+    public Optional<String> getIcon(final Image.Format format) {
         return Optional.ofNullable(data.getIcon())
-                .filter(ignored -> format.equals(PNG) || format.equals(JPEG) || format.equals(WEB_P))
-                .map(icon -> Image.of(String.format(ICON_IMAGE_PATH, getId().asString(), icon), format));
+                .filter(ignored -> (format == PNG) || (format == JPEG) || (format == WEB_P))
+                .map(icon -> ImageUtil.getUrl(String.format(ICON_IMAGE_PATH, getId().asString(), icon), format));
     }
 
     /**

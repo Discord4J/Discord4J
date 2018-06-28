@@ -18,6 +18,7 @@ package discord4j.core.spec;
 
 import discord4j.core.object.Region;
 import discord4j.core.object.entity.Guild;
+import discord4j.core.object.util.Image;
 import discord4j.core.object.util.Snowflake;
 import discord4j.rest.json.request.GuildModifyRequest;
 
@@ -57,8 +58,8 @@ public class GuildEditSpec implements Spec<GuildModifyRequest> {
         return this;
     }
 
-    public GuildEditSpec setIcon(@Nullable String icon) { // TODO Icon class
-        requestBuilder.icon(icon);
+    public GuildEditSpec setIcon(@Nullable Image icon) {
+        requestBuilder.icon(icon.getData());
         return this;
     }
 
