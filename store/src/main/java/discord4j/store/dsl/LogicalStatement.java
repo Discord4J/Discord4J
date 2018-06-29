@@ -21,9 +21,9 @@ public interface LogicalStatement<T> {
 
     LogicalStatement<T> not();
 
-    LogicalStatement<T> and(LogicalStatement<T>... others);
+    LogicalStatement<T> and(LogicalStatement<T> other);
 
-    LogicalStatement<T> or(LogicalStatement<T>... others);
+    LogicalStatement<T> or(LogicalStatement<T> other);
 
-    LogicalStatement<T> xor(LogicalStatement<T>... others);
+    LogicalStatement<T> xor(LogicalStatement<T> other);
 }

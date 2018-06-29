@@ -86,49 +86,33 @@ public class SimpleLogicalStatement<T, V> implements LogicalStatement<T> {
     }
 
     @Override
-    public LogicalStatement<T> and(LogicalStatement<T>... others) {
+    public LogicalStatement<T> and(LogicalStatement<T> stmt) {
         return new SimpleLogicalStatement<T, V>(t -> {
             if (!this.test(t))
                 return false;
-            for (LogicalStatement<T> stmt : others) {
-                if (!(stmt instanceof SimpleLogicalStatement))
-                    throw new RuntimeException("Incompatible statements used!");
-                if (!((SimpleLogicalStatement<T, V>) stmt).test(t))
-                    return false;
-            }
-            return true;
+            if (!(stmt instanceof SimpleLogicalStatement))
+                throw new RuntimeException("Incompatible statements used!");
+            return ((SimpleLogicalStatement<T, V>) stmt).test(t);
         });
     }
 
     @Override
-    public LogicalStatement<T> or(LogicalStatement<T>... others) {
+    public LogicalStatement<T> or(LogicalStatement<T> stmt) {
         return new SimpleLogicalStatement<T, V>(t -> {
             if (this.test(t))
                 return true;
-            for (LogicalStatement<T> stmt : others) {
-                if (!(stmt instanceof SimpleLogicalStatement))
-                    throw new RuntimeException("Incompatible statements used!");
-                if (((SimpleLogicalStatement<T, V>) stmt).test(t))
-                    return true;
-            }
-            return false;
+            if (!(stmt instanceof SimpleLogicalStatement))
+                throw new RuntimeException("Incompatible statements used!");
+            return ((SimpleLogicalStatement<T, V>) stmt).test(t);
         });
     }
 
     @Override
-    public LogicalStatement<T> xor(LogicalStatement<T>... others) {
+    public LogicalStatement<T> xor(LogicalStatement<T> stmt) {
         return new SimpleLogicalStatement<T, V>(t -> {
-            boolean currValue = this.test(t);
-            for (LogicalStatement<T> stmt : others) {
-                if (!(stmt instanceof SimpleLogicalStatement))
-                    throw new RuntimeException("Incompatible statements used!");
-                if (((SimpleLogicalStatement<T, V>) stmt).test(t)) {
-                    if (currValue)
-                        return false;
-                    currValue = true;
-                }
-            }
-            return currValue;
+            if (!(stmt instanceof SimpleLogicalStatement))
+                throw new RuntimeException("Incompatible statements used!");
+            return this.test(t) ^ ((SimpleLogicalStatement<T, V>) stmt).test(t);
         });
     }
 
