@@ -5,8 +5,6 @@ import reactor.core.publisher.Mono;
 
 /**
  * Very simple command abstraction.
- *
- * @see commands.util.AbstractCommand for a more abstracted command implementation base.
  */
 @FunctionalInterface
 public interface BaseCommand {
