@@ -31,14 +31,10 @@ import java.util.function.Predicate;
 public class SimpleLogicalStatement<T, V> implements LogicalStatement<T> {
 
     @Nullable
-    private final Property<T> property;
-    @Nullable
     private final MethodHandle handle;
-    private final boolean matchRange;
     private final Predicate<T> tester;
 
     public SimpleLogicalStatement(Class<T> holder, Property<T> property, @Nullable V value) {
-        this.property = property;
         String getterName = "get" + Character.toTitleCase(property.getName().charAt(0)) + property.getName().substring(1);
         try {
             Method method = holder.getMethod(getterName);
@@ -47,7 +43,6 @@ public class SimpleLogicalStatement<T, V> implements LogicalStatement<T> {
         } catch (IllegalAccessException | NoSuchMethodException e) {
             throw new RuntimeException(e);
         }
-        this.matchRange = false;
         this.tester = (t) -> {
             try {
                 return t == null ? value == null : Objects.equals(handle.bindTo(t).invoke(), value);
@@ -58,7 +53,6 @@ public class SimpleLogicalStatement<T, V> implements LogicalStatement<T> {
     }
 
     public SimpleLogicalStatement(Class<T> holder, Property<T> property, V start, V end) {
-        this.property = property;
         String getterName = "get" + Character.toTitleCase(property.getName().charAt(0)) + property.getName().substring(1);
         try {
             Method method = holder.getMethod(getterName);
@@ -67,7 +61,6 @@ public class SimpleLogicalStatement<T, V> implements LogicalStatement<T> {
         } catch (IllegalAccessException | NoSuchMethodException e) {
             throw new RuntimeException(e);
         }
-        this.matchRange = true;
 
         if (!(start instanceof Comparable || end instanceof Comparable))
             throw new RuntimeException("This constructor overload requires a comparable type!");
@@ -84,9 +77,7 @@ public class SimpleLogicalStatement<T, V> implements LogicalStatement<T> {
 
     private SimpleLogicalStatement(Predicate<T> override) {
         this.tester = override;
-        this.matchRange = false;
         this.handle = null;
-        this.property = null;
     }
 
     @Override
