@@ -10,18 +10,17 @@ public class SimpleCommandProvider implements CommandProvider {
 
     @Override
     public Optional<? extends BaseCommand> provide(MessageCreateEvent context) {
-        if (context.getMessage().getContent().isPresent()) {
-            String content = context.getMessage().getContent().get();
-            if (content.startsWith("!")) {
-                String cmd = content.replaceFirst("!", "").split(" ")[0];
-                switch (cmd) {
-                    case "echo":
-                        return Optional.of(new EchoCommand());
-                    case "logout":
-                        return Optional.of(new LogoutCommand());
-                }
-            }
-        }
-        return Optional.empty();
+        return context.getMessage()
+                      .getContent()
+                      .filter(s -> s.startsWith("!"))
+                      .map(s -> s.replaceFirst("!", "").split(" ")[0])
+                      .map(cmd -> {
+                          if (cmd.equalsIgnoreCase("echo"))
+                              return new EchoCommand();
+                          else if (cmd.equalsIgnoreCase("logout"))
+                              return new LogoutCommand();
+                          else
+                              return null;
+                      });
     }
 }

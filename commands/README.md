@@ -2,7 +2,7 @@
 The `commands` module provides a set of low-level abstractions for implementing commands. 
 
 To use this, command implementations should implement the `CommandProvider` class and users should instantiate the
-`CommandBootrapper` class in order to register `CommandProvider`s for use.
+`CommandBootstrapper` class in order to register `CommandProvider`s for use.
 
 ## Installation
 ### Gradle
