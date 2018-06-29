@@ -23,10 +23,10 @@ import discord4j.store.dsl.QueryBuilderFactory;
 
 import java.io.Serializable;
 
-public class SimpleQueryBuilderFactory<K extends Comparable<K>, T extends Serializable> implements QueryBuilderFactory<K, T, SimpleLogicalStatementFactory<T>, SimpleLogicalStatement<T, ?>> {
+public class SimpleQueryBuilderFactory<K extends Comparable<K>, T extends Serializable> implements QueryBuilderFactory<K, T> {
 
     @Override
-    public QueryBuilder<K, T, SimpleLogicalStatementFactory<T>, SimpleLogicalStatement<T, ?>> create(Store<K, T> store) {
+    public QueryBuilder<K, T> create(Store<K, T> store) {
         return new SimpleQueryBuilder<>(store, store.getValueType());
     }
 }

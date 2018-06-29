@@ -18,6 +18,8 @@
 package discord4j.store.dsl.jvm;
 
 import discord4j.store.Store;
+import discord4j.store.dsl.LogicalStatement;
+import discord4j.store.dsl.LogicalStatementFactory;
 import discord4j.store.dsl.Property;
 import discord4j.store.dsl.QueryBuilder;
 import reactor.core.publisher.Flux;
@@ -31,7 +33,7 @@ import java.util.Queue;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-public class SimpleQueryBuilder<K extends Comparable<K>, T extends Serializable> implements QueryBuilder<K, T, SimpleLogicalStatementFactory<T>, SimpleLogicalStatement<T, ?>> {
+public class SimpleQueryBuilder<K extends Comparable<K>, T extends Serializable> implements QueryBuilder<K, T> {
 
     private final Store<K, T> store;
     private final SimpleLogicalStatementFactory<T> lsf;
@@ -63,29 +65,6 @@ public class SimpleQueryBuilder<K extends Comparable<K>, T extends Serializable>
         this.limit = limit;
     }
 
-    @Override
-    public SimpleLogicalStatementFactory<T> logicalStatementFactory() {
-        return lsf;
-    }
-
-    @Override
-    public QueryBuilder<K, T, SimpleLogicalStatementFactory<T>, SimpleLogicalStatement<T, ?>> filter(Function<SimpleLogicalStatementFactory<T>, SimpleLogicalStatement<T, ?>> callback) {
-        SimpleLogicalStatement<T, ?> compiled = callback.apply(lsf);
-        return new SimpleQueryBuilder<>(store, tests, compiled, lsf, sorter, limit);
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public <V extends Comparable<V>> QueryBuilder<K, T, SimpleLogicalStatementFactory<T>, SimpleLogicalStatement<T, ?>> sortBy(Property<V> property) {
-        if (!Comparable.class.isAssignableFrom(property.getType()))
-            throw new RuntimeException("Property must be comparable!");
-        return new SimpleQueryBuilder<>(store, tests, null, lsf, (o1, o2) -> ((Comparable<T>)o1).compareTo(o2), limit);
-    }
-
-    @Override
-    public QueryBuilder<K, T, SimpleLogicalStatementFactory<T>, SimpleLogicalStatement<T, ?>> limit(int count) {
-        return new SimpleQueryBuilder<>(store, tests, null, lsf, sorter, count);
-    }
 
     Predicate<T> compileStatements() {
         return t -> {
@@ -96,8 +75,32 @@ public class SimpleQueryBuilder<K extends Comparable<K>, T extends Serializable>
             return true;
         };
     }
-
     // Naive impls :eyes:
+
+    @Override
+    public LogicalStatementFactory<T> logicalStatementFactory() {
+        return lsf;
+    }
+
+    @Override
+    public QueryBuilder<K, T> filter(Function<LogicalStatementFactory<T>, ? extends LogicalStatement<T>> callback) {
+        LogicalStatement<T> compiled = callback.apply(lsf);
+        if (!(compiled instanceof SimpleLogicalStatement))
+            throw new RuntimeException("Unexpected implementation!");
+        return new SimpleQueryBuilder<>(store, tests, (SimpleLogicalStatement<T, ?>) compiled, lsf, sorter, limit);
+    }
+
+    @Override
+    public <V extends Comparable<V>> QueryBuilder<K, T> sortBy(Property<V> property) {
+        if (!Comparable.class.isAssignableFrom(property.getType()))
+            throw new RuntimeException("Property must be comparable!");
+        return new SimpleQueryBuilder<>(store, tests, null, lsf, (o1, o2) -> ((Comparable<T>)o1).compareTo(o2), limit);
+    }
+
+    @Override
+    public QueryBuilder<K, T> limit(int count) {
+        return new SimpleQueryBuilder<>(store, tests, null, lsf, sorter, count);
+    }
 
     @Override
     public Mono<T> selectOne() {

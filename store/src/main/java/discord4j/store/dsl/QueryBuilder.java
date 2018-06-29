@@ -23,15 +23,15 @@ import reactor.core.publisher.Mono;
 import java.io.Serializable;
 import java.util.function.Function;
 
-public interface QueryBuilder<K extends Comparable<K>, T extends Serializable, LSF extends LogicalStatementFactory<T>, LS extends LogicalStatement<T>> {
+public interface QueryBuilder<K extends Comparable<K>, T extends Serializable> {
 
-    LSF logicalStatementFactory();
+    LogicalStatementFactory<T> logicalStatementFactory();
 
-    QueryBuilder<K, T, LSF, LS> filter(Function<LSF, LS> callback);
+    QueryBuilder<K, T> filter(Function<LogicalStatementFactory<T>, ? extends LogicalStatement<T>> callback);
 
-    <V extends Comparable<V>> QueryBuilder<K, T, LSF, LS> sortBy(Property<V> property);
+    <V extends Comparable<V>> QueryBuilder<K, T> sortBy(Property<V> property);
 
-    QueryBuilder<K, T, LSF, LS> limit(int count);
+    QueryBuilder<K, T> limit(int count);
 
     Mono<T> selectOne();
 

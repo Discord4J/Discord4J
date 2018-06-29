@@ -62,28 +62,31 @@ public class StoreTests {
     @Test
     public void testQuery() {
         Store<String, TestBean> store = provider.newGenericStore(String.class, TestBean.class);
-        store.save("hello", new TestBean("hello", "world"))
-             .then(store.save("hello2", new TestBean("hello2", "world2")))
+        store.save("hello", new TestBean("hello", "world", 1))
+             .then(store.save("hello2", new TestBean("hello2", "world2", 0)))
              .subscribe();
-        String value = store.query()
-.filter(f -> {
-    return f.match(new Property<>(TestBean.class, "key"), "hello")
-            .and(f.match(new Property<>(TestBean.class, "value"), "world"));
-})
-.selectOne()
-.map(TestBean::getValue)
-.block();
-        assertEquals("world", value);
+        TestBean value = store.query()
+        .filter(f -> {
+            return f.match(new Property<>(TestBean.class, "key"), "hello")
+                    .and(f.match(new Property<>(TestBean.class, "value"), "world"))
+                    .and(f.within(new Property<>(TestBean.class, "arbitrary"), 1, 100));
+        })
+        .selectOne()
+        .block();
+        assertEquals("world", value.getValue());
+        assertEquals(1, value.getArbitrary());
     }
 
     public class TestBean implements Serializable {
 
         private String key;
         private String value;
+        private int arbitrary;
 
-        public TestBean(String key, String value) {
+        public TestBean(String key, String value, int arbitrary) {
             this.key = key;
             this.value = value;
+            this.arbitrary = arbitrary;
         }
 
         public TestBean() {}
@@ -102,6 +105,14 @@ public class StoreTests {
 
         public void setValue(String value) {
             this.value = value;
+        }
+
+        public int getArbitrary() {
+            return arbitrary;
+        }
+
+        public void setArbitrary(int arbitrary) {
+            this.arbitrary = arbitrary;
         }
     }
 

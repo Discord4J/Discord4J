@@ -17,6 +17,8 @@
 package discord4j.store.primitive;
 
 import discord4j.store.Store;
+import discord4j.store.dsl.QueryBuilder;
+import discord4j.store.dsl.QueryBuilderFactory;
 import discord4j.store.util.LongObjTuple2;
 import discord4j.store.util.MappingIterable;
 import org.reactivestreams.Publisher;
@@ -52,6 +54,21 @@ public class ForwardingStore<V extends Serializable> implements LongObjStore<V> 
      */
     protected Store<Long, V> getOriginal() {
         return toForward;
+    }
+
+    @Override
+    public Class<V> getValueType() {
+        return toForward.getValueType();
+    }
+
+    @Override
+    public QueryBuilderFactory<Long, V> queryBuilderFactory() {
+        return toForward.queryBuilderFactory();
+    }
+
+    @Override
+    public QueryBuilder<Long, V> query() {
+        return toForward.query();
     }
 
     @Override

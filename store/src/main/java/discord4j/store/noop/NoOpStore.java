@@ -17,6 +17,8 @@
 package discord4j.store.noop;
 
 import discord4j.store.Store;
+import discord4j.store.dsl.QueryBuilderFactory;
+import discord4j.store.dsl.jvm.SimpleQueryBuilderFactory;
 import discord4j.store.noop.primitive.NoOpLongObjStore;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
@@ -32,6 +34,29 @@ import java.io.Serializable;
  * @see NoOpLongObjStore
  */
 public class NoOpStore<K extends Comparable<K>, V extends Serializable> implements Store<K, V> {
+
+    private final Class<K> keyType;
+    private final Class<V> valueType;
+
+    public NoOpStore(Class<K> keyType, Class<V> valueType) {
+        this.keyType = keyType;
+        this.valueType = valueType;
+    }
+
+    @Override
+    public Class<K> getKeyType() {
+        return keyType;
+    }
+
+    @Override
+    public Class<V> getValueType() {
+        return valueType;
+    }
+
+    @Override
+    public QueryBuilderFactory<K, V> queryBuilderFactory() {
+        return new SimpleQueryBuilderFactory<>();
+    }
 
     @Override
     public Mono<Void> save(K key, V value) {

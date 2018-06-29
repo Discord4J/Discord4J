@@ -21,7 +21,7 @@ import discord4j.store.Store;
 
 import java.io.Serializable;
 
-public interface QueryBuilderFactory<K extends Comparable<K>, T extends Serializable, LSF extends LogicalStatementFactory<T>, LS extends LogicalStatement<T>> {
+public interface QueryBuilderFactory<K extends Comparable<K>, T extends Serializable> {
 
-    QueryBuilder<K, T, LSF, LS> create(Store<K, T> store);
+    QueryBuilder<K, T> create(Store<K, T> store);
 }

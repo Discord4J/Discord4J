@@ -54,14 +54,14 @@ public interface Store<K extends Comparable<K>, V extends Serializable> {
      */
     Class<V> getValueType();
 
-    QueryBuilderFactory<K, V, ? super LogicalStatementFactory<V>, ? super LogicalStatement<V>> queryBuilderFactory();
+    QueryBuilderFactory<K, V> queryBuilderFactory();
 
     /**
      * Starts a complex select query.
      *
      * @return The builder used to prepare the query.
      */
-    default QueryBuilder<K, V, ? super LogicalStatementFactory<V>, ? super LogicalStatement<V>> query() {
+    default QueryBuilder<K, V> query() {
         return queryBuilderFactory().create(this);
     }
 

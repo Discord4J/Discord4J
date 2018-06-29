@@ -35,7 +35,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class MapStore<K extends Comparable<K>, V extends Serializable> implements Store<K, V> {
 
     private final Map<K, V> map = new ConcurrentHashMap<>();
-    private final QueryBuilderFactory<K, V, ? extends LogicalStatementFactory<V>, ? extends LogicalStatement<V>> qbf = new SimpleQueryBuilderFactory<>();
+    private final QueryBuilderFactory<K, V> qbf = new SimpleQueryBuilderFactory<>();
     private final Class<K> key;
     private final Class<V> value;
 
@@ -55,7 +55,7 @@ public class MapStore<K extends Comparable<K>, V extends Serializable> implement
     }
 
     @Override
-    public QueryBuilderFactory<K, V, ? extends LogicalStatementFactory<V>, ? extends LogicalStatement<V>> queryBuilderFactory() {
+    public QueryBuilderFactory<K, V> queryBuilderFactory() {
         return qbf;
     }
 

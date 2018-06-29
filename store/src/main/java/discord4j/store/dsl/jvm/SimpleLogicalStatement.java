@@ -24,6 +24,7 @@ import discord4j.store.util.WithinRangePredicate;
 import javax.annotation.Nullable;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
+import java.lang.reflect.Method;
 import java.util.Objects;
 import java.util.function.Predicate;
 
@@ -38,15 +39,18 @@ public class SimpleLogicalStatement<T, V> implements LogicalStatement<T> {
 
     public SimpleLogicalStatement(Class<T> holder, Property<T> property, @Nullable V value) {
         this.property = property;
+        String getterName = "get" + Character.toTitleCase(property.getName().charAt(0)) + property.getName().substring(1);
         try {
-            this.handle = MethodHandles.lookup().findGetter(holder, property.getName(), property.getType());
-        } catch (NoSuchFieldException | IllegalAccessException e) {
+            Method method = holder.getMethod(getterName);
+            method.setAccessible(true);
+            this.handle = MethodHandles.lookup().unreflect(method);
+        } catch (IllegalAccessException | NoSuchMethodException e) {
             throw new RuntimeException(e);
         }
         this.matchRange = false;
         this.tester = (t) -> {
             try {
-                return t == null ? value == null : Objects.equals(handle.bindTo(t).invokeExact(), value);
+                return t == null ? value == null : Objects.equals(handle.bindTo(t).invoke(), value);
             } catch (Throwable throwable) {
                 throw new RuntimeException(throwable);
             }
@@ -55,9 +59,12 @@ public class SimpleLogicalStatement<T, V> implements LogicalStatement<T> {
 
     public SimpleLogicalStatement(Class<T> holder, Property<T> property, V start, V end) {
         this.property = property;
+        String getterName = "get" + Character.toTitleCase(property.getName().charAt(0)) + property.getName().substring(1);
         try {
-            this.handle = MethodHandles.lookup().findGetter(holder, property.getName(), property.getType());
-        } catch (NoSuchFieldException | IllegalAccessException e) {
+            Method method = holder.getMethod(getterName);
+            method.setAccessible(true);
+            this.handle = MethodHandles.lookup().unreflect(method);
+        } catch (IllegalAccessException | NoSuchMethodException e) {
             throw new RuntimeException(e);
         }
         this.matchRange = true;
@@ -65,7 +72,14 @@ public class SimpleLogicalStatement<T, V> implements LogicalStatement<T> {
         if (!(start instanceof Comparable || end instanceof Comparable))
             throw new RuntimeException("This constructor overload requires a comparable type!");
 
-        this.tester = new WithinRangePredicate((Comparable<V>) start, (Comparable<V>) end);
+        Predicate<V> predicate = new WithinRangePredicate((Comparable<V>) start, (Comparable<V>) end);
+        this.tester = (t) -> {
+            try {
+                return t == null ? start == null || end == null : predicate.test((V) handle.bindTo(t).invoke());
+            } catch (Throwable throwable) {
+                throw new RuntimeException(throwable);
+            }
+        };
     }
 
     private SimpleLogicalStatement(Predicate<T> override) {

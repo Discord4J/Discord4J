@@ -69,8 +69,8 @@ public class NoOpLongObjStore<V extends Serializable> implements LongObjStore<V>
     }
 
     @Override
-    public QueryBuilderFactory<Long, V, ? super LogicalStatementFactory<V>, ? super LogicalStatement<V>> queryBuilderFactory() {
-        return new SimpleQueryBuilderFactory<Long, V>();
+    public QueryBuilderFactory<Long, V> queryBuilderFactory() {
+        return new SimpleQueryBuilderFactory<>();
     }
 
     @Override
