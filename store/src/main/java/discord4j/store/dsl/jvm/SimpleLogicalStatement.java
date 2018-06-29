@@ -107,15 +107,6 @@ public class SimpleLogicalStatement<T, V> implements LogicalStatement<T> {
         });
     }
 
-    @Override
-    public LogicalStatement<T> xor(LogicalStatement<T> stmt) {
-        return new SimpleLogicalStatement<T, V>(t -> {
-            if (!(stmt instanceof SimpleLogicalStatement))
-                throw new RuntimeException("Incompatible statements used!");
-            return this.test(t) ^ ((SimpleLogicalStatement<T, V>) stmt).test(t);
-        });
-    }
-
     public boolean test(T obj) {
         return tester.test(obj);
     }
