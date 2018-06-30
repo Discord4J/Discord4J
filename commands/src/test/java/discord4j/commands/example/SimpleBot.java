@@ -8,9 +8,11 @@ public class SimpleBot {
 
     public static void main(String[] args) throws InterruptedException {
         DiscordClient client = new DiscordClientBuilder(args[0]).build();
-        CommandBootstrapper bootstrapper = new CommandBootstrapper(client);
+        CommandBootstrapper bootstrapper = new CommandBootstrapper.Config().setInterceptor(flux -> {
+            flux.subscribe(System.out::println);
+            return flux;
+        }).strapTo(client);
         bootstrapper.getCommandDispatcher().addCommandProvider(new SimpleCommandProvider());
-        bootstrapper.attach().subscribe(System.out::println);
         client.login().block();
         Thread.sleep(10000);
     }
