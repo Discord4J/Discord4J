@@ -36,13 +36,13 @@ import java.io.Serializable;
 public interface StoreService {
 
     /**
-     * Returns an arbitrary priority for this service. This is used for automated service discovery in the case
+     * Returns an arbitrary order for this service. This is used for automated service discovery in the case
      * that multiple services are present. Conventions: 0 = neutral priority,
-     * {@link Integer#MAX_VALUE} = lowest priority, {@link Integer#MIN_VALUE}.
+     * {@link Integer#MAX_VALUE} = lowest priority, {@link Integer#MIN_VALUE} = highest priority.
      *
      * @return The priority of this service, 0 by default.
      */
-    default int priority() {
+    default int order() {
         return 0;
     }
 
