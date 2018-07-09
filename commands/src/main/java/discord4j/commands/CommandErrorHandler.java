@@ -1,12 +1,11 @@
 package discord4j.commands;
 
-import discord4j.commands.exceptions.CommandException;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 
 /**
- * An interface called when a {@link discord4j.commands.exceptions.CommandException} error is encountered.
+ * An interface called when a {@link CommandException} error is encountered.
  *
- * @see discord4j.commands.exceptions.CommandException
+ * @see CommandException
  */
 @FunctionalInterface
 public interface CommandErrorHandler {

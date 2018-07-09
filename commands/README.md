@@ -1,4 +1,6 @@
 # Discord4J Commands
+FIXME once api is finalized
+
 The `commands` module provides a set of low-level abstractions for implementing commands. 
 
 To use this, command implementations should implement the `CommandProvider` class and users should instantiate the

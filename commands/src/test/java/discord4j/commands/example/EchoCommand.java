@@ -10,14 +10,9 @@ public class EchoCommand implements BaseCommand {
 
     @Override
     public Mono<Void> execute(MessageCreateEvent event) {
-        if (!event.getMessage().getContent().isPresent())
-            return Mono.empty();
-
-        return Flux.fromArray(event.getMessage().getContent().get().split(" ")).skip(1)
-                .collectList()
-                .map(l -> String.join(" ", l))
-                .zipWith(event.getMessage().getChannel())
-                .flatMap(t -> t.getT2().createMessage(new MessageCreateSpec().setContent(t.getT1())))
-                .then();
+        return Mono.justOrEmpty(event.getMessage().getContent())
+                   .map(content -> content.substring(content.indexOf(" ")))
+                   .zipWith(event.getMessage().getChannel(), (content, channel) -> channel.createMessage(content))
+                   .then();
     }
 }
