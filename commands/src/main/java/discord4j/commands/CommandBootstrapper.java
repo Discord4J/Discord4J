@@ -8,7 +8,7 @@ import reactor.core.publisher.Flux;
 import java.util.function.Function;
 
 /**
- * The (thread-safe) entry point for actually using commands. To use, simple construct a
+ * The (thread-safe) entry point for actually using commands. To use, simply construct a
  * {@link discord4j.commands.CommandBootstrapper.Config} instance and call
  * {@link discord4j.commands.CommandBootstrapper.Config#strapTo(discord4j.core.DiscordClient)}.
  *
@@ -60,7 +60,7 @@ public final class CommandBootstrapper {
      * @param dispatcher The new dispatcher to use.
      * @return The same {@link CommandBootstrapper} instance to chain.
      */
-    public CommandBootstrapper replaceCommandDispatcher(CommandDispatcher dispatcher) {
+    public CommandBootstrapper setCommandDispatcher(CommandDispatcher dispatcher) {
         this.dispatcher = dispatcher;
         return this;
     }
@@ -72,7 +72,7 @@ public final class CommandBootstrapper {
      * @param handler The new error handler to use.
      * @return The same {@link CommandBootstrapper} instance to chain.
      */
-    public CommandBootstrapper replaceCommandErrorHandler(CommandErrorHandler handler) {
+    public CommandBootstrapper setCommandErrorHandler(CommandErrorHandler handler) {
         this.errorHandler = handler;
         return this;
     }

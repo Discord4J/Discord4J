@@ -14,8 +14,6 @@ public interface BaseCommand {
      *
      * @param event The event to act as raw context.
      * @return A mono, whose completion signals that this command has been executed.
-     *
-     * @implNote Be careful to not block, blocking can lead to scalability issues.
      */
     Mono<Void> execute(MessageCreateEvent event);
 }

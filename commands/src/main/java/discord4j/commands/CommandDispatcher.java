@@ -61,7 +61,7 @@ public interface CommandDispatcher {
      * @return A {@link discord4j.commands.CommandDispatcher} instance for chaining, this can be a new instance or
      * the current instance.
      */
-    CommandDispatcher dropCommandProvider(CommandProvider provider);
+    CommandDispatcher removeCommandProvider(CommandProvider provider);
 
     /**
      * Called to drop command providers dynamically.
@@ -70,8 +70,8 @@ public interface CommandDispatcher {
      * @return A {@link discord4j.commands.CommandDispatcher} instance for chaining, this can be a new instance or
      * the current instance.
      */
-    default CommandDispatcher dropCommandProviders(Collection<? extends CommandProvider> providers) {
-        providers.forEach(this::dropCommandProvider);
+    default CommandDispatcher removeCommandProviders(Collection<? extends CommandProvider> providers) {
+        providers.forEach(this::removeCommandProvider);
         return this;
     }
 }
