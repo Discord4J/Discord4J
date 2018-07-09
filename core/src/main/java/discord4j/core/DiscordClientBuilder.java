@@ -116,7 +116,7 @@ public final class DiscordClientBuilder {
         return storeServiceLoader;
     }
 
-    public ClientBuilder setStoreServiceLoader(final StoreServiceLoader storeServiceLoader) {
+    public DiscordClientBuilder setStoreServiceLoader(final StoreServiceLoader storeServiceLoader) {
         this.storeServiceLoader = Objects.requireNonNull(storeServiceLoader);
         return this;
     }
