@@ -25,12 +25,8 @@ import java.util.Optional;
  */
 public class CommandException extends RuntimeException {
 
-    @Nullable
-    private final String response;
-
     public CommandException(@Nullable String response) {
-        super("Command Exception", null, false, false); //Prevents expensive stacktrace filling
-        this.response = response;
+        super(response, null, false, false); //Prevents expensive stacktrace filling
     }
 
     /**
@@ -39,6 +35,6 @@ public class CommandException extends RuntimeException {
      * @return The human-readable error message or empty to not respond.
      */
     public Optional<String> response() {
-        return Optional.ofNullable(response);
+        return Optional.ofNullable(getMessage());
     }
 }
