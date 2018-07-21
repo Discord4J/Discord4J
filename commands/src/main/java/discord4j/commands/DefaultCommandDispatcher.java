@@ -14,19 +14,9 @@ import java.util.*;
  */
 public final class DefaultCommandDispatcher implements CommandDispatcher {
 
-    private final Set<CommandProvider> providers;
-    private final Object lock = new Object();
-
-    public DefaultCommandDispatcher(Set<CommandProvider> providers) {
-        this.providers = providers;
-    }
-
-    public DefaultCommandDispatcher() {
-        this(new LinkedHashSet<>()); //Ordered to provide deterministic invocation orders
-    }
-
     @Override
-    public Mono<? extends BaseCommand> dispatch(MessageCreateEvent event, CommandErrorHandler errorHandler) {
+    public Mono<? extends BaseCommand> dispatch(MessageCreateEvent event, Set<CommandProvider> providers,
+                                                CommandErrorHandler errorHandler) {
         for (CommandProvider provider : providers) {
             Optional<? extends BaseCommand> cmd = provider.provide(event);
             if (cmd.isPresent()) {
@@ -36,42 +26,5 @@ public final class DefaultCommandDispatcher implements CommandDispatcher {
             }
         }
         return Mono.empty();
-    }
-
-    @Override
-    public Set<CommandProvider> getCommandProviders() {
-        return Collections.unmodifiableSet(providers);
-    }
-
-    @Override
-    public CommandDispatcher addCommandProvider(CommandProvider provider) {
-        synchronized (lock) {
-            providers.add(provider);
-        }
-        return this;
-    }
-
-    @Override
-    public CommandDispatcher dropCommandProvider(CommandProvider provider) {
-        synchronized (lock) {
-            providers.remove(provider);
-        }
-        return this;
-    }
-
-    @Override
-    public CommandDispatcher addCommandProviders(Collection<? extends CommandProvider> providers) {
-        synchronized (lock) {
-            this.providers.addAll(providers);
-        }
-        return this;
-    }
-
-    @Override
-    public CommandDispatcher dropCommandProviders(Collection<? extends CommandProvider> providers) {
-        synchronized (lock) {
-            this.providers.removeAll(providers);
-        }
-        return this;
     }
 }

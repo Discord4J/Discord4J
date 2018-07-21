@@ -4,6 +4,11 @@ import discord4j.core.DiscordClient;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import reactor.core.publisher.Flux;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
+
 /**
  * The (thread-safe) entry point for actually using commands. To use, simply instantiate and call
  * {@link #attach(discord4j.core.DiscordClient)}.
@@ -26,12 +31,26 @@ public final class CommandBootstrapper {
     private volatile CommandDispatcher dispatcher = DEFAULT_DISPATCHER;
     private volatile CommandErrorHandler errorHandler = DEFAULT_ERROR_HANDLER;
 
+    private final Set<CommandProvider> providers;
+
     /**
-     * Constructsthe message li stener for commands.
+     * Constructs the message listener for commands.
+     *
+     * @see #attach(discord4j.core.DiscordClient)
+     * @param providers The {@link discord4j.commands.CommandProvider}s to initialize this instance with. Note that
+     * this set is expected to be thread-safe as there will be concurrent read access required.
+     */
+    public CommandBootstrapper(Set<CommandProvider> providers) {
+        this.providers = providers;
+    }
+
+    /**
+     * Constructs the message listener for commands.
      *
      * @see #attach(discord4j.core.DiscordClient)
      */
     public CommandBootstrapper() {
+        this(new CopyOnWriteArraySet<>()); //TODO: LinkedHashSet is probably better, but not concurrent!
     }
 
     /**
@@ -43,7 +62,7 @@ public final class CommandBootstrapper {
     public Flux<? extends BaseCommand> attach(DiscordClient client) {
         return client.getEventDispatcher()
                      .on(MessageCreateEvent.class)
-                     .flatMap(event -> dispatcher.dispatch(event, errorHandler))
+                     .flatMap(event -> dispatcher.dispatch(event, providers, errorHandler))
                      .share();
     }
 
@@ -87,5 +106,58 @@ public final class CommandBootstrapper {
      */
     public CommandErrorHandler getErrorHandler() {
         return errorHandler;
+    }
+
+    /**
+     * Gets the command providers registered with this dispatcher.
+     *
+     * @return The providers. It is expected that this returns an immutable copy of the internal backing set.
+     */
+    public Set<CommandProvider> getCommandProviders() {
+        return Collections.unmodifiableSet(providers);
+    }
+
+    /**
+     * Called to add a command provider dynamically.
+     *
+     * @param provider The provider to add.
+     * @return The current {@link discord4j.commands.CommandBootstrapper} instance for chaining.
+     */
+    public CommandBootstrapper addCommandProvider(CommandProvider provider) {
+        providers.add(provider);
+        return this;
+    }
+
+    /**
+     * Called to drop a command provider dynamically.
+     *
+     * @param provider The provider to remove.
+     * @return The current {@link discord4j.commands.CommandBootstrapper} instance for chaining.
+     */
+    public CommandBootstrapper removeCommandProvider(CommandProvider provider) {
+        providers.remove(provider);
+        return this;
+    }
+
+    /**
+     * Called to add command providers dynamically.
+     *
+     * @param providers The providers to add.
+     * @return The current {@link discord4j.commands.CommandBootstrapper} instance for chaining.
+     */
+    public CommandBootstrapper addCommandProviders(Collection<? extends CommandProvider> providers) {
+        this.providers.addAll(providers);
+        return this;
+    }
+
+    /**
+     * Called to remove command providers dynamically.
+     *
+     * @param providers The providers to remove.
+     * @return The current {@link discord4j.commands.CommandBootstrapper} instance for chaining.
+     */
+    public CommandBootstrapper removeCommandProviders(Collection<? extends CommandProvider> providers) {
+        this.providers.removeAll(providers);
+        return this;
     }
 }
