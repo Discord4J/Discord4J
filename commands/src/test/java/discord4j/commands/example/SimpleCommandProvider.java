@@ -6,6 +6,7 @@ import discord4j.core.DiscordClient;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.ApplicationInfo;
 import discord4j.core.object.util.Snowflake;
+import reactor.core.publisher.Mono;
 
 import java.util.Optional;
 
@@ -20,8 +21,8 @@ public class SimpleCommandProvider implements CommandProvider {
     }
 
     @Override
-    public Optional<? extends Command> provide(MessageCreateEvent context) {
-        return context.getMessage()
+    public Mono<? extends Command> provide(MessageCreateEvent context) {
+        return Mono.justOrEmpty(context.getMessage()
                       .getContent()
                       .filter(s -> s.startsWith("!"))
                       .map(s -> s.replaceFirst("!", "").split(" ")[0])
@@ -32,6 +33,6 @@ public class SimpleCommandProvider implements CommandProvider {
                               return new LogoutCommand(ownerId);
                           else
                               return null;
-                      });
+                      }));
     }
 }
