@@ -16,5 +16,5 @@ public interface CommandProvider {
      * @param context The raw event context.
      * @return The matched command based on the context, or empty if no command matched.
      */
-    Optional<? extends BaseCommand> provide(MessageCreateEvent context);
+    Optional<? extends Command> provide(MessageCreateEvent context);
 }

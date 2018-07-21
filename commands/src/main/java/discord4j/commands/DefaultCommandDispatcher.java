@@ -15,10 +15,10 @@ import java.util.*;
 public final class DefaultCommandDispatcher implements CommandDispatcher {
 
     @Override
-    public Mono<? extends BaseCommand> dispatch(MessageCreateEvent event, Set<CommandProvider> providers,
-                                                CommandErrorHandler errorHandler) {
+    public Mono<? extends Command> dispatch(MessageCreateEvent event, Set<CommandProvider> providers,
+                                            CommandErrorHandler errorHandler) {
         for (CommandProvider provider : providers) {
-            Optional<? extends BaseCommand> cmd = provider.provide(event);
+            Optional<? extends Command> cmd = provider.provide(event);
             if (cmd.isPresent()) {
                 return Mono.just(cmd.get())
                         .flatMap(c -> c.execute(event).thenReturn(c))

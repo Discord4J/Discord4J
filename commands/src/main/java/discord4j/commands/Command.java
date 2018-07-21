@@ -7,7 +7,7 @@ import reactor.core.publisher.Mono;
  * Very simple command abstraction.
  */
 @FunctionalInterface
-public interface BaseCommand {
+public interface Command {
 
     /**
      * Called to execute this command.

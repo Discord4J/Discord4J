@@ -59,7 +59,7 @@ public final class CommandBootstrapper {
      *
      * @return A flux (that need not be subscribed to), which signals the completion of command executions.
      */
-    public Flux<? extends BaseCommand> attach(DiscordClient client) {
+    public Flux<? extends Command> attach(DiscordClient client) {
         return client.getEventDispatcher()
                      .on(MessageCreateEvent.class)
                      .flatMap(event -> dispatcher.dispatch(event, providers, errorHandler))
