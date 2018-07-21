@@ -1,6 +1,7 @@
 package discord4j.commands;
 
 import discord4j.core.event.domain.message.MessageCreateEvent;
+import reactor.core.publisher.Mono;
 
 import java.util.Optional;
 
@@ -16,5 +17,5 @@ public interface CommandProvider {
      * @param context The raw event context.
      * @return The matched command based on the context, or empty if no command matched.
      */
-    Optional<? extends Command> provide(MessageCreateEvent context);
+    Mono<? extends Command> provide(MessageCreateEvent context);
 }
