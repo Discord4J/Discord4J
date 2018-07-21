@@ -1,6 +1,6 @@
 package discord4j.commands.example;
 
-import discord4j.commands.BaseCommand;
+import discord4j.commands.Command;
 import discord4j.commands.CommandProvider;
 import discord4j.core.DiscordClient;
 import discord4j.core.event.domain.message.MessageCreateEvent;
@@ -20,7 +20,7 @@ public class SimpleCommandProvider implements CommandProvider {
     }
 
     @Override
-    public Optional<? extends BaseCommand> provide(MessageCreateEvent context) {
+    public Optional<? extends Command> provide(MessageCreateEvent context) {
         return context.getMessage()
                       .getContent()
                       .filter(s -> s.startsWith("!"))

@@ -1,6 +1,6 @@
 package discord4j.commands.example;
 
-import discord4j.commands.BaseCommand;
+import discord4j.commands.Command;
 import discord4j.commands.CommandException;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.Member;
@@ -9,7 +9,7 @@ import reactor.core.publisher.Mono;
 
 import java.util.Optional;
 
-public class LogoutCommand implements BaseCommand {
+public class LogoutCommand implements Command {
 
     private final Snowflake ownerId;
 
