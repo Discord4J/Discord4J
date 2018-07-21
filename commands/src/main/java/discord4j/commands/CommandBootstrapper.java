@@ -5,13 +5,14 @@ import discord4j.core.event.domain.message.MessageCreateEvent;
 import reactor.core.publisher.Flux;
 
 /**
- * The (thread-safe) entry point for actually using commands. To use, simply instantiate and call {@link #attach()}.
+ * The (thread-safe) entry point for actually using commands. To use, simply instantiate and call
+ * {@link #attach(discord4j.core.DiscordClient)}.
  *
  * To register events, obtain the {@link discord4j.commands.CommandDispatcher} via {@link #getCommandDispatcher()}
  * or create a new {@link discord4j.commands.CommandDispatcher} instance replace the default instance with the new
  * one via {@link #setCommandDispatcher(CommandDispatcher)}.
  *
- * @see #attach()
+ * @see #attach(discord4j.core.DiscordClient)
  * @see discord4j.commands.CommandProvider
  * @see discord4j.commands.CommandDispatcher
  * @see discord4j.commands.CommandErrorHandler
@@ -22,17 +23,15 @@ public final class CommandBootstrapper {
     private final static CommandDispatcher DEFAULT_DISPATCHER = new DefaultCommandDispatcher();
     private final static CommandErrorHandler DEFAULT_ERROR_HANDLER = (context, error) -> {};
 
-    private final DiscordClient client;
     private volatile CommandDispatcher dispatcher = DEFAULT_DISPATCHER;
     private volatile CommandErrorHandler errorHandler = DEFAULT_ERROR_HANDLER;
 
     /**
-     * Constructs and injects the message listener for commands.
+     * Constructsthe message li stener for commands.
      *
-     * @see #attach()
+     * @see #attach(discord4j.core.DiscordClient)
      */
-    public CommandBootstrapper(DiscordClient client) {
-        this.client = client;
+    public CommandBootstrapper() {
     }
 
     /**
@@ -41,13 +40,11 @@ public final class CommandBootstrapper {
      *
      * @return A flux (that need not be subscribed to), which signals the completion of command executions.
      */
-    public Flux<? extends BaseCommand> attach() {
-        Flux<? extends BaseCommand> f = client.getEventDispatcher()
-                                              .on(MessageCreateEvent.class)
-                                              .flatMap(event -> dispatcher.dispatch(event, errorHandler))
-                                              .share(); //Allows for multiple subscribes
-        f.subscribe(); //Initial subscribe required to allow for handling without subscriptions
-        return f;
+    public Flux<? extends BaseCommand> attach(DiscordClient client) {
+        return client.getEventDispatcher()
+                     .on(MessageCreateEvent.class)
+                     .flatMap(event -> dispatcher.dispatch(event, errorHandler))
+                     .share();
     }
 
     /**
