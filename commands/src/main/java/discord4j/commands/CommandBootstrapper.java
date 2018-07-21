@@ -2,22 +2,16 @@ package discord4j.commands;
 
 import discord4j.core.DiscordClient;
 import discord4j.core.event.domain.message.MessageCreateEvent;
-import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
 
-import java.util.function.Function;
-
 /**
- * The (thread-safe) entry point for actually using commands. To use, simply construct a
- * {@link discord4j.commands.CommandBootstrapper.Config} instance and call
- * {@link discord4j.commands.CommandBootstrapper.Config#strapTo(discord4j.core.DiscordClient)}.
+ * The (thread-safe) entry point for actually using commands. To use, simply instantiate and call {@link #attach()}.
  *
  * To register events, obtain the {@link discord4j.commands.CommandDispatcher} via {@link #getCommandDispatcher()}
  * or create a new {@link discord4j.commands.CommandDispatcher} instance replace the default instance with the new
- * one via {@link #replaceCommandDispatcher(CommandDispatcher)}.
+ * one via {@link #setCommandDispatcher(CommandDispatcher)}.
  *
- * @see #detach()
- * @see discord4j.commands.CommandBootstrapper.Config
+ * @see #attach()
  * @see discord4j.commands.CommandProvider
  * @see discord4j.commands.CommandDispatcher
  * @see discord4j.commands.CommandErrorHandler
@@ -28,29 +22,32 @@ public final class CommandBootstrapper {
     private final static CommandDispatcher DEFAULT_DISPATCHER = new DefaultCommandDispatcher();
     private final static CommandErrorHandler DEFAULT_ERROR_HANDLER = (context, error) -> {};
 
-    private final Disposable disposable;
-    private volatile CommandDispatcher dispatcher;
-    private volatile CommandErrorHandler errorHandler;
+    private final DiscordClient client;
+    private volatile CommandDispatcher dispatcher = DEFAULT_DISPATCHER;
+    private volatile CommandErrorHandler errorHandler = DEFAULT_ERROR_HANDLER;
 
-    private CommandBootstrapper(DiscordClient client,
-                                CommandDispatcher dispatcher,
-                                CommandErrorHandler errorHandler,
-                                Function<Flux<? extends BaseCommand>, Flux<? extends BaseCommand>> interceptor) {
-        this.dispatcher = dispatcher;
-        this.errorHandler = errorHandler;
-        disposable = client.getEventDispatcher()
-                           .on(MessageCreateEvent.class)
-                           .flatMap(event -> this.dispatcher.dispatch(event, this.errorHandler))
-                           .transform(interceptor::apply)
-                           .subscribe();
+    /**
+     * Constructs and injects the message listener for commands.
+     *
+     * @see #attach()
+     */
+    public CommandBootstrapper(DiscordClient client) {
+        this.client = client;
     }
 
     /**
-     * Detaches this {@link CommandBootstrapper} instance from receiving
-     * {@link discord4j.core.event.domain.message.MessageCreateEvent}s.
+     * Attaches this {@link CommandBootstrapper} instance to the
+     * {@link discord4j.core.event.domain.message.MessageCreateEvent} of the passed in client.
+     *
+     * @return A flux (that need not be subscribed to), which signals the completion of command executions.
      */
-    public void detach() {
-        disposable.dispose();
+    public Flux<? extends BaseCommand> attach() {
+        Flux<? extends BaseCommand> f = client.getEventDispatcher()
+                                              .on(MessageCreateEvent.class)
+                                              .flatMap(event -> dispatcher.dispatch(event, errorHandler))
+                                              .share(); //Allows for multiple subscribes
+        f.subscribe(); //Initial subscribe required to allow for handling without subscriptions
+        return f;
     }
 
     /**
@@ -93,62 +90,5 @@ public final class CommandBootstrapper {
      */
     public CommandErrorHandler getErrorHandler() {
         return errorHandler;
-    }
-
-    /**
-     * The configuration class for {@link discord4j.commands.CommandBootstrapper}.
-     */
-    public static final class Config {
-
-        private Function<Flux<? extends BaseCommand>, Flux<? extends BaseCommand>> interceptor = Function.identity();
-        private CommandDispatcher dispatcher = DEFAULT_DISPATCHER;
-        private CommandErrorHandler errorHandler = DEFAULT_ERROR_HANDLER;
-
-        /**
-         * Sets the command interceptor. Note: At the point where this is called, the command would've already been
-         * dispatched.
-         *
-         * @param interceptor The interceptor, allows for peeking into the command dispatch stream.
-         * @return The same config instance for chaining.
-         */
-        public Config setInterceptor(Function<Flux<? extends BaseCommand>, Flux<? extends BaseCommand>> interceptor) {
-            this.interceptor = interceptor;
-            return this;
-        }
-
-        /**
-         * Sets the {@link discord4j.commands.CommandDispatcher} to use.
-         *
-         * @param dispatcher The dispatcher to use.
-         * @return The same config instance for chaining.
-         */
-        public Config setDispatcher(CommandDispatcher dispatcher) {
-            this.dispatcher = dispatcher;
-            return this;
-        }
-
-        /**
-         * Sets the {@link discord4j.commands.CommandErrorHandler} to use.
-         *
-         * @param errorHandler The error handler to use.
-         * @return The same config instance for chaining.
-         */
-        public Config setErrorHandler(CommandErrorHandler errorHandler) {
-            this.errorHandler = errorHandler;
-            return this;
-        }
-
-        /**
-         * Straps this config to a {@link discord4j.core.DiscordClient}, this immediately registers the built instance
-         * as a message listener.
-         *
-         * @param client The client to strap this to.
-         * @return The built {@link discord4j.commands.CommandBootstrapper} instance.
-         *
-         * @see CommandBootstrapper#detach()
-         */
-        public CommandBootstrapper strapTo(DiscordClient client) {
-            return new CommandBootstrapper(client, dispatcher, errorHandler, interceptor);
-        }
     }
 }
