@@ -3,6 +3,8 @@ package discord4j.commands;
 import discord4j.core.DiscordClient;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import reactor.core.publisher.Flux;
+import reactor.util.Logger;
+import reactor.util.Loggers;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -25,8 +27,11 @@ import java.util.concurrent.CopyOnWriteArraySet;
  */
 public final class CommandBootstrapper {
 
+    private final static Logger log = Loggers.getLogger(CommandBootstrapper.class);
     private final static CommandDispatcher DEFAULT_DISPATCHER = new DefaultCommandDispatcher();
-    private final static CommandErrorHandler DEFAULT_ERROR_HANDLER = (context, error) -> {};
+    private final static CommandErrorHandler DEFAULT_ERROR_HANDLER = (context, error) -> {
+        log.warn("Command excecution failed! Reason: {}", error.response().orElse("None"));
+    };
 
     private volatile CommandDispatcher dispatcher = DEFAULT_DISPATCHER;
     private volatile CommandErrorHandler errorHandler = DEFAULT_ERROR_HANDLER;
