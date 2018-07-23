@@ -597,7 +597,7 @@ public final class DiscordClientImpl implements IDiscordClient {
 	}
 	
 	@Override
-    	public static IUser getUserByMention(String mention) {
+    	public IUser getUserByMention(String mention) {
         	if(mention.startsWith("<@!")) {
 		    String userID = mention.substring(3, mention.length() - 1);
 		    try {
