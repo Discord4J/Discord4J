@@ -595,6 +595,29 @@ public final class DiscordClientImpl implements IDiscordClient {
 
 		return null;
 	}
+	
+	@Override
+    	public static IUser getUserByMention(String mention) {
+        	if(mention.startsWith("<@!")) {
+		    String userID = mention.substring(3, mention.length() - 1);
+		    try {
+			return client.getUserByID(Long.parseLong(userID));
+		    }
+		    catch(NumberFormatException e) {
+			return null;
+		    }
+		}
+		else if(mention.startsWith("<@")) {
+		    String userID = mention.substring(2, mention.length() - 1);
+		    try {
+			return client.getUserByID(Long.parseLong(userID));
+		    }
+		    catch(NumberFormatException e) {
+			return null;
+		    }
+		}
+		else return null;
+	}
 
 	@Override
 	public IUser fetchUser(long id) {
