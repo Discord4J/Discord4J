@@ -260,6 +260,14 @@ public interface IDiscordClient {
 	 * @return The user with the provided ID (or null if one was not found).
 	 */
 	IUser getUserByID(long userID);
+	
+	/**
+	* Returns a user based on a given mention.
+	*
+	* @param mention The mention of the user.
+	* @return The user.
+	*/
+	IUser getUserByMention(String mention);
 
 	/**
 	 * Gets a user by its unique snowflake ID from the client's user cache <b>or</b> by fetching it from Discord.
