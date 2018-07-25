@@ -1,5 +1,5 @@
 dependencies {
-    compile "com.github.quanticc:reactor-netty:v0.8.0-20180624"
+    compile "com.github.quanticc:reactor-netty:v0.8.0.M1-20180724"
     compile "com.fasterxml.jackson.core:jackson-databind:$jackson_version"
     compile "com.fasterxml.jackson.datatype:jackson-datatype-jdk8:$jackson_version"
     compile "com.google.code.findbugs:jsr305:$jsr305_version"
