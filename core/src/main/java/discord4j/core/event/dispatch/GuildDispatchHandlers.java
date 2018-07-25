@@ -364,8 +364,8 @@ class GuildDispatchHandlers {
         Mono<Void> removeRoleFromMembers = serviceMediator.getStateHolder().getGuildStore()
                 .find(guildId)
                 .flatMapMany(guild -> Flux.fromArray(ArrayUtil.toObject(guild.getMembers())))
-                .flatMap(memberId -> serviceMediator.getStateHolder().getMemberStore()
-                        .find(LongLongTuple2.of(guildId, memberId)).map(member -> Tuples.of(memberId, member)))
+                .flatMap(memberId -> serviceMediator.getStateHolder().getMemberStore().find(LongLongTuple2.of(guildId, memberId)).map(member -> Tuples.of(memberId, member)))
+                .filter(t -> ArrayUtil.contains(t.getT2().getRoles(), roleId))
                 .doOnNext(t -> {
                     MemberBean member = t.getT2();
                     member.setRoles(ArrayUtil.remove(member.getRoles(), roleId));

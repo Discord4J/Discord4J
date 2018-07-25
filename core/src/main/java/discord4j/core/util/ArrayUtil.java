@@ -78,4 +78,13 @@ public class ArrayUtil {
         }
         return ret;
     }
+
+    public static boolean contains(long[] array, long l) {
+        for (int i = 0; i < array.length; i++) {
+            if (array[i] == l) {
+                return true;
+            }
+        }
+        return false;
+    }
 }
