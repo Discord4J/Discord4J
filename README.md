@@ -2,7 +2,7 @@
 
 # Discord4J [![Maven Central](https://img.shields.io/maven-central/v/com.discord4j/Discord4J/2.svg?style=flat-square)](https://mvnrepository.com/artifact/com.discord4j/Discord4J)  [![JCenter](https://img.shields.io/bintray/v/austinv11/maven/Discord4J.svg?style=flat-square)](https://bintray.com/austinv11/maven/Discord4J/_latestVersion)  [![Support Server Invite](https://img.shields.io/badge/Join-Discord4J-7289DA.svg?style=flat-square&logo=discord)](https://discord.gg/NxGAeCY)
 
-A reactive Java wrapper for the REST and Gateway components of the official [Discord Bot API](https://discordapp.com/developers/docs/intro).
+A fast, reactive Java wrapper for the REST and Gateway components of the official [Discord Bot API](https://discordapp.com/developers/docs/intro).
 
 Built with [Reactor](https://projectreactor.io/), [Netty](https://netty.io/), and a focus on flexibility, Discord4J provides an efficient, non-blocking interface for creating Discord bots.
 
@@ -46,7 +46,7 @@ client.getEventDispatcher().on(MessageCreateEvent.class)
         .map(MessageCreateEvent::getMessage)
         .filter(msg -> msg.getContent().map(content -> content.equals("!ping")).orElse(false))
         .flatMap(Message::getChannel)
-        .flatMap(channel -> channel.createMessage(spec -> spec.setContent("Pong!")))
+        .flatMap(channel -> channel.createMessage("Pong!"))
         .subscribe();
 
 client.login().block();
