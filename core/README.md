@@ -43,7 +43,7 @@ client.getEventDispatcher().on(MessageCreateEvent.class)
         .map(MessageCreateEvent::getMessage)
         .filter(msg -> msg.getContent().map(content -> content.equals("!ping")).orElse(false))
         .flatMap(Message::getChannel)
-        .flatMap(channel -> channel.createMessage(spec -> spec.setContent("Pong!")))
+        .flatMap(channel -> channel.createMessage("Pong!"))
         .subscribe();
 
 client.login().block();
