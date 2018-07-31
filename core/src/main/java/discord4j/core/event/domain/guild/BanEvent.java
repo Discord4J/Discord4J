@@ -22,6 +22,11 @@ import discord4j.core.object.entity.User;
 import discord4j.core.object.util.Snowflake;
 import reactor.core.publisher.Mono;
 
+/**
+ * Dispatched when a user is banned from a guild.
+ *
+ * @see <a href="https://discordapp.com/developers/docs/topics/gateway#guild-ban-add">Guild Ban Add</a>
+ */
 public class BanEvent extends GuildEvent {
 
     private final User user;

@@ -19,13 +19,17 @@ package discord4j.core.object.entity;
 import discord4j.core.DiscordClient;
 import discord4j.core.ServiceMediator;
 import discord4j.core.object.data.stored.UserBean;
+import discord4j.core.object.util.Image;
 import discord4j.core.object.util.Snowflake;
 import discord4j.core.util.EntityUtil;
+import discord4j.core.util.ImageUtil;
 import discord4j.rest.json.request.DMCreateRequest;
 import reactor.core.publisher.Mono;
 
 import java.util.Objects;
 import java.util.Optional;
+
+import static discord4j.core.object.util.Image.Format.*;
 
 /**
  * A Discord user.
@@ -33,6 +37,12 @@ import java.util.Optional;
  * @see <a href="https://discordapp.com/developers/docs/resources/user">Users Resource</a>
  */
 public class User implements Entity {
+
+    /** The path for default user avatar image URLs. */
+    private static final String DEFAULT_IMAGE_PATH = "embed/avatars/%d";
+
+    /** The path for user avatar image URLs. */
+    private static final String AVATAR_IMAGE_PATH = "avatars/%s/%s";
 
     /** The ServiceMediator associated to this object. */
     private final ServiceMediator serviceMediator;
@@ -75,12 +85,37 @@ public class User implements Entity {
     }
 
     /**
-     * Gets the user's avatar hash, if present.
+     * Gets if the user's avatar is animated.
      *
-     * @return The user's avatar hash, if present.
+     * @return {@code true} if the user's avatar is animated, {@code false} otherwise.
      */
-    public final Optional<String> getAvatarHash() {
-        return Optional.ofNullable(data.getAvatar());
+    public final boolean hasAnimatedAvatar() {
+        final String avatar = data.getAvatar();
+        return (avatar != null) && avatar.startsWith("a_");
+    }
+
+    /**
+     * Gets the user's avatar URL, if present and in a supported format.
+     *
+     * @param format The format for the URL. Supported format types are {@link Image.Format#GIF GIF} if
+     * {@link #hasAnimatedAvatar() animated}, otherwise {@link Image.Format#PNG PNG} or {@link Image.Format#JPEG JPEG}.
+     * @return The user's avatar URL, if present and in a supported format.
+     */
+    public final Optional<String> getAvatarUrl(final Image.Format format) {
+        final boolean animated = hasAnimatedAvatar();
+        return Optional.ofNullable(data.getAvatar())
+                .filter(ignored -> !animated || (format == GIF))
+                .filter(ignored -> (!animated && ((format == PNG) || (format == JPEG))) || animated)
+                .map(avatar -> ImageUtil.getUrl(String.format(AVATAR_IMAGE_PATH, getId().asString(), avatar), format));
+    }
+
+    /**
+     * Gets the default avatar URL for this user.
+     *
+     * @return The default avatar URL for this user.
+     */
+    public final String getDefaultAvatarUrl() {
+        return ImageUtil.getUrl(String.format(DEFAULT_IMAGE_PATH, Integer.parseInt(getDiscriminator()) % 5), PNG);
     }
 
     /**
@@ -137,7 +172,7 @@ public class User implements Entity {
      *
      * @return The ServiceMediator associated to this object.
      */
-    protected final ServiceMediator getServiceMediator() {
+    final ServiceMediator getServiceMediator() {
         return serviceMediator;
     }
 }

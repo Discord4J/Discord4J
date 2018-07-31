@@ -112,7 +112,7 @@ public final class ExtendedInvite extends Invite {
     }
 
     @Override
-    protected ExtendedInviteBean getData() {
+    ExtendedInviteBean getData() {
         return (ExtendedInviteBean) super.getData();
     }
 }

@@ -74,6 +74,20 @@ public interface MessageChannel extends Channel {
     Mono<Message> createMessage(MessageCreateSpec spec);
 
     /**
+     * Requests to create a message. This forwards to {@link #createMessage(MessageCreateSpec)} and
+     * acts as a convenience utility.
+     *
+     * @param message A string message to populate the message with.
+     * @return A {@link Mono} where, upon successful completion, emits the created {@link Message}. If an error is
+     * received, it is emitted through the {@code Mono}.
+     *
+     * @see MessageCreateSpec#setContent(String)
+     */
+    default Mono<Message> createMessage(String message) {
+        return createMessage(new MessageCreateSpec().setContent(message));
+    }
+
+    /**
      * Requests to trigger the typing indicator in this channel. A single invocation of this method will trigger the
      * indicator for 10 seconds or until the bot sends a message in this channel.
      *

@@ -69,7 +69,7 @@ class BaseChannel implements Channel {
      *
      * @return The raw data as represented by Discord.
      */
-    protected ChannelBean getData() {
+    ChannelBean getData() {
         return data;
     }
 
@@ -78,7 +78,7 @@ class BaseChannel implements Channel {
      *
      * @return The ServiceMediator associated to this object.
      */
-    protected ServiceMediator getServiceMediator() {
+    final ServiceMediator getServiceMediator() {
         return serviceMediator;
     }
 }

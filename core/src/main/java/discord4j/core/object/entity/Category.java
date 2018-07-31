@@ -18,6 +18,7 @@ package discord4j.core.object.entity;
 
 import discord4j.core.ServiceMediator;
 import discord4j.core.object.data.stored.CategoryBean;
+import discord4j.core.object.trait.Categorizable;
 import discord4j.core.object.util.Snowflake;
 import discord4j.core.spec.CategoryEditSpec;
 import discord4j.core.util.EntityUtil;
@@ -47,8 +48,9 @@ public final class Category extends BaseGuildChannel {
      */
     public Flux<GuildChannel> getChannels() {
         return getGuild().flatMapMany(Guild::getChannels)
-                .filter(channel -> channel.getCategoryId().orElse(Snowflake.of(0)).equals(getId()));
-        // TODO Sort channels by position? How to accomplish this when getPosition is Mono<Integer>?
+                .ofType(Categorizable.class)
+                .filter(channel -> channel.getCategoryId().orElse(Snowflake.of(0)).equals(getId()))
+                .cast(GuildChannel.class);
     }
 
     /**

@@ -40,7 +40,7 @@ public class RoleCreateSpec implements Spec<RoleCreateRequest> {
     }
 
     public RoleCreateSpec setColor(Color color) {
-        this.color = color.getRed();
+        this.color = color.getRGB() & 0xFFFFFF;
         return this;
     }
 

@@ -17,6 +17,7 @@
 package discord4j.core.event.domain.message;
 
 import discord4j.core.DiscordClient;
+import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.MessageChannel;
 import discord4j.core.object.entity.User;
@@ -24,18 +25,32 @@ import discord4j.core.object.reaction.ReactionEmoji;
 import discord4j.core.object.util.Snowflake;
 import reactor.core.publisher.Mono;
 
+import javax.annotation.Nullable;
+import java.util.Optional;
+
+/**
+ * Dispatched when a reaction is added to a message.
+ * <p>
+ * {@link #guildId} may not be present if the message was in a private channel.
+ *
+ * @see <a href="https://discordapp.com/developers/docs/topics/gateway#message-reaction-add">Message Reaction Add</a>
+ */
 public class ReactionAddEvent extends MessageEvent {
 
     private final long userId;
     private final long channelId;
     private final long messageId;
+    @Nullable
+    private final Long guildId;
     private final ReactionEmoji emoji;
 
-    public ReactionAddEvent(DiscordClient client, long userId, long channelId, long messageId, ReactionEmoji emoji) {
+    public ReactionAddEvent(DiscordClient client, long userId, long channelId, long messageId, @Nullable Long guildId,
+                            ReactionEmoji emoji) {
         super(client);
         this.userId = userId;
         this.channelId = channelId;
         this.messageId = messageId;
+        this.guildId = guildId;
         this.emoji = emoji;
     }
 
@@ -61,6 +76,14 @@ public class ReactionAddEvent extends MessageEvent {
 
     public Mono<Message> getMessage() {
         return getClient().getMessageById(getChannelId(), getMessageId());
+    }
+
+    public Optional<Snowflake> getGuildId() {
+        return Optional.ofNullable(guildId).map(Snowflake::of);
+    }
+
+    public Mono<Guild> getGuild() {
+        return Mono.justOrEmpty(getGuildId()).flatMap(getClient()::getGuildById);
     }
 
     public ReactionEmoji getEmoji() {

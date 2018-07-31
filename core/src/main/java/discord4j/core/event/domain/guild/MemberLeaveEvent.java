@@ -17,9 +17,19 @@
 package discord4j.core.event.domain.guild;
 
 import discord4j.core.DiscordClient;
+import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.util.Snowflake;
+import reactor.core.publisher.Mono;
 
+/**
+ * Dispatched when a user leaves a guild <b>OR</b> is kicked from it.
+ * <p>
+ * Discord does not differentiate between a user leaving on their own and being kicked. Except through audit logs, it is
+ * not possible to tell the difference between these.
+ *
+ * @see <a href="https://discordapp.com/developers/docs/topics/gateway#guild-member-remove">Guild Member Remove</a>
+ */
 public class MemberLeaveEvent extends GuildEvent {
 
     private final User user;
@@ -37,5 +47,9 @@ public class MemberLeaveEvent extends GuildEvent {
 
     public Snowflake getGuildId() {
         return Snowflake.of(guildId);
+    }
+
+    public Mono<Guild> getGuild() {
+        return getClient().getGuildById(getGuildId());
     }
 }

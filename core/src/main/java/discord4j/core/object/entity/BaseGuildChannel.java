@@ -29,7 +29,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -112,16 +111,6 @@ class BaseGuildChannel extends BaseChannel implements GuildChannel {
     }
 
     @Override
-    public final Optional<Snowflake> getCategoryId() {
-        return Optional.ofNullable(getData().getParentId()).map(Snowflake::of);
-    }
-
-    @Override
-    public final Mono<Category> getCategory() {
-        return Mono.justOrEmpty(getCategoryId()).flatMap(getClient()::getCategoryById);
-    }
-
-    @Override
     public int getRawPosition() {
         return getData().getPosition();
     }
@@ -132,7 +121,7 @@ class BaseGuildChannel extends BaseChannel implements GuildChannel {
     }
 
     @Override
-    protected GuildChannelBean getData() {
+    GuildChannelBean getData() {
         return (GuildChannelBean) super.getData();
     }
 }

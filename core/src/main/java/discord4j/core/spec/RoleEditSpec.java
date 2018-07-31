@@ -36,7 +36,7 @@ public class RoleEditSpec implements Spec<RoleModifyRequest> {
     }
 
     public RoleEditSpec setColor(Color color) {
-        requestBuilder.color(color.getRed());
+        requestBuilder.color(color.getRGB() & 0xFFFFFF);
         return this;
     }
 

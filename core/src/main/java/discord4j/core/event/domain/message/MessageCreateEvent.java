@@ -17,13 +17,22 @@
 package discord4j.core.event.domain.message;
 
 import discord4j.core.DiscordClient;
+import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.util.Snowflake;
+import reactor.core.publisher.Mono;
 
 import javax.annotation.Nullable;
 import java.util.Optional;
 
+/**
+ * Dispatched when a message is sent in a message channel.
+ * <p>
+ * {@link #guildId} and {@link #member} may not be present if the message was sent in a private channel.
+ *
+ * @see <a href="https://discordapp.com/developers/docs/topics/gateway#message-create">Message Create</a>
+ */
 public class MessageCreateEvent extends MessageEvent {
 
     private final Message message;
@@ -45,6 +54,10 @@ public class MessageCreateEvent extends MessageEvent {
 
     public Optional<Snowflake> getGuildId() {
         return Optional.ofNullable(guildId).map(Snowflake::of);
+    }
+
+    public Mono<Guild> getGuild() {
+        return Mono.justOrEmpty(getGuildId()).flatMap(getClient()::getGuildById);
     }
 
     public Optional<Member> getMember() {

@@ -17,25 +17,49 @@
 package discord4j.core.event.domain.message;
 
 import discord4j.core.DiscordClient;
+import discord4j.core.object.entity.Message;
+import discord4j.core.object.entity.MessageChannel;
 import discord4j.core.object.util.Snowflake;
+import reactor.core.publisher.Mono;
 
+import javax.annotation.Nullable;
+import java.util.Optional;
+
+/**
+ * Dispatched when a message is deleted.
+ * <p>
+ * The deleted message may not be present if messages are not stored.
+ *
+ * @see <a href="https://discordapp.com/developers/docs/topics/gateway#message-delete">Message Delete</a>
+ */
 public class MessageDeleteEvent extends MessageEvent {
 
     private final long messageId;
     private final long channelId;
+    @Nullable
+    private final Message message;
 
-    public MessageDeleteEvent(DiscordClient client, long messageId, long channelId) {
+    public MessageDeleteEvent(DiscordClient client, long messageId, long channelId, @Nullable Message message) {
         super(client);
         this.messageId = messageId;
         this.channelId = channelId;
+        this.message = message;
     }
 
     public Snowflake getMessageId() {
         return Snowflake.of(messageId);
     }
 
+    public Optional<Message> getMessage() {
+        return Optional.ofNullable(message);
+    }
+
     public Snowflake getChannelId() {
         return Snowflake.of(channelId);
+    }
+
+    public Mono<MessageChannel> getChannel() {
+        return getClient().getMessageChannelById(getChannelId());
     }
 }
 

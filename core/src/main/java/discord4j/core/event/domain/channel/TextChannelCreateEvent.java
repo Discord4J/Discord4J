@@ -19,6 +19,11 @@ package discord4j.core.event.domain.channel;
 import discord4j.core.DiscordClient;
 import discord4j.core.object.entity.TextChannel;
 
+/**
+ * Dispatched when a {@link TextChannel} is created in a guild.
+ *
+ * @see <a href="https://discordapp.com/developers/docs/topics/gateway#channel-create">Channel Create</a>
+ */
 public class TextChannelCreateEvent extends ChannelEvent {
 
     private final TextChannel channel;

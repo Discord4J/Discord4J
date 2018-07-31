@@ -20,10 +20,12 @@ import discord4j.core.DiscordClient;
 import discord4j.core.ServiceMediator;
 import discord4j.core.object.data.WebhookBean;
 import discord4j.core.object.util.Snowflake;
+import discord4j.core.spec.WebhookEditSpec;
 import reactor.core.publisher.Mono;
 
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 /**
  * A Discord webhook.
@@ -151,5 +153,35 @@ public final class Webhook implements Entity {
      */
     public Mono<Void> delete() {
         return serviceMediator.getRestClient().getWebhookService().deleteWebhook(getId().asLong());
+    }
+
+    /**
+     * Requests to edit this webhook.
+     *
+     * @param spec A {@link Consumer} that provides a "blank" {@link WebhookEditSpec} to be operated on. If some
+     * properties need to be retrieved via blocking operations (such as retrieval from a database), then it is
+     * recommended to build the spec externally and call {@link #edit(WebhookEditSpec)}.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits the edited {@link Guild}. If an error is
+     * received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Webhook> edit(final Consumer<WebhookEditSpec> spec) {
+        final WebhookEditSpec mutatedSpec = new WebhookEditSpec();
+        spec.accept(mutatedSpec);
+        return edit(mutatedSpec);
+    }
+
+    /**
+     * Requests to edit this webhook.
+     *
+     * @param spec A configured {@link WebhookEditSpec} to perform the request on.
+     * @return A {@link Mono} where, upon successful completion, emits the edited {@link Webhook}. If an error is
+     * received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Webhook> edit(final WebhookEditSpec spec) {
+        return serviceMediator.getRestClient().getWebhookService()
+                .modifyWebhook(getId().asLong(), spec.asRequest())
+                .map(WebhookBean::new)
+                .map(bean -> new Webhook(serviceMediator, bean));
     }
 }

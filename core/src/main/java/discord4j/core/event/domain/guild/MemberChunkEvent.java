@@ -24,6 +24,13 @@ import reactor.core.publisher.Mono;
 
 import java.util.Set;
 
+/**
+ * Dispatched as members are streamed to the client from Discord.
+ * <p>
+ * By default, all members in all connected guilds are requested on startup.
+ *
+ * @see <a href="https://discordapp.com/developers/docs/topics/gateway#guild-members-chunk">Guild Members Chunk</a>
+ */
 public class MemberChunkEvent extends GuildEvent {
 
     private final long guildId;

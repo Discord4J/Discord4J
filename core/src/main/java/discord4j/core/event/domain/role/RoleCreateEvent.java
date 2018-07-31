@@ -22,6 +22,11 @@ import discord4j.core.object.entity.Role;
 import discord4j.core.object.util.Snowflake;
 import reactor.core.publisher.Mono;
 
+/**
+ * Dispatched when a role is created in a guild.
+ *
+ * @see <a href="https://discordapp.com/developers/docs/topics/gateway#guild-role-create">Guild Role Create</a>
+ */
 public class RoleCreateEvent extends RoleEvent {
 
     private final long guildId;

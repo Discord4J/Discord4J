@@ -24,6 +24,11 @@ import reactor.core.publisher.Mono;
 
 import java.time.Instant;
 
+/**
+ * Dispatched when a user starts typing in a message channel.
+ *
+ * @see <a href="https://discordapp.com/developers/docs/topics/gateway#typing-start">Typing Start</a>
+ */
 public class TypingStartEvent extends ChannelEvent {
 
     private final long channelId;

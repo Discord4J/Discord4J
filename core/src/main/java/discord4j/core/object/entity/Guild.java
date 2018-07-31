@@ -17,22 +17,22 @@
 package discord4j.core.object.entity;
 
 import discord4j.common.json.GuildMemberResponse;
-import discord4j.core.ClientBuilder;
 import discord4j.core.DiscordClient;
 import discord4j.core.ServiceMediator;
-import discord4j.core.object.Region;
-import discord4j.core.object.VoiceState;
-import discord4j.core.object.audit.ActionType;
+import discord4j.core.object.*;
 import discord4j.core.object.audit.AuditLogEntry;
-import discord4j.core.object.data.AuditLogEntryBean;
-import discord4j.core.object.data.RegionBean;
+import discord4j.core.object.data.*;
 import discord4j.core.object.data.stored.*;
 import discord4j.core.object.presence.Presence;
+import discord4j.core.object.util.Image;
 import discord4j.core.object.util.Snowflake;
 import discord4j.core.spec.*;
 import discord4j.core.util.EntityUtil;
+import discord4j.core.util.ImageUtil;
 import discord4j.core.util.PaginationUtil;
+import discord4j.rest.json.request.NicknameModifyRequest;
 import discord4j.rest.json.response.AuditLogResponse;
+import discord4j.rest.json.response.NicknameModifyResponse;
 import discord4j.rest.json.response.PruneResponse;
 import discord4j.store.util.LongLongTuple2;
 import reactor.core.publisher.Flux;
@@ -41,6 +41,7 @@ import reactor.util.function.Tuples;
 
 import javax.annotation.Nullable;
 import java.time.Instant;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -48,12 +49,20 @@ import java.util.function.ToLongFunction;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 
+import static discord4j.core.object.util.Image.Format.*;
+
 /**
  * A Discord guild.
  *
  * @see <a href="https://discordapp.com/developers/docs/resources/guild">Guild Resource</a>
  */
 public final class Guild implements Entity {
+
+    /** The path for guild icon image URLs. */
+    private static final String ICON_IMAGE_PATH = "icons/%s/%s";
+
+    /** The path for guild splash image URLs. */
+    private static final String SPLASH_IMAGE_PATH = "splashes/%s/%s";
 
     /** The ServiceMediator associated to this object. */
     private final ServiceMediator serviceMediator;
@@ -96,21 +105,29 @@ public final class Guild implements Entity {
     }
 
     /**
-     * Gets the icon hash, if present.
+     * Gets the icon URL of the guild, if present and in a supported format.
      *
-     * @return The icon hash, if present.
+     * @param format The format for the URL. Supported format types are {@link Image.Format#PNG PNG},
+     * {@link Image.Format#JPEG JPEG}, and {@link Image.Format#WEB_P WebP}.
+     * @return The icon URL of the guild, if present and in a supported format.
      */
-    public Optional<String> getIconHash() {
-        return Optional.ofNullable(data.getIcon());
+    public Optional<String> getIconUrl(final Image.Format format) {
+        return Optional.ofNullable(data.getIcon())
+                .filter(ignored -> (format == PNG) || (format == JPEG) || (format == WEB_P))
+                .map(icon -> ImageUtil.getUrl(String.format(ICON_IMAGE_PATH, getId().asString(), icon), format));
     }
 
     /**
-     * Gets the splash hash, if present.
+     * Gets the splash URL of the guild, if present and in a supported format.
      *
-     * @return The splash hash, if present.
+     * @param format The format for the URL. Supported format types are {@link Image.Format#PNG PNG},
+     * {@link Image.Format#JPEG JPEG}, and {@link Image.Format#WEB_P WebP}.
+     * @return The splash URL of the guild, if present and in a supported format.
      */
-    public Optional<String> getSplashHash() {
-        return Optional.ofNullable(data.getSplash());
+    public Optional<String> getSplashUrl(final Image.Format format) {
+        return Optional.ofNullable(data.getSplash())
+                .filter(ignored -> (format == PNG) || (format == JPEG) || (format == WEB_P))
+                .map(splash -> ImageUtil.getUrl(String.format(SPLASH_IMAGE_PATH, getId().asString(), splash), format));
     }
 
     /**
@@ -351,17 +368,25 @@ public final class Guild implements Entity {
      * Gets when this guild was joined at, if present.
      *
      * @return When this guild was joined at, if present.
+     *
+     * @implNote If the underlying {@link discord4j.core.DiscordClientBuilder#getStoreService() store} does not save
+     * {@link GuildBean} instances <b>OR</b> the bot is currently not logged in then the returned {@code Optional} will
+     * always be empty.
      */
     public Optional<Instant> getJoinTime() {
         return getGatewayData()
                 .map(GuildBean::getJoinedAt)
-                .map(Instant::parse);
+                .map(timestamp -> DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(timestamp, Instant::from));
     }
 
     /**
      * Gets whether this guild is considered large, if present.
      *
      * @return If present, {@code true} if the guild is considered large, {@code false} otherwise.
+     *
+     * @implNote If the underlying {@link discord4j.core.DiscordClientBuilder#getStoreService() store} does not save
+     * {@link GuildBean} instances <b>OR</b> the bot is currently not logged in then the returned {@code Optional} will
+     * always be empty.
      */
     public Optional<Boolean> isLarge() {
         return getGatewayData().map(GuildBean::getLarge);
@@ -371,6 +396,10 @@ public final class Guild implements Entity {
      * Gets the total number of members in the guild, if present.
      *
      * @return The total number of members in the guild, if present.
+     *
+     * @implNote If the underlying {@link discord4j.core.DiscordClientBuilder#getStoreService() store} does not save
+     * {@link GuildBean} instances <b>OR</b> the bot is currently not logged in then the returned {@code Optional} will
+     * always be empty.
      */
     public OptionalInt getMemberCount() {
         return getGatewayData()
@@ -384,13 +413,14 @@ public final class Guild implements Entity {
      * @return A {@link Flux} that continually emits the {@link VoiceState voice states} of the guild. If an error is
      * received, it is emitted through the {@code Flux}.
      *
-     * @implNote If the underlying {@link ClientBuilder#getStoreService() store} does not save {@link VoiceStateBean}
-     * instances <b>OR</b> the bot is currently not logged in then the returned {@code Flux} will always be empty.
+     * @implNote If the underlying {@link discord4j.core.DiscordClientBuilder#getStoreService() store} does not save
+     * {@link VoiceStateBean} instances <b>OR</b> the bot is currently not logged in then the returned {@code Flux} will
+     * always be empty.
      */
     public Flux<VoiceState> getVoiceStates() {
         return serviceMediator.getStateHolder().getVoiceStateStore()
-                // With unsigned longs this gets everything in range 00..00 (inclusive) to 11..11 (exclusive)
-                .findInRange(LongLongTuple2.of(getId().asLong(), 0), LongLongTuple2.of(getId().asLong(), -1))
+                .findInRange(LongLongTuple2.of(getId().asLong(), Long.MIN_VALUE),
+                             LongLongTuple2.of(getId().asLong(), Long.MAX_VALUE))
                 .map(bean -> new VoiceState(serviceMediator, bean));
     }
 
@@ -447,13 +477,14 @@ public final class Guild implements Entity {
      * @return A {@link Flux} that continually emits the {@link Presence presences} of the guild. If an error is
      * received, it is emitted through the {@code Flux}.
      *
-     * @implNote If the underlying {@link ClientBuilder#getStoreService() store} does not save {@link PresenceBean}
-     * instances <b>OR</b> the bot is currently not logged in then the returned {@code Flux} will always be empty.
+     * @implNote If the underlying {@link discord4j.core.DiscordClientBuilder#getStoreService() store} does not save
+     * {@link PresenceBean} instances <b>OR</b> the bot is currently not logged in then the returned {@code Flux} will
+     * always be empty.
      */
     public Flux<Presence> getPresences() {
         return serviceMediator.getStateHolder().getPresenceStore()
-                // With unsigned longs this gets everything in range 00..00 (inclusive) to 11..11 (exclusive)
-                .findInRange(LongLongTuple2.of(getId().asLong(), 0), LongLongTuple2.of(getId().asLong(), -1))
+                .findInRange(LongLongTuple2.of(getId().asLong(), Long.MIN_VALUE),
+                             LongLongTuple2.of(getId().asLong(), Long.MAX_VALUE))
                 .map(Presence::new);
     }
 
@@ -662,6 +693,75 @@ public final class Guild implements Entity {
     }
 
     /**
+     * Requests to retrieve all the bans for this guild.
+     *
+     * @return A {@link Flux} that continually emits the {@link Ban bans} for this guild. If an error is received, it is
+     * emitted through the {@code Flux}.
+     */
+    public Flux<Ban> getBans() {
+        return serviceMediator.getRestClient().getGuildService()
+                .getGuildBans(getId().asLong())
+                .map(BanBean::new)
+                .map(bean -> new Ban(serviceMediator, bean));
+    }
+
+    /**
+     * Requests to retrieve the ban for the specified user for this guild.
+     *
+     * @param userId The ID of the user to retrieve the ban for this guild.
+     * @return A {@link Mono} where, upon successful completion, emits the {@link Ban ban} for the specified user for
+     * this guild. If an error is received, it is meitted through the {@code Mono}.
+     */
+    public Mono<Ban> getBan(final Snowflake userId) {
+        return serviceMediator.getRestClient().getGuildService()
+                .getGuildBan(getId().asLong(), userId.asLong())
+                .map(BanBean::new)
+                .map(bean -> new Ban(serviceMediator, bean));
+    }
+
+    /**
+     * Requests to ban the specified user.
+     *
+     * @param userId The ID of the user to ban.
+     * @param spec A {@link Consumer} that provides a "blank" {@link BanQuerySpec} to be operated on. If some properties
+     * need to be retrieved via blocking operations (such as retrieval from a database), then it is recommended to build
+     * the spec externally and call {@link #ban(Snowflake, BanQuerySpec)}.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the specified user was
+     * banned. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Void> ban(final Snowflake userId, final Consumer<BanQuerySpec> spec) {
+        final BanQuerySpec mutatedSpec = new BanQuerySpec();
+        spec.accept(mutatedSpec);
+        return ban(userId, mutatedSpec);
+    }
+
+    /**
+     * Requests to ban the specified user.
+     *
+     * @param userId The ID of the user to ban.
+     * @param spec A configured {@link BanQuerySpec} to perform the request on.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the specified user was
+     * banned. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Void> ban(final Snowflake userId, final BanQuerySpec spec) {
+        return serviceMediator.getRestClient().getGuildService()
+                .createGuildBan(getId().asLong(), userId.asLong(), spec.asRequest());
+    }
+
+    /**
+     * Requests to unban the specified user.
+     *
+     * @param userId The ID of the user to unban.
+     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the specified user was
+     * unbanned. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Void> unban(final Snowflake userId) {
+        return serviceMediator.getRestClient().getGuildService().removeGuildBan(getId().asLong(), userId.asLong());
+    }
+
+    /**
      * Requests to retrieve the number of users that will be pruned. Users are pruned if they have not been seen within
      * the past specified amount of days <i>and</i> are not assigned to any roles for this guild.
      *
@@ -706,24 +806,31 @@ public final class Guild implements Entity {
     }
 
     /**
-     * Requests to retrieve the audit log of this guild.
+     * Requests to retrieve the audit log for this guild.
      *
-     * @param responsibleUser The user for which to retrieve audit log entries. Null to request entries for all users.
-     * @param actionType The action type for which to retrieve audit log entries. Null to request entries for all
-     * action types.
-     * @return A {@link Flux} that continually emits entries of this guild's audit log. If an error is received, it is
+     * @param spec A {@link Consumer} that provides a "blank" {@link AuditLogQuerySpec} to be operated on. If some
+     * properties need to be retrieved via blocking operations (such as retrieval from a database), then it is
+     * recommended to build the spec externally and call {@link #getAuditLog(AuditLogQuerySpec)}.
+     *
+     * @return A {@link Flux} that continually emits entries for this guild's audit log. If an error is received, it is
      * emitted through the {@code Flux}.
      */
-    public Flux<AuditLogEntry> getAuditLog(@Nullable Snowflake responsibleUser, @Nullable ActionType actionType) {
+    public Flux<AuditLogEntry> getAuditLog(final Consumer<AuditLogQuerySpec> spec) {
+        final AuditLogQuerySpec mutatedSpec = new AuditLogQuerySpec();
+        spec.accept(mutatedSpec);
+        return getAuditLog(mutatedSpec);
+    }
+
+    /**
+     * Requests to retrieve the audit log for this guild.
+     *
+     * @param spec A configured {@link AuditLogQuerySpec} to perform the request on.
+     * @return A {@link Flux} that continually emits entries for this guild's audit log. If an error is received, it is
+     * emitted through the {@code Flux}.
+     */
+    public Flux<AuditLogEntry> getAuditLog(final AuditLogQuerySpec spec) {
         Function<Map<String, Object>, Flux<AuditLogResponse>> makeRequest = params -> {
-            if (responsibleUser != null) {
-                params.put("user_id", responsibleUser.asString());
-            }
-
-            if (actionType != null) {
-                params.put("action_type", actionType.getValue());
-            }
-
+            params.putAll(spec.asRequest());
             return serviceMediator.getRestClient().getAuditLogService().getAuditLog(getId().asLong(), params).flux();
         };
 
@@ -734,6 +841,45 @@ public final class Guild implements Entity {
                 .flatMap(log -> Flux.fromArray(log.getAuditLogEntries())
                         .map(AuditLogEntryBean::new)
                         .map(bean -> new AuditLogEntry(serviceMediator, bean)));
+    }
+
+    /**
+     * Requests to retrieve the webhooks of the guild.
+     *
+     * @return A {@link Flux} that continually emits the {@link Webhook webhooks} of the guild. If an error is
+     * received, it is emitted through the {@code Flux}.
+     */
+    public Flux<Webhook> getWebhooks() {
+        return serviceMediator.getRestClient().getWebhookService()
+                .getGuildWebhooks(getId().asLong())
+                .map(WebhookBean::new)
+                .map(bean -> new Webhook(serviceMediator, bean));
+    }
+
+    /**
+     * Requests to retrieve the invites of the guild.
+     *
+     * @return A {@link Flux} that continually emits the {@link ExtendedInvite invites} of the guild. If an error is
+     * received, it is emitted through the {@code Flux}.
+     */
+    public Flux<ExtendedInvite> getInvites() {
+        return serviceMediator.getRestClient().getGuildService()
+                .getGuildInvites(getId().asLong())
+                .map(ExtendedInviteBean::new)
+                .map(bean -> new ExtendedInvite(serviceMediator, bean));
+    }
+
+    /**
+     * Requests to change the bot user's nickname in the guild.
+     *
+     * @param newNickname The new nickname.
+     * @return A {@link Mono} where, upon successful completion, emits the bot user's new nickname in this guild. If an
+     * error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<String> changeSelfNickname(@Nullable String newNickname) {
+        return serviceMediator.getRestClient().getGuildService()
+                .modifyOwnNickname(getId().asLong(), new NicknameModifyRequest(newNickname))
+                .map(NicknameModifyResponse::getNick);
     }
 
     /** Automatically scan and delete messages sent in the server that contain explicit content. */

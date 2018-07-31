@@ -19,6 +19,14 @@ package discord4j.core.event.domain.channel;
 import discord4j.core.DiscordClient;
 import discord4j.core.object.entity.Category;
 
+import javax.annotation.Nullable;
+import java.util.Optional;
+
+/**
+ * Dispatched when a {@link Category} is deleted in a guild.
+ *
+ * @see <a href="https://discordapp.com/developers/docs/topics/gateway#channel-delete">Channel Delete</a>
+ */
 public class CategoryDeleteEvent extends ChannelEvent {
 
     private final Category category;

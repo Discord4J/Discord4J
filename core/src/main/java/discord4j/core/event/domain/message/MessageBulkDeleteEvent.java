@@ -17,23 +17,38 @@
 package discord4j.core.event.domain.message;
 
 import discord4j.core.DiscordClient;
+import discord4j.core.object.entity.Guild;
+import discord4j.core.object.entity.Message;
+import discord4j.core.object.entity.MessageChannel;
 import discord4j.core.object.util.Snowflake;
+import reactor.core.publisher.Mono;
 
 import java.util.Arrays;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * Dispatched when multiple messages are deleted at once.
+ * <p>
+ * Corresponding {@link discord4j.core.event.domain.message.MessageDeleteEvent message deletes} are NOT dispatched for
+ * messages included in this event.
+ *
+ * @see <a href="https://discordapp.com/developers/docs/topics/gateway#message-delete-bulk">Message Delete Bulk</a>
+ */
 public class MessageBulkDeleteEvent extends MessageEvent {
 
     private final long[] messageIds;
     private final long channelId;
     private final long guildId;
+    private final Set<Message> messages;
 
-    public MessageBulkDeleteEvent(DiscordClient client, long[] messageIds, long channelId, long guildId) {
+    public MessageBulkDeleteEvent(DiscordClient client, long[] messageIds, long channelId, long guildId,
+                                  Set<Message> messages) {
         super(client);
         this.messageIds = messageIds;
         this.channelId = channelId;
         this.guildId = guildId;
+        this.messages = messages;
     }
 
     public Set<Snowflake> getMessageIds() {
@@ -42,11 +57,23 @@ public class MessageBulkDeleteEvent extends MessageEvent {
                 .collect(Collectors.toSet());
     }
 
+    public Set<Message> getMessages() {
+        return messages;
+    }
+
     public Snowflake getChannelId() {
         return Snowflake.of(channelId);
     }
 
+    public Mono<MessageChannel> getChannel() {
+        return getClient().getMessageChannelById(getChannelId());
+    }
+
     public Snowflake getGuildId() {
         return Snowflake.of(guildId);
+    }
+
+    public Mono<Guild> getGuild() {
+        return getClient().getGuildById(getGuildId());
     }
 }

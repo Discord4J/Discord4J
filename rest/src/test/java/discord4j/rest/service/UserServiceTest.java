@@ -30,6 +30,7 @@ import discord4j.rest.http.client.ClientException;
 import discord4j.rest.http.client.SimpleHttpClient;
 import discord4j.rest.json.request.DMCreateRequest;
 import discord4j.rest.json.request.UserModifyRequest;
+import discord4j.rest.json.response.ErrorResponse;
 import discord4j.rest.request.Router;
 import discord4j.rest.route.Routes;
 import org.junit.Test;
@@ -89,10 +90,9 @@ public class UserServiceTest {
         try {
             getUserService().getUser(1111222).block(); // should throw ClientException
         } catch (ClientException e) {
-            e.getErrorResponse().blockOptional().ifPresent(response -> {
-                System.out.println("Error code: " + response.getCode());
-                System.out.println("Error message: " + response.getMessage());
-            });
+            ErrorResponse response = e.getErrorResponse();
+            System.out.println("Error code: " + response.getFields().get("code"));
+            System.out.println("Error message: " + response.getFields().get("message"));
         }
     }
 

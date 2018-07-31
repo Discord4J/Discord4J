@@ -21,7 +21,6 @@ import discord4j.core.object.util.PermissionSet;
 import discord4j.core.object.util.Snowflake;
 import reactor.core.publisher.Mono;
 
-import java.util.Optional;
 import java.util.Set;
 
 /** A Discord channel associated to a {@link Guild}. */
@@ -64,21 +63,6 @@ public interface GuildChannel extends Channel {
      * @return The name of the channel.
      */
     String getName();
-
-    /**
-     * Gets the ID of the category for this channel, if present.
-     *
-     * @return The ID of the category for this channel, if present.
-     */
-    Optional<Snowflake> getCategoryId();
-
-    /**
-     * Requests to retrieve the category for this channel, if present.
-     *
-     * @return A {@link Mono} where, upon successful completion, emits the {@link Category category} this channel, if
-     * present. If an error is received, it is emitted through the {@code Mono}.
-     */
-    Mono<Category> getCategory();
 
     /**
      * Gets the raw position of the channel as exposed by Discord. This may or may not be accurate with relativity to

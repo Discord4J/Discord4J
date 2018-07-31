@@ -29,6 +29,7 @@ import reactor.core.publisher.Mono;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.time.format.DateTimeFormatter;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -59,7 +60,8 @@ class BaseMessageChannel extends BaseChannel implements MessageChannel {
 
     @Override
     public final Optional<Instant> getLastPinTimestamp() {
-        return Optional.ofNullable(getData().getLastPinTimestamp()).map(Instant::parse);
+        return Optional.ofNullable(getData().getLastPinTimestamp())
+                .map(timestamp -> DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(timestamp, Instant::from));
     }
 
     @Override
@@ -119,7 +121,7 @@ class BaseMessageChannel extends BaseChannel implements MessageChannel {
     }
 
     @Override
-    protected MessageChannelBean getData() {
+    MessageChannelBean getData() {
         return (MessageChannelBean) super.getData();
     }
 }

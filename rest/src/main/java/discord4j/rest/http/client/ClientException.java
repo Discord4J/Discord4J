@@ -22,13 +22,15 @@ import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import reactor.core.publisher.Mono;
 
+import javax.annotation.Nullable;
+
 public class ClientException extends RuntimeException {
 
     private final HttpResponseStatus status;
     private final HttpHeaders headers;
-    private final Mono<ErrorResponse> errorResponse;
+    private final ErrorResponse errorResponse;
 
-    public ClientException(HttpResponseStatus status, HttpHeaders headers, Mono<ErrorResponse> errorResponse) {
+    public ClientException(HttpResponseStatus status, HttpHeaders headers, @Nullable ErrorResponse errorResponse) {
         this.status = status;
         this.headers = headers;
         this.errorResponse = errorResponse;
@@ -42,7 +44,8 @@ public class ClientException extends RuntimeException {
         return headers;
     }
 
-    public Mono<ErrorResponse> getErrorResponse() {
+    @Nullable
+    public ErrorResponse getErrorResponse() {
         return errorResponse;
     }
 

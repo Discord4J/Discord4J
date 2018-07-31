@@ -16,8 +16,8 @@ ext {
     project_jdk = '1.8'
 
     // Dependencies
-    reactor_bom_version = 'Bismuth-SR9'
-    jackson_version = '2.9.4'
+    reactor_bom_version = 'Bismuth-SR10'
+    jackson_version = '2.9.5'
     jsr305_version = '3.0.2'
     junit_version = '4.12'
     logback_version = '1.3.0-alpha4'
@@ -170,7 +170,7 @@ publishing {
 
 bintrayUpload.dependsOn build
 
-task wrapper(type: Wrapper) {
-    gradleVersion = '4.7'
-    distributionUrl = 'https://services.gradle.org/distributions/gradle-4.7-all.zip'
+wrapper {
+    gradleVersion = "4.9"
+    distributionUrl = "https://services.gradle.org/distributions/gradle-$gradleVersion-all.zip"
 }

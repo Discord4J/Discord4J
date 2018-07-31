@@ -18,17 +18,31 @@ package discord4j.core.event.domain.message;
 
 import discord4j.core.DiscordClient;
 import discord4j.core.object.Embed;
+import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Message;
+import discord4j.core.object.entity.MessageChannel;
+import discord4j.core.object.util.Snowflake;
+import reactor.core.publisher.Mono;
 
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Dispatched when a message is updated.
+ * <p>
+ * This event includes both normal message editing as well as the following behavior regarding embeds:
+ * When a message with a link is sent, it does not initially contain its embed. When Discord creates the embed, this
+ * event is fired with it added to the embeds list.
+ *
+ * @see <a href="https://discordapp.com/developers/docs/topics/gateway#message-update">Message Update</a>
+ */
 public class MessageUpdateEvent extends MessageEvent {
 
     private final long messageId;
     private final long channelId;
-    private final long guildId;
+    @Nullable
+    private final Long guildId;
 
     @Nullable
     private final Message old;
@@ -39,7 +53,7 @@ public class MessageUpdateEvent extends MessageEvent {
     private final boolean embedsChanged;
     private final List<Embed> currentEmbeds;
 
-    public MessageUpdateEvent(DiscordClient client, long messageId, long channelId, long guildId,
+    public MessageUpdateEvent(DiscordClient client, long messageId, long channelId, @Nullable Long guildId,
                               @Nullable Message old, boolean contentChanged, @Nullable String currentContent,
                               boolean embedsChanged, List<Embed> currentEmbeds) {
         super(client);
@@ -53,16 +67,28 @@ public class MessageUpdateEvent extends MessageEvent {
         this.currentEmbeds = currentEmbeds;
     }
 
-    public long getMessageId() {
-        return messageId;
+    public Snowflake getMessageId() {
+        return Snowflake.of(messageId);
     }
 
-    public long getChannelId() {
-        return channelId;
+    public Mono<Message> getMessage() {
+        return getClient().getMessageById(getChannelId(), getMessageId());
     }
 
-    public long getGuildId() {
-        return guildId;
+    public Snowflake getChannelId() {
+        return Snowflake.of(channelId);
+    }
+
+    public Mono<MessageChannel> getChannel() {
+        return getClient().getMessageChannelById(getChannelId());
+    }
+
+    public Optional<Snowflake> getGuildId() {
+        return Optional.ofNullable(guildId).map(Snowflake::of);
+    }
+
+    public Mono<Guild> getGuild() {
+        return Mono.justOrEmpty(getGuildId()).flatMap(getClient()::getGuildById);
     }
 
     public Optional<Message> getOld() {

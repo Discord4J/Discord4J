@@ -69,7 +69,9 @@ public abstract class PayloadHandlers {
             String newSessionId = ((Ready) context.getData()).getSessionId();
             context.getClient().sessionId().set(newSessionId);
         }
-        context.getClient().dispatchSink().next(context.getData());
+        if (context.getData() != null) {
+            context.getClient().dispatchSink().next(context.getData());
+        }
     }
 
     private static void handleHeartbeat(PayloadContext<Heartbeat> context) {

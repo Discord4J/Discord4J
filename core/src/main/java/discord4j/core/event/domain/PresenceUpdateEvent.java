@@ -17,12 +17,23 @@
 package discord4j.core.event.domain;
 
 import discord4j.core.DiscordClient;
+import discord4j.core.object.entity.Guild;
+import discord4j.core.object.entity.Member;
+import discord4j.core.object.entity.User;
 import discord4j.core.object.presence.Presence;
 import discord4j.core.object.util.Snowflake;
+import reactor.core.publisher.Mono;
 
 import javax.annotation.Nullable;
 import java.util.Optional;
 
+/**
+ * Dispatched when a user's presence changes.
+ * <p>
+ * The old presence may not be present if presences are not stored.
+ *
+ * @see <a href="https://discordapp.com/developers/docs/topics/gateway#presence-update">Presence Update</a>
+ */
 public class PresenceUpdateEvent extends Event {
 
     private final long guildId;
@@ -43,8 +54,20 @@ public class PresenceUpdateEvent extends Event {
         return Snowflake.of(guildId);
     }
 
+    public Mono<Guild> getGuild() {
+        return getClient().getGuildById(getGuildId());
+    }
+
     public Snowflake getUserId() {
         return Snowflake.of(userId);
+    }
+
+    public Mono<User> getUser() {
+        return getClient().getUserById(getUserId());
+    }
+
+    public Mono<Member> getMember() {
+        return getClient().getMemberById(getGuildId(), getUserId());
     }
 
     public Presence getCurrent() {

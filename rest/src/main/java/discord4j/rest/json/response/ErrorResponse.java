@@ -17,44 +17,28 @@
 
 package discord4j.rest.json.response;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonAnySetter;
 
-import javax.annotation.Nullable;
-import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ErrorResponse {
 
-    @Nullable
-    private Long code;
+    private Map<String, Object> fields = new HashMap<>();
 
-    @Nullable
-    private String message;
-
-    @Nullable
-    @JsonProperty("parent_id")
-    private String[] parentId;
-
-    @Nullable
-    public Long getCode() {
-        return code;
+    public Map<String, Object> getFields() {
+        return fields;
     }
 
-    @Nullable
-    public String getMessage() {
-        return message;
-    }
-
-    @Nullable
-    public String[] getParentId() {
-        return parentId;
+    @JsonAnySetter
+    public void anySetter(String key, Object value) {
+        fields.put(key, value);
     }
 
     @Override
     public String toString() {
-        return "ErrorResponse[" +
-                "code=" + code +
-                ", message=" + message +
-                ", parentId=" + Arrays.toString(parentId) +
-                ']';
+        return "ErrorResponse{" +
+                "fields=" + fields +
+                '}';
     }
 }
