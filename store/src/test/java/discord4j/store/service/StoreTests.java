@@ -53,7 +53,7 @@ public class StoreTests {
     }
 
     @Test
-    public void testPriority() {
+    public void testorder() {
         Map<Class<? extends StoreService>, Integer> override = new HashMap<>();
         override.put(TestService.class, Integer.MAX_VALUE);
         override.put(NoOpStoreService.class, Integer.MIN_VALUE);

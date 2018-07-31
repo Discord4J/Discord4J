@@ -46,7 +46,7 @@ public class StoreServiceLoader {
     /**
      * Creates a reusable instance of the provider, service discovery occurs at this point!
      *
-     * @param priorityOverrides Allows for manual overriding of {@link StoreService#priority()}.
+     * @param priorityOverrides Allows for manual overriding of {@link StoreService#order()}.
      */
     @SuppressWarnings({"ComparatorCombinators", "Convert2Lambda"})
     public StoreServiceLoader(Map<Class<? extends StoreService>, Integer> priorityOverrides) {
@@ -61,8 +61,8 @@ public class StoreServiceLoader {
             services.sort(new Comparator<StoreService>() {
                 @Override
                 public int compare(StoreService ss1, StoreService ss2) {
-                    return Integer.compare(priorityOverrides.getOrDefault(ss1.getClass(), ss1.priority()),
-                            priorityOverrides.getOrDefault(ss2.getClass(), ss2.priority()));
+                    return Integer.compare(priorityOverrides.getOrDefault(ss1.getClass(), ss1.order()),
+                            priorityOverrides.getOrDefault(ss2.getClass(), ss2.order()));
                 }
             });
 
@@ -124,8 +124,8 @@ public class StoreServiceLoader {
         }
 
         @Override
-        public int priority() {
-            int p1 = genericService.priority(), p2 = primitiveService.priority();
+        public int order() {
+            int p1 = genericService.order(), p2 = primitiveService.order();
             return p1 > p2 ? p1 : p2;
         }
 

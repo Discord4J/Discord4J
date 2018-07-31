@@ -34,7 +34,7 @@ import java.io.Serializable;
 public class NoOpStoreService implements StoreService {
 
     @Override
-    public int priority() {
+    public int order() {
         return Integer.MAX_VALUE;
     }
 
