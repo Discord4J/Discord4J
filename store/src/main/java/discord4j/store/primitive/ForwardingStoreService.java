@@ -51,8 +51,8 @@ public class ForwardingStoreService implements StoreService {
     }
 
     @Override
-    public int priority() {
-        return toForward.priority();
+    public int order() {
+        return toForward.order();
     }
 
     @Override
