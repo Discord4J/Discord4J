@@ -97,11 +97,6 @@ jobs:
       - image: circleci/openjdk:8-jdk
     <<: *job_definition
 
-  jvm9:
-    docker:
-      - image: circleci/openjdk:9-jdk
-    <<: *job_definition
-
   jvm10:
     docker:
       - image: circleci/openjdk:10-jdk
@@ -112,8 +107,6 @@ workflows:
   all:
     jobs:
       - jvm8:
-          context: D3J
-      - jvm9:
           context: D3J
       - jvm10:
           context: D3J
