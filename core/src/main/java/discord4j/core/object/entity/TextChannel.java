@@ -22,6 +22,8 @@ import discord4j.core.object.PermissionOverwrite;
 import discord4j.core.object.data.ExtendedInviteBean;
 import discord4j.core.object.data.WebhookBean;
 import discord4j.core.object.data.stored.TextChannelBean;
+import discord4j.core.object.trait.Categorizable;
+import discord4j.core.object.trait.Invitable;
 import discord4j.core.object.util.Snowflake;
 import discord4j.core.spec.InviteCreateSpec;
 import discord4j.core.spec.MessageCreateSpec;
@@ -40,7 +42,7 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 /** A Discord text channel. */
-public final class TextChannel extends BaseChannel implements GuildChannel, MessageChannel {
+public final class TextChannel extends BaseChannel implements Categorizable, GuildChannel, Invitable, MessageChannel {
 
     /** Delegates {@link GuildChannel} operations. */
     private final BaseGuildChannel guildChannel;
@@ -78,16 +80,6 @@ public final class TextChannel extends BaseChannel implements GuildChannel, Mess
     @Override
     public String getName() {
         return guildChannel.getName();
-    }
-
-    @Override
-    public Optional<Snowflake> getCategoryId() {
-        return guildChannel.getCategoryId();
-    }
-
-    @Override
-    public Mono<Category> getCategory() {
-        return guildChannel.getCategory();
     }
 
     @Override
@@ -150,6 +142,37 @@ public final class TextChannel extends BaseChannel implements GuildChannel, Mess
         return messageChannel.getPinnedMessages();
     }
 
+    @Override
+    TextChannelBean getData() {
+        return (TextChannelBean) super.getData();
+    }
+
+    @Override
+    public final Optional<Snowflake> getCategoryId() {
+        return Optional.ofNullable(getData().getGuildChannel().getParentId()).map(Snowflake::of);
+    }
+
+    @Override
+    public final Mono<Category> getCategory() {
+        return Mono.justOrEmpty(getCategoryId()).flatMap(getClient()::getCategoryById);
+    }
+
+    @Override
+    public Mono<ExtendedInvite> createInvite(final InviteCreateSpec spec) {
+        return getServiceMediator().getRestClient().getChannelService()
+                .createChannelInvite(getId().asLong(), spec.asRequest())
+                .map(ExtendedInviteBean::new)
+                .map(bean -> new ExtendedInvite(getServiceMediator(), bean));
+    }
+
+    @Override
+    public Flux<ExtendedInvite> getInvites() {
+        return getServiceMediator().getRestClient().getChannelService()
+                .getChannelInvites(getId().asLong())
+                .map(ExtendedInviteBean::new)
+                .map(bean -> new ExtendedInvite(getServiceMediator(), bean));
+    }
+
     /**
      * Gets the channel topic.
      *
@@ -157,11 +180,6 @@ public final class TextChannel extends BaseChannel implements GuildChannel, Mess
      */
     public String getTopic() {
         return Optional.ofNullable(getData().getTopic()).orElse("");
-    }
-
-    @Override
-    TextChannelBean getData() {
-        return (TextChannelBean) super.getData();
     }
 
     /**
@@ -212,36 +230,6 @@ public final class TextChannel extends BaseChannel implements GuildChannel, Mess
                 .map(EntityUtil::getChannelBean)
                 .map(bean -> EntityUtil.getChannel(getServiceMediator(), bean))
                 .cast(TextChannel.class);
-    }
-
-    /**
-     * Requests to create an invite.
-     *
-     * @param spec A {@link Consumer} that provides a "blank" {@link InviteCreateSpec} to be operated on. If some
-     * properties need to be retrieved via blocking operations (such as retrieval from a database), then it is
-     * recommended to build the spec externally and call {@link #createInvite(InviteCreateSpec)}.
-     *
-     * @return A {@link Mono} where, upon successful completion, emits the created {@link ExtendedInvite}. If an error
-     * is received, it is emitted through the {@code Mono}.
-     */
-    public Mono<ExtendedInvite> createInvite(final Consumer<InviteCreateSpec> spec) {
-        final InviteCreateSpec mutatedSpec = new InviteCreateSpec();
-        spec.accept(mutatedSpec);
-        return createInvite(mutatedSpec);
-    }
-
-    /**
-     * Requests to create an invite.
-     *
-     * @param spec A configured {@link InviteCreateSpec} to perform the request on.
-     * @return A {@link Mono} where, upon successful completion, emits the created {@link ExtendedInvite}. If an error
-     * is received, it is emitted through the {@code Mono}.
-     */
-    public Mono<ExtendedInvite> createInvite(final InviteCreateSpec spec) {
-        return getServiceMediator().getRestClient().getChannelService()
-                .createChannelInvite(getId().asLong(), spec.asRequest())
-                .map(ExtendedInviteBean::new)
-                .map(bean -> new ExtendedInvite(getServiceMediator(), bean));
     }
 
     /**

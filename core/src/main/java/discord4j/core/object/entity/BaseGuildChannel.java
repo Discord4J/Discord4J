@@ -25,7 +25,6 @@ import reactor.core.publisher.Mono;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -64,16 +63,6 @@ class BaseGuildChannel extends BaseChannel implements GuildChannel {
     @Override
     public final String getName() {
         return getData().getName();
-    }
-
-    @Override
-    public final Optional<Snowflake> getCategoryId() {
-        return Optional.ofNullable(getData().getParentId()).map(Snowflake::of);
-    }
-
-    @Override
-    public final Mono<Category> getCategory() {
-        return Mono.justOrEmpty(getCategoryId()).flatMap(getClient()::getCategoryById);
     }
 
     @Override

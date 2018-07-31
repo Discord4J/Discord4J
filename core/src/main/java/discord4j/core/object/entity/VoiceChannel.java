@@ -17,15 +17,23 @@
 package discord4j.core.object.entity;
 
 import discord4j.core.ServiceMediator;
+import discord4j.core.object.ExtendedInvite;
+import discord4j.core.object.data.ExtendedInviteBean;
 import discord4j.core.object.data.stored.VoiceChannelBean;
+import discord4j.core.object.trait.Categorizable;
+import discord4j.core.object.trait.Invitable;
+import discord4j.core.object.util.Snowflake;
+import discord4j.core.spec.InviteCreateSpec;
 import discord4j.core.spec.VoiceChannelEditSpec;
 import discord4j.core.util.EntityUtil;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.Optional;
 import java.util.function.Consumer;
 
 /** A Discord voice channel. */
-public final class VoiceChannel extends BaseGuildChannel {
+public final class VoiceChannel extends BaseGuildChannel implements Categorizable, Invitable {
 
     /**
      * Constructs an {@code VoiceChannel} with an associated ServiceMediator and Discord data.
@@ -37,6 +45,37 @@ public final class VoiceChannel extends BaseGuildChannel {
         super(serviceMediator, data);
     }
 
+    @Override
+    VoiceChannelBean getData() {
+        return (VoiceChannelBean) super.getData();
+    }
+
+    @Override
+    public final Optional<Snowflake> getCategoryId() {
+        return Optional.ofNullable(getData().getParentId()).map(Snowflake::of);
+    }
+
+    @Override
+    public final Mono<Category> getCategory() {
+        return Mono.justOrEmpty(getCategoryId()).flatMap(getClient()::getCategoryById);
+    }
+
+    @Override
+    public Mono<ExtendedInvite> createInvite(final InviteCreateSpec spec) {
+        return getServiceMediator().getRestClient().getChannelService()
+                .createChannelInvite(getId().asLong(), spec.asRequest())
+                .map(ExtendedInviteBean::new)
+                .map(bean -> new ExtendedInvite(getServiceMediator(), bean));
+    }
+
+    @Override
+    public Flux<ExtendedInvite> getInvites() {
+        return getServiceMediator().getRestClient().getChannelService()
+                .getChannelInvites(getId().asLong())
+                .map(ExtendedInviteBean::new)
+                .map(bean -> new ExtendedInvite(getServiceMediator(), bean));
+    }
+
     /**
      * Gets the bitrate (in bits) for this voice channel.
      *
@@ -44,11 +83,6 @@ public final class VoiceChannel extends BaseGuildChannel {
      */
     public int getBitrate() {
         return getData().getBitrate();
-    }
-
-    @Override
-    VoiceChannelBean getData() {
-        return (VoiceChannelBean) super.getData();
     }
 
     /**
