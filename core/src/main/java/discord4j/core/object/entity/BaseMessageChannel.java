@@ -121,7 +121,7 @@ class BaseMessageChannel extends BaseChannel implements MessageChannel {
     }
 
     @Override
-    protected MessageChannelBean getData() {
+    MessageChannelBean getData() {
         return (MessageChannelBean) super.getData();
     }
 }

@@ -50,7 +50,7 @@ public final class PrivateChannel extends BaseMessageChannel {
     }
 
     @Override
-    protected PrivateChannelBean getData() {
+    PrivateChannelBean getData() {
         return (PrivateChannelBean) super.getData();
     }
 

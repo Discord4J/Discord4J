@@ -160,7 +160,7 @@ public final class TextChannel extends BaseChannel implements GuildChannel, Mess
     }
 
     @Override
-    protected TextChannelBean getData() {
+    TextChannelBean getData() {
         return (TextChannelBean) super.getData();
     }
 

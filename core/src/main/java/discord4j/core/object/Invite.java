@@ -117,7 +117,7 @@ public class Invite implements DiscordObject {
      *
      * @return The raw data as represented by Discord.
      */
-    protected InviteBean getData() {
+    InviteBean getData() {
         return data;
     }
 }

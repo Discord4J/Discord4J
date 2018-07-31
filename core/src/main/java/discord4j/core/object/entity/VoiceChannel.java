@@ -47,7 +47,7 @@ public final class VoiceChannel extends BaseGuildChannel {
     }
 
     @Override
-    protected VoiceChannelBean getData() {
+    VoiceChannelBean getData() {
         return (VoiceChannelBean) super.getData();
     }
 

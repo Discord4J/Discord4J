@@ -172,7 +172,7 @@ public class User implements Entity {
      *
      * @return The ServiceMediator associated to this object.
      */
-    protected final ServiceMediator getServiceMediator() {
+    final ServiceMediator getServiceMediator() {
         return serviceMediator;
     }
 }
