@@ -16,16 +16,19 @@
  */
 package discord4j.core.object.entity;
 
+import discord4j.common.json.UserResponse;
 import discord4j.core.DiscordClient;
 import discord4j.core.ServiceMediator;
 import discord4j.core.object.Embed;
 import discord4j.core.object.data.stored.MessageBean;
 import discord4j.core.object.data.stored.ReactionBean;
+import discord4j.core.object.data.stored.UserBean;
 import discord4j.core.object.reaction.Reaction;
 import discord4j.core.object.reaction.ReactionEmoji;
 import discord4j.core.object.util.Snowflake;
 import discord4j.core.spec.MessageEditSpec;
 import discord4j.core.util.EntityUtil;
+import discord4j.core.util.PaginationUtil;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -33,6 +36,7 @@ import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -254,6 +258,25 @@ public final class Message implements Entity {
         return (reactions == null) ? Collections.emptySet() : Arrays.stream(reactions)
                 .map(bean -> new Reaction(serviceMediator, bean))
                 .collect(Collectors.toSet());
+    }
+
+    /**
+     * Requests to retrieve the reactors (users) for the specified emoji for this message.
+     *
+     * @param emoji The emoji to get the reactors (users) for this message.
+     * @return A {@link Flux} that continually emits the {@link User reactors} for the specified emoji for this message.
+     * If an error is received, it is emitted through the {@code Flux}.
+     */
+    public Flux<User> getReactors(final ReactionEmoji emoji) {
+        final Function<Map<String, Object>, Flux<UserResponse>> makeRequest = params ->
+                serviceMediator.getRestClient().getChannelService().getReactions(getChannelId().asLong(),
+                                                                                 getId().asLong(),
+                                                                                 EntityUtil.getEmojiString(emoji),
+                                                                                 params);
+
+        return PaginationUtil.paginateAfter(makeRequest, UserResponse::getId, 0L, 100)
+                .map(UserBean::new)
+                .map(bean -> new User(serviceMediator, bean));
     }
 
     /**
