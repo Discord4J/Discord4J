@@ -72,7 +72,7 @@ class BaseGuildChannel extends BaseChannel implements GuildChannel {
                 .map(p -> getEffectivePermissions(p, getPermissionOverwrites(), member.getId(), member.getGuildId(), member.getRoleIds()));
     }
     
-    public static PermissionSet getEffectivePermissions(PermissionSet permissions, Set<PermissionOverwrite> overwrites, Snowflake member, Snowflake guild, Set<Snowflake> roles) {
+    static PermissionSet getEffectivePermissions(PermissionSet permissions, Set<PermissionOverwrite> overwrites, Snowflake member, Snowflake guild, Set<Snowflake> roles) {
         if (permissions.contains(Permission.ADMINISTRATOR)) {
             return PermissionSet.all();
         }
@@ -93,7 +93,7 @@ class BaseGuildChannel extends BaseChannel implements GuildChannel {
         return permissions;
     }
     
-    public static PermissionSet applyOverwrites(PermissionSet current, Map<Snowflake, PermissionOverwrite> overwrites, Iterable<Snowflake> ids) {
+    static PermissionSet applyOverwrites(PermissionSet current, Map<Snowflake, PermissionOverwrite> overwrites, Iterable<Snowflake> ids) {
         int allow = 0;
         int deny = 0;
         for (Snowflake id : ids) {
