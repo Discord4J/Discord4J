@@ -32,6 +32,7 @@ import discord4j.core.util.ImageUtil;
 import discord4j.core.util.PaginationUtil;
 import discord4j.rest.json.request.NicknameModifyRequest;
 import discord4j.rest.json.response.AuditLogResponse;
+import discord4j.rest.json.response.NicknameModifyResponse;
 import discord4j.rest.json.response.PruneResponse;
 import discord4j.store.util.LongLongTuple2;
 import reactor.core.publisher.Flux;
@@ -877,7 +878,8 @@ public final class Guild implements Entity {
      */
     public Mono<String> changeSelfNickname(@Nullable String newNickname) {
         return serviceMediator.getRestClient().getGuildService()
-                .modifyOwnNickname(getId().asLong(), new NicknameModifyRequest(newNickname));
+                .modifyOwnNickname(getId().asLong(), new NicknameModifyRequest(newNickname))
+                .map(NicknameModifyResponse::getNick);
     }
 
     /** Automatically scan and delete messages sent in the server that contain explicit content. */

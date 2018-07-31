@@ -18,7 +18,6 @@ package discord4j.rest.service;
 
 import discord4j.common.json.GuildMemberResponse;
 import discord4j.common.json.RoleResponse;
-import discord4j.common.json.UserResponse;
 import discord4j.rest.json.request.*;
 import discord4j.rest.json.response.*;
 import discord4j.rest.request.Router;
@@ -98,7 +97,7 @@ public class GuildService extends RestService {
                 .exchange(getRouter());
     }
 
-    public Mono<String> modifyOwnNickname(long guildId, NicknameModifyRequest request) {
+    public Mono<NicknameModifyResponse> modifyOwnNickname(long guildId, NicknameModifyRequest request) {
         return Routes.NICKNAME_MODIFY_OWN.newRequest(guildId)
                 .body(request)
                 .exchange(getRouter());

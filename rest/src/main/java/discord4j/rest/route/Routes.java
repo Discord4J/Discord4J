@@ -507,8 +507,8 @@ public abstract class Routes {
      * @see <a href="https://discordapp.com/developers/docs/resources/guild#modify-current-user's-nick">https
      * ://discordapp.com/developers/docs/resources/guild#modify-current-user's-nick</a>
      */
-    public static final Route<String> NICKNAME_MODIFY_OWN = Route.patch("/guilds/{guild.id}/members/@me/nick",
-            String.class);
+    public static final Route<NicknameModifyResponse> NICKNAME_MODIFY_OWN = Route.patch("/guilds/{guild.id}/members/@me/nick",
+            NicknameModifyResponse.class);
 
     /**
      * Adds a role to a guild member. Requires the 'MANAGE_ROLES' permission. Returns a 204 empty response on success.
