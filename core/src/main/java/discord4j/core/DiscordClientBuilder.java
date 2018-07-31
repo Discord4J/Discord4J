@@ -112,15 +112,6 @@ public final class DiscordClientBuilder {
         return this;
     }
 
-    public StoreServiceLoader getStoreServiceLoader() {
-        return storeServiceLoader;
-    }
-
-    public DiscordClientBuilder setStoreServiceLoader(final StoreServiceLoader storeServiceLoader) {
-        this.storeServiceLoader = Objects.requireNonNull(storeServiceLoader);
-        return this;
-    }
-
     @Nullable
     public StoreService getStoreService() {
         return storeService;
