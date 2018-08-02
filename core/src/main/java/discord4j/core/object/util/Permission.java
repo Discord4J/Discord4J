@@ -47,6 +47,9 @@ public enum Permission {
     /** Allows for viewing of audit logs. */
     VIEW_AUDIT_LOG(0x00000080, false),
 
+    /** Allows for using priority speaker in a voice channel. */
+    PRIORITY_SPEAKER(0x00000100, false),
+
     /** Allows guild members to view a channel, which includes reading messages in text channels. */
     VIEW_CHANNEL(0x00000400, false),
 

@@ -22,7 +22,7 @@ import java.util.*;
 public final class PermissionSet extends AbstractSet<Permission> {
 
     /** Common instance for {@code all()}. */
-    private static final PermissionSet ALL = new PermissionSet(0x7ff7fcff);
+    private static final PermissionSet ALL = new PermissionSet(0x7FF7FDFF);
 
     /** Common instance for {@code none()}. */
     private static final PermissionSet NONE = new PermissionSet(0x00000000);
