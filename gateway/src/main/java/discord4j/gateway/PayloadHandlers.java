@@ -76,6 +76,8 @@ public abstract class PayloadHandlers {
 
     private static void handleHeartbeat(PayloadContext<Heartbeat> context) {
         log.debug("Received heartbeat");
+        context.getHandler().outbound().onNext(
+                GatewayPayload.heartbeat(new Heartbeat(context.getClient().lastSequence().get())));
     }
 
     private static void handleReconnect(PayloadContext<?> context) {
