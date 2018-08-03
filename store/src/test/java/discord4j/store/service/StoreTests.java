@@ -17,6 +17,7 @@
 package discord4j.store.service;
 
 import discord4j.store.Store;
+import discord4j.store.dsl.Property;
 import discord4j.store.primitive.ForwardingStoreService;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
@@ -24,6 +25,7 @@ import reactor.core.publisher.Mono;
 import reactor.util.function.Tuple2;
 import reactor.util.function.Tuples;
 
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -55,6 +57,63 @@ public class StoreTests {
     public void testGenericStore() {
         Store<String, String> store = newStore();
         new StoreTest(Objects.requireNonNull(store)).test();
+    }
+
+    @Test
+    public void testQuery() {
+        Store<String, TestBean> store = provider.newGenericStore(String.class, TestBean.class);
+        store.save("hello", new TestBean("hello", "world", 1))
+             .then(store.save("hello2", new TestBean("hello2", "world2", 0)))
+             .subscribe();
+        TestBean value = store.query()
+        .filter(f -> {
+            return f.match(new Property<>(TestBean.class, "key"), "hello")
+                    .and(f.match(new Property<>(TestBean.class, "value"), "world"))
+                    .and(f.within(new Property<>(TestBean.class, "arbitrary"), 1, 100));
+        })
+        .selectOne()
+        .block();
+        assertEquals("world", value.getValue());
+        assertEquals(1, value.getArbitrary());
+    }
+
+    public class TestBean implements Serializable {
+
+        private String key;
+        private String value;
+        private int arbitrary;
+
+        public TestBean(String key, String value, int arbitrary) {
+            this.key = key;
+            this.value = value;
+            this.arbitrary = arbitrary;
+        }
+
+        public TestBean() {}
+
+        public String getKey() {
+            return key;
+        }
+
+        public void setKey(String key) {
+            this.key = key;
+        }
+
+        public String getValue() {
+            return value;
+        }
+
+        public void setValue(String value) {
+            this.value = value;
+        }
+
+        public int getArbitrary() {
+            return arbitrary;
+        }
+
+        public void setArbitrary(int arbitrary) {
+            this.arbitrary = arbitrary;
+        }
     }
 
     class StoreTest {

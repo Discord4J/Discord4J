@@ -35,7 +35,7 @@ public class TestService implements StoreService {
     @Override
     public <K extends Comparable<K>, V extends Serializable> Store<K, V> provideGenericStore(Class<K> keyClass,
                                                                                              Class<V> valueClass) {
-        return new MapStore<>();
+        return new MapStore<>(keyClass, valueClass);
     }
 
     @Override

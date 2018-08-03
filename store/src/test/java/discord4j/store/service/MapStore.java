@@ -17,6 +17,11 @@
 package discord4j.store.service;
 
 import discord4j.store.Store;
+import discord4j.store.dsl.LogicalStatement;
+import discord4j.store.dsl.LogicalStatementFactory;
+import discord4j.store.dsl.QueryBuilderFactory;
+import discord4j.store.dsl.jvm.SimpleQueryBuilder;
+import discord4j.store.dsl.jvm.SimpleQueryBuilderFactory;
 import discord4j.store.util.WithinRangePredicate;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
@@ -30,6 +35,29 @@ import java.util.concurrent.ConcurrentHashMap;
 public class MapStore<K extends Comparable<K>, V extends Serializable> implements Store<K, V> {
 
     private final Map<K, V> map = new ConcurrentHashMap<>();
+    private final QueryBuilderFactory<K, V> qbf = new SimpleQueryBuilderFactory<>();
+    private final Class<K> key;
+    private final Class<V> value;
+
+    public MapStore(Class<K> key, Class<V> value) {
+        this.key = key;
+        this.value = value;
+    }
+
+    @Override
+    public Class<K> getKeyType() {
+        return key;
+    }
+
+    @Override
+    public Class<V> getValueType() {
+        return value;
+    }
+
+    @Override
+    public QueryBuilderFactory<K, V> queryBuilderFactory() {
+        return qbf;
+    }
 
     @Override
     public Mono<Void> save(K key, V value) {

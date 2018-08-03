@@ -37,6 +37,11 @@ import java.io.Serializable;
 public interface LongObjStore<V extends Serializable> extends Store<Long, V> {
 
     @Override
+    default Class<Long> getKeyType() {
+        return Long.class;
+    }
+
+    @Override
     default Mono<Void> save(Long key, V value) {
         return saveWithLong(key, value);
     }

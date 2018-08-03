@@ -16,6 +16,10 @@
  */
 package discord4j.store.noop.primitive;
 
+import discord4j.store.dsl.LogicalStatement;
+import discord4j.store.dsl.LogicalStatementFactory;
+import discord4j.store.dsl.QueryBuilderFactory;
+import discord4j.store.dsl.jvm.SimpleQueryBuilderFactory;
 import discord4j.store.noop.NoOpStore;
 import discord4j.store.primitive.LongObjStore;
 import discord4j.store.util.LongObjTuple2;
@@ -32,6 +36,12 @@ import java.io.Serializable;
  * @see NoOpStore
  */
 public class NoOpLongObjStore<V extends Serializable> implements LongObjStore<V> {
+
+    private final Class<V> type;
+
+    public NoOpLongObjStore(Class<V> type) {
+        this.type = type;
+    }
 
     @Override
     public Mono<Void> saveWithLong(long key, V value) {
@@ -51,6 +61,16 @@ public class NoOpLongObjStore<V extends Serializable> implements LongObjStore<V>
     @Override
     public Flux<V> findInRange(long start, long end) {
         return Flux.empty();
+    }
+
+    @Override
+    public Class<V> getValueType() {
+        return type;
+    }
+
+    @Override
+    public QueryBuilderFactory<Long, V> queryBuilderFactory() {
+        return new SimpleQueryBuilderFactory<>();
     }
 
     @Override

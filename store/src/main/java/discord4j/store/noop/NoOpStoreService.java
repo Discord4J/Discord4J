@@ -41,7 +41,7 @@ public class NoOpStoreService implements StoreService {
     @Override
     public <K extends Comparable<K>, V extends Serializable> Store<K, V> provideGenericStore(Class<K> keyClass,
                                                                                              Class<V> valueClass) {
-        return new NoOpStore<>();
+        return new NoOpStore<>(keyClass, valueClass);
     }
 
     @Override
@@ -51,7 +51,7 @@ public class NoOpStoreService implements StoreService {
 
     @Override
     public <V extends Serializable> LongObjStore<V> provideLongObjStore(Class<V> valueClass) {
-        return new NoOpLongObjStore<>();
+        return new NoOpLongObjStore<>(valueClass);
     }
 
     @Override

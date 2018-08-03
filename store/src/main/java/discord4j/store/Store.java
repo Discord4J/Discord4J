@@ -16,6 +16,10 @@
  */
 package discord4j.store;
 
+import discord4j.store.dsl.LogicalStatement;
+import discord4j.store.dsl.LogicalStatementFactory;
+import discord4j.store.dsl.QueryBuilder;
+import discord4j.store.dsl.QueryBuilderFactory;
 import discord4j.store.primitive.LongObjStore;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
@@ -35,6 +39,31 @@ import java.io.Serializable;
  * @see discord4j.store.util.AbsentValue
  */
 public interface Store<K extends Comparable<K>, V extends Serializable> {
+
+    /**
+     * Gets the class associated with the key type.
+     *
+     * @return The key type.
+     */
+    Class<K> getKeyType();
+
+    /**
+     * Gets the class associated with the value type.
+     *
+     * @return The value type.
+     */
+    Class<V> getValueType();
+
+    QueryBuilderFactory<K, V> queryBuilderFactory();
+
+    /**
+     * Starts a complex select query.
+     *
+     * @return The builder used to prepare the query.
+     */
+    default QueryBuilder<K, V> query() {
+        return queryBuilderFactory().create(this);
+    }
 
     /**
      * Stores a key value pair.
