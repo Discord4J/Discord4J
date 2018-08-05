@@ -22,11 +22,15 @@ import discord4j.store.primitive.LongObjStore;
 import discord4j.store.service.StoreService;
 import discord4j.store.util.LongLongTuple2;
 import reactor.core.publisher.Mono;
+import reactor.util.Logger;
+import reactor.util.Loggers;
 
 import java.util.concurrent.atomic.AtomicLong;
 
 /** Holder for various pieces of state for use in caching. */
 public final class StateHolder {
+
+    private static final Logger log = Loggers.getLogger(StateHolder.class);
 
     private final LongObjStore<CategoryBean> categoryStore;
     private final LongObjStore<GuildBean> guildStore;
@@ -43,16 +47,37 @@ public final class StateHolder {
 
     StateHolder(final StoreService service) {
         categoryStore = service.provideLongObjStore(CategoryBean.class);
+        log.debug("Using a {} backend for category storage.", categoryStore);
+
         guildStore = service.provideLongObjStore(GuildBean.class);
+        log.debug("Using a {} backend for guild storage.", guildStore);
+
         guildEmojiStore = service.provideLongObjStore(GuildEmojiBean.class);
+        log.debug("Using a {} backend for guild emoji storage.", guildEmojiStore);
+
         memberStore = service.provideGenericStore(LongLongTuple2.class, MemberBean.class);
+        log.debug("Using a {} backend for member storage.", memberStore);
+
         messageStore = service.provideLongObjStore(MessageBean.class);
+        log.debug("Using a {} backend for message storage.", messageStore);
+
         presenceStore = service.provideGenericStore(LongLongTuple2.class, PresenceBean.class);
+        log.debug("Using a {} backend for presence storage.", presenceStore);
+
         roleStore = service.provideLongObjStore(RoleBean.class);
+        log.debug("Using a {} backend for role storage.", roleStore);
+
         textChannelStore = service.provideLongObjStore(TextChannelBean.class);
+        log.debug("Using a {} backend for text channel storage.", textChannelStore);
+
         userStore = service.provideLongObjStore(UserBean.class);
+        log.debug("Using a {} backend for user storage.", userStore);
+
         voiceChannelStore = service.provideLongObjStore(VoiceChannelBean.class);
+        log.debug("Using a {} backend for voice channel storage.", voiceChannelStore);
+        
         voiceStateStore = service.provideGenericStore(LongLongTuple2.class, VoiceStateBean.class);
+        log.debug("Using a {} backend for voice state storage.", voiceStateStore);
         selfId = new AtomicLong();
     }
 
