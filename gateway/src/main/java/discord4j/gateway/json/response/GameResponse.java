@@ -16,11 +16,13 @@
  */
 package discord4j.gateway.json.response;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import discord4j.common.jackson.UnsignedJson;
 
 import javax.annotation.Nullable;
 
+@JsonIgnoreProperties(ignoreUnknown = true) // FIXME
 public class GameResponse {
 
     private String name;
