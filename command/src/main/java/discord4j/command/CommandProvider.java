@@ -1,9 +1,7 @@
-package discord4j.commands;
+package discord4j.command;
 
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import reactor.core.publisher.Mono;
-
-import java.util.Optional;
 
 /**
  * This represents a generic command provider.

@@ -14,7 +14,7 @@ repositories {
 }
 
 dependencies {
-  implementation "com.discord4j.discord4j:discord4j-commands:@VERSION@"
+  implementation command
 }
 ```
 ### Maven

@@ -1,6 +1,6 @@
-package discord4j.commands.example;
+package discord4j.command.example;
 
-import discord4j.commands.CommandBootstrapper;
+import discord4j.command.CommandBootstrapper;
 import discord4j.core.DiscordClient;
 import discord4j.core.DiscordClientBuilder;
 

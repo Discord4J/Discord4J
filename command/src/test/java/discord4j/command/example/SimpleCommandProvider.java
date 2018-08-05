@@ -1,14 +1,12 @@
-package discord4j.commands.example;
+package discord4j.command.example;
 
-import discord4j.commands.Command;
-import discord4j.commands.CommandProvider;
+import discord4j.command.Command;
+import discord4j.command.CommandProvider;
 import discord4j.core.DiscordClient;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.ApplicationInfo;
 import discord4j.core.object.util.Snowflake;
 import reactor.core.publisher.Mono;
-
-import java.util.Optional;
 
 public class SimpleCommandProvider implements CommandProvider {
 

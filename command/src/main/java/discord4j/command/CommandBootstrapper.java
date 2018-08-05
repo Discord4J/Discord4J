@@ -1,4 +1,4 @@
-package discord4j.commands;
+package discord4j.command;
 
 import discord4j.core.DiscordClient;
 import discord4j.core.event.domain.message.MessageCreateEvent;
@@ -12,18 +12,18 @@ import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 /**
- * The (thread-safe) entry point for actually using commands. To use, simply instantiate and call
+ * The (thread-safe) entry point for actually using command. To use, simply instantiate and call
  * {@link #attach(discord4j.core.DiscordClient)}.
  *
- * To register events, obtain the {@link discord4j.commands.CommandDispatcher} via {@link #getCommandDispatcher()}
- * or create a new {@link discord4j.commands.CommandDispatcher} instance replace the default instance with the new
+ * To register events, obtain the {@link discord4j.command.CommandDispatcher} via {@link #getCommandDispatcher()}
+ * or create a new {@link discord4j.command.CommandDispatcher} instance replace the default instance with the new
  * one via {@link #setCommandDispatcher(CommandDispatcher)}.
  *
  * @see #attach(discord4j.core.DiscordClient)
- * @see discord4j.commands.CommandProvider
- * @see discord4j.commands.CommandDispatcher
- * @see discord4j.commands.CommandErrorHandler
- * @see discord4j.commands.DefaultCommandDispatcher
+ * @see discord4j.command.CommandProvider
+ * @see discord4j.command.CommandDispatcher
+ * @see discord4j.command.CommandErrorHandler
+ * @see discord4j.command.DefaultCommandDispatcher
  */
 public final class CommandBootstrapper {
 
@@ -39,10 +39,10 @@ public final class CommandBootstrapper {
     private final Set<CommandProvider> providers;
 
     /**
-     * Constructs the message listener for commands.
+     * Constructs the message listener for command.
      *
      * @see #attach(discord4j.core.DiscordClient)
-     * @param providers The {@link discord4j.commands.CommandProvider}s to initialize this instance with. Note that
+     * @param providers The {@link discord4j.command.CommandProvider}s to initialize this instance with. Note that
      * this set is expected to be thread-safe as there will be concurrent read access required.
      */
     public CommandBootstrapper(Set<CommandProvider> providers) {
@@ -50,7 +50,7 @@ public final class CommandBootstrapper {
     }
 
     /**
-     * Constructs the message listener for commands.
+     * Constructs the message listener for command.
      *
      * @see #attach(discord4j.core.DiscordClient)
      */
@@ -126,7 +126,7 @@ public final class CommandBootstrapper {
      * Called to add a command provider dynamically.
      *
      * @param provider The provider to add.
-     * @return The current {@link discord4j.commands.CommandBootstrapper} instance for chaining.
+     * @return The current {@link discord4j.command.CommandBootstrapper} instance for chaining.
      */
     public CommandBootstrapper addCommandProvider(CommandProvider provider) {
         providers.add(provider);
@@ -137,7 +137,7 @@ public final class CommandBootstrapper {
      * Called to drop a command provider dynamically.
      *
      * @param provider The provider to remove.
-     * @return The current {@link discord4j.commands.CommandBootstrapper} instance for chaining.
+     * @return The current {@link discord4j.command.CommandBootstrapper} instance for chaining.
      */
     public CommandBootstrapper removeCommandProvider(CommandProvider provider) {
         providers.remove(provider);
@@ -148,7 +148,7 @@ public final class CommandBootstrapper {
      * Called to add command providers dynamically.
      *
      * @param providers The providers to add.
-     * @return The current {@link discord4j.commands.CommandBootstrapper} instance for chaining.
+     * @return The current {@link discord4j.command.CommandBootstrapper} instance for chaining.
      */
     public CommandBootstrapper addCommandProviders(Collection<? extends CommandProvider> providers) {
         this.providers.addAll(providers);
@@ -159,7 +159,7 @@ public final class CommandBootstrapper {
      * Called to remove command providers dynamically.
      *
      * @param providers The providers to remove.
-     * @return The current {@link discord4j.commands.CommandBootstrapper} instance for chaining.
+     * @return The current {@link discord4j.command.CommandBootstrapper} instance for chaining.
      */
     public CommandBootstrapper removeCommandProviders(Collection<? extends CommandProvider> providers) {
         this.providers.removeAll(providers);
