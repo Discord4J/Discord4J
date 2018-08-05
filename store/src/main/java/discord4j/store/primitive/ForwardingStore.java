@@ -152,4 +152,11 @@ public class ForwardingStore<V extends Serializable> implements LongObjStore<V> 
     public Flux<LongObjTuple2<V>> longObjEntries() {
         return this.entries().map(LongObjTuple2::from);
     }
+
+    @Override
+    public String toString() {
+        return "ForwardingStore{" +
+                "forwardingTo=" + toForward +
+                '}';
+    }
 }
