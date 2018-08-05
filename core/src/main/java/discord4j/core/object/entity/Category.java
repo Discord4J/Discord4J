@@ -59,6 +59,7 @@ public final class Category extends BaseGuildChannel {
      * @param spec A {@link Consumer} that provides a "blank" {@link CategoryEditSpec} to be operated on. If some
      * properties need to be retrieved via blocking operations (such as retrieval from a database), then it is
      * recommended to build the spec externally and call {@link #edit(CategoryEditSpec)}.
+     *
      * @return A {@link Mono} where, upon successful completion, emits the edited {@link Category}. If an error is
      * received, it is emitted through the {@code Mono}.
      */

@@ -24,7 +24,7 @@ import discord4j.core.object.util.Snowflake;
 import discord4j.core.spec.RoleEditSpec;
 import reactor.core.publisher.Mono;
 
-import java.awt.Color;
+import java.awt.*;
 import java.util.Objects;
 import java.util.function.Consumer;
 
@@ -164,6 +164,7 @@ public final class Role implements Entity {
      * @param spec A {@link Consumer} that provides a "blank" {@link RoleEditSpec} to be operated on. If some properties
      * need to be retrieved via blocking operations (such as retrieval from a database), then it is recommended to build
      * the spec externally and call {@link #edit(RoleEditSpec)}.
+     *
      * @return A {@link Mono} where, upon successful completion, emits the edited {@link Role}. If an error is received,
      * it is emitted through the {@code Mono}.
      */

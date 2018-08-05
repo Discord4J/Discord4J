@@ -323,6 +323,7 @@ public final class Message implements Entity {
      * @param spec A {@link Consumer} that provides a "blank" {@link MessageEditSpec} to be operated on. If some
      * properties need to be retrieved via blocking operations (such as retrieval from a database), then it is
      * recommended to build the spec externally and call {@link #edit(MessageEditSpec)}.
+     *
      * @return A {@link Mono} where, upon successful completion, emits the edited {@link Message}. If an error is
      * received, it is emitted through the {@code Mono}.
      */
