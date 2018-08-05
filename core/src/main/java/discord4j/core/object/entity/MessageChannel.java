@@ -58,7 +58,6 @@ public interface MessageChannel extends Channel {
      * @param spec A {@link Consumer} that provides a "blank" {@link MessageCreateSpec} to be operated on. If some
      * properties need to be retrieved via blocking operations (such as retrieval from a database), then it is
      * recommended to build the spec externally and call {@link #createMessage(MessageCreateSpec)}.
-     *
      * @return A {@link Mono} where, upon successful completion, emits the created {@link Message}. If an error is
      * received, it is emitted through the {@code Mono}.
      */
@@ -80,7 +79,6 @@ public interface MessageChannel extends Channel {
      * @param message A string message to populate the message with.
      * @return A {@link Mono} where, upon successful completion, emits the created {@link Message}. If an error is
      * received, it is emitted through the {@code Mono}.
-     *
      * @see MessageCreateSpec#setContent(String)
      */
     default Mono<Message> createMessage(String message) {

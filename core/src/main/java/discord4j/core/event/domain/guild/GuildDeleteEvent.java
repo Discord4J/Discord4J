@@ -26,8 +26,8 @@ import java.util.Optional;
 /**
  * Dispatched in two different scenarios:
  * <ol>
- *     <li>The bot is kicked from or leaves a guild.</li>
- *     <li>A guild becomes unavailable during an outage. In this scenario, {@link #unavailable} will be true.</li>
+ * <li>The bot is kicked from or leaves a guild.</li>
+ * <li>A guild becomes unavailable during an outage. In this scenario, {@link #unavailable} will be true.</li>
  * </ol>
  *
  * @see <a href="https://discordapp.com/developers/docs/topics/gateway#guild-delete">Guild Delete</a>

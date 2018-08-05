@@ -19,7 +19,10 @@ package discord4j.core.object.entity;
 import discord4j.common.json.GuildMemberResponse;
 import discord4j.core.DiscordClient;
 import discord4j.core.ServiceMediator;
-import discord4j.core.object.*;
+import discord4j.core.object.Ban;
+import discord4j.core.object.ExtendedInvite;
+import discord4j.core.object.Region;
+import discord4j.core.object.VoiceState;
 import discord4j.core.object.audit.AuditLogEntry;
 import discord4j.core.object.data.*;
 import discord4j.core.object.data.stored.*;
@@ -368,10 +371,6 @@ public final class Guild implements Entity {
      * Gets when this guild was joined at, if present.
      *
      * @return When this guild was joined at, if present.
-     *
-     * @implNote If the underlying {@link discord4j.core.DiscordClientBuilder#getStoreService() store} does not save
-     * {@link GuildBean} instances <b>OR</b> the bot is currently not logged in then the returned {@code Optional} will
-     * always be empty.
      */
     public Optional<Instant> getJoinTime() {
         return getGatewayData()
@@ -383,10 +382,6 @@ public final class Guild implements Entity {
      * Gets whether this guild is considered large, if present.
      *
      * @return If present, {@code true} if the guild is considered large, {@code false} otherwise.
-     *
-     * @implNote If the underlying {@link discord4j.core.DiscordClientBuilder#getStoreService() store} does not save
-     * {@link GuildBean} instances <b>OR</b> the bot is currently not logged in then the returned {@code Optional} will
-     * always be empty.
      */
     public Optional<Boolean> isLarge() {
         return getGatewayData().map(GuildBean::getLarge);
@@ -396,10 +391,6 @@ public final class Guild implements Entity {
      * Gets the total number of members in the guild, if present.
      *
      * @return The total number of members in the guild, if present.
-     *
-     * @implNote If the underlying {@link discord4j.core.DiscordClientBuilder#getStoreService() store} does not save
-     * {@link GuildBean} instances <b>OR</b> the bot is currently not logged in then the returned {@code Optional} will
-     * always be empty.
      */
     public OptionalInt getMemberCount() {
         return getGatewayData()
@@ -412,15 +403,11 @@ public final class Guild implements Entity {
      *
      * @return A {@link Flux} that continually emits the {@link VoiceState voice states} of the guild. If an error is
      * received, it is emitted through the {@code Flux}.
-     *
-     * @implNote If the underlying {@link discord4j.core.DiscordClientBuilder#getStoreService() store} does not save
-     * {@link VoiceStateBean} instances <b>OR</b> the bot is currently not logged in then the returned {@code Flux} will
-     * always be empty.
      */
     public Flux<VoiceState> getVoiceStates() {
         return serviceMediator.getStateHolder().getVoiceStateStore()
                 .findInRange(LongLongTuple2.of(getId().asLong(), Long.MIN_VALUE),
-                             LongLongTuple2.of(getId().asLong(), Long.MAX_VALUE))
+                        LongLongTuple2.of(getId().asLong(), Long.MAX_VALUE))
                 .map(bean -> new VoiceState(serviceMediator, bean));
     }
 
@@ -476,15 +463,11 @@ public final class Guild implements Entity {
      *
      * @return A {@link Flux} that continually emits the {@link Presence presences} of the guild. If an error is
      * received, it is emitted through the {@code Flux}.
-     *
-     * @implNote If the underlying {@link discord4j.core.DiscordClientBuilder#getStoreService() store} does not save
-     * {@link PresenceBean} instances <b>OR</b> the bot is currently not logged in then the returned {@code Flux} will
-     * always be empty.
      */
     public Flux<Presence> getPresences() {
         return serviceMediator.getStateHolder().getPresenceStore()
                 .findInRange(LongLongTuple2.of(getId().asLong(), Long.MIN_VALUE),
-                             LongLongTuple2.of(getId().asLong(), Long.MAX_VALUE))
+                        LongLongTuple2.of(getId().asLong(), Long.MAX_VALUE))
                 .map(Presence::new);
     }
 
@@ -494,7 +477,6 @@ public final class Guild implements Entity {
      * @param spec A {@link Consumer} that provides a "blank" {@link GuildEditSpec} to be operated on. If some
      * properties need to be retrieved via blocking operations (such as retrieval from a database), then it is
      * recommended to build the spec externally and call {@link #edit(GuildEditSpec)}.
-     *
      * @return A {@link Mono} where, upon successful completion, emits the edited {@link Guild}. If an error is
      * received, it is emitted through the {@code Mono}.
      */
@@ -524,7 +506,6 @@ public final class Guild implements Entity {
      * @param spec A {@link Consumer} that provides a "blank" {@link GuildEmojiCreateSpec} to be operated on. If some
      * properties need to be retrieved via blocking operations (such as retrieval from a database), then it is
      * recommended to build the spec externally and call {@link #createEmoji(GuildEmojiCreateSpec)}.
-     *
      * @return A {@link Mono} where, upon successful completion, emits the created {@link GuildEmoji}. If an error is
      * received, it is emitted through the {@code Mono}.
      */
@@ -554,7 +535,6 @@ public final class Guild implements Entity {
      * @param spec A {@link Consumer} that provides a "blank" {@link RoleCreateSpec} to be operated on. If some
      * properties need to be retrieved via blocking operations (such as retrieval from a database), then it is
      * recommended to build the spec externally and call {@link #createRole(RoleCreateSpec)}.
-     *
      * @return A {@link Mono} where, upon successful completion, emits the created {@link Role}. If an error is
      * received, it is emitted through the {@code Mono}.
      */
@@ -584,7 +564,6 @@ public final class Guild implements Entity {
      * @param spec A {@link Consumer} that provides a "blank" {@link CategoryCreateSpec} to be operated on. If some
      * properties need to be retrieved via blocking operations (such as retrieval from a database), then it is
      * recommended to build the spec externally and call {@link #createCategory(CategoryCreateSpec)}.
-     *
      * @return A {@link Mono} where, upon successful completion, emits the created {@link Category}. If an error is
      * received, it is emitted through the {@code Mono}.
      */
@@ -615,7 +594,6 @@ public final class Guild implements Entity {
      * @param spec A {@link Consumer} that provides a "blank" {@link TextChannelCreateSpec} to be operated on. If some
      * properties need to be retrieved via blocking operations (such as retrieval from a database), then it is
      * recommended to build the spec externally and call {@link #createTextChannel(TextChannelCreateSpec)}.
-     *
      * @return A {@link Mono} where, upon successful completion, emits the created {@link TextChannel}. If an error is
      * received, it is emitted through the {@code Mono}.
      */
@@ -646,7 +624,6 @@ public final class Guild implements Entity {
      * @param spec A {@link Consumer} that provides a "blank" {@link VoiceChannelCreateSpec} to be operated on. If some
      * properties need to be retrieved via blocking operations (such as retrieval from a database), then it is
      * recommended to build the spec externally and call {@link #createVoiceChannel(VoiceChannelCreateSpec)}.
-     *
      * @return A {@link Mono} where, upon successful completion, emits the created {@link VoiceChannel}. If an error is
      * received, it is emitted through the {@code Mono}.
      */
@@ -726,7 +703,6 @@ public final class Guild implements Entity {
      * @param spec A {@link Consumer} that provides a "blank" {@link BanQuerySpec} to be operated on. If some properties
      * need to be retrieved via blocking operations (such as retrieval from a database), then it is recommended to build
      * the spec externally and call {@link #ban(Snowflake, BanQuerySpec)}.
-     *
      * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the specified user was
      * banned. If an error is received, it is emitted through the {@code Mono}.
      */
@@ -741,7 +717,6 @@ public final class Guild implements Entity {
      *
      * @param userId The ID of the user to ban.
      * @param spec A configured {@link BanQuerySpec} to perform the request on.
-     *
      * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the specified user was
      * banned. If an error is received, it is emitted through the {@code Mono}.
      */
@@ -811,7 +786,6 @@ public final class Guild implements Entity {
      * @param spec A {@link Consumer} that provides a "blank" {@link AuditLogQuerySpec} to be operated on. If some
      * properties need to be retrieved via blocking operations (such as retrieval from a database), then it is
      * recommended to build the spec externally and call {@link #getAuditLog(AuditLogQuerySpec)}.
-     *
      * @return A {@link Flux} that continually emits entries for this guild's audit log. If an error is received, it is
      * emitted through the {@code Flux}.
      */

@@ -58,6 +58,7 @@ class SimpleHttpClientBuilder implements SimpleHttpClient.Builder {
 
     @Override
     public SimpleHttpClient build() {
-        return new SimpleHttpClient(HttpClient.create(options -> options.compression(true)), baseUrl, headers, writerStrategies, readerStrategies);
+        return new SimpleHttpClient(HttpClient.create(options -> options.compression(true)), baseUrl, headers,
+                writerStrategies, readerStrategies);
     }
 }

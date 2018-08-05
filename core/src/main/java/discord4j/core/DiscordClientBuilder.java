@@ -195,7 +195,8 @@ public final class DiscordClientBuilder {
         }
 
         if (identifyOptions.getShardIndex() >= identifyOptions.getShardCount()) {
-            throw new IllegalArgumentException("The provided shard index is incompatible with the requested shard count!");
+            throw new IllegalArgumentException("The provided shard index is incompatible with the requested shard " +
+                    "count!");
         }
 
         final GatewayClient gatewayClient = new GatewayClient(

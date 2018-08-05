@@ -23,7 +23,7 @@ import discord4j.core.object.entity.Role;
 import discord4j.core.object.util.PermissionSet;
 import discord4j.core.object.util.Snowflake;
 
-import java.awt.*;
+import java.awt.Color;
 import java.util.Set;
 
 public final class ChangeKey<T> {
@@ -38,7 +38,8 @@ public final class ChangeKey<T> {
     public static final ChangeKey<Guild.MfaLevel> MFA_LEVEL = changeKey("mfa_level");
     public static final ChangeKey<Guild.VerificationLevel> VERIFICATION_LEVEL = changeKey("verification_level");
     public static final ChangeKey<Guild.ContentFilterLevel> CONTENT_FILTER_LEVEL = changeKey("explicit_content_filter");
-    public static final ChangeKey<Guild.NotificationLevel> NOTIFICATION_LEVEL = changeKey("default_message_notifications");
+    public static final ChangeKey<Guild.NotificationLevel> NOTIFICATION_LEVEL = changeKey(
+            "default_message_notifications");
     public static final ChangeKey<String> VANITY_URL = changeKey("vanity_url_code");
     public static final ChangeKey<Set<Role>> ROLES_ADD = changeKey("$add");
     public static final ChangeKey<Set<Role>> ROLES_REMOVE = changeKey("$remove");

@@ -9,8 +9,8 @@ public class EchoCommand implements Command {
     @Override
     public Mono<Void> execute(MessageCreateEvent event) {
         return Mono.justOrEmpty(event.getMessage().getContent())
-                   .map(content -> content.substring(content.indexOf(" ")))
-                   .zipWith(event.getMessage().getChannel(), (content, channel) -> channel.createMessage(content))
-                   .then();
+                .map(content -> content.substring(content.indexOf(" ")))
+                .zipWith(event.getMessage().getChannel(), (content, channel) -> channel.createMessage(content))
+                .then();
     }
 }

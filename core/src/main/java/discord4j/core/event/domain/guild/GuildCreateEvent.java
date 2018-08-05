@@ -22,11 +22,11 @@ import discord4j.core.object.entity.Guild;
 /**
  * Dispatched in three different scenarios:
  * <ol>
- *     <li>After the bot connects to Discord (after {@link discord4j.core.event.domain.lifecycle.ReadyEvent ReadyEvent}
- *     is dispatched), this event will be dispatched for all guilds the bot is in on this shard.</li>
- *     <li>After an outage (in which many {@link discord4j.core.event.domain.guild.GuildDeleteEvent guild deletes} will
- *     be dispatched), this event will be dispatched as guilds become available again.</li>
- *     <li>When the bot is added to a guild.</li>
+ * <li>After the bot connects to Discord (after {@link discord4j.core.event.domain.lifecycle.ReadyEvent ReadyEvent}
+ * is dispatched), this event will be dispatched for all guilds the bot is in on this shard.</li>
+ * <li>After an outage (in which many {@link discord4j.core.event.domain.guild.GuildDeleteEvent guild deletes} will
+ * be dispatched), this event will be dispatched as guilds become available again.</li>
+ * <li>When the bot is added to a guild.</li>
  * </ol>
  *
  * @see <a href="https://discordapp.com/developers/docs/topics/gateway#guild-create">Guild Create</a>
