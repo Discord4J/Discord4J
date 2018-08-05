@@ -14,7 +14,7 @@ import java.util.concurrent.CopyOnWriteArraySet;
 /**
  * The (thread-safe) entry point for actually using command. To use, simply instantiate and call
  * {@link #attach(discord4j.core.DiscordClient)}.
- *
+ * <p>
  * To register events, obtain the {@link discord4j.command.CommandDispatcher} via {@link #getCommandDispatcher()}
  * or create a new {@link discord4j.command.CommandDispatcher} instance replace the default instance with the new
  * one via {@link #setCommandDispatcher(CommandDispatcher)}.
@@ -41,9 +41,9 @@ public final class CommandBootstrapper {
     /**
      * Constructs the message listener for command.
      *
-     * @see #attach(discord4j.core.DiscordClient)
      * @param providers The {@link discord4j.command.CommandProvider}s to initialize this instance with. Note that
      * this set is expected to be thread-safe as there will be concurrent read access required.
+     * @see #attach(discord4j.core.DiscordClient)
      */
     public CommandBootstrapper(Set<CommandProvider> providers) {
         this.providers = providers;
@@ -66,9 +66,9 @@ public final class CommandBootstrapper {
      */
     public Flux<? extends Command> attach(DiscordClient client) {
         return client.getEventDispatcher()
-                     .on(MessageCreateEvent.class)
-                     .flatMap(event -> dispatcher.dispatch(event, providers, errorHandler))
-                     .share();
+                .on(MessageCreateEvent.class)
+                .flatMap(event -> dispatcher.dispatch(event, providers, errorHandler))
+                .share();
     }
 
     /**

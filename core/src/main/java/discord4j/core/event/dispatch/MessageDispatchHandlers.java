@@ -35,7 +35,6 @@ import discord4j.gateway.json.dispatch.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -124,7 +123,7 @@ class MessageDispatchHandlers {
 
                     if (bean.getReactions() == null) {
                         ReactionBean r = new ReactionBean(1, me, emojiId, emojiName, emojiAnimated);
-                        bean.setReactions(new ReactionBean[] { r });
+                        bean.setReactions(new ReactionBean[]{r});
                     } else {
                         int i;
                         for (i = 0; i < bean.getReactions().length; i++) {
@@ -193,7 +192,7 @@ class MessageDispatchHandlers {
 
         ReactionEmoji emoji = ReactionEmoji.of(emojiId, emojiName, emojiAnimated);
         return removeFromMessage.thenReturn(new ReactionRemoveEvent(client, userId, channelId, messageId, guildId,
-                                                                    emoji));
+                emoji));
     }
 
     static Mono<ReactionRemoveAllEvent> messageReactionRemoveAll(DispatchContext<MessageReactionRemoveAll> context) {

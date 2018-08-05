@@ -133,7 +133,8 @@ public class RetryBotTest {
         }
 
         void configure() {
-            Flux.first(client.getEventDispatcher().on(ReadyEvent.class), client.getEventDispatcher().on(ResumeEvent.class))
+            Flux.first(client.getEventDispatcher().on(ReadyEvent.class),
+                    client.getEventDispatcher().on(ResumeEvent.class))
                     .next()
                     .flatMap(evt -> client.getApplicationInfo())
                     .map(ApplicationInfo::getOwnerId)

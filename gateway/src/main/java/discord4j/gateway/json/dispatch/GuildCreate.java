@@ -314,6 +314,7 @@ public class GuildCreate implements Dispatch {
         private GameResponse game;
 
         public static class User {
+
             @UnsignedJson
             private long id;
 

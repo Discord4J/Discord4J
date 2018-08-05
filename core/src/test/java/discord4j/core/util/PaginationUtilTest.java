@@ -56,6 +56,7 @@ public class PaginationUtilTest {
     }
 
     private static class PageSource {
+
         static Flux<Long> getPage(Map<String, Object> params) {
             if (params.containsKey("after")) {
                 return getPageAfter((Long) params.get("after"), (Integer) params.get("limit"));

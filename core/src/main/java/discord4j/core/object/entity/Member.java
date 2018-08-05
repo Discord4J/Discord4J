@@ -19,9 +19,7 @@ package discord4j.core.object.entity;
 import discord4j.core.ServiceMediator;
 import discord4j.core.object.VoiceState;
 import discord4j.core.object.data.stored.MemberBean;
-import discord4j.core.object.data.stored.PresenceBean;
 import discord4j.core.object.data.stored.UserBean;
-import discord4j.core.object.data.stored.VoiceStateBean;
 import discord4j.core.object.presence.Presence;
 import discord4j.core.object.util.Snowflake;
 import discord4j.core.spec.BanQuerySpec;
@@ -153,10 +151,6 @@ public final class Member extends User {
      *
      * @return A {@link Mono} where, upon successful completion, emits a {@link VoiceState voice state} for this user
      * for this guild. If an error is received, it is emitted through the {@code Mono}.
-     *
-     * @implNote If the underlying {@link discord4j.core.DiscordClientBuilder#getStoreService() store} does not save
-     * {@link VoiceStateBean} instances <b>OR</b> the bot is currently not logged in then the returned {@code Mono} will
-     * always be empty.
      */
     public Mono<VoiceState> getVoiceState() {
         return getServiceMediator().getStateHolder().getVoiceStateStore()
@@ -169,10 +163,6 @@ public final class Member extends User {
      *
      * @return A {@link Mono} where, upon successful completion, emits a {@link Presence presence} for this user for
      * this guild. If an error is received, it is emitted through the {@code Mono}.
-     *
-     * @implNote If the underlying {@link discord4j.core.DiscordClientBuilder#getStoreService() store} does not save
-     * {@link PresenceBean} instances <b>OR</b> the bot is currently not logged in then the returned {@code Mono} will
-     * always be empty.
      */
     public Mono<Presence> getPresence() {
         return getServiceMediator().getStateHolder().getPresenceStore()
@@ -197,7 +187,6 @@ public final class Member extends User {
      * @param spec A {@link Consumer} that provides a "blank" {@link BanQuerySpec} to be operated on. If some properties
      * need to be retrieved via blocking operations (such as retrieval from a database), then it is recommended to build
      * the spec externally and call {@link #ban(BanQuerySpec)}.
-     *
      * @return A {@link Mono} where, upon successful completion, emits nothing; indicating this user was banned. If an
      * error is received, it is emitted through the {@code Mono}.
      */

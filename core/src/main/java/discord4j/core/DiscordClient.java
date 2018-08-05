@@ -41,7 +41,6 @@ import reactor.core.publisher.Mono;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.OptionalLong;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -343,7 +342,8 @@ public final class DiscordClient {
         parameters.put("v", 6);
 
         return serviceMediator.getStoreService()
-                .init(new StoreContext(serviceMediator.getClientConfig().getShardIndex(), MessageBean.class)) //Stores should be initialized before the gateway sends events
+                .init(new StoreContext(serviceMediator.getClientConfig().getShardIndex(), MessageBean.class))
+                //Stores should be initialized before the gateway sends events
                 .then(serviceMediator.getRestClient().getGatewayService().getGateway())
                 .flatMap(response -> serviceMediator.getGatewayClient()
                         .execute(RouteUtils.expandQuery(response.getUrl(), parameters)))

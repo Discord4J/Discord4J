@@ -18,7 +18,6 @@ package discord4j.store.primitive;
 
 import discord4j.store.Store;
 import discord4j.store.util.LongObjTuple2;
-import discord4j.store.util.MappingIterable;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;

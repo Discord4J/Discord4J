@@ -19,7 +19,7 @@ package discord4j.core.spec;
 import discord4j.core.object.util.PermissionSet;
 import discord4j.rest.json.request.RoleCreateRequest;
 
-import java.awt.*;
+import java.awt.Color;
 
 public class RoleCreateSpec implements Spec<RoleCreateRequest> {
 

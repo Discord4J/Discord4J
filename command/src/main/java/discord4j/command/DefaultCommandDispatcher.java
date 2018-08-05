@@ -4,7 +4,7 @@ import discord4j.core.event.domain.message.MessageCreateEvent;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.*;
+import java.util.Set;
 
 /**
  * This is the default {@link discord4j.command.CommandDispatcher} implementation used for
@@ -18,9 +18,9 @@ public final class DefaultCommandDispatcher implements CommandDispatcher {
     public Mono<? extends Command> dispatch(MessageCreateEvent event, Set<CommandProvider> providers,
                                             CommandErrorHandler errorHandler) {
         return Flux.fromIterable(providers)
-            .concatMap(provider -> provider.provide(event))
-            .next()
-            .flatMap(cmd -> cmd.execute(event).thenReturn(cmd))
-            .doOnError(CommandException.class, throwable -> errorHandler.handle(event, throwable));
+                .concatMap(provider -> provider.provide(event))
+                .next()
+                .flatMap(cmd -> cmd.execute(event).thenReturn(cmd))
+                .doOnError(CommandException.class, throwable -> errorHandler.handle(event, throwable));
     }
 }
