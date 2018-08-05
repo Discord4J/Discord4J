@@ -2,9 +2,9 @@
 
 # Discord4J [![Maven Central](https://img.shields.io/maven-central/v/com.discord4j/Discord4J/2.svg?style=flat-square)](https://mvnrepository.com/artifact/com.discord4j/Discord4J)  [![JCenter](https://img.shields.io/bintray/v/austinv11/maven/Discord4J.svg?style=flat-square)](https://bintray.com/austinv11/maven/Discord4J/_latestVersion)  [![Support Server Invite](https://img.shields.io/badge/Join-Discord4J-7289DA.svg?style=flat-square&logo=discord)](https://discord.gg/NxGAeCY)
 
-A fast, reactive Java wrapper for the REST and Gateway components of the official [Discord Bot API](https://discordapp.com/developers/docs/intro).
+A fast, reactive Java wrapper for the official [Discord Bot API](https://discordapp.com/developers/docs/intro).
 
-Built with [Reactor](https://projectreactor.io/), [Netty](https://netty.io/), and a focus on flexibility, Discord4J provides an efficient, non-blocking interface for creating Discord bots.
+Built with [Reactor](https://projectreactor.io/), [Netty](https://netty.io/), and a focus on flexibility, Discord4J provides an effective, non-blocking interface for creating Discord bots. The [reactive](https://www.reactivemanifesto.org/) and asynchronous nature of the library allows for scalability through backpressure and  the efficient use of resources. Its [modularized](#modules) structure gives the user the ability to tailor their experience to different levels of abstraction and pick the right tools for the job.
 
 ## Installation
 ### Gradle
@@ -53,7 +53,7 @@ client.login().block();
 ```
 
 ## Modules
-Discord4J is highly oriented towards customizability and fine-grained control. To achieve this, the project is divided into several "modules" which can be used separately depending on your use case.
+Discord4J is highly oriented towards customizability. To achieve this, the project is divided into several "modules" which can be used separately depending on your use case.
 
 ### [Core](./core/README.md)
 The `core` module combines the other modules to form high-level abstractions for the entire Discord Bot API. This is the module most users will want when making bots.
