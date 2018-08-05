@@ -31,8 +31,7 @@ public final class ServiceMediator {
     private final DiscordClient discordClient;
     private final ClientConfig clientConfig;
 
-    public ServiceMediator(final GatewayClient gatewayClient, final RestClient restClient,
-                           final StoreService storeService,
+    public ServiceMediator(final GatewayClient gatewayClient, final RestClient restClient, final StoreService storeService,
                            final StateHolder stateHolder, final EventDispatcher eventDispatcher,
                            final ClientConfig clientConfig) {
         this.gatewayClient = gatewayClient;

@@ -192,8 +192,8 @@ class GuildDispatchHandlers {
 
         Mono<Void> saveEmojis = serviceMediator.getStateHolder().getGuildEmojiStore()
                 .saveWithLong(Flux.fromArray(context.getDispatch().getEmojis())
-                        .map(GuildEmojiBean::new)
-                        .map(bean -> LongObjTuple2.of(bean.getId(), bean)));
+                                      .map(GuildEmojiBean::new)
+                                      .map(bean -> LongObjTuple2.of(bean.getId(), bean)));
 
         DiscordClient client = context.getServiceMediator().getClient();
         long guildId = context.getDispatch().getGuildId();
