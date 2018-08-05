@@ -15,7 +15,7 @@
  * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package discord4j.commands;
+package discord4j.command;
 
 import javax.annotation.Nullable;
 import java.util.Optional;

@@ -1,4 +1,4 @@
-package discord4j.commands;
+package discord4j.command;
 
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import reactor.core.publisher.Mono;
@@ -18,9 +18,9 @@ public interface CommandDispatcher {
      * Called to handle the logic of invoking a command based on event context.
      *
      * @param event The event context.
-     * @param providers The {@link discord4j.commands.CommandProvider}s this dispatcher should consider for dispatching.
-     * @param errorHandler The error handler to pass to commands.
-     * @return A mono which emits executed commands.
+     * @param providers The {@link discord4j.command.CommandProvider}s this dispatcher should consider for dispatching.
+     * @param errorHandler The error handler to pass to command.
+     * @return A mono which emits executed command.
      */
     Mono<? extends Command> dispatch(MessageCreateEvent event, Set<CommandProvider> providers,
                                      CommandErrorHandler errorHandler);
