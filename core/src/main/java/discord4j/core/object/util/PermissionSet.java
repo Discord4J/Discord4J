@@ -101,6 +101,35 @@ public final class PermissionSet extends AbstractSet<Permission> {
     }
 
     /**
+     * Performs a logical NOT of this permission set.
+     *
+     * @return A new permission set representing this set's complement.
+     */
+    public PermissionSet not() {
+        return PermissionSet.of(~this.rawValue);
+    }
+
+    /**
+     * Performs a logical XOR of this permission set with the other permission set.
+     *
+     * @param other The other permission set.
+     * @return A new permission set of this set XOR the other set.
+     */
+    public PermissionSet xor(PermissionSet other) {
+        return PermissionSet.of(this.rawValue ^ other.rawValue);
+    }
+
+    /**
+     * Subtracts the contents of the given permission set from this permission set.
+     *
+     * @param other The other permission set.
+     * @return A new permission set with the contents of the other set removed.
+     */
+    public PermissionSet subtract(PermissionSet other) {
+        return PermissionSet.of(this.rawValue & (~other.rawValue));
+    }
+
+    /**
      * Gets this {@code PermissionSet} as an {@link EnumSet}.
      *
      * @return This {@code PermissionSet} as an {@link EnumSet}.
