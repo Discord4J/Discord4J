@@ -1,5 +1,5 @@
-# Discord4J Commands
-The `commands` module provides a set of low-level abstractions for implementing commands. This module provides a 
+# Discord4J Command
+The `command` module provides a set of low-level abstractions for implementing commands. This module provides a 
 suitable API for both users trying to add commands to their bot and for users trying to create a high-level command
 abstraction.
 
