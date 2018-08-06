@@ -1,3 +1,5 @@
+apply plugin: 'com.gorylenko.gradle-git-properties'
+
 dependencies {
     compile project(':rest')
     compile project(':gateway')
@@ -8,4 +10,11 @@ dependencies {
     testCompile "junit:junit:$junit_version"
     testCompile "ch.qos.logback:logback-classic:$logback_version"
     testCompile "io.projectreactor:reactor-test"
+}
+
+gitProperties {
+    gitPropertiesDir = "$project.buildDir/resources/main/discord4j/core/util"
+    customProperty 'application.name', project_name
+    customProperty 'application.description', project_description
+    customProperty 'application.url', project_url
 }

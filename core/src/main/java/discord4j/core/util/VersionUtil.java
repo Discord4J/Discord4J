@@ -24,7 +24,7 @@ import java.util.Properties;
 public final class VersionUtil {
 
     public static final String APPLICATION_NAME = "application.name";
-    public static final String APPLICATION_VERSION = "application.version";
+    public static final String APPLICATION_VERSION = "git.build.version";
     public static final String APPLICATION_DESCRIPTION = "application.description";
     public static final String APPLICATION_URL = "application.url";
     public static final String GIT_BRANCH = "git.branch";
@@ -34,7 +34,7 @@ public final class VersionUtil {
 
     public static Properties getProperties() {
         Properties properties = new Properties();
-        try (InputStream inputStream = VersionUtil.class.getResourceAsStream("/git.properties")) {
+        try (InputStream inputStream = VersionUtil.class.getResourceAsStream("git.properties")) {
             if (inputStream != null) {
                 properties.load(inputStream);
             }

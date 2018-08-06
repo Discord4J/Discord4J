@@ -2,7 +2,7 @@ plugins {
     id 'java'
     id 'maven-publish'
     id 'com.jfrog.bintray' version '1.8.0'
-    id 'com.palantir.git-version' version '0.11.0'
+    id 'com.gorylenko.gradle-git-properties' version '1.5.1' apply false
     id 'io.spring.dependency-management' version '1.0.4.RELEASE' apply false
 }
 
@@ -13,6 +13,7 @@ ext {
     artifact_group = 'com.discord4j'
     project_version = '3.0.0-SNAPSHOT'
     project_description = 'Java interface for the Discord API'
+    project_url = 'https://discord4j.com'
     project_jdk = '1.8'
 
     // Dependencies
@@ -96,7 +97,7 @@ allprojects {
             userOrg = 'austinv11'
             repo = 'maven'
             name = 'Discord4J'
-            websiteUrl = 'https://discord4j.com'
+            websiteUrl = project_url
             issueTrackerUrl = 'https://github.com/Discord4J/Discord4J/issues'
             vcsUrl = 'https://github.com/Discord4J/Discord4J.git'
             licenses = ['LGPL-3.0']
@@ -123,10 +124,9 @@ allprojects {
 }
 
 subprojects {
-    apply plugin: 'com.palantir.git-version'
     apply plugin: 'io.spring.dependency-management'
 
-    archivesBaseName = 'discord4j-' + project.name
+    archivesBaseName = "discord4j-$project.name"
 
     publishing {
         publications {
@@ -138,27 +138,6 @@ subprojects {
             }
         }
     }
-
-    task writeGitProperties(type: WriteProperties) {
-        def details = versionDetails()
-        File gitPropertiesDir = new File(project.buildDir, 'resources/main')
-        File gitPropertiesFile = new File(gitPropertiesDir, 'git.properties')
-        outputFile gitPropertiesFile
-        inputs.dir project.files(new File(project.rootDir, '.git')).asFileTree
-        def describe = details.lastTag + '-' + details.commitDistance + '-g' + details.gitHash.substring(0, 7)
-        property 'application.name', 'Discord4J'
-        property 'application.version', project.version
-        property 'application.description', project.description
-        property 'application.url', 'https://github.com/Discord4J/Discord4J'
-        property 'git.branch', details.branchName ?: 'none'
-        property 'git.commit.id', details.gitHashFull
-        property 'git.commit.id.abbrev', details.gitHash
-        property 'git.closest.tag.name', details.lastTag ?: 'none'
-        property 'git.closest.tag.commit.count', details.commitDistance
-        property 'git.commit.id.describe', describe
-    }
-
-    project.getTasks().getByName(JavaPlugin.CLASSES_TASK_NAME).dependsOn writeGitProperties
 }
 
 publishing {
