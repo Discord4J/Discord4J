@@ -1,10 +1,12 @@
-![Discord4J Logo](../images/d4j_l.png?raw=true)
+# Discord4J
 
-# Discord4J [![Maven Central](https://img.shields.io/maven-central/v/com.discord4j/Discord4J/2.svg?style=flat-square)](https://mvnrepository.com/artifact/com.discord4j/Discord4J)  [![JCenter](https://img.shields.io/bintray/v/austinv11/maven/Discord4J.svg?style=flat-square)](https://bintray.com/austinv11/maven/Discord4J/_latestVersion)  [![Support Server Invite](https://img.shields.io/badge/Join-Discord4J-7289DA.svg?style=flat-square&logo=discord)](https://discord.gg/NxGAeCY)
+<img align="right" src="http://raw.githubusercontent.com/Discord4J/discord4j-web/master/public/logo.svg" width=40%> 
+
+[![Maven Central](https://img.shields.io/maven-central/v/com.discord4j/Discord4J/2.svg?style=flat-square)](https://mvnrepository.com/artifact/com.discord4j/Discord4J)  [![JCenter](https://img.shields.io/bintray/v/austinv11/maven/Discord4J.svg?style=flat-square)](https://bintray.com/austinv11/maven/Discord4J/_latestVersion)  [![Support Server Invite](https://img.shields.io/badge/Join-Discord4J-7289DA.svg?style=flat-square&logo=discord)](https://discord.gg/NxGAeCY)
 
 A fast, reactive Java wrapper for the official [Discord Bot API](https://discordapp.com/developers/docs/intro).
 
-Built with [Reactor](https://projectreactor.io/), [Netty](https://netty.io/), and a focus on flexibility, Discord4J provides an effective, non-blocking interface for creating Discord bots. The [reactive](https://www.reactivemanifesto.org/) and asynchronous nature of the library allows for scalability through backpressure and  the efficient use of resources. Its [modularized](#modules) structure gives the user the ability to tailor their experience to different levels of abstraction and pick the right tools for the job.
+Built with [Reactor](https://projectreactor.io/), [Netty](https://netty.io/), and a focus on flexibility, Discord4J provides an effective, non-blocking interface for creating Discord bots. The [reactive](https://www.reactivemanifesto.org/) and asynchronous nature of the library allows for scalability through backpressure handling and the efficient use of resources. Its [modularized](#modules) structure gives the user the ability to tailor their experience to different levels of abstraction and pick the right tools for the job.
 
 ## Installation
 ### Gradle
@@ -67,11 +69,14 @@ The `gateway` module provides a low-level WebSocket client for interacting with 
 ### [Store](./store/README.md)
 The `store` module provides a platform for the efficient caching of Discord gateway data.
 
+### [Commands](./command/README.md)
+The `command` module provides a set of low-level tools for dealing with bot commands. It can be used on its own or easily serve as a basis of interoperability for higher-level command libraries. 
+
 ### [Common](./common/README.md)
 The `common` module contains base utilities and models useful for other modules.
 
 ## Useful Links
-* [Discord4J Site](https://discord4j.com)
+* [Discord4J Site](https://new.discord4j.com)
 * [Discord4J Wiki](https://github.com/Discord4J/Discord4J/wiki)
 * [Javadoc](https://jitpack.io/com/discord4j/discord4j/discord4j-core/v3-SNAPSHOT/javadoc/index.html)
 * [Reactor 3 Reference Guide](http://projectreactor.io/docs/core/release/reference/)
