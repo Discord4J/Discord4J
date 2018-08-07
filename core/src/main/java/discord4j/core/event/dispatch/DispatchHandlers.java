@@ -28,7 +28,7 @@ import discord4j.core.object.entity.User;
 import discord4j.core.object.presence.Presence;
 import discord4j.gateway.json.dispatch.*;
 import discord4j.gateway.retry.GatewayStateChange;
-import discord4j.store.util.LongLongTuple2;
+import discord4j.store.api.util.LongLongTuple2;
 import reactor.core.publisher.Mono;
 
 import java.time.Instant;

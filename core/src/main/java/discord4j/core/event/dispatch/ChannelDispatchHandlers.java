@@ -33,7 +33,7 @@ import discord4j.gateway.json.dispatch.ChannelDelete;
 import discord4j.gateway.json.dispatch.ChannelPinsUpdate;
 import discord4j.gateway.json.dispatch.ChannelUpdate;
 import discord4j.gateway.json.response.GatewayChannelResponse;
-import discord4j.store.primitive.LongObjStore;
+import discord4j.store.api.primitive.LongObjStore;
 import reactor.core.publisher.Mono;
 
 import java.time.Instant;

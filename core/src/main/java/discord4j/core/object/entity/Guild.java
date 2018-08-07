@@ -34,7 +34,7 @@ import discord4j.rest.json.request.NicknameModifyRequest;
 import discord4j.rest.json.response.AuditLogResponse;
 import discord4j.rest.json.response.NicknameModifyResponse;
 import discord4j.rest.json.response.PruneResponse;
-import discord4j.store.util.LongLongTuple2;
+import discord4j.store.api.util.LongLongTuple2;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.function.Tuples;

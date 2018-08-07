@@ -33,8 +33,8 @@ import discord4j.core.util.PaginationUtil;
 import discord4j.gateway.json.GatewayPayload;
 import discord4j.rest.json.response.UserGuildResponse;
 import discord4j.rest.util.RouteUtils;
-import discord4j.store.util.LongLongTuple2;
-import discord4j.store.util.StoreContext;
+import discord4j.store.api.util.LongLongTuple2;
+import discord4j.store.api.util.StoreContext;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 

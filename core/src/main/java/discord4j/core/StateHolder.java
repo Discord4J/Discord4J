@@ -17,10 +17,10 @@
 package discord4j.core;
 
 import discord4j.core.object.data.stored.*;
-import discord4j.store.Store;
-import discord4j.store.primitive.LongObjStore;
-import discord4j.store.service.StoreService;
-import discord4j.store.util.LongLongTuple2;
+import discord4j.store.api.Store;
+import discord4j.store.api.primitive.LongObjStore;
+import discord4j.store.api.service.StoreService;
+import discord4j.store.api.util.LongLongTuple2;
 import reactor.core.publisher.Mono;
 import reactor.util.Logger;
 import reactor.util.Loggers;

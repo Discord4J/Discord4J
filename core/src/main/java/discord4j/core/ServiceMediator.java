@@ -19,7 +19,7 @@ package discord4j.core;
 import discord4j.core.event.EventDispatcher;
 import discord4j.gateway.GatewayClient;
 import discord4j.rest.RestClient;
-import discord4j.store.service.StoreService;
+import discord4j.store.api.service.StoreService;
 
 public final class ServiceMediator {
 

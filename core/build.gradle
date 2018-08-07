@@ -3,7 +3,6 @@ apply plugin: 'com.gorylenko.gradle-git-properties'
 dependencies {
     compile project(':rest')
     compile project(':gateway')
-    compile project(':store')
 
     compile "com.discord4j.stores:stores-jdk:$jdkstores_version"
 
