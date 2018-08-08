@@ -146,7 +146,7 @@ In such an event, please contact me or submit a pull request.
 No one is perfect at programming and I am no exception. If you see something that can be improved, please read the [contributing guildelines](https://github.com/austinv11/Discord4J/blob/master/.github/CONTRIBUTING.md) and feel free to submit a pull request! 
 
 ## Other info
-More information can be found in the official [javadocs](http://austinv11.github.io/Discord4J/docs.html). 
+More information can be found in the official [javadocs](https://discord4j.com/docs.html).
 Alternatively you can view the docs through [Dash](https://kapeli.com/dash), [Velocity](https://velocity.silverlakesoftware.com/), or [Zeal](https://zealdocs.org/) (maintained by [@jammehcow](https://github.com/jammehcow)) under the *User Contributed* tab.
 
 You can contact me on the [Official Discord4J Server (recommended)](https://discord.gg/NxGAeCY) or the [Discord API server](https://discord.gg/discord-api) in the #java_discord4j channel.
