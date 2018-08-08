@@ -29,7 +29,6 @@ import discord4j.rest.json.request.UserModifyRequest;
 import discord4j.rest.json.response.ErrorResponse;
 import discord4j.rest.request.Router;
 import org.junit.Test;
-import reactor.core.scheduler.Schedulers;
 
 import java.util.Collections;
 

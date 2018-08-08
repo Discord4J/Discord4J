@@ -24,7 +24,6 @@ import discord4j.common.jackson.PossibleModule;
 import discord4j.rest.RestTests;
 import discord4j.rest.request.Router;
 import org.junit.Test;
-import reactor.core.scheduler.Schedulers;
 
 public class InviteServiceTest {
 
