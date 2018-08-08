@@ -16,6 +16,7 @@
  */
 package discord4j.gateway.json.dispatch;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import discord4j.common.jackson.UnsignedJson;
 import discord4j.common.json.GuildEmojiResponse;
@@ -307,6 +308,7 @@ public class GuildCreate implements Dispatch {
         }
     }
 
+    @JsonIgnoreProperties("activities") // FIXME
     public static class Presence {
 
         private User user;
