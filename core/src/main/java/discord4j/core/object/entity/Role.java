@@ -22,6 +22,8 @@ import discord4j.core.object.data.stored.RoleBean;
 import discord4j.core.object.util.PermissionSet;
 import discord4j.core.object.util.Snowflake;
 import discord4j.core.spec.RoleEditSpec;
+import discord4j.rest.json.request.PositionModifyRequest;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.awt.*;
@@ -197,5 +199,21 @@ public final class Role implements Entity {
     public Mono<Void> delete() {
         return serviceMediator.getRestClient().getGuildService()
                 .deleteGuildRole(getGuildId().asLong(), getId().asLong());
+    }
+
+    /**
+     * Requests to change this role's position.
+     *
+     * @param position The position to change for this role.
+     * @return A {@link Flux} that continually emits all the {@link Role roles} associated to this role's
+     * {@link #getGuild() guild}. If an error is received, it is emitted through the {@code Flux}.
+     */
+    public Flux<Role> changePosition(final int position) {
+        final PositionModifyRequest[] requests = { new PositionModifyRequest(getId().asLong(), position) };
+
+        return serviceMediator.getRestClient().getGuildService()
+                .modifyGuildChannelPositions(getGuildId().asLong(), requests)
+                .map(RoleBean::new)
+                .map(bean -> new Role(serviceMediator, bean, getGuildId().asLong()));
     }
 }

@@ -67,10 +67,11 @@ public class GuildService extends RestService {
                 .exchange(getRouter());
     }
 
-    public Mono<Void> modifyGuildChannelPositions(long guildId, PositionModifyRequest[] request) {
+    public Flux<RoleResponse> modifyGuildChannelPositions(long guildId, PositionModifyRequest[] request) {
         return Routes.GUILD_CHANNEL_POSITIONS_MODIFY.newRequest(guildId)
                 .body(request)
-                .exchange(getRouter());
+                .exchange(getRouter())
+                .flatMapMany(Flux::fromArray);
     }
 
     public Mono<GuildMemberResponse> getGuildMember(long guildId, long userId) {

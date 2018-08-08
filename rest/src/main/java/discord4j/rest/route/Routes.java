@@ -452,14 +452,14 @@ public abstract class Routes {
             ChannelResponse.class);
 
     /**
-     * Modify the positions of a set of channel objects for the guild. Requires 'MANAGE_CHANNELS' permission. Returns a
-     * 204 empty response on success. Fires multiple Channel Update Gateway events.
+     * Modify the positions of a set of role objects for the guild. Requires the 'MANAGE_ROLES' permission. Returns a
+     * list of all of the guild's role objects on success. Fires multiple Guild Role Update Gateway events.
      *
      * @see <a href="https://discordapp.com/developers/docs/resources/guild#modify-guild-channel-positions">
      *         https://discordapp.com/developers/docs/resources/guild#modify-guild-channel-positions</a>
      */
-    public static final Route<Void> GUILD_CHANNEL_POSITIONS_MODIFY = Route.patch("/guilds/{guild.id}/channels",
-            Void.class);
+    public static final Route<RoleResponse[]> GUILD_CHANNEL_POSITIONS_MODIFY = Route.patch(
+            "/guilds/{guild.id}/channels", RoleResponse[].class);
 
     /**
      * Returns a guild member object for the specified user.

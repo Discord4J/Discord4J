@@ -402,7 +402,7 @@ public final class DiscordClient {
      * @return A {@link Mono} where, upon successful completion, emits the {@link Invite} as represented by the
      * supplied invite code. If an error is received, it is emitted through the {@code Mono}.
      */
-    public Mono<Invite> getInvite(String inviteCode) {
+    public Mono<Invite> getInvite(final String inviteCode) {
         return serviceMediator.getRestClient().getInviteService()
                 .getInvite(inviteCode)
                 .map(InviteBean::new)

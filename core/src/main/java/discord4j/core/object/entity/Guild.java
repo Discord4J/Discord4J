@@ -873,15 +873,15 @@ public final class Guild implements Entity {
     }
 
     /**
-     * Requests to change the bot user's nickname in the guild.
+     * Requests to change the bot user's nickname in this guild.
      *
-     * @param newNickname The new nickname.
+     * @param nickname The new nickname for the bot user in this guild, or {@code null} to remove it.
      * @return A {@link Mono} where, upon successful completion, emits the bot user's new nickname in this guild. If an
      * error is received, it is emitted through the {@code Mono}.
      */
-    public Mono<String> changeSelfNickname(@Nullable String newNickname) {
+    public Mono<String> changeSelfNickname(@Nullable final String nickname) {
         return serviceMediator.getRestClient().getGuildService()
-                .modifyOwnNickname(getId().asLong(), new NicknameModifyRequest(newNickname))
+                .modifyOwnNickname(getId().asLong(), new NicknameModifyRequest(nickname))
                 .map(NicknameModifyResponse::getNick);
     }
 
