@@ -18,9 +18,11 @@ package discord4j.gateway.json;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import discord4j.common.jackson.PossibleModule;
+import discord4j.common.jackson.UnknownPropertyHandler;
+import discord4j.gateway.json.dispatch.PresenceUpdate;
 import discord4j.gateway.json.dispatch.Ready;
 import org.junit.Before;
 import org.junit.Test;
@@ -37,9 +39,74 @@ public class PayloadDeserializationTest {
     public void init() {
         mapper = new ObjectMapper()
                 .setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
-                .configure(DeserializationFeature.FAIL_ON_MISSING_EXTERNAL_TYPE_ID_PROPERTY, false) // required
-                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true)
-                .registerModule(new PossibleModule());
+                .addHandler(new UnknownPropertyHandler(true))
+                .registerModules(new PossibleModule(), new Jdk8Module());
+    }
+
+    @Test
+    public void testIgnoringUnknownProperty() throws IOException {
+        String input = "{\n" +
+                "  \"t\": \"PRESENCE_UPDATE\",\n" +
+                "  \"s\": 116597,\n" +
+                "  \"op\": 0,\n" +
+                "  \"d\": {\n" +
+                "    \"user\": {\n" +
+                "      \"id\": \"000000000000000000\"\n" +
+                "    },\n" +
+                "    \"status\": \"online\",\n" +
+                "    \"roles\": [],\n" +
+                "    \"nick\": null,\n" +
+                "    \"guild_id\": \"000000000000000000\",\n" +
+                "    \"game\": {\n" +
+                "      \"type\": 2,\n" +
+                "      \"timestamps\": {\n" +
+                "        \"start\": 1533777632902,\n" +
+                "        \"end\": 1533777837675\n" +
+                "      },\n" +
+                "      \"sync_id\": \"0000000000000000000000\",\n" +
+                "      \"state\": \"0000000000000000\",\n" +
+                "      \"session_id\": \"00000000000000000000000000000000\",\n" +
+                "      \"party\": {\n" +
+                "        \"id\": \"spotify:000000000000000000\"\n" +
+                "      },\n" +
+                "      \"name\": \"Spotify\",\n" +
+                "      \"id\": \"0000000000000000\",\n" +
+                "      \"flags\": 48,\n" +
+                "      \"details\": \"00000000000000000\",\n" +
+                "      \"created_at\": 1533777810345,\n" +
+                "      \"assets\": {\n" +
+                "        \"large_text\": \"00000000000000000\",\n" +
+                "        \"large_image\": \"spotify:0000000000000000000000000000000000000000\"\n" +
+                "      }\n" +
+                "    },\n" +
+                "    \"activities\": [\n" +
+                "      {\n" +
+                "        \"type\": 2,\n" +
+                "        \"timestamps\": {\n" +
+                "          \"start\": 1533777632902,\n" +
+                "          \"end\": 1533777837675\n" +
+                "        },\n" +
+                "        \"sync_id\": \"0000000000000000000000\",\n" +
+                "        \"state\": \"0000000000000000\",\n" +
+                "        \"session_id\": \"00000000000000000000000000000000\",\n" +
+                "        \"party\": {\n" +
+                "          \"id\": \"spotify:000000000000000000\"\n" +
+                "        },\n" +
+                "        \"name\": \"Spotify\",\n" +
+                "        \"id\": \"0000000000000000\",\n" +
+                "        \"flags\": 48,\n" +
+                "        \"details\": \"00000000000000000\",\n" +
+                "        \"created_at\": 1533777810345,\n" +
+                "        \"assets\": {\n" +
+                "          \"large_text\": \"00000000000000000\",\n" +
+                "          \"large_image\": \"spotify:0000000000000000000000000000000000000000\"\n" +
+                "        }\n" +
+                "      }\n" +
+                "    ]\n" +
+                "  }\n" +
+                "}";
+        GatewayPayload<PresenceUpdate> payload = mapper.readValue(input, GatewayPayload.class);
+        assertNotNull(payload.getData());
     }
 
     @Test
