@@ -30,6 +30,7 @@ public class ClientException extends RuntimeException {
     private final ErrorResponse errorResponse;
 
     public ClientException(HttpResponseStatus status, HttpHeaders headers, @Nullable ErrorResponse errorResponse) {
+        super(status.toString() + (errorResponse != null ? " " + errorResponse.toString() : ""));
         this.status = status;
         this.headers = headers;
         this.errorResponse = errorResponse;
