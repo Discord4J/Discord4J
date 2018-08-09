@@ -7,11 +7,12 @@ This module is extremely extensible while still being relatively lightweight. Th
 ### Gradle
 ```groovy
 repositories {
-  maven { url  "https://jitpack.io" }
+  maven { url 'https://jitpack.io' }
+  maven { url 'https://repo.spring.io/milestone' }
 }
 
 dependencies {
-  implementation "com.discord4j.discord4j:discord4j-command:@VERSION@"
+  implementation 'com.discord4j.discord4j:discord4j-command:@VERSION@'
 }
 ```
 ### Maven
@@ -20,6 +21,10 @@ dependencies {
   <repository>
     <id>jitpack.io</id>
     <url>https://jitpack.io</url>
+  </repository>
+  <repository> 
+    <id>repository.spring.milestone</id> 
+    <url>http://repo.spring.io/milestone</url> 
   </repository>
 </repositories>
 

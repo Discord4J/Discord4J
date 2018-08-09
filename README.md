@@ -12,11 +12,12 @@ Built with [Reactor](https://projectreactor.io/), [Netty](https://netty.io/), an
 ### Gradle
 ```groovy
 repositories {
-  maven { url  "https://jitpack.io" }
+  maven { url 'https://jitpack.io' }
+  maven { url 'https://repo.spring.io/milestone' }
 }
 
 dependencies {
-  implementation "com.discord4j.discord4j:discord4j-core:@VERSION@"
+  implementation 'com.discord4j.discord4j:discord4j-core:@VERSION@'
 }
 ```
 ### Maven
@@ -25,6 +26,10 @@ dependencies {
   <repository>
     <id>jitpack.io</id>
     <url>https://jitpack.io</url>
+  </repository>
+  <repository> 
+    <id>repository.spring.milestone</id> 
+    <url>http://repo.spring.io/milestone</url> 
   </repository>
 </repositories>
 
@@ -66,14 +71,14 @@ The `rest` module provides a low-level HTTP client specifically for Discord whic
 ### [Gateway](./gateway/README.md)
 The `gateway` module provides a low-level WebSocket client for interacting with the [Discord Gateway](https://discordapp.com/developers/docs/topics/gateway).
 
-### [Store](./store/README.md)
-The `store` module provides a platform for the efficient caching of Discord gateway data.
-
 ### [Command](./command/README.md)
 The `command` module provides a set of low-level tools for dealing with bot commands. It can be used on its own or easily serve as a basis of interoperability for higher-level command libraries. 
 
 ### [Common](./common/README.md)
 The `common` module contains base utilities and models useful for other modules.
+
+## Stores
+Discord4J's mechanism for storing information received on the gateway is completely pluggable. This allows both the ability to customize what is stored and how. The Stores repository contains some pre-made implementations as well as the API for making your own.
 
 ## Useful Links
 * [Discord4J Site](https://new.discord4j.com)
