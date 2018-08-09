@@ -5,11 +5,12 @@ The `gateway` module provides a low-level WebSocket client for interacting with 
 ### Gradle
 ```groovy
 repositories {
-  maven { url  "https://jitpack.io" }
+  maven { url 'https://jitpack.io' }
+  maven { url 'https://repo.spring.io/milestone' }
 }
 
 dependencies {
-  implementation "com.discord4j.discord4j:discord4j-gateway:@VERSION@"
+  implementation 'com.discord4j.discord4j:discord4j-gateway:@VERSION@'
 }
 ```
 ### Maven
@@ -18,6 +19,10 @@ dependencies {
   <repository>
     <id>jitpack.io</id>
     <url>https://jitpack.io</url>
+  </repository>
+  <repository> 
+    <id>repository.spring.milestone</id> 
+    <url>http://repo.spring.io/milestone</url> 
   </repository>
 </repositories>
 

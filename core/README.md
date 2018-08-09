@@ -7,11 +7,12 @@ The main features of this module include the high-level `DiscordClient` and repr
 ### Gradle
 ```groovy
 repositories {
-  maven { url  "https://jitpack.io" }
+  maven { url 'https://jitpack.io' }
+  maven { url 'https://repo.spring.io/milestone' }
 }
 
 dependencies {
-  implementation "com.discord4j.discord4j:discord4j-core:@VERSION@"
+  implementation 'com.discord4j.discord4j:discord4j-core:@VERSION@'
 }
 ```
 ### Maven
@@ -20,6 +21,10 @@ dependencies {
   <repository>
     <id>jitpack.io</id>
     <url>https://jitpack.io</url>
+  </repository>
+  <repository> 
+    <id>repository.spring.milestone</id> 
+    <url>http://repo.spring.io/milestone</url> 
   </repository>
 </repositories>
 

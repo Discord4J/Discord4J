@@ -5,11 +5,12 @@ The `rest` module provides a low-level HTTP client specifically for Discord whic
 ### Gradle
 ```groovy
 repositories {
-  maven { url  "https://jitpack.io" }
+  maven { url 'https://jitpack.io' }
+  maven { url 'https://repo.spring.io/milestone' }
 }
 
 dependencies {
-  implementation "com.discord4j.discord4j:discord4j-rest:@VERSION@"
+  implementation 'com.discord4j.discord4j:discord4j-rest:@VERSION@'
 }
 ```
 ### Maven
@@ -18,6 +19,10 @@ dependencies {
   <repository>
     <id>jitpack.io</id>
     <url>https://jitpack.io</url>
+  </repository>
+  <repository> 
+    <id>repository.spring.milestone</id> 
+    <url>http://repo.spring.io/milestone</url> 
   </repository>
 </repositories>
 
