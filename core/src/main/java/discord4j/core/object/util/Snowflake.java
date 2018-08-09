@@ -18,6 +18,7 @@ package discord4j.core.object.util;
 
 import discord4j.core.util.EntityUtil;
 
+import javax.annotation.Nullable;
 import java.math.BigInteger;
 import java.time.Instant;
 
@@ -144,7 +145,7 @@ public final class Snowflake implements Comparable<Snowflake> {
      * @return {@code true} if the other object is "equal to" this one, false otherwise.
      */
     @Override
-    public boolean equals(final Object obj) {
+    public boolean equals(@Nullable final Object obj) {
         return (obj instanceof Snowflake) && (((Snowflake) obj).id == id);
     }
 

@@ -20,6 +20,7 @@ import discord4j.rest.request.DiscordRequest;
 import discord4j.rest.util.RouteUtils;
 import io.netty.handler.codec.http.HttpMethod;
 
+import javax.annotation.Nullable;
 import java.util.Objects;
 
 /**
@@ -89,7 +90,7 @@ public class Route<T> {
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(@Nullable Object obj) {
         if (obj == null) {
             return false;
         }

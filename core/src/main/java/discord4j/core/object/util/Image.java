@@ -16,6 +16,7 @@
  */
 package discord4j.core.object.util;
 
+import javax.annotation.Nullable;
 import java.util.Base64;
 import java.util.Objects;
 
@@ -87,7 +88,7 @@ public final class Image {
      * @return {@code true} if the other object is "equal to" this one, false otherwise.
      */
     @Override
-    public boolean equals(final Object obj) {
+    public boolean equals(@Nullable final Object obj) {
         return (obj instanceof Image) && ((Image) obj).getData().equals(getData());
     }
 

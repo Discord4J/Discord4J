@@ -16,10 +16,12 @@
  */
 package discord4j.common.jackson;
 
+import javax.annotation.Nullable;
+
 public class PossibleFilter {
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(@Nullable Object obj) {
         // Nulls should be included. Only exclude values which are Possible.absent
         if (obj == null) {
             return false;

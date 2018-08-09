@@ -99,7 +99,7 @@ public class GatewayPayload<T extends PayloadData> {
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(@Nullable Object obj) {
         if (obj == null || obj.getClass() != GatewayPayload.class) {
             return false;
         }

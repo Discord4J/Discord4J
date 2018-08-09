@@ -20,6 +20,7 @@ import discord4j.core.DiscordClient;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.util.Snowflake;
 
+import javax.annotation.Nullable;
 import java.util.Objects;
 import java.util.Set;
 
@@ -85,7 +86,7 @@ public class ReadyEvent extends GatewayLifecycleEvent {
         }
 
         @Override
-        public boolean equals(Object o) {
+        public boolean equals(@Nullable Object o) {
             if (this == o) {
                 return true;
             }

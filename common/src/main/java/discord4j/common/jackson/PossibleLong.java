@@ -16,6 +16,7 @@
  */
 package discord4j.common.jackson;
 
+import javax.annotation.Nullable;
 import java.util.NoSuchElementException;
 
 public class PossibleLong {
@@ -60,7 +61,7 @@ public class PossibleLong {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         if (this == o) {
             return true;
         }
