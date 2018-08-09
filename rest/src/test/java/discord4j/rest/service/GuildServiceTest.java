@@ -16,12 +16,7 @@
  */
 package discord4j.rest.service;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.PropertyAccessor;
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
-import discord4j.common.jackson.PossibleModule;
 import discord4j.rest.RestTests;
 import discord4j.rest.json.request.*;
 import discord4j.rest.json.response.ChannelResponse;
@@ -50,17 +45,11 @@ public class GuildServiceTest {
     @Before
     public void setup() {
         String token = System.getenv("token");
-        ObjectMapper mapper = getMapper();
+        boolean ignoreUnknown = !Boolean.parseBoolean(System.getenv("failUnknown"));
+        ObjectMapper mapper = RestTests.getMapper(ignoreUnknown);
         Router router = RestTests.getRouter(token, mapper);
         guildService = new GuildService(router);
         channelService = new ChannelService(router);
-    }
-
-    private ObjectMapper getMapper() {
-        return new ObjectMapper()
-                .setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
-                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true)
-                .registerModules(new PossibleModule(), new Jdk8Module());
     }
 
     private GuildService getGuildService() {

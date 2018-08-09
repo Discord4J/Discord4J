@@ -16,12 +16,8 @@
  */
 package discord4j.rest.service;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.PropertyAccessor;
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import discord4j.common.jackson.Possible;
-import discord4j.common.jackson.PossibleModule;
 import discord4j.rest.RestTests;
 import discord4j.rest.http.client.ClientException;
 import discord4j.rest.json.request.DMCreateRequest;
@@ -45,17 +41,11 @@ public class UserServiceTest {
         }
 
         String token = System.getenv("token");
-        ObjectMapper mapper = getMapper();
+        boolean ignoreUnknown = !Boolean.parseBoolean(System.getenv("failUnknown"));
+        ObjectMapper mapper = RestTests.getMapper(ignoreUnknown);
         Router router = RestTests.getRouter(token, mapper);
 
         return userService = new UserService(router);
-    }
-
-    private ObjectMapper getMapper() {
-        return new ObjectMapper()
-                .setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
-                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true)
-                .registerModule(new PossibleModule());
     }
 
     @Test

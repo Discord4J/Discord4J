@@ -17,7 +17,12 @@
 
 package discord4j.rest;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
+import discord4j.common.jackson.PossibleModule;
+import discord4j.common.jackson.UnknownPropertyHandler;
 import discord4j.rest.http.ExchangeStrategies;
 import discord4j.rest.http.client.DiscordWebClient;
 import discord4j.rest.request.Router;
@@ -38,5 +43,12 @@ public abstract class RestTests {
         DiscordWebClient webClient = new DiscordWebClient(httpClient, defaultHeaders,
                 ExchangeStrategies.withJacksonDefaults(mapper));
         return new Router(webClient, Schedulers.elastic());
+    }
+
+    public static ObjectMapper getMapper(boolean ignoreUnknown) {
+        return new ObjectMapper()
+                .setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
+                .addHandler(new UnknownPropertyHandler(ignoreUnknown))
+                .registerModules(new PossibleModule(), new Jdk8Module());
     }
 }

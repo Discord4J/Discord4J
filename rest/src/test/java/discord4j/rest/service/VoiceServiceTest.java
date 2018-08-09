@@ -36,7 +36,8 @@ public class VoiceServiceTest {
         }
 
         String token = System.getenv("token");
-        ObjectMapper mapper = getMapper();
+        boolean ignoreUnknown = !Boolean.parseBoolean(System.getenv("failUnknown"));
+        ObjectMapper mapper = RestTests.getMapper(ignoreUnknown);
         Router router = RestTests.getRouter(token, mapper);
 
         return voiceService = new VoiceService(router);
