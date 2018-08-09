@@ -27,6 +27,7 @@ import discord4j.core.event.dispatch.DispatchContext;
 import discord4j.core.event.dispatch.DispatchHandlers;
 import discord4j.core.event.domain.Event;
 import discord4j.core.object.presence.Presence;
+import discord4j.core.util.UnknownPropertyHandler;
 import discord4j.core.util.VersionUtil;
 import discord4j.gateway.GatewayClient;
 import discord4j.gateway.IdentifyOptions;
@@ -76,6 +77,7 @@ public final class DiscordClientBuilder {
     @Nullable
     private IdentifyOptions identifyOptions;
     private RetryOptions retryOptions;
+    private boolean ignoreUnknownJsonKeys;
 
     public DiscordClientBuilder(final String token) {
         this.token = Objects.requireNonNull(token);
@@ -87,6 +89,7 @@ public final class DiscordClientBuilder {
         eventProcessor = EmitterProcessor.create(false);
         eventScheduler = Schedulers.elastic();
         retryOptions = new RetryOptions(Duration.ofSeconds(2), Duration.ofSeconds(120), Integer.MAX_VALUE);
+        ignoreUnknownJsonKeys = true;
     }
 
     public String getToken() {
@@ -171,10 +174,19 @@ public final class DiscordClientBuilder {
         this.retryOptions = retryOptions;
     }
 
+    public boolean getIgnoreUnknownJsonKeys() {
+        return ignoreUnknownJsonKeys;
+    }
+
+    public DiscordClientBuilder setIgnoreUnknownJsonKeys(boolean ignoreUnknownJsonKeys) {
+        this.ignoreUnknownJsonKeys = ignoreUnknownJsonKeys;
+        return this;
+    }
+
     public DiscordClient build() {
         final ObjectMapper mapper = new ObjectMapper()
                 .setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
-                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true)
+                .addHandler(new UnknownPropertyHandler(ignoreUnknownJsonKeys))
                 .registerModules(new PossibleModule(), new Jdk8Module());
 
         final Properties properties = VersionUtil.getProperties();

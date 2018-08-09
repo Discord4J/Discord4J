@@ -16,11 +16,9 @@
  */
 package discord4j.gateway.json.dispatch;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import discord4j.common.jackson.UnsignedJson;
 
-@JsonIgnoreProperties({"member"}) // TODO will be useful when chunking is optional
 public class TypingStart implements Dispatch {
 
     @JsonProperty("channel_id")

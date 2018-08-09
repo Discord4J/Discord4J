@@ -16,7 +16,6 @@
  */
 package discord4j.gateway.json.dispatch;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import discord4j.common.jackson.PossibleJson;
 import discord4j.common.jackson.UnsignedJson;
@@ -26,7 +25,6 @@ import discord4j.gateway.json.response.GameResponse;
 import javax.annotation.Nullable;
 import java.util.Arrays;
 
-@JsonIgnoreProperties // ignore all unknown, discord doesn't validate anything
 @PossibleJson
 public class PresenceUpdate implements Dispatch {
 

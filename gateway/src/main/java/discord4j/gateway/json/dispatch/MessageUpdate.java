@@ -16,7 +16,6 @@
  */
 package discord4j.gateway.json.dispatch;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import discord4j.common.jackson.Possible;
 import discord4j.common.jackson.UnsignedJson;
@@ -24,7 +23,6 @@ import discord4j.common.json.EmbedResponse;
 
 import javax.annotation.Nullable;
 
-@JsonIgnoreProperties(ignoreUnknown = true)
 public class MessageUpdate implements Dispatch {
 
     @UnsignedJson

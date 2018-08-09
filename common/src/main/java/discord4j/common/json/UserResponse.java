@@ -16,13 +16,10 @@
  */
 package discord4j.common.json;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import discord4j.common.jackson.UnsignedJson;
 
 import javax.annotation.Nullable;
 
-// FIXME: temporary solution to these many optional fields
-@JsonIgnoreProperties(value = {"verified", "mfa_enabled", "flags", "email", "token", "locale"})
 public class UserResponse {
 
     @UnsignedJson
