@@ -3,6 +3,7 @@ package discord4j.command;
 import discord4j.core.DiscordClient;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import reactor.util.Logger;
 import reactor.util.Loggers;
 
@@ -29,9 +30,10 @@ public final class CommandBootstrapper {
 
     private final static Logger log = Loggers.getLogger(CommandBootstrapper.class);
     private final static CommandDispatcher DEFAULT_DISPATCHER = new DefaultCommandDispatcher();
-    private final static CommandErrorHandler DEFAULT_ERROR_HANDLER = (context, error) -> {
+    private final static CommandErrorHandler DEFAULT_ERROR_HANDLER = (context, error) -> Mono.defer(() -> {
         log.warn("Command excecution failed! Reason: {}", error.response().orElse("None"));
-    };
+        return Mono.empty();
+    });
 
     private volatile CommandDispatcher dispatcher = DEFAULT_DISPATCHER;
     private volatile CommandErrorHandler errorHandler = DEFAULT_ERROR_HANDLER;
@@ -62,7 +64,7 @@ public final class CommandBootstrapper {
      * Attaches this {@link CommandBootstrapper} instance to the
      * {@link discord4j.core.event.domain.message.MessageCreateEvent} of the passed in client.
      *
-     * @return A flux (that need not be subscribed to), which signals the completion of command executions.
+     * @return A flux which signals the completion of command executions.
      */
     public Flux<? extends Command> attach(DiscordClient client) {
         return client.getEventDispatcher()

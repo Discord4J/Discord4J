@@ -20,7 +20,8 @@ public final class DefaultCommandDispatcher implements CommandDispatcher {
         return Flux.fromIterable(providers)
                 .concatMap(provider -> provider.provide(event))
                 .next()
-                .flatMap(cmd -> cmd.execute(event).thenReturn(cmd))
-                .doOnError(CommandException.class, throwable -> errorHandler.handle(event, throwable));
+                .flatMap(cmd -> cmd.execute(event)
+                        .onErrorResume(CommandException.class, t -> errorHandler.handle(event, t))
+                        .thenReturn(cmd));
     }
 }
