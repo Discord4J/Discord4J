@@ -17,11 +17,11 @@
 package discord4j.command;
 
 import discord4j.core.event.domain.message.MessageCreateEvent;
-import reactor.core.publisher.Flux;
+import org.reactivestreams.Publisher;
 
 /** This represents a generic command provider. */
 @FunctionalInterface
-public interface CommandProvider {
+public interface CommandProvider<T> {
 
     /**
      * This is called to provide a matching command based on the event context. This context is composed of the raw
@@ -39,8 +39,8 @@ public interface CommandProvider {
      *
      * @see discord4j.command.CommandDispatcher#dispatch(discord4j.core.event.domain.message.MessageCreateEvent, java.util.Set, CommandErrorHandler)
      */
-    Flux<ProviderContext> provide(MessageCreateEvent context,
-                                  String commandName,
-                                  int commandStartIndex,
-                                  int commandEndIndex);
+    Publisher<ProviderContext<T>> provide(MessageCreateEvent context,
+                                          String commandName,
+                                          int commandStartIndex,
+                                          int commandEndIndex);
 }

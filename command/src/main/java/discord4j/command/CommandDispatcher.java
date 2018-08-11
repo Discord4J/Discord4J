@@ -17,7 +17,7 @@
 package discord4j.command;
 
 import discord4j.core.event.domain.message.MessageCreateEvent;
-import reactor.core.publisher.Flux;
+import org.reactivestreams.Publisher;
 
 import java.util.Set;
 
@@ -48,6 +48,6 @@ public interface CommandDispatcher {
      *
      * @see discord4j.command.CommandProvider#provide(discord4j.core.event.domain.message.MessageCreateEvent, String, int, int)
      */
-    Flux<? extends Command> dispatch(MessageCreateEvent event, Set<CommandProvider> providers,
-                                     CommandErrorHandler errorHandler);
+    Publisher<? extends Command<?>> dispatch(MessageCreateEvent event, Set<CommandProvider<?>> providers,
+                                             CommandErrorHandler errorHandler);
 }

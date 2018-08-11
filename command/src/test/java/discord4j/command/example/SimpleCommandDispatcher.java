@@ -14,23 +14,23 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
-package discord4j.command;
+package discord4j.command.example;
 
+import discord4j.command.AbstractCommandDispatcher;
 import discord4j.core.event.domain.message.MessageCreateEvent;
+import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
 
-import javax.annotation.Nullable;
+public class SimpleCommandDispatcher extends AbstractCommandDispatcher {
 
-/** Very simple command abstraction. */
-@FunctionalInterface
-public interface Command<T> {
+    private final String prefix;
 
-    /**
-     * Called to execute this command.
-     *
-     * @param event The event that triggered this command's execution.
-     * @param context Additional context by this command's {@link CommandProvider}.
-     * @return A mono, whose completion signals that this command has been executed.
-     */
-    Mono<Void> execute(MessageCreateEvent event, @Nullable T context);
+    public SimpleCommandDispatcher(String prefix) {
+        this.prefix = prefix;
+    }
+
+    @Override
+    protected Publisher<String> getPrefixes(MessageCreateEvent event) {
+        return Mono.just(prefix);
+    }
 }

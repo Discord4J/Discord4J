@@ -9,7 +9,7 @@ import reactor.core.publisher.Mono;
 import javax.annotation.Nullable;
 import java.util.Optional;
 
-public class LogoutCommand implements Command {
+public class LogoutCommand implements Command<Void> {
 
     private final Snowflake ownerId;
 
@@ -18,7 +18,7 @@ public class LogoutCommand implements Command {
     }
 
     @Override
-    public Mono<Void> execute(MessageCreateEvent event, @Nullable Object context) {
+    public Mono<Void> execute(MessageCreateEvent event, @Nullable Void context) {
         return Mono.just(event)
                 .map(MessageCreateEvent::getMember)
                 .filter(Optional::isPresent)
