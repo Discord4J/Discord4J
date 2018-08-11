@@ -19,7 +19,9 @@ package discord4j.command;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import org.reactivestreams.Publisher;
 
-/** This represents a generic command provider. */
+/**
+ * This represents a generic command provider.
+ */
 @FunctionalInterface
 public interface CommandProvider<T> {
 

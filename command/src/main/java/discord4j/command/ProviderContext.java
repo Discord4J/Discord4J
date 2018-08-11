@@ -20,7 +20,9 @@ import javax.annotation.Nullable;
 import java.util.Objects;
 import java.util.Optional;
 
-/** Context from a {@link CommandProvider} for a command's execution. */
+/**
+ * Context from a {@link CommandProvider} for a command's execution.
+ */
 public final class ProviderContext<T> {
 
     /**

@@ -38,6 +38,7 @@ import java.util.concurrent.CopyOnWriteArraySet;
  * @see CommandProvider
  * @see CommandDispatcher
  * @see CommandErrorHandler
+ * @see CommandException
  */
 public final class CommandBootstrapper {
 

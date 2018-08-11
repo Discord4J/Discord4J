@@ -21,7 +21,9 @@ import reactor.core.publisher.Mono;
 
 import javax.annotation.Nullable;
 
-/** Very simple command abstraction. */
+/**
+ * Very simple command abstraction.
+ */
 @FunctionalInterface
 public interface Command<T> {
 

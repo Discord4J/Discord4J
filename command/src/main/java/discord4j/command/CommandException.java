@@ -39,6 +39,8 @@ import java.util.Optional;
 
 /**
  * An abstract class for propagating non-fatal, user-facing, command-caused errors.
+ *
+ * @see discord4j.command.CommandErrorHandler
  */
 public class CommandException extends RuntimeException {
 
