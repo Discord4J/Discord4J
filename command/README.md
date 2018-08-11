@@ -83,8 +83,22 @@ Connect the command module:
  * Since this api is optional, we must actually hook everything up to our DiscordClient.
  */
 public class CommandConnectionExample {
+    
+    public class SimpleCommandDispatcher extends AbstractCommandDispatcher {
+        private final String prefix;
+        
+        public SimpleCommandDispatcher(String prefix) {
+            this.prefix = prefix;
+        }
+    
+        @Override
+        protected Publisher<String> getPrefixes(MessageCreateEvent event) {
+            return Mono.just(prefix);
+        }
+    }
+    
     public static void setupCommands(DiscordClient client) {
-        NaiveCommandDispatcher dispatcher = new NaiveCommandDispatcher("!"); //Handles triggering commands using our ! prefix
+        SimpleCommandDispatcher dispatcher = new SimpleCommandDispatcher("!"); //Handles triggering commands using our ! prefix
         CommandBootstrapper bootstrapper = new CommandBootstrapper(dispatcher); //This mediates all internal logic for commands
         bootstrapper.addProvider(new MyCommandProvider()); //Register our command provider
         bootstrapper.attach(client).subscribe(); //Attach the provider to the client and activate it
