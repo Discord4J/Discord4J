@@ -1,7 +1,12 @@
 # Discord4J Command
-The `command` module provides a set of low-level tools for dealing with bot commands. It can be used on its own or easily serve as a basis of interoperability for higher-level command libraries. 
+The `command` module provides a set of low-level tools for dealing with bot commands. It can be used on its own or
+easily serve as a basis of interoperability for higher-level command libraries. 
 
-This module is extremely extensible while still being relatively lightweight. This allows for a very large degree of freedom, meaning that your cool idea for a command api can be easily implemented as a layer atop this base api. Additionally, this api allows for commands to interoperate very easily. Interoperation allows for commands to be easily distributed without an actual bot, meaning that developers can create bot-less "command packs" which can be incorporated into other users' bots quite simply.
+This module is extremely extensible while still being relatively lightweight. This allows for a very large degree of
+freedom, meaning that your cool idea for a command api can be easily implemented as a layer atop this base api.
+Additionally, this api allows for commands to interoperate very easily. Interoperation allows for commands to be easily
+distributed without an actual bot, meaning that developers can create bot-less "command packs" which can be incorporated
+into other users' bots quite simply.
 
 ## Installation
 ### Gradle
@@ -45,7 +50,7 @@ Creating a command:
  */
 public class EchoCommand implements Command {
     @Override
-    public Mono<Void> execute(MessageCreateEvent event) { //This is invoked when !echo has been received
+    public Mono<Void> execute(MessageCreateEvent event, @Nullable Object context) { //invoked message is !echo
         return Mono.justOrEmpty(event.getMessage().getContent())
                 .map(content -> content.substring(content.indexOf(" "))) //Retrieve string to reply with
                 .zipWith(event.getMessage().getChannel(), (content, channel) -> channel.createMessage(content)) //Reply
@@ -60,15 +65,15 @@ Preparing your command for use:
  */
 class MyCommandProvider implements CommandProvider {
     @Override
-    public Mono<? extends Command> provide(MessageCreateEvent context, String commandName, int startIndex, int endIndex) { //Determine which command to use, if any
+    public Flux<ProviderContext> provide(MessageCreateEvent context, String commandName, int startIndex, int endIndex) { //Determine which command(s) to use, if any
         return Mono.justOrEmpty(commandName)
                 .flatMap(commandName -> {
                     if (commandName.equals("echo")) {
-                        return Mono.just(new EchoCommand()); //We're going to handle the message with an EchoCommand
+                        return Mono.just(ProviderContext.of(new EchoCommand())); //Handle message with an EchoCommand
                     }
                     //This provider cant handle the message. Returning empty() lets other providers try
                     return Mono.empty();
-                });
+                }).flux();
     }
 }
 ```
@@ -80,8 +85,8 @@ Connect the command module:
 public class CommandConnectionExample {
     public static void setupCommands(DiscordClient client) {
         NaiveCommandDispatcher dispatcher = new NaiveCommandDispatcher("!"); //Handles triggering commands using our ! prefix
-        CommandBootstrapper bootstrapper = new CommandBootstrapper(dispatcher); //This mediates all the internal logic for commands
-        bootstrapper.addCommandProvider(new MyCommandProvider()); //Register our command provider
+        CommandBootstrapper bootstrapper = new CommandBootstrapper(dispatcher); //This mediates all internal logic for commands
+        bootstrapper.addProvider(new MyCommandProvider()); //Register our command provider
         bootstrapper.attach(client).subscribe(); //Attach the provider to the client and activate it
     }
 }

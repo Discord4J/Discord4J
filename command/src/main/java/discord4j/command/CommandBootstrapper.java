@@ -1,3 +1,19 @@
+/*
+ * This file is part of Discord4J.
+ *
+ * Discord4J is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Discord4J is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package discord4j.command;
 
 import discord4j.core.DiscordClient;
@@ -14,24 +30,28 @@ import java.util.concurrent.CopyOnWriteArraySet;
 
 /**
  * The (thread-safe) entry point for actually using command. To use, simply instantiate and call
- * {@link #attach(discord4j.core.DiscordClient)}.
+ * {@link #attach(DiscordClient)}.
+ * <p>
+ * To register events, obtain the {@link CommandDispatcher} via {@link #getDispatcher()}.
  *
- * @see #attach(discord4j.core.DiscordClient)
- * @see discord4j.command.CommandProvider
- * @see discord4j.command.CommandDispatcher
- * @see discord4j.command.CommandErrorHandler
- * @see discord4j.command.NaiveCommandDispatcher
+ * @see #attach(DiscordClient)
+ * @see CommandProvider
+ * @see CommandDispatcher
+ * @see CommandErrorHandler
+ * @see DefaultCommandDispatcher
  */
 public final class CommandBootstrapper {
 
-    private final static Logger log = Loggers.getLogger(CommandBootstrapper.class);
-    private final static CommandErrorHandler DEFAULT_ERROR_HANDLER = (context, error) -> Mono.defer(() -> {
-        log.warn("Command excecution failed! Reason: {}", error.response().orElse("None"));
+    private static final Logger LOGGER = Loggers.getLogger(CommandBootstrapper.class);
+
+    private static final CommandDispatcher DEFAULT_DISPATCHER = new DefaultCommandDispatcher();
+
+    private static final CommandErrorHandler DEFAULT_ERROR_HANDLER = (context, error) -> {
+        LOGGER.warn(error.getMessage(), error);
         return Mono.empty();
-    });
+    };
 
-    private volatile CommandErrorHandler errorHandler = DEFAULT_ERROR_HANDLER;
-
+    private final CommandErrorHandler errorHandler;
     private final Set<CommandProvider> providers;
     private final CommandDispatcher dispatcher;
 
@@ -39,32 +59,31 @@ public final class CommandBootstrapper {
      * Constructs the message listener for command.
      *
      * @param dispatcher The command dispatcher to be used to emit events from.
-     * @param providers The {@link discord4j.command.CommandProvider}s to initialize this instance with. Note that
-     * this set is expected to be thread-safe as there will be concurrent read access required.
+     * @param errorHandler The {@link CommandErrorHandler} for the dispatcher.
      *
-     * @see #attach(discord4j.core.DiscordClient)
+     * @see #attach(DiscordClient)
      */
-    public CommandBootstrapper(CommandDispatcher dispatcher, Set<CommandProvider> providers) {
+    public CommandBootstrapper(final CommandDispatcher dispatcher, final CommandErrorHandler errorHandler) {
         this.dispatcher = dispatcher;
-        this.providers = providers;
+        this.errorHandler = errorHandler;
+        providers = new CopyOnWriteArraySet<>();
     }
 
     /**
      * Constructs the message listener for command.
      *
-     * @see #attach(discord4j.core.DiscordClient)
+     * @see #attach(DiscordClient)
      */
-    public CommandBootstrapper(CommandDispatcher dispatcher) {
-        this(dispatcher, new CopyOnWriteArraySet<>()); //TODO: LinkedHashSet is probably better, but not concurrent!
+    public CommandBootstrapper(final CommandDispatcher dispatcher) {
+        this(dispatcher, DEFAULT_ERROR_HANDLER);
     }
 
     /**
-     * Attaches this {@link CommandBootstrapper} instance to the
-     * {@link discord4j.core.event.domain.message.MessageCreateEvent} of the passed in client.
+     * Attaches this {@link CommandBootstrapper} instance to the {@link MessageCreateEvent} of the passed in client.
      *
-     * @return A flux which signals the completion of command executions.
+     * @return A flux (that need not be subscribed to), which signals the completion of command executions.
      */
-    public Flux<? extends Command> attach(DiscordClient client) {
+    public Flux<? extends Command> attach(final DiscordClient client) {
         return client.getEventDispatcher()
                 .on(MessageCreateEvent.class)
                 .flatMap(event -> dispatcher.dispatch(event, providers, errorHandler))
@@ -72,23 +91,11 @@ public final class CommandBootstrapper {
     }
 
     /**
-     * Replaces the {@link CommandErrorHandler} used by this instance. This is used to
-     * implement unified error handling despite command implementations.
-     *
-     * @param handler The new error handler to use.
-     * @return The same {@link CommandBootstrapper} instance to chain.
-     */
-    public CommandBootstrapper setCommandErrorHandler(CommandErrorHandler handler) {
-        this.errorHandler = handler;
-        return this;
-    }
-
-    /**
      * Gets the {@link CommandDispatcher} being currently used.
      *
      * @return The current {@link CommandDispatcher}.
      */
-    public CommandDispatcher getCommandDispatcher() {
+    public CommandDispatcher getDispatcher() {
         return dispatcher;
     }
 
@@ -106,7 +113,7 @@ public final class CommandBootstrapper {
      *
      * @return The providers. It is expected that this returns an immutable copy of the internal backing set.
      */
-    public Set<CommandProvider> getCommandProviders() {
+    public Set<CommandProvider> getProviders() {
         return Collections.unmodifiableSet(providers);
     }
 
@@ -114,9 +121,9 @@ public final class CommandBootstrapper {
      * Called to add a command provider dynamically.
      *
      * @param provider The provider to add.
-     * @return The current {@link discord4j.command.CommandBootstrapper} instance for chaining.
+     * @return The current {@link CommandBootstrapper} instance for chaining.
      */
-    public CommandBootstrapper addCommandProvider(CommandProvider provider) {
+    public CommandBootstrapper addProvider(final CommandProvider provider) {
         providers.add(provider);
         return this;
     }
@@ -125,9 +132,9 @@ public final class CommandBootstrapper {
      * Called to drop a command provider dynamically.
      *
      * @param provider The provider to remove.
-     * @return The current {@link discord4j.command.CommandBootstrapper} instance for chaining.
+     * @return The current {@link CommandBootstrapper} instance for chaining.
      */
-    public CommandBootstrapper removeCommandProvider(CommandProvider provider) {
+    public CommandBootstrapper removeProvider(final CommandProvider provider) {
         providers.remove(provider);
         return this;
     }
@@ -136,9 +143,9 @@ public final class CommandBootstrapper {
      * Called to add command providers dynamically.
      *
      * @param providers The providers to add.
-     * @return The current {@link discord4j.command.CommandBootstrapper} instance for chaining.
+     * @return The current {@link CommandBootstrapper} instance for chaining.
      */
-    public CommandBootstrapper addCommandProviders(Collection<? extends CommandProvider> providers) {
+    public CommandBootstrapper addProviders(final Collection<? extends CommandProvider> providers) {
         this.providers.addAll(providers);
         return this;
     }
@@ -147,9 +154,9 @@ public final class CommandBootstrapper {
      * Called to remove command providers dynamically.
      *
      * @param providers The providers to remove.
-     * @return The current {@link discord4j.command.CommandBootstrapper} instance for chaining.
+     * @return The current {@link CommandBootstrapper} instance for chaining.
      */
-    public CommandBootstrapper removeCommandProviders(Collection<? extends CommandProvider> providers) {
+    public CommandBootstrapper removeProviders(final Collection<? extends CommandProvider> providers) {
         this.providers.removeAll(providers);
         return this;
     }

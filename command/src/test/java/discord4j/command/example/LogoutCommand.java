@@ -1,12 +1,12 @@
 package discord4j.command.example;
 
 import discord4j.command.Command;
-import discord4j.command.CommandException;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.util.Snowflake;
 import reactor.core.publisher.Mono;
 
+import javax.annotation.Nullable;
 import java.util.Optional;
 
 public class LogoutCommand implements Command {
@@ -18,7 +18,7 @@ public class LogoutCommand implements Command {
     }
 
     @Override
-    public Mono<Void> execute(MessageCreateEvent event) {
+    public Mono<Void> execute(MessageCreateEvent event, @Nullable Object context) {
         return Mono.just(event)
                 .map(MessageCreateEvent::getMember)
                 .filter(Optional::isPresent)
@@ -26,7 +26,7 @@ public class LogoutCommand implements Command {
                 .map(Member::getId)
                 .filter(memberId -> memberId.equals(ownerId))
                 .switchIfEmpty(Mono.fromRunnable(() -> {
-                    throw new CommandException("You're not my owner!");
+                    throw new IllegalStateException("You're not my owner!");
                 }))
                 .doOnSuccess(i -> event.getClient().logout())
                 .then();

@@ -10,7 +10,7 @@ public class SimpleBot {
     public static void main(String[] args) throws InterruptedException {
         DiscordClient client = new DiscordClientBuilder(args[0]).build();
         CommandBootstrapper bootstrapper = new CommandBootstrapper(new NaiveCommandDispatcher("!"));
-        bootstrapper.addCommandProvider(new SimpleCommandProvider(client));
+        bootstrapper.addProvider(new SimpleCommandProvider(client));
         bootstrapper.attach(client).log().subscribe();
         client.login().block();
     }
