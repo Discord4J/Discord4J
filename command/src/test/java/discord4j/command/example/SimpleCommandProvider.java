@@ -19,19 +19,16 @@ public class SimpleCommandProvider implements CommandProvider {
     }
 
     @Override
-    public Mono<? extends Command> provide(MessageCreateEvent context) {
-        return Mono.justOrEmpty(context.getMessage()
-                .getContent()
-                .filter(s -> s.startsWith("!"))
-                .map(s -> s.replaceFirst("!", "").split(" ")[0])
+    public Mono<? extends Command> provide(MessageCreateEvent context, String cmdName, int startIndex, int endIndex) {
+        return Mono.just(cmdName)
                 .map(cmd -> {
                     if (cmd.equalsIgnoreCase("echo")) {
-                        return new EchoCommand();
+                        return new EchoCommand(startIndex, endIndex);
                     } else if (cmd.equalsIgnoreCase("logout")) {
                         return new LogoutCommand(ownerId);
                     } else {
                         return null;
                     }
-                }));
+                });
     }
 }

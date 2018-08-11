@@ -15,39 +15,37 @@ import java.util.concurrent.CopyOnWriteArraySet;
 /**
  * The (thread-safe) entry point for actually using command. To use, simply instantiate and call
  * {@link #attach(discord4j.core.DiscordClient)}.
- * <p>
- * To register events, obtain the {@link discord4j.command.CommandDispatcher} via {@link #getCommandDispatcher()}
- * or create a new {@link discord4j.command.CommandDispatcher} instance replace the default instance with the new
- * one via {@link #setCommandDispatcher(CommandDispatcher)}.
  *
  * @see #attach(discord4j.core.DiscordClient)
  * @see discord4j.command.CommandProvider
  * @see discord4j.command.CommandDispatcher
  * @see discord4j.command.CommandErrorHandler
- * @see discord4j.command.DefaultCommandDispatcher
+ * @see discord4j.command.NaiveCommandDispatcher
  */
 public final class CommandBootstrapper {
 
     private final static Logger log = Loggers.getLogger(CommandBootstrapper.class);
-    private final static CommandDispatcher DEFAULT_DISPATCHER = new DefaultCommandDispatcher();
     private final static CommandErrorHandler DEFAULT_ERROR_HANDLER = (context, error) -> Mono.defer(() -> {
         log.warn("Command excecution failed! Reason: {}", error.response().orElse("None"));
         return Mono.empty();
     });
 
-    private volatile CommandDispatcher dispatcher = DEFAULT_DISPATCHER;
     private volatile CommandErrorHandler errorHandler = DEFAULT_ERROR_HANDLER;
 
     private final Set<CommandProvider> providers;
+    private final CommandDispatcher dispatcher;
 
     /**
      * Constructs the message listener for command.
      *
+     * @param dispatcher The command dispatcher to be used to emit events from.
      * @param providers The {@link discord4j.command.CommandProvider}s to initialize this instance with. Note that
      * this set is expected to be thread-safe as there will be concurrent read access required.
+     *
      * @see #attach(discord4j.core.DiscordClient)
      */
-    public CommandBootstrapper(Set<CommandProvider> providers) {
+    public CommandBootstrapper(CommandDispatcher dispatcher, Set<CommandProvider> providers) {
+        this.dispatcher = dispatcher;
         this.providers = providers;
     }
 
@@ -56,8 +54,8 @@ public final class CommandBootstrapper {
      *
      * @see #attach(discord4j.core.DiscordClient)
      */
-    public CommandBootstrapper() {
-        this(new CopyOnWriteArraySet<>()); //TODO: LinkedHashSet is probably better, but not concurrent!
+    public CommandBootstrapper(CommandDispatcher dispatcher) {
+        this(dispatcher, new CopyOnWriteArraySet<>()); //TODO: LinkedHashSet is probably better, but not concurrent!
     }
 
     /**
@@ -71,18 +69,6 @@ public final class CommandBootstrapper {
                 .on(MessageCreateEvent.class)
                 .flatMap(event -> dispatcher.dispatch(event, providers, errorHandler))
                 .share();
-    }
-
-    /**
-     * Replaces the {@link CommandDispatcher} used by this instance. This can be used to implement
-     * custom command discovery rules.
-     *
-     * @param dispatcher The new dispatcher to use.
-     * @return The same {@link CommandBootstrapper} instance to chain.
-     */
-    public CommandBootstrapper setCommandDispatcher(CommandDispatcher dispatcher) {
-        this.dispatcher = dispatcher;
-        return this;
     }
 
     /**
