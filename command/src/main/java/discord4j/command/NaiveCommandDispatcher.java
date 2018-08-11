@@ -32,7 +32,7 @@ import java.util.function.Function;
  * thanks to its simplistic logic. This simply performs a lookup on the prefix and then takes the following word to be
  * the command name. Additionally, this dispatcher ignores bots (this is best practice for bot commands!).
  */
-public class NaiveCommandDispatcher implements CommandDispatcher {
+public final class NaiveCommandDispatcher implements CommandDispatcher {
 
     private final Function<MessageCreateEvent, Publisher<String>> prefixGenerator;
 
@@ -45,8 +45,8 @@ public class NaiveCommandDispatcher implements CommandDispatcher {
     }
 
     @Override
-    public Mono<? extends Command> dispatch(MessageCreateEvent event, Set<CommandProvider> providers,
-                                            CommandErrorHandler errorHandler) {
+    public Flux<? extends Command> dispatch(final MessageCreateEvent event, final Set<CommandProvider> providers,
+                                            final CommandErrorHandler errorHandler) {
         return Flux.defer(() -> event.getMessage().getContent().isPresent() ? prefixGenerator.apply(event) : Mono.empty())
                 .filter(prefix -> event.getMessage().getContent().get().startsWith(prefix))
                 .next()
@@ -67,9 +67,8 @@ public class NaiveCommandDispatcher implements CommandDispatcher {
                     return provider.provide(event, hints.getT1(), hints.getT2(),
                             event.getMessage().getContent().get().length());
                 })
-                .next()
-                .flatMap(cmd -> cmd.execute(event)
-                        .onErrorResume(CommandException.class, t -> errorHandler.handle(event, t))
-                        .thenReturn(cmd));
+                .flatMap(context -> context.getCommand().execute(event, context.getContext().orElse(null))
+                        .onErrorResume(error -> errorHandler.handle(event, error))
+                        .thenReturn(context.getCommand()));
     }
 }

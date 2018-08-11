@@ -38,13 +38,10 @@ import java.util.concurrent.CopyOnWriteArraySet;
  * @see CommandProvider
  * @see CommandDispatcher
  * @see CommandErrorHandler
- * @see DefaultCommandDispatcher
  */
 public final class CommandBootstrapper {
 
     private static final Logger LOGGER = Loggers.getLogger(CommandBootstrapper.class);
-
-    private static final CommandDispatcher DEFAULT_DISPATCHER = new DefaultCommandDispatcher();
 
     private static final CommandErrorHandler DEFAULT_ERROR_HANDLER = (context, error) -> {
         LOGGER.warn(error.getMessage(), error);
