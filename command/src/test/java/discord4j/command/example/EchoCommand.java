@@ -4,7 +4,7 @@ import discord4j.command.Command;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import reactor.core.publisher.Mono;
 
-import java.util.function.Function;
+import javax.annotation.Nullable;
 
 public class EchoCommand implements Command {
 
@@ -17,7 +17,7 @@ public class EchoCommand implements Command {
     }
 
     @Override
-    public Mono<Void> execute(MessageCreateEvent event) {
+    public Mono<Void> execute(MessageCreateEvent event, @Nullable Object context) {
         return Mono.justOrEmpty(event.getMessage().getContent())
                 .map(content -> content.substring(startIndex, endIndex))
                 .zipWith(event.getMessage().getChannel())
