@@ -18,6 +18,7 @@
 package discord4j.command;
 
 import discord4j.core.event.domain.message.MessageCreateEvent;
+import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.function.Tuple2;
@@ -33,22 +34,22 @@ import java.util.function.Function;
  */
 public class NaiveCommandDispatcher implements CommandDispatcher {
 
-    private final Function<MessageCreateEvent, String> prefixGenerator;
+    private final Function<MessageCreateEvent, Publisher<String>> prefixGenerator;
 
-    public NaiveCommandDispatcher(Function<MessageCreateEvent, String> prefixGenerator) {
+    public NaiveCommandDispatcher(Function<MessageCreateEvent, Publisher<String>> prefixGenerator) {
         this.prefixGenerator = prefixGenerator;
     }
 
     public NaiveCommandDispatcher(String prefix) {
-        this(e -> prefix);
+        this(e -> Mono.just(prefix));
     }
 
     @Override
     public Mono<? extends Command> dispatch(MessageCreateEvent event, Set<CommandProvider> providers,
                                             CommandErrorHandler errorHandler) {
-        return Mono.defer(() -> Mono.just(prefixGenerator.apply(event)))
-                .filter(prefix -> event.getMessage().getContent().isPresent()
-                        && event.getMessage().getContent().get().startsWith(prefix))
+        return Flux.defer(() -> event.getMessage().getContent().isPresent() ? prefixGenerator.apply(event) : Mono.empty())
+                .filter(prefix -> event.getMessage().getContent().get().startsWith(prefix))
+                .next()
                 .map(prefix -> event.getMessage().getContent().get().substring(prefix.length()).trim())
                 .filterWhen(trimmed -> event.getMessage().getAuthor().map(u -> !u.isBot()))
                 .map(trimmed -> {
