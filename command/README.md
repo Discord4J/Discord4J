@@ -60,10 +60,8 @@ Preparing your command for use:
  */
 class MyCommandProvider implements CommandProvider {
     @Override
-    public Mono<? extends Command> provide(MessageCreateEvent context) { //Determine which command to use, if any
-        return Mono.justOrEmpty(context.getMessage().getContent())
-                .filter(s -> s.startsWith("!")) //Look for our command prefix
-                .map(s -> s.replaceFirst("!", "").split(" ")[0]) //Get the command name
+    public Mono<? extends Command> provide(MessageCreateEvent context, String commandName, int startIndex, int endIndex) { //Determine which command to use, if any
+        return Mono.justOrEmpty(commandName)
                 .flatMap(commandName -> {
                     if (commandName.equals("echo")) {
                         return Mono.just(new EchoCommand()); //We're going to handle the message with an EchoCommand
@@ -81,7 +79,8 @@ Connect the command module:
  */
 public class CommandConnectionExample {
     public static void setupCommands(DiscordClient client) {
-        CommandBootstrapper bootstrapper = new CommandBootstrapper(); //This mediates all the internal logic for commands
+        NaiveCommandDispatcher dispatcher = new NaiveCommandDispatcher("!"); //Handles triggering commands using our ! prefix
+        CommandBootstrapper bootstrapper = new CommandBootstrapper(dispatcher); //This mediates all the internal logic for commands
         bootstrapper.addCommandProvider(new MyCommandProvider()); //Register our command provider
         bootstrapper.attach(client).subscribe(); //Attach the provider to the client and activate it
     }

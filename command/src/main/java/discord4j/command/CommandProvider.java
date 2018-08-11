@@ -16,10 +16,14 @@ public interface CommandProvider {
      * execution (this, by convention, excludes the: prefix, command name, etc).
      *
      * @param context The raw event context.
-     * @param commandName The expected command name parsed.
-     * @param commandStartIndex The start index (inclusive) of where naive parsing of arguments should occur.
-     * @param commandEndIndex The end index (exclusive) of where naive parsing of arguments should occur.
+     * @param commandName The expected command name parsed. <b>Note:</b> this is expected to be a single word only!
+     * @param commandStartIndex The start index (inclusive) of where naive parsing of arguments should occur relative to
+     *      the string held in the sent message.
+     * @param commandEndIndex The end index (exclusive) of where naive parsing of arguments should occur relative to
+     *      the string held in the sent message.
      * @return The matched command based on the context, or empty if no command matched.
+     *
+     * @see discord4j.command.CommandDispatcher#dispatch(discord4j.core.event.domain.message.MessageCreateEvent, java.util.Set, CommandErrorHandler)
      */
     Mono<? extends Command> provide(MessageCreateEvent context,
                                     String commandName,
