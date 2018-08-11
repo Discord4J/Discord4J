@@ -9,7 +9,7 @@ import discord4j.core.object.util.Snowflake;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-public class SimpleCommandProvider implements CommandProvider {
+public class SimpleCommandProvider implements CommandProvider<Void> {
 
     private final DiscordClient client;
     private final Snowflake ownerId;
@@ -20,7 +20,10 @@ public class SimpleCommandProvider implements CommandProvider {
     }
 
     @Override
-    public Flux<ProviderContext> provide(MessageCreateEvent context, String cmdName, int startIndex, int endIndex) {
+    public Flux<ProviderContext<Void>> provide(MessageCreateEvent context,
+                                               String cmdName,
+                                               int startIndex,
+                                               int endIndex) {
         return Mono.just(cmdName)
                 .map(cmd -> {
                     if (cmd.equalsIgnoreCase("echo")) {

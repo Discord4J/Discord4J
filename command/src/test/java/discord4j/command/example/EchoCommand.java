@@ -6,7 +6,7 @@ import reactor.core.publisher.Mono;
 
 import javax.annotation.Nullable;
 
-public class EchoCommand implements Command {
+public class EchoCommand implements Command<Void> {
 
     private final int startIndex;
     private final int endIndex;
@@ -17,7 +17,7 @@ public class EchoCommand implements Command {
     }
 
     @Override
-    public Mono<Void> execute(MessageCreateEvent event, @Nullable Object context) {
+    public Mono<Void> execute(MessageCreateEvent event, @Nullable Void context) {
         return Mono.justOrEmpty(event.getMessage().getContent())
                 .map(content -> content.substring(startIndex, endIndex))
                 .zipWith(event.getMessage().getChannel())

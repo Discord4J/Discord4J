@@ -21,7 +21,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 /** Context from a {@link CommandProvider} for a command's execution. */
-public final class ProviderContext {
+public final class ProviderContext<T> {
 
     /**
      * Constructs a {@code ProviderContext}.
@@ -30,8 +30,8 @@ public final class ProviderContext {
      * @param context The context for the command's execution. May be null.
      * @return A constructed {@code ProviderContext}.
      */
-    public static ProviderContext of(final Command command, @Nullable final Object context) {
-        return new ProviderContext(command, context);
+    public static <T> ProviderContext<T> of(final Command<T> command, @Nullable final T context) {
+        return new ProviderContext<>(command, context);
     }
 
     /**
@@ -40,16 +40,16 @@ public final class ProviderContext {
      * @param command The command for possible execution.
      * @return A constructed {@code ProviderContext}.
      */
-    public static ProviderContext of(final Command command) {
-        return new ProviderContext(command, null);
+    public static <T> ProviderContext<T> of(final Command<T> command) {
+        return new ProviderContext<>(command, null);
     }
 
     /** The command for possibler execution. */
-    private final Command command;
+    private final Command<T> command;
 
     /** The context for the command's execution. May be null. */
     @Nullable
-    private final Object context;
+    private final T context;
 
     /**
      * Constructs a {@code ProviderContext}.
@@ -57,7 +57,7 @@ public final class ProviderContext {
      * @param command The command for possible execution.
      * @param context The context for the command's execution. May be null.
      */
-    private ProviderContext(final Command command, @Nullable final Object context) {
+    private ProviderContext(final Command<T> command, @Nullable final T context) {
         this.command = Objects.requireNonNull(command);
         this.context = context;
     }
@@ -67,7 +67,7 @@ public final class ProviderContext {
      *
      * @return The command for possible execution.
      */
-    public Command getCommand() {
+    public Command<T> getCommand() {
         return command;
     }
 
@@ -76,7 +76,7 @@ public final class ProviderContext {
      *
      * @return The context for the command's execution, if present.
      */
-    public Optional<Object> getContext() {
+    public Optional<T> getContext() {
         return Optional.ofNullable(context);
     }
 }

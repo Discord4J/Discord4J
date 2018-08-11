@@ -49,7 +49,7 @@ public final class CommandBootstrapper {
     };
 
     private final CommandErrorHandler errorHandler;
-    private final Set<CommandProvider> providers;
+    private final Set<CommandProvider<?>> providers;
     private final CommandDispatcher dispatcher;
 
     /**
@@ -80,7 +80,7 @@ public final class CommandBootstrapper {
      *
      * @return A flux (that need not be subscribed to), which signals the completion of command executions.
      */
-    public Flux<? extends Command> attach(final DiscordClient client) {
+    public Flux<? extends Command<?>> attach(final DiscordClient client) {
         return client.getEventDispatcher()
                 .on(MessageCreateEvent.class)
                 .flatMap(event -> dispatcher.dispatch(event, providers, errorHandler))
@@ -110,7 +110,7 @@ public final class CommandBootstrapper {
      *
      * @return The providers. It is expected that this returns an immutable copy of the internal backing set.
      */
-    public Set<CommandProvider> getProviders() {
+    public Set<CommandProvider<?>> getProviders() {
         return Collections.unmodifiableSet(providers);
     }
 
@@ -120,7 +120,7 @@ public final class CommandBootstrapper {
      * @param provider The provider to add.
      * @return The current {@link CommandBootstrapper} instance for chaining.
      */
-    public CommandBootstrapper addProvider(final CommandProvider provider) {
+    public CommandBootstrapper addProvider(final CommandProvider<?> provider) {
         providers.add(provider);
         return this;
     }
@@ -131,7 +131,7 @@ public final class CommandBootstrapper {
      * @param provider The provider to remove.
      * @return The current {@link CommandBootstrapper} instance for chaining.
      */
-    public CommandBootstrapper removeProvider(final CommandProvider provider) {
+    public CommandBootstrapper removeProvider(final CommandProvider<?> provider) {
         providers.remove(provider);
         return this;
     }
@@ -142,7 +142,7 @@ public final class CommandBootstrapper {
      * @param providers The providers to add.
      * @return The current {@link CommandBootstrapper} instance for chaining.
      */
-    public CommandBootstrapper addProviders(final Collection<? extends CommandProvider> providers) {
+    public CommandBootstrapper addProviders(final Collection<? extends CommandProvider<?>> providers) {
         this.providers.addAll(providers);
         return this;
     }
@@ -153,7 +153,7 @@ public final class CommandBootstrapper {
      * @param providers The providers to remove.
      * @return The current {@link CommandBootstrapper} instance for chaining.
      */
-    public CommandBootstrapper removeProviders(final Collection<? extends CommandProvider> providers) {
+    public CommandBootstrapper removeProviders(final Collection<? extends CommandProvider<?>> providers) {
         this.providers.removeAll(providers);
         return this;
     }

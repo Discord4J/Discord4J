@@ -14,23 +14,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
-package discord4j.command;
+@NonNullApi
+package discord4j.command.example;
 
-import discord4j.core.event.domain.message.MessageCreateEvent;
-import reactor.core.publisher.Mono;
-
-import javax.annotation.Nullable;
-
-/** Very simple command abstraction. */
-@FunctionalInterface
-public interface Command<T> {
-
-    /**
-     * Called to execute this command.
-     *
-     * @param event The event that triggered this command's execution.
-     * @param context Additional context by this command's {@link CommandProvider}.
-     * @return A mono, whose completion signals that this command has been executed.
-     */
-    Mono<Void> execute(MessageCreateEvent event, @Nullable T context);
-}
+import reactor.util.annotation.NonNullApi;
