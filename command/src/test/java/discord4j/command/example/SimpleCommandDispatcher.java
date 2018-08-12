@@ -16,7 +16,7 @@
  */
 package discord4j.command.example;
 
-import discord4j.command.AbstractCommandDispatcher;
+import discord4j.command.util.AbstractCommandDispatcher;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;

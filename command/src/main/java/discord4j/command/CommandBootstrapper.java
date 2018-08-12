@@ -16,6 +16,7 @@
  */
 package discord4j.command;
 
+import discord4j.command.util.CommandException;
 import discord4j.core.DiscordClient;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import reactor.core.publisher.Flux;
@@ -84,6 +85,7 @@ public final class CommandBootstrapper {
     public Flux<? extends Command<?>> attach(final DiscordClient client) {
         return client.getEventDispatcher()
                 .on(MessageCreateEvent.class)
+                .filter(event -> event.getMessage().getContent().isPresent())
                 .flatMap(event -> dispatcher.dispatch(event, providers, errorHandler))
                 .share();
     }
