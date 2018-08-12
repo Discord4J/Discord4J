@@ -14,8 +14,12 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
-package discord4j.command;
+package discord4j.command.util;
 
+import discord4j.command.Command;
+import discord4j.command.CommandDispatcher;
+import discord4j.command.CommandErrorHandler;
+import discord4j.command.CommandProvider;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
@@ -45,7 +49,6 @@ public abstract class AbstractCommandDispatcher implements CommandDispatcher {
 
         return event.getMessage().getAuthor()
                 .filter(user -> !user.isBot())
-                .filter(ignored -> content.isPresent())
                 .flatMapMany(ignored -> getPrefixes(event))
                 .filter(content.get()::startsWith)
                 .map(prefix -> content.get().substring(prefix.length()).trim())
