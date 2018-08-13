@@ -87,7 +87,7 @@ public abstract class ReactionEmoji {
      * @return This emoji downcasted to a unicode emoji, if possible.
      */
     public Optional<Unicode> asUnicodeEmoji() {
-        return this instanceof Custom ? Optional.of((Unicode) this) : Optional.empty();
+        return this instanceof Unicode ? Optional.of((Unicode) this) : Optional.empty();
     }
 
     public static final class Custom extends ReactionEmoji {
