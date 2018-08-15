@@ -153,7 +153,7 @@ task aggregatedJavadocs(type: Javadoc,
 		description: "Generate javadocs from all child projects as if it was a single project",
 		group: "Documentation"
 ){
-	def destination = file("${rootDir}/docs/javadoc/${projectVersion.toLowerCase()}")
+	def destination = file("${rootDir}/docs/javadoc/${rootProject.version.toLowerCase()}")
 
 	doFirst {
 		// replace existing directory
