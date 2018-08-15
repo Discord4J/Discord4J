@@ -166,8 +166,13 @@ task aggregatedJavadocs(type: Javadoc,
 	failOnError false
 
 	options {
+        encoding = 'UTF-8'
+        tags = ["apiNote:a:API Note:",
+                "implSpec:a:Implementation Requirements:",
+                "implNote:a:Implementation Note:"]
 		title = "$rootProject.name ${rootProject.version} API"
 		windowTitle = "$rootProject.name ($version)"
+        addStringOption "encoding", "UTF-8"
 		addStringOption "Xdoclint:none", "-quiet"
 		author true
 		// adding links to javadocs for filling specific classes when not existing inside current javadoc
@@ -190,5 +195,5 @@ task aggregatedJavadocs(type: Javadoc,
 
 wrapper {
     gradleVersion = "4.9"
-	distributionType = Wrapper.DistributionType.ALL
+    distributionType = Wrapper.DistributionType.ALL
 }
