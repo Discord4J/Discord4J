@@ -53,11 +53,24 @@ allprojects {
     }
 
     tasks.withType(Javadoc) {
-        options.encoding = 'UTF-8'
-        options.addStringOption('encoding', 'UTF-8')
-        options.tags = ["apiNote:a:API Note:",
-                        "implSpec:a:Implementation Requirements:",
-                        "implNote:a:Implementation Note:"]
+        options {
+            encoding = 'UTF-8'
+            tags = ["apiNote:a:API Note:",
+                    "implSpec:a:Implementation Requirements:",
+                    "implNote:a:Implementation Note:"]
+            addStringOption 'encoding', 'UTF-8'
+            // adding links to javadocs for filling specific classes when not existing inside current javadoc
+            links = [
+                "https://docs.oracle.com/javase/8/docs/api/",
+                "https://docs.oracle.com/javaee/7/api/",
+                "http://fasterxml.github.io/jackson-databind/javadoc/2.9/",
+                "http://www.reactive-streams.org/reactive-streams-1.0.2-javadoc/",
+                "http://projectreactor.io/docs/core/milestone/api/",
+                "http://projectreactor.io/docs/netty/milestone/api/",
+                "http://projectreactor.io/docs/extra/milestone/api/",
+                "http://netty.io/4.1/api/"
+            ]
+        }
     }
 
     tasks.withType(JavaCompile) {
@@ -128,6 +141,11 @@ subprojects {
 
     archivesBaseName = "discord4j-$project.name"
 
+    tasks.withType(Javadoc) {
+        title = "$archivesBaseName ${version} API"
+        options.windowTitle = "$archivesBaseName ($version)"
+    }
+
     publishing {
         publications {
             maven(MavenPublication) {
@@ -140,16 +158,46 @@ subprojects {
     }
 }
 
-publishing {
-    publications {
-        maven(MavenPublication) {
+bintrayUpload.dependsOn build
+
+task aggregateJavadoc(type: Javadoc,
+    description: "Generate javadocs from all child projects as if it was a single project",
+    group: JavaBasePlugin.DOCUMENTATION_GROUP
+) {
+    destinationDir file("${rootProject.buildDir}/docs/aggregateJavadoc")
+    failOnError false
+    title = "$project_name ${project_version} API"
+
+    options {
+        windowTitle = "$project_name $project_version"
+        addStringOption "Xdoclint:none", "-quiet"
+        author true
+    }
+
+    subprojects.each { project ->
+        project.tasks.withType(Javadoc.class).each { doc ->
+            source += doc.source
+            classpath += doc.classpath
+            excludes += doc.excludes
+            includes += doc.includes
         }
     }
 }
 
-bintrayUpload.dependsOn build
+task aggregateJavadocJar(type: Jar, dependsOn: aggregateJavadoc) {
+    classifier = 'javadoc'
+    from aggregateJavadoc.destinationDir
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            artifact aggregateJavadocJar
+        }
+    }
+}
 
 wrapper {
     gradleVersion = "4.9"
-    distributionUrl = "https://services.gradle.org/distributions/gradle-$gradleVersion-all.zip"
+    distributionType = Wrapper.DistributionType.ALL
 }
