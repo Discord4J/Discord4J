@@ -149,20 +149,11 @@ publishing {
 
 bintrayUpload.dependsOn build
 
-task aggregatedJavadocs(type: Javadoc,
+task aggregateJavadoc(type: Javadoc,
 		description: "Generate javadocs from all child projects as if it was a single project",
-		group: "Documentation"
+		group: JavaBasePlugin.DOCUMENTATION_GROUP
 ){
-	def destination = file("${rootDir}/docs/javadoc/${rootProject.version.toLowerCase()}")
-
-	doFirst {
-		// replace existing directory
-		if (destination.exists()) {
-			destination.deleteDir()
-		}
-	}
-
-	destinationDir destination
+	destinationDir file("${rootDir}/build/docs/aggregateJavadoc")
 	failOnError false
 
 	options {
