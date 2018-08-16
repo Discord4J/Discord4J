@@ -159,7 +159,7 @@ task aggregateJavadoc(type: Javadoc,
     description: "Generate javadocs from all child projects as if it was a single project",
     group: JavaBasePlugin.DOCUMENTATION_GROUP
 ) {
-    destinationDir file("${rootDir}/build/docs/aggregateJavadoc")
+    destinationDir file("${rootProject.buildDir}/docs/aggregateJavadoc")
     failOnError false
 
     options {
