@@ -166,10 +166,10 @@ task aggregateJavadoc(type: Javadoc,
 ) {
     destinationDir file("${rootProject.buildDir}/docs/aggregateJavadoc")
     failOnError false
-    title = "$rootProject.name ${version} API"
+    title = "$project_name ${project_version} API"
 
     options {
-        windowTitle = "$rootProject.name ($version)"
+        windowTitle = "$project_name $project_version"
         addStringOption "Xdoclint:none", "-quiet"
         author true
     }
