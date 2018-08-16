@@ -141,6 +141,11 @@ subprojects {
 
     archivesBaseName = "discord4j-$project.name"
 
+    tasks.withType(Javadoc) {
+        title = "$archivesBaseName ${version} API"
+        options.windowTitle = "$archivesBaseName ($version)"
+    }
+
     publishing {
         publications {
             maven(MavenPublication) {
@@ -161,9 +166,9 @@ task aggregateJavadoc(type: Javadoc,
 ) {
     destinationDir file("${rootProject.buildDir}/docs/aggregateJavadoc")
     failOnError false
+    title = "$rootProject.name ${version} API"
 
     options {
-        title = "$rootProject.name ${rootProject.version} API"
         windowTitle = "$rootProject.name ($version)"
         addStringOption "Xdoclint:none", "-quiet"
         author true
