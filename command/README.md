@@ -1,3 +1,5 @@
+### WARNING: The following module is highly experimental and prone to drastic API changes between versions. It is not recommended for general use!
+
 # Discord4J Command
 The `command` module provides a set of low-level tools for dealing with bot commands. It can be used on its own or
 easily serve as a basis of interoperability for higher-level command libraries. 
