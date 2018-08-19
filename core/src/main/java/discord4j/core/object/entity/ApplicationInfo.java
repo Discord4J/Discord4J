@@ -25,6 +25,7 @@ import discord4j.core.util.EntityUtil;
 import discord4j.core.util.ImageUtil;
 import reactor.core.publisher.Mono;
 
+import javax.annotation.Nullable;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -133,7 +134,7 @@ public final class ApplicationInfo implements Entity {
     }
 
     @Override
-    public boolean equals(final Object obj) {
+    public boolean equals(@Nullable final Object obj) {
         return EntityUtil.equals(this, obj);
     }
 

@@ -23,6 +23,7 @@ import discord4j.core.object.util.Snowflake;
 import discord4j.core.util.EntityUtil;
 import reactor.core.publisher.Mono;
 
+import javax.annotation.Nullable;
 import java.util.Objects;
 
 /** An internal implementation of {@link Channel} designed to streamline inheritance. */
@@ -84,7 +85,7 @@ class BaseChannel implements Channel {
     }
 
     @Override
-    public final boolean equals(final Object obj) {
+    public final boolean equals(@Nullable final Object obj) {
         return EntityUtil.equals(this, obj);
     }
 

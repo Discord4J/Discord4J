@@ -26,6 +26,7 @@ import discord4j.core.util.ImageUtil;
 import discord4j.rest.json.request.DMCreateRequest;
 import reactor.core.publisher.Mono;
 
+import javax.annotation.Nullable;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -177,7 +178,7 @@ public class User implements Entity {
     }
 
     @Override
-    public final boolean equals(final Object obj) {
+    public final boolean equals(@Nullable final Object obj) {
         return EntityUtil.equals(this, obj);
     }
 

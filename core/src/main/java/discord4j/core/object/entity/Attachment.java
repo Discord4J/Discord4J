@@ -22,6 +22,7 @@ import discord4j.core.object.data.stored.AttachmentBean;
 import discord4j.core.object.util.Snowflake;
 import discord4j.core.util.EntityUtil;
 
+import javax.annotation.Nullable;
 import java.util.Objects;
 import java.util.OptionalInt;
 
@@ -114,7 +115,7 @@ public final class Attachment implements Entity {
     }
 
     @Override
-    public boolean equals(final Object obj) {
+    public boolean equals(@Nullable final Object obj) {
         return EntityUtil.equals(this, obj);
     }
 

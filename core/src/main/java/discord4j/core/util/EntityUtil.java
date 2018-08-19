@@ -26,6 +26,7 @@ import discord4j.core.object.entity.*;
 import discord4j.core.object.reaction.ReactionEmoji;
 import discord4j.rest.json.response.ChannelResponse;
 
+import javax.annotation.Nullable;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -103,7 +104,7 @@ public final class EntityUtil {
      * @param obj The object to compare to.
      * @return {@code true} if the two objects are equal, {@code false} otherwise.
      */
-    public static boolean equals(final Entity entity, final Object obj) {
+    public static boolean equals(final Entity entity, @Nullable final Object obj) {
         return entity.getClass().isInstance(obj) && ((Entity) obj).getId().equals(entity.getId());
     }
 

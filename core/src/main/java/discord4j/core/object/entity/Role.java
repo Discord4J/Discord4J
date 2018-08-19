@@ -27,6 +27,7 @@ import discord4j.rest.json.request.PositionModifyRequest;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import javax.annotation.Nullable;
 import java.awt.*;
 import java.util.Objects;
 import java.util.function.Consumer;
@@ -219,7 +220,7 @@ public final class Role implements Entity {
     }
 
     @Override
-    public boolean equals(final Object obj) {
+    public boolean equals(@Nullable final Object obj) {
         return EntityUtil.equals(this, obj);
     }
 
