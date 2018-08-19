@@ -429,6 +429,16 @@ public final class Message implements Entity {
                 .deletePinnedMessage(getChannelId().asLong(), getId().asLong());
     }
 
+    @Override
+    public boolean equals(final Object obj) {
+        return EntityUtil.equals(this, obj);
+    }
+
+    @Override
+    public int hashCode() {
+        return EntityUtil.hashCode(this);
+    }
+
     /** Represents the various types of messages. */
     public enum Type {
 

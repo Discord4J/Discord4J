@@ -96,5 +96,26 @@ public final class EntityUtil {
         throw new UnsupportedOperationException("Unknown Value: " + value);
     }
 
+    /**
+     * An utility that checks for equality between an entity and a generic object.
+     *
+     * @param entity The entity to compare to.
+     * @param obj The object to compare to.
+     * @return {@code true} if the two objects are equal, {@code false} otherwise.
+     */
+    public static boolean equals(final Entity entity, final Object obj) {
+        return entity.getClass().isInstance(obj) && ((Entity) obj).getId().equals(entity.getId());
+    }
+
+    /**
+     * An utility that gets the hash code of an entity.
+     *
+     * @param entity The entity to get a hash code from.
+     * @return The hash code of the entity.
+     */
+    public static int hashCode(final Entity entity) {
+        return entity.getId().hashCode();
+    }
+
     private EntityUtil() {}
 }

@@ -21,6 +21,7 @@ import discord4j.core.ServiceMediator;
 import discord4j.core.object.data.WebhookBean;
 import discord4j.core.object.util.Snowflake;
 import discord4j.core.spec.WebhookEditSpec;
+import discord4j.core.util.EntityUtil;
 import reactor.core.publisher.Mono;
 
 import java.util.Objects;
@@ -183,5 +184,15 @@ public final class Webhook implements Entity {
                 .modifyWebhook(getId().asLong(), spec.asRequest())
                 .map(WebhookBean::new)
                 .map(bean -> new Webhook(serviceMediator, bean));
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+        return EntityUtil.equals(this, obj);
+    }
+
+    @Override
+    public int hashCode() {
+        return EntityUtil.hashCode(this);
     }
 }

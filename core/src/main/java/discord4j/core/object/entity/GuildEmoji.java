@@ -23,6 +23,7 @@ import discord4j.core.object.data.stored.GuildEmojiBean;
 import discord4j.core.object.data.stored.UserBean;
 import discord4j.core.object.util.Snowflake;
 import discord4j.core.spec.GuildEmojiEditSpec;
+import discord4j.core.util.EntityUtil;
 import discord4j.core.util.ImageUtil;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -217,5 +218,15 @@ public final class GuildEmoji implements Entity {
     public String getImageUrl() {
         final String path = String.format(EMOJI_IMAGE_PATH, getId().asString());
         return isAnimated() ? ImageUtil.getUrl(path, GIF) : ImageUtil.getUrl(path, PNG);
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+        return EntityUtil.equals(this, obj);
+    }
+
+    @Override
+    public int hashCode() {
+        return EntityUtil.hashCode(this);
     }
 }

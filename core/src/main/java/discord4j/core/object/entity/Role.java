@@ -22,6 +22,7 @@ import discord4j.core.object.data.stored.RoleBean;
 import discord4j.core.object.util.PermissionSet;
 import discord4j.core.object.util.Snowflake;
 import discord4j.core.spec.RoleEditSpec;
+import discord4j.core.util.EntityUtil;
 import discord4j.rest.json.request.PositionModifyRequest;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -215,5 +216,15 @@ public final class Role implements Entity {
                 .modifyGuildChannelPositions(getGuildId().asLong(), requests)
                 .map(RoleBean::new)
                 .map(bean -> new Role(serviceMediator, bean, getGuildId().asLong()));
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+        return EntityUtil.equals(this, obj);
+    }
+
+    @Override
+    public int hashCode() {
+        return EntityUtil.hashCode(this);
     }
 }

@@ -20,6 +20,7 @@ import discord4j.core.DiscordClient;
 import discord4j.core.ServiceMediator;
 import discord4j.core.object.data.stored.ChannelBean;
 import discord4j.core.object.util.Snowflake;
+import discord4j.core.util.EntityUtil;
 import reactor.core.publisher.Mono;
 
 import java.util.Objects;
@@ -80,5 +81,15 @@ class BaseChannel implements Channel {
      */
     final ServiceMediator getServiceMediator() {
         return serviceMediator;
+    }
+
+    @Override
+    public final boolean equals(final Object obj) {
+        return EntityUtil.equals(this, obj);
+    }
+
+    @Override
+    public final int hashCode() {
+        return EntityUtil.hashCode(this);
     }
 }

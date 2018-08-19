@@ -175,4 +175,14 @@ public class User implements Entity {
     final ServiceMediator getServiceMediator() {
         return serviceMediator;
     }
+
+    @Override
+    public final boolean equals(final Object obj) {
+        return EntityUtil.equals(this, obj);
+    }
+
+    @Override
+    public final int hashCode() {
+        return EntityUtil.hashCode(this);
+    }
 }

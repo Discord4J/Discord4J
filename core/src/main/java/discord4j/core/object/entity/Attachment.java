@@ -20,6 +20,7 @@ import discord4j.core.DiscordClient;
 import discord4j.core.ServiceMediator;
 import discord4j.core.object.data.stored.AttachmentBean;
 import discord4j.core.object.util.Snowflake;
+import discord4j.core.util.EntityUtil;
 
 import java.util.Objects;
 import java.util.OptionalInt;
@@ -110,5 +111,15 @@ public final class Attachment implements Entity {
      */
     public OptionalInt getWidth() {
         return (data.getWidth() == null) ? OptionalInt.empty() : OptionalInt.of(data.getWidth());
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+        return EntityUtil.equals(this, obj);
+    }
+
+    @Override
+    public int hashCode() {
+        return EntityUtil.hashCode(this);
     }
 }

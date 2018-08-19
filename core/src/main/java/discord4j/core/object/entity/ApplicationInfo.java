@@ -21,6 +21,7 @@ import discord4j.core.ServiceMediator;
 import discord4j.core.object.data.ApplicationInfoBean;
 import discord4j.core.object.util.Image;
 import discord4j.core.object.util.Snowflake;
+import discord4j.core.util.EntityUtil;
 import discord4j.core.util.ImageUtil;
 import reactor.core.publisher.Mono;
 
@@ -129,5 +130,15 @@ public final class ApplicationInfo implements Entity {
      */
     public Mono<User> getOwner() {
         return serviceMediator.getClient().getUserById(getOwnerId());
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+        return EntityUtil.equals(this, obj);
+    }
+
+    @Override
+    public int hashCode() {
+        return EntityUtil.hashCode(this);
     }
 }
