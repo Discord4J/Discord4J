@@ -129,6 +129,15 @@ public final class Role implements Entity {
     }
 
     /**
+     * Gets whether this role corresponds to the @everyone role.
+     *
+     * @return {@code true} if this role represents the @everyone role, {@code false} otherwise.
+     */
+    public boolean isEveryone() {
+        return getId().equals(getGuildId());
+    }
+
+    /**
      * Gets the ID of the guild this role is associated to.
      *
      * @return The ID of the guild this role is associated to.

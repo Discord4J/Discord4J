@@ -282,6 +282,16 @@ public final class Guild implements Entity {
     }
 
     /**
+     * Requests to retrieve the guild's @everyone {@link Role}.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits the @everyone {@link Role}, if
+     * present. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Role> getEveryoneRole() {
+        return getClient().getRoleById(getId(), getId());
+    }
+
+    /**
      * Gets the guild's emoji's IDs.
      *
      * @return The guild's emoji's IDs.
