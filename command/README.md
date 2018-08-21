@@ -55,7 +55,8 @@ public class EchoCommand implements Command {
     public Mono<Void> execute(MessageCreateEvent event, @Nullable Object context) { //invoked message is !echo
         return Mono.justOrEmpty(event.getMessage().getContent())
                 .map(content -> content.substring(content.indexOf(" "))) //Retrieve string to reply with
-                .zipWith(event.getMessage().getChannel(), (content, channel) -> channel.createMessage(content)) //Reply
+                .zipWith(event.getMessage().getChannel()) // Get channel to send the reply to
+                .flatMap(tuple -> tuple.getT2().createMessage(tuple.getT1())) // Reply
                 .then(); //Transform to Mono<Void>
     }
 }
