@@ -7,6 +7,7 @@ dependencies {
     compile "com.discord4j.stores:stores-jdk:$jdkstores_version"
 
     testCompile "junit:junit:$junit_version"
+    testCompile "org.mockito:mockito-core:$mockito_version"
     testCompile "ch.qos.logback:logback-classic:$logback_version"
     testCompile "io.projectreactor:reactor-test"
 }
