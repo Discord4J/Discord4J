@@ -28,7 +28,6 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.Arrays;
 import java.util.Collections;
 
@@ -131,8 +130,7 @@ public class ChannelServiceTest {
 
     @Test
     public void testCreateReaction() throws UnsupportedEncodingException {
-        String reaction = URLEncoder.encode("❤", "UTF-8");
-        getChannelService().createReaction(permanentChannel, reactionMessage, reaction).block();
+        getChannelService().createReaction(permanentChannel, reactionMessage, "❤").block();
     }
 
     @Test
@@ -147,8 +145,7 @@ public class ChannelServiceTest {
 
     @Test
     public void testGetReactions() throws UnsupportedEncodingException {
-        String reaction = URLEncoder.encode("❤", "UTF-8");
-        getChannelService().getReactions(permanentChannel, permanentMessage, reaction, Collections.emptyMap()).then()
+        getChannelService().getReactions(permanentChannel, permanentMessage, "❤", Collections.emptyMap()).then()
                 .block();
     }
 
