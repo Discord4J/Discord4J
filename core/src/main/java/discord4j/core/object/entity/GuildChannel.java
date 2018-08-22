@@ -57,7 +57,7 @@ public interface GuildChannel extends Channel {
      * @return A {@link Mono} where, upon successful completion, emits the {@link PermissionSet} of the effective
      * permissions of the member for this channel. If an error is received, it is emitted through the {@code Mono}.
      */
-    default Mono<PermissionSet> getEffectivePerms(Member m) {
+    default Mono<PermissionSet> getEffectivePermissions(Member member) {
         return PermissionUtils.effectivePermissions(this, m);
     }
 
