@@ -53,12 +53,12 @@ public interface GuildChannel extends Channel {
     /**
      * Calculates the effective permissions of a {@link Member} for this channel.
      *
-     * @param m The member for which to calculate permissions.
+     * @param member The member for which to calculate permissions.
      * @return A {@link Mono} where, upon successful completion, emits the {@link PermissionSet} of the effective
      * permissions of the member for this channel. If an error is received, it is emitted through the {@code Mono}.
      */
     default Mono<PermissionSet> getEffectivePermissions(Member member) {
-        return PermissionUtils.effectivePermissions(this, m);
+        return PermissionUtils.effectivePermissions(this, member);
     }
 
     /**
