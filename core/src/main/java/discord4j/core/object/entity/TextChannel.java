@@ -22,6 +22,7 @@ import discord4j.core.object.PermissionOverwrite;
 import discord4j.core.object.data.ExtendedInviteBean;
 import discord4j.core.object.data.WebhookBean;
 import discord4j.core.object.data.stored.TextChannelBean;
+import discord4j.core.object.util.PermissionSet;
 import discord4j.core.object.trait.Categorizable;
 import discord4j.core.object.trait.Invitable;
 import discord4j.core.object.util.Snowflake;
@@ -75,6 +76,11 @@ public final class TextChannel extends BaseChannel implements Categorizable, Gui
     @Override
     public Set<PermissionOverwrite> getPermissionOverwrites() {
         return guildChannel.getPermissionOverwrites();
+    }
+    
+    @Override
+    public Mono<PermissionSet> getPermissions(Member member) {
+        return guildChannel.getPermissions(member);
     }
 
     @Override

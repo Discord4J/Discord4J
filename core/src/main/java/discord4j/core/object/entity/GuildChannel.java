@@ -17,6 +17,7 @@
 package discord4j.core.object.entity;
 
 import discord4j.core.object.PermissionOverwrite;
+import discord4j.core.object.util.PermissionSet;
 import discord4j.core.object.util.Snowflake;
 import reactor.core.publisher.Mono;
 
@@ -46,6 +47,15 @@ public interface GuildChannel extends Channel {
      * @return The permission overwrites for this channel.
      */
     Set<PermissionOverwrite> getPermissionOverwrites();
+    
+    /**
+     * Gets the given member's effective permissions in this channel.
+     * 
+     * @param member The {@link Member} in question.
+     * @return A {@link PermissionSet} representing all permissions this user has, considering channel permission
+     *         overwrites.
+     */
+    Mono<PermissionSet> getPermissions(Member member);
 
     /**
      * Gets the name of the channel.

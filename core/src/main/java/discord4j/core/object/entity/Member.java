@@ -23,6 +23,8 @@ import discord4j.core.object.data.stored.PresenceBean;
 import discord4j.core.object.data.stored.UserBean;
 import discord4j.core.object.data.stored.VoiceStateBean;
 import discord4j.core.object.presence.Presence;
+import discord4j.core.object.util.Permission;
+import discord4j.core.object.util.PermissionSet;
 import discord4j.core.object.util.Snowflake;
 import discord4j.core.spec.BanQuerySpec;
 import discord4j.store.api.util.LongLongTuple2;
@@ -178,6 +180,22 @@ public final class Member extends User {
         return getServiceMediator().getStateHolder().getPresenceStore()
                 .find(LongLongTuple2.of(getGuildId().asLong(), getId().asLong()))
                 .map(Presence::new);
+    }
+
+    /**
+     * Utility to get all permissions on a given user.
+     * 
+     * @return A {@link Mono} where, upon successful completion, emits a PermissionSet containing all effective
+     *         permissions for this member.
+     */
+    public Mono<PermissionSet> getPermissions() {
+        return getGuild()
+                .flatMapIterable(Guild::getRoleIds)
+                .filter(role -> getRoleIds().contains(role))
+                .flatMap(id -> getClient().getRoleById(getGuildId(), id))
+                .map(Role::getPermissions)
+                .reduce(PermissionSet.none(), PermissionSet::or)
+                .map(p -> p.contains(Permission.ADMINISTRATOR) ? PermissionSet.all() : p); // ADMINISTRATOR grants all permissions implicitly
     }
 
     /**
