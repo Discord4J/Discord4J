@@ -23,6 +23,8 @@ import discord4j.core.object.data.stored.PresenceBean;
 import discord4j.core.object.data.stored.UserBean;
 import discord4j.core.object.data.stored.VoiceStateBean;
 import discord4j.core.object.presence.Presence;
+import discord4j.core.object.util.PermissionSet;
+import discord4j.core.object.util.PermissionUtils;
 import discord4j.core.object.util.Snowflake;
 import discord4j.core.spec.BanQuerySpec;
 import discord4j.store.api.util.LongLongTuple2;
@@ -252,5 +254,23 @@ public final class Member extends User {
     public Mono<Void> removeRole(final Snowflake roleId) {
         return getServiceMediator().getRestClient().getGuildService()
                 .removeGuildMemberRole(guildId, getId().asLong(), roleId.asLong());
+    }
+
+    /**
+     * Calculates the effective permissions of this member for a {@link GuildChannel}.
+     *
+     * @param c The guild channel for which to calculate permissions.
+     * @return A {@link Mono} where, upon successful completion, emits the {@link PermissionSet} of the effective
+     * permissions of this member for the channel. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<PermissionSet> getEffectivePerms(GuildChannel c) {
+        return getGuild().flatMap(g -> // Get guild
+            g.getEveryoneRole().map(Role::getPermissions).flatMap(everyone -> {// Get everyone perms
+                Flux<PermissionSet> rolePerms = getRoles().map(Role::getPermissions); // Get user role perms
+
+                return PermissionUtils.effectivePermissions(getId(), g.getOwnerId(),
+                    everyone, rolePerms, c.getPermissionOverwrites(), getRoleIds());
+            })
+        );
     }
 }
