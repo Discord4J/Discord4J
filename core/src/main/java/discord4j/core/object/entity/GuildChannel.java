@@ -17,7 +17,10 @@
 package discord4j.core.object.entity;
 
 import discord4j.core.object.PermissionOverwrite;
+import discord4j.core.object.util.PermissionSet;
+import discord4j.core.object.util.PermissionUtils;
 import discord4j.core.object.util.Snowflake;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.Set;
@@ -46,6 +49,17 @@ public interface GuildChannel extends Channel {
      * @return The permission overwrites for this channel.
      */
     Set<PermissionOverwrite> getPermissionOverwrites();
+
+    /**
+     * Calculates the effective permissions of a {@link Member} for this channel.
+     *
+     * @param member The member for which to calculate permissions.
+     * @return A {@link Mono} where, upon successful completion, emits the {@link PermissionSet} of the effective
+     * permissions of the member for this channel. If an error is received, it is emitted through the {@code Mono}.
+     */
+    default Mono<PermissionSet> getEffectivePermissions(Member member) {
+        return PermissionUtils.effectivePermissions(this, member);
+    }
 
     /**
      * Gets the name of the channel.
