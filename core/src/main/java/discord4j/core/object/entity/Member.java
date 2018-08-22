@@ -259,11 +259,11 @@ public final class Member extends User {
     /**
      * Calculates the effective permissions of this member for a {@link GuildChannel}.
      *
-     * @param c The guild channel for which to calculate permissions.
+     * @param channel The guild channel for which to calculate permissions.
      * @return A {@link Mono} where, upon successful completion, emits the {@link PermissionSet} of the effective
      * permissions of this member for the channel. If an error is received, it is emitted through the {@code Mono}.
      */
-    public Mono<PermissionSet> getEffectivePerms(GuildChannel c) {
-        return PermissionUtils.effectivePermissions(c, this);
+    public Mono<PermissionSet> getEffectivePermissions(GuildChannel channel) {
+        return PermissionUtils.effectivePermissions(channel, this);
     }
 }
