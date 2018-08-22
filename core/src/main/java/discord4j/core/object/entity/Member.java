@@ -264,13 +264,6 @@ public final class Member extends User {
      * permissions of this member for the channel. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<PermissionSet> getEffectivePerms(GuildChannel c) {
-        return getGuild().flatMap(g -> // Get guild
-            g.getEveryoneRole().map(Role::getPermissions).flatMap(everyone -> {// Get everyone perms
-                Flux<PermissionSet> rolePerms = getRoles().map(Role::getPermissions); // Get user role perms
-
-                return PermissionUtils.effectivePermissions(getId(), g.getOwnerId(),
-                    everyone, rolePerms, c.getPermissionOverwrites(), getRoleIds());
-            })
-        );
+        return PermissionUtils.effectivePermissions(c, this);
     }
 }

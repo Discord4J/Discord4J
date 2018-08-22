@@ -58,14 +58,7 @@ public interface GuildChannel extends Channel {
      * permissions of the member for this channel. If an error is received, it is emitted through the {@code Mono}.
      */
     default Mono<PermissionSet> getEffectivePerms(Member m) {
-        return getGuild().flatMap(g -> // Get guild
-            g.getEveryoneRole().map(Role::getPermissions).flatMap(everyone -> {// Get everyone perms
-                Flux<PermissionSet> rolePerms = m.getRoles().map(Role::getPermissions); // Get user role perms
-
-                return PermissionUtils.effectivePermissions(m.getId(), g.getOwnerId(),
-                    everyone, rolePerms, getPermissionOverwrites(), m.getRoleIds());
-            })
-        );
+        return PermissionUtils.effectivePermissions(this, m);
     }
 
     /**
