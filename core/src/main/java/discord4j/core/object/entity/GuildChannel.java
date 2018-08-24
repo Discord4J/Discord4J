@@ -16,10 +16,13 @@
  */
 package discord4j.core.object.entity;
 
+import discord4j.core.object.ExtendedPermissionOverwrite;
 import discord4j.core.object.PermissionOverwrite;
+import discord4j.core.object.util.PermissionSet;
 import discord4j.core.object.util.Snowflake;
 import reactor.core.publisher.Mono;
 
+import java.util.Optional;
 import java.util.Set;
 
 /** A Discord channel associated to a {@link Guild}. */
@@ -45,7 +48,13 @@ public interface GuildChannel extends Channel {
      *
      * @return The permission overwrites for this channel.
      */
-    Set<PermissionOverwrite> getPermissionOverwrites();
+    Set<ExtendedPermissionOverwrite> getPermissionOverwrites();
+
+    Optional<ExtendedPermissionOverwrite> getOverwriteForMember(Snowflake memberId);
+
+    Optional<ExtendedPermissionOverwrite> getOverwriteForRole(Snowflake roleId);
+
+    Mono<PermissionSet> getEffectivePermissions(Snowflake memberId);
 
     /**
      * Gets the name of the channel.
@@ -69,4 +78,8 @@ public interface GuildChannel extends Channel {
      * received, it is emitted through the {@code Mono}.
      */
     Mono<Integer> getPosition();
+
+    Mono<Void> addMemberOverwrite(Snowflake memberId, PermissionOverwrite overwrite);
+
+    Mono<Void> addRoleOverwrite(Snowflake roleId, PermissionOverwrite overwrite);
 }

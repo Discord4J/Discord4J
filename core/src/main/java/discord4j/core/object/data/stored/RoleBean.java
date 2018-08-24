@@ -29,7 +29,7 @@ public final class RoleBean implements Serializable {
     private String name;
     private int color;
     private boolean hoist;
-    private int permissions;
+    private long permissions;
     private boolean managed;
     private boolean mentionable;
 
@@ -86,11 +86,11 @@ public final class RoleBean implements Serializable {
         this.hoist = hoist;
     }
 
-    public int getPermissions() {
+    public long getPermissions() {
         return permissions;
     }
 
-    public void setPermissions(final int permissions) {
+    public void setPermissions(final long permissions) {
         this.permissions = permissions;
     }
 

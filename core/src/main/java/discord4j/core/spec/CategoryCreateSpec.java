@@ -17,7 +17,8 @@
 package discord4j.core.spec;
 
 import discord4j.common.json.OverwriteEntity;
-import discord4j.core.object.PermissionOverwrite;
+import discord4j.core.object.ExtendedPermissionOverwrite;
+import discord4j.core.object.TargetedPermissionOverwrite;
 import discord4j.core.object.entity.Channel;
 import discord4j.rest.json.request.ChannelCreateRequest;
 
@@ -33,10 +34,9 @@ public class CategoryCreateSpec implements Spec<ChannelCreateRequest> {
         return this;
     }
 
-    public CategoryCreateSpec setPermissionOverwrites(Set<PermissionOverwrite> permissionOverwrites) {
+    public CategoryCreateSpec setPermissionOverwrites(Set<TargetedPermissionOverwrite> permissionOverwrites) {
         OverwriteEntity[] raw = permissionOverwrites.stream()
-                .map(o -> new OverwriteEntity(o.getId().asLong(), o.getType().getValue(), o.getAllowed().getRawValue(),
-                        o.getDenied().getRawValue()))
+                .map(o -> new OverwriteEntity(o.getTargetId().asLong(), o.getType().getValue(), o.getAllowed().getRawValue(), o.getDenied().getRawValue()))
                 .toArray(OverwriteEntity[]::new);
 
         requestBuilder.permissionOverwrites(raw);

@@ -16,7 +16,7 @@
  */
 package discord4j.core.object.audit;
 
-import discord4j.core.object.PermissionOverwrite;
+import discord4j.core.object.ExtendedPermissionOverwrite;
 import discord4j.core.object.entity.Channel;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Role;
@@ -48,7 +48,7 @@ public final class ChangeKey<T> {
     public static final ChangeKey<Integer> POSITION = changeKey("position");
     public static final ChangeKey<String> TOPIC = changeKey("topic");
     public static final ChangeKey<Integer> BITRATE = changeKey("bitrate");
-    public static final ChangeKey<Set<PermissionOverwrite>> OVERWRITES = changeKey("permission_overwrites");
+    public static final ChangeKey<Set<ExtendedPermissionOverwrite>> OVERWRITES = changeKey("permission_overwrites");
     public static final ChangeKey<Boolean> NSFW = changeKey("nsfw");
     public static final ChangeKey<Snowflake> APPLICATION_ID = changeKey("application_id");
     public static final ChangeKey<PermissionSet> PERMISSIONS = changeKey("permission");

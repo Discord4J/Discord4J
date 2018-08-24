@@ -117,7 +117,7 @@ public enum Permission {
     private final boolean mfa;
 
     /** The permission value. */
-    private final int value;
+    private final long value;
 
     /**
      * Constructs a {@code Permission}.
@@ -125,7 +125,7 @@ public enum Permission {
      * @param value The permission value.
      * @param mfa Whether MFA is required.
      */
-    Permission(final int value, final boolean mfa) {
+    Permission(final long value, final boolean mfa) {
         this.value = value;
         this.mfa = mfa;
     }
@@ -146,7 +146,7 @@ public enum Permission {
      *
      * @return The permission's value.
      */
-    public int getValue() {
+    public long getValue() {
         return value;
     }
 }

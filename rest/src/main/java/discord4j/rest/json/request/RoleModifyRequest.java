@@ -23,12 +23,12 @@ import discord4j.common.jackson.PossibleJson;
 public class RoleModifyRequest {
 
     private final Possible<String> name;
-    private final Possible<Integer> permissions;
+    private final Possible<Long> permissions;
     private final Possible<Integer> color;
     private final Possible<Boolean> hoist;
     private final Possible<Boolean> mentionable;
 
-    public RoleModifyRequest(Possible<String> name, Possible<Integer> permissions,
+    public RoleModifyRequest(Possible<String> name, Possible<Long> permissions,
                              Possible<Integer> color, Possible<Boolean> hoist,
                              Possible<Boolean> mentionable) {
         this.name = name;
@@ -45,7 +45,7 @@ public class RoleModifyRequest {
     public static class Builder {
 
         private Possible<String> name = Possible.absent();
-        private Possible<Integer> permissions = Possible.absent();
+        private Possible<Long> permissions = Possible.absent();
         private Possible<Integer> color = Possible.absent();
         private Possible<Boolean> hoist = Possible.absent();
         private Possible<Boolean> mentionable = Possible.absent();
@@ -55,7 +55,7 @@ public class RoleModifyRequest {
             return this;
         }
 
-        public Builder permissions(int permissions) {
+        public Builder permissions(long permissions) {
             this.permissions = Possible.of(permissions);
             return this;
         }

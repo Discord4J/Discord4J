@@ -23,10 +23,10 @@ public class OverwriteEntity {
     @UnsignedJson
     private long id;
     private String type;
-    private int allow;
-    private int deny;
+    private long allow;
+    private long deny;
 
-    public OverwriteEntity(long id, String type, int allow, int deny) {
+    public OverwriteEntity(long id, String type, long allow, long deny) {
         this.id = id;
         this.type = type;
         this.allow = allow;
@@ -52,19 +52,19 @@ public class OverwriteEntity {
         this.type = type;
     }
 
-    public int getAllow() {
+    public long getAllow() {
         return allow;
     }
 
-    public void setAllow(int allow) {
+    public void setAllow(long allow) {
         this.allow = allow;
     }
 
-    public int getDeny() {
+    public long getDeny() {
         return deny;
     }
 
-    public void setDeny(int deny) {
+    public void setDeny(long deny) {
         this.deny = deny;
     }
 

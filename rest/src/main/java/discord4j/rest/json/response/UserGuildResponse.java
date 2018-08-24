@@ -25,7 +25,7 @@ public class UserGuildResponse {
     private String name;
     private String icon;
     private boolean owner;
-    private int permissions;
+    private long permissions;
 
     public long getId() {
         return id;
@@ -43,7 +43,7 @@ public class UserGuildResponse {
         return owner;
     }
 
-    public int getPermissions() {
+    public long getPermissions() {
         return permissions;
     }
 

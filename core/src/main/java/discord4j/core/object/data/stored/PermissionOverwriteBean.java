@@ -26,8 +26,8 @@ public final class PermissionOverwriteBean implements Serializable {
 
     private long id;
     private String type;
-    private int allow;
-    private int deny;
+    private long allow;
+    private long deny;
 
     public PermissionOverwriteBean(final OverwriteEntity response) {
         id = response.getId();
@@ -54,19 +54,19 @@ public final class PermissionOverwriteBean implements Serializable {
         this.type = type;
     }
 
-    public int getAllow() {
+    public long getAllow() {
         return allow;
     }
 
-    public void setAllow(final int allow) {
+    public void setAllow(final long allow) {
         this.allow = allow;
     }
 
-    public int getDeny() {
+    public long getDeny() {
         return deny;
     }
 
-    public void setDeny(final int deny) {
+    public void setDeny(final long deny) {
         this.deny = deny;
     }
 

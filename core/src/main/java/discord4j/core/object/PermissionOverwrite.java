@@ -1,193 +1,39 @@
-/*
- * This file is part of Discord4J.
- *
- * Discord4J is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Discord4J is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
- */
 package discord4j.core.object;
 
-import discord4j.core.DiscordClient;
-import discord4j.core.ServiceMediator;
-import discord4j.core.object.data.stored.PermissionOverwriteBean;
-import discord4j.core.object.entity.*;
+import discord4j.core.object.entity.Member;
+import discord4j.core.object.entity.Role;
 import discord4j.core.object.util.PermissionSet;
 import discord4j.core.object.util.Snowflake;
 import discord4j.core.util.EntityUtil;
-import reactor.core.publisher.Mono;
 
-import java.util.Objects;
-import java.util.Optional;
+public class PermissionOverwrite {
 
-/**
- * A Discord permission overwrite.
- *
- * @see <a href="https://discordapp.com/developers/docs/resources/channel#overwrite-object">Overwrite Object</a>
- */
-public final class PermissionOverwrite implements DiscordObject {
-
-    /** The ServiceMediator associated to this object. */
-    private final ServiceMediator serviceMediator;
-
-    /** The raw data as represented by Discord, must be non-null. */
-    private final PermissionOverwriteBean data;
-
-    /** The ID of the guild associated to this overwrite. */
-    private final long guildId;
-
-    /** The ID of the channel associated to this overwrite. */
-    private final long channelId;
-
-    /**
-     * Constructs a {@code PermissionOverwrite} with an associated ServiceMediator and Discord data.
-     *
-     * @param serviceMediator The ServiceMediator associated to this object, must be non-null.
-     * @param data The raw data as represented by Discord, must be non-null.
-     * @param guildId The ID of the guild associated to this overwrite.
-     * @param channelId The ID of the channel associated to this overwrite.
-     */
-    public PermissionOverwrite(final ServiceMediator serviceMediator, final PermissionOverwriteBean data,
-                               final long guildId, final long channelId) {
-        this.serviceMediator = Objects.requireNonNull(serviceMediator);
-        this.data = Objects.requireNonNull(data);
-        this.guildId = guildId;
-        this.channelId = channelId;
+    public static PermissionOverwrite of(PermissionSet allowed, PermissionSet denied) {
+        return new PermissionOverwrite(allowed.getRawValue(), denied.getRawValue());
     }
 
-    @Override
-    public DiscordClient getClient() {
-        return serviceMediator.getClient();
+    public static TargetedPermissionOverwrite forMember(Snowflake memberId, PermissionSet allowed, PermissionSet denied) {
+        return new TargetedPermissionOverwrite(allowed.getRawValue(), denied.getRawValue(), memberId.asLong(), Type.MEMBER.value);
     }
 
-    /**
-     * Gets the ID of the role or user this overwrite is associated to.
-     *
-     * @return The ID of the role or user this overwrite is associated to.
-     */
-    public Snowflake getId() {
-        return Snowflake.of(data.getId());
+    public static TargetedPermissionOverwrite forRole(Snowflake roleId, PermissionSet allowed, PermissionSet denied) {
+        return new TargetedPermissionOverwrite(allowed.getRawValue(), denied.getRawValue(), roleId.asLong(), Type.ROLE.value);
     }
 
-    /**
-     * Gets the ID of the role this overwrite is associated to, if present.
-     *
-     * @return The ID of the role this overwrite is associated to, if present.
-     */
-    public Optional<Snowflake> getRoleId() {
-        return Optional.of(getId()).filter(ignored -> getType() == Type.ROLE);
+    private final long allowed;
+    private final long denied;
+
+    PermissionOverwrite(long allowed, long denied) {
+        this.allowed = allowed;
+        this.denied = denied;
     }
 
-    /**
-     * Requests to retrieve the role this overwrite is associated to, if present.
-     *
-     * @return A {@link Mono} where, upon successful completion, emits the {@link Role} this overwrite is associated to,
-     * if present. If an error is received, it is emitted through the {@code Mono}.
-     */
-    public Mono<Role> getRole() {
-        return Mono.justOrEmpty(getRoleId()).flatMap(id -> getClient().getRoleById(getGuildId(), id));
-    }
-
-    /**
-     * Gets the ID of the user this overwrite is associated to, if present.
-     *
-     * @return The ID of the user this overwrite is associated to, if present.
-     */
-    public Optional<Snowflake> getUserId() {
-        return Optional.of(getId()).filter(ignored -> getType() == Type.MEMBER);
-    }
-
-    /**
-     * Requests to retrieve the user this overwrite is associated to, if present.
-     *
-     * @return A {@link Mono} where, upon successful completion, emits the {@link User} this overwrite is associated to,
-     * if present. If an error is received, it is emitted through the {@code Mono}.
-     */
-    public Mono<User> getUser() {
-        return Mono.justOrEmpty(getUserId()).flatMap(getClient()::getUserById);
-    }
-
-    /**
-     * Gets the type of entity this overwrite is for.
-     *
-     * @return The type of entity this overwrite is for.
-     */
-    public Type getType() {
-        return Type.of(data.getType());
-    }
-
-    /**
-     * Gets the permissions explicitly allowed for this overwrite.
-     *
-     * @return The permissions explicitly allowed for this overwrite.
-     */
     public PermissionSet getAllowed() {
-        return PermissionSet.of(data.getAllow());
+        return PermissionSet.of(allowed);
     }
 
-    /**
-     * Gets the permissions explicitly denied for this overwrite.
-     *
-     * @return The permissions explicitly denied for this overwrite.
-     */
     public PermissionSet getDenied() {
-        return PermissionSet.of(data.getDeny());
-    }
-
-    /**
-     * Gets the ID of the guild associated to this overwrite.
-     *
-     * @return The ID of the guild associated to this overwrite.
-     */
-    public Snowflake getGuildId() {
-        return Snowflake.of(guildId);
-    }
-
-    /**
-     * Requests to retrieve the guild associated to this overwrite.
-     *
-     * @return A {@link Mono} where, upon successful completion, emits the {@link Guild} associated to this overwrite.
-     * If an error is received, it is emitted through the {@code Mono}.
-     */
-    public Mono<Guild> getGuild() {
-        return getClient().getGuildById(getGuildId());
-    }
-
-    /**
-     * Gets the ID of the channel associated to this overwrite.
-     *
-     * @return The ID of the channel associated to this overwrite.
-     */
-    public Snowflake getChannelId() {
-        return Snowflake.of(channelId);
-    }
-
-    /**
-     * Requests to retrieve the channel associated to this overwrite.
-     *
-     * @return A {@link Mono} where, upon successful completion, emits the {@link GuildChannel} associated to this
-     * overwrite. If an error is received, it is emitted through the {@code Mono}.
-     */
-    public Mono<GuildChannel> getChannel() {
-        return getClient().getGuildChannelById(getChannelId());
-    }
-
-    /**
-     * Requests to delete this permission overwrite.
-     *
-     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the permission overwrite has
-     * been deleted. If an error is received, it is emitted through the {@code Mono}.
-     */
-    public Mono<Void> delete() {
-        return serviceMediator.getRestClient().getChannelService().deleteChannelPermission(channelId, getId().asLong());
+        return PermissionSet.of(denied);
     }
 
     /** The type of entity a {@link PermissionOverwrite} is explicitly for. */
@@ -203,7 +49,7 @@ public final class PermissionOverwrite implements DiscordObject {
         private final String value;
 
         /**
-         * Constructs a {@code PermissionOverwrite.Type}.
+         * Constructs a {@code ExtendedPermissionOverwrite.Type}.
          *
          * @param value The underlying value as represented by Discord.
          */

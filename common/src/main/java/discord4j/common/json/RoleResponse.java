@@ -26,7 +26,7 @@ public class RoleResponse {
     private int color;
     private boolean hoist;
     private int position;
-    private int permissions;
+    private long permissions;
     private boolean managed;
     private boolean mentionable;
 
@@ -50,7 +50,7 @@ public class RoleResponse {
         return position;
     }
 
-    public int getPermissions() {
+    public long getPermissions() {
         return permissions;
     }
 

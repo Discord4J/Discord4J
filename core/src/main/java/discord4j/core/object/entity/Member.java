@@ -23,8 +23,10 @@ import discord4j.core.object.data.stored.PresenceBean;
 import discord4j.core.object.data.stored.UserBean;
 import discord4j.core.object.data.stored.VoiceStateBean;
 import discord4j.core.object.presence.Presence;
+import discord4j.core.object.util.PermissionSet;
 import discord4j.core.object.util.Snowflake;
 import discord4j.core.spec.BanQuerySpec;
+import discord4j.core.util.PermissionUtil;
 import discord4j.core.spec.GuildMemberEditSpec;
 import discord4j.store.api.util.LongLongTuple2;
 import reactor.core.publisher.Flux;
@@ -32,10 +34,7 @@ import reactor.core.publisher.Mono;
 
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -253,6 +252,20 @@ public final class Member extends User {
     public Mono<Void> removeRole(final Snowflake roleId) {
         return getServiceMediator().getRestClient().getGuildService()
                 .removeGuildMemberRole(guildId, getId().asLong(), roleId.asLong());
+    }
+
+    public Mono<PermissionSet> getBasePermissions() {
+        Mono<Boolean> getIsOwner = getGuild().map(guild -> guild.getOwnerId().equals(getId()));
+        Mono<PermissionSet> getEveryonePerms = getGuild().flatMap(Guild::getEveryoneRole).map(Role::getPermissions);
+        Mono<List<PermissionSet>> getRolePerms = getRoles().map(Role::getPermissions).collectList();
+
+        return getIsOwner.flatMap(isOwner -> {
+            if (isOwner) {
+                return Mono.just(PermissionSet.all());
+            } else {
+                return Mono.zip(getEveryonePerms, getRolePerms, PermissionUtil::computeBasePermissions);
+            }
+        });
     }
 
     /**
