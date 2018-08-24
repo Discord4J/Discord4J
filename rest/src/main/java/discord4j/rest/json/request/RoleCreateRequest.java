@@ -19,12 +19,12 @@ package discord4j.rest.json.request;
 public class RoleCreateRequest {
 
     private final String name;
-    private final int permissions;
+    private final long permissions;
     private final int color;
     private final boolean hoist;
     private final boolean mentionable;
 
-    public RoleCreateRequest(String name, int permissions, int color, boolean hoist, boolean mentionable) {
+    public RoleCreateRequest(String name, long permissions, int color, boolean hoist, boolean mentionable) {
         this.name = name;
         this.permissions = permissions;
         this.color = color;

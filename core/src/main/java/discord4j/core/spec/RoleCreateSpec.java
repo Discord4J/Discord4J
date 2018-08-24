@@ -24,7 +24,7 @@ import java.awt.*;
 public class RoleCreateSpec implements Spec<RoleCreateRequest> {
 
     private String name;
-    private int permissions;
+    private long permissions;
     private int color;
     private boolean hoist;
     private boolean mentionable;

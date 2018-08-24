@@ -18,12 +18,14 @@ package discord4j.core.object.entity;
 
 import discord4j.core.ServiceMediator;
 import discord4j.core.object.ExtendedInvite;
+import discord4j.core.object.ExtendedPermissionOverwrite;
 import discord4j.core.object.PermissionOverwrite;
 import discord4j.core.object.data.ExtendedInviteBean;
 import discord4j.core.object.data.WebhookBean;
 import discord4j.core.object.data.stored.TextChannelBean;
 import discord4j.core.object.trait.Categorizable;
 import discord4j.core.object.trait.Invitable;
+import discord4j.core.object.util.PermissionSet;
 import discord4j.core.object.util.Snowflake;
 import discord4j.core.spec.InviteCreateSpec;
 import discord4j.core.spec.MessageCreateSpec;
@@ -73,8 +75,23 @@ public final class TextChannel extends BaseChannel implements Categorizable, Gui
     }
 
     @Override
-    public Set<PermissionOverwrite> getPermissionOverwrites() {
+    public Set<ExtendedPermissionOverwrite> getPermissionOverwrites() {
         return guildChannel.getPermissionOverwrites();
+    }
+
+    @Override
+    public Optional<ExtendedPermissionOverwrite> getOverwriteForMember(Snowflake memberId) {
+        return guildChannel.getOverwriteForMember(memberId);
+    }
+
+    @Override
+    public Optional<ExtendedPermissionOverwrite> getOverwriteForRole(Snowflake roleId) {
+        return guildChannel.getOverwriteForRole(roleId);
+    }
+
+    @Override
+    public Mono<PermissionSet> getEffectivePermissions(Snowflake memberId) {
+        return guildChannel.getEffectivePermissions(memberId);
     }
 
     @Override
@@ -90,6 +107,17 @@ public final class TextChannel extends BaseChannel implements Categorizable, Gui
     @Override
     public Mono<Integer> getPosition() {
         return guildChannel.getPosition();
+    }
+
+
+    @Override
+    public Mono<Void> addMemberOverwrite(Snowflake memberId, PermissionOverwrite overwrite) {
+        return guildChannel.addMemberOverwrite(memberId, overwrite);
+    }
+
+    @Override
+    public Mono<Void> addRoleOverwrite(Snowflake roleId, PermissionOverwrite overwrite) {
+        return guildChannel.addRoleOverwrite(roleId, overwrite);
     }
 
     @Override

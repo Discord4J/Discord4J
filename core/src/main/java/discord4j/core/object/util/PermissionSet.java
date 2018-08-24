@@ -21,11 +21,17 @@ import java.util.*;
 /** An <i>immutable</i> specialized {@link Set} implementation for use with the {@link Permission} type. */
 public final class PermissionSet extends AbstractSet<Permission> {
 
+    private static final long ALL_RAW = Arrays.stream(Permission.values())
+        .mapToLong(Permission::getValue)
+        .reduce((a, b) -> a | b)
+        .orElseThrow(AssertionError::new);
+    private static final long NONE_RAW = 0;
+
     /** Common instance for {@code all()}. */
-    private static final PermissionSet ALL = new PermissionSet(0x7FF7FDFF);
+    private static final PermissionSet ALL = new PermissionSet(ALL_RAW);
 
     /** Common instance for {@code none()}. */
-    private static final PermissionSet NONE = new PermissionSet(0x00000000);
+    private static final PermissionSet NONE = new PermissionSet(NONE_RAW);
 
     /**
      * Returns a {@code PermissionSet} containing all permissions.
@@ -51,7 +57,7 @@ public final class PermissionSet extends AbstractSet<Permission> {
      * @param rawValue A bit-wise OR evaluation of multiple values returned by {@link Permission#getValue()}.
      * @return A {@code PermissionSet} containing all the permissions represented by the <i>raw value</i>.
      */
-    public static PermissionSet of(final int rawValue) {
+    public static PermissionSet of(final long rawValue) {
         return new PermissionSet(rawValue);
     }
 
@@ -62,21 +68,21 @@ public final class PermissionSet extends AbstractSet<Permission> {
      * @return A {@code PermissionSet} containing all the supplied permissions.
      */
     public static PermissionSet of(final Permission... permissions) {
-        final int rawValue = Arrays.stream(permissions)
-                .mapToInt(Permission::getValue)
+        final long rawValue = Arrays.stream(permissions)
+                .mapToLong(Permission::getValue)
                 .reduce(0, (left, right) -> left | right);
         return new PermissionSet(rawValue);
     }
 
     /** A bit-wise OR evaluation of multiple values returned by {@link Permission#getValue()}. */
-    private final int rawValue;
+    private final long rawValue;
 
     /**
      * Constructs a {@code PermissionSet} with a <i>raw value</i>.
      *
      * @param rawValue A bit-wise OR evaluation of multiple values returned by {@link Permission#getValue()}.
      */
-    private PermissionSet(final int rawValue) {
+    private PermissionSet(final long rawValue) {
         this.rawValue = rawValue;
     }
 
@@ -146,7 +152,7 @@ public final class PermissionSet extends AbstractSet<Permission> {
      * @return The <i>raw value</i> for this {@code PermissionSet}.
      * @see PermissionSet
      */
-    public int getRawValue() {
+    public long getRawValue() {
         return rawValue;
     }
 

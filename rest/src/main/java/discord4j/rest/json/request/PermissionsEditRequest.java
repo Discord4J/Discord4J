@@ -18,11 +18,11 @@ package discord4j.rest.json.request;
 
 public class PermissionsEditRequest {
 
-    private final int allow;
-    private final int deny;
+    private final long allow;
+    private final long deny;
     private final String type;
 
-    public PermissionsEditRequest(int allow, int deny, String type) {
+    public PermissionsEditRequest(long allow, long deny, String type) {
         this.allow = allow;
         this.deny = deny;
         this.type = type;
