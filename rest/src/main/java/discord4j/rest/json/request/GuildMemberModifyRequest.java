@@ -29,6 +29,7 @@ public class GuildMemberModifyRequest {
 
     @Nullable
     private final Possible<String> nick;
+    @Nullable
     @UnsignedJson
     private final Possible<long[]> roles;
     private final Possible<Boolean> mute;

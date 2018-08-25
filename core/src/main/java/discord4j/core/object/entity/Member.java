@@ -264,7 +264,7 @@ public final class Member extends User {
      * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the member has been
      * modified. If an error is received, it is emitted through the {@code Mono}.
      */
-    public Mono<Void> modifyGuildMember(Consumer<GuildMemberModifySpec> spec) {
+    public Mono<Void> modifyGuildMember(final Consumer<GuildMemberModifySpec> spec) {
         GuildMemberModifySpec mutatedSpec = new GuildMemberModifySpec();
         spec.accept(mutatedSpec);
         return modifyGuildMember(mutatedSpec);
@@ -277,7 +277,7 @@ public final class Member extends User {
      * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the member has been
      * modified. If an error is received, it is emitted through the {@code Mono}.
      */
-    public Mono<Void> modifyGuildMember(GuildMemberModifySpec spec) {
+    public Mono<Void> modifyGuildMember(final GuildMemberModifySpec spec) {
         return getServiceMediator().getRestClient().getGuildService()
                 .modifyGuildMember(getGuildId().asLong(), getId().asLong(), spec.asRequest());
     }
@@ -289,7 +289,7 @@ public final class Member extends User {
      * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the nickname has been
      * changed. If an error is received, it is emitted through the {@code Mono}.
      */
-    public Mono<Void> changeNickname(String nickname) {
+    public Mono<Void> changeNickname(final String nickname) {
         return modifyGuildMember(spec -> spec.setNickname(nickname));
     }
 
