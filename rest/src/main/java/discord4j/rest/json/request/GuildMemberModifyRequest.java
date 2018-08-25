@@ -38,7 +38,7 @@ public class GuildMemberModifyRequest {
     @UnsignedJson
     private final PossibleLong channelId;
 
-    public GuildMemberModifyRequest(@Nullable Possible<String> nick, Possible<long[]> roles,
+    public GuildMemberModifyRequest(@Nullable Possible<String> nick, @Nullable Possible<long[]> roles,
                                     Possible<Boolean> mute, Possible<Boolean> deaf,
                                     @Nullable PossibleLong channelId) {
         this.nick = nick;
@@ -55,6 +55,7 @@ public class GuildMemberModifyRequest {
     public static class Builder {
 
         private Possible<String> nick = Possible.absent();
+        @Nullable
         private Possible<long[]> roles = Possible.absent();
         private Possible<Boolean> mute = Possible.absent();
         private Possible<Boolean> deaf = Possible.absent();

@@ -255,7 +255,6 @@ public final class Member extends User {
                 .removeGuildMemberRole(guildId, getId().asLong(), roleId.asLong());
     }
 
-
     /**
      * Requests to modify this member.
      *
@@ -263,7 +262,7 @@ public final class Member extends User {
      * properties need to be retrieved via blocking operations (such as retrieval from a database), then it is
      * recommended to build the spec externally and call {@link #modifyGuildMember(GuildMemberModifySpec)}.
      * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the member has been
-     * modifying. If an error is received, it is emitted through the {@code Mono}.
+     * modified. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Void> modifyGuildMember(Consumer<GuildMemberModifySpec> spec) {
         GuildMemberModifySpec mutatedSpec = new GuildMemberModifySpec();
@@ -272,11 +271,11 @@ public final class Member extends User {
     }
 
     /**
-     * Requests to edit modify this member.
+     * Requests to modify this member.
      *
      * @param spec A configured {@link GuildMemberModifySpec} to perform the request on.
      * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the member has been
-     * modifying. If an error is received, it is emitted through the {@code Mono}.
+     * modified. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Void> modifyGuildMember(GuildMemberModifySpec spec) {
         return getServiceMediator().getRestClient().getGuildService()
@@ -284,7 +283,7 @@ public final class Member extends User {
     }
 
     /**
-     * Changes the nickname of this member.
+     * Requests to change the nickname of this member.
      *
      * @param nickname The nickname to change the member to. Must be between 2 and 32 characters.
      * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the nickname has been
