@@ -65,8 +65,8 @@ public class GuildMemberModifyRequest {
             return this;
         }
 
-        public Builder roles(long[] roles) {
-            this.roles = Possible.of(roles);
+        public Builder roles(@Nullable long[] roles) {
+            this.roles = roles == null ? null : Possible.of(roles);
             return this;
         }
 
