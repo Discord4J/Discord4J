@@ -25,6 +25,7 @@ import discord4j.core.object.data.stored.VoiceStateBean;
 import discord4j.core.object.presence.Presence;
 import discord4j.core.object.util.Snowflake;
 import discord4j.core.spec.BanQuerySpec;
+import discord4j.core.spec.GuildMemberModifySpec;
 import discord4j.store.api.util.LongLongTuple2;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -279,7 +280,7 @@ public final class Member extends User {
      */
     public Mono<Void> modifyGuildMember(GuildMemberModifySpec spec) {
         return getServiceMediator().getRestClient().getGuildService()
-                .modifyGuildMember(getId().asLong(), getGuildId().asLong(), spec.asRequest());
+                .modifyGuildMember(getGuildId().asLong(), getId().asLong(), spec.asRequest());
     }
 
     /**
