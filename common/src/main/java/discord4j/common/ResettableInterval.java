@@ -25,7 +25,7 @@ import java.time.Duration;
 public class ResettableInterval {
 
     private final EmitterProcessor<Long> backing = EmitterProcessor.create(false);
-    private Disposable task;
+    private volatile Disposable task;
 
     public void start(Duration duration) {
         task = Flux.interval(duration).subscribe(backing::onNext);

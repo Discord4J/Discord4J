@@ -21,6 +21,7 @@ import discord4j.core.event.domain.lifecycle.*;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.ApplicationInfo;
 import discord4j.core.object.entity.Message;
+import discord4j.core.object.entity.User;
 import discord4j.core.object.presence.Presence;
 import discord4j.core.object.util.Snowflake;
 import discord4j.gateway.IdentifyOptions;
@@ -28,6 +29,7 @@ import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import reactor.util.Logger;
 import reactor.util.Loggers;
 
@@ -84,7 +86,7 @@ public class RetryBotTest {
             try {
                 String sessionId = options.getResumeSessionId();
                 Integer sequence = options.getResumeSequence();
-                log.debug("Resuming data: {}, {}", sessionId, sequence);
+                log.debug("Saving resume data: {}, {}", sessionId, sequence);
                 Path saved = Files.write(Paths.get("resume.dat"),
                         Collections.singletonList(sessionId + ";" + sequence));
                 log.info("File saved to {}", saved.toAbsolutePath());
@@ -142,7 +144,7 @@ public class RetryBotTest {
                     .subscribe(ownerId::set);
 
             client.getEventDispatcher().on(MessageCreateEvent.class)
-                    .doOnNext(event -> {
+                    .flatMap(event -> {
                         Message message = event.getMessage();
 
                         message.getAuthorId()
@@ -161,10 +163,16 @@ public class RetryBotTest {
                                         // exception if DM
                                         Snowflake guildId = message.getGuild().block().getId();
                                         log.info("Message came from guild: {}", guildId);
+                                    } else if (content.startsWith("!echo ")) {
+                                        message.getAuthor()
+                                                .flatMap(User::getPrivateChannel)
+                                                .flatMap(ch -> ch.createMessage(content.substring("!echo ".length())))
+                                                .subscribe();
                                     }
                                 });
+                        return Mono.just(event);
                     })
-                    .retry() // retry if above block throws
+                    .onErrorContinue()
                     .subscribe();
         }
     }

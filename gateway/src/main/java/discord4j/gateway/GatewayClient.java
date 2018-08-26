@@ -28,7 +28,6 @@ import discord4j.gateway.payload.PayloadWriter;
 import discord4j.gateway.retry.GatewayStateChange;
 import discord4j.gateway.retry.RetryContext;
 import discord4j.gateway.retry.RetryOptions;
-import reactor.core.Disposable;
 import reactor.core.publisher.EmitterProcessor;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxSink;
@@ -46,16 +45,16 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
 
 /**
- * Represents a Discord gateway (websocket) client, implementing its lifecycle.
+ * Represents a Discord WebSocket client, called Gateway, implementing its lifecycle.
  * <p>
- * This is the next component downstream from the websocket handler, that keeps track of a single websocket session.
- * It wraps an instance of {@link discord4j.gateway.DiscordWebSocketHandler} each time a new connection to the
- * gateway is made, therefore only one instance of this class is enough to handle the lifecycle of Discord gateway
- * operations, that could span multiple websocket sessions over time.
+ * Keeps track of a single websocket session by wrapping an instance of
+ * {@link discord4j.gateway.DiscordWebSocketHandler}
+ * each time a new WebSocket connection to Discord is made, therefore only one instance of this class is enough to
+ * handle the lifecycle of the Gateway operations, that could span multiple WebSocket sessions over time.
  * <p>
- * It provides automatic reconnecting through a configurable retry policy, allows downstream consumers to receive
- * inbound events through {@link #dispatch()} and direct raw payloads through {@link #receiver()} and provides
- * {@link #sender()} to submit events.
+ * Provides automatic reconnecting through a configurable retry policy, allows downstream consumers to receive
+ * inbound events through {@link #dispatch()} and direct raw payloads through {@link #receiver()} and allows a user to
+ * submit events through {@link #sender()}.
  */
 public class GatewayClient {
 
@@ -83,15 +82,12 @@ public class GatewayClient {
     private final FluxSink<GatewayPayload<?>> senderSink;
 
     public GatewayClient(PayloadReader payloadReader, PayloadWriter payloadWriter,
-                         RetryOptions retryOptions, String token, IdentifyOptions identifyOptions) {
+            RetryOptions retryOptions, String token, IdentifyOptions identifyOptions) {
         this.payloadReader = Objects.requireNonNull(payloadReader);
         this.payloadWriter = Objects.requireNonNull(payloadWriter);
         this.retryOptions = Objects.requireNonNull(retryOptions);
         this.identifyOptions = Objects.requireNonNull(identifyOptions);
         this.token = Objects.requireNonNull(token);
-
-        // initialize the sinks to safely produce values downstream
-        // we use LATEST backpressure handling to avoid overflow on no subscriber situations
         this.dispatchSink = dispatch.sink(FluxSink.OverflowStrategy.LATEST);
         this.receiverSink = receiver.sink(FluxSink.OverflowStrategy.LATEST);
         this.senderSink = sender.sink(FluxSink.OverflowStrategy.LATEST);
@@ -105,7 +101,8 @@ public class GatewayClient {
      */
     public Mono<Void> execute(String gatewayUrl) {
         return Mono.defer(() -> {
-            final DiscordWebSocketHandler handler = new DiscordWebSocketHandler(payloadReader, payloadWriter);
+            final DiscordWebSocketHandler handler = new DiscordWebSocketHandler(payloadReader, payloadWriter,
+                    receiverSink, sender);
 
             if (identifyOptions.getResumeSequence() != null) {
                 this.lastSequence.set(identifyOptions.getResumeSequence());
@@ -114,59 +111,58 @@ public class GatewayClient {
                 resumable.set(false);
             }
 
-            // Internally subscribe to Ready to signal completion of retry mechanism
-            Disposable readySub = dispatch.filter(GatewayClient::isReadyOrResume).subscribe(d -> {
-                RetryContext retryContext = retryOptions.getRetryContext();
-                if (retryContext.getResetCount() == 0) {
-                    log.info("Gateway connection established");
-                    dispatchSink.next(GatewayStateChange.connected());
-                } else {
-                    log.info("Gateway successfully reconnected");
-                    dispatchSink.next(GatewayStateChange.retrySucceeded(retryContext.getAttempts()));
-                }
-                retryContext.reset();
-                identifyOptions.setResumeSessionId(sessionId.get());
-                resumable.set(true);
-            });
-
-            // Subscribe each inbound GatewayPayload to the receiver sink
-            Disposable inboundSub = handler.inbound()
-                    .doOnError(t -> log.debug("Inbound encountered an error"))
-                    .doOnCancel(() -> log.debug("Inbound cancelled"))
-                    .doOnComplete(() -> log.debug("Inbound completed"))
-                    .subscribe(receiverSink::next);
+            Mono<Void> readyHandler = dispatch.filter(GatewayClient::isReadyOrResume)
+                    .doOnNext(event -> {
+                        RetryContext retryContext = retryOptions.getRetryContext();
+                        if (retryContext.getResetCount() == 0) {
+                            log.info("Gateway connection established");
+                            dispatchSink.next(GatewayStateChange.connected());
+                        } else {
+                            log.info("Gateway successfully reconnected");
+                            dispatchSink.next(GatewayStateChange.retrySucceeded(retryContext.getAttempts()));
+                        }
+                        retryContext.reset();
+                        identifyOptions.setResumeSessionId(sessionId.get());
+                        resumable.set(true);
+                    })
+                    .then();
 
             // Subscribe the receiver to process and transform the inbound payloads into Dispatch events
-            Disposable receiverSub = receiver.map(this::updateSequence)
+            Mono<Void> receiverFuture = receiver.map(this::updateSequence)
                     .map(payload -> payloadContext(payload, handler, this))
-                    .subscribe(PayloadHandlers::handle);
+                    .doOnNext(PayloadHandlers::handle)
+                    .doOnComplete(() -> log.debug("Receiver future completed"))
+                    .then();
 
             // Subscribe the handler's outbound exchange with our outgoing signals
             // routing error and completion signals to close the gateway
-            Disposable senderSub = sender.subscribe(handler.outbound()::onNext, t -> handler.close(), handler::close);
+            Mono<Void> senderFuture = sender.doOnError(t -> handler.close())
+                    .doOnComplete(handler::close)
+                    .doOnComplete(() -> log.debug("Sender future completed"))
+                    .then();
 
             // Create the heartbeat loop, and subscribe it using the sender sink
-            Disposable heartbeatSub = heartbeat.ticks()
+            Mono<Void> heartbeatHandler = heartbeat.ticks()
                     .map(l -> new Heartbeat(lastSequence.get()))
                     .map(GatewayPayload::heartbeat)
-                    .subscribe(handler.outbound()::onNext);
+                    .doOnNext(senderSink::next)
+                    .then();
 
-            return HttpClient.create()
+            Mono<Void> httpFuture = HttpClient.create()
                     .observe(handler)
                     .websocket()
                     .uri(gatewayUrl)
                     .handle(handler::handle)
-                    .then()
+                    .doOnComplete(() -> log.debug("WebSocket future complete"))
+                    .doOnError(t -> log.debug("WebSocket future threw an error", t))
+                    .doOnCancel(() -> log.debug("WebSocket future cancelled"))
+                    .doOnTerminate(heartbeat::stop)
+                    .then();
+
+            return Mono.zip(httpFuture, readyHandler, receiverFuture, senderFuture, heartbeatHandler)
+                    .doOnError(t -> log.error("Gateway client error: {}", t.toString()))
                     .doOnCancel(() -> close(false))
-                    .doOnTerminate(() -> {
-                        log.info("Terminating websocket client");
-                        inboundSub.dispose();
-                        receiverSub.dispose();
-                        senderSub.dispose();
-                        heartbeatSub.dispose();
-                        readySub.dispose();
-                        heartbeat.stop();
-                    });
+                    .then();
         }).retryWhen(retryFactory())
                 .doOnCancel(() -> dispatchSink.next(GatewayStateChange.disconnected()))
                 .doOnTerminate(() -> dispatchSink.next(GatewayStateChange.disconnected()));
@@ -185,7 +181,7 @@ public class GatewayClient {
     }
 
     private PayloadContext<?> payloadContext(GatewayPayload<?> payload, DiscordWebSocketHandler handler,
-                                             GatewayClient client) {
+            GatewayClient client) {
         return new PayloadContext<>(payload, handler, client);
     }
 
