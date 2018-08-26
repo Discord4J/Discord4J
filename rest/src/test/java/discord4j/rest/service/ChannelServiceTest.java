@@ -129,7 +129,7 @@ public class ChannelServiceTest {
     }
 
     @Test
-    public void testCreateReaction() throws UnsupportedEncodingException {
+    public void testCreateReaction() {
         getChannelService().createReaction(permanentChannel, reactionMessage, "❤").block();
     }
 

@@ -27,9 +27,6 @@ import discord4j.core.object.reaction.ReactionEmoji;
 import discord4j.rest.json.response.ChannelResponse;
 
 import javax.annotation.Nullable;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 
 /** An utility class for entity processing. */
 public final class EntityUtil {
@@ -39,11 +36,7 @@ public final class EntityUtil {
 
     public static String getEmojiString(ReactionEmoji emoji) {
         if (emoji instanceof ReactionEmoji.Unicode) {
-            try {
-                return URLEncoder.encode(((ReactionEmoji.Unicode) emoji).getRaw(), StandardCharsets.UTF_8.name());
-            } catch (UnsupportedEncodingException e) {
-                throw new AssertionError(); // UTF-8 is guaranteed to be supported.
-            }
+            return ((ReactionEmoji.Unicode) emoji).getRaw();
         } else {
             ReactionEmoji.Custom custom = ((ReactionEmoji.Custom) emoji);
             return custom.getName() + ":" + custom.getId().asString();
