@@ -29,7 +29,6 @@ public class GuildMemberModifyRequest {
 
     @Nullable
     private final Possible<String> nick;
-    @Nullable
     @UnsignedJson
     private final Possible<long[]> roles;
     private final Possible<Boolean> mute;
@@ -39,7 +38,7 @@ public class GuildMemberModifyRequest {
     @UnsignedJson
     private final PossibleLong channelId;
 
-    public GuildMemberModifyRequest(@Nullable Possible<String> nick, @Nullable Possible<long[]> roles,
+    public GuildMemberModifyRequest(@Nullable Possible<String> nick, Possible<long[]> roles,
                                     Possible<Boolean> mute, Possible<Boolean> deaf,
                                     @Nullable PossibleLong channelId) {
         this.nick = nick;
@@ -56,7 +55,6 @@ public class GuildMemberModifyRequest {
     public static class Builder {
 
         private Possible<String> nick = Possible.absent();
-        @Nullable
         private Possible<long[]> roles = Possible.absent();
         private Possible<Boolean> mute = Possible.absent();
         private Possible<Boolean> deaf = Possible.absent();
@@ -67,8 +65,8 @@ public class GuildMemberModifyRequest {
             return this;
         }
 
-        public Builder roles(@Nullable long[] roles) {
-            this.roles = roles == null ? null : Possible.of(roles);
+        public Builder roles(long[] roles) {
+            this.roles = Possible.of(roles);
             return this;
         }
 

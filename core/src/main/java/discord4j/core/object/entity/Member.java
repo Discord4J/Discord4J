@@ -25,11 +25,12 @@ import discord4j.core.object.data.stored.VoiceStateBean;
 import discord4j.core.object.presence.Presence;
 import discord4j.core.object.util.Snowflake;
 import discord4j.core.spec.BanQuerySpec;
-import discord4j.core.spec.GuildMemberModifySpec;
+import discord4j.core.spec.GuildMemberEditSpec;
 import discord4j.store.api.util.LongLongTuple2;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import javax.annotation.Nullable;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
@@ -256,28 +257,28 @@ public final class Member extends User {
     }
 
     /**
-     * Requests to modify this member.
+     * Requests to edit this member.
      *
-     * @param spec A {@link Consumer} that provides a "blank" {@link GuildMemberModifySpec} to be operated on. If some
+     * @param spec A {@link Consumer} that provides a "blank" {@link GuildMemberEditSpec} to be operated on. If some
      * properties need to be retrieved via blocking operations (such as retrieval from a database), then it is
-     * recommended to build the spec externally and call {@link #modifyGuildMember(GuildMemberModifySpec)}.
-     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the member has been
-     * modified. If an error is received, it is emitted through the {@code Mono}.
+     * recommended to build the spec externally and call {@link #edit(GuildMemberEditSpec)}.
+     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the member has been edited.
+     * If an error is received, it is emitted through the {@code Mono}.
      */
-    public Mono<Void> modifyGuildMember(final Consumer<GuildMemberModifySpec> spec) {
-        GuildMemberModifySpec mutatedSpec = new GuildMemberModifySpec();
+    public Mono<Void> edit(final Consumer<GuildMemberEditSpec> spec) {
+        final GuildMemberEditSpec mutatedSpec = new GuildMemberEditSpec();
         spec.accept(mutatedSpec);
-        return modifyGuildMember(mutatedSpec);
+        return edit(mutatedSpec);
     }
 
     /**
-     * Requests to modify this member.
+     * Requests to edit this member.
      *
-     * @param spec A configured {@link GuildMemberModifySpec} to perform the request on.
-     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the member has been
-     * modified. If an error is received, it is emitted through the {@code Mono}.
+     * @param spec A configured {@link GuildMemberEditSpec} to perform the request on.
+     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the member has been edited.
+     * If an error is received, it is emitted through the {@code Mono}.
      */
-    public Mono<Void> modifyGuildMember(final GuildMemberModifySpec spec) {
+    public Mono<Void> edit(final GuildMemberEditSpec spec) {
         return getServiceMediator().getRestClient().getGuildService()
                 .modifyGuildMember(getGuildId().asLong(), getId().asLong(), spec.asRequest());
     }
@@ -285,12 +286,11 @@ public final class Member extends User {
     /**
      * Requests to change the nickname of this member.
      *
-     * @param nickname The nickname to change the member to. Must be between 2 and 32 characters.
+     * @param nickname The nickname to change the member to. May be null.
      * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the nickname has been
      * changed. If an error is received, it is emitted through the {@code Mono}.
      */
-    public Mono<Void> changeNickname(final String nickname) {
-        return modifyGuildMember(spec -> spec.setNickname(nickname));
+    public Mono<Void> changeNickname(@Nullable final String nickname) {
+        return edit(spec -> spec.setNickname(nickname));
     }
-
 }
