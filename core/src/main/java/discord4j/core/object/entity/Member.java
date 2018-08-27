@@ -25,6 +25,7 @@ import discord4j.core.object.data.stored.VoiceStateBean;
 import discord4j.core.object.presence.Presence;
 import discord4j.core.object.util.Snowflake;
 import discord4j.core.spec.BanQuerySpec;
+import discord4j.core.spec.GuildMemberEditSpec;
 import discord4j.store.api.util.LongLongTuple2;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -252,5 +253,32 @@ public final class Member extends User {
     public Mono<Void> removeRole(final Snowflake roleId) {
         return getServiceMediator().getRestClient().getGuildService()
                 .removeGuildMemberRole(guildId, getId().asLong(), roleId.asLong());
+    }
+
+    /**
+     * Requests to edit this member.
+     *
+     * @param spec A {@link Consumer} that provides a "blank" {@link GuildMemberEditSpec} to be operated on. If some
+     * properties need to be retrieved via blocking operations (such as retrieval from a database), then it is
+     * recommended to build the spec externally and call {@link #edit(GuildMemberEditSpec)}.
+     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the member has been edited.
+     * If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Void> edit(final Consumer<GuildMemberEditSpec> spec) {
+        final GuildMemberEditSpec mutatedSpec = new GuildMemberEditSpec();
+        spec.accept(mutatedSpec);
+        return edit(mutatedSpec);
+    }
+
+    /**
+     * Requests to edit this member.
+     *
+     * @param spec A configured {@link GuildMemberEditSpec} to perform the request on.
+     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the member has been edited.
+     * If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Void> edit(final GuildMemberEditSpec spec) {
+        return getServiceMediator().getRestClient().getGuildService()
+                .modifyGuildMember(getGuildId().asLong(), getId().asLong(), spec.asRequest());
     }
 }

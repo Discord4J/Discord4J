@@ -54,14 +54,15 @@ public class GuildMemberModifyRequest {
 
     public static class Builder {
 
+        @Nullable
         private Possible<String> nick = Possible.absent();
         private Possible<long[]> roles = Possible.absent();
         private Possible<Boolean> mute = Possible.absent();
         private Possible<Boolean> deaf = Possible.absent();
         private PossibleLong channelId = PossibleLong.absent();
 
-        public Builder nick(String nick) {
-            this.nick = Possible.of(nick);
+        public Builder nick(@Nullable String nick) {
+            this.nick = nick == null ? null : Possible.of(nick);
             return this;
         }
 
