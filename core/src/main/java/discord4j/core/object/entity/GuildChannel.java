@@ -50,10 +50,28 @@ public interface GuildChannel extends Channel {
      */
     Set<ExtendedPermissionOverwrite> getPermissionOverwrites();
 
+    /**
+     * Gets the permission overwrite targeting the given member.
+     *
+     * @param memberId The ID of the member to get the overwrite for.
+     * @return The permission overwrite targeting the given member.
+     */
     Optional<ExtendedPermissionOverwrite> getOverwriteForMember(Snowflake memberId);
 
+    /**
+     * Gets the permission overwrite targeting the given role.
+     *
+     * @param roleId The ID of the role to get the overwrite for.
+     * @return The permission overwrite targeting the given role.
+     */
     Optional<ExtendedPermissionOverwrite> getOverwriteForRole(Snowflake roleId);
 
+    /**
+     * Gets the permissions for the given member, taking into account permission overwrites in this channel.
+     *
+     * @param memberId The ID of the member to get permissions for.
+     * @return The permissions for the given member.
+     */
     Mono<PermissionSet> getEffectivePermissions(Snowflake memberId);
 
     /**
@@ -79,7 +97,23 @@ public interface GuildChannel extends Channel {
      */
     Mono<Integer> getPosition();
 
+    /**
+     * Requests to add a permission overwrite for the given member.
+     *
+     * @param memberId The ID of the member to add the overwrite for.
+     * @param overwrite The overwrite to add.
+     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the guild has been deleted.
+     * If an error is received, it is emitted through the {@code Mono}.
+     */
     Mono<Void> addMemberOverwrite(Snowflake memberId, PermissionOverwrite overwrite);
 
+    /**
+     * Requests to add a permission overwrite for the given role.
+     *
+     * @param roleId The ID of the role to add the overwrite for.
+     * @param overwrite The overwrite to add.
+     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the guild has been deleted.
+     * If an error is received, it is emitted through the {@code Mono}.
+     */
     Mono<Void> addRoleOverwrite(Snowflake roleId, PermissionOverwrite overwrite);
 }

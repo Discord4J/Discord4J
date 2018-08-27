@@ -18,6 +18,7 @@ package discord4j.core.util;
 
 import discord4j.core.object.PermissionOverwrite;
 import discord4j.core.object.util.PermissionSet;
+import discord4j.core.object.util.Snowflake;
 import org.junit.Test;
 
 import java.util.Arrays;
@@ -28,6 +29,11 @@ import static discord4j.core.object.util.Permission.*;
 import static org.junit.Assert.assertEquals;
 
 public class PermissionUtilTest {
+
+    private static PermissionOverwrite overwrite(PermissionSet allowed, PermissionSet denied) {
+        // create an overwrite with garbage ID and type. These are not important *for these tests*.
+        return PermissionOverwrite.forMember(Snowflake.of(-1L), allowed, denied);
+    }
 
     @Test
     public void testComputeBase() {
@@ -55,7 +61,7 @@ public class PermissionUtilTest {
     @Test
     public void testRoleOverwriteAllows() {
         PermissionSet base = PermissionSet.of(SEND_MESSAGES);
-        List<PermissionOverwrite> roleOverwrites = Collections.singletonList(PermissionOverwrite.of(PermissionSet.of(PRIORITY_SPEAKER), PermissionSet.none()));
+        List<PermissionOverwrite> roleOverwrites = Collections.singletonList(overwrite(PermissionSet.of(PRIORITY_SPEAKER), PermissionSet.none()));
         PermissionOverwrite memberOverwrite = null;
 
         PermissionSet actual = PermissionUtil.computePermissions(base, roleOverwrites, memberOverwrite);
@@ -68,7 +74,7 @@ public class PermissionUtilTest {
     public void testMemberOverwriteAllows() {
         PermissionSet base = PermissionSet.of(SEND_MESSAGES);
         List<PermissionOverwrite> roleOverwrites = Collections.emptyList();
-        PermissionOverwrite memberOverwrite = PermissionOverwrite.of(PermissionSet.of(PRIORITY_SPEAKER), PermissionSet.none());
+        PermissionOverwrite memberOverwrite = overwrite(PermissionSet.of(PRIORITY_SPEAKER), PermissionSet.none());
 
         PermissionSet actual = PermissionUtil.computePermissions(base, roleOverwrites, memberOverwrite);
         PermissionSet expected = PermissionSet.of(SEND_MESSAGES, PRIORITY_SPEAKER);
@@ -79,7 +85,7 @@ public class PermissionUtilTest {
     @Test
     public void testRoleOverwriteDenies() {
         PermissionSet base = PermissionSet.of(SEND_MESSAGES);
-        List<PermissionOverwrite> roleOverwrites = Collections.singletonList(PermissionOverwrite.of(PermissionSet.none(), PermissionSet.of(SEND_MESSAGES)));
+        List<PermissionOverwrite> roleOverwrites = Collections.singletonList(overwrite(PermissionSet.none(), PermissionSet.of(SEND_MESSAGES)));
         PermissionOverwrite memberOverwrite = null;
 
         PermissionSet actual = PermissionUtil.computePermissions(base, roleOverwrites, memberOverwrite);
@@ -92,7 +98,7 @@ public class PermissionUtilTest {
     public void testOverwriteAllowsAndDenies() {
         PermissionSet base = PermissionSet.of(SEND_MESSAGES);
         List<PermissionOverwrite> roleOverwrites = Collections.emptyList();
-        PermissionOverwrite memberOverwrite = PermissionOverwrite.of(PermissionSet.of(PRIORITY_SPEAKER), PermissionSet.of(SEND_MESSAGES));
+        PermissionOverwrite memberOverwrite = overwrite(PermissionSet.of(PRIORITY_SPEAKER), PermissionSet.of(SEND_MESSAGES));
 
         PermissionSet actual = PermissionUtil.computePermissions(base, roleOverwrites, memberOverwrite);
         PermissionSet expected = PermissionSet.of(PRIORITY_SPEAKER);
@@ -104,7 +110,7 @@ public class PermissionUtilTest {
     public void testMemberOverwriteDenies() {
         PermissionSet base = PermissionSet.of(SEND_MESSAGES);
         List<PermissionOverwrite> roleOverwrites = Collections.emptyList();
-        PermissionOverwrite memberOverwrite = PermissionOverwrite.of(PermissionSet.none(), PermissionSet.of(SEND_MESSAGES));
+        PermissionOverwrite memberOverwrite = overwrite(PermissionSet.none(), PermissionSet.of(SEND_MESSAGES));
 
         PermissionSet actual = PermissionUtil.computePermissions(base, roleOverwrites, memberOverwrite);
         PermissionSet expected = PermissionSet.none();
@@ -128,7 +134,7 @@ public class PermissionUtilTest {
     public void testAdminBypassesOverwrites() {
         PermissionSet base = PermissionSet.of(SEND_MESSAGES, ADMINISTRATOR);
         List<PermissionOverwrite> roleOverwrites = Collections.emptyList();
-        PermissionOverwrite memberOverwrite = PermissionOverwrite.of(PermissionSet.none(), PermissionSet.of(SEND_MESSAGES));
+        PermissionOverwrite memberOverwrite = overwrite(PermissionSet.none(), PermissionSet.of(SEND_MESSAGES));
 
         PermissionSet actual = PermissionUtil.computePermissions(base, roleOverwrites, memberOverwrite);
         PermissionSet expected = PermissionSet.all();

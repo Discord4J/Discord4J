@@ -71,7 +71,7 @@ class BaseGuildChannel extends BaseChannel implements GuildChannel {
     @Override
     public Optional<ExtendedPermissionOverwrite> getOverwriteForMember(Snowflake memberId) {
         return getPermissionOverwrites().stream()
-            .filter(overwrite -> overwrite.getUserId().map(memberId::equals).orElse(false))
+            .filter(overwrite -> overwrite.getMemberId().map(memberId::equals).orElse(false))
             .findFirst();
     }
 
