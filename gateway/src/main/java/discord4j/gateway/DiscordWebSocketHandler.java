@@ -189,7 +189,7 @@ public class DiscordWebSocketHandler implements ConnectionObserver {
      * @param error the cause for this session termination
      */
     public void error(Throwable error) {
-        log.debug("Triggering error sequence ({})", error.toString());
+        log.warn("Triggering error sequence ({})", error.toString());
         if (!completionNotifier.isTerminated()) {
             if (error instanceof CloseException) {
                 log.debug("Signaling completion notifier as error with same CloseException");

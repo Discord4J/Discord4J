@@ -85,7 +85,7 @@ public class DiscordWebClient {
         HttpHeaders requestHeaders = new DefaultHttpHeaders().add(defaultHeaders).setAll(clientRequest.headers());
         String contentType = requestHeaders.get(HttpHeaderNames.CONTENT_TYPE);
         HttpClient.RequestSender sender = httpClient
-                .observe((connection, newState) -> log.info("{} {}", newState, connection))
+                .observe((connection, newState) -> log.debug("{} {}", newState, connection))
                 .headers(headers -> headers.setAll(requestHeaders))
                 .request(clientRequest.method())
                 .uri(clientRequest.url());

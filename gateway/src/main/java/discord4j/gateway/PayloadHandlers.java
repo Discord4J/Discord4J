@@ -102,7 +102,7 @@ public abstract class PayloadHandlers {
         client.heartbeat().start(interval);
 
         if (client.resumable().get()) {
-            log.debug("Attempting to RESUME from {}", client.lastSequence().get());
+            log.info("Attempting to RESUME from {}", client.lastSequence().get());
             client.sender().next(GatewayPayload.resume(
                     new Resume(client.token(), client.getSessionId(), client.lastSequence().get())));
         } else {

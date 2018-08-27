@@ -118,8 +118,10 @@ public class GatewayClient {
             Disposable readySub = dispatch.filter(GatewayClient::isReadyOrResume).subscribe(d -> {
                 RetryContext retryContext = retryOptions.getRetryContext();
                 if (retryContext.getResetCount() == 0) {
+                    log.info("Gateway connection established");
                     dispatchSink.next(GatewayStateChange.connected());
                 } else {
+                    log.info("Gateway successfully reconnected");
                     dispatchSink.next(GatewayStateChange.retrySucceeded(retryContext.getAttempts()));
                 }
                 retryContext.reset();
@@ -157,7 +159,7 @@ public class GatewayClient {
                     .then()
                     .doOnCancel(() -> close(false))
                     .doOnTerminate(() -> {
-                        log.debug("Terminating websocket client, disposing subscriptions");
+                        log.info("Terminating websocket client");
                         inboundSub.dispose();
                         receiverSub.dispose();
                         senderSub.dispose();
@@ -196,7 +198,7 @@ public class GatewayClient {
                 .doOnRetry(context -> {
                     int attempt = context.applicationContext().getAttempts();
                     long backoff = context.backoff().toMillis();
-                    log.debug("Retry attempt {} in {} ms", attempt, backoff);
+                    log.info("Retry attempt {} in {} ms", attempt, backoff);
                     if (attempt == 1) {
                         dispatchSink.next(GatewayStateChange.retryStarted(Duration.ofMillis(backoff)));
                     } else {
