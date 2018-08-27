@@ -30,7 +30,6 @@ import discord4j.store.api.util.LongLongTuple2;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import javax.annotation.Nullable;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
@@ -281,16 +280,5 @@ public final class Member extends User {
     public Mono<Void> edit(final GuildMemberEditSpec spec) {
         return getServiceMediator().getRestClient().getGuildService()
                 .modifyGuildMember(getGuildId().asLong(), getId().asLong(), spec.asRequest());
-    }
-
-    /**
-     * Requests to change the nickname of this member.
-     *
-     * @param nickname The nickname to change the member to. May be null.
-     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the nickname has been
-     * changed. If an error is received, it is emitted through the {@code Mono}.
-     */
-    public Mono<Void> changeNickname(@Nullable final String nickname) {
-        return edit(spec -> spec.setNickname(nickname));
     }
 }
