@@ -24,14 +24,13 @@ import discord4j.core.object.util.Snowflake;
 import reactor.core.publisher.Mono;
 
 import java.util.Objects;
-import java.util.Optional;
 
 /**
  * A Discord permission overwrite.
  *
  * @see <a href="https://discordapp.com/developers/docs/resources/channel#overwrite-object">Overwrite Object</a>
  */
-public final class ExtendedPermissionOverwrite extends TargetedPermissionOverwrite implements DiscordObject {
+public final class ExtendedPermissionOverwrite extends PermissionOverwrite implements DiscordObject {
 
     /** The ServiceMediator associated to this object. */
     private final ServiceMediator serviceMediator;
@@ -52,7 +51,7 @@ public final class ExtendedPermissionOverwrite extends TargetedPermissionOverwri
      */
     public ExtendedPermissionOverwrite(final ServiceMediator serviceMediator, final PermissionOverwriteBean data,
                                        final long guildId, final long channelId) {
-        super(data.getAllow(), data.getDeny(), data.getId(), data.getType());
+        super(data.getAllow(), data.getDeny(), data.getId(), Type.of(data.getType()));
         this.serviceMediator = Objects.requireNonNull(serviceMediator);
         this.guildId = guildId;
         this.channelId = channelId;
@@ -80,7 +79,7 @@ public final class ExtendedPermissionOverwrite extends TargetedPermissionOverwri
      * if present. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<User> getUser() {
-        return Mono.justOrEmpty(getUserId()).flatMap(getClient()::getUserById);
+        return Mono.justOrEmpty(getMemberId()).flatMap(getClient()::getUserById);
     }
 
     /**

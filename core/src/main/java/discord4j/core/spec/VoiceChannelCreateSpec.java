@@ -17,8 +17,7 @@
 package discord4j.core.spec;
 
 import discord4j.common.json.OverwriteEntity;
-import discord4j.core.object.ExtendedPermissionOverwrite;
-import discord4j.core.object.TargetedPermissionOverwrite;
+import discord4j.core.object.PermissionOverwrite;
 import discord4j.core.object.entity.Channel;
 import discord4j.core.object.util.Snowflake;
 import discord4j.rest.json.request.ChannelCreateRequest;
@@ -46,7 +45,7 @@ public class VoiceChannelCreateSpec implements Spec<ChannelCreateRequest> {
         return this;
     }
 
-    public VoiceChannelCreateSpec setPermissionOverwrites(Set<TargetedPermissionOverwrite> permissionOverwrites) {
+    public VoiceChannelCreateSpec setPermissionOverwrites(Set<PermissionOverwrite> permissionOverwrites) {
         OverwriteEntity[] raw = permissionOverwrites.stream()
                 .map(o -> new OverwriteEntity(o.getTargetId().asLong(), o.getType().getValue(), o.getAllowed().getRawValue(), o.getDenied().getRawValue()))
                 .toArray(OverwriteEntity[]::new);

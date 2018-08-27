@@ -254,6 +254,11 @@ public final class Member extends User {
                 .removeGuildMemberRole(guildId, getId().asLong(), roleId.asLong());
     }
 
+    /**
+     * Requests to calculate the permissions granted to this member by his roles in the guild.
+     *
+     * @return The permissions granted to this member by his roles in the guild.
+     */
     public Mono<PermissionSet> getBasePermissions() {
         Mono<Boolean> getIsOwner = getGuild().map(guild -> guild.getOwnerId().equals(getId()));
         Mono<PermissionSet> getEveryonePerms = getGuild().flatMap(Guild::getEveryoneRole).map(Role::getPermissions);
