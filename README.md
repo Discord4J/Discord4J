@@ -132,7 +132,7 @@ public class Main {
 Discord4J has an API for creating modular Discord Bots! See [Martacus's sample repo](https://github.com/Martacus/Simplecommands/tree/master) for an example as to how it works.
 
 ### More examples
-See the [examples directory](https://github.com/austinv11/Discord4J/tree/master/src/test/java/sx/blah/discord/examples).
+See the [example bot](https://github.com/decyg/d4jexamplebot).
 
 ## Deprecation policy
 Due to the nature of the Discord API, any deprecations found in the API should not be expected to last past the current
