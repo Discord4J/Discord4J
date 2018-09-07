@@ -125,29 +125,29 @@ public class DiscordVoiceWS extends WebSocketAdapter implements IIDLinkedObject 
 			JsonNode d = json.has("d") && !json.get("d").isNull() ? json.get("d") : null;
 
 			switch (op) {
-				case READY:
-					try {
-						VoiceReadyResponse ready = DiscordUtils.MAPPER.treeToValue(d, VoiceReadyResponse.class);
-						voiceSocket.setup(endpoint, ready.port, ready.ssrc);
-						beginHeartbeat(ready.heartbeat_interval);
-					} catch (IOException e) {
-						Discord4J.LOGGER.error(LogMarkers.VOICE_WEBSOCKET, "Encountered error handling voice ready payload: ", e);
-					}
-					break;
-				case SESSION_DESCRIPTION:
-					VoiceDescriptionResponse description = DiscordUtils.MAPPER.treeToValue(d, VoiceDescriptionResponse.class);
-					voiceSocket.setSecret(description.secret_key);
-					voiceSocket.begin();
-					break;
-				case SPEAKING:
-					VoiceSpeakingResponse response = DiscordUtils.MAPPER.treeToValue(d, VoiceSpeakingResponse.class);
-					IUser user = getGuild().getUserByID(Long.parseUnsignedLong(response.user_id));
-					users.put(response.ssrc, user);
-					guild.getClient().getDispatcher().dispatch(new UserSpeakingEvent(user.getVoiceStateForGuild(guild).getChannel(), user, response.ssrc, response.speaking));
-					break;
-				case UNKNOWN:
-					Discord4J.LOGGER.debug(LogMarkers.VOICE_WEBSOCKET, "Received unknown voice opcode, {}", message);
-					break;
+			case READY:
+				try {
+					VoiceReadyResponse ready = DiscordUtils.MAPPER.treeToValue(d, VoiceReadyResponse.class);
+					voiceSocket.setup(endpoint, ready.port, ready.ssrc);
+					beginHeartbeat(ready.heartbeat_interval);
+				} catch (IOException e) {
+					Discord4J.LOGGER.error(LogMarkers.VOICE_WEBSOCKET, "Encountered error handling voice ready payload: ", e);
+				}
+				break;
+			case SESSION_DESCRIPTION:
+				VoiceDescriptionResponse description = DiscordUtils.MAPPER.treeToValue(d, VoiceDescriptionResponse.class);
+				voiceSocket.setSecret(description.secret_key);
+				voiceSocket.begin();
+				break;
+			case SPEAKING:
+				VoiceSpeakingResponse response = DiscordUtils.MAPPER.treeToValue(d, VoiceSpeakingResponse.class);
+				IUser user = getGuild().getUserByID(Long.parseUnsignedLong(response.user_id));
+				users.put(response.ssrc, user);
+				guild.getClient().getDispatcher().dispatch(new UserSpeakingEvent(user.getVoiceStateForGuild(guild).getChannel(), user, response.ssrc, response.speaking));
+				break;
+			case UNKNOWN:
+				Discord4J.LOGGER.debug(LogMarkers.VOICE_WEBSOCKET, "Received unknown voice opcode, {}", message);
+				break;
 			}
 		} catch (IOException e) {
 			Discord4J.LOGGER.error(LogMarkers.WEBSOCKET, "JSON Parsing exception!", e);
@@ -158,7 +158,16 @@ public class DiscordVoiceWS extends WebSocketAdapter implements IIDLinkedObject 
 	public void onWebSocketClose(int statusCode, String reason) {
 		super.onWebSocketClose(statusCode, reason);
 		Discord4J.LOGGER.info(LogMarkers.VOICE_WEBSOCKET, "Voice Websocket disconnected with status code {} and reason \"{}\"", statusCode, reason);
-		disconnect(VoiceDisconnectedEvent.Reason.ABNORMAL_CLOSE); // TODO: Reconnect?
+		try {
+			wsClient.stop();
+		} catch (Exception e) {
+			if (!(e instanceof InterruptedException)) {
+				Discord4J.LOGGER.error(LogMarkers.VOICE_WEBSOCKET, "Error while shutting down voice websocket: ", e);
+			}
+		}
+		if (statusCode != 1000 && reason != null) { //Making sure the websocket closed because of abnormal reasons
+			disconnect(VoiceDisconnectedEvent.Reason.ABNORMAL_CLOSE); // TODO: Reconnect?
+		}
 	}
 
 	/**
@@ -177,18 +186,11 @@ public class DiscordVoiceWS extends WebSocketAdapter implements IIDLinkedObject 
 	 * @param reason The reason to use in the dispatched {@link VoiceDisconnectedEvent}.
 	 */
 	public void disconnect(VoiceDisconnectedEvent.Reason reason) {
-		try {
-			shard.getClient().getDispatcher().dispatch(new VoiceDisconnectedEvent(getGuild(), reason));
-			shard.voiceWebSockets.remove(guild.getLongID());
-			heartbeat.shutdownNow();
-			voiceSocket.shutdown();
-			if (getSession() != null) getSession().close(1000, null); // Discord doesn't care about the reason
-			wsClient.stop();
-		} catch (Exception e) {
-			if (!(e instanceof InterruptedException)) {
-				Discord4J.LOGGER.error(LogMarkers.VOICE_WEBSOCKET, "Error while shutting down voice websocket: ", e);
-			}
-		}
+		shard.getClient().getDispatcher().dispatch(new VoiceDisconnectedEvent(getGuild(), reason));
+		shard.voiceWebSockets.remove(guild.getLongID());
+		heartbeat.shutdownNow();
+		voiceSocket.shutdown();
+		if (getSession() != null) getSession().close(1000, null); // Discord doesn't care about the reason
 		Discord4J.LOGGER.info(LogMarkers.VOICE_WEBSOCKET, "Voice Websocket Disconnected.");
 	}
 
