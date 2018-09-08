@@ -150,7 +150,7 @@ public class GatewayClient {
 
             Mono<Void> httpFuture = HttpClient.create()
                     .observe(handler)
-                    .websocket()
+                    .websocket(Integer.MAX_VALUE)
                     .uri(gatewayUrl)
                     .handle(handler::handle)
                     .doOnComplete(() -> log.debug("WebSocket future complete"))

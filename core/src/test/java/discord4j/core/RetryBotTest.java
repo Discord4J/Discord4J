@@ -172,7 +172,7 @@ public class RetryBotTest {
                                 });
                         return Mono.just(event);
                     })
-                    .onErrorContinue()
+                    .onErrorContinue((t, o) -> log.error("Error", t))
                     .subscribe();
         }
     }
