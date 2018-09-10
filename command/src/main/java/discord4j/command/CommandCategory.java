@@ -14,7 +14,20 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
-@NonNullApi
-package discord4j.command.example;
+package discord4j.command;
 
-import reactor.util.annotation.NonNullApi;
+import discord4j.core.event.domain.message.MessageCreateEvent;
+import org.reactivestreams.Publisher;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+
+import java.util.List;
+
+public interface CommandCategory<T> {
+
+    Publisher<CommandContext<T>> provide(MessageCreateEvent event, String commandName, List<String> arguments);
+
+    Publisher<HelpPage> getHelpPage(MessageCreateEvent event, String commandName, List<String> arguments);
+    Flux<HelpPage> getHelpPages(MessageCreateEvent event);
+    Mono<HelpPage> getHelpPage(MessageCreateEvent event);
+}

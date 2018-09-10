@@ -21,18 +21,8 @@ import reactor.core.publisher.Mono;
 
 import javax.annotation.Nullable;
 
-/**
- * Very simple command abstraction.
- */
 @FunctionalInterface
 public interface Command<T> {
 
-    /**
-     * Called to execute this command.
-     *
-     * @param event The event that triggered this command's execution.
-     * @param context Additional context by this command's {@link CommandProvider}.
-     * @return A mono, whose completion signals that this command has been executed.
-     */
     Mono<Void> execute(MessageCreateEvent event, @Nullable T context);
 }

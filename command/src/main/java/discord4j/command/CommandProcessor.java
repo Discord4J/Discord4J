@@ -16,26 +16,13 @@
  */
 package discord4j.command;
 
-import discord4j.command.util.CommandException;
 import discord4j.core.event.domain.message.MessageCreateEvent;
-import reactor.core.publisher.Mono;
+import org.reactivestreams.Publisher;
 
-/**
- * An interface called when an error is encountered.
- *
- * @see CommandException
- */
+import java.util.Set;
+
 @FunctionalInterface
-public interface CommandErrorHandler {
+public interface CommandProcessor {
 
-    /**
-     * Called when an error is encountered.
-     *
-     * @param event The event of where this error occurred.
-     * @param error The error encountered. It should be noted that this throwable will be a subclass of
-     * {@link CommandException} if an error was due to end-user error, and not an internal issue. As
-     * a result it will usually contain a user-friendly message which can simply be reported to the author of the
-     * message attempting to invoke a command.
-     */
-    Mono<Void> handle(MessageCreateEvent event, Throwable error);
+    Publisher<? extends Command<?>> process(MessageCreateEvent event, Set<CommandCategory<?>> categories);
 }

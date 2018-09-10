@@ -14,28 +14,39 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
-package discord4j.command.util;
+package discord4j.command;
 
-import javax.annotation.Nullable;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
-/**
- * An abstract class for propagating non-fatal, user-facing, command-caused errors.
- *
- * @see discord4j.command.CommandErrorHandler
- */
-public class CommandException extends RuntimeException {
+@FunctionalInterface
+public interface HelpPage {
 
-    public CommandException(@Nullable String response) {
-        super(response, null, false, false); //Prevents expensive stacktrace filling
+    String getName();
+
+    default List<String> getAlternativeNames() {
+        return Collections.emptyList();
     }
 
-    /**
-     * Returns a human-readable error message for the user who caused this error to read.
-     *
-     * @return The human-readable error message or empty to not respond.
-     */
-    public Optional<String> response() {
-        return Optional.ofNullable(getMessage());
+    default Optional<String> getSynopsis() {
+        return Optional.empty();
+    }
+
+    default Optional<String> getDescription() {
+        return Optional.empty();
+    }
+
+    default List<String> getExamples() {
+        return Collections.emptyList();
+    }
+
+    default Map<String, String> getFields() {
+        return Collections.emptyMap();
+    }
+
+    default List<HelpPage> getRelatedPages() {
+        return Collections.emptyList();
     }
 }
