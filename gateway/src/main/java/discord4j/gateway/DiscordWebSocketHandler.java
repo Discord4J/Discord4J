@@ -64,8 +64,8 @@ import java.util.logging.Level;
 public class DiscordWebSocketHandler implements ConnectionObserver {
 
     private static final Logger log = Loggers.getLogger(DiscordWebSocketHandler.class);
-    private static final Logger inboundLogger = Loggers.getLogger("discord4j.gateway.session.inbound");
-    private static final Logger outboundLogger = Loggers.getLogger("discord4j.gateway.session.outbound");
+    private static final Logger inboundLogger = Loggers.getLogger("discord4j.gateway.inbound");
+    private static final Logger outboundLogger = Loggers.getLogger("discord4j.gateway.outbound");
 
     private static final String CLOSE_HANDLER = "client.last.closeHandler";
 
