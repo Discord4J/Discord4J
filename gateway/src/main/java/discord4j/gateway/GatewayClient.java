@@ -44,6 +44,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
 
+import static io.netty.handler.codec.http.HttpHeaderNames.USER_AGENT;
+
 /**
  * Represents a Discord WebSocket client, called Gateway, implementing its lifecycle.
  * <p>
@@ -149,6 +151,7 @@ public class GatewayClient {
                     .then();
 
             Mono<Void> httpFuture = HttpClient.create()
+                    .headers(headers -> headers.add(USER_AGENT, "DiscordBot(https://discord4j.com, 3)"))
                     .observe(handler)
                     .websocket(Integer.MAX_VALUE)
                     .uri(gatewayUrl)
