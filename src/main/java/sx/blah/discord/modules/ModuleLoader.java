@@ -44,7 +44,10 @@ import java.util.stream.Collectors;
 
 /**
  * Manages loading and unloading modules for a discord client.
+ *
+ * @deprecated This class is incompatible with Java 9+ due to classloading changes!
  */
+@Deprecated
 public class ModuleLoader {
 
 	/**
@@ -282,7 +285,7 @@ public class ModuleLoader {
 							addModuleClass(classInstance);
 					}
 				}
-			} catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | IOException | ClassNotFoundException e) {
+			} catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | IOException | ClassNotFoundException | ClassCastException e) {
 				Discord4J.LOGGER.error(LogMarkers.MODULES, "Unable to load module " + file.getName() + "!", e);
 			}
 		}
