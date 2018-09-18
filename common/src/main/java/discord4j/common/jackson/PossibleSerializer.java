@@ -57,7 +57,6 @@ public class PossibleSerializer extends ReferenceTypeSerializer<Possible<?>> {
         return !value.isAbsent();
     }
 
-    @Nullable
     @Override
     protected Object _getReferenced(Possible<?> value) {
         return value.get();

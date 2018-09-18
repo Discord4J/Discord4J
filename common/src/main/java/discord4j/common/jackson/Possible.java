@@ -66,7 +66,7 @@ public class Possible<T> {
      * @return An instance of {@code T}, if it is present. Guaranteed to never be null.
      * @throws NoSuchElementException If the value is {@link #isAbsent() absent}.
      */
-    @Nullable
+    @SuppressWarnings("ConstantConditions") // potential null is caught by isAbsent()
     public T get() {
         if (isAbsent()) {
             throw new NoSuchElementException();
