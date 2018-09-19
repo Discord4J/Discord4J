@@ -42,7 +42,6 @@ import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Predicate;
 
 import static io.netty.handler.codec.http.HttpHeaderNames.USER_AGENT;
 
@@ -61,8 +60,6 @@ import static io.netty.handler.codec.http.HttpHeaderNames.USER_AGENT;
 public class GatewayClient {
 
     private static final Logger log = Loggers.getLogger(GatewayClient.class);
-    private static final Predicate<? super Throwable> ABNORMAL_ERROR = t ->
-            !(t instanceof CloseException) || ((CloseException) t).getCode() != 1000;
 
     private final PayloadReader payloadReader;
     private final PayloadWriter payloadWriter;
@@ -189,7 +186,7 @@ public class GatewayClient {
     }
 
     private Retry<RetryContext> retryFactory() {
-        return Retry.<RetryContext>onlyIf(context -> ABNORMAL_ERROR.test(context.exception()))
+        return Retry.<RetryContext>any()
                 .withApplicationContext(retryOptions.getRetryContext())
                 .backoff(retryOptions.getBackoff())
                 .jitter(retryOptions.getJitter())
