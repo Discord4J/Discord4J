@@ -28,6 +28,7 @@ import discord4j.gateway.IdentifyOptions;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
+import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.Logger;
@@ -37,8 +38,10 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.Collections;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class RetryBotTest {
@@ -107,6 +110,22 @@ public class RetryBotTest {
         lifecycleListener.configure();
 
         client.login().block();
+    }
+
+    @Test
+    @Ignore("Example code excluded from CI")
+    public void testAndCancel() throws InterruptedException {
+        DiscordClient client = new DiscordClientBuilder(token).build();
+        CountDownLatch latch = new CountDownLatch(1);
+        Disposable disposable = client.login()
+                .doOnCancel(latch::countDown)
+                .subscribe();
+        Flux.interval(Duration.ofSeconds(19), Duration.ofSeconds(1))
+                .take(1)
+                .doOnNext(t -> disposable.dispose())
+                .subscribe();
+        latch.await();
+        Thread.sleep(5000L);
     }
 
     @Test
