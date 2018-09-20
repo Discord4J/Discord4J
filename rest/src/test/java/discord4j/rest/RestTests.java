@@ -39,7 +39,7 @@ public abstract class RestTests {
         defaultHeaders.add("content-type", "application/json");
         defaultHeaders.add("authorization", "Bot " + token);
         defaultHeaders.add("user-agent", "DiscordBot(http://discord4j.com, test-suite)");
-        HttpClient httpClient = HttpClient.create().baseUrl(Routes.BASE_URL).compress().wiretap();
+        HttpClient httpClient = HttpClient.create().baseUrl(Routes.BASE_URL).compress(true).wiretap();
         DiscordWebClient webClient = new DiscordWebClient(httpClient, defaultHeaders,
                 ExchangeStrategies.withJacksonDefaults(mapper));
         return new Router(webClient, Schedulers.elastic());

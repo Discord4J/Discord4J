@@ -17,14 +17,14 @@ ext {
     project_jdk = '1.8'
 
     // Dependencies
-    reactor_bom_version = 'Californium-RC1'
-    jackson_version = '2.9.5'
+    reactor_bom_version = 'Californium-RELEASE'
+    jackson_version = '2.9.6'
     jsr305_version = '3.0.2'
     junit_version = '4.12'
     mockito_version = '2.7.22'
     logback_version = '1.3.0-alpha4'
     autoservice_version = '1.0-rc4'
-    jdkstores_version = 'ea3e145'
+    jdkstores_version = '7f67388'
 }
 
 allprojects {
@@ -48,8 +48,6 @@ allprojects {
 
     repositories {
         jcenter()
-        maven { url "https://repo.spring.io/snapshot" }
-        maven { url "https://repo.spring.io/milestone" }
         maven { url 'https://jitpack.io' }
     }
 
@@ -115,7 +113,7 @@ allprojects {
             issueTrackerUrl = 'https://github.com/Discord4J/Discord4J/issues'
             vcsUrl = 'https://github.com/Discord4J/Discord4J.git'
             licenses = ['LGPL-3.0']
-            labels = ['discord', 'discord4j', 'd4j', 'reactor', 'nebula']
+            labels = ['discord', 'discord4j', 'd4j', 'reactor']
             publicDownloadNumbers = true
             attributes = [:]
             version {
