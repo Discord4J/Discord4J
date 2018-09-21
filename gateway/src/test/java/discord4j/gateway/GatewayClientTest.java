@@ -39,7 +39,7 @@ import java.time.Duration;
 
 public class GatewayClientTest {
 
-    private static final String gatewayUrl = "wss://gateway.discord.gg/?v=6&encoding=json&compress=zlib-stream";
+    private static final String gatewayUrl = "wss://gateway.discord.gg?v=6&encoding=json&compress=zlib-stream";
 
     private String token;
 

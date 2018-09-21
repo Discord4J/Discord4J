@@ -346,7 +346,7 @@ public final class DiscordClient {
                 //Stores should be initialized before the gateway sends events
                 .then(serviceMediator.getRestClient().getGatewayService().getGateway())
                 .flatMap(response -> serviceMediator.getGatewayClient()
-                        .execute(RouteUtils.expandQuery(response.getUrl() + "/", parameters))) // TODO reactor-netty#228 must be re-merged with 0.8
+                        .execute(RouteUtils.expandQuery(response.getUrl(), parameters)))
                 .then(serviceMediator.getStateHolder().invalidateStores())
                 .then(serviceMediator.getStoreService().dispose());
     }
