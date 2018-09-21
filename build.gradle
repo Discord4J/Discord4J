@@ -94,9 +94,11 @@ allprojects {
         from sourceSets.main.allSource
     }
 
-    artifacts {
-        archives javadocJar
-        archives sourcesJar
+    if (project.name != "BOM") {
+        artifacts {
+            archives javadocJar
+            archives sourcesJar
+        }
     }
 
     bintray {
@@ -148,10 +150,12 @@ subprojects {
     publishing {
         publications {
             maven(MavenPublication) {
-                from components.java
                 artifactId archivesBaseName
-                artifact sourcesJar
-                artifact javadocJar
+                if (project.name != "BOM") {
+                    from components.java
+                    artifact sourcesJar
+                    artifact javadocJar
+                }
             }
         }
     }

@@ -1,0 +1,20 @@
+apply plugin: "io.spring.dependency-management"
+
+description = "Bills of Materials (BOM) for Discord4J packages"
+
+compileJava.enabled = false
+javadoc.enabled = false
+tasks.withType(Jar) {
+    enabled false
+}
+test.enabled = false
+
+dependencyManagement {
+    dependencies {
+        project.rootProject.subprojects.each {
+            if (it.name != "BOM") {
+                dependency "${it.group}:${it.archivesBaseName}:${it.version}"
+            }
+        }
+    }
+}
