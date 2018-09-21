@@ -145,7 +145,6 @@ public class DiscordWebSocketHandler implements ConnectionObserver {
     }
 
     private Publisher<?> toOutboundFrame(GatewayPayload<? extends PayloadData> payload) {
-        // TODO: polish as reactor-netty outbound.sendClose(...) becomes stable
         if (payload.getOp() == null) {
             return Flux.just(new CloseWebSocketFrame(1000, "Logging off"));
         } else if (Opcode.RECONNECT.equals(payload.getOp())) {
@@ -163,7 +162,7 @@ public class DiscordWebSocketHandler implements ConnectionObserver {
      * through a complete signal, dropping all future signals.
      */
     public void close() {
-        log.debug("Triggering close sequence - signaling completion notifier");
+        log.debug("Triggering close sequence");
         completionNotifier.onComplete();
     }
 
@@ -180,10 +179,8 @@ public class DiscordWebSocketHandler implements ConnectionObserver {
         log.warn("Triggering error sequence ({})", error.toString());
         if (!completionNotifier.isTerminated()) {
             if (error instanceof CloseException) {
-                log.debug("Signaling completion notifier as error with same CloseException");
                 completionNotifier.onError(error);
             } else {
-                log.debug("Signaling completion notifier as error with wrapping CloseException");
                 completionNotifier.onError(new CloseException(new CloseStatus(1006, error.toString()), error));
             }
         }

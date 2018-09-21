@@ -114,10 +114,10 @@ public class GatewayClient {
                     .doOnNext(event -> {
                         RetryContext retryContext = retryOptions.getRetryContext();
                         if (retryContext.getResetCount() == 0) {
-                            log.info("Gateway connection established");
+                            log.info("Connected to Gateway");
                             dispatchSink.next(GatewayStateChange.connected());
                         } else {
-                            log.info("Gateway successfully reconnected");
+                            log.info("Reconnected to Gateway");
                             dispatchSink.next(GatewayStateChange.retrySucceeded(retryContext.getAttempts()));
                         }
                         retryContext.reset();
@@ -164,8 +164,8 @@ public class GatewayClient {
                     .doOnCancel(() -> close(false))
                     .then();
         }).retryWhen(retryFactory())
-                .doOnCancel(() -> dispatchSink.next(GatewayStateChange.disconnected()))
-                .doOnTerminate(() -> dispatchSink.next(GatewayStateChange.disconnected()));
+                .doOnCancel(logDisconnected())
+                .doOnTerminate(logDisconnected());
     }
 
     private static boolean isReadyOrResume(Dispatch d) {
@@ -204,6 +204,13 @@ public class GatewayClient {
                     }
                     context.applicationContext().next();
                 });
+    }
+
+    private Runnable logDisconnected() {
+        return () -> {
+            log.info("Disconnected from Gateway");
+            dispatchSink.next(GatewayStateChange.disconnected());
+        };
     }
 
     /**
