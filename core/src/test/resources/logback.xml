@@ -2,7 +2,6 @@
 <configuration scan="true">
     <logger name="io.netty" level="INFO"/>
     <logger name="reactor" level="INFO"/>
-    <logger name="discord4j.common.jackson.UnknownPropertyHandler" level="INFO"/>
 
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>

@@ -40,7 +40,7 @@ public class UnknownPropertyHandler extends DeserializationProblemHandler {
                                          Object beanOrClass, String propertyName) throws IOException {
         if (!ignoreUnknown) return false;
 
-        log.debug("Skipping unknown json property of {}: \"{}\"", beanOrClass.getClass().getName(), propertyName);
+        log.trace("Skipping unknown json property of {}: \"{}\"", beanOrClass.getClass().getName(), propertyName);
         parser.skipChildren();
         return true;
     }
