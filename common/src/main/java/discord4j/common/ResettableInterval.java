@@ -26,9 +26,11 @@ public class ResettableInterval {
 
     private final EmitterProcessor<Long> backing = EmitterProcessor.create(false);
     private volatile Disposable task;
+    private volatile Duration duration;
 
     public void start(Duration duration) {
-        task = Flux.interval(duration).subscribe(backing::onNext);
+        this.task = Flux.interval(Duration.ZERO, duration).subscribe(backing::onNext);
+        this.duration = duration;
     }
 
     public void stop() {
@@ -40,5 +42,9 @@ public class ResettableInterval {
 
     public Flux<Long> ticks() {
         return backing;
+    }
+
+    public Duration getDuration() {
+        return duration;
     }
 }

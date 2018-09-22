@@ -41,6 +41,7 @@ import java.time.Duration;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static io.netty.handler.codec.http.HttpHeaderNames.USER_AGENT;
@@ -72,7 +73,8 @@ public class GatewayClient {
     private final EmitterProcessor<GatewayPayload<?>> sender = EmitterProcessor.create(false);
 
     private final AtomicBoolean resumable = new AtomicBoolean(true);
-    private final AtomicInteger lastSequence = new AtomicInteger(0);
+    private final AtomicInteger sequence = new AtomicInteger(0);
+    private final AtomicLong lastAck = new AtomicLong(0);
     private final ResettableInterval heartbeat = new ResettableInterval();
     private final AtomicReference<String> sessionId = new AtomicReference<>("");
 
@@ -104,11 +106,13 @@ public class GatewayClient {
                     receiverSink, sender);
 
             if (identifyOptions.getResumeSequence() != null) {
-                this.lastSequence.set(identifyOptions.getResumeSequence());
+                this.sequence.set(identifyOptions.getResumeSequence());
                 this.sessionId.set(identifyOptions.getResumeSessionId());
             } else {
                 resumable.set(false);
             }
+
+            lastAck.set(System.currentTimeMillis());
 
             Mono<Void> readyHandler = dispatch.filter(GatewayClient::isReadyOrResume)
                     .doOnNext(event -> {
@@ -142,8 +146,16 @@ public class GatewayClient {
 
             // Create the heartbeat loop, and subscribe it using the sender sink
             Mono<Void> heartbeatHandler = heartbeat.ticks()
-                    .map(l -> new Heartbeat(lastSequence.get()))
-                    .map(GatewayPayload::heartbeat)
+                    .flatMap(t -> {
+                        long delay = System.currentTimeMillis() - lastAck.get();
+                        if (delay > heartbeat.getDuration().toMillis()) {
+                            log.debug("Missing heartbeat ACK for {} ms", delay);
+                            handler.error(new RuntimeException("Reconnecting due to zombie or failed connection"));
+                            return Mono.empty();
+                        } else {
+                            return Mono.just(GatewayPayload.heartbeat(new Heartbeat(sequence.get())));
+                        }
+                    })
                     .doOnNext(senderSink::next)
                     .then();
 
@@ -163,7 +175,8 @@ public class GatewayClient {
                     .doOnError(t -> log.error("Gateway client error: {}", t.toString()))
                     .doOnCancel(() -> close(false))
                     .then();
-        }).retryWhen(retryFactory())
+        })
+                .retryWhen(retryFactory())
                 .doOnCancel(logDisconnected())
                 .doOnTerminate(logDisconnected());
     }
@@ -174,8 +187,8 @@ public class GatewayClient {
 
     private GatewayPayload<?> updateSequence(GatewayPayload<?> payload) {
         if (payload.getSequence() != null) {
-            lastSequence.set(payload.getSequence());
-            identifyOptions.setResumeSequence(lastSequence.get());
+            sequence.set(payload.getSequence());
+            identifyOptions.setResumeSequence(sequence.get());
         }
         return payload;
     }
@@ -278,8 +291,8 @@ public class GatewayClient {
      *
      * @return an integer representing the current gateway sequence
      */
-    public int getLastSequence() {
-        return lastSequence.get();
+    public int getSequence() {
+        return sequence.get();
     }
 
     ///////////////////////////////////////////
@@ -301,8 +314,17 @@ public class GatewayClient {
      *
      * @return an AtomicInteger representing the current gateway sequence
      */
-    AtomicInteger lastSequence() {
-        return lastSequence;
+    AtomicInteger sequence() {
+        return sequence;
+    }
+
+    /**
+     * Gets the atomic reference for the time of the last acknowledged heartbeat.
+     *
+     * @return an AtomicLong representing the last heartbeat ACK timestamp
+     */
+    AtomicLong lastAck() {
+        return lastAck;
     }
 
     /**

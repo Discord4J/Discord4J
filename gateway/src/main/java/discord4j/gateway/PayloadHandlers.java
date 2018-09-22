@@ -76,7 +76,7 @@ public abstract class PayloadHandlers {
 
     private static void handleHeartbeat(PayloadContext<Heartbeat> context) {
         log.debug("Received heartbeat");
-        context.getClient().sender().next(GatewayPayload.heartbeat(new Heartbeat(context.getClient().lastSequence().get())));
+        context.getClient().sender().next(GatewayPayload.heartbeat(new Heartbeat(context.getClient().sequence().get())));
     }
 
     private static void handleReconnect(PayloadContext<?> context) {
@@ -88,7 +88,7 @@ public abstract class PayloadHandlers {
         if (context.getData().isResumable()) {
             String token = client.token();
             client.sender().next(GatewayPayload.resume(
-                    new Resume(token, client.getSessionId(), client.lastSequence().get())));
+                    new Resume(token, client.getSessionId(), client.sequence().get())));
         } else {
             client.resumable().set(false);
             context.getHandler().error(new RuntimeException("Reconnecting due to non-resumable session invalidation"));
@@ -101,22 +101,23 @@ public abstract class PayloadHandlers {
         client.heartbeat().start(interval);
 
         if (client.resumable().get()) {
-            log.info("Attempting to RESUME from {}", client.lastSequence().get());
+            log.debug("Attempting to RESUME from {}", client.sequence().get());
             client.sender().next(GatewayPayload.resume(
-                    new Resume(client.token(), client.getSessionId(), client.lastSequence().get())));
+                    new Resume(client.token(), client.getSessionId(), client.sequence().get())));
         } else {
             IdentifyProperties props = new IdentifyProperties(System.getProperty("os.name"), "Discord4J", "Discord4J");
             IdentifyOptions options = client.identifyOptions();
             int[] shard = new int[]{options.getShardIndex(), options.getShardCount()};
             Identify identify = new Identify(client.token(), props, false, 250,
-                    Optional.ofNullable(shard).map(Possible::of).orElse(Possible.absent()),
+                    Optional.of(shard).map(Possible::of).orElse(Possible.absent()),
                     Optional.ofNullable(options.getInitialStatus()).map(Possible::of).orElse(Possible.absent()));
             client.sender().next(GatewayPayload.identify(identify));
         }
     }
 
     private static void handleHeartbeatAck(PayloadContext<?> context) {
-        log.debug("Received heartbeat ack");
+        log.debug("Heartbeat acknowledged");
+        context.getClient().lastAck().set(System.currentTimeMillis());
     }
 
 }
