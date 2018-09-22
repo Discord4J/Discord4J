@@ -34,4 +34,11 @@ public class PrivateChannelDeleteEvent extends ChannelEvent {
     public PrivateChannel getChannel() {
         return channel;
     }
+
+    @Override
+    public String toString() {
+        return "PrivateChannelDeleteEvent{" +
+                "channel=" + channel +
+                '}';
+    }
 }

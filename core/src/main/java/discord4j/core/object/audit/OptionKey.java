@@ -41,4 +41,11 @@ public class OptionKey<T> {
     public String getField() {
         return field;
     }
+
+    @Override
+    public String toString() {
+        return "OptionKey{" +
+                "field='" + field + '\'' +
+                '}';
+    }
 }

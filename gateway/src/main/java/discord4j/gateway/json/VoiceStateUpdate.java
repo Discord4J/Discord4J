@@ -41,11 +41,11 @@ public class VoiceStateUpdate implements PayloadData {
 
     @Override
     public String toString() {
-        return "VoiceStateUpdate[" +
+        return "VoiceStateUpdate{" +
                 "guildId=" + guildId +
                 ", channelId=" + channelId +
                 ", selfMute=" + selfMute +
                 ", selfDeaf=" + selfDeaf +
-                ']';
+                '}';
     }
 }

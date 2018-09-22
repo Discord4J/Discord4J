@@ -39,9 +39,9 @@ public class GuildMemberAdd implements Dispatch {
 
     @Override
     public String toString() {
-        return "GuildMemberAdd[" +
+        return "GuildMemberAdd{" +
                 "member=" + member +
                 ", guildId=" + guildId +
-                ']';
+                '}';
     }
 }

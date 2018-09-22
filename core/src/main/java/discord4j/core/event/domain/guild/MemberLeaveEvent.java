@@ -52,4 +52,12 @@ public class MemberLeaveEvent extends GuildEvent {
     public Mono<Guild> getGuild() {
         return getClient().getGuildById(getGuildId());
     }
+
+    @Override
+    public String toString() {
+        return "MemberLeaveEvent{" +
+                "user=" + user +
+                ", guildId=" + guildId +
+                '}';
+    }
 }

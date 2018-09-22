@@ -36,4 +36,11 @@ public class VoiceChannelDeleteEvent extends ChannelEvent {
     public VoiceChannel getChannel() {
         return channel;
     }
+
+    @Override
+    public String toString() {
+        return "VoiceChannelDeleteEvent{" +
+                "channel=" + channel +
+                '}';
+    }
 }

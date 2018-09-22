@@ -62,12 +62,12 @@ public class MessageReactionAdd implements Dispatch {
 
     @Override
     public String toString() {
-        return "MessageReactionAdd[" +
+        return "MessageReactionAdd{" +
                 "userId=" + userId +
                 ", channelId=" + channelId +
                 ", guildId=" + guildId +
                 ", messageId=" + messageId +
                 ", emoji=" + emoji +
-                ']';
+                '}';
     }
 }

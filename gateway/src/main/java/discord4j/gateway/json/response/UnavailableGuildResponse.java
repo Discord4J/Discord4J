@@ -34,9 +34,9 @@ public class UnavailableGuildResponse {
 
     @Override
     public String toString() {
-        return "UnavailableGuildResponse[" +
+        return "UnavailableGuildResponse{" +
                 "id=" + id +
                 ", unavailable=" + unavailable +
-                ']';
+                '}';
     }
 }

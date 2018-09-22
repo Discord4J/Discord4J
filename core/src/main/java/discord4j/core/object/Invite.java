@@ -120,4 +120,11 @@ public class Invite implements DiscordObject {
     InviteBean getData() {
         return data;
     }
+
+    @Override
+    public String toString() {
+        return "Invite{" +
+                "data=" + data +
+                '}';
+    }
 }

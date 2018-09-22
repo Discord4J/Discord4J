@@ -50,11 +50,11 @@ public class GuildMemberUpdate implements Dispatch {
 
     @Override
     public String toString() {
-        return "GuildMemberUpdate[" +
+        return "GuildMemberUpdate{" +
                 "guildId=" + guildId +
                 ", roles=" + Arrays.toString(roles) +
                 ", user=" + user +
-                ", nick=" + nick +
-                ']';
+                ", nick='" + nick + '\'' +
+                '}';
     }
 }

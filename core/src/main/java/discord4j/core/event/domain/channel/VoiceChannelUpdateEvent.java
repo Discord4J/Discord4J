@@ -47,4 +47,12 @@ public class VoiceChannelUpdateEvent extends ChannelEvent {
     public Optional<VoiceChannel> getOld() {
         return Optional.ofNullable(old);
     }
+
+    @Override
+    public String toString() {
+        return "VoiceChannelUpdateEvent{" +
+                "current=" + current +
+                ", old=" + old +
+                '}';
+    }
 }

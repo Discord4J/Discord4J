@@ -55,4 +55,11 @@ public final class PrivateChannelBean extends MessageChannelBean {
     public void setRecipients(final long[] recipients) {
         this.recipients = recipients;
     }
+
+    @Override
+    public String toString() {
+        return "PrivateChannelBean{" +
+                "recipients=" + Arrays.toString(recipients) +
+                "} " + super.toString();
+    }
 }

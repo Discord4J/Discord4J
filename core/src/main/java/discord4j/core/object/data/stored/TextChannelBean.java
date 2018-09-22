@@ -89,4 +89,14 @@ public final class TextChannelBean extends ChannelBean {
     public void setNsfw(final boolean nsfw) {
         this.nsfw = nsfw;
     }
+
+    @Override
+    public String toString() {
+        return "TextChannelBean{" +
+                "guildChannel=" + guildChannel +
+                ", messageChannel=" + messageChannel +
+                ", topic='" + topic + '\'' +
+                ", nsfw=" + nsfw +
+                "} " + super.toString();
+    }
 }

@@ -28,8 +28,8 @@ public class BulkDeleteRequest {
 
     @Override
     public String toString() {
-        return "BulkDeleteRequest[" +
+        return "BulkDeleteRequest{" +
                 "messages=" + Arrays.toString(messages) +
-                ']';
+                '}';
     }
 }

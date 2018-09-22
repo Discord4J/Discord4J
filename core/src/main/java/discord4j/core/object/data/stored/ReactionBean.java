@@ -90,4 +90,15 @@ public final class ReactionBean implements Serializable {
     public void setEmojiAnimated(boolean emojiAnimated) {
         this.emojiAnimated = emojiAnimated;
     }
+
+    @Override
+    public String toString() {
+        return "ReactionBean{" +
+                "count=" + count +
+                ", me=" + me +
+                ", emojiId=" + emojiId +
+                ", emojiName='" + emojiName + '\'' +
+                ", emojiAnimated=" + emojiAnimated +
+                '}';
+    }
 }

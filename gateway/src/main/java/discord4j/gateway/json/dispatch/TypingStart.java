@@ -50,11 +50,11 @@ public class TypingStart implements Dispatch {
 
     @Override
     public String toString() {
-        return "TypingStart[" +
+        return "TypingStart{" +
                 "channelId=" + channelId +
                 ", guildId=" + guildId +
                 ", userId=" + userId +
                 ", timestamp=" + timestamp +
-                ']';
+                '}';
     }
 }

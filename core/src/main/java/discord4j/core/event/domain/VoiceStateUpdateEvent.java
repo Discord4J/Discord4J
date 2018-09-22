@@ -49,4 +49,12 @@ public class VoiceStateUpdateEvent extends Event {
     public Optional<VoiceState> getOld() {
         return Optional.ofNullable(old);
     }
+
+    @Override
+    public String toString() {
+        return "VoiceStateUpdateEvent{" +
+                "current=" + current +
+                ", old=" + old +
+                '}';
+    }
 }

@@ -31,9 +31,9 @@ public class WebhookCreateRequest {
 
     @Override
     public String toString() {
-        return "WebhookCreateRequest[" +
-                "name=" + name +
-                ", avatar=" + avatar +
-                ']';
+        return "WebhookCreateRequest{" +
+                "name='" + name + '\'' +
+                ", avatar='" + avatar + '\'' +
+                '}';
     }
 }

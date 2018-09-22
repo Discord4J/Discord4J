@@ -35,9 +35,9 @@ public class GatewayResponse {
 
     @Override
     public String toString() {
-        return "GatewayResponse[" +
-                "url=" + url +
+        return "GatewayResponse{" +
+                "url='" + url + '\'' +
                 ", shards=" + shards +
-                ']';
+                '}';
     }
 }

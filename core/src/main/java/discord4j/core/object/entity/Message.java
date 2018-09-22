@@ -509,4 +509,11 @@ public final class Message implements Entity {
             }
         }
     }
+
+    @Override
+    public String toString() {
+        return "Message{" +
+                "data=" + data +
+                '}';
+    }
 }

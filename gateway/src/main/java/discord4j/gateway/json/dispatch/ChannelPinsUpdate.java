@@ -50,10 +50,10 @@ public class ChannelPinsUpdate implements Dispatch {
 
     @Override
     public String toString() {
-        return "ChannelPinsUpdate[" +
+        return "ChannelPinsUpdate{" +
                 "channelId=" + channelId +
                 ", guildId=" + guildId +
-                ", lastPinTimestamp=" + lastPinTimestamp +
-                ']';
+                ", lastPinTimestamp='" + lastPinTimestamp + '\'' +
+                '}';
     }
 }

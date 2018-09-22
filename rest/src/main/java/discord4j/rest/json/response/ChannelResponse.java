@@ -158,24 +158,24 @@ public class ChannelResponse {
 
     @Override
     public String toString() {
-        return "ChannelResponse[" +
+        return "ChannelResponse{" +
                 "id=" + id +
                 ", type=" + type +
                 ", guildId=" + guildId +
                 ", position=" + position +
                 ", permissionOverwrites=" + Arrays.toString(permissionOverwrites) +
-                ", name=" + name +
-                ", topic=" + topic +
+                ", name='" + name + '\'' +
+                ", topic='" + topic + '\'' +
                 ", nsfw=" + nsfw +
                 ", lastMessageId=" + lastMessageId +
                 ", bitrate=" + bitrate +
                 ", userLimit=" + userLimit +
                 ", recipients=" + Arrays.toString(recipients) +
-                ", icon=" + icon +
+                ", icon='" + icon + '\'' +
                 ", ownerId=" + ownerId +
                 ", applicationId=" + applicationId +
                 ", parentId=" + parentId +
-                ", lastPinTimestamp=" + lastPinTimestamp +
-                ']';
+                ", lastPinTimestamp='" + lastPinTimestamp + '\'' +
+                '}';
     }
 }

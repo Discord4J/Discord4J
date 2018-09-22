@@ -43,4 +43,11 @@ public class IntegrationsUpdateEvent extends GuildEvent {
     public Mono<Guild> getGuild() {
         return getClient().getGuildById(getGuildId());
     }
+
+    @Override
+    public String toString() {
+        return "IntegrationsUpdateEvent{" +
+                "guildId=" + guildId +
+                '}';
+    }
 }

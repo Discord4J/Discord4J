@@ -134,7 +134,7 @@ public class GuildModifyRequest {
 
     @Override
     public String toString() {
-        return "GuildModifyRequest[" +
+        return "GuildModifyRequest{" +
                 "name=" + name +
                 ", region=" + region +
                 ", verificationLevel=" + verificationLevel +
@@ -144,6 +144,6 @@ public class GuildModifyRequest {
                 ", icon=" + icon +
                 ", ownerId=" + ownerId +
                 ", splash=" + splash +
-                ']';
+                '}';
     }
 }

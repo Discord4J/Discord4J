@@ -124,4 +124,9 @@ class BaseMessageChannel extends BaseChannel implements MessageChannel {
     MessageChannelBean getData() {
         return (MessageChannelBean) super.getData();
     }
+
+    @Override
+    public String toString() {
+        return "BaseMessageChannel{} " + super.toString();
+    }
 }

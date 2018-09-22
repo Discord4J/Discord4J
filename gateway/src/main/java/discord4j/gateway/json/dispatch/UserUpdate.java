@@ -30,8 +30,8 @@ public class UserUpdate implements Dispatch {
 
     @Override
     public String toString() {
-        return "UserUpdate[" +
+        return "UserUpdate{" +
                 "user=" + user +
-                ']';
+                '}';
     }
 }

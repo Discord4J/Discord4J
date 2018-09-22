@@ -57,11 +57,11 @@ public class GameAssetsResponse {
 
     @Override
     public String toString() {
-        return "GameAssetsResponse[" +
-                "largeImage=" + largeImage +
-                ", largeText=" + largeText +
-                ", smallImage=" + smallImage +
-                ", smallText=" + smallText +
-                ']';
+        return "GameAssetsResponse{" +
+                "largeImage='" + largeImage + '\'' +
+                ", largeText='" + largeText + '\'' +
+                ", smallImage='" + smallImage + '\'' +
+                ", smallText='" + smallText + '\'' +
+                '}';
     }
 }

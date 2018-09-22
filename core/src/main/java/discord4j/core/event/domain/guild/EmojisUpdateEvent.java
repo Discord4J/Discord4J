@@ -52,4 +52,12 @@ public class EmojisUpdateEvent extends GuildEvent {
     public Set<GuildEmoji> getEmojis() {
         return emojis;
     }
+
+    @Override
+    public String toString() {
+        return "EmojisUpdateEvent{" +
+                "guildId=" + guildId +
+                ", emojis=" + emojis +
+                '}';
+    }
 }

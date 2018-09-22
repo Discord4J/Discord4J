@@ -123,7 +123,7 @@ public class ChannelModifyRequest {
 
     @Override
     public String toString() {
-        return "ChannelModifyRequest[" +
+        return "ChannelModifyRequest{" +
                 "name=" + name +
                 ", position=" + position +
                 ", topic=" + topic +
@@ -132,6 +132,6 @@ public class ChannelModifyRequest {
                 ", userLimit=" + userLimit +
                 ", permissionOverwrites=" + permissionOverwrites +
                 ", parentId=" + parentId +
-                ']';
+                '}';
     }
 }

@@ -91,4 +91,14 @@ public class ReactionRemoveEvent extends MessageEvent {
         return emoji;
     }
 
+    @Override
+    public String toString() {
+        return "ReactionRemoveEvent{" +
+                "userId=" + userId +
+                ", channelId=" + channelId +
+                ", messageId=" + messageId +
+                ", guildId=" + guildId +
+                ", emoji=" + emoji +
+                '}';
+    }
 }

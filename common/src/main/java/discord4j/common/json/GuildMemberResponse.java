@@ -61,13 +61,13 @@ public class GuildMemberResponse {
 
     @Override
     public String toString() {
-        return "GuildMemberResponse[" +
+        return "GuildMemberResponse{" +
                 "user=" + user +
-                ", nick=" + nick +
+                ", nick='" + nick + '\'' +
                 ", roles=" + Arrays.toString(roles) +
-                ", joinedAt=" + joinedAt +
+                ", joinedAt='" + joinedAt + '\'' +
                 ", deaf=" + deaf +
                 ", mute=" + mute +
-                ']';
+                '}';
     }
 }

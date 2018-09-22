@@ -124,4 +124,9 @@ public final class VoiceChannel extends BaseGuildChannel implements Categorizabl
                 .map(bean -> EntityUtil.getChannel(getServiceMediator(), bean))
                 .cast(VoiceChannel.class);
     }
+
+    @Override
+    public String toString() {
+        return "VoiceChannel{} " + super.toString();
+    }
 }

@@ -34,8 +34,8 @@ public class Heartbeat implements PayloadData {
 
     @Override
     public String toString() {
-        return "Heartbeat[" +
+        return "Heartbeat{" +
                 "seq=" + seq +
-                ']';
+                '}';
     }
 }

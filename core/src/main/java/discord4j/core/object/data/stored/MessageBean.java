@@ -267,4 +267,26 @@ public final class MessageBean implements Serializable {
     public void setType(final int type) {
         this.type = type;
     }
+
+    @Override
+    public String toString() {
+        return "MessageBean{" +
+                "id=" + id +
+                ", channelId=" + channelId +
+                ", author=" + author +
+                ", content='" + content + '\'' +
+                ", timestamp='" + timestamp + '\'' +
+                ", editedTimestamp='" + editedTimestamp + '\'' +
+                ", tts=" + tts +
+                ", mentionEveryone=" + mentionEveryone +
+                ", mentions=" + Arrays.toString(mentions) +
+                ", mentionRoles=" + Arrays.toString(mentionRoles) +
+                ", attachments=" + Arrays.toString(attachments) +
+                ", embeds=" + Arrays.toString(embeds) +
+                ", reactions=" + Arrays.toString(reactions) +
+                ", pinned=" + pinned +
+                ", webhookId=" + webhookId +
+                ", type=" + type +
+                '}';
+    }
 }

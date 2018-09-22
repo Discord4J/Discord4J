@@ -26,8 +26,8 @@ public class PruneResponse {
 
     @Override
     public String toString() {
-        return "PruneResponse[" +
+        return "PruneResponse{" +
                 "pruned=" + pruned +
-                ']';
+                '}';
     }
 }

@@ -70,4 +70,11 @@ public final class Ban implements DiscordObject {
     public User getUser() {
         return new User(serviceMediator, data.getUser());
     }
+
+    @Override
+    public String toString() {
+        return "Ban{" +
+                "data=" + data +
+                '}';
+    }
 }

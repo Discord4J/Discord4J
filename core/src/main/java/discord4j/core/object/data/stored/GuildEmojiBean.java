@@ -19,6 +19,7 @@ package discord4j.core.object.data.stored;
 import discord4j.common.json.GuildEmojiResponse;
 
 import java.io.Serializable;
+import java.util.Arrays;
 
 public final class GuildEmojiBean implements Serializable {
 
@@ -88,5 +89,17 @@ public final class GuildEmojiBean implements Serializable {
 
     public void setAnimated(final boolean animated) {
         this.animated = animated;
+    }
+
+    @Override
+    public String toString() {
+        return "GuildEmojiBean{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", roles=" + Arrays.toString(roles) +
+                ", requireColons=" + requireColons +
+                ", managed=" + managed +
+                ", animated=" + animated +
+                '}';
     }
 }

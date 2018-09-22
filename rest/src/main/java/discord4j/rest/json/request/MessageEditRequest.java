@@ -37,9 +37,9 @@ public class MessageEditRequest {
 
     @Override
     public String toString() {
-        return "MessageEditRequest[" +
+        return "MessageEditRequest{" +
                 "content=" + content +
                 ", embed=" + embed +
-                ']';
+                '}';
     }
 }

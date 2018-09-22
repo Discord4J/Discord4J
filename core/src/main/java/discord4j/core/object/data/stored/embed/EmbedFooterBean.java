@@ -59,4 +59,13 @@ public final class EmbedFooterBean implements Serializable {
     public void setProxyIconUrl(final String proxyIconUrl) {
         this.proxyIconUrl = proxyIconUrl;
     }
+
+    @Override
+    public String toString() {
+        return "EmbedFooterBean{" +
+                "text='" + text + '\'' +
+                ", iconUrl='" + iconUrl + '\'' +
+                ", proxyIconUrl='" + proxyIconUrl + '\'' +
+                '}';
+    }
 }

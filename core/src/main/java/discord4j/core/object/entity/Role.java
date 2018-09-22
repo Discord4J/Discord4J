@@ -237,4 +237,12 @@ public final class Role implements Entity {
     public int hashCode() {
         return EntityUtil.hashCode(this);
     }
+
+    @Override
+    public String toString() {
+        return "Role{" +
+                "data=" + data +
+                ", guildId=" + guildId +
+                '}';
+    }
 }

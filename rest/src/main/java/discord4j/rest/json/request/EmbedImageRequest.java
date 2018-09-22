@@ -26,8 +26,8 @@ public class EmbedImageRequest {
 
     @Override
     public String toString() {
-        return "EmbedImageRequest[" +
-                "url=" + url +
-                ']';
+        return "EmbedImageRequest{" +
+                "url='" + url + '\'' +
+                '}';
     }
 }

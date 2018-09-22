@@ -49,12 +49,12 @@ public class UserGuildResponse {
 
     @Override
     public String toString() {
-        return "UserGuildResponse[" +
+        return "UserGuildResponse{" +
                 "id=" + id +
-                ", name=" + name +
-                ", icon=" + icon +
+                ", name='" + name + '\'' +
+                ", icon='" + icon + '\'' +
                 ", owner=" + owner +
                 ", permissions=" + permissions +
-                ']';
+                '}';
     }
 }

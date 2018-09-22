@@ -107,4 +107,15 @@ public class GuildChannelBean extends ChannelBean {
     public final void setPosition(final int position) {
         this.position = position;
     }
+
+    @Override
+    public String toString() {
+        return "GuildChannelBean{" +
+                "guildId=" + guildId +
+                ", permissionOverwrites=" + Arrays.toString(permissionOverwrites) +
+                ", name='" + name + '\'' +
+                ", parentId=" + parentId +
+                ", position=" + position +
+                '}';
+    }
 }

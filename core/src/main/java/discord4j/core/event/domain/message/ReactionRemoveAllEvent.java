@@ -74,4 +74,13 @@ public class ReactionRemoveAllEvent extends MessageEvent {
     public Mono<Guild> getGuild() {
         return Mono.justOrEmpty(getGuildId()).flatMap(getClient()::getGuildById);
     }
+
+    @Override
+    public String toString() {
+        return "ReactionRemoveAllEvent{" +
+                "channelId=" + channelId +
+                ", messageId=" + messageId +
+                ", guildId=" + guildId +
+                '}';
+    }
 }

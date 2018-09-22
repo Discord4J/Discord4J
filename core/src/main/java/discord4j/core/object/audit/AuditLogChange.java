@@ -36,4 +36,12 @@ public class AuditLogChange<T> {
     public Optional<T> getCurrentValue() {
         return Optional.ofNullable(currentValue);
     }
+
+    @Override
+    public String toString() {
+        return "AuditLogChange{" +
+                "oldValue=" + oldValue +
+                ", currentValue=" + currentValue +
+                '}';
+    }
 }

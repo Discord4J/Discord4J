@@ -102,4 +102,15 @@ public final class GuildBean extends BaseGuildBean {
     public void setChannels(final long[] channels) {
         this.channels = channels;
     }
+
+    @Override
+    public String toString() {
+        return "GuildBean{" +
+                "joinedAt='" + joinedAt + '\'' +
+                ", large=" + large +
+                ", memberCount=" + memberCount +
+                ", members=" + Arrays.toString(members) +
+                ", channels=" + Arrays.toString(channels) +
+                "} " + super.toString();
+    }
 }

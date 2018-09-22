@@ -39,9 +39,9 @@ public class GuildMembersChunk implements Dispatch {
 
     @Override
     public String toString() {
-        return "GuildMembersChunk[" +
+        return "GuildMembersChunk{" +
                 "guildId=" + guildId +
                 ", members=" + Arrays.toString(members) +
-                ']';
+                '}';
     }
 }

@@ -27,7 +27,7 @@ public class NicknameModifyResponse {
     @Override
     public String toString() {
         return "NicknameModifyResponse{" +
-                "nick=" + nick +
+                "nick='" + nick + '\'' +
                 '}';
     }
 }

@@ -304,4 +304,29 @@ public class BaseGuildBean implements Serializable {
     public void setSystemChannelId(@Nullable final Long systemChannelId) {
         this.systemChannelId = systemChannelId;
     }
+
+    @Override
+    public String toString() {
+        return "BaseGuildBean{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", icon='" + icon + '\'' +
+                ", splash='" + splash + '\'' +
+                ", ownerId=" + ownerId +
+                ", region='" + region + '\'' +
+                ", afkChannelId=" + afkChannelId +
+                ", afkTimeout=" + afkTimeout +
+                ", embedChannelId=" + embedChannelId +
+                ", verificationLevel=" + verificationLevel +
+                ", defaultMessageNotifications=" + defaultMessageNotifications +
+                ", explicitContentFilter=" + explicitContentFilter +
+                ", roles=" + Arrays.toString(roles) +
+                ", emojis=" + Arrays.toString(emojis) +
+                ", features=" + Arrays.toString(features) +
+                ", mfaLevel=" + mfaLevel +
+                ", applicationId=" + applicationId +
+                ", widgetChannelId=" + widgetChannelId +
+                ", systemChannelId=" + systemChannelId +
+                '}';
+    }
 }

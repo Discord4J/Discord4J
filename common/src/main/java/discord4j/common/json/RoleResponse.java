@@ -64,15 +64,15 @@ public class RoleResponse {
 
     @Override
     public String toString() {
-        return "RoleResponse[" +
+        return "RoleResponse{" +
                 "id=" + id +
-                ", name=" + name +
+                ", name='" + name + '\'' +
                 ", color=" + color +
                 ", hoist=" + hoist +
                 ", position=" + position +
                 ", permissions=" + permissions +
                 ", managed=" + managed +
                 ", mentionable=" + mentionable +
-                ']';
+                '}';
     }
 }

@@ -78,4 +78,11 @@ public final class Reaction implements DiscordObject  {
     public ReactionEmoji getEmoji() {
         return ReactionEmoji.of(data.getEmojiId(), data.getEmojiName(), data.isEmojiAnimated());
     }
+
+    @Override
+    public String toString() {
+        return "Reaction{" +
+                "data=" + data +
+                '}';
+    }
 }

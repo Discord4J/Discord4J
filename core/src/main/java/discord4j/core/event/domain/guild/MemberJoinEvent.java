@@ -49,4 +49,12 @@ public class MemberJoinEvent extends GuildEvent {
     public Mono<Guild> getGuild() {
         return getClient().getGuildById(getGuildId());
     }
+
+    @Override
+    public String toString() {
+        return "MemberJoinEvent{" +
+                "member=" + member +
+                ", guildId=" + guildId +
+                '}';
+    }
 }

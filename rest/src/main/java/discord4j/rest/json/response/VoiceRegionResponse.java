@@ -65,15 +65,15 @@ public class VoiceRegionResponse {
 
     @Override
     public String toString() {
-        return "VoiceRegionResponse[" +
-                "id=" + id +
-                ", name=" + name +
-                ", sampleHostname=" + sampleHostname +
+        return "VoiceRegionResponse{" +
+                "id='" + id + '\'' +
+                ", name='" + name + '\'' +
+                ", sampleHostname='" + sampleHostname + '\'' +
                 ", samplePort=" + samplePort +
                 ", vip=" + vip +
                 ", optimal=" + optimal +
                 ", deprecated=" + deprecated +
                 ", custom=" + custom +
-                ']';
+                '}';
     }
 }

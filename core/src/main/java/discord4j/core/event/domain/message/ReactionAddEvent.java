@@ -89,4 +89,15 @@ public class ReactionAddEvent extends MessageEvent {
     public ReactionEmoji getEmoji() {
         return emoji;
     }
+
+    @Override
+    public String toString() {
+        return "ReactionAddEvent{" +
+                "userId=" + userId +
+                ", channelId=" + channelId +
+                ", messageId=" + messageId +
+                ", guildId=" + guildId +
+                ", emoji=" + emoji +
+                '}';
+    }
 }

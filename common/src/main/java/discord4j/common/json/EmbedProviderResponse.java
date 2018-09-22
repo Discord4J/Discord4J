@@ -31,9 +31,9 @@ public class EmbedProviderResponse {
 
     @Override
     public String toString() {
-        return "EmbedProviderResponse[" +
-                "name=" + name +
-                ", url=" + url +
-                ']';
+        return "EmbedProviderResponse{" +
+                "name='" + name + '\'' +
+                ", url='" + url + '\'' +
+                '}';
     }
 }

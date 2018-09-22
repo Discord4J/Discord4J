@@ -230,4 +230,12 @@ public final class GuildEmoji implements Entity {
     public int hashCode() {
         return EntityUtil.hashCode(this);
     }
+
+    @Override
+    public String toString() {
+        return "GuildEmoji{" +
+                "data=" + data +
+                ", guildId=" + guildId +
+                '}';
+    }
 }

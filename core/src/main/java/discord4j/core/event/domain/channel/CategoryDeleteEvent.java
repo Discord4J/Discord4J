@@ -36,4 +36,11 @@ public class CategoryDeleteEvent extends ChannelEvent {
     public Category getCategory() {
         return category;
     }
+
+    @Override
+    public String toString() {
+        return "CategoryDeleteEvent{" +
+                "category=" + category +
+                '}';
+    }
 }

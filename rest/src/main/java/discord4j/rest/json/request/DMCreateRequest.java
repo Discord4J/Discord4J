@@ -31,8 +31,8 @@ public class DMCreateRequest {
 
     @Override
     public String toString() {
-        return "DMCreateRequest[" +
+        return "DMCreateRequest{" +
                 "recipientId=" + recipientId +
-                ']';
+                '}';
     }
 }

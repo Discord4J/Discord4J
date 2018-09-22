@@ -170,6 +170,6 @@ public final class Snowflake implements Comparable<Snowflake> {
      */
     @Override
     public String toString() {
-        return "Snowflake(" + asString() + ")";
+        return "Snowflake{" + asString() + "}";
     }
 }

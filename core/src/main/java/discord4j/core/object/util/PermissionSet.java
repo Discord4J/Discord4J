@@ -165,4 +165,11 @@ public final class PermissionSet extends AbstractSet<Permission> {
     public int size() {
         return Long.bitCount(rawValue);
     }
+
+    @Override
+    public String toString() {
+        return "PermissionSet{" +
+                "rawValue=" + rawValue +
+                "} " + super.toString();
+    }
 }

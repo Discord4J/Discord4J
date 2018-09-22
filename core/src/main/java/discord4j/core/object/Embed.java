@@ -622,4 +622,11 @@ public final class Embed implements DiscordObject {
             return data.isInline();
         }
     }
+
+    @Override
+    public String toString() {
+        return "Embed{" +
+                "data=" + data +
+                '}';
+    }
 }

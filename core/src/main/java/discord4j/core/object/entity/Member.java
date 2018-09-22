@@ -281,4 +281,12 @@ public final class Member extends User {
         return getServiceMediator().getRestClient().getGuildService()
                 .modifyGuildMember(getGuildId().asLong(), getId().asLong(), spec.asRequest());
     }
+
+    @Override
+    public String toString() {
+        return "Member{" +
+                "data=" + data +
+                ", guildId=" + guildId +
+                "} " + super.toString();
+    }
 }

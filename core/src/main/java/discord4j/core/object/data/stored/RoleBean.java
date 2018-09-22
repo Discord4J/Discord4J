@@ -109,4 +109,18 @@ public final class RoleBean implements Serializable {
     public void setMentionable(final boolean mentionable) {
         this.mentionable = mentionable;
     }
+
+    @Override
+    public String toString() {
+        return "RoleBean{" +
+                "id=" + id +
+                ", position=" + position +
+                ", name='" + name + '\'' +
+                ", color=" + color +
+                ", hoist=" + hoist +
+                ", permissions=" + permissions +
+                ", managed=" + managed +
+                ", mentionable=" + mentionable +
+                '}';
+    }
 }

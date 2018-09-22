@@ -53,4 +53,12 @@ public class MemberChunkEvent extends GuildEvent {
     public Set<Member> getMembers() {
         return members;
     }
+
+    @Override
+    public String toString() {
+        return "MemberChunkEvent{" +
+                "guildId=" + guildId +
+                ", members=" + members +
+                '}';
+    }
 }

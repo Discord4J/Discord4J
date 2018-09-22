@@ -85,4 +85,15 @@ public class MemberUpdateEvent extends GuildEvent {
     public Optional<String> getCurrentNickname() {
         return Optional.ofNullable(currentNickname);
     }
+
+    @Override
+    public String toString() {
+        return "MemberUpdateEvent{" +
+                "guildId=" + guildId +
+                ", memberId=" + memberId +
+                ", old=" + old +
+                ", currentRoles=" + Arrays.toString(currentRoles) +
+                ", currentNickname='" + currentNickname + '\'' +
+                '}';
+    }
 }

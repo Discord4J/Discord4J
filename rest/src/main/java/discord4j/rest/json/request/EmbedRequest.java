@@ -121,10 +121,9 @@ public class EmbedRequest {
         }
     }
 
-
     @Override
     public String toString() {
-        return "EmbedRequest[" +
+        return "EmbedRequest{" +
                 "title=" + title +
                 ", description=" + description +
                 ", url=" + url +
@@ -135,6 +134,6 @@ public class EmbedRequest {
                 ", thumbnail=" + thumbnail +
                 ", author=" + author +
                 ", fields=" + fields +
-                ']';
+                '}';
     }
 }

@@ -33,10 +33,10 @@ public class Resume implements PayloadData {
 
     @Override
     public String toString() {
-        return "Resume[" +
-                "token=hunter2" +
-                ", sessionId=" + sessionId +
+        return "Resume{" +
+                "token='hunter2'" +
+                ", sessionId='" + sessionId + '\'' +
                 ", seq=" + seq +
-                ']';
+                '}';
     }
 }

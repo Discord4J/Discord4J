@@ -51,12 +51,12 @@ public class ConnectionResponse {
 
     @Override
     public String toString() {
-        return "ConnectionResponse[" +
+        return "ConnectionResponse{" +
                 "id=" + id +
-                ", name=" + name +
-                ", type=" + type +
+                ", name='" + name + '\'' +
+                ", type='" + type + '\'' +
                 ", revoked=" + revoked +
                 ", integrations=" + Arrays.toString(integrations) +
-                ']';
+                '}';
     }
 }

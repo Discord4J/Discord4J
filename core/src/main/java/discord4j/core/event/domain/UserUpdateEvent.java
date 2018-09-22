@@ -45,4 +45,12 @@ public class UserUpdateEvent extends Event {
     public Optional<User> getOld() {
         return Optional.ofNullable(old);
     }
+
+    @Override
+    public String toString() {
+        return "UserUpdateEvent{" +
+                "current=" + current +
+                ", old=" + old +
+                '}';
+    }
 }

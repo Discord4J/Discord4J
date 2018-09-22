@@ -59,4 +59,13 @@ public class InviteBean implements Serializable {
     public final void setChannelId(final long channelId) {
         this.channelId = channelId;
     }
+
+    @Override
+    public String toString() {
+        return "InviteBean{" +
+                "code='" + code + '\'' +
+                ", guildId=" + guildId +
+                ", channelId=" + channelId +
+                '}';
+    }
 }

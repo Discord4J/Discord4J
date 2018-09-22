@@ -167,4 +167,11 @@ public final class VoiceState implements DiscordObject {
     public boolean isSuppressed() {
         return data.isSuppress();
     }
+
+    @Override
+    public String toString() {
+        return "VoiceState{" +
+                "data=" + data +
+                '}';
+    }
 }

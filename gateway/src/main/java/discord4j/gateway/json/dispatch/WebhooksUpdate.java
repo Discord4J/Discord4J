@@ -38,9 +38,9 @@ public class WebhooksUpdate implements Dispatch {
 
     @Override
     public String toString() {
-        return "WebhooksUpdate[" +
+        return "WebhooksUpdate{" +
                 "guildId=" + guildId +
                 ", channelId=" + channelId +
-                ']';
+                '}';
     }
 }

@@ -38,11 +38,11 @@ public class MessageCreateRequest {
 
     @Override
     public String toString() {
-        return "MessageCreateRequest[" +
-                "content=" + content +
-                ", nonce=" + nonce +
+        return "MessageCreateRequest{" +
+                "content='" + content + '\'' +
+                ", nonce='" + nonce + '\'' +
                 ", tts=" + tts +
                 ", embed=" + embed +
-                ']';
+                '}';
     }
 }

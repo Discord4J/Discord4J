@@ -37,9 +37,9 @@ public class GuildEmbedModifyRequest {
 
     @Override
     public String toString() {
-        return "GuildEmbedModifyRequest[" +
+        return "GuildEmbedModifyRequest{" +
                 "enabled=" + enabled +
                 ", channelId=" + channelId +
-                ']';
+                '}';
     }
 }

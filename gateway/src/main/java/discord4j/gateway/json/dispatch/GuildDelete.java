@@ -30,8 +30,8 @@ public class GuildDelete implements Dispatch {
 
     @Override
     public String toString() {
-        return "GuildDelete[" +
+        return "GuildDelete{" +
                 "guild=" + guild +
-                ']';
+                '}';
     }
 }

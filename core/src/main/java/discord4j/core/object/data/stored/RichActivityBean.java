@@ -223,4 +223,25 @@ public final class RichActivityBean extends ActivityBean implements Serializable
     public void setSmallText(@Nullable String smallText) {
         this.smallText = smallText;
     }
+
+    @Override
+    public String toString() {
+        return "RichActivityBean{" +
+                "start=" + start +
+                ", end=" + end +
+                ", sessionId='" + sessionId + '\'' +
+                ", applicationId=" + applicationId +
+                ", details='" + details + '\'' +
+                ", syncId='" + syncId + '\'' +
+                ", state='" + state + '\'' +
+                ", flags=" + flags +
+                ", partyId='" + partyId + '\'' +
+                ", currentPartySize=" + currentPartySize +
+                ", maxPartySize=" + maxPartySize +
+                ", largeImage='" + largeImage + '\'' +
+                ", largeText='" + largeText + '\'' +
+                ", smallImage='" + smallImage + '\'' +
+                ", smallText='" + smallText + '\'' +
+                "} " + super.toString();
+    }
 }

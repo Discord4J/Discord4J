@@ -34,9 +34,9 @@ public class GuildEmojiModifyRequest {
 
     @Override
     public String toString() {
-        return "GuildEmojiModifyRequest[" +
+        return "GuildEmojiModifyRequest{" +
                 "name=" + name +
                 ", roles=" + roles +
-                ']';
+                '}';
     }
 }

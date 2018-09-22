@@ -79,4 +79,9 @@ class BaseGuildChannel extends BaseChannel implements GuildChannel {
     GuildChannelBean getData() {
         return (GuildChannelBean) super.getData();
     }
+
+    @Override
+    public String toString() {
+        return "BaseGuildChannel{} " + super.toString();
+    }
 }

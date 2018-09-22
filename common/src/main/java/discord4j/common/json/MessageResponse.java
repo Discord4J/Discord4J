@@ -132,13 +132,13 @@ public class MessageResponse {
 
     @Override
     public String toString() {
-        return "MessageResponse[" +
+        return "MessageResponse{" +
                 "id=" + id +
                 ", channelId=" + channelId +
                 ", author=" + author +
-                ", content=" + content +
-                ", timestamp=" + timestamp +
-                ", editedTimestamp=" + editedTimestamp +
+                ", content='" + content + '\'' +
+                ", timestamp='" + timestamp + '\'' +
+                ", editedTimestamp='" + editedTimestamp + '\'' +
                 ", tts=" + tts +
                 ", mentionEveryone=" + mentionEveryone +
                 ", mentions=" + Arrays.toString(mentions) +
@@ -150,6 +150,6 @@ public class MessageResponse {
                 ", pinned=" + pinned +
                 ", webhookId=" + webhookId +
                 ", type=" + type +
-                ']';
+                '}';
     }
 }

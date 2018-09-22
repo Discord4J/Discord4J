@@ -52,4 +52,12 @@ public class PinsUpdateEvent extends ChannelEvent {
     public Optional<Instant> getLastPinTimestamp() {
         return Optional.ofNullable(lastPinTimestamp);
     }
+
+    @Override
+    public String toString() {
+        return "PinsUpdateEvent{" +
+                "channelId=" + channelId +
+                ", lastPinTimestamp=" + lastPinTimestamp +
+                '}';
+    }
 }

@@ -48,14 +48,14 @@ public class GuildCreateRequest {
 
     @Override
     public String toString() {
-        return "GuildCreateRequest[" +
-                "name=" + name +
-                ", region=" + region +
-                ", icon=" + icon +
+        return "GuildCreateRequest{" +
+                "name='" + name + '\'' +
+                ", region='" + region + '\'' +
+                ", icon='" + icon + '\'' +
                 ", verificationLevel=" + verificationLevel +
                 ", defaultMessageNotifications=" + defaultMessageNotifications +
                 ", roles=" + Arrays.toString(roles) +
                 ", channels=" + Arrays.toString(channels) +
-                ']';
+                '}';
     }
 }

@@ -62,12 +62,12 @@ public class MessageReactionRemove implements Dispatch {
 
     @Override
     public String toString() {
-        return "MessageReactionRemove[" +
+        return "MessageReactionRemove{" +
                 "userId=" + userId +
                 ", channelId=" + channelId +
                 ", guildId=" + guildId +
                 ", messageId=" + messageId +
                 ", emoji=" + emoji +
-                ']';
+                '}';
     }
 }

@@ -56,4 +56,13 @@ public class GuildDeleteEvent extends GuildEvent {
     public boolean isUnavailable() {
         return unavailable;
     }
+
+    @Override
+    public String toString() {
+        return "GuildDeleteEvent{" +
+                "guildId=" + guildId +
+                ", guild=" + guild +
+                ", unavailable=" + unavailable +
+                '}';
+    }
 }

@@ -110,4 +110,18 @@ public class MessageUpdateEvent extends MessageEvent {
     public List<Embed> getCurrentEmbeds() {
         return currentEmbeds;
     }
+
+    @Override
+    public String toString() {
+        return "MessageUpdateEvent{" +
+                "messageId=" + messageId +
+                ", channelId=" + channelId +
+                ", guildId=" + guildId +
+                ", old=" + old +
+                ", contentChanged=" + contentChanged +
+                ", currentContent='" + currentContent + '\'' +
+                ", embedsChanged=" + embedsChanged +
+                ", currentEmbeds=" + currentEmbeds +
+                '}';
+    }
 }

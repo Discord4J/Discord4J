@@ -37,9 +37,9 @@ public class GuildMemberRemove implements Dispatch {
 
     @Override
     public String toString() {
-        return "GuildMemberRemove[" +
+        return "GuildMemberRemove{" +
                 "user=" + user +
                 ", guildId=" + guildId +
-                ']';
+                '}';
     }
 }

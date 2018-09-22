@@ -196,4 +196,11 @@ public final class Webhook implements Entity {
     public int hashCode() {
         return EntityUtil.hashCode(this);
     }
+
+    @Override
+    public String toString() {
+        return "Webhook{" +
+                "data=" + data +
+                '}';
+    }
 }

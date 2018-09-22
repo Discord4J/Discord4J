@@ -38,9 +38,9 @@ public class GuildRoleDelete implements Dispatch {
 
     @Override
     public String toString() {
-        return "GuildRoleDelete[" +
+        return "GuildRoleDelete{" +
                 "guildId=" + guildId +
                 ", roleId=" + roleId +
-                ']';
+                '}';
     }
 }

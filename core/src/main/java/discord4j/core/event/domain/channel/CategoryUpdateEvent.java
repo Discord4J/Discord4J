@@ -48,4 +48,11 @@ public class CategoryUpdateEvent extends ChannelEvent {
         return Optional.ofNullable(old);
     }
 
+    @Override
+    public String toString() {
+        return "CategoryUpdateEvent{" +
+                "current=" + current +
+                ", old=" + old +
+                '}';
+    }
 }

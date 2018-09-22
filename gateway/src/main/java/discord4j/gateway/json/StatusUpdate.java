@@ -46,12 +46,12 @@ public class StatusUpdate implements PayloadData {
 
     @Override
     public String toString() {
-        return "StatusUpdate[" +
+        return "StatusUpdate{" +
                 "since=" + since +
                 ", game=" + game +
-                ", status=" + status +
+                ", status='" + status + '\'' +
                 ", afk=" + afk +
-                ']';
+                '}';
     }
 
     @PossibleJson
@@ -69,11 +69,11 @@ public class StatusUpdate implements PayloadData {
 
         @Override
         public String toString() {
-            return "Game[" +
-                    "name=" + name +
+            return "Game{" +
+                    "name='" + name + '\'' +
                     ", type=" + type +
                     ", url=" + url +
-                    ']';
+                    '}';
         }
     }
 }

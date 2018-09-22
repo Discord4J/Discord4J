@@ -36,4 +36,11 @@ public class VoiceChannelCreateEvent extends ChannelEvent {
     public VoiceChannel getChannel() {
         return channel;
     }
+
+    @Override
+    public String toString() {
+        return "VoiceChannelCreateEvent{" +
+                "channel=" + channel +
+                '}';
+    }
 }

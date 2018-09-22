@@ -313,4 +313,12 @@ public final class TextChannel extends BaseChannel implements Categorizable, Gui
                 .map(WebhookBean::new)
                 .map(bean -> new Webhook(getServiceMediator(), bean));
     }
+
+    @Override
+    public String toString() {
+        return "TextChannel{" +
+                "guildChannel=" + guildChannel +
+                ", messageChannel=" + messageChannel +
+                "} " + super.toString();
+    }
 }

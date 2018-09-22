@@ -1113,4 +1113,11 @@ public final class Guild implements Entity {
             }
         }
     }
+
+    @Override
+    public String toString() {
+        return "Guild{" +
+                "data=" + data +
+                '}';
+    }
 }

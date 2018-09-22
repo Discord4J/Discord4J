@@ -104,4 +104,17 @@ public final class ApplicationInfoBean implements Serializable {
     public void setOwnerId(final long ownerId) {
         this.ownerId = ownerId;
     }
+
+    @Override
+    public String toString() {
+        return "ApplicationInfoBean{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", icon='" + icon + '\'' +
+                ", description='" + description + '\'' +
+                ", botPublic=" + botPublic +
+                ", botRequireCodeGrant=" + botRequireCodeGrant +
+                ", ownerId=" + ownerId +
+                '}';
+    }
 }

@@ -30,8 +30,8 @@ public class VoiceStateUpdateDispatch implements Dispatch {
 
     @Override
     public String toString() {
-        return "VoiceStateUpdateDispatch[" +
+        return "VoiceStateUpdateDispatch{" +
                 "voiceState=" + voiceState +
-                ']';
+                '}';
     }
 }

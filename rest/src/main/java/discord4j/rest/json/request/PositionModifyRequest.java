@@ -31,9 +31,9 @@ public class PositionModifyRequest {
 
     @Override
     public String toString() {
-        return "PositionModifyRequest[" +
+        return "PositionModifyRequest{" +
                 "id=" + id +
                 ", position=" + position +
-                ']';
+                '}';
     }
 }

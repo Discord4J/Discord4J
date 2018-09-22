@@ -257,4 +257,14 @@ public class Activity {
             }
         }
     }
+
+    @Override
+    public String toString() {
+        return "Activity{" +
+                "type=" + type +
+                ", name='" + name + '\'' +
+                ", streamingUrl='" + streamingUrl + '\'' +
+                ", richData=" + richData +
+                '}';
+    }
 }

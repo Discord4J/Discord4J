@@ -83,4 +83,9 @@ public final class Category extends BaseGuildChannel {
                 .map(bean -> EntityUtil.getChannel(getServiceMediator(), bean))
                 .cast(Category.class);
     }
+
+    @Override
+    public String toString() {
+        return "Category{} " + super.toString();
+    }
 }

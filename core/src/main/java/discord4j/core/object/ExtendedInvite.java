@@ -115,4 +115,9 @@ public final class ExtendedInvite extends Invite {
     ExtendedInviteBean getData() {
         return (ExtendedInviteBean) super.getData();
     }
+
+    @Override
+    public String toString() {
+        return "ExtendedInvite{} " + super.toString();
+    }
 }

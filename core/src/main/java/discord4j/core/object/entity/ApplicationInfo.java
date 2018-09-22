@@ -142,4 +142,11 @@ public final class ApplicationInfo implements Entity {
     public int hashCode() {
         return EntityUtil.hashCode(this);
     }
+
+    @Override
+    public String toString() {
+        return "ApplicationInfo{" +
+                "data=" + data +
+                '}';
+    }
 }

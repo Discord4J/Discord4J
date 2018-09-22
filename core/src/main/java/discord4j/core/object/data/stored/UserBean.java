@@ -82,4 +82,15 @@ public final class UserBean implements Serializable {
     public void setBot(boolean bot) {
         isBot = bot;
     }
+
+    @Override
+    public String toString() {
+        return "UserBean{" +
+                "id=" + id +
+                ", username='" + username + '\'' +
+                ", discriminator='" + discriminator + '\'' +
+                ", avatar='" + avatar + '\'' +
+                ", isBot=" + isBot +
+                '}';
+    }
 }

@@ -30,8 +30,8 @@ public class InvalidSession implements PayloadData {
 
     @Override
     public String toString() {
-        return "InvalidSession[" +
+        return "InvalidSession{" +
                 "resumable=" + resumable +
-                ']';
+                '}';
     }
 }

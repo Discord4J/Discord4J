@@ -49,4 +49,12 @@ public final class EmbedProviderBean implements Serializable {
     public void setUrl(final String url) {
         this.url = url;
     }
+
+    @Override
+    public String toString() {
+        return "EmbedProviderBean{" +
+                "name='" + name + '\'' +
+                ", url='" + url + '\'' +
+                '}';
+    }
 }

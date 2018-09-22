@@ -63,4 +63,9 @@ public final class PrivateChannel extends BaseMessageChannel {
     public Flux<User> getRecipients() {
         return Flux.fromIterable(getRecipientIds()).flatMap(getClient()::getUserById);
     }
+
+    @Override
+    public String toString() {
+        return "PrivateChannel{} " + super.toString();
+    }
 }

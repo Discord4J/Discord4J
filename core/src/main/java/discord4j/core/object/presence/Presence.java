@@ -92,4 +92,12 @@ public final class Presence {
 
         return new StatusUpdate(game, status);
     }
+
+    @Override
+    public String toString() {
+        return "Presence{" +
+                "status='" + status + '\'' +
+                ", activity=" + activity +
+                '}';
+    }
 }

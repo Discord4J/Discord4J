@@ -39,9 +39,9 @@ public class GuildEmojisUpdate implements Dispatch {
 
     @Override
     public String toString() {
-        return "GuildEmojisUpdate[" +
+        return "GuildEmojisUpdate{" +
                 "guildId=" + guildId +
                 ", emojis=" + Arrays.toString(emojis) +
-                ']';
+                '}';
     }
 }

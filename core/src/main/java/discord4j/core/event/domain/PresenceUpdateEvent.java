@@ -77,4 +77,14 @@ public class PresenceUpdateEvent extends Event {
     public Optional<Presence> getOld() {
         return Optional.ofNullable(old);
     }
+
+    @Override
+    public String toString() {
+        return "PresenceUpdateEvent{" +
+                "guildId=" + guildId +
+                ", userId=" + userId +
+                ", current=" + current +
+                ", old=" + old +
+                '}';
+    }
 }

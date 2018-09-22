@@ -196,4 +196,23 @@ public final class EmbedBean implements Serializable {
     public void setFields(@Nullable final EmbedFieldBean[] fields) {
         this.fields = fields;
     }
+
+    @Override
+    public String toString() {
+        return "EmbedBean{" +
+                "title='" + title + '\'' +
+                ", type='" + type + '\'' +
+                ", description='" + description + '\'' +
+                ", url='" + url + '\'' +
+                ", timestamp='" + timestamp + '\'' +
+                ", color=" + color +
+                ", footer=" + footer +
+                ", image=" + image +
+                ", thumbnail=" + thumbnail +
+                ", video=" + video +
+                ", provider=" + provider +
+                ", author=" + author +
+                ", fields=" + Arrays.toString(fields) +
+                '}';
+    }
 }

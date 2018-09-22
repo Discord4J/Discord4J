@@ -100,4 +100,17 @@ public final class ExtendedInviteBean extends InviteBean {
     public void setRevoked(final boolean revoked) {
         this.revoked = revoked;
     }
+
+    @Override
+    public String toString() {
+        return "ExtendedInviteBean{" +
+                "inviterId=" + inviterId +
+                ", uses=" + uses +
+                ", maxUses=" + maxUses +
+                ", maxAge=" + maxAge +
+                ", temporary=" + temporary +
+                ", createdAt='" + createdAt + '\'' +
+                ", revoked=" + revoked +
+                "} " + super.toString();
+    }
 }

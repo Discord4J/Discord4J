@@ -113,12 +113,12 @@ public class EmbedResponse {
 
     @Override
     public String toString() {
-        return "EmbedResponse[" +
-                "title=" + title +
-                ", type=" + type +
-                ", description=" + description +
-                ", url=" + url +
-                ", timestamp=" + timestamp +
+        return "EmbedResponse{" +
+                "title='" + title + '\'' +
+                ", type='" + type + '\'' +
+                ", description='" + description + '\'' +
+                ", url='" + url + '\'' +
+                ", timestamp='" + timestamp + '\'' +
                 ", color=" + color +
                 ", footer=" + footer +
                 ", image=" + image +
@@ -127,6 +127,6 @@ public class EmbedResponse {
                 ", provider=" + provider +
                 ", author=" + author +
                 ", fields=" + Arrays.toString(fields) +
-                ']';
+                '}';
     }
 }

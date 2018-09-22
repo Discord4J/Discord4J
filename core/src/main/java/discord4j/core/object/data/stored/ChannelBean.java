@@ -54,4 +54,12 @@ public class ChannelBean implements Serializable {
     public final void setType(final int type) {
         this.type = type;
     }
+
+    @Override
+    public String toString() {
+        return "ChannelBean{" +
+                "id=" + id +
+                ", type=" + type +
+                '}';
+    }
 }

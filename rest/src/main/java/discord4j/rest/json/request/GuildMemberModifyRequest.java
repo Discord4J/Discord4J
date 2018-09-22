@@ -94,12 +94,12 @@ public class GuildMemberModifyRequest {
 
     @Override
     public String toString() {
-        return "GuildMemberModifyRequest[" +
+        return "GuildMemberModifyRequest{" +
                 "nick=" + nick +
                 ", roles=" + roles +
                 ", mute=" + mute +
                 ", deaf=" + deaf +
                 ", channelId=" + channelId +
-                ']';
+                '}';
     }
 }

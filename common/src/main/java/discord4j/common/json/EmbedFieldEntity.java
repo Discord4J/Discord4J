@@ -57,10 +57,10 @@ public class EmbedFieldEntity {
 
     @Override
     public String toString() {
-        return "EmbedFieldEntity[" +
-                "name=" + name +
-                ", value=" + value +
+        return "EmbedFieldEntity{" +
+                "name='" + name + '\'' +
+                ", value='" + value + '\'' +
                 ", inline=" + inline +
-                ']';
+                '}';
     }
 }

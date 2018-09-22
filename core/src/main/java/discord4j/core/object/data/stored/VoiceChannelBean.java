@@ -57,4 +57,12 @@ public final class VoiceChannelBean extends GuildChannelBean {
     public void setUserLimit(final int userLimit) {
         this.userLimit = userLimit;
     }
+
+    @Override
+    public String toString() {
+        return "VoiceChannelBean{" +
+                "bitrate=" + bitrate +
+                ", userLimit=" + userLimit +
+                "} " + super.toString();
+    }
 }

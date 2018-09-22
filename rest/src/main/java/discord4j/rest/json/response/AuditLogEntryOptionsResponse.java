@@ -81,14 +81,14 @@ public class AuditLogEntryOptionsResponse {
 
     @Override
     public String toString() {
-        return "AuditLogEntryOptionsResponse[" +
-                "deleteMemberDays=" + deleteMemberDays +
-                ", membersRemoved=" + membersRemoved +
+        return "AuditLogEntryOptionsResponse{" +
+                "deleteMemberDays='" + deleteMemberDays + '\'' +
+                ", membersRemoved='" + membersRemoved + '\'' +
                 ", channelId=" + channelId +
-                ", count=" + count +
+                ", count='" + count + '\'' +
                 ", id=" + id +
-                ", type=" + type +
-                ", roleName=" + roleName +
-                ']';
+                ", type='" + type + '\'' +
+                ", roleName='" + roleName + '\'' +
+                '}';
     }
 }

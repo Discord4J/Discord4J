@@ -41,10 +41,10 @@ public class VoiceServerUpdate implements Dispatch {
 
     @Override
     public String toString() {
-        return "VoiceServerUpdate[" +
-                "token=" + token +
+        return "VoiceServerUpdate{" +
+                "token='" + token + '\'' +
                 ", guildId=" + guildId +
-                ", endpoint=" + endpoint +
-                ']';
+                ", endpoint='" + endpoint + '\'' +
+                '}';
     }
 }

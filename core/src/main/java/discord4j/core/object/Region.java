@@ -122,4 +122,11 @@ public final class Region implements DiscordObject {
     public boolean isCustom() {
         return data.isCustom();
     }
+
+    @Override
+    public String toString() {
+        return "Region{" +
+                "data=" + data +
+                '}';
+    }
 }

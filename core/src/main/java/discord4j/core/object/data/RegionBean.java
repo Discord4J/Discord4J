@@ -109,4 +109,18 @@ public final class RegionBean implements Serializable {
     public void setCustom(final boolean custom) {
         this.custom = custom;
     }
+
+    @Override
+    public String toString() {
+        return "RegionBean{" +
+                "id='" + id + '\'' +
+                ", name='" + name + '\'' +
+                ", sampleHostname='" + sampleHostname + '\'' +
+                ", samplePort=" + samplePort +
+                ", vip=" + vip +
+                ", optimal=" + optimal +
+                ", deprecated=" + deprecated +
+                ", custom=" + custom +
+                '}';
+    }
 }

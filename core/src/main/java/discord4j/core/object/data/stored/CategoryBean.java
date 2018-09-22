@@ -32,4 +32,9 @@ public final class CategoryBean extends GuildChannelBean {
     }
 
     public CategoryBean() {}
+
+    @Override
+    public String toString() {
+        return "CategoryBean{} " + super.toString();
+    }
 }

@@ -114,6 +114,11 @@ public class GatewayPayload<T extends PayloadData> {
 
     @Override
     public String toString() {
-        return "GatewayPayload[op=" + op + ", data=" + data + ", sequence=" + sequence + ", type=" + type + "]";
+        return "GatewayPayload{" +
+                "op=" + op +
+                ", data=" + data +
+                ", sequence=" + sequence +
+                ", type='" + type + '\'' +
+                '}';
     }
 }

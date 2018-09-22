@@ -61,4 +61,12 @@ public class MessageChannelBean extends ChannelBean {
     public void setLastPinTimestamp(@Nullable final String lastPinTimestamp) {
         this.lastPinTimestamp = lastPinTimestamp;
     }
+
+    @Override
+    public String toString() {
+        return "MessageChannelBean{" +
+                "lastMessageId=" + lastMessageId +
+                ", lastPinTimestamp='" + lastPinTimestamp + '\'' +
+                "} " + super.toString();
+    }
 }

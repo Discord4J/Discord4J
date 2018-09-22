@@ -37,9 +37,9 @@ public class GameTimestampsResponse {
 
     @Override
     public String toString() {
-        return "GameTimestampsResponse[" +
+        return "GameTimestampsResponse{" +
                 "start=" + start +
                 ", end=" + end +
-                ']';
+                '}';
     }
 }

@@ -50,4 +50,11 @@ public class UnbanEvent extends GuildEvent {
         return getClient().getGuildById(getGuildId());
     }
 
+    @Override
+    public String toString() {
+        return "UnbanEvent{" +
+                "user=" + user +
+                ", guildId=" + guildId +
+                '}';
+    }
 }

@@ -88,17 +88,17 @@ public class VoiceStateResponse {
 
     @Override
     public String toString() {
-        return "VoiceStateResponse[" +
+        return "VoiceStateResponse{" +
                 "guildId=" + guildId +
                 ", channelId=" + channelId +
                 ", userId=" + userId +
-                ", sessionId=" + sessionId +
+                ", sessionId='" + sessionId + '\'' +
                 ", deaf=" + deaf +
                 ", mute=" + mute +
                 ", selfDeaf=" + selfDeaf +
                 ", selfVideo=" + selfVideo +
                 ", selfMute=" + selfMute +
                 ", suppress=" + suppress +
-                ']';
+                '}';
     }
 }

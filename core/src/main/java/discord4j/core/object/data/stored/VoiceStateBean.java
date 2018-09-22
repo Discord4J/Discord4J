@@ -135,4 +135,19 @@ public final class VoiceStateBean implements Serializable {
     public void setSuppress(final boolean suppress) {
         this.suppress = suppress;
     }
+
+    @Override
+    public String toString() {
+        return "VoiceStateBean{" +
+                "guildId=" + guildId +
+                ", channelId=" + channelId +
+                ", userId=" + userId +
+                ", sessionId='" + sessionId + '\'' +
+                ", deaf=" + deaf +
+                ", mute=" + mute +
+                ", selfDeaf=" + selfDeaf +
+                ", selfMute=" + selfMute +
+                ", suppress=" + suppress +
+                '}';
+    }
 }

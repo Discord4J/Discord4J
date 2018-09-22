@@ -104,4 +104,17 @@ public final class AttachmentBean implements Serializable {
     public void setWidth(@Nullable final Integer width) {
         this.width = width;
     }
+
+    @Override
+    public String toString() {
+        return "AttachmentBean{" +
+                "id=" + id +
+                ", fileName='" + fileName + '\'' +
+                ", size=" + size +
+                ", url='" + url + '\'' +
+                ", proxyUrl='" + proxyUrl + '\'' +
+                ", height=" + height +
+                ", width=" + width +
+                '}';
+    }
 }

@@ -69,4 +69,14 @@ public final class EmbedVideoBean implements Serializable {
     public void setWidth(final int width) {
         this.width = width;
     }
+
+    @Override
+    public String toString() {
+        return "EmbedVideoBean{" +
+                "url='" + url + '\'' +
+                ", proxyUrl='" + proxyUrl + '\'' +
+                ", height=" + height +
+                ", width=" + width +
+                '}';
+    }
 }

@@ -22,6 +22,7 @@ import discord4j.gateway.json.dispatch.MessageCreate;
 
 import javax.annotation.Nullable;
 import java.io.Serializable;
+import java.util.Arrays;
 
 public final class MemberBean implements Serializable {
 
@@ -75,5 +76,14 @@ public final class MemberBean implements Serializable {
 
     public void setJoinedAt(final String joinedAt) {
         this.joinedAt = joinedAt;
+    }
+
+    @Override
+    public String toString() {
+        return "MemberBean{" +
+                "nick='" + nick + '\'' +
+                ", roles=" + Arrays.toString(roles) +
+                ", joinedAt='" + joinedAt + '\'' +
+                '}';
     }
 }

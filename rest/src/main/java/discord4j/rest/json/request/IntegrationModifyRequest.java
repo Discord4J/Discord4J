@@ -70,10 +70,10 @@ public class IntegrationModifyRequest {
 
     @Override
     public String toString() {
-        return "IntegrationModifyRequest[" +
+        return "IntegrationModifyRequest{" +
                 "expireBehavior=" + expireBehavior +
                 ", expireGracePeriod=" + expireGracePeriod +
                 ", enableEmoticons=" + enableEmoticons +
-                ']';
+                '}';
     }
 }

@@ -54,4 +54,13 @@ public class VoiceServerUpdateEvent extends Event {
     public String getEndpoint() {
         return endpoint;
     }
+
+    @Override
+    public String toString() {
+        return "VoiceServerUpdateEvent{" +
+                "token='" + token + '\'' +
+                ", guildId=" + guildId +
+                ", endpoint='" + endpoint + '\'' +
+                '}';
+    }
 }

@@ -61,5 +61,14 @@ public class MessageDeleteEvent extends MessageEvent {
     public Mono<MessageChannel> getChannel() {
         return getClient().getMessageChannelById(getChannelId());
     }
+
+    @Override
+    public String toString() {
+        return "MessageDeleteEvent{" +
+                "messageId=" + messageId +
+                ", channelId=" + channelId +
+                ", message=" + message +
+                '}';
+    }
 }
 

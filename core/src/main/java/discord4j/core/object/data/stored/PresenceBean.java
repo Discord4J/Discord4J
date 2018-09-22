@@ -97,4 +97,12 @@ public final class PresenceBean implements Serializable {
     public void setStatus(@Nullable final String status) {
         this.status = status;
     }
+
+    @Override
+    public String toString() {
+        return "PresenceBean{" +
+                "activity=" + activity +
+                ", status='" + status + '\'' +
+                '}';
+    }
 }

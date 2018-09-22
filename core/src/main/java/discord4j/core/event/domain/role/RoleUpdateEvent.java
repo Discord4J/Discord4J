@@ -47,4 +47,12 @@ public class RoleUpdateEvent extends RoleEvent {
     public Optional<Role> getOld() {
         return Optional.ofNullable(old);
     }
+
+    @Override
+    public String toString() {
+        return "RoleUpdateEvent{" +
+                "current=" + current +
+                ", old=" + old +
+                '}';
+    }
 }

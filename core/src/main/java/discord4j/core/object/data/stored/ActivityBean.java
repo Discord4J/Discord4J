@@ -62,4 +62,13 @@ public class ActivityBean implements Serializable {
     public void setUrl(@Nullable final String url) {
         this.url = url;
     }
+
+    @Override
+    public String toString() {
+        return "ActivityBean{" +
+                "name='" + name + '\'' +
+                ", type=" + type +
+                ", url='" + url + '\'' +
+                '}';
+    }
 }

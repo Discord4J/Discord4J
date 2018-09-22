@@ -29,8 +29,8 @@ public class NicknameModifyRequest {
 
     @Override
     public String toString() {
-        return "NicknameModifyRequest[" +
-                "nick=" + nick +
-                ']';
+        return "NicknameModifyRequest{" +
+                "nick='" + nick + '\'' +
+                '}';
     }
 }

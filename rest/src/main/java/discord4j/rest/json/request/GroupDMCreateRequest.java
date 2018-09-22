@@ -34,9 +34,9 @@ public class GroupDMCreateRequest {
 
     @Override
     public String toString() {
-        return "GroupDMCreateRequest[" +
+        return "GroupDMCreateRequest{" +
                 "accessTokens=" + Arrays.toString(accessTokens) +
                 ", nicks=" + nicks +
-                ']';
+                '}';
     }
 }

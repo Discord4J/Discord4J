@@ -26,8 +26,8 @@ public class EmbedThumbnailRequest {
 
     @Override
     public String toString() {
-        return "EmbedThumbnailRequest[" +
-                "url=" + url +
-                ']';
+        return "EmbedThumbnailRequest{" +
+                "url='" + url + '\'' +
+                '}';
     }
 }

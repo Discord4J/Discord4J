@@ -35,9 +35,9 @@ public class WebhookModifyRequest {
 
     @Override
     public String toString() {
-        return "WebhookModifyRequest[" +
+        return "WebhookModifyRequest{" +
                 "name=" + name +
                 ", avatar=" + avatar +
-                ']';
+                '}';
     }
 }

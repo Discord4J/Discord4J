@@ -42,10 +42,10 @@ public class AuditLogResponse {
 
     @Override
     public String toString() {
-        return "AuditLogResponse[" +
+        return "AuditLogResponse{" +
                 "webhooks=" + Arrays.toString(webhooks) +
                 ", users=" + Arrays.toString(users) +
                 ", auditLogEntries=" + Arrays.toString(auditLogEntries) +
-                ']';
+                '}';
     }
 }

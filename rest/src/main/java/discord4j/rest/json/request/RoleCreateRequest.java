@@ -34,12 +34,12 @@ public class RoleCreateRequest {
 
     @Override
     public String toString() {
-        return "RoleCreateRequest[" +
-                "name=" + name +
+        return "RoleCreateRequest{" +
+                "name='" + name + '\'' +
                 ", permissions=" + permissions +
                 ", color=" + color +
                 ", hoist=" + hoist +
                 ", mentionable=" + mentionable +
-                ']';
+                '}';
     }
 }

@@ -84,4 +84,11 @@ public final class ChangeKey<T> {
     public String getName() {
         return name;
     }
+
+    @Override
+    public String toString() {
+        return "ChangeKey{" +
+                "name='" + name + '\'' +
+                '}';
+    }
 }

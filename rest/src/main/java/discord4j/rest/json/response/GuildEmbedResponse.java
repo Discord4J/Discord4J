@@ -40,9 +40,9 @@ public class GuildEmbedResponse {
 
     @Override
     public String toString() {
-        return "GuildEmbedResponse[" +
+        return "GuildEmbedResponse{" +
                 "enabled=" + enabled +
                 ", channelId=" + channelId +
-                ']';
+                '}';
     }
 }

@@ -69,4 +69,11 @@ public class AuditLogEntry implements Entity {
     public DiscordClient getClient() {
         return serviceMediator.getClient();
     }
+
+    @Override
+    public String toString() {
+        return "AuditLogEntry{" +
+                "data=" + data +
+                '}';
+    }
 }

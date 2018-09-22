@@ -59,4 +59,13 @@ public final class EmbedFieldBean implements Serializable {
     public void setInline(final boolean inline) {
         this.inline = inline;
     }
+
+    @Override
+    public String toString() {
+        return "EmbedFieldBean{" +
+                "name='" + name + '\'' +
+                ", value='" + value + '\'' +
+                ", inline=" + inline +
+                '}';
+    }
 }

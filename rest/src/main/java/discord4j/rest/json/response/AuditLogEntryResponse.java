@@ -76,14 +76,14 @@ public class AuditLogEntryResponse {
 
     @Override
     public String toString() {
-        return "AuditLogEntryResponse[" +
+        return "AuditLogEntryResponse{" +
                 "targetId=" + targetId +
                 ", changes=" + Arrays.toString(changes) +
                 ", userId=" + userId +
                 ", id=" + id +
                 ", actionType=" + actionType +
                 ", options=" + options +
-                ", reason=" + reason +
-                ']';
+                ", reason='" + reason + '\'' +
+                '}';
     }
 }

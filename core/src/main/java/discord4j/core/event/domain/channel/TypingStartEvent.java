@@ -61,4 +61,13 @@ public class TypingStartEvent extends ChannelEvent {
     public Instant getStartTime() {
         return startTime;
     }
+
+    @Override
+    public String toString() {
+        return "TypingStartEvent{" +
+                "channelId=" + channelId +
+                ", userId=" + userId +
+                ", startTime=" + startTime +
+                '}';
+    }
 }

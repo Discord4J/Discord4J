@@ -47,4 +47,12 @@ public class GuildUpdateEvent extends GuildEvent {
     public Optional<Guild> getOld() {
         return Optional.ofNullable(old);
     }
+
+    @Override
+    public String toString() {
+        return "GuildUpdateEvent{" +
+                "current=" + current +
+                ", old=" + old +
+                '}';
+    }
 }

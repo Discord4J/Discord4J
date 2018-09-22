@@ -113,10 +113,10 @@ public final class Image {
      */
     @Override
     public String toString() {
-        return "Image(" +
+        return "Image{" +
                 "hash='" + hash + '\'' +
                 ", format=" + format +
-                ')';
+                '}';
     }
 
     /**

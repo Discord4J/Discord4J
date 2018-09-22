@@ -35,10 +35,10 @@ public class RequestGuildMembers implements PayloadData {
 
     @Override
     public String toString() {
-        return "RequestGuildMembers[" +
+        return "RequestGuildMembers{" +
                 "guildId=" + guildId +
-                ", query=" + query +
+                ", query='" + query + '\'' +
                 ", limit=" + limit +
-                ']';
+                '}';
     }
 }

@@ -82,12 +82,12 @@ public class RoleModifyRequest {
 
     @Override
     public String toString() {
-        return "RoleModifyRequest[" +
+        return "RoleModifyRequest{" +
                 "name=" + name +
                 ", permissions=" + permissions +
                 ", color=" + color +
                 ", hoist=" + hoist +
                 ", mentionable=" + mentionable +
-                ']';
+                '}';
     }
 }

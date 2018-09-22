@@ -30,10 +30,10 @@ public class PermissionsEditRequest {
 
     @Override
     public String toString() {
-        return "PermissionsEditRequest[" +
+        return "PermissionsEditRequest{" +
                 "allow=" + allow +
                 ", deny=" + deny +
-                ", type=" + type +
-                ']';
+                ", type='" + type + '\'' +
+                '}';
     }
 }

@@ -76,4 +76,14 @@ public class MessageBulkDeleteEvent extends MessageEvent {
     public Mono<Guild> getGuild() {
         return getClient().getGuildById(getGuildId());
     }
+
+    @Override
+    public String toString() {
+        return "MessageBulkDeleteEvent{" +
+                "messageIds=" + Arrays.toString(messageIds) +
+                ", channelId=" + channelId +
+                ", guildId=" + guildId +
+                ", messages=" + messages +
+                '}';
+    }
 }

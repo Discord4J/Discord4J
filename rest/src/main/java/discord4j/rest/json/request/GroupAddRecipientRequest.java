@@ -31,9 +31,9 @@ public class GroupAddRecipientRequest {
 
     @Override
     public String toString() {
-        return "GroupAddRecipientRequest[" +
-                "accessToken=" + accessToken +
-                ", nick=" + nick +
-                ']';
+        return "GroupAddRecipientRequest{" +
+                "accessToken='" + accessToken + '\'' +
+                ", nick='" + nick + '\'' +
+                '}';
     }
 }

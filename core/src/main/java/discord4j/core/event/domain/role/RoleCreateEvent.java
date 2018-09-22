@@ -49,4 +49,12 @@ public class RoleCreateEvent extends RoleEvent {
     public Role getRole() {
         return role;
     }
+
+    @Override
+    public String toString() {
+        return "RoleCreateEvent{" +
+                "guildId=" + guildId +
+                ", role=" + role +
+                '}';
+    }
 }

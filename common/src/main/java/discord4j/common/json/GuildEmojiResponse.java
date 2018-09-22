@@ -67,15 +67,14 @@ public class GuildEmojiResponse {
 
     @Override
     public String toString() {
-        return "EmojiResponse[" +
+        return "GuildEmojiResponse{" +
                 "id=" + id +
-                ", name=" + name +
+                ", name='" + name + '\'' +
                 ", roles=" + Arrays.toString(roles) +
                 ", user=" + user +
                 ", requireColons=" + requireColons +
                 ", managed=" + managed +
                 ", animated=" + animated +
-                ']';
+                '}';
     }
-
 }

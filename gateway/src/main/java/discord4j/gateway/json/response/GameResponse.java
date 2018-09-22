@@ -110,19 +110,19 @@ public class GameResponse {
 
     @Override
     public String toString() {
-        return "GameResponse[" +
-                "name=" + name +
+        return "GameResponse{" +
+                "name='" + name + '\'' +
                 ", type=" + type +
-                ", url=" + url +
+                ", url='" + url + '\'' +
                 ", timestamps=" + timestamps +
-                ", sessionId=" + sessionId +
+                ", sessionId='" + sessionId + '\'' +
                 ", applicationId=" + applicationId +
-                ", details=" + details +
-                ", syncId=" + syncId +
-                ", state=" + state +
+                ", details='" + details + '\'' +
+                ", syncId='" + syncId + '\'' +
+                ", state='" + state + '\'' +
                 ", flags=" + flags +
                 ", party=" + party +
                 ", assets=" + assets +
-                ']';
+                '}';
     }
 }

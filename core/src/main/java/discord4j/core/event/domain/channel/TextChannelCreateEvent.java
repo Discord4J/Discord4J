@@ -36,4 +36,11 @@ public class TextChannelCreateEvent extends ChannelEvent {
     public TextChannel getChannel() {
         return channel;
     }
+
+    @Override
+    public String toString() {
+        return "TextChannelCreateEvent{" +
+                "channel=" + channel +
+                '}';
+    }
 }

@@ -36,10 +36,10 @@ public class ReactionResponse {
 
     @Override
     public String toString() {
-        return "ReactionResponse[" +
+        return "ReactionResponse{" +
                 "count=" + count +
                 ", me=" + me +
                 ", emoji=" + emoji +
-                ']';
+                '}';
     }
 }

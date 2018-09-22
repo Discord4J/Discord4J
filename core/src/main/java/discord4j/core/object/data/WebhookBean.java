@@ -105,4 +105,17 @@ public final class WebhookBean implements Serializable {
     public void setToken(final String token) {
         this.token = token;
     }
+
+    @Override
+    public String toString() {
+        return "WebhookBean{" +
+                "id=" + id +
+                ", guildId=" + guildId +
+                ", channelId=" + channelId +
+                ", user=" + user +
+                ", name='" + name + '\'' +
+                ", avatar='" + avatar + '\'' +
+                ", token='" + token + '\'' +
+                '}';
+    }
 }

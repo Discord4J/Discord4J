@@ -18,6 +18,8 @@ package discord4j.core.event.domain.lifecycle;
 
 import discord4j.core.DiscordClient;
 
+import java.util.Arrays;
+
 /**
  * Dispatched when the gateway connection is successfully resumed.
  *
@@ -34,5 +36,12 @@ public class ResumeEvent extends GatewayLifecycleEvent {
 
     public String[] getTrace() {
         return trace;
+    }
+
+    @Override
+    public String toString() {
+        return "ResumeEvent{" +
+                "trace=" + Arrays.toString(trace) +
+                "} " + super.toString();
     }
 }

@@ -44,11 +44,11 @@ public class EmbedVideoResponse {
 
     @Override
     public String toString() {
-        return "EmbedVideoResponse[" +
-                "url=" + url +
+        return "EmbedVideoResponse{" +
+                "url='" + url + '\'' +
                 ", height=" + height +
                 ", width=" + width +
-                ", proxy_url=" + proxyUrl +
-                ']';
+                ", proxyUrl='" + proxyUrl + '\'' +
+                '}';
     }
 }

@@ -53,4 +53,12 @@ public final class BanBean implements Serializable {
     public void setUser(final UserBean user) {
         this.user = user;
     }
+
+    @Override
+    public String toString() {
+        return "BanBean{" +
+                "reason='" + reason + '\'' +
+                ", user=" + user +
+                '}';
+    }
 }

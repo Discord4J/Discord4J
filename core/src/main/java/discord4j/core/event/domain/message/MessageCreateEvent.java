@@ -63,4 +63,13 @@ public class MessageCreateEvent extends MessageEvent {
     public Optional<Member> getMember() {
         return Optional.ofNullable(member);
     }
+
+    @Override
+    public String toString() {
+        return "MessageCreateEvent{" +
+                "message=" + message +
+                ", guildId=" + guildId +
+                ", member=" + member +
+                '}';
+    }
 }

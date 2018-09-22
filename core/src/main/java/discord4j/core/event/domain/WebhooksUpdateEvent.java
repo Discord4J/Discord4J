@@ -55,4 +55,12 @@ public class WebhooksUpdateEvent extends Event {
     public Mono<TextChannel> getChannel() {
         return getClient().getTextChannelById(getChannelId());
     }
+
+    @Override
+    public String toString() {
+        return "WebhooksUpdateEvent{" +
+                "guildId=" + guildId +
+                ", channelId=" + channelId +
+                '}';
+    }
 }

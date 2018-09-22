@@ -44,10 +44,10 @@ public class MessageDelete implements Dispatch {
 
     @Override
     public String toString() {
-        return "MessageDelete[" +
+        return "MessageDelete{" +
                 "id=" + id +
                 ", channelId=" + channelId +
                 ", guildId=" + guildId +
-                ']';
+                '}';
     }
 }

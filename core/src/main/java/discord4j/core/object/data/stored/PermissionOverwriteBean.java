@@ -69,4 +69,14 @@ public final class PermissionOverwriteBean implements Serializable {
     public void setDeny(final int deny) {
         this.deny = deny;
     }
+
+    @Override
+    public String toString() {
+        return "PermissionOverwriteBean{" +
+                "id=" + id +
+                ", type='" + type + '\'' +
+                ", allow=" + allow +
+                ", deny=" + deny +
+                '}';
+    }
 }

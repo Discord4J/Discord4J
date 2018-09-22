@@ -36,4 +36,11 @@ public class CategoryCreateEvent extends ChannelEvent {
     public Category getCategory() {
         return category;
     }
+
+    @Override
+    public String toString() {
+        return "CategoryCreateEvent{" +
+                "category=" + category +
+                '}';
+    }
 }

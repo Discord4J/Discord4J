@@ -235,4 +235,13 @@ public final class PermissionOverwrite implements DiscordObject {
             }
         }
     }
+
+    @Override
+    public String toString() {
+        return "PermissionOverwrite{" +
+                "data=" + data +
+                ", guildId=" + guildId +
+                ", channelId=" + channelId +
+                '}';
+    }
 }

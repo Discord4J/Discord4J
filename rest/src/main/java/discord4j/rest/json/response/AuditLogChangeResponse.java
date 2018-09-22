@@ -46,10 +46,10 @@ public class AuditLogChangeResponse {
 
     @Override
     public String toString() {
-        return "AuditLogChangeResponse[" +
+        return "AuditLogChangeResponse{" +
                 "newValue=" + newValue +
                 ", oldValue=" + oldValue +
-                ", key=" + key +
-                ']';
+                ", key='" + key + '\'' +
+                '}';
     }
 }

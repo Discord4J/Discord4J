@@ -43,4 +43,11 @@ public class GuildCreateEvent extends GuildEvent {
     public Guild getGuild() {
         return guild;
     }
+
+    @Override
+    public String toString() {
+        return "GuildCreateEvent{" +
+                "guild=" + guild +
+                '}';
+    }
 }

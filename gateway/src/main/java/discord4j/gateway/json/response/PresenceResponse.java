@@ -64,12 +64,12 @@ public class PresenceResponse {
 
     @Override
     public String toString() {
-        return "PresenceResponse[" +
+        return "PresenceResponse{" +
                 "user=" + user +
                 ", roles=" + Arrays.toString(roles) +
                 ", game=" + game +
                 ", guildId=" + guildId +
-                ", status=" + status +
-                ']';
+                ", status='" + status + '\'' +
+                '}';
     }
 }

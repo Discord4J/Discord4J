@@ -61,4 +61,13 @@ public class RoleDeleteEvent extends RoleEvent {
     public Optional<Role> getRole() {
         return Optional.ofNullable(role);
     }
+
+    @Override
+    public String toString() {
+        return "RoleDeleteEvent{" +
+                "guildId=" + guildId +
+                ", roleId=" + roleId +
+                ", role=" + role +
+                '}';
+    }
 }

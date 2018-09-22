@@ -37,9 +37,9 @@ public class Hello implements PayloadData {
 
     @Override
     public String toString() {
-        return "Hello[" +
+        return "Hello{" +
                 "heartbeatInterval=" + heartbeatInterval +
                 ", trace=" + Arrays.toString(trace) +
-                ']';
+                '}';
     }
 }

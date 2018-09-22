@@ -36,11 +36,11 @@ public class InviteCreateRequest {
 
     @Override
     public String toString() {
-        return "InviteCreateRequest[" +
+        return "InviteCreateRequest{" +
                 "maxAge=" + maxAge +
                 ", maxUses=" + maxUses +
                 ", temporary=" + temporary +
                 ", unique=" + unique +
-                ']';
+                '}';
     }
 }

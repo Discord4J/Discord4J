@@ -31,8 +31,8 @@ public class GuildIntegrationsUpdate implements Dispatch {
 
     @Override
     public String toString() {
-        return "GuildIntegrationsUpdate[" +
+        return "GuildIntegrationsUpdate{" +
                 "guildId=" + guildId +
-                ']';
+                '}';
     }
 }

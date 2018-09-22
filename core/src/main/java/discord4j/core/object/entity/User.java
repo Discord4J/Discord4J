@@ -186,4 +186,11 @@ public class User implements Entity {
     public final int hashCode() {
         return EntityUtil.hashCode(this);
     }
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "data=" + data +
+                '}';
+    }
 }

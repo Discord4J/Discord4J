@@ -113,4 +113,17 @@ public class AuditLogEntryBean implements Serializable {
     public void setOptions(Map<String, ?> options) {
         this.options = options;
     }
+
+    @Override
+    public String toString() {
+        return "AuditLogEntryBean{" +
+                "id=" + id +
+                ", targetId=" + targetId +
+                ", responsibleUserId=" + responsibleUserId +
+                ", reason='" + reason + '\'' +
+                ", actionType=" + actionType +
+                ", changes=" + changes +
+                ", options=" + options +
+                '}';
+    }
 }

@@ -34,9 +34,9 @@ public class IntegrationAccountResponse {
 
     @Override
     public String toString() {
-        return "IntegrationAccountResponse[" +
+        return "IntegrationAccountResponse{" +
                 "id=" + id +
-                ", name=" + name +
-                ']';
+                ", name='" + name + '\'' +
+                '}';
     }
 }

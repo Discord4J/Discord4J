@@ -73,14 +73,14 @@ public class WebhookResponse {
 
     @Override
     public String toString() {
-        return "WebhookResponse[" +
+        return "WebhookResponse{" +
                 "id=" + id +
                 ", guildId=" + guildId +
                 ", channelId=" + channelId +
                 ", user=" + user +
-                ", name=" + name +
-                ", avatar=" + avatar +
-                ", token=" + token +
-                ']';
+                ", name='" + name + '\'' +
+                ", avatar='" + avatar + '\'' +
+                ", token='" + token + '\'' +
+                '}';
     }
 }

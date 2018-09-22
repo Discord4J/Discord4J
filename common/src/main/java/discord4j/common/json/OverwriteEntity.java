@@ -70,11 +70,11 @@ public class OverwriteEntity {
 
     @Override
     public String toString() {
-        return "OverwriteEntity[" +
+        return "OverwriteEntity{" +
                 "id=" + id +
-                ", type=" + type +
+                ", type='" + type + '\'' +
                 ", allow=" + allow +
                 ", deny=" + deny +
-                ']';
+                '}';
     }
 }

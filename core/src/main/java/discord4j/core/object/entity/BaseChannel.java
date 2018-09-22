@@ -93,4 +93,11 @@ class BaseChannel implements Channel {
     public final int hashCode() {
         return EntityUtil.hashCode(this);
     }
+
+    @Override
+    public String toString() {
+        return "BaseChannel{" +
+                "data=" + data +
+                '}';
+    }
 }

@@ -33,9 +33,9 @@ public class EmbedFooterRequest {
 
     @Override
     public String toString() {
-        return "EmbedFooterRequest[" +
-                "text=" + text +
-                ", iconUrl=" + iconUrl +
-                ']';
+        return "EmbedFooterRequest{" +
+                "text='" + text + '\'' +
+                ", iconUrl='" + iconUrl + '\'' +
+                '}';
     }
 }

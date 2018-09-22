@@ -32,9 +32,9 @@ public class UserModifyRequest {
 
     @Override
     public String toString() {
-        return "UserModifyRequest[" +
+        return "UserModifyRequest{" +
                 "username=" + username +
                 ", avatar=" + avatar +
-                ']';
+                '}';
     }
 }

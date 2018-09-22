@@ -36,4 +36,11 @@ public class TextChannelDeleteEvent extends ChannelEvent {
     public TextChannel getChannel() {
         return channel;
     }
+
+    @Override
+    public String toString() {
+        return "TextChannelDeleteEvent{" +
+                "channel=" + channel +
+                '}';
+    }
 }

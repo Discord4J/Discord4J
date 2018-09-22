@@ -47,4 +47,12 @@ public class TextChannelUpdateEvent extends ChannelEvent {
     public Optional<TextChannel> getOld() {
         return Optional.ofNullable(old);
     }
+
+    @Override
+    public String toString() {
+        return "TextChannelUpdateEvent{" +
+                "current=" + current +
+                ", old=" + old +
+                '}';
+    }
 }

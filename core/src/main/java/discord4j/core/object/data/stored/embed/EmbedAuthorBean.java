@@ -69,4 +69,14 @@ public final class EmbedAuthorBean implements Serializable {
     public void setProxyIconUrl(final String proxyIconUrl) {
         this.proxyIconUrl = proxyIconUrl;
     }
+
+    @Override
+    public String toString() {
+        return "EmbedAuthorBean{" +
+                "name='" + name + '\'' +
+                ", url='" + url + '\'' +
+                ", iconUrl='" + iconUrl + '\'' +
+                ", proxyIconUrl='" + proxyIconUrl + '\'' +
+                '}';
+    }
 }

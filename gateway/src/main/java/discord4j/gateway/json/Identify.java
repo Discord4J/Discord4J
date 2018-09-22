@@ -43,13 +43,13 @@ public class Identify implements PayloadData {
 
     @Override
     public String toString() {
-        return "Identify[" +
-                "token=hunter2" +
+        return "Identify{" +
+                "token='hunter2'" +
                 ", properties=" + properties +
                 ", compress=" + compress +
                 ", largeThreshold=" + largeThreshold +
                 ", shard=" + shard +
                 ", presence=" + presence +
-                ']';
+                '}';
     }
 }

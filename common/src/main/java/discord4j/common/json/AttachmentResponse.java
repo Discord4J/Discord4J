@@ -68,14 +68,14 @@ public class AttachmentResponse {
 
     @Override
     public String toString() {
-        return "AttachmentResponse[" +
+        return "AttachmentResponse{" +
                 "id=" + id +
-                ", fileName=" + fileName +
+                ", fileName='" + fileName + '\'' +
                 ", size=" + size +
-                ", url=" + url +
-                ", proxyUrl=" + proxyUrl +
+                ", url='" + url + '\'' +
+                ", proxyUrl='" + proxyUrl + '\'' +
                 ", height=" + height +
                 ", width=" + width +
-                ']';
+                '}';
     }
 }

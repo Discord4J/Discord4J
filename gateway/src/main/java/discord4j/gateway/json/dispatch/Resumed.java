@@ -31,8 +31,8 @@ public class Resumed implements Dispatch {
 
     @Override
     public String toString() {
-        return "Resumed[" +
+        return "Resumed{" +
                 "trace=" + Arrays.toString(trace) +
-                ']';
+                '}';
     }
 }
