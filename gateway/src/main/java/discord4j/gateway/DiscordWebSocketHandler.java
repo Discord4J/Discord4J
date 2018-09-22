@@ -105,7 +105,6 @@ public class DiscordWebSocketHandler implements ConnectionObserver {
                 .then()
                 .doOnError(t -> outboundLogger.debug("Sender threw an error: {}", t.toString()))
                 .doOnSuccess(v -> outboundLogger.debug("Sender succeeded"))
-                .doOnCancel(() -> outboundLogger.debug("Sender cancelled"))
                 .doOnTerminate(() -> outboundLogger.debug("Sender terminated"));
 
         Mono<Void> inboundEvents = in.aggregateFrames()
