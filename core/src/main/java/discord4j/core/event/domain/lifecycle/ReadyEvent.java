@@ -21,6 +21,7 @@ import discord4j.core.object.entity.User;
 import discord4j.core.object.util.Snowflake;
 
 import javax.annotation.Nullable;
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.Set;
 
@@ -102,6 +103,24 @@ public class ReadyEvent extends GatewayLifecycleEvent {
         public int hashCode() {
             return Objects.hash(id, available);
         }
+
+        @Override
+        public String toString() {
+            return "Guild{" +
+                    "id=" + id +
+                    ", available=" + available +
+                    '}';
+        }
     }
 
+    @Override
+    public String toString() {
+        return "ReadyEvent{" +
+                "gatewayVersion=" + gatewayVersion +
+                ", self=" + self +
+                ", guilds=" + guilds +
+                ", sessionId='" + sessionId + '\'' +
+                ", trace=" + Arrays.toString(trace) +
+                "}";
+    }
 }
