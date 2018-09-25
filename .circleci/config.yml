@@ -3,7 +3,7 @@
 # Check https://circleci.com/docs/2.0/language-java/ for more details
 #
 version: 2
-      
+
 job_definition: &job_definition
   working_directory: ~/Discord4J
 
@@ -97,9 +97,9 @@ jobs:
       - image: circleci/openjdk:8-jdk
     <<: *job_definition
 
-  jvm10:
+  jvm11:
     docker:
-      - image: circleci/openjdk:10-jdk
+      - image: circleci/openjdk:11-jdk
     <<: *job_definition
 
 workflows:
@@ -108,5 +108,5 @@ workflows:
     jobs:
       - jvm8:
           context: D3J
-      - jvm10:
+      - jvm11:
           context: D3J
