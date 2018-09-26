@@ -148,7 +148,7 @@ public class GatewayClient {
             Mono<Void> heartbeatHandler = heartbeat.ticks()
                     .flatMap(t -> {
                         long delay = System.currentTimeMillis() - lastAck.get();
-                        if (delay > heartbeat.getDuration().toMillis()) {
+                        if (delay > heartbeat.getPeriod().toMillis()) {
                             log.debug("Missing heartbeat ACK for {} ms", delay);
                             handler.error(new RuntimeException("Reconnecting due to zombie or failed connection"));
                             return Mono.empty();
