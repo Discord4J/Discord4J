@@ -114,7 +114,12 @@ class BaseMessageChannel extends BaseChannel implements MessageChannel {
     }
 
     @Override
-    public Flux<Message> getPinnedMessages() {
+    public final Mono<Message> getMessageById(final Snowflake id) {
+        return getClient().getMessageById(getId(), id);
+    }
+
+    @Override
+    public final Flux<Message> getPinnedMessages() {
         return getServiceMediator().getRestClient().getChannelService().getPinnedMessages(getId().asLong())
                 .map(MessageBean::new)
                 .map(bean -> new Message(getServiceMediator(), bean));

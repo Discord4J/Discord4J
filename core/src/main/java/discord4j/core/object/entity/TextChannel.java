@@ -138,6 +138,11 @@ public final class TextChannel extends BaseChannel implements Categorizable, Gui
     }
 
     @Override
+    public Mono<Message> getMessageById(final Snowflake id) {
+        return messageChannel.getMessageById(id);
+    }
+
+    @Override
     public Flux<Message> getPinnedMessages() {
         return messageChannel.getPinnedMessages();
     }

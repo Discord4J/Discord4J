@@ -282,6 +282,17 @@ public final class Guild implements Entity {
     }
 
     /**
+     * Requests to retrieve the role as represented by the supplied ID.
+     *
+     * @param id The ID of the role.
+     * @return A {@link Mono} where, upon successful completion, emits the {@link Role} as represented by the supplied
+     * ID. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Role> getRoleById(final Snowflake id) {
+        return getClient().getRoleById(getId(), id);
+    }
+
+    /**
      * Requests to retrieve the guild's @everyone {@link Role}.
      *
      * @return A {@link Mono} where, upon successful completion, emits the @everyone {@link Role}, if
@@ -310,6 +321,17 @@ public final class Guild implements Entity {
      */
     public Flux<GuildEmoji> getEmojis() {
         return Flux.fromIterable(getEmojiIds()).flatMap(id -> getClient().getGuildEmojiById(getId(), id));
+    }
+
+    /**
+     * Requests to retrieve the guild emoji as represented by the supplied ID.
+     *
+     * @param id The ID of the guild emoji.
+     * @return A {@link Mono} where, upon successful completion, emits the {@link GuildEmoji} as represented by the
+     * supplied ID. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<GuildEmoji> getGuildEmojiById(final Snowflake id) {
+        return getClient().getGuildEmojiById(getId(), id);
     }
 
     /**
@@ -463,6 +485,17 @@ public final class Guild implements Entity {
     }
 
     /**
+     * Requests to retrieve the member as represented by the supplied ID.
+     *
+     * @param id The ID of the member.
+     * @return A {@link Mono} where, upon successful completion, emits the {@link Member} as represented by the supplied
+     * ID. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Member> getMemberById(final Snowflake id) {
+        return getClient().getMemberById(getId(), id);
+    }
+
+    /**
      * Requests to retrieve the channels of the guild.
      *
      * @return A {@link Flux} that continually emits the {@link GuildChannel channels} of the guild. If an error is
@@ -482,6 +515,17 @@ public final class Guild implements Entity {
                         .map(bean -> EntityUtil.getChannel(serviceMediator, bean))
                         .cast(GuildChannel.class))
                 .sort(Comparator.comparing(GuildChannel::getRawPosition).thenComparing(GuildChannel::getId));
+    }
+
+    /**
+     * Requests to retrieve the channel as represented by the supplied ID.
+     *
+     * @param id The ID of the channel.
+     * @return A {@link Mono} where, upon successful completion, emits the {@link GuildChannel} as represented by the
+     * supplied ID. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<GuildChannel> getChannelById(final Snowflake id) {
+        return getClient().getGuildChannelById(id).filter(channel -> channel.getGuildId().equals(getId()));
     }
 
     /**

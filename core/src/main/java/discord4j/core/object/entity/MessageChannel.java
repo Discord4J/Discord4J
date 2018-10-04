@@ -141,6 +141,15 @@ public interface MessageChannel extends Channel {
     Flux<Message> getMessagesAfter(Snowflake messageId);
 
     /**
+     * Requests to retrieve the message as represented by the supplied ID.
+     *
+     * @param id The ID of the message.
+     * @return A {@link Mono} where, upon successful completion, emits the {@link Message} as represented by the
+     * supplied ID. If an error is received, it is emitted through the {@code Mono}.
+     */
+    Mono<Message> getMessageById(Snowflake id);
+
+    /**
      * Requests to retrieve all the pinned messages for this channel.
      *
      * @return A {@link Flux} that continually emits all the pinned messages for this channel. If an error is received,
