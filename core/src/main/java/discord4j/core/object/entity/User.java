@@ -120,6 +120,20 @@ public class User implements Entity {
     }
 
     /**
+     * Gets the user's effective avatar URL.
+     *
+     * @return The user's effective avatar URL.
+     * @implNote This method will first attempt to get the user's {@link #getAvatarUrl(Image.Format) avatar URL}. If the
+     * avatar is {@link #hasAnimatedAvatar() animated}, a {@link Image.Format#GIF GIF} is returned; otherwise a
+     * {@link Image.Format#PNG PNG} is returned. The {@link #getDefaultAvatarUrl() default avatar URL} is returned if no
+     * avatar is set for this user.
+     */
+    public final String getAvatarUrl() {
+        final boolean animated = hasAnimatedAvatar();
+        return getAvatarUrl(animated ? GIF : PNG).orElse(getDefaultAvatarUrl());
+    }
+
+    /**
      * Gets whether the user is a bot.
      *
      * @return {@code true} if this user is a bot, {@code false} otherwise.
