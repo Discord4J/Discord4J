@@ -18,17 +18,18 @@ package discord4j.rest.json.request;
 
 import discord4j.common.jackson.Possible;
 import discord4j.common.jackson.PossibleJson;
+import discord4j.common.jackson.PossibleLong;
 
 @PossibleJson
 public class RoleModifyRequest {
 
     private final Possible<String> name;
-    private final Possible<Long> permissions;
+    private final PossibleLong permissions;
     private final Possible<Integer> color;
     private final Possible<Boolean> hoist;
     private final Possible<Boolean> mentionable;
 
-    public RoleModifyRequest(Possible<String> name, Possible<Long> permissions,
+    public RoleModifyRequest(Possible<String> name, PossibleLong permissions,
                              Possible<Integer> color, Possible<Boolean> hoist,
                              Possible<Boolean> mentionable) {
         this.name = name;
@@ -45,7 +46,7 @@ public class RoleModifyRequest {
     public static class Builder {
 
         private Possible<String> name = Possible.absent();
-        private Possible<Long> permissions = Possible.absent();
+        private PossibleLong permissions = PossibleLong.absent();
         private Possible<Integer> color = Possible.absent();
         private Possible<Boolean> hoist = Possible.absent();
         private Possible<Boolean> mentionable = Possible.absent();
@@ -56,7 +57,7 @@ public class RoleModifyRequest {
         }
 
         public Builder permissions(long permissions) {
-            this.permissions = Possible.of(permissions);
+            this.permissions = PossibleLong.of(permissions);
             return this;
         }
 
