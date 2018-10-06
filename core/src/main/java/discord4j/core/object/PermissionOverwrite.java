@@ -162,9 +162,10 @@ public class PermissionOverwrite {
     @Override
     public String toString() {
         return "PermissionOverwrite{" +
-                "data=" + data +
-                ", guildId=" + guildId +
-                ", channelId=" + channelId +
+                "allowed=" + allowed +
+                ", denied=" + denied +
+                ", targetId=" + targetId +
+                ", type=" + type +
                 '}';
     }
 }
