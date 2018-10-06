@@ -36,6 +36,7 @@ import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
@@ -264,13 +265,9 @@ public final class Member extends User {
         Mono<PermissionSet> getEveryonePerms = getGuild().flatMap(Guild::getEveryoneRole).map(Role::getPermissions);
         Mono<List<PermissionSet>> getRolePerms = getRoles().map(Role::getPermissions).collectList();
 
-        return getIsOwner.flatMap(isOwner -> {
-            if (isOwner) {
-                return Mono.just(PermissionSet.all());
-            } else {
-                return Mono.zip(getEveryonePerms, getRolePerms, PermissionUtil::computeBasePermissions);
-            }
-        });
+        return getIsOwner.filter(Predicate.isEqual(Boolean.TRUE))
+                .flatMap(ignored -> Mono.just(PermissionSet.all()))
+                .switchIfEmpty(Mono.zip(getEveryonePerms, getRolePerms, PermissionUtil::computeBasePermissions));
     }
 
     /**
