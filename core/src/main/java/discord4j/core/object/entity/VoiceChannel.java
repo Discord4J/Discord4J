@@ -20,15 +20,18 @@ import discord4j.core.ServiceMediator;
 import discord4j.core.object.ExtendedInvite;
 import discord4j.core.object.data.ExtendedInviteBean;
 import discord4j.core.object.data.stored.VoiceChannelBean;
+import discord4j.core.object.data.stored.VoiceStateBean;
 import discord4j.core.object.trait.Categorizable;
 import discord4j.core.object.trait.Invitable;
 import discord4j.core.object.util.Snowflake;
 import discord4j.core.spec.InviteCreateSpec;
 import discord4j.core.spec.VoiceChannelEditSpec;
 import discord4j.core.util.EntityUtil;
+import discord4j.store.api.util.LongLongTuple2;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
 
@@ -51,12 +54,12 @@ public final class VoiceChannel extends BaseGuildChannel implements Categorizabl
     }
 
     @Override
-    public final Optional<Snowflake> getCategoryId() {
+    public Optional<Snowflake> getCategoryId() {
         return Optional.ofNullable(getData().getParentId()).map(Snowflake::of);
     }
 
     @Override
-    public final Mono<Category> getCategory() {
+    public Mono<Category> getCategory() {
         return Mono.justOrEmpty(getCategoryId()).flatMap(getClient()::getCategoryById);
     }
 
@@ -123,6 +126,22 @@ public final class VoiceChannel extends BaseGuildChannel implements Categorizabl
                 .map(EntityUtil::getChannelBean)
                 .map(bean -> EntityUtil.getChannel(getServiceMediator(), bean))
                 .cast(VoiceChannel.class);
+    }
+
+    /**
+     * Requests to get all members connected to this voice channel.
+     *
+     * @return A {@link Flux} that continually emits the {@link Member members} connected to this voice channel. If an
+     * error is received, it is emitted through the {@code Flux}.
+     */
+    public Flux<Member> getMembers() {
+        return getServiceMediator().getStateHolder().getVoiceStateStore()
+                .findInRange(LongLongTuple2.of(getGuildId().asLong(), Long.MIN_VALUE),
+                             LongLongTuple2.of(getGuildId().asLong(), Long.MAX_VALUE))
+                .filter(bean -> Objects.equals(bean.getChannelId(), getId().asLong()))
+                .map(VoiceStateBean::getUserId)
+                .map(Snowflake::of)
+                .flatMap(userId -> getClient().getMemberById(getGuildId(), userId));
     }
 
     @Override
