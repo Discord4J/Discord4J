@@ -18,6 +18,7 @@ package discord4j.core.object.entity;
 
 import discord4j.core.ServiceMediator;
 import discord4j.core.object.ExtendedInvite;
+import discord4j.core.object.VoiceState;
 import discord4j.core.object.data.ExtendedInviteBean;
 import discord4j.core.object.data.stored.VoiceChannelBean;
 import discord4j.core.object.data.stored.VoiceStateBean;
@@ -129,19 +130,21 @@ public final class VoiceChannel extends BaseGuildChannel implements Categorizabl
     }
 
     /**
-     * Requests to get all members connected to this voice channel.
+     * Requests to retrieve the voice states of this voice channel.
      *
-     * @return A {@link Flux} that continually emits the {@link Member members} connected to this voice channel. If an
+     * @return A {@link Flux} that continually emits the {@link VoiceState voice states} of this voice channel. If an
      * error is received, it is emitted through the {@code Flux}.
+     *
+     * @implNote If the underlying {@link discord4j.core.DiscordClientBuilder#getStoreService() store} does not save
+     * {@link VoiceStateBean} instances <b>OR</b> the bot is currently not logged in then the returned {@code Flux} will
+     * always be empty.
      */
-    public Flux<Member> getMembers() {
+    public Flux<VoiceState> getVoiceStates() {
         return getServiceMediator().getStateHolder().getVoiceStateStore()
                 .findInRange(LongLongTuple2.of(getGuildId().asLong(), Long.MIN_VALUE),
                              LongLongTuple2.of(getGuildId().asLong(), Long.MAX_VALUE))
                 .filter(bean -> Objects.equals(bean.getChannelId(), getId().asLong()))
-                .map(VoiceStateBean::getUserId)
-                .map(Snowflake::of)
-                .flatMap(userId -> getClient().getMemberById(getGuildId(), userId));
+                .map(bean -> new VoiceState(getServiceMediator(), bean));
     }
 
     @Override
