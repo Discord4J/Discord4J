@@ -53,7 +53,7 @@ public class WebhooksUpdateEvent extends Event {
     }
 
     public Mono<TextChannel> getChannel() {
-        return getClient().getTextChannelById(getChannelId());
+        return getClient().getChannelById(getChannelId()).cast(TextChannel.class);
     }
 
     @Override

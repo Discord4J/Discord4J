@@ -181,13 +181,13 @@ public final class TextChannel extends BaseChannel implements Categorizable, Gui
     }
 
     @Override
-    public final Optional<Snowflake> getCategoryId() {
+    public Optional<Snowflake> getCategoryId() {
         return Optional.ofNullable(getData().getGuildChannel().getParentId()).map(Snowflake::of);
     }
 
     @Override
-    public final Mono<Category> getCategory() {
-        return Mono.justOrEmpty(getCategoryId()).flatMap(getClient()::getCategoryById);
+    public Mono<Category> getCategory() {
+        return Mono.justOrEmpty(getCategoryId()).flatMap(getClient()::getChannelById).cast(Category.class);
     }
 
     @Override

@@ -66,7 +66,7 @@ public class MessageBulkDeleteEvent extends MessageEvent {
     }
 
     public Mono<MessageChannel> getChannel() {
-        return getClient().getMessageChannelById(getChannelId());
+        return getClient().getChannelById(getChannelId()).cast(MessageChannel.class);
     }
 
     public Snowflake getGuildId() {

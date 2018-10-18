@@ -99,7 +99,7 @@ public class Invite implements DiscordObject {
      * associated to. If an error is received, it is emitted through the {@code Mono}.
      */
     public final Mono<TextChannel> getChannel() {
-        return getClient().getTextChannelById(getChannelId());
+        return getClient().getChannelById(getChannelId()).cast(TextChannel.class);
     }
 
     /**

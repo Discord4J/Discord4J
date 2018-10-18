@@ -90,7 +90,7 @@ public final class Message implements Entity {
      * was sent in. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<MessageChannel> getChannel() {
-        return getClient().getMessageChannelById(getChannelId());
+        return getClient().getChannelById(getChannelId()).cast(MessageChannel.class);
     }
 
     /**

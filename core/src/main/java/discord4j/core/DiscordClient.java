@@ -60,61 +60,6 @@ public final class DiscordClient {
     }
 
     /**
-     * Requests to retrieve the category represented by the supplied ID.
-     *
-     * @param categoryId The ID of the category.
-     * @return A {@link Mono} where, upon successful completion, emits the {@link Category} as represented by the
-     * supplied ID. If an error is received, it is emitted through the {@code Mono}.
-     */
-    public Mono<Category> getCategoryById(final Snowflake categoryId) {
-        return getChannelById(categoryId).ofType(Category.class);
-    }
-
-    /**
-     * Requests to retrieve the guild channel represented by the supplied ID.
-     *
-     * @param guildChannelId The ID of the guild channel.
-     * @return A {@link Mono} where, upon successful completion, emits the {@link GuildChannel} as represented by the
-     * supplied ID. If an error is received, it is emitted through the {@code Mono}.
-     */
-    public Mono<GuildChannel> getGuildChannelById(final Snowflake guildChannelId) {
-        return getChannelById(guildChannelId).ofType(GuildChannel.class);
-    }
-
-    /**
-     * Requests to retrieve the message channel represented by the supplied ID.
-     *
-     * @param messageChannelId The ID of the message channel.
-     * @return A {@link Mono} where, upon successful completion, emits the {@link MessageChannel} as represented by the
-     * supplied ID. If an error is received, it is emitted through the {@code Mono}.
-     */
-    public Mono<MessageChannel> getMessageChannelById(final Snowflake messageChannelId) {
-        return getChannelById(messageChannelId).ofType(MessageChannel.class);
-    }
-
-    /**
-     * Requests to retrieve the text channel represented by the supplied ID.
-     *
-     * @param textChannelId The ID of the text channel.
-     * @return A {@link Mono} where, upon successful completion, emits the {@link TextChannel} as represented by the
-     * supplied ID. If an error is received, it is emitted through the {@code Mono}.
-     */
-    public Mono<TextChannel> getTextChannelById(final Snowflake textChannelId) {
-        return getChannelById(textChannelId).ofType(TextChannel.class);
-    }
-
-    /**
-     * Requests to retrieve the voice channel represented by the supplied ID.
-     *
-     * @param voiceChannelId The ID of the voice channel.
-     * @return A {@link Mono} where, upon successful completion, emits the {@link VoiceChannel} as represented by the
-     * supplied ID. If an error is received, it is emitted through the {@code Mono}.
-     */
-    public Mono<VoiceChannel> getVoiceChannelById(final Snowflake voiceChannelId) {
-        return getChannelById(voiceChannelId).ofType(VoiceChannel.class);
-    }
-
-    /**
      * Requests to retrieve the channel represented by the supplied ID.
      *
      * @param channelId The ID of the channel.

@@ -98,7 +98,7 @@ public final class Webhook implements Entity {
      * associated to. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<TextChannel> getChannel() {
-        return getClient().getTextChannelById(getChannelId());
+        return getClient().getChannelById(getChannelId()).cast(TextChannel.class);
     }
 
     /**

@@ -61,7 +61,7 @@ public final class VoiceChannel extends BaseGuildChannel implements Categorizabl
 
     @Override
     public Mono<Category> getCategory() {
-        return Mono.justOrEmpty(getCategoryId()).flatMap(getClient()::getCategoryById);
+        return Mono.justOrEmpty(getCategoryId()).flatMap(getClient()::getChannelById).cast(Category.class);
     }
 
     @Override

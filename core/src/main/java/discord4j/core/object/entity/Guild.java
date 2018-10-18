@@ -200,7 +200,7 @@ public final class Guild implements Entity {
      * If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<VoiceChannel> getAfkChannel() {
-        return Mono.justOrEmpty(getAfkChannelId()).flatMap(getClient()::getVoiceChannelById);
+        return Mono.justOrEmpty(getAfkChannelId()).flatMap(getClient()::getChannelById).cast(VoiceChannel.class);
     }
 
     /**
@@ -228,7 +228,7 @@ public final class Guild implements Entity {
      * present. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<GuildChannel> getEmbedChannel() {
-        return Mono.justOrEmpty(getEmbedChannelId()).flatMap(getClient()::getGuildChannelById);
+        return Mono.justOrEmpty(getEmbedChannelId()).flatMap(getClient()::getChannelById).cast(GuildChannel.class);
     }
 
     /**
@@ -377,7 +377,7 @@ public final class Guild implements Entity {
      * widget, if present. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<GuildChannel> getWidgetChannel() {
-        return Mono.justOrEmpty(getWidgetChannelId()).flatMap(getClient()::getGuildChannelById);
+        return Mono.justOrEmpty(getWidgetChannelId()).flatMap(getClient()::getChannelById).cast(GuildChannel.class);
     }
 
     /**
@@ -396,7 +396,7 @@ public final class Guild implements Entity {
      * messages are sent, if present. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<TextChannel> getSystemChannel() {
-        return Mono.justOrEmpty(getSystemChannelId()).flatMap(getClient()::getTextChannelById);
+        return Mono.justOrEmpty(getSystemChannelId()).flatMap(getClient()::getChannelById).cast(TextChannel.class);
     }
 
     /**
@@ -508,7 +508,8 @@ public final class Guild implements Entity {
                 .map(LongStream::boxed)
                 .flatMapMany(Flux::fromStream)
                 .map(Snowflake::of)
-                .flatMap(getClient()::getGuildChannelById)
+                .flatMap(getClient()::getChannelById)
+                .cast(GuildChannel.class)
                 .switchIfEmpty(serviceMediator.getRestClient().getGuildService()
                         .getGuildChannels(getId().asLong())
                         .map(EntityUtil::getChannelBean)
@@ -525,7 +526,9 @@ public final class Guild implements Entity {
      * supplied ID. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<GuildChannel> getChannelById(final Snowflake id) {
-        return getClient().getGuildChannelById(id).filter(channel -> channel.getGuildId().equals(getId()));
+        return getClient().getChannelById(id)
+                .cast(GuildChannel.class)
+                .filter(channel -> channel.getGuildId().equals(getId()));
     }
 
     /**

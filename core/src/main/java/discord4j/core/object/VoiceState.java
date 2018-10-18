@@ -92,7 +92,7 @@ public final class VoiceState implements DiscordObject {
      * to, if present. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<VoiceChannel> getChannel() {
-        return Mono.justOrEmpty(getChannelId()).flatMap(getClient()::getVoiceChannelById);
+        return Mono.justOrEmpty(getChannelId()).flatMap(getClient()::getChannelById).cast(VoiceChannel.class);
     }
 
     /**

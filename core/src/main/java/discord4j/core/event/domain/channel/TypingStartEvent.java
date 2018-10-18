@@ -47,7 +47,7 @@ public class TypingStartEvent extends ChannelEvent {
     }
 
     public Mono<MessageChannel> getChannel() {
-        return getClient().getMessageChannelById(getChannelId());
+        return getClient().getChannelById(getChannelId()).cast(MessageChannel.class);
     }
 
     public Snowflake getUserId() {

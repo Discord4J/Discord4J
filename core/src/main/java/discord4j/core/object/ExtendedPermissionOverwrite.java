@@ -117,7 +117,7 @@ public final class ExtendedPermissionOverwrite extends PermissionOverwrite imple
      * overwrite. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<GuildChannel> getChannel() {
-        return getClient().getGuildChannelById(getChannelId());
+        return getClient().getChannelById(getChannelId()).cast(GuildChannel.class);
     }
 
     /**

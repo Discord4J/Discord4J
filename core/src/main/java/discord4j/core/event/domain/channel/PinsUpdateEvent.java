@@ -46,7 +46,7 @@ public class PinsUpdateEvent extends ChannelEvent {
     }
 
     public Mono<MessageChannel> getChannel() {
-        return getClient().getMessageChannelById(getChannelId());
+        return getClient().getChannelById(getChannelId()).cast(MessageChannel.class);
     }
 
     public Optional<Instant> getLastPinTimestamp() {
