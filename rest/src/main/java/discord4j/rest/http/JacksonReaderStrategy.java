@@ -21,7 +21,7 @@ import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import reactor.core.Exceptions;
 import reactor.core.publisher.Mono;
-import reactor.netty.ByteBufFlux;
+import reactor.netty.ByteBufMono;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
@@ -51,8 +51,8 @@ public class JacksonReaderStrategy<Res> implements ReaderStrategy<Res> {
     }
 
     @Override
-    public Mono<Res> read(ByteBufFlux content, Class<Res> responseType) {
-        return content.aggregate().asByteArray().map(bytes -> {
+    public Mono<Res> read(ByteBufMono content, Class<Res> responseType) {
+        return content.asByteArray().map(bytes -> {
             try {
                 return objectMapper.readValue(bytes, responseType);
             } catch (JsonProcessingException e) {

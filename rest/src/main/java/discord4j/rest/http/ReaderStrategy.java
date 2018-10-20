@@ -17,7 +17,7 @@
 package discord4j.rest.http;
 
 import reactor.core.publisher.Mono;
-import reactor.netty.ByteBufFlux;
+import reactor.netty.ByteBufMono;
 
 import javax.annotation.Nullable;
 
@@ -46,5 +46,5 @@ public interface ReaderStrategy<Res> {
      * #canRead(Class, String)}
      * @return a Mono for the resolved response, according to the given response type
      */
-    Mono<Res> read(ByteBufFlux content, Class<Res> responseType);
+    Mono<Res> read(ByteBufMono content, Class<Res> responseType);
 }

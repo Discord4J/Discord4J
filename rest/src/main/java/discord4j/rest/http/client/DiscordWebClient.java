@@ -94,8 +94,8 @@ public class DiscordWebClient {
                 .findFirst()
                 .map(DiscordWebClient::<R>cast)
                 .map(writer -> writer.write(sender, body))
-                .orElseGet(() -> Mono.error(noReaderException(body, contentType)))
-                .flatMap(receiver -> receiver.response((response, content) -> {
+                .orElseGet(() -> Mono.error(noWriterException(body, contentType)))
+                .flatMap(receiver -> receiver.responseSingle((response, content) -> {
                     responseConsumer.accept(response);
                     String responseContentType = response.responseHeaders().get(HttpHeaderNames.CONTENT_TYPE);
                     Optional<ReaderStrategy<?>> readerStrategy = exchangeStrategies.readers().stream()
@@ -111,9 +111,9 @@ public class DiscordWebClient {
                     } else {
                         return readerStrategy.map(DiscordWebClient::<T>cast)
                                 .map(s -> s.read(content, responseType))
-                                .orElseGet(() -> Mono.error(noWriterException(responseType, responseContentType)));
+                                .orElseGet(() -> Mono.error(noReaderException(responseType, responseContentType)));
                     }
-                }).next());
+                }));
     }
 
     @SuppressWarnings("unchecked")
@@ -130,11 +130,11 @@ public class DiscordWebClient {
         return new ClientException(response.status(), response.responseHeaders(), errorResponse);
     }
 
-    private static RuntimeException noReaderException(@Nullable Object body, String contentType) {
+    private static RuntimeException noWriterException(@Nullable Object body, String contentType) {
         return new RuntimeException("No strategies to write this request: " + body + " - " + contentType);
     }
 
-    private static RuntimeException noWriterException(Object body, String contentType) {
+    private static RuntimeException noReaderException(Object body, String contentType) {
         return new RuntimeException("No strategies to read this response: " + body + " - " + contentType);
     }
 }

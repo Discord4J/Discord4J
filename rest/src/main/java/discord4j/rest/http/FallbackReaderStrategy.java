@@ -17,7 +17,7 @@
 package discord4j.rest.http;
 
 import reactor.core.publisher.Mono;
-import reactor.netty.ByteBufFlux;
+import reactor.netty.ByteBufMono;
 
 import javax.annotation.Nullable;
 
@@ -33,7 +33,7 @@ public class FallbackReaderStrategy implements ReaderStrategy<String> {
     }
 
     @Override
-    public Mono<String> read(ByteBufFlux content, Class<String> responseType) {
-        return content.aggregate().asString();
+    public Mono<String> read(ByteBufMono content, Class<String> responseType) {
+        return content.asString();
     }
 }
