@@ -30,6 +30,7 @@ public final class TextChannelBean extends ChannelBean {
     @Nullable
     private String topic;
     private boolean nsfw;
+    private int rateLimitPerUser;
 
     public TextChannelBean(final GatewayChannelResponse channel, long guildId) {
         super(channel.getId(), channel.getType());
@@ -37,6 +38,7 @@ public final class TextChannelBean extends ChannelBean {
         messageChannel = new MessageChannelBean(channel);
         topic = channel.getTopic();
         nsfw = channel.getNsfw() != null && channel.getNsfw();
+        rateLimitPerUser = channel.getRateLimitPerUser();
     }
 
     public TextChannelBean(final ChannelResponse response) {
@@ -45,6 +47,7 @@ public final class TextChannelBean extends ChannelBean {
         messageChannel = new MessageChannelBean(response);
         topic = response.getTopic();
         nsfw = response.isNsfw() != null && response.isNsfw();
+        rateLimitPerUser = response.getRateLimitPerUser();
     }
 
     public TextChannelBean() {}
@@ -90,6 +93,14 @@ public final class TextChannelBean extends ChannelBean {
         this.nsfw = nsfw;
     }
 
+    public int getRateLimitPerUser() {
+        return rateLimitPerUser;
+    }
+
+    public void setRateLimitPerUser(final int rateLimitPerUser) {
+        this.rateLimitPerUser = rateLimitPerUser;
+    }
+
     @Override
     public String toString() {
         return "TextChannelBean{" +
@@ -97,6 +108,7 @@ public final class TextChannelBean extends ChannelBean {
                 ", messageChannel=" + messageChannel +
                 ", topic='" + topic + '\'' +
                 ", nsfw=" + nsfw +
+                ", rateLimitPerUser=" + rateLimitPerUser +
                 "} " + super.toString();
     }
 }

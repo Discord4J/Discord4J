@@ -54,6 +54,9 @@ public class GatewayChannelResponse {
     private Integer bitrate;
     @Nullable
     private UserResponse[] recipients;
+    @JsonProperty("rate_limit_per_user")
+    @Nullable
+    private Integer rateLimitPerUser;
 
     @Nullable
     public Integer getUserLimit() {
@@ -114,6 +117,11 @@ public class GatewayChannelResponse {
         return recipients;
     }
 
+    @Nullable
+    public Integer getRateLimitPerUser() {
+        return rateLimitPerUser;
+    }
+
     @Override
     public String toString() {
         return "GatewayChannelResponse{" +
@@ -130,6 +138,7 @@ public class GatewayChannelResponse {
                 ", id=" + id +
                 ", bitrate=" + bitrate +
                 ", recipients=" + Arrays.toString(recipients) +
+                ", rateLimitPerUser=" + rateLimitPerUser +
                 '}';
     }
 }

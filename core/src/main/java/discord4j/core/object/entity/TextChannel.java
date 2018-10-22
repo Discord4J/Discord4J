@@ -225,6 +225,17 @@ public final class TextChannel extends BaseChannel implements Categorizable, Gui
     }
 
     /**
+     * Gets the amount of seconds an user has to wait before sending another message (0-120).
+     * <p>
+     * Bots, as well as users with the permission {@code manage_messages} or {@code manage_channel}, are unaffected.
+     *
+     * @return The amount of seconds an user has to wait before sending another message (0-120).
+     */
+    public int getRateLimitPerUser() {
+        return getData().getRateLimitPerUser();
+    }
+
+    /**
      * Gets the <i>raw</i> mention. This is the format utilized to directly mention another text channel (assuming the
      * text channel exists in context of the mention).
      *

@@ -41,11 +41,13 @@ public class ChannelCreateRequest {
     @UnsignedJson
     private final PossibleLong parentId;
     private final Possible<Boolean> nsfw;
+    @JsonProperty("rate_limit_per_user")
+    private final Possible<Integer> rateLimitPerUser;
 
     public ChannelCreateRequest(String name, Possible<Integer> type, @Nullable Possible<String> topic,
                                 Possible<Integer> bitrate, Possible<Integer> userLimit,
                                 Possible<OverwriteEntity[]> permissionOverwrites, @Nullable PossibleLong parentId,
-                                Possible<Boolean> nsfw) {
+                                Possible<Boolean> nsfw, Possible<Integer> rateLimitPerUser) {
         this.name = name;
         this.type = type;
         this.topic = topic;
@@ -54,6 +56,7 @@ public class ChannelCreateRequest {
         this.permissionOverwrites = permissionOverwrites;
         this.parentId = parentId;
         this.nsfw = nsfw;
+        this.rateLimitPerUser = rateLimitPerUser;
     }
 
     public static Builder builder() {
@@ -71,6 +74,7 @@ public class ChannelCreateRequest {
         private Possible<OverwriteEntity[]> permissionOverwrites = Possible.absent();
         private PossibleLong parentId = PossibleLong.absent();
         private Possible<Boolean> nsfw = Possible.absent();
+        private Possible<Integer> rateLimitPerUser = Possible.absent();
 
         public Builder name(String name) {
             this.name = name;
@@ -112,9 +116,14 @@ public class ChannelCreateRequest {
             return this;
         }
 
+        public Builder rateLimitPerUser(int rateLimitPerUser) {
+            this.rateLimitPerUser = Possible.of(rateLimitPerUser);
+            return this;
+        }
+
         public ChannelCreateRequest build() {
             return new ChannelCreateRequest(name, type, topic, bitrate, userLimit, permissionOverwrites, parentId,
-                    nsfw);
+                    nsfw, rateLimitPerUser);
         }
     }
 
@@ -129,6 +138,7 @@ public class ChannelCreateRequest {
                 ", permissionOverwrites=" + permissionOverwrites +
                 ", parentId=" + parentId +
                 ", nsfw=" + nsfw +
+                ", rateLimitPerUser=" + rateLimitPerUser +
                 '}';
     }
 }

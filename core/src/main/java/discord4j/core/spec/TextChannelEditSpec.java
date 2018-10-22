@@ -62,6 +62,11 @@ public class TextChannelEditSpec implements Spec<ChannelModifyRequest> {
         return this;
     }
 
+    public TextChannelEditSpec setRateLimitPerUser(int rateLimitPerUser) {
+        requestBuilder.rateLimitPerUser(rateLimitPerUser);
+        return this;
+    }
+
     @Override
     public ChannelModifyRequest asRequest() {
         return requestBuilder.build();

@@ -59,6 +59,11 @@ public class TextChannelCreateSpec implements Spec<ChannelCreateRequest> {
         return this;
     }
 
+    public TextChannelCreateSpec setRateLimitPerUser(int rateLimitPerUser) {
+        requestBuilder.rateLimitPerUser(rateLimitPerUser);
+        return this;
+    }
+
     @Override
     public ChannelCreateRequest asRequest() {
         return requestBuilder.build();

@@ -53,6 +53,9 @@ public class ChannelResponse {
     @JsonProperty("user_limit")
     @Nullable
     private Integer userLimit;
+    @JsonProperty("rate_limit_per_user")
+    @Nullable
+    private Integer rateLimitPerUser;
     @Nullable
     private UserResponse[] recipients;
     @Nullable
@@ -127,6 +130,11 @@ public class ChannelResponse {
     }
 
     @Nullable
+    public Integer getRateLimitPerUser() {
+        return rateLimitPerUser;
+    }
+
+    @Nullable
     public UserResponse[] getRecipients() {
         return recipients;
     }
@@ -170,6 +178,7 @@ public class ChannelResponse {
                 ", lastMessageId=" + lastMessageId +
                 ", bitrate=" + bitrate +
                 ", userLimit=" + userLimit +
+                ", rateLimitPerUser=" + rateLimitPerUser +
                 ", recipients=" + Arrays.toString(recipients) +
                 ", icon='" + icon + '\'' +
                 ", ownerId=" + ownerId +
