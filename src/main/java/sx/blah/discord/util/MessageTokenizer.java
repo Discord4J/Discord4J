@@ -48,7 +48,7 @@ public class MessageTokenizer {
 	/**
 	 * Regex for matching custom emoji.
 	 */
-	public static final String CUSTOM_EMOJI_REGEX = "<:[A-Za-z0-9_]{2,}:\\d+>";
+	public static final String CUSTOM_EMOJI_REGEX = "<a?:[A-Za-z0-9_]{2,}:\\d+>";
 	/**
 	 * Regex for matching invite URLs.
 	 */
