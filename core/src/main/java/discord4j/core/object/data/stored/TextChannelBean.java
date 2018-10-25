@@ -38,7 +38,8 @@ public final class TextChannelBean extends ChannelBean {
         messageChannel = new MessageChannelBean(channel);
         topic = channel.getTopic();
         nsfw = channel.getNsfw() != null && channel.getNsfw();
-        rateLimitPerUser = channel.getRateLimitPerUser();
+        final Integer rateLimitPerUser = channel.getRateLimitPerUser();
+        this.rateLimitPerUser = (rateLimitPerUser == null) ? 0 : rateLimitPerUser;
     }
 
     public TextChannelBean(final ChannelResponse response) {
@@ -47,7 +48,8 @@ public final class TextChannelBean extends ChannelBean {
         messageChannel = new MessageChannelBean(response);
         topic = response.getTopic();
         nsfw = response.isNsfw() != null && response.isNsfw();
-        rateLimitPerUser = response.getRateLimitPerUser();
+        final Integer rateLimitPerUser = response.getRateLimitPerUser();
+        this.rateLimitPerUser = (rateLimitPerUser == null) ? 0 : rateLimitPerUser;
     }
 
     public TextChannelBean() {}
