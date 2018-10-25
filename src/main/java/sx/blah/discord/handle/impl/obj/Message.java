@@ -283,7 +283,7 @@ public class Message implements IMessage {
 
 	@Override
 	public List<IUser> getMentions() {
-		if (mentionsEveryone) {
+		if (mentionsEveryone()) {
 			return channel.isPrivate() ? channel.getUsersHere() : channel.getGuild().getUsers();
 		}
 
