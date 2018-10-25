@@ -47,6 +47,9 @@ import java.util.stream.Collectors;
  */
 public final class Message implements Entity {
 
+    /** The maximum amount of characters that can be in the contents of a message. */
+    public static final int MAX_CONTENT_LENGTH = 2000;
+
     /** The ServiceMediator associated to this object. */
     private final ServiceMediator serviceMediator;
 

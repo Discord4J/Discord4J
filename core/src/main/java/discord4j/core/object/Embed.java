@@ -35,6 +35,18 @@ import java.util.stream.Collectors;
  */
 public final class Embed implements DiscordObject {
 
+    /** The maximum amount of characters that can be in an embed title. */
+    public static final int MAX_TITLE_LENGTH = 256;
+
+    /** The maximum amount of characters that can be in an embed description. */
+    public static final int MAX_DESCRIPTION_LENGTH = 2048;
+
+    /** The maximum amount of fields that can be appended to an embed. */
+    public static final int MAX_FIELDS = 25;
+
+    /** The maximum amount of total characters that can be present in an embed. */
+    public static final int MAX_CHARACTER_LENGTH = 6000;
+
     /** The ServiceMediator associated to this object. */
     private final ServiceMediator serviceMediator;
 
@@ -234,6 +246,9 @@ public final class Embed implements DiscordObject {
 
     /** A footer for a Discord {@link Embed embed}. */
     public final class Footer {
+
+        /** The maximum amount of characters that can be in a footer text. */
+        public static final int MAX_TEXT_LENGTH = 2048;
 
         /** The raw data as represented by Discord. */
         private final EmbedFooterBean data;
@@ -513,6 +528,9 @@ public final class Embed implements DiscordObject {
     /** An image for a Discord {@link Embed embed}. */
     public final class Author {
 
+        /** The maximum amount of characters that can be in an author's name. */
+        public static final int MAX_NAME_LENGTH = 256;
+
         /** The raw data as represented by Discord. */
         private final EmbedAuthorBean data;
 
@@ -573,6 +591,12 @@ public final class Embed implements DiscordObject {
 
     /** A field for a Discord {@link Embed embed}. */
     public final class Field {
+
+        /** The maximum amount of characters that can be in a field name. */
+        public static final int MAX_NAME_LENGTH = 256;
+
+        /** The maximum amount of characters that can be in a field value. */
+        public static final int MAX_VALUE_LENGTH = 1024;
 
         /** The raw data as represented by Discord. */
         private final EmbedFieldBean data;
