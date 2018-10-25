@@ -39,22 +39,19 @@ dependencies {
 ```java
 final ObjectMapper mapper = new ObjectMapper()
                 .setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
-                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true)
+                .addHandler(new UnknownPropertyHandler(ignoreUnknownJsonKeys))
                 .registerModules(new PossibleModule(), new Jdk8Module());
 
-final SimpleHttpClient httpClient = SimpleHttpClient.builder()
-                .defaultHeader("content-type", "application/json")
-                .defaultHeader("authorization", "Bot " + token)
-                .defaultHeader("user-agent", "DiscordBot(https://discord4j.com, " + version + ")")
-                .readerStrategy(new JacksonReaderStrategy<>(mapper))
-                .readerStrategy(new EmptyReaderStrategy())
-                .writerStrategy(new MultipartWriterStrategy(mapper))
-                .writerStrategy(new JacksonWriterStrategy(mapper))
-                .writerStrategy(new EmptyWriterStrategy())
-                .baseUrl(Routes.BASE_URL)
-                .build();
+HttpHeaders defaultHeaders = new DefaultHttpHeaders();
+defaultHeaders.add(HttpHeaderNames.CONTENT_TYPE, "application/json");
+defaultHeaders.add(HttpHeaderNames.AUTHORIZATION, "Bot " + token);
+defaultHeaders.add(HttpHeaderNames.USER_AGENT, "DiscordBot(https://discord4j.com, v3)");
+HttpClient httpClient = HttpClient.create().baseUrl(Routes.BASE_URL).compress(true);
 
-final RestClient restClient = new RestClient(new Router(httpClient));
+DiscordWebClient webClient = new DiscordWebClient(httpClient, defaultHeaders,
+        ExchangeStrategies.withJacksonDefaults(mapper));
+
+final RestClient restClient = new RestClient(new Router(httpClient), Schedulers.elastic());
 
 restClient.getApplicationService().getCurrentApplicationInfo()
                 .map(ApplicationInfoResponse::getName)
