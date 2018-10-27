@@ -73,7 +73,7 @@ public class Message implements IMessage {
 	/**
 	 * The users mentioned in the message.
 	 */
-	protected volatile List<Long> mentions;
+	protected volatile List<IUser> mentions;
 
 	/**
 	 * The roles mentioned in the message.
@@ -162,8 +162,7 @@ public class Message implements IMessage {
 		this.channel = (Channel) channel;
 		this.timestamp = timestamp;
 		this.editedTimestamp = editedTimestamp;
-		this.mentions = mentions;
-		this.roleMentions = roleMentions;
+		setMentions(mentions, roleMentions);
 		this.attachments = attachments;
 		this.isPinned = pinned;
 		this.channelMentions = new ArrayList<>();
@@ -211,7 +210,7 @@ public class Message implements IMessage {
 	 * @param roleMentions The role mentions of the message.
 	 */
 	public void setMentions(List<Long> mentions, List<Long> roleMentions) {
-		this.mentions = mentions;
+		this.mentions = mentions.stream().map(client::getUserByID).collect(Collectors.toList());
 		this.roleMentions = roleMentions;
 	}
 
@@ -286,10 +285,7 @@ public class Message implements IMessage {
 		if (mentionsEveryone()) {
 			return channel.isPrivate() ? channel.getUsersHere() : channel.getGuild().getUsers();
 		}
-
-		return mentions.stream()
-				.map(client::getUserByID)
-				.collect(Collectors.toList());
+		return mentions;
 	}
 
 	@Override
@@ -361,7 +357,7 @@ public class Message implements IMessage {
 	 * @return A list of the unique snowflake IDs of the users mentioned in the message.
 	 */
 	public List<Long> getRawMentionsLong() {
-		return mentions;
+		return mentions.stream().map(IIDLinkedObject::getLongID).collect(Collectors.toList());
 	}
 
 	/**
@@ -436,7 +432,7 @@ public class Message implements IMessage {
 	@Override
 	public IMessage copy() {
 		return new Message(client, id, content, author, channel, timestamp, editedTimestamp, everyoneMentionIsValid,
-				mentions, roleMentions, attachments, isPinned, embeds, reactions, webhookID, type);
+				getRawMentionsLong(), roleMentions, attachments, isPinned, embeds, reactions, webhookID, type);
 	}
 
 	@Override
