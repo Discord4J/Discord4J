@@ -444,29 +444,34 @@ public class Message implements IMessage {
 		return getChannel().isPrivate() ? null : getChannel().getGuild();
 	}
 
+	/**
+	 * Sets the CACHED formatted content of the message.
+	 */
 	private void setFormattedContent() {
-		String currentContent = content;
+		if (content == null) {
+			formattedContent = null;
+		} else {
+			String currentContent = content;
 
-		for (long userID : mentions) {
-			IUser u = client.getUserByID(userID);
-			currentContent = u == null ? currentContent.replace("<@" + userID + ">", "invalid-user")
-					: currentContent.replace(u.mention(false), "@" + u.getName())
-					.replace(u.mention(true), "@" + u.getDisplayName(getGuild()));
+			for (long userID : mentions) {
+				IUser u = client.getUserByID(userID);
+				currentContent = u == null ? currentContent.replace("<@" + userID + ">", "@invalid-user")
+						: currentContent.replace(u.mention(false), "@" + u.getName())
+						.replace(u.mention(true), "@" + u.getDisplayName(getGuild()));
+			}
+
+			for (IChannel ch : getChannelMentions())
+				currentContent = currentContent.replace(ch.mention(), "#" + ch.getName());
+
+			for (IRole r : getRoleMentions())
+				currentContent = currentContent.replace(r.mention(), "@" + r.getName());
+
+			formattedContent = currentContent;
 		}
-
-		for (IChannel ch : getChannelMentions())
-			currentContent = currentContent.replace(ch.mention(), "#" + ch.getName());
-
-		for (IRole r : getRoleMentions())
-			currentContent = currentContent.replace(r.mention(), "@" + r.getName());
-
-		formattedContent = currentContent;
 	}
 
 	@Override
 	public String getFormattedContent() {
-		if (content == null)
-			return null;
 		return formattedContent;
 	}
 
