@@ -73,7 +73,7 @@ public class Message implements IMessage {
 	/**
 	 * The users mentioned in the message.
 	 */
-	protected volatile List<IUser> mentions;
+	protected volatile List<Long> mentions;
 
 	/**
 	 * The roles mentioned in the message.
@@ -157,12 +157,12 @@ public class Message implements IMessage {
 				   List<Embed> embeds, List<IReaction> reactions, long webhookID, Type type) {
 		this.client = client;
 		this.id = id;
-		setContent(content);
 		this.author = (User) user;
 		this.channel = (Channel) channel;
 		this.timestamp = timestamp;
 		this.editedTimestamp = editedTimestamp;
-		setMentions(mentions, roleMentions);
+		this.mentions = mentions;
+		this.roleMentions = roleMentions;
 		this.attachments = attachments;
 		this.isPinned = pinned;
 		this.channelMentions = new ArrayList<>();
@@ -172,6 +172,7 @@ public class Message implements IMessage {
 		this.webhookID = webhookID;
 		this.type = type;
 
+		setContent(content);
 		setChannelMentions();
 	}
 
@@ -195,7 +196,7 @@ public class Message implements IMessage {
 	 */
 	public void setContent(String content) {
 		this.content = content;
-		this.formattedContent = null; // Force re-update later
+		setFormattedContent();
 
 		if (content != null) {
 			this.mentionsEveryone = content.contains("@everyone");
@@ -210,7 +211,7 @@ public class Message implements IMessage {
 	 * @param roleMentions The role mentions of the message.
 	 */
 	public void setMentions(List<Long> mentions, List<Long> roleMentions) {
-		this.mentions = mentions.stream().map(client::getUserByID).collect(Collectors.toList());
+		this.mentions = mentions;
 		this.roleMentions = roleMentions;
 	}
 
@@ -285,7 +286,10 @@ public class Message implements IMessage {
 		if (mentionsEveryone()) {
 			return channel.isPrivate() ? channel.getUsersHere() : channel.getGuild().getUsers();
 		}
-		return mentions;
+
+		return mentions.stream()
+				.map(client::getUserByID)
+				.collect(Collectors.toList());
 	}
 
 	@Override
@@ -357,7 +361,7 @@ public class Message implements IMessage {
 	 * @return A list of the unique snowflake IDs of the users mentioned in the message.
 	 */
 	public List<Long> getRawMentionsLong() {
-		return mentions.stream().map(IIDLinkedObject::getLongID).collect(Collectors.toList());
+		return mentions;
 	}
 
 	/**
@@ -432,7 +436,7 @@ public class Message implements IMessage {
 	@Override
 	public IMessage copy() {
 		return new Message(client, id, content, author, channel, timestamp, editedTimestamp, everyoneMentionIsValid,
-				getRawMentionsLong(), roleMentions, attachments, isPinned, embeds, reactions, webhookID, type);
+				mentions, roleMentions, attachments, isPinned, embeds, reactions, webhookID, type);
 	}
 
 	@Override
@@ -440,27 +444,29 @@ public class Message implements IMessage {
 		return getChannel().isPrivate() ? null : getChannel().getGuild();
 	}
 
+	private void setFormattedContent() {
+		String currentContent = content;
+
+		for (long userID : mentions) {
+			IUser u = client.getUserByID(userID);
+			currentContent = u == null ? currentContent.replace("<@" + userID + ">", "invalid-user")
+					: currentContent.replace(u.mention(false), "@" + u.getName())
+					.replace(u.mention(true), "@" + u.getDisplayName(getGuild()));
+		}
+
+		for (IChannel ch : getChannelMentions())
+			currentContent = currentContent.replace(ch.mention(), "#" + ch.getName());
+
+		for (IRole r : getRoleMentions())
+			currentContent = currentContent.replace(r.mention(), "@" + r.getName());
+
+		formattedContent = currentContent;
+	}
+
 	@Override
 	public String getFormattedContent() {
 		if (content == null)
 			return null;
-
-		if (formattedContent == null) {
-			String currentContent = content;
-
-			for (IUser u : getMentions())
-				currentContent = currentContent.replace(u.mention(false), "@" + u.getName())
-						.replace(u.mention(true), "@" + u.getDisplayName(getGuild()));
-
-			for (IChannel ch : getChannelMentions())
-				currentContent = currentContent.replace(ch.mention(), "#" + ch.getName());
-
-			for (IRole r : getRoleMentions())
-				currentContent = currentContent.replace(r.mention(), "@" + r.getName());
-
-			formattedContent = currentContent;
-		}
-
 		return formattedContent;
 	}
 
