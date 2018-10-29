@@ -57,9 +57,7 @@ public class AuditLog {
 	 * @return The entries for the log as a list.
 	 */
 	public List<AuditLogEntry> getEntries() {
-		return entries
-				.values()
-				.stream()
+		return entries.values().stream()
 				.sorted(Comparator.comparing(AuditLogEntry::getLongID).reversed())
 				.collect(Collectors.toList());
 	}
@@ -71,8 +69,7 @@ public class AuditLog {
 	 * @see TargetedEntry
 	 */
 	public List<TargetedEntry> getTargetedEntries() {
-		return getEntries()
-				.stream()
+		return getEntries().stream()
 				.filter(TargetedEntry.class::isInstance)
 				.map(TargetedEntry.class::cast)
 				.collect(Collectors.toList());
@@ -85,8 +82,7 @@ public class AuditLog {
 	 * @see DiscordObjectEntry
 	 */
 	public List<DiscordObjectEntry<?>> getDiscordObjectEntries() {
-		return getEntries()
-				.stream()
+		return getEntries().stream()
 				.filter(DiscordObjectEntry.class::isInstance)
 				.map(entry -> (DiscordObjectEntry<?>) entry)
 				.collect(Collectors.toList());
@@ -100,8 +96,7 @@ public class AuditLog {
 	 * @return The entries of the log which have a target which is of the given type.
 	 */
 	public <T extends IDiscordObject<T>> List<DiscordObjectEntry<T>> getDiscordObjectEntries(Class<T> clazz) {
-		return getDiscordObjectEntries()
-				.stream()
+		return getDiscordObjectEntries().stream()
 				.filter(entry -> clazz.isAssignableFrom(entry.getTarget().getClass()))
 				.map(entry -> (DiscordObjectEntry<T>) entry)
 				.collect(Collectors.toList());
@@ -124,8 +119,7 @@ public class AuditLog {
 	 * @return The entries with the given action type.
 	 */
 	public List<AuditLogEntry> getEntriesByType(ActionType actionType) {
-		return getEntries()
-				.stream()
+		return getEntries().stream()
 				.filter(entry -> entry.getActionType() == actionType)
 				.collect(Collectors.toList());
 	}
@@ -137,8 +131,7 @@ public class AuditLog {
 	 * @return The entries which have a target which have the given unique snowflake ID.
 	 */
 	public List<TargetedEntry> getEntriesByTarget(long targetID) {
-		return getEntries()
-				.stream()
+		return getEntries().stream()
 				.filter(TargetedEntry.class::isInstance)
 				.map(TargetedEntry.class::cast)
 				.filter(entry -> entry.getTargetID() == targetID)
@@ -152,8 +145,7 @@ public class AuditLog {
 	 * @return The entries with the given responsible user.
 	 */
 	public List<AuditLogEntry> getEntriesByResponsibleUser(IUser user) {
-		return getEntries()
-				.stream()
+		return getEntries().stream()
 				.filter(entry -> entry.getResponsibleUser().equals(user))
 				.collect(Collectors.toList());
 	}
