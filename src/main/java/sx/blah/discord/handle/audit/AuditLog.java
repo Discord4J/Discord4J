@@ -25,6 +25,7 @@ import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IUser;
 import sx.blah.discord.util.cache.LongMap;
 
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -52,11 +53,11 @@ public class AuditLog {
 	}
 
 	/**
-	 * Gets the entries for the log as a list.
+	 * Gets the entries for the log as a collection.
 	 *
-	 * @return The entries for the log as a list.
+	 * @return The entries for the log as a collection.
 	 */
-	public List<AuditLogEntry> getEntries() {
+	public Collection<AuditLogEntry> getEntries() {
 		return entries.values().stream()
 				.sorted(Comparator.comparing(AuditLogEntry::getLongID).reversed())
 				.collect(Collectors.toList());
@@ -68,7 +69,7 @@ public class AuditLog {
 	 * @return The entries of the log which have a target.
 	 * @see TargetedEntry
 	 */
-	public List<TargetedEntry> getTargetedEntries() {
+	public Collection<TargetedEntry> getTargetedEntries() {
 		return getEntries().stream()
 				.filter(TargetedEntry.class::isInstance)
 				.map(TargetedEntry.class::cast)
@@ -81,7 +82,7 @@ public class AuditLog {
 	 * @return The entries of the log which have a target which is a Discord object.
 	 * @see DiscordObjectEntry
 	 */
-	public List<DiscordObjectEntry<?>> getDiscordObjectEntries() {
+	public Collection<DiscordObjectEntry<?>> getDiscordObjectEntries() {
 		return getEntries().stream()
 				.filter(DiscordObjectEntry.class::isInstance)
 				.map(entry -> (DiscordObjectEntry<?>) entry)
@@ -95,7 +96,7 @@ public class AuditLog {
 	 * @param <T> The type of target to search for.
 	 * @return The entries of the log which have a target which is of the given type.
 	 */
-	public <T extends IDiscordObject<T>> List<DiscordObjectEntry<T>> getDiscordObjectEntries(Class<T> clazz) {
+	public <T extends IDiscordObject<T>> Collection<DiscordObjectEntry<T>> getDiscordObjectEntries(Class<T> clazz) {
 		return getDiscordObjectEntries().stream()
 				.filter(entry -> clazz.isAssignableFrom(entry.getTarget().getClass()))
 				.map(entry -> (DiscordObjectEntry<T>) entry)
