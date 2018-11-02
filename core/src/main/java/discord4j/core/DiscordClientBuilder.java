@@ -28,9 +28,7 @@ import discord4j.core.event.dispatch.DispatchHandlers;
 import discord4j.core.event.domain.Event;
 import discord4j.core.object.presence.Presence;
 import discord4j.core.util.VersionUtil;
-import discord4j.gateway.GatewayClient;
-import discord4j.gateway.GatewayObserver;
-import discord4j.gateway.IdentifyOptions;
+import discord4j.gateway.*;
 import discord4j.gateway.json.dispatch.Dispatch;
 import discord4j.gateway.payload.JacksonPayloadReader;
 import discord4j.gateway.payload.JacksonPayloadWriter;
@@ -91,6 +89,9 @@ public final class DiscordClientBuilder {
 
     @Nullable
     private GatewayObserver gatewayObserver;
+
+    @Nullable
+    private GatewayLimiter gatewayLimiter;
 
     public DiscordClientBuilder(final String token) {
         this.token = Objects.requireNonNull(token);
@@ -199,6 +200,16 @@ public final class DiscordClientBuilder {
         return this;
     }
 
+    @Nullable
+    public GatewayLimiter getGatewayLimiter() {
+        return gatewayLimiter;
+    }
+
+    public DiscordClientBuilder setGatewayLimiter(@Nullable GatewayLimiter gatewayLimiter) {
+        this.gatewayLimiter = gatewayLimiter;
+        return this;
+    }
+
     private IdentifyOptions initIdentifyOptions() {
         if (identifyOptions != null) {
             IdentifyOptions opts = new IdentifyOptions(
@@ -255,6 +266,13 @@ public final class DiscordClientBuilder {
         return null;
     }
 
+    private GatewayLimiter initGatewayLimiter() {
+        if (gatewayLimiter != null) {
+            return gatewayLimiter;
+        }
+        return new TokenBucket(120, Duration.ofSeconds(60));
+    }
+
     public DiscordClient build() {
         final ObjectMapper mapper = new ObjectMapper()
                 .setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
@@ -269,7 +287,7 @@ public final class DiscordClientBuilder {
         final RetryOptions retryOptions = initRetryOptions();
         final GatewayClient gatewayClient = new GatewayClient(
                 new JacksonPayloadReader(mapper), new JacksonPayloadWriter(mapper),
-                retryOptions, token, identifyOptions, initGatewayObserver());
+                retryOptions, token, identifyOptions, initGatewayObserver(), initGatewayLimiter());
 
         // Retrieve version properties
         final Properties properties = VersionUtil.getProperties();

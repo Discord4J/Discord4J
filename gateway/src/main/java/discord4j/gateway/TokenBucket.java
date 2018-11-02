@@ -24,15 +24,15 @@ import java.time.Duration;
  *
  * @see <a href="https://github.com/vladimir-bukhtoyarov/bucket4j">Bucket4j Project</a>
  */
-public class TokenBucket {
+public class TokenBucket implements GatewayLimiter {
 
     private final long capacity;
     private final double refillTokensPerOneMillis;
     private final long refillTokens;
     private final long refillPeriodMillis;
 
-    private double availableTokens;
-    private long lastRefillTimestamp;
+    private volatile double availableTokens;
+    private volatile long lastRefillTimestamp;
 
     /**
      * Creates token-bucket with specified capacity and refill rate
@@ -50,16 +50,7 @@ public class TokenBucket {
         this.lastRefillTimestamp = System.currentTimeMillis();
     }
 
-    /**
-     * Attempt to consume a given number of permits from this bucket.
-     * <p>
-     * This method does not block or incur in any waiting step. If no permits are available, this method will simply
-     * return <code>false</code>. To obtain the delay needed to wait in order to consume the next tokens, see
-     * {@link #delayMillisToConsume(long)}.
-     *
-     * @param numberTokens the permits to consume
-     * @return <code>true</code> if it was successful, <code>false</code> otherwise
-     */
+    @Override
     public synchronized boolean tryConsume(int numberTokens) {
         refill();
         if (availableTokens < numberTokens) {
@@ -80,13 +71,7 @@ public class TokenBucket {
         }
     }
 
-    /**
-     * Calculate the time (in milliseconds) a consumer should delay a call to {@link #tryConsume(int)} in order to be
-     * successful.
-     *
-     * @param tokens the number of permits sought to consume
-     * @return delay in milliseconds that a consumer must wait to consume <code>tokens</code> amount of permits.
-     */
+    @Override
     public long delayMillisToConsume(long tokens) {
         long currentSize = (long) availableTokens;
         if (tokens <= currentSize) {

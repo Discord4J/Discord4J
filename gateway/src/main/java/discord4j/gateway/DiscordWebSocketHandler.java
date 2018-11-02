@@ -65,12 +65,12 @@ public class DiscordWebSocketHandler {
 
     private final ZlibDecompressor decompressor = new ZlibDecompressor();
     private final MonoProcessor<Void> completionNotifier = MonoProcessor.create();
-    private final TokenBucket limiter = new TokenBucket(120, Duration.ofSeconds(60));
 
     private final PayloadReader reader;
     private final PayloadWriter writer;
     private final FluxSink<GatewayPayload<?>> inbound;
     private final Flux<GatewayPayload<?>> outbound;
+    private final GatewayLimiter outboundLimiter;
 
     private final Logger mainLog;
     private final Logger inLog;
@@ -84,9 +84,11 @@ public class DiscordWebSocketHandler {
      * @param inbound the FluxSink of GatewayPayloads to process inbound payloads
      * @param outbound the Flux of GatewayPayloads to process outbound payloads
      * @param shardIndex the shard index of this connection, for tracing
+     * @param outboundLimiter a GatewayLimiter to throttle outbound payloads
      */
     public DiscordWebSocketHandler(PayloadReader reader, PayloadWriter writer,
-            FluxSink<GatewayPayload<?>> inbound, Flux<GatewayPayload<?>> outbound, int shardIndex) {
+            FluxSink<GatewayPayload<?>> inbound, Flux<GatewayPayload<?>> outbound,
+            int shardIndex, GatewayLimiter outboundLimiter) {
         this.mainLog = Loggers.getLogger("discord4j.gateway." + shardIndex);
         this.inLog = Loggers.getLogger("discord4j.gateway.inbound." + shardIndex);
         this.outLog = Loggers.getLogger("discord4j.gateway.outbound." + shardIndex);
@@ -94,6 +96,7 @@ public class DiscordWebSocketHandler {
         this.writer = writer;
         this.inbound = inbound;
         this.outbound = outbound;
+        this.outboundLimiter = outboundLimiter;
     }
 
     public Mono<Void> handle(WebsocketInbound in, WebsocketOutbound out) {
@@ -135,12 +138,12 @@ public class DiscordWebSocketHandler {
     }
 
     private Publisher<? extends GatewayPayload<? extends PayloadData>> limitRate(GatewayPayload<?> payload) {
-        boolean success = limiter.tryConsume(1);
+        boolean success = outboundLimiter.tryConsume(1);
         if (success) {
             return Mono.just(payload);
         } else {
-            return Mono.delay(Duration.ofMillis(limiter.delayMillisToConsume(1)))
-                    .map(x -> limiter.tryConsume(1))
+            return Mono.delay(Duration.ofMillis(outboundLimiter.delayMillisToConsume(1)))
+                    .map(x -> outboundLimiter.tryConsume(1))
                     .map(consumed -> payload);
         }
     }

@@ -27,6 +27,7 @@ import discord4j.core.object.presence.Presence;
 import discord4j.core.object.util.Snowflake;
 import discord4j.gateway.GatewayObserver;
 import discord4j.gateway.IdentifyOptions;
+import discord4j.gateway.TokenBucket;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -73,7 +74,8 @@ public class RetryBotTest {
     public void testShards() {
         final Map<Integer, IdentifyOptions> optionsMap = initResumeOptions();
         final DiscordClientBuilder builder = new DiscordClientBuilder(token)
-                .setShardCount(shardCount);
+                .setShardCount(shardCount)
+                .setGatewayLimiter(new TokenBucket(120, Duration.ofSeconds(60)));
 
         Flux.range(0, shardCount)
                 .delayUntil(index -> {

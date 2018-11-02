@@ -69,6 +69,7 @@ public class GatewayClient {
     private final IdentifyOptions identifyOptions;
     private final String token;
     private final GatewayObserver observer;
+    private final GatewayLimiter limiter;
 
     private final EmitterProcessor<Dispatch> dispatch = EmitterProcessor.create(false);
     private final EmitterProcessor<GatewayPayload<?>> receiver = EmitterProcessor.create(false);
@@ -86,7 +87,7 @@ public class GatewayClient {
 
     public GatewayClient(PayloadReader payloadReader, PayloadWriter payloadWriter,
             RetryOptions retryOptions, String token, IdentifyOptions identifyOptions,
-            @Nullable GatewayObserver observer) {
+            @Nullable GatewayObserver observer, GatewayLimiter limiter) {
         this.log = Loggers.getLogger("discord4j.gateway.client." + identifyOptions.getShardIndex());
         this.payloadReader = Objects.requireNonNull(payloadReader);
         this.payloadWriter = Objects.requireNonNull(payloadWriter);
@@ -94,6 +95,7 @@ public class GatewayClient {
         this.token = Objects.requireNonNull(token);
         this.identifyOptions = Objects.requireNonNull(identifyOptions);
         this.observer = observer;
+        this.limiter = limiter;
         this.dispatchSink = dispatch.sink(FluxSink.OverflowStrategy.LATEST);
         this.receiverSink = receiver.sink(FluxSink.OverflowStrategy.LATEST);
         this.senderSink = sender.sink(FluxSink.OverflowStrategy.LATEST);
@@ -109,7 +111,7 @@ public class GatewayClient {
         return Mono.defer(() -> {
             final int shard = identifyOptions.getShardIndex();
             final DiscordWebSocketHandler handler = new DiscordWebSocketHandler(payloadReader, payloadWriter,
-                    receiverSink, sender, shard);
+                    receiverSink, sender, shard, limiter);
 
             if (identifyOptions.getResumeSequence() != null) {
                 this.sequence.set(identifyOptions.getResumeSequence());
