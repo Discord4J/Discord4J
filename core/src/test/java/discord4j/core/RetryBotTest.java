@@ -34,13 +34,7 @@ import reactor.core.publisher.Mono;
 import reactor.util.Logger;
 import reactor.util.Loggers;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.Duration;
-import java.time.Instant;
-import java.util.Collections;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -68,35 +62,35 @@ public class RetryBotTest {
     public void test() {
         IdentifyOptions options = new IdentifyOptions(shardId, shardCount, null);
 
-        try {
-            Path path = Paths.get("resume.dat");
-            if (Files.isRegularFile(path)
-                    && Files.getLastModifiedTime(path).toInstant().plusSeconds(60).isAfter(Instant.now())) {
-                for (String line : Files.readAllLines(path)) {
-                    String[] tokens = line.split(";", 2);
-                    options.setResumeSessionId(tokens[0]);
-                    options.setResumeSequence(Integer.valueOf(tokens[1]));
-                }
-            } else {
-                log.debug("Not attempting to resume");
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            // Persist our identify options
-            try {
-                String sessionId = options.getResumeSessionId();
-                Integer sequence = options.getResumeSequence();
-                log.debug("Saving resume data: {}, {}", sessionId, sequence);
-                Path saved = Files.write(Paths.get("resume.dat"),
-                        Collections.singletonList(sessionId + ";" + sequence));
-                log.info("File saved to {}", saved.toAbsolutePath());
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }));
+//        try {
+//            Path path = Paths.get("resume.dat");
+//            if (Files.isRegularFile(path)
+//                    && Files.getLastModifiedTime(path).toInstant().plusSeconds(60).isAfter(Instant.now())) {
+//                for (String line : Files.readAllLines(path)) {
+//                    String[] tokens = line.split(";", 2);
+//                    options.setResumeSessionId(tokens[0]);
+//                    options.setResumeSequence(Integer.valueOf(tokens[1]));
+//                }
+//            } else {
+//                log.debug("Not attempting to resume");
+//            }
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//
+//        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+//            // Persist our identify options
+//            try {
+//                String sessionId = options.getResumeSessionId();
+//                Integer sequence = options.getResumeSequence();
+//                log.debug("Saving resume data: {}, {}", sessionId, sequence);
+//                Path saved = Files.write(Paths.get("resume.dat"),
+//                        Collections.singletonList(sessionId + ";" + sequence));
+//                log.info("File saved to {}", saved.toAbsolutePath());
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+//        }));
 
         DiscordClient client = new DiscordClientBuilder(token)
                 .setIdentifyOptions(options)
