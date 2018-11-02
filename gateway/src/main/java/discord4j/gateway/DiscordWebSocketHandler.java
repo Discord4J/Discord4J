@@ -64,8 +64,6 @@ import java.util.logging.Level;
 public class DiscordWebSocketHandler implements ConnectionObserver {
 
     private static final Logger log = Loggers.getLogger(DiscordWebSocketHandler.class);
-    private static final Logger inboundLogger = Loggers.getLogger("discord4j.gateway.inbound");
-    private static final Logger outboundLogger = Loggers.getLogger("discord4j.gateway.outbound");
 
     private static final String CLOSE_HANDLER = "client.last.closeHandler";
 
@@ -77,6 +75,8 @@ public class DiscordWebSocketHandler implements ConnectionObserver {
     private final PayloadWriter writer;
     private final FluxSink<GatewayPayload<?>> inbound;
     private final Flux<GatewayPayload<?>> outbound;
+    private final Logger inboundLogger;
+    private final Logger outboundLogger;
 
     /**
      * Create a new handler with the given payload reader, payload writer and payload exchanges.
@@ -85,9 +85,12 @@ public class DiscordWebSocketHandler implements ConnectionObserver {
      * @param writer the PayloadWriter to process each outbound payload
      * @param inbound the FluxSink of GatewayPayloads to process inbound payloads
      * @param outbound the Flux of GatewayPayloads to process outbound payloads
+     * @param shardIndex the shard index of this connection, for tracing
      */
     public DiscordWebSocketHandler(PayloadReader reader, PayloadWriter writer,
-            FluxSink<GatewayPayload<?>> inbound, Flux<GatewayPayload<?>> outbound) {
+            FluxSink<GatewayPayload<?>> inbound, Flux<GatewayPayload<?>> outbound, int shardIndex) {
+        this.inboundLogger = Loggers.getLogger("discord4j.gateway.inbound." + shardIndex);
+        this.outboundLogger = Loggers.getLogger("discord4j.gateway.outbound." + shardIndex);
         this.reader = reader;
         this.writer = writer;
         this.inbound = inbound;

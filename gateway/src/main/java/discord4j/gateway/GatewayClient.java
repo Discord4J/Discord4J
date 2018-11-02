@@ -60,13 +60,12 @@ import static io.netty.handler.codec.http.HttpHeaderNames.USER_AGENT;
  */
 public class GatewayClient {
 
-    private static final Logger log = Loggers.getLogger(GatewayClient.class);
-
     private final PayloadReader payloadReader;
     private final PayloadWriter payloadWriter;
     private final RetryOptions retryOptions;
     private final IdentifyOptions identifyOptions;
     private final String token;
+    private final Logger log;
 
     private final EmitterProcessor<Dispatch> dispatch = EmitterProcessor.create(false);
     private final EmitterProcessor<GatewayPayload<?>> receiver = EmitterProcessor.create(false);
@@ -84,6 +83,7 @@ public class GatewayClient {
 
     public GatewayClient(PayloadReader payloadReader, PayloadWriter payloadWriter,
             RetryOptions retryOptions, String token, IdentifyOptions identifyOptions) {
+        this.log = Loggers.getLogger("discord4j.gateway.client." + identifyOptions.getShardIndex());
         this.payloadReader = Objects.requireNonNull(payloadReader);
         this.payloadWriter = Objects.requireNonNull(payloadWriter);
         this.retryOptions = Objects.requireNonNull(retryOptions);
@@ -102,8 +102,9 @@ public class GatewayClient {
      */
     public Mono<Void> execute(String gatewayUrl) {
         return Mono.defer(() -> {
+            final int shard = identifyOptions.getShardIndex();
             final DiscordWebSocketHandler handler = new DiscordWebSocketHandler(payloadReader, payloadWriter,
-                    receiverSink, sender);
+                    receiverSink, sender, shard);
 
             if (identifyOptions.getResumeSequence() != null) {
                 this.sequence.set(identifyOptions.getResumeSequence());
@@ -210,6 +211,9 @@ public class GatewayClient {
                     log.info("Retry attempt {} in {} ms", attempt, backoff);
                     if (attempt == 1) {
                         dispatchSink.next(GatewayStateChange.retryStarted(Duration.ofMillis(backoff)));
+                        if (!isResumableError(context.exception())) {
+                            resumable.set(false);
+                        }
                     } else {
                         dispatchSink.next(GatewayStateChange.retryFailed(attempt - 1,
                                 Duration.ofMillis(backoff)));
@@ -217,6 +221,14 @@ public class GatewayClient {
                     }
                     context.applicationContext().next();
                 });
+    }
+
+    private boolean isResumableError(Throwable t) {
+        if (t instanceof CloseException) {
+            CloseException closeException = (CloseException) t;
+            return closeException.getCode() < 4000;
+        }
+        return true;
     }
 
     private Runnable logDisconnected() {

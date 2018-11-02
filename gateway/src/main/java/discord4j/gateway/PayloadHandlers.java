@@ -35,7 +35,6 @@ import java.util.Optional;
 public abstract class PayloadHandlers {
 
     private static final Map<Opcode<?>, PayloadHandler<?>> handlerMap = new HashMap<>();
-    private static final Logger log = Loggers.getLogger(PayloadHandlers.class);
 
     static {
         addHandler(Opcode.DISPATCH, PayloadHandlers::handleDispatch);
@@ -75,7 +74,7 @@ public abstract class PayloadHandlers {
     }
 
     private static void handleHeartbeat(PayloadContext<Heartbeat> context) {
-        log.debug("Received heartbeat");
+        log(context).debug("Received heartbeat");
         context.getClient().sender().next(GatewayPayload.heartbeat(new Heartbeat(context.getClient().sequence().get())));
     }
 
@@ -101,7 +100,7 @@ public abstract class PayloadHandlers {
         client.heartbeat().start(interval);
 
         if (client.resumable().get()) {
-            log.debug("Attempting to RESUME from {}", client.sequence().get());
+            log(context).debug("Attempting to RESUME from {}", client.sequence().get());
             client.sender().next(GatewayPayload.resume(
                     new Resume(client.token(), client.getSessionId(), client.sequence().get())));
         } else {
@@ -116,8 +115,12 @@ public abstract class PayloadHandlers {
     }
 
     private static void handleHeartbeatAck(PayloadContext<?> context) {
-        log.debug("Heartbeat acknowledged");
+        log(context).debug("Heartbeat acknowledged");
         context.getClient().lastAck().set(System.currentTimeMillis());
+    }
+
+    private static Logger log(PayloadContext<?> context) {
+        return Loggers.getLogger("discord4j.gateway.handler." + context.getClient().identifyOptions().getShardIndex());
     }
 
 }
