@@ -29,6 +29,7 @@ import discord4j.core.event.domain.Event;
 import discord4j.core.object.presence.Presence;
 import discord4j.core.util.VersionUtil;
 import discord4j.gateway.GatewayClient;
+import discord4j.gateway.GatewayObserver;
 import discord4j.gateway.IdentifyOptions;
 import discord4j.gateway.json.dispatch.Dispatch;
 import discord4j.gateway.payload.JacksonPayloadReader;
@@ -66,9 +67,11 @@ public final class DiscordClientBuilder {
 
     private String token;
 
-    private int shardIndex = 0;
+    @Nullable
+    private Integer shardIndex;
 
-    private int shardCount = 1;
+    @Nullable
+    private Integer shardCount;
 
     @Nullable
     private StoreService storeService = null;
@@ -86,6 +89,9 @@ public final class DiscordClientBuilder {
 
     private boolean ignoreUnknownJsonKeys = true;
 
+    @Nullable
+    private GatewayObserver gatewayObserver;
+
     public DiscordClientBuilder(final String token) {
         this.token = Objects.requireNonNull(token);
     }
@@ -99,20 +105,22 @@ public final class DiscordClientBuilder {
         return this;
     }
 
-    public int getShardIndex() {
+    @Nullable
+    public Integer getShardIndex() {
         return shardIndex;
     }
 
-    public DiscordClientBuilder setShardIndex(final int shardIndex) {
+    public DiscordClientBuilder setShardIndex(@Nullable Integer shardIndex) {
         this.shardIndex = shardIndex;
         return this;
     }
 
-    public int getShardCount() {
+    @Nullable
+    public Integer getShardCount() {
         return shardCount;
     }
 
-    public DiscordClientBuilder setShardCount(final int shardCount) {
+    public DiscordClientBuilder setShardCount(@Nullable Integer shardCount) {
         this.shardCount = shardCount;
         return this;
     }
@@ -181,11 +189,29 @@ public final class DiscordClientBuilder {
         return this;
     }
 
+    @Nullable
+    public GatewayObserver getGatewayObserver() {
+        return gatewayObserver;
+    }
+
+    public DiscordClientBuilder setGatewayObserver(@Nullable GatewayObserver gatewayObserver) {
+        this.gatewayObserver = gatewayObserver;
+        return this;
+    }
+
     private IdentifyOptions initIdentifyOptions() {
         if (identifyOptions != null) {
-            return identifyOptions;
+            IdentifyOptions opts = new IdentifyOptions(
+                    shardIndex != null ? shardIndex : identifyOptions.getShardIndex(),
+                    shardCount != null ? shardCount : identifyOptions.getShardCount(),
+                    initialPresence != null ? initialPresence.asStatusUpdate() : null);
+            opts.setResumeSequence(identifyOptions.getResumeSequence());
+            opts.setResumeSessionId(identifyOptions.getResumeSessionId());
+            return opts;
         }
-        return new IdentifyOptions(shardIndex, shardCount,
+        return new IdentifyOptions(
+                shardIndex != null ? shardIndex : 0,
+                shardCount != null ? shardCount : 1,
                 initialPresence != null ? initialPresence.asStatusUpdate() : null);
     }
 
@@ -221,6 +247,14 @@ public final class DiscordClientBuilder {
         return Schedulers.elastic();
     }
 
+    @Nullable
+    private GatewayObserver initGatewayObserver() {
+        if (gatewayObserver != null) {
+            return gatewayObserver;
+        }
+        return null;
+    }
+
     public DiscordClient build() {
         final ObjectMapper mapper = new ObjectMapper()
                 .setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
@@ -235,7 +269,7 @@ public final class DiscordClientBuilder {
         final RetryOptions retryOptions = initRetryOptions();
         final GatewayClient gatewayClient = new GatewayClient(
                 new JacksonPayloadReader(mapper), new JacksonPayloadWriter(mapper),
-                retryOptions, token, identifyOptions);
+                retryOptions, token, identifyOptions, initGatewayObserver());
 
         // Retrieve version properties
         final Properties properties = VersionUtil.getProperties();

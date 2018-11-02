@@ -32,11 +32,13 @@ import reactor.core.publisher.EmitterProcessor;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxSink;
 import reactor.core.publisher.Mono;
+import reactor.netty.ConnectionObserver;
 import reactor.netty.http.client.HttpClient;
 import reactor.retry.Retry;
 import reactor.util.Logger;
 import reactor.util.Loggers;
 
+import javax.annotation.Nullable;
 import java.time.Duration;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -60,12 +62,13 @@ import static io.netty.handler.codec.http.HttpHeaderNames.USER_AGENT;
  */
 public class GatewayClient {
 
+    private final Logger log;
     private final PayloadReader payloadReader;
     private final PayloadWriter payloadWriter;
     private final RetryOptions retryOptions;
     private final IdentifyOptions identifyOptions;
     private final String token;
-    private final Logger log;
+    private final GatewayObserver observer;
 
     private final EmitterProcessor<Dispatch> dispatch = EmitterProcessor.create(false);
     private final EmitterProcessor<GatewayPayload<?>> receiver = EmitterProcessor.create(false);
@@ -82,13 +85,15 @@ public class GatewayClient {
     private final FluxSink<GatewayPayload<?>> senderSink;
 
     public GatewayClient(PayloadReader payloadReader, PayloadWriter payloadWriter,
-            RetryOptions retryOptions, String token, IdentifyOptions identifyOptions) {
+            RetryOptions retryOptions, String token, IdentifyOptions identifyOptions,
+            @Nullable GatewayObserver observer) {
         this.log = Loggers.getLogger("discord4j.gateway.client." + identifyOptions.getShardIndex());
         this.payloadReader = Objects.requireNonNull(payloadReader);
         this.payloadWriter = Objects.requireNonNull(payloadWriter);
         this.retryOptions = Objects.requireNonNull(retryOptions);
-        this.identifyOptions = Objects.requireNonNull(identifyOptions);
         this.token = Objects.requireNonNull(token);
+        this.identifyOptions = Objects.requireNonNull(identifyOptions);
+        this.observer = observer;
         this.dispatchSink = dispatch.sink(FluxSink.OverflowStrategy.LATEST);
         this.receiverSink = receiver.sink(FluxSink.OverflowStrategy.LATEST);
         this.senderSink = sender.sink(FluxSink.OverflowStrategy.LATEST);
@@ -118,16 +123,20 @@ public class GatewayClient {
             Mono<Void> readyHandler = dispatch.filter(GatewayClient::isReadyOrResume)
                     .doOnNext(event -> {
                         RetryContext retryContext = retryOptions.getRetryContext();
+                        ConnectionObserver.State state;
                         if (retryContext.getResetCount() == 0) {
                             log.info("Connected to Gateway");
                             dispatchSink.next(GatewayStateChange.connected());
+                            state = GatewayObserver.CONNECTED;
                         } else {
                             log.info("Reconnected to Gateway");
                             dispatchSink.next(GatewayStateChange.retrySucceeded(retryContext.getAttempts()));
+                            state = GatewayObserver.RETRY_SUCCEEDED;
                         }
                         retryContext.reset();
                         identifyOptions.setResumeSessionId(sessionId.get());
                         resumable.set(true);
+                        notifyObserver(state, identifyOptions);
                     })
                     .then();
 
@@ -162,7 +171,7 @@ public class GatewayClient {
 
             Mono<Void> httpFuture = HttpClient.create()
                     .headers(headers -> headers.add(USER_AGENT, "DiscordBot(https://discord4j.com, 3)"))
-                    .observe(handler)
+                    .observe(observer())
                     .websocket(Integer.MAX_VALUE)
                     .uri(gatewayUrl)
                     .handle(handler::handle)
@@ -190,6 +199,7 @@ public class GatewayClient {
         if (payload.getSequence() != null) {
             sequence.set(payload.getSequence());
             identifyOptions.setResumeSequence(sequence.get());
+            notifyObserver(GatewayObserver.SEQUENCE, identifyOptions);
         }
         return payload;
     }
@@ -211,12 +221,14 @@ public class GatewayClient {
                     log.info("Retry attempt {} in {} ms", attempt, backoff);
                     if (attempt == 1) {
                         dispatchSink.next(GatewayStateChange.retryStarted(Duration.ofMillis(backoff)));
+                        notifyObserver(GatewayObserver.RETRY_STARTED, identifyOptions);
                         if (!isResumableError(context.exception())) {
                             resumable.set(false);
                         }
                     } else {
                         dispatchSink.next(GatewayStateChange.retryFailed(attempt - 1,
                                 Duration.ofMillis(backoff)));
+                        notifyObserver(GatewayObserver.RETRY_FAILED, identifyOptions);
                         resumable.set(false);
                     }
                     context.applicationContext().next();
@@ -235,7 +247,22 @@ public class GatewayClient {
         return () -> {
             log.info("Disconnected from Gateway");
             dispatchSink.next(GatewayStateChange.disconnected());
+            notifyObserver(GatewayObserver.DISCONNECTED, identifyOptions);
         };
+    }
+
+    private ConnectionObserver observer() {
+        ConnectionObserver delegate = (connection, newState) -> log.debug("{} {}", newState, connection);
+        if (observer != null) {
+            return delegate.then((connection, newState) -> observer.onStateChange(newState, identifyOptions));
+        }
+        return delegate;
+    }
+
+    private void notifyObserver(ConnectionObserver.State state, IdentifyOptions options) {
+        if (observer != null) {
+            observer.onStateChange(state, options);
+        }
     }
 
     /**

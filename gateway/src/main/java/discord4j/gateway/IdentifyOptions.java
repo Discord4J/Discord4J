@@ -72,4 +72,15 @@ public class IdentifyOptions {
     public void setResumeSessionId(@Nullable String resumeSessionId) {
         this.resumeSessionId = resumeSessionId;
     }
+
+    @Override
+    public String toString() {
+        return "IdentifyOptions{" +
+                "shardIndex=" + shardIndex +
+                ", shardCount=" + shardCount +
+                ", initialStatus=" + initialStatus +
+                ", resumeSequence=" + resumeSequence +
+                ", resumeSessionId='" + resumeSessionId + '\'' +
+                '}';
+    }
 }

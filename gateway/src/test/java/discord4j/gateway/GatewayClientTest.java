@@ -56,7 +56,7 @@ public class GatewayClientTest {
         PayloadWriter writer = new JacksonPayloadWriter(mapper);
         RetryOptions retryOptions = new RetryOptions(Duration.ofSeconds(5), Duration.ofSeconds(120), Integer.MAX_VALUE);
         GatewayClient gatewayClient = new GatewayClient(reader, writer, retryOptions, token, new IdentifyOptions(0, 1
-                , null));
+                , null), null);
 
         gatewayClient.dispatch().subscribe(dispatch -> {
             if (dispatch instanceof Ready) {

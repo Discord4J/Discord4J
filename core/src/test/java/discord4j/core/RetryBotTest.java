@@ -22,8 +22,10 @@ import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.ApplicationInfo;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.User;
+import discord4j.core.object.presence.Activity;
 import discord4j.core.object.presence.Presence;
 import discord4j.core.object.util.Snowflake;
+import discord4j.gateway.GatewayObserver;
 import discord4j.gateway.IdentifyOptions;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
@@ -34,9 +36,18 @@ import reactor.core.publisher.Mono;
 import reactor.util.Logger;
 import reactor.util.Loggers;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.Duration;
+import java.time.Instant;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
 
 public class RetryBotTest {
 
@@ -59,42 +70,41 @@ public class RetryBotTest {
 
     @Test
     @Ignore("Example code excluded from CI")
-    public void test() {
-        IdentifyOptions options = new IdentifyOptions(shardId, shardCount, null);
+    public void testShards() {
+        final Map<Integer, IdentifyOptions> optionsMap = initResumeOptions();
+        final DiscordClientBuilder builder = new DiscordClientBuilder(token)
+                .setShardCount(shardCount);
 
-//        try {
-//            Path path = Paths.get("resume.dat");
-//            if (Files.isRegularFile(path)
-//                    && Files.getLastModifiedTime(path).toInstant().plusSeconds(60).isAfter(Instant.now())) {
-//                for (String line : Files.readAllLines(path)) {
-//                    String[] tokens = line.split(";", 2);
-//                    options.setResumeSessionId(tokens[0]);
-//                    options.setResumeSequence(Integer.valueOf(tokens[1]));
-//                }
-//            } else {
-//                log.debug("Not attempting to resume");
-//            }
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//
-//        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-//            // Persist our identify options
-//            try {
-//                String sessionId = options.getResumeSessionId();
-//                Integer sequence = options.getResumeSequence();
-//                log.debug("Saving resume data: {}, {}", sessionId, sequence);
-//                Path saved = Files.write(Paths.get("resume.dat"),
-//                        Collections.singletonList(sessionId + ";" + sequence));
-//                log.info("File saved to {}", saved.toAbsolutePath());
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
-//        }));
+        Flux.range(0, shardCount)
+                .delayUntil(index -> {
+                    if (index == 0) {
+                        return Mono.empty();
+                    }
+                    return Mono.delay(Duration.ofSeconds(5));
+                })
+                .flatMap(index -> {
+                    DiscordClient client = builder.setIdentifyOptions(optionsMap.get(index))
+                            .setInitialPresence(Presence.online(Activity.playing("with " + index)))
+                            .setGatewayObserver((s, o) -> {
+                                optionsMap.put(o.getShardIndex(), o);
+                                if (s.equals(GatewayObserver.CONNECTED)) {
+                                    log.info("Shard {} connected", o.getShardIndex());
+                                }
+                            })
+                            .build();
+                    return client.login();
+                })
+                .blockLast();
+    }
+
+    @Test
+    @Ignore("Example code excluded from CI")
+    public void test() {
+        final Map<Integer, IdentifyOptions> optionsMap = initResumeOptions();
 
         DiscordClient client = new DiscordClientBuilder(token)
-                .setIdentifyOptions(options)
-                .setInitialPresence(Presence.doNotDisturb())
+                .setIdentifyOptions(optionsMap.get(0))
+                .setGatewayObserver((s, o) -> optionsMap.put(o.getShardIndex(), o))
                 .build();
 
         CommandListener commandListener = new CommandListener(client);
@@ -136,6 +146,62 @@ public class RetryBotTest {
         lifecycleListener.configure();
 
         client.login().block();
+    }
+
+    private Map<Integer, IdentifyOptions> initResumeOptions() {
+        String resumePath = "resume.test";
+        Map<Integer, IdentifyOptions> map = new ConcurrentHashMap<>();
+        try {
+            Path path = Paths.get(resumePath);
+            if (Files.isRegularFile(path)
+                    && Files.getLastModifiedTime(path).toInstant().plusSeconds(60).isAfter(Instant.now())) {
+                for (String line : Files.readAllLines(path)) {
+                    String[] tokens = line.split(";", 3);
+                    Integer id = Integer.valueOf(tokens[0]);
+                    IdentifyOptions options = new IdentifyOptions(id, shardCount, null);
+                    options.setResumeSessionId(tokens[1]);
+                    options.setResumeSequence(Integer.valueOf(tokens[2]));
+                    map.put(id, options);
+                }
+            } else {
+                log.debug("Not attempting to resume");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            // Persist our identify options
+            try {
+                List<String> lines = map.entrySet()
+                        .stream()
+                        .map(entry -> {
+                            int shard = entry.getKey();
+                            String sessionId = entry.getValue().getResumeSessionId();
+                            Integer sequence = entry.getValue().getResumeSequence();
+                            log.debug("Saving resume data for shard {}: {}, {}", shard, sessionId, sequence);
+                            return shard + ";" + sessionId + ";" + sequence;
+                        })
+                        .filter(line -> !line.contains("null"))
+                        .collect(Collectors.toList());
+                Path saved = Files.write(Paths.get(resumePath), lines);
+                log.info("File saved to {}", saved.toAbsolutePath());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }));
+
+        if (map.isEmpty()) {
+            // fallback to IDENTIFY case
+            for (int i = 0; i < shardCount; i++) {
+                map.put(i, new IdentifyOptions(i, shardCount, null));
+            }
+        } else if (map.size() < shardCount) {
+            for (int i = 0; i < shardCount; i++) {
+                map.computeIfAbsent(i, k -> new IdentifyOptions(k, shardCount, null));
+            }
+        }
+        return map;
     }
 
     public static class CommandListener {

@@ -32,8 +32,6 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxSink;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.MonoProcessor;
-import reactor.netty.Connection;
-import reactor.netty.ConnectionObserver;
 import reactor.netty.NettyPipeline;
 import reactor.netty.http.websocket.WebsocketInbound;
 import reactor.netty.http.websocket.WebsocketOutbound;
@@ -61,11 +59,9 @@ import java.util.logging.Level;
  * All payloads going through this handler are passed to the given {@link discord4j.gateway.payload.PayloadReader}
  * and {@link discord4j.gateway.payload.PayloadWriter}.
  */
-public class DiscordWebSocketHandler implements ConnectionObserver {
+public class DiscordWebSocketHandler {
 
-    private static final Logger log = Loggers.getLogger(DiscordWebSocketHandler.class);
-
-    private static final String CLOSE_HANDLER = "client.last.closeHandler";
+    private static final String HANDLER = "client.last.closeHandler";
 
     private final ZlibDecompressor decompressor = new ZlibDecompressor();
     private final MonoProcessor<Void> completionNotifier = MonoProcessor.create();
@@ -75,8 +71,10 @@ public class DiscordWebSocketHandler implements ConnectionObserver {
     private final PayloadWriter writer;
     private final FluxSink<GatewayPayload<?>> inbound;
     private final Flux<GatewayPayload<?>> outbound;
-    private final Logger inboundLogger;
-    private final Logger outboundLogger;
+
+    private final Logger mainLog;
+    private final Logger inLog;
+    private final Logger outLog;
 
     /**
      * Create a new handler with the given payload reader, payload writer and payload exchanges.
@@ -89,8 +87,9 @@ public class DiscordWebSocketHandler implements ConnectionObserver {
      */
     public DiscordWebSocketHandler(PayloadReader reader, PayloadWriter writer,
             FluxSink<GatewayPayload<?>> inbound, Flux<GatewayPayload<?>> outbound, int shardIndex) {
-        this.inboundLogger = Loggers.getLogger("discord4j.gateway.inbound." + shardIndex);
-        this.outboundLogger = Loggers.getLogger("discord4j.gateway.outbound." + shardIndex);
+        this.mainLog = Loggers.getLogger("discord4j.gateway." + shardIndex);
+        this.inLog = Loggers.getLogger("discord4j.gateway.inbound." + shardIndex);
+        this.outLog = Loggers.getLogger("discord4j.gateway.outbound." + shardIndex);
         this.reader = reader;
         this.writer = writer;
         this.inbound = inbound;
@@ -99,39 +98,39 @@ public class DiscordWebSocketHandler implements ConnectionObserver {
 
     public Mono<Void> handle(WebsocketInbound in, WebsocketOutbound out) {
         AtomicReference<CloseStatus> reason = new AtomicReference<>();
-        in.withConnection(connection -> connection.addHandlerLast(CLOSE_HANDLER, new CloseHandlerAdapter(reason)));
+        in.withConnection(connection -> connection.addHandlerLast(HANDLER, new CloseHandlerAdapter(reason, mainLog)));
 
         Mono<Void> outboundEvents = out.options(NettyPipeline.SendOptions::flushOnEach)
                 .sendObject(outbound.concatMap(this::limitRate)
-                        .log(outboundLogger, Level.FINE, false)
+                        .log(outLog, Level.FINE, false)
                         .flatMap(this::toOutboundFrame))
                 .then()
-                .doOnError(t -> outboundLogger.debug("Sender threw an error: {}", t.toString()))
-                .doOnSuccess(v -> outboundLogger.debug("Sender succeeded"))
-                .doOnTerminate(() -> outboundLogger.debug("Sender terminated"));
+                .doOnError(t -> outLog.debug("Sender threw an error: {}", t.toString()))
+                .doOnSuccess(v -> outLog.debug("Sender succeeded"))
+                .doOnTerminate(() -> outLog.debug("Sender terminated"));
 
         Mono<Void> inboundEvents = in.aggregateFrames()
                 .receiveFrames()
                 .map(WebSocketFrame::content)
                 .compose(decompressor::completeMessages)
                 .map(reader::read)
-                .log(inboundLogger, Level.FINE, false)
+                .log(inLog, Level.FINE, false)
                 .doOnNext(inbound::next)
-                .doOnError(t -> inboundLogger.debug("Receiver threw an error: {}", t.toString()))
+                .doOnError(t -> inLog.debug("Receiver threw an error: {}", t.toString()))
                 .doOnError(this::error)
                 .doOnComplete(() -> {
-                    inboundLogger.debug("Receiver completed");
+                    inLog.debug("Receiver completed");
                     CloseStatus closeStatus = reason.get();
                     if (closeStatus != null) {
-                        inboundLogger.debug("Forwarding close reason: {}", closeStatus);
+                        inLog.debug("Forwarding close reason: {}", closeStatus);
                         error(new CloseException(closeStatus));
                     }
                 })
-                .doOnTerminate(() -> inboundLogger.debug("Receiver terminated"))
+                .doOnTerminate(() -> inLog.debug("Receiver terminated"))
                 .then();
 
         return Mono.zip(completionNotifier, outboundEvents, inboundEvents)
-                .doOnError(t -> log.debug("WebSocket session threw an error: {}", t.toString()))
+                .doOnError(t -> mainLog.debug("WebSocket session threw an error: {}", t.toString()))
                 .then();
     }
 
@@ -164,7 +163,7 @@ public class DiscordWebSocketHandler implements ConnectionObserver {
      * through a complete signal, dropping all future signals.
      */
     public void close() {
-        log.debug("Triggering close sequence");
+        mainLog.debug("Triggering close sequence");
         completionNotifier.onComplete();
     }
 
@@ -178,7 +177,7 @@ public class DiscordWebSocketHandler implements ConnectionObserver {
      * @param error the cause for this session termination
      */
     public void error(Throwable error) {
-        log.warn("Triggering error sequence ({})", error.toString());
+        mainLog.warn("Triggering error sequence ({})", error.toString());
         if (!completionNotifier.isTerminated()) {
             if (error instanceof CloseException) {
                 completionNotifier.onError(error);
@@ -188,17 +187,14 @@ public class DiscordWebSocketHandler implements ConnectionObserver {
         }
     }
 
-    @Override
-    public void onStateChange(Connection connection, State newState) {
-        log.debug("{} {}", newState, connection);
-    }
-
     private static class CloseHandlerAdapter extends ChannelInboundHandlerAdapter {
 
         private final AtomicReference<CloseStatus> closeStatus;
+        private final Logger log;
 
-        private CloseHandlerAdapter(AtomicReference<CloseStatus> closeStatus) {
+        private CloseHandlerAdapter(AtomicReference<CloseStatus> closeStatus, Logger log) {
             this.closeStatus = closeStatus;
+            this.log = log;
         }
 
         @Override
