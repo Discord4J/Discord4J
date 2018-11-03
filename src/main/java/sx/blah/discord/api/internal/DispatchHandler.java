@@ -349,6 +349,7 @@ class DispatchHandler {
 
 		new RequestBuilder(client).setAsync(true).doAction(() -> {
 			try {
+				if (client.getOurUser() == null) client.getDispatcher().waitFor((LoginEvent e) -> e.getShard() == guild.getShard());
 				if (json.large) {
 					shard.ws.send(GatewayOps.REQUEST_GUILD_MEMBERS, new GuildMembersRequest(json.id));
 					client.getDispatcher().waitFor((AllUsersReceivedEvent e) ->
@@ -356,7 +357,7 @@ class DispatchHandler {
 					);
 				}
 			} catch (InterruptedException e) {
-				Discord4J.LOGGER.error(LogMarkers.EVENTS, "Wait for AllUsersReceivedEvent on guild create was interrupted.", e);
+				Discord4J.LOGGER.error(LogMarkers.EVENTS, "Waiting on guild create was interrupted.", e);
 			}
 			return true;
 		}).andThen(() -> {
