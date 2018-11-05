@@ -75,7 +75,7 @@ public class RetryBotTest {
         final Map<Integer, IdentifyOptions> optionsMap = initResumeOptions();
         final DiscordClientBuilder builder = new DiscordClientBuilder(token)
                 .setShardCount(shardCount)
-                .setGatewayLimiter(new TokenBucket(120, Duration.ofSeconds(60)));
+                .setGatewayLimiter(new TokenBucket(115, Duration.ofSeconds(60)));
 
         Flux.range(0, shardCount)
                 .delayUntil(index -> {

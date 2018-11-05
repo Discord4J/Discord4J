@@ -138,14 +138,12 @@ public class DiscordWebSocketHandler {
     }
 
     private Publisher<? extends GatewayPayload<? extends PayloadData>> limitRate(GatewayPayload<?> payload) {
-        boolean success = outboundLimiter.tryConsume(1);
-        if (success) {
+        if (Opcode.HEARTBEAT.equals(payload.getOp())) {
             return Mono.just(payload);
-        } else {
-            return Mono.delay(Duration.ofMillis(outboundLimiter.delayMillisToConsume(1)))
-                    .map(x -> outboundLimiter.tryConsume(1))
-                    .map(consumed -> payload);
         }
+        return Mono.delay(Duration.ofMillis(outboundLimiter.delayMillisToConsume(1)))
+                .map(tick -> outboundLimiter.tryConsume(1))
+                .map(result -> payload);
     }
 
     private Publisher<?> toOutboundFrame(GatewayPayload<? extends PayloadData> payload) {
