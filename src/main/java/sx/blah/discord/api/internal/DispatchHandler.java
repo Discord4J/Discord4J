@@ -349,7 +349,9 @@ class DispatchHandler {
 
 		new RequestBuilder(client).setAsync(true).doAction(() -> {
 			try {
-				if (client.getOurUser() == null) client.getDispatcher().waitFor((LoginEvent e) -> e.getShard().getInfo()[0] == guild.getShard().getInfo()[0]);
+				while (client.getOurUser() == null) {
+					client.getDispatcher().waitFor((LoginEvent e) -> e.getShard().getInfo()[0] == guild.getShard().getInfo()[0], 5000L);
+				}
 				if (json.large) {
 					shard.ws.send(GatewayOps.REQUEST_GUILD_MEMBERS, new GuildMembersRequest(json.id));
 					client.getDispatcher().waitFor((AllUsersReceivedEvent e) ->
