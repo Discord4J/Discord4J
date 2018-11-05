@@ -63,7 +63,9 @@ public class TokenBucket implements GatewayLimiter {
 
     private void refill() {
         long currentTimeMillis = System.currentTimeMillis();
-        if (currentTimeMillis > lastRefillTimestamp) {
+        if (lastRefillTimestamp == 0) {
+            this.lastRefillTimestamp = currentTimeMillis;
+        } else if (currentTimeMillis > lastRefillTimestamp) {
             long millisSinceLastRefill = currentTimeMillis - lastRefillTimestamp;
             double refill = millisSinceLastRefill * refillTokensPerOneMillis;
             this.availableTokens = Math.min(capacity, availableTokens + refill);

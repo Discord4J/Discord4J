@@ -74,16 +74,10 @@ public class RetryBotTest {
     public void testShards() {
         final Map<Integer, IdentifyOptions> optionsMap = initResumeOptions();
         final DiscordClientBuilder builder = new DiscordClientBuilder(token)
-                .setShardCount(shardCount)
-                .setGatewayLimiter(new TokenBucket(115, Duration.ofSeconds(60)));
+                .setGatewayLimiter(new TokenBucket(1, Duration.ofSeconds(5)))
+                .setShardCount(shardCount);
 
         Flux.range(0, shardCount)
-                .delayUntil(index -> {
-                    if (index == 0) {
-                        return Mono.empty();
-                    }
-                    return Mono.delay(Duration.ofSeconds(5));
-                })
                 .flatMap(index -> {
                     DiscordClient client = builder.setIdentifyOptions(optionsMap.get(index))
                             .setInitialPresence(Presence.online(Activity.playing("with " + index)))

@@ -70,6 +70,7 @@ public class DiscordWebSocketHandler {
     private final PayloadWriter writer;
     private final FluxSink<GatewayPayload<?>> inbound;
     private final Flux<GatewayPayload<?>> outbound;
+    private final GatewayLimiter identifyLimiter;
     private final GatewayLimiter outboundLimiter;
 
     private final Logger mainLog;
@@ -84,11 +85,11 @@ public class DiscordWebSocketHandler {
      * @param inbound the FluxSink of GatewayPayloads to process inbound payloads
      * @param outbound the Flux of GatewayPayloads to process outbound payloads
      * @param shardIndex the shard index of this connection, for tracing
-     * @param outboundLimiter a GatewayLimiter to throttle outbound payloads
+     * @param limiter a GatewayLimiter to throttle IDENTIFY requests
      */
     public DiscordWebSocketHandler(PayloadReader reader, PayloadWriter writer,
             FluxSink<GatewayPayload<?>> inbound, Flux<GatewayPayload<?>> outbound,
-            int shardIndex, GatewayLimiter outboundLimiter) {
+            int shardIndex, GatewayLimiter limiter) {
         this.mainLog = Loggers.getLogger("discord4j.gateway." + shardIndex);
         this.inLog = Loggers.getLogger("discord4j.gateway.inbound." + shardIndex);
         this.outLog = Loggers.getLogger("discord4j.gateway.outbound." + shardIndex);
@@ -96,7 +97,8 @@ public class DiscordWebSocketHandler {
         this.writer = writer;
         this.inbound = inbound;
         this.outbound = outbound;
-        this.outboundLimiter = outboundLimiter;
+        this.identifyLimiter = limiter;
+        this.outboundLimiter = new TokenBucket(115, Duration.ofSeconds(60));
     }
 
     public Mono<Void> handle(WebsocketInbound in, WebsocketOutbound out) {
@@ -104,7 +106,7 @@ public class DiscordWebSocketHandler {
         in.withConnection(connection -> connection.addHandlerLast(HANDLER, new CloseHandlerAdapter(reason, mainLog)));
 
         Mono<Void> outboundEvents = out.options(NettyPipeline.SendOptions::flushOnEach)
-                .sendObject(outbound.concatMap(this::limitRate)
+                .sendObject(outbound.concatMap(this::limitRate, 1)
                         .log(outLog, Level.FINE, false)
                         .flatMap(this::toOutboundFrame))
                 .then()
@@ -138,12 +140,20 @@ public class DiscordWebSocketHandler {
     }
 
     private Publisher<? extends GatewayPayload<? extends PayloadData>> limitRate(GatewayPayload<?> payload) {
-        if (Opcode.HEARTBEAT.equals(payload.getOp())) {
+        Opcode<?> op = payload.getOp();
+        if (Opcode.HEARTBEAT.equals(op)) {
             return Mono.just(payload);
         }
-        return Mono.delay(Duration.ofMillis(outboundLimiter.delayMillisToConsume(1)))
-                .map(tick -> outboundLimiter.tryConsume(1))
-                .map(result -> payload);
+        GatewayLimiter limiter = Opcode.IDENTIFY.equals(op) ? identifyLimiter : outboundLimiter;
+        return Mono.defer(() -> Mono.delay(Duration.ofMillis(limiter.delayMillisToConsume(1)))
+                .map(tick -> limiter.tryConsume(1))
+                .flatMap(consumed -> {
+                    if (!consumed) {
+                        return Mono.error(new RuntimeException());
+                    }
+                    return Mono.just(payload);
+                }))
+                .retry();
     }
 
     private Publisher<?> toOutboundFrame(GatewayPayload<? extends PayloadData> payload) {

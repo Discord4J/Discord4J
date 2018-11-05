@@ -85,6 +85,18 @@ public class GatewayClient {
     private final FluxSink<GatewayPayload<?>> receiverSink;
     private final FluxSink<GatewayPayload<?>> senderSink;
 
+    /**
+     * Initializes a new GatewayClient.
+     *
+     * @param payloadReader strategy to read and decode incoming gateway messages
+     * @param payloadWriter strategy to encode and write outgoing gateway messages
+     * @param retryOptions reconnect policy used in this client
+     * @param token Discord bot token
+     * @param identifyOptions used to IDENTIFY or RESUME a gateway connection, specifying the sharding options
+     *         and to set an initial presence
+     * @param observer consumer observing gateway and underlying websocket lifecycle changes
+     * @param limiter rate-limiting policy used for IDENTIFY requests, allowing shard coordination
+     */
     public GatewayClient(PayloadReader payloadReader, PayloadWriter payloadWriter,
             RetryOptions retryOptions, String token, IdentifyOptions identifyOptions,
             @Nullable GatewayObserver observer, GatewayLimiter limiter) {
