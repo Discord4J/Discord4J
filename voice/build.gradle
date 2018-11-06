@@ -1,0 +1,6 @@
+dependencies {
+    compile project(':common')
+
+    testCompile "junit:junit:$junit_version"
+    testCompile "ch.qos.logback:logback-classic:$logback_version"
+}
