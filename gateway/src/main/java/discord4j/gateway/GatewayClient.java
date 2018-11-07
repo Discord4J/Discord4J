@@ -135,7 +135,7 @@ public class GatewayClient {
             lastAck.set(System.currentTimeMillis());
 
             Mono<Void> readyHandler = dispatch.filter(GatewayClient::isReadyOrResume)
-                    .doOnNext(event -> {
+                    .flatMap(event -> {
                         RetryContext retryContext = retryOptions.getRetryContext();
                         ConnectionObserver.State state;
                         if (retryContext.getResetCount() == 0) {
@@ -151,6 +151,7 @@ public class GatewayClient {
                         identifyOptions.setResumeSessionId(sessionId.get());
                         resumable.set(true);
                         notifyObserver(state, identifyOptions);
+                        return Mono.just(event);
                     })
                     .then();
 
@@ -172,11 +173,13 @@ public class GatewayClient {
             Mono<Void> heartbeatHandler = heartbeat.ticks()
                     .flatMap(t -> {
                         long delay = System.currentTimeMillis() - lastAck.get();
-                        if (delay > heartbeat.getPeriod().toMillis()) {
-                            log.debug("Missing heartbeat ACK for {} ms", delay);
+                        // TODO: polish zombie connection detection policy
+                        if (delay > heartbeat.getPeriod().toMillis() * 2) {
+                            log.warn("Missing heartbeat ACK for {} ms", delay);
                             handler.error(new RuntimeException("Reconnecting due to zombie or failed connection"));
                             return Mono.empty();
                         } else {
+                            log.debug("Sending heartbeat {} ms after last ACK", delay);
                             return Mono.just(GatewayPayload.heartbeat(new Heartbeat(sequence.get())));
                         }
                     })
@@ -196,7 +199,7 @@ public class GatewayClient {
                     .then();
 
             return Mono.zip(httpFuture, readyHandler, receiverFuture, senderFuture, heartbeatHandler)
-                    .doOnError(t -> log.error("Gateway client error: {}", t.toString()))
+                    .doOnError(t -> log.error("Gateway client error", t))
                     .doOnCancel(() -> close(false))
                     .then();
         })
@@ -266,11 +269,12 @@ public class GatewayClient {
     }
 
     private ConnectionObserver observer() {
-        ConnectionObserver delegate = (connection, newState) -> log.debug("{} {}", newState, connection);
-        if (observer != null) {
-            return delegate.then((connection, newState) -> observer.onStateChange(newState, identifyOptions));
-        }
-        return delegate;
+        return (connection, newState) -> {
+            log.debug("{} {}", newState, connection);
+            if (observer != null) {
+                observer.onStateChange(newState, identifyOptions);
+            }
+        };
     }
 
     private void notifyObserver(ConnectionObserver.State state, IdentifyOptions options) {

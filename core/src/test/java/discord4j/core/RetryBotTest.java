@@ -22,17 +22,17 @@ import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.ApplicationInfo;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.User;
-import discord4j.core.object.presence.Activity;
 import discord4j.core.object.presence.Presence;
 import discord4j.core.object.util.Snowflake;
 import discord4j.gateway.GatewayObserver;
 import discord4j.gateway.IdentifyOptions;
-import discord4j.gateway.TokenBucket;
+import discord4j.gateway.SimpleBucket;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Hooks;
 import reactor.core.publisher.Mono;
 import reactor.util.Logger;
 import reactor.util.Loggers;
@@ -60,6 +60,7 @@ public class RetryBotTest {
 
     @BeforeClass
     public static void initialize() {
+        Hooks.onOperatorDebug();
         token = System.getenv("token");
         String shardIdValue = System.getenv("shardId");
         String shardCountValue = System.getenv("shardCount");
@@ -69,18 +70,18 @@ public class RetryBotTest {
         }
     }
 
+    // TODO: polish to avoid lingering unidentified shards
     @Test
     @Ignore("Example code excluded from CI")
     public void testShards() {
         final Map<Integer, IdentifyOptions> optionsMap = initResumeOptions();
         final DiscordClientBuilder builder = new DiscordClientBuilder(token)
-                .setGatewayLimiter(new TokenBucket(1, Duration.ofSeconds(5)))
+                .setGatewayLimiter(new SimpleBucket(1, Duration.ofSeconds(6)))
                 .setShardCount(shardCount);
 
         Flux.range(0, shardCount)
                 .flatMap(index -> {
                     DiscordClient client = builder.setIdentifyOptions(optionsMap.get(index))
-                            .setInitialPresence(Presence.online(Activity.playing("with " + index)))
                             .setGatewayObserver((s, o) -> {
                                 optionsMap.put(o.getShardIndex(), o);
                                 if (s.equals(GatewayObserver.CONNECTED)) {

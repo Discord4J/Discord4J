@@ -17,8 +17,10 @@
 
 package discord4j.gateway;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import reactor.core.publisher.EmitterProcessor;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxSink;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
@@ -27,45 +29,46 @@ import reactor.util.Loggers;
 
 import java.time.Duration;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class TokenBucketTest {
 
     private static final Logger log = Loggers.getLogger(TokenBucketTest.class);
 
     @Test
+    @Ignore
     public void testReactiveBucket() throws InterruptedException {
         CountDownLatch latch = new CountDownLatch(1);
-        TokenBucket limiter = new TokenBucket(60, Duration.ofSeconds(30));
+        GatewayLimiter limiter = new SimpleBucket(60, Duration.ofSeconds(30));
 
-        EmitterProcessor<Long> outbound = EmitterProcessor.create();
-        FluxSink<Long> sender = outbound.sink();
+        EmitterProcessor<Integer> outbound = EmitterProcessor.create();
+        FluxSink<Integer> sender = outbound.sink();
+        AtomicInteger received = new AtomicInteger();
 
-        int requests = 65;
+        int requests = 200;
 
-        outbound.log().concatMap(t -> {
-            boolean success = limiter.tryConsume(1);
-            if (success) {
-                return Mono.just(t);
-            } else {
-                return Mono.delay(Duration.ofMillis(limiter.delayMillisToConsume(1)))
-                        .map(x -> limiter.tryConsume(1))
-                        .publishOn(Schedulers.elastic())
-                        .map(consumed -> t);
-            }
-        }).subscribe(t -> {
-            log.info("Got {}", t);
-            if (t == requests) {
-                latch.countDown();
-            }
-        });
-        Mono.fromCallable(() -> {
-            long i = 1;
-            while (i <= requests) {
-                sender.next(i++);
-            }
-            sender.complete();
-            return "OK";
-        }).subscribeOn(Schedulers.elastic()).subscribe();
+        outbound.concatMap(t -> Mono.defer(() -> Mono.delay(Duration.ofMillis(limiter.delayMillisToConsume(1)))
+                        .map(tick -> limiter.tryConsume(1))
+                        .flatMap(consumed -> {
+                            if (!consumed) {
+                                log.info("Retrying...");
+                                return Mono.error(new RuntimeException());
+                            }
+                            return Mono.just(t);
+                        }))
+                        .retry())
+                .subscribe(t -> {
+                    log.info("Got {}", t);
+                    if (received.incrementAndGet() == requests) {
+                        latch.countDown();
+                    }
+                });
+        Flux.range(0, requests)
+                .parallel()
+                .doOnNext(sender::next)
+                .sequential()
+                .subscribeOn(Schedulers.elastic())
+                .subscribe();
         latch.await();
     }
 

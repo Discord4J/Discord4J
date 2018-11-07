@@ -32,6 +32,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxSink;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.MonoProcessor;
+import reactor.core.scheduler.Schedulers;
 import reactor.netty.NettyPipeline;
 import reactor.netty.http.websocket.WebsocketInbound;
 import reactor.netty.http.websocket.WebsocketOutbound;
@@ -98,7 +99,7 @@ public class DiscordWebSocketHandler {
         this.inbound = inbound;
         this.outbound = outbound;
         this.identifyLimiter = limiter;
-        this.outboundLimiter = new TokenBucket(115, Duration.ofSeconds(60));
+        this.outboundLimiter = new SimpleBucket(115, Duration.ofSeconds(60));
     }
 
     public Mono<Void> handle(WebsocketInbound in, WebsocketOutbound out) {
@@ -141,11 +142,11 @@ public class DiscordWebSocketHandler {
 
     private Publisher<? extends GatewayPayload<? extends PayloadData>> limitRate(GatewayPayload<?> payload) {
         Opcode<?> op = payload.getOp();
-        if (Opcode.HEARTBEAT.equals(op)) {
+        if (Opcode.HEARTBEAT.equals(op) || Opcode.RESUME.equals(op)) {
             return Mono.just(payload);
         }
         GatewayLimiter limiter = Opcode.IDENTIFY.equals(op) ? identifyLimiter : outboundLimiter;
-        return Mono.defer(() -> Mono.delay(Duration.ofMillis(limiter.delayMillisToConsume(1)))
+        return Mono.defer(() -> Mono.delay(Duration.ofMillis(limiter.delayMillisToConsume(1)), Schedulers.single())
                 .map(tick -> limiter.tryConsume(1))
                 .flatMap(consumed -> {
                     if (!consumed) {
