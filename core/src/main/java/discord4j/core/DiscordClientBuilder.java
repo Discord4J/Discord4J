@@ -270,7 +270,7 @@ public final class DiscordClientBuilder {
         if (gatewayLimiter != null) {
             return gatewayLimiter;
         }
-        return new TokenBucket(1, Duration.ofSeconds(5));
+        return new SimpleBucket(1, Duration.ofSeconds(6));
     }
 
     public DiscordClient build() {
