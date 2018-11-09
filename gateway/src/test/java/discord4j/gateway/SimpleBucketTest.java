@@ -31,9 +31,9 @@ import java.time.Duration;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class TokenBucketTest {
+public class SimpleBucketTest {
 
-    private static final Logger log = Loggers.getLogger(TokenBucketTest.class);
+    private static final Logger log = Loggers.getLogger(SimpleBucketTest.class);
 
     @Test
     @Ignore
