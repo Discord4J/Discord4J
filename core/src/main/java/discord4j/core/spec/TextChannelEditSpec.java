@@ -48,7 +48,7 @@ public class TextChannelEditSpec implements Spec<ChannelModifyRequest> {
         return this;
     }
 
-    public TextChannelEditSpec setPermissionOverwrites(Set<PermissionOverwrite> permissionOverwrites) {
+    public TextChannelEditSpec setPermissionOverwrites(Set<? extends PermissionOverwrite> permissionOverwrites) {
         OverwriteEntity[] raw = permissionOverwrites.stream()
                 .map(o -> new OverwriteEntity(o.getTargetId().asLong(), o.getType().getValue(), o.getAllowed().getRawValue(), o.getDenied().getRawValue()))
                 .toArray(OverwriteEntity[]::new);

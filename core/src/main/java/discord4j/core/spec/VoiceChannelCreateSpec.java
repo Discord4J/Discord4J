@@ -45,7 +45,7 @@ public class VoiceChannelCreateSpec implements Spec<ChannelCreateRequest> {
         return this;
     }
 
-    public VoiceChannelCreateSpec setPermissionOverwrites(Set<PermissionOverwrite> permissionOverwrites) {
+    public VoiceChannelCreateSpec setPermissionOverwrites(Set<? extends PermissionOverwrite> permissionOverwrites) {
         OverwriteEntity[] raw = permissionOverwrites.stream()
                 .map(o -> new OverwriteEntity(o.getTargetId().asLong(), o.getType().getValue(), o.getAllowed().getRawValue(), o.getDenied().getRawValue()))
                 .toArray(OverwriteEntity[]::new);

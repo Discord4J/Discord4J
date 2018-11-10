@@ -33,7 +33,7 @@ public class CategoryCreateSpec implements Spec<ChannelCreateRequest> {
         return this;
     }
 
-    public CategoryCreateSpec setPermissionOverwrites(Set<PermissionOverwrite> permissionOverwrites) {
+    public CategoryCreateSpec setPermissionOverwrites(Set<? extends PermissionOverwrite> permissionOverwrites) {
         OverwriteEntity[] raw = permissionOverwrites.stream()
                 .map(o -> new OverwriteEntity(o.getTargetId().asLong(), o.getType().getValue(), o.getAllowed().getRawValue(), o.getDenied().getRawValue()))
                 .toArray(OverwriteEntity[]::new);
