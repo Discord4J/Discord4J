@@ -26,6 +26,7 @@ import discord4j.core.object.presence.Presence;
 import discord4j.core.object.util.PermissionSet;
 import discord4j.core.object.util.Snowflake;
 import discord4j.core.spec.BanQuerySpec;
+import discord4j.core.spec.KickQuerySpec;
 import discord4j.core.util.PermissionUtil;
 import discord4j.core.spec.GuildMemberEditSpec;
 import discord4j.store.api.util.LongLongTuple2;
@@ -182,14 +183,30 @@ public final class Member extends User {
     }
 
     /**
+     * Requests to kick this user.
+     *
+     * @param spec A {@link Consumer} that provides a "blank" {@link KickQuerySpec} to be operated on. If some properties
+     * need to be retrieved via blocking operations (such as retrieval from a database), then it is recommended to build
+     * the spec externally and call {@link #kick(KickQuerySpec)}.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating this user was kicked. If an
+     * error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Void> kick(final Consumer<KickQuerySpec> spec) {
+        final KickQuerySpec mutatedSpec = new KickQuerySpec();
+        spec.accept(mutatedSpec);
+        return kick(mutatedSpec);
+    }
+
+    /**
      * Requests to kick this member.
      *
      * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the member was kicked. If an
      * error is received, it is emitted through the {@code Mono}.
      */
-    public Mono<Void> kick() {
+    public Mono<Void> kick(final KickQuerySpec spec) {
         return getServiceMediator().getRestClient().getGuildService()
-                .removeGuildMember(getGuildId().asLong(), getId().asLong());
+                .removeGuildMember(getGuildId().asLong(), getId().asLong(), spec.asRequest());
     }
 
     /**

@@ -744,12 +744,32 @@ public final class Guild implements Entity {
     /**
      * Requests to kick the specified user from this guild.
      *
+     * @param userId The ID of the user to kick.
+     * @param spec A {@link Consumer} that provides a "blank" {@link KickQuerySpec} to be operated on. If some properties
+     * need to be retrieved via blocking operations (such as retrieval from a database), then it is recommended to build
+     * the spec externally and call {@link #kick(Snowflake, KickQuerySpec)}.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the specified user was
+     * kicked. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Void> kick(final Snowflake userId, final Consumer<KickQuerySpec> spec) {
+        final KickQuerySpec mutatedSpec = new KickQuerySpec();
+        spec.accept(mutatedSpec);
+        return kick(userId, mutatedSpec);
+    }
+
+    /**
+     * Requests to kick the specified user from this guild.
+     *
      * @param userId The ID of the user to kick from this guild.
+     * @param spec A configured {@link KickQuerySpec} to perform the request on.
+     *
      * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the specified user was kicked
      * from this guild. If an error is received, it is emitted through the {@code Mono}.
      */
-    public Mono<Void> kick(final Snowflake userId) {
-        return serviceMediator.getRestClient().getGuildService().removeGuildMember(getId().asLong(), userId.asLong());
+    public Mono<Void> kick(final Snowflake userId, final KickQuerySpec spec) {
+        return serviceMediator.getRestClient().getGuildService()
+            .removeGuildMember(getId().asLong(), userId.asLong(), spec.asRequest());
     }
 
     /**

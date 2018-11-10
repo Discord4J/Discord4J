@@ -114,8 +114,9 @@ public class GuildService extends RestService {
                 .exchange(getRouter());
     }
 
-    public Mono<Void> removeGuildMember(long guildId, long userId) {
+    public Mono<Void> removeGuildMember(long guildId, long userId, Map<String, Object> queryParams) {
         return Routes.GUILD_MEMBER_REMOVE.newRequest(guildId, userId)
+                .query(queryParams)
                 .exchange(getRouter());
     }
 
