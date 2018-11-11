@@ -81,6 +81,8 @@ public class GatewayClient {
     private final ResettableInterval heartbeat = new ResettableInterval();
     private final AtomicReference<String> sessionId = new AtomicReference<>("");
 
+    private final AtomicBoolean connected = new AtomicBoolean(false);
+
     private final FluxSink<Dispatch> dispatchSink;
     private final FluxSink<GatewayPayload<?>> receiverSink;
     private final FluxSink<GatewayPayload<?>> senderSink;
@@ -136,6 +138,7 @@ public class GatewayClient {
 
             Mono<Void> readyHandler = dispatch.filter(GatewayClient::isReadyOrResume)
                     .flatMap(event -> {
+                        connected.compareAndSet(false, true);
                         RetryContext retryContext = retryOptions.getRetryContext();
                         ConnectionObserver.State state;
                         if (retryContext.getResetCount() == 0) {
@@ -233,6 +236,7 @@ public class GatewayClient {
                 .jitter(retryOptions.getJitter())
                 .retryMax(retryOptions.getMaxRetries())
                 .doOnRetry(context -> {
+                    connected.compareAndSet(true, false);
                     int attempt = context.applicationContext().getAttempts();
                     long backoff = context.backoff().toMillis();
                     log.info("Retry attempt {} in {} ms", attempt, backoff);
@@ -263,6 +267,7 @@ public class GatewayClient {
     private Runnable logDisconnected() {
         return () -> {
             log.info("Disconnected from Gateway");
+            connected.compareAndSet(true, false);
             dispatchSink.next(GatewayStateChange.disconnected());
             notifyObserver(GatewayObserver.DISCONNECTED, identifyOptions);
         };
@@ -350,6 +355,16 @@ public class GatewayClient {
      */
     public int getSequence() {
         return sequence.get();
+    }
+
+    /**
+     * Returns whether this GatewayClient is currently connected to Discord Gateway therefore capable to send and
+     * receive payloads.
+     *
+     * @return true if the gateway connection is currently established, false otherwise.
+     */
+    public boolean isConnected() {
+        return connected.get();
     }
 
     ///////////////////////////////////////////
