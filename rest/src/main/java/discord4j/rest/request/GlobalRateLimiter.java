@@ -21,6 +21,8 @@ import org.reactivestreams.Subscriber;
 import reactor.core.publisher.EmitterProcessor;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.util.Logger;
+import reactor.util.Loggers;
 
 import java.time.Duration;
 
@@ -33,6 +35,8 @@ import java.time.Duration;
  * completed immediately.
  */
 public class GlobalRateLimiter implements Publisher<Void> {
+
+    private static final Logger log = Loggers.getLogger(GlobalRateLimiter.class);
 
     private static final Object PERMIT = new Object();
 
@@ -52,8 +56,14 @@ public class GlobalRateLimiter implements Publisher<Void> {
      * @param duration The duration to prevent completions for.
      */
     void rateLimitFor(Duration duration) {
+        if (log.isTraceEnabled()) {
+            log.trace("Setting a global rate limit for {}", duration);
+        }
         isRateLimited = true;
         Mono.delay(duration).subscribe(l -> {
+            if (log.isTraceEnabled()) {
+                log.trace("Global rate limit has completed after {}", duration);
+            }
             isRateLimited = false;
             resetNotifier.onNext(PERMIT);
         });

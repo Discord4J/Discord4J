@@ -27,15 +27,17 @@ import reactor.core.publisher.Mono;
 import reactor.core.publisher.MonoProcessor;
 import reactor.netty.http.client.HttpClientResponse;
 import reactor.retry.BackoffDelay;
+import reactor.retry.IterationContext;
 import reactor.retry.Retry;
 import reactor.retry.RetryContext;
+import reactor.util.Logger;
+import reactor.util.Loggers;
 import reactor.util.function.Tuple2;
 
 import java.time.Duration;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
-import java.util.function.Predicate;
+import java.util.logging.Level;
 
 /**
  * A stream of {@link discord4j.rest.request.DiscordRequest DiscordRequests}. Any number of items may be
@@ -53,46 +55,58 @@ class RequestStream<T> {
 
     private final EmitterProcessor<Tuple2<MonoProcessor<T>, DiscordRequest<T>>> backing =
             EmitterProcessor.create(false);
+    private final BucketKey id;
+    private final Logger log;
     private final DiscordWebClient httpClient;
     private final GlobalRateLimiter globalRateLimiter;
-    /**
-     * The retry function used for reading and completing HTTP requests. The back off is determined by the ratelimit
-     * headers returned by Discord in the event of a 429. If the bot is being globally ratelimited, the back off is
-     * applied to the global rate limiter. Otherwise, it is applied only to this stream.
-     */
-    private final Retry<AtomicLong> retryFactory = Retry.onlyIf(new Predicate<RetryContext<AtomicLong>>() {
-        @Override
-        public boolean test(RetryContext<AtomicLong> ctx) {
-            Throwable exception = ctx.exception();
-            if (exception instanceof ClientException) {
-                ClientException clientException = (ClientException) exception;
-                if (clientException.getStatus().code() == 429) { // TODO: retry on other status codes?
-                    boolean global = Boolean.valueOf(clientException.getHeaders().get("X-RateLimit-Global"));
-                    long retryAfter = Long.valueOf(clientException.getHeaders().get("Retry-After"));
+    private final Retry<?> retryFactory;
 
-                    if (global) {
-                        globalRateLimiter.rateLimitFor(Duration.ofMillis(retryAfter));
-                    } else {
-                        ctx.applicationContext().set(retryAfter);
-                    }
-                    return true;
-                }
-            }
-            return false;
-        }
-    }).backoff(context -> {
-        if (context.applicationContext() == null) {
-            return new BackoffDelay(Duration.ZERO);
-        }
-
-        long delay = ((AtomicLong) context.applicationContext()).get();
-        ((AtomicLong) context.applicationContext()).set(0L);
-        return new BackoffDelay(Duration.ofMillis(delay));
-    }).withApplicationContext(new AtomicLong());
-
-    RequestStream(DiscordWebClient httpClient, GlobalRateLimiter globalRateLimiter) {
+    RequestStream(BucketKey id, DiscordWebClient httpClient, GlobalRateLimiter globalRateLimiter) {
+        this.id = id;
+        this.log = Loggers.getLogger("discord4j.rest.request." + id);
         this.httpClient = httpClient;
         this.globalRateLimiter = globalRateLimiter;
+        this.retryFactory = initRetryFactory();
+    }
+
+    /**
+     * The retry function used for reading and completing HTTP requests. The backoff is determined by the ratelimit
+     * headers returned by Discord in the event of a 429. If the bot is being globally ratelimited, the backoff is
+     * applied to the global rate limiter. Otherwise, it is applied only to this stream.
+     */
+    private Retry<?> initRetryFactory() {
+        return Retry.onlyIf(this::shouldRetry).backoff(context -> {
+            if (shouldRetry(context)) {
+                RetryContext<?> ctx = (RetryContext) context;
+                ClientException clientException = (ClientException) ctx.exception();
+                boolean global = Boolean.valueOf(clientException.getHeaders().get("X-RateLimit-Global"));
+                long retryAfter = Long.valueOf(clientException.getHeaders().get("Retry-After"));
+                Duration fixedBackoff = Duration.ofMillis(retryAfter);
+                if (log.isTraceEnabled()) {
+                    log.trace("Calculated backoff (global={}): {}", global, fixedBackoff);
+                }
+                if (global) {
+                    globalRateLimiter.rateLimitFor(fixedBackoff);
+                }
+                return new BackoffDelay(fixedBackoff);
+            }
+            return new BackoffDelay(Duration.ZERO);
+        }).doOnRetry(ctx -> {
+            if (log.isTraceEnabled()) {
+                log.trace("Retry {} due to {} for {}", ctx.iteration(), ctx.exception().toString(), ctx.backoff());
+            }
+        });
+    }
+
+    private boolean shouldRetry(IterationContext<?> context) {
+        RetryContext<?> ctx = (RetryContext) context;
+        Throwable exception = ctx.exception();
+        if (exception instanceof ClientException) {
+            ClientException clientException = (ClientException) exception;
+            // TODO: retry on other status codes?
+            return clientException.getStatus().code() == 429;
+        }
+        return false;
     }
 
     void push(Tuple2<MonoProcessor<T>, DiscordRequest<T>> request) {
@@ -100,7 +114,7 @@ class RequestStream<T> {
     }
 
     void start() {
-        read().subscribe(new Reader());
+        read().subscribe(new Reader(), t -> log.error("Error when consuming request", t));
     }
 
     private Mono<Tuple2<MonoProcessor<T>, DiscordRequest<T>>> read() {
@@ -120,13 +134,19 @@ class RequestStream<T> {
         private volatile Duration sleepTime = Duration.ZERO;
         private final Consumer<HttpClientResponse> rateLimitHandler = response -> {
             HttpHeaders headers = response.responseHeaders();
+            if (log.isTraceEnabled()) {
+                log.trace("Response {} with headers: {}", response.status(), response.responseHeaders());
+            }
 
             int remaining = headers.getInt("X-RateLimit-Remaining", -1);
             if (remaining == 0) {
                 long resetAt = Long.parseLong(headers.get("X-RateLimit-Reset"));
                 long discordTime = headers.getTimeMillis("Date") / 1000;
-
-                sleepTime = Duration.ofSeconds(resetAt - discordTime);
+                Duration nextReset = Duration.ofSeconds(resetAt - discordTime);
+                if (log.isTraceEnabled()) {
+                    log.trace("Setting a new rate limit: {}", nextReset);
+                }
+                sleepTime = nextReset;
             }
         };
 
@@ -135,6 +155,9 @@ class RequestStream<T> {
         public void accept(Tuple2<MonoProcessor<T>, DiscordRequest<T>> tuple) {
             MonoProcessor<T> callback = tuple.getT1();
             DiscordRequest<T> req = tuple.getT2();
+            if (log.isTraceEnabled()) {
+                log.trace("Accepting request: {}", req);
+            }
             ClientRequest request = new ClientRequest(req.getRoute().getMethod(),
                     RouteUtils.expandQuery(req.getCompleteUri(), req.getQueryParams()),
                     Optional.ofNullable(req.getHeaders())
@@ -148,9 +171,11 @@ class RequestStream<T> {
             Class<T> responseType = req.getRoute().getResponseType();
 
             Mono.when(globalRateLimiter)
+                    .log("discord4j.rest.request." + id, Level.FINEST)
                     .materialize()
                     .flatMap(e -> httpClient.exchange(request, req.getBody(), responseType, rateLimitHandler))
                     .retryWhen(retryFactory)
+                    .log("discord4j.rest.response." + id, Level.FINEST)
                     .materialize()
                     .subscribe(signal -> {
                         if (signal.isOnSubscribe()) {
@@ -164,6 +189,9 @@ class RequestStream<T> {
                         }
 
                         Mono.delay(sleepTime).subscribe(l -> {
+                            if (log.isTraceEnabled()) {
+                                log.trace("Ready to consume next request");
+                            }
                             sleepTime = Duration.ZERO;
                             read().subscribe(this);
                         });
