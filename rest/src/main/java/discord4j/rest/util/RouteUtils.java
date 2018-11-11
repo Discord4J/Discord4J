@@ -55,17 +55,21 @@ public class RouteUtils {
 
     @Nullable
     public static String getMajorParam(String template, String complete) {
-        int start = template.indexOf('{');
-        if (start == -1) {
-            return null;
-        }
+        // Currently, the only major parameters are channel.id, guild.id, and webhook.id
+        if (template.contains("{channel.id}") || template.contains("{guild.id}") || template.contains("{webhook.id}")) {
+            int start = template.indexOf('{');
+            if (start == -1) {
+                return null;
+            }
 
-        int end = complete.indexOf('/', start);
-        if (end == -1) {
-            end = complete.length();
-        }
+            int end = complete.indexOf('/', start);
+            if (end == -1) {
+                end = complete.length();
+            }
 
-        return complete.substring(start, end);
+            return complete.substring(start, end);
+        }
+        return null;
     }
 
     private static String encodeUriComponent(@Nullable String source, Type type) {
