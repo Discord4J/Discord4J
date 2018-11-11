@@ -31,9 +31,7 @@ import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 import reactor.core.Disposable;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Hooks;
-import reactor.core.publisher.Mono;
+import reactor.core.publisher.*;
 import reactor.util.Logger;
 import reactor.util.Loggers;
 
@@ -70,26 +68,32 @@ public class RetryBotTest {
         }
     }
 
-    // TODO: polish to avoid lingering unidentified shards
     @Test
     @Ignore("Example code excluded from CI")
     public void testShards() {
+        final ReplayProcessor<Integer> permits = ReplayProcessor.create();
+        final FluxSink<Integer> permitSink = permits.sink();
+        permitSink.next(0);
+
         final Map<Integer, IdentifyOptions> optionsMap = initResumeOptions();
         final DiscordClientBuilder builder = new DiscordClientBuilder(token)
                 .setGatewayLimiter(new SimpleBucket(1, Duration.ofSeconds(6)))
+                .setGatewayObserver((s, o) -> {
+                    optionsMap.put(o.getShardIndex(), o);
+                    if (s.equals(GatewayObserver.CONNECTED)) {
+                        log.info("Shard {} connected", o.getShardIndex());
+                        permitSink.next(o.getShardIndex() + 1);
+                    }
+                })
                 .setShardCount(shardCount);
 
         Flux.range(0, shardCount)
                 .flatMap(index -> {
-                    DiscordClient client = builder.setIdentifyOptions(optionsMap.get(index))
-                            .setGatewayObserver((s, o) -> {
-                                optionsMap.put(o.getShardIndex(), o);
-                                if (s.equals(GatewayObserver.CONNECTED)) {
-                                    log.info("Shard {} connected", o.getShardIndex());
-                                }
-                            })
-                            .build();
-                    return client.login();
+                    DiscordClient client = builder.setIdentifyOptions(optionsMap.get(index)).build();
+                    return permits.filter(index::equals)
+                            .next()
+                            .delayElement(Duration.ofSeconds((long) (Math.signum(index) * 5)))
+                            .then(client.login());
                 })
                 .blockLast();
     }

@@ -320,6 +320,13 @@ public class GuildCreate implements Dispatch {
             public long getId() {
                 return id;
             }
+
+            @Override
+            public String toString() {
+                return "User{" +
+                        "id=" + id +
+                        '}';
+            }
         }
 
         public User getUser() {
