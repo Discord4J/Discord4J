@@ -18,14 +18,26 @@ package discord4j.rest.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import discord4j.rest.RestTests;
+import discord4j.rest.json.response.InviteResponse;
 import discord4j.rest.request.Router;
 import org.junit.Test;
+
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Optional;
+
+import static org.junit.Assert.assertEquals;
 
 public class InviteServiceTest {
 
     private static final String inviteCode = System.getenv("inviteCode");
+    private static final long modifyChannel = Long.parseUnsignedLong(System.getenv("modifyChannel"));
 
     private InviteService inviteService = null;
+
+    private ChannelService channelService = null;
 
     private InviteService getInviteService() {
 
@@ -41,6 +53,15 @@ public class InviteServiceTest {
         return inviteService = new InviteService(router);
     }
 
+    private ChannelService getChannelService() {
+
+        if (channelService != null) {
+            return channelService;
+        }
+
+        return channelService = RestTests.getChannelService();
+    }
+
     @Test
     public void testGetInvite() {
         getInviteService().getInvite(inviteCode).block();
@@ -48,7 +69,27 @@ public class InviteServiceTest {
 
     @Test
     public void testDeleteInvite() {
-        // TODO
+        getChannelService().getChannelInvites(modifyChannel)
+                .filter(invite -> invite.getMaxAge() != null)
+                .filter(invite -> Optional.ofNullable(invite.getCreatedAt())
+                        .map(this::asInstant)
+                        .map(ts -> ts.plusSeconds(invite.getMaxAge()))
+                        .map(ts -> ts.isBefore(Instant.now()))
+                        .orElse(false))
+                .map(InviteResponse::getCode)
+                .flatMap(code -> getInviteService().deleteInvite(code))
+                .blockLast();
+    }
+
+    private Instant asInstant(String timestamp) {
+        return DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(timestamp, Instant::from);
+    }
+
+    @Test
+    public void discordTimestampToInstant() {
+        String timestamp = "2018-06-01T16:40:45.991000+00:00";
+        Instant expected = ZonedDateTime.of(2018, 6, 1, 16, 40, 45, 991_000_000, ZoneId.of("Z")).toInstant();
+        assertEquals(expected, asInstant(timestamp));
     }
 
 }
