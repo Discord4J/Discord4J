@@ -74,6 +74,7 @@ public class GatewayClient {
     private final EmitterProcessor<Dispatch> dispatch = EmitterProcessor.create(false);
     private final EmitterProcessor<GatewayPayload<?>> receiver = EmitterProcessor.create(false);
     private final EmitterProcessor<GatewayPayload<?>> sender = EmitterProcessor.create(false);
+    private final EmitterProcessor<GatewayPayload<Heartbeat>> heartbeats = EmitterProcessor.create(false);
 
     private final AtomicBoolean resumable = new AtomicBoolean(true);
     private final AtomicInteger sequence = new AtomicInteger(0);
@@ -86,6 +87,7 @@ public class GatewayClient {
     private final FluxSink<Dispatch> dispatchSink;
     private final FluxSink<GatewayPayload<?>> receiverSink;
     private final FluxSink<GatewayPayload<?>> senderSink;
+    private final FluxSink<GatewayPayload<Heartbeat>> heartbeatSink;
 
     /**
      * Initializes a new GatewayClient.
@@ -113,6 +115,7 @@ public class GatewayClient {
         this.dispatchSink = dispatch.sink(FluxSink.OverflowStrategy.LATEST);
         this.receiverSink = receiver.sink(FluxSink.OverflowStrategy.LATEST);
         this.senderSink = sender.sink(FluxSink.OverflowStrategy.LATEST);
+        this.heartbeatSink = heartbeats.sink(FluxSink.OverflowStrategy.LATEST);
     }
 
     /**
@@ -125,7 +128,7 @@ public class GatewayClient {
         return Mono.defer(() -> {
             final int shard = identifyOptions.getShardIndex();
             final DiscordWebSocketHandler handler = new DiscordWebSocketHandler(payloadReader, payloadWriter,
-                    receiverSink, sender, shard, limiter);
+                    receiverSink, sender, heartbeats, shard, limiter);
 
             if (identifyOptions.getResumeSequence() != null) {
                 this.sequence.set(identifyOptions.getResumeSequence());
@@ -186,7 +189,7 @@ public class GatewayClient {
                             return Mono.just(GatewayPayload.heartbeat(new Heartbeat(sequence.get())));
                         }
                     })
-                    .doOnNext(senderSink::next)
+                    .doOnNext(heartbeatSink::next)
                     .then();
 
             Mono<Void> httpFuture = HttpClient.create()
