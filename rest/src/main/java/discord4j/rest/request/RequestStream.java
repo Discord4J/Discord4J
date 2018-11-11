@@ -59,14 +59,12 @@ class RequestStream<T> {
     private final Logger log;
     private final DiscordWebClient httpClient;
     private final GlobalRateLimiter globalRateLimiter;
-    private final Retry<?> retryFactory;
 
     RequestStream(BucketKey id, DiscordWebClient httpClient, GlobalRateLimiter globalRateLimiter) {
         this.id = id;
         this.log = Loggers.getLogger("discord4j.rest.request." + id);
         this.httpClient = httpClient;
         this.globalRateLimiter = globalRateLimiter;
-        this.retryFactory = initRetryFactory();
     }
 
     /**
@@ -74,17 +72,14 @@ class RequestStream<T> {
      * headers returned by Discord in the event of a 429. If the bot is being globally ratelimited, the backoff is
      * applied to the global rate limiter. Otherwise, it is applied only to this stream.
      */
-    private Retry<?> initRetryFactory() {
-        return Retry.onlyIf(this::shouldRetry).backoff(context -> {
-            if (shouldRetry(context)) {
+    private Retry<?> rateLimitRetryFactory() {
+        return Retry.onlyIf(this::isRateLimitError).backoff(context -> {
+            if (isRateLimitError(context)) {
                 RetryContext<?> ctx = (RetryContext) context;
                 ClientException clientException = (ClientException) ctx.exception();
                 boolean global = Boolean.valueOf(clientException.getHeaders().get("X-RateLimit-Global"));
                 long retryAfter = Long.valueOf(clientException.getHeaders().get("Retry-After"));
                 Duration fixedBackoff = Duration.ofMillis(retryAfter);
-                if (log.isTraceEnabled()) {
-                    log.trace("Calculated backoff (global={}): {}", global, fixedBackoff);
-                }
                 if (global) {
                     globalRateLimiter.rateLimitFor(fixedBackoff);
                 }
@@ -98,13 +93,38 @@ class RequestStream<T> {
         });
     }
 
-    private boolean shouldRetry(IterationContext<?> context) {
+    /**
+     * This retry function is used for reading and completing HTTP requests in the event of a server error (codes
+     * 502, 503 and 504). The delay is calculated using exponential backoff with jitter.
+     */
+    private boolean isRateLimitError(IterationContext<?> context) {
         RetryContext<?> ctx = (RetryContext) context;
         Throwable exception = ctx.exception();
         if (exception instanceof ClientException) {
             ClientException clientException = (ClientException) exception;
-            // TODO: retry on other status codes?
             return clientException.getStatus().code() == 429;
+        }
+        return false;
+    }
+
+    private Retry<?> serverErrorRetryFactory() {
+        return Retry.onlyIf(this::isServerError)
+                .exponentialBackoffWithJitter(Duration.ofSeconds(2), Duration.ofSeconds(30))
+                .doOnRetry(ctx -> {
+                    if (log.isTraceEnabled()) {
+                        log.trace("Retry {} due to {} for {}", ctx.iteration(), ctx.exception().toString(),
+                                ctx.backoff());
+                    }
+                });
+    }
+
+    private boolean isServerError(IterationContext<?> context) {
+        RetryContext<?> ctx = (RetryContext) context;
+        Throwable exception = ctx.exception();
+        if (exception instanceof ClientException) {
+            ClientException clientException = (ClientException) exception;
+            int code = clientException.getStatus().code();
+            return code == 502 || code == 503 || code == 504;
         }
         return false;
     }
@@ -122,9 +142,9 @@ class RequestStream<T> {
     }
 
     /**
-     * Reads and completes one request from the stream at a time. If a request fails, it is retried according to the
-     * {@link #retryFactory retry function}. The reader may wait in between each request if preemptive ratelimiting is
-     * necessary according to the response headers.
+     * Reads and completes one request from the stream at a time. If a request fails, it is retried according a retry
+     * strategy. The reader may wait in between each request if preemptive ratelimiting is necessary according to the
+     * response headers.
      *
      * @see #sleepTime
      * @see #rateLimitHandler
@@ -135,7 +155,7 @@ class RequestStream<T> {
         private final Consumer<HttpClientResponse> rateLimitHandler = response -> {
             HttpHeaders headers = response.responseHeaders();
             if (log.isTraceEnabled()) {
-                log.trace("Response {} with headers: {}", response.status(), response.responseHeaders());
+                log.trace("Read {} with headers: {}", response.status(), response.responseHeaders());
             }
 
             int remaining = headers.getInt("X-RateLimit-Remaining", -1);
@@ -144,7 +164,7 @@ class RequestStream<T> {
                 long discordTime = headers.getTimeMillis("Date") / 1000;
                 Duration nextReset = Duration.ofSeconds(resetAt - discordTime);
                 if (log.isTraceEnabled()) {
-                    log.trace("Setting a new rate limit: {}", nextReset);
+                    log.trace("Delaying next request by {}", nextReset);
                 }
                 sleepTime = nextReset;
             }
@@ -174,7 +194,8 @@ class RequestStream<T> {
                     .log("discord4j.rest.request." + id, Level.FINEST)
                     .materialize()
                     .flatMap(e -> httpClient.exchange(request, req.getBody(), responseType, rateLimitHandler))
-                    .retryWhen(retryFactory)
+                    .retryWhen(rateLimitRetryFactory())
+                    .retryWhen(serverErrorRetryFactory())
                     .log("discord4j.rest.response." + id, Level.FINEST)
                     .materialize()
                     .subscribe(signal -> {
