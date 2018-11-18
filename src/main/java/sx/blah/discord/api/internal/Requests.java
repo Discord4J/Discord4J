@@ -130,11 +130,11 @@ public class Requests {
 		/**
 		 * Makes a request.
 		 *
-		 * @param url     The url to make the request to.
-		 * @param entity  Any data to serialize and send in the body of the request.
-		 * @param clazz   The class of the object to deserialize the json response into.
+		 * @param url The url to make the request to.
+		 * @param entity Any data to serialize and send in the body of the request.
+		 * @param clazz The class of the object to deserialize the json response into.
 		 * @param headers The headers to include in the request.
-		 * @param <T>     The type of the object to deserialize the json response into.
+		 * @param <T> The type of the object to deserialize the json response into.
 		 * @return The deserialized response.
 		 */
 		public <T> T makeRequest(String url, Object entity, Class<T> clazz, BasicNameValuePair... headers) {
@@ -148,11 +148,11 @@ public class Requests {
 		/**
 		 * Makes a request.
 		 *
-		 * @param url     The url to make the request to.
-		 * @param entity  Any data to serialize and send in the body of the request.
-		 * @param clazz   The class of the object to deserialize the json response into.
+		 * @param url The url to make the request to.
+		 * @param entity Any data to serialize and send in the body of the request.
+		 * @param clazz The class of the object to deserialize the json response into.
 		 * @param headers The headers to include in the request.
-		 * @param <T>     The type of the object to deserialize the json response into.
+		 * @param <T> The type of the object to deserialize the json response into.
 		 * @return The deserialized response.
 		 */
 		public <T> T makeRequest(String url, String entity, Class<T> clazz, BasicNameValuePair... headers) {
@@ -167,10 +167,10 @@ public class Requests {
 		/**
 		 * Makes a request.
 		 *
-		 * @param url     The url to make the request to.
-		 * @param clazz   The class of the object to deserialize the json response into.
+		 * @param url The url to make the request to.
+		 * @param clazz The class of the object to deserialize the json response into.
 		 * @param headers The headers to include in the request.
-		 * @param <T>     The type of the object to deserialize the json response into.
+		 * @param <T> The type of the object to deserialize the json response into.
 		 * @return The deserialized response.
 		 */
 		public <T> T makeRequest(String url, Class<T> clazz, BasicNameValuePair... headers) {
@@ -190,8 +190,8 @@ public class Requests {
 		/**
 		 * Makes a request.
 		 *
-		 * @param url     The url to make the request to.
-		 * @param entity  Any data to serialize and send in the body of the request.
+		 * @param url The url to make the request to.
+		 * @param entity Any data to serialize and send in the body of the request.
 		 * @param headers The headers to include in the request.
 		 */
 		public void makeRequest(String url, Object entity, BasicNameValuePair... headers) {
@@ -205,8 +205,8 @@ public class Requests {
 		/**
 		 * Makes a request.
 		 *
-		 * @param url     The url to make the request to.
-		 * @param entity  Any data to serialize and send in the body of the request.
+		 * @param url The url to make the request to.
+		 * @param entity Any data to serialize and send in the body of the request.
 		 * @param headers The headers to include in the request.
 		 * @return The response as a string.
 		 */
@@ -222,7 +222,7 @@ public class Requests {
 		/**
 		 * Makes a request.
 		 *
-		 * @param url     The url to make the request to.
+		 * @param url The url to make the request to.
 		 * @param headers The headers to include in the request.
 		 * @return The response as a string.
 		 */
@@ -289,10 +289,10 @@ public class Requests {
 
 				if (responseCode == 404) {
 					if (!request.url().toString().contains("invite") && !request.url().toString().contains("messages") && !request.url().toString().contains("users")) //Suppresses common 404s which are a result on queries to verify if something exists or not
-						LOGGER.error(LogMarkers.API, "Received 404 error, please notify the developer and include the URL ({})", request.url().uri().toString());
+						LOGGER.error(LogMarkers.API, "Received 404 error, please notify the developer and include the URL ({})", request.url().uri());
 					return null;
 				} else if (responseCode == 403) {
-					LOGGER.error(LogMarkers.API, "Received 403 forbidden error for url {}. If you believe this is a Discord4J error, report this!", request.url().uri().toString());
+					LOGGER.error(LogMarkers.API, "Received 403 forbidden error for url {}. If you believe this is a Discord4J error, report this!", request.url().uri());
 					return null;
 				} else if (responseCode == 204) { //There is a no content response when deleting messages
 					return null;
@@ -308,7 +308,7 @@ public class Requests {
 					return request(builder, (long) (Math.pow(sleepTime, 2) * ThreadLocalRandom.current().nextLong(5)), retry - 1);
 
 				} else if ((responseCode < 200 || responseCode > 299) && responseCode != 429) {
-					throw new DiscordException("Error on request to " + request.url().uri().toString() + ". Received response code " + responseCode + ". With response text: " + data);
+					throw new DiscordException("Error on request to " + request.url().uri() + ". Received response code " + responseCode + ". With response text: " + data);
 				}
 
 				if (responseCode == 429) {
