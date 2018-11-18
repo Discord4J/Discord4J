@@ -562,8 +562,8 @@ public class Channel implements IChannel {
 						ContentType.MULTIPART_FORM_DATA.withCharset("UTF-8"));
 
 			HttpEntity fileEntity = builder.build();
-			MessageObject messageObject = DiscordUtils.MAPPER.readValue(client.REQUESTS.POST.makeRequest(DiscordEndpoints.CHANNELS + id + "/messages",
-					fileEntity, new BasicNameValuePair("Content-Type", "multipart/form-data")), MessageObject.class);
+			MessageObject messageObject = client.REQUESTS.POST.makeRequest(DiscordEndpoints.CHANNELS + id + "/messages",
+					fileEntity, MessageObject.class, new BasicNameValuePair("Content-Type", "multipart/form-data"));
 
 			return DiscordUtils.getMessageFromJSON(this, messageObject);
 		} catch (IOException e) {

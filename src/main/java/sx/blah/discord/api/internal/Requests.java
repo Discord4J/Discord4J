@@ -18,14 +18,13 @@
 package sx.blah.discord.api.internal;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.http.HttpEntity;
-import org.apache.http.client.methods.*;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.util.EntityUtils;
 import sx.blah.discord.Discord4J;
 import sx.blah.discord.api.internal.json.responses.RateLimitResponse;
 import sx.blah.discord.util.DiscordException;
@@ -33,13 +32,14 @@ import sx.blah.discord.util.LogMarkers;
 import sx.blah.discord.util.RateLimitException;
 
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicLong;
 
-import static sx.blah.discord.Discord4J.*;
+import static sx.blah.discord.Discord4J.LOGGER;
+import static sx.blah.discord.Discord4J.URL;
+import static sx.blah.discord.Discord4J.VERSION;
 
 /**
  * Used to send HTTP requests to Discord.
@@ -57,45 +57,50 @@ public class Requests {
 	public static final Requests GENERAL_REQUESTS = new Requests(null);
 
 	/**
+	 * The HTTP client requests are made on.
+	 */
+	private final OkHttpClient HTTP = new OkHttpClient();
+
+	/**
 	 * Used to send POST requests.
 	 */
-	public final Request POST;
+	public final DiscordRequest POST;
 	/**
 	 * Used to send GET requests.
 	 */
-	public final Request GET;
+	public final DiscordRequest GET;
 	/**
 	 * Used to send DELETE requests.
 	 */
-	public final Request DELETE;
+	public final DiscordRequest DELETE;
 	/**
 	 * Used to send PATCH requests.
 	 */
-	public final Request PATCH;
+	public final DiscordRequest PATCH;
 	/**
 	 * Used to send PUT requests.
 	 */
-	public final Request PUT;
-
-	/**
-	 * The client used for these requests.
-	 */
-	private final DiscordClientImpl client;
+	public final DiscordRequest PUT;
 
 	public Requests(DiscordClientImpl client) {
-		this.client = client;
+		POST = new DiscordRequest(RequestMethod.POST, client);
+		GET = new DiscordRequest(RequestMethod.GET, client);
+		DELETE = new DiscordRequest(RequestMethod.DELETE, client);
+		PATCH = new DiscordRequest(RequestMethod.PATCH, client);
+		PUT = new DiscordRequest(RequestMethod.PUT, client);
+	}
 
-		POST = new Request(HttpPost.class, client);
-		GET = new Request(HttpGet.class, client);
-		DELETE = new Request(HttpDelete.class, client);
-		PATCH = new Request(HttpPatch.class, client);
-		PUT = new Request(HttpPut.class, client);
+	/**
+	 * The method types available for a request.
+	 */
+	public enum RequestMethod {
+		POST, GET, DELETE, PATCH, PUT
 	}
 
 	/**
 	 * A specific HTTP method request type.
 	 */
-	public final class Request {
+	public final class DiscordRequest {
 
 		/**
 		 * The client used for these requests.
@@ -103,15 +108,9 @@ public class Requests {
 		private final DiscordClientImpl client;
 
 		/**
-		 * The HTTP client requests are made on.
+		 * The method type used for the request
 		 */
-		//Same as HttpClients.createDefault() but with the proper user-agent
-		private final CloseableHttpClient CLIENT = HttpClients.custom().setUserAgent(USER_AGENT).build();
-
-		/**
-		 * The class of the method type used for the request
-		 */
-		final Class<? extends HttpUriRequest> requestClass;
+		final RequestMethod method;
 
 		/**
 		 * Keeps track of the time when the global rate limit retry-after interval is over
@@ -123,19 +122,19 @@ public class Requests {
 		 */
 		private final Map<Pair<String, String>, Long> retryAfters = new ConcurrentHashMap<>();
 
-		private Request(Class<? extends HttpUriRequest> clazz, DiscordClientImpl client) {
-			this.requestClass = clazz;
+		private DiscordRequest(RequestMethod method, DiscordClientImpl client) {
+			this.method = method;
 			this.client = client;
 		}
 
 		/**
 		 * Makes a request.
 		 *
-		 * @param url The url to make the request to.
-		 * @param entity Any data to serialize and send in the body of the request.
-		 * @param clazz The class of the object to deserialize the json response into.
+		 * @param url     The url to make the request to.
+		 * @param entity  Any data to serialize and send in the body of the request.
+		 * @param clazz   The class of the object to deserialize the json response into.
 		 * @param headers The headers to include in the request.
-		 * @param <T> The type of the object to deserialize the json response into.
+		 * @param <T>     The type of the object to deserialize the json response into.
 		 * @return The deserialized response.
 		 */
 		public <T> T makeRequest(String url, Object entity, Class<T> clazz, BasicNameValuePair... headers) {
@@ -149,11 +148,11 @@ public class Requests {
 		/**
 		 * Makes a request.
 		 *
-		 * @param url The url to make the request to.
-		 * @param entity Any data to serialize and send in the body of the request.
-		 * @param clazz The class of the object to deserialize the json response into.
+		 * @param url     The url to make the request to.
+		 * @param entity  Any data to serialize and send in the body of the request.
+		 * @param clazz   The class of the object to deserialize the json response into.
 		 * @param headers The headers to include in the request.
-		 * @param <T> The type of the object to deserialize the json response into.
+		 * @param <T>     The type of the object to deserialize the json response into.
 		 * @return The deserialized response.
 		 */
 		public <T> T makeRequest(String url, String entity, Class<T> clazz, BasicNameValuePair... headers) {
@@ -168,15 +167,20 @@ public class Requests {
 		/**
 		 * Makes a request.
 		 *
-		 * @param url The url to make the request to.
-		 * @param clazz The class of the object to deserialize the json response into.
+		 * @param url     The url to make the request to.
+		 * @param clazz   The class of the object to deserialize the json response into.
 		 * @param headers The headers to include in the request.
-		 * @param <T> The type of the object to deserialize the json response into.
+		 * @param <T>     The type of the object to deserialize the json response into.
 		 * @return The deserialized response.
 		 */
 		public <T> T makeRequest(String url, Class<T> clazz, BasicNameValuePair... headers) {
 			try {
-				String response = makeRequest(url, headers);
+				Request.Builder builder = new Request.Builder().url(url).header("User-Agent", USER_AGENT);
+				for (BasicNameValuePair header : headers) {
+					builder.header(header.getName(), header.getValue());
+				}
+				builder.method(method.toString(), null);
+				String response = request(builder);
 				return response == null ? null : DiscordUtils.MAPPER.readValue(response, clazz);
 			} catch (IOException e) {
 				throw new DiscordException("Unable to serialize request!", e);
@@ -186,8 +190,8 @@ public class Requests {
 		/**
 		 * Makes a request.
 		 *
-		 * @param url The url to make the request to.
-		 * @param entity Any data to serialize and send in the body of the request.
+		 * @param url     The url to make the request to.
+		 * @param entity  Any data to serialize and send in the body of the request.
 		 * @param headers The headers to include in the request.
 		 */
 		public void makeRequest(String url, Object entity, BasicNameValuePair... headers) {
@@ -201,78 +205,51 @@ public class Requests {
 		/**
 		 * Makes a request.
 		 *
-		 * @param url The url to make the request to.
-		 * @param entity Any data to serialize and send in the body of the request.
+		 * @param url     The url to make the request to.
+		 * @param entity  Any data to serialize and send in the body of the request.
 		 * @param headers The headers to include in the request.
-		 * @return The response as a byte array.
+		 * @return The response as a string.
 		 */
 		public String makeRequest(String url, String entity, BasicNameValuePair... headers) {
-			return makeRequest(url, new StringEntity(entity, "UTF-8"), headers);
+			Request.Builder builder = new Request.Builder().url(url).header("User-Agent", USER_AGENT);
+			for (BasicNameValuePair header : headers) {
+				builder.header(header.getName(), header.getValue());
+			}
+			builder.method(method.toString(), RequestBody.create(MediaType.parse("charset=utf-8"), entity));
+			return request(builder);
 		}
 
 		/**
 		 * Makes a request.
 		 *
-		 * @param url The url to make the request to.
+		 * @param url     The url to make the request to.
 		 * @param headers The headers to include in the request.
-		 * @return The response as a byte array.
+		 * @return The response as a string.
 		 */
 		public String makeRequest(String url, BasicNameValuePair... headers) {
-			try {
-				HttpUriRequest request = this.requestClass.getConstructor(String.class).newInstance(url);
-				for (BasicNameValuePair header : headers) {
-					request.addHeader(header.getName(), header.getValue());
-				}
-
-				return request(request);
-			} catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-				Discord4J.LOGGER.error(LogMarkers.API, "Discord4J Internal Exception", e);
-				return null;
+			Request.Builder builder = new Request.Builder().url(url).header("User-Agent", USER_AGENT);
+			for (BasicNameValuePair header : headers) {
+				builder.header(header.getName(), header.getValue());
 			}
+			builder.method(method.toString(), null);
+			return request(builder);
 		}
 
-
-		/**
-		 * Makes a request.
-		 *
-		 * @param url The url to make the request to.
-		 * @param entity Any data to serialize and send in the body of the request.
-		 * @param headers The headers to include in the request.
-		 * @return The response as a byte array.
-		 */
-		public String makeRequest(String url, HttpEntity entity, BasicNameValuePair... headers) {
-			try {
-				if (HttpEntityEnclosingRequestBase.class.isAssignableFrom(this.requestClass)) {
-					HttpEntityEnclosingRequestBase request = (HttpEntityEnclosingRequestBase)
-							this.requestClass.getConstructor(String.class).newInstance(url);
-					for (BasicNameValuePair header : headers) {
-						request.addHeader(header.getName(), header.getValue());
-					}
-					request.setEntity(entity);
-					return request(request);
-				} else {
-					LOGGER.error(LogMarkers.API, "Tried to attach HTTP entity to invalid type! ({})", this.requestClass.getSimpleName());
-				}
-			} catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-				Discord4J.LOGGER.error(LogMarkers.API, "Discord4J Internal Exception", e);
-			}
-			return null;
+		private String request(Request.Builder builder) {
+			return request(builder, 1, client == null ? 0 : client.getRetryCount());
 		}
 
-		private String request(HttpUriRequest request) {
-			return request(request, 1, client == null ? 0 : client.getRetryCount());
-		}
-
-		private String request(HttpUriRequest request, long sleepTime, int retry) {
+		private String request(Request.Builder builder, long sleepTime, int retry) {
 			if (client != null)
-				request.addHeader("Authorization", client.getToken());
+				builder.header("Authorization", client.getToken());
 
-			if (request.containsHeader("Content-Type")) {
-				if (request.getFirstHeader("Content-Type").getValue().equals("multipart/form-data")) {
-					request.removeHeaders("Content-Type");
+			String content = builder.build().header("Content-Type");
+			if (content != null) {
+				if (content.equals("multipart/form-data")) {
+					builder.removeHeader("Content-Type");
 				}
 			} else {
-				request.addHeader("Content-Type", "application/json; charset=utf-8");
+				builder.header("Content-Type", "application/json; charset=utf-8");
 			}
 
 			if (globalRetryAfter.get() != -1) {
@@ -280,10 +257,10 @@ public class Requests {
 					globalRetryAfter.set(-1);
 				else
 					throw new RateLimitException("Global rate limit exceeded.",
-							globalRetryAfter.get() - System.currentTimeMillis(), request.getMethod(), true);
+							globalRetryAfter.get() - System.currentTimeMillis(), method.toString(), true);
 			}
 
-			Pair<String, String> methodRequestPair = Pair.of(request.getMethod(), request.getURI().getPath());
+			Pair<String, String> methodRequestPair = Pair.of(method.toString(), builder.build().url().uri().getPath());
 
 			if (retryAfters.containsKey(methodRequestPair)) {
 				if (System.currentTimeMillis() > retryAfters.get(methodRequestPair))
@@ -294,27 +271,28 @@ public class Requests {
 							String.format("%s %s", methodRequestPair.getLeft(), methodRequestPair.getRight()), false);
 			}
 
-			try (CloseableHttpResponse response = CLIENT.execute(request)) {
-				int responseCode = response.getStatusLine().getStatusCode();
+			Request request = builder.build();
+			try (Response response = HTTP.newCall(request).execute()) {
+				int responseCode = response.code();
 
-				if (response.containsHeader("X-RateLimit-Remaining")) {
-					int remaining = Integer.parseInt(response.getFirstHeader("X-RateLimit-Remaining").getValue());
+				String header = response.header("X-RateLimit-Remaining");
+				if (header != null) {
+					int remaining = Integer.parseInt(header);
 					if (remaining == 0) {
-						retryAfters.put(methodRequestPair,
-								Long.parseLong(response.getFirstHeader("X-RateLimit-Reset").getValue()) * 1000);
+						retryAfters.put(methodRequestPair, Long.parseLong(header) * 1000);
 					}
 				}
 
 				String data = null;
-				if (response.getEntity() != null)
-					data = EntityUtils.toString(response.getEntity());
+				if (response.body() != null)
+					data = response.body().string();
 
 				if (responseCode == 404) {
-					if (!request.getURI().toString().contains("invite") && !request.getURI().toString().contains("messages") && !request.getURI().toString().contains("users")) //Suppresses common 404s which are a result on queries to verify if something exists or not
-						LOGGER.error(LogMarkers.API, "Received 404 error, please notify the developer and include the URL ({})", request.getURI());
+					if (!request.url().toString().contains("invite") && !request.url().toString().contains("messages") && !request.url().toString().contains("users")) //Suppresses common 404s which are a result on queries to verify if something exists or not
+						LOGGER.error(LogMarkers.API, "Received 404 error, please notify the developer and include the URL ({})", request.url().uri().toString());
 					return null;
 				} else if (responseCode == 403) {
-					LOGGER.error(LogMarkers.API, "Received 403 forbidden error for url {}. If you believe this is a Discord4J error, report this!", request.getURI());
+					LOGGER.error(LogMarkers.API, "Received 403 forbidden error for url {}. If you believe this is a Discord4J error, report this!", request.url().uri().toString());
 					return null;
 				} else if (responseCode == 204) { //There is a no content response when deleting messages
 					return null;
@@ -327,10 +305,10 @@ public class Requests {
 					} catch (InterruptedException e) {
 						throw new DiscordException("Interrupted while waiting to retry a 5xx response!", e);
 					}
-					return request(request, (long) (Math.pow(sleepTime, 2) * ThreadLocalRandom.current().nextLong(5)), retry - 1);
+					return request(builder, (long) (Math.pow(sleepTime, 2) * ThreadLocalRandom.current().nextLong(5)), retry - 1);
 
 				} else if ((responseCode < 200 || responseCode > 299) && responseCode != 429) {
-					throw new DiscordException("Error on request to " + request.getURI() + ". Received response code " + responseCode + ". With response text: " + data);
+					throw new DiscordException("Error on request to " + request.url().uri().toString() + ". Received response code " + responseCode + ". With response text: " + data);
 				}
 
 				if (responseCode == 429) {
