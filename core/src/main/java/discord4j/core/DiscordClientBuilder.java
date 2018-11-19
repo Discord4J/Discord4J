@@ -26,6 +26,7 @@ import discord4j.core.event.EventDispatcher;
 import discord4j.core.event.dispatch.DispatchContext;
 import discord4j.core.event.dispatch.DispatchHandlers;
 import discord4j.core.event.domain.Event;
+import discord4j.core.object.data.stored.MessageBean;
 import discord4j.core.object.presence.Presence;
 import discord4j.core.util.VersionUtil;
 import discord4j.gateway.*;
@@ -40,6 +41,7 @@ import discord4j.rest.request.Router;
 import discord4j.rest.route.Routes;
 import discord4j.store.api.service.StoreService;
 import discord4j.store.api.service.StoreServiceLoader;
+import discord4j.store.api.util.StoreContext;
 import discord4j.store.jdk.JdkStoreService;
 import io.netty.handler.codec.http.DefaultHttpHeaders;
 import io.netty.handler.codec.http.HttpHeaderNames;
@@ -309,17 +311,18 @@ public final class DiscordClientBuilder {
                 ExchangeStrategies.withJacksonDefaults(mapper));
         final RestClient restClient = new RestClient(new Router(webClient, Schedulers.elastic()));
 
+        // Prepare identify parameters
+        final ClientConfig config = new ClientConfig(token, identifyOptions.getShardIndex(),
+                identifyOptions.getShardCount());
+
         // Prepare Stores
         final StoreService storeService = initStoreService();
-        final StateHolder stateHolder = new StateHolder(storeService);
+        final StateHolder stateHolder = new StateHolder(storeService, new StoreContext(config.getShardIndex(),
+                MessageBean.class));
 
         // Prepare EventDispatcher
         final FluxProcessor<Event, Event> eventProcessor = initEventProcessor();
         final EventDispatcher eventDispatcher = new EventDispatcher(eventProcessor, initEventScheduler());
-
-        // Prepare identify parameters
-        final ClientConfig config = new ClientConfig(token, identifyOptions.getShardIndex(),
-                identifyOptions.getShardCount());
 
         // Prepare mediator and wire gateway events to EventDispatcher
         final ServiceMediator serviceMediator = new ServiceMediator(gatewayClient, restClient, storeService,
