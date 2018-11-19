@@ -25,6 +25,7 @@ import discord4j.common.jackson.UnknownPropertyHandler;
 import discord4j.core.event.EventDispatcher;
 import discord4j.core.event.dispatch.DispatchContext;
 import discord4j.core.event.dispatch.DispatchHandlers;
+import discord4j.core.event.dispatch.StoreInvalidator;
 import discord4j.core.event.domain.Event;
 import discord4j.core.object.data.stored.MessageBean;
 import discord4j.core.object.presence.Presence;
@@ -261,12 +262,11 @@ public final class DiscordClientBuilder {
         return Schedulers.elastic();
     }
 
-    @Nullable
     private GatewayObserver initGatewayObserver() {
         if (gatewayObserver != null) {
             return gatewayObserver;
         }
-        return null;
+        return GatewayObserver.NOOP_LISTENER;
     }
 
     private GatewayLimiter initGatewayLimiter() {
@@ -284,15 +284,11 @@ public final class DiscordClientBuilder {
                 .addHandler(new UnknownPropertyHandler(ignoreUnknownJsonKeys))
                 .registerModules(new PossibleModule(), new Jdk8Module());
 
-        // Prepare GatewayClient
+        // Prepare identify options
         final IdentifyOptions identifyOptions = initIdentifyOptions();
         if (identifyOptions.getShardIndex() < 0 || identifyOptions.getShardIndex() >= identifyOptions.getShardCount()) {
             throw new IllegalArgumentException("0 <= shardIndex < shardCount");
         }
-        final RetryOptions retryOptions = initRetryOptions();
-        final GatewayClient gatewayClient = new GatewayClient(
-                new JacksonPayloadReader(mapper), new JacksonPayloadWriter(mapper),
-                retryOptions, token, identifyOptions, initGatewayObserver(), initGatewayLimiter());
 
         // Retrieve version properties
         final Properties properties = VersionUtil.getProperties();
@@ -319,6 +315,13 @@ public final class DiscordClientBuilder {
         final StoreService storeService = initStoreService();
         final StateHolder stateHolder = new StateHolder(storeService, new StoreContext(config.getShardIndex(),
                 MessageBean.class));
+
+        // Prepare GatewayClient
+        final RetryOptions retryOptions = initRetryOptions();
+        final StoreInvalidator storeInvalidator = new StoreInvalidator(stateHolder);
+        final GatewayClient gatewayClient = new GatewayClient(
+                new JacksonPayloadReader(mapper), new JacksonPayloadWriter(mapper),
+                retryOptions, token, identifyOptions, storeInvalidator.then(initGatewayObserver()), initGatewayLimiter());
 
         // Prepare EventDispatcher
         final FluxProcessor<Event, Event> eventProcessor = initEventProcessor();

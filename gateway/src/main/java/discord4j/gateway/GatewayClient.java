@@ -38,7 +38,6 @@ import reactor.retry.Retry;
 import reactor.util.Logger;
 import reactor.util.Loggers;
 
-import javax.annotation.Nullable;
 import java.time.Duration;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -103,7 +102,7 @@ public class GatewayClient {
      */
     public GatewayClient(PayloadReader payloadReader, PayloadWriter payloadWriter,
             RetryOptions retryOptions, String token, IdentifyOptions identifyOptions,
-            @Nullable GatewayObserver observer, GatewayLimiter limiter) {
+            GatewayObserver observer, GatewayLimiter limiter) {
         this.log = Loggers.getLogger("discord4j.gateway.client." + identifyOptions.getShardIndex());
         this.payloadReader = Objects.requireNonNull(payloadReader);
         this.payloadWriter = Objects.requireNonNull(payloadWriter);
@@ -245,13 +244,16 @@ public class GatewayClient {
                     log.info("Retry attempt {} in {} ms", attempt, backoff);
                     if (attempt == 1) {
                         dispatchSink.next(GatewayStateChange.retryStarted(Duration.ofMillis(backoff)));
-                        notifyObserver(GatewayObserver.RETRY_STARTED, identifyOptions);
-                        if (!isResumableError(context.exception())) {
-                            resumable.set(false);
+                        if (!resumable.get() || !isResumableError(context.exception())) {
+                            resumable.compareAndSet(true, false);
+                            notifyObserver(GatewayObserver.RETRY_STARTED, identifyOptions);
+                        } else {
+                            notifyObserver(GatewayObserver.RETRY_RESUME_STARTED, identifyOptions);
                         }
                     } else {
                         dispatchSink.next(GatewayStateChange.retryFailed(attempt - 1,
                                 Duration.ofMillis(backoff)));
+                        // TODO: add attempt/backoff values to GatewayObserver
                         notifyObserver(GatewayObserver.RETRY_FAILED, identifyOptions);
                         resumable.set(false);
                     }
@@ -279,16 +281,12 @@ public class GatewayClient {
     private ConnectionObserver observer() {
         return (connection, newState) -> {
             log.debug("{} {}", newState, connection);
-            if (observer != null) {
-                observer.onStateChange(newState, identifyOptions);
-            }
+            observer.onStateChange(newState, identifyOptions);
         };
     }
 
     private void notifyObserver(ConnectionObserver.State state, IdentifyOptions options) {
-        if (observer != null) {
-            observer.onStateChange(state, options);
-        }
+        observer.onStateChange(state, options);
     }
 
     /**
