@@ -61,7 +61,7 @@ public class Requests {
 	/**
 	 * The HTTP client requests are made on.
 	 */
-	private final OkHttpClient HTTP;
+	private final OkHttpClient http;
 
 	/**
 	 * Used to send POST requests.
@@ -89,20 +89,13 @@ public class Requests {
 		httpLogger.redactHeader("Set-Cookie");
 		httpLogger.redactHeader("Cookie");
 		httpLogger.redactHeader("Authorization");
-		HTTP = new OkHttpClient.Builder().addInterceptor(httpLogger).build();
+		http = new OkHttpClient.Builder().addInterceptor(httpLogger).build();
 
-		POST = new DiscordRequest(RequestMethod.POST, client);
-		GET = new DiscordRequest(RequestMethod.GET, client);
-		DELETE = new DiscordRequest(RequestMethod.DELETE, client);
-		PATCH = new DiscordRequest(RequestMethod.PATCH, client);
-		PUT = new DiscordRequest(RequestMethod.PUT, client);
-	}
-
-	/**
-	 * The method types available for a request.
-	 */
-	public enum RequestMethod {
-		POST, GET, DELETE, PATCH, PUT
+		POST = new DiscordRequest("POST", client);
+		GET = new DiscordRequest("GET", client);
+		DELETE = new DiscordRequest("DELETE", client);
+		PATCH = new DiscordRequest("PATCH", client);
+		PUT = new DiscordRequest("PUT", client);
 	}
 
 	/**
@@ -118,7 +111,7 @@ public class Requests {
 		/**
 		 * The method type used for the request
 		 */
-		final RequestMethod method;
+		final String method;
 
 		/**
 		 * Keeps track of the time when the global rate limit retry-after interval is over
@@ -130,7 +123,7 @@ public class Requests {
 		 */
 		private final Map<Pair<String, String>, Long> retryAfters = new ConcurrentHashMap<>();
 
-		private DiscordRequest(RequestMethod method, DiscordClientImpl client) {
+		private DiscordRequest(String method, DiscordClientImpl client) {
 			this.method = method;
 			this.client = client;
 		}
@@ -187,10 +180,10 @@ public class Requests {
 				for (BasicNameValuePair header : headers) {
 					builder.header(header.getName(), header.getValue());
 				}
-				if (HttpMethod.requiresRequestBody(method.toString()))
-					builder.method(method.toString(), RequestBody.create(MediaType.parse("charset=utf-8"), ""));
+				if (HttpMethod.requiresRequestBody(method))
+					builder.method(method, RequestBody.create(MediaType.parse("charset=utf-8"), ""));
 				else
-					builder.method(method.toString(), null);
+					builder.method(method, null);
 				String response = request(builder);
 				return response == null ? null : DiscordUtils.MAPPER.readValue(response, clazz);
 			} catch (IOException e) {
@@ -226,7 +219,7 @@ public class Requests {
 			for (BasicNameValuePair header : headers) {
 				builder.header(header.getName(), header.getValue());
 			}
-			builder.method(method.toString(), RequestBody.create(MediaType.parse("charset=utf-8"), entity));
+			builder.method(method, RequestBody.create(MediaType.parse("charset=utf-8"), entity));
 			return request(builder);
 		}
 
@@ -242,10 +235,10 @@ public class Requests {
 			for (BasicNameValuePair header : headers) {
 				builder.header(header.getName(), header.getValue());
 			}
-			if (HttpMethod.requiresRequestBody(method.toString()))
-				builder.method(method.toString(), RequestBody.create(MediaType.parse("charset=utf-8"), ""));
+			if (HttpMethod.requiresRequestBody(method))
+				builder.method(method, RequestBody.create(MediaType.parse("charset=utf-8"), ""));
 			else
-				builder.method(method.toString(), null);
+				builder.method(method, null);
 			return request(builder);
 		}
 
@@ -271,10 +264,10 @@ public class Requests {
 					globalRetryAfter.set(-1);
 				else
 					throw new RateLimitException("Global rate limit exceeded.",
-							globalRetryAfter.get() - System.currentTimeMillis(), method.toString(), true);
+							globalRetryAfter.get() - System.currentTimeMillis(), method, true);
 			}
 
-			Pair<String, String> methodRequestPair = Pair.of(method.toString(), builder.build().url().uri().getPath());
+			Pair<String, String> methodRequestPair = Pair.of(method, builder.build().url().uri().getPath());
 
 			if (retryAfters.containsKey(methodRequestPair)) {
 				if (System.currentTimeMillis() > retryAfters.get(methodRequestPair))
@@ -286,7 +279,7 @@ public class Requests {
 			}
 
 			Request request = builder.build();
-			try (Response response = HTTP.newCall(request).execute()) {
+			try (Response response = http.newCall(request).execute()) {
 				int responseCode = response.code();
 
 				String header = response.header("X-RateLimit-Remaining");
