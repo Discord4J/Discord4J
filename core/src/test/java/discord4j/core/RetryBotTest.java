@@ -44,7 +44,6 @@ import reactor.util.Logger;
 import reactor.util.Loggers;
 
 import java.io.IOException;
-import java.lang.reflect.Modifier;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -84,10 +83,13 @@ public class RetryBotTest {
         permitSink.next(0);
 
         final Map<Integer, IdentifyOptions> optionsMap = loadResumeData();
+        // share stores across shards
+        // we are sure we are not blocking EventDispatcher streams
+        // share IDENTIFY limits
         final DiscordClientBuilder builder = new DiscordClientBuilder(token)
-                .setStoreService(new SingleJdkStoreService()) // share stores across shards
-                .setEventScheduler(Schedulers.immediate()) // we are sure we are not blocking EventDispatcher streams
-                .setGatewayLimiter(new SimpleBucket(1, Duration.ofSeconds(6))) // share IDENTIFY limits
+                .setStoreService(new SingleJdkStoreService())
+                .setEventScheduler(Schedulers.immediate())
+                .setGatewayLimiter(new SimpleBucket(1, Duration.ofSeconds(6)))
                 .setGatewayObserver((s, o) -> {
                     optionsMap.put(o.getShardIndex(), o);
                     if (s.equals(GatewayObserver.CONNECTED)) {
@@ -276,8 +278,6 @@ public class RetryBotTest {
 
     private void subscribeEventCounter(DiscordClient client, Map<String, AtomicLong> counts) {
         reflections.getSubTypesOf(Event.class)
-                .stream()
-                .filter(cls -> Modifier.isAbstract(cls.getModifiers()))
                 .forEach(type -> client.getEventDispatcher().on(type)
                         .map(event -> event.getClass().getSimpleName())
                         .map(name -> counts.computeIfAbsent(name, k -> new AtomicLong()).addAndGet(1))
