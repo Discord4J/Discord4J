@@ -175,20 +175,7 @@ public class Requests {
 		 * @return The deserialized response.
 		 */
 		public <T> T makeRequest(String url, Class<T> clazz, BasicNameValuePair... headers) {
-			try {
-				Request.Builder builder = new Request.Builder().url(url).header("User-Agent", USER_AGENT);
-				for (BasicNameValuePair header : headers) {
-					builder.header(header.getName(), header.getValue());
-				}
-				if (HttpMethod.requiresRequestBody(method))
-					builder.method(method, RequestBody.create(MediaType.parse("charset=utf-8"), ""));
-				else
-					builder.method(method, null);
-				String response = request(builder);
-				return response == null ? null : DiscordUtils.MAPPER.readValue(response, clazz);
-			} catch (IOException e) {
-				throw new DiscordException("Unable to serialize request!", e);
-			}
+			return makeRequest(url, null, clazz, headers);
 		}
 
 		/**
@@ -215,12 +202,7 @@ public class Requests {
 		 * @return The response as a string.
 		 */
 		public String makeRequest(String url, String entity, BasicNameValuePair... headers) {
-			Request.Builder builder = new Request.Builder().url(url).header("User-Agent", USER_AGENT);
-			for (BasicNameValuePair header : headers) {
-				builder.header(header.getName(), header.getValue());
-			}
-			builder.method(method, RequestBody.create(MediaType.parse("charset=utf-8"), entity));
-			return request(builder);
+			return request(builder(url, entity, headers));
 		}
 
 		/**
@@ -231,15 +213,22 @@ public class Requests {
 		 * @return The response as a string.
 		 */
 		public String makeRequest(String url, BasicNameValuePair... headers) {
+			return request(builder(url, null, headers));
+		}
+
+		private Request.Builder builder(String url, String entity, BasicNameValuePair... headers) {
 			Request.Builder builder = new Request.Builder().url(url).header("User-Agent", USER_AGENT);
 			for (BasicNameValuePair header : headers) {
 				builder.header(header.getName(), header.getValue());
 			}
-			if (HttpMethod.requiresRequestBody(method))
+			if (entity != null && !entity.isEmpty()) {
+				builder.method(method, RequestBody.create(MediaType.parse("charset=utf-8"), entity));
+			} else if (HttpMethod.requiresRequestBody(method)) {
 				builder.method(method, RequestBody.create(MediaType.parse("charset=utf-8"), ""));
-			else
+			} else {
 				builder.method(method, null);
-			return request(builder);
+			}
+			return builder;
 		}
 
 		private String request(Request.Builder builder) {
