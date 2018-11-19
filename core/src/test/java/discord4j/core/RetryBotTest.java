@@ -17,7 +17,11 @@
 
 package discord4j.core;
 
-import discord4j.core.event.domain.lifecycle.*;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import discord4j.core.event.domain.Event;
+import discord4j.core.event.domain.lifecycle.ReadyEvent;
+import discord4j.core.event.domain.lifecycle.ResumeEvent;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.ApplicationInfo;
 import discord4j.core.object.entity.Message;
@@ -30,12 +34,17 @@ import discord4j.gateway.SimpleBucket;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.reflections.Reflections;
 import reactor.core.Disposable;
 import reactor.core.publisher.*;
+import reactor.core.scheduler.Schedulers;
+import reactor.netty.DisposableServer;
+import reactor.netty.http.server.HttpServer;
 import reactor.util.Logger;
 import reactor.util.Loggers;
 
 import java.io.IOException;
+import java.lang.reflect.Modifier;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -53,19 +62,18 @@ public class RetryBotTest {
     private static final Logger log = Loggers.getLogger(RetryBotTest.class);
 
     private static String token;
-    private static Integer shardId;
     private static Integer shardCount;
+    private static Reflections reflections;
 
     @BeforeClass
     public static void initialize() {
         Hooks.onOperatorDebug();
         token = System.getenv("token");
-        String shardIdValue = System.getenv("shardId");
         String shardCountValue = System.getenv("shardCount");
-        if (shardIdValue != null && shardCountValue != null) {
-            shardId = Integer.valueOf(shardIdValue);
+        if (shardCountValue != null) {
             shardCount = Integer.valueOf(shardCountValue);
         }
+        reflections = new Reflections(Event.class);
     }
 
     @Test
@@ -75,9 +83,11 @@ public class RetryBotTest {
         final FluxSink<Integer> permitSink = permits.sink();
         permitSink.next(0);
 
-        final Map<Integer, IdentifyOptions> optionsMap = initResumeOptions();
+        final Map<Integer, IdentifyOptions> optionsMap = loadResumeData();
         final DiscordClientBuilder builder = new DiscordClientBuilder(token)
-                .setGatewayLimiter(new SimpleBucket(1, Duration.ofSeconds(6)))
+                .setStoreService(new SingleJdkStoreService()) // share stores across shards
+                .setEventScheduler(Schedulers.immediate()) // we are sure we are not blocking EventDispatcher streams
+                .setGatewayLimiter(new SimpleBucket(1, Duration.ofSeconds(6))) // share IDENTIFY limits
                 .setGatewayObserver((s, o) -> {
                     optionsMap.put(o.getShardIndex(), o);
                     if (s.equals(GatewayObserver.CONNECTED)) {
@@ -87,9 +97,19 @@ public class RetryBotTest {
                 })
                 .setShardCount(shardCount);
 
+        // save our shards
+        final Map<Integer, DiscordClient> clients = new ConcurrentHashMap<>();
+        final Map<String, AtomicLong> counts = new ConcurrentHashMap<>();
+        startHttpServer(new ServerContext(clients, counts));
+
         Flux.range(0, shardCount)
                 .flatMap(index -> {
                     DiscordClient client = builder.setIdentifyOptions(optionsMap.get(index)).build();
+                    clients.put(index, client);
+                    if (optionsMap.get(index).getResumeSequence() != null) {
+                        return client.login();
+                    }
+                    subscribeEventCounter(client, counts);
                     return permits.filter(index::equals)
                             .next()
                             .delayElement(Duration.ofSeconds((long) (Math.signum(index) * 5)))
@@ -101,18 +121,38 @@ public class RetryBotTest {
     @Test
     @Ignore("Example code excluded from CI")
     public void test() {
-        final Map<Integer, IdentifyOptions> optionsMap = initResumeOptions();
+        final Map<Integer, IdentifyOptions> optionsMap = loadResumeData();
 
         DiscordClient client = new DiscordClientBuilder(token)
                 .setIdentifyOptions(optionsMap.get(0))
                 .setGatewayObserver((s, o) -> optionsMap.put(o.getShardIndex(), o))
                 .build();
 
-        CommandListener commandListener = new CommandListener(client);
-        commandListener.configure();
+        Map<Integer, DiscordClient> clients = new ConcurrentHashMap<>();
+        Map<String, AtomicLong> counts = new ConcurrentHashMap<>();
 
-        LifecycleListener lifecycleListener = new LifecycleListener(client);
-        lifecycleListener.configure();
+        clients.put(0, client);
+
+        subscribeEventCounter(client, counts);
+
+        startHttpServer(new ServerContext(clients, counts));
+
+        AtomicLong ownerId = new AtomicLong();
+
+        // Get the bot owner ID to filter commands
+        Flux.first(client.getEventDispatcher().on(ReadyEvent.class),
+                client.getEventDispatcher().on(ResumeEvent.class))
+                .next()
+                .flatMap(evt -> client.getApplicationInfo())
+                .map(ApplicationInfo::getOwnerId)
+                .map(Snowflake::asLong)
+                .subscribe(ownerId::set);
+
+        TestCommands testCommands = new TestCommands(client, ownerId);
+        client.getEventDispatcher().on(MessageCreateEvent.class)
+                .flatMap(testCommands::onMessageCreate)
+                .onErrorContinue((t, o) -> log.error("Error", t))
+                .subscribe();
 
         client.login().block();
     }
@@ -133,23 +173,52 @@ public class RetryBotTest {
         Thread.sleep(5000L);
     }
 
-    @Test
-    @Ignore("Example code excluded from CI")
-    public void testNoCommands() {
-        IdentifyOptions options = new IdentifyOptions(shardId, shardCount, null);
+    public static class TestCommands {
 
-        DiscordClient client = new DiscordClientBuilder(token)
-                .setIdentifyOptions(options)
-                .setInitialPresence(Presence.doNotDisturb())
-                .build();
+        private final DiscordClient client;
+        private final AtomicLong ownerId;
 
-        LifecycleListener lifecycleListener = new LifecycleListener(client);
-        lifecycleListener.configure();
+        public TestCommands(DiscordClient client, AtomicLong ownerId) {
+            this.client = client;
+            this.ownerId = ownerId;
+        }
 
-        client.login().block();
+        public Mono<Void> onMessageCreate(MessageCreateEvent event) {
+            Message message = event.getMessage();
+
+            message.getAuthorId()
+                    .filter(id -> ownerId.get() == id.asLong()) // only accept bot owner messages
+                    .flatMap(id -> message.getContent())
+                    .ifPresent(content -> {
+                        if ("!close".equals(content)) {
+                            client.logout();
+                        } else if ("!retry".equals(content)) {
+                            client.reconnect();
+                        } else if ("!online".equals(content)) {
+                            client.updatePresence(Presence.online()).subscribe();
+                        } else if ("!dnd".equals(content)) {
+                            client.updatePresence(Presence.doNotDisturb()).subscribe();
+                        } else if ("!raise".equals(content)) {
+                            // exception if DM
+                            Snowflake guildId = message.getGuild().block().getId();
+                            log.info("Message came from guild: {}", guildId);
+                        } else if (content.startsWith("!echo ")) {
+                            message.getAuthor()
+                                    .flatMap(User::getPrivateChannel)
+                                    .flatMap(ch -> ch.createMessage(content.substring("!echo ".length())))
+                                    .subscribe();
+                        }
+                    });
+            return Mono.empty();
+        }
     }
 
-    private Map<Integer, IdentifyOptions> initResumeOptions() {
+    /**
+     * Allow resuming across JVM restarts by saving the last sequence and session ID for each shard on exit.
+     *
+     * @return a Map of IdentifyOptions across all shards to be used for resuming sessions.
+     */
+    private Map<Integer, IdentifyOptions> loadResumeData() {
         String resumePath = "resume.test";
         Map<Integer, IdentifyOptions> map = new ConcurrentHashMap<>();
         try {
@@ -205,74 +274,59 @@ public class RetryBotTest {
         return map;
     }
 
-    public static class CommandListener {
+    private void subscribeEventCounter(DiscordClient client, Map<String, AtomicLong> counts) {
+        reflections.getSubTypesOf(Event.class)
+                .stream()
+                .filter(cls -> Modifier.isAbstract(cls.getModifiers()))
+                .forEach(type -> client.getEventDispatcher().on(type)
+                        .map(event -> event.getClass().getSimpleName())
+                        .map(name -> counts.computeIfAbsent(name, k -> new AtomicLong()).addAndGet(1))
+                        .subscribe(null, t -> log.error("Error", t)));
+    }
 
-        private final DiscordClient client;
-        private final AtomicLong ownerId = new AtomicLong();
+    static class ServerContext {
 
-        public CommandListener(DiscordClient client) {
-            this.client = client;
+        private final Map<Integer, DiscordClient> clientMap;
+        private final Map<String, AtomicLong> eventCounts;
+
+        ServerContext(Map<Integer, DiscordClient> clientMap, Map<String, AtomicLong> eventCounts) {
+            this.clientMap = clientMap;
+            this.eventCounts = eventCounts;
         }
+    }
 
-        void configure() {
-            Flux.first(client.getEventDispatcher().on(ReadyEvent.class),
-                    client.getEventDispatcher().on(ResumeEvent.class))
-                    .next()
-                    .flatMap(evt -> client.getApplicationInfo())
-                    .map(ApplicationInfo::getOwnerId)
-                    .map(Snowflake::asLong)
-                    .subscribe(ownerId::set);
-
-            client.getEventDispatcher().on(MessageCreateEvent.class)
-                    .flatMap(event -> {
-                        Message message = event.getMessage();
-
-                        message.getAuthorId()
-                                .filter(id -> ownerId.get() == id.asLong()) // only accept bot owner messages
-                                .flatMap(id -> message.getContent())
-                                .ifPresent(content -> {
-                                    if ("!close".equals(content)) {
-                                        client.logout();
-                                    } else if ("!retry".equals(content)) {
-                                        client.reconnect();
-                                    } else if ("!online".equals(content)) {
-                                        client.updatePresence(Presence.online()).subscribe();
-                                    } else if ("!dnd".equals(content)) {
-                                        client.updatePresence(Presence.doNotDisturb()).subscribe();
-                                    } else if ("!raise".equals(content)) {
-                                        // exception if DM
-                                        Snowflake guildId = message.getGuild().block().getId();
-                                        log.info("Message came from guild: {}", guildId);
-                                    } else if (content.startsWith("!echo ")) {
-                                        message.getAuthor()
-                                                .flatMap(User::getPrivateChannel)
-                                                .flatMap(ch -> ch.createMessage(content.substring("!echo ".length())))
-                                                .subscribe();
+    private void startHttpServer(ServerContext context) {
+        ObjectMapper mapper = new ObjectMapper();
+        DisposableServer facade = HttpServer.create()
+                .port(0)
+                .route(routes -> routes
+                        .get("/users",
+                                (req, res) -> res.sendString(Flux.fromIterable(context.clientMap.values())
+                                        .flatMap(DiscordClient::getUsers)
+                                        .map(User::getId)
+                                        .distinct()
+                                        .count()
+                                        .map(Object::toString))
+                        )
+                        .get("/events",
+                                (req, res) -> {
+                                    try {
+                                        String json = mapper.writeValueAsString(context.eventCounts);
+                                        return res.addHeader("content-type", "application/json")
+                                                .chunkedTransfer(false)
+                                                .sendString(Mono.just(json));
+                                    } catch (JsonProcessingException e) {
+                                        return res.status(500).send();
                                     }
-                                });
-                        return Mono.just(event);
-                    })
-                    .onErrorContinue((t, o) -> log.error("Error", t))
-                    .subscribe();
-        }
+                                }
+                        )
+                )
+                .wiretap(true)
+                .bindNow();
+
+        log.info("Server started at {}:{}", facade.host(), facade.port());
+
+        // kill the server on JVM exit
+        Runtime.getRuntime().addShutdownHook(new Thread(facade::disposeNow));
     }
-
-    public static class LifecycleListener {
-
-        private final DiscordClient client;
-
-        public LifecycleListener(DiscordClient client) {
-            this.client = client;
-        }
-
-        void configure() {
-            client.getEventDispatcher().on(ConnectEvent.class).subscribe();
-            client.getEventDispatcher().on(DisconnectEvent.class).subscribe();
-            client.getEventDispatcher().on(ReconnectStartEvent.class).subscribe();
-            client.getEventDispatcher().on(ReconnectEvent.class).subscribe();
-            client.getEventDispatcher().on(ReconnectFailEvent.class).subscribe();
-        }
-
-    }
-
 }
