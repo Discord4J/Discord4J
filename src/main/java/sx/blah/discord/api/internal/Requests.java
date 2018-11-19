@@ -24,6 +24,7 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 import okhttp3.internal.http.HttpMethod;
+import okhttp3.logging.HttpLoggingInterceptor;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.http.message.BasicNameValuePair;
 import sx.blah.discord.Discord4J;
@@ -60,7 +61,7 @@ public class Requests {
 	/**
 	 * The HTTP client requests are made on.
 	 */
-	private final OkHttpClient HTTP = new OkHttpClient();
+	private final OkHttpClient HTTP;
 
 	/**
 	 * Used to send POST requests.
@@ -84,6 +85,12 @@ public class Requests {
 	public final DiscordRequest PUT;
 
 	public Requests(DiscordClientImpl client) {
+		HttpLoggingInterceptor httpLogger = new HttpLoggingInterceptor(message -> Discord4J.LOGGER.debug(LogMarkers.API, message)).setLevel(HttpLoggingInterceptor.Level.HEADERS);
+		httpLogger.redactHeader("Set-Cookie");
+		httpLogger.redactHeader("Cookie");
+		httpLogger.redactHeader("Authorization");
+		HTTP = new OkHttpClient.Builder().addInterceptor(httpLogger).build();
+
 		POST = new DiscordRequest(RequestMethod.POST, client);
 		GET = new DiscordRequest(RequestMethod.GET, client);
 		DELETE = new DiscordRequest(RequestMethod.DELETE, client);
