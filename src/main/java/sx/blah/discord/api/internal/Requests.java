@@ -23,6 +23,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
+import okhttp3.internal.http.HttpMethod;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.http.message.BasicNameValuePair;
 import sx.blah.discord.Discord4J;
@@ -179,7 +180,10 @@ public class Requests {
 				for (BasicNameValuePair header : headers) {
 					builder.header(header.getName(), header.getValue());
 				}
-				builder.method(method.toString(), null);
+				if (HttpMethod.requiresRequestBody(method.toString()))
+					builder.method(method.toString(), RequestBody.create(MediaType.parse("charset=utf-8"), ""));
+				else
+					builder.method(method.toString(), null);
 				String response = request(builder);
 				return response == null ? null : DiscordUtils.MAPPER.readValue(response, clazz);
 			} catch (IOException e) {
@@ -231,7 +235,10 @@ public class Requests {
 			for (BasicNameValuePair header : headers) {
 				builder.header(header.getName(), header.getValue());
 			}
-			builder.method(method.toString(), null);
+			if (HttpMethod.requiresRequestBody(method.toString()))
+				builder.method(method.toString(), RequestBody.create(MediaType.parse("charset=utf-8"), ""));
+			else
+				builder.method(method.toString(), null);
 			return request(builder);
 		}
 
