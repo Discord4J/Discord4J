@@ -233,6 +233,18 @@ public final class DiscordClient {
     }
 
     /**
+     * Retrieve the currently stored (cached) users.
+     *
+     * @return A {@link Flux} that continually emits the {@link User users} that the current client has stored. If an
+     * error is received, it is emitted through the {@code Flux}.
+     */
+    public Flux<User> getUsers() {
+        return serviceMediator.getStateHolder().getUserStore()
+                .values()
+                .map(bean -> new User(serviceMediator, bean));
+    }
+
+    /**
      * Requests to retrieve the voice regions that are available.
      *
      * @return A {@link Flux} that continually emits the {@link Region regions} that are available. If an error is
