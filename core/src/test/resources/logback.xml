@@ -7,6 +7,9 @@
     <logger name="discord4j.rest.http.client.DiscordWebClient" level="DEBUG"/>
     <logger name="discord4j.dispatch" level="INFO"/>
 
+    <logger name="reactor.netty.http.client.HttpClient" level="TRACE"/>
+    <logger name="reactor.netty.udp.UdpClient" level="TRACE"/>
+
     <turboFilter class="discord4j.core.logback.GatewayEventFilter">
         <EventNames>PRESENCE_UPDATE</EventNames>
     </turboFilter>
