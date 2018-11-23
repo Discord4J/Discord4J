@@ -84,6 +84,16 @@ public class VoiceGatewayClient extends FiniteStateMachine<VoiceGatewayClient.St
                         return RECEIVING_EVENTS;
                     });
 
+            when(RECEIVING_EVENTS)
+                    .on(Speaking.class, speaking -> {
+                        // TODO
+                        return RECEIVING_EVENTS;
+                    })
+                    .on(VoiceDisconnect.class, voiceDisconnect -> {
+                        // TODO
+                        return RECEIVING_EVENTS;
+                    });
+
             whenAny().on(HeartbeatAck.class, ack -> {
                 System.out.println("vGW got voice ack");
                 return getCurrentState();
@@ -142,7 +152,6 @@ public class VoiceGatewayClient extends FiniteStateMachine<VoiceGatewayClient.St
                 .then();
 
         return Mono.zip(inboundThen, outboundThen).log("vc-handle-when").then();
-//        return Mono.when(inboundThen, outboundThen).log("vc-handle-when");
     }
 
     public <T> void send(VoiceGatewayPayload<T> payload) {
@@ -181,6 +190,13 @@ public class VoiceGatewayClient extends FiniteStateMachine<VoiceGatewayClient.St
 
                     gatewayFSM.onEvent(new SessionDescription(d.get("mode").asText(), secret_key));
                     break;
+                case Speaking.OP:
+                    gatewayFSM.onEvent(new Speaking(d.get("user_id").asText(), d.get("ssrc").asInt(), d.get("speaking").asBoolean()));
+                    break;
+                case VoiceDisconnect.OP:
+                    gatewayFSM.onEvent(new VoiceDisconnect(d.get("user_id").asText()));
+                    break;
+                case 12: break; // Undocumented, discord sucks
                 default:
                     System.out.println("unhandled: " + json.toString());
                     throw new UnsupportedOperationException();
