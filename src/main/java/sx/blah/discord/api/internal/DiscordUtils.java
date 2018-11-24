@@ -137,7 +137,7 @@ public class DiscordUtils {
 	/**
 	 * Pattern for Discord's valid streaming URL strings passed to {@link IShard#streaming(String, String)}.
 	 */
-	public static final Pattern STREAM_URL_PATTERN = Pattern.compile("https?://(www\\.)?twitch\\.tv/.+");
+	public static final Pattern STREAM_URL_PATTERN = Pattern.compile("https?:\/\/(www\.)?twitch\.tv\/.+");
 
 	/**
 	 * Pattern for Discord's valid channel names.
