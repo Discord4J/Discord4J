@@ -37,26 +37,30 @@ public class SimpleBucket implements GatewayLimiter {
 
     @Override
     public synchronized boolean tryConsume(int numberTokens) {
-        long now = System.currentTimeMillis();
+        long now = System.nanoTime() / 1_000_000;
+
         if (nextRefillAt.get() <= now) {
             count.set(0);
             nextRefillAt.set(now + refillPeriodMillis);
         }
+
         if (count.get() + numberTokens <= capacity) {
             count.addAndGet(numberTokens);
             return true;
+        } else {
+            return false;
         }
-        return false;
     }
 
     @Override
     public synchronized long delayMillisToConsume(long tokens) {
         if (count.get() + tokens <= capacity) {
             return 0;
+        } else {
+            long now = System.nanoTime() / 1_000_000;
+            long refills = (long) Math.ceil((tokens / (double) capacity) - 1);
+            return (nextRefillAt.get() - now) + (refillPeriodMillis * refills);
         }
-        long now = System.currentTimeMillis();
-        long refills = (long) Math.ceil((tokens / (double) capacity) - 1);
-        return (nextRefillAt.get() - now) + (refillPeriodMillis * refills);
     }
 
 }
