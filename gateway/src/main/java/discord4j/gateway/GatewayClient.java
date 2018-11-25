@@ -77,7 +77,9 @@ public class GatewayClient {
 
     private final AtomicBoolean resumable = new AtomicBoolean(true);
     private final AtomicInteger sequence = new AtomicInteger(0);
-    private final AtomicLong lastAck = new AtomicLong(0);
+    private final AtomicLong lastAckSinceEpochMillis = new AtomicLong(0);
+    private final AtomicLong lastHeartbeatNanos = new AtomicLong(0);
+    private final AtomicLong lastHeartbeatLatencyMillis = new AtomicLong(0);
     private final ResettableInterval heartbeat = new ResettableInterval();
     private final AtomicReference<String> sessionId = new AtomicReference<>("");
 
@@ -136,7 +138,8 @@ public class GatewayClient {
                 resumable.set(false);
             }
 
-            lastAck.set(System.currentTimeMillis());
+            lastAckSinceEpochMillis.set(System.currentTimeMillis());
+            lastHeartbeatNanos.set(System.nanoTime());
 
             Mono<Void> readyHandler = dispatch.filter(GatewayClient::isReadyOrResume)
                     .flatMap(event -> {
@@ -177,7 +180,9 @@ public class GatewayClient {
             // Create the heartbeat loop, and subscribe it using the sender sink
             Mono<Void> heartbeatHandler = heartbeat.ticks()
                     .flatMap(t -> {
-                        long delay = System.currentTimeMillis() - lastAck.get();
+                        long delay = (System.nanoTime() - lastHeartbeatNanos.get()) / 1_000_000;
+                        lastHeartbeatLatencyMillis.set(delay);
+
                         // TODO: polish zombie connection detection policy
                         if (delay > heartbeat.getPeriod().toMillis() * 2) {
                             log.warn("Missing heartbeat ACK for {} ms", delay);
@@ -368,6 +373,32 @@ public class GatewayClient {
         return connected.get();
     }
 
+    /**
+     * Gets the atomic reference for the time of the last acknowledged heartbeat.
+     *
+     * @return an AtomicLong representing the last heartbeat ACK timestamp in milliseconds since
+     * Unix epoch (1/1/1970 0:00:00.000 UTC)
+     */
+    public AtomicLong lastAck() {
+        return lastAckSinceEpochMillis;
+    }
+
+    /**
+     * Gets the last heartbeat latency. That is, the time elapsed between a heartbeat being sent to
+     * the gateway, and a successful heartbeat ACK being sent from the gateway in response.
+     * <p>
+     * This only measures client-heartbeat to gateway-ack, not vice-versa.
+     *
+     * @return an AtomicLong representing the last heartbeat latency in milliseconds. This may be
+     *      zero if no heartbeat ACK has yet been received from the gateway. Callers should safely
+     *      be able to make the assumption in general that this value will never be non-negative,
+     *      however, this is in reality is down to the constraints and implementation of the user's
+     *      high precision monotonic clock implementation.
+     */
+    public AtomicLong lastHeartbeatLatency() {
+        return lastAckSinceEpochMillis;
+    }
+
     ///////////////////////////////////////////
     // Fields for PayloadHandler consumption //
     ///////////////////////////////////////////
@@ -389,15 +420,6 @@ public class GatewayClient {
      */
     AtomicInteger sequence() {
         return sequence;
-    }
-
-    /**
-     * Gets the atomic reference for the time of the last acknowledged heartbeat.
-     *
-     * @return an AtomicLong representing the last heartbeat ACK timestamp
-     */
-    AtomicLong lastAck() {
-        return lastAck;
     }
 
     /**
