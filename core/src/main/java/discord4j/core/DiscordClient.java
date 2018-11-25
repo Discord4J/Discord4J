@@ -328,7 +328,7 @@ public final class DiscordClient {
      *
      * @return the time in milliseconds took Discord to respond to the last heartbeat with an ack.
      */
-    public Long getResponseTime() {
+    public long getResponseTime() {
         return serviceMediator.getGatewayClient().getResponseTime();
     }
 

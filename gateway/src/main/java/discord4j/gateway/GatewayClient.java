@@ -79,6 +79,7 @@ public class GatewayClient {
     private final AtomicInteger sequence = new AtomicInteger(0);
     private final AtomicLong lastSent = new AtomicLong(0);
     private final AtomicLong lastAck = new AtomicLong(0);
+    private final AtomicLong responseTime = new AtomicLong(0);
     private final ResettableInterval heartbeat = new ResettableInterval();
     private final AtomicReference<String> sessionId = new AtomicReference<>("");
 
@@ -374,13 +375,22 @@ public class GatewayClient {
      *
      * @return the time in milliseconds took Discord to respond to the last heartbeat with an ack.
      */
-    public Long getResponseTime() {
-        return lastAck.get() - lastSent.get();
+    public long getResponseTime() {
+        return responseTime.get();
     }
 
-    ///////////////////////////////////////////
-    // Fields for PayloadHandler consumption //
-    ///////////////////////////////////////////
+    /////////////////////////////////
+    // Methods for PayloadHandlers //
+    /////////////////////////////////
+
+    void ackHeartbeat() {
+        lastAck.set(System.currentTimeMillis());
+        responseTime.set(lastAck.get() - lastSent.get());
+    }
+
+    ////////////////////////////////
+    // Fields for PayloadHandlers //
+    ////////////////////////////////
 
     /**
      * Obtains the FluxSink to send Dispatch events towards GatewayClient's users.
@@ -399,24 +409,6 @@ public class GatewayClient {
      */
     AtomicInteger sequence() {
         return sequence;
-    }
-
-    /**
-     * Gets the atomic reference for the time of the last sent heartbeat.
-     *
-     * @return an AtomicLong representing the last sent heartbeat timestamp
-     */
-    AtomicLong lastSent() {
-        return lastSent;
-    }
-
-    /**
-     * Gets the atomic reference for the time of the last acknowledged heartbeat.
-     *
-     * @return an AtomicLong representing the last heartbeat ACK timestamp
-     */
-    AtomicLong lastAck() {
-        return lastAck;
     }
 
     /**
