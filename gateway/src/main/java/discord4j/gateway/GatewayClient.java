@@ -77,6 +77,7 @@ public class GatewayClient {
 
     private final AtomicBoolean resumable = new AtomicBoolean(true);
     private final AtomicInteger sequence = new AtomicInteger(0);
+
     private final AtomicLong lastAckSinceEpochMillis = new AtomicLong(0);
     private final AtomicLong lastHeartbeatNanos = new AtomicLong(0);
     private final AtomicLong lastHeartbeatLatencyMillis = new AtomicLong(0);
@@ -181,15 +182,14 @@ public class GatewayClient {
             Mono<Void> heartbeatHandler = heartbeat.ticks()
                     .flatMap(t -> {
                         long delay = (System.nanoTime() - lastHeartbeatNanos.get()) / 1_000_000;
-                        lastHeartbeatLatencyMillis.set(delay);
 
-                        // TODO: polish zombie connection detection policy
-                        if (delay > heartbeat.getPeriod().toMillis() * 2) {
+                        if (delay > heartbeat.getPeriod().toMillis() + getResponseTime()) {
                             log.warn("Missing heartbeat ACK for {} ms", delay);
                             handler.error(new RuntimeException("Reconnecting due to zombie or failed connection"));
                             return Mono.empty();
                         } else {
                             log.debug("Sending heartbeat {} ms after last ACK", delay);
+                            lastHeartbeatLatencyMillis.set(delay);
                             return Mono.just(GatewayPayload.heartbeat(new Heartbeat(sequence.get())));
                         }
                     })
@@ -373,6 +373,15 @@ public class GatewayClient {
         return connected.get();
     }
 
+    /**
+     * Gets the amount of time it last took Discord to respond to a heartbeat with an ack.
+     *
+     * @return the time in milliseconds took Discord to respond to the last heartbeat with an ack.
+     */
+    public long getResponseTime() {
+        return lastHeartbeatLatencyMillis.get();
+    }
+
     ///////////////////////////////////////////
     // Fields for PayloadHandler consumption //
     ///////////////////////////////////////////
@@ -394,6 +403,16 @@ public class GatewayClient {
      */
     AtomicInteger sequence() {
         return sequence;
+    }
+
+    /**
+     * Gets the atomic reference for the time of the last acknowledged heartbeat.
+     *
+     * @return an AtomicLong representing the last heartbeat ACK timestamp in milliseconds since
+     * Unix epoch (1/1/1970 0:00:00.000 UTC)
+     */
+    AtomicLong lastAck() {
+        return lastAckSinceEpochMillis;
     }
 
     /**
@@ -448,16 +467,6 @@ public class GatewayClient {
      */
     RetryOptions retryOptions() {
         return retryOptions;
-    }
-
-    /**
-     * Gets the atomic reference for the time of the last acknowledged heartbeat.
-     *
-     * @return an AtomicLong representing the last heartbeat ACK timestamp in milliseconds since
-     * Unix epoch (1/1/1970 0:00:00.000 UTC)
-     */
-    AtomicLong lastAck() {
-        return lastAckSinceEpochMillis;
     }
 
     /**

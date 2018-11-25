@@ -315,6 +315,24 @@ public final class DiscordClient {
     }
 
     /**
+     * Returns whether this client is currently connected to Discord Gateway.
+     *
+     * @return true if the gateway connection is currently established, false otherwise.
+     */
+    public boolean isConnected() {
+        return serviceMediator.getGatewayClient().isConnected();
+    }
+
+    /**
+     * Gets the amount of time it last took Discord Gateway to respond to a heartbeat with an ack.
+     *
+     * @return the time in milliseconds took Discord to respond to the last heartbeat with an ack.
+     */
+    public Long getResponseTime() {
+        return serviceMediator.getGatewayClient().getResponseTime();
+    }
+
+    /**
      * Requests to create a guild.
      *
      * @param spec A {@link Consumer} that provides a "blank" {@link GuildCreateSpec} to be operated on. If some
