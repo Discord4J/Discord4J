@@ -82,6 +82,8 @@ public final class DiscordClientBuilder {
 
     private Scheduler eventScheduler;
 
+    private Scheduler routerScheduler;
+
     private Presence initialPresence;
 
     @Nullable
@@ -155,6 +157,15 @@ public final class DiscordClientBuilder {
 
     public DiscordClientBuilder setEventScheduler(final Scheduler eventScheduler) {
         this.eventScheduler = Objects.requireNonNull(eventScheduler);
+        return this;
+    }
+
+    public Scheduler getRouterScheduler() {
+        return routerScheduler;
+    }
+
+    public DiscordClientBuilder setRouterScheduler(Scheduler routerScheduler) {
+        this.routerScheduler = Objects.requireNonNull(routerScheduler);
         return this;
     }
 
@@ -262,6 +273,13 @@ public final class DiscordClientBuilder {
         return Schedulers.elastic();
     }
 
+    private Scheduler initRouterScheduler() {
+        if (routerScheduler != null) {
+            return routerScheduler;
+        }
+        return Schedulers.elastic();
+    }
+
     private GatewayObserver initGatewayObserver() {
         if (gatewayObserver != null) {
             return gatewayObserver;
@@ -305,7 +323,7 @@ public final class DiscordClientBuilder {
         final HttpClient httpClient = HttpClient.create().baseUrl(Routes.BASE_URL).compress(true);
         final DiscordWebClient webClient = new DiscordWebClient(httpClient, defaultHeaders,
                 ExchangeStrategies.withJacksonDefaults(mapper));
-        final RestClient restClient = new RestClient(new Router(webClient, Schedulers.elastic()));
+        final RestClient restClient = new RestClient(new Router(webClient, initRouterScheduler()));
 
         // Prepare identify parameters
         final ClientConfig config = new ClientConfig(token, identifyOptions.getShardIndex(),
