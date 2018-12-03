@@ -27,6 +27,7 @@ public class VoiceStateUpdate implements PayloadData {
     @UnsignedJson
     private final long guildId;
     @JsonProperty("channel_id")
+    @UnsignedJson
     @Nullable
     private final Long channelId;
     @JsonProperty("self_mute")
