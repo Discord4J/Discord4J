@@ -16,6 +16,8 @@
  */
 package discord4j.rest.json.response;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import javax.annotation.Nullable;
 
 public class GatewayResponse {
@@ -23,6 +25,9 @@ public class GatewayResponse {
     private String url;
     @Nullable
     private Integer shards;
+    @JsonProperty("session_start_limit")
+    @Nullable
+    private SessionStartLimit sessionStartLimit;
 
     public String getUrl() {
         return url;
@@ -33,11 +38,58 @@ public class GatewayResponse {
         return shards;
     }
 
+    @Nullable
+    public SessionStartLimit getSessionStartLimit() {
+        return sessionStartLimit;
+    }
+
     @Override
     public String toString() {
         return "GatewayResponse{" +
                 "url='" + url + '\'' +
                 ", shards=" + shards +
+                ", sessionStartLimit=" + sessionStartLimit +
                 '}';
+    }
+
+    public static class SessionStartLimit {
+
+        private int total;
+        private int remaining;
+        @JsonProperty("reset_after")
+        private long resetAfter;
+
+        public int getTotal() {
+            return total;
+        }
+
+        public void setTotal(int total) {
+            this.total = total;
+        }
+
+        public int getRemaining() {
+            return remaining;
+        }
+
+        public void setRemaining(int remaining) {
+            this.remaining = remaining;
+        }
+
+        public long getResetAfter() {
+            return resetAfter;
+        }
+
+        public void setResetAfter(long resetAfter) {
+            this.resetAfter = resetAfter;
+        }
+
+        @Override
+        public String toString() {
+            return "SessionStartLimit{" +
+                    "total=" + total +
+                    ", remaining=" + remaining +
+                    ", resetAfter=" + resetAfter +
+                    '}';
+        }
     }
 }
