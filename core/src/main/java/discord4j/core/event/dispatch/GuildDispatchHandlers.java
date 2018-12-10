@@ -65,6 +65,8 @@ class GuildDispatchHandlers {
         ServiceMediator serviceMediator = context.getServiceMediator();
 
         GuildBean guildBean = new GuildBean(context.getDispatch());
+        // Solves https://github.com/Discord4J/Discord4J/issues/429
+        guildBean.setMembers(new long[0]);
 
         Mono<Void> saveGuild = serviceMediator.getStateHolder().getGuildStore().save(guildBean.getId(), guildBean);
         // TODO optimize to separate into three Publisher<Channel> and saveAll to limit store hits
