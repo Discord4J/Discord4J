@@ -236,16 +236,6 @@ public final class TextChannel extends BaseChannel implements Categorizable, Gui
     }
 
     /**
-     * Gets the <i>raw</i> mention. This is the format utilized to directly mention another text channel (assuming the
-     * text channel exists in context of the mention).
-     *
-     * @return The <i>raw</i> mention.
-     */
-    public String getMention() {
-        return "<#" + getId().asString() + ">";
-    }
-
-    /**
      * Requests to edit this text channel.
      *
      * @param spec A {@link Consumer} that provides a "blank" {@link TextChannelEditSpec} to be operated on. If some

@@ -41,6 +41,16 @@ public interface Channel extends Entity {
      */
     Mono<Void> delete();
 
+    /**
+     * Gets the <i>raw</i> mention. This is the format utilized to directly mention another channel. All channels are
+     * mentionable, but only {@link TextChannel text channels} have special in-client highlighting properties.
+     *
+     * @return The <i>raw</i> mention.
+     */
+    default String getMention() {
+        return "<#" + getId().asString() + '>';
+    }
+
     /** Represents the various types of channels. */
     enum Type {
 
