@@ -915,7 +915,7 @@ public final class Guild implements Entity {
         };
 
         ToLongFunction<AuditLogResponse> getLastEntryId = response ->
-                response.getAuditLogEntries()[response.getAuditLogEntries().length].getId();
+                response.getAuditLogEntries()[response.getAuditLogEntries().length - 1].getId();
 
         return PaginationUtil.paginateBefore(makeRequest, getLastEntryId, Long.MAX_VALUE, 100)
                 .flatMap(log -> Flux.fromArray(log.getAuditLogEntries())
