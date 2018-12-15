@@ -42,10 +42,12 @@ public class ExampleBot {
     private static final Logger log = Loggers.getLogger(ExampleBot.class);
 
     private static String token;
+    private static String testRole;
 
     @BeforeClass
     public static void initialize() {
         token = System.getenv("token");
+        testRole = System.getenv("testRole");
     }
 
     @Test
@@ -94,7 +96,8 @@ public class ExampleBot {
                     .map(Mono::just)
                     .orElseGet(Mono::empty)
                     .flatMap(content -> message.getAuthorAsMember())
-                    .flatMap(member -> member.addRole(Snowflake.of("523522942294818836")));
+                    .flatMap(member -> member.addRole(Snowflake.of(testRole)));
+            // if "testRole" is null, the bot will keep processing events despite throwing an error
         }
     }
 
