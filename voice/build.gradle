@@ -1,6 +1,8 @@
 dependencies {
     compile project(':common')
-    compile 'com.github.GrandPanda:simple-fsm:2ce874422b'
+    compile 'com.github.GrandPanda:simple-fsm:c013d79'
+
+    compile 'com.sedmelluq:lavaplayer:1.3.10'
 
     testCompile "junit:junit:$junit_version"
     testCompile "ch.qos.logback:logback-classic:$logback_version"

@@ -18,6 +18,7 @@ package discord4j.voice;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
+import io.netty.buffer.UnpooledDirectByteBuf;
 import reactor.core.Disposable;
 import reactor.core.publisher.EmitterProcessor;
 import reactor.core.publisher.FluxSink;
@@ -41,8 +42,6 @@ public class VoiceSocket {
     private final EmitterProcessor<ByteBuf> inbound = EmitterProcessor.create(false);
     private final EmitterProcessor<ByteBuf> outbound = EmitterProcessor.create(false);
 
-    private byte[] secretKey;
-
     Mono<? extends Connection> setup(String address, int port) {
         System.out.println("setup");
         return UdpClient.create()
@@ -64,7 +63,8 @@ public class VoiceSocket {
             buf.position(0);
             ByteBuf discoveryPacket = Unpooled.wrappedBuffer(buf);
 
-            System.out.println("got here");
+//            ByteBuf discoveryPacket = Unpooled.buffer(DISCOVERY_PACKET_LENGTH).writeInt(ssrc);
+
             outbound.onNext(discoveryPacket);
         });
 
@@ -90,7 +90,7 @@ public class VoiceSocket {
         return ByteBufFlux.fromInbound(inbound);
     }
 
-    void setSecretKey(byte[] secretKey) {
-        this.secretKey = secretKey;
+    public EmitterProcessor<ByteBuf> getOutbound() {
+        return outbound;
     }
 }
