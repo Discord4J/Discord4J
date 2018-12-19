@@ -20,6 +20,11 @@ import com.darichey.simplefsm.FiniteStateMachine;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.iwebpp.crypto.TweetNaclFast;
+import discord4j.voice.VoiceGatewayState.ReceivingEvents;
+import discord4j.voice.VoiceGatewayState.WaitingForHello;
+import discord4j.voice.VoiceGatewayState.WaitingForReady;
+import discord4j.voice.VoiceGatewayState.WaitingForSessionDescription;
 import discord4j.voice.json.*;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -29,6 +34,7 @@ import reactor.core.Disposable;
 import reactor.core.publisher.EmitterProcessor;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Scheduler;
 import reactor.netty.NettyPipeline;
 import reactor.netty.http.client.HttpClient;
 import reactor.netty.http.websocket.WebsocketInbound;
@@ -36,68 +42,101 @@ import reactor.netty.http.websocket.WebsocketOutbound;
 import reactor.util.Logger;
 import reactor.util.Loggers;
 
+import java.nio.ByteBuffer;
 import java.time.Duration;
-import java.util.Arrays;
+import java.util.concurrent.TimeUnit;
 
-import static discord4j.voice.VoiceGatewayClient.State.*;
 import static io.netty.handler.codec.http.HttpHeaderNames.USER_AGENT;
 
-public class VoiceGatewayClient extends FiniteStateMachine<VoiceGatewayClient.State, VoiceGatewayPayload<?>> {
+public class VoiceGatewayClient {
 
     private final Logger log = Loggers.getLogger("discord4j.voice.gateway.client");
-    private final FiniteStateMachine<State, VoiceGatewayPayload<?>> gatewayFSM;
+    private final FiniteStateMachine<VoiceGatewayState, VoiceGatewayPayload<?>> gatewayFSM;
 
     private final EmitterProcessor<VoiceGatewayPayload<?>> sender = EmitterProcessor.create(false);
     private final ObjectMapper mapper;
     private final VoiceSocket voiceSocket;
 
-    public VoiceGatewayClient(long server_id, long user_id, String session_id, String token, ObjectMapper mapper) {
+    public VoiceGatewayClient(long server_id, long user_id, String session_id, String token, ObjectMapper mapper,
+                              Scheduler scheduler, AudioProvider provider) {
         this.mapper = mapper;
         this.voiceSocket = new VoiceSocket();
-        this.gatewayFSM = new FiniteStateMachine<State, VoiceGatewayPayload<?>>() {{
-            startWith(WAITING_FOR_HELLO);
+        this.gatewayFSM = new FiniteStateMachine<VoiceGatewayState, VoiceGatewayPayload<?>>() {{
+            startWith(WaitingForHello.INSTANCE);
 
-            when(WAITING_FOR_HELLO)
-                    .on(Hello.class, hello -> {
-                        startHeartbeat((long) (hello.getData().heartbeat_interval * .75));
-                        send(new Identify(Long.toUnsignedString(server_id), Long.toUnsignedString(user_id), session_id, token));
-                        return WAITING_FOR_READY;
+            when(WaitingForHello.class)
+                    .on(Hello.class, (curState, hello) -> {
+                        startHeartbeat((long) (hello.getData().heartbeat_interval * .75)); // it's wrong
+                        send(new Identify(Long.toUnsignedString(server_id), Long.toUnsignedString(user_id),
+                                session_id, token));
+                        return WaitingForReady.INSTANCE;
                     });
 
-            when(WAITING_FOR_READY)
-                    .on(Ready.class, ready -> {
+            when(WaitingForReady.class)
+                    .on(Ready.class, (curState, ready) -> {
+                        int ssrc = ready.getData().ssrc;
+
                         voiceSocket.setup(ready.getData().ip, ready.getData().port)
-                                .flatMap(ignored -> voiceSocket.performIpDiscovery(ready.getData().ssrc))
+                                .then(voiceSocket.performIpDiscovery(ssrc))
                                 .subscribe(t -> {
-                                    System.out.println("got here");
                                     String address = t.getT1();
                                     int port = t.getT2();
                                     send(new SelectProtocol("udp", address, port, VoiceSocket.ENCRYPTION_MODE));
                                 });
 
-                        return WAITING_FOR_SESSION_DESCRIPTION;
+                        return new WaitingForSessionDescription(ssrc);
                     });
 
-            when(WAITING_FOR_SESSION_DESCRIPTION)
-                    .on(SessionDescription.class, sessionDesc -> {
-                        voiceSocket.setSecretKey(sessionDesc.getData().secret_key);
-                        return RECEIVING_EVENTS;
+            when(WaitingForSessionDescription.class)
+                    .on(SessionDescription.class, (curState, sessionDesc) -> {
+
+                        TweetNaclFast.SecretBox boxer = new TweetNaclFast.SecretBox(sessionDesc.getData().secret_key);
+                        PacketTransformer transformer = new PacketTransformer(curState.getSsrc(), boxer);
+
+                        Disposable sending = scheduler.schedulePeriodically(new Runnable() {
+                            final ByteBuffer buf = ByteBuffer.allocate(4096);
+                            boolean speaking = false;
+
+                            @Override
+                            public void run() {
+                                if (provider.provide(buf)) {
+                                    if (!speaking) {
+//                                        send(new Speaking(Long.toUnsignedString(user_id), curState.getSsrc(), true));
+                                        send(new SentSpeaking(true, 0, curState.getSsrc()));
+                                        speaking = true;
+                                    }
+
+                                    byte[] b = new byte[buf.limit()];
+                                    buf.get(b);
+                                    buf.clear();
+
+                                    ByteBuf packet = Unpooled.wrappedBuffer(transformer.nextSend(b));
+                                    voiceSocket.getOutbound().onNext(packet);
+                                } else {
+                                    if (speaking) {
+//                                        send(new Speaking(Long.toUnsignedString(user_id), curState.getSsrc(), false));
+                                        send(new SentSpeaking(false, 0, curState.getSsrc()));
+                                        speaking = false;
+                                    }
+                                }
+                            }
+                        }, 0, 20, TimeUnit.MILLISECONDS);
+
+                        return new ReceivingEvents(curState.getSsrc(), sessionDesc.getData().secret_key, sending);
                     });
 
-            when(RECEIVING_EVENTS)
-                    .on(Speaking.class, speaking -> {
-                        // TODO
-                        return RECEIVING_EVENTS;
-                    })
-                    .on(VoiceDisconnect.class, voiceDisconnect -> {
-                        // TODO
-                        return RECEIVING_EVENTS;
-                    });
-
-            whenAny().on(HeartbeatAck.class, ack -> {
-                System.out.println("vGW got voice ack");
+            whenAny()
+                    .on(HeartbeatAck.class, (curState, ack) -> {
+                        System.out.println("vGW got voice ack");
+                        return getCurrentState();
+                    }).on(Speaking.class, (curState, speaking) -> {
+                // TODO
                 return getCurrentState();
-            });
+            })
+                    .on(VoiceDisconnect.class, (curState, voiceDisconnect) -> {
+                        // TODO
+                        return getCurrentState();
+                    });
         }};
     }
 
@@ -148,7 +187,7 @@ public class VoiceGatewayClient extends FiniteStateMachine<VoiceGatewayClient.St
                         return null;
                     }
                 })
-                .doOnCancel(() -> System.out.println("This was cancelled")))
+                        .doOnCancel(() -> System.out.println("This was cancelled")))
                 .then();
 
         return Mono.zip(inboundThen, outboundThen).log("vc-handle-when").then();
@@ -160,8 +199,12 @@ public class VoiceGatewayClient extends FiniteStateMachine<VoiceGatewayClient.St
     }
 
     private Disposable heartbeat = null;
+
     private void startHeartbeat(long interval) {
-        heartbeat = Flux.interval(Duration.ofMillis(interval)).subscribe(l -> send(new Heartbeat(l)));
+        heartbeat = Flux.interval(Duration.ofMillis(interval)).subscribe(l -> send(new Heartbeat(l)), t -> {
+            System.out.println("an error here");
+            t.printStackTrace();
+        });
     }
 
     private void stopHeartbeat() {
@@ -169,7 +212,8 @@ public class VoiceGatewayClient extends FiniteStateMachine<VoiceGatewayClient.St
     }
 
     private void receive(JsonNode json) {
-        log.debug(json.toString());
+        //        log.debug(json.toString());
+        System.out.println(json.toString());
         int op = json.get("op").asInt();
         JsonNode d = json.get("d");
 
@@ -204,12 +248,5 @@ public class VoiceGatewayClient extends FiniteStateMachine<VoiceGatewayClient.St
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
-
-    enum State {
-        WAITING_FOR_HELLO,
-        WAITING_FOR_READY,
-        WAITING_FOR_SESSION_DESCRIPTION,
-        RECEIVING_EVENTS,
     }
 }
