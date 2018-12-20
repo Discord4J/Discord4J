@@ -24,8 +24,6 @@ import java.nio.ByteBuffer;
 
 class VoiceSendTask implements Runnable {
 
-    private final ByteBuffer buf = ByteBuffer.allocate(4096);
-
     private final VoiceGatewayClient client;
     private final AudioProvider provider;
     private final PacketTransformer transformer;
@@ -42,21 +40,19 @@ class VoiceSendTask implements Runnable {
 
     @Override
     public void run() {
-        if (provider.provide(buf)) {
+        if (provider.provide()) {
             if (!speaking) {
                 changeSpeaking(true);
             }
 
-            byte[] b = new byte[buf.limit()];
-            buf.get(b);
-            buf.clear();
-
+            byte[] b = new byte[provider.getBuffer().limit()];
+            provider.getBuffer().get(b);
+            provider.getBuffer().clear();
             ByteBuf packet = Unpooled.wrappedBuffer(transformer.nextSend(b));
+
             client.voiceSocket.send(packet);
-        } else {
-            if (speaking) {
-                changeSpeaking(false);
-            }
+        } else if (speaking) {
+            changeSpeaking(false);
         }
     }
 
