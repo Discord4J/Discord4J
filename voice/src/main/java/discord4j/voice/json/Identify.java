@@ -16,12 +16,14 @@
  */
 package discord4j.voice.json;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class Identify extends VoiceGatewayPayload<Identify.Data> {
 
     public static final int OP = 0;
 
-    public Identify(String server_id, String user_id, String session_id, String token) {
-        this(new Data(server_id, user_id, session_id, token));
+    public Identify(String serverId, String userId, String sessionId, String token) {
+        this(new Data(serverId, userId, sessionId, token));
     }
 
     public Identify(Data data) {
@@ -30,26 +32,19 @@ public class Identify extends VoiceGatewayPayload<Identify.Data> {
 
     public static class Data {
 
-        public String server_id;
-        public String user_id;
-        public String session_id;
+        @JsonProperty("server_id")
+        public String serverId;
+        @JsonProperty("user_id")
+        public String userId;
+        @JsonProperty("session_id")
+        public String sessionId;
         public String token;
 
-        public Data(String server_id, String user_id, String session_id, String token) {
-            this.server_id = server_id;
-            this.user_id = user_id;
-            this.session_id = session_id;
+        public Data(String serverId, String userId, String sessionId, String token) {
+            this.serverId = serverId;
+            this.userId = userId;
+            this.sessionId = sessionId;
             this.token = token;
-        }
-
-        @Override
-        public String toString() {
-            return "Data{" +
-                    "server_id='" + server_id + '\'' +
-                    ", user_id='" + user_id + '\'' +
-                    ", session_id='" + session_id + '\'' +
-                    ", token='" + token + '\'' +
-                    '}';
         }
     }
 }

@@ -56,7 +56,7 @@ public class VoiceGatewayClient {
     private final ObjectMapper mapper;
     final VoiceSocket voiceSocket;
 
-    public VoiceGatewayClient(long server_id, long user_id, String session_id, String token, ObjectMapper mapper,
+    public VoiceGatewayClient(long serverId, long userId, String sessionId, String token, ObjectMapper mapper,
                               Scheduler scheduler, AudioProvider provider) {
         this.mapper = mapper;
         this.voiceSocket = new VoiceSocket();
@@ -65,12 +65,12 @@ public class VoiceGatewayClient {
 
             when(WaitingForHello.class)
                     .on(Hello.class, (curState, hello) -> {
-                        long heartbeatInterval = (long) (hello.getData().heartbeat_interval * .75);
+                        long heartbeatInterval = (long) (hello.getData().heartbeatInterval * .75);
                         Disposable heartbeat = Flux.interval(Duration.ofMillis(heartbeatInterval))
                                 .map(Heartbeat::new)
                                 .subscribe(VoiceGatewayClient.this::send);
 
-                        send(new Identify(Long.toUnsignedString(server_id), Long.toUnsignedString(user_id), session_id, token));
+                        send(new Identify(Long.toUnsignedString(serverId), Long.toUnsignedString(userId), sessionId, token));
                         return new WaitingForReady(heartbeat);
                     });
 
@@ -91,13 +91,13 @@ public class VoiceGatewayClient {
 
             when(WaitingForSessionDescription.class)
                     .on(SessionDescription.class, (curState, sessionDesc) -> {
-                        TweetNaclFast.SecretBox boxer = new TweetNaclFast.SecretBox(sessionDesc.getData().secret_key);
+                        TweetNaclFast.SecretBox boxer = new TweetNaclFast.SecretBox(sessionDesc.getData().secretKey);
                         PacketTransformer transformer = new PacketTransformer(curState.getSsrc(), boxer);
 
                         VoiceSendTask sendTask = new VoiceSendTask(VoiceGatewayClient.this, provider, transformer, curState.getSsrc());
                         Disposable sending = scheduler.schedulePeriodically(sendTask, 0, Opus.FRAME_TIME, TimeUnit.MILLISECONDS);
 
-                        return new ReceivingEvents(curState.getHeartbeat(), curState.getSsrc(), sessionDesc.getData().secret_key, sending);
+                        return new ReceivingEvents(curState.getHeartbeat(), curState.getSsrc(), sessionDesc.getData().secretKey, sending);
                     });
 
             whenAny()
@@ -117,7 +117,7 @@ public class VoiceGatewayClient {
 
     public Mono<Void> execute(String gatewayUrl) {
         return HttpClient.create()
-                .wiretap()
+                .wiretap(true)
                 .headers(headers -> headers.add(USER_AGENT, "DiscordBot(https://discord4j.com, 3)"))
                 .websocket(Integer.MAX_VALUE)
                 .uri(gatewayUrl + "?v=3")

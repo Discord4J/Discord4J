@@ -24,18 +24,18 @@ public class SessionDescription extends VoiceGatewayPayload<SessionDescription.D
         super(OP, data);
     }
 
-    public SessionDescription(String mode, byte[] secret_key) {
-        this(new Data(mode, secret_key));
+    public SessionDescription(String mode, byte[] secretKey) {
+        this(new Data(mode, secretKey));
     }
 
     public static class Data {
 
         public String mode;
-        public byte[]  secret_key;
+        public byte[] secretKey;
 
-        public Data(String mode, byte[] secret_key) {
+        public Data(String mode, byte[] secretKey) {
             this.mode = mode;
-            this.secret_key = secret_key;
+            this.secretKey = secretKey;
         }
     }
 }

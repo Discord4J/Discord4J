@@ -20,7 +20,13 @@ import java.nio.ByteBuffer;
 
 public abstract class AudioProvider {
 
+    public static final int DEFAULT_BUFFER_SIZE = 2048;
+
     private final ByteBuffer buffer;
+
+    public AudioProvider() {
+        this(ByteBuffer.allocate(DEFAULT_BUFFER_SIZE));
+    }
 
     public AudioProvider(ByteBuffer buffer) {
         this.buffer = buffer;

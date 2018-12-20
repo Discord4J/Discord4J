@@ -38,12 +38,4 @@ public abstract class VoiceGatewayPayload<T> {
     public T getData() {
         return data;
     }
-
-    @Override
-    public String toString() {
-        return "VoiceGatewayPayload{" +
-                "op=" + op +
-                ", data=" + data +
-                '}';
-    }
 }
