@@ -21,11 +21,14 @@ import reactor.core.Disposable;
 class VoiceGatewayState {
 
     static final class WaitingForHello extends VoiceGatewayState {
+
         static final WaitingForHello INSTANCE = new WaitingForHello();
+
         private WaitingForHello() {}
     }
 
     static final class WaitingForReady extends VoiceGatewayState {
+
         private final Disposable heartbeat;
 
         WaitingForReady(Disposable heartbeat) {
@@ -38,6 +41,7 @@ class VoiceGatewayState {
     }
 
     static final class WaitingForSessionDescription extends VoiceGatewayState {
+
         private final Disposable heartbeat;
         private final int ssrc;
 
@@ -56,6 +60,7 @@ class VoiceGatewayState {
     }
 
     static final class ReceivingEvents extends VoiceGatewayState {
+
         private final Disposable heartbeat;
         private final int ssrc;
         private final byte[] secretKey;

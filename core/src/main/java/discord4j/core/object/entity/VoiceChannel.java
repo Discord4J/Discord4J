@@ -16,12 +16,6 @@
  */
 package discord4j.core.object.entity;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.PropertyAccessor;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
-import discord4j.common.jackson.PossibleModule;
-import discord4j.common.jackson.UnknownPropertyHandler;
 import discord4j.core.ServiceMediator;
 import discord4j.core.event.domain.VoiceServerUpdateEvent;
 import discord4j.core.event.domain.VoiceStateUpdateEvent;
@@ -40,15 +34,12 @@ import discord4j.gateway.json.GatewayPayload;
 import discord4j.gateway.json.VoiceStateUpdate;
 import discord4j.store.api.util.LongLongTuple2;
 import discord4j.voice.AudioProvider;
-import discord4j.voice.VoiceGatewayClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Schedulers;
 
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 /** A Discord voice channel. */
 public final class VoiceChannel extends BaseGuildChannel implements Categorizable, Invitable {
@@ -161,6 +152,10 @@ public final class VoiceChannel extends BaseGuildChannel implements Categorizabl
                 .map(bean -> new VoiceState(getServiceMediator(), bean));
     }
 
+    public Mono<Void> join(AudioProvider provider) {
+        return join(false, false, provider);
+    }
+
     public Mono<Void> join(boolean selfMute, boolean selfDeaf, AudioProvider provider) {
         ServiceMediator serviceMediator = getServiceMediator();
         long guildId = getGuildId().asLong();
@@ -194,9 +189,9 @@ public final class VoiceChannel extends BaseGuildChannel implements Categorizabl
                     String session = t.getT1().getCurrent().getSessionId();
                     String token = t.getT2().getToken();
 
-                    VoiceGatewayClient vgw = serviceMediator.getVoiceClient().newConnection(guildId, selfId, session, token, provider);
-
-                    return vgw.execute(endpoint);
+                    return serviceMediator.getVoiceClient()
+                            .newConnection(guildId, selfId, session, token, provider)
+                            .execute(endpoint);
                 });
     }
 
