@@ -72,4 +72,9 @@ public final class BucketKey {
 
         return uriTemplate.equals(bucket.uriTemplate) && Objects.equals(majorParam, bucket.majorParam);
     }
+
+    @Override
+    public String toString() {
+        return Integer.toHexString(hashCode());
+    }
 }

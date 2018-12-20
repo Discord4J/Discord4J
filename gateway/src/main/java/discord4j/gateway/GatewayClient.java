@@ -38,7 +38,6 @@ import reactor.retry.Retry;
 import reactor.util.Logger;
 import reactor.util.Loggers;
 
-import javax.annotation.Nullable;
 import java.time.Duration;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -74,16 +73,22 @@ public class GatewayClient {
     private final EmitterProcessor<Dispatch> dispatch = EmitterProcessor.create(false);
     private final EmitterProcessor<GatewayPayload<?>> receiver = EmitterProcessor.create(false);
     private final EmitterProcessor<GatewayPayload<?>> sender = EmitterProcessor.create(false);
+    private final EmitterProcessor<GatewayPayload<Heartbeat>> heartbeats = EmitterProcessor.create(false);
 
     private final AtomicBoolean resumable = new AtomicBoolean(true);
     private final AtomicInteger sequence = new AtomicInteger(0);
+    private final AtomicLong lastSent = new AtomicLong(0);
     private final AtomicLong lastAck = new AtomicLong(0);
+    private final AtomicLong responseTime = new AtomicLong(0);
     private final ResettableInterval heartbeat = new ResettableInterval();
     private final AtomicReference<String> sessionId = new AtomicReference<>("");
+
+    private final AtomicBoolean connected = new AtomicBoolean(false);
 
     private final FluxSink<Dispatch> dispatchSink;
     private final FluxSink<GatewayPayload<?>> receiverSink;
     private final FluxSink<GatewayPayload<?>> senderSink;
+    private final FluxSink<GatewayPayload<Heartbeat>> heartbeatSink;
 
     /**
      * Initializes a new GatewayClient.
@@ -99,7 +104,7 @@ public class GatewayClient {
      */
     public GatewayClient(PayloadReader payloadReader, PayloadWriter payloadWriter,
             RetryOptions retryOptions, String token, IdentifyOptions identifyOptions,
-            @Nullable GatewayObserver observer, GatewayLimiter limiter) {
+            GatewayObserver observer, GatewayLimiter limiter) {
         this.log = Loggers.getLogger("discord4j.gateway.client." + identifyOptions.getShardIndex());
         this.payloadReader = Objects.requireNonNull(payloadReader);
         this.payloadWriter = Objects.requireNonNull(payloadWriter);
@@ -111,6 +116,7 @@ public class GatewayClient {
         this.dispatchSink = dispatch.sink(FluxSink.OverflowStrategy.LATEST);
         this.receiverSink = receiver.sink(FluxSink.OverflowStrategy.LATEST);
         this.senderSink = sender.sink(FluxSink.OverflowStrategy.LATEST);
+        this.heartbeatSink = heartbeats.sink(FluxSink.OverflowStrategy.LATEST);
     }
 
     /**
@@ -123,7 +129,7 @@ public class GatewayClient {
         return Mono.defer(() -> {
             final int shard = identifyOptions.getShardIndex();
             final DiscordWebSocketHandler handler = new DiscordWebSocketHandler(payloadReader, payloadWriter,
-                    receiverSink, sender, shard, limiter);
+                    receiverSink, sender, heartbeats, shard, limiter);
 
             if (identifyOptions.getResumeSequence() != null) {
                 this.sequence.set(identifyOptions.getResumeSequence());
@@ -136,6 +142,7 @@ public class GatewayClient {
 
             Mono<Void> readyHandler = dispatch.filter(GatewayClient::isReadyOrResume)
                     .flatMap(event -> {
+                        connected.compareAndSet(false, true);
                         RetryContext retryContext = retryOptions.getRetryContext();
                         ConnectionObserver.State state;
                         if (retryContext.getResetCount() == 0) {
@@ -173,17 +180,17 @@ public class GatewayClient {
             Mono<Void> heartbeatHandler = heartbeat.ticks()
                     .flatMap(t -> {
                         long delay = System.currentTimeMillis() - lastAck.get();
-                        // TODO: polish zombie connection detection policy
-                        if (delay > heartbeat.getPeriod().toMillis() * 2) {
+                        if (delay > heartbeat.getPeriod().toMillis() + getResponseTime()) {
                             log.warn("Missing heartbeat ACK for {} ms", delay);
                             handler.error(new RuntimeException("Reconnecting due to zombie or failed connection"));
                             return Mono.empty();
                         } else {
                             log.debug("Sending heartbeat {} ms after last ACK", delay);
+                            lastSent.set(System.currentTimeMillis());
                             return Mono.just(GatewayPayload.heartbeat(new Heartbeat(sequence.get())));
                         }
                     })
-                    .doOnNext(senderSink::next)
+                    .doOnNext(heartbeatSink::next)
                     .then();
 
             Mono<Void> httpFuture = HttpClient.create()
@@ -233,18 +240,22 @@ public class GatewayClient {
                 .jitter(retryOptions.getJitter())
                 .retryMax(retryOptions.getMaxRetries())
                 .doOnRetry(context -> {
+                    connected.compareAndSet(true, false);
                     int attempt = context.applicationContext().getAttempts();
                     long backoff = context.backoff().toMillis();
                     log.info("Retry attempt {} in {} ms", attempt, backoff);
                     if (attempt == 1) {
                         dispatchSink.next(GatewayStateChange.retryStarted(Duration.ofMillis(backoff)));
-                        notifyObserver(GatewayObserver.RETRY_STARTED, identifyOptions);
-                        if (!isResumableError(context.exception())) {
-                            resumable.set(false);
+                        if (!resumable.get() || !isResumableError(context.exception())) {
+                            resumable.compareAndSet(true, false);
+                            notifyObserver(GatewayObserver.RETRY_STARTED, identifyOptions);
+                        } else {
+                            notifyObserver(GatewayObserver.RETRY_RESUME_STARTED, identifyOptions);
                         }
                     } else {
                         dispatchSink.next(GatewayStateChange.retryFailed(attempt - 1,
                                 Duration.ofMillis(backoff)));
+                        // TODO: add attempt/backoff values to GatewayObserver
                         notifyObserver(GatewayObserver.RETRY_FAILED, identifyOptions);
                         resumable.set(false);
                     }
@@ -263,6 +274,7 @@ public class GatewayClient {
     private Runnable logDisconnected() {
         return () -> {
             log.info("Disconnected from Gateway");
+            connected.compareAndSet(true, false);
             dispatchSink.next(GatewayStateChange.disconnected());
             notifyObserver(GatewayObserver.DISCONNECTED, identifyOptions);
         };
@@ -271,16 +283,12 @@ public class GatewayClient {
     private ConnectionObserver observer() {
         return (connection, newState) -> {
             log.debug("{} {}", newState, connection);
-            if (observer != null) {
-                observer.onStateChange(newState, identifyOptions);
-            }
+            observer.onStateChange(newState, identifyOptions);
         };
     }
 
     private void notifyObserver(ConnectionObserver.State state, IdentifyOptions options) {
-        if (observer != null) {
-            observer.onStateChange(state, options);
-        }
+        observer.onStateChange(state, options);
     }
 
     /**
@@ -352,9 +360,37 @@ public class GatewayClient {
         return sequence.get();
     }
 
-    ///////////////////////////////////////////
-    // Fields for PayloadHandler consumption //
-    ///////////////////////////////////////////
+    /**
+     * Returns whether this GatewayClient is currently connected to Discord Gateway therefore capable to send and
+     * receive payloads.
+     *
+     * @return true if the gateway connection is currently established, false otherwise.
+     */
+    public boolean isConnected() {
+        return connected.get();
+    }
+
+    /**
+     * Gets the amount of time it last took Discord to respond to a heartbeat with an ack.
+     *
+     * @return the time in milliseconds took Discord to respond to the last heartbeat with an ack.
+     */
+    public long getResponseTime() {
+        return responseTime.get();
+    }
+
+    /////////////////////////////////
+    // Methods for PayloadHandlers //
+    /////////////////////////////////
+
+    void ackHeartbeat() {
+        lastAck.set(System.currentTimeMillis());
+        responseTime.set(lastAck.get() - lastSent.get());
+    }
+
+    ////////////////////////////////
+    // Fields for PayloadHandlers //
+    ////////////////////////////////
 
     /**
      * Obtains the FluxSink to send Dispatch events towards GatewayClient's users.
@@ -373,15 +409,6 @@ public class GatewayClient {
      */
     AtomicInteger sequence() {
         return sequence;
-    }
-
-    /**
-     * Gets the atomic reference for the time of the last acknowledged heartbeat.
-     *
-     * @return an AtomicLong representing the last heartbeat ACK timestamp
-     */
-    AtomicLong lastAck() {
-        return lastAck;
     }
 
     /**

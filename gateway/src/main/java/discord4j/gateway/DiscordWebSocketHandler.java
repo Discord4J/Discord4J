@@ -17,6 +17,7 @@
 package discord4j.gateway;
 
 import discord4j.gateway.json.GatewayPayload;
+import discord4j.gateway.json.Heartbeat;
 import discord4j.gateway.json.Opcode;
 import discord4j.gateway.json.PayloadData;
 import discord4j.gateway.payload.PayloadReader;
@@ -71,6 +72,7 @@ public class DiscordWebSocketHandler {
     private final PayloadWriter writer;
     private final FluxSink<GatewayPayload<?>> inbound;
     private final Flux<GatewayPayload<?>> outbound;
+    private final Flux<GatewayPayload<Heartbeat>> heartbeat;
     private final GatewayLimiter identifyLimiter;
     private final GatewayLimiter outboundLimiter;
 
@@ -85,12 +87,13 @@ public class DiscordWebSocketHandler {
      * @param writer the PayloadWriter to process each outbound payload
      * @param inbound the FluxSink of GatewayPayloads to process inbound payloads
      * @param outbound the Flux of GatewayPayloads to process outbound payloads
+     * @param heartbeat the Flux of heartbeat payloads
      * @param shardIndex the shard index of this connection, for tracing
      * @param limiter a GatewayLimiter to throttle IDENTIFY requests
      */
     public DiscordWebSocketHandler(PayloadReader reader, PayloadWriter writer,
             FluxSink<GatewayPayload<?>> inbound, Flux<GatewayPayload<?>> outbound,
-            int shardIndex, GatewayLimiter limiter) {
+            Flux<GatewayPayload<Heartbeat>> heartbeat, int shardIndex, GatewayLimiter limiter) {
         this.mainLog = Loggers.getLogger("discord4j.gateway." + shardIndex);
         this.inLog = Loggers.getLogger("discord4j.gateway.inbound." + shardIndex);
         this.outLog = Loggers.getLogger("discord4j.gateway.outbound." + shardIndex);
@@ -98,6 +101,7 @@ public class DiscordWebSocketHandler {
         this.writer = writer;
         this.inbound = inbound;
         this.outbound = outbound;
+        this.heartbeat = heartbeat;
         this.identifyLimiter = limiter;
         this.outboundLimiter = new SimpleBucket(115, Duration.ofSeconds(60));
     }
@@ -107,7 +111,7 @@ public class DiscordWebSocketHandler {
         in.withConnection(connection -> connection.addHandlerLast(HANDLER, new CloseHandlerAdapter(reason, mainLog)));
 
         Mono<Void> outboundEvents = out.options(NettyPipeline.SendOptions::flushOnEach)
-                .sendObject(outbound.concatMap(this::limitRate, 1)
+                .sendObject(Flux.merge(heartbeat, outbound.concatMap(this::limitRate, 1))
                         .log(outLog, Level.FINE, false)
                         .flatMap(this::toOutboundFrame))
                 .then()
@@ -141,19 +145,15 @@ public class DiscordWebSocketHandler {
     }
 
     private Publisher<? extends GatewayPayload<? extends PayloadData>> limitRate(GatewayPayload<?> payload) {
-        Opcode<?> op = payload.getOp();
-        if (Opcode.HEARTBEAT.equals(op) || Opcode.RESUME.equals(op)) {
-            return Mono.just(payload);
-        }
-        GatewayLimiter limiter = Opcode.IDENTIFY.equals(op) ? identifyLimiter : outboundLimiter;
-        return Mono.defer(() -> Mono.delay(Duration.ofMillis(limiter.delayMillisToConsume(1)), Schedulers.single())
+        GatewayLimiter limiter = Opcode.IDENTIFY.equals(payload.getOp()) ? identifyLimiter : outboundLimiter;
+        return Mono.delay(Duration.ofMillis(limiter.delayMillisToConsume(1)), Schedulers.single())
                 .map(tick -> limiter.tryConsume(1))
                 .flatMap(consumed -> {
                     if (!consumed) {
                         return Mono.error(new RuntimeException());
                     }
                     return Mono.just(payload);
-                }))
+                })
                 .retry();
     }
 

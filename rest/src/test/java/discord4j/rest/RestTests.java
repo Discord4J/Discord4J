@@ -27,6 +27,7 @@ import discord4j.rest.http.ExchangeStrategies;
 import discord4j.rest.http.client.DiscordWebClient;
 import discord4j.rest.request.Router;
 import discord4j.rest.route.Routes;
+import discord4j.rest.service.ChannelService;
 import io.netty.handler.codec.http.DefaultHttpHeaders;
 import io.netty.handler.codec.http.HttpHeaders;
 import reactor.core.scheduler.Schedulers;
@@ -39,7 +40,7 @@ public abstract class RestTests {
         defaultHeaders.add("content-type", "application/json");
         defaultHeaders.add("authorization", "Bot " + token);
         defaultHeaders.add("user-agent", "DiscordBot(http://discord4j.com, test-suite)");
-        HttpClient httpClient = HttpClient.create().baseUrl(Routes.BASE_URL).compress(true).wiretap();
+        HttpClient httpClient = HttpClient.create().baseUrl(Routes.BASE_URL).compress(true);
         DiscordWebClient webClient = new DiscordWebClient(httpClient, defaultHeaders,
                 ExchangeStrategies.withJacksonDefaults(mapper));
         return new Router(webClient, Schedulers.elastic());
@@ -50,5 +51,13 @@ public abstract class RestTests {
                 .setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
                 .addHandler(new UnknownPropertyHandler(ignoreUnknown))
                 .registerModules(new PossibleModule(), new Jdk8Module());
+    }
+
+    public static ChannelService getChannelService() {
+        String token = System.getenv("token");
+        boolean ignoreUnknown = !Boolean.parseBoolean(System.getenv("failUnknown"));
+        ObjectMapper mapper = getMapper(ignoreUnknown);
+        Router router = getRouter(token, mapper);
+        return new ChannelService(router);
     }
 }

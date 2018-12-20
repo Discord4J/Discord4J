@@ -25,6 +25,12 @@ import reactor.netty.ConnectionObserver;
 @FunctionalInterface
 public interface GatewayObserver {
 
+    GatewayObserver NOOP_LISTENER = (newState, identifyOptions) -> {};
+
+    static GatewayObserver emptyListener() {
+        return NOOP_LISTENER;
+    }
+
     /**
      * React on websocket state change
      *
@@ -32,6 +38,16 @@ public interface GatewayObserver {
      * @param identifyOptions the current shard session and sequence
      */
     void onStateChange(ConnectionObserver.State newState, IdentifyOptions identifyOptions);
+
+    /**
+     * Chain together another {@link GatewayObserver}
+     *
+     * @param other the next {@link GatewayObserver}
+     * @return a new composite {@link GatewayObserver}
+     */
+    default GatewayObserver then(GatewayObserver other) {
+        return CompositeGatewayObserver.compose(this, other);
+    }
 
     ConnectionObserver.State CONNECTED = new ConnectionObserver.State() {
         @Override
@@ -44,6 +60,13 @@ public interface GatewayObserver {
         @Override
         public String toString() {
             return "[gateway_disconnected]";
+        }
+    };
+
+    ConnectionObserver.State RETRY_RESUME_STARTED = new ConnectionObserver.State() {
+        @Override
+        public String toString() {
+            return "[retry_resume_started]";
         }
     };
 

@@ -8,11 +8,10 @@ The main features of this module include the high-level `DiscordClient` and repr
 ```groovy
 repositories {
   maven { url 'https://jitpack.io' }
-  maven { url 'https://repo.spring.io/milestone' }
 }
 
 dependencies {
-  implementation 'com.discord4j.discord4j:discord4j-core:@VERSION@'
+  implementation 'com.discord4j.discord4j:discord4j-core:v3-SNAPSHOT'
 }
 ```
 ### Maven
@@ -22,17 +21,13 @@ dependencies {
     <id>jitpack.io</id>
     <url>https://jitpack.io</url>
   </repository>
-  <repository> 
-    <id>repository.spring.milestone</id> 
-    <url>http://repo.spring.io/milestone</url> 
-  </repository>
 </repositories>
 
 <dependencies>
   <dependency>
     <groupId>com.discord4j.discord4j</groupId>
     <artifactId>discord4j-core</artifactId>
-    <version>@VERSION@</version>
+    <version>v3-SNAPSHOT</version>
   </dependency>
 </dependencies>
 ```
@@ -53,4 +48,3 @@ client.getEventDispatcher().on(MessageCreateEvent.class)
 
 client.login().block();
 ```
-

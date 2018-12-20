@@ -65,6 +65,8 @@ class GuildDispatchHandlers {
         ServiceMediator serviceMediator = context.getServiceMediator();
 
         GuildBean guildBean = new GuildBean(context.getDispatch());
+        // Solves https://github.com/Discord4J/Discord4J/issues/429
+        guildBean.setMembers(new long[0]);
 
         Mono<Void> saveGuild = serviceMediator.getStateHolder().getGuildStore().save(guildBean.getId(), guildBean);
         // TODO optimize to separate into three Publisher<Channel> and saveAll to limit store hits
@@ -140,9 +142,9 @@ class GuildDispatchHandlers {
         return stateHolder.getGuildStore()
                 .find(context.getDispatch().getGuild().getId())
                 .flatMap(guild -> {
-                    Flux<Long> channels = Flux.fromStream(LongStream.of(guild.getChannels()).boxed());
-                    Flux<Long> roles = Flux.fromStream(LongStream.of(guild.getRoles()).boxed());
-                    Flux<Long> emojis = Flux.fromStream(LongStream.of(guild.getEmojis()).boxed());
+                    Flux<Long> channels = Flux.fromStream(() -> LongStream.of(guild.getChannels()).boxed());
+                    Flux<Long> roles = Flux.fromStream(() -> LongStream.of(guild.getRoles()).boxed());
+                    Flux<Long> emojis = Flux.fromStream(() -> LongStream.of(guild.getEmojis()).boxed());
 
                     Mono<Void> deleteTextChannels = stateHolder.getTextChannelStore().delete(channels);
                     Mono<Void> deleteVoiceChannels = stateHolder.getVoiceChannelStore().delete(channels);
@@ -267,7 +269,7 @@ class GuildDispatchHandlers {
                 .map(response -> Tuples.of(response, new MemberBean(response)))
                 .map(tuple -> Tuples.of(LongLongTuple2.of(guildId, tuple.getT1().getUser().getId()), tuple.getT2()));
 
-        Flux<Tuple2<Long, UserBean>> userPairs = Flux.fromStream(Arrays.stream(context.getDispatch().getMembers()))
+        Flux<Tuple2<Long, UserBean>> userPairs = Flux.fromStream(() -> Arrays.stream(context.getDispatch().getMembers()))
                 .map(response -> new UserBean(response.getUser()))
                 .map(bean -> Tuples.of(bean.getId(), bean));
 

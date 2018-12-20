@@ -21,6 +21,7 @@ import discord4j.store.api.Store;
 import discord4j.store.api.primitive.LongObjStore;
 import discord4j.store.api.service.StoreService;
 import discord4j.store.api.util.LongLongTuple2;
+import discord4j.store.api.util.StoreContext;
 import reactor.core.publisher.Mono;
 import reactor.util.Logger;
 import reactor.util.Loggers;
@@ -45,7 +46,9 @@ public final class StateHolder {
     private final Store<LongLongTuple2, VoiceStateBean> voiceStateStore;
     private final AtomicLong selfId;
 
-    StateHolder(final StoreService service) {
+    StateHolder(final StoreService service, final StoreContext context) {
+        service.init(context).block();
+
         categoryStore = service.provideLongObjStore(CategoryBean.class);
         log.debug("Using a {} backend for category storage.", categoryStore);
 
@@ -75,7 +78,7 @@ public final class StateHolder {
 
         voiceChannelStore = service.provideLongObjStore(VoiceChannelBean.class);
         log.debug("Using a {} backend for voice channel storage.", voiceChannelStore);
-        
+
         voiceStateStore = service.provideGenericStore(LongLongTuple2.class, VoiceStateBean.class);
         log.debug("Using a {} backend for voice state storage.", voiceStateStore);
         selfId = new AtomicLong();

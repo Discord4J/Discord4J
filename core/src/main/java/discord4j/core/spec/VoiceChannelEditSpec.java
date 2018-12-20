@@ -38,7 +38,7 @@ public class VoiceChannelEditSpec implements Spec<ChannelModifyRequest> {
         return this;
     }
 
-    public VoiceChannelEditSpec setPermissionOverwrites(Set<PermissionOverwrite> permissionOverwrites) {
+    public VoiceChannelEditSpec setPermissionOverwrites(Set<? extends PermissionOverwrite> permissionOverwrites) {
         OverwriteEntity[] raw = permissionOverwrites.stream()
                 .map(o -> new OverwriteEntity(o.getTargetId().asLong(), o.getType().getValue(), o.getAllowed().getRawValue(), o.getDenied().getRawValue()))
                 .toArray(OverwriteEntity[]::new);

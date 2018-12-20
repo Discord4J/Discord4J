@@ -134,4 +134,15 @@ public class DiscordRequest<T> {
     public Mono<T> exchange(Router router) {
         return router.exchange(this);
     }
+
+    @Override
+    public String toString() {
+        return "DiscordRequest{" +
+                "route=" + route +
+                ", completeUri='" + completeUri + '\'' +
+                ", body=" + body +
+                ", queryParams=" + queryParams +
+                ", headers=" + headers +
+                '}';
+    }
 }

@@ -104,4 +104,13 @@ public class Route<T> {
         return other.method.equals(method) && other.responseType.equals(responseType)
                 && other.uriTemplate.equals(uriTemplate);
     }
+
+    @Override
+    public String toString() {
+        return "Route{" +
+                "method=" + method +
+                ", uriTemplate='" + uriTemplate + '\'' +
+                ", responseType=" + responseType +
+                '}';
+    }
 }

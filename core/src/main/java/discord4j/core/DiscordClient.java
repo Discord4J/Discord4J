@@ -34,7 +34,6 @@ import discord4j.gateway.json.GatewayPayload;
 import discord4j.rest.json.response.UserGuildResponse;
 import discord4j.rest.util.RouteUtils;
 import discord4j.store.api.util.LongLongTuple2;
-import discord4j.store.api.util.StoreContext;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -234,6 +233,18 @@ public final class DiscordClient {
     }
 
     /**
+     * Retrieve the currently stored (cached) users.
+     *
+     * @return A {@link Flux} that continually emits the {@link User users} that the current client has stored. If an
+     * error is received, it is emitted through the {@code Flux}.
+     */
+    public Flux<User> getUsers() {
+        return serviceMediator.getStateHolder().getUserStore()
+                .values()
+                .map(bean -> new User(serviceMediator, bean));
+    }
+
+    /**
      * Requests to retrieve the voice regions that are available.
      *
      * @return A {@link Flux} that continually emits the {@link Region regions} that are available. If an error is
@@ -286,10 +297,7 @@ public final class DiscordClient {
         parameters.put("encoding", "json");
         parameters.put("v", 6);
 
-        return serviceMediator.getStoreService()
-                .init(new StoreContext(serviceMediator.getClientConfig().getShardIndex(), MessageBean.class))
-                //Stores should be initialized before the gateway sends events
-                .then(serviceMediator.getRestClient().getGatewayService().getGateway())
+        return serviceMediator.getRestClient().getGatewayService().getGateway()
                 .flatMap(response -> serviceMediator.getGatewayClient()
                         .execute(RouteUtils.expandQuery(response.getUrl(), parameters)))
                 .then(serviceMediator.getStateHolder().invalidateStores())
@@ -304,6 +312,24 @@ public final class DiscordClient {
     /** Reconnects the client to the gateway. */
     public void reconnect() {
         serviceMediator.getGatewayClient().close(true);
+    }
+
+    /**
+     * Returns whether this client is currently connected to Discord Gateway.
+     *
+     * @return true if the gateway connection is currently established, false otherwise.
+     */
+    public boolean isConnected() {
+        return serviceMediator.getGatewayClient().isConnected();
+    }
+
+    /**
+     * Gets the amount of time it last took Discord Gateway to respond to a heartbeat with an ack.
+     *
+     * @return the time in milliseconds took Discord to respond to the last heartbeat with an ack.
+     */
+    public long getResponseTime() {
+        return serviceMediator.getGatewayClient().getResponseTime();
     }
 
     /**

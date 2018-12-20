@@ -17,39 +17,124 @@
 
 package discord4j.core;
 
+import discord4j.core.event.domain.lifecycle.ReadyEvent;
+import discord4j.core.event.domain.lifecycle.ResumeEvent;
 import discord4j.core.event.domain.message.MessageCreateEvent;
+import discord4j.core.object.entity.ApplicationInfo;
+import discord4j.core.object.entity.Message;
+import discord4j.core.object.entity.MessageChannel;
+import discord4j.core.object.util.Snowflake;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import reactor.util.Logger;
 import reactor.util.Loggers;
 
-import java.util.function.Consumer;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
 
 public class ExampleBot {
 
     private static final Logger log = Loggers.getLogger(ExampleBot.class);
 
     private static String token;
+    private static String testRole;
 
     @BeforeClass
     public static void initialize() {
         token = System.getenv("token");
+        testRole = System.getenv("testRole");
     }
 
     @Test
     @Ignore("Example code excluded from CI")
-    public void testLogBot() {
+    public void testCommandBot() {
         DiscordClient client = new DiscordClientBuilder(token).build();
-        client.getEventDispatcher().on(MessageCreateEvent.class).subscribe(new MessageCreateListener());
+
+        // Get the bot owner ID to filter commands
+        AtomicLong ownerId = new AtomicLong();
+        Flux.first(client.getEventDispatcher().on(ReadyEvent.class),
+                client.getEventDispatcher().on(ResumeEvent.class))
+                .next()
+                .flatMap(evt -> client.getApplicationInfo())
+                .map(ApplicationInfo::getOwnerId)
+                .map(Snowflake::asLong)
+                .subscribe(ownerId::set);
+
+        // Create our event handlers
+        List<EventHandler> eventHandlers = new ArrayList<>();
+        eventHandlers.add(new AddRole());
+        eventHandlers.add(new Echo());
+        eventHandlers.add(new BlockingEcho());
+
+        // Build a safe event-processing pipeline
+        client.getEventDispatcher().on(MessageCreateEvent.class)
+                .filter(event -> event.getMessage().getAuthorId()
+                        .map(Snowflake::asLong)
+                        .filter(id -> ownerId.get() == id)
+                        .isPresent())
+                .flatMap(event -> Mono.whenDelayError(eventHandlers.stream()
+                        .map(handler -> handler.onMessageCreate(event))
+                        .collect(Collectors.toList())))
+                .onErrorContinue((t, o) -> log.error("Error while processing event", t))
+                .subscribe();
+
         client.login().block();
     }
 
-    private static class MessageCreateListener implements Consumer<MessageCreateEvent> {
+    public static class AddRole extends EventHandler {
 
         @Override
-        public void accept(MessageCreateEvent event) {
-            log.info(event.getMessage().getContent().orElse(""));
+        public Mono<Void> onMessageCreate(MessageCreateEvent event) {
+            Message message = event.getMessage();
+            return message.getContent()
+                    .filter(content -> content.startsWith("!addrole"))
+                    .map(Mono::just)
+                    .orElseGet(Mono::empty)
+                    .flatMap(content -> message.getAuthorAsMember())
+                    .flatMap(member -> member.addRole(Snowflake.of(testRole)));
+            // if "testRole" is null, the bot will keep processing events despite throwing an error
         }
+    }
+
+    public static class Echo extends EventHandler {
+
+        @Override
+        public Mono<Void> onMessageCreate(MessageCreateEvent event) {
+            Message message = event.getMessage();
+            return message.getContent()
+                    .filter(content -> content.startsWith("!echo "))
+                    .map(Mono::just)
+                    .orElseGet(Mono::empty)
+                    .map(content -> content.substring("!echo ".length()))
+                    .flatMap(source -> message.getChannel()
+                            .flatMap(channel -> channel.createMessage(source)))
+                    .then();
+        }
+    }
+
+    public static class BlockingEcho extends EventHandler {
+
+        @Override
+        public Mono<Void> onMessageCreate(MessageCreateEvent event) {
+            Message message = event.getMessage();
+            message.getContent()
+                    .filter(content -> content.startsWith("!echos "))
+                    .ifPresent(content -> {
+                        String source = content.substring("!echos ".length());
+                        MessageChannel channel = message.getChannel().block();
+                        channel.createMessage(source).block();
+                    });
+            return Mono.empty();
+        }
+    }
+
+    public static abstract class EventHandler {
+
+        public abstract Mono<Void> onMessageCreate(MessageCreateEvent event);
     }
 }

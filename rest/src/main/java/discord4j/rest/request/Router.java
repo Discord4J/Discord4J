@@ -17,9 +17,12 @@
 package discord4j.rest.request;
 
 import discord4j.rest.http.client.DiscordWebClient;
+import discord4j.rest.route.Routes;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.MonoProcessor;
 import reactor.core.scheduler.Scheduler;
+import reactor.util.Logger;
+import reactor.util.Loggers;
 import reactor.util.function.Tuples;
 
 import java.util.Map;
@@ -30,6 +33,8 @@ import java.util.concurrent.ConcurrentHashMap;
  * {@link discord4j.rest.request.RequestStream RequestStream} according to the bucket in which the request falls.
  */
 public class Router {
+
+    private static final Logger log = Loggers.getLogger(Router.class);
 
     private final DiscordWebClient httpClient;
     private final Scheduler scheduler;
@@ -62,11 +67,22 @@ public class Router {
     @SuppressWarnings("unchecked")
     private <T> RequestStream<T> getStream(DiscordRequest<T> request) {
         return (RequestStream<T>)
-                streamMap.computeIfAbsent(BucketKey.of(request.getRoute().getUriTemplate(), request.getCompleteUri()),
+                streamMap.computeIfAbsent(computeBucket(request),
                         k -> {
-                            RequestStream<T> stream = new RequestStream<>(httpClient, globalRateLimiter);
+                            if (log.isTraceEnabled()) {
+                                log.trace("Creating RequestStream with key {} for request: {} -> {}",
+                                        k, request.getRoute().getUriTemplate(), request.getCompleteUri());
+                            }
+                            RequestStream<T> stream = new RequestStream<>(k, httpClient, globalRateLimiter);
                             stream.start();
                             return stream;
                         });
+    }
+
+    private <T> BucketKey computeBucket(DiscordRequest<T> request) {
+        if (Routes.MESSAGE_DELETE.equals(request.getRoute())) {
+            return BucketKey.of("DELETE " + request.getRoute().getUriTemplate(), request.getCompleteUri());
+        }
+        return BucketKey.of(request.getRoute().getUriTemplate(), request.getCompleteUri());
     }
 }
