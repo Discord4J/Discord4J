@@ -16,18 +16,17 @@
  */
 package discord4j.voice.json;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
-public class VoiceGatewayPayload<T> {
+@JsonDeserialize(using = VoiceGatewayPayloadDeserializer.class)
+public abstract class VoiceGatewayPayload<T> {
 
     private final int op;
     @JsonProperty("d")
     private final T data;
 
-    @JsonCreator
-    public VoiceGatewayPayload(@JsonProperty("op") int op, @JsonProperty("d") T data) {
+    public VoiceGatewayPayload(int op, T data) {
         this.op = op;
         this.data = data;
     }

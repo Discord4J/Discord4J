@@ -31,66 +31,74 @@ import reactor.util.function.Tuple2;
 import reactor.util.function.Tuples;
 
 import java.io.ByteArrayOutputStream;
+import java.net.Inet4Address;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 
 public class VoiceSocket {
 
+    static final String PROTOCOL = "udp";
     static final String ENCRYPTION_MODE = "xsalsa20_poly1305";
     private static final int DISCOVERY_PACKET_LENGTH = 70;
 
     private final EmitterProcessor<ByteBuf> inbound = EmitterProcessor.create(false);
     private final EmitterProcessor<ByteBuf> outbound = EmitterProcessor.create(false);
 
-    Mono<? extends Connection> setup(String address, int port) {
-        System.out.println("setup");
+    Mono<Void> setup(String address, int port) {
         return UdpClient.create()
                 .wiretap()
                 .host(address)
                 .port(port)
                 .handle((in, out) -> {
-                    Mono<Void> inboundThen = in.receive().log("udp inbound").doOnNext(this.inbound::onNext).then();
-                    Mono<Void> outboundThen = out.options(NettyPipeline.SendOptions::flushOnEach).send(outbound.log("udp outbound")).then();
+                    Mono<Void> inboundThen = in.receive()
+                            .log("udp inbound")
+                            .doOnNext(this.inbound::onNext)
+                            .then();
+
+                    Mono<Void> outboundThen = out.options(NettyPipeline.SendOptions::flushOnEach)
+                            .send(outbound.log("udp outbound"))
+                            .then();
 
                     return Mono.zip(inboundThen, outboundThen).then();
                 })
-                .connect();
+                .connect()
+                .then();
     }
 
-    Mono<Tuple2<String, Integer>> performIpDiscovery(int ssrc) {
+    Mono<InetSocketAddress> performIpDiscovery(int ssrc) {
         Mono<Void> sendDiscoveryPacket = Mono.fromRunnable(() -> {
-            ByteBuffer buf = ByteBuffer.allocate(DISCOVERY_PACKET_LENGTH).putInt(ssrc);
-            buf.position(0);
-            ByteBuf discoveryPacket = Unpooled.wrappedBuffer(buf);
-
-//            ByteBuf discoveryPacket = Unpooled.buffer(DISCOVERY_PACKET_LENGTH).writeInt(ssrc);
+            ByteBuf discoveryPacket = Unpooled.buffer(DISCOVERY_PACKET_LENGTH)
+                    .writeInt(ssrc)
+                    .writeZero(DISCOVERY_PACKET_LENGTH - Integer.BYTES);
 
             outbound.onNext(discoveryPacket);
         });
 
-        Mono<Tuple2<String, Integer>> parseResponse = inbound.next()
+        Mono<InetSocketAddress> parseResponse = inbound.next()
                 .map(buf -> {
-                    buf.skipBytes(4);
-                    ByteArrayOutputStream os = new ByteArrayOutputStream(32);
-                    while (true) {
-                        byte c = buf.readByte();
-                        if (c == '\0') break;
-                        os.write(c);
-                    }
-                    String address = new String(os.toByteArray());
+                    String address = getNullTerminatedString(buf, Integer.BYTES); // undocumented: discord replies with the ssrc first, THEN the IP address
                     int port = buf.getUnsignedShortLE(DISCOVERY_PACKET_LENGTH - Short.BYTES);
 
-                    return Tuples.of(address, port);
+                    return InetSocketAddress.createUnresolved(address, port);
                 });
 
         return sendDiscoveryPacket.then(parseResponse);
     }
 
-    ByteBufFlux inbound() {
-        return ByteBufFlux.fromInbound(inbound);
+    void send(ByteBuf data) {
+        outbound.onNext(data);
     }
 
-    public EmitterProcessor<ByteBuf> getOutbound() {
-        return outbound;
+    private static String getNullTerminatedString(ByteBuf buffer, int offset) {
+        buffer.skipBytes(offset);
+        ByteArrayOutputStream os = new ByteArrayOutputStream(15);
+        byte c;
+        while ((c = buffer.readByte()) != 0) {
+            os.write(c);
+        }
+
+        return new String(os.toByteArray(), StandardCharsets.US_ASCII);
     }
 }

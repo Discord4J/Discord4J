@@ -10,42 +10,61 @@ class VoiceGatewayState {
     }
 
     static final class WaitingForReady extends VoiceGatewayState {
-        static final WaitingForReady INSTANCE = new WaitingForReady();
-        private WaitingForReady() {}
+        private final Disposable heartbeat;
+
+        WaitingForReady(Disposable heartbeat) {
+            this.heartbeat = heartbeat;
+        }
+
+        Disposable getHeartbeat() {
+            return heartbeat;
+        }
     }
 
     static final class WaitingForSessionDescription extends VoiceGatewayState {
+        private final Disposable heartbeat;
         private final int ssrc;
 
-        WaitingForSessionDescription(int ssrc) {
+        WaitingForSessionDescription(Disposable heartbeat, int ssrc) {
+            this.heartbeat = heartbeat;
             this.ssrc = ssrc;
         }
 
-        public int getSsrc() {
+        Disposable getHeartbeat() {
+            return heartbeat;
+        }
+
+        int getSsrc() {
             return ssrc;
         }
     }
 
     static final class ReceivingEvents extends VoiceGatewayState {
+        private final Disposable heartbeat;
         private final int ssrc;
         private final byte[] secretKey;
         private final Disposable sending;
 
-        ReceivingEvents(int ssrc, byte[] secretKey, Disposable sending) {
+        ReceivingEvents(Disposable heartbeat, int ssrc, byte[] secretKey, Disposable sending) {
+            this.heartbeat = heartbeat;
             this.ssrc = ssrc;
             this.secretKey = secretKey;
             this.sending = sending;
         }
 
-        public int getSsrc() {
+        Disposable getHeartbeat() {
+            return heartbeat;
+        }
+
+        int getSsrc() {
             return ssrc;
         }
 
-        public byte[] getSecretKey() {
+        byte[] getSecretKey() {
             return secretKey;
         }
 
-        public Disposable getSending() {
+        Disposable getSending() {
             return sending;
         }
     }

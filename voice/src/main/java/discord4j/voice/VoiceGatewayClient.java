@@ -17,20 +17,19 @@
 package discord4j.voice;
 
 import com.darichey.simplefsm.FiniteStateMachine;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.iwebpp.crypto.TweetNaclFast;
 import discord4j.voice.VoiceGatewayState.ReceivingEvents;
 import discord4j.voice.VoiceGatewayState.WaitingForHello;
 import discord4j.voice.VoiceGatewayState.WaitingForReady;
 import discord4j.voice.VoiceGatewayState.WaitingForSessionDescription;
 import discord4j.voice.json.*;
-import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufInputStream;
 import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import reactor.core.Disposable;
+import reactor.core.Exceptions;
 import reactor.core.publisher.EmitterProcessor;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -42,7 +41,7 @@ import reactor.netty.http.websocket.WebsocketOutbound;
 import reactor.util.Logger;
 import reactor.util.Loggers;
 
-import java.nio.ByteBuffer;
+import java.io.InputStream;
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
@@ -55,7 +54,7 @@ public class VoiceGatewayClient {
 
     private final EmitterProcessor<VoiceGatewayPayload<?>> sender = EmitterProcessor.create(false);
     private final ObjectMapper mapper;
-    private final VoiceSocket voiceSocket;
+    final VoiceSocket voiceSocket;
 
     public VoiceGatewayClient(long server_id, long user_id, String session_id, String token, ObjectMapper mapper,
                               Scheduler scheduler, AudioProvider provider) {
@@ -66,10 +65,13 @@ public class VoiceGatewayClient {
 
             when(WaitingForHello.class)
                     .on(Hello.class, (curState, hello) -> {
-                        startHeartbeat((long) (hello.getData().heartbeat_interval * .75)); // it's wrong
-                        send(new Identify(Long.toUnsignedString(server_id), Long.toUnsignedString(user_id),
-                                session_id, token));
-                        return WaitingForReady.INSTANCE;
+                        long heartbeatInterval = (long) (hello.getData().heartbeat_interval * .75);
+                        Disposable heartbeat = Flux.interval(Duration.ofMillis(heartbeatInterval))
+                                .map(Heartbeat::new)
+                                .subscribe(VoiceGatewayClient.this::send);
+
+                        send(new Identify(Long.toUnsignedString(server_id), Long.toUnsignedString(user_id), session_id, token));
+                        return new WaitingForReady(heartbeat);
                     });
 
             when(WaitingForReady.class)
@@ -78,175 +80,79 @@ public class VoiceGatewayClient {
 
                         voiceSocket.setup(ready.getData().ip, ready.getData().port)
                                 .then(voiceSocket.performIpDiscovery(ssrc))
-                                .subscribe(t -> {
-                                    String address = t.getT1();
-                                    int port = t.getT2();
-                                    send(new SelectProtocol("udp", address, port, VoiceSocket.ENCRYPTION_MODE));
+                                .subscribe(ipaddr -> {
+                                    String address = ipaddr.getHostName();
+                                    int port = ipaddr.getPort();
+                                    send(new SelectProtocol(VoiceSocket.PROTOCOL, address, port, VoiceSocket.ENCRYPTION_MODE));
                                 });
 
-                        return new WaitingForSessionDescription(ssrc);
+                        return new WaitingForSessionDescription(curState.getHeartbeat(), ssrc);
                     });
 
             when(WaitingForSessionDescription.class)
                     .on(SessionDescription.class, (curState, sessionDesc) -> {
-
                         TweetNaclFast.SecretBox boxer = new TweetNaclFast.SecretBox(sessionDesc.getData().secret_key);
                         PacketTransformer transformer = new PacketTransformer(curState.getSsrc(), boxer);
 
-                        Disposable sending = scheduler.schedulePeriodically(new Runnable() {
-                            final ByteBuffer buf = ByteBuffer.allocate(4096);
-                            boolean speaking = false;
+                        VoiceSendTask sendTask = new VoiceSendTask(VoiceGatewayClient.this, provider, transformer, curState.getSsrc());
+                        Disposable sending = scheduler.schedulePeriodically(sendTask, 0, Opus.FRAME_TIME, TimeUnit.MILLISECONDS);
 
-                            @Override
-                            public void run() {
-                                if (provider.provide(buf)) {
-                                    if (!speaking) {
-//                                        send(new Speaking(Long.toUnsignedString(user_id), curState.getSsrc(), true));
-                                        send(new SentSpeaking(true, 0, curState.getSsrc()));
-                                        speaking = true;
-                                    }
-
-                                    byte[] b = new byte[buf.limit()];
-                                    buf.get(b);
-                                    buf.clear();
-
-                                    ByteBuf packet = Unpooled.wrappedBuffer(transformer.nextSend(b));
-                                    voiceSocket.getOutbound().onNext(packet);
-                                } else {
-                                    if (speaking) {
-//                                        send(new Speaking(Long.toUnsignedString(user_id), curState.getSsrc(), false));
-                                        send(new SentSpeaking(false, 0, curState.getSsrc()));
-                                        speaking = false;
-                                    }
-                                }
-                            }
-                        }, 0, 20, TimeUnit.MILLISECONDS);
-
-                        return new ReceivingEvents(curState.getSsrc(), sessionDesc.getData().secret_key, sending);
+                        return new ReceivingEvents(curState.getHeartbeat(), curState.getSsrc(), sessionDesc.getData().secret_key, sending);
                     });
 
             whenAny()
                     .on(HeartbeatAck.class, (curState, ack) -> {
-                        System.out.println("vGW got voice ack");
-                        return getCurrentState();
+                        // TODO
+                        return curState;
                     }).on(Speaking.class, (curState, speaking) -> {
-                // TODO
-                return getCurrentState();
-            })
+                        // TODO
+                        return curState;
+                    })
                     .on(VoiceDisconnect.class, (curState, voiceDisconnect) -> {
                         // TODO
-                        return getCurrentState();
+                        return curState;
                     });
         }};
     }
 
     public Mono<Void> execute(String gatewayUrl) {
-        Mono<Void> httpFuture = HttpClient.create()
+        return HttpClient.create()
                 .wiretap()
                 .headers(headers -> headers.add(USER_AGENT, "DiscordBot(https://discord4j.com, 3)"))
                 .websocket(Integer.MAX_VALUE)
                 .uri(gatewayUrl + "?v=3")
                 .handle(this::handle)
-                .doOnComplete(() -> log.debug("Voice WebSocket future complete"))
-                .doOnError(t -> log.debug("Voice WebSocket future threw an error", t))
-                .doOnCancel(() -> log.debug("Voice WebSocket future cancelled"))
-                .doOnTerminate(this::stopHeartbeat)
                 .then();
-
-        return httpFuture;
     }
 
-    public Mono<Void> handle(WebsocketInbound in, WebsocketOutbound out) {
+    private Mono<Void> handle(WebsocketInbound in, WebsocketOutbound out) {
         Mono<Void> inboundThen = in.aggregateFrames()
                 .receiveFrames()
                 .map(WebSocketFrame::content)
-                .map(buf -> {
+                .flatMap(buf -> {
                     try {
-                        ByteBuf n = Unpooled.buffer(buf.readableBytes());
-                        buf.readBytes(n);
-
-                        return mapper.readTree(n.array());
+                        return Mono.justOrEmpty(mapper.readValue((InputStream) new ByteBufInputStream(buf), VoiceGatewayPayload.class));
                     } catch (Exception e) {
-                        e.printStackTrace();
-                        return null; // will kill everything
+                        throw Exceptions.propagate(e);
                     }
                 })
-                .doOnNext(this::receive)
-                .doOnError(Throwable::printStackTrace)
-                .doOnComplete(() -> System.out.println("wtf why"))
-                .log("inbound meme")
+                .doOnNext(gatewayFSM::onEvent)
                 .then();
 
         Mono<Void> outboundThen = out.options(NettyPipeline.SendOptions::flushOnEach)
-                .sendObject(sender.log("sender meme").map(payload -> {
+                .sendObject(sender.map(payload -> {
                     try {
-                        System.out.println(mapper.writeValueAsString(payload));
                         return new TextWebSocketFrame(Unpooled.wrappedBuffer(mapper.writeValueAsBytes(payload)));
                     } catch (Exception e) {
-                        e.printStackTrace();
-                        return null;
+                        throw Exceptions.propagate(e);
                     }
-                })
-                        .doOnCancel(() -> System.out.println("This was cancelled")))
+                }))
                 .then();
 
-        return Mono.zip(inboundThen, outboundThen).log("vc-handle-when").then();
+        return Mono.zip(inboundThen, outboundThen).then();
     }
 
-    public <T> void send(VoiceGatewayPayload<T> payload) {
-        log.info("send ");
+    <T> void send(VoiceGatewayPayload<T> payload) {
         sender.onNext(payload);
-    }
-
-    private Disposable heartbeat = null;
-
-    private void startHeartbeat(long interval) {
-        heartbeat = Flux.interval(Duration.ofMillis(interval)).subscribe(l -> send(new Heartbeat(l)), t -> {
-            System.out.println("an error here");
-            t.printStackTrace();
-        });
-    }
-
-    private void stopHeartbeat() {
-        heartbeat.dispose();
-    }
-
-    private void receive(JsonNode json) {
-        //        log.debug(json.toString());
-        System.out.println(json.toString());
-        int op = json.get("op").asInt();
-        JsonNode d = json.get("d");
-
-        try {
-            switch (op) {
-                case Hello.OP:
-                    gatewayFSM.onEvent(new Hello(d.get("heartbeat_interval").asLong()));
-                    break;
-                case Ready.OP:
-                    gatewayFSM.onEvent(new Ready(d.get("ssrc").asInt(), d.get("ip").asText(), d.get("port").asInt()));
-                    break;
-                case HeartbeatAck.OP:
-                    gatewayFSM.onEvent(new HeartbeatAck(d.asLong()));
-                    break;
-                case SessionDescription.OP:
-                    ArrayNode arrayNode = ((ArrayNode) d.get("secret_key"));
-                    byte[] secret_key = mapper.readValue(arrayNode.traverse(mapper), byte[].class);
-
-                    gatewayFSM.onEvent(new SessionDescription(d.get("mode").asText(), secret_key));
-                    break;
-                case Speaking.OP:
-                    gatewayFSM.onEvent(new Speaking(d.get("user_id").asText(), d.get("ssrc").asInt(), d.get("speaking").asBoolean()));
-                    break;
-                case VoiceDisconnect.OP:
-                    gatewayFSM.onEvent(new VoiceDisconnect(d.get("user_id").asText()));
-                    break;
-                case 12: break; // Undocumented, discord sucks
-                default:
-                    System.out.println("unhandled: " + json.toString());
-                    throw new UnsupportedOperationException();
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 }
