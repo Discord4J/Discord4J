@@ -44,6 +44,7 @@ import discord4j.store.api.service.StoreService;
 import discord4j.store.api.service.StoreServiceLoader;
 import discord4j.store.api.util.StoreContext;
 import discord4j.store.jdk.JdkStoreService;
+import discord4j.voice.VoiceClient;
 import io.netty.handler.codec.http.DefaultHttpHeaders;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpHeaders;
@@ -99,6 +100,8 @@ public final class DiscordClientBuilder {
 
     @Nullable
     private GatewayLimiter gatewayLimiter;
+
+    private Scheduler voiceConnectionScheduler = Schedulers.elastic();
 
     public DiscordClientBuilder(final String token) {
         this.token = Objects.requireNonNull(token);
@@ -226,6 +229,15 @@ public final class DiscordClientBuilder {
         return this;
     }
 
+    public Scheduler getVoiceConnectionScheduler() {
+        return voiceConnectionScheduler;
+    }
+
+    public DiscordClientBuilder setVoiceConnectionScheduler(Scheduler voiceConnectionScheduler) {
+        this.voiceConnectionScheduler = voiceConnectionScheduler;
+        return this;
+    }
+
     private IdentifyOptions initIdentifyOptions() {
         if (identifyOptions != null) {
             IdentifyOptions opts = new IdentifyOptions(
@@ -346,9 +358,11 @@ public final class DiscordClientBuilder {
         final FluxProcessor<Event, Event> eventProcessor = initEventProcessor();
         final EventDispatcher eventDispatcher = new EventDispatcher(eventProcessor, initEventScheduler());
 
+        final VoiceClient voiceClient = new VoiceClient(voiceConnectionScheduler, mapper);
+
         // Prepare mediator and wire gateway events to EventDispatcher
         final ServiceMediator serviceMediator = new ServiceMediator(gatewayClient, restClient, storeService,
-                stateHolder, eventDispatcher, config);
+                stateHolder, eventDispatcher, config, voiceClient);
         serviceMediator.getGatewayClient().dispatch()
                 .map(dispatch -> DispatchContext.of(dispatch, serviceMediator))
                 .flatMap(DispatchHandlers::<Dispatch, Event>handle)
