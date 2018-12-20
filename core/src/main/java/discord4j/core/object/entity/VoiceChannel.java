@@ -194,11 +194,7 @@ public final class VoiceChannel extends BaseGuildChannel implements Categorizabl
                     String session = t.getT1().getCurrent().getSessionId();
                     String token = t.getT2().getToken();
 
-                    final ObjectMapper mapper = new ObjectMapper()
-                            .setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
-                            .addHandler(new UnknownPropertyHandler(true))
-                            .registerModules(new PossibleModule(), new Jdk8Module());
-                    VoiceGatewayClient vgw = new VoiceGatewayClient(guildId, selfId, session, token, mapper, Schedulers.elastic(), provider);
+                    VoiceGatewayClient vgw = serviceMediator.getVoiceClient().newConnection(guildId, selfId, session, token, provider);
 
                     return vgw.execute(endpoint);
                 });
