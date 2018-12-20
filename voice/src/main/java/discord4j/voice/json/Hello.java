@@ -20,8 +20,8 @@ public class Hello extends VoiceGatewayPayload<Hello.Data> {
 
     public static final int OP = 8;
 
-    public Hello(long heartbeat_interval) {
-        this(new Data(heartbeat_interval));
+    public Hello(long heartbeatInterval) {
+        this(new Data(heartbeatInterval));
     }
 
     public Hello(Data data) {
@@ -30,10 +30,10 @@ public class Hello extends VoiceGatewayPayload<Hello.Data> {
 
     public static class Data {
 
-        public long heartbeat_interval;
+        public long heartbeatInterval;
 
-        public Data(long heartbeat_interval) {
-            this.heartbeat_interval = heartbeat_interval;
+        public Data(long heartbeatInterval) {
+            this.heartbeatInterval = heartbeatInterval;
         }
     }
 }
