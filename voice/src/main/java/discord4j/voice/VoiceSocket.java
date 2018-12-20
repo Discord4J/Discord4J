@@ -18,23 +18,13 @@ package discord4j.voice;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-import io.netty.buffer.UnpooledDirectByteBuf;
-import reactor.core.Disposable;
 import reactor.core.publisher.EmitterProcessor;
-import reactor.core.publisher.FluxSink;
 import reactor.core.publisher.Mono;
-import reactor.netty.ByteBufFlux;
-import reactor.netty.Connection;
 import reactor.netty.NettyPipeline;
 import reactor.netty.udp.UdpClient;
-import reactor.util.function.Tuple2;
-import reactor.util.function.Tuples;
 
 import java.io.ByteArrayOutputStream;
-import java.net.Inet4Address;
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 
 public class VoiceSocket {
