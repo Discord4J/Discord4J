@@ -1,3 +1,6 @@
+/*
+ * Code taken from https://github.com/InstantWebP2P/tweetnacl-java under MIT license
+ */
 // Copyright (c) 2014 Tom Zhou<iwebpp@gmail.com>
 
 
