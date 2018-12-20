@@ -129,13 +129,7 @@ public class VoiceGatewayClient {
         Mono<Void> inboundThen = in.aggregateFrames()
                 .receiveFrames()
                 .map(WebSocketFrame::content)
-                .flatMap(buf -> {
-                    try {
-                        return Mono.justOrEmpty(mapper.readValue((InputStream) new ByteBufInputStream(buf), VoiceGatewayPayload.class));
-                    } catch (Exception e) {
-                        throw Exceptions.propagate(e);
-                    }
-                })
+                .flatMap(buf -> Mono.fromCallable(() -> mapper.readValue((InputStream) new ByteBufInputStream(buf), VoiceGatewayPayload.class)))
                 .doOnNext(gatewayFSM::onEvent)
                 .then();
 

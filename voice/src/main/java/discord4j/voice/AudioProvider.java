@@ -18,7 +18,17 @@ package discord4j.voice;
 
 import java.nio.ByteBuffer;
 
-public interface AudioProvider {
+public abstract class AudioProvider {
 
-    boolean provide(ByteBuffer buf);
+    private final ByteBuffer buffer;
+
+    public AudioProvider(ByteBuffer buffer) {
+        this.buffer = buffer;
+    }
+
+    public ByteBuffer getBuffer() {
+        return buffer;
+    }
+
+    public abstract boolean provide();
 }
