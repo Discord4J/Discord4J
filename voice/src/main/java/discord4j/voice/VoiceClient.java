@@ -17,28 +17,29 @@
 package discord4j.voice;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import reactor.core.Disposable;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Scheduler;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
 
 public final class VoiceClient {
 
     private final Scheduler scheduler;
     private final ObjectMapper mapper;
 
-    public VoiceClient(Scheduler scheduler, ObjectMapper mapper) {
+    private final Consumer<Long> leaveChannel;
+
+    public VoiceClient(Scheduler scheduler, ObjectMapper mapper, Consumer<Long> leaveChannel) {
         this.scheduler = scheduler;
         this.mapper = mapper;
+        this.leaveChannel = leaveChannel;
     }
 
     public Mono<VoiceConnection> newConnection(long guildId, long selfId, String session, String token, AudioProvider provider, String gatewayUrl) {
         return Mono.create(sink -> {
             VoiceGatewayClient vgw = new VoiceGatewayClient(guildId, selfId, session, token, mapper, scheduler, provider);
             vgw.start(gatewayUrl, () -> {
-                VoiceConnection connection = new VoiceConnection(vgw);
+                VoiceConnection connection = new VoiceConnection(vgw, () -> leaveChannel.accept(guildId));
                 sink.success(connection);
             });
             sink.onCancel(vgw::stop);
