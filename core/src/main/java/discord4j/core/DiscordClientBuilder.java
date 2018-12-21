@@ -31,6 +31,8 @@ import discord4j.core.object.data.stored.MessageBean;
 import discord4j.core.object.presence.Presence;
 import discord4j.core.util.VersionUtil;
 import discord4j.gateway.*;
+import discord4j.gateway.json.GatewayPayload;
+import discord4j.gateway.json.VoiceStateUpdate;
 import discord4j.gateway.json.dispatch.Dispatch;
 import discord4j.gateway.payload.JacksonPayloadReader;
 import discord4j.gateway.payload.JacksonPayloadWriter;
@@ -358,7 +360,10 @@ public final class DiscordClientBuilder {
         final FluxProcessor<Event, Event> eventProcessor = initEventProcessor();
         final EventDispatcher eventDispatcher = new EventDispatcher(eventProcessor, initEventScheduler());
 
-        final VoiceClient voiceClient = new VoiceClient(voiceConnectionScheduler, mapper);
+        final VoiceClient voiceClient = new VoiceClient(voiceConnectionScheduler, mapper, guildId -> {
+            VoiceStateUpdate voiceStateUpdate = new VoiceStateUpdate(guildId, null, false, false);
+            gatewayClient.sender().next(GatewayPayload.voiceStateUpdate(voiceStateUpdate));
+        });
 
         // Prepare mediator and wire gateway events to EventDispatcher
         final ServiceMediator serviceMediator = new ServiceMediator(gatewayClient, restClient, storeService,
