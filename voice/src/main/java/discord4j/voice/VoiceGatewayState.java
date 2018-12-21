@@ -17,77 +17,74 @@
 package discord4j.voice;
 
 import reactor.core.Disposable;
+import reactor.core.publisher.MonoSink;
 
 class VoiceGatewayState {
 
     static final class WaitingForHello extends VoiceGatewayState {
 
-        static final WaitingForHello INSTANCE = new WaitingForHello();
+        final Disposable websocketTask;
+        final Runnable connectedCallback;
 
-        private WaitingForHello() {}
+        WaitingForHello(Disposable websocketTask, Runnable connectedCallback) {
+            this.websocketTask = websocketTask;
+            this.connectedCallback = connectedCallback;
+        }
     }
 
     static final class WaitingForReady extends VoiceGatewayState {
 
-        private final Disposable heartbeat;
+        final Disposable websocketTask;
+        final Runnable connectedCallback;
+        final Disposable heartbeatTask;
 
-        WaitingForReady(Disposable heartbeat) {
-            this.heartbeat = heartbeat;
-        }
-
-        Disposable getHeartbeat() {
-            return heartbeat;
+        WaitingForReady(Disposable websocketTask, Runnable connectedCallback,
+                               Disposable heartbeatTask) {
+            this.websocketTask = websocketTask;
+            this.connectedCallback = connectedCallback;
+            this.heartbeatTask = heartbeatTask;
         }
     }
 
     static final class WaitingForSessionDescription extends VoiceGatewayState {
 
-        private final Disposable heartbeat;
-        private final int ssrc;
+        final Disposable websocketTask;
+        final Runnable connectedCallback;
+        final Disposable heartbeatTask;
+        final int ssrc;
 
-        WaitingForSessionDescription(Disposable heartbeat, int ssrc) {
-            this.heartbeat = heartbeat;
+        WaitingForSessionDescription(Disposable websocketTask, Runnable connectedCallback,
+                                     Disposable heartbeatTask, int ssrc) {
+            this.websocketTask = websocketTask;
+            this.connectedCallback = connectedCallback;
+            this.heartbeatTask = heartbeatTask;
             this.ssrc = ssrc;
-        }
-
-        Disposable getHeartbeat() {
-            return heartbeat;
-        }
-
-        int getSsrc() {
-            return ssrc;
         }
     }
 
     static final class ReceivingEvents extends VoiceGatewayState {
 
-        private final Disposable heartbeat;
-        private final int ssrc;
-        private final byte[] secretKey;
-        private final Disposable sending;
+        final Disposable websocketTask;
+        final Runnable connectedCallback;
+        final Disposable heartbeatTask;
+        final int ssrc;
+        final byte[] secretKey;
+        final Disposable sendingTask;
 
-        ReceivingEvents(Disposable heartbeat, int ssrc, byte[] secretKey, Disposable sending) {
-            this.heartbeat = heartbeat;
+        ReceivingEvents(Disposable websocketTask, Runnable connectedCallback,
+                        Disposable heartbeatTask, int ssrc, byte[] secretKey, Disposable sendingTask) {
+            this.websocketTask = websocketTask;
+            this.connectedCallback = connectedCallback;
+            this.heartbeatTask = heartbeatTask;
             this.ssrc = ssrc;
             this.secretKey = secretKey;
-            this.sending = sending;
+            this.sendingTask = sendingTask;
         }
+    }
 
-        Disposable getHeartbeat() {
-            return heartbeat;
-        }
-
-        int getSsrc() {
-            return ssrc;
-        }
-
-        byte[] getSecretKey() {
-            return secretKey;
-        }
-
-        Disposable getSending() {
-            return sending;
-        }
+    static final class Stopped extends VoiceGatewayState {
+        static final Stopped INSTANCE = new Stopped();
+        private Stopped() {}
     }
 
     private VoiceGatewayState() {}

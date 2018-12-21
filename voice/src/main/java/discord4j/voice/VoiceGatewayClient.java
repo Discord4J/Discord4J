@@ -19,20 +19,19 @@ package discord4j.voice;
 import com.darichey.simplefsm.FiniteStateMachine;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.iwebpp.crypto.TweetNaclFast;
-import discord4j.voice.VoiceGatewayState.ReceivingEvents;
-import discord4j.voice.VoiceGatewayState.WaitingForHello;
-import discord4j.voice.VoiceGatewayState.WaitingForReady;
-import discord4j.voice.VoiceGatewayState.WaitingForSessionDescription;
+import discord4j.voice.VoiceGatewayEvent.Start;
+import discord4j.voice.VoiceGatewayEvent.Stop;
+import discord4j.voice.VoiceGatewayState.*;
 import discord4j.voice.json.*;
 import io.netty.buffer.ByteBufInputStream;
 import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import reactor.core.Disposable;
-import reactor.core.Exceptions;
 import reactor.core.publisher.EmitterProcessor;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.publisher.MonoSink;
 import reactor.core.scheduler.Scheduler;
 import reactor.netty.NettyPipeline;
 import reactor.netty.http.client.HttpClient;
@@ -50,7 +49,7 @@ import static io.netty.handler.codec.http.HttpHeaderNames.USER_AGENT;
 public class VoiceGatewayClient {
 
     private final Logger log = Loggers.getLogger("discord4j.voice.gateway.client");
-    private final FiniteStateMachine<VoiceGatewayState, VoiceGatewayPayload<?>> gatewayFSM;
+    private final FiniteStateMachine<VoiceGatewayState, VoiceGatewayEvent> gatewayFSM;
 
     private final EmitterProcessor<VoiceGatewayPayload<?>> sender = EmitterProcessor.create(false);
     private final ObjectMapper mapper;
@@ -60,18 +59,34 @@ public class VoiceGatewayClient {
                               Scheduler scheduler, AudioProvider provider) {
         this.mapper = mapper;
         this.voiceSocket = new VoiceSocket();
-        this.gatewayFSM = new FiniteStateMachine<VoiceGatewayState, VoiceGatewayPayload<?>>() {{
-            startWith(WaitingForHello.INSTANCE);
+        this.gatewayFSM = new FiniteStateMachine<VoiceGatewayState, VoiceGatewayEvent>() {{
+            startWith(Stopped.INSTANCE);
+
+            when(Stopped.class)
+                    .on(Start.class, (curState, start) -> {
+                        Disposable websocketTask = HttpClient.create()
+                                .wiretap(true)
+                                .headers(headers -> headers.add(USER_AGENT, "DiscordBot(https://discord4j.com, 3)"))
+                                .websocket(Integer.MAX_VALUE)
+                                .uri(start.gatewayUrl + "?v=3")
+                                .handle(VoiceGatewayClient.this::handle)
+                                .subscribe();
+
+                        log.debug("VoiceGateway State Change: Stopped -> WaitingForHello");
+                        return new WaitingForHello(websocketTask, start.connectedCallback);
+                    });
 
             when(WaitingForHello.class)
                     .on(Hello.class, (curState, hello) -> {
-                        long heartbeatInterval = (long) (hello.getData().heartbeatInterval * .75);
-                        Disposable heartbeat = Flux.interval(Duration.ofMillis(heartbeatInterval))
+                        long heartbeatInterval = (long) (hello.getData().heartbeatInterval * .75); // it's wrong
+                        Disposable heartbeatTask = Flux.interval(Duration.ofMillis(heartbeatInterval))
                                 .map(Heartbeat::new)
                                 .subscribe(VoiceGatewayClient.this::send);
 
                         send(new Identify(Long.toUnsignedString(serverId), Long.toUnsignedString(userId), sessionId, token));
-                        return new WaitingForReady(heartbeat);
+
+                        log.debug("VoiceGateway State Change: WaitingForHello -> WaitingForReady");
+                        return new WaitingForReady(curState.websocketTask, curState.connectedCallback, heartbeatTask);
                     });
 
             when(WaitingForReady.class)
@@ -86,18 +101,33 @@ public class VoiceGatewayClient {
                                     send(new SelectProtocol(VoiceSocket.PROTOCOL, address, port, VoiceSocket.ENCRYPTION_MODE));
                                 });
 
-                        return new WaitingForSessionDescription(curState.getHeartbeat(), ssrc);
+                        log.debug("VoiceGateway State Change: WaitingForReady -> WaitingForSessionDescription");
+                        return new WaitingForSessionDescription(curState.websocketTask, curState.connectedCallback, curState.heartbeatTask, ssrc);
                     });
 
             when(WaitingForSessionDescription.class)
                     .on(SessionDescription.class, (curState, sessionDesc) -> {
-                        TweetNaclFast.SecretBox boxer = new TweetNaclFast.SecretBox(sessionDesc.getData().secretKey);
-                        PacketTransformer transformer = new PacketTransformer(curState.getSsrc(), boxer);
+                        byte[] secretKey = sessionDesc.getData().secretKey;
+                        TweetNaclFast.SecretBox boxer = new TweetNaclFast.SecretBox(secretKey);
+                        PacketTransformer transformer = new PacketTransformer(curState.ssrc, boxer);
 
-                        VoiceSendTask sendTask = new VoiceSendTask(VoiceGatewayClient.this, provider, transformer, curState.getSsrc());
-                        Disposable sending = scheduler.schedulePeriodically(sendTask, 0, Opus.FRAME_TIME, TimeUnit.MILLISECONDS);
+                        VoiceSendTask sendingTask = new VoiceSendTask(scheduler, VoiceGatewayClient.this, provider, transformer, curState.ssrc);
 
-                        return new ReceivingEvents(curState.getHeartbeat(), curState.getSsrc(), sessionDesc.getData().secretKey, sending);
+                        // we're completely connected
+                        curState.connectedCallback.run();
+
+                        log.debug("VoiceGateway State Change: WaitingForSessionDescription -> ReceivingEvents");
+                        return new ReceivingEvents(curState.websocketTask, curState.connectedCallback, curState.heartbeatTask, curState.ssrc, secretKey, sendingTask);
+                    });
+
+            when(ReceivingEvents.class)
+                    .on(Stop.class, (curState, stop) -> {
+                        // clean up running tasks
+                        curState.heartbeatTask.dispose();
+                        curState.sendingTask.dispose();
+
+                        log.debug("VoiceGateway State Change: ReceivingEvents -> Stopped");
+                        return Stopped.INSTANCE;
                     });
 
             whenAny()
@@ -115,32 +145,26 @@ public class VoiceGatewayClient {
         }};
     }
 
-    public Mono<Void> execute(String gatewayUrl) {
-        return HttpClient.create()
-                .wiretap(true)
-                .headers(headers -> headers.add(USER_AGENT, "DiscordBot(https://discord4j.com, 3)"))
-                .websocket(Integer.MAX_VALUE)
-                .uri(gatewayUrl + "?v=3")
-                .handle(this::handle)
-                .then();
+    void start(String gatewayUrl, Runnable connectedCallback) { // TODO can this return the Mono<VoiceConnection>?
+        gatewayFSM.onEvent(new Start(gatewayUrl, connectedCallback));
+    }
+
+    void stop() {
+        gatewayFSM.onEvent(new Stop());
     }
 
     private Mono<Void> handle(WebsocketInbound in, WebsocketOutbound out) {
         Mono<Void> inboundThen = in.aggregateFrames()
                 .receiveFrames()
                 .map(WebSocketFrame::content)
-                .flatMap(buf -> Mono.fromCallable(() -> mapper.readValue((InputStream) new ByteBufInputStream(buf), VoiceGatewayPayload.class)))
+                .flatMap(buf -> Mono.fromCallable(() ->
+                        mapper.readValue((InputStream) new ByteBufInputStream(buf), VoiceGatewayPayload.class)))
                 .doOnNext(gatewayFSM::onEvent)
                 .then();
 
         Mono<Void> outboundThen = out.options(NettyPipeline.SendOptions::flushOnEach)
-                .sendObject(sender.map(payload -> {
-                    try {
-                        return new TextWebSocketFrame(Unpooled.wrappedBuffer(mapper.writeValueAsBytes(payload)));
-                    } catch (Exception e) {
-                        throw Exceptions.propagate(e);
-                    }
-                }))
+                .sendObject(sender.flatMap(payload -> Mono.fromCallable(() ->
+                        new TextWebSocketFrame(Unpooled.wrappedBuffer(mapper.writeValueAsBytes(payload))))))
                 .then();
 
         return Mono.zip(inboundThen, outboundThen).then();

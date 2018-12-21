@@ -26,6 +26,7 @@ import reactor.netty.udp.UdpClient;
 import java.io.ByteArrayOutputStream;
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
+import java.util.logging.Level;
 
 public class VoiceSocket {
 
@@ -38,17 +39,17 @@ public class VoiceSocket {
 
     Mono<Void> setup(String address, int port) {
         return UdpClient.create()
-                .wiretap()
+                .wiretap(true)
                 .host(address)
                 .port(port)
                 .handle((in, out) -> {
                     Mono<Void> inboundThen = in.receive()
-                            .log("udp inbound")
+                            .log("udp inbound", Level.FINEST)
                             .doOnNext(this.inbound::onNext)
                             .then();
 
                     Mono<Void> outboundThen = out.options(NettyPipeline.SendOptions::flushOnEach)
-                            .send(outbound.log("udp outbound"))
+                            .send(outbound.log("udp outbound", Level.FINEST))
                             .then();
 
                     return Mono.zip(inboundThen, outboundThen).then();

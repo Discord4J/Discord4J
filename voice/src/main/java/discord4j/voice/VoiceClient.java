@@ -17,6 +17,8 @@
 package discord4j.voice;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import reactor.core.Disposable;
+import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Scheduler;
 
 import java.util.Map;
@@ -24,7 +26,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public final class VoiceClient {
 
-    private final Map<Long, VoiceGatewayClient> voiceConnections = new ConcurrentHashMap<>();
     private final Scheduler scheduler;
     private final ObjectMapper mapper;
 
@@ -33,21 +34,14 @@ public final class VoiceClient {
         this.mapper = mapper;
     }
 
-    public VoiceGatewayClient getConnection(long guildId) {
-        return voiceConnections.get(guildId);
-    }
-
-    public VoiceGatewayClient newConnection(long guildId, long selfId, String session, String token, AudioProvider provider) {
-        if (voiceConnections.containsKey(guildId)) {
-            throw new IllegalStateException("Attempt to create voice connection when one already exists for guild: " + guildId);
-        }
-
-        VoiceGatewayClient client = new VoiceGatewayClient(guildId, selfId, session, token, mapper, scheduler, provider);
-        voiceConnections.put(guildId, client);
-        return client;
-    }
-
-    public void removeConnection(long guildId) {
-        // TODO
+    public Mono<VoiceConnection> newConnection(long guildId, long selfId, String session, String token, AudioProvider provider, String gatewayUrl) {
+        return Mono.create(sink -> {
+            VoiceGatewayClient vgw = new VoiceGatewayClient(guildId, selfId, session, token, mapper, scheduler, provider);
+            vgw.start(gatewayUrl, () -> {
+                VoiceConnection connection = new VoiceConnection(vgw);
+                sink.success(connection);
+            });
+            sink.onCancel(vgw::stop);
+        });
     }
 }

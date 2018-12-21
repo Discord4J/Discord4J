@@ -19,27 +19,43 @@ package discord4j.voice;
 import discord4j.voice.json.SentSpeaking;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
+import reactor.core.Disposable;
+import reactor.core.scheduler.Scheduler;
 
-import java.nio.ByteBuffer;
+import java.util.concurrent.TimeUnit;
 
-class VoiceSendTask implements Runnable {
+class VoiceSendTask implements Disposable {
 
     private final VoiceGatewayClient client;
     private final AudioProvider provider;
     private final PacketTransformer transformer;
     private final int ssrc;
+    private final Disposable task;
 
     private boolean speaking = false;
 
-    VoiceSendTask(VoiceGatewayClient client, AudioProvider provider, PacketTransformer transformer, int ssrc) {
+    VoiceSendTask(Scheduler scheduler, VoiceGatewayClient client, AudioProvider provider, PacketTransformer transformer, int ssrc) {
         this.client = client;
         this.provider = provider;
         this.transformer = transformer;
         this.ssrc = ssrc;
+        this.task = scheduler.schedulePeriodically(this::run, 0, Opus.FRAME_TIME, TimeUnit.MILLISECONDS);
     }
 
     @Override
-    public void run() {
+    public void dispose() {
+        if (speaking) {
+            changeSpeaking(false);
+        }
+        task.dispose();
+    }
+
+    @Override
+    public boolean isDisposed() {
+        return task.isDisposed();
+    }
+
+    private void run() {
         if (provider.provide()) {
             if (!speaking) {
                 changeSpeaking(true);
