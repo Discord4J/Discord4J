@@ -34,6 +34,7 @@ import discord4j.gateway.json.GatewayPayload;
 import discord4j.gateway.json.VoiceStateUpdate;
 import discord4j.store.api.util.LongLongTuple2;
 import discord4j.voice.AudioProvider;
+import discord4j.voice.VoiceConnection;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -152,11 +153,11 @@ public final class VoiceChannel extends BaseGuildChannel implements Categorizabl
                 .map(bean -> new VoiceState(getServiceMediator(), bean));
     }
 
-    public Mono<Void> join(AudioProvider provider) {
+    public Mono<VoiceConnection> join(AudioProvider provider) {
         return join(false, false, provider);
     }
 
-    public Mono<Void> join(boolean selfMute, boolean selfDeaf, AudioProvider provider) {
+    public Mono<VoiceConnection> join(boolean selfMute, boolean selfDeaf, AudioProvider provider) {
         ServiceMediator serviceMediator = getServiceMediator();
         long guildId = getGuildId().asLong();
         long channelId = getId().asLong();
@@ -189,9 +190,7 @@ public final class VoiceChannel extends BaseGuildChannel implements Categorizabl
                     String session = t.getT1().getCurrent().getSessionId();
                     String token = t.getT2().getToken();
 
-                    return serviceMediator.getVoiceClient()
-                            .newConnection(guildId, selfId, session, token, provider)
-                            .execute(endpoint);
+                    return serviceMediator.getVoiceClient().newConnection(guildId, selfId, session, token, provider, endpoint);
                 });
     }
 

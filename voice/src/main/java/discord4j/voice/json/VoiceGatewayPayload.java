@@ -18,9 +18,10 @@ package discord4j.voice.json;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import discord4j.voice.VoiceGatewayEvent;
 
 @JsonDeserialize(using = VoiceGatewayPayloadDeserializer.class)
-public abstract class VoiceGatewayPayload<T> {
+public abstract class VoiceGatewayPayload<T> implements VoiceGatewayEvent {
 
     private final int op;
     @JsonProperty("d")
