@@ -17,7 +17,6 @@
 package discord4j.voice;
 
 import reactor.core.Disposable;
-import reactor.core.publisher.MonoSink;
 
 class VoiceGatewayState {
 
@@ -52,13 +51,15 @@ class VoiceGatewayState {
         final Runnable connectedCallback;
         final Disposable heartbeatTask;
         final int ssrc;
+        final Disposable udpTask;
 
         WaitingForSessionDescription(Disposable websocketTask, Runnable connectedCallback,
-                                     Disposable heartbeatTask, int ssrc) {
+                                     Disposable heartbeatTask, int ssrc, Disposable udpTask) {
             this.websocketTask = websocketTask;
             this.connectedCallback = connectedCallback;
             this.heartbeatTask = heartbeatTask;
             this.ssrc = ssrc;
+            this.udpTask = udpTask;
         }
     }
 
@@ -68,15 +69,18 @@ class VoiceGatewayState {
         final Runnable connectedCallback;
         final Disposable heartbeatTask;
         final int ssrc;
+        final Disposable udpTask;
         final byte[] secretKey;
         final Disposable sendingTask;
 
         ReceivingEvents(Disposable websocketTask, Runnable connectedCallback,
-                        Disposable heartbeatTask, int ssrc, byte[] secretKey, Disposable sendingTask) {
+                        Disposable heartbeatTask, int ssrc, Disposable udpTask, byte[] secretKey,
+                        Disposable sendingTask) {
             this.websocketTask = websocketTask;
             this.connectedCallback = connectedCallback;
             this.heartbeatTask = heartbeatTask;
             this.ssrc = ssrc;
+            this.udpTask = udpTask;
             this.secretKey = secretKey;
             this.sendingTask = sendingTask;
         }

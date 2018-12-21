@@ -31,7 +31,6 @@ import reactor.core.Disposable;
 import reactor.core.publisher.EmitterProcessor;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.core.publisher.MonoSink;
 import reactor.core.scheduler.Scheduler;
 import reactor.netty.NettyPipeline;
 import reactor.netty.http.client.HttpClient;
@@ -42,7 +41,6 @@ import reactor.util.Loggers;
 
 import java.io.InputStream;
 import java.time.Duration;
-import java.util.concurrent.TimeUnit;
 
 import static io.netty.handler.codec.http.HttpHeaderNames.USER_AGENT;
 
@@ -93,7 +91,7 @@ public class VoiceGatewayClient {
                     .on(Ready.class, (curState, ready) -> {
                         int ssrc = ready.getData().ssrc;
 
-                        voiceSocket.setup(ready.getData().ip, ready.getData().port)
+                        Disposable udpTask = voiceSocket.setup(ready.getData().ip, ready.getData().port)
                                 .then(voiceSocket.performIpDiscovery(ssrc))
                                 .subscribe(ipaddr -> {
                                     String address = ipaddr.getHostName();
@@ -102,7 +100,7 @@ public class VoiceGatewayClient {
                                 });
 
                         log.debug("VoiceGateway State Change: WaitingForReady -> WaitingForSessionDescription");
-                        return new WaitingForSessionDescription(curState.websocketTask, curState.connectedCallback, curState.heartbeatTask, ssrc);
+                        return new WaitingForSessionDescription(curState.websocketTask, curState.connectedCallback, curState.heartbeatTask, ssrc, udpTask);
                     });
 
             when(WaitingForSessionDescription.class)
@@ -117,7 +115,7 @@ public class VoiceGatewayClient {
                         curState.connectedCallback.run();
 
                         log.debug("VoiceGateway State Change: WaitingForSessionDescription -> ReceivingEvents");
-                        return new ReceivingEvents(curState.websocketTask, curState.connectedCallback, curState.heartbeatTask, curState.ssrc, secretKey, sendingTask);
+                        return new ReceivingEvents(curState.websocketTask, curState.connectedCallback, curState.heartbeatTask, curState.ssrc, curState.udpTask, secretKey, sendingTask);
                     });
 
             when(ReceivingEvents.class)
@@ -125,6 +123,7 @@ public class VoiceGatewayClient {
                         // clean up running tasks
                         curState.heartbeatTask.dispose();
                         curState.sendingTask.dispose();
+                        curState.udpTask.dispose();
 
                         log.debug("VoiceGateway State Change: ReceivingEvents -> Stopped");
                         return Stopped.INSTANCE;
