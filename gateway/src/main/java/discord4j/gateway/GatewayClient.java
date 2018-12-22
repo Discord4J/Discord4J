@@ -17,6 +17,7 @@
 package discord4j.gateway;
 
 import discord4j.common.ResettableInterval;
+import discord4j.common.close.CloseException;
 import discord4j.gateway.json.GatewayPayload;
 import discord4j.gateway.json.Heartbeat;
 import discord4j.gateway.json.Opcode;
