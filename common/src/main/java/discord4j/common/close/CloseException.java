@@ -14,43 +14,45 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J. If not, see <http://www.gnu.org/licenses/>.
  */
-package discord4j.gateway;
+
+package discord4j.common.close;
 
 import javax.annotation.Nullable;
 
 /**
- * Container for WebSocket "close" status codes and reasons.
- *
- * @see <a href="https://tools.ietf.org/html/rfc6455#section-7.4.1"> RFC 6455, Section 7.4.1 "Defined Status Codes"</a>
+ * Unchecked exception thrown when a websocket session is closed, in an expected way or not.
+ * <p>
+ * Used to wrap an underlying websocket {@link CloseStatus} so clients can retrieve the
+ * status code and perform actions after it.
  */
-public class CloseStatus {
+public class CloseException extends RuntimeException {
 
-    private final int code;
-    @Nullable
-    private final String reason;
+    private final CloseStatus closeStatus;
 
-    /**
-     * Create a new {@link CloseStatus} instance.
-     *
-     * @param code the status code
-     * @param reason the reason
-     */
-    public CloseStatus(int code, @Nullable String reason) {
-        this.code = code;
-        this.reason = reason;
+    public CloseException(CloseStatus closeStatus) {
+        this(closeStatus, null);
+    }
+
+    public CloseException(CloseStatus closeStatus, @Nullable Throwable cause) {
+        super(cause);
+        this.closeStatus = closeStatus;
+    }
+
+    public CloseStatus getCloseStatus() {
+        return closeStatus;
     }
 
     public int getCode() {
-        return code;
+        return closeStatus.getCode();
     }
 
     @Nullable
     public String getReason() {
-        return reason;
+        return closeStatus.getReason();
     }
 
     @Override
-    public String toString() {
-        return code + (reason == null || reason.isEmpty() ? "" : " " + reason);
+    public String getMessage() {
+        return "WebSocket closed: " + closeStatus.toString();
     }
 }
