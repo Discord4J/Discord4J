@@ -19,6 +19,7 @@ package discord4j.voice;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import reactor.core.publisher.EmitterProcessor;
+import reactor.core.publisher.FluxSink;
 import reactor.core.publisher.Mono;
 import reactor.netty.NettyPipeline;
 import reactor.netty.udp.UdpClient;
@@ -37,6 +38,8 @@ public class VoiceSocket {
     private final EmitterProcessor<ByteBuf> inbound = EmitterProcessor.create(false);
     private final EmitterProcessor<ByteBuf> outbound = EmitterProcessor.create(false);
 
+    private final FluxSink<ByteBuf> inboundSink = inbound.sink(FluxSink.OverflowStrategy.LATEST);
+
     Mono<Void> setup(String address, int port) {
         return UdpClient.create()
                 .wiretap(true)
@@ -45,7 +48,7 @@ public class VoiceSocket {
                 .handle((in, out) -> {
                     Mono<Void> inboundThen = in.receive()
                             .log("udp inbound", Level.FINEST)
-                            .doOnNext(this.inbound::onNext)
+                            .doOnNext(this.inboundSink::next)
                             .then();
 
                     Mono<Void> outboundThen = out.options(NettyPipeline.SendOptions::flushOnEach)
