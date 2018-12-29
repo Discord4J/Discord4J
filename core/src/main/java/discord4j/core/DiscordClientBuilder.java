@@ -62,6 +62,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Properties;
+import java.util.concurrent.Executors;
 
 public final class DiscordClientBuilder {
 
@@ -270,7 +271,7 @@ public final class DiscordClientBuilder {
         if (eventScheduler != null) {
             return eventScheduler;
         }
-        return Schedulers.elastic();
+        return Schedulers.fromExecutor(Executors.newWorkStealingPool());
     }
 
     private Scheduler initRouterScheduler() {
