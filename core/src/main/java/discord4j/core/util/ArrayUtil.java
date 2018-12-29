@@ -36,7 +36,7 @@ public class ArrayUtil {
     }
 
     public static long[] remove(long[] array, long l) {
-        long[] ret = new long[array.length - 1];
+        long[] ret = new long[Math.max(0, array.length - 1)];
         for (int i = 0; i < array.length; i++) {
             if (array[i] == l) {
                 System.arraycopy(array, 0, ret, 0, i);
