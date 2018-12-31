@@ -64,6 +64,8 @@ import java.util.logging.Level;
 public class DiscordWebSocketHandler {
 
     private static final String HANDLER = "client.last.closeHandler";
+    private static final String OUTBOUND_CAPACITY_PROPERTY = "discord4j.gateway.outbound.capacity";
+    private static final String OUTBOUND_DELAY_PROPERTY = "discord4j.gateway.outbound.delay.ms";
 
     private final ZlibDecompressor decompressor = new ZlibDecompressor();
     private final MonoProcessor<Void> completionNotifier = MonoProcessor.create();
@@ -75,6 +77,7 @@ public class DiscordWebSocketHandler {
     private final Flux<GatewayPayload<Heartbeat>> heartbeat;
     private final GatewayLimiter identifyLimiter;
     private final GatewayLimiter outboundLimiter;
+    private final long outboundDelayMillis;
 
     private final Logger mainLog;
     private final Logger inLog;
@@ -103,7 +106,34 @@ public class DiscordWebSocketHandler {
         this.outbound = outbound;
         this.heartbeat = heartbeat;
         this.identifyLimiter = limiter;
-        this.outboundLimiter = new SimpleBucket(115, Duration.ofSeconds(60));
+        this.outboundLimiter = new SimpleBucket(outboundLimiterCapacity(), Duration.ofSeconds(60));
+        this.outboundDelayMillis = outboundDelayMillis();
+    }
+
+    private long outboundLimiterCapacity() {
+        String capacityValue = System.getProperty(OUTBOUND_CAPACITY_PROPERTY);
+        if (capacityValue != null) {
+            try {
+                long capacity = Long.valueOf(capacityValue);
+                mainLog.info("Overriding default outbound limiter capacity: {}", capacity);
+            } catch (NumberFormatException e) {
+                mainLog.warn("Invalid custom outbound limiter capacity: {}", capacityValue);
+            }
+        }
+        return 115;
+    }
+
+    private long outboundDelayMillis() {
+        String delayValue = System.getProperty(OUTBOUND_DELAY_PROPERTY);
+        if (delayValue != null) {
+            try {
+                long value = Long.valueOf(delayValue);
+                mainLog.info("Overriding default outbound delay: {}", value);
+            } catch (NumberFormatException e) {
+                mainLog.warn("Invalid custom outbound delay: {}", delayValue);
+            }
+        }
+        return 0;
     }
 
     public Mono<Void> handle(WebsocketInbound in, WebsocketOutbound out) {
@@ -146,7 +176,7 @@ public class DiscordWebSocketHandler {
 
     private Publisher<? extends GatewayPayload<? extends PayloadData>> limitRate(GatewayPayload<?> payload) {
         GatewayLimiter limiter = Opcode.IDENTIFY.equals(payload.getOp()) ? identifyLimiter : outboundLimiter;
-        return Mono.delay(Duration.ofMillis(limiter.delayMillisToConsume(1)), Schedulers.single())
+        return Mono.defer(() -> Mono.delay(Duration.ofMillis(calculateDelayMillis(limiter)), Schedulers.single()))
                 .map(tick -> limiter.tryConsume(1))
                 .flatMap(consumed -> {
                     if (!consumed) {
@@ -155,6 +185,10 @@ public class DiscordWebSocketHandler {
                     return Mono.just(payload);
                 })
                 .retry();
+    }
+
+    private long calculateDelayMillis(GatewayLimiter limiter) {
+        return limiter.delayMillisToConsume(1) + outboundDelayMillis;
     }
 
     private Publisher<?> toOutboundFrame(GatewayPayload<? extends PayloadData> payload) {
