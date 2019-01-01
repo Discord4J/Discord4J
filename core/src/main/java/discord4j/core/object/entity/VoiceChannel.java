@@ -154,10 +154,28 @@ public final class VoiceChannel extends BaseGuildChannel implements Categorizabl
                 .map(bean -> new VoiceState(getServiceMediator(), bean));
     }
 
+    /**
+     * Requests to join this voice channel.
+     *
+     * @param provider The provider which should be used to send audio to this channel.
+     * @param receiver The receiver which should be used to receive audio from this channel.
+     * @return A {@link Mono} where, upon successful completion, emits a {@link VoiceConnection} when the connection to
+     * the channel is established.
+     */
     public Mono<VoiceConnection> join(AudioProvider provider, AudioReceiver receiver) {
         return join(false, false, provider, receiver);
     }
 
+    /**
+     * Requests to the join this voice channel.
+     *
+     * @param selfMute Whether the bot should be self muted when joining the channel.
+     * @param selfDeaf Whether the bot should be self deafened when joining the channel.
+     * @param provider The provider which should be used to send audio to this channel.
+     * @param receiver The receiver which should be used to receive audio from this channel.
+     * @return A {@link Mono} where, upon successful completion, emits a {@link VoiceConnection} when the connection to
+     * the channel is established.
+     */
     public Mono<VoiceConnection> join(boolean selfMute, boolean selfDeaf, AudioProvider provider, AudioReceiver receiver) {
         ServiceMediator serviceMediator = getServiceMediator();
         long guildId = getGuildId().asLong();
