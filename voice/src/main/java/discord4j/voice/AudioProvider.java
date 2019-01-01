@@ -18,6 +18,13 @@ package discord4j.voice;
 
 import java.nio.ByteBuffer;
 
+/**
+ * Used to send audio.
+ * <p>
+ * The provider uses a shared buffer. Keep this in mind when implementing.
+ *
+ * @see #provide()
+ */
 public abstract class AudioProvider {
 
     public static final int DEFAULT_BUFFER_SIZE = 2048;
@@ -42,5 +49,11 @@ public abstract class AudioProvider {
         return buffer;
     }
 
+    /**
+     * Called every 20 milliseconds and is expected to provide
+     * <a href="https://en.wikipedia.org/wiki/Opus_(audio_format)">Opus</a>-encoded audio according to the format in
+     * {@link Opus} by writing to the provider's {@link #getBuffer() buffer}.
+     * @return Whether audio was provided (the buffer was mutated).
+     */
     public abstract boolean provide();
 }

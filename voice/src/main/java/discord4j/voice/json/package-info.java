@@ -14,30 +14,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
+@NonNullApi
 package discord4j.voice.json;
 
-public class Speaking extends VoiceGatewayPayload<Speaking.Data> {
-
-    public static final int OP = 5;
-
-    public Speaking(String userId, int ssrc, boolean speaking) {
-        this(new Data(userId, ssrc, speaking));
-    }
-
-    public Speaking(Data data) {
-        super(OP, data);
-    }
-
-    public static class Data {
-
-        public final String userId;
-        public final int ssrc;
-        public final boolean speaking;
-
-        Data(String userId, int ssrc, boolean speaking) {
-            this.userId = userId;
-            this.ssrc = ssrc;
-            this.speaking = speaking;
-        }
-    }
-}
+import reactor.util.annotation.NonNullApi;

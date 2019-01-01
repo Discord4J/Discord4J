@@ -22,6 +22,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 
+import javax.annotation.Nullable;
 import java.io.IOException;
 
 public class VoiceGatewayPayloadDeserializer extends StdDeserializer<VoiceGatewayPayload<?>> {
@@ -30,6 +31,7 @@ public class VoiceGatewayPayloadDeserializer extends StdDeserializer<VoiceGatewa
         super(VoiceGatewayPayload.class);
     }
 
+    @Nullable
     @Override
     public VoiceGatewayPayload<?> deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
         JsonNode json = p.getCodec().readTree(p);
