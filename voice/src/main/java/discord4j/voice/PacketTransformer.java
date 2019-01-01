@@ -17,7 +17,9 @@
 package discord4j.voice;
 
 import com.iwebpp.crypto.TweetNaclFast;
+import io.netty.buffer.ByteBuf;
 
+import javax.annotation.Nullable;
 import java.nio.ByteBuffer;
 
 final class PacketTransformer {
@@ -40,6 +42,27 @@ final class PacketTransformer {
         byte[] encrypted = boxer.box(audio, getNonce(header));
 
         return getAudioPacket(header, encrypted);
+    }
+
+    @Nullable
+    byte[] nextReceive(ByteBuf packet) {
+        byte[] header = new byte[RTP_HEADER_LENGTH];
+        packet.getBytes(0, header);
+
+        int audioOffset = RTP_HEADER_LENGTH + (4 * (byte) (header[0] & 0x0F));
+
+        byte[] encrypted = new byte[packet.readableBytes() - audioOffset];
+        packet.getBytes(audioOffset, encrypted);
+
+        byte[] decrypted = boxer.open(encrypted, getNonce(header));
+        if (decrypted == null) {
+            return null;
+        }
+
+        byte[] newPacket = new byte[RTP_HEADER_LENGTH + decrypted.length];
+        System.arraycopy(header, 0, newPacket, 0, RTP_HEADER_LENGTH);
+        System.arraycopy(decrypted, 0, newPacket, audioOffset, decrypted.length);
+        return newPacket;
     }
 
     private byte[] getNonce(byte[] rtpHeader) {

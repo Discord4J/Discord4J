@@ -33,6 +33,7 @@ import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.VoiceChannel;
 import discord4j.core.object.util.Snowflake;
 import discord4j.voice.AudioProvider;
+import discord4j.voice.AudioReceiver;
 import discord4j.voice.VoiceConnection;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
@@ -40,7 +41,6 @@ import org.junit.Test;
 import reactor.core.publisher.Mono;
 
 import java.nio.ByteBuffer;
-import java.time.Duration;
 
 public class ExampleVoiceBot {
 
@@ -82,7 +82,7 @@ public class ExampleVoiceBot {
         client.getEventDispatcher().on(GuildCreateEvent.class)
                 .filter(e -> e.getGuild().getId().asString().equals(guild))
                 .flatMap(g -> client.getChannelById(Snowflake.of(voiceChannel)).ofType(VoiceChannel.class))
-                .flatMap(channel -> channel.join(provider))
+                .flatMap(channel -> channel.join(provider, new LoggingAudioReceiver()))
                 .flatMap(leaveMessage::thenReturn)
                 .subscribe(VoiceConnection::disconnect);
 
@@ -134,6 +134,14 @@ public class ExampleVoiceBot {
         @Override
         public void loadFailed(FriendlyException exception) {
 
+        }
+    }
+
+    private static class LoggingAudioReceiver extends AudioReceiver {
+
+        @Override
+        public void receive(char sequence, int timestamp, int ssrc, byte[] audio) {
+            System.out.println("packet from: " + ssrc);
         }
     }
 }

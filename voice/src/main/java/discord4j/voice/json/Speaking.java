@@ -20,21 +20,21 @@ public class Speaking extends VoiceGatewayPayload<Speaking.Data> {
 
     public static final int OP = 5;
 
-    public Speaking(String userId, int ssrc, boolean speaking) {
+    Speaking(String userId, int ssrc, boolean speaking) {
         this(new Data(userId, ssrc, speaking));
     }
 
-    public Speaking(Data data) {
+    Speaking(Data data) {
         super(OP, data);
     }
 
-    public static class Data {
+    static class Data {
 
-        private final String userId;
-        private final int ssrc;
-        private final boolean speaking;
+        public final String userId;
+        public final int ssrc;
+        public final boolean speaking;
 
-        public Data(String userId, int ssrc, boolean speaking) {
+        Data(String userId, int ssrc, boolean speaking) {
             this.userId = userId;
             this.ssrc = ssrc;
             this.speaking = speaking;

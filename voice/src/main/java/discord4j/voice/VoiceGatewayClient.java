@@ -54,7 +54,7 @@ public class VoiceGatewayClient {
     final VoiceSocket voiceSocket;
 
     public VoiceGatewayClient(long serverId, long userId, String sessionId, String token, ObjectMapper mapper,
-                              Scheduler scheduler, AudioProvider provider) {
+                              Scheduler scheduler, AudioProvider provider, AudioReceiver receiver) {
         this.mapper = mapper;
         this.voiceSocket = new VoiceSocket();
         this.gatewayFSM = new FiniteStateMachine<VoiceGatewayState, VoiceGatewayEvent>() {{
@@ -110,12 +110,13 @@ public class VoiceGatewayClient {
                         PacketTransformer transformer = new PacketTransformer(curState.ssrc, boxer);
 
                         VoiceSendTask sendingTask = new VoiceSendTask(scheduler, VoiceGatewayClient.this, provider, transformer, curState.ssrc);
+                        VoiceReceiveTask receivingTask = new VoiceReceiveTask(voiceSocket.getInbound(), transformer, receiver);
 
                         // we're completely connected
                         curState.connectedCallback.run();
 
                         log.debug("VoiceGateway State Change: WaitingForSessionDescription -> ReceivingEvents");
-                        return new ReceivingEvents(curState.websocketTask, curState.connectedCallback, curState.heartbeatTask, curState.ssrc, curState.udpTask, secretKey, sendingTask);
+                        return new ReceivingEvents(curState.websocketTask, curState.connectedCallback, curState.heartbeatTask, curState.ssrc, curState.udpTask, secretKey, sendingTask, receivingTask);
                     });
 
             when(ReceivingEvents.class)
@@ -123,6 +124,7 @@ public class VoiceGatewayClient {
                         // clean up running tasks
                         curState.heartbeatTask.dispose();
                         curState.sendingTask.dispose();
+                        curState.receivingTask.dispose();
                         curState.udpTask.dispose();
 
                         log.debug("VoiceGateway State Change: ReceivingEvents -> Stopped");

@@ -19,6 +19,7 @@ package discord4j.voice;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import reactor.core.publisher.EmitterProcessor;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxSink;
 import reactor.core.publisher.Mono;
 import reactor.netty.NettyPipeline;
@@ -47,7 +48,7 @@ public class VoiceSocket {
                 .port(port)
                 .handle((in, out) -> {
                     Mono<Void> inboundThen = in.receive()
-                            .log("udp inbound", Level.FINEST)
+                            .log("udp inbound", Level.INFO)
                             .doOnNext(this.inboundSink::next)
                             .then();
 
@@ -83,6 +84,10 @@ public class VoiceSocket {
 
     void send(ByteBuf data) {
         outbound.onNext(data);
+    }
+
+    Flux<ByteBuf> getInbound() {
+        return inbound;
     }
 
     private static String getNullTerminatedString(ByteBuf buffer, int offset) {

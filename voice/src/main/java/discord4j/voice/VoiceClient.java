@@ -35,9 +35,9 @@ public final class VoiceClient {
         this.leaveChannel = leaveChannel;
     }
 
-    public Mono<VoiceConnection> newConnection(long guildId, long selfId, String session, String token, AudioProvider provider, String gatewayUrl) {
+    public Mono<VoiceConnection> newConnection(long guildId, long selfId, String session, String token, String gatewayUrl, AudioProvider provider, AudioReceiver receiver) {
         return Mono.create(sink -> {
-            VoiceGatewayClient vgw = new VoiceGatewayClient(guildId, selfId, session, token, mapper, scheduler, provider);
+            VoiceGatewayClient vgw = new VoiceGatewayClient(guildId, selfId, session, token, mapper, scheduler, provider, receiver);
             vgw.start(gatewayUrl, () -> {
                 VoiceConnection connection = new VoiceConnection(vgw, () -> leaveChannel.accept(guildId));
                 sink.success(connection);
