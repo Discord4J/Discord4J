@@ -72,10 +72,11 @@ class VoiceGatewayState {
         final Disposable udpTask;
         final byte[] secretKey;
         final Disposable sendingTask;
+        final Disposable receivingTask;
 
         ReceivingEvents(Disposable websocketTask, Runnable connectedCallback,
                         Disposable heartbeatTask, int ssrc, Disposable udpTask, byte[] secretKey,
-                        Disposable sendingTask) {
+                        Disposable sendingTask, Disposable receivingTask) {
             this.websocketTask = websocketTask;
             this.connectedCallback = connectedCallback;
             this.heartbeatTask = heartbeatTask;
@@ -83,6 +84,7 @@ class VoiceGatewayState {
             this.udpTask = udpTask;
             this.secretKey = secretKey;
             this.sendingTask = sendingTask;
+            this.receivingTask = receivingTask;
         }
     }
 
