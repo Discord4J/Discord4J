@@ -21,11 +21,15 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import reactor.util.Logger;
+import reactor.util.Loggers;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
 
 public class VoiceGatewayPayloadDeserializer extends StdDeserializer<VoiceGatewayPayload<?>> {
+
+    private static final Logger LOG = Loggers.getLogger(VoiceGatewayPayloadDeserializer.class);
 
     public VoiceGatewayPayloadDeserializer() {
         super(VoiceGatewayPayload.class);
@@ -54,6 +58,7 @@ public class VoiceGatewayPayloadDeserializer extends StdDeserializer<VoiceGatewa
             case VoiceDisconnect.OP:
                 return new VoiceDisconnect(d.get("user_id").asText());
             default:
+                LOG.trace("Received voice gateway payload with unhandled OP: {}", op);
                 return null;
         }
     }
