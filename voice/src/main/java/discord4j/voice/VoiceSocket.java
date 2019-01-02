@@ -48,7 +48,7 @@ public class VoiceSocket {
                 .port(port)
                 .handle((in, out) -> {
                     Mono<Void> inboundThen = in.receive()
-                            .log("udp inbound", Level.INFO)
+                            .log("udp inbound", Level.FINEST)
                             .doOnNext(this.inboundSink::next)
                             .then();
 
