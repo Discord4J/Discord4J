@@ -17,13 +17,13 @@ ext {
     project_jdk = '1.8'
 
     // Dependencies
-    reactor_bom_version = 'Californium-SR2'
-    jackson_version = '2.9.7'
+    reactor_bom_version = 'Californium-SR3'
+    jackson_version = '2.9.8'
     jsr305_version = '3.0.2'
     junit_version = '4.12'
     mockito_version = '2.23.0'
     logback_version = '1.3.0-alpha4'
-    jdkstores_version = 'd0d58a9'
+    jdkstores_version = 'f834348'
 }
 
 allprojects {
