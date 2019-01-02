@@ -88,13 +88,15 @@ class BaseGuildChannel extends BaseChannel implements GuildChannel {
         Mono<PermissionSet> getBasePerms = getMember.flatMap(Member::getBasePermissions);
 
         return Mono.zip(getMember, getBasePerms, (member, basePerms) -> {
+            PermissionOverwrite everyoneOverwrite = getOverwriteForRole(getGuildId()).orElse(null);
+
             List<PermissionOverwrite> roleOverwrites = member.getRoleIds().stream()
                 .map(this::getOverwriteForRole)
                 .flatMap(o -> o.map(Stream::of).orElseGet(Stream::empty)) // jdk 9 Optional#stream
                 .collect(Collectors.toList());
             PermissionOverwrite memberOverwrite = getOverwriteForMember(member.getId()).orElse(null);
 
-            return PermissionUtil.computePermissions(basePerms, roleOverwrites, memberOverwrite);
+            return PermissionUtil.computePermissions(basePerms, everyoneOverwrite, roleOverwrites, memberOverwrite);
         });
     }
 

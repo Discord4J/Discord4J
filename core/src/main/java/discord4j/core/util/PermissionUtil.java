@@ -26,17 +26,41 @@ import java.util.List;
 
 public final class PermissionUtil {
 
+    /**
+     * Computes the permissions granted by a member's roles.
+     *
+     * @param everyonePerms The permissions granted by the everyone role.
+     * @param rolePerms The list of permissions granted by each of the member's other roles.
+     * @return The combined permissions of everyonePerms and rolePerms.
+     *
+     * @see discord4j.core.object.entity.Member#getBasePermissions() Member#getBasePermissions()
+     */
     public static PermissionSet computeBasePermissions(PermissionSet everyonePerms, List<PermissionSet> rolePerms) {
         return rolePerms.stream().reduce(everyonePerms, PermissionSet::or);
     }
 
-    public static PermissionSet computePermissions(PermissionSet base, List<PermissionOverwrite> roleOverwrites,
+    /**
+     * Computes the permissions of a member taking into account permission overwrites.
+     *
+     * @param base The base permissions granted by the member's roles.
+     * @param everyoneOverwrite The overwrite applied to the everyone role in the channel.
+     * @param roleOverwrites The overwrites applied to every other role in the channel.
+     * @param memberOverwrite The overwrite applied to the member in the channel.
+     * @return The permissions with overwrites taken into account.
+     *
+     * @see discord4j.core.object.entity.GuildChannel#getEffectivePermissions(discord4j.core.object.util.Snowflake)
+     * GuildChannel#getEffectivePermissions(Snowflake)
+     */
+    public static PermissionSet computePermissions(PermissionSet base, @Nullable PermissionOverwrite everyoneOverwrite,
+                                                   List<PermissionOverwrite> roleOverwrites,
                                                    @Nullable PermissionOverwrite memberOverwrite) {
         if (base.contains(Permission.ADMINISTRATOR)) {
             return PermissionSet.all();
         }
 
-        List<PermissionOverwrite> allOverwrites = new ArrayList<>(roleOverwrites);
+        List<PermissionOverwrite> allOverwrites = new ArrayList<>();
+        if (everyoneOverwrite != null) allOverwrites.add(everyoneOverwrite);
+        allOverwrites.addAll(roleOverwrites);
         if (memberOverwrite != null) allOverwrites.add(memberOverwrite);
 
         return allOverwrites.stream().reduce(base, PermissionUtil::applyOverwrite, PermissionSet::or); // combiner is never used

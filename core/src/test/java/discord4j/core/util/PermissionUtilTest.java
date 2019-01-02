@@ -52,7 +52,7 @@ public class PermissionUtilTest {
         List<PermissionOverwrite> roleOverwrites = Collections.emptyList();
         PermissionOverwrite memberOverwrite = null;
 
-        PermissionSet actual = PermissionUtil.computePermissions(base, roleOverwrites, memberOverwrite);
+        PermissionSet actual = PermissionUtil.computePermissions(base, null, roleOverwrites, memberOverwrite);
         PermissionSet expected = PermissionSet.of(SEND_MESSAGES);
 
         assertEquals(expected, actual);
@@ -64,7 +64,7 @@ public class PermissionUtilTest {
         List<PermissionOverwrite> roleOverwrites = Collections.singletonList(overwrite(PermissionSet.of(PRIORITY_SPEAKER), PermissionSet.none()));
         PermissionOverwrite memberOverwrite = null;
 
-        PermissionSet actual = PermissionUtil.computePermissions(base, roleOverwrites, memberOverwrite);
+        PermissionSet actual = PermissionUtil.computePermissions(base, null, roleOverwrites, memberOverwrite);
         PermissionSet expected = PermissionSet.of(SEND_MESSAGES, PRIORITY_SPEAKER);
 
         assertEquals(expected, actual);
@@ -76,7 +76,7 @@ public class PermissionUtilTest {
         List<PermissionOverwrite> roleOverwrites = Collections.emptyList();
         PermissionOverwrite memberOverwrite = overwrite(PermissionSet.of(PRIORITY_SPEAKER), PermissionSet.none());
 
-        PermissionSet actual = PermissionUtil.computePermissions(base, roleOverwrites, memberOverwrite);
+        PermissionSet actual = PermissionUtil.computePermissions(base, null, roleOverwrites, memberOverwrite);
         PermissionSet expected = PermissionSet.of(SEND_MESSAGES, PRIORITY_SPEAKER);
 
         assertEquals(expected, actual);
@@ -88,7 +88,7 @@ public class PermissionUtilTest {
         List<PermissionOverwrite> roleOverwrites = Collections.singletonList(overwrite(PermissionSet.none(), PermissionSet.of(SEND_MESSAGES)));
         PermissionOverwrite memberOverwrite = null;
 
-        PermissionSet actual = PermissionUtil.computePermissions(base, roleOverwrites, memberOverwrite);
+        PermissionSet actual = PermissionUtil.computePermissions(base, null, roleOverwrites, memberOverwrite);
         PermissionSet expected = PermissionSet.none();
 
         assertEquals(expected, actual);
@@ -100,7 +100,7 @@ public class PermissionUtilTest {
         List<PermissionOverwrite> roleOverwrites = Collections.emptyList();
         PermissionOverwrite memberOverwrite = overwrite(PermissionSet.of(PRIORITY_SPEAKER), PermissionSet.of(SEND_MESSAGES));
 
-        PermissionSet actual = PermissionUtil.computePermissions(base, roleOverwrites, memberOverwrite);
+        PermissionSet actual = PermissionUtil.computePermissions(base, null, roleOverwrites, memberOverwrite);
         PermissionSet expected = PermissionSet.of(PRIORITY_SPEAKER);
 
         assertEquals(expected, actual);
@@ -112,7 +112,7 @@ public class PermissionUtilTest {
         List<PermissionOverwrite> roleOverwrites = Collections.emptyList();
         PermissionOverwrite memberOverwrite = overwrite(PermissionSet.none(), PermissionSet.of(SEND_MESSAGES));
 
-        PermissionSet actual = PermissionUtil.computePermissions(base, roleOverwrites, memberOverwrite);
+        PermissionSet actual = PermissionUtil.computePermissions(base, null, roleOverwrites, memberOverwrite);
         PermissionSet expected = PermissionSet.none();
 
         assertEquals(expected, actual);
@@ -124,7 +124,7 @@ public class PermissionUtilTest {
         List<PermissionOverwrite> roleOverwrites = Collections.emptyList();
         PermissionOverwrite memberOverwrite = null;
 
-        PermissionSet actual = PermissionUtil.computePermissions(base, roleOverwrites, memberOverwrite);
+        PermissionSet actual = PermissionUtil.computePermissions(base, null, roleOverwrites, memberOverwrite);
         PermissionSet expected = PermissionSet.all();
 
         assertEquals(expected, actual);
@@ -136,8 +136,22 @@ public class PermissionUtilTest {
         List<PermissionOverwrite> roleOverwrites = Collections.emptyList();
         PermissionOverwrite memberOverwrite = overwrite(PermissionSet.none(), PermissionSet.of(SEND_MESSAGES));
 
-        PermissionSet actual = PermissionUtil.computePermissions(base, roleOverwrites, memberOverwrite);
+        PermissionSet actual = PermissionUtil.computePermissions(base, null, roleOverwrites, memberOverwrite);
         PermissionSet expected = PermissionSet.all();
+
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void testIssue468() {
+        PermissionSet everyonePerms = PermissionSet.of(VIEW_CHANNEL, SEND_MESSAGES);
+        PermissionSet rolePerms = PermissionSet.of(VIEW_CHANNEL, SEND_MESSAGES);
+        PermissionOverwrite everyoneOverwrite = overwrite(PermissionSet.none(), PermissionSet.of(SEND_MESSAGES));
+
+        PermissionSet base = PermissionUtil.computeBasePermissions(everyonePerms, Collections.singletonList(rolePerms));
+
+        PermissionSet actual = PermissionUtil.computePermissions(base, everyoneOverwrite, Collections.emptyList(), null);
+        PermissionSet expected = PermissionSet.of(VIEW_CHANNEL);
 
         assertEquals(expected, actual);
     }
