@@ -20,6 +20,8 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
+import discord4j.common.RateLimiter;
+import discord4j.common.SimpleBucket;
 import discord4j.common.jackson.PossibleModule;
 import discord4j.common.jackson.UnknownPropertyHandler;
 import discord4j.core.event.EventDispatcher;
@@ -30,7 +32,9 @@ import discord4j.core.event.domain.Event;
 import discord4j.core.object.data.stored.MessageBean;
 import discord4j.core.object.presence.Presence;
 import discord4j.core.util.VersionUtil;
-import discord4j.gateway.*;
+import discord4j.gateway.GatewayClient;
+import discord4j.gateway.GatewayObserver;
+import discord4j.gateway.IdentifyOptions;
 import discord4j.gateway.json.GatewayPayload;
 import discord4j.gateway.json.VoiceStateUpdate;
 import discord4j.gateway.json.dispatch.Dispatch;
@@ -114,7 +118,7 @@ public final class DiscordClientBuilder {
     private GatewayObserver gatewayObserver;
 
     @Nullable
-    private GatewayLimiter gatewayLimiter;
+    private RateLimiter gatewayLimiter;
 
     private Scheduler voiceConnectionScheduler = Schedulers.elastic();
 
@@ -436,7 +440,7 @@ public final class DiscordClientBuilder {
      * @return the current gateway limiter, for shard coordinated login, can be {@code null} if default is used
      */
     @Nullable
-    public GatewayLimiter getGatewayLimiter() {
+    public RateLimiter getGatewayLimiter() {
         return gatewayLimiter;
     }
 
@@ -447,7 +451,7 @@ public final class DiscordClientBuilder {
      * @param gatewayLimiter the current gateway limiter, for shard coordinated login, can be {@code null} for a default
      * @return this builder
      */
-    public DiscordClientBuilder setGatewayLimiter(@Nullable GatewayLimiter gatewayLimiter) {
+    public DiscordClientBuilder setGatewayLimiter(@Nullable RateLimiter gatewayLimiter) {
         this.gatewayLimiter = gatewayLimiter;
         return this;
     }
@@ -535,7 +539,7 @@ public final class DiscordClientBuilder {
         return GatewayObserver.NOOP_LISTENER;
     }
 
-    private GatewayLimiter initGatewayLimiter() {
+    private RateLimiter initGatewayLimiter() {
         if (gatewayLimiter != null) {
             return gatewayLimiter;
         }

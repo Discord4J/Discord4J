@@ -16,8 +16,6 @@
  */
 package discord4j.rest.request;
 
-import org.reactivestreams.Publisher;
-import org.reactivestreams.Subscriber;
 import reactor.core.publisher.EmitterProcessor;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -34,7 +32,7 @@ import java.time.Duration;
  * the future. If a global ratelimit is in effect, it will be completed when the cooldown ends. Otherwise, it is
  * completed immediately.
  */
-public class GlobalRateLimiter implements Publisher<Void> {
+public class GlobalRateLimiter {
 
     private static final Logger log = Loggers.getLogger(GlobalRateLimiter.class);
 
@@ -44,7 +42,8 @@ public class GlobalRateLimiter implements Publisher<Void> {
     private volatile boolean isRateLimited;
     private final Flux<Void> flux = Flux.create(sink -> sink.onRequest(l -> {
         if (isRateLimited) {
-            resetNotifier.next().subscribe(o -> sink.complete());
+            resetNotifier.next().subscribe(o -> sink.complete(),
+                    t -> log.error("Could not reset global notifier", t));
         } else {
             sink.complete();
         }
@@ -66,11 +65,10 @@ public class GlobalRateLimiter implements Publisher<Void> {
             }
             isRateLimited = false;
             resetNotifier.onNext(PERMIT);
-        });
+        }, t -> log.error("Error while resolving global rate limiter", t));
     }
 
-    @Override
-    public void subscribe(Subscriber<? super Void> s) {
-        flux.subscribe(s);
+    public Mono<Void> onComplete() {
+        return flux.then();
     }
 }

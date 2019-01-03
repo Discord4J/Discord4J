@@ -37,6 +37,7 @@ import reactor.util.function.Tuple2;
 import java.time.Duration;
 import java.util.Optional;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.logging.Level;
 
 /**
@@ -59,12 +60,15 @@ class RequestStream<T> {
     private final Logger log;
     private final DiscordWebClient httpClient;
     private final GlobalRateLimiter globalRateLimiter;
+    private final RateLimitStrategy rateLimitStrategy;
 
-    RequestStream(BucketKey id, DiscordWebClient httpClient, GlobalRateLimiter globalRateLimiter) {
+    RequestStream(BucketKey id, DiscordWebClient httpClient, GlobalRateLimiter globalRateLimiter,
+            RateLimitStrategy rateLimitStrategy) {
         this.id = id;
         this.log = Loggers.getLogger("discord4j.rest.request." + id);
         this.httpClient = httpClient;
         this.globalRateLimiter = globalRateLimiter;
+        this.rateLimitStrategy = rateLimitStrategy;
     }
 
     /**
@@ -134,11 +138,15 @@ class RequestStream<T> {
     }
 
     void start() {
-        read().subscribe(new Reader(), t -> log.error("Error when consuming request", t));
+        read().subscribe(new Reader(rateLimitStrategy), t -> log.error("Error while consuming first request", t));
     }
 
     private Mono<Tuple2<MonoProcessor<T>, DiscordRequest<T>>> read() {
         return backing.next();
+    }
+
+    @FunctionalInterface
+    interface RateLimitStrategy extends Function<HttpClientResponse, Duration> {
     }
 
     /**
@@ -152,33 +160,25 @@ class RequestStream<T> {
     private class Reader implements Consumer<Tuple2<MonoProcessor<T>, DiscordRequest<T>>> {
 
         private volatile Duration sleepTime = Duration.ZERO;
-        private final Consumer<HttpClientResponse> rateLimitHandler = response -> {
-            HttpHeaders headers = response.responseHeaders();
-            if (log.isTraceEnabled()) {
-                log.trace("Read {} with headers: {}", response.status(), response.responseHeaders());
-            }
+        private final Consumer<HttpClientResponse> rateLimitHandler;
 
-            int remaining = headers.getInt("X-RateLimit-Remaining", -1);
-            if (remaining == 0) {
-                long resetAt = Long.parseLong(headers.get("X-RateLimit-Reset"));
-                long discordTime = headers.getTimeMillis("Date") / 1000;
-                Duration nextReset = Duration.ofSeconds(resetAt - discordTime);
+        private Reader(RateLimitStrategy strategy) {
+            this.rateLimitHandler = response -> {
                 if (log.isTraceEnabled()) {
-                    log.trace("Delaying next request by {}", nextReset);
+                    log.trace("Read {} with headers: {}", response.status(), response.responseHeaders());
                 }
-                sleepTime = nextReset;
-            }
-        };
+                Duration nextReset = strategy.apply(response);
+                if (!nextReset.isZero()) {
+                    if (log.isTraceEnabled()) {
+                        log.trace("Delaying next request by {}", nextReset);
+                    }
+                    sleepTime = nextReset;
+                }
+            };
+        }
 
-        @SuppressWarnings("ConstantConditions")
-        @Override
-        public void accept(Tuple2<MonoProcessor<T>, DiscordRequest<T>> tuple) {
-            MonoProcessor<T> callback = tuple.getT1();
-            DiscordRequest<T> req = tuple.getT2();
-            if (log.isTraceEnabled()) {
-                log.trace("Accepting request: {}", req);
-            }
-            ClientRequest request = new ClientRequest(req.getRoute().getMethod(),
+        private Mono<ClientRequest> adaptRequest(DiscordRequest<?> req) {
+            return Mono.fromCallable(() -> new ClientRequest(req.getRoute().getMethod(),
                     RouteUtils.expandQuery(req.getCompleteUri(), req.getQueryParams()),
                     Optional.ofNullable(req.getHeaders())
                             .map(map -> map.entrySet().stream()
@@ -187,36 +187,34 @@ class RequestStream<T> {
                                         entry.getValue().forEach(value -> headers.add(key, value));
                                         return headers;
                                     }, HttpHeaders::add))
-                            .orElse(new DefaultHttpHeaders()));
+                            .orElse(new DefaultHttpHeaders())));
+        }
+
+        @Override
+        public void accept(Tuple2<MonoProcessor<T>, DiscordRequest<T>> tuple) {
+            MonoProcessor<T> callback = tuple.getT1();
+            DiscordRequest<T> req = tuple.getT2();
+            if (log.isTraceEnabled()) {
+                log.trace("Accepting request: {}", req);
+            }
+            Mono<ClientRequest> request = adaptRequest(req);
             Class<T> responseType = req.getRoute().getResponseType();
 
-            Mono.when(globalRateLimiter)
+            globalRateLimiter.onComplete()
+                    .then(request)
                     .log("discord4j.rest.request." + id, Level.FINEST)
-                    .materialize()
-                    .flatMap(e -> httpClient.exchange(request, req.getBody(), responseType, rateLimitHandler))
+                    .flatMap(r -> httpClient.exchange(r, req.getBody(), responseType, rateLimitHandler))
                     .retryWhen(rateLimitRetryFactory())
                     .retryWhen(serverErrorRetryFactory())
                     .log("discord4j.rest.response." + id, Level.FINEST)
-                    .materialize()
-                    .subscribe(signal -> {
-                        if (signal.isOnSubscribe()) {
-                            callback.onSubscribe(signal.getSubscription());
-                        } else if (signal.isOnNext()) {
-                            callback.onNext(signal.get());
-                        } else if (signal.isOnError()) {
-                            callback.onError(signal.getThrowable());
-                        } else if (signal.isOnComplete()) {
-                            callback.onComplete();
+                    .doFinally(signal -> Mono.delay(sleepTime).subscribe(l -> {
+                        if (log.isTraceEnabled()) {
+                            log.trace("Ready to consume next request");
                         }
-
-                        Mono.delay(sleepTime).subscribe(l -> {
-                            if (log.isTraceEnabled()) {
-                                log.trace("Ready to consume next request");
-                            }
-                            sleepTime = Duration.ZERO;
-                            read().subscribe(this);
-                        });
-                    });
+                        sleepTime = Duration.ZERO;
+                        read().subscribe(this, t -> log.error("Error while consuming request", t));
+                    }, t -> log.error("Error while scheduling next request", t)))
+                    .subscribeWith(callback);
         }
     }
 }

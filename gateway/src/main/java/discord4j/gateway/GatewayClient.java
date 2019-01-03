@@ -16,6 +16,7 @@
  */
 package discord4j.gateway;
 
+import discord4j.common.RateLimiter;
 import discord4j.common.ResettableInterval;
 import discord4j.common.close.CloseException;
 import discord4j.gateway.json.GatewayPayload;
@@ -71,7 +72,7 @@ public class GatewayClient {
     private final IdentifyOptions identifyOptions;
     private final String token;
     private final GatewayObserver observer;
-    private final GatewayLimiter limiter;
+    private final RateLimiter limiter;
 
     private final EmitterProcessor<Dispatch> dispatch = EmitterProcessor.create(false);
     private final EmitterProcessor<GatewayPayload<?>> receiver = EmitterProcessor.create(false);
@@ -107,7 +108,7 @@ public class GatewayClient {
      */
     public GatewayClient(PayloadReader payloadReader, PayloadWriter payloadWriter,
             RetryOptions retryOptions, String token, IdentifyOptions identifyOptions,
-            GatewayObserver observer, GatewayLimiter limiter) {
+            GatewayObserver observer, RateLimiter limiter) {
         this.payloadReader = Objects.requireNonNull(payloadReader);
         this.payloadWriter = Objects.requireNonNull(payloadWriter);
         this.retryOptions = Objects.requireNonNull(retryOptions);
