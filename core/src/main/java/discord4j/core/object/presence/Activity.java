@@ -40,6 +40,10 @@ public class Activity {
         return new Activity(Type.LISTENING.getValue(), name, null, null);
     }
 
+    public static Activity watching(String name) {
+        return new Activity(Type.WATCHING.getValue(), name, null, null);
+    }
+
     private final int type;
     private final String name;
     @Nullable
