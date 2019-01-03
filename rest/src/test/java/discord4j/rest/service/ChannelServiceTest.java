@@ -18,6 +18,7 @@ package discord4j.rest.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import discord4j.common.jackson.Possible;
+import discord4j.common.json.MessageResponse;
 import discord4j.rest.RestTests;
 import discord4j.rest.json.request.*;
 import discord4j.rest.request.Router;
@@ -185,7 +186,9 @@ public class ChannelServiceTest {
 
     @Test
     public void testDeleteMessage() {
-        // TODO
+        MessageCreateRequest req = new MessageCreateRequest("Going to delete this!", null, false, null);
+        MessageResponse response = getChannelService().createMessage(permanentChannel, new MultipartRequest(req)).block();
+        getChannelService().deleteMessage(permanentChannel, response.getId(), "This is just a test!").block();
     }
 
     @Test

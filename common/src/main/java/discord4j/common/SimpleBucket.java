@@ -15,7 +15,7 @@
  * along with Discord4J. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package discord4j.gateway;
+package discord4j.common;
 
 import java.time.Duration;
 import java.util.concurrent.atomic.AtomicLong;
@@ -24,7 +24,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * Naive implementation of a rate-limiter that issues a certain amount of permits before requiring consumers to wait
  * until the permits are refilled.
  */
-public class SimpleBucket implements GatewayLimiter {
+public class SimpleBucket implements RateLimiter {
 
     private final long capacity;
     private final long refillPeriodMillis;

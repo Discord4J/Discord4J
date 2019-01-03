@@ -16,6 +16,8 @@
  */
 package discord4j.gateway;
 
+import discord4j.common.RateLimiter;
+import discord4j.common.SimpleBucket;
 import discord4j.common.close.CloseException;
 import discord4j.common.close.CloseHandlerAdapter;
 import discord4j.common.close.CloseStatus;
@@ -25,9 +27,12 @@ import discord4j.gateway.json.Opcode;
 import discord4j.gateway.json.PayloadData;
 import discord4j.gateway.payload.PayloadReader;
 import discord4j.gateway.payload.PayloadWriter;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.codec.http.websocketx.CloseWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
+import io.netty.handler.ssl.SslCloseCompletionEvent;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxSink;
@@ -75,8 +80,8 @@ public class DiscordWebSocketHandler {
     private final FluxSink<GatewayPayload<?>> inbound;
     private final Flux<GatewayPayload<?>> outbound;
     private final Flux<GatewayPayload<Heartbeat>> heartbeat;
-    private final GatewayLimiter identifyLimiter;
-    private final GatewayLimiter outboundLimiter;
+    private final RateLimiter identifyLimiter;
+    private final RateLimiter outboundLimiter;
     private final long outboundDelayMillis;
 
     private final Logger mainLog;
@@ -97,7 +102,7 @@ public class DiscordWebSocketHandler {
      */
     public DiscordWebSocketHandler(PayloadReader reader, PayloadWriter writer,
             FluxSink<GatewayPayload<?>> inbound, Flux<GatewayPayload<?>> outbound,
-            Flux<GatewayPayload<Heartbeat>> heartbeat, int shardIndex, GatewayLimiter limiter) {
+            Flux<GatewayPayload<Heartbeat>> heartbeat, int shardIndex, RateLimiter limiter) {
         this.shardIndex = shardIndex;
         this.mainLog = shardLogger("discord4j.gateway");
         this.inLog = shardLogger("discord4j.gateway.inbound");
@@ -181,7 +186,7 @@ public class DiscordWebSocketHandler {
     }
 
     private Publisher<? extends GatewayPayload<? extends PayloadData>> limitRate(GatewayPayload<?> payload) {
-        GatewayLimiter limiter = Opcode.IDENTIFY.equals(payload.getOp()) ? identifyLimiter : outboundLimiter;
+        RateLimiter limiter = Opcode.IDENTIFY.equals(payload.getOp()) ? identifyLimiter : outboundLimiter;
         return Mono.defer(() -> Mono.delay(Duration.ofMillis(calculateDelayMillis(limiter)), Schedulers.single()))
                 .map(tick -> limiter.tryConsume(1))
                 .flatMap(consumed -> {
@@ -194,7 +199,7 @@ public class DiscordWebSocketHandler {
                 .retry();
     }
 
-    private long calculateDelayMillis(GatewayLimiter limiter) {
+    private long calculateDelayMillis(RateLimiter limiter) {
         return limiter.delayMillisToConsume(1) + outboundDelayMillis;
     }
 

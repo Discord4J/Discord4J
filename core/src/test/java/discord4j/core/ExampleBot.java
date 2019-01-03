@@ -26,7 +26,9 @@ import discord4j.core.object.entity.ApplicationInfo;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.MessageChannel;
 import discord4j.core.object.entity.User;
+import discord4j.core.object.reaction.ReactionEmoji;
 import discord4j.core.object.util.Snowflake;
+import discord4j.rest.http.client.ClientException;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -38,7 +40,9 @@ import reactor.util.Loggers;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class ExampleBot {
@@ -76,6 +80,7 @@ public class ExampleBot {
         eventHandlers.add(new UserInfo());
         eventHandlers.add(new LogLevelChange());
         eventHandlers.add(new BlockingEcho());
+        eventHandlers.add(new Reactor());
 
         // Build a safe event-processing pipeline
         client.getEventDispatcher().on(MessageCreateEvent.class)
@@ -188,8 +193,90 @@ public class ExampleBot {
         }
     }
 
+    public static class Reactor extends EventHandler {
+
+        private final Random random = new Random();
+        // yes this is going into our codebase thanks
+        private final String[] emoji = {"😀", "😬", "😂", "😄", "😅", "😇", "☺️", "😋", "😘", "😚", "😜", "🤑", "😎"
+                , "🤗", "😳", "🙄", "😤", "😱", "😨", "😰", "😥", "🤒", "😭", "💩", "👹", "💀", "👻", "👽", "🤖",
+                "😺", "😹", "😻", "😼", "😽", "🙀", "😿", "😾", "🙌", "👏", "👋", "👍", "👊", "✊", "✌️", "👌", "✋",
+                "👐", "💪", "☝️", "🙏", "👆", "🖐", "🤘", "🖖", "✍️", "💅", "👄", "👅", "👂", "👁", "👀", "👶", "👦",
+                "👧", "👨", "👩", "👱", "👴", "👵", "👲", "👳", "👷", "💂", "🕵", "🎅", "👼", "👸", "👰", "🚶", "🏃",
+                "💃", "👯", "👫", "👬", "👭", "🙇", "💁", "🙅", "🙆", "🙋", "🙎", "🙍", "💇", "💆", "💑", "👨‍❤️‍👨",
+                "💏", "👩‍❤️‍💋‍👩", "👨‍❤️‍💋‍👨", "👩‍👩‍👦", "👨‍👨‍👦", "👮", "👚", "👕", "👖", "👔", "👗", "👙",
+                "👘", "💄", "💋", "🎩", "👟", "👞", "👢", "👡", "👠", "👣", "⛑", "🎓", "👑", "🎒", "👝", "👛", "👜",
+                "💼", "🌂", "💍", "🕶", "👓", "🐯", "🦁", "🐮", "🐷", "🐽", "🐸", "🐙", "🐵", "🐦", "🐧", "🐔", "🐒",
+                "🙉", "🙈", "🐣", "🐥", "🐺", "🐗", "🐴", "🦄", "🐝", "🐛", "🐢", "🦀", "🦂", "🕷", "🐜", "🐞", "🐌",
+                "🐠", "🐟", "🐡", "🐬", "🐋", "🐊", "🐆", "🐘", "🐫", "🐪", "🐄", "🐂", "🐃", "🐏", "🐑", "🐀", "🐁",
+                "🐓", "🦃", "🐉", "🐾", "🐿", "🐇", "🐈", "🐩", "🐕", "🐲", "🌵", "🎄", "🌲", "🌴", "🌱", "🌿", "🌾",
+                "🍁", "🍂", "🍃", "🎋", "🎍", "🍀", "🌺", "🌻", "🌹", "🌷", "🌼", "🌸", "💐", "🍄", "🎃", "🐚", "🌎",
+                "🌍", "🌏", "🌕", "🌖", "🌗", "🌘", "🌑", "🌒", "🌓", "🌔", "🌚", "🌝", "🌛", "🌜", "🌞", "⭐️", "🌟",
+                "💫", "✨", "🌥", "🌦", "🌧", "⛈", "⚡️", "🔥", "❄️", "🌨", "☔️", "☂️", "🌪", "💨", "☃️", "⛄️",
+                "💧", "💦", "🌊", "🍏", "🍎", "🍐", "🍋", "🍌", "🍉", "🍇", "🌶", "🍅", "🍍", "🍑", "🍈", "🍓", "🌽",
+                "🍠", "🍯", "🍞", "🍗", "🧀", "🍖", "🍤", "🌯", "🌮", "🍝", "🍕", "🌭", "🍟", "🍔", "🍳", "🍜", "🍲",
+                "🍥", "🍣", "🍱", "🍛", "🍙", "🍚", "🎂", "🍰", "🍦", "🍨", "🍧", "🍡", "🍢", "🍘", "🍮", "🍬", "🍭",
+                "🍫", "🍿", "🍩", "🍪", "🍺", "☕️", "🍵", "🍶", "🍹", "🍻", "🍼", "🍴", "🍷", "🍽", "⚽️", "🏀", "🏈",
+                "⚾️", "🎾", "🏐", "🏉", "🎱", "🎿", "🏏", "🏑", "🏓", "🏌", "⛳️", "⛷", "🏂", "⛸", "🏹", "🎣", "🚣",
+                "🏊🏼", "🏄", "🏆", "🕴", "🏇", "🚵", "🚴", "🏋", "⛹", "🛀", "🎽", "🏅", "🎖", "🎗", "🏵", "🎫", "🎟"
+                , "🎭", "🎺", "🎷", "🎹", "🎤", "🎪", "🎨", "🎸", "🎻", "🎬", "🎮", "👾", "🎯", "🎲", "🎰", "🎳",
+                "🚗", "🚕", "🚙", "🚌", "🚎", "🏎", "🚓", "🚒", "🚐", "🚛", "🚜", "🏍", "🚲", "🚨", "🚃", "🚟", "🚠",
+                "🚡", "🚖", "🚘", "🚍", "🚔", "🚋", "🚝", "🚄", "🚅", "🚈", "🚞", "🚂", "🚆", "🛬", "🛫", "✈️", "🛩",
+                "🚁", "🚉", "🚊", "🚇", "⛵️", "🛥", "🚤", "⛴", "🚀", "🛳", "🛰", "💺", "🏁", "🚥", "🚦", "🚏", "⛽️",
+                "🚧", "⚓️", "🎡", "🎢", "🎠", "🏗", "🌁", "🗼", "🏭", "⛲️", "⛺️", "🏕", "🗾", "🌋", "🗻", "🏔", "⛰",
+                "🎑", "🏞", "🛣", "🛤", "🌅", "🌄", "🏜", "🏖", "🏝", "🎇", "🌠", "🌌", "🌉", "🌃", "🏙", "🌆", "🌇",
+                "🎆", "🌈", "🏘", "🏰", "🏯", "🏠", "🗽", "🏟", "🏡", "🏚", "🏢", "🏬", "🏣", "🏤", "🏥", "🏦", "🕌",
+                "🏛", "💒", "🏩", "🏫", "🏪", "🏨", "🕍", "🕋", "⛩", "🕹", "💽", "💾", "💿", "📼", "📷", "📹",
+                "🎥", "☎️", "⏱", "🎙", "📻", "📺", "📠", "📟", "⏲", "⏰", "🕰", "⏳", "📡", "🔋", "💴", "💵", "💸",
+                "🛢", "🔦", "💡", "💶", "💷", "💰", "💳", "💎", "🔨", "💣", "🔫", "🔪", "☠️", "🔮", "💈", "💊", "💉",
+                "🔖", "🚿", "🔑", "🛋", "🚪", "🛎", "🖼", "🎁", "🎀", "🎏", "🎈", "🛍", "⛱", "🗺", "🎊", "🎉", "🎎",
+                "🎐", "🎌", "🏮", "📮", "📫", "📯", "📊", "🗃", "📇", "📅", "📉", "📈", "📰", "📕", "📙", "📒", "✂️",
+                "🖇", "📖", "📚", "📌", "📍", "🚩", "❤️", "💔", "❣️", "💕", "💓", "💗", "💖", "💘", "💝", "💠", "🔔"};
+
+        @Override
+        public Mono<Void> onMessageCreate(MessageCreateEvent event) {
+            Message message = event.getMessage();
+            return message.getContent()
+                    .filter(content -> content.startsWith("!react"))
+                    .map(content -> {
+                        String rawCount = content.substring("!react".length());
+                        int count = 1;
+                        try {
+                            count = Math.max(1, Math.min(10, Integer.parseInt(rawCount.trim())));
+                        } catch (NumberFormatException e) {
+                            log.info("Could not parse {} into a number", e);
+                        }
+                        // Some emoji will fail with error 400, duplicates can happen, etc.
+                        return Flux.fromIterable(randomEmoji(count))
+                                .doOnNext(emoji -> log.info("Reacting with {}", emoji))
+                                .flatMap(emoji -> message.addReaction(ReactionEmoji.unicode(emoji)))
+                                .onErrorContinue(isStatusCode(400),
+                                        (t, o) -> log.info("Dropping value due to {}", t.toString()))
+                                .then();
+                    })
+                    .orElseGet(Mono::empty);
+        }
+
+        private List<String> randomEmoji(int count) {
+            List<String> emojiList = new ArrayList<>();
+            for (int i = 0; i < count; i++) {
+                emojiList.add(emoji[random.nextInt(emoji.length)]);
+            }
+            return emojiList;
+        }
+    }
+
     public static abstract class EventHandler {
 
         public abstract Mono<Void> onMessageCreate(MessageCreateEvent event);
+    }
+
+    private static Predicate<Throwable> isStatusCode(int code) {
+        return t -> {
+            if (t instanceof ClientException) {
+                ClientException e = (ClientException) t;
+                return e.getStatus().code() == code;
+            }
+            return false;
+        };
     }
 }

@@ -19,6 +19,7 @@ package discord4j.core;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import discord4j.common.SimpleBucket;
 import discord4j.core.event.domain.Event;
 import discord4j.core.event.domain.lifecycle.ReadyEvent;
 import discord4j.core.event.domain.lifecycle.ResumeEvent;
@@ -32,7 +33,6 @@ import discord4j.core.shard.ShardJdkStoreService;
 import discord4j.core.shard.ShardStoreRegistry;
 import discord4j.gateway.GatewayObserver;
 import discord4j.gateway.IdentifyOptions;
-import discord4j.gateway.SimpleBucket;
 import discord4j.rest.request.SingleRouterFactory;
 import org.junit.BeforeClass;
 import org.junit.Ignore;

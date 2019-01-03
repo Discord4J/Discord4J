@@ -15,12 +15,12 @@
  * along with Discord4J. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package discord4j.gateway;
+package discord4j.common;
 
 /**
  * Represents a rate-limiting strategy that can be shared across shards.
  */
-public interface GatewayLimiter {
+public interface RateLimiter {
 
     /**
      * Attempt to consume a given number of permits from this bucket.

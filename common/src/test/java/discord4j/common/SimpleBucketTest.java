@@ -15,7 +15,7 @@
  * along with Discord4J. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package discord4j.gateway;
+package discord4j.common;
 
 import org.junit.Ignore;
 import org.junit.Test;
@@ -39,7 +39,7 @@ public class SimpleBucketTest {
     @Ignore
     public void testReactiveBucket() throws InterruptedException {
         CountDownLatch latch = new CountDownLatch(1);
-        GatewayLimiter limiter = new SimpleBucket(60, Duration.ofSeconds(30));
+        RateLimiter limiter = new SimpleBucket(60, Duration.ofSeconds(30));
 
         EmitterProcessor<Integer> outbound = EmitterProcessor.create();
         FluxSink<Integer> sender = outbound.sink();
