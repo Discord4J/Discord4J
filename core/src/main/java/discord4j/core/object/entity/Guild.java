@@ -868,6 +868,16 @@ public final class Guild implements Entity {
     /**
      * Requests to retrieve the audit log for this guild.
      *
+     * @return A {@link Flux} that continually emits entries for this guild's audit log. If an error is received, it is
+     * emitted through the {@code Flux}.
+     */
+    public Flux<AuditLogEntry> getAuditLog() {
+        return getAuditLog(new AuditLogQuerySpec());
+    }
+
+    /**
+     * Requests to retrieve the audit log for this guild.
+     *
      * @param spec A {@link Consumer} that provides a "blank" {@link AuditLogQuerySpec} to be operated on. If some
      * properties need to be retrieved via blocking operations (such as retrieval from a database), then it is
      * recommended to build the spec externally and call {@link #getAuditLog(AuditLogQuerySpec)}.
