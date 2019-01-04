@@ -223,7 +223,7 @@ public final class Role implements Entity {
         final PositionModifyRequest[] requests = { new PositionModifyRequest(getId().asLong(), position) };
 
         return serviceMediator.getRestClient().getGuildService()
-                .modifyGuildChannelPositions(getGuildId().asLong(), requests)
+                .modifyGuildRolePositions(getGuildId().asLong(), requests)
                 .map(RoleBean::new)
                 .map(bean -> new Role(serviceMediator, bean, getGuildId().asLong()));
     }
