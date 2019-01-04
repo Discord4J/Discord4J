@@ -48,12 +48,12 @@ public class VoiceSocket {
                 .port(port)
                 .handle((in, out) -> {
                     Mono<Void> inboundThen = in.receive()
-                            .log("udp inbound", Level.FINEST)
+                            .log("discord4j.voice.udp.inbound", Level.FINEST)
                             .doOnNext(this.inboundSink::next)
                             .then();
 
                     Mono<Void> outboundThen = out.options(NettyPipeline.SendOptions::flushOnEach)
-                            .send(outbound.log("udp outbound", Level.FINEST))
+                            .send(outbound.log("discord4j.voice.udp.outbound", Level.FINEST))
                             .then();
 
                     return Mono.zip(inboundThen, outboundThen).then();
