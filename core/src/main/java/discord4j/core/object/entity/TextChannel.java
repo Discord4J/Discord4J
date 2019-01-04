@@ -207,12 +207,12 @@ public final class TextChannel extends BaseChannel implements Categorizable, Gui
     }
 
     /**
-     * Gets the channel topic.
+     * Gets the channel topic, if present
      *
-     * @return The channel topic.
+     * @return The channel topic, if present.
      */
-    public String getTopic() {
-        return Optional.ofNullable(getData().getTopic()).orElse("");
+    public Optional<String> getTopic() {
+        return Optional.ofNullable(getData().getTopic());
     }
 
     /**
