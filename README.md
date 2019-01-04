@@ -46,7 +46,7 @@ client.getEventDispatcher().on(ReadyEvent.class)
 
 client.getEventDispatcher().on(MessageCreateEvent.class)
         .map(MessageCreateEvent::getMessage)
-        .filter(msg -> msg.getContent().map(content -> content.equals("!ping")).orElse(false))
+        .filter(msg -> msg.getContent().map("!ping"::equals).orElse(false))
         .flatMap(Message::getChannel)
         .flatMap(channel -> channel.createMessage("Pong!"))
         .subscribe();
