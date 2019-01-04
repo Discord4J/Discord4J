@@ -29,7 +29,9 @@ public class PaginationUtilTest {
 
     @Test
     public void testAfter() {
-        Function<Map<String, Object>, Flux<Long>> makeRequest = PageSource::getPage;
+        PageSource source = new PageSource(Integer.MAX_VALUE);
+
+        Function<Map<String, Object>, Flux<Long>> makeRequest = source::getPage;
         Flux<Long> actual = PaginationUtil.paginateAfter(makeRequest, box -> box, 0L, 100)
                 .limitRequest(300);
 
@@ -43,7 +45,9 @@ public class PaginationUtilTest {
 
     @Test
     public void testBefore() {
-        Function<Map<String, Object>, Flux<Long>> makeRequest = PageSource::getPage;
+        PageSource source = new PageSource(Integer.MAX_VALUE);
+
+        Function<Map<String, Object>, Flux<Long>> makeRequest = source::getPage;
         Flux<Long> actual = PaginationUtil.paginateBefore(makeRequest, box -> box, 300L, 100)
                 .limitRequest(300);
 
@@ -55,8 +59,48 @@ public class PaginationUtilTest {
                 .verify();
     }
 
+    @Test
+    public void testAfterRequestMoreThanAvailable() {
+        PageSource source = new PageSource(150);
+
+        Function<Map<String, Object>, Flux<Long>> makeRequest = source::getPage;
+        Flux<Long> actual = PaginationUtil.paginateAfter(makeRequest, box -> box, 0L, 100)
+                .limitRequest(300);
+
+        Iterable<Long> expected = Stream.iterate(1L, it -> it + 1).limit(150).collect(Collectors.toList());
+
+        StepVerifier.create(actual)
+                .expectNextSequence(expected)
+                .expectComplete()
+                .verify();
+    }
+
+    @Test
+    public void testBeforeRequestMoreThanAvailable() {
+        PageSource source = new PageSource(150);
+
+        Function<Map<String, Object>, Flux<Long>> makeRequest = source::getPage;
+        Flux<Long> actual = PaginationUtil.paginateBefore(makeRequest, box -> box, 300L, 100)
+                .limitRequest(150);
+
+        Iterable<Long> expected = Stream.iterate(299L, it -> it - 1).limit(150).collect(Collectors.toList());
+
+        StepVerifier.create(actual)
+                .expectNextSequence(expected)
+                .expectComplete()
+                .verify();
+    }
+
     private static class PageSource {
-        static Flux<Long> getPage(Map<String, Object> params) {
+
+        private final int numberOfItems;
+        private int emitted = 0;
+
+        private PageSource(int numberOfItems) {
+            this.numberOfItems = numberOfItems;
+        }
+
+        Flux<Long> getPage(Map<String, Object> params) {
             if (params.containsKey("after")) {
                 return getPageAfter((Long) params.get("after"), (Integer) params.get("limit"));
             } else {
@@ -64,17 +108,27 @@ public class PaginationUtilTest {
             }
         }
 
-        static Flux<Long> getPageAfter(long after, int limit) {
+        Flux<Long> getPageAfter(long after, int limit) {
             return Flux.<Long, Long>generate(() -> after, (state, sink) -> {
-                sink.next(state + 1);
-                return state + 1;
+                if (emitted++ >= numberOfItems) {
+                    sink.complete();
+                    return state;
+                } else {
+                    sink.next(state + 1);
+                    return state + 1;
+                }
             }).limitRequest(limit);
         }
 
-        static Flux<Long> getPageBefore(long before, int limit) {
+        Flux<Long> getPageBefore(long before, int limit) {
             return Flux.<Long, Long>generate(() -> before, (state, sink) -> {
-                sink.next(state - 1);
-                return state - 1;
+                if (emitted++ >= numberOfItems) {
+                    sink.complete();
+                    return state;
+                } else {
+                    sink.next(state - 1);
+                    return state - 1;
+                }
             }).limitRequest(limit);
         }
     }

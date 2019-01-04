@@ -34,6 +34,7 @@ import discord4j.core.util.EntityUtil;
 import discord4j.core.util.ImageUtil;
 import discord4j.core.util.PaginationUtil;
 import discord4j.rest.json.request.NicknameModifyRequest;
+import discord4j.rest.json.response.AuditLogEntryResponse;
 import discord4j.rest.json.response.AuditLogResponse;
 import discord4j.rest.json.response.NicknameModifyResponse;
 import discord4j.rest.json.response.PruneResponse;
@@ -904,8 +905,14 @@ public final class Guild implements Entity {
             return serviceMediator.getRestClient().getAuditLogService().getAuditLog(getId().asLong(), params).flux();
         };
 
-        ToLongFunction<AuditLogResponse> getLastEntryId = response ->
-                response.getAuditLogEntries()[response.getAuditLogEntries().length - 1].getId();
+        ToLongFunction<AuditLogResponse> getLastEntryId = response -> {
+            AuditLogEntryResponse[] entries = response.getAuditLogEntries();
+            if (entries.length == 0) {
+                return Long.MAX_VALUE;
+            } else {
+                return entries[entries.length - 1].getId();
+            }
+        };
 
         return PaginationUtil.paginateBefore(makeRequest, getLastEntryId, Long.MAX_VALUE, 100)
                 .flatMap(log -> Flux.fromArray(log.getAuditLogEntries())
