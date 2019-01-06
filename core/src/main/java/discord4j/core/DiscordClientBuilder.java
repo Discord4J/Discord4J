@@ -67,6 +67,13 @@ import java.util.Objects;
 import java.util.Properties;
 import java.util.concurrent.Executors;
 
+/**
+ * Builder suited for creating a {@link discord4j.core.DiscordClient}.
+ * <p>
+ * Allows creating a Discord client for a single shard with many configurable options. You can reuse this builder for
+ * sharding as long as you set the {@link #setShardIndex(Integer)} and {@link #setShardCount(Integer)}
+ * options, or {@link #setIdentifyOptions(discord4j.gateway.IdentifyOptions)}.
+ */
 public final class DiscordClientBuilder {
 
     private static final Logger log = Loggers.getLogger(DiscordClientBuilder.class);
@@ -80,19 +87,24 @@ public final class DiscordClientBuilder {
     private Integer shardCount;
 
     @Nullable
-    private StoreService storeService = null;
+    private StoreService storeService;
 
+    @Nullable
     private FluxProcessor<Event, Event> eventProcessor;
 
+    @Nullable
     private Scheduler eventScheduler;
 
+    @Nullable
     private Scheduler routerScheduler;
 
+    @Nullable
     private Presence initialPresence;
 
     @Nullable
     private IdentifyOptions identifyOptions;
 
+    @Nullable
     private RetryOptions retryOptions;
 
     private boolean ignoreUnknownJsonKeys = true;
@@ -105,138 +117,349 @@ public final class DiscordClientBuilder {
 
     private Scheduler voiceConnectionScheduler = Schedulers.elastic();
 
+    /**
+     * Initialize a new builder with the given token.
+     *
+     * @param token the bot token used to authenticate to Discord
+     */
     public DiscordClientBuilder(final String token) {
         this.token = Objects.requireNonNull(token);
     }
 
+    /**
+     * Retrieve the token set in this builder.
+     *
+     * @return the current bot token
+     */
     public String getToken() {
         return token;
     }
 
+    /**
+     * Change the token stored in this builder.
+     *
+     * @param token the new bot token
+     * @return this builder
+     */
     public DiscordClientBuilder setToken(final String token) {
         this.token = Objects.requireNonNull(token);
         return this;
     }
 
+    /**
+     * Retrieve the current shard index.
+     *
+     * @return the current shard index, can be {@code null}
+     */
     @Nullable
     public Integer getShardIndex() {
         return shardIndex;
     }
 
+    /**
+     * Change the shard index. Can override shard index set in
+     * {@link #setIdentifyOptions(discord4j.gateway.IdentifyOptions)}.
+     * <p>
+     * Validation is only performed during {@link #build()}. Make sure the following holds:
+     * <blockquote><pre>0 <= shardIndex < shardCount</pre></blockquote>
+     *
+     * @param shardIndex the new shard index, can be set to {@code null} to use the value under
+     * {@link #setIdentifyOptions(discord4j.gateway.IdentifyOptions)} if set, or fallback to a default
+     * @return this builder
+     */
     public DiscordClientBuilder setShardIndex(@Nullable Integer shardIndex) {
         this.shardIndex = shardIndex;
         return this;
     }
 
+    /**
+     * Retrieve the current shard count, can be {@code null}
+     *
+     * @return the current shard count
+     */
     @Nullable
     public Integer getShardCount() {
         return shardCount;
     }
 
+    /**
+     * Change the shard count.
+     * <p>
+     * Validation is only performed during {@link #build()}. Make sure the following holds:
+     * <blockquote><pre>0 <= shardIndex < shardCount</pre></blockquote>
+     *
+     * @param shardCount the new shard count, can be set to {@code null} to use a default value
+     * @return this builder
+     */
     public DiscordClientBuilder setShardCount(@Nullable Integer shardCount) {
         this.shardCount = shardCount;
         return this;
     }
 
+    /**
+     * Get the current {@link discord4j.store.api.service.StoreService} factory, used to create
+     * {@link discord4j.store.api.Store} instances on login to cache entities.
+     * <p>
+     * Can be {@code null} if automatic discovery is to be used.
+     *
+     * @return the current StoreService factory, {@code null} if automatic discovery should be used
+     */
     @Nullable
     public StoreService getStoreService() {
         return storeService;
     }
 
-    public DiscordClientBuilder setStoreService(final StoreService storeService) {
-        this.storeService = Objects.requireNonNull(storeService);
+    /**
+     * Set a new {@link discord4j.store.api.service.StoreService} to this builder, used to create
+     * {@link discord4j.store.api.Store} instances on login to cache entities.
+     *
+     * @param storeService a new StoreService factory, can be {@code null} to enable automatic discovery
+     * @return this builder
+     */
+    public DiscordClientBuilder setStoreService(@Nullable StoreService storeService) {
+        this.storeService = storeService;
         return this;
     }
 
+    /**
+     * Get the current {@link reactor.core.publisher.FluxProcessor} used to queue Discord events in conjunction with
+     * {@link discord4j.core.event.EventDispatcher}. Can be {@code null} if a default is used
+     * ({@link reactor.core.publisher.EmitterProcessor})
+     *
+     * @return a FluxProcessor dedicated to queue events, can be {@code null} when using a default value
+     */
+    @Nullable
     public FluxProcessor<Event, Event> getEventProcessor() {
         return eventProcessor;
     }
 
-    public DiscordClientBuilder setEventProcessor(final FluxProcessor<Event, Event> eventProcessor) {
-        this.eventProcessor = Objects.requireNonNull(eventProcessor);
+    /**
+     * Set a new {@link reactor.core.publisher.FluxProcessor} used to queue Discord events in conjunction with
+     * {@link discord4j.core.event.EventDispatcher}.
+     *
+     * @param eventProcessor a new FluxProcessor used in this builder. Can be left {@code null} if a default is to
+     * be used ({@link reactor.core.publisher.EmitterProcessor})
+     * @return this builder
+     */
+    public DiscordClientBuilder setEventProcessor(@Nullable FluxProcessor<Event, Event> eventProcessor) {
+        this.eventProcessor = eventProcessor;
         return this;
     }
 
+    /**
+     * Get the current {@link reactor.core.scheduler.Scheduler} used to publish events through
+     * {@link discord4j.core.event.EventDispatcher}.
+     *
+     * @return the current Scheduler for event dispatching, can be {@code null} when using a default value
+     */
+    @Nullable
     public Scheduler getEventScheduler() {
         return eventScheduler;
     }
 
-    public DiscordClientBuilder setEventScheduler(final Scheduler eventScheduler) {
-        this.eventScheduler = Objects.requireNonNull(eventScheduler);
+    /**
+     * Set a new {@link reactor.core.scheduler.Scheduler} used to publish events through
+     * {@link discord4j.core.event.EventDispatcher}.
+     *
+     * @param eventScheduler a new Scheduler for event dispatching. Can be {@code null} to use a default value
+     * @return this builder
+     */
+    public DiscordClientBuilder setEventScheduler(@Nullable Scheduler eventScheduler) {
+        this.eventScheduler = eventScheduler;
         return this;
     }
 
+    /**
+     * Get the current {@link reactor.core.scheduler.Scheduler} used to execute REST API requests and to process their
+     * responses.
+     *
+     * @return the current scheduler for REST API actions, can be {@code null} when using a default value
+     */
+    @Nullable
     public Scheduler getRouterScheduler() {
         return routerScheduler;
     }
 
-    public DiscordClientBuilder setRouterScheduler(Scheduler routerScheduler) {
-        this.routerScheduler = Objects.requireNonNull(routerScheduler);
+    /**
+     * Set a new {@link reactor.core.scheduler.Scheduler} used to execute REST API requests and to process their
+     * responses.
+     *
+     * @param routerScheduler a new scheduler for REST API actions. Can be {@code null} to use a default value
+     * @return this builder
+     */
+    public DiscordClientBuilder setRouterScheduler(@Nullable Scheduler routerScheduler) {
+        this.routerScheduler = routerScheduler;
         return this;
     }
 
+    /**
+     * Get the current {@link discord4j.core.object.presence.Presence} object used when identifying to the Gateway.
+     *
+     * @return the current presence status used for login. Can be {@code null} to use the value under
+     *         {@link #setIdentifyOptions(discord4j.gateway.IdentifyOptions)} if set, or fallback to a default
+     */
+    @Nullable
     public Presence getInitialPresence() {
         return initialPresence;
     }
 
+    /**
+     * Set a new {@link discord4j.core.object.presence.Presence} object used when identifying to the Gateway.
+     *
+     * @param initialPresence the new presence status used for login. Can be {@code null} to use the value under
+     *         {@link #setIdentifyOptions(discord4j.gateway.IdentifyOptions)} if set, or fallback to a default
+     * @return this builder
+     */
     public DiscordClientBuilder setInitialPresence(@Nullable Presence initialPresence) {
         this.initialPresence = initialPresence;
         return this;
     }
 
+    /**
+     * Get the current {@link discord4j.gateway.IdentifyOptions} set in this builder. IdentifyOptions is a container
+     * object targeted to group all parameters applied on bot login, like shard information, initial status and even
+     * session identifier and sequence required to resume a session.
+     * <p>
+     * Options under {@link #getShardIndex()}, {@link #getShardCount()} and {@link #getInitialPresence()} override the
+     * values in this object.
+     *
+     * @return the current set of bot identification options
+     */
     @Nullable
     public IdentifyOptions getIdentifyOptions() {
         return identifyOptions;
     }
 
-    public DiscordClientBuilder setIdentifyOptions(IdentifyOptions identifyOptions) {
+    /**
+     * Set a new {@link discord4j.gateway.IdentifyOptions} to this builder. IdentifyOptions is a container object
+     * targeted to group all parameters applied on bot login, like shard information, initial status and even session
+     * identifier and sequence required to resume a session.
+     * <p>
+     * Options under {@link #setShardIndex(Integer)}, {@link #setShardCount(Integer)} and
+     * {@link #setInitialPresence(discord4j.core.object.presence.Presence)} override the values in this object.
+     *
+     * @param identifyOptions the new bot identification options. Can be set to {@code null} to use a default
+     * @return this builder
+     */
+    public DiscordClientBuilder setIdentifyOptions(@Nullable IdentifyOptions identifyOptions) {
         this.identifyOptions = identifyOptions;
         return this;
     }
 
+    /**
+     * Get the current {@link discord4j.gateway.retry.RetryOptions} set in this builder. RetryOptions is an advanced
+     * container object to parameterize the retry policy used in the gateway operations.
+     *
+     * @return the current retry policy, can be {@code null} if default is used
+     */
+    @Nullable
     public RetryOptions getRetryOptions() {
         return retryOptions;
     }
 
-    public void setRetryOptions(RetryOptions retryOptions) {
+    /**
+     * Set a new {@link discord4j.gateway.retry.RetryOptions} to this builder. RetryOptions is an advanced
+     * container object to parameterize the retry policy used in the gateway operations.
+     *
+     * @param retryOptions the new retry policy. Can be set to {@code null} to use a default
+     */
+    public void setRetryOptions(@Nullable RetryOptions retryOptions) {
         this.retryOptions = retryOptions;
     }
 
+    /**
+     * Retrieves the current behavior under missing fields on entity deserialization. This is an advanced option used
+     * for debugging.
+     *
+     * @return {@code true} (default) if deserialization problems are to be ignored, {@code false} otherwise
+     * @see discord4j.common.jackson.UnknownPropertyHandler
+     */
     public boolean getIgnoreUnknownJsonKeys() {
         return ignoreUnknownJsonKeys;
     }
 
+    /**
+     * Set the new behavior under missing fields on entity deserialization. This is an advanced option used
+     * for debugging.
+     *
+     * @param ignoreUnknownJsonKeys {@code true} if deserialization problems are to be ignored, {@code false}
+     *         otherwise
+     * @return this builder
+     * @see discord4j.common.jackson.UnknownPropertyHandler
+     */
     public DiscordClientBuilder setIgnoreUnknownJsonKeys(boolean ignoreUnknownJsonKeys) {
         this.ignoreUnknownJsonKeys = ignoreUnknownJsonKeys;
         return this;
     }
 
+    /**
+     * Get the current {@link discord4j.gateway.GatewayObserver} set in this builder. GatewayObserver is used as a
+     * simple event listener for gateway connection lifecycle. User can be notified of broad lifecycle events like
+     * connections, resumes, reconnects and disconnects but also very specific ones like session sequence updates.
+     *
+     * @return an event listener for gateway lifecycle, can be {@code null} if default is used
+     * @see discord4j.core.event.dispatch.StoreInvalidator
+     */
     @Nullable
     public GatewayObserver getGatewayObserver() {
         return gatewayObserver;
     }
 
+    /**
+     * Set a new {@link discord4j.gateway.GatewayObserver} to this builder. GatewayObserver is used as a simple event
+     * listener for gateway connection lifecycle. User can be notified of broad lifecycle events like connections,
+     * resumes, reconnects and disconnects but also very specific ones like session sequence updates.
+     *
+     * @param gatewayObserver a new event listener for gateway lifecycle. Can be chained using
+     *         {@link discord4j.gateway.GatewayObserver#then(discord4j.gateway.GatewayObserver)} to create a
+     *         composite of an arbitrary number of listeners. Can be set to {@code null} to use a default
+     * @return this builder
+     */
     public DiscordClientBuilder setGatewayObserver(@Nullable GatewayObserver gatewayObserver) {
         this.gatewayObserver = gatewayObserver;
         return this;
     }
 
+    /**
+     * Get the current {@link discord4j.gateway.GatewayLimiter} set in this builder. GatewayLimiter is a rate limiting
+     * strategy dedicated to coordinate actions between shards, like identifying to the gateway.
+     *
+     * @return the current gateway limiter, for shard coordinated login, can be {@code null} if default is used
+     */
     @Nullable
     public GatewayLimiter getGatewayLimiter() {
         return gatewayLimiter;
     }
 
+    /**
+     * Set a new {@link discord4j.gateway.GatewayLimiter} to this builder. GatewayLimiter is a rate limiting strategy
+     * dedicated to coordinate actions between shards, like identifying to the gateway.
+     *
+     * @param gatewayLimiter the current gateway limiter, for shard coordinated login, can be {@code null} for a default
+     * @return this builder
+     */
     public DiscordClientBuilder setGatewayLimiter(@Nullable GatewayLimiter gatewayLimiter) {
         this.gatewayLimiter = gatewayLimiter;
         return this;
     }
 
+    /**
+     * Get the current {@link reactor.core.scheduler.Scheduler} for voice sending tasks.
+     *
+     * @return the scheduler for voice sending tasks
+     */
     public Scheduler getVoiceConnectionScheduler() {
         return voiceConnectionScheduler;
     }
 
+    /**
+     * Set a new {@link reactor.core.scheduler.Scheduler} for voice sending tasks.
+     *
+     * @param voiceConnectionScheduler the new scheduler for voice sending tasks, must not be {@code null}
+     * @return this builder
+     */
     public DiscordClientBuilder setVoiceConnectionScheduler(Scheduler voiceConnectionScheduler) {
-        this.voiceConnectionScheduler = voiceConnectionScheduler;
+        this.voiceConnectionScheduler = Objects.requireNonNull(voiceConnectionScheduler);
         return this;
     }
 
@@ -285,7 +508,7 @@ public final class DiscordClientBuilder {
         if (eventScheduler != null) {
             return eventScheduler;
         }
-        return Schedulers.fromExecutor(Executors.newWorkStealingPool());
+        return Schedulers.fromExecutor(Executors.newWorkStealingPool(), true);
     }
 
     private Scheduler initRouterScheduler() {
@@ -309,6 +532,11 @@ public final class DiscordClientBuilder {
         return new SimpleBucket(1, Duration.ofSeconds(6));
     }
 
+    /**
+     * Create a client ready to connect to Discord.
+     *
+     * @return a {@link discord4j.core.DiscordClient} based on this builder parameters
+     */
     public DiscordClient build() {
         Hooks.onOperatorDebug();
 
@@ -322,6 +550,7 @@ public final class DiscordClientBuilder {
         if (identifyOptions.getShardIndex() < 0 || identifyOptions.getShardIndex() >= identifyOptions.getShardCount()) {
             throw new IllegalArgumentException("0 <= shardIndex < shardCount");
         }
+        final int shardId = identifyOptions.getShardIndex();
 
         // Retrieve version properties
         final Properties properties = VersionUtil.getProperties();
@@ -340,9 +569,7 @@ public final class DiscordClientBuilder {
                 ExchangeStrategies.withJacksonDefaults(mapper));
         final RestClient restClient = new RestClient(new Router(webClient, initRouterScheduler()));
 
-        // Prepare identify parameters
-        final ClientConfig config = new ClientConfig(token, identifyOptions.getShardIndex(),
-                identifyOptions.getShardCount());
+        final ClientConfig config = new ClientConfig(token, shardId, identifyOptions.getShardCount());
 
         // Prepare Stores
         final StoreService storeService = initStoreService();
@@ -358,7 +585,7 @@ public final class DiscordClientBuilder {
 
         // Prepare EventDispatcher
         final FluxProcessor<Event, Event> eventProcessor = initEventProcessor();
-        final EventDispatcher eventDispatcher = new EventDispatcher(eventProcessor, initEventScheduler());
+        final EventDispatcher eventDispatcher = new EventDispatcher(eventProcessor, initEventScheduler(), shardId);
 
         final VoiceClient voiceClient = new VoiceClient(voiceConnectionScheduler, mapper, guildId -> {
             VoiceStateUpdate voiceStateUpdate = new VoiceStateUpdate(guildId, null, false, false);
@@ -373,7 +600,7 @@ public final class DiscordClientBuilder {
                 .flatMap(DispatchHandlers::<Dispatch, Event>handle)
                 .subscribeWith(eventProcessor);
 
-        log.info("Shard {} with {} {} ({})", identifyOptions.getShardIndex(), name, gitDescribe, url);
+        log.info("Shard {} with {} {} ({})", shardId, name, gitDescribe, url);
         return serviceMediator.getClient();
     }
 }
