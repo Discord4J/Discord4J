@@ -72,6 +72,7 @@ public class ExampleBot {
         List<EventHandler> eventHandlers = new ArrayList<>();
         eventHandlers.add(new AddRole());
         eventHandlers.add(new Echo());
+        eventHandlers.add(new UserInfo());
         eventHandlers.add(new LogLevelChange());
         eventHandlers.add(new BlockingEcho());
 
@@ -118,6 +119,25 @@ public class ExampleBot {
                     .flatMap(source -> message.getChannel()
                             .flatMap(channel -> channel.createMessage(source)))
                     .then();
+        }
+    }
+
+    public static class UserInfo extends EventHandler {
+
+        @Override
+        public Mono<Void> onMessageCreate(MessageCreateEvent event) {
+            Message message = event.getMessage();
+            if (message.getContent()
+                    .filter(content -> content.startsWith("!user "))
+                    .isPresent()) {
+                return Mono.justOrEmpty(message.getContent())
+                        .map(content -> content.split(" ", 2))
+                        .flatMap(tokens -> message.getClient().getUserById(Snowflake.of(tokens[1])))
+                        .flatMap(user -> message.getChannel()
+                                .flatMap(channel -> channel.createMessage(user.getUsername())))
+                        .then();
+            }
+            return Mono.empty();
         }
     }
 

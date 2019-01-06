@@ -20,19 +20,23 @@ package discord4j.rest.http.client;
 import discord4j.rest.json.response.ErrorResponse;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpResponseStatus;
+import reactor.netty.http.client.HttpClientResponse;
 
 import javax.annotation.Nullable;
 
 public class ClientException extends RuntimeException {
 
+    private final ClientRequest request;
     private final HttpResponseStatus status;
     private final HttpHeaders headers;
     private final ErrorResponse errorResponse;
 
-    public ClientException(HttpResponseStatus status, HttpHeaders headers, @Nullable ErrorResponse errorResponse) {
-        super(status.toString() + (errorResponse != null ? " " + errorResponse.toString() : ""));
-        this.status = status;
-        this.headers = headers;
+    public ClientException(ClientRequest request, HttpClientResponse response, @Nullable ErrorResponse errorResponse) {
+        super(request.method().toString() + " " + request.url() + " returned " + response.status().toString() +
+                (errorResponse != null ? " with response " + errorResponse.getFields() : ""));
+        this.request = request;
+        this.status = response.status();
+        this.headers = response.responseHeaders();
         this.errorResponse = errorResponse;
     }
 
@@ -51,10 +55,11 @@ public class ClientException extends RuntimeException {
 
     @Override
     public String toString() {
-        return "ClientException[" +
-                "status=" + status +
+        return "ClientException{" +
+                "request=" + request +
+                ", status=" + status +
                 ", headers=" + headers +
                 ", errorResponse=" + errorResponse +
-                ']';
+                "}";
     }
 }

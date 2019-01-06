@@ -46,4 +46,13 @@ public class ClientRequest {
     public HttpHeaders headers() {
         return headers;
     }
+
+    @Override
+    public String toString() {
+        return "ClientRequest{" +
+                "method=" + method +
+                ", url='" + url + '\'' +
+                ", headers=" + headers +
+                '}';
+    }
 }

@@ -70,7 +70,7 @@ public class DiscordWebClient {
      * The request will be processed according to the writer strategies and its response according to the reader
      * strategies available.
      *
-     * @param clientRequest the method, headers and URI of the client HTTP request
+     * @param request the method, headers and URI of the client HTTP request
      * @param body an object representing the body of the request
      * @param responseType the desired response type
      * @param responseConsumer the consumer to use while processing the response
@@ -78,17 +78,17 @@ public class DiscordWebClient {
      * @param <T> the type of the response body, can be {@link java.lang.Void}
      * @return a {@link reactor.core.publisher.Mono} of {@link T} with the response
      */
-    public <R, T> Mono<T> exchange(ClientRequest clientRequest, @Nullable R body, Class<T> responseType,
+    public <R, T> Mono<T> exchange(ClientRequest request, @Nullable R body, Class<T> responseType,
             Consumer<HttpClientResponse> responseConsumer) {
         Objects.requireNonNull(responseType);
 
-        HttpHeaders requestHeaders = new DefaultHttpHeaders().add(defaultHeaders).setAll(clientRequest.headers());
+        HttpHeaders requestHeaders = new DefaultHttpHeaders().add(defaultHeaders).setAll(request.headers());
         String contentType = requestHeaders.get(HttpHeaderNames.CONTENT_TYPE);
         HttpClient.RequestSender sender = httpClient
                 .observe((connection, newState) -> log.debug("{} {}", newState, connection))
                 .headers(headers -> headers.setAll(requestHeaders))
-                .request(clientRequest.method())
-                .uri(clientRequest.url());
+                .request(request.method())
+                .uri(request.url());
         return exchangeStrategies.writers().stream()
                 .filter(s -> s.canWrite(body != null ? body.getClass() : null, contentType))
                 .findFirst()
@@ -106,8 +106,8 @@ public class DiscordWebClient {
                         return Mono.justOrEmpty(readerStrategy)
                                 .map(DiscordWebClient::<ErrorResponse>cast)
                                 .flatMap(s -> s.read(content, ErrorResponse.class))
-                                .flatMap(s -> Mono.<T>error(clientException(response, s)))
-                                .switchIfEmpty(Mono.error(clientException(response, null)));
+                                .flatMap(s -> Mono.<T>error(clientException(request, response, s)))
+                                .switchIfEmpty(Mono.error(clientException(request, response, null)));
                     } else {
                         return readerStrategy.map(DiscordWebClient::<T>cast)
                                 .map(s -> s.read(content, responseType))
@@ -126,8 +126,8 @@ public class DiscordWebClient {
         return (ReaderStrategy<T>) strategy;
     }
 
-    private static ClientException clientException(HttpClientResponse response, @Nullable ErrorResponse errorResponse) {
-        return new ClientException(response.status(), response.responseHeaders(), errorResponse);
+    private static ClientException clientException(ClientRequest request, HttpClientResponse response, @Nullable ErrorResponse errorResponse) {
+        return new ClientException(request, response, errorResponse);
     }
 
     private static RuntimeException noWriterException(@Nullable Object body, String contentType) {
