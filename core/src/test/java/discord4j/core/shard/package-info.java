@@ -14,34 +14,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J. If not, see <http://www.gnu.org/licenses/>.
  */
+@NonNullApi
+package discord4j.core.shard;
 
-package discord4j.core;
-
-import discord4j.store.jdk.JdkStore;
-import reactor.core.publisher.Mono;
-
-import java.io.Serializable;
-import java.util.Map;
-
-public class DirtyJdkStore<K extends Comparable<K>, V extends Serializable> extends JdkStore<K, V> {
-
-    public DirtyJdkStore(Map<K, V> map) {
-        super(map);
-    }
-
-    public DirtyJdkStore(boolean persist) {
-        super(persist);
-    }
-
-    @Override
-    public Mono<Void> invalidate() {
-        return Mono.empty();
-    }
-
-    @Override
-    public String toString() {
-        return "DirtyJdkStore@" + Integer.toHexString(hashCode()) + "{" +
-                "map=" + getMap().getClass().getCanonicalName() +
-                '}';
-    }
-}
+import reactor.util.annotation.NonNullApi;

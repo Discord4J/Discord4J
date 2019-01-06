@@ -15,35 +15,40 @@
  * along with Discord4J. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package discord4j.core;
+package discord4j.core.shard;
 
 import discord4j.store.api.Store;
 import discord4j.store.api.util.StoreContext;
+import discord4j.store.jdk.JdkStore;
 import discord4j.store.jdk.JdkStoreService;
 import reactor.core.publisher.Mono;
 
 import java.io.Serializable;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
-public class SingleJdkStoreService extends JdkStoreService {
+public class ShardJdkStoreService extends JdkStoreService {
 
-    private final Map<Class<?>, Store<?, ?>> stores = new ConcurrentHashMap<>();
+    private final ShardStoreRegistry registry;
+
     volatile Class<?> messageClass;
+    volatile int shardId;
+
+    public ShardJdkStoreService(ShardStoreRegistry registry) {
+        this.registry = registry;
+    }
 
     @Override
-    @SuppressWarnings("unchecked")
     public <K extends Comparable<K>, V extends Serializable> Store<K, V> provideGenericStore(Class<K> keyClass,
-                                                                                             Class<V> valueClass) {
-        if (!stores.containsKey(valueClass)) {
-            stores.put(valueClass, new DirtyJdkStore<>(!valueClass.equals(messageClass)));
+            Class<V> valueClass) {
+        if (!registry.containsStore(valueClass)) {
+            registry.putStore(valueClass, new JdkStore<K, V>(!valueClass.equals(messageClass)));
         }
-        return (Store<K, V>) stores.get(valueClass);
+        return new ShardAwareStore<>(registry.getValueStore(keyClass, valueClass), registry.getKeyStore(valueClass, shardId));
     }
 
     @Override
     public Mono<Void> init(StoreContext context) {
         messageClass = context.getMessageClass();
+        shardId = context.getShard();
         return Mono.empty();
     }
 }

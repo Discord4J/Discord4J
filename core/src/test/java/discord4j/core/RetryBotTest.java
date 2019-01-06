@@ -28,6 +28,8 @@ import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.presence.Presence;
 import discord4j.core.object.util.Snowflake;
+import discord4j.core.shard.ShardJdkStoreService;
+import discord4j.core.shard.ShardStoreRegistry;
 import discord4j.gateway.GatewayObserver;
 import discord4j.gateway.IdentifyOptions;
 import discord4j.gateway.SimpleBucket;
@@ -84,11 +86,11 @@ public class RetryBotTest {
         permitSink.next(0);
 
         final Map<Integer, IdentifyOptions> optionsMap = loadResumeData();
-        // share stores across shards
-        // we are sure we are not blocking EventDispatcher streams
-        // share IDENTIFY limits
+        // share stores across shards, in conjunction with ShardJdkStoreService (see below)
+        ShardStoreRegistry registry = new ShardStoreRegistry();
+        // using Schedulers.immediate() because we are not blocking EventDispatcher streams
+        // pass a GatewayLimiter to make all shards aware of IDENTIFY rate limits
         final DiscordClientBuilder builder = new DiscordClientBuilder(token)
-                .setStoreService(new SingleJdkStoreService())
                 .setEventScheduler(Schedulers.immediate())
                 .setGatewayLimiter(new SimpleBucket(1, Duration.ofSeconds(6)))
                 .setGatewayObserver((s, o) -> {
@@ -107,7 +109,9 @@ public class RetryBotTest {
 
         Flux.range(0, shardCount)
                 .flatMap(index -> {
-                    DiscordClient client = builder.setIdentifyOptions(optionsMap.get(index)).build();
+                    DiscordClient client = builder.setIdentifyOptions(optionsMap.get(index))
+                            .setStoreService(new ShardJdkStoreService(registry))
+                            .build();
                     clients.put(index, client);
                     if (optionsMap.get(index).getResumeSequence() != null) {
                         return client.login();
