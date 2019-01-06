@@ -133,7 +133,7 @@ public class DiscordWebSocketHandler {
                 mainLog.warn("Invalid custom outbound delay: {}", delayValue);
             }
         }
-        return 0;
+        return 10;
     }
 
     public Mono<Void> handle(WebsocketInbound in, WebsocketOutbound out) {
