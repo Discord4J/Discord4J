@@ -161,7 +161,7 @@ public final class DiscordClientBuilder {
      * {@link #setIdentifyOptions(discord4j.gateway.IdentifyOptions)}.
      * <p>
      * Validation is only performed during {@link #build()}. Make sure the following holds:
-     * <blockquote><pre>0 <= shardIndex < shardCount</pre></blockquote>
+     * <blockquote><pre>0 &lt;= shardIndex &lt; shardCount</pre></blockquote>
      *
      * @param shardIndex the new shard index, can be set to {@code null} to use the value under
      * {@link #setIdentifyOptions(discord4j.gateway.IdentifyOptions)} if set, or fallback to a default
@@ -186,7 +186,7 @@ public final class DiscordClientBuilder {
      * Change the shard count.
      * <p>
      * Validation is only performed during {@link #build()}. Make sure the following holds:
-     * <blockquote><pre>0 <= shardIndex < shardCount</pre></blockquote>
+     * <blockquote><pre>0 &lt;= shardIndex &lt; shardCount</pre></blockquote>
      *
      * @param shardCount the new shard count, can be set to {@code null} to use a default value
      * @return this builder
