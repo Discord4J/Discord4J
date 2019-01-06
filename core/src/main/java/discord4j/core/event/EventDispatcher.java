@@ -43,16 +43,19 @@ public class EventDispatcher {
 
     private final FluxProcessor<Event, Event> processor;
     private final Scheduler scheduler;
+    private final int shardIndex;
 
     /**
      * Creates a new event dispatcher using the given processor and thread model.
      *
      * @param processor a FluxProcessor of Event types, used to bridge gateway events to the dispatcher subscribers
      * @param scheduler a Scheduler to ensure a certain thread model on each published signal
+     * @param shardIndex the shard ID for logger name purposes
      */
-    public EventDispatcher(FluxProcessor<Event, Event> processor, Scheduler scheduler) {
+    public EventDispatcher(FluxProcessor<Event, Event> processor, Scheduler scheduler, int shardIndex) {
         this.processor = processor;
         this.scheduler = scheduler;
+        this.shardIndex = shardIndex;
     }
 
     /**
@@ -66,7 +69,7 @@ public class EventDispatcher {
     public <T extends Event> Flux<T> on(Class<T> eventClass) {
         return processor.publishOn(scheduler)
                 .ofType(eventClass)
-                .log("discord4j.dispatch." + eventClass.getSimpleName(), Level.FINE,
+                .log("discord4j.dispatch." + eventClass.getSimpleName() + "." + shardIndex, Level.FINE,
                         SignalType.ON_NEXT, SignalType.ON_SUBSCRIBE, SignalType.ON_ERROR, SignalType.CANCEL);
     }
 }

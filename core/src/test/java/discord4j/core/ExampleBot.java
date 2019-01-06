@@ -17,6 +17,8 @@
 
 package discord4j.core;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.LoggerContext;
 import discord4j.core.event.domain.lifecycle.ReadyEvent;
 import discord4j.core.event.domain.lifecycle.ResumeEvent;
 import discord4j.core.event.domain.message.MessageCreateEvent;
@@ -27,6 +29,7 @@ import discord4j.core.object.util.Snowflake;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.Logger;
@@ -69,6 +72,7 @@ public class ExampleBot {
         List<EventHandler> eventHandlers = new ArrayList<>();
         eventHandlers.add(new AddRole());
         eventHandlers.add(new Echo());
+        eventHandlers.add(new LogLevelChange());
         eventHandlers.add(new BlockingEcho());
 
         // Build a safe event-processing pipeline
@@ -114,6 +118,35 @@ public class ExampleBot {
                     .flatMap(source -> message.getChannel()
                             .flatMap(channel -> channel.createMessage(source)))
                     .then();
+        }
+    }
+
+    public static class LogLevelChange extends EventHandler {
+
+        private final LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
+
+        @Override
+        public Mono<Void> onMessageCreate(MessageCreateEvent event) {
+            Message message = event.getMessage();
+            if (message.getContent()
+                    .filter(content -> content.startsWith("!log "))
+                    .isPresent()) {
+                return Mono.justOrEmpty(message.getContent())
+                        .map(content -> content.split(" ", 3))
+                        .doOnNext(tokens -> {
+                            String level = tokens[1];
+                            String name = tokens[2];
+                            Level logLevel = Level.valueOf(level);
+                            context.getLoggerList().stream()
+                                    .filter(logger -> logger.getName().startsWith(name))
+                                    .forEach(logger -> {
+                                        log.info("Changing {} to {}", logger, logLevel);
+                                        logger.setLevel(logLevel);
+                                    });
+                        })
+                        .then();
+            }
+            return Mono.empty();
         }
     }
 
