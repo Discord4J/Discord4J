@@ -23,7 +23,6 @@ import discord4j.common.json.UserResponse;
 
 public class GuildBanRemove implements Dispatch {
 
-    @JsonUnwrapped
     private UserResponse user;
     @JsonProperty("guild_id")
     @UnsignedJson
