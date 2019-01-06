@@ -2,7 +2,7 @@ plugins {
     id 'java'
     id 'maven-publish'
     id 'nebula.nebula-bintray' version '5.0.0'
-    id 'com.gorylenko.gradle-git-properties' version '1.5.1' apply false
+    id 'com.gorylenko.gradle-git-properties' version '2.0.0-beta1' apply false
     id 'io.spring.dependency-management' version '1.0.6.RELEASE' apply false
 }
 
