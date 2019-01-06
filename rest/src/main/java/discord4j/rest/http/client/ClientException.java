@@ -40,6 +40,10 @@ public class ClientException extends RuntimeException {
         this.errorResponse = errorResponse;
     }
 
+    public ClientRequest getRequest() {
+        return request;
+    }
+
     public HttpResponseStatus getStatus() {
         return status;
     }
