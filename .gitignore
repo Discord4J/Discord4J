@@ -23,6 +23,7 @@ build/
 # Gradle
 .gradle
 !gradle-wrapper.jar
+local.properties
 
 # Misc
 logs/

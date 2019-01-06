@@ -1,7 +1,7 @@
 plugins {
     id 'java'
     id 'maven-publish'
-    id 'com.jfrog.bintray' version '1.8.0'
+    id 'nebula.nebula-bintray' version '5.0.0'
     id 'com.gorylenko.gradle-git-properties' version '1.5.1' apply false
     id 'io.spring.dependency-management' version '1.0.6.RELEASE' apply false
 }
@@ -11,7 +11,7 @@ ext {
     github_org = 'Discord4J'
     project_name = 'Discord4J'
     artifact_group = 'com.discord4j'
-    project_version = '3.0.0-SNAPSHOT'
+    project_version = "$version"
     project_description = 'Java interface for the Discord API'
     project_url = 'https://discord4j.com'
     project_jdk = '1.8'
@@ -23,14 +23,14 @@ ext {
     junit_version = '4.12'
     mockito_version = '2.23.0'
     logback_version = '1.3.0-alpha4'
-    jdkstores_version = 'f834348'
+    jdkstores_version = "$storesVersion"
 }
 
 allprojects {
     apply plugin: 'java'
     apply plugin: 'io.spring.dependency-management'
     apply plugin: 'maven-publish'
-    apply plugin: 'com.jfrog.bintray'
+    apply plugin: 'nebula.nebula-bintray'
 
     group = artifact_group
     version = project_version
@@ -47,6 +47,7 @@ allprojects {
 
     repositories {
         jcenter()
+        maven { url 'https://dl.bintray.com/discord4j/maven' }
         maven { url 'https://jitpack.io' }
     }
 
@@ -105,7 +106,7 @@ allprojects {
         dryRun = false
         publish = true
         pkg {
-            userOrg = 'austinv11'
+            userOrg = 'discord4j'
             repo = 'maven'
             name = 'Discord4J'
             websiteUrl = project_url
@@ -196,6 +197,6 @@ publishing {
 }
 
 wrapper {
-    gradleVersion = "4.7"
+    gradleVersion = "5.1"
     distributionType = Wrapper.DistributionType.ALL
 }

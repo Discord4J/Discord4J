@@ -5,7 +5,7 @@ dependencies {
     compile project(':gateway')
     compile project(':voice')
 
-    compile "com.discord4j.stores:stores-jdk:$jdkstores_version"
+    compile "$storesArtifact:$jdkstores_version"
 
     testCompile "junit:junit:$junit_version"
     testCompile "org.mockito:mockito-core:$mockito_version"
