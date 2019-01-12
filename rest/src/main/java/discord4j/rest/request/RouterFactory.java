@@ -17,17 +17,9 @@
 
 package discord4j.rest.request;
 
-import reactor.core.publisher.Mono;
+import discord4j.rest.http.client.DiscordWebClient;
 
-public interface Router {
+public interface RouterFactory {
 
-    /**
-     * Queues a request for execution in the appropriate {@link RequestStream request stream}
-     * according to the request's {@link BucketKey bucket}.
-     *
-     * @param request The request to queue.
-     * @param <T> The request's response type.
-     * @return A mono that receives signals based on the request's response.
-     */
-    <T> Mono<T> exchange(DiscordRequest<T> request);
+    Router getRouter(DiscordWebClient webClient);
 }

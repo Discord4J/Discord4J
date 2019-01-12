@@ -33,6 +33,7 @@ import discord4j.core.shard.ShardStoreRegistry;
 import discord4j.gateway.GatewayObserver;
 import discord4j.gateway.IdentifyOptions;
 import discord4j.gateway.SimpleBucket;
+import discord4j.rest.request.SingleRouterFactory;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -92,6 +93,7 @@ public class RetryBotTest {
         // pass a GatewayLimiter to make all shards aware of IDENTIFY rate limits
         final DiscordClientBuilder builder = new DiscordClientBuilder(token)
                 .setEventScheduler(Schedulers.immediate())
+                .setRouterFactory(new SingleRouterFactory())
                 .setGatewayLimiter(new SimpleBucket(1, Duration.ofSeconds(6)))
                 .setGatewayObserver((s, o) -> {
                     optionsMap.put(o.getShardIndex(), o);

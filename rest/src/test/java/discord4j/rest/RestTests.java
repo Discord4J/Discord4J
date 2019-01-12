@@ -25,6 +25,7 @@ import discord4j.common.jackson.PossibleModule;
 import discord4j.common.jackson.UnknownPropertyHandler;
 import discord4j.rest.http.ExchangeStrategies;
 import discord4j.rest.http.client.DiscordWebClient;
+import discord4j.rest.request.DefaultRouter;
 import discord4j.rest.request.Router;
 import discord4j.rest.route.Routes;
 import discord4j.rest.service.ChannelService;
@@ -43,7 +44,7 @@ public abstract class RestTests {
         HttpClient httpClient = HttpClient.create().baseUrl(Routes.BASE_URL).compress(true);
         DiscordWebClient webClient = new DiscordWebClient(httpClient, defaultHeaders,
                 ExchangeStrategies.withJacksonDefaults(mapper));
-        return new Router(webClient, Schedulers.elastic());
+        return new DefaultRouter(webClient, Schedulers.elastic());
     }
 
     public static ObjectMapper getMapper(boolean ignoreUnknown) {

@@ -40,7 +40,8 @@ import discord4j.gateway.retry.RetryOptions;
 import discord4j.rest.RestClient;
 import discord4j.rest.http.ExchangeStrategies;
 import discord4j.rest.http.client.DiscordWebClient;
-import discord4j.rest.request.Router;
+import discord4j.rest.request.DefaultRouterFactory;
+import discord4j.rest.request.RouterFactory;
 import discord4j.rest.route.Routes;
 import discord4j.store.api.service.StoreService;
 import discord4j.store.api.service.StoreServiceLoader;
@@ -96,7 +97,7 @@ public final class DiscordClientBuilder {
     private Scheduler eventScheduler;
 
     @Nullable
-    private Scheduler routerScheduler;
+    private RouterFactory routerFactory;
 
     @Nullable
     private Presence initialPresence;
@@ -164,7 +165,7 @@ public final class DiscordClientBuilder {
      * <blockquote><pre>0 &lt;= shardIndex &lt; shardCount</pre></blockquote>
      *
      * @param shardIndex the new shard index, can be set to {@code null} to use the value under
-     * {@link #setIdentifyOptions(discord4j.gateway.IdentifyOptions)} if set, or fallback to a default
+     *         {@link #setIdentifyOptions(discord4j.gateway.IdentifyOptions)} if set, or fallback to a default
      * @return this builder
      */
     public DiscordClientBuilder setShardIndex(@Nullable Integer shardIndex) {
@@ -238,7 +239,7 @@ public final class DiscordClientBuilder {
      * {@link discord4j.core.event.EventDispatcher}.
      *
      * @param eventProcessor a new FluxProcessor used in this builder. Can be left {@code null} if a default is to
-     * be used ({@link reactor.core.publisher.EmitterProcessor})
+     *         be used ({@link reactor.core.publisher.EmitterProcessor})
      * @return this builder
      */
     public DiscordClientBuilder setEventProcessor(@Nullable FluxProcessor<Event, Event> eventProcessor) {
@@ -270,25 +271,31 @@ public final class DiscordClientBuilder {
     }
 
     /**
-     * Get the current {@link reactor.core.scheduler.Scheduler} used to execute REST API requests and to process their
-     * responses.
+     * Get the current {@link discord4j.rest.request.RouterFactory} used to create a
+     * {@link discord4j.rest.request.Router} that executes Discord REST API requests.
      *
-     * @return the current scheduler for REST API actions, can be {@code null} when using a default value
+     * @return the current RouterFactory used to create a Router that perform API requests
      */
     @Nullable
-    public Scheduler getRouterScheduler() {
-        return routerScheduler;
+    public RouterFactory getRouterFactory() {
+        return routerFactory;
     }
 
     /**
-     * Set a new {@link reactor.core.scheduler.Scheduler} used to execute REST API requests and to process their
-     * responses.
+     * Set a new {@link discord4j.rest.request.RouterFactory} used to create a {@link discord4j.rest.request.Router}
+     * that executes Discord REST API requests.
+     * <p>
+     * The resulting client will utilize the produced Router for every request. When performing sharding operations, it
+     * is expected that the underlying {@link discord4j.rest.request.Router} instance to be shared across shards in
+     * order to properly coordinate rate-limits on global endpoints. For those cases, use
+     * {@link discord4j.rest.request.SingleRouterFactory}.
      *
-     * @param routerScheduler a new scheduler for REST API actions. Can be {@code null} to use a default value
+     * @param routerFactory a new RouterFactory to crate a Router that performs API requests. Pass {@code null} to use a
+     *         default value
      * @return this builder
      */
-    public DiscordClientBuilder setRouterScheduler(@Nullable Scheduler routerScheduler) {
-        this.routerScheduler = routerScheduler;
+    public DiscordClientBuilder setRouterFactory(@Nullable RouterFactory routerFactory) {
+        this.routerFactory = routerFactory;
         return this;
     }
 
@@ -511,11 +518,11 @@ public final class DiscordClientBuilder {
         return Schedulers.fromExecutor(Executors.newWorkStealingPool(), true);
     }
 
-    private Scheduler initRouterScheduler() {
-        if (routerScheduler != null) {
-            return routerScheduler;
+    private RouterFactory initRouterFactory() {
+        if (routerFactory != null) {
+            return routerFactory;
         }
-        return Schedulers.elastic();
+        return new DefaultRouterFactory(Schedulers.elastic());
     }
 
     private GatewayObserver initGatewayObserver() {
@@ -567,7 +574,7 @@ public final class DiscordClientBuilder {
         final HttpClient httpClient = HttpClient.create().baseUrl(Routes.BASE_URL).compress(true);
         final DiscordWebClient webClient = new DiscordWebClient(httpClient, defaultHeaders,
                 ExchangeStrategies.withJacksonDefaults(mapper));
-        final RestClient restClient = new RestClient(new Router(webClient, initRouterScheduler()));
+        final RestClient restClient = new RestClient(initRouterFactory().getRouter(webClient));
 
         final ClientConfig config = new ClientConfig(token, shardId, identifyOptions.getShardCount());
 
@@ -581,7 +588,8 @@ public final class DiscordClientBuilder {
         final StoreInvalidator storeInvalidator = new StoreInvalidator(stateHolder);
         final GatewayClient gatewayClient = new GatewayClient(
                 new JacksonPayloadReader(mapper), new JacksonPayloadWriter(mapper),
-                retryOptions, token, identifyOptions, storeInvalidator.then(initGatewayObserver()), initGatewayLimiter());
+                retryOptions, token, identifyOptions, storeInvalidator.then(initGatewayObserver()),
+                initGatewayLimiter());
 
         // Prepare EventDispatcher
         final FluxProcessor<Event, Event> eventProcessor = initEventProcessor();

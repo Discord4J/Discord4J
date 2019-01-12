@@ -126,7 +126,7 @@ public class DiscordRequest<T> {
     }
 
     /**
-     * Exchange this request through the given {@link discord4j.rest.request.Router}.
+     * Exchange this request through the given {@link Router}.
      *
      * @param router a router that performs this request
      * @return the result of this request

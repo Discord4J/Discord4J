@@ -5,6 +5,7 @@
     <logger name="discord4j.gateway.inbound" level="INFO"/>
     <logger name="discord4j.gateway.outbound" level="INFO"/>
     <logger name="discord4j.rest.http.client.DiscordWebClient" level="INFO"/>
+    <logger name="discord4j.rest.request" level="TRACE"/>
     <logger name="discord4j.dispatch" level="INFO"/>
     <logger name="discord4j.dispatch.PresenceUpdateEvent" level="INFO"/>
 
