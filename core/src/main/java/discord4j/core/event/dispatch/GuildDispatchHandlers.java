@@ -65,8 +65,12 @@ class GuildDispatchHandlers {
         ServiceMediator serviceMediator = context.getServiceMediator();
 
         GuildBean guildBean = new GuildBean(context.getDispatch());
-        // Solves https://github.com/Discord4J/Discord4J/issues/429
-        guildBean.setMembers(new long[0]);
+        if (guildBean.getLarge()) {
+            // Solves https://github.com/Discord4J/Discord4J/issues/429
+            // Member store cannot have duplicates because keys cannot
+            // be duped, but array addition in GuildBeans can
+            guildBean.setMembers(new long[0]);
+        }
 
         Mono<Void> saveGuild = serviceMediator.getStateHolder().getGuildStore().save(guildBean.getId(), guildBean);
         // TODO optimize to separate into three Publisher<Channel> and saveAll to limit store hits
@@ -104,6 +108,13 @@ class GuildDispatchHandlers {
                         .map(member -> Tuples.of(LongLongTuple2.of(guildBean.getId(), member.getUser().getId()),
                                 new MemberBean(member))));
 
+        Mono<Void> saveUsers = serviceMediator.getStateHolder().getUserStore()
+                .save(Flux.just(context.getDispatch().getMembers())
+                        .map(GuildMemberResponse::getUser)
+                        .map(UserBean::new)
+                        .map(bean -> Tuples.of(bean.getId(), bean)))
+                .then();
+
         Mono<Void> saveVoiceStates = serviceMediator.getStateHolder().getVoiceStateStore()
                 .save(Flux.just(context.getDispatch().getVoiceStates())
                         .map(voiceState -> Tuples.of(LongLongTuple2.of(guildBean.getId(), voiceState.getUserId()),
@@ -114,16 +125,18 @@ class GuildDispatchHandlers {
                         .map(presence -> Tuples.of(LongLongTuple2.of(guildBean.getId(), presence.getUser().getId()),
                                 new PresenceBean(presence))));
 
-        Mono<Void> startMemberChunk = Mono.fromRunnable(() -> {
-            context.getServiceMediator().getGatewayClient().sender()
-                    .next(GatewayPayload.requestGuildMembers(new RequestGuildMembers(guildBean.getId(), "", 0)));
-        });
+        Mono<Void> startMemberChunk = Mono.just(guildBean)
+                .filter(GuildBean::getLarge)
+                .doOnNext(bean -> context.getServiceMediator().getGatewayClient().sender()
+                        .next(GatewayPayload.requestGuildMembers(new RequestGuildMembers(bean.getId(), "", 0))))
+                .then();
 
         return saveGuild
                 .and(saveChannels)
                 .and(saveRoles)
                 .and(saveEmojis)
                 .and(saveMembers)
+                .and(saveUsers)
                 .and(saveVoiceStates)
                 .and(savePresences)
                 .and(startMemberChunk) // TODO make optional
