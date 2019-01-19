@@ -16,6 +16,7 @@
  */
 package discord4j.core.spec;
 
+import discord4j.core.object.util.Snowflake;
 import discord4j.rest.json.request.EmbedRequest;
 import discord4j.rest.json.request.MessageCreateRequest;
 import discord4j.rest.util.MultipartRequest;
@@ -40,8 +41,13 @@ public class MessageCreateSpec implements Spec<MultipartRequest> {
         return this;
     }
 
-    public MessageCreateSpec setNonce(String nonce) {
-        this.nonce = nonce;
+    public MessageCreateSpec setNonce(Snowflake nonce) {
+        this.nonce = nonce.toString();
+        return this;
+    }
+
+    public MessageCreateSpec setTts(boolean tts) {
+        this.tts = tts;
         return this;
     }
 
