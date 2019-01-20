@@ -27,6 +27,7 @@ import discord4j.rest.json.request.RoleCreateRequest;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 public class GuildCreateSpec implements Spec<GuildCreateRequest> {
 
@@ -64,13 +65,17 @@ public class GuildCreateSpec implements Spec<GuildCreateRequest> {
         return this;
     }
 
-    public GuildCreateSpec addRole(RoleCreateSpec roleSpec) {
-        roles.add(roleSpec.asRequest());
+    public GuildCreateSpec addRole(Consumer<? super RoleCreateSpec> roleSpec) {
+        final RoleCreateSpec mutatedSpec = new RoleCreateSpec();
+        roleSpec.accept(mutatedSpec);
+        roles.add(mutatedSpec.asRequest());
         return this;
     }
 
-    public GuildCreateSpec addEveryoneRole(RoleCreateSpec roleSpec) {
-        roles.add(0, roleSpec.asRequest());
+    public GuildCreateSpec addEveryoneRole(Consumer<? super RoleCreateSpec> roleSpec) {
+        final RoleCreateSpec mutatedSpec = new RoleCreateSpec();
+        roleSpec.accept(mutatedSpec);
+        roles.add(mutatedSpec.asRequest());
         return this;
     }
 

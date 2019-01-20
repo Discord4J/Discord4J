@@ -19,10 +19,13 @@ package discord4j.core.spec;
 import discord4j.common.jackson.Possible;
 import discord4j.rest.json.request.WebhookModifyRequest;
 
-public class WebhookEditSpec implements Spec<WebhookModifyRequest> {
+import javax.annotation.Nullable;
+
+public class WebhookEditSpec implements AuditSpec<WebhookModifyRequest> {
 
     private Possible<String> name = Possible.absent();
     private Possible<String> avatar = Possible.absent();
+    private String reason;
 
     public WebhookEditSpec setName(String name) {
         this.name = Possible.of(name);
@@ -32,6 +35,18 @@ public class WebhookEditSpec implements Spec<WebhookModifyRequest> {
     public WebhookEditSpec setAvatar(String avatar) {
         this.avatar = Possible.of(avatar);
         return this;
+    }
+
+    @Override
+    public WebhookEditSpec setReason(final String reason) {
+        this.reason = reason;
+        return this;
+    }
+
+    @Nullable
+    @Override
+    public String getReason() {
+        return reason;
     }
 
     @Override

@@ -65,16 +65,12 @@ class BaseMessageChannel extends BaseChannel implements MessageChannel {
     }
 
     @Override
-    public final Mono<Message> createMessage(final Consumer<MessageCreateSpec> spec) {
+    public final Mono<Message> createMessage(final Consumer<? super MessageCreateSpec> spec) {
         final MessageCreateSpec mutatedSpec = new MessageCreateSpec();
         spec.accept(mutatedSpec);
-        return createMessage(mutatedSpec);
-    }
 
-    @Override
-    public final Mono<Message> createMessage(final MessageCreateSpec spec) {
         return getServiceMediator().getRestClient().getChannelService()
-                .createMessage(getId().asLong(), spec.asRequest())
+                .createMessage(getId().asLong(), mutatedSpec.asRequest())
                 .map(MessageBean::new)
                 .map(bean -> new Message(getServiceMediator(), bean));
     }

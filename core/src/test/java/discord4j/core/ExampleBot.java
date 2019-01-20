@@ -101,7 +101,7 @@ public class ExampleBot {
                     .map(Mono::just)
                     .orElseGet(Mono::empty)
                     .flatMap(content -> message.getAuthorAsMember())
-                    .flatMap(member -> member.addRole(Snowflake.of(testRole)));
+                    .flatMap(member -> member.addRole(Snowflake.of(testRole), null));
             // if "testRole" is null, the bot will keep processing events despite throwing an error
         }
     }

@@ -552,29 +552,16 @@ public final class Guild implements Entity {
     /**
      * Requests to edit this guild.
      *
-     * @param spec A {@link Consumer} that provides a "blank" {@link GuildEditSpec} to be operated on. If some
-     * properties need to be retrieved via blocking operations (such as retrieval from a database), then it is
-     * recommended to build the spec externally and call {@link #edit(GuildEditSpec)}.
-     *
+     * @param spec A {@link Consumer} that provides a "blank" {@link GuildEditSpec} to be operated on.
      * @return A {@link Mono} where, upon successful completion, emits the edited {@link Guild}. If an error is
      * received, it is emitted through the {@code Mono}.
      */
-    public Mono<Guild> edit(final Consumer<GuildEditSpec> spec) {
+    public Mono<Guild> edit(final Consumer<? super GuildEditSpec> spec) {
         final GuildEditSpec mutatedSpec = new GuildEditSpec();
         spec.accept(mutatedSpec);
-        return edit(mutatedSpec);
-    }
 
-    /**
-     * Requests to edit this guild.
-     *
-     * @param spec A configured {@link GuildEditSpec} to perform the request on.
-     * @return A {@link Mono} where, upon successful completion, emits the edited {@link Guild}. If an error is
-     * received, it is emitted through the {@code Mono}.
-     */
-    public Mono<Guild> edit(final GuildEditSpec spec) {
         return serviceMediator.getRestClient().getGuildService()
-                .modifyGuild(getId().asLong(), spec.asRequest())
+                .modifyGuild(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason())
                 .map(BaseGuildBean::new)
                 .map(bean -> new Guild(serviceMediator, bean));
     }
@@ -582,29 +569,16 @@ public final class Guild implements Entity {
     /**
      * Requests to create an emoji.
      *
-     * @param spec A {@link Consumer} that provides a "blank" {@link GuildEmojiCreateSpec} to be operated on. If some
-     * properties need to be retrieved via blocking operations (such as retrieval from a database), then it is
-     * recommended to build the spec externally and call {@link #createEmoji(GuildEmojiCreateSpec)}.
-     *
+     * @param spec A {@link Consumer} that provides a "blank" {@link GuildEmojiCreateSpec} to be operated on.
      * @return A {@link Mono} where, upon successful completion, emits the created {@link GuildEmoji}. If an error is
      * received, it is emitted through the {@code Mono}.
      */
-    public Mono<GuildEmoji> createEmoji(final Consumer<GuildEmojiCreateSpec> spec) {
+    public Mono<GuildEmoji> createEmoji(final Consumer<? super GuildEmojiCreateSpec> spec) {
         final GuildEmojiCreateSpec mutatedSpec = new GuildEmojiCreateSpec();
         spec.accept(mutatedSpec);
-        return createEmoji(mutatedSpec);
-    }
 
-    /**
-     * Requests to create an emoji.
-     *
-     * @param spec A configured {@link GuildEmojiCreateSpec} to perform the request on.
-     * @return A {@link Mono} where, upon successful completion, emits the created {@link GuildEmoji}. If an error is
-     * received, it is emitted through the {@code Mono}.
-     */
-    public Mono<GuildEmoji> createEmoji(final GuildEmojiCreateSpec spec) {
         return serviceMediator.getRestClient().getEmojiService()
-                .createGuildEmoji(getId().asLong(), spec.asRequest())
+                .createGuildEmoji(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason())
                 .map(GuildEmojiBean::new)
                 .map(bean -> new GuildEmoji(serviceMediator, bean, getId().asLong()));
     }
@@ -612,29 +586,16 @@ public final class Guild implements Entity {
     /**
      * Requests to create a role.
      *
-     * @param spec A {@link Consumer} that provides a "blank" {@link RoleCreateSpec} to be operated on. If some
-     * properties need to be retrieved via blocking operations (such as retrieval from a database), then it is
-     * recommended to build the spec externally and call {@link #createRole(RoleCreateSpec)}.
-     *
+     * @param spec A {@link Consumer} that provides a "blank" {@link RoleCreateSpec} to be operated on.
      * @return A {@link Mono} where, upon successful completion, emits the created {@link Role}. If an error is
      * received, it is emitted through the {@code Mono}.
      */
-    public Mono<Role> createRole(final Consumer<RoleCreateSpec> spec) {
+    public Mono<Role> createRole(final Consumer<? super RoleCreateSpec> spec) {
         final RoleCreateSpec mutatedSpec = new RoleCreateSpec();
         spec.accept(mutatedSpec);
-        return createRole(mutatedSpec);
-    }
 
-    /**
-     * Requests to create a role.
-     *
-     * @param spec A configured {@link RoleCreateSpec} to perform the request on.
-     * @return A {@link Mono} where, upon successful completion, emits the created {@link Role}. If an error is
-     * received, it is emitted through the {@code Mono}.
-     */
-    public Mono<Role> createRole(final RoleCreateSpec spec) {
         return serviceMediator.getRestClient().getGuildService()
-                .createGuildRole(getId().asLong(), spec.asRequest())
+                .createGuildRole(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason())
                 .map(RoleBean::new)
                 .map(bean -> new Role(serviceMediator, bean, getId().asLong()));
     }
@@ -642,29 +603,16 @@ public final class Guild implements Entity {
     /**
      * Requests to create a category.
      *
-     * @param spec A {@link Consumer} that provides a "blank" {@link CategoryCreateSpec} to be operated on. If some
-     * properties need to be retrieved via blocking operations (such as retrieval from a database), then it is
-     * recommended to build the spec externally and call {@link #createCategory(CategoryCreateSpec)}.
-     *
+     * @param spec A {@link Consumer} that provides a "blank" {@link CategoryCreateSpec} to be operated on.
      * @return A {@link Mono} where, upon successful completion, emits the created {@link Category}. If an error is
      * received, it is emitted through the {@code Mono}.
      */
-    public Mono<Category> createCategory(final Consumer<CategoryCreateSpec> spec) {
+    public Mono<Category> createCategory(final Consumer<? super CategoryCreateSpec> spec) {
         final CategoryCreateSpec mutatedSpec = new CategoryCreateSpec();
         spec.accept(mutatedSpec);
-        return createCategory(mutatedSpec);
-    }
 
-    /**
-     * Requests to create a category.
-     *
-     * @param spec A configured {@link CategoryCreateSpec} to perform the request on.
-     * @return A {@link Mono} where, upon successful completion, emits the created {@link Category}. If an error is
-     * received, it is emitted through the {@code Mono}.
-     */
-    public Mono<Category> createCategory(final CategoryCreateSpec spec) {
         return serviceMediator.getRestClient().getGuildService()
-                .createGuildChannel(getId().asLong(), spec.asRequest())
+                .createGuildChannel(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason())
                 .map(EntityUtil::getChannelBean)
                 .map(bean -> EntityUtil.getChannel(serviceMediator, bean))
                 .cast(Category.class);
@@ -673,29 +621,16 @@ public final class Guild implements Entity {
     /**
      * Requests to create a text channel.
      *
-     * @param spec A {@link Consumer} that provides a "blank" {@link TextChannelCreateSpec} to be operated on. If some
-     * properties need to be retrieved via blocking operations (such as retrieval from a database), then it is
-     * recommended to build the spec externally and call {@link #createTextChannel(TextChannelCreateSpec)}.
-     *
+     * @param spec A {@link Consumer} that provides a "blank" {@link TextChannelCreateSpec} to be operated on.
      * @return A {@link Mono} where, upon successful completion, emits the created {@link TextChannel}. If an error is
      * received, it is emitted through the {@code Mono}.
      */
-    public Mono<TextChannel> createTextChannel(final Consumer<TextChannelCreateSpec> spec) {
+    public Mono<TextChannel> createTextChannel(final Consumer<? super TextChannelCreateSpec> spec) {
         final TextChannelCreateSpec mutatedSpec = new TextChannelCreateSpec();
         spec.accept(mutatedSpec);
-        return createTextChannel(mutatedSpec);
-    }
 
-    /**
-     * Requests to create a text channel.
-     *
-     * @param spec A configured {@link TextChannelCreateSpec} to perform the request on.
-     * @return A {@link Mono} where, upon successful completion, emits the created {@link TextChannel}. If an error is
-     * received, it is emitted through the {@code Mono}.
-     */
-    public Mono<TextChannel> createTextChannel(final TextChannelCreateSpec spec) {
         return serviceMediator.getRestClient().getGuildService()
-                .createGuildChannel(getId().asLong(), spec.asRequest())
+                .createGuildChannel(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason())
                 .map(EntityUtil::getChannelBean)
                 .map(bean -> EntityUtil.getChannel(serviceMediator, bean))
                 .cast(TextChannel.class);
@@ -704,29 +639,16 @@ public final class Guild implements Entity {
     /**
      * Requests to create a voice channel.
      *
-     * @param spec A {@link Consumer} that provides a "blank" {@link VoiceChannelCreateSpec} to be operated on. If some
-     * properties need to be retrieved via blocking operations (such as retrieval from a database), then it is
-     * recommended to build the spec externally and call {@link #createVoiceChannel(VoiceChannelCreateSpec)}.
-     *
+     * @param spec A {@link Consumer} that provides a "blank" {@link VoiceChannelCreateSpec} to be operated on.
      * @return A {@link Mono} where, upon successful completion, emits the created {@link VoiceChannel}. If an error is
      * received, it is emitted through the {@code Mono}.
      */
-    public Mono<VoiceChannel> createVoiceChannel(final Consumer<VoiceChannelCreateSpec> spec) {
+    public Mono<VoiceChannel> createVoiceChannel(final Consumer<? super VoiceChannelCreateSpec> spec) {
         final VoiceChannelCreateSpec mutatedSpec = new VoiceChannelCreateSpec();
         spec.accept(mutatedSpec);
-        return createVoiceChannel(mutatedSpec);
-    }
 
-    /**
-     * Requests to create a voice channel.
-     *
-     * @param spec A configured {@link VoiceChannelCreateSpec} to perform the request on.
-     * @return A {@link Mono} where, upon successful completion, emits the created {@link VoiceChannel}. If an error is
-     * received, it is emitted through the {@code Mono}.
-     */
-    public Mono<VoiceChannel> createVoiceChannel(final VoiceChannelCreateSpec spec) {
         return serviceMediator.getRestClient().getGuildService()
-                .createGuildChannel(getId().asLong(), spec.asRequest())
+                .createGuildChannel(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason())
                 .map(EntityUtil::getChannelBean)
                 .map(bean -> EntityUtil.getChannel(serviceMediator, bean))
                 .cast(VoiceChannel.class);
@@ -743,14 +665,17 @@ public final class Guild implements Entity {
     }
 
     /**
-     * Requests to kick the specified user from this guild.
+     * Requests to kick the specified user from this guild while optionally specifying a reason.
      *
      * @param userId The ID of the user to kick from this guild.
+     * @param reason The reason, if present.
+     *
      * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the specified user was kicked
      * from this guild. If an error is received, it is emitted through the {@code Mono}.
      */
-    public Mono<Void> kick(final Snowflake userId) {
-        return serviceMediator.getRestClient().getGuildService().removeGuildMember(getId().asLong(), userId.asLong());
+    public Mono<Void> kick(final Snowflake userId, @Nullable final String reason) {
+        return serviceMediator.getRestClient().getGuildService()
+                .removeGuildMember(getId().asLong(), userId.asLong(), reason);
     }
 
     /**
@@ -784,42 +709,29 @@ public final class Guild implements Entity {
      * Requests to ban the specified user.
      *
      * @param userId The ID of the user to ban.
-     * @param spec A {@link Consumer} that provides a "blank" {@link BanQuerySpec} to be operated on. If some properties
-     * need to be retrieved via blocking operations (such as retrieval from a database), then it is recommended to build
-     * the spec externally and call {@link #ban(Snowflake, BanQuerySpec)}.
-     *
+     * @param spec A {@link Consumer} that provides a "blank" {@link BanQuerySpec} to be operated on.
      * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the specified user was
      * banned. If an error is received, it is emitted through the {@code Mono}.
      */
-    public Mono<Void> ban(final Snowflake userId, final Consumer<BanQuerySpec> spec) {
+    public Mono<Void> ban(final Snowflake userId, final Consumer<? super BanQuerySpec> spec) {
         final BanQuerySpec mutatedSpec = new BanQuerySpec();
         spec.accept(mutatedSpec);
-        return ban(userId, mutatedSpec);
-    }
 
-    /**
-     * Requests to ban the specified user.
-     *
-     * @param userId The ID of the user to ban.
-     * @param spec A configured {@link BanQuerySpec} to perform the request on.
-     *
-     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the specified user was
-     * banned. If an error is received, it is emitted through the {@code Mono}.
-     */
-    public Mono<Void> ban(final Snowflake userId, final BanQuerySpec spec) {
         return serviceMediator.getRestClient().getGuildService()
-                .createGuildBan(getId().asLong(), userId.asLong(), spec.asRequest());
+                .createGuildBan(getId().asLong(), userId.asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason());
     }
 
     /**
-     * Requests to unban the specified user.
+     * Requests to unban the specified user while optionally specifying a reason.
      *
      * @param userId The ID of the user to unban.
+     * @param reason The reason, if present.
      * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the specified user was
      * unbanned. If an error is received, it is emitted through the {@code Mono}.
      */
-    public Mono<Void> unban(final Snowflake userId) {
-        return serviceMediator.getRestClient().getGuildService().removeGuildBan(getId().asLong(), userId.asLong());
+    public Mono<Void> unban(final Snowflake userId, @Nullable final String reason) {
+        return serviceMediator.getRestClient().getGuildService()
+                .removeGuildBan(getId().asLong(), userId.asLong(), reason);
     }
 
     /**
@@ -840,19 +752,21 @@ public final class Guild implements Entity {
     }
 
     /**
-     * Requests to prune users. Users are pruned if they have not been seen within the past specified amount of days
-     * <i>and</i> are not assigned to any roles for this guild.
+     * Requests to prune users while optionally specifying a reason. Users are pruned if they have not been seen within
+     * the past specified amount of days <i>and</i> are not assigned to any roles for this guild.
      *
      * @param days The number of days since an user must have been seen to avoid being kicked.
+     * @param reason The reason, if present.
+     *
      * @return A {@link Mono} where, upon successful completion, emits the number of users who were pruned. If an error
      * is received, it is emitted through the {@code Mono}.
      */
-    public Mono<Integer> prune(final int days) {
+    public Mono<Integer> prune(final int days, @Nullable final String reason) {
         final Map<String, Object> queryParams = new HashMap<>(1);
         queryParams.put("days", days);
 
         return serviceMediator.getRestClient().getGuildService()
-                .beginGuildPrune(getId().asLong(), queryParams)
+                .beginGuildPrune(getId().asLong(), queryParams, reason)
                 .map(PruneResponse::getPruned);
     }
 

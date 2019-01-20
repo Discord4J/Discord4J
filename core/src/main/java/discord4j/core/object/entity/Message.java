@@ -324,42 +324,30 @@ public final class Message implements Entity {
     /**
      * Requests to edit this message.
      *
-     * @param spec A {@link Consumer} that provides a "blank" {@link MessageEditSpec} to be operated on. If some
-     * properties need to be retrieved via blocking operations (such as retrieval from a database), then it is
-     * recommended to build the spec externally and call {@link #edit(MessageEditSpec)}.
-     *
+     * @param spec A {@link Consumer} that provides a "blank" {@link MessageEditSpec} to be operated on.
      * @return A {@link Mono} where, upon successful completion, emits the edited {@link Message}. If an error is
      * received, it is emitted through the {@code Mono}.
      */
-    public Mono<Message> edit(final Consumer<MessageEditSpec> spec) {
+    public Mono<Message> edit(final Consumer<? super MessageEditSpec> spec) {
         final MessageEditSpec mutatedSpec = new MessageEditSpec();
         spec.accept(mutatedSpec);
-        return edit(mutatedSpec);
-    }
 
-    /**
-     * Requests to edit this message.
-     *
-     * @param spec A configured {@link MessageEditSpec} to perform the request on.
-     * @return A {@link Mono} where, upon successful completion, emits the edited {@link Message}. If an error is
-     * received, it is emitted through the {@code Mono}.
-     */
-    public Mono<Message> edit(final MessageEditSpec spec) {
         return serviceMediator.getRestClient().getChannelService()
-                .editMessage(getChannelId().asLong(), getId().asLong(), spec.asRequest())
+                .editMessage(getChannelId().asLong(), getId().asLong(), mutatedSpec.asRequest())
                 .map(MessageBean::new)
                 .map(bean -> new Message(serviceMediator, bean));
     }
 
     /**
-     * Requests to delete this message.
+     * Requests to delete this message while optionally specifying a reason.
      *
+     * @param reason The reason, if present.
      * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the message has been deleted.
      * If an error is received, it is emitted through the {@code Mono}.
      */
-    public Mono<Void> delete() {
+    public Mono<Void> delete(@Nullable final String reason) {
         return serviceMediator.getRestClient().getChannelService()
-                .deleteMessage(getChannelId().asLong(), getId().asLong());
+                .deleteMessage(getChannelId().asLong(), getId().asLong(), reason);
     }
 
     /**

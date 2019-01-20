@@ -77,7 +77,7 @@ public class InviteServiceTest {
                         .map(ts -> ts.isBefore(Instant.now()))
                         .orElse(false))
                 .map(InviteResponse::getCode)
-                .flatMap(code -> getInviteService().deleteInvite(code))
+                .flatMap(code -> getInviteService().deleteInvite(code, null))
                 .blockLast();
     }
 

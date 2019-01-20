@@ -55,27 +55,14 @@ public interface MessageChannel extends Channel {
     /**
      * Requests to create a message.
      *
-     * @param spec A {@link Consumer} that provides a "blank" {@link MessageCreateSpec} to be operated on. If some
-     * properties need to be retrieved via blocking operations (such as retrieval from a database), then it is
-     * recommended to build the spec externally and call {@link #createMessage(MessageCreateSpec)}.
-     *
+     * @param spec A {@link Consumer} that provides a "blank" {@link MessageCreateSpec} to be operated on.
      * @return A {@link Mono} where, upon successful completion, emits the created {@link Message}. If an error is
      * received, it is emitted through the {@code Mono}.
      */
-    Mono<Message> createMessage(Consumer<MessageCreateSpec> spec);
+    Mono<Message> createMessage(Consumer<? super MessageCreateSpec> spec);
 
     /**
-     * Requests to create a message.
-     *
-     * @param spec A configured {@link MessageCreateSpec} to perform the request on.
-     * @return A {@link Mono} where, upon successful completion, emits the created {@link Message}. If an error is
-     * received, it is emitted through the {@code Mono}.
-     */
-    Mono<Message> createMessage(MessageCreateSpec spec);
-
-    /**
-     * Requests to create a message. This forwards to {@link #createMessage(MessageCreateSpec)} and
-     * acts as a convenience utility.
+     * Requests to create a message with only {@link MessageCreateSpec#setContent(String) content}.
      *
      * @param message A string message to populate the message with.
      * @return A {@link Mono} where, upon successful completion, emits the created {@link Message}. If an error is
@@ -83,8 +70,8 @@ public interface MessageChannel extends Channel {
      *
      * @see MessageCreateSpec#setContent(String)
      */
-    default Mono<Message> createMessage(String message) {
-        return createMessage(new MessageCreateSpec().setContent(message));
+    default Mono<Message> createMessage(final String message) {
+        return createMessage(spec -> spec.setContent(message));
     }
 
     /**

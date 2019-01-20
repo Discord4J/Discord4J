@@ -30,27 +30,11 @@ public interface Invitable {
     /**
      * Requests to create an invite.
      *
-     * @param spec A {@link Consumer} that provides a "blank" {@link InviteCreateSpec} to be operated on. If some
-     * properties need to be retrieved via blocking operations (such as retrieval from a database), then it is
-     * recommended to build the spec externally and call {@link #createInvite(InviteCreateSpec)}.
-     *
+     * @param spec A {@link Consumer} that provides a "blank" {@link InviteCreateSpec} to be operated on.
      * @return A {@link Mono} where, upon successful completion, emits the created {@link ExtendedInvite}. If an error
      * is received, it is emitted through the {@code Mono}.
      */
-    default Mono<ExtendedInvite> createInvite(final Consumer<InviteCreateSpec> spec) {
-        final InviteCreateSpec mutatedSpec = new InviteCreateSpec();
-        spec.accept(mutatedSpec);
-        return createInvite(mutatedSpec);
-    }
-
-    /**
-     * Requests to create an invite.
-     *
-     * @param spec A configured {@link InviteCreateSpec} to perform the request on.
-     * @return A {@link Mono} where, upon successful completion, emits the created {@link ExtendedInvite}. If an error
-     * is received, it is emitted through the {@code Mono}.
-     */
-    Mono<ExtendedInvite> createInvite(InviteCreateSpec spec);
+    Mono<ExtendedInvite> createInvite(final Consumer<? super InviteCreateSpec> spec);
 
     /**
      * Requests to retrieve this channel's invites.

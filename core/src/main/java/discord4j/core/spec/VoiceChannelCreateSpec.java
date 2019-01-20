@@ -23,12 +23,15 @@ import discord4j.core.object.util.Snowflake;
 import discord4j.rest.json.request.ChannelCreateRequest;
 
 import javax.annotation.Nullable;
+import java.util.Optional;
 import java.util.Set;
 
-public class VoiceChannelCreateSpec implements Spec<ChannelCreateRequest> {
+public class VoiceChannelCreateSpec implements AuditSpec<ChannelCreateRequest> {
 
     private final ChannelCreateRequest.Builder requestBuilder = ChannelCreateRequest.builder()
             .type(Channel.Type.GUILD_VOICE.getValue());
+    @Nullable
+    private String reason;
 
     public VoiceChannelCreateSpec setName(String name) {
         requestBuilder.name(name);
@@ -57,6 +60,18 @@ public class VoiceChannelCreateSpec implements Spec<ChannelCreateRequest> {
     public VoiceChannelCreateSpec setParentId(@Nullable Snowflake parentId) {
         requestBuilder.parentId(parentId == null ? null : parentId.asLong());
         return this;
+    }
+
+    @Override
+    public VoiceChannelCreateSpec setReason(@Nullable final String reason) {
+        this.reason = reason;
+        return this;
+    }
+
+    @Override
+    @Nullable
+    public String getReason() {
+        return reason;
     }
 
     @Override

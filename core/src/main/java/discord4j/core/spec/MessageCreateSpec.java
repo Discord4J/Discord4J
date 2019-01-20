@@ -51,14 +51,10 @@ public class MessageCreateSpec implements Spec<MultipartRequest> {
         return this;
     }
 
-    public MessageCreateSpec setEmbed(Consumer<EmbedCreateSpec> spec) {
+    public MessageCreateSpec setEmbed(Consumer<? super EmbedCreateSpec> spec) {
         final EmbedCreateSpec mutatedSpec = new EmbedCreateSpec();
         spec.accept(mutatedSpec);
-        return setEmbed(mutatedSpec);
-    }
-
-    public MessageCreateSpec setEmbed(EmbedCreateSpec embed) {
-        this.embed = embed.asRequest();
+        embed = mutatedSpec.asRequest();
         return this;
     }
 

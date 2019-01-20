@@ -335,28 +335,16 @@ public final class DiscordClient {
     /**
      * Requests to create a guild.
      *
-     * @param spec A {@link Consumer} that provides a "blank" {@link GuildCreateSpec} to be operated on. If some
-     * properties need to be retrieved via blocking operations (such as retrieval from a database), then it is
-     * recommended to build the spec externally and call {@link #createGuild(GuildCreateSpec)}.
+     * @param spec A {@link Consumer} that provides a "blank" {@link GuildCreateSpec} to be operated on.
      * @return A {@link Mono} where, upon successful completion, emits the created {@link Guild}. If an error is
      * received, it is emitted through the {@code Mono}.
      */
-    public Mono<Guild> createGuild(final Consumer<GuildCreateSpec> spec) {
+    public Mono<Guild> createGuild(final Consumer<? super GuildCreateSpec> spec) {
         final GuildCreateSpec mutatedSpec = new GuildCreateSpec();
         spec.accept(mutatedSpec);
-        return createGuild(mutatedSpec);
-    }
 
-    /**
-     * Requests to create a guild.
-     *
-     * @param spec A configured {@link GuildCreateSpec} to perform the request on.
-     * @return A {@link Mono} where, upon successful completion, emits the created {@link Guild}. If an error is
-     * received, it is emitted through the {@code Mono}.
-     */
-    public Mono<Guild> createGuild(final GuildCreateSpec spec) {
         return serviceMediator.getRestClient().getGuildService()
-                .createGuild(spec.asRequest())
+                .createGuild(mutatedSpec.asRequest())
                 .map(BaseGuildBean::new)
                 .map(bean -> new Guild(serviceMediator, bean));
     }

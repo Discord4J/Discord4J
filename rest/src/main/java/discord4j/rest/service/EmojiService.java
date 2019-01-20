@@ -24,6 +24,8 @@ import discord4j.rest.route.Routes;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import javax.annotation.Nullable;
+
 public class EmojiService extends RestService {
 
     public EmojiService(Router router) {
@@ -41,20 +43,23 @@ public class EmojiService extends RestService {
                 .exchange(getRouter());
     }
 
-    public Mono<GuildEmojiResponse> createGuildEmoji(long guildId, GuildEmojiCreateRequest request) {
+    public Mono<GuildEmojiResponse> createGuildEmoji(long guildId, GuildEmojiCreateRequest request, @Nullable String reason) {
         return Routes.GUILD_EMOJI_CREATE.newRequest(guildId)
                 .body(request)
+                .optionalHeader("X-Audit-Log-Reason", reason)
                 .exchange(getRouter());
     }
 
-    public Mono<GuildEmojiResponse> modifyGuildEmoji(long guildId, long emojiId, GuildEmojiModifyRequest request) {
+    public Mono<GuildEmojiResponse> modifyGuildEmoji(long guildId, long emojiId, GuildEmojiModifyRequest request, @Nullable String reason) {
         return Routes.GUILD_EMOJI_MODIFY.newRequest(guildId, emojiId)
                 .body(request)
+                .optionalHeader("X-Audit-Log-Reason", reason)
                 .exchange(getRouter());
     }
 
-    public Mono<Void> deleteGuildEmoji(long guildId, long emojiId) {
+    public Mono<Void> deleteGuildEmoji(long guildId, long emojiId, @Nullable String reason) {
         return Routes.GUILD_EMOJI_DELETE.newRequest(guildId, emojiId)
+                .optionalHeader("X-Audit-Log-Reason", reason)
                 .exchange(getRouter());
     }
 }

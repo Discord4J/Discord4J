@@ -74,7 +74,7 @@ public class GuildServiceTest {
     @Test
     public void testModifyGuild() {
         GuildModifyRequest req = GuildModifyRequest.builder().region("us-south").build();
-        getGuildService().modifyGuild(guild, req).block();
+        getGuildService().modifyGuild(guild, req, null).block();
     }
 
     @Test
@@ -91,7 +91,7 @@ public class GuildServiceTest {
     public void testCreateGuildChannel() {
         String randomName = Long.toHexString(Double.doubleToLongBits(Math.random()));
         ChannelCreateRequest req = ChannelCreateRequest.builder().name(randomName).parentId(trashCategory).build();
-        getGuildService().createGuildChannel(guild, req).block();
+        getGuildService().createGuildChannel(guild, req, null).block();
     }
 
     @Test
@@ -99,7 +99,7 @@ public class GuildServiceTest {
         getGuildService().getGuildChannels(guild)
                 .filter(res -> res.getParentId() != null && trashCategory == res.getParentId())
                 .map(ChannelResponse::getId)
-                .flatMap(id -> getChannelService().deleteChannel(id))
+                .flatMap(id -> getChannelService().deleteChannel(id, null))
                 .then()
                 .block();
     }
@@ -127,7 +127,7 @@ public class GuildServiceTest {
     @Test
     public void testModifyGuildMember() {
         GuildMemberModifyRequest req = GuildMemberModifyRequest.builder().nick("nickname").build();
-        getGuildService().modifyGuildMember(guild, member, req).block();
+        getGuildService().modifyGuildMember(guild, member, req, null).block();
     }
 
     @Test
@@ -180,7 +180,7 @@ public class GuildServiceTest {
     public void testCreateGuildRole() {
         String randomName = "test_" + Long.toHexString(Double.doubleToLongBits(Math.random()));
         RoleCreateRequest req = new RoleCreateRequest(randomName, 0, 0, false, false);
-        getGuildService().createGuildRole(guild, req).block();
+        getGuildService().createGuildRole(guild, req, null).block();
     }
 
     @Test
@@ -191,7 +191,7 @@ public class GuildServiceTest {
     @Test
     public void testModifyGuildRole() {
         RoleModifyRequest req = RoleModifyRequest.builder().permissions(0).build();
-        getGuildService().modifyGuildRole(guild, permanentRole, req).block();
+        getGuildService().modifyGuildRole(guild, permanentRole, req, null).block();
     }
 
     @Test
@@ -199,7 +199,7 @@ public class GuildServiceTest {
         getGuildService().getGuildRoles(guild)
                 .filter(role -> role.getName().startsWith("test_") || role.getName().startsWith("3f"))
                 .limitRequest(5)
-                .flatMap(role -> getGuildService().deleteGuildRole(guild, role.getId()))
+                .flatMap(role -> getGuildService().deleteGuildRole(guild, role.getId(), null))
                 .blockLast();
     }
 
@@ -211,7 +211,7 @@ public class GuildServiceTest {
     @Test
     public void testBeginGuildPrune() {
         // shouldn't actually prune anyone because everyone in test server should have a role
-        getGuildService().beginGuildPrune(guild, Collections.emptyMap()).block();
+        getGuildService().beginGuildPrune(guild, Collections.emptyMap(), null).block();
     }
 
     @Test

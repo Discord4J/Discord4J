@@ -18,10 +18,13 @@ package discord4j.core.spec;
 
 import discord4j.rest.json.request.WebhookCreateRequest;
 
-public class WebhookCreateSpec implements Spec<WebhookCreateRequest> {
+import javax.annotation.Nullable;
+
+public class WebhookCreateSpec implements AuditSpec<WebhookCreateRequest> {
 
     private String name;
     private String avatar;
+    private String reason;
 
     public WebhookCreateSpec setName(String name) {
         this.name = name;
@@ -31,6 +34,18 @@ public class WebhookCreateSpec implements Spec<WebhookCreateRequest> {
     public WebhookCreateSpec setAvatar(String avatar) {
         this.avatar = avatar;
         return this;
+    }
+
+    @Override
+    public WebhookCreateSpec setReason(@Nullable final String reason) {
+        this.reason = reason;
+        return this;
+    }
+
+    @Nullable
+    @Override
+    public String getReason() {
+        return reason;
     }
 
     @Override

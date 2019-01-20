@@ -23,12 +23,15 @@ import discord4j.core.object.util.Snowflake;
 import discord4j.rest.json.request.ChannelCreateRequest;
 
 import javax.annotation.Nullable;
+import java.util.Optional;
 import java.util.Set;
 
-public class TextChannelCreateSpec implements Spec<ChannelCreateRequest> {
+public class TextChannelCreateSpec implements AuditSpec<ChannelCreateRequest> {
 
     private final ChannelCreateRequest.Builder requestBuilder = ChannelCreateRequest.builder()
             .type(Channel.Type.GUILD_TEXT.getValue());
+    @Nullable
+    private String reason;
 
     public TextChannelCreateSpec setName(String name) {
         requestBuilder.name(name);
@@ -62,6 +65,18 @@ public class TextChannelCreateSpec implements Spec<ChannelCreateRequest> {
     public TextChannelCreateSpec setRateLimitPerUser(int rateLimitPerUser) {
         requestBuilder.rateLimitPerUser(rateLimitPerUser);
         return this;
+    }
+
+    @Override
+    public TextChannelCreateSpec setReason(@Nullable final String reason) {
+        this.reason = reason;
+        return this;
+    }
+
+    @Override
+    @Nullable
+    public String getReason() {
+        return reason;
     }
 
     @Override

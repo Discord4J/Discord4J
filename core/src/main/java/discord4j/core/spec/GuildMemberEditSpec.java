@@ -22,9 +22,11 @@ import discord4j.rest.json.request.GuildMemberModifyRequest;
 import javax.annotation.Nullable;
 import java.util.Set;
 
-public class GuildMemberEditSpec implements Spec<GuildMemberModifyRequest> {
+public class GuildMemberEditSpec implements AuditSpec<GuildMemberModifyRequest> {
 
     private final GuildMemberModifyRequest.Builder builder = GuildMemberModifyRequest.builder();
+    @Nullable
+    private String reason;
 
     public GuildMemberEditSpec setNewVoiceChannel(@Nullable Snowflake channel) {
         builder.channelId(channel == null ? null : channel.asLong());
@@ -49,6 +51,18 @@ public class GuildMemberEditSpec implements Spec<GuildMemberModifyRequest> {
     public GuildMemberEditSpec setRoles(Set<Snowflake> roles) {
         builder.roles(roles.stream().mapToLong(Snowflake::asLong).toArray());
         return this;
+    }
+
+    @Override
+    public GuildMemberEditSpec setReason(@Nullable final String reason) {
+        this.reason = reason;
+        return this;
+    }
+
+    @Override
+    @Nullable
+    public String getReason() {
+        return reason;
     }
 
     @Override

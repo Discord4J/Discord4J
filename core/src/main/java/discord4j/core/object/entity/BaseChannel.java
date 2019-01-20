@@ -62,8 +62,8 @@ class BaseChannel implements Channel {
     }
 
     @Override
-    public final Mono<Void> delete() {
-        return serviceMediator.getRestClient().getChannelService().deleteChannel(getId().asLong()).then();
+    public final Mono<Void> delete(@Nullable final String reason) {
+        return serviceMediator.getRestClient().getChannelService().deleteChannel(getId().asLong(), reason).then();
     }
 
     /**

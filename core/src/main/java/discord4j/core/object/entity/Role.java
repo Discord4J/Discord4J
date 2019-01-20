@@ -174,42 +174,30 @@ public final class Role implements Entity {
     /**
      * Requests to edit this role.
      *
-     * @param spec A {@link Consumer} that provides a "blank" {@link RoleEditSpec} to be operated on. If some properties
-     * need to be retrieved via blocking operations (such as retrieval from a database), then it is recommended to build
-     * the spec externally and call {@link #edit(RoleEditSpec)}.
-     *
+     * @param spec A {@link Consumer} that provides a "blank" {@link RoleEditSpec} to be operated on.
      * @return A {@link Mono} where, upon successful completion, emits the edited {@link Role}. If an error is received,
      * it is emitted through the {@code Mono}.
      */
-    public Mono<Role> edit(final Consumer<RoleEditSpec> spec) {
+    public Mono<Role> edit(final Consumer<? super RoleEditSpec> spec) {
         final RoleEditSpec mutatedSpec = new RoleEditSpec();
         spec.accept(mutatedSpec);
-        return edit(mutatedSpec);
-    }
 
-    /**
-     * Requests to edit this role.
-     *
-     * @param spec A configured {@link RoleEditSpec} to perform the request on.
-     * @return A {@link Mono} where, upon successful completion, emits the edited {@link Role}. If an error is received,
-     * it is emitted through the {@code Mono}.
-     */
-    public Mono<Role> edit(final RoleEditSpec spec) {
         return serviceMediator.getRestClient().getGuildService()
-                .modifyGuildRole(getGuildId().asLong(), getId().asLong(), spec.asRequest())
+                .modifyGuildRole(getGuildId().asLong(), getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason())
                 .map(RoleBean::new)
                 .map(bean -> new Role(serviceMediator, bean, getGuildId().asLong()));
     }
 
     /**
-     * Requests to delete this role.
+     * Requests to delete this role while optionally specifying the reason.
      *
+     * @param reason The reason, if present.
      * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the role has been deleted. If
      * an error is received, it is emitted through the {@code Mono}.
      */
-    public Mono<Void> delete() {
+    public Mono<Void> delete(@Nullable final String reason) {
         return serviceMediator.getRestClient().getGuildService()
-                .deleteGuildRole(getGuildId().asLong(), getId().asLong());
+                .deleteGuildRole(getGuildId().asLong(), getId().asLong(), reason);
     }
 
     /**

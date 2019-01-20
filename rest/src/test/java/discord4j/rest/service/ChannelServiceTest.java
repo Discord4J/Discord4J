@@ -64,7 +64,7 @@ public class ChannelServiceTest {
     @Test
     public void testModifyChannel() {
         ChannelModifyRequest req = ChannelModifyRequest.builder().topic("test modify").build();
-        getChannelService().modifyChannel(modifyChannel, req).block();
+        getChannelService().modifyChannel(modifyChannel, req, null).block();
     }
 
     @Test
@@ -174,7 +174,7 @@ public class ChannelServiceTest {
     @Test
     public void testEditChannelPermissions() {
         PermissionsEditRequest req = new PermissionsEditRequest(0, 0, "member");
-        getChannelService().editChannelPermissions(modifyChannel, permanentOverwrite, req).block();
+        getChannelService().editChannelPermissions(modifyChannel, permanentOverwrite, req, null).block();
     }
 
     @Test
@@ -185,7 +185,7 @@ public class ChannelServiceTest {
     @Test
     public void testCreateChannelInvite() {
         InviteCreateRequest req = new InviteCreateRequest(1, 0, true, true);
-        getChannelService().createChannelInvite(modifyChannel, req).block();
+        getChannelService().createChannelInvite(modifyChannel, req, null).block();
     }
 
     @Test

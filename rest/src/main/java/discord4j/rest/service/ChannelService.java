@@ -27,6 +27,7 @@ import discord4j.rest.util.MultipartRequest;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import javax.annotation.Nullable;
 import java.util.Map;
 import java.util.Objects;
 
@@ -41,14 +42,16 @@ public class ChannelService extends RestService {
                 .exchange(getRouter());
     }
 
-    public Mono<ChannelResponse> modifyChannel(long channelId, ChannelModifyRequest request) {
+    public Mono<ChannelResponse> modifyChannel(long channelId, ChannelModifyRequest request, @Nullable String reason) {
         return Routes.CHANNEL_MODIFY_PARTIAL.newRequest(channelId)
                 .body(request)
+                .optionalHeader("X-Audit-Log-Reason", reason)
                 .exchange(getRouter());
     }
 
-    public Mono<ChannelResponse> deleteChannel(long channelId) {
+    public Mono<ChannelResponse> deleteChannel(long channelId, @Nullable String reason) {
         return Routes.CHANNEL_DELETE.newRequest(channelId)
+                .optionalHeader("X-Audit-Log-Reason", reason)
                 .exchange(getRouter());
     }
 
@@ -105,8 +108,9 @@ public class ChannelService extends RestService {
                 .exchange(getRouter());
     }
 
-    public Mono<Void> deleteMessage(long channelId, long messageId) {
+    public Mono<Void> deleteMessage(long channelId, long messageId, @Nullable String reason) {
         return Routes.MESSAGE_DELETE.newRequest(channelId, messageId)
+                .optionalHeader("X-Audit-Log-Reason", reason)
                 .exchange(getRouter());
     }
 
@@ -116,9 +120,10 @@ public class ChannelService extends RestService {
                 .exchange(getRouter());
     }
 
-    public Mono<Void> editChannelPermissions(long channelId, long overwriteId, PermissionsEditRequest request) {
+    public Mono<Void> editChannelPermissions(long channelId, long overwriteId, PermissionsEditRequest request, @Nullable String reason) {
         return Routes.CHANNEL_PERMISSIONS_EDIT.newRequest(channelId, overwriteId)
                 .body(request)
+                .optionalHeader("X-Audit-Log-Reason", reason)
                 .exchange(getRouter());
     }
 
@@ -128,14 +133,16 @@ public class ChannelService extends RestService {
                 .flatMapMany(Flux::fromArray);
     }
 
-    public Mono<InviteResponse> createChannelInvite(long channelId, InviteCreateRequest request) {
+    public Mono<InviteResponse> createChannelInvite(long channelId, InviteCreateRequest request, @Nullable String reason) {
         return Routes.CHANNEL_INVITE_CREATE.newRequest(channelId)
                 .body(request)
+                .optionalHeader("X-Audit-Log-Reason", reason)
                 .exchange(getRouter());
     }
 
-    public Mono<Void> deleteChannelPermission(long channelId, long overwriteId) {
+    public Mono<Void> deleteChannelPermission(long channelId, long overwriteId, @Nullable String reason) {
         return Routes.CHANNEL_PERMISSION_DELETE.newRequest(channelId, overwriteId)
+                .optionalHeader("X-Audit-Log-Reason", reason)
                 .exchange(getRouter());
     }
 

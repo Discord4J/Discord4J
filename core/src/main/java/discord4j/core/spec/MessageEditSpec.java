@@ -21,6 +21,7 @@ import discord4j.rest.json.request.EmbedRequest;
 import discord4j.rest.json.request.MessageEditRequest;
 
 import javax.annotation.Nullable;
+import java.util.function.Consumer;
 
 public class MessageEditSpec implements Spec<MessageEditRequest> {
 
@@ -34,8 +35,15 @@ public class MessageEditSpec implements Spec<MessageEditRequest> {
         return this;
     }
 
-    public MessageEditSpec setEmbed(@Nullable EmbedCreateSpec embed) {
-        this.embed = embed == null ? null : Possible.of(embed.asRequest());
+    public MessageEditSpec setEmbed(@Nullable Consumer<? super EmbedCreateSpec> spec) {
+        if (spec != null) {
+            final EmbedCreateSpec mutatedSpec = new EmbedCreateSpec();
+            spec.accept(mutatedSpec);
+            embed = Possible.of(mutatedSpec.asRequest());
+        } else {
+            embed = null;
+        }
+
         return this;
     }
 

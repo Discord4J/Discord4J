@@ -25,6 +25,7 @@ import discord4j.rest.route.Routes;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import javax.annotation.Nullable;
 import java.util.Map;
 
 public class GuildService extends RestService {
@@ -44,9 +45,10 @@ public class GuildService extends RestService {
                 .exchange(getRouter());
     }
 
-    public Mono<GuildResponse> modifyGuild(long guildId, GuildModifyRequest request) {
+    public Mono<GuildResponse> modifyGuild(long guildId, GuildModifyRequest request, @Nullable String reason) {
         return Routes.GUILD_MODIFY.newRequest(guildId)
                 .body(request)
+                .optionalHeader("X-Audit-Log-Reason", reason)
                 .exchange(getRouter());
     }
 
@@ -61,9 +63,10 @@ public class GuildService extends RestService {
                 .flatMapMany(Flux::fromArray);
     }
 
-    public Mono<ChannelResponse> createGuildChannel(long guildId, ChannelCreateRequest request) {
+    public Mono<ChannelResponse> createGuildChannel(long guildId, ChannelCreateRequest request, @Nullable String reason) {
         return Routes.GUILD_CHANNEL_CREATE.newRequest(guildId)
                 .body(request)
+                .optionalHeader("X-Audit-Log-Reason", reason)
                 .exchange(getRouter());
     }
 
@@ -92,9 +95,10 @@ public class GuildService extends RestService {
                 .exchange(getRouter());
     }
 
-    public Mono<Void> modifyGuildMember(long guildId, long userId, GuildMemberModifyRequest request) {
+    public Mono<Void> modifyGuildMember(long guildId, long userId, GuildMemberModifyRequest request, @Nullable String reason) {
         return Routes.GUILD_MEMBER_MODIFY.newRequest(guildId, userId)
                 .body(request)
+                .optionalHeader("X-Audit-Log-Reason", reason)
                 .exchange(getRouter());
     }
 
@@ -104,18 +108,21 @@ public class GuildService extends RestService {
                 .exchange(getRouter());
     }
 
-    public Mono<Void> addGuildMemberRole(long guildId, long userId, long roleId) {
+    public Mono<Void> addGuildMemberRole(long guildId, long userId, long roleId, @Nullable String reason) {
         return Routes.GUILD_MEMBER_ROLE_ADD.newRequest(guildId, userId, roleId)
+                .optionalHeader("X-Audit-Log-Reason", reason)
                 .exchange(getRouter());
     }
 
-    public Mono<Void> removeGuildMemberRole(long guildId, long userId, long roleId) {
+    public Mono<Void> removeGuildMemberRole(long guildId, long userId, long roleId, @Nullable String reason) {
         return Routes.GUILD_MEMBER_ROLE_REMOVE.newRequest(guildId, userId, roleId)
+                .optionalHeader("X-Audit-Log-Reason", reason)
                 .exchange(getRouter());
     }
 
-    public Mono<Void> removeGuildMember(long guildId, long userId) {
+    public Mono<Void> removeGuildMember(long guildId, long userId, @Nullable String reason) {
         return Routes.GUILD_MEMBER_REMOVE.newRequest(guildId, userId)
+                .optionalHeader("X-Audit-Log-Reason", reason)
                 .exchange(getRouter());
     }
 
@@ -130,14 +137,16 @@ public class GuildService extends RestService {
                 .exchange(getRouter());
     }
 
-    public Mono<Void> createGuildBan(long guildId, long userId, Map<String, Object> queryParams) {
+    public Mono<Void> createGuildBan(long guildId, long userId, Map<String, Object> queryParams, @Nullable String reason) {
         return Routes.GUILD_BAN_CREATE.newRequest(guildId, userId)
                 .query(queryParams)
+                .optionalHeader("X-Audit-Log-Reason", reason)
                 .exchange(getRouter());
     }
 
-    public Mono<Void> removeGuildBan(long guildId, long userId) {
+    public Mono<Void> removeGuildBan(long guildId, long userId, @Nullable String reason) {
         return Routes.GUILD_BAN_REMOVE.newRequest(guildId, userId)
+                .optionalHeader("X-Audit-Log-Reason", reason)
                 .exchange(getRouter());
     }
 
@@ -147,9 +156,10 @@ public class GuildService extends RestService {
                 .flatMapMany(Flux::fromArray);
     }
 
-    public Mono<RoleResponse> createGuildRole(long guildId, RoleCreateRequest request) {
+    public Mono<RoleResponse> createGuildRole(long guildId, RoleCreateRequest request, @Nullable String reason) {
         return Routes.GUILD_ROLE_CREATE.newRequest(guildId)
                 .body(request)
+                .optionalHeader("X-Audit-Log-Reason", reason)
                 .exchange(getRouter());
     }
 
@@ -160,14 +170,16 @@ public class GuildService extends RestService {
                 .flatMapMany(Flux::fromArray);
     }
 
-    public Mono<RoleResponse> modifyGuildRole(long guildId, long roleId, RoleModifyRequest request) {
+    public Mono<RoleResponse> modifyGuildRole(long guildId, long roleId, RoleModifyRequest request, @Nullable String reason) {
         return Routes.GUILD_ROLE_MODIFY.newRequest(guildId, roleId)
                 .body(request)
+                .optionalHeader("X-Audit-Log-Reason", reason)
                 .exchange(getRouter());
     }
 
-    public Mono<Void> deleteGuildRole(long guildId, long roleId) {
+    public Mono<Void> deleteGuildRole(long guildId, long roleId, @Nullable String reason) {
         return Routes.GUILD_ROLE_DELETE.newRequest(guildId, roleId)
+                .optionalHeader("X-Audit-Log-Reason", reason)
                 .exchange(getRouter());
     }
 
@@ -177,9 +189,10 @@ public class GuildService extends RestService {
                 .exchange(getRouter());
     }
 
-    public Mono<PruneResponse> beginGuildPrune(long guildId, Map<String, Object> queryParams) {
+    public Mono<PruneResponse> beginGuildPrune(long guildId, Map<String, Object> queryParams, @Nullable String reason) {
         return Routes.GUILD_PRUNE_BEGIN.newRequest(guildId)
                 .query(queryParams)
+                .optionalHeader("X-Audit-Log-Reason", reason)
                 .exchange(getRouter());
     }
 
