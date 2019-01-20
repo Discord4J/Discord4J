@@ -178,42 +178,30 @@ public final class GuildEmoji implements Entity {
     /**
      * Requests to edit this guild emoji.
      *
-     * @param spec A {@link Consumer} that provides a "blank" {@link GuildEmojiEditSpec} to be operated on. If some
-     * properties need to be retrieved via blocking operations (such as retrieval from a database), then it is
-     * recommended to build the spec externally and call {@link #edit(GuildEmojiEditSpec)}.
-     *
+     * @param spec A {@link Consumer} that provides a "blank" {@link GuildEmojiEditSpec} to be operated on.
      * @return A {@link Mono} where, upon successful completion, emits the edited {@link GuildEmoji}. If an error is
      * received, it is emitted through the {@code Mono}.
      */
-    public Mono<GuildEmoji> edit(final Consumer<GuildEmojiEditSpec> spec) {
+    public Mono<GuildEmoji> edit(final Consumer<? super GuildEmojiEditSpec> spec) {
         final GuildEmojiEditSpec mutatedSpec = new GuildEmojiEditSpec();
         spec.accept(mutatedSpec);
-        return edit(mutatedSpec);
-    }
 
-    /**
-     * Requests to edit this guild emoji.
-     *
-     * @param spec A configured {@link GuildEmojiEditSpec} to perform the request on.
-     * @return A {@link Mono} where, upon successful completion, emits the edited {@link GuildEmoji}. If an error is
-     * received, it is emitted through the {@code Mono}.
-     */
-    public Mono<GuildEmoji> edit(final GuildEmojiEditSpec spec) {
         return serviceMediator.getRestClient().getEmojiService()
-                .modifyGuildEmoji(getGuildId().asLong(), getId().asLong(), spec.asRequest())
+                .modifyGuildEmoji(getGuildId().asLong(), getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason())
                 .map(GuildEmojiBean::new)
                 .map(bean -> new GuildEmoji(serviceMediator, bean, getGuildId().asLong()));
     }
 
     /**
-     * Requests to delete this emoji.
+     * Requests to delete this emoji while optionally specifying a reason.
      *
+     * @param reason The reason, if present.
      * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the emoji has been deleted.
      * If an error is received, it is emitted through the {@code Mono}.
      */
-    public Mono<Void> delete() {
+    public Mono<Void> delete(@Nullable final String reason) {
         return serviceMediator.getRestClient().getEmojiService()
-                .deleteGuildEmoji(getGuildId().asLong(), getId().asLong());
+                .deleteGuildEmoji(getGuildId().asLong(), getId().asLong(), reason);
     }
 
     /**

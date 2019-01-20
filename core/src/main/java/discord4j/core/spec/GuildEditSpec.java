@@ -23,10 +23,13 @@ import discord4j.core.object.util.Snowflake;
 import discord4j.rest.json.request.GuildModifyRequest;
 
 import javax.annotation.Nullable;
+import java.util.Optional;
 
-public class GuildEditSpec implements Spec<GuildModifyRequest> {
+public class GuildEditSpec implements AuditSpec<GuildModifyRequest> {
 
     private final GuildModifyRequest.Builder requestBuilder = GuildModifyRequest.builder();
+    @Nullable
+    private String reason;
 
     public GuildEditSpec setName(String name) {
         requestBuilder.name(name);
@@ -71,6 +74,18 @@ public class GuildEditSpec implements Spec<GuildModifyRequest> {
     public GuildEditSpec setSplash(@Nullable String splash) {
         requestBuilder.splash(splash);
         return this;
+    }
+
+    @Override
+    public GuildEditSpec setReason(@Nullable final String reason) {
+        this.reason = reason;
+        return this;
+    }
+
+    @Override
+    @Nullable
+    public String getReason() {
+        return reason;
     }
 
     @Override

@@ -24,9 +24,11 @@ import discord4j.rest.json.request.ChannelModifyRequest;
 import javax.annotation.Nullable;
 import java.util.Set;
 
-public class VoiceChannelEditSpec implements Spec<ChannelModifyRequest> {
+public class VoiceChannelEditSpec implements AuditSpec<ChannelModifyRequest> {
 
     private final ChannelModifyRequest.Builder requestBuilder = ChannelModifyRequest.builder();
+    @Nullable
+    private String reason;
 
     public VoiceChannelEditSpec setName(String name) {
         requestBuilder.name(name);
@@ -60,6 +62,18 @@ public class VoiceChannelEditSpec implements Spec<ChannelModifyRequest> {
     public VoiceChannelEditSpec setUserLimit(int userLimit) {
         requestBuilder.userLimit(userLimit);
         return this;
+    }
+
+    @Override
+    public VoiceChannelEditSpec setReason(@Nullable final String reason) {
+        this.reason = reason;
+        return this;
+    }
+
+    @Override
+    @Nullable
+    public String getReason() {
+        return reason;
     }
 
     @Override

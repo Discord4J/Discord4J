@@ -16,21 +16,30 @@
  */
 package discord4j.core.spec;
 
+import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
-public final class BanQuerySpec implements Spec<Map<String, Object>> {
+public final class BanQuerySpec implements AuditSpec<Map<String, Object>> {
 
     private final Map<String, Object> request = new HashMap<>(2);
-
-    public BanQuerySpec setReason(final String reason) {
-        request.put("reason", reason);
-        return this;
-    }
 
     public BanQuerySpec setDeleteMessageDays(final int days) {
         request.put("delete-message-days", days);
         return this;
+    }
+
+    @Override
+    public BanQuerySpec setReason(@Nullable final String reason) {
+        request.put("reason", reason);
+        return this;
+    }
+
+    @Override
+    @Nullable
+    public String getReason() {
+        return (String) request.get("reason");
     }
 
     @Override

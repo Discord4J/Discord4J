@@ -20,14 +20,17 @@ import discord4j.core.object.util.Image;
 import discord4j.core.object.util.Snowflake;
 import discord4j.rest.json.request.GuildEmojiCreateRequest;
 
+import javax.annotation.Nullable;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
-public class GuildEmojiCreateSpec implements Spec<GuildEmojiCreateRequest> {
+public class GuildEmojiCreateSpec implements AuditSpec<GuildEmojiCreateRequest> {
 
     private String name;
     private String image;
     private final Set<Snowflake> roles = new HashSet<>();
+    private String reason;
 
     public GuildEmojiCreateSpec setName(String name) {
         this.name = name;
@@ -42,6 +45,18 @@ public class GuildEmojiCreateSpec implements Spec<GuildEmojiCreateRequest> {
     public GuildEmojiCreateSpec addRole(Snowflake roleId) {
         roles.add(roleId);
         return this;
+    }
+
+    @Override
+    public GuildEmojiCreateSpec setReason(@Nullable final String reason) {
+        this.reason = reason;
+        return this;
+    }
+
+    @Override
+    @Nullable
+    public String getReason() {
+        return reason;
     }
 
     @Override

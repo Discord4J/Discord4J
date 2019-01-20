@@ -27,6 +27,7 @@ import discord4j.core.util.PermissionUtil;
 import discord4j.rest.json.request.PermissionsEditRequest;
 import reactor.core.publisher.Mono;
 
+import javax.annotation.Nullable;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -116,23 +117,23 @@ class BaseGuildChannel extends BaseChannel implements GuildChannel {
     }
 
     @Override
-    public Mono<Void> addMemberOverwrite(Snowflake memberId, PermissionOverwrite overwrite) {
+    public Mono<Void> addMemberOverwrite(Snowflake memberId, PermissionOverwrite overwrite, @Nullable String reason) {
         PermissionSet allow = overwrite.getAllowed();
         PermissionSet deny = overwrite.getDenied();
         PermissionsEditRequest request = new PermissionsEditRequest(allow.getRawValue(), deny.getRawValue(), "member");
 
         return getServiceMediator().getRestClient().getChannelService()
-            .editChannelPermissions(getId().asLong(), memberId.asLong(), request);
+            .editChannelPermissions(getId().asLong(), memberId.asLong(), request, reason);
     }
 
     @Override
-    public Mono<Void> addRoleOverwrite(Snowflake roleId, PermissionOverwrite overwrite) {
+    public Mono<Void> addRoleOverwrite(Snowflake roleId, PermissionOverwrite overwrite, @Nullable String reason) {
         PermissionSet allow = overwrite.getAllowed();
         PermissionSet deny = overwrite.getDenied();
         PermissionsEditRequest request = new PermissionsEditRequest(allow.getRawValue(), deny.getRawValue(), "role");
 
         return getServiceMediator().getRestClient().getChannelService()
-            .editChannelPermissions(getId().asLong(), roleId.asLong(), request);
+            .editChannelPermissions(getId().asLong(), roleId.asLong(), request, reason);
     }
 
     @Override

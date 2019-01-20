@@ -23,6 +23,7 @@ import discord4j.core.object.entity.*;
 import discord4j.core.object.util.Snowflake;
 import reactor.core.publisher.Mono;
 
+import javax.annotation.Nullable;
 import java.util.Objects;
 
 /**
@@ -121,13 +122,14 @@ public final class ExtendedPermissionOverwrite extends PermissionOverwrite imple
     }
 
     /**
-     * Requests to delete this permission overwrite.
+     * Requests to delete this permission overwrite while optionally specifying a reason.
      *
+     * @param reason The reason, if present.
      * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the permission overwrite has
      * been deleted. If an error is received, it is emitted through the {@code Mono}.
      */
-    public Mono<Void> delete() {
+    public Mono<Void> delete(@Nullable final String reason) {
         return serviceMediator.getRestClient().getChannelService()
-            .deleteChannelPermission(channelId, getTargetId().asLong());
+                .deleteChannelPermission(channelId, getTargetId().asLong(), reason);
     }
 }

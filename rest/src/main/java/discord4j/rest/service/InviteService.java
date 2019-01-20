@@ -21,6 +21,8 @@ import discord4j.rest.request.Router;
 import discord4j.rest.route.Routes;
 import reactor.core.publisher.Mono;
 
+import javax.annotation.Nullable;
+
 public class InviteService extends RestService {
 
     public InviteService(Router router) {
@@ -32,8 +34,9 @@ public class InviteService extends RestService {
                 .exchange(getRouter());
     }
 
-    public Mono<InviteResponse> deleteInvite(String inviteCode) {
+    public Mono<InviteResponse> deleteInvite(String inviteCode, @Nullable String reason) {
         return Routes.INVITE_DELETE.newRequest(inviteCode)
+                .optionalHeader("X-Audit-Log-Reason", reason)
                 .exchange(getRouter());
     }
 }

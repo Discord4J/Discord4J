@@ -21,12 +21,16 @@ import discord4j.core.object.PermissionOverwrite;
 import discord4j.core.object.entity.Channel;
 import discord4j.rest.json.request.ChannelCreateRequest;
 
+import javax.annotation.Nullable;
+import java.util.Optional;
 import java.util.Set;
 
-public class CategoryCreateSpec implements Spec<ChannelCreateRequest> {
+public class CategoryCreateSpec implements AuditSpec<ChannelCreateRequest> {
 
     private final ChannelCreateRequest.Builder requestBuilder = ChannelCreateRequest.builder()
             .type(Channel.Type.GUILD_CATEGORY.getValue());
+    @Nullable
+    private String reason;
 
     public CategoryCreateSpec setName(String name) {
         requestBuilder.name(name);
@@ -40,6 +44,18 @@ public class CategoryCreateSpec implements Spec<ChannelCreateRequest> {
 
         requestBuilder.permissionOverwrites(raw);
         return this;
+    }
+
+    @Override
+    public CategoryCreateSpec setReason(@Nullable final String reason) {
+        this.reason = reason;
+        return this;
+    }
+
+    @Override
+    @Nullable
+    public String getReason() {
+        return reason;
     }
 
     @Override

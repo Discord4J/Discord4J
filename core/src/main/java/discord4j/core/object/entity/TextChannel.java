@@ -37,6 +37,7 @@ import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import javax.annotation.Nullable;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
@@ -111,13 +112,13 @@ public final class TextChannel extends BaseChannel implements Categorizable, Gui
 
 
     @Override
-    public Mono<Void> addMemberOverwrite(Snowflake memberId, PermissionOverwrite overwrite) {
-        return guildChannel.addMemberOverwrite(memberId, overwrite);
+    public Mono<Void> addMemberOverwrite(Snowflake memberId, PermissionOverwrite overwrite, @Nullable String reason) {
+        return guildChannel.addMemberOverwrite(memberId, overwrite, reason);
     }
 
     @Override
-    public Mono<Void> addRoleOverwrite(Snowflake roleId, PermissionOverwrite overwrite) {
-        return guildChannel.addRoleOverwrite(roleId, overwrite);
+    public Mono<Void> addRoleOverwrite(Snowflake roleId, PermissionOverwrite overwrite, @Nullable String reason) {
+        return guildChannel.addRoleOverwrite(roleId, overwrite, reason);
     }
 
     @Override
@@ -136,12 +137,7 @@ public final class TextChannel extends BaseChannel implements Categorizable, Gui
     }
 
     @Override
-    public Mono<Message> createMessage(final Consumer<MessageCreateSpec> spec) {
-        return messageChannel.createMessage(spec);
-    }
-
-    @Override
-    public Mono<Message> createMessage(final MessageCreateSpec spec) {
+    public Mono<Message> createMessage(final Consumer<? super MessageCreateSpec> spec) {
         return messageChannel.createMessage(spec);
     }
 
@@ -191,9 +187,12 @@ public final class TextChannel extends BaseChannel implements Categorizable, Gui
     }
 
     @Override
-    public Mono<ExtendedInvite> createInvite(final InviteCreateSpec spec) {
+    public Mono<ExtendedInvite> createInvite(final Consumer<? super InviteCreateSpec> spec) {
+        final InviteCreateSpec mutatedSpec = new InviteCreateSpec();
+        spec.accept(mutatedSpec);
+
         return getServiceMediator().getRestClient().getChannelService()
-                .createChannelInvite(getId().asLong(), spec.asRequest())
+                .createChannelInvite(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason())
                 .map(ExtendedInviteBean::new)
                 .map(bean -> new ExtendedInvite(getServiceMediator(), bean));
     }
@@ -238,29 +237,16 @@ public final class TextChannel extends BaseChannel implements Categorizable, Gui
     /**
      * Requests to edit this text channel.
      *
-     * @param spec A {@link Consumer} that provides a "blank" {@link TextChannelEditSpec} to be operated on. If some
-     * properties need to be retrieved via blocking operations (such as retrieval from a database), then it is
-     * recommended to build the spec externally and call {@link #edit(TextChannelEditSpec)}.
-     *
+     * @param spec A {@link Consumer} that provides a "blank" {@link TextChannelEditSpec} to be operated on.
      * @return A {@link Mono} where, upon successful completion, emits the edited {@link TextChannel}. If an error is
      * received, it is emitted through the {@code Mono}.
      */
-    public Mono<TextChannel> edit(final Consumer<TextChannelEditSpec> spec) {
+    public Mono<TextChannel> edit(final Consumer<? super TextChannelEditSpec> spec) {
         final TextChannelEditSpec mutatedSpec = new TextChannelEditSpec();
         spec.accept(mutatedSpec);
-        return edit(mutatedSpec);
-    }
 
-    /**
-     * Requests to edit this text channel.
-     *
-     * @param spec A configured {@link TextChannelEditSpec} to perform the request on.
-     * @return A {@link Mono} where, upon successful completion, emits the edited {@link TextChannel}. If an error is
-     * received, it is emitted through the {@code Mono}.
-     */
-    public Mono<TextChannel> edit(final TextChannelEditSpec spec) {
         return getServiceMediator().getRestClient().getChannelService()
-                .modifyChannel(getId().asLong(), spec.asRequest())
+                .modifyChannel(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason())
                 .map(EntityUtil::getChannelBean)
                 .map(bean -> EntityUtil.getChannel(getServiceMediator(), bean))
                 .cast(TextChannel.class);
@@ -309,28 +295,16 @@ public final class TextChannel extends BaseChannel implements Categorizable, Gui
     /**
      * Requests to create a webhook.
      *
-     * @param spec A {@link Consumer} that provides a "blank" {@link WebhookCreateSpec} to be operated on. If some
-     * properties need to be retrieved via blocking operations (such as retrieval from a database), then it is
-     * recommended to build the spec externally and call {@link #createWebhook(WebhookCreateSpec)}.
+     * @param spec A {@link Consumer} that provides a "blank" {@link WebhookCreateSpec} to be operated on.
      * @return A {@link Mono} where, upon successful completion, emits the created {@link Webhook}. If an error
      * is received, it is emitted through the {@code Mono}.
      */
-    public Mono<Webhook> createWebhook(final Consumer<WebhookCreateSpec> spec) {
+    public Mono<Webhook> createWebhook(final Consumer<? super WebhookCreateSpec> spec) {
         final WebhookCreateSpec mutatedSpec = new WebhookCreateSpec();
         spec.accept(mutatedSpec);
-        return createWebhook(mutatedSpec);
-    }
 
-    /**
-     * Requests to create a webhook.
-     *
-     * @param spec A configured {@link WebhookCreateSpec} to perform the request on.
-     * @return A {@link Mono} where, upon successful completion, emits the created {@link Webhook}. If an error
-     * is received, it is emitted through the {@code Mono}.
-     */
-    public Mono<Webhook> createWebhook(final WebhookCreateSpec spec) {
         return getServiceMediator().getRestClient().getWebhookService()
-                .createWebhook(getId().asLong(), spec.asRequest())
+                .createWebhook(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason())
                 .map(WebhookBean::new)
                 .map(bean -> new Webhook(getServiceMediator(), bean));
     }

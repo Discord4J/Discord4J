@@ -32,6 +32,7 @@ import discord4j.store.api.util.LongLongTuple2;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import javax.annotation.Nullable;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -186,77 +187,70 @@ public final class Member extends User {
     }
 
     /**
-     * Requests to kick this member.
+     * Requests to kick this member while optionally specifying the reason.
      *
+     * @param reason The reason, if present.
      * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the member was kicked. If an
      * error is received, it is emitted through the {@code Mono}.
      */
-    public Mono<Void> kick() {
+    public Mono<Void> kick(@Nullable final String reason) {
         return getServiceMediator().getRestClient().getGuildService()
-                .removeGuildMember(getGuildId().asLong(), getId().asLong());
+                .removeGuildMember(getGuildId().asLong(), getId().asLong(), reason);
     }
 
     /**
      * Requests to ban this user.
      *
-     * @param spec A {@link Consumer} that provides a "blank" {@link BanQuerySpec} to be operated on. If some properties
-     * need to be retrieved via blocking operations (such as retrieval from a database), then it is recommended to build
-     * the spec externally and call {@link #ban(BanQuerySpec)}.
-     *
+     * @param spec A {@link Consumer} that provides a "blank" {@link BanQuerySpec} to be operated on.
      * @return A {@link Mono} where, upon successful completion, emits nothing; indicating this user was banned. If an
      * error is received, it is emitted through the {@code Mono}.
      */
-    public Mono<Void> ban(final Consumer<BanQuerySpec> spec) {
+    public Mono<Void> ban(final Consumer<? super BanQuerySpec> spec) {
         final BanQuerySpec mutatedSpec = new BanQuerySpec();
         spec.accept(mutatedSpec);
-        return ban(mutatedSpec);
-    }
 
-    /**
-     * Requests to ban this user.
-     *
-     * @param spec A configured {@link BanQuerySpec} to perform the request on.
-     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating this user was banned. If an
-     * error is received, it is emitted through the {@code Mono}.
-     */
-    public Mono<Void> ban(final BanQuerySpec spec) {
         return getServiceMediator().getRestClient().getGuildService()
-                .createGuildBan(getGuildId().asLong(), getId().asLong(), spec.asRequest());
+                .createGuildBan(getGuildId().asLong(), getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason());
     }
 
     /**
-     * Requests to unban this user.
+     * Requests to unban this user while optionally specifying the reason.
      *
+     * @param reason The reason, if present.
      * @return A {@link Mono} where, upon successful completion, emits nothing; indicating this user was unbanned. If an
      * error is received, it is emitted through the {@code Mono}.
      */
-    public Mono<Void> unban() {
+    public Mono<Void> unban(@Nullable final String reason) {
         return getServiceMediator().getRestClient().getGuildService()
-                .removeGuildBan(getGuildId().asLong(), getId().asLong());
+                .removeGuildBan(getGuildId().asLong(), getId().asLong(), reason);
     }
 
     /**
-     * Requests to add a role to this member.
+     * Requests to add a role to this member while optionally specifying the reason.
      *
      * @param roleId The ID of the role to add to this member.
+     * @param reason The reason, if present.
+     *
      * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the role was added to this
      * member. If an error is received, it is emitted through the {@code Mono}.
      */
-    public Mono<Void> addRole(final Snowflake roleId) {
+    public Mono<Void> addRole(final Snowflake roleId, @Nullable final String reason) {
         return getServiceMediator().getRestClient().getGuildService()
-                .addGuildMemberRole(guildId, getId().asLong(), roleId.asLong());
+                .addGuildMemberRole(guildId, getId().asLong(), roleId.asLong(), reason);
     }
 
     /**
-     * Requests to remove a role from this member.
+     * Requests to remove a role from this member while optionally specifying the reason.
      *
      * @param roleId The ID of the role to remove from this member.
+     * @param reason The reason, if present.
+     *
      * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the role was removed from
      * this member. If an error is received, it is emitted through the {@code Mono}.
      */
-    public Mono<Void> removeRole(final Snowflake roleId) {
+    public Mono<Void> removeRole(final Snowflake roleId, @Nullable final String reason) {
         return getServiceMediator().getRestClient().getGuildService()
-                .removeGuildMemberRole(guildId, getId().asLong(), roleId.asLong());
+                .removeGuildMemberRole(guildId, getId().asLong(), roleId.asLong(), reason);
     }
 
     /**
@@ -277,28 +271,16 @@ public final class Member extends User {
     /**
      * Requests to edit this member.
      *
-     * @param spec A {@link Consumer} that provides a "blank" {@link GuildMemberEditSpec} to be operated on. If some
-     * properties need to be retrieved via blocking operations (such as retrieval from a database), then it is
-     * recommended to build the spec externally and call {@link #edit(GuildMemberEditSpec)}.
+     * @param spec A {@link Consumer} that provides a "blank" {@link GuildMemberEditSpec} to be operated on.
      * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the member has been edited.
      * If an error is received, it is emitted through the {@code Mono}.
      */
-    public Mono<Void> edit(final Consumer<GuildMemberEditSpec> spec) {
+    public Mono<Void> edit(final Consumer<? super GuildMemberEditSpec> spec) {
         final GuildMemberEditSpec mutatedSpec = new GuildMemberEditSpec();
         spec.accept(mutatedSpec);
-        return edit(mutatedSpec);
-    }
 
-    /**
-     * Requests to edit this member.
-     *
-     * @param spec A configured {@link GuildMemberEditSpec} to perform the request on.
-     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the member has been edited.
-     * If an error is received, it is emitted through the {@code Mono}.
-     */
-    public Mono<Void> edit(final GuildMemberEditSpec spec) {
         return getServiceMediator().getRestClient().getGuildService()
-                .modifyGuildMember(getGuildId().asLong(), getId().asLong(), spec.asRequest());
+                .modifyGuildMember(getGuildId().asLong(), getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason());
     }
 
     @Override

@@ -16,8 +16,12 @@
  */
 package discord4j.core.spec;
 
-@FunctionalInterface
-public interface Spec<T> {
+import javax.annotation.Nullable;
 
-    T asRequest();
+public interface AuditSpec<T> extends Spec<T> {
+
+    AuditSpec<T> setReason(@Nullable String reason);
+
+    @Nullable
+    String getReason();
 }

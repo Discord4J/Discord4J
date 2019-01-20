@@ -68,7 +68,7 @@ public class WebhookServiceTest {
     @Test
     public void testModifyWebhook() {
         WebhookModifyRequest req = new WebhookModifyRequest(Possible.of("Permanent Webhook"), Possible.absent());
-        getWebhookService().modifyWebhook(permanentWebhook, req).block();
+        getWebhookService().modifyWebhook(permanentWebhook, req, null).block();
     }
 
     @Test

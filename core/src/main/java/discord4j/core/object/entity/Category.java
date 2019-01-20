@@ -56,29 +56,16 @@ public final class Category extends BaseGuildChannel {
     /**
      * Requests to edit this category.
      *
-     * @param spec A {@link Consumer} that provides a "blank" {@link CategoryEditSpec} to be operated on. If some
-     * properties need to be retrieved via blocking operations (such as retrieval from a database), then it is
-     * recommended to build the spec externally and call {@link #edit(CategoryEditSpec)}.
-     *
+     * @param spec A {@link Consumer} that provides a "blank" {@link CategoryEditSpec} to be operated on.
      * @return A {@link Mono} where, upon successful completion, emits the edited {@link Category}. If an error is
      * received, it is emitted through the {@code Mono}.
      */
-    public Mono<Category> edit(final Consumer<CategoryEditSpec> spec) {
+    public Mono<Category> edit(final Consumer<? super CategoryEditSpec> spec) {
         final CategoryEditSpec mutatedSpec = new CategoryEditSpec();
         spec.accept(mutatedSpec);
-        return edit(mutatedSpec);
-    }
 
-    /**
-     * Requests to edit this category.
-     *
-     * @param spec A configured {@link CategoryEditSpec} to perform the request on.
-     * @return A {@link Mono} where, upon successful completion, emits the edited {@link Category}. If an error is
-     * received, it is emitted through the {@code Mono}.
-     */
-    public Mono<Category> edit(final CategoryEditSpec spec) {
         return getServiceMediator().getRestClient().getChannelService()
-                .modifyChannel(getId().asLong(), spec.asRequest())
+                .modifyChannel(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason())
                 .map(EntityUtil::getChannelBean)
                 .map(bean -> EntityUtil.getChannel(getServiceMediator(), bean))
                 .cast(Category.class);

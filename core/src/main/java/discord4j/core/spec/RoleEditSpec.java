@@ -19,11 +19,14 @@ package discord4j.core.spec;
 import discord4j.core.object.util.PermissionSet;
 import discord4j.rest.json.request.RoleModifyRequest;
 
+import javax.annotation.Nullable;
 import java.awt.*;
 
-public class RoleEditSpec implements Spec<RoleModifyRequest> {
+public class RoleEditSpec implements AuditSpec<RoleModifyRequest> {
 
     private final RoleModifyRequest.Builder requestBuilder = RoleModifyRequest.builder();
+    @Nullable
+    private String reason;
 
     public RoleEditSpec setName(String name) {
         requestBuilder.name(name);
@@ -48,6 +51,18 @@ public class RoleEditSpec implements Spec<RoleModifyRequest> {
     public RoleEditSpec setMentionable(boolean mentionable) {
         requestBuilder.mentionable(mentionable);
         return this;
+    }
+
+    @Override
+    public RoleEditSpec setReason(@Nullable final String reason) {
+        this.reason = reason;
+        return this;
+    }
+
+    @Override
+    @Nullable
+    public String getReason() {
+        return reason;
     }
 
     @Override

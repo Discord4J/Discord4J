@@ -22,6 +22,7 @@ import discord4j.core.object.util.PermissionSet;
 import discord4j.core.object.util.Snowflake;
 import reactor.core.publisher.Mono;
 
+import javax.annotation.Nullable;
 import java.util.Optional;
 import java.util.Set;
 
@@ -98,22 +99,26 @@ public interface GuildChannel extends Channel {
     Mono<Integer> getPosition();
 
     /**
-     * Requests to add a permission overwrite for the given member.
+     * Requests to add a permission overwrite for the given member while optionally specifying a reason.
      *
      * @param memberId The ID of the member to add the overwrite for.
      * @param overwrite The overwrite to add.
+     * @param reason The reason, if present.
+     *
      * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the guild has been deleted.
      * If an error is received, it is emitted through the {@code Mono}.
      */
-    Mono<Void> addMemberOverwrite(Snowflake memberId, PermissionOverwrite overwrite);
+    Mono<Void> addMemberOverwrite(Snowflake memberId, PermissionOverwrite overwrite, @Nullable String reason);
 
     /**
-     * Requests to add a permission overwrite for the given role.
+     * Requests to add a permission overwrite for the given role while optionally specifying a reason.
      *
      * @param roleId The ID of the role to add the overwrite for.
      * @param overwrite The overwrite to add.
+     * @param reason The reason, if present.
+     *
      * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the guild has been deleted.
      * If an error is received, it is emitted through the {@code Mono}.
      */
-    Mono<Void> addRoleOverwrite(Snowflake roleId, PermissionOverwrite overwrite);
+    Mono<Void> addRoleOverwrite(Snowflake roleId, PermissionOverwrite overwrite, @Nullable String reason);
 }

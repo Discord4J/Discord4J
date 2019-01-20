@@ -126,6 +126,18 @@ public class DiscordRequest<T> {
     }
 
     /**
+     * Adds the given key and value to the headers of this request
+     * if and only if {@code value} is not {@code null}.
+     *
+     * @param key the header key
+     * @param value the header value
+     * @return this request
+     */
+    public DiscordRequest<T> optionalHeader(String key, @Nullable String value) {
+        return (value == null) ? this : header(key, value);
+    }
+
+    /**
      * Exchange this request through the given {@link Router}.
      *
      * @param router a router that performs this request

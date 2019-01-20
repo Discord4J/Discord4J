@@ -19,6 +19,8 @@ package discord4j.core.object.entity;
 import discord4j.core.util.EntityUtil;
 import reactor.core.publisher.Mono;
 
+import javax.annotation.Nullable;
+
 /**
  * A Discord channel.
  *
@@ -34,12 +36,13 @@ public interface Channel extends Entity {
     Type getType();
 
     /**
-     * Requests to delete this channel.
+     * Requests to delete this channel while optionally specifying a reason.
      *
+     * @param reason The reason, if present.
      * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the channel has been deleted.
      * If an error is received, it is emitted through the {@code Mono}.
      */
-    Mono<Void> delete();
+    Mono<Void> delete(@Nullable String reason);
 
     /**
      * Gets the <i>raw</i> mention. This is the format utilized to directly mention another channel. All channels are

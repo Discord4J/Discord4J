@@ -19,15 +19,18 @@ package discord4j.core.spec;
 import discord4j.core.object.util.PermissionSet;
 import discord4j.rest.json.request.RoleCreateRequest;
 
+import javax.annotation.Nullable;
 import java.awt.*;
+import java.util.Optional;
 
-public class RoleCreateSpec implements Spec<RoleCreateRequest> {
+public class RoleCreateSpec implements AuditSpec<RoleCreateRequest> {
 
     private String name;
     private long permissions;
     private int color;
     private boolean hoist;
     private boolean mentionable;
+    private String reason;
 
     public RoleCreateSpec setName(String name) {
         this.name = name;
@@ -52,6 +55,18 @@ public class RoleCreateSpec implements Spec<RoleCreateRequest> {
     public RoleCreateSpec setMentionable(boolean mentionable) {
         this.mentionable = mentionable;
         return this;
+    }
+
+    @Override
+    public RoleCreateSpec setReason(@Nullable final String reason) {
+        this.reason = reason;
+        return this;
+    }
+
+    @Override
+    @Nullable
+    public String getReason() {
+        return reason;
     }
 
     @Override

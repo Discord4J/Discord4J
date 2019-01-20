@@ -18,12 +18,15 @@ package discord4j.core.spec;
 
 import discord4j.rest.json.request.InviteCreateRequest;
 
-public class InviteCreateSpec implements Spec<InviteCreateRequest> {
+import javax.annotation.Nullable;
+
+public class InviteCreateSpec implements AuditSpec<InviteCreateRequest> {
 
     private int maxAge;
     private int maxUses;
     private boolean temporary;
     private boolean unique;
+    private String reason;
 
     public InviteCreateSpec setMaxAge(int maxAge) {
         this.maxAge = maxAge;
@@ -43,6 +46,18 @@ public class InviteCreateSpec implements Spec<InviteCreateRequest> {
     public InviteCreateSpec setUnique(boolean unique) {
         this.unique = unique;
         return this;
+    }
+
+    @Override
+    public InviteCreateSpec setReason(@Nullable final String reason) {
+        this.reason = reason;
+        return this;
+    }
+
+    @Override
+    @Nullable
+    public String getReason() {
+        return reason;
     }
 
     @Override

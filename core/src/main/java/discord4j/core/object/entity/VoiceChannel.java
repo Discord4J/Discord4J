@@ -67,9 +67,12 @@ public final class VoiceChannel extends BaseGuildChannel implements Categorizabl
     }
 
     @Override
-    public Mono<ExtendedInvite> createInvite(final InviteCreateSpec spec) {
+    public Mono<ExtendedInvite> createInvite(final Consumer<? super InviteCreateSpec> spec) {
+        final InviteCreateSpec mutatedSpec = new InviteCreateSpec();
+        spec.accept(mutatedSpec);
+
         return getServiceMediator().getRestClient().getChannelService()
-                .createChannelInvite(getId().asLong(), spec.asRequest())
+                .createChannelInvite(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason())
                 .map(ExtendedInviteBean::new)
                 .map(bean -> new ExtendedInvite(getServiceMediator(), bean));
     }
@@ -103,29 +106,16 @@ public final class VoiceChannel extends BaseGuildChannel implements Categorizabl
     /**
      * Requests to edit a voice channel.
      *
-     * @param spec A {@link Consumer} that provides a "blank" {@link VoiceChannelEditSpec} to be operated on. If some
-     * properties need to be retrieved via blocking operations (such as retrieval from a database), then it is
-     * recommended to build the spec externally and call {@link #edit(VoiceChannelEditSpec)}.
-     *
+     * @param spec A {@link Consumer} that provides a "blank" {@link VoiceChannelEditSpec} to be operated on.
      * @return A {@link Mono} where, upon successful completion, emits the edited {@link VoiceChannel}. If an error is
      * received, it is emitted through the {@code Mono}.
      */
-    public Mono<VoiceChannel> edit(final Consumer<VoiceChannelEditSpec> spec) {
+    public Mono<VoiceChannel> edit(final Consumer<? super VoiceChannelEditSpec> spec) {
         final VoiceChannelEditSpec mutatedSpec = new VoiceChannelEditSpec();
         spec.accept(mutatedSpec);
-        return edit(mutatedSpec);
-    }
 
-    /**
-     * Requests to edit a voice channel.
-     *
-     * @param spec A configured {@link VoiceChannelEditSpec} to perform the request on.
-     * @return A {@link Mono} where, upon successful completion, emits the edited {@link VoiceChannel}. If an error is
-     * received, it is emitted through the {@code Mono}.
-     */
-    public Mono<VoiceChannel> edit(final VoiceChannelEditSpec spec) {
         return getServiceMediator().getRestClient().getChannelService()
-                .modifyChannel(getId().asLong(), spec.asRequest())
+                .modifyChannel(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason())
                 .map(EntityUtil::getChannelBean)
                 .map(bean -> EntityUtil.getChannel(getServiceMediator(), bean))
                 .cast(VoiceChannel.class);

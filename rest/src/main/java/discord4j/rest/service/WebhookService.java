@@ -24,15 +24,18 @@ import discord4j.rest.route.Routes;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import javax.annotation.Nullable;
+
 public class WebhookService extends RestService {
 
     public WebhookService(Router router) {
         super(router);
     }
 
-    public Mono<WebhookResponse> createWebhook(long channelId, WebhookCreateRequest request) {
+    public Mono<WebhookResponse> createWebhook(long channelId, WebhookCreateRequest request, @Nullable String reason) {
         return Routes.CHANNEL_WEBHOOK_CREATE.newRequest(channelId)
                 .body(request)
+                .optionalHeader("X-Audit-Log-Reason", reason)
                 .exchange(getRouter());
     }
 
@@ -53,14 +56,16 @@ public class WebhookService extends RestService {
                 .exchange(getRouter());
     }
 
-    public Mono<WebhookResponse> modifyWebhook(long webhookId, WebhookModifyRequest request) {
+    public Mono<WebhookResponse> modifyWebhook(long webhookId, WebhookModifyRequest request, @Nullable String reason) {
         return Routes.WEBHOOK_MODIFY.newRequest(webhookId)
                 .body(request)
+                .optionalHeader("X-Audit-Log-Reason", reason)
                 .exchange(getRouter());
     }
 
-    public Mono<Void> deleteWebhook(long webhookId) {
+    public Mono<Void> deleteWebhook(long webhookId, @Nullable String reason) {
         return Routes.WEBHOOK_DELETE.newRequest(webhookId)
+                .optionalHeader("X-Audit-Log-Reason", reason)
                 .exchange(getRouter());
     }
 }

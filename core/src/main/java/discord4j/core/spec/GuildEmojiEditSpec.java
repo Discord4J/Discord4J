@@ -20,12 +20,15 @@ import discord4j.common.jackson.Possible;
 import discord4j.core.object.util.Snowflake;
 import discord4j.rest.json.request.GuildEmojiModifyRequest;
 
+import javax.annotation.Nullable;
+import java.util.Optional;
 import java.util.Set;
 
-public class GuildEmojiEditSpec implements Spec<GuildEmojiModifyRequest> {
+public class GuildEmojiEditSpec implements AuditSpec<GuildEmojiModifyRequest> {
 
     private Possible<String> name = Possible.absent();
     private Possible<long[]> roles = Possible.absent();
+    private String reason;
 
     public GuildEmojiEditSpec setName(String name) {
         this.name = Possible.of(name);
@@ -35,6 +38,18 @@ public class GuildEmojiEditSpec implements Spec<GuildEmojiModifyRequest> {
     public GuildEmojiEditSpec setRoles(Set<Snowflake> roles) {
         this.roles = Possible.of(roles.stream().mapToLong(Snowflake::asLong).toArray());
         return this;
+    }
+
+    @Override
+    public GuildEmojiEditSpec setReason(@Nullable final String reason) {
+        this.reason = reason;
+        return this;
+    }
+
+    @Override
+    @Nullable
+    public String getReason() {
+        return reason;
     }
 
     @Override

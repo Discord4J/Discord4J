@@ -24,6 +24,7 @@ import discord4j.core.object.entity.TextChannel;
 import discord4j.core.object.util.Snowflake;
 import reactor.core.publisher.Mono;
 
+import javax.annotation.Nullable;
 import java.util.Objects;
 
 /**
@@ -103,13 +104,14 @@ public class Invite implements DiscordObject {
     }
 
     /**
-     * Requests to delete this invite.
+     * Requests to delete this invite while optionally specifying a reason.
      *
+     * @param reason The reason, if present.
      * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the invite has been deleted.
      * If an error is received, it is emitted through the {@code Mono}.
      */
-    public final Mono<Void> delete() {
-        return serviceMediator.getRestClient().getInviteService().deleteInvite(getCode()).then();
+    public final Mono<Void> delete(@Nullable final String reason) {
+        return serviceMediator.getRestClient().getInviteService().deleteInvite(getCode(), reason).then();
     }
 
     /**

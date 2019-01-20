@@ -148,41 +148,29 @@ public final class Webhook implements Entity {
     }
 
     /**
-     * Requests to delete this webhook.
+     * Requests to delete this webhook while optionally specifying a reason.
      *
+     * @param reason The reason, if present.
      * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the webhook has been deleted.
      * If an error is received, it is emitted through the {@code Mono}.
      */
-    public Mono<Void> delete() {
-        return serviceMediator.getRestClient().getWebhookService().deleteWebhook(getId().asLong());
+    public Mono<Void> delete(@Nullable final String reason) {
+        return serviceMediator.getRestClient().getWebhookService().deleteWebhook(getId().asLong(), reason);
     }
 
     /**
      * Requests to edit this webhook.
      *
-     * @param spec A {@link Consumer} that provides a "blank" {@link WebhookEditSpec} to be operated on. If some
-     * properties need to be retrieved via blocking operations (such as retrieval from a database), then it is
-     * recommended to build the spec externally and call {@link #edit(WebhookEditSpec)}.
-     *
+     * @param spec A {@link Consumer} that provides a "blank" {@link WebhookEditSpec} to be operated on.
      * @return A {@link Mono} where, upon successful completion, emits the edited {@link Guild}. If an error is
      * received, it is emitted through the {@code Mono}.
      */
-    public Mono<Webhook> edit(final Consumer<WebhookEditSpec> spec) {
+    public Mono<Webhook> edit(final Consumer<? super WebhookEditSpec> spec) {
         final WebhookEditSpec mutatedSpec = new WebhookEditSpec();
         spec.accept(mutatedSpec);
-        return edit(mutatedSpec);
-    }
 
-    /**
-     * Requests to edit this webhook.
-     *
-     * @param spec A configured {@link WebhookEditSpec} to perform the request on.
-     * @return A {@link Mono} where, upon successful completion, emits the edited {@link Webhook}. If an error is
-     * received, it is emitted through the {@code Mono}.
-     */
-    public Mono<Webhook> edit(final WebhookEditSpec spec) {
         return serviceMediator.getRestClient().getWebhookService()
-                .modifyWebhook(getId().asLong(), spec.asRequest())
+                .modifyWebhook(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason())
                 .map(WebhookBean::new)
                 .map(bean -> new Webhook(serviceMediator, bean));
     }
