@@ -85,6 +85,9 @@ public final class Member extends User {
 
     /**
      * Requests to retrieve the user's guild roles.
+     * <p>
+     * The returned {@code Flux} will emit items in order based off their <i>natural</i> position, which is indicated
+     * visually in the Discord client. For roles, the "lowest" role will be emitted first.
      *
      * @return A {@link Flux} that continually emits the user's guild {@link Role roles}. If an error is received, it is
      * emitted through the {@code Flux}.

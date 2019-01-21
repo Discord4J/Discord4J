@@ -272,6 +272,9 @@ public final class Guild implements Entity {
 
     /**
      * Requests to retrieve the guild's roles.
+     * <p>
+     * The returned {@code Flux} will emit items in order based off their <i>natural</i> position, which is indicated
+     * visually in the Discord client. For roles, the "lowest" role will be emitted first.
      *
      * @return A {@link Flux} that continually emits the guild's {@link Role roles}. If an error is received, it is
      * emitted through the {@code Flux}.
@@ -498,6 +501,9 @@ public final class Guild implements Entity {
 
     /**
      * Requests to retrieve the channels of the guild.
+     * <p>
+     * The returned {@code Flux} will emit items in order based off their <i>natural</i> position, which is indicated
+     * visually in the Discord client. For channels, the "highest" channel will be emitted first.
      *
      * @return A {@link Flux} that continually emits the {@link GuildChannel channels} of the guild. If an error is
      * received, it is emitted through the {@code Flux}.
