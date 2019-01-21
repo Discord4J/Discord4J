@@ -90,7 +90,8 @@ public final class Member extends User {
      * emitted through the {@code Flux}.
      */
     public Flux<Role> getRoles() {
-        return Flux.fromIterable(getRoleIds()).flatMap(id -> getClient().getRoleById(getGuildId(), id));
+        return Flux.fromIterable(getRoleIds()).flatMap(id -> getClient().getRoleById(getGuildId(), id))
+                .sort(Comparator.comparing(Role::getRawPosition).thenComparing(Role::getId));
     }
 
     /**
