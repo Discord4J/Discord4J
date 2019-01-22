@@ -82,8 +82,10 @@ public class ExampleVoiceBot {
         client.getEventDispatcher().on(GuildCreateEvent.class)
                 .filter(e -> e.getGuild().getId().asString().equals(guild))
                 .flatMap(g -> client.getChannelById(Snowflake.of(voiceChannel)).ofType(VoiceChannel.class))
-                .flatMap(channel -> channel.join(provider, new LoggingAudioReceiver()))
-                .flatMap(leaveMessage::thenReturn)
+                .flatMap(channel -> channel.join(spec -> {
+                    spec.setReceiver(new LoggingAudioReceiver());
+                    spec.setProvider(provider);
+                })).flatMap(leaveMessage::thenReturn)
                 .subscribe(VoiceConnection::disconnect);
 
         client.login().block();
