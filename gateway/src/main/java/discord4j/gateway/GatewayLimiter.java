@@ -17,6 +17,9 @@
 
 package discord4j.gateway;
 
+/**
+ * Represents a rate-limiting strategy that can be shared across shards.
+ */
 public interface GatewayLimiter {
 
     /**

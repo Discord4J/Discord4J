@@ -2,7 +2,7 @@
 
 <img align="right" src="https://raw.githubusercontent.com/Discord4J/discord4j-web/master/public/logo.svg?sanitize=true" width=27%>
 
-[![Maven Central](https://img.shields.io/maven-central/v/com.discord4j/Discord4J/2.svg?style=flat-square)](https://mvnrepository.com/artifact/com.discord4j/Discord4J)  [![JCenter](https://img.shields.io/bintray/v/austinv11/maven/Discord4J.svg?style=flat-square)](https://bintray.com/austinv11/maven/Discord4J/_latestVersion)  [![Support Server Invite](https://img.shields.io/badge/Join-Discord4J-7289DA.svg?style=flat-square&logo=discord)](https://discord.gg/NxGAeCY)
+[![Maven Central](https://img.shields.io/maven-central/v/com.discord4j/Discord4J/2.svg?style=flat-square)](https://mvnrepository.com/artifact/com.discord4j/Discord4J)  [![JCenter](https://img.shields.io/bintray/v/discord4j/maven/Discord4J.svg?style=flat-square)](https://bintray.com/austinv11/maven/Discord4J/_latestVersion)  [![Support Server Invite](https://img.shields.io/badge/Join-Discord4J-7289DA.svg?style=flat-square&logo=discord)](https://discord.gg/NxGAeCY)
 
 A fast, reactive Java wrapper for the official [Discord Bot API](https://discordapp.com/developers/docs/intro).
 

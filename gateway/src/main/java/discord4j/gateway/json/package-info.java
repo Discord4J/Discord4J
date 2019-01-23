@@ -14,6 +14,9 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
+/**
+ * Statically typed representations of Discord's gateway domain.
+ */
 @NonNullApi
 package discord4j.gateway.json;
 

@@ -20,6 +20,10 @@ package discord4j.gateway;
 import java.time.Duration;
 import java.util.concurrent.atomic.AtomicLong;
 
+/**
+ * Naive implementation of a rate-limiter that issues a certain amount of permits before requiring consumers to wait
+ * until the permits are refilled.
+ */
 public class SimpleBucket implements GatewayLimiter {
 
     private final long capacity;
