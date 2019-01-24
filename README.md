@@ -37,6 +37,15 @@ dependencies {
 </dependencies>
 ```
 
+### SBT
+```scala
+libraryDependencies ++= Seq(
+  "com.github.discord4j.discord4j" % "discord4j-core" % "v3-SNAPSHOT"
+)
+
+resolvers += "jitpack.io" at "https://jitpack.io"
+```
+
 ## Quick Example
 ```java
 final DiscordClient client = new DiscordClientBuilder("token").build();
