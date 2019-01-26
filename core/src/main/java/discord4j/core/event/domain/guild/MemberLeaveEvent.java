@@ -18,8 +18,11 @@ package discord4j.core.event.domain.guild;
 
 import discord4j.core.DiscordClient;
 import discord4j.core.object.entity.Guild;
+import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.util.Snowflake;
+import java.util.Optional;
+import javax.annotation.Nullable;
 import reactor.core.publisher.Mono;
 
 /**
@@ -34,11 +37,14 @@ public class MemberLeaveEvent extends GuildEvent {
 
     private final User user;
     private final long guildId;
+    @Nullable
+    private final Member member;
 
-    public MemberLeaveEvent(DiscordClient client, User user, long guildId) {
+    public MemberLeaveEvent(DiscordClient client, User user, long guildId, @Nullable Member member) {
         super(client);
         this.user = user;
         this.guildId = guildId;
+        this.member = member;
     }
 
     public User getUser() {
@@ -51,6 +57,10 @@ public class MemberLeaveEvent extends GuildEvent {
 
     public Mono<Guild> getGuild() {
         return getClient().getGuildById(getGuildId());
+    }
+
+    public Optional<Member> getMember() {
+        return Optional.ofNullable(member);
     }
 
     @Override

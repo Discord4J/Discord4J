@@ -35,6 +35,7 @@ import discord4j.gateway.json.RequestGuildMembers;
 import discord4j.gateway.json.dispatch.*;
 import discord4j.store.api.util.LongLongTuple2;
 import discord4j.store.api.util.LongObjTuple2;
+import java.util.Optional;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.function.Tuple2;
@@ -259,18 +260,23 @@ class GuildDispatchHandlers {
         UserResponse response = context.getDispatch().getUser();
 
         Mono<Void> removeMemberId = serviceMediator.getStateHolder().getGuildStore()
-                .find(context.getDispatch().getGuildId())
+                .find(guildId)
                 .doOnNext(guild -> guild.setMembers(ArrayUtil.remove(guild.getMembers(), response.getId())))
                 .flatMap(guild -> serviceMediator.getStateHolder().getGuildStore().save(guildId, guild));
 
+        Mono<Member> member = serviceMediator.getStateHolder().getMemberStore()
+            .find(LongLongTuple2.of(guildId, response.getId()))
+            .map(bean -> new Member(serviceMediator, bean, new UserBean(response), guildId));
+
         Mono<Void> deleteMember = serviceMediator.getStateHolder().getMemberStore()
-                .delete(LongLongTuple2.of(context.getDispatch().getGuildId(), context.getDispatch().getUser().getId()));
+                .delete(LongLongTuple2.of(guildId, response.getId()));
 
         User user = new User(serviceMediator, new UserBean(response));
 
-        return removeMemberId
-                .and(deleteMember)
-                .thenReturn(new MemberLeaveEvent(serviceMediator.getClient(), user, guildId));
+        return member.map(Optional::of)
+            .defaultIfEmpty(Optional.empty())
+            .flatMap(Mono.when(removeMemberId, deleteMember)::thenReturn)
+            .map(m -> new MemberLeaveEvent(serviceMediator.getClient(), user, guildId, m.orElse(null)));
     }
 
     static Mono<MemberChunkEvent> guildMembersChunk(DispatchContext<GuildMembersChunk> context) {
