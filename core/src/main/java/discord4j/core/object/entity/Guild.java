@@ -665,6 +665,17 @@ public final class Guild implements Entity {
     }
 
     /**
+     * Requests to kick the specified user from this guild.
+     *
+     * @param userId The ID of the user to kick from this guild.
+     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the specified user was kicked
+     * from this guild. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Void> kick(final Snowflake userId) {
+        return kick(userId, null);
+    }
+
+    /**
      * Requests to kick the specified user from this guild while optionally specifying a reason.
      *
      * @param userId The ID of the user to kick from this guild.
@@ -722,6 +733,17 @@ public final class Guild implements Entity {
     }
 
     /**
+     * Requests to unban the specified user.
+     *
+     * @param userId The ID of the user to unban.
+     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the specified user was
+     * unbanned. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Void> unban(final Snowflake userId) {
+        return unban(userId, null);
+    }
+
+    /**
      * Requests to unban the specified user while optionally specifying a reason.
      *
      * @param userId The ID of the user to unban.
@@ -749,6 +771,18 @@ public final class Guild implements Entity {
         return serviceMediator.getRestClient().getGuildService()
                 .getGuildPruneCount(getId().asLong(), queryParams)
                 .map(PruneResponse::getPruned);
+    }
+
+    /**
+     * Requests to prune users. Users are pruned if they have not been seen within the past specified amount of days
+     * <i>and</i> are not assigned to any roles for this guild.
+     *
+     * @param days The number of days since an user must have been seen to avoid being kicked.
+     * @return A {@link Mono} where, upon successful completion, emits the number of users who were pruned. If an error
+     * is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Integer> prune(final int days) {
+        return prune(days, null);
     }
 
     /**

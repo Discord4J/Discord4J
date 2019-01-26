@@ -339,6 +339,16 @@ public final class Message implements Entity {
     }
 
     /**
+     * Requests to delete this message.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the message has been deleted.
+     * If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Void> delete() {
+        return delete(null);
+    }
+
+    /**
      * Requests to delete this message while optionally specifying a reason.
      *
      * @param reason The reason, if present.

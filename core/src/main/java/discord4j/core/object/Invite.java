@@ -104,6 +104,16 @@ public class Invite implements DiscordObject {
     }
 
     /**
+     * Requests to delete this invite.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the invite has been deleted.
+     * If an error is received, it is emitted through the {@code Mono}.
+     */
+    public final Mono<Void> delete() {
+        return delete(null);
+    }
+
+    /**
      * Requests to delete this invite while optionally specifying a reason.
      *
      * @param reason The reason, if present.
