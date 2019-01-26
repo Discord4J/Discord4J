@@ -189,6 +189,16 @@ public final class Role implements Entity {
     }
 
     /**
+     * Requests to delete this role.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the role has been deleted. If
+     * an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Void> delete() {
+        return delete(null);
+    }
+
+    /**
      * Requests to delete this role while optionally specifying the reason.
      *
      * @param reason The reason, if present.

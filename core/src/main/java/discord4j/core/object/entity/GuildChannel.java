@@ -99,6 +99,19 @@ public interface GuildChannel extends Channel {
     Mono<Integer> getPosition();
 
     /**
+     * Requests to add a permission overwrite for the given member.
+     *
+     * @param memberId The ID of the member to add the overwrite for.
+     * @param overwrite The overwrite to add.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the guild has been deleted.
+     * If an error is received, it is emitted through the {@code Mono}.
+     */
+    default Mono<Void> addMemberOverwrite(final Snowflake memberId, final PermissionOverwrite overwrite) {
+        return addMemberOverwrite(memberId, overwrite, null);
+    }
+
+    /**
      * Requests to add a permission overwrite for the given member while optionally specifying a reason.
      *
      * @param memberId The ID of the member to add the overwrite for.
@@ -109,6 +122,19 @@ public interface GuildChannel extends Channel {
      * If an error is received, it is emitted through the {@code Mono}.
      */
     Mono<Void> addMemberOverwrite(Snowflake memberId, PermissionOverwrite overwrite, @Nullable String reason);
+
+    /**
+     * Requests to add a permission overwrite for the given role.
+     *
+     * @param roleId The ID of the role to add the overwrite for.
+     * @param overwrite The overwrite to add.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the guild has been deleted.
+     * If an error is received, it is emitted through the {@code Mono}.
+     */
+    default Mono<Void> addRoleOverwrite(final Snowflake roleId, final PermissionOverwrite overwrite) {
+        return addRoleOverwrite(roleId, overwrite, null);
+    }
 
     /**
      * Requests to add a permission overwrite for the given role while optionally specifying a reason.

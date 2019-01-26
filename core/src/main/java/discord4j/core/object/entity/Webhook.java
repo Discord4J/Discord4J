@@ -148,6 +148,16 @@ public final class Webhook implements Entity {
     }
 
     /**
+     * Requests to delete this webhook.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the webhook has been deleted.
+     * If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Void> delete() {
+        return delete(null);
+    }
+
+    /**
      * Requests to delete this webhook while optionally specifying a reason.
      *
      * @param reason The reason, if present.

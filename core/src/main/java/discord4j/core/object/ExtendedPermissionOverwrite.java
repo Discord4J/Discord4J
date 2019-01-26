@@ -122,6 +122,16 @@ public final class ExtendedPermissionOverwrite extends PermissionOverwrite imple
     }
 
     /**
+     * Requests to delete this permission overwrite.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the permission overwrite has
+     * been deleted. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Void> delete() {
+        return delete(null);
+    }
+
+    /**
      * Requests to delete this permission overwrite while optionally specifying a reason.
      *
      * @param reason The reason, if present.

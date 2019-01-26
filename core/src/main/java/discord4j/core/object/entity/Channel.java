@@ -36,6 +36,16 @@ public interface Channel extends Entity {
     Type getType();
 
     /**
+     * Requests to delete this channel.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the channel has been deleted.
+     * If an error is received, it is emitted through the {@code Mono}.
+     */
+    default Mono<Void> delete() {
+        return delete(null);
+    }
+
+    /**
      * Requests to delete this channel while optionally specifying a reason.
      *
      * @param reason The reason, if present.

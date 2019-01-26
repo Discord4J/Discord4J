@@ -187,6 +187,16 @@ public final class Member extends User {
     }
 
     /**
+     * Requests to kick this member.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the member was kicked. If an
+     * error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Void> kick() {
+        return kick(null);
+    }
+
+    /**
      * Requests to kick this member while optionally specifying the reason.
      *
      * @param reason The reason, if present.
@@ -214,6 +224,16 @@ public final class Member extends User {
     }
 
     /**
+     * Requests to unban this user.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating this user was unbanned. If an
+     * error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Void> unban() {
+        return unban(null);
+    }
+
+    /**
      * Requests to unban this user while optionally specifying the reason.
      *
      * @param reason The reason, if present.
@@ -223,6 +243,17 @@ public final class Member extends User {
     public Mono<Void> unban(@Nullable final String reason) {
         return getServiceMediator().getRestClient().getGuildService()
                 .removeGuildBan(getGuildId().asLong(), getId().asLong(), reason);
+    }
+
+    /**
+     * Requests to add a role to this member.
+     *
+     * @param roleId The ID of the role to add to this member.
+     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the role was added to this
+     * member. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Void> addRole(final Snowflake roleId) {
+        return addRole(roleId, null);
     }
 
     /**
@@ -237,6 +268,17 @@ public final class Member extends User {
     public Mono<Void> addRole(final Snowflake roleId, @Nullable final String reason) {
         return getServiceMediator().getRestClient().getGuildService()
                 .addGuildMemberRole(guildId, getId().asLong(), roleId.asLong(), reason);
+    }
+
+    /**
+     * Requests to remove a role from this member.
+     *
+     * @param roleId The ID of the role to remove from this member.
+     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the role was removed from
+     * this member. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Void> removeRole(final Snowflake roleId) {
+        return removeRole(roleId, null);
     }
 
     /**
