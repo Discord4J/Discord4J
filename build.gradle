@@ -48,7 +48,6 @@ allprojects {
 
     repositories {
         jcenter()
-        maven { url 'https://dl.bintray.com/discord4j/maven' }
         maven { url 'https://jitpack.io' }
     }
 
