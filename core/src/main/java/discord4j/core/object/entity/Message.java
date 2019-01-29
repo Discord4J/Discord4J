@@ -18,17 +18,17 @@ package discord4j.core.object.entity;
 
 import discord4j.common.json.UserResponse;
 import discord4j.core.DiscordClient;
-import discord4j.core.ServiceMediator;
+import discord4j.core.internal.ServiceMediator;
+import discord4j.core.internal.data.stored.MessageBean;
+import discord4j.core.internal.data.stored.ReactionBean;
+import discord4j.core.internal.data.stored.UserBean;
+import discord4j.core.internal.util.EntityUtil;
+import discord4j.core.internal.util.PaginationUtil;
 import discord4j.core.object.Embed;
-import discord4j.core.object.data.stored.MessageBean;
-import discord4j.core.object.data.stored.ReactionBean;
-import discord4j.core.object.data.stored.UserBean;
 import discord4j.core.object.reaction.Reaction;
 import discord4j.core.object.reaction.ReactionEmoji;
 import discord4j.core.object.util.Snowflake;
 import discord4j.core.spec.MessageEditSpec;
-import discord4j.core.util.EntityUtil;
-import discord4j.core.util.PaginationUtil;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 

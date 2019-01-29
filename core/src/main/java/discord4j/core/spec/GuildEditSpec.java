@@ -23,7 +23,6 @@ import discord4j.core.object.util.Snowflake;
 import discord4j.rest.json.request.GuildModifyRequest;
 
 import javax.annotation.Nullable;
-import java.util.Optional;
 
 public class GuildEditSpec implements AuditSpec<GuildModifyRequest> {
 

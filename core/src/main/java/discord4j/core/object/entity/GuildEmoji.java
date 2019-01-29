@@ -18,13 +18,13 @@ package discord4j.core.object.entity;
 
 import discord4j.common.json.GuildEmojiResponse;
 import discord4j.core.DiscordClient;
-import discord4j.core.ServiceMediator;
-import discord4j.core.object.data.stored.GuildEmojiBean;
-import discord4j.core.object.data.stored.UserBean;
+import discord4j.core.internal.ServiceMediator;
+import discord4j.core.internal.data.stored.GuildEmojiBean;
+import discord4j.core.internal.data.stored.UserBean;
+import discord4j.core.internal.util.EntityUtil;
+import discord4j.core.internal.util.ImageUtil;
 import discord4j.core.object.util.Snowflake;
 import discord4j.core.spec.GuildEmojiEditSpec;
-import discord4j.core.util.EntityUtil;
-import discord4j.core.util.ImageUtil;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 

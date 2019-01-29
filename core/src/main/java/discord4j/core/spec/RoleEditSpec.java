@@ -20,7 +20,7 @@ import discord4j.core.object.util.PermissionSet;
 import discord4j.rest.json.request.RoleModifyRequest;
 
 import javax.annotation.Nullable;
-import java.awt.*;
+import java.awt.Color;
 
 public class RoleEditSpec implements AuditSpec<RoleModifyRequest> {
 

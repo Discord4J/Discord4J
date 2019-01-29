@@ -16,10 +16,10 @@
  */
 package discord4j.core.object.presence;
 
-import discord4j.core.object.data.stored.ActivityBean;
-import discord4j.core.object.data.stored.RichActivityBean;
+import discord4j.core.internal.data.stored.ActivityBean;
+import discord4j.core.internal.data.stored.RichActivityBean;
+import discord4j.core.internal.util.EntityUtil;
 import discord4j.core.object.util.Snowflake;
-import discord4j.core.util.EntityUtil;
 
 import javax.annotation.Nullable;
 import java.time.Instant;

@@ -22,7 +22,6 @@ import discord4j.rest.json.request.GuildEmojiCreateRequest;
 
 import javax.annotation.Nullable;
 import java.util.HashSet;
-import java.util.Optional;
 import java.util.Set;
 
 public class GuildEmojiCreateSpec implements AuditSpec<GuildEmojiCreateRequest> {

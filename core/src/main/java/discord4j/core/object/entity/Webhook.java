@@ -17,11 +17,11 @@
 package discord4j.core.object.entity;
 
 import discord4j.core.DiscordClient;
-import discord4j.core.ServiceMediator;
-import discord4j.core.object.data.WebhookBean;
+import discord4j.core.internal.ServiceMediator;
+import discord4j.core.internal.data.WebhookBean;
+import discord4j.core.internal.util.EntityUtil;
 import discord4j.core.object.util.Snowflake;
 import discord4j.core.spec.WebhookEditSpec;
-import discord4j.core.util.EntityUtil;
 import reactor.core.publisher.Mono;
 
 import javax.annotation.Nullable;

@@ -23,7 +23,6 @@ import discord4j.core.object.util.Snowflake;
 import discord4j.rest.json.request.ChannelCreateRequest;
 
 import javax.annotation.Nullable;
-import java.util.Optional;
 import java.util.Set;
 
 public class VoiceChannelCreateSpec implements AuditSpec<ChannelCreateRequest> {

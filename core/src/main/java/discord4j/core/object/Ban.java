@@ -17,8 +17,8 @@
 package discord4j.core.object;
 
 import discord4j.core.DiscordClient;
-import discord4j.core.ServiceMediator;
-import discord4j.core.object.data.BanBean;
+import discord4j.core.internal.ServiceMediator;
+import discord4j.core.internal.data.BanBean;
 import discord4j.core.object.entity.User;
 
 import java.util.Objects;

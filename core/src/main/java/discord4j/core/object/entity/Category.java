@@ -16,12 +16,12 @@
  */
 package discord4j.core.object.entity;
 
-import discord4j.core.ServiceMediator;
-import discord4j.core.object.data.stored.CategoryBean;
+import discord4j.core.internal.ServiceMediator;
+import discord4j.core.internal.data.stored.CategoryBean;
+import discord4j.core.internal.util.EntityUtil;
 import discord4j.core.object.trait.Categorizable;
 import discord4j.core.object.util.Snowflake;
 import discord4j.core.spec.CategoryEditSpec;
-import discord4j.core.util.EntityUtil;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 

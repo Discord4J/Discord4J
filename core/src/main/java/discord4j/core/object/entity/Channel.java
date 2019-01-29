@@ -16,7 +16,7 @@
  */
 package discord4j.core.object.entity;
 
-import discord4j.core.util.EntityUtil;
+import discord4j.core.internal.util.EntityUtil;
 import reactor.core.publisher.Mono;
 
 import javax.annotation.Nullable;

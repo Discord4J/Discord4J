@@ -16,7 +16,7 @@
  */
 package discord4j.core.object.util;
 
-import discord4j.core.util.EntityUtil;
+import discord4j.core.internal.util.EntityUtil;
 
 import javax.annotation.Nullable;
 import java.math.BigInteger;

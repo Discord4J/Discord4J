@@ -23,13 +23,16 @@ import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import discord4j.common.jackson.PossibleModule;
 import discord4j.common.jackson.UnknownPropertyHandler;
 import discord4j.core.event.EventDispatcher;
-import discord4j.core.event.dispatch.DispatchContext;
-import discord4j.core.event.dispatch.DispatchHandlers;
-import discord4j.core.event.dispatch.StoreInvalidator;
 import discord4j.core.event.domain.Event;
-import discord4j.core.object.data.stored.MessageBean;
+import discord4j.core.internal.ClientConfig;
+import discord4j.core.internal.ServiceMediator;
+import discord4j.core.internal.StateHolder;
+import discord4j.core.internal.data.stored.MessageBean;
+import discord4j.core.internal.dispatch.DispatchContext;
+import discord4j.core.internal.dispatch.DispatchHandlers;
+import discord4j.core.internal.dispatch.StoreInvalidator;
+import discord4j.core.internal.util.VersionUtil;
 import discord4j.core.object.presence.Presence;
-import discord4j.core.util.VersionUtil;
 import discord4j.gateway.*;
 import discord4j.gateway.json.GatewayPayload;
 import discord4j.gateway.json.VoiceStateUpdate;
@@ -405,7 +408,7 @@ public final class DiscordClientBuilder {
      * connections, resumes, reconnects and disconnects but also very specific ones like session sequence updates.
      *
      * @return an event listener for gateway lifecycle, can be {@code null} if default is used
-     * @see discord4j.core.event.dispatch.StoreInvalidator
+     * @see discord4j.core.internal.dispatch.StoreInvalidator
      */
     @Nullable
     public GatewayObserver getGatewayObserver() {

@@ -21,7 +21,6 @@ import discord4j.core.object.PermissionOverwrite;
 import discord4j.rest.json.request.ChannelModifyRequest;
 
 import javax.annotation.Nullable;
-import java.util.Optional;
 import java.util.Set;
 
 public class CategoryEditSpec implements AuditSpec<ChannelModifyRequest> {

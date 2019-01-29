@@ -16,14 +16,14 @@
  */
 package discord4j.core.object.entity;
 
-import discord4j.core.ServiceMediator;
+import discord4j.core.internal.ServiceMediator;
+import discord4j.core.internal.data.stored.GuildChannelBean;
+import discord4j.core.internal.data.stored.PermissionOverwriteBean;
+import discord4j.core.internal.util.PermissionUtil;
 import discord4j.core.object.ExtendedPermissionOverwrite;
 import discord4j.core.object.PermissionOverwrite;
-import discord4j.core.object.data.stored.GuildChannelBean;
-import discord4j.core.object.data.stored.PermissionOverwriteBean;
 import discord4j.core.object.util.PermissionSet;
 import discord4j.core.object.util.Snowflake;
-import discord4j.core.util.PermissionUtil;
 import discord4j.rest.json.request.PermissionsEditRequest;
 import reactor.core.publisher.Mono;
 

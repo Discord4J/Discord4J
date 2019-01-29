@@ -17,18 +17,18 @@
 package discord4j.core.object.entity;
 
 import discord4j.core.DiscordClient;
-import discord4j.core.ServiceMediator;
-import discord4j.core.object.data.stored.RoleBean;
+import discord4j.core.internal.ServiceMediator;
+import discord4j.core.internal.data.stored.RoleBean;
+import discord4j.core.internal.util.EntityUtil;
 import discord4j.core.object.util.PermissionSet;
 import discord4j.core.object.util.Snowflake;
 import discord4j.core.spec.RoleEditSpec;
-import discord4j.core.util.EntityUtil;
 import discord4j.rest.json.request.PositionModifyRequest;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import javax.annotation.Nullable;
-import java.awt.*;
+import java.awt.Color;
 import java.util.Objects;
 import java.util.function.Consumer;
 

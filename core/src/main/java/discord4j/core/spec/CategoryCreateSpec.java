@@ -22,7 +22,6 @@ import discord4j.core.object.entity.Channel;
 import discord4j.rest.json.request.ChannelCreateRequest;
 
 import javax.annotation.Nullable;
-import java.util.Optional;
 import java.util.Set;
 
 public class CategoryCreateSpec implements AuditSpec<ChannelCreateRequest> {

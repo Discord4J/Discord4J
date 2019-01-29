@@ -17,12 +17,12 @@
 package discord4j.core.object.entity;
 
 import discord4j.common.json.MessageResponse;
-import discord4j.core.ServiceMediator;
-import discord4j.core.object.data.stored.MessageBean;
-import discord4j.core.object.data.stored.MessageChannelBean;
+import discord4j.core.internal.ServiceMediator;
+import discord4j.core.internal.data.stored.MessageBean;
+import discord4j.core.internal.data.stored.MessageChannelBean;
+import discord4j.core.internal.util.PaginationUtil;
 import discord4j.core.object.util.Snowflake;
 import discord4j.core.spec.MessageCreateSpec;
-import discord4j.core.util.PaginationUtil;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;

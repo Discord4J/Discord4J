@@ -17,19 +17,21 @@
 package discord4j.core;
 
 import discord4j.core.event.EventDispatcher;
+import discord4j.core.internal.ClientConfig;
+import discord4j.core.internal.ServiceMediator;
+import discord4j.core.internal.data.ApplicationInfoBean;
+import discord4j.core.internal.data.InviteBean;
+import discord4j.core.internal.data.RegionBean;
+import discord4j.core.internal.data.WebhookBean;
+import discord4j.core.internal.data.stored.*;
+import discord4j.core.internal.util.EntityUtil;
+import discord4j.core.internal.util.PaginationUtil;
 import discord4j.core.object.Invite;
 import discord4j.core.object.Region;
-import discord4j.core.object.data.ApplicationInfoBean;
-import discord4j.core.object.data.InviteBean;
-import discord4j.core.object.data.RegionBean;
-import discord4j.core.object.data.WebhookBean;
-import discord4j.core.object.data.stored.*;
 import discord4j.core.object.entity.*;
 import discord4j.core.object.presence.Presence;
 import discord4j.core.object.util.Snowflake;
 import discord4j.core.spec.GuildCreateSpec;
-import discord4j.core.util.EntityUtil;
-import discord4j.core.util.PaginationUtil;
 import discord4j.gateway.json.GatewayPayload;
 import discord4j.rest.json.response.UserGuildResponse;
 import discord4j.rest.util.RouteUtils;
@@ -54,7 +56,7 @@ public final class DiscordClient {
      *
      * @param serviceMediator The ServiceMediator associated to this object.
      */
-    DiscordClient(final ServiceMediator serviceMediator) {
+    public DiscordClient(final ServiceMediator serviceMediator) {
         this.serviceMediator = serviceMediator;
     }
 
@@ -399,5 +401,19 @@ public final class DiscordClient {
                 .switchIfEmpty(serviceMediator.getRestClient().getUserService()
                         .getUser(userId.asLong())
                         .map(UserBean::new));
+    }
+
+    /**
+     * Gets the {@link ServiceMediator} associated with this client.
+     *
+     * @return The {@link ServiceMediator} associated with this client.
+     *
+     * @apiNote This method provides an entry point to the internals of Discord4J Core. Under most circumstances, using
+     * this method is unnecessary and is heavily discouraged. In most situations, it is desirable to use the other
+     * Discord4J modules directly than accessing them through this method. The returned {@code ServiceMediator} is a
+     * class for the {@code internal} package which does not guarantee API stability.
+     */
+    public ServiceMediator getServiceMediator() {
+        return serviceMediator;
     }
 }

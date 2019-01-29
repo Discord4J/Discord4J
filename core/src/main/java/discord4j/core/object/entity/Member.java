@@ -16,17 +16,17 @@
  */
 package discord4j.core.object.entity;
 
-import discord4j.core.ServiceMediator;
+import discord4j.core.internal.ServiceMediator;
+import discord4j.core.internal.data.stored.MemberBean;
+import discord4j.core.internal.data.stored.PresenceBean;
+import discord4j.core.internal.data.stored.UserBean;
+import discord4j.core.internal.data.stored.VoiceStateBean;
+import discord4j.core.internal.util.PermissionUtil;
 import discord4j.core.object.VoiceState;
-import discord4j.core.object.data.stored.MemberBean;
-import discord4j.core.object.data.stored.PresenceBean;
-import discord4j.core.object.data.stored.UserBean;
-import discord4j.core.object.data.stored.VoiceStateBean;
 import discord4j.core.object.presence.Presence;
 import discord4j.core.object.util.PermissionSet;
 import discord4j.core.object.util.Snowflake;
 import discord4j.core.spec.BanQuerySpec;
-import discord4j.core.util.PermissionUtil;
 import discord4j.core.spec.GuildMemberEditSpec;
 import discord4j.store.api.util.LongLongTuple2;
 import reactor.core.publisher.Flux;

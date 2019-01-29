@@ -17,12 +17,12 @@
 package discord4j.core.object.entity;
 
 import discord4j.core.DiscordClient;
-import discord4j.core.ServiceMediator;
-import discord4j.core.object.data.stored.UserBean;
+import discord4j.core.internal.ServiceMediator;
+import discord4j.core.internal.data.stored.UserBean;
+import discord4j.core.internal.util.EntityUtil;
+import discord4j.core.internal.util.ImageUtil;
 import discord4j.core.object.util.Image;
 import discord4j.core.object.util.Snowflake;
-import discord4j.core.util.EntityUtil;
-import discord4j.core.util.ImageUtil;
 import discord4j.rest.json.request.DMCreateRequest;
 import reactor.core.publisher.Mono;
 

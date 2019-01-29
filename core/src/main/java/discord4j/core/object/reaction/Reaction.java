@@ -17,9 +17,9 @@
 package discord4j.core.object.reaction;
 
 import discord4j.core.DiscordClient;
-import discord4j.core.ServiceMediator;
+import discord4j.core.internal.ServiceMediator;
+import discord4j.core.internal.data.stored.ReactionBean;
 import discord4j.core.object.DiscordObject;
-import discord4j.core.object.data.stored.ReactionBean;
 
 import java.util.Objects;
 

@@ -16,19 +16,19 @@
  */
 package discord4j.core.object.entity;
 
-import discord4j.core.ServiceMediator;
+import discord4j.core.internal.ServiceMediator;
+import discord4j.core.internal.data.ExtendedInviteBean;
+import discord4j.core.internal.data.stored.VoiceChannelBean;
+import discord4j.core.internal.data.stored.VoiceStateBean;
+import discord4j.core.internal.util.EntityUtil;
 import discord4j.core.object.ExtendedInvite;
 import discord4j.core.object.VoiceState;
-import discord4j.core.object.data.ExtendedInviteBean;
-import discord4j.core.object.data.stored.VoiceChannelBean;
-import discord4j.core.object.data.stored.VoiceStateBean;
 import discord4j.core.object.trait.Categorizable;
 import discord4j.core.object.trait.Invitable;
 import discord4j.core.object.util.Snowflake;
 import discord4j.core.spec.InviteCreateSpec;
 import discord4j.core.spec.VoiceChannelEditSpec;
 import discord4j.core.spec.VoiceChannelJoinSpec;
-import discord4j.core.util.EntityUtil;
 import discord4j.store.api.util.LongLongTuple2;
 import discord4j.voice.VoiceConnection;
 import reactor.core.publisher.Flux;

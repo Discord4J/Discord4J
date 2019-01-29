@@ -16,7 +16,7 @@
  */
 package discord4j.core.object.presence;
 
-import discord4j.core.util.EntityUtil;
+import discord4j.core.internal.util.EntityUtil;
 
 public enum Status {
 

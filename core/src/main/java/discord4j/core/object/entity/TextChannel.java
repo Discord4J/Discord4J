@@ -16,13 +16,14 @@
  */
 package discord4j.core.object.entity;
 
-import discord4j.core.ServiceMediator;
+import discord4j.core.internal.ServiceMediator;
+import discord4j.core.internal.data.ExtendedInviteBean;
+import discord4j.core.internal.data.WebhookBean;
+import discord4j.core.internal.data.stored.TextChannelBean;
+import discord4j.core.internal.util.EntityUtil;
 import discord4j.core.object.ExtendedInvite;
 import discord4j.core.object.ExtendedPermissionOverwrite;
 import discord4j.core.object.PermissionOverwrite;
-import discord4j.core.object.data.ExtendedInviteBean;
-import discord4j.core.object.data.WebhookBean;
-import discord4j.core.object.data.stored.TextChannelBean;
 import discord4j.core.object.trait.Categorizable;
 import discord4j.core.object.trait.Invitable;
 import discord4j.core.object.util.PermissionSet;
@@ -31,7 +32,6 @@ import discord4j.core.spec.InviteCreateSpec;
 import discord4j.core.spec.MessageCreateSpec;
 import discord4j.core.spec.TextChannelEditSpec;
 import discord4j.core.spec.WebhookCreateSpec;
-import discord4j.core.util.EntityUtil;
 import discord4j.rest.json.request.BulkDeleteRequest;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;

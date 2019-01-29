@@ -17,9 +17,12 @@
 package discord4j.core.object;
 
 import discord4j.core.DiscordClient;
-import discord4j.core.ServiceMediator;
-import discord4j.core.object.data.stored.PermissionOverwriteBean;
-import discord4j.core.object.entity.*;
+import discord4j.core.internal.ServiceMediator;
+import discord4j.core.internal.data.stored.PermissionOverwriteBean;
+import discord4j.core.object.entity.Guild;
+import discord4j.core.object.entity.GuildChannel;
+import discord4j.core.object.entity.Role;
+import discord4j.core.object.entity.User;
 import discord4j.core.object.util.Snowflake;
 import reactor.core.publisher.Mono;
 

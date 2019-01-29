@@ -17,10 +17,10 @@
 package discord4j.core.object.entity;
 
 import discord4j.core.DiscordClient;
-import discord4j.core.ServiceMediator;
-import discord4j.core.object.data.stored.AttachmentBean;
+import discord4j.core.internal.ServiceMediator;
+import discord4j.core.internal.data.stored.AttachmentBean;
+import discord4j.core.internal.util.EntityUtil;
 import discord4j.core.object.util.Snowflake;
-import discord4j.core.util.EntityUtil;
 
 import javax.annotation.Nullable;
 import java.util.Objects;
