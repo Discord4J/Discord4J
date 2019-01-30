@@ -50,6 +50,7 @@ public class VoiceChannelJoinSpec implements Spec<Mono<VoiceConnection>> {
         return this;
     }
 
+    @Deprecated
     public VoiceChannelJoinSpec setReceiver(final AudioReceiver receiver) {
         this.receiver = receiver;
         return this;
