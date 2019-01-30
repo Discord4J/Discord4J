@@ -24,7 +24,11 @@ import java.nio.ByteBuffer;
  * The receiver uses a shared buffer. Keep this in mind when implementing.
  *
  * @see #receive()
+ *
+ * @deprecated Discord does not officially support bots receiving audio. It is not guaranteed that this functionality
+ * works properly. Use at your own risk.
  */
+@Deprecated
 public abstract class AudioReceiver {
 
     public static final int DEFAULT_BUFFER_SIZE = 2048;
