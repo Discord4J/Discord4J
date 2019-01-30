@@ -89,6 +89,7 @@ public class VoiceChannelJoinSpec implements Spec<Mono<VoiceConnection>> {
         final Mono<VoiceServerUpdateEvent> waitForVoiceServerUpdate = client.getEventDispatcher()
                 .on(VoiceServerUpdateEvent.class)
                 .filter(vsu -> vsu.getGuildId().asLong() == guildId)
+                .filter(vsu -> vsu.getEndpoint() != null) // sometimes Discord sends null here. If so, another VSU should arrive afterwards
                 .next();
 
         return sendVoiceStateUpdate

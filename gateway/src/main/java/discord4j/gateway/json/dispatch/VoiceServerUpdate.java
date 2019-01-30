@@ -19,6 +19,8 @@ package discord4j.gateway.json.dispatch;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import discord4j.common.jackson.UnsignedJson;
 
+import javax.annotation.Nullable;
+
 public class VoiceServerUpdate implements Dispatch {
 
     private String token;
@@ -35,6 +37,7 @@ public class VoiceServerUpdate implements Dispatch {
         return guildId;
     }
 
+    @Nullable
     public String getEndpoint() {
         return endpoint;
     }

@@ -21,6 +21,8 @@ import discord4j.core.object.entity.Guild;
 import discord4j.core.object.util.Snowflake;
 import reactor.core.publisher.Mono;
 
+import javax.annotation.Nullable;
+
 /**
  * Dispatched when initially connecting to a voice channel.
  *
@@ -30,9 +32,10 @@ public class VoiceServerUpdateEvent extends Event {
 
     private final String token;
     private final long guildId;
+    @Nullable
     private final String endpoint;
 
-    public VoiceServerUpdateEvent(DiscordClient client, String token, long guildId, String endpoint) {
+    public VoiceServerUpdateEvent(DiscordClient client, String token, long guildId, @Nullable String endpoint) {
         super(client);
         this.token = token;
         this.guildId = guildId;
@@ -51,6 +54,7 @@ public class VoiceServerUpdateEvent extends Event {
         return getClient().getGuildById(getGuildId());
     }
 
+    @Nullable
     public String getEndpoint() {
         return endpoint;
     }
