@@ -82,6 +82,7 @@ public class DiscordWebSocketHandler {
     private final Logger mainLog;
     private final Logger inLog;
     private final Logger outLog;
+    private final int shardIndex;
 
     /**
      * Create a new handler with the given payload reader, payload writer and payload exchanges.
@@ -97,9 +98,10 @@ public class DiscordWebSocketHandler {
     public DiscordWebSocketHandler(PayloadReader reader, PayloadWriter writer,
             FluxSink<GatewayPayload<?>> inbound, Flux<GatewayPayload<?>> outbound,
             Flux<GatewayPayload<Heartbeat>> heartbeat, int shardIndex, GatewayLimiter limiter) {
-        this.mainLog = Loggers.getLogger("discord4j.gateway." + shardIndex);
-        this.inLog = Loggers.getLogger("discord4j.gateway.inbound." + shardIndex);
-        this.outLog = Loggers.getLogger("discord4j.gateway.outbound." + shardIndex);
+        this.mainLog = shardLogger("discord4j.gateway");
+        this.inLog = shardLogger("discord4j.gateway.inbound");
+        this.outLog = shardLogger("discord4j.gateway.outbound");
+        this.shardIndex = shardIndex;
         this.reader = reader;
         this.writer = writer;
         this.inbound = inbound;
@@ -108,6 +110,10 @@ public class DiscordWebSocketHandler {
         this.identifyLimiter = limiter;
         this.outboundLimiter = new SimpleBucket(outboundLimiterCapacity(), Duration.ofSeconds(60));
         this.outboundDelayMillis = outboundDelayMillis();
+    }
+
+    private Logger shardLogger(String name) {
+        return Loggers.getLogger(name + "." + shardIndex);
     }
 
     private long outboundLimiterCapacity() {
@@ -144,10 +150,7 @@ public class DiscordWebSocketHandler {
                 .sendObject(Flux.merge(heartbeat, outbound.concatMap(this::limitRate, 1))
                         .log(outLog, Level.FINE, false)
                         .flatMap(this::toOutboundFrame))
-                .then()
-                .doOnError(t -> outLog.debug("Sender threw an error: {}", t.toString()))
-                .doOnSuccess(v -> outLog.debug("Sender succeeded"))
-                .doOnTerminate(() -> outLog.debug("Sender terminated"));
+                .then();
 
         Mono<Void> inboundEvents = in.aggregateFrames()
                 .receiveFrames()
@@ -156,7 +159,6 @@ public class DiscordWebSocketHandler {
                 .map(reader::read)
                 .log(inLog, Level.FINE, false)
                 .doOnNext(inbound::next)
-                .doOnError(t -> inLog.debug("Receiver threw an error: {}", t.toString()))
                 .doOnError(this::error)
                 .doOnComplete(() -> {
                     inLog.debug("Receiver completed");
@@ -166,10 +168,14 @@ public class DiscordWebSocketHandler {
                         error(new CloseException(closeStatus));
                     }
                 })
-                .doOnTerminate(() -> inLog.debug("Receiver terminated"))
                 .then();
 
-        return Mono.zip(completionNotifier, outboundEvents, inboundEvents)
+        return Mono
+                .zip(
+                        completionNotifier.log(shardLogger("discord4j.gateway.zip"), Level.FINE, false),
+                        outboundEvents.log(shardLogger("discord4j.gateway.zip.in"), Level.FINE, false),
+                        inboundEvents.log(shardLogger("discord4j.gateway.zip.out"), Level.FINE, false)
+                )
                 .doOnError(t -> mainLog.debug("WebSocket session threw an error: {}", t.toString()))
                 .then();
     }
@@ -184,6 +190,7 @@ public class DiscordWebSocketHandler {
                     }
                     return Mono.just(payload);
                 })
+                .doOnError(t -> mainLog.warn("Could not send OP {} payload, retrying", payload.getOp()))
                 .retry();
     }
 

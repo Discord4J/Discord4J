@@ -45,6 +45,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.logging.Level;
 
 import static io.netty.handler.codec.http.HttpHeaderNames.USER_AGENT;
 
@@ -99,14 +100,13 @@ public class GatewayClient {
      * @param retryOptions reconnect policy used in this client
      * @param token Discord bot token
      * @param identifyOptions used to IDENTIFY or RESUME a gateway connection, specifying the sharding options
-     *         and to set an initial presence
+     * and to set an initial presence
      * @param observer consumer observing gateway and underlying websocket lifecycle changes
      * @param limiter rate-limiting policy used for IDENTIFY requests, allowing shard coordination
      */
     public GatewayClient(PayloadReader payloadReader, PayloadWriter payloadWriter,
             RetryOptions retryOptions, String token, IdentifyOptions identifyOptions,
             GatewayObserver observer, GatewayLimiter limiter) {
-        this.log = Loggers.getLogger("discord4j.gateway.client." + identifyOptions.getShardIndex());
         this.payloadReader = Objects.requireNonNull(payloadReader);
         this.payloadWriter = Objects.requireNonNull(payloadWriter);
         this.retryOptions = Objects.requireNonNull(retryOptions);
@@ -118,6 +118,7 @@ public class GatewayClient {
         this.receiverSink = receiver.sink(FluxSink.OverflowStrategy.LATEST);
         this.senderSink = sender.sink(FluxSink.OverflowStrategy.LATEST);
         this.heartbeatSink = heartbeats.sink(FluxSink.OverflowStrategy.LATEST);
+        this.log = shardLogger("discord4j.gateway.client");
     }
 
     /**
@@ -167,14 +168,12 @@ public class GatewayClient {
             Mono<Void> receiverFuture = receiver.map(this::updateSequence)
                     .map(payload -> payloadContext(payload, handler, this))
                     .doOnNext(PayloadHandlers::handle)
-                    .doOnComplete(() -> log.debug("Receiver future completed"))
                     .then();
 
             // Subscribe the handler's outbound exchange with our outgoing signals
             // routing error and completion signals to close the gateway
             Mono<Void> senderFuture = sender.doOnError(t -> handler.close())
                     .doOnComplete(handler::close)
-                    .doOnComplete(() -> log.debug("Sender future completed"))
                     .then();
 
             // Create the heartbeat loop, and subscribe it using the sender sink
@@ -200,13 +199,17 @@ public class GatewayClient {
                     .websocket(Integer.MAX_VALUE)
                     .uri(gatewayUrl)
                     .handle(handler::handle)
-                    .doOnComplete(() -> log.debug("WebSocket future complete"))
-                    .doOnError(t -> log.debug("WebSocket future threw an error", t))
-                    .doOnCancel(() -> log.debug("WebSocket future cancelled"))
                     .doOnTerminate(heartbeat::stop)
                     .then();
 
-            return Mono.zip(httpFuture, readyHandler, receiverFuture, senderFuture, heartbeatHandler)
+            return Mono
+                    .zip(
+                            httpFuture.log(shardLogger("discord4j.gateway.zip.http"), Level.FINE, false),
+                            readyHandler.log(shardLogger("discord4j.gateway.zip.ready"), Level.FINE, false),
+                            receiverFuture.log(shardLogger("discord4j.gateway.zip.receiver"), Level.FINE, false),
+                            senderFuture.log(shardLogger("discord4j.gateway.zip.sender"), Level.FINE, false),
+                            heartbeatHandler.log(shardLogger("discord4j.gateway.zip.heartbeat"), Level.FINE, false)
+                    )
                     .doOnError(t -> log.error("Gateway client error", t))
                     .doOnCancel(() -> close(false))
                     .then();
@@ -214,6 +217,10 @@ public class GatewayClient {
                 .retryWhen(retryFactory())
                 .doOnCancel(logDisconnected())
                 .doOnTerminate(logDisconnected());
+    }
+
+    private Logger shardLogger(String name) {
+        return Loggers.getLogger(name + "." + identifyOptions.getShardIndex());
     }
 
     private static boolean isReadyOrResume(Dispatch d) {
@@ -397,7 +404,7 @@ public class GatewayClient {
      * Obtains the FluxSink to send Dispatch events towards GatewayClient's users.
      *
      * @return a {@link reactor.core.publisher.FluxSink} for {@link discord4j.gateway.json.dispatch.Dispatch}
-     *         objects
+     * objects
      */
     FluxSink<Dispatch> dispatchSink() {
         return dispatchSink;

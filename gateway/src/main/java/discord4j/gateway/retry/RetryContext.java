@@ -17,6 +17,8 @@
 package discord4j.gateway.retry;
 
 import java.time.Duration;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Encapsulate retrying state for reconnect operations.
@@ -30,9 +32,9 @@ public class RetryContext {
     private final Duration firstBackoff;
     private final Duration maxBackoffInterval;
 
-    private boolean connected = false;
-    private int attempts = 1;
-    private int resetCount = 0;
+    private AtomicBoolean connected = new AtomicBoolean(false);
+    private AtomicInteger attempts = new AtomicInteger(1);
+    private AtomicInteger resetCount = new AtomicInteger(0);
 
     public RetryContext(Duration firstBackoff, Duration maxBackoffInterval) {
         this.firstBackoff = firstBackoff;
@@ -43,17 +45,17 @@ public class RetryContext {
      * Signal that the next retry attempt should be underway.
      */
     public void next() {
-        connected = false;
-        attempts++;
+        connected.compareAndSet(true, false);
+        attempts.incrementAndGet();
     }
 
     /**
      * Reset the attempt count, treating further calls to {@link #next()} as new retry sequences.
      */
     public void reset() {
-        connected = true;
-        attempts = 1;
-        resetCount++;
+        connected.compareAndSet(false, true);
+        attempts.set(1);
+        resetCount.incrementAndGet();
     }
 
     public Duration getFirstBackoff() {
@@ -65,14 +67,14 @@ public class RetryContext {
     }
 
     public boolean isConnected() {
-        return connected;
+        return connected.get();
     }
 
     public int getAttempts() {
-        return attempts;
+        return attempts.get();
     }
 
     public int getResetCount() {
-        return resetCount;
+        return resetCount.get();
     }
 }
