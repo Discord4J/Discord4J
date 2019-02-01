@@ -20,9 +20,14 @@ import discord4j.core.object.util.Snowflake;
 import discord4j.rest.json.request.EmbedRequest;
 import discord4j.rest.json.request.MessageCreateRequest;
 import discord4j.rest.util.MultipartRequest;
+import reactor.util.function.Tuple2;
+import reactor.util.function.Tuples;
 
 import javax.annotation.Nullable;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.function.Consumer;
 
 public class MessageCreateSpec implements Spec<MultipartRequest> {
@@ -33,8 +38,7 @@ public class MessageCreateSpec implements Spec<MultipartRequest> {
     private String nonce;
     private boolean tts;
     private EmbedRequest embed;
-    private String fileName;
-    private InputStream file;
+    private List<Tuple2<String, InputStream>> files;
 
     public MessageCreateSpec setContent(String content) {
         this.content = content;
@@ -58,20 +62,15 @@ public class MessageCreateSpec implements Spec<MultipartRequest> {
         return this;
     }
 
-    public MessageCreateSpec setFile(String fileName, InputStream file) {
-        this.fileName = fileName;
-        this.file = file;
+    public MessageCreateSpec addFile(String fileName, InputStream file) {
+        if (files == null) files = new ArrayList<>(1);
+        files.add(Tuples.of(fileName, file));
         return this;
     }
 
     @Override
     public MultipartRequest asRequest() {
         MessageCreateRequest json = new MessageCreateRequest(content, nonce, tts, embed);
-
-        if (file != null) {
-            return new MultipartRequest(json, fileName, file);
-        } else {
-            return new MultipartRequest(json);
-        }
+        return new MultipartRequest(json, files == null ? Collections.emptyList() : files);
     }
 }

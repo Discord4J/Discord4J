@@ -26,8 +26,11 @@ import reactor.netty.http.client.HttpClient;
 import reactor.netty.http.client.HttpClientForm;
 import reactor.util.Logger;
 import reactor.util.Loggers;
+import reactor.util.function.Tuple2;
 
 import javax.annotation.Nullable;
+import java.io.InputStream;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -57,11 +60,17 @@ public class MultipartWriterStrategy implements WriterStrategy<MultipartRequest>
             return Mono.empty(); // or .error() ?
         }
         final MessageCreateRequest createRequest = body.getCreateRequest();
+        final List<Tuple2<String, InputStream>> files = body.getFiles();
         return Mono.just(send.sendForm((request, form) -> {
-            if (body.getFile() != null) {
-                form.multipart(true).file("file", Optional.ofNullable(body.getFileName()).orElse("unknown"),
-                        body.getFile(), "application/octet-stream");
+            form.multipart(true);
+            if (body.getFiles().size() == 1) {
+                form.file("file", files.get(0).getT1(), files.get(0).getT2(), "application/octet-stream");
+            } else {
+                for (int i = 0; i < files.size(); i++) {
+                    form.file("file" + i, files.get(i).getT1(), files.get(i).getT2(), "application/octet-stream");
+                }
             }
+
             if (createRequest != null) {
                 try {
                     String payload = objectMapper.writeValueAsString(createRequest);

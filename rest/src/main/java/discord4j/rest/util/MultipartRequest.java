@@ -18,24 +18,30 @@
 package discord4j.rest.util;
 
 import discord4j.rest.json.request.MessageCreateRequest;
+import reactor.util.function.Tuple2;
+import reactor.util.function.Tuples;
 
 import javax.annotation.Nullable;
 import java.io.InputStream;
+import java.util.Collections;
+import java.util.List;
 
 public class MultipartRequest {
 
     private final MessageCreateRequest createRequest;
-    private final String fileName;
-    private final InputStream file;
+    private final List<Tuple2<String, InputStream>> files;
 
     public MultipartRequest(MessageCreateRequest createRequest) {
-        this(createRequest, null, null);
+        this(createRequest, Collections.emptyList());
     }
 
-    public MultipartRequest(MessageCreateRequest createRequest, @Nullable String fileName, @Nullable InputStream file) {
+    public MultipartRequest(MessageCreateRequest createRequest, String fileName, InputStream file) {
+        this(createRequest, Collections.singletonList(Tuples.of(fileName, file)));
+    }
+
+    public MultipartRequest(MessageCreateRequest createRequest, List<Tuple2<String, InputStream>> files) {
         this.createRequest = createRequest;
-        this.fileName = fileName;
-        this.file = file;
+        this.files = files;
     }
 
     @Nullable
@@ -43,13 +49,7 @@ public class MultipartRequest {
         return createRequest;
     }
 
-    @Nullable
-    public String getFileName() {
-        return fileName;
-    }
-
-    @Nullable
-    public InputStream getFile() {
-        return file;
+    public List<Tuple2<String, InputStream>> getFiles() {
+        return files;
     }
 }
