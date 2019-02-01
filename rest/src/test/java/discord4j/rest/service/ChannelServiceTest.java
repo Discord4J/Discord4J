@@ -23,6 +23,8 @@ import discord4j.rest.json.request.*;
 import discord4j.rest.request.Router;
 import discord4j.rest.util.MultipartRequest;
 import org.junit.Test;
+import reactor.util.function.Tuple2;
+import reactor.util.function.Tuples;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -30,6 +32,7 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 public class ChannelServiceTest {
 
@@ -97,6 +100,25 @@ public class ChannelServiceTest {
             }
             byte[] bytes = readAllBytes(inputStream);
             MultipartRequest request = new MultipartRequest(req, "fileTest.txt", new ByteArrayInputStream(bytes));
+            getChannelService().createMessage(permanentChannel, request).block();
+        }
+    }
+
+    @Test
+    public void testCreateMessagesWithMultipleFiles() throws IOException {
+        MessageCreateRequest req = new MessageCreateRequest("Hello world with *multiple* files!", null, false, null);
+        try (InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream("fileTest.txt")) {
+            if (inputStream == null) {
+                throw new NullPointerException();
+            }
+            byte[] bytes = readAllBytes(inputStream);
+
+            ByteArrayInputStream in0 = new ByteArrayInputStream(bytes);
+            ByteArrayInputStream in1 = new ByteArrayInputStream(bytes);
+            List<Tuple2<String, InputStream>> files = Arrays.asList(Tuples.of("file0.txt", in0),
+                    Tuples.of("file1.txt", in1));
+
+            MultipartRequest request = new MultipartRequest(req, files);
             getChannelService().createMessage(permanentChannel, request).block();
         }
     }

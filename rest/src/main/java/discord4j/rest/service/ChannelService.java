@@ -69,8 +69,8 @@ public class ChannelService extends RestService {
 
     public Mono<MessageResponse> createMessage(long channelId, MultipartRequest request) {
         return Routes.MESSAGE_CREATE.newRequest(channelId)
-                .header("content-type", request.getFile() != null ? "multipart/form-data" : "application/json")
-                .body(Objects.requireNonNull(request.getFile() != null ? request : request.getCreateRequest()))
+                .header("content-type", request.getFiles().isEmpty() ? "application/json" : "multipart/form-data")
+                .body(Objects.requireNonNull(request.getFiles().isEmpty() ? request.getCreateRequest() : request))
                 .exchange(getRouter());
     }
 
