@@ -98,10 +98,10 @@ public class DiscordWebSocketHandler {
     public DiscordWebSocketHandler(PayloadReader reader, PayloadWriter writer,
             FluxSink<GatewayPayload<?>> inbound, Flux<GatewayPayload<?>> outbound,
             Flux<GatewayPayload<Heartbeat>> heartbeat, int shardIndex, GatewayLimiter limiter) {
+        this.shardIndex = shardIndex;
         this.mainLog = shardLogger("discord4j.gateway");
         this.inLog = shardLogger("discord4j.gateway.inbound");
         this.outLog = shardLogger("discord4j.gateway.outbound");
-        this.shardIndex = shardIndex;
         this.reader = reader;
         this.writer = writer;
         this.inbound = inbound;
