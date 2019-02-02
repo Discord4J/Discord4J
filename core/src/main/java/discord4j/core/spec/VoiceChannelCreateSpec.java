@@ -48,6 +48,11 @@ public class VoiceChannelCreateSpec implements AuditSpec<ChannelCreateRequest> {
         return this;
     }
 
+    public VoiceChannelCreateSpec setPosition(int position) {
+        requestBuilder.setPosition(position);
+        return this;
+    }
+
     public VoiceChannelCreateSpec setPermissionOverwrites(Set<? extends PermissionOverwrite> permissionOverwrites) {
         OverwriteEntity[] raw = permissionOverwrites.stream()
                 .map(o -> new OverwriteEntity(o.getTargetId().asLong(), o.getType().getValue(), o.getAllowed().getRawValue(), o.getDenied().getRawValue()))

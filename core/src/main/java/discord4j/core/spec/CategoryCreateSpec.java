@@ -37,6 +37,11 @@ public class CategoryCreateSpec implements AuditSpec<ChannelCreateRequest> {
         return this;
     }
 
+    public CategoryCreateSpec setPosition(int position) {
+        requestBuilder.setPosition(position);
+        return this;
+    }
+
     public CategoryCreateSpec setPermissionOverwrites(Set<? extends PermissionOverwrite> permissionOverwrites) {
         OverwriteEntity[] raw = permissionOverwrites.stream()
                 .map(o -> new OverwriteEntity(o.getTargetId().asLong(), o.getType().getValue(), o.getAllowed().getRawValue(), o.getDenied().getRawValue()))

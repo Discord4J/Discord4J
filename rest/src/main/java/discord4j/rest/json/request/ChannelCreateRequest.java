@@ -34,6 +34,9 @@ public class ChannelCreateRequest {
     private final Possible<Integer> bitrate;
     @JsonProperty("user_limit")
     private final Possible<Integer> userLimit;
+    @JsonProperty("rate_limit_per_user")
+    private final Possible<Integer> rateLimitPerUser;
+    private final Possible<Integer> position;
     @JsonProperty("permission_overwrites")
     private final Possible<OverwriteEntity[]> permissionOverwrites;
     @JsonProperty("parent_id")
@@ -41,22 +44,22 @@ public class ChannelCreateRequest {
     @UnsignedJson
     private final PossibleLong parentId;
     private final Possible<Boolean> nsfw;
-    @JsonProperty("rate_limit_per_user")
-    private final Possible<Integer> rateLimitPerUser;
 
     public ChannelCreateRequest(String name, Possible<Integer> type, @Nullable Possible<String> topic,
                                 Possible<Integer> bitrate, Possible<Integer> userLimit,
+                                Possible<Integer> rateLimitPerUser, Possible<Integer> position,
                                 Possible<OverwriteEntity[]> permissionOverwrites, @Nullable PossibleLong parentId,
-                                Possible<Boolean> nsfw, Possible<Integer> rateLimitPerUser) {
+                                Possible<Boolean> nsfw) {
         this.name = name;
         this.type = type;
         this.topic = topic;
         this.bitrate = bitrate;
         this.userLimit = userLimit;
+        this.rateLimitPerUser = rateLimitPerUser;
+        this.position = position;
         this.permissionOverwrites = permissionOverwrites;
         this.parentId = parentId;
         this.nsfw = nsfw;
-        this.rateLimitPerUser = rateLimitPerUser;
     }
 
     public static Builder builder() {
@@ -71,10 +74,11 @@ public class ChannelCreateRequest {
         private Possible<String> topic = Possible.absent();
         private Possible<Integer> bitrate = Possible.absent();
         private Possible<Integer> userLimit = Possible.absent();
+        private Possible<Integer> rateLimitPerUser = Possible.absent();
+        private Possible<Integer> position = Possible.absent();
         private Possible<OverwriteEntity[]> permissionOverwrites = Possible.absent();
         private PossibleLong parentId = PossibleLong.absent();
         private Possible<Boolean> nsfw = Possible.absent();
-        private Possible<Integer> rateLimitPerUser = Possible.absent();
 
         public Builder name(String name) {
             this.name = name;
@@ -101,6 +105,16 @@ public class ChannelCreateRequest {
             return this;
         }
 
+        public Builder rateLimitPerUser(int rateLimitPerUser) {
+            this.rateLimitPerUser = Possible.of(rateLimitPerUser);
+            return this;
+        }
+
+        public Builder setPosition(int position) {
+            this.position = Possible.of(position);
+            return this;
+        }
+
         public Builder permissionOverwrites(OverwriteEntity[] permissionOverwrites) {
             this.permissionOverwrites = Possible.of(permissionOverwrites);
             return this;
@@ -116,14 +130,9 @@ public class ChannelCreateRequest {
             return this;
         }
 
-        public Builder rateLimitPerUser(int rateLimitPerUser) {
-            this.rateLimitPerUser = Possible.of(rateLimitPerUser);
-            return this;
-        }
-
         public ChannelCreateRequest build() {
-            return new ChannelCreateRequest(name, type, topic, bitrate, userLimit, permissionOverwrites, parentId,
-                    nsfw, rateLimitPerUser);
+            return new ChannelCreateRequest(name, type, topic, bitrate, userLimit, rateLimitPerUser, position,
+                    permissionOverwrites, parentId, nsfw);
         }
     }
 
@@ -135,10 +144,11 @@ public class ChannelCreateRequest {
                 ", topic=" + topic +
                 ", bitrate=" + bitrate +
                 ", userLimit=" + userLimit +
+                ", rateLimitPerUser=" + rateLimitPerUser +
+                ", position=" + position +
                 ", permissionOverwrites=" + permissionOverwrites +
                 ", parentId=" + parentId +
                 ", nsfw=" + nsfw +
-                ", rateLimitPerUser=" + rateLimitPerUser +
                 '}';
     }
 }

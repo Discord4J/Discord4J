@@ -43,6 +43,16 @@ public class TextChannelCreateSpec implements AuditSpec<ChannelCreateRequest> {
         return this;
     }
 
+    public TextChannelCreateSpec setRateLimitPerUser(int rateLimitPerUser) {
+        requestBuilder.rateLimitPerUser(rateLimitPerUser);
+        return this;
+    }
+
+    public TextChannelCreateSpec setPosition(int position) {
+        requestBuilder.setPosition(position);
+        return this;
+    }
+
     public TextChannelCreateSpec setPermissionOverwrites(Set<? extends PermissionOverwrite> permissionOverwrites) {
         OverwriteEntity[] raw = permissionOverwrites.stream()
                 .map(o -> new OverwriteEntity(o.getTargetId().asLong(), o.getType().getValue(), o.getAllowed().getRawValue(), o.getDenied().getRawValue()))
@@ -59,11 +69,6 @@ public class TextChannelCreateSpec implements AuditSpec<ChannelCreateRequest> {
 
     public TextChannelCreateSpec setNsfw(boolean nsfw) {
         requestBuilder.nsfw(nsfw);
-        return this;
-    }
-
-    public TextChannelCreateSpec setRateLimitPerUser(int rateLimitPerUser) {
-        requestBuilder.rateLimitPerUser(rateLimitPerUser);
         return this;
     }
 
