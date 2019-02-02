@@ -160,15 +160,15 @@ public class DiscordWebSocketHandler {
                 .log(inLog, Level.FINE, false)
                 .doOnNext(inbound::next)
                 .doOnError(this::error)
-                .doOnComplete(() -> {
-                    inLog.debug("Receiver completed");
+                .then(Mono.defer(() -> {
+                    inLog.info("Receiver completed");
                     CloseStatus closeStatus = reason.get();
                     if (closeStatus != null) {
-                        inLog.debug("Forwarding close reason: {}", closeStatus);
-                        error(new CloseException(closeStatus));
+                        inLog.info("Forwarding close reason: {}", closeStatus);
+                        return Mono.error(new CloseException(closeStatus));
                     }
-                })
-                .then();
+                    return Mono.empty();
+                }));
 
         return Mono
                 .zip(
