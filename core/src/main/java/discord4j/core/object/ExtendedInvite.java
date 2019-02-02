@@ -102,15 +102,6 @@ public final class ExtendedInvite extends Invite {
         return DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(getData().getCreatedAt(), Instant::from);
     }
 
-    /**
-     * Gets whether this invite is revoked.
-     *
-     * @return {@code true} if this invite was revoked, {@code false} otherwise.
-     */
-    public boolean isRevoked() {
-        return getData().isRevoked();
-    }
-
     @Override
     ExtendedInviteBean getData() {
         return (ExtendedInviteBean) super.getData();
