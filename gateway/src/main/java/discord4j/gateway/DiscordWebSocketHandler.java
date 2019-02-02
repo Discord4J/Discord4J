@@ -161,7 +161,7 @@ public class DiscordWebSocketHandler {
                 .doOnNext(inbound::next)
                 .doOnError(this::error)
                 .then(Mono.defer(() -> {
-                    inLog.info("Receiver completed");
+                    inLog.info("Receiver completed on shard {}", shardIndex);
                     CloseStatus closeStatus = reason.get();
                     if (closeStatus != null) {
                         inLog.info("Forwarding close reason: {}", closeStatus);
@@ -173,8 +173,8 @@ public class DiscordWebSocketHandler {
         return Mono
                 .zip(
                         completionNotifier.log(shardLogger("discord4j.gateway.zip"), Level.FINE, false),
-                        outboundEvents.log(shardLogger("discord4j.gateway.zip.in"), Level.FINE, false),
-                        inboundEvents.log(shardLogger("discord4j.gateway.zip.out"), Level.FINE, false)
+                        outboundEvents.log(shardLogger("discord4j.gateway.zip.out"), Level.FINE, false),
+                        inboundEvents.log(shardLogger("discord4j.gateway.zip.in"), Level.FINE, false)
                 )
                 .doOnError(t -> mainLog.debug("WebSocket session threw an error: {}", t.toString()))
                 .then();
@@ -216,7 +216,7 @@ public class DiscordWebSocketHandler {
      * through a complete signal, dropping all future signals.
      */
     public void close() {
-        mainLog.debug("Triggering close sequence");
+        mainLog.info("Triggering close sequence");
         completionNotifier.onComplete();
     }
 
