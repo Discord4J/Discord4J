@@ -102,6 +102,7 @@ public class RetryBotTest {
                         permitSink.next(o.getShardIndex() + 1);
                     }
                 })
+                .setInitialPresence(Presence.invisible())
                 .setShardCount(shardCount);
 
         // save our shards
