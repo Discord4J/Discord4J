@@ -20,6 +20,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.TypeFactory;
+import io.netty.buffer.ByteBufAllocator;
 import reactor.core.Exceptions;
 import reactor.core.publisher.Mono;
 import reactor.netty.ByteBufFlux;
@@ -27,6 +28,7 @@ import reactor.netty.http.client.HttpClient;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.Type;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Write to a request from an {@code Object} to a JSON {@code String} using Jackson 2.9.
@@ -56,7 +58,9 @@ public class JacksonWriterStrategy implements WriterStrategy<Object> {
             return Mono.error(new RuntimeException("Missing body"));
         }
         try {
-            return Mono.just(sender.send(ByteBufFlux.fromString(Mono.just(objectMapper.writeValueAsString(body)))));
+            return Mono.just(sender.send(
+                    ByteBufFlux.fromString(Mono.just(objectMapper.writeValueAsString(body)),
+                            StandardCharsets.UTF_8, ByteBufAllocator.DEFAULT)));
         } catch (JsonProcessingException e) {
             throw Exceptions.propagate(e);
         }
