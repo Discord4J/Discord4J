@@ -214,9 +214,7 @@ public class GatewayClient {
                     .doOnCancel(() -> close(false))
                     .then();
         })
-                .log(shardLogger("discord4j.gateway.client.preRetry"), Level.FINE, false)
                 .retryWhen(retryFactory())
-                .log(shardLogger("discord4j.gateway.client.postRetry"), Level.FINE, false)
                 .doOnCancel(logDisconnected())
                 .doOnTerminate(logDisconnected());
     }
