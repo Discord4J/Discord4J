@@ -35,7 +35,6 @@ import reactor.core.publisher.FluxSink;
 import reactor.core.publisher.Mono;
 import reactor.netty.ConnectionObserver;
 import reactor.netty.http.client.HttpClient;
-import reactor.netty.resources.ConnectionProvider;
 import reactor.retry.Retry;
 import reactor.util.Logger;
 import reactor.util.Loggers;
@@ -194,7 +193,7 @@ public class GatewayClient {
                     .doOnNext(heartbeatSink::next)
                     .then();
 
-            Mono<Void> httpFuture = HttpClient.create(ConnectionProvider.newConnection())
+            Mono<Void> httpFuture = HttpClient.create()
                     .headers(headers -> headers.add(USER_AGENT, "DiscordBot(https://discord4j.com, 3)"))
                     .observe(observer())
                     .websocket(Integer.MAX_VALUE)
