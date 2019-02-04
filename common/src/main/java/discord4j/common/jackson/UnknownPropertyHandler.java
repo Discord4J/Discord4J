@@ -20,14 +20,10 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.deser.DeserializationProblemHandler;
-import reactor.util.Logger;
-import reactor.util.Loggers;
 
 import java.io.IOException;
 
 public class UnknownPropertyHandler extends DeserializationProblemHandler {
-
-    private static final Logger log = Loggers.getLogger(UnknownPropertyHandler.class);
 
     private final boolean ignoreUnknown;
 
@@ -38,9 +34,9 @@ public class UnknownPropertyHandler extends DeserializationProblemHandler {
     @Override
     public boolean handleUnknownProperty(DeserializationContext ctx, JsonParser parser, JsonDeserializer<?> deser,
                                          Object beanOrClass, String propertyName) throws IOException {
-        if (!ignoreUnknown) return false;
-
-        log.trace("Skipping unknown json property of {}: \"{}\"", beanOrClass.getClass().getName(), propertyName);
+        if (!ignoreUnknown) {
+            return false;
+        }
         parser.skipChildren();
         return true;
     }
