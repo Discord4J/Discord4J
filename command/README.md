@@ -11,38 +11,37 @@ distributed without an actual bot, meaning that developers can create bot-less "
 into other users' bots quite simply.
 
 ## Installation
+Just replace `@VERSION@` with the latest given by ![](https://img.shields.io/maven-central/v/com.discord4j/discord4j-command.svg?style=flat-square)
 ### Gradle
 ```groovy
 repositories {
-  maven { url 'https://jitpack.io' }
-  maven { url 'https://repo.spring.io/milestone' }
+  jcenter()
 }
 
 dependencies {
-  implementation 'com.discord4j.discord4j:discord4j-command:@VERSION@'
+  implementation 'com.discord4j:discord4j-command:@VERSION@'
 }
 ```
 ### Maven
 ```xml
 <repositories>
   <repository>
-    <id>jitpack.io</id>
-    <url>https://jitpack.io</url>
-  </repository>
-  <repository> 
-    <id>repository.spring.milestone</id> 
-    <url>http://repo.spring.io/milestone</url> 
+    <id>jcenter</id>
+    <url>https://jcenter.bintray.com/</url>
   </repository>
 </repositories>
 
 <dependencies>
   <dependency>
-    <groupId>com.discord4j.discord4j</groupId>
+    <groupId>com.discord4j</groupId>
     <artifactId>discord4j-command</artifactId>
     <version>@VERSION@</version>
   </dependency>
 </dependencies>
 ```
+
+## Development builds
+Please follow our instructions at [Using Jitpack](https://github.com/Discord4J/Discord4J/wiki/Using-Jitpack)
 
 ## Example usage
 Creating a command:

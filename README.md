@@ -2,7 +2,7 @@
 
 <img align="right" src="https://raw.githubusercontent.com/Discord4J/discord4j-web/master/public/logo.svg?sanitize=true" width=27%>
 
-[![Maven Central](https://img.shields.io/maven-central/v/com.discord4j/Discord4J/2.svg?style=flat-square)](https://mvnrepository.com/artifact/com.discord4j/Discord4J)  [![JCenter](https://img.shields.io/bintray/v/discord4j/maven/Discord4J.svg?style=flat-square)](https://bintray.com/austinv11/maven/Discord4J/_latestVersion)  [![Support Server Invite](https://img.shields.io/badge/Join-Discord4J-7289DA.svg?style=flat-square&logo=discord)](https://discord.gg/NxGAeCY)
+[![Maven Central](https://img.shields.io/maven-central/v/com.discord4j/discord4j-core.svg?style=flat-square)](https://mvnrepository.com/artifact/com.discord4j/discord4j-core) [![Support Server Invite](https://img.shields.io/badge/Join-Discord4J-7289DA.svg?style=flat-square&logo=discord)](https://discord.gg/NxGAeCY)
 
 A fast, reactive Java wrapper for the official [Discord Bot API](https://discordapp.com/developers/docs/intro).
 
@@ -12,27 +12,27 @@ Built with [Reactor](https://projectreactor.io/), [Netty](https://netty.io/), an
 ### Gradle
 ```groovy
 repositories {
-  maven { url 'https://jitpack.io' }
+  jcenter()
 }
 
 dependencies {
-  implementation 'com.discord4j.discord4j:discord4j-core:v3-SNAPSHOT'
+  implementation 'com.discord4j:discord4j-core:3.0.0.M2'
 }
 ```
 ### Maven
 ```xml
 <repositories>
   <repository>
-    <id>jitpack.io</id>
-    <url>https://jitpack.io</url>
+    <id>jcenter</id>
+    <url>https://jcenter.bintray.com/</url>
   </repository>
 </repositories>
 
 <dependencies>
   <dependency>
-    <groupId>com.discord4j.discord4j</groupId>
+    <groupId>com.discord4j</groupId>
     <artifactId>discord4j-core</artifactId>
-    <version>v3-SNAPSHOT</version>
+    <version>3.0.0.M2</version>
   </dependency>
 </dependencies>
 ```
@@ -40,10 +40,10 @@ dependencies {
 ### SBT
 ```scala
 libraryDependencies ++= Seq(
-  "com.github.discord4j.discord4j" % "discord4j-core" % "v3-SNAPSHOT"
+  "com.discord4j" % "discord4j-core" % "3.0.0.M2"
 )
 
-resolvers += "jitpack.io" at "https://jitpack.io"
+resolvers += "jcenter" at "https://jcenter.bintray.com/"
 ```
 
 ## Quick Example
@@ -75,6 +75,9 @@ The `rest` module provides a low-level HTTP client specifically for Discord whic
 ### [Gateway](./gateway/README.md)
 The `gateway` module provides a low-level WebSocket client for interacting with the [Discord Gateway](https://discordapp.com/developers/docs/topics/gateway).
 
+### [Voice](./voice/README.md)
+The `voice` module provides a client to manipulate audio through [Voice Connections](https://discordapp.com/developers/docs/topics/voice-connections).
+
 ### [Command](./command/README.md)
 The `command` module provides a set of low-level tools for dealing with bot commands. It can be used on its own or easily serve as a basis of interoperability for higher-level command libraries. 
 
@@ -82,10 +85,13 @@ The `command` module provides a set of low-level tools for dealing with bot comm
 The `common` module contains base utilities and models useful for other modules.
 
 ## Stores
-Discord4J's mechanism for storing information received on the gateway is completely pluggable. This allows both the ability to customize what is stored and how. The Stores repository contains some pre-made implementations as well as the API for making your own.
+Discord4J's mechanism for storing information received on the gateway is completely pluggable. This allows both the ability to customize what is stored and how. The [Stores](https://github.com/Discord4J/Stores) repository contains some pre-made implementations as well as the API for making your own.
+
+## Development builds
+Please follow our instructions at [Using Jitpack](https://github.com/Discord4J/Discord4J/wiki/Using-Jitpack)
 
 ## Useful Links
 * [Discord4J Site](https://new.discord4j.com)
 * [Discord4J Wiki](https://github.com/Discord4J/Discord4J/wiki)
-* [Javadoc](https://jitpack.io/com/discord4j/discord4j/discord4j-core/v3-SNAPSHOT/javadoc/index.html)
+* [Javadoc](https://javadoc.jitpack.io/com/discord4j/discord4j/build/3.0.0.M2/javadoc/index.html)
 * [Reactor 3 Reference Guide](http://projectreactor.io/docs/core/release/reference/)

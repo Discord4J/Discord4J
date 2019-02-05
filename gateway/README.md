@@ -2,15 +2,15 @@
 The `gateway` module provides a low-level WebSocket client for interacting with the [Discord Gateway](https://discordapp.com/developers/docs/topics/gateway).
 
 ## Installation
+Just replace `@VERSION@` with the latest given by ![](https://img.shields.io/maven-central/v/com.discord4j/discord4j-gateway.svg?style=flat-square)
 ### Gradle
 ```groovy
 repositories {
-  maven { url 'https://jitpack.io' }
-  maven { url 'https://repo.spring.io/milestone' }
+  jcenter()
 }
 
 dependencies {
-  implementation 'com.discord4j.discord4j:discord4j-gateway:@VERSION@'
+  implementation 'com.discord4j:discord4j-gateway:@VERSION@'
 }
 ```
 ### Maven
@@ -20,20 +20,19 @@ dependencies {
     <id>jitpack.io</id>
     <url>https://jitpack.io</url>
   </repository>
-  <repository> 
-    <id>repository.spring.milestone</id> 
-    <url>http://repo.spring.io/milestone</url> 
-  </repository>
 </repositories>
 
 <dependencies>
   <dependency>
-    <groupId>com.discord4j.discord4j</groupId>
+    <groupId>com.discord4j</groupId>
     <artifactId>discord4j-gateway</artifactId>
     <version>@VERSION@</version>
   </dependency>
 </dependencies>
 ```
+
+## Development builds
+Please follow our instructions at [Using Jitpack](https://github.com/Discord4J/Discord4J/wiki/Using-Jitpack)
 
 ## Example Usage
 ```java
