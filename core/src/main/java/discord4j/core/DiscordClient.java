@@ -28,6 +28,7 @@ import discord4j.core.object.entity.*;
 import discord4j.core.object.presence.Presence;
 import discord4j.core.object.util.Snowflake;
 import discord4j.core.spec.GuildCreateSpec;
+import discord4j.core.spec.UserEditSpec;
 import discord4j.core.util.EntityUtil;
 import discord4j.core.util.PaginationUtil;
 import discord4j.gateway.json.GatewayPayload;
@@ -366,6 +367,23 @@ public final class DiscordClient {
                 .getInvite(inviteCode)
                 .map(InviteBean::new)
                 .map(bean -> new Invite(serviceMediator, bean));
+    }
+
+    /**
+     * Requests to edit this client (i.e., modify the current bot user).
+     *
+     * @param spec A {@link Consumer} that provides a "blank" {@link UserEditSpec} to be operated on.
+     * @return A {@link Mono} where, upon successful completion, emits the edited {@link User}. If an error is received,
+     * it is emitted through the {@code Mono}.
+     */
+    public Mono<User> edit(final Consumer<? super UserEditSpec> spec) {
+        final UserEditSpec mutatedSpec = new UserEditSpec();
+        spec.accept(mutatedSpec);
+
+        return serviceMediator.getRestClient().getUserService()
+                .modifyCurrentUser(mutatedSpec.asRequest())
+                .map(UserBean::new)
+                .map(bean -> new User(serviceMediator, bean));
     }
 
     /**
