@@ -282,7 +282,7 @@ release {
     }
 }
 
-afterReleaseBuild.dependsOn publish
+//afterReleaseBuild.dependsOn publish
 
 wrapper {
     gradleVersion = "5.1.1"
