@@ -203,7 +203,7 @@ def customizePom(pom) {
             resolveStrategy = Closure.DELEGATE_FIRST
 
             description 'A JVM-based REST/WS wrapper for the official Discord Bot API'
-            name 'Stores'
+            name 'Discord4J'
             url 'https://github.com/Discord4J/Discord4J'
             organization {
                 name 'Discord4J'
@@ -282,7 +282,7 @@ release {
     }
 }
 
-//afterReleaseBuild.dependsOn publish
+afterReleaseBuild.dependsOn publish
 
 wrapper {
     gradleVersion = "5.1.1"
