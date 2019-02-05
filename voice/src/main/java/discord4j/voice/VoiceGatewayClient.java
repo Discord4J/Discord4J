@@ -16,7 +16,7 @@
  */
 package discord4j.voice;
 
-import com.darichey.simplefsm.FiniteStateMachine;
+import com.discord4j.fsm.FiniteStateMachine;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.iwebpp.crypto.TweetNaclFast;
 import discord4j.voice.VoiceGatewayEvent.Start;
