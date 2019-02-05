@@ -167,9 +167,11 @@ subprojects {
                     } else {
                         url 'https://oss.sonatype.org/content/repositories/snapshots/'
                     }
-                    credentials {
-                        username sonatypeUsername
-                        password sonatypePassword
+                    if (project.hasProperty('sonatypeUsername') && project.hasProperty('sonatypePassword')) {
+                        credentials {
+                            username project.property('sonatypeUsername')
+                            password project.property('sonatypePassword')
+                        }
                     }
                 }
             }
