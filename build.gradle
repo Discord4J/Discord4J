@@ -1,10 +1,11 @@
 plugins {
     id 'java'
     id 'maven-publish'
-    id 'nebula.nebula-bintray' version '5.0.0'
+    id 'signing'
     id 'com.gorylenko.gradle-git-properties' version '2.0.0' apply false
     id 'io.spring.dependency-management' version '1.0.6.RELEASE' apply false
     id 'com.github.ben-manes.versions' version '0.20.0'
+    id 'net.researchgate.release' version '2.8.0'
 }
 
 ext {
@@ -25,13 +26,18 @@ ext {
     mockito_version = '2.23.4'
     logback_version = '1.3.0-alpha4'
     jdkstores_version = "$storesVersion"
+
+    isJitpack = "true" == System.getenv("JITPACK")
+    isRelease = !version.toString().endsWith('-SNAPSHOT')
 }
 
 allprojects {
     apply plugin: 'java'
     apply plugin: 'io.spring.dependency-management'
     apply plugin: 'maven-publish'
-    apply plugin: 'nebula.nebula-bintray'
+    if (!isJitpack && isRelease) {
+        apply plugin: 'signing'
+    }
 
     group = artifact_group
     version = project_version
@@ -60,14 +66,14 @@ allprojects {
             addStringOption 'encoding', 'UTF-8'
             // adding links to javadocs for filling specific classes when not existing inside current javadoc
             links = [
-                "https://docs.oracle.com/javase/8/docs/api/",
-                "https://docs.oracle.com/javaee/7/api/",
-                "http://fasterxml.github.io/jackson-databind/javadoc/2.9/",
-                "http://www.reactive-streams.org/reactive-streams-1.0.2-javadoc/",
-                "http://projectreactor.io/docs/core/milestone/api/",
-                "http://projectreactor.io/docs/netty/milestone/api/",
-                "http://projectreactor.io/docs/extra/milestone/api/",
-                "http://netty.io/4.1/api/"
+                    "https://docs.oracle.com/javase/8/docs/api/",
+                    "https://docs.oracle.com/javaee/7/api/",
+                    "http://fasterxml.github.io/jackson-databind/javadoc/2.9/",
+                    "http://www.reactive-streams.org/reactive-streams-1.0.2-javadoc/",
+                    "http://projectreactor.io/docs/core/milestone/api/",
+                    "http://projectreactor.io/docs/netty/milestone/api/",
+                    "http://projectreactor.io/docs/extra/milestone/api/",
+                    "http://netty.io/4.1/api/"
             ]
         }
     }
@@ -99,38 +105,9 @@ allprojects {
         archives sourcesJar
     }
 
-    bintray {
-        user = project.hasProperty('bintrayUser') ? project.property('bintrayUser') : System.getenv('BINTRAY_USER')
-        key = project.hasProperty('bintrayKey') ? project.property('bintrayKey') : System.getenv('BINTRAY_KEY')
-        publications = ['maven']
-        dryRun = false
-        publish = true
-        pkg {
-            userOrg = 'discord4j'
-            repo = 'maven'
-            name = 'Discord4J'
-            websiteUrl = project_url
-            issueTrackerUrl = 'https://github.com/Discord4J/Discord4J/issues'
-            vcsUrl = 'https://github.com/Discord4J/Discord4J.git'
-            licenses = ['LGPL-3.0']
-            labels = ['discord', 'discord4j', 'd4j', 'reactor']
-            publicDownloadNumbers = true
-            attributes = [:]
-            version {
-                name = project.version
-                vcsTag = project.version
-                gpg {
-                    sign = true
-                }
-                if (project.hasProperty('sonatypeUsername') && project.hasProperty('sonatypePassword')) {
-                    def sonatypeUsername = project.property('sonatypeUsername')
-                    def sonatypePassword = project.property('sonatypePassword')
-                    mavenCentralSync {
-                        user = sonatypeUsername
-                        password = sonatypePassword
-                    }
-                }
-            }
+    if (!isJitpack && isRelease) {
+        signing {
+            sign configurations.archives
         }
     }
 }
@@ -148,20 +125,118 @@ subprojects {
     publishing {
         publications {
             maven(MavenPublication) {
+                customizePom(pom)
+
                 from components.java
                 artifactId archivesBaseName
+
                 artifact sourcesJar
                 artifact javadocJar
+
+                if (!isJitpack && isRelease) {
+                    pom.withXml {
+                        def pomFile = file("${project.buildDir}/generated-pom.xml")
+                        writeTo(pomFile)
+                        def pomAscFile = signing.sign(pomFile).signatureFiles[0]
+                        artifact(pomAscFile) {
+                            classifier = null
+                            extension = 'pom.asc'
+                        }
+                    }
+
+                    project.tasks.signArchives.signatureFiles.each {
+                        artifact(it) {
+                            def matcher = it.file =~ /-(sources|javadoc)\.jar\.asc$/
+                            if (matcher.find()) {
+                                classifier = matcher.group(1)
+                            } else {
+                                classifier = null
+                            }
+                            extension = 'jar.asc'
+                        }
+                    }
+                }
+            }
+        }
+
+        if (!isJitpack) {
+            repositories {
+                maven {
+                    if (isRelease) {
+                        url 'https://oss.sonatype.org/service/local/staging/deploy/maven2'
+                    } else {
+                        url 'https://oss.sonatype.org/content/repositories/snapshots/'
+                    }
+                    credentials {
+                        username sonatypeUsername
+                        password sonatypePassword
+                    }
+                }
+            }
+        }
+    }
+
+    if (!isJitpack && isRelease) {
+        model {
+            tasks.generatePomFileForMavenPublication {
+                destination = file("$buildDir/generated-pom.xml")
+            }
+            tasks.publishMavenPublicationToMavenLocal {
+                dependsOn project.tasks.signArchives
+            }
+            tasks.publishMavenPublicationToMavenRepository {
+                dependsOn project.tasks.signArchives
             }
         }
     }
 }
 
-bintrayUpload.dependsOn build
+def customizePom(pom) {
+    pom.withXml {
+        def root = asNode()
+
+        root.dependencies.removeAll { dep ->
+            dep.scope == "test"
+        }
+
+        root.children().last() + {
+            resolveStrategy = Closure.DELEGATE_FIRST
+
+            description 'A JVM-based REST/WS wrapper for the official Discord Bot API'
+            name 'Stores'
+            url 'https://github.com/Discord4J/Discord4J'
+            organization {
+                name 'Discord4J'
+                url 'https://discord4j.com'
+            }
+            issueManagement {
+                system 'GitHub'
+                url 'https://github.com/Discord4J/Discord4J/issues'
+            }
+            licenses {
+                license {
+                    name 'LGPL-3.0'
+                    url 'https://github.com/Discord4J/Discord4J/LICENSE.txt'
+                    distribution 'repo'
+                }
+            }
+            scm {
+                url 'https://github.com/Discord4J/Discord4J'
+                connection 'scm:git:git://github.com/Discord4J/Discord4J.git'
+                developerConnection 'scm:git:ssh://git@github.com:Discord4J/Discord4J.git'
+            }
+            developers {
+                developer {
+                    name 'The Discord4J Team'
+                }
+            }
+        }
+    }
+}
 
 task aggregateJavadoc(type: Javadoc,
-    description: "Generate javadocs from all child projects as if it was a single project",
-    group: JavaBasePlugin.DOCUMENTATION_GROUP
+        description: "Generate javadocs from all child projects as if it was a single project",
+        group: JavaBasePlugin.DOCUMENTATION_GROUP
 ) {
     destinationDir file("${rootProject.buildDir}/docs/aggregateJavadoc")
     failOnError false
@@ -188,13 +263,23 @@ task aggregateJavadocJar(type: Jar, dependsOn: aggregateJavadoc) {
     from aggregateJavadoc.destinationDir
 }
 
-publishing {
-    publications {
-        maven(MavenPublication) {
-            artifact aggregateJavadocJar
+if (isJitpack) {
+    publishing {
+        publications {
+            maven(MavenPublication) {
+                artifact aggregateJavadocJar
+            }
         }
     }
 }
+
+release {
+    preTagCommitMessage = 'Release version'
+    tagCommitMessage = 'Release version'
+    newVersionCommitMessage = 'Next development version'
+}
+
+afterReleaseBuild.dependsOn publish
 
 wrapper {
     gradleVersion = "5.1.1"
