@@ -2,6 +2,13 @@
 
 ---
 
+### If you're looking for v3 documentation head over to our [wiki](https://github.com/Discord4J/Discord4J/wiki).
+v2 is currently on feature freeze so we highly recommend you upgrade.
+
+If you have any questions or suggestions for the wiki please mention any of the admins on the official D4J help server.
+
+---
+
 If you are looking for the javadocs they can be found [here](https://jitpack.io/com/github/austinv11/Discord4J/2.9.3/javadoc/).
 
 This wiki will demonstrate some sample use cases of the D4J API and code examples of more complex concepts such as the RequestBuffer and event listeners.
@@ -33,7 +40,3 @@ All the docs are stored on the github repo under the "docs" folder, to submit yo
 This wiki is written under the assumption that the user wishes to read and understand the various components of D4J. If you just want to import something and then press play and have something that works check out the starter bot here: https://github.com/decyg/d4jexamplebot/
 
 Some example commands are written in the `CommandHandler` class.
-
----
-
-If you have any questions or suggestions for the wiki please mention any of the admins on the official D4J help server.
