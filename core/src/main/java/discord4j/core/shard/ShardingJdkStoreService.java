@@ -25,14 +25,14 @@ import reactor.core.publisher.Mono;
 
 import java.io.Serializable;
 
-public class ShardJdkStoreService extends JdkStoreService {
+public class ShardingJdkStoreService extends JdkStoreService {
 
-    private final ShardStoreRegistry registry;
+    private final ShardingStoreRegistry registry;
 
     volatile Class<?> messageClass;
     volatile int shardId;
 
-    public ShardJdkStoreService(ShardStoreRegistry registry) {
+    public ShardingJdkStoreService(ShardingStoreRegistry registry) {
         this.registry = registry;
     }
 

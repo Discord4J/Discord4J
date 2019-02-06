@@ -15,20 +15,17 @@
  * along with Discord4J. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package discord4j.rest.request;
+package discord4j.core.shard;
 
-import discord4j.rest.http.client.DiscordWebClient;
+import discord4j.store.api.Store;
 
-/**
- * Factory used to produce {@link discord4j.rest.request.Router} instances dedicated to execute API requests.
- */
-public interface RouterFactory {
+import java.io.Serializable;
+import java.util.Set;
 
-    /**
-     * Retrieve a {@link discord4j.rest.request.Router} configured to process API requests.
-     *
-     * @param webClient a web client to parameterize the Router creation
-     * @return a Router prepared to process API requests
-     */
-    Router getRouter(DiscordWebClient webClient);
+public interface ShardingStoreRegistry {
+
+    boolean containsStore(Class<?> valueClass);
+    <V extends Serializable, K extends Comparable<K>> void putStore(Class<V> valueClass, Store<K, V> store);
+    <K extends Comparable<K>, V extends Serializable> Store<K, V> getValueStore(Class<K> key, Class<V> value);
+    <K extends Comparable<K>, V extends Serializable> Set<K> getKeyStore(Class<V> valueClass, int shardId);
 }

@@ -20,6 +20,9 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
+import discord4j.common.GitProperties;
+import discord4j.common.JacksonResourceProvider;
+import discord4j.common.ReactorResourceProvider;
 import discord4j.common.RateLimiter;
 import discord4j.common.SimpleBucket;
 import discord4j.common.jackson.PossibleModule;
@@ -31,7 +34,6 @@ import discord4j.core.event.dispatch.StoreInvalidator;
 import discord4j.core.event.domain.Event;
 import discord4j.core.object.data.stored.MessageBean;
 import discord4j.core.object.presence.Presence;
-import discord4j.core.util.VersionUtil;
 import discord4j.gateway.GatewayClient;
 import discord4j.gateway.GatewayObserver;
 import discord4j.gateway.IdentifyOptions;
@@ -46,15 +48,11 @@ import discord4j.rest.http.ExchangeStrategies;
 import discord4j.rest.http.client.DiscordWebClient;
 import discord4j.rest.request.DefaultRouterFactory;
 import discord4j.rest.request.RouterFactory;
-import discord4j.rest.route.Routes;
 import discord4j.store.api.service.StoreService;
 import discord4j.store.api.service.StoreServiceLoader;
 import discord4j.store.api.util.StoreContext;
 import discord4j.store.jdk.JdkStoreService;
 import discord4j.voice.VoiceClient;
-import io.netty.handler.codec.http.DefaultHttpHeaders;
-import io.netty.handler.codec.http.HttpHeaderNames;
-import io.netty.handler.codec.http.HttpHeaders;
 import reactor.core.publisher.EmitterProcessor;
 import reactor.core.publisher.FluxProcessor;
 import reactor.core.publisher.Hooks;
@@ -99,6 +97,15 @@ public final class DiscordClientBuilder {
 
     @Nullable
     private Scheduler eventScheduler;
+
+    @Nullable
+    private JacksonResourceProvider jacksonResourceProvider;
+
+    @Nullable
+    private ReactorResourceProvider restResourceProvider;
+
+    @Nullable
+    private ReactorResourceProvider gatewayResourceProvider;
 
     @Nullable
     private RouterFactory routerFactory;
@@ -274,6 +281,36 @@ public final class DiscordClientBuilder {
         return this;
     }
 
+    @Nullable
+    public JacksonResourceProvider getJacksonResourceProvider() {
+        return jacksonResourceProvider;
+    }
+
+    public DiscordClientBuilder setJacksonResourceProvider(@Nullable JacksonResourceProvider jacksonResourceProvider) {
+        this.jacksonResourceProvider = jacksonResourceProvider;
+        return this;
+    }
+
+    @Nullable
+    public ReactorResourceProvider getRestResourceProvider() {
+        return restResourceProvider;
+    }
+
+    public DiscordClientBuilder setRestResourceProvider(@Nullable ReactorResourceProvider restResourceProvider) {
+        this.restResourceProvider = restResourceProvider;
+        return this;
+    }
+
+    @Nullable
+    public ReactorResourceProvider getGatewayResourceProvider() {
+        return gatewayResourceProvider;
+    }
+
+    public DiscordClientBuilder setGatewayResourceProvider(@Nullable ReactorResourceProvider gatewayResourceProvider) {
+        this.gatewayResourceProvider = gatewayResourceProvider;
+        return this;
+    }
+
     /**
      * Get the current {@link discord4j.rest.request.RouterFactory} used to create a
      * {@link discord4j.rest.request.Router} that executes Discord REST API requests.
@@ -294,8 +331,8 @@ public final class DiscordClientBuilder {
      * order to properly coordinate rate-limits on global endpoints. For those cases, use
      * {@link discord4j.rest.request.SingleRouterFactory}.
      *
-     * @param routerFactory a new RouterFactory to crate a Router that performs API requests. Pass {@code null} to use a
-     * default value
+     * @param routerFactory a new RouterFactory to create a Router that performs API requests. Pass {@code null} to
+     * use a default value
      * @return this builder
      */
     public DiscordClientBuilder setRouterFactory(@Nullable RouterFactory routerFactory) {
@@ -525,11 +562,37 @@ public final class DiscordClientBuilder {
         return Schedulers.fromExecutor(Executors.newWorkStealingPool(), true);
     }
 
+    private JacksonResourceProvider initJacksonResources() {
+        if (jacksonResourceProvider != null) {
+            return jacksonResourceProvider;
+        }
+        return new JacksonResourceProvider(mapper ->
+                mapper.addHandler(new UnknownPropertyHandler(ignoreUnknownJsonKeys)));
+    }
+
+    private ReactorResourceProvider initRestResources() {
+        if (restResourceProvider != null) {
+            return restResourceProvider;
+        }
+        return new ReactorResourceProvider();
+    }
+
+    private DiscordWebClient initWebClient(HttpClient httpClient, ObjectMapper mapper) {
+        return new DiscordWebClient(httpClient, ExchangeStrategies.jackson(mapper), token);
+    }
+
     private RouterFactory initRouterFactory() {
         if (routerFactory != null) {
             return routerFactory;
         }
         return new DefaultRouterFactory(Schedulers.elastic());
+    }
+
+    private ReactorResourceProvider initGatewayResources() {
+        if (gatewayResourceProvider != null) {
+            return gatewayResourceProvider;
+        }
+        return new ReactorResourceProvider();
     }
 
     private GatewayObserver initGatewayObserver() {
@@ -565,40 +628,31 @@ public final class DiscordClientBuilder {
             throw new IllegalArgumentException("0 <= shardIndex < shardCount");
         }
         final int shardId = identifyOptions.getShardIndex();
-
-        // Retrieve version properties
-        final Properties properties = VersionUtil.getProperties();
-        final String version = properties.getProperty(VersionUtil.APPLICATION_VERSION, "3");
-        final String url = properties.getProperty(VersionUtil.APPLICATION_URL, "https://discord4j.com");
-        final String name = properties.getProperty(VersionUtil.APPLICATION_NAME, "Discord4J");
-        final String gitDescribe = properties.getProperty(VersionUtil.GIT_COMMIT_ID_DESCRIBE, version);
-
-        // Prepare RestClient
-        final HttpHeaders defaultHeaders = new DefaultHttpHeaders();
-        defaultHeaders.add(HttpHeaderNames.CONTENT_TYPE, "application/json");
-        defaultHeaders.add(HttpHeaderNames.AUTHORIZATION, "Bot " + token);
-        defaultHeaders.add(HttpHeaderNames.USER_AGENT, "DiscordBot(" + url + ", " + version + ")");
-        final HttpClient httpClient = HttpClient.create().baseUrl(Routes.BASE_URL).compress(true);
-        final DiscordWebClient webClient = new DiscordWebClient(httpClient, defaultHeaders,
-                ExchangeStrategies.withJacksonDefaults(mapper));
-        final RestClient restClient = new RestClient(initRouterFactory().getRouter(webClient));
-
         final ClientConfig config = new ClientConfig(token, shardId, identifyOptions.getShardCount());
+
+        // Prepare REST client
+        final JacksonResourceProvider jackson = initJacksonResources();
+        final ReactorResourceProvider rest = initRestResources();
+        final DiscordWebClient webClient = initWebClient(rest.getHttpClient(), jackson.getObjectMapper());
+        final RouterFactory routerFactory = initRouterFactory();
+        final RestClient restClient = new RestClient(routerFactory.getRouter(webClient));
 
         // Prepare Stores
         final StoreService storeService = initStoreService();
         final StateHolder stateHolder = new StateHolder(storeService, new StoreContext(config.getShardIndex(),
                 MessageBean.class));
 
-        // Prepare GatewayClient
+        // Prepare gateway client
+        final ReactorResourceProvider gateway = initGatewayResources();
         final RetryOptions retryOptions = initRetryOptions();
         final StoreInvalidator storeInvalidator = new StoreInvalidator(stateHolder);
-        final GatewayClient gatewayClient = new GatewayClient(
-                new JacksonPayloadReader(mapper), new JacksonPayloadWriter(mapper),
+        final GatewayClient gatewayClient = new GatewayClient(gateway.getHttpClient(),
+                new JacksonPayloadReader(jackson.getObjectMapper()),
+                new JacksonPayloadWriter(jackson.getObjectMapper()),
                 retryOptions, token, identifyOptions, storeInvalidator.then(initGatewayObserver()),
                 initGatewayLimiter());
 
-        // Prepare EventDispatcher
+        // Prepare event dispatcher
         final FluxProcessor<Event, Event> eventProcessor = initEventProcessor();
         final EventDispatcher eventDispatcher = new EventDispatcher(eventProcessor, initEventScheduler(), shardId);
 
@@ -616,6 +670,11 @@ public final class DiscordClientBuilder {
                 .onErrorContinue((error, item) -> log.error("Error while dispatching event {}", item, error))
                 .subscribeWith(eventProcessor);
 
+        final Properties properties = GitProperties.getProperties();
+        final String url = properties.getProperty(GitProperties.APPLICATION_URL, "https://discord4j.com");
+        final String name = properties.getProperty(GitProperties.APPLICATION_NAME, "Discord4J");
+        final String version = properties.getProperty(GitProperties.APPLICATION_VERSION, "3");
+        final String gitDescribe = properties.getProperty(GitProperties.GIT_COMMIT_ID_DESCRIBE, version);
         log.info("Shard {} with {} {} ({})", shardId, name, gitDescribe, url);
         return serviceMediator.getClient();
     }

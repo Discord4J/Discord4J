@@ -18,28 +18,24 @@
 package discord4j.rest.request;
 
 import discord4j.rest.http.client.DiscordWebClient;
-import reactor.core.scheduler.Scheduler;
-import reactor.core.scheduler.Schedulers;
 
+/**
+ * A {@link discord4j.rest.request.RouterFactory} that caches a {@link discord4j.rest.request.Router} captured at
+ * instantiation instead of producing a new one each time
+ * {@link #getRouter(discord4j.rest.http.client.DiscordWebClient)} is called.
+ * <p>
+ * Suited for sharing a router in order to coordinate its work across shards.
+ */
 public class SingleRouterFactory implements RouterFactory {
 
-    private final Scheduler scheduler;
+    private final Router router;
 
-    private volatile Router router;
-
-    public SingleRouterFactory() {
-        this(Schedulers.elastic());
-    }
-
-    public SingleRouterFactory(Scheduler scheduler) {
-        this.scheduler = scheduler;
+    public SingleRouterFactory(Router router) {
+        this.router = router;
     }
 
     @Override
-    public synchronized Router getRouter(DiscordWebClient httpClient) {
-        if (router == null) {
-            router = new DefaultRouter(httpClient, scheduler);
-        }
+    public Router getRouter(DiscordWebClient httpClient) {
         return router;
     }
 }

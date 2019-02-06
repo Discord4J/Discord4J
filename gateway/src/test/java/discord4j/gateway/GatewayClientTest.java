@@ -36,6 +36,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 import reactor.core.publisher.FluxSink;
 import reactor.core.scheduler.Schedulers;
+import reactor.netty.http.client.HttpClient;
 
 import java.time.Duration;
 
@@ -58,7 +59,8 @@ public class GatewayClientTest {
         PayloadWriter writer = new JacksonPayloadWriter(mapper);
         RetryOptions retryOptions = new RetryOptions(Duration.ofSeconds(5), Duration.ofSeconds(120),
                 Integer.MAX_VALUE, Schedulers.elastic());
-        GatewayClient gatewayClient = new GatewayClient(reader, writer, retryOptions, token,
+        GatewayClient gatewayClient = new GatewayClient(HttpClient.create(),
+                reader, writer, retryOptions, token,
                 new IdentifyOptions(0, 1, null), null,
                 new SimpleBucket(1, Duration.ofSeconds(6)));
 

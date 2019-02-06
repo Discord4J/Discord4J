@@ -66,6 +66,7 @@ import static io.netty.handler.codec.http.HttpHeaderNames.USER_AGENT;
 public class GatewayClient {
 
     private final Logger log;
+    private final HttpClient httpClient;
     private final PayloadReader payloadReader;
     private final PayloadWriter payloadWriter;
     private final RetryOptions retryOptions;
@@ -97,6 +98,7 @@ public class GatewayClient {
     /**
      * Initializes a new GatewayClient.
      *
+     * @param httpClient the underlying HttpClient used to perform the connection
      * @param payloadReader strategy to read and decode incoming gateway messages
      * @param payloadWriter strategy to encode and write outgoing gateway messages
      * @param retryOptions reconnect policy used in this client
@@ -106,9 +108,10 @@ public class GatewayClient {
      * @param observer consumer observing gateway and underlying websocket lifecycle changes
      * @param limiter rate-limiting policy used for IDENTIFY requests, allowing shard coordination
      */
-    public GatewayClient(PayloadReader payloadReader, PayloadWriter payloadWriter,
+    public GatewayClient(HttpClient httpClient, PayloadReader payloadReader, PayloadWriter payloadWriter,
             RetryOptions retryOptions, String token, IdentifyOptions identifyOptions,
             GatewayObserver observer, RateLimiter limiter) {
+        this.httpClient = httpClient;
         this.payloadReader = Objects.requireNonNull(payloadReader);
         this.payloadWriter = Objects.requireNonNull(payloadWriter);
         this.retryOptions = Objects.requireNonNull(retryOptions);
@@ -195,7 +198,7 @@ public class GatewayClient {
                     .doOnNext(heartbeatSink::next)
                     .then();
 
-            Mono<Void> httpFuture = HttpClient.create()
+            Mono<Void> httpFuture = httpClient
                     .headers(headers -> headers.add(USER_AGENT, "DiscordBot(https://discord4j.com, 3)"))
                     .observe(observer())
                     .websocket(Integer.MAX_VALUE)
