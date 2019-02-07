@@ -42,6 +42,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 /** A Discord text channel. */
@@ -272,20 +273,20 @@ public final class TextChannel extends BaseChannel implements Categorizable, Gui
             return true;
         };
 
-        final Predicate<List<String>> filterMessageIdChunk = messageIdChunk -> {
-            if (messageIdChunk.size() == 1) { // REST accepts 2 or more items
-                ignoredMessageIds.add(Snowflake.of(messageIdChunk.get(0)));
-                return false;
-            }
+        final Function<List<String>, Mono<Boolean>> filterMessageIdChunk = messageIdChunk ->
+                Mono.just(messageIdChunk.get(0)) // REST accepts 2 or more items
+                        .filter(ignore -> messageIdChunk.size() == 1)
+                        .flatMap(id -> getServiceMediator().getRestClient().getChannelService()
+                                .deleteMessage(getId().asLong(), Long.parseLong(id), null))
+                        .hasElement()
+                        .map(identity -> !identity);
 
-            return !messageIdChunk.isEmpty();
-        };
-
-        return Flux.defer(() -> messageIds).distinct()
+        return Flux.defer(() -> messageIds)
+                .distinct()
                 .filter(filterMessageId)
                 .map(Snowflake::asString)
                 .buffer(100) // REST accepts 100 IDs
-                .filter(filterMessageIdChunk)
+                .filterWhen(filterMessageIdChunk)
                 .map(messageIdChunk -> messageIdChunk.toArray(new String[messageIdChunk.size()]))
                 .flatMap(messageIdChunk -> getServiceMediator().getRestClient().getChannelService()
                         .bulkDeleteMessages(getId().asLong(), new BulkDeleteRequest(messageIdChunk)))
