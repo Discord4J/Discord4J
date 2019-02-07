@@ -277,7 +277,8 @@ public final class TextChannel extends BaseChannel implements Categorizable, Gui
                 Mono.just(messageIdChunk.get(0)) // REST accepts 2 or more items
                         .filter(ignore -> messageIdChunk.size() == 1)
                         .flatMap(id -> getServiceMediator().getRestClient().getChannelService()
-                                .deleteMessage(getId().asLong(), Long.parseLong(id), null))
+                                .deleteMessage(getId().asLong(), Long.parseLong(id), null)
+                                .thenReturn(id))
                         .hasElement()
                         .map(identity -> !identity);
 
