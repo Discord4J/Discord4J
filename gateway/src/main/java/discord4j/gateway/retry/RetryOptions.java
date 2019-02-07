@@ -17,6 +17,7 @@
 
 package discord4j.gateway.retry;
 
+import reactor.core.scheduler.Scheduler;
 import reactor.retry.Backoff;
 import reactor.retry.BackoffDelay;
 import reactor.retry.Jitter;
@@ -30,6 +31,7 @@ public class RetryOptions {
 
     private final RetryContext retryContext;
     private final int maxRetries;
+    private final Scheduler backoffScheduler;
 
     /**
      * Create a retry configuration object.
@@ -37,8 +39,9 @@ public class RetryOptions {
      * @param firstBackoff the Duration to backoff on first attempts
      * @param maxBackoffInterval the maximum backoff Duration
      * @param maxRetries the maximum amount of retries to attempt a reconnect
+     * @param scheduler the backoff scheduler used for reconnect delays
      */
-    public RetryOptions(Duration firstBackoff, Duration maxBackoffInterval, int maxRetries) {
+    public RetryOptions(Duration firstBackoff, Duration maxBackoffInterval, int maxRetries, Scheduler scheduler) {
         if (firstBackoff.minus(Duration.ofSeconds(2)).isNegative()) {
             throw new IllegalArgumentException("firstBackoff duration must be at least 2 seconds");
         }
@@ -50,6 +53,7 @@ public class RetryOptions {
         }
         this.retryContext = new RetryContext(firstBackoff, maxBackoffInterval);
         this.maxRetries = maxRetries;
+        this.backoffScheduler = scheduler;
     }
 
     /**
@@ -97,5 +101,14 @@ public class RetryOptions {
      */
     public int getMaxRetries() {
         return maxRetries;
+    }
+
+    /**
+     * Returns a scheduler provided every reconnect attempt, as backoff delay.
+     *
+     * @return scheduler used when reconnecting
+     */
+    public Scheduler getBackoffScheduler() {
+        return backoffScheduler;
     }
 }

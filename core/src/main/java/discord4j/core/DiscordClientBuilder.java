@@ -165,7 +165,7 @@ public final class DiscordClientBuilder {
      * <blockquote><pre>0 &lt;= shardIndex &lt; shardCount</pre></blockquote>
      *
      * @param shardIndex the new shard index, can be set to {@code null} to use the value under
-     *         {@link #setIdentifyOptions(discord4j.gateway.IdentifyOptions)} if set, or fallback to a default
+     * {@link #setIdentifyOptions(discord4j.gateway.IdentifyOptions)} if set, or fallback to a default
      * @return this builder
      */
     public DiscordClientBuilder setShardIndex(@Nullable Integer shardIndex) {
@@ -239,7 +239,7 @@ public final class DiscordClientBuilder {
      * {@link discord4j.core.event.EventDispatcher}.
      *
      * @param eventProcessor a new FluxProcessor used in this builder. Can be left {@code null} if a default is to
-     *         be used ({@link reactor.core.publisher.EmitterProcessor})
+     * be used ({@link reactor.core.publisher.EmitterProcessor})
      * @return this builder
      */
     public DiscordClientBuilder setEventProcessor(@Nullable FluxProcessor<Event, Event> eventProcessor) {
@@ -291,7 +291,7 @@ public final class DiscordClientBuilder {
      * {@link discord4j.rest.request.SingleRouterFactory}.
      *
      * @param routerFactory a new RouterFactory to crate a Router that performs API requests. Pass {@code null} to use a
-     *         default value
+     * default value
      * @return this builder
      */
     public DiscordClientBuilder setRouterFactory(@Nullable RouterFactory routerFactory) {
@@ -303,7 +303,7 @@ public final class DiscordClientBuilder {
      * Get the current {@link discord4j.core.object.presence.Presence} object used when identifying to the Gateway.
      *
      * @return the current presence status used for login. Can be {@code null} to use the value under
-     *         {@link #setIdentifyOptions(discord4j.gateway.IdentifyOptions)} if set, or fallback to a default
+     * {@link #setIdentifyOptions(discord4j.gateway.IdentifyOptions)} if set, or fallback to a default
      */
     @Nullable
     public Presence getInitialPresence() {
@@ -314,7 +314,7 @@ public final class DiscordClientBuilder {
      * Set a new {@link discord4j.core.object.presence.Presence} object used when identifying to the Gateway.
      *
      * @param initialPresence the new presence status used for login. Can be {@code null} to use the value under
-     *         {@link #setIdentifyOptions(discord4j.gateway.IdentifyOptions)} if set, or fallback to a default
+     * {@link #setIdentifyOptions(discord4j.gateway.IdentifyOptions)} if set, or fallback to a default
      * @return this builder
      */
     public DiscordClientBuilder setInitialPresence(@Nullable Presence initialPresence) {
@@ -390,7 +390,7 @@ public final class DiscordClientBuilder {
      * for debugging.
      *
      * @param ignoreUnknownJsonKeys {@code true} if deserialization problems are to be ignored, {@code false}
-     *         otherwise
+     * otherwise
      * @return this builder
      * @see discord4j.common.jackson.UnknownPropertyHandler
      */
@@ -418,8 +418,8 @@ public final class DiscordClientBuilder {
      * resumes, reconnects and disconnects but also very specific ones like session sequence updates.
      *
      * @param gatewayObserver a new event listener for gateway lifecycle. Can be chained using
-     *         {@link discord4j.gateway.GatewayObserver#then(discord4j.gateway.GatewayObserver)} to create a
-     *         composite of an arbitrary number of listeners. Can be set to {@code null} to use a default
+     * {@link discord4j.gateway.GatewayObserver#then(discord4j.gateway.GatewayObserver)} to create a
+     * composite of an arbitrary number of listeners. Can be set to {@code null} to use a default
      * @return this builder
      */
     public DiscordClientBuilder setGatewayObserver(@Nullable GatewayObserver gatewayObserver) {
@@ -490,7 +490,8 @@ public final class DiscordClientBuilder {
         if (retryOptions != null) {
             return retryOptions;
         }
-        return new RetryOptions(Duration.ofSeconds(2), Duration.ofSeconds(120), Integer.MAX_VALUE);
+        return new RetryOptions(Duration.ofSeconds(2), Duration.ofSeconds(120),
+                Integer.MAX_VALUE, Schedulers.parallel());
     }
 
     private StoreService initStoreService() {

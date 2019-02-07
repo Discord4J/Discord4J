@@ -244,6 +244,7 @@ public class GatewayClient {
     private Retry<RetryContext> retryFactory() {
         return Retry.<RetryContext>any()
                 .withApplicationContext(retryOptions.getRetryContext())
+                .withBackoffScheduler(retryOptions.getBackoffScheduler())
                 .backoff(retryOptions.getBackoff())
                 .jitter(retryOptions.getJitter())
                 .retryMax(retryOptions.getMaxRetries())
