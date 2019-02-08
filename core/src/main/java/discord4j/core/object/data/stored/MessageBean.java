@@ -32,7 +32,8 @@ public final class MessageBean implements Serializable {
 
     private long id;
     private long channelId;
-    private long author;
+    @Nullable
+    private UserBean author;
     @Nullable
     private String content;
     private String timestamp;
@@ -54,7 +55,7 @@ public final class MessageBean implements Serializable {
     public MessageBean(final MessageResponse response) {
         id = response.getId();
         channelId = response.getChannelId();
-        author = response.getAuthor().getId();
+        author = (response.getWebhookId() == null) ? new UserBean(response.getAuthor()) : null;
         content = response.getContent();
         timestamp = response.getTimestamp();
         editedTimestamp = response.getEditedTimestamp();
@@ -88,7 +89,7 @@ public final class MessageBean implements Serializable {
     public MessageBean(MessageCreate messageCreate) {
         id = messageCreate.getId();
         channelId = messageCreate.getChannelId();
-        author = messageCreate.getAuthor().getId();
+        author = (messageCreate.getWebhookId() == null) ? new UserBean(messageCreate.getAuthor()) : null;
         content = messageCreate.getContent();
         timestamp = messageCreate.getTimestamp();
         editedTimestamp = messageCreate.getEditedTimestamp();
@@ -152,11 +153,12 @@ public final class MessageBean implements Serializable {
         this.channelId = channelId;
     }
 
-    public long getAuthor() {
+    @Nullable
+    public UserBean getAuthor() {
         return author;
     }
 
-    public void setAuthor(final long author) {
+    public void setAuthor(@Nullable final UserBean author) {
         this.author = author;
     }
 

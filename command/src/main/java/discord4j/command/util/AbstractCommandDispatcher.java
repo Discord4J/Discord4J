@@ -47,7 +47,7 @@ public abstract class AbstractCommandDispatcher implements CommandDispatcher {
                                                     final CommandErrorHandler errorHandler) {
         final Optional<String> content = event.getMessage().getContent();
 
-        return event.getMessage().getAuthor()
+        return Mono.justOrEmpty(event.getMessage().getAuthor())
                 .filter(user -> !user.isBot())
                 .flatMapMany(ignored -> getPrefixes(event))
                 .filter(content.get()::startsWith)

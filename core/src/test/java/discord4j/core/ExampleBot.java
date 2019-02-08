@@ -25,6 +25,7 @@ import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.ApplicationInfo;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.MessageChannel;
+import discord4j.core.object.entity.User;
 import discord4j.core.object.util.Snowflake;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
@@ -78,7 +79,8 @@ public class ExampleBot {
 
         // Build a safe event-processing pipeline
         client.getEventDispatcher().on(MessageCreateEvent.class)
-                .filter(event -> event.getMessage().getAuthorId()
+                .filter(event -> event.getMessage().getAuthor()
+                        .map(User::getId)
                         .map(Snowflake::asLong)
                         .filter(id -> ownerId.get() == id)
                         .isPresent())

@@ -97,18 +97,6 @@ public final class Message implements Entity {
     }
 
     /**
-     * Gets the ID of the author of this message, if present.
-     *
-     * @return The ID of the author of this message, if present.
-     */
-    public Optional<Snowflake> getAuthorId() {
-        // author is not a real user if webhook is present (message was sent by webhook)
-        return Optional.of(data.getAuthor())
-                .filter(ignored -> !getWebhookId().isPresent())
-                .map(Snowflake::of);
-    }
-
-    /**
      * Gets the ID the webhook that generated this message, if present.
      *
      * @return The ID of the webhook that generated this message, if present.
@@ -118,13 +106,12 @@ public final class Message implements Entity {
     }
 
     /**
-     * Requests to retrieve the author of this message, if present.
+     * Gets the author of this message, if present.
      *
-     * @return A {@link Mono} where, upon successful completion, emits the {@link User author} of this message, if
-     * present. If an error is received, it is emitted through the {@code Mono}.
+     * @return The author of this message, if present.
      */
-    public Mono<User> getAuthor() {
-        return Mono.justOrEmpty(getAuthorId()).flatMap(getClient()::getUserById);
+    public Optional<User> getAuthor() {
+        return Optional.ofNullable(data.getAuthor()).map(bean -> new User(serviceMediator, bean));
     }
 
     /**
@@ -135,8 +122,10 @@ public final class Message implements Entity {
      * through the {@code Mono}.
      */
     public Mono<Member> getAuthorAsMember() {
-        return Mono.justOrEmpty(getAuthorId()).flatMap(authorId ->
-                getGuild().flatMap(guild -> getClient().getMemberById(guild.getId(), authorId)));
+        return Mono.justOrEmpty(getAuthor())
+                .flatMap(author -> getGuild()
+                        .map(Guild::getId)
+                        .flatMap(author::asMember));
     }
 
     /**

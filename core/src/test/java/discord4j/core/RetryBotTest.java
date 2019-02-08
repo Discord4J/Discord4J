@@ -197,9 +197,9 @@ public class RetryBotTest {
         public Mono<Void> onMessageCreate(MessageCreateEvent event) {
             Message message = event.getMessage();
 
-            message.getAuthorId()
-                    .filter(id -> ownerId.get() == id.asLong()) // only accept bot owner messages
-                    .flatMap(id -> message.getContent())
+            message.getAuthor()
+                    .filter(user -> ownerId.get() == user.getId().asLong()) // only accept bot owner messages
+                    .flatMap(ignored -> message.getContent())
                     .ifPresent(content -> {
                         if ("!close".equals(content)) {
                             client.logout();
@@ -214,7 +214,7 @@ public class RetryBotTest {
                             Snowflake guildId = message.getGuild().block().getId();
                             log.info("Message came from guild: {}", guildId);
                         } else if (content.startsWith("!echo ")) {
-                            message.getAuthor()
+                            Mono.justOrEmpty(message.getAuthor())
                                     .flatMap(User::getPrivateChannel)
                                     .flatMap(ch -> ch.createMessage(content.substring("!echo ".length())))
                                     .subscribe();
