@@ -45,6 +45,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 
 import static io.netty.handler.codec.http.HttpHeaderNames.USER_AGENT;
@@ -210,7 +211,7 @@ public class GatewayClient {
                             senderFuture.log(shardLogger("discord4j.gateway.zip.sender"), Level.FINE, false),
                             heartbeatHandler.log(shardLogger("discord4j.gateway.zip.heartbeat"), Level.FINE, false)
                     )
-                    .doOnError(t -> log.error("Gateway client error", t))
+                    .doOnError(logReconnectReason())
                     .doOnCancel(() -> close(false))
                     .then();
         })
@@ -286,6 +287,16 @@ public class GatewayClient {
             connected.compareAndSet(true, false);
             dispatchSink.next(GatewayStateChange.disconnected());
             notifyObserver(GatewayObserver.DISCONNECTED, identifyOptions);
+        };
+    }
+
+    private Consumer<Throwable> logReconnectReason() {
+        return t -> {
+            if (t instanceof CloseException && isResumableError(t)) {
+                log.error("Gateway client error: {}", t.toString());
+            } else {
+                log.error("Gateway client error", t);
+            }
         };
     }
 
