@@ -17,59 +17,45 @@
 
 package discord4j.common;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import reactor.core.publisher.EmitterProcessor;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxSink;
 import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Schedulers;
-import reactor.util.Logger;
-import reactor.util.Loggers;
+import reactor.test.StepVerifier;
 
 import java.time.Duration;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class SimpleBucketTest {
 
-    private static final Logger log = Loggers.getLogger(SimpleBucketTest.class);
-
     @Test
-    @Ignore
-    public void testReactiveBucket() throws InterruptedException {
-        CountDownLatch latch = new CountDownLatch(1);
+    public void testReactiveBucket() {
         RateLimiter limiter = new SimpleBucket(60, Duration.ofSeconds(30));
 
         EmitterProcessor<Integer> outbound = EmitterProcessor.create();
         FluxSink<Integer> sender = outbound.sink();
-        AtomicInteger received = new AtomicInteger();
 
         int requests = 200;
 
         outbound.concatMap(t -> Mono.defer(() -> Mono.delay(Duration.ofMillis(limiter.delayMillisToConsume(1)))
-                        .map(tick -> limiter.tryConsume(1))
-                        .flatMap(consumed -> {
-                            if (!consumed) {
-                                log.info("Retrying...");
-                                return Mono.error(new RuntimeException());
-                            }
-                            return Mono.just(t);
-                        }))
-                        .retry())
-                .subscribe(t -> {
-                    log.info("Got {}", t);
-                    if (received.incrementAndGet() == requests) {
-                        latch.countDown();
+                .map(tick -> limiter.tryConsume(1))
+                .flatMap(consumed -> {
+                    if (!consumed) {
+                        return Mono.error(new RuntimeException());
                     }
-                });
-        Flux.range(0, requests)
-                .parallel()
-                .doOnNext(sender::next)
-                .sequential()
-                .subscribeOn(Schedulers.elastic())
+                    return Mono.just(t);
+                }))
+                .retry())
                 .subscribe();
-        latch.await();
+
+        StepVerifier.withVirtualTime(() ->
+                Flux.range(0, requests)
+                        .parallel()
+                        .doOnNext(sender::next)
+                        .sequential())
+                .expectNextCount(requests)
+                .expectComplete()
+                .verify();
     }
 
 }

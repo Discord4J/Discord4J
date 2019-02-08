@@ -5,4 +5,5 @@ dependencies {
     compile "com.google.code.findbugs:jsr305:$jsr305_version"
 
     testCompile "junit:junit:$junit_version"
+    testCompile "io.projectreactor:reactor-test"
 }
