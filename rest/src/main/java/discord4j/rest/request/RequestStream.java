@@ -25,6 +25,7 @@ import io.netty.handler.codec.http.HttpHeaders;
 import reactor.core.publisher.EmitterProcessor;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.MonoProcessor;
+import reactor.core.publisher.SignalType;
 import reactor.netty.http.client.HttpClientResponse;
 import reactor.retry.BackoffDelay;
 import reactor.retry.IterationContext;
@@ -207,14 +208,30 @@ class RequestStream<T> {
                     .retryWhen(rateLimitRetryFactory())
                     .retryWhen(serverErrorRetryFactory())
                     .log("discord4j.rest.response." + id, Level.FINEST)
-                    .doFinally(signal -> Mono.delay(sleepTime).subscribe(l -> {
-                        if (log.isTraceEnabled()) {
-                            log.trace("Ready to consume next request");
+                    .doFinally(this::next)
+                    // TODO investigate why we can't use subscribeWith(callback) + downstream onErrorContinue
+                    .materialize()
+                    .subscribe(signal -> {
+                        if (signal.isOnSubscribe()) {
+                            callback.onSubscribe(signal.getSubscription());
+                        } else if (signal.isOnNext()) {
+                            callback.onNext(signal.get());
+                        } else if (signal.isOnError()) {
+                            callback.onError(signal.getThrowable());
+                        } else if (signal.isOnComplete()) {
+                            callback.onComplete();
                         }
-                        sleepTime = Duration.ZERO;
-                        read().subscribe(this, t -> log.error("Error while consuming request", t));
-                    }, t -> log.error("Error while scheduling next request", t)))
-                    .subscribeWith(callback);
+                    });
+        }
+
+        private void next(SignalType signal) {
+            Mono.delay(sleepTime).subscribe(l -> {
+                if (log.isTraceEnabled()) {
+                    log.trace("Ready to consume next request after {}", signal);
+                }
+                sleepTime = Duration.ZERO;
+                read().subscribe(this, t -> log.error("Error while consuming request", t));
+            }, t -> log.error("Error while scheduling next request", t));
         }
     }
 }

@@ -18,12 +18,12 @@
 package discord4j.common;
 
 /**
- * Represents a rate-limiting strategy that can be shared across shards.
+ * A basic rate-limiting strategy that distributes permits.
  */
 public interface RateLimiter {
 
     /**
-     * Attempt to consume a given number of permits from this bucket.
+     * Attempt to consume a given number of permits from this limiter.
      * <p>
      * This method does not block or incur in any waiting step. If no permits are available, this method will simply
      * return <code>false</code>. To obtain the delay needed to wait in order to consume the next tokens, see
