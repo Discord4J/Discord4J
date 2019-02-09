@@ -239,7 +239,7 @@ public class ShardingClientBuilder {
      * <pre>
      * new ShardingClientBuilder(token)
      *     .build()
-     * 	   .map(builder -> builder.setInitialPresence(
+     * 	   .map(builder -&gt; builder.setInitialPresence(
      * 		    Presence.online(Activity.playing("Shard " + builder.getShardIndex()))))
      *     .map(DiscordClientBuilder::build)
      *     .flatMap(DiscordClient::login)
