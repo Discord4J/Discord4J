@@ -43,9 +43,7 @@ public class JacksonResourceProvider {
      * registers modules to handle Discord4J specific mappings and ignores unknown properties.
      */
     public JacksonResourceProvider() {
-        this.objectMapper = initializer.andThen(mapper -> mapper
-                .addHandler(new UnknownPropertyHandler(true)))
-                .apply(new ObjectMapper());
+        this(mapper -> mapper.addHandler(new UnknownPropertyHandler(true)));
     }
 
     /**
@@ -60,7 +58,7 @@ public class JacksonResourceProvider {
 
     /**
      * Create with a pre-configured {@link com.fasterxml.jackson.databind.ObjectMapper}. Using this will replace the
-     * recommended default and can lead to unexpected results and errors.
+     * recommended default and can lead to unexpected behavior and errors.
      *
      * @param objectMapper a pre-configured ObjectMapper to use
      */
