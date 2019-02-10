@@ -46,7 +46,7 @@ libraryDependencies ++= Seq(
 resolvers += "jcenter" at "https://jcenter.bintray.com/"
 ```
 
-## Quick Example
+## Quick Example (Reactive and Blocking)
 ```java
 final DiscordClient client = new DiscordClientBuilder("token").build();
 
@@ -59,6 +59,22 @@ client.getEventDispatcher().on(MessageCreateEvent.class)
         .flatMap(Message::getChannel)
         .flatMap(channel -> channel.createMessage("Pong!"))
         .subscribe();
+
+client.login().block();
+```
+```java
+final DiscordClient client = new DiscordClientBuilder("token").build();
+
+client.getEventDispatcher().on(ReadyEvent.class)
+        .subscribe(ready -> System.out.println("Logged in as " + ready.getSelf().getUsername()));
+
+client.getEventDispatcher().on(MessageCreateEvent.class)
+        .subscribe(event -> {
+            Message message = event.getMessage();
+            if (message.getContent().map("!ping"::equals).orElse(false)) {
+                message.getChannel().block().createMessage("Pong!").block();
+            }
+         });
 
 client.login().block();
 ```
