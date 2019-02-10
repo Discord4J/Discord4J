@@ -42,7 +42,7 @@ public class MessageCreateSpec implements Spec<MultipartRequest> {
     }
 
     public MessageCreateSpec setNonce(Snowflake nonce) {
-        this.nonce = nonce.toString();
+        this.nonce = nonce.asString();
         return this;
     }
 
