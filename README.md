@@ -109,5 +109,5 @@ Please follow our instructions at [Using Jitpack](https://github.com/Discord4J/D
 ## Useful Links
 * [Discord4J Site](https://new.discord4j.com)
 * [Discord4J Wiki](https://github.com/Discord4J/Discord4J/wiki)
-* [Javadoc](https://javadoc.jitpack.io/com/discord4j/discord4j/build/3.0.0.M2/javadoc/index.html)
+* [Javadoc](http://javadoc.io/doc/com.discord4j/discord4j-core/)
 * [Reactor 3 Reference Guide](http://projectreactor.io/docs/core/release/reference/)
