@@ -22,7 +22,7 @@ import reactor.core.publisher.Mono;
 
 import java.util.Optional;
 
-/** A trait for objects that can contain {@link Category cateogires}. */
+/** A trait for objects that can contain a {@link Category}. */
 public interface Categorizable {
 
     /**
