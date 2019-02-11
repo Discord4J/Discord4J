@@ -134,7 +134,8 @@ public final class Message implements Entity {
      * @return The contents of the message, if present.
      */
     public Optional<String> getContent() {
-        return Optional.of(data.getContent()).filter(content -> !content.isEmpty());
+        // Even though the bean / responses say it's not nullable Discord is being stupid atm
+        return Optional.ofNullable(data.getContent()).filter(content -> !content.isEmpty());
     }
 
     /**
