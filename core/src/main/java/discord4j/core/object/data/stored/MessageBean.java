@@ -34,7 +34,6 @@ public final class MessageBean implements Serializable {
     private long channelId;
     @Nullable
     private UserBean author;
-    @Nullable
     private String content;
     private String timestamp;
     @Nullable
@@ -162,12 +161,11 @@ public final class MessageBean implements Serializable {
         this.author = author;
     }
 
-    @Nullable
     public String getContent() {
         return content;
     }
 
-    public void setContent(@Nullable final String content) {
+    public void setContent(final String content) {
         this.content = content;
     }
 

@@ -30,7 +30,6 @@ public class MessageResponse {
     @UnsignedJson
     private long channelId;
     private UserResponse author;
-    @Nullable
     private String content;
     private String timestamp;
     @JsonProperty("edited_timestamp")
@@ -69,7 +68,6 @@ public class MessageResponse {
         return author;
     }
 
-    @Nullable
     public String getContent() {
         return content;
     }

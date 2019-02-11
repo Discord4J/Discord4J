@@ -134,7 +134,7 @@ public final class Message implements Entity {
      * @return The contents of the message, if present.
      */
     public Optional<String> getContent() {
-        return Optional.ofNullable(data.getContent());
+        return Optional.of(data.getContent()).filter(content -> !content.isEmpty());
     }
 
     /**

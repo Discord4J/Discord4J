@@ -46,7 +46,6 @@ public class MessageCreate implements Dispatch {
     @JsonProperty("edited_timestamp")
     @Nullable
     private String editedTimestamp;
-    @Nullable
     private String content;
     @JsonProperty("channel_id")
     @UnsignedJson
@@ -116,7 +115,6 @@ public class MessageCreate implements Dispatch {
         return editedTimestamp;
     }
 
-    @Nullable
     public String getContent() {
         return content;
     }
