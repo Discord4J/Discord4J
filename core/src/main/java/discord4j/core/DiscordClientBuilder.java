@@ -607,6 +607,7 @@ public final class DiscordClientBuilder {
         serviceMediator.getGatewayClient().dispatch()
                 .map(dispatch -> DispatchContext.of(dispatch, serviceMediator))
                 .flatMap(DispatchHandlers::<Dispatch, Event>handle)
+                .onErrorContinue((error, item) -> log.error("Error while dispatching event {}", item, error))
                 .subscribeWith(eventProcessor);
 
         log.info("Shard {} with {} {} ({})", shardId, name, gitDescribe, url);
