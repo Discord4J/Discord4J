@@ -263,10 +263,11 @@ public final class Message implements Entity {
      */
     public Flux<User> getReactors(final ReactionEmoji emoji) {
         final Function<Map<String, Object>, Flux<UserResponse>> makeRequest = params ->
-                serviceMediator.getRestClient().getChannelService().getReactions(getChannelId().asLong(),
-                                                                                 getId().asLong(),
-                                                                                 EntityUtil.getEmojiString(emoji),
-                                                                                 params);
+                serviceMediator.getRestClient().getChannelService()
+                        .getReactions(getChannelId().asLong(), getId().asLong(),
+                                EntityUtil.getEmojiString(emoji),
+                                params)
+                        .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex()));
 
         return PaginationUtil.paginateAfter(makeRequest, UserResponse::getId, 0L, 100)
                 .map(UserBean::new)
@@ -325,7 +326,8 @@ public final class Message implements Entity {
         return serviceMediator.getRestClient().getChannelService()
                 .editMessage(getChannelId().asLong(), getId().asLong(), mutatedSpec.asRequest())
                 .map(MessageBean::new)
-                .map(bean -> new Message(serviceMediator, bean));
+                .map(bean -> new Message(serviceMediator, bean))
+                .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex()));
     }
 
     /**
@@ -347,7 +349,8 @@ public final class Message implements Entity {
      */
     public Mono<Void> delete(@Nullable final String reason) {
         return serviceMediator.getRestClient().getChannelService()
-                .deleteMessage(getChannelId().asLong(), getId().asLong(), reason);
+                .deleteMessage(getChannelId().asLong(), getId().asLong(), reason)
+                .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex()));
     }
 
     /**
@@ -359,7 +362,8 @@ public final class Message implements Entity {
      */
     public Mono<Void> addReaction(final ReactionEmoji emoji) {
         return serviceMediator.getRestClient().getChannelService()
-                .createReaction(getChannelId().asLong(), getId().asLong(), EntityUtil.getEmojiString(emoji));
+                .createReaction(getChannelId().asLong(), getId().asLong(), EntityUtil.getEmojiString(emoji))
+                .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex()));
     }
 
     /**
@@ -373,7 +377,8 @@ public final class Message implements Entity {
     public Mono<Void> removeReaction(final ReactionEmoji emoji, final Snowflake userId) {
         return serviceMediator.getRestClient().getChannelService()
                 .deleteReaction(getChannelId().asLong(), getId().asLong(), EntityUtil.getEmojiString(emoji),
-                        userId.asLong());
+                        userId.asLong())
+                .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex()));
     }
 
     /**
@@ -385,7 +390,8 @@ public final class Message implements Entity {
      */
     public Mono<Void> removeSelfReaction(final ReactionEmoji emoji) {
         return serviceMediator.getRestClient().getChannelService()
-                .deleteOwnReaction(getChannelId().asLong(), getId().asLong(), EntityUtil.getEmojiString(emoji));
+                .deleteOwnReaction(getChannelId().asLong(), getId().asLong(), EntityUtil.getEmojiString(emoji))
+                .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex()));
     }
 
     /**
@@ -396,7 +402,8 @@ public final class Message implements Entity {
      */
     public Mono<Void> removeAllReactions() {
         return serviceMediator.getRestClient().getChannelService()
-                .deleteAllReactions(getChannelId().asLong(), getId().asLong());
+                .deleteAllReactions(getChannelId().asLong(), getId().asLong())
+                .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex()));
     }
 
     /**
@@ -407,7 +414,8 @@ public final class Message implements Entity {
      */
     public Mono<Void> pin() {
         return serviceMediator.getRestClient().getChannelService()
-                .addPinnedMessage(getChannelId().asLong(), getId().asLong());
+                .addPinnedMessage(getChannelId().asLong(), getId().asLong())
+                .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex()));
     }
 
     /**
@@ -418,7 +426,8 @@ public final class Message implements Entity {
      */
     public Mono<Void> unpin() {
         return serviceMediator.getRestClient().getChannelService()
-                .deletePinnedMessage(getChannelId().asLong(), getId().asLong());
+                .deletePinnedMessage(getChannelId().asLong(), getId().asLong())
+                .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex()));
     }
 
     @Override

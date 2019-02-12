@@ -123,7 +123,8 @@ class BaseGuildChannel extends BaseChannel implements GuildChannel {
         PermissionsEditRequest request = new PermissionsEditRequest(allow.getRawValue(), deny.getRawValue(), "member");
 
         return getServiceMediator().getRestClient().getChannelService()
-            .editChannelPermissions(getId().asLong(), memberId.asLong(), request, reason);
+                .editChannelPermissions(getId().asLong(), memberId.asLong(), request, reason)
+                .subscriberContext(ctx -> ctx.put("shard", getServiceMediator().getClientConfig().getShardIndex()));
     }
 
     @Override
@@ -133,7 +134,8 @@ class BaseGuildChannel extends BaseChannel implements GuildChannel {
         PermissionsEditRequest request = new PermissionsEditRequest(allow.getRawValue(), deny.getRawValue(), "role");
 
         return getServiceMediator().getRestClient().getChannelService()
-            .editChannelPermissions(getId().asLong(), roleId.asLong(), request, reason);
+                .editChannelPermissions(getId().asLong(), roleId.asLong(), request, reason)
+                .subscriberContext(ctx -> ctx.put("shard", getServiceMediator().getClientConfig().getShardIndex()));
     }
 
     @Override

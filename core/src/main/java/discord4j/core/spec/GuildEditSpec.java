@@ -23,7 +23,6 @@ import discord4j.core.object.util.Snowflake;
 import discord4j.rest.json.request.GuildModifyRequest;
 
 import javax.annotation.Nullable;
-import java.util.Optional;
 
 public class GuildEditSpec implements AuditSpec<GuildModifyRequest> {
 
@@ -47,7 +46,7 @@ public class GuildEditSpec implements AuditSpec<GuildModifyRequest> {
     }
 
     public GuildEditSpec setDefaultMessageNotificationsLevel(Guild.NotificationLevel notificationsLevel) {
-        requestBuilder.defaultMessageNoficiations(notificationsLevel.getValue());
+        requestBuilder.defaultMessageNotifications(notificationsLevel.getValue());
         return this;
     }
 

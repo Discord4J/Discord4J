@@ -63,7 +63,10 @@ class BaseChannel implements Channel {
 
     @Override
     public final Mono<Void> delete(@Nullable final String reason) {
-        return serviceMediator.getRestClient().getChannelService().deleteChannel(getId().asLong(), reason).then();
+        return serviceMediator.getRestClient().getChannelService()
+                .deleteChannel(getId().asLong(), reason)
+                .then()
+                .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex()));
     }
 
     /**

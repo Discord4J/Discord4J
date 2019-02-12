@@ -74,7 +74,8 @@ public final class VoiceChannel extends BaseGuildChannel implements Categorizabl
         return getServiceMediator().getRestClient().getChannelService()
                 .createChannelInvite(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason())
                 .map(ExtendedInviteBean::new)
-                .map(bean -> new ExtendedInvite(getServiceMediator(), bean));
+                .map(bean -> new ExtendedInvite(getServiceMediator(), bean))
+                .subscriberContext(ctx -> ctx.put("shard", getServiceMediator().getClientConfig().getShardIndex()));
     }
 
     @Override
@@ -82,7 +83,8 @@ public final class VoiceChannel extends BaseGuildChannel implements Categorizabl
         return getServiceMediator().getRestClient().getChannelService()
                 .getChannelInvites(getId().asLong())
                 .map(ExtendedInviteBean::new)
-                .map(bean -> new ExtendedInvite(getServiceMediator(), bean));
+                .map(bean -> new ExtendedInvite(getServiceMediator(), bean))
+                .subscriberContext(ctx -> ctx.put("shard", getServiceMediator().getClientConfig().getShardIndex()));
     }
 
     /**
@@ -118,7 +120,8 @@ public final class VoiceChannel extends BaseGuildChannel implements Categorizabl
                 .modifyChannel(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason())
                 .map(EntityUtil::getChannelBean)
                 .map(bean -> EntityUtil.getChannel(getServiceMediator(), bean))
-                .cast(VoiceChannel.class);
+                .cast(VoiceChannel.class)
+                .subscriberContext(ctx -> ctx.put("shard", getServiceMediator().getClientConfig().getShardIndex()));
     }
 
     /**

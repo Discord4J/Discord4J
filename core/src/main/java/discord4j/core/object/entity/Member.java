@@ -205,7 +205,8 @@ public final class Member extends User {
      */
     public Mono<Void> kick(@Nullable final String reason) {
         return getServiceMediator().getRestClient().getGuildService()
-                .removeGuildMember(getGuildId().asLong(), getId().asLong(), reason);
+                .removeGuildMember(getGuildId().asLong(), getId().asLong(), reason)
+                .subscriberContext(ctx -> ctx.put("shard", getServiceMediator().getClientConfig().getShardIndex()));
     }
 
     /**
@@ -220,7 +221,8 @@ public final class Member extends User {
         spec.accept(mutatedSpec);
 
         return getServiceMediator().getRestClient().getGuildService()
-                .createGuildBan(getGuildId().asLong(), getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason());
+                .createGuildBan(getGuildId().asLong(), getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason())
+                .subscriberContext(ctx -> ctx.put("shard", getServiceMediator().getClientConfig().getShardIndex()));
     }
 
     /**
@@ -242,7 +244,8 @@ public final class Member extends User {
      */
     public Mono<Void> unban(@Nullable final String reason) {
         return getServiceMediator().getRestClient().getGuildService()
-                .removeGuildBan(getGuildId().asLong(), getId().asLong(), reason);
+                .removeGuildBan(getGuildId().asLong(), getId().asLong(), reason)
+                .subscriberContext(ctx -> ctx.put("shard", getServiceMediator().getClientConfig().getShardIndex()));
     }
 
     /**
@@ -267,7 +270,8 @@ public final class Member extends User {
      */
     public Mono<Void> addRole(final Snowflake roleId, @Nullable final String reason) {
         return getServiceMediator().getRestClient().getGuildService()
-                .addGuildMemberRole(guildId, getId().asLong(), roleId.asLong(), reason);
+                .addGuildMemberRole(guildId, getId().asLong(), roleId.asLong(), reason)
+                .subscriberContext(ctx -> ctx.put("shard", getServiceMediator().getClientConfig().getShardIndex()));
     }
 
     /**
@@ -292,7 +296,8 @@ public final class Member extends User {
      */
     public Mono<Void> removeRole(final Snowflake roleId, @Nullable final String reason) {
         return getServiceMediator().getRestClient().getGuildService()
-                .removeGuildMemberRole(guildId, getId().asLong(), roleId.asLong(), reason);
+                .removeGuildMemberRole(guildId, getId().asLong(), roleId.asLong(), reason)
+                .subscriberContext(ctx -> ctx.put("shard", getServiceMediator().getClientConfig().getShardIndex()));
     }
 
     /**
@@ -322,7 +327,8 @@ public final class Member extends User {
         spec.accept(mutatedSpec);
 
         return getServiceMediator().getRestClient().getGuildService()
-                .modifyGuildMember(getGuildId().asLong(), getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason());
+                .modifyGuildMember(getGuildId().asLong(), getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason())
+                .subscriberContext(ctx -> ctx.put("shard", getServiceMediator().getClientConfig().getShardIndex()));
     }
 
     @Override

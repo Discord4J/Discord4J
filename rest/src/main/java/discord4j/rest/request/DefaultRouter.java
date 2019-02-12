@@ -28,7 +28,6 @@ import reactor.core.scheduler.Schedulers;
 import reactor.netty.http.client.HttpClientResponse;
 import reactor.util.Logger;
 import reactor.util.Loggers;
-import reactor.util.function.Tuples;
 
 import java.time.Duration;
 import java.util.Map;
@@ -59,13 +58,17 @@ public class DefaultRouter implements Router {
 
     @Override
     public <T> Mono<T> exchange(DiscordRequest<T> request) {
-        return Mono.defer(() -> {
-            RequestStream<T> stream = getStream(request);
-            MonoProcessor<T> callback = MonoProcessor.create();
-
-            stream.push(Tuples.of(callback, request));
-            return callback;
-        }).publishOn(scheduler);
+        return Mono.defer(Mono::subscriberContext)
+                .flatMap(ctx -> {
+                    RequestStream<T> stream = getStream(request);
+                    MonoProcessor<T> callback = MonoProcessor.create();
+                    String shardId = ctx.getOrEmpty("shard")
+                            .map(Object::toString)
+                            .orElse("?");
+                    stream.push(new RequestCorrelation<>(request, callback, shardId));
+                    return callback;
+                })
+                .publishOn(scheduler);
     }
 
     @SuppressWarnings("unchecked")

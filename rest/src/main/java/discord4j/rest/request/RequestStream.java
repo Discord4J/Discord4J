@@ -33,7 +33,6 @@ import reactor.retry.Retry;
 import reactor.retry.RetryContext;
 import reactor.util.Logger;
 import reactor.util.Loggers;
-import reactor.util.function.Tuple2;
 
 import java.time.Duration;
 import java.util.Optional;
@@ -42,9 +41,8 @@ import java.util.function.Function;
 import java.util.logging.Level;
 
 /**
- * A stream of {@link discord4j.rest.request.DiscordRequest DiscordRequests}. Any number of items may be
- * {@link #push(reactor.util.function.Tuple2)} written to the stream. However, the
- * {@link discord4j.rest.request.RequestStream.Reader reader} ensures that only one is read at a time. This
+ * A stream of {@link DiscordRequest DiscordRequests}. Any number of items may be {@link #push(RequestCorrelation)}
+ * written to the stream. However, the {@link Reader reader} ensures that only one is read at a time. This
  * linearization ensures proper ratelimit handling.
  * <p>
  * The flow of a request through the stream is as follows:
@@ -55,8 +53,7 @@ import java.util.logging.Level;
  */
 class RequestStream<T> {
 
-    private final EmitterProcessor<Tuple2<MonoProcessor<T>, DiscordRequest<T>>> backing =
-            EmitterProcessor.create(false);
+    private final EmitterProcessor<RequestCorrelation<T>> backing = EmitterProcessor.create(false);
     private final BucketKey id;
     private final Logger log;
     private final DiscordWebClient httpClient;
@@ -64,9 +61,9 @@ class RequestStream<T> {
     private final RateLimitStrategy rateLimitStrategy;
 
     RequestStream(BucketKey id, DiscordWebClient httpClient, GlobalRateLimiter globalRateLimiter,
-            RateLimitStrategy rateLimitStrategy) {
+                  RateLimitStrategy rateLimitStrategy) {
         this.id = id;
-        this.log = Loggers.getLogger("discord4j.rest.request." + id);
+        this.log = Loggers.getLogger("discord4j.rest.traces." + id);
         this.httpClient = httpClient;
         this.globalRateLimiter = globalRateLimiter;
         this.rateLimitStrategy = rateLimitStrategy;
@@ -98,10 +95,6 @@ class RequestStream<T> {
         });
     }
 
-    /**
-     * This retry function is used for reading and completing HTTP requests in the event of a server error (codes
-     * 502, 503 and 504). The delay is calculated using exponential backoff with jitter.
-     */
     private boolean isRateLimitError(IterationContext<?> context) {
         RetryContext<?> ctx = (RetryContext) context;
         Throwable exception = ctx.exception();
@@ -112,6 +105,10 @@ class RequestStream<T> {
         return false;
     }
 
+    /**
+     * This retry function is used for reading and completing HTTP requests in the event of a server error (codes
+     * 500, 502, 503 and 504). The delay is calculated using exponential backoff with jitter.
+     */
     private Retry<?> serverErrorRetryFactory() {
         return Retry.onlyIf(this::isServerError)
                 .exponentialBackoffWithJitter(Duration.ofSeconds(2), Duration.ofSeconds(30))
@@ -134,7 +131,7 @@ class RequestStream<T> {
         return false;
     }
 
-    void push(Tuple2<MonoProcessor<T>, DiscordRequest<T>> request) {
+    void push(RequestCorrelation<T> request) {
         backing.onNext(request);
     }
 
@@ -142,12 +139,8 @@ class RequestStream<T> {
         read().subscribe(new Reader(rateLimitStrategy), t -> log.error("Error while consuming first request", t));
     }
 
-    private Mono<Tuple2<MonoProcessor<T>, DiscordRequest<T>>> read() {
+    private Mono<RequestCorrelation<T>> read() {
         return backing.next();
-    }
-
-    @FunctionalInterface
-    interface RateLimitStrategy extends Function<HttpClientResponse, Duration> {
     }
 
     /**
@@ -158,7 +151,7 @@ class RequestStream<T> {
      * @see #sleepTime
      * @see #rateLimitHandler
      */
-    private class Reader implements Consumer<Tuple2<MonoProcessor<T>, DiscordRequest<T>>> {
+    private class Reader implements Consumer<RequestCorrelation<T>> {
 
         private volatile Duration sleepTime = Duration.ZERO;
         private final Consumer<HttpClientResponse> rateLimitHandler;
@@ -192,24 +185,25 @@ class RequestStream<T> {
         }
 
         @Override
-        public void accept(Tuple2<MonoProcessor<T>, DiscordRequest<T>> tuple) {
-            MonoProcessor<T> callback = tuple.getT1();
-            DiscordRequest<T> req = tuple.getT2();
-            if (log.isTraceEnabled()) {
-                log.trace("Accepting request: {}", req);
+        public void accept(RequestCorrelation<T> correlation) {
+            DiscordRequest<T> req = correlation.getRequest();
+            MonoProcessor<T> callback = correlation.getResponse();
+            String shard = correlation.getShardId();
+            Logger logger = getTraceLogger(shard);
+            if (logger.isTraceEnabled()) {
+                logger.trace("Accepting request: {}", shard, req);
             }
             Mono<ClientRequest> request = adaptRequest(req);
             Class<T> responseType = req.getRoute().getResponseType();
 
             globalRateLimiter.onComplete()
                     .then(request)
-                    .log("discord4j.rest.request." + id, Level.FINEST)
+                    .log("discord4j.rest.request." + id + "." + shard, Level.FINEST)
                     .flatMap(r -> httpClient.exchange(r, req.getBody(), responseType, rateLimitHandler))
                     .retryWhen(rateLimitRetryFactory())
                     .retryWhen(serverErrorRetryFactory())
-                    .log("discord4j.rest.response." + id, Level.FINEST)
-                    .doFinally(this::next)
-                    // TODO investigate why we can't use subscribeWith(callback) + downstream onErrorContinue
+                    .log("discord4j.rest.response." + id + "." + shard, Level.FINEST)
+                    .doFinally(signal -> next(signal, shard))
                     .materialize()
                     .subscribe(signal -> {
                         if (signal.isOnSubscribe()) {
@@ -224,14 +218,23 @@ class RequestStream<T> {
                     });
         }
 
-        private void next(SignalType signal) {
+        private void next(SignalType signal, String shard) {
+            Logger logger = getTraceLogger(shard);
             Mono.delay(sleepTime).subscribe(l -> {
-                if (log.isTraceEnabled()) {
-                    log.trace("Ready to consume next request after {}", signal);
+                if (logger.isTraceEnabled()) {
+                    logger.trace("Ready to consume next request after {}", signal);
                 }
                 sleepTime = Duration.ZERO;
-                read().subscribe(this, t -> log.error("Error while consuming request", t));
-            }, t -> log.error("Error while scheduling next request", t));
+                read().subscribe(this, t -> logger.error("Error while consuming request", t));
+            }, t -> logger.error("Error while scheduling next request", t));
         }
+
+        private Logger getTraceLogger(String shard) {
+            return Loggers.getLogger("discord4j.rest.traces." + id + "." + shard);
+        }
+    }
+
+    @FunctionalInterface
+    interface RateLimitStrategy extends Function<HttpClientResponse, Duration> {
     }
 }

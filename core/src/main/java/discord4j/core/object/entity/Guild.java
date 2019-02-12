@@ -182,7 +182,8 @@ public final class Guild implements Entity {
         return serviceMediator.getRestClient().getGuildService()
                 .getGuildVoiceRegions(getId().asLong())
                 .map(RegionBean::new)
-                .map(bean -> new Region(serviceMediator, bean));
+                .map(bean -> new Region(serviceMediator, bean))
+                .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex()));
     }
 
     /**
@@ -471,7 +472,9 @@ public final class Guild implements Entity {
      */
     public Flux<Member> getMembers() {
         Function<Map<String, Object>, Flux<GuildMemberResponse>> doRequest = params ->
-                serviceMediator.getRestClient().getGuildService().getGuildMembers(getId().asLong(), params);
+                serviceMediator.getRestClient().getGuildService()
+                        .getGuildMembers(getId().asLong(), params)
+                        .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex()));
 
         Flux<Member> requestMembers =
                 PaginationUtil.paginateAfter(doRequest, response -> response.getUser().getId(), 0, 100)
@@ -521,7 +524,8 @@ public final class Guild implements Entity {
                         .getGuildChannels(getId().asLong())
                         .map(EntityUtil::getChannelBean)
                         .map(bean -> EntityUtil.getChannel(serviceMediator, bean))
-                        .cast(GuildChannel.class))
+                        .cast(GuildChannel.class)
+                        .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex())))
                 .sort(Comparator.comparing(GuildChannel::getRawPosition).thenComparing(GuildChannel::getId));
     }
 
@@ -569,7 +573,8 @@ public final class Guild implements Entity {
         return serviceMediator.getRestClient().getGuildService()
                 .modifyGuild(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason())
                 .map(BaseGuildBean::new)
-                .map(bean -> new Guild(serviceMediator, bean));
+                .map(bean -> new Guild(serviceMediator, bean))
+                .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex()));
     }
 
     /**
@@ -586,7 +591,8 @@ public final class Guild implements Entity {
         return serviceMediator.getRestClient().getEmojiService()
                 .createGuildEmoji(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason())
                 .map(GuildEmojiBean::new)
-                .map(bean -> new GuildEmoji(serviceMediator, bean, getId().asLong()));
+                .map(bean -> new GuildEmoji(serviceMediator, bean, getId().asLong()))
+                .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex()));
     }
 
     /**
@@ -603,7 +609,8 @@ public final class Guild implements Entity {
         return serviceMediator.getRestClient().getGuildService()
                 .createGuildRole(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason())
                 .map(RoleBean::new)
-                .map(bean -> new Role(serviceMediator, bean, getId().asLong()));
+                .map(bean -> new Role(serviceMediator, bean, getId().asLong()))
+                .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex()));
     }
 
     /**
@@ -621,7 +628,8 @@ public final class Guild implements Entity {
                 .createGuildChannel(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason())
                 .map(EntityUtil::getChannelBean)
                 .map(bean -> EntityUtil.getChannel(serviceMediator, bean))
-                .cast(Category.class);
+                .cast(Category.class)
+                .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex()));
     }
 
     /**
@@ -639,7 +647,8 @@ public final class Guild implements Entity {
                 .createGuildChannel(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason())
                 .map(EntityUtil::getChannelBean)
                 .map(bean -> EntityUtil.getChannel(serviceMediator, bean))
-                .cast(TextChannel.class);
+                .cast(TextChannel.class)
+                .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex()));
     }
 
     /**
@@ -657,7 +666,8 @@ public final class Guild implements Entity {
                 .createGuildChannel(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason())
                 .map(EntityUtil::getChannelBean)
                 .map(bean -> EntityUtil.getChannel(serviceMediator, bean))
-                .cast(VoiceChannel.class);
+                .cast(VoiceChannel.class)
+                .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex()));
     }
 
     /**
@@ -667,7 +677,9 @@ public final class Guild implements Entity {
      * If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Void> delete() {
-        return serviceMediator.getRestClient().getGuildService().deleteGuild(getId().asLong());
+        return serviceMediator.getRestClient().getGuildService()
+                .deleteGuild(getId().asLong())
+                .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex()));
     }
 
     /**
@@ -692,7 +704,8 @@ public final class Guild implements Entity {
      */
     public Mono<Void> kick(final Snowflake userId, @Nullable final String reason) {
         return serviceMediator.getRestClient().getGuildService()
-                .removeGuildMember(getId().asLong(), userId.asLong(), reason);
+                .removeGuildMember(getId().asLong(), userId.asLong(), reason)
+                .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex()));
     }
 
     /**
@@ -705,7 +718,8 @@ public final class Guild implements Entity {
         return serviceMediator.getRestClient().getGuildService()
                 .getGuildBans(getId().asLong())
                 .map(BanBean::new)
-                .map(bean -> new Ban(serviceMediator, bean));
+                .map(bean -> new Ban(serviceMediator, bean))
+                .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex()));
     }
 
     /**
@@ -719,7 +733,8 @@ public final class Guild implements Entity {
         return serviceMediator.getRestClient().getGuildService()
                 .getGuildBan(getId().asLong(), userId.asLong())
                 .map(BanBean::new)
-                .map(bean -> new Ban(serviceMediator, bean));
+                .map(bean -> new Ban(serviceMediator, bean))
+                .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex()));
     }
 
     /**
@@ -735,7 +750,8 @@ public final class Guild implements Entity {
         spec.accept(mutatedSpec);
 
         return serviceMediator.getRestClient().getGuildService()
-                .createGuildBan(getId().asLong(), userId.asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason());
+                .createGuildBan(getId().asLong(), userId.asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason())
+                .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex()));
     }
 
     /**
@@ -759,7 +775,8 @@ public final class Guild implements Entity {
      */
     public Mono<Void> unban(final Snowflake userId, @Nullable final String reason) {
         return serviceMediator.getRestClient().getGuildService()
-                .removeGuildBan(getId().asLong(), userId.asLong(), reason);
+                .removeGuildBan(getId().asLong(), userId.asLong(), reason)
+                .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex()));
     }
 
     /**
@@ -776,7 +793,8 @@ public final class Guild implements Entity {
 
         return serviceMediator.getRestClient().getGuildService()
                 .getGuildPruneCount(getId().asLong(), queryParams)
-                .map(PruneResponse::getPruned);
+                .map(PruneResponse::getPruned)
+                .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex()));
     }
 
     /**
@@ -807,7 +825,8 @@ public final class Guild implements Entity {
 
         return serviceMediator.getRestClient().getGuildService()
                 .beginGuildPrune(getId().asLong(), queryParams, reason)
-                .map(PruneResponse::getPruned);
+                .map(PruneResponse::getPruned)
+                .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex()));
     }
 
     /**
@@ -817,7 +836,9 @@ public final class Guild implements Entity {
      * an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Void> leave() {
-        return serviceMediator.getRestClient().getUserService().leaveGuild(getId().asLong());
+        return serviceMediator.getRestClient().getUserService()
+                .leaveGuild(getId().asLong())
+                .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex()));
     }
 
     /**
@@ -856,7 +877,10 @@ public final class Guild implements Entity {
     public Flux<AuditLogEntry> getAuditLog(final AuditLogQuerySpec spec) {
         Function<Map<String, Object>, Flux<AuditLogResponse>> makeRequest = params -> {
             params.putAll(spec.asRequest());
-            return serviceMediator.getRestClient().getAuditLogService().getAuditLog(getId().asLong(), params).flux();
+            return serviceMediator.getRestClient().getAuditLogService()
+                    .getAuditLog(getId().asLong(), params)
+                    .flux()
+                    .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex()));
         };
 
         ToLongFunction<AuditLogResponse> getLastEntryId = response -> {
@@ -884,7 +908,8 @@ public final class Guild implements Entity {
         return serviceMediator.getRestClient().getWebhookService()
                 .getGuildWebhooks(getId().asLong())
                 .map(WebhookBean::new)
-                .map(bean -> new Webhook(serviceMediator, bean));
+                .map(bean -> new Webhook(serviceMediator, bean))
+                .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex()));
     }
 
     /**
@@ -897,7 +922,8 @@ public final class Guild implements Entity {
         return serviceMediator.getRestClient().getGuildService()
                 .getGuildInvites(getId().asLong())
                 .map(ExtendedInviteBean::new)
-                .map(bean -> new ExtendedInvite(serviceMediator, bean));
+                .map(bean -> new ExtendedInvite(serviceMediator, bean))
+                .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex()));
     }
 
     /**
@@ -910,7 +936,8 @@ public final class Guild implements Entity {
     public Mono<String> changeSelfNickname(@Nullable final String nickname) {
         return serviceMediator.getRestClient().getGuildService()
                 .modifyOwnNickname(getId().asLong(), new NicknameModifyRequest(nickname))
-                .map(NicknameModifyResponse::getNick);
+                .map(NicknameModifyResponse::getNick)
+                .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex()));
     }
 
     @Override

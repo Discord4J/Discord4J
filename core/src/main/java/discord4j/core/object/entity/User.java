@@ -179,7 +179,8 @@ public class User implements Entity {
                 .createDM(new DMCreateRequest(getId().asLong()))
                 .map(EntityUtil::getChannelBean)
                 .map(bean -> EntityUtil.getChannel(serviceMediator, bean))
-                .cast(PrivateChannel.class);
+                .cast(PrivateChannel.class)
+                .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex()));
     }
 
     /**

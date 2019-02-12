@@ -72,14 +72,16 @@ class BaseMessageChannel extends BaseChannel implements MessageChannel {
         return getServiceMediator().getRestClient().getChannelService()
                 .createMessage(getId().asLong(), mutatedSpec.asRequest())
                 .map(MessageBean::new)
-                .map(bean -> new Message(getServiceMediator(), bean));
+                .map(bean -> new Message(getServiceMediator(), bean))
+                .subscriberContext(ctx -> ctx.put("shard", getServiceMediator().getClientConfig().getShardIndex()));
     }
 
     @Override
     public final Mono<Void> type() {
         return getServiceMediator().getRestClient().getChannelService()
                 .triggerTypingIndicator(getId().asLong())
-                .then();
+                .then()
+                .subscriberContext(ctx -> ctx.put("shard", getServiceMediator().getClientConfig().getShardIndex()));
     }
 
     @Override
@@ -92,7 +94,10 @@ class BaseMessageChannel extends BaseChannel implements MessageChannel {
     @Override
     public final Flux<Message> getMessagesBefore(final Snowflake messageId) {
         final Function<Map<String, Object>, Flux<MessageResponse>> doRequest = params ->
-                getServiceMediator().getRestClient().getChannelService().getMessages(getId().asLong(), params);
+                getServiceMediator().getRestClient().getChannelService()
+                        .getMessages(getId().asLong(), params)
+                        .subscriberContext(ctx -> ctx.put("shard",
+                                getServiceMediator().getClientConfig().getShardIndex()));
 
         return PaginationUtil.paginateBefore(doRequest, MessageResponse::getId, messageId.asLong(), 100)
                 .map(MessageBean::new)
@@ -102,7 +107,10 @@ class BaseMessageChannel extends BaseChannel implements MessageChannel {
     @Override
     public final Flux<Message> getMessagesAfter(final Snowflake messageId) {
         final Function<Map<String, Object>, Flux<MessageResponse>> doRequest = params ->
-                getServiceMediator().getRestClient().getChannelService().getMessages(getId().asLong(), params);
+                getServiceMediator().getRestClient().getChannelService()
+                        .getMessages(getId().asLong(), params)
+                        .subscriberContext(ctx -> ctx.put("shard",
+                                getServiceMediator().getClientConfig().getShardIndex()));
 
         return PaginationUtil.paginateAfter(doRequest, MessageResponse::getId, messageId.asLong(), 100)
                 .map(MessageBean::new)
@@ -116,9 +124,11 @@ class BaseMessageChannel extends BaseChannel implements MessageChannel {
 
     @Override
     public final Flux<Message> getPinnedMessages() {
-        return getServiceMediator().getRestClient().getChannelService().getPinnedMessages(getId().asLong())
+        return getServiceMediator().getRestClient().getChannelService()
+                .getPinnedMessages(getId().asLong())
                 .map(MessageBean::new)
-                .map(bean -> new Message(getServiceMediator(), bean));
+                .map(bean -> new Message(getServiceMediator(), bean))
+                .subscriberContext(ctx -> ctx.put("shard", getServiceMediator().getClientConfig().getShardIndex()));
     }
 
     @Override
