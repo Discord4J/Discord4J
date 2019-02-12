@@ -68,7 +68,8 @@ public final class Category extends BaseGuildChannel {
                 .modifyChannel(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason())
                 .map(EntityUtil::getChannelBean)
                 .map(bean -> EntityUtil.getChannel(getServiceMediator(), bean))
-                .cast(Category.class);
+                .cast(Category.class)
+                .subscriberContext(ctx -> ctx.put("shard", getServiceMediator().getClientConfig().getShardIndex()));
     }
 
     @Override

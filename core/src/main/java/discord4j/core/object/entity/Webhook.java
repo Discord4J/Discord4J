@@ -165,7 +165,9 @@ public final class Webhook implements Entity {
      * If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Void> delete(@Nullable final String reason) {
-        return serviceMediator.getRestClient().getWebhookService().deleteWebhook(getId().asLong(), reason);
+        return serviceMediator.getRestClient().getWebhookService()
+                .deleteWebhook(getId().asLong(), reason)
+                .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex()));
     }
 
     /**
@@ -182,7 +184,8 @@ public final class Webhook implements Entity {
         return serviceMediator.getRestClient().getWebhookService()
                 .modifyWebhook(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason())
                 .map(WebhookBean::new)
-                .map(bean -> new Webhook(serviceMediator, bean));
+                .map(bean -> new Webhook(serviceMediator, bean))
+                .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex()));
     }
 
     @Override

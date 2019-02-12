@@ -140,6 +140,7 @@ public final class ExtendedPermissionOverwrite extends PermissionOverwrite imple
      */
     public Mono<Void> delete(@Nullable final String reason) {
         return serviceMediator.getRestClient().getChannelService()
-                .deleteChannelPermission(channelId, getTargetId().asLong(), reason);
+                .deleteChannelPermission(channelId, getTargetId().asLong(), reason)
+                .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex()));
     }
 }

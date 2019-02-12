@@ -185,7 +185,8 @@ public final class Role implements Entity {
         return serviceMediator.getRestClient().getGuildService()
                 .modifyGuildRole(getGuildId().asLong(), getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason())
                 .map(RoleBean::new)
-                .map(bean -> new Role(serviceMediator, bean, getGuildId().asLong()));
+                .map(bean -> new Role(serviceMediator, bean, getGuildId().asLong()))
+                .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex()));
     }
 
     /**
@@ -207,7 +208,8 @@ public final class Role implements Entity {
      */
     public Mono<Void> delete(@Nullable final String reason) {
         return serviceMediator.getRestClient().getGuildService()
-                .deleteGuildRole(getGuildId().asLong(), getId().asLong(), reason);
+                .deleteGuildRole(getGuildId().asLong(), getId().asLong(), reason)
+                .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex()));
     }
 
     /**
@@ -223,7 +225,8 @@ public final class Role implements Entity {
         return serviceMediator.getRestClient().getGuildService()
                 .modifyGuildRolePositions(getGuildId().asLong(), requests)
                 .map(RoleBean::new)
-                .map(bean -> new Role(serviceMediator, bean, getGuildId().asLong()));
+                .map(bean -> new Role(serviceMediator, bean, getGuildId().asLong()))
+                .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex()));
     }
 
     @Override

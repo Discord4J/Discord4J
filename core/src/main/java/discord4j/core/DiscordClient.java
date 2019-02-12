@@ -76,7 +76,8 @@ public final class DiscordClient {
 
         final Mono<ChannelBean> rest = serviceMediator.getRestClient().getChannelService()
                 .getChannel(channelId.asLong())
-                .map(EntityUtil::getChannelBean);
+                .map(EntityUtil::getChannelBean)
+                .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex()));
 
         return category.cast(ChannelBean.class)
                 .switchIfEmpty(textChannel)
@@ -98,7 +99,8 @@ public final class DiscordClient {
                 .cast(BaseGuildBean.class)
                 .switchIfEmpty(serviceMediator.getRestClient().getGuildService()
                         .getGuild(guildId.asLong())
-                        .map(BaseGuildBean::new))
+                        .map(BaseGuildBean::new)
+                        .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex())))
                 .map(baseGuildBean -> new Guild(serviceMediator, baseGuildBean));
     }
 
@@ -115,7 +117,8 @@ public final class DiscordClient {
                 .find(emojiId.asLong())
                 .switchIfEmpty(serviceMediator.getRestClient().getEmojiService()
                         .getGuildEmoji(guildId.asLong(), emojiId.asLong())
-                        .map(GuildEmojiBean::new))
+                        .map(GuildEmojiBean::new)
+                        .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex())))
                 .map(guildEmojiBean -> new GuildEmoji(serviceMediator, guildEmojiBean, guildId.asLong()));
     }
 
@@ -132,7 +135,8 @@ public final class DiscordClient {
                 .find(LongLongTuple2.of(guildId.asLong(), userId.asLong()))
                 .switchIfEmpty(serviceMediator.getRestClient().getGuildService()
                         .getGuildMember(guildId.asLong(), userId.asLong())
-                        .map(MemberBean::new));
+                        .map(MemberBean::new)
+                        .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex())));
 
         return member.flatMap(memberBean -> getUserBean(userId).map(userBean ->
                 new Member(serviceMediator, memberBean, userBean, guildId.asLong())));
@@ -151,7 +155,8 @@ public final class DiscordClient {
                 .find(messageId.asLong())
                 .switchIfEmpty(serviceMediator.getRestClient().getChannelService()
                         .getMessage(channelId.asLong(), messageId.asLong())
-                        .map(MessageBean::new))
+                        .map(MessageBean::new)
+                        .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex())))
                 .map(messageBean -> new Message(serviceMediator, messageBean));
     }
 
@@ -170,7 +175,8 @@ public final class DiscordClient {
                         .getGuildRoles(guildId.asLong())
                         .filter(response -> response.getId() == roleId.asLong())
                         .map(RoleBean::new)
-                        .singleOrEmpty())
+                        .singleOrEmpty()
+                        .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex())))
                 .map(roleBean -> new Role(serviceMediator, roleBean, guildId.asLong()));
     }
 
@@ -196,7 +202,8 @@ public final class DiscordClient {
         return serviceMediator.getRestClient().getWebhookService()
                 .getWebhook(webhookId.asLong())
                 .map(WebhookBean::new)
-                .map(webhookBean -> new Webhook(serviceMediator, webhookBean));
+                .map(webhookBean -> new Webhook(serviceMediator, webhookBean))
+                .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex()));
     }
 
     /**
@@ -209,7 +216,8 @@ public final class DiscordClient {
         return serviceMediator.getRestClient().getApplicationService()
                 .getCurrentApplicationInfo()
                 .map(ApplicationInfoBean::new)
-                .map(applicationInfoBean -> new ApplicationInfo(serviceMediator, applicationInfoBean));
+                .map(applicationInfoBean -> new ApplicationInfo(serviceMediator, applicationInfoBean))
+                .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex()));
     }
 
     /**
@@ -220,7 +228,9 @@ public final class DiscordClient {
      */
     public Flux<Guild> getGuilds() {
         final Function<Map<String, Object>, Flux<UserGuildResponse>> makeRequest = params ->
-                serviceMediator.getRestClient().getUserService().getCurrentUserGuilds(params);
+                serviceMediator.getRestClient().getUserService()
+                        .getCurrentUserGuilds(params)
+                        .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex()));
 
         return serviceMediator.getStateHolder().getGuildStore()
                 .values()
@@ -229,7 +239,8 @@ public final class DiscordClient {
                         .map(UserGuildResponse::getId)
                         .filter(id -> (id >> 22) % getConfig().getShardCount() == getConfig().getShardIndex())
                         .flatMap(serviceMediator.getRestClient().getGuildService()::getGuild)
-                        .map(BaseGuildBean::new))
+                        .map(BaseGuildBean::new)
+                        .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex())))
                 .map(bean -> new Guild(serviceMediator, bean));
     }
 
@@ -254,7 +265,8 @@ public final class DiscordClient {
     public Flux<Region> getRegions() {
         return serviceMediator.getRestClient().getVoiceService().getVoiceRegions()
                 .map(RegionBean::new)
-                .map(bean -> new Region(serviceMediator, bean));
+                .map(bean -> new Region(serviceMediator, bean))
+                .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex()));
     }
 
     /**
@@ -269,9 +281,11 @@ public final class DiscordClient {
                 .filter(it -> it != 0)
                 .map(Snowflake::of)
                 .flatMap(this::getUserById)
-                .switchIfEmpty(serviceMediator.getRestClient().getUserService().getCurrentUser()
+                .switchIfEmpty(serviceMediator.getRestClient().getUserService()
+                        .getCurrentUser()
                         .map(UserBean::new)
-                        .map(bean -> new User(serviceMediator, bean)));
+                        .map(bean -> new User(serviceMediator, bean))
+                        .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex())));
     }
 
     /**
@@ -299,6 +313,7 @@ public final class DiscordClient {
         parameters.put("v", 6);
 
         return serviceMediator.getRestClient().getGatewayService().getGateway()
+                .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex()))
                 .flatMap(response -> serviceMediator.getGatewayClient()
                         .execute(RouteUtils.expandQuery(response.getUrl(), parameters)))
                 .then(serviceMediator.getStateHolder().invalidateStores())
@@ -347,7 +362,8 @@ public final class DiscordClient {
         return serviceMediator.getRestClient().getGuildService()
                 .createGuild(mutatedSpec.asRequest())
                 .map(BaseGuildBean::new)
-                .map(bean -> new Guild(serviceMediator, bean));
+                .map(bean -> new Guild(serviceMediator, bean))
+                .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex()));
     }
 
     public Mono<Void> updatePresence(final Presence presence) {
@@ -366,7 +382,8 @@ public final class DiscordClient {
         return serviceMediator.getRestClient().getInviteService()
                 .getInvite(inviteCode)
                 .map(InviteBean::new)
-                .map(bean -> new Invite(serviceMediator, bean));
+                .map(bean -> new Invite(serviceMediator, bean))
+                .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex()));
     }
 
     /**
@@ -383,7 +400,8 @@ public final class DiscordClient {
         return serviceMediator.getRestClient().getUserService()
                 .modifyCurrentUser(mutatedSpec.asRequest())
                 .map(UserBean::new)
-                .map(bean -> new User(serviceMediator, bean));
+                .map(bean -> new User(serviceMediator, bean))
+                .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex()));
     }
 
     /**
@@ -416,6 +434,7 @@ public final class DiscordClient {
                 .find(userId.asLong())
                 .switchIfEmpty(serviceMediator.getRestClient().getUserService()
                         .getUser(userId.asLong())
-                        .map(UserBean::new));
+                        .map(UserBean::new)
+                        .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex())));
     }
 }

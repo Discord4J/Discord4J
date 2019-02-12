@@ -121,7 +121,10 @@ public class Invite implements DiscordObject {
      * If an error is received, it is emitted through the {@code Mono}.
      */
     public final Mono<Void> delete(@Nullable final String reason) {
-        return serviceMediator.getRestClient().getInviteService().deleteInvite(getCode(), reason).then();
+        return serviceMediator.getRestClient().getInviteService()
+                .deleteInvite(getCode(), reason)
+                .then()
+                .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex()));
     }
 
     /**

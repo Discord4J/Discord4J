@@ -126,7 +126,8 @@ public final class GuildEmoji implements Entity {
                 .getGuildEmoji(getGuildId().asLong(), getId().asLong())
                 .map(GuildEmojiResponse::getUser)
                 .map(UserBean::new)
-                .map(bean -> new User(serviceMediator, bean));
+                .map(bean -> new User(serviceMediator, bean))
+                .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex()));
     }
 
     /**
@@ -189,7 +190,8 @@ public final class GuildEmoji implements Entity {
         return serviceMediator.getRestClient().getEmojiService()
                 .modifyGuildEmoji(getGuildId().asLong(), getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason())
                 .map(GuildEmojiBean::new)
-                .map(bean -> new GuildEmoji(serviceMediator, bean, getGuildId().asLong()));
+                .map(bean -> new GuildEmoji(serviceMediator, bean, getGuildId().asLong()))
+                .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex()));
     }
 
     /**
@@ -211,7 +213,8 @@ public final class GuildEmoji implements Entity {
      */
     public Mono<Void> delete(@Nullable final String reason) {
         return serviceMediator.getRestClient().getEmojiService()
-                .deleteGuildEmoji(getGuildId().asLong(), getId().asLong(), reason);
+                .deleteGuildEmoji(getGuildId().asLong(), getId().asLong(), reason)
+                .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex()));
     }
 
     /**

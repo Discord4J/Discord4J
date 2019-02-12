@@ -195,7 +195,8 @@ public final class TextChannel extends BaseChannel implements Categorizable, Gui
         return getServiceMediator().getRestClient().getChannelService()
                 .createChannelInvite(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason())
                 .map(ExtendedInviteBean::new)
-                .map(bean -> new ExtendedInvite(getServiceMediator(), bean));
+                .map(bean -> new ExtendedInvite(getServiceMediator(), bean))
+                .subscriberContext(ctx -> ctx.put("shard", getServiceMediator().getClientConfig().getShardIndex()));
     }
 
     @Override
@@ -203,7 +204,8 @@ public final class TextChannel extends BaseChannel implements Categorizable, Gui
         return getServiceMediator().getRestClient().getChannelService()
                 .getChannelInvites(getId().asLong())
                 .map(ExtendedInviteBean::new)
-                .map(bean -> new ExtendedInvite(getServiceMediator(), bean));
+                .map(bean -> new ExtendedInvite(getServiceMediator(), bean))
+                .subscriberContext(ctx -> ctx.put("shard", getServiceMediator().getClientConfig().getShardIndex()));
     }
 
     /**
@@ -250,7 +252,8 @@ public final class TextChannel extends BaseChannel implements Categorizable, Gui
                 .modifyChannel(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason())
                 .map(EntityUtil::getChannelBean)
                 .map(bean -> EntityUtil.getChannel(getServiceMediator(), bean))
-                .cast(TextChannel.class);
+                .cast(TextChannel.class)
+                .subscriberContext(ctx -> ctx.put("shard", getServiceMediator().getClientConfig().getShardIndex()));
     }
 
     /**
@@ -278,7 +281,9 @@ public final class TextChannel extends BaseChannel implements Categorizable, Gui
                         .filter(ignore -> messageIdChunk.size() == 1)
                         .flatMap(id -> getServiceMediator().getRestClient().getChannelService()
                                 .deleteMessage(getId().asLong(), Long.parseLong(id), null)
-                                .thenReturn(id))
+                                .thenReturn(id)
+                                .subscriberContext(ctx -> ctx.put("shard",
+                                        getServiceMediator().getClientConfig().getShardIndex())))
                         .hasElement()
                         .map(identity -> !identity);
 
@@ -290,7 +295,9 @@ public final class TextChannel extends BaseChannel implements Categorizable, Gui
                 .filterWhen(filterMessageIdChunk)
                 .map(messageIdChunk -> messageIdChunk.toArray(new String[messageIdChunk.size()]))
                 .flatMap(messageIdChunk -> getServiceMediator().getRestClient().getChannelService()
-                        .bulkDeleteMessages(getId().asLong(), new BulkDeleteRequest(messageIdChunk)))
+                        .bulkDeleteMessages(getId().asLong(), new BulkDeleteRequest(messageIdChunk))
+                        .subscriberContext(ctx -> ctx.put("shard",
+                                getServiceMediator().getClientConfig().getShardIndex())))
                 .thenMany(Flux.fromIterable(ignoredMessageIds));
     }
 
@@ -308,7 +315,8 @@ public final class TextChannel extends BaseChannel implements Categorizable, Gui
         return getServiceMediator().getRestClient().getWebhookService()
                 .createWebhook(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason())
                 .map(WebhookBean::new)
-                .map(bean -> new Webhook(getServiceMediator(), bean));
+                .map(bean -> new Webhook(getServiceMediator(), bean))
+                .subscriberContext(ctx -> ctx.put("shard", getServiceMediator().getClientConfig().getShardIndex()));
     }
 
     /**
@@ -321,7 +329,8 @@ public final class TextChannel extends BaseChannel implements Categorizable, Gui
         return getServiceMediator().getRestClient().getWebhookService()
                 .getChannelWebhooks(getId().asLong())
                 .map(WebhookBean::new)
-                .map(bean -> new Webhook(getServiceMediator(), bean));
+                .map(bean -> new Webhook(getServiceMediator(), bean))
+                .subscriberContext(ctx -> ctx.put("shard", getServiceMediator().getClientConfig().getShardIndex()));
     }
 
     @Override

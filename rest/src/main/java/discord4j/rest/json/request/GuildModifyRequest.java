@@ -71,7 +71,7 @@ public class GuildModifyRequest {
         private Possible<String> name = Possible.absent();
         private Possible<String> region = Possible.absent();
         private Possible<Integer> verificationLevel = Possible.absent();
-        private Possible<Integer> defaultMessageNoficiations = Possible.absent();
+        private Possible<Integer> defaultMessageNotifications = Possible.absent();
         @Nullable
         private PossibleLong afkChannelId = PossibleLong.absent();
         private Possible<Integer> afkTimeout = Possible.absent();
@@ -96,8 +96,8 @@ public class GuildModifyRequest {
             return this;
         }
 
-        public Builder defaultMessageNoficiations(int defaultMessageNoficiations) {
-            this.defaultMessageNoficiations = Possible.of(defaultMessageNoficiations);
+        public Builder defaultMessageNotifications(int defaultMessageNotifications) {
+            this.defaultMessageNotifications = Possible.of(defaultMessageNotifications);
             return this;
         }
 
@@ -127,7 +127,7 @@ public class GuildModifyRequest {
         }
 
         public GuildModifyRequest build() {
-            return new GuildModifyRequest(name, region, verificationLevel, defaultMessageNoficiations, afkChannelId,
+            return new GuildModifyRequest(name, region, verificationLevel, defaultMessageNotifications, afkChannelId,
                     afkTimeout, icon, ownerId, splash);
         }
     }
