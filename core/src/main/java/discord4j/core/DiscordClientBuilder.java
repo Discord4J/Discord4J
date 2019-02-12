@@ -369,9 +369,11 @@ public final class DiscordClientBuilder {
      * container object to parameterize the retry policy used in the gateway operations.
      *
      * @param retryOptions the new retry policy. Can be set to {@code null} to use a default
+     * @return this builder
      */
-    public void setRetryOptions(@Nullable RetryOptions retryOptions) {
+    public DiscordClientBuilder setRetryOptions(@Nullable RetryOptions retryOptions) {
         this.retryOptions = retryOptions;
+        return this;
     }
 
     /**
