@@ -16,7 +16,7 @@ repositories {
 }
 
 dependencies {
-  implementation 'com.discord4j:discord4j-core:3.0.0.M2'
+  implementation 'com.discord4j:discord4j-core:3.0.0.M3-1'
 }
 ```
 ### Maven
@@ -32,7 +32,7 @@ dependencies {
   <dependency>
     <groupId>com.discord4j</groupId>
     <artifactId>discord4j-core</artifactId>
-    <version>3.0.0.M2</version>
+    <version>3.0.0.M3-1</version>
   </dependency>
 </dependencies>
 ```
@@ -40,7 +40,7 @@ dependencies {
 ### SBT
 ```scala
 libraryDependencies ++= Seq(
-  "com.discord4j" % "discord4j-core" % "3.0.0.M2"
+  "com.discord4j" % "discord4j-core" % "3.0.0.M3-1"
 )
 
 resolvers += "jcenter" at "https://jcenter.bintray.com/"
