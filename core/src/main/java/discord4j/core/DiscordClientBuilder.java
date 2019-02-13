@@ -16,16 +16,11 @@
  */
 package discord4j.core;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import discord4j.common.GitProperties;
 import discord4j.common.JacksonResourceProvider;
-import discord4j.common.ReactorResourceProvider;
 import discord4j.common.RateLimiter;
 import discord4j.common.SimpleBucket;
-import discord4j.common.jackson.PossibleModule;
 import discord4j.common.jackson.UnknownPropertyHandler;
 import discord4j.core.event.EventDispatcher;
 import discord4j.core.event.dispatch.DispatchContext;
@@ -100,12 +95,6 @@ public final class DiscordClientBuilder {
 
     @Nullable
     private JacksonResourceProvider jacksonResourceProvider;
-
-    @Nullable
-    private ReactorResourceProvider restResourceProvider;
-
-    @Nullable
-    private ReactorResourceProvider gatewayResourceProvider;
 
     @Nullable
     private RouterFactory routerFactory;
@@ -302,54 +291,6 @@ public final class DiscordClientBuilder {
     }
 
     /**
-     * Get the current {@link ReactorResourceProvider} dedicated to set up a connection pool, an event loop, as well
-     * as the supporting {@link HttpClient} used for REST API operations.
-     *
-     * @return the current resource provider used for REST operations, or {@code null} if using a default value
-     */
-    @Nullable
-    public ReactorResourceProvider getRestResourceProvider() {
-        return restResourceProvider;
-    }
-
-    /**
-     * Set a new {@link ReactorResourceProvider} dedicated to set up a connection pool, an event pool, as well as the
-     * supporting {@link HttpClient} used for REST API operations.
-     *
-     * @param restResourceProvider the new resource provider used for REST operations, can be {@code null} to use a
-     * default value
-     * @return this builder
-     */
-    public DiscordClientBuilder setRestResourceProvider(@Nullable ReactorResourceProvider restResourceProvider) {
-        this.restResourceProvider = restResourceProvider;
-        return this;
-    }
-
-    /**
-     * Get the current {@link ReactorResourceProvider} dedicated to set up a connection pool, an event loop, as well
-     * as the supporting {@link HttpClient} used for maintaining gateway connections.
-     *
-     * @return the current resource provider used for gateway operations, or {@code null} if using a default value
-     */
-    @Nullable
-    public ReactorResourceProvider getGatewayResourceProvider() {
-        return gatewayResourceProvider;
-    }
-
-    /**
-     * Set a new {@link ReactorResourceProvider} dedicated to set up a connection pool, an event pool, as well as the
-     * supporting {@link HttpClient} used for maintaining gateway connections.
-     *
-     * @param gatewayResourceProvider the new resource provider used for gateway operations, can be {@code null} to
-     * use a default value
-     * @return this builder
-     */
-    public DiscordClientBuilder setGatewayResourceProvider(@Nullable ReactorResourceProvider gatewayResourceProvider) {
-        this.gatewayResourceProvider = gatewayResourceProvider;
-        return this;
-    }
-
-    /**
      * Get the current {@link RouterFactory} used to create a {@link discord4j.rest.request.Router} that executes
      * Discord REST API requests.
      *
@@ -509,7 +450,7 @@ public final class DiscordClientBuilder {
     }
 
     /**
-     * Get the current {@link GatewayLimiter} set in this builder. GatewayLimiter is a rate limiting strategy
+     * Get the current {@link RateLimiter} set in this builder. GatewayLimiter is a rate limiting strategy
      * dedicated to coordinate actions between shards, like identifying to the gateway.
      *
      * @return the current gateway limiter, for shard coordinated login, can be {@code null} if default is used
@@ -520,7 +461,7 @@ public final class DiscordClientBuilder {
     }
 
     /**
-     * Set a new {@link GatewayLimiter} to this builder. GatewayLimiter is a rate limiting strategy dedicated to
+     * Set a new {@link RateLimiter} to this builder. GatewayLimiter is a rate limiting strategy dedicated to
      * coordinate actions between shards, like identifying to the gateway.
      *
      * @param gatewayLimiter the current gateway limiter, for shard coordinated login, can be {@code null} for a default
@@ -608,11 +549,8 @@ public final class DiscordClientBuilder {
                 mapper.addHandler(new UnknownPropertyHandler(ignoreUnknownJsonKeys)));
     }
 
-    private ReactorResourceProvider initRestResources() {
-        if (restResourceProvider != null) {
-            return restResourceProvider;
-        }
-        return new ReactorResourceProvider();
+    private HttpClient initHttpClient() {
+        return HttpClient.create().compress(true);
     }
 
     private DiscordWebClient initWebClient(HttpClient httpClient, ObjectMapper mapper) {
@@ -624,13 +562,6 @@ public final class DiscordClientBuilder {
             return routerFactory;
         }
         return new DefaultRouterFactory(Schedulers.elastic());
-    }
-
-    private ReactorResourceProvider initGatewayResources() {
-        if (gatewayResourceProvider != null) {
-            return gatewayResourceProvider;
-        }
-        return new ReactorResourceProvider();
     }
 
     private GatewayObserver initGatewayObserver() {
@@ -655,11 +586,6 @@ public final class DiscordClientBuilder {
     public DiscordClient build() {
         Hooks.onOperatorDebug();
 
-        final ObjectMapper mapper = new ObjectMapper()
-                .setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
-                .addHandler(new UnknownPropertyHandler(ignoreUnknownJsonKeys))
-                .registerModules(new PossibleModule(), new Jdk8Module());
-
         // Prepare identify options
         final IdentifyOptions identifyOptions = initIdentifyOptions();
         if (identifyOptions.getShardIndex() < 0 || identifyOptions.getShardIndex() >= identifyOptions.getShardCount()) {
@@ -670,8 +596,8 @@ public final class DiscordClientBuilder {
 
         // Prepare REST client
         final JacksonResourceProvider jackson = initJacksonResources();
-        final ReactorResourceProvider rest = initRestResources();
-        final DiscordWebClient webClient = initWebClient(rest.getHttpClient(), jackson.getObjectMapper());
+        final HttpClient httpClient = initHttpClient();
+        final DiscordWebClient webClient = initWebClient(httpClient, jackson.getObjectMapper());
         final RouterFactory routerFactory = initRouterFactory();
         final RestClient restClient = new RestClient(routerFactory.getRouter(webClient));
 
@@ -681,10 +607,9 @@ public final class DiscordClientBuilder {
                 MessageBean.class));
 
         // Prepare gateway client
-        final ReactorResourceProvider gateway = initGatewayResources();
         final RetryOptions retryOptions = initRetryOptions();
         final StoreInvalidator storeInvalidator = new StoreInvalidator(stateHolder);
-        final GatewayClient gatewayClient = new GatewayClient(gateway.getHttpClient(),
+        final GatewayClient gatewayClient = new GatewayClient(httpClient,
                 new JacksonPayloadReader(jackson.getObjectMapper()),
                 new JacksonPayloadWriter(jackson.getObjectMapper()),
                 retryOptions, token, identifyOptions, storeInvalidator.then(initGatewayObserver()),
@@ -694,10 +619,11 @@ public final class DiscordClientBuilder {
         final FluxProcessor<Event, Event> eventProcessor = initEventProcessor();
         final EventDispatcher eventDispatcher = new EventDispatcher(eventProcessor, initEventScheduler(), shardId);
 
-        final VoiceClient voiceClient = new VoiceClient(voiceConnectionScheduler, mapper, guildId -> {
-            VoiceStateUpdate voiceStateUpdate = new VoiceStateUpdate(guildId, null, false, false);
-            gatewayClient.sender().next(GatewayPayload.voiceStateUpdate(voiceStateUpdate));
-        });
+        final VoiceClient voiceClient = new VoiceClient(voiceConnectionScheduler, jackson.getObjectMapper(),
+                guildId -> {
+                    VoiceStateUpdate voiceStateUpdate = new VoiceStateUpdate(guildId, null, false, false);
+                    gatewayClient.sender().next(GatewayPayload.voiceStateUpdate(voiceStateUpdate));
+                });
 
         // Prepare mediator and wire gateway events to EventDispatcher
         final ServiceMediator serviceMediator = new ServiceMediator(gatewayClient, restClient, storeService,

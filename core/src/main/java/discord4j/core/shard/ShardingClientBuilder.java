@@ -18,10 +18,9 @@
 package discord4j.core.shard;
 
 import discord4j.common.JacksonResourceProvider;
-import discord4j.common.ReactorResourceProvider;
+import discord4j.common.SimpleBucket;
 import discord4j.core.DiscordClientBuilder;
 import discord4j.gateway.GatewayObserver;
-import discord4j.gateway.SimpleBucket;
 import discord4j.rest.RestClient;
 import discord4j.rest.http.ExchangeStrategies;
 import discord4j.rest.http.client.DiscordWebClient;
@@ -35,6 +34,7 @@ import reactor.core.publisher.FluxSink;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.ReplayProcessor;
 import reactor.core.scheduler.Schedulers;
+import reactor.netty.http.client.HttpClient;
 import reactor.util.Logger;
 import reactor.util.Loggers;
 import reactor.util.function.Tuple2;
@@ -134,8 +134,8 @@ public class ShardingClientBuilder {
     }
 
     /**
-     * Set a new {@link discord4j.rest.request.RouterFactory} used to create a {@link discord4j.rest.request.Router}
-     * that executes Discord REST API requests and will be shared across all sharding clients created by this builder.
+     * Set a new {@link RouterFactory} used to create a {@link Router} that executes Discord REST API requests and
+     * will be shared across all sharding clients created by this builder.
      * <p>
      * Make sure the given factory is capable of coordinating rate limits across shards, otherwise use the
      * default value as it is shard aware.
@@ -150,7 +150,7 @@ public class ShardingClientBuilder {
     }
 
     /**
-     * Returns the current {@link discord4j.core.shard.ShardingStoreRegistry} used to coordinate stores across shards.
+     * Returns the current {@link ShardingStoreRegistry} used to coordinate stores across shards.
      *
      * @return the store registry
      */
@@ -160,10 +160,10 @@ public class ShardingClientBuilder {
     }
 
     /**
-     * Set a new {@link discord4j.core.shard.ShardingStoreRegistry} used to coordinate stores across shards. The default
-     * value is to use {@link discord4j.core.shard.ShardingJdkStoreRegistry}. If you wish to disable this feature, set
-     * the resulting client stores to any non-coordinating value through
-     * {@link discord4j.core.DiscordClientBuilder#setStoreService(discord4j.store.api.service.StoreService)} in order to
+     * Set a new {@link ShardingStoreRegistry} used to coordinate stores across shards. The default value is to use
+     * {@link ShardingJdkStoreRegistry}. If you wish to disable this feature, set the resulting client stores to any
+     * non-coordinating value through
+     * {@link DiscordClientBuilder#setStoreService(discord4j.store.api.service.StoreService)} in order to
      * override the default value that attempts to communicate with this registry.
      *
      * @param shardingStoreRegistry a new store registry to coordinate shards. Can be <code>null</code> to use the
@@ -176,8 +176,8 @@ public class ShardingClientBuilder {
     }
 
     /**
-     * Returns the current {@link java.util.function.Predicate} used to include only a set of shards in the creation
-     * process. By default all shards given by the shard count are created.
+     * Returns the current {@link Predicate} used to include only a set of shards in the creation process. By default
+     * all shards given by the shard count are created.
      *
      * @return the current predicate of shard index indicating which shards should be created, can be <code>null</code>
      */
@@ -187,8 +187,8 @@ public class ShardingClientBuilder {
     }
 
     /**
-     * Set a new {@link java.util.function.Predicate} of shard index, indicating whether a shard should be created. Can
-     * be used in scenarios when you want to partially colocate the shards given by shard count.
+     * Set a new {@link Predicate} of shard index, indicating whether a shard should be created. Can be used in
+     * scenarios when you want to partially colocate the shards given by shard count.
      *
      * @param shardIndexFilter the new predicate of shard index to use in order to filter shard creation
      * @return this builder
@@ -231,8 +231,8 @@ public class ShardingClientBuilder {
     }
 
     /**
-     * Create a sequence of {@link discord4j.core.DiscordClientBuilder}s each representing a shard, up to the
-     * resulting shard count, filtering out values not matching the predicate given by {@link #getShardIndexFilter()}.
+     * Create a sequence of {@link DiscordClientBuilder}s each representing a shard, up to the resulting shard count,
+     * filtering out values not matching the predicate given by {@link #getShardIndexFilter()}.
      * <p>
      * This sequence can be further customized on a per-shard basis until you call
      * {@link discord4j.core.DiscordClient#login()}:
@@ -253,8 +253,7 @@ public class ShardingClientBuilder {
      */
     public Flux<DiscordClientBuilder> build() {
         final JacksonResourceProvider jackson = new JacksonResourceProvider();
-        final ReactorResourceProvider reactor = new ReactorResourceProvider();
-        final DiscordWebClient webClient = new DiscordWebClient(reactor.getHttpClient(),
+        final DiscordWebClient webClient = new DiscordWebClient(HttpClient.create().compress(true),
                 ExchangeStrategies.jackson(jackson.getObjectMapper()), token);
         final Router router = initRouterFactory().getRouter(webClient);
         final RestClient restClient = new RestClient(router);
@@ -266,9 +265,7 @@ public class ShardingClientBuilder {
 
         final DiscordClientBuilder builder = new DiscordClientBuilder(token)
                 .setJacksonResourceProvider(jackson)
-                .setRestResourceProvider(reactor)
                 .setRouterFactory(new SingleRouterFactory(router))
-                .setGatewayResourceProvider(reactor)
                 .setGatewayLimiter(new SimpleBucket(1, Duration.ofSeconds(6)))
                 .setGatewayObserver((s, o) -> {
                     if (s.equals(GatewayObserver.CONNECTED)) {
