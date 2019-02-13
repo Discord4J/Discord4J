@@ -108,8 +108,6 @@ public final class DiscordClientBuilder {
     @Nullable
     private RetryOptions retryOptions;
 
-    private boolean ignoreUnknownJsonKeys = true;
-
     @Nullable
     private GatewayObserver gatewayObserver;
 
@@ -397,31 +395,6 @@ public final class DiscordClientBuilder {
     }
 
     /**
-     * Retrieves the current behavior under missing fields on entity deserialization. This is an advanced option used
-     * for debugging.
-     *
-     * @return {@code true} (default) if deserialization problems are to be ignored, {@code false} otherwise
-     * @see UnknownPropertyHandler
-     */
-    public boolean getIgnoreUnknownJsonKeys() {
-        return ignoreUnknownJsonKeys;
-    }
-
-    /**
-     * Set the new behavior under missing fields on entity deserialization. This is an advanced option used
-     * for debugging.
-     *
-     * @param ignoreUnknownJsonKeys {@code true} if deserialization problems are to be ignored, {@code false}
-     * otherwise
-     * @return this builder
-     * @see UnknownPropertyHandler
-     */
-    public DiscordClientBuilder setIgnoreUnknownJsonKeys(boolean ignoreUnknownJsonKeys) {
-        this.ignoreUnknownJsonKeys = ignoreUnknownJsonKeys;
-        return this;
-    }
-
-    /**
      * Get the current {@link GatewayObserver} set in this builder. GatewayObserver is used as a simple event
      * listener for gateway connection lifecycle. User can be notified of broad lifecycle events like connections,
      * resumes, reconnects and disconnects but also very specific ones like session sequence updates.
@@ -545,8 +518,7 @@ public final class DiscordClientBuilder {
         if (jacksonResourceProvider != null) {
             return jacksonResourceProvider;
         }
-        return new JacksonResourceProvider(mapper ->
-                mapper.addHandler(new UnknownPropertyHandler(ignoreUnknownJsonKeys)));
+        return new JacksonResourceProvider(mapper -> mapper.addHandler(new UnknownPropertyHandler(true)));
     }
 
     private HttpClient initHttpClient() {
