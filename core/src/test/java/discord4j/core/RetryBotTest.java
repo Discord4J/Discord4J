@@ -19,7 +19,6 @@ package discord4j.core;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import discord4j.common.SimpleBucket;
 import discord4j.core.event.domain.Event;
 import discord4j.core.event.domain.lifecycle.ReadyEvent;
 import discord4j.core.event.domain.lifecycle.ResumeEvent;
@@ -29,17 +28,16 @@ import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.presence.Presence;
 import discord4j.core.object.util.Snowflake;
-import discord4j.core.shard.ShardJdkStoreService;
-import discord4j.core.shard.ShardStoreRegistry;
-import discord4j.gateway.GatewayObserver;
+import discord4j.core.shard.ShardingClientBuilder;
 import discord4j.gateway.IdentifyOptions;
-import discord4j.rest.request.SingleRouterFactory;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.reflections.Reflections;
 import reactor.core.Disposable;
-import reactor.core.publisher.*;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Hooks;
+import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 import reactor.netty.DisposableServer;
 import reactor.netty.http.server.HttpServer;
@@ -81,50 +79,23 @@ public class RetryBotTest {
 
     @Test
     @Ignore("Example code excluded from CI")
-    public void testShards() {
-        final ReplayProcessor<Integer> permits = ReplayProcessor.create();
-        final FluxSink<Integer> permitSink = permits.sink();
-        permitSink.next(0);
+    public void testWithSetShardCount() {
+        new ShardingClientBuilder(token)
+                .setShardCount(shardCount)
+                .build()
+                .map(DiscordClientBuilder::build)
+                .flatMap(DiscordClient::login)
+                .blockLast();
+    }
 
-        final Map<Integer, IdentifyOptions> optionsMap = loadResumeData();
-        // share stores across shards, in conjunction with ShardJdkStoreService (see below)
-        ShardStoreRegistry registry = new ShardStoreRegistry();
-        // using Schedulers.immediate() because we are not blocking EventDispatcher streams
-        // pass a GatewayLimiter to make all shards aware of IDENTIFY rate limits
-        final DiscordClientBuilder builder = new DiscordClientBuilder(token)
-                .setEventScheduler(Schedulers.immediate())
-                .setRouterFactory(new SingleRouterFactory())
-                .setGatewayLimiter(new SimpleBucket(1, Duration.ofSeconds(6)))
-                .setGatewayObserver((s, o) -> {
-                    optionsMap.put(o.getShardIndex(), o);
-                    if (s.equals(GatewayObserver.CONNECTED)) {
-                        log.info("Shard {} connected", o.getShardIndex());
-                        permitSink.next(o.getShardIndex() + 1);
-                    }
-                })
-                .setInitialPresence(Presence.invisible())
-                .setShardCount(shardCount);
-
-        // save our shards
-        final Map<Integer, DiscordClient> clients = new ConcurrentHashMap<>();
-        final Map<String, AtomicLong> counts = new ConcurrentHashMap<>();
-        startHttpServer(new ServerContext(clients, counts));
-
-        Flux.range(0, shardCount)
-                .flatMap(index -> {
-                    DiscordClient client = builder.setIdentifyOptions(optionsMap.get(index))
-                            .setStoreService(new ShardJdkStoreService(registry))
-                            .build();
-                    clients.put(index, client);
-                    if (optionsMap.get(index).getResumeSequence() != null) {
-                        return client.login();
-                    }
-                    subscribeEventCounter(client, counts);
-                    return permits.filter(index::equals)
-                            .next()
-                            .delayElement(Duration.ofSeconds((long) (Math.signum(index) * 5)))
-                            .then(client.login());
-                })
+    @Test
+    @Ignore("Example code excluded from CI")
+    public void testWithRecommendedShardCount() {
+        new ShardingClientBuilder(token)
+                .build()
+                .map(builder -> builder.setInitialPresence(Presence.invisible()))
+                .map(DiscordClientBuilder::build)
+                .flatMap(DiscordClient::login)
                 .blockLast();
     }
 

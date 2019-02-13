@@ -17,6 +17,7 @@
 
 package discord4j.rest.http.client;
 
+import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpMethod;
 
@@ -52,7 +53,7 @@ public class ClientRequest {
         return "ClientRequest{" +
                 "method=" + method +
                 ", url='" + url + '\'' +
-                ", headers=" + headers +
+                ", headers=" + headers.copy().remove(HttpHeaderNames.AUTHORIZATION).toString() +
                 '}';
     }
 }

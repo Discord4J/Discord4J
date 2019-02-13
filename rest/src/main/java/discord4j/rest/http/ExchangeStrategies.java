@@ -48,7 +48,7 @@ public interface ExchangeStrategies {
      * @param mapper the Jackson object mapper
      * @return the built strategies
      */
-    static ExchangeStrategies withJacksonDefaults(ObjectMapper mapper) {
+    static ExchangeStrategies jackson(ObjectMapper mapper) {
         List<WriterStrategy<?>> writerStrategies = new ArrayList<>();
         writerStrategies.add(new MultipartWriterStrategy(mapper));
         writerStrategies.add(new JacksonWriterStrategy(mapper));

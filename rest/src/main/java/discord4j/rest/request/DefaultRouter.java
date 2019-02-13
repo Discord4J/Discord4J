@@ -8,11 +8,11 @@
  *
  * Discord4J is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public License
- * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Discord4J. If not, see <http://www.gnu.org/licenses/>.
  */
 package discord4j.rest.request;
 
@@ -36,6 +36,9 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Facilitates the routing of {@link discord4j.rest.request.DiscordRequest DiscordRequests} to the proper
  * {@link discord4j.rest.request.RequestStream RequestStream} according to the bucket in which the request falls.
+ * <p>
+ * Must be cached using {@link discord4j.rest.request.SingleRouterFactory} if intended for sharding, to properly
+ * coordinate queueing and rate-limiting across buckets.
  */
 public class DefaultRouter implements Router {
 
@@ -47,10 +50,22 @@ public class DefaultRouter implements Router {
     private final GlobalRateLimiter globalRateLimiter = new GlobalRateLimiter();
     private final Map<BucketKey, RequestStream<?>> streamMap = new ConcurrentHashMap<>();
 
+    /**
+     * Create a bucket-aware router using the {@link reactor.core.scheduler.Schedulers#elastic()} scheduler, to allow
+     * the use of blocking API. Use the alternate constructor to customize it.
+     *
+     * @param httpClient the web client executing each request instructed by this router
+     */
     public DefaultRouter(DiscordWebClient httpClient) {
         this(httpClient, Schedulers.elastic());
     }
 
+    /**
+     * Create a bucket-aware router that uses the given {@link reactor.core.scheduler.Scheduler}.
+     *
+     * @param httpClient the web client executing each request instructed by this router
+     * @param scheduler the scheduler used to execute each request
+     */
     public DefaultRouter(DiscordWebClient httpClient, Scheduler scheduler) {
         this.httpClient = httpClient;
         this.scheduler = scheduler;

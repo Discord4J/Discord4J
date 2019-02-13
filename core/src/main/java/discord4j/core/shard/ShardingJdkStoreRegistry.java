@@ -24,27 +24,32 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class ShardStoreRegistry {
+public class ShardingJdkStoreRegistry implements ShardingStoreRegistry {
 
     private final Map<Class<?>, Store<?, ?>> valueStore = new ConcurrentHashMap<>();
     private final Map<Integer, Map<Class<?>, Set<?>>> keyStores = new ConcurrentHashMap<>();
 
-    boolean containsStore(Class<?> valueClass) {
+    @Override
+    public boolean containsStore(Class<?> valueClass) {
         return valueStore.containsKey(valueClass);
     }
 
-    <V extends Serializable, K extends Comparable<K>> void putStore(Class<V> valueClass, Store<K, V> store) {
+    @Override
+    public <V extends Serializable, K extends Comparable<K>> void putStore(Class<V> valueClass, Store<K, V> store) {
         valueStore.put(valueClass, store);
     }
 
+    @Override
     @SuppressWarnings("unchecked")
-    <K extends Comparable<K>, V extends Serializable> Store<K, V> getValueStore(Class<K> key, Class<V> value) {
+    public <K extends Comparable<K>, V extends Serializable> Store<K, V> getValueStore(Class<K> key, Class<V> value) {
         return (Store<K, V>) valueStore.get(value);
     }
 
+    @Override
     @SuppressWarnings("unchecked")
-    <K extends Comparable<K>, V extends Serializable> Set<K> getKeyStore(Class<V> valueClass, int shardId) {
+    public <K extends Comparable<K>, V extends Serializable> Set<K> getKeyStore(Class<V> valueClass, int shardId) {
         return (Set<K>) keyStores.computeIfAbsent(shardId, k -> new ConcurrentHashMap<>())
                 .computeIfAbsent(valueClass, k -> ConcurrentHashMap.newKeySet());
     }
+
 }

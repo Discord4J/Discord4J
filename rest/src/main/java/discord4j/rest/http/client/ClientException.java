@@ -18,6 +18,7 @@
 package discord4j.rest.http.client;
 
 import discord4j.rest.json.response.ErrorResponse;
+import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import reactor.netty.http.client.HttpClientResponse;
@@ -62,7 +63,7 @@ public class ClientException extends RuntimeException {
         return "ClientException{" +
                 "request=" + request +
                 ", status=" + status +
-                ", headers=" + headers +
+                ", headers=" + headers.copy().remove(HttpHeaderNames.AUTHORIZATION).toString() +
                 ", errorResponse=" + errorResponse +
                 "}";
     }

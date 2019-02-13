@@ -14,21 +14,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J. If not, see <http://www.gnu.org/licenses/>.
  */
+@NonNullApi
+package discord4j.common;
 
-package discord4j.rest.request;
-
-import discord4j.rest.http.client.DiscordWebClient;
-
-/**
- * Factory used to produce {@link discord4j.rest.request.Router} instances dedicated to execute API requests.
- */
-public interface RouterFactory {
-
-    /**
-     * Retrieve a {@link discord4j.rest.request.Router} configured to process API requests.
-     *
-     * @param webClient a web client to parameterize the Router creation
-     * @return a Router prepared to process API requests
-     */
-    Router getRouter(DiscordWebClient webClient);
-}
+import reactor.util.annotation.NonNullApi;

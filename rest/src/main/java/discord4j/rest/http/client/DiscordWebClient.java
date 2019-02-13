@@ -17,10 +17,12 @@
 
 package discord4j.rest.http.client;
 
+import discord4j.common.GitProperties;
 import discord4j.rest.http.ExchangeStrategies;
 import discord4j.rest.http.ReaderStrategy;
 import discord4j.rest.http.WriterStrategy;
 import discord4j.rest.json.response.ErrorResponse;
+import discord4j.rest.route.Routes;
 import io.netty.handler.codec.http.DefaultHttpHeaders;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpHeaders;
@@ -33,6 +35,7 @@ import reactor.util.Loggers;
 import javax.annotation.Nullable;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Properties;
 import java.util.function.Consumer;
 
 /**
@@ -46,7 +49,16 @@ public class DiscordWebClient {
     private final HttpHeaders defaultHeaders;
     private final ExchangeStrategies exchangeStrategies;
 
-    public DiscordWebClient(HttpClient httpClient, HttpHeaders defaultHeaders, ExchangeStrategies exchangeStrategies) {
+    public DiscordWebClient(HttpClient httpClient, ExchangeStrategies exchangeStrategies, String token) {
+        final Properties properties = GitProperties.getProperties();
+        final String version = properties.getProperty(GitProperties.APPLICATION_VERSION, "3");
+        final String url = properties.getProperty(GitProperties.APPLICATION_URL, "https://discord4j.com");
+
+        final HttpHeaders defaultHeaders = new DefaultHttpHeaders();
+        defaultHeaders.add(HttpHeaderNames.CONTENT_TYPE, "application/json");
+        defaultHeaders.add(HttpHeaderNames.AUTHORIZATION, "Bot " + token);
+        defaultHeaders.add(HttpHeaderNames.USER_AGENT, "DiscordBot(" + url + ", " + version + ")");
+
         this.httpClient = httpClient;
         this.defaultHeaders = defaultHeaders;
         this.exchangeStrategies = exchangeStrategies;
@@ -85,6 +97,7 @@ public class DiscordWebClient {
         HttpHeaders requestHeaders = new DefaultHttpHeaders().add(defaultHeaders).setAll(request.headers());
         String contentType = requestHeaders.get(HttpHeaderNames.CONTENT_TYPE);
         HttpClient.RequestSender sender = httpClient
+                .baseUrl(Routes.BASE_URL)
                 .observe((connection, newState) -> log.debug("{} {}", newState, connection))
                 .headers(headers -> headers.setAll(requestHeaders))
                 .request(request.method())
@@ -126,7 +139,8 @@ public class DiscordWebClient {
         return (ReaderStrategy<T>) strategy;
     }
 
-    private static ClientException clientException(ClientRequest request, HttpClientResponse response, @Nullable ErrorResponse errorResponse) {
+    private static ClientException clientException(ClientRequest request, HttpClientResponse response,
+            @Nullable ErrorResponse errorResponse) {
         return new ClientException(request, response, errorResponse);
     }
 

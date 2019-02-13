@@ -15,26 +15,38 @@
  * along with Discord4J. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package discord4j.core.util;
+package discord4j.common;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
-public final class VersionUtil {
+/**
+ * Provide information about the Git repository version captured at build time.
+ */
+public class GitProperties {
 
     public static final String APPLICATION_NAME = "application.name";
+    /**
+     * Use it on the properties given by {@link #getProperties()} to get project version captured at build time.
+     */
     public static final String APPLICATION_VERSION = "git.build.version";
-    public static final String APPLICATION_DESCRIPTION = "application.description";
     public static final String APPLICATION_URL = "application.url";
-    public static final String GIT_BRANCH = "git.branch";
-    public static final String GIT_COMMIT_ID = "git.commit.id";
-    public static final String GIT_COMMIT_ID_ABBREV = "git.commit.id.abbrev";
+    /**
+     * Use it on the properties given by {@link #getProperties()} to get repository version captured at build time.
+     */
     public static final String GIT_COMMIT_ID_DESCRIBE = "git.commit.id.describe";
 
+    /**
+     * Load a {@link java.util.Properties} object with application version data.
+     *
+     * @return a property list with application version details
+     * @see discord4j.common.GitProperties#APPLICATION_VERSION
+     * @see discord4j.common.GitProperties#GIT_COMMIT_ID_DESCRIBE
+     */
     public static Properties getProperties() {
         Properties properties = new Properties();
-        try (InputStream inputStream = VersionUtil.class.getResourceAsStream("git.properties")) {
+        try (InputStream inputStream = GitProperties.class.getResourceAsStream("git.properties")) {
             if (inputStream != null) {
                 properties.load(inputStream);
             }
