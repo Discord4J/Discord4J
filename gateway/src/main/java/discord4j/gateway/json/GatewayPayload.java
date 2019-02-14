@@ -47,9 +47,6 @@ public class GatewayPayload<T extends PayloadData> {
         this.type = type;
     }
 
-    public GatewayPayload() {
-    }
-
     public static GatewayPayload<Heartbeat> heartbeat(Heartbeat data) {
         return new GatewayPayload<>(Opcode.HEARTBEAT, data, null, null);
     }

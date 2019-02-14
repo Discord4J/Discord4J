@@ -94,7 +94,8 @@ public class IdentifyOptions {
     }
 
     /**
-     * Set a new value representing the last observed gateway sequence.
+     * Set a new value representing the last observed gateway sequence. Modifying this value after a connection has
+     * been established will lead to unexpected behavior.
      *
      * @param resumeSequence the new observed gateway sequence
      */
@@ -114,7 +115,8 @@ public class IdentifyOptions {
     }
 
     /**
-     * Set a new session id for the client using this policy.
+     * Set a new session id for the client using this policy. Modifying this value after a connection has been
+     * established will lead to unexpected behavior.
      *
      * @param resumeSessionId the new session id
      */

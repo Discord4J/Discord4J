@@ -29,26 +29,36 @@ import discord4j.core.object.presence.Presence;
 import discord4j.core.object.util.Snowflake;
 import discord4j.core.spec.GuildCreateSpec;
 import discord4j.core.spec.UserEditSpec;
+import discord4j.core.util.AlreadyConnectedException;
 import discord4j.core.util.EntityUtil;
 import discord4j.core.util.PaginationUtil;
+import discord4j.gateway.GatewayClient;
+import discord4j.gateway.GatewayObserver;
 import discord4j.gateway.json.GatewayPayload;
+import discord4j.rest.json.response.GatewayResponse;
 import discord4j.rest.json.response.UserGuildResponse;
 import discord4j.rest.util.RouteUtils;
 import discord4j.store.api.util.LongLongTuple2;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.util.Logger;
+import reactor.util.Loggers;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
 /** A high-level abstraction of common Discord operations such as entity retrieval and Discord shard manipulation. */
 public final class DiscordClient {
 
+    private static final Logger log = Loggers.getLogger(DiscordClient.class);
+
     /** The ServiceMediator associated to this object. */
     private final ServiceMediator serviceMediator;
+
+    private final AtomicBoolean isDisposed = new AtomicBoolean(true);
 
     /**
      * Constructs a {@code DiscordClient} with an associated ServiceMediator.
@@ -307,27 +317,54 @@ public final class DiscordClient {
      * invoke {@link Mono#block()}.
      */
     public Mono<Void> login() {
-        final Map<String, Object> parameters = new HashMap<>(3);
-        parameters.put("compress", "zlib-stream");
-        parameters.put("encoding", "json");
-        parameters.put("v", 6);
+        return Mono
+                .fromRunnable(() -> {
+                    if (!isDisposed.compareAndSet(true, false)) {
+                        throw new AlreadyConnectedException();
+                    }
+                })
+                .then(serviceMediator.getRestClient().getGatewayService().getGateway())
+                .transform(loginSequence(serviceMediator.getGatewayClient()));
+    }
 
-        return serviceMediator.getRestClient().getGatewayService().getGateway()
+    private Function<Mono<GatewayResponse>, Mono<Void>> loginSequence(GatewayClient client) {
+        return sequence -> sequence
                 .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex()))
-                .flatMap(response -> serviceMediator.getGatewayClient()
-                        .execute(RouteUtils.expandQuery(response.getUrl(), parameters)))
+                .flatMap(response -> client.execute(
+                        RouteUtils.expandQuery(response.getUrl(),
+                                serviceMediator.getClientConfig().getGatewayParameters()),
+                        GatewayObserver.NOOP_LISTENER))
                 .then(serviceMediator.getStateHolder().invalidateStores())
-                .then(serviceMediator.getStoreService().dispose());
+                .then(serviceMediator.getStoreService().dispose())
+                .doOnError(t -> !(t instanceof AlreadyConnectedException), t -> setDisposed())
+                .doOnCancel(this::setDisposed)
+                .doOnTerminate(this::setDisposed);
     }
 
-    /** Logs out the client from the gateway. */
-    public void logout() {
-        serviceMediator.getGatewayClient().close(false);
+    private void setDisposed() {
+        if (!isDisposed.compareAndSet(false, true)) {
+            log.warn("Shard {} was already disposed", serviceMediator.getClientConfig().getShardIndex());
+        }
     }
 
-    /** Reconnects the client to the gateway. */
-    public void reconnect() {
-        serviceMediator.getGatewayClient().close(true);
+    /**
+     * Logs out the client from the gateway.
+     *
+     * @return a {@link Mono} deferring completion until this client has completely disconnected from the gateway
+     */
+    public Mono<Void> logout() {
+        return serviceMediator.getGatewayClient().close(false);
+    }
+
+    /**
+     * Reconnects the client to the gateway.
+     *
+     * @return an empty {@link Mono}
+     * @deprecated This method is for debugging purposes only and can be removed on a later release.
+     */
+    @Deprecated
+    public Mono<Void> reconnect() {
+        return serviceMediator.getGatewayClient().close(true);
     }
 
     /**

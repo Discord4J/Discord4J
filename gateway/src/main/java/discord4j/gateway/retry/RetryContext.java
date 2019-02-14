@@ -58,6 +58,15 @@ public class RetryContext {
         resetCount.incrementAndGet();
     }
 
+    /**
+     * Clear the attempt count, treating further calls to {@link #next()} as brand new retry context.
+     */
+    public void clear() {
+        connected.compareAndSet(true, false);
+        attempts.set(1);
+        resetCount.set(0);
+    }
+
     public Duration getFirstBackoff() {
         return firstBackoff;
     }

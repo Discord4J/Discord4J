@@ -16,6 +16,12 @@
  */
 package discord4j.core;
 
+import java.util.HashMap;
+import java.util.Map;
+
+/**
+ * A set of parameters currently used to establish a connection to the gateway.
+ */
 public final class ClientConfig {
 
     private final String token;
@@ -28,15 +34,43 @@ public final class ClientConfig {
         this.shardCount = shardCount;
     }
 
+    /**
+     * The bot token used to identify to the gateway.
+     *
+     * @return a bot token
+     */
     public String getToken() {
         return token;
     }
 
+    /**
+     * The current shard index used to identify to the gateway.
+     *
+     * @return the shard index
+     */
     public int getShardIndex() {
         return shardIndex;
     }
 
+    /**
+     * The number of shards used to identify to the gateway.
+     *
+     * @return the shard count
+     */
     public int getShardCount() {
         return shardCount;
+    }
+
+    /**
+     * Retrieves the set of query parameters used to establish a gateway URL connection.
+     *
+     * @return a Map of query parameters targeting a gateway connection
+     */
+    public Map<String, Object> getGatewayParameters() {
+        final Map<String, Object> parameters = new HashMap<>(3);
+        parameters.put("compress", "zlib-stream");
+        parameters.put("encoding", "json");
+        parameters.put("v", 6);
+        return parameters;
     }
 }

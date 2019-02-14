@@ -25,6 +25,8 @@ import reactor.util.annotation.Nullable;
  */
 public class CloseStatus {
 
+    public static final CloseStatus NORMAL_CLOSE = new CloseStatus(1000, "Logging off");
+
     private final int code;
     @Nullable
     private final String reason;

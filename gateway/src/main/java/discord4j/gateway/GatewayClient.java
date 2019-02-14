@@ -19,6 +19,7 @@ package discord4j.gateway;
 import discord4j.common.RateLimiter;
 import discord4j.common.ResettableInterval;
 import discord4j.common.close.CloseException;
+import discord4j.common.close.CloseStatus;
 import discord4j.gateway.json.GatewayPayload;
 import discord4j.gateway.json.Heartbeat;
 import discord4j.gateway.json.Opcode;
@@ -30,10 +31,7 @@ import discord4j.gateway.payload.PayloadWriter;
 import discord4j.gateway.retry.GatewayStateChange;
 import discord4j.gateway.retry.RetryContext;
 import discord4j.gateway.retry.RetryOptions;
-import reactor.core.publisher.EmitterProcessor;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.FluxSink;
-import reactor.core.publisher.Mono;
+import reactor.core.publisher.*;
 import reactor.netty.ConnectionObserver;
 import reactor.netty.http.client.HttpClient;
 import reactor.retry.Retry;
@@ -54,9 +52,8 @@ import static io.netty.handler.codec.http.HttpHeaderNames.USER_AGENT;
 /**
  * Represents a Discord WebSocket client, called Gateway, implementing its lifecycle.
  * <p>
- * Keeps track of a single websocket session by wrapping an instance of
- * {@link discord4j.gateway.DiscordWebSocketHandler}
- * each time a new WebSocket connection to Discord is made, therefore only one instance of this class is enough to
+ * Keeps track of a single websocket session by wrapping an instance of {@link DiscordWebSocketHandler} each time a
+ * new WebSocket connection to Discord is made, therefore only one instance of this class is enough to
  * handle the lifecycle of the Gateway operations, that could span multiple WebSocket sessions over time.
  * <p>
  * Provides automatic reconnecting through a configurable retry policy, allows downstream consumers to receive
@@ -72,8 +69,12 @@ public class GatewayClient {
     private final RetryOptions retryOptions;
     private final IdentifyOptions identifyOptions;
     private final String token;
-    private final GatewayObserver observer;
+    private final GatewayObserver initialObserver;
     private final RateLimiter limiter;
+
+    private volatile GatewayObserver observer;
+    private volatile MonoProcessor<Void> disconnectNotifier;
+    private volatile MonoProcessor<CloseStatus> closeTrigger;
 
     private final EmitterProcessor<Dispatch> dispatch = EmitterProcessor.create(false);
     private final EmitterProcessor<GatewayPayload<?>> receiver = EmitterProcessor.create(false);
@@ -109,21 +110,21 @@ public class GatewayClient {
      * @param limiter rate-limiting policy used for IDENTIFY requests, allowing shard coordination
      */
     public GatewayClient(HttpClient httpClient, PayloadReader payloadReader, PayloadWriter payloadWriter,
-            RetryOptions retryOptions, String token, IdentifyOptions identifyOptions,
-            GatewayObserver observer, RateLimiter limiter) {
+                         RetryOptions retryOptions, String token, IdentifyOptions identifyOptions,
+                         GatewayObserver observer, RateLimiter limiter) {
         this.httpClient = httpClient;
         this.payloadReader = Objects.requireNonNull(payloadReader);
         this.payloadWriter = Objects.requireNonNull(payloadWriter);
         this.retryOptions = Objects.requireNonNull(retryOptions);
         this.token = Objects.requireNonNull(token);
         this.identifyOptions = Objects.requireNonNull(identifyOptions);
-        this.observer = observer;
+        this.initialObserver = observer;
         this.limiter = limiter;
         this.dispatchSink = dispatch.sink(FluxSink.OverflowStrategy.LATEST);
         this.receiverSink = receiver.sink(FluxSink.OverflowStrategy.LATEST);
         this.senderSink = sender.sink(FluxSink.OverflowStrategy.LATEST);
         this.heartbeatSink = heartbeats.sink(FluxSink.OverflowStrategy.LATEST);
-        this.log = shardLogger("discord4j.gateway.client");
+        this.log = shardLogger(".client");
     }
 
     /**
@@ -133,10 +134,25 @@ public class GatewayClient {
      * @return a Mono signaling completion
      */
     public Mono<Void> execute(String gatewayUrl) {
+        return execute(gatewayUrl, GatewayObserver.NOOP_LISTENER);
+    }
+
+    /**
+     * Establish a reconnecting gateway connection to the given URL, allowing an ad-hoc observer to be notified.
+     *
+     * @param gatewayUrl the URL used to establish a websocket connection
+     * @param additionalObserver an additional observer to be notified of events
+     * @return a Mono signaling completion
+     */
+    public Mono<Void> execute(String gatewayUrl, GatewayObserver additionalObserver) {
         return Mono.defer(() -> {
+            disconnectNotifier = MonoProcessor.create();
+            closeTrigger = MonoProcessor.create();
+            observer = this.initialObserver.then(additionalObserver);
+
             final int shard = identifyOptions.getShardIndex();
             final DiscordWebSocketHandler handler = new DiscordWebSocketHandler(payloadReader, payloadWriter,
-                    receiverSink, sender, heartbeats, shard, limiter);
+                    receiverSink, sender, closeTrigger, heartbeats, shard, limiter);
 
             if (identifyOptions.getResumeSequence() != null) {
                 this.sequence.set(identifyOptions.getResumeSequence());
@@ -167,19 +183,21 @@ public class GatewayClient {
                         notifyObserver(state, identifyOptions);
                         return Mono.just(event);
                     })
-                    .then();
+                    .then()
+                    .log(shardLogger(".zip.ready"), Level.FINEST, false);
 
             // Subscribe the receiver to process and transform the inbound payloads into Dispatch events
             Mono<Void> receiverFuture = receiver.map(this::updateSequence)
                     .map(payload -> payloadContext(payload, handler, this))
                     .doOnNext(PayloadHandlers::handle)
-                    .then();
+                    .then()
+                    .log(shardLogger(".zip.receiver"), Level.FINEST, false);
 
             // Subscribe the handler's outbound exchange with our outgoing signals
-            // routing error and completion signals to close the gateway
-            Mono<Void> senderFuture = sender.doOnError(t -> handler.close())
-                    .doOnComplete(handler::close)
-                    .then();
+            // routing completion signals to close the gateway
+            Mono<Void> senderFuture = sender.doOnComplete(handler::close)
+                    .then()
+                    .log(shardLogger(".zip.sender"), Level.FINEST, false);
 
             // Create the heartbeat loop, and subscribe it using the sender sink
             Mono<Void> heartbeatHandler = heartbeat.ticks()
@@ -196,36 +214,30 @@ public class GatewayClient {
                         }
                     })
                     .doOnNext(heartbeatSink::next)
-                    .then();
+                    .then()
+                    .log(shardLogger(".zip.heartbeat"), Level.FINEST, false);
 
             Mono<Void> httpFuture = httpClient
                     .headers(headers -> headers.add(USER_AGENT, "DiscordBot(https://discord4j.com, 3)"))
-                    .observe(observer())
+                    .observe(getObserver())
                     .websocket(Integer.MAX_VALUE)
                     .uri(gatewayUrl)
                     .handle(handler::handle)
                     .doOnTerminate(heartbeat::stop)
-                    .then();
+                    .then()
+                    .log(shardLogger(".zip.http"), Level.FINEST, false);
 
-            return Mono
-                    .zip(
-                            httpFuture.log(shardLogger("discord4j.gateway.zip.http"), Level.FINE, false),
-                            readyHandler.log(shardLogger("discord4j.gateway.zip.ready"), Level.FINE, false),
-                            receiverFuture.log(shardLogger("discord4j.gateway.zip.receiver"), Level.FINE, false),
-                            senderFuture.log(shardLogger("discord4j.gateway.zip.sender"), Level.FINE, false),
-                            heartbeatHandler.log(shardLogger("discord4j.gateway.zip.heartbeat"), Level.FINE, false)
-                    )
+            return Mono.zip(httpFuture, readyHandler, receiverFuture, senderFuture, heartbeatHandler)
                     .doOnError(logReconnectReason())
-                    .doOnCancel(() -> close(false))
                     .then();
         })
                 .retryWhen(retryFactory())
-                .doOnCancel(logDisconnected())
-                .doOnTerminate(logDisconnected());
+                .doOnCancel(() -> closeTrigger.onNext(CloseStatus.NORMAL_CLOSE))
+                .then(Mono.defer(() -> disconnectNotifier));
     }
 
-    private Logger shardLogger(String name) {
-        return Loggers.getLogger(name + "." + identifyOptions.getShardIndex());
+    private Logger shardLogger(String gateway) {
+        return Loggers.getLogger("discord4j.gateway" + gateway + "." + identifyOptions.getShardIndex());
     }
 
     private static boolean isReadyOrResume(Dispatch d) {
@@ -242,7 +254,7 @@ public class GatewayClient {
     }
 
     private PayloadContext<?> payloadContext(GatewayPayload<?> payload, DiscordWebSocketHandler handler,
-            GatewayClient client) {
+                                             GatewayClient client) {
         return new PayloadContext<>(payload, handler, client);
     }
 
@@ -285,15 +297,6 @@ public class GatewayClient {
         return true;
     }
 
-    private Runnable logDisconnected() {
-        return () -> {
-            log.info("Disconnected from Gateway");
-            connected.compareAndSet(true, false);
-            dispatchSink.next(GatewayStateChange.disconnected());
-            notifyObserver(GatewayObserver.DISCONNECTED, identifyOptions);
-        };
-    }
-
     private Consumer<Throwable> logReconnectReason() {
         return t -> {
             if (t instanceof CloseException && isResumableError(t)) {
@@ -304,10 +307,24 @@ public class GatewayClient {
         };
     }
 
-    private ConnectionObserver observer() {
+    private ConnectionObserver getObserver() {
         return (connection, newState) -> {
             log.debug("{} {}", newState, connection);
-            observer.onStateChange(newState, identifyOptions);
+            if (closeTrigger.isTerminated() && newState == ConnectionObserver.State.DISCONNECTING) {
+                log.info("Disconnected from Gateway");
+                retryOptions.getRetryContext().clear();
+                connected.compareAndSet(true, false);
+                resumable.set(false);
+                sequence.set(0);
+                lastSent.set(0);
+                lastAck.set(0);
+                responseTime.set(0);
+                sessionId.set("");
+                dispatchSink.next(GatewayStateChange.disconnected());
+                notifyObserver(GatewayObserver.DISCONNECTED, identifyOptions);
+                disconnectNotifier.onComplete();
+            }
+            notifyObserver(newState, identifyOptions);
         };
     }
 
@@ -319,14 +336,21 @@ public class GatewayClient {
      * Terminates this client's current gateway connection, and optionally, reconnect to it.
      *
      * @param reconnect if this client should attempt to reconnect after closing
+     * @return a {@link Mono} deferring completion until the disconnection is completed, or if reconnecting, an empty
+     * one.
      */
-    public void close(boolean reconnect) {
+    public Mono<Void> close(boolean reconnect) {
         if (reconnect) {
+            // TODO: deprecate this branch
             resumable.set(false);
             senderSink.next(new GatewayPayload<>(Opcode.RECONNECT, null, null, null));
+            return Mono.empty();
         } else {
-            senderSink.next(new GatewayPayload<>());
-            senderSink.complete();
+            closeTrigger.onNext(CloseStatus.NORMAL_CLOSE);
+            if (disconnectNotifier == null) {
+                return Mono.error(new IllegalStateException("Gateway client is not active!"));
+            }
+            return disconnectNotifier.log("discord4j.gateway.disconnect");
         }
     }
 
@@ -419,7 +443,7 @@ public class GatewayClient {
     /**
      * Obtains the FluxSink to send Dispatch events towards GatewayClient's users.
      *
-     * @return a {@link reactor.core.publisher.FluxSink} for {@link discord4j.gateway.json.dispatch.Dispatch}
+     * @return a {@link FluxSink} for {@link Dispatch}
      * objects
      */
     FluxSink<Dispatch> dispatchSink() {
@@ -447,7 +471,7 @@ public class GatewayClient {
     /**
      * Gets the heartbeat manager bound to this GatewayClient.
      *
-     * @return a {@link discord4j.common.ResettableInterval} to manipulate heartbeat operations
+     * @return a {@link ResettableInterval} to manipulate heartbeat operations
      */
     ResettableInterval heartbeat() {
         return heartbeat;

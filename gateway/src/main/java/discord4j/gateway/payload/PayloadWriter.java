@@ -18,10 +18,10 @@ package discord4j.gateway.payload;
 
 import discord4j.gateway.json.GatewayPayload;
 import io.netty.buffer.ByteBuf;
+import org.reactivestreams.Publisher;
 
 /**
- * Strategy for encoding a {@link discord4j.gateway.json.GatewayPayload} and writing its contents to a {@link
- * io.netty.buffer.ByteBuf}.
+ * Strategy for encoding a {@link GatewayPayload} and writing its contents to a {@link Publisher} of {@link ByteBuf}.
  */
 public interface PayloadWriter {
 
@@ -29,7 +29,7 @@ public interface PayloadWriter {
      * Write a given payload to the output buffer.
      *
      * @param payload the output payload
-     * @return the outbound {@code ByteBuf}
+     * @return the publisher of outbound {@code ByteBuf}
      */
-    ByteBuf write(GatewayPayload<?> payload);
+    Publisher<ByteBuf> write(GatewayPayload<?> payload);
 }

@@ -79,8 +79,6 @@ public class GatewayClientTest {
                         gatewayClient.close(false);
                     } else if ("!retry".equals(content)) {
                         gatewayClient.close(true);
-                    } else if ("!fail".equals(content)) {
-                        outboundSink.next(new GatewayPayload<>());
                     }
                 });
 

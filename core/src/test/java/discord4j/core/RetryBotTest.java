@@ -173,9 +173,9 @@ public class RetryBotTest {
                     .flatMap(ignored -> message.getContent())
                     .ifPresent(content -> {
                         if ("!close".equals(content)) {
-                            client.logout();
+                            client.logout().subscribe();
                         } else if ("!retry".equals(content)) {
-                            client.reconnect();
+                            client.reconnect().subscribe();
                         } else if ("!online".equals(content)) {
                             client.updatePresence(Presence.online()).subscribe();
                         } else if ("!dnd".equals(content)) {
