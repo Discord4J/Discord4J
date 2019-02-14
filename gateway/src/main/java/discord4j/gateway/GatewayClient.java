@@ -18,6 +18,7 @@ package discord4j.gateway;
 
 import discord4j.common.RateLimiter;
 import discord4j.common.ResettableInterval;
+import discord4j.common.SimpleBucket;
 import discord4j.common.close.CloseException;
 import discord4j.common.close.CloseStatus;
 import discord4j.gateway.json.GatewayPayload;
@@ -31,7 +32,10 @@ import discord4j.gateway.payload.PayloadWriter;
 import discord4j.gateway.retry.GatewayStateChange;
 import discord4j.gateway.retry.RetryContext;
 import discord4j.gateway.retry.RetryOptions;
+import io.netty.buffer.ByteBuf;
+import org.reactivestreams.Publisher;
 import reactor.core.publisher.*;
+import reactor.core.scheduler.Schedulers;
 import reactor.netty.ConnectionObserver;
 import reactor.netty.http.client.HttpClient;
 import reactor.retry.Retry;
@@ -56,12 +60,13 @@ import static io.netty.handler.codec.http.HttpHeaderNames.USER_AGENT;
  * new WebSocket connection to Discord is made, therefore only one instance of this class is enough to
  * handle the lifecycle of the Gateway operations, that could span multiple WebSocket sessions over time.
  * <p>
- * Provides automatic reconnecting through a configurable retry policy, allows downstream consumers to receive
- * inbound events through {@link #dispatch()} and direct raw payloads through {@link #receiver()} and allows a user to
+ * Provides automatic reconnecting through a configurable retry policy, allows consumers to receive inbound events
+ * through {@link #dispatch()} and direct raw payloads through {@link #receiver()} and allows a producer to
  * submit events through {@link #sender()}.
  */
 public class GatewayClient {
 
+    // basic properties
     private final Logger log;
     private final HttpClient httpClient;
     private final PayloadReader payloadReader;
@@ -70,17 +75,21 @@ public class GatewayClient {
     private final IdentifyOptions identifyOptions;
     private final String token;
     private final GatewayObserver initialObserver;
-    private final RateLimiter limiter;
+    private final RateLimiter identifyLimiter;
+    private final long outboundDelayMillis;
 
-    private volatile GatewayObserver observer;
-    private volatile MonoProcessor<Void> disconnectNotifier;
-    private volatile MonoProcessor<CloseStatus> closeTrigger;
-
+    // reactive pipelines
     private final EmitterProcessor<Dispatch> dispatch = EmitterProcessor.create(false);
-    private final EmitterProcessor<GatewayPayload<?>> receiver = EmitterProcessor.create(false);
+    private final EmitterProcessor<ByteBuf> receiver = EmitterProcessor.create(false);
     private final EmitterProcessor<GatewayPayload<?>> sender = EmitterProcessor.create(false);
     private final EmitterProcessor<GatewayPayload<Heartbeat>> heartbeats = EmitterProcessor.create(false);
+    private final FluxSink<Dispatch> dispatchSink;
+    private final FluxSink<ByteBuf> receiverSink;
+    private final FluxSink<GatewayPayload<?>> senderSink;
+    private final FluxSink<GatewayPayload<Heartbeat>> heartbeatSink;
 
+    // mutable state
+    private final AtomicBoolean connected = new AtomicBoolean(false);
     private final AtomicBoolean resumable = new AtomicBoolean(true);
     private final AtomicInteger sequence = new AtomicInteger(0);
     private final AtomicLong lastSent = new AtomicLong(0);
@@ -88,13 +97,9 @@ public class GatewayClient {
     private final AtomicLong responseTime = new AtomicLong(0);
     private final ResettableInterval heartbeat = new ResettableInterval();
     private final AtomicReference<String> sessionId = new AtomicReference<>("");
-
-    private final AtomicBoolean connected = new AtomicBoolean(false);
-
-    private final FluxSink<Dispatch> dispatchSink;
-    private final FluxSink<GatewayPayload<?>> receiverSink;
-    private final FluxSink<GatewayPayload<?>> senderSink;
-    private final FluxSink<GatewayPayload<Heartbeat>> heartbeatSink;
+    private volatile GatewayObserver observer;
+    private volatile MonoProcessor<Void> disconnectNotifier;
+    private volatile MonoProcessor<CloseStatus> closeTrigger;
 
     /**
      * Initializes a new GatewayClient.
@@ -107,19 +112,20 @@ public class GatewayClient {
      * @param identifyOptions used to IDENTIFY or RESUME a gateway connection, specifying the sharding options
      * and to set an initial presence
      * @param observer consumer observing gateway and underlying websocket lifecycle changes
-     * @param limiter rate-limiting policy used for IDENTIFY requests, allowing shard coordination
+     * @param identifyLimiter rate-limiting policy used for IDENTIFY requests, allowing shard coordination
      */
     public GatewayClient(HttpClient httpClient, PayloadReader payloadReader, PayloadWriter payloadWriter,
                          RetryOptions retryOptions, String token, IdentifyOptions identifyOptions,
-                         GatewayObserver observer, RateLimiter limiter) {
-        this.httpClient = httpClient;
+                         GatewayObserver observer, RateLimiter identifyLimiter) {
+        this.httpClient = Objects.requireNonNull(httpClient);
         this.payloadReader = Objects.requireNonNull(payloadReader);
         this.payloadWriter = Objects.requireNonNull(payloadWriter);
         this.retryOptions = Objects.requireNonNull(retryOptions);
         this.token = Objects.requireNonNull(token);
         this.identifyOptions = Objects.requireNonNull(identifyOptions);
-        this.initialObserver = observer;
-        this.limiter = limiter;
+        this.initialObserver = Objects.requireNonNull(observer);
+        this.identifyLimiter = Objects.requireNonNull(identifyLimiter);
+        this.outboundDelayMillis = outboundDelayMillis();
         this.dispatchSink = dispatch.sink(FluxSink.OverflowStrategy.LATEST);
         this.receiverSink = receiver.sink(FluxSink.OverflowStrategy.LATEST);
         this.senderSink = sender.sink(FluxSink.OverflowStrategy.LATEST);
@@ -150,9 +156,13 @@ public class GatewayClient {
             closeTrigger = MonoProcessor.create();
             observer = this.initialObserver.then(additionalObserver);
 
-            final int shard = identifyOptions.getShardIndex();
-            final DiscordWebSocketHandler handler = new DiscordWebSocketHandler(payloadReader, payloadWriter,
-                    receiverSink, sender, closeTrigger, heartbeats, shard, limiter);
+            RateLimiter limiter = new SimpleBucket(outboundLimiterCapacity(), Duration.ofSeconds(60));
+            Flux<ByteBuf> outbound = Flux.merge(heartbeats, sender.concatMap(payload -> throttle(payload, limiter), 1))
+                    .log(shardLogger(".outbound"), Level.FINE, false)
+                    .flatMap(payload -> Flux.from(payloadWriter.write(payload)));
+
+            int shard = identifyOptions.getShardIndex();
+            DiscordWebSocketHandler handler = new DiscordWebSocketHandler(receiverSink, outbound, closeTrigger, shard);
 
             if (identifyOptions.getResumeSequence() != null) {
                 this.sequence.set(identifyOptions.getResumeSequence());
@@ -187,7 +197,9 @@ public class GatewayClient {
                     .log(shardLogger(".zip.ready"), Level.FINEST, false);
 
             // Subscribe the receiver to process and transform the inbound payloads into Dispatch events
-            Mono<Void> receiverFuture = receiver.map(this::updateSequence)
+            Mono<Void> receiverFuture = receiver.flatMap(payloadReader::read)
+                    .log(shardLogger(".inbound"), Level.FINE, false)
+                    .map(this::updateSequence)
                     .map(payload -> payloadContext(payload, handler, this))
                     .doOnNext(PayloadHandlers::handle)
                     .then()
@@ -196,6 +208,11 @@ public class GatewayClient {
             // Subscribe the handler's outbound exchange with our outgoing signals
             // routing completion signals to close the gateway
             Mono<Void> senderFuture = sender.doOnComplete(handler::close)
+                    .doOnNext(payload -> {
+                        if (Opcode.RECONNECT.equals(payload.getOp())) {
+                            handler.error(new RuntimeException("Reconnecting due to user action"));
+                        }
+                    })
                     .then()
                     .log(shardLogger(".zip.sender"), Level.FINEST, false);
 
@@ -234,6 +251,24 @@ public class GatewayClient {
                 .retryWhen(retryFactory())
                 .doOnCancel(() -> closeTrigger.onNext(CloseStatus.NORMAL_CLOSE))
                 .then(Mono.defer(() -> disconnectNotifier));
+    }
+
+    private Publisher<? extends GatewayPayload<?>> throttle(GatewayPayload<?> payload, RateLimiter outboundLimiter) {
+        RateLimiter limiter = Opcode.IDENTIFY.equals(payload.getOp()) ? identifyLimiter : outboundLimiter;
+        return Mono.defer(() -> Mono.delay(Duration.ofMillis(calculateDelayMillis(limiter)), Schedulers.single()))
+                .map(tick -> limiter.tryConsume(1))
+                .flatMap(consumed -> {
+                    if (!consumed) {
+                        return Mono.error(new RuntimeException());
+                    }
+                    return Mono.just(payload);
+                })
+                .doOnError(t -> shardLogger("").warn("Could not send OP {} payload, retrying", payload.getOp()))
+                .retry();
+    }
+
+    private long calculateDelayMillis(RateLimiter limiter) {
+        return limiter.delayMillisToConsume(1) + outboundDelayMillis;
     }
 
     private Logger shardLogger(String gateway) {
@@ -378,7 +413,7 @@ public class GatewayClient {
      * @return a Flux of GatewayPayload values
      */
     public Flux<GatewayPayload<?>> receiver() {
-        return receiver;
+        return receiver.flatMap(payloadReader::read);
     }
 
     /**
@@ -512,5 +547,44 @@ public class GatewayClient {
      */
     RetryOptions retryOptions() {
         return retryOptions;
+    }
+
+    // Initializers to customize internal outbound rate-limiter
+
+    /**
+     * JVM property that allows modifying the number of outbound payloads permitted before activating the
+     * rate-limiter and delaying every following payload for 60 seconds. Default value: 115 permits
+     */
+    private static final String OUTBOUND_CAPACITY_PROPERTY = "discord4j.gateway.outbound.capacity";
+    /**
+     * JVM property representing the delay between each sent payload, in milliseconds. Can be used to introduce
+     * artificial throttling for debugging purposes or dealing with rate-limiter issues. Default value: 10 ms
+     */
+    private static final String OUTBOUND_DELAY_PROPERTY = "discord4j.gateway.outbound.delay.ms";
+
+    private long outboundLimiterCapacity() {
+        String capacityValue = System.getProperty(OUTBOUND_CAPACITY_PROPERTY);
+        if (capacityValue != null) {
+            try {
+                long capacity = Long.valueOf(capacityValue);
+                shardLogger("").info("Overriding default outbound limiter capacity: {}", capacity);
+            } catch (NumberFormatException e) {
+                shardLogger("").warn("Invalid custom outbound limiter capacity: {}", capacityValue);
+            }
+        }
+        return 115;
+    }
+
+    private long outboundDelayMillis() {
+        String delayValue = System.getProperty(OUTBOUND_DELAY_PROPERTY);
+        if (delayValue != null) {
+            try {
+                long value = Long.valueOf(delayValue);
+                shardLogger("").info("Overriding default outbound delay: {}", value);
+            } catch (NumberFormatException e) {
+                shardLogger("").warn("Invalid custom outbound delay: {}", delayValue);
+            }
+        }
+        return 10;
     }
 }
