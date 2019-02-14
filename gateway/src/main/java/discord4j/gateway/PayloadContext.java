@@ -30,9 +30,9 @@ public class PayloadContext<T extends PayloadData> {
 
     private final GatewayPayload<T> payload;
     private final DiscordWebSocketHandler handler;
-    private final GatewayClient client;
+    private final DefaultGatewayClient client;
 
-    public PayloadContext(GatewayPayload<T> payload, DiscordWebSocketHandler handler, GatewayClient client) {
+    public PayloadContext(GatewayPayload<T> payload, DiscordWebSocketHandler handler, DefaultGatewayClient client) {
         this.payload = payload;
         this.handler = handler;
         this.client = client;
@@ -51,7 +51,7 @@ public class PayloadContext<T extends PayloadData> {
         return handler;
     }
 
-    public GatewayClient getClient() {
+    public DefaultGatewayClient getClient() {
         return client;
     }
 }

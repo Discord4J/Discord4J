@@ -29,6 +29,7 @@ import discord4j.core.event.dispatch.StoreInvalidator;
 import discord4j.core.event.domain.Event;
 import discord4j.core.object.data.stored.MessageBean;
 import discord4j.core.object.presence.Presence;
+import discord4j.gateway.DefaultGatewayClient;
 import discord4j.gateway.GatewayClient;
 import discord4j.gateway.GatewayObserver;
 import discord4j.gateway.IdentifyOptions;
@@ -581,7 +582,7 @@ public final class DiscordClientBuilder {
         // Prepare gateway client
         final RetryOptions retryOptions = initRetryOptions();
         final StoreInvalidator storeInvalidator = new StoreInvalidator(stateHolder);
-        final GatewayClient gatewayClient = new GatewayClient(httpClient,
+        final GatewayClient gatewayClient = new DefaultGatewayClient(httpClient,
                 new JacksonPayloadReader(jackson.getObjectMapper()),
                 new JacksonPayloadWriter(jackson.getObjectMapper()),
                 retryOptions, token, identifyOptions, storeInvalidator.then(initGatewayObserver()),
