@@ -50,11 +50,11 @@ public class DiscordRequest<T> {
         this.completeUri = completeUri;
     }
 
-    Route<T> getRoute() {
+    public Route<T> getRoute() {
         return route;
     }
 
-    String getCompleteUri() {
+    public String getCompleteUri() {
         return completeUri;
     }
 

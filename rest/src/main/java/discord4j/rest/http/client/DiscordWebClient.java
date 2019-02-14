@@ -91,7 +91,7 @@ public class DiscordWebClient {
      * @return a {@link reactor.core.publisher.Mono} of {@link T} with the response
      */
     public <R, T> Mono<T> exchange(ClientRequest request, @Nullable R body, Class<T> responseType,
-            Consumer<HttpClientResponse> responseConsumer) {
+                                   Consumer<HttpClientResponse> responseConsumer) {
         Objects.requireNonNull(responseType);
 
         HttpHeaders requestHeaders = new DefaultHttpHeaders().add(defaultHeaders).setAll(request.headers());
@@ -110,6 +110,7 @@ public class DiscordWebClient {
                 .orElseGet(() -> Mono.error(noWriterException(body, contentType)))
                 .flatMap(receiver -> receiver.responseSingle((response, content) -> {
                     responseConsumer.accept(response);
+
                     String responseContentType = response.responseHeaders().get(HttpHeaderNames.CONTENT_TYPE);
                     Optional<ReaderStrategy<?>> readerStrategy = exchangeStrategies.readers().stream()
                             .filter(s -> s.canRead(responseType, responseContentType))
@@ -140,7 +141,7 @@ public class DiscordWebClient {
     }
 
     private static ClientException clientException(ClientRequest request, HttpClientResponse response,
-            @Nullable ErrorResponse errorResponse) {
+                                                   @Nullable ErrorResponse errorResponse) {
         return new ClientException(request, response, errorResponse);
     }
 

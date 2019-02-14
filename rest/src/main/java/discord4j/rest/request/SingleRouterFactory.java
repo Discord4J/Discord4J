@@ -38,4 +38,9 @@ public class SingleRouterFactory implements RouterFactory {
     public Router getRouter(DiscordWebClient httpClient) {
         return router;
     }
+
+    @Override
+    public Router getRouter(DiscordWebClient httpClient, RouterOptions routerOptions) {
+        return router;
+    }
 }

@@ -34,7 +34,9 @@ import reactor.util.Loggers;
 import reactor.util.annotation.Nullable;
 
 import java.time.Duration;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.logging.Level;
@@ -59,15 +61,17 @@ class RequestStream<T> {
     private final GlobalRateLimiter globalRateLimiter;
     private final RateLimitStrategy rateLimitStrategy;
     private final Scheduler rateLimitScheduler;
+    private final RouterOptions routerOptions;
 
     RequestStream(BucketKey id, DiscordWebClient httpClient, GlobalRateLimiter globalRateLimiter,
-                  RateLimitStrategy rateLimitStrategy, Scheduler rateLimitScheduler) {
+                  RateLimitStrategy rateLimitStrategy, Scheduler rateLimitScheduler, RouterOptions routerOptions) {
         this.id = id;
         this.log = Loggers.getLogger("discord4j.rest.traces." + id);
         this.httpClient = httpClient;
         this.globalRateLimiter = globalRateLimiter;
         this.rateLimitStrategy = rateLimitStrategy;
         this.rateLimitScheduler = rateLimitScheduler;
+        this.routerOptions = routerOptions;
     }
 
     /**
@@ -112,7 +116,7 @@ class RequestStream<T> {
      * 502, 503 and 504). The delay is calculated using exponential backoff with jitter.
      */
     private Retry<?> serverErrorRetryFactory() {
-        return Retry.onlyIf(this::isServerError)
+        return Retry.onlyIf(ClientException.isRetryContextStatusCode(502, 503, 504))
                 .exponentialBackoffWithJitter(Duration.ofSeconds(2), Duration.ofSeconds(30))
                 .doOnRetry(ctx -> {
                     if (log.isTraceEnabled()) {
@@ -120,17 +124,6 @@ class RequestStream<T> {
                                 ctx.backoff());
                     }
                 });
-    }
-
-    private boolean isServerError(IterationContext<?> context) {
-        RetryContext<?> ctx = (RetryContext) context;
-        Throwable exception = ctx.exception();
-        if (exception instanceof ClientException) {
-            ClientException clientException = (ClientException) exception;
-            int code = clientException.getStatus().code();
-            return code == 502 || code == 503 || code == 504;
-        }
-        return false;
     }
 
     void push(RequestCorrelation<T> request) {
@@ -169,6 +162,23 @@ class RequestStream<T> {
             };
         }
 
+        private Mono<ClientRequest> adaptRequest(DiscordRequest<?> req) {
+            return Mono.fromCallable(() -> new ClientRequest(req,
+                    RouteUtils.expandQuery(req.getCompleteUri(), req.getQueryParams()),
+                    adaptHeaders(req.getHeaders())));
+        }
+
+        private HttpHeaders adaptHeaders(@Nullable Map<String, Set<String>> requestHeaders) {
+            return Optional.ofNullable(requestHeaders)
+                    .map(map -> map.entrySet().stream()
+                            .reduce((HttpHeaders) new DefaultHttpHeaders(), (headers, entry) -> {
+                                String key = entry.getKey();
+                                entry.getValue().forEach(value -> headers.add(key, value));
+                                return headers;
+                            }, HttpHeaders::add))
+                    .orElse(new DefaultHttpHeaders());
+        }
+
         @Override
         protected void hookOnNext(RequestCorrelation<T> correlation) {
             DiscordRequest<T> request = correlation.getRequest();
@@ -186,6 +196,7 @@ class RequestStream<T> {
                     .log(requestLog, Level.FINEST, false)
                     .flatMap(r -> httpClient.exchange(r, request.getBody(), responseType, rateLimitHandler))
                     .retryWhen(rateLimitRetryFactory())
+                    .transform(getResponseTransformers(request))
                     .retryWhen(serverErrorRetryFactory())
                     .log(responseLog, Level.FINEST, false)
                     .doFinally(signal -> next(signal, traceLog)))
@@ -203,17 +214,12 @@ class RequestStream<T> {
                     });
         }
 
-        private Mono<ClientRequest> adaptRequest(DiscordRequest<?> req) {
-            return Mono.fromCallable(() -> new ClientRequest(req.getRoute().getMethod(),
-                    RouteUtils.expandQuery(req.getCompleteUri(), req.getQueryParams()),
-                    Optional.ofNullable(req.getHeaders())
-                            .map(map -> map.entrySet().stream()
-                                    .reduce((HttpHeaders) new DefaultHttpHeaders(), (headers, entry) -> {
-                                        String key = entry.getKey();
-                                        entry.getValue().forEach(value -> headers.add(key, value));
-                                        return headers;
-                                    }, HttpHeaders::add))
-                            .orElse(new DefaultHttpHeaders())));
+        private Function<Mono<T>, Mono<T>> getResponseTransformers(DiscordRequest<T> discordRequest) {
+            return routerOptions.getResponseTransformers()
+                    .stream()
+                    .map(rt -> rt.transform(discordRequest))
+                    .reduce(Function::andThen)
+                    .orElse(mono -> mono);
         }
 
         private void next(SignalType signal, Logger logger) {

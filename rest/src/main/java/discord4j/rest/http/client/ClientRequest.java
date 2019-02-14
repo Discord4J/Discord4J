@@ -17,27 +17,29 @@
 
 package discord4j.rest.http.client;
 
+import discord4j.rest.request.DiscordRequest;
+import discord4j.rest.route.Route;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpMethod;
 
 /**
- * A wrapper over a partial HTTP client request definition.
+ * An adapted request definition from an original {@link DiscordRequest}.
  */
 public class ClientRequest {
 
-    private final HttpMethod method;
+    private final DiscordRequest<?> request;
     private final String url;
     private final HttpHeaders headers;
 
-    public ClientRequest(HttpMethod method, String url, HttpHeaders headers) {
-        this.method = method;
+    public ClientRequest(DiscordRequest<?> request, String url, HttpHeaders headers) {
+        this.request = request;
         this.url = url;
         this.headers = headers;
     }
 
     public HttpMethod method() {
-        return method;
+        return request.getRoute().getMethod();
     }
 
     public String url() {
@@ -48,10 +50,18 @@ public class ClientRequest {
         return headers;
     }
 
+    public DiscordRequest<?> getDiscordRequest() {
+        return request;
+    }
+
+    public Route<?> getRoute() {
+        return request.getRoute();
+    }
+
     @Override
     public String toString() {
         return "ClientRequest{" +
-                "method=" + method +
+                "method=" + method() +
                 ", url='" + url + '\'' +
                 ", headers=" + headers.copy().remove(HttpHeaderNames.AUTHORIZATION).toString() +
                 '}';

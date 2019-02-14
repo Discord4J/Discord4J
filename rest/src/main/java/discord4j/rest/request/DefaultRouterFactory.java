@@ -19,24 +19,34 @@ package discord4j.rest.request;
 
 import discord4j.rest.http.client.DiscordWebClient;
 import reactor.core.scheduler.Scheduler;
-import reactor.core.scheduler.Schedulers;
 
 public class DefaultRouterFactory implements RouterFactory {
 
-    private final Scheduler responseScheduler;
-    private final Scheduler rateLimitScheduler;
+    private final RouterOptions routerOptions;
 
     public DefaultRouterFactory() {
-        this(Schedulers.elastic(), Schedulers.elastic());
+        this.routerOptions = RouterOptions.builder().build();
     }
 
+    @Deprecated
     public DefaultRouterFactory(Scheduler responseScheduler, Scheduler rateLimitScheduler) {
-        this.responseScheduler = responseScheduler;
-        this.rateLimitScheduler = rateLimitScheduler;
+        this.routerOptions = RouterOptions.builder()
+                .responseScheduler(responseScheduler)
+                .rateLimitScheduler(rateLimitScheduler)
+                .build();
+    }
+
+    public DefaultRouterFactory(RouterOptions routerOptions) {
+        this.routerOptions = routerOptions;
     }
 
     @Override
-    public Router getRouter(DiscordWebClient httpClient) {
-        return new DefaultRouter(httpClient, responseScheduler, rateLimitScheduler);
+    public Router getRouter(DiscordWebClient webClient) {
+        return new DefaultRouter(webClient, routerOptions);
+    }
+
+    @Override
+    public Router getRouter(DiscordWebClient webClient, RouterOptions routerOptions) {
+        return new DefaultRouter(webClient, routerOptions);
     }
 }

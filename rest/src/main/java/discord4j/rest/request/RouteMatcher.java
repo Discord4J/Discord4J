@@ -17,20 +17,27 @@
 
 package discord4j.rest.request;
 
-import discord4j.rest.http.client.DiscordWebClient;
+import discord4j.rest.route.Route;
+import reactor.util.annotation.Nullable;
 
-/**
- * Factory used to produce {@link discord4j.rest.request.Router} instances dedicated to execute API requests.
- */
-public interface RouterFactory {
+public class RouteMatcher {
 
-    /**
-     * Retrieve a {@link discord4j.rest.request.Router} configured to process API requests.
-     *
-     * @param webClient a web client to parameterize the Router creation
-     * @return a Router prepared to process API requests
-     */
-    Router getRouter(DiscordWebClient webClient);
+    @Nullable
+    private final DiscordRequest<?> request;
 
-    Router getRouter(DiscordWebClient webClient, RouterOptions routerOptions);
+    public RouteMatcher(DiscordRequest<?> request) {
+        this.request = request;
+    }
+
+    public static RouteMatcher any() {
+        return new RouteMatcher(null);
+    }
+
+    public static RouteMatcher route(Route<?> route) {
+        return new RouteMatcher(route.newRequest());
+    }
+
+    public boolean matches(DiscordRequest<?> otherRequest) {
+        return request == null || request.getRoute().getResponseType().isInstance(otherRequest.getRoute().getResponseType());
+    }
 }

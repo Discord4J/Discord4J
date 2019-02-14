@@ -16,6 +16,7 @@
  */
 package discord4j.rest.request;
 
+import discord4j.rest.route.Route;
 import discord4j.rest.util.RouteUtils;
 import reactor.util.annotation.Nullable;
 
@@ -28,7 +29,7 @@ import java.util.Objects;
  * Following the <a href="https://discordapp.com/developers/docs/topics/rate-limits#rate-limits">
  * Discord documentation</a>, requests belong to the same bucket if:
  * <ul>
- * <li>The {@link discord4j.rest.route.Route#uriTemplate uriTemplates} are equal.</li>
+ * <li>The {@link Route#getUriTemplate()} are equal.</li>
  * <li>The {@link #majorParam major parameters} are equal.</li>
  * </ul>
  * Note that HTTP method is <b>not</b> considered (requests fall into the same bucket even if the methods are different)

@@ -34,6 +34,9 @@ public class RouteUtils {
     }
 
     public static String expand(String template, Object... variables) {
+        if (variables.length == 0) {
+            return template;
+        }
         StringBuffer buf = new StringBuffer();
         Matcher matcher = PARAMETER_PATTERN.matcher(template);
         int index = 0;

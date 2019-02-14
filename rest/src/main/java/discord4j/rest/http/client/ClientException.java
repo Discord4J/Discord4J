@@ -21,8 +21,16 @@ import discord4j.rest.json.response.ErrorResponse;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpResponseStatus;
+import org.reactivestreams.Publisher;
+import reactor.core.publisher.Mono;
 import reactor.netty.http.client.HttpClientResponse;
+import reactor.retry.Retry;
+import reactor.retry.RetryContext;
 import reactor.util.annotation.Nullable;
+
+import java.util.Arrays;
+import java.util.function.Function;
+import java.util.function.Predicate;
 
 public class ClientException extends RuntimeException {
 
@@ -65,5 +73,53 @@ public class ClientException extends RuntimeException {
                 ", headers=" + headers.copy().remove(HttpHeaderNames.AUTHORIZATION).toString() +
                 ", errorResponse=" + errorResponse +
                 "}";
+    }
+
+    public static Predicate<Throwable> isStatusCode(int code) {
+        return t -> {
+            if (t instanceof ClientException) {
+                ClientException e = (ClientException) t;
+                return e.getStatus().code() == code;
+            }
+            return false;
+        };
+    }
+
+    public static Predicate<Throwable> isStatusCode(Integer... codes) {
+        return t -> {
+            if (t instanceof ClientException) {
+                ClientException e = (ClientException) t;
+                return Arrays.asList(codes).contains(e.getStatus().code());
+            }
+            return false;
+        };
+    }
+
+    public static Predicate<RetryContext<?>> isRetryContextStatusCode(int code) {
+        return ctx -> {
+            if (ctx.exception() instanceof ClientException) {
+                ClientException e = (ClientException) ctx.exception();
+                return e.getStatus().code() == code;
+            }
+            return false;
+        };
+    }
+
+    public static Predicate<RetryContext<?>> isRetryContextStatusCode(Integer... codes) {
+        return ctx -> {
+            if (ctx.exception() instanceof ClientException) {
+                ClientException e = (ClientException) ctx.exception();
+                return Arrays.asList(codes).contains(e.getStatus().code());
+            }
+            return false;
+        };
+    }
+
+    public static <T> Function<Mono<T>, Publisher<T>> emptyOnStatus(int code) {
+        return mono -> mono.onErrorResume(isStatusCode(code), t -> Mono.empty());
+    }
+
+    public static <T> Function<Mono<T>, Publisher<T>> retryOnceOnStatus(int code) {
+        return mono -> mono.retryWhen(Retry.onlyIf(isRetryContextStatusCode(code)).retryOnce());
     }
 }

@@ -27,6 +27,10 @@ import discord4j.core.object.reaction.ReactionEmoji;
 import discord4j.core.object.util.Image;
 import discord4j.core.object.util.Snowflake;
 import discord4j.rest.http.client.ClientException;
+import discord4j.rest.request.RouteMatcher;
+import discord4j.rest.request.RouterOptions;
+import discord4j.rest.response.ResponseFunction;
+import discord4j.rest.route.Routes;
 import org.apache.commons.io.IOUtils;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
@@ -36,16 +40,17 @@ import reactor.core.Exceptions;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.netty.http.client.HttpClient;
+import reactor.retry.Retry;
 import reactor.util.Logger;
 import reactor.util.Loggers;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class ExampleBot {
@@ -64,7 +69,16 @@ public class ExampleBot {
     @Test
     @Ignore("Example code excluded from CI")
     public void testCommandBot() {
-        DiscordClient client = new DiscordClientBuilder(token).build();
+        DiscordClient client = new DiscordClientBuilder(token)
+                .setRouterOptions(RouterOptions.builder()
+                        .onClientResponse(ResponseFunction.emptyWhenNotFound()) // globally turn any 404 into {}
+                        .onClientResponse(ResponseFunction.retryOnceOnErrorStatus(500)) // wait 1 sec and retry any 500
+                        .onClientResponse(ResponseFunction.emptyOnErrorStatus(RouteMatcher.route(Routes.REACTION_CREATE), 400))
+                        .onClientResponse(ResponseFunction.retryWhen(RouteMatcher.route(Routes.MESSAGE_CREATE),
+                                Retry.onlyIf(ClientException.isRetryContextStatusCode(500))
+                                        .exponentialBackoffWithJitter(Duration.ofSeconds(2), Duration.ofSeconds(10))))
+                        .build())
+                .build();
 
         // Get the bot owner ID to filter commands
         AtomicLong ownerId = new AtomicLong();
@@ -151,6 +165,10 @@ public class ExampleBot {
                                                 .addField("Avatar URL", user.getAvatarUrl(), false)
                                                 .setImage(user.getAvatarUrl()))
                                 )))
+                        .switchIfEmpty(Mono.just("Not found")
+                                .flatMap(reason -> message.getChannel()
+                                        .flatMap(channel -> channel.createMessage(reason)))
+                        )
                         .then();
             }
             return Mono.empty();
@@ -258,7 +276,7 @@ public class ExampleBot {
                         }
                         return Flux.fromIterable(fetch(count))
                                 .flatMap(emoji -> message.addReaction(ReactionEmoji.unicode(emoji))
-                                        .onErrorContinue(isStatusCode(400),
+                                        .onErrorContinue(ClientException.isStatusCode(400),
                                                 (t, o) -> log.info("Dropping {} due to {}", t.toString()))
                                 )
                                 .then();
@@ -309,15 +327,5 @@ public class ExampleBot {
     public static abstract class EventHandler {
 
         public abstract Mono<Void> onMessageCreate(MessageCreateEvent event);
-    }
-
-    private static Predicate<Throwable> isStatusCode(int code) {
-        return t -> {
-            if (t instanceof ClientException) {
-                ClientException e = (ClientException) t;
-                return e.getStatus().code() == code;
-            }
-            return false;
-        };
     }
 }
