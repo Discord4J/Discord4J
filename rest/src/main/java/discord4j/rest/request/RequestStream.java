@@ -191,7 +191,7 @@ class RequestStream<T> {
             String shard = correlation.getShardId();
             Logger logger = getTraceLogger(shard);
             if (logger.isTraceEnabled()) {
-                logger.trace("Accepting request: {}", shard, req);
+                logger.trace("Accepting request: {}", req);
             }
             Mono<ClientRequest> request = adaptRequest(req);
             Class<T> responseType = req.getRoute().getResponseType();
