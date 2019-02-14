@@ -350,7 +350,8 @@ public class GatewayClient {
             if (disconnectNotifier == null) {
                 return Mono.error(new IllegalStateException("Gateway client is not active!"));
             }
-            return disconnectNotifier.log("discord4j.gateway.disconnect");
+            return disconnectNotifier
+                    .log(shardLogger(".disconnect"), Level.FINE, false);
         }
     }
 
