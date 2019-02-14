@@ -18,8 +18,7 @@
 package discord4j.gateway;
 
 import discord4j.gateway.json.StatusUpdate;
-
-import javax.annotation.Nullable;
+import reactor.util.annotation.Nullable;
 
 /**
  * An object that contains all the parameters used for identifying a bot to Discord gateway.

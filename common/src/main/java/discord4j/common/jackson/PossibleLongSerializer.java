@@ -22,8 +22,7 @@ import com.fasterxml.jackson.databind.jsontype.TypeSerializer;
 import com.fasterxml.jackson.databind.ser.std.ReferenceTypeSerializer;
 import com.fasterxml.jackson.databind.type.ReferenceType;
 import com.fasterxml.jackson.databind.util.NameTransformer;
-
-import javax.annotation.Nullable;
+import reactor.util.annotation.Nullable;
 
 public class PossibleLongSerializer extends ReferenceTypeSerializer<PossibleLong> {
 

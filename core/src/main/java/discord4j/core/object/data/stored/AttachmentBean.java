@@ -17,8 +17,8 @@
 package discord4j.core.object.data.stored;
 
 import discord4j.common.json.AttachmentResponse;
+import reactor.util.annotation.Nullable;
 
-import javax.annotation.Nullable;
 import java.io.Serializable;
 
 public final class AttachmentBean implements Serializable {

@@ -26,8 +26,8 @@ import discord4j.core.object.util.Snowflake;
 import discord4j.core.util.PermissionUtil;
 import discord4j.rest.json.request.PermissionsEditRequest;
 import reactor.core.publisher.Mono;
+import reactor.util.annotation.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;

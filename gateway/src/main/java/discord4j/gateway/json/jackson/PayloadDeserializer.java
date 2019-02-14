@@ -24,8 +24,8 @@ import discord4j.gateway.json.GatewayPayload;
 import discord4j.gateway.json.Opcode;
 import discord4j.gateway.json.PayloadData;
 import discord4j.gateway.json.dispatch.*;
+import reactor.util.annotation.Nullable;
 
-import javax.annotation.Nullable;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;

@@ -17,7 +17,7 @@
 
 package discord4j.common.close;
 
-import javax.annotation.Nullable;
+import reactor.util.annotation.Nullable;
 
 /**
  * Unchecked exception thrown when a websocket session is closed, in an expected way or not.

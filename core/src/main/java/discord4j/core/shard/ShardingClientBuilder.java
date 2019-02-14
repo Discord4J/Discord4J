@@ -36,9 +36,9 @@ import reactor.core.publisher.ReplayProcessor;
 import reactor.netty.http.client.HttpClient;
 import reactor.util.Logger;
 import reactor.util.Loggers;
+import reactor.util.annotation.Nullable;
 import reactor.util.function.Tuple2;
 
-import javax.annotation.Nullable;
 import java.time.Duration;
 import java.util.Objects;
 import java.util.function.Predicate;

@@ -3,8 +3,7 @@ package discord4j.command.example;
 import discord4j.command.Command;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import reactor.core.publisher.Mono;
-
-import javax.annotation.Nullable;
+import reactor.util.annotation.Nullable;
 
 public class EchoCommand implements Command<Void> {
 

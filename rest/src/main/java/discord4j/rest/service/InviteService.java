@@ -20,8 +20,7 @@ import discord4j.rest.json.response.InviteResponse;
 import discord4j.rest.request.Router;
 import discord4j.rest.route.Routes;
 import reactor.core.publisher.Mono;
-
-import javax.annotation.Nullable;
+import reactor.util.annotation.Nullable;
 
 public class InviteService extends RestService {
 

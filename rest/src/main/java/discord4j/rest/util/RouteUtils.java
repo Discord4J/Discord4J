@@ -16,7 +16,8 @@
  */
 package discord4j.rest.util;
 
-import javax.annotation.Nullable;
+import reactor.util.annotation.Nullable;
+
 import java.io.ByteArrayOutputStream;
 import java.nio.charset.Charset;
 import java.util.Map;

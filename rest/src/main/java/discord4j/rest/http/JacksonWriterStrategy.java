@@ -25,8 +25,8 @@ import reactor.core.Exceptions;
 import reactor.core.publisher.Mono;
 import reactor.netty.ByteBufFlux;
 import reactor.netty.http.client.HttpClient;
+import reactor.util.annotation.Nullable;
 
-import javax.annotation.Nullable;
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 

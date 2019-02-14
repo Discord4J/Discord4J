@@ -21,9 +21,10 @@ import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.util.Snowflake;
-import java.util.Optional;
-import javax.annotation.Nullable;
 import reactor.core.publisher.Mono;
+import reactor.util.annotation.Nullable;
+
+import java.util.Optional;
 
 /**
  * Dispatched when a user leaves a guild <b>OR</b> is kicked from it.

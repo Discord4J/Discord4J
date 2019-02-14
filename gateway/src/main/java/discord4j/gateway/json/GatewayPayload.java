@@ -21,8 +21,8 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import discord4j.gateway.json.jackson.OpcodeConverter;
 import discord4j.gateway.json.jackson.PayloadDeserializer;
+import reactor.util.annotation.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.Objects;
 
 @JsonDeserialize(using = PayloadDeserializer.class)

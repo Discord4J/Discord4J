@@ -18,8 +18,7 @@ package discord4j.gateway.json;
 
 import discord4j.common.jackson.Possible;
 import discord4j.common.jackson.PossibleJson;
-
-import javax.annotation.Nullable;
+import reactor.util.annotation.Nullable;
 
 public class StatusUpdate implements PayloadData {
 

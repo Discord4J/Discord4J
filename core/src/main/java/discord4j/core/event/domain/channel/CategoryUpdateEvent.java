@@ -18,8 +18,8 @@ package discord4j.core.event.domain.channel;
 
 import discord4j.core.DiscordClient;
 import discord4j.core.object.entity.Category;
+import reactor.util.annotation.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.Optional;
 
 /**

@@ -18,8 +18,7 @@ package discord4j.rest.http;
 
 import reactor.core.publisher.Mono;
 import reactor.netty.http.client.HttpClient;
-
-import javax.annotation.Nullable;
+import reactor.util.annotation.Nullable;
 
 /**
  * Strategy for encoding an object of type {@code <Req>} and writing the encoded stream of bytes to an {@link

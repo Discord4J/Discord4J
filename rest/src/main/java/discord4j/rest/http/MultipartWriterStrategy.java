@@ -26,12 +26,11 @@ import reactor.netty.http.client.HttpClient;
 import reactor.netty.http.client.HttpClientForm;
 import reactor.util.Logger;
 import reactor.util.Loggers;
+import reactor.util.annotation.Nullable;
 import reactor.util.function.Tuple2;
 
-import javax.annotation.Nullable;
 import java.io.InputStream;
 import java.util.List;
-import java.util.Optional;
 
 /**
  * Write to a request from a {@code Consumer<HttpClientRequest.Form>} using reactor-netty's {@link

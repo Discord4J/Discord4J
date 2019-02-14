@@ -26,8 +26,8 @@ import discord4j.rest.route.Routes;
 import discord4j.rest.util.MultipartRequest;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.util.annotation.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.Map;
 import java.util.Objects;
 

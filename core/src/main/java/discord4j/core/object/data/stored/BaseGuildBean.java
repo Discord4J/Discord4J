@@ -21,8 +21,8 @@ import discord4j.common.json.RoleResponse;
 import discord4j.gateway.json.dispatch.GuildCreate;
 import discord4j.gateway.json.dispatch.GuildUpdate;
 import discord4j.rest.json.response.GuildResponse;
+import reactor.util.annotation.Nullable;
 
-import javax.annotation.Nullable;
 import java.io.Serializable;
 import java.util.Arrays;
 

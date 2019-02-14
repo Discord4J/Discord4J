@@ -16,7 +16,8 @@
  */
 package discord4j.common.jackson;
 
-import javax.annotation.Nullable;
+import reactor.util.annotation.Nullable;
+
 import java.util.NoSuchElementException;
 import java.util.Objects;
 

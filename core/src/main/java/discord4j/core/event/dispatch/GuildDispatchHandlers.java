@@ -35,13 +35,13 @@ import discord4j.gateway.json.RequestGuildMembers;
 import discord4j.gateway.json.dispatch.*;
 import discord4j.store.api.util.LongLongTuple2;
 import discord4j.store.api.util.LongObjTuple2;
-import java.util.Optional;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.function.Tuple2;
 import reactor.util.function.Tuples;
 
 import java.util.Arrays;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;

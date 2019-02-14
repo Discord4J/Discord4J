@@ -18,8 +18,7 @@ package discord4j.core.object.data.stored;
 
 import discord4j.gateway.json.response.GatewayChannelResponse;
 import discord4j.rest.json.response.ChannelResponse;
-
-import javax.annotation.Nullable;
+import reactor.util.annotation.Nullable;
 
 public final class TextChannelBean extends ChannelBean {
 

@@ -19,8 +19,8 @@ package discord4j.core.object.data.stored;
 import discord4j.common.json.GuildMemberResponse;
 import discord4j.gateway.json.dispatch.GuildMemberUpdate;
 import discord4j.gateway.json.dispatch.MessageCreate;
+import reactor.util.annotation.Nullable;
 
-import javax.annotation.Nullable;
 import java.io.Serializable;
 import java.util.Arrays;
 

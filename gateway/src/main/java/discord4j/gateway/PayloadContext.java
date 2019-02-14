@@ -18,8 +18,7 @@ package discord4j.gateway;
 
 import discord4j.gateway.json.GatewayPayload;
 import discord4j.gateway.json.PayloadData;
-
-import javax.annotation.Nullable;
+import reactor.util.annotation.Nullable;
 
 /**
  * Represents gateway payload data enriched with context for processing through a

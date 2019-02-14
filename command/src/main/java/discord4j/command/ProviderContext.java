@@ -16,7 +16,8 @@
  */
 package discord4j.command;
 
-import javax.annotation.Nullable;
+import reactor.util.annotation.Nullable;
+
 import java.util.Objects;
 import java.util.Optional;
 

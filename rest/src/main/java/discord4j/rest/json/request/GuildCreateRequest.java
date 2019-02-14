@@ -17,8 +17,8 @@
 package discord4j.rest.json.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import reactor.util.annotation.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.Arrays;
 
 public class GuildCreateRequest {

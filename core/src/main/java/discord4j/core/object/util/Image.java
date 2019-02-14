@@ -16,7 +16,8 @@
  */
 package discord4j.core.object.util;
 
-import javax.annotation.Nullable;
+import reactor.util.annotation.Nullable;
+
 import java.util.Base64;
 import java.util.Objects;
 

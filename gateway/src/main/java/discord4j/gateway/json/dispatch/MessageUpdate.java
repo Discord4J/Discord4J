@@ -20,8 +20,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import discord4j.common.jackson.Possible;
 import discord4j.common.jackson.UnsignedJson;
 import discord4j.common.json.EmbedResponse;
-
-import javax.annotation.Nullable;
+import reactor.util.annotation.Nullable;
 
 public class MessageUpdate implements Dispatch {
 

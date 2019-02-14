@@ -17,8 +17,7 @@
 package discord4j.rest.json.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-
-import javax.annotation.Nullable;
+import reactor.util.annotation.Nullable;
 
 public class EmbedFooterRequest {
 

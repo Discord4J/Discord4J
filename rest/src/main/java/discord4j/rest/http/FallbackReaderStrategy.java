@@ -18,8 +18,7 @@ package discord4j.rest.http;
 
 import reactor.core.publisher.Mono;
 import reactor.netty.ByteBufMono;
-
-import javax.annotation.Nullable;
+import reactor.util.annotation.Nullable;
 
 /**
  * Read a response as a {@code String}, regardless of its type and response Content-Type. It serves as a "catch-all"

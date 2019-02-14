@@ -20,8 +20,8 @@ import discord4j.core.object.data.stored.ActivityBean;
 import discord4j.core.object.data.stored.RichActivityBean;
 import discord4j.core.object.util.Snowflake;
 import discord4j.core.util.EntityUtil;
+import reactor.util.annotation.Nullable;
 
-import javax.annotation.Nullable;
 import java.time.Instant;
 import java.util.Optional;
 import java.util.OptionalInt;

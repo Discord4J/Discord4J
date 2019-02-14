@@ -19,9 +19,8 @@ package discord4j.core.spec;
 import discord4j.common.jackson.Possible;
 import discord4j.core.object.util.Snowflake;
 import discord4j.rest.json.request.GuildEmojiModifyRequest;
+import reactor.util.annotation.Nullable;
 
-import javax.annotation.Nullable;
-import java.util.Optional;
 import java.util.Set;
 
 public class GuildEmojiEditSpec implements AuditSpec<GuildEmojiModifyRequest> {

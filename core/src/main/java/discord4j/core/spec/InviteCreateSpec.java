@@ -17,8 +17,7 @@
 package discord4j.core.spec;
 
 import discord4j.rest.json.request.InviteCreateRequest;
-
-import javax.annotation.Nullable;
+import reactor.util.annotation.Nullable;
 
 public class InviteCreateSpec implements AuditSpec<InviteCreateRequest> {
 

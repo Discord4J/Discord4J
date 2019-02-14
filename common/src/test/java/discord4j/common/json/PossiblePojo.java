@@ -17,8 +17,8 @@
 package discord4j.common.json;
 
 import discord4j.common.jackson.Possible;
+import reactor.util.annotation.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.Objects;
 
 public class PossiblePojo {

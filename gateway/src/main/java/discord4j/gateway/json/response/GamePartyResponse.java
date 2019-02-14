@@ -16,7 +16,8 @@
  */
 package discord4j.gateway.json.response;
 
-import javax.annotation.Nullable;
+import reactor.util.annotation.Nullable;
+
 import java.util.Arrays;
 
 public class GamePartyResponse {

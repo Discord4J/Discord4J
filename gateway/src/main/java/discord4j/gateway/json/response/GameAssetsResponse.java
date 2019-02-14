@@ -17,8 +17,7 @@
 package discord4j.gateway.json.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-
-import javax.annotation.Nullable;
+import reactor.util.annotation.Nullable;
 
 public class GameAssetsResponse {
 

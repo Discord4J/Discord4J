@@ -18,8 +18,7 @@ package discord4j.core.object.entity;
 
 import discord4j.core.util.EntityUtil;
 import reactor.core.publisher.Mono;
-
-import javax.annotation.Nullable;
+import reactor.util.annotation.Nullable;
 
 /**
  * A Discord channel.

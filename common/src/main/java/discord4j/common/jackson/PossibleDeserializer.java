@@ -22,8 +22,7 @@ import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.deser.ValueInstantiator;
 import com.fasterxml.jackson.databind.deser.std.ReferenceTypeDeserializer;
 import com.fasterxml.jackson.databind.jsontype.TypeDeserializer;
-
-import javax.annotation.Nullable;
+import reactor.util.annotation.Nullable;
 
 public class PossibleDeserializer extends ReferenceTypeDeserializer<Possible<?>> {
 

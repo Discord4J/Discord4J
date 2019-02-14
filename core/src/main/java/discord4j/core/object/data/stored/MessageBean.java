@@ -21,8 +21,8 @@ import discord4j.common.json.ReactionResponse;
 import discord4j.common.json.UserResponse;
 import discord4j.core.object.data.stored.embed.EmbedBean;
 import discord4j.gateway.json.dispatch.MessageCreate;
+import reactor.util.annotation.Nullable;
 
-import javax.annotation.Nullable;
 import java.io.Serializable;
 import java.util.Arrays;
 

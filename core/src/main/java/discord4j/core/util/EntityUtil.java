@@ -25,8 +25,7 @@ import discord4j.core.object.data.stored.VoiceChannelBean;
 import discord4j.core.object.entity.*;
 import discord4j.core.object.reaction.ReactionEmoji;
 import discord4j.rest.json.response.ChannelResponse;
-
-import javax.annotation.Nullable;
+import reactor.util.annotation.Nullable;
 
 /** An utility class for entity processing. */
 public final class EntityUtil {

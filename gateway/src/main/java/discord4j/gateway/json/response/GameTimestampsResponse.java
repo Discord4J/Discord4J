@@ -16,7 +16,7 @@
  */
 package discord4j.gateway.json.response;
 
-import javax.annotation.Nullable;
+import reactor.util.annotation.Nullable;
 
 public class GameTimestampsResponse {
 

@@ -16,7 +16,7 @@
  */
 package discord4j.common.jackson;
 
-import javax.annotation.Nullable;
+import reactor.util.annotation.Nullable;
 
 public class PossibleFilter {
 

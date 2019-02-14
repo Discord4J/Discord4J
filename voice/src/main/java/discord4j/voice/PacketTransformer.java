@@ -18,8 +18,8 @@ package discord4j.voice;
 
 import com.iwebpp.crypto.TweetNaclFast;
 import io.netty.buffer.ByteBuf;
+import reactor.util.annotation.Nullable;
 
-import javax.annotation.Nullable;
 import java.nio.ByteBuffer;
 
 final class PacketTransformer {

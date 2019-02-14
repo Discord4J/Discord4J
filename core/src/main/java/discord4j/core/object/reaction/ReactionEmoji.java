@@ -18,8 +18,8 @@ package discord4j.core.object.reaction;
 
 import discord4j.core.object.entity.GuildEmoji;
 import discord4j.core.object.util.Snowflake;
+import reactor.util.annotation.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.Objects;
 import java.util.Optional;
 

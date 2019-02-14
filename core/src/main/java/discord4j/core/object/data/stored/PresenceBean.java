@@ -20,8 +20,8 @@ import discord4j.gateway.json.dispatch.GuildCreate;
 import discord4j.gateway.json.dispatch.PresenceUpdate;
 import discord4j.gateway.json.response.GameResponse;
 import discord4j.gateway.json.response.PresenceResponse;
+import reactor.util.annotation.Nullable;
 
-import javax.annotation.Nullable;
 import java.io.Serializable;
 
 public final class PresenceBean implements Serializable {

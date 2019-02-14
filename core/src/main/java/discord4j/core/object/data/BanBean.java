@@ -18,8 +18,8 @@ package discord4j.core.object.data;
 
 import discord4j.core.object.data.stored.UserBean;
 import discord4j.rest.json.response.BanResponse;
+import reactor.util.annotation.Nullable;
 
-import javax.annotation.Nullable;
 import java.io.Serializable;
 
 public final class BanBean implements Serializable {

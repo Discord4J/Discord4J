@@ -22,8 +22,7 @@ import discord4j.common.jackson.PossibleJson;
 import discord4j.common.jackson.PossibleLong;
 import discord4j.common.jackson.UnsignedJson;
 import discord4j.common.json.OverwriteEntity;
-
-import javax.annotation.Nullable;
+import reactor.util.annotation.Nullable;
 
 @PossibleJson
 public class ChannelModifyRequest {

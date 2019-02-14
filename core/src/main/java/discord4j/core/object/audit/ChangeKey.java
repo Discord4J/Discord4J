@@ -23,7 +23,7 @@ import discord4j.core.object.entity.Role;
 import discord4j.core.object.util.PermissionSet;
 import discord4j.core.object.util.Snowflake;
 
-import java.awt.*;
+import java.awt.Color;
 import java.util.Set;
 
 public final class ChangeKey<T> {

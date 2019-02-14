@@ -17,8 +17,8 @@
 package discord4j.core.object.data.stored.embed;
 
 import discord4j.common.json.*;
+import reactor.util.annotation.Nullable;
 
-import javax.annotation.Nullable;
 import java.io.Serializable;
 import java.util.Arrays;
 

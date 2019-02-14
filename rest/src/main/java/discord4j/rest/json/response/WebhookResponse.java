@@ -19,8 +19,7 @@ package discord4j.rest.json.response;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import discord4j.common.jackson.UnsignedJson;
 import discord4j.common.json.UserResponse;
-
-import javax.annotation.Nullable;
+import reactor.util.annotation.Nullable;
 
 public class WebhookResponse {
 

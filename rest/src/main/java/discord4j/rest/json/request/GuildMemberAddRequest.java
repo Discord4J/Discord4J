@@ -20,8 +20,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import discord4j.common.jackson.Possible;
 import discord4j.common.jackson.PossibleJson;
 import discord4j.common.jackson.UnsignedJson;
-
-import javax.annotation.Nullable;
+import reactor.util.annotation.Nullable;
 
 @PossibleJson
 public class GuildMemberAddRequest {

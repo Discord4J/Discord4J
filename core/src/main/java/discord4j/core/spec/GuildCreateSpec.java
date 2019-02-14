@@ -23,8 +23,8 @@ import discord4j.core.object.util.Image;
 import discord4j.rest.json.request.GuildCreateRequest;
 import discord4j.rest.json.request.PartialChannelRequest;
 import discord4j.rest.json.request.RoleCreateRequest;
+import reactor.util.annotation.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;

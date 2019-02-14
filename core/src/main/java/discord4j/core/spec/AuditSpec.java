@@ -16,7 +16,7 @@
  */
 package discord4j.core.spec;
 
-import javax.annotation.Nullable;
+import reactor.util.annotation.Nullable;
 
 public interface AuditSpec<T> extends Spec<T> {
 

@@ -22,8 +22,7 @@ import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import reactor.netty.http.client.HttpClientResponse;
-
-import javax.annotation.Nullable;
+import reactor.util.annotation.Nullable;
 
 public class ClientException extends RuntimeException {
 

@@ -19,8 +19,8 @@ package discord4j.core.object.presence;
 import discord4j.common.jackson.Possible;
 import discord4j.core.object.data.stored.PresenceBean;
 import discord4j.gateway.json.StatusUpdate;
+import reactor.util.annotation.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.Optional;
 
 /**

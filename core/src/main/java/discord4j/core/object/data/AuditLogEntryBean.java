@@ -19,8 +19,8 @@ package discord4j.core.object.data;
 import discord4j.core.object.audit.AuditLogChange;
 import discord4j.core.util.AuditLogUtil;
 import discord4j.rest.json.response.AuditLogEntryResponse;
+import reactor.util.annotation.Nullable;
 
-import javax.annotation.Nullable;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collections;
