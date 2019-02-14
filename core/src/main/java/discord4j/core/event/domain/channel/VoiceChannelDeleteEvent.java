@@ -16,8 +16,9 @@
  */
 package discord4j.core.event.domain.channel;
 
-import discord4j.core.DiscordClient;
+import discord4j.core.GatewayAggregate;
 import discord4j.core.object.entity.channel.VoiceChannel;
+import discord4j.gateway.ShardInfo;
 
 /**
  * Dispatched when a {@link VoiceChannel} is deleted in a guild.
@@ -30,8 +31,8 @@ public class VoiceChannelDeleteEvent extends ChannelEvent {
 
     private final VoiceChannel channel;
 
-    public VoiceChannelDeleteEvent(DiscordClient client, VoiceChannel channel) {
-        super(client);
+    public VoiceChannelDeleteEvent(GatewayAggregate gateway, ShardInfo shardInfo, VoiceChannel channel) {
+        super(gateway, shardInfo);
         this.channel = channel;
     }
 

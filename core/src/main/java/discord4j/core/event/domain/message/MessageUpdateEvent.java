@@ -16,12 +16,13 @@
  */
 package discord4j.core.event.domain.message;
 
-import discord4j.core.DiscordClient;
+import discord4j.core.GatewayAggregate;
 import discord4j.core.object.Embed;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.core.object.util.Snowflake;
+import discord4j.gateway.ShardInfo;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
 
@@ -55,10 +56,10 @@ public class MessageUpdateEvent extends MessageEvent {
     private final boolean embedsChanged;
     private final List<Embed> currentEmbeds;
 
-    public MessageUpdateEvent(DiscordClient client, long messageId, long channelId, @Nullable Long guildId,
+    public MessageUpdateEvent(GatewayAggregate gateway, ShardInfo shardInfo, long messageId, long channelId, @Nullable Long guildId,
                               @Nullable Message old, boolean contentChanged, @Nullable String currentContent,
                               boolean embedsChanged, List<Embed> currentEmbeds) {
-        super(client);
+        super(gateway, shardInfo);
         this.messageId = messageId;
         this.channelId = channelId;
         this.guildId = guildId;
@@ -85,7 +86,7 @@ public class MessageUpdateEvent extends MessageEvent {
      * If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Message> getMessage() {
-        return getClient().getMessageById(getChannelId(), getMessageId());
+        return getGateway().getMessageById(getChannelId(), getMessageId());
     }
 
     /**
@@ -104,7 +105,7 @@ public class MessageUpdateEvent extends MessageEvent {
      * {@link Message}. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<MessageChannel> getChannel() {
-        return getClient().getChannelById(getChannelId()).cast(MessageChannel.class);
+        return getGateway().getChannelById(getChannelId()).cast(MessageChannel.class);
     }
 
     /**
@@ -123,7 +124,7 @@ public class MessageUpdateEvent extends MessageEvent {
      * {@link Message}. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Guild> getGuild() {
-        return Mono.justOrEmpty(getGuildId()).flatMap(getClient()::getGuildById);
+        return Mono.justOrEmpty(getGuildId()).flatMap(getGateway()::getGuildById);
     }
 
     /**

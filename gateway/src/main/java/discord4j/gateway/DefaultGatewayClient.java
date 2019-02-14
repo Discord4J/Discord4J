@@ -31,8 +31,8 @@ import discord4j.gateway.payload.PayloadReader;
 import discord4j.gateway.payload.PayloadWriter;
 import discord4j.gateway.retry.GatewayStateChange;
 import discord4j.gateway.retry.PartialDisconnectException;
+import discord4j.gateway.retry.ReconnectOptions;
 import discord4j.gateway.retry.RetryContext;
-import discord4j.gateway.retry.RetryOptions;
 import io.netty.buffer.ByteBuf;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.*;
@@ -42,7 +42,7 @@ import reactor.netty.http.client.HttpClient;
 import reactor.retry.Retry;
 import reactor.util.Logger;
 import reactor.util.Loggers;
-import reactor.util.annotation.Nullable;
+import reactor.util.function.Tuples;
 
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
@@ -80,7 +80,8 @@ public class DefaultGatewayClient implements GatewayClient {
     private final HttpClient httpClient;
     private final PayloadReader payloadReader;
     private final PayloadWriter payloadWriter;
-    private final RetryOptions retryOptions;
+    private final ReconnectOptions reconnectOptions;
+    private final RetryContext retryContext;
     private final IdentifyOptions identifyOptions;
     private final String token;
     private final GatewayObserver initialObserver;
@@ -102,11 +103,11 @@ public class DefaultGatewayClient implements GatewayClient {
     private final AtomicBoolean connected = new AtomicBoolean(false);
     private final AtomicBoolean resumable = new AtomicBoolean(true);
     private final AtomicInteger sequence = new AtomicInteger(0);
+    private final AtomicReference<String> sessionId = new AtomicReference<>("");
     private final AtomicLong lastSent = new AtomicLong(0);
     private final AtomicLong lastAck = new AtomicLong(0);
     private final AtomicLong responseTime = new AtomicLong(0);
     private final ResettableInterval heartbeat = new ResettableInterval();
-    private final AtomicReference<String> sessionId = new AtomicReference<>("");
     private volatile GatewayObserver observer;
     private volatile MonoProcessor<Void> disconnectNotifier;
     private volatile MonoProcessor<CloseStatus> closeTrigger;
@@ -114,27 +115,19 @@ public class DefaultGatewayClient implements GatewayClient {
     /**
      * Initializes a new GatewayClient.
      *
-     * @param httpClient the underlying HttpClient used to perform the connection
-     * @param payloadReader strategy to read and decode incoming gateway messages
-     * @param payloadWriter strategy to encode and write outgoing gateway messages
-     * @param retryOptions reconnect policy used in this client
-     * @param token Discord bot token
-     * @param identifyOptions used to IDENTIFY or RESUME a gateway connection, specifying the sharding options
-     * and to set an initial presence
-     * @param observer consumer observing gateway and underlying websocket lifecycle changes, can be {@code null}
-     * @param identifyLimiter rate-limiting policy used for IDENTIFY requests, allowing shard coordination
+     * @param options the {@link GatewayOptions} to configure this client
      */
-    public DefaultGatewayClient(HttpClient httpClient, PayloadReader payloadReader, PayloadWriter payloadWriter,
-                                RetryOptions retryOptions, String token, IdentifyOptions identifyOptions,
-                                @Nullable GatewayObserver observer, PayloadTransformer identifyLimiter) {
-        this.httpClient = Objects.requireNonNull(httpClient);
-        this.payloadReader = Objects.requireNonNull(payloadReader);
-        this.payloadWriter = Objects.requireNonNull(payloadWriter);
-        this.retryOptions = Objects.requireNonNull(retryOptions);
-        this.token = Objects.requireNonNull(token);
-        this.identifyOptions = Objects.requireNonNull(identifyOptions);
-        this.initialObserver = observer;
-        this.identifyLimiter = Objects.requireNonNull(identifyLimiter);
+    public DefaultGatewayClient(GatewayOptions options) {
+        this.token = Objects.requireNonNull(options.getToken());
+        this.httpClient = Objects.requireNonNull(options.getHttpClient());
+        this.payloadReader = Objects.requireNonNull(options.getPayloadReader());
+        this.payloadWriter = Objects.requireNonNull(options.getPayloadWriter());
+        this.reconnectOptions = options.getReconnectOptions();
+        this.retryContext = new RetryContext(reconnectOptions.getFirstBackoff(),
+                reconnectOptions.getMaxBackoffInterval());
+        this.identifyOptions = Objects.requireNonNull(options.getIdentifyOptions());
+        this.initialObserver = options.getInitialObserver();
+        this.identifyLimiter = Objects.requireNonNull(options.getIdentifyLimiter());
         this.receiverSink = receiver.sink(FluxSink.OverflowStrategy.LATEST);
         this.senderSink = sender.sink(FluxSink.OverflowStrategy.LATEST);
         this.dispatchSink = dispatch.sink(FluxSink.OverflowStrategy.LATEST);
@@ -160,9 +153,13 @@ public class DefaultGatewayClient implements GatewayClient {
             Logger senderLog = shardLogger(".sender");
             Logger receiverLog = shardLogger(".receiver");
 
+            MonoProcessor<Void> ping = MonoProcessor.create();
+
             // Setup the sending logic from multiple sources into one merged Flux
             Flux<ByteBuf> identifyFlux = outbound.filter(payload -> Opcode.IDENTIFY.equals(payload.getOp()))
+                    .delayUntil(payload -> ping)
                     .flatMap(payload -> Flux.from(payloadWriter.write(payload)))
+                    .map(buf -> Tuples.of((GatewayClient) this, buf))
                     .transform(identifyLimiter);
             PayloadTransformer limiter = new RateLimiterTransformer(
                     new SimpleBucket(outboundLimiterCapacity(), Duration.ofSeconds(60)));
@@ -170,6 +167,7 @@ public class DefaultGatewayClient implements GatewayClient {
                     .log(shardLogger(".outbound"), Level.FINE, false)
                     .flatMap(payload -> Flux.from(payloadWriter.write(payload)))
                     .transform(buf -> Flux.merge(buf, sender))
+                    .map(buf -> Tuples.of((GatewayClient) this, buf))
                     .transform(limiter);
             Flux<ByteBuf> heartbeatFlux = heartbeats.flatMap(payload -> Flux.from(payloadWriter.write(payload)));
             Flux<ByteBuf> outFlux = Flux.merge(heartbeatFlux, identifyFlux, payloadFlux)
@@ -178,7 +176,8 @@ public class DefaultGatewayClient implements GatewayClient {
             int shard = identifyOptions.getShardIndex();
             DiscordWebSocketHandler handler = new DiscordWebSocketHandler(receiverSink, outFlux, closeTrigger, shard);
 
-            if (identifyOptions.getResumeSequence() != null) {
+            Integer resumeSequence = identifyOptions.getResumeSequence();
+            if (resumeSequence != null && resumeSequence > 0) {
                 this.sequence.set(identifyOptions.getResumeSequence());
                 this.sessionId.set(identifyOptions.getResumeSessionId());
             } else {
@@ -188,7 +187,6 @@ public class DefaultGatewayClient implements GatewayClient {
             Mono<Void> readyHandler = dispatch.filter(DefaultGatewayClient::isReadyOrResume)
                     .flatMap(event -> {
                         connected.compareAndSet(false, true);
-                        RetryContext retryContext = retryOptions.getRetryContext();
                         ConnectionObserver.State state;
                         if (retryContext.getResetCount() == 0) {
                             log.info("Connected to Gateway");
@@ -224,6 +222,7 @@ public class DefaultGatewayClient implements GatewayClient {
                     .map(payload -> new PayloadContext<>(payload, handler, this))
                     .publishOn(Schedulers.elastic())
                     .doOnNext(PayloadHandlers::handle)
+                    .doOnNext(ctx -> ping.onComplete())
                     .then()
                     .log(shardLogger(".zip.ack"), Level.FINEST, false);
 
@@ -310,11 +309,11 @@ public class DefaultGatewayClient implements GatewayClient {
 
     private Retry<RetryContext> retryFactory() {
         return Retry.<RetryContext>onlyIf(t -> isRetryable(t.exception()))
-                .withApplicationContext(retryOptions.getRetryContext())
-                .withBackoffScheduler(retryOptions.getBackoffScheduler())
-                .backoff(retryOptions.getBackoff())
-                .jitter(retryOptions.getJitter())
-                .retryMax(retryOptions.getMaxRetries())
+                .withApplicationContext(retryContext)
+                .withBackoffScheduler(reconnectOptions.getBackoffScheduler())
+                .backoff(reconnectOptions.getBackoff())
+                .jitter(reconnectOptions.getJitter())
+                .retryMax(reconnectOptions.getMaxRetries())
                 .doOnRetry(context -> {
                     connected.compareAndSet(true, false);
                     int attempt = context.applicationContext().getAttempts();
@@ -368,9 +367,10 @@ public class DefaultGatewayClient implements GatewayClient {
     private ConnectionObserver getObserver() {
         return (connection, newState) -> {
             log.debug("{} {}", newState, connection);
-            if (closeTrigger.isTerminated() && newState == ConnectionObserver.State.DISCONNECTING) {
+            if (closeTrigger.isTerminated() && (newState == ConnectionObserver.State.RELEASED
+                    || newState == ConnectionObserver.State.DISCONNECTING)) {
                 log.info("Disconnected from Gateway");
-                retryOptions.getRetryContext().clear();
+                retryContext.clear();
                 connected.compareAndSet(true, false);
                 lastSent.set(0);
                 lastAck.set(0);
@@ -536,15 +536,6 @@ public class DefaultGatewayClient implements GatewayClient {
         return identifyOptions;
     }
 
-    /**
-     * Gets the configuration object for gateway reconnection procedure.
-     *
-     * @return a RetryOptions configuration object
-     */
-    RetryOptions retryOptions() {
-        return retryOptions;
-    }
-
     // Initializers to customize internal outbound rate-limiter
 
     /**
@@ -557,7 +548,7 @@ public class DefaultGatewayClient implements GatewayClient {
         String capacityValue = System.getProperty(OUTBOUND_CAPACITY_PROPERTY);
         if (capacityValue != null) {
             try {
-                long capacity = Long.valueOf(capacityValue);
+                long capacity = Long.parseLong(capacityValue);
                 shardLogger("").info("Overriding default outbound limiter capacity: {}", capacity);
             } catch (NumberFormatException e) {
                 shardLogger("").warn("Invalid custom outbound limiter capacity: {}", capacityValue);

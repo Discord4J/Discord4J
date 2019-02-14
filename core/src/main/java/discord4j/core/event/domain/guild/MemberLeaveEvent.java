@@ -16,11 +16,12 @@
  */
 package discord4j.core.event.domain.guild;
 
-import discord4j.core.DiscordClient;
+import discord4j.core.GatewayAggregate;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.util.Snowflake;
+import discord4j.gateway.ShardInfo;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
 
@@ -43,8 +44,8 @@ public class MemberLeaveEvent extends GuildEvent {
     @Nullable
     private final Member member;
 
-    public MemberLeaveEvent(DiscordClient client, User user, long guildId, @Nullable Member member) {
-        super(client);
+    public MemberLeaveEvent(GatewayAggregate gateway, ShardInfo shardInfo, User user, long guildId, @Nullable Member member) {
+        super(gateway, shardInfo);
         this.user = user;
         this.guildId = guildId;
         this.member = member;
@@ -75,7 +76,7 @@ public class MemberLeaveEvent extends GuildEvent {
      * If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Guild> getGuild() {
-        return getClient().getGuildById(getGuildId());
+        return getGateway().getGuildById(getGuildId());
     }
 
     /**

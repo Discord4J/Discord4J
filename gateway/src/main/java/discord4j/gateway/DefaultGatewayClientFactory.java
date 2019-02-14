@@ -17,11 +17,6 @@
 
 package discord4j.gateway;
 
-import discord4j.gateway.payload.PayloadReader;
-import discord4j.gateway.payload.PayloadWriter;
-import discord4j.gateway.retry.RetryOptions;
-import reactor.netty.http.client.HttpClient;
-
 /**
  * Default factory to create {@link GatewayClient} objects based on {@link DefaultGatewayClient} that connects using a
  * single shard per client, forwarding events through {@link discord4j.gateway.json.GatewayPayload} objects.
@@ -29,11 +24,7 @@ import reactor.netty.http.client.HttpClient;
 public class DefaultGatewayClientFactory implements GatewayClientFactory {
 
     @Override
-    public GatewayClient getGatewayClient(HttpClient httpClient, PayloadReader payloadReader,
-                                          PayloadWriter payloadWriter,
-                                          RetryOptions retryOptions, String token, IdentifyOptions identifyOptions,
-                                          GatewayObserver observer, PayloadTransformer identifyLimiter) {
-        return new DefaultGatewayClient(httpClient, payloadReader, payloadWriter, retryOptions, token, identifyOptions,
-                observer, identifyLimiter);
+    public GatewayClient getGatewayClient(GatewayOptions options) {
+        return new DefaultGatewayClient(options);
     }
 }

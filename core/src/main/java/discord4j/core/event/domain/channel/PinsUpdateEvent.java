@@ -16,9 +16,10 @@
  */
 package discord4j.core.event.domain.channel;
 
-import discord4j.core.DiscordClient;
+import discord4j.core.GatewayAggregate;
 import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.core.object.util.Snowflake;
+import discord4j.gateway.ShardInfo;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
 
@@ -37,8 +38,8 @@ public class PinsUpdateEvent extends ChannelEvent {
     private final long channelId;
     private final Instant lastPinTimestamp;
 
-    public PinsUpdateEvent(DiscordClient client, long channelId, @Nullable Instant lastPinTimestamp) {
-        super(client);
+    public PinsUpdateEvent(GatewayAggregate gateway, ShardInfo shardInfo, long channelId, @Nullable Instant lastPinTimestamp) {
+        super(gateway, shardInfo);
         this.channelId = channelId;
         this.lastPinTimestamp = lastPinTimestamp;
     }
@@ -61,7 +62,7 @@ public class PinsUpdateEvent extends ChannelEvent {
      * If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<MessageChannel> getChannel() {
-        return getClient().getChannelById(getChannelId()).cast(MessageChannel.class);
+        return getGateway().getChannelById(getChannelId()).cast(MessageChannel.class);
     }
 
     /**

@@ -72,8 +72,7 @@ public class EventDispatcher {
         return processor.publishOn(scheduler)
                 .ofType(eventClass)
                 .doOnNext(event -> {
-                    int shard = event.getClient().getConfig().getShardIndex();
-                    Logger log = Loggers.getLogger("discord4j.events." + eventClass.getSimpleName() + "." + shard);
+                    Logger log = Loggers.getLogger("discord4j.events." + eventClass.getSimpleName());
                     if (log.isDebugEnabled()) {
                         log.debug("{}", event);
                     }

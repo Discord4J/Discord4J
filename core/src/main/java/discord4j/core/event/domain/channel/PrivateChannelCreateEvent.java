@@ -16,8 +16,9 @@
  */
 package discord4j.core.event.domain.channel;
 
-import discord4j.core.DiscordClient;
+import discord4j.core.GatewayAggregate;
 import discord4j.core.object.entity.channel.PrivateChannel;
+import discord4j.gateway.ShardInfo;
 
 /**
  * Dispatched when a {@link PrivateChannel} is created.
@@ -30,8 +31,8 @@ public class PrivateChannelCreateEvent extends ChannelEvent {
 
     private final PrivateChannel channel;
 
-    public PrivateChannelCreateEvent(DiscordClient client, PrivateChannel channel) {
-        super(client);
+    public PrivateChannelCreateEvent(GatewayAggregate gateway, ShardInfo shardInfo, PrivateChannel channel) {
+        super(gateway, shardInfo);
         this.channel = channel;
     }
 

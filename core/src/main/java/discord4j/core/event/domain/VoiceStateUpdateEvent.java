@@ -16,8 +16,9 @@
  */
 package discord4j.core.event.domain;
 
-import discord4j.core.DiscordClient;
+import discord4j.core.GatewayAggregate;
 import discord4j.core.object.VoiceState;
+import discord4j.gateway.ShardInfo;
 import reactor.util.annotation.Nullable;
 
 import java.util.Optional;
@@ -38,8 +39,8 @@ public class VoiceStateUpdateEvent extends Event {
     private final VoiceState current;
     private final VoiceState old;
 
-    public VoiceStateUpdateEvent(DiscordClient client, VoiceState current, @Nullable VoiceState old) {
-        super(client);
+    public VoiceStateUpdateEvent(GatewayAggregate gateway, ShardInfo shardInfo, VoiceState current, @Nullable VoiceState old) {
+        super(gateway, shardInfo);
         this.current = current;
         this.old = old;
     }

@@ -16,6 +16,7 @@
  */
 package discord4j.core.event.dispatch;
 
+import discord4j.core.GatewayAggregate;
 import discord4j.core.event.domain.lifecycle.*;
 import discord4j.core.object.data.stored.UserBean;
 import discord4j.core.object.entity.User;
@@ -31,44 +32,44 @@ import java.util.stream.Collectors;
 class LifecycleDispatchHandlers {
 
     static Mono<ReadyEvent> ready(DispatchContext<Ready> context) {
+        GatewayAggregate gateway = context.getGatewayAggregate();
         Ready dispatch = context.getDispatch();
         UserBean userBean = new UserBean(dispatch.getUser());
 
-        User self = new User(context.getServiceMediator(), userBean);
+        User self = new User(gateway, userBean);
         Set<ReadyEvent.Guild> guilds = Arrays.stream(dispatch.getGuilds())
                 .map(g -> new ReadyEvent.Guild(g.getId(), !g.isUnavailable()))
                 .collect(Collectors.toSet());
 
-        Mono<Void> saveUser = context.getServiceMediator().getStateHolder().getUserStore()
+        Mono<Void> saveUser = gateway.getStateHolder().getUserStore()
                 .save(context.getDispatch().getUser().getId(), userBean);
 
         Mono<Void> saveSelfId = Mono.fromRunnable(() ->
-                context.getServiceMediator().getStateHolder().getSelfId().set(userBean.getId()));
+                gateway.getStateHolder().getSelfId().set(userBean.getId()));
 
         return saveUser.and(saveSelfId)
-                .thenReturn(new ReadyEvent(context.getServiceMediator().getClient(), dispatch.getVersion(), self,
+                .thenReturn(new ReadyEvent(gateway, context.getShardInfo(), dispatch.getVersion(), self,
                         guilds, dispatch.getSessionId(), dispatch.getTrace()));
     }
 
     static Mono<ResumeEvent> resumed(DispatchContext<Resumed> context) {
-        return Mono.just(new ResumeEvent(context.getServiceMediator().getClient(), context.getDispatch().getTrace()));
+        return Mono.just(new ResumeEvent(context.getGatewayAggregate(), context.getShardInfo(), context.getDispatch().getTrace()));
     }
 
     static Mono<? extends GatewayLifecycleEvent> gatewayStateChanged(DispatchContext<GatewayStateChange> context) {
+        GatewayAggregate gateway = context.getGatewayAggregate();
         GatewayStateChange dispatch = context.getDispatch();
         switch (dispatch.getState()) {
             case CONNECTED:
-                return Mono.just(new ConnectEvent(context.getServiceMediator().getClient()));
+                return Mono.just(new ConnectEvent(gateway, context.getShardInfo()));
             case RETRY_STARTED:
-                return Mono.just(new ReconnectStartEvent(context.getServiceMediator().getClient()));
+                return Mono.just(new ReconnectStartEvent(gateway, context.getShardInfo()));
             case RETRY_FAILED:
-                return Mono.just(new ReconnectFailEvent(context.getServiceMediator().getClient(),
-                        dispatch.getCurrentAttempt()));
+                return Mono.just(new ReconnectFailEvent(gateway, context.getShardInfo(), dispatch.getCurrentAttempt()));
             case RETRY_SUCCEEDED:
-                return Mono.just(new ReconnectEvent(context.getServiceMediator().getClient(),
-                        dispatch.getCurrentAttempt()));
+                return Mono.just(new ReconnectEvent(gateway, context.getShardInfo(), dispatch.getCurrentAttempt()));
             case DISCONNECTED:
-                return Mono.just(new DisconnectEvent(context.getServiceMediator().getClient()));
+                return Mono.just(new DisconnectEvent(gateway, context.getShardInfo()));
         }
         return Mono.empty();
     }

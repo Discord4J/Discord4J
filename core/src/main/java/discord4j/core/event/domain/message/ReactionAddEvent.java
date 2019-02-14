@@ -16,13 +16,14 @@
  */
 package discord4j.core.event.domain.message;
 
-import discord4j.core.DiscordClient;
+import discord4j.core.GatewayAggregate;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.core.object.reaction.ReactionEmoji;
 import discord4j.core.object.util.Snowflake;
+import discord4j.gateway.ShardInfo;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
 
@@ -46,9 +47,9 @@ public class ReactionAddEvent extends MessageEvent {
     private final Long guildId;
     private final ReactionEmoji emoji;
 
-    public ReactionAddEvent(DiscordClient client, long userId, long channelId, long messageId, @Nullable Long guildId,
+    public ReactionAddEvent(GatewayAggregate gateway, ShardInfo shardInfo, long userId, long channelId, long messageId, @Nullable Long guildId,
                             ReactionEmoji emoji) {
-        super(client);
+        super(gateway, shardInfo);
         this.userId = userId;
         this.channelId = channelId;
         this.messageId = messageId;
@@ -72,7 +73,7 @@ public class ReactionAddEvent extends MessageEvent {
      * If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<User> getUser() {
-        return getClient().getUserById(getUserId());
+        return getGateway().getUserById(getUserId());
     }
 
     /**
@@ -91,7 +92,7 @@ public class ReactionAddEvent extends MessageEvent {
      * the {@link Message} in the event. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<MessageChannel> getChannel() {
-        return getClient().getChannelById(getChannelId()).cast(MessageChannel.class);
+        return getGateway().getChannelById(getChannelId()).cast(MessageChannel.class);
     }
 
     /**
@@ -110,7 +111,7 @@ public class ReactionAddEvent extends MessageEvent {
      * If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Message> getMessage() {
-        return getClient().getMessageById(getChannelId(), getMessageId());
+        return getGateway().getMessageById(getChannelId(), getMessageId());
     }
 
     /**
@@ -131,7 +132,7 @@ public class ReactionAddEvent extends MessageEvent {
      * involved, if present. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Guild> getGuild() {
-        return Mono.justOrEmpty(getGuildId()).flatMap(getClient()::getGuildById);
+        return Mono.justOrEmpty(getGuildId()).flatMap(getGateway()::getGuildById);
     }
 
     /**

@@ -17,12 +17,13 @@
 package discord4j.core.event.domain;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import discord4j.core.DiscordClient;
+import discord4j.core.GatewayAggregate;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.presence.Presence;
 import discord4j.core.object.util.Snowflake;
+import discord4j.gateway.ShardInfo;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
 
@@ -45,9 +46,9 @@ public class PresenceUpdateEvent extends Event {
     private final Presence current;
     private final Presence old;
 
-    public PresenceUpdateEvent(DiscordClient client, long guildId, @Nullable User oldUser, JsonNode user,
+    public PresenceUpdateEvent(GatewayAggregate gateway, ShardInfo shardInfo, long guildId, @Nullable User oldUser, JsonNode user,
                                Presence current, @Nullable Presence old) {
-        super(client);
+        super(gateway, shardInfo);
         this.guildId = guildId;
         this.oldUser = oldUser;
         this.user = user;
@@ -70,7 +71,7 @@ public class PresenceUpdateEvent extends Event {
      * @return A {@link Mono} where, upon successful completion, emits the {@link Guild} involved in the event.
      */
     public Mono<Guild> getGuild() {
-        return getClient().getGuildById(getGuildId());
+        return getGateway().getGuildById(getGuildId());
     }
 
     /**
@@ -131,7 +132,7 @@ public class PresenceUpdateEvent extends Event {
      * If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<User> getUser() {
-        return getClient().getUserById(getUserId());
+        return getGateway().getUserById(getUserId());
     }
 
     /**
@@ -141,7 +142,7 @@ public class PresenceUpdateEvent extends Event {
      * If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Member> getMember() {
-        return getClient().getMemberById(getGuildId(), getUserId());
+        return getGateway().getMemberById(getGuildId(), getUserId());
     }
 
     /**

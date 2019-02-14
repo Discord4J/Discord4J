@@ -17,7 +17,8 @@
 
 package discord4j.core.event.domain.lifecycle;
 
-import discord4j.core.DiscordClient;
+import discord4j.core.GatewayAggregate;
+import discord4j.gateway.ShardInfo;
 
 /**
  * Indicates that a gateway connection is starting a reconnect attempt. Can be followed by {@link ReconnectEvent} if
@@ -27,8 +28,8 @@ import discord4j.core.DiscordClient;
  */
 public class ReconnectStartEvent extends GatewayLifecycleEvent {
 
-    public ReconnectStartEvent(DiscordClient client) {
-        super(client);
+    public ReconnectStartEvent(GatewayAggregate gateway, ShardInfo shardInfo) {
+        super(gateway, shardInfo);
     }
 
     @Override

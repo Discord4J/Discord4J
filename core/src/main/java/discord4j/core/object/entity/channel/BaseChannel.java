@@ -17,7 +17,7 @@
 package discord4j.core.object.entity.channel;
 
 import discord4j.core.DiscordClient;
-import discord4j.core.ServiceMediator;
+import discord4j.core.GatewayAggregate;
 import discord4j.core.object.data.stored.ChannelBean;
 import discord4j.core.object.util.Snowflake;
 import discord4j.core.util.EntityUtil;
@@ -32,23 +32,28 @@ class BaseChannel implements Channel {
     /** The raw data as represented by Discord. */
     private final ChannelBean data;
 
-    /** The ServiceMediator associated to this object. */
-    private final ServiceMediator serviceMediator;
+    /** The gateway associated to this object. */
+    private final GatewayAggregate gateway;
 
     /**
      * Constructs a {@code BaseChannel} with an associated ServiceMediator and Discord data.
      *
-     * @param serviceMediator The ServiceMediator associated to this object, must be non-null.
+     * @param gateway The {@link GatewayAggregate} associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
      */
-    BaseChannel(final ServiceMediator serviceMediator, final ChannelBean data) {
-        this.serviceMediator = Objects.requireNonNull(serviceMediator);
+    BaseChannel(final GatewayAggregate gateway, final ChannelBean data) {
+        this.gateway = Objects.requireNonNull(gateway);
         this.data = Objects.requireNonNull(data);
     }
 
     @Override
     public final DiscordClient getClient() {
-        return serviceMediator.getClient();
+        return gateway.getDiscordClient();
+    }
+
+    @Override
+    public GatewayAggregate getGateway() {
+        return gateway;
     }
 
     @Override
@@ -63,10 +68,9 @@ class BaseChannel implements Channel {
 
     @Override
     public final Mono<Void> delete(@Nullable final String reason) {
-        return serviceMediator.getRestClient().getChannelService()
+        return gateway.getRestClient().getChannelService()
                 .deleteChannel(getId().asLong(), reason)
-                .then()
-                .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex()));
+                .then();
     }
 
     /**
@@ -76,15 +80,6 @@ class BaseChannel implements Channel {
      */
     ChannelBean getData() {
         return data;
-    }
-
-    /**
-     * Gets the ServiceMediator associated to this object.
-     *
-     * @return The ServiceMediator associated to this object.
-     */
-    final ServiceMediator getServiceMediator() {
-        return serviceMediator;
     }
 
     @Override

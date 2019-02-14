@@ -17,7 +17,7 @@
 package discord4j.core.object;
 
 import discord4j.core.DiscordClient;
-import discord4j.core.ServiceMediator;
+import discord4j.core.GatewayAggregate;
 import discord4j.core.object.data.InviteBean;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.User;
@@ -37,8 +37,8 @@ import java.util.OptionalInt;
  */
 public class Invite implements DiscordObject {
 
-    /** The ServiceMediator associated to this object. */
-    private final ServiceMediator serviceMediator;
+    /** The gateway associated to this object. */
+    private final GatewayAggregate gateway;
 
     /** The raw data as represented by Discord. */
     private final InviteBean data;
@@ -46,17 +46,22 @@ public class Invite implements DiscordObject {
     /**
      * Constructs a {@code Invite} with an associated ServiceMediator and Discord data.
      *
-     * @param serviceMediator The ServiceMediator associated to this object, must be non-null.
+     * @param gateway The {@link GatewayAggregate} associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
      */
-    public Invite(final ServiceMediator serviceMediator, final InviteBean data) {
-        this.serviceMediator = Objects.requireNonNull(serviceMediator);
+    public Invite(final GatewayAggregate gateway, final InviteBean data) {
+        this.gateway = Objects.requireNonNull(gateway);
         this.data = Objects.requireNonNull(data);
     }
 
     @Override
     public final DiscordClient getClient() {
-        return serviceMediator.getClient();
+        return gateway.getDiscordClient();
+    }
+
+    @Override
+    public GatewayAggregate getGateway() {
+        return gateway;
     }
 
     /**
@@ -84,7 +89,7 @@ public class Invite implements DiscordObject {
      * to. If an error is received, it is emitted through the {@code Mono}.
      */
     public final Mono<Guild> getGuild() {
-        return getClient().getGuildById(getGuildId());
+        return gateway.getGuildById(getGuildId());
     }
 
     /**
@@ -103,7 +108,7 @@ public class Invite implements DiscordObject {
      * associated to. If an error is received, it is emitted through the {@code Mono}.
      */
     public final Mono<CategorizableChannel> getChannel() {
-        return getClient().getChannelById(getChannelId()).cast(CategorizableChannel.class);
+        return getGateway().getChannelById(getChannelId()).cast(CategorizableChannel.class);
     }
 
     /**
@@ -168,10 +173,9 @@ public class Invite implements DiscordObject {
      * If an error is received, it is emitted through the {@code Mono}.
      */
     public final Mono<Void> delete(@Nullable final String reason) {
-        return serviceMediator.getRestClient().getInviteService()
+        return gateway.getRestClient().getInviteService()
                 .deleteInvite(getCode(), reason)
-                .then()
-                .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex()));
+                .then();
     }
 
     /**

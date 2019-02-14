@@ -188,6 +188,7 @@ class RequestStream<T> {
                     Mono.fromCallable(() -> new ClientRequest(request))
                             .log(requestLog, Level.FINEST, false)
                             .flatMap(r -> httpClient.exchange(r, request.getBody(), responseType, rateLimitHandler))
+                            .subscriberContext(ctx -> ctx.putNonNull("shard", shard))
                             .retryWhen(rateLimitRetryFactory())
                             .transform(getResponseTransformers(request))
                             .retryWhen(serverErrorRetryFactory())

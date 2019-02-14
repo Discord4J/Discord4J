@@ -20,19 +20,18 @@ package discord4j.core;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import discord4j.core.event.domain.Event;
-import discord4j.core.event.domain.lifecycle.ReadyEvent;
-import discord4j.core.event.domain.lifecycle.ResumeEvent;
 import discord4j.core.event.domain.message.MessageCreateEvent;
-import discord4j.core.object.entity.ApplicationInfo;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.User;
+import discord4j.core.object.entity.channel.PrivateChannel;
 import discord4j.core.object.presence.Presence;
 import discord4j.core.object.util.Snowflake;
-import discord4j.core.shard.ShardingClientBuilder;
 import discord4j.gateway.IdentifyOptions;
+import discord4j.gateway.ShardInfo;
 import discord4j.gateway.json.GatewayPayload;
 import discord4j.gateway.json.Opcode;
 import discord4j.gateway.retry.PartialDisconnectException;
+import discord4j.rest.entity.data.ApplicationInfoData;
 import io.netty.buffer.Unpooled;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
@@ -46,6 +45,7 @@ import reactor.netty.DisposableServer;
 import reactor.netty.http.server.HttpServer;
 import reactor.util.Logger;
 import reactor.util.Loggers;
+import reactor.util.function.Tuples;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -83,65 +83,97 @@ public class RetryBotTest {
     @Test
     @Ignore("Example code excluded from CI")
     public void testWithSetShardCount() {
-        new ShardingClientBuilder(token)
-                .setShardCount(shardCount)
+        DiscordClient.builder(token)
                 .build()
-                .map(builder -> builder.setInitialPresence(Presence.invisible()))
-                .map(DiscordClientBuilder::build)
-                .flatMap(DiscordClient::login)
-                .blockLast();
+                .gateway()
+                .setShardCount(shardCount)
+                .setInitialPresence(shard -> Presence.invisible())
+                .login(gateway -> Mono.empty())
+                .block();
+    }
+
+    @Test
+    @Ignore("Example code excluded from CI")
+    public void testWithConnect() throws InterruptedException {
+        List<GatewayConnection> connections = DiscordClient.create(token)
+                .gateway()
+                .setShardCount(shardCount)
+                .connect(gateway -> gateway.getEventDispatcher()
+                        .on(MessageCreateEvent.class)
+                        .filter(event -> event.getMessage().getContent().orElse("").equals("!exit"))
+                        .doOnNext(event -> log.info("Proceeding to exit!!!"))
+                        .flatMap(event -> event.getGateway().logout())
+                        .then())
+                .block();
+        CountDownLatch latch = new CountDownLatch(1);
+        for (GatewayConnection connection : connections) {
+            log.info(connection.getIdentifyOptions().toString());
+            connection.getGateway().getCloseProcessor().log("discord4j.close.processor.")
+                    .subscribe(null, t -> {
+                        log.info("Disconnected from {} with error", connection, t);
+                        latch.countDown();
+                    }, () -> {
+                        log.info("Disconnected from {}", connection);
+                        latch.countDown();
+                    });
+        }
+        latch.await();
     }
 
     @Test
     @Ignore("Example code excluded from CI")
     public void testWithRecommendedShardCount() {
-        new ShardingClientBuilder(token)
+        DiscordClient.builder(token)
                 .build()
-                .map(builder -> builder.setInitialPresence(Presence.invisible()))
-                .map(DiscordClientBuilder::build)
-                .flatMap(DiscordClient::login)
-                .blockLast();
+                .gateway()
+                .login(gateway -> gateway.getEventDispatcher().on(MessageCreateEvent.class)
+                        .filterWhen(e -> e.getMessage().getChannel().ofType(PrivateChannel.class).hasElement())
+                        .doOnNext(event -> log.info("{}", event))
+                        .then())
+                .block();
     }
 
     @Test
     @Ignore("Example code excluded from CI")
     public void test() {
         String resumePath = "resume.test";
-        final Map<Integer, IdentifyOptions> optionsMap = loadResumeData(resumePath);
-
-        DiscordClient client = new DiscordClientBuilder(token)
-                .setIdentifyOptions(optionsMap.get(0))
-                .setGatewayObserver((s, o) -> optionsMap.put(o.getShardIndex(), o))
-                .build();
-
-        Map<Integer, DiscordClient> clients = new ConcurrentHashMap<>();
+        Map<ShardInfo, IdentifyOptions> optionsMap = loadResumeData(resumePath);
+        DiscordClient client = DiscordClient.create(token);
         Map<String, AtomicLong> counts = new ConcurrentHashMap<>();
 
-        clients.put(0, client);
-
-        subscribeEventCounter(client, counts);
-
-        startHttpServer(new ServerContext(clients, counts));
-
-        AtomicLong ownerId = new AtomicLong();
-
         // Get the bot owner ID to filter commands
-        Flux.first(client.getEventDispatcher().on(ReadyEvent.class),
-                client.getEventDispatcher().on(ResumeEvent.class))
-                .next()
-                .flatMap(evt -> client.getApplicationInfo())
-                .map(ApplicationInfo::getOwnerId)
-                .map(Snowflake::asLong)
-                .subscribe(ownerId::set);
-
-        TestCommands testCommands = new TestCommands(client, ownerId);
-        client.getEventDispatcher().on(MessageCreateEvent.class)
-                .flatMap(testCommands::onMessageCreate)
-                .onErrorContinue((t, o) -> log.error("Error", t))
-                .subscribe();
+        Mono<Long> ownerId = client.getApplicationInfo()
+                .map(ApplicationInfoData::getOwnerId)
+                .cache();
 
         try {
-            client.login().block();
+            client.gateway()
+                    .setGatewayObserver((newState, identifyOptions) -> {
+                        optionsMap.put(identifyOptions.getShardInfo(), identifyOptions);
+                    })
+                    .setResumeOptions(shard -> {
+                        IdentifyOptions loaded = optionsMap.get(shard);
+                        String sessionId = loaded.getResumeSessionId() == null ? "" : loaded.getResumeSessionId();
+                        Integer sequence = loaded.getResumeSequence() == null ? 0 : loaded.getResumeSequence();
+                        return Tuples.of(sessionId, sequence);
+                    })
+                    .login(gateway -> {
+                        subscribeEventCounter(gateway, counts);
+                        startHttpServer(new ServerContext(gateway, counts));
+
+                        TestCommands testCommands = new TestCommands(gateway);
+                        return gateway.getEventDispatcher().on(MessageCreateEvent.class)
+                                .filterWhen(event -> ownerId.map(owner -> {
+                                    Long author = event.getMessage().getAuthor()
+                                            .map(u -> u.getId().asLong())
+                                            .orElse(null);
+                                    return owner.equals(author);
+                                }))
+                                .flatMap(testCommands::onMessageCreate)
+                                .onErrorContinue((t, o) -> log.error("Error", t))
+                                .then();
+                    })
+                    .block();
         } catch (PartialDisconnectException e) {
             log.warn("This client can reconnect and RESUME");
         }
@@ -152,7 +184,7 @@ public class RetryBotTest {
     @Test
     @Ignore("Example code excluded from CI")
     public void testAndCancel() throws InterruptedException {
-        DiscordClient client = new DiscordClientBuilder(token).build();
+        DiscordClient client = DiscordClient.create(token);
         CountDownLatch latch = new CountDownLatch(1);
         Disposable disposable = client.login()
                 .doOnCancel(latch::countDown)
@@ -167,34 +199,33 @@ public class RetryBotTest {
 
     public static class TestCommands {
 
-        private final DiscordClient client;
-        private final AtomicLong ownerId;
+        private final GatewayAggregate gateway;
 
-        public TestCommands(DiscordClient client, AtomicLong ownerId) {
-            this.client = client;
-            this.ownerId = ownerId;
+        public TestCommands(GatewayAggregate gateway) {
+            this.gateway = gateway;
         }
 
         public Mono<Void> onMessageCreate(MessageCreateEvent event) {
             Message message = event.getMessage();
 
             message.getAuthor()
-                    .filter(user -> ownerId.get() == user.getId().asLong()) // only accept bot owner messages
-                    .flatMap(ignored -> message.getContent())
+                    .flatMap(__ -> message.getContent())
                     .ifPresent(content -> {
                         if ("!close".equals(content)) {
-                            client.logout().subscribe();
+                            gateway.logout().subscribe();
                         } else if ("!retry".equals(content)) {
-                            client.getServiceMediator().getGatewayClient().sender()
-                                    .next(new GatewayPayload<>(Opcode.RECONNECT, null, null, null));
+                            gateway.getGatewayClientMap().values()
+                                    .forEach(gatewayClient -> gatewayClient.sender()
+                                            .next(new GatewayPayload<>(Opcode.RECONNECT, null, null, null)));
                         } else if ("!disconnect".equals(content)) {
-                            client.getServiceMediator().getGatewayClient().close(true).subscribe();
+                            gateway.getGatewayClientMap().values()
+                                    .forEach(gatewayClient -> gatewayClient.close(true).subscribe());
                         } else if ("!online".equals(content)) {
-                            client.updatePresence(Presence.online()).subscribe();
+                            gateway.updatePresence(0, Presence.online()).subscribe();
                         } else if ("!dnd".equals(content)) {
-                            client.updatePresence(Presence.doNotDisturb()).subscribe();
+                            gateway.updatePresence(0, Presence.doNotDisturb()).subscribe();
                         } else if (content.startsWith("!raw ")) {
-                            event.getClient().getServiceMediator().getGatewayClient()
+                            gateway.getGatewayClientMap().get(0)
                                     .sendBuffer(Mono.just(
                                             Unpooled.wrappedBuffer(
                                                     content.substring("!raw ".length())
@@ -220,19 +251,22 @@ public class RetryBotTest {
      *
      * @return a Map of IdentifyOptions across all shards to be used for resuming sessions.
      */
-    private Map<Integer, IdentifyOptions> loadResumeData(String resumePath) {
-        Map<Integer, IdentifyOptions> map = new ConcurrentHashMap<>();
+    private Map<ShardInfo, IdentifyOptions> loadResumeData(String resumePath) {
+        Map<ShardInfo, IdentifyOptions> map = new ConcurrentHashMap<>();
         try {
             Path path = Paths.get(resumePath);
             if (Files.isRegularFile(path)
                     && Files.getLastModifiedTime(path).toInstant().plusSeconds(60).isAfter(Instant.now())) {
                 for (String line : Files.readAllLines(path)) {
-                    String[] tokens = line.split(";", 3);
-                    Integer id = Integer.valueOf(tokens[0]);
-                    IdentifyOptions options = new IdentifyOptions(id, shardCount, null);
-                    options.setResumeSessionId(tokens[1]);
-                    options.setResumeSequence(Integer.valueOf(tokens[2]));
-                    map.put(id, options);
+                    // id;count;sessionId;sequence
+                    String[] tokens = line.split(";", 4);
+                    int id = Integer.parseInt(tokens[0]);
+                    int count = Integer.parseInt(tokens[1]);
+                    ShardInfo shardInfo = new ShardInfo(id, count);
+                    IdentifyOptions identifyOptions = new IdentifyOptions(id, count, null);
+                    identifyOptions.setResumeSessionId(tokens[2]);
+                    identifyOptions.setResumeSequence(Integer.valueOf(tokens[3]));
+                    map.put(shardInfo, identifyOptions);
                 }
             } else {
                 log.debug("Not attempting to resume");
@@ -243,27 +277,29 @@ public class RetryBotTest {
 
         if (map.isEmpty()) {
             // fallback to IDENTIFY case
-            for (int i = 0; i < shardCount; i++) {
-                map.put(i, new IdentifyOptions(i, shardCount, null));
+            for (int id = 0; id < shardCount; id++) {
+                ShardInfo shardInfo = new ShardInfo(id, shardCount);
+                map.put(shardInfo, new IdentifyOptions(id, shardCount, null));
             }
         } else if (map.size() < shardCount) {
-            for (int i = 0; i < shardCount; i++) {
-                map.computeIfAbsent(i, k -> new IdentifyOptions(k, shardCount, null));
+            for (int id = 0; id < shardCount; id++) {
+                ShardInfo shardInfo = new ShardInfo(id, shardCount);
+                map.computeIfAbsent(shardInfo, k -> new IdentifyOptions(k.getIndex(), k.getCount(), null));
             }
         }
         return map;
     }
 
-    private void saveResumeData(Map<Integer, IdentifyOptions> map, String resumePath) {
+    private void saveResumeData(Map<ShardInfo, IdentifyOptions> map, String resumePath) {
         try {
             List<String> lines = map.entrySet()
                     .stream()
                     .map(entry -> {
-                        int shard = entry.getKey();
+                        ShardInfo shard = entry.getKey();
                         String sessionId = entry.getValue().getResumeSessionId();
                         Integer sequence = entry.getValue().getResumeSequence();
                         log.debug("Saving resume data for shard {}: {}, {}", shard, sessionId, sequence);
-                        return shard + ";" + sessionId + ";" + sequence;
+                        return shard.getIndex() + ";" + shard.getCount() + ";" + sessionId + ";" + sequence;
                     })
                     .filter(line -> !line.contains("null"))
                     .collect(Collectors.toList());
@@ -274,9 +310,9 @@ public class RetryBotTest {
         }
     }
 
-    private void subscribeEventCounter(DiscordClient client, Map<String, AtomicLong> counts) {
+    private void subscribeEventCounter(GatewayAggregate gateway, Map<String, AtomicLong> counts) {
         reflections.getSubTypesOf(Event.class)
-                .forEach(type -> client.getEventDispatcher().on(type)
+                .forEach(type -> gateway.getEventDispatcher().on(type)
                         .map(event -> event.getClass().getSimpleName())
                         .map(name -> counts.computeIfAbsent(name, k -> new AtomicLong()).addAndGet(1))
                         .subscribe(null, t -> log.error("Error", t)));
@@ -284,11 +320,11 @@ public class RetryBotTest {
 
     static class ServerContext {
 
-        private final Map<Integer, DiscordClient> clientMap;
+        private final GatewayAggregate gateway;
         private final Map<String, AtomicLong> eventCounts;
 
-        ServerContext(Map<Integer, DiscordClient> clientMap, Map<String, AtomicLong> eventCounts) {
-            this.clientMap = clientMap;
+        ServerContext(GatewayAggregate gateway, Map<String, AtomicLong> eventCounts) {
+            this.gateway = gateway;
             this.eventCounts = eventCounts;
         }
     }
@@ -299,8 +335,7 @@ public class RetryBotTest {
                 .port(0)
                 .route(routes -> routes
                         .get("/users",
-                                (req, res) -> res.sendString(Flux.fromIterable(context.clientMap.values())
-                                        .flatMap(DiscordClient::getUsers)
+                                (req, res) -> res.sendString(context.gateway.getUsers()
                                         .map(User::getId)
                                         .distinct()
                                         .count()

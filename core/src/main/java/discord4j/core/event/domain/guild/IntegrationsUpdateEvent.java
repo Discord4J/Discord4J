@@ -16,9 +16,10 @@
  */
 package discord4j.core.event.domain.guild;
 
-import discord4j.core.DiscordClient;
+import discord4j.core.GatewayAggregate;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.util.Snowflake;
+import discord4j.gateway.ShardInfo;
 import reactor.core.publisher.Mono;
 
 /**
@@ -33,8 +34,8 @@ public class IntegrationsUpdateEvent extends GuildEvent {
 
     private final long guildId;
 
-    public IntegrationsUpdateEvent(DiscordClient client, long guildId) {
-        super(client);
+    public IntegrationsUpdateEvent(GatewayAggregate gateway, ShardInfo shardInfo, long guildId) {
+        super(gateway, shardInfo);
         this.guildId = guildId;
     }
 
@@ -54,7 +55,7 @@ public class IntegrationsUpdateEvent extends GuildEvent {
      * If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Guild> getGuild() {
-        return getClient().getGuildById(getGuildId());
+        return getGateway().getGuildById(getGuildId());
     }
 
     @Override

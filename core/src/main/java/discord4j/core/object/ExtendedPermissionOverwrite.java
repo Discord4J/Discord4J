@@ -17,7 +17,7 @@
 package discord4j.core.object;
 
 import discord4j.core.DiscordClient;
-import discord4j.core.ServiceMediator;
+import discord4j.core.GatewayAggregate;
 import discord4j.core.object.data.stored.PermissionOverwriteBean;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Role;
@@ -36,8 +36,8 @@ import java.util.Objects;
  */
 public final class ExtendedPermissionOverwrite extends PermissionOverwrite implements DiscordObject {
 
-    /** The ServiceMediator associated to this object. */
-    private final ServiceMediator serviceMediator;
+    /** The gateway associated to this object. */
+    private final GatewayAggregate gateway;
 
     /** The ID of the guild associated to this overwrite. */
     private final long guildId;
@@ -48,22 +48,27 @@ public final class ExtendedPermissionOverwrite extends PermissionOverwrite imple
     /**
      * Constructs a {@code ExtendedPermissionOverwrite} with an associated ServiceMediator and Discord data.
      *
-     * @param serviceMediator The ServiceMediator associated to this object, must be non-null.
+     * @param gateway The {@link GatewayAggregate} associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
      * @param guildId The ID of the guild associated to this overwrite.
      * @param channelId The ID of the channel associated to this overwrite.
      */
-    public ExtendedPermissionOverwrite(final ServiceMediator serviceMediator, final PermissionOverwriteBean data,
+    public ExtendedPermissionOverwrite(final GatewayAggregate gateway, final PermissionOverwriteBean data,
                                        final long guildId, final long channelId) {
         super(data.getAllow(), data.getDeny(), data.getId(), Type.of(data.getType()));
-        this.serviceMediator = Objects.requireNonNull(serviceMediator);
+        this.gateway = Objects.requireNonNull(gateway);
         this.guildId = guildId;
         this.channelId = channelId;
     }
 
     @Override
     public DiscordClient getClient() {
-        return serviceMediator.getClient();
+        return gateway.getDiscordClient();
+    }
+
+    @Override
+    public GatewayAggregate getGateway() {
+        return gateway;
     }
 
     /**
@@ -73,7 +78,7 @@ public final class ExtendedPermissionOverwrite extends PermissionOverwrite imple
      * if present. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Role> getRole() {
-        return Mono.justOrEmpty(getRoleId()).flatMap(id -> getClient().getRoleById(getGuildId(), id));
+        return Mono.justOrEmpty(getRoleId()).flatMap(id -> gateway.getRoleById(getGuildId(), id));
     }
 
     /**
@@ -83,7 +88,7 @@ public final class ExtendedPermissionOverwrite extends PermissionOverwrite imple
      * if present. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<User> getUser() {
-        return Mono.justOrEmpty(getMemberId()).flatMap(getClient()::getUserById);
+        return Mono.justOrEmpty(getMemberId()).flatMap(getGateway()::getUserById);
     }
 
     /**
@@ -102,7 +107,7 @@ public final class ExtendedPermissionOverwrite extends PermissionOverwrite imple
      * If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Guild> getGuild() {
-        return getClient().getGuildById(getGuildId());
+        return gateway.getGuildById(getGuildId());
     }
 
     /**
@@ -121,7 +126,7 @@ public final class ExtendedPermissionOverwrite extends PermissionOverwrite imple
      * overwrite. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<GuildChannel> getChannel() {
-        return getClient().getChannelById(getChannelId()).cast(GuildChannel.class);
+        return getGateway().getChannelById(getChannelId()).cast(GuildChannel.class);
     }
 
     /**
@@ -142,8 +147,7 @@ public final class ExtendedPermissionOverwrite extends PermissionOverwrite imple
      * been deleted. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Void> delete(@Nullable final String reason) {
-        return serviceMediator.getRestClient().getChannelService()
-                .deleteChannelPermission(channelId, getTargetId().asLong(), reason)
-                .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex()));
+        return gateway.getRestClient().getChannelService()
+                .deleteChannelPermission(channelId, getTargetId().asLong(), reason);
     }
 }

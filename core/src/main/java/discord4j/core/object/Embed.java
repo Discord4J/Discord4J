@@ -17,7 +17,7 @@
 package discord4j.core.object;
 
 import discord4j.core.DiscordClient;
-import discord4j.core.ServiceMediator;
+import discord4j.core.GatewayAggregate;
 import discord4j.core.object.data.stored.embed.*;
 import discord4j.core.util.EntityUtil;
 
@@ -46,8 +46,8 @@ public final class Embed implements DiscordObject {
     /** The maximum amount of total characters that can be present in an embed. */
     public static final int MAX_CHARACTER_LENGTH = 6000;
 
-    /** The ServiceMediator associated to this object. */
-    private final ServiceMediator serviceMediator;
+    /** The gateway associated to this object. */
+    private final GatewayAggregate gateway;
 
     /** The raw data as represented by Discord. */
     private final EmbedBean data;
@@ -55,17 +55,22 @@ public final class Embed implements DiscordObject {
     /**
      * Constructs an {@code Embed} with an associated ServiceMediator and Discord data.
      *
-     * @param serviceMediator The ServiceMediator associated to this object, must be non-null.
+     * @param gateway The {@link GatewayAggregate} associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
      */
-    public Embed(final ServiceMediator serviceMediator, final EmbedBean data) {
-        this.serviceMediator = Objects.requireNonNull(serviceMediator);
+    public Embed(final GatewayAggregate gateway, final EmbedBean data) {
+        this.gateway = Objects.requireNonNull(gateway);
         this.data = Objects.requireNonNull(data);
     }
 
     @Override
     public DiscordClient getClient() {
-        return serviceMediator.getClient();
+        return gateway.getDiscordClient();
+    }
+
+    @Override
+    public GatewayAggregate getGateway() {
+        return gateway;
     }
 
     /**

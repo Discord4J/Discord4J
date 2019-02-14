@@ -16,8 +16,9 @@
  */
 package discord4j.core.event.domain;
 
-import discord4j.core.DiscordClient;
+import discord4j.core.GatewayAggregate;
 import discord4j.core.object.entity.User;
+import discord4j.gateway.ShardInfo;
 import reactor.util.annotation.Nullable;
 
 import java.util.Optional;
@@ -34,8 +35,8 @@ public class UserUpdateEvent extends Event {
     private final User current;
     private final User old;
 
-    public UserUpdateEvent(DiscordClient client, User current, @Nullable User old) {
-        super(client);
+    public UserUpdateEvent(GatewayAggregate gateway, ShardInfo shardInfo, User current, @Nullable User old) {
+        super(gateway, shardInfo);
         this.current = current;
         this.old = old;
     }

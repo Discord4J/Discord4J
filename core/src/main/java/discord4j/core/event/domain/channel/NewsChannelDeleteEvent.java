@@ -16,8 +16,9 @@
  */
 package discord4j.core.event.domain.channel;
 
-import discord4j.core.DiscordClient;
+import discord4j.core.GatewayAggregate;
 import discord4j.core.object.entity.channel.NewsChannel;
+import discord4j.gateway.ShardInfo;
 
 /**
  * Dispatched when a {@link NewsChannel} is deleted in a guild.
@@ -30,8 +31,8 @@ public class NewsChannelDeleteEvent extends ChannelEvent {
 
     private final NewsChannel channel;
 
-    public NewsChannelDeleteEvent(DiscordClient client, NewsChannel channel) {
-        super(client);
+    public NewsChannelDeleteEvent(GatewayAggregate gateway, ShardInfo shardInfo, NewsChannel channel) {
+        super(gateway, shardInfo);
         this.channel = channel;
     }
 

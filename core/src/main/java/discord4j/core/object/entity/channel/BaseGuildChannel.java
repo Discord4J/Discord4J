@@ -16,7 +16,7 @@
  */
 package discord4j.core.object.entity.channel;
 
-import discord4j.core.ServiceMediator;
+import discord4j.core.GatewayAggregate;
 import discord4j.core.object.ExtendedPermissionOverwrite;
 import discord4j.core.object.PermissionOverwrite;
 import discord4j.core.object.data.stored.ChannelBean;
@@ -41,11 +41,11 @@ class BaseGuildChannel extends BaseChannel implements GuildChannel {
     /**
      * Constructs an {@code BaseGuildChannel} with an associated ServiceMediator and Discord data.
      *
-     * @param serviceMediator The ServiceMediator associated to this object, must be non-null.
+     * @param gateway The {@link GatewayAggregate} associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
      */
-    BaseGuildChannel(final ServiceMediator serviceMediator, final ChannelBean data) {
-        super(serviceMediator, data);
+    BaseGuildChannel(final GatewayAggregate gateway, final ChannelBean data) {
+        super(gateway, data);
     }
 
     @Override
@@ -55,7 +55,7 @@ class BaseGuildChannel extends BaseChannel implements GuildChannel {
 
     @Override
     public final Mono<Guild> getGuild() {
-        return getClient().getGuildById(getGuildId());
+        return getGateway().getGuildById(getGuildId());
     }
 
     @Override
@@ -67,7 +67,7 @@ class BaseGuildChannel extends BaseChannel implements GuildChannel {
             long guildId = getGuildId().asLong();
             long channelId = getId().asLong();
             return Arrays.stream(permissionOverwrites)
-                    .map(bean -> new ExtendedPermissionOverwrite(getServiceMediator(), bean, guildId, channelId))
+                    .map(bean -> new ExtendedPermissionOverwrite(getGateway(), bean, guildId, channelId))
                     .collect(Collectors.toSet());
         }
     }
@@ -88,7 +88,7 @@ class BaseGuildChannel extends BaseChannel implements GuildChannel {
 
     @Override
     public Mono<PermissionSet> getEffectivePermissions(Snowflake memberId) {
-        Mono<Member> getMember = getClient().getMemberById(getGuildId(), memberId);
+        Mono<Member> getMember = getGateway().getMemberById(getGuildId(), memberId);
         Mono<PermissionSet> getBasePerms = getMember.flatMap(Member::getBasePermissions);
 
         return Mono.zip(getMember, getBasePerms, (member, basePerms) -> {
@@ -129,9 +129,8 @@ class BaseGuildChannel extends BaseChannel implements GuildChannel {
         PermissionSet deny = overwrite.getDenied();
         PermissionsEditRequest request = new PermissionsEditRequest(allow.getRawValue(), deny.getRawValue(), "member");
 
-        return getServiceMediator().getRestClient().getChannelService()
-                .editChannelPermissions(getId().asLong(), memberId.asLong(), request, reason)
-                .subscriberContext(ctx -> ctx.put("shard", getServiceMediator().getClientConfig().getShardIndex()));
+        return getGateway().getRestClient().getChannelService()
+                .editChannelPermissions(getId().asLong(), memberId.asLong(), request, reason);
     }
 
     @Override
@@ -140,9 +139,8 @@ class BaseGuildChannel extends BaseChannel implements GuildChannel {
         PermissionSet deny = overwrite.getDenied();
         PermissionsEditRequest request = new PermissionsEditRequest(allow.getRawValue(), deny.getRawValue(), "role");
 
-        return getServiceMediator().getRestClient().getChannelService()
-                .editChannelPermissions(getId().asLong(), roleId.asLong(), request, reason)
-                .subscriberContext(ctx -> ctx.put("shard", getServiceMediator().getClientConfig().getShardIndex()));
+        return getGateway().getRestClient().getChannelService()
+                .editChannelPermissions(getId().asLong(), roleId.asLong(), request, reason);
     }
 
     @Override

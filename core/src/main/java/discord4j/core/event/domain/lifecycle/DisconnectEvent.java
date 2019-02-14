@@ -17,7 +17,8 @@
 
 package discord4j.core.event.domain.lifecycle;
 
-import discord4j.core.DiscordClient;
+import discord4j.core.GatewayAggregate;
+import discord4j.gateway.ShardInfo;
 
 /**
  * Indicates that a gateway connection is disconnected.
@@ -26,8 +27,8 @@ import discord4j.core.DiscordClient;
  */
 public class DisconnectEvent extends GatewayLifecycleEvent {
 
-    public DisconnectEvent(DiscordClient client) {
-        super(client);
+    public DisconnectEvent(GatewayAggregate gateway, ShardInfo shardInfo) {
+        super(gateway, shardInfo);
     }
 
     @Override

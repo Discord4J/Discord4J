@@ -30,7 +30,7 @@ import java.util.function.Function;
  * Provides a centralized Jackson 2.9 {@link com.fasterxml.jackson.databind.ObjectMapper} allowing customization and
  * reuse across the application.
  */
-public class JacksonResourceProvider {
+public class JacksonResources {
 
     private static final Function<ObjectMapper, ObjectMapper> initializer = mapper -> mapper
             .setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
@@ -42,17 +42,17 @@ public class JacksonResourceProvider {
      * Create a default {@link com.fasterxml.jackson.databind.ObjectMapper} that allows any field visibility,
      * registers modules to handle Discord4J specific mappings and ignores unknown properties.
      */
-    public JacksonResourceProvider() {
+    public JacksonResources() {
         this(mapper -> mapper.addHandler(new UnknownPropertyHandler(true)));
     }
 
     /**
      * Create a custom {@link com.fasterxml.jackson.databind.ObjectMapper}, based on the defaults given by
-     * {@link #JacksonResourceProvider()}
+     * {@link #JacksonResources()}
      *
      * @param mapper a Function to customize the ObjectMapper to be created
      */
-    public JacksonResourceProvider(Function<ObjectMapper, ObjectMapper> mapper) {
+    public JacksonResources(Function<ObjectMapper, ObjectMapper> mapper) {
         this.objectMapper = initializer.andThen(mapper).apply(new ObjectMapper());
     }
 
@@ -62,7 +62,7 @@ public class JacksonResourceProvider {
      *
      * @param objectMapper a pre-configured ObjectMapper to use
      */
-    public JacksonResourceProvider(ObjectMapper objectMapper) {
+    public JacksonResources(ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
     }
 

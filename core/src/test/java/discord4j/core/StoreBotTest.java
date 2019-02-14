@@ -19,15 +19,13 @@ package discord4j.core;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import discord4j.common.JacksonResourceProvider;
+import discord4j.common.JacksonResources;
 import discord4j.core.event.domain.Event;
+import discord4j.core.object.data.stored.MessageBean;
 import discord4j.core.object.presence.Presence;
-import discord4j.core.shard.ShardingClientBuilder;
-import discord4j.core.shard.ShardingJdkStoreRegistry;
-import discord4j.core.shard.ShardingStoreRegistry;
 import discord4j.store.api.mapping.MappingStoreService;
+import discord4j.store.api.noop.NoOpStoreService;
 import discord4j.store.jdk.JdkStoreService;
-
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -63,49 +61,47 @@ public class StoreBotTest {
     @Test
     @Ignore("Example code excluded from CI")
     public void testStoreBot() {
-        Map<Integer, DiscordClient> clients = new ConcurrentHashMap<>();
         Map<String, AtomicLong> counts = new ConcurrentHashMap<>();
-        JacksonResourceProvider jackson = new JacksonResourceProvider();
-        startHttpServer(clients, counts, jackson.getObjectMapper());
-        ShardingStoreRegistry registry = new ShardingJdkStoreRegistry();
-        new ShardingClientBuilder(token)
-                .setShardingStoreRegistry(registry)
-                // showcase disabling the cache for messages
+        JacksonResources jackson = new JacksonResources();
+
+        DiscordClient client = DiscordClient.builder(token)
+                .setJacksonResources(jackson)
+                .build();
+
+        client.gateway(GatewayResources.builder()
                 .setStoreService(MappingStoreService.create()
-                        //.setMapping(new NoOpStoreService(), MessageBean.class)
+                        .setMapping(new NoOpStoreService(), MessageBean.class)
                         .setFallback(new JdkStoreService()))
-                .build()
-                .map(builder -> builder.setJacksonResourceProvider(jackson)
-                        .setInitialPresence(Presence.invisible()))
-                .map(DiscordClientBuilder::build)
-                .doOnNext(client -> clients.put(client.getConfig().getShardIndex(), client))
-                .doOnNext(client -> subscribeEventCounter(client, counts))
-                .flatMap(DiscordClient::login)
-                .blockLast();
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> clients.forEach((id, client) -> client.logout().block())));
+                .build())
+                .setInitialPresence(shard -> Presence.invisible())
+                .login(gateway -> {
+                    startHttpServer(gateway, counts, jackson.getObjectMapper());
+                    subscribeEventCounter(gateway, counts);
+                    return Mono.empty();
+                })
+                .block();
     }
 
-    private void subscribeEventCounter(DiscordClient client, Map<String, AtomicLong> counts) {
+    private void subscribeEventCounter(GatewayAggregate gateway, Map<String, AtomicLong> counts) {
         reflections.getSubTypesOf(Event.class)
                 .stream()
                 .filter(cls -> reflections.getSubTypesOf(cls).isEmpty())
                 .forEach(type -> {
-                    client.getEventDispatcher().on(type)
+                    gateway.getEventDispatcher().on(type)
                             .map(event -> event.getClass().getSimpleName())
                             .map(name -> counts.computeIfAbsent(name, k -> new AtomicLong()).addAndGet(1))
                             .subscribe(null, t -> log.error("Error", t));
                 });
     }
 
-    private void startHttpServer(Map<Integer, DiscordClient> shards, Map<String, AtomicLong> counts,
+    private void startHttpServer(GatewayAggregate gateway, Map<String, AtomicLong> counts,
                                  ObjectMapper mapper) {
         DisposableServer facade = HttpServer.create()
                 .port(0) // use an ephemeral port
                 .route(routes -> routes
                         .get("/counts",
                                 (req, res) -> {
-                                    DiscordClient client = shards.get(0);
-                                    StateHolder stores = client.getServiceMediator().getStateHolder();
+                                    StateHolder stores = gateway.getStateHolder();
                                     Mono<String> result = Flux.merge(
                                             Mono.just("users").zipWith(stores.getUserStore().count()),
                                             Mono.just("guilds").zipWith(stores.getGuildStore().count()),

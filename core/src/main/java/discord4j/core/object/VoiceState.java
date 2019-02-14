@@ -17,7 +17,7 @@
 package discord4j.core.object;
 
 import discord4j.core.DiscordClient;
-import discord4j.core.ServiceMediator;
+import discord4j.core.GatewayAggregate;
 import discord4j.core.object.data.stored.VoiceStateBean;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.User;
@@ -35,8 +35,8 @@ import java.util.Optional;
  */
 public final class VoiceState implements DiscordObject {
 
-    /** The ServiceMediator associated to this object. */
-    private final ServiceMediator serviceMediator;
+    /** The gateway associated to this object. */
+    private final GatewayAggregate gateway;
 
     /** The raw data as represented by Discord. */
     private final VoiceStateBean data;
@@ -44,17 +44,22 @@ public final class VoiceState implements DiscordObject {
     /**
      * Constructs a {@code VoiceState} with an associated ServiceMediator and Discord data.
      *
-     * @param serviceMediator The ServiceMediator associated to this object, must be non-null.
+     * @param gateway The {@link GatewayAggregate} associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
      */
-    public VoiceState(final ServiceMediator serviceMediator, final VoiceStateBean data) {
-        this.serviceMediator = Objects.requireNonNull(serviceMediator);
+    public VoiceState(final GatewayAggregate gateway, final VoiceStateBean data) {
+        this.gateway = Objects.requireNonNull(gateway);
         this.data = Objects.requireNonNull(data);
     }
 
     @Override
     public DiscordClient getClient() {
-        return serviceMediator.getClient();
+        return gateway.getDiscordClient();
+    }
+
+    @Override
+    public GatewayAggregate getGateway() {
+        return gateway;
     }
 
     /**
@@ -73,7 +78,7 @@ public final class VoiceState implements DiscordObject {
      * error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Guild> getGuild() {
-        return getClient().getGuildById(getGuildId());
+        return gateway.getGuildById(getGuildId());
     }
 
     /**
@@ -92,7 +97,7 @@ public final class VoiceState implements DiscordObject {
      * to, if present. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<VoiceChannel> getChannel() {
-        return Mono.justOrEmpty(getChannelId()).flatMap(getClient()::getChannelById).cast(VoiceChannel.class);
+        return Mono.justOrEmpty(getChannelId()).flatMap(getGateway()::getChannelById).cast(VoiceChannel.class);
     }
 
     /**
@@ -111,7 +116,7 @@ public final class VoiceState implements DiscordObject {
      * error is received, it is emitted through the {@code Mono}.
      */
     public Mono<User> getUser() {
-        return getClient().getUserById(getUserId());
+        return getGateway().getUserById(getUserId());
     }
 
     /**

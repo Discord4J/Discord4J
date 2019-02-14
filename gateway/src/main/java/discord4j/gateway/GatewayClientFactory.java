@@ -17,11 +17,6 @@
 
 package discord4j.gateway;
 
-import discord4j.gateway.payload.PayloadReader;
-import discord4j.gateway.payload.PayloadWriter;
-import discord4j.gateway.retry.RetryOptions;
-import reactor.netty.http.client.HttpClient;
-
 /**
  * An abstract factory to create a {@link GatewayClient}, allowing clients to send and receive Discord Gateway events
  * from this node.
@@ -31,17 +26,8 @@ public interface GatewayClientFactory {
     /**
      * Create {@link GatewayClient} objects, supporting real-time events from Discord.
      *
-     * @param httpClient a Reactor Netty {@link HttpClient} to use in the created client
-     * @param payloadReader a deserialization strategy to received payloads
-     * @param payloadWriter a serialization strategy to sent payloads
-     * @param retryOptions a configurable reconnection policy
-     * @param token an authorization token to log into Discord Gateway
-     * @param identifyOptions a configurable set of shard and presence parameters
-     * @param observer a hook that listens to many gateway lifecycle events
-     * @param identifyLimiter a rate-limiting policy to coordinate identify requests
+     * @param options the {@link GatewayOptions} used to configure the resulting client
      * @return a client allowing communication with Discord Gateway
      */
-    GatewayClient getGatewayClient(HttpClient httpClient, PayloadReader payloadReader, PayloadWriter payloadWriter,
-                                   RetryOptions retryOptions, String token, IdentifyOptions identifyOptions,
-                                   GatewayObserver observer, PayloadTransformer identifyLimiter);
+    GatewayClient getGatewayClient(GatewayOptions options);
 }

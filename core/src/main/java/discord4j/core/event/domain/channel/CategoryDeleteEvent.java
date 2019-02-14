@@ -16,8 +16,9 @@
  */
 package discord4j.core.event.domain.channel;
 
-import discord4j.core.DiscordClient;
+import discord4j.core.GatewayAggregate;
 import discord4j.core.object.entity.channel.Category;
+import discord4j.gateway.ShardInfo;
 
 /**
  * Dispatched when a {@link Category} is deleted in a guild.
@@ -30,8 +31,8 @@ public class CategoryDeleteEvent extends ChannelEvent {
 
     private final Category category;
 
-    public CategoryDeleteEvent(DiscordClient client, Category category) {
-        super(client);
+    public CategoryDeleteEvent(GatewayAggregate gateway, ShardInfo shardInfo, Category category) {
+        super(gateway, shardInfo);
         this.category = category;
     }
 

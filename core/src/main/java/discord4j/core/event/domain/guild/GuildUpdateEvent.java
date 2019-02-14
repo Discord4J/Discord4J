@@ -16,8 +16,9 @@
  */
 package discord4j.core.event.domain.guild;
 
-import discord4j.core.DiscordClient;
+import discord4j.core.GatewayAggregate;
 import discord4j.core.object.entity.Guild;
+import discord4j.gateway.ShardInfo;
 import reactor.util.annotation.Nullable;
 
 import java.util.Optional;
@@ -36,8 +37,8 @@ public class GuildUpdateEvent extends GuildEvent {
     private final Guild current;
     private final Guild old;
 
-    public GuildUpdateEvent(DiscordClient client, Guild current, @Nullable Guild old) {
-        super(client);
+    public GuildUpdateEvent(GatewayAggregate gateway, ShardInfo shardInfo, Guild current, @Nullable Guild old) {
+        super(gateway, shardInfo);
         this.current = current;
         this.old = old;
     }

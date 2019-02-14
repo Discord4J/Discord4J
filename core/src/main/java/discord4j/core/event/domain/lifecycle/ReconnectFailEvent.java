@@ -17,7 +17,8 @@
 
 package discord4j.core.event.domain.lifecycle;
 
-import discord4j.core.DiscordClient;
+import discord4j.core.GatewayAggregate;
+import discord4j.gateway.ShardInfo;
 
 /**
  * Indicates that a reconnection attempt has failed and a new attempt should be scheduled, in that case, this event
@@ -29,8 +30,8 @@ public class ReconnectFailEvent extends GatewayLifecycleEvent {
 
     private final int currentAttempt;
 
-    public ReconnectFailEvent(DiscordClient client, int currentAttempt) {
-        super(client);
+    public ReconnectFailEvent(GatewayAggregate gateway, ShardInfo shardInfo, int currentAttempt) {
+        super(gateway, shardInfo);
         this.currentAttempt = currentAttempt;
     }
 

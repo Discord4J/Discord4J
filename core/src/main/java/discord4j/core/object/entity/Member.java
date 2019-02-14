@@ -16,7 +16,7 @@
  */
 package discord4j.core.object.entity;
 
-import discord4j.core.ServiceMediator;
+import discord4j.core.GatewayAggregate;
 import discord4j.core.object.VoiceState;
 import discord4j.core.object.data.stored.MemberBean;
 import discord4j.core.object.data.stored.PresenceBean;
@@ -59,14 +59,14 @@ public final class Member extends User {
     /**
      * Constructs a {@code Member} with an associated ServiceMediator and Discord data.
      *
-     * @param serviceMediator The ServiceMediator associated to this object, must be non-null.
+     * @param gateway The {@link GatewayAggregate} associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
      * @param userData The user data as represented by Discord, must be non-null.
      * @param guildId The ID of the guild this user is associated to.
      */
-    public Member(final ServiceMediator serviceMediator, final MemberBean data, final UserBean userData,
+    public Member(final GatewayAggregate gateway, final MemberBean data, final UserBean userData,
                   final long guildId) {
-        super(serviceMediator, userData);
+        super(gateway, userData);
         this.data = Objects.requireNonNull(data);
         this.guildId = guildId;
     }
@@ -100,7 +100,7 @@ public final class Member extends User {
      */
     public Flux<Role> getRoles() {
         return Flux.fromIterable(getRoleIds())
-                .flatMap(id -> getClient().getRoleById(getGuildId(), id));
+                .flatMap(id -> getGateway().getRoleById(getGuildId(), id));
     }
 
     /**
@@ -113,7 +113,7 @@ public final class Member extends User {
      * is received, it is emitted through the {@code Mono}.
      */
     public Mono<Role> getHighestRole() {
-        return MathFlux.max(Flux.fromIterable(getRoleIds()).flatMap(id -> getClient().getRoleById(getGuildId(), id)),
+        return MathFlux.max(Flux.fromIterable(getRoleIds()).flatMap(id -> getGateway().getRoleById(getGuildId(), id)),
                             OrderUtil.ROLE_ORDER);
     }
 
@@ -152,7 +152,7 @@ public final class Member extends User {
      * to. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Guild> getGuild() {
-        return getClient().getGuildById(getGuildId());
+        return getGateway().getGuildById(getGuildId());
     }
 
     /**
@@ -189,14 +189,14 @@ public final class Member extends User {
      * @return A {@link Mono} where, upon successful completion, emits a {@link VoiceState voice state} for this user
      * for this guild. If an error is received, it is emitted through the {@code Mono}.
      *
-     * @implNote If the underlying {@link discord4j.core.DiscordClientBuilder#getStoreService() store} does not save
+     * @implNote If the underlying store does not save
      * {@link VoiceStateBean} instances <b>OR</b> the bot is currently not logged in then the returned {@code Mono} will
      * always be empty.
      */
     public Mono<VoiceState> getVoiceState() {
-        return getServiceMediator().getStateHolder().getVoiceStateStore()
+        return getGateway().getStateHolder().getVoiceStateStore()
                 .find(LongLongTuple2.of(getGuildId().asLong(), getId().asLong()))
-                .map(bean -> new VoiceState(getServiceMediator(), bean));
+                .map(bean -> new VoiceState(getGateway(), bean));
     }
 
     /**
@@ -205,12 +205,12 @@ public final class Member extends User {
      * @return A {@link Mono} where, upon successful completion, emits a {@link Presence presence} for this user for
      * this guild. If an error is received, it is emitted through the {@code Mono}.
      *
-     * @implNote If the underlying {@link discord4j.core.DiscordClientBuilder#getStoreService() store} does not save
+     * @implNote If the underlying store does not save
      * {@link PresenceBean} instances <b>OR</b> the bot is currently not logged in then the returned {@code Mono} will
      * always be empty.
      */
     public Mono<Presence> getPresence() {
-        return getServiceMediator().getStateHolder().getPresenceStore()
+        return getGateway().getStateHolder().getPresenceStore()
                 .find(LongLongTuple2.of(getGuildId().asLong(), getId().asLong()))
                 .map(Presence::new);
     }
@@ -233,9 +233,8 @@ public final class Member extends User {
      * error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Void> kick(@Nullable final String reason) {
-        return getServiceMediator().getRestClient().getGuildService()
-                .removeGuildMember(getGuildId().asLong(), getId().asLong(), reason)
-                .subscriberContext(ctx -> ctx.put("shard", getServiceMediator().getClientConfig().getShardIndex()));
+        return getGateway().getRestClient().getGuildService()
+                .removeGuildMember(getGuildId().asLong(), getId().asLong(), reason);
     }
 
     /**
@@ -249,9 +248,8 @@ public final class Member extends User {
         final BanQuerySpec mutatedSpec = new BanQuerySpec();
         spec.accept(mutatedSpec);
 
-        return getServiceMediator().getRestClient().getGuildService()
-                .createGuildBan(getGuildId().asLong(), getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason())
-                .subscriberContext(ctx -> ctx.put("shard", getServiceMediator().getClientConfig().getShardIndex()));
+        return getGateway().getRestClient().getGuildService()
+                .createGuildBan(getGuildId().asLong(), getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason());
     }
 
     /**
@@ -272,9 +270,8 @@ public final class Member extends User {
      * error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Void> unban(@Nullable final String reason) {
-        return getServiceMediator().getRestClient().getGuildService()
-                .removeGuildBan(getGuildId().asLong(), getId().asLong(), reason)
-                .subscriberContext(ctx -> ctx.put("shard", getServiceMediator().getClientConfig().getShardIndex()));
+        return getGateway().getRestClient().getGuildService()
+                .removeGuildBan(getGuildId().asLong(), getId().asLong(), reason);
     }
 
     /**
@@ -298,9 +295,8 @@ public final class Member extends User {
      * member. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Void> addRole(final Snowflake roleId, @Nullable final String reason) {
-        return getServiceMediator().getRestClient().getGuildService()
-                .addGuildMemberRole(guildId, getId().asLong(), roleId.asLong(), reason)
-                .subscriberContext(ctx -> ctx.put("shard", getServiceMediator().getClientConfig().getShardIndex()));
+        return getGateway().getRestClient().getGuildService()
+                .addGuildMemberRole(guildId, getId().asLong(), roleId.asLong(), reason);
     }
 
     /**
@@ -324,9 +320,8 @@ public final class Member extends User {
      * this member. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Void> removeRole(final Snowflake roleId, @Nullable final String reason) {
-        return getServiceMediator().getRestClient().getGuildService()
-                .removeGuildMemberRole(guildId, getId().asLong(), roleId.asLong(), reason)
-                .subscriberContext(ctx -> ctx.put("shard", getServiceMediator().getClientConfig().getShardIndex()));
+        return getGateway().getRestClient().getGuildService()
+                .removeGuildMemberRole(guildId, getId().asLong(), roleId.asLong(), reason);
     }
 
     /**
@@ -390,7 +385,7 @@ public final class Member extends User {
      * it is emitted through the {@code Mono}.
      */
     public Mono<Boolean> isHigher(Snowflake id) {
-        return getClient().getMemberById(getGuildId(), id).flatMap(this::isHigher);
+        return getGateway().getMemberById(getGuildId(), id).flatMap(this::isHigher);
     }
 
     /**
@@ -457,9 +452,8 @@ public final class Member extends User {
         final GuildMemberEditSpec mutatedSpec = new GuildMemberEditSpec();
         spec.accept(mutatedSpec);
 
-        return getServiceMediator().getRestClient().getGuildService()
-                .modifyGuildMember(getGuildId().asLong(), getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason())
-                .subscriberContext(ctx -> ctx.put("shard", getServiceMediator().getClientConfig().getShardIndex()));
+        return getGateway().getRestClient().getGuildService()
+                .modifyGuildMember(getGuildId().asLong(), getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason());
     }
 
     @Override

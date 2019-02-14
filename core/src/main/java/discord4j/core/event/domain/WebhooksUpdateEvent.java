@@ -16,10 +16,11 @@
  */
 package discord4j.core.event.domain;
 
-import discord4j.core.DiscordClient;
+import discord4j.core.GatewayAggregate;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.channel.TextChannel;
 import discord4j.core.object.util.Snowflake;
+import discord4j.gateway.ShardInfo;
 import reactor.core.publisher.Mono;
 
 /**
@@ -36,8 +37,8 @@ public class WebhooksUpdateEvent extends Event {
     private final long guildId;
     private final long channelId;
 
-    public WebhooksUpdateEvent(DiscordClient client, long guildId, long channelId) {
-        super(client);
+    public WebhooksUpdateEvent(GatewayAggregate gateway, ShardInfo shardInfo, long guildId, long channelId) {
+        super(gateway, shardInfo);
         this.guildId = guildId;
         this.channelId = channelId;
     }
@@ -58,7 +59,7 @@ public class WebhooksUpdateEvent extends Event {
      * If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Guild> getGuild() {
-        return getClient().getGuildById(getGuildId());
+        return getGateway().getGuildById(getGuildId());
     }
 
     /**
@@ -77,7 +78,7 @@ public class WebhooksUpdateEvent extends Event {
      * If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<TextChannel> getChannel() {
-        return getClient().getChannelById(getChannelId()).cast(TextChannel.class);
+        return getGateway().getChannelById(getChannelId()).cast(TextChannel.class);
     }
 
     @Override

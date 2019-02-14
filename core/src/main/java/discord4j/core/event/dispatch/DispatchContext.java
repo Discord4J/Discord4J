@@ -17,7 +17,8 @@
 
 package discord4j.core.event.dispatch;
 
-import discord4j.core.ServiceMediator;
+import discord4j.core.GatewayAggregate;
+import discord4j.gateway.ShardInfo;
 import discord4j.gateway.json.dispatch.Dispatch;
 
 /**
@@ -29,22 +30,28 @@ import discord4j.gateway.json.dispatch.Dispatch;
 public class DispatchContext<D extends Dispatch> {
 
     private final D dispatch;
-    private final ServiceMediator serviceMediator;
+    private final GatewayAggregate gatewayAggregate;
+    private final ShardInfo shardInfo;
 
-    public static <D extends Dispatch> DispatchContext<D> of(D dispatch, ServiceMediator serviceMediator) {
-        return new DispatchContext<>(dispatch, serviceMediator);
+    public static <D extends Dispatch> DispatchContext<D> of(D dispatch, GatewayAggregate gatewayAggregate, ShardInfo shardInfo) {
+        return new DispatchContext<>(dispatch, gatewayAggregate, shardInfo);
     }
 
-    private DispatchContext(D dispatch, ServiceMediator serviceMediator) {
+    private DispatchContext(D dispatch, GatewayAggregate gatewayAggregate, ShardInfo shardInfo) {
         this.dispatch = dispatch;
-        this.serviceMediator = serviceMediator;
+        this.gatewayAggregate = gatewayAggregate;
+        this.shardInfo = shardInfo;
     }
 
     public D getDispatch() {
         return dispatch;
     }
 
-    public ServiceMediator getServiceMediator() {
-        return serviceMediator;
+    public GatewayAggregate getGatewayAggregate() {
+        return gatewayAggregate;
+    }
+
+    public ShardInfo getShardInfo() {
+        return shardInfo;
     }
 }

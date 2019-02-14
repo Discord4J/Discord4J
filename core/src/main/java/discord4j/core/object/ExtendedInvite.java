@@ -16,7 +16,7 @@
  */
 package discord4j.core.object;
 
-import discord4j.core.ServiceMediator;
+import discord4j.core.GatewayAggregate;
 import discord4j.core.object.data.ExtendedInviteBean;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.util.Snowflake;
@@ -37,11 +37,11 @@ public final class ExtendedInvite extends Invite {
     /**
      * Constructs a {@code ExtendedInvite} with an associated ServiceMediator and Discord data.
      *
-     * @param serviceMediator The ServiceMediator associated to this object, must be non-null.
+     * @param gateway The {@link GatewayAggregate} associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
      */
-    public ExtendedInvite(final ServiceMediator serviceMediator, final ExtendedInviteBean data) {
-        super(serviceMediator, data);
+    public ExtendedInvite(final GatewayAggregate gateway, final ExtendedInviteBean data) {
+        super(gateway, data);
     }
 
     /**
@@ -60,7 +60,7 @@ public final class ExtendedInvite extends Invite {
      * an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<User> getInviter() {
-        return getClient().getUserById(getInviterId());
+        return getGateway().getUserById(getInviterId());
     }
 
     /**

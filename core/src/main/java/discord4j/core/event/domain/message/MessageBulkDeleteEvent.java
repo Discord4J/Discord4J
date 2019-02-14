@@ -16,11 +16,12 @@
  */
 package discord4j.core.event.domain.message;
 
-import discord4j.core.DiscordClient;
+import discord4j.core.GatewayAggregate;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.TextChannel;
 import discord4j.core.object.util.Snowflake;
+import discord4j.gateway.ShardInfo;
 import reactor.core.publisher.Mono;
 
 import java.util.Arrays;
@@ -44,9 +45,9 @@ public class MessageBulkDeleteEvent extends MessageEvent {
     private final long guildId;
     private final Set<Message> messages;
 
-    public MessageBulkDeleteEvent(DiscordClient client, long[] messageIds, long channelId, long guildId,
+    public MessageBulkDeleteEvent(GatewayAggregate gateway, ShardInfo shardInfo, long[] messageIds, long channelId, long guildId,
                                   Set<Message> messages) {
-        super(client);
+        super(gateway, shardInfo);
         this.messageIds = messageIds;
         this.channelId = channelId;
         this.guildId = guildId;
@@ -90,7 +91,7 @@ public class MessageBulkDeleteEvent extends MessageEvent {
      * were deleted from. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<TextChannel> getChannel() {
-        return getClient().getChannelById(getChannelId()).cast(TextChannel.class);
+        return getGateway().getChannelById(getChannelId()).cast(TextChannel.class);
     }
 
     /**
@@ -109,7 +110,7 @@ public class MessageBulkDeleteEvent extends MessageEvent {
      * where deleted from. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Guild> getGuild() {
-        return getClient().getGuildById(getGuildId());
+        return getGateway().getGuildById(getGuildId());
     }
 
     @Override

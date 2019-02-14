@@ -15,29 +15,27 @@
  * along with Discord4J. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package discord4j.core;
+package discord4j.rest.entity;
 
-import discord4j.gateway.GatewayObserver;
-import discord4j.gateway.IdentifyOptions;
-import reactor.netty.ConnectionObserver;
+import discord4j.rest.RestClient;
+import discord4j.rest.entity.data.MessageData;
+import reactor.core.publisher.Mono;
 
-import java.util.function.Consumer;
+public class RestMessage {
 
-/**
- * Allows notifying an externally managed sink for {@link GatewayObserver#CONNECTED} events.
- */
-public class ConnectedObserver implements GatewayObserver {
+    private final RestClient restClient;
+    private final long channelId;
+    private final long id;
 
-    private final Consumer<IdentifyOptions> task;
-
-    public ConnectedObserver(Consumer<IdentifyOptions> task) {
-        this.task = task;
+    public RestMessage(RestClient restClient, long channelId, long id) {
+        this.restClient = restClient;
+        this.channelId = channelId;
+        this.id = id;
     }
 
-    @Override
-    public void onStateChange(ConnectionObserver.State newState, IdentifyOptions identifyOptions) {
-        if (GatewayObserver.CONNECTED.equals(newState)) {
-            task.accept(identifyOptions);
-        }
+    public Mono<MessageData> getData() {
+        return restClient.getChannelService()
+                .getMessage(channelId, id)
+                .map(MessageData::new);
     }
 }

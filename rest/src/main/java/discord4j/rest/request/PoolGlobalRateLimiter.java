@@ -72,7 +72,7 @@ public class PoolGlobalRateLimiter implements GlobalRateLimiter {
     public <T> Flux<T> withLimiter(Publisher<T> stage) {
         return outer.withPoolable(permit -> Mono.subscriberContext()
                 .flatMapMany(ctx -> {
-                    permit.bucket = ctx.getOrDefault("bucket", "<unknown>");
+                    permit.bucket = ctx.getOrDefault("bucket", "default");
                     log.debug("[{}] Acquired permit", permit);
                     Duration delay = getRemaining();
                     if (!delay.isNegative() && !delay.isZero()) {

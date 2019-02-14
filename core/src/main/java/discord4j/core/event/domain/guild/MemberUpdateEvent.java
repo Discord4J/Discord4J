@@ -16,10 +16,11 @@
  */
 package discord4j.core.event.domain.guild;
 
-import discord4j.core.DiscordClient;
+import discord4j.core.GatewayAggregate;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.util.Snowflake;
+import discord4j.gateway.ShardInfo;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
 
@@ -47,9 +48,9 @@ public class MemberUpdateEvent extends GuildEvent {
     @Nullable
     private final String currentNickname;
 
-    public MemberUpdateEvent(DiscordClient client, long guildId, long memberId, @Nullable Member old,
+    public MemberUpdateEvent(GatewayAggregate gateway, ShardInfo shardInfo, long guildId, long memberId, @Nullable Member old,
                              long[] currentRoles, @Nullable String currentNickname) {
-        super(client);
+        super(gateway, shardInfo);
 
         this.guildId = guildId;
         this.memberId = memberId;
@@ -74,7 +75,7 @@ public class MemberUpdateEvent extends GuildEvent {
      * If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Guild> getGuild() {
-        return getClient().getGuildById(getGuildId());
+        return getGateway().getGuildById(getGuildId());
     }
 
     /**
@@ -93,7 +94,7 @@ public class MemberUpdateEvent extends GuildEvent {
      * If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Member> getMember() {
-        return getClient().getMemberById(getGuildId(), getMemberId());
+        return getGateway().getMemberById(getGuildId(), getMemberId());
     }
 
     /**

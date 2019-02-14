@@ -16,7 +16,7 @@
  */
 package discord4j.core.object.entity.channel;
 
-import discord4j.core.ServiceMediator;
+import discord4j.core.GatewayAggregate;
 import discord4j.core.object.data.stored.ChannelBean;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.util.Snowflake;
@@ -33,11 +33,11 @@ public final class PrivateChannel extends BaseMessageChannel {
     /**
      * Constructs an {@code PrivateChannel} with an associated ServiceMediator and Discord data.
      *
-     * @param serviceMediator The ServiceMediator associated to this object, must be non-null.
+     * @param gateway The {@link GatewayAggregate} associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
      */
-    public PrivateChannel(final ServiceMediator serviceMediator, final ChannelBean data) {
-        super(serviceMediator, data);
+    public PrivateChannel(final GatewayAggregate gateway, final ChannelBean data) {
+        super(gateway, data);
     }
 
     /**
@@ -58,7 +58,7 @@ public final class PrivateChannel extends BaseMessageChannel {
      * is received, it is emitted through the {@code Flux}.
      */
     public Flux<User> getRecipients() {
-        return Flux.fromIterable(getRecipientIds()).flatMap(getClient()::getUserById);
+        return Flux.fromIterable(getRecipientIds()).flatMap(getGateway()::getUserById);
     }
 
     @Override

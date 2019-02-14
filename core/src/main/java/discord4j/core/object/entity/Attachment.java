@@ -17,7 +17,7 @@
 package discord4j.core.object.entity;
 
 import discord4j.core.DiscordClient;
-import discord4j.core.ServiceMediator;
+import discord4j.core.GatewayAggregate;
 import discord4j.core.object.data.stored.AttachmentBean;
 import discord4j.core.object.util.Snowflake;
 import discord4j.core.util.EntityUtil;
@@ -36,8 +36,8 @@ public final class Attachment implements Entity {
     /** The prefix of the name of files which are displayed as spoilers. **/
     public static final String SPOILER_PREFIX = "SPOILER_";
 
-    /** The ServiceMediator associated to this object. */
-    private final ServiceMediator serviceMediator;
+    /** The gateway associated to this object. */
+    private final GatewayAggregate gateway;
 
     /** The raw data as represented by Discord. */
     private final AttachmentBean data;
@@ -45,17 +45,22 @@ public final class Attachment implements Entity {
     /**
      * Constructs an {@code Attachment} with an associated ServiceMediator and Discord data.
      *
-     * @param serviceMediator The ServiceMediator associated to this object, must be non-null.
+     * @param gateway The {@link GatewayAggregate} associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
      */
-    public Attachment(final ServiceMediator serviceMediator, final AttachmentBean data) {
-        this.serviceMediator = Objects.requireNonNull(serviceMediator);
+    public Attachment(final GatewayAggregate gateway, final AttachmentBean data) {
+        this.gateway = Objects.requireNonNull(gateway);
         this.data = Objects.requireNonNull(data);
     }
 
     @Override
     public DiscordClient getClient() {
-        return serviceMediator.getClient();
+        return gateway.getDiscordClient();
+    }
+
+    @Override
+    public GatewayAggregate getGateway() {
+        return gateway;
     }
 
     @Override

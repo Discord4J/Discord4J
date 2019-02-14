@@ -16,7 +16,7 @@
  */
 package discord4j.core.object.entity.channel;
 
-import discord4j.core.ServiceMediator;
+import discord4j.core.GatewayAggregate;
 import discord4j.core.object.ExtendedInvite;
 import discord4j.core.object.ExtendedPermissionOverwrite;
 import discord4j.core.object.PermissionOverwrite;
@@ -58,14 +58,14 @@ class BaseGuildMessageChannel extends BaseChannel implements GuildMessageChannel
     /**
      * Constructs an {@code BaseGuildMessageChannel} with an associated ServiceMediator and Discord data.
      *
-     * @param serviceMediator The ServiceMediator associated to this object, must be non-null.
+     * @param gateway The {@link GatewayAggregate} associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
      */
-    BaseGuildMessageChannel(final ServiceMediator serviceMediator, final ChannelBean data) {
-        super(serviceMediator, data);
-        guildChannel = new BaseGuildChannel(serviceMediator, data);
-        messageChannel = new BaseMessageChannel(serviceMediator, data);
-        categorizableChannel = new BaseCategorizableChannel(serviceMediator, data);
+    BaseGuildMessageChannel(final GatewayAggregate gateway, final ChannelBean data) {
+        super(gateway, data);
+        guildChannel = new BaseGuildChannel(gateway, data);
+        messageChannel = new BaseMessageChannel(gateway, data);
+        categorizableChannel = new BaseCategorizableChannel(gateway, data);
     }
 
     @Override
@@ -226,11 +226,9 @@ class BaseGuildMessageChannel extends BaseChannel implements GuildMessageChannel
         final Function<List<String>, Mono<Boolean>> filterMessageIdChunk = messageIdChunk ->
                 Mono.just(messageIdChunk.get(0)) // REST accepts 2 or more items
                         .filter(ignore -> messageIdChunk.size() == 1)
-                        .flatMap(id -> getServiceMediator().getRestClient().getChannelService()
+                        .flatMap(id -> getGateway().getRestClient().getChannelService()
                                 .deleteMessage(getId().asLong(), Long.parseLong(id), null)
-                                .thenReturn(id)
-                                .subscriberContext(ctx -> ctx.put("shard",
-                                        getServiceMediator().getClientConfig().getShardIndex())))
+                                .thenReturn(id))
                         .hasElement()
                         .map(identity -> !identity);
 
@@ -241,10 +239,8 @@ class BaseGuildMessageChannel extends BaseChannel implements GuildMessageChannel
                 .buffer(100) // REST accepts 100 IDs
                 .filterWhen(filterMessageIdChunk)
                 .map(messageIdChunk -> messageIdChunk.toArray(new String[messageIdChunk.size()]))
-                .flatMap(messageIdChunk -> getServiceMediator().getRestClient().getChannelService()
-                        .bulkDeleteMessages(getId().asLong(), new BulkDeleteRequest(messageIdChunk))
-                        .subscriberContext(ctx -> ctx.put("shard",
-                                getServiceMediator().getClientConfig().getShardIndex())))
+                .flatMap(messageIdChunk -> getGateway().getRestClient().getChannelService()
+                        .bulkDeleteMessages(getId().asLong(), new BulkDeleteRequest(messageIdChunk)))
                 .thenMany(Flux.fromIterable(ignoredMessageIds));
     }
 
@@ -259,11 +255,10 @@ class BaseGuildMessageChannel extends BaseChannel implements GuildMessageChannel
         final WebhookCreateSpec mutatedSpec = new WebhookCreateSpec();
         spec.accept(mutatedSpec);
 
-        return getServiceMediator().getRestClient().getWebhookService()
+        return getGateway().getRestClient().getWebhookService()
                 .createWebhook(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason())
                 .map(WebhookBean::new)
-                .map(bean -> new Webhook(getServiceMediator(), bean))
-                .subscriberContext(ctx -> ctx.put("shard", getServiceMediator().getClientConfig().getShardIndex()));
+                .map(bean -> new Webhook(getGateway(), bean));
     }
 
     /**
@@ -273,11 +268,10 @@ class BaseGuildMessageChannel extends BaseChannel implements GuildMessageChannel
      * received, it is emitted through the {@code Flux}.
      */
     public Flux<Webhook> getWebhooks() {
-        return getServiceMediator().getRestClient().getWebhookService()
+        return getGateway().getRestClient().getWebhookService()
                 .getChannelWebhooks(getId().asLong())
                 .map(WebhookBean::new)
-                .map(bean -> new Webhook(getServiceMediator(), bean))
-                .subscriberContext(ctx -> ctx.put("shard", getServiceMediator().getClientConfig().getShardIndex()));
+                .map(bean -> new Webhook(getGateway(), bean));
     }
 
     @Override

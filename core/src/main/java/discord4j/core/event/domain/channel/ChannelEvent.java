@@ -16,16 +16,17 @@
  */
 package discord4j.core.event.domain.channel;
 
-import discord4j.core.DiscordClient;
+import discord4j.core.GatewayAggregate;
 import discord4j.core.event.domain.Event;
 import discord4j.core.object.entity.channel.Channel;
+import discord4j.gateway.ShardInfo;
 
 /**
  * Represents an event related to a {@link Channel}.
  */
 public abstract class ChannelEvent extends Event {
 
-    public ChannelEvent(DiscordClient client) {
-        super(client);
+    public ChannelEvent(GatewayAggregate gateway, ShardInfo shardInfo) {
+        super(gateway, shardInfo);
     }
 }

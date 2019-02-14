@@ -18,7 +18,7 @@ package discord4j.core.object.entity;
 
 import discord4j.common.json.UserResponse;
 import discord4j.core.DiscordClient;
-import discord4j.core.ServiceMediator;
+import discord4j.core.GatewayAggregate;
 import discord4j.core.object.Embed;
 import discord4j.core.object.data.stored.MessageBean;
 import discord4j.core.object.data.stored.ReactionBean;
@@ -52,8 +52,8 @@ public final class Message implements Entity {
     /** The maximum amount of characters that can be in the contents of a message. */
     public static final int MAX_CONTENT_LENGTH = 2000;
 
-    /** The ServiceMediator associated to this object. */
-    private final ServiceMediator serviceMediator;
+    /** The gateway associated to this object. */
+    private final GatewayAggregate gateway;
 
     /** The raw data as represented by Discord. */
     private final MessageBean data;
@@ -61,17 +61,22 @@ public final class Message implements Entity {
     /**
      * Constructs a {@code Message} with an associated ServiceMediator and Discord data.
      *
-     * @param serviceMediator The ServiceMediator associated to this object, must be non-null.
+     * @param gateway The {@link GatewayAggregate} associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
      */
-    public Message(final ServiceMediator serviceMediator, final MessageBean data) {
-        this.serviceMediator = Objects.requireNonNull(serviceMediator);
+    public Message(final GatewayAggregate gateway, final MessageBean data) {
+        this.gateway = Objects.requireNonNull(gateway);
         this.data = Objects.requireNonNull(data);
     }
 
     @Override
     public DiscordClient getClient() {
-        return serviceMediator.getClient();
+        return gateway.getDiscordClient();
+    }
+
+    @Override
+    public GatewayAggregate getGateway() {
+        return gateway;
     }
 
     @Override
@@ -95,7 +100,7 @@ public final class Message implements Entity {
      * was sent in. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<MessageChannel> getChannel() {
-        return getClient().getChannelById(getChannelId()).cast(MessageChannel.class);
+        return getGateway().getChannelById(getChannelId()).cast(MessageChannel.class);
     }
 
     /**
@@ -113,7 +118,7 @@ public final class Message implements Entity {
      * @return The author of this message, if present.
      */
     public Optional<User> getAuthor() {
-        return Optional.ofNullable(data.getAuthor()).map(bean -> new User(serviceMediator, bean));
+        return Optional.ofNullable(data.getAuthor()).map(bean -> new User(gateway, bean));
     }
 
     /**
@@ -195,7 +200,7 @@ public final class Message implements Entity {
      * error is received, it is emitted through the {@code Flux}.
      */
     public Flux<User> getUserMentions() {
-        return Flux.fromIterable(getUserMentionIds()).flatMap(getClient()::getUserById);
+        return Flux.fromIterable(getUserMentionIds()).flatMap(getGateway()::getUserById);
     }
 
     /**
@@ -219,7 +224,7 @@ public final class Message implements Entity {
         return Flux.fromIterable(getRoleMentionIds())
                 .flatMap(roleId -> getGuild()
                         .map(Guild::getId)
-                        .flatMap(guildId -> getClient().getRoleById(guildId, roleId)));
+                        .flatMap(guildId -> gateway.getRoleById(guildId, roleId)));
     }
 
     /**
@@ -229,7 +234,7 @@ public final class Message implements Entity {
      */
     public Set<Attachment> getAttachments() {
         return Arrays.stream(data.getAttachments())
-                .map(bean -> new Attachment(serviceMediator, bean))
+                .map(bean -> new Attachment(gateway, bean))
                 .collect(Collectors.toSet());
     }
 
@@ -240,7 +245,7 @@ public final class Message implements Entity {
      */
     public List<Embed> getEmbeds() {
         return Arrays.stream(data.getEmbeds())
-                .map(bean -> new Embed(serviceMediator, bean))
+                .map(bean -> new Embed(gateway, bean))
                 .collect(Collectors.toList());
     }
 
@@ -252,7 +257,7 @@ public final class Message implements Entity {
     public Set<Reaction> getReactions() {
         final ReactionBean[] reactions = data.getReactions();
         return (reactions == null) ? Collections.emptySet() : Arrays.stream(reactions)
-                .map(bean -> new Reaction(serviceMediator, bean))
+                .map(bean -> new Reaction(gateway, bean))
                 .collect(Collectors.toSet());
     }
 
@@ -265,15 +270,14 @@ public final class Message implements Entity {
      */
     public Flux<User> getReactors(final ReactionEmoji emoji) {
         final Function<Map<String, Object>, Flux<UserResponse>> makeRequest = params ->
-                serviceMediator.getRestClient().getChannelService()
+                gateway.getRestClient().getChannelService()
                         .getReactions(getChannelId().asLong(), getId().asLong(),
                                 EntityUtil.getEmojiString(emoji),
-                                params)
-                        .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex()));
+                                params);
 
         return PaginationUtil.paginateAfter(makeRequest, UserResponse::getId, 0L, 100)
                 .map(UserBean::new)
-                .map(bean -> new User(serviceMediator, bean));
+                .map(bean -> new User(gateway, bean));
     }
 
     /**
@@ -292,7 +296,7 @@ public final class Message implements Entity {
      * message, if present. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Webhook> getWebhook() {
-        return Mono.justOrEmpty(getWebhookId()).flatMap(getClient()::getWebhookById);
+        return Mono.justOrEmpty(getWebhookId()).flatMap(getGateway()::getWebhookById);
     }
 
     /**
@@ -325,11 +329,10 @@ public final class Message implements Entity {
         final MessageEditSpec mutatedSpec = new MessageEditSpec();
         spec.accept(mutatedSpec);
 
-        return serviceMediator.getRestClient().getChannelService()
+        return gateway.getRestClient().getChannelService()
                 .editMessage(getChannelId().asLong(), getId().asLong(), mutatedSpec.asRequest())
                 .map(MessageBean::new)
-                .map(bean -> new Message(serviceMediator, bean))
-                .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex()));
+                .map(bean -> new Message(gateway, bean));
     }
 
     /**
@@ -350,9 +353,8 @@ public final class Message implements Entity {
      * If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Void> delete(@Nullable final String reason) {
-        return serviceMediator.getRestClient().getChannelService()
-                .deleteMessage(getChannelId().asLong(), getId().asLong(), reason)
-                .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex()));
+        return gateway.getRestClient().getChannelService()
+                .deleteMessage(getChannelId().asLong(), getId().asLong(), reason);
     }
 
     /**
@@ -363,9 +365,8 @@ public final class Message implements Entity {
      * this message. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Void> addReaction(final ReactionEmoji emoji) {
-        return serviceMediator.getRestClient().getChannelService()
-                .createReaction(getChannelId().asLong(), getId().asLong(), EntityUtil.getEmojiString(emoji))
-                .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex()));
+        return gateway.getRestClient().getChannelService()
+                .createReaction(getChannelId().asLong(), getId().asLong(), EntityUtil.getEmojiString(emoji));
     }
 
     /**
@@ -377,10 +378,9 @@ public final class Message implements Entity {
      * specified user was removed on this message. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Void> removeReaction(final ReactionEmoji emoji, final Snowflake userId) {
-        return serviceMediator.getRestClient().getChannelService()
+        return gateway.getRestClient().getChannelService()
                 .deleteReaction(getChannelId().asLong(), getId().asLong(), EntityUtil.getEmojiString(emoji),
-                        userId.asLong())
-                .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex()));
+                        userId.asLong());
     }
 
     /**
@@ -391,9 +391,8 @@ public final class Message implements Entity {
      * user was removed on this message. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Void> removeSelfReaction(final ReactionEmoji emoji) {
-        return serviceMediator.getRestClient().getChannelService()
-                .deleteOwnReaction(getChannelId().asLong(), getId().asLong(), EntityUtil.getEmojiString(emoji))
-                .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex()));
+        return gateway.getRestClient().getChannelService()
+                .deleteOwnReaction(getChannelId().asLong(), getId().asLong(), EntityUtil.getEmojiString(emoji));
     }
 
     /**
@@ -403,9 +402,8 @@ public final class Message implements Entity {
      * message were removed. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Void> removeAllReactions() {
-        return serviceMediator.getRestClient().getChannelService()
-                .deleteAllReactions(getChannelId().asLong(), getId().asLong())
-                .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex()));
+        return gateway.getRestClient().getChannelService()
+                .deleteAllReactions(getChannelId().asLong(), getId().asLong());
     }
 
     /**
@@ -415,9 +413,8 @@ public final class Message implements Entity {
      * an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Void> pin() {
-        return serviceMediator.getRestClient().getChannelService()
-                .addPinnedMessage(getChannelId().asLong(), getId().asLong())
-                .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex()));
+        return gateway.getRestClient().getChannelService()
+                .addPinnedMessage(getChannelId().asLong(), getId().asLong());
     }
 
     /**
@@ -427,9 +424,8 @@ public final class Message implements Entity {
      * an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Void> unpin() {
-        return serviceMediator.getRestClient().getChannelService()
-                .deletePinnedMessage(getChannelId().asLong(), getId().asLong())
-                .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex()));
+        return gateway.getRestClient().getChannelService()
+                .deletePinnedMessage(getChannelId().asLong(), getId().asLong());
     }
 
     @Override

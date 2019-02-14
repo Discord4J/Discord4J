@@ -16,10 +16,11 @@
  */
 package discord4j.core.event.domain.channel;
 
-import discord4j.core.DiscordClient;
+import discord4j.core.GatewayAggregate;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.core.object.util.Snowflake;
+import discord4j.gateway.ShardInfo;
 import reactor.core.publisher.Mono;
 
 import java.time.Instant;
@@ -37,8 +38,8 @@ public class TypingStartEvent extends ChannelEvent {
     private final long userId;
     private final Instant startTime;
 
-    public TypingStartEvent(DiscordClient client, long channelId, long userId, Instant startTime) {
-        super(client);
+    public TypingStartEvent(GatewayAggregate gateway, ShardInfo shardInfo, long channelId, long userId, Instant startTime) {
+        super(gateway, shardInfo);
         this.channelId = channelId;
         this.userId = userId;
         this.startTime = startTime;
@@ -60,7 +61,7 @@ public class TypingStartEvent extends ChannelEvent {
      * started typing in. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<MessageChannel> getChannel() {
-        return getClient().getChannelById(getChannelId()).cast(MessageChannel.class);
+        return getGateway().getChannelById(getChannelId()).cast(MessageChannel.class);
     }
 
     /**
@@ -79,7 +80,7 @@ public class TypingStartEvent extends ChannelEvent {
      * If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<User> getUser() {
-        return getClient().getUserById(getUserId());
+        return getGateway().getUserById(getUserId());
     }
 
     /**

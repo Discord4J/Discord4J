@@ -16,10 +16,11 @@
  */
 package discord4j.core.event.domain.guild;
 
-import discord4j.core.DiscordClient;
+import discord4j.core.GatewayAggregate;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.GuildEmoji;
 import discord4j.core.object.util.Snowflake;
+import discord4j.gateway.ShardInfo;
 import reactor.core.publisher.Mono;
 
 import java.util.Set;
@@ -37,8 +38,8 @@ public class EmojisUpdateEvent extends GuildEvent {
     private final long guildId;
     private final Set<GuildEmoji> emojis;
 
-    public EmojisUpdateEvent(DiscordClient client, long guildId, Set<GuildEmoji> emojis) {
-        super(client);
+    public EmojisUpdateEvent(GatewayAggregate gateway, ShardInfo shardInfo, long guildId, Set<GuildEmoji> emojis) {
+        super(gateway, shardInfo);
         this.guildId = guildId;
         this.emojis = emojis;
     }
@@ -59,7 +60,7 @@ public class EmojisUpdateEvent extends GuildEvent {
      * If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Guild> getGuild() {
-        return getClient().getGuildById(getGuildId());
+        return getGateway().getGuildById(getGuildId());
     }
 
     /**

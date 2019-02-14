@@ -16,8 +16,9 @@
  */
 package discord4j.core.event.domain.guild;
 
-import discord4j.core.DiscordClient;
+import discord4j.core.GatewayAggregate;
 import discord4j.core.object.entity.Guild;
+import discord4j.gateway.ShardInfo;
 
 /**
  * Dispatched in three different scenarios:
@@ -37,8 +38,8 @@ public class GuildCreateEvent extends GuildEvent {
 
     private final Guild guild;
 
-    public GuildCreateEvent(DiscordClient client, Guild guild) {
-        super(client);
+    public GuildCreateEvent(GatewayAggregate gateway, ShardInfo shardInfo, Guild guild) {
+        super(gateway, shardInfo);
         this.guild = guild;
     }
 

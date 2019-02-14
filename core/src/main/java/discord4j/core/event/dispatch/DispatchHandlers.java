@@ -17,8 +17,7 @@
 package discord4j.core.event.dispatch;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import discord4j.core.DiscordClient;
-import discord4j.core.ServiceMediator;
+import discord4j.core.GatewayAggregate;
 import discord4j.core.event.domain.*;
 import discord4j.core.event.domain.channel.TypingStartEvent;
 import discord4j.core.object.VoiceState;
@@ -108,8 +107,7 @@ public abstract class DispatchHandlers {
     }
 
     private static Mono<PresenceUpdateEvent> presenceUpdate(DispatchContext<PresenceUpdate> context) {
-        ServiceMediator serviceMediator = context.getServiceMediator();
-        DiscordClient client = serviceMediator.getClient();
+        GatewayAggregate gateway = context.getGatewayAggregate();
 
         long guildId = context.getDispatch().getGuildId();
         JsonNode user = context.getDispatch().getUser();
@@ -118,9 +116,9 @@ public abstract class DispatchHandlers {
         PresenceBean bean = new PresenceBean(context.getDispatch());
         Presence current = new Presence(bean);
 
-        Mono<Void> saveNew = serviceMediator.getStateHolder().getPresenceStore().save(key, bean);
+        Mono<Void> saveNew = gateway.getStateHolder().getPresenceStore().save(key, bean);
 
-        Mono<Optional<User>> saveUser = serviceMediator.getStateHolder().getUserStore()
+        Mono<Optional<User>> saveUser = gateway.getStateHolder().getUserStore()
                 .find(userId)
                 .map(oldBean -> {
                     UserBean newBean = new UserBean(oldBean);
@@ -129,85 +127,85 @@ public abstract class DispatchHandlers {
                     JsonNode avatar = user.get("avatar");
 
                     newBean.setUsername((username == null) ? oldBean.getUsername() : username.asText());
-                    newBean.setDiscriminator((discriminator == null) ? oldBean.getDiscriminator() : discriminator.asText());
-                    newBean.setAvatar((avatar == null) ? oldBean.getAvatar() : (avatar.isNull() ? null : avatar.asText()));
+                    newBean.setDiscriminator((discriminator == null) ? oldBean.getDiscriminator() :
+                            discriminator.asText());
+                    newBean.setAvatar((avatar == null) ? oldBean.getAvatar() : (avatar.isNull() ? null :
+                            avatar.asText()));
 
                     return Tuples.of(oldBean, newBean);
                 })
-                .flatMap(tuple -> serviceMediator.getStateHolder().getUserStore()
+                .flatMap(tuple -> gateway.getStateHolder().getUserStore()
                         .save(userId, tuple.getT2())
                         .thenReturn(tuple.getT1()))
-                .map(userBean -> new User(serviceMediator, userBean))
+                .map(userBean -> new User(gateway, userBean))
                 .map(Optional::of)
                 .defaultIfEmpty(Optional.empty());
 
         return saveUser.flatMap(oldUser ->
-                serviceMediator.getStateHolder().getPresenceStore()
+                gateway.getStateHolder().getPresenceStore()
                         .find(key)
                         .flatMap(saveNew::thenReturn)
-                        .map(old -> new PresenceUpdateEvent(client, guildId, oldUser.orElse(null), user, current, new Presence(old)))
-                        .switchIfEmpty(saveNew.thenReturn(new PresenceUpdateEvent(client, guildId, oldUser.orElse(null), user, current, null))));
+                        .map(old -> new PresenceUpdateEvent(gateway, context.getShardInfo(), guildId, oldUser.orElse(null), user, current,
+                                new Presence(old)))
+                        .switchIfEmpty(saveNew.thenReturn(new PresenceUpdateEvent(gateway, context.getShardInfo(), guildId,
+                                oldUser.orElse(null), user, current, null))));
     }
 
     private static Mono<TypingStartEvent> typingStart(DispatchContext<TypingStart> context) {
-        DiscordClient client = context.getServiceMediator().getClient();
         long channelId = context.getDispatch().getChannelId();
         long userId = context.getDispatch().getUserId();
         Instant startTime = Instant.ofEpochMilli(context.getDispatch().getTimestamp());
 
-        return Mono.just(new TypingStartEvent(client, channelId, userId, startTime));
+        return Mono.just(new TypingStartEvent(context.getGatewayAggregate(), context.getShardInfo(), channelId, userId, startTime));
     }
 
     private static Mono<UserUpdateEvent> userUpdate(DispatchContext<UserUpdate> context) {
-        ServiceMediator serviceMediator = context.getServiceMediator();
-        DiscordClient client = serviceMediator.getClient();
+        GatewayAggregate gateway = context.getGatewayAggregate();
 
         UserBean bean = new UserBean(context.getDispatch().getUser());
-        User current = new User(serviceMediator, bean);
+        User current = new User(gateway, bean);
 
-        Mono<Void> saveNew = serviceMediator.getStateHolder().getUserStore().save(bean.getId(), bean);
+        Mono<Void> saveNew = gateway.getStateHolder().getUserStore().save(bean.getId(), bean);
 
-        return serviceMediator.getStateHolder().getUserStore()
+        return gateway.getStateHolder().getUserStore()
                 .find(context.getDispatch().getUser().getId())
                 .flatMap(saveNew::thenReturn)
-                .map(old -> new UserUpdateEvent(client, current, new User(serviceMediator, old)))
-                .switchIfEmpty(saveNew.thenReturn(new UserUpdateEvent(client, current, null)));
+                .map(old -> new UserUpdateEvent(gateway, context.getShardInfo(), current, new User(gateway, old)))
+                .switchIfEmpty(saveNew.thenReturn(new UserUpdateEvent(gateway, context.getShardInfo(), current, null)));
     }
 
     private static Mono<Event> voiceServerUpdate(DispatchContext<VoiceServerUpdate> context) {
-        DiscordClient client = context.getServiceMediator().getClient();
         String token = context.getDispatch().getToken();
         long guildId = context.getDispatch().getGuildId();
         String endpoint = context.getDispatch().getEndpoint();
 
-        return Mono.just(new VoiceServerUpdateEvent(client, token, guildId, endpoint));
+        return Mono.just(new VoiceServerUpdateEvent(context.getGatewayAggregate(), context.getShardInfo(), token, guildId, endpoint));
     }
 
-    private static Mono<VoiceStateUpdateEvent> voiceStateUpdateDispatch(DispatchContext<VoiceStateUpdateDispatch>
-                                                                                context) {
-        ServiceMediator serviceMediator = context.getServiceMediator();
-        DiscordClient client = serviceMediator.getClient();
+    private static Mono<VoiceStateUpdateEvent> voiceStateUpdateDispatch(
+            DispatchContext<VoiceStateUpdateDispatch> context) {
+        GatewayAggregate gateway = context.getGatewayAggregate();
 
         long guildId = context.getDispatch().getVoiceState().getGuildId();
         long userId = context.getDispatch().getVoiceState().getUserId();
 
         LongLongTuple2 key = LongLongTuple2.of(guildId, userId);
         VoiceStateBean bean = new VoiceStateBean(context.getDispatch().getVoiceState());
-        VoiceState current = new VoiceState(serviceMediator, bean);
+        VoiceState current = new VoiceState(gateway, bean);
 
-        Mono<Void> saveNew = serviceMediator.getStateHolder().getVoiceStateStore().save(key, bean);
+        Mono<Void> saveNew = gateway.getStateHolder().getVoiceStateStore().save(key, bean);
 
-        return serviceMediator.getStateHolder().getVoiceStateStore()
+        return gateway.getStateHolder().getVoiceStateStore()
                 .find(key)
                 .flatMap(saveNew::thenReturn)
-                .map(old -> new VoiceStateUpdateEvent(client, current, new VoiceState(serviceMediator, old)))
-                .switchIfEmpty(saveNew.thenReturn(new VoiceStateUpdateEvent(client, current, null)));
+                .map(old -> new VoiceStateUpdateEvent(gateway, context.getShardInfo(), current, new VoiceState(gateway, old)))
+                .switchIfEmpty(saveNew.thenReturn(new VoiceStateUpdateEvent(gateway, context.getShardInfo(), current, null)));
     }
 
     private static Mono<Event> webhooksUpdate(DispatchContext<WebhooksUpdate> context) {
         long guildId = context.getDispatch().getGuildId();
         long channelId = context.getDispatch().getChannelId();
 
-        return Mono.just(new WebhooksUpdateEvent(context.getServiceMediator().getClient(), guildId, channelId));
+        return Mono.just(new WebhooksUpdateEvent(context.getGatewayAggregate(), context.getShardInfo(), guildId, channelId));
     }
 }

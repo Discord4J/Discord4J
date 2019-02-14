@@ -30,7 +30,7 @@ import discord4j.gateway.payload.JacksonPayloadReader;
 import discord4j.gateway.payload.JacksonPayloadWriter;
 import discord4j.gateway.payload.PayloadReader;
 import discord4j.gateway.payload.PayloadWriter;
-import discord4j.gateway.retry.RetryOptions;
+import discord4j.gateway.retry.ReconnectOptions;
 import org.junit.Ignore;
 import org.junit.Test;
 import reactor.core.publisher.Mono;
@@ -55,13 +55,17 @@ public class GatewayClientTest {
         ObjectMapper mapper = getMapper();
         PayloadReader reader = new JacksonPayloadReader(mapper);
         PayloadWriter writer = new JacksonPayloadWriter(mapper);
-        RetryOptions retryOptions = new RetryOptions(Duration.ofSeconds(5), Duration.ofSeconds(120),
-                Integer.MAX_VALUE, Schedulers.elastic());
-        GatewayClient gatewayClient = new DefaultGatewayClient(HttpClient.create(),
-                reader, writer, retryOptions, token,
-                new IdentifyOptions(0, 1, null), null,
-                new RateLimiterTransformer(new SimpleBucket(1, Duration.ofSeconds(6))));
-
+        ReconnectOptions reconnectOptions = ReconnectOptions.builder().build();
+        GatewayOptions gatewayOptions = GatewayOptions.builder()
+                .setHttpClient(HttpClient.create())
+                .setPayloadReader(reader)
+                .setPayloadWriter(writer)
+                .setReconnectOptions(reconnectOptions)
+                .setToken(token)
+                .setIdentifyOptions(new IdentifyOptions(0, 1, null))
+                .setIdentifyLimiter(new RateLimiterTransformer(new SimpleBucket(1, Duration.ofSeconds(6))))
+                .build();
+        GatewayClient gatewayClient = new DefaultGatewayClient(gatewayOptions);
         gatewayClient.dispatch().subscribe(dispatch -> {
             if (dispatch instanceof Ready) {
                 System.out.println("Test received READY!");
@@ -112,24 +116,27 @@ public class GatewayClientTest {
         PayloadTransformer transformer = new RateLimiterTransformer(new SimpleBucket(1, Duration.ofSeconds(6)));
         for (int i = 0; i < shardCount; i++) {
             CountDownLatch next = new CountDownLatch(1);
-            GatewayClient shard = new DefaultGatewayClient(
-                    HttpClient.create().compress(true),
-                    new JacksonPayloadReader(mapper),
-                    new JacksonPayloadWriter(mapper),
-                    // RetryOptions must not be shared as it tracks state for a single shard
-                    new RetryOptions(Duration.ofSeconds(2), Duration.ofSeconds(120), Integer.MAX_VALUE,
-                            Schedulers.elastic()),
-                    token,
-                    new IdentifyOptions(i, shardCount,
-                            new StatusUpdate(null, "invisible")),
-                    (s, o) -> {
+            ReconnectOptions reconnectOptions = ReconnectOptions.builder().build();
+            GatewayOptions gatewayOptions = GatewayOptions.builder()
+                    .setHttpClient(HttpClient.create().compress(true))
+                    .setPayloadReader(new JacksonPayloadReader(mapper))
+                    .setPayloadWriter(new JacksonPayloadWriter(mapper))
+                    .setReconnectOptions(reconnectOptions)
+                    .setToken(token)
+                    .setIdentifyOptions(new IdentifyOptions(i, shardCount,
+                            new StatusUpdate(null, "invisible")))
+                    .setIdentifyLimiter(new RateLimiterTransformer(new SimpleBucket(1, Duration.ofSeconds(6))))
+                    .setInitialObserver((s, o) -> {
                         if (s.equals(GatewayObserver.CONNECTED)) {
                             next.countDown();
                         }
                         if (s.equals(GatewayObserver.DISCONNECTED)) {
                             exit.countDown();
                         }
-                    }, transformer);
+                    })
+                    .setIdentifyLimiter(transformer)
+                    .build();
+            GatewayClient shard = new DefaultGatewayClient(gatewayOptions);
             latches.add(next);
             int shardIndex = i;
             Schedulers.elastic().schedule(() -> {

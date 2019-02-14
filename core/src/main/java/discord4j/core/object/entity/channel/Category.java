@@ -16,7 +16,7 @@
  */
 package discord4j.core.object.entity.channel;
 
-import discord4j.core.ServiceMediator;
+import discord4j.core.GatewayAggregate;
 import discord4j.core.object.data.stored.ChannelBean;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.spec.CategoryEditSpec;
@@ -32,11 +32,11 @@ public final class Category extends BaseGuildChannel {
     /**
      * Constructs an {@code Category} with an associated ServiceMediator and Discord data.
      *
-     * @param serviceMediator The ServiceMediator associated to this object, must be non-null.
+     * @param gateway The {@link GatewayAggregate} associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
      */
-    public Category(final ServiceMediator serviceMediator, final ChannelBean data) {
-        super(serviceMediator, data);
+    public Category(final GatewayAggregate gateway, final ChannelBean data) {
+        super(gateway, data);
     }
 
     /**
@@ -62,12 +62,11 @@ public final class Category extends BaseGuildChannel {
         final CategoryEditSpec mutatedSpec = new CategoryEditSpec();
         spec.accept(mutatedSpec);
 
-        return getServiceMediator().getRestClient().getChannelService()
+        return getGateway().getRestClient().getChannelService()
                 .modifyChannel(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason())
                 .map(ChannelBean::new)
-                .map(bean -> EntityUtil.getChannel(getServiceMediator(), bean))
-                .cast(Category.class)
-                .subscriberContext(ctx -> ctx.put("shard", getServiceMediator().getClientConfig().getShardIndex()));
+                .map(bean -> EntityUtil.getChannel(getGateway(), bean))
+                .cast(Category.class);
     }
 
     @Override

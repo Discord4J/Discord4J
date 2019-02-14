@@ -17,6 +17,7 @@
 package discord4j.core.object;
 
 import discord4j.core.DiscordClient;
+import discord4j.core.GatewayAggregate;
 
 /** An object characterized by the Discord platform. */
 public interface DiscordObject {
@@ -27,4 +28,11 @@ public interface DiscordObject {
      * @return The DiscordClient associated to this object.
      */
     DiscordClient getClient();
+
+    /**
+     * Returns the gateway associated to this object.
+     *
+     * @return the {@link GatewayAggregate} associated to this object.
+     */
+    GatewayAggregate getGateway();
 }

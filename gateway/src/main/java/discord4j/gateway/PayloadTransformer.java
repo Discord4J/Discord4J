@@ -20,11 +20,12 @@ package discord4j.gateway;
 import io.netty.buffer.ByteBuf;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
+import reactor.util.function.Tuple2;
 
 import java.util.function.Function;
 
 /**
  * A transformation function to a sequence of raw {@link ByteBuf} payloads.
  */
-public interface PayloadTransformer extends Function<Flux<ByteBuf>, Publisher<ByteBuf>> {
+public interface PayloadTransformer extends Function<Flux<Tuple2<GatewayClient, ByteBuf>>, Publisher<ByteBuf>> {
 }

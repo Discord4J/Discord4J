@@ -16,7 +16,7 @@
  */
 package discord4j.core.object.entity.channel;
 
-import discord4j.core.ServiceMediator;
+import discord4j.core.GatewayAggregate;
 import discord4j.core.object.ExtendedInvite;
 import discord4j.core.object.data.ExtendedInviteBean;
 import discord4j.core.object.data.stored.ChannelBean;
@@ -30,8 +30,8 @@ import java.util.function.Consumer;
 
 class BaseCategorizableChannel extends BaseGuildChannel implements CategorizableChannel {
 
-    BaseCategorizableChannel(ServiceMediator serviceMediator, ChannelBean data) {
-        super(serviceMediator, data);
+    BaseCategorizableChannel(GatewayAggregate gateway, ChannelBean data) {
+        super(gateway, data);
     }
 
     @Override
@@ -41,7 +41,7 @@ class BaseCategorizableChannel extends BaseGuildChannel implements Categorizable
 
     @Override
     public Mono<Category> getCategory() {
-        return Mono.justOrEmpty(getCategoryId()).flatMap(getClient()::getChannelById).cast(Category.class);
+        return Mono.justOrEmpty(getCategoryId()).flatMap(getGateway()::getChannelById).cast(Category.class);
     }
 
     @Override
@@ -49,19 +49,17 @@ class BaseCategorizableChannel extends BaseGuildChannel implements Categorizable
         final InviteCreateSpec mutatedSpec = new InviteCreateSpec();
         spec.accept(mutatedSpec);
 
-        return getServiceMediator().getRestClient().getChannelService()
+        return getGateway().getRestClient().getChannelService()
                 .createChannelInvite(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason())
                 .map(ExtendedInviteBean::new)
-                .map(bean -> new ExtendedInvite(getServiceMediator(), bean))
-                .subscriberContext(ctx -> ctx.put("shard", getServiceMediator().getClientConfig().getShardIndex()));
+                .map(bean -> new ExtendedInvite(getGateway(), bean));
     }
 
     @Override
     public Flux<ExtendedInvite> getInvites() {
-        return getServiceMediator().getRestClient().getChannelService()
+        return getGateway().getRestClient().getChannelService()
                 .getChannelInvites(getId().asLong())
                 .map(ExtendedInviteBean::new)
-                .map(bean -> new ExtendedInvite(getServiceMediator(), bean))
-                .subscriberContext(ctx -> ctx.put("shard", getServiceMediator().getClientConfig().getShardIndex()));
+                .map(bean -> new ExtendedInvite(getGateway(), bean));
     }
 }
