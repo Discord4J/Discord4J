@@ -31,8 +31,8 @@ import reactor.netty.http.client.HttpClient;
 import reactor.netty.http.client.HttpClientResponse;
 import reactor.util.Logger;
 import reactor.util.Loggers;
+import reactor.util.annotation.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Properties;

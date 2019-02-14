@@ -16,10 +16,10 @@
  */
 package discord4j.core.spec;
 
-import javax.annotation.Nullable;
+import reactor.util.annotation.Nullable;
+
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 public final class BanQuerySpec implements AuditSpec<Map<String, Object>> {
 

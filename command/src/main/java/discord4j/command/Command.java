@@ -18,8 +18,7 @@ package discord4j.command;
 
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import reactor.core.publisher.Mono;
-
-import javax.annotation.Nullable;
+import reactor.util.annotation.Nullable;
 
 /**
  * Very simple command abstraction.

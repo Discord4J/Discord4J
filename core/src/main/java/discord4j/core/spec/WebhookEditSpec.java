@@ -18,8 +18,7 @@ package discord4j.core.spec;
 
 import discord4j.common.jackson.Possible;
 import discord4j.rest.json.request.WebhookModifyRequest;
-
-import javax.annotation.Nullable;
+import reactor.util.annotation.Nullable;
 
 public class WebhookEditSpec implements AuditSpec<WebhookModifyRequest> {
 

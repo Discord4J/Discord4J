@@ -21,8 +21,8 @@ import discord4j.core.ServiceMediator;
 import discord4j.core.object.data.stored.AttachmentBean;
 import discord4j.core.object.util.Snowflake;
 import discord4j.core.util.EntityUtil;
+import reactor.util.annotation.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.Objects;
 import java.util.OptionalInt;
 

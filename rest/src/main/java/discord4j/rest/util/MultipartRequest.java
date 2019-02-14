@@ -18,10 +18,10 @@
 package discord4j.rest.util;
 
 import discord4j.rest.json.request.MessageCreateRequest;
+import reactor.util.annotation.Nullable;
 import reactor.util.function.Tuple2;
 import reactor.util.function.Tuples;
 
-import javax.annotation.Nullable;
 import java.io.InputStream;
 import java.util.Collections;
 import java.util.List;

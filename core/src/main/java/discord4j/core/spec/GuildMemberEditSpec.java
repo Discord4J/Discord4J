@@ -18,8 +18,8 @@ package discord4j.core.spec;
 
 import discord4j.core.object.util.Snowflake;
 import discord4j.rest.json.request.GuildMemberModifyRequest;
+import reactor.util.annotation.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.Set;
 
 public class GuildMemberEditSpec implements AuditSpec<GuildMemberModifyRequest> {

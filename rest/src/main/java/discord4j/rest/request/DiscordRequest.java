@@ -18,8 +18,8 @@ package discord4j.rest.request;
 
 import discord4j.rest.route.Route;
 import reactor.core.publisher.Mono;
+import reactor.util.annotation.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;

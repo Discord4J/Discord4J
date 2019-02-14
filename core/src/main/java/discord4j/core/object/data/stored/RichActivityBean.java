@@ -20,8 +20,8 @@ import discord4j.gateway.json.response.GameAssetsResponse;
 import discord4j.gateway.json.response.GamePartyResponse;
 import discord4j.gateway.json.response.GameResponse;
 import discord4j.gateway.json.response.GameTimestampsResponse;
+import reactor.util.annotation.Nullable;
 
-import javax.annotation.Nullable;
 import java.io.Serializable;
 
 public final class RichActivityBean extends ActivityBean implements Serializable {

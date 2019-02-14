@@ -21,8 +21,7 @@ import discord4j.core.object.entity.Guild;
 import discord4j.core.object.util.Image;
 import discord4j.core.object.util.Snowflake;
 import discord4j.rest.json.request.GuildModifyRequest;
-
-import javax.annotation.Nullable;
+import reactor.util.annotation.Nullable;
 
 public class GuildEditSpec implements AuditSpec<GuildModifyRequest> {
 

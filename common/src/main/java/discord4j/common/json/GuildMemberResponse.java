@@ -18,8 +18,8 @@ package discord4j.common.json;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import discord4j.common.jackson.UnsignedJson;
+import reactor.util.annotation.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.Arrays;
 
 public class GuildMemberResponse {

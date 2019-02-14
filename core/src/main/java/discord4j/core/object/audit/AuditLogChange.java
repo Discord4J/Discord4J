@@ -16,7 +16,8 @@
  */
 package discord4j.core.object.audit;
 
-import javax.annotation.Nullable;
+import reactor.util.annotation.Nullable;
+
 import java.util.Optional;
 
 public class AuditLogChange<T> {

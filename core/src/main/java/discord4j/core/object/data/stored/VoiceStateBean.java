@@ -18,8 +18,8 @@ package discord4j.core.object.data.stored;
 
 import discord4j.gateway.json.dispatch.GuildCreate;
 import discord4j.gateway.json.response.VoiceStateResponse;
+import reactor.util.annotation.Nullable;
 
-import javax.annotation.Nullable;
 import java.io.Serializable;
 
 public final class VoiceStateBean implements Serializable {

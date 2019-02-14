@@ -17,8 +17,7 @@
 package discord4j.rest.json.response;
 
 import discord4j.common.json.UserResponse;
-
-import javax.annotation.Nullable;
+import reactor.util.annotation.Nullable;
 
 public class BanResponse {
 

@@ -19,8 +19,8 @@ package discord4j.rest.json.response;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import discord4j.common.jackson.UnsignedJson;
 import discord4j.common.json.UserResponse;
+import reactor.util.annotation.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.Arrays;
 
 public class ApplicationInfoResponse {

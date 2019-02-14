@@ -21,8 +21,8 @@ import discord4j.common.jackson.PossibleJson;
 import discord4j.common.jackson.UnsignedJson;
 import discord4j.common.json.UserResponse;
 import discord4j.gateway.json.response.GameResponse;
+import reactor.util.annotation.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.Arrays;
 
 @PossibleJson

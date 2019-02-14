@@ -17,8 +17,7 @@
 package discord4j.common.json;
 
 import discord4j.common.jackson.UnsignedJson;
-
-import javax.annotation.Nullable;
+import reactor.util.annotation.Nullable;
 
 public class EmojiResponse {
 

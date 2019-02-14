@@ -19,8 +19,7 @@ package discord4j.gateway.json.dispatch;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import discord4j.common.jackson.UnsignedJson;
 import discord4j.common.json.EmojiResponse;
-
-import javax.annotation.Nullable;
+import reactor.util.annotation.Nullable;
 
 public class MessageReactionRemove implements Dispatch {
 

@@ -17,8 +17,7 @@
 package discord4j.core.spec;
 
 import discord4j.rest.json.request.WebhookCreateRequest;
-
-import javax.annotation.Nullable;
+import reactor.util.annotation.Nullable;
 
 public class WebhookCreateSpec implements AuditSpec<WebhookCreateRequest> {
 

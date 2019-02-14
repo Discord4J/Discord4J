@@ -56,8 +56,8 @@ import reactor.core.scheduler.Schedulers;
 import reactor.netty.http.client.HttpClient;
 import reactor.util.Logger;
 import reactor.util.Loggers;
+import reactor.util.annotation.Nullable;
 
-import javax.annotation.Nullable;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;

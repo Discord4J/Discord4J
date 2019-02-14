@@ -19,8 +19,8 @@ package discord4j.core.spec;
 import discord4j.common.jackson.Possible;
 import discord4j.rest.json.request.EmbedRequest;
 import discord4j.rest.json.request.MessageEditRequest;
+import reactor.util.annotation.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.function.Consumer;
 
 public class MessageEditSpec implements Spec<MessageEditRequest> {

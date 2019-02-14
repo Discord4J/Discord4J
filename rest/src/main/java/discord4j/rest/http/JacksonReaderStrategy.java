@@ -22,8 +22,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import reactor.core.Exceptions;
 import reactor.core.publisher.Mono;
 import reactor.netty.ByteBufMono;
+import reactor.util.annotation.Nullable;
 
-import javax.annotation.Nullable;
 import java.io.IOException;
 import java.lang.reflect.Type;
 

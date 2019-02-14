@@ -19,8 +19,8 @@ package discord4j.core.event.domain.lifecycle;
 import discord4j.core.DiscordClient;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.util.Snowflake;
+import reactor.util.annotation.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.Set;

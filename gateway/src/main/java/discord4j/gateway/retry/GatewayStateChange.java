@@ -18,8 +18,8 @@
 package discord4j.gateway.retry;
 
 import discord4j.gateway.json.dispatch.Dispatch;
+import reactor.util.annotation.Nullable;
 
-import javax.annotation.Nullable;
 import java.time.Duration;
 
 public class GatewayStateChange implements Dispatch {

@@ -23,8 +23,8 @@ import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.TextChannel;
 import discord4j.core.object.util.Snowflake;
 import reactor.core.publisher.Mono;
+import reactor.util.annotation.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.Objects;
 
 /**

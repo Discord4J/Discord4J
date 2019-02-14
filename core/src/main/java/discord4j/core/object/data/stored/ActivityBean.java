@@ -17,8 +17,8 @@
 package discord4j.core.object.data.stored;
 
 import discord4j.gateway.json.response.GameResponse;
+import reactor.util.annotation.Nullable;
 
-import javax.annotation.Nullable;
 import java.io.Serializable;
 
 public class ActivityBean implements Serializable {

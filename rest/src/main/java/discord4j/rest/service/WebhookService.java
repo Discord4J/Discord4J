@@ -23,8 +23,7 @@ import discord4j.rest.request.Router;
 import discord4j.rest.route.Routes;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
-import javax.annotation.Nullable;
+import reactor.util.annotation.Nullable;
 
 public class WebhookService extends RestService {
 

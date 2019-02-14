@@ -17,8 +17,8 @@
 package discord4j.rest.request;
 
 import discord4j.rest.util.RouteUtils;
+import reactor.util.annotation.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.Objects;
 
 /**

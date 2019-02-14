@@ -18,8 +18,7 @@ package discord4j.rest.http;
 
 import reactor.core.publisher.Mono;
 import reactor.netty.ByteBufMono;
-
-import javax.annotation.Nullable;
+import reactor.util.annotation.Nullable;
 
 /**
  * Strategy for reading from a {@link reactor.netty.http.client.HttpClientResponse} and decoding the stream of bytes

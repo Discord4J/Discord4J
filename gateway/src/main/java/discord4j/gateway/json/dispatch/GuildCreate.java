@@ -23,8 +23,8 @@ import discord4j.common.json.GuildMemberResponse;
 import discord4j.common.json.RoleResponse;
 import discord4j.gateway.json.response.GameResponse;
 import discord4j.gateway.json.response.GatewayChannelResponse;
+import reactor.util.annotation.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.Arrays;
 
 public class GuildCreate implements Dispatch {

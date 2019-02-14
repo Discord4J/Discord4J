@@ -16,7 +16,7 @@
  */
 package discord4j.common.close;
 
-import javax.annotation.Nullable;
+import reactor.util.annotation.Nullable;
 
 /**
  * Container for WebSocket "close" status codes and reasons.

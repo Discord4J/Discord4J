@@ -17,7 +17,6 @@
 package discord4j.gateway.json.dispatch;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import discord4j.common.jackson.UnsignedJson;
 import discord4j.common.json.UserResponse;
 

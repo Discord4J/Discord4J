@@ -19,10 +19,9 @@ package discord4j.core.spec;
 import discord4j.core.object.util.Image;
 import discord4j.core.object.util.Snowflake;
 import discord4j.rest.json.request.GuildEmojiCreateRequest;
+import reactor.util.annotation.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.HashSet;
-import java.util.Optional;
 import java.util.Set;
 
 public class GuildEmojiCreateSpec implements AuditSpec<GuildEmojiCreateRequest> {

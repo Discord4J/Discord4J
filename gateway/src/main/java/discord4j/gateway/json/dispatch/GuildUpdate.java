@@ -20,8 +20,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import discord4j.common.jackson.UnsignedJson;
 import discord4j.common.json.GuildEmojiResponse;
 import discord4j.common.json.RoleResponse;
+import reactor.util.annotation.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.Arrays;
 
 public class GuildUpdate implements Dispatch {

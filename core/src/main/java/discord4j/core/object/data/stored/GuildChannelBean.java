@@ -19,8 +19,8 @@ package discord4j.core.object.data.stored;
 import discord4j.common.json.OverwriteEntity;
 import discord4j.gateway.json.response.GatewayChannelResponse;
 import discord4j.rest.json.response.ChannelResponse;
+import reactor.util.annotation.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.Objects;
 

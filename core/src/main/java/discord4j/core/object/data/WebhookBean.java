@@ -17,8 +17,8 @@
 package discord4j.core.object.data;
 
 import discord4j.rest.json.response.WebhookResponse;
+import reactor.util.annotation.Nullable;
 
-import javax.annotation.Nullable;
 import java.io.Serializable;
 import java.util.Objects;
 

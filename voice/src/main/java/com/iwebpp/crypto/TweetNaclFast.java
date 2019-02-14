@@ -8,7 +8,6 @@ package com.iwebpp.crypto;
 
 import java.io.UnsupportedEncodingException;
 import java.security.SecureRandom;
-import java.lang.System;
 import java.util.concurrent.atomic.AtomicLong;
 
 

@@ -4,7 +4,6 @@ dependencies {
     compile "io.projectreactor.netty:reactor-netty"
     compile "com.fasterxml.jackson.core:jackson-databind:$jackson_version"
     compile "com.fasterxml.jackson.datatype:jackson-datatype-jdk8:$jackson_version"
-    compile "com.google.code.findbugs:jsr305:$jsr305_version"
 
     testCompile "junit:junit:$junit_version"
     testCompile "io.projectreactor:reactor-test"

@@ -24,8 +24,8 @@ import discord4j.core.object.util.Snowflake;
 import discord4j.core.util.EntityUtil;
 import discord4j.core.util.ImageUtil;
 import reactor.core.publisher.Mono;
+import reactor.util.annotation.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.Objects;
 import java.util.Optional;
 

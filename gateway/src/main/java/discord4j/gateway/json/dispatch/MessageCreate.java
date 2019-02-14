@@ -21,8 +21,8 @@ import discord4j.common.jackson.UnsignedJson;
 import discord4j.common.json.AttachmentResponse;
 import discord4j.common.json.EmbedResponse;
 import discord4j.common.json.UserResponse;
+import reactor.util.annotation.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.Arrays;
 
 public class MessageCreate implements Dispatch {

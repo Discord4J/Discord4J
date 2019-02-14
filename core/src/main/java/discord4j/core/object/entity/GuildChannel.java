@@ -21,8 +21,8 @@ import discord4j.core.object.PermissionOverwrite;
 import discord4j.core.object.util.PermissionSet;
 import discord4j.core.object.util.Snowflake;
 import reactor.core.publisher.Mono;
+import reactor.util.annotation.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.Optional;
 import java.util.Set;
 
