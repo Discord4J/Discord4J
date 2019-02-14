@@ -36,7 +36,7 @@ public abstract class RestTests {
     public static Router getRouter(String token, ObjectMapper mapper) {
         DiscordWebClient webClient = new DiscordWebClient(HttpClient.create().compress(true),
                 ExchangeStrategies.jackson(mapper), token);
-        return new DefaultRouter(webClient, Schedulers.elastic());
+        return new DefaultRouter(webClient, Schedulers.elastic(), Schedulers.elastic());
     }
 
     public static ObjectMapper getMapper(boolean ignoreUnknown) {

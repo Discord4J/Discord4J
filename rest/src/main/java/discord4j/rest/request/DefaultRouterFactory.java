@@ -23,18 +23,20 @@ import reactor.core.scheduler.Schedulers;
 
 public class DefaultRouterFactory implements RouterFactory {
 
-    private final Scheduler scheduler;
+    private final Scheduler responseScheduler;
+    private final Scheduler rateLimitScheduler;
 
     public DefaultRouterFactory() {
-        this(Schedulers.elastic());
+        this(Schedulers.elastic(), Schedulers.elastic());
     }
 
-    public DefaultRouterFactory(Scheduler scheduler) {
-        this.scheduler = scheduler;
+    public DefaultRouterFactory(Scheduler responseScheduler, Scheduler rateLimitScheduler) {
+        this.responseScheduler = responseScheduler;
+        this.rateLimitScheduler = rateLimitScheduler;
     }
 
     @Override
     public Router getRouter(DiscordWebClient httpClient) {
-        return new DefaultRouter(httpClient, scheduler);
+        return new DefaultRouter(httpClient, responseScheduler, rateLimitScheduler);
     }
 }

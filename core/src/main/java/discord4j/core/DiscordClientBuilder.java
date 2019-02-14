@@ -533,7 +533,7 @@ public final class DiscordClientBuilder {
         if (routerFactory != null) {
             return routerFactory;
         }
-        return new DefaultRouterFactory(Schedulers.elastic());
+        return new DefaultRouterFactory();
     }
 
     private GatewayObserver initGatewayObserver() {

@@ -33,7 +33,6 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxSink;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.ReplayProcessor;
-import reactor.core.scheduler.Schedulers;
 import reactor.netty.http.client.HttpClient;
 import reactor.util.Logger;
 import reactor.util.Loggers;
@@ -202,7 +201,7 @@ public class ShardingClientBuilder {
         if (routerFactory != null) {
             return routerFactory;
         }
-        return new DefaultRouterFactory(Schedulers.elastic());
+        return new DefaultRouterFactory();
     }
 
     private Mono<Integer> initShardCount(RestClient restClient) {

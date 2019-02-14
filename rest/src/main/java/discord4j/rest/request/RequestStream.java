@@ -26,6 +26,7 @@ import reactor.core.publisher.EmitterProcessor;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.MonoProcessor;
 import reactor.core.publisher.SignalType;
+import reactor.core.scheduler.Scheduler;
 import reactor.netty.http.client.HttpClientResponse;
 import reactor.retry.BackoffDelay;
 import reactor.retry.IterationContext;
@@ -59,14 +60,16 @@ class RequestStream<T> {
     private final DiscordWebClient httpClient;
     private final GlobalRateLimiter globalRateLimiter;
     private final RateLimitStrategy rateLimitStrategy;
+    private final Scheduler rateLimitScheduler;
 
     RequestStream(BucketKey id, DiscordWebClient httpClient, GlobalRateLimiter globalRateLimiter,
-                  RateLimitStrategy rateLimitStrategy) {
+                  RateLimitStrategy rateLimitStrategy, Scheduler rateLimitScheduler) {
         this.id = id;
         this.log = Loggers.getLogger("discord4j.rest.traces." + id);
         this.httpClient = httpClient;
         this.globalRateLimiter = globalRateLimiter;
         this.rateLimitStrategy = rateLimitStrategy;
+        this.rateLimitScheduler = rateLimitScheduler;
     }
 
     /**
@@ -220,7 +223,7 @@ class RequestStream<T> {
 
         private void next(SignalType signal, String shard) {
             Logger logger = getTraceLogger(shard);
-            Mono.delay(sleepTime).subscribe(l -> {
+            Mono.delay(sleepTime, rateLimitScheduler).subscribe(l -> {
                 if (logger.isTraceEnabled()) {
                     logger.trace("Ready to consume next request after {}", signal);
                 }

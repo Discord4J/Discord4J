@@ -46,7 +46,8 @@ public class DefaultRouter implements Router {
     private static final ResponseHeaderStrategy HEADER_STRATEGY = new ResponseHeaderStrategy();
 
     private final DiscordWebClient httpClient;
-    private final Scheduler scheduler;
+    private final Scheduler responseScheduler;
+    private final Scheduler rateLimitScheduler;
     private final GlobalRateLimiter globalRateLimiter = new GlobalRateLimiter();
     private final Map<BucketKey, RequestStream<?>> streamMap = new ConcurrentHashMap<>();
 
@@ -57,18 +58,20 @@ public class DefaultRouter implements Router {
      * @param httpClient the web client executing each request instructed by this router
      */
     public DefaultRouter(DiscordWebClient httpClient) {
-        this(httpClient, Schedulers.elastic());
+        this(httpClient, Schedulers.elastic(), Schedulers.elastic());
     }
 
     /**
      * Create a bucket-aware router that uses the given {@link reactor.core.scheduler.Scheduler}.
      *
      * @param httpClient the web client executing each request instructed by this router
-     * @param scheduler the scheduler used to execute each request
+     * @param responseScheduler the scheduler used to execute each request
+     * @param rateLimitScheduler the scheduler used to perform delays caused by rate limiting
      */
-    public DefaultRouter(DiscordWebClient httpClient, Scheduler scheduler) {
+    public DefaultRouter(DiscordWebClient httpClient, Scheduler responseScheduler, Scheduler rateLimitScheduler) {
         this.httpClient = httpClient;
-        this.scheduler = scheduler;
+        this.responseScheduler = responseScheduler;
+        this.rateLimitScheduler = rateLimitScheduler;
     }
 
     @Override
@@ -83,7 +86,7 @@ public class DefaultRouter implements Router {
                     stream.push(new RequestCorrelation<>(request, callback, shardId));
                     return callback;
                 })
-                .publishOn(scheduler);
+                .publishOn(responseScheduler);
     }
 
     @SuppressWarnings("unchecked")
@@ -96,7 +99,7 @@ public class DefaultRouter implements Router {
                                         k, request.getRoute().getUriTemplate(), request.getCompleteUri());
                             }
                             RequestStream<T> stream = new RequestStream<>(k, httpClient, globalRateLimiter,
-                                    getRateLimitStrategy(request));
+                                    getRateLimitStrategy(request), rateLimitScheduler);
                             stream.start();
                             return stream;
                         });
