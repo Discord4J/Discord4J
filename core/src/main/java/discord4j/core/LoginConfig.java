@@ -15,17 +15,21 @@
  * along with Discord4J. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package discord4j.gateway;
+package discord4j.core;
 
-import io.netty.buffer.ByteBuf;
-import org.reactivestreams.Publisher;
-import reactor.core.publisher.Flux;
-import reactor.util.function.Tuple2;
+import reactor.core.scheduler.Scheduler;
+import reactor.util.annotation.Nullable;
 
-import java.util.function.Function;
+public class LoginConfig {
 
-/**
- * A transformation function to a sequence of raw {@link ByteBuf} payloads.
- */
-public interface PayloadTransformer extends Function<Flux<Tuple2<GatewayClient, ByteBuf>>, Publisher<ByteBuf>> {
+    private final Scheduler blockScheduler;
+
+    public LoginConfig(@Nullable Scheduler blockScheduler) {
+        this.blockScheduler = blockScheduler;
+    }
+
+    @Nullable
+    public Scheduler getBlockScheduler() {
+        return blockScheduler;
+    }
 }

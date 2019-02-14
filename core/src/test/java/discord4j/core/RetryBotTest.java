@@ -30,6 +30,8 @@ import discord4j.core.object.presence.Presence;
 import discord4j.core.object.util.Snowflake;
 import discord4j.core.shard.ShardingClientBuilder;
 import discord4j.gateway.IdentifyOptions;
+import discord4j.gateway.PayloadTransformer;
+import discord4j.gateway.PoolingTransformer;
 import discord4j.gateway.json.GatewayPayload;
 import discord4j.gateway.json.Opcode;
 import discord4j.gateway.retry.PartialDisconnectException;
@@ -42,6 +44,8 @@ import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Hooks;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Scheduler;
+import reactor.core.scheduler.Schedulers;
 import reactor.netty.DisposableServer;
 import reactor.netty.http.server.HttpServer;
 import reactor.util.Logger;
@@ -83,10 +87,14 @@ public class RetryBotTest {
     @Test
     @Ignore("Example code excluded from CI")
     public void testWithSetShardCount() {
+        PayloadTransformer pt = new PoolingTransformer(1, Duration.ofSeconds(5));
         new ShardingClientBuilder(token)
                 .setShardCount(shardCount)
                 .build()
-                .map(builder -> builder.setInitialPresence(Presence.invisible()))
+                .map(builder -> builder
+                        .setInitialPresence(Presence.invisible())
+                        .setIdentifyLimiter(pt)
+                )
                 .map(DiscordClientBuilder::build)
                 .flatMap(DiscordClient::login)
                 .blockLast();
@@ -95,9 +103,13 @@ public class RetryBotTest {
     @Test
     @Ignore("Example code excluded from CI")
     public void testWithRecommendedShardCount() {
+        PayloadTransformer pt = new PoolingTransformer(1, Duration.ofSeconds(5));
         new ShardingClientBuilder(token)
                 .build()
-                .map(builder -> builder.setInitialPresence(Presence.invisible()))
+                .map(builder -> builder
+                        .setInitialPresence(Presence.invisible())
+                        .setIdentifyLimiter(pt)
+                )
                 .map(DiscordClientBuilder::build)
                 .flatMap(DiscordClient::login)
                 .blockLast();
@@ -141,7 +153,8 @@ public class RetryBotTest {
                 .subscribe();
 
         try {
-            client.login().block();
+            Scheduler toDispose = Schedulers.newElastic("gateway", 60, false);
+            client.login(spec -> spec.setBlockUntilLogout(toDispose)).block();
         } catch (PartialDisconnectException e) {
             log.warn("This client can reconnect and RESUME");
         }

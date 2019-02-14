@@ -17,15 +17,20 @@
 
 package discord4j.gateway;
 
-import io.netty.buffer.ByteBuf;
-import org.reactivestreams.Publisher;
-import reactor.core.publisher.Flux;
-import reactor.util.function.Tuple2;
+public class GatewayOptions {
 
-import java.util.function.Function;
 
-/**
- * A transformation function to a sequence of raw {@link ByteBuf} payloads.
- */
-public interface PayloadTransformer extends Function<Flux<Tuple2<GatewayClient, ByteBuf>>, Publisher<ByteBuf>> {
+    protected GatewayOptions(Builder builder) {
+
+    }
+
+    public static class Builder {
+
+        protected Builder() {
+        }
+
+        public GatewayOptions build() {
+            return new GatewayOptions(this);
+        }
+    }
 }

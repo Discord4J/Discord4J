@@ -33,6 +33,7 @@ import discord4j.core.spec.UserEditSpec;
 import discord4j.core.util.EntityUtil;
 import discord4j.core.util.PaginationUtil;
 import discord4j.gateway.GatewayClient;
+import discord4j.gateway.GatewayConnection;
 import discord4j.gateway.GatewayObserver;
 import discord4j.gateway.json.GatewayPayload;
 import discord4j.rest.json.response.GatewayResponse;
@@ -41,8 +42,11 @@ import discord4j.rest.util.RouteUtils;
 import discord4j.store.api.util.LongLongTuple2;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.publisher.MonoProcessor;
+import reactor.core.scheduler.Scheduler;
 import reactor.util.Logger;
 import reactor.util.Loggers;
+import reactor.util.annotation.Nullable;
 
 import java.util.Map;
 import java.util.Optional;
@@ -314,7 +318,7 @@ public final class DiscordClient {
     }
 
     /**
-     * Logs in the client to the gateway.
+     * Login the client to the gateway.
      *
      * @return A {@link Mono} that completes (either successfully or with an error) when the client disconnects from the
      * gateway without a reconnect attempt. It is recommended to call this from {@code main} and as a final statement
@@ -328,16 +332,54 @@ public final class DiscordClient {
                     }
                 })
                 .then(serviceMediator.getRestClient().getGatewayService().getGateway())
-                .transform(loginSequence(serviceMediator.getGatewayClient()));
+                .transform(loginSequence(serviceMediator.getGatewayClient(), null));
     }
 
-    private Function<Mono<GatewayResponse>, Mono<Void>> loginSequence(GatewayClient client) {
+    /**
+     * Establish a connection to the gateway and log in with this client, returning a {@link GatewayConnection} after
+     * the underlying websocket has connected, and can be used to manipulate its lifecycle.
+     *
+     * @return a {@link Mono} deferring completion until the gateway has connected. If a gateway connection is still
+     * active under this client, an error will be emitted through the Mono.
+     */
+    public Mono<GatewayConnection> login(Consumer<? super LoginConfigSpec> consumer) {
+        return Mono.create(sink -> {
+            final LoginConfigSpec baseSpec = new LoginConfigSpec(serviceMediator);
+            if (!isDisposed.compareAndSet(true, false)) {
+                throw new AlreadyConnectedException();
+            }
+            GatewayClient client = serviceMediator.getGatewayClient(); // or a custom one
+            MonoProcessor<Void> disconnectFuture = MonoProcessor.create();
+            ConnectedObserver observer = new ConnectedObserver(identify -> {
+                GatewayConnection connection = new GatewayConnection(client, identify, disconnectFuture);
+                sink.success(connection);
+            });
+            Mono<Void> gatewayFuture = serviceMediator.getRestClient().getGatewayService().getGateway()
+                    .transform(loginSequence(client, observer))
+                    .doOnError(t -> !(t instanceof AlreadyConnectedException), t -> disconnectFuture.onComplete())
+                    .doOnCancel(disconnectFuture::onComplete)
+                    .doOnTerminate(disconnectFuture::onComplete);
+            consumer.accept(baseSpec);
+            LoginConfig loginConfig = baseSpec.asRequest();
+            Scheduler blockScheduler = loginConfig.getBlockScheduler();
+            if (blockScheduler != null) {
+                sink.onCancel(() -> client.close(false));
+                gatewayFuture.publishOn(blockScheduler).block();
+            } else {
+                sink.onCancel(gatewayFuture
+                        .subscribe(null, t -> log.error("Gateway terminated with an error", t)));
+            }
+        });
+    }
+
+    private Function<Mono<GatewayResponse>, Mono<Void>> loginSequence(GatewayClient client,
+                                                                      @Nullable ConnectedObserver observer) {
         return sequence -> sequence
                 .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex()))
                 .flatMap(response -> client.execute(
                         RouteUtils.expandQuery(response.getUrl(),
                                 serviceMediator.getClientConfig().getGatewayParameters()),
-                        GatewayObserver.NOOP_LISTENER))
+                        observer == null ? GatewayObserver.NOOP_LISTENER : observer))
                 .then(serviceMediator.getStateHolder().invalidateStores())
                 .then(serviceMediator.getStoreService().dispose())
                 .doOnCancel(this::setDisposed)

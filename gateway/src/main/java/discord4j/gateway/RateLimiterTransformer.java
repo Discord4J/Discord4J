@@ -23,6 +23,7 @@ import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
+import reactor.util.function.Tuple2;
 
 import java.time.Duration;
 
@@ -38,11 +39,11 @@ public class RateLimiterTransformer implements PayloadTransformer {
     }
 
     @Override
-    public Publisher<ByteBuf> apply(Flux<ByteBuf> publisher) {
-        return publisher.concatMap(payload -> Mono
+    public Publisher<ByteBuf> apply(Flux<Tuple2<GatewayClient, ByteBuf>> publisher) {
+        return publisher.concatMap(t2 -> Mono
                 .<ByteBuf>create(sink -> {
                     if (limiter.tryConsume(1)) {
-                        sink.success(payload);
+                        sink.success(t2.getT2());
                     } else {
                         sink.error(new RuntimeException());
                     }

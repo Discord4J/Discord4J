@@ -43,6 +43,7 @@ import reactor.retry.Retry;
 import reactor.util.Logger;
 import reactor.util.Loggers;
 import reactor.util.annotation.Nullable;
+import reactor.util.function.Tuples;
 
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
@@ -160,9 +161,13 @@ public class DefaultGatewayClient implements GatewayClient {
             Logger senderLog = shardLogger(".sender");
             Logger receiverLog = shardLogger(".receiver");
 
+            MonoProcessor<Void> ping = MonoProcessor.create();
+
             // Setup the sending logic from multiple sources into one merged Flux
             Flux<ByteBuf> identifyFlux = outbound.filter(payload -> Opcode.IDENTIFY.equals(payload.getOp()))
+                    .delayUntil(payload -> ping)
                     .flatMap(payload -> Flux.from(payloadWriter.write(payload)))
+                    .map(buf -> Tuples.of((GatewayClient) this, buf))
                     .transform(identifyLimiter);
             PayloadTransformer limiter = new RateLimiterTransformer(
                     new SimpleBucket(outboundLimiterCapacity(), Duration.ofSeconds(60)));
@@ -170,6 +175,7 @@ public class DefaultGatewayClient implements GatewayClient {
                     .log(shardLogger(".outbound"), Level.FINE, false)
                     .flatMap(payload -> Flux.from(payloadWriter.write(payload)))
                     .transform(buf -> Flux.merge(buf, sender))
+                    .map(buf -> Tuples.of((GatewayClient) this, buf))
                     .transform(limiter);
             Flux<ByteBuf> heartbeatFlux = heartbeats.flatMap(payload -> Flux.from(payloadWriter.write(payload)));
             Flux<ByteBuf> outFlux = Flux.merge(heartbeatFlux, identifyFlux, payloadFlux)
@@ -224,6 +230,7 @@ public class DefaultGatewayClient implements GatewayClient {
                     .map(payload -> new PayloadContext<>(payload, handler, this))
                     .publishOn(Schedulers.elastic())
                     .doOnNext(PayloadHandlers::handle)
+                    .doOnNext(ctx -> ping.onComplete())
                     .then()
                     .log(shardLogger(".zip.ack"), Level.FINEST, false);
 
