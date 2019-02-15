@@ -22,15 +22,28 @@ import discord4j.core.object.util.Snowflake;
 import java.util.HashMap;
 import java.util.Map;
 
+/** A spec used to query audit log entries that match the specified filter. */
 public final class AuditLogQuerySpec implements Spec<Map<String, Object>> {
 
     private final Map<String, Object> request = new HashMap<>(2);
 
+    /**
+     * Sets the query to only return entries where the user specified is responsible for the action.
+     *
+     * @param userId The {@code Snowflake} of the responsible user to filter by.
+     * @return This spec.
+     */
     public AuditLogQuerySpec setResponsibleUser(final Snowflake userId) {
         request.put("user_id", userId.asLong());
         return this;
     }
 
+    /**
+     * Sets the query to return entries where the action type is the same as the one provided.
+     *
+     * @param actionType The {@code ActionType} of the audit log entries to filter by.
+     * @return This spec.
+     */
     public AuditLogQuerySpec setActionType(final ActionType actionType) {
         request.put("action_type", actionType.getValue());
         return this;

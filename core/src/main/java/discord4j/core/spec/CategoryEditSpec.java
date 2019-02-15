@@ -18,30 +18,51 @@ package discord4j.core.spec;
 
 import discord4j.common.json.OverwriteEntity;
 import discord4j.core.object.PermissionOverwrite;
+import discord4j.core.object.entity.Category;
 import discord4j.rest.json.request.ChannelModifyRequest;
 import reactor.util.annotation.Nullable;
 
 import java.util.Set;
 
+/** A spec used to edit an existing {@link Category}. */
 public class CategoryEditSpec implements AuditSpec<ChannelModifyRequest> {
 
     private final ChannelModifyRequest.Builder requestBuilder = ChannelModifyRequest.builder();
     @Nullable
     private String reason;
 
+    /**
+     * Sets the name for the {@link Category}.
+     *
+     * @param name The new name of the category.
+     * @return This spec.
+     */
     public CategoryEditSpec setName(String name) {
         requestBuilder.name(name);
         return this;
     }
 
+    /**
+     * Sets the position for the {@link Category}.
+     *
+     * @param position The raw position for the category.
+     * @return This spec.
+     */
     public CategoryEditSpec setPosition(int position) {
         requestBuilder.position(position);
         return this;
     }
 
+    /**
+     * Sets the permission overwrites for the {@link Category}.
+     *
+     * @param permissionOverwrites The {@code Set<PermissionOverwrite>} which contains overwrites for the category.
+     * @return This spec.
+     */
     public CategoryEditSpec setPermissionOverwrites(Set<? extends PermissionOverwrite> permissionOverwrites) {
         OverwriteEntity[] raw = permissionOverwrites.stream()
-                .map(o -> new OverwriteEntity(o.getTargetId().asLong(), o.getType().getValue(), o.getAllowed().getRawValue(), o.getDenied().getRawValue()))
+                .map(o -> new OverwriteEntity(o.getTargetId().asLong(), o.getType().getValue(),
+                        o.getAllowed().getRawValue(), o.getDenied().getRawValue()))
                 .toArray(OverwriteEntity[]::new);
 
         requestBuilder.permissionOverwrites(raw);
