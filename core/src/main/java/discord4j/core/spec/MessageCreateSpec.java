@@ -16,6 +16,7 @@
  */
 package discord4j.core.spec;
 
+import discord4j.core.object.entity.Attachment;
 import discord4j.core.object.util.Snowflake;
 import discord4j.rest.json.request.EmbedRequest;
 import discord4j.rest.json.request.MessageCreateRequest;
@@ -63,9 +64,13 @@ public class MessageCreateSpec implements Spec<MultipartRequest> {
     }
 
     public MessageCreateSpec addFile(String fileName, InputStream file) {
-        if (files == null) files = new ArrayList<>(1);
+        if (files == null) files = new ArrayList<>(1); // most common case is only 1 attachment per message
         files.add(Tuples.of(fileName, file));
         return this;
+    }
+
+    public MessageCreateSpec addFileSpoiler(String fileName, InputStream file) {
+        return addFile(Attachment.SPOILER_PREFIX + fileName, file);
     }
 
     @Override

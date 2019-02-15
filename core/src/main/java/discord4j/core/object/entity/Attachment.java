@@ -33,6 +33,9 @@ import java.util.OptionalInt;
  */
 public final class Attachment implements Entity {
 
+    /** The prefix of the name of files which are displayed as spoilers. **/
+    public static final String SPOILER_PREFIX = "SPOILER_";
+
     /** The ServiceMediator associated to this object. */
     private final ServiceMediator serviceMediator;
 
@@ -112,6 +115,15 @@ public final class Attachment implements Entity {
      */
     public OptionalInt getWidth() {
         return (data.getWidth() == null) ? OptionalInt.empty() : OptionalInt.of(data.getWidth());
+    }
+
+    /**
+     * Gets whether the attachment is a spoiler.
+     *
+     * @return {@code true} if the attachment is a spoiler, {@code false} otherwise.
+     */
+    public boolean isSpoiler() {
+        return getFilename().startsWith(SPOILER_PREFIX);
     }
 
     @Override
