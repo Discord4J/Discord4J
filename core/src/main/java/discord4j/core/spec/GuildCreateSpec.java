@@ -75,7 +75,7 @@ public class GuildCreateSpec implements Spec<GuildCreateRequest> {
     public GuildCreateSpec addEveryoneRole(Consumer<? super RoleCreateSpec> roleSpec) {
         final RoleCreateSpec mutatedSpec = new RoleCreateSpec();
         roleSpec.accept(mutatedSpec);
-        roles.add(mutatedSpec.asRequest());
+        roles.add(0, mutatedSpec.asRequest());
         return this;
     }
 
