@@ -33,6 +33,8 @@ import java.util.OptionalInt;
  */
 public final class Attachment implements Entity {
 
+    public static final String SPOILER_PREFIX = "SPOILER_";
+
     /** The ServiceMediator associated to this object. */
     private final ServiceMediator serviceMediator;
 
@@ -112,6 +114,10 @@ public final class Attachment implements Entity {
      */
     public OptionalInt getWidth() {
         return (data.getWidth() == null) ? OptionalInt.empty() : OptionalInt.of(data.getWidth());
+    }
+
+    public boolean isSpoiler() {
+        return getFilename().startsWith(SPOILER_PREFIX);
     }
 
     @Override
