@@ -2,7 +2,7 @@
 
 <img align="right" src="https://raw.githubusercontent.com/Discord4J/discord4j-web/master/public/logo.svg?sanitize=true" width=27%>
 
-[![Maven Central](https://img.shields.io/maven-central/v/com.discord4j/discord4j-core.svg?style=flat-square)](https://mvnrepository.com/artifact/com.discord4j/discord4j-core) [![Support Server Invite](https://img.shields.io/badge/Join-Discord4J-7289DA.svg?style=flat-square&logo=discord)](https://discord.gg/NxGAeCY)
+[![Maven Central](https://img.shields.io/maven-central/v/com.discord4j/discord4j-core.svg?style=flat-square)](https://search.maven.org/artifact/com.discord4j/discord4j-core) [![Support Server Invite](https://img.shields.io/badge/Join-Discord4J-7289DA.svg?style=flat-square&logo=discord)](https://discord.gg/NxGAeCY)
 
 A fast, reactive Java wrapper for the official [Discord Bot API](https://discordapp.com/developers/docs/intro).
 
@@ -11,23 +11,12 @@ Built with [Reactor](https://projectreactor.io/), [Netty](https://netty.io/), an
 ## Installation
 ### Gradle
 ```groovy
-repositories {
-  jcenter()
-}
-
 dependencies {
   implementation 'com.discord4j:discord4j-core:3.0.0.M3-1'
 }
 ```
 ### Maven
 ```xml
-<repositories>
-  <repository>
-    <id>jcenter</id>
-    <url>https://jcenter.bintray.com/</url>
-  </repository>
-</repositories>
-
 <dependencies>
   <dependency>
     <groupId>com.discord4j</groupId>
@@ -42,8 +31,6 @@ dependencies {
 libraryDependencies ++= Seq(
   "com.discord4j" % "discord4j-core" % "3.0.0.M3-1"
 )
-
-resolvers += "jcenter" at "https://jcenter.bintray.com/"
 ```
 
 ## Quick Example (Reactive and Blocking)
