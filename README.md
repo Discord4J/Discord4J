@@ -11,8 +11,12 @@ Built with [Reactor](https://projectreactor.io/), [Netty](https://netty.io/), an
 ## Installation
 ### Gradle
 ```groovy
+repositories {
+  mavenCentral()
+}
+
 dependencies {
-  implementation 'com.discord4j:discord4j-core:3.0.0.M3-1'
+  implementation 'com.discord4j:discord4j-core:3.0.0.M4'
 }
 ```
 ### Maven
@@ -21,7 +25,7 @@ dependencies {
   <dependency>
     <groupId>com.discord4j</groupId>
     <artifactId>discord4j-core</artifactId>
-    <version>3.0.0.M3-1</version>
+    <version>3.0.0.M4</version>
   </dependency>
 </dependencies>
 ```
@@ -29,7 +33,7 @@ dependencies {
 ### SBT
 ```scala
 libraryDependencies ++= Seq(
-  "com.discord4j" % "discord4j-core" % "3.0.0.M3-1"
+  "com.discord4j" % "discord4j-core" % "3.0.0.M4"
 )
 ```
 
