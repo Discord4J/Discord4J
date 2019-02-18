@@ -55,6 +55,7 @@ allprojects {
     repositories {
         jcenter()
         maven { url 'https://jitpack.io' }
+        maven { url 'https://oss.sonatype.org/content/repositories/staging' }
     }
 
     tasks.withType(Javadoc) {
@@ -63,17 +64,18 @@ allprojects {
             tags = ["apiNote:a:API Note:",
                     "implSpec:a:Implementation Requirements:",
                     "implNote:a:Implementation Note:"]
+            addStringOption 'Xdoclint:none', '-quiet'
             addStringOption 'encoding', 'UTF-8'
             // adding links to javadocs for filling specific classes when not existing inside current javadoc
             links = [
                     "https://docs.oracle.com/javase/8/docs/api/",
                     "https://docs.oracle.com/javaee/7/api/",
-                    "http://fasterxml.github.io/jackson-databind/javadoc/2.9/",
+                    "https://fasterxml.github.io/jackson-databind/javadoc/2.9/",
                     "http://www.reactive-streams.org/reactive-streams-1.0.2-javadoc/",
-                    "http://projectreactor.io/docs/core/milestone/api/",
-                    "http://projectreactor.io/docs/netty/milestone/api/",
-                    "http://projectreactor.io/docs/extra/milestone/api/",
-                    "http://netty.io/4.1/api/"
+                    "https://projectreactor.io/docs/core/release/api/",
+                    "https://projectreactor.io/docs/netty/release/api/",
+                    "https://projectreactor.io/docs/extra/release/api/",
+                    "https://netty.io/4.1/api/"
             ]
         }
     }
