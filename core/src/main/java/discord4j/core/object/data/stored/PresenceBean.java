@@ -26,6 +26,7 @@ import java.io.Serializable;
 
 public final class PresenceBean implements Serializable {
 
+    public static final PresenceBean DEFAULT_OFFLINE = new PresenceBean(null, "offline");
     private static final long serialVersionUID = -2046485730083712716L;
 
     @Nullable
@@ -76,6 +77,11 @@ public final class PresenceBean implements Serializable {
             activity = new ActivityBean(game);
         }
         status = presence.getStatus();
+    }
+
+    private PresenceBean(@Nullable final ActivityBean activity, final String status) {
+        this.activity = activity;
+        this.status = status;
     }
 
     public PresenceBean() {}

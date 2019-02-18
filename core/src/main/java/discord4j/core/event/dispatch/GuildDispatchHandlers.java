@@ -28,6 +28,7 @@ import discord4j.core.event.domain.role.RoleDeleteEvent;
 import discord4j.core.event.domain.role.RoleUpdateEvent;
 import discord4j.core.object.data.stored.*;
 import discord4j.core.object.entity.*;
+import discord4j.core.object.util.Snowflake;
 import discord4j.core.util.ArrayUtil;
 import discord4j.core.util.EntityUtil;
 import discord4j.gateway.json.GatewayPayload;
@@ -131,6 +132,18 @@ class GuildDispatchHandlers {
                         .next(GatewayPayload.requestGuildMembers(new RequestGuildMembers(bean.getId(), "", 0))))
                 .then();
 
+        Mono<Void> saveOfflinePresences = Mono.just(guildBean.getMembers())
+                .map(LongStream::of)
+                .map(LongStream::boxed)
+                .flatMapMany(Flux::fromStream)
+                .filterWhen(id -> serviceMediator.getStateHolder().getPresenceStore()
+                        .find(LongLongTuple2.of(guildBean.getId(), id))
+                        .hasElement()
+                        .map(identity -> !identity))
+                .flatMap(id -> serviceMediator.getStateHolder().getPresenceStore()
+                        .save(LongLongTuple2.of(guildBean.getId(), id), PresenceBean.DEFAULT_OFFLINE))
+                .then();
+
         return saveGuild
                 .and(saveChannels)
                 .and(saveRoles)
@@ -139,6 +152,7 @@ class GuildDispatchHandlers {
                 .and(saveUsers)
                 .and(saveVoiceStates)
                 .and(savePresences)
+                .and(saveOfflinePresences)
                 .and(startMemberChunk)
                 .thenReturn(new GuildCreateEvent(serviceMediator.getClient(), new Guild(serviceMediator, guildBean)));
     }
@@ -311,9 +325,21 @@ class GuildDispatchHandlers {
                 .map(tuple -> new Member(serviceMediator, tuple.getT1(), tuple.getT2(), guildId))
                 .collect(Collectors.toSet());
 
+        Mono<Void> saveOfflinePresences = Flux.fromIterable(members)
+                .map(Member::getId)
+                .map(Snowflake::asLong)
+                .filterWhen(id -> serviceMediator.getStateHolder().getPresenceStore()
+                        .find(LongLongTuple2.of(guildId, id))
+                        .hasElement()
+                        .map(identity -> !identity))
+                .flatMap(id -> serviceMediator.getStateHolder().getPresenceStore()
+                        .save(LongLongTuple2.of(guildId, id), PresenceBean.DEFAULT_OFFLINE))
+                .then();
+
         return addMemberIds
                 .and(saveMembers)
                 .and(saveUsers)
+                .and(saveOfflinePresences)
                 .thenReturn(new MemberChunkEvent(serviceMediator.getClient(), guildId, members));
     }
 
