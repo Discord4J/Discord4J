@@ -4,6 +4,10 @@ The `voice` module provides a client to manipulate audio through [Voice Connecti
 Just replace `@VERSION@` with the latest given by ![](https://img.shields.io/maven-central/v/com.discord4j/discord4j-voice.svg?style=flat-square)
 ### Gradle
 ```groovy
+repositories {
+  mavenCentral()
+}
+
 dependencies {
   implementation 'com.discord4j:discord4j-voice:@VERSION@'
 }

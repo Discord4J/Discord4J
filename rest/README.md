@@ -5,6 +5,10 @@ The `rest` module provides a low-level HTTP client specifically for Discord whic
 Just replace `@VERSION@` with the latest given by ![](https://img.shields.io/maven-central/v/com.discord4j/discord4j-rest.svg?style=flat-square)
 ### Gradle
 ```groovy
+repositories {
+  mavenCentral()
+}
+
 dependencies {
   implementation 'com.discord4j:discord4j-rest:@VERSION@'
 }

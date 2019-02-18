@@ -5,6 +5,10 @@ The `common` module contains base utilities and models useful for other modules.
 Just replace `@VERSION@` with the latest given by ![](https://img.shields.io/maven-central/v/com.discord4j/discord4j-common.svg?style=flat-square)
 ### Gradle
 ```groovy
+repositories {
+  mavenCentral()
+}
+
 dependencies {
   implementation 'com.discord4j:discord4j-common:@VERSION@'
 }

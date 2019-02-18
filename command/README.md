@@ -14,6 +14,10 @@ into other users' bots quite simply.
 Just replace `@VERSION@` with the latest given by ![](https://img.shields.io/maven-central/v/com.discord4j/discord4j-command.svg?style=flat-square)
 ### Gradle
 ```groovy
+repositories {
+  mavenCentral()
+}
+
 dependencies {
   implementation 'com.discord4j:discord4j-command:@VERSION@'
 }

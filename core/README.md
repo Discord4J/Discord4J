@@ -7,6 +7,10 @@ The main features of this module include the high-level `DiscordClient` and repr
 Just replace `@VERSION@` with the latest given by ![](https://img.shields.io/maven-central/v/com.discord4j/discord4j-core.svg?style=flat-square)
 ### Gradle
 ```groovy
+repositories {
+  mavenCentral()
+}
+
 dependencies {
   implementation 'com.discord4j:discord4j-core:@VERSION@'
 }

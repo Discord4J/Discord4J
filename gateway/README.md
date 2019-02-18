@@ -5,6 +5,10 @@ The `gateway` module provides a low-level WebSocket client for interacting with 
 Just replace `@VERSION@` with the latest given by ![](https://img.shields.io/maven-central/v/com.discord4j/discord4j-gateway.svg?style=flat-square)
 ### Gradle
 ```groovy
+repositories {
+  mavenCentral()
+}
+
 dependencies {
   implementation 'com.discord4j:discord4j-gateway:@VERSION@'
 }
