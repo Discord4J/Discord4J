@@ -848,48 +848,31 @@ public final class Guild implements Entity {
      * emitted through the {@code Flux}.
      */
     public Flux<AuditLogEntry> getAuditLog() {
-        return getAuditLog(new AuditLogQuerySpec());
+        return getAuditLog(ignored -> {});
     }
 
     /**
      * Requests to retrieve the audit log for this guild.
      *
-     * @param spec A {@link Consumer} that provides a "blank" {@link AuditLogQuerySpec} to be operated on. If some
-     * properties need to be retrieved via blocking operations (such as retrieval from a database), then it is
-     * recommended to build the spec externally and call {@link #getAuditLog(AuditLogQuerySpec)}.
-     *
+     * @param spec A {@link Consumer} that provides a "blank" {@link AuditLogQuerySpec} to be operated on.
      * @return A {@link Flux} that continually emits entries for this guild's audit log. If an error is received, it is
      * emitted through the {@code Flux}.
      */
-    public Flux<AuditLogEntry> getAuditLog(final Consumer<AuditLogQuerySpec> spec) {
+    public Flux<AuditLogEntry> getAuditLog(final Consumer<? super AuditLogQuerySpec> spec) {
         final AuditLogQuerySpec mutatedSpec = new AuditLogQuerySpec();
         spec.accept(mutatedSpec);
-        return getAuditLog(mutatedSpec);
-    }
 
-    /**
-     * Requests to retrieve the audit log for this guild.
-     *
-     * @param spec A configured {@link AuditLogQuerySpec} to perform the request on.
-     * @return A {@link Flux} that continually emits entries for this guild's audit log. If an error is received, it is
-     * emitted through the {@code Flux}.
-     */
-    public Flux<AuditLogEntry> getAuditLog(final AuditLogQuerySpec spec) {
-        Function<Map<String, Object>, Flux<AuditLogResponse>> makeRequest = params -> {
-            params.putAll(spec.asRequest());
+        final Function<Map<String, Object>, Flux<AuditLogResponse>> makeRequest = params -> {
+            params.putAll(mutatedSpec.asRequest());
             return serviceMediator.getRestClient().getAuditLogService()
                     .getAuditLog(getId().asLong(), params)
                     .flux()
                     .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex()));
         };
 
-        ToLongFunction<AuditLogResponse> getLastEntryId = response -> {
-            AuditLogEntryResponse[] entries = response.getAuditLogEntries();
-            if (entries.length == 0) {
-                return Long.MAX_VALUE;
-            } else {
-                return entries[entries.length - 1].getId();
-            }
+        final ToLongFunction<AuditLogResponse> getLastEntryId = response -> {
+            final AuditLogEntryResponse[] entries = response.getAuditLogEntries();
+            return (entries.length == 0) ? Long.MAX_VALUE : entries[entries.length - 1].getId();
         };
 
         return PaginationUtil.paginateBefore(makeRequest, getLastEntryId, Long.MAX_VALUE, 100)
