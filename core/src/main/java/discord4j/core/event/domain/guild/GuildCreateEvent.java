@@ -31,12 +31,12 @@ import discord4j.core.object.entity.Guild;
  *
  * @see <a href="https://discordapp.com/developers/docs/topics/gateway#guild-create">Guild Create</a>
  */
-public class GuildCreateEvent extends GuildEvent {
+public class GuildCreateEvent extends AbstractGuildEvent {
 
     private final Guild guild;
 
     public GuildCreateEvent(DiscordClient client, Guild guild) {
-        super(client);
+        super(client, guild.getId().asLong());
         this.guild = guild;
     }
 

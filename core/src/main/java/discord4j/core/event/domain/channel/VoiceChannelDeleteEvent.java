@@ -17,24 +17,31 @@
 package discord4j.core.event.domain.channel;
 
 import discord4j.core.DiscordClient;
+import discord4j.core.event.domain.guild.GuildEvent;
 import discord4j.core.object.entity.VoiceChannel;
+import discord4j.core.object.util.Snowflake;
 
 /**
  * Dispatched when a {@link VoiceChannel} is deleted in a guild.
  *
  * @see <a href="https://discordapp.com/developers/docs/topics/gateway#channel-delete">Channel Delete</a>
  */
-public class VoiceChannelDeleteEvent extends ChannelEvent {
+public class VoiceChannelDeleteEvent extends AbstractChannelEvent implements GuildEvent {
 
     private final VoiceChannel channel;
 
     public VoiceChannelDeleteEvent(DiscordClient client, VoiceChannel channel) {
-        super(client);
+        super(client, channel.getId().asLong());
         this.channel = channel;
     }
 
     public VoiceChannel getChannel() {
         return channel;
+    }
+
+    @Override
+    public Snowflake getGuildId() {
+        return channel.getGuildId();
     }
 
     @Override

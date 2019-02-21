@@ -17,9 +17,9 @@
 package discord4j.core.event.domain.lifecycle;
 
 import discord4j.core.DiscordClient;
-import discord4j.core.event.domain.Event;
+import discord4j.core.event.domain.AbstractEvent;
 
-public abstract class GatewayLifecycleEvent extends Event {
+public abstract class GatewayLifecycleEvent extends AbstractEvent {
 
     public GatewayLifecycleEvent(DiscordClient client) {
         super(client);

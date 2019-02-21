@@ -16,7 +16,7 @@
  */
 package discord4j.command;
 
-import discord4j.core.event.domain.message.MessageCreateEvent;
+import discord4j.core.event.domain.channel.message.MessageCreateEvent;
 import org.reactivestreams.Publisher;
 
 /**
@@ -39,7 +39,7 @@ public interface CommandProvider<T> {
      *      the string held in the sent message.
      * @return The matched command based on the context, or empty if no command matched.
      *
-     * @see discord4j.command.CommandDispatcher#dispatch(discord4j.core.event.domain.message.MessageCreateEvent, java.util.Set, CommandErrorHandler)
+     * @see discord4j.command.CommandDispatcher#dispatch(discord4j.core.event.domain.channel.message.MessageCreateEvent, java.util.Set, CommandErrorHandler)
      */
     Publisher<ProviderContext<T>> provide(MessageCreateEvent context,
                                           String commandName,

@@ -16,12 +16,10 @@
  */
 package discord4j.core.event.domain.channel;
 
-import discord4j.core.DiscordClient;
 import discord4j.core.event.domain.Event;
+import discord4j.core.object.util.Snowflake;
 
-public abstract class ChannelEvent extends Event {
+public interface ChannelEvent extends Event {
 
-    public ChannelEvent(DiscordClient client) {
-        super(client);
-    }
+    Snowflake getChannelId();
 }

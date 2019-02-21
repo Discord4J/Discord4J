@@ -17,7 +17,9 @@
 package discord4j.core.event.domain.channel;
 
 import discord4j.core.DiscordClient;
+import discord4j.core.event.domain.guild.GuildEvent;
 import discord4j.core.object.entity.VoiceChannel;
+import discord4j.core.object.util.Snowflake;
 import reactor.util.annotation.Nullable;
 
 import java.util.Optional;
@@ -29,13 +31,13 @@ import java.util.Optional;
  *
  * @see <a href="https://discordapp.com/developers/docs/topics/gateway#channel-delete">Channel Delete</a>
  */
-public class VoiceChannelUpdateEvent extends ChannelEvent {
+public class VoiceChannelUpdateEvent extends AbstractChannelEvent implements GuildEvent {
 
     private final VoiceChannel current;
     private final VoiceChannel old;
 
     public VoiceChannelUpdateEvent(DiscordClient client, VoiceChannel current, @Nullable VoiceChannel old) {
-        super(client);
+        super(client, current.getId().asLong());
         this.current = current;
         this.old = old;
     }
@@ -46,6 +48,11 @@ public class VoiceChannelUpdateEvent extends ChannelEvent {
 
     public Optional<VoiceChannel> getOld() {
         return Optional.ofNullable(old);
+    }
+
+    @Override
+    public Snowflake getGuildId() {
+        return current.getGuildId();
     }
 
     @Override

@@ -17,6 +17,7 @@
 package discord4j.core.event.domain.channel;
 
 import discord4j.core.DiscordClient;
+import discord4j.core.event.domain.user.UserEvent;
 import discord4j.core.object.entity.MessageChannel;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.util.Snowflake;
@@ -29,27 +30,22 @@ import java.time.Instant;
  *
  * @see <a href="https://discordapp.com/developers/docs/topics/gateway#typing-start">Typing Start</a>
  */
-public class TypingStartEvent extends ChannelEvent {
+public class TypingStartEvent extends AbstractChannelEvent implements UserEvent {
 
-    private final long channelId;
     private final long userId;
     private final Instant startTime;
 
     public TypingStartEvent(DiscordClient client, long channelId, long userId, Instant startTime) {
-        super(client);
-        this.channelId = channelId;
+        super(client, channelId);
         this.userId = userId;
         this.startTime = startTime;
-    }
-
-    public Snowflake getChannelId() {
-        return Snowflake.of(channelId);
     }
 
     public Mono<MessageChannel> getChannel() {
         return getClient().getChannelById(getChannelId()).cast(MessageChannel.class);
     }
 
+    @Override
     public Snowflake getUserId() {
         return Snowflake.of(userId);
     }
@@ -65,8 +61,7 @@ public class TypingStartEvent extends ChannelEvent {
     @Override
     public String toString() {
         return "TypingStartEvent{" +
-                "channelId=" + channelId +
-                ", userId=" + userId +
+                "userId=" + userId +
                 ", startTime=" + startTime +
                 '}';
     }

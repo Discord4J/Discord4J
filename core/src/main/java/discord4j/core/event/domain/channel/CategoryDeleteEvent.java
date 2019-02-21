@@ -17,24 +17,31 @@
 package discord4j.core.event.domain.channel;
 
 import discord4j.core.DiscordClient;
+import discord4j.core.event.domain.guild.GuildEvent;
 import discord4j.core.object.entity.Category;
+import discord4j.core.object.util.Snowflake;
 
 /**
  * Dispatched when a {@link Category} is deleted in a guild.
  *
  * @see <a href="https://discordapp.com/developers/docs/topics/gateway#channel-delete">Channel Delete</a>
  */
-public class CategoryDeleteEvent extends ChannelEvent {
+public class CategoryDeleteEvent extends AbstractChannelEvent implements GuildEvent {
 
     private final Category category;
 
     public CategoryDeleteEvent(DiscordClient client, Category category) {
-        super(client);
+        super(client, category.getId().asLong());
         this.category = category;
     }
 
     public Category getCategory() {
         return category;
+    }
+
+    @Override
+    public Snowflake getGuildId() {
+        return category.getGuildId();
     }
 
     @Override

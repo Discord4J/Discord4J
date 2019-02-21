@@ -20,7 +20,7 @@ import discord4j.command.Command;
 import discord4j.command.CommandDispatcher;
 import discord4j.command.CommandErrorHandler;
 import discord4j.command.CommandProvider;
-import discord4j.core.event.domain.message.MessageCreateEvent;
+import discord4j.core.event.domain.channel.message.MessageCreateEvent;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;

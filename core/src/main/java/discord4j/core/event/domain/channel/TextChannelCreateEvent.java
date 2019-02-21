@@ -17,24 +17,31 @@
 package discord4j.core.event.domain.channel;
 
 import discord4j.core.DiscordClient;
+import discord4j.core.event.domain.guild.GuildEvent;
 import discord4j.core.object.entity.TextChannel;
+import discord4j.core.object.util.Snowflake;
 
 /**
  * Dispatched when a {@link TextChannel} is created in a guild.
  *
  * @see <a href="https://discordapp.com/developers/docs/topics/gateway#channel-create">Channel Create</a>
  */
-public class TextChannelCreateEvent extends ChannelEvent {
+public class TextChannelCreateEvent extends AbstractChannelEvent implements GuildEvent {
 
     private final TextChannel channel;
 
     public TextChannelCreateEvent(DiscordClient client, TextChannel channel) {
-        super(client);
+        super(client, channel.getId().asLong());
         this.channel = channel;
     }
 
     public TextChannel getChannel() {
         return channel;
+    }
+
+    @Override
+    public Snowflake getGuildId() {
+        return channel.getGuildId();
     }
 
     @Override

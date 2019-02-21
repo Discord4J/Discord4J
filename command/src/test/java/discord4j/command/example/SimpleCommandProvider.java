@@ -3,7 +3,7 @@ package discord4j.command.example;
 import discord4j.command.CommandProvider;
 import discord4j.command.ProviderContext;
 import discord4j.core.DiscordClient;
-import discord4j.core.event.domain.message.MessageCreateEvent;
+import discord4j.core.event.domain.channel.message.MessageCreateEvent;
 import discord4j.core.object.entity.ApplicationInfo;
 import discord4j.core.object.util.Snowflake;
 import reactor.core.publisher.Flux;

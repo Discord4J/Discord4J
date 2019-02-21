@@ -22,12 +22,12 @@ import discord4j.core.object.entity.PrivateChannel;
 /**
  * TODO what does this mean?
  */
-public class PrivateChannelDeleteEvent extends ChannelEvent {
+public class PrivateChannelDeleteEvent extends AbstractChannelEvent {
 
     private final PrivateChannel channel;
 
     public PrivateChannelDeleteEvent(DiscordClient client, PrivateChannel channel) {
-        super(client);
+        super(client, channel.getId().asLong());
         this.channel = channel;
     }
 

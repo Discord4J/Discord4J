@@ -17,24 +17,31 @@
 package discord4j.core.event.domain.channel;
 
 import discord4j.core.DiscordClient;
+import discord4j.core.event.domain.guild.GuildEvent;
 import discord4j.core.object.entity.TextChannel;
+import discord4j.core.object.util.Snowflake;
 
 /**
  * Dispatched when a {@link TextChannel} is deleted in a guild.
  *
  * @see <a href="https://discordapp.com/developers/docs/topics/gateway#channel-delete">Channel Delete</a>
  */
-public class TextChannelDeleteEvent extends ChannelEvent {
+public class TextChannelDeleteEvent extends AbstractChannelEvent implements GuildEvent {
 
     private final TextChannel channel;
 
     public TextChannelDeleteEvent(DiscordClient client, TextChannel channel) {
-        super(client);
+        super(client, channel.getId().asLong());
         this.channel = channel;
     }
 
     public TextChannel getChannel() {
         return channel;
+    }
+
+    @Override
+    public Snowflake getGuildId() {
+        return channel.getGuildId();
     }
 
     @Override

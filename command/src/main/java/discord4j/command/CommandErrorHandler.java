@@ -17,7 +17,7 @@
 package discord4j.command;
 
 import discord4j.command.util.CommandException;
-import discord4j.core.event.domain.message.MessageCreateEvent;
+import discord4j.core.event.domain.channel.message.MessageCreateEvent;
 import reactor.core.publisher.Mono;
 
 /**

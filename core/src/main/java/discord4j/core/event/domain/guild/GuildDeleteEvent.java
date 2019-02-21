@@ -18,7 +18,6 @@ package discord4j.core.event.domain.guild;
 
 import discord4j.core.DiscordClient;
 import discord4j.core.object.entity.Guild;
-import discord4j.core.object.util.Snowflake;
 import reactor.util.annotation.Nullable;
 
 import java.util.Optional;
@@ -32,21 +31,15 @@ import java.util.Optional;
  *
  * @see <a href="https://discordapp.com/developers/docs/topics/gateway#guild-delete">Guild Delete</a>
  */
-public class GuildDeleteEvent extends GuildEvent {
+public class GuildDeleteEvent extends AbstractGuildEvent {
 
-    private final long guildId;
     private final Guild guild;
     private final boolean unavailable;
 
     public GuildDeleteEvent(DiscordClient client, long guildId, @Nullable Guild guild, boolean unavailable) {
-        super(client);
-        this.guildId = guildId;
+        super(client, guildId);
         this.guild = guild;
         this.unavailable = unavailable;
-    }
-
-    public Snowflake getGuildId() {
-        return Snowflake.of(guildId);
     }
 
     public Optional<Guild> getGuild() {
@@ -60,8 +53,7 @@ public class GuildDeleteEvent extends GuildEvent {
     @Override
     public String toString() {
         return "GuildDeleteEvent{" +
-                "guildId=" + guildId +
-                ", guild=" + guild +
+                "guild=" + guild +
                 ", unavailable=" + unavailable +
                 '}';
     }

@@ -24,12 +24,12 @@ import discord4j.core.object.entity.PrivateChannel;
  *
  * @see <a href="https://discordapp.com/developers/docs/topics/gateway#channel-create">Channel Create</a>
  */
-public class PrivateChannelCreateEvent extends ChannelEvent {
+public class PrivateChannelCreateEvent extends AbstractChannelEvent {
 
     private final PrivateChannel channel;
 
     public PrivateChannelCreateEvent(DiscordClient client, PrivateChannel channel) {
-        super(client);
+        super(client, channel.getId().asLong());
         this.channel = channel;
     }
 

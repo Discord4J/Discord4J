@@ -18,7 +18,6 @@ package discord4j.core.event.domain.guild;
 
 import discord4j.core.DiscordClient;
 import discord4j.core.object.entity.Guild;
-import discord4j.core.object.util.Snowflake;
 import reactor.core.publisher.Mono;
 
 /**
@@ -27,17 +26,10 @@ import reactor.core.publisher.Mono;
  * @see <a href="https://discordapp.com/developers/docs/topics/gateway#guild-integrations-update">Guild Integrations
  * Update</a>
  */
-public class IntegrationsUpdateEvent extends GuildEvent {
-
-    private final long guildId;
+public class IntegrationsUpdateEvent extends AbstractGuildEvent {
 
     public IntegrationsUpdateEvent(DiscordClient client, long guildId) {
-        super(client);
-        this.guildId = guildId;
-    }
-
-    public Snowflake getGuildId() {
-        return Snowflake.of(guildId);
+        super(client, guildId);
     }
 
     public Mono<Guild> getGuild() {
@@ -46,8 +38,6 @@ public class IntegrationsUpdateEvent extends GuildEvent {
 
     @Override
     public String toString() {
-        return "IntegrationsUpdateEvent{" +
-                "guildId=" + guildId +
-                '}';
+        return "IntegrationsUpdateEvent{}";
     }
 }

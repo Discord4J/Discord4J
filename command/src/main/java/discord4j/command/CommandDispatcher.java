@@ -16,7 +16,7 @@
  */
 package discord4j.command;
 
-import discord4j.core.event.domain.message.MessageCreateEvent;
+import discord4j.core.event.domain.channel.message.MessageCreateEvent;
 import org.reactivestreams.Publisher;
 
 import java.util.Set;
@@ -46,7 +46,7 @@ public interface CommandDispatcher {
      * @param errorHandler The error handler to pass to command.
      * @return A flux which emits executed command.
      *
-     * @see discord4j.command.CommandProvider#provide(discord4j.core.event.domain.message.MessageCreateEvent, String, int, int)
+     * @see discord4j.command.CommandProvider#provide(discord4j.core.event.domain.channel.message.MessageCreateEvent, String, int, int)
      */
     Publisher<? extends Command<?>> dispatch(MessageCreateEvent event, Set<CommandProvider<?>> providers,
                                              CommandErrorHandler errorHandler);

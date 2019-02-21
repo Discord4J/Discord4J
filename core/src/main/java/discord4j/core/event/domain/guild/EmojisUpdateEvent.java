@@ -19,7 +19,6 @@ package discord4j.core.event.domain.guild;
 import discord4j.core.DiscordClient;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.GuildEmoji;
-import discord4j.core.object.util.Snowflake;
 import reactor.core.publisher.Mono;
 
 import java.util.Set;
@@ -30,19 +29,13 @@ import java.util.Set;
  *
  * @see <a href="https://discordapp.com/developers/docs/topics/gateway#guild-emojis-update">Guild Emojis Update</a>
  */
-public class EmojisUpdateEvent extends GuildEvent {
+public class EmojisUpdateEvent extends AbstractGuildEvent {
 
-    private final long guildId;
     private final Set<GuildEmoji> emojis;
 
     public EmojisUpdateEvent(DiscordClient client, long guildId, Set<GuildEmoji> emojis) {
-        super(client);
-        this.guildId = guildId;
+        super(client, guildId);
         this.emojis = emojis;
-    }
-
-    public Snowflake getGuildId() {
-        return Snowflake.of(guildId);
     }
 
     public Mono<Guild> getGuild() {
@@ -56,8 +49,7 @@ public class EmojisUpdateEvent extends GuildEvent {
     @Override
     public String toString() {
         return "EmojisUpdateEvent{" +
-                "guildId=" + guildId +
-                ", emojis=" + emojis +
+                "emojis=" + emojis +
                 '}';
     }
 }

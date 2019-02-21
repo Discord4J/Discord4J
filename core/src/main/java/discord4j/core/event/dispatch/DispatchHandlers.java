@@ -18,8 +18,13 @@ package discord4j.core.event.dispatch;
 
 import discord4j.core.DiscordClient;
 import discord4j.core.ServiceMediator;
-import discord4j.core.event.domain.*;
+import discord4j.core.event.domain.Event;
 import discord4j.core.event.domain.channel.TypingStartEvent;
+import discord4j.core.event.domain.channel.WebhooksUpdateEvent;
+import discord4j.core.event.domain.guild.VoiceServerUpdateEvent;
+import discord4j.core.event.domain.guild.VoiceStateUpdateEvent;
+import discord4j.core.event.domain.user.PresenceUpdateEvent;
+import discord4j.core.event.domain.user.UserUpdateEvent;
 import discord4j.core.object.VoiceState;
 import discord4j.core.object.data.stored.PresenceBean;
 import discord4j.core.object.data.stored.UserBean;

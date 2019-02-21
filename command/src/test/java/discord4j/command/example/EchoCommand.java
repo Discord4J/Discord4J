@@ -1,7 +1,7 @@
 package discord4j.command.example;
 
 import discord4j.command.Command;
-import discord4j.core.event.domain.message.MessageCreateEvent;
+import discord4j.core.event.domain.channel.message.MessageCreateEvent;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
 

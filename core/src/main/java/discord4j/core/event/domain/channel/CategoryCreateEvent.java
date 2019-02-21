@@ -17,24 +17,31 @@
 package discord4j.core.event.domain.channel;
 
 import discord4j.core.DiscordClient;
+import discord4j.core.event.domain.guild.GuildEvent;
 import discord4j.core.object.entity.Category;
+import discord4j.core.object.util.Snowflake;
 
 /**
  * Dispatched when a {@link Category} is created in a guild.
  *
  * @see <a href="https://discordapp.com/developers/docs/topics/gateway#channel-create">Channel Create</a>
  */
-public class CategoryCreateEvent extends ChannelEvent {
+public class CategoryCreateEvent extends AbstractChannelEvent implements GuildEvent {
 
     private final Category category;
 
     public CategoryCreateEvent(DiscordClient client, Category category) {
-        super(client);
+        super(client, category.getId().asLong());
         this.category = category;
     }
 
     public Category getCategory() {
         return category;
+    }
+
+    @Override
+    public Snowflake getGuildId() {
+        return category.getGuildId();
     }
 
     @Override

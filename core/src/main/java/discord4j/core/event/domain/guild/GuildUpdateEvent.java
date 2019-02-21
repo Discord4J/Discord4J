@@ -29,13 +29,13 @@ import java.util.Optional;
  *
  * @see <a href="https://discordapp.com/developers/docs/topics/gateway#guild-update">Guild Update</a>
  */
-public class GuildUpdateEvent extends GuildEvent {
+public class GuildUpdateEvent extends AbstractGuildEvent {
 
     private final Guild current;
     private final Guild old;
 
     public GuildUpdateEvent(DiscordClient client, Guild current, @Nullable Guild old) {
-        super(client);
+        super(client, current.getId().asLong());
         this.current = current;
         this.old = old;
     }

@@ -18,8 +18,8 @@ package discord4j.core.spec;
 
 import discord4j.core.DiscordClient;
 import discord4j.core.ServiceMediator;
-import discord4j.core.event.domain.VoiceServerUpdateEvent;
-import discord4j.core.event.domain.VoiceStateUpdateEvent;
+import discord4j.core.event.domain.guild.VoiceServerUpdateEvent;
+import discord4j.core.event.domain.guild.VoiceStateUpdateEvent;
 import discord4j.core.object.entity.VoiceChannel;
 import discord4j.gateway.json.GatewayPayload;
 import discord4j.gateway.json.VoiceStateUpdate;

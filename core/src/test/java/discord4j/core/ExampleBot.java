@@ -19,9 +19,9 @@ package discord4j.core;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.LoggerContext;
+import discord4j.core.event.domain.channel.message.MessageCreateEvent;
 import discord4j.core.event.domain.lifecycle.ReadyEvent;
 import discord4j.core.event.domain.lifecycle.ResumeEvent;
-import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.ApplicationInfo;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.MessageChannel;

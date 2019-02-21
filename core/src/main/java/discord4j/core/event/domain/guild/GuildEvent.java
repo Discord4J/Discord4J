@@ -16,12 +16,10 @@
  */
 package discord4j.core.event.domain.guild;
 
-import discord4j.core.DiscordClient;
 import discord4j.core.event.domain.Event;
+import discord4j.core.object.util.Snowflake;
 
-public abstract class GuildEvent extends Event {
+public interface GuildEvent extends Event {
 
-    public GuildEvent(DiscordClient client) {
-        super(client);
-    }
+    Snowflake getGuildId();
 }

@@ -17,24 +17,31 @@
 package discord4j.core.event.domain.channel;
 
 import discord4j.core.DiscordClient;
+import discord4j.core.event.domain.guild.GuildEvent;
 import discord4j.core.object.entity.VoiceChannel;
+import discord4j.core.object.util.Snowflake;
 
 /**
  * Dispatched when a {@link VoiceChannel} is created in a guild.
  *
  * @see <a href="https://discordapp.com/developers/docs/topics/gateway#channel-create">Channel Create</a>
  */
-public class VoiceChannelCreateEvent extends ChannelEvent {
+public class VoiceChannelCreateEvent extends AbstractChannelEvent implements GuildEvent {
 
     private final VoiceChannel channel;
 
     public VoiceChannelCreateEvent(DiscordClient client, VoiceChannel channel) {
-        super(client);
+        super(client, channel.getId().asLong());
         this.channel = channel;
     }
 
     public VoiceChannel getChannel() {
         return channel;
+    }
+
+    @Override
+    public Snowflake getGuildId() {
+        return channel.getGuildId();
     }
 
     @Override

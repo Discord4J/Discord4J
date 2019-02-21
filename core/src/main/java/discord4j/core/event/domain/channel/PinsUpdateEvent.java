@@ -18,7 +18,6 @@ package discord4j.core.event.domain.channel;
 
 import discord4j.core.DiscordClient;
 import discord4j.core.object.entity.MessageChannel;
-import discord4j.core.object.util.Snowflake;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
 
@@ -30,19 +29,13 @@ import java.util.Optional;
  *
  * @see <a href="https://discordapp.com/developers/docs/topics/gateway#channel-pins-update">Channel Pins Update</a>
  */
-public class PinsUpdateEvent extends ChannelEvent {
+public class PinsUpdateEvent extends AbstractChannelEvent {
 
-    private final long channelId;
     private final Instant lastPinTimestamp;
 
     public PinsUpdateEvent(DiscordClient client, long channelId, @Nullable Instant lastPinTimestamp) {
-        super(client);
-        this.channelId = channelId;
+        super(client, channelId);
         this.lastPinTimestamp = lastPinTimestamp;
-    }
-
-    public Snowflake getChannelId() {
-        return Snowflake.of(channelId);
     }
 
     public Mono<MessageChannel> getChannel() {
@@ -56,8 +49,7 @@ public class PinsUpdateEvent extends ChannelEvent {
     @Override
     public String toString() {
         return "PinsUpdateEvent{" +
-                "channelId=" + channelId +
-                ", lastPinTimestamp=" + lastPinTimestamp +
+                "lastPinTimestamp=" + lastPinTimestamp +
                 '}';
     }
 }

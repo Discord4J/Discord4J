@@ -19,7 +19,6 @@ package discord4j.core.event.domain.guild;
 import discord4j.core.DiscordClient;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Member;
-import discord4j.core.object.util.Snowflake;
 import reactor.core.publisher.Mono;
 
 import java.util.Set;
@@ -31,19 +30,13 @@ import java.util.Set;
  *
  * @see <a href="https://discordapp.com/developers/docs/topics/gateway#guild-members-chunk">Guild Members Chunk</a>
  */
-public class MemberChunkEvent extends GuildEvent {
+public class MemberChunkEvent extends AbstractGuildEvent {
 
-    private final long guildId;
     private final Set<Member> members;
 
     public MemberChunkEvent(DiscordClient client, long guildId, Set<Member> members) {
-        super(client);
-        this.guildId = guildId;
+        super(client, guildId);
         this.members = members;
-    }
-
-    public Snowflake getGuildId() {
-        return Snowflake.of(guildId);
     }
 
     public Mono<Guild> getGuild() {
@@ -57,8 +50,7 @@ public class MemberChunkEvent extends GuildEvent {
     @Override
     public String toString() {
         return "MemberChunkEvent{" +
-                "guildId=" + guildId +
-                ", members=" + members +
+                "members=" + members +
                 '}';
     }
 }
