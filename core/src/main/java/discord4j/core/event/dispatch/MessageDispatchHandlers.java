@@ -223,8 +223,7 @@ class MessageDispatchHandlers {
 
         long messageId = context.getDispatch().getId();
         long channelId = context.getDispatch().getChannelId();
-        PossibleLong possibleGuildId = context.getDispatch().getGuildId();
-        Long guildId = possibleGuildId.isAbsent() ? null : possibleGuildId.get();
+        Long guildId = context.getDispatch().getGuildId();
 
         Possible<String> content = context.getDispatch().getContent();
         boolean contentChanged = content == null || !content.isAbsent();

@@ -32,7 +32,8 @@ public class MessageUpdate implements Dispatch {
     private long channelId;
     @JsonProperty("guild_id")
     @UnsignedJson
-    private PossibleLong guildId = PossibleLong.absent();
+    @Nullable
+    private Long guildId;
     @Nullable
     private Possible<String> content = Possible.absent();
     @Nullable
@@ -46,7 +47,8 @@ public class MessageUpdate implements Dispatch {
         return channelId;
     }
 
-    public PossibleLong getGuildId() {
+    @Nullable
+    public Long getGuildId() {
         return guildId;
     }
 
