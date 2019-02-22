@@ -8,13 +8,13 @@
  *
  * Discord4J is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public License
- * along with Discord4J. If not, see <http://www.gnu.org/licenses/>.
+ * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
-package discord4j.core.event.domain.guild;
+package discord4j.core.event.domain.guild.member;
 
 import discord4j.core.DiscordClient;
 import discord4j.core.object.VoiceState;
@@ -31,13 +31,13 @@ import java.util.Optional;
  *
  * @see <a href="https://discordapp.com/developers/docs/topics/gateway#voice-state-update">Voice State Update</a>
  */
-public class VoiceStateUpdateEvent extends AbstractGuildEvent {
+public class VoiceStateUpdateEvent extends AbstractMemberEvent {
 
     private final VoiceState current;
     private final VoiceState old;
 
     public VoiceStateUpdateEvent(DiscordClient client, VoiceState current, @Nullable VoiceState old) {
-        super(client, current.getGuildId().asLong());
+        super(client, current.getGuildId().asLong(), current.getUserId().asLong());
         this.current = current;
         this.old = old;
     }

@@ -14,13 +14,11 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
-package discord4j.core.event.domain.guild;
+package discord4j.core.event.domain.guild.member;
 
 import discord4j.core.DiscordClient;
-import discord4j.core.event.domain.user.UserEvent;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Member;
-import discord4j.core.object.util.Snowflake;
 import reactor.core.publisher.Mono;
 
 /**
@@ -28,18 +26,13 @@ import reactor.core.publisher.Mono;
  *
  * @see <a href="https://discordapp.com/developers/docs/topics/gateway#guild-member-add">Guild Member Add</a>
  */
-public class MemberJoinEvent extends AbstractGuildEvent implements UserEvent {
+public class MemberJoinEvent extends AbstractMemberEvent {
 
     private final Member member;
 
     public MemberJoinEvent(DiscordClient client, Member member, long guildId) {
-        super(client, guildId);
+        super(client, guildId, member.getId().asLong());
         this.member = member;
-    }
-
-    @Override
-    public Snowflake getUserId() {
-        return member.getId();
     }
 
     public Member getMember() {

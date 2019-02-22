@@ -14,10 +14,9 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
-package discord4j.core.event.domain.guild;
+package discord4j.core.event.domain.guild.member;
 
 import discord4j.core.DiscordClient;
-import discord4j.core.event.domain.user.UserEvent;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.util.Snowflake;
@@ -34,9 +33,7 @@ import java.util.stream.Collectors;
  *
  * @see <a href="https://discordapp.com/developers/docs/topics/gateway#guild-member-update">Guild Member Update</a>
  */
-public class MemberUpdateEvent extends AbstractGuildEvent implements UserEvent {
-
-    private final long memberId;
+public class MemberUpdateEvent extends AbstractMemberEvent {
 
     @Nullable
     private final Member old;
@@ -47,24 +44,14 @@ public class MemberUpdateEvent extends AbstractGuildEvent implements UserEvent {
 
     public MemberUpdateEvent(DiscordClient client, long guildId, long memberId, @Nullable Member old,
                              long[] currentRoles, @Nullable String currentNickname) {
-        super(client, guildId);
-        this.memberId = memberId;
+        super(client, guildId, memberId);
         this.old = old;
         this.currentRoles = currentRoles;
         this.currentNickname = currentNickname;
     }
 
-    @Override
-    public Snowflake getUserId() {
-        return Snowflake.of(memberId);
-    }
-
     public Mono<Guild> getGuild() {
         return getClient().getGuildById(getGuildId());
-    }
-
-    public Snowflake getMemberId() {
-        return Snowflake.of(memberId);
     }
 
     public Mono<Member> getMember() {
@@ -88,8 +75,7 @@ public class MemberUpdateEvent extends AbstractGuildEvent implements UserEvent {
     @Override
     public String toString() {
         return "MemberUpdateEvent{" +
-                "memberId=" + memberId +
-                ", old=" + old +
+                "old=" + old +
                 ", currentRoles=" + Arrays.toString(currentRoles) +
                 ", currentNickname='" + currentNickname + '\'' +
                 '}';

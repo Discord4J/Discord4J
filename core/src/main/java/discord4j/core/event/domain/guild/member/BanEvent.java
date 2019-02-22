@@ -14,13 +14,11 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
-package discord4j.core.event.domain.guild;
+package discord4j.core.event.domain.guild.member;
 
 import discord4j.core.DiscordClient;
-import discord4j.core.event.domain.user.UserEvent;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.User;
-import discord4j.core.object.util.Snowflake;
 import reactor.core.publisher.Mono;
 
 /**
@@ -28,18 +26,13 @@ import reactor.core.publisher.Mono;
  *
  * @see <a href="https://discordapp.com/developers/docs/topics/gateway#guild-ban-add">Guild Ban Add</a>
  */
-public class BanEvent extends AbstractGuildEvent implements UserEvent {
+public class BanEvent extends AbstractMemberEvent {
 
     private final User user;
 
     public BanEvent(DiscordClient client, User user, long guildId) {
-        super(client, guildId);
+        super(client, guildId, user.getId().asLong());
         this.user = user;
-    }
-
-    @Override
-    public Snowflake getUserId() {
-        return user.getId();
     }
 
     public User getUser() {

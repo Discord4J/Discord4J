@@ -8,21 +8,19 @@
  *
  * Discord4J is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public License
- * along with Discord4J. If not, see <http://www.gnu.org/licenses/>.
+ * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
-package discord4j.core.event.domain.user;
+package discord4j.core.event.domain.guild.member;
 
 import discord4j.core.DiscordClient;
-import discord4j.core.event.domain.guild.GuildEvent;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.presence.Presence;
-import discord4j.core.object.util.Snowflake;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
 
@@ -35,23 +33,16 @@ import java.util.Optional;
  *
  * @see <a href="https://discordapp.com/developers/docs/topics/gateway#presence-update">Presence Update</a>
  */
-public class PresenceUpdateEvent extends AbstractUserEvent implements GuildEvent {
+public class PresenceUpdateEvent extends AbstractMemberEvent {
 
-    private final long guildId;
     private final Presence current;
     private final Presence old;
 
     public PresenceUpdateEvent(DiscordClient client, long guildId, long userId, Presence current,
                                @Nullable Presence old) {
-        super(client, userId);
-        this.guildId = guildId;
+        super(client, guildId, userId);
         this.current = current;
         this.old = old;
-    }
-
-    @Override
-    public Snowflake getGuildId() {
-        return Snowflake.of(guildId);
     }
 
     public Mono<Guild> getGuild() {
@@ -77,8 +68,7 @@ public class PresenceUpdateEvent extends AbstractUserEvent implements GuildEvent
     @Override
     public String toString() {
         return "PresenceUpdateEvent{" +
-                "guildId=" + guildId +
-                ", current=" + current +
+                "current=" + current +
                 ", old=" + old +
                 '}';
     }

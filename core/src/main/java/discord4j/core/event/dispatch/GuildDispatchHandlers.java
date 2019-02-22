@@ -23,6 +23,7 @@ import discord4j.core.DiscordClient;
 import discord4j.core.ServiceMediator;
 import discord4j.core.StateHolder;
 import discord4j.core.event.domain.guild.*;
+import discord4j.core.event.domain.guild.member.*;
 import discord4j.core.event.domain.guild.role.RoleCreateEvent;
 import discord4j.core.event.domain.guild.role.RoleDeleteEvent;
 import discord4j.core.event.domain.guild.role.RoleUpdateEvent;
