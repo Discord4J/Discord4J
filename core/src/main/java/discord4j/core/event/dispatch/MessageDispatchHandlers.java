@@ -17,6 +17,7 @@
 package discord4j.core.event.dispatch;
 
 import discord4j.common.jackson.Possible;
+import discord4j.common.jackson.PossibleLong;
 import discord4j.common.json.EmbedResponse;
 import discord4j.core.DiscordClient;
 import discord4j.core.ServiceMediator;
@@ -222,7 +223,7 @@ class MessageDispatchHandlers {
 
         long messageId = context.getDispatch().getId();
         long channelId = context.getDispatch().getChannelId();
-        Possible<Long> possibleGuildId = context.getDispatch().getGuildId();
+        PossibleLong possibleGuildId = context.getDispatch().getGuildId();
         Long guildId = possibleGuildId.isAbsent() ? null : possibleGuildId.get();
 
         Possible<String> content = context.getDispatch().getContent();
