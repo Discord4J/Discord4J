@@ -35,6 +35,7 @@ public class ChannelCreate implements Dispatch {
         return channel;
     }
 
+    @Nullable
     public Long getGuildId() {
         return guildId;
     }
