@@ -59,7 +59,7 @@ class ChannelDispatchHandlers {
         ServiceMediator serviceMediator = context.getServiceMediator();
         DiscordClient client = serviceMediator.getClient();
         GatewayChannelResponse channel = context.getDispatch().getChannel();
-        long guildId = context.getDispatch().getGuildId();
+        Long guildId = context.getDispatch().getGuildId();
         TextChannelBean bean = new TextChannelBean(channel, guildId);
 
         Mono<TextChannelCreateEvent> saveChannel = serviceMediator.getStateHolder().getTextChannelStore()
@@ -82,7 +82,7 @@ class ChannelDispatchHandlers {
         ServiceMediator serviceMediator = context.getServiceMediator();
         DiscordClient client = serviceMediator.getClient();
         GatewayChannelResponse channel = context.getDispatch().getChannel();
-        long guildId = context.getDispatch().getGuildId();
+        Long guildId = context.getDispatch().getGuildId();
         VoiceChannelBean bean = new VoiceChannelBean(channel, guildId);
 
         Mono<VoiceChannelCreateEvent> saveChannel = serviceMediator.getStateHolder().getVoiceChannelStore()
@@ -97,7 +97,7 @@ class ChannelDispatchHandlers {
         ServiceMediator serviceMediator = context.getServiceMediator();
         DiscordClient client = serviceMediator.getClient();
         GatewayChannelResponse channel = context.getDispatch().getChannel();
-        long guildId = context.getDispatch().getGuildId();
+        Long guildId = context.getDispatch().getGuildId();
         CategoryBean bean = new CategoryBean(channel, guildId);
 
         Mono<CategoryCreateEvent> saveChannel = serviceMediator.getStateHolder().getCategoryStore()
