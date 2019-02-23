@@ -30,6 +30,7 @@ import discord4j.gateway.json.dispatch.Resumed;
 import discord4j.gateway.payload.PayloadReader;
 import discord4j.gateway.payload.PayloadWriter;
 import discord4j.gateway.retry.GatewayStateChange;
+import discord4j.gateway.retry.PartialDisconnectException;
 import discord4j.gateway.retry.RetryContext;
 import discord4j.gateway.retry.RetryOptions;
 import io.netty.buffer.ByteBuf;
@@ -283,7 +284,7 @@ public class DefaultGatewayClient implements GatewayClient {
     }
 
     private Retry<RetryContext> retryFactory() {
-        return Retry.<RetryContext>any()
+        return Retry.<RetryContext>onlyIf(t -> isRetryable(t.exception()))
                 .withApplicationContext(retryOptions.getRetryContext())
                 .withBackoffScheduler(retryOptions.getBackoffScheduler())
                 .backoff(retryOptions.getBackoff())
@@ -313,6 +314,14 @@ public class DefaultGatewayClient implements GatewayClient {
                 });
     }
 
+    private boolean isRetryable(Throwable t) {
+        if (t instanceof CloseException) {
+            CloseException closeException = (CloseException) t;
+            return closeException.getCode() != 4004;
+        }
+        return !(t instanceof PartialDisconnectException);
+    }
+
     private boolean isResumableError(Throwable t) {
         if (t instanceof CloseException) {
             CloseException closeException = (CloseException) t;
@@ -323,7 +332,7 @@ public class DefaultGatewayClient implements GatewayClient {
 
     private Consumer<Throwable> logReconnectReason() {
         return t -> {
-            if (t instanceof CloseException && isResumableError(t)) {
+            if ((t instanceof CloseException && isResumableError(t)) || t instanceof PartialDisconnectException) {
                 log.error("Gateway client error: {}", t.toString());
             } else {
                 log.error("Gateway client error", t);
@@ -338,14 +347,18 @@ public class DefaultGatewayClient implements GatewayClient {
                 log.info("Disconnected from Gateway");
                 retryOptions.getRetryContext().clear();
                 connected.compareAndSet(true, false);
-                resumable.set(false);
-                sequence.set(0);
                 lastSent.set(0);
                 lastAck.set(0);
                 responseTime.set(0);
-                sessionId.set("");
                 dispatchSink.next(GatewayStateChange.disconnected());
-                notifyObserver(GatewayObserver.DISCONNECTED, identifyOptions);
+                if (closeTrigger.isError()) {
+                    notifyObserver(GatewayObserver.DISCONNECTED_RESUME, identifyOptions);
+                } else {
+                    resumable.set(false);
+                    sequence.set(0);
+                    sessionId.set("");
+                    notifyObserver(GatewayObserver.DISCONNECTED, identifyOptions);
+                }
                 disconnectNotifier.onComplete();
             }
             notifyObserver(newState, identifyOptions);
@@ -357,21 +370,18 @@ public class DefaultGatewayClient implements GatewayClient {
     }
 
     @Override
-    public Mono<Void> close(boolean reconnect) {
+    public Mono<Void> close(boolean allowResume) {
         return Mono.defer(() -> {
-            if (reconnect) {
-                // TODO: deprecate this branch
-                resumable.set(false);
-                return send(Mono.just(new GatewayPayload<>(Opcode.RECONNECT, null, null, null)))
-                        .then();
-            } else {
-                if (closeTrigger == null || disconnectNotifier == null) {
-                    return Mono.error(new IllegalStateException("Gateway client is not active!"));
-                }
-                closeTrigger.onNext(CloseStatus.NORMAL_CLOSE);
-                return disconnectNotifier
-                        .log(shardLogger(".disconnect"), Level.FINE, false);
+            if (closeTrigger == null || disconnectNotifier == null) {
+                return Mono.error(new IllegalStateException("Gateway client is not active!"));
             }
+            if (allowResume) {
+                closeTrigger.onError(new PartialDisconnectException());
+            } else {
+                closeTrigger.onNext(CloseStatus.NORMAL_CLOSE);
+            }
+            return disconnectNotifier
+                    .log(shardLogger(".disconnect"), Level.FINE, false);
         });
     }
 

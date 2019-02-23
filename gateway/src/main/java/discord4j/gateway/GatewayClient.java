@@ -50,13 +50,14 @@ public interface GatewayClient {
     Mono<Void> execute(String gatewayUrl, GatewayObserver additionalObserver);
 
     /**
-     * Terminates this client's current gateway connection, and optionally, reconnect to it.
+     * Terminates this client's current gateway connection, optionally allowing a RESUME attempt.
      *
-     * @param reconnect if this client should attempt to reconnect after closing
-     * @return a {@link Mono} deferring completion until the disconnection is completed, or if reconnecting, an empty
-     * one.
+     * @param allowResume if this client should attempt to reconnect after closing. if set to <code>true</code> the main
+     * execution {@link Mono} will complete with a {@link discord4j.gateway.retry.PartialDisconnectException} you can
+     * use to perform additional behavior and optionally, reconnect.
+     * @return a {@link Mono} deferring completion until the disconnection has completed.
      */
-    Mono<Void> close(boolean reconnect);
+    Mono<Void> close(boolean allowResume);
 
     /**
      * Obtains the Flux of Dispatch events inbound from the gateway connection made by this client.

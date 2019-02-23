@@ -30,6 +30,7 @@ import discord4j.core.object.presence.Presence;
 import discord4j.core.object.util.Snowflake;
 import discord4j.core.shard.ShardingClientBuilder;
 import discord4j.gateway.IdentifyOptions;
+import discord4j.gateway.retry.PartialDisconnectException;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -102,7 +103,8 @@ public class RetryBotTest {
     @Test
     @Ignore("Example code excluded from CI")
     public void test() {
-        final Map<Integer, IdentifyOptions> optionsMap = loadResumeData();
+        String resumePath = "resume.test";
+        final Map<Integer, IdentifyOptions> optionsMap = loadResumeData(resumePath);
 
         DiscordClient client = new DiscordClientBuilder(token)
                 .setEventScheduler(Schedulers.fromExecutor(Executors.newWorkStealingPool()))
@@ -136,7 +138,13 @@ public class RetryBotTest {
                 .onErrorContinue((t, o) -> log.error("Error", t))
                 .subscribe();
 
-        client.login().block();
+        try {
+            client.login().block();
+        } catch (PartialDisconnectException e) {
+            log.warn("This client can reconnect and RESUME");
+        }
+
+        saveResumeData(optionsMap, resumePath);
     }
 
     @Test
@@ -200,8 +208,7 @@ public class RetryBotTest {
      *
      * @return a Map of IdentifyOptions across all shards to be used for resuming sessions.
      */
-    private Map<Integer, IdentifyOptions> loadResumeData() {
-        String resumePath = "resume.test";
+    private Map<Integer, IdentifyOptions> loadResumeData(String resumePath) {
         Map<Integer, IdentifyOptions> map = new ConcurrentHashMap<>();
         try {
             Path path = Paths.get(resumePath);
@@ -219,29 +226,8 @@ public class RetryBotTest {
                 log.debug("Not attempting to resume");
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            log.warn("Could not load resume data", e);
         }
-
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            // Persist our identify options
-            try {
-                List<String> lines = map.entrySet()
-                        .stream()
-                        .map(entry -> {
-                            int shard = entry.getKey();
-                            String sessionId = entry.getValue().getResumeSessionId();
-                            Integer sequence = entry.getValue().getResumeSequence();
-                            log.debug("Saving resume data for shard {}: {}, {}", shard, sessionId, sequence);
-                            return shard + ";" + sessionId + ";" + sequence;
-                        })
-                        .filter(line -> !line.contains("null"))
-                        .collect(Collectors.toList());
-                Path saved = Files.write(Paths.get(resumePath), lines);
-                log.info("File saved to {}", saved.toAbsolutePath());
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }));
 
         if (map.isEmpty()) {
             // fallback to IDENTIFY case
@@ -254,6 +240,26 @@ public class RetryBotTest {
             }
         }
         return map;
+    }
+
+    private void saveResumeData(Map<Integer, IdentifyOptions> map, String resumePath) {
+        try {
+            List<String> lines = map.entrySet()
+                    .stream()
+                    .map(entry -> {
+                        int shard = entry.getKey();
+                        String sessionId = entry.getValue().getResumeSessionId();
+                        Integer sequence = entry.getValue().getResumeSequence();
+                        log.debug("Saving resume data for shard {}: {}, {}", shard, sessionId, sequence);
+                        return shard + ";" + sessionId + ";" + sequence;
+                    })
+                    .filter(line -> !line.contains("null"))
+                    .collect(Collectors.toList());
+            Path saved = Files.write(Paths.get(resumePath), lines);
+            log.info("File saved to {}", saved.toAbsolutePath());
+        } catch (IOException e) {
+            log.warn("Could not save resume data", e);
+        }
     }
 
     private void subscribeEventCounter(DiscordClient client, Map<String, AtomicLong> counts) {

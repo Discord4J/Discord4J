@@ -49,6 +49,9 @@ public interface GatewayObserver {
         return CompositeGatewayObserver.compose(this, other);
     }
 
+    /**
+     * Propagated when a gateway connection has been established.
+     */
     ConnectionObserver.State CONNECTED = new ConnectionObserver.State() {
         @Override
         public String toString() {
@@ -56,6 +59,9 @@ public interface GatewayObserver {
         }
     };
 
+    /**
+     * Propagated when a gateway connection has been fully closed.
+     */
     ConnectionObserver.State DISCONNECTED = new ConnectionObserver.State() {
         @Override
         public String toString() {
@@ -63,6 +69,19 @@ public interface GatewayObserver {
         }
     };
 
+    /**
+     * Propagated when a gateway connection has been closed but is still open for a RESUME attempt.
+     */
+    ConnectionObserver.State DISCONNECTED_RESUME = new ConnectionObserver.State() {
+        @Override
+        public String toString() {
+            return "[gateway_disconnected_resume]";
+        }
+    };
+
+    /**
+     * Propagated when a reconnection attempt with RESUME has started.
+     */
     ConnectionObserver.State RETRY_RESUME_STARTED = new ConnectionObserver.State() {
         @Override
         public String toString() {
@@ -70,6 +89,9 @@ public interface GatewayObserver {
         }
     };
 
+    /**
+     * Propagated when a reconnection attempt with IDENTIFY has started.
+     */
     ConnectionObserver.State RETRY_STARTED = new ConnectionObserver.State() {
         @Override
         public String toString() {
@@ -77,6 +99,9 @@ public interface GatewayObserver {
         }
     };
 
+    /**
+     * Propagated when a reconnection attempt has succeeded.
+     */
     ConnectionObserver.State RETRY_SUCCEEDED = new ConnectionObserver.State() {
         @Override
         public String toString() {
@@ -84,6 +109,9 @@ public interface GatewayObserver {
         }
     };
 
+    /**
+     * Propagated when a reconnection attempt has failed.
+     */
     ConnectionObserver.State RETRY_FAILED = new ConnectionObserver.State() {
         @Override
         public String toString() {
@@ -91,6 +119,9 @@ public interface GatewayObserver {
         }
     };
 
+    /**
+     * Propagated when the current session sequence value has updated.
+     */
     ConnectionObserver.State SEQUENCE = new ConnectionObserver.State() {
         @Override
         public String toString() {

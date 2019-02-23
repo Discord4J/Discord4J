@@ -336,7 +336,6 @@ public final class DiscordClient {
                         GatewayObserver.NOOP_LISTENER))
                 .then(serviceMediator.getStateHolder().invalidateStores())
                 .then(serviceMediator.getStoreService().dispose())
-                .doOnError(t -> !(t instanceof AlreadyConnectedException), t -> setDisposed())
                 .doOnCancel(this::setDisposed)
                 .doOnTerminate(this::setDisposed);
     }
@@ -354,17 +353,6 @@ public final class DiscordClient {
      */
     public Mono<Void> logout() {
         return serviceMediator.getGatewayClient().close(false);
-    }
-
-    /**
-     * Reconnects the client to the gateway.
-     *
-     * @return an empty {@link Mono}
-     * @deprecated This method is for debugging purposes only and can be removed on a later release.
-     */
-    @Deprecated
-    public Mono<Void> reconnect() {
-        return serviceMediator.getGatewayClient().close(true);
     }
 
     /**
