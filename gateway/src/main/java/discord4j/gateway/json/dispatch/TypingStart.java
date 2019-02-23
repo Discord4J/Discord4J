@@ -38,6 +38,7 @@ public class TypingStart implements Dispatch {
         return channelId;
     }
 
+    @Nullable
     public Long getGuildId() {
         return guildId;
     }
