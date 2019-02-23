@@ -17,6 +17,7 @@
 package discord4j.core.event.dispatch;
 
 import discord4j.common.jackson.Possible;
+import discord4j.common.jackson.PossibleLong;
 import discord4j.common.json.EmbedResponse;
 import discord4j.core.DiscordClient;
 import discord4j.core.ServiceMediator;
@@ -62,7 +63,14 @@ class MessageDispatchHandlers {
         Mono<Void> saveMessage = context.getServiceMediator().getStateHolder().getMessageStore()
                 .save(bean.getId(), bean);
 
+        Mono<Void> editLastMessageId = context.getServiceMediator().getStateHolder().getTextChannelStore()
+                .find(bean.getChannelId())
+                .doOnNext(channelBean -> channelBean.getMessageChannel().setLastMessageId(bean.getId()))
+                .flatMap(channelBean -> context.getServiceMediator().getStateHolder().getTextChannelStore()
+                        .save(channelBean.getId(), channelBean));
+
         return saveMessage
+                .and(editLastMessageId)
                 .thenReturn(new MessageCreateEvent(client, message, guildId, member));
     }
 
@@ -215,7 +223,7 @@ class MessageDispatchHandlers {
 
         long messageId = context.getDispatch().getId();
         long channelId = context.getDispatch().getChannelId();
-        long guildId = context.getDispatch().getGuildId();
+        Long guildId = context.getDispatch().getGuildId();
 
         Possible<String> content = context.getDispatch().getContent();
         boolean contentChanged = content == null || !content.isAbsent();

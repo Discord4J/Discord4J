@@ -18,6 +18,7 @@ package discord4j.gateway.json.dispatch;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import discord4j.common.jackson.Possible;
+import discord4j.common.jackson.PossibleLong;
 import discord4j.common.jackson.UnsignedJson;
 import discord4j.common.json.EmbedResponse;
 import reactor.util.annotation.Nullable;
@@ -31,7 +32,8 @@ public class MessageUpdate implements Dispatch {
     private long channelId;
     @JsonProperty("guild_id")
     @UnsignedJson
-    private long guildId;
+    @Nullable
+    private Long guildId;
     @Nullable
     private Possible<String> content = Possible.absent();
     @Nullable
@@ -45,7 +47,8 @@ public class MessageUpdate implements Dispatch {
         return channelId;
     }
 
-    public long getGuildId() {
+    @Nullable
+    public Long getGuildId() {
         return guildId;
     }
 
