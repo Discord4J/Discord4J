@@ -88,8 +88,17 @@ public interface GatewayClient {
      */
     FluxSink<GatewayPayload<?>> sender();
 
-    default Flux<?> send(Publisher<GatewayPayload<?>> publisher) {
-        return Flux.from(publisher).map(payload -> sender().next(payload));
+    /**
+     * Sends a sequence of {@link GatewayPayload payloads} through this {@link GatewayClient} and returns a
+     * {@link Mono} that signals completion when the payloads have been sent.
+     *
+     * @param publisher a sequence of outbound payloads
+     * @return a {@link Mono} completing when payloads have been sent
+     */
+    default Mono<Void> send(Publisher<GatewayPayload<?>> publisher) {
+        return Flux.from(publisher)
+                .doOnNext(payload -> sender().next(payload))
+                .then();
     }
 
     /**
