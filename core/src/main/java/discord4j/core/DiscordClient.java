@@ -70,6 +70,16 @@ public final class DiscordClient {
     }
 
     /**
+     * Obtain the {@link ServiceMediator} associated with this {@link DiscordClient}. This is an advanced method to
+     * access underlying middleware and resources.
+     *
+     * @return the current {@link ServiceMediator} for this client
+     */
+    public ServiceMediator getServiceMediator() {
+        return serviceMediator;
+    }
+
+    /**
      * Requests to retrieve the channel represented by the supplied ID.
      *
      * @param channelId The ID of the channel.

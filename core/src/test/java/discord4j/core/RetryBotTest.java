@@ -183,7 +183,7 @@ public class RetryBotTest {
                         if ("!close".equals(content)) {
                             client.logout().subscribe();
                         } else if ("!retry".equals(content)) {
-                            client.reconnect().subscribe();
+                            client.getServiceMediator().getGatewayClient().close(true).subscribe();
                         } else if ("!online".equals(content)) {
                             client.updatePresence(Presence.online()).subscribe();
                         } else if ("!dnd".equals(content)) {
