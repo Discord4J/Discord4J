@@ -40,6 +40,7 @@ public class MessageDelete implements Dispatch {
         return channelId;
     }
 
+    @Nullable
     public Long getGuildId() {
         return guildId;
     }
