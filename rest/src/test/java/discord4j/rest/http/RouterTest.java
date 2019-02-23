@@ -70,10 +70,12 @@ public class RouterTest {
         ObjectMapper mapper = getMapper();
         Router router = RestTests.getRouter(token, mapper);
 
+        String cid = Integer.toHexString(this.hashCode());
+
         for (int i = 0; i < 10; i++) {
             final int a = i;
 
-            MessageCreateRequest body = new MessageCreateRequest("hi " + a, null, false, null);
+            MessageCreateRequest body = new MessageCreateRequest(cid + " " + a, null, false, null);
 
             Routes.MESSAGE_CREATE.newRequest(channelId)
                     .body(body)
@@ -113,10 +115,12 @@ public class RouterTest {
         Router router = RestTests.getRouter(token, mapper);
         Scheduler thread = Schedulers.single();
 
+        String cid = Integer.toHexString(this.hashCode());
+
         for (int i = 0; i < 6; i++) {
             final int a = i;
 
-            MessageCreateRequest body = new MessageCreateRequest("hi " + a, null, false, null);
+            MessageCreateRequest body = new MessageCreateRequest(cid + " " + a, null, false, null);
 
             Routes.MESSAGE_CREATE.newRequest(channelId)
                     .body(body)
@@ -138,14 +142,16 @@ public class RouterTest {
         ObjectMapper mapper = getMapper();
         Router router = RestTests.getRouter(token, mapper);
 
-        MessageCreateRequest body0 = new MessageCreateRequest("hi 0 at" + Instant.now(), null, false, null);
+        String cid = Integer.toHexString(this.hashCode());
+
+        MessageCreateRequest body0 = new MessageCreateRequest(cid + " 0 at" + Instant.now(), null, false, null);
 
         Routes.MESSAGE_CREATE.newRequest(channelId)
                 .body(body0)
                 .exchange(router)
                 .block();
 
-        MessageCreateRequest body1 = new MessageCreateRequest("hi 1 at" + Instant.now(), null, false, null);
+        MessageCreateRequest body1 = new MessageCreateRequest(cid + " 1 at" + Instant.now(), null, false, null);
 
         Routes.MESSAGE_CREATE.newRequest(channelId)
                 .body(body1)
