@@ -358,19 +358,21 @@ public class DefaultGatewayClient implements GatewayClient {
 
     @Override
     public Mono<Void> close(boolean reconnect) {
-        if (reconnect) {
-            // TODO: deprecate this branch
-            resumable.set(false);
-            senderSink.next(new GatewayPayload<>(Opcode.RECONNECT, null, null, null));
-            return Mono.empty();
-        } else {
-            closeTrigger.onNext(CloseStatus.NORMAL_CLOSE);
-            if (disconnectNotifier == null) {
-                return Mono.error(new IllegalStateException("Gateway client is not active!"));
+        return Mono.defer(() -> {
+            if (reconnect) {
+                // TODO: deprecate this branch
+                resumable.set(false);
+                return send(Mono.just(new GatewayPayload<>(Opcode.RECONNECT, null, null, null)))
+                        .then();
+            } else {
+                if (closeTrigger == null || disconnectNotifier == null) {
+                    return Mono.error(new IllegalStateException("Gateway client is not active!"));
+                }
+                closeTrigger.onNext(CloseStatus.NORMAL_CLOSE);
+                return disconnectNotifier
+                        .log(shardLogger(".disconnect"), Level.FINE, false);
             }
-            return disconnectNotifier
-                    .log(shardLogger(".disconnect"), Level.FINE, false);
-        }
+        });
     }
 
     @Override
