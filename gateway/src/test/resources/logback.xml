@@ -2,6 +2,7 @@
 <configuration scan="true">
     <logger name="io.netty" level="INFO"/>
     <logger name="reactor" level="INFO"/>
+    <logger name="discord4j.gateway.client" level="DEBUG"/>
 
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
@@ -9,7 +10,7 @@
         </encoder>
     </appender>
 
-    <root level="DEBUG">
+    <root level="INFO">
         <appender-ref ref="CONSOLE"/>
     </root>
 </configuration>

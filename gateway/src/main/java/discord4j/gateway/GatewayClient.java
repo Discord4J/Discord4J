@@ -25,10 +25,10 @@ import reactor.core.publisher.FluxSink;
 import reactor.core.publisher.Mono;
 
 /**
- * Represents a Discord WebSocket client, called Gateway, implementing its lifecycle.
+ * Represents a Discord real-time websocket client, called Gateway, implementing its lifecycle.
  * <p>
  * Allows consumers to receive inbound events through {@link #dispatch()} and direct raw payloads through
- * {@link #receiver()} and allows a producer to submit events through {@link #sender()}.
+ * {@link #receiver()} and allows a producer to submit events through {@link #send(Publisher)} and {@link #sender()}.
  */
 public interface GatewayClient {
 
@@ -82,8 +82,7 @@ public interface GatewayClient {
     Flux<GatewayPayload<?>> receiver();
 
     /**
-     * Retrieves a new FluxSink to safely produce outbound values. By Reactive Streams Specs Rule 2.12 this can't be
-     * called twice from the same instance (based on object equality).
+     * Retrieves a new FluxSink to safely produce outbound values using {@link FluxSink#next(Object)}.
      *
      * @return a serializing FluxSink
      */

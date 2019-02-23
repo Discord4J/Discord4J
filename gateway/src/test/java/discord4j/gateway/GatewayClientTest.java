@@ -24,6 +24,7 @@ import discord4j.common.SimpleBucket;
 import discord4j.common.jackson.PossibleModule;
 import discord4j.common.jackson.UnknownPropertyHandler;
 import discord4j.gateway.json.GatewayPayload;
+import discord4j.gateway.json.StatusUpdate;
 import discord4j.gateway.json.dispatch.MessageCreate;
 import discord4j.gateway.json.dispatch.Ready;
 import discord4j.gateway.payload.JacksonPayloadReader;
@@ -31,7 +32,6 @@ import discord4j.gateway.payload.JacksonPayloadWriter;
 import discord4j.gateway.payload.PayloadReader;
 import discord4j.gateway.payload.PayloadWriter;
 import discord4j.gateway.retry.RetryOptions;
-import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import reactor.core.publisher.FluxSink;
@@ -39,21 +39,19 @@ import reactor.core.scheduler.Schedulers;
 import reactor.netty.http.client.HttpClient;
 
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CountDownLatch;
 
 public class GatewayClientTest {
 
     private static final String gatewayUrl = "wss://gateway.discord.gg?v=6&encoding=json&compress=zlib-stream";
 
-    private String token;
-
-    @Before
-    public void initialize() {
-        token = System.getenv("token");
-    }
-
     @Test
     @Ignore("Example code not under CI")
     public void test() {
+        // need to set 1 env vars, token
+        String token = System.getenv("token");
         ObjectMapper mapper = getMapper();
         PayloadReader reader = new JacksonPayloadReader(mapper);
         PayloadWriter writer = new JacksonPayloadWriter(mapper);
@@ -70,6 +68,7 @@ public class GatewayClientTest {
             }
         });
 
+        // sink to manually produce individual values
         FluxSink<GatewayPayload<?>> outboundSink = gatewayClient.sender();
 
         gatewayClient.dispatch().ofType(MessageCreate.class)
@@ -83,6 +82,59 @@ public class GatewayClientTest {
                 });
 
         gatewayClient.execute(gatewayUrl).block();
+    }
+
+    /*
+     * Example code showcasing raw gateway module usage to launch an arbitrary number of shards, coordinating their
+     * connection process using CountDownLatch objects.
+     */
+    @Test
+    @Ignore("Example code not under CI")
+    public void testShards() throws InterruptedException {
+        // need to set 2 env vars, token and shardCount
+        String token = System.getenv("token");
+        int shardCount = Integer.parseInt(System.getenv("shardCount"));
+        ObjectMapper mapper = getMapper();
+
+        CountDownLatch latch = new CountDownLatch(0);
+        List<CountDownLatch> latches = new ArrayList<>();
+        latches.add(latch);
+        CountDownLatch exit = new CountDownLatch(shardCount);
+
+        for (int i = 0; i < shardCount; i++) {
+            CountDownLatch next = new CountDownLatch(1);
+            GatewayClient shard = new DefaultGatewayClient(
+                    HttpClient.create().compress(true),
+                    new JacksonPayloadReader(mapper),
+                    new JacksonPayloadWriter(mapper),
+                    new RetryOptions(Duration.ofSeconds(2), Duration.ofSeconds(120), Integer.MAX_VALUE,
+                            Schedulers.elastic()),
+                    token,
+                    new IdentifyOptions(i, shardCount,
+                            new StatusUpdate(null, "invisible")),
+                    (s, o) -> {
+                        if (s.equals(GatewayObserver.CONNECTED)) {
+                            next.countDown();
+                        }
+                        if (s.equals(GatewayObserver.DISCONNECTED)) {
+                            exit.countDown();
+                        }
+                    },
+                    new SimpleBucket(1, Duration.ofSeconds(6)));
+            latches.add(next);
+            int shardIndex = i;
+            Schedulers.elastic().schedule(() -> {
+                try {
+                    latches.get(shardIndex).await();
+                    System.out.println("Running shard " + shardIndex);
+                    shard.execute("wss://gateway.discord.gg/?v=6&encoding=json&compress=zlib-stream").block();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            });
+        }
+
+        exit.await();
     }
 
     private ObjectMapper getMapper() {
