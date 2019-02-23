@@ -357,18 +357,15 @@ class GuildDispatchHandlers {
 
         Mono<MemberUpdateEvent> update = serviceMediator.getStateHolder().getMemberStore()
                 .find(key)
-                .flatMap(bean -> {
+                .flatMap(oldBean -> {
                     UserBean user = new UserBean(context.getDispatch().getUser());
-                    Member old = new Member(serviceMediator, new MemberBean(bean, context.getDispatch()), user,
-                            guildId);
+                    Member old = new Member(serviceMediator, oldBean, user, guildId);
 
-                    bean.setNick(currentNick);
-                    bean.setRoles(currentRoles);
+                    MemberBean newBean = new MemberBean(oldBean, context.getDispatch());
 
                     return serviceMediator.getStateHolder().getMemberStore()
-                            .save(key, bean)
-                            .thenReturn(new MemberUpdateEvent(client, guildId, memberId, old, currentRoles,
-                                    currentNick));
+                            .save(key, newBean)
+                            .thenReturn(new MemberUpdateEvent(client, guildId, memberId, old, currentRoles, currentNick));
                 });
 
         return update.defaultIfEmpty(new MemberUpdateEvent(client, guildId, memberId, null, currentRoles, currentNick));
