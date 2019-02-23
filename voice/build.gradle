@@ -5,3 +5,9 @@ dependencies {
     testCompile "junit:junit:$junit_version"
     testCompile "ch.qos.logback:logback-classic:$logback_version"
 }
+
+javadoc {
+    dependsOn project(':common').javadoc
+
+    options.linksOffline rootProject.buildDocsUrl('discord4j-common'), project(':common').javadoc.destinationDir.toURI() as String
+}

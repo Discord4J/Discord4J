@@ -12,3 +12,19 @@ dependencies {
     testCompile "org.reflections:reflections:0.9.11"
     testCompile "com.sedmelluq:lavaplayer:1.3.10"
 }
+
+javadoc {
+    dependsOn project(':rest').javadoc
+    dependsOn project(':gateway').javadoc
+    dependsOn project(':voice').javadoc
+
+    options.linksOffline rootProject.buildDocsUrl('discord4j-common'), project(':common').javadoc.destinationDir.toURI() as String
+    options.linksOffline rootProject.buildDocsUrl('discord4j-rest'), project(':rest').javadoc.destinationDir.toURI() as String
+    options.linksOffline rootProject.buildDocsUrl('discord4j-gateway'), project(':gateway').javadoc.destinationDir.toURI() as String
+    options.linksOffline rootProject.buildDocsUrl('discord4j-voice'), project(':voice').javadoc.destinationDir.toURI() as String
+
+    options.linksOffline "https://www.javadoc.io/page/com.discord4j/stores-api/$storesVersion/" as String,
+            "https://javadoc.jitpack.io/com/discord4j/stores/stores-api/$storesVersion/javadoc/" as String
+    options.linksOffline "https://www.javadoc.io/page/com.discord4j/stores-jdk/$storesVersion/" as String,
+            "https://javadoc.jitpack.io/com/discord4j/stores/stores-jdk/$storesVersion/javadoc/" as String
+}
