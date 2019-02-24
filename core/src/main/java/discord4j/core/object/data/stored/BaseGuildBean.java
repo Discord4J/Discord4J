@@ -144,6 +144,30 @@ public class BaseGuildBean implements Serializable {
         systemChannelId = response.getSystemChannelId();
     }
 
+    public BaseGuildBean(final BaseGuildBean toCopy) {
+        id = toCopy.getId();
+        name = toCopy.getName();
+        icon = toCopy.getIcon();
+        splash = toCopy.getSplash();
+        ownerId = toCopy.getOwnerId();
+        region = toCopy.getRegion();
+        afkChannelId = toCopy.getAfkChannelId();
+        afkTimeout = toCopy.getAfkTimeout();
+        embedChannelId = toCopy.getEmbedChannelId();
+        verificationLevel = toCopy.getVerificationLevel();
+        defaultMessageNotifications = toCopy.getDefaultMessageNotifications();
+        explicitContentFilter = toCopy.getExplicitContentFilter();
+
+        roles = Arrays.copyOf(toCopy.getRoles(), toCopy.getRoles().length);
+        emojis = Arrays.copyOf(toCopy.getEmojis(), toCopy.getEmojis().length);
+
+        features = toCopy.getFeatures();
+        mfaLevel = toCopy.getMfaLevel();
+        applicationId = toCopy.getApplicationId();
+        widgetChannelId = toCopy.getWidgetChannelId();
+        systemChannelId = toCopy.getSystemChannelId();
+    }
+
     public BaseGuildBean() {}
 
     public long getId() {

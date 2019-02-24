@@ -51,6 +51,12 @@ public final class MemberBean implements Serializable {
         joinedAt = toCopy.getJoinedAt();
     }
 
+    public MemberBean(final MemberBean toCopy) {
+        nick = toCopy.getNick();
+        roles = Arrays.copyOf(toCopy.getRoles(), toCopy.getRoles().length);
+        joinedAt = toCopy.getJoinedAt();
+    }
+
     public MemberBean() {}
 
     @Nullable

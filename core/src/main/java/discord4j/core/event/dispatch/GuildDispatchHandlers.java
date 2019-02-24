@@ -210,6 +210,7 @@ class GuildDispatchHandlers {
 
         Mono<Void> updateGuildBean = serviceMediator.getStateHolder().getGuildStore()
                 .find(context.getDispatch().getGuildId())
+                .map(GuildBean::new)
                 .doOnNext(guild -> {
                     long[] emojis = Arrays.stream(context.getDispatch().getEmojis())
                             .mapToLong(GuildEmojiResponse::getId)
@@ -251,6 +252,7 @@ class GuildDispatchHandlers {
 
         Mono<Void> addMemberId = serviceMediator.getStateHolder().getGuildStore()
                 .find(guildId)
+                .map(GuildBean::new)
                 .doOnNext(guild -> guild.setMembers(ArrayUtil.add(guild.getMembers(), response.getUser().getId())))
                 .flatMap(guild -> serviceMediator.getStateHolder().getGuildStore().save(guildId, guild));
 
@@ -275,6 +277,7 @@ class GuildDispatchHandlers {
 
         Mono<Void> removeMemberId = serviceMediator.getStateHolder().getGuildStore()
                 .find(guildId)
+                .map(GuildBean::new)
                 .doOnNext(guild -> guild.setMembers(ArrayUtil.remove(guild.getMembers(), response.getId())))
                 .flatMap(guild -> serviceMediator.getStateHolder().getGuildStore().save(guildId, guild));
 
@@ -307,6 +310,7 @@ class GuildDispatchHandlers {
 
         Mono<Void> addMemberIds = serviceMediator.getStateHolder().getGuildStore()
                 .find(guildId)
+                .map(GuildBean::new)
                 .doOnNext(guild -> {
                     long[] ids = Arrays.stream(context.getDispatch().getMembers())
                             .map(GuildMemberResponse::getUser)
@@ -380,6 +384,7 @@ class GuildDispatchHandlers {
 
         Mono<Void> addRoleId = serviceMediator.getStateHolder().getGuildStore()
                 .find(context.getDispatch().getGuildId())
+                .map(GuildBean::new)
                 .doOnNext(guild -> guild.setRoles(ArrayUtil.add(guild.getRoles(), bean.getId())))
                 .flatMap(guild -> serviceMediator.getStateHolder().getGuildStore().save(guild.getId(), guild));
 
@@ -398,6 +403,7 @@ class GuildDispatchHandlers {
 
         Mono<Void> removeRoleId = serviceMediator.getStateHolder().getGuildStore()
                 .find(guildId)
+                .map(GuildBean::new)
                 .doOnNext(guild -> guild.setRoles(ArrayUtil.remove(guild.getRoles(), roleId)))
                 .flatMap(guild -> serviceMediator.getStateHolder().getGuildStore().save(guildId, guild));
 
@@ -407,11 +413,14 @@ class GuildDispatchHandlers {
         Mono<Void> removeRoleFromMembers = serviceMediator.getStateHolder().getGuildStore()
                 .find(guildId)
                 .flatMapMany(guild -> Flux.fromArray(ArrayUtil.toObject(guild.getMembers())))
-                .flatMap(memberId -> serviceMediator.getStateHolder().getMemberStore().find(LongLongTuple2.of(guildId, memberId)).map(member -> Tuples.of(memberId, member)))
+                .flatMap(memberId -> serviceMediator.getStateHolder().getMemberStore()
+                        .find(LongLongTuple2.of(guildId, memberId))
+                        .map(member -> Tuples.of(memberId, member)))
                 .filter(t -> ArrayUtil.contains(t.getT2().getRoles(), roleId))
-                .doOnNext(t -> {
-                    MemberBean member = t.getT2();
+                .map(t -> {
+                    MemberBean member = new MemberBean(t.getT2());
                     member.setRoles(ArrayUtil.remove(member.getRoles(), roleId));
+                    return Tuples.of(t.getT1(), member);
                 })
                 .flatMap(t -> serviceMediator.getStateHolder().getMemberStore()
                         .save(LongLongTuple2.of(guildId, t.getT1()), t.getT2()))

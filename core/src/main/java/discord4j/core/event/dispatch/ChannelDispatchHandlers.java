@@ -112,6 +112,7 @@ class ChannelDispatchHandlers {
                                                 long guildId) {
         return guildStore
                 .find(guildId)
+                .map(GuildBean::new)
                 .doOnNext(guild -> guild.setChannels(ArrayUtil.add(guild.getChannels(), channel.getId())))
                 .flatMap(guild -> guildStore.save(guild.getId(), guild));
     }
@@ -188,6 +189,7 @@ class ChannelDispatchHandlers {
                                                      long guildId) {
         return guildStore
                 .find(guildId)
+                .map(GuildBean::new)
                 .doOnNext(guild -> guild.setChannels(ArrayUtil.remove(guild.getChannels(), channel.getId())))
                 .flatMap(guild -> guildStore.save(guild.getId(), guild));
     }

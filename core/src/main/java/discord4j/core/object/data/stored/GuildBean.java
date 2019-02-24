@@ -57,8 +57,18 @@ public final class GuildBean extends BaseGuildBean {
         this.joinedAt = toCopy.joinedAt;
         this.large = toCopy.large;
         this.memberCount = toCopy.memberCount;
-        this.members = toCopy.members;
-        this.channels = toCopy.channels;
+        this.members = Arrays.copyOf(toCopy.members, toCopy.members.length);
+        this.channels = Arrays.copyOf(toCopy.members, toCopy.members.length);
+    }
+
+    public GuildBean(final GuildBean toCopy) {
+        super(toCopy);
+
+        this.joinedAt = toCopy.getJoinedAt();
+        this.large = toCopy.getLarge();
+        this.memberCount = toCopy.getMemberCount();
+        this.members = Arrays.copyOf(toCopy.members, toCopy.members.length);
+        this.channels = Arrays.copyOf(toCopy.members, toCopy.members.length);
     }
 
     public GuildBean() {}

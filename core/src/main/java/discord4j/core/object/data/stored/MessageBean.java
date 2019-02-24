@@ -124,11 +124,11 @@ public final class MessageBean implements Serializable {
         editedTimestamp = toCopy.editedTimestamp;
         tts = toCopy.tts;
         mentionEveryone = toCopy.mentionEveryone;
-        mentions = toCopy.mentions;
-        mentionRoles = toCopy.mentionRoles;
-        attachments = toCopy.attachments;
-        embeds = toCopy.embeds;
-        reactions = toCopy.reactions;
+        mentions = Arrays.copyOf(toCopy.mentions, toCopy.mentions.length);
+        mentionRoles = Arrays.copyOf(toCopy.mentionRoles, toCopy.mentionRoles.length);
+        attachments = Arrays.copyOf(toCopy.attachments, toCopy.attachments.length);
+        embeds = Arrays.copyOf(toCopy.embeds, toCopy.embeds.length);
+        reactions = Arrays.copyOf(toCopy.reactions, toCopy.reactions.length);
         pinned = toCopy.pinned;
         webhookId = toCopy.webhookId;
         type = toCopy.type;
