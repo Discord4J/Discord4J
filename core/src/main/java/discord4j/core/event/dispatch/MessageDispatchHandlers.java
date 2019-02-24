@@ -147,7 +147,7 @@ class MessageDispatchHandlers {
                             ReactionBean newExisting = new ReactionBean(oldExisting);
                             newExisting.setMe(me);
                             newExisting.setCount(oldExisting.getCount() + 1);
-                            ArrayUtil.replace(newBean.getReactions(), oldExisting, newExisting);
+                            newBean.setReactions(ArrayUtil.replace(oldBean.getReactions(), oldExisting, newExisting));
                         } else {
                             ReactionBean r = new ReactionBean(1, me, emojiId, emojiName, emojiAnimated);
                             newBean.setReactions(ArrayUtil.add(oldBean.getReactions(), r));
@@ -201,7 +201,7 @@ class MessageDispatchHandlers {
                             newExisting.setMe(false);
                         }
 
-                        ArrayUtil.replace(newBean.getReactions(), existing, newExisting);
+                        newBean.setReactions(ArrayUtil.replace(oldBean.getReactions(), existing, newExisting));
                     }
                     return newBean;
                 })
