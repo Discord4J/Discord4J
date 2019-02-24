@@ -61,36 +61,42 @@ public class Requests {
 	/**
 	 * The HTTP client requests are made on.
 	 */
-	private final OkHttpClient http;
+	private static final OkHttpClient HTTP;
 
 	/**
 	 * Used to send POST requests.
 	 */
 	public final DiscordRequest POST;
+
 	/**
 	 * Used to send GET requests.
 	 */
 	public final DiscordRequest GET;
+
 	/**
 	 * Used to send DELETE requests.
 	 */
 	public final DiscordRequest DELETE;
+
 	/**
 	 * Used to send PATCH requests.
 	 */
 	public final DiscordRequest PATCH;
+
 	/**
 	 * Used to send PUT requests.
 	 */
 	public final DiscordRequest PUT;
 
-	public Requests(DiscordClientImpl client) {
+	static {
 		HttpLoggingInterceptor httpLogger = new HttpLoggingInterceptor(message -> Discord4J.LOGGER.debug(LogMarkers.API, message)).setLevel(HttpLoggingInterceptor.Level.HEADERS);
 		httpLogger.redactHeader("Set-Cookie");
 		httpLogger.redactHeader("Cookie");
 		httpLogger.redactHeader("Authorization");
-		http = new OkHttpClient.Builder().addInterceptor(httpLogger).build();
+		HTTP = new OkHttpClient.Builder().addInterceptor(httpLogger).build();
+	}
 
+	public Requests(DiscordClientImpl client) {
 		POST = new DiscordRequest("POST", client);
 		GET = new DiscordRequest("GET", client);
 		DELETE = new DiscordRequest("DELETE", client);
@@ -268,7 +274,7 @@ public class Requests {
 			}
 
 			Request request = builder.build();
-			try (Response response = http.newCall(request).execute()) {
+			try (Response response = HTTP.newCall(request).execute()) {
 				int responseCode = response.code();
 
 				String header = response.header("X-RateLimit-Remaining");
