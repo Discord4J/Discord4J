@@ -20,6 +20,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import discord4j.common.jackson.UnsignedJson;
 import discord4j.gateway.json.response.GatewayChannelResponse;
+import reactor.util.annotation.Nullable;
 
 public class ChannelCreate implements Dispatch {
 
@@ -27,13 +28,15 @@ public class ChannelCreate implements Dispatch {
     private GatewayChannelResponse channel;
     @JsonProperty("guild_id")
     @UnsignedJson
-    private long guildId;
+    @Nullable
+    private Long guildId;
 
     public GatewayChannelResponse getChannel() {
         return channel;
     }
 
-    public long getGuildId() {
+    @Nullable
+    public Long getGuildId() {
         return guildId;
     }
 
