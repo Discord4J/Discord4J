@@ -327,7 +327,17 @@ public final class Member extends User {
     public Mono<Boolean> isHigher(Member member) {
     	Mono<Integer> getHighestPosition = getRoles().flatMap(Role::getPosition).defaultIfEmpty(0).last();
     	Mono<Integer> getMemberHighestPosition = member.getRoles().flatMap(Role::getPosition).defaultIfEmpty(0).last();
-		return Mono.zip(getHighestPosition, getMemberHighestPosition, (p1, p2) -> p1 > p2);
+    	
+    	return getGuild().map(Guild::getOwnerId)
+    			.flatMap(ownerId -> {
+    				if(ownerId.equals(getId())) {
+    					return Mono.just(true);
+    				}
+    				if(ownerId.equals(member.getId())) {
+    					return Mono.just(false);
+    				}
+		    		return Mono.zip(getHighestPosition, getMemberHighestPosition, (p1, p2) -> p1 > p2);
+		    	});    	
 	}
     
     /**
