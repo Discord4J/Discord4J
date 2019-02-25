@@ -161,8 +161,6 @@ public class DefaultGatewayClient implements GatewayClient {
                 resumable.set(false);
             }
 
-            lastAck.set(System.currentTimeMillis());
-
             Mono<Void> readyHandler = dispatch.filter(DefaultGatewayClient::isReadyOrResume)
                     .flatMap(event -> {
                         connected.compareAndSet(false, true);
@@ -209,14 +207,16 @@ public class DefaultGatewayClient implements GatewayClient {
             // Create the heartbeat loop, and subscribe it using the sender sink
             Mono<Void> heartbeatHandler = heartbeat.ticks()
                     .flatMap(t -> {
-                        long delay = System.currentTimeMillis() - lastAck.get();
+                        long now = System.currentTimeMillis();
+                        lastAck.compareAndSet(0, now);
+                        long delay = now - lastAck.get();
                         if (delay > heartbeat.getPeriod().toMillis() + getResponseTime()) {
                             log.warn("Missing heartbeat ACK for {} ms", delay);
                             handler.error(new RuntimeException("Reconnecting due to zombie or failed connection"));
                             return Mono.empty();
                         } else {
                             log.debug("Sending heartbeat {} ms after last ACK", delay);
-                            lastSent.set(System.currentTimeMillis());
+                            lastSent.set(now);
                             return Mono.just(GatewayPayload.heartbeat(new Heartbeat(sequence.get())));
                         }
                     })
@@ -425,8 +425,7 @@ public class DefaultGatewayClient implements GatewayClient {
     /////////////////////////////////
 
     void ackHeartbeat() {
-        lastAck.set(System.currentTimeMillis());
-        responseTime.set(lastAck.get() - lastSent.get());
+        responseTime.set(lastAck.updateAndGet(x -> System.currentTimeMillis()) - lastSent.get());
     }
 
     ////////////////////////////////
