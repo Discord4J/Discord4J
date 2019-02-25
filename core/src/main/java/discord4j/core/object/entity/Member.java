@@ -316,12 +316,12 @@ public final class Member extends User {
     }
     
     /**
-	 * Requests to determine if this member is higher in the role hierarchy than member.
+	 * Requests to determine if this member is higher in the role hierarchy than the provided member.
 	 * This is determined by the positions of each of the members' highest roles.
 	 *
-	 * @param member The member who must be lower in the role hierarchy.
+	 * @param member The member to compare in the role hierarchy with this member.
 	 * @return A {@link Mono} where, upon successful completion, emits {@code true} if this member is higher in the 
-	 * role hierarchy than member, {@code false} otherwise. If an error is received, it is emitted 
+	 * role hierarchy than the provided member, {@code false} otherwise. If an error is received, it is emitted 
 	 * through the {@code Mono}.
 	 */
     public Mono<Boolean> isHigher(Member member) {
@@ -344,14 +344,13 @@ public final class Member extends User {
 	 * Requests to determine if this member is higher in the role hierarchy than the member as represented 
 	 * by the supplied ID. This is determined by the positions of each of the members' highest roles.
 	 *
-	 * @param id The ID of the member who must be lower in the role hierarchy.
+	 * @param id The ID of the member to compare in the role hierarchy with this member.
 	 * @return A {@link Mono} where, upon successful completion, emits {@code true} if this member is higher in the role 
 	 * hierarchy than the member as represented by the supplied ID, {@code false} otherwise. If an error is received, 
 	 * it is emitted through the {@code Mono}.
 	 */
     public Mono<Boolean> isHigher(Snowflake id) {
-    	return getGuild().flatMap(guild -> guild.getMemberById(id))
-    			.flatMap(this::isHigher);
+    	return getClient().getMemberById(getGuildId(), id).flatMap(this::isHigher);
 	}
 
     /**
