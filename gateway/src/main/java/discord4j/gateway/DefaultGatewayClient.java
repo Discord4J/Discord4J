@@ -145,6 +145,7 @@ public class DefaultGatewayClient implements GatewayClient {
             disconnectNotifier = MonoProcessor.create();
             closeTrigger = MonoProcessor.create();
             observer = this.initialObserver.then(additionalObserver);
+            lastAck.set(0);
 
             RateLimiter limiter = new SimpleBucket(outboundLimiterCapacity(), Duration.ofSeconds(60));
             Flux<ByteBuf> outbound = Flux.merge(heartbeats, sender.concatMap(payload -> throttle(payload, limiter), 1))

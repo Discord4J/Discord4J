@@ -30,6 +30,8 @@ import discord4j.core.object.presence.Presence;
 import discord4j.core.object.util.Snowflake;
 import discord4j.core.shard.ShardingClientBuilder;
 import discord4j.gateway.IdentifyOptions;
+import discord4j.gateway.json.GatewayPayload;
+import discord4j.gateway.json.Opcode;
 import discord4j.gateway.retry.PartialDisconnectException;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
@@ -183,6 +185,9 @@ public class RetryBotTest {
                         if ("!close".equals(content)) {
                             client.logout().subscribe();
                         } else if ("!retry".equals(content)) {
+                            client.getServiceMediator().getGatewayClient().sender()
+                                    .next(new GatewayPayload<>(Opcode.RECONNECT, null, null, null));
+                        } else if ("!disconnect".equals(content)) {
                             client.getServiceMediator().getGatewayClient().close(true).subscribe();
                         } else if ("!online".equals(content)) {
                             client.updatePresence(Presence.online()).subscribe();
