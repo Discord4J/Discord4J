@@ -34,6 +34,7 @@ import reactor.retry.Retry;
 import reactor.retry.RetryContext;
 import reactor.util.Logger;
 import reactor.util.Loggers;
+import reactor.util.annotation.Nullable;
 
 import java.time.Duration;
 import java.util.Optional;
@@ -110,7 +111,7 @@ class RequestStream<T> {
 
     /**
      * This retry function is used for reading and completing HTTP requests in the event of a server error (codes
-     * 500, 502, 503 and 504). The delay is calculated using exponential backoff with jitter.
+     * 502, 503 and 504). The delay is calculated using exponential backoff with jitter.
      */
     private Retry<?> serverErrorRetryFactory() {
         return Retry.onlyIf(this::isServerError)
@@ -192,21 +193,23 @@ class RequestStream<T> {
             DiscordRequest<T> req = correlation.getRequest();
             MonoProcessor<T> callback = correlation.getResponse();
             String shard = correlation.getShardId();
-            Logger logger = getTraceLogger(shard);
-            if (logger.isTraceEnabled()) {
-                logger.trace("Accepting request: {}", req);
+            Logger traceLog = getLogger("traces", shard);
+            if (traceLog.isTraceEnabled()) {
+                traceLog.trace("Accepting request: {}", req);
             }
+            Logger requestLog = getLogger("request", shard);
+            Logger responseLog = getLogger("response", shard);
             Mono<ClientRequest> request = adaptRequest(req);
             Class<T> responseType = req.getRoute().getResponseType();
 
             globalRateLimiter.onComplete()
                     .then(request)
-                    .log("discord4j.rest.request." + id + "." + shard, Level.FINEST)
+                    .log(requestLog, Level.FINEST, false)
                     .flatMap(r -> httpClient.exchange(r, req.getBody(), responseType, rateLimitHandler))
                     .retryWhen(rateLimitRetryFactory())
                     .retryWhen(serverErrorRetryFactory())
-                    .log("discord4j.rest.response." + id + "." + shard, Level.FINEST)
-                    .doFinally(signal -> next(signal, shard))
+                    .log(responseLog, Level.FINEST, false)
+                    .doFinally(signal -> next(signal, traceLog))
                     .materialize()
                     .subscribe(signal -> {
                         if (signal.isOnSubscribe()) {
@@ -221,8 +224,7 @@ class RequestStream<T> {
                     });
         }
 
-        private void next(SignalType signal, String shard) {
-            Logger logger = getTraceLogger(shard);
+        private void next(SignalType signal, Logger logger) {
             Mono.delay(sleepTime, rateLimitScheduler).subscribe(l -> {
                 if (logger.isTraceEnabled()) {
                     logger.trace("Ready to consume next request after {}", signal);
@@ -232,8 +234,9 @@ class RequestStream<T> {
             }, t -> logger.error("Error while scheduling next request", t));
         }
 
-        private Logger getTraceLogger(String shard) {
-            return Loggers.getLogger("discord4j.rest.traces." + id + "." + shard);
+        private Logger getLogger(String path, @Nullable String shard) {
+            String shardPath = shard == null ? "" : "." + shard;
+            return Loggers.getLogger("discord4j.rest." + path + "." + id + shardPath);
         }
     }
 

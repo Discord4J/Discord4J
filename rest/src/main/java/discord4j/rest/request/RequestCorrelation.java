@@ -18,6 +18,7 @@
 package discord4j.rest.request;
 
 import reactor.core.publisher.MonoProcessor;
+import reactor.util.annotation.Nullable;
 
 class RequestCorrelation<T> {
 
@@ -25,7 +26,7 @@ class RequestCorrelation<T> {
     private final MonoProcessor<T> response;
     private final String shardId;
 
-    RequestCorrelation(DiscordRequest<T> request, MonoProcessor<T> response, String shardId) {
+    RequestCorrelation(DiscordRequest<T> request, MonoProcessor<T> response, @Nullable String shardId) {
         this.request = request;
         this.response = response;
         this.shardId = shardId;
@@ -39,6 +40,7 @@ class RequestCorrelation<T> {
         return response;
     }
 
+    @Nullable
     public String getShardId() {
         return shardId;
     }

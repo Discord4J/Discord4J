@@ -82,7 +82,7 @@ public class DefaultRouter implements Router {
                     MonoProcessor<T> callback = MonoProcessor.create();
                     String shardId = ctx.getOrEmpty("shard")
                             .map(Object::toString)
-                            .orElse("?");
+                            .orElse(null);
                     stream.push(new RequestCorrelation<>(request, callback, shardId));
                     return callback;
                 })
