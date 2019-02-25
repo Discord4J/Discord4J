@@ -16,5 +16,11 @@
  */
 package discord4j.gateway.json;
 
+/**
+ * Marker interface for any payload event data contained within the "d" field of a {@link GatewayPayload}.
+ *
+ * @see <a href="https://discordapp.com/developers/docs/topics/gateway#payloads-gateway-payload-structure">
+ * Gateway Payload Structure</a>
+ */
 public interface PayloadData {
 }

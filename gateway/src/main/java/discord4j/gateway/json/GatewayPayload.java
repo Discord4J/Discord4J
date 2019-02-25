@@ -25,6 +25,11 @@ import reactor.util.annotation.Nullable;
 
 import java.util.Objects;
 
+/**
+ * Basic structure a Discord gateway payload object.
+ *
+ * @param <T> the type of the event object
+ */
 @JsonDeserialize(using = PayloadDeserializer.class)
 public class GatewayPayload<T extends PayloadData> {
 
