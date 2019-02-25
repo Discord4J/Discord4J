@@ -17,6 +17,8 @@
 package discord4j.core.util;
 
 import java.lang.reflect.Array;
+import java.util.Arrays;
+import java.util.Objects;
 
 public class ArrayUtil {
 
@@ -77,6 +79,16 @@ public class ArrayUtil {
             ret[i] = array[i];
         }
         return ret;
+    }
+
+    public static <T> T[] replace(T[] array, T old, T replacement) {
+        T[] copy = Arrays.copyOf(array, array.length);
+        for (int i = 0; i < array.length; i++) {
+            if (Objects.equals(array[i], old)) {
+                copy[i] = replacement;
+            }
+        }
+        return copy;
     }
 
     public static boolean contains(long[] array, long l) {

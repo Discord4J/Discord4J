@@ -48,6 +48,14 @@ public final class ReactionBean implements Serializable {
         this.emojiAnimated = emojiAnimated;
     }
 
+    public ReactionBean(final ReactionBean toCopy) {
+        this.count = toCopy.count;
+        this.me = toCopy.me;
+        this.emojiId = toCopy.emojiId;
+        this.emojiName = toCopy.emojiName;
+        this.emojiAnimated = toCopy.emojiAnimated;
+    }
+
     public ReactionBean() {}
 
     public int getCount() {

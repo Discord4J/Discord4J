@@ -126,30 +126,35 @@ class MessageDispatchHandlers {
 
         Mono<Void> addToMessage = context.getServiceMediator().getStateHolder().getMessageStore()
                 .find(messageId)
-                .doOnNext(bean -> {
+                .map(oldBean -> {
                     boolean me = context.getServiceMediator().getStateHolder().getSelfId().get() == userId;
+                    MessageBean newBean = new MessageBean(oldBean);
 
-                    if (bean.getReactions() == null) {
+                    if (oldBean.getReactions() == null) {
                         ReactionBean r = new ReactionBean(1, me, emojiId, emojiName, emojiAnimated);
-                        bean.setReactions(new ReactionBean[] { r });
+                        newBean.setReactions(new ReactionBean[] { r });
                     } else {
                         int i;
-                        for (i = 0; i < bean.getReactions().length; i++) {
-                            ReactionBean r = bean.getReactions()[i];
+                        for (i = 0; i < oldBean.getReactions().length; i++) {
+                            ReactionBean r = oldBean.getReactions()[i];
                             if (Objects.equals(r.getEmojiId(), emojiId) && r.getEmojiName().equals(emojiName)) {
                                 break;
                             }
                         }
 
-                        if (i < bean.getReactions().length) {
-                            ReactionBean existing = bean.getReactions()[i];
-                            existing.setMe(me);
-                            existing.setCount(existing.getCount() + 1);
+                        if (i < oldBean.getReactions().length) {
+                            ReactionBean oldExisting = oldBean.getReactions()[i];
+                            ReactionBean newExisting = new ReactionBean(oldExisting);
+                            newExisting.setMe(me);
+                            newExisting.setCount(oldExisting.getCount() + 1);
+                            newBean.setReactions(ArrayUtil.replace(oldBean.getReactions(), oldExisting, newExisting));
                         } else {
                             ReactionBean r = new ReactionBean(1, me, emojiId, emojiName, emojiAnimated);
-                            bean.setReactions(ArrayUtil.add(bean.getReactions(), r));
+                            newBean.setReactions(ArrayUtil.add(oldBean.getReactions(), r));
                         }
                     }
+
+                    return newBean;
                 })
                 .flatMap(bean ->
                         context.getServiceMediator().getStateHolder().getMessageStore().save(bean.getId(), bean));
@@ -174,26 +179,31 @@ class MessageDispatchHandlers {
 
         Mono<Void> removeFromMessage = context.getServiceMediator().getStateHolder().getMessageStore()
                 .find(messageId)
-                .doOnNext(bean -> {
+                .map(oldBean -> {
                     int i;
                     // noinspection ConstantConditions reactions must be present if one is being removed
-                    for (i = 0; i < bean.getReactions().length; i++) {
-                        ReactionBean r = bean.getReactions()[i];
+                    for (i = 0; i < oldBean.getReactions().length; i++) {
+                        ReactionBean r = oldBean.getReactions()[i];
                         if (Objects.equals(r.getEmojiId(), emojiId) && r.getEmojiName().equals(emojiName)) {
                             break;
                         }
                     }
 
-                    ReactionBean existing = bean.getReactions()[i];
+                    MessageBean newBean = new MessageBean(oldBean);
+                    ReactionBean existing = oldBean.getReactions()[i];
                     if (existing.getCount() - 1 == 0) {
-                        bean.setReactions(ArrayUtil.remove(bean.getReactions(), existing));
+                        newBean.setReactions(ArrayUtil.remove(oldBean.getReactions(), existing));
                     } else {
-                        existing.setCount(existing.getCount() - 1);
+                        ReactionBean newExisting = new ReactionBean(existing);
+                        newExisting.setCount(existing.getCount() - 1);
 
                         if (context.getServiceMediator().getStateHolder().getSelfId().get() == userId) {
-                            existing.setMe(false);
+                            newExisting.setMe(false);
                         }
+
+                        newBean.setReactions(ArrayUtil.replace(oldBean.getReactions(), existing, newExisting));
                     }
+                    return newBean;
                 })
                 .flatMap(bean ->
                         context.getServiceMediator().getStateHolder().getMessageStore().save(bean.getId(), bean));
@@ -211,6 +221,7 @@ class MessageDispatchHandlers {
 
         Mono<Void> removeAllFromMessage = context.getServiceMediator().getStateHolder().getMessageStore()
                 .find(messageId)
+                .map(MessageBean::new)
                 .doOnNext(bean -> bean.setReactions(null))
                 .flatMap(bean ->
                         context.getServiceMediator().getStateHolder().getMessageStore().save(bean.getId(), bean));
