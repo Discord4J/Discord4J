@@ -314,6 +314,35 @@ public final class Member extends User {
                 .flatMap(ignored -> Mono.just(PermissionSet.all()))
                 .switchIfEmpty(Mono.zip(getEveryonePerms, getRolePerms, PermissionUtil::computeBasePermissions));
     }
+    
+    /**
+	 * Requests to determine if this member is higher in the role hierarchy than member.
+	 * This is determined by the positions of each of the members' highest roles.
+	 *
+	 * @param member The member who must be lower in the role hierarchy.
+	 * @return A {@link Mono} where, upon successful completion, emits {@code true} if this member is higher in the 
+	 * role hierarchy than member, {@code false} otherwise. If an error is received, it is emitted 
+	 * through the {@code Mono}.
+	 */
+    public Mono<Boolean> isHigher(Member member) {
+    	Mono<Integer> getHighestPosition = getRoles().flatMap(Role::getPosition).defaultIfEmpty(0).last();
+    	Mono<Integer> getMemberHighestPosition = member.getRoles().flatMap(Role::getPosition).defaultIfEmpty(0).last();
+		return Mono.zip(getHighestPosition, getMemberHighestPosition, (p1, p2) -> p1 > p2);
+	}
+    
+    /**
+	 * Requests to determine if this member is higher in the role hierarchy than the member as represented 
+	 * by the supplied ID. This is determined by the positions of each of the members' highest roles.
+	 *
+	 * @param id The ID of the member who must be lower in the role hierarchy.
+	 * @return A {@link Mono} where, upon successful completion, emits {@code true} if this member is higher in the role 
+	 * hierarchy than the member as represented by the supplied ID, {@code false} otherwise. If an error is received, 
+	 * it is emitted through the {@code Mono}.
+	 */
+    public Mono<Boolean> isHigher(Snowflake id) {
+    	return getGuild().flatMap(guild -> guild.getMemberById(id))
+    			.flatMap(this::isHigher);
+	}
 
     /**
      * Requests to edit this member.
