@@ -319,14 +319,16 @@ public final class Member extends User {
 	 * Requests to determine if this member is higher in the role hierarchy than the provided member.
 	 * This is determined by the positions of each of the members' highest roles.
 	 *
-	 * @param member The member to compare in the role hierarchy with this member.
+	 * @param otherMember The member to compare in the role hierarchy with this member.
 	 * @return A {@link Mono} where, upon successful completion, emits {@code true} if this member is higher in the 
 	 * role hierarchy than the provided member, {@code false} otherwise. If an error is received, it is emitted 
 	 * through the {@code Mono}.
 	 */
-    public Mono<Boolean> isHigher(Member member) {
-    	Mono<Integer> getHighestPosition = getRoles().flatMap(Role::getPosition).defaultIfEmpty(0).last();
-    	Mono<Integer> getMemberHighestPosition = member.getRoles().flatMap(Role::getPosition).defaultIfEmpty(0).last();
+    public Mono<Boolean> isHigher(Member otherMember) {
+    	
+    	// getRoles() emits items in order based off their natural position, the "highest" role, if present, will be emitted last
+    	Mono<Integer> getThisHighestPosition = getRoles().flatMap(Role::getPosition).defaultIfEmpty(0).last();
+    	Mono<Integer> getOtherHighestPosition = otherMember.getRoles().flatMap(Role::getPosition).defaultIfEmpty(0).last();
     	
     	return getGuild().map(Guild::getOwnerId)
     			.flatMap(ownerId -> {
@@ -336,7 +338,7 @@ public final class Member extends User {
     				if(ownerId.equals(member.getId())) {
     					return Mono.just(false);
     				}
-		    		return Mono.zip(getHighestPosition, getMemberHighestPosition, (p1, p2) -> p1 > p2);
+		    		return Mono.zip(getThisHighestPosition, getOtherHighestPosition, (p1, p2) -> p1 > p2);
 		    	});    	
 	}
     
