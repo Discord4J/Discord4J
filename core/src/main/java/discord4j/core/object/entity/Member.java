@@ -314,50 +314,51 @@ public final class Member extends User {
                 .flatMap(ignored -> Mono.just(PermissionSet.all()))
                 .switchIfEmpty(Mono.zip(getEveryonePerms, getRolePerms, PermissionUtil::computeBasePermissions));
     }
-    
+
     /**
-	 * Requests to determine if this member is higher in the role hierarchy than the provided member.
-	 * This is determined by the positions of each of the members' highest roles.
-	 *
-	 * @param otherMember The member to compare in the role hierarchy with this member.
-	 * @return A {@link Mono} where, upon successful completion, emits {@code true} if this member is higher in the 
-	 * role hierarchy than the provided member, {@code false} otherwise. If an error is received, it is emitted 
-	 * through the {@code Mono}.
-	 */
+     * Requests to determine if this member is higher in the role hierarchy than the provided member.
+     * This is determined by the positions of each of the members' highest roles.
+     *
+     * @param otherMember The member to compare in the role hierarchy with this member.
+     * @return A {@link Mono} where, upon successful completion, emits {@code true} if this member is higher in the
+     * role hierarchy than the provided member, {@code false} otherwise. If an error is received, it is emitted
+     * through the {@code Mono}.
+     */
     public Mono<Boolean> isHigher(Member otherMember) {
-    	// A member cannot be higher in the role hierarchy than himself
-    	if(this.equals(otherMember)) {
-    		return Mono.just(false);
-    	}
-    	
-    	// getRoles() emits items in order based off their natural position, the "highest" role, if present, will be emitted last
-    	Mono<Integer> getThisHighestPosition = getRoles().flatMap(Role::getPosition).defaultIfEmpty(0).last();
-    	Mono<Integer> getOtherHighestPosition = otherMember.getRoles().flatMap(Role::getPosition).defaultIfEmpty(0).last();
-    	
-    	return getGuild().map(Guild::getOwnerId)
-    			.flatMap(ownerId -> {
-    				if(ownerId.equals(getId())) {
-    					return Mono.just(true);
-    				}
-    				if(ownerId.equals(member.getId())) {
-    					return Mono.just(false);
-    				}
-		    		return Mono.zip(getThisHighestPosition, getOtherHighestPosition, (p1, p2) -> p1 > p2);
-		    	});    	
-	}
-    
+        // A member cannot be higher in the role hierarchy than himself
+        if (this.equals(otherMember)) {
+            return Mono.just(false);
+        }
+
+        // getRoles() emits items in order based off their natural position, the "highest" role, if present, will be
+        // emitted last
+        Mono<Integer> getThisHighestPosition = getRoles().flatMap(Role::getPosition).defaultIfEmpty(0).last();
+        Mono<Integer> getOtherHighestPosition = otherMember.getRoles().flatMap(Role::getPosition).defaultIfEmpty(0).last();
+
+        return getGuild().map(Guild::getOwnerId)
+                .flatMap(ownerId -> {
+                    if (ownerId.equals(getId())) {
+                        return Mono.just(true);
+                    }
+                    if (ownerId.equals(otherMember.getId())) {
+                        return Mono.just(false);
+                    }
+                    return Mono.zip(getThisHighestPosition, getOtherHighestPosition, (p1, p2) -> p1 > p2);
+                });
+    }
+
     /**
-	 * Requests to determine if this member is higher in the role hierarchy than the member as represented 
-	 * by the supplied ID. This is determined by the positions of each of the members' highest roles.
-	 *
-	 * @param id The ID of the member to compare in the role hierarchy with this member.
-	 * @return A {@link Mono} where, upon successful completion, emits {@code true} if this member is higher in the role 
-	 * hierarchy than the member as represented by the supplied ID, {@code false} otherwise. If an error is received, 
-	 * it is emitted through the {@code Mono}.
-	 */
+     * Requests to determine if this member is higher in the role hierarchy than the member as represented
+     * by the supplied ID. This is determined by the positions of each of the members' highest roles.
+     *
+     * @param id The ID of the member to compare in the role hierarchy with this member.
+     * @return A {@link Mono} where, upon successful completion, emits {@code true} if this member is higher in the role
+     * hierarchy than the member as represented by the supplied ID, {@code false} otherwise. If an error is received,
+     * it is emitted through the {@code Mono}.
+     */
     public Mono<Boolean> isHigher(Snowflake id) {
-    	return getClient().getMemberById(getGuildId(), id).flatMap(this::isHigher);
-	}
+        return getClient().getMemberById(getGuildId(), id).flatMap(this::isHigher);
+    }
 
     /**
      * Requests to edit this member.
