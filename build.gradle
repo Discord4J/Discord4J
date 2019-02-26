@@ -3,7 +3,7 @@ plugins {
     id 'maven-publish'
     id 'signing'
     id 'com.gorylenko.gradle-git-properties' version '2.0.0' apply false
-    id 'io.spring.dependency-management' version '1.0.6.RELEASE' apply false
+    id 'io.spring.dependency-management' version '1.0.7.RELEASE' apply false
     id 'com.github.ben-manes.versions' version '0.17.0'
     id 'net.researchgate.release' version '2.8.0'
 }
