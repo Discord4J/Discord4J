@@ -325,6 +325,10 @@ public final class Member extends User {
 	 * through the {@code Mono}.
 	 */
     public Mono<Boolean> isHigher(Member otherMember) {
+    	// A member cannot be higher in the role hierarchy than himself
+    	if(this.equals(otherMember)) {
+    		return Mono.just(false);
+    	}
     	
     	// getRoles() emits items in order based off their natural position, the "highest" role, if present, will be emitted last
     	Mono<Integer> getThisHighestPosition = getRoles().flatMap(Role::getPosition).defaultIfEmpty(0).last();
