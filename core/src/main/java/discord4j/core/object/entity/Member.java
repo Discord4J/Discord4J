@@ -316,7 +316,8 @@ public final class Member extends User {
     }
 
     /**
-     * Requests to determine if this member is higher in the role hierarchy than the provided member.
+     * Requests to determine if this member is higher in the role hierarchy than the provided member or signal
+     * IllegalArgumentException if the provided member is in a different guild than this member.
      * This is determined by the positions of each of the members' highest roles.
      *
      * @param otherMember The member to compare in the role hierarchy with this member.
@@ -325,6 +326,10 @@ public final class Member extends User {
      * through the {@code Mono}.
      */
     public Mono<Boolean> isHigher(Member otherMember) {
+        if (!getGuildId().equals(otherMember.getGuildId())) {
+            return Mono.error(new IllegalArgumentException("The provided member is in a different guild."));
+        }
+
         // A member cannot be higher in the role hierarchy than himself
         if (this.equals(otherMember)) {
             return Mono.just(false);
@@ -349,7 +354,9 @@ public final class Member extends User {
 
     /**
      * Requests to determine if this member is higher in the role hierarchy than the member as represented
-     * by the supplied ID. This is determined by the positions of each of the members' highest roles.
+     * by the supplied ID or signal IllegalArgumentException if the member as represented by the supplied ID is in
+     * a different guild than this member.
+     * This is determined by the positions of each of the members' highest roles.
      *
      * @param id The ID of the member to compare in the role hierarchy with this member.
      * @return A {@link Mono} where, upon successful completion, emits {@code true} if this member is higher in the role
