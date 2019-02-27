@@ -128,7 +128,7 @@ public final class MessageBean implements Serializable {
         mentionRoles = Arrays.copyOf(toCopy.mentionRoles, toCopy.mentionRoles.length);
         attachments = Arrays.copyOf(toCopy.attachments, toCopy.attachments.length);
         embeds = Arrays.copyOf(toCopy.embeds, toCopy.embeds.length);
-        reactions = Arrays.copyOf(toCopy.reactions, toCopy.reactions.length);
+        reactions = (toCopy.reactions == null) ? null : Arrays.copyOf(toCopy.reactions, toCopy.reactions.length);
         pinned = toCopy.pinned;
         webhookId = toCopy.webhookId;
         type = toCopy.type;
