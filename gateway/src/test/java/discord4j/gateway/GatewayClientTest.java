@@ -60,7 +60,7 @@ public class GatewayClientTest {
         GatewayClient gatewayClient = new DefaultGatewayClient(HttpClient.create(),
                 reader, writer, retryOptions, token,
                 new IdentifyOptions(0, 1, null), null,
-                new SimpleBucket(1, Duration.ofSeconds(6)));
+                new RateLimiterTransformer(new SimpleBucket(1, Duration.ofSeconds(6))));
 
         gatewayClient.dispatch().subscribe(dispatch -> {
             if (dispatch instanceof Ready) {
@@ -101,12 +101,15 @@ public class GatewayClientTest {
         latches.add(latch);
         CountDownLatch exit = new CountDownLatch(shardCount);
 
+        // we must share the PayloadTransformer across shards to coordinate IDENTIFY requests
+        PayloadTransformer transformer = new RateLimiterTransformer(new SimpleBucket(1, Duration.ofSeconds(6)));
         for (int i = 0; i < shardCount; i++) {
             CountDownLatch next = new CountDownLatch(1);
             GatewayClient shard = new DefaultGatewayClient(
                     HttpClient.create().compress(true),
                     new JacksonPayloadReader(mapper),
                     new JacksonPayloadWriter(mapper),
+                    // RetryOptions must not be shared as it tracks state for a single shard
                     new RetryOptions(Duration.ofSeconds(2), Duration.ofSeconds(120), Integer.MAX_VALUE,
                             Schedulers.elastic()),
                     token,
@@ -119,15 +122,14 @@ public class GatewayClientTest {
                         if (s.equals(GatewayObserver.DISCONNECTED)) {
                             exit.countDown();
                         }
-                    },
-                    new SimpleBucket(1, Duration.ofSeconds(6)));
+                    }, transformer);
             latches.add(next);
             int shardIndex = i;
             Schedulers.elastic().schedule(() -> {
                 try {
                     latches.get(shardIndex).await();
                     System.out.println("Running shard " + shardIndex);
-                    shard.execute("wss://gateway.discord.gg/?v=6&encoding=json&compress=zlib-stream").block();
+                    shard.execute(gatewayUrl).block();
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }

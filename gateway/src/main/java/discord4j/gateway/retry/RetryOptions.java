@@ -26,8 +26,8 @@ import java.time.Duration;
 
 /**
  * A configuration object to customize the gateway retry (reconnecting) policy. Tracks reconnection state for a
- * single connection, therefore instances are <strong>not shareable</strong> across
- * {@link discord4j.gateway.GatewayClient GatewayClient} instances.
+ * single connection, therefore instances are <strong>not shareable</strong> across multiple
+ * {@link discord4j.gateway.GatewayClient GatewayClients}.
  */
 public class RetryOptions {
 

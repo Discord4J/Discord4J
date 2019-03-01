@@ -21,6 +21,7 @@ import discord4j.common.JacksonResourceProvider;
 import discord4j.common.SimpleBucket;
 import discord4j.core.DiscordClientBuilder;
 import discord4j.gateway.GatewayObserver;
+import discord4j.gateway.RateLimiterTransformer;
 import discord4j.rest.RestClient;
 import discord4j.rest.http.ExchangeStrategies;
 import discord4j.rest.http.client.DiscordWebClient;
@@ -265,7 +266,7 @@ public class ShardingClientBuilder {
         final DiscordClientBuilder builder = new DiscordClientBuilder(token)
                 .setJacksonResourceProvider(jackson)
                 .setRouterFactory(new SingleRouterFactory(router))
-                .setGatewayLimiter(new SimpleBucket(1, Duration.ofSeconds(6)))
+                .setIdentifyLimiter(new RateLimiterTransformer(new SimpleBucket(1, Duration.ofSeconds(6))))
                 .setGatewayObserver((s, o) -> {
                     if (s.equals(GatewayObserver.CONNECTED)) {
                         log.info("Shard {} connected", o.getShardIndex());

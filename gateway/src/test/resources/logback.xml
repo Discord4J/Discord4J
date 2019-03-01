@@ -3,6 +3,7 @@
     <logger name="io.netty" level="INFO"/>
     <logger name="reactor" level="INFO"/>
     <logger name="discord4j.gateway.client" level="DEBUG"/>
+    <!--<logger name="discord4j.gateway.sender" level="TRACE"/>-->
 
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>

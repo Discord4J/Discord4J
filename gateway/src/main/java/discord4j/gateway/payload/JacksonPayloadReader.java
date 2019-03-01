@@ -26,7 +26,7 @@ import reactor.util.Logger;
 import reactor.util.Loggers;
 
 import java.io.IOException;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 public class JacksonPayloadReader implements PayloadReader {
 
@@ -55,7 +55,7 @@ public class JacksonPayloadReader implements PayloadReader {
                     // if eof input - just ignore
                     if (payload.readableBytes() > 0) {
                         log.warn("Error while decoding JSON ({} bytes): {}", payload.readableBytes(),
-                                payload.toString(Charset.forName("UTF-8")), e);
+                                payload.toString(StandardCharsets.UTF_8), e);
                     }
                     sink.success();
                 } else {

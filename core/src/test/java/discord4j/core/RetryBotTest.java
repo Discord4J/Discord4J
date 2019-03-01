@@ -33,6 +33,7 @@ import discord4j.gateway.IdentifyOptions;
 import discord4j.gateway.json.GatewayPayload;
 import discord4j.gateway.json.Opcode;
 import discord4j.gateway.retry.PartialDisconnectException;
+import io.netty.buffer.Unpooled;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -48,6 +49,7 @@ import reactor.util.Logger;
 import reactor.util.Loggers;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -193,6 +195,13 @@ public class RetryBotTest {
                             client.updatePresence(Presence.online()).subscribe();
                         } else if ("!dnd".equals(content)) {
                             client.updatePresence(Presence.doNotDisturb()).subscribe();
+                        } else if (content.startsWith("!raw ")) {
+                            event.getClient().getServiceMediator().getGatewayClient()
+                                    .sendBuffer(Mono.just(
+                                            Unpooled.wrappedBuffer(
+                                                    content.substring("!raw ".length())
+                                                            .getBytes(StandardCharsets.UTF_8))))
+                                    .subscribe();
                         } else if ("!raise".equals(content)) {
                             // exception if DM
                             Snowflake guildId = message.getGuild().block().getId();

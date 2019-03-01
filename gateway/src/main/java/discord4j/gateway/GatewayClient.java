@@ -19,16 +19,24 @@ package discord4j.gateway;
 
 import discord4j.gateway.json.GatewayPayload;
 import discord4j.gateway.json.dispatch.Dispatch;
+import io.netty.buffer.ByteBuf;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxSink;
 import reactor.core.publisher.Mono;
+
+import java.util.function.Function;
 
 /**
  * Represents a Discord real-time websocket client, called Gateway, implementing its lifecycle.
  * <p>
  * Allows consumers to receive inbound events through {@link #dispatch()} and direct raw payloads through
  * {@link #receiver()} and allows a producer to submit events through {@link #send(Publisher)} and {@link #sender()}.
+ * <p>
+ * Additionally, supports low-level {@link ByteBuf} based communication through {@link #receiver(Function)} and
+ * {@link #sendBuffer(Publisher)}.
+ *
+ * @see <a href="https://discordapp.com/developers/docs/topics/gateway">Gateway</a>
  */
 public interface GatewayClient {
 
@@ -36,7 +44,7 @@ public interface GatewayClient {
      * Establish a reconnecting gateway connection to the given URL.
      *
      * @param gatewayUrl the URL used to establish a websocket connection
-     * @return a Mono signaling completion
+     * @return a {@link Mono} signaling completion
      */
     Mono<Void> execute(String gatewayUrl);
 
@@ -45,7 +53,7 @@ public interface GatewayClient {
      *
      * @param gatewayUrl the URL used to establish a websocket connection
      * @param additionalObserver an additional observer to be notified of events
-     * @return a Mono signaling completion
+     * @return a {@link Mono} signaling completion
      */
     Mono<Void> execute(String gatewayUrl, GatewayObserver additionalObserver);
 
@@ -60,7 +68,7 @@ public interface GatewayClient {
     Mono<Void> close(boolean allowResume);
 
     /**
-     * Obtains the Flux of Dispatch events inbound from the gateway connection made by this client.
+     * Obtains the {@link Flux} of {@link Dispatch} events inbound from the gateway connection made by this client.
      * <p>
      * Can be used like this, for example, to get all created message events:
      * <pre>
@@ -70,21 +78,31 @@ public interface GatewayClient {
      * });
      * </pre>
      *
-     * @return a Flux of Dispatch values
+     * @return a {@link Flux} of {@link Dispatch} values
      */
     Flux<Dispatch> dispatch();
 
     /**
-     * Obtains the Flux of raw payloads inbound from the gateway connection made by this client.
+     * Obtains the {@link Flux} of raw payloads inbound from the gateway connection made by this client.
      *
-     * @return a Flux of GatewayPayload values
+     * @return a {@link Flux} of {@link GatewayPayload} values
      */
     Flux<GatewayPayload<?>> receiver();
 
     /**
-     * Retrieves a new FluxSink to safely produce outbound values using {@link FluxSink#next(Object)}.
+     * Obtains a {@link Flux} of raw payloads inbound from the gateway connection made by this client, transformed by a
+     * mapping function.
      *
-     * @return a serializing FluxSink
+     * @param mapper a mapping function turning raw {@link ByteBuf} objects into a given type
+     * @param <T> the type of the resulting inbound {@link Flux}
+     * @return a {@link Flux} of raw payloads transformed by a mapping function
+     */
+    <T> Flux<T> receiver(Function<ByteBuf, Publisher<? extends T>> mapper);
+
+    /**
+     * Retrieves a new {@link FluxSink} to safely produce outbound values using {@link FluxSink#next(Object)}.
+     *
+     * @return a serializing {@link FluxSink}
      */
     FluxSink<GatewayPayload<?>> sender();
 
@@ -100,6 +118,18 @@ public interface GatewayClient {
                 .doOnNext(payload -> sender().next(payload))
                 .then();
     }
+
+    /**
+     * Sends a sequence of {@link ByteBuf} payloads through this {@link GatewayClient} and returns a {@link Mono}
+     * that signals completion when the given publisher completes.
+     * <p>
+     * Sequences produced this way are not expected to be validated against errors or invalid input by the underlying
+     * implementation.
+     *
+     * @param publisher a sequence of outbound payloads
+     * @return a {@link Mono} signaling completion, if an error occurs while producing it is emitted through the Mono
+     */
+    Mono<Void> sendBuffer(Publisher<ByteBuf> publisher);
 
     /**
      * Retrieve the ID of the current gateway session.

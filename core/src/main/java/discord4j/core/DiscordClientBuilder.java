@@ -19,7 +19,6 @@ package discord4j.core;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import discord4j.common.GitProperties;
 import discord4j.common.JacksonResourceProvider;
-import discord4j.common.RateLimiter;
 import discord4j.common.SimpleBucket;
 import discord4j.common.jackson.UnknownPropertyHandler;
 import discord4j.core.event.EventDispatcher;
@@ -29,10 +28,7 @@ import discord4j.core.event.dispatch.StoreInvalidator;
 import discord4j.core.event.domain.Event;
 import discord4j.core.object.data.stored.MessageBean;
 import discord4j.core.object.presence.Presence;
-import discord4j.gateway.DefaultGatewayClient;
-import discord4j.gateway.GatewayClient;
-import discord4j.gateway.GatewayObserver;
-import discord4j.gateway.IdentifyOptions;
+import discord4j.gateway.*;
 import discord4j.gateway.json.GatewayPayload;
 import discord4j.gateway.json.VoiceStateUpdate;
 import discord4j.gateway.json.dispatch.Dispatch;
@@ -113,7 +109,7 @@ public final class DiscordClientBuilder {
     private GatewayObserver gatewayObserver;
 
     @Nullable
-    private RateLimiter gatewayLimiter;
+    private PayloadTransformer identifyLimiter;
 
     private Scheduler voiceConnectionScheduler = Schedulers.elastic();
 
@@ -424,25 +420,25 @@ public final class DiscordClientBuilder {
     }
 
     /**
-     * Get the current {@link RateLimiter} set in this builder. GatewayLimiter is a rate limiting strategy
-     * dedicated to coordinate actions between shards, like identifying to the gateway.
+     * Get the current {@link PayloadTransformer} set in this builder. The transformer will be used as a rate
+     * limiting strategy dedicated to coordinate identify requests between shards.
      *
-     * @return the current gateway limiter, for shard coordinated login, can be {@code null} if default is used
+     * @return the current gateway limiter, for shard coordination, can be {@code null} if default is used
      */
     @Nullable
-    public RateLimiter getGatewayLimiter() {
-        return gatewayLimiter;
+    public PayloadTransformer getIdentifyLimiter() {
+        return identifyLimiter;
     }
 
     /**
-     * Set a new {@link RateLimiter} to this builder. GatewayLimiter is a rate limiting strategy dedicated to
-     * coordinate actions between shards, like identifying to the gateway.
+     * Set a new {@link PayloadTransformer} to this builder. The transformer will be used as a rate limiting strategy
+     * dedicated to coordinate identify requests between shards.
      *
-     * @param gatewayLimiter the current gateway limiter, for shard coordinated login, can be {@code null} for a default
+     * @param identifyLimiter the current limiter strategy, for shard coordination, can be {@code null} for a default
      * @return this builder
      */
-    public DiscordClientBuilder setGatewayLimiter(@Nullable RateLimiter gatewayLimiter) {
-        this.gatewayLimiter = gatewayLimiter;
+    public DiscordClientBuilder setIdentifyLimiter(@Nullable PayloadTransformer identifyLimiter) {
+        this.identifyLimiter = identifyLimiter;
         return this;
     }
 
@@ -544,11 +540,11 @@ public final class DiscordClientBuilder {
         return GatewayObserver.NOOP_LISTENER;
     }
 
-    private RateLimiter initGatewayLimiter() {
-        if (gatewayLimiter != null) {
-            return gatewayLimiter;
+    private PayloadTransformer initIdentifyLimiter() {
+        if (identifyLimiter != null) {
+            return identifyLimiter;
         }
-        return new SimpleBucket(1, Duration.ofSeconds(6));
+        return new RateLimiterTransformer(new SimpleBucket(1, Duration.ofSeconds(6)));
     }
 
     /**
@@ -586,7 +582,7 @@ public final class DiscordClientBuilder {
                 new JacksonPayloadReader(jackson.getObjectMapper()),
                 new JacksonPayloadWriter(jackson.getObjectMapper()),
                 retryOptions, token, identifyOptions, storeInvalidator.then(initGatewayObserver()),
-                initGatewayLimiter());
+                initIdentifyLimiter());
 
         // Prepare event dispatcher
         final FluxProcessor<Event, Event> eventProcessor = initEventProcessor();
