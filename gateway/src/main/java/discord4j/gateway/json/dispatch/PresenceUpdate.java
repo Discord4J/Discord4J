@@ -17,6 +17,7 @@
 package discord4j.gateway.json.dispatch;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.JsonNode;
 import discord4j.common.jackson.PossibleJson;
 import discord4j.common.jackson.UnsignedJson;
 import discord4j.common.json.UserResponse;
@@ -28,7 +29,7 @@ import java.util.Arrays;
 @PossibleJson
 public class PresenceUpdate implements Dispatch {
 
-    private UserResponse user; // TODO figure out fields here
+    private JsonNode user;
     @Nullable
     @UnsignedJson
     private long[] roles;
@@ -41,7 +42,7 @@ public class PresenceUpdate implements Dispatch {
     @Nullable
     private String nick;
 
-    public UserResponse getUser() {
+    public JsonNode getUser() {
         return user;
     }
 

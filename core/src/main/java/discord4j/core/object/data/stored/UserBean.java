@@ -40,6 +40,14 @@ public final class UserBean implements Serializable {
         isBot = response.isBot() != null && response.isBot();
     }
 
+    public UserBean(final UserBean toCopy) {
+        id = toCopy.id;
+        username = toCopy.username;
+        discriminator = toCopy.discriminator;
+        avatar = toCopy.avatar;
+        isBot = toCopy.isBot;
+    }
+
     public UserBean() {}
 
     public long getId() {

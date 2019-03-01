@@ -16,6 +16,7 @@
  */
 package discord4j.core.event.dispatch;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import discord4j.core.DiscordClient;
 import discord4j.core.ServiceMediator;
 import discord4j.core.event.domain.*;
@@ -30,10 +31,12 @@ import discord4j.gateway.json.dispatch.*;
 import discord4j.gateway.retry.GatewayStateChange;
 import discord4j.store.api.util.LongLongTuple2;
 import reactor.core.publisher.Mono;
+import reactor.util.function.Tuples;
 
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * Registry for {@link discord4j.gateway.json.dispatch.Dispatch} to {@link discord4j.core.event.domain.Event}
@@ -109,18 +112,41 @@ public abstract class DispatchHandlers {
         DiscordClient client = serviceMediator.getClient();
 
         long guildId = context.getDispatch().getGuildId();
-        long userId = context.getDispatch().getUser().getId();
+        JsonNode user = context.getDispatch().getUser();
+        long userId = Long.parseUnsignedLong(user.get("id").asText());
         LongLongTuple2 key = LongLongTuple2.of(guildId, userId);
         PresenceBean bean = new PresenceBean(context.getDispatch());
         Presence current = new Presence(bean);
 
         Mono<Void> saveNew = serviceMediator.getStateHolder().getPresenceStore().save(key, bean);
 
-        return serviceMediator.getStateHolder().getPresenceStore()
-                .find(key)
-                .flatMap(saveNew::thenReturn)
-                .map(old -> new PresenceUpdateEvent(client, guildId, userId, current, new Presence(old)))
-                .switchIfEmpty(saveNew.thenReturn(new PresenceUpdateEvent(client, guildId, userId, current, null)));
+        Mono<Optional<User>> saveUser = serviceMediator.getStateHolder().getUserStore()
+                .find(userId)
+                .map(oldBean -> {
+                    UserBean newBean = new UserBean(oldBean);
+                    JsonNode username = user.get("username");
+                    JsonNode discriminator = user.get("discriminator");
+                    JsonNode avatar = user.get("avatar");
+
+                    newBean.setUsername((username == null) ? oldBean.getUsername() : username.asText());
+                    newBean.setDiscriminator((discriminator == null) ? oldBean.getDiscriminator() : discriminator.asText());
+                    newBean.setAvatar((avatar == null) ? oldBean.getAvatar() : (avatar.isNull() ? null : avatar.asText()));
+
+                    return Tuples.of(oldBean, newBean);
+                })
+                .flatMap(tuple -> serviceMediator.getStateHolder().getUserStore()
+                        .save(userId, tuple.getT2())
+                        .thenReturn(tuple.getT1()))
+                .map(userBean -> new User(serviceMediator, userBean))
+                .map(Optional::of)
+                .defaultIfEmpty(Optional.empty());
+
+        return saveUser.flatMap(oldUser ->
+                serviceMediator.getStateHolder().getPresenceStore()
+                        .find(key)
+                        .flatMap(saveNew::thenReturn)
+                        .map(old -> new PresenceUpdateEvent(client, guildId, oldUser.orElse(null), user, current, new Presence(old)))
+                        .switchIfEmpty(saveNew.thenReturn(new PresenceUpdateEvent(client, guildId, oldUser.orElse(null), user, current, null))));
     }
 
     private static Mono<TypingStartEvent> typingStart(DispatchContext<TypingStart> context) {

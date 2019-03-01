@@ -16,6 +16,7 @@
  */
 package discord4j.core.event.domain;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import discord4j.core.DiscordClient;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Member;
@@ -37,15 +38,17 @@ import java.util.Optional;
 public class PresenceUpdateEvent extends Event {
 
     private final long guildId;
-    private final long userId;
+    private final User oldUser;
+    private final JsonNode user;
     private final Presence current;
     private final Presence old;
 
-    public PresenceUpdateEvent(DiscordClient client, long guildId, long userId, Presence current,
-                               @Nullable Presence old) {
+    public PresenceUpdateEvent(DiscordClient client, long guildId, @Nullable User oldUser, JsonNode user,
+                               Presence current, @Nullable Presence old) {
         super(client);
         this.guildId = guildId;
-        this.userId = userId;
+        this.oldUser = oldUser;
+        this.user = user;
         this.current = current;
         this.old = old;
     }
@@ -58,8 +61,26 @@ public class PresenceUpdateEvent extends Event {
         return getClient().getGuildById(getGuildId());
     }
 
+    public Optional<User> getOldUser() {
+        return Optional.ofNullable(oldUser);
+    }
+
+    public Optional<String> getNewUsername() {
+        return Optional.ofNullable(user.get("username")).map(JsonNode::asText);
+    }
+
+    public Optional<String> getNewDiscriminator() {
+        return Optional.ofNullable(user.get("discriminator")).map(JsonNode::asText);
+    }
+
+    public Optional<String> getNewAvatar() {
+        return Optional.ofNullable(user.get("avatar"))
+                .filter(node -> !node.isNull())
+                .map(JsonNode::asText);
+    }
+
     public Snowflake getUserId() {
-        return Snowflake.of(userId);
+        return Snowflake.of(user.get("id").asText());
     }
 
     public Mono<User> getUser() {
@@ -82,7 +103,8 @@ public class PresenceUpdateEvent extends Event {
     public String toString() {
         return "PresenceUpdateEvent{" +
                 "guildId=" + guildId +
-                ", userId=" + userId +
+                ", oldUser=" + oldUser +
+                ", user=" + user +
                 ", current=" + current +
                 ", old=" + old +
                 '}';
