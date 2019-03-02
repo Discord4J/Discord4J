@@ -97,6 +97,9 @@ public final class DiscordClientBuilder {
     private RouterFactory routerFactory;
 
     @Nullable
+    private GatewayClientFactory gatewayClientFactory;
+
+    @Nullable
     private Presence initialPresence;
 
     @Nullable
@@ -311,6 +314,28 @@ public final class DiscordClientBuilder {
      */
     public DiscordClientBuilder setRouterFactory(@Nullable RouterFactory routerFactory) {
         this.routerFactory = routerFactory;
+        return this;
+    }
+
+    /**
+     * Get the current {@link GatewayClientFactory} to use with the resulting clients.
+     *
+     * @return the currently installed factory, or {@code null} if using a {@link DefaultGatewayClientFactory}
+     */
+    @Nullable
+    public GatewayClientFactory getGatewayClientFactory() {
+        return gatewayClientFactory;
+    }
+
+    /**
+     * Set a new {@link GatewayClientFactory} to this builder, allowing you to configure the underlying
+     * {@link GatewayClient} used when logging in with the resulting clients.
+     *
+     * @param gatewayClientFactory the new factory, or {@code null} to use a {@link DefaultGatewayClientFactory}
+     * @return this builder
+     */
+    public DiscordClientBuilder setGatewayClientFactory(@Nullable GatewayClientFactory gatewayClientFactory) {
+        this.gatewayClientFactory = gatewayClientFactory;
         return this;
     }
 
@@ -533,6 +558,13 @@ public final class DiscordClientBuilder {
         return new DefaultRouterFactory();
     }
 
+    private GatewayClientFactory initGatewayClientFactory() {
+        if (gatewayClientFactory != null) {
+            return gatewayClientFactory;
+        }
+        return new DefaultGatewayClientFactory();
+    }
+
     private GatewayObserver initGatewayObserver() {
         if (gatewayObserver != null) {
             return gatewayObserver;
@@ -578,7 +610,7 @@ public final class DiscordClientBuilder {
         // Prepare gateway client
         final RetryOptions retryOptions = initRetryOptions();
         final StoreInvalidator storeInvalidator = new StoreInvalidator(stateHolder);
-        final GatewayClient gatewayClient = new DefaultGatewayClient(httpClient,
+        final GatewayClient gatewayClient = initGatewayClientFactory().getGatewayClient(httpClient,
                 new JacksonPayloadReader(jackson.getObjectMapper()),
                 new JacksonPayloadWriter(jackson.getObjectMapper()),
                 retryOptions, token, identifyOptions, storeInvalidator.then(initGatewayObserver()),
