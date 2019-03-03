@@ -41,6 +41,7 @@ import reactor.netty.http.client.HttpClient;
 import reactor.retry.Retry;
 import reactor.util.Logger;
 import reactor.util.Loggers;
+import reactor.util.annotation.Nullable;
 
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
@@ -118,19 +119,19 @@ public class DefaultGatewayClient implements GatewayClient {
      * @param token Discord bot token
      * @param identifyOptions used to IDENTIFY or RESUME a gateway connection, specifying the sharding options
      * and to set an initial presence
-     * @param observer consumer observing gateway and underlying websocket lifecycle changes
+     * @param observer consumer observing gateway and underlying websocket lifecycle changes, can be {@code null}
      * @param identifyLimiter rate-limiting policy used for IDENTIFY requests, allowing shard coordination
      */
     public DefaultGatewayClient(HttpClient httpClient, PayloadReader payloadReader, PayloadWriter payloadWriter,
                                 RetryOptions retryOptions, String token, IdentifyOptions identifyOptions,
-                                GatewayObserver observer, PayloadTransformer identifyLimiter) {
+                                @Nullable GatewayObserver observer, PayloadTransformer identifyLimiter) {
         this.httpClient = Objects.requireNonNull(httpClient);
         this.payloadReader = Objects.requireNonNull(payloadReader);
         this.payloadWriter = Objects.requireNonNull(payloadWriter);
         this.retryOptions = Objects.requireNonNull(retryOptions);
         this.token = Objects.requireNonNull(token);
         this.identifyOptions = Objects.requireNonNull(identifyOptions);
-        this.initialObserver = Objects.requireNonNull(observer);
+        this.initialObserver = observer;
         this.identifyLimiter = Objects.requireNonNull(identifyLimiter);
         this.receiverSink = receiver.sink(FluxSink.OverflowStrategy.LATEST);
         this.senderSink = sender.sink(FluxSink.OverflowStrategy.LATEST);
@@ -150,7 +151,7 @@ public class DefaultGatewayClient implements GatewayClient {
         return Mono.defer(() -> {
             disconnectNotifier = MonoProcessor.create();
             closeTrigger = MonoProcessor.create();
-            observer = this.initialObserver.then(additionalObserver);
+            observer = initialObserver == null ? additionalObserver : initialObserver.then(additionalObserver);
             lastAck.set(0);
 
             Logger senderLog = shardLogger(".sender");
