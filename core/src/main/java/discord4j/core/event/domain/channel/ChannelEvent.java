@@ -18,7 +18,11 @@ package discord4j.core.event.domain.channel;
 
 import discord4j.core.DiscordClient;
 import discord4j.core.event.domain.Event;
+import discord4j.core.object.entity.Channel;
 
+/**
+ * Represents an event related to a {@link Channel}.
+ */
 public abstract class ChannelEvent extends Event {
 
     public ChannelEvent(DiscordClient client) {

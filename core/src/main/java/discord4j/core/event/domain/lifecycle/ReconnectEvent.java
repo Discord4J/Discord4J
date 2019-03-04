@@ -19,6 +19,9 @@ package discord4j.core.event.domain.lifecycle;
 
 import discord4j.core.DiscordClient;
 
+/**
+ * Indicates that a gateway connection has correctly reconnected.
+ */
 public class ReconnectEvent extends GatewayLifecycleEvent {
 
     private final int currentAttempt;

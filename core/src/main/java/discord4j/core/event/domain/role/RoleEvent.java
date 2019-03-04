@@ -18,7 +18,11 @@ package discord4j.core.event.domain.role;
 
 import discord4j.core.DiscordClient;
 import discord4j.core.event.domain.Event;
+import discord4j.core.object.entity.Role;
 
+/**
+ * Represents an event related to a {@link Role}.
+ */
 public abstract class RoleEvent extends Event {
 
     public RoleEvent(DiscordClient client) {

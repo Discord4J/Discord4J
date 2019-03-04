@@ -401,6 +401,13 @@ public final class DiscordClient {
                 .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex()));
     }
 
+    /**
+     * Update this client {@link Presence}.
+     *
+     * @param presence The updated client presence.
+     * @return A {@link Mono} that signals completion upon successful update. If an error is received, it is emitted
+     * through the {@code Mono}.
+     */
     public Mono<Void> updatePresence(final Presence presence) {
         return Mono.fromRunnable(() -> serviceMediator.getGatewayClient().sender().next(
                 GatewayPayload.statusUpdate(presence.asStatusUpdate())));

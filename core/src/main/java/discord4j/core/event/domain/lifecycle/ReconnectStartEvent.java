@@ -36,6 +36,10 @@ package discord4j.core.event.domain.lifecycle;
 
 import discord4j.core.DiscordClient;
 
+/**
+ * Indicates that a gateway connection is starting a reconnect attempt. Can be followed by {@link ReconnectEvent} if
+ * successful, or {@link ReconnectFailEvent} if not.
+ */
 public class ReconnectStartEvent extends GatewayLifecycleEvent {
 
     public ReconnectStartEvent(DiscordClient client) {

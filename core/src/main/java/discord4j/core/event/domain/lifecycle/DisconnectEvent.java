@@ -19,6 +19,9 @@ package discord4j.core.event.domain.lifecycle;
 
 import discord4j.core.DiscordClient;
 
+/**
+ * Indicates that a gateway connection is disconnected.
+ */
 public class DisconnectEvent extends GatewayLifecycleEvent {
 
     public DisconnectEvent(DiscordClient client) {

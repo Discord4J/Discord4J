@@ -19,6 +19,9 @@ package discord4j.core.event.domain.lifecycle;
 
 import discord4j.core.DiscordClient;
 
+/**
+ * Indicates that a gateway connection is successful.
+ */
 public class ConnectEvent extends GatewayLifecycleEvent {
 
     public ConnectEvent(DiscordClient client) {

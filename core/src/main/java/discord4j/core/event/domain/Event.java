@@ -19,6 +19,9 @@ package discord4j.core.event.domain;
 
 import discord4j.core.DiscordClient;
 
+/**
+ * Represents a Discord real-time event used to track a client's state.
+ */
 public abstract class Event {
 
     private final DiscordClient client;
@@ -27,6 +30,11 @@ public abstract class Event {
         this.client = client;
     }
 
+    /**
+     * Get the {@link DiscordClient} that emitted this {@link Event}.
+     *
+     * @return The client emitting this event.
+     */
     public DiscordClient getClient() {
         return client;
     }

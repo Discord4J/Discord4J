@@ -36,6 +36,10 @@ package discord4j.core.event.domain.lifecycle;
 
 import discord4j.core.DiscordClient;
 
+/**
+ * Indicates that a reconnection attempt has failed and a new attempt should be scheduled, in that case, this event
+ * will be followed by a {@link ReconnectStartEvent}.
+ */
 public class ReconnectFailEvent extends GatewayLifecycleEvent {
 
     private final int currentAttempt;

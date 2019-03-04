@@ -18,7 +18,11 @@ package discord4j.core.event.domain.guild;
 
 import discord4j.core.DiscordClient;
 import discord4j.core.event.domain.Event;
+import discord4j.core.object.entity.Guild;
 
+/**
+ * Represents an event related to a {@link Guild}.
+ */
 public abstract class GuildEvent extends Event {
 
     public GuildEvent(DiscordClient client) {

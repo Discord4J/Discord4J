@@ -19,6 +19,9 @@ package discord4j.core.event.domain.lifecycle;
 import discord4j.core.DiscordClient;
 import discord4j.core.event.domain.Event;
 
+/**
+ * Represents a lifecycle status change for a gateway connection.
+ */
 public abstract class GatewayLifecycleEvent extends Event {
 
     public GatewayLifecycleEvent(DiscordClient client) {

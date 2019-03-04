@@ -16,6 +16,11 @@
  */
 package discord4j.core.spec;
 
+/**
+ * A contract specifying how an object should be built.
+ *
+ * @param <T> the type of the resulting object.
+ */
 @FunctionalInterface
 public interface Spec<T> {
 
