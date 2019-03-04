@@ -50,7 +50,8 @@ public class VoiceChannelCreateSpec implements AuditSpec<ChannelCreateRequest> {
     /**
      * Sets the bitrate for the created {@link VoiceChannel}.
      *
-     * @param bitrate The maximum amount of bits to send per second in the voice channel, related to the quality of audio. A valid bitrate is a number from 8 to 96.
+     * @param bitrate The maximum amount of bits to send per second in the voice channel, related to the quality of
+     * audio. A valid bitrate is a number from 8 to 96.
      * @return This spec.
      */
     public VoiceChannelCreateSpec setBitrate(int bitrate) {
@@ -61,7 +62,8 @@ public class VoiceChannelCreateSpec implements AuditSpec<ChannelCreateRequest> {
     /**
      * Sets the user limit for the created {@link VoiceChannel}.
      * <p>
-     * Users with {@link Permission#MOVE_MEMBERS} ignore this limit and can also move other users into the channel past the limit.
+     * Users with {@link Permission#MOVE_MEMBERS} ignore this limit and can also move other users into the channel
+     * past the limit.
      *
      * @param userLimit The maximum number of users that can join the voice channel at once.
      * @return This spec.
@@ -90,7 +92,8 @@ public class VoiceChannelCreateSpec implements AuditSpec<ChannelCreateRequest> {
      */
     public VoiceChannelCreateSpec setPermissionOverwrites(Set<? extends PermissionOverwrite> permissionOverwrites) {
         OverwriteEntity[] raw = permissionOverwrites.stream()
-                .map(o -> new OverwriteEntity(o.getTargetId().asLong(), o.getType().getValue(), o.getAllowed().getRawValue(), o.getDenied().getRawValue()))
+                .map(o -> new OverwriteEntity(o.getTargetId().asLong(), o.getType().getValue(),
+                        o.getAllowed().getRawValue(), o.getDenied().getRawValue()))
                 .toArray(OverwriteEntity[]::new);
 
         requestBuilder.permissionOverwrites(raw);

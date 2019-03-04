@@ -16,22 +16,41 @@
  */
 package discord4j.core.spec;
 
+import discord4j.core.object.entity.Webhook;
+import discord4j.core.object.util.Image;
 import discord4j.rest.json.request.WebhookCreateRequest;
 import reactor.util.annotation.Nullable;
 
+/**
+ * Spec used to create a {@link Webhook} entity.
+ *
+ * @see <a href="https://discordapp.com/developers/docs/resources/webhook#create-webhook">Create Webhook</a>
+ */
 public class WebhookCreateSpec implements AuditSpec<WebhookCreateRequest> {
 
     private String name;
     private String avatar;
     private String reason;
 
+    /**
+     * Sets the name of the created {@link Webhook}.
+     *
+     * @param name The webhook name.
+     * @return This spec.
+     */
     public WebhookCreateSpec setName(String name) {
         this.name = name;
         return this;
     }
 
-    public WebhookCreateSpec setAvatar(String avatar) {
-        this.avatar = avatar;
+    /**
+     * Sets the image of the created {@link Webhook}.
+     *
+     * @param avatar The webhook image.
+     * @return This spec.
+     */
+    public WebhookCreateSpec setAvatar(@Nullable Image avatar) {
+        this.avatar = avatar == null ? null : avatar.getData();
         return this;
     }
 

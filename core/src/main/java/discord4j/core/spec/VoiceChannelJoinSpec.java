@@ -30,6 +30,10 @@ import reactor.core.publisher.Mono;
 
 import java.util.Objects;
 
+/**
+ * Spec used to request a connection to a {@link VoiceChannel} and handle the initialization of the resulting
+ * {@link VoiceConnection}.
+ */
 public class VoiceChannelJoinSpec implements Spec<Mono<VoiceConnection>> {
 
     private AudioProvider provider = AudioProvider.NO_OP;
@@ -45,22 +49,48 @@ public class VoiceChannelJoinSpec implements Spec<Mono<VoiceConnection>> {
         this.voiceChannel = voiceChannel;
     }
 
+    /**
+     * Configure the {@link AudioProvider} to use in the created {@link VoiceConnection}.
+     *
+     * @param provider Used to send audio.
+     * @return This spec.
+     */
     public VoiceChannelJoinSpec setProvider(final AudioProvider provider) {
         this.provider = provider;
         return this;
     }
 
+    /**
+     * Configure the {@link AudioReceiver} to use in the created {@link VoiceConnection}.
+     *
+     * @param receiver Used to receive audio.
+     * @return This spec.
+     * @deprecated Discord does not officially support bots receiving audio. It is not guaranteed that this
+     * functionality works properly. Use at your own risk.
+     */
     @Deprecated
     public VoiceChannelJoinSpec setReceiver(final AudioReceiver receiver) {
         this.receiver = receiver;
         return this;
     }
 
+    /**
+     * Sets whether to deafen this client when establishing a {@link VoiceConnection}.
+     *
+     * @param selfDeaf If this client is deafened.
+     * @return This spec.
+     */
     public VoiceChannelJoinSpec setSelfDeaf(final boolean selfDeaf) {
         this.selfDeaf = selfDeaf;
         return this;
     }
 
+    /**
+     * Sets whether to mute this client when establishing a {@link VoiceConnection}.
+     *
+     * @param selfMute If this client is muted.
+     * @return This spec.
+     */
     public VoiceChannelJoinSpec setSelfMute(final boolean selfMute) {
         this.selfMute = selfMute;
         return this;
@@ -90,7 +120,8 @@ public class VoiceChannelJoinSpec implements Spec<Mono<VoiceConnection>> {
         final Mono<VoiceServerUpdateEvent> waitForVoiceServerUpdate = client.getEventDispatcher()
                 .on(VoiceServerUpdateEvent.class)
                 .filter(vsu -> vsu.getGuildId().asLong() == guildId)
-                .filter(vsu -> vsu.getEndpoint() != null) // sometimes Discord sends null here. If so, another VSU should arrive afterwards
+                .filter(vsu -> vsu.getEndpoint() != null) // sometimes Discord sends null here. If so, another VSU
+                // should arrive afterwards
                 .next();
 
         return sendVoiceStateUpdate

@@ -17,20 +17,39 @@
 package discord4j.core.spec;
 
 import discord4j.common.jackson.Possible;
+import discord4j.core.object.util.Image;
 import discord4j.rest.json.request.UserModifyRequest;
+import reactor.util.annotation.Nullable;
 
+/**
+ * Spec used to modify the current user.
+ *
+ * @see <a href="https://discordapp.com/developers/docs/resources/user#modify-current-user">Modify Current User</a>
+ */
 public class UserEditSpec implements Spec<UserModifyRequest> {
 
     private Possible<String> username = Possible.absent();
     private Possible<String> avatar = Possible.absent();
 
+    /**
+     * Sets the user's username. May cause the discriminator to be randomized.
+     *
+     * @param username The user's username.
+     * @return This spec.
+     */
     public UserEditSpec setUsername(String username) {
         this.username = Possible.of(username);
         return this;
     }
 
-    public UserEditSpec setAvatar(String avatar) {
-        this.avatar = Possible.of(avatar);
+    /**
+     * Sets the user's avatar.
+     *
+     * @param avatar The user's avatar.
+     * @return This spec.
+     */
+    public UserEditSpec setAvatar(@Nullable Image avatar) {
+        this.avatar = avatar == null ? Possible.absent() : Possible.of(avatar.getData());
         return this;
     }
 

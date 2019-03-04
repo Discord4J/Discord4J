@@ -18,52 +18,104 @@ package discord4j.core.spec;
 
 import discord4j.common.json.OverwriteEntity;
 import discord4j.core.object.PermissionOverwrite;
+import discord4j.core.object.entity.TextChannel;
+import discord4j.core.object.util.Permission;
 import discord4j.core.object.util.Snowflake;
 import discord4j.rest.json.request.ChannelModifyRequest;
 import reactor.util.annotation.Nullable;
 
 import java.util.Set;
 
+/**
+ * Spec used to modify a guild {@link TextChannel} settings.
+ *
+ * @see <a href="https://discordapp.com/developers/docs/resources/channel#modify-channel">Modify Channel</a>
+ */
 public class TextChannelEditSpec implements AuditSpec<ChannelModifyRequest> {
 
     private final ChannelModifyRequest.Builder requestBuilder = ChannelModifyRequest.builder();
     @Nullable
     private String reason;
 
+    /**
+     * Sets the name of the modified {@link TextChannel}.
+     *
+     * @param name The channel name.
+     * @return This spec.
+     */
     public TextChannelEditSpec setName(String name) {
         requestBuilder.name(name);
         return this;
     }
 
+    /**
+     * Sets the position of the modified {@link TextChannel}.
+     *
+     * @param position The channel position.
+     * @return This spec.
+     */
     public TextChannelEditSpec setPosition(int position) {
         requestBuilder.position(position);
         return this;
     }
 
+    /**
+     * Sets the topic of the modified {@link TextChannel}.
+     *
+     * @param topic The channel topic.
+     * @return This spec.
+     */
     public TextChannelEditSpec setTopic(String topic) {
         requestBuilder.topic(topic);
         return this;
     }
 
+    /**
+     * Sets whether the modified {@link TextChannel} should be NSFW (not safe for work).
+     *
+     * @param nsfw The channel nsfw property.
+     * @return This spec.
+     */
     public TextChannelEditSpec setNsfw(boolean nsfw) {
         requestBuilder.nsfw(nsfw);
         return this;
     }
 
+    /**
+     * Sets the modified {@link TextChannel} permission overwrites.
+     *
+     * @param permissionOverwrites The set of {@link PermissionOverwrite} objects.
+     * @return This spec.
+     */
     public TextChannelEditSpec setPermissionOverwrites(Set<? extends PermissionOverwrite> permissionOverwrites) {
         OverwriteEntity[] raw = permissionOverwrites.stream()
-                .map(o -> new OverwriteEntity(o.getTargetId().asLong(), o.getType().getValue(), o.getAllowed().getRawValue(), o.getDenied().getRawValue()))
+                .map(o -> new OverwriteEntity(o.getTargetId().asLong(), o.getType().getValue(),
+                        o.getAllowed().getRawValue(), o.getDenied().getRawValue()))
                 .toArray(OverwriteEntity[]::new);
 
         requestBuilder.permissionOverwrites(raw);
         return this;
     }
 
+    /**
+     * Sets the identifier of the parent category of the modified {@link TextChannel}.
+     *
+     * @param parentId The parent category identifier.
+     * @return This spec.
+     */
     public TextChannelEditSpec setParentId(@Nullable Snowflake parentId) {
         requestBuilder.parentId(parentId == null ? null : parentId.asLong());
         return this;
     }
 
+    /**
+     * Sets the amount of seconds a user has to wait before sending another message to the modified
+     * {@link TextChannel}, from 0 to 120. Does not affect bots or users with {@link Permission#MANAGE_MESSAGES} or
+     * {@link Permission#MANAGE_CHANNELS} permissions.
+     *
+     * @param rateLimitPerUser The channel user rate limit, in seconds.
+     * @return This spec.
+     */
     public TextChannelEditSpec setRateLimitPerUser(int rateLimitPerUser) {
         requestBuilder.rateLimitPerUser(rateLimitPerUser);
         return this;

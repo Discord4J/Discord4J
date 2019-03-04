@@ -17,22 +17,41 @@
 package discord4j.core.spec;
 
 import discord4j.common.jackson.Possible;
+import discord4j.core.object.entity.Webhook;
+import discord4j.core.object.util.Image;
 import discord4j.rest.json.request.WebhookModifyRequest;
 import reactor.util.annotation.Nullable;
 
+/**
+ * Spec to modify a {@link Webhook} entity.
+ *
+ * @see <a href="https://discordapp.com/developers/docs/resources/webhook#modify-webhook>Modify Webhook</a>
+ */
 public class WebhookEditSpec implements AuditSpec<WebhookModifyRequest> {
 
     private Possible<String> name = Possible.absent();
     private Possible<String> avatar = Possible.absent();
     private String reason;
 
+    /**
+     * Sets the name of the modified {@link Webhook}.
+     *
+     * @param name The webhook name.
+     * @return This spec.
+     */
     public WebhookEditSpec setName(String name) {
         this.name = Possible.of(name);
         return this;
     }
 
-    public WebhookEditSpec setAvatar(String avatar) {
-        this.avatar = Possible.of(avatar);
+    /**
+     * Sets the image of the modified {@link Webhook}.
+     *
+     * @param avatar The webhook image.
+     * @return This spec.
+     */
+    public WebhookEditSpec setAvatar(@Nullable Image avatar) {
+        this.avatar = avatar == null ? Possible.absent() : Possible.of(avatar.getData());
         return this;
     }
 
