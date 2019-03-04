@@ -1,6 +1,6 @@
 ![Discord4J Logo](/images/d4j_l.png?raw=true)
 
-# Discord4J [![Maven Central](https://img.shields.io/maven-central/v/com.discord4j/Discord4J/2.svg?style=flat-square)](https://mvnrepository.com/artifact/com.discord4j/Discord4J)  [![JCenter](https://img.shields.io/bintray/v/austinv11/maven/Discord4J.svg?style=flat-square)](https://bintray.com/austinv11/maven/Discord4J/_latestVersion)  [![Support Server Invite](https://img.shields.io/badge/Join-Discord4J-7289DA.svg?style=flat-square&logo=discord)](https://discord.gg/NxGAeCY) [![Documentation Status](https://img.shields.io/readthedocs/discord4j.svg?style=flat-square)](http://discord4j.readthedocs.io/en/latest/) [![Build Status](https://img.shields.io/circleci/project/github/Discord4J/Discord4J/master.svg?style=flat-square)](https://circleci.com/gh/Discord4J/Discord4J/tree/master)
+# Discord4J [![](https://jitpack.io/v/Discord4J/Discord4J.svg)](https://jitpack.io/#Discord4J/Discord4J) [![Support Server Invite](https://img.shields.io/badge/Join-Discord4J-7289DA.svg?style=flat-square&logo=discord)](https://discord.gg/NxGAeCY) [![Documentation Status](https://img.shields.io/readthedocs/discord4j.svg?style=flat-square)](http://discord4j.readthedocs.io/en/latest/) [![Build Status](https://img.shields.io/circleci/project/github/Discord4J/Discord4J/master.svg?style=flat-square)](https://circleci.com/gh/Discord4J/Discord4J/tree/master)
 
 Java interface for the official [Discord](https://discordapp.com/) API, written in Java 8.
 [The API is also available in a few other languages.](https://discordapi.com/unofficial/libs.html)
@@ -13,6 +13,10 @@ Given that `@VERSION@` = the version of Discord4J.
 In your `pom.xml` add:
 ```xml
 <repositories>
+	<repository>
+		<id>jitpack.io</id>
+		<url>https://jitpack.io</url>
+	</repository>
   <repository>
     <id>jcenter</id>
     <url>http://jcenter.bintray.com</url>
@@ -21,7 +25,7 @@ In your `pom.xml` add:
 
 <dependencies>
   <dependency>
-    <groupId>com.discord4j</groupId> <!-- However our packages are all under sx.blah in version 2.x! -->
+    <groupId>com.github.Discord4J</groupId> <!-- However our packages are all under sx.blah in version 2.x! -->
     <artifactId>Discord4J</artifactId>
     <version>@VERSION@</version>
   </dependency>
@@ -32,6 +36,7 @@ In your `build.gradle` add:
 ```groovy
 repositories {
   jcenter()
+	maven { url 'https://jitpack.io' }
 }
 
 dependencies {
@@ -46,6 +51,7 @@ libraryDependencies ++= Seq(
 )
 
 resolvers += "jcenter" at "http://jcenter.bintray.com"
+resolvers += "jitpack" at "https://jitpack.io"
 ```
 ### Manually with the shaded jar
 If you don't use Maven nor Gradle (which you really should, because it's a lot more flexible and allows you to update easily), you can always [grab the shaded jar file](https://discord4j.com/downloads.html) (which has all the D4J dependencies inside), and link it in your IntelliJ or Eclipse project.
