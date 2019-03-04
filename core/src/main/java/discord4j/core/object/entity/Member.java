@@ -33,6 +33,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
 
+import java.awt.Color;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -365,6 +366,20 @@ public final class Member extends User {
      */
     public Mono<Boolean> isHigher(Snowflake id) {
         return getClient().getMemberById(getGuildId(), id).flatMap(this::isHigher);
+    }
+
+    /**
+     * Requests to determine the {@link Color} this member would be visually represented in the Discord client.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits the {@code Color} this member would be visually
+     * represented in the Discord client. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Color> getColor() {
+        return getRoles()
+                .map(Role::getColor)
+                .filter(color -> !color.equals(Role.DEFAULT_COLOR))
+                .last()
+                .defaultIfEmpty(Role.DEFAULT_COLOR);
     }
 
     /**

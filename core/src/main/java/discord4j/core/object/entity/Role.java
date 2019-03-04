@@ -39,6 +39,9 @@ import java.util.function.Consumer;
  */
 public final class Role implements Entity {
 
+    /** The default {@link Color} of a {@code Role}. */
+    public static final Color DEFAULT_COLOR = new Color(0, true);
+
     /** The ServiceMediator associated to this object. */
     private final ServiceMediator serviceMediator;
 
