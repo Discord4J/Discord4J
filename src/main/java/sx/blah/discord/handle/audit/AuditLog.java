@@ -26,6 +26,7 @@ import sx.blah.discord.handle.obj.IUser;
 import sx.blah.discord.util.cache.LongMap;
 
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -57,7 +58,9 @@ public class AuditLog {
 	 * @return The entries for the log as a collection.
 	 */
 	public Collection<AuditLogEntry> getEntries() {
-		return entries.values();
+		return entries.values().stream()
+				.sorted(Comparator.comparing(AuditLogEntry::getLongID).reversed())
+				.collect(Collectors.toList());
 	}
 
 	/**
@@ -67,7 +70,7 @@ public class AuditLog {
 	 * @see TargetedEntry
 	 */
 	public Collection<TargetedEntry> getTargetedEntries() {
-		return entries.values().stream()
+		return getEntries().stream()
 				.filter(TargetedEntry.class::isInstance)
 				.map(TargetedEntry.class::cast)
 				.collect(Collectors.toList());
@@ -80,7 +83,7 @@ public class AuditLog {
 	 * @see DiscordObjectEntry
 	 */
 	public Collection<DiscordObjectEntry<?>> getDiscordObjectEntries() {
-		return entries.values().stream()
+		return getEntries().stream()
 				.filter(DiscordObjectEntry.class::isInstance)
 				.map(entry -> (DiscordObjectEntry<?>) entry)
 				.collect(Collectors.toList());

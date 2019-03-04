@@ -239,7 +239,7 @@ public class Role implements IRole {
 
 	@Override
 	public void changeHoist(boolean hoist) {
-		edit(new RoleEditRequest.Builder().mentionable(hoist).build());
+		edit(new RoleEditRequest.Builder().hoist(hoist).build());
 	}
 
 	@Override

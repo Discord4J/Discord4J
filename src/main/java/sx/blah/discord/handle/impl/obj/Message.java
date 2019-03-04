@@ -157,7 +157,6 @@ public class Message implements IMessage {
 				   List<Embed> embeds, List<IReaction> reactions, long webhookID, Type type) {
 		this.client = client;
 		this.id = id;
-		setContent(content);
 		this.author = (User) user;
 		this.channel = (Channel) channel;
 		this.timestamp = timestamp;
@@ -173,6 +172,7 @@ public class Message implements IMessage {
 		this.webhookID = webhookID;
 		this.type = type;
 
+		setContent(content);
 		setChannelMentions();
 	}
 
@@ -196,7 +196,7 @@ public class Message implements IMessage {
 	 */
 	public void setContent(String content) {
 		this.content = content;
-		this.formattedContent = null; // Force re-update later
+		setFormattedContent();
 
 		if (content != null) {
 			this.mentionsEveryone = content.contains("@everyone");
@@ -283,7 +283,7 @@ public class Message implements IMessage {
 
 	@Override
 	public List<IUser> getMentions() {
-		if (mentionsEveryone) {
+		if (mentionsEveryone()) {
 			return channel.isPrivate() ? channel.getUsersHere() : channel.getGuild().getUsers();
 		}
 
@@ -444,17 +444,21 @@ public class Message implements IMessage {
 		return getChannel().isPrivate() ? null : getChannel().getGuild();
 	}
 
-	@Override
-	public String getFormattedContent() {
-		if (content == null)
-			return null;
-
-		if (formattedContent == null) {
+	/**
+	 * Sets the CACHED formatted content of the message.
+	 */
+	private void setFormattedContent() {
+		if (content == null) {
+			formattedContent = null;
+		} else {
 			String currentContent = content;
 
-			for (IUser u : getMentions())
-				currentContent = currentContent.replace(u.mention(false), "@" + u.getName())
+			for (long userID : mentions) {
+				IUser u = client.getUserByID(userID);
+				currentContent = u == null ? currentContent.replace("<@" + userID + ">", "@invalid-user")
+						: currentContent.replace(u.mention(false), "@" + u.getName())
 						.replace(u.mention(true), "@" + u.getDisplayName(getGuild()));
+			}
 
 			for (IChannel ch : getChannelMentions())
 				currentContent = currentContent.replace(ch.mention(), "#" + ch.getName());
@@ -464,7 +468,10 @@ public class Message implements IMessage {
 
 			formattedContent = currentContent;
 		}
+	}
 
+	@Override
+	public String getFormattedContent() {
 		return formattedContent;
 	}
 
