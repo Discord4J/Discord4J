@@ -22,13 +22,12 @@ import ch.qos.logback.classic.LoggerContext;
 import discord4j.core.event.domain.lifecycle.ReadyEvent;
 import discord4j.core.event.domain.lifecycle.ResumeEvent;
 import discord4j.core.event.domain.message.MessageCreateEvent;
-import discord4j.core.object.entity.ApplicationInfo;
-import discord4j.core.object.entity.Message;
-import discord4j.core.object.entity.MessageChannel;
-import discord4j.core.object.entity.User;
+import discord4j.core.object.entity.*;
 import discord4j.core.object.reaction.ReactionEmoji;
+import discord4j.core.object.util.Image;
 import discord4j.core.object.util.Snowflake;
 import discord4j.rest.http.client.ClientException;
+import org.apache.commons.io.IOUtils;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -36,9 +35,11 @@ import org.slf4j.LoggerFactory;
 import reactor.core.Exceptions;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.netty.http.client.HttpClient;
 import reactor.util.Logger;
 import reactor.util.Loggers;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -83,6 +84,7 @@ public class ExampleBot {
         eventHandlers.add(new LogLevelChange());
         eventHandlers.add(new BlockingEcho());
         eventHandlers.add(new Reactor());
+        eventHandlers.add(new ChangeAvatar());
 
         // Build a safe event-processing pipeline
         client.getEventDispatcher().on(MessageCreateEvent.class)
@@ -272,6 +274,35 @@ public class ExampleBot {
                 emoji.remove(index);
             }
             return reactions;
+        }
+    }
+
+    public static class ChangeAvatar extends EventHandler {
+
+        @Override
+        public Mono<Void> onMessageCreate(MessageCreateEvent event) {
+            Message message = event.getMessage();
+            if (message.getContent()
+                    .filter(content -> content.equals("!avatar"))
+                    .isPresent()) {
+                for (Attachment attachment : message.getAttachments()) {
+                    // This code is very optimistic as it does not check for status codes or file types
+                    return HttpClient.create()
+                            .get()
+                            .uri(attachment.getUrl())
+                            .responseSingle((res, mono) -> mono.asInputStream())
+                            .flatMap(input -> message.getClient()
+                                    .edit(spec -> {
+                                        try {
+                                            spec.setAvatar(Image.ofRaw(IOUtils.toByteArray(input), Image.Format.PNG));
+                                        } catch (IOException e) {
+                                            throw Exceptions.propagate(e);
+                                        }
+                                    }))
+                            .then();
+                }
+            }
+            return Mono.empty();
         }
     }
 
