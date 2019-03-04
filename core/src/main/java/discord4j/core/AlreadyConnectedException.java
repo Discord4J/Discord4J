@@ -15,7 +15,7 @@
  * along with Discord4J. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package discord4j.core.util;
+package discord4j.core;
 
 /**
  * Unchecked exception indicating that an attempt to create a connection has failed because an active

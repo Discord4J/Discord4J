@@ -24,7 +24,6 @@ import discord4j.common.jackson.UnknownPropertyHandler;
 import discord4j.core.event.EventDispatcher;
 import discord4j.core.event.dispatch.DispatchContext;
 import discord4j.core.event.dispatch.DispatchHandlers;
-import discord4j.core.event.dispatch.StoreInvalidator;
 import discord4j.core.event.domain.Event;
 import discord4j.core.object.data.stored.MessageBean;
 import discord4j.core.object.presence.Presence;

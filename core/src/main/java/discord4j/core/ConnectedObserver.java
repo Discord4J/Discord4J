@@ -15,32 +15,29 @@
  * along with Discord4J. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package discord4j.core.event.dispatch;
+package discord4j.core;
 
-import discord4j.core.StateHolder;
 import discord4j.gateway.GatewayObserver;
 import discord4j.gateway.IdentifyOptions;
 import reactor.netty.ConnectionObserver;
-import reactor.util.Logger;
-import reactor.util.Loggers;
 
-public class StoreInvalidator implements GatewayObserver {
+import java.util.function.Consumer;
 
-    private static final Logger log = Loggers.getLogger(StoreInvalidator.class);
+/**
+ * Allows notifying an externally managed sink for {@link GatewayObserver#CONNECTED} events.
+ */
+public class ConnectedObserver implements GatewayObserver {
 
-    private final StateHolder stateHolder;
+    private final Consumer<IdentifyOptions> task;
 
-    public StoreInvalidator(StateHolder stateHolder) {
-        this.stateHolder = stateHolder;
+    public ConnectedObserver(Consumer<IdentifyOptions> task) {
+        this.task = task;
     }
 
     @Override
     public void onStateChange(ConnectionObserver.State newState, IdentifyOptions identifyOptions) {
-        if (GatewayObserver.RETRY_STARTED.equals(newState)
-                || GatewayObserver.RETRY_FAILED.equals(newState)
-                || GatewayObserver.DISCONNECTED.equals(newState)) {
-            log.debug("Invalidating stores");
-            stateHolder.invalidateStores().subscribe();
+        if (GatewayObserver.CONNECTED.equals(newState)) {
+            task.accept(identifyOptions);
         }
     }
 }

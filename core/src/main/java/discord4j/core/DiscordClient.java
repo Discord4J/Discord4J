@@ -29,7 +29,6 @@ import discord4j.core.object.presence.Presence;
 import discord4j.core.object.util.Snowflake;
 import discord4j.core.spec.GuildCreateSpec;
 import discord4j.core.spec.UserEditSpec;
-import discord4j.core.util.AlreadyConnectedException;
 import discord4j.core.util.EntityUtil;
 import discord4j.core.util.PaginationUtil;
 import discord4j.gateway.GatewayClient;
