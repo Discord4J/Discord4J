@@ -21,10 +21,17 @@ import reactor.util.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 
+/** A spec used to configure a user ban. */
 public final class BanQuerySpec implements AuditSpec<Map<String, Object>> {
 
     private final Map<String, Object> request = new HashMap<>(2);
 
+    /**
+     * Sets the number of days to delete messages for (0-7).
+     *
+     * @param days A number from 0 to 7 indicating how many days of messages should be deleted when a user is banned.
+     * @return This spec.
+     */
     public BanQuerySpec setDeleteMessageDays(final int days) {
         request.put("delete-message-days", days);
         return this;

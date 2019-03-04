@@ -18,12 +18,14 @@ package discord4j.core.spec;
 
 import discord4j.common.json.OverwriteEntity;
 import discord4j.core.object.PermissionOverwrite;
+import discord4j.core.object.entity.Category;
 import discord4j.core.object.entity.Channel;
 import discord4j.rest.json.request.ChannelCreateRequest;
 import reactor.util.annotation.Nullable;
 
 import java.util.Set;
 
+/** A spec used to configure and create a {@link Category}. */
 public class CategoryCreateSpec implements AuditSpec<ChannelCreateRequest> {
 
     private final ChannelCreateRequest.Builder requestBuilder = ChannelCreateRequest.builder()
@@ -31,19 +33,38 @@ public class CategoryCreateSpec implements AuditSpec<ChannelCreateRequest> {
     @Nullable
     private String reason;
 
+    /**
+     * Sets the name for the created {@link Category}.
+     *
+     * @param name The name of the category.
+     * @return This spec.
+     */
     public CategoryCreateSpec setName(String name) {
         requestBuilder.name(name);
         return this;
     }
 
+    /**
+     * Sets the position for the created {@link Category}.
+     *
+     * @param position The raw position for the category.
+     * @return This spec.
+     */
     public CategoryCreateSpec setPosition(int position) {
         requestBuilder.setPosition(position);
         return this;
     }
 
+    /**
+     * Sets the permission overwrites for the created {@link Category}.
+     *
+     * @param permissionOverwrites The {@code Set<PermissionOverwrite>} which contains overwrites for the category.
+     * @return This spec.
+     */
     public CategoryCreateSpec setPermissionOverwrites(Set<? extends PermissionOverwrite> permissionOverwrites) {
         OverwriteEntity[] raw = permissionOverwrites.stream()
-                .map(o -> new OverwriteEntity(o.getTargetId().asLong(), o.getType().getValue(), o.getAllowed().getRawValue(), o.getDenied().getRawValue()))
+                .map(o -> new OverwriteEntity(o.getTargetId().asLong(), o.getType().getValue(),
+                        o.getAllowed().getRawValue(), o.getDenied().getRawValue()))
                 .toArray(OverwriteEntity[]::new);
 
         requestBuilder.permissionOverwrites(raw);

@@ -29,6 +29,19 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
+/**
+ * A spec used to configure and create a {@link Guild}.
+ * <b>This can only be used for bots in less than 10 guilds.</b>
+ * <p>
+ * This spec also has some limitations to it. The name, region,
+ * verification level, and default message notification level are all required to be able to properly build the spec.
+ * The first role added, either from {@link #addEveryoneRole} or
+ * {@link #addRole}, will automatically be set as the default @everyone role. Each
+ * subsequent call to {@link #addEveryoneRole} will not override the first role but
+ * shift all other roles down.
+ *
+ * @see <a href="https://discordapp.com/developers/docs/resources/guild#create-guild">Create Guild</a>
+ */
 public class GuildCreateSpec implements Spec<GuildCreateRequest> {
 
     private String name;
@@ -40,31 +53,67 @@ public class GuildCreateSpec implements Spec<GuildCreateRequest> {
     private final List<RoleCreateRequest> roles = new ArrayList<>();
     private final List<PartialChannelRequest> channels = new ArrayList<>();
 
+    /**
+     * Sets the name for the created {@link Guild}.
+     *
+     * @param name The name of the guild.
+     * @return This spec.
+     */
     public GuildCreateSpec setName(String name) {
         this.name = name;
         return this;
     }
 
+    /**
+     * Sets the voice region for the created {@link Guild}.
+     *
+     * @param region The voice region for the guild.
+     * @return This spec.
+     */
     public GuildCreateSpec setRegion(Region region) {
         this.region = region.getId();
         return this;
     }
 
+    /**
+     * Sets the image icon to display for the created {@link Guild}.
+     *
+     * @param icon The icon for the guild.
+     * @return This spec.
+     */
     public GuildCreateSpec setIcon(@Nullable Image icon) {
         this.icon = (icon == null) ? null : icon.getData();
         return this;
     }
 
+    /**
+     * Sets the verification level required before a member can send messages in the created {@link Guild}.
+     *
+     * @param verificationLevel The verification level for the guild.
+     * @return This spec.
+     */
     public GuildCreateSpec setVerificationLevel(Guild.VerificationLevel verificationLevel) {
         this.verificationLevel = verificationLevel.getValue();
         return this;
     }
 
+    /**
+     * Sets the default message notification level for the created {@link Guild}.
+     *
+     * @param notificationLevel The default notification level for the guild.
+     * @return This spec.
+     */
     public GuildCreateSpec setDefaultMessageNotificationLevel(Guild.NotificationLevel notificationLevel) {
         this.defaultMessageNotificationLevel = notificationLevel.getValue();
         return this;
     }
 
+    /**
+     * Adds the role spec to the list of roles for the created {@link Guild}.
+     *
+     * @param roleSpec The role spec to add to the list of roles.
+     * @return This spec.
+     */
     public GuildCreateSpec addRole(Consumer<? super RoleCreateSpec> roleSpec) {
         final RoleCreateSpec mutatedSpec = new RoleCreateSpec();
         roleSpec.accept(mutatedSpec);
@@ -72,6 +121,16 @@ public class GuildCreateSpec implements Spec<GuildCreateRequest> {
         return this;
     }
 
+    /**
+     * Sets the default @everyone role for the created {@link Guild}. This shifts all other roles in the list, if
+     * present, down by one. It does not replace other @everyone roles already set.
+     * <p>
+     * When creating a guild, Discord automatically takes the first role in the role array as the default @everyone
+     * role. See this limitation and others at {@link GuildCreateSpec}.
+     *
+     * @param roleSpec The default @everyone role spec to add to the list of roles.
+     * @return This spec.
+     */
     public GuildCreateSpec addEveryoneRole(Consumer<? super RoleCreateSpec> roleSpec) {
         final RoleCreateSpec mutatedSpec = new RoleCreateSpec();
         roleSpec.accept(mutatedSpec);
@@ -79,6 +138,13 @@ public class GuildCreateSpec implements Spec<GuildCreateRequest> {
         return this;
     }
 
+    /**
+     * Adds the channel to the list of channels for the created {@link Guild}.
+     *
+     * @param name The name of the channel.
+     * @param type The type of the channel.
+     * @return This spec.
+     */
     public GuildCreateSpec addChannel(String name, Channel.Type type) {
         channels.add(new PartialChannelRequest(name, type.getValue()));
         return this;

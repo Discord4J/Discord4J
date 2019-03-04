@@ -26,56 +26,125 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * A spec used to configure and send an embed.
+ * @see <a href="https://i.stack.imgur.com/HRWHk.png">Embed Layout</a>
+ */
 public class EmbedCreateSpec implements Spec<EmbedRequest> {
 
     private final EmbedRequest.Builder requestBuilder = EmbedRequest.builder();
     private final List<EmbedFieldEntity> fields = new ArrayList<>();
 
+    /**
+     * Sets the main title of the embed.
+     *
+     * @param title The title of the embed.
+     * @return This spec.
+     */
     public EmbedCreateSpec setTitle(String title) {
         requestBuilder.title(title);
         return this;
     }
 
+    /**
+     * Sets the main description of the embed.
+     *
+     * @param description The description of the embed.
+     * @return This spec.
+     */
     public EmbedCreateSpec setDescription(String description) {
         requestBuilder.description(description);
         return this;
     }
 
+    /**
+     * Sets the URL of the embed.
+     *
+     * @param url A URL which can be clicked on through the main title of the embed.
+     * @return This spec.
+     */
     public EmbedCreateSpec setUrl(String url) {
         requestBuilder.url(url);
         return this;
     }
 
+    /**
+     * Sets the timestamp to display in the embed. The timestamp is displayed locally for each user's timezone.
+     *
+     * @param timestamp A {@link Instant} to display in the embed footer.
+     * @return This spec.
+     */
     public EmbedCreateSpec setTimestamp(Instant timestamp) {
         requestBuilder.timestamp(DateTimeFormatter.ISO_INSTANT.format(timestamp));
         return this;
     }
 
+    /**
+     * Sets the color of the embed.
+     *
+     * @param color A {@link Color} to display on the embed.
+     * @return This spec.
+     */
     public EmbedCreateSpec setColor(final Color color) {
         requestBuilder.color(color.getRGB() & 0xFFFFFF);
         return this;
     }
 
+    /**
+     * Sets the footer of the embed.
+     *
+     * @param text The footer text.
+     * @param iconUrl An icon URL to display in the footer.
+     * @return This spec.
+     */
     public EmbedCreateSpec setFooter(String text, @Nullable String iconUrl) {
         requestBuilder.footer(new EmbedFooterRequest(text, iconUrl));
         return this;
     }
 
+    /**
+     * Sets the main image of the embed.
+     *
+     * @param url An image URL.
+     * @return This spec.
+     */
     public EmbedCreateSpec setImage(String url) {
         requestBuilder.image(new EmbedImageRequest(url));
         return this;
     }
 
+    /**
+     * Sets the thumbnail of the embed.
+     *
+     * @param url An image URL.
+     * @return This spec.
+     */
     public EmbedCreateSpec setThumbnail(String url) {
         requestBuilder.thumbnail(new EmbedThumbnailRequest(url));
         return this;
     }
 
+    /**
+     * Sets the author section of the embed.
+     *
+     * @param name The author name to display.
+     * @param url A URL which can be clicked on through the author name.
+     * @param iconUrl An icon URL displayed as the avatar next to the author name.
+     * @return This spec.
+     */
     public EmbedCreateSpec setAuthor(String name, @Nullable String url, @Nullable String iconUrl) {
         requestBuilder.author(new EmbedAuthorRequest(name, url, iconUrl));
         return this;
     }
 
+    /**
+     * Adds a field to the embed.
+     *
+     * @param name The name of the field.
+     * @param value The text inside of the field.
+     * @param inline Whether to inline the field or not.
+     * @return This spec.
+     */
     public EmbedCreateSpec addField(String name, String value, boolean inline) {
         this.fields.add(new EmbedFieldEntity(name, value, inline));
         return this;
