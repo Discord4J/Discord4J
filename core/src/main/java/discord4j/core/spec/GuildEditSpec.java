@@ -23,54 +23,113 @@ import discord4j.core.object.util.Snowflake;
 import discord4j.rest.json.request.GuildModifyRequest;
 import reactor.util.annotation.Nullable;
 
+/**
+ * A spec used to selectively modify properties from a {@link Guild}.
+ *
+ * @see <a href="https://discordapp.com/developers/docs/resources/guild#modify-guild">Modify Guild</a>
+ */
 public class GuildEditSpec implements AuditSpec<GuildModifyRequest> {
 
     private final GuildModifyRequest.Builder requestBuilder = GuildModifyRequest.builder();
     @Nullable
     private String reason;
 
+    /**
+     * Sets the modified {@link Guild} name.
+     *
+     * @param name the guild name
+     * @return this spec
+     */
     public GuildEditSpec setName(String name) {
         requestBuilder.name(name);
         return this;
     }
 
+    /**
+     * Sets the voice region for the modified {@link Guild}.
+     *
+     * @param region The voice region for the guild.
+     * @return This spec.
+     */
     public GuildEditSpec setRegion(Region region) {
         requestBuilder.region(region.getId());
         return this;
     }
 
+    /**
+     * Sets the verification level required before a member can send messages in the modified {@link Guild}.
+     *
+     * @param verificationLevel The verification level for the guild.
+     * @return This spec.
+     */
     public GuildEditSpec setVerificationLevel(Guild.VerificationLevel verificationLevel) {
         requestBuilder.verificationLevel(verificationLevel.getValue());
         return this;
     }
 
+    /**
+     * Sets the default message notification level for the modified {@link Guild}.
+     *
+     * @param notificationsLevel The default notification level for the guild.
+     * @return This spec.
+     */
     public GuildEditSpec setDefaultMessageNotificationsLevel(Guild.NotificationLevel notificationsLevel) {
         requestBuilder.defaultMessageNotifications(notificationsLevel.getValue());
         return this;
     }
 
+    /**
+     * Sets the {@link Snowflake} identifier for the channel designated as AFK channel in this {@link Guild}.
+     *
+     * @param afkChannelId The identifier for the AFK channel.
+     * @return This spec.
+     */
     public GuildEditSpec setAfkChannelId(@Nullable Snowflake afkChannelId) {
         requestBuilder.afkChannelId(afkChannelId == null ? null : afkChannelId.asLong());
         return this;
     }
 
+    /**
+     * Sets the AFK timeout, in seconds, for this {@link Guild}.
+     *
+     * @param afkTimeout The AFK timeout, in seconds.
+     * @return This spec.
+     */
     public GuildEditSpec setAfkTimeout(int afkTimeout) {
         requestBuilder.afkTimeout(afkTimeout);
         return this;
     }
 
+    /**
+     * Sets the image icon to display for the modified {@link Guild}.
+     *
+     * @param icon The icon for the guild.
+     * @return This spec.
+     */
     public GuildEditSpec setIcon(@Nullable Image icon) {
         requestBuilder.icon((icon == null) ? null : icon.getData());
         return this;
     }
 
+    /**
+     * Sets the new owner ID for this {@link Guild}. Used to transfer guild ownership if this client is the owner.
+     *
+     * @param ownerId The identifier for the new guild owner.
+     * @return This spec.
+     */
     public GuildEditSpec setOwnerId(Snowflake ownerId) {
         requestBuilder.ownerId(ownerId.asLong());
         return this;
     }
 
-    public GuildEditSpec setSplash(@Nullable String splash) {
-        requestBuilder.splash(splash);
+    /**
+     * Sets the splash image to display for the modified {@link Guild}. Used in VIP guilds.
+     *
+     * @param splash The image for the guild.
+     * @return This spec.
+     */
+    public GuildEditSpec setSplash(@Nullable Image splash) {
+        requestBuilder.splash((splash == null) ? null : splash.getData());
         return this;
     }
 

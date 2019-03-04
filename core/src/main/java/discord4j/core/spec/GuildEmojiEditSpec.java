@@ -17,23 +17,41 @@
 package discord4j.core.spec;
 
 import discord4j.common.jackson.Possible;
+import discord4j.core.object.entity.GuildEmoji;
 import discord4j.core.object.util.Snowflake;
 import discord4j.rest.json.request.GuildEmojiModifyRequest;
 import reactor.util.annotation.Nullable;
 
 import java.util.Set;
 
+/**
+ * Spec used to modify an existing {@link GuildEmoji}.
+ *
+ * @see <a href="https://discordapp.com/developers/docs/resources/emoji#modify-guild-emoji>Modify Guild Emoji</a>
+ */
 public class GuildEmojiEditSpec implements AuditSpec<GuildEmojiModifyRequest> {
 
     private Possible<String> name = Possible.absent();
     private Possible<long[]> roles = Possible.absent();
     private String reason;
 
+    /**
+     * Sets the name for the modified {@link GuildEmoji}.
+     *
+     * @param name The name for the emoji.
+     * @return This spec.
+     */
     public GuildEmojiEditSpec setName(String name) {
         this.name = Possible.of(name);
         return this;
     }
 
+    /**
+     * Sets the list of roles for which the modified {@link GuildEmoji} will be whitelisted.
+     *
+     * @param roles The set of role identifiers.
+     * @return This spec.
+     */
     public GuildEmojiEditSpec setRoles(Set<Snowflake> roles) {
         this.roles = Possible.of(roles.stream().mapToLong(Snowflake::asLong).toArray());
         return this;

@@ -26,8 +26,6 @@ import discord4j.core.object.util.Snowflake;
 import discord4j.rest.json.request.ChannelCreateRequest;
 import reactor.util.annotation.Nullable;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.Set;
 
 /** A spec used to configure and create a {@link VoiceChannel}. */
@@ -91,8 +89,6 @@ public class VoiceChannelCreateSpec implements AuditSpec<ChannelCreateRequest> {
      * @return This spec.
      */
     public VoiceChannelCreateSpec setPermissionOverwrites(Set<? extends PermissionOverwrite> permissionOverwrites) {
-        Map<Character, Integer> myMap = new LinkedHashMap<>();
-        Map.Entry<Character, Integer>[] entries = myMap.entrySet().stream().toArray(Map.Entry[]::new);
         OverwriteEntity[] raw = permissionOverwrites.stream()
                 .map(o -> new OverwriteEntity(o.getTargetId().asLong(), o.getType().getValue(), o.getAllowed().getRawValue(), o.getDenied().getRawValue()))
                 .toArray(OverwriteEntity[]::new);

@@ -30,15 +30,12 @@ import java.util.List;
 import java.util.function.Consumer;
 
 /**
- * A spec used to configure and create a {@link Guild}.
- * <b>This can only be used for bots in less than 10 guilds.</b>
+ * A spec used to configure and create a {@link Guild}. <b>This can only be used for bots in less than 10 guilds.</b>
  * <p>
- * This spec also has some limitations to it. The name, region,
- * verification level, and default message notification level are all required to be able to properly build the spec.
- * The first role added, either from {@link #addEveryoneRole} or
- * {@link #addRole}, will automatically be set as the default @everyone role. Each
- * subsequent call to {@link #addEveryoneRole} will not override the first role but
- * shift all other roles down.
+ * This spec also has some limitations to it. The name, region, verification level, and default message notification
+ * level are all required to be able to properly build the spec. The first role added, either from
+ * {@link #addEveryoneRole} or {@link #addRole}, will automatically be set as the default @everyone role. Each
+ * subsequent call to {@link #addEveryoneRole} will not override the first role but shift all other roles down.
  *
  * @see <a href="https://discordapp.com/developers/docs/resources/guild#create-guild">Create Guild</a>
  */

@@ -36,7 +36,7 @@ public class EmbedCreateSpec implements Spec<EmbedRequest> {
     private final List<EmbedFieldEntity> fields = new ArrayList<>();
 
     /**
-     * Sets the main title of the embed.
+     * Sets the title of the embed.
      *
      * @param title The title of the embed.
      * @return This spec.
@@ -47,7 +47,7 @@ public class EmbedCreateSpec implements Spec<EmbedRequest> {
     }
 
     /**
-     * Sets the main description of the embed.
+     * Sets the description of the embed.
      *
      * @param description The description of the embed.
      * @return This spec.
@@ -60,7 +60,7 @@ public class EmbedCreateSpec implements Spec<EmbedRequest> {
     /**
      * Sets the URL of the embed.
      *
-     * @param url A URL which can be clicked on through the main title of the embed.
+     * @param url A URL which can be clicked on through the title of the embed.
      * @return This spec.
      */
     public EmbedCreateSpec setUrl(String url) {
@@ -103,7 +103,7 @@ public class EmbedCreateSpec implements Spec<EmbedRequest> {
     }
 
     /**
-     * Sets the main image of the embed.
+     * Sets the image of the embed.
      *
      * @param url An image URL.
      * @return This spec.

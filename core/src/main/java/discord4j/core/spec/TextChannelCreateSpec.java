@@ -19,12 +19,19 @@ package discord4j.core.spec;
 import discord4j.common.json.OverwriteEntity;
 import discord4j.core.object.PermissionOverwrite;
 import discord4j.core.object.entity.Channel;
+import discord4j.core.object.entity.TextChannel;
+import discord4j.core.object.util.Permission;
 import discord4j.core.object.util.Snowflake;
 import discord4j.rest.json.request.ChannelCreateRequest;
 import reactor.util.annotation.Nullable;
 
 import java.util.Set;
 
+/**
+ * Spec used to create guild {@link TextChannel} entities.
+ *
+ * @see <a href="https://discordapp.com/developers/docs/resources/guild#create-guild-channel">Create Guild Channel</a>
+ */
 public class TextChannelCreateSpec implements AuditSpec<ChannelCreateRequest> {
 
     private final ChannelCreateRequest.Builder requestBuilder = ChannelCreateRequest.builder()
@@ -32,40 +39,85 @@ public class TextChannelCreateSpec implements AuditSpec<ChannelCreateRequest> {
     @Nullable
     private String reason;
 
+    /**
+     * Sets the name of the created {@link TextChannel}.
+     *
+     * @param name The channel name.
+     * @return This spec.
+     */
     public TextChannelCreateSpec setName(String name) {
         requestBuilder.name(name);
         return this;
     }
 
+    /**
+     * Sets the created {@link TextChannel} topic.
+     *
+     * @param topic The channel topic.
+     * @return This spec.
+     */
     public TextChannelCreateSpec setTopic(@Nullable String topic) {
         requestBuilder.topic(topic);
         return this;
     }
 
+    /**
+     * Sets the amount of seconds a user has to wait before sending another message to the created
+     * {@link TextChannel}, from 0 to 120. Does not affect bots or users with {@link Permission#MANAGE_MESSAGES} or
+     * {@link Permission#MANAGE_CHANNELS} permissions.
+     *
+     * @param rateLimitPerUser The channel user rate limit, in seconds.
+     * @return This spec.
+     */
     public TextChannelCreateSpec setRateLimitPerUser(int rateLimitPerUser) {
         requestBuilder.rateLimitPerUser(rateLimitPerUser);
         return this;
     }
 
+    /**
+     * Sets the sorting position of the created {@link TextChannel}.
+     *
+     * @param position The channel position.
+     * @return This spec.
+     */
     public TextChannelCreateSpec setPosition(int position) {
         requestBuilder.setPosition(position);
         return this;
     }
 
+    /**
+     * Sets the created {@link TextChannel} permission overwrites.
+     *
+     * @param permissionOverwrites The set of {@link PermissionOverwrite} objects.
+     * @return This spec.
+     */
     public TextChannelCreateSpec setPermissionOverwrites(Set<? extends PermissionOverwrite> permissionOverwrites) {
         OverwriteEntity[] raw = permissionOverwrites.stream()
-                .map(o -> new OverwriteEntity(o.getTargetId().asLong(), o.getType().getValue(), o.getAllowed().getRawValue(), o.getDenied().getRawValue()))
+                .map(o -> new OverwriteEntity(o.getTargetId().asLong(), o.getType().getValue(),
+                        o.getAllowed().getRawValue(), o.getDenied().getRawValue()))
                 .toArray(OverwriteEntity[]::new);
 
         requestBuilder.permissionOverwrites(raw);
         return this;
     }
 
+    /**
+     * Sets the identifier of the parent category of the created {@link TextChannel}.
+     *
+     * @param parentId The parent category identifier.
+     * @return This spec.
+     */
     public TextChannelCreateSpec setParentId(@Nullable Snowflake parentId) {
         requestBuilder.parentId(parentId == null ? null : parentId.asLong());
         return this;
     }
 
+    /**
+     * Sets whether the created {@link TextChannel} is NSFW (not safe for work).
+     *
+     * @param nsfw The channel nsfw property.
+     * @return This spec.
+     */
     public TextChannelCreateSpec setNsfw(boolean nsfw) {
         requestBuilder.nsfw(nsfw);
         return this;

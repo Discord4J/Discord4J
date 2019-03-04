@@ -16,12 +16,18 @@
  */
 package discord4j.core.spec;
 
+import discord4j.core.object.entity.Role;
 import discord4j.core.object.util.PermissionSet;
 import discord4j.rest.json.request.RoleCreateRequest;
 import reactor.util.annotation.Nullable;
 
 import java.awt.Color;
 
+/**
+ * Spec used to create a new guild {@link Role} entity.
+ *
+ * @see <a href="https://discordapp.com/developers/docs/resources/guild#create-guild-role">Create Guild Role</a>
+ */
 public class RoleCreateSpec implements AuditSpec<RoleCreateRequest> {
 
     private String name;
@@ -31,26 +37,56 @@ public class RoleCreateSpec implements AuditSpec<RoleCreateRequest> {
     private boolean mentionable;
     private String reason;
 
+    /**
+     * Sets the name of the created {@link Role}.
+     *
+     * @param name The role name.
+     * @return This spec.
+     */
     public RoleCreateSpec setName(String name) {
         this.name = name;
         return this;
     }
 
+    /**
+     * Sets the enabled/disabled permissions, in the form of a {@link PermissionSet} for the created {@link Role}.
+     *
+     * @param permissions The role permissions.
+     * @return This spec.
+     */
     public RoleCreateSpec setPermissions(PermissionSet permissions) {
         this.permissions = permissions.getRawValue();
         return this;
     }
 
+    /**
+     * Sets the color of the created {@link Role}.
+     *
+     * @param color The role color.
+     * @return This spec.
+     */
     public RoleCreateSpec setColor(Color color) {
         this.color = color.getRGB() & 0xFFFFFF;
         return this;
     }
 
+    /**
+     * Sets whether the created {@link Role} should be displayed separately in the sidebar.
+     *
+     * @param hoist The role hoisted property.
+     * @return This spec.
+     */
     public RoleCreateSpec setHoist(boolean hoist) {
         this.hoist = hoist;
         return this;
     }
 
+    /**
+     * Sets whether the created {@link Role} should be mentionable.
+     *
+     * @param mentionable The role mentionable property.
+     * @return This spec.
+     */
     public RoleCreateSpec setMentionable(boolean mentionable) {
         this.mentionable = mentionable;
         return this;

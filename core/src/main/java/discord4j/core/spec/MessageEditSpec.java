@@ -17,12 +17,18 @@
 package discord4j.core.spec;
 
 import discord4j.common.jackson.Possible;
+import discord4j.core.object.entity.Message;
 import discord4j.rest.json.request.EmbedRequest;
 import discord4j.rest.json.request.MessageEditRequest;
 import reactor.util.annotation.Nullable;
 
 import java.util.function.Consumer;
 
+/**
+ * Spec used to edit {@link Message} entities this client has sent before.
+ *
+ * @see <a href="https://discordapp.com/developers/docs/resources/channel#edit-message">Edit Message</a>
+ */
 public class MessageEditSpec implements Spec<MessageEditRequest> {
 
     @Nullable
@@ -30,11 +36,23 @@ public class MessageEditSpec implements Spec<MessageEditRequest> {
     @Nullable
     private Possible<EmbedRequest> embed = Possible.absent();
 
+    /**
+     * Sets the new contents for the edited {@link Message}.
+     *
+     * @param content This message contents.
+     * @return This spec.
+     */
     public MessageEditSpec setContent(@Nullable String content) {
         this.content = content == null ? null : Possible.of(content);
         return this;
     }
 
+    /**
+     * Sets the new rich content for the edited {@link Message}.
+     *
+     * @param spec An {@link EmbedCreateSpec} consumer used to attach rich content when creating a message.
+     * @return This spec.
+     */
     public MessageEditSpec setEmbed(@Nullable Consumer<? super EmbedCreateSpec> spec) {
         if (spec != null) {
             final EmbedCreateSpec mutatedSpec = new EmbedCreateSpec();

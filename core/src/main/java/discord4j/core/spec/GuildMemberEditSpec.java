@@ -16,38 +16,79 @@
  */
 package discord4j.core.spec;
 
+import discord4j.core.object.entity.Member;
+import discord4j.core.object.util.Permission;
 import discord4j.core.object.util.Snowflake;
 import discord4j.rest.json.request.GuildMemberModifyRequest;
 import reactor.util.annotation.Nullable;
 
 import java.util.Set;
 
+/**
+ * Spec used to modify guild members.
+ *
+ * @see <a href="https://discordapp.com/developers/docs/resources/guild#modify-guild-member">Modify Guild Member</a>
+ */
 public class GuildMemberEditSpec implements AuditSpec<GuildMemberModifyRequest> {
 
     private final GuildMemberModifyRequest.Builder builder = GuildMemberModifyRequest.builder();
     @Nullable
     private String reason;
 
+    /**
+     * Sets the new voice channel to move the targeted {@link Member}, if they are connected to voice. Requires the
+     * {@link Permission#MOVE_MEMBERS} permission.
+     *
+     * @param channel The voice channel identifier.
+     * @return This spec.
+     */
     public GuildMemberEditSpec setNewVoiceChannel(@Nullable Snowflake channel) {
         builder.channelId(channel == null ? null : channel.asLong());
         return this;
     }
 
+    /**
+     * Sets whether the targeted {@link Member} is muted in voice channels. Requires the
+     * {@link Permission#MUTE_MEMBERS} permission.
+     *
+     * @param mute {@code true} if the {@link Member} should be muted, {@code false} otherwise.
+     * @return This spec.
+     */
     public GuildMemberEditSpec setMute(boolean mute) {
         builder.mute(mute);
         return this;
     }
 
+    /**
+     * Sets whether the targeted {@link Member} is deafened in voice channels. Requires the
+     * {@link Permission#DEAFEN_MEMBERS} permission.
+     *
+     * @param deaf {@code true} if the {@link Member} should be deafened, {@code false} otherwise.
+     * @return This spec.
+     */
     public GuildMemberEditSpec setDeafen(boolean deaf) {
         builder.deaf(deaf);
         return this;
     }
 
+    /**
+     * Sets a new nickname to the targeted {@link Member}. Requires the {@link Permission#MANAGE_NICKNAMES} permission.
+     *
+     * @param nickname The new nickname, can be {@link null} to reset.
+     * @return This spec.
+     */
     public GuildMemberEditSpec setNickname(@Nullable String nickname) {
         builder.nick(nickname);
         return this;
     }
 
+    /**
+     * Sets the new role identifiers the targeted {@link Member} is assigned.  Requires the
+     * {@link Permission#MANAGE_ROLES} permission.
+     *
+     * @param roles The set of role identifiers.
+     * @return This spec.
+     */
     public GuildMemberEditSpec setRoles(Set<Snowflake> roles) {
         builder.roles(roles.stream().mapToLong(Snowflake::asLong).toArray());
         return this;

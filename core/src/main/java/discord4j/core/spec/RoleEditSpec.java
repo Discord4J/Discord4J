@@ -16,38 +16,74 @@
  */
 package discord4j.core.spec;
 
+import discord4j.core.object.entity.Role;
 import discord4j.core.object.util.PermissionSet;
 import discord4j.rest.json.request.RoleModifyRequest;
 import reactor.util.annotation.Nullable;
 
 import java.awt.Color;
 
+/**
+ * Spec used to modify a guild {@link Role}.
+ *
+ * @see <a href="https://discordapp.com/developers/docs/resources/guild#modify-guild-role">Modify Guild Role</a>
+ */
 public class RoleEditSpec implements AuditSpec<RoleModifyRequest> {
 
     private final RoleModifyRequest.Builder requestBuilder = RoleModifyRequest.builder();
     @Nullable
     private String reason;
 
+    /**
+     * Sets the new name of the {@link Role}.
+     *
+     * @param name The role name.
+     * @return This spec.
+     */
     public RoleEditSpec setName(String name) {
         requestBuilder.name(name);
         return this;
     }
 
+    /**
+     * Sets the new permissions for the {@link Role}.
+     *
+     * @param permissions The role permissions.
+     * @return This spec.
+     */
     public RoleEditSpec setPermissions(PermissionSet permissions) {
         requestBuilder.permissions(permissions.getRawValue());
         return this;
     }
 
+    /**
+     * Sets the new color of the {@link Role}.
+     *
+     * @param color The role color.
+     * @return This spec.
+     */
     public RoleEditSpec setColor(Color color) {
         requestBuilder.color(color.getRGB() & 0xFFFFFF);
         return this;
     }
 
+    /**
+     * Sets whether the modified {@link Role} should be displayed separately in the sidebar.
+     *
+     * @param hoist The role hoisted property.
+     * @return This spec.
+     */
     public RoleEditSpec setHoist(boolean hoist) {
         requestBuilder.hoist(hoist);
         return this;
     }
 
+    /**
+     * Sets whether the modified {@link Role} should be mentionable.
+     *
+     * @param mentionable The role mentionable property.
+     * @return This spec.
+     */
     public RoleEditSpec setMentionable(boolean mentionable) {
         requestBuilder.mentionable(mentionable);
         return this;

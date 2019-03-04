@@ -16,6 +16,7 @@
  */
 package discord4j.core.spec;
 
+import discord4j.core.object.entity.GuildEmoji;
 import discord4j.core.object.util.Image;
 import discord4j.core.object.util.Snowflake;
 import discord4j.rest.json.request.GuildEmojiCreateRequest;
@@ -24,6 +25,11 @@ import reactor.util.annotation.Nullable;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * Spec used to create {@link GuildEmoji} objects. Emojis and animated emojis have a maximum file size of 256kb.
+ *
+ * @see <a href="https://discordapp.com/developers/docs/resources/emoji#create-guild-emoji>Create Guild Emoji</a>
+ */
 public class GuildEmojiCreateSpec implements AuditSpec<GuildEmojiCreateRequest> {
 
     private String name;
@@ -31,16 +37,34 @@ public class GuildEmojiCreateSpec implements AuditSpec<GuildEmojiCreateRequest> 
     private final Set<Snowflake> roles = new HashSet<>();
     private String reason;
 
+    /**
+     * Sets the name for the created {@link GuildEmoji}.
+     *
+     * @param name The name for the emoji.
+     * @return This spec.
+     */
     public GuildEmojiCreateSpec setName(String name) {
         this.name = name;
         return this;
     }
 
+    /**
+     * Sets the image for the created {@link GuildEmoji}.
+     *
+     * @param image The image used for the emoji.
+     * @return This spec.
+     */
     public GuildEmojiCreateSpec setImage(Image image) {
         this.image = image.getData();
         return this;
     }
 
+    /**
+     * Adds a role for which the created {@link GuildEmoji} will be whitelisted.
+     *
+     * @param roleId The role identifier.
+     * @return This spec.
+     */
     public GuildEmojiCreateSpec addRole(Snowflake roleId) {
         roles.add(roleId);
         return this;
