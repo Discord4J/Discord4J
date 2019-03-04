@@ -143,7 +143,12 @@ public class ExampleBot {
                         .map(content -> content.split(" ", 2))
                         .flatMap(tokens -> message.getClient().getUserById(Snowflake.of(tokens[1])))
                         .flatMap(user -> message.getChannel()
-                                .flatMap(channel -> channel.createMessage(user.getUsername())))
+                                .flatMap(channel -> channel.createMessage(msg ->
+                                        msg.setEmbed(embed -> embed
+                                                .addField("Name", user.getUsername(), false)
+                                                .addField("Avatar URL", user.getAvatarUrl(), false)
+                                                .setImage(user.getAvatarUrl()))
+                                )))
                         .then();
             }
             return Mono.empty();
