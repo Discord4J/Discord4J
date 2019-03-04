@@ -8,16 +8,16 @@
  *
  * Discord4J is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public License
- * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Discord4J. If not, see <http://www.gnu.org/licenses/>.
  */
 /**
- * Representation of Discord REST API request entities.
+ * Representation of common capabilities across the entity domain model.
  */
 @NonNullApi
-package discord4j.rest.json.request;
+package discord4j.core.object.trait;
 
 import reactor.util.annotation.NonNullApi;

@@ -14,6 +14,9 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
+/**
+ * Components to build and route requests to the Discord REST API.
+ */
 @NonNullApi
 package discord4j.rest.request;
 

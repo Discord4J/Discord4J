@@ -24,7 +24,8 @@ import java.util.Objects;
 import java.util.Optional;
 
 /**
- * An emoji used for {@link Reaction message reactions}.
+ * An emoji used for {@link Reaction message reactions}, provides factory methods such as {@link #unicode(String)}
+ * and others to generate reactions.
  */
 public abstract class ReactionEmoji {
 

@@ -14,6 +14,9 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
+/**
+ * Classes supporting reaction functionality like {@link discord4j.core.object.reaction.ReactionEmoji}
+ */
 @NonNullApi
 package discord4j.core.object.reaction;
 

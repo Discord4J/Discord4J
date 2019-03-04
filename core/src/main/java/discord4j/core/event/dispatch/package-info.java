@@ -14,6 +14,10 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J. If not, see <http://www.gnu.org/licenses/>.
  */
+/**
+ * Mappers between {@link discord4j.gateway.json.dispatch.Dispatch} and {@link discord4j.core.event.domain.Event},
+ * and other connection observers.
+ */
 @NonNullApi
 package discord4j.core.event.dispatch;
 
