@@ -67,14 +67,17 @@ Preparing your command for use:
  */
 class MyCommandProvider implements CommandProvider {
     @Override
-    public Flux<ProviderContext> provide(MessageCreateEvent context, String commandName, int startIndex, int endIndex) { //Determine which command(s) to use, if any
-        return Mono.justOrEmpty(commandName)
-                .flatMap(commandName -> {
-                    if (commandName.equals("echo")) {
-                        return Mono.just(ProviderContext.of(new EchoCommand())); //Handle message with an EchoCommand
+    public Flux<ProviderContext<Void>> provide(MessageCreateEvent context,
+                                               String cmdName,
+                                               int startIndex,
+                                               int endIndex) {
+        return Mono.just(cmdName)
+                .map(cmd -> {
+                    if (cmd.equalsIgnoreCase("echo")) {
+                        return ProviderContext.of(new EchoCommand(startIndex, endIndex));
+                    } else {
+                        return null;
                     }
-                    //This provider cant handle the message. Returning empty() lets other providers try
-                    return Mono.empty();
                 }).flux();
     }
 }
