@@ -18,9 +18,7 @@ package discord4j.gateway.json.dispatch;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import discord4j.common.jackson.UnsignedJson;
-import discord4j.common.json.AttachmentResponse;
-import discord4j.common.json.EmbedResponse;
-import discord4j.common.json.UserResponse;
+import discord4j.common.json.*;
 import reactor.util.annotation.Nullable;
 
 import java.util.Arrays;
@@ -239,101 +237,6 @@ public class MessageCreate implements Dispatch {
                     ", description='" + description + '\'' +
                     ", icon='" + icon + '\'' +
                     ", name='" + name + '\'' +
-                    '}';
-        }
-    }
-
-    public static class Mention {
-
-        private String username;
-        @UnsignedJson
-        private long id;
-        private String discriminator;
-        @Nullable
-        private String avatar;
-        private MessageMember member;
-        @Nullable
-        private Boolean bot;
-
-        public String getUsername() {
-            return username;
-        }
-
-        public long getId() {
-            return id;
-        }
-
-        public String getDiscriminator() {
-            return discriminator;
-        }
-
-        @Nullable
-        public String getAvatar() {
-            return avatar;
-        }
-
-        public MessageMember getMember() {
-            return member;
-        }
-
-        @Nullable
-        public Boolean getBot() {
-            return bot;
-        }
-
-        @Override
-        public String toString() {
-            return "Mention{" +
-                    "username='" + username + '\'' +
-                    ", id=" + id +
-                    ", discriminator='" + discriminator + '\'' +
-                    ", avatar='" + avatar + '\'' +
-                    ", member=" + member +
-                    ", bot=" + bot +
-                    '}';
-        }
-    }
-
-    public static class MessageMember {
-
-        @UnsignedJson
-        private long[] roles;
-        @Nullable
-        private String nick;
-        private boolean mute;
-        private boolean deaf;
-        @JsonProperty("joined_at")
-        private String joinedAt;
-
-        public long[] getRoles() {
-            return roles;
-        }
-
-        @Nullable
-        public String getNick() {
-            return nick;
-        }
-
-        public boolean isMute() {
-            return mute;
-        }
-
-        public boolean isDeaf() {
-            return deaf;
-        }
-
-        public String getJoinedAt() {
-            return joinedAt;
-        }
-
-        @Override
-        public String toString() {
-            return "MessageMember{" +
-                    "roles=" + Arrays.toString(roles) +
-                    ", nick='" + nick + '\'' +
-                    ", mute=" + mute +
-                    ", deaf=" + deaf +
-                    ", joinedAt='" + joinedAt + '\'' +
                     '}';
         }
     }

@@ -21,6 +21,7 @@ import discord4j.common.jackson.Possible;
 import discord4j.common.jackson.UnsignedJson;
 import discord4j.common.json.AttachmentResponse;
 import discord4j.common.json.EmbedResponse;
+import discord4j.common.json.Mention;
 import discord4j.common.json.UserResponse;
 import reactor.util.annotation.Nullable;
 
@@ -34,7 +35,7 @@ public class MessageUpdate implements Dispatch {
     private Possible<Boolean> pinned = Possible.absent();
     @Nullable
     private String nonce;
-    private Possible<MessageCreate.Mention[]> mentions = Possible.absent();
+    private Possible<Mention[]> mentions = Possible.absent();
     @JsonProperty("mention_roles")
     private Possible<long[]> mentionRoles = Possible.absent();
     @JsonProperty("mention_everyone")
@@ -78,7 +79,7 @@ public class MessageUpdate implements Dispatch {
         return nonce;
     }
 
-    public Possible<MessageCreate.Mention[]> getMentions() {
+    public Possible<Mention[]> getMentions() {
         return mentions;
     }
 
