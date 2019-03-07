@@ -11,6 +11,7 @@ public class Mention {
     private String discriminator;
     @Nullable
     private String avatar;
+    @Nullable
     private MessageMember member;
     @Nullable
     private Boolean bot;
@@ -32,6 +33,7 @@ public class Mention {
         return avatar;
     }
 
+    @Nullable
     public MessageMember getMember() {
         return member;
     }

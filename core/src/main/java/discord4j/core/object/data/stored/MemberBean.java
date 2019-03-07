@@ -18,6 +18,7 @@ package discord4j.core.object.data.stored;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import discord4j.common.json.GuildMemberResponse;
+import discord4j.common.json.MessageMember;
 import discord4j.gateway.json.dispatch.GuildMemberUpdate;
 import discord4j.gateway.json.dispatch.MessageCreate;
 import reactor.util.annotation.Nullable;
@@ -41,7 +42,7 @@ public final class MemberBean implements Serializable {
         joinedAt = response.getJoinedAt();
     }
 
-    public MemberBean(final MessageCreate.MessageMember member) {
+    public MemberBean(final MessageMember member) {
         nick = member.getNick();
         roles = member.getRoles();
         joinedAt = member.getJoinedAt();
