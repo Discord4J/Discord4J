@@ -36,6 +36,7 @@ Please follow our instructions at [Using Jitpack](https://github.com/Discord4J/D
 
 ## Example Usage
 ```java
+String token = "...";
 ObjectMapper mapper = getMapper();
 PayloadReader reader = new JacksonPayloadReader(mapper);
 PayloadWriter writer = new JacksonPayloadWriter(mapper);
@@ -44,7 +45,7 @@ RetryOptions retryOptions = new RetryOptions(Duration.ofSeconds(5), Duration.ofS
 GatewayClient gatewayClient = new DefaultGatewayClient(HttpClient.create(),
         reader, writer, retryOptions, token,
         new IdentifyOptions(0, 1, null), null,
-        new SimpleBucket(1, Duration.ofSeconds(6)));
+        new RateLimiterTransformer(new SimpleBucket(1, Duration.ofSeconds(6))));
 
 gatewayClient.dispatch().subscribe(dispatch -> {
     if (dispatch instanceof Ready) {
@@ -52,15 +53,23 @@ gatewayClient.dispatch().subscribe(dispatch -> {
     }
 });
 
-FluxSink<GatewayPayload<?>> outboundSink = gatewayClient.sender();
+gatewayClient.receiver(byteBuf -> Mono.fromRunnable(() -> {
+    try {
+        String json = mapper.writeValueAsString(mapper.readTree(byteBuf.array()));
+        System.out.println(json);
+    } catch (IOException e) {
+        e.printStackTrace();
+    }
+})).subscribe();
 
 gatewayClient.dispatch().ofType(MessageCreate.class)
         .subscribe(message -> {
             String content = message.getContent();
+            System.out.println(content);
             if ("!close".equals(content)) {
-                gatewayClient.close(false);
+                gatewayClient.close(false).block();
             } else if ("!retry".equals(content)) {
-                gatewayClient.close(true);
+                gatewayClient.close(true).block();
             }
         });
 
