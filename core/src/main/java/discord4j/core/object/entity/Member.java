@@ -336,20 +336,12 @@ public final class Member extends User {
             return Mono.just(false);
         }
 
-        // getRoles() emits items in order based off their natural position, the "highest" role, if present, will be
-        // emitted last
-        Mono<Integer> getThisHighestPosition = getRoles().flatMap(Role::getPosition).defaultIfEmpty(0).last();
-        Mono<Integer> getOtherHighestPosition = otherMember.getRoles().flatMap(Role::getPosition).defaultIfEmpty(0).last();
-
         return getGuild().map(Guild::getOwnerId)
                 .flatMap(ownerId -> {
-                    if (ownerId.equals(getId())) {
-                        return Mono.just(true);
-                    }
                     if (ownerId.equals(otherMember.getId())) {
                         return Mono.just(false);
                     }
-                    return Mono.zip(getThisHighestPosition, getOtherHighestPosition, (p1, p2) -> p1 > p2);
+                    return otherMember.getRoles().collectList().flatMap(this::hasHigherRoles);
                 });
     }
 
@@ -366,6 +358,31 @@ public final class Member extends User {
      */
     public Mono<Boolean> isHigher(Snowflake id) {
         return getClient().getMemberById(getGuildId(), id).flatMap(this::isHigher);
+    }
+
+    /**
+     * Requests to determine if the position of this member's highest role is greater than the highest position of the
+     * provided roles.
+     *
+     * @param otherRoles The list of roles to compare in the role hierarchy with this member's roles.
+     * @return A {@link Mono} where, upon successful completion, emits {@code true} if the position of this member's
+     * highest role is greater than the highest position of the provided roles, {@code false} otherwise.
+     * If an error is received it is emitted through the {@code Mono}.
+     */
+    public Mono<Boolean> hasHigherRoles(List<Role> otherRoles) {
+        // getRoles() emits items in order based off their natural position, the "highest" role, if present, will be
+        // emitted last
+        Mono<Integer> getThisHighestPosition = getRoles().flatMap(Role::getPosition).defaultIfEmpty(0).last();
+        Mono<Integer> getOtherHighestPosition = Flux.fromIterable(otherRoles).flatMap(Role::getPosition)
+                .defaultIfEmpty(0).last();
+
+        return getGuild().map(Guild::getOwnerId)
+                .flatMap(ownerId -> {
+                    if (ownerId.equals(getId())) {
+                        return Mono.just(true);
+                    }
+                    return Mono.zip(getThisHighestPosition, getOtherHighestPosition, (p1, p2) -> p1 > p2);
+                });
     }
 
     /**
