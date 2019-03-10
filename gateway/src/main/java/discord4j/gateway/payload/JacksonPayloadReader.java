@@ -50,7 +50,7 @@ public class JacksonPayloadReader implements PayloadReader {
             try {
                 GatewayPayload<?> value = mapper.readValue(payload.array(), new TypeReference<GatewayPayload<?>>() {});
                 sink.success(value);
-            } catch (IOException e) {
+            } catch (IOException | IllegalArgumentException e) {
                 if (lenient) {
                     // if eof input - just ignore
                     if (payload.readableBytes() > 0) {
