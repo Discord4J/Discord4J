@@ -362,7 +362,8 @@ public final class Member extends User {
 
     /**
      * Requests to determine if the position of this member's highest role is greater than the highest position of the
-     * provided roles.
+     * provided roles or signal IllegalArgumentException if the provided roles are from a different guild than this
+     * member.
      *
      * @param otherRoles The list of roles to compare in the role hierarchy with this member's roles.
      * @return A {@link Mono} where, upon successful completion, emits {@code true} if the position of this member's
@@ -370,6 +371,12 @@ public final class Member extends User {
      * If an error is received it is emitted through the {@code Mono}.
      */
     public Mono<Boolean> hasHigherRoles(List<Role> otherRoles) {
+        for(Role role : otherRoles) {
+            if(!role.getGuildId().equals(getGuildId())) {
+                return Mono.error(new IllegalArgumentException("The provided roles are from a different guild."));
+            }
+        }
+
         // getRoles() emits items in order based off their natural position, the "highest" role, if present, will be
         // emitted last
         Mono<Integer> getThisHighestPosition = getRoles().flatMap(Role::getPosition).defaultIfEmpty(0).last();
