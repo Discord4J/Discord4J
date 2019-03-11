@@ -16,10 +16,12 @@
  */
 package discord4j.core.object.data.stored;
 
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import discord4j.common.json.OverwriteEntity;
 
 import java.io.Serializable;
 
+@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS)
 public final class PermissionOverwriteBean implements Serializable {
 
     private static final long serialVersionUID = 6913011818425161574L;

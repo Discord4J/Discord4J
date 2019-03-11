@@ -21,7 +21,6 @@ import discord4j.store.api.Store;
 import discord4j.store.api.util.StoreContext;
 import discord4j.store.jdk.JdkStore;
 import discord4j.store.jdk.JdkStoreService;
-import reactor.core.publisher.Mono;
 
 import java.io.Serializable;
 
@@ -46,9 +45,8 @@ public class ShardingJdkStoreService extends JdkStoreService {
     }
 
     @Override
-    public Mono<Void> init(StoreContext context) {
+    public void init(StoreContext context) {
         messageClass = context.getMessageClass();
         shardId = context.getShard();
-        return Mono.empty();
     }
 }

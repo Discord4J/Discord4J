@@ -16,6 +16,7 @@
  */
 package discord4j.core.object.data.stored;
 
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import discord4j.common.json.GuildMemberResponse;
 import discord4j.gateway.json.dispatch.GuildMemberUpdate;
 import discord4j.gateway.json.dispatch.MessageCreate;
@@ -24,6 +25,7 @@ import reactor.util.annotation.Nullable;
 import java.io.Serializable;
 import java.util.Arrays;
 
+@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS)
 public final class MemberBean implements Serializable {
 
     private static final long serialVersionUID = 6346416731162094189L;

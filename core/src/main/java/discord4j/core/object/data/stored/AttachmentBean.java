@@ -16,11 +16,13 @@
  */
 package discord4j.core.object.data.stored;
 
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import discord4j.common.json.AttachmentResponse;
 import reactor.util.annotation.Nullable;
 
 import java.io.Serializable;
 
+@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS)
 public final class AttachmentBean implements Serializable {
 
     private static final long serialVersionUID = -5000709886925013964L;

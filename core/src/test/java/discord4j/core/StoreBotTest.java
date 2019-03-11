@@ -21,8 +21,14 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import discord4j.common.JacksonResourceProvider;
 import discord4j.core.event.domain.Event;
+import discord4j.core.object.data.stored.MessageBean;
 import discord4j.core.object.presence.Presence;
 import discord4j.core.shard.ShardingClientBuilder;
+import discord4j.core.shard.ShardingJdkStoreRegistry;
+import discord4j.core.shard.ShardingJdkStoreService;
+import discord4j.core.shard.ShardingStoreRegistry;
+import discord4j.store.api.mapping.MappingStoreService;
+import discord4j.store.api.noop.NoOpStoreService;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -33,6 +39,7 @@ import reactor.core.Exceptions;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Hooks;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 import reactor.netty.DisposableServer;
 import reactor.netty.http.server.HttpServer;
 import reactor.util.function.Tuple2;
@@ -62,9 +69,16 @@ public class StoreBotTest {
         Map<String, AtomicLong> counts = new ConcurrentHashMap<>();
         JacksonResourceProvider jackson = new JacksonResourceProvider();
         startHttpServer(clients, counts, jackson.getObjectMapper());
+        ShardingStoreRegistry registry = new ShardingJdkStoreRegistry();
         new ShardingClientBuilder(token)
+                .setShardingStoreRegistry(registry)
                 .build()
+                .publishOn(Schedulers.elastic())
                 .map(builder -> builder.setJacksonResourceProvider(jackson)
+                        // showcase disabling the cache for messages
+                        .setStoreService(MappingStoreService.create()
+                                .setMapping(MessageBean.class, new NoOpStoreService())
+                                .setFallback(new ShardingJdkStoreService(registry)))
                         .setInitialPresence(Presence.invisible()))
                 .map(DiscordClientBuilder::build)
                 .doOnNext(client -> clients.put(client.getConfig().getShardIndex(), client))
