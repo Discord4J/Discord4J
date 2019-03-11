@@ -23,7 +23,6 @@ import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import discord4j.common.SimpleBucket;
 import discord4j.common.jackson.PossibleModule;
 import discord4j.common.jackson.UnknownPropertyHandler;
-import discord4j.gateway.json.GatewayPayload;
 import discord4j.gateway.json.StatusUpdate;
 import discord4j.gateway.json.dispatch.MessageCreate;
 import discord4j.gateway.json.dispatch.Ready;
@@ -34,10 +33,11 @@ import discord4j.gateway.payload.PayloadWriter;
 import discord4j.gateway.retry.RetryOptions;
 import org.junit.Ignore;
 import org.junit.Test;
-import reactor.core.publisher.FluxSink;
+import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 import reactor.netty.http.client.HttpClient;
 
+import java.io.IOException;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
@@ -68,16 +68,23 @@ public class GatewayClientTest {
             }
         });
 
-        // sink to manually produce individual values
-        FluxSink<GatewayPayload<?>> outboundSink = gatewayClient.sender();
+        gatewayClient.receiver(byteBuf -> Mono.fromRunnable(() -> {
+            try {
+                String json = mapper.writeValueAsString(mapper.readTree(byteBuf.array()));
+                System.out.println(json);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        })).subscribe();
 
         gatewayClient.dispatch().ofType(MessageCreate.class)
                 .subscribe(message -> {
                     String content = message.getContent();
+                    System.out.println(content);
                     if ("!close".equals(content)) {
-                        gatewayClient.close(false);
+                        gatewayClient.close(false).block();
                     } else if ("!retry".equals(content)) {
-                        gatewayClient.close(true);
+                        gatewayClient.close(true).block();
                     }
                 });
 
