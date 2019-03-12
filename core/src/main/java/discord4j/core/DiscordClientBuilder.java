@@ -30,7 +30,6 @@ import discord4j.core.object.presence.Presence;
 import discord4j.gateway.*;
 import discord4j.gateway.json.GatewayPayload;
 import discord4j.gateway.json.VoiceStateUpdate;
-import discord4j.gateway.json.dispatch.Dispatch;
 import discord4j.gateway.payload.JacksonPayloadReader;
 import discord4j.gateway.payload.JacksonPayloadWriter;
 import discord4j.gateway.retry.RetryOptions;
@@ -630,8 +629,9 @@ public final class DiscordClientBuilder {
                 stateHolder, eventDispatcher, config, voiceClient);
         serviceMediator.getGatewayClient().dispatch()
                 .map(dispatch -> DispatchContext.of(dispatch, serviceMediator))
-                .flatMap(DispatchHandlers::<Dispatch, Event>handle)
-                .onErrorContinue((error, item) -> log.error("Error while dispatching event {}", item, error))
+                .flatMap(context -> DispatchHandlers.handle(context)
+                        .onErrorContinue((error, item) -> log.error("Error while dispatching {} for {}",
+                                context.getDispatch(), item, error)))
                 .subscribeWith(eventProcessor);
 
         final Properties properties = GitProperties.getProperties();
