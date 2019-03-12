@@ -30,6 +30,7 @@ import discord4j.core.object.presence.Presence;
 import discord4j.gateway.*;
 import discord4j.gateway.json.GatewayPayload;
 import discord4j.gateway.json.VoiceStateUpdate;
+import discord4j.gateway.json.dispatch.Dispatch;
 import discord4j.gateway.payload.JacksonPayloadReader;
 import discord4j.gateway.payload.JacksonPayloadWriter;
 import discord4j.gateway.retry.RetryOptions;
@@ -630,7 +631,7 @@ public final class DiscordClientBuilder {
         serviceMediator.getGatewayClient().dispatch()
                 .map(dispatch -> DispatchContext.of(dispatch, serviceMediator))
                 .flatMap(context -> DispatchHandlers.handle(context)
-                        .onErrorContinue((error, item) -> log.error("Error while dispatching {} for {}",
+                        .onErrorContinue((error, item) -> log(context).error("Error dispatching {} for {}",
                                 context.getDispatch(), item, error)))
                 .subscribeWith(eventProcessor);
 
@@ -641,5 +642,9 @@ public final class DiscordClientBuilder {
         final String gitDescribe = properties.getProperty(GitProperties.GIT_COMMIT_ID_DESCRIBE, version);
         log.info("Shard {} with {} {} ({})", shardId, name, gitDescribe, url);
         return serviceMediator.getClient();
+    }
+
+    private Logger log(DispatchContext<Dispatch> context) {
+        return Loggers.getLogger("discord4j.dispatch." + context.getServiceMediator().getClientConfig().getShardIndex());
     }
 }
