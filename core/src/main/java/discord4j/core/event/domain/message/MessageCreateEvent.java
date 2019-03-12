@@ -20,6 +20,7 @@ import discord4j.core.DiscordClient;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Message;
+import discord4j.core.object.entity.MessageChannel;
 import discord4j.core.object.util.Snowflake;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
@@ -50,6 +51,10 @@ public class MessageCreateEvent extends MessageEvent {
 
     public Message getMessage() {
         return message;
+    }
+
+    public Mono<MessageChannel> getChannel() {
+        return message.getChannel();
     }
 
     public Optional<Snowflake> getGuildId() {
