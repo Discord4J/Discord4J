@@ -378,8 +378,7 @@ public final class Member extends User {
         return getRoles()
                 .map(Role::getColor)
                 .filter(color -> !color.equals(Role.DEFAULT_COLOR))
-                .last()
-                .defaultIfEmpty(Role.DEFAULT_COLOR);
+                .last(Role.DEFAULT_COLOR);
     }
 
     /**
