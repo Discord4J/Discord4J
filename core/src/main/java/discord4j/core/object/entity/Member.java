@@ -338,6 +338,9 @@ public final class Member extends User {
 
         return getGuild().map(Guild::getOwnerId)
                 .flatMap(ownerId -> {
+                    if (ownerId.equals(getId())) {
+                        return Mono.just(true);
+                    }
                     if (ownerId.equals(otherMember.getId())) {
                         return Mono.just(false);
                     }
@@ -371,8 +374,8 @@ public final class Member extends User {
      * If an error is received it is emitted through the {@code Mono}.
      */
     public Mono<Boolean> hasHigherRoles(List<Role> otherRoles) {
-        for(Role role : otherRoles) {
-            if(!role.getGuildId().equals(getGuildId())) {
+        for (Role role : otherRoles) {
+            if (!role.getGuildId().equals(getGuildId())) {
                 return Mono.error(new IllegalArgumentException("The provided roles are from a different guild."));
             }
         }
@@ -383,13 +386,7 @@ public final class Member extends User {
         Mono<Integer> getOtherHighestPosition = Flux.fromIterable(otherRoles).flatMap(Role::getPosition)
                 .defaultIfEmpty(0).last();
 
-        return getGuild().map(Guild::getOwnerId)
-                .flatMap(ownerId -> {
-                    if (ownerId.equals(getId())) {
-                        return Mono.just(true);
-                    }
-                    return Mono.zip(getThisHighestPosition, getOtherHighestPosition, (p1, p2) -> p1 > p2);
-                });
+        return Mono.zip(getThisHighestPosition, getOtherHighestPosition, (p1, p2) -> p1 > p2);
     }
 
     /**
