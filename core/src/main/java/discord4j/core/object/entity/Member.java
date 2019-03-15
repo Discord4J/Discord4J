@@ -376,7 +376,8 @@ public final class Member extends User {
     public Mono<Boolean> hasHigherRoles(List<Role> otherRoles) {
         for (Role role : otherRoles) {
             if (!role.getGuildId().equals(getGuildId())) {
-                return Mono.error(new IllegalArgumentException("The provided roles are from a different guild."));
+                return Mono.error(new IllegalArgumentException("The provided role with ID " + role.getId().asString()
+                        + " is from a different guild."));
             }
         }
 
