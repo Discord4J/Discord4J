@@ -31,6 +31,7 @@ import discord4j.core.util.PermissionUtil;
 import discord4j.store.api.util.LongLongTuple2;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.math.MathFlux;
 import reactor.util.annotation.Nullable;
 
 import java.awt.Color;
@@ -381,11 +382,10 @@ public final class Member extends User {
             }
         }
 
-        // getRoles() emits items in order based off their natural position, the "highest" role, if present, will be
-        // emitted last
-        Mono<Integer> getThisHighestPosition = getRoles().flatMap(Role::getPosition).defaultIfEmpty(0).last();
-        Mono<Integer> getOtherHighestPosition = Flux.fromIterable(otherRoles).flatMap(Role::getPosition)
-                .defaultIfEmpty(0).last();
+        Mono<Integer> getThisHighestPosition = MathFlux.max(getRoles().flatMap(Role::getPosition))
+                .defaultIfEmpty(0);
+        Mono<Integer> getOtherHighestPosition = MathFlux.max(Flux.fromIterable(otherRoles).flatMap(Role::getPosition))
+                .defaultIfEmpty(0);
 
         return Mono.zip(getThisHighestPosition, getOtherHighestPosition, (p1, p2) -> p1 > p2);
     }
