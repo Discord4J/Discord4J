@@ -373,7 +373,7 @@ public final class Member extends User {
      * highest role is greater than the highest position of the provided roles, {@code false} otherwise.
      * If an error is received it is emitted through the {@code Mono}.
      */
-    public Mono<Boolean> hasHigherRoles(List<Role> otherRoles) {
+    public Mono<Boolean> hasHigherRoles(Iterable<Role> otherRoles) {
         for (Role role : otherRoles) {
             if (!role.getGuildId().equals(getGuildId())) {
                 return Mono.error(new IllegalArgumentException("The provided role with ID " + role.getId().asString()
