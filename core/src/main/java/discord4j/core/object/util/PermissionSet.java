@@ -106,7 +106,8 @@ public final class PermissionSet extends AbstractSet<Permission> {
      * {@code
      * PermissionSet set0 = PermissionSet.of(KICK_MEMBERS, BAN_MEMBERS);
      * PermissionSet set1 = PermissionSet.of(KICK_MEMBERS);
-     * set0.and(set1) = PermissionSet.of(KICK_MEMBERS);
+     *
+     * set0.and(set1) = PermissionSet.of(KICK_MEMBERS)
      * }
      * </pre>
      *
@@ -126,7 +127,8 @@ public final class PermissionSet extends AbstractSet<Permission> {
      * {@code
      * PermissionSet set0 = PermissionSet.of(KICK_MEMBERS);
      * PermissionSet set1 = PermissionSet.of(BAN_MEMBERS);
-     * set0.and(set1) = PermissionSet.of(KICK_MEMBERS, BAN_MEMBERS);
+     *
+     * set0.or(set1) = PermissionSet.of(KICK_MEMBERS, BAN_MEMBERS)
      * }
      * </pre>
      *
@@ -146,6 +148,7 @@ public final class PermissionSet extends AbstractSet<Permission> {
      * {@code
      * PermissionSet set0 = PermissionSet.of(KICK_MEMBERS, BAN_MEMBERS, ATTACH_FILES);
      * PermissionSet set1 = PermissionSet.of(ATTACH_FILES, CONNECT);
+     *
      * set0.xor(set1) = PermissionSet.of(KICK_MEMBERS, BAN_MEMBERS, CONNECT)
      * }
      * </pre>
@@ -167,6 +170,7 @@ public final class PermissionSet extends AbstractSet<Permission> {
      * {@code
      * PermissionSet set0 = PermissionSet.of(KICK_MEMBERS, BAN_MEMBERS, ATTACH_FILES);
      * PermissionSet set1 = PermissionSet.of(BAN_MEMBERS, ATTACH_FILES, CONNECT);
+     *
      * set0.andNot(set1) = PermissionSet.of(KICK_MEMBERS)
      * }
      * </pre>
@@ -187,7 +191,8 @@ public final class PermissionSet extends AbstractSet<Permission> {
      * {@code
      * PermissionSet set0 = PermissionSet.of(KICK_MEMBERS, BAN_MEMBERS, ATTACH_FILES);
      * PermissionSet set1 = PermissionSet.of(BAN_MEMBERS, ATTACH_FILES, CONNECT);
-     * set0.andNot(set1) = PermissionSet.of(KICK_MEMBERS)
+     *
+     * set0.subtract(set1) = PermissionSet.of(KICK_MEMBERS)
      * }
      * </pre>
      *
@@ -209,6 +214,7 @@ public final class PermissionSet extends AbstractSet<Permission> {
      * <pre>
      * {@code
      * PermissionSet set = PermissionSet.none();
+     *
      * set.not() = PermissionSet.all()
      * }
      * </pre>
