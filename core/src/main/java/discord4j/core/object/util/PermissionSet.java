@@ -100,8 +100,8 @@ public final class PermissionSet extends AbstractSet<Permission> {
     /**
      * Performs a logical <b>AND</b> of this permission set with the other permission set.
      * <p>
-     * The resultant set is the <b>intersection</b> of this set and the other set. A permission is contained iff it was
-     * contained in both this set and the other set.
+     * The resultant set is the <b>intersection</b> of this set and the other set. A permission is contained if and only if it was
+     * contained in both this set and the other set. This is analogous to {@link Set#retainAll(java.util.Collection)}.
      * <pre>
      * {@code
      * PermissionSet set0 = PermissionSet.of(KICK_MEMBERS, BAN_MEMBERS);
@@ -120,8 +120,8 @@ public final class PermissionSet extends AbstractSet<Permission> {
     /**
      * Performs a logical <b>OR</b> of this permission set with the other permission set.
      * <p>
-     * The resultant set is the <b>union</b> of this set and the other set. A permission is contained iff it was
-     * contained in either this set or the other set.
+     * The resultant set is the <b>union</b> of this set and the other set. A permission is contained if and only if it
+     * was contained in either this set or the other set. This is analogous to {@link Set#addAll(java.util.Collection)}.
      * <pre>
      * {@code
      * PermissionSet set0 = PermissionSet.of(KICK_MEMBERS);
@@ -140,13 +140,13 @@ public final class PermissionSet extends AbstractSet<Permission> {
     /**
      * Performs a logical <b>XOR</b> of this permission set with the other permission set.
      * <p>
-     * The resultant set is the <b>symmetric difference</b> of this set and the other set. A permission is contained iff
-     * it was contained in <b>only</b> this set or contained in <b>only</b> the other set.
+     * The resultant set is the <b>symmetric difference</b> of this set and the other set. A permission is contained if
+     * and only if it was contained in <b>only</b> this set or contained in <b>only</b> the other set.
      * <pre>
      * {@code
      * PermissionSet set0 = PermissionSet.of(KICK_MEMBERS, BAN_MEMBERS, ATTACH_FILES);
      * PermissionSet set1 = PermissionSet.of(ATTACH_FILES, CONNECT);
-     * set0.xor(set1) = PermissionSet.of(Permission.KICK_MEMBERS, Permission.BAN_MEMBERS, Permission.CONNECT)
+     * set0.xor(set1) = PermissionSet.of(KICK_MEMBERS, BAN_MEMBERS, CONNECT)
      * }
      * </pre>
      *
@@ -160,8 +160,9 @@ public final class PermissionSet extends AbstractSet<Permission> {
     /**
      * Performs a logical <b>AND NOT</b> of this permission set with the other permission set.
      * <p>
-     * The resultant set is the <b>relative complement</b> of this set and the other set. A permission is contained iff
-     * it was contained in this set and <b>not</b> contained in the other set.
+     * The resultant set is the <b>relative complement</b> of this set and the other set. A permission is contained if
+     * and only if it was contained in this set and <b>not</b> contained in the other set. This is analogous to
+     * {@link Set#removeAll(java.util.Collection)}.
      * <pre>
      * {@code
      * PermissionSet set0 = PermissionSet.of(KICK_MEMBERS, BAN_MEMBERS, ATTACH_FILES);
@@ -180,8 +181,8 @@ public final class PermissionSet extends AbstractSet<Permission> {
     /**
      * Performs a logical <b>AND NOT</b> of this permission set with the other permission set.
      * <p>
-     * The resultant set is the <b>relative complement</b> of this set and the other set. A permission is contained iff
-     * it was contained in this set and <b>not</b> contained in the other set.
+     * The resultant set is the <b>relative complement</b> of this set and the other set. A permission is contained if
+     * and only if it was contained in this set and <b>not</b> contained in the other set.
      * <pre>
      * {@code
      * PermissionSet set0 = PermissionSet.of(KICK_MEMBERS, BAN_MEMBERS, ATTACH_FILES);
@@ -203,8 +204,8 @@ public final class PermissionSet extends AbstractSet<Permission> {
     /**
      * Performs a logical <b>NOT</b> of this permission set.
      * <p>
-     * The resultant set is the <b>complement</b> of this set. A permission is contained iff it was <b>not</b>
-     * contained in this set.
+     * The resultant set is the <b>complement</b> of this set. A permission is contained if and only if it was
+     * <b>not</b> contained in this set.
      * <pre>
      * {@code
      * PermissionSet set = PermissionSet.none();
