@@ -16,12 +16,14 @@
  */
 package discord4j.core.object.data.stored;
 
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import discord4j.gateway.json.dispatch.GuildCreate;
 import discord4j.gateway.json.response.VoiceStateResponse;
 import reactor.util.annotation.Nullable;
 
 import java.io.Serializable;
 
+@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS)
 public final class VoiceStateBean implements Serializable {
 
     private static final long serialVersionUID = 7194969399964938104L;

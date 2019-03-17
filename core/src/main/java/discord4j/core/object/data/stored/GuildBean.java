@@ -16,6 +16,7 @@
  */
 package discord4j.core.object.data.stored;
 
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import discord4j.common.json.GuildMemberResponse;
 import discord4j.common.json.UserResponse;
 import discord4j.gateway.json.dispatch.GuildCreate;
@@ -24,6 +25,7 @@ import discord4j.gateway.json.response.GatewayChannelResponse;
 
 import java.util.Arrays;
 
+@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS)
 public final class GuildBean extends BaseGuildBean {
 
     private static final long serialVersionUID = 4350381811087818276L;

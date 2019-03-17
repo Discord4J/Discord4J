@@ -17,6 +17,7 @@
 package discord4j.core.object.entity;
 
 import discord4j.core.object.util.Snowflake;
+import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.core.spec.MessageCreateSpec;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
@@ -72,6 +73,17 @@ public interface MessageChannel extends Channel {
      */
     default Mono<Message> createMessage(final String message) {
         return createMessage(spec -> spec.setContent(message));
+    }
+
+    /**
+     * Requests to create a message with only an {@link MessageCreateSpec#setEmbed(Consumer)}.
+     *
+     * @param spec A {@link Consumer} that provides a "blank" {@link EmbedCreateSpec} to be operated on.
+     * @return A {@link Mono} where, upon successful completion, emits the created {@link Message}. If an error is
+     * received, it is emitted through the {@code Mono}.
+     */
+    default Mono<Message> createEmbed(final Consumer<? super EmbedCreateSpec> spec) {
+        return createMessage(messageSpec -> messageSpec.setEmbed(spec));
     }
 
     /**

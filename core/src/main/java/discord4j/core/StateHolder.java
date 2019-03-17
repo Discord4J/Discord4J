@@ -47,7 +47,7 @@ public final class StateHolder {
     private final AtomicLong selfId;
 
     StateHolder(final StoreService service, final StoreContext context) {
-        service.init(context).block();
+        service.init(context);
 
         categoryStore = service.provideLongObjStore(CategoryBean.class);
         log.debug("Using a {} backend for category storage.", categoryStore);

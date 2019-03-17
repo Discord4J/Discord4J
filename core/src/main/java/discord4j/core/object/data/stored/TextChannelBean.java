@@ -16,10 +16,12 @@
  */
 package discord4j.core.object.data.stored;
 
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import discord4j.gateway.json.response.GatewayChannelResponse;
 import discord4j.rest.json.response.ChannelResponse;
 import reactor.util.annotation.Nullable;
 
+@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS)
 public final class TextChannelBean extends ChannelBean {
 
     private static final long serialVersionUID = 7465805580034446331L;

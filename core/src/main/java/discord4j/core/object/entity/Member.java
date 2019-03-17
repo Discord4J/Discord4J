@@ -101,6 +101,20 @@ public final class Member extends User {
     }
 
     /**
+     * Requests to retrieve the user's highest guild role.
+     * <p>
+     * The highest role is defined to be the role with the highest position, based on Discord's ordering. This is the
+     * role that appears at the <b>top</b> in Discord's UI.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits the user's highest {@link Role role}. If an error
+     * is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Role> getHighestRole() {
+        return MathFlux.max(Flux.fromIterable(getRoleIds()).flatMap(id -> getClient().getRoleById(getGuildId(), id)),
+                            Comparator.comparing(Role::getRawPosition).thenComparing(Role::getId));
+    }
+
+    /**
      * Gets when the user joined the guild.
      *
      * @return When the user joined the guild.
@@ -399,8 +413,7 @@ public final class Member extends User {
         return getRoles()
                 .map(Role::getColor)
                 .filter(color -> !color.equals(Role.DEFAULT_COLOR))
-                .last()
-                .defaultIfEmpty(Role.DEFAULT_COLOR);
+                .last(Role.DEFAULT_COLOR);
     }
 
     /**

@@ -630,8 +630,9 @@ public final class DiscordClientBuilder {
                 stateHolder, eventDispatcher, config, voiceClient);
         serviceMediator.getGatewayClient().dispatch()
                 .map(dispatch -> DispatchContext.of(dispatch, serviceMediator))
-                .flatMap(DispatchHandlers::<Dispatch, Event>handle)
-                .onErrorContinue((error, item) -> log.error("Error while dispatching event {}", item, error))
+                .flatMap(context -> DispatchHandlers.handle(context)
+                        .onErrorContinue((error, item) -> log(context).error("Error dispatching {} for {}",
+                                context.getDispatch(), item, error)))
                 .subscribeWith(eventProcessor);
 
         final Properties properties = GitProperties.getProperties();
@@ -641,5 +642,9 @@ public final class DiscordClientBuilder {
         final String gitDescribe = properties.getProperty(GitProperties.GIT_COMMIT_ID_DESCRIBE, version);
         log.info("Shard {} with {} {} ({})", shardId, name, gitDescribe, url);
         return serviceMediator.getClient();
+    }
+
+    private Logger log(DispatchContext<Dispatch> context) {
+        return Loggers.getLogger("discord4j.dispatch." + context.getServiceMediator().getClientConfig().getShardIndex());
     }
 }

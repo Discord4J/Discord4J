@@ -16,11 +16,13 @@
  */
 package discord4j.core.object.data.stored;
 
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import discord4j.common.json.UserResponse;
 import reactor.util.annotation.Nullable;
 
 import java.io.Serializable;
 
+@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS)
 public final class UserBean implements Serializable {
 
     private static final long serialVersionUID = 1555537329840118514L;

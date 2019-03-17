@@ -16,10 +16,12 @@
  */
 package discord4j.core.object.data.stored;
 
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import discord4j.common.json.RoleResponse;
 
 import java.io.Serializable;
 
+@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS)
 public final class RoleBean implements Serializable {
 
     private static final long serialVersionUID = 5330465140581253151L;

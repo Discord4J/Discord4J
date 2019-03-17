@@ -16,11 +16,13 @@
  */
 package discord4j.core.object.data.stored;
 
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import discord4j.common.json.GuildEmojiResponse;
 
 import java.io.Serializable;
 import java.util.Arrays;
 
+@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS)
 public final class GuildEmojiBean implements Serializable {
 
     private static final long serialVersionUID = -514669448967485261L;
