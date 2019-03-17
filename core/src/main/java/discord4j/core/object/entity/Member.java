@@ -382,8 +382,7 @@ public final class Member extends User {
             }
         }
 
-        Mono<Integer> getThisHighestPosition = MathFlux.max(getRoles().flatMap(Role::getPosition))
-                .defaultIfEmpty(0);
+        Mono<Integer> getThisHighestPosition = getHighestRole().flatMap(Role::getPosition).defaultIfEmpty(0);
         Mono<Integer> getOtherHighestPosition = MathFlux.max(Flux.fromIterable(otherRoles).flatMap(Role::getPosition))
                 .defaultIfEmpty(0);
 
