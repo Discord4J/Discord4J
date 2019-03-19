@@ -39,6 +39,7 @@ import reactor.core.Exceptions;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Hooks;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
 import reactor.netty.DisposableServer;
 import reactor.netty.http.server.HttpServer;
@@ -70,6 +71,7 @@ public class StoreBotTest {
         JacksonResourceProvider jackson = new JacksonResourceProvider();
         startHttpServer(clients, counts, jackson.getObjectMapper());
         ShardingStoreRegistry registry = new ShardingJdkStoreRegistry();
+        Scheduler eventScheduler = Schedulers.newSingle("events");
         new ShardingClientBuilder(token)
                 .setShardingStoreRegistry(registry)
                 .build()
@@ -79,6 +81,7 @@ public class StoreBotTest {
                         .setStoreService(MappingStoreService.create()
                                 .setMapping(MessageBean.class, new NoOpStoreService())
                                 .setFallback(new ShardingJdkStoreService(registry)))
+                        .setEventScheduler(eventScheduler)
                         .setInitialPresence(Presence.invisible()))
                 .map(DiscordClientBuilder::build)
                 .doOnNext(client -> clients.put(client.getConfig().getShardIndex(), client))

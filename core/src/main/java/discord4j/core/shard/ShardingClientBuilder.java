@@ -34,6 +34,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxSink;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.ReplayProcessor;
+import reactor.core.scheduler.Schedulers;
 import reactor.netty.http.client.HttpClient;
 import reactor.util.Logger;
 import reactor.util.Loggers;
@@ -42,6 +43,7 @@ import reactor.util.function.Tuple2;
 
 import java.time.Duration;
 import java.util.Objects;
+import java.util.concurrent.Executors;
 import java.util.function.Predicate;
 
 /**
@@ -267,6 +269,7 @@ public class ShardingClientBuilder {
                 .setJacksonResourceProvider(jackson)
                 .setRouterFactory(new SingleRouterFactory(router))
                 .setIdentifyLimiter(new RateLimiterTransformer(new SimpleBucket(1, Duration.ofSeconds(6))))
+                .setEventScheduler(Schedulers.fromExecutor(Executors.newWorkStealingPool(), true))
                 .setGatewayObserver((s, o) -> {
                     if (s.equals(GatewayObserver.CONNECTED)) {
                         log.info("Shard {} connected", o.getShardIndex());
