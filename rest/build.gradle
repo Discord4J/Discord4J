@@ -1,6 +1,7 @@
 dependencies {
     compile project(':common')
 
+    compile "io.projectreactor:reactor-core:3.2.6.RELEASE"
     compile "io.projectreactor.addons:reactor-extra"
 
     testCompile "junit:junit:$junit_version"
