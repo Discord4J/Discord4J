@@ -18,8 +18,8 @@ package discord4j.core.object.util;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static discord4j.core.object.util.Permission.*;
+import static org.junit.Assert.*;
 
 public class PermissionSetTest {
 
@@ -37,29 +37,59 @@ public class PermissionSetTest {
 
     @Test
     public void testCustom() {
-        PermissionSet permSet = PermissionSet.of(Permission.ADD_REACTIONS, Permission.MANAGE_ROLES);
+        PermissionSet permSet = PermissionSet.of(ADD_REACTIONS, MANAGE_ROLES);
         assertEquals(2, permSet.size());
-        assertTrue(permSet.contains(Permission.ADD_REACTIONS));
-        assertTrue(permSet.contains(Permission.MANAGE_ROLES));
-    }
-
-    @Test
-    public void testOr() {
-        PermissionSet set0 = PermissionSet.of(Permission.KICK_MEMBERS);
-        PermissionSet set1 = PermissionSet.of(Permission.BAN_MEMBERS);
-        PermissionSet result = set0.or(set1);
-
-        assertEquals(2, result.size());
-        assertEquals(PermissionSet.of(Permission.KICK_MEMBERS, Permission.BAN_MEMBERS), result);
+        assertTrue(permSet.contains(ADD_REACTIONS));
+        assertTrue(permSet.contains(MANAGE_ROLES));
+        assertFalse(permSet.contains(BAN_MEMBERS));
     }
 
     @Test
     public void testAnd() {
-        PermissionSet set0 = PermissionSet.of(Permission.KICK_MEMBERS, Permission.BAN_MEMBERS);
-        PermissionSet set1 = PermissionSet.of(Permission.KICK_MEMBERS);
+        PermissionSet set0 = PermissionSet.of(KICK_MEMBERS, BAN_MEMBERS);
+        PermissionSet set1 = PermissionSet.of(KICK_MEMBERS);
         PermissionSet result = set0.and(set1);
 
         assertEquals(1, result.size());
-        assertEquals(PermissionSet.of(Permission.KICK_MEMBERS), result);
+        assertEquals(PermissionSet.of(KICK_MEMBERS), result);
+    }
+
+    @Test
+    public void testOr() {
+        PermissionSet set0 = PermissionSet.of(KICK_MEMBERS);
+        PermissionSet set1 = PermissionSet.of(BAN_MEMBERS);
+        PermissionSet result = set0.or(set1);
+
+        assertEquals(2, result.size());
+        assertEquals(PermissionSet.of(KICK_MEMBERS, BAN_MEMBERS), result);
+    }
+
+    @Test
+    public void testXor() {
+        PermissionSet set0 = PermissionSet.of(KICK_MEMBERS, BAN_MEMBERS, ATTACH_FILES);
+        PermissionSet set1 = PermissionSet.of(ATTACH_FILES, CONNECT);
+        PermissionSet result = set0.xor(set1);
+
+        assertEquals(3, result.size());
+        assertEquals(PermissionSet.of(KICK_MEMBERS, BAN_MEMBERS, CONNECT), result);
+    }
+
+    @Test
+    public void testAndNot() {
+        PermissionSet set0 = PermissionSet.of(KICK_MEMBERS, BAN_MEMBERS, ATTACH_FILES);
+        PermissionSet set1 = PermissionSet.of(BAN_MEMBERS, ATTACH_FILES, CONNECT);
+        PermissionSet result = set0.andNot(set1);
+
+        assertEquals(1, result.size());
+        assertEquals(PermissionSet.of(KICK_MEMBERS), result);
+    }
+
+    @Test
+    public void testNot() {
+        PermissionSet set = PermissionSet.none();
+        PermissionSet result = set.not();
+
+        assertEquals(Permission.values().length, result.size());
+        assertEquals(PermissionSet.all(), result);
     }
 }

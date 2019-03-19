@@ -18,7 +18,18 @@ package discord4j.core.object.util;
 
 import java.util.*;
 
-/** An <i>immutable</i> specialized {@link Set} implementation for use with the {@link Permission} type. */
+/**
+ * An <b>immutable</b>, specialized {@code Set<Permission>}.
+ *
+ * <p>
+ * This is a <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/doc-files/ValueBased.html">value-based</a>
+ * class; use of identity-sensitive operations (including reference equality
+ * ({@code ==}), identity hash code, or synchronization) on instances of
+ * {@code PermissionSet} may have unpredictable results and should be avoided.
+ * The {@code equals} method should be used for comparisons.
+ *
+ * @see <a href="https://discordapp.com/developers/docs/topics/permissions">Discord Permissions</a>
+ */
 public final class PermissionSet extends AbstractSet<Permission> {
 
     private static final long ALL_RAW = Arrays.stream(Permission.values())
@@ -87,52 +98,131 @@ public final class PermissionSet extends AbstractSet<Permission> {
     }
 
     /**
-     * Performs a logical AND of of this permission set with the other permission set.
+     * Performs a logical <b>AND</b> of this permission set with the other permission set.
+     * <p>
+     * The resultant set is the <b>intersection</b> of this set and the other set. A permission is contained if and only if it was
+     * contained in both this set and the other set. This is analogous to {@link Set#retainAll(java.util.Collection)}.
+     * <pre>
+     * {@code
+     * PermissionSet set0 = PermissionSet.of(KICK_MEMBERS, BAN_MEMBERS);
+     * PermissionSet set1 = PermissionSet.of(KICK_MEMBERS);
+     *
+     * set0.and(set1) = PermissionSet.of(KICK_MEMBERS)
+     * }
+     * </pre>
      *
      * @param other The other permission set.
-     * @return A new permission set of this set AND the other set.
+     * @return The intersection of this set with the other set.
      */
     public PermissionSet and(PermissionSet other) {
         return PermissionSet.of(this.rawValue & other.rawValue);
     }
 
     /**
-     * Performs a logical OR of this permission set with the other permission set.
+     * Performs a logical <b>OR</b> of this permission set with the other permission set.
+     * <p>
+     * The resultant set is the <b>union</b> of this set and the other set. A permission is contained if and only if it
+     * was contained in either this set or the other set. This is analogous to {@link Set#addAll(java.util.Collection)}.
+     * <pre>
+     * {@code
+     * PermissionSet set0 = PermissionSet.of(KICK_MEMBERS);
+     * PermissionSet set1 = PermissionSet.of(BAN_MEMBERS);
+     *
+     * set0.or(set1) = PermissionSet.of(KICK_MEMBERS, BAN_MEMBERS)
+     * }
+     * </pre>
      *
      * @param other The other permission set.
-     * @return A new permission set of this set OR the other set.
+     * @return The union of this set with the other set.
      */
     public PermissionSet or(PermissionSet other) {
         return PermissionSet.of(this.rawValue | other.rawValue);
     }
 
     /**
-     * Performs a logical NOT of this permission set.
+     * Performs a logical <b>XOR</b> of this permission set with the other permission set.
+     * <p>
+     * The resultant set is the <b>symmetric difference</b> of this set and the other set. A permission is contained if
+     * and only if it was contained in <b>only</b> this set or contained in <b>only</b> the other set.
+     * <pre>
+     * {@code
+     * PermissionSet set0 = PermissionSet.of(KICK_MEMBERS, BAN_MEMBERS, ATTACH_FILES);
+     * PermissionSet set1 = PermissionSet.of(ATTACH_FILES, CONNECT);
      *
-     * @return A new permission set representing this set's complement.
-     */
-    public PermissionSet not() {
-        return PermissionSet.of(~this.rawValue);
-    }
-
-    /**
-     * Performs a logical XOR of this permission set with the other permission set.
+     * set0.xor(set1) = PermissionSet.of(KICK_MEMBERS, BAN_MEMBERS, CONNECT)
+     * }
+     * </pre>
      *
      * @param other The other permission set.
-     * @return A new permission set of this set XOR the other set.
+     * @return The symmetric difference of this set with the other set.
      */
     public PermissionSet xor(PermissionSet other) {
         return PermissionSet.of(this.rawValue ^ other.rawValue);
     }
 
     /**
-     * Subtracts the contents of the given permission set from this permission set.
+     * Performs a logical <b>AND NOT</b> of this permission set with the other permission set.
+     * <p>
+     * The resultant set is the <b>relative complement</b> of this set and the other set. A permission is contained if
+     * and only if it was contained in this set and <b>not</b> contained in the other set. This is analogous to
+     * {@link Set#removeAll(java.util.Collection)}.
+     * <pre>
+     * {@code
+     * PermissionSet set0 = PermissionSet.of(KICK_MEMBERS, BAN_MEMBERS, ATTACH_FILES);
+     * PermissionSet set1 = PermissionSet.of(BAN_MEMBERS, ATTACH_FILES, CONNECT);
+     *
+     * set0.andNot(set1) = PermissionSet.of(KICK_MEMBERS)
+     * }
+     * </pre>
      *
      * @param other The other permission set.
-     * @return A new permission set with the contents of the other set removed.
+     * @return The relative complement of this set with the other set.
      */
+    public PermissionSet andNot(PermissionSet other) {
+        return PermissionSet.of(this.rawValue & (~other.rawValue));
+    }
+
+    /**
+     * Performs a logical <b>AND NOT</b> of this permission set with the other permission set.
+     * <p>
+     * The resultant set is the <b>relative complement</b> of this set and the other set. A permission is contained if
+     * and only if it was contained in this set and <b>not</b> contained in the other set.
+     * <pre>
+     * {@code
+     * PermissionSet set0 = PermissionSet.of(KICK_MEMBERS, BAN_MEMBERS, ATTACH_FILES);
+     * PermissionSet set1 = PermissionSet.of(BAN_MEMBERS, ATTACH_FILES, CONNECT);
+     *
+     * set0.subtract(set1) = PermissionSet.of(KICK_MEMBERS)
+     * }
+     * </pre>
+     *
+     * @param other The other permission set.
+     * @return The relative complement of this set with the other set.
+     *
+     * @deprecated Use {@link PermissionSet#andNot(PermissionSet)} instead.
+     */
+    @Deprecated
     public PermissionSet subtract(PermissionSet other) {
         return PermissionSet.of(this.rawValue & (~other.rawValue));
+    }
+
+    /**
+     * Performs a logical <b>NOT</b> of this permission set.
+     * <p>
+     * The resultant set is the <b>complement</b> of this set. A permission is contained if and only if it was
+     * <b>not</b> contained in this set.
+     * <pre>
+     * {@code
+     * PermissionSet set = PermissionSet.none();
+     *
+     * set.not() = PermissionSet.all()
+     * }
+     * </pre>
+     *
+     * @return The complement of this set.
+     */
+    public PermissionSet not() {
+        return PermissionSet.of(~this.rawValue & ALL_RAW); // mask with ALL_RAW so undefined perms aren't flipped
     }
 
     /**
@@ -170,6 +260,24 @@ public final class PermissionSet extends AbstractSet<Permission> {
     @Override
     public int size() {
         return Long.bitCount(rawValue);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        PermissionSet that = (PermissionSet) o;
+        return rawValue == that.rawValue;
+    }
+
+    @Override
+    public int hashCode() {
+        return Long.hashCode(rawValue);
     }
 
     @Override
