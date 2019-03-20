@@ -119,6 +119,8 @@ public interface MessageChannel extends Channel {
      * @param until The companion {@link Publisher} that signals when to stop triggering the typing indicator.
      * @return A {@link Flux} which continually emits each time the typing indicator is triggered and completes when it
      * will no longer be triggered. If an error is received, it is emitted through the {@code Flux}.
+     *
+     * @implNote The default implementation actually sends a typing request every 8 seconds so it appears continuous.
      */
     Flux<Long> typeUntil(Publisher<?> until);
 

@@ -86,9 +86,15 @@ class BaseMessageChannel extends BaseChannel implements MessageChannel {
 
     @Override
     public final Flux<Long> typeUntil(final Publisher<?> until) {
-        return Flux.interval(Duration.ZERO, Duration.ofSeconds(10L))
-                .flatMap(l -> type().thenReturn(l))
+        Flux<Long> repeatUntilOther = Flux.interval(Duration.ofSeconds(8L)) // 8 to avoid choppiness
+                .flatMap(tick -> type().thenReturn(tick + 1)) // add 1 to offset the separate type() request
                 .takeUntilOther(until);
+
+        // send the first typing indicator before subscribing to the other publisher to ensure that a message send will
+        // cancel the indicator properly. #509
+        return type()
+                .thenReturn(0L) // start with tick 0
+                .concatWith(repeatUntilOther);
     }
 
     @Override
