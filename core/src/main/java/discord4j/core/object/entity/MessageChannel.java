@@ -96,8 +96,25 @@ public interface MessageChannel extends Channel {
     Mono<Void> type();
 
     /**
-     * Requests to trigger the typing indicator in this channel. It will be continuously triggered until the given
-     * publisher emits.
+     * Requests to trigger the typing indicator in this channel. It will be continuously triggered every 10 seconds
+     * until the given publisher emits.
+     * <p>
+     * This method <b>cannot</b> stop the typing indicator during the 10 second duration. It simply checks every 10
+     * seconds whether to trigger the indicator again depending on if the publisher emitted. For example, the following
+     * code will show the typing indicator for <b>10</b> seconds, not 5:
+     * <pre>
+     * {@code
+     * channel.typeUntil(Mono.delay(Duration.ofSeconds(5))
+     * }
+     * </pre>
+     * <p>
+     * The only way to stop the typing indicator during the 10 second duration is to send a message in the channel. For
+     * example, the following code will show the typing indicator until the message is sent:
+     * <pre>
+     * {@code
+     * channel.typeUntil(channel.createMessage("Hello"))
+     * }
+     * </pre>
      *
      * @param until The companion {@link Publisher} that signals when to stop triggering the typing indicator.
      * @return A {@link Flux} which continually emits each time the typing indicator is triggered and completes when it
