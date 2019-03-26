@@ -29,6 +29,8 @@ import java.util.Optional;
  *     <li>The bot is kicked from or leaves a guild.</li>
  *     <li>A guild becomes unavailable during an outage. In this scenario, {@link #unavailable} will be true.</li>
  * </ol>
+ * <p>
+ * This event is dispatched by Discord.
  *
  * @see <a href="https://discordapp.com/developers/docs/topics/gateway#guild-delete">Guild Delete</a>
  */
@@ -45,14 +47,26 @@ public class GuildDeleteEvent extends GuildEvent {
         this.unavailable = unavailable;
     }
 
+    /**
+     * Gets the Snowflake ID of the guild that is involved in the event.
+     * @return The ID of the guild.
+     */
     public Snowflake getGuildId() {
         return Snowflake.of(guildId);
     }
 
+    /**
+     * Gets an Optional of the Guild involved in this event.
+     * @return The Guild involved in this event.
+     */
     public Optional<Guild> getGuild() {
         return Optional.ofNullable(guild);
     }
 
+    /**
+     * Gets whether or not the Guild is now unavailable.
+     * @return Whether or not the Guild is unavailable.
+     */
     public boolean isUnavailable() {
         return unavailable;
     }

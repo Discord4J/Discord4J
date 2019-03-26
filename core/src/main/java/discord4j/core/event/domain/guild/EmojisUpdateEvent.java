@@ -27,6 +27,8 @@ import java.util.Set;
 /**
  * Dispatched when an emoji is added/deleted/or edited in a guild. The {@link #emojis} set includes ALL emojis of the
  * guild.
+ * <p>
+ * This event is dispatched by Discord
  *
  * @see <a href="https://discordapp.com/developers/docs/topics/gateway#guild-emojis-update">Guild Emojis Update</a>
  */
@@ -41,14 +43,26 @@ public class EmojisUpdateEvent extends GuildEvent {
         this.emojis = emojis;
     }
 
+    /**
+     * Gets the Snowflake ID of the guild involved in the event.
+     * @return The Snowflake ID of the guild.
+     */
     public Snowflake getGuildId() {
         return Snowflake.of(guildId);
     }
 
+    /**
+     * Gets the Guild involved in the event.
+     * @return The Guild involved in the event.
+     */
     public Mono<Guild> getGuild() {
         return getClient().getGuildById(getGuildId());
     }
 
+    /**
+     * Gets a list of ALL emojis of the Guild.
+     * @return A list of ALL emojis of the Guild.
+     */
     public Set<GuildEmoji> getEmojis() {
         return emojis;
     }

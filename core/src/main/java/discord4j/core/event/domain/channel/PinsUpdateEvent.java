@@ -27,6 +27,8 @@ import java.util.Optional;
 
 /**
  * Dispatched when a message is pinned or unpinned in a message channel.
+ * <p>
+ * This event is dispatched by Discord.
  *
  * @see <a href="https://discordapp.com/developers/docs/topics/gateway#channel-pins-update">Channel Pins Update</a>
  */
@@ -41,14 +43,26 @@ public class PinsUpdateEvent extends ChannelEvent {
         this.lastPinTimestamp = lastPinTimestamp;
     }
 
+    /**
+     * Gets the Snowflake ID of the Channel the pinned/unpinned message is in.
+     * @return the ID of the channel involved.
+     */
     public Snowflake getChannelId() {
         return Snowflake.of(channelId);
     }
 
+    /**
+     * Gets the MessageChannel the pinned/unpinned message is in.
+     * @return The MessageChannel involved.
+     */
     public Mono<MessageChannel> getChannel() {
         return getClient().getChannelById(getChannelId()).cast(MessageChannel.class);
     }
 
+    /**
+     * Gets the ISO8601 timestamp of when the last pinned message was pinned. This is NOT the timestamp of when the message was created.
+     * @return The timestamp of the when the last pinned message was pinned.
+     */
     public Optional<Instant> getLastPinTimestamp() {
         return Optional.ofNullable(lastPinTimestamp);
     }

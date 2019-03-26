@@ -32,6 +32,8 @@ import java.util.Optional;
  * Dispatched when a reaction is removed on a message.
  * <p>
  * {@link #guildId} may not be present if the message was in a private channel.
+ * <p>
+ * This event is dispatched by Discord.
  *
  * @see <a href="https://discordapp.com/developers/docs/topics/gateway#message-reaction-remove">Message Reaction
  * Remove</a>
@@ -55,38 +57,74 @@ public class ReactionRemoveEvent extends MessageEvent {
         this.emoji = emoji;
     }
 
+    /**
+     * Gets the Snowflake ID of the User who's reaction has been removed.
+     * @return The ID of the User who's reaction has been removed.
+     */
     public Snowflake getUserId() {
         return Snowflake.of(userId);
     }
 
+    /**
+     * Gets the Uer who's reaction has been removed.
+     * @return The ID of the User who's reaction has been removed.
+     */
     public Mono<User> getUser() {
         return getClient().getUserById(getUserId());
     }
 
+    /**
+     * Gets the Snowflake ID of the channel containing the message the reaction was removed from.
+     * @return The ID of the channel involved.
+     */
     public Snowflake getChannelId() {
         return Snowflake.of(channelId);
     }
 
+    /**
+     * Gets the MessageChannel containing the message the reaction was removed from.
+     * @return The channel containing the message involved.
+     */
     public Mono<MessageChannel> getChannel() {
         return getClient().getChannelById(getChannelId()).cast(MessageChannel.class);
     }
 
+    /**
+     * Gets the Snowflake ID of the message the reaction was removed from.
+     * @return The ID of the message involved.
+     */
     public Snowflake getMessageId() {
         return Snowflake.of(messageId);
     }
 
+    /**
+     * Gets the Message the reaction was removed from.
+     * @return The message the reaction was removed from.
+     */
     public Mono<Message> getMessage() {
         return getClient().getMessageById(getChannelId(), getMessageId());
     }
 
+    /**
+     * Gets the Snowflake ID of the Guild the message involved is in. This may not be available if the message was sent in a private channel.
+     * @return The ID of the guild involved.
+     */
     public Optional<Snowflake> getGuildId() {
         return Optional.ofNullable(guildId).map(Snowflake::of);
     }
 
+    /**
+     * Gets the Guild the message involved is in. This may not be available if the message was sent in a private channel.
+     * @return The Guild involved.
+     */
     public Mono<Guild> getGuild() {
         return Mono.justOrEmpty(getGuildId()).flatMap(getClient()::getGuildById);
     }
 
+    /**
+     * The ReactionEmoji that was removed from a message.
+     * @return The emoji that has been removed.
+     */
     public ReactionEmoji getEmoji() {
         return emoji;
     }

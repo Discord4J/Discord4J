@@ -24,6 +24,8 @@ import java.util.Optional;
 
 /**
  * Dispatched when a user is updated.
+ * <p>
+ * This event is dispatched by Discord
  *
  * @see <a href="https://discordapp.com/developers/docs/topics/gateway#user-update">User Update</a>
  */
@@ -38,10 +40,18 @@ public class UserUpdateEvent extends Event {
         this.old = old;
     }
 
+    /**
+     * Gets the current, new version of the User that has been updated in this event.
+     * @return The current version of the User involved.
+     */
     public User getCurrent() {
         return current;
     }
 
+    /**
+     * Gets the old version of the User that has been updated in this event. This may not be available if Users are not stored.
+     * @return The old version of the User involved.
+     */
     public Optional<User> getOld() {
         return Optional.ofNullable(old);
     }

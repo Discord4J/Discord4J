@@ -30,6 +30,8 @@ import java.util.Optional;
  * Dispatched when a message is sent in a message channel.
  * <p>
  * {@link #guildId} and {@link #member} may not be present if the message was sent in a private channel.
+ * <p>
+ * This event is dispatched by Discord.
  *
  * @see <a href="https://discordapp.com/developers/docs/topics/gateway#message-create">Message Create</a>
  */
@@ -48,18 +50,34 @@ public class MessageCreateEvent extends MessageEvent {
         this.member = member;
     }
 
+    /**
+     * Gets the message that was created in this event.
+     * @return The Message that was created.
+     */
     public Message getMessage() {
         return message;
     }
 
+    /**
+     * Gets the Snowflake ID of the guild the Message was created in. This may not be available if the message was sent in a private channel.
+     * @return The ID of the guild containing the message.
+     */
     public Optional<Snowflake> getGuildId() {
         return Optional.ofNullable(guildId).map(Snowflake::of);
     }
 
+    /**
+     * Gets the guild the Message was created in. This may not be available if the message was sent in a private channel.
+     * @return The guild containing the message.
+     */
     public Mono<Guild> getGuild() {
         return Mono.justOrEmpty(getGuildId()).flatMap(getClient()::getGuildById);
     }
 
+    /**
+     * Gets the Member who has sent the message created in this event. This may not be available if the message was sent in a private channel.
+     * @return The Member who has sent the message created in this event.
+     */
     public Optional<Member> getMember() {
         return Optional.ofNullable(member);
     }

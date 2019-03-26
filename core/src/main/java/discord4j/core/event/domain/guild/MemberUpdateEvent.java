@@ -30,6 +30,8 @@ import java.util.stream.Collectors;
 
 /**
  * Dispatched when a user's nickname or roles change in a guild.
+ * <p>
+ * This event is dispatched by Discord.
  *
  * @see <a href="https://discordapp.com/developers/docs/topics/gateway#guild-member-update">Guild Member Update</a>
  */
@@ -56,32 +58,60 @@ public class MemberUpdateEvent extends GuildEvent {
         this.currentNickname = currentNickname;
     }
 
+    /**
+     * Gets the Snowflake ID of the Guild involved in the event.
+     * @return The ID of the Guild involved.
+     */
     public Snowflake getGuildId() {
         return Snowflake.of(guildId);
     }
 
+    /**
+     * Gets the Guild involved in the event.
+     * @return The guild involved.
+     */
     public Mono<Guild> getGuild() {
         return getClient().getGuildById(getGuildId());
     }
 
+    /**
+     * Gets the Snowflake ID of the Member involved in the event.
+     * @return The ID of the Member involved.
+     */
     public Snowflake getMemberId() {
         return Snowflake.of(memberId);
     }
 
+    /**
+     * Gets the Member involved in the event.
+     * @return The Member involved.
+     */
     public Mono<Member> getMember() {
         return getClient().getMemberById(getGuildId(), getMemberId());
     }
 
+    /**
+     * Gets the old version of the Member involved in the event. This may not be available if Members are not stored.
+     * @return the old version of the Member involved.
+     */
     public Optional<Member> getOld() {
         return Optional.ofNullable(old);
     }
 
+    /**
+     * Gets a list of Snowflake IDs of roles the Member is currently assigned.
+     * @return The IDs of the roles the Member is assigned.
+     */
     public Set<Snowflake> getCurrentRoles() {
         return Arrays.stream(currentRoles)
                 .mapToObj(Snowflake::of)
                 .collect(Collectors.toSet());
     }
 
+    /**
+     * Gets the current nickname of the Member involved in this event.
+     * @return The current nickname, if any, of the Member involved.
+     */
     public Optional<String> getCurrentNickname() {
         return Optional.ofNullable(currentNickname);
     }

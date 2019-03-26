@@ -24,6 +24,8 @@ import reactor.core.publisher.Mono;
 
 /**
  * Dispatched when a role is created in a guild.
+ * <p>
+ * This event is dispatched by Discord.
  *
  * @see <a href="https://discordapp.com/developers/docs/topics/gateway#guild-role-create">Guild Role Create</a>
  */
@@ -38,14 +40,26 @@ public class RoleCreateEvent extends RoleEvent {
         this.role = role;
     }
 
+    /**
+     * Gets the Snowflake ID of the Guild the role was created in.
+     * @return The ID of the Guild the role was created in.
+     */
     public Snowflake getGuildId() {
         return Snowflake.of(guildId);
     }
 
+    /**
+     * Gets the Guild the role was created in.
+     * @return The Guild involved.
+     */
     public Mono<Guild> getGuild() {
         return getClient().getGuildById(getGuildId());
     }
 
+    /**
+     * Gets the role that was created in this event.
+     * @return The Role that was created.
+     */
     public Role getRole() {
         return role;
     }

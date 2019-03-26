@@ -32,6 +32,8 @@ import java.util.Optional;
  * Dispatched when a user's presence changes.
  * <p>
  * The old presence may not be present if presences are not stored.
+ * <p>
+ * This event is dispatched by Discord
  *
  * @see <a href="https://discordapp.com/developers/docs/topics/gateway#presence-update">Presence Update</a>
  */
@@ -53,48 +55,92 @@ public class PresenceUpdateEvent extends Event {
         this.old = old;
     }
 
+    /**
+     * Gets the Snowflake ID of the Guild containing the User whose presence has been updated.
+     * @return The ID of the Guild involved.
+     */
     public Snowflake getGuildId() {
         return Snowflake.of(guildId);
     }
 
+    /**
+     * Gets the Guild containing the User whose presence has been updated.
+     * @return The Guild involved.
+     */
     public Mono<Guild> getGuild() {
         return getClient().getGuildById(getGuildId());
     }
 
+    /**
+     * Gets the old version of the User that was updated. This may not be available if Users are not stored.
+     * @return The old version of the user.
+     */
     public Optional<User> getOldUser() {
         return Optional.ofNullable(oldUser);
     }
 
+    /**
+     * Gets the User's new username. This may not exist if the user's username has not been changed.
+     * @return The user's new username.
+     */
     public Optional<String> getNewUsername() {
         return Optional.ofNullable(user.get("username")).map(JsonNode::asText);
     }
 
+    /**
+     * Gets the User's new discriminator. This may not exist if the user's discriminator has not been changed.
+     * @return The user's new discriminator.
+     */
     public Optional<String> getNewDiscriminator() {
         return Optional.ofNullable(user.get("discriminator")).map(JsonNode::asText);
     }
 
+    /**
+     * Gets the User's new avatar. This may not exist if the user's discriminator has not been changed.
+     * @return The user's new avatar.
+     */
     public Optional<String> getNewAvatar() {
         return Optional.ofNullable(user.get("avatar"))
                 .filter(node -> !node.isNull())
                 .map(JsonNode::asText);
     }
 
+    /**
+     * Gets the Snowflake ID of the user whose presence has been changed in this event.
+     * @return The ID of the user involved.
+     */
     public Snowflake getUserId() {
         return Snowflake.of(user.get("id").asText());
     }
 
+    /**
+     * Gets the User whose presence has been changed in this event.
+     * @return The user involved.
+     */
     public Mono<User> getUser() {
         return getClient().getUserById(getUserId());
     }
 
+    /**
+     * Gets the Member object of the User involved in this event.
+     * @return The Member involved.
+     */
     public Mono<Member> getMember() {
         return getClient().getMemberById(getGuildId(), getUserId());
     }
 
+    /**
+     * Gets the current, new version of the presence.
+     * @return The current, new version of the presence.
+     */
     public Presence getCurrent() {
         return current;
     }
 
+    /**
+     * Gets the old version of the presence that was changed. This may not be available if presence are not stored.
+     * @return The old version of the presence.
+     */
     public Optional<Presence> getOld() {
         return Optional.ofNullable(old);
     }

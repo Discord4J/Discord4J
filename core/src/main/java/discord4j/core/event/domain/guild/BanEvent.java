@@ -24,6 +24,8 @@ import reactor.core.publisher.Mono;
 
 /**
  * Dispatched when a user is banned from a guild.
+ * <p>
+ * This event is dispatched by Discord.
  *
  * @see <a href="https://discordapp.com/developers/docs/topics/gateway#guild-ban-add">Guild Ban Add</a>
  */
@@ -38,14 +40,26 @@ public class BanEvent extends GuildEvent {
         this.guildId = guildId;
     }
 
+    /**
+     * Gets the User that has been banned from the Guild.
+     * @return The User that has been banned.
+     */
     public User getUser() {
         return user;
     }
 
+    /**
+     * Gets the Snowflake ID of the guild in this event.
+     * @return The Snowflake ID of the guild.
+     */
     public Snowflake getGuildId() {
         return Snowflake.of(guildId);
     }
 
+    /**
+     * Gets the Guild involved in this event.
+     * @return The Guild involved in this event.
+     */
     public Mono<Guild> getGuild() {
         return getClient().getGuildById(getGuildId());
     }

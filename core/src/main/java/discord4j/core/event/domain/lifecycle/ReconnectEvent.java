@@ -21,6 +21,8 @@ import discord4j.core.DiscordClient;
 
 /**
  * Indicates that a gateway connection has correctly reconnected.
+ * <p>
+ * This event is dispatched by Discord4J.
  */
 public class ReconnectEvent extends GatewayLifecycleEvent {
 
@@ -31,6 +33,10 @@ public class ReconnectEvent extends GatewayLifecycleEvent {
         this.currentAttempt = currentAttempt;
     }
 
+    /**
+     * Gets the current reconnect attempt.
+     * @return The current reconnect attempt.
+     */
     public int getCurrentAttempt() {
         return currentAttempt;
     }

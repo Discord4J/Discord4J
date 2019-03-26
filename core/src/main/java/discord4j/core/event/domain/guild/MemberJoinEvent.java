@@ -24,6 +24,8 @@ import reactor.core.publisher.Mono;
 
 /**
  * Dispatched when a user joins a guild.
+ * <p>
+ * This event is dispatched by Discord.
  *
  * @see <a href="https://discordapp.com/developers/docs/topics/gateway#guild-member-add">Guild Member Add</a>
  */
@@ -38,14 +40,26 @@ public class MemberJoinEvent extends GuildEvent {
         this.guildId = guildId;
     }
 
+    /**
+     * Gets the member that has joined the Guild in this event.
+     * @return The Member that has joined
+     */
     public Member getMember() {
         return member;
     }
 
+    /**
+     * Gets the Snowflake ID of the guild the member has joined in this event.
+     * @return The ID of the guild.
+     */
     public Snowflake getGuildId() {
         return Snowflake.of(guildId);
     }
 
+    /**
+     * Gets the Guild the member has joined in this event.
+     * @return The guild the member has joined
+     */
     public Mono<Guild> getGuild() {
         return getClient().getGuildById(getGuildId());
     }

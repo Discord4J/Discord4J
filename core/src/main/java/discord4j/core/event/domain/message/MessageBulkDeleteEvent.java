@@ -32,6 +32,8 @@ import java.util.stream.Collectors;
  * <p>
  * Corresponding {@link discord4j.core.event.domain.message.MessageDeleteEvent message deletes} are NOT dispatched for
  * messages included in this event.
+ * <p>
+ * This event is dispatched by Discord
  *
  * @see <a href="https://discordapp.com/developers/docs/topics/gateway#message-delete-bulk">Message Delete Bulk</a>
  */
@@ -51,28 +53,52 @@ public class MessageBulkDeleteEvent extends MessageEvent {
         this.messages = messages;
     }
 
+    /**
+     * Gets a list of Snowflake IDs of the messages that were deleted.
+     * @return a list of IDs of the messages that were deleted.
+     */
     public Set<Snowflake> getMessageIds() {
         return Arrays.stream(messageIds)
                 .mapToObj(Snowflake::of)
                 .collect(Collectors.toSet());
     }
 
+    /**
+     * Gets a list of Messages there were deleted in this event.
+     * @return a list of Messages that were deleted.
+     */
     public Set<Message> getMessages() {
         return messages;
     }
 
+    /**
+     * Gets the Snowflake ID of the Channel the messages were deleted in.
+     * @return The ID of the channel that the messages were deleted in.
+     */
     public Snowflake getChannelId() {
         return Snowflake.of(channelId);
     }
 
+    /**
+     * Gets the MessageChannel representation of the channel the messages were deleted in.
+     * @return The MessageChannel the messages were deleted in.
+     */
     public Mono<MessageChannel> getChannel() {
         return getClient().getChannelById(getChannelId()).cast(MessageChannel.class);
     }
 
+    /**
+     * Gets the Snowflake ID of the Guild the messages were deleted in.
+     * @return The ID of the Guild the messages were deleted in.
+     */
     public Snowflake getGuildId() {
         return Snowflake.of(guildId);
     }
 
+    /**
+     * Gets the Guild the messages were deleted in.
+     * @return The Guild the messages were deleted in.
+     */
     public Mono<Guild> getGuild() {
         return getClient().getGuildById(getGuildId());
     }

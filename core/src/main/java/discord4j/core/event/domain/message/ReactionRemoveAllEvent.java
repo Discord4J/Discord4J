@@ -33,6 +33,8 @@ import java.util.Optional;
  * <p>
  * Corresponding {@link discord4j.core.event.domain.message.ReactionRemoveEvent reactions removes} are NOT dispatched
  * for messages included in this event.
+ * <p>
+ * This event is dispatched by Discord.
  *
  * @see <a href="https://discordapp.com/developers/docs/topics/gateway#message-reaction-remove-all">Message Reaction
  * Remove All</a>
@@ -51,26 +53,50 @@ public class ReactionRemoveAllEvent extends MessageEvent {
         this.guildId = guildId;
     }
 
+    /**
+     * Gets the Snowflake ID of the channel containing the Message and the removed Reactions.
+     * @return The ID of the channel involved.
+     */
     public Snowflake getChannelId() {
         return Snowflake.of(channelId);
     }
 
+    /**
+     * Gets the MessageChannel containing the Message and the removed reactions.
+     * @return The channel involved.
+     */
     public Mono<MessageChannel> getChannel() {
         return getClient().getChannelById(getChannelId()).cast(MessageChannel.class);
     }
 
+    /**
+     * Gets the Snowflake ID of the message the reactions were removed from in this event.
+     * @return The ID of the message involved.
+     */
     public Snowflake getMessageId() {
         return Snowflake.of(messageId);
     }
 
+    /**
+     * Gets the Message the reactions were removed from in this event.
+     * @return The message involved.
+     */
     public Mono<Message> getMessage() {
         return getClient().getMessageById(getChannelId(), getMessageId());
     }
 
+    /**
+     * Gets the Snowflake ID of the Guild containing the Message the reactions were removed from. This may not be available if the message was sent in a private channel.
+     * @return The ID of the Guild containing the message involved.
+     */
     public Optional<Snowflake> getGuildId() {
         return Optional.ofNullable(guildId).map(Snowflake::of);
     }
 
+    /**
+     * Gets the Guild containing the Message the reactions were removed from. This may not if the message was sent in a private channel.
+     * @return The Guild containing the message involved.
+     */
     public Mono<Guild> getGuild() {
         return Mono.justOrEmpty(getGuildId()).flatMap(getClient()::getGuildById);
     }

@@ -25,7 +25,9 @@ import java.util.Optional;
 /**
  * Dispatched when a role is updated in a guild.
  * <p>
- * The old role may not be present if messages are not stored.
+ * The old role may not be present if roles are not stored.
+ * <p>
+ * This event is dispatched by Discord
  *
  * @see <a href="https://discordapp.com/developers/docs/topics/gateway#guild-role-update">Guild Role Update</a>
  */
@@ -40,10 +42,18 @@ public class RoleUpdateEvent extends RoleEvent {
         this.old = old;
     }
 
+    /**
+     * Gets the current, new version of the Role that was updated in the event.
+     * @return The current version of the updated Role.
+     */
     public Role getCurrent() {
         return current;
     }
 
+    /**
+     * Gets the old version of the Role that was updated in this event. This may not be available if Roles are not stored.
+     * @return The old version of the updated Role.
+     */
     public Optional<Role> getOld() {
         return Optional.ofNullable(old);
     }

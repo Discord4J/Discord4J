@@ -21,6 +21,8 @@ import discord4j.core.DiscordClient;
 
 /**
  * Indicates that a gateway connection is disconnected.
+ * <p>
+ * This event is dispatched by Discord4J.
  */
 public class DisconnectEvent extends GatewayLifecycleEvent {
 

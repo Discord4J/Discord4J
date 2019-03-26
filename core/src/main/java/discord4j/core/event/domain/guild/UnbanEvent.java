@@ -24,6 +24,8 @@ import reactor.core.publisher.Mono;
 
 /**
  * Dispatched when a user is unbanned from a guild.
+ * <p>
+ * This event is dispatched by Discord
  *
  * @see <a href="https://discordapp.com/developers/docs/topics/gateway#guild-ban-remove">Guild Ban Remove</a>
  */
@@ -38,14 +40,26 @@ public class UnbanEvent extends GuildEvent {
         this.guildId = guildId;
     }
 
+    /**
+     * Gets the User that has been unbanned in this event.
+     * @return The User that has been unbanned.
+     */
     public User getUser() {
         return user;
     }
 
+    /**
+     * Gets the Snowflake ID of the Guild the Member was unbanned from.
+     * @return The ID of the Guild involved.
+     */
     public Snowflake getGuildId() {
         return Snowflake.of(guildId);
     }
 
+    /**
+     * Gets the Guild the Member was unbanned from.
+     * @return The Guild involved.
+     */
     public Mono<Guild> getGuild() {
         return getClient().getGuildById(getGuildId());
     }

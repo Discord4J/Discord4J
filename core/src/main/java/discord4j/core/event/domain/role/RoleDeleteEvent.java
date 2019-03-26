@@ -29,6 +29,8 @@ import java.util.Optional;
  * Dispatched when a role is deleted in a guild.
  * <p>
  * The deleted role may not be present if roles are not stored.
+ * <p>
+ * This event is dispatched by Discord
  *
  * @see <a href="https://discordapp.com/developers/docs/topics/gateway#guild-role-delete">Guild Role Delete</a>
  */
@@ -46,18 +48,34 @@ public class RoleDeleteEvent extends RoleEvent {
         this.role = role;
     }
 
+    /**
+     * Gets the Snowflake ID of the guild the role was deleted in.
+     * @return The ID of the guild involved.
+     */
     public Snowflake getGuildId() {
         return Snowflake.of(guildId);
     }
 
+    /**
+     * Gets the Guild the Role was deleted in.
+     * @return The Guild involved.
+     */
     public Mono<Guild> getGuild() {
         return getClient().getGuildById(getGuildId());
     }
 
+    /**
+     * Gets the Snowflake ID of the Role that was deleted in this event.
+     * @return The ID of the deleted Role.
+     */
     public Snowflake getRoleId() {
         return Snowflake.of(roleId);
     }
 
+    /**
+     * Gets the Role that was deleted in this event. This may not be available if Roles are not stored.
+     * @return The Role that was deleted in this event.
+     */
     public Optional<Role> getRole() {
         return Optional.ofNullable(role);
     }

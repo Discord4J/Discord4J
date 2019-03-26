@@ -26,6 +26,8 @@ import java.time.Instant;
 
 /**
  * Dispatched when a user starts typing in a message channel.
+ * <p>
+ * This event is dispatched by Discord
  *
  * @see <a href="https://discordapp.com/developers/docs/topics/gateway#typing-start">Typing Start</a>
  */
@@ -42,22 +44,42 @@ public class TypingStartEvent extends ChannelEvent {
         this.startTime = startTime;
     }
 
+    /**
+     * Gets the Snowflake ID of the channel the user has started typing in.
+     * @return the ID of the channel the user is typing in.
+     */
     public Snowflake getChannelId() {
         return Snowflake.of(channelId);
     }
 
+    /**
+     * Gets the MessageChannel the user has started typing in.
+     * @return The MessageChannel the user is typing in.
+     */
     public Mono<MessageChannel> getChannel() {
         return getClient().getChannelById(getChannelId()).cast(MessageChannel.class);
     }
 
+    /**
+     * Gets the Snowflake ID of the User who has started typing in this event.
+     * @return The ID of the User who has started typing.
+     */
     public Snowflake getUserId() {
         return Snowflake.of(userId);
     }
 
+    /**
+     * Gets the User who has started typing in this event.
+     * @return The User who has started typing.
+     */
     public Mono<User> getUser() {
         return getClient().getUserById(getUserId());
     }
 
+    /**
+     * Gets the time at which the user started typing in this event.
+     * @return The time at which the user starting typing.
+     */
     public Instant getStartTime() {
         return startTime;
     }

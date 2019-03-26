@@ -39,6 +39,8 @@ import discord4j.core.DiscordClient;
 /**
  * Indicates that a reconnection attempt has failed and a new attempt should be scheduled, in that case, this event
  * will be followed by a {@link ReconnectStartEvent}.
+ * <p>
+ * This event is dispatched by Discord4J.
  */
 public class ReconnectFailEvent extends GatewayLifecycleEvent {
 
@@ -49,6 +51,10 @@ public class ReconnectFailEvent extends GatewayLifecycleEvent {
         this.currentAttempt = currentAttempt;
     }
 
+    /**
+     * Gets the current reconnect attempt.
+     * @return The current reconnect attempt.
+     */
     public int getCurrentAttempt() {
         return currentAttempt;
     }

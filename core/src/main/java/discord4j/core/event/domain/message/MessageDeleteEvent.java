@@ -29,6 +29,8 @@ import java.util.Optional;
  * Dispatched when a message is deleted.
  * <p>
  * The deleted message may not be present if messages are not stored.
+ * <p>
+ * This event is dispatched by Discord.
  *
  * @see <a href="https://discordapp.com/developers/docs/topics/gateway#message-delete">Message Delete</a>
  */
@@ -46,18 +48,34 @@ public class MessageDeleteEvent extends MessageEvent {
         this.message = message;
     }
 
+    /**
+     * Gets the Snowflake ID of the message that was deleted.
+     * @return The ID of the deleted message.
+     */
     public Snowflake getMessageId() {
         return Snowflake.of(messageId);
     }
 
+    /**
+     * Gets the Message that was deleted in this event. This may not be available if messages are not stored.
+     * @return The deleted message.
+     */
     public Optional<Message> getMessage() {
         return Optional.ofNullable(message);
     }
 
+    /**
+     * Gets the Snowflake ID of the channel the message was deleted from.
+     * @return The ID of the channel that the message was deleted from.
+     */
     public Snowflake getChannelId() {
         return Snowflake.of(channelId);
     }
 
+    /**
+     * Gets the MessageChannel the Message was deleted from.
+     * @return The MessageChannel the Message was deleted from.
+     */
     public Mono<MessageChannel> getChannel() {
         return getClient().getChannelById(getChannelId()).cast(MessageChannel.class);
     }

@@ -31,6 +31,8 @@ import java.util.Optional;
  * <p>
  * Discord does not differentiate between a user leaving on their own and being kicked. Except through audit logs, it is
  * not possible to tell the difference between these.
+ * <p>
+ * This event is dispatched by Discord.
  *
  * @see <a href="https://discordapp.com/developers/docs/topics/gateway#guild-member-remove">Guild Member Remove</a>
  */
@@ -48,18 +50,34 @@ public class MemberLeaveEvent extends GuildEvent {
         this.member = member;
     }
 
+    /**
+     * Gets the User that has left the Guild in this event.
+     * @return The User that has left the Guild
+     */
     public User getUser() {
         return user;
     }
 
+    /**
+     * Gets the Snowflake ID of the Guild that the User has left in this event.
+     * @return The ID of the Guild.
+     */
     public Snowflake getGuildId() {
         return Snowflake.of(guildId);
     }
 
+    /**
+     * Gets the Guild that the User has left in this event.
+     * @return The Guild that the user has left.
+     */
     public Mono<Guild> getGuild() {
         return getClient().getGuildById(getGuildId());
     }
 
+    /**
+     * Gets the Member object of the User that has left the Guild in this event.
+     * @return The Member object of the User that has left the Guild.
+     */
     public Optional<Member> getMember() {
         return Optional.ofNullable(member);
     }

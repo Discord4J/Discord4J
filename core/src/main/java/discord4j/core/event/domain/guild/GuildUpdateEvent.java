@@ -26,6 +26,8 @@ import java.util.Optional;
  * Dispatched when a guild is updated.
  * <p>
  * The old guild may not be present if guilds are not stored.
+ * <p>
+ * This event is Dispatched by Discord.
  *
  * @see <a href="https://discordapp.com/developers/docs/topics/gateway#guild-update">Guild Update</a>
  */
@@ -40,10 +42,18 @@ public class GuildUpdateEvent extends GuildEvent {
         this.old = old;
     }
 
+    /**
+     * Gets the current version of the Guild involved in this event.
+     * @return The current Guild involved in this event.
+     */
     public Guild getCurrent() {
         return current;
     }
 
+    /**
+     * Gets the old version of the Guild involved in this event. This may not be available if guilds are not stored.
+     * @return The old Guild involved in this event.
+     */
     public Optional<Guild> getOld() {
         return Optional.ofNullable(old);
     }

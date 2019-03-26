@@ -21,6 +21,10 @@ import discord4j.core.object.entity.PrivateChannel;
 
 /**
  * TODO what does this mean?
+ * <p>
+ * This event is dispatched by Discord.
+ *
+ * @see <a href="https://discordapp.com/developers/docs/topics/gateway#channel-delete">Channel Delete</a>
  */
 public class PrivateChannelDeleteEvent extends ChannelEvent {
 
@@ -31,6 +35,10 @@ public class PrivateChannelDeleteEvent extends ChannelEvent {
         this.channel = channel;
     }
 
+    /**
+     * Gets the PrivateChannel that was deleted in this event.
+     * @return The PrivateChannel that was deleted.
+     */
     public PrivateChannel getChannel() {
         return channel;
     }
