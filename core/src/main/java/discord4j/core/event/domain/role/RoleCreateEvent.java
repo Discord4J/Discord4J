@@ -41,27 +41,29 @@ public class RoleCreateEvent extends RoleEvent {
     }
 
     /**
-     * Gets the Snowflake ID of the Guild the role was created in.
+     * Gets the {@link Snowflake} ID of the {@link Guild} the {@link Role} was created in.
      *
-     * @return The ID of the Guild the role was created in.
+     * @return The ID of the {@link Guild} the {@link Role} was created in.
      */
     public Snowflake getGuildId() {
         return Snowflake.of(guildId);
     }
 
     /**
-     * Requests to retrieve the Guild the role was created in.
+     * Requests to retrieve the {@link Guild} the {@link Role} was created in.
      *
-     * @return A {@link Mono} where, upon successful completion, emits the Guild the role was created in. If an error is received, it is emitted through the Mono.
+     * @return A {@link Mono} where, upon successful completion, emits the {@link Guild} the {@link Guild}
+     * was created in.
+     * If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Guild> getGuild() {
         return getClient().getGuildById(getGuildId());
     }
 
     /**
-     * Gets the role that was created in this event.
+     * Gets the {@link Role} that was created in this event.
      *
-     * @return The Role that was created.
+     * @return The {@link Role} that was created.
      */
     public Role getRole() {
         return role;

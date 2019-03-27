@@ -53,7 +53,7 @@ public class VoiceServerUpdateEvent extends Event {
     }
 
     /**
-     * Gets the Snowflake ID of the guild whose voice server has been updated in this event.
+     * Gets the {@link Snowflake} ID of the guild whose voice server has been updated in this event.
      *
      * @return The ID of the guild involved.
      */
@@ -62,9 +62,11 @@ public class VoiceServerUpdateEvent extends Event {
     }
 
     /**
-     * Requests to retrieve the Guild whose voice server has been updated in this event.
+     * Requests to retrieve the {@link Guild} whose voice server has been updated in this event.
      *
-     * @return A {@link Mono} where, upon successful completion, emits the Guild whose voice server has been updated. If an error is received, it is emitted through the Mono.
+     * @return A {@link Mono} where, upon successful completion, emits the {@link Guild} whose voice server has been
+     * updated.
+     * If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Guild> getGuild() {
         return getClient().getGuildById(getGuildId());

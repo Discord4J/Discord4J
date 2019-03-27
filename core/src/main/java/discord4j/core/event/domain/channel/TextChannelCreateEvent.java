@@ -36,9 +36,9 @@ public class TextChannelCreateEvent extends ChannelEvent {
     }
 
     /**
-     * Gets the TextChannel that was created in this event.
+     * Gets the {@link TextChannel} that was created in this event.
      *
-     * @return The newly created TextChannel.
+     * @return The newly created {@link TextChannel}.
      */
     public TextChannel getChannel() {
         return channel;

@@ -43,18 +43,19 @@ public class GuildUpdateEvent extends GuildEvent {
     }
 
     /**
-     * Gets the current version of the Guild involved in this event.
+     * Gets the current version of the {@link Guild} involved in this event.
      *
-     * @return The current Guild involved in this event.
+     * @return The current {@link Guild} involved in this event.
      */
     public Guild getCurrent() {
         return current;
     }
 
     /**
-     * Gets the old version of the Guild involved in this event, if present. This may not be available if guilds are not stored.
+     * Gets the old version of the {@link Guild} involved in this event, if present.
+     * This may not be available if {@code Guild} are not stored.
      *
-     * @return The old Guild involved in this event, if present.
+     * @return The old {@link Guild} involved in this event, if present.
      */
     public Optional<Guild> getOld() {
         return Optional.ofNullable(old);

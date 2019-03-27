@@ -28,7 +28,7 @@ import java.util.Set;
  * Dispatched when an emoji is added/deleted/or edited in a guild. The {@link #emojis} set includes ALL emojis of the
  * guild.
  * <p>
- * This event is dispatched by Discord
+ * This event is dispatched by Discord.
  *
  * @see <a href="https://discordapp.com/developers/docs/topics/gateway#guild-emojis-update">Guild Emojis Update</a>
  */
@@ -44,27 +44,28 @@ public class EmojisUpdateEvent extends GuildEvent {
     }
 
     /**
-     * Gets the Snowflake ID of the guild involved in the event.
+     * Gets the {@link Snowflake} ID of the {@link Guild} involved in the event.
      *
-     * @return The Snowflake ID of the guild.
+     * @return The ID of the {@link Guild}.
      */
     public Snowflake getGuildId() {
         return Snowflake.of(guildId);
     }
 
     /**
-     * Requests to retrieve the Guild whose emojis have been updated.
+     * Requests to retrieve the {@link Guild} whose emojis have been updated.
      *
-     * @return A {@link Mono} where, upon successful completion, emits the Guild involved. If an error is received, it is emitted through the Mono.
+     * @return A {@link Mono} where, upon successful completion, emits the {@link Guild} involved.
+     * If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Guild> getGuild() {
         return getClient().getGuildById(getGuildId());
     }
 
     /**
-     * Gets a list of ALL emojis of the Guild.
+     * Gets a list of ALL emojis of the {@link Guild}.
      *
-     * @return A list of ALL emojis of the Guild.
+     * @return A list of ALL emojis of the {@link com.sun.media.sound.WaveExtensibleFileReader.GUID}.
      */
     public Set<GuildEmoji> getEmojis() {
         return emojis;

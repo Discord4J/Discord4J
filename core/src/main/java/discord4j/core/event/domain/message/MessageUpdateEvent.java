@@ -70,99 +70,103 @@ public class MessageUpdateEvent extends MessageEvent {
     }
 
     /**
-     * Gets the Snowflake ID of the message that has been updated in this event.
+     * Gets the {@link Snowflake} ID of the {@link Message} that has been updated in this event.
      *
-     * @return THe ID of the message.
+     * @return THe ID of the {@link Message}.
      */
     public Snowflake getMessageId() {
         return Snowflake.of(messageId);
     }
 
     /**
-     * Requests to retrieve the Message that has been updated in this event.
+     * Requests to retrieve the {@link Message} that has been updated in this event.
      *
-     * @return A {@link Mono} where, upon successful completion, emits the Message that was updated. If an error is received, it is emitted through the Mono.
+     * @return A {@link Mono} where, upon successful completion, emits the {@link Message} that was updated.
+     * If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Message> getMessage() {
         return getClient().getMessageById(getChannelId(), getMessageId());
     }
 
     /**
-     * Gets the Snowflake ID of the channel containing the updated Message.
+     * Gets the {@link Snowflake} ID of the {@link MessageChannel} containing the updated {@link Message}.
      *
-     * @return The ID of the channel containing the updated Message.
+     * @return The ID of the {@link MessageChannel} containing the updated {@link Message}.
      */
     public Snowflake getChannelId() {
         return Snowflake.of(channelId);
     }
 
     /**
-     * Requests to retrieve the Channel containing the updated Message in this event.
+     * Requests to retrieve the {@link MessageChannel} containing the updated {@link Message} in this event.
      *
-     * @return A {@link Mono} where, upon successful completion, emits the MessageChannel containing the message. If an error is received, it is emitted through the Mono.
+     * @return A {@link Mono} where, upon successful completion, emits the {@link MessageChannel} containing the
+     * {@link Message}. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<MessageChannel> getChannel() {
         return getClient().getChannelById(getChannelId()).cast(MessageChannel.class);
     }
 
     /**
-     * The Snowflake ID of the Guild containing the updated Message in this event, if present.
+     * The {@link Snowflake} ID of the {@link Guild} containing the updated {@link Message} in this event, if present.
      *
-     * @return The ID of the guild containing the updated Message, if present.
+     * @return The ID of the {@link Guild} containing the updated {@link Message}, if present.
      */
     public Optional<Snowflake> getGuildId() {
         return Optional.ofNullable(guildId).map(Snowflake::of);
     }
 
     /**
-     * Request to retrieve the Guild containing the updated Message in this event.
+     * Request to retrieve the {@link Guild} containing the updated {@link Message} in this event.
      *
-     * @return A {@link Mono} where, upon successful completion, emits the Guild containing the updated message. If an error is received, it is emitted through the Mono.
+     * @return A {@link Mono} where, upon successful completion, emits the {@link Guild} containing the updated
+     * {@link Message}. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Guild> getGuild() {
         return Mono.justOrEmpty(getGuildId()).flatMap(getClient()::getGuildById);
     }
 
     /**
-     * Gets the old version of the updated Message, if present. This may not be available if messages are not stored.
+     * Gets the old version of the updated {@link Message}, if present.
+     * This may not be available if {@code Messages} are not stored.
      *
-     * @return The old version of the updated Message, if present.
+     * @return The old version of the updated {@link Message}, if present.
      */
     public Optional<Message> getOld() {
         return Optional.ofNullable(old);
     }
 
     /**
-     * Gets whether or not the content of the message has been changed in this event.
+     * Gets whether or not the content of the {@link Message} has been changed in this event.
      *
-     * @return Whether or not the content of the message has been changed.
+     * @return Whether or not the content of the {@link Message} has been changed.
      */
     public boolean isContentChanged() {
         return contentChanged;
     }
 
     /**
-     * Gets the current, new, version of the message's content in this event, if present.
+     * Gets the current, new, version of the {@link Message}'s content in this event, if present.
      *
-     * @return The current version of the Message's content, if present.
+     * @return The current version of the {@link Message}'s content, if present.
      */
     public Optional<String> getCurrentContent() {
         return Optional.ofNullable(currentContent);
     }
 
     /**
-     * Gets whether or not the embed in the message has been changed in this event.
+     * Gets whether or not the {@link Embed} in the {@link Message} has been changed in this event.
      *
-     * @return Whether or not the embed in the message has been changed.
+     * @return Whether or not the {@link Embed} in the {@link Message} has been changed.
      */
     public boolean isEmbedsChanged() {
         return embedsChanged;
     }
 
     /**
-     * Gets the current, new, version of the message's embed in this event.
+     * Gets the current, new, version of the {@link Message}'s {@link Embed} in this event.
      *
-     * @return The current version of the Message's embed.
+     * @return The current version of the {@link Message}'s {@link Embed}.
      */
     public List<Embed> getCurrentEmbeds() {
         return currentEmbeds;

@@ -27,7 +27,7 @@ import java.time.Instant;
 /**
  * Dispatched when a user starts typing in a message channel.
  * <p>
- * This event is dispatched by Discord
+ * This event is dispatched by Discord.
  *
  * @see <a href="https://discordapp.com/developers/docs/topics/gateway#typing-start">Typing Start</a>
  */
@@ -45,45 +45,47 @@ public class TypingStartEvent extends ChannelEvent {
     }
 
     /**
-     * Gets the Snowflake ID of the channel the user has started typing in.
+     * Gets the {@link Snowflake} ID of the {@link MessageChannel} the user has started typing in.
      *
-     * @return the ID of the channel the user is typing in.
+     * @return the ID of the {@link MessageChannel} the {@link User} is typing in.
      */
     public Snowflake getChannelId() {
         return Snowflake.of(channelId);
     }
 
     /**
-     * Requests to retrieve the MessageChannel the user has started typing in.
+     * Requests to retrieve the {@link MessageChannel} the user has started typing in.
      *
-     * @return A {@link Mono} where, upon successful completion, emits the MessageChannel the user has started typing in. If an error is received, it is emitted through the Mono.
+     * @return A {@link Mono} where, upon successful completion, emits the {@link MessageChannel} the {@link User} has
+     * started typing in. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<MessageChannel> getChannel() {
         return getClient().getChannelById(getChannelId()).cast(MessageChannel.class);
     }
 
     /**
-     * Gets the Snowflake ID of the User who has started typing in this event.
+     * Gets the {@link Snowflake} ID of the {@link User} who has started typing in this event.
      *
-     * @return The ID of the User who has started typing.
+     * @return The ID of the {@link User} who has started typing.
      */
     public Snowflake getUserId() {
         return Snowflake.of(userId);
     }
 
     /**
-     * Requests to retrieve the User who has started typing in this event.
+     * Requests to retrieve the {@link User} who has started typing in this event.
      *
-     * @return A {@link Mono} where, upon successful completion, emits the User that has started typing. If an error is received, it is emitted through the Mono.
+     * @return A {@link Mono} where, upon successful completion, emits the {@link User} that has started typing.
+     * If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<User> getUser() {
         return getClient().getUserById(getUserId());
     }
 
     /**
-     * Gets the time at which the user started typing in this event.
+     * Gets the time at which the {@link User} started typing in this event.
      *
-     * @return The time at which the user starting typing.
+     * @return The time at which the {@link User} starting typing.
      */
     public Instant getStartTime() {
         return startTime;

@@ -22,7 +22,7 @@ import discord4j.core.object.entity.Category;
 /**
  * Dispatched when a {@link Category} is created in a guild.
  * <p>
- * This event is dispatched by Discord
+ * This event is dispatched by Discord.
  *
  * @see <a href="https://discordapp.com/developers/docs/topics/gateway#channel-create">Channel Create</a>
  */
@@ -36,9 +36,9 @@ public class CategoryCreateEvent extends ChannelEvent {
     }
 
     /**
-     * Gets the Category that was created in this event.
+     * Gets the {@link Category} that was created in this event.
      *
-     * @return The category created.
+     * @return The {@link Category} created.
      */
     public Category getCategory() {
         return category;

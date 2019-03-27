@@ -41,27 +41,28 @@ public class BanEvent extends GuildEvent {
     }
 
     /**
-     * Gets the User that has been banned from the Guild.
+     * Gets the {@link User} that has been banned from the {@link Guild}.
      *
-     * @return The User that has been banned.
+     * @return The {@link User} that has been banned.
      */
     public User getUser() {
         return user;
     }
 
     /**
-     * Gets the Snowflake ID of the guild in this event.
+     * Gets the {@link Snowflake} ID of the {@link Guild} in this event.
      *
-     * @return The Snowflake ID of the guild.
+     * @return The ID of the {@link Guild}.
      */
     public Snowflake getGuildId() {
         return Snowflake.of(guildId);
     }
 
     /**
-     * Requests to retrieve the Guild the User was banned from.
+     * Requests to retrieve the {@link Guild} the {@link User} was banned from.
      *
-     * @return A {@link Mono} where, upon successful completion, emits the Guild involved in this event. If an error is received, it is emitted through the Mono.
+     * @return A {@link Mono} where, upon successful completion, emits the {@link Guild} involved in this event.
+     * If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Guild> getGuild() {
         return getClient().getGuildById(getGuildId());

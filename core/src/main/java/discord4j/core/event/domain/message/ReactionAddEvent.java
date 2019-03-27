@@ -33,7 +33,7 @@ import java.util.Optional;
  * <p>
  * {@link #guildId} may not be present if the message was in a private channel.
  * <p>
- * This event is dispatched by Discord
+ * This event is dispatched by Discord.
  *
  * @see <a href="https://discordapp.com/developers/docs/topics/gateway#message-reaction-add">Message Reaction Add</a>
  */
@@ -57,81 +57,87 @@ public class ReactionAddEvent extends MessageEvent {
     }
 
     /**
-     * Gets the Snowflake ID of the User who added a reaction in this event.
+     * Gets the {@link Snowflake} ID of the {@link User} who added a reaction in this event.
      *
-     * @return The Id of the User who added a reaction.
+     * @return The Id of the {@link User} who added a reaction.
      */
     public Snowflake getUserId() {
         return Snowflake.of(userId);
     }
 
     /**
-     * Requests to retrieve the User who added a reaction in this event.
+     * Requests to retrieve the {@link User} who added a reaction in this event.
      *
-     * @return A {@link Mono} where, upon successful completion, emits the User that has added the reaction. If an error is received, it is emitted through the Mono.
+     * @return A {@link Mono} where, upon successful completion, emits the {@link User} that has added the reaction.
+     * If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<User> getUser() {
         return getClient().getUserById(getUserId());
     }
 
     /**
-     * Gets the Snowflake ID of the channel the message and reaction are in.
+     * Gets the {@link Snowflake} ID of the {@link MessageChannel} the {@link Message} and reaction are in.
      *
-     * @return The ID of the channel involved.
+     * @return The ID of the {@link MessageChannel} involved.
      */
     public Snowflake getChannelId() {
         return Snowflake.of(channelId);
     }
 
     /**
-     * Requests to retrieve the MessageChannel the message and reaction are in.
+     * Requests to retrieve the {@link MessageChannel} the {@link Message} and reaction are in.
      *
-     * @return A {@link Mono} where, upon successful completion, emits the MessageChannel containing the message in the event. If an error is received, it is emitted through the Mono.
+     * @return A {@link Mono} where, upon successful completion, emits the {@link MessageChannel} containing
+     * the {@link Message} in the event. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<MessageChannel> getChannel() {
         return getClient().getChannelById(getChannelId()).cast(MessageChannel.class);
     }
 
     /**
-     * Gets the Snowflake ID of the message the reaction was added to in this event.
+     * Gets the {@link Snowflake} ID of the {@link Message} the reaction was added to in this event.
      *
-     * @return The ID of the message the reaction was added to.
+     * @return The ID of the {@link Message} the reaction was added to.
      */
     public Snowflake getMessageId() {
         return Snowflake.of(messageId);
     }
 
     /**
-     * Request to retrieve the Message the reaction was added to in this event.
+     * Request to retrieve the {@link Message} the reaction was added to in this event.
      *
-     * @return A {@link Mono} where, upon successful completion, emits the Message the reaction was added to. If an error is received, it is emitted through the Mono.
+     * @return A {@link Mono} where, upon successful completion, emits the {@link Message} the reaction was added to.
+     * If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Message> getMessage() {
         return getClient().getMessageById(getChannelId(), getMessageId());
     }
 
     /**
-     * Gets the Snowflake ID of the Guild containing the Message and Reaction, if present. This may not be available if the reaction is to a message in a private channel.
+     * Gets the {@link Snowflake} ID of the {@link Guild} containing the {@link Message} and Reaction, if present.
+     * This may not be available if the reaction is to a {@code Message} in a private channel.
      *
-     * @return The ID of the guild involved in the event, if present.
+     * @return The ID of the {@link Guild} involved in the event, if present.
      */
     public Optional<Snowflake> getGuildId() {
         return Optional.ofNullable(guildId).map(Snowflake::of);
     }
 
     /**
-     * Request to retrieve the Guild containing the Message and reaction, if present. This may not be available if the reaction is to a message in a private channel.
+     * Request to retrieve the {@link Guild} containing the {@link Message} and reaction, if present.
+     * This may not be available if the reaction is to a {@code Message} in a private channel.
      *
-     * @return A {@link Mono} where, upon successful completion, emits the Guild containing the message involved, if present. If an error is received, it is emitted through the Mono.
+     * @return A {@link Mono} where, upon successful completion, emits the {@link Guild} containing the {@link Message}
+     * involved, if present. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Guild> getGuild() {
         return Mono.justOrEmpty(getGuildId()).flatMap(getClient()::getGuildById);
     }
 
     /**
-     * Gets the ReactionEmoji that was added to the Message in this event.
+     * Gets the {@link ReactionEmoji} that was added to the {@link Message} in this event.
      *
-     * @return The emoji added to the message as a reaction.
+     * @return The {@code Emoji} added to the {@link Message} as a reaction.
      */
     public ReactionEmoji getEmoji() {
         return emoji;

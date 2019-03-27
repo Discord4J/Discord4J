@@ -22,7 +22,7 @@ import discord4j.core.object.entity.TextChannel;
 /**
  * Dispatched when a {@link TextChannel} is deleted in a guild.
  * <p>
- * This event is dispatched by Discord
+ * This event is dispatched by Discord.
  *
  * @see <a href="https://discordapp.com/developers/docs/topics/gateway#channel-delete">Channel Delete</a>
  */
@@ -36,9 +36,9 @@ public class TextChannelDeleteEvent extends ChannelEvent {
     }
 
     /**
-     * Gets the TextChannel that was deleted in this event.
+     * Gets the {@link TextChannel} that was deleted in this event.
      *
-     * @return The deleted TextChannel.
+     * @return The {@link TextChannel} TextChannel.
      */
     public TextChannel getChannel() {
         return channel;

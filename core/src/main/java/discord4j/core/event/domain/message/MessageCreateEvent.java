@@ -51,36 +51,40 @@ public class MessageCreateEvent extends MessageEvent {
     }
 
     /**
-     * Gets the message that was created in this event.
+     * Gets the {@link Message} that was created in this event.
      *
-     * @return The Message that was created.
+     * @return The {@link Message} that was created.
      */
     public Message getMessage() {
         return message;
     }
 
     /**
-     * Gets the Snowflake ID of the guild the Message was created in, if present. This may not be available if the message was sent in a private channel.
+     * Gets the {@link Snowflake} ID of the {@link Guild} the {@link Message} was created in, if present.
+     * This may not be available if the {@code Message} was sent in a private channel.
      *
-     * @return The ID of the guild containing the message, if present.
+     * @return The ID of the {@link Guild} containing the {@link Message}, if present.
      */
     public Optional<Snowflake> getGuildId() {
         return Optional.ofNullable(guildId).map(Snowflake::of);
     }
 
     /**
-     * Requests to retrieve the guild the Message was created in, if present. This may not be available if the message was sent in a private channel.
+     * Requests to retrieve the {@link Guild} the {@link Message} was created in, if present.
+     * This may not be available if the {@code Message} was sent in a private channel.
      *
-     * @return A {@link Mono} where, upon successful completion, emits the Guild the message was created in, if present. If an error is received, it is emitted through the Mono.
+     * @return A {@link Mono} where, upon successful completion, emits the {@link Guild} the message was created in,
+     * if present. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Guild> getGuild() {
         return Mono.justOrEmpty(getGuildId()).flatMap(getClient()::getGuildById);
     }
 
     /**
-     * Gets the Member who has sent the message created in this event, if present. This may not be available if the message was sent in a private channel.
+     * Gets the {@link Member} who has sent the {@link Message} created in this event, if present.
+     * This may not be available if the {@code Message} was sent in a private channel.
      *
-     * @return The Member who has sent the message created in this event, if present.
+     * @return The {@link Member} who has sent the {@link Message} created in this event, if present.
      */
     public Optional<Member> getMember() {
         return Optional.ofNullable(member);

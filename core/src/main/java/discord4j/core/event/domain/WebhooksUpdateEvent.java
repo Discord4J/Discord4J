@@ -27,7 +27,7 @@ import reactor.core.publisher.Mono;
  * <p>
  * Discord does not send any information about what was actually updated. This is simply a notification of SOME update.
  * <p>
- * This event is dispatched by Discord
+ * This event is dispatched by Discord.
  *
  * @see <a href="https://discordapp.com/developers/docs/topics/gateway#webhooks-update">Webhooks Update</a>
  */
@@ -43,7 +43,7 @@ public class WebhooksUpdateEvent extends Event {
     }
 
     /**
-     * Gets the Snowflake ID of the guild that had a webhook updated in this event.
+     * Gets the {@link Snowflake} ID of the guild that had a webhook updated in this event.
      *
      * @return The ID of the guild involved.
      */
@@ -52,16 +52,17 @@ public class WebhooksUpdateEvent extends Event {
     }
 
     /**
-     * Requests to retrieve the Guild that had a webhook updated in this event.
+     * Requests to retrieve the {@link Guild} that had a webhook updated in this event.
      *
-     * @return A {@link Mono} where, upon successful completion, emits the Guild involved in the event. If an error is
+     * @return A {@link Mono} where, upon successful completion, emits the {@link Guild} involved in the event.
+     * If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Guild> getGuild() {
         return getClient().getGuildById(getGuildId());
     }
 
     /**
-     * Gets the Snowflake ID of the channel the webhook belongs to.
+     * Gets the {@link Snowflake} ID of the channel the webhook belongs to.
      *
      * @return The ID of the channel involved.
      */
@@ -70,9 +71,10 @@ public class WebhooksUpdateEvent extends Event {
     }
 
     /**
-     * Requests to retrieve the TextChannel the webhook belongs to.
+     * Requests to retrieve the {@link TextChannel} the webhook belongs to.
      *
-     * @return A {@link Mono} where, upon successful completion, emits the TextChannel involved in the event. If an error is received, it is emitted through the Mono.
+     * @return A {@link Mono} where, upon successful completion, emits the {@link TextChannel} involved in the event.
+     * If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<TextChannel> getChannel() {
         return getClient().getChannelById(getChannelId()).cast(TextChannel.class);

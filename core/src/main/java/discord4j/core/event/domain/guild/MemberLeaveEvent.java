@@ -51,36 +51,37 @@ public class MemberLeaveEvent extends GuildEvent {
     }
 
     /**
-     * Gets the User that has left the Guild in this event.
+     * Gets the {@link User} that has left the {@link Guild} in this event.
      *
-     * @return The User that has left the Guild
+     * @return The {@link User} that has left the {@link Guild}
      */
     public User getUser() {
         return user;
     }
 
     /**
-     * Gets the Snowflake ID of the Guild that the User has left in this event.
+     * Gets the {@link Snowflake} ID of the {@link Guild} that the {@link User} has left in this event.
      *
-     * @return The ID of the Guild.
+     * @return The ID of the {@link Guild}.
      */
     public Snowflake getGuildId() {
         return Snowflake.of(guildId);
     }
 
     /**
-     * Requests to retrieve the Guild that the User has left in this event.
+     * Requests to retrieve the {@link Guild} that the {@link User} has left in this event.
      *
-     * @return A {@link Mono} where, upon successful completion, emits the Guild that the user has left. If an error is received, it is emitted through the Mono.
+     * @return A {@link Mono} where, upon successful completion, emits the {@link Guild} that the {@link User} has left.
+     * If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Guild> getGuild() {
         return getClient().getGuildById(getGuildId());
     }
 
     /**
-     * Gets the Member object of the User that has left the Guild in this event, if present.
+     * Gets the {@link Member} object of the {@link User} that has left the {@link Guild} in this event, if present.
      *
-     * @return The Member object of the User that has left the Guild, if present.
+     * @return The {@link Member} object of the {@link User} that has left the {@link Guild}, if present.
      */
     public Optional<Member> getMember() {
         return Optional.ofNullable(member);

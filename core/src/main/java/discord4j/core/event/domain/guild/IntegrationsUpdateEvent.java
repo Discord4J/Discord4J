@@ -24,7 +24,7 @@ import reactor.core.publisher.Mono;
 /**
  * Dispatched when guild integrations are updated.
  * <p>
- * This event is dispatched by Discord
+ * This event is dispatched by Discord.
  *
  * @see <a href="https://discordapp.com/developers/docs/topics/gateway#guild-integrations-update">Guild Integrations
  * Update</a>
@@ -39,18 +39,19 @@ public class IntegrationsUpdateEvent extends GuildEvent {
     }
 
     /**
-     * The Snowflake ID of the Guild involved in this event.
+     * The {@link Snowflake} ID of the {@link Guild} involved in this event.
      *
-     * @return The Snowflake ID of the guild.
+     * @return The ID of the {@link Guild}.
      */
     public Snowflake getGuildId() {
         return Snowflake.of(guildId);
     }
 
     /**
-     * Requests to retrieve the Guild whose integrations have been updated.
+     * Requests to retrieve the {@link Guild} whose integrations have been updated.
      *
-     * @return A {@link Mono} where, upon successful completion, emits the Guild involved in the event. If an error is received, it is emitted through the Mono.
+     * @return A {@link Mono} where, upon successful completion, emits the {@link Guild} involved in the event.
+     * If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Guild> getGuild() {
         return getClient().getGuildById(getGuildId());

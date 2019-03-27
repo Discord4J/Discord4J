@@ -41,27 +41,28 @@ public class MemberJoinEvent extends GuildEvent {
     }
 
     /**
-     * Gets the member that has joined the Guild in this event.
+     * Gets the {@link Member} that has joined the {@link Guild} in this event.
      *
-     * @return The Member that has joined
+     * @return The {@link Member} that has joined
      */
     public Member getMember() {
         return member;
     }
 
     /**
-     * Gets the Snowflake ID of the guild the member has joined in this event.
+     * Gets the {@link Snowflake} ID of the {@link Guild} the {@link Member} has joined in this event.
      *
-     * @return The ID of the guild.
+     * @return The ID of the {@link Guild}.
      */
     public Snowflake getGuildId() {
         return Snowflake.of(guildId);
     }
 
     /**
-     * Requests to retrieve the Guild the member has joined in this event.
+     * Requests to retrieve the {@link Guild} the {@link Member} has joined in this event.
      *
-     * @return A {@link Mono} where, upon successful completion, emits the Guild the member has joined. If an error is received, it is emitted through the Mono.
+     * @return A {@link Mono} where, upon successful completion, emits the {@link Guild} the {@link Member} has joined.
+     * If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Guild> getGuild() {
         return getClient().getGuildById(getGuildId());

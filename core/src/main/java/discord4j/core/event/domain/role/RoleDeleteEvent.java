@@ -30,7 +30,7 @@ import java.util.Optional;
  * <p>
  * The deleted role may not be present if roles are not stored.
  * <p>
- * This event is dispatched by Discord
+ * This event is dispatched by Discord.
  *
  * @see <a href="https://discordapp.com/developers/docs/topics/gateway#guild-role-delete">Guild Role Delete</a>
  */
@@ -49,27 +49,29 @@ public class RoleDeleteEvent extends RoleEvent {
     }
 
     /**
-     * Gets the Snowflake ID of the guild the role was deleted in.
+     * Gets the {@link Snowflake} ID of the {@link Guild} the {@link Role} was deleted in.
      *
-     * @return The ID of the guild involved.
+     * @return The ID of the {@link Guild} involved.
      */
     public Snowflake getGuildId() {
         return Snowflake.of(guildId);
     }
 
     /**
-     * Requests to retrieve the Guild the Role was deleted in.
+     * Requests to retrieve the {@link Guild} the {@link Role} was deleted in.
      *
-     * @return A {@link Mono} where, upon successful completion, emits the Guild containing the deleted role. If an error is received, it is emitted through the Mono.
+     * @return A {@link Mono} where, upon successful completion, emits the {@link Guild} containing the deleted
+     * {@link Role}.
+     * If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Guild> getGuild() {
         return getClient().getGuildById(getGuildId());
     }
 
     /**
-     * Gets the Snowflake ID of the Role that was deleted in this event.
+     * Gets the {@link Snowflake} ID of the {@link Role} that was deleted in this event.
      *
-     * @return The ID of the deleted Role.
+     * @return The ID of the deleted {@link Role}.
      *
      */
     public Snowflake getRoleId() {
@@ -77,9 +79,10 @@ public class RoleDeleteEvent extends RoleEvent {
     }
 
     /**
-     * Gets the Role that was deleted in this event, if present. This may not be available if Roles are not stored.
+     * Gets the {@link Role} that was deleted in this event, if present. This may not be available if {@code Roles} are
+     * not stored.
      *
-     * @return The Role that was deleted in this event, if present.
+     * @return The {@link Role} that was deleted in this event, if present.
      */
     public Optional<Role> getRole() {
         return Optional.ofNullable(role);

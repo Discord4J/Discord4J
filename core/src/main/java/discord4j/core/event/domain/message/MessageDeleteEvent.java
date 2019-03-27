@@ -49,36 +49,38 @@ public class MessageDeleteEvent extends MessageEvent {
     }
 
     /**
-     * Gets the Snowflake ID of the message that was deleted.
+     * Gets the {@link Snowflake} ID of the {@link Message} that was deleted.
      *
-     * @return The ID of the deleted message.
+     * @return The ID of the deleted {@link Message}.
      */
     public Snowflake getMessageId() {
         return Snowflake.of(messageId);
     }
 
     /**
-     * Gets the Message that was deleted in this event, if present. This may not be available if messages are not stored.
+     * Gets the {@link Message} that was deleted in this event, if present.
+     * This may not be available if {@code Messages} are not stored.
      *
-     * @return The deleted message, if present.
+     * @return The deleted {@link Message}, if present.
      */
     public Optional<Message> getMessage() {
         return Optional.ofNullable(message);
     }
 
     /**
-     * Gets the Snowflake ID of the channel the message was deleted from.
+     * Gets the {@link Snowflake} ID of the {@link MessageChannel} the {@link Message} was deleted from.
      *
-     * @return The ID of the channel that the message was deleted from.
+     * @return The ID of the {@link MessageChannel} that the {@link Message} was deleted from.
      */
     public Snowflake getChannelId() {
         return Snowflake.of(channelId);
     }
 
     /**
-     * Requests to retrieve the MessageChannel the Message was deleted from.
+     * Requests to retrieve the {@link MessageChannel} the {@link Message} was deleted from.
      *
-     * @return A {@link Mono} where, upon successful completion, emits the MessageChannel the message was deleted in. If an error is received, it is emitted through the Mono.
+     * @return A {@link Mono} where, upon successful completion, emits the {@link MessageChannel} the
+     * {@link Message} was deleted in. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<MessageChannel> getChannel() {
         return getClient().getChannelById(getChannelId()).cast(MessageChannel.class);

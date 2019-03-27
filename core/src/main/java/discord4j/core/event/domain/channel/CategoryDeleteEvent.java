@@ -36,9 +36,9 @@ public class CategoryDeleteEvent extends ChannelEvent {
     }
 
     /**
-     * Gets the Category that was deleted in this event.
+     * Gets the {@link Category} that was deleted in this event.
      *
-     * @return The deleted Category.
+     * @return The deleted {@link Category}.
      */
     public Category getCategory() {
         return category;

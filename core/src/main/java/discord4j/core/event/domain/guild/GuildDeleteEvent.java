@@ -48,27 +48,27 @@ public class GuildDeleteEvent extends GuildEvent {
     }
 
     /**
-     * Gets the Snowflake ID of the guild that is involved in the event.
+     * Gets the {@link Snowflake} ID of the {@link Guild} that is involved in the event.
      *
-     * @return The ID of the guild.
+     * @return The ID of the {@link Guild}.
      */
     public Snowflake getGuildId() {
         return Snowflake.of(guildId);
     }
 
     /**
-     * Gets the Guild involved in this event, if present.
+     * Gets the {@link Guild} involved in this event, if present.
      *
-     * @return The Guild involved in this event, if present.
+     * @return The {@link Guild} involved in this event, if present.
      */
     public Optional<Guild> getGuild() {
         return Optional.ofNullable(guild);
     }
 
     /**
-     * Gets whether or not the Guild is now unavailable.
+     * Gets whether or not the {@link Guild} is now unavailable.
      *
-     * @return Whether or not the Guild is unavailable.
+     * @return Whether or not the {@link Guild} is unavailable.
      */
     public boolean isUnavailable() {
         return unavailable;

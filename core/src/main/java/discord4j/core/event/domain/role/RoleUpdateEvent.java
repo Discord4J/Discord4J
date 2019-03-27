@@ -27,7 +27,7 @@ import java.util.Optional;
  * <p>
  * The old role may not be present if roles are not stored.
  * <p>
- * This event is dispatched by Discord
+ * This event is dispatched by Discord.
  *
  * @see <a href="https://discordapp.com/developers/docs/topics/gateway#guild-role-update">Guild Role Update</a>
  */
@@ -43,18 +43,19 @@ public class RoleUpdateEvent extends RoleEvent {
     }
 
     /**
-     * Gets the current, new version of the Role that was updated in the event.
+     * Gets the current, new version of the {@link Role} that was updated in the event.
      *
-     * @return The current version of the updated Role.
+     * @return The current version of the updated {@link Role}.
      */
     public Role getCurrent() {
         return current;
     }
 
     /**
-     * Gets the old version of the Role that was updated in this event. if present. This may not be available if Roles are not stored.
+     * Gets the old version of the {@link Role} that was updated in this event. if present.
+     * This may not be available if {@code Role} are not stored.
      *
-     * @return The old version of the updated Role, if present.
+     * @return The old version of the updated {@link Role}, if present.
      */
     public Optional<Role> getOld() {
         return Optional.ofNullable(old);

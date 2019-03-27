@@ -29,7 +29,7 @@ import java.util.Optional;
  * <p>
  * The old voice state may not be present if voice states are not stored.
  * <p>
- * This event is dispatched by Discord
+ * This event is dispatched by Discord.
  *
  * @see <a href="https://discordapp.com/developers/docs/topics/gateway#voice-state-update">Voice State Update</a>
  */
@@ -45,18 +45,19 @@ public class VoiceStateUpdateEvent extends Event {
     }
 
     /**
-     * Gets the current, new, VoiceState that has been updated in this event.
+     * Gets the current, new, {@link VoiceState} that has been updated in this event.
      *
-     * @return The current VoiceState.
+     * @return The current {@link VoiceState}.
      */
     public VoiceState getCurrent() {
         return current;
     }
 
     /**
-     * Gets the old VoiceState that has been updated in this event, if present. This may not be available if VoiceStates are not stored.
+     * Gets the old {@link VoiceState} that has been updated in this event, if present.
+     * This may not be available if {@code VoiceStates} are not stored.
      *
-     * @return The old VoiceState, if present.
+     * @return The old {@link VoiceState}, if present.
      */
     public Optional<VoiceState> getOld() {
         return Optional.ofNullable(old);

@@ -58,81 +58,88 @@ public class ReactionRemoveEvent extends MessageEvent {
     }
 
     /**
-     * Gets the Snowflake ID of the User who's reaction has been removed.
+     * Gets the {@link Snowflake} ID of the {@link User} who's reaction has been removed.
      *
-     * @return The ID of the User who's reaction has been removed.
+     * @return The ID of the {@link User} who's reaction has been removed.
      */
     public Snowflake getUserId() {
         return Snowflake.of(userId);
     }
 
     /**
-     * Requests to retrieve the User who's reaction has been removed.
+     * Requests to retrieve the {@link User} who's reaction has been removed.
      *
-     * @return A {@link Mono} where, upon successful completion, emits the User who's reaction has been removed. If an error is received, it is emitted through the Mono.
+     * @return A {@link Mono} where, upon successful completion, emits the {@link User} who's reaction has been removed.
+     * If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<User> getUser() {
         return getClient().getUserById(getUserId());
     }
 
     /**
-     * Gets the Snowflake ID of the channel containing the message the reaction was removed from.
+     * Gets the {@link Snowflake} ID of the {@link MessageChannel} containing the {@link Message} the reaction
+     * was removed from.
      *
-     * @return The ID of the channel involved.
+     * @return The ID of the {@link MessageChannel} involved.
      */
     public Snowflake getChannelId() {
         return Snowflake.of(channelId);
     }
 
     /**
-     * Requests to retrieve the MessageChannel containing the message the reaction was removed from.
+     * Requests to retrieve the {@link MessageChannel} containing the {@link Message} the reaction was removed from.
      *
-     * @return A {@link Mono} where, upon successful completion, emits the MessageChannel containing the message involved. If an error is received, it is emitted through the Mono.
+     * @return A {@link Mono} where, upon successful completion, emits the {@link MessageChannel} containing the
+     * {@link Message} involved. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<MessageChannel> getChannel() {
         return getClient().getChannelById(getChannelId()).cast(MessageChannel.class);
     }
 
     /**
-     * Gets the Snowflake ID of the message the reaction was removed from.
+     * Gets the {@link Snowflake} ID of the {@link Message} the reaction was removed from.
      *
-     * @return The ID of the message involved.
+     * @return The ID of the {@link Message} involved.
      */
     public Snowflake getMessageId() {
         return Snowflake.of(messageId);
     }
 
     /**
-     * Requests to retrieve the Message the reaction was removed from.
+     * Requests to retrieve the {@link Message} the reaction was removed from.
      *
-     * @return A {@link Mono} where, upon completion, emits the Message the reaction was removed from. If an error is received, it is emitted through the Mono.
+     * @return A {@link Mono} where, upon completion, emits the {@link Message} the reaction was removed from.
+     * If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Message> getMessage() {
         return getClient().getMessageById(getChannelId(), getMessageId());
     }
 
     /**
-     * Gets the Snowflake ID of the Guild the message involved is in, if present. This may not be available if the message was sent in a private channel.
+     * Gets the {@link Snowflake} ID of the {@link Guild} the {@link Message} involved is in, if present.
+     * This may not be available if the {@code Message} was sent in a private channel.
      *
-     * @return The ID of the guild involved, if present.
+     * @return The ID of the {@link Guild} involved, if present.
      */
     public Optional<Snowflake> getGuildId() {
         return Optional.ofNullable(guildId).map(Snowflake::of);
     }
 
     /**
-     * Requests to retrieve the Guild the message involved is in, if present. This may not be available if the message was sent in a private channel.
+     * Requests to retrieve the {@link Guild} the {@link Message} involved is in, if present.
+     * This may not be available if the {@code Message} was sent in a private channel.
      *
-     * @return A {@link Mono} where, upon successful completion, emits the Guild containing the Message involved, if present. If an error is received, it is emitted through the Mono.
+     * @return A {@link Mono} where, upon successful completion, emits the {@link Guild} containing the
+     * {@link Message} involved, if present. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Guild> getGuild() {
         return Mono.justOrEmpty(getGuildId()).flatMap(getClient()::getGuildById);
     }
 
     /**
-     * The ReactionEmoji that was removed from a message.
+     * The {@link ReactionEmoji} that was removed from a message.
      *
-     * @return The emoji that has been removed.
+     * @return The {@code Emoji} that has been removed.
      */
     public ReactionEmoji getEmoji() {
         return emoji;

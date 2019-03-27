@@ -22,7 +22,7 @@ import discord4j.core.object.entity.VoiceChannel;
 /**
  * Dispatched when a {@link VoiceChannel} is created in a guild.
  * <p>
- * This event is dispatched by Discord
+ * This event is dispatched by Discord.
  *
  * @see <a href="https://discordapp.com/developers/docs/topics/gateway#channel-create">Channel Create</a>
  */
@@ -36,9 +36,9 @@ public class VoiceChannelCreateEvent extends ChannelEvent {
     }
 
     /**
-     * Gets the VoiceChannel that was created in this event.
+     * Gets the {@link VoiceChannel} that was created in this event.
      *
-     * @return The newly created VoiceChannel.
+     * @return The newly created {@link VoiceChannel}.
      */
     public VoiceChannel getChannel() {
         return channel;

@@ -60,21 +60,23 @@ public class ReadyEvent extends GatewayLifecycleEvent {
     }
 
     /**
-     * Gets the bot user.
+     * Gets the bot {@link User}.
      *
-     * @return The bot user.
+     * @return The bot {@link User}.
      */
     public User getSelf() {
         return self;
     }
 
     /**
-     * Gets a set of Unavailable Guilds. These guilds have not yet been provided via GuildCreate events
+     * Gets a set of Unavailable {@link Guild}. These {@code Guilds} have not yet been provided via a
+     * {@link discord4j.core.event.domain.guild.GuildCreateEvent}
      *
      *
-     * @see <a href="https://discordapp.com/developers/docs/resources/guild#unavailable-guild-object">Unavailable Guild Object</a>
+     * @see <a href="https://discordapp.com/developers/docs/resources/guild#unavailable-guild-object">
+     *     Unavailable Guild Object</a>
      *
-     * @return A set of unavailable guilds.
+     * @return A set of unavailable {@code Guilds}.
      */
     public Set<Guild> getGuilds() {
         return guilds;
@@ -90,7 +92,7 @@ public class ReadyEvent extends GatewayLifecycleEvent {
     }
 
     /**
-     * Gets the trace provided by Discord. Used for debugging - The guilds the user is in.
+     * Gets the trace provided by Discord. Used for debugging - The {@code Guilds} the user is in.
      *
      * @return The trace provided by Discord.
      */
@@ -112,16 +114,17 @@ public class ReadyEvent extends GatewayLifecycleEvent {
         }
 
         /**
-         * Gets the Snowflake ID of the guild.
+         * Gets the {@link Snowflake} ID of the guild.
          *
-         * @return the Snowflake ID of the guild.
+         * @return the {@link Snowflake} ID of the guild.
          */
         public Snowflake getId() {
             return Snowflake.of(id);
         }
 
         /**
-         * Whether or not the Guild has been made available via a {@link discord4j.core.event.domain.guild.GuildCreateEvent}
+         * Whether or not the Guild has been made available via a
+         * {@link discord4j.core.event.domain.guild.GuildCreateEvent}
          *
          * @return Whether or not the Guild has been made available yet.
          */

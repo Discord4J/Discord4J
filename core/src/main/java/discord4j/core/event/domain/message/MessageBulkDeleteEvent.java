@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
  * Corresponding {@link discord4j.core.event.domain.message.MessageDeleteEvent message deletes} are NOT dispatched for
  * messages included in this event.
  * <p>
- * This event is dispatched by Discord
+ * This event is dispatched by Discord.
  *
  * @see <a href="https://discordapp.com/developers/docs/topics/gateway#message-delete-bulk">Message Delete Bulk</a>
  */
@@ -54,7 +54,7 @@ public class MessageBulkDeleteEvent extends MessageEvent {
     }
 
     /**
-     * Gets a list of Snowflake IDs of the messages that were deleted.
+     * Gets a list of {@link Snowflake} IDs of the messages that were deleted.
      *
      * @return a list of IDs of the messages that were deleted.
      */
@@ -65,45 +65,48 @@ public class MessageBulkDeleteEvent extends MessageEvent {
     }
 
     /**
-     * Gets a list of Messages there were deleted in this event.
+     * Gets a list of {@link Message} objects there were deleted in this event.
      *
-     * @return a list of Messages that were deleted.
+     * @return a list of {@link Message} objects that were deleted.
      */
     public Set<Message> getMessages() {
         return messages;
     }
 
     /**
-     * Gets the Snowflake ID of the Channel the messages were deleted in.
+     * Gets the {@link Snowflake} ID of the {@link MessageChannel} the messages were deleted in.
      *
-     * @return The ID of the channel that the messages were deleted in.
+     * @return The ID of the {@link MessageChannel} that the messages were deleted in.
      */
     public Snowflake getChannelId() {
         return Snowflake.of(channelId);
     }
 
     /**
-     * Requests to retrieve the MessageChannel representation of the channel the messages were deleted in.
+     * Requests to retrieve the {@link MessageChannel} representation of the {@code Channel} the messages were deleted
+     * in.
      *
-     * @return A {@link Mono} where, upon successful completion, emits the MessageChannel the messages were deleted from. If an error is received, it is emitted through the Mono.
+     * @return A {@link Mono} where, upon successful completion, emits the {@link MessageChannel} the messages
+     * were deleted from. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<MessageChannel> getChannel() {
         return getClient().getChannelById(getChannelId()).cast(MessageChannel.class);
     }
 
     /**
-     * Gets the Snowflake ID of the Guild the messages were deleted in.
+     * Gets the {@link Snowflake} ID of the {@link Guild} the messages were deleted in.
      *
-     * @return The ID of the Guild the messages were deleted in.
+     * @return The ID of the {@link Guild} the messages were deleted in.
      */
     public Snowflake getGuildId() {
         return Snowflake.of(guildId);
     }
 
     /**
-     * Requests to retrieve the Guild the messages were deleted in.
+     * Requests to retrieve the {@link Guild} the messages were deleted in.
      *
-     * @return A {@link Mono} where, upon successful completion, emits the Guild the messages where deleted from. If an error is received, it is emitted through the Mono.
+     * @return A {@link Mono} where, upon successful completion, emits the {@link Guild} the messages
+     * where deleted from. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Guild> getGuild() {
         return getClient().getGuildById(getGuildId());

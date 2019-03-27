@@ -27,7 +27,7 @@ import java.util.Optional;
  * <p>
  * The old category may not be present if voice channels are not stored.
  * <p>
- * This event is dispatched by Discord
+ * This event is dispatched by Discord.
  *
  * @see <a href="https://discordapp.com/developers/docs/topics/gateway#channel-delete">Channel Delete</a>
  */
@@ -43,18 +43,19 @@ public class VoiceChannelUpdateEvent extends ChannelEvent {
     }
 
     /**
-     * Gets the current, new, version of the VoiceChannel that was updated in this event.
+     * Gets the current, new, version of the {@link VoiceChannel} that was updated in this event.
      *
-     * @return The current version of the updated VoiceChannel
+     * @return The current version of the updated {@link VoiceChannel}
      */
     public VoiceChannel getCurrent() {
         return current;
     }
 
     /**
-     * Gets the old version of the VoiceChannel that was updated in this event, if present. This may not be available if VoiceChannels are not stored.
+     * Gets the old version of the {@link VoiceChannel} that was updated in this event, if present.
+     * This may not be available if {@code VoiceChannels} are not stored.
      *
-     * @return The old version of the updated VoiceChannel, if present.
+     * @return The old version of the updated {@link VoiceChannel}, if present.
      */
     public Optional<VoiceChannel> getOld() {
         return Optional.ofNullable(old);

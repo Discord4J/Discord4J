@@ -44,26 +44,32 @@ public class PinsUpdateEvent extends ChannelEvent {
     }
 
     /**
-     * Gets the Snowflake ID of the Channel the pinned/unpinned message is in.
+     * Gets the {@link Snowflake} ID of the {@link MessageChannel} the pinned/unpinned
+     * {@link discord4j.core.object.entity.Message} is in.
      *
-     * @return the ID of the channel involved.
+     * @return the ID of the {@link MessageChannel} involved.
      */
     public Snowflake getChannelId() {
         return Snowflake.of(channelId);
     }
 
     /**
-     * Requests to retrieve the MessageChannel the pinned/unpinned message is in.
+     * Requests to retrieve the {@link MessageChannel} the pinned/unpinned
+     * {@link discord4j.core.object.entity.Message} is in.
      *
-     * @return A {@link Mono} where, upon successful completion, emits the MessageChannel involved. If an error is received, it is emitted through the Mono.
+     * @return A {@link Mono} where, upon successful completion, emits the {@link MessageChannel} involved.
+     * If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<MessageChannel> getChannel() {
         return getClient().getChannelById(getChannelId()).cast(MessageChannel.class);
     }
 
     /**
-     * Gets the ISO8601 timestamp of when the last pinned message was pinned, if present. This is NOT the timestamp of when the message was created.
-     * @return The timestamp of the when the last pinned message was pinned, if present.
+     * Gets the ISO8601 timestamp of when the last pinned {@link discord4j.core.object.entity.Message} w
+     * as pinned, if present. This is NOT the timestamp of when the {@code Message} was created.
+     * 
+     * @return The timestamp of the when the last pinned {@link discord4j.core.object.entity.Message} was pinned,
+     * if present.
      */
     public Optional<Instant> getLastPinTimestamp() {
         return Optional.ofNullable(lastPinTimestamp);
