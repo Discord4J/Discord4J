@@ -71,6 +71,7 @@ public class MessageUpdateEvent extends MessageEvent {
 
     /**
      * Gets the Snowflake ID of the message that has been updated in this event.
+     *
      * @return THe ID of the message.
      */
     public Snowflake getMessageId() {
@@ -78,8 +79,9 @@ public class MessageUpdateEvent extends MessageEvent {
     }
 
     /**
-     * Gets the Message that has been updated in this event.
-     * @return The message that has been updated.
+     * Requests to retrieve the Message that has been updated in this event.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits the Message that was updated. If an error is received, it is emitted through the Mono.
      */
     public Mono<Message> getMessage() {
         return getClient().getMessageById(getChannelId(), getMessageId());
@@ -87,6 +89,7 @@ public class MessageUpdateEvent extends MessageEvent {
 
     /**
      * Gets the Snowflake ID of the channel containing the updated Message.
+     *
      * @return The ID of the channel containing the updated Message.
      */
     public Snowflake getChannelId() {
@@ -94,39 +97,44 @@ public class MessageUpdateEvent extends MessageEvent {
     }
 
     /**
-     * Gets the Channel containing the updated Message in this event.
-     * @return The Channel containing the updated Message.
+     * Requests to retrieve the Channel containing the updated Message in this event.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits the MessageChannel containing the message. If an error is received, it is emitted through the Mono.
      */
     public Mono<MessageChannel> getChannel() {
         return getClient().getChannelById(getChannelId()).cast(MessageChannel.class);
     }
 
     /**
-     * The Snowflake ID of the Guild containing the updated Message in this event.
-     * @return The ID of the guild containing the updated Message.
+     * The Snowflake ID of the Guild containing the updated Message in this event, if present.
+     *
+     * @return The ID of the guild containing the updated Message, if present.
      */
     public Optional<Snowflake> getGuildId() {
         return Optional.ofNullable(guildId).map(Snowflake::of);
     }
 
     /**
-     * Gets the Guild containing the updated Message in this event.
-     * @return The Guild containing the updated Message.
+     * Request to retrieve the Guild containing the updated Message in this event.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits the Guild containing the updated message. If an error is received, it is emitted through the Mono.
      */
     public Mono<Guild> getGuild() {
         return Mono.justOrEmpty(getGuildId()).flatMap(getClient()::getGuildById);
     }
 
     /**
-     * Gets the old version of the updated Message. This may not be available if messages are not stored.
-     * @return The old version of the updated Message.
+     * Gets the old version of the updated Message, if present. This may not be available if messages are not stored.
+     *
+     * @return The old version of the updated Message, if present.
      */
     public Optional<Message> getOld() {
         return Optional.ofNullable(old);
     }
 
     /**
-     * gets whether or not the content of the message has been changed in this event.
+     * Gets whether or not the content of the message has been changed in this event.
+     *
      * @return Whether or not the content of the message has been changed.
      */
     public boolean isContentChanged() {
@@ -134,8 +142,9 @@ public class MessageUpdateEvent extends MessageEvent {
     }
 
     /**
-     * Gets the current, new, version of the message's content in this event.
-     * @return The current version of the Message's content.
+     * Gets the current, new, version of the message's content in this event, if present.
+     *
+     * @return The current version of the Message's content, if present.
      */
     public Optional<String> getCurrentContent() {
         return Optional.ofNullable(currentContent);
@@ -143,6 +152,7 @@ public class MessageUpdateEvent extends MessageEvent {
 
     /**
      * Gets whether or not the embed in the message has been changed in this event.
+     *
      * @return Whether or not the embed in the message has been changed.
      */
     public boolean isEmbedsChanged() {
@@ -151,6 +161,7 @@ public class MessageUpdateEvent extends MessageEvent {
 
     /**
      * Gets the current, new, version of the message's embed in this event.
+     *
      * @return The current version of the Message's embed.
      */
     public List<Embed> getCurrentEmbeds() {

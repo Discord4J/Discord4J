@@ -52,6 +52,7 @@ public class MessageCreateEvent extends MessageEvent {
 
     /**
      * Gets the message that was created in this event.
+     *
      * @return The Message that was created.
      */
     public Message getMessage() {
@@ -59,24 +60,27 @@ public class MessageCreateEvent extends MessageEvent {
     }
 
     /**
-     * Gets the Snowflake ID of the guild the Message was created in. This may not be available if the message was sent in a private channel.
-     * @return The ID of the guild containing the message.
+     * Gets the Snowflake ID of the guild the Message was created in, if present. This may not be available if the message was sent in a private channel.
+     *
+     * @return The ID of the guild containing the message, if present.
      */
     public Optional<Snowflake> getGuildId() {
         return Optional.ofNullable(guildId).map(Snowflake::of);
     }
 
     /**
-     * Gets the guild the Message was created in. This may not be available if the message was sent in a private channel.
-     * @return The guild containing the message.
+     * Requests to retrieve the guild the Message was created in, if present. This may not be available if the message was sent in a private channel.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits the Guild the message was created in, if present. If an error is received, it is emitted through the Mono.
      */
     public Mono<Guild> getGuild() {
         return Mono.justOrEmpty(getGuildId()).flatMap(getClient()::getGuildById);
     }
 
     /**
-     * Gets the Member who has sent the message created in this event. This may not be available if the message was sent in a private channel.
-     * @return The Member who has sent the message created in this event.
+     * Gets the Member who has sent the message created in this event, if present. This may not be available if the message was sent in a private channel.
+     *
+     * @return The Member who has sent the message created in this event, if present.
      */
     public Optional<Member> getMember() {
         return Optional.ofNullable(member);

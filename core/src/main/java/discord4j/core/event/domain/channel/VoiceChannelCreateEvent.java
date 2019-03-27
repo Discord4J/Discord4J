@@ -37,6 +37,7 @@ public class VoiceChannelCreateEvent extends ChannelEvent {
 
     /**
      * Gets the VoiceChannel that was created in this event.
+     *
      * @return The newly created VoiceChannel.
      */
     public VoiceChannel getChannel() {

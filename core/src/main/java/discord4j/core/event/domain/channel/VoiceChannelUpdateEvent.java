@@ -44,6 +44,7 @@ public class VoiceChannelUpdateEvent extends ChannelEvent {
 
     /**
      * Gets the current, new, version of the VoiceChannel that was updated in this event.
+     *
      * @return The current version of the updated VoiceChannel
      */
     public VoiceChannel getCurrent() {
@@ -51,8 +52,9 @@ public class VoiceChannelUpdateEvent extends ChannelEvent {
     }
 
     /**
-     * Gets the old version of the VoiceChannel that was updated in this event. This may not be available if VoiceChannels are not stored.
-     * @return The old version of the updated VoiceChannel.
+     * Gets the old version of the VoiceChannel that was updated in this event, if present. This may not be available if VoiceChannels are not stored.
+     *
+     * @return The old version of the updated VoiceChannel, if present.
      */
     public Optional<VoiceChannel> getOld() {
         return Optional.ofNullable(old);

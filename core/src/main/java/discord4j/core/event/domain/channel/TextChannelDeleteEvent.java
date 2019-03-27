@@ -37,6 +37,7 @@ public class TextChannelDeleteEvent extends ChannelEvent {
 
     /**
      * Gets the TextChannel that was deleted in this event.
+     *
      * @return The deleted TextChannel.
      */
     public TextChannel getChannel() {

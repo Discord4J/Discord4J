@@ -46,6 +46,7 @@ public class TypingStartEvent extends ChannelEvent {
 
     /**
      * Gets the Snowflake ID of the channel the user has started typing in.
+     *
      * @return the ID of the channel the user is typing in.
      */
     public Snowflake getChannelId() {
@@ -53,8 +54,9 @@ public class TypingStartEvent extends ChannelEvent {
     }
 
     /**
-     * Gets the MessageChannel the user has started typing in.
-     * @return The MessageChannel the user is typing in.
+     * Requests to retrieve the MessageChannel the user has started typing in.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits the MessageChannel the user has started typing in. If an error is received, it is emitted through the Mono.
      */
     public Mono<MessageChannel> getChannel() {
         return getClient().getChannelById(getChannelId()).cast(MessageChannel.class);
@@ -62,6 +64,7 @@ public class TypingStartEvent extends ChannelEvent {
 
     /**
      * Gets the Snowflake ID of the User who has started typing in this event.
+     *
      * @return The ID of the User who has started typing.
      */
     public Snowflake getUserId() {
@@ -69,8 +72,9 @@ public class TypingStartEvent extends ChannelEvent {
     }
 
     /**
-     * Gets the User who has started typing in this event.
-     * @return The User who has started typing.
+     * Requests to retrieve the User who has started typing in this event.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits the User that has started typing. If an error is received, it is emitted through the Mono.
      */
     public Mono<User> getUser() {
         return getClient().getUserById(getUserId());
@@ -78,6 +82,7 @@ public class TypingStartEvent extends ChannelEvent {
 
     /**
      * Gets the time at which the user started typing in this event.
+     *
      * @return The time at which the user starting typing.
      */
     public Instant getStartTime() {

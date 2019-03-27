@@ -46,6 +46,7 @@ public class MemberChunkEvent extends GuildEvent {
 
     /**
      * Gets the Snowflake ID of the guild involved in this event.
+     *
      * @return The Snowflake ID of the guild.
      */
     public Snowflake getGuildId() {
@@ -53,8 +54,9 @@ public class MemberChunkEvent extends GuildEvent {
     }
 
     /**
-     * Gets the Guild involved in the event.
-     * @return The Guild involved.
+     * Requests to retrieve the Guild involved in the event.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits the Guild involved in the event. If an error is received, it is emitted through the Mono.
      */
     public Mono<Guild> getGuild() {
         return getClient().getGuildById(getGuildId());
@@ -63,6 +65,7 @@ public class MemberChunkEvent extends GuildEvent {
     /**
      * Gets a list of Members that have been streamed to the client in this event.
      * This may not contain all members of the guild.
+     *
      * @return The list of Members streamed to the client in this event.
      */
     public Set<Member> getMembers() {

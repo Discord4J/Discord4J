@@ -52,6 +52,7 @@ public class ReadyEvent extends GatewayLifecycleEvent {
 
     /**
      * Gets the gateway protocol version being used. Ex. 6.
+     *
      * @return The gateway protocol version being used.
      */
     public int getGatewayVersion() {
@@ -60,6 +61,7 @@ public class ReadyEvent extends GatewayLifecycleEvent {
 
     /**
      * Gets the bot user.
+     *
      * @return The bot user.
      */
     public User getSelf() {
@@ -71,6 +73,7 @@ public class ReadyEvent extends GatewayLifecycleEvent {
      *
      *
      * @see <a href="https://discordapp.com/developers/docs/resources/guild#unavailable-guild-object">Unavailable Guild Object</a>
+     *
      * @return A set of unavailable guilds.
      */
     public Set<Guild> getGuilds() {
@@ -79,6 +82,7 @@ public class ReadyEvent extends GatewayLifecycleEvent {
 
     /**
      * Gets the current session ID of the connection.
+     *
      * @return the session ID of the connection
      */
     public String getSessionId() {
@@ -87,6 +91,7 @@ public class ReadyEvent extends GatewayLifecycleEvent {
 
     /**
      * Gets the trace provided by Discord. Used for debugging - The guilds the user is in.
+     *
      * @return The trace provided by Discord.
      */
     public String[] getTrace() {
@@ -108,6 +113,7 @@ public class ReadyEvent extends GatewayLifecycleEvent {
 
         /**
          * Gets the Snowflake ID of the guild.
+         *
          * @return the Snowflake ID of the guild.
          */
         public Snowflake getId() {
@@ -116,6 +122,7 @@ public class ReadyEvent extends GatewayLifecycleEvent {
 
         /**
          * Whether or not the Guild has been made available via a {@link discord4j.core.event.domain.guild.GuildCreateEvent}
+         *
          * @return Whether or not the Guild has been made available yet.
          */
         public boolean isAvailable() {

@@ -37,6 +37,7 @@ public class PrivateChannelCreateEvent extends ChannelEvent {
 
     /**
      * Gets the PrivateChannel that was created in this event.
+     *
      * @return The PrivateChannel that was created.
      */
     public PrivateChannel getChannel() {

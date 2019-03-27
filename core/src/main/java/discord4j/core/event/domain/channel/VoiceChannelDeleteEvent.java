@@ -37,6 +37,7 @@ public class VoiceChannelDeleteEvent extends ChannelEvent {
 
     /**
      * Gets the VoiceChannel that has been deleted in this event.
+     *
      * @return The deleted VoiceChannel.
      */
     public VoiceChannel getChannel() {

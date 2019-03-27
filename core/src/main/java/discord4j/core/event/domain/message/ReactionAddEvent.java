@@ -58,6 +58,7 @@ public class ReactionAddEvent extends MessageEvent {
 
     /**
      * Gets the Snowflake ID of the User who added a reaction in this event.
+     *
      * @return The Id of the User who added a reaction.
      */
     public Snowflake getUserId() {
@@ -65,8 +66,9 @@ public class ReactionAddEvent extends MessageEvent {
     }
 
     /**
-     * The User who added a reaction in this event.
-     * @return The user who added a reaction.
+     * Requests to retrieve the User who added a reaction in this event.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits the User that has added the reaction. If an error is received, it is emitted through the Mono.
      */
     public Mono<User> getUser() {
         return getClient().getUserById(getUserId());
@@ -74,6 +76,7 @@ public class ReactionAddEvent extends MessageEvent {
 
     /**
      * Gets the Snowflake ID of the channel the message and reaction are in.
+     *
      * @return The ID of the channel involved.
      */
     public Snowflake getChannelId() {
@@ -81,8 +84,9 @@ public class ReactionAddEvent extends MessageEvent {
     }
 
     /**
-     * Gets the MessageChannel the message and reaction are in.
-     * @return The MessageChannel involved.
+     * Requests to retrieve the MessageChannel the message and reaction are in.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits the MessageChannel containing the message in the event. If an error is received, it is emitted through the Mono.
      */
     public Mono<MessageChannel> getChannel() {
         return getClient().getChannelById(getChannelId()).cast(MessageChannel.class);
@@ -90,6 +94,7 @@ public class ReactionAddEvent extends MessageEvent {
 
     /**
      * Gets the Snowflake ID of the message the reaction was added to in this event.
+     *
      * @return The ID of the message the reaction was added to.
      */
     public Snowflake getMessageId() {
@@ -97,24 +102,27 @@ public class ReactionAddEvent extends MessageEvent {
     }
 
     /**
-     * Gets the Message the reaction was added to in this event.
-     * @return The Message the reaction was added to.
+     * Request to retrieve the Message the reaction was added to in this event.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits the Message the reaction was added to. If an error is received, it is emitted through the Mono.
      */
     public Mono<Message> getMessage() {
         return getClient().getMessageById(getChannelId(), getMessageId());
     }
 
     /**
-     * Gets the Snowflake ID of the Guild containing the Message and Reaction. This may not be available if the reaction is to a message in a private channel.
-     * @return The ID of the guild involved in the event.
+     * Gets the Snowflake ID of the Guild containing the Message and Reaction, if present. This may not be available if the reaction is to a message in a private channel.
+     *
+     * @return The ID of the guild involved in the event, if present.
      */
     public Optional<Snowflake> getGuildId() {
         return Optional.ofNullable(guildId).map(Snowflake::of);
     }
 
     /**
-     * Gets the Guild containing the Message and reaction. This may not be available if the reaction is to a message in a private channel.
-     * @return The Guild involved in this event.
+     * Request to retrieve the Guild containing the Message and reaction, if present. This may not be available if the reaction is to a message in a private channel.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits the Guild containing the message involved, if present. If an error is received, it is emitted through the Mono.
      */
     public Mono<Guild> getGuild() {
         return Mono.justOrEmpty(getGuildId()).flatMap(getClient()::getGuildById);
@@ -122,6 +130,7 @@ public class ReactionAddEvent extends MessageEvent {
 
     /**
      * Gets the ReactionEmoji that was added to the Message in this event.
+     *
      * @return The emoji added to the message as a reaction.
      */
     public ReactionEmoji getEmoji() {

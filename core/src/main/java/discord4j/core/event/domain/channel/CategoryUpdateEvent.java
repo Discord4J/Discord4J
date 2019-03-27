@@ -44,6 +44,7 @@ public class CategoryUpdateEvent extends ChannelEvent {
 
     /**
      * Get the current, new, version of the Category that has been updated in this event.
+     *
      * @return The current version of the updated Category.
      */
     public Category getCurrent() {
@@ -51,8 +52,9 @@ public class CategoryUpdateEvent extends ChannelEvent {
     }
 
     /**
-     * Gets the old version of the Category that has been updated in this event. This may not be available if Categories are not stored.
-     * @return The old version of the updated Category
+     * Gets the old version of the Category that has been updated in this event, if present. This may not be available if Categories are not stored.
+     *
+     * @return The old version of the updated Category, if present.
      */
     public Optional<Category> getOld() {
         return Optional.ofNullable(old);

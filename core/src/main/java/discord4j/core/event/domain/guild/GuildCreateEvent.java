@@ -44,6 +44,7 @@ public class GuildCreateEvent extends GuildEvent {
 
     /**
      * Gets the guild that has become available in this event.
+     *
      * @return The guild that has become available.
      */
     public Guild getGuild() {

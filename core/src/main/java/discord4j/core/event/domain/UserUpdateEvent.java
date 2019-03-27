@@ -42,6 +42,7 @@ public class UserUpdateEvent extends Event {
 
     /**
      * Gets the current, new version of the User that has been updated in this event.
+     *
      * @return The current version of the User involved.
      */
     public User getCurrent() {
@@ -49,8 +50,9 @@ public class UserUpdateEvent extends Event {
     }
 
     /**
-     * Gets the old version of the User that has been updated in this event. This may not be available if Users are not stored.
-     * @return The old version of the User involved.
+     * Gets the old version of the User that has been updated in this event, if present. This may not be available if Users are not stored.
+     *
+     * @return The old version of the User involved, if present.
      */
     public Optional<User> getOld() {
         return Optional.ofNullable(old);

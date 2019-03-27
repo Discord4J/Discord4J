@@ -44,6 +44,7 @@ public class RoleUpdateEvent extends RoleEvent {
 
     /**
      * Gets the current, new version of the Role that was updated in the event.
+     *
      * @return The current version of the updated Role.
      */
     public Role getCurrent() {
@@ -51,8 +52,9 @@ public class RoleUpdateEvent extends RoleEvent {
     }
 
     /**
-     * Gets the old version of the Role that was updated in this event. This may not be available if Roles are not stored.
-     * @return The old version of the updated Role.
+     * Gets the old version of the Role that was updated in this event. if present. This may not be available if Roles are not stored.
+     *
+     * @return The old version of the updated Role, if present.
      */
     public Optional<Role> getOld() {
         return Optional.ofNullable(old);

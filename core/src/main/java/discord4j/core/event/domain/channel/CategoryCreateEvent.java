@@ -37,6 +37,7 @@ public class CategoryCreateEvent extends ChannelEvent {
 
     /**
      * Gets the Category that was created in this event.
+     *
      * @return The category created.
      */
     public Category getCategory() {

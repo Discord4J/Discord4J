@@ -50,6 +50,7 @@ public class MessageDeleteEvent extends MessageEvent {
 
     /**
      * Gets the Snowflake ID of the message that was deleted.
+     *
      * @return The ID of the deleted message.
      */
     public Snowflake getMessageId() {
@@ -57,8 +58,9 @@ public class MessageDeleteEvent extends MessageEvent {
     }
 
     /**
-     * Gets the Message that was deleted in this event. This may not be available if messages are not stored.
-     * @return The deleted message.
+     * Gets the Message that was deleted in this event, if present. This may not be available if messages are not stored.
+     *
+     * @return The deleted message, if present.
      */
     public Optional<Message> getMessage() {
         return Optional.ofNullable(message);
@@ -66,6 +68,7 @@ public class MessageDeleteEvent extends MessageEvent {
 
     /**
      * Gets the Snowflake ID of the channel the message was deleted from.
+     *
      * @return The ID of the channel that the message was deleted from.
      */
     public Snowflake getChannelId() {
@@ -73,8 +76,9 @@ public class MessageDeleteEvent extends MessageEvent {
     }
 
     /**
-     * Gets the MessageChannel the Message was deleted from.
-     * @return The MessageChannel the Message was deleted from.
+     * Requests to retrieve the MessageChannel the Message was deleted from.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits the MessageChannel the message was deleted in. If an error is received, it is emitted through the Mono.
      */
     public Mono<MessageChannel> getChannel() {
         return getClient().getChannelById(getChannelId()).cast(MessageChannel.class);

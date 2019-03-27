@@ -50,6 +50,7 @@ public class RoleDeleteEvent extends RoleEvent {
 
     /**
      * Gets the Snowflake ID of the guild the role was deleted in.
+     *
      * @return The ID of the guild involved.
      */
     public Snowflake getGuildId() {
@@ -57,8 +58,9 @@ public class RoleDeleteEvent extends RoleEvent {
     }
 
     /**
-     * Gets the Guild the Role was deleted in.
-     * @return The Guild involved.
+     * Requests to retrieve the Guild the Role was deleted in.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits the Guild containing the deleted role. If an error is received, it is emitted through the Mono.
      */
     public Mono<Guild> getGuild() {
         return getClient().getGuildById(getGuildId());
@@ -66,15 +68,18 @@ public class RoleDeleteEvent extends RoleEvent {
 
     /**
      * Gets the Snowflake ID of the Role that was deleted in this event.
+     *
      * @return The ID of the deleted Role.
+     *
      */
     public Snowflake getRoleId() {
         return Snowflake.of(roleId);
     }
 
     /**
-     * Gets the Role that was deleted in this event. This may not be available if Roles are not stored.
-     * @return The Role that was deleted in this event.
+     * Gets the Role that was deleted in this event, if present. This may not be available if Roles are not stored.
+     *
+     * @return The Role that was deleted in this event, if present.
      */
     public Optional<Role> getRole() {
         return Optional.ofNullable(role);

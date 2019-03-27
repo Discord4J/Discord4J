@@ -38,6 +38,7 @@ public class ResumeEvent extends GatewayLifecycleEvent {
 
     /**
      * Gets the trace of the event. Used for debugging - the guilds the user is in.
+     *
      * @return The trace provided by Discord, containing the guild the user is in.
      */
     public String[] getTrace() {

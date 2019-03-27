@@ -35,6 +35,7 @@ public class ReconnectEvent extends GatewayLifecycleEvent {
 
     /**
      * Gets the current reconnect attempt.
+     *
      * @return The current reconnect attempt.
      */
     public int getCurrentAttempt() {

@@ -45,6 +45,7 @@ public class EmojisUpdateEvent extends GuildEvent {
 
     /**
      * Gets the Snowflake ID of the guild involved in the event.
+     *
      * @return The Snowflake ID of the guild.
      */
     public Snowflake getGuildId() {
@@ -52,8 +53,9 @@ public class EmojisUpdateEvent extends GuildEvent {
     }
 
     /**
-     * Gets the Guild involved in the event.
-     * @return The Guild involved in the event.
+     * Requests to retrieve the Guild whose emojis have been updated.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits the Guild involved. If an error is received, it is emitted through the Mono.
      */
     public Mono<Guild> getGuild() {
         return getClient().getGuildById(getGuildId());
@@ -61,6 +63,7 @@ public class EmojisUpdateEvent extends GuildEvent {
 
     /**
      * Gets a list of ALL emojis of the Guild.
+     *
      * @return A list of ALL emojis of the Guild.
      */
     public Set<GuildEmoji> getEmojis() {

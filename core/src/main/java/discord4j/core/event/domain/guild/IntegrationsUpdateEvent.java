@@ -40,6 +40,7 @@ public class IntegrationsUpdateEvent extends GuildEvent {
 
     /**
      * The Snowflake ID of the Guild involved in this event.
+     *
      * @return The Snowflake ID of the guild.
      */
     public Snowflake getGuildId() {
@@ -47,8 +48,9 @@ public class IntegrationsUpdateEvent extends GuildEvent {
     }
 
     /**
-     * The Guild involved in this event.
-     * @return The Guild involved.
+     * Requests to retrieve the Guild whose integrations have been updated.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits the Guild involved in the event. If an error is received, it is emitted through the Mono.
      */
     public Mono<Guild> getGuild() {
         return getClient().getGuildById(getGuildId());

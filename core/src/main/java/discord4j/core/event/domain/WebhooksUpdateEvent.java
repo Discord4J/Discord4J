@@ -44,6 +44,7 @@ public class WebhooksUpdateEvent extends Event {
 
     /**
      * Gets the Snowflake ID of the guild that had a webhook updated in this event.
+     *
      * @return The ID of the guild involved.
      */
     public Snowflake getGuildId() {
@@ -51,8 +52,9 @@ public class WebhooksUpdateEvent extends Event {
     }
 
     /**
-     * Gets the Guild that had a webhook updated in this event.
-     * @return The ID of the guild involved.
+     * Requests to retrieve the Guild that had a webhook updated in this event.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits the Guild involved in the event. If an error is
      */
     public Mono<Guild> getGuild() {
         return getClient().getGuildById(getGuildId());
@@ -60,6 +62,7 @@ public class WebhooksUpdateEvent extends Event {
 
     /**
      * Gets the Snowflake ID of the channel the webhook belongs to.
+     *
      * @return The ID of the channel involved.
      */
     public Snowflake getChannelId() {
@@ -67,8 +70,9 @@ public class WebhooksUpdateEvent extends Event {
     }
 
     /**
-     * Gets the TextChannel the webhook belongs to.
-     * @return The TextChannel involved.
+     * Requests to retrieve the TextChannel the webhook belongs to.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits the TextChannel involved in the event. If an error is received, it is emitted through the Mono.
      */
     public Mono<TextChannel> getChannel() {
         return getClient().getChannelById(getChannelId()).cast(TextChannel.class);

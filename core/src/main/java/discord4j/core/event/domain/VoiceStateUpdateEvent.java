@@ -46,6 +46,7 @@ public class VoiceStateUpdateEvent extends Event {
 
     /**
      * Gets the current, new, VoiceState that has been updated in this event.
+     *
      * @return The current VoiceState.
      */
     public VoiceState getCurrent() {
@@ -53,8 +54,9 @@ public class VoiceStateUpdateEvent extends Event {
     }
 
     /**
-     * Gets the old VoiceState that has been updated in this event. This may not be available if VoiceStates are not stored.
-     * @return The old VoiceState.
+     * Gets the old VoiceState that has been updated in this event, if present. This may not be available if VoiceStates are not stored.
+     *
+     * @return The old VoiceState, if present.
      */
     public Optional<VoiceState> getOld() {
         return Optional.ofNullable(old);

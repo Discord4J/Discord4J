@@ -52,6 +52,7 @@ public class MemberLeaveEvent extends GuildEvent {
 
     /**
      * Gets the User that has left the Guild in this event.
+     *
      * @return The User that has left the Guild
      */
     public User getUser() {
@@ -60,6 +61,7 @@ public class MemberLeaveEvent extends GuildEvent {
 
     /**
      * Gets the Snowflake ID of the Guild that the User has left in this event.
+     *
      * @return The ID of the Guild.
      */
     public Snowflake getGuildId() {
@@ -67,16 +69,18 @@ public class MemberLeaveEvent extends GuildEvent {
     }
 
     /**
-     * Gets the Guild that the User has left in this event.
-     * @return The Guild that the user has left.
+     * Requests to retrieve the Guild that the User has left in this event.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits the Guild that the user has left. If an error is received, it is emitted through the Mono.
      */
     public Mono<Guild> getGuild() {
         return getClient().getGuildById(getGuildId());
     }
 
     /**
-     * Gets the Member object of the User that has left the Guild in this event.
-     * @return The Member object of the User that has left the Guild.
+     * Gets the Member object of the User that has left the Guild in this event, if present.
+     *
+     * @return The Member object of the User that has left the Guild, if present.
      */
     public Optional<Member> getMember() {
         return Optional.ofNullable(member);

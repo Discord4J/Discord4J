@@ -42,6 +42,7 @@ public class UnbanEvent extends GuildEvent {
 
     /**
      * Gets the User that has been unbanned in this event.
+     *
      * @return The User that has been unbanned.
      */
     public User getUser() {
@@ -50,6 +51,7 @@ public class UnbanEvent extends GuildEvent {
 
     /**
      * Gets the Snowflake ID of the Guild the Member was unbanned from.
+     *
      * @return The ID of the Guild involved.
      */
     public Snowflake getGuildId() {
@@ -57,8 +59,9 @@ public class UnbanEvent extends GuildEvent {
     }
 
     /**
-     * Gets the Guild the Member was unbanned from.
-     * @return The Guild involved.
+     * Requests to retrieve the Guild the Member was unbanned from.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits the Guild the Member was unbanned from. If an error is received, it is emitted through the Mono.
      */
     public Mono<Guild> getGuild() {
         return getClient().getGuildById(getGuildId());

@@ -45,6 +45,7 @@ public class PinsUpdateEvent extends ChannelEvent {
 
     /**
      * Gets the Snowflake ID of the Channel the pinned/unpinned message is in.
+     *
      * @return the ID of the channel involved.
      */
     public Snowflake getChannelId() {
@@ -52,16 +53,17 @@ public class PinsUpdateEvent extends ChannelEvent {
     }
 
     /**
-     * Gets the MessageChannel the pinned/unpinned message is in.
-     * @return The MessageChannel involved.
+     * Requests to retrieve the MessageChannel the pinned/unpinned message is in.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits the MessageChannel involved. If an error is received, it is emitted through the Mono.
      */
     public Mono<MessageChannel> getChannel() {
         return getClient().getChannelById(getChannelId()).cast(MessageChannel.class);
     }
 
     /**
-     * Gets the ISO8601 timestamp of when the last pinned message was pinned. This is NOT the timestamp of when the message was created.
-     * @return The timestamp of the when the last pinned message was pinned.
+     * Gets the ISO8601 timestamp of when the last pinned message was pinned, if present. This is NOT the timestamp of when the message was created.
+     * @return The timestamp of the when the last pinned message was pinned, if present.
      */
     public Optional<Instant> getLastPinTimestamp() {
         return Optional.ofNullable(lastPinTimestamp);

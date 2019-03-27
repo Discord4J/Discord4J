@@ -37,6 +37,7 @@ public class PrivateChannelDeleteEvent extends ChannelEvent {
 
     /**
      * Gets the PrivateChannel that was deleted in this event.
+     *
      * @return The PrivateChannel that was deleted.
      */
     public PrivateChannel getChannel() {

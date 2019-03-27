@@ -44,6 +44,7 @@ public class TextChannelUpdateEvent extends ChannelEvent {
 
     /**
      * Gets the current, new version of the TextChannel that was updated in this event.
+     *
      * @return The current version of the updated TextChannel.
      */
     public TextChannel getCurrent() {
@@ -51,8 +52,9 @@ public class TextChannelUpdateEvent extends ChannelEvent {
     }
 
     /**
-     * Gets the old version of the TextChannel that was updated in this event. This may not be available if TextChannels are not stored.
-     * @return The old version of the updated TextChannel.
+     * Gets the old version of the TextChannel that was updated in this event, if present. This may not be available if TextChannels are not stored.
+     *
+     * @return The old version of the updated TextChannel, if present.
      */
     public Optional<TextChannel> getOld() {
         return Optional.ofNullable(old);

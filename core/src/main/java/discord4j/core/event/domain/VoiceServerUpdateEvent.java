@@ -45,6 +45,7 @@ public class VoiceServerUpdateEvent extends Event {
 
     /**
      * Gets the voice connection token for the guild.
+     *
      * @return The voice connection token.
      */
     public String getToken() {
@@ -53,6 +54,7 @@ public class VoiceServerUpdateEvent extends Event {
 
     /**
      * Gets the Snowflake ID of the guild whose voice server has been updated in this event.
+     *
      * @return The ID of the guild involved.
      */
     public Snowflake getGuildId() {
@@ -60,8 +62,9 @@ public class VoiceServerUpdateEvent extends Event {
     }
 
     /**
-     * Gets the Guild whose voice server has been updated in this event.
-     * @return The Guild involved.
+     * Requests to retrieve the Guild whose voice server has been updated in this event.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits the Guild whose voice server has been updated. If an error is received, it is emitted through the Mono.
      */
     public Mono<Guild> getGuild() {
         return getClient().getGuildById(getGuildId());
@@ -69,6 +72,7 @@ public class VoiceServerUpdateEvent extends Event {
 
     /**
      * Gets the voice server host's endpoint URL.
+     *
      * @return The void server host's endpoint URL.
      */
     @Nullable
