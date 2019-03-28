@@ -39,8 +39,6 @@ import reactor.core.Exceptions;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Hooks;
 import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Scheduler;
-import reactor.core.scheduler.Schedulers;
 import reactor.netty.DisposableServer;
 import reactor.netty.http.server.HttpServer;
 import reactor.util.function.Tuple2;
@@ -71,17 +69,14 @@ public class StoreBotTest {
         JacksonResourceProvider jackson = new JacksonResourceProvider();
         startHttpServer(clients, counts, jackson.getObjectMapper());
         ShardingStoreRegistry registry = new ShardingJdkStoreRegistry();
-        Scheduler eventScheduler = Schedulers.newSingle("events");
         new ShardingClientBuilder(token)
                 .setShardingStoreRegistry(registry)
                 .build()
-                .publishOn(Schedulers.elastic())
                 .map(builder -> builder.setJacksonResourceProvider(jackson)
                         // showcase disabling the cache for messages
                         .setStoreService(MappingStoreService.create()
                                 .setMapping(MessageBean.class, new NoOpStoreService())
                                 .setFallback(new ShardingJdkStoreService(registry)))
-                        .setEventScheduler(eventScheduler)
                         .setInitialPresence(Presence.invisible()))
                 .map(DiscordClientBuilder::build)
                 .doOnNext(client -> clients.put(client.getConfig().getShardIndex(), client))
@@ -96,7 +91,6 @@ public class StoreBotTest {
                 .stream()
                 .filter(cls -> reflections.getSubTypesOf(cls).isEmpty())
                 .forEach(type -> {
-                    log.info("Registering event {} for client {}", type, client.getConfig().getShardIndex());
                     client.getEventDispatcher().on(type)
                             .map(event -> event.getClass().getSimpleName())
                             .map(name -> counts.computeIfAbsent(name, k -> new AtomicLong()).addAndGet(1))

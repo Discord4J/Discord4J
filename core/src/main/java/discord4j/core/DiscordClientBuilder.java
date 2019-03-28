@@ -50,6 +50,7 @@ import reactor.core.publisher.Hooks;
 import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
 import reactor.netty.http.client.HttpClient;
+import reactor.scheduler.forkjoin.ForkJoinPoolScheduler;
 import reactor.util.Logger;
 import reactor.util.Loggers;
 import reactor.util.annotation.Nullable;
@@ -59,7 +60,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Properties;
-import java.util.concurrent.Executors;
 
 /**
  * Builder suited for creating a {@link DiscordClient}.
@@ -532,7 +532,7 @@ public final class DiscordClientBuilder {
         if (eventScheduler != null) {
             return eventScheduler;
         }
-        return Schedulers.fromExecutor(Executors.newWorkStealingPool(), true);
+        return ForkJoinPoolScheduler.create("events");
     }
 
     private JacksonResourceProvider initJacksonResources() {
