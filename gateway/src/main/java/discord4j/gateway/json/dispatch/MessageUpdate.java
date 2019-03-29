@@ -42,11 +42,10 @@ public class MessageUpdate implements Dispatch {
     private Possible<Boolean> mentionEveryone = Possible.absent();
     @UnsignedJson
     private long id;
-    @Nullable
     private Possible<EmbedResponse[]> embeds = Possible.absent();
     @JsonProperty("edited_timestamp")
-    private Possible<String> editedTimestamp = Possible.absent();
     @Nullable
+    private String editedTimestamp;
     private Possible<String> content = Possible.absent();
     @JsonProperty("channel_id")
     @UnsignedJson
@@ -100,11 +99,11 @@ public class MessageUpdate implements Dispatch {
         return embeds;
     }
 
-    public Possible<String> getEditedTimestamp() {
+    @Nullable
+    public String getEditedTimestamp() {
         return editedTimestamp;
     }
 
-    @Nullable
     public Possible<String> getContent() {
         return content;
     }

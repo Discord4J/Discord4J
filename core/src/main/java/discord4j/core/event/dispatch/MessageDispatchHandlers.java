@@ -267,8 +267,7 @@ class MessageDispatchHandlers {
         Boolean mentionEveryone = context.getDispatch().getMentionEveryone().isAbsent() ? null :
                 context.getDispatch().getMentionEveryone().get();
 
-        String editedTimestamp = context.getDispatch().getEditedTimestamp().isAbsent() ? null :
-                context.getDispatch().getEditedTimestamp().get();
+        String editedTimestamp = context.getDispatch().getEditedTimestamp();
 
         Mono<MessageUpdateEvent> update = context.getServiceMediator().getStateHolder().getMessageStore()
                 .find(messageId)
