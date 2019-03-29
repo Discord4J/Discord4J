@@ -21,6 +21,8 @@ import discord4j.core.object.entity.Category;
 
 /**
  * Dispatched when a {@link Category} is deleted in a guild.
+ * <p>
+ * This event is dispatched by Discord.
  *
  * @see <a href="https://discordapp.com/developers/docs/topics/gateway#channel-delete">Channel Delete</a>
  */
@@ -33,6 +35,11 @@ public class CategoryDeleteEvent extends ChannelEvent {
         this.category = category;
     }
 
+    /**
+     * Gets the {@link Category} that was deleted in this event.
+     *
+     * @return The deleted {@link Category}.
+     */
     public Category getCategory() {
         return category;
     }

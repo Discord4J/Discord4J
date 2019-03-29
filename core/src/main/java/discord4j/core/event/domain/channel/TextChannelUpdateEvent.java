@@ -26,6 +26,8 @@ import java.util.Optional;
  * Dispatched when a {@link TextChannel} is updated in a guild.
  * <p>
  * The old text channel may not be present if text channels are not stored.
+ * <p>
+ * This event is dispatched by Discord.
  *
  * @see <a href="https://discordapp.com/developers/docs/topics/gateway#channel-update">Channel Update</a>
  */
@@ -40,10 +42,21 @@ public class TextChannelUpdateEvent extends ChannelEvent {
         this.old = old;
     }
 
+    /**
+     * Gets the current, new version of the {@link TextChannel} that was updated in this event.
+     *
+     * @return The current version of the updated {@link TextChannel}.
+     */
     public TextChannel getCurrent() {
         return current;
     }
 
+    /**
+     * Gets the old version of the {@link TextChannel} that was updated in this event, if present.
+     * This may not be available if {@code TextChannels} are not stored.
+     *
+     * @return The old version of the updated {@link TextChannel}, if present.
+     */
     public Optional<TextChannel> getOld() {
         return Optional.ofNullable(old);
     }

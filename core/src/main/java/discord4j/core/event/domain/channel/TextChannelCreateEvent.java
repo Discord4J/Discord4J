@@ -21,6 +21,8 @@ import discord4j.core.object.entity.TextChannel;
 
 /**
  * Dispatched when a {@link TextChannel} is created in a guild.
+ * <p>
+ * This event is dispatched by Discord.
  *
  * @see <a href="https://discordapp.com/developers/docs/topics/gateway#channel-create">Channel Create</a>
  */
@@ -33,6 +35,11 @@ public class TextChannelCreateEvent extends ChannelEvent {
         this.channel = channel;
     }
 
+    /**
+     * Gets the {@link TextChannel} that was created in this event.
+     *
+     * @return The newly created {@link TextChannel}.
+     */
     public TextChannel getChannel() {
         return channel;
     }

@@ -22,6 +22,8 @@ import java.util.Arrays;
 
 /**
  * Dispatched when the gateway connection is successfully resumed.
+ * <p>
+ * This event is dispatched by Discord.
  *
  * @see <a href="https://discordapp.com/developers/docs/topics/gateway#resumed">Resumed</a>
  */
@@ -34,6 +36,11 @@ public class ResumeEvent extends GatewayLifecycleEvent {
         this.trace = trace;
     }
 
+    /**
+     * Gets the trace of the event. Used for debugging - the guilds the user is in.
+     *
+     * @return The trace provided by Discord, containing the guild the user is in.
+     */
     public String[] getTrace() {
         return trace;
     }

@@ -27,6 +27,8 @@ import java.util.Set;
 
 /**
  * Dispatched when an initial connection to the Discord gateway has been established.
+ * <p>
+ * This event is dispatched by Discord.
  *
  * @see <a href="https://discordapp.com/developers/docs/topics/gateway#ready">Ready</a>
  */
@@ -48,26 +50,59 @@ public class ReadyEvent extends GatewayLifecycleEvent {
         this.trace = trace;
     }
 
+    /**
+     * Gets the gateway protocol version being used. Ex. 6.
+     *
+     * @return The gateway protocol version being used.
+     */
     public int getGatewayVersion() {
         return gatewayVersion;
     }
 
+    /**
+     * Gets the bot {@link User}.
+     *
+     * @return The bot {@link User}.
+     */
     public User getSelf() {
         return self;
     }
 
+    /**
+     * Gets a set of Unavailable {@link Guild}. These {@code Guilds} have not yet been provided via a
+     * {@link discord4j.core.event.domain.guild.GuildCreateEvent}
+     *
+     *
+     * @see <a href="https://discordapp.com/developers/docs/resources/guild#unavailable-guild-object">
+     *     Unavailable Guild Object</a>
+     *
+     * @return A set of unavailable {@code Guilds}.
+     */
     public Set<Guild> getGuilds() {
         return guilds;
     }
 
+    /**
+     * Gets the current session ID of the connection.
+     *
+     * @return the session ID of the connection
+     */
     public String getSessionId() {
         return sessionId;
     }
 
+    /**
+     * Gets the trace provided by Discord. Used for debugging - The {@code Guilds} the user is in.
+     *
+     * @return The trace provided by Discord.
+     */
     public String[] getTrace() {
         return trace;
     }
 
+    /**
+     * An incomplete Guild provided by Discord upon the ready event
+     */
     public static class Guild {
 
         private final long id;
@@ -78,10 +113,21 @@ public class ReadyEvent extends GatewayLifecycleEvent {
             this.available = available;
         }
 
+        /**
+         * Gets the {@link Snowflake} ID of the guild.
+         *
+         * @return the {@link Snowflake} ID of the guild.
+         */
         public Snowflake getId() {
             return Snowflake.of(id);
         }
 
+        /**
+         * Whether or not the Guild has been made available via a
+         * {@link discord4j.core.event.domain.guild.GuildCreateEvent}
+         *
+         * @return Whether or not the Guild has been made available yet.
+         */
         public boolean isAvailable() {
             return available;
         }

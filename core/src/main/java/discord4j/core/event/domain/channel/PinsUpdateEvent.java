@@ -27,6 +27,8 @@ import java.util.Optional;
 
 /**
  * Dispatched when a message is pinned or unpinned in a message channel.
+ * <p>
+ * This event is dispatched by Discord.
  *
  * @see <a href="https://discordapp.com/developers/docs/topics/gateway#channel-pins-update">Channel Pins Update</a>
  */
@@ -41,14 +43,34 @@ public class PinsUpdateEvent extends ChannelEvent {
         this.lastPinTimestamp = lastPinTimestamp;
     }
 
+    /**
+     * Gets the {@link Snowflake} ID of the {@link MessageChannel} the pinned/unpinned
+     * {@link discord4j.core.object.entity.Message} is in.
+     *
+     * @return the ID of the {@link MessageChannel} involved.
+     */
     public Snowflake getChannelId() {
         return Snowflake.of(channelId);
     }
 
+    /**
+     * Requests to retrieve the {@link MessageChannel} the pinned/unpinned
+     * {@link discord4j.core.object.entity.Message} is in.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits the {@link MessageChannel} involved.
+     * If an error is received, it is emitted through the {@code Mono}.
+     */
     public Mono<MessageChannel> getChannel() {
         return getClient().getChannelById(getChannelId()).cast(MessageChannel.class);
     }
 
+    /**
+     * Gets the ISO8601 timestamp of when the last pinned {@link discord4j.core.object.entity.Message} w
+     * as pinned, if present. This is NOT the timestamp of when the {@code Message} was created.
+     * 
+     * @return The timestamp of the when the last pinned {@link discord4j.core.object.entity.Message} was pinned,
+     * if present.
+     */
     public Optional<Instant> getLastPinTimestamp() {
         return Optional.ofNullable(lastPinTimestamp);
     }

@@ -21,6 +21,8 @@ import discord4j.core.object.entity.PrivateChannel;
 
 /**
  * Dispatched when a {@link PrivateChannel} is created.
+ * <p>
+ * This event is dispatched by Discord.
  *
  * @see <a href="https://discordapp.com/developers/docs/topics/gateway#channel-create">Channel Create</a>
  */
@@ -33,6 +35,11 @@ public class PrivateChannelCreateEvent extends ChannelEvent {
         this.channel = channel;
     }
 
+    /**
+     * Gets the {@link PrivateChannel} that was created in this event.
+     *
+     * @return The {@link PrivateChannel} that was created.
+     */
     public PrivateChannel getChannel() {
         return channel;
     }

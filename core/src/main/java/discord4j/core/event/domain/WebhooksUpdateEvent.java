@@ -26,6 +26,8 @@ import reactor.core.publisher.Mono;
  * Dispatched when a webhook is updated in a guild.
  * <p>
  * Discord does not send any information about what was actually updated. This is simply a notification of SOME update.
+ * <p>
+ * This event is dispatched by Discord.
  *
  * @see <a href="https://discordapp.com/developers/docs/topics/gateway#webhooks-update">Webhooks Update</a>
  */
@@ -40,18 +42,40 @@ public class WebhooksUpdateEvent extends Event {
         this.channelId = channelId;
     }
 
+    /**
+     * Gets the {@link Snowflake} ID of the guild that had a webhook updated in this event.
+     *
+     * @return The ID of the guild involved.
+     */
     public Snowflake getGuildId() {
         return Snowflake.of(guildId);
     }
 
+    /**
+     * Requests to retrieve the {@link Guild} that had a webhook updated in this event.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits the {@link Guild} involved in the event.
+     * If an error is received, it is emitted through the {@code Mono}.
+     */
     public Mono<Guild> getGuild() {
         return getClient().getGuildById(getGuildId());
     }
 
+    /**
+     * Gets the {@link Snowflake} ID of the channel the webhook belongs to.
+     *
+     * @return The ID of the channel involved.
+     */
     public Snowflake getChannelId() {
         return Snowflake.of(channelId);
     }
 
+    /**
+     * Requests to retrieve the {@link TextChannel} the webhook belongs to.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits the {@link TextChannel} involved in the event.
+     * If an error is received, it is emitted through the {@code Mono}.
+     */
     public Mono<TextChannel> getChannel() {
         return getClient().getChannelById(getChannelId()).cast(TextChannel.class);
     }

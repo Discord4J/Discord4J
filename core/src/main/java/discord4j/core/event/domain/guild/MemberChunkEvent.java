@@ -28,6 +28,8 @@ import java.util.Set;
  * Dispatched as members are streamed to the client from Discord.
  * <p>
  * By default, all members in all connected guilds are requested on startup.
+ * <p>
+ * This event is dispatched by Discord.
  *
  * @see <a href="https://discordapp.com/developers/docs/topics/gateway#guild-members-chunk">Guild Members Chunk</a>
  */
@@ -42,14 +44,31 @@ public class MemberChunkEvent extends GuildEvent {
         this.members = members;
     }
 
+    /**
+     * Gets the {@link Snowflake} ID of the {@link Guild} involved in this event.
+     *
+     * @return The ID of the {@link Guild}.
+     */
     public Snowflake getGuildId() {
         return Snowflake.of(guildId);
     }
 
+    /**
+     * Requests to retrieve the {@link Guild} involved in the event.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits the {@link Guild} involved in the event.
+     * If an error is received, it is emitted through the {@code Mono}.
+     */
     public Mono<Guild> getGuild() {
         return getClient().getGuildById(getGuildId());
     }
 
+    /**
+     * Gets a list of {@code Members} that have been streamed to the client in this event.
+     * This may not contain all {@code Members} of the {@link Guild}.
+     *
+     * @return The list of {@code Members} streamed to the client in this event.
+     */
     public Set<Member> getMembers() {
         return members;
     }

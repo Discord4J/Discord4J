@@ -26,6 +26,8 @@ import java.util.Optional;
  * Dispatched when a {@link Category} is updated in a guild.
  * <p>
  * The old category may not be present if categories are not stored.
+ * <p>
+ * This event is dispatched by Discord.
  *
  * @see <a href="https://discordapp.com/developers/docs/topics/gateway#channel-update">Channel Update</a>
  */
@@ -40,10 +42,21 @@ public class CategoryUpdateEvent extends ChannelEvent {
         this.old = old;
     }
 
+    /**
+     * Get the current, new, version of the {@link Category} that has been updated in this event.
+     *
+     * @return The current version of the updated {@link Category}.
+     */
     public Category getCurrent() {
         return current;
     }
 
+    /**
+     * Gets the old version of the {@link Category} that has been updated in this event, if present.
+     * This may not be available if {@code Categories} are not stored.
+     *
+     * @return The old version of the updated {@link Category}, if present.
+     */
     public Optional<Category> getOld() {
         return Optional.ofNullable(old);
     }

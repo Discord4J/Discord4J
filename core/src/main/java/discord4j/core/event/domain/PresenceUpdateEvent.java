@@ -32,6 +32,8 @@ import java.util.Optional;
  * Dispatched when a user's presence changes.
  * <p>
  * The old presence may not be present if presences are not stored.
+ * <p>
+ * This event is dispatched by Discord.
  *
  * @see <a href="https://discordapp.com/developers/docs/topics/gateway#presence-update">Presence Update</a>
  */
@@ -53,48 +55,110 @@ public class PresenceUpdateEvent extends Event {
         this.old = old;
     }
 
+    /**
+     * Gets the {@link Snowflake} ID of the {@link Guild} containing the {@link User} whose presence has been updated.
+     *
+     * @return The ID of the {@link Guild} involved.
+     */
     public Snowflake getGuildId() {
         return Snowflake.of(guildId);
     }
 
+    /**
+     * Gets the {@link Guild} containing the {@link User} whose presence has been updated.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits the {@link Guild} involved in the event.
+     */
     public Mono<Guild> getGuild() {
         return getClient().getGuildById(getGuildId());
     }
 
+    /**
+     * Gets the old version of the {@link User} that was updated, if present.
+     * This may not be available if {@code Users} are not stored.
+     *
+     * @return The old version of the {@link User}, if present.
+     */
     public Optional<User> getOldUser() {
         return Optional.ofNullable(oldUser);
     }
 
+    /**
+     * Gets the {@link User}'s new username, if present. This may not exist if the {@code user}'s username has not
+     * been changed.
+     *
+     * @return The {@link User}'s new username, if present.
+     */
     public Optional<String> getNewUsername() {
         return Optional.ofNullable(user.get("username")).map(JsonNode::asText);
     }
 
+    /**
+     * Gets the {@link User}'s new discriminator, if present.
+     * This may not exist if the {@code User}'s discriminator has not been changed.
+     *
+     * @return The {@link User}'s new discriminator, if present.
+     */
     public Optional<String> getNewDiscriminator() {
         return Optional.ofNullable(user.get("discriminator")).map(JsonNode::asText);
     }
 
+    /**
+     * Gets the {@link User}'s new avatar, if present. This may not exist if the {@code User}'s discriminator has not
+     * been changed.
+     *
+     * @return The user's new avatar, if present.
+     */
     public Optional<String> getNewAvatar() {
         return Optional.ofNullable(user.get("avatar"))
                 .filter(node -> !node.isNull())
                 .map(JsonNode::asText);
     }
 
+    /**
+     * Gets the {@link Snowflake} ID of the {@link User} whose presence has been updated in this event.
+     *
+     * @return The ID of the {@link User} whose presence has been updated.
+     */
     public Snowflake getUserId() {
         return Snowflake.of(user.get("id").asText());
     }
 
+    /**
+     * Requests to retrieve the {@link User} whose presence has been changed in this event.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits the {@link User} involved in this event.
+     * If an error is received, it is emitted through the {@code Mono}.
+     */
     public Mono<User> getUser() {
         return getClient().getUserById(getUserId());
     }
 
+    /**
+     * Requests to retrieve the {@link Member} object of the {@link User} involved in this event.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits the {@link Member} involved in this event.
+     * If an error is received, it is emitted through the {@code Mono}.
+     */
     public Mono<Member> getMember() {
         return getClient().getMemberById(getGuildId(), getUserId());
     }
 
+    /**
+     * Gets the current, new version of the {@link Presence}.
+     *
+     * @return The current, new version of the {@link Presence}.
+     */
     public Presence getCurrent() {
         return current;
     }
 
+    /**
+     * Gets the old version of the {@link Presence} that was changed, if present.
+     * This may not be available if {@code Presence} are not stored.
+     *
+     * @return The old version of the {@link Presence}, if present.
+     */
     public Optional<Presence> getOld() {
         return Optional.ofNullable(old);
     }

@@ -28,6 +28,8 @@ import discord4j.core.object.entity.Guild;
  *     be dispatched), this event will be dispatched as guilds become available again.</li>
  *     <li>When the bot is added to a guild.</li>
  * </ol>
+ * <p>
+ * This event is dispatched by Discord.
  *
  * @see <a href="https://discordapp.com/developers/docs/topics/gateway#guild-create">Guild Create</a>
  */
@@ -40,6 +42,11 @@ public class GuildCreateEvent extends GuildEvent {
         this.guild = guild;
     }
 
+    /**
+     * Gets the {@link Guild} that has become available in this event.
+     *
+     * @return The {@link Guild} that has become available.
+     */
     public Guild getGuild() {
         return guild;
     }

@@ -24,6 +24,8 @@ import reactor.util.annotation.Nullable;
 
 /**
  * Dispatched when initially connecting to a voice channel.
+ * <p>
+ * This event is dispatched by Discord.
  *
  * @see <a href="https://discordapp.com/developers/docs/topics/gateway#voice-server-update">Voice Server Update</a>
  */
@@ -41,18 +43,40 @@ public class VoiceServerUpdateEvent extends Event {
         this.endpoint = endpoint;
     }
 
+    /**
+     * Gets the voice connection token for the guild.
+     *
+     * @return The voice connection token.
+     */
     public String getToken() {
         return token;
     }
 
+    /**
+     * Gets the {@link Snowflake} ID of the guild whose voice server has been updated in this event.
+     *
+     * @return The ID of the guild involved.
+     */
     public Snowflake getGuildId() {
         return Snowflake.of(guildId);
     }
 
+    /**
+     * Requests to retrieve the {@link Guild} whose voice server has been updated in this event.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits the {@link Guild} whose voice server has been
+     * updated.
+     * If an error is received, it is emitted through the {@code Mono}.
+     */
     public Mono<Guild> getGuild() {
         return getClient().getGuildById(getGuildId());
     }
 
+    /**
+     * Gets the voice server host's endpoint URL.
+     *
+     * @return The void server host's endpoint URL.
+     */
     @Nullable
     public String getEndpoint() {
         return endpoint;
