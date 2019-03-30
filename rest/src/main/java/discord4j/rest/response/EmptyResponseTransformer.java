@@ -26,6 +26,14 @@ import reactor.util.Loggers;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
+/**
+ * A {@link ResponseFunction} that is able to transform an error sequence with a HTTP 404 status, into an empty
+ * sequence.
+ *
+ * @see ResponseFunction#emptyWhenNotFound()
+ * @see ResponseFunction#emptyWhenNotFound(RouteMatcher)
+ * @see ResponseFunction#emptyOnErrorStatus(RouteMatcher, Integer...)
+ */
 public class EmptyResponseTransformer implements ResponseFunction {
 
     private static final Logger log = Loggers.getLogger(EmptyResponseTransformer.class);
@@ -42,7 +50,7 @@ public class EmptyResponseTransformer implements ResponseFunction {
     public <T> Function<Mono<T>, Mono<T>> transform(DiscordRequest<T> request) {
         if (routeMatcher.matches(request)) {
             return mono -> mono.onErrorResume(predicate, t -> {
-                log.info("Returning empty response for {} after {}", request, t.toString());
+                log.debug("Returning empty response for {} after {}", request, t.toString());
                 return Mono.empty();
             });
         }

@@ -26,7 +26,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Encodes all of the needed information to make an HTTP request to Discord.
+ * Template encoding all of the needed information to make an HTTP request to Discord.
  *
  * @param <T> The response type.
  * @since 3.0

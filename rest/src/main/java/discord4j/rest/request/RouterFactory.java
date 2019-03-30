@@ -27,10 +27,18 @@ public interface RouterFactory {
     /**
      * Retrieve a {@link discord4j.rest.request.Router} configured to process API requests.
      *
-     * @param webClient a web client to parameterize the Router creation
-     * @return a Router prepared to process API requests
+     * @param webClient a web client to parameterize the {@link Router} creation
+     * @return a {@link Router} prepared to process API requests
      */
     Router getRouter(DiscordWebClient webClient);
 
+    /**
+     * Retrieve a {@link discord4j.rest.request.Router} that can be further configured with the given
+     * {@link RouterOptions} to process API requests.
+     *
+     * @param webClient a web client to parameterize the {@link Router} creation
+     * @param routerOptions a configuration object to control the behavior of the resulting {@link Router}
+     * @return a {@link Router} prepared to process API requests
+     */
     Router getRouter(DiscordWebClient webClient, RouterOptions routerOptions);
 }

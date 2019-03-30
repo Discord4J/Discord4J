@@ -20,6 +20,12 @@ package discord4j.rest.request;
 import discord4j.rest.http.client.DiscordWebClient;
 import reactor.core.scheduler.Scheduler;
 
+/**
+ * A monolithic {@link RouterFactory} that can build {@link Router} instances to execute Discord API requests.
+ * <p>
+ * This factory creates a new instance each time so it is not fit for coordinating sharding requests. For those cases,
+ * see {@link SingleRouterFactory}.
+ */
 public class DefaultRouterFactory implements RouterFactory {
 
     private final RouterOptions routerOptions;

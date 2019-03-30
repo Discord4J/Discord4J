@@ -41,6 +41,7 @@ import discord4j.rest.request.DefaultRouterFactory;
 import discord4j.rest.request.Router;
 import discord4j.rest.request.RouterFactory;
 import discord4j.rest.request.RouterOptions;
+import discord4j.rest.response.ResponseFunction;
 import discord4j.store.api.service.StoreService;
 import discord4j.store.api.service.StoreServiceLoader;
 import discord4j.store.api.util.StoreContext;
@@ -303,6 +304,11 @@ public final class DiscordClientBuilder {
         return routerFactory;
     }
 
+    /**
+     * Gets the current {@link RouterOptions} used to configure {@link RouterFactory} instances.
+     *
+     * @return the current {@code RouterOptions} used by this client
+     */
     @Nullable
     public RouterOptions getRouterOptions() {
         return routerOptions;
@@ -326,6 +332,19 @@ public final class DiscordClientBuilder {
         return this;
     }
 
+    /**
+     * Sets a new {@link RouterOptions} used to configure a {@link RouterFactory}.
+     * <p>
+     * {@code RouterOptions} instances provide a way to override the {@link Scheduler} used for retrieving API responses
+     * and scheduling rate limiting actions. It also allows changing the behavior associated with API errors through
+     * {@link RouterOptions.Builder#onClientResponse(ResponseFunction)}.
+     * <p>
+     * If you use a default {@code RouterFactory}, it will use the supplied {@code RouterOptions} to configure itself
+     * while building this client.
+     *
+     * @param routerOptions a new {@code RouterOptions} to configure a {@code RouterFactory}
+     * @return this builder
+     */
     public DiscordClientBuilder setRouterOptions(@Nullable RouterOptions routerOptions) {
         this.routerOptions = routerOptions;
         return this;

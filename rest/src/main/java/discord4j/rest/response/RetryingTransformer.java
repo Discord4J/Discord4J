@@ -24,6 +24,9 @@ import reactor.retry.Retry;
 
 import java.util.function.Function;
 
+/**
+ * A {@link ResponseFunction} that is able to transform an error sequence into a retrying one.
+ */
 public class RetryingTransformer implements ResponseFunction {
 
     private final RouteMatcher routeMatcher;

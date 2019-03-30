@@ -18,8 +18,12 @@
 package discord4j.rest.request;
 
 import discord4j.rest.route.Route;
+import discord4j.rest.route.Routes;
 import reactor.util.annotation.Nullable;
 
+/**
+ * A predicate that can match a given {@link DiscordRequest}.
+ */
 public class RouteMatcher {
 
     @Nullable
@@ -29,14 +33,32 @@ public class RouteMatcher {
         this.request = request;
     }
 
+    /**
+     * Create a new {@link RouteMatcher} that returns true for every request.
+     *
+     * @return a new {@link RouteMatcher}
+     */
     public static RouteMatcher any() {
         return new RouteMatcher(null);
     }
 
+    /**
+     * Create a new {@link RouteMatcher} that matches any request made for the given {@link Route}. A list of
+     * {@link Route} objects exist in the {@link Routes} class.
+     *
+     * @param route the {@link Route} to be matched by this instance
+     * @return a new {@link RouteMatcher}
+     */
     public static RouteMatcher route(Route<?> route) {
         return new RouteMatcher(route.newRequest());
     }
 
+    /**
+     * Tests this matcher against the given {@link DiscordRequest}.
+     *
+     * @param otherRequest the {@link DiscordRequest} argument
+     * @return {@code true} if the input argument matches the predicate, otherwise {@code false}
+     */
     public boolean matches(DiscordRequest<?> otherRequest) {
         return request == null || request.getRoute().getResponseType().isInstance(otherRequest.getRoute().getResponseType());
     }

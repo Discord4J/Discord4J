@@ -24,14 +24,17 @@ import reactor.core.publisher.Mono;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
+/**
+ * A {@link ResponseFunction} that is able to transform an error sequence into a custom response.
+ */
 public class ResumingTransformer implements ResponseFunction {
 
     private final RouteMatcher routeMatcher;
     private final Predicate<Throwable> predicate;
     private Function<Throwable, Mono<?>> fallback;
 
-    public ResumingTransformer(RouteMatcher routeMatcher, Predicate<Throwable> predicate, Function<Throwable,
-            Mono<?>> fallback) {
+    public ResumingTransformer(RouteMatcher routeMatcher, Predicate<Throwable> predicate,
+                               Function<Throwable, Mono<?>> fallback) {
         this.routeMatcher = routeMatcher;
         this.predicate = predicate;
         this.fallback = fallback;
