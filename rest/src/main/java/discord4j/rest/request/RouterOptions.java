@@ -18,6 +18,7 @@
 package discord4j.rest.request;
 
 import discord4j.rest.response.ResponseFunction;
+import discord4j.rest.route.Route;
 import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
 
@@ -96,37 +97,66 @@ public class RouterOptions {
          * Sets a new API response behavior to the supporting {@link Router}, allowing cross-cutting behavior across
          * all requests made by the {@code Router}.
          * <p>
-         * The given {@link ResponseFunction} will be applied after every response. Calling
-         * {@link #onClientResponse(ResponseFunction)} multiple times will result in additive behavior, so care must be
-         * taken regarding the <strong>order</strong> in which multiple calls occur. Responses will processed in this
-         * order and only the first matching one will be transformed.
+         * The given {@link ResponseFunction} will be applied after every response. Calling this function multiple
+         * times will result in additive behavior, so care must be taken regarding the <strong>order</strong> in
+         * which multiple calls occur. Responses will processed in this order and only the first matching one will be
+         * transformed.
          * <p>
          * Built-in factories are supplied for commonly used behavior:
          * <ul>
-         * <li>{@link ResponseFunction}</li>
+         * <li>{@link ResponseFunction#emptyWhenNotFound()} transforms any HTTP 404 error into an empty sequence.</li>
+         * <li>{@link ResponseFunction#emptyWhenNotFound(RouteMatcher)} transforms HTTP 404 errors from the given
+         * {@link Route}s into an empty sequence.</li>
+         * <li>{@link ResponseFunction#emptyOnErrorStatus(RouteMatcher, Integer...)} provides the same behavior as
+         * above but for any given status codes.</li>
+         * <li>{@link ResponseFunction#retryOnceOnErrorStatus(Integer...)} retries once for the given status codes.</li>
+         * <li>{@link ResponseFunction#retryOnceOnErrorStatus(RouteMatcher, Integer...)} provides the same behavior
+         * as above but for any matching {@link Route}.</li>
          * </ul>
          *
-         * @param errorHandler
-         * @return
+         * @param errorHandler the {@link ResponseFunction} to transform the responses from matching requests.
+         * @return this builder
          */
         public Builder onClientResponse(ResponseFunction errorHandler) {
             responseTransformers.add(errorHandler);
             return this;
         }
 
+        /**
+         * Creates the {@link RouterOptions} object.
+         *
+         * @return the resulting {@link RouterOptions}
+         */
         public RouterOptions build() {
             return new RouterOptions(this);
         }
     }
 
+    /**
+     * Gets the defined response scheduler. Allows flexibility for blocking usage if a {@link Scheduler} that allows
+     * blocking is set.
+     *
+     * @return this option's response {@link Scheduler}
+     */
     public Scheduler getResponseScheduler() {
         return responseScheduler;
     }
 
+    /**
+     * Gets the defined scheduler for rate limiting delay purposes.
+     *
+     * @return this option's rate limiting {@link Scheduler}
+     */
     public Scheduler getRateLimitScheduler() {
         return rateLimitScheduler;
     }
 
+    /**
+     * Gets the list of {@link ResponseFunction} transformations that can be applied to every response. They are to be
+     * processed in the given order.
+     *
+     * @return a list of {@link ResponseFunction} objects.
+     */
     public List<ResponseFunction> getResponseTransformers() {
         return responseTransformers;
     }

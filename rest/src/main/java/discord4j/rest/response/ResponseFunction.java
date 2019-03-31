@@ -21,6 +21,7 @@ import discord4j.rest.http.client.ClientException;
 import discord4j.rest.request.DiscordRequest;
 import discord4j.rest.request.RouteMatcher;
 import discord4j.rest.request.Router;
+import discord4j.rest.request.RouterOptions;
 import reactor.core.publisher.Mono;
 import reactor.retry.Retry;
 
@@ -30,10 +31,14 @@ import java.util.function.Function;
 /**
  * A transformation function used while processing {@link DiscordRequest} objects.
  * <p>
- * Using {@code ResponseFunction} objects is targeted to supporting {@link Router} implementations that allow enrichment
+ * Using {@link ResponseFunction} objects is targeted to supporting {@link Router} implementations that allow enrichment
  * of a response {@link Mono} pipeline, allowing cross-cutting behavior for specialized error handling or retrying under
  * specific conditions like an HTTP status code or a given API request route. Usage beyond this concern is not
  * supported and could interfere with downstream operations.
+ * <p>
+ * Typical {@link ResponseFunction} usage is through {@link RouterOptions} builder option
+ * {@link RouterOptions.Builder#onClientResponse(ResponseFunction)}, where it can be applied using one of the static
+ * helper methods defined in this class.
  */
 public interface ResponseFunction {
 
@@ -59,8 +64,8 @@ public interface ResponseFunction {
     }
 
     /**
-     * Transforms HTTP 404 status codes received by the requests matching the given {@link RouteMatcher} into an
-     * empty sequence, effectively suppressing the {@link ClientException} that would be forwarded otherwise. See
+     * Transforms HTTP 404 status codes caused by requests matching the given {@link RouteMatcher} into an empty
+     * sequence, effectively suppressing the {@link ClientException} that would be forwarded otherwise. See
      * {@link #emptyWhenNotFound()} to apply this transformation across all {@link Router} requests.
      *
      * @param routeMatcher the {@link RouteMatcher} determining whether to match a particular request
@@ -71,7 +76,7 @@ public interface ResponseFunction {
     }
 
     /**
-     * Transforms the given <strong>error</strong> status codes received by the requests matching the given
+     * Transforms the given <strong>error</strong> status codes caused by requests matching the given
      * {@link RouteMatcher}, effectively suppressing the {@link ClientException} that would be forwarded otherwise.
      * <p>
      * Only a subset of HTTP status codes is supported, like all the ones from 400 and 500 series, except for the 429
@@ -87,8 +92,8 @@ public interface ResponseFunction {
 
     /**
      * Applies a retry strategy to retry <strong>once</strong> with a fixed backoff of 1 second to the given
-     * <strong>error</strong> status codes received by the requests matching the given {@link RouteMatcher},
-     * effectively suppressing the {@link ClientException} that would be forwarded otherwise.
+     * <strong>error</strong> status codes caused by any request, effectively suppressing the {@link ClientException}
+     * that would be forwarded otherwise.
      * <p>
      * Only a subset of HTTP status codes is supported, like all the ones from 400 and 500 series, except for the 429
      * (Too Many Requests) error that is handled upstream.
@@ -102,6 +107,29 @@ public interface ResponseFunction {
      */
     static RetryingTransformer retryOnceOnErrorStatus(Integer... codes) {
         return new RetryingTransformer(RouteMatcher.any(),
+                Retry.onlyIf(ClientException.isRetryContextStatusCode(codes))
+                        .fixedBackoff(Duration.ofSeconds(1))
+                        .retryOnce());
+    }
+
+    /**
+     * Applies a retry strategy to retry <strong>once</strong> with a fixed backoff of 1 second to the given
+     * <strong>error</strong> status codes caused by requests matching the given {@link RouteMatcher}, effectively
+     * suppressing the {@link ClientException} that would be forwarded otherwise.
+     * <p>
+     * Only a subset of HTTP status codes is supported, like all the ones from 400 and 500 series, except for the 429
+     * (Too Many Requests) error that is handled upstream.
+     * <p>
+     * Please note that if you specify error codes 502, 503 or 504 you will replace a built-in retry factory that
+     * handles Discord service errors using an exponential backoff with jitter strategy.
+     *
+     * @param routeMatcher the {@link RouteMatcher} determining whether to match a particular request
+     * @param codes the list of HTTP status codes to match when applying this transformation
+     * @return a {@link ResponseFunction} that transforms matching response statuses into sequence that retries the
+     * request once after waiting 1 second.
+     */
+    static RetryingTransformer retryOnceOnErrorStatus(RouteMatcher routeMatcher, Integer... codes) {
+        return new RetryingTransformer(routeMatcher,
                 Retry.onlyIf(ClientException.isRetryContextStatusCode(codes))
                         .fixedBackoff(Duration.ofSeconds(1))
                         .retryOnce());
