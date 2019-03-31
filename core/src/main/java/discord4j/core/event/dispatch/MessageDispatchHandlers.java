@@ -17,7 +17,6 @@
 package discord4j.core.event.dispatch;
 
 import discord4j.common.jackson.Possible;
-import discord4j.common.jackson.PossibleLong;
 import discord4j.common.json.EmbedResponse;
 import discord4j.common.json.Mention;
 import discord4j.common.json.MessageMember;
@@ -186,7 +185,7 @@ class MessageDispatchHandlers {
                     // noinspection ConstantConditions reactions must be present if one is being removed
                     for (i = 0; i < oldBean.getReactions().length; i++) {
                         ReactionBean r = oldBean.getReactions()[i];
-                        if (Objects.equals(r.getEmojiId(), emojiId) && r.getEmojiName().equals(emojiName)) {
+                        if (emojiId == null && r.getEmojiName().equals(emojiName) || Objects.equals(r.getEmojiId(), emojiId)) {
                             break;
                         }
                     }
