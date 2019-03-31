@@ -17,6 +17,7 @@
 package discord4j.core.object.data.stored;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import discord4j.common.json.Mention;
 import discord4j.common.json.MessageResponse;
 import discord4j.common.json.ReactionResponse;
 import discord4j.common.json.UserResponse;
@@ -98,7 +99,7 @@ public final class MessageBean implements Serializable {
         mentionEveryone = messageCreate.isMentionEveryone();
 
         mentions = Arrays.stream(messageCreate.getMentions())
-                .mapToLong(MessageCreate.Mention::getId)
+                .mapToLong(Mention::getId)
                 .toArray();
 
         mentionRoles = messageCreate.getMentionRoles();

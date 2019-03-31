@@ -19,6 +19,8 @@ package discord4j.core.event.dispatch;
 import discord4j.common.jackson.Possible;
 import discord4j.common.jackson.PossibleLong;
 import discord4j.common.json.EmbedResponse;
+import discord4j.common.json.Mention;
+import discord4j.common.json.MessageMember;
 import discord4j.core.DiscordClient;
 import discord4j.core.ServiceMediator;
 import discord4j.core.event.domain.message.*;
@@ -51,7 +53,7 @@ class MessageDispatchHandlers {
         Message message = new Message(context.getServiceMediator(), bean);
 
         Long guildId = context.getDispatch().getGuildId();
-        MessageCreate.MessageMember memberResponse = context.getDispatch().getMember();
+        MessageMember memberResponse = context.getDispatch().getMember();
         Member member = null;
 
         if (guildId != null && memberResponse != null) {
@@ -253,6 +255,20 @@ class MessageDispatchHandlers {
                 .map(bean -> new Embed(context.getServiceMediator(), bean))
                 .collect(Collectors.toList());
 
+        Possible<Mention[]> mentions = context.getDispatch().getMentions();
+        long[] mentionIds = mentions.isAbsent() ? null :
+                Arrays.stream(mentions.get())
+                    .mapToLong(Mention::getId)
+                    .toArray();
+
+        long[] mentionRoles = context.getDispatch().getMentionRoles().isAbsent() ? null :
+                context.getDispatch().getMentionRoles().get();
+
+        Boolean mentionEveryone = context.getDispatch().getMentionEveryone().isAbsent() ? null :
+                context.getDispatch().getMentionEveryone().get();
+
+        String editedTimestamp = context.getDispatch().getEditedTimestamp();
+
         Mono<MessageUpdateEvent> update = context.getServiceMediator().getStateHolder().getMessageStore()
                 .find(messageId)
                 .flatMap(oldBean -> {
@@ -262,6 +278,10 @@ class MessageDispatchHandlers {
 
                     newBean.setContent(currentContent);
                     newBean.setEmbeds(embedBeans);
+                    if (mentionIds != null) newBean.setMentions(mentionIds);
+                    if (mentionRoles != null) newBean.setMentionRoles(mentionRoles);
+                    if (mentionEveryone != null) newBean.setMentionEveryone(mentionEveryone);
+                    if (editedTimestamp != null) newBean.setEditedTimestamp(editedTimestamp);
 
                     MessageUpdateEvent event = new MessageUpdateEvent(client, messageId, channelId, guildId, old,
                             contentChanged, currentContent, embedsChanged, embedList);
