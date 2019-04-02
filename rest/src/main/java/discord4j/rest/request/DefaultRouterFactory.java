@@ -30,10 +30,21 @@ public class DefaultRouterFactory implements RouterFactory {
 
     private final RouterOptions routerOptions;
 
+    /**
+     * Create a {@link DefaultRouterFactory} with default options. See {@link RouterOptions#create()} for information
+     * about the default values.
+     */
     public DefaultRouterFactory() {
-        this.routerOptions = RouterOptions.builder().build();
+        this.routerOptions = RouterOptions.create();
     }
 
+    /**
+     * Create a {@link DefaultRouterFactory} with the given {@link Scheduler} options.
+     *
+     * @param responseScheduler the {@link Scheduler} used to publish responses
+     * @param rateLimitScheduler the {@link Scheduler} used to delay rate limited requests
+     * @deprecated use {@link #DefaultRouterFactory(RouterOptions)}
+     */
     @Deprecated
     public DefaultRouterFactory(Scheduler responseScheduler, Scheduler rateLimitScheduler) {
         this.routerOptions = RouterOptions.builder()
@@ -42,6 +53,11 @@ public class DefaultRouterFactory implements RouterFactory {
                 .build();
     }
 
+    /**
+     * Create a {@link DefaultRouterFactory} configured with the given {@link RouterOptions}.
+     *
+     * @param routerOptions the options to configure the produced {@link Router} instances
+     */
     public DefaultRouterFactory(RouterOptions routerOptions) {
         this.routerOptions = routerOptions;
     }

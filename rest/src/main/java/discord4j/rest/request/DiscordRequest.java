@@ -45,29 +45,60 @@ public class DiscordRequest<T> {
     @Nullable
     private Map<String, Set<String>> headers;
 
+    /**
+     * Create a new {@link DiscordRequest} template based on a {@link Route} and its compiled URI.
+     *
+     * @param route the API resource targeted by this request
+     * @param completeUri the request URI compiled with the appropriate path variables
+     */
     public DiscordRequest(Route<T> route, String completeUri) {
         this.route = route;
         this.completeUri = completeUri;
     }
 
+    /**
+     * Return the API endpoint targeted by this request.
+     *
+     * @return the {@link Route} of this {@link DiscordRequest}
+     */
     public Route<T> getRoute() {
         return route;
     }
 
+    /**
+     * Return the compiled URI of this request.
+     *
+     * @return the compiled URI, containing the actual path variables
+     */
     public String getCompleteUri() {
         return completeUri;
     }
 
+    /**
+     * Return the body of this request, if present.
+     *
+     * @return the body of this request, or {@code null} if this request carries no HTTP body
+     */
     @Nullable
     public Object getBody() {
         return body;
     }
 
+    /**
+     * Return the query parameters saved in this request, if present.
+     *
+     * @return a map representing query parameters, or {@code null} if none are defined
+     */
     @Nullable
     public Map<String, Object> getQueryParams() {
         return queryParams;
     }
 
+    /**
+     * Return the request headers, if present.
+     *
+     * @return a map representing HTTP headers, or {@code null} if none are defined
+     */
     @Nullable
     public Map<String, Set<String>> getHeaders() {
         return headers;

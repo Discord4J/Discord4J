@@ -305,7 +305,7 @@ public final class DiscordClientBuilder {
     }
 
     /**
-     * Gets the current {@link RouterOptions} used to configure {@link RouterFactory} instances.
+     * Return the current {@link RouterOptions} used to configure {@link RouterFactory} instances.
      *
      * @return the current {@code RouterOptions} used by this client
      */

@@ -19,9 +19,6 @@ package discord4j.rest.request;
 import discord4j.rest.http.client.ClientException;
 import discord4j.rest.http.client.ClientRequest;
 import discord4j.rest.http.client.DiscordWebClient;
-import discord4j.rest.util.RouteUtils;
-import io.netty.handler.codec.http.DefaultHttpHeaders;
-import io.netty.handler.codec.http.HttpHeaders;
 import reactor.core.publisher.*;
 import reactor.core.scheduler.Scheduler;
 import reactor.netty.http.client.HttpClientResponse;
@@ -34,9 +31,6 @@ import reactor.util.Loggers;
 import reactor.util.annotation.Nullable;
 
 import java.time.Duration;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.logging.Level;
@@ -162,23 +156,6 @@ class RequestStream<T> {
             };
         }
 
-        private Mono<ClientRequest> adaptRequest(DiscordRequest<?> req) {
-            return Mono.fromCallable(() -> new ClientRequest(req,
-                    RouteUtils.expandQuery(req.getCompleteUri(), req.getQueryParams()),
-                    adaptHeaders(req.getHeaders())));
-        }
-
-        private HttpHeaders adaptHeaders(@Nullable Map<String, Set<String>> requestHeaders) {
-            return Optional.ofNullable(requestHeaders)
-                    .map(map -> map.entrySet().stream()
-                            .reduce((HttpHeaders) new DefaultHttpHeaders(), (headers, entry) -> {
-                                String key = entry.getKey();
-                                entry.getValue().forEach(value -> headers.add(key, value));
-                                return headers;
-                            }, HttpHeaders::add))
-                    .orElse(new DefaultHttpHeaders());
-        }
-
         @Override
         protected void hookOnNext(RequestCorrelation<T> correlation) {
             DiscordRequest<T> request = correlation.getRequest();
@@ -192,7 +169,7 @@ class RequestStream<T> {
             Logger responseLog = getLogger("response", shard);
             Class<T> responseType = request.getRoute().getResponseType();
 
-            globalRateLimiter.withLimiter(() -> adaptRequest(request)
+            globalRateLimiter.withLimiter(() -> Mono.fromCallable(() -> new ClientRequest(request))
                     .log(requestLog, Level.FINEST, false)
                     .flatMap(r -> httpClient.exchange(r, request.getBody(), responseType, rateLimitHandler))
                     .retryWhen(rateLimitRetryFactory())

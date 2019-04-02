@@ -19,9 +19,13 @@ package discord4j.rest.http.client;
 
 import discord4j.rest.request.DiscordRequest;
 import discord4j.rest.route.Route;
+import discord4j.rest.util.RouteUtils;
+import io.netty.handler.codec.http.DefaultHttpHeaders;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpMethod;
+
+import java.util.Optional;
 
 /**
  * An adapted request definition from an original {@link DiscordRequest}.
@@ -32,28 +36,65 @@ public class ClientRequest {
     private final String url;
     private final HttpHeaders headers;
 
-    public ClientRequest(DiscordRequest<?> request, String url, HttpHeaders headers) {
+    /**
+     * Create a new {@link ClientRequest} from the given request template.
+     *
+     * @param request the {@link DiscordRequest} template
+     */
+    public ClientRequest(DiscordRequest<?> request) {
         this.request = request;
-        this.url = url;
-        this.headers = headers;
+        this.url = RouteUtils.expandQuery(request.getCompleteUri(), request.getQueryParams());
+        this.headers = Optional.ofNullable(request.getHeaders())
+                .map(map -> map.entrySet().stream()
+                        .reduce((HttpHeaders) new DefaultHttpHeaders(), (headers, entry) -> {
+                            String key = entry.getKey();
+                            entry.getValue().forEach(value -> headers.add(key, value));
+                            return headers;
+                        }, HttpHeaders::add))
+                .orElse(new DefaultHttpHeaders());
     }
 
-    public HttpMethod method() {
+    /**
+     * Return the HTTP method.
+     *
+     * @return the {@link HttpMethod} of this {@link ClientRequest}
+     */
+    public HttpMethod getMethod() {
         return request.getRoute().getMethod();
     }
 
-    public String url() {
+    /**
+     * Return the request URL.
+     *
+     * @return the request URL for this {@link ClientRequest}
+     */
+    public String getUrl() {
         return url;
     }
 
-    public HttpHeaders headers() {
+    /**
+     * Return the headers of this request.
+     *
+     * @return the {@link HttpHeaders} of this {@link ClientRequest}
+     */
+    public HttpHeaders getHeaders() {
         return headers;
     }
 
+    /**
+     * Return the original request template.
+     *
+     * @return the {@link DiscordRequest} template that created this {@link ClientRequest}
+     */
     public DiscordRequest<?> getDiscordRequest() {
         return request;
     }
 
+    /**
+     * Return the API endpoint targeted by this request.
+     *
+     * @return the {@link Route} requested by this {@link ClientRequest}
+     */
     public Route<?> getRoute() {
         return request.getRoute();
     }
@@ -61,7 +102,7 @@ public class ClientRequest {
     @Override
     public String toString() {
         return "ClientRequest{" +
-                "method=" + method() +
+                "method=" + getMethod() +
                 ", url='" + url + '\'' +
                 ", headers=" + headers.copy().remove(HttpHeaderNames.AUTHORIZATION).toString() +
                 '}';

@@ -50,21 +50,21 @@ public class DefaultRouter implements Router {
     private final Map<BucketKey, RequestStream<?>> streamMap = new ConcurrentHashMap<>();
 
     /**
-     * Create a bucket-aware router using the {@link reactor.core.scheduler.Schedulers#elastic()} scheduler, to allow
-     * the use of blocking API. Use the alternate constructor to customize it.
+     * Create a bucket-aware router using the defaults provided by {@link RouterOptions#create()}.
      *
      * @param httpClient the web client executing each request instructed by this router
      */
     public DefaultRouter(DiscordWebClient httpClient) {
-        this(httpClient, RouterOptions.builder().build());
+        this(httpClient, RouterOptions.create());
     }
 
     /**
-     * Create a bucket-aware router that uses the given {@link reactor.core.scheduler.Scheduler}.
+     * Create a Discord API bucket-aware {@link Router} that uses the given {@link reactor.core.scheduler.Scheduler}.
      *
      * @param httpClient the web client executing each request instructed by this router
      * @param responseScheduler the scheduler used to execute each request
      * @param rateLimitScheduler the scheduler used to perform delays caused by rate limiting
+     * @deprecated use {@link #DefaultRouter(DiscordWebClient, RouterOptions)}
      */
     @Deprecated
     public DefaultRouter(DiscordWebClient httpClient, Scheduler responseScheduler, Scheduler rateLimitScheduler) {
@@ -75,6 +75,12 @@ public class DefaultRouter implements Router {
                 .build();
     }
 
+    /**
+     * Create a Discord API bucket-aware {@link Router} configured with the given options.
+     *
+     * @param httpClient the web client executing each request instructed by this router
+     * @param routerOptions the options that configure this {@link Router}
+     */
     public DefaultRouter(DiscordWebClient httpClient, RouterOptions routerOptions) {
         this.httpClient = httpClient;
         this.routerOptions = routerOptions;
@@ -105,7 +111,8 @@ public class DefaultRouter implements Router {
                                         k, request.getRoute().getUriTemplate(), request.getCompleteUri());
                             }
                             RequestStream<T> stream = new RequestStream<>(k, httpClient, globalRateLimiter,
-                                    getRateLimitStrategy(request), routerOptions.getRateLimitScheduler(), routerOptions);
+                                    getRateLimitStrategy(request), routerOptions.getRateLimitScheduler(),
+                                    routerOptions);
                             stream.start();
                             return stream;
                         });

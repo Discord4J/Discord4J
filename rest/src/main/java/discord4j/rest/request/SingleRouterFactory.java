@@ -32,6 +32,11 @@ public class SingleRouterFactory implements RouterFactory {
 
     private final Router router;
 
+    /**
+     * Create a new {@link SingleRouterFactory} that will always produce the given {@link Router} instance.
+     *
+     * @param router the {@link Router} instance that will be produced by this factory.
+     */
     public SingleRouterFactory(Router router) {
         this.router = router;
     }

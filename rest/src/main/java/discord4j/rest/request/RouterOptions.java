@@ -30,6 +30,16 @@ import java.util.List;
  */
 public class RouterOptions {
 
+    /**
+     * The default {@link Scheduler} to publish responses. Allows blocking usage.
+     */
+    public static final Scheduler DEFAULT_RESPONSE_SCHEDULER = Schedulers.elastic();
+
+    /**
+     * The default {@link Scheduler} to delay rate limited requests.
+     */
+    public static final Scheduler DEFAULT_RATE_LIMIT_SCHEDULER = Schedulers.elastic();
+
     private final Scheduler responseScheduler;
     private final Scheduler rateLimitScheduler;
     private final List<ResponseFunction> responseTransformers;
@@ -50,7 +60,8 @@ public class RouterOptions {
     }
 
     /**
-     * Returns a new {@link RouterOptions} with default settings.
+     * Returns a new {@link RouterOptions} with default settings. See {@link #DEFAULT_RESPONSE_SCHEDULER} and
+     * {@link #DEFAULT_RATE_LIMIT_SCHEDULER} for the default values.
      *
      * @return a new {@code RouterOptions}
      */
@@ -63,8 +74,8 @@ public class RouterOptions {
      */
     public static class Builder {
 
-        private Scheduler responseScheduler = Schedulers.elastic();
-        private Scheduler rateLimitScheduler = Schedulers.elastic();
+        private Scheduler responseScheduler = DEFAULT_RESPONSE_SCHEDULER;
+        private Scheduler rateLimitScheduler = DEFAULT_RATE_LIMIT_SCHEDULER;
         private final List<ResponseFunction> responseTransformers = new ArrayList<>();
 
         protected Builder() {

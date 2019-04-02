@@ -75,8 +75,15 @@ public class ClientException extends RuntimeException {
     private final HttpHeaders headers;
     private final ErrorResponse errorResponse;
 
+    /**
+     * Create a new {@link ClientException} with the given HTTP request and response details.
+     *
+     * @param request the original {@link ClientRequest} that caused this exception
+     * @param response the failing {@link HttpClientResponse}
+     * @param errorResponse the response body converted to an {@link ErrorResponse}, or {@code null} if not available
+     */
     public ClientException(ClientRequest request, HttpClientResponse response, @Nullable ErrorResponse errorResponse) {
-        super(request.method().toString() + " " + request.url() + " returned " + response.status().toString() +
+        super(request.getMethod().toString() + " " + request.getUrl() + " returned " + response.status().toString() +
                 (errorResponse != null ? " with response " + errorResponse.getFields() : ""));
         this.request = request;
         this.status = response.status();
@@ -85,7 +92,7 @@ public class ClientException extends RuntimeException {
     }
 
     /**
-     * Gets the {@link ClientRequest} encapsulating a Discord API request.
+     * Return the {@link ClientRequest} encapsulating a Discord API request.
      *
      * @return the request that caused this exception
      */
@@ -94,7 +101,7 @@ public class ClientException extends RuntimeException {
     }
 
     /**
-     * Gets the {@link HttpResponseStatus} with information related to the HTTP error. The actual status code can be
+     * Return the {@link HttpResponseStatus} with information related to the HTTP error. The actual status code can be
      * obtained through {@link HttpResponseStatus#code()}.
      *
      * @return the HTTP error associated to this exception
@@ -104,8 +111,8 @@ public class ClientException extends RuntimeException {
     }
 
     /**
-     * Gets the {@link HttpHeaders} from the error <strong>response</strong>. To get request headers refer to
-     * {@link #getRequest()} and then {@link ClientRequest#headers()}.
+     * Return the {@link HttpHeaders} from the error <strong>response</strong>. To get request headers refer to
+     * {@link #getRequest()} and then {@link ClientRequest#getHeaders()}.
      *
      * @return the HTTP response headers
      */
@@ -114,7 +121,7 @@ public class ClientException extends RuntimeException {
     }
 
     /**
-     * Gets the HTTP response body in the form of a Discord {@link ErrorResponse}, if present. {@link ErrorResponse}
+     * Return the HTTP response body in the form of a Discord {@link ErrorResponse}, if present. {@link ErrorResponse}
      * is a common object that contains an internal status code and messages, and could be used to further clarify
      * the source of the API error.
      *
@@ -210,7 +217,7 @@ public class ClientException extends RuntimeException {
     }
 
     /**
-     * Transformation function that be used within an operator such as {@link Mono#transform(Function)} or
+     * Transformation function that can be used within an operator such as {@link Mono#transform(Function)} or
      * {@link Mono#compose(Function)} to turn an error sequence matching the given HTTP status code, into an empty
      * sequence, effectively suppressing the original error.
      *
@@ -223,7 +230,7 @@ public class ClientException extends RuntimeException {
     }
 
     /**
-     * Transformation function that be used within an operator such as {@link Mono#transform(Function)} or
+     * Transformation function that can be used within an operator such as {@link Mono#transform(Function)} or
      * {@link Mono#compose(Function)} to apply a retrying strategy in case of an error matching the given HTTP status
      * code. The provided retrying strategy will wait 1 second, and then retry once.
      *
