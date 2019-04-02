@@ -28,7 +28,24 @@ import reactor.util.Loggers;
 
 import java.util.concurrent.atomic.AtomicLong;
 
-/** Holder for various pieces of state for use in caching. */
+/**
+ * Holder for various pieces of state for use in caching.
+ * <p>
+ * In addition to saving the current bot user ID, the following stores are kept in this class:
+ * <ul>
+ * <li>Category store: {@code long} keys and {@link CategoryBean} values.</li>
+ * <li>Guild store: {@code long} keys and {@link GuildBean} values.</li>
+ * <li>Guild emoji store: {@code long} keys and {@link GuildEmojiBean} values.</li>
+ * <li>Member store: {@code long} pair keys and {@link MemberBean} values.</li>
+ * <li>Message store: {@code long} keys and {@link MessageBean} values.</li>
+ * <li>Presence store: {@code long} pair keys and {@link PresenceBean} values.</li>
+ * <li>Role store: {@code long} keys and {@link RoleBean} values.</li>
+ * <li>Text channel store: {@code long} keys and {@link TextChannelBean} values.</li>
+ * <li>User store: {@code long} keys and {@link UserBean} values.</li>
+ * <li>Voice channel store: {@code long} keys and {@link VoiceChannelBean} values.</li>
+ * <li>Voice state store: {@code long} pair keys and {@link VoiceStateBean} values.</li>
+ * </ul>
+ */
 public final class StateHolder {
 
     private static final Logger log = Loggers.getLogger(StateHolder.class);

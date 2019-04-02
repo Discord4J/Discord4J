@@ -23,8 +23,8 @@ import discord4j.store.api.service.StoreService;
 import discord4j.voice.VoiceClient;
 
 /**
- * {@link ServiceMediator} encapsulates the set of dependencies core module requires to function, giving access to the
- * underlying resources currently on use.
+ * {@link ServiceMediator} encapsulates the set of dependencies core module requires to function, giving access to
+ * resources currently in use.
  * <p>
  * The following are some of the resources available through this mediator:
  * <ul>
@@ -61,7 +61,7 @@ public final class ServiceMediator {
     }
 
     /**
-     * Get the current client for Gateway operations.
+     * Return the current client for Gateway operations.
      *
      * @return the current {@link GatewayClient}
      */
@@ -70,7 +70,7 @@ public final class ServiceMediator {
     }
 
     /**
-     * Get the current client for REST operations providing a low-level way to perform requests.
+     * Return the current client for REST operations providing a low-level way to perform requests.
      *
      * @return the current {@link RestClient}
      */
@@ -79,7 +79,7 @@ public final class ServiceMediator {
     }
 
     /**
-     * Get the current store factory.
+     * Return the current store factory.
      *
      * @return the current {@link StoreService}
      */
@@ -88,7 +88,7 @@ public final class ServiceMediator {
     }
 
     /**
-     * Get access to the stored/cached values coming from real-time Gateway updates.
+     * Return access to the stored/cached values coming from real-time Gateway updates.
      *
      * @return the current {@link StateHolder}
      */
@@ -97,7 +97,7 @@ public final class ServiceMediator {
     }
 
     /**
-     * Get the event dispatching processor used by this client.
+     * Return the event dispatching processor used by this client.
      *
      * @return the current {@link EventDispatcher}
      */
@@ -106,7 +106,7 @@ public final class ServiceMediator {
     }
 
     /**
-     * Get the {@link DiscordClient} that is served by this instance.
+     * Return the {@link DiscordClient} that is served by this instance.
      *
      * @return the current {@link DiscordClient}
      */
@@ -115,7 +115,7 @@ public final class ServiceMediator {
     }
 
     /**
-     * Get the current configuration for initiating gateway connections.
+     * Return the current configuration for initiating gateway connections.
      *
      * @return the current {@link ClientConfig}
      */
@@ -124,7 +124,7 @@ public final class ServiceMediator {
     }
 
     /**
-     * Get the current voice client to initiate voice gateway connections.
+     * Return the current voice client to initiate voice gateway connections.
      *
      * @return the current {@link VoiceClient}
      */
