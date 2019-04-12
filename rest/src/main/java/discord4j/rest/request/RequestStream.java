@@ -93,8 +93,7 @@ class RequestStream<T> {
             return new BackoffDelay(Duration.ZERO);
         }).doOnRetry(ctx -> {
             if (log.isTraceEnabled()) {
-                log.trace("Retry {} due to {} for {}", ctx.iteration(), ctx.exception().toString(), ctx.backoff
-                        ());
+                log.trace("Retry {} due to {} for {}", ctx.iteration(), ctx.exception().toString(), ctx.backoff());
             }
         });
     }
