@@ -40,7 +40,8 @@ import java.util.function.Supplier;
  */
 public class GlobalRateLimiter {
 
-    private final Semaphore semaphore = new Semaphore(1, true);
+    private final Semaphore outer = new Semaphore(8, true);
+    private final Semaphore inner = new Semaphore(1, true);
     private final AtomicLong limitedUntil = new AtomicLong(0L);
 
     /**
@@ -89,20 +90,45 @@ public class GlobalRateLimiter {
                 this::release);
     }
 
-    private Mono<Semaphore> acquire() {
+    private Mono<Resource> acquire() {
         return Mono
-                .fromRunnable(() -> {
+                .fromCallable(() -> {
                     try {
-                        semaphore.acquire();
+                        outer.acquire();
+                        if (delayNanos() > 0) {
+                            try {
+                                inner.acquire();
+                                return new Resource(outer, inner);
+                            } catch (InterruptedException e) {
+                                throw Exceptions.propagate(e);
+                            }
+                        }
+                        return new Resource(outer, null);
                     } catch (InterruptedException e) {
                         throw Exceptions.propagate(e);
                     }
                 })
-                .then(onComplete())
-                .thenReturn(semaphore);
+                .delayUntil(resource -> onComplete());
     }
 
-    private Mono<Void> release(Semaphore resource) {
-        return Mono.fromRunnable(resource::release);
+    private Mono<Void> release(Resource resource) {
+        return Mono.fromRunnable(() -> {
+            if (resource.inner != null) {
+                resource.inner.release();
+            }
+            if (resource.outer != null) {
+                resource.outer.release();
+            }
+        });
+    }
+
+    static class Resource {
+        private final Semaphore outer;
+        private final Semaphore inner;
+
+        Resource(Semaphore outer, Semaphore inner) {
+            this.outer = outer;
+            this.inner = inner;
+        }
     }
 }

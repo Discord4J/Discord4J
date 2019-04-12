@@ -22,7 +22,6 @@ import discord4j.rest.http.client.DiscordWebClient;
 import discord4j.rest.util.RouteUtils;
 import io.netty.handler.codec.http.DefaultHttpHeaders;
 import io.netty.handler.codec.http.HttpHeaders;
-import org.reactivestreams.Subscription;
 import reactor.core.publisher.*;
 import reactor.core.scheduler.Scheduler;
 import reactor.netty.http.client.HttpClientResponse;
@@ -171,11 +170,6 @@ class RequestStream<T> {
         }
 
         @Override
-        protected void hookOnSubscribe(Subscription subscription) {
-            request(1);
-        }
-
-        @Override
         protected void hookOnNext(RequestCorrelation<T> correlation) {
             DiscordRequest<T> request = correlation.getRequest();
             MonoProcessor<T> callback = correlation.getResponse();
@@ -228,7 +222,6 @@ class RequestStream<T> {
                     logger.trace("Ready to consume next request after {}", signal);
                 }
                 sleepTime = Duration.ZERO;
-                request(1);
             }, t -> logger.error("Error while scheduling next request", t));
         }
 
