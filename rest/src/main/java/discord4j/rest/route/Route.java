@@ -17,7 +17,6 @@
 package discord4j.rest.route;
 
 import discord4j.rest.request.DiscordRequest;
-import discord4j.rest.util.RouteUtils;
 import io.netty.handler.codec.http.HttpMethod;
 import reactor.util.annotation.Nullable;
 
@@ -87,7 +86,7 @@ public class Route<T> {
      * @see discord4j.rest.request.DiscordRequest#exchange
      */
     public DiscordRequest<T> newRequest(Object... uriVars) {
-        return new DiscordRequest<>(this, RouteUtils.expand(getUriTemplate(), uriVars));
+        return new DiscordRequest<>(this, uriVars);
     }
 
     /**

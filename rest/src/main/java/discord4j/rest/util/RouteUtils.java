@@ -16,10 +16,12 @@
  */
 package discord4j.rest.util;
 
+import discord4j.common.annotations.Experimental;
 import reactor.util.annotation.Nullable;
 
 import java.io.ByteArrayOutputStream;
 import java.nio.charset.Charset;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -45,6 +47,20 @@ public class RouteUtils {
         }
         matcher.appendTail(buf);
         return buf.toString();
+    }
+
+    @Experimental
+    public static Map<String, String> createVariableMap(String template, Object... variables) {
+        Map<String, String> variableMap = new LinkedHashMap<>();
+        if (variables.length == 0) {
+            return variableMap;
+        }
+        Matcher matcher = PARAMETER_PATTERN.matcher(template);
+        int index = 0;
+        while (matcher.find()) {
+            variableMap.put(matcher.group().replaceAll("[{}]", ""), variables[index++].toString());
+        }
+        return variableMap;
     }
 
     public static String expandQuery(String uri, @Nullable Map<String, ?> values) {

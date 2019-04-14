@@ -17,6 +17,7 @@
 
 package discord4j.rest.response;
 
+import discord4j.common.annotations.Experimental;
 import discord4j.rest.http.client.ClientException;
 import discord4j.rest.request.DiscordRequest;
 import discord4j.rest.request.RouteMatcher;
@@ -40,6 +41,7 @@ import java.util.function.Function;
  * {@link RouterOptions.Builder#onClientResponse(ResponseFunction)}, where it can be applied using one of the static
  * helper methods defined in this class.
  */
+@Experimental
 public interface ResponseFunction {
 
     /**

@@ -17,6 +17,7 @@
 
 package discord4j.rest.response;
 
+import discord4j.common.annotations.Experimental;
 import discord4j.rest.request.DiscordRequest;
 import discord4j.rest.request.RouteMatcher;
 import reactor.core.publisher.Mono;
@@ -27,6 +28,7 @@ import java.util.function.Predicate;
 /**
  * A {@link ResponseFunction} that is able to transform an error sequence into a custom response.
  */
+@Experimental
 public class ResumingTransformer implements ResponseFunction {
 
     private final RouteMatcher routeMatcher;

@@ -17,6 +17,7 @@
 package discord4j.rest.request;
 
 import discord4j.rest.route.Route;
+import discord4j.rest.util.RouteUtils;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
 
@@ -24,6 +25,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Predicate;
 
 /**
  * Template encoding all of the needed information to make an HTTP request to Discord.
@@ -35,6 +37,7 @@ public class DiscordRequest<T> {
 
     private final Route<T> route;
     private final String completeUri;
+    private final Map<String, String> uriVariableMap;
 
     @Nullable
     private Object body;
@@ -49,11 +52,12 @@ public class DiscordRequest<T> {
      * Create a new {@link DiscordRequest} template based on a {@link Route} and its compiled URI.
      *
      * @param route the API resource targeted by this request
-     * @param completeUri the request URI compiled with the appropriate path variables
+     * @param uriVars the values to expand each template parameter
      */
-    public DiscordRequest(Route<T> route, String completeUri) {
+    public DiscordRequest(Route<T> route, Object... uriVars) {
         this.route = route;
-        this.completeUri = completeUri;
+        this.completeUri = RouteUtils.expand(route.getUriTemplate(), uriVars);
+        this.uriVariableMap = RouteUtils.createVariableMap(route.getUriTemplate(), uriVars);
     }
 
     /**
@@ -166,6 +170,10 @@ public class DiscordRequest<T> {
      */
     public DiscordRequest<T> optionalHeader(String key, @Nullable String value) {
         return (value == null) ? this : header(key, value);
+    }
+
+    boolean matchesVariables(Predicate<Map<String, String>> matcher) {
+        return matcher.test(uriVariableMap);
     }
 
     /**

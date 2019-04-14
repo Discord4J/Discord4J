@@ -17,11 +17,10 @@
 
 package discord4j.rest.response;
 
+import discord4j.common.annotations.Experimental;
 import discord4j.rest.request.DiscordRequest;
 import discord4j.rest.request.RouteMatcher;
 import reactor.core.publisher.Mono;
-import reactor.util.Logger;
-import reactor.util.Loggers;
 
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -34,9 +33,8 @@ import java.util.function.Predicate;
  * @see ResponseFunction#emptyWhenNotFound(RouteMatcher)
  * @see ResponseFunction#emptyOnErrorStatus(RouteMatcher, Integer...)
  */
+@Experimental
 public class EmptyResponseTransformer implements ResponseFunction {
-
-    private static final Logger log = Loggers.getLogger(EmptyResponseTransformer.class);
 
     private final RouteMatcher routeMatcher;
     private final Predicate<Throwable> predicate;
@@ -49,10 +47,7 @@ public class EmptyResponseTransformer implements ResponseFunction {
     @Override
     public <T> Function<Mono<T>, Mono<T>> transform(DiscordRequest<T> request) {
         if (routeMatcher.matches(request)) {
-            return mono -> mono.onErrorResume(predicate, t -> {
-                log.debug("Returning empty response for {} after {}", request, t.toString());
-                return Mono.empty();
-            });
+            return mono -> mono.onErrorResume(predicate, t -> Mono.empty());
         }
         return mono -> mono;
     }

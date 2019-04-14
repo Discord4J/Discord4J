@@ -17,6 +17,7 @@
 
 package discord4j.rest.request;
 
+import discord4j.common.annotations.Experimental;
 import discord4j.rest.response.ResponseFunction;
 import discord4j.rest.route.Route;
 import reactor.core.scheduler.Scheduler;
@@ -106,12 +107,11 @@ public class RouterOptions {
 
         /**
          * Sets a new API response behavior to the supporting {@link Router}, allowing cross-cutting behavior across
-         * all requests made by the {@code Router}.
+         * all requests made by it.
          * <p>
          * The given {@link ResponseFunction} will be applied after every response. Calling this function multiple
          * times will result in additive behavior, so care must be taken regarding the <strong>order</strong> in
-         * which multiple calls occur. Responses will processed in this order and only the first matching one will be
-         * transformed.
+         * which multiple calls occur. Transformations will be added to the response pipeline in that order.
          * <p>
          * Built-in factories are supplied for commonly used behavior:
          * <ul>
@@ -128,6 +128,7 @@ public class RouterOptions {
          * @param errorHandler the {@link ResponseFunction} to transform the responses from matching requests.
          * @return this builder
          */
+        @Experimental
         public Builder onClientResponse(ResponseFunction errorHandler) {
             responseTransformers.add(errorHandler);
             return this;
