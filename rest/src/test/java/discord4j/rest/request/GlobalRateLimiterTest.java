@@ -17,8 +17,11 @@
 package discord4j.rest.request;
 
 import org.junit.Test;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.time.Duration;
+import java.util.Random;
 
 public class GlobalRateLimiterTest {
 
@@ -26,14 +29,29 @@ public class GlobalRateLimiterTest {
     public void testGlobalRateLimiter() {
         GlobalRateLimiter rateLimiter = new GlobalRateLimiter();
 
-        rateLimiter.rateLimitFor(Duration.ofSeconds(2));
+        rateLimiter.rateLimitFor(Duration.ofSeconds(1));
 
         rateLimiter.onComplete().block();
         System.out.println("1");
 
-        rateLimiter.rateLimitFor(Duration.ofSeconds(2));
+        rateLimiter.rateLimitFor(Duration.ofSeconds(1));
 
         rateLimiter.onComplete().block();
         System.out.println("2");
+    }
+
+    @Test
+    public void testBurstingRequestsGlobalRateLimiter() {
+        GlobalRateLimiter rateLimiter = new GlobalRateLimiter();
+        Random random = new Random();
+        Flux.range(0, 100)
+                .flatMap(index -> rateLimiter.withLimiter(() -> {
+                    if (random.nextDouble() < 0.1) {
+                        long delay = random.nextInt(500);
+                        rateLimiter.rateLimitFor(Duration.ofMillis(delay));
+                    }
+                    return Mono.just(index);
+                }))
+                .blockLast();
     }
 }

@@ -22,10 +22,7 @@ import discord4j.rest.http.client.DiscordWebClient;
 import discord4j.rest.util.RouteUtils;
 import io.netty.handler.codec.http.DefaultHttpHeaders;
 import io.netty.handler.codec.http.HttpHeaders;
-import reactor.core.publisher.EmitterProcessor;
-import reactor.core.publisher.Mono;
-import reactor.core.publisher.MonoProcessor;
-import reactor.core.publisher.SignalType;
+import reactor.core.publisher.*;
 import reactor.core.scheduler.Scheduler;
 import reactor.netty.http.client.HttpClientResponse;
 import reactor.retry.BackoffDelay;
@@ -44,8 +41,8 @@ import java.util.logging.Level;
 
 /**
  * A stream of {@link DiscordRequest DiscordRequests}. Any number of items may be {@link #push(RequestCorrelation)}
- * written to the stream. However, the {@link Reader reader} ensures that only one is read at a time. This
- * linearization ensures proper ratelimit handling.
+ * written to the stream. However, the {@link RequestSubscriber} ensures that only one is read at a time. This
+ * serialization ensures proper rate limit handling.
  * <p>
  * The flow of a request through the stream is as follows:
  *
@@ -74,8 +71,8 @@ class RequestStream<T> {
     }
 
     /**
-     * The retry function used for reading and completing HTTP requests. The backoff is determined by the ratelimit
-     * headers returned by Discord in the event of a 429. If the bot is being globally ratelimited, the backoff is
+     * The retry function used for reading and completing HTTP requests. The backoff is determined by the rate limit
+     * headers returned by Discord in the event of a 429. If the bot is being globally rate limited, the backoff is
      * applied to the global rate limiter. Otherwise, it is applied only to this stream.
      */
     private Retry<?> rateLimitRetryFactory() {
@@ -87,6 +84,7 @@ class RequestStream<T> {
                 long retryAfter = Long.valueOf(clientException.getHeaders().get("Retry-After"));
                 Duration fixedBackoff = Duration.ofMillis(retryAfter);
                 if (global) {
+                    log.debug("Globally rate limited for {}", fixedBackoff);
                     globalRateLimiter.rateLimitFor(fixedBackoff);
                 }
                 return new BackoffDelay(fixedBackoff);
@@ -140,27 +138,23 @@ class RequestStream<T> {
     }
 
     void start() {
-        read().subscribe(new Reader(rateLimitStrategy), t -> log.error("Error while consuming first request", t));
-    }
-
-    private Mono<RequestCorrelation<T>> read() {
-        return backing.next();
+        backing.subscribe(new RequestSubscriber(rateLimitStrategy));
     }
 
     /**
      * Reads and completes one request from the stream at a time. If a request fails, it is retried according a retry
-     * strategy. The reader may wait in between each request if preemptive ratelimiting is necessary according to the
+     * strategy. The reader may wait in between each request if preemptive rate limiting is necessary according to the
      * response headers.
      *
      * @see #sleepTime
      * @see #rateLimitHandler
      */
-    private class Reader implements Consumer<RequestCorrelation<T>> {
+    private class RequestSubscriber extends BaseSubscriber<RequestCorrelation<T>> {
 
         private volatile Duration sleepTime = Duration.ZERO;
         private final Consumer<HttpClientResponse> rateLimitHandler;
 
-        private Reader(RateLimitStrategy strategy) {
+        public RequestSubscriber(RateLimitStrategy strategy) {
             this.rateLimitHandler = response -> {
                 if (log.isTraceEnabled()) {
                     log.trace("Read {} with headers: {}", response.status(), response.responseHeaders());
@@ -173,6 +167,40 @@ class RequestStream<T> {
                     sleepTime = nextReset;
                 }
             };
+        }
+
+        @Override
+        protected void hookOnNext(RequestCorrelation<T> correlation) {
+            DiscordRequest<T> request = correlation.getRequest();
+            MonoProcessor<T> callback = correlation.getResponse();
+            String shard = correlation.getShardId();
+            Logger traceLog = getLogger("traces", shard);
+            if (traceLog.isTraceEnabled()) {
+                traceLog.trace("Accepting request: {}", request);
+            }
+            Logger requestLog = getLogger("request", shard);
+            Logger responseLog = getLogger("response", shard);
+            Class<T> responseType = request.getRoute().getResponseType();
+
+            globalRateLimiter.withLimiter(() -> adaptRequest(request)
+                    .log(requestLog, Level.FINEST, false)
+                    .flatMap(r -> httpClient.exchange(r, request.getBody(), responseType, rateLimitHandler))
+                    .retryWhen(rateLimitRetryFactory())
+                    .retryWhen(serverErrorRetryFactory())
+                    .log(responseLog, Level.FINEST, false)
+                    .doFinally(signal -> next(signal, traceLog)))
+                    .materialize()
+                    .subscribe(signal -> {
+                        if (signal.isOnSubscribe()) {
+                            callback.onSubscribe(signal.getSubscription());
+                        } else if (signal.isOnNext()) {
+                            callback.onNext(signal.get());
+                        } else if (signal.isOnError()) {
+                            callback.onError(signal.getThrowable());
+                        } else if (signal.isOnComplete()) {
+                            callback.onComplete();
+                        }
+                    });
         }
 
         private Mono<ClientRequest> adaptRequest(DiscordRequest<?> req) {
@@ -188,49 +216,12 @@ class RequestStream<T> {
                             .orElse(new DefaultHttpHeaders())));
         }
 
-        @Override
-        public void accept(RequestCorrelation<T> correlation) {
-            DiscordRequest<T> req = correlation.getRequest();
-            MonoProcessor<T> callback = correlation.getResponse();
-            String shard = correlation.getShardId();
-            Logger traceLog = getLogger("traces", shard);
-            if (traceLog.isTraceEnabled()) {
-                traceLog.trace("Accepting request: {}", req);
-            }
-            Logger requestLog = getLogger("request", shard);
-            Logger responseLog = getLogger("response", shard);
-            Mono<ClientRequest> request = adaptRequest(req);
-            Class<T> responseType = req.getRoute().getResponseType();
-
-            globalRateLimiter.onComplete()
-                    .then(request)
-                    .log(requestLog, Level.FINEST, false)
-                    .flatMap(r -> httpClient.exchange(r, req.getBody(), responseType, rateLimitHandler))
-                    .retryWhen(rateLimitRetryFactory())
-                    .retryWhen(serverErrorRetryFactory())
-                    .log(responseLog, Level.FINEST, false)
-                    .doFinally(signal -> next(signal, traceLog))
-                    .materialize()
-                    .subscribe(signal -> {
-                        if (signal.isOnSubscribe()) {
-                            callback.onSubscribe(signal.getSubscription());
-                        } else if (signal.isOnNext()) {
-                            callback.onNext(signal.get());
-                        } else if (signal.isOnError()) {
-                            callback.onError(signal.getThrowable());
-                        } else if (signal.isOnComplete()) {
-                            callback.onComplete();
-                        }
-                    });
-        }
-
         private void next(SignalType signal, Logger logger) {
             Mono.delay(sleepTime, rateLimitScheduler).subscribe(l -> {
                 if (logger.isTraceEnabled()) {
                     logger.trace("Ready to consume next request after {}", signal);
                 }
                 sleepTime = Duration.ZERO;
-                read().subscribe(this, t -> logger.error("Error while consuming request", t));
             }, t -> logger.error("Error while scheduling next request", t));
         }
 
