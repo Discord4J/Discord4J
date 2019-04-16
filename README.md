@@ -99,7 +99,7 @@ Discord4J's mechanism for storing information received on the gateway is complet
 Please follow our instructions at [Using Jitpack](https://github.com/Discord4J/Discord4J/wiki/Using-Jitpack)
 
 ## Useful Links
-* [Discord4J Site](https://new.discord4j.com)
+* [Discord4J Site](https://discord4j.com)
 * [Discord4J Wiki](https://github.com/Discord4J/Discord4J/wiki)
 * [Javadoc](http://javadoc.io/doc/com.discord4j/discord4j-core/)
 * [Reactor 3 Reference Guide](http://projectreactor.io/docs/core/release/reference/)
