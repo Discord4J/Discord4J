@@ -56,24 +56,24 @@ public interface ResponseFunction {
 
     /**
      * Transform every HTTP 404 status code into an empty response into an empty sequence, effectively suppressing
-     * the {@link ClientException} that would be forwarded otherwise. See {@link #emptyWhenNotFound(RouteMatcher)}
+     * the {@link ClientException} that would be forwarded otherwise. See {@link #emptyIfNotFound(RouteMatcher)}
      * for an override that supports applying the transformation to a subset of requests.
      *
      * @return a {@link ResponseFunction} that transforms any HTTP 404 error into an empty sequence
      */
-    static EmptyResponseTransformer emptyWhenNotFound() {
+    static EmptyResponseTransformer emptyIfNotFound() {
         return new EmptyResponseTransformer(RouteMatcher.any(), ClientException.isStatusCode(404));
     }
 
     /**
      * Transforms HTTP 404 status codes caused by requests matching the given {@link RouteMatcher} into an empty
      * sequence, effectively suppressing the {@link ClientException} that would be forwarded otherwise. See
-     * {@link #emptyWhenNotFound()} to apply this transformation across all {@link Router} requests.
+     * {@link #emptyIfNotFound()} to apply this transformation across all {@link Router} requests.
      *
      * @param routeMatcher the {@link RouteMatcher} determining whether to match a particular request
      * @return a {@link ResponseFunction} that transforms matching HTTP 404 errors into an empty sequence
      */
-    static EmptyResponseTransformer emptyWhenNotFound(RouteMatcher routeMatcher) {
+    static EmptyResponseTransformer emptyIfNotFound(RouteMatcher routeMatcher) {
         return new EmptyResponseTransformer(routeMatcher, ClientException.isStatusCode(404));
     }
 

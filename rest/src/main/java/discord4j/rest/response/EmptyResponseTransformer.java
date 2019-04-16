@@ -29,8 +29,8 @@ import java.util.function.Predicate;
  * A {@link ResponseFunction} that is able to transform an error sequence with a HTTP 404 status, into an empty
  * sequence.
  *
- * @see ResponseFunction#emptyWhenNotFound()
- * @see ResponseFunction#emptyWhenNotFound(RouteMatcher)
+ * @see ResponseFunction#emptyIfNotFound()
+ * @see ResponseFunction#emptyIfNotFound(RouteMatcher)
  * @see ResponseFunction#emptyOnErrorStatus(RouteMatcher, Integer...)
  */
 @Experimental

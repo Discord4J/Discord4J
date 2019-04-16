@@ -71,9 +71,13 @@ public class ExampleBot {
     public void testCommandBot() {
         DiscordClient client = new DiscordClientBuilder(token)
                 .setRouterOptions(RouterOptions.builder()
-                        .onClientResponse(ResponseFunction.emptyWhenNotFound()) // globally turn any 404 into {}
-                        .onClientResponse(ResponseFunction.retryOnceOnErrorStatus(500)) // wait 1 sec and retry any 500
+                        // globally suppress any not found (404) error
+                        .onClientResponse(ResponseFunction.emptyIfNotFound())
+                        // wait 1 second and retry any server error (500)
+                        .onClientResponse(ResponseFunction.retryOnceOnErrorStatus(500))
+                        // bad requests (400) while adding reactions will be suppressed
                         .onClientResponse(ResponseFunction.emptyOnErrorStatus(RouteMatcher.route(Routes.REACTION_CREATE), 400))
+                        // server error (500) while creating a message will be retried, with backoff, until it succeeds
                         .onClientResponse(ResponseFunction.retryWhen(RouteMatcher.route(Routes.MESSAGE_CREATE),
                                 Retry.onlyIf(ClientException.isRetryContextStatusCode(500))
                                         .exponentialBackoffWithJitter(Duration.ofSeconds(2), Duration.ofSeconds(10))))

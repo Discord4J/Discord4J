@@ -52,19 +52,19 @@ import java.util.function.Predicate;
  * <p>
  * The following example would retry a request if it has failed with an HTTP 500 error:
  * <pre>
- *     client.getEventDispatcher().on(MessageCreateEvent.class)
- * 		    .map(MessageCreateEvent::getMessage)
- * 		    .filter(msg -> msg.getContent().map("!ping"::equals).orElse(false))
- * 		    .flatMap(Message::getChannel)
- * 		    .flatMap(channel -> channel.createMessage("Pong!")
- * 				    .transform(ClientException.retryOnceOnStatus(500)))
- * 		    .subscribe();
+ * client.getEventDispatcher().on(MessageCreateEvent.class)
+ *     .map(MessageCreateEvent::getMessage)
+ *     .filter(msg -&gt; msg.getContent().map("!ping"::equals).orElse(false))
+ *     .flatMap(Message::getChannel)
+ *     .flatMap(channel -&gt; channel.createMessage("Pong!")
+ *         .transform(ClientException.retryOnceOnStatus(500)))
+ *     .subscribe();
  * </pre>
  * While the following one would transform a not found user into an empty sequence:
  * <pre>
- *      client.getUserById(Snowflake.of(userLongId))
- * 		    .onErrorResume(ClientException.isStatusCode(404), error -> Mono.empty())
- * 		    .subscribe(user -> System.out.println("Found: " + user.getUsername()));
+ * client.getUserById(Snowflake.of(userLongId))
+ *     .onErrorResume(ClientException.isStatusCode(404), error -&gt; Mono.empty())
+ *     .subscribe(user -&gt; System.out.println("Found: " + user.getUsername()));
  * </pre>
  * For global or {@link Route} based error handling, refer to the {@link ResponseFunction} class.
  */
@@ -184,17 +184,11 @@ public class ClientException extends RuntimeException {
      * like {@link Retry#onlyIf(Predicate)} where this method can be used as argument.
      *
      * @param code the status code for which this {@link Predicate} should return {@code true}
-     * @return a {@link Predicate} that returns {@code true} if the given {@link Throwable} is a {@link ClientException}
-     * containing the given HTTP status code.
+     * @return a {@link Predicate} that returns {@code true} if the given {@link RetryContext} exception is a
+     * {@link ClientException} containing the given HTTP status code.
      */
     public static Predicate<RetryContext<?>> isRetryContextStatusCode(int code) {
-        return ctx -> {
-            if (ctx.exception() instanceof ClientException) {
-                ClientException e = (ClientException) ctx.exception();
-                return e.getStatus().code() == code;
-            }
-            return false;
-        };
+        return ctx -> isStatusCode(code).test(ctx.exception());
     }
 
     /**
@@ -207,13 +201,7 @@ public class ClientException extends RuntimeException {
      * containing the given HTTP status code.
      */
     public static Predicate<RetryContext<?>> isRetryContextStatusCode(Integer... codes) {
-        return ctx -> {
-            if (ctx.exception() instanceof ClientException) {
-                ClientException e = (ClientException) ctx.exception();
-                return Arrays.asList(codes).contains(e.getStatus().code());
-            }
-            return false;
-        };
+        return ctx -> isStatusCode(codes).test(ctx.exception());
     }
 
     /**

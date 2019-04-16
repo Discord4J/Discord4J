@@ -115,8 +115,8 @@ public class RouterOptions {
          * <p>
          * Built-in factories are supplied for commonly used behavior:
          * <ul>
-         * <li>{@link ResponseFunction#emptyWhenNotFound()} transforms any HTTP 404 error into an empty sequence.</li>
-         * <li>{@link ResponseFunction#emptyWhenNotFound(RouteMatcher)} transforms HTTP 404 errors from the given
+         * <li>{@link ResponseFunction#emptyIfNotFound()} transforms any HTTP 404 error into an empty sequence.</li>
+         * <li>{@link ResponseFunction#emptyIfNotFound(RouteMatcher)} transforms HTTP 404 errors from the given
          * {@link Route}s into an empty sequence.</li>
          * <li>{@link ResponseFunction#emptyOnErrorStatus(RouteMatcher, Integer...)} provides the same behavior as
          * above but for any given status codes.</li>
