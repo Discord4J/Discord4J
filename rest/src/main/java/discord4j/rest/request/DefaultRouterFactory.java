@@ -19,24 +19,56 @@ package discord4j.rest.request;
 
 import discord4j.rest.http.client.DiscordWebClient;
 import reactor.core.scheduler.Scheduler;
-import reactor.core.scheduler.Schedulers;
 
+/**
+ * A monolithic {@link RouterFactory} that can build {@link Router} instances to execute Discord API requests.
+ * <p>
+ * This factory creates a new instance each time so it is not fit for coordinating sharding requests. For those cases,
+ * see {@link SingleRouterFactory}.
+ */
 public class DefaultRouterFactory implements RouterFactory {
 
-    private final Scheduler responseScheduler;
-    private final Scheduler rateLimitScheduler;
+    private final RouterOptions routerOptions;
 
+    /**
+     * Create a {@link DefaultRouterFactory} with default options. See {@link RouterOptions#create()} for information
+     * about the default values.
+     */
     public DefaultRouterFactory() {
-        this(Schedulers.elastic(), Schedulers.elastic());
+        this.routerOptions = RouterOptions.create();
     }
 
+    /**
+     * Create a {@link DefaultRouterFactory} with the given {@link Scheduler} options.
+     *
+     * @param responseScheduler the {@link Scheduler} used to publish responses
+     * @param rateLimitScheduler the {@link Scheduler} used to delay rate limited requests
+     * @deprecated use {@link #DefaultRouterFactory(RouterOptions)}
+     */
+    @Deprecated
     public DefaultRouterFactory(Scheduler responseScheduler, Scheduler rateLimitScheduler) {
-        this.responseScheduler = responseScheduler;
-        this.rateLimitScheduler = rateLimitScheduler;
+        this.routerOptions = RouterOptions.builder()
+                .responseScheduler(responseScheduler)
+                .rateLimitScheduler(rateLimitScheduler)
+                .build();
+    }
+
+    /**
+     * Create a {@link DefaultRouterFactory} configured with the given {@link RouterOptions}.
+     *
+     * @param routerOptions the options to configure the produced {@link Router} instances
+     */
+    public DefaultRouterFactory(RouterOptions routerOptions) {
+        this.routerOptions = routerOptions;
     }
 
     @Override
-    public Router getRouter(DiscordWebClient httpClient) {
-        return new DefaultRouter(httpClient, responseScheduler, rateLimitScheduler);
+    public Router getRouter(DiscordWebClient webClient) {
+        return new DefaultRouter(webClient, routerOptions);
+    }
+
+    @Override
+    public Router getRouter(DiscordWebClient webClient, RouterOptions routerOptions) {
+        return new DefaultRouter(webClient, routerOptions);
     }
 }

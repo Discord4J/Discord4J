@@ -28,7 +28,6 @@ import discord4j.rest.http.client.DiscordWebClient;
 import discord4j.rest.request.DefaultRouter;
 import discord4j.rest.request.Router;
 import discord4j.rest.service.ChannelService;
-import reactor.core.scheduler.Schedulers;
 import reactor.netty.http.client.HttpClient;
 
 public abstract class RestTests {
@@ -36,7 +35,7 @@ public abstract class RestTests {
     public static Router getRouter(String token, ObjectMapper mapper) {
         DiscordWebClient webClient = new DiscordWebClient(HttpClient.create().compress(true),
                 ExchangeStrategies.jackson(mapper), token);
-        return new DefaultRouter(webClient, Schedulers.elastic(), Schedulers.elastic());
+        return new DefaultRouter(webClient);
     }
 
     public static ObjectMapper getMapper(boolean ignoreUnknown) {

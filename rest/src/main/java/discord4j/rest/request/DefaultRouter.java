@@ -24,7 +24,6 @@ import io.netty.handler.codec.http.HttpHeaders;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.MonoProcessor;
 import reactor.core.scheduler.Scheduler;
-import reactor.core.scheduler.Schedulers;
 import reactor.netty.http.client.HttpClientResponse;
 import reactor.util.Logger;
 import reactor.util.Loggers;
@@ -46,32 +45,45 @@ public class DefaultRouter implements Router {
     private static final ResponseHeaderStrategy HEADER_STRATEGY = new ResponseHeaderStrategy();
 
     private final DiscordWebClient httpClient;
-    private final Scheduler responseScheduler;
-    private final Scheduler rateLimitScheduler;
+    private final RouterOptions routerOptions;
     private final GlobalRateLimiter globalRateLimiter = new GlobalRateLimiter();
     private final Map<BucketKey, RequestStream<?>> streamMap = new ConcurrentHashMap<>();
 
     /**
-     * Create a bucket-aware router using the {@link reactor.core.scheduler.Schedulers#elastic()} scheduler, to allow
-     * the use of blocking API. Use the alternate constructor to customize it.
+     * Create a bucket-aware router using the defaults provided by {@link RouterOptions#create()}.
      *
      * @param httpClient the web client executing each request instructed by this router
      */
     public DefaultRouter(DiscordWebClient httpClient) {
-        this(httpClient, Schedulers.elastic(), Schedulers.elastic());
+        this(httpClient, RouterOptions.create());
     }
 
     /**
-     * Create a bucket-aware router that uses the given {@link reactor.core.scheduler.Scheduler}.
+     * Create a Discord API bucket-aware {@link Router} that uses the given {@link reactor.core.scheduler.Scheduler}.
      *
      * @param httpClient the web client executing each request instructed by this router
      * @param responseScheduler the scheduler used to execute each request
      * @param rateLimitScheduler the scheduler used to perform delays caused by rate limiting
+     * @deprecated use {@link #DefaultRouter(DiscordWebClient, RouterOptions)}
      */
+    @Deprecated
     public DefaultRouter(DiscordWebClient httpClient, Scheduler responseScheduler, Scheduler rateLimitScheduler) {
         this.httpClient = httpClient;
-        this.responseScheduler = responseScheduler;
-        this.rateLimitScheduler = rateLimitScheduler;
+        this.routerOptions = RouterOptions.builder()
+                .responseScheduler(responseScheduler)
+                .rateLimitScheduler(rateLimitScheduler)
+                .build();
+    }
+
+    /**
+     * Create a Discord API bucket-aware {@link Router} configured with the given options.
+     *
+     * @param httpClient the web client executing each request instructed by this router
+     * @param routerOptions the options that configure this {@link Router}
+     */
+    public DefaultRouter(DiscordWebClient httpClient, RouterOptions routerOptions) {
+        this.httpClient = httpClient;
+        this.routerOptions = routerOptions;
     }
 
     @Override
@@ -86,7 +98,7 @@ public class DefaultRouter implements Router {
                     stream.push(new RequestCorrelation<>(request, callback, shardId));
                     return callback;
                 })
-                .publishOn(responseScheduler);
+                .publishOn(routerOptions.getResponseScheduler());
     }
 
     @SuppressWarnings("unchecked")
@@ -99,7 +111,8 @@ public class DefaultRouter implements Router {
                                         k, request.getRoute().getUriTemplate(), request.getCompleteUri());
                             }
                             RequestStream<T> stream = new RequestStream<>(k, httpClient, globalRateLimiter,
-                                    getRateLimitStrategy(request), rateLimitScheduler);
+                                    getRateLimitStrategy(request), routerOptions.getRateLimitScheduler(),
+                                    routerOptions);
                             stream.start();
                             return stream;
                         });

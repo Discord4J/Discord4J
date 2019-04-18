@@ -39,7 +39,7 @@ import java.util.Properties;
 import java.util.function.Consumer;
 
 /**
- * HTTP client tailored for Discord REST API requests.
+ * Reactor Netty based HTTP client dedicated to Discord REST API requests.
  */
 public class DiscordWebClient {
 
@@ -49,6 +49,13 @@ public class DiscordWebClient {
     private final HttpHeaders defaultHeaders;
     private final ExchangeStrategies exchangeStrategies;
 
+    /**
+     * Create a new {@link DiscordWebClient} wrapping HTTP, Discord and encoding/decoding resources.
+     *
+     * @param httpClient a Reactor Netty HTTP client
+     * @param exchangeStrategies a strategy to transform requests and responses
+     * @param token a Discord token for API authorization
+     */
     public DiscordWebClient(HttpClient httpClient, ExchangeStrategies exchangeStrategies, String token) {
         final Properties properties = GitProperties.getProperties();
         final String version = properties.getProperty(GitProperties.APPLICATION_VERSION, "3");
@@ -64,14 +71,29 @@ public class DiscordWebClient {
         this.exchangeStrategies = exchangeStrategies;
     }
 
+    /**
+     * Return the underlying Reactor Netty HTTP client.
+     *
+     * @return the HTTP client used by this {@link DiscordWebClient}
+     */
     public HttpClient getHttpClient() {
         return httpClient;
     }
 
+    /**
+     * Return the default headers used in every request.
+     *
+     * @return the {@link HttpHeaders} used by this {@link DiscordWebClient} in every request
+     */
     public HttpHeaders getDefaultHeaders() {
         return defaultHeaders;
     }
 
+    /**
+     * Return the strategy used for request and response conversion
+     *
+     * @return the {@link ExchangeStrategies} used by this {@link DiscordWebClient} in every request
+     */
     public ExchangeStrategies getExchangeStrategies() {
         return exchangeStrategies;
     }
@@ -91,17 +113,17 @@ public class DiscordWebClient {
      * @return a {@link reactor.core.publisher.Mono} of {@link T} with the response
      */
     public <R, T> Mono<T> exchange(ClientRequest request, @Nullable R body, Class<T> responseType,
-            Consumer<HttpClientResponse> responseConsumer) {
+                                   Consumer<HttpClientResponse> responseConsumer) {
         Objects.requireNonNull(responseType);
 
-        HttpHeaders requestHeaders = new DefaultHttpHeaders().add(defaultHeaders).setAll(request.headers());
+        HttpHeaders requestHeaders = new DefaultHttpHeaders().add(defaultHeaders).setAll(request.getHeaders());
         String contentType = requestHeaders.get(HttpHeaderNames.CONTENT_TYPE);
         HttpClient.RequestSender sender = httpClient
                 .baseUrl(Routes.BASE_URL)
                 .observe((connection, newState) -> log.debug("{} {}", newState, connection))
                 .headers(headers -> headers.setAll(requestHeaders))
-                .request(request.method())
-                .uri(request.url());
+                .request(request.getMethod())
+                .uri(request.getUrl());
         return exchangeStrategies.writers().stream()
                 .filter(s -> s.canWrite(body != null ? body.getClass() : null, contentType))
                 .findFirst()
@@ -110,6 +132,7 @@ public class DiscordWebClient {
                 .orElseGet(() -> Mono.error(noWriterException(body, contentType)))
                 .flatMap(receiver -> receiver.responseSingle((response, content) -> {
                     responseConsumer.accept(response);
+
                     String responseContentType = response.responseHeaders().get(HttpHeaderNames.CONTENT_TYPE);
                     Optional<ReaderStrategy<?>> readerStrategy = exchangeStrategies.readers().stream()
                             .filter(s -> s.canRead(responseType, responseContentType))
@@ -140,7 +163,7 @@ public class DiscordWebClient {
     }
 
     private static ClientException clientException(ClientRequest request, HttpClientResponse response,
-            @Nullable ErrorResponse errorResponse) {
+                                                   @Nullable ErrorResponse errorResponse) {
         return new ClientException(request, response, errorResponse);
     }
 

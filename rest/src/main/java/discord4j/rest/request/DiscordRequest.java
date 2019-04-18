@@ -17,6 +17,7 @@
 package discord4j.rest.request;
 
 import discord4j.rest.route.Route;
+import discord4j.rest.util.RouteUtils;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
 
@@ -24,9 +25,10 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Predicate;
 
 /**
- * Encodes all of the needed information to make an HTTP request to Discord.
+ * Template encoding all of the needed information to make an HTTP request to Discord.
  *
  * @param <T> The response type.
  * @since 3.0
@@ -35,6 +37,7 @@ public class DiscordRequest<T> {
 
     private final Route<T> route;
     private final String completeUri;
+    private final Map<String, String> uriVariableMap;
 
     @Nullable
     private Object body;
@@ -45,29 +48,61 @@ public class DiscordRequest<T> {
     @Nullable
     private Map<String, Set<String>> headers;
 
-    public DiscordRequest(Route<T> route, String completeUri) {
+    /**
+     * Create a new {@link DiscordRequest} template based on a {@link Route} and its compiled URI.
+     *
+     * @param route the API resource targeted by this request
+     * @param uriVars the values to expand each template parameter
+     */
+    public DiscordRequest(Route<T> route, Object... uriVars) {
         this.route = route;
-        this.completeUri = completeUri;
+        this.completeUri = RouteUtils.expand(route.getUriTemplate(), uriVars);
+        this.uriVariableMap = RouteUtils.createVariableMap(route.getUriTemplate(), uriVars);
     }
 
-    Route<T> getRoute() {
+    /**
+     * Return the API endpoint targeted by this request.
+     *
+     * @return the {@link Route} of this {@link DiscordRequest}
+     */
+    public Route<T> getRoute() {
         return route;
     }
 
-    String getCompleteUri() {
+    /**
+     * Return the compiled URI of this request.
+     *
+     * @return the compiled URI, containing the actual path variables
+     */
+    public String getCompleteUri() {
         return completeUri;
     }
 
+    /**
+     * Return the body of this request, if present.
+     *
+     * @return the body of this request, or {@code null} if this request carries no HTTP body
+     */
     @Nullable
     public Object getBody() {
         return body;
     }
 
+    /**
+     * Return the query parameters saved in this request, if present.
+     *
+     * @return a map representing query parameters, or {@code null} if none are defined
+     */
     @Nullable
     public Map<String, Object> getQueryParams() {
         return queryParams;
     }
 
+    /**
+     * Return the request headers, if present.
+     *
+     * @return a map representing HTTP headers, or {@code null} if none are defined
+     */
     @Nullable
     public Map<String, Set<String>> getHeaders() {
         return headers;
@@ -135,6 +170,10 @@ public class DiscordRequest<T> {
      */
     public DiscordRequest<T> optionalHeader(String key, @Nullable String value) {
         return (value == null) ? this : header(key, value);
+    }
+
+    boolean matchesVariables(Predicate<Map<String, String>> matcher) {
+        return matcher.test(uriVariableMap);
     }
 
     /**

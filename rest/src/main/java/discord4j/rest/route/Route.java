@@ -17,7 +17,6 @@
 package discord4j.rest.route;
 
 import discord4j.rest.request.DiscordRequest;
-import discord4j.rest.util.RouteUtils;
 import io.netty.handler.codec.http.HttpMethod;
 import reactor.util.annotation.Nullable;
 
@@ -61,10 +60,20 @@ public class Route<T> {
         return new Route<>(HttpMethod.DELETE, uri, responseType);
     }
 
+    /**
+     * Return the HTTP method for this route.
+     *
+     * @return the {@link HttpMethod} of this {@link Route}
+     */
     public HttpMethod getMethod() {
         return method;
     }
 
+    /**
+     * Return the route's response type. Can be {@link Void} if the {@link Route} has no response body.
+     *
+     * @return the response type of this {@link Route}
+     */
     public Class<T> getResponseType() {
         return responseType;
     }
@@ -77,9 +86,14 @@ public class Route<T> {
      * @see discord4j.rest.request.DiscordRequest#exchange
      */
     public DiscordRequest<T> newRequest(Object... uriVars) {
-        return new DiscordRequest<>(this, RouteUtils.expand(getUriTemplate(), uriVars));
+        return new DiscordRequest<>(this, uriVars);
     }
 
+    /**
+     * Return the URI template that defines this route.
+     *
+     * @return a URI template, probably containing path parameters, that is defining this {@link Route}
+     */
     public String getUriTemplate() {
         return uriTemplate;
     }

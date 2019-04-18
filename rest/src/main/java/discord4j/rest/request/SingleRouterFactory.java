@@ -20,22 +20,34 @@ package discord4j.rest.request;
 import discord4j.rest.http.client.DiscordWebClient;
 
 /**
- * A {@link discord4j.rest.request.RouterFactory} that caches a {@link discord4j.rest.request.Router} captured at
- * instantiation instead of producing a new one each time
- * {@link #getRouter(discord4j.rest.http.client.DiscordWebClient)} is called.
+ * A monolithic {@link discord4j.rest.request.RouterFactory} that caches a {@link discord4j.rest.request.Router}
+ * captured at instantiation instead of producing a new one each time
+ * {@link #getRouter(discord4j.rest.http.client.DiscordWebClient)} or
+ * {@link #getRouter(DiscordWebClient, RouterOptions)} is called.
  * <p>
- * Suited for sharing a router in order to coordinate its work across shards.
+ * Suited for sharing a router in order to coordinate its work across shards. It is not suited for distributed scenarios
+ * where multiple shards exist across processes unless care is taken to properly coordinate each request externally.
  */
 public class SingleRouterFactory implements RouterFactory {
 
     private final Router router;
 
+    /**
+     * Create a new {@link SingleRouterFactory} that will always produce the given {@link Router} instance.
+     *
+     * @param router the {@link Router} instance that will be produced by this factory.
+     */
     public SingleRouterFactory(Router router) {
         this.router = router;
     }
 
     @Override
     public Router getRouter(DiscordWebClient httpClient) {
+        return router;
+    }
+
+    @Override
+    public Router getRouter(DiscordWebClient httpClient, RouterOptions routerOptions) {
         return router;
     }
 }

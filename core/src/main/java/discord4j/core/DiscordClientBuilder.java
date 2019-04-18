@@ -38,7 +38,10 @@ import discord4j.rest.RestClient;
 import discord4j.rest.http.ExchangeStrategies;
 import discord4j.rest.http.client.DiscordWebClient;
 import discord4j.rest.request.DefaultRouterFactory;
+import discord4j.rest.request.Router;
 import discord4j.rest.request.RouterFactory;
+import discord4j.rest.request.RouterOptions;
+import discord4j.rest.response.ResponseFunction;
 import discord4j.store.api.service.StoreService;
 import discord4j.store.api.service.StoreServiceLoader;
 import discord4j.store.api.util.StoreContext;
@@ -94,6 +97,9 @@ public final class DiscordClientBuilder {
 
     @Nullable
     private RouterFactory routerFactory;
+
+    @Nullable
+    private RouterOptions routerOptions;
 
     @Nullable
     private GatewayClientFactory gatewayClientFactory;
@@ -299,6 +305,16 @@ public final class DiscordClientBuilder {
     }
 
     /**
+     * Return the current {@link RouterOptions} used to configure {@link RouterFactory} instances.
+     *
+     * @return the current {@code RouterOptions} used by this client
+     */
+    @Nullable
+    public RouterOptions getRouterOptions() {
+        return routerOptions;
+    }
+
+    /**
      * Set a new {@link RouterFactory} used to create a {@link discord4j.rest.request.Router} that executes Discord
      * REST API requests.
      * <p>
@@ -313,6 +329,24 @@ public final class DiscordClientBuilder {
      */
     public DiscordClientBuilder setRouterFactory(@Nullable RouterFactory routerFactory) {
         this.routerFactory = routerFactory;
+        return this;
+    }
+
+    /**
+     * Sets a new {@link RouterOptions} used to configure a {@link RouterFactory}.
+     * <p>
+     * {@code RouterOptions} instances provide a way to override the {@link Scheduler} used for retrieving API responses
+     * and scheduling rate limiting actions. It also allows changing the behavior associated with API errors through
+     * {@link RouterOptions.Builder#onClientResponse(ResponseFunction)}.
+     * <p>
+     * If you use a default {@code RouterFactory}, it will use the supplied {@code RouterOptions} to configure itself
+     * while building this client.
+     *
+     * @param routerOptions a new {@code RouterOptions} to configure a {@code RouterFactory}
+     * @return this builder
+     */
+    public DiscordClientBuilder setRouterOptions(@Nullable RouterOptions routerOptions) {
+        this.routerOptions = routerOptions;
         return this;
     }
 
@@ -557,6 +591,13 @@ public final class DiscordClientBuilder {
         return new DefaultRouterFactory();
     }
 
+    private Router initRouter(RouterFactory factory, DiscordWebClient webClient) {
+        if (routerOptions != null) {
+            return factory.getRouter(webClient, routerOptions);
+        }
+        return factory.getRouter(webClient);
+    }
+
     private GatewayClientFactory initGatewayClientFactory() {
         if (gatewayClientFactory != null) {
             return gatewayClientFactory;
@@ -599,7 +640,7 @@ public final class DiscordClientBuilder {
         final HttpClient httpClient = initHttpClient();
         final DiscordWebClient webClient = initWebClient(httpClient, jackson.getObjectMapper());
         final RouterFactory routerFactory = initRouterFactory();
-        final RestClient restClient = new RestClient(routerFactory.getRouter(webClient));
+        final RestClient restClient = new RestClient(initRouter(routerFactory, webClient));
 
         // Prepare Stores
         final StoreService storeService = initStoreService();
