@@ -31,6 +31,7 @@ import reactor.util.Loggers;
 import reactor.util.annotation.Nullable;
 
 import java.time.Duration;
+import java.time.Instant;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.logging.Level;
@@ -144,7 +145,11 @@ class RequestStream<T> {
         public RequestSubscriber(RateLimitStrategy strategy) {
             this.rateLimitHandler = response -> {
                 if (log.isTraceEnabled()) {
-                    log.trace("Read {} with headers: {}", response.status(), response.responseHeaders());
+                    Instant requestTimestamp =
+                            Instant.ofEpochMilli(response.currentContext().get(DiscordWebClient.REQUEST_TIMESTAMP_KEY));
+                    Duration responseTime = Duration.between(requestTimestamp, Instant.now());
+                    log.trace("Read {} in {} with headers: {}", response.status(), responseTime,
+                            response.responseHeaders());
                 }
                 Duration nextReset = strategy.apply(response);
                 if (!nextReset.isZero()) {

@@ -33,6 +33,7 @@ import reactor.util.Logger;
 import reactor.util.Loggers;
 import reactor.util.annotation.Nullable;
 
+import java.time.Instant;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Properties;
@@ -44,6 +45,8 @@ import java.util.function.Consumer;
 public class DiscordWebClient {
 
     private static final Logger log = Loggers.getLogger(DiscordWebClient.class);
+
+    public static final String REQUEST_TIMESTAMP_KEY = "requestTimestamp";
 
     private final HttpClient httpClient;
     private final HttpHeaders defaultHeaders;
@@ -149,7 +152,8 @@ public class DiscordWebClient {
                                 .map(s -> s.read(content, responseType))
                                 .orElseGet(() -> Mono.error(noReaderException(responseType, responseContentType)));
                     }
-                }));
+                }))
+                .subscriberContext(ctx -> ctx.put(REQUEST_TIMESTAMP_KEY, Instant.now().toEpochMilli()));
     }
 
     @SuppressWarnings("unchecked")
