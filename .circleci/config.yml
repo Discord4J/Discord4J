@@ -1,7 +1,7 @@
 version: 2.1
 
 _defaults: &defaults
-  working_directory: ~/stores
+  working_directory: ~/Discord4J
   environment:
     JVM_OPTS: -Xmx3200m
     TERM: dumb
