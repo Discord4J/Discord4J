@@ -46,6 +46,9 @@ workflows:
           filters:
             tags:
               only: /.*/
+            branches:
+              only:
+                - master
 
 commands:
   build:
@@ -124,4 +127,4 @@ commands:
             - gradle-build-{{ .Environment.cacheVersion }}-{{ .Revision }}
             - gradle-build
       - deploy:
-          command: ./gradlew -x test publishToMavenLocal publish
+          command: ./gradlew -x test publish
