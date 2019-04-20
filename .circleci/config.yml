@@ -1,112 +1,127 @@
-# Java Gradle CircleCI 2.0 configuration file
-#
-# Check https://circleci.com/docs/2.0/language-java/ for more details
-#
-version: 2
+version: 2.1
 
-job_definition: &job_definition
-  working_directory: ~/Discord4J
-
+_defaults: &defaults
+  working_directory: ~/stores
   environment:
-    # Customize the JVM maximum heap limit
     JVM_OPTS: -Xmx3200m
     TERM: dumb
 
-  steps:
-    - checkout
-
-    - run:
-        name: Collecting dependency definitions for cache key
-        command: find -type f -name '*.gradle' -exec cat {} >>~/dependencies.gradle \;
-
-    # restore saved caches
-    - restore_cache:
-        keys:
-          - gradle-wrapper-{{ .Environment.cacheVersion }}-{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}
-          - gradle-wrapper
-
-    - restore_cache:
-        keys:
-          - gradle-cache-{{ .Environment.cacheVersion }}-{{ checksum "~/dependencies.gradle" }}
-          - gradle-cache
-
-    - restore_cache:
-        keys:
-          - gradle-build-caches-{{ .Environment.cacheVersion }}-{{ .Revision }}
-          - gradle-build-caches
-
-    - run:
-        name: Restoring Gradle Build Caches
-        command: |
-          [ -d ~/gradle-build-caches ] &&
-            [ -n "$(ls -A ~/gradle-build-caches)" ] &&
-            rm -rf ~/.gradle/caches/build-cache-* &&
-            mv ~/gradle-build-caches/* ~/.gradle/caches/ || true
-
-    # download and cache dependencies and Gradle
-    - run:
-        name: Downloading Dependencies
-        command: ./gradlew --max-workers 2 downloadDependencies
-
-    - save_cache:
-        paths:
-          - ~/.gradle/wrapper/
-        key: gradle-wrapper-{{ .Environment.cacheVersion }}-{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}
-
-    - save_cache:
-        paths:
-          - ~/.gradle/caches/
-        key: gradle-cache-{{ .Environment.cacheVersion }}-{{ checksum "~/dependencies.gradle" }}
-
-    # build everything needed for publication
-    - run:
-        name: Building Project
-        command: ./gradlew --max-workers 2 --continue test
-
-    # cache gradle build caches
-    - run:
-        name: Collecting Gradle Build Caches
-        command: |
-          mkdir -p ~/gradle-build-caches
-          [ -d ~/.gradle/caches ] &&
-            [ -n "$(ls -Ad ~/.gradle/caches/build-cache-* 2>/dev/null)" ] &&
-            mv ~/.gradle/caches/build-cache-* ~/gradle-build-caches || true
-        when: always
-
-    - save_cache:
-        paths:
-          - ~/gradle-build-caches
-        key: gradle-build-caches-{{ .Environment.cacheVersion }}-{{ .Revision }}
-        when: always
-
-    # reports
-    - run:
-        name: Save test results
-        command: |
-          mkdir -p ~/junit/
-          find . -type f -regex ".*/build/test-results/.*xml" -exec cp {} ~/junit/ \;
-        when: always
-    - store_test_results:
-        path: ~/junit
-    - store_artifacts:
-        path: ~/junit
-
-jobs:
-  jvm8:
+executors:
+  jdk8:
+    <<: *defaults
     docker:
       - image: circleci/openjdk:8-jdk
-    <<: *job_definition
-
-  jvm11:
+  jdk11:
+    <<: *defaults
     docker:
       - image: circleci/openjdk:11-jdk
-    <<: *job_definition
+
+jobs:
+  build-jdk8:
+    executor: jdk8
+    steps:
+      - build
+  build-jdk11:
+    executor: jdk11
+    steps:
+      - build
+  release:
+    executor: jdk8
+    steps:
+      - publish
 
 workflows:
   version: 2
   all:
     jobs:
-      - jvm8:
+      - build-jdk8:
           context: D3J
-      - jvm11:
+      - build-jdk11:
           context: D3J
+      - release:
+          context: D3J
+          requires:
+            - build-jdk8
+            - build-jdk11
+          filters:
+            tags:
+              only: /.*/
+
+commands:
+  build:
+    description: "Build and test"
+    steps:
+      - checkout
+      - run:
+          name: "Collecting dependency definitions for cache key"
+          command: find -type f -name '*.gradle' -exec md5sum {} >> ~/dependencies.gradle \;
+      - restore_cache:
+          keys:
+            - gradle-wrapper-{{ .Environment.cacheVersion }}-{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}
+            - gradle-wrapper
+      - restore_cache:
+          keys:
+            - gradle-cache-{{ .Environment.cacheVersion }}-{{ checksum "~/dependencies.gradle" }}
+            - gradle-cache
+      - restore_cache:
+          keys:
+            - gradle-build-{{ .Environment.cacheVersion }}-{{ .Revision }}
+            - gradle-build
+      - run:
+          name: "Restoring Gradle Build Caches"
+          command: |
+            [ -d ~/gradle-build-caches ] &&
+              [ -n "$(ls -A ~/gradle-build-caches)" ] &&
+              rm -rf ~/.gradle/caches/build-cache-* &&
+              mv ~/gradle-build-caches/* ~/.gradle/caches/ || true
+      - run:
+          name: "Downloading Dependencies"
+          command: ./gradlew --max-workers 2 downloadDependencies
+      - save_cache:
+          paths:
+            - ~/.gradle/wrapper/
+          key: gradle-wrapper-{{ .Environment.cacheVersion }}-{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}
+      - save_cache:
+          paths:
+            - ~/.gradle/caches/
+          key: gradle-cache-{{ .Environment.cacheVersion }}-{{ checksum "~/dependencies.gradle" }}
+      - run:
+          name: "Building Project"
+          command: ./gradlew --max-workers 2 --continue test
+      - run:
+          name: "Collecting Gradle Build Caches"
+          command: |
+            mkdir -p ~/gradle-build-caches
+            [ -d ~/.gradle/caches ] &&
+              [ -n "$(ls -Ad ~/.gradle/caches/build-cache-* 2>/dev/null)" ] &&
+              mv ~/.gradle/caches/build-cache-* ~/gradle-build-caches || true
+          when: always
+      - save_cache:
+          paths:
+            - ~/gradle-build-caches
+          key: gradle-build-{{ .Environment.cacheVersion }}-{{ .Revision }}
+          when: always
+      - run:
+          name: "Save test results"
+          command: |
+            mkdir -p ~/junit/
+            find . -type f -regex ".*/build/test-results/.*xml" -exec cp {} ~/junit/ \;
+          when: always
+      - store_test_results:
+          path: ~/junit
+      - store_artifacts:
+          path: ~/junit
+  publish:
+    description: "Publish artifacts"
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - gradle-wrapper-{{ .Environment.cacheVersion }}-{{ checksum "gradle/wrapper/gradle-wrapper.properties" }}
+            - gradle-wrapper
+      - restore_cache:
+          keys:
+            - gradle-build-{{ .Environment.cacheVersion }}-{{ .Revision }}
+            - gradle-build
+      - deploy:
+          command: ./gradlew -x test publishToMavenLocal publish

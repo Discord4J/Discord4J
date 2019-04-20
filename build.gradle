@@ -109,6 +109,11 @@ allprojects {
 
     if (!isJitpack && isRelease) {
         signing {
+            def signingKey = findProperty("signingKey")
+            def signingPassword = findProperty("signingPassword")
+            if (signingKey != null && signingPassword != null) {
+                useInMemoryPgpKeys(new String(signingKey.decodeBase64()), signingPassword as String)
+            }
             sign configurations.archives
         }
     }
@@ -169,10 +174,12 @@ subprojects {
                     } else {
                         url 'https://oss.sonatype.org/content/repositories/snapshots/'
                     }
-                    if (project.hasProperty('sonatypeUsername') && project.hasProperty('sonatypePassword')) {
+                    def sonatypeUsername = findProperty('sonatypeUsername')
+                    def sonatypePassword = findProperty('sonatypePassword')
+                    if (sonatypeUsername != null && sonatypePassword != null) {
                         credentials {
-                            username project.property('sonatypeUsername')
-                            password project.property('sonatypePassword')
+                            username sonatypeUsername
+                            password sonatypePassword
                         }
                     }
                 }
@@ -204,7 +211,7 @@ def customizePom(pom) {
         }
 
         root.children().last() + {
-            resolveStrategy = Closure.DELEGATE_FIRST
+            resolveStrategy = DELEGATE_FIRST
 
             description 'A JVM-based REST/WS wrapper for the official Discord Bot API'
             name 'Discord4J'
