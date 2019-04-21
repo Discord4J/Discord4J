@@ -20,17 +20,28 @@ import io.netty.buffer.ByteBuf;
 import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.util.Logger;
+import reactor.util.Loggers;
 
 class VoiceReceiveTask implements Disposable {
+
+    private static final Logger log = Loggers.getLogger(VoiceReceiveTask.class);
 
     private final Disposable task;
 
     VoiceReceiveTask(Flux<ByteBuf> in, PacketTransformer transformer, AudioReceiver receiver) {
-        this.task = in.flatMap(packet -> Mono.justOrEmpty(transformer.nextReceive(packet))).subscribe(buf -> {
-            receiver.getBuffer().put(buf);
-            receiver.getBuffer().flip();
-            receiver.receive();
-        });
+        this.task = in
+                .flatMap(packet -> Mono.justOrEmpty(transformer.nextReceive(packet)))
+                .map(buf -> {
+                    if (receiver != AudioReceiver.NO_OP) {
+                        receiver.getBuffer().put(buf);
+                        receiver.getBuffer().flip();
+                        receiver.receive();
+                    }
+                    return buf;
+                })
+                .onErrorContinue((t, o) -> log.error("Error while receiving audio", t))
+                .subscribe();
     }
 
     @Override

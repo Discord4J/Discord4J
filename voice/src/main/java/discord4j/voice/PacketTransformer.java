@@ -53,6 +53,7 @@ final class PacketTransformer {
 
         byte[] encrypted = new byte[packet.readableBytes() - audioOffset];
         packet.getBytes(audioOffset, encrypted);
+        packet.release();
 
         byte[] decrypted = boxer.open(encrypted, getNonce(header));
         if (decrypted == null) {

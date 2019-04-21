@@ -47,7 +47,7 @@ public class VoiceSocket {
                 .host(address)
                 .port(port)
                 .handle((in, out) -> {
-                    Mono<Void> inboundThen = in.receive()
+                    Mono<Void> inboundThen = in.receive().retain()
                             .log("discord4j.voice.udp.inbound", Level.FINEST)
                             .doOnNext(this.inboundSink::next)
                             .then();
@@ -75,7 +75,7 @@ public class VoiceSocket {
                 .map(buf -> {
                     String address = getNullTerminatedString(buf, Integer.BYTES); // undocumented: discord replies with the ssrc first, THEN the IP address
                     int port = buf.getUnsignedShortLE(DISCOVERY_PACKET_LENGTH - Short.BYTES);
-
+                    buf.release();
                     return InetSocketAddress.createUnresolved(address, port);
                 });
 

@@ -31,20 +31,15 @@ import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.VoiceState;
 import discord4j.core.object.entity.Member;
 import discord4j.voice.AudioProvider;
-import discord4j.voice.AudioReceiver;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 import reactor.core.publisher.Mono;
-import reactor.util.Logger;
-import reactor.util.Loggers;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 
 public class ExampleVoiceBot {
-
-    private static final Logger log = Loggers.getLogger(ExampleVoiceBot.class);
 
     private static String token;
     private static String owner;
@@ -80,7 +75,6 @@ public class ExampleVoiceBot {
                         .flatMap(Member::getVoiceState)
                         .flatMap(VoiceState::getChannel)
                         .flatMap(channel -> channel.join(spec -> {
-                            spec.setReceiver(new LoggingAudioReceiver());
                             spec.setProvider(provider);
                         }))
                 )
@@ -152,15 +146,6 @@ public class ExampleVoiceBot {
         @Override
         public void loadFailed(FriendlyException exception) {
 
-        }
-    }
-
-    private static class LoggingAudioReceiver extends AudioReceiver {
-
-        @Override
-        public void receive(char sequence, int timestamp, int ssrc, byte[] audio) {
-            log.info("sequence={}, timestamp={}, ssrc={}, audio.length={}",
-                    String.format("%04x", (int) sequence), timestamp, ssrc, audio.length);
         }
     }
 }
