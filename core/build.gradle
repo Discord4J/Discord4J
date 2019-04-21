@@ -1,3 +1,6 @@
+plugins {
+    id 'org.jetbrains.kotlin.jvm' version '1.3.30'
+}
 dependencies {
     compile project(':rest')
     compile project(':gateway')
@@ -11,6 +14,8 @@ dependencies {
     testCompile "io.projectreactor:reactor-test"
     testCompile "org.reflections:reflections:0.9.11"
     testCompile "com.sedmelluq:lavaplayer:1.3.16"
+    compileOnly "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
+    compileOnly "org.jetbrains.kotlinx:kotlinx-coroutines-reactor:1.2.0-alpha"
 }
 
 javadoc {
@@ -25,4 +30,18 @@ javadoc {
 
     options.linksOffline rootProject.buildStoresDocsUrl('stores-api', false), rootProject.buildStoresDocsUrl('stores-api', true)
     options.linksOffline rootProject.buildStoresDocsUrl('stores-jdk', false), rootProject.buildStoresDocsUrl('stores-jdk', true)
+}
+repositories {
+    mavenCentral()
+}
+
+compileKotlin {
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
+}
+compileTestKotlin {
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
 }
