@@ -306,12 +306,7 @@ release {
     preTagCommitMessage = 'Release version'
     tagCommitMessage = 'Release version'
     newVersionCommitMessage = 'Next development version'
-    git {
-        requireBranch = ''
-    }
 }
-
-afterReleaseBuild.dependsOn publish
 
 wrapper {
     distributionType = Wrapper.DistributionType.ALL
