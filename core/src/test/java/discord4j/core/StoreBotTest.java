@@ -75,7 +75,7 @@ public class StoreBotTest {
                 .map(builder -> builder.setJacksonResourceProvider(jackson)
                         // showcase disabling the cache for messages
                         .setStoreService(MappingStoreService.create()
-                                .setMapping(MessageBean.class, new NoOpStoreService())
+                                .setMapping(new NoOpStoreService(), MessageBean.class)
                                 .setFallback(new ShardingJdkStoreService(registry)))
                         .setInitialPresence(Presence.invisible()))
                 .map(DiscordClientBuilder::build)
