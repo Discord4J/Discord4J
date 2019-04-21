@@ -22,8 +22,6 @@ import discord4j.rest.request.DiscordRequest;
 import discord4j.rest.request.RouteMatcher;
 import reactor.core.publisher.Mono;
 import reactor.retry.Retry;
-import reactor.util.Logger;
-import reactor.util.Loggers;
 
 import java.util.function.Function;
 
@@ -32,8 +30,6 @@ import java.util.function.Function;
  */
 @Experimental
 public class RetryingTransformer implements ResponseFunction {
-
-    private static final Logger log = Loggers.getLogger(RetryingTransformer.class);
 
     private final RouteMatcher routeMatcher;
     private final Retry<?> retryFactory;
@@ -46,7 +42,6 @@ public class RetryingTransformer implements ResponseFunction {
     @Override
     public <T> Function<Mono<T>, Mono<T>> transform(DiscordRequest<T> request) {
         if (routeMatcher.matches(request)) {
-            log.info("Enabling retry factory to {}", request);
             return mono -> mono.retryWhen(retryFactory);
         }
         return mono -> mono;
