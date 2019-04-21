@@ -42,7 +42,6 @@ import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Hooks;
 import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Schedulers;
 import reactor.netty.DisposableServer;
 import reactor.netty.http.server.HttpServer;
 import reactor.util.Logger;
@@ -59,7 +58,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
@@ -111,7 +109,6 @@ public class RetryBotTest {
         final Map<Integer, IdentifyOptions> optionsMap = loadResumeData(resumePath);
 
         DiscordClient client = new DiscordClientBuilder(token)
-                .setEventScheduler(Schedulers.fromExecutor(Executors.newWorkStealingPool()))
                 .setIdentifyOptions(optionsMap.get(0))
                 .setGatewayObserver((s, o) -> optionsMap.put(o.getShardIndex(), o))
                 .build();

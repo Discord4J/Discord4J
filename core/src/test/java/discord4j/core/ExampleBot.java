@@ -100,7 +100,6 @@ public class ExampleBot {
         eventHandlers.add(new Echo());
         eventHandlers.add(new UserInfo());
         eventHandlers.add(new LogLevelChange());
-        eventHandlers.add(new BlockingEcho());
         eventHandlers.add(new Reactor());
         eventHandlers.add(new ChangeAvatar());
 
@@ -125,10 +124,8 @@ public class ExampleBot {
         @Override
         public Mono<Void> onMessageCreate(MessageCreateEvent event) {
             Message message = event.getMessage();
-            return message.getContent()
+            return Mono.justOrEmpty(message.getContent())
                     .filter(content -> content.startsWith("!addrole"))
-                    .map(Mono::just)
-                    .orElseGet(Mono::empty)
                     .flatMap(content -> message.getAuthorAsMember())
                     .flatMap(member -> member.addRole(Snowflake.of(testRole), null));
             // if "testRole" is null, the bot will keep processing events despite throwing an error
@@ -140,10 +137,8 @@ public class ExampleBot {
         @Override
         public Mono<Void> onMessageCreate(MessageCreateEvent event) {
             Message message = event.getMessage();
-            return message.getContent()
+            return Mono.justOrEmpty(message.getContent())
                     .filter(content -> content.startsWith("!echo "))
-                    .map(Mono::just)
-                    .orElseGet(Mono::empty)
                     .map(content -> content.substring("!echo ".length()))
                     .flatMap(source -> message.getChannel()
                             .flatMap(channel -> channel.createMessage(source)))
@@ -208,22 +203,6 @@ public class ExampleBot {
         }
     }
 
-    public static class BlockingEcho extends EventHandler {
-
-        @Override
-        public Mono<Void> onMessageCreate(MessageCreateEvent event) {
-            Message message = event.getMessage();
-            message.getContent()
-                    .filter(content -> content.startsWith("!echos "))
-                    .ifPresent(content -> {
-                        String source = content.substring("!echos ".length());
-                        MessageChannel channel = message.getChannel().block();
-                        channel.createMessage(source).block();
-                    });
-            return Mono.empty();
-        }
-    }
-
     public static class Reactor extends EventHandler {
 
         private final Random random = new Random();
@@ -279,10 +258,7 @@ public class ExampleBot {
                             }
                         }
                         return Flux.fromIterable(fetch(count))
-                                .flatMap(emoji -> message.addReaction(ReactionEmoji.unicode(emoji))
-                                        .onErrorContinue(ClientException.isStatusCode(400),
-                                                (t, o) -> log.info("Dropping {} due to {}", t.toString()))
-                                )
+                                .flatMap(emoji -> message.addReaction(ReactionEmoji.unicode(emoji)))
                                 .then();
                     })
                     .orElseGet(Mono::empty);

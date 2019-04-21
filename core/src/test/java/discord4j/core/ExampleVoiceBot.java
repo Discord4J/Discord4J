@@ -27,35 +27,31 @@ import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import com.sedmelluq.discord.lavaplayer.track.playback.MutableAudioFrame;
 import com.sedmelluq.discord.lavaplayer.track.playback.NonAllocatingAudioFrameBuffer;
-import discord4j.core.event.domain.guild.GuildCreateEvent;
 import discord4j.core.event.domain.message.MessageCreateEvent;
+import discord4j.core.object.VoiceState;
 import discord4j.core.object.entity.Member;
-import discord4j.core.object.entity.VoiceChannel;
-import discord4j.core.object.util.Snowflake;
 import discord4j.voice.AudioProvider;
 import discord4j.voice.AudioReceiver;
-import discord4j.voice.VoiceConnection;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 import reactor.core.publisher.Mono;
+import reactor.util.Logger;
+import reactor.util.Loggers;
 
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 
 public class ExampleVoiceBot {
 
+    private static final Logger log = Loggers.getLogger(ExampleVoiceBot.class);
+
     private static String token;
-    private static String voiceChannel;
-    private static String audioSource;
-    private static String guild;
     private static String owner;
 
     @BeforeClass
     public static void initialize() {
         token = System.getenv("token");
-        voiceChannel = System.getenv("voiceChannel");
-        audioSource = System.getenv("audioSource");
-        guild = System.getenv("guild");
         owner = System.getenv("owner");
     }
 
@@ -68,25 +64,45 @@ public class ExampleVoiceBot {
         AudioSourceManagers.registerRemoteSources(playerManager);
         AudioPlayer player = playerManager.createPlayer();
         AudioProvider provider = new LavaplayerAudioProvider(player);
-        playerManager.loadItem(audioSource, new MyAudioLoadResultHandler(player));
 
         // Bind events and log in
         DiscordClient client = new DiscordClientBuilder(token).build();
 
-        Mono<Void> leaveMessage = client.getEventDispatcher().on(MessageCreateEvent.class)
-                .filter(e -> e.getMember().map(Member::getId).map(it -> it.asString().equals(owner)).orElse(false))
+        Mono<MessageCreateEvent> leaveMessage = client.getEventDispatcher().on(MessageCreateEvent.class)
+                .filter(e -> owner == null || e.getMember().map(Member::getId).map(it -> it.asString().equals(owner)).orElse(false))
                 .filter(e -> e.getMessage().getContent().map(it -> it.equals("!leave")).orElse(false))
-                .next()
-                .then();
+                .next();
 
-        client.getEventDispatcher().on(GuildCreateEvent.class)
-                .filter(e -> e.getGuild().getId().asString().equals(guild))
-                .flatMap(g -> client.getChannelById(Snowflake.of(voiceChannel)).ofType(VoiceChannel.class))
-                .flatMap(channel -> channel.join(spec -> {
-                    spec.setReceiver(new LoggingAudioReceiver());
-                    spec.setProvider(provider);
-                })).flatMap(leaveMessage::thenReturn)
-                .subscribe(VoiceConnection::disconnect);
+        client.getEventDispatcher().on(MessageCreateEvent.class)
+                .filter(e -> owner == null || e.getMember().map(Member::getId).map(it -> it.asString().equals(owner)).orElse(false))
+                .filter(e -> e.getMessage().getContent().map(it -> it.startsWith("!join")).orElse(false))
+                .flatMap(e -> Mono.justOrEmpty(e.getMember())
+                        .flatMap(Member::getVoiceState)
+                        .flatMap(VoiceState::getChannel)
+                        .flatMap(channel -> channel.join(spec -> {
+                            spec.setReceiver(new LoggingAudioReceiver());
+                            spec.setProvider(provider);
+                        }))
+                )
+                .zipWith(leaveMessage)
+                .doOnNext(t2 -> t2.getT1().disconnect())
+                .repeat()
+                .subscribe();
+
+        client.getEventDispatcher().on(MessageCreateEvent.class)
+                .filter(e -> owner == null || e.getMember().map(Member::getId).map(it -> it.asString().equals(owner)).orElse(false))
+                .filter(e -> e.getMessage().getContent().map(it -> it.startsWith("!play ")).orElse(false))
+                .flatMap(e -> Mono.justOrEmpty(e.getMessage().getContent())
+                        .map(content -> Arrays.asList(content.split(" ")))
+                        .doOnNext(command -> playerManager.loadItem(command.get(1),
+                                new MyAudioLoadResultHandler(player))))
+                .subscribe();
+
+        client.getEventDispatcher().on(MessageCreateEvent.class)
+                .filter(e -> owner == null || e.getMember().map(Member::getId).map(it -> it.asString().equals(owner)).orElse(false))
+                .filter(e -> e.getMessage().getContent().map(it -> it.equals("!stop")).orElse(false))
+                .doOnNext(e -> player.stopTrack())
+                .subscribe();
 
         client.login().block();
     }
@@ -143,7 +159,8 @@ public class ExampleVoiceBot {
 
         @Override
         public void receive(char sequence, int timestamp, int ssrc, byte[] audio) {
-            System.out.println("packet from: " + ssrc);
+            log.info("sequence={}, timestamp={}, ssrc={}, audio.length={}",
+                    String.format("%04x", (int) sequence), timestamp, ssrc, audio.length);
         }
     }
 }
