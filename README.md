@@ -1,4 +1,5 @@
 ![Discord4J Logo](/images/d4j_l.png?raw=true)
+### Discord4J v2 has been depreciated and will no longer be getting updated.  Please use [Discord4J V3](https://github.com/Discord4J/Discord4J)
 
 # Discord4J [![](https://jitpack.io/v/Discord4J/Discord4J.svg)](https://jitpack.io/#Discord4J/Discord4J) [![Support Server Invite](https://img.shields.io/badge/Join-Discord4J-7289DA.svg?style=flat-square&logo=discord)](https://discord.gg/NxGAeCY) [![Documentation Status](https://img.shields.io/readthedocs/discord4j.svg?style=flat-square)](http://discord4j.readthedocs.io/en/latest/) [![Build Status](https://img.shields.io/circleci/project/github/Discord4J/Discord4J/master.svg?style=flat-square)](https://circleci.com/gh/Discord4J/Discord4J/tree/master)
 
