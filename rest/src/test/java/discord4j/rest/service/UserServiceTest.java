@@ -63,7 +63,7 @@ public class UserServiceTest {
         try {
             getUserService().getUser(1111222).block(); // should throw ClientException
         } catch (ClientException e) {
-            ErrorResponse response = e.getErrorResponse();
+            ErrorResponse response = e.getErrorResponse().orElse(null);
             System.out.println("Error code: " + response.getFields().get("code"));
             System.out.println("Error message: " + response.getFields().get("message"));
         }
