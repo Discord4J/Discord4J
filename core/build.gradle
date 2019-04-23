@@ -15,7 +15,7 @@ dependencies {
     testCompile "org.reflections:reflections:0.9.11"
     testCompile "com.sedmelluq:lavaplayer:1.3.16"
     compileOnly "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
-    compileOnly "org.jetbrains.kotlinx:kotlinx-coroutines-reactor:1.2.0-alpha"
+    compileOnly "org.jetbrains.kotlinx:kotlinx-coroutines-reactor:1.2.0"
 }
 
 javadoc {
@@ -30,9 +30,6 @@ javadoc {
 
     options.linksOffline rootProject.buildStoresDocsUrl('stores-api', false), rootProject.buildStoresDocsUrl('stores-api', true)
     options.linksOffline rootProject.buildStoresDocsUrl('stores-jdk', false), rootProject.buildStoresDocsUrl('stores-jdk', true)
-}
-repositories {
-    mavenCentral()
 }
 
 compileKotlin {

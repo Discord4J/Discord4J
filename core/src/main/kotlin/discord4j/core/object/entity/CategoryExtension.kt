@@ -1,9 +1,7 @@
 package discord4j.core.`object`.entity
 
-import discord4j.core.`object`.entity.Category
-import discord4j.core.`object`.entity.GuildChannel
-import discord4j.core.spec.CategoryEditSpec
 import discord4j.core.await
+import discord4j.core.spec.CategoryEditSpec
 
 /**
  * Requests the channels associated with this [Category].

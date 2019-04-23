@@ -2,8 +2,6 @@ package discord4j.core.`object`.entity
 
 import discord4j.core.`object`.ExtendedPermissionOverwrite
 import discord4j.core.`object`.PermissionOverwrite
-import discord4j.core.`object`.entity.Guild
-import discord4j.core.`object`.entity.GuildChannel
 import discord4j.core.`object`.util.PermissionSet
 import discord4j.core.`object`.util.Snowflake
 import discord4j.core.await
@@ -29,4 +27,3 @@ suspend fun GuildChannel.awaitAddRoleOverwrite(
     overwrite: PermissionOverwrite,
     reason: String? = null
 ): Unit = addRoleOverwrite(id, overwrite, reason).unit()
-
