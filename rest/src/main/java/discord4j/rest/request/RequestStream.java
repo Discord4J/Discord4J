@@ -109,10 +109,10 @@ class RequestStream<T> {
 
     /**
      * This retry function is used for reading and completing HTTP requests in the event of a server error (codes
-     * 502, 503 and 504). The delay is calculated using exponential backoff with jitter.
+     * 500, 502, 503 and 504). The delay is calculated using exponential backoff with jitter.
      */
     private Retry<?> serverErrorRetryFactory() {
-        return Retry.onlyIf(ClientException.isRetryContextStatusCode(502, 503, 504))
+        return Retry.onlyIf(ClientException.isRetryContextStatusCode(500, 502, 503, 504))
                 .exponentialBackoffWithJitter(Duration.ofSeconds(2), Duration.ofSeconds(30))
                 .doOnRetry(ctx -> {
                     if (log.isTraceEnabled()) {
