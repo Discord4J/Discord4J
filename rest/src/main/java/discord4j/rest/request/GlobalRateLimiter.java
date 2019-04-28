@@ -18,6 +18,8 @@ package discord4j.rest.request;
 
 import reactor.core.Exceptions;
 import reactor.core.publisher.Mono;
+import reactor.util.Logger;
+import reactor.util.Loggers;
 
 import java.time.Duration;
 import java.util.concurrent.Semaphore;
@@ -39,6 +41,8 @@ import java.util.function.Supplier;
  * completed immediately.
  */
 public class GlobalRateLimiter {
+
+    private static final Logger log = Loggers.getLogger(GlobalRateLimiter.class);
 
     private final Semaphore outer = new Semaphore(8, true);
     private final Semaphore inner = new Semaphore(1, true);
@@ -100,6 +104,7 @@ public class GlobalRateLimiter {
                                 inner.acquire();
                                 return new Resource(outer, inner);
                             } catch (InterruptedException e) {
+                                outer.release();
                                 throw Exceptions.propagate(e);
                             }
                         }
@@ -108,6 +113,9 @@ public class GlobalRateLimiter {
                         throw Exceptions.propagate(e);
                     }
                 })
+                .doOnError(t -> log.warn("Unable to acquire resource from limiter ({}/{})",
+                        outer.availablePermits(), outer.getQueueLength(), t))
+                .retry()
                 .delayUntil(resource -> onComplete());
     }
 
