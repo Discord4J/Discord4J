@@ -11,9 +11,9 @@
     <!--<logger name="discord4j.gateway.sender" level="TRACE"/>-->
     <!--<logger name="discord4j.gateway.zip" level="DEBUG"/>-->
     <logger name="discord4j.rest.http.client.DiscordWebClient" level="INFO"/>
-    <logger name="discord4j.rest.http.MultipartWriterStrategy" level="TRACE"/>
-    <logger name="discord4j.rest.http.JacksonWriterStrategy" level="TRACE"/>
-    <logger name="discord4j.rest.http.JacksonReaderStrategy" level="TRACE"/>
+    <!--<logger name="discord4j.rest.http.MultipartWriterStrategy" level="TRACE"/>-->
+    <!--<logger name="discord4j.rest.http.JacksonWriterStrategy" level="TRACE"/>-->
+    <!--<logger name="discord4j.rest.http.JacksonReaderStrategy" level="TRACE"/>-->
     <logger name="discord4j.rest.traces" level="INFO"/>
     <logger name="discord4j.rest.request" level="INFO"/>
     <logger name="discord4j.rest.response" level="INFO"/>
