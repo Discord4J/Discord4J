@@ -16,7 +16,6 @@
  */
 package discord4j.rest.request;
 
-import reactor.core.Exceptions;
 import reactor.core.publisher.Mono;
 import reactor.util.Logger;
 import reactor.util.Loggers;
@@ -97,26 +96,13 @@ public class GlobalRateLimiter {
     private Mono<Resource> acquire() {
         return Mono
                 .fromCallable(() -> {
-                    try {
-                        outer.acquire();
-                        if (delayNanos() > 0) {
-                            try {
-                                inner.acquire();
-                                return new Resource(outer, inner);
-                            } catch (InterruptedException e) {
-                                outer.release();
-                                throw Exceptions.propagate(e);
-                            }
-                        }
-                        return new Resource(outer, null);
-                    } catch (InterruptedException e) {
-                        throw Exceptions.propagate(e);
+                    outer.acquireUninterruptibly();
+                    if (delayNanos() > 0) {
+                        inner.acquireUninterruptibly();
+                        return new Resource(outer, inner);
                     }
+                    return new Resource(outer, null);
                 })
-                .doOnError(t -> log.warn("Unable to acquire resource from limiter (outer: {}/{}, inner: {}/{})",
-                        outer.availablePermits(), outer.getQueueLength(),
-                        inner.availablePermits(), inner.getQueueLength(), t))
-                .retry()
                 .delayUntil(resource -> onComplete());
     }
 
