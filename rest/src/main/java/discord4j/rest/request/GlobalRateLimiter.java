@@ -113,8 +113,9 @@ public class GlobalRateLimiter {
                         throw Exceptions.propagate(e);
                     }
                 })
-                .doOnError(t -> log.warn("Unable to acquire resource from limiter ({}/{})",
-                        outer.availablePermits(), outer.getQueueLength(), t))
+                .doOnError(t -> log.warn("Unable to acquire resource from limiter (outer: {}/{}, inner: {}/{})",
+                        outer.availablePermits(), outer.getQueueLength(),
+                        inner.availablePermits(), inner.getQueueLength(), t))
                 .retry()
                 .delayUntil(resource -> onComplete());
     }
