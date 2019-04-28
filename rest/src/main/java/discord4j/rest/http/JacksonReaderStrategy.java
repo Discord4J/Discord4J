@@ -22,6 +22,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import reactor.core.Exceptions;
 import reactor.core.publisher.Mono;
 import reactor.netty.ByteBufMono;
+import reactor.util.Logger;
+import reactor.util.Loggers;
 import reactor.util.annotation.Nullable;
 
 import java.io.IOException;
@@ -33,6 +35,8 @@ import java.lang.reflect.Type;
  * @param <Res> the type of object in the read response
  */
 public class JacksonReaderStrategy<Res> implements ReaderStrategy<Res> {
+
+    private static final Logger log = Loggers.getLogger(JacksonReaderStrategy.class);
 
     private final ObjectMapper objectMapper;
 
@@ -52,16 +56,26 @@ public class JacksonReaderStrategy<Res> implements ReaderStrategy<Res> {
 
     @Override
     public Mono<Res> read(ByteBufMono content, Class<Res> responseType) {
-        return content.asByteArray().map(bytes -> {
-            try {
-                return objectMapper.readValue(bytes, responseType);
-            } catch (JsonProcessingException e) {
-                throw Exceptions.propagate(new RuntimeException(e.toString()
-                        .replaceAll("(\"token\": \")([A-Za-z0-9.-]*)(\")", "$1hunter2$3")));
-            } catch (IOException e) {
-                throw Exceptions.propagate(e);
-            }
-        });
+        return content.asByteArray()
+                .map(bytes -> {
+                    try {
+                        return objectMapper.readValue(bytes, responseType);
+                    } catch (JsonProcessingException e) {
+                        throw Exceptions.propagate(new RuntimeException(e.toString()
+                                .replaceAll("(\"token\": \")([A-Za-z0-9.-]*)(\")", "$1hunter2$3")));
+                    } catch (IOException e) {
+                        throw Exceptions.propagate(e);
+                    }
+                })
+                .doOnNext(response -> {
+                    if (log.isTraceEnabled()) {
+                        try {
+                            log.trace("{}", objectMapper.writeValueAsString(response));
+                        } catch (JsonProcessingException e) {
+                            log.trace("Error while printing debug response: {}", response, e);
+                        }
+                    }
+                });
     }
 
     private JavaType getJavaType(Type type) {

@@ -25,6 +25,8 @@ import reactor.core.Exceptions;
 import reactor.core.publisher.Mono;
 import reactor.netty.ByteBufFlux;
 import reactor.netty.http.client.HttpClient;
+import reactor.util.Logger;
+import reactor.util.Loggers;
 import reactor.util.annotation.Nullable;
 
 import java.lang.reflect.Type;
@@ -34,6 +36,8 @@ import java.nio.charset.StandardCharsets;
  * Write to a request from an {@code Object} to a JSON {@code String} using Jackson 2.9.
  */
 public class JacksonWriterStrategy implements WriterStrategy<Object> {
+
+    private static final Logger log = Loggers.getLogger(JacksonWriterStrategy.class);
 
     private final ObjectMapper objectMapper;
 
@@ -57,10 +61,19 @@ public class JacksonWriterStrategy implements WriterStrategy<Object> {
         if (body == null) {
             return Mono.error(new RuntimeException("Missing body"));
         }
+        Mono<String> source = Mono.fromCallable(() -> mapToString(body))
+                .doOnNext(json -> {
+                    if (log.isTraceEnabled()) {
+                        log.trace("{}", json);
+                    }
+                });
+        return Mono.fromCallable(() -> sender.send(
+                ByteBufFlux.fromString(source, StandardCharsets.UTF_8, ByteBufAllocator.DEFAULT)));
+    }
+
+    private String mapToString(Object value) {
         try {
-            return Mono.just(sender.send(
-                    ByteBufFlux.fromString(Mono.just(objectMapper.writeValueAsString(body)),
-                            StandardCharsets.UTF_8, ByteBufAllocator.DEFAULT)));
+            return objectMapper.writeValueAsString(value);
         } catch (JsonProcessingException e) {
             throw Exceptions.propagate(e);
         }
