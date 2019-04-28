@@ -26,7 +26,6 @@ import reactor.util.annotation.Nullable;
 @PossibleJson
 public class GuildMemberModifyRequest {
 
-    @Nullable
     private final Possible<String> nick;
     @UnsignedJson
     private final Possible<long[]> roles;
@@ -37,7 +36,7 @@ public class GuildMemberModifyRequest {
     @UnsignedJson
     private final PossibleLong channelId;
 
-    public GuildMemberModifyRequest(@Nullable Possible<String> nick, Possible<long[]> roles,
+    public GuildMemberModifyRequest(Possible<String> nick, Possible<long[]> roles,
                                     Possible<Boolean> mute, Possible<Boolean> deaf,
                                     @Nullable PossibleLong channelId) {
         this.nick = nick;
@@ -53,7 +52,6 @@ public class GuildMemberModifyRequest {
 
     public static class Builder {
 
-        @Nullable
         private Possible<String> nick = Possible.absent();
         private Possible<long[]> roles = Possible.absent();
         private Possible<Boolean> mute = Possible.absent();
@@ -61,7 +59,7 @@ public class GuildMemberModifyRequest {
         private PossibleLong channelId = PossibleLong.absent();
 
         public Builder nick(@Nullable String nick) {
-            this.nick = nick == null ? null : Possible.of(nick);
+            this.nick = nick == null ? Possible.of("") : Possible.of(nick);
             return this;
         }
 

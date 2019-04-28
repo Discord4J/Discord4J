@@ -74,7 +74,7 @@ public class GuildMemberEditSpec implements AuditSpec<GuildMemberModifyRequest> 
     /**
      * Sets a new nickname to the targeted {@link Member}. Requires the {@link Permission#MANAGE_NICKNAMES} permission.
      *
-     * @param nickname The new nickname, can be {@link null} to reset.
+     * @param nickname The new nickname, can be {@code null} or an empty string to reset.
      * @return This spec.
      */
     public GuildMemberEditSpec setNickname(@Nullable String nickname) {
