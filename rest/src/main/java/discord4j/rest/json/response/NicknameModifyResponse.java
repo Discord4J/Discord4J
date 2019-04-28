@@ -16,10 +16,14 @@
  */
 package discord4j.rest.json.response;
 
+import reactor.util.annotation.Nullable;
+
 public class NicknameModifyResponse {
 
+    @Nullable
     private String nick;
 
+    @Nullable
     public String getNick() {
         return nick;
     }

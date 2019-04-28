@@ -36,7 +36,6 @@ import discord4j.core.util.PaginationUtil;
 import discord4j.rest.json.request.NicknameModifyRequest;
 import discord4j.rest.json.response.AuditLogEntryResponse;
 import discord4j.rest.json.response.AuditLogResponse;
-import discord4j.rest.json.response.NicknameModifyResponse;
 import discord4j.rest.json.response.PruneResponse;
 import discord4j.store.api.util.LongLongTuple2;
 import reactor.core.publisher.Flux;
@@ -913,13 +912,21 @@ public final class Guild implements Entity {
      * Requests to change the bot user's nickname in this guild.
      *
      * @param nickname The new nickname for the bot user in this guild, or {@code null} to remove it.
-     * @return A {@link Mono} where, upon successful completion, emits the bot user's new nickname in this guild. If an
-     * error is received, it is emitted through the {@code Mono}.
+     * @return A {@link Mono} where, upon successful completion, emits the bot user's new nickname in this guild. If
+     * the nickname was set to {@code null}, then this {@link Mono} will complete empty. If an error is received, it
+     * is emitted through the {@code Mono}.
      */
     public Mono<String> changeSelfNickname(@Nullable final String nickname) {
         return serviceMediator.getRestClient().getGuildService()
                 .modifyOwnNickname(getId().asLong(), new NicknameModifyRequest(nickname))
-                .map(NicknameModifyResponse::getNick)
+                .<String>handle((response, next) -> {
+                    String nick = response.getNick();
+                    if (nick != null) {
+                        next.next(nick);
+                    } else {
+                        next.complete();
+                    }
+                })
                 .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex()));
     }
 
