@@ -27,6 +27,7 @@ import discord4j.core.event.dispatch.DispatchHandlers;
 import discord4j.core.event.domain.Event;
 import discord4j.core.object.data.stored.MessageBean;
 import discord4j.core.object.presence.Presence;
+import discord4j.core.shard.ShardingClientBuilder;
 import discord4j.gateway.*;
 import discord4j.gateway.json.GatewayPayload;
 import discord4j.gateway.json.VoiceStateUpdate;
@@ -341,6 +342,10 @@ public final class DiscordClientBuilder {
      * <p>
      * If you use a default {@code RouterFactory}, it will use the supplied {@code RouterOptions} to configure itself
      * while building this client.
+     * <p>
+     * Calling this method while sharding clients will not apply the supplied options as requests on the coordinated
+     * {@link Router} implementation have already begun. Use
+     * {@link ShardingClientBuilder#setRouterOptions(RouterOptions)} instead.
      *
      * @param routerOptions a new {@code RouterOptions} to configure a {@code RouterFactory}
      * @return this builder

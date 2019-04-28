@@ -26,14 +26,13 @@ import discord4j.rest.RestClient;
 import discord4j.rest.http.ExchangeStrategies;
 import discord4j.rest.http.client.DiscordWebClient;
 import discord4j.rest.json.response.GatewayResponse;
-import discord4j.rest.request.DefaultRouterFactory;
-import discord4j.rest.request.Router;
-import discord4j.rest.request.RouterFactory;
-import discord4j.rest.request.SingleRouterFactory;
+import discord4j.rest.request.*;
+import discord4j.rest.response.ResponseFunction;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxSink;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.ReplayProcessor;
+import reactor.core.scheduler.Scheduler;
 import reactor.netty.http.client.HttpClient;
 import reactor.scheduler.forkjoin.ForkJoinPoolScheduler;
 import reactor.util.Logger;
@@ -63,6 +62,9 @@ public class ShardingClientBuilder {
 
     @Nullable
     private RouterFactory routerFactory;
+
+    @Nullable
+    private RouterOptions routerOptions;
 
     @Nullable
     private ShardingStoreRegistry shardingStoreRegistry;
@@ -135,6 +137,16 @@ public class ShardingClientBuilder {
     }
 
     /**
+     * Return the current {@link RouterOptions} used to configure {@link RouterFactory} instances.
+     *
+     * @return the current {@code RouterOptions} used by this client
+     */
+    @Nullable
+    public RouterOptions getRouterOptions() {
+        return routerOptions;
+    }
+
+    /**
      * Set a new {@link RouterFactory} used to create a {@link Router} that executes Discord REST API requests and
      * will be shared across all sharding clients created by this builder.
      * <p>
@@ -147,6 +159,24 @@ public class ShardingClientBuilder {
      */
     public ShardingClientBuilder setRouterFactory(@Nullable RouterFactory routerFactory) {
         this.routerFactory = routerFactory;
+        return this;
+    }
+
+    /**
+     * Sets a new {@link RouterOptions} used to configure a {@link RouterFactory}.
+     * <p>
+     * {@code RouterOptions} instances provide a way to override the {@link Scheduler} used for retrieving API responses
+     * and scheduling rate limiting actions. It also allows changing the behavior associated with API errors through
+     * {@link RouterOptions.Builder#onClientResponse(ResponseFunction)}.
+     * <p>
+     * If you use a default {@code RouterFactory}, it will use the supplied {@code RouterOptions} to configure itself
+     * while building this client.
+     *
+     * @param routerOptions a new {@code RouterOptions} to configure a {@code RouterFactory}
+     * @return this builder
+     */
+    public ShardingClientBuilder setRouterOptions(@Nullable RouterOptions routerOptions) {
+        this.routerOptions = routerOptions;
         return this;
     }
 
@@ -206,6 +236,13 @@ public class ShardingClientBuilder {
         return new DefaultRouterFactory();
     }
 
+    private Router initRouter(RouterFactory factory, DiscordWebClient webClient) {
+        if (routerOptions != null) {
+            return factory.getRouter(webClient, routerOptions);
+        }
+        return factory.getRouter(webClient);
+    }
+
     private Mono<Integer> initShardCount(RestClient restClient) {
         if (shardCount == null) {
             return restClient.getGatewayService().getGatewayBot()
@@ -256,7 +293,8 @@ public class ShardingClientBuilder {
         final JacksonResourceProvider jackson = new JacksonResourceProvider();
         final DiscordWebClient webClient = new DiscordWebClient(HttpClient.create().compress(true),
                 ExchangeStrategies.jackson(jackson.getObjectMapper()), token);
-        final Router router = initRouterFactory().getRouter(webClient);
+        final RouterFactory routerFactory = initRouterFactory();
+        final Router router = initRouter(routerFactory, webClient);
         final RestClient restClient = new RestClient(router);
 
         final ShardingStoreRegistry storeRegistry = initStoreRegistry();
