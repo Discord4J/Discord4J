@@ -22,7 +22,10 @@ import ch.qos.logback.classic.LoggerContext;
 import discord4j.core.event.domain.lifecycle.ReadyEvent;
 import discord4j.core.event.domain.lifecycle.ResumeEvent;
 import discord4j.core.event.domain.message.MessageCreateEvent;
-import discord4j.core.object.entity.*;
+import discord4j.core.object.entity.ApplicationInfo;
+import discord4j.core.object.entity.Attachment;
+import discord4j.core.object.entity.Message;
+import discord4j.core.object.entity.User;
 import discord4j.core.object.reaction.ReactionEmoji;
 import discord4j.core.object.util.Image;
 import discord4j.core.object.util.Snowflake;
@@ -36,6 +39,7 @@ import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.LoggerFactory;
+import reactor.BlockHound;
 import reactor.core.Exceptions;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -69,6 +73,8 @@ public class ExampleBot {
     @Test
     @Ignore("Example code excluded from CI")
     public void testCommandBot() {
+        BlockHound.install();
+
         DiscordClient client = new DiscordClientBuilder(token)
                 .setRouterOptions(RouterOptions.builder()
                         // globally suppress any not found (404) error
