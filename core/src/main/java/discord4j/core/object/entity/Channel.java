@@ -81,7 +81,7 @@ public interface Channel extends Entity {
         /** Represents a {@link Category}. */
         GUILD_CATEGORY(4),
 
-        /** Represents a special news {@link TextChannel} */
+        /** Represents a special news {@link TextChannel}. */
         GUILD_NEWS(5);
 
         /** The underlying value as represented by Discord. */
