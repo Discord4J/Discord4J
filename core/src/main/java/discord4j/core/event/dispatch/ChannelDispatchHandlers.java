@@ -45,6 +45,7 @@ class ChannelDispatchHandlers {
         Channel.Type type = Channel.Type.of(context.getDispatch().getChannel().getType());
 
         switch (type) {
+            case GUILD_NEWS:
             case GUILD_TEXT: return textChannelCreate(context);
             case DM: return privateChannelCreate(context);
             case GUILD_VOICE: return voiceChannelCreate(context);
