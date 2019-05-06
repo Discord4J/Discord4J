@@ -43,7 +43,7 @@ public class GlobalRateLimiter {
 
     private static final Logger log = Loggers.getLogger(GlobalRateLimiter.class);
 
-    private final Semaphore outer = new Semaphore(8, true);
+    private final Semaphore outer = new Semaphore(14, true);
     private final Semaphore inner = new Semaphore(1, true);
     private final AtomicLong limitedUntil = new AtomicLong(0L);
 
