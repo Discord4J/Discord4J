@@ -73,7 +73,7 @@ public class GlobalRateLimiter {
         return Mono.empty();
     }
 
-    private long delayNanos() {
+    long delayNanos() {
         return limitedUntil.get() - System.nanoTime();
     }
 
