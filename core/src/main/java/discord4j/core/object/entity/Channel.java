@@ -79,7 +79,13 @@ public interface Channel extends Entity {
         GROUP_DM(3),
 
         /** Represents a {@link Category}. */
-        GUILD_CATEGORY(4);
+        GUILD_CATEGORY(4),
+
+        /** Represents a {@link NewsChannel}. */
+        GUILD_NEWS(5),
+
+        /** Represents a {@link StoreChannel}.*/
+        GUILD_STORE(6);
 
         /** The underlying value as represented by Discord. */
         private final int value;
@@ -116,6 +122,8 @@ public interface Channel extends Entity {
                 case 2: return GUILD_VOICE;
                 case 3: return GROUP_DM;
                 case 4: return GUILD_CATEGORY;
+                case 5: return GUILD_NEWS;
+                case 6: return GUILD_STORE;
                 default: return EntityUtil.throwUnsupportedDiscordValue(value);
             }
         }

@@ -86,11 +86,7 @@ public final class DiscordClient {
      * supplied ID. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Channel> getChannelById(final Snowflake channelId) {
-        final Mono<CategoryBean> category = serviceMediator.getStateHolder().getCategoryStore()
-                .find(channelId.asLong());
-        final Mono<TextChannelBean> textChannel = serviceMediator.getStateHolder().getTextChannelStore()
-                .find(channelId.asLong());
-        final Mono<VoiceChannelBean> voiceChannel = serviceMediator.getStateHolder().getVoiceChannelStore()
+        final Mono<ChannelBean> channel = serviceMediator.getStateHolder().getChannelStore()
                 .find(channelId.asLong());
 
         final Mono<ChannelBean> rest = serviceMediator.getRestClient().getChannelService()
@@ -98,9 +94,7 @@ public final class DiscordClient {
                 .map(EntityUtil::getChannelBean)
                 .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex()));
 
-        return category.cast(ChannelBean.class)
-                .switchIfEmpty(textChannel)
-                .switchIfEmpty(voiceChannel)
+        return channel
                 .switchIfEmpty(rest)
                 .map(channelBean -> EntityUtil.getChannel(serviceMediator, channelBean));
     }

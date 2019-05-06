@@ -77,24 +77,8 @@ class GuildDispatchHandlers {
         Mono<Void> saveGuild = serviceMediator.getStateHolder().getGuildStore().save(guildBean.getId(), guildBean);
         // TODO optimize to separate into three Publisher<Channel> and saveAll to limit store hits
         Mono<Void> saveChannels = Flux.just(context.getDispatch().getChannels()).flatMap(channel -> {
-            switch (Channel.Type.of(channel.getType())) {
-                case GUILD_TEXT:
-                    TextChannelBean textChannelBean = new TextChannelBean(channel, guildBean.getId());
-                    textChannelBean.setGuildId(guildBean.getId());
-                    return serviceMediator.getStateHolder().getTextChannelStore().save(channel.getId(),
-                            textChannelBean);
-                case GUILD_VOICE:
-                    VoiceChannelBean voiceChannelBean = new VoiceChannelBean(channel, guildBean.getId());
-                    voiceChannelBean.setGuildId(guildBean.getId());
-                    return serviceMediator.getStateHolder().getVoiceChannelStore().save(channel.getId(),
-                            voiceChannelBean);
-                case GUILD_CATEGORY:
-                    CategoryBean categoryBean = new CategoryBean(channel, guildBean.getId());
-                    categoryBean.setGuildId(guildBean.getId());
-                    return serviceMediator.getStateHolder().getCategoryStore().save(channel.getId(), categoryBean);
-                default:
-                    return EntityUtil.throwUnsupportedDiscordValue(channel.getType());
-            }
+            ChannelBean channelBean = new ChannelBean(channel, guildBean.getId());
+            return serviceMediator.getStateHolder().getChannelStore().save(channel.getId(), channelBean);
         }).then();
 
         Mono<Void> saveRoles = serviceMediator.getStateHolder().getRoleStore()
@@ -173,9 +157,7 @@ class GuildDispatchHandlers {
                     Flux<Long> roles = Flux.fromStream(() -> LongStream.of(guild.getRoles()).boxed());
                     Flux<Long> emojis = Flux.fromStream(() -> LongStream.of(guild.getEmojis()).boxed());
 
-                    Mono<Void> deleteTextChannels = stateHolder.getTextChannelStore().delete(channels);
-                    Mono<Void> deleteVoiceChannels = stateHolder.getVoiceChannelStore().delete(channels);
-                    Mono<Void> deleteCategories = stateHolder.getCategoryStore().delete(channels);
+                    Mono<Void> deleteChannels = stateHolder.getChannelStore().delete(channels);
                     Mono<Void> deleteRoles = stateHolder.getRoleStore().delete(roles);
                     Mono<Void> deleteEmojis = stateHolder.getGuildEmojiStore().delete(emojis);
                     Mono<Void> deleteMembers = stateHolder.getMemberStore()
@@ -187,9 +169,7 @@ class GuildDispatchHandlers {
                     Mono<Void> deletePresences = stateHolder.getPresenceStore()
                             .deleteInRange(LongLongTuple2.of(guild.getId(), 0), LongLongTuple2.of(guild.getId(), -1));
 
-                    return deleteTextChannels
-                            .and(deleteVoiceChannels)
-                            .and(deleteCategories)
+                    return deleteChannels
                             .and(deleteRoles)
                             .and(deleteEmojis)
                             .and(deleteMembers)
@@ -222,8 +202,8 @@ class GuildDispatchHandlers {
 
         Mono<Void> saveEmojis = serviceMediator.getStateHolder().getGuildEmojiStore()
                 .saveWithLong(Flux.fromArray(context.getDispatch().getEmojis())
-                                      .map(GuildEmojiBean::new)
-                                      .map(bean -> LongObjTuple2.of(bean.getId(), bean)));
+                        .map(GuildEmojiBean::new)
+                        .map(bean -> LongObjTuple2.of(bean.getId(), bean)));
 
         DiscordClient client = context.getServiceMediator().getClient();
         long guildId = context.getDispatch().getGuildId();
@@ -282,8 +262,8 @@ class GuildDispatchHandlers {
                 .flatMap(guild -> serviceMediator.getStateHolder().getGuildStore().save(guildId, guild));
 
         Mono<Member> member = serviceMediator.getStateHolder().getMemberStore()
-            .find(LongLongTuple2.of(guildId, response.getId()))
-            .map(bean -> new Member(serviceMediator, bean, new UserBean(response), guildId));
+                .find(LongLongTuple2.of(guildId, response.getId()))
+                .map(bean -> new Member(serviceMediator, bean, new UserBean(response), guildId));
 
         Mono<Void> deleteMember = serviceMediator.getStateHolder().getMemberStore()
                 .delete(LongLongTuple2.of(guildId, response.getId()));
@@ -291,9 +271,9 @@ class GuildDispatchHandlers {
         User user = new User(serviceMediator, new UserBean(response));
 
         return member.map(Optional::of)
-            .defaultIfEmpty(Optional.empty())
-            .flatMap(Mono.when(removeMemberId, deleteMember)::thenReturn)
-            .map(m -> new MemberLeaveEvent(serviceMediator.getClient(), user, guildId, m.orElse(null)));
+                .defaultIfEmpty(Optional.empty())
+                .flatMap(Mono.when(removeMemberId, deleteMember)::thenReturn)
+                .map(m -> new MemberLeaveEvent(serviceMediator.getClient(), user, guildId, m.orElse(null)));
     }
 
     static Mono<MemberChunkEvent> guildMembersChunk(DispatchContext<GuildMembersChunk> context) {
@@ -304,9 +284,10 @@ class GuildDispatchHandlers {
                 .map(response -> Tuples.of(response, new MemberBean(response)))
                 .map(tuple -> Tuples.of(LongLongTuple2.of(guildId, tuple.getT1().getUser().getId()), tuple.getT2()));
 
-        Flux<Tuple2<Long, UserBean>> userPairs = Flux.fromStream(() -> Arrays.stream(context.getDispatch().getMembers()))
-                .map(response -> new UserBean(response.getUser()))
-                .map(bean -> Tuples.of(bean.getId(), bean));
+        Flux<Tuple2<Long, UserBean>> userPairs =
+                Flux.fromStream(() -> Arrays.stream(context.getDispatch().getMembers()))
+                        .map(response -> new UserBean(response.getUser()))
+                        .map(bean -> Tuples.of(bean.getId(), bean));
 
         Mono<Void> addMemberIds = serviceMediator.getStateHolder().getGuildStore()
                 .find(guildId)
@@ -369,7 +350,8 @@ class GuildDispatchHandlers {
 
                     return serviceMediator.getStateHolder().getMemberStore()
                             .save(key, newBean)
-                            .thenReturn(new MemberUpdateEvent(client, guildId, memberId, old, currentRoles, currentNick));
+                            .thenReturn(new MemberUpdateEvent(client, guildId, memberId, old, currentRoles,
+                                    currentNick));
                 });
 
         return update.defaultIfEmpty(new MemberUpdateEvent(client, guildId, memberId, null, currentRoles, currentNick));

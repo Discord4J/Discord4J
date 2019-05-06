@@ -17,7 +17,7 @@
 package discord4j.core.object.entity;
 
 import discord4j.core.ServiceMediator;
-import discord4j.core.object.data.stored.CategoryBean;
+import discord4j.core.object.data.stored.ChannelBean;
 import discord4j.core.object.trait.Categorizable;
 import discord4j.core.object.util.Snowflake;
 import discord4j.core.spec.CategoryEditSpec;
@@ -36,7 +36,7 @@ public final class Category extends BaseGuildChannel {
      * @param serviceMediator The ServiceMediator associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
      */
-    public Category(final ServiceMediator serviceMediator, final CategoryBean data) {
+    public Category(final ServiceMediator serviceMediator, final ChannelBean data) {
         super(serviceMediator, data);
     }
 

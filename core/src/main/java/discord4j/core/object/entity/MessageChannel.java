@@ -28,7 +28,7 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
-/** A Discord channel that can utilizes messages. */
+/** A Discord channel that can utilize messages. */
 public interface MessageChannel extends Channel {
 
     /**

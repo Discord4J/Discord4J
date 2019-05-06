@@ -17,53 +17,53 @@
 package discord4j.core.event.domain.channel;
 
 import discord4j.core.DiscordClient;
-import discord4j.core.object.entity.VoiceChannel;
+import discord4j.core.object.entity.StoreChannel;
 import reactor.util.annotation.Nullable;
 
 import java.util.Optional;
 
 /**
- * Dispatched when a {@link VoiceChannel} is updated in a guild.
+ * Dispatched when a {@link StoreChannel} is updated in a guild.
  * <p>
- * The old voice channel may not be present if channels are not stored.
+ * The old store channel may not be present if channels are not stored.
  * <p>
  * This event is dispatched by Discord.
  *
  * @see <a href="https://discordapp.com/developers/docs/topics/gateway#channel-update">Channel Update</a>
  */
-public class VoiceChannelUpdateEvent extends ChannelEvent {
+public class StoreChannelUpdateEvent extends ChannelEvent {
 
-    private final VoiceChannel current;
-    private final VoiceChannel old;
+    private final StoreChannel current;
+    private final StoreChannel old;
 
-    public VoiceChannelUpdateEvent(DiscordClient client, VoiceChannel current, @Nullable VoiceChannel old) {
+    public StoreChannelUpdateEvent(DiscordClient client, StoreChannel current, @Nullable StoreChannel old) {
         super(client);
         this.current = current;
         this.old = old;
     }
 
     /**
-     * Gets the current, new version of the {@link VoiceChannel} that was updated in this event.
+     * Gets the current, new version of the {@link StoreChannel} that was updated in this event.
      *
-     * @return The current version of the updated {@link VoiceChannel}.
+     * @return The current version of the updated {@link StoreChannel}.
      */
-    public VoiceChannel getCurrent() {
+    public StoreChannel getCurrent() {
         return current;
     }
 
     /**
-     * Gets the old version of the {@link VoiceChannel} that was updated in this event, if present.
-     * This may not be available if {@code VoiceChannels} are not stored.
+     * Gets the old version of the {@link StoreChannel} that was updated in this event, if present.
+     * This may not be available if {@code StoreChannels} are not retained.
      *
-     * @return The old version of the updated {@link VoiceChannel}, if present.
+     * @return The old version of the updated {@link StoreChannel}, if present.
      */
-    public Optional<VoiceChannel> getOld() {
+    public Optional<StoreChannel> getOld() {
         return Optional.ofNullable(old);
     }
 
     @Override
     public String toString() {
-        return "VoiceChannelUpdateEvent{" +
+        return "StoreChannelUpdateEvent{" +
                 "current=" + current +
                 ", old=" + old +
                 '}';

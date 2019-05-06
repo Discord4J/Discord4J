@@ -25,70 +25,70 @@ import reactor.util.annotation.Nullable;
 import java.util.Optional;
 
 /**
- * Dispatched when a {@link TextChannel} is updated in a guild.
+ * Dispatched when a {@link NewsChannel} is updated in a guild.
  * <p>
- * The {@link TextChannel} may have been turned into a {@link NewsChannel}.
+ * The {@link NewsChannel} may have been turned into a {@link TextChannel}.
  * <p>
- * The old text channel may not be present if channels are not stored.
+ * The old news channel may not be present if news channels are not stored.
  * <p>
  * This event is dispatched by Discord.
  *
  * @see <a href="https://discordapp.com/developers/docs/topics/gateway#channel-update">Channel Update</a>
  */
-public class TextChannelUpdateEvent extends ChannelEvent {
+public class NewsChannelUpdateEvent extends ChannelEvent {
 
     private final GuildMessageChannel current;
-    private final TextChannel old;
+    private final NewsChannel old;
 
-    public TextChannelUpdateEvent(DiscordClient client, GuildMessageChannel current, @Nullable TextChannel old) {
+    public NewsChannelUpdateEvent(DiscordClient client, GuildMessageChannel current, @Nullable NewsChannel old) {
         super(client);
         this.current = current;
         this.old = old;
     }
 
     /**
-     * Gets the current, new version of the {@link TextChannel} that was updated in this event.
-     * The {@link TextChannel} may have been turned into a {@link NewsChannel}.
+     * Gets the current, new version of the {@link NewsChannel} that was updated in this event.
+     * The {@link NewsChannel} may have been turned into a {@link TextChannel}.
      *
-     * @return The current version of the updated {@link TextChannel}.
+     * @return The current version of the updated {@link NewsChannel}.
      */
     public GuildMessageChannel getCurrent() {
         return current;
     }
 
     /**
-     * Gets the current, new version of the {@link TextChannel} that was updated in this event as an optional
+     * Gets the current, new version of the {@link NewsChannel} that was updated in this event as an optional
      * value of a {@link NewsChannel}.
      *
-     * @return An optional value of a {@link NewsChannel}. Empty if the channel continued to be a {@link TextChannel}.
+     * @return An optional value of a {@link NewsChannel}. Empty if the channel was changed to a {@link TextChannel}.
      */
     public Optional<NewsChannel> getNewsChannel() {
         return current instanceof NewsChannel ? Optional.of((NewsChannel) current) : Optional.empty();
     }
 
     /**
-     * Gets the current, new version of the {@link TextChannel} that was updated in this event as an optional
+     * Gets the current, new version of the {@link NewsChannel} that was updated in this event as an optional
      * value of a {@link TextChannel}.
      *
-     * @return An optional value of a {@link TextChannel}. Empty if the channel was changed to a {@link NewsChannel}.
+     * @return An optional value of a {@link TextChannel}. Empty if the channel continued to be a {@link NewsChannel}.
      */
     public Optional<TextChannel> getTextChannel() {
         return current instanceof TextChannel ? Optional.of((TextChannel) current) : Optional.empty();
     }
 
     /**
-     * Gets the old version of the {@link TextChannel} that was updated in this event, if present.
-     * This may not be available if {@code TextChannels} are not stored.
+     * Gets the old version of the {@link NewsChannel} that was updated in this event, if present.
+     * This may not be available if {@code NewsChannels} are not stored.
      *
-     * @return The old version of the updated {@link TextChannel}, if present.
+     * @return The old version of the updated {@link NewsChannel}, if present.
      */
-    public Optional<TextChannel> getOld() {
+    public Optional<NewsChannel> getOld() {
         return Optional.ofNullable(old);
     }
 
     @Override
     public String toString() {
-        return "TextChannelUpdateEvent{" +
+        return "NewsChannelUpdateEvent{" +
                 "current=" + current +
                 ", old=" + old +
                 '}';

@@ -17,11 +17,7 @@
 package discord4j.core.util;
 
 import discord4j.core.ServiceMediator;
-import discord4j.core.object.data.PrivateChannelBean;
-import discord4j.core.object.data.stored.CategoryBean;
 import discord4j.core.object.data.stored.ChannelBean;
-import discord4j.core.object.data.stored.TextChannelBean;
-import discord4j.core.object.data.stored.VoiceChannelBean;
 import discord4j.core.object.entity.*;
 import discord4j.core.object.reaction.ReactionEmoji;
 import discord4j.rest.json.response.ChannelResponse;
@@ -50,13 +46,7 @@ public final class EntityUtil {
      * @return The converted {@code ChannelBean}.
      */
     public static ChannelBean getChannelBean(final ChannelResponse response) {
-        switch (Channel.Type.of(response.getType())) {
-            case GUILD_TEXT: return new TextChannelBean(response);
-            case DM: return new PrivateChannelBean(response);
-            case GUILD_VOICE: return new VoiceChannelBean(response);
-            case GUILD_CATEGORY: return new CategoryBean(response);
-            default: return throwUnsupportedDiscordValue(response);
-        }
+        return new ChannelBean(response);
     }
 
     /**
@@ -69,10 +59,11 @@ public final class EntityUtil {
      */
     public static Channel getChannel(final ServiceMediator serviceMediator, final ChannelBean bean) {
         switch (Channel.Type.of(bean.getType())) {
-            case GUILD_TEXT: return new TextChannel(serviceMediator, (TextChannelBean) bean);
-            case DM: return new PrivateChannel(serviceMediator, (PrivateChannelBean) bean);
-            case GUILD_VOICE: return new VoiceChannel(serviceMediator, (VoiceChannelBean) bean);
-            case GUILD_CATEGORY: return new Category(serviceMediator, (CategoryBean) bean);
+            case GUILD_TEXT: return new TextChannel(serviceMediator, bean);
+            case DM: return new PrivateChannel(serviceMediator, bean);
+            case GUILD_VOICE: return new VoiceChannel(serviceMediator, bean);
+            case GUILD_CATEGORY: return new Category(serviceMediator, bean);
+            case GUILD_NEWS: return new NewsChannel(serviceMediator, bean);
             default: return throwUnsupportedDiscordValue(bean);
         }
     }

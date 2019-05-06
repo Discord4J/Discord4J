@@ -18,8 +18,8 @@ package discord4j.core.object.entity;
 
 import discord4j.common.json.MessageResponse;
 import discord4j.core.ServiceMediator;
+import discord4j.core.object.data.stored.ChannelBean;
 import discord4j.core.object.data.stored.MessageBean;
-import discord4j.core.object.data.stored.MessageChannelBean;
 import discord4j.core.object.util.Snowflake;
 import discord4j.core.spec.MessageCreateSpec;
 import discord4j.core.util.PaginationUtil;
@@ -44,7 +44,7 @@ class BaseMessageChannel extends BaseChannel implements MessageChannel {
      * @param serviceMediator The ServiceMediator associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
      */
-    BaseMessageChannel(final ServiceMediator serviceMediator, final MessageChannelBean data) {
+    BaseMessageChannel(final ServiceMediator serviceMediator, final ChannelBean data) {
         super(serviceMediator, data);
     }
 
@@ -135,11 +135,6 @@ class BaseMessageChannel extends BaseChannel implements MessageChannel {
                 .map(MessageBean::new)
                 .map(bean -> new Message(getServiceMediator(), bean))
                 .subscriberContext(ctx -> ctx.put("shard", getServiceMediator().getClientConfig().getShardIndex()));
-    }
-
-    @Override
-    MessageChannelBean getData() {
-        return (MessageChannelBean) super.getData();
     }
 
     @Override

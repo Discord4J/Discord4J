@@ -17,7 +17,7 @@
 package discord4j.core.object.entity;
 
 import discord4j.core.ServiceMediator;
-import discord4j.core.object.data.PrivateChannelBean;
+import discord4j.core.object.data.stored.ChannelBean;
 import discord4j.core.object.util.Snowflake;
 import reactor.core.publisher.Flux;
 
@@ -34,7 +34,7 @@ public final class PrivateChannel extends BaseMessageChannel {
      * @param serviceMediator The ServiceMediator associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
      */
-    public PrivateChannel(final ServiceMediator serviceMediator, final PrivateChannelBean data) {
+    public PrivateChannel(final ServiceMediator serviceMediator, final ChannelBean data) {
         super(serviceMediator, data);
     }
 
@@ -47,11 +47,6 @@ public final class PrivateChannel extends BaseMessageChannel {
         return Arrays.stream(getData().getRecipients())
                 .mapToObj(Snowflake::of)
                 .collect(Collectors.toSet());
-    }
-
-    @Override
-    PrivateChannelBean getData() {
-        return (PrivateChannelBean) super.getData();
     }
 
     /**

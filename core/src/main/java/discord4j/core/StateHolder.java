@@ -33,16 +33,14 @@ import java.util.concurrent.atomic.AtomicLong;
  * <p>
  * In addition to saving the current bot user ID, the following stores are kept in this class:
  * <ul>
- * <li>Category store: {@code long} keys and {@link CategoryBean} values.</li>
+ * <li>Channel store: {@code long} keys and {@link ChannelBean} values.</li>
  * <li>Guild store: {@code long} keys and {@link GuildBean} values.</li>
  * <li>Guild emoji store: {@code long} keys and {@link GuildEmojiBean} values.</li>
  * <li>Member store: {@code long} pair keys and {@link MemberBean} values.</li>
  * <li>Message store: {@code long} keys and {@link MessageBean} values.</li>
  * <li>Presence store: {@code long} pair keys and {@link PresenceBean} values.</li>
  * <li>Role store: {@code long} keys and {@link RoleBean} values.</li>
- * <li>Text channel store: {@code long} keys and {@link TextChannelBean} values.</li>
  * <li>User store: {@code long} keys and {@link UserBean} values.</li>
- * <li>Voice channel store: {@code long} keys and {@link VoiceChannelBean} values.</li>
  * <li>Voice state store: {@code long} pair keys and {@link VoiceStateBean} values.</li>
  * </ul>
  */
@@ -50,24 +48,22 @@ public final class StateHolder {
 
     private static final Logger log = Loggers.getLogger(StateHolder.class);
 
-    private final LongObjStore<CategoryBean> categoryStore;
+    private final LongObjStore<ChannelBean> channelStore;
     private final LongObjStore<GuildBean> guildStore;
     private final LongObjStore<GuildEmojiBean> guildEmojiStore;
     private final Store<LongLongTuple2, MemberBean> memberStore;
     private final LongObjStore<MessageBean> messageStore;
     private final Store<LongLongTuple2, PresenceBean> presenceStore;
     private final LongObjStore<RoleBean> roleStore;
-    private final LongObjStore<TextChannelBean> textChannelStore;
     private final LongObjStore<UserBean> userStore;
-    private final LongObjStore<VoiceChannelBean> voiceChannelStore;
     private final Store<LongLongTuple2, VoiceStateBean> voiceStateStore;
     private final AtomicLong selfId;
 
     StateHolder(final StoreService service, final StoreContext context) {
         service.init(context);
 
-        categoryStore = service.provideLongObjStore(CategoryBean.class);
-        log.debug("Using a {} backend for category storage.", categoryStore);
+        channelStore = service.provideLongObjStore(ChannelBean.class);
+        log.debug("Using a {} backend for channel storage.", channelStore);
 
         guildStore = service.provideLongObjStore(GuildBean.class);
         log.debug("Using a {} backend for guild storage.", guildStore);
@@ -87,22 +83,16 @@ public final class StateHolder {
         roleStore = service.provideLongObjStore(RoleBean.class);
         log.debug("Using a {} backend for role storage.", roleStore);
 
-        textChannelStore = service.provideLongObjStore(TextChannelBean.class);
-        log.debug("Using a {} backend for text channel storage.", textChannelStore);
-
         userStore = service.provideLongObjStore(UserBean.class);
         log.debug("Using a {} backend for user storage.", userStore);
-
-        voiceChannelStore = service.provideLongObjStore(VoiceChannelBean.class);
-        log.debug("Using a {} backend for voice channel storage.", voiceChannelStore);
 
         voiceStateStore = service.provideGenericStore(LongLongTuple2.class, VoiceStateBean.class);
         log.debug("Using a {} backend for voice state storage.", voiceStateStore);
         selfId = new AtomicLong();
     }
 
-    public LongObjStore<CategoryBean> getCategoryStore() {
-        return categoryStore;
+    public LongObjStore<ChannelBean> getChannelStore() {
+        return channelStore;
     }
 
     public LongObjStore<GuildBean> getGuildStore() {
@@ -129,16 +119,8 @@ public final class StateHolder {
         return roleStore;
     }
 
-    public LongObjStore<TextChannelBean> getTextChannelStore() {
-        return textChannelStore;
-    }
-
     public LongObjStore<UserBean> getUserStore() {
         return userStore;
-    }
-
-    public LongObjStore<VoiceChannelBean> getVoiceChannelStore() {
-        return voiceChannelStore;
     }
 
     public Store<LongLongTuple2, VoiceStateBean> getVoiceStateStore() {
@@ -150,16 +132,14 @@ public final class StateHolder {
     }
 
     public Mono<Void> invalidateStores() {
-        return categoryStore.invalidate()
+        return channelStore.invalidate()
                 .and(guildStore.invalidate())
                 .and(guildEmojiStore.invalidate())
                 .and(memberStore.invalidate())
                 .and(messageStore.invalidate())
                 .and(presenceStore.invalidate())
                 .and(roleStore.invalidate())
-                .and(textChannelStore.invalidate())
                 .and(userStore.invalidate())
-                .and(voiceChannelStore.invalidate())
                 .and(voiceStateStore.invalidate());
     }
 }
