@@ -46,7 +46,7 @@ public class DefaultRouter implements Router {
 
     private final DiscordWebClient httpClient;
     private final RouterOptions routerOptions;
-    private final GlobalRateLimiter globalRateLimiter = new GlobalRateLimiter();
+    private final GlobalRateLimiter globalRateLimiter = new GlobalRateLimiter(14 /* To be parametrized */);
     private final Map<BucketKey, RequestStream<?>> streamMap = new ConcurrentHashMap<>();
 
     /**

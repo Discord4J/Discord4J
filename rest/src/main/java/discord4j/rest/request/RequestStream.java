@@ -84,6 +84,10 @@ class RequestStream<T> {
                 long retryAfter = Long.valueOf(clientException.getHeaders().get("Retry-After"));
                 Duration fixedBackoff = Duration.ofMillis(retryAfter);
                 if (global) {
+                    long existingRateLimit = globalRateLimiter.delayNanos();
+                    if (existingRateLimit > 0) {
+                        return new BackoffDelay(Duration.ofNanos(existingRateLimit));
+                    }
                     log.debug("Globally rate limited for {}", fixedBackoff);
                     globalRateLimiter.rateLimitFor(fixedBackoff);
                 }
