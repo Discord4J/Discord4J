@@ -74,7 +74,7 @@ public class GlobalRateLimiter {
     private Mono<Void> notifier() {
         long delayNanos = delayNanos();
         if (delayNanos > 0) {
-            return Mono.delay(Duration.ofNanos(delayNanos), Schedulers.elastic()).then();
+            return Mono.delay(Duration.ofNanos(delayNanos)).then();
         }
         return Mono.empty();
     }
