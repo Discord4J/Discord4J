@@ -177,7 +177,7 @@ public class User implements Entity {
     public final Mono<PrivateChannel> getPrivateChannel() {
         return serviceMediator.getRestClient().getUserService()
                 .createDM(new DMCreateRequest(getId().asLong()))
-                .map(EntityUtil::getChannelBean)
+                .map(ChannelBean::new)
                 .map(bean -> EntityUtil.getChannel(serviceMediator, bean))
                 .cast(PrivateChannel.class)
                 .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex()));

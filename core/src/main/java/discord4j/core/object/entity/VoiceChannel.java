@@ -113,7 +113,7 @@ public final class VoiceChannel extends BaseGuildChannel implements Categorizabl
 
         return getServiceMediator().getRestClient().getChannelService()
                 .modifyChannel(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason())
-                .map(EntityUtil::getChannelBean)
+                .map(ChannelBean::new)
                 .map(bean -> EntityUtil.getChannel(getServiceMediator(), bean))
                 .cast(VoiceChannel.class)
                 .subscriberContext(ctx -> ctx.put("shard", getServiceMediator().getClientConfig().getShardIndex()));

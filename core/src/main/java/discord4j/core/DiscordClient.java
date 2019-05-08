@@ -91,7 +91,7 @@ public final class DiscordClient {
 
         final Mono<ChannelBean> rest = serviceMediator.getRestClient().getChannelService()
                 .getChannel(channelId.asLong())
-                .map(EntityUtil::getChannelBean)
+                .map(ChannelBean::new)
                 .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex()));
 
         return channel

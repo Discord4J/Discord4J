@@ -521,7 +521,7 @@ public final class Guild implements Entity {
                 .cast(GuildChannel.class)
                 .switchIfEmpty(serviceMediator.getRestClient().getGuildService()
                         .getGuildChannels(getId().asLong())
-                        .map(EntityUtil::getChannelBean)
+                        .map(ChannelBean::new)
                         .map(bean -> EntityUtil.getChannel(serviceMediator, bean))
                         .cast(GuildChannel.class)
                         .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex())))
@@ -625,7 +625,7 @@ public final class Guild implements Entity {
 
         return serviceMediator.getRestClient().getGuildService()
                 .createGuildChannel(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason())
-                .map(EntityUtil::getChannelBean)
+                .map(ChannelBean::new)
                 .map(bean -> EntityUtil.getChannel(serviceMediator, bean))
                 .cast(NewsChannel.class)
                 .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex()));
@@ -644,7 +644,7 @@ public final class Guild implements Entity {
 
         return serviceMediator.getRestClient().getGuildService()
                 .createGuildChannel(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason())
-                .map(EntityUtil::getChannelBean)
+                .map(ChannelBean::new)
                 .map(bean -> EntityUtil.getChannel(serviceMediator, bean))
                 .cast(StoreChannel.class)
                 .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex()));
@@ -663,7 +663,7 @@ public final class Guild implements Entity {
 
         return serviceMediator.getRestClient().getGuildService()
                 .createGuildChannel(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason())
-                .map(EntityUtil::getChannelBean)
+                .map(ChannelBean::new)
                 .map(bean -> EntityUtil.getChannel(serviceMediator, bean))
                 .cast(Category.class)
                 .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex()));
@@ -682,7 +682,7 @@ public final class Guild implements Entity {
 
         return serviceMediator.getRestClient().getGuildService()
                 .createGuildChannel(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason())
-                .map(EntityUtil::getChannelBean)
+                .map(ChannelBean::new)
                 .map(bean -> EntityUtil.getChannel(serviceMediator, bean))
                 .cast(TextChannel.class)
                 .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex()));
@@ -701,7 +701,7 @@ public final class Guild implements Entity {
 
         return serviceMediator.getRestClient().getGuildService()
                 .createGuildChannel(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason())
-                .map(EntityUtil::getChannelBean)
+                .map(ChannelBean::new)
                 .map(bean -> EntityUtil.getChannel(serviceMediator, bean))
                 .cast(VoiceChannel.class)
                 .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex()));

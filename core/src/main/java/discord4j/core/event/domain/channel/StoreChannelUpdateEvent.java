@@ -53,7 +53,7 @@ public class StoreChannelUpdateEvent extends ChannelEvent {
 
     /**
      * Gets the old version of the {@link StoreChannel} that was updated in this event, if present.
-     * This may not be available if {@code StoreChannels} are not retained.
+     * This may not be available if {@code StoreChannels} are not stored.
      *
      * @return The old version of the updated {@link StoreChannel}, if present.
      */

@@ -49,7 +49,7 @@ public class StoreChannel extends BaseGuildChannel {
 
         return getServiceMediator().getRestClient().getChannelService()
                 .modifyChannel(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason())
-                .map(EntityUtil::getChannelBean)
+                .map(ChannelBean::new)
                 .map(bean -> EntityUtil.getChannel(getServiceMediator(), bean))
                 .cast(StoreChannel.class)
                 .subscriberContext(ctx -> ctx.put("shard", getServiceMediator().getClientConfig().getShardIndex()));

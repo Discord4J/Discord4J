@@ -20,7 +20,6 @@ import discord4j.core.ServiceMediator;
 import discord4j.core.object.data.stored.ChannelBean;
 import discord4j.core.object.entity.*;
 import discord4j.core.object.reaction.ReactionEmoji;
-import discord4j.rest.json.response.ChannelResponse;
 import reactor.util.annotation.Nullable;
 
 /** An utility class for entity processing. */
@@ -39,17 +38,6 @@ public final class EntityUtil {
     }
 
     /**
-     * An utility that converts some instance of {@code ChannelResponse} to its associated {@code ChannelBean}
-     * {@link Channel.Type type}. That is to say, {@code response.getType() == ChannelBean#getType()}.
-     *
-     * @param response The {@code ChannelResponse} to convert.
-     * @return The converted {@code ChannelBean}.
-     */
-    public static ChannelBean getChannelBean(final ChannelResponse response) {
-        return new ChannelBean(response);
-    }
-
-    /**
      * An utility that converts some instance of {@code ChannelBean} to its associated {@code Channel}
      * {@link Channel.Type type}. That is to say, {@code bean.getType() == Channel#getType().getValue()}.
      *
@@ -64,6 +52,7 @@ public final class EntityUtil {
             case GUILD_VOICE: return new VoiceChannel(serviceMediator, bean);
             case GUILD_CATEGORY: return new Category(serviceMediator, bean);
             case GUILD_NEWS: return new NewsChannel(serviceMediator, bean);
+            case GUILD_STORE: return new StoreChannel(serviceMediator, bean);
             default: return throwUnsupportedDiscordValue(bean);
         }
     }
