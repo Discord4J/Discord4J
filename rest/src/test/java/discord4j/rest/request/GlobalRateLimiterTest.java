@@ -27,7 +27,7 @@ public class GlobalRateLimiterTest {
 
     @Test
     public void testGlobalRateLimiter() {
-        GlobalRateLimiter rateLimiter = new GlobalRateLimiter();
+        GlobalRateLimiter rateLimiter = new GlobalRateLimiter(14);
 
         rateLimiter.rateLimitFor(Duration.ofSeconds(1));
 
@@ -42,7 +42,7 @@ public class GlobalRateLimiterTest {
 
     @Test
     public void testBurstingRequestsGlobalRateLimiter() {
-        GlobalRateLimiter rateLimiter = new GlobalRateLimiter();
+        GlobalRateLimiter rateLimiter = new GlobalRateLimiter(14);
         Random random = new Random();
         Flux.range(0, 100)
                 .flatMap(index -> rateLimiter.withLimiter(() -> {

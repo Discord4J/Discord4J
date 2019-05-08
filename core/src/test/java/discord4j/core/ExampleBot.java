@@ -24,7 +24,9 @@ import discord4j.core.event.domain.lifecycle.ResumeEvent;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.ApplicationInfo;
 import discord4j.core.object.entity.Attachment;
+import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Message;
+import discord4j.core.object.entity.TextChannel;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.reaction.ReactionEmoji;
 import discord4j.core.object.util.Image;
@@ -39,10 +41,11 @@ import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.LoggerFactory;
-import reactor.BlockHound;
+import reactor.blockhound.BlockHound;
 import reactor.core.Exceptions;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.function.TupleUtils;
 import reactor.netty.http.client.HttpClient;
 import reactor.retry.Retry;
 import reactor.util.Logger;
@@ -87,6 +90,7 @@ public class ExampleBot {
                         .onClientResponse(ResponseFunction.retryWhen(RouteMatcher.route(Routes.MESSAGE_CREATE),
                                 Retry.onlyIf(ClientException.isRetryContextStatusCode(500))
                                         .exponentialBackoffWithJitter(Duration.ofSeconds(2), Duration.ofSeconds(10))))
+                        .requestParallelism(14)
                         .build())
                 .build();
 
@@ -108,6 +112,7 @@ public class ExampleBot {
         eventHandlers.add(new LogLevelChange());
         eventHandlers.add(new Reactor());
         eventHandlers.add(new ChangeAvatar());
+        eventHandlers.add(new BurstMessages());
 
         // Build a safe event-processing pipeline
         client.getEventDispatcher().on(MessageCreateEvent.class)
@@ -307,6 +312,32 @@ public class ExampleBot {
                 }
             }
             return Mono.empty();
+        }
+    }
+
+    public static class BurstMessages extends EventHandler {
+
+        @Override
+        public Mono<Void> onMessageCreate(MessageCreateEvent event) {
+            if (!event.getMessage().getContent().orElse("").startsWith("!burstmessages")) {
+                return Mono.empty();
+            }
+            return event.getGuild()
+                    .flatMapMany(Guild::getChannels)
+                    .ofType(TextChannel.class)
+                    .filter(channel -> channel.getName().startsWith("test"))
+                    .collectList()
+                    .doOnNext(channelList -> Flux.fromIterable(channelList)
+                            .flatMap(channel -> Flux.range(1, 5)
+                                    .map(String::valueOf)
+                                    .flatMap(channel::createMessage))
+                            .collectList()
+                            .elapsed()
+                            .doOnNext(TupleUtils.consumer(
+                                    (time, messageList) -> log.info("Sent {} messages in {} milliseconds ({} messages/s)",
+                                            messageList.size(), time, (messageList.size() / (double) time) * 1000)))
+                            .subscribe()) // Separate subscribe in order to improve accuracy of elapsed time
+                    .then();
         }
     }
 

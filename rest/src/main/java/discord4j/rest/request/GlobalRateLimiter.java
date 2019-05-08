@@ -17,8 +17,7 @@
 package discord4j.rest.request;
 
 import reactor.core.publisher.Mono;
-import reactor.util.Logger;
-import reactor.util.Loggers;
+import reactor.core.scheduler.Schedulers;
 
 import java.time.Duration;
 import java.util.concurrent.Semaphore;
@@ -41,11 +40,18 @@ import java.util.function.Supplier;
  */
 public class GlobalRateLimiter {
 
-    private static final Logger log = Loggers.getLogger(GlobalRateLimiter.class);
-
-    private final Semaphore outer = new Semaphore(8, true);
+    private final Semaphore outer;
     private final Semaphore inner = new Semaphore(1, true);
     private final AtomicLong limitedUntil = new AtomicLong(0L);
+
+    /**
+     * Creates a new global rate limiter with the specified parallelism level.
+     *
+     * @param parallelism the maximum number of requests that this limiter will allow in parallel
+     */
+    public GlobalRateLimiter(int parallelism) {
+        this.outer = new Semaphore(parallelism, true);
+    }
 
     /**
      * Sets a new rate limit that will be applied to every new resource acquired.
@@ -73,7 +79,7 @@ public class GlobalRateLimiter {
         return Mono.empty();
     }
 
-    private long delayNanos() {
+    long delayNanos() {
         return limitedUntil.get() - System.nanoTime();
     }
 
@@ -103,6 +109,7 @@ public class GlobalRateLimiter {
                     }
                     return new Resource(outer, null);
                 })
+                .subscribeOn(Schedulers.elastic())
                 .delayUntil(resource -> onComplete());
     }
 

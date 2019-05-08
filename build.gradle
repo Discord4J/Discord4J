@@ -19,7 +19,7 @@ ext {
     project_jdk = '1.8'
 
     // Dependencies
-    reactor_bom_version = 'Californium-SR6'
+    reactor_bom_version = 'Californium-SR7'
     jackson_version = '2.9.8'
     junit_version = '4.12'
     mockito_version = '2.27.0'

@@ -46,7 +46,7 @@ public class DefaultRouter implements Router {
 
     private final DiscordWebClient httpClient;
     private final RouterOptions routerOptions;
-    private final GlobalRateLimiter globalRateLimiter = new GlobalRateLimiter();
+    private final GlobalRateLimiter globalRateLimiter;
     private final Map<BucketKey, RequestStream<?>> streamMap = new ConcurrentHashMap<>();
 
     /**
@@ -68,11 +68,10 @@ public class DefaultRouter implements Router {
      */
     @Deprecated
     public DefaultRouter(DiscordWebClient httpClient, Scheduler responseScheduler, Scheduler rateLimitScheduler) {
-        this.httpClient = httpClient;
-        this.routerOptions = RouterOptions.builder()
+        this(httpClient, RouterOptions.builder()
                 .responseScheduler(responseScheduler)
                 .rateLimitScheduler(rateLimitScheduler)
-                .build();
+                .build());
     }
 
     /**
@@ -84,6 +83,7 @@ public class DefaultRouter implements Router {
     public DefaultRouter(DiscordWebClient httpClient, RouterOptions routerOptions) {
         this.httpClient = httpClient;
         this.routerOptions = routerOptions;
+        this.globalRateLimiter = new GlobalRateLimiter(routerOptions.getRequestParallelism());
     }
 
     @Override
