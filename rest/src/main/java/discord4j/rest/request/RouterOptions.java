@@ -41,14 +41,21 @@ public class RouterOptions {
      */
     public static final Scheduler DEFAULT_RATE_LIMIT_SCHEDULER = Schedulers.elastic();
 
+    /**
+     * The default number of router requests allowed in parallel.
+     */
+    public static final int DEFAULT_REQUEST_PARALLELISM = 8;
+
     private final Scheduler responseScheduler;
     private final Scheduler rateLimitScheduler;
     private final List<ResponseFunction> responseTransformers;
+    private final int requestParallelism;
 
     protected RouterOptions(Builder builder) {
         this.responseScheduler = builder.responseScheduler;
         this.rateLimitScheduler = builder.rateLimitScheduler;
         this.responseTransformers = builder.responseTransformers;
+        this.requestParallelism = builder.requestParallelism;
     }
 
     /**
@@ -78,6 +85,7 @@ public class RouterOptions {
         private Scheduler responseScheduler = DEFAULT_RESPONSE_SCHEDULER;
         private Scheduler rateLimitScheduler = DEFAULT_RATE_LIMIT_SCHEDULER;
         private final List<ResponseFunction> responseTransformers = new ArrayList<>();
+        private int requestParallelism = DEFAULT_REQUEST_PARALLELISM;
 
         protected Builder() {
         }
@@ -135,6 +143,21 @@ public class RouterOptions {
         }
 
         /**
+         * Define the level of parallel requests the configured {@link Router} should be allowed to make. In-flight
+         * requests beyond the parallelism value will wait until a permit is released.
+         * <p>
+         * Modifying this value can increase the API request throughput at the cost of potentially hitting the global
+         * rate limit. Defaults to {@link #DEFAULT_REQUEST_PARALLELISM}.
+         *
+         * @param requestParallelism the number of parallel requests allowed
+         * @return this builder
+         */
+        public Builder requestParallelism(int requestParallelism) {
+            this.requestParallelism = requestParallelism;
+            return this;
+        }
+
+        /**
          * Creates the {@link RouterOptions} object.
          *
          * @return the resulting {@link RouterOptions}
@@ -145,7 +168,7 @@ public class RouterOptions {
     }
 
     /**
-     * Gets the defined response scheduler. Allows flexibility for blocking usage if a {@link Scheduler} that allows
+     * Returns the defined response scheduler. Allows flexibility for blocking usage if a {@link Scheduler} that allows
      * blocking is set.
      *
      * @return this option's response {@link Scheduler}
@@ -155,7 +178,7 @@ public class RouterOptions {
     }
 
     /**
-     * Gets the defined scheduler for rate limiting delay purposes.
+     * Returns the defined scheduler for rate limiting delay purposes.
      *
      * @return this option's rate limiting {@link Scheduler}
      */
@@ -164,12 +187,22 @@ public class RouterOptions {
     }
 
     /**
-     * Gets the list of {@link ResponseFunction} transformations that can be applied to every response. They are to be
+     * Returns the list of {@link ResponseFunction} transformations that can be applied to every response. They are
+     * to be
      * processed in the given order.
      *
      * @return a list of {@link ResponseFunction} objects.
      */
     public List<ResponseFunction> getResponseTransformers() {
         return responseTransformers;
+    }
+
+    /**
+     * Returns the number of allowed parallel requests the configured {@link Router} should adhere to.
+     *
+     * @return the number of allowed parallel requests.
+     */
+    public int getRequestParallelism() {
+        return requestParallelism;
     }
 }

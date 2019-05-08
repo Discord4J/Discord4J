@@ -90,6 +90,7 @@ public class ExampleBot {
                         .onClientResponse(ResponseFunction.retryWhen(RouteMatcher.route(Routes.MESSAGE_CREATE),
                                 Retry.onlyIf(ClientException.isRetryContextStatusCode(500))
                                         .exponentialBackoffWithJitter(Duration.ofSeconds(2), Duration.ofSeconds(10))))
+                        .requestParallelism(14)
                         .build())
                 .build();
 
