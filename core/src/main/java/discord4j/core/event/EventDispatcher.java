@@ -26,17 +26,24 @@ import reactor.core.scheduler.Scheduler;
 import java.util.logging.Level;
 
 /**
- * Distributes events to each subscriber.
+ * Distributes events to subscribers. {@link Event} instances can be published over this class and dispatched to all
+ * subscribers.
  * <p>
- * Can be used in a reactive manner by calling {@link #on(Class)} giving the proper
- * {@link discord4j.core.event.domain.Event} class as argument. Uses an underlying
- * {@link reactor.core.publisher.FluxProcessor} that must be supplied on construction, as well as a
- * {@link reactor.core.scheduler.Scheduler} to define subscriber thread affinity.
+ * Individual events can be published to subscribers using {@link #publish(Event)} while they can be used to consumed
+ * through {@link #on(Class)} giving the proper {@link Event} class as argument.
+ * <p>
+ * Uses an underlying {@link FluxProcessor} that must be supplied on construction, as well as a {@link Scheduler} to
+ * define subscriber thread affinity.
  * <p>
  * Each event can be consumed using the following pattern:
  * <pre>
  *     dispatcher.on(MessageCreatedEvent.class)
  *           .subscribe(event -&gt; event.getMessage());
+ * </pre>
+ * While events can be published through:
+ * <pre>
+ *     fluxOfEvents.doOnNext(dispatcher::publish)
+ *           .subscribe();
  * </pre>
  */
 public class EventDispatcher {
@@ -50,7 +57,7 @@ public class EventDispatcher {
      *
      * @param processor a FluxProcessor of Event types, used to bridge gateway events to the dispatcher subscribers
      * @param scheduler a Scheduler to ensure a certain thread model on each published signal
-     * @param shardIndex the shard ID for logger name purposes
+     * @param shardIndex the shard ID for logging purposes
      */
     public EventDispatcher(FluxProcessor<Event, Event> processor, Scheduler scheduler, int shardIndex) {
         this.processor = processor;
@@ -59,8 +66,7 @@ public class EventDispatcher {
     }
 
     /**
-     * Retrieves a {@link reactor.core.publisher.Flux} with elements of the given
-     * {@link discord4j.core.event.domain.Event} type.
+     * Retrieves a {@link Flux} with elements of the given {@link Event} type.
      *
      * @param eventClass the event class to obtain events from
      * @param <T> the type of the event class
@@ -71,5 +77,14 @@ public class EventDispatcher {
                 .ofType(eventClass)
                 .log("discord4j.dispatch." + eventClass.getSimpleName() + "." + shardIndex, Level.FINE,
                         SignalType.ON_NEXT, SignalType.ON_SUBSCRIBE, SignalType.ON_ERROR, SignalType.CANCEL);
+    }
+
+    /**
+     * Publishes an {@link Event} to the dispatcher.
+     *
+     * @param event the {@link Event} to publish
+     */
+    public void publish(Event event) {
+        processor.onNext(event);
     }
 }
