@@ -86,6 +86,7 @@ public class ShardingClientBuilder {
      *
      * @return the current bot token
      */
+    @Deprecated
     public String getToken() {
         return token;
     }
@@ -108,6 +109,7 @@ public class ShardingClientBuilder {
      * {@link discord4j.rest.route.Routes#GATEWAY_BOT_GET} endpoint.
      */
     @Nullable
+    @Deprecated
     public Integer getShardCount() {
         return shardCount;
     }
@@ -132,18 +134,9 @@ public class ShardingClientBuilder {
      * @return the current RouterFactory used to create a Router that perform API requests
      */
     @Nullable
+    @Deprecated
     public RouterFactory getRouterFactory() {
         return routerFactory;
-    }
-
-    /**
-     * Return the current {@link RouterOptions} used to configure {@link RouterFactory} instances.
-     *
-     * @return the current {@code RouterOptions} used by this client
-     */
-    @Nullable
-    public RouterOptions getRouterOptions() {
-        return routerOptions;
     }
 
     /**
@@ -160,6 +153,17 @@ public class ShardingClientBuilder {
     public ShardingClientBuilder setRouterFactory(@Nullable RouterFactory routerFactory) {
         this.routerFactory = routerFactory;
         return this;
+    }
+
+    /**
+     * Return the current {@link RouterOptions} used to configure {@link RouterFactory} instances.
+     *
+     * @return the current {@code RouterOptions} used by this client
+     */
+    @Nullable
+    @Deprecated
+    public RouterOptions getRouterOptions() {
+        return routerOptions;
     }
 
     /**
@@ -186,6 +190,7 @@ public class ShardingClientBuilder {
      * @return the store registry
      */
     @Nullable
+    @Deprecated
     public ShardingStoreRegistry getShardingStoreRegistry() {
         return shardingStoreRegistry;
     }
@@ -213,6 +218,7 @@ public class ShardingClientBuilder {
      * @return the current predicate of shard index indicating which shards should be created, can be <code>null</code>
      */
     @Nullable
+    @Deprecated
     public Predicate<Integer> getShardIndexFilter() {
         return shardIndexFilter;
     }

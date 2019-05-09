@@ -136,6 +136,7 @@ public final class DiscordClientBuilder {
      *
      * @return the current bot token
      */
+    @Deprecated
     public String getToken() {
         return token;
     }
@@ -157,6 +158,7 @@ public final class DiscordClientBuilder {
      * @return the current shard index, can be {@code null}
      */
     @Nullable
+    @Deprecated
     public Integer getShardIndex() {
         return shardIndex;
     }
@@ -182,6 +184,7 @@ public final class DiscordClientBuilder {
      * @return the current shard count
      */
     @Nullable
+    @Deprecated
     public Integer getShardCount() {
         return shardCount;
     }
@@ -209,6 +212,7 @@ public final class DiscordClientBuilder {
      * @return the current StoreService factory, {@code null} if automatic discovery should be used
      */
     @Nullable
+    @Deprecated
     public StoreService getStoreService() {
         return storeService;
     }
@@ -232,6 +236,7 @@ public final class DiscordClientBuilder {
      * @return a FluxProcessor dedicated to queue events, can be {@code null} when using a default value
      */
     @Nullable
+    @Deprecated
     public FluxProcessor<Event, Event> getEventProcessor() {
         return eventProcessor;
     }
@@ -254,6 +259,7 @@ public final class DiscordClientBuilder {
      * @return the current Scheduler for event dispatching, can be {@code null} when using a default value
      */
     @Nullable
+    @Deprecated
     public Scheduler getEventScheduler() {
         return eventScheduler;
     }
@@ -277,6 +283,7 @@ public final class DiscordClientBuilder {
      * using a default value
      */
     @Nullable
+    @Deprecated
     public JacksonResourceProvider getJacksonResourceProvider() {
         return jacksonResourceProvider;
     }
@@ -301,18 +308,9 @@ public final class DiscordClientBuilder {
      * @return the current RouterFactory used to create a Router that perform API requests
      */
     @Nullable
+    @Deprecated
     public RouterFactory getRouterFactory() {
         return routerFactory;
-    }
-
-    /**
-     * Return the current {@link RouterOptions} used to configure {@link RouterFactory} instances.
-     *
-     * @return the current {@code RouterOptions} used by this client
-     */
-    @Nullable
-    public RouterOptions getRouterOptions() {
-        return routerOptions;
     }
 
     /**
@@ -331,6 +329,17 @@ public final class DiscordClientBuilder {
     public DiscordClientBuilder setRouterFactory(@Nullable RouterFactory routerFactory) {
         this.routerFactory = routerFactory;
         return this;
+    }
+
+    /**
+     * Return the current {@link RouterOptions} used to configure {@link RouterFactory} instances.
+     *
+     * @return the current {@code RouterOptions} used by this client
+     */
+    @Nullable
+    @Deprecated
+    public RouterOptions getRouterOptions() {
+        return routerOptions;
     }
 
     /**
@@ -361,6 +370,7 @@ public final class DiscordClientBuilder {
      * @return the currently installed factory, or {@code null} if using a {@link DefaultGatewayClientFactory}
      */
     @Nullable
+    @Deprecated
     public GatewayClientFactory getGatewayClientFactory() {
         return gatewayClientFactory;
     }
@@ -384,6 +394,7 @@ public final class DiscordClientBuilder {
      * {@link #setIdentifyOptions(IdentifyOptions)} if set, or fallback to a default
      */
     @Nullable
+    @Deprecated
     public Presence getInitialPresence() {
         return initialPresence;
     }
@@ -411,6 +422,7 @@ public final class DiscordClientBuilder {
      * @return the current set of bot identification options
      */
     @Nullable
+    @Deprecated
     public IdentifyOptions getIdentifyOptions() {
         return identifyOptions;
     }
@@ -438,6 +450,7 @@ public final class DiscordClientBuilder {
      * @return the current retry policy, can be {@code null} if default is used
      */
     @Nullable
+    @Deprecated
     public RetryOptions getRetryOptions() {
         return retryOptions;
     }
@@ -463,6 +476,7 @@ public final class DiscordClientBuilder {
      * @see StoreInvalidator
      */
     @Nullable
+    @Deprecated
     public GatewayObserver getGatewayObserver() {
         return gatewayObserver;
     }
@@ -489,6 +503,7 @@ public final class DiscordClientBuilder {
      * @return the current gateway limiter, for shard coordination, can be {@code null} if default is used
      */
     @Nullable
+    @Deprecated
     public PayloadTransformer getIdentifyLimiter() {
         return identifyLimiter;
     }
@@ -510,6 +525,7 @@ public final class DiscordClientBuilder {
      *
      * @return the scheduler for voice sending tasks
      */
+    @Deprecated
     public Scheduler getVoiceConnectionScheduler() {
         return voiceConnectionScheduler;
     }
