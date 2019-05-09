@@ -26,6 +26,7 @@ import discord4j.core.util.PaginationUtil;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -86,7 +87,7 @@ class BaseMessageChannel extends BaseChannel implements MessageChannel {
 
     @Override
     public final Flux<Long> typeUntil(final Publisher<?> until) {
-        Flux<Long> repeatUntilOther = Flux.interval(Duration.ofSeconds(8L)) // 8 to avoid choppiness
+        Flux<Long> repeatUntilOther = Flux.interval(Duration.ofSeconds(8L), Schedulers.elastic()) // 8 to avoid choppiness
                 .flatMap(tick -> type().thenReturn(tick + 1)) // add 1 to offset the separate type() request
                 .takeUntilOther(until);
 

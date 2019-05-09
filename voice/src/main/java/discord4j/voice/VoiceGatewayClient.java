@@ -32,6 +32,7 @@ import reactor.core.publisher.EmitterProcessor;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Scheduler;
+import reactor.core.scheduler.Schedulers;
 import reactor.netty.NettyPipeline;
 import reactor.netty.http.client.HttpClient;
 import reactor.netty.http.websocket.WebsocketInbound;
@@ -77,7 +78,7 @@ public class VoiceGatewayClient {
             when(WaitingForHello.class)
                     .on(Hello.class, (curState, hello) -> {
                         long heartbeatInterval = (long) (hello.getData().heartbeatInterval * .75); // it's wrong
-                        Disposable heartbeatTask = Flux.interval(Duration.ofMillis(heartbeatInterval))
+                        Disposable heartbeatTask = Flux.interval(Duration.ofMillis(heartbeatInterval), Schedulers.elastic())
                                 .map(Heartbeat::new)
                                 .subscribe(VoiceGatewayClient.this::send);
 

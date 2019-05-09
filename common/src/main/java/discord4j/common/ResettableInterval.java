@@ -19,6 +19,7 @@ package discord4j.common;
 import reactor.core.Disposable;
 import reactor.core.publisher.EmitterProcessor;
 import reactor.core.publisher.Flux;
+import reactor.core.scheduler.Schedulers;
 
 import java.time.Duration;
 
@@ -30,7 +31,8 @@ public class ResettableInterval {
 
     public void start(Duration period) {
         this.period = period;
-        this.task = Flux.interval(Duration.ZERO, period).subscribe(backing::onNext);
+        this.task = Flux.interval(Duration.ZERO, period, Schedulers.elastic())
+                .subscribe(backing::onNext);
     }
 
     public void stop() {
