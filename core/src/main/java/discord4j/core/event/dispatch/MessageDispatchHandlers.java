@@ -138,7 +138,7 @@ class MessageDispatchHandlers {
                         int i;
                         for (i = 0; i < oldBean.getReactions().length; i++) {
                             ReactionBean r = oldBean.getReactions()[i];
-                            if (Objects.equals(r.getEmojiId(), emojiId) && r.getEmojiName().equals(emojiName)) {
+                            if (emojiId == null && r.getEmojiName().equals(emojiName) || Objects.equals(r.getEmojiId(), emojiId)) {
                                 break;
                             }
                         }
