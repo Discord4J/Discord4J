@@ -20,10 +20,9 @@ package discord4j.core.event;
 import discord4j.core.event.domain.Event;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxProcessor;
-import reactor.core.publisher.SignalType;
 import reactor.core.scheduler.Scheduler;
-
-import java.util.logging.Level;
+import reactor.util.Logger;
+import reactor.util.Loggers;
 
 /**
  * Distributes events to subscribers. {@link Event} instances can be published over this class and dispatched to all
@@ -50,19 +49,16 @@ public class EventDispatcher {
 
     private final FluxProcessor<Event, Event> processor;
     private final Scheduler scheduler;
-    private final int shardIndex;
 
     /**
      * Creates a new event dispatcher using the given processor and thread model.
      *
      * @param processor a FluxProcessor of Event types, used to bridge gateway events to the dispatcher subscribers
      * @param scheduler a Scheduler to ensure a certain thread model on each published signal
-     * @param shardIndex the shard ID for logging purposes
      */
-    public EventDispatcher(FluxProcessor<Event, Event> processor, Scheduler scheduler, int shardIndex) {
+    public EventDispatcher(FluxProcessor<Event, Event> processor, Scheduler scheduler) {
         this.processor = processor;
         this.scheduler = scheduler;
-        this.shardIndex = shardIndex;
     }
 
     /**
@@ -75,8 +71,13 @@ public class EventDispatcher {
     public <T extends Event> Flux<T> on(Class<T> eventClass) {
         return processor.publishOn(scheduler)
                 .ofType(eventClass)
-                .log("discord4j.dispatch." + eventClass.getSimpleName() + "." + shardIndex, Level.FINE,
-                        SignalType.ON_NEXT, SignalType.ON_SUBSCRIBE, SignalType.ON_ERROR, SignalType.CANCEL);
+                .doOnNext(event -> {
+                    int shard = event.getClient().getConfig().getShardIndex();
+                    Logger log = Loggers.getLogger("discord4j.events." + eventClass.getSimpleName() + "." + shard);
+                    if (log.isDebugEnabled()) {
+                        log.debug("{}", event);
+                    }
+                });
     }
 
     /**

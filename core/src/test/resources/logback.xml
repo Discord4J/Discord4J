@@ -18,6 +18,7 @@
     <logger name="discord4j.rest.request" level="INFO"/>
     <logger name="discord4j.rest.response" level="INFO"/>
     <logger name="discord4j.dispatch" level="INFO"/>
+    <logger name="discord4j.events" level="INFO"/>
 
     <turboFilter class="discord4j.core.logback.GatewayEventFilter">
         <Include>MESSAGE_CREATE</Include>

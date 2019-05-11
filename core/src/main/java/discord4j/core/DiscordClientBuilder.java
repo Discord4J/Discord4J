@@ -31,7 +31,6 @@ import discord4j.core.shard.ShardingClientBuilder;
 import discord4j.gateway.*;
 import discord4j.gateway.json.GatewayPayload;
 import discord4j.gateway.json.VoiceStateUpdate;
-import discord4j.gateway.json.dispatch.Dispatch;
 import discord4j.gateway.payload.JacksonPayloadReader;
 import discord4j.gateway.payload.JacksonPayloadWriter;
 import discord4j.gateway.retry.RetryOptions;
@@ -48,9 +47,7 @@ import discord4j.store.api.service.StoreServiceLoader;
 import discord4j.store.api.util.StoreContext;
 import discord4j.store.jdk.JdkStoreService;
 import discord4j.voice.VoiceClient;
-import reactor.core.publisher.EmitterProcessor;
-import reactor.core.publisher.FluxProcessor;
-import reactor.core.publisher.Hooks;
+import reactor.core.publisher.*;
 import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
 import reactor.netty.http.client.HttpClient;
@@ -64,6 +61,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Properties;
+import java.util.logging.Level;
 
 /**
  * Builder suited for creating a {@link DiscordClient}.
@@ -587,7 +585,7 @@ public final class DiscordClientBuilder {
         if (eventScheduler != null) {
             return eventScheduler;
         }
-        return ForkJoinPoolScheduler.create("events");
+        return ForkJoinPoolScheduler.create("discord4j-events");
     }
 
     private JacksonResourceProvider initJacksonResources() {
@@ -679,7 +677,7 @@ public final class DiscordClientBuilder {
 
         // Prepare event dispatcher
         final FluxProcessor<Event, Event> eventProcessor = initEventProcessor();
-        final EventDispatcher eventDispatcher = new EventDispatcher(eventProcessor, initEventScheduler(), shardId);
+        final EventDispatcher eventDispatcher = new EventDispatcher(eventProcessor, initEventScheduler());
 
         final VoiceClient voiceClient = new VoiceClient(voiceConnectionScheduler, jackson.getObjectMapper(),
                 guildId -> {
@@ -690,12 +688,19 @@ public final class DiscordClientBuilder {
         // Prepare mediator and wire gateway events to EventDispatcher
         final ServiceMediator serviceMediator = new ServiceMediator(gatewayClient, restClient, storeService,
                 stateHolder, eventDispatcher, config, voiceClient);
+        Logger dispatchLog = Loggers.getLogger("discord4j.dispatch." + config.getShardIndex());
         serviceMediator.getGatewayClient().dispatch()
+                .log(dispatchLog, Level.FINE, false)
                 .map(dispatch -> DispatchContext.of(dispatch, serviceMediator))
                 .flatMap(context -> DispatchHandlers.handle(context)
-                        .onErrorContinue((error, item) -> log(context).error("Error dispatching {} for {}",
-                                context.getDispatch(), item, error)))
-                .subscribeWith(eventProcessor);
+                        .onErrorResume(error -> {
+                            dispatchLog.error("Error dispatching {}", context.getDispatch(), error);
+                            return Mono.empty();
+                        }))
+                .doOnNext(eventDispatcher::publish)
+                .subscribe(null,
+                        t -> dispatchLog.error("Dispatch consumer error", t),
+                        () -> dispatchLog.info("Dispatch consumer completed"));
 
         final Properties properties = GitProperties.getProperties();
         final String url = properties.getProperty(GitProperties.APPLICATION_URL, "https://discord4j.com");
@@ -704,9 +709,5 @@ public final class DiscordClientBuilder {
         final String gitDescribe = properties.getProperty(GitProperties.GIT_COMMIT_ID_DESCRIBE, version);
         log.info("Shard {} with {} {} ({})", shardId, name, gitDescribe, url);
         return serviceMediator.getClient();
-    }
-
-    private Logger log(DispatchContext<Dispatch> context) {
-        return Loggers.getLogger("discord4j.dispatch." + context.getServiceMediator().getClientConfig().getShardIndex());
     }
 }
