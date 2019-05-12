@@ -30,7 +30,6 @@ import discord4j.core.object.data.stored.*;
 import discord4j.core.object.entity.*;
 import discord4j.core.object.util.Snowflake;
 import discord4j.core.util.ArrayUtil;
-import discord4j.core.util.EntityUtil;
 import discord4j.gateway.json.GatewayPayload;
 import discord4j.gateway.json.RequestGuildMembers;
 import discord4j.gateway.json.dispatch.*;
@@ -234,6 +233,7 @@ class GuildDispatchHandlers {
                 .find(guildId)
                 .map(GuildBean::new)
                 .doOnNext(guild -> guild.setMembers(ArrayUtil.add(guild.getMembers(), response.getUser().getId())))
+                .doOnNext(guild -> guild.setMemberCount(guild.getMemberCount() + 1))
                 .flatMap(guild -> serviceMediator.getStateHolder().getGuildStore().save(guildId, guild));
 
         Mono<Void> saveMember = serviceMediator.getStateHolder().getMemberStore()
@@ -259,6 +259,7 @@ class GuildDispatchHandlers {
                 .find(guildId)
                 .map(GuildBean::new)
                 .doOnNext(guild -> guild.setMembers(ArrayUtil.remove(guild.getMembers(), response.getId())))
+                .doOnNext(guild -> guild.setMemberCount(guild.getMemberCount() - 1))
                 .flatMap(guild -> serviceMediator.getStateHolder().getGuildStore().save(guildId, guild));
 
         Mono<Member> member = serviceMediator.getStateHolder().getMemberStore()
