@@ -18,6 +18,7 @@
 package discord4j.common;
 
 import java.time.Duration;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -27,24 +28,24 @@ import java.util.concurrent.atomic.AtomicLong;
 public class SimpleBucket implements RateLimiter {
 
     private final long capacity;
-    private final long refillPeriodMillis;
+    private final long refillPeriodNanos;
 
     private final AtomicLong count;
     private final AtomicLong nextRefillAt;
 
     public SimpleBucket(long capacity, Duration refillPeriod) {
         this.capacity = capacity;
-        this.refillPeriodMillis = refillPeriod.toMillis();
+        this.refillPeriodNanos = refillPeriod.toNanos();
         this.count = new AtomicLong(0);
         this.nextRefillAt = new AtomicLong(0);
     }
 
     @Override
     public synchronized boolean tryConsume(int numberTokens) {
-        long now = System.currentTimeMillis();
+        long now = System.nanoTime();
         if (nextRefillAt.get() <= now) {
             count.set(0);
-            nextRefillAt.set(now + refillPeriodMillis);
+            nextRefillAt.set(now + refillPeriodNanos);
         }
         if (count.get() + numberTokens <= capacity) {
             count.addAndGet(numberTokens);
@@ -58,9 +59,9 @@ public class SimpleBucket implements RateLimiter {
         if (count.get() + tokens <= capacity) {
             return 0;
         }
-        long now = System.currentTimeMillis();
+        long now = System.nanoTime();
         long refills = (long) Math.ceil((tokens / (double) capacity) - 1);
-        return (nextRefillAt.get() - now) + (refillPeriodMillis * refills);
+        return TimeUnit.NANOSECONDS.toMillis((nextRefillAt.get() - now) + (refillPeriodNanos * refills));
     }
 
 }

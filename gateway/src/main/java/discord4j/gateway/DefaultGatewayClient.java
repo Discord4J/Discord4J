@@ -47,6 +47,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Objects;
 import java.util.Properties;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
@@ -229,15 +230,15 @@ public class DefaultGatewayClient implements GatewayClient {
             // Create the heartbeat loop, and subscribe it using the sender sink
             Mono<Void> heartbeatHandler = heartbeat.ticks()
                     .flatMap(t -> {
-                        long now = System.currentTimeMillis();
+                        long now = System.nanoTime();
                         lastAck.compareAndSet(0, now);
                         long delay = now - lastAck.get();
-                        if (delay > heartbeat.getPeriod().toMillis() + getResponseTime()) {
-                            log.warn("Missing heartbeat ACK for {} ms", delay);
+                        if (delay > heartbeat.getPeriod().toNanos() + getResponseTimeDuration().toNanos()) {
+                            log.warn("Missing heartbeat ACK for {}", Duration.ofNanos(delay));
                             handler.error(new RuntimeException("Reconnecting due to zombie or failed connection"));
                             return Mono.empty();
                         } else {
-                            log.debug("Sending heartbeat {} ms after last ACK", delay);
+                            log.debug("Sending heartbeat {} after last ACK", Duration.ofNanos(delay));
                             lastSent.set(now);
                             return Mono.just(GatewayPayload.heartbeat(new Heartbeat(sequence.get())));
                         }
@@ -440,7 +441,12 @@ public class DefaultGatewayClient implements GatewayClient {
 
     @Override
     public long getResponseTime() {
-        return responseTime.get();
+        return TimeUnit.NANOSECONDS.toMillis(responseTime.get());
+    }
+
+    // TODO: getResponseTime for 3.1
+    Duration getResponseTimeDuration() {
+        return Duration.ofNanos(responseTime.get());
     }
 
     /////////////////////////////////
@@ -448,7 +454,7 @@ public class DefaultGatewayClient implements GatewayClient {
     /////////////////////////////////
 
     void ackHeartbeat() {
-        responseTime.set(lastAck.updateAndGet(x -> System.currentTimeMillis()) - lastSent.get());
+        responseTime.set(lastAck.updateAndGet(x -> System.nanoTime()) - lastSent.get());
     }
 
     ////////////////////////////////
