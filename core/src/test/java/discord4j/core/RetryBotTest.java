@@ -86,6 +86,7 @@ public class RetryBotTest {
         new ShardingClientBuilder(token)
                 .setShardCount(shardCount)
                 .build()
+                .map(builder -> builder.setInitialPresence(Presence.invisible()))
                 .map(DiscordClientBuilder::build)
                 .flatMap(DiscordClient::login)
                 .blockLast();

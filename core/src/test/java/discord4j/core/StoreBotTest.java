@@ -21,14 +21,12 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import discord4j.common.JacksonResourceProvider;
 import discord4j.core.event.domain.Event;
-import discord4j.core.object.data.stored.MessageBean;
 import discord4j.core.object.presence.Presence;
 import discord4j.core.shard.ShardingClientBuilder;
 import discord4j.core.shard.ShardingJdkStoreRegistry;
 import discord4j.core.shard.ShardingJdkStoreService;
 import discord4j.core.shard.ShardingStoreRegistry;
 import discord4j.store.api.mapping.MappingStoreService;
-import discord4j.store.api.noop.NoOpStoreService;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -75,7 +73,7 @@ public class StoreBotTest {
                 .map(builder -> builder.setJacksonResourceProvider(jackson)
                         // showcase disabling the cache for messages
                         .setStoreService(MappingStoreService.create()
-                                .setMapping(new NoOpStoreService(), MessageBean.class)
+                                //.setMapping(new NoOpStoreService(), MessageBean.class)
                                 .setFallback(new ShardingJdkStoreService(registry)))
                         .setInitialPresence(Presence.invisible()))
                 .map(DiscordClientBuilder::build)

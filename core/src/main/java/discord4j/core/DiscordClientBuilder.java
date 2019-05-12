@@ -697,10 +697,7 @@ public final class DiscordClientBuilder {
                             dispatchLog.error("Error dispatching {}", context.getDispatch(), error);
                             return Mono.empty();
                         }))
-                .doOnNext(eventDispatcher::publish)
-                .subscribe(null,
-                        t -> dispatchLog.error("Dispatch consumer error", t),
-                        () -> dispatchLog.info("Dispatch consumer completed"));
+                .subscribeWith(eventProcessor);
 
         final Properties properties = GitProperties.getProperties();
         final String url = properties.getProperty(GitProperties.APPLICATION_URL, "https://discord4j.com");
