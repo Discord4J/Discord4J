@@ -20,7 +20,7 @@ import discord4j.core.ServiceMediator;
 import discord4j.core.object.ExtendedInvite;
 import discord4j.core.object.VoiceState;
 import discord4j.core.object.data.ExtendedInviteBean;
-import discord4j.core.object.data.stored.VoiceChannelBean;
+import discord4j.core.object.data.stored.ChannelBean;
 import discord4j.core.object.data.stored.VoiceStateBean;
 import discord4j.core.object.trait.Categorizable;
 import discord4j.core.object.trait.Invitable;
@@ -47,13 +47,8 @@ public final class VoiceChannel extends BaseGuildChannel implements Categorizabl
      * @param serviceMediator The ServiceMediator associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
      */
-    public VoiceChannel(final ServiceMediator serviceMediator, final VoiceChannelBean data) {
+    public VoiceChannel(final ServiceMediator serviceMediator, final ChannelBean data) {
         super(serviceMediator, data);
-    }
-
-    @Override
-    VoiceChannelBean getData() {
-        return (VoiceChannelBean) super.getData();
     }
 
     @Override
@@ -118,7 +113,7 @@ public final class VoiceChannel extends BaseGuildChannel implements Categorizabl
 
         return getServiceMediator().getRestClient().getChannelService()
                 .modifyChannel(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason())
-                .map(EntityUtil::getChannelBean)
+                .map(ChannelBean::new)
                 .map(bean -> EntityUtil.getChannel(getServiceMediator(), bean))
                 .cast(VoiceChannel.class)
                 .subscriberContext(ctx -> ctx.put("shard", getServiceMediator().getClientConfig().getShardIndex()));

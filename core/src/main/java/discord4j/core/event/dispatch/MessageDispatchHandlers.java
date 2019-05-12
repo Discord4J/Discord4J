@@ -64,10 +64,10 @@ class MessageDispatchHandlers {
         Mono<Void> saveMessage = context.getServiceMediator().getStateHolder().getMessageStore()
                 .save(bean.getId(), bean);
 
-        Mono<Void> editLastMessageId = context.getServiceMediator().getStateHolder().getTextChannelStore()
+        Mono<Void> editLastMessageId = context.getServiceMediator().getStateHolder().getChannelStore()
                 .find(bean.getChannelId())
-                .doOnNext(channelBean -> channelBean.getMessageChannel().setLastMessageId(bean.getId()))
-                .flatMap(channelBean -> context.getServiceMediator().getStateHolder().getTextChannelStore()
+                .doOnNext(channelBean -> channelBean.setLastMessageId(bean.getId()))
+                .flatMap(channelBean -> context.getServiceMediator().getStateHolder().getChannelStore()
                         .save(channelBean.getId(), channelBean));
 
         return saveMessage

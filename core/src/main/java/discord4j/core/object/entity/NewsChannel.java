@@ -18,62 +18,47 @@ package discord4j.core.object.entity;
 
 import discord4j.core.ServiceMediator;
 import discord4j.core.object.data.stored.ChannelBean;
-import discord4j.core.object.trait.Categorizable;
-import discord4j.core.object.util.Snowflake;
-import discord4j.core.spec.CategoryEditSpec;
+import discord4j.core.spec.NewsChannelEditSpec;
+import discord4j.core.spec.TextChannelEditSpec;
 import discord4j.core.util.EntityUtil;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.function.Consumer;
 
-/** A Discord category. */
-public final class Category extends BaseGuildChannel {
+/** A Discord news channel. */
+public class NewsChannel extends BaseGuildMessageChannel {
 
     /**
-     * Constructs an {@code Category} with an associated ServiceMediator and Discord data.
+     * Constructs an {@code NewsChannel} with an associated ServiceMediator and Discord data.
      *
      * @param serviceMediator The ServiceMediator associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
      */
-    public Category(final ServiceMediator serviceMediator, final ChannelBean data) {
+    public NewsChannel(ServiceMediator serviceMediator, ChannelBean data) {
         super(serviceMediator, data);
     }
 
     /**
-     * Requests to retrieve the channels residing in this category.
+     * Requests to edit this news channel.
      *
-     * @return A {@link Flux} that continually emits the {@link GuildChannel channels} residing in this category. If an
-     * error is received, it is emitted through the {@code Flux}.
-     */
-    public Flux<GuildChannel> getChannels() {
-        return getGuild().flatMapMany(Guild::getChannels)
-                .ofType(Categorizable.class)
-                .filter(channel -> channel.getCategoryId().orElse(Snowflake.of(0)).equals(getId()))
-                .cast(GuildChannel.class);
-    }
-
-    /**
-     * Requests to edit this category.
-     *
-     * @param spec A {@link Consumer} that provides a "blank" {@link CategoryEditSpec} to be operated on.
-     * @return A {@link Mono} where, upon successful completion, emits the edited {@link Category}. If an error is
+     * @param spec A {@link Consumer} that provides a "blank" {@link TextChannelEditSpec} to be operated on.
+     * @return A {@link Mono} where, upon successful completion, emits the edited {@link NewsChannel}. If an error is
      * received, it is emitted through the {@code Mono}.
      */
-    public Mono<Category> edit(final Consumer<? super CategoryEditSpec> spec) {
-        final CategoryEditSpec mutatedSpec = new CategoryEditSpec();
+    public Mono<NewsChannel> edit(final Consumer<? super NewsChannelEditSpec> spec) {
+        final NewsChannelEditSpec mutatedSpec = new NewsChannelEditSpec();
         spec.accept(mutatedSpec);
 
         return getServiceMediator().getRestClient().getChannelService()
                 .modifyChannel(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason())
                 .map(ChannelBean::new)
                 .map(bean -> EntityUtil.getChannel(getServiceMediator(), bean))
-                .cast(Category.class)
+                .cast(NewsChannel.class)
                 .subscriberContext(ctx -> ctx.put("shard", getServiceMediator().getClientConfig().getShardIndex()));
     }
 
     @Override
     public String toString() {
-        return "Category{} " + super.toString();
+        return "NewsChannel{} " + super.toString();
     }
 }

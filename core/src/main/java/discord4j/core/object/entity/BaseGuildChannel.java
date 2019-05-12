@@ -19,7 +19,7 @@ package discord4j.core.object.entity;
 import discord4j.core.ServiceMediator;
 import discord4j.core.object.ExtendedPermissionOverwrite;
 import discord4j.core.object.PermissionOverwrite;
-import discord4j.core.object.data.stored.GuildChannelBean;
+import discord4j.core.object.data.stored.ChannelBean;
 import discord4j.core.object.data.stored.PermissionOverwriteBean;
 import discord4j.core.object.util.PermissionSet;
 import discord4j.core.object.util.Snowflake;
@@ -41,7 +41,7 @@ class BaseGuildChannel extends BaseChannel implements GuildChannel {
      * @param serviceMediator The ServiceMediator associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
      */
-    BaseGuildChannel(final ServiceMediator serviceMediator, final GuildChannelBean data) {
+    BaseGuildChannel(final ServiceMediator serviceMediator, final ChannelBean data) {
         super(serviceMediator, data);
     }
 
@@ -136,11 +136,6 @@ class BaseGuildChannel extends BaseChannel implements GuildChannel {
         return getServiceMediator().getRestClient().getChannelService()
                 .editChannelPermissions(getId().asLong(), roleId.asLong(), request, reason)
                 .subscriberContext(ctx -> ctx.put("shard", getServiceMediator().getClientConfig().getShardIndex()));
-    }
-
-    @Override
-    GuildChannelBean getData() {
-        return (GuildChannelBean) super.getData();
     }
 
     @Override
