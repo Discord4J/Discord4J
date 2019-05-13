@@ -22,16 +22,10 @@ import ch.qos.logback.classic.LoggerContext;
 import discord4j.core.event.domain.lifecycle.ReadyEvent;
 import discord4j.core.event.domain.lifecycle.ResumeEvent;
 import discord4j.core.event.domain.message.MessageCreateEvent;
-import discord4j.core.object.entity.ApplicationInfo;
-import discord4j.core.object.entity.Attachment;
-import discord4j.core.object.entity.Guild;
-import discord4j.core.object.entity.Message;
-import discord4j.core.object.entity.TextChannel;
-import discord4j.core.object.entity.User;
+import discord4j.core.object.entity.*;
 import discord4j.core.object.reaction.ReactionEmoji;
 import discord4j.core.object.util.Image;
 import discord4j.core.object.util.Snowflake;
-import discord4j.rest.http.client.ClientException;
 import discord4j.rest.request.RouteMatcher;
 import discord4j.rest.request.RouterOptions;
 import discord4j.rest.response.ResponseFunction;
@@ -47,12 +41,10 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.function.TupleUtils;
 import reactor.netty.http.client.HttpClient;
-import reactor.retry.Retry;
 import reactor.util.Logger;
 import reactor.util.Loggers;
 
 import java.io.IOException;
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -65,12 +57,10 @@ public class ExampleBot {
     private static final Logger log = Loggers.getLogger(ExampleBot.class);
 
     private static String token;
-    private static String testRole;
 
     @BeforeClass
     public static void initialize() {
         token = System.getenv("token");
-        testRole = System.getenv("testRole");
     }
 
     @Test
@@ -82,14 +72,8 @@ public class ExampleBot {
                 .setRouterOptions(RouterOptions.builder()
                         // globally suppress any not found (404) error
                         .onClientResponse(ResponseFunction.emptyIfNotFound())
-                        // wait 1 second and retry any server error (500)
-                        .onClientResponse(ResponseFunction.retryOnceOnErrorStatus(500))
                         // bad requests (400) while adding reactions will be suppressed
                         .onClientResponse(ResponseFunction.emptyOnErrorStatus(RouteMatcher.route(Routes.REACTION_CREATE), 400))
-                        // server error (500) while creating a message will be retried, with backoff, until it succeeds
-                        .onClientResponse(ResponseFunction.retryWhen(RouteMatcher.route(Routes.MESSAGE_CREATE),
-                                Retry.onlyIf(ClientException.isRetryContextStatusCode(500))
-                                        .exponentialBackoffWithJitter(Duration.ofSeconds(2), Duration.ofSeconds(10))))
                         .requestParallelism(14)
                         .build())
                 .build();
@@ -136,10 +120,26 @@ public class ExampleBot {
         public Mono<Void> onMessageCreate(MessageCreateEvent event) {
             Message message = event.getMessage();
             return Mono.justOrEmpty(message.getContent())
-                    .filter(content -> content.startsWith("!addrole"))
-                    .flatMap(content -> message.getAuthorAsMember())
-                    .flatMap(member -> member.addRole(Snowflake.of(testRole), null));
-            // if "testRole" is null, the bot will keep processing events despite throwing an error
+                    .filterWhen(content -> message.getGuild().hasElement())
+                    .filter(content -> content.startsWith("!addrole "))
+                    .flatMap(content -> {
+                        // !addrole userId roleName
+                        String[] tokens = content.split(" ", 3);
+                        if (tokens.length > 2) {
+                            String user = tokens[1];
+                            String roleName = tokens[2];
+                            Mono<Member> member = message.getGuild()
+                                    .flatMap(g -> g.getMemberById(Snowflake.of(user)));
+                            Mono<Role> role = message.getGuild()
+                                    .flatMapMany(Guild::getRoles)
+                                    .filter(r -> r.getName().equalsIgnoreCase(roleName))
+                                    .next();
+                            return member.zipWith(role)
+                                    .flatMap(t2 -> t2.getT1().addRole(t2.getT2().getId()));
+                        }
+                        return Mono.empty();
+                    })
+                    .then();
         }
     }
 
@@ -334,8 +334,8 @@ public class ExampleBot {
                             .collectList()
                             .elapsed()
                             .doOnNext(TupleUtils.consumer(
-                                    (time, messageList) -> log.info("Sent {} messages in {} milliseconds ({} messages/s)",
-                                            messageList.size(), time, (messageList.size() / (double) time) * 1000)))
+                                    (time, list) -> log.info("Sent {} messages in {} milliseconds ({} messages/s)",
+                                            list.size(), time, (list.size() / (double) time) * 1000)))
                             .subscribe()) // Separate subscribe in order to improve accuracy of elapsed time
                     .then();
         }
