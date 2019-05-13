@@ -133,6 +133,17 @@ public class GuildEditSpec implements AuditSpec<GuildModifyRequest> {
         return this;
     }
 
+    /**
+     * Sets the banner image to display for the modified {@link Guild}. Used in VERIFIED guilds.
+     *
+     * @param banner The image for the guild.
+     * @return This spec.
+     */
+    public GuildEditSpec setBanner(@Nullable Image banner) {
+        requestBuilder.banner((banner == null) ? null : banner.getData());
+        return this;
+    }
+
     @Override
     public GuildEditSpec setReason(@Nullable final String reason) {
         this.reason = reason;

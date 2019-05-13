@@ -45,11 +45,13 @@ public class GuildModifyRequest {
     private final PossibleLong ownerId;
     @Nullable
     private final Possible<String> splash;
+    @Nullable
+    private final Possible<String> banner;
 
     public GuildModifyRequest(Possible<String> name, Possible<String> region, Possible<Integer> verificationLevel,
                               Possible<Integer> defaultMessageNotifications, @Nullable PossibleLong afkChannelId,
                               Possible<Integer> afkTimeout, @Nullable Possible<String> icon, PossibleLong ownerId,
-                              @Nullable Possible<String> splash) {
+                              @Nullable Possible<String> splash,@Nullable Possible<String> banner) {
         this.name = name;
         this.region = region;
         this.verificationLevel = verificationLevel;
@@ -59,6 +61,7 @@ public class GuildModifyRequest {
         this.icon = icon;
         this.ownerId = ownerId;
         this.splash = splash;
+        this.banner = banner;
     }
 
     public static Builder builder() {
@@ -79,6 +82,8 @@ public class GuildModifyRequest {
         private PossibleLong ownerId = PossibleLong.absent();
         @Nullable
         private Possible<String> splash = Possible.absent();
+        @Nullable
+        private Possible<String> banner = Possible.absent();
 
         public Builder name(String name) {
             this.name = Possible.of(name);
@@ -125,9 +130,14 @@ public class GuildModifyRequest {
             return this;
         }
 
+        public Builder banner(@Nullable String banner) {
+            this.banner = banner == null ? null : Possible.of(banner);
+            return this;
+        }
+
         public GuildModifyRequest build() {
             return new GuildModifyRequest(name, region, verificationLevel, defaultMessageNotifications, afkChannelId,
-                    afkTimeout, icon, ownerId, splash);
+                    afkTimeout, icon, ownerId, splash, banner);
         }
     }
 
@@ -143,6 +153,7 @@ public class GuildModifyRequest {
                 ", icon=" + icon +
                 ", ownerId=" + ownerId +
                 ", splash=" + splash +
+                ", banner=" + banner +
                 '}';
     }
 }

@@ -31,6 +31,7 @@ public final class ChangeKey<T> {
     public static final ChangeKey<String> NAME = changeKey("name");
     public static final ChangeKey<String> ICON = changeKey("icon_hash");
     public static final ChangeKey<String> SPLASH = changeKey("splash_hash");
+    public static final ChangeKey<String> BANNER = changeKey("banner_hash");
     public static final ChangeKey<Snowflake> OWNER = changeKey("owner_id");
     public static final ChangeKey<String> REGION = changeKey("region");
     public static final ChangeKey<Snowflake> AFK_CHANNEL = changeKey("afk_channel_id");

@@ -39,6 +39,7 @@ public class GuildUpdate implements Dispatch {
     @UnsignedJson
     private Long systemChannelId;
     private String splash;
+    private String banner;
     private RoleResponse[] roles;
     private String region;
     @JsonProperty("owner_id")
@@ -96,6 +97,10 @@ public class GuildUpdate implements Dispatch {
 
     public String getSplash() {
         return splash;
+    }
+
+    public String getBanner() {
+        return banner;
     }
 
     public RoleResponse[] getRoles() {
@@ -177,6 +182,7 @@ public class GuildUpdate implements Dispatch {
                 ", verificationLevel=" + verificationLevel +
                 ", systemChannelId=" + systemChannelId +
                 ", splash='" + splash + '\'' +
+                ", splash='" + banner + '\'' +
                 ", roles=" + Arrays.toString(roles) +
                 ", region='" + region + '\'' +
                 ", ownerId=" + ownerId +
