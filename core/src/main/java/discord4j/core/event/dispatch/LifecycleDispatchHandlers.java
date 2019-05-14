@@ -36,7 +36,7 @@ class LifecycleDispatchHandlers {
 
         User self = new User(context.getServiceMediator(), userBean);
         Set<ReadyEvent.Guild> guilds = Arrays.stream(dispatch.getGuilds())
-                .map(g -> new ReadyEvent.Guild(g.getId(), g.isUnavailable()))
+                .map(g -> new ReadyEvent.Guild(g.getId(), !g.isUnavailable()))
                 .collect(Collectors.toSet());
 
         Mono<Void> saveUser = context.getServiceMediator().getStateHolder().getUserStore()
