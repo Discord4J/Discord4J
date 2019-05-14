@@ -20,7 +20,7 @@ repositories {
 }
 
 dependencies {
-  implementation 'com.discord4j:discord4j-core:3.0.4'
+  implementation 'com.discord4j:discord4j-core:3.0.5'
 }
 ```
 ### Maven
@@ -29,7 +29,7 @@ dependencies {
   <dependency>
     <groupId>com.discord4j</groupId>
     <artifactId>discord4j-core</artifactId>
-    <version>3.0.4</version>
+    <version>3.0.5</version>
   </dependency>
 </dependencies>
 ```
@@ -37,7 +37,7 @@ dependencies {
 ### SBT
 ```scala
 libraryDependencies ++= Seq(
-  "com.discord4j" % "discord4j-core" % "3.0.4"
+  "com.discord4j" % "discord4j-core" % "3.0.5"
 )
 ```
 
