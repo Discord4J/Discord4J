@@ -38,18 +38,17 @@ workflows:
           context: D3J
       - build-jdk11:
           context: D3J
-      - hold:
-          type: approval
-          requires:
-            - build-jdk8
-            - build-jdk11
       - release:
           context: D3J
           requires:
-            - hold
+            - build-jdk8
+            - build-jdk11
           filters:
             tags:
               only: /.*/
+            branches:
+              only:
+                - master
 
 commands:
   build:
