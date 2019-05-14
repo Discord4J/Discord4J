@@ -66,7 +66,9 @@ public class ExampleBot {
     @Test
     @Ignore("Example code excluded from CI")
     public void testCommandBot() {
-        BlockHound.install();
+        BlockHound.builder()
+                .allowBlockingCallsInside("java.io.FileInputStream", "readBytes")
+                .install();
 
         DiscordClient client = new DiscordClientBuilder(token)
                 .setRouterOptions(RouterOptions.builder()
