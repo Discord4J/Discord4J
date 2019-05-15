@@ -23,33 +23,43 @@ import reactor.util.Logger;
 import reactor.util.Loggers;
 
 import java.time.Duration;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Random;
 
 public class GlobalRateLimiterTest {
 
     private static final Logger log = Loggers.getLogger(GlobalRateLimiterTest.class);
 
+    private List<GlobalRateLimiter> limiters() {
+        return Arrays.asList(
+                new SemaphoreGlobalRateLimiter(8),
+                new PoolGlobalRateLimiter(8));
+    }
+
     @Test
     public void testGlobalRateLimiter() {
-        GlobalRateLimiter rateLimiter = new SemaphoreGlobalRateLimiter(8);
-        rateLimiter.rateLimitFor(Duration.ofSeconds(1));
-        rateLimiter.withLimiter(Mono.just("1").doOnNext(log::info)).blockLast();
-        rateLimiter.rateLimitFor(Duration.ofSeconds(1));
-        rateLimiter.withLimiter(Mono.just("2").doOnNext(log::info)).blockLast();
+        for (GlobalRateLimiter rateLimiter : limiters()) {
+            rateLimiter.rateLimitFor(Duration.ofSeconds(1));
+            rateLimiter.withLimiter(Mono.just("1").doOnNext(log::info)).blockLast();
+            rateLimiter.rateLimitFor(Duration.ofSeconds(1));
+            rateLimiter.withLimiter(Mono.just("2").doOnNext(log::info)).blockLast();
+        }
     }
 
     @Test
     public void testBurstingRequestsGlobalRateLimiter() {
-        GlobalRateLimiter rateLimiter = new SemaphoreGlobalRateLimiter(8);
-        Random random = new Random();
-        Flux.range(0, 100)
-                .flatMap(index -> rateLimiter.withLimiter(Mono.defer(() -> {
-                    if (random.nextDouble() < 0.1) {
-                        long delay = random.nextInt(500);
-                        rateLimiter.rateLimitFor(Duration.ofMillis(delay));
-                    }
-                    return Mono.just(index);
-                })))
-                .blockLast();
+        for (GlobalRateLimiter rateLimiter : limiters()) {
+            Random random = new Random();
+            Flux.range(0, 100)
+                    .flatMap(index -> rateLimiter.withLimiter(Mono.defer(() -> {
+                        if (random.nextDouble() < 0.1) {
+                            long delay = random.nextInt(500);
+                            rateLimiter.rateLimitFor(Duration.ofMillis(delay));
+                        }
+                        return Mono.just(index);
+                    })))
+                    .blockLast();
+        }
     }
 }
