@@ -40,7 +40,7 @@ public class RouterOptions {
     /**
      * The default {@link Scheduler} to delay rate limited requests.
      */
-    public static final Scheduler DEFAULT_RATE_LIMIT_SCHEDULER = Schedulers.elastic();
+    public static final Scheduler DEFAULT_RATE_LIMIT_SCHEDULER = Schedulers.newParallel("discord4j-worker");
 
     /**
      * The default number of router requests allowed in parallel.
@@ -62,7 +62,7 @@ public class RouterOptions {
             this.globalRateLimiter = builder.globalRateLimiter;
         } else {
             this.requestParallelism = builder.requestParallelism;
-            this.globalRateLimiter = new SemaphoreGlobalRateLimiter(builder.requestParallelism);
+            this.globalRateLimiter = new PoolGlobalRateLimiter(builder.requestParallelism);
         }
     }
 

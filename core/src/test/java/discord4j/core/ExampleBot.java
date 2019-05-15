@@ -74,7 +74,7 @@ public class ExampleBot {
                         .onClientResponse(ResponseFunction.emptyIfNotFound())
                         // bad requests (400) while adding reactions will be suppressed
                         .onClientResponse(ResponseFunction.emptyOnErrorStatus(RouteMatcher.route(Routes.REACTION_CREATE), 400))
-                        .requestParallelism(14)
+                        .requestParallelism(12)
                         .build())
                 .build();
 
@@ -97,6 +97,32 @@ public class ExampleBot {
         eventHandlers.add(new Reactor());
         eventHandlers.add(new ChangeAvatar());
         eventHandlers.add(new BurstMessages());
+        eventHandlers.add(new EventHandler() {
+            @Override
+            public Mono<Void> onMessageCreate(MessageCreateEvent event) {
+                Message message = event.getMessage();
+                return Mono.justOrEmpty(message.getContent())
+                        .filter(content -> content.equals("!t1"))
+                        .flatMap(content -> message.getGuild())
+                        .flatMapMany(guild -> Flux.range(1, 40)
+                                .flatMap(index -> guild.createTextChannel(spec -> spec.setName("test" + index))))
+                        .then();
+            }
+        });
+        eventHandlers.add(new EventHandler() {
+            @Override
+            public Mono<Void> onMessageCreate(MessageCreateEvent event) {
+                Message message = event.getMessage();
+                return Mono.justOrEmpty(message.getContent())
+                        .filter(content -> content.equals("!t2"))
+                        .flatMap(content -> message.getGuild())
+                        .flatMapMany(Guild::getChannels)
+                        .ofType(TextChannel.class)
+                        .filter(channel -> channel.getName().startsWith("test"))
+                        .flatMap(Channel::delete)
+                        .then();
+            }
+        });
 
         // Build a safe event-processing pipeline
         client.getEventDispatcher().on(MessageCreateEvent.class)
