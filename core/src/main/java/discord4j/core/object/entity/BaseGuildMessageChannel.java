@@ -214,7 +214,7 @@ class BaseGuildMessageChannel extends BaseChannel implements GuildMessageChannel
      * @return {@code true} if this channel is considered NSFW (Not Safe For Work), {@code false} otherwise.
      */
     public boolean isNsfw() {
-        return getData().isNsfw();
+        return getData().isNsfw() != null && getData().isNsfw();
     }
 
     /**
