@@ -49,6 +49,7 @@ workflows:
             branches:
               only:
                 - master
+                - 3.0.x
 
 commands:
   build:

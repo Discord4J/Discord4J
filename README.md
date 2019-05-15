@@ -3,9 +3,9 @@
 <a href="https://discord4j.com"><img align="right" src="https://raw.githubusercontent.com/Discord4J/discord4j-web/master/public/logo.svg?sanitize=true" width=27%></a>
 
 [![Support Server Invite](https://img.shields.io/discord/208023865127862272.svg?color=7289da&label=Discord4J&logo=discord&style=flat-square)](https://discord.gg/NxGAeCY)
-[![Maven Central](https://img.shields.io/maven-central/v/com.discord4j/discord4j-core.svg?style=flat-square)](https://search.maven.org/artifact/com.discord4j/discord4j-core)
+[![Maven Central](https://img.shields.io/maven-central/v/com.discord4j/discord4j-core/3.0.svg?style=flat-square)](https://search.maven.org/artifact/com.discord4j/discord4j-core)
 [![Javadocs](https://www.javadoc.io/badge/com.discord4j/discord4j-core.svg?color=blue&style=flat-square)](https://www.javadoc.io/doc/com.discord4j/discord4j-core)
-[![CircleCI branch](https://img.shields.io/circleci/project/github/Discord4J/Discord4J/master.svg?label=circleci&logo=circleci&style=flat-square)](https://circleci.com/gh/Discord4J/Discord4J/tree/master)
+[![CircleCI branch](https://img.shields.io/circleci/project/github/Discord4J/Discord4J/3.0.x.svg?label=circleci&logo=circleci&style=flat-square)](https://circleci.com/gh/Discord4J/Discord4J/tree/3.0.x)
 
 
 A fast, reactive Java wrapper for the official [Discord Bot API](https://discordapp.com/developers/docs/intro).
