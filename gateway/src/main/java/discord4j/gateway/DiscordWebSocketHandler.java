@@ -97,6 +97,15 @@ public class DiscordWebSocketHandler {
                 .compose(decompressor::completeMessages)
                 .doOnNext(inbound::next)
                 .doOnError(this::error)
+                .doOnCancel(() -> {
+                    shardLogger(".inbound").info("Receiver cancelled on shard {}", shardIndex);
+                    CloseStatus closeStatus = reason.get();
+                    if (closeStatus != null && !closeTrigger.isTerminated()) {
+                        shardLogger(".inbound").info("Forwarding close reason: {}", closeStatus);
+                        error(new CloseException(closeStatus));
+                    }
+                    error(new RuntimeException("Inbound cancelled"));
+                })
                 .then(Mono.<Void>defer(() -> {
                     shardLogger(".inbound").info("Receiver completed on shard {}", shardIndex);
                     CloseStatus closeStatus = reason.get();
