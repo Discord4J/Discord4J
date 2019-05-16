@@ -36,6 +36,8 @@ public class BaseGuildBean implements Serializable {
     private String icon;
     @Nullable
     private String splash;
+    @Nullable
+    private String banner;
     private long ownerId;
     private String region;
     @Nullable
@@ -62,6 +64,7 @@ public class BaseGuildBean implements Serializable {
         name = guildCreate.getName();
         icon = guildCreate.getIcon();
         splash = guildCreate.getSplash();
+        banner = guildCreate.getBanner();
         ownerId = guildCreate.getOwnerId();
         region = guildCreate.getRegion();
         afkChannelId = guildCreate.getAfkChannelId();
@@ -91,6 +94,7 @@ public class BaseGuildBean implements Serializable {
         name = guildUpdate.getName();
         icon = guildUpdate.getIcon();
         splash = guildUpdate.getSplash();
+        banner = guildUpdate.getBanner();
         ownerId = guildUpdate.getOwnerId();
         region = guildUpdate.getRegion();
         afkChannelId = guildUpdate.getAfkChannelId();
@@ -120,6 +124,7 @@ public class BaseGuildBean implements Serializable {
         name = response.getName();
         icon = response.getIcon();
         splash = response.getSplash();
+        banner = response.getBanner();
         ownerId = response.getOwnerId();
         region = response.getRegion();
         afkChannelId = response.getAfkChannelId();
@@ -149,6 +154,7 @@ public class BaseGuildBean implements Serializable {
         name = toCopy.getName();
         icon = toCopy.getIcon();
         splash = toCopy.getSplash();
+        banner = toCopy.getBanner();
         ownerId = toCopy.getOwnerId();
         region = toCopy.getRegion();
         afkChannelId = toCopy.getAfkChannelId();
@@ -200,8 +206,17 @@ public class BaseGuildBean implements Serializable {
         return splash;
     }
 
+    @Nullable
+    public String getBanner() {
+        return banner;
+    }
+
     public void setSplash(@Nullable final String splash) {
         this.splash = splash;
+    }
+
+    public void setBanner(@Nullable final String banner) {
+        this.banner = banner;
     }
 
     public long getOwnerId() {
@@ -336,6 +351,7 @@ public class BaseGuildBean implements Serializable {
                 ", name='" + name + '\'' +
                 ", icon='" + icon + '\'' +
                 ", splash='" + splash + '\'' +
+                ", banner='" + banner + '\'' +
                 ", ownerId=" + ownerId +
                 ", region='" + region + '\'' +
                 ", afkChannelId=" + afkChannelId +

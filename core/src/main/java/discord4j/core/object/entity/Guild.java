@@ -67,6 +67,9 @@ public final class Guild implements Entity {
     /** The path for guild splash image URLs. */
     private static final String SPLASH_IMAGE_PATH = "splashes/%s/%s";
 
+    /** The path for guild banner image URLs. */
+    private static final String BANNER_IMAGE_PATH = "banners/%s/%s";
+
     /** The ServiceMediator associated to this object. */
     private final ServiceMediator serviceMediator;
 
@@ -131,6 +134,19 @@ public final class Guild implements Entity {
         return Optional.ofNullable(data.getSplash())
                 .filter(ignored -> (format == PNG) || (format == JPEG) || (format == WEB_P))
                 .map(splash -> ImageUtil.getUrl(String.format(SPLASH_IMAGE_PATH, getId().asString(), splash), format));
+    }
+
+    /**
+     * Gets the banner URL of the guild, if present and in a supported format.
+     *
+     * @param format The format for the URL. Supported format types are {@link Image.Format#PNG PNG},
+     * {@link Image.Format#JPEG JPEG}, and {@link Image.Format#WEB_P WebP}.
+     * @return The banner URL of the guild, if present and in a supported format.
+     */
+    public Optional<String> getBannerUrl(final Image.Format format) {
+        return Optional.ofNullable(data.getBanner())
+            .filter(ignored -> (format == PNG) || (format == JPEG) || (format == WEB_P))
+            .map(splash -> ImageUtil.getUrl(String.format(BANNER_IMAGE_PATH, getId().asString(), splash), format));
     }
 
     /**
