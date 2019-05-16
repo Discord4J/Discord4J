@@ -30,6 +30,7 @@ public class ChannelBean implements Serializable {
 
     private long id;
     private int type;
+    private boolean nsfw;
 
     @Nullable
     private Long guildId;
@@ -41,8 +42,6 @@ public class ChannelBean implements Serializable {
     private String name;
     @Nullable
     private String topic;
-    @Nullable
-    private Boolean nsfw;
     @Nullable
     private Long lastMessageId;
     @Nullable
@@ -73,7 +72,7 @@ public class ChannelBean implements Serializable {
                         .toArray(PermissionOverwriteBean[]::new);
         name = channel.getName();
         topic = channel.getTopic();
-        nsfw = channel.getNsfw();
+        nsfw = channel.getNsfw() != null && channel.getNsfw();
         lastMessageId = channel.getLastMessageId();
         bitrate = channel.getBitrate();
         userLimit = channel.getUserLimit();
@@ -97,7 +96,7 @@ public class ChannelBean implements Serializable {
                         .toArray(PermissionOverwriteBean[]::new);
         name = response.getName();
         topic = response.getTopic();
-        nsfw = response.isNsfw();
+        nsfw = response.isNsfw() != null && response.isNsfw();
         lastMessageId = response.getLastMessageId();
         bitrate = response.getBitrate();
         userLimit = response.getUserLimit();
@@ -178,12 +177,11 @@ public class ChannelBean implements Serializable {
         this.topic = topic;
     }
 
-    @Nullable
-    public Boolean isNsfw() {
+    public boolean isNsfw() {
         return nsfw;
     }
 
-    public void setNsfw(@Nullable final Boolean nsfw) {
+    public void setNsfw(final boolean nsfw) {
         this.nsfw = nsfw;
     }
 
