@@ -39,6 +39,7 @@ public class GuildCreate implements Dispatch {
     @UnsignedJson
     private Long systemChannelId;
     private String splash;
+    private String banner;
     private RoleResponse[] roles;
     private String region;
     private Presence[] presences;
@@ -103,6 +104,10 @@ public class GuildCreate implements Dispatch {
 
     public String getSplash() {
         return splash;
+    }
+
+    public String getBanner() {
+        return banner;
     }
 
     public RoleResponse[] getRoles() {
@@ -209,6 +214,7 @@ public class GuildCreate implements Dispatch {
                 ", unavailable=" + unavailable +
                 ", systemChannelId=" + systemChannelId +
                 ", splash='" + splash + '\'' +
+                ", banner='" + banner + '\'' +
                 ", roles=" + Arrays.toString(roles) +
                 ", region='" + region + '\'' +
                 ", presences=" + Arrays.toString(presences) +

@@ -55,6 +55,7 @@ public class GuildResponse {
     @JsonProperty("explicit_content_filter")
     private int explicitContentFilter;
     private String splash;
+    private String banner;
     private String[] features;
     @JsonProperty("afk_channel_id")
     @Nullable
@@ -129,6 +130,10 @@ public class GuildResponse {
         return splash;
     }
 
+    public String getBanner() {
+        return banner;
+    }
+
     public String[] getFeatures() {
         return features;
     }
@@ -178,6 +183,7 @@ public class GuildResponse {
                 ", embedChannelId=" + embedChannelId +
                 ", explicitContentFilter=" + explicitContentFilter +
                 ", splash='" + splash + '\'' +
+                ", banner='" + banner + '\'' +
                 ", features=" + Arrays.toString(features) +
                 ", afkChannelId=" + afkChannelId +
                 ", widgetEnabled=" + widgetEnabled +
