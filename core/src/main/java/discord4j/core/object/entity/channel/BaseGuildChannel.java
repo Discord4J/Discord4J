@@ -14,13 +14,15 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
-package discord4j.core.object.entity;
+package discord4j.core.object.entity.channel;
 
 import discord4j.core.ServiceMediator;
 import discord4j.core.object.ExtendedPermissionOverwrite;
 import discord4j.core.object.PermissionOverwrite;
 import discord4j.core.object.data.stored.ChannelBean;
 import discord4j.core.object.data.stored.PermissionOverwriteBean;
+import discord4j.core.object.entity.Guild;
+import discord4j.core.object.entity.Member;
 import discord4j.core.object.util.PermissionSet;
 import discord4j.core.object.util.Snowflake;
 import discord4j.core.util.PermissionUtil;
@@ -47,7 +49,7 @@ class BaseGuildChannel extends BaseChannel implements GuildChannel {
 
     @Override
     public final Snowflake getGuildId() {
-        return Snowflake.of(getData().getGuildId());
+        return Snowflake.of(Objects.requireNonNull(getData().getGuildId()));
     }
 
     @Override
@@ -64,23 +66,23 @@ class BaseGuildChannel extends BaseChannel implements GuildChannel {
             long guildId = getGuildId().asLong();
             long channelId = getId().asLong();
             return Arrays.stream(permissionOverwrites)
-                .map(bean -> new ExtendedPermissionOverwrite(getServiceMediator(), bean, guildId, channelId))
-                .collect(Collectors.toSet());
+                    .map(bean -> new ExtendedPermissionOverwrite(getServiceMediator(), bean, guildId, channelId))
+                    .collect(Collectors.toSet());
         }
     }
 
     @Override
     public Optional<ExtendedPermissionOverwrite> getOverwriteForMember(Snowflake memberId) {
         return getPermissionOverwrites().stream()
-            .filter(overwrite -> overwrite.getMemberId().map(memberId::equals).orElse(false))
-            .findFirst();
+                .filter(overwrite -> overwrite.getMemberId().map(memberId::equals).orElse(false))
+                .findFirst();
     }
 
     @Override
     public Optional<ExtendedPermissionOverwrite> getOverwriteForRole(Snowflake roleId) {
         return getPermissionOverwrites().stream()
-            .filter(overwrite -> overwrite.getRoleId().map(roleId::equals).orElse(false))
-            .findFirst();
+                .filter(overwrite -> overwrite.getRoleId().map(roleId::equals).orElse(false))
+                .findFirst();
     }
 
     @Override
@@ -92,9 +94,9 @@ class BaseGuildChannel extends BaseChannel implements GuildChannel {
             PermissionOverwrite everyoneOverwrite = getOverwriteForRole(getGuildId()).orElse(null);
 
             List<PermissionOverwrite> roleOverwrites = member.getRoleIds().stream()
-                .map(this::getOverwriteForRole)
-                .flatMap(o -> o.map(Stream::of).orElseGet(Stream::empty)) // jdk 9 Optional#stream
-                .collect(Collectors.toList());
+                    .map(this::getOverwriteForRole)
+                    .flatMap(o -> o.map(Stream::of).orElseGet(Stream::empty)) // jdk 9 Optional#stream
+                    .collect(Collectors.toList());
             PermissionOverwrite memberOverwrite = getOverwriteForMember(member.getId()).orElse(null);
 
             return PermissionUtil.computePermissions(basePerms, everyoneOverwrite, roleOverwrites, memberOverwrite);
@@ -108,7 +110,7 @@ class BaseGuildChannel extends BaseChannel implements GuildChannel {
 
     @Override
     public int getRawPosition() {
-        return getData().getPosition();
+        return Objects.requireNonNull(getData().getPosition());
     }
 
     @Override

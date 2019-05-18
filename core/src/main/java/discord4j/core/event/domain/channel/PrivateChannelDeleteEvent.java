@@ -17,7 +17,7 @@
 package discord4j.core.event.domain.channel;
 
 import discord4j.core.DiscordClient;
-import discord4j.core.object.entity.PrivateChannel;
+import discord4j.core.object.entity.channel.PrivateChannel;
 
 /**
  * TODO what does this mean?

@@ -14,10 +14,11 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
-package discord4j.core.object.entity;
+package discord4j.core.object.entity.channel;
 
 import discord4j.core.object.ExtendedPermissionOverwrite;
 import discord4j.core.object.PermissionOverwrite;
+import discord4j.core.object.entity.Guild;
 import discord4j.core.object.util.PermissionSet;
 import discord4j.core.object.util.Snowflake;
 import reactor.core.publisher.Mono;
@@ -28,7 +29,6 @@ import java.util.Set;
 
 /** A Discord channel associated to a {@link Guild}. */
 public interface GuildChannel extends Channel {
-
     /**
      * Gets the ID of the guild this channel is associated to.
      *
