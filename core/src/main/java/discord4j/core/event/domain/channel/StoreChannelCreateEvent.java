@@ -17,7 +17,7 @@
 package discord4j.core.event.domain.channel;
 
 import discord4j.core.DiscordClient;
-import discord4j.core.object.entity.StoreChannel;
+import discord4j.core.object.entity.channel.StoreChannel;
 
 /**
  * Dispatched when a {@link StoreChannel} is created in a guild.

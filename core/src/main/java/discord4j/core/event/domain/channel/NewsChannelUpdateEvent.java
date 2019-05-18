@@ -17,9 +17,9 @@
 package discord4j.core.event.domain.channel;
 
 import discord4j.core.DiscordClient;
-import discord4j.core.object.entity.GuildMessageChannel;
-import discord4j.core.object.entity.NewsChannel;
-import discord4j.core.object.entity.TextChannel;
+import discord4j.core.object.entity.channel.GuildMessageChannel;
+import discord4j.core.object.entity.channel.NewsChannel;
+import discord4j.core.object.entity.channel.TextChannel;
 import reactor.util.annotation.Nullable;
 
 import java.util.Optional;

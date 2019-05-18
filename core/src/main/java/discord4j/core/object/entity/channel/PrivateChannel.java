@@ -14,18 +14,20 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
-package discord4j.core.object.entity;
+package discord4j.core.object.entity.channel;
 
 import discord4j.core.ServiceMediator;
 import discord4j.core.object.data.stored.ChannelBean;
+import discord4j.core.object.entity.User;
 import discord4j.core.object.util.Snowflake;
 import reactor.core.publisher.Flux;
 
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-/** A Discord private channel (also known as a DM). */
+/** A Discord private channel (also known as a DM channel). */
 public final class PrivateChannel extends BaseMessageChannel {
 
     /**
@@ -44,7 +46,7 @@ public final class PrivateChannel extends BaseMessageChannel {
      * @return The IDs of the recipients for this private channel.
      */
     public Set<Snowflake> getRecipientIds() {
-        return Arrays.stream(getData().getRecipients())
+        return Arrays.stream(Objects.requireNonNull(getData().getRecipients()))
                 .mapToObj(Snowflake::of)
                 .collect(Collectors.toSet());
     }

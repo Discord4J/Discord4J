@@ -17,8 +17,8 @@
 package discord4j.core.spec;
 
 import discord4j.core.object.Region;
-import discord4j.core.object.entity.Channel;
 import discord4j.core.object.entity.Guild;
+import discord4j.core.object.entity.channel.Channel;
 import discord4j.core.object.util.Image;
 import discord4j.rest.json.request.GuildCreateRequest;
 import discord4j.rest.json.request.PartialChannelRequest;

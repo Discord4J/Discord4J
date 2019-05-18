@@ -14,51 +14,50 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
-package discord4j.core.object.entity;
+package discord4j.core.object.entity.channel;
 
 import discord4j.core.ServiceMediator;
 import discord4j.core.object.data.stored.ChannelBean;
-import discord4j.core.spec.NewsChannelEditSpec;
-import discord4j.core.spec.TextChannelEditSpec;
+import discord4j.core.spec.StoreChannelEditSpec;
 import discord4j.core.util.EntityUtil;
 import reactor.core.publisher.Mono;
 
 import java.util.function.Consumer;
 
-/** A Discord news channel. */
-public class NewsChannel extends BaseGuildMessageChannel {
+/** A Discord store channel. */
+public final class StoreChannel extends BaseCategorizableInvitableChannel {
 
     /**
-     * Constructs an {@code NewsChannel} with an associated ServiceMediator and Discord data.
+     * Constructs an {@code StoreChannel} with an associated ServiceMediator and Discord data.
      *
      * @param serviceMediator The ServiceMediator associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
      */
-    public NewsChannel(ServiceMediator serviceMediator, ChannelBean data) {
+    public StoreChannel(ServiceMediator serviceMediator, ChannelBean data) {
         super(serviceMediator, data);
     }
 
     /**
-     * Requests to edit this news channel.
+     * Requests to edit this store channel.
      *
-     * @param spec A {@link Consumer} that provides a "blank" {@link TextChannelEditSpec} to be operated on.
-     * @return A {@link Mono} where, upon successful completion, emits the edited {@link NewsChannel}. If an error is
+     * @param spec A {@link Consumer} that provides a "blank" {@link StoreChannelEditSpec} to be operated on.
+     * @return A {@link Mono} where, upon successful completion, emits the edited {@link StoreChannel}. If an error is
      * received, it is emitted through the {@code Mono}.
      */
-    public Mono<NewsChannel> edit(final Consumer<? super NewsChannelEditSpec> spec) {
-        final NewsChannelEditSpec mutatedSpec = new NewsChannelEditSpec();
+    public Mono<StoreChannel> edit(final Consumer<? super StoreChannelEditSpec> spec) {
+        final StoreChannelEditSpec mutatedSpec = new StoreChannelEditSpec();
         spec.accept(mutatedSpec);
 
         return getServiceMediator().getRestClient().getChannelService()
                 .modifyChannel(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason())
                 .map(ChannelBean::new)
                 .map(bean -> EntityUtil.getChannel(getServiceMediator(), bean))
-                .cast(NewsChannel.class)
+                .cast(StoreChannel.class)
                 .subscriberContext(ctx -> ctx.put("shard", getServiceMediator().getClientConfig().getShardIndex()));
     }
 
     @Override
     public String toString() {
-        return "NewsChannel{} " + super.toString();
+        return "StoreChannel{} " + super.toString();
     }
 }

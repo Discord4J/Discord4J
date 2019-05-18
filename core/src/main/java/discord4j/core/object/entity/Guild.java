@@ -26,6 +26,7 @@ import discord4j.core.object.VoiceState;
 import discord4j.core.object.audit.AuditLogEntry;
 import discord4j.core.object.data.*;
 import discord4j.core.object.data.stored.*;
+import discord4j.core.object.entity.channel.*;
 import discord4j.core.object.presence.Presence;
 import discord4j.core.object.util.Image;
 import discord4j.core.object.util.Snowflake;

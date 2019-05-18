@@ -19,7 +19,6 @@ package discord4j.core.spec;
 import discord4j.core.object.Embed;
 import discord4j.core.object.entity.Attachment;
 import discord4j.core.object.entity.Message;
-import discord4j.core.object.entity.TextChannel;
 import discord4j.core.object.util.Snowflake;
 import discord4j.rest.json.request.EmbedRequest;
 import discord4j.rest.json.request.MessageCreateRequest;

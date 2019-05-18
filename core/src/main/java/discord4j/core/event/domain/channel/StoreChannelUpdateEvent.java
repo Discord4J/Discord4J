@@ -17,7 +17,7 @@
 package discord4j.core.event.domain.channel;
 
 import discord4j.core.DiscordClient;
-import discord4j.core.object.entity.StoreChannel;
+import discord4j.core.object.entity.channel.StoreChannel;
 import reactor.util.annotation.Nullable;
 
 import java.util.Optional;
