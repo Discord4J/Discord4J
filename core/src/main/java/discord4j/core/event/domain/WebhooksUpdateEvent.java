@@ -18,7 +18,7 @@ package discord4j.core.event.domain;
 
 import discord4j.core.DiscordClient;
 import discord4j.core.object.entity.Guild;
-import discord4j.core.object.entity.TextChannel;
+import discord4j.core.object.entity.channel.TextChannel;
 import discord4j.core.object.util.Snowflake;
 import reactor.core.publisher.Mono;
 

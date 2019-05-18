@@ -19,6 +19,7 @@ package discord4j.core.object.entity;
 import discord4j.core.DiscordClient;
 import discord4j.core.ServiceMediator;
 import discord4j.core.object.data.WebhookBean;
+import discord4j.core.object.entity.channel.GuildMessageChannel;
 import discord4j.core.object.util.Snowflake;
 import discord4j.core.spec.WebhookEditSpec;
 import discord4j.core.util.EntityUtil;
@@ -94,11 +95,11 @@ public final class Webhook implements Entity {
     /**
      * Requests to retrieve the channel this webhook is associated to.
      *
-     * @return A {@link Mono} where, upon successful completion, emits the {@link TextChannel channel} this webhook is
+     * @return A {@link Mono} where, upon successful completion, emits the {@link GuildMessageChannel channel} this webhook is
      * associated to. If an error is received, it is emitted through the {@code Mono}.
      */
-    public Mono<TextChannel> getChannel() {
-        return getClient().getChannelById(getChannelId()).cast(TextChannel.class);
+    public Mono<GuildMessageChannel> getChannel() {
+        return getClient().getChannelById(getChannelId()).cast(GuildMessageChannel.class);
     }
 
     /**

@@ -14,18 +14,12 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
-package discord4j.core.object.entity;
+package discord4j.core.object.entity.channel;
 
 import discord4j.core.ServiceMediator;
-import discord4j.core.object.ExtendedInvite;
 import discord4j.core.object.VoiceState;
-import discord4j.core.object.data.ExtendedInviteBean;
 import discord4j.core.object.data.stored.ChannelBean;
 import discord4j.core.object.data.stored.VoiceStateBean;
-import discord4j.core.object.trait.Categorizable;
-import discord4j.core.object.trait.Invitable;
-import discord4j.core.object.util.Snowflake;
-import discord4j.core.spec.InviteCreateSpec;
 import discord4j.core.spec.VoiceChannelEditSpec;
 import discord4j.core.spec.VoiceChannelJoinSpec;
 import discord4j.core.util.EntityUtil;
@@ -35,11 +29,10 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.Objects;
-import java.util.Optional;
 import java.util.function.Consumer;
 
 /** A Discord voice channel. */
-public final class VoiceChannel extends BaseGuildChannel implements Categorizable, Invitable {
+public final class VoiceChannel extends BaseCategorizableInvitableChannel {
 
     /**
      * Constructs an {@code VoiceChannel} with an associated ServiceMediator and Discord data.
@@ -51,44 +44,13 @@ public final class VoiceChannel extends BaseGuildChannel implements Categorizabl
         super(serviceMediator, data);
     }
 
-    @Override
-    public Optional<Snowflake> getCategoryId() {
-        return Optional.ofNullable(getData().getParentId()).map(Snowflake::of);
-    }
-
-    @Override
-    public Mono<Category> getCategory() {
-        return Mono.justOrEmpty(getCategoryId()).flatMap(getClient()::getChannelById).cast(Category.class);
-    }
-
-    @Override
-    public Mono<ExtendedInvite> createInvite(final Consumer<? super InviteCreateSpec> spec) {
-        final InviteCreateSpec mutatedSpec = new InviteCreateSpec();
-        spec.accept(mutatedSpec);
-
-        return getServiceMediator().getRestClient().getChannelService()
-                .createChannelInvite(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason())
-                .map(ExtendedInviteBean::new)
-                .map(bean -> new ExtendedInvite(getServiceMediator(), bean))
-                .subscriberContext(ctx -> ctx.put("shard", getServiceMediator().getClientConfig().getShardIndex()));
-    }
-
-    @Override
-    public Flux<ExtendedInvite> getInvites() {
-        return getServiceMediator().getRestClient().getChannelService()
-                .getChannelInvites(getId().asLong())
-                .map(ExtendedInviteBean::new)
-                .map(bean -> new ExtendedInvite(getServiceMediator(), bean))
-                .subscriberContext(ctx -> ctx.put("shard", getServiceMediator().getClientConfig().getShardIndex()));
-    }
-
     /**
      * Gets the bitrate (in bits) for this voice channel.
      *
      * @return Gets the bitrate (in bits) for this voice channel.
      */
     public int getBitrate() {
-        return getData().getBitrate();
+        return Objects.requireNonNull(getData().getBitrate());
     }
 
     /**
@@ -97,7 +59,7 @@ public final class VoiceChannel extends BaseGuildChannel implements Categorizabl
      * @return The user limit of this voice channel.
      */
     public int getUserLimit() {
-        return getData().getUserLimit();
+        return Objects.requireNonNull(getData().getUserLimit());
     }
 
     /**
@@ -132,7 +94,7 @@ public final class VoiceChannel extends BaseGuildChannel implements Categorizabl
     public Flux<VoiceState> getVoiceStates() {
         return getServiceMediator().getStateHolder().getVoiceStateStore()
                 .findInRange(LongLongTuple2.of(getGuildId().asLong(), Long.MIN_VALUE),
-                             LongLongTuple2.of(getGuildId().asLong(), Long.MAX_VALUE))
+                        LongLongTuple2.of(getGuildId().asLong(), Long.MAX_VALUE))
                 .filter(bean -> Objects.equals(bean.getChannelId(), getId().asLong()))
                 .map(bean -> new VoiceState(getServiceMediator(), bean));
     }

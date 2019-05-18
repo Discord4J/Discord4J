@@ -25,6 +25,7 @@ import discord4j.core.object.data.RegionBean;
 import discord4j.core.object.data.WebhookBean;
 import discord4j.core.object.data.stored.*;
 import discord4j.core.object.entity.*;
+import discord4j.core.object.entity.channel.Channel;
 import discord4j.core.object.presence.Presence;
 import discord4j.core.object.util.Snowflake;
 import discord4j.core.spec.GuildCreateSpec;

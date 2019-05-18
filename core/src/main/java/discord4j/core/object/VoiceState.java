@@ -21,7 +21,7 @@ import discord4j.core.ServiceMediator;
 import discord4j.core.object.data.stored.VoiceStateBean;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.User;
-import discord4j.core.object.entity.VoiceChannel;
+import discord4j.core.object.entity.channel.VoiceChannel;
 import discord4j.core.object.util.Snowflake;
 import reactor.core.publisher.Mono;
 

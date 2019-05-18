@@ -17,7 +17,7 @@
 package discord4j.core.event.domain.channel;
 
 import discord4j.core.DiscordClient;
-import discord4j.core.object.entity.NewsChannel;
+import discord4j.core.object.entity.channel.NewsChannel;
 
 /**
  * Dispatched when a {@link NewsChannel} is created in a guild.

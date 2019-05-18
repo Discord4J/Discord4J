@@ -23,6 +23,8 @@ import discord4j.core.object.Embed;
 import discord4j.core.object.data.stored.MessageBean;
 import discord4j.core.object.data.stored.ReactionBean;
 import discord4j.core.object.data.stored.UserBean;
+import discord4j.core.object.entity.channel.GuildChannel;
+import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.core.object.reaction.Reaction;
 import discord4j.core.object.reaction.ReactionEmoji;
 import discord4j.core.object.util.Snowflake;

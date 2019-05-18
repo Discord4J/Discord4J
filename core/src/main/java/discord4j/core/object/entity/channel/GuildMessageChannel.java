@@ -14,10 +14,9 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
-package discord4j.core.object.entity;
+package discord4j.core.object.entity.channel;
 
-import discord4j.core.object.trait.Categorizable;
-import discord4j.core.object.trait.Invitable;
+import discord4j.core.object.entity.Webhook;
 import discord4j.core.object.util.Snowflake;
 import discord4j.core.spec.WebhookCreateSpec;
 import org.reactivestreams.Publisher;
@@ -27,8 +26,7 @@ import reactor.core.publisher.Mono;
 import java.util.Optional;
 import java.util.function.Consumer;
 
-/** A Discord channel that is associated to a {@link Guild} and can utilize messages. */
-public interface GuildMessageChannel extends Categorizable, GuildChannel, Invitable, MessageChannel {
+public interface GuildMessageChannel extends CategorizableInvitableChannel, MessageChannel {
 
     /**
      * Gets the channel topic, if present
@@ -36,13 +34,6 @@ public interface GuildMessageChannel extends Categorizable, GuildChannel, Invita
      * @return The channel topic, if present.
      */
     Optional<String> getTopic();
-
-    /**
-     * Gets whether this channel is considered NSFW (Not Safe For Work).
-     *
-     * @return {@code true} if this channel is considered NSFW (Not Safe For Work), {@code false} otherwise.
-     */
-    boolean isNsfw();
 
     /**
      * Requests to bulk delete the supplied message IDs.

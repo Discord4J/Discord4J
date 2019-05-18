@@ -14,49 +14,65 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
-package discord4j.core.object.entity;
+package discord4j.core.object.entity.channel;
 
 import discord4j.core.ServiceMediator;
 import discord4j.core.object.data.stored.ChannelBean;
-import discord4j.core.spec.StoreChannelEditSpec;
+import discord4j.core.object.entity.Guild;
+import discord4j.core.object.util.Snowflake;
+import discord4j.core.spec.CategoryEditSpec;
 import discord4j.core.util.EntityUtil;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.function.Consumer;
 
-public class StoreChannel extends BaseGuildChannel {
+/** A Discord category. */
+public final class Category extends BaseGuildChannel {
 
     /**
-     * Constructs an {@code StoreChannel} with an associated ServiceMediator and Discord data.
+     * Constructs an {@code Category} with an associated ServiceMediator and Discord data.
      *
      * @param serviceMediator The ServiceMediator associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
      */
-    public StoreChannel(ServiceMediator serviceMediator, ChannelBean data) {
+    public Category(final ServiceMediator serviceMediator, final ChannelBean data) {
         super(serviceMediator, data);
     }
 
     /**
-     * Requests to edit this store channel.
+     * Requests to retrieve the channels residing in this category.
      *
-     * @param spec A {@link Consumer} that provides a "blank" {@link StoreChannelEditSpec} to be operated on.
-     * @return A {@link Mono} where, upon successful completion, emits the edited {@link StoreChannel}. If an error is
+     * @return A {@link Flux} that continually emits the {@link CategorizableInvitableChannel channels} residing in this category. If an
+     * error is received, it is emitted through the {@code Flux}.
+     */
+    public Flux<CategorizableInvitableChannel> getChannels() {
+        return getGuild().flatMapMany(Guild::getChannels)
+                .ofType(CategorizableInvitableChannel.class)
+                .filter(channel -> channel.getCategoryId().map(getId()::equals).orElse(false));
+    }
+
+    /**
+     * Requests to edit this category.
+     *
+     * @param spec A {@link Consumer} that provides a "blank" {@link CategoryEditSpec} to be operated on.
+     * @return A {@link Mono} where, upon successful completion, emits the edited {@link Category}. If an error is
      * received, it is emitted through the {@code Mono}.
      */
-    public Mono<StoreChannel> edit(final Consumer<? super StoreChannelEditSpec> spec) {
-        final StoreChannelEditSpec mutatedSpec = new StoreChannelEditSpec();
+    public Mono<Category> edit(final Consumer<? super CategoryEditSpec> spec) {
+        final CategoryEditSpec mutatedSpec = new CategoryEditSpec();
         spec.accept(mutatedSpec);
 
         return getServiceMediator().getRestClient().getChannelService()
                 .modifyChannel(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason())
                 .map(ChannelBean::new)
                 .map(bean -> EntityUtil.getChannel(getServiceMediator(), bean))
-                .cast(StoreChannel.class)
+                .cast(Category.class)
                 .subscriberContext(ctx -> ctx.put("shard", getServiceMediator().getClientConfig().getShardIndex()));
     }
 
     @Override
     public String toString() {
-        return "StoreChannel{} " + super.toString();
+        return "Category{} " + super.toString();
     }
 }

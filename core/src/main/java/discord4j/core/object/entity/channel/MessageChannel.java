@@ -14,8 +14,9 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
-package discord4j.core.object.entity;
+package discord4j.core.object.entity.channel;
 
+import discord4j.core.object.entity.Message;
 import discord4j.core.object.util.Snowflake;
 import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.core.spec.MessageCreateSpec;
@@ -29,7 +30,7 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 /** A Discord channel that can utilize messages. */
-public interface MessageChannel extends Channel {
+public interface MessageChannel {
 
     /**
      * Gets the ID of the last message sent in this channel, if present.

@@ -20,7 +20,7 @@ import discord4j.core.DiscordClient;
 import discord4j.core.ServiceMediator;
 import discord4j.core.object.data.InviteBean;
 import discord4j.core.object.entity.Guild;
-import discord4j.core.object.entity.TextChannel;
+import discord4j.core.object.entity.channel.CategorizableInvitableChannel;
 import discord4j.core.object.util.Snowflake;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
@@ -96,11 +96,11 @@ public class Invite implements DiscordObject {
     /**
      * Requests to retrieve the channel this invite is associated to.
      *
-     * @return A {@link Mono} where, upon successful completion, emits the {@link TextChannel channel} this invite is
+     * @return A {@link Mono} where, upon successful completion, emits the {@link CategorizableInvitableChannel channel} this invite is
      * associated to. If an error is received, it is emitted through the {@code Mono}.
      */
-    public final Mono<TextChannel> getChannel() {
-        return getClient().getChannelById(getChannelId()).cast(TextChannel.class);
+    public final Mono<CategorizableInvitableChannel> getChannel() {
+        return getClient().getChannelById(getChannelId()).cast(CategorizableInvitableChannel.class);
     }
 
     /**
