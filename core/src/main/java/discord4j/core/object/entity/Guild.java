@@ -649,25 +649,6 @@ public final class Guild implements Entity {
     }
 
     /**
-     * Requests to create a store channel.
-     *
-     * @param spec A {@link Consumer} that provides a "blank" {@link StoreChannelCreateSpec} to be operated on.
-     * @return A {@link Mono} where, upon successful completion, emits the created {@link StoreChannel}. If an error is
-     * received, it is emitted through the {@code Mono}.
-     */
-    public Mono<StoreChannel> createStoreChannel(final Consumer<? super StoreChannelCreateSpec> spec) {
-        final StoreChannelCreateSpec mutatedSpec = new StoreChannelCreateSpec();
-        spec.accept(mutatedSpec);
-
-        return serviceMediator.getRestClient().getGuildService()
-                .createGuildChannel(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason())
-                .map(ChannelBean::new)
-                .map(bean -> EntityUtil.getChannel(serviceMediator, bean))
-                .cast(StoreChannel.class)
-                .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex()));
-    }
-
-    /**
      * Requests to create a category.
      *
      * @param spec A {@link Consumer} that provides a "blank" {@link CategoryCreateSpec} to be operated on.
