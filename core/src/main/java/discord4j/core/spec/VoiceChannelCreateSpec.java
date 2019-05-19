@@ -18,6 +18,7 @@ package discord4j.core.spec;
 
 import discord4j.common.json.OverwriteEntity;
 import discord4j.core.object.PermissionOverwrite;
+import discord4j.core.object.entity.channel.Category;
 import discord4j.core.object.entity.channel.Channel;
 import discord4j.core.object.entity.channel.VoiceChannel;
 import discord4j.core.object.util.Permission;

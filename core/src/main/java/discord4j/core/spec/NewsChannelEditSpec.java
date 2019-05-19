@@ -18,6 +18,7 @@ package discord4j.core.spec;
 
 import discord4j.common.json.OverwriteEntity;
 import discord4j.core.object.PermissionOverwrite;
+import discord4j.core.object.entity.channel.NewsChannel;
 import discord4j.core.object.util.Snowflake;
 import discord4j.rest.json.request.ChannelModifyRequest;
 import reactor.util.annotation.Nullable;
@@ -26,7 +27,7 @@ import java.util.Set;
 
 /**
  * Spec used to modify a guild {@link NewsChannel} settings.
- *
+ *G
  * @see <a href="https://discordapp.com/developers/docs/resources/channel#modify-channel">Modify Channel</a>
  */
 public class NewsChannelEditSpec implements AuditSpec<ChannelModifyRequest> {
