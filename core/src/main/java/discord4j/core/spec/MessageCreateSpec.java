@@ -19,6 +19,7 @@ package discord4j.core.spec;
 import discord4j.core.object.Embed;
 import discord4j.core.object.entity.Attachment;
 import discord4j.core.object.entity.Message;
+import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.core.object.util.Snowflake;
 import discord4j.rest.json.request.EmbedRequest;
 import discord4j.rest.json.request.MessageCreateRequest;
@@ -34,7 +35,7 @@ import java.util.List;
 import java.util.function.Consumer;
 
 /**
- * Spec used to create {@link Message Messages} to {@link TextChannel TextChannels}. Clients using this spec must
+ * Spec used to create {@link Message Messages} to {@link MessageChannel MessageChannels}. Clients using this spec must
  * have connected to gateway at least once.
  *
  * @see <a href="https://discordapp.com/developers/docs/resources/channel#create-message">Create Message</a>

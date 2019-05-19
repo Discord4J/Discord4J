@@ -48,7 +48,7 @@ public final class PermissionUtil {
      * @param memberOverwrite The overwrite applied to the member in the channel.
      * @return The permissions with overwrites taken into account.
      *
-     * @see discord4j.core.object.entity.GuildChannel#getEffectivePermissions(discord4j.core.object.util.Snowflake)
+     * @see discord4j.core.object.entity.channel.GuildChannel#getEffectivePermissions(discord4j.core.object.util.Snowflake)
      * GuildChannel#getEffectivePermissions(Snowflake)
      */
     public static PermissionSet computePermissions(PermissionSet base, @Nullable PermissionOverwrite everyoneOverwrite,
