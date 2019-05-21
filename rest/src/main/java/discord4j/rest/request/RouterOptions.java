@@ -22,6 +22,7 @@ import discord4j.rest.response.ResponseFunction;
 import discord4j.rest.route.Route;
 import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
+import reactor.util.annotation.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -50,12 +51,19 @@ public class RouterOptions {
     private final Scheduler rateLimitScheduler;
     private final List<ResponseFunction> responseTransformers;
     private final int requestParallelism;
+    private final GlobalRateLimiter globalRateLimiter;
 
     protected RouterOptions(Builder builder) {
         this.responseScheduler = builder.responseScheduler;
         this.rateLimitScheduler = builder.rateLimitScheduler;
         this.responseTransformers = builder.responseTransformers;
-        this.requestParallelism = builder.requestParallelism;
+        if (builder.globalRateLimiter != null) {
+            this.requestParallelism = -1; // @deprecated
+            this.globalRateLimiter = builder.globalRateLimiter;
+        } else {
+            this.requestParallelism = builder.requestParallelism;
+            this.globalRateLimiter = new SemaphoreGlobalRateLimiter(builder.requestParallelism);
+        }
     }
 
     /**
@@ -86,6 +94,8 @@ public class RouterOptions {
         private Scheduler rateLimitScheduler = DEFAULT_RATE_LIMIT_SCHEDULER;
         private final List<ResponseFunction> responseTransformers = new ArrayList<>();
         private int requestParallelism = DEFAULT_REQUEST_PARALLELISM;
+        @Nullable
+        private GlobalRateLimiter globalRateLimiter;
 
         protected Builder() {
         }
@@ -158,6 +168,24 @@ public class RouterOptions {
         }
 
         /**
+         * Define the {@link GlobalRateLimiter} to be applied while configuring the {@link Router} for a client.
+         * {@link GlobalRateLimiter} purpose is to coordinate API requests to properly delay them under global rate
+         * limiting scenarios. {@link RouterFactory} is responsible for applying the given implementation when building
+         * the {@link Router}.
+         * <p>
+         * Setting a limiter here will override any value set on {@link #requestParallelism(int)}.
+         *
+         * @param globalRateLimiter the limiter instance to be used while configuring a {@link Router}, if supported by
+         * the used {@link RouterFactory}
+         * @return this builder
+         * @see GlobalRateLimiter
+         */
+        public Builder globalRateLimiter(GlobalRateLimiter globalRateLimiter) {
+            this.globalRateLimiter = globalRateLimiter;
+            return this;
+        }
+
+        /**
          * Creates the {@link RouterOptions} object.
          *
          * @return the resulting {@link RouterOptions}
@@ -201,8 +229,20 @@ public class RouterOptions {
      * Returns the number of allowed parallel requests the configured {@link Router} should adhere to.
      *
      * @return the number of allowed parallel requests.
+     * @deprecated for removal, using {@link #getGlobalRateLimiter()} instead
      */
+    @Deprecated
     public int getRequestParallelism() {
         return requestParallelism;
+    }
+
+    /**
+     * Returns the currently configured {@link GlobalRateLimiter}. Defaults to {@link SemaphoreGlobalRateLimiter} with
+     * parallelism of {@link #DEFAULT_REQUEST_PARALLELISM} or the value supplied via the builder.
+     *
+     * @return the configured {@link GlobalRateLimiter}
+     */
+    public GlobalRateLimiter getGlobalRateLimiter() {
+        return globalRateLimiter;
     }
 }

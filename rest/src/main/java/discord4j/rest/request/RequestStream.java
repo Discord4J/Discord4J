@@ -84,9 +84,9 @@ class RequestStream<T> {
                 long retryAfter = Long.valueOf(clientException.getHeaders().get("Retry-After"));
                 Duration fixedBackoff = Duration.ofMillis(retryAfter);
                 if (global) {
-                    long existingRateLimit = globalRateLimiter.delayNanos();
-                    if (existingRateLimit > 0) {
-                        return new BackoffDelay(Duration.ofNanos(existingRateLimit));
+                    Duration remaining = globalRateLimiter.getRemaining();
+                    if (!remaining.isNegative() && !remaining.isZero()) {
+                        return new BackoffDelay(remaining);
                     }
                     log.debug("Globally rate limited for {}", fixedBackoff);
                     globalRateLimiter.rateLimitFor(fixedBackoff);
@@ -184,14 +184,15 @@ class RequestStream<T> {
             Logger responseLog = getLogger("response", shard);
             Class<T> responseType = request.getRoute().getResponseType();
 
-            globalRateLimiter.withLimiter(() -> Mono.fromCallable(() -> new ClientRequest(request))
-                    .log(requestLog, Level.FINEST, false)
-                    .flatMap(r -> httpClient.exchange(r, request.getBody(), responseType, rateLimitHandler))
-                    .retryWhen(rateLimitRetryFactory())
-                    .transform(getResponseTransformers(request))
-                    .retryWhen(serverErrorRetryFactory())
-                    .log(responseLog, Level.FINEST, false)
-                    .doFinally(signal -> next(signal, traceLog)))
+            globalRateLimiter.withLimiter(
+                    Mono.fromCallable(() -> new ClientRequest(request))
+                            .log(requestLog, Level.FINEST, false)
+                            .flatMap(r -> httpClient.exchange(r, request.getBody(), responseType, rateLimitHandler))
+                            .retryWhen(rateLimitRetryFactory())
+                            .transform(getResponseTransformers(request))
+                            .retryWhen(serverErrorRetryFactory())
+                            .log(responseLog, Level.FINEST, false)
+                            .doFinally(signal -> next(signal, traceLog)))
                     .materialize()
                     .subscribe(signal -> {
                         if (signal.isOnSubscribe()) {

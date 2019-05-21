@@ -83,7 +83,7 @@ public class DefaultRouter implements Router {
     public DefaultRouter(DiscordWebClient httpClient, RouterOptions routerOptions) {
         this.httpClient = httpClient;
         this.routerOptions = routerOptions;
-        this.globalRateLimiter = new GlobalRateLimiter(routerOptions.getRequestParallelism());
+        this.globalRateLimiter = routerOptions.getGlobalRateLimiter();
     }
 
     @Override
