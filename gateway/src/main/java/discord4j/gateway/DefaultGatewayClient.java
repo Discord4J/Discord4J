@@ -36,6 +36,7 @@ import discord4j.gateway.retry.RetryOptions;
 import io.netty.buffer.ByteBuf;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.*;
+import reactor.core.scheduler.Schedulers;
 import reactor.netty.ConnectionObserver;
 import reactor.netty.http.client.HttpClient;
 import reactor.retry.Retry;
@@ -207,14 +208,23 @@ public class DefaultGatewayClient implements GatewayClient {
                     .log(shardLogger(".zip.ready"), Level.FINEST, false);
 
             // Subscribe the receiver to process and transform the inbound payloads into Dispatch events
-            Mono<Void> receiverFuture = receiver.doOnNext(buf -> trace(receiverLog, buf))
-                    .flatMap(payloadReader::read)
+            Flux<GatewayPayload<?>> receiverFlux = receiver.doOnNext(buf -> trace(receiverLog, buf))
+                    .flatMap(payloadReader::read);
+
+            Mono<Void> receiverFuture = receiverFlux.filter(payload -> !Opcode.HEARTBEAT_ACK.equals(payload.getOp()))
                     .log(shardLogger(".inbound"), Level.FINE, false)
                     .map(this::updateSequence)
                     .map(payload -> new PayloadContext<>(payload, handler, this))
                     .doOnNext(PayloadHandlers::handle)
                     .then()
                     .log(shardLogger(".zip.receiver"), Level.FINEST, false);
+
+            Mono<Void> ackFuture = receiverFlux.filter(payload -> Opcode.HEARTBEAT_ACK.equals(payload.getOp()))
+                    .map(payload -> new PayloadContext<>(payload, handler, this))
+                    .publishOn(Schedulers.elastic())
+                    .doOnNext(PayloadHandlers::handle)
+                    .then()
+                    .log(shardLogger(".zip.ack"), Level.FINEST, false);
 
             // Subscribe the handler's outbound exchange with our outgoing signals
             // routing completion signals to close the gateway
@@ -257,7 +267,7 @@ public class DefaultGatewayClient implements GatewayClient {
                     .then()
                     .log(shardLogger(".zip.http"), Level.FINEST, false);
 
-            return Mono.zip(httpFuture, readyHandler, receiverFuture, senderFuture, heartbeatHandler)
+            return Mono.zip(httpFuture, readyHandler, receiverFuture, ackFuture, senderFuture, heartbeatHandler)
                     .doOnError(logReconnectReason())
                     .then();
         })
