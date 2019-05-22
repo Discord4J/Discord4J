@@ -30,7 +30,6 @@ import discord4j.rest.request.RouteMatcher;
 import discord4j.rest.request.RouterOptions;
 import discord4j.rest.response.ResponseFunction;
 import discord4j.rest.route.Routes;
-import org.apache.commons.io.IOUtils;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -44,7 +43,6 @@ import reactor.netty.http.client.HttpClient;
 import reactor.util.Logger;
 import reactor.util.Loggers;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -99,32 +97,6 @@ public class ExampleBot {
         eventHandlers.add(new Reactor());
         eventHandlers.add(new ChangeAvatar());
         eventHandlers.add(new BurstMessages());
-        eventHandlers.add(new EventHandler() {
-            @Override
-            public Mono<Void> onMessageCreate(MessageCreateEvent event) {
-                Message message = event.getMessage();
-                return Mono.justOrEmpty(message.getContent())
-                        .filter(content -> content.equals("!t1"))
-                        .flatMap(content -> message.getGuild())
-                        .flatMapMany(guild -> Flux.range(1, 40)
-                                .flatMap(index -> guild.createTextChannel(spec -> spec.setName("test" + index))))
-                        .then();
-            }
-        });
-        eventHandlers.add(new EventHandler() {
-            @Override
-            public Mono<Void> onMessageCreate(MessageCreateEvent event) {
-                Message message = event.getMessage();
-                return Mono.justOrEmpty(message.getContent())
-                        .filter(content -> content.equals("!t2"))
-                        .flatMap(content -> message.getGuild())
-                        .flatMapMany(Guild::getChannels)
-                        .ofType(TextChannel.class)
-                        .filter(channel -> channel.getName().startsWith("test"))
-                        .flatMap(Channel::delete)
-                        .then();
-            }
-        });
 
         // Build a safe event-processing pipeline
         client.getEventDispatcher().on(MessageCreateEvent.class)
@@ -327,15 +299,9 @@ public class ExampleBot {
                     return HttpClient.create()
                             .get()
                             .uri(attachment.getUrl())
-                            .responseSingle((res, mono) -> mono.asInputStream())
+                            .responseSingle((res, mono) -> mono.asByteArray())
                             .flatMap(input -> message.getClient()
-                                    .edit(spec -> {
-                                        try {
-                                            spec.setAvatar(Image.ofRaw(IOUtils.toByteArray(input), Image.Format.PNG));
-                                        } catch (IOException e) {
-                                            throw Exceptions.propagate(e);
-                                        }
-                                    }))
+                                    .edit(spec -> spec.setAvatar(Image.ofRaw(input, Image.Format.PNG))))
                             .then();
                 }
             }
