@@ -112,15 +112,6 @@ public class User implements Entity {
     }
 
     /**
-     * Gets the default avatar URL for this user.
-     *
-     * @return The default avatar URL for this user.
-     */
-    public final String getDefaultAvatarUrl() {
-        return ImageUtil.getUrl(String.format(DEFAULT_IMAGE_PATH, Integer.parseInt(getDiscriminator()) % 5), PNG);
-    }
-
-    /**
      * Gets the user's effective avatar URL.
      *
      * @return The user's effective avatar URL.
@@ -132,6 +123,33 @@ public class User implements Entity {
     public final String getAvatarUrl() {
         final boolean animated = hasAnimatedAvatar();
         return getAvatarUrl(animated ? GIF : PNG).orElse(getDefaultAvatarUrl());
+    }
+
+    /**
+     * Gets the user's avatar. This is the avatar at the url given by {@link #getAvatarUrl(Image.Format)}.
+     *
+     * @return The user's effective avatar.
+     */
+    public Mono<Image> getAvatar(final Image.Format format) {
+        return Mono.justOrEmpty(getAvatarUrl(format)).flatMap(Image::ofUrl);
+    }
+
+    /**
+     * Gets the user's effective avatar. This is the avatar at the url given by {@link #getAvatarUrl()}.
+     *
+     * @return The user's effective avatar.
+     */
+    public final Mono<Image> getAvatar() {
+        return Image.ofUrl(getAvatarUrl());
+    }
+
+    /**
+     * Gets the default avatar URL for this user.
+     *
+     * @return The default avatar URL for this user.
+     */
+    public final String getDefaultAvatarUrl() {
+        return ImageUtil.getUrl(String.format(DEFAULT_IMAGE_PATH, Integer.parseInt(getDiscriminator()) % 5), PNG);
     }
 
     /**
