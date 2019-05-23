@@ -19,7 +19,6 @@ package discord4j.core.object.entity.channel;
 import discord4j.core.ServiceMediator;
 import discord4j.core.object.data.stored.ChannelBean;
 import discord4j.core.object.entity.Guild;
-import discord4j.core.object.util.Snowflake;
 import discord4j.core.spec.CategoryEditSpec;
 import discord4j.core.util.EntityUtil;
 import reactor.core.publisher.Flux;
@@ -43,12 +42,12 @@ public final class Category extends BaseGuildChannel {
     /**
      * Requests to retrieve the channels residing in this category.
      *
-     * @return A {@link Flux} that continually emits the {@link CategorizableInvitableChannel channels} residing in this category. If an
+     * @return A {@link Flux} that continually emits the {@link CategorizableChannel channels} residing in this category. If an
      * error is received, it is emitted through the {@code Flux}.
      */
-    public Flux<CategorizableInvitableChannel> getChannels() {
+    public Flux<CategorizableChannel> getChannels() {
         return getGuild().flatMapMany(Guild::getChannels)
-                .ofType(CategorizableInvitableChannel.class)
+                .ofType(CategorizableChannel.class)
                 .filter(channel -> channel.getCategoryId().map(getId()::equals).orElse(false));
     }
 

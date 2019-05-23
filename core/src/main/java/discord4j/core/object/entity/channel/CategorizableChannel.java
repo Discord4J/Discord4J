@@ -25,8 +25,8 @@ import reactor.core.publisher.Mono;
 import java.util.Optional;
 import java.util.function.Consumer;
 
-// TODO name and docs
-public interface CategorizableInvitableChannel extends GuildChannel {
+/** A Discord channel which can be categorized into a {@link Category}. These channels can also have invites. */
+public interface CategorizableChannel extends GuildChannel {
 
     /**
      * Gets the ID of the category for this channel, if present.

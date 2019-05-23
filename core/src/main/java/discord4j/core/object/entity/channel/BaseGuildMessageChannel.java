@@ -20,7 +20,6 @@ import discord4j.core.ServiceMediator;
 import discord4j.core.object.ExtendedInvite;
 import discord4j.core.object.ExtendedPermissionOverwrite;
 import discord4j.core.object.PermissionOverwrite;
-import discord4j.core.object.data.ExtendedInviteBean;
 import discord4j.core.object.data.WebhookBean;
 import discord4j.core.object.data.stored.ChannelBean;
 import discord4j.core.object.entity.Guild;
@@ -53,8 +52,8 @@ class BaseGuildMessageChannel extends BaseChannel implements GuildMessageChannel
     /** Delegates {@link MessageChannel} operations. */
     private final BaseMessageChannel messageChannel;
 
-    /** Delegates {@link CategorizableInvitableChannel} operations. */
-    private final BaseCategorizableInvitableChannel categorizableInvitableChannel;
+    /** Delegates {@link CategorizableChannel} operations. */
+    private final BaseCategorizableChannel categorizableChannel;
 
     /**
      * Constructs an {@code BaseGuildMessageChannel} with an associated ServiceMediator and Discord data.
@@ -66,7 +65,7 @@ class BaseGuildMessageChannel extends BaseChannel implements GuildMessageChannel
         super(serviceMediator, data);
         guildChannel = new BaseGuildChannel(serviceMediator, data);
         messageChannel = new BaseMessageChannel(serviceMediator, data);
-        categorizableInvitableChannel = new BaseCategorizableInvitableChannel(serviceMediator, data);
+        categorizableChannel = new BaseCategorizableChannel(serviceMediator, data);
     }
 
     @Override
@@ -177,22 +176,22 @@ class BaseGuildMessageChannel extends BaseChannel implements GuildMessageChannel
 
     @Override
     public Optional<Snowflake> getCategoryId() {
-        return categorizableInvitableChannel.getCategoryId();
+        return categorizableChannel.getCategoryId();
     }
 
     @Override
     public Mono<Category> getCategory() {
-        return categorizableInvitableChannel.getCategory();
+        return categorizableChannel.getCategory();
     }
 
     @Override
     public Mono<ExtendedInvite> createInvite(final Consumer<? super InviteCreateSpec> spec) {
-        return categorizableInvitableChannel.createInvite(spec);
+        return categorizableChannel.createInvite(spec);
     }
 
     @Override
     public Flux<ExtendedInvite> getInvites() {
-        return categorizableInvitableChannel.getInvites();
+        return categorizableChannel.getInvites();
     }
 
     /**
