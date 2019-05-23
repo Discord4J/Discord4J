@@ -25,7 +25,7 @@ import reactor.core.publisher.Mono;
 import java.util.function.Consumer;
 
 /** A Discord store channel. */
-public final class StoreChannel extends BaseCategorizableInvitableChannel {
+public final class StoreChannel extends BaseCategorizableChannel {
 
     /**
      * Constructs an {@code StoreChannel} with an associated ServiceMediator and Discord data.

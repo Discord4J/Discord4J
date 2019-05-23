@@ -28,9 +28,9 @@ import reactor.core.publisher.Mono;
 import java.util.Optional;
 import java.util.function.Consumer;
 
-class BaseCategorizableInvitableChannel extends BaseGuildChannel implements CategorizableInvitableChannel {
+class BaseCategorizableChannel extends BaseGuildChannel implements CategorizableChannel {
 
-    BaseCategorizableInvitableChannel(ServiceMediator serviceMediator, ChannelBean data) {
+    BaseCategorizableChannel(ServiceMediator serviceMediator, ChannelBean data) {
         super(serviceMediator, data);
     }
 
