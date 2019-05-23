@@ -26,7 +26,7 @@ import reactor.core.publisher.Mono;
 import java.util.Optional;
 import java.util.function.Consumer;
 
-public interface GuildMessageChannel extends CategorizableInvitableChannel, MessageChannel {
+public interface GuildMessageChannel extends CategorizableChannel, MessageChannel {
 
     /**
      * Gets the channel topic, if present

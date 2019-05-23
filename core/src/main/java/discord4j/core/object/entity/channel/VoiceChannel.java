@@ -32,7 +32,7 @@ import java.util.Objects;
 import java.util.function.Consumer;
 
 /** A Discord voice channel. */
-public final class VoiceChannel extends BaseCategorizableInvitableChannel {
+public final class VoiceChannel extends BaseCategorizableChannel {
 
     /**
      * Constructs an {@code VoiceChannel} with an associated ServiceMediator and Discord data.
