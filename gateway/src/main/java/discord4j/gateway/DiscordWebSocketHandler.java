@@ -89,6 +89,18 @@ public class DiscordWebSocketHandler {
         Mono<Void> outboundEvents = out.options(NettyPipeline.SendOptions::flushOnEach)
                 .sendObject(Flux.merge(closeFuture, outbound.map(TextWebSocketFrame::new)))
                 .then()
+                .doOnTerminate(() -> {
+                    shardLogger(".outbound").info("Sender completed on shard {}", shardIndex);
+                    if (!closeTrigger.isTerminated()) {
+                        CloseStatus closeStatus = reason.get();
+                        if (closeStatus != null) {
+                            shardLogger(".outbound").info("Forwarding close reason: {}", closeStatus);
+                            error(new CloseException(closeStatus));
+                        } else {
+                            error(new RuntimeException("Sender completed"));
+                        }
+                    }
+                })
                 .log(shardLogger(".zip.out"), Level.FINEST, false);
 
         Mono<Void> inboundEvents = in.aggregateFrames()
@@ -97,15 +109,6 @@ public class DiscordWebSocketHandler {
                 .compose(decompressor::completeMessages)
                 .doOnNext(inbound::next)
                 .doOnError(this::error)
-                .doOnCancel(() -> {
-                    shardLogger(".inbound").info("Receiver cancelled on shard {}", shardIndex);
-                    CloseStatus closeStatus = reason.get();
-                    if (closeStatus != null && !closeTrigger.isTerminated()) {
-                        shardLogger(".inbound").info("Forwarding close reason: {}", closeStatus);
-                        error(new CloseException(closeStatus));
-                    }
-                    error(new RuntimeException("Inbound cancelled"));
-                })
                 .then(Mono.<Void>defer(() -> {
                     shardLogger(".inbound").info("Receiver completed on shard {}", shardIndex);
                     CloseStatus closeStatus = reason.get();
