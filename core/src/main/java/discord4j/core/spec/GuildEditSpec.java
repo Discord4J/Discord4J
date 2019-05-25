@@ -107,7 +107,7 @@ public class GuildEditSpec implements AuditSpec<GuildModifyRequest> {
      * @return This spec.
      */
     public GuildEditSpec setIcon(@Nullable Image icon) {
-        requestBuilder.icon((icon == null) ? null : icon.getData());
+        requestBuilder.icon((icon == null) ? null : icon.getDataUri());
         return this;
     }
 
@@ -129,7 +129,7 @@ public class GuildEditSpec implements AuditSpec<GuildModifyRequest> {
      * @return This spec.
      */
     public GuildEditSpec setSplash(@Nullable Image splash) {
-        requestBuilder.splash((splash == null) ? null : splash.getData());
+        requestBuilder.splash((splash == null) ? null : splash.getDataUri());
         return this;
     }
 
@@ -140,7 +140,7 @@ public class GuildEditSpec implements AuditSpec<GuildModifyRequest> {
      * @return This spec.
      */
     public GuildEditSpec setBanner(@Nullable Image banner) {
-        requestBuilder.banner((banner == null) ? null : banner.getData());
+        requestBuilder.banner((banner == null) ? null : banner.getDataUri());
         return this;
     }
 

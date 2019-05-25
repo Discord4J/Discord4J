@@ -51,7 +51,7 @@ public class WebhookEditSpec implements AuditSpec<WebhookModifyRequest> {
      * @return This spec.
      */
     public WebhookEditSpec setAvatar(@Nullable Image avatar) {
-        this.avatar = avatar == null ? Possible.absent() : Possible.of(avatar.getData());
+        this.avatar = avatar == null ? Possible.absent() : Possible.of(avatar.getDataUri());
         return this;
     }
 
