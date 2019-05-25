@@ -124,6 +124,17 @@ public final class Guild implements Entity {
     }
 
     /**
+     * Gets the icon of the guild.
+     *
+     * @param format The format in which to get the image.
+     * @return A {@link Mono} where, upon successful completion, emits the {@link Image icon} of the guild. If an
+     * error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Image> getIcon(final Image.Format format) {
+        return Mono.justOrEmpty(getIconUrl(format)).flatMap(Image::ofUrl);
+    }
+
+    /**
      * Gets the splash URL of the guild, if present and in a supported format.
      *
      * @param format The format for the URL. Supported format types are {@link Image.Format#PNG PNG},
@@ -137,6 +148,17 @@ public final class Guild implements Entity {
     }
 
     /**
+     * Gets the splash of the guild.
+     *
+     * @param format The format in which to get the image.
+     * @return A {@link Mono} where, upon successful completion, emits the {@link Image splash} of the guild. If an
+     * error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Image> getSplash(final Image.Format format) {
+        return Mono.justOrEmpty(getSplashUrl(format)).flatMap(Image::ofUrl);
+    }
+
+    /**
      * Gets the banner URL of the guild, if present and in a supported format.
      *
      * @param format The format for the URL. Supported format types are {@link Image.Format#PNG PNG},
@@ -147,6 +169,17 @@ public final class Guild implements Entity {
         return Optional.ofNullable(data.getBanner())
             .filter(ignored -> (format == PNG) || (format == JPEG) || (format == WEB_P))
             .map(splash -> ImageUtil.getUrl(String.format(BANNER_IMAGE_PATH, getId().asString(), splash), format));
+    }
+
+    /**
+     * Gets the banner of the guild.
+     *
+     * @param format The format in which to get the image.
+     * @return A {@link Mono} where, upon successful completion, emits the {@link Image banner} of the guild. If an
+     * error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Image> getBanner(final Image.Format format) {
+        return Mono.justOrEmpty(getBannerUrl(format)).flatMap(Image::ofUrl);
     }
 
     /**

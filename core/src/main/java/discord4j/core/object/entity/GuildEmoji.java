@@ -21,6 +21,7 @@ import discord4j.core.DiscordClient;
 import discord4j.core.ServiceMediator;
 import discord4j.core.object.data.stored.GuildEmojiBean;
 import discord4j.core.object.data.stored.UserBean;
+import discord4j.core.object.util.Image;
 import discord4j.core.object.util.Snowflake;
 import discord4j.core.spec.GuildEmojiEditSpec;
 import discord4j.core.util.EntityUtil;
@@ -225,6 +226,16 @@ public final class GuildEmoji implements Entity {
     public String getImageUrl() {
         final String path = String.format(EMOJI_IMAGE_PATH, getId().asString());
         return isAnimated() ? ImageUtil.getUrl(path, GIF) : ImageUtil.getUrl(path, PNG);
+    }
+
+    /**
+     * Gets the image for this guild emoji.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits the {@link Image image} of the emoji. If an
+     * error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Image> getImage() {
+        return Image.ofUrl(getImageUrl());
     }
 
     /**
