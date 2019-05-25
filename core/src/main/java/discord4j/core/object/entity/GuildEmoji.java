@@ -231,7 +231,8 @@ public final class GuildEmoji implements Entity {
     /**
      * Gets the image for this guild emoji.
      *
-     * @return The image for this guild emoji.
+     * @return A {@link Mono} where, upon successful completion, emits the {@link Image image} of the emoji. If an
+     * error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Image> getImage() {
         return Image.ofUrl(getImageUrl());

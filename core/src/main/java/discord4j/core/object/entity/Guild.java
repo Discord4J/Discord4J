@@ -127,7 +127,8 @@ public final class Guild implements Entity {
      * Gets the icon of the guild.
      *
      * @param format The format in which to get the image.
-     * @return The icon of the guild.
+     * @return A {@link Mono} where, upon successful completion, emits the {@link Image icon} of the guild. If an
+     * error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Image> getIcon(final Image.Format format) {
         return Mono.justOrEmpty(getIconUrl(format)).flatMap(Image::ofUrl);
@@ -150,7 +151,8 @@ public final class Guild implements Entity {
      * Gets the splash of the guild.
      *
      * @param format The format in which to get the image.
-     * @return The splash of the guild.
+     * @return A {@link Mono} where, upon successful completion, emits the {@link Image splash} of the guild. If an
+     * error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Image> getSplash(final Image.Format format) {
         return Mono.justOrEmpty(getSplashUrl(format)).flatMap(Image::ofUrl);
@@ -173,7 +175,8 @@ public final class Guild implements Entity {
      * Gets the banner of the guild.
      *
      * @param format The format in which to get the image.
-     * @return The banner of the guild.
+     * @return A {@link Mono} where, upon successful completion, emits the {@link Image banner} of the guild. If an
+     * error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Image> getBanner(final Image.Format format) {
         return Mono.justOrEmpty(getBannerUrl(format)).flatMap(Image::ofUrl);

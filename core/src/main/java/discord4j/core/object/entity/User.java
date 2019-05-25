@@ -128,7 +128,8 @@ public class User implements Entity {
     /**
      * Gets the user's avatar. This is the avatar at the url given by {@link #getAvatarUrl(Image.Format)}.
      *
-     * @return The user's effective avatar.
+     * @return A {@link Mono} where, upon successful completion, emits the {@link Image avatar} of the user. If an
+     * error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Image> getAvatar(final Image.Format format) {
         return Mono.justOrEmpty(getAvatarUrl(format)).flatMap(Image::ofUrl);
@@ -137,7 +138,8 @@ public class User implements Entity {
     /**
      * Gets the user's effective avatar. This is the avatar at the url given by {@link #getAvatarUrl()}.
      *
-     * @return The user's effective avatar.
+     * @return A {@link Mono} where, upon successful completion, emits the {@link Image avatar} of the user. If an
+     * error is received, it is emitted through the {@code Mono}.
      */
     public final Mono<Image> getAvatar() {
         return Image.ofUrl(getAvatarUrl());

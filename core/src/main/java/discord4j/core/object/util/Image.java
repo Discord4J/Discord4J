@@ -45,7 +45,8 @@ public final class Image {
      * Constructs an {@code Image} using the resource at the given url.
      *
      * @param url The url of the image.
-     * @return An {@code Image} with the data at the given url.
+     * @return A {@link Mono} where, upon successful completion, emits an {@link Image} with the data at the url. If an
+     * error is received, it is emitted through the {@code Mono}.
      */
     public static Mono<Image> ofUrl(final String url) {
         return HttpClient.create()
