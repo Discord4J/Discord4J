@@ -16,6 +16,8 @@
  */
 package discord4j.core.object.util;
 
+import reactor.core.publisher.Mono;
+import reactor.netty.http.client.HttpClient;
 import reactor.util.annotation.Nullable;
 
 import java.util.Base64;
@@ -29,14 +31,31 @@ import java.util.Objects;
 public final class Image {
 
     /**
-     * Constructs an {@code Image} utilizing raw image data and the {@link Format} the image represents.
+     * Constructs an {@code Image} utilizing raw image data.
      *
-     * @param image The raw image data. Must be non-null.
-     * @param format The {@link Format} the image represents. Must be non-null.
-     * @return A constructed {@code Image} with hashed raw image data and the {@link Format} the image represents.
+     * @param image The raw image data.
+     * @param format The {@link Format} of the data.
+     * @return An {@code Image} with raw image data.
      */
     public static Image ofRaw(final byte[] image, final Format format) {
         return new Image(Base64.getEncoder().encodeToString(image), format);
+    }
+
+    /**
+     * Constructs an {@code Image} using the resource at the given url.
+     *
+     * @param url The url of the image.
+     * @return A {@link Mono} where, upon successful completion, emits an {@link Image} with the data at the url. If an
+     * error is received, it is emitted through the {@code Mono}.
+     */
+    public static Mono<Image> ofUrl(final String url) {
+        return HttpClient.create()
+                .get()
+                .uri(url)
+                .responseSingle((res, body) -> body.asByteArray().map(image -> {
+                    Format format = Format.valueOf(res.responseHeaders().get("Content-Type").replace("image/", ""));
+                    return Image.ofRaw(image, format);
+                }));
     }
 
     /** The hash of the image. */
@@ -69,9 +88,9 @@ public final class Image {
     }
 
     /**
-     * Gets the data as it would be represented for a Discord request.
+     * Gets a data URI for this image.
      *
-     * @return The data as it would be represented for a Discord request.
+     * @return The data URI for this image.
      */
     public String getData() {
         return String.format("data:image/%s;base64,%s", format.extension, hash);
