@@ -307,6 +307,9 @@ release {
     preTagCommitMessage = 'Release version'
     tagCommitMessage = 'Release version'
     newVersionCommitMessage = 'Next development version'
+    git {
+        requireBranch = ''
+    }
 }
 
 wrapper {
