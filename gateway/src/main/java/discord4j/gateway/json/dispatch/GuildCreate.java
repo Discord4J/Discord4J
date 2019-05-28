@@ -21,7 +21,7 @@ import discord4j.common.jackson.UnsignedJson;
 import discord4j.common.json.GuildEmojiResponse;
 import discord4j.common.json.GuildMemberResponse;
 import discord4j.common.json.RoleResponse;
-import discord4j.gateway.json.response.GameResponse;
+import discord4j.gateway.json.response.ActivityResponse;
 import discord4j.gateway.json.response.GatewayChannelResponse;
 import reactor.util.annotation.Nullable;
 
@@ -42,7 +42,7 @@ public class GuildCreate implements Dispatch {
     private String banner;
     private RoleResponse[] roles;
     private String region;
-    private Presence[] presences;
+    private PresenceUpdate[] presences;
     @JsonProperty("owner_id")
     @UnsignedJson
     private long ownerId;
@@ -130,7 +130,7 @@ public class GuildCreate implements Dispatch {
         return region;
     }
 
-    public Presence[] getPresences() {
+    public PresenceUpdate[] getPresences() {
         return presences;
     }
 
@@ -323,50 +323,6 @@ public class GuildCreate implements Dispatch {
                     ", mute=" + mute +
                     ", deaf=" + deaf +
                     ", channelId=" + channelId +
-                    '}';
-        }
-    }
-
-    public static class Presence {
-
-        private User user;
-        private String status;
-        private GameResponse game;
-
-        public static class User {
-            @UnsignedJson
-            private long id;
-
-            public long getId() {
-                return id;
-            }
-
-            @Override
-            public String toString() {
-                return "User{" +
-                        "id=" + id +
-                        '}';
-            }
-        }
-
-        public User getUser() {
-            return user;
-        }
-
-        public String getStatus() {
-            return status;
-        }
-
-        public GameResponse getGame() {
-            return game;
-        }
-
-        @Override
-        public String toString() {
-            return "Presence{" +
-                    "user=" + user +
-                    ", status='" + status + '\'' +
-                    ", game=" + game +
                     '}';
         }
     }
