@@ -43,9 +43,9 @@ public final class PresenceBean implements Serializable {
         this(
             presence.getGame() == null ? null : new ActivityBean(presence.getGame()),
             presence.getStatus(),
-            Possible.orElse(presence.getClientStatus().getDesktop()),
-            Possible.orElse(presence.getClientStatus().getMobile()),
-            Possible.orElse(presence.getClientStatus().getWeb())
+            Possible.orElseNull(presence.getClientStatus().getDesktop()),
+            Possible.orElseNull(presence.getClientStatus().getMobile()),
+            Possible.orElseNull(presence.getClientStatus().getWeb())
         );
     }
 
