@@ -28,20 +28,20 @@ public class ActivityResponse {
     private String name;
     private int type;
     @Nullable
-    private Possible<String> url;
-    private Possible<Timestamps> timestamps;
+    private Possible<String> url = Possible.absent();
+    private Possible<Timestamps> timestamps = Possible.absent();
     @JsonProperty("application_id")
     @UnsignedJson
-    private PossibleLong applicationId;
+    private PossibleLong applicationId = PossibleLong.absent();
     @Nullable
-    private Possible<String> details;
+    private Possible<String> details = Possible.absent();
     @Nullable
-    private Possible<String> state;
-    private Possible<Party> party;
-    private Possible<Assets> assets;
-    private Possible<Secrets> secrets;
-    private Possible<Boolean> instance;
-    private Possible<Integer> flags;
+    private Possible<String> state = Possible.absent();
+    private Possible<Party> party = Possible.absent();
+    private Possible<Assets> assets = Possible.absent();
+    private Possible<Secrets> secrets = Possible.absent();
+    private Possible<Boolean> instance = Possible.absent();
+    private Possible<Integer> flags = Possible.absent();
 
     public String getName() {
         return name;
