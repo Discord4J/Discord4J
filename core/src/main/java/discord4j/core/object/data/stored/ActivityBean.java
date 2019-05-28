@@ -65,29 +65,29 @@ public class ActivityBean implements Serializable {
     public ActivityBean(final ActivityResponse response) {
         this.name = response.getName();
         this.type = response.getType();
-        this.url = Possible.orElse(response.getUrl());
+        this.url = Possible.orElseNull(response.getUrl());
 
-        ActivityResponse.Timestamps timestamps = Possible.orElse(response.getTimestamps());
+        ActivityResponse.Timestamps timestamps = Possible.orElseNull(response.getTimestamps());
         if (timestamps == null) {
             this.start = null;
             this.end = null;
         } else {
-            this.start = Possible.orElse(timestamps.getStart());
-            this.end = Possible.orElse(timestamps.getEnd());
+            this.start = Possible.orElseNull(timestamps.getStart());
+            this.end = Possible.orElseNull(timestamps.getEnd());
         }
 
         this.applicationId = response.getApplicationId().isAbsent()  ? null : response.getApplicationId().get();
-        this.details = Possible.orElse(response.getDetails());
-        this.state = Possible.orElse(response.getState());
+        this.details = Possible.orElseNull(response.getDetails());
+        this.state = Possible.orElseNull(response.getState());
 
-        ActivityResponse.Party party = Possible.orElse(response.getParty());
+        ActivityResponse.Party party = Possible.orElseNull(response.getParty());
         if (party == null) {
             this.partyId = null;
             this.currentPartySize = null;
             this.maxPartySize = null;
         } else {
-            this.partyId = Possible.orElse(party.getId());
-            int[] size = Possible.orElse(party.getSize());
+            this.partyId = Possible.orElseNull(party.getId());
+            int[] size = Possible.orElseNull(party.getSize());
             if (size == null) {
                 this.currentPartySize = null;
                 this.maxPartySize = null;
@@ -97,32 +97,32 @@ public class ActivityBean implements Serializable {
             }
         }
 
-        ActivityResponse.Assets assets = Possible.orElse(response.getAssets());
+        ActivityResponse.Assets assets = Possible.orElseNull(response.getAssets());
         if (assets == null) {
             this.largeImage = null;
             this.largeText = null;
             this.smallImage = null;
             this.smallText = null;
         } else {
-            this.largeImage = Possible.orElse(assets.getLargeImage());
-            this.largeText = Possible.orElse(assets.getLargeText());
-            this.smallImage = Possible.orElse(assets.getSmallImage());
-            this.smallText = Possible.orElse(assets.getSmallText());
+            this.largeImage = Possible.orElseNull(assets.getLargeImage());
+            this.largeText = Possible.orElseNull(assets.getLargeText());
+            this.smallImage = Possible.orElseNull(assets.getSmallImage());
+            this.smallText = Possible.orElseNull(assets.getSmallText());
         }
 
-        ActivityResponse.Secrets secrets = Possible.orElse(response.getSecrets());
+        ActivityResponse.Secrets secrets = Possible.orElseNull(response.getSecrets());
         if (secrets == null) {
             this.joinSecret = null;
             this.spectateSecret = null;
             this.matchSecret = null;
         } else {
-            this.joinSecret = Possible.orElse(secrets.getJoin());
-            this.spectateSecret = Possible.orElse(secrets.getSpectate());
-            this.matchSecret = Possible.orElse(secrets.getMatch());
+            this.joinSecret = Possible.orElseNull(secrets.getJoin());
+            this.spectateSecret = Possible.orElseNull(secrets.getSpectate());
+            this.matchSecret = Possible.orElseNull(secrets.getMatch());
         }
 
         this.instance = response.getInstance().isAbsent() ? false : response.getInstance().get();
-        this.flags = Possible.orElse(response.getFlags());
+        this.flags = Possible.orElseNull(response.getFlags());
     }
 
     public ActivityBean(int type, String name, @Nullable String url) {

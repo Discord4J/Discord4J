@@ -62,7 +62,7 @@ public class Possible<T> {
     }
 
     @Nullable
-    public static <T> T orElse(@Nullable Possible<T> possible) {
+    public static <T> T orElseNull(@Nullable Possible<T> possible) {
         if (possible == null || possible.isAbsent()) {
             return null;
         }
