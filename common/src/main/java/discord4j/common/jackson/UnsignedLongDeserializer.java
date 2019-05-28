@@ -54,9 +54,11 @@ public class UnsignedLongDeserializer extends StdDeserializer<Object> implements
                 ret[i] = Long.parseUnsignedLong(ary[i]);
             }
             return ret;
+        } else if (type.equals(PossibleLong.class)) {
+            return PossibleLong.of(Long.parseUnsignedLong(p.getValueAsString()));
         }
 
         throw new IllegalStateException("Attempt to deserialize field marked with @UnsignedJson which is not of type" +
-                " Long | long[]: " + type.getSimpleName());
+                " Long | long[] | PossibleLong: " + type.getSimpleName());
     }
 }
