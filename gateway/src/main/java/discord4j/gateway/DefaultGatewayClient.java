@@ -155,6 +155,7 @@ public class DefaultGatewayClient implements GatewayClient {
             closeTrigger = MonoProcessor.create();
             observer = initialObserver == null ? additionalObserver : initialObserver.then(additionalObserver);
             lastAck.set(0);
+            lastSent.set(0);
 
             Logger senderLog = shardLogger(".sender");
             Logger receiverLog = shardLogger(".receiver");
@@ -243,7 +244,7 @@ public class DefaultGatewayClient implements GatewayClient {
                         long now = System.nanoTime();
                         lastAck.compareAndSet(0, now);
                         long delay = now - lastAck.get();
-                        if (delay > heartbeat.getPeriod().toNanos() + getResponseTimeDuration().toNanos()) {
+                        if (lastSent.get() - lastAck.get() > 0) {
                             log.warn("Missing heartbeat ACK for {}", Duration.ofNanos(delay));
                             handler.error(new RuntimeException("Reconnecting due to zombie or failed connection"));
                             return Mono.empty();
