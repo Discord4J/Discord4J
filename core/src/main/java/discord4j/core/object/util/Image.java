@@ -53,7 +53,7 @@ public final class Image {
                 .get()
                 .uri(url)
                 .responseSingle((res, body) -> body.asByteArray().map(image -> {
-                    Format format = Format.valueOf(res.responseHeaders().get("Content-Type").replace("image/", ""));
+                    Format format = Format.fromContentType(res.responseHeaders().get("Content-Type"));
                     return Image.ofRaw(image, format);
                 }));
     }
@@ -177,6 +177,16 @@ public final class Image {
          */
         public String getExtension() {
             return extension;
+        }
+
+        private static Format fromContentType(String contentType) {
+            switch (contentType) {
+                case "image/jpeg": return JPEG;
+                case "image/png": return PNG;
+                case "image/webp": return WEB_P;
+                case "image/gif": return GIF;
+                default: throw new IllegalArgumentException(contentType);
+            }
         }
     }
 }
