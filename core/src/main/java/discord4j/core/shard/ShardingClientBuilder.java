@@ -28,6 +28,8 @@ import discord4j.rest.http.client.DiscordWebClient;
 import discord4j.rest.json.response.GatewayResponse;
 import discord4j.rest.request.*;
 import discord4j.rest.response.ResponseFunction;
+import discord4j.store.api.service.StoreService;
+import discord4j.store.jdk.JdkStoreService;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxSink;
 import reactor.core.publisher.Mono;
@@ -42,6 +44,7 @@ import reactor.util.function.Tuple2;
 
 import java.time.Duration;
 import java.util.Objects;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 /**
@@ -71,6 +74,9 @@ public class ShardingClientBuilder {
 
     @Nullable
     private Predicate<Integer> shardIndexFilter;
+
+    @Nullable
+    private Function<Integer, StoreService> storeServiceForShard;
 
     /**
      * Initialize a new builder with the given token.
@@ -235,6 +241,22 @@ public class ShardingClientBuilder {
         return this;
     }
 
+    /**
+     * Set a mapper that describes the {@link StoreService} instance to use for each shard. The produced Stores will be
+     * automatically coordinated together using the registry defined via
+     * {@link #setShardingStoreRegistry(ShardingStoreRegistry)} (or a {@link ShardingJdkStoreRegistry} by default), so
+     * it is not advised to provide already coordinated stores via this method. If you wish to use non-coordinated
+     * stores, set them separately via {@link DiscordClientBuilder#setStoreService(StoreService)} on each resulting
+     * client.
+     *
+     * @param storeServiceForShard a function that maps a shard index to a {@link StoreService} instance
+     * @return this builder
+     */
+    public ShardingClientBuilder setStoreServiceForShard(@Nullable Function<Integer, StoreService> storeServiceForShard) {
+        this.storeServiceForShard = storeServiceForShard;
+        return this;
+    }
+
     private RouterFactory initRouterFactory() {
         if (routerFactory != null) {
             return routerFactory;
@@ -274,6 +296,13 @@ public class ShardingClientBuilder {
         return index -> true;
     }
 
+    private Function<Integer, StoreService> initStoreServiceForShard() {
+        if (storeServiceForShard != null) {
+            return storeServiceForShard;
+        }
+        return index -> new JdkStoreService();
+    }
+
     /**
      * Create a sequence of {@link DiscordClientBuilder}s each representing a shard, up to the resulting shard count,
      * filtering out values not matching the predicate given by {@link #getShardIndexFilter()}.
@@ -304,6 +333,7 @@ public class ShardingClientBuilder {
         final RestClient restClient = new RestClient(router);
 
         final ShardingStoreRegistry storeRegistry = initStoreRegistry();
+        final Function<Integer, StoreService> storeServiceForShard = initStoreServiceForShard();
         final ReplayProcessor<Integer> permits = ReplayProcessor.create();
         final FluxSink<Integer> permitSink = permits.sink();
         permitSink.next(0);
@@ -312,7 +342,7 @@ public class ShardingClientBuilder {
                 .setJacksonResourceProvider(jackson)
                 .setRouterFactory(new SingleRouterFactory(router))
                 .setIdentifyLimiter(new RateLimiterTransformer(new SimpleBucket(1, Duration.ofSeconds(6))))
-                .setEventScheduler(ForkJoinPoolScheduler.create("events"))
+                .setEventScheduler(ForkJoinPoolScheduler.create("discord4j-events"))
                 .setGatewayObserver((s, o) -> {
                     if (s.equals(GatewayObserver.CONNECTED)) {
                         log.info("Shard {} connected", o.getShardIndex());
@@ -325,7 +355,8 @@ public class ShardingClientBuilder {
                         .filter(initShardIndexFilter())
                         .zipWith(permits)
                         .map(Tuple2::getT1)
-                        .map(index -> builder.setStoreService(new ShardingJdkStoreService(storeRegistry))
+                        .map(index -> builder.setStoreService(new ShardAwareStoreService(storeRegistry,
+                                        storeServiceForShard.apply(index)))
                                 .setShardIndex(index)
                                 .setShardCount(count)));
     }

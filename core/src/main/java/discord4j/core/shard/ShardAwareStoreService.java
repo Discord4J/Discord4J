@@ -26,6 +26,10 @@ import discord4j.store.api.service.StoreService;
 import discord4j.store.api.util.StoreContext;
 import reactor.core.publisher.Mono;
 
+/**
+ * Factory that delegates the creation of the store to a backing factory and then wraps it into a
+ * {@link ShardAwareStore}.
+ */
 public class ShardAwareStoreService implements StoreService {
 
     private final ShardingStoreRegistry registry;
