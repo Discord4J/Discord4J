@@ -312,6 +312,19 @@ release {
     }
 }
 
+task updateReadme {
+    doLast {
+        copy {
+            from '.github/README_TEMPLATE.md'
+            into '.'
+            rename { 'README.md' }
+            expand version: version
+        }
+    }
+}
+
+preTagCommit.dependsOn updateReadme
+
 wrapper {
     distributionType = Wrapper.DistributionType.ALL
 }
