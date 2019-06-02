@@ -59,7 +59,7 @@ public class ShardAwareStoreService implements StoreService {
 
     @Override
     public boolean hasLongObjStores() {
-        return backingStoreService.hasLongObjStores();
+        return true;
     }
 
     @Override

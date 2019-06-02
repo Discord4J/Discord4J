@@ -71,7 +71,7 @@ public class StoreBotTest {
         new ShardingClientBuilder(token)
                 .setShardingStoreRegistry(registry)
                 // showcase disabling the cache for messages
-                .setStoreServiceForShard(index -> MappingStoreService.create()
+                .setStoreService(MappingStoreService.create()
                         //.setMapping(new NoOpStoreService(), MessageBean.class)
                         .setFallback(new JdkStoreService()))
                 .build()

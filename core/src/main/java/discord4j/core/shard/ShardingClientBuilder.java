@@ -28,6 +28,7 @@ import discord4j.rest.http.client.DiscordWebClient;
 import discord4j.rest.json.response.GatewayResponse;
 import discord4j.rest.request.*;
 import discord4j.rest.response.ResponseFunction;
+import discord4j.store.api.Store;
 import discord4j.store.api.service.StoreService;
 import discord4j.store.jdk.JdkStoreService;
 import reactor.core.publisher.Flux;
@@ -44,7 +45,6 @@ import reactor.util.function.Tuple2;
 
 import java.time.Duration;
 import java.util.Objects;
-import java.util.function.Function;
 import java.util.function.Predicate;
 
 /**
@@ -76,7 +76,7 @@ public class ShardingClientBuilder {
     private Predicate<Integer> shardIndexFilter;
 
     @Nullable
-    private Function<Integer, StoreService> storeServiceForShard;
+    private StoreService storeService;
 
     /**
      * Initialize a new builder with the given token.
@@ -242,18 +242,17 @@ public class ShardingClientBuilder {
     }
 
     /**
-     * Set a mapper that describes the {@link StoreService} instance to use for each shard. The produced Stores will be
-     * automatically coordinated together using the registry defined via
-     * {@link #setShardingStoreRegistry(ShardingStoreRegistry)} (or a {@link ShardingJdkStoreRegistry} by default), so
-     * it is not advised to provide already coordinated stores via this method. If you wish to use non-coordinated
-     * stores, set them separately via {@link DiscordClientBuilder#setStoreService(StoreService)} on each resulting
-     * client.
+     * Set a new {@link StoreService} that will create a {@link Store} for each shard. The resulting stores will be
+     * automatically coordinated across shards using the registry defined via
+     * {@link #setShardingStoreRegistry(ShardingStoreRegistry)} (or a {@link ShardingJdkStoreRegistry} by default). If
+     * you wish to use non-coordinated stores, set them via {@link DiscordClientBuilder#setStoreService(StoreService)}
+     * on each client separately.
      *
-     * @param storeServiceForShard a function that maps a shard index to a {@link StoreService} instance
+     * @param storeService the {@link StoreService} that will create stores for all shards
      * @return this builder
      */
-    public ShardingClientBuilder setStoreServiceForShard(@Nullable Function<Integer, StoreService> storeServiceForShard) {
-        this.storeServiceForShard = storeServiceForShard;
+    public ShardingClientBuilder setStoreService(@Nullable StoreService storeService) {
+        this.storeService = storeService;
         return this;
     }
 
@@ -296,11 +295,11 @@ public class ShardingClientBuilder {
         return index -> true;
     }
 
-    private Function<Integer, StoreService> initStoreServiceForShard() {
-        if (storeServiceForShard != null) {
-            return storeServiceForShard;
+    private StoreService initStoreService() {
+        if (storeService != null) {
+            return storeService;
         }
-        return index -> new JdkStoreService();
+        return new JdkStoreService();
     }
 
     /**
@@ -333,7 +332,7 @@ public class ShardingClientBuilder {
         final RestClient restClient = new RestClient(router);
 
         final ShardingStoreRegistry storeRegistry = initStoreRegistry();
-        final Function<Integer, StoreService> storeServiceForShard = initStoreServiceForShard();
+        final StoreService storeService = initStoreService();
         final ReplayProcessor<Integer> permits = ReplayProcessor.create();
         final FluxSink<Integer> permitSink = permits.sink();
         permitSink.next(0);
@@ -355,8 +354,7 @@ public class ShardingClientBuilder {
                         .filter(initShardIndexFilter())
                         .zipWith(permits)
                         .map(Tuple2::getT1)
-                        .map(index -> builder.setStoreService(new ShardAwareStoreService(storeRegistry,
-                                        storeServiceForShard.apply(index)))
+                        .map(index -> builder.setStoreService(new ShardAwareStoreService(storeRegistry, storeService))
                                 .setShardIndex(index)
                                 .setShardCount(count)));
     }
