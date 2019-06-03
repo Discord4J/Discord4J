@@ -4,7 +4,6 @@
     <logger name="reactor" level="INFO"/>
     <logger name="reactor.retry" level="INFO"/>
     <logger name="discord4j.core" level="INFO"/>
-    <logger name="discord4j.core.StateHolder" level="DEBUG"/>
     <logger name="discord4j.gateway.client" level="INFO"/>
     <logger name="discord4j.gateway.inbound" level="INFO"/>
     <logger name="discord4j.gateway.outbound" level="INFO"/>
