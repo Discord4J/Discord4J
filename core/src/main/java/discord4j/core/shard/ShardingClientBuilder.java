@@ -28,6 +28,9 @@ import discord4j.rest.http.client.DiscordWebClient;
 import discord4j.rest.json.response.GatewayResponse;
 import discord4j.rest.request.*;
 import discord4j.rest.response.ResponseFunction;
+import discord4j.store.api.Store;
+import discord4j.store.api.service.StoreService;
+import discord4j.store.jdk.JdkStoreService;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxSink;
 import reactor.core.publisher.Mono;
@@ -71,6 +74,9 @@ public class ShardingClientBuilder {
 
     @Nullable
     private Predicate<Integer> shardIndexFilter;
+
+    @Nullable
+    private StoreService storeService;
 
     /**
      * Initialize a new builder with the given token.
@@ -235,6 +241,21 @@ public class ShardingClientBuilder {
         return this;
     }
 
+    /**
+     * Set a new {@link StoreService} that will create a {@link Store} for each shard. The resulting stores will be
+     * automatically coordinated across shards using the registry defined via
+     * {@link #setShardingStoreRegistry(ShardingStoreRegistry)} (or a {@link ShardingJdkStoreRegistry} by default). If
+     * you wish to use non-coordinated stores, set them via {@link DiscordClientBuilder#setStoreService(StoreService)}
+     * on each client separately.
+     *
+     * @param storeService the {@link StoreService} that will create stores for all shards
+     * @return this builder
+     */
+    public ShardingClientBuilder setStoreService(@Nullable StoreService storeService) {
+        this.storeService = storeService;
+        return this;
+    }
+
     private RouterFactory initRouterFactory() {
         if (routerFactory != null) {
             return routerFactory;
@@ -274,6 +295,13 @@ public class ShardingClientBuilder {
         return index -> true;
     }
 
+    private StoreService initStoreService() {
+        if (storeService != null) {
+            return storeService;
+        }
+        return new JdkStoreService();
+    }
+
     /**
      * Create a sequence of {@link DiscordClientBuilder}s each representing a shard, up to the resulting shard count,
      * filtering out values not matching the predicate given by {@link #getShardIndexFilter()}.
@@ -304,6 +332,7 @@ public class ShardingClientBuilder {
         final RestClient restClient = new RestClient(router);
 
         final ShardingStoreRegistry storeRegistry = initStoreRegistry();
+        final StoreService storeService = initStoreService();
         final ReplayProcessor<Integer> permits = ReplayProcessor.create();
         final FluxSink<Integer> permitSink = permits.sink();
         permitSink.next(0);
@@ -312,7 +341,7 @@ public class ShardingClientBuilder {
                 .setJacksonResourceProvider(jackson)
                 .setRouterFactory(new SingleRouterFactory(router))
                 .setIdentifyLimiter(new RateLimiterTransformer(new SimpleBucket(1, Duration.ofSeconds(6))))
-                .setEventScheduler(ForkJoinPoolScheduler.create("events"))
+                .setEventScheduler(ForkJoinPoolScheduler.create("discord4j-events"))
                 .setGatewayObserver((s, o) -> {
                     if (s.equals(GatewayObserver.CONNECTED)) {
                         log.info("Shard {} connected", o.getShardIndex());
@@ -325,7 +354,7 @@ public class ShardingClientBuilder {
                         .filter(initShardIndexFilter())
                         .zipWith(permits)
                         .map(Tuple2::getT1)
-                        .map(index -> builder.setStoreService(new ShardingJdkStoreService(storeRegistry))
+                        .map(index -> builder.setStoreService(new ShardAwareStoreService(storeRegistry, storeService))
                                 .setShardIndex(index)
                                 .setShardCount(count)));
     }

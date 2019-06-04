@@ -115,4 +115,11 @@ public class ShardAwareStore<K extends Comparable<K>, V extends Serializable> im
         return delete(Flux.fromIterable(keySet))
                 .then(Mono.fromRunnable(keySet::clear));
     }
+
+    @Override
+    public String toString() {
+        return "ShardAwareStore{"
+                + "valueStore=" + valueStore
+                + '}';
+    }
 }
