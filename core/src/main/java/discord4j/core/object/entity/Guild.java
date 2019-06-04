@@ -282,6 +282,15 @@ public final class Guild implements Entity {
     }
 
     /**
+     * Gets the Premium Tier for the guild
+     *
+     * @return The Premium Tier for the guild.
+     */
+    public PremiumTier getPremiumTier() {
+        return PremiumTier.of(data.getPremiumTier());
+    }
+
+    /**
      * Gets the level of verification required for the guild.
      *
      * @return The level of verification required for the guild.
@@ -493,6 +502,21 @@ public final class Guild implements Entity {
         return getGatewayData()
                 .map(guildBean -> OptionalInt.of(guildBean.getMemberCount()))
                 .orElseGet(OptionalInt::empty);
+    }
+
+    /**
+     * Gets the total number of members in the guild with Subscription using Boost, if present.
+     *
+     * @return The total number of members in the guild with Subscription using Boost, if present.
+     *
+     * @implNote If the underlying {@link discord4j.core.DiscordClientBuilder#getStoreService() store} does not save
+     * {@link GuildBean} instances <b>OR</b> the bot is currently not logged in then the returned {@code Optional} will
+     * always be empty.
+     */
+    public OptionalInt getPremiumSubcriptionsCount() {
+        return getGatewayData()
+            .map(guildBean -> OptionalInt.of(guildBean.getPremiumSubscriptionsCount()))
+            .orElseGet(OptionalInt::empty);
     }
 
     /**
@@ -1170,6 +1194,59 @@ public final class Guild implements Entity {
             switch (value) {
                 case 0: return ALL_MESSAGES;
                 case 1: return ONLY_MENTIONS;
+                default: return EntityUtil.throwUnsupportedDiscordValue(value);
+            }
+        }
+    }
+
+    /**
+     * Represent the server boost tier of the {@link Guild}
+     * @see <a href="https://support.discordapp.com/hc/es/articles/360028038352">Server Boost</a>
+     */
+    public enum PremiumTier {
+
+        NONE(0),
+
+        TIER_1(1),
+
+        TIER_2(2),
+
+        TIER_3(3);
+
+        /** The underlying value as represented by Discord. */
+        private final int value;
+
+        /**
+         * Constructs a {@code Guild.PremiumTier}.
+         *
+         * @param value The underlying value as represented by Discord.
+         */
+        PremiumTier(final int value) {
+            this.value = value;
+        }
+
+        /**
+         * Gets the underlying value as represented by Discord.
+         *
+         * @return The underlying value as represented by Discord.
+         */
+        public int getValue() {
+            return value;
+        }
+
+        /**
+         * Gets the boost tier of the guild. It is guaranteed that invoking {@link #getValue()} from the
+         * returned enum will equal ({@code ==}) the supplied {@code value}.
+         *
+         * @param value The underlying value as represented by Discord.
+         * @return The boost tier of the guild.
+         */
+        public static PremiumTier of(final int value) {
+            switch (value) {
+                case 0: return NONE;
+                case 1: return TIER_1;
+                case 2: return TIER_2;
+                case 3: return TIER_3;
                 default: return EntityUtil.throwUnsupportedDiscordValue(value);
             }
         }

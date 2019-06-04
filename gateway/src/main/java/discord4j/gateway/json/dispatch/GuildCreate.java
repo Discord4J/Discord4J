@@ -49,6 +49,10 @@ public class GuildCreate implements Dispatch {
     private String name;
     @JsonProperty("mfa_level")
     private int mfaLevel;
+    @JsonProperty("premium_tier")
+    private int premiumTier;
+    @JsonProperty("premium_subscription_count")
+    private int premiumSubcriptionsCount;
     private GuildMemberResponse[] members;
     @JsonProperty("member_count")
     private int memberCount;
@@ -88,6 +92,10 @@ public class GuildCreate implements Dispatch {
     public VoiceState[] getVoiceStates() {
         return voiceStates;
     }
+
+    public int getPremiumTier() { return premiumTier; }
+
+    public int getPremiumSubcriptionsCount() { return premiumSubcriptionsCount; }
 
     public int getVerificationLevel() {
         return verificationLevel;
@@ -211,6 +219,8 @@ public class GuildCreate implements Dispatch {
         return "GuildCreate{" +
                 "voiceStates=" + Arrays.toString(voiceStates) +
                 ", verificationLevel=" + verificationLevel +
+                ", premiumTier=" + premiumTier +
+                ", premiumSubcriptionsCount=" + premiumSubcriptionsCount +
                 ", unavailable=" + unavailable +
                 ", systemChannelId=" + systemChannelId +
                 ", splash='" + splash + '\'' +

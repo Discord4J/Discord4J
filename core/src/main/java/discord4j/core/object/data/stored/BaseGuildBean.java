@@ -45,6 +45,8 @@ public class BaseGuildBean implements Serializable {
     private int afkTimeout;
     @Nullable
     private Long embedChannelId;
+    private int premiumTier;
+    private int premiumSubscriptionsCount;
     private int verificationLevel;
     private int defaultMessageNotifications;
     private int explicitContentFilter;
@@ -71,6 +73,8 @@ public class BaseGuildBean implements Serializable {
         afkTimeout = guildCreate.getAfkTimeout();
         embedChannelId = guildCreate.getEmbedChannelId();
         verificationLevel = guildCreate.getVerificationLevel();
+        premiumTier = guildCreate.getPremiumTier();
+
         defaultMessageNotifications = guildCreate.getDefaultMessageNotifications();
         explicitContentFilter = guildCreate.getExplicitContentFilter();
 
@@ -101,6 +105,7 @@ public class BaseGuildBean implements Serializable {
         afkTimeout = guildUpdate.getAfkTimeout();
         embedChannelId = guildUpdate.getEmbedChannelId();
         verificationLevel = guildUpdate.getVerificationLevel();
+        premiumTier = guildUpdate.getPremiumTier();
         defaultMessageNotifications = guildUpdate.getDefaultMessageNotifications();
         explicitContentFilter = guildUpdate.getExplicitContentFilter();
 
@@ -131,6 +136,7 @@ public class BaseGuildBean implements Serializable {
         afkTimeout = response.getAfkTimeout();
         embedChannelId = response.getEmbedChannelId();
         verificationLevel = response.getVerificationLevel();
+        premiumTier = response.getPremiumTier();
         defaultMessageNotifications = response.getDefaultMessageNotifications();
         explicitContentFilter = response.getExplicitContentFilter();
 
@@ -161,6 +167,7 @@ public class BaseGuildBean implements Serializable {
         afkTimeout = toCopy.getAfkTimeout();
         embedChannelId = toCopy.getEmbedChannelId();
         verificationLevel = toCopy.getVerificationLevel();
+        premiumTier = toCopy.getPremiumTier();
         defaultMessageNotifications = toCopy.getDefaultMessageNotifications();
         explicitContentFilter = toCopy.getExplicitContentFilter();
 
@@ -269,6 +276,8 @@ public class BaseGuildBean implements Serializable {
         this.verificationLevel = verificationLevel;
     }
 
+    public int getPremiumTier() { return premiumTier; }
+
     public int getDefaultMessageNotifications() {
         return defaultMessageNotifications;
     }
@@ -357,6 +366,7 @@ public class BaseGuildBean implements Serializable {
                 ", afkChannelId=" + afkChannelId +
                 ", afkTimeout=" + afkTimeout +
                 ", embedChannelId=" + embedChannelId +
+                ", premiumTier=" + premiumTier +
                 ", verificationLevel=" + verificationLevel +
                 ", defaultMessageNotifications=" + defaultMessageNotifications +
                 ", explicitContentFilter=" + explicitContentFilter +
