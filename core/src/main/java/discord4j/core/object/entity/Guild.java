@@ -1200,17 +1200,22 @@ public final class Guild implements Entity {
     }
 
     /**
-     * Represent the server boost tier of the {@link Guild}
-     * @see <a href="https://support.discordapp.com/hc/es/articles/360028038352">Server Boost</a>
+     * Represent the server Premium Tier (aka boost level) of the {@link Guild}
+     * @see <a href="https://support.discordapp.com/hc/en/articles/360028038352">Server Boost info</a>
+     * @see <a href="https://discordapp.com/developers/docs/resources/guild#guild-object-premium-tier">Premium Tier docs</a>
      */
     public enum PremiumTier {
 
+        /** no Premium Tier **/
         NONE(0),
 
+        /** Premium Tier 1 (Boost Level 1) **/
         TIER_1(1),
 
+        /** Premium Tier 2 (Boost Level 2) **/
         TIER_2(2),
 
+        /** Premium Tier 3 (Boost Level 3) **/
         TIER_3(3);
 
         /** The underlying value as represented by Discord. */
@@ -1235,11 +1240,11 @@ public final class Guild implements Entity {
         }
 
         /**
-         * Gets the boost tier of the guild. It is guaranteed that invoking {@link #getValue()} from the
+         * Gets the Premium Tier (aka boost level) of the Guild. It is guaranteed that invoking {@link #getValue()} from the
          * returned enum will equal ({@code ==}) the supplied {@code value}.
          *
          * @param value The underlying value as represented by Discord.
-         * @return The boost tier of the guild.
+         * @return The Premium Tier (aka boost level) of the {Guild.
          */
         public static PremiumTier of(final int value) {
             switch (value) {
