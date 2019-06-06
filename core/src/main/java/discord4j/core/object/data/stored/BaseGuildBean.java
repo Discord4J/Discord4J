@@ -276,7 +276,9 @@ public class BaseGuildBean implements Serializable {
         this.verificationLevel = verificationLevel;
     }
 
-    public int getPremiumTier() { return premiumTier; }
+    public int getPremiumTier() {
+        return premiumTier;
+    }
 
     public int getDefaultMessageNotifications() {
         return defaultMessageNotifications;

@@ -93,9 +93,13 @@ public class GuildCreate implements Dispatch {
         return voiceStates;
     }
 
-    public int getPremiumTier() { return premiumTier; }
+    public int getPremiumTier() {
+        return premiumTier;
+    }
 
-    public int getPremiumSubcriptionsCount() { return premiumSubcriptionsCount; }
+    public int getPremiumSubcriptionsCount() {
+        return premiumSubcriptionsCount;
+    }
 
     public int getVerificationLevel() {
         return verificationLevel;

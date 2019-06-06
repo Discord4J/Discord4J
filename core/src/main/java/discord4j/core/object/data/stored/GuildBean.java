@@ -97,7 +97,9 @@ public final class GuildBean extends BaseGuildBean {
         return premiumSubscriptionsCount;
     }
 
-    public void setPremiumSubscriptionsCount(final Integer premiumSubscriptionsCount) { this.premiumSubscriptionsCount = premiumSubscriptionsCount; }
+    public void setPremiumSubscriptionsCount(final Integer premiumSubscriptionsCount) {
+        this.premiumSubscriptionsCount = premiumSubscriptionsCount;
+    }
 
     public int getMemberCount() {
         return memberCount;
