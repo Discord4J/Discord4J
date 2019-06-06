@@ -89,7 +89,14 @@ class BaseChannel implements Channel {
 
     @Override
     public final boolean equals(@Nullable final Object obj) {
-        return EntityUtil.equals(this, obj);
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || !BaseChannel.class.isAssignableFrom(obj.getClass())) {
+            return false;
+        }
+        BaseChannel that = (BaseChannel) obj;
+        return getId().equals(that.getId());
     }
 
     @Override

@@ -105,15 +105,13 @@ public final class GuildEmoji implements Entity {
     /**
      * Requests to retrieve the roles this emoji is whitelisted to.
      * <p>
-     * The returned {@code Flux} will emit items in order based off their <i>natural</i> position, which is indicated
-     * visually in the Discord client. For roles, the "lowest" role will be emitted first.
+     * The order of items emitted by the returned {@code Flux} is unspecified.
      *
      * @return A {@link Flux} that continually emits the {@link Role roles} this emoji is whitelisted for. if an error
      * is received, it is emitted through the {@code Flux}.
      */
     public Flux<Role> getRoles() {
-        return Flux.fromIterable(getRoleIds()).flatMap(id -> getClient().getRoleById(getGuildId(), id))
-                .sort(Comparator.comparing(Role::getRawPosition).thenComparing(Role::getId));
+        return Flux.fromIterable(getRoleIds()).flatMap(id -> getClient().getRoleById(getGuildId(), id));
     }
 
     /**

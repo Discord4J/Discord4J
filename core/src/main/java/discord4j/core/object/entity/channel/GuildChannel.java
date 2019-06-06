@@ -21,6 +21,8 @@ import discord4j.core.object.PermissionOverwrite;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.util.PermissionSet;
 import discord4j.core.object.util.Snowflake;
+import discord4j.core.util.OrderUtil;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
 
@@ -92,6 +94,25 @@ public interface GuildChannel extends Channel {
 
     /**
      * Requests to retrieve the position of the channel relative to other channels in the guild.
+     * <p>
+     * This is determined by the index of this channel in the {@link OrderUtil#orderGuildChannels(Flux) sorted} list of channels of the guild.
+     * <p>
+     * Warning: Because this method must sort the guild channels, it is inefficient to make repeated invocations for the
+     * same set of channels (meaning that channels haven't been added or removed). For example, instead of writing:
+     * <pre>
+     * {@code
+     * guild.getChannels()
+     *   .flatMap(c -> c.getPosition().map(pos -> c.getName() + " : " + pos))
+     * }
+     * </pre>
+     * It would be much more efficient to write:
+     * <pre>
+     * {@code
+     * guild.getChannels()
+     *   .transform(OrderUtil::orderGuildChannels)
+     *   .index((pos, c) -> c.getName() + " : " + pos)
+     * }
+     * </pre>
      *
      * @return A {@link Mono} where, upon successful completion, emits the position of the channel. If an error is
      * received, it is emitted through the {@code Mono}.

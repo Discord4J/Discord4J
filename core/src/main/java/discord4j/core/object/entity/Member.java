@@ -27,6 +27,7 @@ import discord4j.core.object.util.PermissionSet;
 import discord4j.core.object.util.Snowflake;
 import discord4j.core.spec.BanQuerySpec;
 import discord4j.core.spec.GuildMemberEditSpec;
+import discord4j.core.util.OrderUtil;
 import discord4j.core.util.PermissionUtil;
 import discord4j.store.api.util.LongLongTuple2;
 import reactor.core.publisher.Flux;
@@ -89,15 +90,14 @@ public final class Member extends User {
     /**
      * Requests to retrieve the user's guild roles.
      * <p>
-     * The returned {@code Flux} will emit items in order based off their <i>natural</i> position, which is indicated
-     * visually in the Discord client. For roles, the "lowest" role will be emitted first.
+     * The order of items emitted by the returned {@code Flux} is unspecified.
      *
      * @return A {@link Flux} that continually emits the user's guild {@link Role roles}. If an error is received, it is
      * emitted through the {@code Flux}.
      */
     public Flux<Role> getRoles() {
-        return Flux.fromIterable(getRoleIds()).flatMap(id -> getClient().getRoleById(getGuildId(), id))
-                .sort(Comparator.comparing(Role::getRawPosition).thenComparing(Role::getId));
+        return Flux.fromIterable(getRoleIds())
+                .flatMap(id -> getClient().getRoleById(getGuildId(), id));
     }
 
     /**
@@ -111,7 +111,7 @@ public final class Member extends User {
      */
     public Mono<Role> getHighestRole() {
         return MathFlux.max(Flux.fromIterable(getRoleIds()).flatMap(id -> getClient().getRoleById(getGuildId(), id)),
-                            Comparator.comparing(Role::getRawPosition).thenComparing(Role::getId));
+                            OrderUtil.ROLE_ORDER);
     }
 
     /**
@@ -356,20 +356,22 @@ public final class Member extends User {
             return Mono.error(new IllegalArgumentException("The provided member is in a different guild."));
         }
 
-        // A member cannot be higher in the role hierarchy than himself
+        // A member is not considered to be higher in the role hierarchy than himself
         if (this.equals(otherMember)) {
             return Mono.just(false);
         }
 
         return getGuild().map(Guild::getOwnerId)
                 .flatMap(ownerId -> {
+                    // the owner of the guild is higher in the role hierarchy than everyone
                     if (ownerId.equals(getId())) {
                         return Mono.just(true);
                     }
                     if (ownerId.equals(otherMember.getId())) {
                         return Mono.just(false);
                     }
-                    return otherMember.getRoles().collectList().flatMap(this::hasHigherRoles);
+
+                    return hasHigherRoles(otherMember.getRoleIds());
                 });
     }
 
@@ -390,27 +392,41 @@ public final class Member extends User {
 
     /**
      * Requests to determine if the position of this member's highest role is greater than the highest position of the
-     * provided roles or signal IllegalArgumentException if the provided roles are from a different guild than this
-     * member.
+     * provided roles.
+     * <p>
+     * The behavior of this operation is undefined if a given role is from a different guild.
      *
-     * @param otherRoles The list of roles to compare in the role hierarchy with this member's roles.
+     * @param otherRoles The set of roles to compare in the role hierarchy with this member's roles.
      * @return A {@link Mono} where, upon successful completion, emits {@code true} if the position of this member's
      * highest role is greater than the highest position of the provided roles, {@code false} otherwise.
      * If an error is received it is emitted through the {@code Mono}.
      */
-    public Mono<Boolean> hasHigherRoles(Iterable<Role> otherRoles) {
-        for (Role role : otherRoles) {
-            if (!role.getGuildId().equals(getGuildId())) {
-                return Mono.error(new IllegalArgumentException("The provided role with ID " + role.getId().asString()
-                        + " is from a different guild."));
-            }
-        }
+    public Mono<Boolean> hasHigherRoles(Set<Snowflake> otherRoles) {
+        return getGuild()
+                .flatMapMany(Guild::getRoles)
+                .transform(OrderUtil::orderRoles)
+                .collectList()
+                .map(guildRoles -> { // Get the sorted list of guild roles
+                    Set<Snowflake> thisRoleIds = getRoleIds();
 
-        Mono<Integer> getThisHighestPosition = getHighestRole().flatMap(Role::getPosition).defaultIfEmpty(0);
-        Mono<Integer> getOtherHighestPosition = MathFlux.max(Flux.fromIterable(otherRoles).flatMap(Role::getPosition))
-                .defaultIfEmpty(0);
+                    // Get the position of this member's highest role by finding the maximum element in guildRoles which
+                    // the member has and then finding its index in the sorted list of guild roles (the role's actual
+                    // position). The @everyone role is not included, so if we end up with empty, that is their only
+                    // role which is always at position 0.
+                    int thisHighestRolePos = guildRoles.stream()
+                            .filter(role -> thisRoleIds.contains(role.getId()))
+                            .max(OrderUtil.ROLE_ORDER)
+                            .map(guildRoles::indexOf)
+                            .orElse(0);
 
-        return Mono.zip(getThisHighestPosition, getOtherHighestPosition, (p1, p2) -> p1 > p2);
+                    int otherHighestPos = guildRoles.stream()
+                            .filter(role -> otherRoles.contains(role.getId()))
+                            .max(OrderUtil.ROLE_ORDER)
+                            .map(guildRoles::indexOf)
+                            .orElse(0);
+
+                    return thisHighestRolePos > otherHighestPos;
+                });
     }
 
     /**
@@ -420,10 +436,11 @@ public final class Member extends User {
      * represented in the Discord client. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Color> getColor() {
-        return getRoles()
+        Flux<Role> rolesWithColor = getRoles().filter(it -> !it.getColor().equals(Role.DEFAULT_COLOR));
+
+        return MathFlux.max(rolesWithColor, OrderUtil.ROLE_ORDER)
                 .map(Role::getColor)
-                .filter(color -> !color.equals(Role.DEFAULT_COLOR))
-                .last(Role.DEFAULT_COLOR);
+                .defaultIfEmpty(Role.DEFAULT_COLOR);
     }
 
     /**
