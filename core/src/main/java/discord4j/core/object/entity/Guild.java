@@ -333,7 +333,8 @@ public final class Guild implements Entity {
     /**
      * Requests to retrieve the guild's roles.
      * <p>
-     * The order of items emitted by the returned {@code Flux} is unspecified.
+     * The order of items emitted by the returned {@code Flux} is unspecified. Use {@link OrderUtil#orderRoles(Flux)}
+     * to consistently order roles.
      *
      * @return A {@link Flux} that continually emits the guild's {@link Role roles}. If an error is received, it is
      * emitted through the {@code Flux}.
@@ -577,7 +578,8 @@ public final class Guild implements Entity {
     /**
      * Requests to retrieve the guild's channels.
      * <p>
-     * The order of items emitted by the returned {@code Flux} is unspecified.
+     * The order of items emitted by the returned {@code Flux} is unspecified. Use {@link OrderUtil#orderGuildChannels(Flux)}
+     * to consistently order channels.
      *
      * @return A {@link Flux} that continually emits the guild's {@link GuildChannel channels}. If an error is received, it is
      * emitted through the {@code Flux}.

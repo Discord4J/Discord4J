@@ -90,7 +90,8 @@ public final class Member extends User {
     /**
      * Requests to retrieve the user's guild roles.
      * <p>
-     * The order of items emitted by the returned {@code Flux} is unspecified.
+     * The order of items emitted by the returned {@code Flux} is unspecified. Use {@link OrderUtil#orderRoles(Flux)}
+     * to consistently order roles.
      *
      * @return A {@link Flux} that continually emits the user's guild {@link Role roles}. If an error is received, it is
      * emitted through the {@code Flux}.

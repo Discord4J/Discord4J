@@ -25,7 +25,9 @@ import discord4j.core.object.util.Snowflake;
 import reactor.core.publisher.Flux;
 
 import java.util.*;
+import java.util.function.Function;
 
+/** A utility class for the sorting of {@link Role roles} and {@link GuildChannel guild channels}. */
 public final class OrderUtil {
 
     /**
@@ -70,6 +72,14 @@ public final class OrderUtil {
      * Sorts {@link GuildChannel guild channels} according to visual ordering in Discord. Channels at the top of the
      * list are first. This sorts channels within the same category according to {@link #BUCKETED_CHANNEL_ORDER} and
      * then sorts those categories according to {@link #CHANNEL_ORDER}.
+     * <p>
+     * This function can be used with {@link Flux#transform(Function)} for better chaining:
+     * <pre>
+     * {@code
+     * guild.getChannels()
+     *   .transform(OrderUtil::orderGuildChannels)
+     * }
+     * </pre>
      *
      * @param channels The guild channels to sort.
      * @return The sorted guild channels.
@@ -83,6 +93,14 @@ public final class OrderUtil {
     /**
      * Sorts {@link Role roles} according to visual ordering in Discord. Roles at the bottom of the list are first. This
      * sorts roles according to {@link #ROLE_ORDER}.
+     * <p>
+     * This function can be used with {@link Flux#transform(Function)} for better chaining:
+     * <pre>
+     * {@code
+     * guild.getRoles()
+     *   .transform(OrderUtil::orderRoles)
+     * }
+     * </pre>
      *
      * @param roles The roles to sort.
      * @return The sorted roles.
