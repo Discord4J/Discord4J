@@ -124,6 +124,16 @@ public final class Member extends User {
     }
 
     /**
+     * Gets when the user boost the guild, if present.
+     *
+     * @return When the user boost the guild, if present.
+     */
+    public Optional<Instant> getPremiumTime() {
+        return Optional.ofNullable(data.getPremiumSince())
+                .map(timestamp -> DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(timestamp, Instant::from));
+    }
+
+    /**
      * Gets the ID of the guild this user is associated to.
      *
      * @return The ID of the guild this user is associated to.
