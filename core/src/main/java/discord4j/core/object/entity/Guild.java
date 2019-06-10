@@ -119,7 +119,7 @@ public final class Guild implements Entity {
      */
     public Optional<String> getIconUrl(final Image.Format format) {
         return Optional.ofNullable(data.getIcon())
-                .filter(ignored -> (format == PNG) || (format == JPEG) || (format == WEB_P))
+                .filter(ignored -> (format == PNG) || (format == JPEG) || (format == WEB_P) || (format == GIF))
                 .map(icon -> ImageUtil.getUrl(String.format(ICON_IMAGE_PATH, getId().asString(), icon), format));
     }
 
