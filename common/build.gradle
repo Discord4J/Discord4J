@@ -2,6 +2,7 @@ apply plugin: 'com.gorylenko.gradle-git-properties'
 
 dependencies {
     compile "io.projectreactor.netty:reactor-netty"
+    compile "io.projectreactor.addons:reactor-pool:$reactor_pool_version"
     compile "com.fasterxml.jackson.core:jackson-databind:$jackson_version"
     compile "com.fasterxml.jackson.datatype:jackson-datatype-jdk8:$jackson_version"
 
