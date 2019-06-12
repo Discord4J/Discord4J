@@ -32,6 +32,7 @@ public final class GuildBean extends BaseGuildBean {
 
     private String joinedAt;
     private boolean large;
+    private int premiumSubscriptionsCount;
     private int memberCount;
     private long[] members;
     private long[] channels;
@@ -42,6 +43,7 @@ public final class GuildBean extends BaseGuildBean {
         this.joinedAt = guildCreate.getJoinedAt();
         this.large = guildCreate.isLarge();
         this.memberCount = guildCreate.getMemberCount();
+        this.premiumSubscriptionsCount = guildCreate.getPremiumSubcriptionsCount();
 
         members = Arrays.stream(guildCreate.getMembers())
                 .map(GuildMemberResponse::getUser)
@@ -91,6 +93,14 @@ public final class GuildBean extends BaseGuildBean {
         this.large = large;
     }
 
+    public int getPremiumSubscriptionsCount() {
+        return premiumSubscriptionsCount;
+    }
+
+    public void setPremiumSubscriptionsCount(final Integer premiumSubscriptionsCount) {
+        this.premiumSubscriptionsCount = premiumSubscriptionsCount;
+    }
+
     public int getMemberCount() {
         return memberCount;
     }
@@ -121,6 +131,7 @@ public final class GuildBean extends BaseGuildBean {
                 "joinedAt='" + joinedAt + '\'' +
                 ", large=" + large +
                 ", memberCount=" + memberCount +
+                ", premiumSubscriptionsCount=" + premiumSubscriptionsCount +
                 ", members=" + Arrays.toString(members) +
                 ", channels=" + Arrays.toString(channels) +
                 "} " + super.toString();

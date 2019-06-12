@@ -65,6 +65,10 @@ public class GuildResponse {
     private boolean widgetEnabled;
     @JsonProperty("verification_level")
     private int verificationLevel;
+    @JsonProperty("premium_tier")
+    private int premiumTier;
+    @JsonProperty("premium_subscription_count")
+    private int premiumSubcriptionsCount;
     @JsonProperty("owner_id")
     @UnsignedJson
     private long ownerId;
@@ -147,6 +151,14 @@ public class GuildResponse {
         return widgetEnabled;
     }
 
+    public int getPremiumTier() {
+        return premiumTier;
+    }
+
+    public int getPremiumSubcriptionsCount() {
+        return premiumSubcriptionsCount;
+    }
+
     public int getVerificationLevel() {
         return verificationLevel;
     }
@@ -171,6 +183,8 @@ public class GuildResponse {
     public String toString() {
         return "GuildResponse{" +
                 "mfaLevel=" + mfaLevel +
+                ", premiumTier=" + premiumTier +
+                ", premiumSubcriptionsCount=" + premiumSubcriptionsCount +
                 ", emojis=" + Arrays.toString(emojis) +
                 ", applicationId=" + applicationId +
                 ", name='" + name + '\'' +
