@@ -467,7 +467,19 @@ public final class Message implements Entity {
         CHANNEL_PINNED_MESSAGE(6),
 
         /** A message created when an user joins a guild. */
-        GUILD_MEMBER_JOIN(7);
+        GUILD_MEMBER_JOIN(7),
+
+        /** A message created when an user boost a guild. */
+        USER_PREMIUM_GUILD_SUBSCRIPTION(8),
+
+        /** A message created when an user boost a guild and the guild reach the tier 1. */
+        USER_PREMIUM_GUILD_SUBSCRIPTION_TIER_1(9),
+
+        /** A message created when an user boost a guild and the guild reach the tier 2. */
+        USER_PREMIUM_GUILD_SUBSCRIPTION_TIER_2(10),
+
+        /** A message created when an user boost a guild and the guild reach the tier 3. */
+        USER_PREMIUM_GUILD_SUBSCRIPTION_TIER_3(11);
 
         /** The underlying value as represented by Discord. */
         private final int value;
@@ -507,6 +519,10 @@ public final class Message implements Entity {
                 case 5: return CHANNEL_ICON_CHANGE;
                 case 6: return CHANNEL_PINNED_MESSAGE;
                 case 7: return GUILD_MEMBER_JOIN;
+                case 8: return USER_PREMIUM_GUILD_SUBSCRIPTION;
+                case 9: return USER_PREMIUM_GUILD_SUBSCRIPTION_TIER_1;
+                case 10: return USER_PREMIUM_GUILD_SUBSCRIPTION_TIER_2;
+                case 11: return USER_PREMIUM_GUILD_SUBSCRIPTION_TIER_3;
                 default: return EntityUtil.throwUnsupportedDiscordValue(value);
             }
         }

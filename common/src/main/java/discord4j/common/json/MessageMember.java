@@ -16,6 +16,8 @@ public class MessageMember {
     private boolean deaf;
     @JsonProperty("joined_at")
     private String joinedAt;
+    @JsonProperty("premium_since")
+    private String premiumSince;
 
     public long[] getRoles() {
         return roles;
@@ -38,6 +40,11 @@ public class MessageMember {
         return joinedAt;
     }
 
+    @Nullable
+    public String getPremiumSince() {
+        return premiumSince;
+    }
+
     @Override
     public String toString() {
         return "MessageMember{" +
@@ -46,6 +53,7 @@ public class MessageMember {
             ", mute=" + mute +
             ", deaf=" + deaf +
             ", joinedAt='" + joinedAt + '\'' +
+            ", premiumSince='" + premiumSince + '\'' +
             '}';
     }
 

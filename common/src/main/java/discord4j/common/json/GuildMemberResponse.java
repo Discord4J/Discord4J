@@ -31,6 +31,8 @@ public class GuildMemberResponse {
     private long[] roles;
     @JsonProperty("joined_at")
     private String joinedAt;
+    @JsonProperty("premium_since")
+    private String premiumSince;
     private boolean deaf;
     private boolean mute;
 
@@ -51,6 +53,11 @@ public class GuildMemberResponse {
         return joinedAt;
     }
 
+    @Nullable
+    public String getPremiumSince() {
+        return premiumSince;
+    }
+
     public boolean isDeaf() {
         return deaf;
     }
@@ -66,6 +73,7 @@ public class GuildMemberResponse {
                 ", nick='" + nick + '\'' +
                 ", roles=" + Arrays.toString(roles) +
                 ", joinedAt='" + joinedAt + '\'' +
+                ", premiumSince='" + premiumSince + '\'' +
                 ", deaf=" + deaf +
                 ", mute=" + mute +
                 '}';

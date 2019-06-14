@@ -35,29 +35,35 @@ public final class MemberBean implements Serializable {
     private String nick;
     private long[] roles;
     private String joinedAt;
+    @Nullable
+    private String premiumSince;
 
     public MemberBean(final GuildMemberResponse response) {
         nick = response.getNick();
         roles = response.getRoles();
         joinedAt = response.getJoinedAt();
+        premiumSince = response.getPremiumSince();
     }
 
     public MemberBean(final MessageMember member) {
         nick = member.getNick();
         roles = member.getRoles();
         joinedAt = member.getJoinedAt();
+        premiumSince = member.getPremiumSince();
     }
 
     public MemberBean(final MemberBean toCopy, final GuildMemberUpdate update) {
         nick = update.getNick();
         roles = update.getRoles();
         joinedAt = toCopy.getJoinedAt();
+        premiumSince = toCopy.getPremiumSince();
     }
 
     public MemberBean(final MemberBean toCopy) {
         nick = toCopy.getNick();
         roles = Arrays.copyOf(toCopy.getRoles(), toCopy.getRoles().length);
         joinedAt = toCopy.getJoinedAt();
+        premiumSince = toCopy.getPremiumSince();
     }
 
     public MemberBean() {}
@@ -87,12 +93,22 @@ public final class MemberBean implements Serializable {
         this.joinedAt = joinedAt;
     }
 
+    @Nullable
+    public String getPremiumSince() {
+        return premiumSince;
+    }
+
+    public void setPremiumSince(@Nullable final String premiumSince) {
+        this.premiumSince = premiumSince;
+    }
+
     @Override
     public String toString() {
         return "MemberBean{" +
                 "nick='" + nick + '\'' +
                 ", roles=" + Arrays.toString(roles) +
                 ", joinedAt='" + joinedAt + '\'' +
+                ", premiumSince='" + premiumSince + '\'' +
                 '}';
     }
 }

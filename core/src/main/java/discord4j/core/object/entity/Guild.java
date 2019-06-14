@@ -120,7 +120,7 @@ public final class Guild implements Entity {
      */
     public Optional<String> getIconUrl(final Image.Format format) {
         return Optional.ofNullable(data.getIcon())
-                .filter(ignored -> (format == PNG) || (format == JPEG) || (format == WEB_P))
+                .filter(ignored -> (format == PNG) || (format == JPEG) || (format == WEB_P) || (format == GIF))
                 .map(icon -> ImageUtil.getUrl(String.format(ICON_IMAGE_PATH, getId().asString(), icon), format));
     }
 
@@ -280,6 +280,15 @@ public final class Guild implements Entity {
      */
     public Mono<GuildChannel> getEmbedChannel() {
         return Mono.justOrEmpty(getEmbedChannelId()).flatMap(getClient()::getChannelById).cast(GuildChannel.class);
+    }
+
+    /**
+     * Gets the Premium Tier for the guild
+     *
+     * @return The Premium Tier for the guild.
+     */
+    public PremiumTier getPremiumTier() {
+        return PremiumTier.of(data.getPremiumTier());
     }
 
     /**
@@ -494,6 +503,21 @@ public final class Guild implements Entity {
         return getGatewayData()
                 .map(guildBean -> OptionalInt.of(guildBean.getMemberCount()))
                 .orElseGet(OptionalInt::empty);
+    }
+
+    /**
+     * Gets the total number of members in the guild with Subscription using Boost, if present.
+     *
+     * @return The total number of members in the guild with Subscription using Boost, if present.
+     *
+     * @implNote If the underlying {@link discord4j.core.DiscordClientBuilder#getStoreService() store} does not save
+     * {@link GuildBean} instances <b>OR</b> the bot is currently not logged in then the returned {@code Optional} will
+     * always be empty.
+     */
+    public OptionalInt getPremiumSubcriptionsCount() {
+        return getGatewayData()
+            .map(guildBean -> OptionalInt.of(guildBean.getPremiumSubscriptionsCount()))
+            .orElseGet(OptionalInt::empty);
     }
 
     /**
@@ -1152,6 +1176,64 @@ public final class Guild implements Entity {
             switch (value) {
                 case 0: return ALL_MESSAGES;
                 case 1: return ONLY_MENTIONS;
+                default: return EntityUtil.throwUnsupportedDiscordValue(value);
+            }
+        }
+    }
+
+    /**
+     * Represent the server Premium Tier (aka boost level) of the {@link Guild}
+     * @see <a href="https://support.discordapp.com/hc/en/articles/360028038352">Server Boost info</a>
+     * @see <a href="https://discordapp.com/developers/docs/resources/guild#guild-object-premium-tier">Premium Tier docs</a>
+     */
+    public enum PremiumTier {
+
+        /** no Premium Tier **/
+        NONE(0),
+
+        /** Premium Tier 1 (Boost Level 1) **/
+        TIER_1(1),
+
+        /** Premium Tier 2 (Boost Level 2) **/
+        TIER_2(2),
+
+        /** Premium Tier 3 (Boost Level 3) **/
+        TIER_3(3);
+
+        /** The underlying value as represented by Discord. */
+        private final int value;
+
+        /**
+         * Constructs a {@code Guild.PremiumTier}.
+         *
+         * @param value The underlying value as represented by Discord.
+         */
+        PremiumTier(final int value) {
+            this.value = value;
+        }
+
+        /**
+         * Gets the underlying value as represented by Discord.
+         *
+         * @return The underlying value as represented by Discord.
+         */
+        public int getValue() {
+            return value;
+        }
+
+        /**
+         * Gets the Premium Tier (aka boost level) of the Guild. It is guaranteed that invoking {@link #getValue()} from the
+         * returned enum will equal ({@code ==}) the supplied {@code value}.
+         *
+         * @param value The underlying value as represented by Discord.
+         * @return The Premium Tier (aka boost level) of the {Guild.
+         */
+        public static PremiumTier of(final int value) {
+            switch (value) {
+                case 0: return NONE;
+                case 1: return TIER_1;
+                case 2: return TIER_2;
+                case 3: return TIER_3;
                 default: return EntityUtil.throwUnsupportedDiscordValue(value);
             }
         }
