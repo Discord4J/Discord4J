@@ -83,7 +83,7 @@ public class GuildMemberEditSpec implements AuditSpec<GuildMemberModifyRequest> 
     }
 
     /**
-     * Sets the new role identifiers the targeted {@link Member} is assigned.  Requires the
+     * Sets the new role identifiers the targeted {@link Member} is assigned. Requires the
      * {@link Permission#MANAGE_ROLES} permission.
      *
      * @param roles The set of role identifiers.
