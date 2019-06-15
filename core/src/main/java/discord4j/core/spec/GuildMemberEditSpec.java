@@ -48,9 +48,8 @@ public class GuildMemberEditSpec implements AuditSpec<GuildMemberModifyRequest> 
     }
 
     /**
-     * Sets whether the targeted {@link Member} is muted in voice channels. Requires the
+     * Sets whether the targeted {@link Member} is muted in voice channels, if they are connected to voice. Requires the
      * {@link Permission#MUTE_MEMBERS} permission.
-     * <br>As a note, you cannot mute a Member that isn't already in a VoiceChannel
      *
      * @param mute {@code true} if the {@link Member} should be muted, {@code false} otherwise.
      * @return This spec.
@@ -61,9 +60,8 @@ public class GuildMemberEditSpec implements AuditSpec<GuildMemberModifyRequest> 
     }
 
     /**
-     * Sets whether the targeted {@link Member} is deafened in voice channels. Requires the
+     * Sets whether the targeted {@link Member} is deafened in voice channels, if they are connected to voice. Requires the
      * {@link Permission#DEAFEN_MEMBERS} permission.
-     * <br>As a note, you cannot deafen a Member that isn't already in a VoiceChannel
      *
      * @param deaf {@code true} if the {@link Member} should be deafened, {@code false} otherwise.
      * @return This spec.
