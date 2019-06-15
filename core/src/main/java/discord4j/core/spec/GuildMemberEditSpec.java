@@ -39,7 +39,7 @@ public class GuildMemberEditSpec implements AuditSpec<GuildMemberModifyRequest> 
      * Sets the new voice channel to move the targeted {@link Member}, if they are connected to voice. Requires the
      * {@link Permission#MOVE_MEMBERS} permission.
      *
-     * @param channel The voice channel identifier.
+     * @param channel The voice channel identifier or null to disconnect from voice channel.
      * @return This spec.
      */
     public GuildMemberEditSpec setNewVoiceChannel(@Nullable Snowflake channel) {
