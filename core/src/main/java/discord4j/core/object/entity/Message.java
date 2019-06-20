@@ -411,6 +411,8 @@ public final class Message implements Entity {
      *
      * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the messaged was pinned. If
      * an error is received, it is emitted through the {@code Mono}.
+     * <br>
+     * The max pinned messages in a Text Channel actually is 50.
      */
     public Mono<Void> pin() {
         return serviceMediator.getRestClient().getChannelService()
