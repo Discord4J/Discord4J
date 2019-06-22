@@ -101,4 +101,15 @@ public final class PresenceBean implements Serializable {
     public void setWebStatus(@Nullable String webStatus) {
         this.webStatus = webStatus;
     }
+
+    @Override
+    public String toString() {
+        return "PresenceBean{" +
+                "activity=" + activity +
+                ", status='" + status + '\'' +
+                ", desktopStatus='" + desktopStatus + '\'' +
+                ", mobileStatus='" + mobileStatus + '\'' +
+                ", webStatus='" + webStatus + '\'' +
+                '}';
+    }
 }
