@@ -23,6 +23,7 @@ import discord4j.core.object.util.PermissionSet;
 import discord4j.core.object.util.Snowflake;
 import discord4j.core.spec.RoleEditSpec;
 import discord4j.core.util.EntityUtil;
+import discord4j.core.util.OrderUtil;
 import discord4j.rest.json.request.PositionModifyRequest;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -73,8 +74,37 @@ public final class Role implements Entity {
         return data.getPosition();
     }
 
+    /**
+     * Requests to retrieve the position of the role relative to other roles in the guild.
+     * <p>
+     * This is determined by the index of this role in the {@link OrderUtil#orderRoles(Flux) sorted} list of roles of the guild.
+     * <p>
+     * Warning: Because this method must sort the guild roles, it is inefficient to make repeated invocations for the
+     * same set of roles (meaning that roles haven't been added or removed). For example, instead of writing:
+     * <pre>
+     * {@code
+     * guild.getRoles()
+     *   .flatMap(r -> r.getPosition().map(pos -> r.getName() + " : " + pos))
+     * }
+     * </pre>
+     * It would be much more efficient to write:
+     * <pre>
+     * {@code
+     * guild.getRoles()
+     *   .transform(OrderUtil::orderRoles)
+     *   .index((pos, r) -> r.getName() + " : " + pos)
+     * }
+     * </pre>
+     *
+     * @return A {@link Mono} where, upon successful completion, emits the position of the role. If an error is
+     * received, it is emitted through the {@code Mono}.
+     */
     public Mono<Integer> getPosition() {
-        return getGuild().flatMapMany(Guild::getRoles).collectList().map(list -> list.indexOf(this));
+        return getGuild()
+                .flatMapMany(Guild::getRoles)
+                .transform(OrderUtil::orderRoles)
+                .collectList()
+                .map(roles -> roles.indexOf(this));
     }
 
     /**
