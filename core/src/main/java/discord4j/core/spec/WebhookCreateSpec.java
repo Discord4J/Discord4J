@@ -50,7 +50,7 @@ public class WebhookCreateSpec implements AuditSpec<WebhookCreateRequest> {
      * @return This spec.
      */
     public WebhookCreateSpec setAvatar(@Nullable Image avatar) {
-        this.avatar = avatar == null ? null : avatar.getData();
+        this.avatar = avatar == null ? null : avatar.getDataUri();
         return this;
     }
 

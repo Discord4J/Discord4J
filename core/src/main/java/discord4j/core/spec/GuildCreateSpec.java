@@ -79,7 +79,7 @@ public class GuildCreateSpec implements Spec<GuildCreateRequest> {
      * @return This spec.
      */
     public GuildCreateSpec setIcon(@Nullable Image icon) {
-        this.icon = (icon == null) ? null : icon.getData();
+        this.icon = (icon == null) ? null : icon.getDataUri();
         return this;
     }
 

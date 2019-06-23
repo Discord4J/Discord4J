@@ -113,15 +113,13 @@ public final class Guild implements Entity {
     }
 
     /**
-     * Gets the icon URL of the guild, if present and in a supported format.
+     * Gets the icon URL of the guild, if present.
      *
-     * @param format The format for the URL. Supported format types are {@link Image.Format#PNG PNG},
-     * {@link Image.Format#JPEG JPEG}, and {@link Image.Format#WEB_P WebP}.
-     * @return The icon URL of the guild, if present and in a supported format.
+     * @param format The format for the URL.
+     * @return The icon URL of the guild, if present.
      */
     public Optional<String> getIconUrl(final Image.Format format) {
         return Optional.ofNullable(data.getIcon())
-                .filter(ignored -> (format == PNG) || (format == JPEG) || (format == WEB_P) || (format == GIF))
                 .map(icon -> ImageUtil.getUrl(String.format(ICON_IMAGE_PATH, getId().asString(), icon), format));
     }
 
@@ -137,15 +135,13 @@ public final class Guild implements Entity {
     }
 
     /**
-     * Gets the splash URL of the guild, if present and in a supported format.
+     * Gets the splash URL of the guild, if present.
      *
-     * @param format The format for the URL. Supported format types are {@link Image.Format#PNG PNG},
-     * {@link Image.Format#JPEG JPEG}, and {@link Image.Format#WEB_P WebP}.
-     * @return The splash URL of the guild, if present and in a supported format.
+     * @param format The format for the URL.
+     * @return The splash URL of the guild, if present.
      */
     public Optional<String> getSplashUrl(final Image.Format format) {
         return Optional.ofNullable(data.getSplash())
-                .filter(ignored -> (format == PNG) || (format == JPEG) || (format == WEB_P))
                 .map(splash -> ImageUtil.getUrl(String.format(SPLASH_IMAGE_PATH, getId().asString(), splash), format));
     }
 
@@ -161,15 +157,13 @@ public final class Guild implements Entity {
     }
 
     /**
-     * Gets the banner URL of the guild, if present and in a supported format.
+     * Gets the banner URL of the guild, if present.
      *
-     * @param format The format for the URL. Supported format types are {@link Image.Format#PNG PNG},
-     * {@link Image.Format#JPEG JPEG}, and {@link Image.Format#WEB_P WebP}.
-     * @return The banner URL of the guild, if present and in a supported format.
+     * @param format The format for the URL.
+     * @return The banner URL of the guild, if present.
      */
     public Optional<String> getBannerUrl(final Image.Format format) {
         return Optional.ofNullable(data.getBanner())
-            .filter(ignored -> (format == PNG) || (format == JPEG) || (format == WEB_P))
             .map(splash -> ImageUtil.getUrl(String.format(BANNER_IMAGE_PATH, getId().asString(), splash), format));
     }
 
