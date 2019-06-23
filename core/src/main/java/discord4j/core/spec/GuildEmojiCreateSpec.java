@@ -55,7 +55,7 @@ public class GuildEmojiCreateSpec implements AuditSpec<GuildEmojiCreateRequest> 
      * @return This spec.
      */
     public GuildEmojiCreateSpec setImage(Image image) {
-        this.image = image.getData();
+        this.image = image.getDataUri();
         return this;
     }
 
