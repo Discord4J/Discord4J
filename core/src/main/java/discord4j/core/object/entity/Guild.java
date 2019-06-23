@@ -33,6 +33,7 @@ import discord4j.core.object.util.Snowflake;
 import discord4j.core.spec.*;
 import discord4j.core.util.EntityUtil;
 import discord4j.core.util.ImageUtil;
+import discord4j.core.util.OrderUtil;
 import discord4j.core.util.PaginationUtil;
 import discord4j.rest.json.request.NicknameModifyRequest;
 import discord4j.rest.json.response.AuditLogEntryResponse;
@@ -332,16 +333,15 @@ public final class Guild implements Entity {
     /**
      * Requests to retrieve the guild's roles.
      * <p>
-     * The returned {@code Flux} will emit items in order based off their <i>natural</i> position, which is indicated
-     * visually in the Discord client. For roles, the "lowest" role will be emitted first.
+     * The order of items emitted by the returned {@code Flux} is unspecified. Use {@link OrderUtil#orderRoles(Flux)}
+     * to consistently order roles.
      *
      * @return A {@link Flux} that continually emits the guild's {@link Role roles}. If an error is received, it is
      * emitted through the {@code Flux}.
      */
     public Flux<Role> getRoles() {
         return Flux.fromIterable(getRoleIds())
-                .flatMap(id -> getClient().getRoleById(getId(), id))
-                .sort(Comparator.comparing(Role::getRawPosition).thenComparing(Role::getId));
+                .flatMap(id -> getClient().getRoleById(getId(), id));
     }
 
     /**
@@ -576,13 +576,13 @@ public final class Guild implements Entity {
     }
 
     /**
-     * Requests to retrieve the channels of the guild.
+     * Requests to retrieve the guild's channels.
      * <p>
-     * The returned {@code Flux} will emit items in order based off their <i>natural</i> position, which is indicated
-     * visually in the Discord client. For channels, the "highest" channel will be emitted first.
+     * The order of items emitted by the returned {@code Flux} is unspecified. Use {@link OrderUtil#orderGuildChannels(Flux)}
+     * to consistently order channels.
      *
-     * @return A {@link Flux} that continually emits the {@link GuildChannel channels} of the guild. If an error is
-     * received, it is emitted through the {@code Flux}.
+     * @return A {@link Flux} that continually emits the guild's {@link GuildChannel channels}. If an error is received, it is
+     * emitted through the {@code Flux}.
      */
     public Flux<GuildChannel> getChannels() {
         return Mono.justOrEmpty(getGatewayData())
@@ -598,8 +598,7 @@ public final class Guild implements Entity {
                         .map(ChannelBean::new)
                         .map(bean -> EntityUtil.getChannel(serviceMediator, bean))
                         .cast(GuildChannel.class)
-                        .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex())))
-                .sort(Comparator.comparing(GuildChannel::getRawPosition).thenComparing(GuildChannel::getId));
+                        .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex())));
     }
 
     /**

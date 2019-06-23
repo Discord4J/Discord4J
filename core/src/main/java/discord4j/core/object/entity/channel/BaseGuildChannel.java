@@ -25,6 +25,7 @@ import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.util.PermissionSet;
 import discord4j.core.object.util.Snowflake;
+import discord4j.core.util.OrderUtil;
 import discord4j.core.util.PermissionUtil;
 import discord4j.rest.json.request.PermissionsEditRequest;
 import reactor.core.publisher.Mono;
@@ -115,7 +116,11 @@ class BaseGuildChannel extends BaseChannel implements GuildChannel {
 
     @Override
     public final Mono<Integer> getPosition() {
-        return getGuild().flatMapMany(Guild::getChannels).collectList().map(list -> list.indexOf(this));
+        return getGuild()
+                .flatMapMany(Guild::getChannels)
+                .transform(OrderUtil::orderGuildChannels)
+                .collectList()
+                .map(channels -> channels.indexOf(this));
     }
 
     @Override
