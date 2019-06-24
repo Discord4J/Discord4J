@@ -149,6 +149,18 @@ public class EmbedCreateSpec implements Spec<EmbedRequest> {
         this.fields.add(new EmbedFieldEntity(name, value, inline));
         return this;
     }
+    
+    /**
+     * Adds a field to the embed. 
+     * 
+     * @param entity An already instantiated {@link EmbedFieldEntity}
+     * @return This spec.
+     * @see {@link #addField(String, String, boolean)}
+     */
+    public EmbedCreateSpec addField(EmbedFieldEntity entity) {
+    	this.fields.add(entity);
+    	return this;
+    }
 
     @Override
     public EmbedRequest asRequest() {
