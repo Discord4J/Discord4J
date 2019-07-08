@@ -15,7 +15,7 @@ import discord4j.core.unit
  * @return A suspended call to the [reactor.core.publisher.Mono] that, upon successful non-empty completion,
  * returns the [Role]. If the mono is empty it's null. If an error is received it's thrown.
  */
-suspend fun ExtendedPermissionOverwrite.role(): Role? = role.awaitNull()
+suspend fun ExtendedPermissionOverwrite.awaitRole(): Role? = role.awaitNull()
 
 /**
  * Requests the user that's associated with this overwrite.
@@ -23,7 +23,7 @@ suspend fun ExtendedPermissionOverwrite.role(): Role? = role.awaitNull()
  * @return A suspended call to the [reactor.core.publisher.Mono] that, upon successful non-empty completion,
  * returns the [User]. If the mono is empty it's null. If an error is received it's thrown.
  */
-suspend fun ExtendedPermissionOverwrite.user(): User? = user.awaitNull()
+suspend fun ExtendedPermissionOverwrite.awaitUser(): User? = user.awaitNull()
 
 /**
  * Requests the guild that's associated with this overwrite.
@@ -31,7 +31,7 @@ suspend fun ExtendedPermissionOverwrite.user(): User? = user.awaitNull()
  * @return A suspended call to the [reactor.core.publisher.Mono] that, upon successful completion, returns
  * the [Guild]. If an error is received it's thrown.
  */
-suspend fun ExtendedPermissionOverwrite.guild(): Guild = guild.await()
+suspend fun ExtendedPermissionOverwrite.awaitGuild(): Guild = guild.await()
 
 /**
  * Requests the channel that's associated with this overwrite.
@@ -39,7 +39,7 @@ suspend fun ExtendedPermissionOverwrite.guild(): Guild = guild.await()
  * @return A suspended call to the [reactor.core.publisher.Mono] that, upon successful completion, returns
  * the [GuildChannel]. If an error is received it's thrown.
  */
-suspend fun ExtendedPermissionOverwrite.channel(): GuildChannel = channel.await()
+suspend fun ExtendedPermissionOverwrite.awaitChannel(): GuildChannel = channel.await()
 
 /**
  * Requests to delete this overwrite.

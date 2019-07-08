@@ -4,4 +4,4 @@ import discord4j.core.`object`.entity.Role
 import discord4j.core.grab
 
 
-fun RoleUpdateEvent.old(): Role? = old.grab()
+fun RoleUpdateEvent.nullableOld(): Role? = old.grab()

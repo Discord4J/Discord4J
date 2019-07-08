@@ -16,7 +16,7 @@ fun ApplicationInfo.icon(format: Image.Format): String? = getIcon(format).grab()
  * Gets the description for the application.
  *
  */
-fun ApplicationInfo.description(): String? = description.grab()
+fun ApplicationInfo.nullableDescription(): String? = description.grab()
 
 /**
  * Requests the owner of the application.
@@ -24,4 +24,4 @@ fun ApplicationInfo.description(): String? = description.grab()
  * @return A suspended call to the [reactor.core.publisher.Mono] that, upon successful completion,
  * returns the [User] that represents the owner. If an error is received it's thrown.
  */
-suspend fun ApplicationInfo.owner(): User = owner.await()
+suspend fun ApplicationInfo.awaitOwner(): User = owner.await()

@@ -4,4 +4,4 @@ import discord4j.core.`object`.entity.Guild
 import discord4j.core.await
 
 
-suspend fun VoiceServerUpdateEvent.guild(): Guild = guild.await()
+suspend fun VoiceServerUpdateEvent.awaitGuild(): Guild = guild.await()

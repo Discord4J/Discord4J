@@ -6,5 +6,5 @@ import discord4j.core.await
 import discord4j.core.grab
 
 
-suspend fun RoleDeleteEvent.guild(): Guild = guild.await()
-fun RoleDeleteEvent.role(): Role? = role.grab()
+suspend fun RoleDeleteEvent.awaitGuild(): Guild = guild.await()
+fun RoleDeleteEvent.nullableRole(): Role? = role.grab()

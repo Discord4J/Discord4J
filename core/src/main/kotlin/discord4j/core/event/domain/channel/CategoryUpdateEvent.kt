@@ -4,4 +4,4 @@ import discord4j.core.`object`.entity.Category
 import discord4j.core.grab
 
 
-fun CategoryUpdateEvent.old(): Category? = old.grab()
+fun CategoryUpdateEvent.nullableOld(): Category? = old.grab()

@@ -7,5 +7,5 @@ import discord4j.core.spec.VoiceChannelJoinSpec
 import discord4j.voice.VoiceConnection
 
 suspend fun VoiceChannel.update(spec: (VoiceChannelEditSpec) -> Unit): VoiceChannel = edit(spec).await()
-suspend fun VoiceChannel.voiceStates(): List<VoiceState> = voiceStates.await()
+suspend fun VoiceChannel.awaitVoiceStates(): List<VoiceState> = voiceStates.await()
 suspend fun VoiceChannel.awaitJoin(spec: (VoiceChannelJoinSpec) -> Unit): VoiceConnection = join(spec).await()

@@ -110,7 +110,7 @@ suspend fun DiscordClient.applicationInfo(): ApplicationInfo = applicationInfo.a
  * @return A suspended call to the [reactor.core.publisher.Flux] from [DiscordClient.getGuilds] where,
  * upon a non empty successful competition, returns a [List] of [Guild]s. If an error is received, it is thrown.
  */
-suspend fun DiscordClient.guilds(): List<Guild> = guilds.await()
+suspend fun DiscordClient.awaitGuilds(): List<Guild> = guilds.await()
 
 /**
  * Requests to retrieve the users the current client can see.
@@ -118,7 +118,7 @@ suspend fun DiscordClient.guilds(): List<Guild> = guilds.await()
  * @return A suspended call to the [reactor.core.publisher.Flux] from [DiscordClient.getUsers] where,
  * upon a non empty successful competition, returns a [List] of [User]s. If an error is received, it is thrown.
  */
-suspend fun DiscordClient.users(): List<User> = users.await()
+suspend fun DiscordClient.awaitUsers(): List<User> = users.await()
 
 /**
  * Requests to retrieve the regions that are available.
@@ -126,7 +126,7 @@ suspend fun DiscordClient.users(): List<User> = users.await()
  * @return A suspended call to the [reactor.core.publisher.Flux] from [DiscordClient.getRegions] where,
  * upon a non empty successful competition, returns a [List] of [Region]s. If an error is received, it is thrown.
  */
-suspend fun DiscordClient.regions(): List<Region> = regions.await()
+suspend fun DiscordClient.awaitRegions(): List<Region> = regions.await()
 
 /**
  * Requests to retrieve the current user.
@@ -134,14 +134,14 @@ suspend fun DiscordClient.regions(): List<Region> = regions.await()
  * @return A suspended call to the [reactor.core.publisher.Mono] from [DiscordClient.getSelf] where,
  * upon a non empty successful competition, returns the current [User]. If an error is received, it is thrown.
  */
-suspend fun DiscordClient.self(): User = self.await()
+suspend fun DiscordClient.awaitSelf(): User = self.await()
 
 /**
  * Requests the current user's ID.
  *
  * @return A Snowflake? represented by the value of the [java.util.Optional] if it's present, or null if it's not.
  */
-fun DiscordClient.selfId(): Snowflake? = selfId.grab()
+fun DiscordClient.nullableSelfId(): Snowflake? = selfId.grab()
 
 /**
  * Logs in the client to the gateway.
@@ -187,7 +187,7 @@ suspend fun DiscordClient.changePresence(presence: Presence): Unit = updatePrese
  * upon a non empty successful competition, returns the [Invite]. If the [reactor.core.publisher.Mono] is empty,
  * it returns null. If an error is received, it is thrown.
  */
-suspend fun DiscordClient.awaitInvite(code: String): Invite? = getInvite(code).awaitNull()
+suspend fun DiscordClient.nullableInvite(code: String): Invite? = getInvite(code).awaitNull()
 
 /**
  * Requests to update the current user.

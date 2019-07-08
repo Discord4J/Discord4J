@@ -20,4 +20,4 @@ suspend fun Invitable.newInvite(spec: (InviteCreateSpec) -> Unit): ExtendedInvit
  * @return A suspended call to the [reactor.core.publisher.Mono] that, upon successful completion,
  * the list of [Invite]s for this entity is returned. If an error is received it's thrown.
  */
-suspend fun Invitable.invites(): List<Invite> = invites.await()
+suspend fun Invitable.awaitInvites(): List<Invite> = invites.await()

@@ -7,6 +7,6 @@ import discord4j.core.await
 import discord4j.core.grab
 
 
-fun MessageCreateEvent.guildId(): Snowflake? = guildId.grab()
-suspend fun MessageCreateEvent.guild(): Guild = guild.await()
-fun MessageCreateEvent.member(): Member? = member.grab()
+fun MessageCreateEvent.nullableGuildId(): Snowflake? = guildId.grab()
+suspend fun MessageCreateEvent.awaitGuild(): Guild = guild.await()
+fun MessageCreateEvent.nullableMember(): Member? = member.grab()

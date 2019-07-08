@@ -7,11 +7,11 @@ import discord4j.core.grab
  *
  * @return The nullable height of the attachment.
  */
-fun Attachment.height(): Int? = height.grab()
+fun Attachment.nullableHeight(): Int? = height.grab()
 
 /**
  * Grabs the width of the attachment.
  *
  * @return The nullable width of the attachment.
  */
-fun Attachment.width(): Int? = width.grab()
+fun Attachment.nullableWidth(): Int? = width.grab()

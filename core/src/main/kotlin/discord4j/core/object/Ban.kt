@@ -9,4 +9,4 @@ import discord4j.core.grab
  *
  * @return The nullable reason for the ban.
  */
-fun Ban.reason(): String? = reason.grab()
+fun Ban.nullableReason(): String? = reason.grab()

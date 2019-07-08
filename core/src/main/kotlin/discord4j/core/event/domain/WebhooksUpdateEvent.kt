@@ -5,5 +5,5 @@ import discord4j.core.`object`.entity.TextChannel
 import discord4j.core.await
 
 
-suspend fun WebhooksUpdateEvent.guild(): Guild = guild.await()
-suspend fun WebhooksUpdateEvent.channel(): TextChannel = channel.await()
+suspend fun WebhooksUpdateEvent.awaitGuild(): Guild = guild.await()
+suspend fun WebhooksUpdateEvent.awaitChannel(): TextChannel = channel.await()

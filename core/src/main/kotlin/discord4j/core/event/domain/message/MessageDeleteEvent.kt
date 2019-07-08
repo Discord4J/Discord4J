@@ -6,5 +6,5 @@ import discord4j.core.await
 import discord4j.core.grab
 
 
-fun MessageDeleteEvent.message(): Message? = message.grab()
-suspend fun MessageDeleteEvent.channel(): MessageChannel = channel.await()
+fun MessageDeleteEvent.nullableMessage(): Message? = message.grab()
+suspend fun MessageDeleteEvent.awaitChannel(): MessageChannel = channel.await()

@@ -9,8 +9,8 @@ import discord4j.core.await
 import discord4j.core.grab
 
 
-suspend fun ReactionRemoveEvent.user(): User = user.await()
-suspend fun ReactionRemoveEvent.channel(): MessageChannel = channel.await()
-suspend fun ReactionRemoveEvent.message(): Message = message.await()
-fun ReactionRemoveEvent.guildId(): Snowflake? = guildId.grab()
-suspend fun ReactionRemoveEvent.guild(): Guild = guild.await()
+suspend fun ReactionRemoveEvent.awaitUser(): User = user.await()
+suspend fun ReactionRemoveEvent.awaitChannel(): MessageChannel = channel.await()
+suspend fun ReactionRemoveEvent.awaitMessage(): Message = message.await()
+fun ReactionRemoveEvent.nullableGuildId(): Snowflake? = guildId.grab()
+suspend fun ReactionRemoveEvent.awaitGuild(): Guild = guild.await()

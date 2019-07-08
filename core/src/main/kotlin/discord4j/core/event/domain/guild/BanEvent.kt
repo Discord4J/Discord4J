@@ -4,4 +4,4 @@ import discord4j.core.`object`.entity.Guild
 import discord4j.core.await
 
 
-suspend fun BanEvent.guild(): Guild = guild.await()
+suspend fun BanEvent.awaitGuild(): Guild = guild.await()

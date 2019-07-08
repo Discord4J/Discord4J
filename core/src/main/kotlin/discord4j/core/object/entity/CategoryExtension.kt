@@ -9,7 +9,7 @@ import discord4j.core.spec.CategoryEditSpec
  * @return A suspended call to the ='[reactor.core.publisher.Mono] that, upon successful completion,
  * returns the [List] of [GuildChannel]s. If an error is received it's thrown.
  */
-suspend fun Category.channels(): List<GuildChannel> = channels.await()
+suspend fun Category.awaitChannels(): List<GuildChannel> = channels.await()
 
 /**
  * Requests to update the current category.

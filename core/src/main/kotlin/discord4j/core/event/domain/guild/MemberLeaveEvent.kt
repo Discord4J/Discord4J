@@ -6,5 +6,5 @@ import discord4j.core.await
 import discord4j.core.grab
 
 
-suspend fun MemberLeaveEvent.guild(): Guild = guild.await()
-fun MemberLeaveEvent.member(): Member? = member.grab()
+suspend fun MemberLeaveEvent.awaitGuild(): Guild = guild.await()
+fun MemberLeaveEvent.nullableMember(): Member? = member.grab()

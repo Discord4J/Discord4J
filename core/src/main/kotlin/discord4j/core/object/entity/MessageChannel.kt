@@ -12,9 +12,9 @@ import java.time.Instant
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
-fun MessageChannel.lastMessageId(): Snowflake? = lastMessageId.grab()
-suspend fun MessageChannel.lastMessage(): Message? = lastMessage.awaitNull()
-fun MessageChannel.lastPinTimestamp(): Instant? = lastPinTimestamp.grab()
+fun MessageChannel.nullableLastMessageId(): Snowflake? = lastMessageId.grab()
+suspend fun MessageChannel.awaitLastMessage(): Message? = lastMessage.awaitNull()
+fun MessageChannel.nullableLastPinTimestamp(): Instant? = lastPinTimestamp.grab()
 suspend fun MessageChannel.newMessage(spec: (MessageCreateSpec) -> Unit): Message = createMessage(spec).await()
 suspend fun MessageChannel.newMessage(message: String): Message = newMessage { it.setContent(message) }
 suspend fun MessageChannel.newEmbed(spec: (EmbedCreateSpec) -> Unit): Message = newMessage { it.setEmbed(spec) }
@@ -26,4 +26,4 @@ suspend fun MessageChannel.awaitTypeUntil(trigger: suspend () -> Unit): ReceiveC
 fun MessageChannel.awaitMessagesBefore(id: Snowflake): ReceiveChannel<Message> = getMessagesBefore(id).infinite()
 fun MessageChannel.awaitMessagesAfter(id: Snowflake): ReceiveChannel<Message> = getMessagesAfter(id).infinite()
 suspend fun MessageChannel.awaitMessage(id: Snowflake): Message? = getMessageById(id).awaitNull()
-suspend fun MessageChannel.pinnedMessages(): List<Message> = pinnedMessages.await()
+suspend fun MessageChannel.awaitPinnedMessages(): List<Message> = pinnedMessages.await()

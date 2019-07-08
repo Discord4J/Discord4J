@@ -6,5 +6,5 @@ import discord4j.core.grab
 import java.time.Instant
 
 
-suspend fun PinsUpdateEvent.channel(): MessageChannel = channel.await()
-fun PinsUpdateEvent.lastPinTimestamp(): Instant? = lastPinTimestamp.grab()
+suspend fun PinsUpdateEvent.awaitChannel(): MessageChannel = channel.await()
+fun PinsUpdateEvent.nullableLastPinTimestamp(): Instant? = lastPinTimestamp.grab()

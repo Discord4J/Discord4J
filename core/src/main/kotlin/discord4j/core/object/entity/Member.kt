@@ -10,12 +10,12 @@ import discord4j.core.spec.BanQuerySpec
 import discord4j.core.spec.GuildMemberEditSpec
 import discord4j.core.unit
 
-suspend fun Member.roles(): List<Role> = roles.await()
-suspend fun Member.highestRole(): Role = highestRole.await()
-suspend fun Member.guild(): Guild = guild.await()
-fun Member.nickname(): String? = nickname.grab()
-suspend fun Member.voiceState(): VoiceState? = voiceState.await()
-suspend fun Member.presence(): Presence? = presence.await()
+suspend fun Member.awaitRoles(): List<Role> = roles.await()
+suspend fun Member.awaitHighestRole(): Role = highestRole.await()
+suspend fun Member.awaitGuild(): Guild = guild.await()
+fun Member.nullableNickname(): String? = nickname.grab()
+suspend fun Member.awaitVoiceState(): VoiceState? = voiceState.await()
+suspend fun Member.awaitPresence(): Presence? = presence.await()
 suspend fun Member.awaitKick(reason: String? = null): Unit = kick(reason).unit()
 suspend fun Member.awaitBan(spec: (BanQuerySpec) -> Unit): Unit = ban(spec).unit()
 suspend fun Member.awaitUnban(reason: String? = null): Unit = unban(reason).unit()

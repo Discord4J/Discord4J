@@ -12,4 +12,4 @@ suspend fun TextChannel.awaitBulkDelete(messages: ReceiveChannel<Snowflake>): Li
     bulkDelete(messages.asFlux()).await()
 
 suspend fun TextChannel.newWebhook(spec: (WebhookCreateSpec) -> Unit): Webhook = createWebhook(spec).await()
-suspend fun TextChannel.webhooks(): List<Webhook> = webhooks.await()
+suspend fun TextChannel.awaitWebhooks(): List<Webhook> = webhooks.await()

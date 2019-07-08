@@ -11,7 +11,7 @@ import discord4j.core.unit
  * @return A suspended call to the [reactor.core.publisher.Mono] that, upon successful completion,
  * the [Guild] is returned. If an error is received it's thrown.
  */
-suspend fun Invite.guild(): Guild = guild.await()
+suspend fun Invite.awaitGuild(): Guild = guild.await()
 
 /**
  * Requests the channel this invite is associated with.
@@ -19,7 +19,7 @@ suspend fun Invite.guild(): Guild = guild.await()
  * @return A suspended call to the [reactor.core.publisher.Mono] that, upon successful completion,
  * the [TextChannel] is returned. If an error is received it's thrown.
  */
-suspend fun Invite.channel(): TextChannel = channel.await()
+suspend fun Invite.awaitChannel(): TextChannel = channel.await()
 
 /**
  * Requests to delete the invite.

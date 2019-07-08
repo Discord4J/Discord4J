@@ -4,4 +4,4 @@ import discord4j.core.`object`.entity.User
 import discord4j.core.grab
 
 
-fun UserUpdateEvent.old(): User? = old.grab()
+fun UserUpdateEvent.nullableOld(): User? = old.grab()

@@ -8,4 +8,4 @@ import discord4j.core.grab
  *
  * @return The nullable [Activity].
  */
-fun Presence.activity(): Activity? = activity.grab()
+fun Presence.nullableActivity(): Activity? = activity.grab()

@@ -4,4 +4,4 @@ import discord4j.core.`object`.entity.VoiceChannel
 import discord4j.core.grab
 
 
-fun VoiceChannelUpdateEvent.old(): VoiceChannel? = old.grab()
+fun VoiceChannelUpdateEvent.nullableOld(): VoiceChannel? = old.grab()

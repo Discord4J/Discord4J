@@ -4,4 +4,4 @@ import discord4j.core.`object`.entity.Guild
 import discord4j.core.await
 
 
-suspend fun EmojisUpdateEvent.guild(): Guild = guild.await()
+suspend fun EmojisUpdateEvent.awaitGuild(): Guild = guild.await()

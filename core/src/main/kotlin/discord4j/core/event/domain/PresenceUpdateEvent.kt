@@ -8,11 +8,11 @@ import discord4j.core.await
 import discord4j.core.grab
 
 
-suspend fun PresenceUpdateEvent.guild(): Guild = guild.await()
-fun PresenceUpdateEvent.oldUser(): User? = oldUser.grab()
-fun PresenceUpdateEvent.newUsername(): String? = newUsername.grab()
-fun PresenceUpdateEvent.newDiscriminator(): String? = newDiscriminator.grab()
-fun PresenceUpdateEvent.newAvatar(): String? = newAvatar.grab()
-suspend fun PresenceUpdateEvent.user(): User = user.await()
-suspend fun PresenceUpdateEvent.member(): Member = member.await()
-fun PresenceUpdateEvent.old(): Presence? = old.grab()
+suspend fun PresenceUpdateEvent.awaitGuild(): Guild = guild.await()
+fun PresenceUpdateEvent.nullableOldUser(): User? = oldUser.grab()
+fun PresenceUpdateEvent.nullableNewUsername(): String? = newUsername.grab()
+fun PresenceUpdateEvent.nullableNewDiscriminator(): String? = newDiscriminator.grab()
+fun PresenceUpdateEvent.nullableNewAvatar(): String? = newAvatar.grab()
+suspend fun PresenceUpdateEvent.awaitUser(): User = user.await()
+suspend fun PresenceUpdateEvent.awaitMember(): Member = member.await()
+fun PresenceUpdateEvent.nullableOld(): Presence? = old.grab()

@@ -9,13 +9,13 @@ import discord4j.core.awaitNull
 import discord4j.core.grab
 import discord4j.core.unit
 
-suspend fun GuildChannel.guild(): Guild = guild.await()
+suspend fun GuildChannel.awaitGuild(): Guild = guild.await()
 fun GuildChannel.awaitOverwriteForMember(id: Snowflake): ExtendedPermissionOverwrite? = getOverwriteForMember(id).grab()
 fun GuildChannel.awaitOverwriteForRole(id: Snowflake): ExtendedPermissionOverwrite? = getOverwriteForRole(id).grab()
 suspend fun GuildChannel.awaitEffectivePermissions(id: Snowflake): PermissionSet? =
     getEffectivePermissions(id).awaitNull()
 
-suspend fun GuildChannel.position(): Int = position.await()
+suspend fun GuildChannel.awaitPosition(): Int = position.await()
 suspend fun GuildChannel.awaitAddMemberOverwrite(
     id: Snowflake,
     overwrite: PermissionOverwrite,

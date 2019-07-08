@@ -6,7 +6,7 @@ import discord4j.core.await
 import discord4j.core.grab
 
 
-suspend fun MemberUpdateEvent.guild(): Guild = guild.await()
-suspend fun MemberUpdateEvent.member(): Member = member.await()
-fun MemberUpdateEvent.old(): Member? = old.grab()
-fun MemberUpdateEvent.currentNickname(): String? = currentNickname.grab()
+suspend fun MemberUpdateEvent.awaitGuild(): Guild = guild.await()
+suspend fun MemberUpdateEvent.awaitMember(): Member = member.await()
+fun MemberUpdateEvent.nullableOld(): Member? = old.grab()
+fun MemberUpdateEvent.nullableCurrentNickname(): String? = currentNickname.grab()

@@ -10,74 +10,74 @@ import java.time.Instant
  *
  * @return The nullable streaming URL.
  */
-fun Activity.streamingUrl(): String? = streamingUrl.grab()
+fun Activity.nullableStreamingUrl(): String? = streamingUrl.grab()
 
 /**
  * Grabs the start time.
  *
  * @return The nullable start time.
  */
-fun Activity.start(): Instant? = start.grab()
+fun Activity.nullableStart(): Instant? = start.grab()
 
 /**
  * Grabs the end time.
  *
  * @return The nullable end time.
  */
-fun Activity.end(): Instant? = end.grab()
+fun Activity.nullableEnd(): Instant? = end.grab()
 
 /**
  * Grabs the application ID.
  *
  * @return The nullable application ID.
  */
-fun Activity.applicationId(): Snowflake? = applicationId.grab()
+fun Activity.nullableApplicationId(): Snowflake? = applicationId.grab()
 
 /**
  * Grabs the details of what the player is doing.
  *
  * @return The nullable detail of what the player is doing.
  */
-fun Activity.details(): String? = details.grab()
+fun Activity.nullableDetails(): String? = details.grab()
 
 /**
  * Grabs the party status.
  *
  * @return The nullable party status.
  */
-fun Activity.state(): String? = state.grab()
+fun Activity.nullableState(): String? = state.grab()
 
 /**
  * Grabs the party ID.
  *
  * @return The nullable party ID.
  */
-fun Activity.partyId(): String? = partyId.grab()
+fun Activity.nullablePartyId(): String? = partyId.grab()
 
 /**
  * Grabs the ID of the large image.
  *
  * @return The nullable ID of the large image.
  */
-fun Activity.largeImageId(): String? = largeImageId.grab()
+fun Activity.nullableLargeImageId(): String? = largeImageId.grab()
 
 /**
  * Grabs the text of the large image.
  *
  * @return The nullable text of the large image.
  */
-fun Activity.largeText(): String? = largeText.grab()
+fun Activity.nullableLargeText(): String? = largeText.grab()
 
 /**
  * Grabs the ID of the small image.
  *
  * @return The nullable ID of the small image.
  */
-fun Activity.smallImageId(): String? = smallImageId.grab()
+fun Activity.nullableSmallImageId(): String? = smallImageId.grab()
 
 /**
  * Grabs the text of the small image.
  *
  * @return The nullable text of the small image.
  */
-fun Activity.smallText(): String? = smallText.grab()
+fun Activity.nullableSmallText(): String? = smallText.grab()

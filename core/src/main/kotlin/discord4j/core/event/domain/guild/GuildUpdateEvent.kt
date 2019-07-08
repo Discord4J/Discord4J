@@ -4,4 +4,4 @@ import discord4j.core.`object`.entity.Guild
 import discord4j.core.grab
 
 
-fun GuildUpdateEvent.old(): Guild? = old.grab()
+fun GuildUpdateEvent.nullableOld(): Guild? = old.grab()

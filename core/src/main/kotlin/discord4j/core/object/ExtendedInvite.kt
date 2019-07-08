@@ -11,11 +11,11 @@ import java.time.Instant
  * @return A suspended call to the [reactor.core.publisher.Mono] where, upon successful competition, returns
  * the [User] who made the invite. If an error is received it's thrown.
  */
-suspend fun ExtendedInvite.inviter(): User = inviter.await()
+suspend fun ExtendedInvite.awaitInviter(): User = inviter.await()
 
 /**
  * Gets the expiration of the invite.
  *
  * @return The nullable expiration of the invite.
  */
-fun ExtendedInvite.expiration(): Instant? = expiration.grab()
+fun ExtendedInvite.nullableExpiration(): Instant? = expiration.grab()

@@ -8,11 +8,11 @@ import discord4j.core.grab
  *
  * @return The nullable [Snowflake] of the role.
  */
-fun PermissionOverwrite.roleId(): Snowflake? = roleId.grab()
+fun PermissionOverwrite.nullableRoleId(): Snowflake? = roleId.grab()
 
 /**
  * Grabs the member ID associated with this overwrite.
  *
  * @return The nullable [Snowflake] of the role.
  */
-fun PermissionOverwrite.memberId(): Snowflake? = memberId.grab()
+fun PermissionOverwrite.nullableMemberId(): Snowflake? = memberId.grab()
