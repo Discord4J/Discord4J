@@ -180,9 +180,10 @@ class MessageDispatchHandlers {
 
         Mono<Void> removeFromMessage = context.getServiceMediator().getStateHolder().getMessageStore()
                 .find(messageId)
+                .filter(bean -> bean.getReactions() != null)
                 .map(oldBean -> {
                     int i;
-                    // noinspection ConstantConditions reactions must be present if one is being removed
+                    // noinspection ConstantConditions filter covers getReactions() null case
                     for (i = 0; i < oldBean.getReactions().length; i++) {
                         ReactionBean r = oldBean.getReactions()[i];
                         if (emojiId == null && r.getEmojiName().equals(emojiName) || Objects.equals(r.getEmojiId(), emojiId)) {
