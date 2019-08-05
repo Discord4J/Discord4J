@@ -39,7 +39,7 @@ public class GuildMemberEditSpec implements AuditSpec<GuildMemberModifyRequest> 
      * Sets the new voice channel to move the targeted {@link Member}, if they are connected to voice. Requires the
      * {@link Permission#MOVE_MEMBERS} permission.
      *
-     * @param channel The voice channel identifier or null to disconnect from voice channel.
+     * @param channel The voice channel identifier or {@code null} to disconnect from voice channel.
      * @return This spec.
      */
     public GuildMemberEditSpec setNewVoiceChannel(@Nullable Snowflake channel) {
@@ -48,7 +48,7 @@ public class GuildMemberEditSpec implements AuditSpec<GuildMemberModifyRequest> 
     }
 
     /**
-     * Sets whether the targeted {@link Member} is muted in voice channels. Requires the
+     * Sets whether the targeted {@link Member} is muted in voice channels, if they are connected to voice. Requires the
      * {@link Permission#MUTE_MEMBERS} permission.
      *
      * @param mute {@code true} if the {@link Member} should be muted, {@code false} otherwise.
@@ -60,7 +60,7 @@ public class GuildMemberEditSpec implements AuditSpec<GuildMemberModifyRequest> 
     }
 
     /**
-     * Sets whether the targeted {@link Member} is deafened in voice channels. Requires the
+     * Sets whether the targeted {@link Member} is deafened in voice channels, if they are connected to voice. Requires the
      * {@link Permission#DEAFEN_MEMBERS} permission.
      *
      * @param deaf {@code true} if the {@link Member} should be deafened, {@code false} otherwise.
@@ -83,7 +83,7 @@ public class GuildMemberEditSpec implements AuditSpec<GuildMemberModifyRequest> 
     }
 
     /**
-     * Sets the new role identifiers the targeted {@link Member} is assigned.  Requires the
+     * Sets the new role identifiers the targeted {@link Member} is assigned. Requires the
      * {@link Permission#MANAGE_ROLES} permission.
      *
      * @param roles The set of role identifiers.

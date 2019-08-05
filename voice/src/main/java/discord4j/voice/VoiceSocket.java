@@ -22,7 +22,6 @@ import reactor.core.publisher.EmitterProcessor;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxSink;
 import reactor.core.publisher.Mono;
-import reactor.netty.NettyPipeline;
 import reactor.netty.udp.UdpClient;
 
 import java.io.ByteArrayOutputStream;
@@ -52,8 +51,7 @@ public class VoiceSocket {
                             .doOnNext(this.inboundSink::next)
                             .then();
 
-                    Mono<Void> outboundThen = out.options(NettyPipeline.SendOptions::flushOnEach)
-                            .send(outbound.log("discord4j.voice.udp.outbound", Level.FINEST))
+                    Mono<Void> outboundThen = out.send(outbound.log("discord4j.voice.udp.outbound", Level.FINEST))
                             .then();
 
                     return Mono.zip(inboundThen, outboundThen).then();

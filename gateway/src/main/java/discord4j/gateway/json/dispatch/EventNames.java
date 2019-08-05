@@ -54,4 +54,5 @@ public abstract class EventNames {
 
     // Ignored
     public static final String PRESENCES_REPLACE = "PRESENCES_REPLACE";
+    public static final String GIFT_CODE_UPDATE = "GIFT_CODE_UPDATE";
 }

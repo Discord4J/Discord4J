@@ -27,7 +27,6 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxSink;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.MonoProcessor;
-import reactor.netty.NettyPipeline;
 import reactor.netty.http.websocket.WebsocketInbound;
 import reactor.netty.http.websocket.WebsocketOutbound;
 import reactor.util.Logger;
@@ -86,8 +85,7 @@ public class DiscordWebSocketHandler {
         Mono<CloseWebSocketFrame> closeFuture = closeTrigger
                 .map(status -> new CloseWebSocketFrame(status.getCode(), status.getReason()));
 
-        Mono<Void> outboundEvents = out.options(NettyPipeline.SendOptions::flushOnEach)
-                .sendObject(Flux.merge(closeFuture, outbound.map(TextWebSocketFrame::new)))
+        Mono<Void> outboundEvents = out.sendObject(Flux.merge(closeFuture, outbound.map(TextWebSocketFrame::new)))
                 .then()
                 .doOnTerminate(() -> {
                     shardLogger(".outbound").info("Sender completed on shard {}", shardIndex);

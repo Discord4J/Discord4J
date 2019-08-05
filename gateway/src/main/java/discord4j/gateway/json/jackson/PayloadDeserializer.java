@@ -76,6 +76,7 @@ public class PayloadDeserializer extends StdDeserializer<GatewayPayload<?>> {
 
         // Ignored
         dispatchTypes.put(EventNames.PRESENCES_REPLACE, null);
+        dispatchTypes.put(EventNames.GIFT_CODE_UPDATE, null);
     }
 
     public PayloadDeserializer() {

@@ -51,7 +51,7 @@ public class PoolGlobalRateLimiter implements GlobalRateLimiter {
                     log.debug("[{}] Released permit", resource);
                     return Mono.empty();
                 })
-                .build();
+                .fifo();
     }
 
     private Permit newPermit() {
