@@ -477,7 +477,10 @@ public final class Message implements Entity {
         USER_PREMIUM_GUILD_SUBSCRIPTION_TIER_2(10),
 
         /** A message created when an user boost a guild and the guild reach the tier 3. */
-        USER_PREMIUM_GUILD_SUBSCRIPTION_TIER_3(11);
+        USER_PREMIUM_GUILD_SUBSCRIPTION_TIER_3(11),
+
+        /** A message created when an user follow a channel from another guild into specific channel (<a href="https://support.discordapp.com/hc/en-us/articles/360028384531-Server-Following-FAQ">Server Following</a>). */
+        CHANNEL_FOLLOW_ADD(11);
 
         /** The underlying value as represented by Discord. */
         private final int value;
@@ -521,6 +524,7 @@ public final class Message implements Entity {
                 case 9: return USER_PREMIUM_GUILD_SUBSCRIPTION_TIER_1;
                 case 10: return USER_PREMIUM_GUILD_SUBSCRIPTION_TIER_2;
                 case 11: return USER_PREMIUM_GUILD_SUBSCRIPTION_TIER_3;
+                case 12: return CHANNEL_FOLLOW_ADD;
                 default: return EntityUtil.throwUnsupportedDiscordValue(value);
             }
         }
