@@ -480,7 +480,7 @@ public final class Message implements Entity {
         USER_PREMIUM_GUILD_SUBSCRIPTION_TIER_3(11),
 
         /** A message created when an user follow a channel from another guild into specific channel (<a href="https://support.discordapp.com/hc/en-us/articles/360028384531-Server-Following-FAQ">Server Following</a>). */
-        CHANNEL_FOLLOW_ADD(11);
+        CHANNEL_FOLLOW_ADD(12);
 
         /** The underlying value as represented by Discord. */
         private final int value;
