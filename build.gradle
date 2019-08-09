@@ -3,9 +3,9 @@ plugins {
     id 'maven-publish'
     id 'signing'
     id 'com.gorylenko.gradle-git-properties' version '2.0.0' apply false
-    id 'io.spring.dependency-management' version '1.0.7.RELEASE' apply false
+    id 'io.spring.dependency-management' version '1.0.8.RELEASE' apply false
     id 'com.github.ben-manes.versions' version '0.21.0'
-    id 'net.researchgate.release' version '2.8.0'
+    id 'net.researchgate.release' version '2.8.1'
 }
 
 ext {
@@ -19,17 +19,17 @@ ext {
     project_jdk = '1.8'
 
     // Dependencies
-    reactor_bom_version = 'Californium-SR9'
+    reactor_bom_version = 'Californium-SR10'
     jackson_version = '2.9.9'
     jdkstores_version = "$storesVersion"
 
     // Test dependencies
     junit_version = '4.12'
-    mockito_version = '2.28.2'
+    mockito_version = '3.0.0'
     logback_version = '1.3.0-alpha4'
     reflections_version = '0.9.11'
-    lavaplayer_version = '1.3.17'
-    blockhound_version = '1.0.0.M4'
+    lavaplayer_version = '1.3.19'
+    blockhound_version = '1.0.0.M5'
 
     isJitpack = "true" == System.getenv("JITPACK")
     isRelease = !version.toString().endsWith('-SNAPSHOT')
