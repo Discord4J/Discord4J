@@ -111,7 +111,10 @@ public enum Permission {
     MANAGE_WEBHOOKS(0x20000000, true),
 
     /** Allows management and editing of emojis. */
-    MANAGE_EMOJIS(0x40000000, true);
+    MANAGE_EMOJIS(0x40000000, true),
+
+    /** Allows for Stream in voice channel */
+    STREAM(0x00000200,false);
 
     /** Whether MFA is required. */
     private final boolean mfa;
