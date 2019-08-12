@@ -20,6 +20,7 @@ import discord4j.common.json.UserResponse;
 import discord4j.core.DiscordClient;
 import discord4j.core.ServiceMediator;
 import discord4j.core.object.Embed;
+import discord4j.core.object.MessageReference;
 import discord4j.core.object.data.stored.MessageBean;
 import discord4j.core.object.data.stored.ReactionBean;
 import discord4j.core.object.data.stored.UserBean;
@@ -291,6 +292,25 @@ public final class Message implements Entity {
      */
     public Mono<Webhook> getWebhook() {
         return Mono.justOrEmpty(getWebhookId()).flatMap(getClient()::getWebhookById);
+    }
+
+    /**
+     * Gets the Message Reference (Follow channel system), if present.
+     *
+     * @return The {@code MessageReference}, if present.
+     */
+    public Optional<MessageReference> getMessageReference() {
+        return Optional.ofNullable(data.getMessageReference())
+            .map(bean -> new MessageReference(serviceMediator,bean));
+    }
+
+    /**
+     * Gets the flags of Message, if present.
+     *
+     * @return The {@code Integer} of flags, if present.
+     */
+    public Optional<Integer> getFlags() {
+        return Optional.ofNullable(data.getFlags());
     }
 
     /**
