@@ -305,12 +305,15 @@ public final class Message implements Entity {
     }
 
     /**
-     * Gets the flags of Message, if present.
+     * Gets the flags of Message.
      *
-     * @return The {@code Integer} of flags, if present.
+     * @return A {@code EnumSet} with the flags of message.
      */
-    public Optional<Integer> getFlags() {
-        return Optional.ofNullable(data.getFlags());
+    public EnumSet<Flag> getFlags() {
+        if(data.getFlags() != null) {
+            return Flag.of(data.getFlags());
+        }
+        return EnumSet.noneOf(Flag.class);
     }
 
     /**
@@ -458,6 +461,69 @@ public final class Message implements Entity {
     @Override
     public int hashCode() {
         return EntityUtil.hashCode(this);
+    }
+
+    /** Represents the Flags of messages. */
+    public enum Flag {
+
+        /** This message has been published to subscribed channels (via Channel Following). */
+        CROSSPOSTED(0),
+
+        /** This message originated from a message in another channel (via Channel Following). */
+        IS_CROSSPOST(1),
+
+        /** Do not include any embeds when serializing this message. */
+        SUPPRESS_EMBEDS(2);
+
+        /** The underlying value as represented by Discord. */
+        private final int value;
+
+        /** The flag value as represented by Discord. */
+        private final int flag;
+
+        /**
+         * Constructs a {@code Message.Flags}.
+         */
+        Flag(final int value) {
+            this.value = value;
+            this.flag = 1 << value;
+        }
+
+        /**
+         * Gets the underlying value as represented by Discord.
+         *
+         * @return The underlying value as represented by Discord.
+         */
+        public int getValue() {
+            return value;
+        }
+
+        /**
+         * Gets the flag value as represented by Discord.
+         *
+         * @return The flag value as represented by Discord.
+         */
+        public int getFlag() {
+            return flag;
+        }
+
+        /**
+         * Gets the flags of message. It is guaranteed that invoking {@link #getValue()} from the returned enum will
+         * equal ({@code ==}) the supplied {@code value}.
+         *
+         * @param value The flags value as represented by Discord.
+         * @return The {@link EnumSet} of flags.
+         */
+        public static EnumSet<Flag> of(final int value) {
+            final EnumSet<Flag> messageFlags = EnumSet.noneOf(Flag.class);
+            for (Flag flag : Flag.values()) {
+                long flagValue = flag.getFlag();
+                if((flagValue & value) == flagValue) {
+                    messageFlags.add(flag);
+                }
+            }
+            return messageFlags;
+        }
     }
 
     /** Represents the various types of messages. */

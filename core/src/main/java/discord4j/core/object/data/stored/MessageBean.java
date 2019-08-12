@@ -309,6 +309,8 @@ public final class MessageBean implements Serializable {
                 ", reactions=" + Arrays.toString(reactions) +
                 ", pinned=" + pinned +
                 ", webhookId=" + webhookId +
+                ", messageReference=" + messageReference +
+                ", flags=" + flags +
                 ", type=" + type +
                 '}';
     }

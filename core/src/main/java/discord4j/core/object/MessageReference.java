@@ -37,8 +37,9 @@ public class MessageReference implements DiscordObject {
         return Snowflake.of(data.getChannelId());
     }
 
-    public Snowflake getGuildId() {
-        return Snowflake.of(data.getGuildId());
+    public Optional<Snowflake> getGuildId() {
+        return Optional.ofNullable(data.getGuildId())
+            .map(Snowflake::of);
     }
 
     public Optional<Snowflake> getMessageId() {

@@ -8,9 +8,10 @@ import java.io.Serializable;
 public class MessageReferenceBean implements Serializable {
 
     private long channelId;
-    private long guildId;
     @Nullable
-    private long messageId;
+    private Long guildId;
+    @Nullable
+    private Long messageId;
 
     public MessageReferenceBean(final MessageReferenceResponse response) {
         channelId = response.getChannelId();
@@ -26,19 +27,20 @@ public class MessageReferenceBean implements Serializable {
         return channelId;
     }
 
-    public long getGuildId() {
+    @Nullable
+    public Long getGuildId() {
         return guildId;
     }
 
     @Nullable
-    public long getMessageId() {
+    public Long getMessageId() {
         return messageId;
     }
 
     @Override
     public String toString() {
         return "MessageReferenceResponse{" +
-            ", channelId=" + channelId +
+            "channelId=" + channelId +
             ", guildId=" + guildId +
             ", messageId=" + messageId +
             '}';
