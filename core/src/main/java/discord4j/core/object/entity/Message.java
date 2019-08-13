@@ -30,6 +30,7 @@ import discord4j.core.object.util.Snowflake;
 import discord4j.core.spec.MessageEditSpec;
 import discord4j.core.util.EntityUtil;
 import discord4j.core.util.PaginationUtil;
+import discord4j.rest.json.request.SuppressEmbedsRequest;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
@@ -374,6 +375,20 @@ public final class Message implements Entity {
         return serviceMediator.getRestClient().getChannelService()
                 .deleteMessage(getChannelId().asLong(), getId().asLong(), reason)
                 .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex()));
+    }
+
+    /**
+     * Requests to suppress all embeds in this message.
+     * if the message have the embeds suppressed then this action can undo the suppressed embeds.
+     *
+     * @param suppresed Determine if you need suppressed or not the embeds.
+     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the process has been complete.
+     * If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Void> suppressEmbeds(final boolean suppresed) {
+        return serviceMediator.getRestClient().getChannelService()
+            .suppressEmbeds(getChannelId().asLong(), getId().asLong(), new SuppressEmbedsRequest(suppresed))
+            .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex()));
     }
 
     /**

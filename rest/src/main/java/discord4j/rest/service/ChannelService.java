@@ -120,6 +120,12 @@ public class ChannelService extends RestService {
                 .exchange(getRouter());
     }
 
+    public Mono<Void> suppressEmbeds(long channelId, long messageId, SuppressEmbedsRequest request) {
+        return Routes.MESSAGE_SUPPRESS_EMBEDS.newRequest(channelId,messageId)
+                .body(request)
+                .exchange(getRouter());
+    }
+
     public Mono<Void> editChannelPermissions(long channelId, long overwriteId, PermissionsEditRequest request, @Nullable String reason) {
         return Routes.CHANNEL_PERMISSIONS_EDIT.newRequest(channelId, overwriteId)
                 .body(request)
