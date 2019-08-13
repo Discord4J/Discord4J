@@ -11,22 +11,24 @@ public class MessageReferenceResponse {
     private long channelId;
     @JsonProperty("guild_id")
     @UnsignedJson
-    private long guildId;
+    @Nullable
+    private Long guildId;
     @JsonProperty("message_id")
     @UnsignedJson
     @Nullable
-    private long messageId;
+    private Long messageId;
 
     public long getChannelId() {
         return channelId;
     }
 
-    public long getGuildId() {
+    @Nullable
+    public Long getGuildId() {
         return guildId;
     }
 
     @Nullable
-    public long getMessageId() {
+    public Long getMessageId() {
         return messageId;
     }
 
