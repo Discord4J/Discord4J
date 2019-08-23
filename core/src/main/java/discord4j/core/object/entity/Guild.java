@@ -54,8 +54,6 @@ import java.util.function.ToLongFunction;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 
-import static discord4j.core.object.util.Image.Format.*;
-
 /**
  * A Discord guild.
  *
