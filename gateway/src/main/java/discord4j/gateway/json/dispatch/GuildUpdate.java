@@ -38,6 +38,8 @@ public class GuildUpdate implements Dispatch {
     private int premiumTier;
     @JsonProperty("premium_subscription_count")
     private int premiumSubcriptionsCount;
+    @JsonProperty("preferred_locale")
+    private String preferredLocale;
     @JsonProperty("system_channel_id")
     @Nullable
     @UnsignedJson
@@ -96,6 +98,10 @@ public class GuildUpdate implements Dispatch {
 
     public int getPremiumSubcriptionsCount() {
         return premiumSubcriptionsCount;
+    }
+
+    public String getPreferredLocale() {
+        return preferredLocale;
     }
 
     public int getVerificationLevel() {
@@ -194,6 +200,7 @@ public class GuildUpdate implements Dispatch {
                 ", verificationLevel=" + verificationLevel +
                 ", premiumTier=" + premiumTier +
                 ", premiumSubcriptionsCount=" + premiumSubcriptionsCount +
+                ", preferredLocale=" + preferredLocale +
                 ", systemChannelId=" + systemChannelId +
                 ", splash='" + splash + '\'' +
                 ", splash='" + banner + '\'' +

@@ -287,6 +287,15 @@ public final class Guild implements Entity {
     }
 
     /**
+     * Gets the preferred locale of this guild, only set if guild has the "DISCOVERABLE" feature, defaults to en-US.
+     *
+     * @return The preferred locale of this guild, only set if guild has the "DISCOVERABLE" feature, defaults to en-US.
+     */
+    public String getPreferredLocale() {
+        return data.getPreferredLocale();
+    }
+
+    /**
      * Gets the level of verification required for the guild.
      *
      * @return The level of verification required for the guild.
