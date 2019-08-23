@@ -32,7 +32,7 @@ public final class GuildBean extends BaseGuildBean {
 
     private String joinedAt;
     private boolean large;
-    private int premiumSubscriptionsCount;
+    private int premiumSubscriptionCount;
     private int memberCount;
     private long[] members;
     private long[] channels;
@@ -43,12 +43,12 @@ public final class GuildBean extends BaseGuildBean {
         this.joinedAt = guildCreate.getJoinedAt();
         this.large = guildCreate.isLarge();
         this.memberCount = guildCreate.getMemberCount();
-        this.premiumSubscriptionsCount = guildCreate.getPremiumSubcriptionsCount();
+        this.premiumSubscriptionCount = guildCreate.getPremiumSubscriptionCount();
 
         members = Arrays.stream(guildCreate.getMembers())
                 .map(GuildMemberResponse::getUser)
                 .mapToLong(UserResponse::getId)
-                .distinct() 
+                .distinct()
                 .toArray();
 
         channels = Arrays.stream(guildCreate.getChannels())
@@ -94,12 +94,12 @@ public final class GuildBean extends BaseGuildBean {
         this.large = large;
     }
 
-    public int getPremiumSubscriptionsCount() {
-        return premiumSubscriptionsCount;
+    public int getPremiumSubscriptionCount() {
+        return premiumSubscriptionCount;
     }
 
-    public void setPremiumSubscriptionsCount(final Integer premiumSubscriptionsCount) {
-        this.premiumSubscriptionsCount = premiumSubscriptionsCount;
+    public void setPremiumSubscriptionCount(final Integer premiumSubscriptionCount) {
+        this.premiumSubscriptionCount = premiumSubscriptionCount;
     }
 
     public int getMemberCount() {
@@ -132,7 +132,7 @@ public final class GuildBean extends BaseGuildBean {
                 "joinedAt='" + joinedAt + '\'' +
                 ", large=" + large +
                 ", memberCount=" + memberCount +
-                ", premiumSubscriptionsCount=" + premiumSubscriptionsCount +
+                ", premiumSubscriptionCount=" + premiumSubscriptionCount +
                 ", members=" + Arrays.toString(members) +
                 ", channels=" + Arrays.toString(channels) +
                 "} " + super.toString();

@@ -68,7 +68,7 @@ public class GuildResponse {
     @JsonProperty("premium_tier")
     private int premiumTier;
     @JsonProperty("premium_subscription_count")
-    private int premiumSubcriptionsCount;
+    private int premiumSubscriptionCount;
     @JsonProperty("owner_id")
     @UnsignedJson
     private long ownerId;
@@ -155,8 +155,8 @@ public class GuildResponse {
         return premiumTier;
     }
 
-    public int getPremiumSubcriptionsCount() {
-        return premiumSubcriptionsCount;
+    public int getPremiumSubscriptionCount() {
+        return premiumSubscriptionCount;
     }
 
     public int getVerificationLevel() {
@@ -184,7 +184,7 @@ public class GuildResponse {
         return "GuildResponse{" +
                 "mfaLevel=" + mfaLevel +
                 ", premiumTier=" + premiumTier +
-                ", premiumSubcriptionsCount=" + premiumSubcriptionsCount +
+                ", premiumSubscriptionCount=" + premiumSubscriptionCount +
                 ", emojis=" + Arrays.toString(emojis) +
                 ", applicationId=" + applicationId +
                 ", name='" + name + '\'' +
