@@ -54,8 +54,6 @@ import java.util.function.ToLongFunction;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 
-import static discord4j.core.object.util.Image.Format.*;
-
 /**
  * A Discord guild.
  *
@@ -291,8 +289,8 @@ public final class Guild implements Entity {
      *
      * @return The preferred locale of this guild, only set if guild has the "DISCOVERABLE" feature, defaults to en-US.
      */
-    public String getPreferredLocale() {
-        return data.getPreferredLocale();
+    public Locale getPreferredLocale() {
+        return new Locale.Builder().setLanguageTag(data.getPreferredLocale()).build();
     }
 
     /**
