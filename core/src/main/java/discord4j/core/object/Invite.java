@@ -26,6 +26,8 @@ import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
 
 import java.util.Objects;
+import java.util.Optional;
+import java.util.OptionalInt;
 
 /**
  * A Discord invite.
@@ -91,6 +93,19 @@ public class Invite implements DiscordObject {
      */
     public final Snowflake getChannelId() {
         return Snowflake.of(data.getChannelId());
+    }
+
+    /**
+     * Gets an approximate count of online members (only present when the target user is set) of the guild this invite
+     * is associated to, if present.
+     *
+     * @return An approximate count of online members (only present when the target user is set) of the guild this
+     * invite is associated to, if present.
+     */
+    public final OptionalInt getApproximatePresenceCount() {
+        return Optional.ofNullable(data.getApproximatePresenceCount())
+            .map(OptionalInt::of)
+            .orElse(OptionalInt.empty());
     }
 
     /**

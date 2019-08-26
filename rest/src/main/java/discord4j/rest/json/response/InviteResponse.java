@@ -25,6 +25,9 @@ public class InviteResponse {
     private String code;
     private GuildResponse guild;
     private ChannelResponse channel;
+    @JsonProperty("approximate_presence_count")
+    @Nullable
+    private Integer approximatePresenceCount;
     @Nullable
     private UserResponse inviter;
     @Nullable
@@ -54,6 +57,11 @@ public class InviteResponse {
 
     public ChannelResponse getChannel() {
         return channel;
+    }
+
+    @Nullable
+    public Integer getApproximatePresenceCount() {
+        return approximatePresenceCount;
     }
 
     @Nullable
@@ -97,6 +105,7 @@ public class InviteResponse {
                 "code='" + code + '\'' +
                 ", guild=" + guild +
                 ", channel=" + channel +
+                ", approximatePresenceCount=" + approximatePresenceCount +
                 ", inviter=" + inviter +
                 ", uses=" + uses +
                 ", maxUses=" + maxUses +

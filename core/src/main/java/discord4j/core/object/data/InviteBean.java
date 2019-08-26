@@ -17,6 +17,7 @@
 package discord4j.core.object.data;
 
 import discord4j.rest.json.response.InviteResponse;
+import reactor.util.annotation.Nullable;
 
 import java.io.Serializable;
 
@@ -27,11 +28,14 @@ public class InviteBean implements Serializable {
     private String code;
     private long guildId;
     private long channelId;
+    @Nullable
+    private Integer approximatePresenceCount;
 
     public InviteBean(final InviteResponse response) {
         code = response.getCode();
         guildId = response.getGuild().getId();
         channelId = response.getChannel().getId();
+        approximatePresenceCount = response.getApproximatePresenceCount();
     }
 
     public InviteBean() {}
@@ -60,12 +64,22 @@ public class InviteBean implements Serializable {
         this.channelId = channelId;
     }
 
+    @Nullable
+    public final Integer getApproximatePresenceCount() {
+        return approximatePresenceCount;
+    }
+
+    public final void setApproximatePresenceCount(@Nullable final Integer approximatePresenceCount) {
+        this.approximatePresenceCount = approximatePresenceCount;
+    }
+
     @Override
     public String toString() {
         return "InviteBean{" +
                 "code='" + code + '\'' +
                 ", guildId=" + guildId +
                 ", channelId=" + channelId +
+                ", approximatePresenceCount=" + approximatePresenceCount +
                 '}';
     }
 }
