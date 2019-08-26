@@ -280,6 +280,10 @@ public class BaseGuildBean implements Serializable {
         return premiumTier;
     }
 
+    public void setPremiumTier(final int premiumTier) {
+        this.premiumTier = premiumTier;
+    }
+
     public int getDefaultMessageNotifications() {
         return defaultMessageNotifications;
     }
