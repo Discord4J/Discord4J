@@ -109,6 +109,17 @@ public class Invite implements DiscordObject {
     }
 
     /**
+     * Gets approximate count of total members of the guild this invite is associated to., if present.
+     *
+     * @return An approximate count of total members of the guild this invite is associated to, if present.
+     */
+    public final OptionalInt getApproximateMemberCount() {
+        return Optional.ofNullable(data.getApproximateMemberCount())
+            .map(OptionalInt::of)
+            .orElse(OptionalInt.empty());
+    }
+
+    /**
      * Requests to retrieve the channel this invite is associated to.
      *
      * @return A {@link Mono} where, upon successful completion, emits the {@link TextChannel channel} this invite is

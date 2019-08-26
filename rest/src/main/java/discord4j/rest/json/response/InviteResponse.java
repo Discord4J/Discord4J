@@ -28,6 +28,9 @@ public class InviteResponse {
     @JsonProperty("approximate_presence_count")
     @Nullable
     private Integer approximatePresenceCount;
+    @JsonProperty("approximate_member_count")
+    @Nullable
+    private Integer approximateMemberCount;
     @Nullable
     private UserResponse inviter;
     @Nullable
@@ -62,6 +65,11 @@ public class InviteResponse {
     @Nullable
     public Integer getApproximatePresenceCount() {
         return approximatePresenceCount;
+    }
+
+    @Nullable
+    public Integer getApproximateMemberCount() {
+        return approximateMemberCount;
     }
 
     @Nullable
@@ -106,6 +114,7 @@ public class InviteResponse {
                 ", guild=" + guild +
                 ", channel=" + channel +
                 ", approximatePresenceCount=" + approximatePresenceCount +
+                ", approximateMemberCount=" + approximateMemberCount +
                 ", inviter=" + inviter +
                 ", uses=" + uses +
                 ", maxUses=" + maxUses +
