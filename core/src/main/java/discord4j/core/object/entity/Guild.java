@@ -433,6 +433,16 @@ public final class Guild implements Entity {
     }
 
     /**
+     * Gets whether this guild widget is enabled, if present.
+     *
+     * @return If present, {@code true} if the guild widget is enabled, {@code false} otherwise.
+     *
+     */
+    public Optional<Boolean> isWidgetEnabled() {
+        return Optional.ofNullable(data.isWidgetEnabled());
+    }
+
+    /**
      * Gets the channel ID for the server widget, if present.
      *
      * @return The channel ID for the server widget, if present.

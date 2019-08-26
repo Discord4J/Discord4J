@@ -90,6 +90,9 @@ public class GuildCreate implements Dispatch {
     @Nullable
     @UnsignedJson
     private Long widgetChannelId;
+    @JsonProperty("widget_enabled")
+    @Nullable
+    private Boolean widgetEnabled;
     @JsonProperty("vanity_url_code")
     @Nullable
     private String vanityUrlCode;
@@ -231,6 +234,11 @@ public class GuildCreate implements Dispatch {
     }
 
     @Nullable
+    public Boolean isWidgetEnabled() {
+        return widgetEnabled;
+    }
+
+    @Nullable
     public Long getWidgetChannelId() {
         return widgetChannelId;
     }
@@ -289,6 +297,7 @@ public class GuildCreate implements Dispatch {
                 ", afkTimeout=" + afkTimeout +
                 ", afkChannelId=" + afkChannelId +
                 ", embedChannelId=" + embedChannelId +
+                ", widgetEnabled=" + widgetEnabled +
                 ", widgetChannelId=" + widgetChannelId +
                 ", vanityUrlCode=" + vanityUrlCode +
                 ", description=" + description +

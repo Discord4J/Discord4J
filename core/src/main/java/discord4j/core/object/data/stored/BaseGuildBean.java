@@ -58,6 +58,8 @@ public class BaseGuildBean implements Serializable {
     @Nullable
     private Long applicationId;
     @Nullable
+    private Boolean widgetEnabled;
+    @Nullable
     private Long widgetChannelId;
     @Nullable
     private Long systemChannelId;
@@ -99,6 +101,7 @@ public class BaseGuildBean implements Serializable {
         features = guildCreate.getFeatures();
         mfaLevel = guildCreate.getMfaLevel();
         applicationId = guildCreate.getApplicationId();
+        widgetEnabled = guildCreate.isWidgetEnabled();
         widgetChannelId = guildCreate.getWidgetChannelId();
         systemChannelId = guildCreate.getSystemChannelId();
         vanityUrlCode = guildCreate.getVanityUrlCode();
@@ -135,6 +138,7 @@ public class BaseGuildBean implements Serializable {
         features = guildUpdate.getFeatures();
         mfaLevel = guildUpdate.getMfaLevel();
         applicationId = guildUpdate.getApplicationId();
+        widgetEnabled = guildUpdate.isWidgetEnabled();
         widgetChannelId = guildUpdate.getWidgetChannelId();
         systemChannelId = guildUpdate.getSystemChannelId();
         vanityUrlCode = guildUpdate.getVanityUrlCode();
@@ -171,6 +175,7 @@ public class BaseGuildBean implements Serializable {
         features = response.getFeatures();
         mfaLevel = response.getMfaLevel();
         applicationId = response.getApplicationId();
+        widgetEnabled = response.isWidgetEnabled();
         widgetChannelId = response.getWidgetChannelId();
         systemChannelId = response.getSystemChannelId();
         vanityUrlCode = response.getVanityUrlCode();
@@ -202,6 +207,7 @@ public class BaseGuildBean implements Serializable {
         features = toCopy.getFeatures();
         mfaLevel = toCopy.getMfaLevel();
         applicationId = toCopy.getApplicationId();
+        widgetEnabled = toCopy.isWidgetEnabled();
         widgetChannelId = toCopy.getWidgetChannelId();
         systemChannelId = toCopy.getSystemChannelId();
         vanityUrlCode = toCopy.getVanityUrlCode();
@@ -375,6 +381,15 @@ public class BaseGuildBean implements Serializable {
     }
 
     @Nullable
+    public Boolean isWidgetEnabled() {
+        return widgetEnabled;
+    }
+
+    public void setWidgetEnabled(@Nullable final Boolean widgetEnabled) {
+        this.widgetEnabled = widgetEnabled;
+    }
+
+    @Nullable
     public Long getWidgetChannelId() {
         return widgetChannelId;
     }
@@ -451,6 +466,7 @@ public class BaseGuildBean implements Serializable {
                 ", features=" + Arrays.toString(features) +
                 ", mfaLevel=" + mfaLevel +
                 ", applicationId=" + applicationId +
+                ", widgetEnabled=" + widgetEnabled +
                 ", widgetChannelId=" + widgetChannelId +
                 ", systemChannelId=" + systemChannelId +
                 ", vanityUrlCode=" + vanityUrlCode +

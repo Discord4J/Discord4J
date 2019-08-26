@@ -27,7 +27,8 @@ import java.util.Arrays;
 public class GuildUpdate implements Dispatch {
 
     @JsonProperty("widget_enabled")
-    private boolean widgetEnabled;
+    @Nullable
+    private Boolean widgetEnabled;
     @JsonProperty("widget_channel_id")
     @Nullable
     @UnsignedJson
@@ -94,7 +95,8 @@ public class GuildUpdate implements Dispatch {
     @Nullable
     private Integer maxMembers;
 
-    public boolean isWidgetEnabled() {
+    @Nullable
+    public Boolean isWidgetEnabled() {
         return widgetEnabled;
     }
 

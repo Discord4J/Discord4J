@@ -62,7 +62,8 @@ public class GuildResponse {
     @UnsignedJson
     private Long afkChannelId;
     @JsonProperty("widget_enabled")
-    private boolean widgetEnabled;
+    @Nullable
+    private Boolean widgetEnabled;
     @JsonProperty("verification_level")
     private int verificationLevel;
     @JsonProperty("premium_tier")
@@ -160,7 +161,8 @@ public class GuildResponse {
         return afkChannelId;
     }
 
-    public boolean isWidgetEnabled() {
+    @Nullable
+    public Boolean isWidgetEnabled() {
         return widgetEnabled;
     }
 
