@@ -46,7 +46,6 @@ public class BaseGuildBean implements Serializable {
     @Nullable
     private Long embedChannelId;
     private int premiumTier;
-    private int premiumSubscriptionsCount;
     private int verificationLevel;
     private int defaultMessageNotifications;
     private int explicitContentFilter;
