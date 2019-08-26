@@ -291,9 +291,9 @@ public final class Guild implements Entity {
     }
 
     /**
-     * Gets the preferred locale of this guild, only set if guild has the "DISCOVERABLE" feature, defaults to en-US.
+     * Gets the preferred locale of the guild, only set if guild has the "DISCOVERABLE" feature, defaults to en-US.
      *
-     * @return The preferred locale of this guild, only set if guild has the "DISCOVERABLE" feature, defaults to en-US.
+     * @return The preferred locale of the guild, only set if guild has the "DISCOVERABLE" feature, defaults to en-US.
      */
     public Locale getPreferredLocale() {
         return new Locale.Builder().setLanguageTag(data.getPreferredLocale()).build();
@@ -647,6 +647,15 @@ public final class Guild implements Entity {
      */
     public Optional<String> getVanityUrlCode() {
         return Optional.ofNullable(data.getVanityUrlCode());
+    }
+
+    /**
+     * Gets the description of the guild, if present.
+     *
+     * @return The description of the guild, if present.
+     */
+    public Optional<String> getDescription() {
+        return Optional.ofNullable(data.getDescription());
     }
 
     /**

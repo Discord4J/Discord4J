@@ -63,6 +63,8 @@ public class BaseGuildBean implements Serializable {
     private Long systemChannelId;
     @Nullable
     private String vanityUrlCode;
+    @Nullable
+    private String description;
 
     public BaseGuildBean(final GuildCreate guildCreate) {
         id = guildCreate.getId();
@@ -96,6 +98,7 @@ public class BaseGuildBean implements Serializable {
         widgetChannelId = guildCreate.getWidgetChannelId();
         systemChannelId = guildCreate.getSystemChannelId();
         vanityUrlCode = guildCreate.getVanityUrlCode();
+        description = guildCreate.getDescription();
     }
 
     public BaseGuildBean(final GuildUpdate guildUpdate) {
@@ -129,6 +132,7 @@ public class BaseGuildBean implements Serializable {
         widgetChannelId = guildUpdate.getWidgetChannelId();
         systemChannelId = guildUpdate.getSystemChannelId();
         vanityUrlCode = guildUpdate.getVanityUrlCode();
+        description = guildUpdate.getDescription();
     }
 
     public BaseGuildBean(final GuildResponse response) {
@@ -162,6 +166,7 @@ public class BaseGuildBean implements Serializable {
         widgetChannelId = response.getWidgetChannelId();
         systemChannelId = response.getSystemChannelId();
         vanityUrlCode = response.getVanityUrlCode();
+        description = response.getDescription();
     }
 
     public BaseGuildBean(final BaseGuildBean toCopy) {
@@ -190,6 +195,7 @@ public class BaseGuildBean implements Serializable {
         widgetChannelId = toCopy.getWidgetChannelId();
         systemChannelId = toCopy.getSystemChannelId();
         vanityUrlCode = toCopy.getVanityUrlCode();
+        description = toCopy.getDescription();
     }
 
     public BaseGuildBean() {}
@@ -298,7 +304,7 @@ public class BaseGuildBean implements Serializable {
     public void setPreferredLocale(final String preferredLocale) {
         this.preferredLocale = preferredLocale;
     }
-    
+
     public int getDefaultMessageNotifications() {
         return defaultMessageNotifications;
     }
@@ -383,6 +389,15 @@ public class BaseGuildBean implements Serializable {
         this.vanityUrlCode = vanityUrlCode;
     }
 
+    @Nullable
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(@Nullable final String description) {
+        this.description = description;
+    }
+
     @Override
     public String toString() {
         return "BaseGuildBean{" +
@@ -409,6 +424,7 @@ public class BaseGuildBean implements Serializable {
                 ", widgetChannelId=" + widgetChannelId +
                 ", systemChannelId=" + systemChannelId +
                 ", vanityUrlCode=" + vanityUrlCode +
+                ", description=" + description +
                 '}';
     }
 }

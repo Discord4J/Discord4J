@@ -82,6 +82,8 @@ public class GuildResponse {
     @JsonProperty("vanity_url_code")
     @Nullable
     private String vanityUrlCode;
+    @Nullable
+    private String description;
 
     public int getMfaLevel() {
         return mfaLevel;
@@ -193,6 +195,11 @@ public class GuildResponse {
         return vanityUrlCode;
     }
 
+    @Nullable
+    public String getDescription() {
+        return description;
+    }
+
     @Override
     public String toString() {
         return "GuildResponse{" +
@@ -222,6 +229,7 @@ public class GuildResponse {
                 ", id=" + id +
                 ", icon='" + icon + '\'' +
                 ", vanityUrlCode=" + vanityUrlCode +
+                ", description=" + description +
                 '}';
     }
 }
