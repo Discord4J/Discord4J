@@ -659,6 +659,15 @@ public final class Guild implements Entity {
     }
 
     /**
+     * Gets the maximum amount of presences of the guild.
+     *
+     * @return The maximum amount of presences for the guild.
+     */
+    public int getMaxPresences() {
+        return data.getMaxPresences() == null ? 5000 : data.getMaxPresences();
+    }
+
+    /**
      * Requests to edit this guild.
      *
      * @param spec A {@link Consumer} that provides a "blank" {@link GuildEditSpec} to be operated on.

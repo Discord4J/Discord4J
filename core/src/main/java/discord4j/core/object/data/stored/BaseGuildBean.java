@@ -65,6 +65,8 @@ public class BaseGuildBean implements Serializable {
     private String vanityUrlCode;
     @Nullable
     private String description;
+    @Nullable
+    private Integer maxPresences;
 
     public BaseGuildBean(final GuildCreate guildCreate) {
         id = guildCreate.getId();
@@ -99,6 +101,7 @@ public class BaseGuildBean implements Serializable {
         systemChannelId = guildCreate.getSystemChannelId();
         vanityUrlCode = guildCreate.getVanityUrlCode();
         description = guildCreate.getDescription();
+        maxPresences = guildCreate.getMaxPresences();
     }
 
     public BaseGuildBean(final GuildUpdate guildUpdate) {
@@ -133,6 +136,7 @@ public class BaseGuildBean implements Serializable {
         systemChannelId = guildUpdate.getSystemChannelId();
         vanityUrlCode = guildUpdate.getVanityUrlCode();
         description = guildUpdate.getDescription();
+        maxPresences = guildUpdate.getMaxPresences();
     }
 
     public BaseGuildBean(final GuildResponse response) {
@@ -167,6 +171,7 @@ public class BaseGuildBean implements Serializable {
         systemChannelId = response.getSystemChannelId();
         vanityUrlCode = response.getVanityUrlCode();
         description = response.getDescription();
+        maxPresences = response.getMaxPresences();
     }
 
     public BaseGuildBean(final BaseGuildBean toCopy) {
@@ -196,6 +201,7 @@ public class BaseGuildBean implements Serializable {
         systemChannelId = toCopy.getSystemChannelId();
         vanityUrlCode = toCopy.getVanityUrlCode();
         description = toCopy.getDescription();
+        maxPresences = toCopy.getMaxPresences();
     }
 
     public BaseGuildBean() {}
@@ -398,6 +404,15 @@ public class BaseGuildBean implements Serializable {
         this.description = description;
     }
 
+    @Nullable
+    public Integer getMaxPresences() {
+        return maxPresences;
+    }
+
+    public void setMaxPresences(@Nullable final Integer maxPresences) {
+        this.maxPresences = maxPresences;
+    }
+
     @Override
     public String toString() {
         return "BaseGuildBean{" +
@@ -425,6 +440,7 @@ public class BaseGuildBean implements Serializable {
                 ", systemChannelId=" + systemChannelId +
                 ", vanityUrlCode=" + vanityUrlCode +
                 ", description=" + description +
+                ", maxPresences=" + maxPresences +
                 '}';
     }
 }

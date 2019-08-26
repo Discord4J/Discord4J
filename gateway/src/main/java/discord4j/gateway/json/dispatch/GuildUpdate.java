@@ -87,6 +87,9 @@ public class GuildUpdate implements Dispatch {
     private String vanityUrlCode;
     @Nullable
     private String description;
+    @JsonProperty("max_presences")
+    @Nullable
+    private Integer maxPresences;
 
     public boolean isWidgetEnabled() {
         return widgetEnabled;
@@ -207,6 +210,11 @@ public class GuildUpdate implements Dispatch {
         return description;
     }
 
+    @Nullable
+    public Integer getMaxPresences() {
+        return maxPresences;
+    }
+
     @Override
     public String toString() {
         return "GuildUpdate{" +
@@ -238,6 +246,7 @@ public class GuildUpdate implements Dispatch {
                 ", guildId=" + guildId +
                 ", vanityUrlCode=" + vanityUrlCode +
                 ", description=" + description +
+                ", maxPresences=" + maxPresences +
                 '}';
     }
 }
