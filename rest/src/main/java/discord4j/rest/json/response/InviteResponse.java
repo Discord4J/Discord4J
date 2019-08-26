@@ -40,6 +40,9 @@ public class InviteResponse {
     @JsonProperty("created_at")
     @Nullable
     private String createdAt;
+    @JsonProperty("revoked")
+    @Nullable
+    private Boolean revoked;
 
     public String getCode() {
         return code;
@@ -83,6 +86,11 @@ public class InviteResponse {
         return createdAt;
     }
 
+    @Nullable
+    public Boolean getRevoked() {
+        return revoked;
+    }
+
     @Override
     public String toString() {
         return "InviteResponse{" +
@@ -95,6 +103,7 @@ public class InviteResponse {
                 ", maxAge=" + maxAge +
                 ", temporary=" + temporary +
                 ", createdAt='" + createdAt + '\'' +
+                ", revoked=" + revoked +
                 '}';
     }
 }
