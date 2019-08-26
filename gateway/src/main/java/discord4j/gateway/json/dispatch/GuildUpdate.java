@@ -82,6 +82,9 @@ public class GuildUpdate implements Dispatch {
     @JsonProperty("guild_id")
     @UnsignedJson
     private long guildId;
+    @JsonProperty("vanity_url_code")
+    @Nullable
+    private String vanityUrlCode;
 
     public boolean isWidgetEnabled() {
         return widgetEnabled;
@@ -192,6 +195,11 @@ public class GuildUpdate implements Dispatch {
         return guildId;
     }
 
+    @Nullable
+    public String getVanityUrlCode() {
+        return vanityUrlCode;
+    }
+
     @Override
     public String toString() {
         return "GuildUpdate{" +
@@ -221,6 +229,7 @@ public class GuildUpdate implements Dispatch {
                 ", afkTimeout=" + afkTimeout +
                 ", afkChannelId=" + afkChannelId +
                 ", guildId=" + guildId +
+                ", vanityUrlCode=" + vanityUrlCode +
                 '}';
     }
 }

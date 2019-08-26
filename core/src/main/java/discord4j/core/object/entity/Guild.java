@@ -641,6 +641,15 @@ public final class Guild implements Entity {
     }
 
     /**
+     *	Gets the vanity url code of the guild, if present.
+     *
+     * @return The vanity url code of the guild, if present.
+     */
+    public Optional<String> getVanityUrlCode() {
+        return Optional.ofNullable(data.getVanityUrlCode());
+    }
+
+    /**
      * Requests to edit this guild.
      *
      * @param spec A {@link Consumer} that provides a "blank" {@link GuildEditSpec} to be operated on.

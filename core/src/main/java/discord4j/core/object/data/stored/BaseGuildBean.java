@@ -61,6 +61,8 @@ public class BaseGuildBean implements Serializable {
     private Long widgetChannelId;
     @Nullable
     private Long systemChannelId;
+    @Nullable
+    private String vanityUrlCode;
 
     public BaseGuildBean(final GuildCreate guildCreate) {
         id = guildCreate.getId();
@@ -93,6 +95,7 @@ public class BaseGuildBean implements Serializable {
         applicationId = guildCreate.getApplicationId();
         widgetChannelId = guildCreate.getWidgetChannelId();
         systemChannelId = guildCreate.getSystemChannelId();
+        vanityUrlCode = guildCreate.getVanityUrlCode();
     }
 
     public BaseGuildBean(final GuildUpdate guildUpdate) {
@@ -125,6 +128,7 @@ public class BaseGuildBean implements Serializable {
         applicationId = guildUpdate.getApplicationId();
         widgetChannelId = guildUpdate.getWidgetChannelId();
         systemChannelId = guildUpdate.getSystemChannelId();
+        vanityUrlCode = guildUpdate.getVanityUrlCode();
     }
 
     public BaseGuildBean(final GuildResponse response) {
@@ -157,6 +161,7 @@ public class BaseGuildBean implements Serializable {
         applicationId = response.getApplicationId();
         widgetChannelId = response.getWidgetChannelId();
         systemChannelId = response.getSystemChannelId();
+        vanityUrlCode = response.getVanityUrlCode();
     }
 
     public BaseGuildBean(final BaseGuildBean toCopy) {
@@ -184,6 +189,7 @@ public class BaseGuildBean implements Serializable {
         applicationId = toCopy.getApplicationId();
         widgetChannelId = toCopy.getWidgetChannelId();
         systemChannelId = toCopy.getSystemChannelId();
+        vanityUrlCode = toCopy.getVanityUrlCode();
     }
 
     public BaseGuildBean() {}
@@ -368,6 +374,15 @@ public class BaseGuildBean implements Serializable {
         this.systemChannelId = systemChannelId;
     }
 
+    @Nullable
+    public String getVanityUrlCode() {
+        return vanityUrlCode;
+    }
+
+    public void setVanityUrlCode(@Nullable final String vanityUrlCode) {
+        this.vanityUrlCode = vanityUrlCode;
+    }
+
     @Override
     public String toString() {
         return "BaseGuildBean{" +
@@ -393,6 +408,7 @@ public class BaseGuildBean implements Serializable {
                 ", applicationId=" + applicationId +
                 ", widgetChannelId=" + widgetChannelId +
                 ", systemChannelId=" + systemChannelId +
+                ", vanityUrlCode=" + vanityUrlCode +
                 '}';
     }
 }

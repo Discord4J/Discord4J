@@ -90,6 +90,9 @@ public class GuildCreate implements Dispatch {
     @Nullable
     @UnsignedJson
     private Long widgetChannelId;
+    @JsonProperty("vanity_url_code")
+    @Nullable
+    private String vanityUrlCode;
 
     public VoiceState[] getVoiceStates() {
         return voiceStates;
@@ -224,6 +227,11 @@ public class GuildCreate implements Dispatch {
         return widgetChannelId;
     }
 
+    @Nullable
+    public String getVanityUrlCode() {
+        return vanityUrlCode;
+    }
+
     @Override
     public String toString() {
         return "GuildCreate{" +
@@ -259,6 +267,7 @@ public class GuildCreate implements Dispatch {
                 ", afkChannelId=" + afkChannelId +
                 ", embedChannelId=" + embedChannelId +
                 ", widgetChannelId=" + widgetChannelId +
+                ", vanityUrlCode=" + vanityUrlCode +
                 '}';
     }
 
