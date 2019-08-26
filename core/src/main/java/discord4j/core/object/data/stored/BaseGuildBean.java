@@ -47,6 +47,7 @@ public class BaseGuildBean implements Serializable {
     private Long embedChannelId;
     private int premiumTier;
     private int premiumSubscriptionsCount;
+    private String preferredLocale;
     private int verificationLevel;
     private int defaultMessageNotifications;
     private int explicitContentFilter;
@@ -74,6 +75,7 @@ public class BaseGuildBean implements Serializable {
         embedChannelId = guildCreate.getEmbedChannelId();
         verificationLevel = guildCreate.getVerificationLevel();
         premiumTier = guildCreate.getPremiumTier();
+        preferredLocale = guildCreate.getPreferredLocale();
 
         defaultMessageNotifications = guildCreate.getDefaultMessageNotifications();
         explicitContentFilter = guildCreate.getExplicitContentFilter();
@@ -106,6 +108,7 @@ public class BaseGuildBean implements Serializable {
         embedChannelId = guildUpdate.getEmbedChannelId();
         verificationLevel = guildUpdate.getVerificationLevel();
         premiumTier = guildUpdate.getPremiumTier();
+        preferredLocale = guildUpdate.getPreferredLocale();
         defaultMessageNotifications = guildUpdate.getDefaultMessageNotifications();
         explicitContentFilter = guildUpdate.getExplicitContentFilter();
 
@@ -137,6 +140,7 @@ public class BaseGuildBean implements Serializable {
         embedChannelId = response.getEmbedChannelId();
         verificationLevel = response.getVerificationLevel();
         premiumTier = response.getPremiumTier();
+        preferredLocale = response.getPreferredLocale();
         defaultMessageNotifications = response.getDefaultMessageNotifications();
         explicitContentFilter = response.getExplicitContentFilter();
 
@@ -168,6 +172,7 @@ public class BaseGuildBean implements Serializable {
         embedChannelId = toCopy.getEmbedChannelId();
         verificationLevel = toCopy.getVerificationLevel();
         premiumTier = toCopy.getPremiumTier();
+        preferredLocale = toCopy.getPreferredLocale();
         defaultMessageNotifications = toCopy.getDefaultMessageNotifications();
         explicitContentFilter = toCopy.getExplicitContentFilter();
 
@@ -280,6 +285,14 @@ public class BaseGuildBean implements Serializable {
         return premiumTier;
     }
 
+    public String getPreferredLocale() {
+        return preferredLocale;
+    }
+
+    public void setPreferredLocale(final String preferredLocale) {
+        this.preferredLocale = preferredLocale;
+    }
+    
     public int getDefaultMessageNotifications() {
         return defaultMessageNotifications;
     }
@@ -369,6 +382,7 @@ public class BaseGuildBean implements Serializable {
                 ", afkTimeout=" + afkTimeout +
                 ", embedChannelId=" + embedChannelId +
                 ", premiumTier=" + premiumTier +
+                ", preferredLocale=" + preferredLocale +
                 ", verificationLevel=" + verificationLevel +
                 ", defaultMessageNotifications=" + defaultMessageNotifications +
                 ", explicitContentFilter=" + explicitContentFilter +
