@@ -109,7 +109,7 @@ public class Invite implements DiscordObject {
     }
 
     /**
-     * Gets approximate count of total members of the guild this invite is associated to., if present.
+     * Gets approximate count of total members of the guild this invite is associated to, if present.
      *
      * @return An approximate count of total members of the guild this invite is associated to, if present.
      */
