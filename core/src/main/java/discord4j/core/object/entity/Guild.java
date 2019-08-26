@@ -499,6 +499,19 @@ public final class Guild implements Entity {
     }
 
     /**
+     * Gets whether this guild is unavailable, if present.
+     *
+     * @return If present, {@code true} if the guild is unavailable, {@code false} otherwise.
+     *
+     * @implNote If the underlying {@link discord4j.core.DiscordClientBuilder#getStoreService() store} does not save
+     * {@link GuildBean} instances <b>OR</b> the bot is currently not logged in then the returned {@code Optional} will
+     * always be empty.
+     */
+    public Optional<Boolean> isUnavailable() {
+        return getGatewayData().map(GuildBean::getUnavailable);
+    }
+
+    /**
      * Gets the total number of members in the guild, if present.
      *
      * @return The total number of members in the guild, if present.
