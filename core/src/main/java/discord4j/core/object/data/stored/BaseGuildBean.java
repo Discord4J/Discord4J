@@ -67,6 +67,8 @@ public class BaseGuildBean implements Serializable {
     private String description;
     @Nullable
     private Integer maxPresences;
+    @Nullable
+    private Integer maxMembers;
 
     public BaseGuildBean(final GuildCreate guildCreate) {
         id = guildCreate.getId();
@@ -102,6 +104,7 @@ public class BaseGuildBean implements Serializable {
         vanityUrlCode = guildCreate.getVanityUrlCode();
         description = guildCreate.getDescription();
         maxPresences = guildCreate.getMaxPresences();
+        maxMembers = guildCreate.getMaxMembers();
     }
 
     public BaseGuildBean(final GuildUpdate guildUpdate) {
@@ -137,6 +140,7 @@ public class BaseGuildBean implements Serializable {
         vanityUrlCode = guildUpdate.getVanityUrlCode();
         description = guildUpdate.getDescription();
         maxPresences = guildUpdate.getMaxPresences();
+        maxMembers = guildUpdate.getMaxMembers();
     }
 
     public BaseGuildBean(final GuildResponse response) {
@@ -172,6 +176,7 @@ public class BaseGuildBean implements Serializable {
         vanityUrlCode = response.getVanityUrlCode();
         description = response.getDescription();
         maxPresences = response.getMaxPresences();
+        maxMembers = response.getMaxMembers();
     }
 
     public BaseGuildBean(final BaseGuildBean toCopy) {
@@ -202,6 +207,7 @@ public class BaseGuildBean implements Serializable {
         vanityUrlCode = toCopy.getVanityUrlCode();
         description = toCopy.getDescription();
         maxPresences = toCopy.getMaxPresences();
+        maxMembers = toCopy.getMaxMembers();
     }
 
     public BaseGuildBean() {}
@@ -413,6 +419,15 @@ public class BaseGuildBean implements Serializable {
         this.maxPresences = maxPresences;
     }
 
+    @Nullable
+    public Integer getMaxMembers() {
+        return maxMembers;
+    }
+
+    public void setMaxMembers(@Nullable final Integer maxMembers) {
+        this.maxMembers = maxMembers;
+    }
+
     @Override
     public String toString() {
         return "BaseGuildBean{" +
@@ -441,6 +456,7 @@ public class BaseGuildBean implements Serializable {
                 ", vanityUrlCode=" + vanityUrlCode +
                 ", description=" + description +
                 ", maxPresences=" + maxPresences +
+                ", maxMembers=" + maxMembers +
                 '}';
     }
 }

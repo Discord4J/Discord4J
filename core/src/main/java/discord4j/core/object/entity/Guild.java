@@ -668,6 +668,15 @@ public final class Guild implements Entity {
     }
 
     /**
+     * Gets the maximum amount of members of the guild, if present.
+     *
+     * @return The maximum amount of members for the guild, if present.
+     */
+    public OptionalInt getMaxMembers() {
+        return data.getMaxMembers() == null ? OptionalInt.empty() : OptionalInt.of(data.getMaxMembers());
+    }
+
+    /**
      * Requests to edit this guild.
      *
      * @param spec A {@link Consumer} that provides a "blank" {@link GuildEditSpec} to be operated on.

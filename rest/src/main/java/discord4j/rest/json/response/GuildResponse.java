@@ -87,6 +87,9 @@ public class GuildResponse {
     @JsonProperty("max_presences")
     @Nullable
     private Integer maxPresences;
+    @JsonProperty("max_members")
+    @Nullable
+    private Integer maxMembers;
 
     public int getMfaLevel() {
         return mfaLevel;
@@ -208,6 +211,11 @@ public class GuildResponse {
         return maxPresences;
     }
 
+    @Nullable
+    public Integer getMaxMembers() {
+        return maxMembers;
+    }
+
     @Override
     public String toString() {
         return "GuildResponse{" +
@@ -239,6 +247,7 @@ public class GuildResponse {
                 ", vanityUrlCode=" + vanityUrlCode +
                 ", description=" + description +
                 ", maxPresences=" + maxPresences +
+                ", maxMembers=" + maxMembers +
                 '}';
     }
 }

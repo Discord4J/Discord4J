@@ -48,7 +48,7 @@ public final class GuildBean extends BaseGuildBean {
         members = Arrays.stream(guildCreate.getMembers())
                 .map(GuildMemberResponse::getUser)
                 .mapToLong(UserResponse::getId)
-                .distinct() 
+                .distinct()
                 .toArray();
 
         channels = Arrays.stream(guildCreate.getChannels())

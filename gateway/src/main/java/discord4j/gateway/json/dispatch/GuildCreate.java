@@ -98,6 +98,9 @@ public class GuildCreate implements Dispatch {
     @JsonProperty("max_presences")
     @Nullable
     private Integer maxPresences;
+    @JsonProperty("max_members")
+    @Nullable
+    private Integer maxMembers;
 
     public VoiceState[] getVoiceStates() {
         return voiceStates;
@@ -247,6 +250,11 @@ public class GuildCreate implements Dispatch {
         return maxPresences;
     }
 
+    @Nullable
+    public Integer getMaxMembers() {
+        return maxMembers;
+    }
+
     @Override
     public String toString() {
         return "GuildCreate{" +
@@ -285,6 +293,7 @@ public class GuildCreate implements Dispatch {
                 ", vanityUrlCode=" + vanityUrlCode +
                 ", description=" + description +
                 ", maxPresences=" + maxPresences +
+                ", maxMembers=" + maxMembers +
                 '}';
     }
 
