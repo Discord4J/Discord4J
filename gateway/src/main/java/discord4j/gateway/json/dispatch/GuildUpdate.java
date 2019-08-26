@@ -37,7 +37,7 @@ public class GuildUpdate implements Dispatch {
     @JsonProperty("premium_tier")
     private int premiumTier;
     @JsonProperty("premium_subscription_count")
-    private int premiumSubcriptionsCount;
+    private int premiumSubscriptionCount;
     @JsonProperty("system_channel_id")
     @Nullable
     @UnsignedJson
@@ -94,8 +94,8 @@ public class GuildUpdate implements Dispatch {
         return premiumTier;
     }
 
-    public int getPremiumSubcriptionsCount() {
-        return premiumSubcriptionsCount;
+    public int getPremiumSubscriptionCount() {
+        return premiumSubscriptionCount;
     }
 
     public int getVerificationLevel() {
@@ -193,7 +193,7 @@ public class GuildUpdate implements Dispatch {
                 ", widgetChannelId=" + widgetChannelId +
                 ", verificationLevel=" + verificationLevel +
                 ", premiumTier=" + premiumTier +
-                ", premiumSubcriptionsCount=" + premiumSubcriptionsCount +
+                ", premiumSubscriptionCount=" + premiumSubscriptionCount +
                 ", systemChannelId=" + systemChannelId +
                 ", splash='" + splash + '\'' +
                 ", splash='" + banner + '\'' +

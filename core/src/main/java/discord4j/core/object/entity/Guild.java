@@ -513,9 +513,9 @@ public final class Guild implements Entity {
      * {@link GuildBean} instances <b>OR</b> the bot is currently not logged in then the returned {@code Optional} will
      * always be empty.
      */
-    public OptionalInt getPremiumSubcriptionsCount() {
+    public OptionalInt getPremiumSubscriptionCount() {
         return getGatewayData()
-            .map(guildBean -> OptionalInt.of(guildBean.getPremiumSubscriptionsCount()))
+            .map(guildBean -> OptionalInt.of(guildBean.getPremiumSubscriptionCount()))
             .orElseGet(OptionalInt::empty);
     }
 
