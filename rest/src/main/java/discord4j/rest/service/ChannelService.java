@@ -122,6 +122,7 @@ public class ChannelService extends RestService {
 
     public Mono<Void> suppressEmbeds(long channelId, long messageId, SuppressEmbedsRequest request) {
         return Routes.MESSAGE_SUPPRESS_EMBEDS.newRequest(channelId,messageId)
+                .header("content-type", "application/json")
                 .body(request)
                 .exchange(getRouter());
     }

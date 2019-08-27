@@ -384,6 +384,7 @@ public final class Message implements Entity {
      * @param suppresed Determine if you need suppressed or not the embeds.
      * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the process has been complete.
      * If an error is received, it is emitted through the {@code Mono}.
+     * @deprecated Discord draft api
      */
     public Mono<Void> suppressEmbeds(final boolean suppresed) {
         return serviceMediator.getRestClient().getChannelService()
