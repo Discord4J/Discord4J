@@ -61,6 +61,9 @@ import static discord4j.core.object.util.Image.Format.*;
  */
 public final class Guild implements Entity {
 
+    /** The default value for the maximum number of presences. **/
+    private static final int DEFAULT_MAX_PRESENCES = 5000;
+
     /** The path for guild icon image URLs. */
     private static final String ICON_IMAGE_PATH = "icons/%s/%s";
 
@@ -687,7 +690,7 @@ public final class Guild implements Entity {
      * @return The maximum amount of presences for the guild.
      */
     public int getMaxPresences() {
-        return data.getMaxPresences() == null ? 5000 : data.getMaxPresences();
+        return Optional.ofNullable(data.getMaxPresences()).orElse(DEFAULT_MAX_PRESENCES);
     }
 
     /**
