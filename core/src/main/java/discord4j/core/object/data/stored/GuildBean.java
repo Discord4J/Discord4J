@@ -94,7 +94,7 @@ public final class GuildBean extends BaseGuildBean {
         return large;
     }
 
-    public void setLarge(final Boolean large) {
+    public void setLarge(final boolean large) {
         this.large = large;
     }
 
@@ -110,7 +110,7 @@ public final class GuildBean extends BaseGuildBean {
         return unavailable;
     }
 
-    public void setUnavailable(final Boolean unavailable) {
+    public void setUnavailable(final boolean unavailable) {
         this.unavailable = unavailable;
     }
 
@@ -118,7 +118,7 @@ public final class GuildBean extends BaseGuildBean {
         return memberCount;
     }
 
-    public void setMemberCount(final Integer memberCount) {
+    public void setMemberCount(final int memberCount) {
         this.memberCount = memberCount;
     }
 
