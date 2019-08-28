@@ -16,6 +16,7 @@
  */
 package discord4j.common.json;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import discord4j.common.jackson.UnsignedJson;
 import reactor.util.annotation.Nullable;
 
@@ -29,6 +30,16 @@ public class UserResponse {
     private String avatar;
     @Nullable
     private Boolean bot;
+    @JsonProperty("mfa_enabled")
+    @Nullable
+    private Boolean mfaEnabled;
+    @Nullable
+    private String locale;
+    @Nullable
+    private Integer flags;
+    @JsonProperty("premium_type")
+    @Nullable
+    private Integer premiumType;
 
     public long getId() {
         return id;
@@ -52,6 +63,26 @@ public class UserResponse {
         return bot;
     }
 
+    @Nullable
+    public Boolean isMfaEnabled() {
+        return mfaEnabled;
+    }
+
+    @Nullable
+    public String getLocale() {
+        return locale;
+    }
+
+    @Nullable
+    public Integer getFlags() {
+        return flags;
+    }
+
+    @Nullable
+    public Integer getPremiumType() {
+        return premiumType;
+    }
+
     @Override
     public String toString() {
         return "UserResponse{" +
@@ -60,6 +91,10 @@ public class UserResponse {
                 ", discriminator='" + discriminator + '\'' +
                 ", avatar='" + avatar + '\'' +
                 ", bot=" + bot +
+                ", mfaEnabled=" + mfaEnabled +
+                ", locale=" + locale +
+                ", flags=" + flags +
+                ", premiumType=" + premiumType +
                 '}';
     }
 }

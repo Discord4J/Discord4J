@@ -33,6 +33,14 @@ public final class UserBean implements Serializable {
     @Nullable
     private String avatar;
     private boolean isBot;
+    private boolean isMfaEnabled;
+    @Nullable
+    private String locale;
+    @Nullable
+    private Integer flags;
+    @Nullable
+    private Integer premiumType;
+
 
     public UserBean(final UserResponse response) {
         id = response.getId();
@@ -40,6 +48,10 @@ public final class UserBean implements Serializable {
         discriminator = response.getDiscriminator();
         avatar = response.getAvatar();
         isBot = response.isBot() != null && response.isBot();
+        isMfaEnabled = response.isMfaEnabled() != null && response.isMfaEnabled();
+        locale = response.getLocale();
+        flags = response.getFlags();
+        premiumType = response.getPremiumType();
     }
 
     public UserBean(final UserBean toCopy) {
@@ -48,6 +60,10 @@ public final class UserBean implements Serializable {
         discriminator = toCopy.discriminator;
         avatar = toCopy.avatar;
         isBot = toCopy.isBot;
+        isMfaEnabled = toCopy.isMfaEnabled;
+        locale = toCopy.locale;
+        flags = toCopy.flags;
+        premiumType = toCopy.premiumType;
     }
 
     public UserBean() {}
@@ -89,8 +105,43 @@ public final class UserBean implements Serializable {
         return isBot;
     }
 
-    public void setBot(boolean bot) {
+    public void setBot(final boolean bot) {
         isBot = bot;
+    }
+
+    public boolean isMfaEnabled() {
+        return isMfaEnabled;
+    }
+
+    public void setMfaEnabled(final boolean mfaEnabled) {
+        this.isMfaEnabled = isMfaEnabled;
+    }
+
+    @Nullable
+    public String getLocale() {
+        return locale;
+    }
+
+    public void setLocale(@Nullable final String locale) {
+        this.locale = locale;
+    }
+
+    @Nullable
+    public Integer getFlags() {
+        return flags;
+    }
+
+    public void setFlags(@Nullable final Integer flags) {
+        this.flags = flags;
+    }
+
+    @Nullable
+    public Integer getPremiumType() {
+        return premiumType;
+    }
+
+    public void setPremiumType(@Nullable final Integer premiumType) {
+        this.premiumType = premiumType;
     }
 
     @Override
@@ -101,6 +152,10 @@ public final class UserBean implements Serializable {
                 ", discriminator='" + discriminator + '\'' +
                 ", avatar='" + avatar + '\'' +
                 ", isBot=" + isBot +
+                ", isMfaEnabled=" + isMfaEnabled +
+                ", locale=" + locale +
+                ", flags=" + flags +
+                ", premiumType=" + premiumType +
                 '}';
     }
 }

@@ -164,6 +164,24 @@ public class User implements Entity {
     }
 
     /**
+     * Gets whether the user has two factor enabled on their account.
+     *
+     * @return {@code true} if the user has two factor enabled on their account, {@code false} otherwise.
+     */
+    public boolean isMfaEnabled() {
+        return data.isMfaEnabled();
+    }
+
+    /**
+     * Gets the user's chosen language option, if present.
+     *
+     * @return the user's chosen language option, if present.
+     */
+    public Optional<String> getLocale() {
+        return Optional.ofNullable(data.getLocale());
+    }
+
+    /**
      * Gets the <i>raw</i> mention. This is the format utilized to directly mention another user (assuming the user
      * exists in context of the mention).
      *
