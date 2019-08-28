@@ -433,13 +433,13 @@ public final class Guild implements Entity {
     }
 
     /**
-     * Gets whether this guild widget is enabled, if present.
+     * Gets whether this guild widget is enabled.
      *
-     * @return If present, {@code true} if the guild widget is enabled, {@code false} otherwise.
+     * @return {@code true} if the guild widget is enabled, {@code false} otherwise.
      *
      */
-    public Optional<Boolean> isWidgetEnabled() {
-        return Optional.ofNullable(data.isWidgetEnabled());
+    public boolean isWidgetEnabled() {
+        return Optional.ofNullable(data.isWidgetEnabled()).orElse(false);
     }
 
     /**
