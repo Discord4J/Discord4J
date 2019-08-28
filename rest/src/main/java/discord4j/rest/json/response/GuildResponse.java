@@ -68,7 +68,8 @@ public class GuildResponse {
     @JsonProperty("premium_tier")
     private int premiumTier;
     @JsonProperty("premium_subscription_count")
-    private int premiumSubscriptionCount;
+    @Nullable
+    private Integer premiumSubscriptionCount;
     @JsonProperty("owner_id")
     @UnsignedJson
     private long ownerId;
@@ -155,7 +156,8 @@ public class GuildResponse {
         return premiumTier;
     }
 
-    public int getPremiumSubscriptionCount() {
+    @Nullable
+    public Integer getPremiumSubscriptionCount() {
         return premiumSubscriptionCount;
     }
 

@@ -52,7 +52,8 @@ public class GuildCreate implements Dispatch {
     @JsonProperty("premium_tier")
     private int premiumTier;
     @JsonProperty("premium_subscription_count")
-    private int premiumSubscriptionCount;
+    @Nullable
+    private Integer premiumSubscriptionCount;
     private GuildMemberResponse[] members;
     @JsonProperty("member_count")
     private int memberCount;
@@ -97,7 +98,8 @@ public class GuildCreate implements Dispatch {
         return premiumTier;
     }
 
-    public int getPremiumSubscriptionCount() {
+    @Nullable
+    public Integer getPremiumSubscriptionCount() {
         return premiumSubscriptionCount;
     }
 

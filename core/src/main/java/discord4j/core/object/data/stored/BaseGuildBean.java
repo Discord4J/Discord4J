@@ -45,6 +45,8 @@ public class BaseGuildBean implements Serializable {
     private int afkTimeout;
     @Nullable
     private Long embedChannelId;
+    @Nullable
+    private Integer premiumSubscriptionCount;
     private int premiumTier;
     private int verificationLevel;
     private int defaultMessageNotifications;
@@ -73,6 +75,7 @@ public class BaseGuildBean implements Serializable {
         embedChannelId = guildCreate.getEmbedChannelId();
         verificationLevel = guildCreate.getVerificationLevel();
         premiumTier = guildCreate.getPremiumTier();
+        premiumSubscriptionCount = guildCreate.getPremiumSubscriptionCount();
 
         defaultMessageNotifications = guildCreate.getDefaultMessageNotifications();
         explicitContentFilter = guildCreate.getExplicitContentFilter();
@@ -105,6 +108,7 @@ public class BaseGuildBean implements Serializable {
         embedChannelId = guildUpdate.getEmbedChannelId();
         verificationLevel = guildUpdate.getVerificationLevel();
         premiumTier = guildUpdate.getPremiumTier();
+        premiumSubscriptionCount = guildUpdate.getPremiumSubscriptionCount();
         defaultMessageNotifications = guildUpdate.getDefaultMessageNotifications();
         explicitContentFilter = guildUpdate.getExplicitContentFilter();
 
@@ -136,6 +140,7 @@ public class BaseGuildBean implements Serializable {
         embedChannelId = response.getEmbedChannelId();
         verificationLevel = response.getVerificationLevel();
         premiumTier = response.getPremiumTier();
+        premiumSubscriptionCount = response.getPremiumSubscriptionCount();
         defaultMessageNotifications = response.getDefaultMessageNotifications();
         explicitContentFilter = response.getExplicitContentFilter();
 
@@ -167,6 +172,7 @@ public class BaseGuildBean implements Serializable {
         embedChannelId = toCopy.getEmbedChannelId();
         verificationLevel = toCopy.getVerificationLevel();
         premiumTier = toCopy.getPremiumTier();
+        premiumSubscriptionCount = toCopy.getPremiumSubscriptionCount();
         defaultMessageNotifications = toCopy.getDefaultMessageNotifications();
         explicitContentFilter = toCopy.getExplicitContentFilter();
 
@@ -283,6 +289,15 @@ public class BaseGuildBean implements Serializable {
         this.premiumTier = premiumTier;
     }
 
+    @Nullable
+    public Integer getPremiumSubscriptionCount() {
+        return premiumSubscriptionCount;
+    }
+
+    public void setPremiumSubscriptionCount(@Nullable final Integer premiumSubscriptionCount) {
+        this.premiumSubscriptionCount = premiumSubscriptionCount;
+    }
+
     public int getDefaultMessageNotifications() {
         return defaultMessageNotifications;
     }
@@ -372,6 +387,7 @@ public class BaseGuildBean implements Serializable {
                 ", afkTimeout=" + afkTimeout +
                 ", embedChannelId=" + embedChannelId +
                 ", premiumTier=" + premiumTier +
+                ", premiumSubscriptionCount=" + premiumSubscriptionCount +
                 ", verificationLevel=" + verificationLevel +
                 ", defaultMessageNotifications=" + defaultMessageNotifications +
                 ", explicitContentFilter=" + explicitContentFilter +

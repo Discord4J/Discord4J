@@ -291,6 +291,17 @@ public final class Guild implements Entity {
     }
 
     /**
+     * Gets the total number of users currently boosting this server, if present.
+     *
+     * @return The total number of users currently boosting this server, if present.
+     */
+    public OptionalInt getPremiumSubscriptionCount() {
+        return Optional.ofNullable(data.getPremiumSubscriptionCount())
+            .map(OptionalInt::of)
+            .orElse(OptionalInt.empty());
+    }
+
+    /**
      * Gets the level of verification required for the guild.
      *
      * @return The level of verification required for the guild.
@@ -502,21 +513,6 @@ public final class Guild implements Entity {
         return getGatewayData()
                 .map(guildBean -> OptionalInt.of(guildBean.getMemberCount()))
                 .orElseGet(OptionalInt::empty);
-    }
-
-    /**
-     * Gets the total number of members in the guild with Subscription using Boost, if present.
-     *
-     * @return The total number of members in the guild with Subscription using Boost, if present.
-     *
-     * @implNote If the underlying {@link discord4j.core.DiscordClientBuilder#getStoreService() store} does not save
-     * {@link GuildBean} instances <b>OR</b> the bot is currently not logged in then the returned {@code Optional} will
-     * always be empty.
-     */
-    public OptionalInt getPremiumSubscriptionCount() {
-        return getGatewayData()
-            .map(guildBean -> OptionalInt.of(guildBean.getPremiumSubscriptionCount()))
-            .orElseGet(OptionalInt::empty);
     }
 
     /**

@@ -37,7 +37,8 @@ public class GuildUpdate implements Dispatch {
     @JsonProperty("premium_tier")
     private int premiumTier;
     @JsonProperty("premium_subscription_count")
-    private int premiumSubscriptionCount;
+    @Nullable
+    private Integer premiumSubscriptionCount;
     @JsonProperty("system_channel_id")
     @Nullable
     @UnsignedJson
@@ -94,7 +95,8 @@ public class GuildUpdate implements Dispatch {
         return premiumTier;
     }
 
-    public int getPremiumSubscriptionCount() {
+    @Nullable
+    public Integer getPremiumSubscriptionCount() {
         return premiumSubscriptionCount;
     }
 
