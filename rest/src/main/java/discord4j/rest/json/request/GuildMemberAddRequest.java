@@ -25,7 +25,7 @@ import reactor.util.annotation.Nullable;
 @PossibleJson
 public class GuildMemberAddRequest {
 
-    @JsonProperty("access_token")
+    @JsonProperty("accessToken")
     private final String accessToken;
     @Nullable
     private final Possible<String> nick;
