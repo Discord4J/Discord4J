@@ -25,6 +25,9 @@ public class InviteResponse {
     private String code;
     private GuildResponse guild;
     private ChannelResponse channel;
+    @JsonProperty("target_user")
+    @Nullable
+    private UserResponse targetUser;
     @JsonProperty("approximate_presence_count")
     @Nullable
     private Integer approximatePresenceCount;
@@ -60,6 +63,11 @@ public class InviteResponse {
 
     public ChannelResponse getChannel() {
         return channel;
+    }
+
+    @Nullable
+    public UserResponse getTargetUser() {
+        return targetUser;
     }
 
     @Nullable
@@ -113,6 +121,7 @@ public class InviteResponse {
                 "code='" + code + '\'' +
                 ", guild=" + guild +
                 ", channel=" + channel +
+                ", targetUser=" + targetUser +
                 ", approximatePresenceCount=" + approximatePresenceCount +
                 ", approximateMemberCount=" + approximateMemberCount +
                 ", inviter=" + inviter +
