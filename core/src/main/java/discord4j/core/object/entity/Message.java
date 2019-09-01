@@ -381,14 +381,14 @@ public final class Message implements Entity {
      * Requests to suppress all embeds in this message.
      * if the message have the embeds suppressed then this action can undo the suppressed embeds.
      *
-     * @param suppresed Determine if you need suppressed or not the embeds.
+     * @param suppress Determine if you need suppress or not the embeds.
      * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the process has been complete.
      * If an error is received, it is emitted through the {@code Mono}.
-     * @deprecated Discord draft api
+     * @deprecated Discord draft api (subject to change)
      */
-    public Mono<Void> suppressEmbeds(final boolean suppresed) {
+    public Mono<Void> suppressEmbeds(final boolean suppress) {
         return serviceMediator.getRestClient().getChannelService()
-            .suppressEmbeds(getChannelId().asLong(), getId().asLong(), new SuppressEmbedsRequest(suppresed))
+            .suppressEmbeds(getChannelId().asLong(), getId().asLong(), new SuppressEmbedsRequest(suppress))
             .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex()));
     }
 

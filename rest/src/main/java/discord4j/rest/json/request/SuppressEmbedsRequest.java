@@ -1,20 +1,18 @@
 package discord4j.rest.json.request;
 
-import discord4j.common.jackson.PossibleJson;
 
-@PossibleJson
 public class SuppressEmbedsRequest {
 
-    private final boolean suppressed;
+    private final boolean suppress;
 
-    public SuppressEmbedsRequest(boolean suppresed) {
-        this.suppressed = suppresed;
+    public SuppressEmbedsRequest(boolean suppress) {
+        this.suppress = suppress;
     }
 
     @Override
     public String toString() {
         return "SuppressEmbedsRequest{" +
-            "suppresed=" + suppressed +
+            "suppress=" + suppress +
             '}';
     }
 
