@@ -694,7 +694,7 @@ public final class DiscordClientBuilder {
                 .map(dispatch -> DispatchContext.of(dispatch, serviceMediator))
                 .flatMap(context -> DispatchHandlers.handle(context)
                         .onErrorResume(error -> {
-                            dispatchLog.error("Error dispatching {}", context.getDispatch(), error);
+                            dispatchLog.error("Error dispatching {}", context.getDispatch().getClass().getSimpleName(), error);
                             return Mono.empty();
                         }))
                 .subscribeWith(eventProcessor);
