@@ -46,7 +46,7 @@ public class PoolGlobalRateLimiter implements GlobalRateLimiter {
      */
     public PoolGlobalRateLimiter(int parallelism) {
         this.outer = PoolBuilder.from(Mono.fromCallable(this::newPermit))
-                .sizeMax(parallelism)
+                .sizeBetween(1, parallelism)
                 .releaseHandler(resource -> {
                     log.debug("[{}] Released permit", resource);
                     return Mono.empty();
