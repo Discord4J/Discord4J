@@ -74,8 +74,8 @@ public final class Member extends User {
     @Override
     public Mono<Member> asMember(final Snowflake guildId) {
         return Mono.just(this)
-            .filter(member -> member.getGuildId().equals(guildId))
-            .switchIfEmpty(super.asMember(guildId));
+                .filter(member -> member.getGuildId().equals(guildId))
+                .switchIfEmpty(super.asMember(guildId));
     }
 
     /**
