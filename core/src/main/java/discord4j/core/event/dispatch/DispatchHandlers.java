@@ -17,7 +17,7 @@
 package discord4j.core.event.dispatch;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import discord4j.core.GatewayAggregate;
+import discord4j.core.Gateway;
 import discord4j.core.event.domain.*;
 import discord4j.core.event.domain.channel.TypingStartEvent;
 import discord4j.core.object.VoiceState;
@@ -107,7 +107,7 @@ public abstract class DispatchHandlers {
     }
 
     private static Mono<PresenceUpdateEvent> presenceUpdate(DispatchContext<PresenceUpdate> context) {
-        GatewayAggregate gateway = context.getGatewayAggregate();
+        Gateway gateway = context.getGateway();
 
         long guildId = context.getDispatch().getGuildId();
         JsonNode user = context.getDispatch().getUser();
@@ -156,11 +156,11 @@ public abstract class DispatchHandlers {
         long userId = context.getDispatch().getUserId();
         Instant startTime = Instant.ofEpochMilli(context.getDispatch().getTimestamp());
 
-        return Mono.just(new TypingStartEvent(context.getGatewayAggregate(), context.getShardInfo(), channelId, userId, startTime));
+        return Mono.just(new TypingStartEvent(context.getGateway(), context.getShardInfo(), channelId, userId, startTime));
     }
 
     private static Mono<UserUpdateEvent> userUpdate(DispatchContext<UserUpdate> context) {
-        GatewayAggregate gateway = context.getGatewayAggregate();
+        Gateway gateway = context.getGateway();
 
         UserBean bean = new UserBean(context.getDispatch().getUser());
         User current = new User(gateway, bean);
@@ -179,12 +179,12 @@ public abstract class DispatchHandlers {
         long guildId = context.getDispatch().getGuildId();
         String endpoint = context.getDispatch().getEndpoint();
 
-        return Mono.just(new VoiceServerUpdateEvent(context.getGatewayAggregate(), context.getShardInfo(), token, guildId, endpoint));
+        return Mono.just(new VoiceServerUpdateEvent(context.getGateway(), context.getShardInfo(), token, guildId, endpoint));
     }
 
     private static Mono<VoiceStateUpdateEvent> voiceStateUpdateDispatch(
             DispatchContext<VoiceStateUpdateDispatch> context) {
-        GatewayAggregate gateway = context.getGatewayAggregate();
+        Gateway gateway = context.getGateway();
 
         long guildId = context.getDispatch().getVoiceState().getGuildId();
         long userId = context.getDispatch().getVoiceState().getUserId();
@@ -206,6 +206,6 @@ public abstract class DispatchHandlers {
         long guildId = context.getDispatch().getGuildId();
         long channelId = context.getDispatch().getChannelId();
 
-        return Mono.just(new WebhooksUpdateEvent(context.getGatewayAggregate(), context.getShardInfo(), guildId, channelId));
+        return Mono.just(new WebhooksUpdateEvent(context.getGateway(), context.getShardInfo(), guildId, channelId));
     }
 }

@@ -16,7 +16,7 @@
  */
 package discord4j.core.event.dispatch;
 
-import discord4j.core.GatewayAggregate;
+import discord4j.core.Gateway;
 import discord4j.core.event.domain.lifecycle.*;
 import discord4j.core.object.data.stored.UserBean;
 import discord4j.core.object.entity.User;
@@ -32,7 +32,7 @@ import java.util.stream.Collectors;
 class LifecycleDispatchHandlers {
 
     static Mono<ReadyEvent> ready(DispatchContext<Ready> context) {
-        GatewayAggregate gateway = context.getGatewayAggregate();
+        Gateway gateway = context.getGateway();
         Ready dispatch = context.getDispatch();
         UserBean userBean = new UserBean(dispatch.getUser());
 
@@ -53,11 +53,11 @@ class LifecycleDispatchHandlers {
     }
 
     static Mono<ResumeEvent> resumed(DispatchContext<Resumed> context) {
-        return Mono.just(new ResumeEvent(context.getGatewayAggregate(), context.getShardInfo(), context.getDispatch().getTrace()));
+        return Mono.just(new ResumeEvent(context.getGateway(), context.getShardInfo(), context.getDispatch().getTrace()));
     }
 
     static Mono<? extends GatewayLifecycleEvent> gatewayStateChanged(DispatchContext<GatewayStateChange> context) {
-        GatewayAggregate gateway = context.getGatewayAggregate();
+        Gateway gateway = context.getGateway();
         GatewayStateChange dispatch = context.getDispatch();
         switch (dispatch.getState()) {
             case CONNECTED:

@@ -17,7 +17,7 @@
 package discord4j.core.object;
 
 import discord4j.core.DiscordClient;
-import discord4j.core.GatewayAggregate;
+import discord4j.core.Gateway;
 import discord4j.core.object.data.InviteBean;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.User;
@@ -38,7 +38,7 @@ import java.util.OptionalInt;
 public class Invite implements DiscordObject {
 
     /** The gateway associated to this object. */
-    private final GatewayAggregate gateway;
+    private final Gateway gateway;
 
     /** The raw data as represented by Discord. */
     private final InviteBean data;
@@ -46,10 +46,10 @@ public class Invite implements DiscordObject {
     /**
      * Constructs a {@code Invite} with an associated ServiceMediator and Discord data.
      *
-     * @param gateway The {@link GatewayAggregate} associated to this object, must be non-null.
+     * @param gateway The {@link Gateway} associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
      */
-    public Invite(final GatewayAggregate gateway, final InviteBean data) {
+    public Invite(final Gateway gateway, final InviteBean data) {
         this.gateway = Objects.requireNonNull(gateway);
         this.data = Objects.requireNonNull(data);
     }
@@ -60,7 +60,7 @@ public class Invite implements DiscordObject {
     }
 
     @Override
-    public GatewayAggregate getGateway() {
+    public Gateway getGateway() {
         return gateway;
     }
 
@@ -128,7 +128,7 @@ public class Invite implements DiscordObject {
      * associated to. If an error is received, it is emitted through the {@code Mono}.
      */
     public final Mono<User> getTargetUser() {
-        return getTargetUserId().map(getClient()::getUserById).orElse(Mono.empty());
+        return getTargetUserId().map(getGateway()::getUserById).orElse(Mono.empty());
     }
 
     /**

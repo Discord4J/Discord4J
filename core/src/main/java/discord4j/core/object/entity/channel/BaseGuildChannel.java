@@ -16,7 +16,7 @@
  */
 package discord4j.core.object.entity.channel;
 
-import discord4j.core.GatewayAggregate;
+import discord4j.core.Gateway;
 import discord4j.core.object.ExtendedPermissionOverwrite;
 import discord4j.core.object.PermissionOverwrite;
 import discord4j.core.object.data.stored.ChannelBean;
@@ -41,10 +41,10 @@ class BaseGuildChannel extends BaseChannel implements GuildChannel {
     /**
      * Constructs an {@code BaseGuildChannel} with an associated ServiceMediator and Discord data.
      *
-     * @param gateway The {@link GatewayAggregate} associated to this object, must be non-null.
+     * @param gateway The {@link Gateway} associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
      */
-    BaseGuildChannel(final GatewayAggregate gateway, final ChannelBean data) {
+    BaseGuildChannel(final Gateway gateway, final ChannelBean data) {
         super(gateway, data);
     }
 

@@ -16,7 +16,7 @@
  */
 package discord4j.core.event.dispatch;
 
-import discord4j.core.GatewayAggregate;
+import discord4j.core.Gateway;
 import discord4j.core.StateHolder;
 import discord4j.core.event.domain.Event;
 import discord4j.core.event.domain.channel.*;
@@ -54,7 +54,7 @@ class ChannelDispatchHandlers {
     }
 
     private static Mono<TextChannelCreateEvent> textChannelCreate(DispatchContext<ChannelCreate> context) {
-        GatewayAggregate gateway = context.getGatewayAggregate();
+        Gateway gateway = context.getGateway();
         GatewayChannelResponse channel = context.getDispatch().getChannel();
         long guildId = context.getDispatch().getGuildId();
         ChannelBean bean = new ChannelBean(channel, guildId);
@@ -68,14 +68,14 @@ class ChannelDispatchHandlers {
     }
 
     private static Mono<PrivateChannelCreateEvent> privateChannelCreate(DispatchContext<ChannelCreate> context) {
-        GatewayAggregate gateway = context.getGatewayAggregate();
+        Gateway gateway = context.getGateway();
         ChannelBean bean = new ChannelBean(context.getDispatch().getChannel());
 
         return Mono.just(new PrivateChannelCreateEvent(gateway, context.getShardInfo(), new PrivateChannel(gateway, bean)));
     }
 
     private static Mono<VoiceChannelCreateEvent> voiceChannelCreate(DispatchContext<ChannelCreate> context) {
-        GatewayAggregate gateway = context.getGatewayAggregate();
+        Gateway gateway = context.getGateway();
         GatewayChannelResponse channel = context.getDispatch().getChannel();
         long guildId = context.getDispatch().getGuildId();
         ChannelBean bean = new ChannelBean(channel, guildId);
@@ -89,7 +89,7 @@ class ChannelDispatchHandlers {
     }
 
     private static Mono<CategoryCreateEvent> categoryCreate(DispatchContext<ChannelCreate> context) {
-        GatewayAggregate gateway = context.getGatewayAggregate();
+        Gateway gateway = context.getGateway();
         GatewayChannelResponse channel = context.getDispatch().getChannel();
         long guildId = context.getDispatch().getGuildId();
         ChannelBean bean = new ChannelBean(channel, guildId);
@@ -103,7 +103,7 @@ class ChannelDispatchHandlers {
     }
 
     private static Mono<NewsChannelCreateEvent> newsChannelCreate(DispatchContext<ChannelCreate> context) {
-        GatewayAggregate gateway = context.getGatewayAggregate();
+        Gateway gateway = context.getGateway();
         GatewayChannelResponse channel = context.getDispatch().getChannel();
         long guildId = context.getDispatch().getGuildId();
         ChannelBean bean = new ChannelBean(channel, guildId);
@@ -117,7 +117,7 @@ class ChannelDispatchHandlers {
     }
 
     private static Mono<StoreChannelCreateEvent> storeChannelCreate(DispatchContext<ChannelCreate> context) {
-        GatewayAggregate gateway = context.getGatewayAggregate();
+        Gateway gateway = context.getGateway();
         GatewayChannelResponse channel = context.getDispatch().getChannel();
         long guildId = context.getDispatch().getGuildId();
         ChannelBean bean = new ChannelBean(channel, guildId);
@@ -156,7 +156,7 @@ class ChannelDispatchHandlers {
     }
 
     private static Mono<TextChannelDeleteEvent> textChannelDelete(DispatchContext<ChannelDelete> context) {
-        GatewayAggregate gateway = context.getGatewayAggregate();
+        Gateway gateway = context.getGateway();
         StateHolder stateHolder = gateway.getStateHolder();
         GatewayChannelResponse channel = context.getDispatch().getChannel();
         long guildId = context.getDispatch().getGuildId();
@@ -171,7 +171,7 @@ class ChannelDispatchHandlers {
     }
 
     private static Mono<PrivateChannelDeleteEvent> privateChannelDelete(DispatchContext<ChannelDelete> context) {
-        GatewayAggregate gateway = context.getGatewayAggregate();
+        Gateway gateway = context.getGateway();
         ChannelBean bean = new ChannelBean(context.getDispatch().getChannel());
 
         return Mono.just(new PrivateChannelDeleteEvent(gateway, context.getShardInfo(), new PrivateChannel(gateway, bean)));
@@ -179,7 +179,7 @@ class ChannelDispatchHandlers {
     }
 
     private static Mono<VoiceChannelDeleteEvent> voiceChannelDelete(DispatchContext<ChannelDelete> context) {
-        GatewayAggregate gateway = context.getGatewayAggregate();
+        Gateway gateway = context.getGateway();
         StateHolder stateHolder = gateway.getStateHolder();
         GatewayChannelResponse channel = context.getDispatch().getChannel();
         long guildId = context.getDispatch().getGuildId();
@@ -194,7 +194,7 @@ class ChannelDispatchHandlers {
     }
 
     private static Mono<CategoryDeleteEvent> categoryDelete(DispatchContext<ChannelDelete> context) {
-        GatewayAggregate gateway = context.getGatewayAggregate();
+        Gateway gateway = context.getGateway();
         StateHolder stateHolder = gateway.getStateHolder();
         GatewayChannelResponse channel = context.getDispatch().getChannel();
         long guildId = context.getDispatch().getGuildId();
@@ -209,7 +209,7 @@ class ChannelDispatchHandlers {
     }
 
     private static Mono<NewsChannelDeleteEvent> newsChannelDelete(DispatchContext<ChannelDelete> context) {
-        GatewayAggregate gateway = context.getGatewayAggregate();
+        Gateway gateway = context.getGateway();
         StateHolder stateHolder = gateway.getStateHolder();
         GatewayChannelResponse channel = context.getDispatch().getChannel();
         long guildId = context.getDispatch().getGuildId();
@@ -224,7 +224,7 @@ class ChannelDispatchHandlers {
     }
 
     private static Mono<StoreChannelDeleteEvent> storeChannelDelete(DispatchContext<ChannelDelete> context) {
-        GatewayAggregate gateway = context.getGatewayAggregate();
+        Gateway gateway = context.getGateway();
         StateHolder stateHolder = gateway.getStateHolder();
         GatewayChannelResponse channel = context.getDispatch().getChannel();
         long guildId = context.getDispatch().getGuildId();
@@ -253,7 +253,7 @@ class ChannelDispatchHandlers {
                 DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(context.getDispatch().getLastPinTimestamp(),
                         Instant::from);
 
-        return Mono.just(new PinsUpdateEvent(context.getGatewayAggregate(), context.getShardInfo(), channelId, timestamp));
+        return Mono.just(new PinsUpdateEvent(context.getGateway(), context.getShardInfo(), channelId, timestamp));
     }
 
     static Mono<? extends Event> channelUpdate(DispatchContext<ChannelUpdate> context) {
@@ -274,7 +274,7 @@ class ChannelDispatchHandlers {
     }
 
     private static Mono<TextChannelUpdateEvent> textChannelUpdate(DispatchContext<ChannelUpdate> context) {
-        GatewayAggregate gateway = context.getGatewayAggregate();
+        Gateway gateway = context.getGateway();
         GatewayChannelResponse channel = context.getDispatch().getChannel();
         long guildId = context.getDispatch().getGuildId();
         ChannelBean bean = new ChannelBean(channel, guildId);
@@ -290,7 +290,7 @@ class ChannelDispatchHandlers {
     }
 
     private static Mono<VoiceChannelUpdateEvent> voiceChannelUpdate(DispatchContext<ChannelUpdate> context) {
-        GatewayAggregate gateway = context.getGatewayAggregate();
+        Gateway gateway = context.getGateway();
         GatewayChannelResponse channel = context.getDispatch().getChannel();
         long guildId = context.getDispatch().getGuildId();
         ChannelBean bean = new ChannelBean(channel, guildId);
@@ -306,7 +306,7 @@ class ChannelDispatchHandlers {
     }
 
     private static Mono<CategoryUpdateEvent> categoryUpdate(DispatchContext<ChannelUpdate> context) {
-        GatewayAggregate gateway = context.getGatewayAggregate();
+        Gateway gateway = context.getGateway();
         GatewayChannelResponse channel = context.getDispatch().getChannel();
         long guildId = context.getDispatch().getGuildId();
         ChannelBean bean = new ChannelBean(channel, guildId);
@@ -322,7 +322,7 @@ class ChannelDispatchHandlers {
     }
 
     private static Mono<NewsChannelUpdateEvent> newsChannelUpdate(DispatchContext<ChannelUpdate> context) {
-        GatewayAggregate gateway = context.getGatewayAggregate();
+        Gateway gateway = context.getGateway();
         GatewayChannelResponse channel = context.getDispatch().getChannel();
         long guildId = context.getDispatch().getGuildId();
         ChannelBean bean = new ChannelBean(channel, guildId);
@@ -338,7 +338,7 @@ class ChannelDispatchHandlers {
     }
 
     private static Mono<StoreChannelUpdateEvent> storeChannelUpdate(DispatchContext<ChannelUpdate> context) {
-        GatewayAggregate gateway = context.getGatewayAggregate();
+        Gateway gateway = context.getGateway();
         GatewayChannelResponse channel = context.getDispatch().getChannel();
         long guildId = context.getDispatch().getGuildId();
         ChannelBean bean = new ChannelBean(channel, guildId);
@@ -353,7 +353,7 @@ class ChannelDispatchHandlers {
                 .switchIfEmpty(saveNew.thenReturn(new StoreChannelUpdateEvent(gateway, context.getShardInfo(), current, null)));
     }
 
-    private static GuildMessageChannel getConvertibleChannel(GatewayAggregate gateway, ChannelBean bean) {
+    private static GuildMessageChannel getConvertibleChannel(Gateway gateway, ChannelBean bean) {
         switch (Channel.Type.of(bean.getType())) {
             case GUILD_NEWS: return new NewsChannel(gateway, bean);
             case GUILD_TEXT: return new TextChannel(gateway, bean);

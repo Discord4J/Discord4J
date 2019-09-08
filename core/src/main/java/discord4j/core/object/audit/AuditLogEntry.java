@@ -17,7 +17,7 @@
 package discord4j.core.object.audit;
 
 import discord4j.core.DiscordClient;
-import discord4j.core.GatewayAggregate;
+import discord4j.core.Gateway;
 import discord4j.core.object.data.AuditLogEntryBean;
 import discord4j.core.object.entity.Entity;
 import discord4j.core.object.util.Snowflake;
@@ -30,11 +30,11 @@ public class AuditLogEntry implements Entity {
 	public static final int MAX_REASON_LENGTH = 512;
 
     /** The gateway associated to this object. */
-    private final GatewayAggregate gateway;
+    private final Gateway gateway;
 
     private final AuditLogEntryBean data;
 
-    public AuditLogEntry(final GatewayAggregate gateway, final AuditLogEntryBean data) {
+    public AuditLogEntry(final Gateway gateway, final AuditLogEntryBean data) {
         this.gateway = gateway;
         this.data = data;
     }
@@ -76,7 +76,7 @@ public class AuditLogEntry implements Entity {
     }
 
     @Override
-    public GatewayAggregate getGateway() {
+    public Gateway getGateway() {
         return gateway;
     }
 

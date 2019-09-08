@@ -17,7 +17,7 @@
 package discord4j.core.object.entity;
 
 import discord4j.core.DiscordClient;
-import discord4j.core.GatewayAggregate;
+import discord4j.core.Gateway;
 import discord4j.core.object.data.WebhookBean;
 import discord4j.core.object.entity.channel.GuildMessageChannel;
 import discord4j.core.object.util.Snowflake;
@@ -38,7 +38,7 @@ import java.util.function.Consumer;
 public final class Webhook implements Entity {
 
     /** The gateway associated to this object. */
-    private final GatewayAggregate gateway;
+    private final Gateway gateway;
 
     /** The raw data as represented by Discord. */
     private final WebhookBean data;
@@ -46,10 +46,10 @@ public final class Webhook implements Entity {
     /**
      * Constructs a {@code Webhook} with an associated ServiceMediator and Discord data.
      *
-     * @param gateway The {@link GatewayAggregate} associated to this object, must be non-null.
+     * @param gateway The {@link Gateway} associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
      */
-    public Webhook(final GatewayAggregate gateway, final WebhookBean data) {
+    public Webhook(final Gateway gateway, final WebhookBean data) {
         this.gateway = Objects.requireNonNull(gateway);
         this.data = Objects.requireNonNull(data);
     }
@@ -60,7 +60,7 @@ public final class Webhook implements Entity {
     }
 
     @Override
-    public GatewayAggregate getGateway() {
+    public Gateway getGateway() {
         return gateway;
     }
 

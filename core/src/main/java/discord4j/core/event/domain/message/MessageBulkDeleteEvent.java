@@ -16,7 +16,7 @@
  */
 package discord4j.core.event.domain.message;
 
-import discord4j.core.GatewayAggregate;
+import discord4j.core.Gateway;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.TextChannel;
@@ -45,7 +45,7 @@ public class MessageBulkDeleteEvent extends MessageEvent {
     private final long guildId;
     private final Set<Message> messages;
 
-    public MessageBulkDeleteEvent(GatewayAggregate gateway, ShardInfo shardInfo, long[] messageIds, long channelId, long guildId,
+    public MessageBulkDeleteEvent(Gateway gateway, ShardInfo shardInfo, long[] messageIds, long channelId, long guildId,
                                   Set<Message> messages) {
         super(gateway, shardInfo);
         this.messageIds = messageIds;

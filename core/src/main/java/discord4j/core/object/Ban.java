@@ -17,7 +17,7 @@
 package discord4j.core.object;
 
 import discord4j.core.DiscordClient;
-import discord4j.core.GatewayAggregate;
+import discord4j.core.Gateway;
 import discord4j.core.object.data.BanBean;
 import discord4j.core.object.entity.User;
 
@@ -32,7 +32,7 @@ import java.util.Optional;
 public final class Ban implements DiscordObject {
 
     /** The gateway associated to this object. */
-    private final GatewayAggregate gateway;
+    private final Gateway gateway;
 
     /** The raw data as represented by Discord. */
     private final BanBean data;
@@ -40,10 +40,10 @@ public final class Ban implements DiscordObject {
     /**
      * Constructs a {@code Ban} with an associated ServiceMediator and Discord data.
      *
-     * @param gateway The {@link GatewayAggregate} associated to this object, must be non-null.
+     * @param gateway The {@link Gateway} associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
      */
-    public Ban(final GatewayAggregate gateway, final BanBean data) {
+    public Ban(final Gateway gateway, final BanBean data) {
         this.gateway = Objects.requireNonNull(gateway);
         this.data = Objects.requireNonNull(data);
     }
@@ -54,7 +54,7 @@ public final class Ban implements DiscordObject {
     }
 
     @Override
-    public GatewayAggregate getGateway() {
+    public Gateway getGateway() {
         return gateway;
     }
 

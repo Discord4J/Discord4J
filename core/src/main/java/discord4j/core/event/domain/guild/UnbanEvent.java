@@ -16,7 +16,7 @@
  */
 package discord4j.core.event.domain.guild;
 
-import discord4j.core.GatewayAggregate;
+import discord4j.core.Gateway;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.util.Snowflake;
@@ -35,7 +35,7 @@ public class UnbanEvent extends GuildEvent {
     private final User user;
     private final long guildId;
 
-    public UnbanEvent(GatewayAggregate gateway, ShardInfo shardInfo, User user, long guildId) {
+    public UnbanEvent(Gateway gateway, ShardInfo shardInfo, User user, long guildId) {
         super(gateway, shardInfo);
         this.user = user;
         this.guildId = guildId;

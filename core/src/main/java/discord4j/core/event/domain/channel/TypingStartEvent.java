@@ -16,7 +16,7 @@
  */
 package discord4j.core.event.domain.channel;
 
-import discord4j.core.GatewayAggregate;
+import discord4j.core.Gateway;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.core.object.util.Snowflake;
@@ -38,7 +38,7 @@ public class TypingStartEvent extends ChannelEvent {
     private final long userId;
     private final Instant startTime;
 
-    public TypingStartEvent(GatewayAggregate gateway, ShardInfo shardInfo, long channelId, long userId, Instant startTime) {
+    public TypingStartEvent(Gateway gateway, ShardInfo shardInfo, long channelId, long userId, Instant startTime) {
         super(gateway, shardInfo);
         this.channelId = channelId;
         this.userId = userId;

@@ -93,7 +93,7 @@ public class ExampleBot {
         eventHandlers.add(new BurstMessages());
 
         // Build a safe event-processing pipeline
-        client.gateway().login(gateway ->
+        client.gateway().connectAndWait(gateway ->
                 gateway.getEventDispatcher().on(MessageCreateEvent.class)
                         .filterWhen(event -> ownerId.map(owner -> {
                             Long author = event.getMessage().getAuthor()

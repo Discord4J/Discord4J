@@ -17,7 +17,7 @@
 package discord4j.core.object.entity;
 
 import discord4j.core.DiscordClient;
-import discord4j.core.GatewayAggregate;
+import discord4j.core.Gateway;
 import discord4j.core.object.data.ApplicationInfoBean;
 import discord4j.core.object.util.Image;
 import discord4j.core.object.util.Snowflake;
@@ -36,7 +36,7 @@ public final class ApplicationInfo implements Entity {
     private static final String ICON_IMAGE_PATH = "app-icons/%s/%s";
 
     /** The gateway associated to this object. */
-    private final GatewayAggregate gateway;
+    private final Gateway gateway;
 
     /** The raw data as represented by Discord. */
     private final ApplicationInfoBean data;
@@ -44,10 +44,10 @@ public final class ApplicationInfo implements Entity {
     /**
      * Constructs a {@code ApplicationInfo} with an associated ServiceMediator and Discord data.
      *
-     * @param gateway The {@link GatewayAggregate} associated to this object, must be non-null.
+     * @param gateway The {@link Gateway} associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
      */
-    public ApplicationInfo(final GatewayAggregate gateway, final ApplicationInfoBean data) {
+    public ApplicationInfo(final Gateway gateway, final ApplicationInfoBean data) {
         this.gateway = Objects.requireNonNull(gateway);
         this.data = Objects.requireNonNull(data);
     }
@@ -58,7 +58,7 @@ public final class ApplicationInfo implements Entity {
     }
 
     @Override
-    public GatewayAggregate getGateway() {
+    public Gateway getGateway() {
         return gateway;
     }
 

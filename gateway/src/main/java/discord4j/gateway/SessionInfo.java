@@ -19,22 +19,22 @@ package discord4j.gateway;
 
 import java.util.Objects;
 
-public class ShardInfo {
+public class SessionInfo {
 
-    private final int index;
-    private final int count;
+    private final String sessionId;
+    private final Integer sequence;
 
-    public ShardInfo(int index, int count) {
-        this.index = index;
-        this.count = count;
+    public SessionInfo(String sessionId, Integer sequence) {
+        this.sessionId = sessionId;
+        this.sequence = sequence;
     }
 
-    public int getIndex() {
-        return index;
+    public String getSessionId() {
+        return sessionId;
     }
 
-    public int getCount() {
-        return count;
+    public Integer getSequence() {
+        return sequence;
     }
 
     @Override
@@ -45,21 +45,21 @@ public class ShardInfo {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        ShardInfo shardInfo = (ShardInfo) o;
-        return index == shardInfo.index &&
-                count == shardInfo.count;
+        SessionInfo that = (SessionInfo) o;
+        return Objects.equals(sessionId, that.sessionId) &&
+                Objects.equals(sequence, that.sequence);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(index, count);
+        return Objects.hash(sessionId, sequence);
     }
 
     @Override
     public String toString() {
-        return "ShardInfo{" +
-                "index=" + index +
-                ", count=" + count +
+        return "SessionInfo{" +
+                "sessionId='" + sessionId + '\'' +
+                ", sequence=" + sequence +
                 '}';
     }
 }

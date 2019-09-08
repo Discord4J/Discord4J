@@ -21,7 +21,7 @@ import discord4j.common.json.EmbedResponse;
 import discord4j.common.json.Mention;
 import discord4j.common.json.MessageMember;
 import discord4j.core.DiscordClient;
-import discord4j.core.GatewayAggregate;
+import discord4j.core.Gateway;
 import discord4j.core.event.domain.message.*;
 import discord4j.core.object.Embed;
 import discord4j.core.object.data.stored.MemberBean;
@@ -46,7 +46,7 @@ import java.util.stream.Collectors;
 class MessageDispatchHandlers {
 
     static Mono<MessageCreateEvent> messageCreate(DispatchContext<MessageCreate> context) {
-        GatewayAggregate gateway = context.getGatewayAggregate();
+        Gateway gateway = context.getGateway();
         DiscordClient client = gateway.getDiscordClient();
 
         MessageBean bean = new MessageBean(context.getDispatch());
@@ -77,7 +77,7 @@ class MessageDispatchHandlers {
     }
 
     static Mono<MessageDeleteEvent> messageDelete(DispatchContext<MessageDelete> context) {
-        GatewayAggregate gateway = context.getGatewayAggregate();
+        Gateway gateway = context.getGateway();
         DiscordClient client = gateway.getDiscordClient();
         long messageId = context.getDispatch().getId();
         long channelId = context.getDispatch().getChannelId();
@@ -94,7 +94,7 @@ class MessageDispatchHandlers {
     }
 
     static Mono<MessageBulkDeleteEvent> messageDeleteBulk(DispatchContext<MessageDeleteBulk> context) {
-        GatewayAggregate gateway = context.getGatewayAggregate();
+        Gateway gateway = context.getGateway();
         DiscordClient client = gateway.getDiscordClient();
         long messageIds[] = context.getDispatch().getIds();
         long channelId = context.getDispatch().getChannelId();
@@ -115,7 +115,7 @@ class MessageDispatchHandlers {
     }
 
     static Mono<ReactionAddEvent> messageReactionAdd(DispatchContext<MessageReactionAdd> context) {
-        GatewayAggregate gateway = context.getGatewayAggregate();
+        Gateway gateway = context.getGateway();
         DiscordClient client = gateway.getDiscordClient();
 
         Long emojiId = context.getDispatch().getEmoji().getId();
@@ -169,7 +169,7 @@ class MessageDispatchHandlers {
     }
 
     static Mono<ReactionRemoveEvent> messageReactionRemove(DispatchContext<MessageReactionRemove> context) {
-        GatewayAggregate gateway = context.getGatewayAggregate();
+        Gateway gateway = context.getGateway();
         DiscordClient client = gateway.getDiscordClient();
 
         Long emojiId = context.getDispatch().getEmoji().getId();
@@ -220,7 +220,7 @@ class MessageDispatchHandlers {
     }
 
     static Mono<ReactionRemoveAllEvent> messageReactionRemoveAll(DispatchContext<MessageReactionRemoveAll> context) {
-        GatewayAggregate gateway = context.getGatewayAggregate();
+        Gateway gateway = context.getGateway();
         DiscordClient client = gateway.getDiscordClient();
         long channelId = context.getDispatch().getChannelId();
         long messageId = context.getDispatch().getMessageId();
@@ -237,7 +237,7 @@ class MessageDispatchHandlers {
     }
 
     static Mono<MessageUpdateEvent> messageUpdate(DispatchContext<MessageUpdate> context) {
-        GatewayAggregate gateway = context.getGatewayAggregate();
+        Gateway gateway = context.getGateway();
         DiscordClient client = gateway.getDiscordClient();
 
         long messageId = context.getDispatch().getId();

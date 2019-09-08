@@ -17,7 +17,7 @@
 package discord4j.core.object;
 
 import discord4j.core.DiscordClient;
-import discord4j.core.GatewayAggregate;
+import discord4j.core.Gateway;
 import discord4j.core.object.data.stored.PermissionOverwriteBean;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Role;
@@ -37,7 +37,7 @@ import java.util.Objects;
 public final class ExtendedPermissionOverwrite extends PermissionOverwrite implements DiscordObject {
 
     /** The gateway associated to this object. */
-    private final GatewayAggregate gateway;
+    private final Gateway gateway;
 
     /** The ID of the guild associated to this overwrite. */
     private final long guildId;
@@ -48,12 +48,12 @@ public final class ExtendedPermissionOverwrite extends PermissionOverwrite imple
     /**
      * Constructs a {@code ExtendedPermissionOverwrite} with an associated ServiceMediator and Discord data.
      *
-     * @param gateway The {@link GatewayAggregate} associated to this object, must be non-null.
+     * @param gateway The {@link Gateway} associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
      * @param guildId The ID of the guild associated to this overwrite.
      * @param channelId The ID of the channel associated to this overwrite.
      */
-    public ExtendedPermissionOverwrite(final GatewayAggregate gateway, final PermissionOverwriteBean data,
+    public ExtendedPermissionOverwrite(final Gateway gateway, final PermissionOverwriteBean data,
                                        final long guildId, final long channelId) {
         super(data.getAllow(), data.getDeny(), data.getId(), Type.of(data.getType()));
         this.gateway = Objects.requireNonNull(gateway);
@@ -67,7 +67,7 @@ public final class ExtendedPermissionOverwrite extends PermissionOverwrite imple
     }
 
     @Override
-    public GatewayAggregate getGateway() {
+    public Gateway getGateway() {
         return gateway;
     }
 

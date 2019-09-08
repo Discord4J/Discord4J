@@ -16,7 +16,7 @@
  */
 package discord4j.core.util;
 
-import discord4j.core.GatewayAggregate;
+import discord4j.core.Gateway;
 import discord4j.core.object.data.stored.ChannelBean;
 import discord4j.core.object.entity.Entity;
 import discord4j.core.object.entity.channel.*;
@@ -42,11 +42,11 @@ public final class EntityUtil {
      * An utility that converts some instance of {@code ChannelBean} to its associated {@code Channel}
      * {@link Channel.Type type}. That is to say, {@code bean.getType() == Channel#getType().getValue()}.
      *
-     * @param gateway The {@link GatewayAggregate} associated to this object, must be non-null.
+     * @param gateway The {@link Gateway} associated to this object, must be non-null.
      * @param bean The {@code ChannelBean} to convert.
      * @return The converted {@code Channel}.
      */
-    public static Channel getChannel(final GatewayAggregate gateway, final ChannelBean bean) {
+    public static Channel getChannel(final Gateway gateway, final ChannelBean bean) {
         switch (Channel.Type.of(bean.getType())) {
             case GUILD_TEXT: return new TextChannel(gateway, bean);
             case DM: return new PrivateChannel(gateway, bean);

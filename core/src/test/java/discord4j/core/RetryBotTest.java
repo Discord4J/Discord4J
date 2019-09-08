@@ -20,13 +20,14 @@ package discord4j.core;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import discord4j.core.event.domain.Event;
+import discord4j.core.event.domain.lifecycle.ReadyEvent;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.User;
-import discord4j.core.object.entity.channel.PrivateChannel;
 import discord4j.core.object.presence.Presence;
 import discord4j.core.object.util.Snowflake;
 import discord4j.gateway.IdentifyOptions;
+import discord4j.gateway.SessionInfo;
 import discord4j.gateway.ShardInfo;
 import discord4j.gateway.json.GatewayPayload;
 import discord4j.gateway.json.Opcode;
@@ -45,7 +46,6 @@ import reactor.netty.DisposableServer;
 import reactor.netty.http.server.HttpServer;
 import reactor.util.Logger;
 import reactor.util.Loggers;
-import reactor.util.function.Tuples;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -59,6 +59,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.logging.Level;
 import java.util.stream.Collectors;
 
 public class RetryBotTest {
@@ -88,27 +89,39 @@ public class RetryBotTest {
                 .gateway()
                 .setShardCount(shardCount)
                 .setInitialPresence(shard -> Presence.invisible())
-                .login(gateway -> Mono.empty())
+                .connectAndWait(gateway -> Mono.empty())
                 .block();
     }
 
     @Test
     @Ignore("Example code excluded from CI")
     public void testWithConnect() throws InterruptedException {
-        List<GatewayConnection> connections = DiscordClient.create(token)
+        GatewayAggregate aggregate = DiscordClient.create(token)
                 .gateway()
                 .setShardCount(shardCount)
-                .connect(gateway -> gateway.getEventDispatcher()
-                        .on(MessageCreateEvent.class)
-                        .filter(event -> event.getMessage().getContent().orElse("").equals("!exit"))
-                        .doOnNext(event -> log.info("Proceeding to exit!!!"))
-                        .flatMap(event -> event.getGateway().logout())
-                        .then())
+                .connect(gateway -> Mono.empty())
                 .block();
+
+        assert aggregate != null;
+
+        aggregate.getGateway().getEventDispatcher()
+                .on(ReadyEvent.class)
+                .doOnNext(e -> log.info("Session {} is READY", e.getShardInfo().getIndex()))
+                .subscribe();
+
+        aggregate.getGateway().getEventDispatcher()
+                .on(MessageCreateEvent.class)
+                .filter(event -> event.getMessage().getContent().orElse("").equals("9988"))
+                .doOnNext(event -> log.info("Proceeding to exit!!!"))
+                .flatMap(event -> event.getGateway().logout())
+                .subscribe();
+
         CountDownLatch latch = new CountDownLatch(1);
-        for (GatewayConnection connection : connections) {
+        log.info("Connections: {}", aggregate.getConnections().size());
+        for (GatewayConnection connection : aggregate.getConnections()) {
             log.info(connection.getIdentifyOptions().toString());
-            connection.getGateway().getCloseProcessor().log("discord4j.close.processor.")
+            connection.getGateway().getCloseProcessor()
+                    .log("discord4j.close.processor." + connection.getIdentifyOptions().getShardIndex(), Level.INFO)
                     .subscribe(null, t -> {
                         log.info("Disconnected from {} with error", connection, t);
                         latch.countDown();
@@ -126,10 +139,7 @@ public class RetryBotTest {
         DiscordClient.builder(token)
                 .build()
                 .gateway()
-                .login(gateway -> gateway.getEventDispatcher().on(MessageCreateEvent.class)
-                        .filterWhen(e -> e.getMessage().getChannel().ofType(PrivateChannel.class).hasElement())
-                        .doOnNext(event -> log.info("{}", event))
-                        .then())
+                .connectAndWait(gateway -> Mono.empty())
                 .block();
     }
 
@@ -155,9 +165,9 @@ public class RetryBotTest {
                         IdentifyOptions loaded = optionsMap.get(shard);
                         String sessionId = loaded.getResumeSessionId() == null ? "" : loaded.getResumeSessionId();
                         Integer sequence = loaded.getResumeSequence() == null ? 0 : loaded.getResumeSequence();
-                        return Tuples.of(sessionId, sequence);
+                        return new SessionInfo(sessionId, sequence);
                     })
-                    .login(gateway -> {
+                    .connectAndWait(gateway -> {
                         subscribeEventCounter(gateway, counts);
                         startHttpServer(new ServerContext(gateway, counts));
 
@@ -199,9 +209,9 @@ public class RetryBotTest {
 
     public static class TestCommands {
 
-        private final GatewayAggregate gateway;
+        private final Gateway gateway;
 
-        public TestCommands(GatewayAggregate gateway) {
+        public TestCommands(Gateway gateway) {
             this.gateway = gateway;
         }
 
@@ -310,7 +320,7 @@ public class RetryBotTest {
         }
     }
 
-    private void subscribeEventCounter(GatewayAggregate gateway, Map<String, AtomicLong> counts) {
+    private void subscribeEventCounter(Gateway gateway, Map<String, AtomicLong> counts) {
         reflections.getSubTypesOf(Event.class)
                 .forEach(type -> gateway.getEventDispatcher().on(type)
                         .map(event -> event.getClass().getSimpleName())
@@ -320,10 +330,10 @@ public class RetryBotTest {
 
     static class ServerContext {
 
-        private final GatewayAggregate gateway;
+        private final Gateway gateway;
         private final Map<String, AtomicLong> eventCounts;
 
-        ServerContext(GatewayAggregate gateway, Map<String, AtomicLong> eventCounts) {
+        ServerContext(Gateway gateway, Map<String, AtomicLong> eventCounts) {
             this.gateway = gateway;
             this.eventCounts = eventCounts;
         }

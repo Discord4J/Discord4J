@@ -16,7 +16,7 @@
  */
 package discord4j.core.event.domain.channel;
 
-import discord4j.core.GatewayAggregate;
+import discord4j.core.Gateway;
 import discord4j.core.object.entity.channel.Category;
 import discord4j.gateway.ShardInfo;
 import reactor.util.annotation.Nullable;
@@ -37,7 +37,7 @@ public class CategoryUpdateEvent extends ChannelEvent {
     private final Category current;
     private final Category old;
 
-    public CategoryUpdateEvent(GatewayAggregate gateway, ShardInfo shardInfo, Category current, @Nullable Category old) {
+    public CategoryUpdateEvent(Gateway gateway, ShardInfo shardInfo, Category current, @Nullable Category old) {
         super(gateway, shardInfo);
         this.current = current;
         this.old = old;

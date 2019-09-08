@@ -19,6 +19,7 @@ package discord4j.core;
 
 import discord4j.gateway.PayloadTransformer;
 import discord4j.gateway.PoolingTransformer;
+import discord4j.gateway.SessionInfo;
 import discord4j.gateway.ShardInfo;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxSink;
@@ -49,8 +50,13 @@ public class LocalShardCoordinator implements ShardCoordinator {
     }
 
     @Override
-    public void publishConnectedEvent(ShardInfo shardInfo) {
+    public void publishConnected(ShardInfo shardInfo) {
         permitSink.next(shardInfo.getIndex() + 1);
+    }
+
+    @Override
+    public void publishDisconnected(ShardInfo shardInfo, SessionInfo sessionInfo) {
+
     }
 
     @Override

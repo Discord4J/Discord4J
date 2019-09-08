@@ -65,6 +65,18 @@ public class GatewayResources {
         return new Builder();
     }
 
+    public Builder mutate() {
+        Builder builder = new Builder();
+
+        builder.setStoreService(getStoreService())
+                .setReconnectOptions(getReconnectOptions())
+                .setShardCoordinator(getShardCoordinator())
+                .setEventScheduler(getEventScheduler())
+                .setVoiceConnectionScheduler(getVoiceConnectionScheduler());
+
+        return builder;
+    }
+
     public static class Builder {
 
         private StoreService storeService;

@@ -16,7 +16,7 @@
  */
 package discord4j.core.event.domain.message;
 
-import discord4j.core.GatewayAggregate;
+import discord4j.core.Gateway;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.User;
@@ -47,7 +47,7 @@ public class ReactionAddEvent extends MessageEvent {
     private final Long guildId;
     private final ReactionEmoji emoji;
 
-    public ReactionAddEvent(GatewayAggregate gateway, ShardInfo shardInfo, long userId, long channelId, long messageId, @Nullable Long guildId,
+    public ReactionAddEvent(Gateway gateway, ShardInfo shardInfo, long userId, long channelId, long messageId, @Nullable Long guildId,
                             ReactionEmoji emoji) {
         super(gateway, shardInfo);
         this.userId = userId;

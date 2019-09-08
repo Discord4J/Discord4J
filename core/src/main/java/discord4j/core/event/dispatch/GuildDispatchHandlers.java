@@ -19,7 +19,7 @@ package discord4j.core.event.dispatch;
 import discord4j.common.json.GuildEmojiResponse;
 import discord4j.common.json.GuildMemberResponse;
 import discord4j.common.json.UserResponse;
-import discord4j.core.GatewayAggregate;
+import discord4j.core.Gateway;
 import discord4j.core.StateHolder;
 import discord4j.core.event.domain.guild.*;
 import discord4j.core.event.domain.role.RoleCreateEvent;
@@ -48,21 +48,21 @@ import java.util.stream.LongStream;
 class GuildDispatchHandlers {
 
     static Mono<BanEvent> guildBanAdd(DispatchContext<GuildBanAdd> context) {
-        User user = new User(context.getGatewayAggregate(), new UserBean(context.getDispatch().getUser()));
+        User user = new User(context.getGateway(), new UserBean(context.getDispatch().getUser()));
         long guildId = context.getDispatch().getGuildId();
 
-        return Mono.just(new BanEvent(context.getGatewayAggregate(), context.getShardInfo(), user, guildId));
+        return Mono.just(new BanEvent(context.getGateway(), context.getShardInfo(), user, guildId));
     }
 
     static Mono<UnbanEvent> guildBanRemove(DispatchContext<GuildBanRemove> context) {
-        User user = new User(context.getGatewayAggregate(), new UserBean(context.getDispatch().getUser()));
+        User user = new User(context.getGateway(), new UserBean(context.getDispatch().getUser()));
         long guildId = context.getDispatch().getGuildId();
 
-        return Mono.just(new UnbanEvent(context.getGatewayAggregate(), context.getShardInfo(), user, guildId));
+        return Mono.just(new UnbanEvent(context.getGateway(), context.getShardInfo(), user, guildId));
     }
 
     static Mono<GuildCreateEvent> guildCreate(DispatchContext<GuildCreate> context) {
-        GatewayAggregate gateway = context.getGatewayAggregate();
+        Gateway gateway = context.getGateway();
 
         GuildBean guildBean = new GuildBean(context.getDispatch());
         if (guildBean.getLarge()) {
@@ -110,7 +110,7 @@ class GuildDispatchHandlers {
 
         Mono<Void> startMemberChunk = Mono.just(guildBean)
                 .filter(GuildBean::getLarge)
-                .flatMap(bean -> context.getGatewayAggregate()
+                .flatMap(bean -> context.getGateway()
                         .getGatewayClientMap()
                         .get(context.getShardInfo().getIndex())
                         .send(Mono.just(GatewayPayload.requestGuildMembers(
@@ -143,7 +143,7 @@ class GuildDispatchHandlers {
     }
 
     static Mono<GuildDeleteEvent> guildDelete(DispatchContext<GuildDelete> context) {
-        GatewayAggregate gateway = context.getGatewayAggregate();
+        Gateway gateway = context.getGateway();
         StateHolder stateHolder = gateway.getStateHolder();
 
         long guildId = context.getDispatch().getGuild().getId();
@@ -180,14 +180,14 @@ class GuildDispatchHandlers {
                 })
                 .flatMap(deleteGuild::thenReturn)
                 .map(bean -> {
-                    Guild guild = new Guild(context.getGatewayAggregate(), bean);
+                    Guild guild = new Guild(context.getGateway(), bean);
                     return new GuildDeleteEvent(gateway, context.getShardInfo(), guildId, guild, unavailable);
                 })
                 .switchIfEmpty(deleteGuild.thenReturn(new GuildDeleteEvent(gateway, context.getShardInfo(), guildId, null, unavailable)));
     }
 
     static Mono<EmojisUpdateEvent> guildEmojisUpdate(DispatchContext<GuildEmojisUpdate> context) {
-        GatewayAggregate gateway = context.getGatewayAggregate();
+        Gateway gateway = context.getGateway();
 
         Mono<Void> updateGuildBean = gateway.getStateHolder().getGuildStore()
                 .find(context.getDispatch().getGuildId())
@@ -219,12 +219,12 @@ class GuildDispatchHandlers {
     }
 
     static Mono<IntegrationsUpdateEvent> guildIntegrationsUpdate(DispatchContext<GuildIntegrationsUpdate> context) {
-        return Mono.just(new IntegrationsUpdateEvent(context.getGatewayAggregate(), context.getShardInfo(),
+        return Mono.just(new IntegrationsUpdateEvent(context.getGateway(), context.getShardInfo(),
                 context.getDispatch().getGuildId()));
     }
 
     static Mono<MemberJoinEvent> guildMemberAdd(DispatchContext<GuildMemberAdd> context) {
-        GatewayAggregate gateway = context.getGatewayAggregate();
+        Gateway gateway = context.getGateway();
         long guildId = context.getDispatch().getGuildId();
         GuildMemberResponse response = context.getDispatch().getMember();
         MemberBean bean = new MemberBean(response);
@@ -252,7 +252,7 @@ class GuildDispatchHandlers {
     }
 
     static Mono<MemberLeaveEvent> guildMemberRemove(DispatchContext<GuildMemberRemove> context) {
-        GatewayAggregate gateway = context.getGatewayAggregate();
+        Gateway gateway = context.getGateway();
         long guildId = context.getDispatch().getGuildId();
         UserResponse response = context.getDispatch().getUser();
 
@@ -279,7 +279,7 @@ class GuildDispatchHandlers {
     }
 
     static Mono<MemberChunkEvent> guildMembersChunk(DispatchContext<GuildMembersChunk> context) {
-        GatewayAggregate gateway = context.getGatewayAggregate();
+        Gateway gateway = context.getGateway();
         long guildId = context.getDispatch().getGuildId();
 
         Flux<Tuple2<LongLongTuple2, MemberBean>> memberPairs = Flux.fromArray(context.getDispatch().getMembers())
@@ -331,7 +331,7 @@ class GuildDispatchHandlers {
     }
 
     static Mono<MemberUpdateEvent> guildMemberUpdate(DispatchContext<GuildMemberUpdate> context) {
-        GatewayAggregate gateway = context.getGatewayAggregate();
+        Gateway gateway = context.getGateway();
 
         long guildId = context.getDispatch().getGuildId();
         long memberId = context.getDispatch().getUser().getId();
@@ -360,7 +360,7 @@ class GuildDispatchHandlers {
     }
 
     static Mono<RoleCreateEvent> guildRoleCreate(DispatchContext<GuildRoleCreate> context) {
-        GatewayAggregate gateway = context.getGatewayAggregate();
+        Gateway gateway = context.getGateway();
         long guildId = context.getDispatch().getGuildId();
         RoleBean bean = new RoleBean(context.getDispatch().getRole());
         Role role = new Role(gateway, bean, guildId);
@@ -380,7 +380,7 @@ class GuildDispatchHandlers {
     }
 
     static Mono<RoleDeleteEvent> guildRoleDelete(DispatchContext<GuildRoleDelete> context) {
-        GatewayAggregate gateway = context.getGatewayAggregate();
+        Gateway gateway = context.getGateway();
         long guildId = context.getDispatch().getGuildId();
         long roleId = context.getDispatch().getRoleId();
 
@@ -421,7 +421,7 @@ class GuildDispatchHandlers {
     }
 
     static Mono<RoleUpdateEvent> guildRoleUpdate(DispatchContext<GuildRoleUpdate> context) {
-        GatewayAggregate gateway = context.getGatewayAggregate();
+        Gateway gateway = context.getGateway();
         long guildId = context.getDispatch().getGuildId();
 
         RoleBean bean = new RoleBean(context.getDispatch().getRole());
@@ -437,7 +437,7 @@ class GuildDispatchHandlers {
     }
 
     static Mono<GuildUpdateEvent> guildUpdate(DispatchContext<GuildUpdate> context) {
-        GatewayAggregate gateway = context.getGatewayAggregate();
+        Gateway gateway = context.getGateway();
 
         long guildId = context.getDispatch().getGuildId();
 

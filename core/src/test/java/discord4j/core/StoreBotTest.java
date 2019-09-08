@@ -74,7 +74,7 @@ public class StoreBotTest {
                         .setFallback(new JdkStoreService()))
                 .build())
                 .setInitialPresence(shard -> Presence.invisible())
-                .login(gateway -> {
+                .connectAndWait(gateway -> {
                     startHttpServer(gateway, counts, jackson.getObjectMapper());
                     subscribeEventCounter(gateway, counts);
                     return Mono.empty();
@@ -82,7 +82,7 @@ public class StoreBotTest {
                 .block();
     }
 
-    private void subscribeEventCounter(GatewayAggregate gateway, Map<String, AtomicLong> counts) {
+    private void subscribeEventCounter(Gateway gateway, Map<String, AtomicLong> counts) {
         reflections.getSubTypesOf(Event.class)
                 .stream()
                 .filter(cls -> reflections.getSubTypesOf(cls).isEmpty())
@@ -94,7 +94,7 @@ public class StoreBotTest {
                 });
     }
 
-    private void startHttpServer(GatewayAggregate gateway, Map<String, AtomicLong> counts,
+    private void startHttpServer(Gateway gateway, Map<String, AtomicLong> counts,
                                  ObjectMapper mapper) {
         DisposableServer facade = HttpServer.create()
                 .port(0) // use an ephemeral port

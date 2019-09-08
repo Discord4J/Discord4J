@@ -17,7 +17,7 @@
 package discord4j.core.spec;
 
 import discord4j.core.DiscordClient;
-import discord4j.core.GatewayAggregate;
+import discord4j.core.Gateway;
 import discord4j.core.event.domain.VoiceServerUpdateEvent;
 import discord4j.core.event.domain.VoiceStateUpdateEvent;
 import discord4j.core.object.entity.channel.VoiceChannel;
@@ -43,10 +43,10 @@ public class VoiceChannelJoinSpec implements Spec<Mono<VoiceConnection>> {
     private boolean selfDeaf;
     private boolean selfMute;
 
-    private final GatewayAggregate gateway;
+    private final Gateway gateway;
     private final VoiceChannel voiceChannel;
 
-    public VoiceChannelJoinSpec(final GatewayAggregate gateway, final VoiceChannel voiceChannel) {
+    public VoiceChannelJoinSpec(final Gateway gateway, final VoiceChannel voiceChannel) {
         this.gateway = Objects.requireNonNull(gateway);
         this.voiceChannel = voiceChannel;
     }

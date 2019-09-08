@@ -16,7 +16,7 @@
  */
 package discord4j.core.event.domain.guild;
 
-import discord4j.core.GatewayAggregate;
+import discord4j.core.Gateway;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.GuildEmoji;
 import discord4j.core.object.util.Snowflake;
@@ -38,7 +38,7 @@ public class EmojisUpdateEvent extends GuildEvent {
     private final long guildId;
     private final Set<GuildEmoji> emojis;
 
-    public EmojisUpdateEvent(GatewayAggregate gateway, ShardInfo shardInfo, long guildId, Set<GuildEmoji> emojis) {
+    public EmojisUpdateEvent(Gateway gateway, ShardInfo shardInfo, long guildId, Set<GuildEmoji> emojis) {
         super(gateway, shardInfo);
         this.guildId = guildId;
         this.emojis = emojis;

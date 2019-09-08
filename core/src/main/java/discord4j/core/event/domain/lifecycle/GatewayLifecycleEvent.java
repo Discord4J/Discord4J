@@ -16,7 +16,7 @@
  */
 package discord4j.core.event.domain.lifecycle;
 
-import discord4j.core.GatewayAggregate;
+import discord4j.core.Gateway;
 import discord4j.core.event.domain.Event;
 import discord4j.gateway.ShardInfo;
 
@@ -25,7 +25,7 @@ import discord4j.gateway.ShardInfo;
  */
 public abstract class GatewayLifecycleEvent extends Event {
 
-    public GatewayLifecycleEvent(GatewayAggregate gateway, ShardInfo shardInfo) {
+    public GatewayLifecycleEvent(Gateway gateway, ShardInfo shardInfo) {
         super(gateway, shardInfo);
     }
 }

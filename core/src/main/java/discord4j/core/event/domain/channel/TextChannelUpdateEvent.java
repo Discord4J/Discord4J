@@ -16,7 +16,7 @@
  */
 package discord4j.core.event.domain.channel;
 
-import discord4j.core.GatewayAggregate;
+import discord4j.core.Gateway;
 import discord4j.core.object.entity.channel.GuildMessageChannel;
 import discord4j.core.object.entity.channel.NewsChannel;
 import discord4j.core.object.entity.channel.TextChannel;
@@ -41,7 +41,7 @@ public class TextChannelUpdateEvent extends ChannelEvent {
     private final GuildMessageChannel current;
     private final TextChannel old;
 
-    public TextChannelUpdateEvent(GatewayAggregate gateway, ShardInfo shardInfo, GuildMessageChannel current, @Nullable TextChannel old) {
+    public TextChannelUpdateEvent(Gateway gateway, ShardInfo shardInfo, GuildMessageChannel current, @Nullable TextChannel old) {
         super(gateway, shardInfo);
         this.current = current;
         this.old = old;

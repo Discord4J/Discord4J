@@ -16,7 +16,7 @@
  */
 package discord4j.core.object.entity.channel;
 
-import discord4j.core.GatewayAggregate;
+import discord4j.core.Gateway;
 import discord4j.core.object.data.stored.ChannelBean;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.util.Snowflake;
@@ -33,10 +33,10 @@ public final class PrivateChannel extends BaseMessageChannel {
     /**
      * Constructs an {@code PrivateChannel} with an associated ServiceMediator and Discord data.
      *
-     * @param gateway The {@link GatewayAggregate} associated to this object, must be non-null.
+     * @param gateway The {@link Gateway} associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
      */
-    public PrivateChannel(final GatewayAggregate gateway, final ChannelBean data) {
+    public PrivateChannel(final Gateway gateway, final ChannelBean data) {
         super(gateway, data);
     }
 

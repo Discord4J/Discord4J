@@ -16,7 +16,7 @@
  */
 package discord4j.core.event.domain.channel;
 
-import discord4j.core.GatewayAggregate;
+import discord4j.core.Gateway;
 import discord4j.core.object.entity.channel.PrivateChannel;
 import discord4j.gateway.ShardInfo;
 
@@ -31,7 +31,7 @@ public class PrivateChannelDeleteEvent extends ChannelEvent {
 
     private final PrivateChannel channel;
 
-    public PrivateChannelDeleteEvent(GatewayAggregate gateway, ShardInfo shardInfo, PrivateChannel channel) {
+    public PrivateChannelDeleteEvent(Gateway gateway, ShardInfo shardInfo, PrivateChannel channel) {
         super(gateway, shardInfo);
         this.channel = channel;
     }

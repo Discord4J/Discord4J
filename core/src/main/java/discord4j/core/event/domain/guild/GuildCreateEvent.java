@@ -16,7 +16,7 @@
  */
 package discord4j.core.event.domain.guild;
 
-import discord4j.core.GatewayAggregate;
+import discord4j.core.Gateway;
 import discord4j.core.object.entity.Guild;
 import discord4j.gateway.ShardInfo;
 
@@ -38,7 +38,7 @@ public class GuildCreateEvent extends GuildEvent {
 
     private final Guild guild;
 
-    public GuildCreateEvent(GatewayAggregate gateway, ShardInfo shardInfo, Guild guild) {
+    public GuildCreateEvent(Gateway gateway, ShardInfo shardInfo, Guild guild) {
         super(gateway, shardInfo);
         this.guild = guild;
     }

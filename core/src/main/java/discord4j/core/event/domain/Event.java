@@ -18,7 +18,7 @@
 package discord4j.core.event.domain;
 
 import discord4j.core.DiscordClient;
-import discord4j.core.GatewayAggregate;
+import discord4j.core.Gateway;
 import discord4j.gateway.ShardInfo;
 
 /**
@@ -26,15 +26,15 @@ import discord4j.gateway.ShardInfo;
  */
 public abstract class Event {
 
-    private final GatewayAggregate gateway;
+    private final Gateway gateway;
     private final ShardInfo shardInfo;
 
-    protected Event(GatewayAggregate gateway, ShardInfo shardInfo) {
+    protected Event(Gateway gateway, ShardInfo shardInfo) {
         this.gateway = gateway;
         this.shardInfo = shardInfo;
     }
 
-    public GatewayAggregate getGateway() {
+    public Gateway getGateway() {
         return gateway;
     }
 

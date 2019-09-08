@@ -16,7 +16,7 @@
  */
 package discord4j.core.event.domain.message;
 
-import discord4j.core.GatewayAggregate;
+import discord4j.core.Gateway;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.MessageChannel;
@@ -47,7 +47,7 @@ public class ReactionRemoveAllEvent extends MessageEvent {
     @Nullable
     private final Long guildId;
 
-    public ReactionRemoveAllEvent(GatewayAggregate gateway, ShardInfo shardInfo, long channelId, long messageId, @Nullable Long guildId) {
+    public ReactionRemoveAllEvent(Gateway gateway, ShardInfo shardInfo, long channelId, long messageId, @Nullable Long guildId) {
         super(gateway, shardInfo);
         this.channelId = channelId;
         this.messageId = messageId;

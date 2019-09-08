@@ -16,7 +16,7 @@
  */
 package discord4j.core.event.domain.guild;
 
-import discord4j.core.GatewayAggregate;
+import discord4j.core.Gateway;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.util.Snowflake;
@@ -48,7 +48,7 @@ public class MemberUpdateEvent extends GuildEvent {
     @Nullable
     private final String currentNickname;
 
-    public MemberUpdateEvent(GatewayAggregate gateway, ShardInfo shardInfo, long guildId, long memberId, @Nullable Member old,
+    public MemberUpdateEvent(Gateway gateway, ShardInfo shardInfo, long guildId, long memberId, @Nullable Member old,
                              long[] currentRoles, @Nullable String currentNickname) {
         super(gateway, shardInfo);
 

@@ -24,6 +24,7 @@ import discord4j.core.object.util.Snowflake;
 import discord4j.core.spec.GuildCreateSpec;
 import discord4j.core.spec.UserEditSpec;
 import discord4j.core.util.PaginationUtil;
+import discord4j.gateway.GatewayOptions;
 import discord4j.rest.entity.*;
 import discord4j.rest.entity.data.*;
 import discord4j.rest.json.response.UserGuildResponse;
@@ -215,25 +216,6 @@ public final class DiscordClient {
     }
 
     /**
-     * Login the client to the gateway.
-     *
-     * @return A {@link Mono} that completes (either successfully or with an error) when the client disconnects from the
-     * gateway without a reconnect attempt. It is recommended to call this from {@code main} and as a final statement
-     * invoke {@link Mono#block()}.
-     */
-    public Mono<Void> login() {
-        return gateway().login(gateway -> Mono.empty());
-    }
-
-    public GatewayBootstrap gateway() {
-        return new GatewayBootstrap(this, GatewayResources.builder().build());
-    }
-
-    public GatewayBootstrap gateway(GatewayResources resources) {
-        return new GatewayBootstrap(this, resources);
-    }
-
-    /**
      * Requests to create a guild.
      *
      * @param spec A {@link Consumer} that provides a "blank" {@link GuildCreateSpec} to be operated on.
@@ -276,5 +258,24 @@ public final class DiscordClient {
         return coreResources.getRestClient().getUserService()
                 .modifyCurrentUser(mutatedSpec.asRequest())
                 .map(UserData::new);
+    }
+
+    /**
+     * Login the client to the gateway.
+     *
+     * @return A {@link Mono} that completes (either successfully or with an error) when the client disconnects from the
+     * gateway without a reconnect attempt. It is recommended to call this from {@code main} and as a final statement
+     * invoke {@link Mono#block()}.
+     */
+    public Mono<Void> login() {
+        return gateway().connectAndWait(gateway -> Mono.empty());
+    }
+
+    public GatewayBootstrap<GatewayOptions> gateway() {
+        return GatewayBootstrap.create(this, GatewayResources.builder().build());
+    }
+
+    public GatewayBootstrap<GatewayOptions> gateway(GatewayResources resources) {
+        return GatewayBootstrap.create(this, resources);
     }
 }

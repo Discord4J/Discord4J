@@ -16,7 +16,7 @@
  */
 package discord4j.core.event.domain;
 
-import discord4j.core.GatewayAggregate;
+import discord4j.core.Gateway;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.channel.TextChannel;
 import discord4j.core.object.util.Snowflake;
@@ -37,7 +37,7 @@ public class WebhooksUpdateEvent extends Event {
     private final long guildId;
     private final long channelId;
 
-    public WebhooksUpdateEvent(GatewayAggregate gateway, ShardInfo shardInfo, long guildId, long channelId) {
+    public WebhooksUpdateEvent(Gateway gateway, ShardInfo shardInfo, long guildId, long channelId) {
         super(gateway, shardInfo);
         this.guildId = guildId;
         this.channelId = channelId;

@@ -16,7 +16,7 @@
  */
 package discord4j.core.event.domain;
 
-import discord4j.core.GatewayAggregate;
+import discord4j.core.Gateway;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.util.Snowflake;
 import discord4j.gateway.ShardInfo;
@@ -37,7 +37,7 @@ public class VoiceServerUpdateEvent extends Event {
     @Nullable
     private final String endpoint;
 
-    public VoiceServerUpdateEvent(GatewayAggregate gateway, ShardInfo shardInfo, String token, long guildId, @Nullable String endpoint) {
+    public VoiceServerUpdateEvent(Gateway gateway, ShardInfo shardInfo, String token, long guildId, @Nullable String endpoint) {
         super(gateway, shardInfo);
         this.token = token;
         this.guildId = guildId;

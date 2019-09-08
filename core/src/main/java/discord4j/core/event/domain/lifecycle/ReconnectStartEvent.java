@@ -17,7 +17,7 @@
 
 package discord4j.core.event.domain.lifecycle;
 
-import discord4j.core.GatewayAggregate;
+import discord4j.core.Gateway;
 import discord4j.gateway.ShardInfo;
 
 /**
@@ -28,7 +28,7 @@ import discord4j.gateway.ShardInfo;
  */
 public class ReconnectStartEvent extends GatewayLifecycleEvent {
 
-    public ReconnectStartEvent(GatewayAggregate gateway, ShardInfo shardInfo) {
+    public ReconnectStartEvent(Gateway gateway, ShardInfo shardInfo) {
         super(gateway, shardInfo);
     }
 

@@ -16,7 +16,7 @@
  */
 package discord4j.core.event.domain.guild;
 
-import discord4j.core.GatewayAggregate;
+import discord4j.core.Gateway;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.util.Snowflake;
@@ -35,7 +35,7 @@ public class MemberJoinEvent extends GuildEvent {
     private final Member member;
     private final long guildId;
 
-    public MemberJoinEvent(GatewayAggregate gateway, ShardInfo shardInfo, Member member, long guildId) {
+    public MemberJoinEvent(Gateway gateway, ShardInfo shardInfo, Member member, long guildId) {
         super(gateway, shardInfo);
         this.member = member;
         this.guildId = guildId;

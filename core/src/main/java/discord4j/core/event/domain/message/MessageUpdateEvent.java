@@ -16,7 +16,7 @@
  */
 package discord4j.core.event.domain.message;
 
-import discord4j.core.GatewayAggregate;
+import discord4j.core.Gateway;
 import discord4j.core.object.Embed;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Message;
@@ -56,7 +56,7 @@ public class MessageUpdateEvent extends MessageEvent {
     private final boolean embedsChanged;
     private final List<Embed> currentEmbeds;
 
-    public MessageUpdateEvent(GatewayAggregate gateway, ShardInfo shardInfo, long messageId, long channelId, @Nullable Long guildId,
+    public MessageUpdateEvent(Gateway gateway, ShardInfo shardInfo, long messageId, long channelId, @Nullable Long guildId,
                               @Nullable Message old, boolean contentChanged, @Nullable String currentContent,
                               boolean embedsChanged, List<Embed> currentEmbeds) {
         super(gateway, shardInfo);

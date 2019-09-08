@@ -16,7 +16,7 @@
  */
 package discord4j.core.event.domain.guild;
 
-import discord4j.core.GatewayAggregate;
+import discord4j.core.Gateway;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.User;
@@ -44,7 +44,7 @@ public class MemberLeaveEvent extends GuildEvent {
     @Nullable
     private final Member member;
 
-    public MemberLeaveEvent(GatewayAggregate gateway, ShardInfo shardInfo, User user, long guildId, @Nullable Member member) {
+    public MemberLeaveEvent(Gateway gateway, ShardInfo shardInfo, User user, long guildId, @Nullable Member member) {
         super(gateway, shardInfo);
         this.user = user;
         this.guildId = guildId;

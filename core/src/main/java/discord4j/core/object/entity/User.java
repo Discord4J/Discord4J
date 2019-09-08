@@ -17,7 +17,7 @@
 package discord4j.core.object.entity;
 
 import discord4j.core.DiscordClient;
-import discord4j.core.GatewayAggregate;
+import discord4j.core.Gateway;
 import discord4j.core.object.data.stored.ChannelBean;
 import discord4j.core.object.data.stored.UserBean;
 import discord4j.core.object.entity.channel.PrivateChannel;
@@ -49,7 +49,7 @@ public class User implements Entity {
     private static final String AVATAR_IMAGE_PATH = "avatars/%s/%s";
 
     /** The gateway associated to this object. */
-    private final GatewayAggregate gateway;
+    private final Gateway gateway;
 
     /** The raw data as represented by Discord. */
     private final UserBean data;
@@ -57,10 +57,10 @@ public class User implements Entity {
     /**
      * Constructs an {@code User} with an associated ServiceMediator and Discord data.
      *
-     * @param gateway The {@link GatewayAggregate} associated to this object, must be non-null.
+     * @param gateway The {@link Gateway} associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
      */
-    public User(final GatewayAggregate gateway, final UserBean data) {
+    public User(final Gateway gateway, final UserBean data) {
         this.gateway = Objects.requireNonNull(gateway);
         this.data = Objects.requireNonNull(data);
     }
@@ -71,7 +71,7 @@ public class User implements Entity {
     }
 
     @Override
-    public GatewayAggregate getGateway() {
+    public Gateway getGateway() {
         return gateway;
     }
 

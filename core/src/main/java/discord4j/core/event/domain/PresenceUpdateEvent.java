@@ -17,7 +17,7 @@
 package discord4j.core.event.domain;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import discord4j.core.GatewayAggregate;
+import discord4j.core.Gateway;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.User;
@@ -46,7 +46,7 @@ public class PresenceUpdateEvent extends Event {
     private final Presence current;
     private final Presence old;
 
-    public PresenceUpdateEvent(GatewayAggregate gateway, ShardInfo shardInfo, long guildId, @Nullable User oldUser, JsonNode user,
+    public PresenceUpdateEvent(Gateway gateway, ShardInfo shardInfo, long guildId, @Nullable User oldUser, JsonNode user,
                                Presence current, @Nullable Presence old) {
         super(gateway, shardInfo);
         this.guildId = guildId;

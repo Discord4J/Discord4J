@@ -48,7 +48,7 @@ public class PoolingTransformer implements PayloadTransformer {
         this.capacity = capacity;
         this.refillPeriodNanos = refillPeriod.toNanos();
         this.pool = PoolBuilder.from(Mono.fromCallable(Permit::new))
-                .sizeMax(capacity)
+                .sizeBetween(1, capacity)
                 .releaseHandler(permit -> Mono.delay(getDurationUntilNextRefill().plus(permit.releaseDelay))
                         .doOnNext(tick -> log.warn("[{}] Released permit", permit))
                         .then())

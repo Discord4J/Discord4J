@@ -18,8 +18,10 @@
 package discord4j.core;
 
 import discord4j.gateway.PayloadTransformer;
+import discord4j.gateway.SessionInfo;
 import discord4j.gateway.ShardInfo;
 import reactor.core.publisher.Flux;
+import reactor.util.annotation.Nullable;
 
 import java.util.function.Function;
 
@@ -37,18 +39,27 @@ public interface ShardCoordinator {
     Function<Flux<ShardInfo>, Flux<ShardInfo>> getIdentifyOperator();
 
     /**
-     * Notifies this coordinator that a given shard has connected successfully. Can be used to signal other shards
-     * for authentication.
-     *
-     * @param shardInfo the connected shard details
-     */
-    void publishConnectedEvent(ShardInfo shardInfo);
-
-    /**
      * Returns a transformation function for a sequence of payloads that can be held or delayed in order to successfully
      * identify multiple shards in a coordinated manner.
      *
      * @return a {@link PayloadTransformer} allowing IDENTIFY payload coordination across shards
      */
     PayloadTransformer getIdentifyLimiter();
+
+    /**
+     * Notifies this coordinator that a given shard has connected successfully. Can be used to signal other shards
+     * for authentication.
+     *
+     * @param shardInfo the connected shard details
+     */
+    void publishConnected(ShardInfo shardInfo);
+
+    /**
+     * Notifies this coordinator that a given shard has disconnected.
+     *
+     * @param shardInfo the disconnected shard details
+     * @param sessionInfo the disconnected shard session details to resume, or <code>null</code> if resume is not
+     * available.
+     */
+    void publishDisconnected(ShardInfo shardInfo, @Nullable SessionInfo sessionInfo);
 }

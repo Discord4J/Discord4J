@@ -16,7 +16,7 @@
  */
 package discord4j.core.event.domain.role;
 
-import discord4j.core.GatewayAggregate;
+import discord4j.core.Gateway;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Role;
 import discord4j.core.object.util.Snowflake;
@@ -35,7 +35,7 @@ public class RoleCreateEvent extends RoleEvent {
     private final long guildId;
     private final Role role;
 
-    public RoleCreateEvent(GatewayAggregate gateway, ShardInfo shardInfo, long guildId, Role role) {
+    public RoleCreateEvent(Gateway gateway, ShardInfo shardInfo, long guildId, Role role) {
         super(gateway, shardInfo);
         this.guildId = guildId;
         this.role = role;

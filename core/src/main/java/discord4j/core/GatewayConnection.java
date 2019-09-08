@@ -26,20 +26,20 @@ import reactor.core.publisher.Mono;
  */
 public class GatewayConnection {
 
-    private final GatewayAggregate gatewayAggregate;
+    private final Gateway gateway;
     private final IdentifyOptions identifyOptions;
 
-    public GatewayConnection(GatewayAggregate gatewayAggregate, IdentifyOptions identifyOptions) {
-        this.gatewayAggregate = gatewayAggregate;
+    public GatewayConnection(Gateway gateway, IdentifyOptions identifyOptions) {
+        this.gateway = gateway;
         this.identifyOptions = identifyOptions;
     }
 
     private GatewayClient getGatewayClient() {
-        return gatewayAggregate.getGatewayClientMap().get(identifyOptions.getShardIndex());
+        return gateway.getGatewayClientMap().get(identifyOptions.getShardIndex());
     }
 
-    public GatewayAggregate getGateway() {
-        return gatewayAggregate;
+    public Gateway getGateway() {
+        return gateway;
     }
 
     /**
@@ -84,6 +84,6 @@ public class GatewayConnection {
      * @return a {@link Mono} signaling completion upon disconnect
      */
     public Mono<Void> onDisconnect() {
-        return gatewayAggregate.getCloseProcessor();
+        return gateway.getCloseProcessor();
     }
 }

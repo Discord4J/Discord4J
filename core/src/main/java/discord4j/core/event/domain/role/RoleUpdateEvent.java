@@ -16,7 +16,7 @@
  */
 package discord4j.core.event.domain.role;
 
-import discord4j.core.GatewayAggregate;
+import discord4j.core.Gateway;
 import discord4j.core.object.entity.Role;
 import discord4j.gateway.ShardInfo;
 import reactor.util.annotation.Nullable;
@@ -37,7 +37,7 @@ public class RoleUpdateEvent extends RoleEvent {
     private final Role current;
     private final Role old;
 
-    public RoleUpdateEvent(GatewayAggregate gateway, ShardInfo shardInfo, Role current, @Nullable Role old) {
+    public RoleUpdateEvent(Gateway gateway, ShardInfo shardInfo, Role current, @Nullable Role old) {
         super(gateway, shardInfo);
         this.current = current;
         this.old = old;

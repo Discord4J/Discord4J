@@ -16,7 +16,7 @@
  */
 package discord4j.core.object.entity;
 
-import discord4j.core.GatewayAggregate;
+import discord4j.core.Gateway;
 import discord4j.core.object.VoiceState;
 import discord4j.core.object.data.stored.MemberBean;
 import discord4j.core.object.data.stored.PresenceBean;
@@ -59,12 +59,12 @@ public final class Member extends User {
     /**
      * Constructs a {@code Member} with an associated ServiceMediator and Discord data.
      *
-     * @param gateway The {@link GatewayAggregate} associated to this object, must be non-null.
+     * @param gateway The {@link Gateway} associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
      * @param userData The user data as represented by Discord, must be non-null.
      * @param guildId The ID of the guild this user is associated to.
      */
-    public Member(final GatewayAggregate gateway, final MemberBean data, final UserBean userData,
+    public Member(final Gateway gateway, final MemberBean data, final UserBean userData,
                   final long guildId) {
         super(gateway, userData);
         this.data = Objects.requireNonNull(data);
