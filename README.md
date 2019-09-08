@@ -92,9 +92,6 @@ The `gateway` module provides a low-level WebSocket client for interacting with 
 ### [Voice](./voice/README.md)
 The `voice` module provides a client to manipulate audio through [Voice Connections](https://discordapp.com/developers/docs/topics/voice-connections).
 
-### [Command](./command/README.md)
-The `command` module provides a set of low-level tools for dealing with bot commands. It can be used on its own or easily serve as a basis of interoperability for higher-level command libraries. 
-
 ### [Common](./common/README.md)
 The `common` module contains base utilities and models useful for other modules.
 
