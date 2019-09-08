@@ -13,6 +13,9 @@ A fast, reactive Java wrapper for the official [Discord Bot API](https://discord
 Built with [Reactor](https://projectreactor.io/), [Netty](https://netty.io/), and a focus on flexibility, Discord4J provides an effective, non-blocking interface for creating Discord bots. The [reactive](https://www.reactivemanifesto.org/) and asynchronous nature of the library allows for scalability through backpressure handling and the efficient use of resources. Its [modularized](#modules) structure gives the user the ability to tailor their experience to different levels of abstraction and pick the right tools for the job.
 
 ## Installation
+
+Our current stable line is [`3.0.x`](https://github.com/Discord4J/Discord4J/tree/3.0.x)
+
 ### Gradle
 ```groovy
 repositories {
@@ -98,11 +101,28 @@ The `common` module contains base utilities and models useful for other modules.
 ## Stores
 Discord4J's mechanism for storing information received on the gateway is completely pluggable. This allows both the ability to customize what is stored and how. The [Stores](https://github.com/Discord4J/Stores) repository contains some pre-made implementations as well as the API for making your own.
 
-## Development builds
-Please follow our instructions at [Using Jitpack](https://github.com/Discord4J/Discord4J/wiki/Using-Jitpack)
-
 ## Useful Links
 * [Discord4J Site](https://discord4j.com)
 * [Discord4J Wiki](https://github.com/Discord4J/Discord4J/wiki)
 * [Javadoc](http://javadoc.io/doc/com.discord4j/discord4j-core/)
 * [Reactor 3 Reference Guide](http://projectreactor.io/docs/core/release/reference/)
+
+## Development builds
+Please follow our instructions at [Using Jitpack](https://github.com/Discord4J/Discord4J/wiki/Using-Jitpack)
+
+### v3.1 development builds
+
+Make sure you have the appropriate repositories:
+
+```groovy
+repositories {
+  maven { url 'https://oss.sonatype.org/content/repositories/snapshots' }
+  maven { url 'https://repo.spring.io/snapshot' }
+  maven { url 'https://repo.spring.io/milestone' }
+  mavenCentral()
+}
+
+dependencies {
+  implementation 'com.discord4j:discord4j-core:3.1.0-SNAPSHOT'
+}
+```

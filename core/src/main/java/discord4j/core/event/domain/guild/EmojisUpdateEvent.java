@@ -65,7 +65,7 @@ public class EmojisUpdateEvent extends GuildEvent {
     /**
      * Gets a list of ALL emojis of the {@link Guild}.
      *
-     * @return A list of ALL emojis of the {@link com.sun.media.sound.WaveExtensibleFileReader.GUID}.
+     * @return A list of ALL emojis of the {@link Guild}.
      */
     public Set<GuildEmoji> getEmojis() {
         return emojis;

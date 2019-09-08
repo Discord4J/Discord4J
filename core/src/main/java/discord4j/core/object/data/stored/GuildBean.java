@@ -32,6 +32,7 @@ public final class GuildBean extends BaseGuildBean {
 
     private String joinedAt;
     private boolean large;
+    private boolean unavailable;
     private int memberCount;
     private long[] members;
     private long[] channels;
@@ -41,6 +42,7 @@ public final class GuildBean extends BaseGuildBean {
 
         this.joinedAt = guildCreate.getJoinedAt();
         this.large = guildCreate.isLarge();
+        this.unavailable = guildCreate.isUnavailable();
         this.memberCount = guildCreate.getMemberCount();
 
         members = Arrays.stream(guildCreate.getMembers())
@@ -59,6 +61,7 @@ public final class GuildBean extends BaseGuildBean {
 
         this.joinedAt = toCopy.joinedAt;
         this.large = toCopy.large;
+        this.unavailable = toCopy.unavailable;
         this.memberCount = toCopy.memberCount;
         this.members = Arrays.copyOf(toCopy.members, toCopy.members.length);
         this.channels = Arrays.copyOf(toCopy.channels, toCopy.channels.length);
@@ -69,6 +72,7 @@ public final class GuildBean extends BaseGuildBean {
 
         this.joinedAt = toCopy.getJoinedAt();
         this.large = toCopy.getLarge();
+        this.unavailable = toCopy.getUnavailable();
         this.memberCount = toCopy.getMemberCount();
         this.members = Arrays.copyOf(toCopy.members, toCopy.members.length);
         this.channels = Arrays.copyOf(toCopy.channels, toCopy.channels.length);
@@ -88,15 +92,23 @@ public final class GuildBean extends BaseGuildBean {
         return large;
     }
 
-    public void setLarge(final Boolean large) {
+    public void setLarge(final boolean large) {
         this.large = large;
+    }
+
+    public boolean getUnavailable() {
+        return unavailable;
+    }
+
+    public void setUnavailable(final boolean unavailable) {
+        this.unavailable = unavailable;
     }
 
     public int getMemberCount() {
         return memberCount;
     }
 
-    public void setMemberCount(final Integer memberCount) {
+    public void setMemberCount(final int memberCount) {
         this.memberCount = memberCount;
     }
 
@@ -121,6 +133,7 @@ public final class GuildBean extends BaseGuildBean {
         return "GuildBean{" +
                 "joinedAt='" + joinedAt + '\'' +
                 ", large=" + large +
+                ", unavailable=" + unavailable +
                 ", memberCount=" + memberCount +
                 ", members=" + Arrays.toString(members) +
                 ", channels=" + Arrays.toString(channels) +

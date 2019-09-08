@@ -20,6 +20,7 @@ import discord4j.core.DiscordClient;
 import discord4j.core.ServiceMediator;
 import discord4j.core.object.data.stored.ChannelBean;
 import discord4j.core.object.data.stored.UserBean;
+import discord4j.core.object.entity.channel.PrivateChannel;
 import discord4j.core.object.util.Image;
 import discord4j.core.object.util.Snowflake;
 import discord4j.core.util.EntityUtil;
@@ -97,17 +98,13 @@ public class User implements Entity {
     }
 
     /**
-     * Gets the user's avatar URL, if present and in a supported format.
+     * Gets the user's avatar URL, if present.
      *
-     * @param format The format for the URL. Supported format types are {@link Image.Format#GIF GIF} if
-     * {@link #hasAnimatedAvatar() animated}, otherwise {@link Image.Format#PNG PNG} or {@link Image.Format#JPEG JPEG}.
-     * @return The user's avatar URL, if present and in a supported format.
+     * @param format The format for the URL.
+     * @return The user's avatar URL, if present.
      */
     public final Optional<String> getAvatarUrl(final Image.Format format) {
-        final boolean animated = hasAnimatedAvatar();
         return Optional.ofNullable(data.getAvatar())
-                .filter(ignored -> !animated || (format == GIF))
-                .filter(ignored -> (!animated && ((format == PNG) || (format == JPEG))) || animated)
                 .map(avatar -> ImageUtil.getUrl(String.format(AVATAR_IMAGE_PATH, getId().asString(), avatar), format));
     }
 

@@ -17,6 +17,7 @@
 package discord4j.core.object.data;
 
 import discord4j.rest.json.response.InviteResponse;
+import reactor.util.annotation.Nullable;
 
 import java.io.Serializable;
 
@@ -27,11 +28,20 @@ public class InviteBean implements Serializable {
     private String code;
     private long guildId;
     private long channelId;
+    @Nullable
+    private Long targetUserId;
+    @Nullable
+    private Integer approximatePresenceCount;
+    @Nullable
+    private Integer approximateMemberCount;
 
     public InviteBean(final InviteResponse response) {
         code = response.getCode();
         guildId = response.getGuild().getId();
         channelId = response.getChannel().getId();
+        targetUserId = response.getTargetUser() == null ? null : response.getTargetUser().getId();
+        approximatePresenceCount = response.getApproximatePresenceCount();
+        approximateMemberCount = response.getApproximateMemberCount();
     }
 
     public InviteBean() {}
@@ -60,12 +70,42 @@ public class InviteBean implements Serializable {
         this.channelId = channelId;
     }
 
+    @Nullable
+    public final Long getTargetUserId() {
+        return targetUserId;
+    }
+
+    public final void setTargetUserId(@Nullable final Long targetUserId) {
+        this.targetUserId = targetUserId;
+    }
+
+    @Nullable
+    public final Integer getApproximatePresenceCount() {
+        return approximatePresenceCount;
+    }
+
+    public final void setApproximatePresenceCount(@Nullable final Integer approximatePresenceCount) {
+        this.approximatePresenceCount = approximatePresenceCount;
+    }
+
+    @Nullable
+    public final Integer getApproximateMemberCount() {
+        return approximateMemberCount;
+    }
+
+    public final void setApproximateMemberCount(@Nullable final Integer approximateMemberCount) {
+        this.approximateMemberCount = approximateMemberCount;
+    }
+
     @Override
     public String toString() {
         return "InviteBean{" +
                 "code='" + code + '\'' +
                 ", guildId=" + guildId +
                 ", channelId=" + channelId +
+                ", targetUserId=" + targetUserId +
+                ", approximatePresenceCount=" + approximatePresenceCount +
+                ", approximateMemberCount=" + approximateMemberCount +
                 '}';
     }
 }

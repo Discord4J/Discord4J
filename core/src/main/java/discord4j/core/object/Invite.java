@@ -20,12 +20,15 @@ import discord4j.core.DiscordClient;
 import discord4j.core.ServiceMediator;
 import discord4j.core.object.data.InviteBean;
 import discord4j.core.object.entity.Guild;
-import discord4j.core.object.entity.TextChannel;
+import discord4j.core.object.entity.User;
+import discord4j.core.object.entity.channel.CategorizableChannel;
 import discord4j.core.object.util.Snowflake;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
 
 import java.util.Objects;
+import java.util.Optional;
+import java.util.OptionalInt;
 
 /**
  * A Discord invite.
@@ -96,11 +99,55 @@ public class Invite implements DiscordObject {
     /**
      * Requests to retrieve the channel this invite is associated to.
      *
-     * @return A {@link Mono} where, upon successful completion, emits the {@link TextChannel channel} this invite is
+     * @return A {@link Mono} where, upon successful completion, emits the {@link CategorizableChannel channel} this invite is
      * associated to. If an error is received, it is emitted through the {@code Mono}.
      */
-    public final Mono<TextChannel> getChannel() {
-        return getClient().getChannelById(getChannelId()).cast(TextChannel.class);
+    public final Mono<CategorizableChannel> getChannel() {
+        return getClient().getChannelById(getChannelId()).cast(CategorizableChannel.class);
+    }
+
+    /**
+     * Gets the ID of the target user this invite is associated to, if present.
+     *
+     * @return The ID of the target user this invite is associated to, if present.
+     */
+    public final Optional<Snowflake> getTargetUserId() {
+        return Optional.ofNullable(data.getTargetUserId())
+            .map(Snowflake::of);
+    }
+
+    /**
+     * Requests to retrieve the target user this invite is associated to.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits the {@link User target user} this invite is
+     * associated to. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public final Mono<User> getTargetUser() {
+        return getTargetUserId().map(getClient()::getUserById).orElse(Mono.empty());
+    }
+
+    /**
+     * Gets an approximate count of online members (only present when the target user is set) of the guild this invite
+     * is associated to, if present.
+     *
+     * @return An approximate count of online members (only present when the target user is set) of the guild this
+     * invite is associated to, if present.
+     */
+    public final OptionalInt getApproximatePresenceCount() {
+        return Optional.ofNullable(data.getApproximatePresenceCount())
+            .map(OptionalInt::of)
+            .orElse(OptionalInt.empty());
+    }
+
+    /**
+     * Gets approximate count of total members of the guild this invite is associated to, if present.
+     *
+     * @return An approximate count of total members of the guild this invite is associated to, if present.
+     */
+    public final OptionalInt getApproximateMemberCount() {
+        return Optional.ofNullable(data.getApproximateMemberCount())
+            .map(OptionalInt::of)
+            .orElse(OptionalInt.empty());
     }
 
     /**

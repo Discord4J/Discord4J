@@ -74,16 +74,25 @@ public final class ApplicationInfo implements Entity {
     }
 
     /**
-     * Gets the icon URL of the application, if present and in a supported format.
+     * Gets the icon URL of the application, if present.
      *
-     * @param format The format for the URL. Supported format types are {@link Image.Format#PNG PNG},
-     * {@link Image.Format#JPEG JPEG}, and {@link Image.Format#WEB_P WebP}.
-     * @return The icon URL of the application, if present and in a supported format.
+     * @param format The format for the URL.
+     * @return The icon URL of the application, if present.
      */
-    public Optional<String> getIcon(final Image.Format format) {
+    public Optional<String> getIconUrl(final Image.Format format) {
         return Optional.ofNullable(data.getIcon())
-                .filter(ignored -> (format == PNG) || (format == JPEG) || (format == WEB_P))
                 .map(icon -> ImageUtil.getUrl(String.format(ICON_IMAGE_PATH, getId().asString(), icon), format));
+    }
+
+    /**
+     * Gets the icon of the application.
+     *
+     * @param format The format in which to get the icon.
+     * @return A {@link Mono} where, upon successful completion, emits the {@link Image icon} of the application. If an
+     * error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Image> getIcon(final Image.Format format) {
+        return Mono.justOrEmpty(getIconUrl(format)).flatMap(Image::ofUrl);
     }
 
     /**

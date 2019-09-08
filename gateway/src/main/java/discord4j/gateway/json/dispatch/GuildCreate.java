@@ -54,6 +54,8 @@ public class GuildCreate implements Dispatch {
     @JsonProperty("premium_subscription_count")
     @Nullable
     private Integer premiumSubscriptionCount;
+    @JsonProperty("preferred_locale")
+    private String preferredLocale;
     private GuildMemberResponse[] members;
     @JsonProperty("member_count")
     private int memberCount;
@@ -89,6 +91,20 @@ public class GuildCreate implements Dispatch {
     @Nullable
     @UnsignedJson
     private Long widgetChannelId;
+    @JsonProperty("widget_enabled")
+    @Nullable
+    private Boolean widgetEnabled;
+    @JsonProperty("vanity_url_code")
+    @Nullable
+    private String vanityUrlCode;
+    @Nullable
+    private String description;
+    @JsonProperty("max_presences")
+    @Nullable
+    private Integer maxPresences;
+    @JsonProperty("max_members")
+    @Nullable
+    private Integer maxMembers;
 
     public VoiceState[] getVoiceStates() {
         return voiceStates;
@@ -101,6 +117,10 @@ public class GuildCreate implements Dispatch {
     @Nullable
     public Integer getPremiumSubscriptionCount() {
         return premiumSubscriptionCount;
+    }
+
+    public String getPreferredLocale() {
+        return preferredLocale;
     }
 
     public int getVerificationLevel() {
@@ -216,8 +236,33 @@ public class GuildCreate implements Dispatch {
     }
 
     @Nullable
+    public Boolean isWidgetEnabled() {
+        return widgetEnabled;
+    }
+
+    @Nullable
     public Long getWidgetChannelId() {
         return widgetChannelId;
+    }
+
+    @Nullable
+    public String getVanityUrlCode() {
+        return vanityUrlCode;
+    }
+
+    @Nullable
+    public String getDescription() {
+        return description;
+    }
+
+    @Nullable
+    public Integer getMaxPresences() {
+        return maxPresences;
+    }
+
+    @Nullable
+    public Integer getMaxMembers() {
+        return maxMembers;
     }
 
     @Override
@@ -227,6 +272,7 @@ public class GuildCreate implements Dispatch {
                 ", verificationLevel=" + verificationLevel +
                 ", premiumTier=" + premiumTier +
                 ", premiumSubscriptionCount=" + premiumSubscriptionCount +
+                ", preferredLocale=" + preferredLocale +
                 ", unavailable=" + unavailable +
                 ", systemChannelId=" + systemChannelId +
                 ", splash='" + splash + '\'' +
@@ -253,7 +299,12 @@ public class GuildCreate implements Dispatch {
                 ", afkTimeout=" + afkTimeout +
                 ", afkChannelId=" + afkChannelId +
                 ", embedChannelId=" + embedChannelId +
+                ", widgetEnabled=" + widgetEnabled +
                 ", widgetChannelId=" + widgetChannelId +
+                ", vanityUrlCode=" + vanityUrlCode +
+                ", description=" + description +
+                ", maxPresences=" + maxPresences +
+                ", maxMembers=" + maxMembers +
                 '}';
     }
 

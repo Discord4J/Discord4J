@@ -26,12 +26,14 @@ import discord4j.core.object.VoiceState;
 import discord4j.core.object.audit.AuditLogEntry;
 import discord4j.core.object.data.*;
 import discord4j.core.object.data.stored.*;
+import discord4j.core.object.entity.channel.*;
 import discord4j.core.object.presence.Presence;
 import discord4j.core.object.util.Image;
 import discord4j.core.object.util.Snowflake;
 import discord4j.core.spec.*;
 import discord4j.core.util.EntityUtil;
 import discord4j.core.util.ImageUtil;
+import discord4j.core.util.OrderUtil;
 import discord4j.core.util.PaginationUtil;
 import discord4j.rest.json.request.NicknameModifyRequest;
 import discord4j.rest.json.response.AuditLogEntryResponse;
@@ -60,6 +62,9 @@ import static discord4j.core.object.util.Image.Format.*;
  * @see <a href="https://discordapp.com/developers/docs/resources/guild">Guild Resource</a>
  */
 public final class Guild implements Entity {
+
+    /** The default value for the maximum number of presences. **/
+    private static final int DEFAULT_MAX_PRESENCES = 5000;
 
     /** The path for guild icon image URLs. */
     private static final String ICON_IMAGE_PATH = "icons/%s/%s";
@@ -111,15 +116,13 @@ public final class Guild implements Entity {
     }
 
     /**
-     * Gets the icon URL of the guild, if present and in a supported format.
+     * Gets the icon URL of the guild, if present.
      *
-     * @param format The format for the URL. Supported format types are {@link Image.Format#PNG PNG},
-     * {@link Image.Format#JPEG JPEG}, and {@link Image.Format#WEB_P WebP}.
-     * @return The icon URL of the guild, if present and in a supported format.
+     * @param format The format for the URL.
+     * @return The icon URL of the guild, if present.
      */
     public Optional<String> getIconUrl(final Image.Format format) {
         return Optional.ofNullable(data.getIcon())
-                .filter(ignored -> (format == PNG) || (format == JPEG) || (format == WEB_P) || (format == GIF))
                 .map(icon -> ImageUtil.getUrl(String.format(ICON_IMAGE_PATH, getId().asString(), icon), format));
     }
 
@@ -135,15 +138,13 @@ public final class Guild implements Entity {
     }
 
     /**
-     * Gets the splash URL of the guild, if present and in a supported format.
+     * Gets the splash URL of the guild, if present.
      *
-     * @param format The format for the URL. Supported format types are {@link Image.Format#PNG PNG},
-     * {@link Image.Format#JPEG JPEG}, and {@link Image.Format#WEB_P WebP}.
-     * @return The splash URL of the guild, if present and in a supported format.
+     * @param format The format for the URL.
+     * @return The splash URL of the guild, if present.
      */
     public Optional<String> getSplashUrl(final Image.Format format) {
         return Optional.ofNullable(data.getSplash())
-                .filter(ignored -> (format == PNG) || (format == JPEG) || (format == WEB_P))
                 .map(splash -> ImageUtil.getUrl(String.format(SPLASH_IMAGE_PATH, getId().asString(), splash), format));
     }
 
@@ -159,15 +160,13 @@ public final class Guild implements Entity {
     }
 
     /**
-     * Gets the banner URL of the guild, if present and in a supported format.
+     * Gets the banner URL of the guild, if present.
      *
-     * @param format The format for the URL. Supported format types are {@link Image.Format#PNG PNG},
-     * {@link Image.Format#JPEG JPEG}, and {@link Image.Format#WEB_P WebP}.
-     * @return The banner URL of the guild, if present and in a supported format.
+     * @param format The format for the URL.
+     * @return The banner URL of the guild, if present.
      */
     public Optional<String> getBannerUrl(final Image.Format format) {
         return Optional.ofNullable(data.getBanner())
-            .filter(ignored -> (format == PNG) || (format == JPEG) || (format == WEB_P))
             .map(splash -> ImageUtil.getUrl(String.format(BANNER_IMAGE_PATH, getId().asString(), splash), format));
     }
 
@@ -300,6 +299,14 @@ public final class Guild implements Entity {
             .map(OptionalInt::of)
             .orElse(OptionalInt.empty());
     }
+  
+     * Gets the preferred locale of the guild, only set if guild has the "DISCOVERABLE" feature, defaults to en-US.
+     *
+     * @return The preferred locale of the guild, only set if guild has the "DISCOVERABLE" feature, defaults to en-US.
+     */
+    public Locale getPreferredLocale() {
+        return new Locale.Builder().setLanguageTag(data.getPreferredLocale()).build();
+    }
 
     /**
      * Gets the level of verification required for the guild.
@@ -342,16 +349,15 @@ public final class Guild implements Entity {
     /**
      * Requests to retrieve the guild's roles.
      * <p>
-     * The returned {@code Flux} will emit items in order based off their <i>natural</i> position, which is indicated
-     * visually in the Discord client. For roles, the "lowest" role will be emitted first.
+     * The order of items emitted by the returned {@code Flux} is unspecified. Use {@link OrderUtil#orderRoles(Flux)}
+     * to consistently order roles.
      *
      * @return A {@link Flux} that continually emits the guild's {@link Role roles}. If an error is received, it is
      * emitted through the {@code Flux}.
      */
     public Flux<Role> getRoles() {
         return Flux.fromIterable(getRoleIds())
-                .flatMap(id -> getClient().getRoleById(getId(), id))
-                .sort(Comparator.comparing(Role::getRawPosition).thenComparing(Role::getId));
+                .flatMap(id -> getClient().getRoleById(getId(), id));
     }
 
     /**
@@ -435,6 +441,16 @@ public final class Guild implements Entity {
     }
 
     /**
+     * Gets whether this guild widget is enabled.
+     *
+     * @return {@code true} if the guild widget is enabled, {@code false} otherwise.
+     *
+     */
+    public boolean isWidgetEnabled() {
+        return Optional.ofNullable(data.isWidgetEnabled()).orElse(false);
+    }
+
+    /**
      * Gets the channel ID for the server widget, if present.
      *
      * @return The channel ID for the server widget, if present.
@@ -498,6 +514,19 @@ public final class Guild implements Entity {
      */
     public Optional<Boolean> isLarge() {
         return getGatewayData().map(GuildBean::getLarge);
+    }
+
+    /**
+     * Gets whether this guild is unavailable, if present.
+     *
+     * @return If present, {@code true} if the guild is unavailable, {@code false} otherwise.
+     *
+     * @implNote If the underlying {@link discord4j.core.DiscordClientBuilder#getStoreService() store} does not save
+     * {@link GuildBean} instances <b>OR</b> the bot is currently not logged in then the returned {@code Optional} will
+     * always be empty.
+     */
+    public Optional<Boolean> isUnavailable() {
+        return getGatewayData().map(GuildBean::getUnavailable);
     }
 
     /**
@@ -571,13 +600,13 @@ public final class Guild implements Entity {
     }
 
     /**
-     * Requests to retrieve the channels of the guild.
+     * Requests to retrieve the guild's channels.
      * <p>
-     * The returned {@code Flux} will emit items in order based off their <i>natural</i> position, which is indicated
-     * visually in the Discord client. For channels, the "highest" channel will be emitted first.
+     * The order of items emitted by the returned {@code Flux} is unspecified. Use {@link OrderUtil#orderGuildChannels(Flux)}
+     * to consistently order channels.
      *
-     * @return A {@link Flux} that continually emits the {@link GuildChannel channels} of the guild. If an error is
-     * received, it is emitted through the {@code Flux}.
+     * @return A {@link Flux} that continually emits the guild's {@link GuildChannel channels}. If an error is received, it is
+     * emitted through the {@code Flux}.
      */
     public Flux<GuildChannel> getChannels() {
         return Mono.justOrEmpty(getGatewayData())
@@ -593,8 +622,7 @@ public final class Guild implements Entity {
                         .map(ChannelBean::new)
                         .map(bean -> EntityUtil.getChannel(serviceMediator, bean))
                         .cast(GuildChannel.class)
-                        .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex())))
-                .sort(Comparator.comparing(GuildChannel::getRawPosition).thenComparing(GuildChannel::getId));
+                        .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex())));
     }
 
     /**
@@ -625,6 +653,42 @@ public final class Guild implements Entity {
                 .findInRange(LongLongTuple2.of(getId().asLong(), Long.MIN_VALUE),
                              LongLongTuple2.of(getId().asLong(), Long.MAX_VALUE))
                 .map(Presence::new);
+    }
+
+    /**
+     *	Gets the vanity url code of the guild, if present.
+     *
+     * @return The vanity url code of the guild, if present.
+     */
+    public Optional<String> getVanityUrlCode() {
+        return Optional.ofNullable(data.getVanityUrlCode());
+    }
+
+    /**
+     * Gets the description of the guild, if present.
+     *
+     * @return The description of the guild, if present.
+     */
+    public Optional<String> getDescription() {
+        return Optional.ofNullable(data.getDescription());
+    }
+
+    /**
+     * Gets the maximum amount of presences of the guild.
+     *
+     * @return The maximum amount of presences for the guild.
+     */
+    public int getMaxPresences() {
+        return Optional.ofNullable(data.getMaxPresences()).orElse(DEFAULT_MAX_PRESENCES);
+    }
+
+    /**
+     * Gets the maximum amount of members of the guild, if present.
+     *
+     * @return The maximum amount of members for the guild, if present.
+     */
+    public OptionalInt getMaxMembers() {
+        return data.getMaxMembers() == null ? OptionalInt.empty() : OptionalInt.of(data.getMaxMembers());
     }
 
     /**
@@ -697,25 +761,6 @@ public final class Guild implements Entity {
                 .map(ChannelBean::new)
                 .map(bean -> EntityUtil.getChannel(serviceMediator, bean))
                 .cast(NewsChannel.class)
-                .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex()));
-    }
-
-    /**
-     * Requests to create a store channel.
-     *
-     * @param spec A {@link Consumer} that provides a "blank" {@link StoreChannelCreateSpec} to be operated on.
-     * @return A {@link Mono} where, upon successful completion, emits the created {@link StoreChannel}. If an error is
-     * received, it is emitted through the {@code Mono}.
-     */
-    public Mono<StoreChannel> createStoreChannel(final Consumer<? super StoreChannelCreateSpec> spec) {
-        final StoreChannelCreateSpec mutatedSpec = new StoreChannelCreateSpec();
-        spec.accept(mutatedSpec);
-
-        return serviceMediator.getRestClient().getGuildService()
-                .createGuildChannel(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason())
-                .map(ChannelBean::new)
-                .map(bean -> EntityUtil.getChannel(serviceMediator, bean))
-                .cast(StoreChannel.class)
                 .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex()));
     }
 

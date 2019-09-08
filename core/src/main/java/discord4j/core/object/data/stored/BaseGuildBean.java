@@ -48,6 +48,7 @@ public class BaseGuildBean implements Serializable {
     @Nullable
     private Integer premiumSubscriptionCount;
     private int premiumTier;
+    private String preferredLocale;
     private int verificationLevel;
     private int defaultMessageNotifications;
     private int explicitContentFilter;
@@ -58,9 +59,19 @@ public class BaseGuildBean implements Serializable {
     @Nullable
     private Long applicationId;
     @Nullable
+    private Boolean widgetEnabled;
+    @Nullable
     private Long widgetChannelId;
     @Nullable
     private Long systemChannelId;
+    @Nullable
+    private String vanityUrlCode;
+    @Nullable
+    private String description;
+    @Nullable
+    private Integer maxPresences;
+    @Nullable
+    private Integer maxMembers;
 
     public BaseGuildBean(final GuildCreate guildCreate) {
         id = guildCreate.getId();
@@ -76,6 +87,7 @@ public class BaseGuildBean implements Serializable {
         verificationLevel = guildCreate.getVerificationLevel();
         premiumTier = guildCreate.getPremiumTier();
         premiumSubscriptionCount = guildCreate.getPremiumSubscriptionCount();
+        preferredLocale = guildCreate.getPreferredLocale();
 
         defaultMessageNotifications = guildCreate.getDefaultMessageNotifications();
         explicitContentFilter = guildCreate.getExplicitContentFilter();
@@ -91,8 +103,13 @@ public class BaseGuildBean implements Serializable {
         features = guildCreate.getFeatures();
         mfaLevel = guildCreate.getMfaLevel();
         applicationId = guildCreate.getApplicationId();
+        widgetEnabled = guildCreate.isWidgetEnabled();
         widgetChannelId = guildCreate.getWidgetChannelId();
         systemChannelId = guildCreate.getSystemChannelId();
+        vanityUrlCode = guildCreate.getVanityUrlCode();
+        description = guildCreate.getDescription();
+        maxPresences = guildCreate.getMaxPresences();
+        maxMembers = guildCreate.getMaxMembers();
     }
 
     public BaseGuildBean(final GuildUpdate guildUpdate) {
@@ -109,6 +126,7 @@ public class BaseGuildBean implements Serializable {
         verificationLevel = guildUpdate.getVerificationLevel();
         premiumTier = guildUpdate.getPremiumTier();
         premiumSubscriptionCount = guildUpdate.getPremiumSubscriptionCount();
+        preferredLocale = guildUpdate.getPreferredLocale();
         defaultMessageNotifications = guildUpdate.getDefaultMessageNotifications();
         explicitContentFilter = guildUpdate.getExplicitContentFilter();
 
@@ -123,8 +141,13 @@ public class BaseGuildBean implements Serializable {
         features = guildUpdate.getFeatures();
         mfaLevel = guildUpdate.getMfaLevel();
         applicationId = guildUpdate.getApplicationId();
+        widgetEnabled = guildUpdate.isWidgetEnabled();
         widgetChannelId = guildUpdate.getWidgetChannelId();
         systemChannelId = guildUpdate.getSystemChannelId();
+        vanityUrlCode = guildUpdate.getVanityUrlCode();
+        description = guildUpdate.getDescription();
+        maxPresences = guildUpdate.getMaxPresences();
+        maxMembers = guildUpdate.getMaxMembers();
     }
 
     public BaseGuildBean(final GuildResponse response) {
@@ -141,6 +164,7 @@ public class BaseGuildBean implements Serializable {
         verificationLevel = response.getVerificationLevel();
         premiumTier = response.getPremiumTier();
         premiumSubscriptionCount = response.getPremiumSubscriptionCount();
+        preferredLocale = response.getPreferredLocale();
         defaultMessageNotifications = response.getDefaultMessageNotifications();
         explicitContentFilter = response.getExplicitContentFilter();
 
@@ -155,8 +179,13 @@ public class BaseGuildBean implements Serializable {
         features = response.getFeatures();
         mfaLevel = response.getMfaLevel();
         applicationId = response.getApplicationId();
+        widgetEnabled = response.isWidgetEnabled();
         widgetChannelId = response.getWidgetChannelId();
         systemChannelId = response.getSystemChannelId();
+        vanityUrlCode = response.getVanityUrlCode();
+        description = response.getDescription();
+        maxPresences = response.getMaxPresences();
+        maxMembers = response.getMaxMembers();
     }
 
     public BaseGuildBean(final BaseGuildBean toCopy) {
@@ -173,6 +202,7 @@ public class BaseGuildBean implements Serializable {
         verificationLevel = toCopy.getVerificationLevel();
         premiumTier = toCopy.getPremiumTier();
         premiumSubscriptionCount = toCopy.getPremiumSubscriptionCount();
+        preferredLocale = toCopy.getPreferredLocale();
         defaultMessageNotifications = toCopy.getDefaultMessageNotifications();
         explicitContentFilter = toCopy.getExplicitContentFilter();
 
@@ -182,8 +212,13 @@ public class BaseGuildBean implements Serializable {
         features = toCopy.getFeatures();
         mfaLevel = toCopy.getMfaLevel();
         applicationId = toCopy.getApplicationId();
+        widgetEnabled = toCopy.isWidgetEnabled();
         widgetChannelId = toCopy.getWidgetChannelId();
         systemChannelId = toCopy.getSystemChannelId();
+        vanityUrlCode = toCopy.getVanityUrlCode();
+        description = toCopy.getDescription();
+        maxPresences = toCopy.getMaxPresences();
+        maxMembers = toCopy.getMaxMembers();
     }
 
     public BaseGuildBean() {}
@@ -297,6 +332,14 @@ public class BaseGuildBean implements Serializable {
     public void setPremiumSubscriptionCount(@Nullable final Integer premiumSubscriptionCount) {
         this.premiumSubscriptionCount = premiumSubscriptionCount;
     }
+  
+    public String getPreferredLocale() {
+        return preferredLocale;
+    }
+
+    public void setPreferredLocale(final String preferredLocale) {
+        this.preferredLocale = preferredLocale;
+    }
 
     public int getDefaultMessageNotifications() {
         return defaultMessageNotifications;
@@ -356,6 +399,15 @@ public class BaseGuildBean implements Serializable {
     }
 
     @Nullable
+    public Boolean isWidgetEnabled() {
+        return widgetEnabled;
+    }
+
+    public void setWidgetEnabled(@Nullable final Boolean widgetEnabled) {
+        this.widgetEnabled = widgetEnabled;
+    }
+
+    @Nullable
     public Long getWidgetChannelId() {
         return widgetChannelId;
     }
@@ -373,6 +425,42 @@ public class BaseGuildBean implements Serializable {
         this.systemChannelId = systemChannelId;
     }
 
+    @Nullable
+    public String getVanityUrlCode() {
+        return vanityUrlCode;
+    }
+
+    public void setVanityUrlCode(@Nullable final String vanityUrlCode) {
+        this.vanityUrlCode = vanityUrlCode;
+    }
+
+    @Nullable
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(@Nullable final String description) {
+        this.description = description;
+    }
+
+    @Nullable
+    public Integer getMaxPresences() {
+        return maxPresences;
+    }
+
+    public void setMaxPresences(@Nullable final Integer maxPresences) {
+        this.maxPresences = maxPresences;
+    }
+
+    @Nullable
+    public Integer getMaxMembers() {
+        return maxMembers;
+    }
+
+    public void setMaxMembers(@Nullable final Integer maxMembers) {
+        this.maxMembers = maxMembers;
+    }
+
     @Override
     public String toString() {
         return "BaseGuildBean{" +
@@ -388,6 +476,7 @@ public class BaseGuildBean implements Serializable {
                 ", embedChannelId=" + embedChannelId +
                 ", premiumTier=" + premiumTier +
                 ", premiumSubscriptionCount=" + premiumSubscriptionCount +
+                ", preferredLocale=" + preferredLocale +
                 ", verificationLevel=" + verificationLevel +
                 ", defaultMessageNotifications=" + defaultMessageNotifications +
                 ", explicitContentFilter=" + explicitContentFilter +
@@ -396,8 +485,13 @@ public class BaseGuildBean implements Serializable {
                 ", features=" + Arrays.toString(features) +
                 ", mfaLevel=" + mfaLevel +
                 ", applicationId=" + applicationId +
+                ", widgetEnabled=" + widgetEnabled +
                 ", widgetChannelId=" + widgetChannelId +
                 ", systemChannelId=" + systemChannelId +
+                ", vanityUrlCode=" + vanityUrlCode +
+                ", description=" + description +
+                ", maxPresences=" + maxPresences +
+                ", maxMembers=" + maxMembers +
                 '}';
     }
 }

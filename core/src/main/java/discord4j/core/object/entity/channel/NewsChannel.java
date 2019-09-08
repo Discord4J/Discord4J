@@ -14,19 +14,18 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
-package discord4j.core.object.entity;
+package discord4j.core.object.entity.channel;
 
 import discord4j.core.ServiceMediator;
 import discord4j.core.object.data.stored.ChannelBean;
 import discord4j.core.spec.NewsChannelEditSpec;
-import discord4j.core.spec.TextChannelEditSpec;
 import discord4j.core.util.EntityUtil;
 import reactor.core.publisher.Mono;
 
 import java.util.function.Consumer;
 
 /** A Discord news channel. */
-public class NewsChannel extends BaseGuildMessageChannel {
+public final class NewsChannel extends BaseGuildMessageChannel {
 
     /**
      * Constructs an {@code NewsChannel} with an associated ServiceMediator and Discord data.
@@ -41,7 +40,7 @@ public class NewsChannel extends BaseGuildMessageChannel {
     /**
      * Requests to edit this news channel.
      *
-     * @param spec A {@link Consumer} that provides a "blank" {@link TextChannelEditSpec} to be operated on.
+     * @param spec A {@link Consumer} that provides a "blank" {@link NewsChannelEditSpec} to be operated on.
      * @return A {@link Mono} where, upon successful completion, emits the edited {@link NewsChannel}. If an error is
      * received, it is emitted through the {@code Mono}.
      */

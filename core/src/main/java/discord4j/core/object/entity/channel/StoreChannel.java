@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
-package discord4j.core.object.entity;
+package discord4j.core.object.entity.channel;
 
 import discord4j.core.ServiceMediator;
 import discord4j.core.object.data.stored.ChannelBean;
@@ -24,7 +24,8 @@ import reactor.core.publisher.Mono;
 
 import java.util.function.Consumer;
 
-public class StoreChannel extends BaseGuildChannel {
+/** A Discord store channel. */
+public final class StoreChannel extends BaseCategorizableChannel {
 
     /**
      * Constructs an {@code StoreChannel} with an associated ServiceMediator and Discord data.

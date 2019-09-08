@@ -27,7 +27,8 @@ import java.util.Arrays;
 public class GuildUpdate implements Dispatch {
 
     @JsonProperty("widget_enabled")
-    private boolean widgetEnabled;
+    @Nullable
+    private Boolean widgetEnabled;
     @JsonProperty("widget_channel_id")
     @Nullable
     @UnsignedJson
@@ -39,6 +40,8 @@ public class GuildUpdate implements Dispatch {
     @JsonProperty("premium_subscription_count")
     @Nullable
     private Integer premiumSubscriptionCount;
+    @JsonProperty("preferred_locale")
+    private String preferredLocale;
     @JsonProperty("system_channel_id")
     @Nullable
     @UnsignedJson
@@ -81,8 +84,20 @@ public class GuildUpdate implements Dispatch {
     @JsonProperty("guild_id")
     @UnsignedJson
     private long guildId;
+    @JsonProperty("vanity_url_code")
+    @Nullable
+    private String vanityUrlCode;
+    @Nullable
+    private String description;
+    @JsonProperty("max_presences")
+    @Nullable
+    private Integer maxPresences;
+    @JsonProperty("max_members")
+    @Nullable
+    private Integer maxMembers;
 
-    public boolean isWidgetEnabled() {
+    @Nullable
+    public Boolean isWidgetEnabled() {
         return widgetEnabled;
     }
 
@@ -98,6 +113,10 @@ public class GuildUpdate implements Dispatch {
     @Nullable
     public Integer getPremiumSubscriptionCount() {
         return premiumSubscriptionCount;
+    }
+
+    public String getPreferredLocale() {
+        return preferredLocale;
     }
 
     public int getVerificationLevel() {
@@ -188,6 +207,26 @@ public class GuildUpdate implements Dispatch {
         return guildId;
     }
 
+    @Nullable
+    public String getVanityUrlCode() {
+        return vanityUrlCode;
+    }
+
+    @Nullable
+    public String getDescription() {
+        return description;
+    }
+
+    @Nullable
+    public Integer getMaxPresences() {
+        return maxPresences;
+    }
+
+    @Nullable
+    public Integer getMaxMembers() {
+        return maxMembers;
+    }
+
     @Override
     public String toString() {
         return "GuildUpdate{" +
@@ -196,6 +235,7 @@ public class GuildUpdate implements Dispatch {
                 ", verificationLevel=" + verificationLevel +
                 ", premiumTier=" + premiumTier +
                 ", premiumSubscriptionCount=" + premiumSubscriptionCount +
+                ", preferredLocale=" + preferredLocale +
                 ", systemChannelId=" + systemChannelId +
                 ", splash='" + splash + '\'' +
                 ", splash='" + banner + '\'' +
@@ -216,6 +256,10 @@ public class GuildUpdate implements Dispatch {
                 ", afkTimeout=" + afkTimeout +
                 ", afkChannelId=" + afkChannelId +
                 ", guildId=" + guildId +
+                ", vanityUrlCode=" + vanityUrlCode +
+                ", description=" + description +
+                ", maxPresences=" + maxPresences +
+                ", maxMembers=" + maxMembers +
                 '}';
     }
 }

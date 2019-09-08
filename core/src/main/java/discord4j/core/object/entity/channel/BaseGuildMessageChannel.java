@@ -14,15 +14,17 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
-package discord4j.core.object.entity;
+package discord4j.core.object.entity.channel;
 
 import discord4j.core.ServiceMediator;
 import discord4j.core.object.ExtendedInvite;
 import discord4j.core.object.ExtendedPermissionOverwrite;
 import discord4j.core.object.PermissionOverwrite;
-import discord4j.core.object.data.ExtendedInviteBean;
 import discord4j.core.object.data.WebhookBean;
 import discord4j.core.object.data.stored.ChannelBean;
+import discord4j.core.object.entity.Guild;
+import discord4j.core.object.entity.Message;
+import discord4j.core.object.entity.Webhook;
 import discord4j.core.object.util.PermissionSet;
 import discord4j.core.object.util.Snowflake;
 import discord4j.core.spec.InviteCreateSpec;
@@ -50,6 +52,9 @@ class BaseGuildMessageChannel extends BaseChannel implements GuildMessageChannel
     /** Delegates {@link MessageChannel} operations. */
     private final BaseMessageChannel messageChannel;
 
+    /** Delegates {@link CategorizableChannel} operations. */
+    private final BaseCategorizableChannel categorizableChannel;
+
     /**
      * Constructs an {@code BaseGuildMessageChannel} with an associated ServiceMediator and Discord data.
      *
@@ -60,6 +65,7 @@ class BaseGuildMessageChannel extends BaseChannel implements GuildMessageChannel
         super(serviceMediator, data);
         guildChannel = new BaseGuildChannel(serviceMediator, data);
         messageChannel = new BaseMessageChannel(serviceMediator, data);
+        categorizableChannel = new BaseCategorizableChannel(serviceMediator, data);
     }
 
     @Override
@@ -170,33 +176,22 @@ class BaseGuildMessageChannel extends BaseChannel implements GuildMessageChannel
 
     @Override
     public Optional<Snowflake> getCategoryId() {
-        return Optional.ofNullable(getData().getParentId()).map(Snowflake::of);
+        return categorizableChannel.getCategoryId();
     }
 
     @Override
     public Mono<Category> getCategory() {
-        return Mono.justOrEmpty(getCategoryId()).flatMap(getClient()::getChannelById).cast(Category.class);
+        return categorizableChannel.getCategory();
     }
 
     @Override
     public Mono<ExtendedInvite> createInvite(final Consumer<? super InviteCreateSpec> spec) {
-        final InviteCreateSpec mutatedSpec = new InviteCreateSpec();
-        spec.accept(mutatedSpec);
-
-        return getServiceMediator().getRestClient().getChannelService()
-                .createChannelInvite(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason())
-                .map(ExtendedInviteBean::new)
-                .map(bean -> new ExtendedInvite(getServiceMediator(), bean))
-                .subscriberContext(ctx -> ctx.put("shard", getServiceMediator().getClientConfig().getShardIndex()));
+        return categorizableChannel.createInvite(spec);
     }
 
     @Override
     public Flux<ExtendedInvite> getInvites() {
-        return getServiceMediator().getRestClient().getChannelService()
-                .getChannelInvites(getId().asLong())
-                .map(ExtendedInviteBean::new)
-                .map(bean -> new ExtendedInvite(getServiceMediator(), bean))
-                .subscriberContext(ctx -> ctx.put("shard", getServiceMediator().getClientConfig().getShardIndex()));
+        return categorizableChannel.getInvites();
     }
 
     /**
@@ -206,15 +201,6 @@ class BaseGuildMessageChannel extends BaseChannel implements GuildMessageChannel
      */
     public Optional<String> getTopic() {
         return Optional.ofNullable(getData().getTopic());
-    }
-
-    /**
-     * Gets whether this channel is considered NSFW (Not Safe For Work).
-     *
-     * @return {@code true} if this channel is considered NSFW (Not Safe For Work), {@code false} otherwise.
-     */
-    public boolean isNsfw() {
-        return getData().isNsfw();
     }
 
     /**

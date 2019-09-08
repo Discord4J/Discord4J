@@ -14,16 +14,19 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
-package discord4j.core.object.trait;
+package discord4j.core.object.entity.channel;
 
-import discord4j.core.object.entity.Category;
+import discord4j.core.object.ExtendedInvite;
 import discord4j.core.object.util.Snowflake;
+import discord4j.core.spec.InviteCreateSpec;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.Optional;
+import java.util.function.Consumer;
 
-/** A trait for objects that can contain a {@link Category}. */
-public interface Categorizable {
+/** A Discord channel which can be categorized into a {@link Category}. These channels can also have invites. */
+public interface CategorizableChannel extends GuildChannel {
 
     /**
      * Gets the ID of the category for this channel, if present.
@@ -39,4 +42,21 @@ public interface Categorizable {
      * present. If an error is received, it is emitted through the {@code Mono}.
      */
     Mono<Category> getCategory();
+
+    /**
+     * Requests to create an invite.
+     *
+     * @param spec A {@link Consumer} that provides a "blank" {@link InviteCreateSpec} to be operated on.
+     * @return A {@link Mono} where, upon successful completion, emits the created {@link ExtendedInvite}. If an error
+     * is received, it is emitted through the {@code Mono}.
+     */
+    Mono<ExtendedInvite> createInvite(final Consumer<? super InviteCreateSpec> spec);
+
+    /**
+     * Requests to retrieve this channel's invites.
+     *
+     * @return A {@link Flux} that continually emits this channel's {@link ExtendedInvite invites}. If an error is
+     * received, it is emitted through the {@code Flux}.
+     */
+    Flux<ExtendedInvite> getInvites();
 }

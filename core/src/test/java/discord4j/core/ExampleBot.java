@@ -23,6 +23,7 @@ import discord4j.core.event.domain.lifecycle.ReadyEvent;
 import discord4j.core.event.domain.lifecycle.ResumeEvent;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.*;
+import discord4j.core.object.entity.channel.TextChannel;
 import discord4j.core.object.reaction.ReactionEmoji;
 import discord4j.core.object.util.Image;
 import discord4j.core.object.util.Snowflake;
@@ -74,7 +75,7 @@ public class ExampleBot {
                         .onClientResponse(ResponseFunction.emptyIfNotFound())
                         // bad requests (400) while adding reactions will be suppressed
                         .onClientResponse(ResponseFunction.emptyOnErrorStatus(RouteMatcher.route(Routes.REACTION_CREATE), 400))
-                        .requestParallelism(14)
+                        .requestParallelism(12)
                         .build())
                 .build();
 

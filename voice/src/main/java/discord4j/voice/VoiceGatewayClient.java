@@ -33,7 +33,6 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
-import reactor.netty.NettyPipeline;
 import reactor.netty.http.client.HttpClient;
 import reactor.netty.http.websocket.WebsocketInbound;
 import reactor.netty.http.websocket.WebsocketOutbound;
@@ -164,9 +163,8 @@ public class VoiceGatewayClient {
                 .doOnNext(gatewayFSM::onEvent)
                 .then();
 
-        Mono<Void> outboundThen = out.options(NettyPipeline.SendOptions::flushOnEach)
-                .sendObject(sender.flatMap(payload -> Mono.fromCallable(() ->
-                        new TextWebSocketFrame(Unpooled.wrappedBuffer(mapper.writeValueAsBytes(payload))))))
+        Mono<Void> outboundThen = out.sendObject(sender.flatMap(payload -> Mono.fromCallable(() ->
+                new TextWebSocketFrame(Unpooled.wrappedBuffer(mapper.writeValueAsBytes(payload))))))
                 .then();
 
         return Mono.zip(inboundThen, outboundThen).then();

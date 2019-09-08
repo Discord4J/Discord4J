@@ -14,61 +14,64 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
-package discord4j.core.object.entity;
+package discord4j.core.object.entity.channel;
 
 import discord4j.core.ServiceMediator;
 import discord4j.core.object.data.stored.ChannelBean;
-import discord4j.core.spec.TextChannelEditSpec;
+import discord4j.core.object.entity.Guild;
+import discord4j.core.spec.CategoryEditSpec;
 import discord4j.core.util.EntityUtil;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.function.Consumer;
 
-/** A Discord text channel. */
-public final class TextChannel extends BaseGuildMessageChannel {
+/** A Discord category. */
+public final class Category extends BaseGuildChannel {
 
     /**
-     * Constructs an {@code TextChannel} with an associated ServiceMediator and Discord data.
+     * Constructs an {@code Category} with an associated ServiceMediator and Discord data.
      *
      * @param serviceMediator The ServiceMediator associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
      */
-    public TextChannel(ServiceMediator serviceMediator, ChannelBean data) {
+    public Category(final ServiceMediator serviceMediator, final ChannelBean data) {
         super(serviceMediator, data);
     }
 
     /**
-     * Gets the amount of seconds an user has to wait before sending another message (0-120).
-     * <p>
-     * Bots, as well as users with the permission {@code manage_messages} or {@code manage_channel}, are unaffected.
+     * Requests to retrieve the channels residing in this category.
      *
-     * @return The amount of seconds an user has to wait before sending another message (0-120).
+     * @return A {@link Flux} that continually emits the {@link CategorizableChannel channels} residing in this category. If an
+     * error is received, it is emitted through the {@code Flux}.
      */
-    public int getRateLimitPerUser() {
-        return getData().getRateLimitPerUser();
+    public Flux<CategorizableChannel> getChannels() {
+        return getGuild().flatMapMany(Guild::getChannels)
+                .ofType(CategorizableChannel.class)
+                .filter(channel -> channel.getCategoryId().map(getId()::equals).orElse(false));
     }
 
     /**
-     * Requests to edit this text channel.
+     * Requests to edit this category.
      *
-     * @param spec A {@link Consumer} that provides a "blank" {@link TextChannelEditSpec} to be operated on.
-     * @return A {@link Mono} where, upon successful completion, emits the edited {@link TextChannel}. If an error is
+     * @param spec A {@link Consumer} that provides a "blank" {@link CategoryEditSpec} to be operated on.
+     * @return A {@link Mono} where, upon successful completion, emits the edited {@link Category}. If an error is
      * received, it is emitted through the {@code Mono}.
      */
-    public Mono<TextChannel> edit(final Consumer<? super TextChannelEditSpec> spec) {
-        final TextChannelEditSpec mutatedSpec = new TextChannelEditSpec();
+    public Mono<Category> edit(final Consumer<? super CategoryEditSpec> spec) {
+        final CategoryEditSpec mutatedSpec = new CategoryEditSpec();
         spec.accept(mutatedSpec);
 
         return getServiceMediator().getRestClient().getChannelService()
                 .modifyChannel(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason())
                 .map(ChannelBean::new)
                 .map(bean -> EntityUtil.getChannel(getServiceMediator(), bean))
-                .cast(TextChannel.class)
+                .cast(Category.class)
                 .subscriberContext(ctx -> ctx.put("shard", getServiceMediator().getClientConfig().getShardIndex()));
     }
 
     @Override
     public String toString() {
-        return "TextChannel{} " + super.toString();
+        return "Category{} " + super.toString();
     }
 }

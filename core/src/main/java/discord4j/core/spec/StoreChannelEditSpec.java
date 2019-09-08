@@ -18,7 +18,7 @@ package discord4j.core.spec;
 
 import discord4j.common.json.OverwriteEntity;
 import discord4j.core.object.PermissionOverwrite;
-import discord4j.core.object.entity.StoreChannel;
+import discord4j.core.object.entity.channel.StoreChannel;
 import discord4j.rest.json.request.ChannelModifyRequest;
 import reactor.util.annotation.Nullable;
 

@@ -19,6 +19,7 @@ package discord4j.core.util;
 import discord4j.core.ServiceMediator;
 import discord4j.core.object.data.stored.ChannelBean;
 import discord4j.core.object.entity.*;
+import discord4j.core.object.entity.channel.*;
 import discord4j.core.object.reaction.ReactionEmoji;
 import reactor.util.annotation.Nullable;
 

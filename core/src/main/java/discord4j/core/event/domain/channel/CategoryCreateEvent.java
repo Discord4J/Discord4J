@@ -17,7 +17,7 @@
 package discord4j.core.event.domain.channel;
 
 import discord4j.core.DiscordClient;
-import discord4j.core.object.entity.Category;
+import discord4j.core.object.entity.channel.Category;
 
 /**
  * Dispatched when a {@link Category} is created in a guild.
