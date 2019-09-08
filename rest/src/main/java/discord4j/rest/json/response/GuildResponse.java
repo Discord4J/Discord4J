@@ -62,13 +62,16 @@ public class GuildResponse {
     @UnsignedJson
     private Long afkChannelId;
     @JsonProperty("widget_enabled")
-    private boolean widgetEnabled;
+    @Nullable
+    private Boolean widgetEnabled;
     @JsonProperty("verification_level")
     private int verificationLevel;
     @JsonProperty("premium_tier")
     private int premiumTier;
     @JsonProperty("premium_subscription_count")
     private int premiumSubcriptionsCount;
+    @JsonProperty("preferred_locale")
+    private String preferredLocale;
     @JsonProperty("owner_id")
     @UnsignedJson
     private long ownerId;
@@ -77,6 +80,17 @@ public class GuildResponse {
     @UnsignedJson
     private long id;
     private String icon;
+    @JsonProperty("vanity_url_code")
+    @Nullable
+    private String vanityUrlCode;
+    @Nullable
+    private String description;
+    @JsonProperty("max_presences")
+    @Nullable
+    private Integer maxPresences;
+    @JsonProperty("max_members")
+    @Nullable
+    private Integer maxMembers;
 
     public int getMfaLevel() {
         return mfaLevel;
@@ -147,7 +161,8 @@ public class GuildResponse {
         return afkChannelId;
     }
 
-    public boolean isWidgetEnabled() {
+    @Nullable
+    public Boolean isWidgetEnabled() {
         return widgetEnabled;
     }
 
@@ -157,6 +172,10 @@ public class GuildResponse {
 
     public int getPremiumSubcriptionsCount() {
         return premiumSubcriptionsCount;
+    }
+
+    public String getPreferredLocale() {
+        return preferredLocale;
     }
 
     public int getVerificationLevel() {
@@ -179,12 +198,33 @@ public class GuildResponse {
         return icon;
     }
 
+    @Nullable
+    public String getVanityUrlCode() {
+        return vanityUrlCode;
+    }
+
+    @Nullable
+    public String getDescription() {
+        return description;
+    }
+
+    @Nullable
+    public Integer getMaxPresences() {
+        return maxPresences;
+    }
+
+    @Nullable
+    public Integer getMaxMembers() {
+        return maxMembers;
+    }
+
     @Override
     public String toString() {
         return "GuildResponse{" +
                 "mfaLevel=" + mfaLevel +
                 ", premiumTier=" + premiumTier +
                 ", premiumSubcriptionsCount=" + premiumSubcriptionsCount +
+                ", preferredLocale=" + preferredLocale +
                 ", emojis=" + Arrays.toString(emojis) +
                 ", applicationId=" + applicationId +
                 ", name='" + name + '\'' +
@@ -206,6 +246,10 @@ public class GuildResponse {
                 ", embedEnabled=" + embedEnabled +
                 ", id=" + id +
                 ", icon='" + icon + '\'' +
+                ", vanityUrlCode=" + vanityUrlCode +
+                ", description=" + description +
+                ", maxPresences=" + maxPresences +
+                ", maxMembers=" + maxMembers +
                 '}';
     }
 }
