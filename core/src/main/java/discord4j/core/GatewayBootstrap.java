@@ -219,36 +219,37 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                 ForkJoinPoolScheduler.create("discord4j-events"));
     }
 
-    public Mono<Void> connectAndWait(Function<Gateway, Mono<Void>> scopeFunction) {
+    public Mono<Void> connectAwaitDisconnect(Function<Gateway, Mono<Void>> whileConnectedFunction) {
         // login and complete on disconnect
-        return Mono.usingWhen(acquire(),
-                agg -> scopeFunction.apply(agg.getGateway())
-                        .then(Mono.whenDelayError(agg.getConnections().stream()
-                                .map(GatewayConnection::onDisconnect)
-                                .collect(Collectors.toList()))),
-                closeConnections(),
-                closeConnections());
+        return withConnection(gateway -> whileConnectedFunction.apply(gateway).then(gateway.onDisconnect()));
+    }
+
+    public <T> Mono<T> withConnection(Function<Gateway, Mono<T>> whileConnectedFunction) {
+        return Mono.usingWhen(build(), agg -> whileConnectedFunction.apply(agg.getGateway()), closeConnections());
     }
 
     private Function<GatewayAggregate, Publisher<?>> closeConnections() {
         return agg -> Mono.whenDelayError(agg.getConnections().stream()
+                .filter(GatewayConnection::isConnected)
                 .map(GatewayConnection::logout)
                 .collect(Collectors.toList()));
     }
 
-    public Mono<GatewayAggregate> connect(Function<Gateway, Mono<Void>> scopeFunction) {
+    public Mono<Gateway> acquireConnection() {
         // login and complete on connect
-        return acquire().flatMap(agg -> scopeFunction.apply(agg.getGateway())
-                .thenReturn(agg)
-                .doOnError(t -> agg.getGateway().notifyOnClose())
-                .doOnCancel(agg.getGateway()::notifyOnClose));
+        return build().map(GatewayAggregate::getGateway);
     }
 
-    private Mono<GatewayAggregate> acquire() {
-        return acquire(clientFactory == null ? DefaultGatewayClient::new : clientFactory);
+    public <T> Mono<T> acquireConnection(Function<Gateway, Mono<T>> onConnectedFunction) {
+        // login and complete on connect
+        return build().flatMap(agg -> onConnectedFunction.apply(agg.getGateway()));
     }
 
-    private Mono<GatewayAggregate> acquire(Function<O, GatewayClient> clientFactory) {
+    private Mono<GatewayAggregate> build() {
+        return build(clientFactory == null ? DefaultGatewayClient::new : clientFactory);
+    }
+
+    private Mono<GatewayAggregate> build(Function<O, GatewayClient> clientFactory) {
         CoreResources coreResources = client.getCoreResources();
         Mono<Integer> shardCount = initShardCount(coreResources.getRestClient());
         HttpClient httpClient = initHttpClient();
@@ -291,13 +292,15 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                                 identify.setResumeSequence(resume.getSequence());
                             }
                             Disposable.Composite forCleanup = Disposables.composite();
+                            MonoProcessor<Void> shardCloseSignal = MonoProcessor.create();
                             GatewayObserver observer = storeInvalidator
                                     .then((state, opts) -> {
                                         if (state.equals(GatewayObserver.CONNECTED)) {
                                             log.info("Shard {} connected", opts.getShardIndex());
                                             shardCoordinator.publishConnected(
                                                     new ShardInfo(opts.getShardIndex(), opts.getShardCount()));
-                                            GatewayConnection connection = new GatewayConnection(gateway, identify);
+                                            GatewayConnection connection = new GatewayConnection(
+                                                    gateway, identify, shardCloseSignal);
                                             sink.success(connection);
                                         }
                                         boolean canResume = state.equals(GatewayObserver.DISCONNECTED_RESUME);
@@ -307,6 +310,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                                                     new ShardInfo(opts.getShardIndex(), opts.getShardCount()),
                                                     canResume ? new SessionInfo(opts.getResumeSessionId(),
                                                             opts.getResumeSequence()) : null);
+                                            shardCloseSignal.onComplete();
                                             gateway.getGatewayClientMap().remove(opts.getShardIndex());
                                             gateway.getVoiceClientMap().remove(opts.getShardIndex());
                                             if (gateway.getGatewayClientMap().isEmpty()) {

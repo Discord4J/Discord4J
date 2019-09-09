@@ -20,7 +20,6 @@ package discord4j.core;
 import discord4j.gateway.DefaultGatewayClient;
 import discord4j.gateway.GatewayOptions;
 import org.junit.Test;
-import reactor.core.publisher.Mono;
 
 public class CustomOptionsBot {
 
@@ -66,7 +65,7 @@ public class CustomOptionsBot {
     @Test
     public void customBot() {
         CustomOptions custom = CustomOptions.builder().build();
-        GatewayAggregate aggregate = DiscordClient.create(System.getenv("token"))
+        Gateway g = DiscordClient.create(System.getenv("token"))
                 .gateway()
                 .extraOptions(options -> {
                     CustomOptions.Builder builder = custom.mutate();
@@ -82,7 +81,7 @@ public class CustomOptionsBot {
                             .build();
                 })
                 .setGatewayClientFactory(CustomGatewayClient::new)
-                .connect(gateway -> Mono.empty())
+                .acquireConnection()
                 .block();
     }
 }

@@ -17,7 +17,6 @@
 
 package discord4j.core;
 
-import discord4j.core.event.EmitterEventDispatcher;
 import discord4j.core.event.EventDispatcher;
 import discord4j.core.event.domain.Event;
 import discord4j.core.object.Invite;
@@ -65,7 +64,7 @@ import java.util.stream.Collectors;
  *     <li>Access to the base {@link DiscordClient} for direct REST API operations.</li>
  *     <li>Access to {@link CoreResources} like the {@link RestClient} used to perform API requests.</li>
  *     <li>Access to {@link GatewayResources} that configure Gateway operations and coordination among shards.</li>
- *     <li>Access to {@link EmitterEventDispatcher} publishing events from all participating shards.</li>
+ *     <li>Access to {@link EventDispatcher} publishing events from all participating shards.</li>
  *     <li>Access to {@link StateHolder} for low-level manipulation of cached Gateway entities. Modifying the underlying
  *     structure during runtime is not recommended and can lead to incorrect or missing values.</li>
  * </ul>
@@ -163,10 +162,6 @@ public class Gateway {
 
     public Mono<Void> getCloseProcessor() {
         return closeProcessor;
-    }
-
-    void notifyOnClose() {
-        closeProcessor.onComplete();
     }
 
     public StateHolder getStateHolder() {
@@ -486,6 +481,14 @@ public class Gateway {
         return Mono.whenDelayError(gatewayClientMap.values().stream()
                 .map(client -> client.close(false))
                 .collect(Collectors.toList()));
+    }
+
+    public Mono<Void> onDisconnect() {
+        return closeProcessor;
+    }
+
+    public <T extends Event> Flux<T> on(Class<T> eventClass) {
+        return getEventDispatcher().on(eventClass);
     }
 
     public <T extends Event> Mono<Void> on(Class<T> eventClass, Function<T, Mono<Void>> action) {

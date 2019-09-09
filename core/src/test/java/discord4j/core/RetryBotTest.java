@@ -59,7 +59,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.logging.Level;
 import java.util.stream.Collectors;
 
 public class RetryBotTest {
@@ -89,48 +88,34 @@ public class RetryBotTest {
                 .gateway()
                 .setShardCount(shardCount)
                 .setInitialPresence(shard -> Presence.invisible())
-                .connectAndWait(gateway -> Mono.empty())
+                .connectAwaitDisconnect(gateway -> Mono.empty())
                 .block();
     }
 
     @Test
     @Ignore("Example code excluded from CI")
     public void testWithConnect() throws InterruptedException {
-        GatewayAggregate aggregate = DiscordClient.create(token)
+        Gateway g = DiscordClient.create(token)
                 .gateway()
                 .setShardCount(shardCount)
-                .connect(gateway -> Mono.empty())
+                .acquireConnection()
                 .block();
 
-        assert aggregate != null;
+        assert g != null;
 
-        aggregate.getGateway().getEventDispatcher()
+        g.getEventDispatcher()
                 .on(ReadyEvent.class)
                 .doOnNext(e -> log.info("Session {} is READY", e.getShardInfo().getIndex()))
                 .subscribe();
 
-        aggregate.getGateway().getEventDispatcher()
+        g.getEventDispatcher()
                 .on(MessageCreateEvent.class)
                 .filter(event -> event.getMessage().getContent().orElse("").equals("9988"))
                 .doOnNext(event -> log.info("Proceeding to exit!!!"))
                 .flatMap(event -> event.getGateway().logout())
                 .subscribe();
 
-        CountDownLatch latch = new CountDownLatch(1);
-        log.info("Connections: {}", aggregate.getConnections().size());
-        for (GatewayConnection connection : aggregate.getConnections()) {
-            log.info(connection.getIdentifyOptions().toString());
-            connection.getGateway().getCloseProcessor()
-                    .log("discord4j.close.processor." + connection.getIdentifyOptions().getShardIndex(), Level.INFO)
-                    .subscribe(null, t -> {
-                        log.info("Disconnected from {} with error", connection, t);
-                        latch.countDown();
-                    }, () -> {
-                        log.info("Disconnected from {}", connection);
-                        latch.countDown();
-                    });
-        }
-        latch.await();
+        g.onDisconnect().block();
     }
 
     @Test
@@ -139,7 +124,7 @@ public class RetryBotTest {
         DiscordClient.builder(token)
                 .build()
                 .gateway()
-                .connectAndWait(gateway -> Mono.empty())
+                .connectAwaitDisconnect(gateway -> Mono.empty())
                 .block();
     }
 
@@ -167,7 +152,7 @@ public class RetryBotTest {
                         Integer sequence = loaded.getResumeSequence() == null ? 0 : loaded.getResumeSequence();
                         return new SessionInfo(sessionId, sequence);
                     })
-                    .connectAndWait(gateway -> {
+                    .connectAwaitDisconnect(gateway -> {
                         subscribeEventCounter(gateway, counts);
                         startHttpServer(new ServerContext(gateway, counts));
 

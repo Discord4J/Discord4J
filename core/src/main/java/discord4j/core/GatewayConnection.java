@@ -20,20 +20,25 @@ package discord4j.core;
 import discord4j.gateway.GatewayClient;
 import discord4j.gateway.IdentifyOptions;
 import reactor.core.publisher.Mono;
+import reactor.core.publisher.MonoProcessor;
+import reactor.util.annotation.Nullable;
 
 /**
  * A handle to manipulate a gateway connection, represents a connection to an active {@link GatewayClient}.
  */
-public class GatewayConnection {
+class GatewayConnection {
 
     private final Gateway gateway;
     private final IdentifyOptions identifyOptions;
+    private final MonoProcessor<Void> closeSignal;
 
-    public GatewayConnection(Gateway gateway, IdentifyOptions identifyOptions) {
+    public GatewayConnection(Gateway gateway, IdentifyOptions identifyOptions, MonoProcessor<Void> closeSignal) {
         this.gateway = gateway;
         this.identifyOptions = identifyOptions;
+        this.closeSignal = closeSignal;
     }
 
+    @Nullable
     private GatewayClient getGatewayClient() {
         return gateway.getGatewayClientMap().get(identifyOptions.getShardIndex());
     }
@@ -48,7 +53,12 @@ public class GatewayConnection {
      * @return a {@link Mono} deferring completion until this client has completely disconnected from the gateway
      */
     public Mono<Void> logout() {
-        return getGatewayClient().close(false);
+        GatewayClient client = getGatewayClient();
+        if (client != null) {
+            return client.close(false);
+        } else {
+            return Mono.empty();
+        }
     }
 
     /**
@@ -57,7 +67,12 @@ public class GatewayConnection {
      * @return true if the gateway connection is currently established, false otherwise.
      */
     public boolean isConnected() {
-        return getGatewayClient().isConnected();
+        GatewayClient client = getGatewayClient();
+        if (client != null) {
+            return client.isConnected();
+        } else {
+            return false;
+        }
     }
 
     /**
@@ -66,7 +81,12 @@ public class GatewayConnection {
      * @return the time in milliseconds took Discord to respond to the last heartbeat with an ack.
      */
     public long getResponseTime() {
-        return getGatewayClient().getResponseTime();
+        GatewayClient client = getGatewayClient();
+        if (client != null) {
+            return client.getResponseTime();
+        } else {
+            return -1;
+        }
     }
 
     /**
@@ -84,6 +104,6 @@ public class GatewayConnection {
      * @return a {@link Mono} signaling completion upon disconnect
      */
     public Mono<Void> onDisconnect() {
-        return gateway.getCloseProcessor();
+        return closeSignal;
     }
 }

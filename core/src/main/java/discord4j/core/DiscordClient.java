@@ -262,13 +262,17 @@ public final class DiscordClient {
 
     /**
      * Login the client to the gateway.
-     *
-     * @return A {@link Mono} that completes (either successfully or with an error) when the client disconnects from the
-     * gateway without a reconnect attempt. It is recommended to call this from {@code main} and as a final statement
-     * invoke {@link Mono#block()}.
      */
-    public Mono<Void> login() {
-        return gateway().connectAndWait(gateway -> Mono.empty());
+    public Mono<Gateway> login() {
+        return gateway().acquireConnection();
+    }
+
+    public <T> Mono<T> login(Function<Gateway, Mono<T>> onConnectedFunction) {
+        return gateway().acquireConnection(onConnectedFunction);
+    }
+
+    public <T> Mono<T> withGateway(Function<Gateway, Mono<T>> whileConnectedFunction) {
+        return gateway().withConnection(whileConnectedFunction);
     }
 
     public GatewayBootstrap<GatewayOptions> gateway() {

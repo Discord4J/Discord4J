@@ -74,7 +74,7 @@ public class StoreBotTest {
                         .setFallback(new JdkStoreService()))
                 .build())
                 .setInitialPresence(shard -> Presence.invisible())
-                .connectAndWait(gateway -> {
+                .connectAwaitDisconnect(gateway -> {
                     startHttpServer(gateway, counts, jackson.getObjectMapper());
                     subscribeEventCounter(gateway, counts);
                     return Mono.empty();

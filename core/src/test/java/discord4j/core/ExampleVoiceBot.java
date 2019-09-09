@@ -63,7 +63,7 @@ public class ExampleVoiceBot {
         // Bind events and log in
         DiscordClient client = DiscordClient.create(token);
 
-        client.gateway().connectAndWait(gateway -> {
+        client.gateway().connectAwaitDisconnect(gateway -> {
 
             Mono<MessageCreateEvent> leave = gateway.getEventDispatcher().on(MessageCreateEvent.class)
                     .filter(e -> owner == null || e.getMember().map(Member::getId).map(it -> it.asString().equals(owner)).orElse(false))
