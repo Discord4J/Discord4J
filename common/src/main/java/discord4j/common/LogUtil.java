@@ -31,10 +31,10 @@ public class LogUtil {
 
     public static String format(Context context, String msg) {
         String header = Stream.of(
-                context.getOrEmpty(KEY_BUCKET_ID).map(id -> "B: " + id),
-                context.getOrEmpty(KEY_REQUEST_ID).map(id -> "R: " + id),
-                context.getOrEmpty(KEY_GATEWAY_ID).map(id -> "G: " + id),
-                context.getOrEmpty(KEY_SHARD_ID).map(id -> "S: " + id))
+                context.getOrEmpty(KEY_BUCKET_ID).map(id -> "B:" + id),
+                context.getOrEmpty(KEY_REQUEST_ID).map(id -> "R:" + id),
+                context.getOrEmpty(KEY_GATEWAY_ID).map(id -> "G:" + id),
+                context.getOrEmpty(KEY_SHARD_ID).map(id -> "S:" + id))
                 .map(opt -> opt.orElse(""))
                 .filter(str -> !str.isEmpty())
                 .collect(Collectors.joining(", "));

@@ -16,6 +16,7 @@
  */
 package discord4j.rest.request;
 
+import discord4j.common.LogUtil;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -72,7 +73,7 @@ public class PoolGlobalRateLimiter implements GlobalRateLimiter {
     public <T> Flux<T> withLimiter(Publisher<T> stage) {
         return outer.withPoolable(permit -> Mono.subscriberContext()
                 .flatMapMany(ctx -> {
-                    permit.bucket = ctx.getOrDefault("bucket", "default");
+                    permit.bucket = ctx.getOrDefault(LogUtil.KEY_BUCKET_ID, "default");
                     log.debug("[{}] Acquired permit", permit);
                     Duration delay = getRemaining();
                     if (!delay.isNegative() && !delay.isZero()) {

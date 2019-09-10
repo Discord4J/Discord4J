@@ -104,7 +104,7 @@ public class DiscordWebSocketHandler {
         Mono<Void> inboundEvents = in.aggregateFrames()
                 .receiveFrames()
                 .map(WebSocketFrame::content)
-                .compose(decompressor::completeMessages)
+                .transformDeferred(decompressor::completeMessages)
                 .doOnNext(inbound::next)
                 .doOnError(this::error)
                 .then(Mono.<Void>defer(() -> {

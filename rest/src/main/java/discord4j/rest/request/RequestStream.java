@@ -16,6 +16,7 @@
  */
 package discord4j.rest.request;
 
+import discord4j.common.LogUtil;
 import discord4j.rest.http.client.ClientException;
 import discord4j.rest.http.client.ClientRequest;
 import discord4j.rest.http.client.DiscordWebClient;
@@ -29,13 +30,13 @@ import reactor.retry.Retry;
 import reactor.retry.RetryContext;
 import reactor.util.Logger;
 import reactor.util.Loggers;
-import reactor.util.annotation.Nullable;
 
 import java.time.Duration;
 import java.time.Instant;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.logging.Level;
+
+import static discord4j.common.LogUtil.format;
 
 /**
  * A stream of {@link DiscordRequest DiscordRequests}. Any number of items may be {@link #push(RequestCorrelation)}
@@ -52,7 +53,6 @@ class RequestStream<T> {
 
     private final EmitterProcessor<RequestCorrelation<T>> backing = EmitterProcessor.create(false);
     private final BucketKey id;
-    private final Logger log;
     private final DiscordWebClient httpClient;
     private final GlobalRateLimiter globalRateLimiter;
     private final RateLimitStrategy rateLimitStrategy;
@@ -62,7 +62,6 @@ class RequestStream<T> {
     RequestStream(BucketKey id, DiscordWebClient httpClient, GlobalRateLimiter globalRateLimiter,
                   RateLimitStrategy rateLimitStrategy, Scheduler rateLimitScheduler, RouterOptions routerOptions) {
         this.id = id;
-        this.log = Loggers.getLogger("discord4j.rest.traces." + id);
         this.httpClient = httpClient;
         this.globalRateLimiter = globalRateLimiter;
         this.rateLimitStrategy = rateLimitStrategy;
@@ -95,8 +94,9 @@ class RequestStream<T> {
             }
             return new BackoffDelay(Duration.ZERO);
         }).doOnRetry(ctx -> {
-            if (log.isTraceEnabled()) {
-                log.trace("Retry {} due to {} for {}", ctx.iteration(), ctx.exception().toString(), ctx.backoff());
+            if (log.isDebugEnabled()) {
+                log.debug("Retry {} in {} due to {} for {}",
+                        ctx.iteration(), id.toString(), ctx.exception().toString(), ctx.backoff());
             }
         });
     }
@@ -120,8 +120,8 @@ class RequestStream<T> {
                 .exponentialBackoffWithJitter(Duration.ofSeconds(2), Duration.ofSeconds(30))
                 .doOnRetry(ctx -> {
                     if (log.isTraceEnabled()) {
-                        log.trace("Retry {} due to {} for {}", ctx.iteration(), ctx.exception().toString(),
-                                ctx.backoff());
+                        log.trace("Retry {} in bucket {} due to {} for {}",
+                                ctx.iteration(), id.toString(), ctx.exception().toString(), ctx.backoff());
                     }
                 });
     }
@@ -149,17 +149,17 @@ class RequestStream<T> {
 
         public RequestSubscriber(RateLimitStrategy strategy) {
             this.rateLimitHandler = response -> {
-                if (log.isTraceEnabled()) {
+                if (log.isDebugEnabled()) {
                     Instant requestTimestamp =
-                            Instant.ofEpochMilli(response.currentContext().get(DiscordWebClient.REQUEST_TIMESTAMP_KEY));
+                            Instant.ofEpochMilli(response.currentContext().get(DiscordWebClient.KEY_REQUEST_TIMESTAMP));
                     Duration responseTime = Duration.between(requestTimestamp, Instant.now());
-                    log.trace("Read {} in {} with headers: {}", response.status(), responseTime,
-                            response.responseHeaders());
+                    log.debug(format(response.currentContext(), "Read {} in {} with headers: {}"),
+                            response.status(), responseTime, response.responseHeaders());
                 }
                 Duration nextReset = strategy.apply(response);
                 if (!nextReset.isZero()) {
-                    if (log.isTraceEnabled()) {
-                        log.trace("Delaying next request by {}", nextReset);
+                    if (log.isDebugEnabled()) {
+                        log.debug(format(response.currentContext(), "Delaying next request by {}"), nextReset);
                     }
                     sleepTime = nextReset;
                 }
@@ -175,25 +175,25 @@ class RequestStream<T> {
         protected void hookOnNext(RequestCorrelation<T> correlation) {
             DiscordRequest<T> request = correlation.getRequest();
             MonoProcessor<T> callback = correlation.getResponse();
-            String shard = correlation.getShardId();
-            Logger traceLog = getLogger("traces", shard);
-            if (traceLog.isTraceEnabled()) {
-                traceLog.trace("Accepting request: {}", request);
+
+            if (tracesLog.isDebugEnabled()) {
+                tracesLog.debug("Accepting request in bucket {}: {}", id.toString(), request);
             }
-            Logger requestLog = getLogger("request", shard);
-            Logger responseLog = getLogger("response", shard);
+
             Class<T> responseType = request.getRoute().getResponseType();
 
             globalRateLimiter.withLimiter(
                     Mono.fromCallable(() -> new ClientRequest(request))
-                            .log(requestLog, Level.FINEST, false)
+                            .doOnEach(s -> requestLog.debug(format(s.getContext(), "{}"), s))
                             .flatMap(r -> httpClient.exchange(r, request.getBody(), responseType, rateLimitHandler))
-                            .subscriberContext(ctx -> ctx.putNonNull("shard", shard))
+                            .doOnEach(s -> responseLog.debug(format(s.getContext(), "{}"), s))
+                            .subscriberContext(ctx -> ctx
+                                    .putAll(correlation.getContext())
+                                    .put(LogUtil.KEY_BUCKET_ID, id.toString()))
                             .retryWhen(rateLimitRetryFactory())
                             .transform(getResponseTransformers(request))
                             .retryWhen(serverErrorRetryFactory())
-                            .log(responseLog, Level.FINEST, false)
-                            .doFinally(signal -> next(signal, traceLog)))
+                            .doFinally(this::next))
                     .materialize()
                     .subscribe(signal -> {
                         if (signal.isOnSubscribe()) {
@@ -216,23 +216,23 @@ class RequestStream<T> {
                     .orElse(mono -> mono);
         }
 
-        private void next(SignalType signal, Logger logger) {
+        private void next(SignalType signal) {
             Mono.delay(sleepTime, rateLimitScheduler).subscribe(l -> {
-                if (logger.isTraceEnabled()) {
-                    logger.trace("Ready to consume next request after {}", signal);
+                if (tracesLog.isDebugEnabled()) {
+                    tracesLog.debug("Ready to consume next request in bucket {} after {}", id.toString(), signal);
                 }
                 sleepTime = Duration.ZERO;
                 request(1);
-            }, t -> logger.error("Error while scheduling next request", t));
-        }
-
-        private Logger getLogger(String path, @Nullable String shard) {
-            String shardPath = shard == null ? "" : "." + shard;
-            return Loggers.getLogger("discord4j.rest." + path + "." + id + shardPath);
+            }, t -> tracesLog.error("Error while scheduling next request in bucket {}", id.toString(), t));
         }
     }
 
     @FunctionalInterface
     interface RateLimitStrategy extends Function<HttpClientResponse, Duration> {
     }
+
+    private static final Logger log = Loggers.getLogger("discord4j.rest");
+    private static final Logger tracesLog = Loggers.getLogger("discord4j.rest.traces");
+    private static final Logger requestLog = Loggers.getLogger("discord4j.rest.request");
+    private static final Logger responseLog = Loggers.getLogger("discord4j.rest.response");
 }

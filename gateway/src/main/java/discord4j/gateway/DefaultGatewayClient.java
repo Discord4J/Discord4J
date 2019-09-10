@@ -54,8 +54,8 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.logging.Level;
 
+import static discord4j.common.LogUtil.format;
 import static io.netty.handler.codec.http.HttpHeaderNames.USER_AGENT;
 
 /**
@@ -75,7 +75,6 @@ import static io.netty.handler.codec.http.HttpHeaderNames.USER_AGENT;
 public class DefaultGatewayClient implements GatewayClient {
 
     // basic properties
-    private final Logger log;
     private final HttpClient httpClient;
     private final PayloadReader payloadReader;
     private final PayloadWriter payloadWriter;
@@ -132,136 +131,132 @@ public class DefaultGatewayClient implements GatewayClient {
         this.dispatchSink = dispatch.sink(FluxSink.OverflowStrategy.BUFFER);
         this.outboundSink = outbound.sink(FluxSink.OverflowStrategy.ERROR);
         this.heartbeatSink = heartbeats.sink(FluxSink.OverflowStrategy.ERROR);
-        this.log = shardLogger(".client");
     }
 
     @Override
     public Mono<Void> execute(String gatewayUrl) {
-        return Mono.defer(() -> {
-            disconnectNotifier = MonoProcessor.create();
-            closeTrigger = MonoProcessor.create();
-            lastAck.set(0);
-            lastSent.set(0);
+        return Mono.defer(Mono::subscriberContext)
+                .flatMap(context -> {
+                    disconnectNotifier = MonoProcessor.create();
+                    closeTrigger = MonoProcessor.create();
+                    lastAck.set(0);
+                    lastSent.set(0);
 
-            Logger senderLog = shardLogger(".sender");
-            Logger receiverLog = shardLogger(".receiver");
+                    MonoProcessor<Void> ping = MonoProcessor.create();
 
-            MonoProcessor<Void> ping = MonoProcessor.create();
+                    // Setup the sending logic from multiple sources into one merged Flux
+                    Flux<ByteBuf> identifyFlux = outbound.filter(payload -> Opcode.IDENTIFY.equals(payload.getOp()))
+                            .delayUntil(payload -> ping)
+                            .flatMap(payload -> Flux.from(payloadWriter.write(payload)))
+                            .map(buf -> Tuples.of((GatewayClient) this, buf))
+                            .transform(identifyLimiter);
+                    Flux<ByteBuf> payloadFlux = outbound.filter(payload -> !Opcode.IDENTIFY.equals(payload.getOp()))
+                            .doOnEach(s -> outboundLog.debug(format(context, s.toString())))
+                            .flatMap(payload -> Flux.from(payloadWriter.write(payload)))
+                            .transform(buf -> Flux.merge(buf, sender))
+                            .map(buf -> Tuples.of((GatewayClient) this, buf))
+                            .transform(new PoolingTransformer(outboundLimiterCapacity(), Duration.ofSeconds(60)));
+                    Flux<ByteBuf> heartbeatFlux =
+                            heartbeats.flatMap(payload -> Flux.from(payloadWriter.write(payload)));
+                    Flux<ByteBuf> outFlux = Flux.merge(heartbeatFlux, identifyFlux, payloadFlux)
+                            .doOnNext(buf -> trace(senderLog, buf));
 
-            // Setup the sending logic from multiple sources into one merged Flux
-            Flux<ByteBuf> identifyFlux = outbound.filter(payload -> Opcode.IDENTIFY.equals(payload.getOp()))
-                    .delayUntil(payload -> ping)
-                    .flatMap(payload -> Flux.from(payloadWriter.write(payload)))
-                    .map(buf -> Tuples.of((GatewayClient) this, buf))
-                    .transform(identifyLimiter);
-            Flux<ByteBuf> payloadFlux = outbound.filter(payload -> !Opcode.IDENTIFY.equals(payload.getOp()))
-                    .log(shardLogger(".outbound"), Level.FINE, false)
-                    .flatMap(payload -> Flux.from(payloadWriter.write(payload)))
-                    .transform(buf -> Flux.merge(buf, sender))
-                    .map(buf -> Tuples.of((GatewayClient) this, buf))
-                    .transform(new PoolingTransformer(outboundLimiterCapacity(), Duration.ofSeconds(60)));
-            Flux<ByteBuf> heartbeatFlux = heartbeats.flatMap(payload -> Flux.from(payloadWriter.write(payload)));
-            Flux<ByteBuf> outFlux = Flux.merge(heartbeatFlux, identifyFlux, payloadFlux)
-                    .doOnNext(buf -> trace(senderLog, buf));
+                    int shard = identifyOptions.getShardIndex();
+                    DiscordWebSocketHandler handler = new DiscordWebSocketHandler(receiverSink, outFlux, closeTrigger
+                            , shard);
 
-            int shard = identifyOptions.getShardIndex();
-            DiscordWebSocketHandler handler = new DiscordWebSocketHandler(receiverSink, outFlux, closeTrigger, shard);
+                    Integer resumeSequence = identifyOptions.getResumeSequence();
+                    if (resumeSequence != null && resumeSequence > 0) {
+                        this.sequence.set(identifyOptions.getResumeSequence());
+                        this.sessionId.set(identifyOptions.getResumeSessionId());
+                    } else {
+                        resumable.set(false);
+                    }
 
-            Integer resumeSequence = identifyOptions.getResumeSequence();
-            if (resumeSequence != null && resumeSequence > 0) {
-                this.sequence.set(identifyOptions.getResumeSequence());
-                this.sessionId.set(identifyOptions.getResumeSessionId());
-            } else {
-                resumable.set(false);
-            }
+                    Mono<Void> readyHandler = dispatch.filter(DefaultGatewayClient::isReadyOrResume)
+                            .flatMap(event -> {
+                                connected.compareAndSet(false, true);
+                                ConnectionObserver.State state;
+                                if (retryContext.getResetCount() == 0) {
+                                    log.info(format(context, "Connected to Gateway"));
+                                    dispatchSink.next(GatewayStateChange.connected());
+                                    state = GatewayObserver.CONNECTED;
+                                } else {
+                                    log.info(format(context, "Reconnected to Gateway"));
+                                    dispatchSink.next(GatewayStateChange.retrySucceeded(retryContext.getAttempts()));
+                                    state = GatewayObserver.RETRY_SUCCEEDED;
+                                }
+                                retryContext.reset();
+                                identifyOptions.setResumeSessionId(sessionId.get());
+                                resumable.set(true);
+                                notifyObserver(state, identifyOptions);
+                                return Mono.just(event);
+                            })
+                            .then();
 
-            Mono<Void> readyHandler = dispatch.filter(DefaultGatewayClient::isReadyOrResume)
-                    .flatMap(event -> {
-                        connected.compareAndSet(false, true);
-                        ConnectionObserver.State state;
-                        if (retryContext.getResetCount() == 0) {
-                            log.info("Connected to Gateway");
-                            dispatchSink.next(GatewayStateChange.connected());
-                            state = GatewayObserver.CONNECTED;
-                        } else {
-                            log.info("Reconnected to Gateway");
-                            dispatchSink.next(GatewayStateChange.retrySucceeded(retryContext.getAttempts()));
-                            state = GatewayObserver.RETRY_SUCCEEDED;
-                        }
-                        retryContext.reset();
-                        identifyOptions.setResumeSessionId(sessionId.get());
-                        resumable.set(true);
-                        notifyObserver(state, identifyOptions);
-                        return Mono.just(event);
-                    })
-                    .then()
-                    .log(shardLogger(".zip.ready"), Level.FINEST, false);
+                    // Subscribe the receiver to process and transform the inbound payloads into Dispatch events
+                    Flux<GatewayPayload<?>> receiverFlux = receiver.doOnNext(buf -> trace(receiverLog, buf))
+                            .flatMap(payloadReader::read);
 
-            // Subscribe the receiver to process and transform the inbound payloads into Dispatch events
-            Flux<GatewayPayload<?>> receiverFlux = receiver.doOnNext(buf -> trace(receiverLog, buf))
-                    .flatMap(payloadReader::read);
+                    Mono<Void> receiverFuture =
+                            receiverFlux.filter(payload -> !Opcode.HEARTBEAT_ACK.equals(payload.getOp()))
+                                    .doOnEach(s -> inboundLog.debug(format(context, s.toString())))
+                                    .map(this::updateSequence)
+                                    .map(payload -> new PayloadContext<>(payload, handler, this, context))
+                                    .doOnNext(PayloadHandlers::handle)
+                                    .then();
 
-            Mono<Void> receiverFuture = receiverFlux.filter(payload -> !Opcode.HEARTBEAT_ACK.equals(payload.getOp()))
-                    .log(shardLogger(".inbound"), Level.FINE, false)
-                    .map(this::updateSequence)
-                    .map(payload -> new PayloadContext<>(payload, handler, this))
-                    .doOnNext(PayloadHandlers::handle)
-                    .then()
-                    .log(shardLogger(".zip.receiver"), Level.FINEST, false);
+                    Mono<Void> ackFuture = receiverFlux.filter(payload -> Opcode.HEARTBEAT_ACK.equals(payload.getOp()))
+                            .map(payload -> new PayloadContext<>(payload, handler, this, context))
+                            .publishOn(Schedulers.elastic())
+                            .doOnNext(PayloadHandlers::handle)
+                            .doOnNext(ctx -> ping.onComplete())
+                            .then();
 
-            Mono<Void> ackFuture = receiverFlux.filter(payload -> Opcode.HEARTBEAT_ACK.equals(payload.getOp()))
-                    .map(payload -> new PayloadContext<>(payload, handler, this))
-                    .publishOn(Schedulers.elastic())
-                    .doOnNext(PayloadHandlers::handle)
-                    .doOnNext(ctx -> ping.onComplete())
-                    .then()
-                    .log(shardLogger(".zip.ack"), Level.FINEST, false);
+                    // Subscribe the handler's outbound exchange with our outgoing signals
+                    // routing completion signals to close the gateway
+                    Mono<Void> senderFuture = outbound.doOnComplete(handler::close)
+                            .doOnNext(payload -> {
+                                if (Opcode.RECONNECT.equals(payload.getOp())) {
+                                    handler.error(new RuntimeException("Reconnecting due to user action"));
+                                }
+                            })
+                            .then();
 
-            // Subscribe the handler's outbound exchange with our outgoing signals
-            // routing completion signals to close the gateway
-            Mono<Void> senderFuture = outbound.doOnComplete(handler::close)
-                    .doOnNext(payload -> {
-                        if (Opcode.RECONNECT.equals(payload.getOp())) {
-                            handler.error(new RuntimeException("Reconnecting due to user action"));
-                        }
-                    })
-                    .then()
-                    .log(shardLogger(".zip.sender"), Level.FINEST, false);
+                    // Create the heartbeat loop, and subscribe it using the sender sink
+                    Mono<Void> heartbeatHandler = heartbeat.ticks()
+                            .flatMap(t -> {
+                                long now = System.nanoTime();
+                                lastAck.compareAndSet(0, now);
+                                long delay = now - lastAck.get();
+                                if (lastSent.get() - lastAck.get() > 0) {
+                                    log.warn(format(context, "Missing heartbeat ACK for {}"), Duration.ofNanos(delay));
+                                    handler.error(new RuntimeException("Reconnecting due to zombie or failed " +
+                                            "connection"));
+                                    return Mono.empty();
+                                } else {
+                                    log.debug(format(context, "Sending heartbeat {} after last ACK"),
+                                            Duration.ofNanos(delay));
+                                    lastSent.set(now);
+                                    return Mono.just(GatewayPayload.heartbeat(new Heartbeat(sequence.get())));
+                                }
+                            })
+                            .doOnNext(heartbeatSink::next)
+                            .then();
 
-            // Create the heartbeat loop, and subscribe it using the sender sink
-            Mono<Void> heartbeatHandler = heartbeat.ticks()
-                    .flatMap(t -> {
-                        long now = System.nanoTime();
-                        lastAck.compareAndSet(0, now);
-                        long delay = now - lastAck.get();
-                        if (lastSent.get() - lastAck.get() > 0) {
-                            log.warn("Missing heartbeat ACK for {}", Duration.ofNanos(delay));
-                            handler.error(new RuntimeException("Reconnecting due to zombie or failed connection"));
-                            return Mono.empty();
-                        } else {
-                            log.debug("Sending heartbeat {} after last ACK", Duration.ofNanos(delay));
-                            lastSent.set(now);
-                            return Mono.just(GatewayPayload.heartbeat(new Heartbeat(sequence.get())));
-                        }
-                    })
-                    .doOnNext(heartbeatSink::next)
-                    .then()
-                    .log(shardLogger(".zip.heartbeat"), Level.FINEST, false);
+                    Mono<Void> httpFuture = httpClient
+                            .headers(headers -> headers.add(USER_AGENT, initUserAgent()))
+                            .observe(getObserver())
+                            .websocket(Integer.MAX_VALUE)
+                            .uri(gatewayUrl)
+                            .handle(handler::handle)
+                            .doOnTerminate(heartbeat::stop)
+                            .then();
 
-            Mono<Void> httpFuture = httpClient
-                    .headers(headers -> headers.add(USER_AGENT, initUserAgent()))
-                    .observe(getObserver())
-                    .websocket(Integer.MAX_VALUE)
-                    .uri(gatewayUrl)
-                    .handle(handler::handle)
-                    .doOnTerminate(heartbeat::stop)
-                    .then()
-                    .log(shardLogger(".zip.http"), Level.FINEST, false);
-
-            return Mono.zip(httpFuture, readyHandler, receiverFuture, ackFuture, senderFuture, heartbeatHandler)
-                    .doOnError(logReconnectReason())
-                    .then();
-        })
+                    return Mono.zip(httpFuture, readyHandler, receiverFuture, ackFuture, senderFuture, heartbeatHandler)
+                            .doOnError(logReconnectReason())
+                            .then();
+                })
                 .retryWhen(retryFactory())
                 .doOnCancel(() -> closeTrigger.onNext(CloseStatus.NORMAL_CLOSE))
                 .then(Mono.defer(() -> disconnectNotifier));
@@ -279,10 +274,6 @@ public class DefaultGatewayClient implements GatewayClient {
             log.trace(buf.toString(StandardCharsets.UTF_8)
                     .replaceAll("(\"token\": ?\")([A-Za-z0-9.-]*)(\")", "$1hunter2$3"));
         }
-    }
-
-    private Logger shardLogger(String gateway) {
-        return Loggers.getLogger("discord4j.gateway" + gateway + "." + identifyOptions.getShardIndex());
     }
 
     private static boolean isReadyOrResume(Dispatch d) {
@@ -396,8 +387,7 @@ public class DefaultGatewayClient implements GatewayClient {
             } else {
                 closeTrigger.onNext(CloseStatus.NORMAL_CLOSE);
             }
-            return disconnectNotifier
-                    .log(shardLogger(".disconnect"), Level.FINE, false);
+            return disconnectNotifier;
         });
     }
 
@@ -540,11 +530,17 @@ public class DefaultGatewayClient implements GatewayClient {
         if (capacityValue != null) {
             try {
                 int capacity = Integer.parseInt(capacityValue);
-                shardLogger("").info("Overriding default outbound limiter capacity: {}", capacity);
+                log.info("Overriding default outbound limiter capacity: {}", capacity);
             } catch (NumberFormatException e) {
-                shardLogger("").warn("Invalid custom outbound limiter capacity: {}", capacityValue);
+                log.warn("Invalid custom outbound limiter capacity: {}", capacityValue);
             }
         }
         return 115;
     }
+
+    private static final Logger log = Loggers.getLogger("discord4j.gateway");
+    private static final Logger senderLog = Loggers.getLogger("discord4j.gateway.sender");
+    private static final Logger receiverLog = Loggers.getLogger("discord4j.gateway.receiver");
+    private static final Logger outboundLog = Loggers.getLogger("discord4j.gateway.outbound");
+    private static final Logger inboundLog = Loggers.getLogger("discord4j.gateway.inbound");
 }

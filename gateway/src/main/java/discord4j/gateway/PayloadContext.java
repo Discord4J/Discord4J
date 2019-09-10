@@ -19,6 +19,7 @@ package discord4j.gateway;
 import discord4j.gateway.json.GatewayPayload;
 import discord4j.gateway.json.PayloadData;
 import reactor.util.annotation.Nullable;
+import reactor.util.context.Context;
 
 /**
  * Represents gateway payload data enriched with context for processing through a
@@ -31,11 +32,14 @@ public class PayloadContext<T extends PayloadData> {
     private final GatewayPayload<T> payload;
     private final DiscordWebSocketHandler handler;
     private final DefaultGatewayClient client;
+    private final Context context;
 
-    public PayloadContext(GatewayPayload<T> payload, DiscordWebSocketHandler handler, DefaultGatewayClient client) {
+    public PayloadContext(GatewayPayload<T> payload, DiscordWebSocketHandler handler, DefaultGatewayClient client,
+                          Context context) {
         this.payload = payload;
         this.handler = handler;
         this.client = client;
+        this.context = context;
     }
 
     public GatewayPayload<T> getPayload() {
@@ -53,5 +57,9 @@ public class PayloadContext<T extends PayloadData> {
 
     public DefaultGatewayClient getClient() {
         return client;
+    }
+
+    public Context getContext() {
+        return context;
     }
 }

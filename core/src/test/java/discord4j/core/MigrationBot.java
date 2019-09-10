@@ -18,11 +18,14 @@
 package discord4j.core;
 
 import discord4j.core.event.domain.message.MessageCreateEvent;
+import discord4j.core.object.entity.User;
+import discord4j.core.object.util.Snowflake;
 import org.junit.Ignore;
 import org.junit.Test;
 import reactor.core.publisher.Mono;
 import reactor.util.Logger;
 import reactor.util.Loggers;
+import reactor.util.function.Tuple2;
 
 public class MigrationBot {
 
@@ -51,13 +54,20 @@ public class MigrationBot {
         DiscordClient client = DiscordClient.create(token);
         // if our inner pipeline is finite, we can potentially use it to terminate the bot
         // and extract the result outside
-        MessageCreateEvent last = client.withGateway(
-                gateway -> gateway.on(MessageCreateEvent.class)
-                        .filter(event -> event.getMessage().getContent().orElse("").equals("hello"))
-                        .next())
+        MessageCreateEvent lastEvent = client.withGateway(
+                gateway -> {
+                    Mono<MessageCreateEvent> last = gateway.on(MessageCreateEvent.class)
+                            .filter(event -> event.getMessage().getContent().orElse("").equals("last"))
+                            .next();
+
+                    Mono<User> fetchUser = gateway.getUserById(Snowflake.of(134127815531560960L))
+                            .doOnNext(user -> log.info('[' + Integer.toHexString(gateway.hashCode()) + "] {}", user));
+
+                    return Mono.zip(fetchUser, last).map(Tuple2::getT2);
+                })
                 .block();
-        assert last != null;
-        log.info("This message stopped me: {}", last.getMessage());
+        assert lastEvent != null;
+        log.info("This message stopped me: {}", lastEvent.getMessage());
     }
 
     @Test

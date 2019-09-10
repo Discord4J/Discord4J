@@ -16,6 +16,7 @@
  */
 package discord4j.rest.request;
 
+import discord4j.common.LogUtil;
 import discord4j.rest.route.Route;
 import discord4j.rest.util.RouteUtils;
 import reactor.core.publisher.Mono;
@@ -183,7 +184,8 @@ public class DiscordRequest<T> {
      * @return the result of this request
      */
     public Mono<T> exchange(Router router) {
-        return router.exchange(this);
+        return router.exchange(this)
+                .subscriberContext(ctx -> ctx.put(LogUtil.KEY_REQUEST_ID, Integer.toHexString(hashCode())));
     }
 
     @Override
