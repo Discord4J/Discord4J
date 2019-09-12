@@ -314,8 +314,6 @@ public class GuildCreate implements Dispatch {
         private boolean suppress;
         @JsonProperty("session_id")
         private String sessionId;
-        @JsonProperty("self_video")
-        private boolean selfVideo;
         @JsonProperty("self_mute")
         private boolean selfMute;
         @JsonProperty("self_deaf")
@@ -338,8 +336,6 @@ public class GuildCreate implements Dispatch {
             return sessionId;
         }
 
-        public boolean isSelfVideo() {
-            return selfVideo;
         }
 
         public boolean isSelfMute() {
@@ -368,7 +364,6 @@ public class GuildCreate implements Dispatch {
                     "userId=" + userId +
                     ", suppress=" + suppress +
                     ", sessionId='" + sessionId + '\'' +
-                    ", selfVideo=" + selfVideo +
                     ", selfMute=" + selfMute +
                     ", selfDeaf=" + selfDeaf +
                     ", mute=" + mute +
