@@ -40,6 +40,9 @@ public class VoiceStateResponse {
     private boolean selfDeaf;
     @JsonProperty("self_mute")
     private boolean selfMute;
+    @JsonProperty("self_stream")
+    @Nullable
+    private Boolean selfStream;
     private boolean suppress;
 
     public long getGuildId() {
@@ -75,6 +78,11 @@ public class VoiceStateResponse {
         return selfMute;
     }
 
+    @Nullable
+    public Boolean isSelfStream() {
+        return selfStream;
+    }
+
     public boolean isSuppress() {
         return suppress;
     }
@@ -90,6 +98,7 @@ public class VoiceStateResponse {
                 ", mute=" + mute +
                 ", selfDeaf=" + selfDeaf +
                 ", selfMute=" + selfMute +
+                ", selfStream=" + selfStream +
                 ", suppress=" + suppress +
                 '}';
     }

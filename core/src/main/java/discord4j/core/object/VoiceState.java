@@ -160,6 +160,15 @@ public final class VoiceState implements DiscordObject {
     }
 
     /**
+     * Gets whether this user is streaming using "Go Live".
+     *
+     * @return {@code true} if this user is streaming using "Go Live", {@code false} otherwise.
+     */
+    public boolean isSelfStreaming() {
+        return Optional.ofNullable(data.isSelfStream()).orElse(false);
+    }
+
+    /**
      * Gets whether this user is muted by the current user.
      *
      * @return {@code true} if this user is muted by the current user, {@code false} otherwise.

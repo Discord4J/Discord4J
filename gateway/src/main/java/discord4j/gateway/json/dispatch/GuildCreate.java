@@ -323,6 +323,9 @@ public class GuildCreate implements Dispatch {
         @JsonProperty("channel_id")
         @UnsignedJson
         private long channelId;
+        @JsonProperty("self_stream")
+        @Nullable
+        private Boolean selfStream;
 
         public long getUserId() {
             return userId;
@@ -352,6 +355,9 @@ public class GuildCreate implements Dispatch {
 
         public boolean isDeaf() {
             return deaf;
+        @Nullable
+        public Boolean isSelfStream() {
+            return selfStream;
         }
 
         public long getChannelId() {
@@ -369,6 +375,7 @@ public class GuildCreate implements Dispatch {
                     ", mute=" + mute +
                     ", deaf=" + deaf +
                     ", channelId=" + channelId +
+                    ", selfStream=" + selfStream +
                     '}';
         }
     }
