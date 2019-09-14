@@ -55,6 +55,10 @@ public class ShardInfo {
         return Objects.hash(index, count);
     }
 
+    public String format() {
+        return String.valueOf(index + ',' + count);
+    }
+
     @Override
     public String toString() {
         return "ShardInfo{" +

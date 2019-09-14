@@ -491,11 +491,7 @@ public class Gateway {
         return getEventDispatcher().on(eventClass);
     }
 
-    public <T extends Event> Mono<Void> on(Class<T> eventClass, Function<T, Mono<Void>> action) {
-        return getEventDispatcher().on(eventClass)
-                .flatMap(event -> action.apply(event)
-                        .doOnError(t -> log.warn("Error while handling event: {}", event, t))
-                        .onErrorResume(t -> Mono.empty()))
-                .then();
+    public <T extends Event> Flux<T> on(Class<T> eventClass, Function<T, Mono<Void>> action) {
+        return getEventDispatcher().on(eventClass, action);
     }
 }

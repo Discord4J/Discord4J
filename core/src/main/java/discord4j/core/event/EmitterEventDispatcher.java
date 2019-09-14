@@ -20,9 +20,15 @@ package discord4j.core.event;
 import discord4j.core.event.domain.Event;
 import reactor.core.publisher.EmitterProcessor;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.FluxSink;
+import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Scheduler;
+import reactor.scheduler.forkjoin.ForkJoinPoolScheduler;
 import reactor.util.Logger;
 import reactor.util.Loggers;
+import reactor.util.concurrent.Queues;
+
+import java.util.function.Function;
 
 /**
  * Distributes events to subscribers. {@link Event} instances can be published over this class and dispatched to all
@@ -48,39 +54,62 @@ import reactor.util.Loggers;
 public class EmitterEventDispatcher implements EventDispatcher {
 
     private final EmitterProcessor<Event> processor;
+    private final FluxSink<Event> sink;
     private final Scheduler scheduler;
+
+    public static EmitterEventDispatcher create() {
+        return withStrategy(FluxSink.OverflowStrategy.DROP);
+    }
+
+    public static EmitterEventDispatcher buffering() {
+        return withStrategy(FluxSink.OverflowStrategy.BUFFER);
+    }
+
+    public static EmitterEventDispatcher withStrategy(FluxSink.OverflowStrategy strategy) {
+        return new EmitterEventDispatcher(
+                EmitterProcessor.create(Queues.SMALL_BUFFER_SIZE, false),
+                strategy,
+                ForkJoinPoolScheduler.create("discord4j-events"));
+    }
 
     /**
      * Creates a new event dispatcher using the given processor and thread model.
      *
      * @param processor an {@link EmitterProcessor} of {@link Event}, used to bridge gateway events to the dispatcher
      * subscribers
+     * @param strategy an overflow strategy, see {@link FluxSink.OverflowStrategy} for the available strategies
      * @param scheduler a {@link Scheduler} to ensure a certain thread model on each published signal
      */
-    public EmitterEventDispatcher(EmitterProcessor<Event> processor, Scheduler scheduler) {
+    public EmitterEventDispatcher(EmitterProcessor<Event> processor, FluxSink.OverflowStrategy strategy,
+                                  Scheduler scheduler) {
         this.processor = processor;
+        this.sink = processor.sink(strategy);
         this.scheduler = scheduler;
     }
 
     @Override
     public <T extends Event> Flux<T> on(Class<T> eventClass) {
-        return processor.publishOn(scheduler)
-                .ofType(eventClass)
-                .doOnNext(event -> {
+        return processor.publishOn(scheduler).ofType(eventClass);
+    }
+
+    @Override
+    public <T extends Event> Flux<T> on(Class<T> eventClass, Function<T, Mono<Void>> eventListener) {
+        return on(eventClass).flatMap(event -> eventListener.apply(event)
+                .onErrorResume(t -> {
                     Logger log = Loggers.getLogger("discord4j.events." + eventClass.getSimpleName());
-                    if (log.isDebugEnabled()) {
-                        log.debug("{shard:{}} {}", event.getShardInfo().getIndex(), event);
-                    }
-                });
+                    log.error("[shard={}] Listener failed to process event", event.getShardInfo().format(), t);
+                    return Mono.empty();
+                })
+                .thenReturn(event));
     }
 
     @Override
     public void publish(Event event) {
-        processor.onNext(event);
+        sink.next(event);
     }
 
     @Override
     public void complete() {
-        processor.onComplete();
+        sink.complete();
     }
 }

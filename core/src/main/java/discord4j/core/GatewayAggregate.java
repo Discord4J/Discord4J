@@ -19,7 +19,7 @@ package discord4j.core;
 
 import java.util.List;
 
-public class GatewayAggregate {
+class GatewayAggregate {
 
     private final List<GatewayConnection> connections;
     private final Gateway gateway;

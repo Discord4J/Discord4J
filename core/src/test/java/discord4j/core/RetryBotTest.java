@@ -153,8 +153,8 @@ public class RetryBotTest {
                         return new SessionInfo(sessionId, sequence);
                     })
                     .connectAwaitDisconnect(gateway -> {
-                        subscribeEventCounter(gateway, counts);
-                        startHttpServer(new ServerContext(gateway, counts));
+//                        subscribeEventCounter(gateway, counts);
+//                        startHttpServer(new ServerContext(gateway, counts));
 
                         TestCommands testCommands = new TestCommands(gateway);
                         return gateway.getEventDispatcher().on(MessageCreateEvent.class)
@@ -324,9 +324,9 @@ public class RetryBotTest {
         }
     }
 
-    private void startHttpServer(ServerContext context) {
+    private Mono<? extends DisposableServer> bindHttpServer(ServerContext context) {
         ObjectMapper mapper = new ObjectMapper();
-        DisposableServer facade = HttpServer.create()
+        return HttpServer.create()
                 .port(0)
                 .route(routes -> routes
                         .get("/users",
@@ -350,11 +350,6 @@ public class RetryBotTest {
                         )
                 )
                 .wiretap(true)
-                .bindNow();
-
-        log.info("Server started at {}:{}", facade.host(), facade.port());
-
-        // kill the server on JVM exit
-        Runtime.getRuntime().addShutdownHook(new Thread(facade::disposeNow));
+                .bind();
     }
 }

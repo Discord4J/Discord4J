@@ -21,6 +21,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import discord4j.common.JacksonResources;
 import discord4j.core.event.domain.Event;
+import discord4j.core.event.domain.lifecycle.GatewayLifecycleEvent;
 import discord4j.core.object.data.stored.MessageBean;
 import discord4j.core.object.presence.Presence;
 import discord4j.store.api.mapping.MappingStoreService;
@@ -74,10 +75,16 @@ public class StoreBotTest {
                         .setFallback(new JdkStoreService()))
                 .build())
                 .setInitialPresence(shard -> Presence.invisible())
-                .connectAwaitDisconnect(gateway -> {
-                    startHttpServer(gateway, counts, jackson.getObjectMapper());
-                    subscribeEventCounter(gateway, counts);
-                    return Mono.empty();
+                .withConnection(gateway -> {
+                    log.info("Start!");
+                    //startHttpServer(gateway, counts, jackson.getObjectMapper());
+                    //subscribeEventCounter(gateway, counts);
+
+                    Mono<Void> listener = gateway.on(GatewayLifecycleEvent.class)
+                            .doOnNext(e -> log.info("[shard={}] {}", e.getShardInfo().format(), e.toString()))
+                            .then();
+
+                    return Mono.when(listener, gateway.onDisconnect());
                 })
                 .block();
     }

@@ -19,6 +19,9 @@ package discord4j.core.event;
 
 import discord4j.core.event.domain.Event;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+
+import java.util.function.Function;
 
 /**
  * Distributes events to subscribers. {@link Event} instances can be published over this class and dispatched to all
@@ -48,6 +51,17 @@ public interface EventDispatcher {
      * @return a new {@link Flux} with the requested events
      */
     <T extends Event> Flux<T> on(Class<T> eventClass);
+
+    /**
+     * Retrieves a {@link Flux} with elements of the given {@link Event} type, registering a user-provided function
+     * to process the event. Any error thrown within the function will be logged and suppressed.
+     *
+     * @param eventClass the event class to obtain events from
+     * @param eventListener a function to process each event
+     * @param <T> the type of the event class
+     * @return a new {@link Flux} with the requested events
+     */
+    <T extends Event> Flux<T> on(Class<T> eventClass, Function<T, Mono<Void>> eventListener);
 
     /**
      * Publishes an {@link Event} to the dispatcher.

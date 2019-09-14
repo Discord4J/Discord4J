@@ -84,7 +84,7 @@ public class DefaultGatewayClient implements GatewayClient {
     private final RetryContext retryContext;
     private final IdentifyOptions identifyOptions;
     private final String token;
-    private final GatewayObserver initialObserver;
+    private final GatewayObserver observer;
     private final PayloadTransformer identifyLimiter;
 
     // reactive pipelines
@@ -108,7 +108,6 @@ public class DefaultGatewayClient implements GatewayClient {
     private final AtomicLong lastAck = new AtomicLong(0);
     private final AtomicLong responseTime = new AtomicLong(0);
     private final ResettableInterval heartbeat = new ResettableInterval();
-    private volatile GatewayObserver observer;
     private volatile MonoProcessor<Void> disconnectNotifier;
     private volatile MonoProcessor<CloseStatus> closeTrigger;
 
@@ -126,27 +125,22 @@ public class DefaultGatewayClient implements GatewayClient {
         this.retryContext = new RetryContext(reconnectOptions.getFirstBackoff(),
                 reconnectOptions.getMaxBackoffInterval());
         this.identifyOptions = Objects.requireNonNull(options.getIdentifyOptions());
-        this.initialObserver = options.getInitialObserver();
+        this.observer = options.getInitialObserver();
         this.identifyLimiter = Objects.requireNonNull(options.getIdentifyLimiter());
-        this.receiverSink = receiver.sink(FluxSink.OverflowStrategy.LATEST);
-        this.senderSink = sender.sink(FluxSink.OverflowStrategy.LATEST);
-        this.dispatchSink = dispatch.sink(FluxSink.OverflowStrategy.LATEST);
-        this.outboundSink = outbound.sink(FluxSink.OverflowStrategy.LATEST);
-        this.heartbeatSink = heartbeats.sink(FluxSink.OverflowStrategy.LATEST);
+        // TODO: consider exposing OverflowStrategy to GatewayOptions
+        this.receiverSink = receiver.sink(FluxSink.OverflowStrategy.ERROR);
+        this.senderSink = sender.sink(FluxSink.OverflowStrategy.ERROR);
+        this.dispatchSink = dispatch.sink(FluxSink.OverflowStrategy.BUFFER);
+        this.outboundSink = outbound.sink(FluxSink.OverflowStrategy.ERROR);
+        this.heartbeatSink = heartbeats.sink(FluxSink.OverflowStrategy.ERROR);
         this.log = shardLogger(".client");
     }
 
     @Override
     public Mono<Void> execute(String gatewayUrl) {
-        return execute(gatewayUrl, GatewayObserver.NOOP_LISTENER);
-    }
-
-    @Override
-    public Mono<Void> execute(String gatewayUrl, GatewayObserver additionalObserver) {
         return Mono.defer(() -> {
             disconnectNotifier = MonoProcessor.create();
             closeTrigger = MonoProcessor.create();
-            observer = initialObserver == null ? additionalObserver : initialObserver.then(additionalObserver);
             lastAck.set(0);
             lastSent.set(0);
 

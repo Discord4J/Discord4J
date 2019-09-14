@@ -40,12 +40,10 @@ import discord4j.voice.VoiceClient;
 import org.reactivestreams.Publisher;
 import reactor.core.Disposable;
 import reactor.core.Disposables;
-import reactor.core.publisher.EmitterProcessor;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.MonoProcessor;
 import reactor.netty.http.client.HttpClient;
-import reactor.scheduler.forkjoin.ForkJoinPoolScheduler;
 import reactor.util.Logger;
 import reactor.util.Loggers;
 
@@ -214,9 +212,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
         if (eventDispatcher != null) {
             return eventDispatcher;
         }
-        return new EmitterEventDispatcher(
-                EmitterProcessor.create(256, false),
-                ForkJoinPoolScheduler.create("discord4j-events"));
+        return EmitterEventDispatcher.buffering();
     }
 
     public Mono<Void> connectAwaitDisconnect(Function<Gateway, Mono<Void>> whileConnectedFunction) {
