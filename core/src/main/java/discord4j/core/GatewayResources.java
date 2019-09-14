@@ -39,7 +39,6 @@ public class GatewayResources {
     private final StoreService storeService;
     private final ReconnectOptions reconnectOptions;
     private final ShardCoordinator shardCoordinator;
-    private final Scheduler eventScheduler;
     private final Scheduler voiceConnectionScheduler;
 
     protected GatewayResources(Builder builder) {
@@ -57,7 +56,6 @@ public class GatewayResources {
         this.storeService = Objects.requireNonNull(storeService);
         this.reconnectOptions = Objects.requireNonNull(builder.reconnectOptions);
         this.shardCoordinator = Objects.requireNonNull(builder.shardCoordinator);
-        this.eventScheduler = Objects.requireNonNull(builder.eventScheduler);
         this.voiceConnectionScheduler = Objects.requireNonNull(builder.voiceConnectionScheduler);
     }
 
@@ -71,7 +69,6 @@ public class GatewayResources {
         builder.setStoreService(getStoreService())
                 .setReconnectOptions(getReconnectOptions())
                 .setShardCoordinator(getShardCoordinator())
-                .setEventScheduler(getEventScheduler())
                 .setVoiceConnectionScheduler(getVoiceConnectionScheduler());
 
         return builder;
@@ -82,7 +79,6 @@ public class GatewayResources {
         private StoreService storeService;
         private ReconnectOptions reconnectOptions = ReconnectOptions.builder().build();
         private ShardCoordinator shardCoordinator = new LocalShardCoordinator();
-        private Scheduler eventScheduler = Schedulers.elastic();
         private Scheduler voiceConnectionScheduler = Schedulers.elastic();
 
         protected Builder() {
@@ -100,11 +96,6 @@ public class GatewayResources {
 
         public Builder setShardCoordinator(ShardCoordinator shardCoordinator) {
             this.shardCoordinator = shardCoordinator;
-            return this;
-        }
-
-        public Builder setEventScheduler(Scheduler eventScheduler) {
-            this.eventScheduler = eventScheduler;
             return this;
         }
 
@@ -128,10 +119,6 @@ public class GatewayResources {
 
     public ShardCoordinator getShardCoordinator() {
         return shardCoordinator;
-    }
-
-    public Scheduler getEventScheduler() {
-        return eventScheduler;
     }
 
     public Scheduler getVoiceConnectionScheduler() {

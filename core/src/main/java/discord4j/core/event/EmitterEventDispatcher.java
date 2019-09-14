@@ -38,7 +38,8 @@ import java.util.function.Function;
  * through {@link #on(Class)} giving the proper {@link Event} class as argument.
  * <p>
  * Uses an underlying {@link EmitterProcessor} that can be configured during instantiation. Thread affinity can also
- * be configured by supplying a {@link Scheduler}.
+ * be configured by supplying a {@link Scheduler}, while an {@link FluxSink.OverflowStrategy} is applied to handle
+ * backpressure of inbound Events, especially during startup.
  * <p>
  * Each event can be consumed using the following pattern:
  * <pre>
@@ -57,14 +58,34 @@ public class EmitterEventDispatcher implements EventDispatcher {
     private final FluxSink<Event> sink;
     private final Scheduler scheduler;
 
+    /**
+     * Create an {@link EmitterEventDispatcher} that uses a dropping {@link FluxSink.OverflowStrategy} meaning that it
+     * will discard events if the receiver is not ready. This typically occurs during startup before all shards have
+     * connected. For a version of this dispatcher that can handle the initial burst of events, see {@link #buffering()}
+     *
+     * @return a dropping {@link EmitterEventDispatcher}
+     */
     public static EmitterEventDispatcher create() {
         return withStrategy(FluxSink.OverflowStrategy.DROP);
     }
 
+    /**
+     * Create an {@link EmitterEventDispatcher} that will buffer incoming events to retain all startup events as each
+     * shard connects at the cost of increased memory usage. Useful if you want to subscribe to events happening
+     * early in the shard's lifecycle.
+     *
+     * @return a buffering {@link EmitterEventDispatcher}
+     */
     public static EmitterEventDispatcher buffering() {
         return withStrategy(FluxSink.OverflowStrategy.BUFFER);
     }
 
+    /**
+     * Create an {@link EmitterEventDispatcher} with a custom {@link FluxSink.OverflowStrategy}.
+     *
+     * @param strategy the supplied strategy to use while publishing events to handle backpressure
+     * @return an {@link EmitterEventDispatcher} with a customized backpressure strategy
+     */
     public static EmitterEventDispatcher withStrategy(FluxSink.OverflowStrategy strategy) {
         return new EmitterEventDispatcher(
                 EmitterProcessor.create(Queues.SMALL_BUFFER_SIZE, false),
@@ -73,7 +94,8 @@ public class EmitterEventDispatcher implements EventDispatcher {
     }
 
     /**
-     * Creates a new event dispatcher using the given processor and thread model.
+     * Creates a new event dispatcher using an externally managed processor, backpressure-handling strategy and
+     * thread model.
      *
      * @param processor an {@link EmitterProcessor} of {@link Event}, used to bridge gateway events to the dispatcher
      * subscribers
@@ -97,7 +119,7 @@ public class EmitterEventDispatcher implements EventDispatcher {
         return on(eventClass).flatMap(event -> eventListener.apply(event)
                 .onErrorResume(t -> {
                     Logger log = Loggers.getLogger("discord4j.events." + eventClass.getSimpleName());
-                    log.error("[shard={}] Listener failed to process event", event.getShardInfo().format(), t);
+                    log.error("[shard={}] Error while processing event", event.getShardInfo().format(), t);
                     return Mono.empty();
                 })
                 .thenReturn(event));

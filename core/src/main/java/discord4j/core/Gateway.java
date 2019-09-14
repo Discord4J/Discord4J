@@ -43,8 +43,6 @@ import discord4j.voice.VoiceClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.MonoProcessor;
-import reactor.util.Logger;
-import reactor.util.Loggers;
 
 import java.util.Map;
 import java.util.Objects;
@@ -70,8 +68,6 @@ import java.util.stream.Collectors;
  * </ul>
  */
 public class Gateway {
-
-    private static final Logger log = Loggers.getLogger(Gateway.class);
 
     private final DiscordClient discordClient;
     private final CoreResources coreResources;
@@ -477,12 +473,26 @@ public class Gateway {
                         .map(UserBean::new));
     }
 
+    /**
+     * Disconnects this {@link Gateway} from Discord upon subscribing. All joining {@link GatewayClient
+     * GatewayClients} will attempt to gracefully close and complete this {@link Mono} after all of them have
+     * disconnected.
+     *
+     * @return A {@link Mono} that, on subscription, will disconnect each connection established by this
+     * {@link Gateway} and complete after all of them have closed.
+     */
     public Mono<Void> logout() {
         return Mono.whenDelayError(gatewayClientMap.values().stream()
                 .map(client -> client.close(false))
                 .collect(Collectors.toList()));
     }
 
+    /**
+     * Return a {@link Mono} that signals completion when all joining {@link GatewayClient GatewayClients} have
+     * disconnected.
+     *
+     * @return
+     */
     public Mono<Void> onDisconnect() {
         return closeProcessor;
     }
