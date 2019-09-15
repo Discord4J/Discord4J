@@ -133,14 +133,12 @@ public abstract class ReactionEmoji {
                 return false;
             }
             Custom custom = (Custom) o;
-            return id == custom.id &&
-                    isAnimated == custom.isAnimated &&
-                    Objects.equals(name, custom.name);
+            return id == custom.id;
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(id, name, isAnimated);
+            return Objects.hash(id);
         }
     }
 
