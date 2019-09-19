@@ -56,7 +56,7 @@ public class ShardInfo {
     }
 
     public String format() {
-        return String.valueOf(index + ',' + count);
+        return index + "," + count;
     }
 
     @Override

@@ -15,12 +15,13 @@
  * along with Discord4J. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package discord4j.core;
+package discord4j.core.shard;
 
 import discord4j.gateway.PayloadTransformer;
 import discord4j.gateway.SessionInfo;
 import discord4j.gateway.ShardInfo;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
 
 import java.util.function.Function;
@@ -36,7 +37,7 @@ public interface ShardCoordinator {
      *
      * @return a reactive transform used to coordinate shard authentication
      */
-    Function<Flux<ShardInfo>, Flux<ShardInfo>> getIdentifyOperator();
+    Function<Flux<ShardInfo>, Flux<ShardInfo>> getConnectOperator();
 
     /**
      * Returns a transformation function for a sequence of payloads that can be held or delayed in order to successfully
@@ -52,7 +53,7 @@ public interface ShardCoordinator {
      *
      * @param shardInfo the connected shard details
      */
-    void publishConnected(ShardInfo shardInfo);
+    Mono<Void> publishConnected(ShardInfo shardInfo);
 
     /**
      * Notifies this coordinator that a given shard has disconnected.
@@ -61,5 +62,5 @@ public interface ShardCoordinator {
      * @param sessionInfo the disconnected shard session details to resume, or <code>null</code> if resume is not
      * available.
      */
-    void publishDisconnected(ShardInfo shardInfo, @Nullable SessionInfo sessionInfo);
+    Mono<Void> publishDisconnected(ShardInfo shardInfo, @Nullable SessionInfo sessionInfo);
 }

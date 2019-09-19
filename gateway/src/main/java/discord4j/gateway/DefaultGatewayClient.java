@@ -155,6 +155,7 @@ public class DefaultGatewayClient implements GatewayClient {
                     .flatMap(payload -> Flux.from(payloadWriter.write(payload)))
                     .map(buf -> Tuples.of((GatewayClient) this, buf))
                     .transform(identifyLimiter);
+            // TODO replace with BucketPool
             PayloadTransformer limiter = new RateLimiterTransformer(
                     new SimpleBucket(outboundLimiterCapacity(), Duration.ofSeconds(60)));
             Flux<ByteBuf> payloadFlux = outbound.filter(payload -> !Opcode.IDENTIFY.equals(payload.getOp()))

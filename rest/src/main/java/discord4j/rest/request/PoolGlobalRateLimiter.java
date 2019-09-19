@@ -97,7 +97,7 @@ public class PoolGlobalRateLimiter implements GlobalRateLimiter {
 
         @Override
         public String toString() {
-            return id + "-" + bucket;
+            return bucket + ":" + id;
         }
     }
 }

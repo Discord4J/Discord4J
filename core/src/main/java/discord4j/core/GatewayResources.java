@@ -17,7 +17,9 @@
 
 package discord4j.core;
 
+import discord4j.core.shard.LocalShardCoordinator;
 import discord4j.core.shard.ShardAwareStoreService;
+import discord4j.core.shard.ShardCoordinator;
 import discord4j.core.shard.ShardingJdkStoreRegistry;
 import discord4j.gateway.GatewayClient;
 import discord4j.gateway.retry.ReconnectOptions;

@@ -15,7 +15,7 @@
  * along with Discord4J. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package discord4j.core;
+package discord4j.core.shard;
 
 import discord4j.gateway.PayloadTransformer;
 import discord4j.gateway.PoolingTransformer;
@@ -23,8 +23,8 @@ import discord4j.gateway.SessionInfo;
 import discord4j.gateway.ShardInfo;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxSink;
+import reactor.core.publisher.Mono;
 import reactor.core.publisher.ReplayProcessor;
-import reactor.util.function.Tuple2;
 
 import java.time.Duration;
 import java.util.function.Function;
@@ -45,18 +45,18 @@ public class LocalShardCoordinator implements ShardCoordinator {
     }
 
     @Override
-    public Function<Flux<ShardInfo>, Flux<ShardInfo>> getIdentifyOperator() {
-        return sequence -> sequence.zipWith(permits).map(Tuple2::getT1);
+    public Function<Flux<ShardInfo>, Flux<ShardInfo>> getConnectOperator() {
+        return sequence -> sequence.zipWith(permits, (t2, permit) -> t2);
     }
 
     @Override
-    public void publishConnected(ShardInfo shardInfo) {
-        permitSink.next(shardInfo.getIndex() + 1);
+    public Mono<Void> publishConnected(ShardInfo shardInfo) {
+        return Mono.fromRunnable(() -> permitSink.next(shardInfo.getIndex() + 1));
     }
 
     @Override
-    public void publishDisconnected(ShardInfo shardInfo, SessionInfo sessionInfo) {
-
+    public Mono<Void> publishDisconnected(ShardInfo shardInfo, SessionInfo sessionInfo) {
+        return Mono.empty();
     }
 
     @Override
