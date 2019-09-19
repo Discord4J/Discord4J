@@ -48,8 +48,10 @@ public class SemaphoreGlobalRateLimiter implements GlobalRateLimiter {
      *
      * @param duration the {@link Duration} every new acquired resource should wait before being used
      */
-    public void rateLimitFor(Duration duration) {
-        limitedUntil = System.nanoTime() + duration.toNanos();
+    public Mono<Void> rateLimitFor(Duration duration) {
+        return Mono.fromRunnable(() -> {
+            limitedUntil = System.nanoTime() + duration.toNanos();
+        });
     }
 
     /**
@@ -62,17 +64,15 @@ public class SemaphoreGlobalRateLimiter implements GlobalRateLimiter {
     }
 
     private Mono<Void> notifier() {
-        Duration remaining = getRemaining();
-        if (!remaining.isNegative() && !remaining.isZero()) {
-            return Mono.delay(remaining).then();
-        } else {
-            return Mono.empty();
-        }
+        return getRemaining()
+                .filter(remaining -> !remaining.isNegative() && !remaining.isZero())
+                .flatMap(remaining -> Mono.delay(remaining).then())
+                .switchIfEmpty(Mono.empty());
     }
 
     @Override
-    public Duration getRemaining() {
-        return Duration.ofNanos(limitedUntil - System.nanoTime());
+    public Mono<Duration> getRemaining() {
+        return Mono.just(Duration.ofNanos(limitedUntil - System.nanoTime()));
     }
 
     /**
@@ -87,20 +87,20 @@ public class SemaphoreGlobalRateLimiter implements GlobalRateLimiter {
         return Flux.usingWhen(
                 acquire(),
                 resource -> stage,
-                this::release,
                 this::release);
     }
 
     private Mono<Resource> acquire() {
-        return Mono.fromCallable(
+        return Mono.defer(
                 () -> {
                     outer.acquireUninterruptibly();
-                    Duration remaining = getRemaining();
-                    if (!remaining.isNegative() && !remaining.isZero()) {
-                        inner.acquireUninterruptibly();
-                        return new Resource(outer, inner);
-                    }
-                    return new Resource(outer, null);
+                    return getRemaining()
+                            .filter(remaining -> !remaining.isNegative() && !remaining.isZero())
+                            .map(__ -> {
+                                inner.acquireUninterruptibly();
+                                return new Resource(outer, inner);
+                            })
+                            .switchIfEmpty(Mono.fromCallable(() -> new Resource(outer, null)));
                 })
                 .subscribeOn(Schedulers.elastic())
                 .delayUntil(resource -> onComplete());
