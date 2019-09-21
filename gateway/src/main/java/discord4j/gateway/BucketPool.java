@@ -46,7 +46,7 @@ public class BucketPool {
         this.pool = PoolBuilder.from(Mono.fromCallable(Permit::new))
                 .sizeBetween(1, capacity)
                 .releaseHandler(permit -> Mono.delay(getDurationUntilNextRefill().plus(permit.releaseDelay))
-                        .doOnNext(tick -> log.warn("[{}] Released permit", permit))
+                        .doOnNext(tick -> log.trace("[{}] Released permit", permit))
                         .then())
                 .fifo();
     }
@@ -55,7 +55,7 @@ public class BucketPool {
         AtomicReference<PooledRef<Permit>> emitted = new AtomicReference<>();
         return pool.acquire()
                 .doOnNext(pooledRef -> {
-                    log.warn("[{}] Acquired permit", pooledRef.poolable());
+                    log.trace("[{}] Acquired permit", pooledRef.poolable());
                     emitted.set(pooledRef);
                     long now = System.nanoTime();
                     if (nextRefillAt.get() <= now) {
@@ -70,7 +70,7 @@ public class BucketPool {
                 .doFinally(st -> {
                     PooledRef<Permit> ref = emitted.get();
                     if (ref != null && emitted.compareAndSet(ref, null)) {
-                        log.warn("[{}] Releasing permit", ref.poolable());
+                        log.trace("[{}] Releasing permit", ref.poolable());
                         ref.release().subscribe();
                     }
                 })
@@ -87,6 +87,18 @@ public class BucketPool {
 
     private static class Permit {
 
+        static final AtomicInteger ID = new AtomicInteger(0);
+
+        private final int id;
         private Duration releaseDelay = Duration.ZERO;
+
+        private Permit() {
+            id = ID.incrementAndGet();
+        }
+
+        @Override
+        public String toString() {
+            return id + ":" + Integer.toHexString(hashCode());
+        }
     }
 }

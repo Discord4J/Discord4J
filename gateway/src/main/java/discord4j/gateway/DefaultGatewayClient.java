@@ -18,7 +18,6 @@ package discord4j.gateway;
 
 import discord4j.common.GitProperties;
 import discord4j.common.ResettableInterval;
-import discord4j.common.SimpleBucket;
 import discord4j.common.close.CloseException;
 import discord4j.common.close.CloseStatus;
 import discord4j.gateway.json.GatewayPayload;
@@ -155,15 +154,12 @@ public class DefaultGatewayClient implements GatewayClient {
                     .flatMap(payload -> Flux.from(payloadWriter.write(payload)))
                     .map(buf -> Tuples.of((GatewayClient) this, buf))
                     .transform(identifyLimiter);
-            // TODO replace with BucketPool
-            PayloadTransformer limiter = new RateLimiterTransformer(
-                    new SimpleBucket(outboundLimiterCapacity(), Duration.ofSeconds(60)));
             Flux<ByteBuf> payloadFlux = outbound.filter(payload -> !Opcode.IDENTIFY.equals(payload.getOp()))
                     .log(shardLogger(".outbound"), Level.FINE, false)
                     .flatMap(payload -> Flux.from(payloadWriter.write(payload)))
                     .transform(buf -> Flux.merge(buf, sender))
                     .map(buf -> Tuples.of((GatewayClient) this, buf))
-                    .transform(limiter);
+                    .transform(new PoolingTransformer(outboundLimiterCapacity(), Duration.ofSeconds(60)));
             Flux<ByteBuf> heartbeatFlux = heartbeats.flatMap(payload -> Flux.from(payloadWriter.write(payload)));
             Flux<ByteBuf> outFlux = Flux.merge(heartbeatFlux, identifyFlux, payloadFlux)
                     .doOnNext(buf -> trace(senderLog, buf));
@@ -539,11 +535,11 @@ public class DefaultGatewayClient implements GatewayClient {
      */
     private static final String OUTBOUND_CAPACITY_PROPERTY = "discord4j.gateway.outbound.capacity";
 
-    private long outboundLimiterCapacity() {
+    private int outboundLimiterCapacity() {
         String capacityValue = System.getProperty(OUTBOUND_CAPACITY_PROPERTY);
         if (capacityValue != null) {
             try {
-                long capacity = Long.parseLong(capacityValue);
+                int capacity = Integer.parseInt(capacityValue);
                 shardLogger("").info("Overriding default outbound limiter capacity: {}", capacity);
             } catch (NumberFormatException e) {
                 shardLogger("").warn("Invalid custom outbound limiter capacity: {}", capacityValue);
