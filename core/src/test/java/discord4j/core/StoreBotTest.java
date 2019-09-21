@@ -20,8 +20,10 @@ package discord4j.core;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import discord4j.common.JacksonResources;
+import discord4j.core.event.ReplayEventDispatcher;
 import discord4j.core.event.domain.Event;
 import discord4j.core.event.domain.lifecycle.GatewayLifecycleEvent;
+import discord4j.core.event.domain.lifecycle.ReadyEvent;
 import discord4j.core.object.data.stored.MessageBean;
 import discord4j.core.object.presence.Presence;
 import discord4j.store.api.mapping.MappingStoreService;
@@ -41,6 +43,7 @@ import reactor.netty.DisposableServer;
 import reactor.netty.http.server.HttpServer;
 import reactor.util.function.Tuple2;
 
+import java.time.Duration;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
@@ -74,6 +77,7 @@ public class StoreBotTest {
                         .setMapping(new NoOpStoreService(), MessageBean.class)
                         .setFallback(new JdkStoreService()))
                 .build())
+                .setEventDispatcher(ReplayEventDispatcher.withTimeout(Duration.ofMinutes(2)))
                 .setInitialPresence(shard -> Presence.invisible())
                 .withConnection(gateway -> {
                     log.info("Start!");
@@ -81,6 +85,7 @@ public class StoreBotTest {
                     //subscribeEventCounter(gateway, counts);
 
                     Mono<Void> listener = gateway.on(GatewayLifecycleEvent.class)
+                            .filter(e -> !e.getClass().equals(ReadyEvent.class))
                             .doOnNext(e -> log.info("[shard={}] {}", e.getShardInfo().format(), e.toString()))
                             .then();
 
