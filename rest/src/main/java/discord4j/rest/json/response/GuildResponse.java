@@ -69,7 +69,8 @@ public class GuildResponse {
     @JsonProperty("premium_tier")
     private int premiumTier;
     @JsonProperty("premium_subscription_count")
-    private int premiumSubcriptionsCount;
+    @Nullable
+    private Integer premiumSubscriptionCount;
     @JsonProperty("preferred_locale")
     private String preferredLocale;
     @JsonProperty("owner_id")
@@ -170,8 +171,9 @@ public class GuildResponse {
         return premiumTier;
     }
 
-    public int getPremiumSubcriptionsCount() {
-        return premiumSubcriptionsCount;
+    @Nullable
+    public Integer getPremiumSubscriptionCount() {
+        return premiumSubscriptionCount;
     }
 
     public String getPreferredLocale() {
@@ -223,7 +225,7 @@ public class GuildResponse {
         return "GuildResponse{" +
                 "mfaLevel=" + mfaLevel +
                 ", premiumTier=" + premiumTier +
-                ", premiumSubcriptionsCount=" + premiumSubcriptionsCount +
+                ", premiumSubscriptionCount=" + premiumSubscriptionCount +
                 ", preferredLocale=" + preferredLocale +
                 ", emojis=" + Arrays.toString(emojis) +
                 ", applicationId=" + applicationId +

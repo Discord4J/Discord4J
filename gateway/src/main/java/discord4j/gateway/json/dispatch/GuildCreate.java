@@ -52,7 +52,8 @@ public class GuildCreate implements Dispatch {
     @JsonProperty("premium_tier")
     private int premiumTier;
     @JsonProperty("premium_subscription_count")
-    private int premiumSubcriptionsCount;
+    @Nullable
+    private Integer premiumSubscriptionCount;
     @JsonProperty("preferred_locale")
     private String preferredLocale;
     private GuildMemberResponse[] members;
@@ -113,8 +114,9 @@ public class GuildCreate implements Dispatch {
         return premiumTier;
     }
 
-    public int getPremiumSubcriptionsCount() {
-        return premiumSubcriptionsCount;
+    @Nullable
+    public Integer getPremiumSubscriptionCount() {
+        return premiumSubscriptionCount;
     }
 
     public String getPreferredLocale() {
@@ -269,7 +271,7 @@ public class GuildCreate implements Dispatch {
                 "voiceStates=" + Arrays.toString(voiceStates) +
                 ", verificationLevel=" + verificationLevel +
                 ", premiumTier=" + premiumTier +
-                ", premiumSubcriptionsCount=" + premiumSubcriptionsCount +
+                ", premiumSubscriptionCount=" + premiumSubscriptionCount +
                 ", preferredLocale=" + preferredLocale +
                 ", unavailable=" + unavailable +
                 ", systemChannelId=" + systemChannelId +
