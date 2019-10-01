@@ -37,6 +37,8 @@ public final class VoiceStateBean implements Serializable {
     private boolean mute;
     private boolean selfDeaf;
     private boolean selfMute;
+    @Nullable
+    private Boolean selfStream;
     private boolean suppress;
 
     public VoiceStateBean(final GuildCreate.VoiceState voiceState, final long guildId) {
@@ -48,6 +50,7 @@ public final class VoiceStateBean implements Serializable {
         mute = voiceState.isMute();
         selfDeaf = voiceState.isSelfDeaf();
         selfMute = voiceState.isSelfMute();
+        selfStream = voiceState.isSelfStream();
         suppress = voiceState.isSuppress();
     }
 
@@ -60,6 +63,7 @@ public final class VoiceStateBean implements Serializable {
         mute = response.isMute();
         selfDeaf = response.isSelfDeaf();
         selfMute = response.isSelfMute();
+        selfStream = response.isSelfStream();
         suppress = response.isSuppress();
     }
 
@@ -130,6 +134,15 @@ public final class VoiceStateBean implements Serializable {
         this.selfMute = selfMute;
     }
 
+    @Nullable
+    public Boolean isSelfStream() {
+        return selfStream;
+    }
+
+    public void setSelfStream(@Nullable final Boolean selfStream) {
+        this.selfStream = selfStream;
+    }
+
     public boolean isSuppress() {
         return suppress;
     }
@@ -149,6 +162,7 @@ public final class VoiceStateBean implements Serializable {
                 ", mute=" + mute +
                 ", selfDeaf=" + selfDeaf +
                 ", selfMute=" + selfMute +
+                ", selfStream=" + selfStream +
                 ", suppress=" + suppress +
                 '}';
     }
