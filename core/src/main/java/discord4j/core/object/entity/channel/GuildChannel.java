@@ -125,8 +125,8 @@ public interface GuildChannel extends Channel {
      * @param memberId The ID of the member to add the overwrite for.
      * @param overwrite The overwrite to add.
      *
-     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the guild has been deleted.
-     * If an error is received, it is emitted through the {@code Mono}.
+     * @return A {@link Mono} where, upon successful completion, emits nothing; If an error is received, it is emitted
+     * through the {@code Mono}.
      */
     default Mono<Void> addMemberOverwrite(final Snowflake memberId, final PermissionOverwrite overwrite) {
         return addMemberOverwrite(memberId, overwrite, null);
@@ -139,8 +139,8 @@ public interface GuildChannel extends Channel {
      * @param overwrite The overwrite to add.
      * @param reason The reason, if present.
      *
-     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the guild has been deleted.
-     * If an error is received, it is emitted through the {@code Mono}.
+     * @return A {@link Mono} where, upon successful completion, emits nothing; If an error is received, it is emitted
+     * through the {@code Mono}.
      */
     Mono<Void> addMemberOverwrite(Snowflake memberId, PermissionOverwrite overwrite, @Nullable String reason);
 
@@ -150,8 +150,8 @@ public interface GuildChannel extends Channel {
      * @param roleId The ID of the role to add the overwrite for.
      * @param overwrite The overwrite to add.
      *
-     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the guild has been deleted.
-     * If an error is received, it is emitted through the {@code Mono}.
+     * @return A {@link Mono} where, upon successful completion, emits nothing; If an error is received, it is emitted
+     * through the {@code Mono}.
      */
     default Mono<Void> addRoleOverwrite(final Snowflake roleId, final PermissionOverwrite overwrite) {
         return addRoleOverwrite(roleId, overwrite, null);
@@ -164,8 +164,8 @@ public interface GuildChannel extends Channel {
      * @param overwrite The overwrite to add.
      * @param reason The reason, if present.
      *
-     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the guild has been deleted.
-     * If an error is received, it is emitted through the {@code Mono}.
+     * @return A {@link Mono} where, upon successful completion, emits nothing; If an error is received, it is emitted
+     * through the {@code Mono}.
      */
     Mono<Void> addRoleOverwrite(Snowflake roleId, PermissionOverwrite overwrite, @Nullable String reason);
 }
