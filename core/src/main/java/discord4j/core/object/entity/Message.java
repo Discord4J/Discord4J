@@ -20,6 +20,7 @@ import discord4j.common.json.UserResponse;
 import discord4j.core.DiscordClient;
 import discord4j.core.ServiceMediator;
 import discord4j.core.object.Embed;
+import discord4j.core.object.MessageReference;
 import discord4j.core.object.data.stored.MessageBean;
 import discord4j.core.object.data.stored.ReactionBean;
 import discord4j.core.object.data.stored.UserBean;
@@ -29,6 +30,7 @@ import discord4j.core.object.util.Snowflake;
 import discord4j.core.spec.MessageEditSpec;
 import discord4j.core.util.EntityUtil;
 import discord4j.core.util.PaginationUtil;
+import discord4j.rest.json.request.SuppressEmbedsRequest;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
@@ -294,6 +296,28 @@ public final class Message implements Entity {
     }
 
     /**
+     * Gets the Message Reference (Follow channel system), if present.
+     *
+     * @return The {@code MessageReference}, if present.
+     */
+    public Optional<MessageReference> getMessageReference() {
+        return Optional.ofNullable(data.getMessageReference())
+            .map(bean -> new MessageReference(serviceMediator,bean));
+    }
+
+    /**
+     * Gets the flags of Message.
+     *
+     * @return A {@code EnumSet} with the flags of message.
+     */
+    public EnumSet<Flag> getFlags() {
+        if(data.getFlags() != null) {
+            return Flag.of(data.getFlags());
+        }
+        return EnumSet.noneOf(Flag.class);
+    }
+
+    /**
      * Requests to retrieve the guild this message is associated to, if present.
      *
      * @return A {@link Mono} where, upon successful completion, emits the {@link Guild} this message is associated to,
@@ -351,6 +375,21 @@ public final class Message implements Entity {
         return serviceMediator.getRestClient().getChannelService()
                 .deleteMessage(getChannelId().asLong(), getId().asLong(), reason)
                 .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex()));
+    }
+
+    /**
+     * Requests to suppress all embeds in this message.
+     * if the message have the embeds suppressed then this action can undo the suppressed embeds.
+     *
+     * @param suppress Determine if you need suppress or not the embeds.
+     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the process has been complete.
+     * If an error is received, it is emitted through the {@code Mono}.
+     * @deprecated Discord draft api (subject to change)
+     */
+    public Mono<Void> suppressEmbeds(final boolean suppress) {
+        return serviceMediator.getRestClient().getChannelService()
+            .suppressEmbeds(getChannelId().asLong(), getId().asLong(), new SuppressEmbedsRequest(suppress))
+            .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex()));
     }
 
     /**
@@ -440,6 +479,69 @@ public final class Message implements Entity {
         return EntityUtil.hashCode(this);
     }
 
+    /** Represents the Flags of messages. */
+    public enum Flag {
+
+        /** This message has been published to subscribed channels (via Channel Following). */
+        CROSSPOSTED(0),
+
+        /** This message originated from a message in another channel (via Channel Following). */
+        IS_CROSSPOST(1),
+
+        /** Do not include any embeds when serializing this message. */
+        SUPPRESS_EMBEDS(2);
+
+        /** The underlying value as represented by Discord. */
+        private final int value;
+
+        /** The flag value as represented by Discord. */
+        private final int flag;
+
+        /**
+         * Constructs a {@code Message.Flags}.
+         */
+        Flag(final int value) {
+            this.value = value;
+            this.flag = 1 << value;
+        }
+
+        /**
+         * Gets the underlying value as represented by Discord.
+         *
+         * @return The underlying value as represented by Discord.
+         */
+        public int getValue() {
+            return value;
+        }
+
+        /**
+         * Gets the flag value as represented by Discord.
+         *
+         * @return The flag value as represented by Discord.
+         */
+        public int getFlag() {
+            return flag;
+        }
+
+        /**
+         * Gets the flags of message. It is guaranteed that invoking {@link #getValue()} from the returned enum will
+         * equal ({@code ==}) the supplied {@code value}.
+         *
+         * @param value The flags value as represented by Discord.
+         * @return The {@link EnumSet} of flags.
+         */
+        public static EnumSet<Flag> of(final int value) {
+            final EnumSet<Flag> messageFlags = EnumSet.noneOf(Flag.class);
+            for (Flag flag : Flag.values()) {
+                long flagValue = flag.getFlag();
+                if((flagValue & value) == flagValue) {
+                    messageFlags.add(flag);
+                }
+            }
+            return messageFlags;
+        }
+    }
+
     /** Represents the various types of messages. */
     public enum Type {
 
@@ -477,7 +579,10 @@ public final class Message implements Entity {
         USER_PREMIUM_GUILD_SUBSCRIPTION_TIER_2(10),
 
         /** A message created when an user boost a guild and the guild reach the tier 3. */
-        USER_PREMIUM_GUILD_SUBSCRIPTION_TIER_3(11);
+        USER_PREMIUM_GUILD_SUBSCRIPTION_TIER_3(11),
+
+        /** A message created when an user follow a channel from another guild into specific channel (<a href="https://support.discordapp.com/hc/en-us/articles/360028384531-Server-Following-FAQ">Server Following</a>). */
+        CHANNEL_FOLLOW_ADD(12);
 
         /** The underlying value as represented by Discord. */
         private final int value;
@@ -521,6 +626,7 @@ public final class Message implements Entity {
                 case 9: return USER_PREMIUM_GUILD_SUBSCRIPTION_TIER_1;
                 case 10: return USER_PREMIUM_GUILD_SUBSCRIPTION_TIER_2;
                 case 11: return USER_PREMIUM_GUILD_SUBSCRIPTION_TIER_3;
+                case 12: return CHANNEL_FOLLOW_ADD;
                 default: return EntityUtil.throwUnsupportedDiscordValue(value);
             }
         }
