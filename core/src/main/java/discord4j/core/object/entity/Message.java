@@ -16,6 +16,7 @@
  */
 package discord4j.core.object.entity;
 
+import discord4j.common.annotations.Experimental;
 import discord4j.common.json.UserResponse;
 import discord4j.core.DiscordClient;
 import discord4j.core.ServiceMediator;
@@ -296,22 +297,22 @@ public final class Message implements Entity {
     }
 
     /**
-     * Gets the Message Reference (Follow channel system), if present.
+     * Returns the {@link MessageReference} in this message (Server Following feature), if present.
      *
      * @return The {@code MessageReference}, if present.
      */
     public Optional<MessageReference> getMessageReference() {
         return Optional.ofNullable(data.getMessageReference())
-            .map(bean -> new MessageReference(serviceMediator,bean));
+                .map(bean -> new MessageReference(serviceMediator, bean));
     }
 
     /**
-     * Gets the flags of Message.
+     * Returns the flags of this {@link Message}, describing its features.
      *
-     * @return A {@code EnumSet} with the flags of message.
+     * @return A {@code EnumSet} with the flags of this message.
      */
     public EnumSet<Flag> getFlags() {
-        if(data.getFlags() != null) {
+        if (data.getFlags() != null) {
             return Flag.of(data.getFlags());
         }
         return EnumSet.noneOf(Flag.class);
@@ -378,18 +379,18 @@ public final class Message implements Entity {
     }
 
     /**
-     * Requests to suppress all embeds in this message.
-     * if the message have the embeds suppressed then this action can undo the suppressed embeds.
+     * Requests to suppress all embeds in this message. If the message have the embeds suppressed then this action
+     * can undo the suppressed embeds.
      *
      * @param suppress Determine if you need suppress or not the embeds.
-     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the process has been complete.
-     * If an error is received, it is emitted through the {@code Mono}.
-     * @deprecated Discord draft api (subject to change)
+     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the process has been
+     * completed. If an error is received, it is emitted through the {@code Mono}.
      */
+    @Experimental
     public Mono<Void> suppressEmbeds(final boolean suppress) {
         return serviceMediator.getRestClient().getChannelService()
-            .suppressEmbeds(getChannelId().asLong(), getId().asLong(), new SuppressEmbedsRequest(suppress))
-            .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex()));
+                .suppressEmbeds(getChannelId().asLong(), getId().asLong(), new SuppressEmbedsRequest(suppress))
+                .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex()));
     }
 
     /**
@@ -479,7 +480,7 @@ public final class Message implements Entity {
         return EntityUtil.hashCode(this);
     }
 
-    /** Represents the Flags of messages. */
+    /** Describes extra features of a message. */
     public enum Flag {
 
         /** This message has been published to subscribed channels (via Channel Following). */
@@ -498,7 +499,7 @@ public final class Message implements Entity {
         private final int flag;
 
         /**
-         * Constructs a {@code Message.Flags}.
+         * Constructs a {@code Message.Flag}.
          */
         Flag(final int value) {
             this.value = value;
@@ -524,8 +525,8 @@ public final class Message implements Entity {
         }
 
         /**
-         * Gets the flags of message. It is guaranteed that invoking {@link #getValue()} from the returned enum will
-         * equal ({@code ==}) the supplied {@code value}.
+         * Gets the flags of message. It is guaranteed that invoking {@link #getValue()} from the returned enum will be
+         * equal ({@code ==}) to the supplied {@code value}.
          *
          * @param value The flags value as represented by Discord.
          * @return The {@link EnumSet} of flags.
@@ -534,7 +535,7 @@ public final class Message implements Entity {
             final EnumSet<Flag> messageFlags = EnumSet.noneOf(Flag.class);
             for (Flag flag : Flag.values()) {
                 long flagValue = flag.getFlag();
-                if((flagValue & value) == flagValue) {
+                if ((flagValue & value) == flagValue) {
                     messageFlags.add(flag);
                 }
             }
@@ -581,7 +582,10 @@ public final class Message implements Entity {
         /** A message created when an user boost a guild and the guild reach the tier 3. */
         USER_PREMIUM_GUILD_SUBSCRIPTION_TIER_3(11),
 
-        /** A message created when an user follow a channel from another guild into specific channel (<a href="https://support.discordapp.com/hc/en-us/articles/360028384531-Server-Following-FAQ">Server Following</a>). */
+        /**
+         * A message created when a user follows a channel from another guild into specific channel (
+         * <a href="https://support.discordapp.com/hc/en-us/articles/360028384531-Server-Following-FAQ">Server Following</a>).
+         */
         CHANNEL_FOLLOW_ADD(12);
 
         /** The underlying value as represented by Discord. */
@@ -606,8 +610,8 @@ public final class Message implements Entity {
         }
 
         /**
-         * Gets the type of message. It is guaranteed that invoking {@link #getValue()} from the returned enum will
-         * equal ({@code ==}) the supplied {@code value}.
+         * Gets the type of message. It is guaranteed that invoking {@link #getValue()} from the returned enum will be
+         * equal ({@code ==}) to the supplied {@code value}.
          *
          * @param value The underlying value as represented by Discord.
          * @return The type of message.

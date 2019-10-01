@@ -89,7 +89,8 @@ public final class MessageBean implements Serializable {
 
         pinned = response.isPinned();
         webhookId = response.getWebhookId();
-        messageReference = (response.getMessageReference() != null) ? new MessageReferenceBean(response.getMessageReference()) : null;
+        messageReference = (response.getMessageReference() != null) ?
+                new MessageReferenceBean(response.getMessageReference()) : null;
         flags = response.getFlags();
         type = response.getType();
     }
@@ -121,7 +122,8 @@ public final class MessageBean implements Serializable {
         this.reactions = null; // no reactions on message_create
         pinned = messageCreate.isPinned();
         webhookId = messageCreate.getWebhookId();
-        messageReference = (messageCreate.getMessageReference() != null) ? new MessageReferenceBean(messageCreate.getMessageReference()) : null;
+        messageReference = (messageCreate.getMessageReference() != null) ?
+                new MessageReferenceBean(messageCreate.getMessageReference()) : null;
         flags = messageCreate.getFlags();
         type = messageCreate.getType();
     }

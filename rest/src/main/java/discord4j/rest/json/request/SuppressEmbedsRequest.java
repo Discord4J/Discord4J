@@ -12,8 +12,8 @@ public class SuppressEmbedsRequest {
     @Override
     public String toString() {
         return "SuppressEmbedsRequest{" +
-            "suppress=" + suppress +
-            '}';
+                "suppress=" + suppress +
+                '}';
     }
 
 }

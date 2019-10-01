@@ -1,5 +1,6 @@
 package discord4j.core.object;
 
+import discord4j.common.annotations.Experimental;
 import discord4j.core.DiscordClient;
 import discord4j.core.ServiceMediator;
 import discord4j.core.object.data.stored.MessageReferenceBean;
@@ -9,11 +10,12 @@ import java.util.Objects;
 import java.util.Optional;
 
 /**
- * A Message Reference used in Webhooks from Follow channel system.
- * All data here is of the Guild Source of followed channel.
+ * A Message Reference used by the Server Following feature.
  *
- * @see <a href="https://discordapp.com/developers/docs/resources/channel#message-reference-structure?">MessageReference Object</a>
+ * @see <a href="https://discordapp.com/developers/docs/resources/channel#message-object-message-structure">
+ * MessageReference Object</a>
  */
+@Experimental
 public class MessageReference implements DiscordObject {
 
     /** The ServiceMediator associated to this object. */
@@ -23,9 +25,9 @@ public class MessageReference implements DiscordObject {
     private final MessageReferenceBean data;
 
     /**
-     * Constructs an {@code MessageReference} with an associated ServiceMediator and Discord data.
+     * Constructs a {@code MessageReference} with an associated {@link ServiceMediator} and Discord data.
      *
-     * @param serviceMediator The ServiceMediator associated to this object, must be non-null.
+     * @param serviceMediator The {@link ServiceMediator} associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
      */
     public MessageReference(final ServiceMediator serviceMediator, final MessageReferenceBean data) {
@@ -39,12 +41,12 @@ public class MessageReference implements DiscordObject {
 
     public Optional<Snowflake> getGuildId() {
         return Optional.ofNullable(data.getGuildId())
-            .map(Snowflake::of);
+                .map(Snowflake::of);
     }
 
     public Optional<Snowflake> getMessageId() {
         return Optional.ofNullable(data.getMessageId())
-            .map(Snowflake::of);
+                .map(Snowflake::of);
     }
 
     @Override
@@ -55,7 +57,7 @@ public class MessageReference implements DiscordObject {
     @Override
     public String toString() {
         return "MessageReference{" +
-            "data=" + data +
-            '}';
+                "data=" + data +
+                '}';
     }
 }

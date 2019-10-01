@@ -35,9 +35,9 @@ public class MessageReferenceResponse {
     @Override
     public String toString() {
         return "MessageReferenceResponse{" +
-            ", channelId=" + channelId +
-            ", guildId=" + guildId +
-            ", messageId=" + messageId +
-            '}';
+                ", channelId=" + channelId +
+                ", guildId=" + guildId +
+                ", messageId=" + messageId +
+                '}';
     }
 }

@@ -193,6 +193,7 @@ public class MessageCreate implements Dispatch {
     }
 
     public static class Activity {
+
         private int type;
         @JsonProperty("party_id")
         @Nullable
