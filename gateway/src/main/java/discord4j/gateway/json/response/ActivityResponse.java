@@ -113,14 +113,14 @@ public class ActivityResponse {
     }
 
     public static class Timestamps {
-        private Possible<Integer> start;
-        private Possible<Integer> end;
+        private Possible<Long> start;
+        private Possible<Long> end;
 
-        public Possible<Integer> getStart() {
+        public Possible<Long> getStart() {
             return start;
         }
 
-        public Possible<Integer> getEnd() {
+        public Possible<Long> getEnd() {
             return end;
         }
 

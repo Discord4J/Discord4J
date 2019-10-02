@@ -29,9 +29,9 @@ public class ActivityBean implements Serializable {
     @Nullable
     private String url;
     @Nullable
-    private Integer start;
+    private Long start;
     @Nullable
-    private Integer end;
+    private Long end;
     @Nullable
     private Long applicationId;
     @Nullable
@@ -157,20 +157,20 @@ public class ActivityBean implements Serializable {
     }
 
     @Nullable
-    public Integer getStart() {
+    public Long getStart() {
         return start;
     }
 
-    public void setStart(@Nullable Integer start) {
+    public void setStart(@Nullable Long start) {
         this.start = start;
     }
 
     @Nullable
-    public Integer getEnd() {
+    public Long getEnd() {
         return end;
     }
 
-    public void setEnd(@Nullable Integer end) {
+    public void setEnd(@Nullable Long end) {
         this.end = end;
     }
 
