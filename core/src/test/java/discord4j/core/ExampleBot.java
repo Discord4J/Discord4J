@@ -99,19 +99,24 @@ public class ExampleBot {
         eventHandlers.add(new BurstMessages());
 
         // Build a safe event-processing pipeline
-        client.getEventDispatcher().on(MessageCreateEvent.class)
-                .filter(event -> event.getMessage().getAuthor()
-                        .map(User::getId)
-                        .map(Snowflake::asLong)
-                        .filter(id -> ownerId.get() == id)
-                        .isPresent())
-                .flatMap(event -> Mono.whenDelayError(eventHandlers.stream()
-                        .map(handler -> handler.onMessageCreate(event))
-                        .collect(Collectors.toList())))
-                .onErrorContinue((t, o) -> log.error("Error while processing event", t))
-                .subscribe();
+        Mono<Void> events = client.getEventDispatcher()
+                .on(MessageCreateEvent.class, event -> {
+                    boolean fromOwner = event.getMessage().getAuthor()
+                            .map(User::getId)
+                            .map(Snowflake::asLong)
+                            .filter(id -> ownerId.get() == id)
+                            .isPresent();
+                    if (fromOwner) {
+                        return Mono.whenDelayError(eventHandlers.stream()
+                                .map(handler -> handler.onMessageCreate(event))
+                                .collect(Collectors.toList()));
+                    } else {
+                        return Mono.empty();
+                    }
+                })
+                .then();
 
-        client.login().block();
+        Mono.when(events, client.login()).block();
     }
 
     public static class AddRole extends EventHandler {
