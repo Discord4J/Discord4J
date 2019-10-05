@@ -17,113 +17,35 @@
 
 package discord4j.core;
 
-import discord4j.core.shard.LocalShardCoordinator;
-import discord4j.core.shard.ShardAwareStoreService;
+import discord4j.core.event.EventDispatcher;
 import discord4j.core.shard.ShardCoordinator;
-import discord4j.core.shard.ShardingJdkStoreRegistry;
 import discord4j.gateway.GatewayClient;
-import discord4j.gateway.retry.ReconnectOptions;
-import discord4j.store.api.service.StoreService;
-import discord4j.store.api.service.StoreServiceLoader;
-import discord4j.store.jdk.JdkStoreService;
-import reactor.core.scheduler.Scheduler;
-import reactor.core.scheduler.Schedulers;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
 
 /**
  * A set of dependencies required to build and coordinate multiple {@link GatewayClient} instances.
  */
 public class GatewayResources {
 
-    private final StoreService storeService;
-    private final ReconnectOptions reconnectOptions;
+    private final StateHolder stateHolder;
+    private final EventDispatcher eventDispatcher;
     private final ShardCoordinator shardCoordinator;
-    private final Scheduler voiceConnectionScheduler;
 
-    protected GatewayResources(Builder builder) {
-        StoreService storeService = builder.storeService;
-
-        if (storeService == null) {
-            Map<Class<? extends StoreService>, Integer> priority = new HashMap<>();
-            // We want almost minimum priority, so that jdk can beat no-op but most implementations will beat jdk
-            priority.put(JdkStoreService.class, Integer.MAX_VALUE - 1);
-            StoreServiceLoader storeServiceLoader = new StoreServiceLoader(priority);
-            storeService = new ShardAwareStoreService(new ShardingJdkStoreRegistry(),
-                    storeServiceLoader.getStoreService());
-        }
-
-        this.storeService = Objects.requireNonNull(storeService);
-        this.reconnectOptions = Objects.requireNonNull(builder.reconnectOptions);
-        this.shardCoordinator = Objects.requireNonNull(builder.shardCoordinator);
-        this.voiceConnectionScheduler = Objects.requireNonNull(builder.voiceConnectionScheduler);
+    public GatewayResources(StateHolder stateHolder, EventDispatcher eventDispatcher,
+                            ShardCoordinator shardCoordinator) {
+        this.stateHolder = stateHolder;
+        this.eventDispatcher = eventDispatcher;
+        this.shardCoordinator = shardCoordinator;
     }
 
-    public static Builder builder() {
-        return new Builder();
+    public StateHolder getStateHolder() {
+        return stateHolder;
     }
 
-    public Builder mutate() {
-        Builder builder = new Builder();
-
-        builder.setStoreService(getStoreService())
-                .setReconnectOptions(getReconnectOptions())
-                .setShardCoordinator(getShardCoordinator())
-                .setVoiceConnectionScheduler(getVoiceConnectionScheduler());
-
-        return builder;
-    }
-
-    public static class Builder {
-
-        private StoreService storeService;
-        private ReconnectOptions reconnectOptions = ReconnectOptions.builder().build();
-        private ShardCoordinator shardCoordinator = new LocalShardCoordinator();
-        private Scheduler voiceConnectionScheduler = Schedulers.elastic();
-
-        protected Builder() {
-        }
-
-        public Builder setStoreService(StoreService storeService) {
-            this.storeService = storeService;
-            return this;
-        }
-
-        public Builder setReconnectOptions(ReconnectOptions reconnectOptions) {
-            this.reconnectOptions = reconnectOptions;
-            return this;
-        }
-
-        public Builder setShardCoordinator(ShardCoordinator shardCoordinator) {
-            this.shardCoordinator = shardCoordinator;
-            return this;
-        }
-
-        public Builder setVoiceConnectionScheduler(Scheduler voiceConnectionScheduler) {
-            this.voiceConnectionScheduler = voiceConnectionScheduler;
-            return this;
-        }
-
-        public GatewayResources build() {
-            return new GatewayResources(this);
-        }
-    }
-
-    public StoreService getStoreService() {
-        return storeService;
-    }
-
-    public ReconnectOptions getReconnectOptions() {
-        return reconnectOptions;
+    public EventDispatcher getEventDispatcher() {
+        return eventDispatcher;
     }
 
     public ShardCoordinator getShardCoordinator() {
         return shardCoordinator;
-    }
-
-    public Scheduler getVoiceConnectionScheduler() {
-        return voiceConnectionScheduler;
     }
 }

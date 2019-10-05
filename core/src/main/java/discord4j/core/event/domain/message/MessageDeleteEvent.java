@@ -16,7 +16,7 @@
  */
 package discord4j.core.event.domain.message;
 
-import discord4j.core.Gateway;
+import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.core.object.util.Snowflake;
@@ -42,7 +42,7 @@ public class MessageDeleteEvent extends MessageEvent {
     @Nullable
     private final Message message;
 
-    public MessageDeleteEvent(Gateway gateway, ShardInfo shardInfo, long messageId, long channelId, @Nullable Message message) {
+    public MessageDeleteEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, long messageId, long channelId, @Nullable Message message) {
         super(gateway, shardInfo);
         this.messageId = messageId;
         this.channelId = channelId;
@@ -84,7 +84,7 @@ public class MessageDeleteEvent extends MessageEvent {
      * {@link Message} was deleted in. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<MessageChannel> getChannel() {
-        return getGateway().getChannelById(getChannelId()).cast(MessageChannel.class);
+        return getClient().getChannelById(getChannelId()).cast(MessageChannel.class);
     }
 
     @Override

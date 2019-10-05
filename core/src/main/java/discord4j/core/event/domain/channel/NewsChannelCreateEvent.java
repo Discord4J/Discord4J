@@ -16,7 +16,7 @@
  */
 package discord4j.core.event.domain.channel;
 
-import discord4j.core.Gateway;
+import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.channel.NewsChannel;
 import discord4j.gateway.ShardInfo;
 
@@ -31,7 +31,7 @@ public class NewsChannelCreateEvent extends ChannelEvent {
 
     private final NewsChannel channel;
 
-    public NewsChannelCreateEvent(Gateway gateway, ShardInfo shardInfo, NewsChannel channel) {
+    public NewsChannelCreateEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, NewsChannel channel) {
         super(gateway, shardInfo);
         this.channel = channel;
     }

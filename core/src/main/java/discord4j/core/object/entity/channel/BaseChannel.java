@@ -17,7 +17,7 @@
 package discord4j.core.object.entity.channel;
 
 import discord4j.core.DiscordClient;
-import discord4j.core.Gateway;
+import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.data.stored.ChannelBean;
 import discord4j.core.object.util.Snowflake;
 import discord4j.core.util.EntityUtil;
@@ -33,26 +33,26 @@ class BaseChannel implements Channel {
     private final ChannelBean data;
 
     /** The gateway associated to this object. */
-    private final Gateway gateway;
+    private final GatewayDiscordClient gateway;
 
     /**
      * Constructs a {@code BaseChannel} with an associated ServiceMediator and Discord data.
      *
-     * @param gateway The {@link Gateway} associated to this object, must be non-null.
+     * @param gateway The {@link GatewayDiscordClient} associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
      */
-    BaseChannel(final Gateway gateway, final ChannelBean data) {
+    BaseChannel(final GatewayDiscordClient gateway, final ChannelBean data) {
         this.gateway = Objects.requireNonNull(gateway);
         this.data = Objects.requireNonNull(data);
     }
 
     @Override
     public final DiscordClient getClient() {
-        return gateway.getDiscordClient();
+        return gateway.rest();
     }
 
     @Override
-    public Gateway getGateway() {
+    public GatewayDiscordClient getGateway() {
         return gateway;
     }
 

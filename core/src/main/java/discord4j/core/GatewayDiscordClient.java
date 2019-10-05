@@ -45,7 +45,6 @@ import reactor.core.publisher.Mono;
 import reactor.core.publisher.MonoProcessor;
 
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
@@ -59,7 +58,7 @@ import java.util.stream.Collectors;
  * <p>
  * The following are some of the resources available through this aggregate:
  * <ul>
- *     <li>Access to the base {@link DiscordClient} for direct REST API operations.</li>
+ *     <li>Access to the base {@link DiscordClient} for direct REST API operations through {@link #rest()}.</li>
  *     <li>Access to {@link CoreResources} like the {@link RestClient} used to perform API requests.</li>
  *     <li>Access to {@link GatewayResources} that configure Gateway operations and coordination among shards.</li>
  *     <li>Access to {@link EventDispatcher} publishing events from all participating shards.</li>
@@ -67,85 +66,27 @@ import java.util.stream.Collectors;
  *     structure during runtime is not recommended and can lead to incorrect or missing values.</li>
  * </ul>
  */
-public class Gateway {
+public class GatewayDiscordClient {
 
     private final DiscordClient discordClient;
-    private final CoreResources coreResources;
     private final GatewayResources gatewayResources;
-    private final EventDispatcher eventDispatcher;
     private final MonoProcessor<Void> closeProcessor;
-    private final StateHolder stateHolder;
-    private final Map<Integer, GatewayClient> gatewayClientMap;
-    private final Map<Integer, VoiceClient> voiceClientMap;
+    private final Map<Integer, GatewayClient> gatewayClientMap = new ConcurrentHashMap<>();
+    private final Map<Integer, VoiceClient> voiceClientMap = new ConcurrentHashMap<>();
 
-    protected Gateway(Builder builder) {
-        this.discordClient = Objects.requireNonNull(builder.discordClient);
-        this.coreResources = Objects.requireNonNull(builder.coreResources);
-        this.gatewayResources = Objects.requireNonNull(builder.gatewayResources);
-        this.eventDispatcher = Objects.requireNonNull(builder.eventDispatcher);
-        this.closeProcessor = Objects.requireNonNull(builder.closeProcessor);
-        this.stateHolder = Objects.requireNonNull(builder.stateHolder);
-        this.gatewayClientMap = new ConcurrentHashMap<>();
-        this.voiceClientMap = new ConcurrentHashMap<>();
+    public GatewayDiscordClient(DiscordClient discordClient, GatewayResources gatewayResources,
+                                MonoProcessor<Void> closeProcessor) {
+        this.discordClient = discordClient;
+        this.gatewayResources = gatewayResources;
+        this.closeProcessor = closeProcessor;
     }
 
-    public static Gateway.Builder builder() {
-        return new Builder();
-    }
-
-    public static class Builder {
-
-        private DiscordClient discordClient;
-        private CoreResources coreResources;
-        private GatewayResources gatewayResources;
-        private EventDispatcher eventDispatcher;
-        private MonoProcessor<Void> closeProcessor;
-        private StateHolder stateHolder;
-
-        protected Builder() {
-        }
-
-        public Builder setDiscordClient(DiscordClient discordClient) {
-            this.discordClient = discordClient;
-            return this;
-        }
-
-        public Builder setCoreResources(CoreResources coreResources) {
-            this.coreResources = coreResources;
-            return this;
-        }
-
-        public Builder setGatewayResources(GatewayResources gatewayResources) {
-            this.gatewayResources = gatewayResources;
-            return this;
-        }
-
-        public Builder setEventDispatcher(EventDispatcher eventDispatcher) {
-            this.eventDispatcher = eventDispatcher;
-            return this;
-        }
-
-        public Builder setCloseProcessor(MonoProcessor<Void> closeProcessor) {
-            this.closeProcessor = closeProcessor;
-            return this;
-        }
-
-        public Builder setStateHolder(StateHolder stateHolder) {
-            this.stateHolder = stateHolder;
-            return this;
-        }
-
-        public Gateway build() {
-            return new Gateway(this);
-        }
-    }
-
-    public DiscordClient getDiscordClient() {
+    public DiscordClient rest() {
         return discordClient;
     }
 
     public CoreResources getCoreResources() {
-        return coreResources;
+        return discordClient.getCoreResources();
     }
 
     public GatewayResources getGatewayResources() {
@@ -153,7 +94,7 @@ public class Gateway {
     }
 
     public EventDispatcher getEventDispatcher() {
-        return eventDispatcher;
+        return gatewayResources.getEventDispatcher();
     }
 
     public Mono<Void> getCloseProcessor() {
@@ -161,7 +102,7 @@ public class Gateway {
     }
 
     public StateHolder getStateHolder() {
-        return stateHolder;
+        return gatewayResources.getStateHolder();
     }
 
     public Map<Integer, GatewayClient> getGatewayClientMap() {
@@ -173,7 +114,7 @@ public class Gateway {
     }
 
     public RestClient getRestClient() {
-        return coreResources.getRestClient();
+        return getCoreResources().getRestClient();
     }
 
     /**
@@ -184,7 +125,7 @@ public class Gateway {
      * supplied ID. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Channel> getChannelById(final Snowflake channelId) {
-        final Mono<ChannelBean> channel = stateHolder.getChannelStore()
+        final Mono<ChannelBean> channel = getStateHolder().getChannelStore()
                 .find(channelId.asLong());
 
         final Mono<ChannelBean> rest = getRestClient().getChannelService()
@@ -204,7 +145,7 @@ public class Gateway {
      * ID. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Guild> getGuildById(final Snowflake guildId) {
-        return stateHolder.getGuildStore()
+        return getStateHolder().getGuildStore()
                 .find(guildId.asLong())
                 .cast(BaseGuildBean.class)
                 .switchIfEmpty(getRestClient().getGuildService()
@@ -222,7 +163,7 @@ public class Gateway {
      * supplied IDs. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<GuildEmoji> getGuildEmojiById(final Snowflake guildId, final Snowflake emojiId) {
-        return stateHolder.getGuildEmojiStore()
+        return getStateHolder().getGuildEmojiStore()
                 .find(emojiId.asLong())
                 .switchIfEmpty(getRestClient().getEmojiService()
                         .getGuildEmoji(guildId.asLong(), emojiId.asLong())
@@ -239,7 +180,7 @@ public class Gateway {
      * IDs. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Member> getMemberById(final Snowflake guildId, final Snowflake userId) {
-        final Mono<MemberBean> member = stateHolder.getMemberStore()
+        final Mono<MemberBean> member = getStateHolder().getMemberStore()
                 .find(LongLongTuple2.of(guildId.asLong(), userId.asLong()))
                 .switchIfEmpty(getRestClient().getGuildService()
                         .getGuildMember(guildId.asLong(), userId.asLong())
@@ -258,7 +199,7 @@ public class Gateway {
      * supplied IDs. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Message> getMessageById(final Snowflake channelId, final Snowflake messageId) {
-        return stateHolder.getMessageStore()
+        return getStateHolder().getMessageStore()
                 .find(messageId.asLong())
                 .switchIfEmpty(getRestClient().getChannelService()
                         .getMessage(channelId.asLong(), messageId.asLong())
@@ -275,7 +216,7 @@ public class Gateway {
      * IDs. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Role> getRoleById(final Snowflake guildId, final Snowflake roleId) {
-        return stateHolder.getRoleStore()
+        return getStateHolder().getRoleStore()
                 .find(roleId.asLong())
                 .switchIfEmpty(getRestClient().getGuildService()
                         .getGuildRoles(guildId.asLong())
@@ -334,7 +275,7 @@ public class Gateway {
                 getRestClient().getUserService()
                         .getCurrentUserGuilds(params);
 
-        return stateHolder.getGuildStore()
+        return getStateHolder().getGuildStore()
                 .values()
                 .cast(BaseGuildBean.class)
                 .switchIfEmpty(PaginationUtil.paginateAfter(makeRequest, UserGuildResponse::getId, 0L, 100)
@@ -352,7 +293,7 @@ public class Gateway {
      * error is received, it is emitted through the {@code Flux}.
      */
     public Flux<User> getUsers() {
-        return stateHolder.getUserStore()
+        return getStateHolder().getUserStore()
                 .values()
                 .map(bean -> new User(this, bean));
     }
@@ -376,7 +317,7 @@ public class Gateway {
      * received, it is emitted through the {@code Mono}.
      */
     public Mono<User> getSelf() {
-        final long selfId = stateHolder.getSelfId().get();
+        final long selfId = getStateHolder().getSelfId().get();
         return Mono.just(selfId)
                 .filter(it -> it != 0)
                 .map(Snowflake::of)
@@ -393,7 +334,7 @@ public class Gateway {
      * @return The bot user's ID.
      */
     public Optional<Snowflake> getSelfId() {
-        return Optional.of(stateHolder.getSelfId().get())
+        return Optional.of(getStateHolder().getSelfId().get())
                 .filter(it -> it != 0)
                 .map(Snowflake::of);
     }
@@ -466,7 +407,7 @@ public class Gateway {
      * supplied ID. If an error is received, it is emitted through the {@code Mono}.
      */
     private Mono<UserBean> getUserBean(final Snowflake userId) {
-        return stateHolder.getUserStore()
+        return getStateHolder().getUserStore()
                 .find(userId.asLong())
                 .switchIfEmpty(getRestClient().getUserService()
                         .getUser(userId.asLong())
@@ -474,12 +415,12 @@ public class Gateway {
     }
 
     /**
-     * Disconnects this {@link Gateway} from Discord upon subscribing. All joining {@link GatewayClient
+     * Disconnects this {@link GatewayDiscordClient} from Discord upon subscribing. All joining {@link GatewayClient
      * GatewayClients} will attempt to gracefully close and complete this {@link Mono} after all of them have
      * disconnected.
      *
      * @return A {@link Mono} that, on subscription, will disconnect each connection established by this
-     * {@link Gateway} and complete after all of them have closed.
+     * {@link GatewayDiscordClient} and complete after all of them have closed.
      */
     public Mono<Void> logout() {
         return Mono.whenDelayError(gatewayClientMap.values().stream()

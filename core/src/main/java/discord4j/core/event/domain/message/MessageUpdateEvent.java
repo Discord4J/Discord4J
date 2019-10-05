@@ -16,7 +16,7 @@
  */
 package discord4j.core.event.domain.message;
 
-import discord4j.core.Gateway;
+import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.Embed;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Message;
@@ -56,7 +56,7 @@ public class MessageUpdateEvent extends MessageEvent {
     private final boolean embedsChanged;
     private final List<Embed> currentEmbeds;
 
-    public MessageUpdateEvent(Gateway gateway, ShardInfo shardInfo, long messageId, long channelId, @Nullable Long guildId,
+    public MessageUpdateEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, long messageId, long channelId, @Nullable Long guildId,
                               @Nullable Message old, boolean contentChanged, @Nullable String currentContent,
                               boolean embedsChanged, List<Embed> currentEmbeds) {
         super(gateway, shardInfo);
@@ -86,7 +86,7 @@ public class MessageUpdateEvent extends MessageEvent {
      * If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Message> getMessage() {
-        return getGateway().getMessageById(getChannelId(), getMessageId());
+        return getClient().getMessageById(getChannelId(), getMessageId());
     }
 
     /**
@@ -105,7 +105,7 @@ public class MessageUpdateEvent extends MessageEvent {
      * {@link Message}. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<MessageChannel> getChannel() {
-        return getGateway().getChannelById(getChannelId()).cast(MessageChannel.class);
+        return getClient().getChannelById(getChannelId()).cast(MessageChannel.class);
     }
 
     /**
@@ -124,7 +124,7 @@ public class MessageUpdateEvent extends MessageEvent {
      * {@link Message}. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Guild> getGuild() {
-        return Mono.justOrEmpty(getGuildId()).flatMap(getGateway()::getGuildById);
+        return Mono.justOrEmpty(getGuildId()).flatMap(getClient()::getGuildById);
     }
 
     /**

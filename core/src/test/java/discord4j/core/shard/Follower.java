@@ -18,7 +18,6 @@
 package discord4j.core.shard;
 
 import discord4j.core.DiscordClient;
-import discord4j.core.GatewayResources;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import reactor.core.publisher.Mono;
 
@@ -26,14 +25,13 @@ public class Follower {
 
     public static void main(String[] args) {
         DiscordClient.create(System.getenv("token"))
-                .gateway(GatewayResources.builder()
-                        .setShardCoordinator(new RSocketShardCoordinator("localhost", 32323))
-                        .build())
+                .gateway()
+                .setShardCoordinator(new RSocketShardCoordinator("localhost", 32323))
                 .setShardFilter(shard -> shard.getIndex() % 2 != 0)
                 .withConnection(gateway -> {
                     Mono<Void> exitHandler = gateway.on(MessageCreateEvent.class)
                             .filter(event -> event.getMessage().getContent().orElse("").equals("Test 0"))
-                            .flatMap(event -> event.getGateway().logout())
+                            .flatMap(event -> event.getClient().logout())
                             .then();
                     return Mono.when(exitHandler, gateway.onDisconnect());
                 })

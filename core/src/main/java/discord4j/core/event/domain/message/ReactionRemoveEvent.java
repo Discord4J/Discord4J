@@ -16,7 +16,7 @@
  */
 package discord4j.core.event.domain.message;
 
-import discord4j.core.Gateway;
+import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.User;
@@ -48,7 +48,7 @@ public class ReactionRemoveEvent extends MessageEvent {
     private final Long guildId;
     private final ReactionEmoji emoji;
 
-    public ReactionRemoveEvent(Gateway gateway, ShardInfo shardInfo, long userId, long channelId, long messageId,
+    public ReactionRemoveEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, long userId, long channelId, long messageId,
                                @Nullable Long guildId, ReactionEmoji emoji) {
         super(gateway, shardInfo);
         this.userId = userId;
@@ -74,7 +74,7 @@ public class ReactionRemoveEvent extends MessageEvent {
      * If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<User> getUser() {
-        return getGateway().getUserById(getUserId());
+        return getClient().getUserById(getUserId());
     }
 
     /**
@@ -94,7 +94,7 @@ public class ReactionRemoveEvent extends MessageEvent {
      * {@link Message} involved. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<MessageChannel> getChannel() {
-        return getGateway().getChannelById(getChannelId()).cast(MessageChannel.class);
+        return getClient().getChannelById(getChannelId()).cast(MessageChannel.class);
     }
 
     /**
@@ -113,7 +113,7 @@ public class ReactionRemoveEvent extends MessageEvent {
      * If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Message> getMessage() {
-        return getGateway().getMessageById(getChannelId(), getMessageId());
+        return getClient().getMessageById(getChannelId(), getMessageId());
     }
 
     /**
@@ -134,7 +134,7 @@ public class ReactionRemoveEvent extends MessageEvent {
      * {@link Message} involved, if present. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Guild> getGuild() {
-        return Mono.justOrEmpty(getGuildId()).flatMap(getGateway()::getGuildById);
+        return Mono.justOrEmpty(getGuildId()).flatMap(getClient()::getGuildById);
     }
 
     /**

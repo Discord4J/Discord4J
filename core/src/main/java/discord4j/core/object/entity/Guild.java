@@ -18,7 +18,7 @@ package discord4j.core.object.entity;
 
 import discord4j.common.json.GuildMemberResponse;
 import discord4j.core.DiscordClient;
-import discord4j.core.Gateway;
+import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.Ban;
 import discord4j.core.object.ExtendedInvite;
 import discord4j.core.object.Region;
@@ -74,7 +74,7 @@ public final class Guild implements Entity {
     private static final String BANNER_IMAGE_PATH = "banners/%s/%s";
 
     /** The gateway associated to this object. */
-    private final Gateway gateway;
+    private final GatewayDiscordClient gateway;
 
     /** The raw data as represented by Discord. */
     private final BaseGuildBean data;
@@ -82,21 +82,21 @@ public final class Guild implements Entity {
     /**
      * Constructs an {@code Guild} with an associated ServiceMediator and Discord data.
      *
-     * @param gateway The {@link Gateway} associated to this object, must be non-null.
+     * @param gateway The {@link GatewayDiscordClient} associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
      */
-    public Guild(final Gateway gateway, final BaseGuildBean data) {
+    public Guild(final GatewayDiscordClient gateway, final BaseGuildBean data) {
         this.gateway = Objects.requireNonNull(gateway);
         this.data = Objects.requireNonNull(data);
     }
 
     @Override
     public DiscordClient getClient() {
-        return gateway.getDiscordClient();
+        return gateway.rest();
     }
 
     @Override
-    public Gateway getGateway() {
+    public GatewayDiscordClient getGateway() {
         return gateway;
     }
 

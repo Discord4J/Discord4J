@@ -16,7 +16,7 @@
  */
 package discord4j.core.object.entity.channel;
 
-import discord4j.core.Gateway;
+import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.ExtendedInvite;
 import discord4j.core.object.data.ExtendedInviteBean;
 import discord4j.core.object.data.stored.ChannelBean;
@@ -30,7 +30,7 @@ import java.util.function.Consumer;
 
 class BaseCategorizableChannel extends BaseGuildChannel implements CategorizableChannel {
 
-    BaseCategorizableChannel(Gateway gateway, ChannelBean data) {
+    BaseCategorizableChannel(GatewayDiscordClient gateway, ChannelBean data) {
         super(gateway, data);
     }
 

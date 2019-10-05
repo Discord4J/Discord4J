@@ -16,7 +16,7 @@
  */
 package discord4j.core.event.domain.lifecycle;
 
-import discord4j.core.Gateway;
+import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.util.Snowflake;
 import discord4j.gateway.ShardInfo;
@@ -41,7 +41,7 @@ public class ReadyEvent extends GatewayLifecycleEvent {
     private final String sessionId;
     private final String[] trace;
 
-    public ReadyEvent(Gateway gateway, ShardInfo shardInfo, int gatewayVersion, User self, Set<Guild> guilds, String sessionId,
+    public ReadyEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, int gatewayVersion, User self, Set<Guild> guilds, String sessionId,
                       String[] trace) {
         super(gateway, shardInfo);
         this.gatewayVersion = gatewayVersion;

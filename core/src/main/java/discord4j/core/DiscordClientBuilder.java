@@ -47,20 +47,11 @@ public final class DiscordClientBuilder {
     private static final Logger log = Loggers.getLogger(DiscordClientBuilder.class);
 
     private String token;
-
-    @Nullable
-    private ReactorResources reactorResources;
-
-    @Nullable
-    private JacksonResources jacksonResources;
-
-    @Nullable
-    private RouterFactory routerFactory;
-
-    @Nullable
-    private RouterOptions routerOptions;
-
-    private boolean operatorDebug = true;
+    private ReactorResources reactorResources = null;
+    private JacksonResources jacksonResources = null;
+    private RouterFactory routerFactory = null;
+    private RouterOptions routerOptions = null;
+    private boolean debugMode = true;
 
     /**
      * Initialize a new builder with the given token.
@@ -139,8 +130,8 @@ public final class DiscordClientBuilder {
         return this;
     }
 
-    public DiscordClientBuilder setOperatorDebug(boolean operatorDebug) {
-        this.operatorDebug = operatorDebug;
+    public DiscordClientBuilder setDebugMode(boolean debugMode) {
+        this.debugMode = debugMode;
         return this;
     }
 
@@ -182,7 +173,7 @@ public final class DiscordClientBuilder {
      * @return a {@link DiscordClient} based on this bJHuilder parameters
      */
     public DiscordClient build() {
-        if (operatorDebug) {
+        if (debugMode) {
             Hooks.onOperatorDebug();
         }
 
@@ -193,12 +184,7 @@ public final class DiscordClientBuilder {
         RouterFactory routerFactory = initRouterFactory();
         Router router = initRouter(routerFactory, webClient);
         RestClient restClient = new RestClient(router);
-        CoreResources coreResources = CoreResources.builder()
-                .setReactorResources(reactor)
-                .setJacksonResources(jackson)
-                .setToken(token)
-                .setRestClient(restClient)
-                .build();
+        CoreResources coreResources = new CoreResources(token, restClient, reactor, jackson);
 
         Properties properties = GitProperties.getProperties();
         String url = properties.getProperty(GitProperties.APPLICATION_URL, "https://discord4j.com");

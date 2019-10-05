@@ -16,7 +16,7 @@
  */
 package discord4j.core.event.domain.channel;
 
-import discord4j.core.Gateway;
+import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.channel.TextChannel;
 import discord4j.gateway.ShardInfo;
 
@@ -31,7 +31,7 @@ public class TextChannelDeleteEvent extends ChannelEvent {
 
     private final TextChannel channel;
 
-    public TextChannelDeleteEvent(Gateway gateway, ShardInfo shardInfo, TextChannel channel) {
+    public TextChannelDeleteEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, TextChannel channel) {
         super(gateway, shardInfo);
         this.channel = channel;
     }

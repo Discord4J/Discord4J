@@ -16,7 +16,7 @@
  */
 package discord4j.core.event.domain.message;
 
-import discord4j.core.Gateway;
+import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.Event;
 import discord4j.core.object.entity.Message;
 import discord4j.gateway.ShardInfo;
@@ -26,7 +26,7 @@ import discord4j.gateway.ShardInfo;
  */
 public abstract class MessageEvent extends Event {
 
-    public MessageEvent(Gateway gateway, ShardInfo shardInfo) {
+    public MessageEvent(GatewayDiscordClient gateway, ShardInfo shardInfo) {
         super(gateway, shardInfo);
     }
 }

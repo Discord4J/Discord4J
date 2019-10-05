@@ -16,7 +16,7 @@
  */
 package discord4j.core.event.domain.guild;
 
-import discord4j.core.Gateway;
+import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.util.Snowflake;
@@ -48,7 +48,7 @@ public class MemberUpdateEvent extends GuildEvent {
     @Nullable
     private final String currentNickname;
 
-    public MemberUpdateEvent(Gateway gateway, ShardInfo shardInfo, long guildId, long memberId, @Nullable Member old,
+    public MemberUpdateEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, long guildId, long memberId, @Nullable Member old,
                              long[] currentRoles, @Nullable String currentNickname) {
         super(gateway, shardInfo);
 
@@ -75,7 +75,7 @@ public class MemberUpdateEvent extends GuildEvent {
      * If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Guild> getGuild() {
-        return getGateway().getGuildById(getGuildId());
+        return getClient().getGuildById(getGuildId());
     }
 
     /**
@@ -94,7 +94,7 @@ public class MemberUpdateEvent extends GuildEvent {
      * If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Member> getMember() {
-        return getGateway().getMemberById(getGuildId(), getMemberId());
+        return getClient().getMemberById(getGuildId(), getMemberId());
     }
 
     /**

@@ -16,7 +16,7 @@
  */
 package discord4j.core.event.domain.role;
 
-import discord4j.core.Gateway;
+import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Role;
 import discord4j.core.object.util.Snowflake;
@@ -42,7 +42,7 @@ public class RoleDeleteEvent extends RoleEvent {
     @Nullable
     private Role role;
 
-    public RoleDeleteEvent(Gateway gateway, ShardInfo shardInfo, long guildId, long roleId, @Nullable Role role) {
+    public RoleDeleteEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, long guildId, long roleId, @Nullable Role role) {
         super(gateway, shardInfo);
         this.guildId = guildId;
         this.roleId = roleId;
@@ -66,7 +66,7 @@ public class RoleDeleteEvent extends RoleEvent {
      * If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Guild> getGuild() {
-        return getGateway().getGuildById(getGuildId());
+        return getClient().getGuildById(getGuildId());
     }
 
     /**

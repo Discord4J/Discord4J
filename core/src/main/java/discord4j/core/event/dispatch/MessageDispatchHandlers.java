@@ -21,7 +21,7 @@ import discord4j.common.json.EmbedResponse;
 import discord4j.common.json.Mention;
 import discord4j.common.json.MessageMember;
 import discord4j.core.DiscordClient;
-import discord4j.core.Gateway;
+import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.message.*;
 import discord4j.core.object.Embed;
 import discord4j.core.object.data.stored.MemberBean;
@@ -46,8 +46,8 @@ import java.util.stream.Collectors;
 class MessageDispatchHandlers {
 
     static Mono<MessageCreateEvent> messageCreate(DispatchContext<MessageCreate> context) {
-        Gateway gateway = context.getGateway();
-        DiscordClient client = gateway.getDiscordClient();
+        GatewayDiscordClient gateway = context.getGateway();
+        DiscordClient client = gateway.rest();
 
         MessageBean bean = new MessageBean(context.getDispatch());
         Message message = new Message(gateway, bean);
@@ -77,8 +77,8 @@ class MessageDispatchHandlers {
     }
 
     static Mono<MessageDeleteEvent> messageDelete(DispatchContext<MessageDelete> context) {
-        Gateway gateway = context.getGateway();
-        DiscordClient client = gateway.getDiscordClient();
+        GatewayDiscordClient gateway = context.getGateway();
+        DiscordClient client = gateway.rest();
         long messageId = context.getDispatch().getId();
         long channelId = context.getDispatch().getChannelId();
 
@@ -94,8 +94,8 @@ class MessageDispatchHandlers {
     }
 
     static Mono<MessageBulkDeleteEvent> messageDeleteBulk(DispatchContext<MessageDeleteBulk> context) {
-        Gateway gateway = context.getGateway();
-        DiscordClient client = gateway.getDiscordClient();
+        GatewayDiscordClient gateway = context.getGateway();
+        DiscordClient client = gateway.rest();
         long messageIds[] = context.getDispatch().getIds();
         long channelId = context.getDispatch().getChannelId();
         long guildId = context.getDispatch().getGuildId();
@@ -115,8 +115,8 @@ class MessageDispatchHandlers {
     }
 
     static Mono<ReactionAddEvent> messageReactionAdd(DispatchContext<MessageReactionAdd> context) {
-        Gateway gateway = context.getGateway();
-        DiscordClient client = gateway.getDiscordClient();
+        GatewayDiscordClient gateway = context.getGateway();
+        DiscordClient client = gateway.rest();
 
         Long emojiId = context.getDispatch().getEmoji().getId();
         String emojiName = context.getDispatch().getEmoji().getName();
@@ -170,8 +170,8 @@ class MessageDispatchHandlers {
     }
 
     static Mono<ReactionRemoveEvent> messageReactionRemove(DispatchContext<MessageReactionRemove> context) {
-        Gateway gateway = context.getGateway();
-        DiscordClient client = gateway.getDiscordClient();
+        GatewayDiscordClient gateway = context.getGateway();
+        DiscordClient client = gateway.rest();
 
         Long emojiId = context.getDispatch().getEmoji().getId();
         String emojiName = context.getDispatch().getEmoji().getName();
@@ -222,8 +222,8 @@ class MessageDispatchHandlers {
     }
 
     static Mono<ReactionRemoveAllEvent> messageReactionRemoveAll(DispatchContext<MessageReactionRemoveAll> context) {
-        Gateway gateway = context.getGateway();
-        DiscordClient client = gateway.getDiscordClient();
+        GatewayDiscordClient gateway = context.getGateway();
+        DiscordClient client = gateway.rest();
         long channelId = context.getDispatch().getChannelId();
         long messageId = context.getDispatch().getMessageId();
         Long guildId = context.getDispatch().getGuildId();
@@ -239,8 +239,8 @@ class MessageDispatchHandlers {
     }
 
     static Mono<MessageUpdateEvent> messageUpdate(DispatchContext<MessageUpdate> context) {
-        Gateway gateway = context.getGateway();
-        DiscordClient client = gateway.getDiscordClient();
+        GatewayDiscordClient gateway = context.getGateway();
+        DiscordClient client = gateway.rest();
 
         long messageId = context.getDispatch().getId();
         long channelId = context.getDispatch().getChannelId();

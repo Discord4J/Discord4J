@@ -48,6 +48,7 @@ public final class StateHolder {
 
     private static final Logger log = Loggers.getLogger(StateHolder.class);
 
+    private final StoreService storeService;
     private final LongObjStore<ChannelBean> channelStore;
     private final LongObjStore<GuildBean> guildStore;
     private final LongObjStore<GuildEmojiBean> guildEmojiStore;
@@ -60,6 +61,8 @@ public final class StateHolder {
     private final AtomicLong selfId;
 
     StateHolder(final StoreService service, final StoreContext context) {
+        storeService = service;
+
         service.init(context);
 
         channelStore = service.provideLongObjStore(ChannelBean.class);
@@ -89,6 +92,10 @@ public final class StateHolder {
         voiceStateStore = service.provideGenericStore(LongLongTuple2.class, VoiceStateBean.class);
         log.debug("Using a {} backend for voice state storage.", voiceStateStore);
         selfId = new AtomicLong();
+    }
+
+    public StoreService getStoreService() {
+        return storeService;
     }
 
     public LongObjStore<ChannelBean> getChannelStore() {

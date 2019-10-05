@@ -17,7 +17,7 @@
 
 package discord4j.core.event.dispatch;
 
-import discord4j.core.Gateway;
+import discord4j.core.GatewayDiscordClient;
 import discord4j.gateway.ShardInfo;
 import discord4j.gateway.json.dispatch.Dispatch;
 
@@ -30,14 +30,14 @@ import discord4j.gateway.json.dispatch.Dispatch;
 public class DispatchContext<D extends Dispatch> {
 
     private final D dispatch;
-    private final Gateway gateway;
+    private final GatewayDiscordClient gateway;
     private final ShardInfo shardInfo;
 
-    public static <D extends Dispatch> DispatchContext<D> of(D dispatch, Gateway gateway, ShardInfo shardInfo) {
+    public static <D extends Dispatch> DispatchContext<D> of(D dispatch, GatewayDiscordClient gateway, ShardInfo shardInfo) {
         return new DispatchContext<>(dispatch, gateway, shardInfo);
     }
 
-    private DispatchContext(D dispatch, Gateway gateway, ShardInfo shardInfo) {
+    private DispatchContext(D dispatch, GatewayDiscordClient gateway, ShardInfo shardInfo) {
         this.dispatch = dispatch;
         this.gateway = gateway;
         this.shardInfo = shardInfo;
@@ -47,7 +47,7 @@ public class DispatchContext<D extends Dispatch> {
         return dispatch;
     }
 
-    public Gateway getGateway() {
+    public GatewayDiscordClient getGateway() {
         return gateway;
     }
 

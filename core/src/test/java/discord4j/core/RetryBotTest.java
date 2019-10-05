@@ -88,18 +88,17 @@ public class RetryBotTest {
                 .gateway()
                 .setShardCount(shardCount)
                 .setInitialPresence(shard -> Presence.invisible())
-                .connectAwaitDisconnect(gateway -> Mono.empty())
+                .withConnectionUntilDisconnect(gateway -> Mono.empty())
                 .block();
     }
 
     @Test
     @Ignore("Example code excluded from CI")
     public void testWithConnect() throws InterruptedException {
-        Gateway g = DiscordClient.create(token)
+        GatewayDiscordClient g = DiscordClient.create(token)
                 .gateway()
                 .setShardCount(shardCount)
-                .acquireConnection()
-                .block();
+                .connectNow();
 
         assert g != null;
 
@@ -112,7 +111,7 @@ public class RetryBotTest {
                 .on(MessageCreateEvent.class)
                 .filter(event -> event.getMessage().getContent().orElse("").equals("9988"))
                 .doOnNext(event -> log.info("Proceeding to exit!!!"))
-                .flatMap(event -> event.getGateway().logout())
+                .flatMap(event -> event.getClient().logout())
                 .subscribe();
 
         g.onDisconnect().block();
@@ -124,7 +123,7 @@ public class RetryBotTest {
         DiscordClient.builder(token)
                 .build()
                 .gateway()
-                .connectAwaitDisconnect(gateway -> Mono.empty())
+                .withConnectionUntilDisconnect(gateway -> Mono.empty())
                 .block();
     }
 
@@ -152,7 +151,7 @@ public class RetryBotTest {
                         Integer sequence = loaded.getResumeSequence() == null ? 0 : loaded.getResumeSequence();
                         return new SessionInfo(sessionId, sequence);
                     })
-                    .connectAwaitDisconnect(gateway -> {
+                    .withConnectionUntilDisconnect(gateway -> {
 //                        subscribeEventCounter(gateway, counts);
 //                        startHttpServer(new ServerContext(gateway, counts));
 
@@ -194,9 +193,9 @@ public class RetryBotTest {
 
     public static class TestCommands {
 
-        private final Gateway gateway;
+        private final GatewayDiscordClient gateway;
 
-        public TestCommands(Gateway gateway) {
+        public TestCommands(GatewayDiscordClient gateway) {
             this.gateway = gateway;
         }
 
@@ -305,7 +304,7 @@ public class RetryBotTest {
         }
     }
 
-    private void subscribeEventCounter(Gateway gateway, Map<String, AtomicLong> counts) {
+    private void subscribeEventCounter(GatewayDiscordClient gateway, Map<String, AtomicLong> counts) {
         reflections.getSubTypesOf(Event.class)
                 .forEach(type -> gateway.getEventDispatcher().on(type)
                         .map(event -> event.getClass().getSimpleName())
@@ -315,10 +314,10 @@ public class RetryBotTest {
 
     static class ServerContext {
 
-        private final Gateway gateway;
+        private final GatewayDiscordClient gateway;
         private final Map<String, AtomicLong> eventCounts;
 
-        ServerContext(Gateway gateway, Map<String, AtomicLong> eventCounts) {
+        ServerContext(GatewayDiscordClient gateway, Map<String, AtomicLong> eventCounts) {
             this.gateway = gateway;
             this.eventCounts = eventCounts;
         }

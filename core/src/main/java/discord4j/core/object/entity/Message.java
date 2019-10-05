@@ -18,7 +18,7 @@ package discord4j.core.object.entity;
 
 import discord4j.common.json.UserResponse;
 import discord4j.core.DiscordClient;
-import discord4j.core.Gateway;
+import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.Embed;
 import discord4j.core.object.data.stored.MessageBean;
 import discord4j.core.object.data.stored.ReactionBean;
@@ -53,7 +53,7 @@ public final class Message implements Entity {
     public static final int MAX_CONTENT_LENGTH = 2000;
 
     /** The gateway associated to this object. */
-    private final Gateway gateway;
+    private final GatewayDiscordClient gateway;
 
     /** The raw data as represented by Discord. */
     private final MessageBean data;
@@ -61,21 +61,21 @@ public final class Message implements Entity {
     /**
      * Constructs a {@code Message} with an associated ServiceMediator and Discord data.
      *
-     * @param gateway The {@link Gateway} associated to this object, must be non-null.
+     * @param gateway The {@link GatewayDiscordClient} associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
      */
-    public Message(final Gateway gateway, final MessageBean data) {
+    public Message(final GatewayDiscordClient gateway, final MessageBean data) {
         this.gateway = Objects.requireNonNull(gateway);
         this.data = Objects.requireNonNull(data);
     }
 
     @Override
     public DiscordClient getClient() {
-        return gateway.getDiscordClient();
+        return gateway.rest();
     }
 
     @Override
-    public Gateway getGateway() {
+    public GatewayDiscordClient getGateway() {
         return gateway;
     }
 

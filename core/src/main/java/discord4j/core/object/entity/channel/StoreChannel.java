@@ -16,7 +16,7 @@
  */
 package discord4j.core.object.entity.channel;
 
-import discord4j.core.Gateway;
+import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.data.stored.ChannelBean;
 import discord4j.core.spec.StoreChannelEditSpec;
 import discord4j.core.util.EntityUtil;
@@ -30,10 +30,10 @@ public final class StoreChannel extends BaseCategorizableChannel {
     /**
      * Constructs an {@code StoreChannel} with an associated ServiceMediator and Discord data.
      *
-     * @param gateway The {@link Gateway} associated to this object, must be non-null.
+     * @param gateway The {@link GatewayDiscordClient} associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
      */
-    public StoreChannel(Gateway gateway, ChannelBean data) {
+    public StoreChannel(GatewayDiscordClient gateway, ChannelBean data) {
         super(gateway, data);
     }
 

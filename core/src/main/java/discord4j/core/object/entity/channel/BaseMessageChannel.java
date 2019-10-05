@@ -17,7 +17,7 @@
 package discord4j.core.object.entity.channel;
 
 import discord4j.common.json.MessageResponse;
-import discord4j.core.Gateway;
+import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.data.stored.ChannelBean;
 import discord4j.core.object.data.stored.MessageBean;
 import discord4j.core.object.entity.Message;
@@ -43,10 +43,10 @@ class BaseMessageChannel extends BaseChannel implements MessageChannel {
     /**
      * Constructs an {@code BaseMessageChannel} with an associated ServiceMediator and Discord data.
      *
-     * @param gateway The {@link Gateway} associated to this object, must be non-null.
+     * @param gateway The {@link GatewayDiscordClient} associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
      */
-    BaseMessageChannel(final Gateway gateway, final ChannelBean data) {
+    BaseMessageChannel(final GatewayDiscordClient gateway, final ChannelBean data) {
         super(gateway, data);
     }
 

@@ -28,11 +28,11 @@ import reactor.util.annotation.Nullable;
  */
 class GatewayConnection {
 
-    private final Gateway gateway;
+    private final GatewayDiscordClient gateway;
     private final IdentifyOptions identifyOptions;
     private final MonoProcessor<Void> closeSignal;
 
-    public GatewayConnection(Gateway gateway, IdentifyOptions identifyOptions, MonoProcessor<Void> closeSignal) {
+    public GatewayConnection(GatewayDiscordClient gateway, IdentifyOptions identifyOptions, MonoProcessor<Void> closeSignal) {
         this.gateway = gateway;
         this.identifyOptions = identifyOptions;
         this.closeSignal = closeSignal;
@@ -43,7 +43,7 @@ class GatewayConnection {
         return gateway.getGatewayClientMap().get(identifyOptions.getShardIndex());
     }
 
-    public Gateway getGateway() {
+    public GatewayDiscordClient getGateway() {
         return gateway;
     }
 

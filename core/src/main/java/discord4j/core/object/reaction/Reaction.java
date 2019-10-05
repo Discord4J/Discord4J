@@ -17,7 +17,7 @@
 package discord4j.core.object.reaction;
 
 import discord4j.core.DiscordClient;
-import discord4j.core.Gateway;
+import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.DiscordObject;
 import discord4j.core.object.data.stored.ReactionBean;
 
@@ -31,7 +31,7 @@ import java.util.Objects;
 public final class Reaction implements DiscordObject  {
 
     /** The gateway associated to this object. */
-    private final Gateway gateway;
+    private final GatewayDiscordClient gateway;
 
     /** The raw data as represented by Discord. */
     private final ReactionBean data;
@@ -39,21 +39,21 @@ public final class Reaction implements DiscordObject  {
     /**
      * Constructs a {@code Reaction} with an associated ServiceMediator and Discord data.
      *
-     * @param gateway The {@link Gateway} associated to this object, must be non-null.
+     * @param gateway The {@link GatewayDiscordClient} associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
      */
-    public Reaction(final Gateway gateway, final ReactionBean data) {
+    public Reaction(final GatewayDiscordClient gateway, final ReactionBean data) {
         this.gateway = Objects.requireNonNull(gateway);
         this.data = Objects.requireNonNull(data);
     }
 
     @Override
     public DiscordClient getClient() {
-        return gateway.getDiscordClient();
+        return gateway.rest();
     }
 
     @Override
-    public Gateway getGateway() {
+    public GatewayDiscordClient getGateway() {
         return gateway;
     }
 

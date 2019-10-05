@@ -16,6 +16,7 @@
  */
 package discord4j.core;
 
+import discord4j.core.event.EventDispatcher;
 import discord4j.core.object.Invite;
 import discord4j.core.object.Region;
 import discord4j.core.object.entity.*;
@@ -30,8 +31,6 @@ import discord4j.rest.entity.data.*;
 import discord4j.rest.json.response.UserGuildResponse;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.util.Logger;
-import reactor.util.Loggers;
 
 import java.util.Map;
 import java.util.function.Consumer;
@@ -42,8 +41,6 @@ import java.util.function.Function;
  * of real-time bot clients through Discord Gateway.
  */
 public final class DiscordClient {
-
-    private static final Logger log = Loggers.getLogger(DiscordClient.class);
 
     private final CoreResources coreResources;
 
@@ -261,25 +258,38 @@ public final class DiscordClient {
     }
 
     /**
-     * Login the client to the gateway.
+     * Login the client to the gateway, using the recommended amount of shards, locally coordinated. The resulting
+     * {@link GatewayDiscordClient} is capable of managing these shards and providing a single
+     * {@link EventDispatcher} and entity cache.
+     * <p>
+     * To further configure the Gateway connections, such as initial presence, sharding and caching options, see
+     * {@link #gateway()}.
+     * </p>
+     * <p>
+     * <strong>Note:</strong> Starting from v3.1, this method will return a {@link Mono} of a
+     * {@link GatewayDiscordClient}, emitting the result once shards have connected. Therefore, <strong>calling
+     * {@link Mono#block()} will now return upon connection instead of disconnection.</strong>
+     * </p>
+     *
+     * @return a {@link Mono} for a handle to maintain a group of shards connected to real-time Discord Gateway,
+     * emitted once all connections have been made. If an error is received, it is emitted through the {@link Mono}.
      */
-    public Mono<Gateway> login() {
-        return gateway().acquireConnection();
+    public Mono<GatewayDiscordClient> login() {
+        return gateway().connect();
     }
 
-    public <T> Mono<T> login(Function<Gateway, Mono<T>> onConnectedFunction) {
-        return gateway().acquireConnection(onConnectedFunction);
-    }
-
-    public <T> Mono<T> withGateway(Function<Gateway, Mono<T>> whileConnectedFunction) {
+    public <T> Mono<T> withGateway(Function<GatewayDiscordClient, Mono<T>> whileConnectedFunction) {
         return gateway().withConnection(whileConnectedFunction);
     }
 
+    /**
+     * Start bootstrapping a connection to the real-time Discord Gateway. The resulting builder can be configured to
+     * create a {@link GatewayDiscordClient} which groups all connecting shards providing a single
+     * {@link EventDispatcher} and entity cache.
+     *
+     * @return a bootstrap to create {@link GatewayDiscordClient} instances.
+     */
     public GatewayBootstrap<GatewayOptions> gateway() {
-        return GatewayBootstrap.create(this, GatewayResources.builder().build());
-    }
-
-    public GatewayBootstrap<GatewayOptions> gateway(GatewayResources resources) {
-        return GatewayBootstrap.create(this, resources);
+        return GatewayBootstrap.create(this);
     }
 }

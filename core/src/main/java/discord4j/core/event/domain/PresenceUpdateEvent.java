@@ -17,7 +17,7 @@
 package discord4j.core.event.domain;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import discord4j.core.Gateway;
+import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.User;
@@ -46,7 +46,7 @@ public class PresenceUpdateEvent extends Event {
     private final Presence current;
     private final Presence old;
 
-    public PresenceUpdateEvent(Gateway gateway, ShardInfo shardInfo, long guildId, @Nullable User oldUser, JsonNode user,
+    public PresenceUpdateEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, long guildId, @Nullable User oldUser, JsonNode user,
                                Presence current, @Nullable Presence old) {
         super(gateway, shardInfo);
         this.guildId = guildId;
@@ -71,7 +71,7 @@ public class PresenceUpdateEvent extends Event {
      * @return A {@link Mono} where, upon successful completion, emits the {@link Guild} involved in the event.
      */
     public Mono<Guild> getGuild() {
-        return getGateway().getGuildById(getGuildId());
+        return getClient().getGuildById(getGuildId());
     }
 
     /**
@@ -132,7 +132,7 @@ public class PresenceUpdateEvent extends Event {
      * If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<User> getUser() {
-        return getGateway().getUserById(getUserId());
+        return getClient().getUserById(getUserId());
     }
 
     /**
@@ -142,7 +142,7 @@ public class PresenceUpdateEvent extends Event {
      * If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Member> getMember() {
-        return getGateway().getMemberById(getGuildId(), getUserId());
+        return getClient().getMemberById(getGuildId(), getUserId());
     }
 
     /**

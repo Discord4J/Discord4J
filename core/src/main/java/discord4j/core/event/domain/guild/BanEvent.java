@@ -16,7 +16,7 @@
  */
 package discord4j.core.event.domain.guild;
 
-import discord4j.core.Gateway;
+import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.util.Snowflake;
@@ -35,7 +35,7 @@ public class BanEvent extends GuildEvent {
     private final User user;
     private final long guildId;
 
-    public BanEvent(Gateway gateway, ShardInfo shardInfo, User user, long guildId) {
+    public BanEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, User user, long guildId) {
         super(gateway, shardInfo);
         this.user = user;
         this.guildId = guildId;
@@ -66,7 +66,7 @@ public class BanEvent extends GuildEvent {
      * If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Guild> getGuild() {
-        return getGateway().getGuildById(getGuildId());
+        return getClient().getGuildById(getGuildId());
     }
 
     @Override

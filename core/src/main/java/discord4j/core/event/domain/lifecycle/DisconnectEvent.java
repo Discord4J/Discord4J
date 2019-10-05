@@ -17,7 +17,7 @@
 
 package discord4j.core.event.domain.lifecycle;
 
-import discord4j.core.Gateway;
+import discord4j.core.GatewayDiscordClient;
 import discord4j.gateway.ShardInfo;
 
 /**
@@ -27,7 +27,7 @@ import discord4j.gateway.ShardInfo;
  */
 public class DisconnectEvent extends GatewayLifecycleEvent {
 
-    public DisconnectEvent(Gateway gateway, ShardInfo shardInfo) {
+    public DisconnectEvent(GatewayDiscordClient gateway, ShardInfo shardInfo) {
         super(gateway, shardInfo);
     }
 

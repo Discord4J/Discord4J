@@ -16,7 +16,7 @@
  */
 package discord4j.core.event.domain.message;
 
-import discord4j.core.Gateway;
+import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.MessageChannel;
@@ -47,7 +47,7 @@ public class ReactionRemoveAllEvent extends MessageEvent {
     @Nullable
     private final Long guildId;
 
-    public ReactionRemoveAllEvent(Gateway gateway, ShardInfo shardInfo, long channelId, long messageId, @Nullable Long guildId) {
+    public ReactionRemoveAllEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, long channelId, long messageId, @Nullable Long guildId) {
         super(gateway, shardInfo);
         this.channelId = channelId;
         this.messageId = messageId;
@@ -70,7 +70,7 @@ public class ReactionRemoveAllEvent extends MessageEvent {
      * involved. If an error is received, it is emitted through the {@code Mono}
      */
     public Mono<MessageChannel> getChannel() {
-        return getGateway().getChannelById(getChannelId()).cast(MessageChannel.class);
+        return getClient().getChannelById(getChannelId()).cast(MessageChannel.class);
     }
 
     /**
@@ -89,7 +89,7 @@ public class ReactionRemoveAllEvent extends MessageEvent {
      * removed from. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Message> getMessage() {
-        return getGateway().getMessageById(getChannelId(), getMessageId());
+        return getClient().getMessageById(getChannelId(), getMessageId());
     }
 
     /**
@@ -111,7 +111,7 @@ public class ReactionRemoveAllEvent extends MessageEvent {
      * the {@link Message} involved, if present. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Guild> getGuild() {
-        return Mono.justOrEmpty(getGuildId()).flatMap(getGateway()::getGuildById);
+        return Mono.justOrEmpty(getGuildId()).flatMap(getClient()::getGuildById);
     }
 
     @Override

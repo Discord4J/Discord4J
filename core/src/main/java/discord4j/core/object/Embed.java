@@ -17,7 +17,7 @@
 package discord4j.core.object;
 
 import discord4j.core.DiscordClient;
-import discord4j.core.Gateway;
+import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.data.stored.embed.*;
 import discord4j.core.util.EntityUtil;
 
@@ -47,7 +47,7 @@ public final class Embed implements DiscordObject {
     public static final int MAX_CHARACTER_LENGTH = 6000;
 
     /** The gateway associated to this object. */
-    private final Gateway gateway;
+    private final GatewayDiscordClient gateway;
 
     /** The raw data as represented by Discord. */
     private final EmbedBean data;
@@ -55,21 +55,21 @@ public final class Embed implements DiscordObject {
     /**
      * Constructs an {@code Embed} with an associated ServiceMediator and Discord data.
      *
-     * @param gateway The {@link Gateway} associated to this object, must be non-null.
+     * @param gateway The {@link GatewayDiscordClient} associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
      */
-    public Embed(final Gateway gateway, final EmbedBean data) {
+    public Embed(final GatewayDiscordClient gateway, final EmbedBean data) {
         this.gateway = Objects.requireNonNull(gateway);
         this.data = Objects.requireNonNull(data);
     }
 
     @Override
     public DiscordClient getClient() {
-        return gateway.getDiscordClient();
+        return gateway.rest();
     }
 
     @Override
-    public Gateway getGateway() {
+    public GatewayDiscordClient getGateway() {
         return gateway;
     }
 

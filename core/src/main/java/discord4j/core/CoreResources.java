@@ -21,8 +21,6 @@ import discord4j.common.JacksonResources;
 import discord4j.common.ReactorResources;
 import discord4j.rest.RestClient;
 
-import java.util.Objects;
-
 /**
  * A set of resources required to build {@link DiscordClient} instances and are used for core Discord4J operations
  * like entity manipulation and API communication.
@@ -34,50 +32,12 @@ public class CoreResources {
     private final ReactorResources reactorResources;
     private final JacksonResources jacksonResources;
 
-    protected CoreResources(Builder builder) {
-        this.token = Objects.requireNonNull(builder.token);
-        this.restClient = Objects.requireNonNull(builder.restClient);
-        this.reactorResources = Objects.requireNonNull(builder.reactorResources);
-        this.jacksonResources = Objects.requireNonNull(builder.jacksonResources);
-    }
-
-    public static CoreResources.Builder builder() {
-        return new Builder();
-    }
-
-    public static class Builder {
-
-        private String token;
-        private RestClient restClient;
-        private ReactorResources reactorResources;
-        private JacksonResources jacksonResources;
-
-        protected Builder() {
-        }
-
-        public Builder setToken(String token) {
-            this.token = token;
-            return this;
-        }
-
-        public Builder setRestClient(RestClient restClient) {
-            this.restClient = restClient;
-            return this;
-        }
-
-        public Builder setReactorResources(ReactorResources reactorResources) {
-            this.reactorResources = reactorResources;
-            return this;
-        }
-
-        public Builder setJacksonResources(JacksonResources jacksonResources) {
-            this.jacksonResources = jacksonResources;
-            return this;
-        }
-
-        public CoreResources build() {
-            return new CoreResources(this);
-        }
+    public CoreResources(String token, RestClient restClient, ReactorResources reactorResources,
+                         JacksonResources jacksonResources) {
+        this.token = token;
+        this.restClient = restClient;
+        this.reactorResources = reactorResources;
+        this.jacksonResources = jacksonResources;
     }
 
     public String getToken() {

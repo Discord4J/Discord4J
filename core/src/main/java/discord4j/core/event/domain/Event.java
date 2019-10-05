@@ -17,8 +17,7 @@
 
 package discord4j.core.event.domain;
 
-import discord4j.core.DiscordClient;
-import discord4j.core.Gateway;
+import discord4j.core.GatewayDiscordClient;
 import discord4j.gateway.ShardInfo;
 
 /**
@@ -26,28 +25,29 @@ import discord4j.gateway.ShardInfo;
  */
 public abstract class Event {
 
-    private final Gateway gateway;
+    private final GatewayDiscordClient gateway;
     private final ShardInfo shardInfo;
 
-    protected Event(Gateway gateway, ShardInfo shardInfo) {
+    protected Event(GatewayDiscordClient gateway, ShardInfo shardInfo) {
         this.gateway = gateway;
         this.shardInfo = shardInfo;
     }
 
-    public Gateway getGateway() {
-        return gateway;
-    }
-
-    public ShardInfo getShardInfo() {
-        return shardInfo;
-    }
-
     /**
-     * Get the {@link DiscordClient} that emitted this {@link Event}.
+     * Get the {@link GatewayDiscordClient} that emitted this {@link Event}.
      *
      * @return The client emitting this event.
      */
-    public DiscordClient getClient() {
-        return gateway.getDiscordClient();
+    public GatewayDiscordClient getClient() {
+        return gateway;
+    }
+
+    /**
+     * Retrieve the shard details from this {@link Event}.
+     *
+     * @return a {@link ShardInfo} object reflecting index and count for this event.
+     */
+    public ShardInfo getShardInfo() {
+        return shardInfo;
     }
 }

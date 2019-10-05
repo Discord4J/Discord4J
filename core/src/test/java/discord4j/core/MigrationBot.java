@@ -39,7 +39,7 @@ public class MigrationBot {
         client.withGateway(
                 gateway -> gateway.on(MessageCreateEvent.class)
                         .filter(event -> event.getMessage().getContent().orElse("").equals("exit"))
-                        .flatMap(event -> event.getGateway().logout())
+                        .flatMap(event -> event.getClient().logout())
                         .then())
                 .block();
     }
@@ -76,12 +76,12 @@ public class MigrationBot {
         String token = System.getenv("token");
         DiscordClient client = DiscordClient.create(token);
         // If you want to manually acquire a Gateway, you will become responsible for its release
-        Gateway gateway = client.login().block();
+        GatewayDiscordClient gateway = client.login().block();
         assert gateway != null;
         // let's add something to stop the bot from a command
         gateway.on(MessageCreateEvent.class)
                 .filter(event -> event.getMessage().getContent().orElse("").equals("exit"))
-                .flatMap(event -> event.getGateway().logout())
+                .flatMap(event -> event.getClient().logout())
                 .subscribe();
         // we should block until it disconnects
         gateway.onDisconnect().block();

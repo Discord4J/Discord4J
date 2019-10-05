@@ -16,7 +16,7 @@
  */
 package discord4j.core.object.entity.channel;
 
-import discord4j.core.Gateway;
+import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.VoiceState;
 import discord4j.core.object.data.stored.ChannelBean;
 import discord4j.core.object.data.stored.VoiceStateBean;
@@ -37,10 +37,10 @@ public final class VoiceChannel extends BaseCategorizableChannel {
     /**
      * Constructs an {@code VoiceChannel} with an associated ServiceMediator and Discord data.
      *
-     * @param gateway The {@link Gateway} associated to this object, must be non-null.
+     * @param gateway The {@link GatewayDiscordClient} associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
      */
-    public VoiceChannel(final Gateway gateway, final ChannelBean data) {
+    public VoiceChannel(final GatewayDiscordClient gateway, final ChannelBean data) {
         super(gateway, data);
     }
 

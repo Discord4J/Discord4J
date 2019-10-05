@@ -16,7 +16,7 @@
  */
 package discord4j.core.event.domain.message;
 
-import discord4j.core.Gateway;
+import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Message;
@@ -44,7 +44,7 @@ public class MessageCreateEvent extends MessageEvent {
     @Nullable
     private final Member member;
 
-    public MessageCreateEvent(Gateway gateway, ShardInfo shardInfo, Message message, @Nullable Long guildId, @Nullable Member member) {
+    public MessageCreateEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, Message message, @Nullable Long guildId, @Nullable Member member) {
         super(gateway, shardInfo);
         this.message = message;
         this.guildId = guildId;
@@ -78,7 +78,7 @@ public class MessageCreateEvent extends MessageEvent {
      * if present. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Guild> getGuild() {
-        return Mono.justOrEmpty(getGuildId()).flatMap(getGateway()::getGuildById);
+        return Mono.justOrEmpty(getGuildId()).flatMap(getClient()::getGuildById);
     }
 
     /**

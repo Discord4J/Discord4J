@@ -16,7 +16,7 @@
  */
 package discord4j.core.object.entity.channel;
 
-import discord4j.core.Gateway;
+import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.data.stored.ChannelBean;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.spec.CategoryEditSpec;
@@ -32,10 +32,10 @@ public final class Category extends BaseGuildChannel {
     /**
      * Constructs an {@code Category} with an associated ServiceMediator and Discord data.
      *
-     * @param gateway The {@link Gateway} associated to this object, must be non-null.
+     * @param gateway The {@link GatewayDiscordClient} associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
      */
-    public Category(final Gateway gateway, final ChannelBean data) {
+    public Category(final GatewayDiscordClient gateway, final ChannelBean data) {
         super(gateway, data);
     }
 

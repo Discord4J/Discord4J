@@ -72,11 +72,10 @@ public class StoreBotTest {
                 .setJacksonResources(jackson)
                 .build();
 
-        client.gateway(GatewayResources.builder()
+        client.gateway()
                 .setStoreService(MappingStoreService.create()
                         .setMapping(new NoOpStoreService(), MessageBean.class)
                         .setFallback(new JdkStoreService()))
-                .build())
                 .setEventDispatcher(ReplayEventDispatcher.withTimeout(Duration.ofMinutes(2)))
                 .setInitialPresence(shard -> Presence.invisible())
                 .withConnection(gateway -> {
@@ -94,7 +93,7 @@ public class StoreBotTest {
                 .block();
     }
 
-    private void subscribeEventCounter(Gateway gateway, Map<String, AtomicLong> counts) {
+    private void subscribeEventCounter(GatewayDiscordClient gateway, Map<String, AtomicLong> counts) {
         reflections.getSubTypesOf(Event.class)
                 .stream()
                 .filter(cls -> reflections.getSubTypesOf(cls).isEmpty())
@@ -106,7 +105,7 @@ public class StoreBotTest {
                 });
     }
 
-    private void startHttpServer(Gateway gateway, Map<String, AtomicLong> counts,
+    private void startHttpServer(GatewayDiscordClient gateway, Map<String, AtomicLong> counts,
                                  ObjectMapper mapper) {
         DisposableServer facade = HttpServer.create()
                 .port(0) // use an ephemeral port

@@ -16,7 +16,7 @@
  */
 package discord4j.core.event.domain.guild;
 
-import discord4j.core.Gateway;
+import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.util.Snowflake;
@@ -39,7 +39,7 @@ public class MemberChunkEvent extends GuildEvent {
     private final long guildId;
     private final Set<Member> members;
 
-    public MemberChunkEvent(Gateway gateway, ShardInfo shardInfo, long guildId, Set<Member> members) {
+    public MemberChunkEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, long guildId, Set<Member> members) {
         super(gateway, shardInfo);
         this.guildId = guildId;
         this.members = members;
@@ -61,7 +61,7 @@ public class MemberChunkEvent extends GuildEvent {
      * If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Guild> getGuild() {
-        return getGateway().getGuildById(getGuildId());
+        return getClient().getGuildById(getGuildId());
     }
 
     /**

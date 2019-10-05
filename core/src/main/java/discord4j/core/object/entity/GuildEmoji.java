@@ -18,7 +18,7 @@ package discord4j.core.object.entity;
 
 import discord4j.common.json.GuildEmojiResponse;
 import discord4j.core.DiscordClient;
-import discord4j.core.Gateway;
+import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.data.stored.GuildEmojiBean;
 import discord4j.core.object.data.stored.UserBean;
 import discord4j.core.object.util.Image;
@@ -51,7 +51,7 @@ public final class GuildEmoji implements Entity {
     private static final String EMOJI_IMAGE_PATH = "emojis/%s";
 
     /** The gateway associated to this object. */
-    private final Gateway gateway;
+    private final GatewayDiscordClient gateway;
 
     /** The raw data as represented by Discord. */
     private final GuildEmojiBean data;
@@ -62,11 +62,11 @@ public final class GuildEmoji implements Entity {
     /**
      * Constructs a {@code GuildEmoji} with an associated ServiceMediator and Discord data.
      *
-     * @param gateway The {@link Gateway} associated to this object, must be non-null.
+     * @param gateway The {@link GatewayDiscordClient} associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
      * @param guildId The ID of the guild this emoji is associated to.
      */
-    public GuildEmoji(final Gateway gateway, final GuildEmojiBean data, final long guildId) {
+    public GuildEmoji(final GatewayDiscordClient gateway, final GuildEmojiBean data, final long guildId) {
         this.gateway = Objects.requireNonNull(gateway);
         this.data = Objects.requireNonNull(data);
         this.guildId = guildId;
@@ -74,11 +74,11 @@ public final class GuildEmoji implements Entity {
 
     @Override
     public DiscordClient getClient() {
-        return gateway.getDiscordClient();
+        return gateway.rest();
     }
 
     @Override
-    public Gateway getGateway() {
+    public GatewayDiscordClient getGateway() {
         return gateway;
     }
 

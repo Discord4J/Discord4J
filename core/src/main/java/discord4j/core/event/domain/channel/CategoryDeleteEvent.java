@@ -16,7 +16,7 @@
  */
 package discord4j.core.event.domain.channel;
 
-import discord4j.core.Gateway;
+import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.channel.Category;
 import discord4j.gateway.ShardInfo;
 
@@ -31,7 +31,7 @@ public class CategoryDeleteEvent extends ChannelEvent {
 
     private final Category category;
 
-    public CategoryDeleteEvent(Gateway gateway, ShardInfo shardInfo, Category category) {
+    public CategoryDeleteEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, Category category) {
         super(gateway, shardInfo);
         this.category = category;
     }

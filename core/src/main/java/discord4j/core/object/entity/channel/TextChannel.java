@@ -16,7 +16,7 @@
  */
 package discord4j.core.object.entity.channel;
 
-import discord4j.core.Gateway;
+import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.data.stored.ChannelBean;
 import discord4j.core.spec.TextChannelEditSpec;
 import discord4j.core.util.EntityUtil;
@@ -31,10 +31,10 @@ public final class TextChannel extends BaseGuildMessageChannel {
     /**
      * Constructs an {@code TextChannel} with an associated ServiceMediator and Discord data.
      *
-     * @param gateway The {@link Gateway} associated to this object, must be non-null.
+     * @param gateway The {@link GatewayDiscordClient} associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
      */
-    public TextChannel(Gateway gateway, ChannelBean data) {
+    public TextChannel(GatewayDiscordClient gateway, ChannelBean data) {
         super(gateway, data);
     }
 

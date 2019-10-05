@@ -17,7 +17,7 @@
 package discord4j.core.object;
 
 import discord4j.core.DiscordClient;
-import discord4j.core.Gateway;
+import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.data.InviteBean;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.User;
@@ -38,7 +38,7 @@ import java.util.OptionalInt;
 public class Invite implements DiscordObject {
 
     /** The gateway associated to this object. */
-    private final Gateway gateway;
+    private final GatewayDiscordClient gateway;
 
     /** The raw data as represented by Discord. */
     private final InviteBean data;
@@ -46,21 +46,21 @@ public class Invite implements DiscordObject {
     /**
      * Constructs a {@code Invite} with an associated ServiceMediator and Discord data.
      *
-     * @param gateway The {@link Gateway} associated to this object, must be non-null.
+     * @param gateway The {@link GatewayDiscordClient} associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
      */
-    public Invite(final Gateway gateway, final InviteBean data) {
+    public Invite(final GatewayDiscordClient gateway, final InviteBean data) {
         this.gateway = Objects.requireNonNull(gateway);
         this.data = Objects.requireNonNull(data);
     }
 
     @Override
     public final DiscordClient getClient() {
-        return gateway.getDiscordClient();
+        return gateway.rest();
     }
 
     @Override
-    public Gateway getGateway() {
+    public GatewayDiscordClient getGateway() {
         return gateway;
     }
 

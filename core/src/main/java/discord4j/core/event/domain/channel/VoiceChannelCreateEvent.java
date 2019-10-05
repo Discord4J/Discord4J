@@ -16,7 +16,7 @@
  */
 package discord4j.core.event.domain.channel;
 
-import discord4j.core.Gateway;
+import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.channel.VoiceChannel;
 import discord4j.gateway.ShardInfo;
 
@@ -31,7 +31,7 @@ public class VoiceChannelCreateEvent extends ChannelEvent {
 
     private final VoiceChannel channel;
 
-    public VoiceChannelCreateEvent(Gateway gateway, ShardInfo shardInfo, VoiceChannel channel) {
+    public VoiceChannelCreateEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, VoiceChannel channel) {
         super(gateway, shardInfo);
         this.channel = channel;
     }

@@ -17,7 +17,7 @@
 package discord4j.core.object.entity;
 
 import discord4j.core.DiscordClient;
-import discord4j.core.Gateway;
+import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.data.stored.RoleBean;
 import discord4j.rest.entity.RestRole;
 import discord4j.core.object.util.PermissionSet;
@@ -45,7 +45,7 @@ public final class Role implements Entity {
     public static final Color DEFAULT_COLOR = new Color(0, true);
 
     /** The gateway associated to this object. */
-    private final Gateway gateway;
+    private final GatewayDiscordClient gateway;
 
     /** The raw data as represented by Discord. */
     private final RoleBean data;
@@ -57,13 +57,13 @@ public final class Role implements Entity {
     private final long guildId;
 
     /**
-     * Constructs a {@code Role} with an associated {@link Gateway} and Discord data.
+     * Constructs a {@code Role} with an associated {@link GatewayDiscordClient} and Discord data.
      *
-     * @param gateway The {@link Gateway} associated to this object, must be non-null.
+     * @param gateway The {@link GatewayDiscordClient} associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
      * @param guildId The ID of the guild this role is associated to.
      */
-    public Role(final Gateway gateway, final RoleBean data, final long guildId) {
+    public Role(final GatewayDiscordClient gateway, final RoleBean data, final long guildId) {
         this.gateway = Objects.requireNonNull(gateway);
         this.data = Objects.requireNonNull(data);
         RestClient restClient = gateway.getCoreResources().getRestClient();
@@ -73,11 +73,11 @@ public final class Role implements Entity {
 
     @Override
     public DiscordClient getClient() {
-        return gateway.getDiscordClient();
+        return gateway.rest();
     }
 
     @Override
-    public Gateway getGateway() {
+    public GatewayDiscordClient getGateway() {
         return gateway;
     }
 

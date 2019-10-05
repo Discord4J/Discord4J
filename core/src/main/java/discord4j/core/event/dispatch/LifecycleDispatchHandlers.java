@@ -16,7 +16,7 @@
  */
 package discord4j.core.event.dispatch;
 
-import discord4j.core.Gateway;
+import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.lifecycle.*;
 import discord4j.core.object.data.stored.UserBean;
 import discord4j.core.object.entity.User;
@@ -32,7 +32,7 @@ import java.util.stream.Collectors;
 class LifecycleDispatchHandlers {
 
     static Mono<ReadyEvent> ready(DispatchContext<Ready> context) {
-        Gateway gateway = context.getGateway();
+        GatewayDiscordClient gateway = context.getGateway();
         Ready dispatch = context.getDispatch();
         UserBean userBean = new UserBean(dispatch.getUser());
 
@@ -57,7 +57,7 @@ class LifecycleDispatchHandlers {
     }
 
     static Mono<? extends GatewayLifecycleEvent> gatewayStateChanged(DispatchContext<GatewayStateChange> context) {
-        Gateway gateway = context.getGateway();
+        GatewayDiscordClient gateway = context.getGateway();
         GatewayStateChange dispatch = context.getDispatch();
         switch (dispatch.getState()) {
             case CONNECTED:
