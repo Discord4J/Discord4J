@@ -16,7 +16,6 @@
  */
 package discord4j.core.spec;
 
-import discord4j.core.DiscordClient;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.VoiceServerUpdateEvent;
 import discord4j.core.event.domain.VoiceStateUpdateEvent;
@@ -30,6 +29,7 @@ import discord4j.voice.VoiceClient;
 import discord4j.voice.VoiceConnection;
 import reactor.core.publisher.Mono;
 
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -100,17 +100,15 @@ public class VoiceChannelJoinSpec implements Spec<Mono<VoiceConnection>> {
 
     @Override
     public Mono<VoiceConnection> asRequest() {
-        final DiscordClient client = voiceChannel.getClient();
         final long guildId = voiceChannel.getGuildId().asLong();
         final long channelId = voiceChannel.getId().asLong();
         final long selfId = gateway.getStateHolder().getSelfId().get();
 
-        int count = voiceChannel.getGateway().getGatewayClientMap().size();
+        Map<Integer, GatewayClient> gatewayClients = voiceChannel.getGateway().getGatewayClientMap();
+        int count = gatewayClients.size();
         int shardId = (int) ((voiceChannel.getGuildId().asLong() >> 22) % count);
-
-        GatewayClient gatewayClient = gateway.getGatewayClientMap().get(shardId);
+        GatewayClient gatewayClient = gatewayClients.get(shardId);
         VoiceClient voiceClient = gateway.getVoiceClientMap().get(shardId);
-
         if (gatewayClient == null) {
             return Mono.error(new RuntimeException("Shard id not set"));
         }

@@ -17,6 +17,8 @@
 
 package discord4j.core;
 
+import discord4j.common.JacksonResources;
+import discord4j.common.ReactorResources;
 import discord4j.core.event.EventDispatcher;
 import discord4j.core.event.domain.Event;
 import discord4j.core.object.Invite;
@@ -38,15 +40,19 @@ import discord4j.gateway.GatewayClient;
 import discord4j.gateway.json.GatewayPayload;
 import discord4j.rest.RestClient;
 import discord4j.rest.json.response.UserGuildResponse;
+import discord4j.store.api.Store;
 import discord4j.store.api.util.LongLongTuple2;
 import discord4j.voice.VoiceClient;
+import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.MonoProcessor;
+import reactor.util.Logger;
+import reactor.util.Loggers;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -68,51 +74,105 @@ import java.util.stream.Collectors;
  */
 public class GatewayDiscordClient {
 
+    private static final Logger log = Loggers.getLogger(GatewayDiscordClient.class);
+
     private final DiscordClient discordClient;
     private final GatewayResources gatewayResources;
     private final MonoProcessor<Void> closeProcessor;
-    private final Map<Integer, GatewayClient> gatewayClientMap = new ConcurrentHashMap<>();
-    private final Map<Integer, VoiceClient> voiceClientMap = new ConcurrentHashMap<>();
+    private final Map<Integer, GatewayClient> gatewayClientMap;
+    private final Map<Integer, VoiceClient> voiceClientMap;
 
     public GatewayDiscordClient(DiscordClient discordClient, GatewayResources gatewayResources,
-                                MonoProcessor<Void> closeProcessor) {
+                                MonoProcessor<Void> closeProcessor, Map<Integer, GatewayClient> gatewayClientMap,
+                                Map<Integer, VoiceClient> voiceClientMap) {
         this.discordClient = discordClient;
         this.gatewayResources = gatewayResources;
         this.closeProcessor = closeProcessor;
+        this.gatewayClientMap = gatewayClientMap;
+        this.voiceClientMap = voiceClientMap;
     }
 
+    /**
+     * Access the parent {@link DiscordClient} capable of performing direct REST API requests and REST entities.
+     *
+     * @return the {@link DiscordClient} that created this {@link GatewayDiscordClient}
+     */
     public DiscordClient rest() {
         return discordClient;
     }
 
+    /**
+     * Returns the set of resources essential to operate on a {@link DiscordClient} for entity manipulation,
+     * scheduling and API communication, like the {@link RestClient}, {@link JacksonResources} and
+     * {@link ReactorResources}.
+     *
+     * @return the {@link CoreResources} for the parent {@link DiscordClient}
+     */
     public CoreResources getCoreResources() {
         return discordClient.getCoreResources();
     }
 
+    /**
+     * Returns the set of resources essential to build {@link GatewayClient} instances and manage multiple Discord
+     * Gateway connections.
+     *
+     * @return the {@link GatewayResources} tied to this {@link GatewayDiscordClient}
+     */
     public GatewayResources getGatewayResources() {
         return gatewayResources;
     }
 
+    /**
+     * Distributes events to subscribers. Starting from v3.1, the {@link EventDispatcher} is capable of distributing
+     * events from all {@link GatewayClient} connections (shards) that were specified when this
+     * {@link GatewayDiscordClient} was created.
+     *
+     * @return the {@link EventDispatcher} tied to this {@link GatewayDiscordClient}
+     */
     public EventDispatcher getEventDispatcher() {
         return gatewayResources.getEventDispatcher();
     }
 
-    public Mono<Void> getCloseProcessor() {
-        return closeProcessor;
-    }
-
+    /**
+     * Repository aggregate of all caching related operations. Discord Gateway mandates its clients to cache its
+     * updates through events coming from the real-time websocket. The {@link StateHolder} is the mediator for the
+     * underlying {@link Store} instances for each cached entity.
+     * <p>
+     * While directly querying the repositories is possible, we discourage attempting to modify their internal
+     * structure, as it would interfere with Discord4J event publishing tasks.
+     *
+     * @return the {@link StateHolder} tied to this {@link GatewayDiscordClient}
+     */
     public StateHolder getStateHolder() {
+        // TODO consider exposing a read-only wrapper instead
         return gatewayResources.getStateHolder();
     }
 
+    /**
+     * Returns an unmodifiable view of the {@link GatewayClient} instances created by this
+     * {@link GatewayDiscordClient}. The returned map uses shard index for keys.
+     *
+     * @return a map of {@link GatewayClient} instances
+     */
     public Map<Integer, GatewayClient> getGatewayClientMap() {
-        return gatewayClientMap;
+        return Collections.unmodifiableMap(gatewayClientMap);
     }
 
+    /**
+     * Returns an unmodifiable view of the {@link VoiceClient} instances created by this
+     * {@link GatewayDiscordClient}. The returned map uses shard index for keys.
+     *
+     * @return a map of {@link VoiceClient} instances
+     */
     public Map<Integer, VoiceClient> getVoiceClientMap() {
-        return voiceClientMap;
+        return Collections.unmodifiableMap(voiceClientMap);
     }
 
+    /**
+     * Returns the {@link RestClient} used to execute REST API requests.
+     *
+     * @return the {@link RestClient} tied to the parent {@link DiscordClient} through {@link CoreResources}
+     */
     public RestClient getRestClient() {
         return getCoreResources().getRestClient();
     }
@@ -419,7 +479,7 @@ public class GatewayDiscordClient {
      * GatewayClients} will attempt to gracefully close and complete this {@link Mono} after all of them have
      * disconnected.
      *
-     * @return A {@link Mono} that, on subscription, will disconnect each connection established by this
+     * @return A {@link Mono} that upon subscription, will disconnect each connection established by this
      * {@link GatewayDiscordClient} and complete after all of them have closed.
      */
     public Mono<Void> logout() {
@@ -432,17 +492,89 @@ public class GatewayDiscordClient {
      * Return a {@link Mono} that signals completion when all joining {@link GatewayClient GatewayClients} have
      * disconnected.
      *
-     * @return
+     * @return a {@link Mono} that will complete once all {@link GatewayClient} instances connected to this
+     * {@link GatewayDiscordClient} have disconnected.
      */
     public Mono<Void> onDisconnect() {
         return closeProcessor;
     }
 
-    public <T extends Event> Flux<T> on(Class<T> eventClass) {
+    /**
+     * Retrieves a {@link Flux} with elements of the given {@link Event} type.
+     * <p>
+     * <strong>Note: </strong> Errors occurring while processing events will terminate your sequence. If you wish to use
+     * a version capable of handling errors for you, use {@link #on(Class, Function)}. See
+     * <a href="https://github.com/reactive-streams/reactive-streams-jvm#1.7">Reactive Streams Spec</a>
+     * explaining this behavior.
+     * </p>
+     * <p>
+     * A recommended pattern to use this method is wrapping your code that may throw exceptions within a {@code
+     * flatMap} block and use {@link Mono#onErrorResume(Function)}, {@link Flux#onErrorResume(Function)} or
+     * equivalent methods to maintain the sequence active:
+     * </p>
+     * <pre>
+     * client.on(MessageCreateEvent.class)
+     *     .flatMap(event -&gt; myCodeThatMightThrow(event)
+     *             .onErrorResume(error -&gt; {
+     *                 // log and then discard the error to keep the sequence alive
+     *                 log.error("Failed to handle event!", error);
+     *                 return Mono.empty();
+     *             }))
+     *     .subscribe();
+     * </pre>
+     * <p>
+     * For more alternatives to handling errors, please see
+     * <a href="https://github.com/Discord4J/Discord4J/wiki/Error-Handling">Error Handling</a> wiki page.
+     * </p>
+     *
+     * @param eventClass the event class to obtain events from
+     * @param <E> the type of the event class
+     * @return a new {@link reactor.core.publisher.Flux} with the requested events
+     */
+    public <E extends Event> Flux<E> on(Class<E> eventClass) {
         return getEventDispatcher().on(eventClass);
     }
 
-    public <T extends Event> Flux<T> on(Class<T> eventClass, Function<T, Mono<Void>> action) {
-        return getEventDispatcher().on(eventClass, action);
+    /**
+     * Retrieves a {@link Flux} with elements of the given {@link Event} type, processing them through a given
+     * {@link Function}. Errors occurring within the mapper will be logged and discarded, preventing the termination of
+     * the "infinite" event sequence.
+     * <p>
+     * There are multiple ways of using this event handling method, for example:
+     * </p>
+     * <pre>
+     * client.on(MessageCreateEvent.class, event -> {
+     *         // myCodeThatMightThrow should return a Reactor type (Mono or Flux)
+     *         return myCodeThatMightThrow(event);
+     *     })
+     *     .subscribe();
+     *
+     * client.on(MessageCreateEvent.class, event -> {
+     *         // myCodeThatMightThrow *can* be blocking
+     *         myCodeThatMightThrow(event);
+     *         return Mono.empty(); // but we have to return a Reactor type
+     *     })
+     *     .subscribe();
+     * </pre>
+     * <p>
+     * Continuing the chain after {@code on(class, event -> ...)} will require your own error handling strategy.
+     * Check the docs for {@link #on(Class)} for more details.
+     * </p>
+     *
+     * @param eventClass the event class to obtain events from
+     * @param mapper an event mapping function called on each event. If you do not wish to perform further operations
+     * you can return {@code Mono.empty()}.
+     * @param <E> the type of the event class
+     * @param <T> the type of the event mapper function
+     * @return a new {@link reactor.core.publisher.Flux} with the type resulting from the given event mapper
+     */
+    public <E extends Event, T> Flux<T> on(Class<E> eventClass, Function<E, Publisher<T>> mapper) {
+        return on(eventClass)
+                .flatMap(event -> Flux.from(mapper.apply(event))
+                        .onErrorResume(t -> {
+                            log.warn("Error while handling {} in shard [{}]", eventClass.getSimpleName(),
+                                    event.getShardInfo().format(), t);
+                            return Mono.empty();
+                        }));
     }
 }

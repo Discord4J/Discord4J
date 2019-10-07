@@ -21,14 +21,9 @@ import discord4j.core.event.domain.Event;
 import reactor.core.publisher.EmitterProcessor;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxSink;
-import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Scheduler;
 import reactor.scheduler.forkjoin.ForkJoinPoolScheduler;
-import reactor.util.Logger;
-import reactor.util.Loggers;
 import reactor.util.concurrent.Queues;
-
-import java.util.function.Function;
 
 /**
  * Distributes events to subscribers. {@link Event} instances can be published over this class and dispatched to all
@@ -112,17 +107,6 @@ public class EmitterEventDispatcher implements EventDispatcher {
     @Override
     public <T extends Event> Flux<T> on(Class<T> eventClass) {
         return processor.publishOn(scheduler).ofType(eventClass);
-    }
-
-    @Override
-    public <T extends Event> Flux<T> on(Class<T> eventClass, Function<T, Mono<Void>> eventListener) {
-        return on(eventClass).flatMap(event -> eventListener.apply(event)
-                .onErrorResume(t -> {
-                    Logger log = Loggers.getLogger("discord4j.events." + eventClass.getSimpleName());
-                    log.error("[shard={}] Error while processing event", event.getShardInfo().format(), t);
-                    return Mono.empty();
-                })
-                .thenReturn(event));
     }
 
     @Override

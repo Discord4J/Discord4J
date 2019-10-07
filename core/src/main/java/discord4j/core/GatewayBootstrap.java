@@ -62,6 +62,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.logging.Level;
@@ -206,7 +207,10 @@ public class GatewayBootstrap<O extends GatewayOptions> {
         EventDispatcher eventDispatcher = initEventDispatcher();
         GatewayResources resources = new GatewayResources(stateHolder, eventDispatcher, shardCoordinator);
         MonoProcessor<Void> closeProcessor = MonoProcessor.create();
-        GatewayDiscordClient gateway = new GatewayDiscordClient(client, resources, closeProcessor);
+        Map<Integer, GatewayClient> gatewayClients = new ConcurrentHashMap<>();
+        Map<Integer, VoiceClient> voiceClients = new ConcurrentHashMap<>();
+        GatewayDiscordClient gateway = new GatewayDiscordClient(client, resources, closeProcessor,
+                gatewayClients, voiceClients);
 
         return computeShardCount(client.getCoreResources().getRestClient())
                 .flatMapMany(count -> Flux.range(0, count)
@@ -235,8 +239,8 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                                                 gatewayClient.sender().next(GatewayPayload.voiceStateUpdate(voiceStateUpdate));
                                             });
 
-                                    gateway.getGatewayClientMap().put(shard.getIndex(), gatewayClient);
-                                    gateway.getVoiceClientMap().put(shard.getIndex(), voiceClient);
+                                    gatewayClients.put(shard.getIndex(), gatewayClient);
+                                    voiceClients.put(shard.getIndex(), voiceClient);
 
                                     // wire gateway events to EventDispatcher
                                     Logger dispatchLog = Loggers.getLogger("discord4j.dispatch." + shard.getIndex());
@@ -275,8 +279,8 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                                                             .then(stateHolder.invalidateStores())
                                                             .then(Mono.fromRunnable(() -> {
                                                                 shardCloseSignal.onComplete();
-                                                                gateway.getGatewayClientMap().remove(shard.getIndex());
-                                                                gateway.getVoiceClientMap().remove(shard.getIndex());
+                                                                gatewayClients.remove(shard.getIndex());
+                                                                voiceClients.remove(shard.getIndex());
                                                                 if (gateway.getGatewayClientMap().isEmpty()) {
                                                                     closeProcessor.onComplete();
                                                                     forCleanup.dispose();
