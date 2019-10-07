@@ -48,10 +48,10 @@ public final class NewsChannel extends BaseGuildMessageChannel {
         final NewsChannelEditSpec mutatedSpec = new NewsChannelEditSpec();
         spec.accept(mutatedSpec);
 
-        return getGateway().getRestClient().getChannelService()
+        return getClient().getRestClient().getChannelService()
                 .modifyChannel(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason())
                 .map(ChannelBean::new)
-                .map(bean -> EntityUtil.getChannel(getGateway(), bean))
+                .map(bean -> EntityUtil.getChannel(getClient(), bean))
                 .cast(NewsChannel.class);
     }
 

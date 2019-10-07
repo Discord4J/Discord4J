@@ -16,7 +16,6 @@
  */
 package discord4j.core.object.entity;
 
-import discord4j.core.DiscordClient;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.data.WebhookBean;
 import discord4j.core.object.entity.channel.GuildMessageChannel;
@@ -55,12 +54,7 @@ public final class Webhook implements Entity {
     }
 
     @Override
-    public DiscordClient getClient() {
-        return gateway.rest();
-    }
-
-    @Override
-    public GatewayDiscordClient getGateway() {
+    public GatewayDiscordClient getClient() {
         return gateway;
     }
 
@@ -104,7 +98,7 @@ public final class Webhook implements Entity {
      * associated to. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<GuildMessageChannel> getChannel() {
-        return getGateway().getChannelById(getChannelId()).cast(GuildMessageChannel.class);
+        return gateway.getChannelById(getChannelId()).cast(GuildMessageChannel.class);
     }
 
     /**
@@ -123,7 +117,7 @@ public final class Webhook implements Entity {
      * by, if present. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<User> getCreator() {
-        return getGateway().getUserById(getCreatorId());
+        return gateway.getUserById(getCreatorId());
     }
 
     /**

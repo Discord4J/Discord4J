@@ -16,7 +16,6 @@
  */
 package discord4j.core.object.reaction;
 
-import discord4j.core.DiscordClient;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.DiscordObject;
 import discord4j.core.object.data.stored.ReactionBean;
@@ -48,12 +47,7 @@ public final class Reaction implements DiscordObject  {
     }
 
     @Override
-    public DiscordClient getClient() {
-        return gateway.rest();
-    }
-
-    @Override
-    public GatewayDiscordClient getGateway() {
+    public GatewayDiscordClient getClient() {
         return gateway;
     }
 

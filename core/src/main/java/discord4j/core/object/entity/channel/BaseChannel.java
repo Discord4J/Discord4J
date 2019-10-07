@@ -16,7 +16,6 @@
  */
 package discord4j.core.object.entity.channel;
 
-import discord4j.core.DiscordClient;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.data.stored.ChannelBean;
 import discord4j.core.object.util.Snowflake;
@@ -47,12 +46,7 @@ class BaseChannel implements Channel {
     }
 
     @Override
-    public final DiscordClient getClient() {
-        return gateway.rest();
-    }
-
-    @Override
-    public GatewayDiscordClient getGateway() {
+    public final GatewayDiscordClient getClient() {
         return gateway;
     }
 

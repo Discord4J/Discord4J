@@ -16,7 +16,6 @@
  */
 package discord4j.core.object;
 
-import discord4j.core.DiscordClient;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.data.RegionBean;
 
@@ -47,12 +46,7 @@ public final class Region implements DiscordObject {
     }
 
     @Override
-    public DiscordClient getClient() {
-        return gateway.rest();
-    }
-
-    @Override
-    public GatewayDiscordClient getGateway() {
+    public GatewayDiscordClient getClient() {
         return gateway;
     }
 

@@ -17,7 +17,6 @@
 package discord4j.core.object.entity;
 
 import discord4j.common.json.UserResponse;
-import discord4j.core.DiscordClient;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.Embed;
 import discord4j.core.object.data.stored.MessageBean;
@@ -70,12 +69,7 @@ public final class Message implements Entity {
     }
 
     @Override
-    public DiscordClient getClient() {
-        return gateway.rest();
-    }
-
-    @Override
-    public GatewayDiscordClient getGateway() {
+    public GatewayDiscordClient getClient() {
         return gateway;
     }
 
@@ -100,7 +94,7 @@ public final class Message implements Entity {
      * was sent in. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<MessageChannel> getChannel() {
-        return getGateway().getChannelById(getChannelId()).cast(MessageChannel.class);
+        return gateway.getChannelById(getChannelId()).cast(MessageChannel.class);
     }
 
     /**
@@ -200,7 +194,7 @@ public final class Message implements Entity {
      * error is received, it is emitted through the {@code Flux}.
      */
     public Flux<User> getUserMentions() {
-        return Flux.fromIterable(getUserMentionIds()).flatMap(getGateway()::getUserById);
+        return Flux.fromIterable(getUserMentionIds()).flatMap(gateway::getUserById);
     }
 
     /**
@@ -296,7 +290,7 @@ public final class Message implements Entity {
      * message, if present. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Webhook> getWebhook() {
-        return Mono.justOrEmpty(getWebhookId()).flatMap(getGateway()::getWebhookById);
+        return Mono.justOrEmpty(getWebhookId()).flatMap(gateway::getWebhookById);
     }
 
     /**

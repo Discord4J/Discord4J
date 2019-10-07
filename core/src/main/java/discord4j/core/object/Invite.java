@@ -16,7 +16,6 @@
  */
 package discord4j.core.object;
 
-import discord4j.core.DiscordClient;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.data.InviteBean;
 import discord4j.core.object.entity.Guild;
@@ -55,12 +54,7 @@ public class Invite implements DiscordObject {
     }
 
     @Override
-    public final DiscordClient getClient() {
-        return gateway.rest();
-    }
-
-    @Override
-    public GatewayDiscordClient getGateway() {
+    public final GatewayDiscordClient getClient() {
         return gateway;
     }
 
@@ -108,7 +102,7 @@ public class Invite implements DiscordObject {
      * associated to. If an error is received, it is emitted through the {@code Mono}.
      */
     public final Mono<CategorizableChannel> getChannel() {
-        return getGateway().getChannelById(getChannelId()).cast(CategorizableChannel.class);
+        return gateway.getChannelById(getChannelId()).cast(CategorizableChannel.class);
     }
 
     /**
@@ -128,7 +122,7 @@ public class Invite implements DiscordObject {
      * associated to. If an error is received, it is emitted through the {@code Mono}.
      */
     public final Mono<User> getTargetUser() {
-        return getTargetUserId().map(getGateway()::getUserById).orElse(Mono.empty());
+        return getTargetUserId().map(gateway::getUserById).orElse(Mono.empty());
     }
 
     /**

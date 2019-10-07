@@ -69,10 +69,10 @@ public final class TextChannel extends BaseGuildMessageChannel {
         final TextChannelEditSpec mutatedSpec = new TextChannelEditSpec();
         spec.accept(mutatedSpec);
 
-        return getGateway().getRestClient().getChannelService()
+        return getClient().getRestClient().getChannelService()
                 .modifyChannel(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason())
                 .map(ChannelBean::new)
-                .map(bean -> EntityUtil.getChannel(getGateway(), bean))
+                .map(bean -> EntityUtil.getChannel(getClient(), bean))
                 .cast(TextChannel.class);
     }
 

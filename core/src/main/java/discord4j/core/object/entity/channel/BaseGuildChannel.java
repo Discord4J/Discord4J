@@ -55,7 +55,7 @@ class BaseGuildChannel extends BaseChannel implements GuildChannel {
 
     @Override
     public final Mono<Guild> getGuild() {
-        return getGateway().getGuildById(getGuildId());
+        return getClient().getGuildById(getGuildId());
     }
 
     @Override
@@ -67,7 +67,7 @@ class BaseGuildChannel extends BaseChannel implements GuildChannel {
             long guildId = getGuildId().asLong();
             long channelId = getId().asLong();
             return Arrays.stream(permissionOverwrites)
-                    .map(bean -> new ExtendedPermissionOverwrite(getGateway(), bean, guildId, channelId))
+                    .map(bean -> new ExtendedPermissionOverwrite(getClient(), bean, guildId, channelId))
                     .collect(Collectors.toSet());
         }
     }
@@ -88,7 +88,7 @@ class BaseGuildChannel extends BaseChannel implements GuildChannel {
 
     @Override
     public Mono<PermissionSet> getEffectivePermissions(Snowflake memberId) {
-        Mono<Member> getMember = getGateway().getMemberById(getGuildId(), memberId);
+        Mono<Member> getMember = getClient().getMemberById(getGuildId(), memberId);
         Mono<PermissionSet> getBasePerms = getMember.flatMap(Member::getBasePermissions);
 
         return Mono.zip(getMember, getBasePerms, (member, basePerms) -> {
@@ -129,7 +129,7 @@ class BaseGuildChannel extends BaseChannel implements GuildChannel {
         PermissionSet deny = overwrite.getDenied();
         PermissionsEditRequest request = new PermissionsEditRequest(allow.getRawValue(), deny.getRawValue(), "member");
 
-        return getGateway().getRestClient().getChannelService()
+        return getClient().getRestClient().getChannelService()
                 .editChannelPermissions(getId().asLong(), memberId.asLong(), request, reason);
     }
 
@@ -139,7 +139,7 @@ class BaseGuildChannel extends BaseChannel implements GuildChannel {
         PermissionSet deny = overwrite.getDenied();
         PermissionsEditRequest request = new PermissionsEditRequest(allow.getRawValue(), deny.getRawValue(), "role");
 
-        return getGateway().getRestClient().getChannelService()
+        return getClient().getRestClient().getChannelService()
                 .editChannelPermissions(getId().asLong(), roleId.asLong(), request, reason);
     }
 

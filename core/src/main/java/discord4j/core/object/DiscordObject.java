@@ -18,21 +18,17 @@ package discord4j.core.object;
 
 import discord4j.core.DiscordClient;
 import discord4j.core.GatewayDiscordClient;
+import discord4j.store.api.Store;
 
 /** An object characterized by the Discord platform. */
 public interface DiscordObject {
 
     /**
-     * Gets the DiscordClient associated to this object.
+     * Returns the {@link GatewayDiscordClient} that created this object. Methods in it are exclusively based on the
+     * entity cache or {@link Store} in use. Refer to calling {@code getClient().rest()} to access a
+     * {@link DiscordClient} that is capable of requesting entities directly from the REST API.
      *
-     * @return The DiscordClient associated to this object.
+     * @return The {@link GatewayDiscordClient} associated to this object.
      */
-    DiscordClient getClient();
-
-    /**
-     * Returns the gateway associated to this object.
-     *
-     * @return the {@link GatewayDiscordClient} associated to this object.
-     */
-    GatewayDiscordClient getGateway();
+    GatewayDiscordClient getClient();
 }

@@ -41,7 +41,7 @@ class BaseCategorizableChannel extends BaseGuildChannel implements Categorizable
 
     @Override
     public Mono<Category> getCategory() {
-        return Mono.justOrEmpty(getCategoryId()).flatMap(getGateway()::getChannelById).cast(Category.class);
+        return Mono.justOrEmpty(getCategoryId()).flatMap(getClient()::getChannelById).cast(Category.class);
     }
 
     @Override
@@ -49,17 +49,17 @@ class BaseCategorizableChannel extends BaseGuildChannel implements Categorizable
         final InviteCreateSpec mutatedSpec = new InviteCreateSpec();
         spec.accept(mutatedSpec);
 
-        return getGateway().getRestClient().getChannelService()
+        return getClient().getRestClient().getChannelService()
                 .createChannelInvite(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason())
                 .map(ExtendedInviteBean::new)
-                .map(bean -> new ExtendedInvite(getGateway(), bean));
+                .map(bean -> new ExtendedInvite(getClient(), bean));
     }
 
     @Override
     public Flux<ExtendedInvite> getInvites() {
-        return getGateway().getRestClient().getChannelService()
+        return getClient().getRestClient().getChannelService()
                 .getChannelInvites(getId().asLong())
                 .map(ExtendedInviteBean::new)
-                .map(bean -> new ExtendedInvite(getGateway(), bean));
+                .map(bean -> new ExtendedInvite(getClient(), bean));
     }
 }

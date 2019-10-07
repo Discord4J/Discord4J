@@ -16,7 +16,6 @@
  */
 package discord4j.core.object.entity;
 
-import discord4j.core.DiscordClient;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.data.stored.AttachmentBean;
 import discord4j.core.object.util.Snowflake;
@@ -54,12 +53,7 @@ public final class Attachment implements Entity {
     }
 
     @Override
-    public DiscordClient getClient() {
-        return gateway.rest();
-    }
-
-    @Override
-    public GatewayDiscordClient getGateway() {
+    public GatewayDiscordClient getClient() {
         return gateway;
     }
 

@@ -162,7 +162,7 @@ public class ExampleBot {
                     .isPresent()) {
                 return Mono.justOrEmpty(message.getContent())
                         .map(content -> content.split(" ", 2))
-                        .flatMap(tokens -> message.getGateway().getUserById(Snowflake.of(tokens[1])))
+                        .flatMap(tokens -> message.getClient().getUserById(Snowflake.of(tokens[1])))
                         .flatMap(user -> message.getChannel()
                                 .flatMap(channel -> channel.createMessage(msg ->
                                         msg.setEmbed(embed -> embed

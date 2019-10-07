@@ -104,7 +104,7 @@ public class VoiceChannelJoinSpec implements Spec<Mono<VoiceConnection>> {
         final long channelId = voiceChannel.getId().asLong();
         final long selfId = gateway.getStateHolder().getSelfId().get();
 
-        Map<Integer, GatewayClient> gatewayClients = voiceChannel.getGateway().getGatewayClientMap();
+        Map<Integer, GatewayClient> gatewayClients = voiceChannel.getClient().getGatewayClientMap();
         int count = gatewayClients.size();
         int shardId = (int) ((voiceChannel.getGuildId().asLong() >> 22) % count);
         GatewayClient gatewayClient = gatewayClients.get(shardId);

@@ -62,10 +62,10 @@ public final class Category extends BaseGuildChannel {
         final CategoryEditSpec mutatedSpec = new CategoryEditSpec();
         spec.accept(mutatedSpec);
 
-        return getGateway().getRestClient().getChannelService()
+        return getClient().getRestClient().getChannelService()
                 .modifyChannel(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason())
                 .map(ChannelBean::new)
-                .map(bean -> EntityUtil.getChannel(getGateway(), bean))
+                .map(bean -> EntityUtil.getChannel(getClient(), bean))
                 .cast(Category.class);
     }
 

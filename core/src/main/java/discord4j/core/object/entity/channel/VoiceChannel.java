@@ -73,10 +73,10 @@ public final class VoiceChannel extends BaseCategorizableChannel {
         final VoiceChannelEditSpec mutatedSpec = new VoiceChannelEditSpec();
         spec.accept(mutatedSpec);
 
-        return getGateway().getRestClient().getChannelService()
+        return getClient().getRestClient().getChannelService()
                 .modifyChannel(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason())
                 .map(ChannelBean::new)
-                .map(bean -> EntityUtil.getChannel(getGateway(), bean))
+                .map(bean -> EntityUtil.getChannel(getClient(), bean))
                 .cast(VoiceChannel.class);
     }
 
@@ -91,11 +91,11 @@ public final class VoiceChannel extends BaseCategorizableChannel {
      * always be empty.
      */
     public Flux<VoiceState> getVoiceStates() {
-        return getGateway().getStateHolder().getVoiceStateStore()
+        return getClient().getStateHolder().getVoiceStateStore()
                 .findInRange(LongLongTuple2.of(getGuildId().asLong(), Long.MIN_VALUE),
                         LongLongTuple2.of(getGuildId().asLong(), Long.MAX_VALUE))
                 .filter(bean -> Objects.equals(bean.getChannelId(), getId().asLong()))
-                .map(bean -> new VoiceState(getGateway(), bean));
+                .map(bean -> new VoiceState(getClient(), bean));
     }
 
     /**
@@ -106,7 +106,7 @@ public final class VoiceChannel extends BaseCategorizableChannel {
      * connection to the channel has been established. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<VoiceConnection> join(final Consumer<? super VoiceChannelJoinSpec> spec) {
-        final VoiceChannelJoinSpec mutatedSpec = new VoiceChannelJoinSpec(getGateway(), this);
+        final VoiceChannelJoinSpec mutatedSpec = new VoiceChannelJoinSpec(getClient(), this);
         spec.accept(mutatedSpec);
 
         return mutatedSpec.asRequest();

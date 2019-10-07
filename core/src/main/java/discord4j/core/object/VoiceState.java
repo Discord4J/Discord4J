@@ -16,7 +16,6 @@
  */
 package discord4j.core.object;
 
-import discord4j.core.DiscordClient;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.data.stored.VoiceStateBean;
 import discord4j.core.object.entity.Guild;
@@ -53,12 +52,7 @@ public final class VoiceState implements DiscordObject {
     }
 
     @Override
-    public DiscordClient getClient() {
-        return gateway.rest();
-    }
-
-    @Override
-    public GatewayDiscordClient getGateway() {
+    public GatewayDiscordClient getClient() {
         return gateway;
     }
 
@@ -97,7 +91,7 @@ public final class VoiceState implements DiscordObject {
      * to, if present. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<VoiceChannel> getChannel() {
-        return Mono.justOrEmpty(getChannelId()).flatMap(getGateway()::getChannelById).cast(VoiceChannel.class);
+        return Mono.justOrEmpty(getChannelId()).flatMap(gateway::getChannelById).cast(VoiceChannel.class);
     }
 
     /**
@@ -116,7 +110,7 @@ public final class VoiceState implements DiscordObject {
      * error is received, it is emitted through the {@code Mono}.
      */
     public Mono<User> getUser() {
-        return getGateway().getUserById(getUserId());
+        return gateway.getUserById(getUserId());
     }
 
     /**

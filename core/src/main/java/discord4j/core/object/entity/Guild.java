@@ -17,7 +17,6 @@
 package discord4j.core.object.entity;
 
 import discord4j.common.json.GuildMemberResponse;
-import discord4j.core.DiscordClient;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.Ban;
 import discord4j.core.object.ExtendedInvite;
@@ -91,12 +90,7 @@ public final class Guild implements Entity {
     }
 
     @Override
-    public DiscordClient getClient() {
-        return gateway.rest();
-    }
-
-    @Override
-    public GatewayDiscordClient getGateway() {
+    public GatewayDiscordClient getClient() {
         return gateway;
     }
 
@@ -200,7 +194,7 @@ public final class Guild implements Entity {
      * error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Member> getOwner() {
-        return getGateway().getMemberById(getId(), getOwnerId());
+        return gateway.getMemberById(getId(), getOwnerId());
     }
 
     /**
@@ -251,7 +245,7 @@ public final class Guild implements Entity {
      * If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<VoiceChannel> getAfkChannel() {
-        return Mono.justOrEmpty(getAfkChannelId()).flatMap(getGateway()::getChannelById).cast(VoiceChannel.class);
+        return Mono.justOrEmpty(getAfkChannelId()).flatMap(gateway::getChannelById).cast(VoiceChannel.class);
     }
 
     /**
@@ -279,7 +273,7 @@ public final class Guild implements Entity {
      * present. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<GuildChannel> getEmbedChannel() {
-        return Mono.justOrEmpty(getEmbedChannelId()).flatMap(getGateway()::getChannelById).cast(GuildChannel.class);
+        return Mono.justOrEmpty(getEmbedChannelId()).flatMap(gateway::getChannelById).cast(GuildChannel.class);
     }
 
     /**
@@ -401,7 +395,7 @@ public final class Guild implements Entity {
      * emitted through the {@code Flux}.
      */
     public Flux<GuildEmoji> getEmojis() {
-        return Flux.fromIterable(getEmojiIds()).flatMap(id -> getGateway().getGuildEmojiById(getId(), id));
+        return Flux.fromIterable(getEmojiIds()).flatMap(id -> gateway.getGuildEmojiById(getId(), id));
     }
 
     /**
@@ -412,7 +406,7 @@ public final class Guild implements Entity {
      * supplied ID. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<GuildEmoji> getGuildEmojiById(final Snowflake id) {
-        return getGateway().getGuildEmojiById(getId(), id);
+        return gateway.getGuildEmojiById(getId(), id);
     }
 
     /**
@@ -468,7 +462,7 @@ public final class Guild implements Entity {
      * widget, if present. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<GuildChannel> getWidgetChannel() {
-        return Mono.justOrEmpty(getWidgetChannelId()).flatMap(getGateway()::getChannelById).cast(GuildChannel.class);
+        return Mono.justOrEmpty(getWidgetChannelId()).flatMap(gateway::getChannelById).cast(GuildChannel.class);
     }
 
     /**
@@ -487,7 +481,7 @@ public final class Guild implements Entity {
      * messages are sent, if present. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<TextChannel> getSystemChannel() {
-        return Mono.justOrEmpty(getSystemChannelId()).flatMap(getGateway()::getChannelById).cast(TextChannel.class);
+        return Mono.justOrEmpty(getSystemChannelId()).flatMap(gateway::getChannelById).cast(TextChannel.class);
     }
 
     /**
@@ -585,7 +579,7 @@ public final class Guild implements Entity {
                 .map(LongStream::boxed)
                 .flatMapMany(Flux::fromStream)
                 .map(Snowflake::of)
-                .flatMap(memberId -> getGateway().getMemberById(getId(), memberId))
+                .flatMap(memberId -> gateway.getMemberById(getId(), memberId))
                 .switchIfEmpty(requestMembers);
     }
 
@@ -597,7 +591,7 @@ public final class Guild implements Entity {
      * ID. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Member> getMemberById(final Snowflake id) {
-        return getGateway().getMemberById(getId(), id);
+        return gateway.getMemberById(getId(), id);
     }
 
     /**
@@ -616,7 +610,7 @@ public final class Guild implements Entity {
                 .map(LongStream::boxed)
                 .flatMapMany(Flux::fromStream)
                 .map(Snowflake::of)
-                .flatMap(getGateway()::getChannelById)
+                .flatMap(gateway::getChannelById)
                 .cast(GuildChannel.class)
                 .switchIfEmpty(gateway.getRestClient().getGuildService()
                         .getGuildChannels(getId().asLong())
@@ -633,7 +627,7 @@ public final class Guild implements Entity {
      * supplied ID. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<GuildChannel> getChannelById(final Snowflake id) {
-        return getGateway().getChannelById(id)
+        return gateway.getChannelById(id)
                 .cast(GuildChannel.class)
                 .filter(channel -> channel.getGuildId().equals(getId()));
     }

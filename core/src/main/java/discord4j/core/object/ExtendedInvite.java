@@ -60,7 +60,7 @@ public final class ExtendedInvite extends Invite {
      * an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<User> getInviter() {
-        return getGateway().getUserById(getInviterId());
+        return getClient().getUserById(getInviterId());
     }
 
     /**

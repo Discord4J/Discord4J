@@ -100,7 +100,7 @@ public final class Member extends User {
      */
     public Flux<Role> getRoles() {
         return Flux.fromIterable(getRoleIds())
-                .flatMap(id -> getGateway().getRoleById(getGuildId(), id));
+                .flatMap(id -> getClient().getRoleById(getGuildId(), id));
     }
 
     /**
@@ -113,7 +113,7 @@ public final class Member extends User {
      * is received, it is emitted through the {@code Mono}.
      */
     public Mono<Role> getHighestRole() {
-        return MathFlux.max(Flux.fromIterable(getRoleIds()).flatMap(id -> getGateway().getRoleById(getGuildId(), id)),
+        return MathFlux.max(Flux.fromIterable(getRoleIds()).flatMap(id -> getClient().getRoleById(getGuildId(), id)),
                             OrderUtil.ROLE_ORDER);
     }
 
@@ -152,7 +152,7 @@ public final class Member extends User {
      * to. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Guild> getGuild() {
-        return getGateway().getGuildById(getGuildId());
+        return getClient().getGuildById(getGuildId());
     }
 
     /**
@@ -194,9 +194,9 @@ public final class Member extends User {
      * always be empty.
      */
     public Mono<VoiceState> getVoiceState() {
-        return getGateway().getStateHolder().getVoiceStateStore()
+        return getClient().getStateHolder().getVoiceStateStore()
                 .find(LongLongTuple2.of(getGuildId().asLong(), getId().asLong()))
-                .map(bean -> new VoiceState(getGateway(), bean));
+                .map(bean -> new VoiceState(getClient(), bean));
     }
 
     /**
@@ -210,7 +210,7 @@ public final class Member extends User {
      * always be empty.
      */
     public Mono<Presence> getPresence() {
-        return getGateway().getStateHolder().getPresenceStore()
+        return getClient().getStateHolder().getPresenceStore()
                 .find(LongLongTuple2.of(getGuildId().asLong(), getId().asLong()))
                 .map(Presence::new);
     }
@@ -233,7 +233,7 @@ public final class Member extends User {
      * error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Void> kick(@Nullable final String reason) {
-        return getGateway().getRestClient().getGuildService()
+        return getClient().getRestClient().getGuildService()
                 .removeGuildMember(getGuildId().asLong(), getId().asLong(), reason);
     }
 
@@ -248,7 +248,7 @@ public final class Member extends User {
         final BanQuerySpec mutatedSpec = new BanQuerySpec();
         spec.accept(mutatedSpec);
 
-        return getGateway().getRestClient().getGuildService()
+        return getClient().getRestClient().getGuildService()
                 .createGuildBan(getGuildId().asLong(), getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason());
     }
 
@@ -270,7 +270,7 @@ public final class Member extends User {
      * error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Void> unban(@Nullable final String reason) {
-        return getGateway().getRestClient().getGuildService()
+        return getClient().getRestClient().getGuildService()
                 .removeGuildBan(getGuildId().asLong(), getId().asLong(), reason);
     }
 
@@ -295,7 +295,7 @@ public final class Member extends User {
      * member. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Void> addRole(final Snowflake roleId, @Nullable final String reason) {
-        return getGateway().getRestClient().getGuildService()
+        return getClient().getRestClient().getGuildService()
                 .addGuildMemberRole(guildId, getId().asLong(), roleId.asLong(), reason);
     }
 
@@ -320,7 +320,7 @@ public final class Member extends User {
      * this member. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Void> removeRole(final Snowflake roleId, @Nullable final String reason) {
-        return getGateway().getRestClient().getGuildService()
+        return getClient().getRestClient().getGuildService()
                 .removeGuildMemberRole(guildId, getId().asLong(), roleId.asLong(), reason);
     }
 
@@ -385,7 +385,7 @@ public final class Member extends User {
      * it is emitted through the {@code Mono}.
      */
     public Mono<Boolean> isHigher(Snowflake id) {
-        return getGateway().getMemberById(getGuildId(), id).flatMap(this::isHigher);
+        return getClient().getMemberById(getGuildId(), id).flatMap(this::isHigher);
     }
 
     /**
@@ -452,7 +452,7 @@ public final class Member extends User {
         final GuildMemberEditSpec mutatedSpec = new GuildMemberEditSpec();
         spec.accept(mutatedSpec);
 
-        return getGateway().getRestClient().getGuildService()
+        return getClient().getRestClient().getGuildService()
                 .modifyGuildMember(getGuildId().asLong(), getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason());
     }
 

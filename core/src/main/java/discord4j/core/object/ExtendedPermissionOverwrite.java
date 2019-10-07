@@ -16,7 +16,6 @@
  */
 package discord4j.core.object;
 
-import discord4j.core.DiscordClient;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.data.stored.PermissionOverwriteBean;
 import discord4j.core.object.entity.Guild;
@@ -62,12 +61,7 @@ public final class ExtendedPermissionOverwrite extends PermissionOverwrite imple
     }
 
     @Override
-    public DiscordClient getClient() {
-        return gateway.rest();
-    }
-
-    @Override
-    public GatewayDiscordClient getGateway() {
+    public GatewayDiscordClient getClient() {
         return gateway;
     }
 
@@ -88,7 +82,7 @@ public final class ExtendedPermissionOverwrite extends PermissionOverwrite imple
      * if present. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<User> getUser() {
-        return Mono.justOrEmpty(getMemberId()).flatMap(getGateway()::getUserById);
+        return Mono.justOrEmpty(getMemberId()).flatMap(gateway::getUserById);
     }
 
     /**
@@ -126,7 +120,7 @@ public final class ExtendedPermissionOverwrite extends PermissionOverwrite imple
      * overwrite. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<GuildChannel> getChannel() {
-        return getGateway().getChannelById(getChannelId()).cast(GuildChannel.class);
+        return gateway.getChannelById(getChannelId()).cast(GuildChannel.class);
     }
 
     /**

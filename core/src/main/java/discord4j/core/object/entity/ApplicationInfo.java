@@ -16,7 +16,6 @@
  */
 package discord4j.core.object.entity;
 
-import discord4j.core.DiscordClient;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.data.ApplicationInfoBean;
 import discord4j.core.object.util.Image;
@@ -53,12 +52,7 @@ public final class ApplicationInfo implements Entity {
     }
 
     @Override
-    public DiscordClient getClient() {
-        return gateway.rest();
-    }
-
-    @Override
-    public GatewayDiscordClient getGateway() {
+    public GatewayDiscordClient getClient() {
         return gateway;
     }
 

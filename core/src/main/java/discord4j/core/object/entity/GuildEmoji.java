@@ -17,7 +17,6 @@
 package discord4j.core.object.entity;
 
 import discord4j.common.json.GuildEmojiResponse;
-import discord4j.core.DiscordClient;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.data.stored.GuildEmojiBean;
 import discord4j.core.object.data.stored.UserBean;
@@ -73,12 +72,7 @@ public final class GuildEmoji implements Entity {
     }
 
     @Override
-    public DiscordClient getClient() {
-        return gateway.rest();
-    }
-
-    @Override
-    public GatewayDiscordClient getGateway() {
+    public GatewayDiscordClient getClient() {
         return gateway;
     }
 

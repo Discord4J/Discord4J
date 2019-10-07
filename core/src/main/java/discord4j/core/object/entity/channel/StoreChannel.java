@@ -48,10 +48,10 @@ public final class StoreChannel extends BaseCategorizableChannel {
         final StoreChannelEditSpec mutatedSpec = new StoreChannelEditSpec();
         spec.accept(mutatedSpec);
 
-        return getGateway().getRestClient().getChannelService()
+        return getClient().getRestClient().getChannelService()
                 .modifyChannel(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason())
                 .map(ChannelBean::new)
-                .map(bean -> EntityUtil.getChannel(getGateway(), bean))
+                .map(bean -> EntityUtil.getChannel(getClient(), bean))
                 .cast(StoreChannel.class);
     }
 

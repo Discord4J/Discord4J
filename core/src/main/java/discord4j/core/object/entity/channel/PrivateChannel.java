@@ -58,7 +58,7 @@ public final class PrivateChannel extends BaseMessageChannel {
      * is received, it is emitted through the {@code Flux}.
      */
     public Flux<User> getRecipients() {
-        return Flux.fromIterable(getRecipientIds()).flatMap(getGateway()::getUserById);
+        return Flux.fromIterable(getRecipientIds()).flatMap(getClient()::getUserById);
     }
 
     @Override

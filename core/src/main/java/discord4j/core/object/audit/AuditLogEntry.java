@@ -16,7 +16,6 @@
  */
 package discord4j.core.object.audit;
 
-import discord4j.core.DiscordClient;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.data.AuditLogEntryBean;
 import discord4j.core.object.entity.Entity;
@@ -71,12 +70,7 @@ public class AuditLogEntry implements Entity {
     }
 
     @Override
-    public DiscordClient getClient() {
-        return gateway.rest();
-    }
-
-    @Override
-    public GatewayDiscordClient getGateway() {
+    public GatewayDiscordClient getClient() {
         return gateway;
     }
 

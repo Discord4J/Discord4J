@@ -57,7 +57,7 @@ class BaseMessageChannel extends BaseChannel implements MessageChannel {
 
     @Override
     public final Mono<Message> getLastMessage() {
-        return Mono.justOrEmpty(getLastMessageId()).flatMap(id -> getGateway().getMessageById(getId(), id));
+        return Mono.justOrEmpty(getLastMessageId()).flatMap(id -> getClient().getMessageById(getId(), id));
     }
 
     @Override
@@ -71,15 +71,15 @@ class BaseMessageChannel extends BaseChannel implements MessageChannel {
         final MessageCreateSpec mutatedSpec = new MessageCreateSpec();
         spec.accept(mutatedSpec);
 
-        return getGateway().getRestClient().getChannelService()
+        return getClient().getRestClient().getChannelService()
                 .createMessage(getId().asLong(), mutatedSpec.asRequest())
                 .map(MessageBean::new)
-                .map(bean -> new Message(getGateway(), bean));
+                .map(bean -> new Message(getClient(), bean));
     }
 
     @Override
     public final Mono<Void> type() {
-        return getGateway().getRestClient().getChannelService()
+        return getClient().getRestClient().getChannelService()
                 .triggerTypingIndicator(getId().asLong())
                 .then();
     }
@@ -100,36 +100,36 @@ class BaseMessageChannel extends BaseChannel implements MessageChannel {
     @Override
     public final Flux<Message> getMessagesBefore(final Snowflake messageId) {
         final Function<Map<String, Object>, Flux<MessageResponse>> doRequest = params ->
-                getGateway().getRestClient().getChannelService()
+                getClient().getRestClient().getChannelService()
                         .getMessages(getId().asLong(), params);
 
         return PaginationUtil.paginateBefore(doRequest, MessageResponse::getId, messageId.asLong(), 100)
                 .map(MessageBean::new)
-                .map(bean -> new Message(getGateway(), bean));
+                .map(bean -> new Message(getClient(), bean));
     }
 
     @Override
     public final Flux<Message> getMessagesAfter(final Snowflake messageId) {
         final Function<Map<String, Object>, Flux<MessageResponse>> doRequest = params ->
-                getGateway().getRestClient().getChannelService()
+                getClient().getRestClient().getChannelService()
                         .getMessages(getId().asLong(), params);
 
         return PaginationUtil.paginateAfter(doRequest, MessageResponse::getId, messageId.asLong(), 100)
                 .map(MessageBean::new)
-                .map(bean -> new Message(getGateway(), bean));
+                .map(bean -> new Message(getClient(), bean));
     }
 
     @Override
     public final Mono<Message> getMessageById(final Snowflake id) {
-        return getGateway().getMessageById(getId(), id);
+        return getClient().getMessageById(getId(), id);
     }
 
     @Override
     public final Flux<Message> getPinnedMessages() {
-        return getGateway().getRestClient().getChannelService()
+        return getClient().getRestClient().getChannelService()
                 .getPinnedMessages(getId().asLong())
                 .map(MessageBean::new)
-                .map(bean -> new Message(getGateway(), bean));
+                .map(bean -> new Message(getClient(), bean));
     }
 
     @Override

@@ -226,7 +226,7 @@ class BaseGuildMessageChannel extends BaseChannel implements GuildMessageChannel
         final Function<List<String>, Mono<Boolean>> filterMessageIdChunk = messageIdChunk ->
                 Mono.just(messageIdChunk.get(0)) // REST accepts 2 or more items
                         .filter(ignore -> messageIdChunk.size() == 1)
-                        .flatMap(id -> getGateway().getRestClient().getChannelService()
+                        .flatMap(id -> getClient().getRestClient().getChannelService()
                                 .deleteMessage(getId().asLong(), Long.parseLong(id), null)
                                 .thenReturn(id))
                         .hasElement()
@@ -239,7 +239,7 @@ class BaseGuildMessageChannel extends BaseChannel implements GuildMessageChannel
                 .buffer(100) // REST accepts 100 IDs
                 .filterWhen(filterMessageIdChunk)
                 .map(messageIdChunk -> messageIdChunk.toArray(new String[messageIdChunk.size()]))
-                .flatMap(messageIdChunk -> getGateway().getRestClient().getChannelService()
+                .flatMap(messageIdChunk -> getClient().getRestClient().getChannelService()
                         .bulkDeleteMessages(getId().asLong(), new BulkDeleteRequest(messageIdChunk)))
                 .thenMany(Flux.fromIterable(ignoredMessageIds));
     }
@@ -255,10 +255,10 @@ class BaseGuildMessageChannel extends BaseChannel implements GuildMessageChannel
         final WebhookCreateSpec mutatedSpec = new WebhookCreateSpec();
         spec.accept(mutatedSpec);
 
-        return getGateway().getRestClient().getWebhookService()
+        return getClient().getRestClient().getWebhookService()
                 .createWebhook(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason())
                 .map(WebhookBean::new)
-                .map(bean -> new Webhook(getGateway(), bean));
+                .map(bean -> new Webhook(getClient(), bean));
     }
 
     /**
@@ -268,10 +268,10 @@ class BaseGuildMessageChannel extends BaseChannel implements GuildMessageChannel
      * received, it is emitted through the {@code Flux}.
      */
     public Flux<Webhook> getWebhooks() {
-        return getGateway().getRestClient().getWebhookService()
+        return getClient().getRestClient().getWebhookService()
                 .getChannelWebhooks(getId().asLong())
                 .map(WebhookBean::new)
-                .map(bean -> new Webhook(getGateway(), bean));
+                .map(bean -> new Webhook(getClient(), bean));
     }
 
     @Override
