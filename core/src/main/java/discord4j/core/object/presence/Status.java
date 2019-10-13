@@ -46,4 +46,10 @@ public enum Status {
             default: return EntityUtil.throwUnsupportedDiscordValue(value);
         }
     }
+
+    public enum Platform {
+        DESKTOP,
+        MOBILE,
+        WEB
+    }
 }

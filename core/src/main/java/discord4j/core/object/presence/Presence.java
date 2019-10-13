@@ -17,6 +17,7 @@
 package discord4j.core.object.presence;
 
 import discord4j.common.jackson.Possible;
+import discord4j.core.object.data.stored.ActivityBean;
 import discord4j.core.object.data.stored.PresenceBean;
 import discord4j.gateway.json.StatusUpdate;
 import reactor.util.annotation.Nullable;
@@ -58,28 +59,34 @@ public final class Presence {
         return new Presence(Status.INVISIBLE, null);
     }
 
-    private final String status;
-    private final Activity activity;
+    private final PresenceBean data;
 
-    public Presence(final PresenceBean bean) {
-        this(bean.getStatus(), bean.getActivity() == null ? null : new Activity(bean.getActivity()));
+    public Presence(final PresenceBean data) {
+        this.data = data;
     }
 
-    private Presence(Status status, @Nullable Activity activity) {
-        this(status.getValue(), activity);
-    }
-
-    private Presence(String status, @Nullable Activity activity) {
-        this.status = status;
-        this.activity = activity;
+    private Presence(final Status status, @Nullable final Activity activity) {
+        ActivityBean activityBean = activity == null
+            ? null
+            : new ActivityBean(activity.getType().getValue(), activity.getName(), activity.getStreamingUrl().orElse(null));
+        this.data = new PresenceBean(activityBean, status.getValue(), null, null, null);
     }
 
     public Status getStatus() {
-        return Status.of(status);
+        return Status.of(data.getStatus());
+    }
+
+    public Optional<Status> getStatus(Status.Platform platform) {
+        switch (platform) {
+            case DESKTOP: return Optional.ofNullable(data.getDesktopStatus()).map(Status::of);
+            case MOBILE: return Optional.ofNullable(data.getMobileStatus()).map(Status::of);
+            case WEB: return Optional.ofNullable(data.getWebStatus()).map(Status::of);
+            default: throw new AssertionError();
+        }
     }
 
     public Optional<Activity> getActivity() {
-        return Optional.ofNullable(activity);
+        return Optional.ofNullable(data.getActivity()).map(Activity::new);
     }
 
     public StatusUpdate asStatusUpdate() {
@@ -90,14 +97,13 @@ public final class Presence {
                 })
                 .orElse(null);
 
-        return new StatusUpdate(game, status);
+        return new StatusUpdate(game, data.getStatus());
     }
 
     @Override
     public String toString() {
         return "Presence{" +
-                "status='" + status + '\'' +
-                ", activity=" + activity +
-                '}';
+            "data=" + data +
+            '}';
     }
 }

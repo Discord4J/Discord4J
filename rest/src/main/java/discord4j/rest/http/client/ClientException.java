@@ -23,6 +23,7 @@ import discord4j.rest.route.Route;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpResponseStatus;
+import java.util.Optional;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
 import reactor.netty.http.client.HttpClientResponse;
@@ -127,9 +128,8 @@ public class ClientException extends RuntimeException {
      *
      * @return the Discord error response, if present.
      */
-    @Nullable
-    public ErrorResponse getErrorResponse() {
-        return errorResponse;
+    public Optional<ErrorResponse> getErrorResponse() {
+        return Optional.ofNullable(errorResponse);
     }
 
     @Override

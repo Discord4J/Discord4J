@@ -21,7 +21,7 @@ import discord4j.common.jackson.UnsignedJson;
 import discord4j.common.json.GuildEmojiResponse;
 import discord4j.common.json.GuildMemberResponse;
 import discord4j.common.json.RoleResponse;
-import discord4j.gateway.json.response.GameResponse;
+import discord4j.gateway.json.response.ActivityResponse;
 import discord4j.gateway.json.response.GatewayChannelResponse;
 import reactor.util.annotation.Nullable;
 
@@ -42,7 +42,7 @@ public class GuildCreate implements Dispatch {
     private String banner;
     private RoleResponse[] roles;
     private String region;
-    private Presence[] presences;
+    private PresenceUpdate[] presences;
     @JsonProperty("owner_id")
     @UnsignedJson
     private long ownerId;
@@ -152,7 +152,7 @@ public class GuildCreate implements Dispatch {
         return region;
     }
 
-    public Presence[] getPresences() {
+    public PresenceUpdate[] getPresences() {
         return presences;
     }
 
@@ -310,116 +310,74 @@ public class GuildCreate implements Dispatch {
 
     public static class VoiceState {
 
-        @JsonProperty("user_id")
-        @UnsignedJson
-        private long userId;
-        private boolean suppress;
-        @JsonProperty("session_id")
-        private String sessionId;
-        @JsonProperty("self_video")
-        private boolean selfVideo;
-        @JsonProperty("self_mute")
-        private boolean selfMute;
-        @JsonProperty("self_deaf")
-        private boolean selfDeaf;
-        private boolean mute;
-        private boolean deaf;
         @JsonProperty("channel_id")
         @UnsignedJson
         private long channelId;
+        @JsonProperty("user_id")
+        @UnsignedJson
+        private long userId;
+        @JsonProperty("session_id")
+        private String sessionId;
+        private boolean deaf;
+        private boolean mute;
+        @JsonProperty("self_deaf")
+        private boolean selfDeaf;
+        @JsonProperty("self_mute")
+        private boolean selfMute;
+        @JsonProperty("self_stream")
+        @Nullable
+        private Boolean selfStream;
+        private boolean suppress;
+
+        public long getChannelId() {
+            return channelId;
+        }
 
         public long getUserId() {
             return userId;
-        }
-
-        public boolean isSuppress() {
-            return suppress;
         }
 
         public String getSessionId() {
             return sessionId;
         }
 
-        public boolean isSelfVideo() {
-            return selfVideo;
-        }
-
-        public boolean isSelfMute() {
-            return selfMute;
-        }
-
-        public boolean isSelfDeaf() {
-            return selfDeaf;
+        public boolean isDeaf() {
+            return deaf;
         }
 
         public boolean isMute() {
             return mute;
         }
 
-        public boolean isDeaf() {
-            return deaf;
+        public boolean isSelfDeaf() {
+            return selfDeaf;
         }
 
-        public long getChannelId() {
-            return channelId;
+        public boolean isSelfMute() {
+            return selfMute;
+        }
+
+        @Nullable
+        public Boolean isSelfStream() {
+            return selfStream;
+        }
+
+        public boolean isSuppress() {
+            return suppress;
         }
 
         @Override
         public String toString() {
             return "VoiceState{" +
-                    "userId=" + userId +
-                    ", suppress=" + suppress +
+                    "channelId=" + channelId +
+                    ", userId=" + userId +
                     ", sessionId='" + sessionId + '\'' +
-                    ", selfVideo=" + selfVideo +
-                    ", selfMute=" + selfMute +
-                    ", selfDeaf=" + selfDeaf +
-                    ", mute=" + mute +
                     ", deaf=" + deaf +
-                    ", channelId=" + channelId +
-                    '}';
-        }
-    }
-
-    public static class Presence {
-
-        private User user;
-        private String status;
-        private GameResponse game;
-
-        public static class User {
-            @UnsignedJson
-            private long id;
-
-            public long getId() {
-                return id;
-            }
-
-            @Override
-            public String toString() {
-                return "User{" +
-                        "id=" + id +
-                        '}';
-            }
-        }
-
-        public User getUser() {
-            return user;
-        }
-
-        public String getStatus() {
-            return status;
-        }
-
-        public GameResponse getGame() {
-            return game;
-        }
-
-        @Override
-        public String toString() {
-            return "Presence{" +
-                    "user=" + user +
-                    ", status='" + status + '\'' +
-                    ", game=" + game +
+                    ", mute=" + mute +
+                    ", selfDeaf=" + selfDeaf +
+                    ", selfMute=" + selfMute +
+                    ", selfStream=" + selfStream +
+                    ", suppress=" + suppress +
                     '}';
         }
     }

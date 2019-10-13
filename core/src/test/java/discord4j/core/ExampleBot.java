@@ -93,20 +93,23 @@ public class ExampleBot {
         eventHandlers.add(new BurstMessages());
 
         // Build a safe event-processing pipeline
-        client.gateway().withConnectionUntilDisconnect(gateway ->
-                gateway.getEventDispatcher().on(MessageCreateEvent.class)
-                        .filterWhen(event -> ownerId.map(owner -> {
-                            Long author = event.getMessage().getAuthor()
-                                    .map(u -> u.getId().asLong())
-                                    .orElse(null);
-                            return owner.equals(author);
-                        }))
-                        .flatMap(event -> Mono.whenDelayError(eventHandlers.stream()
-                                .map(handler -> handler.onMessageCreate(event))
-                                .collect(Collectors.toList())))
-                        .onErrorContinue((t, o) -> log.error("Error while processing event", t))
-                        .then())
-                .block();
+        GatewayDiscordClient gateway = client.login().block();
+        assert gateway != null;
+
+        Mono<Void> events = gateway.on(MessageCreateEvent.class, event -> ownerId
+                .filter(owner -> {
+                    Long author = event.getMessage().getAuthor()
+                            .map(u -> u.getId().asLong())
+                            .orElse(null);
+                    return owner.equals(author);
+                })
+                .flatMap(id -> Mono.when(eventHandlers.stream()
+                        .map(handler -> handler.onMessageCreate(event))
+                        .collect(Collectors.toList()))
+                ))
+                .then();
+
+        Mono.when(events, gateway.onDisconnect()).block();
     }
 
     public static class AddRole extends EventHandler {

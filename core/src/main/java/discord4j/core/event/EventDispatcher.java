@@ -19,6 +19,9 @@ package discord4j.core.event;
 
 import discord4j.core.event.domain.Event;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+
+import java.util.function.Function;
 
 /**
  * Distributes events to subscribers. {@link Event} instances can be published over this class and dispatched to all
@@ -42,12 +45,36 @@ public interface EventDispatcher {
 
     /**
      * Retrieves a {@link Flux} with elements of the given {@link Event} type.
+     * <p>
+     * <strong>Note: </strong> Errors occurring while processing events will terminate your sequence. See
+     * <a href="https://github.com/reactive-streams/reactive-streams-jvm#1.7">Reactive Streams Spec</a>
+     * explaining this behavior.
+     * </p>
+     * <p>
+     * A recommended pattern to use this method is wrapping your code that may throw exceptions within a {@code
+     * flatMap} block and use {@link Mono#onErrorResume(Function)}, {@link Flux#onErrorResume(Function)} or
+     * equivalent methods to maintain the sequence active:
+     * </p>
+     * <pre>
+     * client.getEventDispatcher().on(MessageCreateEvent.class)
+     *     .flatMap(event -&gt; myCodeThatMightThrow(event)
+     *             .onErrorResume(error -&gt; {
+     *                 // log and then discard the error to keep the sequence alive
+     *                 log.error("Failed to handle event!", error);
+     *                 return Mono.empty();
+     *             }))
+     *     .subscribe();
+     * </pre>
+     * <p>
+     * For more alternatives to handling errors, please see
+     * <a href="https://github.com/Discord4J/Discord4J/wiki/Error-Handling">Error Handling</a> wiki page.
+     * </p>
      *
      * @param eventClass the event class to obtain events from
-     * @param <T> the type of the event class
-     * @return a new {@link Flux} with the requested events
+     * @param <E> the type of the event class
+     * @return a new {@link reactor.core.publisher.Flux} with the requested events
      */
-    <T extends Event> Flux<T> on(Class<T> eventClass);
+    <E extends Event> Flux<E> on(Class<E> eventClass);
 
     /**
      * Publishes an {@link Event} to the dispatcher.

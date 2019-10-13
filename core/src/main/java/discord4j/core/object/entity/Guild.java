@@ -411,6 +411,8 @@ public final class Guild implements Entity {
 
     /**
      * Gets the enabled guild features.
+     * <br>
+     * You can see the available <a href="https://discordapp.com/developers/docs/resources/guild#guild-object-guild-features">guild features</a>
      *
      * @return The enabled guild features.
      */

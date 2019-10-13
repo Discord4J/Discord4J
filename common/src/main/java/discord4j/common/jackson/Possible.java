@@ -61,6 +61,14 @@ public class Possible<T> {
         return (Possible<T>) ABSENT;
     }
 
+    @Nullable
+    public static <T> T orElseNull(@Nullable Possible<T> possible) {
+        if (possible == null || possible.isAbsent()) {
+            return null;
+        }
+        return possible.get();
+    }
+
     /**
      * Returns an instance of {@code T} if this instance of {@code Possible} represents a non-absent value.
      *

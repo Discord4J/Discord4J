@@ -17,59 +17,55 @@
 package discord4j.core.object.presence;
 
 import discord4j.core.object.data.stored.ActivityBean;
-import discord4j.core.object.data.stored.RichActivityBean;
 import discord4j.core.object.util.Snowflake;
 import discord4j.core.util.EntityUtil;
 import reactor.util.annotation.Nullable;
 
 import java.time.Instant;
+import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.Optional;
 import java.util.OptionalInt;
+import java.util.stream.Collectors;
 
 public class Activity {
 
     public static Activity playing(String name) {
-        return new Activity(Type.PLAYING.getValue(), name, null, null);
+        return new Activity(Type.PLAYING.getValue(), name, null);
     }
 
     public static Activity streaming(String name, String url) {
-        return new Activity(Type.STREAMING.getValue(), name, url, null);
+        return new Activity(Type.STREAMING.getValue(), name, url);
     }
 
     public static Activity listening(String name) {
-        return new Activity(Type.LISTENING.getValue(), name, null, null);
+        return new Activity(Type.LISTENING.getValue(), name, null);
     }
 
     public static Activity watching(String name) {
-        return new Activity(Type.WATCHING.getValue(), name, null, null);
+        return new Activity(Type.WATCHING.getValue(), name, null);
     }
 
-    private final int type;
-    private final String name;
-    @Nullable
-    private final String streamingUrl;
-    @Nullable
-    private final RichActivityBean richData;
+    private final ActivityBean data;
 
-    Activity(final ActivityBean bean) {
-        this(bean.getType(), bean.getName(), bean.getUrl(),
-                bean instanceof RichActivityBean ? (RichActivityBean) bean : null);
+    Activity(final ActivityBean data) {
+        this.data = data;
     }
 
-    private Activity(int type, String name, @Nullable String streamingUrl, @Nullable RichActivityBean richData) {
-        this.type = type;
-        this.name = name;
-        this.streamingUrl = streamingUrl;
-        this.richData = richData;
+    private Activity(int type, String name, @Nullable String streamingUrl) {
+        this.data = new ActivityBean();
+        this.data.setType(type);
+        this.data.setName(name);
+        this.data.setUrl(streamingUrl);
     }
 
     /**
-     * Gets the specific "action" for this activity.
+     * Gets the type for this activity.
      *
-     * @return The specific "action" for this activity.
+     * @return The type for this activity.
      */
     public Type getType() {
-        return Type.of(type);
+        return Type.of(data.getType());
     }
 
     /**
@@ -78,7 +74,7 @@ public class Activity {
      * @return The activity's name.
      */
     public String getName() {
-        return name;
+        return data.getName();
     }
 
     /**
@@ -87,7 +83,7 @@ public class Activity {
      * @return The stream url, if present.
      */
     public Optional<String> getStreamingUrl() {
-        return Optional.ofNullable(streamingUrl);
+        return Optional.ofNullable(data.getUrl());
     }
 
     /**
@@ -96,7 +92,8 @@ public class Activity {
      * @return The UNIX time (in milliseconds) of when the activity started, if present.
      */
     public Optional<Instant> getStart() {
-        return Optional.ofNullable(richData).map(RichActivityBean::getStart).map(Instant::ofEpochMilli);
+        return Optional.ofNullable(data.getStart())
+            .map(Instant::ofEpochMilli);
     }
 
     /**
@@ -105,7 +102,8 @@ public class Activity {
      * @return The UNIX time (in milliseconds) of when the activity ends, if present.
      */
     public Optional<Instant> getEnd() {
-        return Optional.ofNullable(richData).map(RichActivityBean::getEnd).map(Instant::ofEpochMilli);
+        return Optional.ofNullable(data.getEnd())
+            .map(Instant::ofEpochMilli);
     }
 
     /**
@@ -114,7 +112,8 @@ public class Activity {
      * @return The application ID for the game, if present.
      */
     public Optional<Snowflake> getApplicationId() {
-        return Optional.ofNullable(richData).map(RichActivityBean::getApplicationId).map(Snowflake::of);
+        return Optional.ofNullable(data.getApplicationId())
+            .map(Snowflake::of);
     }
 
     /**
@@ -123,7 +122,7 @@ public class Activity {
      * @return What the player is currently doing, if present.
      */
     public Optional<String> getDetails() {
-        return Optional.ofNullable(richData).map(RichActivityBean::getDetails);
+        return Optional.ofNullable(data.getDetails());
     }
 
     /**
@@ -132,7 +131,7 @@ public class Activity {
      * @return The user's current party status, if present.
      */
     public Optional<String> getState() {
-        return Optional.ofNullable(richData).map(RichActivityBean::getState);
+        return Optional.ofNullable(data.getState());
     }
 
     /**
@@ -141,7 +140,7 @@ public class Activity {
      * @return The ID of the party, if present.
      */
     public Optional<String> getPartyId() {
-        return Optional.ofNullable(richData).map(RichActivityBean::getPartyId);
+        return Optional.ofNullable(data.getPartyId());
     }
 
     /**
@@ -150,11 +149,7 @@ public class Activity {
      * @return The party's current size, if present.
      */
     public OptionalInt getCurrentPartySize() {
-        if (richData == null) {
-            return OptionalInt.empty();
-        }
-
-        final Integer currentPartySize = richData.getCurrentPartySize();
+        final Integer currentPartySize = data.getCurrentPartySize();
         return (currentPartySize == null) ? OptionalInt.empty() : OptionalInt.of(currentPartySize);
     }
 
@@ -164,11 +159,7 @@ public class Activity {
      * @return The party's max size, if present.
      */
     public OptionalInt getMaxPartySize() {
-        if (richData == null) {
-            return OptionalInt.empty();
-        }
-
-        final Integer maxPartySize = richData.getMaxPartySize();
+        final Integer maxPartySize = data.getMaxPartySize();
         return (maxPartySize == null) ? OptionalInt.empty() : OptionalInt.of(maxPartySize);
     }
 
@@ -178,7 +169,7 @@ public class Activity {
      * @return The ID for a large asset of the activity, usually a {@code Snowflake}, if present.
      */
     public Optional<String> getLargeImageId() {
-        return Optional.ofNullable(richData).map(RichActivityBean::getLargeImage);
+        return Optional.ofNullable(data.getLargeImage());
     }
 
     /**
@@ -187,7 +178,7 @@ public class Activity {
      * @return The text displayed when hovering over the large image of the activity, if present.
      */
     public Optional<String> getLargeText() {
-        return Optional.ofNullable(richData).map(RichActivityBean::getLargeText);
+        return Optional.ofNullable(data.getLargeText());
     }
 
     /**
@@ -196,7 +187,7 @@ public class Activity {
      * @return The ID for a small asset of the activity, usually a {@code Snowflake}, if present.
      */
     public Optional<String> getSmallImageId() {
-        return Optional.ofNullable(richData).map(RichActivityBean::getSmallImage);
+        return Optional.ofNullable(data.getSmallImage());
     }
 
     /**
@@ -205,7 +196,33 @@ public class Activity {
      * @return The text displayed when hovering over the small image of the activity, if present.
      */
     public Optional<String> getSmallText() {
-        return Optional.ofNullable(richData).map(RichActivityBean::getSmallText);
+        return Optional.ofNullable(data.getSmallText());
+    }
+
+    public Optional<String> getJoinSecret() {
+        return Optional.ofNullable(data.getJoinSecret());
+    }
+
+    public Optional<String> getSpectateSecret() {
+        return Optional.ofNullable(data.getSpectateSecret());
+    }
+
+    public Optional<String> getMatchSecret() {
+        return Optional.ofNullable(data.getMatchSecret());
+    }
+
+    public boolean isInstance() {
+        return data.getInstance();
+    }
+
+    public EnumSet<Flag> getFlags() {
+        if (data.getFlags() == null) {
+            return EnumSet.noneOf(Flag.class);
+        }
+
+        return Arrays.stream(Flag.values())
+            .filter(f -> (data.getFlags() & f.getValue()) == f.getValue())
+            .collect(Collectors.toCollection(() -> EnumSet.noneOf(Flag.class)));
     }
 
     /** The type of "action" for an activity. */
@@ -262,13 +279,42 @@ public class Activity {
         }
     }
 
+    public enum Flag {
+
+        INSTANCE(1),
+        JOIN(2),
+        SPECTATE(4),
+        JOIN_REQUEST(8),
+        SYNC(16),
+        PLAY(32);
+
+        private final int value;
+
+        Flag(int value) {
+            this.value = value;
+        }
+
+        public int getValue() {
+            return value;
+        }
+
+        public static Flag of(final int value) {
+            switch (value) {
+                case 1: return INSTANCE;
+                case 2: return JOIN;
+                case 4: return SPECTATE;
+                case 8: return JOIN_REQUEST;
+                case 16: return SYNC;
+                case 32: return PLAY;
+                default: return EntityUtil.throwUnsupportedDiscordValue(value);
+            }
+        }
+    }
+
     @Override
     public String toString() {
         return "Activity{" +
-                "type=" + type +
-                ", name='" + name + '\'' +
-                ", streamingUrl='" + streamingUrl + '\'' +
-                ", richData=" + richData +
-                '}';
+            "data=" + data +
+            '}';
     }
 }

@@ -17,10 +17,8 @@
 package discord4j.core.object.data.stored;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import discord4j.gateway.json.dispatch.GuildCreate;
+import discord4j.common.jackson.Possible;
 import discord4j.gateway.json.dispatch.PresenceUpdate;
-import discord4j.gateway.json.response.GameResponse;
-import discord4j.gateway.json.response.PresenceResponse;
 import reactor.util.annotation.Nullable;
 
 import java.io.Serializable;
@@ -28,82 +26,80 @@ import java.io.Serializable;
 @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS)
 public final class PresenceBean implements Serializable {
 
-    public static final PresenceBean DEFAULT_OFFLINE = new PresenceBean(null, "offline");
+    public static final PresenceBean DEFAULT_OFFLINE = new PresenceBean(null, "offline", null, null, null);
     private static final long serialVersionUID = -2046485730083712716L;
 
     @Nullable
     private ActivityBean activity;
-    @Nullable
     private String status;
+    @Nullable
+    private String desktopStatus;
+    @Nullable
+    private String mobileStatus;
+    @Nullable
+    private String webStatus;
 
-    public PresenceBean(final PresenceResponse response) {
-        final GameResponse game = response.getGame();
-
-        if (game == null) {
-            activity = null;
-        } else if (game.getTimestamps() != null || game.getSessionId() != null || game.getApplicationId() != null ||
-                game.getDetails() != null || game.getSyncId() != null || game.getState() != null ||
-                game.getParty() != null || game.getAssets() != null) {
-            activity = new RichActivityBean(game);
-        } else {
-            activity = new ActivityBean(game);
-        }
-        status = response.getStatus();
+    public PresenceBean(final PresenceUpdate presence) {
+        this(
+            presence.getGame() == null ? null : new ActivityBean(presence.getGame()),
+            presence.getStatus(),
+            Possible.orElseNull(presence.getClientStatus().getDesktop()),
+            Possible.orElseNull(presence.getClientStatus().getMobile()),
+            Possible.orElseNull(presence.getClientStatus().getWeb())
+        );
     }
 
-    public PresenceBean(final PresenceUpdate update) {
-        final GameResponse game = update.getGame();
-
-        if (game == null) {
-            activity = null;
-        } else if (game.getTimestamps() != null || game.getSessionId() != null || game.getApplicationId() != null ||
-                game.getDetails() != null || game.getSyncId() != null || game.getState() != null ||
-                game.getParty() != null || game.getAssets() != null) {
-            activity = new RichActivityBean(game);
-        } else {
-            activity = new ActivityBean(game);
-        }
-        status = update.getStatus();
-    }
-
-    public PresenceBean(final GuildCreate.Presence presence) {
-        final GameResponse game = presence.getGame();
-
-        if (game == null) {
-            activity = null;
-        } else if (game.getTimestamps() != null || game.getSessionId() != null || game.getApplicationId() != null ||
-                game.getDetails() != null || game.getSyncId() != null || game.getState() != null ||
-                game.getParty() != null || game.getAssets() != null) {
-            activity = new RichActivityBean(game);
-        } else {
-            activity = new ActivityBean(game);
-        }
-        status = presence.getStatus();
-    }
-
-    private PresenceBean(@Nullable final ActivityBean activity, final String status) {
+    public PresenceBean(@Nullable ActivityBean activity, String status, @Nullable String desktopStatus,
+                        @Nullable String mobileStatus, @Nullable String webStatus) {
         this.activity = activity;
         this.status = status;
+        this.desktopStatus = desktopStatus;
+        this.mobileStatus = mobileStatus;
+        this.webStatus = webStatus;
     }
-
-    public PresenceBean() {}
 
     @Nullable
     public ActivityBean getActivity() {
         return activity;
     }
 
-    public void setActivity(@Nullable final ActivityBean activity) {
+    public void setActivity(@Nullable ActivityBean activity) {
         this.activity = activity;
     }
 
-    @Nullable
     public String getStatus() {
         return status;
     }
 
-    public void setStatus(@Nullable final String status) {
+    public void setStatus(String status) {
         this.status = status;
+    }
+
+    @Nullable
+    public String getDesktopStatus() {
+        return desktopStatus;
+    }
+
+    public void setDesktopStatus(@Nullable String desktopStatus) {
+        this.desktopStatus = desktopStatus;
+    }
+
+    @Nullable
+    public String getMobileStatus() {
+        return mobileStatus;
+    }
+
+    public void setMobileStatus(@Nullable String mobileStatus) {
+        this.mobileStatus = mobileStatus;
+    }
+
+    @Nullable
+    public String getWebStatus() {
+        return webStatus;
+    }
+
+    public void setWebStatus(@Nullable String webStatus) {
+        this.webStatus = webStatus;
     }
 
     @Override
@@ -111,6 +107,9 @@ public final class PresenceBean implements Serializable {
         return "PresenceBean{" +
                 "activity=" + activity +
                 ", status='" + status + '\'' +
+                ", desktopStatus='" + desktopStatus + '\'' +
+                ", mobileStatus='" + mobileStatus + '\'' +
+                ", webStatus='" + webStatus + '\'' +
                 '}';
     }
 }

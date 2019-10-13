@@ -52,6 +52,10 @@ public final class MessageBean implements Serializable {
     private boolean pinned;
     @Nullable
     private Long webhookId;
+    @Nullable
+    private MessageReferenceBean messageReference;
+    @Nullable
+    private Integer flags;
     private int type;
 
     public MessageBean(final MessageResponse response) {
@@ -85,6 +89,9 @@ public final class MessageBean implements Serializable {
 
         pinned = response.isPinned();
         webhookId = response.getWebhookId();
+        messageReference = (response.getMessageReference() != null) ?
+                new MessageReferenceBean(response.getMessageReference()) : null;
+        flags = response.getFlags();
         type = response.getType();
     }
 
@@ -115,6 +122,9 @@ public final class MessageBean implements Serializable {
         this.reactions = null; // no reactions on message_create
         pinned = messageCreate.isPinned();
         webhookId = messageCreate.getWebhookId();
+        messageReference = (messageCreate.getMessageReference() != null) ?
+                new MessageReferenceBean(messageCreate.getMessageReference()) : null;
+        flags = messageCreate.getFlags();
         type = messageCreate.getType();
     }
 
@@ -134,6 +144,8 @@ public final class MessageBean implements Serializable {
         reactions = (toCopy.reactions == null) ? null : Arrays.copyOf(toCopy.reactions, toCopy.reactions.length);
         pinned = toCopy.pinned;
         webhookId = toCopy.webhookId;
+        messageReference = toCopy.messageReference;
+        flags = toCopy.flags;
         type = toCopy.type;
     }
 
@@ -263,6 +275,16 @@ public final class MessageBean implements Serializable {
         this.webhookId = webhookId;
     }
 
+    @Nullable
+    public MessageReferenceBean getMessageReference() {
+        return messageReference;
+    }
+
+    @Nullable
+    public Integer getFlags() {
+        return flags;
+    }
+
     public int getType() {
         return type;
     }
@@ -289,6 +311,8 @@ public final class MessageBean implements Serializable {
                 ", reactions=" + Arrays.toString(reactions) +
                 ", pinned=" + pinned +
                 ", webhookId=" + webhookId +
+                ", messageReference=" + messageReference +
+                ", flags=" + flags +
                 ", type=" + type +
                 '}';
     }

@@ -105,7 +105,7 @@ class GuildDispatchHandlers {
 
         Mono<Void> savePresences = context.getStateHolder().getPresenceStore()
                 .save(Flux.just(context.getDispatch().getPresences())
-                        .map(presence -> Tuples.of(LongLongTuple2.of(guildBean.getId(), presence.getUser().getId()),
+                        .map(presence -> Tuples.of(LongLongTuple2.of(guildBean.getId(), presence.getUser().get("id").asLong()),
                                 new PresenceBean(presence))));
 
         Mono<Void> startMemberChunk = Mono.just(guildBean)

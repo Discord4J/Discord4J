@@ -59,6 +59,11 @@ public class MessageCreate implements Dispatch {
     @UnsignedJson
     private Long webhookId;
     @Nullable
+    private Integer flags;
+    @JsonProperty("message_reference")
+    @Nullable
+    private MessageReferenceResponse messageReference;
+    @Nullable
     private Activity activity;
     @Nullable
     private Application application;
@@ -149,6 +154,16 @@ public class MessageCreate implements Dispatch {
         return application;
     }
 
+    @Nullable
+    public Integer getFlags() {
+        return flags;
+    }
+
+    @Nullable
+    public MessageReferenceResponse getMessageReference() {
+        return messageReference;
+    }
+
     @Override
     public String toString() {
         return "MessageCreate{" +
@@ -170,12 +185,15 @@ public class MessageCreate implements Dispatch {
                 ", attachments=" + Arrays.toString(attachments) +
                 ", guildId=" + guildId +
                 ", webhookId=" + webhookId +
+                ", messageReference=" + messageReference +
+                ", flags=" + flags +
                 ", activity=" + activity +
                 ", application=" + application +
                 '}';
     }
 
     public static class Activity {
+
         private int type;
         @JsonProperty("party_id")
         @Nullable

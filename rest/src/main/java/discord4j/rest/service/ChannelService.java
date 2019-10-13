@@ -16,6 +16,7 @@
  */
 package discord4j.rest.service;
 
+import discord4j.common.annotations.Experimental;
 import discord4j.common.json.MessageResponse;
 import discord4j.common.json.UserResponse;
 import discord4j.rest.json.request.*;
@@ -116,6 +117,14 @@ public class ChannelService extends RestService {
 
     public Mono<Void> bulkDeleteMessages(long channelId, BulkDeleteRequest request) {
         return Routes.MESSAGE_DELETE_BULK.newRequest(channelId)
+                .body(request)
+                .exchange(getRouter());
+    }
+
+    @Experimental
+    public Mono<Void> suppressEmbeds(long channelId, long messageId, SuppressEmbedsRequest request) {
+        return Routes.MESSAGE_SUPPRESS_EMBEDS.newRequest(channelId,messageId)
+                .header("content-type", "application/json")
                 .body(request)
                 .exchange(getRouter());
     }

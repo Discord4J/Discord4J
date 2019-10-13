@@ -18,13 +18,11 @@ package discord4j.gateway.json.dispatch;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
+import discord4j.common.jackson.Possible;
 import discord4j.common.jackson.PossibleJson;
 import discord4j.common.jackson.UnsignedJson;
-import discord4j.common.json.UserResponse;
-import discord4j.gateway.json.response.GameResponse;
+import discord4j.gateway.json.response.ActivityResponse;
 import reactor.util.annotation.Nullable;
-
-import java.util.Arrays;
 
 @PossibleJson
 public class PresenceUpdate implements Dispatch {
@@ -34,13 +32,14 @@ public class PresenceUpdate implements Dispatch {
     @UnsignedJson
     private long[] roles;
     @Nullable
-    private GameResponse game;
+    private ActivityResponse game;
     @JsonProperty("guild_id")
     @UnsignedJson
     private long guildId;
     private String status;
-    @Nullable
-    private String nick;
+    private ActivityResponse[] activities;
+    @JsonProperty("client_status")
+    private ClientStatus clientStatus;
 
     public JsonNode getUser() {
         return user;
@@ -52,7 +51,7 @@ public class PresenceUpdate implements Dispatch {
     }
 
     @Nullable
-    public GameResponse getGame() {
+    public ActivityResponse getGame() {
         return game;
     }
 
@@ -64,20 +63,40 @@ public class PresenceUpdate implements Dispatch {
         return status;
     }
 
-    @Nullable
-    public String getNick() {
-        return nick;
+    public ActivityResponse[] getActivities() {
+        return activities;
     }
 
-    @Override
-    public String toString() {
-        return "PresenceUpdate{" +
-                "user=" + user +
-                ", roles=" + Arrays.toString(roles) +
-                ", game=" + game +
-                ", guildId=" + guildId +
-                ", status='" + status + '\'' +
-                ", nick='" + nick + '\'' +
+    public ClientStatus getClientStatus() {
+        return clientStatus;
+    }
+
+    @PossibleJson
+    public static class ClientStatus {
+
+        private Possible<String> desktop;
+        private Possible<String> mobile;
+        private Possible<String> web;
+
+        public Possible<String> getDesktop() {
+            return desktop;
+        }
+
+        public Possible<String> getMobile() {
+            return mobile;
+        }
+
+        public Possible<String> getWeb() {
+            return web;
+        }
+
+        @Override
+        public String toString() {
+            return "ClientStatus{" +
+                "desktop=" + desktop +
+                ", mobile=" + mobile +
+                ", web=" + web +
                 '}';
+        }
     }
 }
