@@ -59,11 +59,11 @@ class ChannelDispatchHandlers {
         long guildId = context.getDispatch().getGuildId();
         ChannelBean bean = new ChannelBean(channel, guildId);
 
-        Mono<TextChannelCreateEvent> saveChannel = gateway.getStateHolder().getChannelStore()
+        Mono<TextChannelCreateEvent> saveChannel = context.getStateHolder().getChannelStore()
                 .save(bean.getId(), bean)
                 .thenReturn(new TextChannelCreateEvent(gateway, context.getShardInfo(), new TextChannel(gateway, bean)));
 
-        return addChannelToGuild(gateway.getStateHolder().getGuildStore(), channel, guildId)
+        return addChannelToGuild(context.getStateHolder().getGuildStore(), channel, guildId)
                 .then(saveChannel);
     }
 
@@ -80,11 +80,11 @@ class ChannelDispatchHandlers {
         long guildId = context.getDispatch().getGuildId();
         ChannelBean bean = new ChannelBean(channel, guildId);
 
-        Mono<VoiceChannelCreateEvent> saveChannel = gateway.getStateHolder().getChannelStore()
+        Mono<VoiceChannelCreateEvent> saveChannel = context.getStateHolder().getChannelStore()
                 .save(bean.getId(), bean)
                 .thenReturn(new VoiceChannelCreateEvent(gateway, context.getShardInfo(), new VoiceChannel(gateway, bean)));
 
-        return addChannelToGuild(gateway.getStateHolder().getGuildStore(), channel, guildId)
+        return addChannelToGuild(context.getStateHolder().getGuildStore(), channel, guildId)
                 .then(saveChannel);
     }
 
@@ -94,11 +94,11 @@ class ChannelDispatchHandlers {
         long guildId = context.getDispatch().getGuildId();
         ChannelBean bean = new ChannelBean(channel, guildId);
 
-        Mono<CategoryCreateEvent> saveChannel = gateway.getStateHolder().getChannelStore()
+        Mono<CategoryCreateEvent> saveChannel = context.getStateHolder().getChannelStore()
                 .save(bean.getId(), bean)
                 .thenReturn(new CategoryCreateEvent(gateway, context.getShardInfo(), new Category(gateway, bean)));
 
-        return addChannelToGuild(gateway.getStateHolder().getGuildStore(), channel, guildId)
+        return addChannelToGuild(context.getStateHolder().getGuildStore(), channel, guildId)
                 .then(saveChannel);
     }
 
@@ -108,11 +108,11 @@ class ChannelDispatchHandlers {
         long guildId = context.getDispatch().getGuildId();
         ChannelBean bean = new ChannelBean(channel, guildId);
 
-        Mono<NewsChannelCreateEvent> saveChannel = gateway.getStateHolder().getChannelStore()
+        Mono<NewsChannelCreateEvent> saveChannel = context.getStateHolder().getChannelStore()
                 .save(bean.getId(), bean)
                 .thenReturn(new NewsChannelCreateEvent(gateway, context.getShardInfo(), new NewsChannel(gateway, bean)));
 
-        return addChannelToGuild(gateway.getStateHolder().getGuildStore(), channel, guildId)
+        return addChannelToGuild(context.getStateHolder().getGuildStore(), channel, guildId)
                 .then(saveChannel);
     }
 
@@ -122,11 +122,11 @@ class ChannelDispatchHandlers {
         long guildId = context.getDispatch().getGuildId();
         ChannelBean bean = new ChannelBean(channel, guildId);
 
-        Mono<StoreChannelCreateEvent> saveChannel = gateway.getStateHolder().getChannelStore()
+        Mono<StoreChannelCreateEvent> saveChannel = context.getStateHolder().getChannelStore()
                 .save(bean.getId(), bean)
                 .thenReturn(new StoreChannelCreateEvent(gateway, context.getShardInfo(), new StoreChannel(gateway, bean)));
 
-        return addChannelToGuild(gateway.getStateHolder().getGuildStore(), channel, guildId)
+        return addChannelToGuild(context.getStateHolder().getGuildStore(), channel, guildId)
                 .then(saveChannel);
     }
 
@@ -157,7 +157,7 @@ class ChannelDispatchHandlers {
 
     private static Mono<TextChannelDeleteEvent> textChannelDelete(DispatchContext<ChannelDelete> context) {
         GatewayDiscordClient gateway = context.getGateway();
-        StateHolder stateHolder = gateway.getStateHolder();
+        StateHolder stateHolder = context.getStateHolder();
         GatewayChannelResponse channel = context.getDispatch().getChannel();
         long guildId = context.getDispatch().getGuildId();
         ChannelBean bean = new ChannelBean(channel, guildId);
@@ -180,7 +180,7 @@ class ChannelDispatchHandlers {
 
     private static Mono<VoiceChannelDeleteEvent> voiceChannelDelete(DispatchContext<ChannelDelete> context) {
         GatewayDiscordClient gateway = context.getGateway();
-        StateHolder stateHolder = gateway.getStateHolder();
+        StateHolder stateHolder = context.getStateHolder();
         GatewayChannelResponse channel = context.getDispatch().getChannel();
         long guildId = context.getDispatch().getGuildId();
         ChannelBean bean = new ChannelBean(channel, guildId);
@@ -195,7 +195,7 @@ class ChannelDispatchHandlers {
 
     private static Mono<CategoryDeleteEvent> categoryDelete(DispatchContext<ChannelDelete> context) {
         GatewayDiscordClient gateway = context.getGateway();
-        StateHolder stateHolder = gateway.getStateHolder();
+        StateHolder stateHolder = context.getStateHolder();
         GatewayChannelResponse channel = context.getDispatch().getChannel();
         long guildId = context.getDispatch().getGuildId();
         ChannelBean bean = new ChannelBean(channel, guildId);
@@ -210,7 +210,7 @@ class ChannelDispatchHandlers {
 
     private static Mono<NewsChannelDeleteEvent> newsChannelDelete(DispatchContext<ChannelDelete> context) {
         GatewayDiscordClient gateway = context.getGateway();
-        StateHolder stateHolder = gateway.getStateHolder();
+        StateHolder stateHolder = context.getStateHolder();
         GatewayChannelResponse channel = context.getDispatch().getChannel();
         long guildId = context.getDispatch().getGuildId();
         ChannelBean bean = new ChannelBean(channel, guildId);
@@ -225,7 +225,7 @@ class ChannelDispatchHandlers {
 
     private static Mono<StoreChannelDeleteEvent> storeChannelDelete(DispatchContext<ChannelDelete> context) {
         GatewayDiscordClient gateway = context.getGateway();
-        StateHolder stateHolder = gateway.getStateHolder();
+        StateHolder stateHolder = context.getStateHolder();
         GatewayChannelResponse channel = context.getDispatch().getChannel();
         long guildId = context.getDispatch().getGuildId();
         ChannelBean bean = new ChannelBean(channel, guildId);
@@ -280,9 +280,9 @@ class ChannelDispatchHandlers {
         ChannelBean bean = new ChannelBean(channel, guildId);
         GuildMessageChannel current = getConvertibleChannel(gateway, bean);
 
-        Mono<Void> saveNew = gateway.getStateHolder().getChannelStore().save(bean.getId(), bean);
+        Mono<Void> saveNew = context.getStateHolder().getChannelStore().save(bean.getId(), bean);
 
-        return gateway.getStateHolder().getChannelStore()
+        return context.getStateHolder().getChannelStore()
                 .find(bean.getId())
                 .flatMap(saveNew::thenReturn)
                 .map(old -> new TextChannelUpdateEvent(gateway, context.getShardInfo(), current, new TextChannel(gateway, old)))
@@ -296,9 +296,9 @@ class ChannelDispatchHandlers {
         ChannelBean bean = new ChannelBean(channel, guildId);
         VoiceChannel current = new VoiceChannel(gateway, bean);
 
-        Mono<Void> saveNew = gateway.getStateHolder().getChannelStore().save(bean.getId(), bean);
+        Mono<Void> saveNew = context.getStateHolder().getChannelStore().save(bean.getId(), bean);
 
-        return gateway.getStateHolder().getChannelStore()
+        return context.getStateHolder().getChannelStore()
                 .find(bean.getId())
                 .flatMap(saveNew::thenReturn)
                 .map(old -> new VoiceChannelUpdateEvent(gateway, context.getShardInfo(), current, new VoiceChannel(gateway, old)))
@@ -312,9 +312,9 @@ class ChannelDispatchHandlers {
         ChannelBean bean = new ChannelBean(channel, guildId);
         Category current = new Category(gateway, bean);
 
-        Mono<Void> saveNew = gateway.getStateHolder().getChannelStore().save(bean.getId(), bean);
+        Mono<Void> saveNew = context.getStateHolder().getChannelStore().save(bean.getId(), bean);
 
-        return gateway.getStateHolder().getChannelStore()
+        return context.getStateHolder().getChannelStore()
                 .find(bean.getId())
                 .flatMap(saveNew::thenReturn)
                 .map(old -> new CategoryUpdateEvent(gateway, context.getShardInfo(), current, new Category(gateway, old)))
@@ -328,9 +328,9 @@ class ChannelDispatchHandlers {
         ChannelBean bean = new ChannelBean(channel, guildId);
         GuildMessageChannel current = getConvertibleChannel(gateway, bean);
 
-        Mono<Void> saveNew = gateway.getStateHolder().getChannelStore().save(bean.getId(), bean);
+        Mono<Void> saveNew = context.getStateHolder().getChannelStore().save(bean.getId(), bean);
 
-        return gateway.getStateHolder().getChannelStore()
+        return context.getStateHolder().getChannelStore()
                 .find(bean.getId())
                 .flatMap(saveNew::thenReturn)
                 .map(old -> new NewsChannelUpdateEvent(gateway, context.getShardInfo(), current, new NewsChannel(gateway, old)))
@@ -344,9 +344,9 @@ class ChannelDispatchHandlers {
         ChannelBean bean = new ChannelBean(channel, guildId);
         StoreChannel current = new StoreChannel(gateway, bean);
 
-        Mono<Void> saveNew = gateway.getStateHolder().getChannelStore().save(bean.getId(), bean);
+        Mono<Void> saveNew = context.getStateHolder().getChannelStore().save(bean.getId(), bean);
 
-        return gateway.getStateHolder().getChannelStore()
+        return context.getStateHolder().getChannelStore()
                 .find(bean.getId())
                 .flatMap(saveNew::thenReturn)
                 .map(old -> new StoreChannelUpdateEvent(gateway, context.getShardInfo(), current, new StoreChannel(gateway, old)))

@@ -20,31 +20,51 @@ package discord4j.core;
 import discord4j.core.event.EventDispatcher;
 import discord4j.core.shard.ShardCoordinator;
 import discord4j.gateway.GatewayClient;
+import discord4j.store.api.Store;
 
 /**
  * A set of dependencies required to build and coordinate multiple {@link GatewayClient} instances.
  */
 public class GatewayResources {
 
-    private final StateHolder stateHolder;
+    private final StateView stateView;
     private final EventDispatcher eventDispatcher;
     private final ShardCoordinator shardCoordinator;
 
-    public GatewayResources(StateHolder stateHolder, EventDispatcher eventDispatcher,
+    public GatewayResources(StateView stateView, EventDispatcher eventDispatcher,
                             ShardCoordinator shardCoordinator) {
-        this.stateHolder = stateHolder;
+        this.stateView = stateView;
         this.eventDispatcher = eventDispatcher;
         this.shardCoordinator = shardCoordinator;
     }
 
-    public StateHolder getStateHolder() {
-        return stateHolder;
+    /**
+     * Repository aggregate view of all caching related operations. Discord Gateway mandates its clients to cache its
+     * updates through events coming from the real-time websocket. The {@link StateView} is a read-only facade for
+     * {@link StateHolder} which is the mediator for the underlying {@link Store} instances for each cached entity.
+     *
+     * @return the {@link StateView} tied to this {@link GatewayResources}
+     */
+    public StateView getStateView() {
+        return stateView;
     }
 
+    /**
+     * Distributes events to subscribers. Starting from v3.1, the {@link EventDispatcher} is capable of distributing
+     * events from all {@link GatewayClient} connections (shards) that were specified when this
+     * {@link GatewayDiscordClient} was created.
+     *
+     * @return the {@link EventDispatcher} tied to this {@link GatewayResources}
+     */
     public EventDispatcher getEventDispatcher() {
         return eventDispatcher;
     }
 
+    /**
+     * Returns the {@link ShardCoordinator} that is capable of coordinating certain shard actions.
+     *
+     * @return the {@link ShardCoordinator} tied to this {@link GatewayResources}
+     */
     public ShardCoordinator getShardCoordinator() {
         return shardCoordinator;
     }

@@ -17,14 +17,31 @@
 
 package discord4j.core.shard;
 
-import discord4j.store.api.Store;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
-import java.io.Serializable;
+public class ShardKeyStore<K extends Comparable<K>> {
 
-public interface ShardingStoreRegistry {
+    private Map<Integer, Set<K>> keysByShard = new ConcurrentHashMap<>();
 
-    boolean containsStore(Class<?> valueClass);
-    <V extends Serializable, K extends Comparable<K>> void putStore(Class<V> valueClass, Store<K, V> store);
-    <K extends Comparable<K>, V extends Serializable> Store<K, V> getValueStore(Class<K> key, Class<V> value);
-    <K extends Comparable<K>, V extends Serializable> ShardKeyStore<K> getKeyStore(Class<V> valueClass);
+    public boolean add(int shardId, K key) {
+        return keySet(shardId).add(key);
+    }
+
+    public boolean remove(int shardId, K key) {
+        return keySet(shardId).remove(key);
+    }
+
+    public void clear(int shardId) {
+        keySet(shardId).clear();
+    }
+
+    public Set<K> keys(int shardId) {
+        return keySet(shardId);
+    }
+
+    private Set<K> keySet(int shardId) {
+        return keysByShard.computeIfAbsent(shardId, k -> ConcurrentHashMap.newKeySet());
+    }
 }

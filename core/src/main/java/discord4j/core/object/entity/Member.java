@@ -194,7 +194,7 @@ public final class Member extends User {
      * always be empty.
      */
     public Mono<VoiceState> getVoiceState() {
-        return getClient().getStateHolder().getVoiceStateStore()
+        return getClient().getGatewayResources().getStateView().getVoiceStateStore()
                 .find(LongLongTuple2.of(getGuildId().asLong(), getId().asLong()))
                 .map(bean -> new VoiceState(getClient(), bean));
     }
@@ -210,7 +210,7 @@ public final class Member extends User {
      * always be empty.
      */
     public Mono<Presence> getPresence() {
-        return getClient().getStateHolder().getPresenceStore()
+        return getClient().getGatewayResources().getStateView().getPresenceStore()
                 .find(LongLongTuple2.of(getGuildId().asLong(), getId().asLong()))
                 .map(Presence::new);
     }

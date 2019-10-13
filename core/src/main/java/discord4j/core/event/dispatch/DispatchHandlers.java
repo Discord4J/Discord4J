@@ -116,9 +116,9 @@ public abstract class DispatchHandlers {
         PresenceBean bean = new PresenceBean(context.getDispatch());
         Presence current = new Presence(bean);
 
-        Mono<Void> saveNew = gateway.getStateHolder().getPresenceStore().save(key, bean);
+        Mono<Void> saveNew = context.getStateHolder().getPresenceStore().save(key, bean);
 
-        Mono<Optional<User>> saveUser = gateway.getStateHolder().getUserStore()
+        Mono<Optional<User>> saveUser = context.getStateHolder().getUserStore()
                 .find(userId)
                 .map(oldBean -> {
                     UserBean newBean = new UserBean(oldBean);
@@ -134,7 +134,7 @@ public abstract class DispatchHandlers {
 
                     return Tuples.of(oldBean, newBean);
                 })
-                .flatMap(tuple -> gateway.getStateHolder().getUserStore()
+                .flatMap(tuple -> context.getStateHolder().getUserStore()
                         .save(userId, tuple.getT2())
                         .thenReturn(tuple.getT1()))
                 .map(userBean -> new User(gateway, userBean))
@@ -142,7 +142,7 @@ public abstract class DispatchHandlers {
                 .defaultIfEmpty(Optional.empty());
 
         return saveUser.flatMap(oldUser ->
-                gateway.getStateHolder().getPresenceStore()
+                context.getStateHolder().getPresenceStore()
                         .find(key)
                         .flatMap(saveNew::thenReturn)
                         .map(old -> new PresenceUpdateEvent(gateway, context.getShardInfo(), guildId, oldUser.orElse(null), user, current,
@@ -165,9 +165,9 @@ public abstract class DispatchHandlers {
         UserBean bean = new UserBean(context.getDispatch().getUser());
         User current = new User(gateway, bean);
 
-        Mono<Void> saveNew = gateway.getStateHolder().getUserStore().save(bean.getId(), bean);
+        Mono<Void> saveNew = context.getStateHolder().getUserStore().save(bean.getId(), bean);
 
-        return gateway.getStateHolder().getUserStore()
+        return context.getStateHolder().getUserStore()
                 .find(context.getDispatch().getUser().getId())
                 .flatMap(saveNew::thenReturn)
                 .map(old -> new UserUpdateEvent(gateway, context.getShardInfo(), current, new User(gateway, old)))
@@ -193,9 +193,9 @@ public abstract class DispatchHandlers {
         VoiceStateBean bean = new VoiceStateBean(context.getDispatch().getVoiceState());
         VoiceState current = new VoiceState(gateway, bean);
 
-        Mono<Void> saveNew = gateway.getStateHolder().getVoiceStateStore().save(key, bean);
+        Mono<Void> saveNew = context.getStateHolder().getVoiceStateStore().save(key, bean);
 
-        return gateway.getStateHolder().getVoiceStateStore()
+        return context.getStateHolder().getVoiceStateStore()
                 .find(key)
                 .flatMap(saveNew::thenReturn)
                 .map(old -> new VoiceStateUpdateEvent(gateway, context.getShardInfo(), current, new VoiceState(gateway, old)))

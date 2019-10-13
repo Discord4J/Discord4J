@@ -62,7 +62,7 @@ public class GatewayClientTest {
                 .setPayloadWriter(writer)
                 .setReconnectOptions(reconnectOptions)
                 .setToken(token)
-                .setIdentifyOptions(new IdentifyOptions(0, 1, null))
+                .setIdentifyOptions(new IdentifyOptions(new ShardInfo(0, 1), null))
                 .setIdentifyLimiter(new RateLimiterTransformer(new SimpleBucket(1, Duration.ofSeconds(6))))
                 .build();
         GatewayClient gatewayClient = new DefaultGatewayClient(gatewayOptions);
@@ -123,7 +123,7 @@ public class GatewayClientTest {
                     .setPayloadWriter(new JacksonPayloadWriter(mapper))
                     .setReconnectOptions(reconnectOptions)
                     .setToken(token)
-                    .setIdentifyOptions(new IdentifyOptions(i, shardCount,
+                    .setIdentifyOptions(new IdentifyOptions(new ShardInfo(i, shardCount),
                             new StatusUpdate(null, "invisible")))
                     .setIdentifyLimiter(new RateLimiterTransformer(new SimpleBucket(1, Duration.ofSeconds(6))))
                     .setInitialObserver((s, o) -> {

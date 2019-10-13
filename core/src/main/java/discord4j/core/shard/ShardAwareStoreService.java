@@ -17,14 +17,14 @@
 
 package discord4j.core.shard;
 
-import java.io.Serializable;
-
 import discord4j.store.api.Store;
 import discord4j.store.api.primitive.ForwardingStore;
 import discord4j.store.api.primitive.LongObjStore;
 import discord4j.store.api.service.StoreService;
 import discord4j.store.api.util.StoreContext;
 import reactor.core.publisher.Mono;
+
+import java.io.Serializable;
 
 /**
  * Factory that delegates the creation of the store to a backing factory and then wraps it into a
@@ -54,7 +54,7 @@ public class ShardAwareStoreService implements StoreService {
         if (!registry.containsStore(valueClass)) {
             registry.putStore(valueClass, backingStoreService.provideGenericStore(keyClass, valueClass));
         }
-        return new ShardAwareStore<>(registry.getValueStore(keyClass, valueClass), registry.getKeyStore(valueClass, shardId));
+        return new ShardAwareStore<>(registry.getValueStore(keyClass, valueClass), registry.getKeyStore(valueClass));
     }
 
     @Override

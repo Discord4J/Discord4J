@@ -91,7 +91,7 @@ public final class VoiceChannel extends BaseCategorizableChannel {
      * always be empty.
      */
     public Flux<VoiceState> getVoiceStates() {
-        return getClient().getStateHolder().getVoiceStateStore()
+        return getClient().getGatewayResources().getStateView().getVoiceStateStore()
                 .findInRange(LongLongTuple2.of(getGuildId().asLong(), Long.MIN_VALUE),
                         LongLongTuple2.of(getGuildId().asLong(), Long.MAX_VALUE))
                 .filter(bean -> Objects.equals(bean.getChannelId(), getId().asLong()))

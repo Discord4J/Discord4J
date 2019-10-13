@@ -29,7 +29,6 @@ public class ShardingJdkStoreService extends JdkStoreService {
     private final ShardingStoreRegistry registry;
 
     volatile Class<?> messageClass;
-    volatile int shardId;
 
     public ShardingJdkStoreService(ShardingStoreRegistry registry) {
         this.registry = registry;
@@ -41,12 +40,11 @@ public class ShardingJdkStoreService extends JdkStoreService {
         if (!registry.containsStore(valueClass)) {
             registry.putStore(valueClass, new JdkStore<K, V>(!valueClass.equals(messageClass)));
         }
-        return new ShardAwareStore<>(registry.getValueStore(keyClass, valueClass), registry.getKeyStore(valueClass, shardId));
+        return new ShardAwareStore<>(registry.getValueStore(keyClass, valueClass), registry.getKeyStore(valueClass));
     }
 
     @Override
     public void init(StoreContext context) {
         messageClass = context.getMessageClass();
-        shardId = context.getShard();
     }
 }

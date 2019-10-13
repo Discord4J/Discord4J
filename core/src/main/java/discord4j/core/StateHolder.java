@@ -138,7 +138,7 @@ public final class StateHolder {
         return selfId;
     }
 
-    public Mono<Void> invalidateStores() {
+    public Mono<Void> invalidateStores(int shardId) {
         return channelStore.invalidate()
                 .and(guildStore.invalidate())
                 .and(guildEmojiStore.invalidate())

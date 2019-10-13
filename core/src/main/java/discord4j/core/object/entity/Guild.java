@@ -551,7 +551,7 @@ public final class Guild implements Entity {
      * always be empty.
      */
     public Flux<VoiceState> getVoiceStates() {
-        return gateway.getStateHolder().getVoiceStateStore()
+        return gateway.getGatewayResources().getStateView().getVoiceStateStore()
                 .findInRange(LongLongTuple2.of(getId().asLong(), Long.MIN_VALUE),
                              LongLongTuple2.of(getId().asLong(), Long.MAX_VALUE))
                 .map(bean -> new VoiceState(gateway, bean));
@@ -643,7 +643,7 @@ public final class Guild implements Entity {
      * always be empty.
      */
     public Flux<Presence> getPresences() {
-        return gateway.getStateHolder().getPresenceStore()
+        return gateway.getGatewayResources().getStateView().getPresenceStore()
                 .findInRange(LongLongTuple2.of(getId().asLong(), Long.MIN_VALUE),
                              LongLongTuple2.of(getId().asLong(), Long.MAX_VALUE))
                 .map(Presence::new);

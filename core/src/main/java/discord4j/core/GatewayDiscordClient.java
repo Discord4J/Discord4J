@@ -40,7 +40,6 @@ import discord4j.gateway.GatewayClient;
 import discord4j.gateway.json.GatewayPayload;
 import discord4j.rest.RestClient;
 import discord4j.rest.json.response.UserGuildResponse;
-import discord4j.store.api.Store;
 import discord4j.store.api.util.LongLongTuple2;
 import discord4j.voice.VoiceClient;
 import org.reactivestreams.Publisher;
@@ -52,7 +51,6 @@ import reactor.util.Loggers;
 
 import java.util.Collections;
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -134,21 +132,6 @@ public class GatewayDiscordClient {
     }
 
     /**
-     * Repository aggregate of all caching related operations. Discord Gateway mandates its clients to cache its
-     * updates through events coming from the real-time websocket. The {@link StateHolder} is the mediator for the
-     * underlying {@link Store} instances for each cached entity.
-     * <p>
-     * While directly querying the repositories is possible, we discourage attempting to modify their internal
-     * structure, as it would interfere with Discord4J event publishing tasks.
-     *
-     * @return the {@link StateHolder} tied to this {@link GatewayDiscordClient}
-     */
-    public StateHolder getStateHolder() {
-        // TODO consider exposing a read-only wrapper instead
-        return gatewayResources.getStateHolder();
-    }
-
-    /**
      * Returns an unmodifiable view of the {@link GatewayClient} instances created by this
      * {@link GatewayDiscordClient}. The returned map uses shard index for keys.
      *
@@ -185,7 +168,7 @@ public class GatewayDiscordClient {
      * supplied ID. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Channel> getChannelById(final Snowflake channelId) {
-        final Mono<ChannelBean> channel = getStateHolder().getChannelStore()
+        final Mono<ChannelBean> channel = gatewayResources.getStateView().getChannelStore()
                 .find(channelId.asLong());
 
         final Mono<ChannelBean> rest = getRestClient().getChannelService()
@@ -205,7 +188,7 @@ public class GatewayDiscordClient {
      * ID. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Guild> getGuildById(final Snowflake guildId) {
-        return getStateHolder().getGuildStore()
+        return gatewayResources.getStateView().getGuildStore()
                 .find(guildId.asLong())
                 .cast(BaseGuildBean.class)
                 .switchIfEmpty(getRestClient().getGuildService()
@@ -223,7 +206,7 @@ public class GatewayDiscordClient {
      * supplied IDs. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<GuildEmoji> getGuildEmojiById(final Snowflake guildId, final Snowflake emojiId) {
-        return getStateHolder().getGuildEmojiStore()
+        return gatewayResources.getStateView().getGuildEmojiStore()
                 .find(emojiId.asLong())
                 .switchIfEmpty(getRestClient().getEmojiService()
                         .getGuildEmoji(guildId.asLong(), emojiId.asLong())
@@ -240,7 +223,7 @@ public class GatewayDiscordClient {
      * IDs. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Member> getMemberById(final Snowflake guildId, final Snowflake userId) {
-        final Mono<MemberBean> member = getStateHolder().getMemberStore()
+        final Mono<MemberBean> member = gatewayResources.getStateView().getMemberStore()
                 .find(LongLongTuple2.of(guildId.asLong(), userId.asLong()))
                 .switchIfEmpty(getRestClient().getGuildService()
                         .getGuildMember(guildId.asLong(), userId.asLong())
@@ -259,7 +242,7 @@ public class GatewayDiscordClient {
      * supplied IDs. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Message> getMessageById(final Snowflake channelId, final Snowflake messageId) {
-        return getStateHolder().getMessageStore()
+        return gatewayResources.getStateView().getMessageStore()
                 .find(messageId.asLong())
                 .switchIfEmpty(getRestClient().getChannelService()
                         .getMessage(channelId.asLong(), messageId.asLong())
@@ -276,7 +259,7 @@ public class GatewayDiscordClient {
      * IDs. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Role> getRoleById(final Snowflake guildId, final Snowflake roleId) {
-        return getStateHolder().getRoleStore()
+        return gatewayResources.getStateView().getRoleStore()
                 .find(roleId.asLong())
                 .switchIfEmpty(getRestClient().getGuildService()
                         .getGuildRoles(guildId.asLong())
@@ -335,7 +318,7 @@ public class GatewayDiscordClient {
                 getRestClient().getUserService()
                         .getCurrentUserGuilds(params);
 
-        return getStateHolder().getGuildStore()
+        return gatewayResources.getStateView().getGuildStore()
                 .values()
                 .cast(BaseGuildBean.class)
                 .switchIfEmpty(PaginationUtil.paginateAfter(makeRequest, UserGuildResponse::getId, 0L, 100)
@@ -353,7 +336,7 @@ public class GatewayDiscordClient {
      * error is received, it is emitted through the {@code Flux}.
      */
     public Flux<User> getUsers() {
-        return getStateHolder().getUserStore()
+        return gatewayResources.getStateView().getUserStore()
                 .values()
                 .map(bean -> new User(this, bean));
     }
@@ -377,7 +360,7 @@ public class GatewayDiscordClient {
      * received, it is emitted through the {@code Mono}.
      */
     public Mono<User> getSelf() {
-        final long selfId = getStateHolder().getSelfId().get();
+        final long selfId = gatewayResources.getStateView().getSelfId();
         return Mono.just(selfId)
                 .filter(it -> it != 0)
                 .map(Snowflake::of)
@@ -389,14 +372,12 @@ public class GatewayDiscordClient {
     }
 
     /**
-     * Gets the bot user's ID. This may not be present if this client is not yet logged in.
+     * Gets the bot user's ID.
      *
      * @return The bot user's ID.
      */
-    public Optional<Snowflake> getSelfId() {
-        return Optional.of(getStateHolder().getSelfId().get())
-                .filter(it -> it != 0)
-                .map(Snowflake::of);
+    public Snowflake getSelfId() {
+        return Snowflake.of(gatewayResources.getStateView().getSelfId());
     }
 
     /**
@@ -467,7 +448,7 @@ public class GatewayDiscordClient {
      * supplied ID. If an error is received, it is emitted through the {@code Mono}.
      */
     private Mono<UserBean> getUserBean(final Snowflake userId) {
-        return getStateHolder().getUserStore()
+        return gatewayResources.getStateView().getUserStore()
                 .find(userId.asLong())
                 .switchIfEmpty(getRestClient().getUserService()
                         .getUser(userId.asLong())

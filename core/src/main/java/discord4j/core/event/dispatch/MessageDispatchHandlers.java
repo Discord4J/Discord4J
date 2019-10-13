@@ -20,7 +20,6 @@ import discord4j.common.jackson.Possible;
 import discord4j.common.json.EmbedResponse;
 import discord4j.common.json.Mention;
 import discord4j.common.json.MessageMember;
-import discord4j.core.DiscordClient;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.message.*;
 import discord4j.core.object.Embed;
@@ -47,8 +46,6 @@ class MessageDispatchHandlers {
 
     static Mono<MessageCreateEvent> messageCreate(DispatchContext<MessageCreate> context) {
         GatewayDiscordClient gateway = context.getGateway();
-        DiscordClient client = gateway.rest();
-
         MessageBean bean = new MessageBean(context.getDispatch());
         Message message = new Message(gateway, bean);
 
@@ -62,13 +59,13 @@ class MessageDispatchHandlers {
             member = new Member(gateway, authorMember, authorUser, guildId);
         }
 
-        Mono<Void> saveMessage = gateway.getStateHolder().getMessageStore()
+        Mono<Void> saveMessage = context.getStateHolder().getMessageStore()
                 .save(bean.getId(), bean);
 
-        Mono<Void> editLastMessageId = gateway.getStateHolder().getChannelStore()
+        Mono<Void> editLastMessageId = context.getStateHolder().getChannelStore()
                 .find(bean.getChannelId())
                 .doOnNext(channelBean -> channelBean.setLastMessageId(bean.getId()))
-                .flatMap(channelBean -> gateway.getStateHolder().getChannelStore()
+                .flatMap(channelBean -> context.getStateHolder().getChannelStore()
                         .save(channelBean.getId(), channelBean));
 
         return saveMessage
@@ -78,14 +75,13 @@ class MessageDispatchHandlers {
 
     static Mono<MessageDeleteEvent> messageDelete(DispatchContext<MessageDelete> context) {
         GatewayDiscordClient gateway = context.getGateway();
-        DiscordClient client = gateway.rest();
         long messageId = context.getDispatch().getId();
         long channelId = context.getDispatch().getChannelId();
 
-        Mono<Void> deleteMessage = gateway.getStateHolder().getMessageStore()
+        Mono<Void> deleteMessage = context.getStateHolder().getMessageStore()
                 .delete(context.getDispatch().getId());
 
-        return gateway.getStateHolder().getMessageStore()
+        return context.getStateHolder().getMessageStore()
                 .find(messageId)
                 .flatMap(deleteMessage::thenReturn)
                 .map(messageBean -> new MessageDeleteEvent(gateway, context.getShardInfo(), messageId, channelId,
@@ -95,16 +91,15 @@ class MessageDispatchHandlers {
 
     static Mono<MessageBulkDeleteEvent> messageDeleteBulk(DispatchContext<MessageDeleteBulk> context) {
         GatewayDiscordClient gateway = context.getGateway();
-        DiscordClient client = gateway.rest();
         long messageIds[] = context.getDispatch().getIds();
         long channelId = context.getDispatch().getChannelId();
         long guildId = context.getDispatch().getGuildId();
 
-        Mono<Void> deleteMessages = gateway.getStateHolder().getMessageStore()
+        Mono<Void> deleteMessages = context.getStateHolder().getMessageStore()
                 .delete(Flux.fromArray(ArrayUtil.toObject(messageIds)));
 
         return Flux.fromArray(ArrayUtil.toObject(messageIds))
-                .flatMap(gateway.getStateHolder().getMessageStore()::find)
+                .flatMap(context.getStateHolder().getMessageStore()::find)
                 .map(messageBean -> new Message(gateway, messageBean))
                 .collect(Collectors.toSet())
                 .flatMap(deleteMessages::thenReturn)
@@ -116,8 +111,6 @@ class MessageDispatchHandlers {
 
     static Mono<ReactionAddEvent> messageReactionAdd(DispatchContext<MessageReactionAdd> context) {
         GatewayDiscordClient gateway = context.getGateway();
-        DiscordClient client = gateway.rest();
-
         Long emojiId = context.getDispatch().getEmoji().getId();
         String emojiName = context.getDispatch().getEmoji().getName();
         boolean emojiAnimated = context.getDispatch().getEmoji().getAnimated() != null
@@ -128,10 +121,10 @@ class MessageDispatchHandlers {
         long messageId = context.getDispatch().getMessageId();
         Long guildId = context.getDispatch().getGuildId();
 
-        Mono<Void> addToMessage = gateway.getStateHolder().getMessageStore()
+        Mono<Void> addToMessage = context.getStateHolder().getMessageStore()
                 .find(messageId)
                 .map(oldBean -> {
-                    boolean me = gateway.getStateHolder().getSelfId().get() == userId;
+                    boolean me = context.getStateHolder().getSelfId().get() == userId;
                     MessageBean newBean = new MessageBean(oldBean);
 
                     if (oldBean.getReactions() == null) {
@@ -162,7 +155,7 @@ class MessageDispatchHandlers {
                     return newBean;
                 })
                 .flatMap(bean ->
-                        gateway.getStateHolder().getMessageStore().save(bean.getId(), bean));
+                        context.getStateHolder().getMessageStore().save(bean.getId(), bean));
 
         ReactionEmoji emoji = ReactionEmoji.of(emojiId, emojiName, emojiAnimated);
         return addToMessage.thenReturn(new ReactionAddEvent(gateway, context.getShardInfo(), userId, channelId, messageId, guildId, emoji));
@@ -171,8 +164,6 @@ class MessageDispatchHandlers {
 
     static Mono<ReactionRemoveEvent> messageReactionRemove(DispatchContext<MessageReactionRemove> context) {
         GatewayDiscordClient gateway = context.getGateway();
-        DiscordClient client = gateway.rest();
-
         Long emojiId = context.getDispatch().getEmoji().getId();
         String emojiName = context.getDispatch().getEmoji().getName();
         boolean emojiAnimated = context.getDispatch().getEmoji().getAnimated() != null
@@ -183,7 +174,7 @@ class MessageDispatchHandlers {
         long messageId = context.getDispatch().getMessageId();
         Long guildId = context.getDispatch().getGuildId();
 
-        Mono<Void> removeFromMessage = gateway.getStateHolder().getMessageStore()
+        Mono<Void> removeFromMessage = context.getStateHolder().getMessageStore()
                 .find(messageId)
                 .filter(bean -> bean.getReactions() != null)
                 .map(oldBean -> {
@@ -205,7 +196,7 @@ class MessageDispatchHandlers {
                         ReactionBean newExisting = new ReactionBean(existing);
                         newExisting.setCount(existing.getCount() - 1);
 
-                        if (gateway.getStateHolder().getSelfId().get() == userId) {
+                        if (context.getStateHolder().getSelfId().get() == userId) {
                             newExisting.setMe(false);
                         }
 
@@ -214,7 +205,7 @@ class MessageDispatchHandlers {
                     return newBean;
                 })
                 .flatMap(bean ->
-                        gateway.getStateHolder().getMessageStore().save(bean.getId(), bean));
+                        context.getStateHolder().getMessageStore().save(bean.getId(), bean));
 
         ReactionEmoji emoji = ReactionEmoji.of(emojiId, emojiName, emojiAnimated);
         return removeFromMessage.thenReturn(new ReactionRemoveEvent(gateway, context.getShardInfo(), userId, channelId, messageId, guildId,
@@ -223,25 +214,22 @@ class MessageDispatchHandlers {
 
     static Mono<ReactionRemoveAllEvent> messageReactionRemoveAll(DispatchContext<MessageReactionRemoveAll> context) {
         GatewayDiscordClient gateway = context.getGateway();
-        DiscordClient client = gateway.rest();
         long channelId = context.getDispatch().getChannelId();
         long messageId = context.getDispatch().getMessageId();
         Long guildId = context.getDispatch().getGuildId();
 
-        Mono<Void> removeAllFromMessage = gateway.getStateHolder().getMessageStore()
+        Mono<Void> removeAllFromMessage = context.getStateHolder().getMessageStore()
                 .find(messageId)
                 .map(MessageBean::new)
                 .doOnNext(bean -> bean.setReactions(null))
                 .flatMap(bean ->
-                        gateway.getStateHolder().getMessageStore().save(bean.getId(), bean));
+                        context.getStateHolder().getMessageStore().save(bean.getId(), bean));
 
         return removeAllFromMessage.thenReturn(new ReactionRemoveAllEvent(gateway, context.getShardInfo(), channelId, messageId, guildId));
     }
 
     static Mono<MessageUpdateEvent> messageUpdate(DispatchContext<MessageUpdate> context) {
         GatewayDiscordClient gateway = context.getGateway();
-        DiscordClient client = gateway.rest();
-
         long messageId = context.getDispatch().getId();
         long channelId = context.getDispatch().getChannelId();
         Long guildId = context.getDispatch().getGuildId();
@@ -277,7 +265,7 @@ class MessageDispatchHandlers {
 
         String editedTimestamp = context.getDispatch().getEditedTimestamp();
 
-        Mono<MessageUpdateEvent> update = gateway.getStateHolder().getMessageStore()
+        Mono<MessageUpdateEvent> update = context.getStateHolder().getMessageStore()
                 .find(messageId)
                 .flatMap(oldBean -> {
                     // updating the content and embed of the bean in the store
@@ -294,7 +282,7 @@ class MessageDispatchHandlers {
                     MessageUpdateEvent event = new MessageUpdateEvent(gateway, context.getShardInfo(), messageId, channelId, guildId, old,
                             contentChanged, currentContent, embedsChanged, embedList);
 
-                    return gateway.getStateHolder().getMessageStore()
+                    return context.getStateHolder().getMessageStore()
                             .save(newBean.getId(), newBean)
                             .thenReturn(event);
                 });

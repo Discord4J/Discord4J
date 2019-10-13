@@ -112,7 +112,7 @@ public class StoreBotTest {
                 .route(routes -> routes
                         .get("/counts",
                                 (req, res) -> {
-                                    StateHolder stores = gateway.getStateHolder();
+                                    StateView stores = gateway.getGatewayResources().getStateView();
                                     Mono<String> result = Flux.merge(
                                             Mono.just("users").zipWith(stores.getUserStore().count()),
                                             Mono.just("guilds").zipWith(stores.getGuildStore().count()),
