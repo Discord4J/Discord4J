@@ -302,11 +302,12 @@ public class DefaultGatewayClient implements GatewayClient {
                     long backoff = context.backoff().toMillis();
                     log.info("Retry attempt {} in {} ms", attempt, backoff);
                     if (attempt == 1) {
-                        dispatchSink.next(GatewayStateChange.retryStarted(Duration.ofMillis(backoff)));
                         if (!resumable.get() || !isResumableError(context.exception())) {
+                            dispatchSink.next(GatewayStateChange.retryStarted(Duration.ofMillis(backoff)));
                             resumable.compareAndSet(true, false);
                             notifyObserver(GatewayObserver.RETRY_STARTED, identifyOptions);
                         } else {
+                            dispatchSink.next(GatewayStateChange.retryStartedResume(Duration.ofMillis(backoff)));
                             notifyObserver(GatewayObserver.RETRY_RESUME_STARTED, identifyOptions);
                         }
                     } else {

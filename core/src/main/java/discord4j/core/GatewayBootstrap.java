@@ -296,7 +296,8 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                                                 } else if (event.getState() == GatewayStateChange.State.RETRY_FAILED
                                                         || event.getState() == GatewayStateChange.State.RETRY_STARTED) {
                                                     log.debug(format(ctx, "Invalidating stores for shard"));
-                                                    return stateHolder.invalidateStores(shard.getIndex());
+                                                    // TODO: uncomment once #invalidate(shardId) is part of Store API
+                                                    //return stateHolder.invalidateStores(shard.getIndex());
                                                 }
                                                 return Mono.empty();
                                             })

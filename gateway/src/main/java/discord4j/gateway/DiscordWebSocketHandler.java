@@ -17,7 +17,6 @@
 package discord4j.gateway;
 
 import discord4j.common.close.CloseException;
-import discord4j.common.close.CloseHandlerAdapter;
 import discord4j.common.close.CloseStatus;
 import io.netty.buffer.ByteBuf;
 import io.netty.handler.codec.http.websocketx.CloseWebSocketFrame;
@@ -32,7 +31,6 @@ import reactor.netty.http.websocket.WebsocketOutbound;
 import reactor.util.Logger;
 import reactor.util.Loggers;
 
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 
 /**
@@ -76,29 +74,27 @@ public class DiscordWebSocketHandler {
     }
 
     public Mono<Void> handle(WebsocketInbound in, WebsocketOutbound out) {
-        AtomicReference<CloseStatus> reason = new AtomicReference<>();
-        in.withConnection(connection -> connection.addHandlerLast(HANDLER, new CloseHandlerAdapter(reason, log)));
-
         Mono<Void> completionFuture = completionNotifier
                 .log(shardLogger(".zip"), Level.FINEST, false);
 
-        Mono<CloseWebSocketFrame> closeFuture = closeTrigger
+        Mono<CloseWebSocketFrame> outboundClose = closeTrigger
                 .map(status -> new CloseWebSocketFrame(status.getCode(), status.getReason()));
 
-        Mono<Void> outboundEvents = out.sendObject(Flux.merge(closeFuture, outbound.map(TextWebSocketFrame::new)))
+        Mono<CloseStatus> inboundClose = in.receiveCloseStatus()
+                .map(status -> new CloseStatus(status.code(), status.reasonText()));
+
+        Mono<Void> outboundEvents = out.sendObject(Flux.merge(outboundClose, outbound.map(TextWebSocketFrame::new)))
                 .then()
-                .doOnTerminate(() -> {
+                .then(Mono.defer(() -> {
                     shardLogger(".outbound").info("Sender completed on shard {}", shardIndex);
-                    if (!closeTrigger.isTerminated()) {
-                        CloseStatus closeStatus = reason.get();
-                        if (closeStatus != null) {
-                            shardLogger(".outbound").info("Forwarding close reason: {}", closeStatus);
-                            error(new CloseException(closeStatus));
-                        } else {
-                            error(new RuntimeException("Sender completed"));
-                        }
-                    }
-                })
+                    return inboundClose.filter(__ -> !closeTrigger.isTerminated())
+                            .doOnNext(closeStatus -> {
+                                shardLogger(".outbound").info("Forwarding close reason: {}", closeStatus);
+                                error(new CloseException(closeStatus));
+                            })
+                            .switchIfEmpty(Mono.fromRunnable(() -> error(new RuntimeException("Sender completed"))))
+                            .then();
+                }))
                 .log(shardLogger(".zip.out"), Level.FINEST, false);
 
         Mono<Void> inboundEvents = in.aggregateFrames()
@@ -109,12 +105,11 @@ public class DiscordWebSocketHandler {
                 .doOnError(this::error)
                 .then(Mono.<Void>defer(() -> {
                     shardLogger(".inbound").info("Receiver completed on shard {}", shardIndex);
-                    CloseStatus closeStatus = reason.get();
-                    if (closeStatus != null && !closeTrigger.isTerminated()) {
-                        shardLogger(".inbound").info("Forwarding close reason: {}", closeStatus);
-                        return Mono.error(new CloseException(closeStatus));
-                    }
-                    return Mono.empty();
+                    return inboundClose.filter(__ -> !closeTrigger.isTerminated())
+                            .flatMap(closeStatus -> {
+                                shardLogger(".inbound").info("Forwarding close reason: {}", closeStatus);
+                                return Mono.error(new CloseException(closeStatus));
+                            });
                 }))
                 .log(shardLogger(".zip.in"), Level.FINEST, false);
 
@@ -158,6 +153,4 @@ public class DiscordWebSocketHandler {
     private Logger shardLogger(String gateway) {
         return Loggers.getLogger("discord4j.gateway" + gateway + "." + shardIndex);
     }
-
-    private static final String HANDLER = "client.last.closeHandler";
 }
