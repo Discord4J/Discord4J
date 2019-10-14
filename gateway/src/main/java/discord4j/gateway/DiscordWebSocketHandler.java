@@ -30,8 +30,9 @@ import reactor.netty.http.websocket.WebsocketInbound;
 import reactor.netty.http.websocket.WebsocketOutbound;
 import reactor.util.Logger;
 import reactor.util.Loggers;
+import reactor.util.context.Context;
 
-import java.util.logging.Level;
+import static discord4j.common.LogUtil.format;
 
 /**
  * Represents a WebSocket handler specialized for Discord gateway operations.
@@ -53,8 +54,7 @@ public class DiscordWebSocketHandler {
     private final MonoProcessor<CloseStatus> closeTrigger;
     private final MonoProcessor<Void> completionNotifier = MonoProcessor.create();
     private final ZlibDecompressor decompressor = new ZlibDecompressor();
-    private final Logger log;
-    private final int shardIndex;
+    private final Context context;
 
     /**
      * Create a new handler with the given data pipelines.
@@ -62,21 +62,17 @@ public class DiscordWebSocketHandler {
      * @param inbound the {@link FluxSink} of {@link ByteBuf} to process inbound payloads
      * @param outbound the {@link Flux} of {@link ByteBuf} to process outbound payloads
      * @param closeTrigger a {@link MonoProcessor} that triggers the closing of this session
-     * @param shardIndex the shard index of this connection, for tracing
+     * @param context the Reactor {@link Context} that owns this handler, to enrich logging
      */
     public DiscordWebSocketHandler(FluxSink<ByteBuf> inbound, Flux<ByteBuf> outbound,
-                                   MonoProcessor<CloseStatus> closeTrigger, int shardIndex) {
+                                   MonoProcessor<CloseStatus> closeTrigger, Context context) {
         this.inbound = inbound;
         this.outbound = outbound;
         this.closeTrigger = closeTrigger;
-        this.shardIndex = shardIndex;
-        this.log = shardLogger("");
+        this.context = context;
     }
 
     public Mono<Void> handle(WebsocketInbound in, WebsocketOutbound out) {
-        Mono<Void> completionFuture = completionNotifier
-                .log(shardLogger(".zip"), Level.FINEST, false);
-
         Mono<CloseWebSocketFrame> outboundClose = closeTrigger
                 .map(status -> new CloseWebSocketFrame(status.getCode(), status.getReason()));
 
@@ -86,16 +82,15 @@ public class DiscordWebSocketHandler {
         Mono<Void> outboundEvents = out.sendObject(Flux.merge(outboundClose, outbound.map(TextWebSocketFrame::new)))
                 .then()
                 .then(Mono.defer(() -> {
-                    shardLogger(".outbound").info("Sender completed on shard {}", shardIndex);
+                    log.info(format(context, "Sender completed"));
                     return inboundClose.filter(__ -> !closeTrigger.isTerminated())
                             .doOnNext(closeStatus -> {
-                                shardLogger(".outbound").info("Forwarding close reason: {}", closeStatus);
+                                log.info(format(context, "Outbound close reason: {}"), closeStatus);
                                 error(new CloseException(closeStatus));
                             })
                             .switchIfEmpty(Mono.fromRunnable(() -> error(new RuntimeException("Sender completed"))))
                             .then();
-                }))
-                .log(shardLogger(".zip.out"), Level.FINEST, false);
+                }));
 
         Mono<Void> inboundEvents = in.aggregateFrames()
                 .receiveFrames()
@@ -104,17 +99,16 @@ public class DiscordWebSocketHandler {
                 .doOnNext(inbound::next)
                 .doOnError(this::error)
                 .then(Mono.<Void>defer(() -> {
-                    shardLogger(".inbound").info("Receiver completed on shard {}", shardIndex);
+                    log.info(format(context, "Receiver completed"));
                     return inboundClose.filter(__ -> !closeTrigger.isTerminated())
                             .flatMap(closeStatus -> {
-                                shardLogger(".inbound").info("Forwarding close reason: {}", closeStatus);
+                                log.info(format(context, "Inbound close reason: {}"), closeStatus);
                                 return Mono.error(new CloseException(closeStatus));
                             });
-                }))
-                .log(shardLogger(".zip.in"), Level.FINEST, false);
+                }));
 
-        return Mono.zip(completionFuture, outboundEvents, inboundEvents)
-                .doOnError(t -> log.debug("WebSocket session threw an error: {}", t.toString()))
+        return Mono.zip(completionNotifier, outboundEvents, inboundEvents)
+                .doOnError(t -> log.debug(format(context, "WebSocket session threw an error: {}"), t.toString()))
                 .then();
     }
 
@@ -125,7 +119,7 @@ public class DiscordWebSocketHandler {
      * through a complete signal, dropping all future signals.
      */
     public void close() {
-        log.info("Triggering close sequence");
+        log.info(format(context, "Triggering close sequence"));
         closeTrigger.onNext(CloseStatus.NORMAL_CLOSE);
         completionNotifier.onComplete();
     }
@@ -140,7 +134,7 @@ public class DiscordWebSocketHandler {
      * @param error the cause for this session termination
      */
     public void error(Throwable error) {
-        log.warn("Triggering error sequence ({})", error.toString());
+        log.warn(format(context, "Triggering error sequence ({})"), error.toString());
         if (!completionNotifier.isTerminated()) {
             if (error instanceof CloseException) {
                 completionNotifier.onError(error);
@@ -150,7 +144,5 @@ public class DiscordWebSocketHandler {
         }
     }
 
-    private Logger shardLogger(String gateway) {
-        return Loggers.getLogger("discord4j.gateway" + gateway + "." + shardIndex);
-    }
+    private static final Logger log = Loggers.getLogger("discord4j.gateway.session");
 }

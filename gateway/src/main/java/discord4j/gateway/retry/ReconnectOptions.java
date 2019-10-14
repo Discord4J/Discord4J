@@ -67,7 +67,7 @@ public class ReconnectOptions {
             return new BackoffDelay(appContext.getFirstBackoff(), appContext.getMaxBackoffInterval(), nextBackoff);
         };
         private Jitter jitter = Jitter.random();
-        private Scheduler backoffScheduler = Schedulers.elastic();
+        private Scheduler backoffScheduler = Schedulers.parallel();
 
         protected Builder() {
         }

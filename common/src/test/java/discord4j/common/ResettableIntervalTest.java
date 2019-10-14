@@ -17,6 +17,7 @@
 package discord4j.common;
 
 import org.junit.Test;
+import reactor.core.scheduler.Schedulers;
 
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
@@ -26,7 +27,7 @@ public class ResettableIntervalTest {
     @Test
     public void test() throws InterruptedException {
 
-        ResettableInterval interval = new ResettableInterval();
+        ResettableInterval interval = new ResettableInterval(Schedulers.elastic());
         interval.ticks().subscribe(System.out::println);
 
         interval.start(Duration.ofSeconds(1));

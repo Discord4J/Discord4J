@@ -41,6 +41,7 @@ import reactor.netty.http.client.HttpClient;
 import reactor.retry.Retry;
 import reactor.util.Logger;
 import reactor.util.Loggers;
+import reactor.util.context.Context;
 import reactor.util.function.Tuples;
 
 import java.nio.charset.StandardCharsets;
@@ -105,7 +106,7 @@ public class DefaultGatewayClient implements GatewayClient {
     private final AtomicLong lastSent = new AtomicLong(0);
     private final AtomicLong lastAck = new AtomicLong(0);
     private final AtomicLong responseTime = new AtomicLong(0);
-    private final ResettableInterval heartbeat = new ResettableInterval();
+    private final ResettableInterval heartbeat;
     private volatile MonoProcessor<Void> disconnectNotifier;
     private volatile MonoProcessor<CloseStatus> closeTrigger;
 
@@ -126,11 +127,13 @@ public class DefaultGatewayClient implements GatewayClient {
         this.observer = options.getInitialObserver();
         this.identifyLimiter = Objects.requireNonNull(options.getIdentifyLimiter());
         // TODO: consider exposing OverflowStrategy to GatewayOptions
-        this.receiverSink = receiver.sink(FluxSink.OverflowStrategy.ERROR);
+        this.receiverSink = receiver.sink(FluxSink.OverflowStrategy.BUFFER);
         this.senderSink = sender.sink(FluxSink.OverflowStrategy.ERROR);
         this.dispatchSink = dispatch.sink(FluxSink.OverflowStrategy.BUFFER);
         this.outboundSink = outbound.sink(FluxSink.OverflowStrategy.ERROR);
         this.heartbeatSink = heartbeats.sink(FluxSink.OverflowStrategy.ERROR);
+        // TODO use ReactorResources#getTimedTaskScheduler
+        this.heartbeat = new ResettableInterval(Schedulers.parallel());
     }
 
     @Override
@@ -161,9 +164,8 @@ public class DefaultGatewayClient implements GatewayClient {
                     Flux<ByteBuf> outFlux = Flux.merge(heartbeatFlux, identifyFlux, payloadFlux)
                             .doOnNext(buf -> trace(senderLog, buf));
 
-                    int shard = identifyOptions.getShardIndex();
                     DiscordWebSocketHandler handler = new DiscordWebSocketHandler(receiverSink, outFlux, closeTrigger
-                            , shard);
+                            , context);
 
                     Integer resumeSequence = identifyOptions.getResumeSequence();
                     if (resumeSequence != null && resumeSequence > 0) {
@@ -208,7 +210,8 @@ public class DefaultGatewayClient implements GatewayClient {
 
                     Mono<Void> ackFuture = receiverFlux.filter(payload -> Opcode.HEARTBEAT_ACK.equals(payload.getOp()))
                             .map(payload -> new PayloadContext<>(payload, handler, this, context))
-                            .publishOn(Schedulers.elastic())
+                            // TODO use ReactorResources#getTimedTaskScheduler
+                            //.publishOn(Schedulers.elastic())
                             .doOnNext(PayloadHandlers::handle)
                             .doOnNext(ctx -> ping.onComplete())
                             .then();
@@ -246,7 +249,7 @@ public class DefaultGatewayClient implements GatewayClient {
 
                     Mono<Void> httpFuture = httpClient
                             .headers(headers -> headers.add(USER_AGENT, initUserAgent()))
-                            .observe(getObserver())
+                            .observe(getObserver(context))
                             .websocket(Integer.MAX_VALUE)
                             .uri(gatewayUrl)
                             .handle(handler::handle)
@@ -254,7 +257,7 @@ public class DefaultGatewayClient implements GatewayClient {
                             .then();
 
                     return Mono.zip(httpFuture, readyHandler, receiverFuture, ackFuture, senderFuture, heartbeatHandler)
-                            .doOnError(logReconnectReason())
+                            .doOnError(logReconnectReason(context))
                             .then();
                 })
                 .retryWhen(retryFactory())
@@ -299,20 +302,19 @@ public class DefaultGatewayClient implements GatewayClient {
                 .doOnRetry(context -> {
                     connected.compareAndSet(true, false);
                     int attempt = context.applicationContext().getAttempts();
-                    long backoff = context.backoff().toMillis();
-                    log.info("Retry attempt {} in {} ms", attempt, backoff);
+                    Duration backoff = context.backoff();
+                    log.info("Retry attempt {} for shard {} in {}", attempt, identifyOptions.getShardIndex(), backoff);
                     if (attempt == 1) {
                         if (!resumable.get() || !isResumableError(context.exception())) {
-                            dispatchSink.next(GatewayStateChange.retryStarted(Duration.ofMillis(backoff)));
+                            dispatchSink.next(GatewayStateChange.retryStarted(backoff));
                             resumable.compareAndSet(true, false);
                             notifyObserver(GatewayObserver.RETRY_STARTED, identifyOptions);
                         } else {
-                            dispatchSink.next(GatewayStateChange.retryStartedResume(Duration.ofMillis(backoff)));
+                            dispatchSink.next(GatewayStateChange.retryStartedResume(backoff));
                             notifyObserver(GatewayObserver.RETRY_RESUME_STARTED, identifyOptions);
                         }
                     } else {
-                        dispatchSink.next(GatewayStateChange.retryFailed(attempt - 1,
-                                Duration.ofMillis(backoff)));
+                        dispatchSink.next(GatewayStateChange.retryFailed(attempt - 1, backoff));
                         // TODO: add attempt/backoff values to GatewayObserver
                         notifyObserver(GatewayObserver.RETRY_FAILED, identifyOptions);
                         resumable.set(false);
@@ -337,22 +339,22 @@ public class DefaultGatewayClient implements GatewayClient {
         return true;
     }
 
-    private Consumer<Throwable> logReconnectReason() {
+    private Consumer<Throwable> logReconnectReason(Context context) {
         return t -> {
             if ((t instanceof CloseException && isResumableError(t)) || t instanceof PartialDisconnectException) {
-                log.error("Gateway client error: {}", t.toString());
+                log.error(format(context, "Gateway client error: {}"), t.toString());
             } else {
-                log.error("Gateway client error", t);
+                log.error(format(context, "Gateway client error"), t);
             }
         };
     }
 
-    private ConnectionObserver getObserver() {
+    private ConnectionObserver getObserver(Context context) {
         return (connection, newState) -> {
             log.debug("{} {}", newState, connection);
             if (closeTrigger.isTerminated() && (newState == ConnectionObserver.State.RELEASED
                     || newState == ConnectionObserver.State.DISCONNECTING)) {
-                log.info("Disconnected from Gateway");
+                log.info(format(context, "Disconnected from Gateway"));
                 retryContext.clear();
                 connected.compareAndSet(true, false);
                 lastSent.set(0);
@@ -539,7 +541,7 @@ public class DefaultGatewayClient implements GatewayClient {
         return 115;
     }
 
-    private static final Logger log = Loggers.getLogger("discord4j.gateway");
+    private static final Logger log = Loggers.getLogger("discord4j.gateway.client");
     private static final Logger senderLog = Loggers.getLogger("discord4j.gateway.sender");
     private static final Logger receiverLog = Loggers.getLogger("discord4j.gateway.receiver");
     private static final Logger outboundLog = Loggers.getLogger("discord4j.gateway.outbound");

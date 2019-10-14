@@ -19,19 +19,24 @@ package discord4j.common;
 import reactor.core.Disposable;
 import reactor.core.publisher.EmitterProcessor;
 import reactor.core.publisher.Flux;
-import reactor.core.scheduler.Schedulers;
+import reactor.core.scheduler.Scheduler;
 
 import java.time.Duration;
 
 public class ResettableInterval {
 
+    private final Scheduler scheduler;
     private final EmitterProcessor<Long> backing = EmitterProcessor.create(false);
     private volatile Disposable task;
     private volatile Duration period;
 
+    public ResettableInterval(Scheduler scheduler) {
+        this.scheduler = scheduler;
+    }
+
     public void start(Duration period) {
         this.period = period;
-        this.task = Flux.interval(Duration.ZERO, period, Schedulers.elastic())
+        this.task = Flux.interval(Duration.ZERO, period, scheduler)
                 .subscribe(backing::onNext);
     }
 
