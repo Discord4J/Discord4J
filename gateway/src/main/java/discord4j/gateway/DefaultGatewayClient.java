@@ -17,6 +17,7 @@
 package discord4j.gateway;
 
 import discord4j.common.GitProperties;
+import discord4j.common.ReactorResources;
 import discord4j.common.ResettableInterval;
 import discord4j.common.close.CloseException;
 import discord4j.common.close.CloseStatus;
@@ -37,7 +38,6 @@ import org.reactivestreams.Publisher;
 import reactor.core.publisher.*;
 import reactor.core.scheduler.Schedulers;
 import reactor.netty.ConnectionObserver;
-import reactor.netty.http.client.HttpClient;
 import reactor.retry.Retry;
 import reactor.util.Logger;
 import reactor.util.Loggers;
@@ -76,7 +76,7 @@ import static io.netty.handler.codec.http.HttpHeaderNames.USER_AGENT;
 public class DefaultGatewayClient implements GatewayClient {
 
     // basic properties
-    private final HttpClient httpClient;
+    private final ReactorResources reactorResources;
     private final PayloadReader payloadReader;
     private final PayloadWriter payloadWriter;
     private final ReconnectOptions reconnectOptions;
@@ -117,7 +117,7 @@ public class DefaultGatewayClient implements GatewayClient {
      */
     public DefaultGatewayClient(GatewayOptions options) {
         this.token = Objects.requireNonNull(options.getToken());
-        this.httpClient = Objects.requireNonNull(options.getHttpClient());
+        this.reactorResources = Objects.requireNonNull(options.getReactorResources());
         this.payloadReader = Objects.requireNonNull(options.getPayloadReader());
         this.payloadWriter = Objects.requireNonNull(options.getPayloadWriter());
         this.reconnectOptions = options.getReconnectOptions();
@@ -210,8 +210,7 @@ public class DefaultGatewayClient implements GatewayClient {
 
                     Mono<Void> ackFuture = receiverFlux.filter(payload -> Opcode.HEARTBEAT_ACK.equals(payload.getOp()))
                             .map(payload -> new PayloadContext<>(payload, handler, this, context))
-                            // TODO use ReactorResources#getTimedTaskScheduler
-                            //.publishOn(Schedulers.elastic())
+//                            .publishOn(reactorResources.getTimerTaskScheduler())
                             .doOnNext(PayloadHandlers::handle)
                             .doOnNext(ctx -> ping.onComplete())
                             .then();
@@ -247,7 +246,7 @@ public class DefaultGatewayClient implements GatewayClient {
                             .doOnNext(heartbeatSink::next)
                             .then();
 
-                    Mono<Void> httpFuture = httpClient
+                    Mono<Void> httpFuture = reactorResources.getHttpClient()
                             .headers(headers -> headers.add(USER_AGENT, initUserAgent()))
                             .observe(getObserver(context))
                             .websocket(Integer.MAX_VALUE)
@@ -360,10 +359,11 @@ public class DefaultGatewayClient implements GatewayClient {
                 lastSent.set(0);
                 lastAck.set(0);
                 responseTime.set(0);
-                dispatchSink.next(GatewayStateChange.disconnected());
                 if (closeTrigger.isError()) {
+                    dispatchSink.next(GatewayStateChange.disconnectedResume());
                     notifyObserver(GatewayObserver.DISCONNECTED_RESUME, identifyOptions);
                 } else {
+                    dispatchSink.next(GatewayStateChange.disconnected());
                     resumable.set(false);
                     sequence.set(0);
                     sessionId.set("");

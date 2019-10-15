@@ -18,6 +18,7 @@
 package discord4j.core;
 
 import discord4j.common.LogUtil;
+import discord4j.common.ReactorResources;
 import discord4j.core.event.EmitterEventDispatcher;
 import discord4j.core.event.EventDispatcher;
 import discord4j.core.event.dispatch.DispatchContext;
@@ -52,9 +53,6 @@ import reactor.core.Disposables;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.MonoProcessor;
-import reactor.core.scheduler.Scheduler;
-import reactor.core.scheduler.Schedulers;
-import reactor.netty.http.client.HttpClient;
 import reactor.util.Logger;
 import reactor.util.Loggers;
 import reactor.util.annotation.Nullable;
@@ -67,7 +65,6 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.logging.Level;
 import java.util.stream.Collectors;
 
 import static discord4j.common.LogUtil.format;
@@ -75,12 +72,10 @@ import static discord4j.common.LogUtil.format;
 public class GatewayBootstrap<O extends GatewayOptions> {
 
     private static final Logger log = Loggers.getLogger(GatewayBootstrap.class);
-    private static final Logger dispatchLog = Loggers.getLogger("discord4j.dispatch");
 
     public static final int RECOMMENDED_SHARD_COUNT = 0;
 
     private final DiscordClient client;
-    //private final GatewayResources resources;
     private final Function<GatewayOptions, O> optionsModifier;
 
     private int shardCount = RECOMMENDED_SHARD_COUNT;
@@ -92,12 +87,12 @@ public class GatewayBootstrap<O extends GatewayOptions> {
     private Function<ShardInfo, Presence> initialPresence = shard -> null;
     private Function<ShardInfo, SessionInfo> resumeOptions = shard -> null;
 
-    private HttpClient httpClient = null;
+    private ReactorResources gatewayReactorResources = null;
+    private ReactorResources voiceReactorResources = null;
     private PayloadReader payloadReader = null;
     private PayloadWriter payloadWriter = null;
     private ReconnectOptions reconnectOptions = ReconnectOptions.builder().build();
     private GatewayObserver gatewayObserver = GatewayObserver.NOOP_LISTENER;
-    private Scheduler voiceConnectionScheduler = Schedulers.elastic();
 
     public static GatewayBootstrap<GatewayOptions> create(DiscordClient client) {
         return new GatewayBootstrap<>(client, Function.identity());
@@ -157,8 +152,13 @@ public class GatewayBootstrap<O extends GatewayOptions> {
         return this;
     }
 
-    public GatewayBootstrap<O> setHttpClient(HttpClient httpClient) {
-        this.httpClient = httpClient;
+    public GatewayBootstrap<O> setGatewayReactorResources(ReactorResources gatewayReactorResources) {
+        this.gatewayReactorResources = gatewayReactorResources;
+        return this;
+    }
+
+    public GatewayBootstrap<O> setVoiceReactorResources(ReactorResources voiceReactorResources) {
+        this.voiceReactorResources = voiceReactorResources;
         return this;
     }
 
@@ -187,9 +187,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
     }
 
     public <T> Mono<T> withConnection(Function<GatewayDiscordClient, Mono<T>> whileConnectedFunction) {
-        return Mono.usingWhen(connect(), gateway -> whileConnectedFunction.apply(gateway)
-                        .subscriberContext(ctx -> ctx.put(LogUtil.KEY_GATEWAY_ID, Integer.toHexString(gateway.hashCode()))),
-                closeConnections());
+        return Mono.usingWhen(connect(), whileConnectedFunction, closeConnections());
     }
 
     private Function<GatewayDiscordClient, Publisher<?>> closeConnections() {
@@ -209,7 +207,6 @@ public class GatewayBootstrap<O extends GatewayOptions> {
     }
 
     public Mono<GatewayDiscordClient> connect(Function<O, GatewayClient> clientFactory) {
-        // TODO: update StoreContext and remove shard param
         StateHolder stateHolder = new StateHolder(initStoreService(), new StoreContext(0, MessageBean.class));
         StateView stateView = new StateView(stateHolder);
         EventDispatcher eventDispatcher = initEventDispatcher();
@@ -225,103 +222,118 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                         .map(index -> new ShardInfo(index, count))
                         .filter(initShardFilter())
                         .transform(shardCoordinator.getConnectOperator())
-                        .concatMap(shard -> Mono.subscriberContext()
-                                .flatMap(ctx -> Mono.<GatewayConnection>create(sink -> {
-                                    StatusUpdate initial = Optional.ofNullable(initialPresence.apply(shard))
-                                            .map(Presence::asStatusUpdate)
-                                            .orElse(null);
-                                    IdentifyOptions identify = new IdentifyOptions(shard, initial);
-                                    SessionInfo resume = resumeOptions.apply(shard);
-                                    if (resume != null) {
-                                        identify.setResumeSessionId(resume.getSessionId());
-                                        identify.setResumeSequence(resume.getSequence());
-                                    }
-                                    Disposable.Composite forCleanup = Disposables.composite();
-                                    GatewayClient gatewayClient = clientFactory.apply(buildOptions(identify));
-                                    VoiceClient voiceClient = new VoiceClient(
-                                            voiceConnectionScheduler,
-                                            client.getCoreResources().getJacksonResources().getObjectMapper(),
-                                            guildId -> {
-                                                VoiceStateUpdate voiceStateUpdate = new VoiceStateUpdate(
-                                                        guildId, null, false, false);
-                                                gatewayClient.sender().next(GatewayPayload.voiceStateUpdate(voiceStateUpdate));
-                                            });
-
-                                    gatewayClients.put(shard.getIndex(), gatewayClient);
-                                    voiceClients.put(shard.getIndex(), voiceClient);
-
-                                    // wire gateway events to EventDispatcher
-                                    forCleanup.add(gatewayClient.dispatch()
-                                            .log(dispatchLog, Level.FINE, false)
-                                            .map(dispatch -> DispatchContext.of(dispatch, gateway, stateHolder, shard))
-                                            .flatMap(context -> DispatchHandlers.handle(context)
-                                                    .onErrorResume(error -> {
-                                                        dispatchLog.error(format(ctx, "Error dispatching event"), error);
-                                                        return Mono.empty();
-                                                    }))
-                                            .doOnNext(eventDispatcher::publish)
-                                            .subscribe());
-
-                                    // wire internal shard coordinator events
-                                    // TODO: transition into separate lifecycleSink for these events
-                                    MonoProcessor<Void> shardCloseSignal = MonoProcessor.create();
-                                    forCleanup.add(gatewayClient.dispatch()
-                                            .map(dispatch -> DispatchContext.of(dispatch, gateway, stateHolder, shard))
-                                            .filter(context -> context.getDispatch().getClass() == GatewayStateChange.class)
-                                            .flatMap(context -> {
-                                                GatewayStateChange event = (GatewayStateChange) context.getDispatch();
-                                                if (event.getState() == GatewayStateChange.State.CONNECTED) {
-                                                    log.info(format(ctx, "Shard connected"));
-                                                    return shardCoordinator.publishConnected(shard)
-                                                            .doOnTerminate(() -> {
-                                                                GatewayConnection connection = new GatewayConnection(
-                                                                        gateway, identify, shardCloseSignal);
-                                                                sink.success(connection);
-                                                            });
-                                                } else if (event.getState() == GatewayStateChange.State.DISCONNECTED) {
-                                                    log.info(format(ctx, "Shard disconnected"));
-                                                    // TODO: include resume case
-                                                    // TODO: should we dispose StoreService/EventDispatcher here?
-                                                    return shardCoordinator.publishDisconnected(shard, null)
-                                                            .then(stateHolder.invalidateStores(shard.getIndex()))
-                                                            .then(Mono.fromRunnable(() -> {
-                                                                shardCloseSignal.onComplete();
-                                                                gatewayClients.remove(shard.getIndex());
-                                                                voiceClients.remove(shard.getIndex());
-                                                                if (gateway.getGatewayClientMap().isEmpty()) {
-                                                                    closeProcessor.onComplete();
-                                                                    forCleanup.dispose();
-                                                                }
-                                                            }));
-                                                } else if (event.getState() == GatewayStateChange.State.RETRY_FAILED
-                                                        || event.getState() == GatewayStateChange.State.RETRY_STARTED) {
-                                                    log.debug(format(ctx, "Invalidating stores for shard"));
-                                                    // TODO: uncomment once #invalidate(shardId) is part of Store API
-                                                    //return stateHolder.invalidateStores(shard.getIndex());
-                                                }
-                                                return Mono.empty();
-                                            })
-                                            .subscribe());
-
-                                    sink.onCancel(this.client.getCoreResources()
-                                            .getRestClient()
-                                            .getGatewayService()
-                                            .getGateway()
-                                            .transform(loginOperator(gatewayClient))
-                                            .then(stateHolder.invalidateStores(shard.getIndex()))
-                                            .subscriberContext(buildContext(gateway, shard))
-                                            .subscribe(null,
-                                                    t -> log.error(format(ctx, "Gateway terminated with an error"), t)));
-                                }))
-                                .subscriberContext(buildContext(gateway, shard))
-                        ))
+                        .concatMap(shard -> acquireConnection(shard, clientFactory, gateway, stateHolder,
+                                eventDispatcher, gatewayClients, voiceClients, closeProcessor)))
                 .collectList()
                 .thenReturn(gateway);
     }
 
+    private Mono<GatewayConnection> acquireConnection(ShardInfo shard,
+                                                      Function<O, GatewayClient> clientFactory,
+                                                      GatewayDiscordClient gateway,
+                                                      StateHolder stateHolder,
+                                                      EventDispatcher eventDispatcher,
+                                                      Map<Integer, GatewayClient> gatewayClients,
+                                                      Map<Integer, VoiceClient> voiceClients,
+                                                      MonoProcessor<Void> closeProcessor) {
+        return Mono.subscriberContext()
+                .flatMap(ctx -> Mono.<GatewayConnection>create(sink -> {
+                    StatusUpdate initial = Optional.ofNullable(initialPresence.apply(shard))
+                            .map(Presence::asStatusUpdate)
+                            .orElse(null);
+                    IdentifyOptions identify = new IdentifyOptions(shard, initial);
+                    SessionInfo resume = resumeOptions.apply(shard);
+                    if (resume != null) {
+                        identify.setResumeSessionId(resume.getSessionId());
+                        identify.setResumeSequence(resume.getSequence());
+                    }
+                    Disposable.Composite forCleanup = Disposables.composite();
+                    GatewayClient gatewayClient = clientFactory.apply(buildOptions(identify));
+                    // TODO use ReactorResources to build VoiceClient instances (custom HttpClient, UdpClient)
+                    VoiceClient voiceClient = new VoiceClient(
+                            initVoiceReactorResources().getTimerTaskScheduler(),
+                            client.getCoreResources().getJacksonResources().getObjectMapper(),
+                            guildId -> {
+                                VoiceStateUpdate voiceStateUpdate = new VoiceStateUpdate(
+                                        guildId, null, false, false);
+                                gatewayClient.sender().next(GatewayPayload.voiceStateUpdate(voiceStateUpdate));
+                            });
+
+                    gatewayClients.put(shard.getIndex(), gatewayClient);
+                    voiceClients.put(shard.getIndex(), voiceClient);
+
+                    // wire gateway events to EventDispatcher
+                    forCleanup.add(gatewayClient.dispatch()
+                            .map(dispatch -> DispatchContext.of(dispatch, gateway, stateHolder, shard))
+                            .flatMap(context -> DispatchHandlers.handle(context)
+                                    .onErrorResume(error -> {
+                                        log.error(format(ctx, "Error dispatching event"), error);
+                                        return Mono.empty();
+                                    }))
+                            .doOnNext(eventDispatcher::publish)
+                            .subscribe());
+
+                    // wire internal shard coordinator events
+                    // TODO: transition into separate lifecycleSink for these events
+                    MonoProcessor<Void> shardCloseSignal = MonoProcessor.create();
+                    forCleanup.add(gatewayClient.dispatch()
+                            .map(dispatch -> DispatchContext.of(dispatch, gateway, stateHolder, shard))
+                            .filter(context -> context.getDispatch().getClass() == GatewayStateChange.class)
+                            .flatMap(context -> {
+                                GatewayStateChange event = (GatewayStateChange) context.getDispatch();
+                                switch (event.getState()) {
+                                    case CONNECTED:
+                                        log.info(format(ctx, "Shard connected"));
+                                        return shardCoordinator.publishConnected(shard)
+                                                .doOnTerminate(() -> {
+                                                    GatewayConnection connection = new GatewayConnection(
+                                                            gateway, identify, shardCloseSignal);
+                                                    sink.success(connection);
+                                                });
+                                    case DISCONNECTED:
+                                    case DISCONNECTED_RESUME:
+                                        log.info(format(ctx, "Shard disconnected"));
+                                        boolean allowResume = event.getState() != GatewayStateChange.State.DISCONNECTED;
+                                        SessionInfo session = allowResume ?
+                                                new SessionInfo(gatewayClient.getSessionId(),
+                                                        gatewayClient.getSequence()) : null;
+                                        // TODO: should we dispose StoreService/EventDispatcher here?
+                                        return shardCoordinator.publishDisconnected(shard, session)
+                                                .then(stateHolder.invalidateStores())
+                                                .then(Mono.fromRunnable(() -> {
+                                                    shardCloseSignal.onComplete();
+                                                    gatewayClients.remove(shard.getIndex());
+                                                    voiceClients.remove(shard.getIndex());
+                                                    if (gateway.getGatewayClientMap().isEmpty()) {
+                                                        closeProcessor.onComplete();
+                                                        forCleanup.dispose();
+                                                    }
+                                                }));
+                                    case RETRY_STARTED:
+                                    case RETRY_FAILED:
+                                        log.debug(format(ctx, "Invalidating stores for shard"));
+                                        return stateHolder.invalidateStores();
+                                }
+                                return Mono.empty();
+                            })
+                            .subscriberContext(buildContext(gateway, shard))
+                            .subscribe());
+
+                    sink.onCancel(this.client.getCoreResources()
+                            .getRestClient()
+                            .getGatewayService()
+                            .getGateway()
+                            .transform(loginOperator(gatewayClient))
+                            .then(stateHolder.invalidateStores())
+                            .subscriberContext(buildContext(gateway, shard))
+                            .subscribe(null, t -> log.error(format(ctx, "Gateway terminated with an error"), t)));
+                }))
+                .subscriberContext(buildContext(gateway, shard));
+    }
+
     private Function<Context, Context> buildContext(GatewayDiscordClient gateway, ShardInfo shard) {
         return ctx -> ctx.put(LogUtil.KEY_GATEWAY_ID, Integer.toHexString(gateway.hashCode()))
-                .put(LogUtil.KEY_SHARD_ID, shard.getIndex() + "," + shard.getCount());
+                .put(LogUtil.KEY_SHARD_ID, shard.format());
     }
 
     private PayloadReader initPayloadReader() {
@@ -338,11 +350,18 @@ public class GatewayBootstrap<O extends GatewayOptions> {
         return new JacksonPayloadWriter(client.getCoreResources().getJacksonResources().getObjectMapper());
     }
 
-    private HttpClient initHttpClient() {
-        if (httpClient != null) {
-            return httpClient;
+    private ReactorResources initGatewayReactorResources() {
+        if (gatewayReactorResources != null) {
+            return gatewayReactorResources;
         }
-        return client.getCoreResources().getReactorResources().getHttpClient();
+        return client.getCoreResources().getReactorResources();
+    }
+
+    private ReactorResources initVoiceReactorResources() {
+        if (voiceReactorResources != null) {
+            return voiceReactorResources;
+        }
+        return client.getCoreResources().getReactorResources();
     }
 
     private Predicate<ShardInfo> initShardFilter() {
@@ -382,7 +401,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
     private O buildOptions(IdentifyOptions identify) {
         GatewayOptions options = GatewayOptions.builder()
                 .setToken(client.getCoreResources().getToken())
-                .setHttpClient(initHttpClient())
+                .setReactorResources(initGatewayReactorResources())
                 .setPayloadReader(initPayloadReader())
                 .setPayloadWriter(initPayloadWriter())
                 .setReconnectOptions(reconnectOptions)

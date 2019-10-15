@@ -17,15 +17,15 @@
 
 package discord4j.gateway;
 
+import discord4j.common.ReactorResources;
 import discord4j.gateway.payload.PayloadReader;
 import discord4j.gateway.payload.PayloadWriter;
 import discord4j.gateway.retry.ReconnectOptions;
-import reactor.netty.http.client.HttpClient;
 
 public class GatewayOptions {
 
     private final String token;
-    private final HttpClient httpClient;
+    private final ReactorResources reactorResources;
     private final PayloadReader payloadReader;
     private final PayloadWriter payloadWriter;
     private final ReconnectOptions reconnectOptions;
@@ -35,7 +35,7 @@ public class GatewayOptions {
 
     protected GatewayOptions(Builder builder) {
         this.token = builder.token;
-        this.httpClient = builder.httpClient;
+        this.reactorResources = builder.reactorResources;
         this.payloadReader = builder.payloadReader;
         this.payloadWriter = builder.payloadWriter;
         this.reconnectOptions = builder.reconnectOptions;
@@ -51,7 +51,7 @@ public class GatewayOptions {
     public static class Builder {
 
         private String token;
-        private HttpClient httpClient;
+        private ReactorResources reactorResources;
         private PayloadReader payloadReader;
         private PayloadWriter payloadWriter;
         private ReconnectOptions reconnectOptions;
@@ -67,8 +67,8 @@ public class GatewayOptions {
             return this;
         }
 
-        public Builder setHttpClient(HttpClient httpClient) {
-            this.httpClient = httpClient;
+        public Builder setReactorResources(ReactorResources reactorResources) {
+            this.reactorResources = reactorResources;
             return this;
         }
 
@@ -111,8 +111,8 @@ public class GatewayOptions {
         return token;
     }
 
-    public HttpClient getHttpClient() {
-        return httpClient;
+    public ReactorResources getReactorResources() {
+        return reactorResources;
     }
 
     public PayloadReader getPayloadReader() {

@@ -17,60 +17,41 @@
 
 package discord4j.common;
 
+import reactor.core.scheduler.Scheduler;
+import reactor.core.scheduler.Schedulers;
 import reactor.netty.http.client.HttpClient;
 import reactor.netty.resources.ConnectionProvider;
 import reactor.netty.resources.LoopResources;
 
-import java.util.function.Function;
-
 /**
- * Provides Reactor Netty resources like an {@link HttpClient} that can be customized and
- * reused across the application.
+ * Provides Reactor Netty resources like an {@link HttpClient} and {@link Scheduler} instances that can be customized
+ * and reused across the application.
  * <p>
- * Allow a user to externally manage the connection pool through a custom
- * {@link ConnectionProvider}, and custom event loop threads using a
- * {@link LoopResources}.
+ * Allow a user to externally manage the connection pool through a custom {@link ConnectionProvider}, and custom
+ * event loop threads using a {@link LoopResources}.
  */
 public class ReactorResources {
 
-    private final static Function<HttpClient, HttpClient> initializer = client -> client.compress(true);
-
     private final HttpClient httpClient;
+    private final Scheduler timerTaskScheduler;
 
     /**
-     * Create with a default {@link HttpClient} instance.
+     * Create with a default {@link HttpClient} and {@link Scheduler} for timed tasks instances.
      */
     public ReactorResources() {
-        this.httpClient = initializer.apply(HttpClient.create());
+        this.httpClient = HttpClient.create().compress(true);
+        this.timerTaskScheduler = Schedulers.parallel();
     }
 
     /**
-     * Create with a set of external Reactor Netty connection pool and event loop threads.
-     * <p>Use this in case you want dedicated resources for a particular client or clients instead of the global
-     * default. Requires externally disposing of the given parameters on
-     * application shutdown, through {@link ConnectionProvider#dispose()} and
-     * {@link LoopResources#dispose()}.
+     * Create with a pre-configured {@link HttpClient} and {@link Scheduler} suited for timed tasks instances.
      *
-     * @param provider the connection pool provider to use
-     * @param resources the set of event loop threads to use
-     * @param mapper a Function to customize the underlying HttpClient
+     * @param httpClient the underlying {@link HttpClient} to use
+     * @param timerTaskScheduler the time-capable {@link Scheduler} to use
      */
-    public ReactorResources(ConnectionProvider provider, LoopResources resources,
-                            Function<HttpClient, HttpClient> mapper) {
-        this.httpClient = initializer.andThen(mapper).apply(initHttpClient(provider, resources));
-    }
-
-    /**
-     * Create with a pre-configured {@link HttpClient} instance.
-     *
-     * @param httpClient the underlying HttpClient to use
-     */
-    public ReactorResources(HttpClient httpClient) {
+    public ReactorResources(HttpClient httpClient, Scheduler timerTaskScheduler) {
         this.httpClient = httpClient;
-    }
-
-    private HttpClient initHttpClient(ConnectionProvider provider, LoopResources resources) {
-        return HttpClient.create(provider).tcpConfiguration(tcpClient -> tcpClient.runOn(resources));
+        this.timerTaskScheduler = timerTaskScheduler;
     }
 
     /**
@@ -80,5 +61,28 @@ public class ReactorResources {
      */
     public HttpClient getHttpClient() {
         return httpClient;
+    }
+
+    /**
+     * Get the {@link Scheduler} configured by this provider to be used in timed tasks.
+     *
+     * @return a time-capable {@link Scheduler}
+     */
+    public Scheduler getTimerTaskScheduler() {
+        return timerTaskScheduler;
+    }
+
+    /**
+     * Create a Reactor Netty {@link HttpClient} using the given connection pool and event loop threads.
+     * <p>Use this in case you want dedicated resources for a particular client or clients instead of the global
+     * default. Requires externally disposing of the given parameters on
+     * application shutdown, through {@link ConnectionProvider#dispose()} and
+     * {@link LoopResources#dispose()}.
+     *
+     * @param provider the connection pool provider to use
+     * @param resources the set of event loop threads to use
+     */
+    public static HttpClient newHttpClient(ConnectionProvider provider, LoopResources resources) {
+        return HttpClient.create(provider).tcpConfiguration(tcpClient -> tcpClient.runOn(resources));
     }
 }

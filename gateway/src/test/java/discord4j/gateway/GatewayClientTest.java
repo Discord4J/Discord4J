@@ -20,6 +20,7 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
+import discord4j.common.ReactorResources;
 import discord4j.common.SimpleBucket;
 import discord4j.common.jackson.PossibleModule;
 import discord4j.common.jackson.UnknownPropertyHandler;
@@ -35,7 +36,6 @@ import org.junit.Ignore;
 import org.junit.Test;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
-import reactor.netty.http.client.HttpClient;
 
 import java.io.IOException;
 import java.time.Duration;
@@ -57,7 +57,7 @@ public class GatewayClientTest {
         PayloadWriter writer = new JacksonPayloadWriter(mapper);
         ReconnectOptions reconnectOptions = ReconnectOptions.builder().build();
         GatewayOptions gatewayOptions = GatewayOptions.builder()
-                .setHttpClient(HttpClient.create())
+                .setReactorResources(new ReactorResources())
                 .setPayloadReader(reader)
                 .setPayloadWriter(writer)
                 .setReconnectOptions(reconnectOptions)
@@ -118,7 +118,7 @@ public class GatewayClientTest {
             CountDownLatch next = new CountDownLatch(1);
             ReconnectOptions reconnectOptions = ReconnectOptions.builder().build();
             GatewayOptions gatewayOptions = GatewayOptions.builder()
-                    .setHttpClient(HttpClient.create().compress(true))
+                    .setReactorResources(new ReactorResources())
                     .setPayloadReader(new JacksonPayloadReader(mapper))
                     .setPayloadWriter(new JacksonPayloadWriter(mapper))
                     .setReconnectOptions(reconnectOptions)

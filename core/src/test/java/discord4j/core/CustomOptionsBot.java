@@ -42,7 +42,7 @@ public class CustomOptionsBot {
                     .setIdentifyOptions(getIdentifyOptions())
                     .setPayloadWriter(getPayloadWriter())
                     .setPayloadReader(getPayloadReader())
-                    .setHttpClient(getHttpClient());
+                    .setReactorResources(getReactorResources());
             return builder;
         }
 
@@ -77,7 +77,7 @@ public class CustomOptionsBot {
                             .setIdentifyOptions(options.getIdentifyOptions())
                             .setPayloadWriter(options.getPayloadWriter())
                             .setPayloadReader(options.getPayloadReader())
-                            .setHttpClient(options.getHttpClient())
+                            .setReactorResources(options.getReactorResources())
                             .build();
                 })
                 .setGatewayClientFactory(CustomGatewayClient::new)

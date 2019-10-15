@@ -70,6 +70,7 @@ class LifecycleDispatchHandlers {
             case RETRY_SUCCEEDED:
                 return Mono.just(new ReconnectEvent(gateway, context.getShardInfo(), dispatch.getCurrentAttempt()));
             case DISCONNECTED:
+            case DISCONNECTED_RESUME:
                 return Mono.just(new DisconnectEvent(gateway, context.getShardInfo()));
         }
         return Mono.empty();

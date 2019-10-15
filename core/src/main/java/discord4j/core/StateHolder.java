@@ -66,31 +66,32 @@ public final class StateHolder {
         service.init(context);
 
         channelStore = service.provideLongObjStore(ChannelBean.class);
-        log.debug("Using a {} backend for channel storage.", channelStore);
+        log.debug("Channel storage     : {}", channelStore);
 
         guildStore = service.provideLongObjStore(GuildBean.class);
-        log.debug("Using a {} backend for guild storage.", guildStore);
+        log.debug("Guild storage       : {}", guildStore);
 
         guildEmojiStore = service.provideLongObjStore(GuildEmojiBean.class);
-        log.debug("Using a {} backend for guild emoji storage.", guildEmojiStore);
+        log.debug("Guild emoji storage : {}", guildEmojiStore);
 
         memberStore = service.provideGenericStore(LongLongTuple2.class, MemberBean.class);
-        log.debug("Using a {} backend for member storage.", memberStore);
+        log.debug("Member storage      : {}", memberStore);
 
         messageStore = service.provideLongObjStore(MessageBean.class);
-        log.debug("Using a {} backend for message storage.", messageStore);
+        log.debug("Message storage     : {}", messageStore);
 
         presenceStore = service.provideGenericStore(LongLongTuple2.class, PresenceBean.class);
-        log.debug("Using a {} backend for presence storage.", presenceStore);
+        log.debug("Presence storage    : {}", presenceStore);
 
         roleStore = service.provideLongObjStore(RoleBean.class);
-        log.debug("Using a {} backend for role storage.", roleStore);
+        log.debug("Role storage        : {}", roleStore);
 
         userStore = service.provideLongObjStore(UserBean.class);
-        log.debug("Using a {} backend for user storage.", userStore);
+        log.debug("User storage        : {}", userStore);
 
         voiceStateStore = service.provideGenericStore(LongLongTuple2.class, VoiceStateBean.class);
-        log.debug("Using a {} backend for voice state storage.", voiceStateStore);
+        log.debug("Voice state storage : {}", voiceStateStore);
+
         selfId = new AtomicLong();
     }
 
@@ -138,7 +139,7 @@ public final class StateHolder {
         return selfId;
     }
 
-    public Mono<Void> invalidateStores(int shardId) {
+    public Mono<Void> invalidateStores() {
         return channelStore.invalidate()
                 .and(guildStore.invalidate())
                 .and(guildEmojiStore.invalidate())
