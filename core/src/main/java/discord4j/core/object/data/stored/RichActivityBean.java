@@ -49,9 +49,9 @@ public final class RichActivityBean extends ActivityBean implements Serializable
     @Nullable
     private String partyId;
     @Nullable
-    private Integer currentPartySize;
+    private Long currentPartySize;
     @Nullable
-    private Integer maxPartySize;
+    private Long maxPartySize;
     @Nullable
     private String largeImage;
     @Nullable
@@ -75,7 +75,7 @@ public final class RichActivityBean extends ActivityBean implements Serializable
         flags = response.getFlags();
         final GamePartyResponse party = response.getParty();
         partyId = (party == null) ? null : party.getId();
-        final int[] size = (party == null) ? null : party.getSize();
+        final long[] size = (party == null) ? null : party.getSize();
         currentPartySize = (size == null) ? null : size[0];
         maxPartySize = (size == null) ? null : size[1];
         final GameAssetsResponse assets = response.getAssets();
@@ -173,20 +173,20 @@ public final class RichActivityBean extends ActivityBean implements Serializable
     }
 
     @Nullable
-    public Integer getCurrentPartySize() {
+    public Long getCurrentPartySize() {
         return currentPartySize;
     }
 
-    public void setCurrentPartySize(@Nullable Integer currentPartySize) {
+    public void setCurrentPartySize(@Nullable Long currentPartySize) {
         this.currentPartySize = currentPartySize;
     }
 
     @Nullable
-    public Integer getMaxPartySize() {
+    public Long getMaxPartySize() {
         return maxPartySize;
     }
 
-    public void setMaxPartySize(@Nullable Integer maxPartySize) {
+    public void setMaxPartySize(@Nullable Long maxPartySize) {
         this.maxPartySize = maxPartySize;
     }
 
