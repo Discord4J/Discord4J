@@ -211,6 +211,9 @@ public class Activity {
     /** The type of "action" for an activity. */
     public enum Type {
 
+        /** Unknown type **/
+        UNKNOWN(-1),
+
         /** "Playing {name}" */
         PLAYING(0),
 
@@ -257,7 +260,7 @@ public class Activity {
                 case 1: return STREAMING;
                 case 2: return LISTENING;
                 case 3: return WATCHING;
-                default: return EntityUtil.throwUnsupportedDiscordValue(value);
+                default: return UNKNOWN;
             }
         }
     }
