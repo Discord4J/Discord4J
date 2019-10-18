@@ -41,11 +41,11 @@ public final class PresenceBean implements Serializable {
 
     public PresenceBean(final PresenceUpdate presence) {
         this(
-            presence.getGame() == null ? null : new ActivityBean(presence.getGame()),
-            presence.getStatus(),
-            Possible.orElseNull(presence.getClientStatus().getDesktop()),
-            Possible.orElseNull(presence.getClientStatus().getMobile()),
-            Possible.orElseNull(presence.getClientStatus().getWeb())
+                presence.getGame() == null ? null : new ActivityBean(presence.getGame()),
+                presence.getStatus(),
+                Possible.orElseNull(presence.getClientStatus(), PresenceUpdate.ClientStatus::getDesktop),
+                Possible.orElseNull(presence.getClientStatus(), PresenceUpdate.ClientStatus::getMobile),
+                Possible.orElseNull(presence.getClientStatus(), PresenceUpdate.ClientStatus::getWeb)
         );
     }
 
