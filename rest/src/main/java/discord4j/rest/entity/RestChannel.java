@@ -17,8 +17,10 @@
 
 package discord4j.rest.entity;
 
-import discord4j.rest.entity.data.ChannelData;
 import discord4j.rest.RestClient;
+import discord4j.rest.entity.data.ChannelData;
+import discord4j.rest.entity.data.MessageData;
+import discord4j.rest.util.MultipartRequest;
 import reactor.core.publisher.Mono;
 
 public class RestChannel {
@@ -35,5 +37,11 @@ public class RestChannel {
         return restClient.getChannelService()
                 .getChannel(id)
                 .map(ChannelData::new);
+    }
+
+    public Mono<MessageData> createMessage(MultipartRequest request) {
+        return restClient.getChannelService()
+                .createMessage(id, request)
+                .map(MessageData::new);
     }
 }

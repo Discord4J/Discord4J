@@ -32,7 +32,10 @@ import discord4j.gateway.ShardInfo;
 import discord4j.gateway.json.GatewayPayload;
 import discord4j.gateway.json.Opcode;
 import discord4j.gateway.retry.PartialDisconnectException;
+import discord4j.rest.entity.RestChannel;
 import discord4j.rest.entity.data.ApplicationInfoData;
+import discord4j.rest.json.request.MessageCreateRequest;
+import discord4j.rest.util.MultipartRequest;
 import io.netty.buffer.Unpooled;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
@@ -152,8 +155,8 @@ public class RetryBotTest {
                         return new SessionInfo(sessionId, sequence);
                     })
                     .withConnectionUntilDisconnect(gateway -> {
-//                        subscribeEventCounter(gateway, counts);
-//                        startHttpServer(new ServerContext(gateway, counts));
+                        //                        subscribeEventCounter(gateway, counts);
+                        //                        startHttpServer(new ServerContext(gateway, counts));
 
                         TestCommands testCommands = new TestCommands(gateway);
                         return gateway.getEventDispatcher().on(MessageCreateEvent.class)
@@ -230,9 +233,11 @@ public class RetryBotTest {
                             Snowflake guildId = message.getGuild().block().getId();
                             log.info("Message came from guild: {}", guildId);
                         } else if (content.startsWith("!echo ")) {
-                            Mono.justOrEmpty(message.getAuthor())
-                                    .flatMap(User::getPrivateChannel)
-                                    .flatMap(ch -> ch.createMessage(content.substring("!echo ".length())))
+                            MessageCreateRequest request = new MessageCreateRequest(
+                                    content.substring("!echo ".length()),
+                                    null, false, null);
+                            new RestChannel(gateway.getRestClient(), message.getChannelId().asLong())
+                                    .createMessage(new MultipartRequest(request))
                                     .subscribe();
                         }
                     });

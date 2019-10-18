@@ -7,9 +7,8 @@
     <logger name="discord4j.gateway.client" level="DEBUG"/>
     <logger name="discord4j.gateway.inbound" level="INFO"/>
     <logger name="discord4j.gateway.outbound" level="INFO"/>
-    <!--<logger name="discord4j.gateway.receiver" level="TRACE"/>-->
-    <!--<logger name="discord4j.gateway.sender" level="TRACE"/>-->
-    <!--<logger name="discord4j.gateway.zip" level="TRACE"/>-->
+    <logger name="discord4j.gateway.payload.inbound" level="INFO"/>
+    <logger name="discord4j.gateway.payload.outbound" level="INFO"/>
     <logger name="discord4j.rest.http.client.DiscordWebClient" level="INFO"/>
     <!--<logger name="discord4j.rest.http.MultipartWriterStrategy" level="TRACE"/>-->
     <!--<logger name="discord4j.rest.http.JacksonWriterStrategy" level="TRACE"/>-->
