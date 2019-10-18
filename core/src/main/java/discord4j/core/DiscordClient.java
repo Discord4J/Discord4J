@@ -39,6 +39,7 @@ import discord4j.rest.json.response.GatewayResponse;
 import discord4j.rest.json.response.UserGuildResponse;
 import discord4j.rest.util.RouteUtils;
 import discord4j.store.api.util.LongLongTuple2;
+import java.time.Duration;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.Logger;
@@ -371,9 +372,9 @@ public final class DiscordClient {
     /**
      * Gets the amount of time it last took Discord Gateway to respond to a heartbeat with an ack.
      *
-     * @return the time in milliseconds took Discord to respond to the last heartbeat with an ack.
+     * @return the duration which Discord took to respond to the last heartbeat with an ack.
      */
-    public long getResponseTime() {
+    public Duration getResponseTime() {
         return serviceMediator.getGatewayClient().getResponseTime();
     }
 
