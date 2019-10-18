@@ -16,7 +16,6 @@
  */
 package discord4j.rest.request;
 
-import discord4j.common.LogUtil;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -38,6 +37,8 @@ public class PoolGlobalRateLimiter implements GlobalRateLimiter {
     private static final Logger log = Loggers.getLogger(PoolGlobalRateLimiter.class);
 
     private final Pool<Permit> outer;
+    private final AtomicInteger permitId = new AtomicInteger(0);
+
     private volatile long limitedUntil = 0;
 
     /**
@@ -49,14 +50,14 @@ public class PoolGlobalRateLimiter implements GlobalRateLimiter {
         this.outer = PoolBuilder.from(Mono.fromCallable(this::newPermit))
                 .sizeBetween(1, parallelism)
                 .releaseHandler(resource -> {
-                    log.debug("[{}] Released permit", resource);
+                    log.trace(format("Released permit {}"), resource);
                     return Mono.empty();
                 })
                 .fifo();
     }
 
     private Permit newPermit() {
-        return new Permit(Permit.ID.incrementAndGet());
+        return new Permit();
     }
 
     @Override
@@ -71,34 +72,33 @@ public class PoolGlobalRateLimiter implements GlobalRateLimiter {
 
     @Override
     public <T> Flux<T> withLimiter(Publisher<T> stage) {
-        return outer.withPoolable(permit -> Mono.subscriberContext()
-                .flatMapMany(ctx -> {
-                    permit.bucket = ctx.getOrDefault(LogUtil.KEY_BUCKET_ID, "default");
-                    log.debug("[{}] Acquired permit", permit);
-                    Duration delay = getRemaining();
-                    if (!delay.isNegative() && !delay.isZero()) {
-                        log.debug("[{}] Waiting for {} before processing request", permit, delay);
-                        return Mono.delay(delay).flatMapMany(tick -> Flux.from(stage));
-                    } else {
-                        return stage;
-                    }
-                }));
+        return outer.withPoolable(permit -> {
+            log.trace(format("Acquired permit {}"), permit);
+            Duration delay = getRemaining();
+            if (!delay.isNegative() && !delay.isZero()) {
+                log.trace(format("Delay permit {} for {}"), permit, delay);
+                return Mono.delay(delay).flatMapMany(tick -> Flux.from(stage));
+            } else {
+                return stage;
+            }
+        });
     }
 
-    static class Permit {
+    private String format(String message) {
+        return "[pool-" + Integer.toHexString(hashCode()) + "] " + message;
+    }
 
-        static final AtomicInteger ID = new AtomicInteger(0);
+    private class Permit {
 
-        final int id;
-        String bucket;
+        private final int id;
 
-        Permit(int id) {
-            this.id = id;
+        private Permit() {
+            id = permitId.incrementAndGet();
         }
 
         @Override
         public String toString() {
-            return bucket + ":" + id;
+            return "[id: " + id + ", 0x" + Integer.toHexString(hashCode()) + ']';
         }
     }
 }

@@ -37,6 +37,7 @@ public class BucketPool {
     private final long refillPeriodNanos;
 
     private final Pool<Permit> pool;
+    private final AtomicInteger permitId = new AtomicInteger(0);
     private final AtomicInteger count = new AtomicInteger(0);
     private final AtomicLong nextRefillAt = new AtomicLong(0);
 
@@ -46,7 +47,7 @@ public class BucketPool {
         this.pool = PoolBuilder.from(Mono.fromCallable(Permit::new))
                 .sizeBetween(1, capacity)
                 .releaseHandler(permit -> Mono.delay(getDurationUntilNextRefill().plus(permit.releaseDelay))
-                        .doOnNext(tick -> log.trace("[{}] Released permit", permit))
+                        .doOnNext(tick -> log.trace(format("Released permit {}"), permit))
                         .then())
                 .fifo();
     }
@@ -55,7 +56,7 @@ public class BucketPool {
         AtomicReference<PooledRef<Permit>> emitted = new AtomicReference<>();
         return pool.acquire()
                 .doOnNext(pooledRef -> {
-                    log.trace("[{}] Acquired permit", pooledRef.poolable());
+                    log.trace(format("Acquired permit {}"), pooledRef.poolable());
                     emitted.set(pooledRef);
                     long now = System.nanoTime();
                     if (nextRefillAt.get() <= now) {
@@ -70,7 +71,7 @@ public class BucketPool {
                 .doFinally(st -> {
                     PooledRef<Permit> ref = emitted.get();
                     if (ref != null && emitted.compareAndSet(ref, null)) {
-                        log.trace("[{}] Releasing permit", ref.poolable());
+                        log.trace(format("Releasing permit {}"), ref.poolable());
                         ref.release().subscribe();
                     }
                 })
@@ -85,20 +86,22 @@ public class BucketPool {
         return Duration.ofNanos(nextRefillAt.get() - now);
     }
 
-    private static class Permit {
+    private String format(String message) {
+        return "[pool-" + Integer.toHexString(hashCode()) + "] " + message;
+    }
 
-        static final AtomicInteger ID = new AtomicInteger(0);
+    private class Permit {
 
         private final int id;
         private Duration releaseDelay = Duration.ZERO;
 
         private Permit() {
-            id = ID.incrementAndGet();
+            id = permitId.incrementAndGet();
         }
 
         @Override
         public String toString() {
-            return id + ":" + Integer.toHexString(hashCode());
+            return "[id: " + id + ", 0x" + Integer.toHexString(hashCode()) + ']';
         }
     }
 }

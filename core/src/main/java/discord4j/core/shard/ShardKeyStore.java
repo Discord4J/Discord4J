@@ -17,16 +17,11 @@
 
 package discord4j.core.shard;
 
-import reactor.util.Logger;
-import reactor.util.Loggers;
-
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ShardKeyStore<K extends Comparable<K>> {
-
-    private static final Logger log = Loggers.getLogger(ShardKeyStore.class);
 
     private Map<Integer, Set<K>> keysByShard = new ConcurrentHashMap<>();
 
@@ -39,9 +34,7 @@ public class ShardKeyStore<K extends Comparable<K>> {
     }
 
     public void clear(int shardId) {
-        Set<K> set = keySet(shardId);
-        log.info("Invalidating {} keys from shardId = {}", set.size(), shardId);
-        set.clear();
+        keySet(shardId).clear();
     }
 
     public Set<K> keys(int shardId) {
