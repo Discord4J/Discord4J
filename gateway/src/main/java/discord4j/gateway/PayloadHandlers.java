@@ -101,7 +101,7 @@ public abstract class PayloadHandlers {
         client.heartbeat().start(interval);
 
         if (client.resumable().get()) {
-            log.info(format(context.getContext(), "Attempting to RESUME from {}"), client.sequence().get());
+            log.debug(format(context.getContext(), "Resuming from {}"), client.sequence().get());
             client.sender().next(GatewayPayload.resume(
                     new Resume(client.token(), client.getSessionId(), client.sequence().get())));
         } else {
@@ -111,6 +111,7 @@ public abstract class PayloadHandlers {
             Identify identify = new Identify(client.token(), props, false, 250,
                     Optional.of(shard).map(Possible::of).orElse(Possible.absent()),
                     Optional.ofNullable(options.getInitialStatus()).map(Possible::of).orElse(Possible.absent()));
+            log.debug(format(context.getContext(), "Identifying to Gateway"), client.sequence().get());
             client.sender().next(GatewayPayload.identify(identify));
         }
     }

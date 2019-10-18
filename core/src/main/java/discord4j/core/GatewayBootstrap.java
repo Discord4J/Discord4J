@@ -86,6 +86,8 @@ public class GatewayBootstrap<O extends GatewayOptions> {
     private Function<O, GatewayClient> clientFactory = DefaultGatewayClient::new;
     private Function<ShardInfo, Presence> initialPresence = shard -> null;
     private Function<ShardInfo, SessionInfo> resumeOptions = shard -> null;
+    private boolean completeEventDispatcherOnDisconnect = true;
+    private boolean disposeStoreServiceOnDisconnect = true;
 
     private ReactorResources gatewayReactorResources = null;
     private ReactorResources voiceReactorResources = null;
@@ -264,19 +266,24 @@ public class GatewayBootstrap<O extends GatewayOptions> {
 
                     // wire gateway events to EventDispatcher
                     forCleanup.add(gatewayClient.dispatch()
+                            .takeUntilOther(closeProcessor)
                             .map(dispatch -> DispatchContext.of(dispatch, gateway, stateHolder, shard))
-                            .flatMap(context -> DispatchHandlers.handle(context)
+                            .flatMap(dispatchContext -> DispatchHandlers.handle(dispatchContext)
+                                    .subscriberContext(c -> c.put(LogUtil.KEY_SHARD_ID, shard.getIndex()))
                                     .onErrorResume(error -> {
                                         log.error(format(ctx, "Error dispatching event"), error);
                                         return Mono.empty();
                                     }))
                             .doOnNext(eventDispatcher::publish)
-                            .subscribe());
+                            .subscribe(null,
+                                    t -> log.error(format(ctx, "Event mapper terminated with an error"), t),
+                                    () -> log.info(format(ctx, "Event mapper completed"))));
 
                     // wire internal shard coordinator events
                     // TODO: transition into separate lifecycleSink for these events
                     MonoProcessor<Void> shardCloseSignal = MonoProcessor.create();
                     forCleanup.add(gatewayClient.dispatch()
+                            .takeUntilOther(closeProcessor)
                             .map(dispatch -> DispatchContext.of(dispatch, gateway, stateHolder, shard))
                             .filter(context -> context.getDispatch().getClass() == GatewayStateChange.class)
                             .flatMap(context -> {
@@ -297,17 +304,25 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                                         SessionInfo session = allowResume ?
                                                 new SessionInfo(gatewayClient.getSessionId(),
                                                         gatewayClient.getSequence()) : null;
-                                        // TODO: should we dispose StoreService/EventDispatcher here?
                                         return shardCoordinator.publishDisconnected(shard, session)
                                                 .then(stateHolder.invalidateStores())
                                                 .then(Mono.fromRunnable(() -> {
                                                     shardCloseSignal.onComplete();
                                                     gatewayClients.remove(shard.getIndex());
                                                     voiceClients.remove(shard.getIndex());
-                                                    if (gateway.getGatewayClientMap().isEmpty()) {
+                                                }))
+                                                .then(Mono.defer(() -> {
+                                                    if (gatewayClients.isEmpty()) {
+                                                        log.debug(format(ctx, "All shards disconnected"));
                                                         closeProcessor.onComplete();
-                                                        forCleanup.dispose();
+                                                        if (completeEventDispatcherOnDisconnect) {
+                                                            eventDispatcher.complete();
+                                                        }
+                                                        if (disposeStoreServiceOnDisconnect) {
+                                                            return storeService.dispose();
+                                                        }
                                                     }
+                                                    return Mono.empty();
                                                 }));
                                     case RETRY_STARTED:
                                     case RETRY_FAILED:
@@ -317,23 +332,30 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                                 return Mono.empty();
                             })
                             .subscriberContext(buildContext(gateway, shard))
-                            .subscribe());
+                            .subscribe(null,
+                                    t -> log.error(format(ctx, "Lifecycle listener terminated with an error"), t),
+                                    () -> log.debug(format(ctx, "Lifecycle listener completed"))));
 
-                    sink.onCancel(this.client.getCoreResources()
+                    forCleanup.add(this.client.getCoreResources()
                             .getRestClient()
                             .getGatewayService()
                             .getGateway()
-                            .transform(loginOperator(gatewayClient))
+                            .flatMap(response -> gatewayClient.execute(
+                                    RouteUtils.expandQuery(response.getUrl(), getGatewayParameters())))
                             .then(stateHolder.invalidateStores())
                             .subscriberContext(buildContext(gateway, shard))
-                            .subscribe(null, t -> log.error(format(ctx, "Gateway terminated with an error"), t)));
+                            .subscribe(null,
+                                    t -> log.error(format(ctx, "Gateway terminated with an error"), t),
+                                    () -> log.debug(format(ctx, "Gateway completed"))));
+
+                    sink.onCancel(forCleanup);
                 }))
                 .subscriberContext(buildContext(gateway, shard));
     }
 
     private Function<Context, Context> buildContext(GatewayDiscordClient gateway, ShardInfo shard) {
         return ctx -> ctx.put(LogUtil.KEY_GATEWAY_ID, Integer.toHexString(gateway.hashCode()))
-                .put(LogUtil.KEY_SHARD_ID, shard.format());
+                .put(LogUtil.KEY_SHARD_ID, shard.getIndex());
     }
 
     private PayloadReader initPayloadReader() {
@@ -410,11 +432,6 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                 .setIdentifyLimiter(shardCoordinator.getIdentifyLimiter())
                 .build();
         return this.optionsModifier.apply(options);
-    }
-
-    private Function<Mono<GatewayResponse>, Mono<Void>> loginOperator(GatewayClient client) {
-        return mono -> mono.flatMap(response -> client.execute(
-                RouteUtils.expandQuery(response.getUrl(), getGatewayParameters())));
     }
 
     private Map<String, Object> getGatewayParameters() {

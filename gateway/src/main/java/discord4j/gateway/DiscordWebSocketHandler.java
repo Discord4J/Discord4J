@@ -16,8 +16,9 @@
  */
 package discord4j.gateway;
 
-import discord4j.common.close.CloseException;
 import discord4j.common.close.CloseStatus;
+import discord4j.common.close.CloseStrategy;
+import discord4j.gateway.retry.PartialDisconnectException;
 import io.netty.buffer.ByteBuf;
 import io.netty.handler.codec.http.websocketx.CloseWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
@@ -31,6 +32,7 @@ import reactor.netty.http.websocket.WebsocketOutbound;
 import reactor.util.Logger;
 import reactor.util.Loggers;
 import reactor.util.context.Context;
+import reactor.util.function.Tuple2;
 
 import static discord4j.common.LogUtil.format;
 
@@ -43,16 +45,14 @@ import static discord4j.common.LogUtil.format;
  * This handler uses a {@link FluxSink} of {@link ByteBuf} to push inbound payloads and a {@link Flux} of
  * {@link ByteBuf} to pull outbound payloads.
  * <p>
- * The handler also provides two methods to control the lifecycle and proper cleanup, like {@link #close()} and
- * {@link #error(Throwable)} which perform operations on the current session. It is necessary to use these methods in
- * order to signal closure or errors and cleanly complete the session.
+ * The handler also provides methods to control the lifecycle which perform operations on the current session. It is
+ * required to use them to properly release important resources and complete the session.
  */
 public class DiscordWebSocketHandler {
 
     private final FluxSink<ByteBuf> inbound;
     private final Flux<ByteBuf> outbound;
-    private final MonoProcessor<CloseStatus> closeTrigger;
-    private final MonoProcessor<Void> completionNotifier = MonoProcessor.create();
+    private final MonoProcessor<CloseStrategy> sessionClose;
     private final ZlibDecompressor decompressor = new ZlibDecompressor();
     private final Context context;
 
@@ -61,87 +61,78 @@ public class DiscordWebSocketHandler {
      *
      * @param inbound the {@link FluxSink} of {@link ByteBuf} to process inbound payloads
      * @param outbound the {@link Flux} of {@link ByteBuf} to process outbound payloads
-     * @param closeTrigger a {@link MonoProcessor} that triggers the closing of this session
      * @param context the Reactor {@link Context} that owns this handler, to enrich logging
      */
-    public DiscordWebSocketHandler(FluxSink<ByteBuf> inbound, Flux<ByteBuf> outbound,
-                                   MonoProcessor<CloseStatus> closeTrigger, Context context) {
+    public DiscordWebSocketHandler(FluxSink<ByteBuf> inbound, Flux<ByteBuf> outbound, Context context) {
         this.inbound = inbound;
         this.outbound = outbound;
-        this.closeTrigger = closeTrigger;
+        this.sessionClose = MonoProcessor.create();
         this.context = context;
     }
 
-    public Mono<Void> handle(WebsocketInbound in, WebsocketOutbound out) {
-        Mono<CloseWebSocketFrame> outboundClose = closeTrigger
+    public Mono<Tuple2<CloseStrategy, CloseStatus>> handle(WebsocketInbound in, WebsocketOutbound out) {
+        Mono<CloseWebSocketFrame> outboundClose = sessionClose
+                .doOnNext(strategy -> log.info(format(context, "Closing gateway session: {}"), strategy))
+                .flatMap(strategy -> {
+                    switch (strategy.getAction()) {
+                        case RETRY_ABRUPTLY:
+                        case STOP_ABRUPTLY:
+                            return Mono.error(strategy.getCause() != null ? strategy.getCause() :
+                                    new PartialDisconnectException());
+                        case RETRY:
+                        case STOP:
+                        default:
+                            return Mono.just(CloseStatus.NORMAL_CLOSE);
+                    }
+                })
                 .map(status -> new CloseWebSocketFrame(status.getCode(), status.getReason()));
 
         Mono<CloseStatus> inboundClose = in.receiveCloseStatus()
                 .map(status -> new CloseStatus(status.code(), status.reasonText()));
 
         Mono<Void> outboundEvents = out.sendObject(Flux.merge(outboundClose, outbound.map(TextWebSocketFrame::new)))
-                .then()
-                .then(Mono.defer(() -> {
-                    log.info(format(context, "Sender completed"));
-                    return inboundClose.filter(__ -> !closeTrigger.isTerminated())
-                            .doOnNext(closeStatus -> {
-                                log.info(format(context, "Outbound close reason: {}"), closeStatus);
-                                error(new CloseException(closeStatus));
-                            })
-                            .switchIfEmpty(Mono.fromRunnable(() -> error(new RuntimeException("Sender completed"))))
-                            .then();
-                }));
+                .then();
 
         Mono<Void> inboundEvents = in.aggregateFrames()
                 .receiveFrames()
                 .map(WebSocketFrame::content)
                 .transformDeferred(decompressor::completeMessages)
                 .doOnNext(inbound::next)
-                .doOnError(this::error)
-                .then(Mono.<Void>defer(() -> {
-                    log.info(format(context, "Receiver completed"));
-                    return inboundClose.filter(__ -> !closeTrigger.isTerminated())
-                            .flatMap(closeStatus -> {
-                                log.info(format(context, "Inbound close reason: {}"), closeStatus);
-                                return Mono.error(new CloseException(closeStatus));
-                            });
-                }));
-
-        return Mono.zip(completionNotifier, outboundEvents, inboundEvents)
-                .doOnError(t -> log.debug(format(context, "WebSocket session threw an error: {}"), t.toString()))
                 .then();
+
+        // zip both sequences to join terminal signals
+        // errors will be converted into a retrying strategy
+        // produce both the resulting strategy and the inbound close status (or a default one if missing)
+        return Mono.zip(outboundEvents, inboundEvents)
+                .doOnError(this::error)
+                .then(Mono.zip(sessionClose, inboundClose.defaultIfEmpty(CloseStatus.ABNORMAL_CLOSE)));
     }
 
     /**
-     * Initiates a close sequence that will terminate this session. It will notify all exchanges and the session
-     * completion {@link reactor.core.publisher.Mono} in
-     * {@link #handle(reactor.netty.http.websocket.WebsocketInbound, reactor.netty.http.websocket.WebsocketOutbound)}
-     * through a complete signal, dropping all future signals.
+     * Initiates a close sequence that will terminate this session and instruct consumers downstream that a reconnect
+     * should take place afterwards.
      */
     public void close() {
-        log.info(format(context, "Triggering close sequence"));
-        closeTrigger.onNext(CloseStatus.NORMAL_CLOSE);
-        completionNotifier.onComplete();
+        close(CloseStrategy.retry(null));
     }
 
     /**
-     * Initiates a close sequence with the given error. It will terminate this session with an error signal on the
-     * {@link #handle(reactor.netty.http.websocket.WebsocketInbound, reactor.netty.http.websocket.WebsocketOutbound)}
-     * method, while completing both exchanges through normal complete signals.
-     * <p>
-     * The error can then be channeled downstream and acted upon accordingly.
+     * Initiates a close sequence that will terminate this session and then execute a given {@link CloseStrategy}.
+     *
+     * @param strategy the {@link CloseStrategy} to follow after the close sequence starts
+     */
+    public void close(CloseStrategy strategy) {
+        sessionClose.onNext(strategy);
+    }
+
+    /**
+     * Initiates a close sequence with the given error. The session will be terminated abruptly and then instruct
+     * consumers downstream that a reconnect should take place afterwards.
      *
      * @param error the cause for this session termination
      */
     public void error(Throwable error) {
-        log.warn(format(context, "Triggering error sequence ({})"), error.toString());
-        if (!completionNotifier.isTerminated()) {
-            if (error instanceof CloseException) {
-                completionNotifier.onError(error);
-            } else {
-                completionNotifier.onError(new CloseException(new CloseStatus(1006, error.toString()), error));
-            }
-        }
+        close(CloseStrategy.retryAbruptly(error));
     }
 
     private static final Logger log = Loggers.getLogger("discord4j.gateway.session");

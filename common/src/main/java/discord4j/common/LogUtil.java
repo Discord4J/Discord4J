@@ -17,8 +17,11 @@
 
 package discord4j.common;
 
+import reactor.util.Logger;
+import reactor.util.annotation.Nullable;
 import reactor.util.context.Context;
 
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -47,6 +50,35 @@ public class LogUtil {
                     .toString();
         } else {
             return msg;
+        }
+    }
+
+    public static String formatValue(@Nullable Object value, boolean limitLength) {
+        if (value == null) {
+            return "";
+        }
+        String str;
+        if (value instanceof CharSequence) {
+            str = String.valueOf(value);
+        } else {
+            try {
+                str = value.toString();
+            } catch (Throwable ex) {
+                str = ex.toString();
+            }
+        }
+        return (limitLength && str.length() > 100 ? str.substring(0, 100) + "..." : str);
+    }
+
+    public static void traceDebug(Logger logger, Function<Boolean, String> messageFactory) {
+        if (logger.isDebugEnabled()) {
+            boolean traceEnabled = logger.isTraceEnabled();
+            String logMessage = messageFactory.apply(traceEnabled);
+            if (traceEnabled) {
+                logger.trace(logMessage);
+            } else {
+                logger.debug(logMessage);
+            }
         }
     }
 }

@@ -477,7 +477,7 @@ public class GatewayDiscordClient {
      * {@link GatewayDiscordClient} have disconnected.
      */
     public Mono<Void> onDisconnect() {
-        return closeProcessor;
+        return closeProcessor.log("discord4j.gateway.onDisconnect");
     }
 
     /**

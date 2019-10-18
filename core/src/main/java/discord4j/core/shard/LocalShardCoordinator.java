@@ -35,7 +35,7 @@ import java.util.function.Function;
  */
 public class LocalShardCoordinator implements ShardCoordinator {
 
-    private final PayloadTransformer identifyLimiter = new PoolingTransformer(1, Duration.ofSeconds(5));
+    private final PayloadTransformer identifyLimiter = new PoolingTransformer(1, Duration.ofMillis(5500));
 
     private final ReplayProcessor<Integer> permits = ReplayProcessor.create();
     private final FluxSink<Integer> permitSink = permits.sink();
