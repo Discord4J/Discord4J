@@ -27,7 +27,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * calculations (through {@link #next()} and restarting the attempt count once a retry has succeeded (through
  * {@link #reset()}).
  */
-public class RetryContext {
+public class ReconnectContext {
 
     private final Duration firstBackoff;
     private final Duration maxBackoffInterval;
@@ -36,7 +36,7 @@ public class RetryContext {
     private final AtomicInteger attempts = new AtomicInteger(1);
     private final AtomicInteger resetCount = new AtomicInteger(0);
 
-    public RetryContext(Duration firstBackoff, Duration maxBackoffInterval) {
+    public ReconnectContext(Duration firstBackoff, Duration maxBackoffInterval) {
         this.firstBackoff = firstBackoff;
         this.maxBackoffInterval = maxBackoffInterval;
     }

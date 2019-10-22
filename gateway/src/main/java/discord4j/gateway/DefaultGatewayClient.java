@@ -22,7 +22,6 @@ import discord4j.common.ReactorResources;
 import discord4j.common.ResettableInterval;
 import discord4j.common.close.CloseException;
 import discord4j.common.close.CloseStatus;
-import discord4j.gateway.retry.DisconnectBehavior;
 import discord4j.gateway.json.GatewayPayload;
 import discord4j.gateway.json.Heartbeat;
 import discord4j.gateway.json.Opcode;
@@ -31,10 +30,7 @@ import discord4j.gateway.json.dispatch.Ready;
 import discord4j.gateway.json.dispatch.Resumed;
 import discord4j.gateway.payload.PayloadReader;
 import discord4j.gateway.payload.PayloadWriter;
-import discord4j.gateway.retry.GatewayStateChange;
-import discord4j.gateway.retry.PartialDisconnectException;
-import discord4j.gateway.retry.ReconnectOptions;
-import discord4j.gateway.retry.RetryContext;
+import discord4j.gateway.retry.*;
 import io.netty.buffer.ByteBuf;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.*;
@@ -80,7 +76,7 @@ public class DefaultGatewayClient implements GatewayClient {
     private final PayloadReader payloadReader;
     private final PayloadWriter payloadWriter;
     private final ReconnectOptions reconnectOptions;
-    private final RetryContext retryContext;
+    private final ReconnectContext reconnectContext;
     private final IdentifyOptions identifyOptions;
     private final String token;
     private final GatewayObserver observer;
@@ -121,7 +117,7 @@ public class DefaultGatewayClient implements GatewayClient {
         this.payloadReader = Objects.requireNonNull(options.getPayloadReader());
         this.payloadWriter = Objects.requireNonNull(options.getPayloadWriter());
         this.reconnectOptions = options.getReconnectOptions();
-        this.retryContext = new RetryContext(reconnectOptions.getFirstBackoff(),
+        this.reconnectContext = new ReconnectContext(reconnectOptions.getFirstBackoff(),
                 reconnectOptions.getMaxBackoffInterval());
         this.identifyOptions = Objects.requireNonNull(options.getIdentifyOptions());
         this.observer = options.getInitialObserver();
@@ -137,7 +133,7 @@ public class DefaultGatewayClient implements GatewayClient {
 
     @Override
     public Mono<Void> execute(String gatewayUrl) {
-        return Mono.defer(() -> Mono.subscriberContext()
+        return Mono.subscriberContext()
                 .flatMap(context -> {
                     disconnectNotifier = MonoProcessor.create();
                     lastAck.set(0);
@@ -176,16 +172,16 @@ public class DefaultGatewayClient implements GatewayClient {
                             .doOnNext(event -> {
                                 connected.set(true);
                                 ConnectionObserver.State state;
-                                if (retryContext.getResetCount() == 0) {
+                                if (reconnectContext.getResetCount() == 0) {
                                     log.info(format(context, "Connected to Gateway"));
                                     dispatchSink.next(GatewayStateChange.connected());
                                     state = GatewayObserver.CONNECTED;
                                 } else {
                                     log.info(format(context, "Reconnected to Gateway"));
-                                    dispatchSink.next(GatewayStateChange.retrySucceeded(retryContext.getAttempts()));
+                                    dispatchSink.next(GatewayStateChange.retrySucceeded(reconnectContext.getAttempts()));
                                     state = GatewayObserver.RETRY_SUCCEEDED;
                                 }
-                                retryContext.reset();
+                                reconnectContext.reset();
                                 identifyOptions.setResumeSessionId(sessionId.get());
                                 resumable.set(true);
                                 notifyObserver(state, identifyOptions);
@@ -212,7 +208,8 @@ public class DefaultGatewayClient implements GatewayClient {
                     Mono<Void> senderFuture = outbound.doOnComplete(sessionHandler::close)
                             .doOnNext(payload -> {
                                 if (Opcode.RECONNECT.equals(payload.getOp())) {
-                                    sessionHandler.error(new RuntimeException("Reconnecting due to user action"));
+                                    sessionHandler.error(
+                                            new GatewayException(context, "Reconnecting due to user action"));
                                 }
                             })
                             .then();
@@ -225,8 +222,8 @@ public class DefaultGatewayClient implements GatewayClient {
                                 long delay = now - lastAck.get();
                                 if (lastSent.get() - lastAck.get() > 0) {
                                     log.warn(format(context, "Missing heartbeat ACK for {}"), Duration.ofNanos(delay));
-                                    sessionHandler.error(
-                                            new RuntimeException("Reconnecting due to zombie or failed connection"));
+                                    sessionHandler.error(new GatewayException(context,
+                                            "Reconnecting due to zombie or failed connection"));
                                     return Mono.empty();
                                 } else {
                                     log.debug(format(context, "Sending heartbeat {} after last ACK"),
@@ -244,14 +241,14 @@ public class DefaultGatewayClient implements GatewayClient {
                             .websocket(Integer.MAX_VALUE)
                             .uri(gatewayUrl)
                             .handle(sessionHandler::handle)
-                            .flatMap(t2 -> handleCloseStrategy(t2.getT1(), t2.getT2(), context))
+                            .flatMap(t2 -> handleClose(t2.getT1(), t2.getT2(), context))
                             .then();
 
                     return Mono.zip(httpFuture, readyHandler, receiverFuture, senderFuture, heartbeatHandler)
-                            .doOnError(t -> log.error(format(context, "Gateway client error: {}"), t.toString()))
+                            .doOnError(t -> log.error(format(context, "{}"), t.toString()))
                             .doOnCancel(() -> sessionHandler.close())
                             .then();
-                }))
+                })
                 .retryWhen(retryFactory())
                 .then(Mono.defer(() -> disconnectNotifier))
                 .doOnTerminate(heartbeat::stop);
@@ -282,20 +279,21 @@ public class DefaultGatewayClient implements GatewayClient {
         return payload;
     }
 
-    private Retry<RetryContext> retryFactory() {
-        return Retry.<RetryContext>onlyIf(t -> isRetryable(t.exception()))
-                .withApplicationContext(retryContext)
+    private Retry<ReconnectContext> retryFactory() {
+        return Retry.<ReconnectContext>onlyIf(t -> isRetryable(t.exception()))
+                .withApplicationContext(reconnectContext)
                 .withBackoffScheduler(reconnectOptions.getBackoffScheduler())
                 .backoff(reconnectOptions.getBackoff())
                 .jitter(reconnectOptions.getJitter())
                 .retryMax(reconnectOptions.getMaxRetries())
-                .doOnRetry(context -> {
+                .doOnRetry(retryContext -> {
                     connected.set(false);
-                    int attempt = context.applicationContext().getAttempts();
-                    Duration backoff = context.backoff();
-                    log.info("Retry {} on shard {} in {}", attempt, identifyOptions.getShardIndex(), backoff);
+                    int attempt = retryContext.applicationContext().getAttempts();
+                    Duration backoff = retryContext.backoff();
+                    log.info(format(getContextFromException(retryContext.exception()),
+                            "Reconnect attempt {} in {}"), attempt, backoff);
                     if (attempt == 1) {
-                        if (!resumable.get() || !isResumableError(context.exception())) {
+                        if (!resumable.get() || !isResumableError(retryContext.exception())) {
                             dispatchSink.next(GatewayStateChange.retryStarted(backoff));
                             resumable.set(false);
                             notifyObserver(GatewayObserver.RETRY_STARTED, identifyOptions);
@@ -309,7 +307,7 @@ public class DefaultGatewayClient implements GatewayClient {
                         notifyObserver(GatewayObserver.RETRY_FAILED, identifyOptions);
                         resumable.set(false);
                     }
-                    context.applicationContext().next();
+                    retryContext.applicationContext().next();
                 });
     }
 
@@ -329,18 +327,27 @@ public class DefaultGatewayClient implements GatewayClient {
         return true;
     }
 
-    private Mono<CloseStatus> handleCloseStrategy(DisconnectBehavior strategy, CloseStatus closeStatus, Context context) {
-        log.info(format(context, "Closed session due to {}"), strategy);
-        retryContext.clear();
+    private Context getContextFromException(Throwable t) {
+        if (t instanceof CloseException) {
+            return ((CloseException) t).getContext();
+        }
+        if (t instanceof GatewayException) {
+            return ((GatewayException) t).getContext();
+        }
+        return Context.empty();
+    }
+
+    private Mono<CloseStatus> handleClose(DisconnectBehavior behavior, CloseStatus closeStatus, Context context) {
+        reconnectContext.clear();
         connected.set(false);
         lastSent.set(0);
         lastAck.set(0);
         responseTime.set(0);
 
-        if (strategy.getAction() == DisconnectBehavior.Action.STOP_ABRUPTLY) {
+        if (behavior.getAction() == DisconnectBehavior.Action.STOP_ABRUPTLY) {
             dispatchSink.next(GatewayStateChange.disconnectedResume());
             notifyObserver(GatewayObserver.DISCONNECTED_RESUME, identifyOptions);
-        } else if (strategy.getAction() == DisconnectBehavior.Action.STOP) {
+        } else if (behavior.getAction() == DisconnectBehavior.Action.STOP) {
             dispatchSink.next(GatewayStateChange.disconnected());
             resumable.set(false);
             sequence.set(0);
@@ -348,7 +355,7 @@ public class DefaultGatewayClient implements GatewayClient {
             notifyObserver(GatewayObserver.DISCONNECTED, identifyOptions);
         }
 
-        switch (strategy.getAction()) {
+        switch (behavior.getAction()) {
             case STOP_ABRUPTLY:
             case STOP:
                 disconnectNotifier.onComplete();
@@ -356,8 +363,7 @@ public class DefaultGatewayClient implements GatewayClient {
             case RETRY_ABRUPTLY:
             case RETRY:
             default:
-                log.info("Returning as error");
-                return Mono.error(new CloseException(closeStatus, strategy.getCause()));
+                return Mono.error(new CloseException(closeStatus, context, behavior.getCause()));
         }
     }
 
@@ -379,7 +385,7 @@ public class DefaultGatewayClient implements GatewayClient {
                 return Mono.error(new IllegalStateException("Gateway client is not active!"));
             }
             if (allowResume) {
-                sessionHandler.close(DisconnectBehavior.stopAbruptly(new PartialDisconnectException()));
+                sessionHandler.close(DisconnectBehavior.stopAbruptly(null));
             } else {
                 sessionHandler.close(DisconnectBehavior.stop(null));
             }

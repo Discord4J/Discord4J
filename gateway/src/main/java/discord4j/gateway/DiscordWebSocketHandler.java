@@ -72,13 +72,13 @@ public class DiscordWebSocketHandler {
 
     public Mono<Tuple2<DisconnectBehavior, CloseStatus>> handle(WebsocketInbound in, WebsocketOutbound out) {
         Mono<CloseWebSocketFrame> outboundClose = sessionClose
-                .doOnNext(behavior -> log.info(format(context, "Closing gateway session: {}"), behavior))
+                .doOnNext(behavior -> log.debug(format(context, "Closing session with behavior: {}"), behavior))
                 .flatMap(behavior -> {
                     switch (behavior.getAction()) {
                         case RETRY_ABRUPTLY:
                         case STOP_ABRUPTLY:
                             return Mono.error(behavior.getCause() != null ? behavior.getCause() :
-                                    new PartialDisconnectException());
+                                    new PartialDisconnectException(context));
                         case RETRY:
                         case STOP:
                         default:

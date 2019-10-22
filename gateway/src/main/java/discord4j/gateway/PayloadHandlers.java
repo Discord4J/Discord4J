@@ -20,6 +20,7 @@ import discord4j.common.jackson.Possible;
 import discord4j.gateway.json.*;
 import discord4j.gateway.json.dispatch.Dispatch;
 import discord4j.gateway.json.dispatch.Ready;
+import discord4j.gateway.retry.GatewayException;
 import reactor.util.Logger;
 import reactor.util.Loggers;
 
@@ -91,7 +92,8 @@ public abstract class PayloadHandlers {
                     new Resume(token, client.getSessionId(), client.sequence().get())));
         } else {
             client.resumable().set(false);
-            context.getHandler().error(new RuntimeException("Reconnecting due to non-resumable session invalidation"));
+            context.getHandler().error(new GatewayException(context.getContext(),
+                    "Reconnecting due to non-resumable session invalidation"));
         }
     }
 
@@ -101,7 +103,7 @@ public abstract class PayloadHandlers {
         client.heartbeat().start(interval);
 
         if (client.resumable().get()) {
-            log.debug(format(context.getContext(), "Resuming from {}"), client.sequence().get());
+            log.debug(format(context.getContext(), "Resuming Gateway session from {}"), client.sequence().get());
             client.sender().next(GatewayPayload.resume(
                     new Resume(client.token(), client.getSessionId(), client.sequence().get())));
         } else {
@@ -118,7 +120,8 @@ public abstract class PayloadHandlers {
 
     private static void handleHeartbeatAck(PayloadContext<?> context) {
         context.getClient().ackHeartbeat();
-        log.debug(format(context.getContext(), "Heartbeat acknowledged after {}"), context.getClient().getResponseTimeDuration());
+        log.debug(format(context.getContext(), "Heartbeat acknowledged after {}"),
+                context.getClient().getResponseTimeDuration());
     }
 
     private static final Logger log = Loggers.getLogger("discord4j.gateway.handler");

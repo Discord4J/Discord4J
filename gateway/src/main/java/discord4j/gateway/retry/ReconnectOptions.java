@@ -56,7 +56,7 @@ public class ReconnectOptions {
         private Duration maxBackoffInterval = Duration.ofSeconds(120);
         private int maxRetries = Integer.MAX_VALUE;
         private Backoff backoff = context -> {
-            RetryContext appContext = (RetryContext) context.applicationContext();
+            ReconnectContext appContext = (ReconnectContext) context.applicationContext();
             Duration nextBackoff;
             try {
                 long factor = (long) Math.pow(2, (appContext.getAttempts() - 1));

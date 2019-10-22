@@ -30,6 +30,7 @@ import java.time.Duration;
 /**
  * Transforms a payload sequence to throttle it using a {@link RateLimiter} instance.
  */
+@Deprecated
 public class RateLimiterTransformer implements PayloadTransformer {
 
     private final RateLimiter limiter;
