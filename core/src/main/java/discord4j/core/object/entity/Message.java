@@ -32,6 +32,8 @@ import discord4j.core.object.util.Snowflake;
 import discord4j.core.spec.MessageEditSpec;
 import discord4j.core.util.EntityUtil;
 import discord4j.core.util.PaginationUtil;
+import discord4j.rest.entity.RestChannel;
+import discord4j.rest.entity.RestMessage;
 import discord4j.rest.json.request.SuppressEmbedsRequest;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -60,6 +62,9 @@ public final class Message implements Entity {
     /** The raw data as represented by Discord. */
     private final MessageBean data;
 
+    /** A handle to execute REST API operations for this entity. */
+    private final RestMessage rest;
+
     /**
      * Constructs a {@code Message} with an associated ServiceMediator and Discord data.
      *
@@ -69,6 +74,7 @@ public final class Message implements Entity {
     public Message(final GatewayDiscordClient gateway, final MessageBean data) {
         this.gateway = Objects.requireNonNull(gateway);
         this.data = Objects.requireNonNull(data);
+        this.rest = new RestMessage(gateway.getRestClient(), data.getChannelId(), data.getId());
     }
 
     @Override
@@ -79,6 +85,20 @@ public final class Message implements Entity {
     @Override
     public Snowflake getId() {
         return Snowflake.of(data.getId());
+    }
+
+    /**
+     * Return a {@link RestMessage} handle to execute REST API operations on this entity.
+     */
+    public RestMessage getRestMessage() {
+        return rest;
+    }
+
+    /**
+     * Return a {@link RestChannel} handle to execute REST API operations on the channel of this message.
+     */
+    public RestChannel getRestChannel() {
+        return new RestChannel(gateway.getRestClient(), data.getChannelId());
     }
 
     /**

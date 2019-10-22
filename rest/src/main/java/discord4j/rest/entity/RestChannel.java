@@ -17,11 +17,12 @@
 
 package discord4j.rest.entity;
 
+import discord4j.common.json.MessageResponse;
 import discord4j.rest.RestClient;
 import discord4j.rest.entity.data.ChannelData;
-import discord4j.rest.entity.data.MessageData;
 import discord4j.rest.util.MultipartRequest;
 import reactor.core.publisher.Mono;
+import reactor.util.annotation.Nullable;
 
 public class RestChannel {
 
@@ -39,9 +40,26 @@ public class RestChannel {
                 .map(ChannelData::new);
     }
 
-    public Mono<MessageData> createMessage(MultipartRequest request) {
-        return restClient.getChannelService()
-                .createMessage(id, request)
-                .map(MessageData::new);
+    /**
+     * Requests to create a message using a given {@link MultipartRequest} as body.
+     *
+     * @param request The request body used to create a new message
+     * @return A {@link Mono} where, upon successful completion, emits the created {@link MessageResponse}. If an
+     * error is
+     * received, it is emitted through the {@code Mono}.
+     */
+    public Mono<MessageResponse> createMessage(MultipartRequest request) {
+        return restClient.getChannelService().createMessage(id, request);
+    }
+
+    /**
+     * Requests to delete this channel while optionally specifying a reason.
+     *
+     * @param reason The reason, if present.
+     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the channel has been deleted.
+     * If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Void> delete(@Nullable String reason) {
+        return restClient.getChannelService().deleteChannel(id, reason).then();
     }
 }

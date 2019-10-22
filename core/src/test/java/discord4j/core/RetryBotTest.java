@@ -32,7 +32,6 @@ import discord4j.gateway.ShardInfo;
 import discord4j.gateway.json.GatewayPayload;
 import discord4j.gateway.json.Opcode;
 import discord4j.gateway.retry.PartialDisconnectException;
-import discord4j.rest.entity.RestChannel;
 import discord4j.rest.entity.data.ApplicationInfoData;
 import discord4j.rest.json.request.MessageCreateRequest;
 import discord4j.rest.util.MultipartRequest;
@@ -101,7 +100,8 @@ public class RetryBotTest {
         GatewayDiscordClient g = DiscordClient.create(token)
                 .gateway()
                 .setShardCount(shardCount)
-                .connectNow();
+                .connect()
+                .block();
 
         assert g != null;
 
@@ -236,7 +236,7 @@ public class RetryBotTest {
                             MessageCreateRequest request = new MessageCreateRequest(
                                     content.substring("!echo ".length()),
                                     null, false, null);
-                            new RestChannel(gateway.getRestClient(), message.getChannelId().asLong())
+                            message.getRestChannel()
                                     .createMessage(new MultipartRequest(request))
                                     .subscribe();
                         }

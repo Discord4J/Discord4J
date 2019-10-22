@@ -20,6 +20,7 @@ import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.data.stored.ChannelBean;
 import discord4j.core.object.util.Snowflake;
 import discord4j.core.util.EntityUtil;
+import discord4j.rest.entity.RestChannel;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
 
@@ -34,6 +35,9 @@ class BaseChannel implements Channel {
     /** The gateway associated to this object. */
     private final GatewayDiscordClient gateway;
 
+    /** A handle to execute REST API operations for this entity. */
+    private final RestChannel rest;
+
     /**
      * Constructs a {@code BaseChannel} with an associated ServiceMediator and Discord data.
      *
@@ -43,6 +47,7 @@ class BaseChannel implements Channel {
     BaseChannel(final GatewayDiscordClient gateway, final ChannelBean data) {
         this.gateway = Objects.requireNonNull(gateway);
         this.data = Objects.requireNonNull(data);
+        this.rest = new RestChannel(gateway.getRestClient(), data.getId());
     }
 
     @Override
@@ -56,15 +61,18 @@ class BaseChannel implements Channel {
     }
 
     @Override
+    public RestChannel getRestChannel() {
+        return rest;
+    }
+
+    @Override
     public final Type getType() {
         return Type.of(data.getType());
     }
 
     @Override
     public final Mono<Void> delete(@Nullable final String reason) {
-        return gateway.getRestClient().getChannelService()
-                .deleteChannel(getId().asLong(), reason)
-                .then();
+        return rest.delete(reason);
     }
 
     /**

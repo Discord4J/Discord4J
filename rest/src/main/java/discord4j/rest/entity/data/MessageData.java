@@ -26,26 +26,30 @@ import java.util.Arrays;
 
 public class MessageData {
 
-    private long id;
-    private long channelId;
+    private final long id;
+    private final long channelId;
     @Nullable
-    private UserData author;
-    private String content;
-    private String timestamp;
+    private final UserData author;
+    private final String content;
+    private final String timestamp;
     @Nullable
-    private String editedTimestamp;
-    private boolean tts;
-    private boolean mentionEveryone;
-    private long[] mentions;
-    private long[] mentionRoles;
-    private AttachmentData[] attachments;
-    private EmbedData[] embeds;
+    private final String editedTimestamp;
+    private final boolean tts;
+    private final boolean mentionEveryone;
+    private final long[] mentions;
+    private final long[] mentionRoles;
+    private final AttachmentData[] attachments;
+    private final EmbedData[] embeds;
     @Nullable
-    private ReactionData[] reactions;
-    private boolean pinned;
+    private final ReactionData[] reactions;
+    private final boolean pinned;
     @Nullable
-    private Long webhookId;
-    private int type;
+    private final Long webhookId;
+    @Nullable
+    private final MessageReferenceData messageReference;
+    @Nullable
+    private final Integer flags;
+    private final int type;
 
     public MessageData(MessageResponse response) {
         id = response.getId();
@@ -78,6 +82,9 @@ public class MessageData {
 
         pinned = response.isPinned();
         webhookId = response.getWebhookId();
+        messageReference = (response.getMessageReference() != null) ?
+                new MessageReferenceData(response.getMessageReference()) : null;
+        flags = response.getFlags();
         type = response.getType();
     }
 
@@ -85,16 +92,8 @@ public class MessageData {
         return id;
     }
 
-    public void setId(long id) {
-        this.id = id;
-    }
-
     public long getChannelId() {
         return channelId;
-    }
-
-    public void setChannelId(long channelId) {
-        this.channelId = channelId;
     }
 
     @Nullable
@@ -102,24 +101,12 @@ public class MessageData {
         return author;
     }
 
-    public void setAuthor(@Nullable UserData author) {
-        this.author = author;
-    }
-
     public String getContent() {
         return content;
     }
 
-    public void setContent(String content) {
-        this.content = content;
-    }
-
     public String getTimestamp() {
         return timestamp;
-    }
-
-    public void setTimestamp(String timestamp) {
-        this.timestamp = timestamp;
     }
 
     @Nullable
@@ -127,56 +114,28 @@ public class MessageData {
         return editedTimestamp;
     }
 
-    public void setEditedTimestamp(@Nullable String editedTimestamp) {
-        this.editedTimestamp = editedTimestamp;
-    }
-
     public boolean isTts() {
         return tts;
-    }
-
-    public void setTts(boolean tts) {
-        this.tts = tts;
     }
 
     public boolean isMentionEveryone() {
         return mentionEveryone;
     }
 
-    public void setMentionEveryone(boolean mentionEveryone) {
-        this.mentionEveryone = mentionEveryone;
-    }
-
     public long[] getMentions() {
         return mentions;
-    }
-
-    public void setMentions(long[] mentions) {
-        this.mentions = mentions;
     }
 
     public long[] getMentionRoles() {
         return mentionRoles;
     }
 
-    public void setMentionRoles(long[] mentionRoles) {
-        this.mentionRoles = mentionRoles;
-    }
-
     public AttachmentData[] getAttachments() {
         return attachments;
     }
 
-    public void setAttachments(AttachmentData[] attachments) {
-        this.attachments = attachments;
-    }
-
     public EmbedData[] getEmbeds() {
         return embeds;
-    }
-
-    public void setEmbeds(EmbedData[] embeds) {
-        this.embeds = embeds;
     }
 
     @Nullable
@@ -184,16 +143,8 @@ public class MessageData {
         return reactions;
     }
 
-    public void setReactions(@Nullable ReactionData[] reactions) {
-        this.reactions = reactions;
-    }
-
     public boolean isPinned() {
         return pinned;
-    }
-
-    public void setPinned(boolean pinned) {
-        this.pinned = pinned;
     }
 
     @Nullable
@@ -201,16 +152,18 @@ public class MessageData {
         return webhookId;
     }
 
-    public void setWebhookId(@Nullable Long webhookId) {
-        this.webhookId = webhookId;
+    @Nullable
+    public MessageReferenceData getMessageReference() {
+        return messageReference;
+    }
+
+    @Nullable
+    public Integer getFlags() {
+        return flags;
     }
 
     public int getType() {
         return type;
-    }
-
-    public void setType(int type) {
-        this.type = type;
     }
 
     @Override
@@ -231,6 +184,8 @@ public class MessageData {
                 ", reactions=" + Arrays.toString(reactions) +
                 ", pinned=" + pinned +
                 ", webhookId=" + webhookId +
+                ", messageReference=" + messageReference +
+                ", flags=" + flags +
                 ", type=" + type +
                 '}';
     }

@@ -86,5 +86,5 @@ public interface EventDispatcher {
     /**
      * Signal that this event dispatcher must complete.
      */
-    void complete();
+    void shutdown();
 }

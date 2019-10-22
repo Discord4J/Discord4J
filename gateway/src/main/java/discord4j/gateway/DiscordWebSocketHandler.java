@@ -17,7 +17,7 @@
 package discord4j.gateway;
 
 import discord4j.common.close.CloseStatus;
-import discord4j.common.close.CloseStrategy;
+import discord4j.gateway.retry.DisconnectBehavior;
 import discord4j.gateway.retry.PartialDisconnectException;
 import io.netty.buffer.ByteBuf;
 import io.netty.handler.codec.http.websocketx.CloseWebSocketFrame;
@@ -52,7 +52,7 @@ public class DiscordWebSocketHandler {
 
     private final FluxSink<ByteBuf> inbound;
     private final Flux<ByteBuf> outbound;
-    private final MonoProcessor<CloseStrategy> sessionClose;
+    private final MonoProcessor<DisconnectBehavior> sessionClose;
     private final ZlibDecompressor decompressor = new ZlibDecompressor();
     private final Context context;
 
@@ -70,14 +70,14 @@ public class DiscordWebSocketHandler {
         this.context = context;
     }
 
-    public Mono<Tuple2<CloseStrategy, CloseStatus>> handle(WebsocketInbound in, WebsocketOutbound out) {
+    public Mono<Tuple2<DisconnectBehavior, CloseStatus>> handle(WebsocketInbound in, WebsocketOutbound out) {
         Mono<CloseWebSocketFrame> outboundClose = sessionClose
-                .doOnNext(strategy -> log.info(format(context, "Closing gateway session: {}"), strategy))
-                .flatMap(strategy -> {
-                    switch (strategy.getAction()) {
+                .doOnNext(behavior -> log.info(format(context, "Closing gateway session: {}"), behavior))
+                .flatMap(behavior -> {
+                    switch (behavior.getAction()) {
                         case RETRY_ABRUPTLY:
                         case STOP_ABRUPTLY:
-                            return Mono.error(strategy.getCause() != null ? strategy.getCause() :
+                            return Mono.error(behavior.getCause() != null ? behavior.getCause() :
                                     new PartialDisconnectException());
                         case RETRY:
                         case STOP:
@@ -101,11 +101,11 @@ public class DiscordWebSocketHandler {
                 .then();
 
         // zip both sequences to join terminal signals
-        // errors will be converted into a retrying strategy
-        // produce both the resulting strategy and the inbound close status (or a default one if missing)
+        // errors will be converted into a retrying behavior
+        // produce both the resulting behavior and the inbound close status (or a default one if missing)
         return Mono.zip(outboundEvents, inboundEvents)
                 .doOnError(this::error)
-                .then(Mono.zip(sessionClose, inboundClose.defaultIfEmpty(CloseStatus.ABNORMAL_CLOSE)));
+                .then(Mono.zip(sessionClose, inboundClose));
     }
 
     /**
@@ -113,16 +113,16 @@ public class DiscordWebSocketHandler {
      * should take place afterwards.
      */
     public void close() {
-        close(CloseStrategy.retry(null));
+        close(DisconnectBehavior.retry(null));
     }
 
     /**
-     * Initiates a close sequence that will terminate this session and then execute a given {@link CloseStrategy}.
+     * Initiates a close sequence that will terminate this session and then execute a given {@link DisconnectBehavior}.
      *
-     * @param strategy the {@link CloseStrategy} to follow after the close sequence starts
+     * @param behavior the {@link DisconnectBehavior} to follow after the close sequence starts
      */
-    public void close(CloseStrategy strategy) {
-        sessionClose.onNext(strategy);
+    public void close(DisconnectBehavior behavior) {
+        sessionClose.onNext(behavior);
     }
 
     /**
@@ -132,7 +132,7 @@ public class DiscordWebSocketHandler {
      * @param error the cause for this session termination
      */
     public void error(Throwable error) {
-        close(CloseStrategy.retryAbruptly(error));
+        close(DisconnectBehavior.retryAbruptly(error));
     }
 
     private static final Logger log = Loggers.getLogger("discord4j.gateway.session");

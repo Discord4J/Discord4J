@@ -67,7 +67,7 @@ public class CustomOptionsBot {
         CustomOptions custom = CustomOptions.builder().build();
         DiscordClient.create(System.getenv("token"))
                 .gateway()
-                .extraOptions(options -> {
+                .setExtraOptions(options -> {
                     CustomOptions.Builder builder = custom.mutate();
 
                     return (CustomOptions) builder.setIdentifyLimiter(options.getIdentifyLimiter())
@@ -81,6 +81,7 @@ public class CustomOptionsBot {
                             .build();
                 })
                 .setGatewayClientFactory(CustomGatewayClient::new)
-                .connectNow();
+                .connect()
+                .block();
     }
 }

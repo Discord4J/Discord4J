@@ -69,6 +69,28 @@ import java.util.stream.Collectors;
 
 import static discord4j.common.LogUtil.format;
 
+/**
+ * A builder to create a {@link GatewayDiscordClient}. The place where resources and many configurations are set before
+ * connecting to Discord Gateway. Defaults are set to enable built-in sharding using the recommended amount of shards.
+ * Refer to each setter for more details about the default values for each configuration.
+ * <p>
+ * Discord Gateway connections are not established until one of the following methods is subscribed to:
+ * <ul>
+ *     <li>{@link #connect()} to obtain a {@link Mono} for a {@link GatewayDiscordClient} that can be externally
+ *     operated upon.</li>
+ *     <li>{@link #connect(Function)} to customize the {@link GatewayClient} instances to build.</li>
+ *     <li>{@link #withConnection(Function)} to work with the {@link GatewayDiscordClient} in a scoped way, providing
+ *     a mapping function that will close and release all resources on completion.</li>
+ *     <li>{@link #withConnectionUntilDisconnect(Function)} to work in a scoped way (just as above), with the
+ *     difference that the mapper function will also defer completion until all Gateway connections have ended.</li>
+ * </ul>
+ * For all cases, the produced {@link Mono} result or mapper function call will happen after all joining shards have
+ * established a connection. You can configure which shards are joining by specifying a
+ * {@link #setShardFilter(Predicate)}
+ * </p>
+ *
+ * @param <O> the configuration flavor supplied to the {@link GatewayClient} instances to be built.
+ */
 public class GatewayBootstrap<O extends GatewayOptions> {
 
     private static final Logger log = Loggers.getLogger(GatewayBootstrap.class);
@@ -86,8 +108,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
     private Function<O, GatewayClient> clientFactory = DefaultGatewayClient::new;
     private Function<ShardInfo, Presence> initialPresence = shard -> null;
     private Function<ShardInfo, SessionInfo> resumeOptions = shard -> null;
-    private boolean completeEventDispatcherOnDisconnect = true;
-    private boolean disposeStoreServiceOnDisconnect = true;
+    private Function<GatewayDiscordClient, Mono<Void>> destroyHandler = defaultDestroyHandler();
 
     private ReactorResources gatewayReactorResources = null;
     private ReactorResources voiceReactorResources = null;
@@ -96,6 +117,13 @@ public class GatewayBootstrap<O extends GatewayOptions> {
     private ReconnectOptions reconnectOptions = ReconnectOptions.builder().build();
     private GatewayObserver gatewayObserver = GatewayObserver.NOOP_LISTENER;
 
+    /**
+     * Create a default {@link GatewayBootstrap} based off the given {@link DiscordClient} that provides an instance
+     * of {@link CoreResources} used to provide defaults while building a {@link GatewayDiscordClient}.
+     *
+     * @param client the {@link DiscordClient} used to setup configuration
+     * @return a default builder to create {@link GatewayDiscordClient}
+     */
     public static GatewayBootstrap<GatewayOptions> create(DiscordClient client) {
         return new GatewayBootstrap<>(client, Function.identity());
     }
@@ -106,31 +134,82 @@ public class GatewayBootstrap<O extends GatewayOptions> {
     }
 
     GatewayBootstrap(GatewayBootstrap<?> source, Function<GatewayOptions, O> optionsModifier) {
-        this.client = source.client;
         this.optionsModifier = optionsModifier;
+
+        this.client = source.client;
+        this.shardCount = source.shardCount;
+        this.shardFilter = source.shardFilter;
+        this.shardCoordinator = source.shardCoordinator;
+        this.eventDispatcher = source.eventDispatcher;
+        this.storeService = source.storeService;
+        this.initialPresence = source.initialPresence;
+        this.resumeOptions = source.resumeOptions;
+        this.destroyHandler = source.destroyHandler;
+        this.gatewayReactorResources = source.gatewayReactorResources;
+        this.voiceReactorResources = source.voiceReactorResources;
+        this.payloadReader = source.payloadReader;
+        this.payloadWriter = source.payloadWriter;
+        this.reconnectOptions = source.reconnectOptions;
+        this.gatewayObserver = source.gatewayObserver;
     }
 
-    public <O2 extends GatewayOptions> GatewayBootstrap<O2> extraOptions(Function<? super O, O2> optionsModifier) {
+    /**
+     * Add a configuration for {@link GatewayClient} implementation-specific cases, changing the type of the current
+     * {@link GatewayOptions} object passed to the {@link GatewayClient} factory in connect methods.
+     *
+     * @param optionsModifier {@link Function} to transform the {@link GatewayOptions} type to provide custom
+     * {@link GatewayClient} implementations a proper configuration object.
+     * @param <O2> new type for the options
+     * @return a new {@link GatewayBootstrap} that will now work with the new options type.
+     */
+    public <O2 extends GatewayOptions> GatewayBootstrap<O2> setExtraOptions(Function<? super O, O2> optionsModifier) {
         return new GatewayBootstrap<>(this, this.optionsModifier.andThen(optionsModifier));
     }
 
+    /**
+     * Define the shard count value used when identifying to the Gateway. Note that this number is unrelated to the
+     * actual number of shards joining while connecting. To further configure the actual shards to join refer to
+     * {@link #setShardFilter(Predicate)}.
+     * <p>
+     * The default is to use the recommended shard count given by Discord.
+     * </p>
+     *
+     * @param shardCount the shard count property to use when connecting to Gateway
+     * @return this builder
+     */
     public GatewayBootstrap<O> setShardCount(int shardCount) {
         this.shardCount = shardCount;
         return this;
     }
 
+    /**
+     * Set a {@link Predicate} to determine whether a shard should join the produced {@link GatewayDiscordClient}.
+     * Defaults to connecting to all shards given by shard count.
+     *
+     * @param shardFilter a {@link Predicate} for {@link ShardInfo} objects. Called for each shard determined by
+     * {@link #setShardCount(int)} and schedules it for connection if returning {@code true}.
+     * @return this builder
+     */
     public GatewayBootstrap<O> setShardFilter(Predicate<ShardInfo> shardFilter) {
         this.shardFilter = Objects.requireNonNull(shardFilter);
         return this;
     }
 
+    /**
+     * Set a custom {@link ShardCoordinator} to manage multiple {@link GatewayDiscordClient} instances, even across
+     * boundaries. Defaults to using {@link LocalShardCoordinator}.
+     *
+     * @param shardCoordinator an externally managed {@link ShardCoordinator} to coordinate multiple
+     * {@link GatewayDiscordClient} instances.
+     * @return this builder
+     */
     public GatewayBootstrap<O> setShardCoordinator(ShardCoordinator shardCoordinator) {
         this.shardCoordinator = Objects.requireNonNull(shardCoordinator);
         return this;
     }
 
     public GatewayBootstrap<O> setEventDispatcher(@Nullable EventDispatcher eventDispatcher) {
-        this.eventDispatcher = null;
+        this.eventDispatcher = eventDispatcher;
         return this;
     }
 
@@ -139,37 +218,42 @@ public class GatewayBootstrap<O extends GatewayOptions> {
         return this;
     }
 
+    public GatewayBootstrap<O> setDestroyHandler(Function<GatewayDiscordClient, Mono<Void>> destroyHandler) {
+        this.destroyHandler = Objects.requireNonNull(destroyHandler, "destroyHandler");
+        return this;
+    }
+
     public GatewayBootstrap<O> setGatewayClientFactory(Function<O, GatewayClient> clientFactory) {
-        this.clientFactory = Objects.requireNonNull(clientFactory);
+        this.clientFactory = Objects.requireNonNull(clientFactory, "clientFactory");
         return this;
     }
 
     public GatewayBootstrap<O> setInitialPresence(Function<ShardInfo, Presence> initialPresence) {
-        this.initialPresence = initialPresence;
+        this.initialPresence = Objects.requireNonNull(initialPresence, "initialPresence");
         return this;
     }
 
     public GatewayBootstrap<O> setResumeOptions(Function<ShardInfo, SessionInfo> resumeOptions) {
-        this.resumeOptions = resumeOptions;
+        this.resumeOptions = Objects.requireNonNull(resumeOptions, "resumeOptions");
         return this;
     }
 
-    public GatewayBootstrap<O> setGatewayReactorResources(ReactorResources gatewayReactorResources) {
+    public GatewayBootstrap<O> setGatewayReactorResources(@Nullable ReactorResources gatewayReactorResources) {
         this.gatewayReactorResources = gatewayReactorResources;
         return this;
     }
 
-    public GatewayBootstrap<O> setVoiceReactorResources(ReactorResources voiceReactorResources) {
+    public GatewayBootstrap<O> setVoiceReactorResources(@Nullable ReactorResources voiceReactorResources) {
         this.voiceReactorResources = voiceReactorResources;
         return this;
     }
 
-    public GatewayBootstrap<O> setPayloadReader(PayloadReader payloadReader) {
+    public GatewayBootstrap<O> setPayloadReader(@Nullable PayloadReader payloadReader) {
         this.payloadReader = payloadReader;
         return this;
     }
 
-    public GatewayBootstrap<O> setPayloadWriter(PayloadWriter payloadWriter) {
+    public GatewayBootstrap<O> setPayloadWriter(@Nullable PayloadWriter payloadWriter) {
         this.payloadWriter = payloadWriter;
         return this;
     }
@@ -198,10 +282,6 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                 .filter(GatewayClient::isConnected)
                 .map(gc -> gc.close(false))
                 .collect(Collectors.toList()));
-    }
-
-    public GatewayDiscordClient connectNow() {
-        return connect().block();
     }
 
     public Mono<GatewayDiscordClient> connect() {
@@ -315,14 +395,8 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                                                     if (gatewayClients.isEmpty()) {
                                                         log.debug(format(ctx, "All shards disconnected"));
                                                         closeProcessor.onComplete();
-                                                        if (completeEventDispatcherOnDisconnect) {
-                                                            eventDispatcher.complete();
-                                                        }
-                                                        if (disposeStoreServiceOnDisconnect) {
-                                                            return storeService.dispose();
-                                                        }
                                                     }
-                                                    return Mono.empty();
+                                                    return destroyHandler.apply(gateway);
                                                 }));
                                     case RETRY_STARTED:
                                     case RETRY_FAILED:
@@ -440,5 +514,12 @@ public class GatewayBootstrap<O extends GatewayOptions> {
         parameters.put("encoding", "json");
         parameters.put("v", 6);
         return parameters;
+    }
+
+    static Function<GatewayDiscordClient, Mono<Void>> defaultDestroyHandler() {
+        return gateway -> {
+            gateway.getEventDispatcher().shutdown();
+            return gateway.getGatewayResources().getStateView().getStoreService().dispose();
+        };
     }
 }

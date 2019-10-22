@@ -106,7 +106,7 @@ public class ReplayEventDispatcher implements EventDispatcher {
     }
 
     @Override
-    public void complete() {
+    public void shutdown() {
         sink.complete();
     }
 }

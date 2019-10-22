@@ -71,8 +71,7 @@ class BaseMessageChannel extends BaseChannel implements MessageChannel {
         final MessageCreateSpec mutatedSpec = new MessageCreateSpec();
         spec.accept(mutatedSpec);
 
-        return getClient().getRestClient().getChannelService()
-                .createMessage(getId().asLong(), mutatedSpec.asRequest())
+        return getRestChannel().createMessage(mutatedSpec.asRequest())
                 .map(MessageBean::new)
                 .map(bean -> new Message(getClient(), bean));
     }

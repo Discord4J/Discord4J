@@ -18,6 +18,7 @@ package discord4j.core.object.entity.channel;
 
 import discord4j.core.object.entity.Entity;
 import discord4j.core.util.EntityUtil;
+import discord4j.rest.entity.RestChannel;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
 
@@ -63,6 +64,11 @@ public interface Channel extends Entity {
         return "<#" + getId().asString() + '>';
     }
 
+    /**
+     * Return a {@link RestChannel} handle to execute REST API operations on this entity.
+     */
+    RestChannel getRestChannel();
+
     /** Represents the various types of channels. */
     enum Type {
 
@@ -84,7 +90,7 @@ public interface Channel extends Entity {
         /** Represents a {@link NewsChannel}. */
         GUILD_NEWS(5),
 
-        /** Represents a {@link StoreChannel}.*/
+        /** Represents a {@link StoreChannel}. */
         GUILD_STORE(6);
 
         /** The underlying value as represented by Discord. */

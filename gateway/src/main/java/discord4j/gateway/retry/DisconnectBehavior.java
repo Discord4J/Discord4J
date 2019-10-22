@@ -15,59 +15,59 @@
  * along with Discord4J. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package discord4j.common.close;
+package discord4j.gateway.retry;
 
 import reactor.util.annotation.Nullable;
 
 /**
  * Encapsulates a strategy to deal with the closing and release of a resource.
  */
-public class CloseStrategy {
+public class DisconnectBehavior {
 
     private final Action action;
     private final Throwable cause;
 
     /**
-     * Create a {@link CloseStrategy} that instructs a client to retry in a graceful manner, with an optional cause.
+     * Create a {@link DisconnectBehavior} that instructs a client to retry in a graceful manner, with an optional cause.
      *
      * @param cause optionally, a {@link Throwable} that triggered this close intent
-     * @return a {@link CloseStrategy} that will gracefully attempt to retry
+     * @return a {@link DisconnectBehavior} that will gracefully attempt to retry
      */
-    public static CloseStrategy retry(@Nullable Throwable cause) {
-        return new CloseStrategy(Action.RETRY, cause);
+    public static DisconnectBehavior retry(@Nullable Throwable cause) {
+        return new DisconnectBehavior(Action.RETRY, cause);
     }
 
     /**
-     * Create a {@link CloseStrategy} that instructs a client to stop in a graceful manner, with an optional cause.
+     * Create a {@link DisconnectBehavior} that instructs a client to stop in a graceful manner, with an optional cause.
      *
      * @param cause optionally, a {@link Throwable} that triggered this close intent
-     * @return a {@link CloseStrategy} that will gracefully stop and release resources
+     * @return a {@link DisconnectBehavior} that will gracefully stop and release resources
      */
-    public static CloseStrategy stop(@Nullable Throwable cause) {
-        return new CloseStrategy(Action.STOP, cause);
+    public static DisconnectBehavior stop(@Nullable Throwable cause) {
+        return new DisconnectBehavior(Action.STOP, cause);
     }
 
     /**
-     * Create a {@link CloseStrategy} that instructs a client to retry abruptly, with an optional cause.
+     * Create a {@link DisconnectBehavior} that instructs a client to retry abruptly, with an optional cause.
      *
      * @param cause optionally, a {@link Throwable} that triggered this close intent
-     * @return a {@link CloseStrategy} that will abruptly close before attempting to retry
+     * @return a {@link DisconnectBehavior} that will abruptly close before attempting to retry
      */
-    public static CloseStrategy retryAbruptly(@Nullable Throwable cause) {
-        return new CloseStrategy(Action.RETRY_ABRUPTLY, cause);
+    public static DisconnectBehavior retryAbruptly(@Nullable Throwable cause) {
+        return new DisconnectBehavior(Action.RETRY_ABRUPTLY, cause);
     }
 
     /**
-     * Create a {@link CloseStrategy} that instructs a client to stop abruptly, with an optional cause.
+     * Create a {@link DisconnectBehavior} that instructs a client to stop abruptly, with an optional cause.
      *
      * @param cause optionally, a {@link Throwable} that triggered this close intent
-     * @return a {@link CloseStrategy} that will abruptly stop and release resources
+     * @return a {@link DisconnectBehavior} that will abruptly stop and release resources
      */
-    public static CloseStrategy stopAbruptly(@Nullable Throwable cause) {
-        return new CloseStrategy(Action.STOP_ABRUPTLY, cause);
+    public static DisconnectBehavior stopAbruptly(@Nullable Throwable cause) {
+        return new DisconnectBehavior(Action.STOP_ABRUPTLY, cause);
     }
 
-    private CloseStrategy(Action action, Throwable cause) {
+    private DisconnectBehavior(Action action, @Nullable Throwable cause) {
         this.action = action;
         this.cause = cause;
     }

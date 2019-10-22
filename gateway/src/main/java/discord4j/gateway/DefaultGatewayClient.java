@@ -22,7 +22,7 @@ import discord4j.common.ReactorResources;
 import discord4j.common.ResettableInterval;
 import discord4j.common.close.CloseException;
 import discord4j.common.close.CloseStatus;
-import discord4j.common.close.CloseStrategy;
+import discord4j.gateway.retry.DisconnectBehavior;
 import discord4j.gateway.json.GatewayPayload;
 import discord4j.gateway.json.Heartbeat;
 import discord4j.gateway.json.Opcode;
@@ -329,7 +329,7 @@ public class DefaultGatewayClient implements GatewayClient {
         return true;
     }
 
-    private Mono<CloseStatus> handleCloseStrategy(CloseStrategy strategy, CloseStatus closeStatus, Context context) {
+    private Mono<CloseStatus> handleCloseStrategy(DisconnectBehavior strategy, CloseStatus closeStatus, Context context) {
         log.info(format(context, "Closed session due to {}"), strategy);
         retryContext.clear();
         connected.set(false);
@@ -337,10 +337,10 @@ public class DefaultGatewayClient implements GatewayClient {
         lastAck.set(0);
         responseTime.set(0);
 
-        if (strategy.getAction() == CloseStrategy.Action.STOP_ABRUPTLY) {
+        if (strategy.getAction() == DisconnectBehavior.Action.STOP_ABRUPTLY) {
             dispatchSink.next(GatewayStateChange.disconnectedResume());
             notifyObserver(GatewayObserver.DISCONNECTED_RESUME, identifyOptions);
-        } else if (strategy.getAction() == CloseStrategy.Action.STOP) {
+        } else if (strategy.getAction() == DisconnectBehavior.Action.STOP) {
             dispatchSink.next(GatewayStateChange.disconnected());
             resumable.set(false);
             sequence.set(0);
@@ -379,9 +379,9 @@ public class DefaultGatewayClient implements GatewayClient {
                 return Mono.error(new IllegalStateException("Gateway client is not active!"));
             }
             if (allowResume) {
-                sessionHandler.close(CloseStrategy.stopAbruptly(new PartialDisconnectException()));
+                sessionHandler.close(DisconnectBehavior.stopAbruptly(new PartialDisconnectException()));
             } else {
-                sessionHandler.close(CloseStrategy.stop(null));
+                sessionHandler.close(DisconnectBehavior.stop(null));
             }
             return disconnectNotifier;
         });
