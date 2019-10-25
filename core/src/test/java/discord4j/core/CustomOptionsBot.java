@@ -80,8 +80,7 @@ public class CustomOptionsBot {
                             .setReactorResources(options.getReactorResources())
                             .build();
                 })
-                .setGatewayClientFactory(CustomGatewayClient::new)
-                .connect()
+                .connect(CustomGatewayClient::new)
                 .block();
     }
 }

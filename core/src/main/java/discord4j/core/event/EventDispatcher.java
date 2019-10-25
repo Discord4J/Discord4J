@@ -84,7 +84,7 @@ public interface EventDispatcher {
     void publish(Event event);
 
     /**
-     * Signal that this event dispatcher must complete.
+     * Signal that this event dispatcher must terminate and release its resources.
      */
     void shutdown();
 }

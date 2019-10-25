@@ -22,6 +22,9 @@ import discord4j.gateway.payload.PayloadReader;
 import discord4j.gateway.payload.PayloadWriter;
 import discord4j.gateway.retry.ReconnectOptions;
 
+/**
+ * A set of options targeting the configuration of {@link GatewayClient} implementations.
+ */
 public class GatewayOptions {
 
     private final String token;
@@ -44,8 +47,31 @@ public class GatewayOptions {
         this.identifyLimiter = builder.identifyLimiter;
     }
 
+    /**
+     * Create a {@link Builder} for {@link GatewayOptions}.
+     *
+     * @return a new builder
+     */
     public static Builder builder() {
         return new GatewayOptions.Builder();
+    }
+
+    /**
+     * Create a {@link Builder} using the options configured in this instance.
+     *
+     * @return a new builder using the current options
+     */
+    public Builder mutate() {
+        Builder builder = new Builder();
+        builder.setIdentifyLimiter(getIdentifyLimiter())
+                .setInitialObserver(getInitialObserver())
+                .setToken(getToken())
+                .setReconnectOptions(getReconnectOptions())
+                .setIdentifyOptions(getIdentifyOptions())
+                .setPayloadWriter(getPayloadWriter())
+                .setPayloadReader(getPayloadReader())
+                .setReactorResources(getReactorResources());
+        return builder;
     }
 
     public static class Builder {

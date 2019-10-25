@@ -23,6 +23,8 @@ import discord4j.core.event.EmitterEventDispatcher;
 import discord4j.core.event.EventDispatcher;
 import discord4j.core.event.dispatch.DispatchContext;
 import discord4j.core.event.dispatch.DispatchHandlers;
+import discord4j.core.event.domain.Event;
+import discord4j.core.event.domain.lifecycle.ReadyEvent;
 import discord4j.core.object.data.stored.MessageBean;
 import discord4j.core.object.presence.Presence;
 import discord4j.core.shard.LocalShardCoordinator;
@@ -42,11 +44,13 @@ import discord4j.gateway.retry.ReconnectOptions;
 import discord4j.rest.RestClient;
 import discord4j.rest.json.response.GatewayResponse;
 import discord4j.rest.util.RouteUtils;
+import discord4j.store.api.Store;
 import discord4j.store.api.service.StoreService;
 import discord4j.store.api.service.StoreServiceLoader;
 import discord4j.store.api.util.StoreContext;
 import discord4j.store.jdk.JdkStoreService;
 import discord4j.voice.VoiceClient;
+import io.netty.buffer.ByteBuf;
 import org.reactivestreams.Publisher;
 import reactor.core.Disposable;
 import reactor.core.Disposables;
@@ -77,7 +81,7 @@ import static discord4j.common.LogUtil.format;
  * Discord Gateway connections are not established until one of the following methods is subscribed to:
  * <ul>
  *     <li>{@link #connect()} to obtain a {@link Mono} for a {@link GatewayDiscordClient} that can be externally
- *     operated upon.</li>
+ *     managed.</li>
  *     <li>{@link #connect(Function)} to customize the {@link GatewayClient} instances to build.</li>
  *     <li>{@link #withConnection(Function)} to work with the {@link GatewayDiscordClient} in a scoped way, providing
  *     a mapping function that will close and release all resources on completion.</li>
@@ -105,10 +109,9 @@ public class GatewayBootstrap<O extends GatewayOptions> {
     private ShardCoordinator shardCoordinator = new LocalShardCoordinator();
     private EventDispatcher eventDispatcher = null;
     private StoreService storeService = null;
-    private Function<O, GatewayClient> clientFactory = DefaultGatewayClient::new;
     private Function<ShardInfo, Presence> initialPresence = shard -> null;
     private Function<ShardInfo, SessionInfo> resumeOptions = shard -> null;
-    private Function<GatewayDiscordClient, Mono<Void>> destroyHandler = defaultDestroyHandler();
+    private Function<GatewayDiscordClient, Mono<Void>> destroyHandler = gatewayDestroyHandler();
 
     private ReactorResources gatewayReactorResources = null;
     private ReactorResources voiceReactorResources = null;
@@ -208,70 +211,172 @@ public class GatewayBootstrap<O extends GatewayOptions> {
         return this;
     }
 
+    /**
+     * Set a custom {@link EventDispatcher} to receive {@link Event Events} from all joining shards and publish them to
+     * all subscribers. Defaults to using {@link EmitterEventDispatcher#buffering()} that will buffer all events
+     * until all joining shards have connected.
+     *
+     * @param eventDispatcher an externally managed {@link EventDispatcher} to publish events
+     * @return this builder
+     */
     public GatewayBootstrap<O> setEventDispatcher(@Nullable EventDispatcher eventDispatcher) {
         this.eventDispatcher = eventDispatcher;
         return this;
     }
 
+    /**
+     * Set a custom {@link StoreService}, an abstract factory to create {@link Store} instances, to cache Gateway
+     * updates. Defaults to using {@link JdkStoreService} unless another factory of higher priority is discovered.
+     *
+     * @param storeService an externally managed {@link StoreService} to receive Gateway updates
+     * @return this builder
+     */
     public GatewayBootstrap<O> setStoreService(@Nullable StoreService storeService) {
         this.storeService = storeService;
         return this;
     }
 
+    /**
+     * Set a custom {@link Function handler} that generate a destroy sequence to be run once all joining shards have
+     * disconnected, after all internal resources have been released. The destroy procedure is applied asynchronously
+     * and errors are logged and swallowed. Defaults to {@link GatewayBootstrap#gatewayDestroyHandler()} that will
+     * release the set {@link EventDispatcher} and {@link StoreService}.
+     *
+     * @param destroyHandler the {@link Function} supplying a {@link Mono} to reset state
+     * @return this builder
+     */
     public GatewayBootstrap<O> setDestroyHandler(Function<GatewayDiscordClient, Mono<Void>> destroyHandler) {
         this.destroyHandler = Objects.requireNonNull(destroyHandler, "destroyHandler");
         return this;
     }
 
-    public GatewayBootstrap<O> setGatewayClientFactory(Function<O, GatewayClient> clientFactory) {
-        this.clientFactory = Objects.requireNonNull(clientFactory, "clientFactory");
-        return this;
-    }
-
+    /**
+     * Set a {@link Function} to determine the {@link Presence} that each joining shard should use when identifying
+     * to the Gateway. Defaults to no presence given.
+     *
+     * @param initialPresence a {@link Function} that supplies {@link Presence} instances from a given {@link ShardInfo}
+     * @return this builder
+     */
     public GatewayBootstrap<O> setInitialPresence(Function<ShardInfo, Presence> initialPresence) {
         this.initialPresence = Objects.requireNonNull(initialPresence, "initialPresence");
         return this;
     }
 
+    /**
+     * Set a {@link Function} to determine the details to resume a session that each joining shard should use when
+     * identifying for the first time to the Gateway. Defaults to returning {@code null} to begin a fresh session on
+     * startup.
+     *
+     * @param resumeOptions a {@link Function} that supplies {@link SessionInfo} instances from a given
+     * {@link ShardInfo}
+     * @return this builder
+     */
     public GatewayBootstrap<O> setResumeOptions(Function<ShardInfo, SessionInfo> resumeOptions) {
         this.resumeOptions = Objects.requireNonNull(resumeOptions, "resumeOptions");
         return this;
     }
 
+    /**
+     * Customize the {@link ReactorResources} used exclusively for Gateway-related operations, such as maintaining
+     * the websocket connections and scheduling Gateway tasks. Defaults to using the parent {@link ReactorResources}
+     * inherited from {@link DiscordClient}, which is equivalent to supplying {@code null} as argument.
+     *
+     * @param gatewayReactorResources a {@link ReactorResources} object for Gateway operations
+     * @return this builder
+     */
     public GatewayBootstrap<O> setGatewayReactorResources(@Nullable ReactorResources gatewayReactorResources) {
         this.gatewayReactorResources = gatewayReactorResources;
         return this;
     }
 
-    public GatewayBootstrap<O> setVoiceReactorResources(@Nullable ReactorResources voiceReactorResources) {
-        this.voiceReactorResources = voiceReactorResources;
-        return this;
-    }
-
+    /**
+     * Customize how inbound Gateway payloads are decoded from {@link ByteBuf}.
+     *
+     * @param payloadReader a Gateway payload decoder
+     * @return this builder
+     */
     public GatewayBootstrap<O> setPayloadReader(@Nullable PayloadReader payloadReader) {
         this.payloadReader = payloadReader;
         return this;
     }
 
+    /**
+     * Customize how outbound Gateway payloads are encoded into {@link ByteBuf}.
+     *
+     * @param payloadWriter a Gateway payload encoder
+     * @return this builder
+     */
     public GatewayBootstrap<O> setPayloadWriter(@Nullable PayloadWriter payloadWriter) {
         this.payloadWriter = payloadWriter;
         return this;
     }
 
+    /**
+     * Set a custom {@link ReconnectOptions} to configure how Gateway connections will attempt to reconnect every
+     * time a websocket session is closed.
+     *
+     * @param reconnectOptions a {@link ReconnectOptions} policy to use in Gateway connections
+     * @return this builder
+     */
     public GatewayBootstrap<O> setReconnectOptions(ReconnectOptions reconnectOptions) {
         this.reconnectOptions = Objects.requireNonNull(reconnectOptions);
         return this;
     }
 
+    /**
+     * Set a custom {@link GatewayObserver} to be notified of Gateway lifecycle events across all joining shards.
+     *
+     * @param gatewayObserver a {@link GatewayObserver} to install on all joining shards
+     * @return this builder
+     */
     public GatewayBootstrap<O> setGatewayObserver(GatewayObserver gatewayObserver) {
         this.gatewayObserver = Objects.requireNonNull(gatewayObserver);
         return this;
     }
 
+    /**
+     * Customize the {@link ReactorResources} used exclusively for voice-related operations, such as maintaining
+     * the Voice Gateway websocket connections, Voice UDP socket connections and scheduling Gateway tasks. Defaults
+     * to using the parent {@link ReactorResources} inherited from {@link DiscordClient}, which is equivalent to
+     * supplying {@code null} as argument.
+     *
+     * @param voiceReactorResources a {@link ReactorResources} object for voice operations
+     * @return this builder
+     */
+    public GatewayBootstrap<O> setVoiceReactorResources(@Nullable ReactorResources voiceReactorResources) {
+        this.voiceReactorResources = voiceReactorResources;
+        return this;
+    }
+
+    /**
+     * Connect to the Discord Gateway upon subscription to acquire a {@link GatewayDiscordClient} instance and use it
+     * in a declarative manner, releasing the object once the derived usage {@link Function} terminates or is
+     * cancelled and also the {@link GatewayDiscordClient} has disconnected from the Gateway.
+     * <p>
+     * Calling this method is useful when you operate on the {@link GatewayDiscordClient} object using reactive API you
+     * can compose within the scope of the given {@link Function}.
+     *
+     * @param whileConnectedFunction the {@link Function} to apply the <strong>connected</strong>
+     * {@link GatewayDiscordClient} and trigger a processing pipeline from it.
+     * @return the {@link Mono} result of processing the given {@link Function} after all resources have released
+     */
     public Mono<Void> withConnectionUntilDisconnect(Function<GatewayDiscordClient, Mono<Void>> whileConnectedFunction) {
         return withConnection(gateway -> whileConnectedFunction.apply(gateway).then(gateway.onDisconnect()));
     }
 
+    /**
+     * Connect to the Discord Gateway upon subscription to acquire a {@link GatewayDiscordClient} instance and use it
+     * in a declarative manner, releasing the object once the derived usage {@link Function} terminates or is cancelled.
+     * <p>
+     * Calling this method is useful when you operate on the {@link GatewayDiscordClient} object using reactive API you
+     * can compose within the scope of the given {@link Function}. Using {@link GatewayDiscordClient#onDisconnect()}
+     * within the scope will await for disconnection before releasing resources.
+     *
+     * @param whileConnectedFunction the {@link Function} to apply the <strong>connected</strong>
+     * {@link GatewayDiscordClient} and trigger a processing pipeline from it.
+     * @param <T> type of the given {@link Function} output
+     * @return the {@link Mono} result of processing the given {@link Function} after all resources have released
+     */
     public <T> Mono<T> withConnection(Function<GatewayDiscordClient, Mono<T>> whileConnectedFunction) {
         return Mono.usingWhen(connect(), whileConnectedFunction, closeConnections());
     }
@@ -284,10 +389,33 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                 .collect(Collectors.toList()));
     }
 
+    /**
+     * Connect to the Discord Gateway upon subscription to build a {@link GatewayClient} from the set of options
+     * configured by this builder. The resulting {@link GatewayDiscordClient} can be externally managed, leaving you
+     * in charge of properly releasing its resources by calling {@link GatewayDiscordClient#logout()}.
+     * <p>
+     * All joining shards, determined by a combination of {@link #setShardCount(int)} and
+     * {@link #setShardFilter(Predicate)}, will attempt to serially connect to Discord Gateway, coordinated by the
+     * current {@link ShardCoordinator}. If one of the shards fail to connect due to a retryable problem like invalid
+     * session it will retry before continuing to the next one.
+     *
+     * @return a {@link Mono} that upon subscription and after all joining shards properly connect, given by the
+     * reception of each shard's {@link ReadyEvent} payload, emits a {@link GatewayDiscordClient}. If an error occurs
+     * during the setup sequence, it will be emitted through the {@link Mono}.
+     */
     public Mono<GatewayDiscordClient> connect() {
-        return connect(clientFactory == null ? DefaultGatewayClient::new : clientFactory);
+        return connect(DefaultGatewayClient::new);
     }
 
+    /**
+     * Connect to the Discord Gateway upon subscription using a custom {@link Function factory} to build a
+     * {@link GatewayClient} from the set of options configured by this builder. See {@link #connect()} for more details
+     * about how the returned {@link Mono} operates.
+     *
+     * @return a {@link Mono} that upon subscription and after all joining shards properly connect, given by the
+     * reception of each shard's {@link ReadyEvent} payload, emits a {@link GatewayDiscordClient}. If an error occurs
+     * during the setup sequence, it will be emitted through the {@link Mono}.
+     */
     public Mono<GatewayDiscordClient> connect(Function<O, GatewayClient> clientFactory) {
         StateHolder stateHolder = new StateHolder(initStoreService(), new StoreContext(0, MessageBean.class));
         StateView stateView = new StateView(stateHolder);
@@ -394,10 +522,15 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                                                 .then(Mono.defer(() -> {
                                                     if (gatewayClients.isEmpty()) {
                                                         log.debug(format(ctx, "All shards disconnected"));
-                                                        closeProcessor.onComplete();
+                                                        return destroyHandler.apply(gateway)
+                                                                .doOnTerminate(closeProcessor::onComplete);
                                                     }
-                                                    return destroyHandler.apply(gateway);
-                                                }));
+                                                    return Mono.empty();
+                                                }))
+                                                .onErrorResume(t -> {
+                                                    log.warn(format(ctx, "Error while releasing resources"), t);
+                                                    return Mono.empty();
+                                                });
                                     case RETRY_STARTED:
                                     case RETRY_FAILED:
                                         log.debug(format(ctx, "Invalidating stores for shard"));
@@ -516,7 +649,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
         return parameters;
     }
 
-    static Function<GatewayDiscordClient, Mono<Void>> defaultDestroyHandler() {
+    public static Function<GatewayDiscordClient, Mono<Void>> gatewayDestroyHandler() {
         return gateway -> {
             gateway.getEventDispatcher().shutdown();
             return gateway.getGatewayResources().getStateView().getStoreService().dispose();

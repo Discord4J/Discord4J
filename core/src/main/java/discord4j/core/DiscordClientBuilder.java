@@ -170,7 +170,7 @@ public final class DiscordClientBuilder {
     /**
      * Create a client ready to connect to Discord.
      *
-     * @return a {@link DiscordClient} based on this bJHuilder parameters
+     * @return a {@link DiscordClient} based on this builder parameters
      */
     public DiscordClient build() {
         if (debugMode) {

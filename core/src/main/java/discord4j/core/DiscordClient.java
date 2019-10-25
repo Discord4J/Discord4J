@@ -29,6 +29,7 @@ import discord4j.gateway.GatewayOptions;
 import discord4j.rest.entity.*;
 import discord4j.rest.entity.data.*;
 import discord4j.rest.json.response.UserGuildResponse;
+import discord4j.store.api.service.StoreService;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -53,10 +54,23 @@ public final class DiscordClient {
         this.coreResources = coreResources;
     }
 
+    /**
+     * Create a {@link DiscordClient} with default options, using the given token for authentication.
+     *
+     * @param token the bot token used for authentication
+     * @return a {@link DiscordClient} configured with the default options
+     */
     public static DiscordClient create(String token) {
         return new DiscordClientBuilder(token).build();
     }
 
+    /**
+     * Obtain a {@link DiscordClientBuilder} able to create {@link DiscordClient} instances, using the given token
+     * for authentication.
+     *
+     * @param token the bot token used for authentication
+     * @return a {@link DiscordClientBuilder}
+     */
     public static DiscordClientBuilder builder(String token) {
         return new DiscordClientBuilder(token);
     }
@@ -258,9 +272,9 @@ public final class DiscordClient {
     }
 
     /**
-     * Login the client to the gateway, using the recommended amount of shards, locally coordinated. The resulting
+     * Login the client to the gateway, using the recommended amount of shards, locally coordinated. The derived
      * {@link GatewayDiscordClient} is capable of managing these shards and providing a single
-     * {@link EventDispatcher} and entity cache.
+     * {@link EventDispatcher} to publish Gateway updates and {@link StoreService} for entity caching.
      * <p>
      * To further configure the Gateway connections, such as initial presence, sharding and caching options, see
      * {@link #gateway()}.
@@ -285,7 +299,7 @@ public final class DiscordClient {
     /**
      * Start bootstrapping a connection to the real-time Discord Gateway. The resulting builder can be configured to
      * create a {@link GatewayDiscordClient} which groups all connecting shards providing a single
-     * {@link EventDispatcher} and entity cache.
+     * {@link EventDispatcher} to publish Gateway updates and {@link StoreService} for entity caching.
      *
      * @return a bootstrap to create {@link GatewayDiscordClient} instances.
      */

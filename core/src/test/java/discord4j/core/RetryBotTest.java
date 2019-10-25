@@ -154,7 +154,7 @@ public class RetryBotTest {
                         Integer sequence = loaded.getResumeSequence() == null ? 0 : loaded.getResumeSequence();
                         return new SessionInfo(sessionId, sequence);
                     })
-                    .withConnectionUntilDisconnect(gateway -> {
+                    .withConnection(gateway -> {
                         //                        subscribeEventCounter(gateway, counts);
                         //                        startHttpServer(new ServerContext(gateway, counts));
 
