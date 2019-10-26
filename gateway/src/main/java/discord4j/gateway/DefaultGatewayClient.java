@@ -451,12 +451,7 @@ public class DefaultGatewayClient implements GatewayClient {
     }
 
     @Override
-    public long getResponseTime() {
-        return TimeUnit.NANOSECONDS.toMillis(responseTime.get());
-    }
-
-    // TODO: getResponseTime for 3.1
-    Duration getResponseTimeDuration() {
+    public Duration getResponseTime() {
         return Duration.ofNanos(responseTime.get());
     }
 

@@ -115,7 +115,7 @@ public abstract class PayloadHandlers {
 
     private static void handleHeartbeatAck(PayloadContext<?> context) {
         context.getClient().ackHeartbeat();
-        log(context).debug("Heartbeat acknowledged after {}", context.getClient().getResponseTimeDuration());
+        log(context).debug("Heartbeat acknowledged after {}", context.getClient().getResponseTime());
     }
 
     private static Logger log(PayloadContext<?> context) {
