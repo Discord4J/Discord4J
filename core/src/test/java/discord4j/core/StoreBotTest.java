@@ -26,6 +26,7 @@ import discord4j.core.event.domain.lifecycle.GatewayLifecycleEvent;
 import discord4j.core.event.domain.lifecycle.ReadyEvent;
 import discord4j.core.object.data.stored.MessageBean;
 import discord4j.core.object.presence.Presence;
+import discord4j.core.state.StateView;
 import discord4j.store.api.mapping.MappingStoreService;
 import discord4j.store.api.noop.NoOpStoreService;
 import discord4j.store.jdk.JdkStoreService;

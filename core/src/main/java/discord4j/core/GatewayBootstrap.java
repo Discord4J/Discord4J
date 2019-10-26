@@ -31,6 +31,7 @@ import discord4j.core.shard.LocalShardCoordinator;
 import discord4j.core.shard.ShardAwareStoreService;
 import discord4j.core.shard.ShardCoordinator;
 import discord4j.core.shard.ShardingJdkStoreRegistry;
+import discord4j.core.state.StateView;
 import discord4j.gateway.*;
 import discord4j.gateway.json.GatewayPayload;
 import discord4j.gateway.json.StatusUpdate;

@@ -14,16 +14,16 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J. If not, see <http://www.gnu.org/licenses/>.
  */
-package discord4j.core;
+package discord4j.core.state;
 
+import discord4j.core.StateHolder;
 import discord4j.core.object.data.stored.*;
-import discord4j.store.api.Store;
-import discord4j.store.api.primitive.LongObjStore;
+import discord4j.store.api.ReadOnlyStore;
 import discord4j.store.api.service.StoreService;
 import discord4j.store.api.util.LongLongTuple2;
 
 /**
- * Holder for various pieces of state for use in caching.
+ * Read-only view for various pieces of state for use in caching.
  * <p>
  * In addition to saving the current bot user ID, the following stores are kept in this class:
  * <ul>
@@ -50,39 +50,39 @@ public final class StateView {
         return stateHolder.getStoreService();
     }
 
-    public LongObjStore<ChannelBean> getChannelStore() {
-        return stateHolder.getChannelStore();
+    public LongObjStoreView<ChannelBean> getChannelStore() {
+        return new LongObjStoreView<>(stateHolder.getChannelStore());
     }
 
-    public LongObjStore<GuildBean> getGuildStore() {
-        return stateHolder.getGuildStore();
+    public LongObjStoreView<GuildBean> getGuildStore() {
+        return new LongObjStoreView<>(stateHolder.getGuildStore());
     }
 
-    public LongObjStore<GuildEmojiBean> getGuildEmojiStore() {
-        return stateHolder.getGuildEmojiStore();
+    public LongObjStoreView<GuildEmojiBean> getGuildEmojiStore() {
+        return new LongObjStoreView<>(stateHolder.getGuildEmojiStore());
     }
 
-    public Store<LongLongTuple2, MemberBean> getMemberStore() {
-        return stateHolder.getMemberStore();
+    public StoreView<LongLongTuple2, MemberBean> getMemberStore() {
+        return new StoreView<>(stateHolder.getMemberStore());
     }
 
-    public LongObjStore<MessageBean> getMessageStore() {
-        return stateHolder.getMessageStore();
+    public LongObjStoreView<MessageBean> getMessageStore() {
+        return new LongObjStoreView<>(stateHolder.getMessageStore());
     }
 
-    public Store<LongLongTuple2, PresenceBean> getPresenceStore() {
-        return stateHolder.getPresenceStore();
+    public StoreView<LongLongTuple2, PresenceBean> getPresenceStore() {
+        return new StoreView<>(stateHolder.getPresenceStore());
     }
 
-    public LongObjStore<RoleBean> getRoleStore() {
-        return stateHolder.getRoleStore();
+    public LongObjStoreView<RoleBean> getRoleStore() {
+        return new LongObjStoreView<>(stateHolder.getRoleStore());
     }
 
-    public LongObjStore<UserBean> getUserStore() {
-        return stateHolder.getUserStore();
+    public LongObjStoreView<UserBean> getUserStore() {
+        return new LongObjStoreView<>(stateHolder.getUserStore());
     }
 
-    public Store<LongLongTuple2, VoiceStateBean> getVoiceStateStore() {
+    public ReadOnlyStore<LongLongTuple2, VoiceStateBean> getVoiceStateStore() {
         return stateHolder.getVoiceStateStore();
     }
 
