@@ -17,7 +17,6 @@
 
 package discord4j.core;
 
-import discord4j.core.event.domain.Event;
 import discord4j.core.event.domain.lifecycle.ReadyEvent;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.Message;
@@ -35,7 +34,6 @@ import io.netty.buffer.Unpooled;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.reflections.Reflections;
 import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Hooks;
@@ -62,7 +60,6 @@ public class RetryBotTest {
 
     private static String token;
     private static Integer shardCount;
-    private static Reflections reflections;
 
     @BeforeClass
     public static void initialize() {
@@ -72,7 +69,6 @@ public class RetryBotTest {
         if (shardCountValue != null) {
             shardCount = Integer.valueOf(shardCountValue);
         }
-        reflections = new Reflections(Event.class);
     }
 
     @Test
@@ -83,7 +79,7 @@ public class RetryBotTest {
                 .gateway()
                 .setShardCount(shardCount)
                 .setInitialPresence(shard -> Presence.invisible())
-                .withConnectionUntilDisconnect(gateway -> Mono.empty())
+                .withConnection(GatewayDiscordClient::onDisconnect)
                 .block();
     }
 
@@ -119,7 +115,7 @@ public class RetryBotTest {
         DiscordClient.builder(token)
                 .build()
                 .gateway()
-                .withConnectionUntilDisconnect(gateway -> Mono.empty())
+                .withConnection(GatewayDiscordClient::onDisconnect)
                 .block();
     }
 

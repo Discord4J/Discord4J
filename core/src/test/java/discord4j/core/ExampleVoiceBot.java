@@ -63,8 +63,7 @@ public class ExampleVoiceBot {
         // Bind events and log in
         DiscordClient client = DiscordClient.create(token);
 
-        client.gateway().withConnectionUntilDisconnect(gateway -> {
-
+        client.gateway().withConnection(gateway -> {
             Mono<MessageCreateEvent> leave = gateway.getEventDispatcher().on(MessageCreateEvent.class)
                     .filter(e -> owner == null || e.getMember().map(Member::getId).map(it -> it.asString().equals(owner)).orElse(false))
                     .filter(e -> e.getMessage().getContent().map(it -> it.equals("!leave")).orElse(false))
@@ -101,8 +100,7 @@ public class ExampleVoiceBot {
                     .then();
 
             return Mono.when(join, play, stop);
-        })
-                .block();
+        }).block();
     }
 
     private static class LavaplayerAudioProvider extends AudioProvider {

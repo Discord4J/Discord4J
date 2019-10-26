@@ -18,9 +18,11 @@
 package discord4j.core.event;
 
 import discord4j.core.event.domain.Event;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
+import reactor.core.publisher.*;
+import reactor.scheduler.forkjoin.ForkJoinPoolScheduler;
+import reactor.util.concurrent.Queues;
 
+import java.time.Duration;
 import java.util.function.Function;
 
 /**
@@ -49,12 +51,10 @@ public interface EventDispatcher {
      * <strong>Note: </strong> Errors occurring while processing events will terminate your sequence. See
      * <a href="https://github.com/reactive-streams/reactive-streams-jvm#1.7">Reactive Streams Spec</a>
      * explaining this behavior.
-     * </p>
      * <p>
      * A recommended pattern to use this method is wrapping your code that may throw exceptions within a {@code
      * flatMap} block and use {@link Mono#onErrorResume(Function)}, {@link Flux#onErrorResume(Function)} or
      * equivalent methods to maintain the sequence active:
-     * </p>
      * <pre>
      * client.getEventDispatcher().on(MessageCreateEvent.class)
      *     .flatMap(event -&gt; myCodeThatMightThrow(event)
@@ -68,7 +68,6 @@ public interface EventDispatcher {
      * <p>
      * For more alternatives to handling errors, please see
      * <a href="https://github.com/Discord4J/Discord4J/wiki/Error-Handling">Error Handling</a> wiki page.
-     * </p>
      *
      * @param eventClass the event class to obtain events from
      * @param <E> the type of the event class
@@ -87,4 +86,50 @@ public interface EventDispatcher {
      * Signal that this event dispatcher must terminate and release its resources.
      */
     void shutdown();
+
+    // Factories
+
+    /**
+     * Create an {@link EventDispatcher} that will buffer incoming events to retain all startup events as each
+     * shard connects at the cost of increased memory usage. Since this factory uses {@link EmitterProcessor}, it will
+     * only buffer events until the first subscriber. After that, late subscribers will only see events after it, so
+     * this is recommended if you have a single subscription.
+     *
+     * @return a buffering {@link EventDispatcher} backed by an {@link EmitterProcessor}
+     */
+    static EventDispatcher buffering() {
+        return new DefaultEventDispatcher(
+                EmitterProcessor.create(Queues.SMALL_BUFFER_SIZE, false),
+                FluxSink.OverflowStrategy.BUFFER,
+                ForkJoinPoolScheduler.create("discord4j-events"));
+    }
+
+    /**
+     * Create an {@link EventDispatcher} that is time-bounded and retains all elements whose age is at most {@code
+     * maxAge}, replaying them to late subscribers.
+     *
+     * @param maxAge the maximum age of the contained items
+     * @return an {@link EventDispatcher} backed by a {@link ReplayProcessor} with a time-bounded backlog
+     * @see ReplayProcessor#createTimeout(Duration)
+     */
+    static EventDispatcher replayingWithTimeout(Duration maxAge) {
+        return new DefaultEventDispatcher(
+                ReplayProcessor.createTimeout(maxAge),
+                FluxSink.OverflowStrategy.IGNORE,
+                ForkJoinPoolScheduler.create("discord4j-events"));
+    }
+
+    /**
+     * Create an {@link EventDispatcher} that will replays up to {@code historySize} elements to late subscribers.
+     *
+     * @param historySize the backlog size or maximum items retained for replay
+     * @return an {@link EventDispatcher} backed by a {@link ReplayProcessor} with a customized backlog size
+     * @see ReplayProcessor#create(int)
+     */
+    static EventDispatcher replayingWithSize(int historySize) {
+        return new DefaultEventDispatcher(
+                ReplayProcessor.create(historySize),
+                FluxSink.OverflowStrategy.IGNORE,
+                ForkJoinPoolScheduler.create("discord4j-events"));
+    }
 }

@@ -19,7 +19,6 @@ package discord4j.core;
 
 import discord4j.common.LogUtil;
 import discord4j.common.ReactorResources;
-import discord4j.core.event.EmitterEventDispatcher;
 import discord4j.core.event.EventDispatcher;
 import discord4j.core.event.dispatch.DispatchContext;
 import discord4j.core.event.dispatch.DispatchHandlers;
@@ -62,6 +61,7 @@ import reactor.util.Loggers;
 import reactor.util.annotation.Nullable;
 import reactor.util.context.Context;
 
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -85,13 +85,10 @@ import static discord4j.common.LogUtil.format;
  *     <li>{@link #connect(Function)} to customize the {@link GatewayClient} instances to build.</li>
  *     <li>{@link #withConnection(Function)} to work with the {@link GatewayDiscordClient} in a scoped way, providing
  *     a mapping function that will close and release all resources on completion.</li>
- *     <li>{@link #withConnectionUntilDisconnect(Function)} to work in a scoped way (just as above), with the
- *     difference that the mapper function will also defer completion until all Gateway connections have ended.</li>
  * </ul>
  * For all cases, the produced {@link Mono} result or mapper function call will happen after all joining shards have
  * established a connection. You can configure which shards are joining by specifying a
- * {@link #setShardFilter(Predicate)}
- * </p>
+ * {@link #setShardFilter(Predicate)}.
  *
  * @param <O> the configuration flavor supplied to the {@link GatewayClient} instances to be built.
  */
@@ -110,6 +107,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
     private ShardCoordinator shardCoordinator = new LocalShardCoordinator();
     private EventDispatcher eventDispatcher = null;
     private StoreService storeService = null;
+    private Function<StoreService, StoreService> storeServiceMapper = shardAwareStoreService();
     private Function<ShardInfo, Presence> initialPresence = shard -> null;
     private Function<ShardInfo, SessionInfo> resumeOptions = shard -> null;
     private Function<GatewayDiscordClient, Mono<Void>> destroyHandler = shutdownDestroyHandler();
@@ -147,6 +145,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
         this.shardCoordinator = source.shardCoordinator;
         this.eventDispatcher = source.eventDispatcher;
         this.storeService = source.storeService;
+        this.storeServiceMapper = source.storeServiceMapper;
         this.initialPresence = source.initialPresence;
         this.resumeOptions = source.resumeOptions;
         this.destroyHandler = source.destroyHandler;
@@ -177,7 +176,6 @@ public class GatewayBootstrap<O extends GatewayOptions> {
      * {@link #setShardFilter(Predicate)}.
      * <p>
      * The default is to use the recommended shard count given by Discord.
-     * </p>
      *
      * @param shardCount the shard count property to use when connecting to Gateway
      * @return this builder
@@ -228,8 +226,10 @@ public class GatewayBootstrap<O extends GatewayOptions> {
 
     /**
      * Set a custom {@link EventDispatcher} to receive {@link Event Events} from all joining shards and publish them to
-     * all subscribers. Defaults to using {@link EmitterEventDispatcher#buffering()} that will buffer all events
-     * until all joining shards have connected.
+     * all subscribers. Defaults to using {@link EventDispatcher#buffering()} if {@code awaitAllShards} is {@code
+     * true} that will buffer all events until the first subscriber subscribes to the dispatcher, and
+     * {@link EventDispatcher#replayingWithTimeout(Duration)} if {@code awaitAllShards} is {@code false} that will
+     * retain up to 2 minutes worth of events in history.
      *
      * @param eventDispatcher an externally managed {@link EventDispatcher} to publish events
      * @return this builder
@@ -248,6 +248,21 @@ public class GatewayBootstrap<O extends GatewayOptions> {
      */
     public GatewayBootstrap<O> setStoreService(@Nullable StoreService storeService) {
         this.storeService = storeService;
+        return this;
+    }
+
+    /**
+     * Set a transformation function to modify or enrich the given or auto-detected {@link StoreService}.
+     * <p>
+     * Defaults to {@link #shardAwareStoreService()} that wraps the service with a {@link ShardAwareStoreService}
+     * that is capable of tracking the shard index of a given entity and properly disposing them on shard invalidation.
+     * To disable this behavior you can set {@link #identityStoreService()} as argument.
+     *
+     * @param storeServiceMapper a {@link Function} to transform a {@link StoreService}
+     * @return this builder
+     */
+    public GatewayBootstrap<O> setStoreServiceMapper(Function<StoreService, StoreService> storeServiceMapper) {
+        this.storeServiceMapper = Objects.requireNonNull(storeServiceMapper, "storeServiceMapper");
         return this;
     }
 
@@ -365,26 +380,6 @@ public class GatewayBootstrap<O extends GatewayOptions> {
 
     /**
      * Connect to the Discord Gateway upon subscription to acquire a {@link GatewayDiscordClient} instance and use it
-     * in a declarative manner, releasing the object once the derived usage {@link Function} terminates or is
-     * cancelled and also the {@link GatewayDiscordClient} has disconnected from the Gateway.
-     * <p>
-     * The timing of acquiring a {@link GatewayDiscordClient} depends on the {@link #setAwaitAllShards(boolean)}
-     * setting: if {@code true}, when all joining shards have connected; if {@code false}, as soon as it is possible
-     * to establish a connection to the Gateway.
-     * <p>
-     * Calling this method is useful when you operate on the {@link GatewayDiscordClient} object using reactive API you
-     * can compose within the scope of the given {@link Function}.
-     *
-     * @param whileConnectedFunction the {@link Function} to apply the <strong>connected</strong>
-     * {@link GatewayDiscordClient} and trigger a processing pipeline from it.
-     * @return the {@link Mono} result of processing the given {@link Function} after all resources have released
-     */
-    public Mono<Void> withConnectionUntilDisconnect(Function<GatewayDiscordClient, Mono<Void>> whileConnectedFunction) {
-        return withConnection(gateway -> whileConnectedFunction.apply(gateway).then(gateway.onDisconnect()));
-    }
-
-    /**
-     * Connect to the Discord Gateway upon subscription to acquire a {@link GatewayDiscordClient} instance and use it
      * in a declarative manner, releasing the object once the derived usage {@link Function} terminates or is cancelled.
      * <p>
      * The timing of acquiring a {@link GatewayDiscordClient} depends on the {@link #setAwaitAllShards(boolean)}
@@ -466,7 +461,8 @@ public class GatewayBootstrap<O extends GatewayOptions> {
             return connections.collectList().thenReturn(gateway);
         } else {
             return Mono.create(sink -> {
-                sink.onCancel(connections.subscribe(null, sink::error));
+                sink.onCancel(connections.subscribe(null,
+                        t -> log.error("Connection handler terminated with an error", t)));
                 sink.success(gateway);
             });
         }
@@ -638,7 +634,11 @@ public class GatewayBootstrap<O extends GatewayOptions> {
         if (eventDispatcher != null) {
             return eventDispatcher;
         }
-        return EmitterEventDispatcher.buffering();
+        if (awaitAllShards) {
+            return EventDispatcher.replayingWithTimeout(Duration.ofMinutes(2));
+        } else {
+            return EventDispatcher.buffering();
+        }
     }
 
     private StoreService initStoreService() {
@@ -647,10 +647,9 @@ public class GatewayBootstrap<O extends GatewayOptions> {
             // We want almost minimum priority, so that jdk can beat no-op but most implementations will beat jdk
             priority.put(JdkStoreService.class, Integer.MAX_VALUE - 1);
             StoreServiceLoader storeServiceLoader = new StoreServiceLoader(priority);
-            storeService = new ShardAwareStoreService(new ShardingJdkStoreRegistry(),
-                    storeServiceLoader.getStoreService());
+            storeService = storeServiceLoader.getStoreService();
         }
-        return storeService;
+        return storeServiceMapper.apply(storeService);
     }
 
     private Mono<Integer> computeShardCount(RestClient restClient) {
@@ -683,14 +682,47 @@ public class GatewayBootstrap<O extends GatewayOptions> {
         return parameters;
     }
 
+    /**
+     * A destroy handler that doesn't perform any cleanup task.
+     *
+     * @return a noop destroy handler
+     */
     public static Function<GatewayDiscordClient, Mono<Void>> noopDestroyHandler() {
         return gateway -> Mono.empty();
     }
 
+
+    /**
+     * A destroy handler that calls {@link EventDispatcher#shutdown()} followed by {@link StoreService#dispose()} in an
+     * asynchronous fashion.
+     *
+     * @return a shutdown destroy handler
+     */
     public static Function<GatewayDiscordClient, Mono<Void>> shutdownDestroyHandler() {
         return gateway -> {
             gateway.getEventDispatcher().shutdown();
             return gateway.getGatewayResources().getStateView().getStoreService().dispose();
         };
     }
+
+    /**
+     * A {@link StoreService} mapper that doesn't modify the input.
+     *
+     * @return a noop {@link StoreService} mapper
+     */
+    public static Function<StoreService, StoreService> identityStoreService() {
+        return storeService -> storeService;
+    }
+
+    /**
+     * A {@link StoreService} mapper that will wrap the input with a {@link ShardAwareStoreService} using a
+     * {@link ShardingJdkStoreRegistry} that will track shard index of saved entities to allow for cleanup on shard
+     * invalidation.
+     *
+     * @return a shard-aware {@link StoreService} mapper
+     */
+    public static Function<StoreService, StoreService> shardAwareStoreService() {
+        return storeService -> new ShardAwareStoreService(new ShardingJdkStoreRegistry(), storeService);
+    }
+
 }

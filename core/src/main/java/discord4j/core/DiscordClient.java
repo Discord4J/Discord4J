@@ -278,12 +278,10 @@ public final class DiscordClient {
      * <p>
      * To further configure the Gateway connections, such as initial presence, sharding and caching options, see
      * {@link #gateway()}.
-     * </p>
      * <p>
      * <strong>Note:</strong> Starting from v3.1, this method will return a {@link Mono} of a
      * {@link GatewayDiscordClient}, emitting the result once shards have connected. Therefore, <strong>calling
      * {@link Mono#block()} will now return upon connection instead of disconnection.</strong>
-     * </p>
      *
      * @return a {@link Mono} for a handle to maintain a group of shards connected to real-time Discord Gateway,
      * emitted once all connections have been made. If an error is received, it is emitted through the {@link Mono}.
@@ -292,6 +290,21 @@ public final class DiscordClient {
         return gateway().connect();
     }
 
+    /**
+     * Connect to the Discord Gateway upon subscription to acquire a {@link GatewayDiscordClient} instance and use it
+     * in a declarative manner, releasing the object once the derived usage {@link Function} terminates or is cancelled.
+     * <p>
+     * To further configure the bot features, refer to using {@link #gateway()}.
+     * <p>
+     * Calling this method is useful when you operate on the {@link GatewayDiscordClient} object using reactive API you
+     * can compose within the scope of the given {@link Function}. Using {@link GatewayDiscordClient#onDisconnect()}
+     * within the scope will await for disconnection before releasing resources.
+     *
+     * @param whileConnectedFunction the {@link Function} to apply the <strong>connected</strong>
+     * {@link GatewayDiscordClient} and trigger a processing pipeline from it.
+     * @param <T> type of the given {@link Function} output
+     * @return the {@link Mono} result of processing the given {@link Function} after all resources have released
+     */
     public <T> Mono<T> withGateway(Function<GatewayDiscordClient, Mono<T>> whileConnectedFunction) {
         return gateway().withConnection(whileConnectedFunction);
     }

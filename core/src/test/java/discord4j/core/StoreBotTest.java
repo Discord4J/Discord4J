@@ -20,7 +20,7 @@ package discord4j.core;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import discord4j.common.JacksonResources;
-import discord4j.core.event.ReplayEventDispatcher;
+import discord4j.core.event.EventDispatcher;
 import discord4j.core.event.domain.Event;
 import discord4j.core.event.domain.lifecycle.GatewayLifecycleEvent;
 import discord4j.core.event.domain.lifecycle.ReadyEvent;
@@ -77,38 +77,35 @@ public class StoreBotTest {
                 .setStoreService(MappingStoreService.create()
                         .setMapping(new NoOpStoreService(), MessageBean.class)
                         .setFallback(new JdkStoreService()))
-                .setEventDispatcher(ReplayEventDispatcher.withTimeout(Duration.ofMinutes(2)))
+                .setEventDispatcher(EventDispatcher.replayingWithTimeout(Duration.ofMinutes(2)))
                 .setInitialPresence(shard -> Presence.invisible())
                 .withConnection(gateway -> {
                     log.info("Start!");
-                    //startHttpServer(gateway, counts, jackson.getObjectMapper());
-                    //subscribeEventCounter(gateway, counts);
+
+                    Mono<Void> server = startHttpServer(gateway, counts, jackson.getObjectMapper()).then();
 
                     Mono<Void> listener = gateway.on(GatewayLifecycleEvent.class)
                             .filter(e -> !e.getClass().equals(ReadyEvent.class))
                             .doOnNext(e -> log.info("[shard={}] {}", e.getShardInfo().format(), e.toString()))
                             .then();
 
-                    return Mono.when(listener, gateway.onDisconnect());
+                    Mono<Void> eventCounter = Flux.fromIterable(reflections.getSubTypesOf(Event.class))
+                            .filter(cls -> reflections.getSubTypesOf(cls).isEmpty())
+                            .flatMap(type -> gateway.on(type).doOnNext(event -> {
+                                String key = event.getClass().getSimpleName();
+                                counts.computeIfAbsent(key, k -> new AtomicLong()).addAndGet(1);
+                            }))
+                            .then();
+
+                    return Mono.when(server, listener, eventCounter);
                 })
                 .block();
     }
 
-    private void subscribeEventCounter(GatewayDiscordClient gateway, Map<String, AtomicLong> counts) {
-        reflections.getSubTypesOf(Event.class)
-                .stream()
-                .filter(cls -> reflections.getSubTypesOf(cls).isEmpty())
-                .forEach(type -> {
-                    gateway.getEventDispatcher().on(type)
-                            .map(event -> event.getClass().getSimpleName())
-                            .map(name -> counts.computeIfAbsent(name, k -> new AtomicLong()).addAndGet(1))
-                            .subscribe(null, t -> log.error("Error", t));
-                });
-    }
-
-    private void startHttpServer(GatewayDiscordClient gateway, Map<String, AtomicLong> counts,
-                                 ObjectMapper mapper) {
-        DisposableServer facade = HttpServer.create()
+    private Mono<? extends DisposableServer> startHttpServer(GatewayDiscordClient gateway,
+                                                             Map<String, AtomicLong> counts,
+                                                             ObjectMapper mapper) {
+        return HttpServer.create()
                 .port(0) // use an ephemeral port
                 .route(routes -> routes
                         .get("/counts",
@@ -132,25 +129,21 @@ public class StoreBotTest {
                                 }
                         )
                         .get("/events",
-                                (req, res) -> {
-                                    try {
-                                        String json = mapper.writeValueAsString(counts);
-                                        return res.addHeader("content-type", "application/json")
+                                (req, res) -> Mono.fromCallable(() -> mapper.writeValueAsString(counts))
+                                        .flatMap(json -> res.addHeader("content-type", "application/json")
                                                 .chunkedTransfer(false)
-                                                .sendString(Mono.just(json));
-                                    } catch (JsonProcessingException e) {
-                                        return res.status(500).send();
-                                    }
-                                }
+                                                .sendString(Mono.just(json))
+                                                .then()
+                                                .onErrorResume(t -> res.status(500).send()))
                         )
                 )
-                .bindNow();
-
-        log.info("*************************************************************");
-        log.info("Server started at {}:{}", facade.host(), facade.port());
-        log.info("*************************************************************");
-
-        // kill the server on JVM exit
-        Runtime.getRuntime().addShutdownHook(new Thread(facade::disposeNow));
+                .bind()
+                .doOnNext(facade -> {
+                    log.info("*************************************************************");
+                    log.info("Server started at {}:{}", facade.host(), facade.port());
+                    log.info("*************************************************************");
+                    // kill the server on JVM exit
+                    Runtime.getRuntime().addShutdownHook(new Thread(() -> facade.disposeNow()));
+                });
     }
 }

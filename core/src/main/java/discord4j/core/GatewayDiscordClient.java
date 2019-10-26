@@ -487,12 +487,10 @@ public class GatewayDiscordClient {
      * a version capable of handling errors for you, use {@link #on(Class, Function)}. See
      * <a href="https://github.com/reactive-streams/reactive-streams-jvm#1.7">Reactive Streams Spec</a>
      * explaining this behavior.
-     * </p>
      * <p>
      * A recommended pattern to use this method is wrapping your code that may throw exceptions within a {@code
      * flatMap} block and use {@link Mono#onErrorResume(Function)}, {@link Flux#onErrorResume(Function)} or
      * equivalent methods to maintain the sequence active:
-     * </p>
      * <pre>
      * client.on(MessageCreateEvent.class)
      *     .flatMap(event -&gt; myCodeThatMightThrow(event)
@@ -506,7 +504,6 @@ public class GatewayDiscordClient {
      * <p>
      * For more alternatives to handling errors, please see
      * <a href="https://github.com/Discord4J/Discord4J/wiki/Error-Handling">Error Handling</a> wiki page.
-     * </p>
      *
      * @param eventClass the event class to obtain events from
      * @param <E> the type of the event class
@@ -522,7 +519,6 @@ public class GatewayDiscordClient {
      * the "infinite" event sequence.
      * <p>
      * There are multiple ways of using this event handling method, for example:
-     * </p>
      * <pre>
      * client.on(MessageCreateEvent.class, event -> {
      *         // myCodeThatMightThrow should return a Reactor type (Mono or Flux)
@@ -540,7 +536,6 @@ public class GatewayDiscordClient {
      * <p>
      * Continuing the chain after {@code on(class, event -> ...)} will require your own error handling strategy.
      * Check the docs for {@link #on(Class)} for more details.
-     * </p>
      *
      * @param eventClass the event class to obtain events from
      * @param mapper an event mapping function called on each event. If you do not wish to perform further operations
