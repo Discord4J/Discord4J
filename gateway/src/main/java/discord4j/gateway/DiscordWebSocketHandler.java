@@ -70,6 +70,18 @@ public class DiscordWebSocketHandler {
         this.context = context;
     }
 
+    /**
+     * Handle an upgraded websocket connection, given by both {@link WebsocketInbound} and {@link WebsocketOutbound} to
+     * manage a session until the remote closes or one of the local methods {@link #close()} or
+     * {@link #error(Throwable)} methods are called. When that happens, a close procedure will take place and ultimately
+     * emit a pair of {@link DisconnectBehavior} and remote {@link CloseStatus}, if present or "-1" if none is present.
+     *
+     * @param in the websocket inbound
+     * @param out the websocket outbound
+     * @return a {@link Mono} that upon subscription, manages a websocket session until it closes where a {@link Tuple2}
+     * is emitted representing both the {@link DisconnectBehavior} that initiated the close procedure, and the inbound
+     * {@link CloseStatus}.
+     */
     public Mono<Tuple2<DisconnectBehavior, CloseStatus>> handle(WebsocketInbound in, WebsocketOutbound out) {
         Mono<CloseWebSocketFrame> outboundClose = sessionClose
                 .doOnNext(behavior -> log.debug(format(context, "Closing session with behavior: {}"), behavior))
@@ -100,9 +112,6 @@ public class DiscordWebSocketHandler {
                 .doOnNext(inbound::next)
                 .then();
 
-        // zip both sequences to join terminal signals
-        // errors will be converted into a retrying behavior
-        // produce both the resulting behavior and the inbound close status (or a default one if missing)
         return Mono.zip(outboundEvents, inboundEvents)
                 .doOnError(this::error)
                 .then(Mono.zip(sessionClose, inboundClose));

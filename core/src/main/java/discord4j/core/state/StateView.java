@@ -18,7 +18,6 @@ package discord4j.core.state;
 
 import discord4j.core.StateHolder;
 import discord4j.core.object.data.stored.*;
-import discord4j.store.api.ReadOnlyStore;
 import discord4j.store.api.service.StoreService;
 import discord4j.store.api.util.LongLongTuple2;
 
@@ -82,8 +81,8 @@ public final class StateView {
         return new LongObjStoreView<>(stateHolder.getUserStore());
     }
 
-    public ReadOnlyStore<LongLongTuple2, VoiceStateBean> getVoiceStateStore() {
-        return stateHolder.getVoiceStateStore();
+    public StoreView<LongLongTuple2, VoiceStateBean> getVoiceStateStore() {
+        return new StoreView<>(stateHolder.getVoiceStateStore());
     }
 
     public long getSelfId() {

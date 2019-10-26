@@ -17,13 +17,10 @@
 
 package discord4j.core;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import discord4j.core.event.domain.Event;
 import discord4j.core.event.domain.lifecycle.ReadyEvent;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.Message;
-import discord4j.core.object.entity.User;
 import discord4j.core.object.presence.Presence;
 import discord4j.core.object.util.Snowflake;
 import discord4j.gateway.IdentifyOptions;
@@ -31,7 +28,6 @@ import discord4j.gateway.SessionInfo;
 import discord4j.gateway.ShardInfo;
 import discord4j.gateway.json.GatewayPayload;
 import discord4j.gateway.json.Opcode;
-import discord4j.gateway.retry.PartialDisconnectException;
 import discord4j.rest.entity.data.ApplicationInfoData;
 import discord4j.rest.json.request.MessageCreateRequest;
 import discord4j.rest.util.MultipartRequest;
@@ -44,8 +40,6 @@ import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Hooks;
 import reactor.core.publisher.Mono;
-import reactor.netty.DisposableServer;
-import reactor.netty.http.server.HttpServer;
 import reactor.util.Logger;
 import reactor.util.Loggers;
 
@@ -60,7 +54,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 public class RetryBotTest {
@@ -136,44 +129,38 @@ public class RetryBotTest {
         String resumePath = "resume.test";
         Map<ShardInfo, IdentifyOptions> optionsMap = loadResumeData(resumePath);
         DiscordClient client = DiscordClient.create(token);
-        Map<String, AtomicLong> counts = new ConcurrentHashMap<>();
 
         // Get the bot owner ID to filter commands
         Mono<Long> ownerId = client.getApplicationInfo()
                 .map(ApplicationInfoData::getOwnerId)
                 .cache();
 
-        try {
-            client.gateway()
-                    .setGatewayObserver((newState, identifyOptions) -> {
-                        optionsMap.put(identifyOptions.getShardInfo(), identifyOptions);
-                    })
-                    .setResumeOptions(shard -> {
-                        IdentifyOptions loaded = optionsMap.get(shard);
-                        String sessionId = loaded.getResumeSessionId() == null ? "" : loaded.getResumeSessionId();
-                        Integer sequence = loaded.getResumeSequence() == null ? 0 : loaded.getResumeSequence();
-                        return new SessionInfo(sessionId, sequence);
-                    })
-                    .withConnection(gateway -> {
-                        //                        subscribeEventCounter(gateway, counts);
-                        //                        startHttpServer(new ServerContext(gateway, counts));
+        Mono<GatewayDiscordClient> login = client.gateway()
+                .setGatewayObserver((newState, identifyOptions) -> {
+                    optionsMap.put(identifyOptions.getShardInfo(), identifyOptions);
+                })
+                .setResumeOptions(shard -> {
+                    IdentifyOptions loaded = optionsMap.get(shard);
+                    String sessionId = loaded.getResumeSessionId() == null ? "" : loaded.getResumeSessionId();
+                    Integer sequence = loaded.getResumeSequence() == null ? 0 : loaded.getResumeSequence();
+                    return new SessionInfo(sessionId, sequence);
+                })
+                .connect();
 
-                        TestCommands testCommands = new TestCommands(gateway);
-                        return gateway.getEventDispatcher().on(MessageCreateEvent.class)
-                                .filterWhen(event -> ownerId.map(owner -> {
-                                    Long author = event.getMessage().getAuthor()
-                                            .map(u -> u.getId().asLong())
-                                            .orElse(null);
-                                    return owner.equals(author);
-                                }))
-                                .flatMap(testCommands::onMessageCreate)
-                                .onErrorContinue((t, o) -> log.error("Error", t))
-                                .then();
-                    })
-                    .block();
-        } catch (PartialDisconnectException e) {
-            log.warn("This client can reconnect and RESUME");
-        }
+        login.flatMap(gateway -> {
+            TestCommands testCommands = new TestCommands(gateway);
+            return gateway.getEventDispatcher().on(MessageCreateEvent.class)
+                    .filterWhen(event -> ownerId.map(owner -> {
+                        Long author = event.getMessage().getAuthor()
+                                .map(u -> u.getId().asLong())
+                                .orElse(null);
+                        return owner.equals(author);
+                    }))
+                    .flatMap(testCommands::onMessageCreate)
+                    .doOnError(t -> log.error("Error in event handler", t))
+                    .retry()
+                    .then();
+        }).block();
 
         saveResumeData(optionsMap, resumePath);
     }
@@ -307,53 +294,5 @@ public class RetryBotTest {
         } catch (IOException e) {
             log.warn("Could not save resume data", e);
         }
-    }
-
-    private void subscribeEventCounter(GatewayDiscordClient gateway, Map<String, AtomicLong> counts) {
-        reflections.getSubTypesOf(Event.class)
-                .forEach(type -> gateway.getEventDispatcher().on(type)
-                        .map(event -> event.getClass().getSimpleName())
-                        .map(name -> counts.computeIfAbsent(name, k -> new AtomicLong()).addAndGet(1))
-                        .subscribe(null, t -> log.error("Error", t)));
-    }
-
-    static class ServerContext {
-
-        private final GatewayDiscordClient gateway;
-        private final Map<String, AtomicLong> eventCounts;
-
-        ServerContext(GatewayDiscordClient gateway, Map<String, AtomicLong> eventCounts) {
-            this.gateway = gateway;
-            this.eventCounts = eventCounts;
-        }
-    }
-
-    private Mono<? extends DisposableServer> bindHttpServer(ServerContext context) {
-        ObjectMapper mapper = new ObjectMapper();
-        return HttpServer.create()
-                .port(0)
-                .route(routes -> routes
-                        .get("/users",
-                                (req, res) -> res.sendString(context.gateway.getUsers()
-                                        .map(User::getId)
-                                        .distinct()
-                                        .count()
-                                        .map(Object::toString))
-                        )
-                        .get("/events",
-                                (req, res) -> {
-                                    try {
-                                        String json = mapper.writeValueAsString(context.eventCounts);
-                                        return res.addHeader("content-type", "application/json")
-                                                .chunkedTransfer(false)
-                                                .sendString(Mono.just(json));
-                                    } catch (JsonProcessingException e) {
-                                        return res.status(500).send();
-                                    }
-                                }
-                        )
-                )
-                .wiretap(true)
-                .bind();
     }
 }

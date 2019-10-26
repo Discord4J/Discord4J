@@ -486,7 +486,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                             .doOnNext(eventDispatcher::publish)
                             .subscribe(null,
                                     t -> log.error(format(ctx, "Event mapper terminated with an error"), t),
-                                    () -> log.info(format(ctx, "Event mapper completed"))));
+                                    () -> log.debug(format(ctx, "Event mapper completed"))));
 
                     // wire internal shard coordinator events
                     // TODO: transition into separate lifecycleSink for these events
@@ -522,7 +522,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                                                 }))
                                                 .then(Mono.defer(() -> {
                                                     if (gatewayClients.isEmpty()) {
-                                                        log.debug(format(ctx, "All shards disconnected"));
+                                                        log.info(format(ctx, "All shards disconnected"));
                                                         return destroyHandler.apply(gateway)
                                                                 .doOnTerminate(closeProcessor::onComplete);
                                                     }
