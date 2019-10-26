@@ -24,7 +24,6 @@ import discord4j.core.event.EventDispatcher;
 import discord4j.core.event.dispatch.DispatchContext;
 import discord4j.core.event.dispatch.DispatchHandlers;
 import discord4j.core.event.domain.Event;
-import discord4j.core.event.domain.lifecycle.ReadyEvent;
 import discord4j.core.object.data.stored.MessageBean;
 import discord4j.core.object.presence.Presence;
 import discord4j.core.shard.LocalShardCoordinator;
@@ -107,12 +106,13 @@ public class GatewayBootstrap<O extends GatewayOptions> {
 
     private int shardCount = RECOMMENDED_SHARD_COUNT;
     private Predicate<ShardInfo> shardFilter = shard -> true;
+    private boolean awaitAllShards = false;
     private ShardCoordinator shardCoordinator = new LocalShardCoordinator();
     private EventDispatcher eventDispatcher = null;
     private StoreService storeService = null;
     private Function<ShardInfo, Presence> initialPresence = shard -> null;
     private Function<ShardInfo, SessionInfo> resumeOptions = shard -> null;
-    private Function<GatewayDiscordClient, Mono<Void>> destroyHandler = gatewayDestroyHandler();
+    private Function<GatewayDiscordClient, Mono<Void>> destroyHandler = shutdownDestroyHandler();
 
     private ReactorResources gatewayReactorResources = null;
     private ReactorResources voiceReactorResources = null;
@@ -143,6 +143,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
         this.client = source.client;
         this.shardCount = source.shardCount;
         this.shardFilter = source.shardFilter;
+        this.awaitAllShards = source.awaitAllShards;
         this.shardCoordinator = source.shardCoordinator;
         this.eventDispatcher = source.eventDispatcher;
         this.storeService = source.storeService;
@@ -200,6 +201,19 @@ public class GatewayBootstrap<O extends GatewayOptions> {
     }
 
     /**
+     * Set if the connect {@link Mono} should defer completion until all joining shards have connected. Defaults to
+     * {@code false}.
+     *
+     * @param awaitAllShards {@code true} if connect should wait until all joining shards have connected before
+     * completing, or {@code false} to complete immediately
+     * @return this builder
+     */
+    public GatewayBootstrap<O> setAwaitAllShards(boolean awaitAllShards) {
+        this.awaitAllShards = awaitAllShards;
+        return this;
+    }
+
+    /**
      * Set a custom {@link ShardCoordinator} to manage multiple {@link GatewayDiscordClient} instances, even across
      * boundaries. Defaults to using {@link LocalShardCoordinator}.
      *
@@ -240,7 +254,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
     /**
      * Set a custom {@link Function handler} that generate a destroy sequence to be run once all joining shards have
      * disconnected, after all internal resources have been released. The destroy procedure is applied asynchronously
-     * and errors are logged and swallowed. Defaults to {@link GatewayBootstrap#gatewayDestroyHandler()} that will
+     * and errors are logged and swallowed. Defaults to {@link GatewayBootstrap#shutdownDestroyHandler()} that will
      * release the set {@link EventDispatcher} and {@link StoreService}.
      *
      * @param destroyHandler the {@link Function} supplying a {@link Mono} to reset state
@@ -354,6 +368,10 @@ public class GatewayBootstrap<O extends GatewayOptions> {
      * in a declarative manner, releasing the object once the derived usage {@link Function} terminates or is
      * cancelled and also the {@link GatewayDiscordClient} has disconnected from the Gateway.
      * <p>
+     * The timing of acquiring a {@link GatewayDiscordClient} depends on the {@link #setAwaitAllShards(boolean)}
+     * setting: if {@code true}, when all joining shards have connected; if {@code false}, as soon as it is possible
+     * to establish a connection to the Gateway.
+     * <p>
      * Calling this method is useful when you operate on the {@link GatewayDiscordClient} object using reactive API you
      * can compose within the scope of the given {@link Function}.
      *
@@ -368,6 +386,10 @@ public class GatewayBootstrap<O extends GatewayOptions> {
     /**
      * Connect to the Discord Gateway upon subscription to acquire a {@link GatewayDiscordClient} instance and use it
      * in a declarative manner, releasing the object once the derived usage {@link Function} terminates or is cancelled.
+     * <p>
+     * The timing of acquiring a {@link GatewayDiscordClient} depends on the {@link #setAwaitAllShards(boolean)}
+     * setting: if {@code true}, when all joining shards have connected; if {@code false}, as soon as it is possible to
+     * establish a connection to the Gateway.
      * <p>
      * Calling this method is useful when you operate on the {@link GatewayDiscordClient} object using reactive API you
      * can compose within the scope of the given {@link Function}. Using {@link GatewayDiscordClient#onDisconnect()}
@@ -395,14 +417,18 @@ public class GatewayBootstrap<O extends GatewayOptions> {
      * configured by this builder. The resulting {@link GatewayDiscordClient} can be externally managed, leaving you
      * in charge of properly releasing its resources by calling {@link GatewayDiscordClient#logout()}.
      * <p>
+     * The timing of acquiring a {@link GatewayDiscordClient} depends on the {@link #setAwaitAllShards(boolean)}
+     * setting: if {@code true}, when all joining shards have connected; if {@code false}, as soon as it is possible
+     * to establish a connection to the Gateway.
+     * <p>
      * All joining shards, determined by a combination of {@link #setShardCount(int)} and
      * {@link #setShardFilter(Predicate)}, will attempt to serially connect to Discord Gateway, coordinated by the
      * current {@link ShardCoordinator}. If one of the shards fail to connect due to a retryable problem like invalid
      * session it will retry before continuing to the next one.
      *
-     * @return a {@link Mono} that upon subscription and after all joining shards properly connect, given by the
-     * reception of each shard's {@link ReadyEvent} payload, emits a {@link GatewayDiscordClient}. If an error occurs
-     * during the setup sequence, it will be emitted through the {@link Mono}.
+     * @return a {@link Mono} that upon subscription and depending on the configuration of
+     * {@link #setAwaitAllShards(boolean)}, emits a {@link GatewayDiscordClient}. If an error occurs during the setup
+     * sequence, it will be emitted through the {@link Mono}.
      */
     public Mono<GatewayDiscordClient> connect() {
         return connect(DefaultGatewayClient::new);
@@ -413,9 +439,9 @@ public class GatewayBootstrap<O extends GatewayOptions> {
      * {@link GatewayClient} from the set of options configured by this builder. See {@link #connect()} for more details
      * about how the returned {@link Mono} operates.
      *
-     * @return a {@link Mono} that upon subscription and after all joining shards properly connect, given by the
-     * reception of each shard's {@link ReadyEvent} payload, emits a {@link GatewayDiscordClient}. If an error occurs
-     * during the setup sequence, it will be emitted through the {@link Mono}.
+     * @return a {@link Mono} that upon subscription and depending on the configuration of
+     * {@link #setAwaitAllShards(boolean)}, emits a {@link GatewayDiscordClient}. If an error occurs during the setup
+     * sequence, it will be emitted through the {@link Mono}.
      */
     public Mono<GatewayDiscordClient> connect(Function<O, GatewayClient> clientFactory) {
         StateHolder stateHolder = new StateHolder(initStoreService(), new StoreContext(0, MessageBean.class));
@@ -428,15 +454,22 @@ public class GatewayBootstrap<O extends GatewayOptions> {
         GatewayDiscordClient gateway = new GatewayDiscordClient(client, resources, closeProcessor,
                 gatewayClients, voiceClients);
 
-        return computeShardCount(client.getCoreResources().getRestClient())
+        Flux<GatewayConnection> connections = computeShardCount(client.getCoreResources().getRestClient())
                 .flatMapMany(count -> Flux.range(0, count)
                         .map(index -> new ShardInfo(index, count))
                         .filter(initShardFilter())
                         .transform(shardCoordinator.getConnectOperator())
                         .concatMap(shard -> acquireConnection(shard, clientFactory, gateway, stateHolder,
-                                eventDispatcher, gatewayClients, voiceClients, closeProcessor)))
-                .collectList()
-                .thenReturn(gateway);
+                                eventDispatcher, gatewayClients, voiceClients, closeProcessor)));
+
+        if (awaitAllShards) {
+            return connections.collectList().thenReturn(gateway);
+        } else {
+            return Mono.create(sink -> {
+                sink.onCancel(connections.subscribe(null, sink::error));
+                sink.success(gateway);
+            });
+        }
     }
 
     private Mono<GatewayConnection> acquireConnection(ShardInfo shard,
@@ -650,7 +683,11 @@ public class GatewayBootstrap<O extends GatewayOptions> {
         return parameters;
     }
 
-    public static Function<GatewayDiscordClient, Mono<Void>> gatewayDestroyHandler() {
+    public static Function<GatewayDiscordClient, Mono<Void>> noopDestroyHandler() {
+        return gateway -> Mono.empty();
+    }
+
+    public static Function<GatewayDiscordClient, Mono<Void>> shutdownDestroyHandler() {
         return gateway -> {
             gateway.getEventDispatcher().shutdown();
             return gateway.getGatewayResources().getStateView().getStoreService().dispose();

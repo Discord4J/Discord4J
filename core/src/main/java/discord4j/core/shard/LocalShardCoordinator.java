@@ -30,8 +30,8 @@ import java.time.Duration;
 import java.util.function.Function;
 
 /**
- * A centralized local {@link ShardCoordinator} that can operate on a single JVM instance to coordinate authentication
- * attempts across multiple shards.
+ * A centralized local {@link ShardCoordinator} that can operate on a single JVM instance to coordinate Gateway
+ * connection and identifying attempts across multiple shards.
  */
 public class LocalShardCoordinator implements ShardCoordinator {
 
@@ -40,6 +40,10 @@ public class LocalShardCoordinator implements ShardCoordinator {
     private final ReplayProcessor<Integer> permits = ReplayProcessor.create();
     private final FluxSink<Integer> permitSink = permits.sink();
 
+    /**
+     * Create a new {@link LocalShardCoordinator} that is able to locally coordinate multiple shards under a single
+     * JVM instance.
+     */
     public LocalShardCoordinator() {
         permitSink.next(0);
     }
