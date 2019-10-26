@@ -20,6 +20,7 @@ package discord4j.gateway;
 import discord4j.gateway.json.GatewayPayload;
 import discord4j.gateway.json.dispatch.Dispatch;
 import io.netty.buffer.ByteBuf;
+import java.time.Duration;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxSink;
@@ -147,7 +148,7 @@ public interface GatewayClient {
     /**
      * Gets the amount of time it last took Discord to respond to a heartbeat with an ack.
      *
-     * @return the time in milliseconds took Discord to respond to the last heartbeat with an ack.
+     * @return the duration which Discord took to respond to the last heartbeat with an ack.
      */
-    long getResponseTime();
+    Duration getResponseTime();
 }

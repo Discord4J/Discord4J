@@ -120,8 +120,7 @@ public class RSocketShardCoordinator implements ShardCoordinator {
     @Override
     public PayloadTransformer getIdentifyLimiter() {
         return sequence -> sequence.flatMap(t2 -> clientSetup.flatMap(
-                rSocket -> rSocket.requestResponse(DefaultPayload.create("identify:" +
-                        Duration.ofMillis(t2.getT1().getResponseTime()).toString()))
+                rSocket -> rSocket.requestResponse(DefaultPayload.create("identify:" + t2.getT1().getResponseTime().toString()))
                         .doOnNext(payload -> log.debug(">: {}", payload.getDataUtf8())))
                 .thenReturn(t2.getT2()));
     }

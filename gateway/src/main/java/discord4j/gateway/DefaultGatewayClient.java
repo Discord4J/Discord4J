@@ -45,7 +45,6 @@ import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Objects;
 import java.util.Properties;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
@@ -434,12 +433,7 @@ public class DefaultGatewayClient implements GatewayClient {
     }
 
     @Override
-    public long getResponseTime() {
-        return TimeUnit.NANOSECONDS.toMillis(responseTime.get());
-    }
-
-    // TODO: getResponseTime for 3.1
-    Duration getResponseTimeDuration() {
+    public Duration getResponseTime() {
         return Duration.ofNanos(responseTime.get());
     }
 

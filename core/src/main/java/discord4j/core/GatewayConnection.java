@@ -23,6 +23,8 @@ import reactor.core.publisher.Mono;
 import reactor.core.publisher.MonoProcessor;
 import reactor.util.annotation.Nullable;
 
+import java.time.Duration;
+
 /**
  * A handle to manipulate a gateway connection, represents a connection to an active {@link GatewayClient}.
  */
@@ -80,12 +82,12 @@ class GatewayConnection {
      *
      * @return the time in milliseconds took Discord to respond to the last heartbeat with an ack.
      */
-    public long getResponseTime() {
+    public Duration getResponseTime() {
         GatewayClient client = getGatewayClient();
         if (client != null) {
             return client.getResponseTime();
         } else {
-            return -1;
+            return Duration.ZERO;
         }
     }
 

@@ -34,8 +34,7 @@ public class PoolingTransformer implements PayloadTransformer {
 
     @Override
     public Publisher<ByteBuf> apply(Flux<Tuple2<GatewayClient, ByteBuf>> publisher) {
-        return publisher.flatMap(t2 -> this.pool.acquire(
-                Duration.ofMillis(t2.getT1().getResponseTime()))
+        return publisher.flatMap(t2 -> this.pool.acquire(t2.getT1().getResponseTime())
                 .thenReturn(t2.getT2()));
     }
 }

@@ -121,7 +121,7 @@ public abstract class PayloadHandlers {
     private static void handleHeartbeatAck(PayloadContext<?> context) {
         context.getClient().ackHeartbeat();
         log.debug(format(context.getContext(), "Heartbeat acknowledged after {}"),
-                context.getClient().getResponseTimeDuration());
+                context.getClient().getResponseTime());
     }
 
     private static final Logger log = Loggers.getLogger("discord4j.gateway.handler");
