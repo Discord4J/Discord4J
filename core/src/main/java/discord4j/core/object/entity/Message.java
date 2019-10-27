@@ -546,6 +546,9 @@ public final class Message implements Entity {
     /** Represents the various types of messages. */
     public enum Type {
 
+        /** Unknown type */
+        UNKNOWN(-1),
+
         /** A message created by a user. */
         DEFAULT(0),
 
@@ -631,7 +634,7 @@ public final class Message implements Entity {
                 case 10: return USER_PREMIUM_GUILD_SUBSCRIPTION_TIER_2;
                 case 11: return USER_PREMIUM_GUILD_SUBSCRIPTION_TIER_3;
                 case 12: return CHANNEL_FOLLOW_ADD;
-                default: return EntityUtil.throwUnsupportedDiscordValue(value);
+                default: return UNKNOWN;
             }
         }
     }

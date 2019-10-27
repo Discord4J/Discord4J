@@ -1127,6 +1127,9 @@ public final class Guild implements Entity {
     /** Automatically scan and delete messages sent in the server that contain explicit content. */
     public enum ContentFilterLevel {
 
+        /** Unknown content filter level */
+        UNKNOWN(-1),
+
         /** Don't scan any messages. */
         DISABLED(0),
 
@@ -1169,7 +1172,7 @@ public final class Guild implements Entity {
                 case 0: return DISABLED;
                 case 1: return MEMBERS_WITHOUT_ROLES;
                 case 2: return ALL_MEMBERS;
-                default: return EntityUtil.throwUnsupportedDiscordValue(value);
+                default: return UNKNOWN;
             }
         }
     }
@@ -1179,6 +1182,9 @@ public final class Guild implements Entity {
      * setting can only be changed by the server owner if they have 2FA enabled on their account.
      */
     public enum MfaLevel {
+
+        /** Unknown MFA level */
+        UNKNOWN(-1),
 
         /** Disabled 2FA requirement. */
         NONE(0),
@@ -1218,7 +1224,7 @@ public final class Guild implements Entity {
             switch (value) {
                 case 0: return NONE;
                 case 1: return ELEVATED;
-                default: return EntityUtil.throwUnsupportedDiscordValue(value);
+                default: return UNKNOWN;
             }
         }
     }
@@ -1228,6 +1234,9 @@ public final class Guild implements Entity {
      * notification for every message sent in the server or not.
      */
     public enum NotificationLevel {
+
+        /** Unknown notification level */
+        UNKNOWN(-1),
 
         /** Receive a notification for all messages. */
         ALL_MESSAGES(0),
@@ -1267,7 +1276,7 @@ public final class Guild implements Entity {
             switch (value) {
                 case 0: return ALL_MESSAGES;
                 case 1: return ONLY_MENTIONS;
-                default: return EntityUtil.throwUnsupportedDiscordValue(value);
+                default: return UNKNOWN;
             }
         }
     }
@@ -1278,6 +1287,9 @@ public final class Guild implements Entity {
      * @see <a href="https://discordapp.com/developers/docs/resources/guild#guild-object-premium-tier">Premium Tier docs</a>
      */
     public enum PremiumTier {
+
+        /** Unknown Premium Tier */
+        UNKNOWN(-1),
 
         /** no Premium Tier **/
         NONE(0),
@@ -1325,7 +1337,7 @@ public final class Guild implements Entity {
                 case 1: return TIER_1;
                 case 2: return TIER_2;
                 case 3: return TIER_3;
-                default: return EntityUtil.throwUnsupportedDiscordValue(value);
+                default: return UNKNOWN;
             }
         }
     }
@@ -1335,6 +1347,9 @@ public final class Guild implements Entity {
      * channels or initiate a direct message conversation. If a member has an assigned role this does not apply.
      */
     public enum VerificationLevel {
+
+        /** Unknown verification level */
+        UNKNOWN(-1),
 
         /** Unrestricted. */
         NONE(0),
@@ -1386,7 +1401,7 @@ public final class Guild implements Entity {
                 case 2: return MEDIUM;
                 case 3: return HIGH;
                 case 4: return VERY_HIGH;
-                default: return EntityUtil.throwUnsupportedDiscordValue(value);
+                default: return UNKNOWN;
             }
         }
     }

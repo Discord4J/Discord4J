@@ -66,6 +66,9 @@ public interface Channel extends Entity {
     /** Represents the various types of channels. */
     enum Type {
 
+        /** Unknown type */
+        UNKNOWN(-1),
+
         /** Represents a {@link TextChannel}. */
         GUILD_TEXT(0),
 
@@ -124,7 +127,7 @@ public interface Channel extends Entity {
                 case 4: return GUILD_CATEGORY;
                 case 5: return GUILD_NEWS;
                 case 6: return GUILD_STORE;
-                default: return EntityUtil.throwUnsupportedDiscordValue(value);
+                default: return UNKNOWN;
             }
         }
     }
