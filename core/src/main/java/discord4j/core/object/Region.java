@@ -16,8 +16,7 @@
  */
 package discord4j.core.object;
 
-import discord4j.core.DiscordClient;
-import discord4j.core.ServiceMediator;
+import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.data.RegionBean;
 
 import java.util.Objects;
@@ -29,8 +28,8 @@ import java.util.Objects;
  */
 public final class Region implements DiscordObject {
 
-    /** The ServiceMediator associated to this object. */
-    private final ServiceMediator serviceMediator;
+    /** The gateway associated to this object. */
+    private final GatewayDiscordClient gateway;
 
     /** The raw data as represented by Discord. */
     private final RegionBean data;
@@ -38,17 +37,17 @@ public final class Region implements DiscordObject {
     /**
      * Constructs a {@code Region} with an associated ServiceMediator and Discord data.
      *
-     * @param serviceMediator The ServiceMediator associated to this object, must be non-null.
+     * @param gateway The {@link GatewayDiscordClient} associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
      */
-    public Region(final ServiceMediator serviceMediator, final RegionBean data) {
-        this.serviceMediator = Objects.requireNonNull(serviceMediator);
+    public Region(final GatewayDiscordClient gateway, final RegionBean data) {
+        this.gateway = Objects.requireNonNull(gateway);
         this.data = Objects.requireNonNull(data);
     }
 
     @Override
-    public DiscordClient getClient() {
-        return serviceMediator.getClient();
+    public GatewayDiscordClient getClient() {
+        return gateway;
     }
 
     /**

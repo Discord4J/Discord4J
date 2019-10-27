@@ -16,8 +16,7 @@
  */
 package discord4j.core.object.audit;
 
-import discord4j.core.DiscordClient;
-import discord4j.core.ServiceMediator;
+import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.data.AuditLogEntryBean;
 import discord4j.core.object.entity.Entity;
 import discord4j.core.object.util.Snowflake;
@@ -29,11 +28,13 @@ public class AuditLogEntry implements Entity {
     /** The maximum amount of characters that can be in an audit log reason. */
 	public static final int MAX_REASON_LENGTH = 512;
 
-    private final ServiceMediator serviceMediator;
+    /** The gateway associated to this object. */
+    private final GatewayDiscordClient gateway;
+
     private final AuditLogEntryBean data;
 
-    public AuditLogEntry(final ServiceMediator serviceMediator, final AuditLogEntryBean data) {
-        this.serviceMediator = serviceMediator;
+    public AuditLogEntry(final GatewayDiscordClient gateway, final AuditLogEntryBean data) {
+        this.gateway = gateway;
         this.data = data;
     }
 
@@ -69,8 +70,8 @@ public class AuditLogEntry implements Entity {
     }
 
     @Override
-    public DiscordClient getClient() {
-        return serviceMediator.getClient();
+    public GatewayDiscordClient getClient() {
+        return gateway;
     }
 
     @Override

@@ -17,8 +17,7 @@
 package discord4j.core.object.entity;
 
 import discord4j.common.json.GuildEmojiResponse;
-import discord4j.core.DiscordClient;
-import discord4j.core.ServiceMediator;
+import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.data.stored.GuildEmojiBean;
 import discord4j.core.object.data.stored.UserBean;
 import discord4j.core.object.util.Image;
@@ -32,7 +31,6 @@ import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
 
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -51,8 +49,8 @@ public final class GuildEmoji implements Entity {
     /** The path for {@code GuildEmoji} image URLs. */
     private static final String EMOJI_IMAGE_PATH = "emojis/%s";
 
-    /** The ServiceMediator associated to this object. */
-    private final ServiceMediator serviceMediator;
+    /** The gateway associated to this object. */
+    private final GatewayDiscordClient gateway;
 
     /** The raw data as represented by Discord. */
     private final GuildEmojiBean data;
@@ -63,19 +61,19 @@ public final class GuildEmoji implements Entity {
     /**
      * Constructs a {@code GuildEmoji} with an associated ServiceMediator and Discord data.
      *
-     * @param serviceMediator The ServiceMediator associated to this object, must be non-null.
+     * @param gateway The {@link GatewayDiscordClient} associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
      * @param guildId The ID of the guild this emoji is associated to.
      */
-    public GuildEmoji(final ServiceMediator serviceMediator, final GuildEmojiBean data, final long guildId) {
-        this.serviceMediator = Objects.requireNonNull(serviceMediator);
+    public GuildEmoji(final GatewayDiscordClient gateway, final GuildEmojiBean data, final long guildId) {
+        this.gateway = Objects.requireNonNull(gateway);
         this.data = Objects.requireNonNull(data);
         this.guildId = guildId;
     }
 
     @Override
-    public DiscordClient getClient() {
-        return serviceMediator.getClient();
+    public GatewayDiscordClient getClient() {
+        return gateway;
     }
 
     @Override
@@ -113,7 +111,7 @@ public final class GuildEmoji implements Entity {
      * is received, it is emitted through the {@code Flux}.
      */
     public Flux<Role> getRoles() {
-        return Flux.fromIterable(getRoleIds()).flatMap(id -> getClient().getRoleById(getGuildId(), id));
+        return Flux.fromIterable(getRoleIds()).flatMap(id -> gateway.getRoleById(getGuildId(), id));
     }
 
     /**
@@ -123,12 +121,11 @@ public final class GuildEmoji implements Entity {
      * an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<User> getUser() {
-        return serviceMediator.getRestClient().getEmojiService()
+        return gateway.getRestClient().getEmojiService()
                 .getGuildEmoji(getGuildId().asLong(), getId().asLong())
                 .map(GuildEmojiResponse::getUser)
                 .map(UserBean::new)
-                .map(bean -> new User(serviceMediator, bean))
-                .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex()));
+                .map(bean -> new User(gateway, bean));
     }
 
     /**
@@ -174,7 +171,7 @@ public final class GuildEmoji implements Entity {
      * to. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Guild> getGuild() {
-        return getClient().getGuildById(getGuildId());
+        return gateway.getGuildById(getGuildId());
     }
 
     /**
@@ -188,11 +185,10 @@ public final class GuildEmoji implements Entity {
         final GuildEmojiEditSpec mutatedSpec = new GuildEmojiEditSpec();
         spec.accept(mutatedSpec);
 
-        return serviceMediator.getRestClient().getEmojiService()
+        return gateway.getRestClient().getEmojiService()
                 .modifyGuildEmoji(getGuildId().asLong(), getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason())
                 .map(GuildEmojiBean::new)
-                .map(bean -> new GuildEmoji(serviceMediator, bean, getGuildId().asLong()))
-                .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex()));
+                .map(bean -> new GuildEmoji(gateway, bean, getGuildId().asLong()));
     }
 
     /**
@@ -213,9 +209,8 @@ public final class GuildEmoji implements Entity {
      * If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Void> delete(@Nullable final String reason) {
-        return serviceMediator.getRestClient().getEmojiService()
-                .deleteGuildEmoji(getGuildId().asLong(), getId().asLong(), reason)
-                .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex()));
+        return gateway.getRestClient().getEmojiService()
+                .deleteGuildEmoji(getGuildId().asLong(), getId().asLong(), reason);
     }
 
     /**

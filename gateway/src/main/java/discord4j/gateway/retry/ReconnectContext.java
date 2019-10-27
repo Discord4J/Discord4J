@@ -27,16 +27,16 @@ import java.util.concurrent.atomic.AtomicInteger;
  * calculations (through {@link #next()} and restarting the attempt count once a retry has succeeded (through
  * {@link #reset()}).
  */
-public class RetryContext {
+public class ReconnectContext {
 
     private final Duration firstBackoff;
     private final Duration maxBackoffInterval;
 
-    private AtomicBoolean connected = new AtomicBoolean(false);
-    private AtomicInteger attempts = new AtomicInteger(1);
-    private AtomicInteger resetCount = new AtomicInteger(0);
+    private final AtomicBoolean connected = new AtomicBoolean(false);
+    private final AtomicInteger attempts = new AtomicInteger(1);
+    private final AtomicInteger resetCount = new AtomicInteger(0);
 
-    public RetryContext(Duration firstBackoff, Duration maxBackoffInterval) {
+    public ReconnectContext(Duration firstBackoff, Duration maxBackoffInterval) {
         this.firstBackoff = firstBackoff;
         this.maxBackoffInterval = maxBackoffInterval;
     }
@@ -45,26 +45,29 @@ public class RetryContext {
      * Signal that the next retry attempt should be underway.
      */
     public void next() {
-        connected.compareAndSet(true, false);
-        attempts.incrementAndGet();
+        if (connected.compareAndSet(true, false)) {
+            attempts.incrementAndGet();
+        }
     }
 
     /**
      * Reset the attempt count, treating further calls to {@link #next()} as new retry sequences.
      */
     public void reset() {
-        connected.compareAndSet(false, true);
-        attempts.set(1);
-        resetCount.incrementAndGet();
+        if (connected.compareAndSet(false, true)) {
+            attempts.set(1);
+            resetCount.incrementAndGet();
+        }
     }
 
     /**
      * Clear the attempt count, treating further calls to {@link #next()} as brand new retry context.
      */
     public void clear() {
-        connected.compareAndSet(true, false);
-        attempts.set(1);
-        resetCount.set(0);
+        if (connected.compareAndSet(true, false)) {
+            attempts.set(1);
+            resetCount.set(0);
+        }
     }
 
     public Duration getFirstBackoff() {

@@ -17,5 +17,11 @@
 
 package discord4j.gateway.retry;
 
-public class PartialDisconnectException extends RuntimeException {
+import reactor.util.context.Context;
+
+public class PartialDisconnectException extends GatewayException {
+
+    public PartialDisconnectException(Context context) {
+        super(context);
+    }
 }

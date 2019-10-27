@@ -17,7 +17,7 @@
 package discord4j.core.object.entity.channel;
 
 import discord4j.common.json.MessageResponse;
-import discord4j.core.ServiceMediator;
+import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.data.stored.ChannelBean;
 import discord4j.core.object.data.stored.MessageBean;
 import discord4j.core.object.entity.Message;
@@ -43,11 +43,11 @@ class BaseMessageChannel extends BaseChannel implements MessageChannel {
     /**
      * Constructs an {@code BaseMessageChannel} with an associated ServiceMediator and Discord data.
      *
-     * @param serviceMediator The ServiceMediator associated to this object, must be non-null.
+     * @param gateway The {@link GatewayDiscordClient} associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
      */
-    BaseMessageChannel(final ServiceMediator serviceMediator, final ChannelBean data) {
-        super(serviceMediator, data);
+    BaseMessageChannel(final GatewayDiscordClient gateway, final ChannelBean data) {
+        super(gateway, data);
     }
 
     @Override
@@ -71,19 +71,16 @@ class BaseMessageChannel extends BaseChannel implements MessageChannel {
         final MessageCreateSpec mutatedSpec = new MessageCreateSpec();
         spec.accept(mutatedSpec);
 
-        return getServiceMediator().getRestClient().getChannelService()
-                .createMessage(getId().asLong(), mutatedSpec.asRequest())
+        return getRestChannel().createMessage(mutatedSpec.asRequest())
                 .map(MessageBean::new)
-                .map(bean -> new Message(getServiceMediator(), bean))
-                .subscriberContext(ctx -> ctx.put("shard", getServiceMediator().getClientConfig().getShardIndex()));
+                .map(bean -> new Message(getClient(), bean));
     }
 
     @Override
     public final Mono<Void> type() {
-        return getServiceMediator().getRestClient().getChannelService()
+        return getClient().getRestClient().getChannelService()
                 .triggerTypingIndicator(getId().asLong())
-                .then()
-                .subscriberContext(ctx -> ctx.put("shard", getServiceMediator().getClientConfig().getShardIndex()));
+                .then();
     }
 
     @Override
@@ -102,27 +99,23 @@ class BaseMessageChannel extends BaseChannel implements MessageChannel {
     @Override
     public final Flux<Message> getMessagesBefore(final Snowflake messageId) {
         final Function<Map<String, Object>, Flux<MessageResponse>> doRequest = params ->
-                getServiceMediator().getRestClient().getChannelService()
-                        .getMessages(getId().asLong(), params)
-                        .subscriberContext(ctx -> ctx.put("shard",
-                                getServiceMediator().getClientConfig().getShardIndex()));
+                getClient().getRestClient().getChannelService()
+                        .getMessages(getId().asLong(), params);
 
         return PaginationUtil.paginateBefore(doRequest, MessageResponse::getId, messageId.asLong(), 100)
                 .map(MessageBean::new)
-                .map(bean -> new Message(getServiceMediator(), bean));
+                .map(bean -> new Message(getClient(), bean));
     }
 
     @Override
     public final Flux<Message> getMessagesAfter(final Snowflake messageId) {
         final Function<Map<String, Object>, Flux<MessageResponse>> doRequest = params ->
-                getServiceMediator().getRestClient().getChannelService()
-                        .getMessages(getId().asLong(), params)
-                        .subscriberContext(ctx -> ctx.put("shard",
-                                getServiceMediator().getClientConfig().getShardIndex()));
+                getClient().getRestClient().getChannelService()
+                        .getMessages(getId().asLong(), params);
 
         return PaginationUtil.paginateAfter(doRequest, MessageResponse::getId, messageId.asLong(), 100)
                 .map(MessageBean::new)
-                .map(bean -> new Message(getServiceMediator(), bean));
+                .map(bean -> new Message(getClient(), bean));
     }
 
     @Override
@@ -132,11 +125,10 @@ class BaseMessageChannel extends BaseChannel implements MessageChannel {
 
     @Override
     public final Flux<Message> getPinnedMessages() {
-        return getServiceMediator().getRestClient().getChannelService()
+        return getClient().getRestClient().getChannelService()
                 .getPinnedMessages(getId().asLong())
                 .map(MessageBean::new)
-                .map(bean -> new Message(getServiceMediator(), bean))
-                .subscriberContext(ctx -> ctx.put("shard", getServiceMediator().getClientConfig().getShardIndex()));
+                .map(bean -> new Message(getClient(), bean));
     }
 
     @Override

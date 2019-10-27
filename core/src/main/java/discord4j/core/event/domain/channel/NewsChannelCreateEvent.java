@@ -16,8 +16,9 @@
  */
 package discord4j.core.event.domain.channel;
 
-import discord4j.core.DiscordClient;
+import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.channel.NewsChannel;
+import discord4j.gateway.ShardInfo;
 
 /**
  * Dispatched when a {@link NewsChannel} is created in a guild.
@@ -30,8 +31,8 @@ public class NewsChannelCreateEvent extends ChannelEvent {
 
     private final NewsChannel channel;
 
-    public NewsChannelCreateEvent(DiscordClient client, NewsChannel channel) {
-        super(client);
+    public NewsChannelCreateEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, NewsChannel channel) {
+        super(gateway, shardInfo);
         this.channel = channel;
     }
 

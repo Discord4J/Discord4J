@@ -17,8 +17,9 @@
 package discord4j.gateway;
 
 import discord4j.common.GitProperties;
+import discord4j.common.LogUtil;
+import discord4j.common.ReactorResources;
 import discord4j.common.ResettableInterval;
-import discord4j.common.SimpleBucket;
 import discord4j.common.close.CloseException;
 import discord4j.common.close.CloseStatus;
 import discord4j.gateway.json.GatewayPayload;
@@ -29,34 +30,28 @@ import discord4j.gateway.json.dispatch.Ready;
 import discord4j.gateway.json.dispatch.Resumed;
 import discord4j.gateway.payload.PayloadReader;
 import discord4j.gateway.payload.PayloadWriter;
-import discord4j.gateway.retry.GatewayStateChange;
-import discord4j.gateway.retry.PartialDisconnectException;
-import discord4j.gateway.retry.RetryContext;
-import discord4j.gateway.retry.RetryOptions;
+import discord4j.gateway.retry.*;
 import io.netty.buffer.ByteBuf;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.*;
-import reactor.core.scheduler.Schedulers;
 import reactor.netty.ConnectionObserver;
-import reactor.netty.http.client.HttpClient;
 import reactor.retry.Retry;
 import reactor.util.Logger;
 import reactor.util.Loggers;
-import reactor.util.annotation.Nullable;
+import reactor.util.context.Context;
+import reactor.util.function.Tuples;
 
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Objects;
 import java.util.Properties;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.logging.Level;
 
+import static discord4j.common.LogUtil.format;
 import static io.netty.handler.codec.http.HttpHeaderNames.USER_AGENT;
 
 /**
@@ -76,15 +71,16 @@ import static io.netty.handler.codec.http.HttpHeaderNames.USER_AGENT;
 public class DefaultGatewayClient implements GatewayClient {
 
     // basic properties
-    private final Logger log;
-    private final HttpClient httpClient;
+    private final ReactorResources reactorResources;
     private final PayloadReader payloadReader;
     private final PayloadWriter payloadWriter;
-    private final RetryOptions retryOptions;
+    private final ReconnectOptions reconnectOptions;
+    private final ReconnectContext reconnectContext;
     private final IdentifyOptions identifyOptions;
     private final String token;
-    private final GatewayObserver initialObserver;
+    private final GatewayObserver observer;
     private final PayloadTransformer identifyLimiter;
+    private final ResettableInterval heartbeat;
 
     // reactive pipelines
     private final EmitterProcessor<ByteBuf> receiver = EmitterProcessor.create(false);
@@ -98,183 +94,163 @@ public class DefaultGatewayClient implements GatewayClient {
     private final FluxSink<GatewayPayload<?>> outboundSink;
     private final FluxSink<GatewayPayload<Heartbeat>> heartbeatSink;
 
-    // mutable state
+    // mutable state, modified here and at PayloadHandlers
     private final AtomicBoolean connected = new AtomicBoolean(false);
     private final AtomicBoolean resumable = new AtomicBoolean(true);
     private final AtomicInteger sequence = new AtomicInteger(0);
+    private final AtomicReference<String> sessionId = new AtomicReference<>("");
     private final AtomicLong lastSent = new AtomicLong(0);
     private final AtomicLong lastAck = new AtomicLong(0);
     private final AtomicLong responseTime = new AtomicLong(0);
-    private final ResettableInterval heartbeat = new ResettableInterval();
-    private final AtomicReference<String> sessionId = new AtomicReference<>("");
-    private volatile GatewayObserver observer;
     private volatile MonoProcessor<Void> disconnectNotifier;
-    private volatile MonoProcessor<CloseStatus> closeTrigger;
+    private volatile DiscordWebSocketHandler sessionHandler;
 
     /**
      * Initializes a new GatewayClient.
      *
-     * @param httpClient the underlying HttpClient used to perform the connection
-     * @param payloadReader strategy to read and decode incoming gateway messages
-     * @param payloadWriter strategy to encode and write outgoing gateway messages
-     * @param retryOptions reconnect policy used in this client
-     * @param token Discord bot token
-     * @param identifyOptions used to IDENTIFY or RESUME a gateway connection, specifying the sharding options
-     * and to set an initial presence
-     * @param observer consumer observing gateway and underlying websocket lifecycle changes, can be {@code null}
-     * @param identifyLimiter rate-limiting policy used for IDENTIFY requests, allowing shard coordination
+     * @param options the {@link GatewayOptions} to configure this client
      */
-    public DefaultGatewayClient(HttpClient httpClient, PayloadReader payloadReader, PayloadWriter payloadWriter,
-                                RetryOptions retryOptions, String token, IdentifyOptions identifyOptions,
-                                @Nullable GatewayObserver observer, PayloadTransformer identifyLimiter) {
-        this.httpClient = Objects.requireNonNull(httpClient);
-        this.payloadReader = Objects.requireNonNull(payloadReader);
-        this.payloadWriter = Objects.requireNonNull(payloadWriter);
-        this.retryOptions = Objects.requireNonNull(retryOptions);
-        this.token = Objects.requireNonNull(token);
-        this.identifyOptions = Objects.requireNonNull(identifyOptions);
-        this.initialObserver = observer;
-        this.identifyLimiter = Objects.requireNonNull(identifyLimiter);
-        this.receiverSink = receiver.sink(FluxSink.OverflowStrategy.LATEST);
-        this.senderSink = sender.sink(FluxSink.OverflowStrategy.LATEST);
-        this.dispatchSink = dispatch.sink(FluxSink.OverflowStrategy.LATEST);
-        this.outboundSink = outbound.sink(FluxSink.OverflowStrategy.LATEST);
-        this.heartbeatSink = heartbeats.sink(FluxSink.OverflowStrategy.LATEST);
-        this.log = shardLogger(".client");
+    public DefaultGatewayClient(GatewayOptions options) {
+        this.token = Objects.requireNonNull(options.getToken());
+        this.reactorResources = Objects.requireNonNull(options.getReactorResources());
+        this.payloadReader = Objects.requireNonNull(options.getPayloadReader());
+        this.payloadWriter = Objects.requireNonNull(options.getPayloadWriter());
+        this.reconnectOptions = options.getReconnectOptions();
+        this.reconnectContext = new ReconnectContext(reconnectOptions.getFirstBackoff(),
+                reconnectOptions.getMaxBackoffInterval());
+        this.identifyOptions = Objects.requireNonNull(options.getIdentifyOptions());
+        this.observer = options.getInitialObserver();
+        this.identifyLimiter = Objects.requireNonNull(options.getIdentifyLimiter());
+        // TODO: consider exposing OverflowStrategy to GatewayOptions
+        this.receiverSink = receiver.sink(FluxSink.OverflowStrategy.BUFFER);
+        this.senderSink = sender.sink(FluxSink.OverflowStrategy.ERROR);
+        this.dispatchSink = dispatch.sink(FluxSink.OverflowStrategy.BUFFER);
+        this.outboundSink = outbound.sink(FluxSink.OverflowStrategy.ERROR);
+        this.heartbeatSink = heartbeats.sink(FluxSink.OverflowStrategy.ERROR);
+        this.heartbeat = new ResettableInterval(reactorResources.getTimerTaskScheduler());
     }
 
     @Override
     public Mono<Void> execute(String gatewayUrl) {
-        return execute(gatewayUrl, GatewayObserver.NOOP_LISTENER);
-    }
+        return Mono.subscriberContext()
+                .flatMap(context -> {
+                    disconnectNotifier = MonoProcessor.create();
+                    lastAck.set(0);
+                    lastSent.set(0);
 
-    @Override
-    public Mono<Void> execute(String gatewayUrl, GatewayObserver additionalObserver) {
-        return Mono.defer(() -> {
-            disconnectNotifier = MonoProcessor.create();
-            closeTrigger = MonoProcessor.create();
-            observer = initialObserver == null ? additionalObserver : initialObserver.then(additionalObserver);
-            lastAck.set(0);
-            lastSent.set(0);
+                    MonoProcessor<Void> ping = MonoProcessor.create();
 
-            Logger senderLog = shardLogger(".sender");
-            Logger receiverLog = shardLogger(".receiver");
+                    // Setup the sending logic from multiple sources into one merged Flux
+                    Flux<ByteBuf> identifyFlux = outbound.filter(payload -> Opcode.IDENTIFY.equals(payload.getOp()))
+                            .delayUntil(payload -> ping)
+                            .flatMap(payload -> Flux.from(payloadWriter.write(payload)))
+                            .map(buf -> Tuples.of((GatewayClient) this, buf))
+                            .transform(identifyLimiter);
+                    Flux<ByteBuf> payloadFlux = outbound.filter(payload -> !Opcode.IDENTIFY.equals(payload.getOp()))
+                            .doOnEach(s -> outboundLog.debug(format(context, s.toString())))
+                            .flatMap(payload -> Flux.from(payloadWriter.write(payload)))
+                            .transform(buf -> Flux.merge(buf, sender))
+                            .map(buf -> Tuples.of((GatewayClient) this, buf))
+                            .transform(new PoolingTransformer(outboundLimiterCapacity(), Duration.ofSeconds(60)));
+                    Flux<ByteBuf> heartbeatFlux =
+                            heartbeats.flatMap(payload -> Flux.from(payloadWriter.write(payload)));
+                    Flux<ByteBuf> outFlux = Flux.merge(heartbeatFlux, identifyFlux, payloadFlux)
+                            .doOnNext(buf -> logPayload(senderLog, context, buf));
 
-            // Setup the sending logic from multiple sources into one merged Flux
-            Flux<ByteBuf> identifyFlux = outbound.filter(payload -> Opcode.IDENTIFY.equals(payload.getOp()))
-                    .flatMap(payload -> Flux.from(payloadWriter.write(payload)))
-                    .transform(identifyLimiter);
-            PayloadTransformer limiter = new RateLimiterTransformer(
-                    new SimpleBucket(outboundLimiterCapacity(), Duration.ofSeconds(60)));
-            Flux<ByteBuf> payloadFlux = outbound.filter(payload -> !Opcode.IDENTIFY.equals(payload.getOp()))
-                    .log(shardLogger(".outbound"), Level.FINE, false)
-                    .flatMap(payload -> Flux.from(payloadWriter.write(payload)))
-                    .transform(buf -> Flux.merge(buf, sender))
-                    .transform(limiter);
-            Flux<ByteBuf> heartbeatFlux = heartbeats.flatMap(payload -> Flux.from(payloadWriter.write(payload)));
-            Flux<ByteBuf> outFlux = Flux.merge(heartbeatFlux, identifyFlux, payloadFlux)
-                    .doOnNext(buf -> trace(senderLog, buf));
+                    sessionHandler = new DiscordWebSocketHandler(receiverSink, outFlux, context);
 
-            int shard = identifyOptions.getShardIndex();
-            DiscordWebSocketHandler handler = new DiscordWebSocketHandler(receiverSink, outFlux, closeTrigger, shard);
+                    Integer resumeSequence = identifyOptions.getResumeSequence();
+                    if (resumeSequence != null && resumeSequence > 0) {
+                        this.sequence.set(identifyOptions.getResumeSequence());
+                        this.sessionId.set(identifyOptions.getResumeSessionId());
+                    } else {
+                        resumable.set(false);
+                    }
 
-            if (identifyOptions.getResumeSequence() != null) {
-                this.sequence.set(identifyOptions.getResumeSequence());
-                this.sessionId.set(identifyOptions.getResumeSessionId());
-            } else {
-                resumable.set(false);
-            }
+                    Mono<Void> readyHandler = dispatch.filter(DefaultGatewayClient::isReadyOrResume)
+                            .doOnNext(event -> {
+                                connected.set(true);
+                                ConnectionObserver.State state;
+                                if (reconnectContext.getResetCount() == 0) {
+                                    log.info(format(context, "Connected to Gateway"));
+                                    dispatchSink.next(GatewayStateChange.connected());
+                                    state = GatewayObserver.CONNECTED;
+                                } else {
+                                    log.info(format(context, "Reconnected to Gateway"));
+                                    dispatchSink.next(GatewayStateChange.retrySucceeded(reconnectContext.getAttempts()));
+                                    state = GatewayObserver.RETRY_SUCCEEDED;
+                                }
+                                reconnectContext.reset();
+                                identifyOptions.setResumeSessionId(sessionId.get());
+                                resumable.set(true);
+                                notifyObserver(state, identifyOptions);
+                            })
+                            .then();
 
-            Mono<Void> readyHandler = dispatch.filter(DefaultGatewayClient::isReadyOrResume)
-                    .flatMap(event -> {
-                        connected.compareAndSet(false, true);
-                        RetryContext retryContext = retryOptions.getRetryContext();
-                        ConnectionObserver.State state;
-                        if (retryContext.getResetCount() == 0) {
-                            log.info("Connected to Gateway");
-                            dispatchSink.next(GatewayStateChange.connected());
-                            state = GatewayObserver.CONNECTED;
-                        } else {
-                            log.info("Reconnected to Gateway");
-                            dispatchSink.next(GatewayStateChange.retrySucceeded(retryContext.getAttempts()));
-                            state = GatewayObserver.RETRY_SUCCEEDED;
-                        }
-                        retryContext.reset();
-                        identifyOptions.setResumeSessionId(sessionId.get());
-                        resumable.set(true);
-                        notifyObserver(state, identifyOptions);
-                        return Mono.just(event);
-                    })
-                    .then()
-                    .log(shardLogger(".zip.ready"), Level.FINEST, false);
+                    // Subscribe the receiver to process and transform the inbound payloads into Dispatch events
+                    Mono<Void> receiverFuture = receiver
+                            .doOnNext(buf -> logPayload(receiverLog, context, buf))
+                            .flatMap(payloadReader::read)
+                            .doOnEach(s -> inboundLog.debug(format(context, s.toString())))
+                            .doOnNext(payload -> {
+                                if (Opcode.HEARTBEAT_ACK.equals(payload.getOp())) {
+                                    ping.onComplete();
+                                }
+                            })
+                            .map(this::updateSequence)
+                            .map(payload -> new PayloadContext<>(payload, sessionHandler, this, context))
+                            .doOnNext(PayloadHandlers::handle)
+                            .then();
 
-            // Subscribe the receiver to process and transform the inbound payloads into Dispatch events
-            Flux<GatewayPayload<?>> receiverFlux = receiver.doOnNext(buf -> trace(receiverLog, buf))
-                    .flatMap(payloadReader::read);
+                    // Subscribe the handler's outbound exchange with our outbound signals
+                    // routing completion signals to close the gateway
+                    Mono<Void> senderFuture = outbound.doOnComplete(sessionHandler::close)
+                            .doOnNext(payload -> {
+                                if (Opcode.RECONNECT.equals(payload.getOp())) {
+                                    sessionHandler.error(
+                                            new GatewayException(context, "Reconnecting due to user action"));
+                                }
+                            })
+                            .then();
 
-            Mono<Void> receiverFuture = receiverFlux.filter(payload -> !Opcode.HEARTBEAT_ACK.equals(payload.getOp()))
-                    .log(shardLogger(".inbound"), Level.FINE, false)
-                    .map(this::updateSequence)
-                    .map(payload -> new PayloadContext<>(payload, handler, this))
-                    .doOnNext(PayloadHandlers::handle)
-                    .then()
-                    .log(shardLogger(".zip.receiver"), Level.FINEST, false);
+                    // Create the heartbeat loop, and subscribe it using the sender sink
+                    Mono<Void> heartbeatHandler = heartbeat.ticks()
+                            .flatMap(t -> {
+                                long now = System.nanoTime();
+                                lastAck.compareAndSet(0, now);
+                                long delay = now - lastAck.get();
+                                if (lastSent.get() - lastAck.get() > 0) {
+                                    log.warn(format(context, "Missing heartbeat ACK for {}"), Duration.ofNanos(delay));
+                                    sessionHandler.error(new GatewayException(context,
+                                            "Reconnecting due to zombie or failed connection"));
+                                    return Mono.empty();
+                                } else {
+                                    log.debug(format(context, "Sending heartbeat {} after last ACK"),
+                                            Duration.ofNanos(delay));
+                                    lastSent.set(now);
+                                    return Mono.just(GatewayPayload.heartbeat(new Heartbeat(sequence.get())));
+                                }
+                            })
+                            .doOnNext(heartbeatSink::next)
+                            .then();
 
-            Mono<Void> ackFuture = receiverFlux.filter(payload -> Opcode.HEARTBEAT_ACK.equals(payload.getOp()))
-                    .map(payload -> new PayloadContext<>(payload, handler, this))
-                    .publishOn(Schedulers.elastic())
-                    .doOnNext(PayloadHandlers::handle)
-                    .then()
-                    .log(shardLogger(".zip.ack"), Level.FINEST, false);
+                    Mono<Void> httpFuture = reactorResources.getHttpClient()
+                            .headers(headers -> headers.add(USER_AGENT, initUserAgent()))
+                            .observe(getObserver(context))
+                            .websocket(Integer.MAX_VALUE)
+                            .uri(gatewayUrl)
+                            .handle(sessionHandler::handle)
+                            .flatMap(t2 -> handleClose(t2.getT1(), t2.getT2(), context))
+                            .then();
 
-            // Subscribe the handler's outbound exchange with our outgoing signals
-            // routing completion signals to close the gateway
-            Mono<Void> senderFuture = outbound.doOnComplete(handler::close)
-                    .doOnNext(payload -> {
-                        if (Opcode.RECONNECT.equals(payload.getOp())) {
-                            handler.error(new RuntimeException("Reconnecting due to user action"));
-                        }
-                    })
-                    .then()
-                    .log(shardLogger(".zip.sender"), Level.FINEST, false);
-
-            // Create the heartbeat loop, and subscribe it using the sender sink
-            Mono<Void> heartbeatHandler = heartbeat.ticks()
-                    .flatMap(t -> {
-                        long now = System.nanoTime();
-                        lastAck.compareAndSet(0, now);
-                        long delay = now - lastAck.get();
-                        if (lastSent.get() - lastAck.get() > 0) {
-                            log.warn("Missing heartbeat ACK for {}", Duration.ofNanos(delay));
-                            handler.error(new RuntimeException("Reconnecting due to zombie or failed connection"));
-                            return Mono.empty();
-                        } else {
-                            log.debug("Sending heartbeat {} after last ACK", Duration.ofNanos(delay));
-                            lastSent.set(now);
-                            return Mono.just(GatewayPayload.heartbeat(new Heartbeat(sequence.get())));
-                        }
-                    })
-                    .doOnNext(heartbeatSink::next)
-                    .then()
-                    .log(shardLogger(".zip.heartbeat"), Level.FINEST, false);
-
-            Mono<Void> httpFuture = httpClient
-                    .headers(headers -> headers.add(USER_AGENT, initUserAgent()))
-                    .observe(getObserver())
-                    .websocket(Integer.MAX_VALUE)
-                    .uri(gatewayUrl)
-                    .handle(handler::handle)
-                    .doOnTerminate(heartbeat::stop)
-                    .then()
-                    .log(shardLogger(".zip.http"), Level.FINEST, false);
-
-            return Mono.zip(httpFuture, readyHandler, receiverFuture, ackFuture, senderFuture, heartbeatHandler)
-                    .doOnError(logReconnectReason())
-                    .then();
-        })
+                    return Mono.zip(httpFuture, readyHandler, receiverFuture, senderFuture, heartbeatHandler)
+                            .doOnError(t -> log.error(format(context, "{}"), t.toString()))
+                            .doOnCancel(() -> sessionHandler.close())
+                            .then();
+                })
                 .retryWhen(retryFactory())
-                .doOnCancel(() -> closeTrigger.onNext(CloseStatus.NORMAL_CLOSE))
-                .then(Mono.defer(() -> disconnectNotifier));
+                .then(Mono.defer(() -> disconnectNotifier))
+                .doOnTerminate(heartbeat::stop);
     }
 
     private String initUserAgent() {
@@ -284,15 +260,9 @@ public class DefaultGatewayClient implements GatewayClient {
         return "DiscordBot(" + url + ", " + version + ")";
     }
 
-    private void trace(Logger log, ByteBuf buf) {
-        if (log.isTraceEnabled()) {
-            log.trace(buf.toString(StandardCharsets.UTF_8)
-                    .replaceAll("(\"token\": ?\")([A-Za-z0-9.-]*)(\")", "$1hunter2$3"));
-        }
-    }
-
-    private Logger shardLogger(String gateway) {
-        return Loggers.getLogger("discord4j.gateway" + gateway + "." + identifyOptions.getShardIndex());
+    private void logPayload(Logger log, Context context, ByteBuf buf) {
+        LogUtil.traceDebug(log, trace -> format(context, LogUtil.formatValue(buf.toString(StandardCharsets.UTF_8)
+                .replaceAll("(\"token\": ?\")([A-Za-z0-9.-]*)(\")", "$1hunter2$3"), !trace)));
     }
 
     private static boolean isReadyOrResume(Dispatch d) {
@@ -308,34 +278,35 @@ public class DefaultGatewayClient implements GatewayClient {
         return payload;
     }
 
-    private Retry<RetryContext> retryFactory() {
-        return Retry.<RetryContext>onlyIf(t -> isRetryable(t.exception()))
-                .withApplicationContext(retryOptions.getRetryContext())
-                .withBackoffScheduler(retryOptions.getBackoffScheduler())
-                .backoff(retryOptions.getBackoff())
-                .jitter(retryOptions.getJitter())
-                .retryMax(retryOptions.getMaxRetries())
-                .doOnRetry(context -> {
-                    connected.compareAndSet(true, false);
-                    int attempt = context.applicationContext().getAttempts();
-                    long backoff = context.backoff().toMillis();
-                    log.info("Retry attempt {} in {} ms", attempt, backoff);
+    private Retry<ReconnectContext> retryFactory() {
+        return Retry.<ReconnectContext>onlyIf(t -> isRetryable(t.exception()))
+                .withApplicationContext(reconnectContext)
+                .withBackoffScheduler(reconnectOptions.getBackoffScheduler())
+                .backoff(reconnectOptions.getBackoff())
+                .jitter(reconnectOptions.getJitter())
+                .retryMax(reconnectOptions.getMaxRetries())
+                .doOnRetry(retryContext -> {
+                    connected.set(false);
+                    int attempt = retryContext.applicationContext().getAttempts();
+                    Duration backoff = retryContext.backoff();
+                    log.info(format(getContextFromException(retryContext.exception()),
+                            "Reconnect attempt {} in {}"), attempt, backoff);
                     if (attempt == 1) {
-                        dispatchSink.next(GatewayStateChange.retryStarted(Duration.ofMillis(backoff)));
-                        if (!resumable.get() || !isResumableError(context.exception())) {
-                            resumable.compareAndSet(true, false);
+                        if (!resumable.get() || !isResumableError(retryContext.exception())) {
+                            dispatchSink.next(GatewayStateChange.retryStarted(backoff));
+                            resumable.set(false);
                             notifyObserver(GatewayObserver.RETRY_STARTED, identifyOptions);
                         } else {
+                            dispatchSink.next(GatewayStateChange.retryStartedResume(backoff));
                             notifyObserver(GatewayObserver.RETRY_RESUME_STARTED, identifyOptions);
                         }
                     } else {
-                        dispatchSink.next(GatewayStateChange.retryFailed(attempt - 1,
-                                Duration.ofMillis(backoff)));
+                        dispatchSink.next(GatewayStateChange.retryFailed(attempt - 1, backoff));
                         // TODO: add attempt/backoff values to GatewayObserver
                         notifyObserver(GatewayObserver.RETRY_FAILED, identifyOptions);
                         resumable.set(false);
                     }
-                    context.applicationContext().next();
+                    retryContext.applicationContext().next();
                 });
     }
 
@@ -355,37 +326,49 @@ public class DefaultGatewayClient implements GatewayClient {
         return true;
     }
 
-    private Consumer<Throwable> logReconnectReason() {
-        return t -> {
-            if ((t instanceof CloseException && isResumableError(t)) || t instanceof PartialDisconnectException) {
-                log.error("Gateway client error: {}", t.toString());
-            } else {
-                log.error("Gateway client error", t);
-            }
-        };
+    private Context getContextFromException(Throwable t) {
+        if (t instanceof CloseException) {
+            return ((CloseException) t).getContext();
+        }
+        if (t instanceof GatewayException) {
+            return ((GatewayException) t).getContext();
+        }
+        return Context.empty();
     }
 
-    private ConnectionObserver getObserver() {
-        return (connection, newState) -> {
-            log.debug("{} {}", newState, connection);
-            if (closeTrigger.isTerminated() && newState == ConnectionObserver.State.DISCONNECTING) {
-                log.info("Disconnected from Gateway");
-                retryOptions.getRetryContext().clear();
-                connected.compareAndSet(true, false);
-                lastSent.set(0);
-                lastAck.set(0);
-                responseTime.set(0);
-                dispatchSink.next(GatewayStateChange.disconnected());
-                if (closeTrigger.isError()) {
-                    notifyObserver(GatewayObserver.DISCONNECTED_RESUME, identifyOptions);
-                } else {
-                    resumable.set(false);
-                    sequence.set(0);
-                    sessionId.set("");
-                    notifyObserver(GatewayObserver.DISCONNECTED, identifyOptions);
-                }
+    private Mono<CloseStatus> handleClose(DisconnectBehavior behavior, CloseStatus closeStatus, Context context) {
+        reconnectContext.clear();
+        connected.set(false);
+        lastSent.set(0);
+        lastAck.set(0);
+        responseTime.set(0);
+
+        if (behavior.getAction() == DisconnectBehavior.Action.STOP_ABRUPTLY) {
+            dispatchSink.next(GatewayStateChange.disconnectedResume());
+            notifyObserver(GatewayObserver.DISCONNECTED_RESUME, identifyOptions);
+        } else if (behavior.getAction() == DisconnectBehavior.Action.STOP) {
+            dispatchSink.next(GatewayStateChange.disconnected());
+            resumable.set(false);
+            sequence.set(0);
+            sessionId.set("");
+            notifyObserver(GatewayObserver.DISCONNECTED, identifyOptions);
+        }
+
+        switch (behavior.getAction()) {
+            case STOP_ABRUPTLY:
+            case STOP:
                 disconnectNotifier.onComplete();
-            }
+                return Mono.just(closeStatus);
+            case RETRY_ABRUPTLY:
+            case RETRY:
+            default:
+                return Mono.error(new CloseException(closeStatus, context, behavior.getCause()));
+        }
+    }
+
+    private ConnectionObserver getObserver(Context context) {
+        return (connection, newState) -> {
+            log.debug(format(context, "{} {}"), newState, connection);
             notifyObserver(newState, identifyOptions);
         };
     }
@@ -397,16 +380,15 @@ public class DefaultGatewayClient implements GatewayClient {
     @Override
     public Mono<Void> close(boolean allowResume) {
         return Mono.defer(() -> {
-            if (closeTrigger == null || disconnectNotifier == null) {
+            if (sessionHandler == null || disconnectNotifier == null) {
                 return Mono.error(new IllegalStateException("Gateway client is not active!"));
             }
             if (allowResume) {
-                closeTrigger.onError(new PartialDisconnectException());
+                sessionHandler.close(DisconnectBehavior.stopAbruptly(null));
             } else {
-                closeTrigger.onNext(CloseStatus.NORMAL_CLOSE);
+                sessionHandler.close(DisconnectBehavior.stop(null));
             }
-            return disconnectNotifier
-                    .log(shardLogger(".disconnect"), Level.FINE, false);
+            return disconnectNotifier;
         });
     }
 
@@ -531,15 +513,6 @@ public class DefaultGatewayClient implements GatewayClient {
         return identifyOptions;
     }
 
-    /**
-     * Gets the configuration object for gateway reconnection procedure.
-     *
-     * @return a RetryOptions configuration object
-     */
-    RetryOptions retryOptions() {
-        return retryOptions;
-    }
-
     // Initializers to customize internal outbound rate-limiter
 
     /**
@@ -548,16 +521,22 @@ public class DefaultGatewayClient implements GatewayClient {
      */
     private static final String OUTBOUND_CAPACITY_PROPERTY = "discord4j.gateway.outbound.capacity";
 
-    private long outboundLimiterCapacity() {
+    private int outboundLimiterCapacity() {
         String capacityValue = System.getProperty(OUTBOUND_CAPACITY_PROPERTY);
         if (capacityValue != null) {
             try {
-                long capacity = Long.valueOf(capacityValue);
-                shardLogger("").info("Overriding default outbound limiter capacity: {}", capacity);
+                int capacity = Integer.parseInt(capacityValue);
+                log.info("Overriding default outbound limiter capacity: {}", capacity);
             } catch (NumberFormatException e) {
-                shardLogger("").warn("Invalid custom outbound limiter capacity: {}", capacityValue);
+                log.warn("Invalid custom outbound limiter capacity: {}", capacityValue);
             }
         }
         return 115;
     }
+
+    private static final Logger log = Loggers.getLogger("discord4j.gateway.client");
+    private static final Logger senderLog = Loggers.getLogger("discord4j.gateway.payload.outbound");
+    private static final Logger receiverLog = Loggers.getLogger("discord4j.gateway.payload.inbound");
+    private static final Logger outboundLog = Loggers.getLogger("discord4j.gateway.outbound");
+    private static final Logger inboundLog = Loggers.getLogger("discord4j.gateway.inbound");
 }

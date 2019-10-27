@@ -16,7 +16,7 @@
  */
 package discord4j.core.object.entity.channel;
 
-import discord4j.core.ServiceMediator;
+import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.data.stored.ChannelBean;
 import discord4j.core.spec.StoreChannelEditSpec;
 import discord4j.core.util.EntityUtil;
@@ -30,11 +30,11 @@ public final class StoreChannel extends BaseCategorizableChannel {
     /**
      * Constructs an {@code StoreChannel} with an associated ServiceMediator and Discord data.
      *
-     * @param serviceMediator The ServiceMediator associated to this object, must be non-null.
+     * @param gateway The {@link GatewayDiscordClient} associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
      */
-    public StoreChannel(ServiceMediator serviceMediator, ChannelBean data) {
-        super(serviceMediator, data);
+    public StoreChannel(GatewayDiscordClient gateway, ChannelBean data) {
+        super(gateway, data);
     }
 
     /**
@@ -48,12 +48,11 @@ public final class StoreChannel extends BaseCategorizableChannel {
         final StoreChannelEditSpec mutatedSpec = new StoreChannelEditSpec();
         spec.accept(mutatedSpec);
 
-        return getServiceMediator().getRestClient().getChannelService()
+        return getClient().getRestClient().getChannelService()
                 .modifyChannel(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason())
                 .map(ChannelBean::new)
-                .map(bean -> EntityUtil.getChannel(getServiceMediator(), bean))
-                .cast(StoreChannel.class)
-                .subscriberContext(ctx -> ctx.put("shard", getServiceMediator().getClientConfig().getShardIndex()));
+                .map(bean -> EntityUtil.getChannel(getClient(), bean))
+                .cast(StoreChannel.class);
     }
 
     @Override

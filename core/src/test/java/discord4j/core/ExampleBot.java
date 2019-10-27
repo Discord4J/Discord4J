@@ -19,14 +19,13 @@ package discord4j.core;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.LoggerContext;
-import discord4j.core.event.domain.lifecycle.ReadyEvent;
-import discord4j.core.event.domain.lifecycle.ResumeEvent;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.*;
 import discord4j.core.object.entity.channel.TextChannel;
 import discord4j.core.object.reaction.ReactionEmoji;
 import discord4j.core.object.util.Image;
 import discord4j.core.object.util.Snowflake;
+import discord4j.rest.entity.data.ApplicationInfoData;
 import discord4j.rest.request.RouteMatcher;
 import discord4j.rest.request.RouterOptions;
 import discord4j.rest.response.ResponseFunction;
@@ -48,7 +47,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 public class ExampleBot {
@@ -69,7 +67,7 @@ public class ExampleBot {
                 .allowBlockingCallsInside("java.io.FileInputStream", "readBytes")
                 .install();
 
-        DiscordClient client = new DiscordClientBuilder(token)
+        DiscordClient client = DiscordClient.builder(token)
                 .setRouterOptions(RouterOptions.builder()
                         // globally suppress any not found (404) error
                         .onClientResponse(ResponseFunction.emptyIfNotFound())
@@ -80,14 +78,9 @@ public class ExampleBot {
                 .build();
 
         // Get the bot owner ID to filter commands
-        AtomicLong ownerId = new AtomicLong();
-        Flux.first(client.getEventDispatcher().on(ReadyEvent.class),
-                client.getEventDispatcher().on(ResumeEvent.class))
-                .next()
-                .flatMap(evt -> client.getApplicationInfo())
-                .map(ApplicationInfo::getOwnerId)
-                .map(Snowflake::asLong)
-                .subscribe(ownerId::set);
+        Mono<Long> ownerId = client.getApplicationInfo()
+                .map(ApplicationInfoData::getOwnerId)
+                .cache();
 
         // Create our event handlers
         List<EventHandler> eventHandlers = new ArrayList<>();
@@ -100,24 +93,23 @@ public class ExampleBot {
         eventHandlers.add(new BurstMessages());
 
         // Build a safe event-processing pipeline
-        Mono<Void> events = client.getEventDispatcher()
-                .on(MessageCreateEvent.class, event -> {
-                    boolean fromOwner = event.getMessage().getAuthor()
-                            .map(User::getId)
-                            .map(Snowflake::asLong)
-                            .filter(id -> ownerId.get() == id)
-                            .isPresent();
-                    if (fromOwner) {
-                        return Mono.whenDelayError(eventHandlers.stream()
-                                .map(handler -> handler.onMessageCreate(event))
-                                .collect(Collectors.toList()));
-                    } else {
-                        return Mono.empty();
-                    }
+        GatewayDiscordClient gateway = client.login().block();
+        assert gateway != null;
+
+        Mono<Void> events = gateway.on(MessageCreateEvent.class, event -> ownerId
+                .filter(owner -> {
+                    Long author = event.getMessage().getAuthor()
+                            .map(u -> u.getId().asLong())
+                            .orElse(null);
+                    return owner.equals(author);
                 })
+                .flatMap(id -> Mono.when(eventHandlers.stream()
+                        .map(handler -> handler.onMessageCreate(event))
+                        .collect(Collectors.toList()))
+                ))
                 .then();
 
-        Mono.when(events, client.login()).block();
+        Mono.when(events, gateway.onDisconnect()).block();
     }
 
     public static class AddRole extends EventHandler {

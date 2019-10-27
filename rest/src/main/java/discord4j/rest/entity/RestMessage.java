@@ -15,11 +15,27 @@
  * along with Discord4J. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package discord4j.core;
+package discord4j.rest.entity;
 
-/**
- * Unchecked exception indicating that an attempt to create a connection has failed because an active
- * connection to the same destination already exists.
- */
-public class AlreadyConnectedException extends RuntimeException {
+import discord4j.rest.RestClient;
+import discord4j.rest.entity.data.MessageData;
+import reactor.core.publisher.Mono;
+
+public class RestMessage {
+
+    private final RestClient restClient;
+    private final long channelId;
+    private final long id;
+
+    public RestMessage(RestClient restClient, long channelId, long id) {
+        this.restClient = restClient;
+        this.channelId = channelId;
+        this.id = id;
+    }
+
+    public Mono<MessageData> getData() {
+        return restClient.getChannelService()
+                .getMessage(channelId, id)
+                .map(MessageData::new);
+    }
 }

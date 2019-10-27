@@ -28,9 +28,7 @@ import reactor.util.annotation.Nullable;
  */
 public class IdentifyOptions {
 
-    private final int shardIndex;
-
-    private final int shardCount;
+    private final ShardInfo shardInfo;
 
     @Nullable
     private final StatusUpdate initialStatus;
@@ -44,14 +42,16 @@ public class IdentifyOptions {
     /**
      * Create a new identifying policy.
      *
-     * @param shardIndex shard ID the client using this policy will identify with
-     * @param shardCount number of shards the client using this policy will identify with
+     * @param shardInfo shard index and count the client using this policy will identify with
      * @param initialStatus initial presence status the bot will identify with
      */
-    public IdentifyOptions(int shardIndex, int shardCount, @Nullable StatusUpdate initialStatus) {
-        this.shardIndex = shardIndex;
-        this.shardCount = shardCount;
+    public IdentifyOptions(ShardInfo shardInfo, @Nullable StatusUpdate initialStatus) {
+        this.shardInfo = shardInfo;
         this.initialStatus = initialStatus;
+    }
+
+    public ShardInfo getShardInfo() {
+        return shardInfo;
     }
 
     /**
@@ -60,7 +60,7 @@ public class IdentifyOptions {
      * @return an identifier indicating the shard number used by this policy
      */
     public int getShardIndex() {
-        return shardIndex;
+        return shardInfo.getIndex();
     }
 
     /**
@@ -69,7 +69,7 @@ public class IdentifyOptions {
      * @return number of shards the client using this policy will identify with
      */
     public int getShardCount() {
-        return shardCount;
+        return shardInfo.getCount();
     }
 
     /**
@@ -127,11 +127,8 @@ public class IdentifyOptions {
     @Override
     public String toString() {
         return "IdentifyOptions{" +
-                "shardIndex=" + shardIndex +
-                ", shardCount=" + shardCount +
+                "shardInfo=" + shardInfo +
                 ", initialStatus=" + initialStatus +
-                ", resumeSequence=" + resumeSequence +
-                ", resumeSessionId='" + resumeSessionId + '\'' +
                 '}';
     }
 }

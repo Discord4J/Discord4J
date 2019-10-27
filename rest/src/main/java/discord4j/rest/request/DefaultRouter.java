@@ -90,10 +90,7 @@ public class DefaultRouter implements Router {
                 .flatMap(ctx -> {
                     RequestStream<T> stream = getStream(request);
                     MonoProcessor<T> callback = MonoProcessor.create();
-                    String shardId = ctx.getOrEmpty("shard")
-                            .map(Object::toString)
-                            .orElse(null);
-                    stream.push(new RequestCorrelation<>(request, callback, shardId));
+                    stream.push(new RequestCorrelation<>(request, callback, ctx));
                     return callback;
                 })
                 .publishOn(routerOptions.getResponseScheduler());

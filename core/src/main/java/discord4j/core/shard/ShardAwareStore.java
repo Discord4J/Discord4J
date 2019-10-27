@@ -17,40 +17,39 @@
 
 package discord4j.core.shard;
 
+import discord4j.common.LogUtil;
 import discord4j.store.api.Store;
 import discord4j.store.api.util.WithinRangePredicate;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.util.context.Context;
 import reactor.util.function.Tuple2;
 
 import java.io.Serializable;
-import java.util.Set;
 
 public class ShardAwareStore<K extends Comparable<K>, V extends Serializable> implements Store<K, V> {
 
     private final Store<K, V> valueStore;
-    private final Set<K> keySet;
+    private final ShardKeyStore<K> keyStore;
 
-    public ShardAwareStore(Store<K, V> valueStore, Set<K> keySet) {
+    public ShardAwareStore(Store<K, V> valueStore, ShardKeyStore<K> keyStore) {
         this.valueStore = valueStore;
-        this.keySet = keySet;
+        this.keyStore = keyStore;
     }
 
     @Override
     public Mono<Void> save(K key, V value) {
-        return valueStore.save(key, value)
-                .then(Mono.fromRunnable(() -> keySet.add(key)));
+        return Mono.subscriberContext()
+                .flatMap(ctx -> valueStore.save(key, value).then(addKey(ctx, key)));
     }
 
     @Override
     public Mono<Void> save(Publisher<Tuple2<K, V>> entryStream) {
-        return Flux.from(entryStream)
-                .flatMap(t -> {
-                    keySet.add(t.getT1());
-                    return valueStore.save(t.getT1(), t.getT2());
-                })
-                .then();
+        return Mono.subscriberContext()
+                .flatMap(ctx -> Flux.from(entryStream)
+                        .flatMap(t -> valueStore.save(t.getT1(), t.getT2()).then(addKey(ctx, t.getT1())))
+                        .then());
     }
 
     @Override
@@ -70,34 +69,30 @@ public class ShardAwareStore<K extends Comparable<K>, V extends Serializable> im
 
     @Override
     public Mono<Void> delete(K id) {
-        return valueStore.delete(id)
-                .then(Mono.fromRunnable(() -> keySet.remove(id)));
+        return Mono.subscriberContext()
+                .flatMap(ctx -> valueStore.delete(id).then(removeKey(ctx, id)));
     }
 
     @Override
     public Mono<Void> delete(Publisher<K> ids) {
-        return Flux.from(ids)
-                .flatMap(id -> {
-                    keySet.remove(id);
-                    return valueStore.delete(id);
-                })
-                .then();
+        return Mono.subscriberContext()
+                .flatMap(ctx -> Flux.from(ids)
+                        .flatMap(id -> valueStore.delete(id).then(removeKey(ctx, id)))
+                        .then());
     }
 
     @Override
     public Mono<Void> deleteInRange(K start, K end) {
-        return valueStore.keys().filter(new WithinRangePredicate<>(start, end))
-                .flatMap(id -> {
-                    keySet.remove(id);
-                    return valueStore.delete(id);
-                })
-                .then();
+        return Mono.subscriberContext()
+                .flatMap(ctx -> valueStore.keys().filter(new WithinRangePredicate<>(start, end))
+                        .flatMap(id -> valueStore.delete(id).then(removeKey(ctx, id)))
+                        .then());
     }
 
     @Override
     public Mono<Void> deleteAll() {
-        return valueStore.deleteAll()
-                .then(Mono.fromRunnable(keySet::clear));
+        return Mono.subscriberContext()
+                .flatMap(ctx -> valueStore.deleteAll().then(clearKeys(ctx)));
     }
 
     @Override
@@ -112,8 +107,29 @@ public class ShardAwareStore<K extends Comparable<K>, V extends Serializable> im
 
     @Override
     public Mono<Void> invalidate() {
-        return delete(Flux.fromIterable(keySet))
-                .then(Mono.fromRunnable(keySet::clear));
+        return Mono.subscriberContext()
+                .flatMap(ctx -> delete(getKeys(ctx)).then(clearKeys(ctx)));
+    }
+
+    private Mono<Void> addKey(Context ctx, K key) {
+        return Mono.fromRunnable(() -> ctx.<Integer>getOrEmpty(LogUtil.KEY_SHARD_ID)
+                .ifPresent(id -> keyStore.add(id, key)));
+    }
+
+    private Mono<Void> removeKey(Context ctx, K key) {
+        return Mono.fromRunnable(() -> ctx.<Integer>getOrEmpty(LogUtil.KEY_SHARD_ID)
+                .ifPresent(id -> keyStore.remove(id, key)));
+    }
+
+    private Mono<Void> clearKeys(Context ctx) {
+        return Mono.fromRunnable(() -> ctx.<Integer>getOrEmpty(LogUtil.KEY_SHARD_ID)
+                .ifPresent(keyStore::clear));
+    }
+
+    private Flux<K> getKeys(Context ctx) {
+        return Flux.defer(() -> ctx.<Integer>getOrEmpty(LogUtil.KEY_SHARD_ID)
+                .map(id -> Flux.fromIterable(keyStore.keys(id)))
+                .orElseGet(Flux::empty));
     }
 
     @Override

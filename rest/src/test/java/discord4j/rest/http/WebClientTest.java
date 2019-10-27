@@ -17,7 +17,7 @@
 
 package discord4j.rest.http;
 
-import discord4j.common.JacksonResourceProvider;
+import discord4j.common.JacksonResources;
 import discord4j.rest.http.client.DiscordWebClient;
 import discord4j.rest.request.DefaultRouter;
 import discord4j.rest.request.DiscordRequest;
@@ -75,7 +75,7 @@ public class WebClientTest {
     @Test
     @Ignore
     public void htmlResponse() {
-        ExchangeStrategies ex2 = ExchangeStrategies.jackson(new JacksonResourceProvider().getObjectMapper());
+        ExchangeStrategies ex2 = ExchangeStrategies.jackson(new JacksonResources().getObjectMapper());
         DiscordWebClient webClient = new DiscordWebClient(HttpClient.create(),
                 ex2, null); // no token, it's not a discord request
         Route<String> fakeRoute = Route.get("http://0.0.0.0:" + PORT + "/html", String.class);

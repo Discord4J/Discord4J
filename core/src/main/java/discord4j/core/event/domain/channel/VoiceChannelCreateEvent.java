@@ -16,8 +16,9 @@
  */
 package discord4j.core.event.domain.channel;
 
-import discord4j.core.DiscordClient;
+import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.channel.VoiceChannel;
+import discord4j.gateway.ShardInfo;
 
 /**
  * Dispatched when a {@link VoiceChannel} is created in a guild.
@@ -30,8 +31,8 @@ public class VoiceChannelCreateEvent extends ChannelEvent {
 
     private final VoiceChannel channel;
 
-    public VoiceChannelCreateEvent(DiscordClient client, VoiceChannel channel) {
-        super(client);
+    public VoiceChannelCreateEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, VoiceChannel channel) {
+        super(gateway, shardInfo);
         this.channel = channel;
     }
 

@@ -16,10 +16,11 @@
  */
 package discord4j.core.event.domain.role;
 
-import discord4j.core.DiscordClient;
+import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Role;
 import discord4j.core.object.util.Snowflake;
+import discord4j.gateway.ShardInfo;
 import reactor.core.publisher.Mono;
 
 /**
@@ -34,8 +35,8 @@ public class RoleCreateEvent extends RoleEvent {
     private final long guildId;
     private final Role role;
 
-    public RoleCreateEvent(DiscordClient client, long guildId, Role role) {
-        super(client);
+    public RoleCreateEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, long guildId, Role role) {
+        super(gateway, shardInfo);
         this.guildId = guildId;
         this.role = role;
     }

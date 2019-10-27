@@ -16,13 +16,14 @@
  */
 package discord4j.core.event.domain.message;
 
-import discord4j.core.DiscordClient;
+import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.core.object.reaction.ReactionEmoji;
 import discord4j.core.object.util.Snowflake;
+import discord4j.gateway.ShardInfo;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
 
@@ -46,9 +47,9 @@ public class ReactionAddEvent extends MessageEvent {
     private final Long guildId;
     private final ReactionEmoji emoji;
 
-    public ReactionAddEvent(DiscordClient client, long userId, long channelId, long messageId, @Nullable Long guildId,
+    public ReactionAddEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, long userId, long channelId, long messageId, @Nullable Long guildId,
                             ReactionEmoji emoji) {
-        super(client);
+        super(gateway, shardInfo);
         this.userId = userId;
         this.channelId = channelId;
         this.messageId = messageId;

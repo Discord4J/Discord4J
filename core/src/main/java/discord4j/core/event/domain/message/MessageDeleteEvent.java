@@ -16,10 +16,11 @@
  */
 package discord4j.core.event.domain.message;
 
-import discord4j.core.DiscordClient;
+import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.core.object.util.Snowflake;
+import discord4j.gateway.ShardInfo;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
 
@@ -41,8 +42,8 @@ public class MessageDeleteEvent extends MessageEvent {
     @Nullable
     private final Message message;
 
-    public MessageDeleteEvent(DiscordClient client, long messageId, long channelId, @Nullable Message message) {
-        super(client);
+    public MessageDeleteEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, long messageId, long channelId, @Nullable Message message) {
+        super(gateway, shardInfo);
         this.messageId = messageId;
         this.channelId = channelId;
         this.message = message;

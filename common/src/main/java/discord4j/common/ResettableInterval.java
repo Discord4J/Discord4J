@@ -17,36 +17,33 @@
 package discord4j.common;
 
 import reactor.core.Disposable;
+import reactor.core.Disposables;
 import reactor.core.publisher.EmitterProcessor;
 import reactor.core.publisher.Flux;
-import reactor.core.scheduler.Schedulers;
+import reactor.core.scheduler.Scheduler;
 
 import java.time.Duration;
 
 public class ResettableInterval {
 
+    private final Scheduler scheduler;
+    private final Disposable.Swap task;
     private final EmitterProcessor<Long> backing = EmitterProcessor.create(false);
-    private volatile Disposable task;
-    private volatile Duration period;
+
+    public ResettableInterval(Scheduler scheduler) {
+        this.scheduler = scheduler;
+        this.task = Disposables.swap();
+    }
 
     public void start(Duration period) {
-        this.period = period;
-        this.task = Flux.interval(Duration.ZERO, period, Schedulers.elastic())
-                .subscribe(backing::onNext);
+        this.task.update(Flux.interval(Duration.ZERO, period, scheduler).subscribe(backing::onNext));
     }
 
     public void stop() {
-        if (task == null) {
-            throw new IllegalStateException("Emitter has not started!");
-        }
-        task.dispose();
+        task.get().dispose();
     }
 
     public Flux<Long> ticks() {
         return backing;
-    }
-
-    public Duration getPeriod() {
-        return period;
     }
 }

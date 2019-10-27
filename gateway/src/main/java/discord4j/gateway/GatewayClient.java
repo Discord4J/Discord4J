@@ -50,15 +50,6 @@ public interface GatewayClient {
     Mono<Void> execute(String gatewayUrl);
 
     /**
-     * Establish a reconnecting gateway connection to the given URL, allowing an ad-hoc observer to be notified.
-     *
-     * @param gatewayUrl the URL used to establish a websocket connection
-     * @param additionalObserver an additional observer to be notified of events
-     * @return a {@link Mono} signaling completion
-     */
-    Mono<Void> execute(String gatewayUrl, GatewayObserver additionalObserver);
-
-    /**
      * Terminates this client's current gateway connection.
      *
      * @param allowResume if resuming this session after closing is possible. if set to <code>true</code> the main

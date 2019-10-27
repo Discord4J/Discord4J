@@ -15,29 +15,24 @@
  * along with Discord4J. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package discord4j.core;
+package discord4j.gateway.retry;
 
-import discord4j.gateway.GatewayObserver;
-import discord4j.gateway.IdentifyOptions;
-import reactor.netty.ConnectionObserver;
+import reactor.util.context.Context;
 
-import java.util.function.Consumer;
+public class GatewayException extends RuntimeException {
 
-/**
- * Allows notifying an externally managed sink for {@link GatewayObserver#CONNECTED} events.
- */
-public class ConnectedObserver implements GatewayObserver {
+    private final Context context;
 
-    private final Consumer<IdentifyOptions> task;
-
-    public ConnectedObserver(Consumer<IdentifyOptions> task) {
-        this.task = task;
+    public GatewayException(Context context) {
+        this.context = context;
     }
 
-    @Override
-    public void onStateChange(ConnectionObserver.State newState, IdentifyOptions identifyOptions) {
-        if (GatewayObserver.CONNECTED.equals(newState)) {
-            task.accept(identifyOptions);
-        }
+    public GatewayException(Context context, String message) {
+        super(message);
+        this.context = context;
+    }
+
+    public Context getContext() {
+        return context;
     }
 }

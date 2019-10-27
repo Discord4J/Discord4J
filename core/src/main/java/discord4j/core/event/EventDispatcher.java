@@ -18,17 +18,11 @@
 package discord4j.core.event;
 
 import discord4j.core.event.domain.Event;
-import org.reactivestreams.Publisher;
-import org.reactivestreams.Subscription;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.FluxProcessor;
-import reactor.core.publisher.Mono;
-import reactor.core.publisher.SignalType;
-import reactor.core.scheduler.Scheduler;
-import reactor.util.Logger;
-import reactor.util.Loggers;
+import reactor.core.publisher.*;
+import reactor.scheduler.forkjoin.ForkJoinPoolScheduler;
+import reactor.util.concurrent.Queues;
 
-import java.util.concurrent.atomic.AtomicReference;
+import java.time.Duration;
 import java.util.function.Function;
 
 /**
@@ -37,9 +31,6 @@ import java.util.function.Function;
  * <p>
  * Individual events can be published to subscribers using {@link #publish(Event)} while they can be used to consumed
  * through {@link #on(Class)} giving the proper {@link Event} class as argument.
- * <p>
- * Uses an underlying {@link FluxProcessor} that must be supplied on construction, as well as a {@link Scheduler} to
- * define subscriber thread affinity.
  * <p>
  * Each event can be consumed using the following pattern:
  * <pre>
@@ -52,37 +43,18 @@ import java.util.function.Function;
  *           .subscribe();
  * </pre>
  */
-public class EventDispatcher {
-
-    private static final Logger log = Loggers.getLogger(EventDispatcher.class);
-
-    private final FluxProcessor<Event, Event> processor;
-    private final Scheduler scheduler;
-
-    /**
-     * Creates a new event dispatcher using the given processor and thread model.
-     *
-     * @param processor a FluxProcessor of Event types, used to bridge gateway events to the dispatcher subscribers
-     * @param scheduler a Scheduler to ensure a certain thread model on each published signal
-     */
-    public EventDispatcher(FluxProcessor<Event, Event> processor, Scheduler scheduler) {
-        this.processor = processor;
-        this.scheduler = scheduler;
-    }
+public interface EventDispatcher {
 
     /**
      * Retrieves a {@link Flux} with elements of the given {@link Event} type.
      * <p>
-     * <strong>Note: </strong> Errors occurring while processing events will terminate your sequence. If you wish to use
-     * a version capable of handling errors for you, use {@link #on(Class, Function)}. See
+     * <strong>Note: </strong> Errors occurring while processing events will terminate your sequence. See
      * <a href="https://github.com/reactive-streams/reactive-streams-jvm#1.7">Reactive Streams Spec</a>
      * explaining this behavior.
-     * </p>
      * <p>
      * A recommended pattern to use this method is wrapping your code that may throw exceptions within a {@code
      * flatMap} block and use {@link Mono#onErrorResume(Function)}, {@link Flux#onErrorResume(Function)} or
      * equivalent methods to maintain the sequence active:
-     * </p>
      * <pre>
      * client.getEventDispatcher().on(MessageCreateEvent.class)
      *     .flatMap(event -&gt; myCodeThatMightThrow(event)
@@ -96,93 +68,68 @@ public class EventDispatcher {
      * <p>
      * For more alternatives to handling errors, please see
      * <a href="https://github.com/Discord4J/Discord4J/wiki/Error-Handling">Error Handling</a> wiki page.
-     * </p>
      *
      * @param eventClass the event class to obtain events from
      * @param <E> the type of the event class
      * @return a new {@link reactor.core.publisher.Flux} with the requested events
      */
-    public <E extends Event> Flux<E> on(Class<E> eventClass) {
-        AtomicReference<Subscription> subscription = new AtomicReference<>();
-        return processor.publishOn(scheduler)
-                .ofType(eventClass)
-                .doOnNext(event -> {
-                    int shard = event.getClient().getConfig().getShardIndex();
-                    Logger log = logger(eventClass, shard);
-                    if (log.isDebugEnabled()) {
-                        log.debug("{}", event);
-                    }
-                })
-                .doOnSubscribe(sub -> {
-                    subscription.set(sub);
-                    log.debug(format(sub, "{} subscription created"), eventClass.getSimpleName());
-                })
-                .doFinally(signal -> {
-                    if (signal == SignalType.CANCEL) {
-                        log.debug(format(subscription.get(), "{} subscription cancelled"), eventClass.getSimpleName());
-                    }
-                });
-    }
-
-    /**
-     * Retrieves a {@link Flux} with elements of the given {@link Event} type, processing them through a given
-     * {@link Function}. Errors occurring within the mapper will be logged and discarded, preventing the termination of
-     * the "infinite" event sequence.
-     * <p>
-     * There are multiple ways of using this event handling method, for example:
-     * </p>
-     * <pre>
-     * client.getEventDispatcher()
-     *     .on(MessageCreateEvent.class, event -> {
-     *         // myCodeThatMightThrow should return a Reactor type (Mono or Flux)
-     *         return myCodeThatMightThrow(event);
-     *     })
-     *     .subscribe();
-     *
-     * client.getEventDispatcher()
-     *     .on(MessageCreateEvent.class, event -> {
-     *         // myCodeThatMightThrow *can* be blocking
-     *         myCodeThatMightThrow(event);
-     *         return Mono.empty(); // but we have to return a Reactor type
-     *     })
-     *     .subscribe();
-     * </pre>
-     * <p>
-     * Continuing the chain after {@code on(class, event -> ...)} will require your own error handling strategy.
-     * Check the docs for {@link #on(Class)} for more details.
-     * </p>
-     *
-     * @param eventClass the event class to obtain events from
-     * @param mapper an event mapping function called on each event. If you do not wish to perform further operations
-     * you can return {@code Mono.empty()}.
-     * @param <E> the type of the event class
-     * @param <T> the type of the event mapper function
-     * @return a new {@link reactor.core.publisher.Flux} with the type resulting from the given event mapper
-     */
-    public <E extends Event, T> Flux<T> on(Class<E> eventClass, Function<E, Publisher<T>> mapper) {
-        return on(eventClass)
-                .flatMap(event -> Flux.from(mapper.apply(event))
-                        .onErrorResume(t -> {
-                            int shard = event.getClient().getConfig().getShardIndex();
-                            logger(eventClass, shard).warn("Error while handling event", t);
-                            return Mono.empty();
-                        }));
-    }
-
-    private Logger logger(Class<?> eventClass, int shard) {
-        return Loggers.getLogger("discord4j.events." + eventClass.getSimpleName() + "." + shard);
-    }
-
-    private String format(Subscription s, String msg) {
-        return '[' + Integer.toHexString(s.hashCode()) + "] " + msg;
-    }
+    <E extends Event> Flux<E> on(Class<E> eventClass);
 
     /**
      * Publishes an {@link Event} to the dispatcher.
      *
      * @param event the {@link Event} to publish
      */
-    public void publish(Event event) {
-        processor.onNext(event);
+    void publish(Event event);
+
+    /**
+     * Signal that this event dispatcher must terminate and release its resources.
+     */
+    void shutdown();
+
+    // Factories
+
+    /**
+     * Create an {@link EventDispatcher} that will buffer incoming events to retain all startup events as each
+     * shard connects at the cost of increased memory usage. Since this factory uses {@link EmitterProcessor}, it will
+     * only buffer events until the first subscriber. After that, late subscribers will only see events after it, so
+     * this is recommended if you have a single subscription.
+     *
+     * @return a buffering {@link EventDispatcher} backed by an {@link EmitterProcessor}
+     */
+    static EventDispatcher buffering() {
+        return new DefaultEventDispatcher(
+                EmitterProcessor.create(Queues.SMALL_BUFFER_SIZE, false),
+                FluxSink.OverflowStrategy.BUFFER,
+                ForkJoinPoolScheduler.create("discord4j-events"));
+    }
+
+    /**
+     * Create an {@link EventDispatcher} that is time-bounded and retains all elements whose age is at most {@code
+     * maxAge}, replaying them to late subscribers.
+     *
+     * @param maxAge the maximum age of the contained items
+     * @return an {@link EventDispatcher} backed by a {@link ReplayProcessor} with a time-bounded backlog
+     * @see ReplayProcessor#createTimeout(Duration)
+     */
+    static EventDispatcher replayingWithTimeout(Duration maxAge) {
+        return new DefaultEventDispatcher(
+                ReplayProcessor.createTimeout(maxAge),
+                FluxSink.OverflowStrategy.IGNORE,
+                ForkJoinPoolScheduler.create("discord4j-events"));
+    }
+
+    /**
+     * Create an {@link EventDispatcher} that will replays up to {@code historySize} elements to late subscribers.
+     *
+     * @param historySize the backlog size or maximum items retained for replay
+     * @return an {@link EventDispatcher} backed by a {@link ReplayProcessor} with a customized backlog size
+     * @see ReplayProcessor#create(int)
+     */
+    static EventDispatcher replayingWithSize(int historySize) {
+        return new DefaultEventDispatcher(
+                ReplayProcessor.create(historySize),
+                FluxSink.OverflowStrategy.IGNORE,
+                ForkJoinPoolScheduler.create("discord4j-events"));
     }
 }

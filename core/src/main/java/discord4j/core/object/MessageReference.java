@@ -1,8 +1,7 @@
 package discord4j.core.object;
 
 import discord4j.common.annotations.Experimental;
-import discord4j.core.DiscordClient;
-import discord4j.core.ServiceMediator;
+import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.data.stored.MessageReferenceBean;
 import discord4j.core.object.util.Snowflake;
 
@@ -18,20 +17,20 @@ import java.util.Optional;
 @Experimental
 public class MessageReference implements DiscordObject {
 
-    /** The ServiceMediator associated to this object. */
-    private final ServiceMediator serviceMediator;
+    /** The gateway associated to this object. */
+    private final GatewayDiscordClient gateway;
 
     /** The raw data as represented by Discord. */
     private final MessageReferenceBean data;
 
     /**
-     * Constructs a {@code MessageReference} with an associated {@link ServiceMediator} and Discord data.
+     * Constructs a {@code MessageReference} with an associated {@link GatewayDiscordClient} and Discord data.
      *
-     * @param serviceMediator The {@link ServiceMediator} associated to this object, must be non-null.
+     * @param gateway The {@link GatewayDiscordClient} associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
      */
-    public MessageReference(final ServiceMediator serviceMediator, final MessageReferenceBean data) {
-        this.serviceMediator = Objects.requireNonNull(serviceMediator);
+    public MessageReference(final GatewayDiscordClient gateway, final MessageReferenceBean data) {
+        this.gateway = Objects.requireNonNull(gateway);
         this.data = Objects.requireNonNull(data);
     }
 
@@ -50,8 +49,8 @@ public class MessageReference implements DiscordObject {
     }
 
     @Override
-    public DiscordClient getClient() {
-        return serviceMediator.getClient();
+    public GatewayDiscordClient getClient() {
+        return gateway;
     }
 
     @Override

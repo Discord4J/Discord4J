@@ -19,65 +19,69 @@ package discord4j.core;
 import discord4j.core.event.EventDispatcher;
 import discord4j.core.object.Invite;
 import discord4j.core.object.Region;
-import discord4j.core.object.data.ApplicationInfoBean;
-import discord4j.core.object.data.InviteBean;
-import discord4j.core.object.data.RegionBean;
-import discord4j.core.object.data.WebhookBean;
-import discord4j.core.object.data.stored.*;
 import discord4j.core.object.entity.*;
 import discord4j.core.object.entity.channel.Channel;
-import discord4j.core.object.presence.Presence;
 import discord4j.core.object.util.Snowflake;
 import discord4j.core.spec.GuildCreateSpec;
 import discord4j.core.spec.UserEditSpec;
-import discord4j.core.util.EntityUtil;
 import discord4j.core.util.PaginationUtil;
-import discord4j.gateway.GatewayClient;
-import discord4j.gateway.GatewayObserver;
-import discord4j.gateway.json.GatewayPayload;
-import discord4j.rest.json.response.GatewayResponse;
+import discord4j.gateway.GatewayOptions;
+import discord4j.rest.entity.*;
+import discord4j.rest.entity.data.*;
 import discord4j.rest.json.response.UserGuildResponse;
-import discord4j.rest.util.RouteUtils;
-import discord4j.store.api.util.LongLongTuple2;
-import java.time.Duration;
+import discord4j.store.api.service.StoreService;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.util.Logger;
-import reactor.util.Loggers;
 
 import java.util.Map;
-import java.util.Optional;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-/** A high-level abstraction of common Discord operations such as entity retrieval and Discord shard manipulation. */
+/**
+ * A high-level abstraction of common Discord4J operations such as entity retrieval through Discord API or the creation
+ * of real-time bot clients through Discord Gateway.
+ */
 public final class DiscordClient {
 
-    private static final Logger log = Loggers.getLogger(DiscordClient.class);
-
-    /** The ServiceMediator associated to this object. */
-    private final ServiceMediator serviceMediator;
-
-    private final AtomicBoolean isDisposed = new AtomicBoolean(true);
+    private final CoreResources coreResources;
 
     /**
-     * Constructs a {@code DiscordClient} with an associated ServiceMediator.
+     * Constructs a {@code DiscordClient} with an associated {@link CoreResources}.
      *
-     * @param serviceMediator The ServiceMediator associated to this object.
+     * @param coreResources The {@link CoreResources} associated to this object.
      */
-    DiscordClient(final ServiceMediator serviceMediator) {
-        this.serviceMediator = serviceMediator;
+    DiscordClient(CoreResources coreResources) {
+        this.coreResources = coreResources;
     }
 
     /**
-     * Obtain the {@link ServiceMediator} associated with this {@link DiscordClient}. This is an advanced method to
-     * access underlying middleware and resources.
+     * Create a {@link DiscordClient} with default options, using the given token for authentication.
      *
-     * @return the current {@link ServiceMediator} for this client
+     * @param token the bot token used for authentication
+     * @return a {@link DiscordClient} configured with the default options
      */
-    public ServiceMediator getServiceMediator() {
-        return serviceMediator;
+    public static DiscordClient create(String token) {
+        return new DiscordClientBuilder(token).build();
+    }
+
+    /**
+     * Obtain a {@link DiscordClientBuilder} able to create {@link DiscordClient} instances, using the given token
+     * for authentication.
+     *
+     * @param token the bot token used for authentication
+     * @return a {@link DiscordClientBuilder}
+     */
+    public static DiscordClientBuilder builder(String token) {
+        return new DiscordClientBuilder(token);
+    }
+
+    /**
+     * Obtain the {@link CoreResources} associated with this {@link DiscordClient}.
+     *
+     * @return the current {@link CoreResources} for this client
+     */
+    public CoreResources getCoreResources() {
+        return coreResources;
     }
 
     /**
@@ -87,18 +91,8 @@ public final class DiscordClient {
      * @return A {@link Mono} where, upon successful completion, emits the {@link Channel} as represented by the
      * supplied ID. If an error is received, it is emitted through the {@code Mono}.
      */
-    public Mono<Channel> getChannelById(final Snowflake channelId) {
-        final Mono<ChannelBean> channel = serviceMediator.getStateHolder().getChannelStore()
-                .find(channelId.asLong());
-
-        final Mono<ChannelBean> rest = serviceMediator.getRestClient().getChannelService()
-                .getChannel(channelId.asLong())
-                .map(ChannelBean::new)
-                .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex()));
-
-        return channel
-                .switchIfEmpty(rest)
-                .map(channelBean -> EntityUtil.getChannel(serviceMediator, channelBean));
+    public RestChannel getChannelById(final Snowflake channelId) {
+        return new RestChannel(coreResources.getRestClient(), channelId.asLong());
     }
 
     /**
@@ -108,15 +102,8 @@ public final class DiscordClient {
      * @return A {@link Mono} where, upon successful completion, emits the {@link Guild} as represented by the supplied
      * ID. If an error is received, it is emitted through the {@code Mono}.
      */
-    public Mono<Guild> getGuildById(final Snowflake guildId) {
-        return serviceMediator.getStateHolder().getGuildStore()
-                .find(guildId.asLong())
-                .cast(BaseGuildBean.class)
-                .switchIfEmpty(serviceMediator.getRestClient().getGuildService()
-                        .getGuild(guildId.asLong())
-                        .map(BaseGuildBean::new)
-                        .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex())))
-                .map(baseGuildBean -> new Guild(serviceMediator, baseGuildBean));
+    public RestGuild getGuildById(final Snowflake guildId) {
+        return new RestGuild(coreResources.getRestClient(), guildId.asLong());
     }
 
     /**
@@ -127,14 +114,8 @@ public final class DiscordClient {
      * @return A {@link Mono} where, upon successful completion, emits the {@link GuildEmoji} as represented by the
      * supplied IDs. If an error is received, it is emitted through the {@code Mono}.
      */
-    public Mono<GuildEmoji> getGuildEmojiById(final Snowflake guildId, final Snowflake emojiId) {
-        return serviceMediator.getStateHolder().getGuildEmojiStore()
-                .find(emojiId.asLong())
-                .switchIfEmpty(serviceMediator.getRestClient().getEmojiService()
-                        .getGuildEmoji(guildId.asLong(), emojiId.asLong())
-                        .map(GuildEmojiBean::new)
-                        .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex())))
-                .map(guildEmojiBean -> new GuildEmoji(serviceMediator, guildEmojiBean, guildId.asLong()));
+    public RestGuildEmoji getGuildEmojiById(final Snowflake guildId, final Snowflake emojiId) {
+        return new RestGuildEmoji(coreResources.getRestClient(), guildId.asLong(), emojiId.asLong());
     }
 
     /**
@@ -145,16 +126,8 @@ public final class DiscordClient {
      * @return A {@link Mono} where, upon successful completion, emits the {@link Member} as represented by the supplied
      * IDs. If an error is received, it is emitted through the {@code Mono}.
      */
-    public Mono<Member> getMemberById(final Snowflake guildId, final Snowflake userId) {
-        final Mono<MemberBean> member = serviceMediator.getStateHolder().getMemberStore()
-                .find(LongLongTuple2.of(guildId.asLong(), userId.asLong()))
-                .switchIfEmpty(serviceMediator.getRestClient().getGuildService()
-                        .getGuildMember(guildId.asLong(), userId.asLong())
-                        .map(MemberBean::new)
-                        .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex())));
-
-        return member.flatMap(memberBean -> getUserBean(userId).map(userBean ->
-                new Member(serviceMediator, memberBean, userBean, guildId.asLong())));
+    public RestMember getMemberById(final Snowflake guildId, final Snowflake userId) {
+        return new RestMember(coreResources.getRestClient(), guildId.asLong(), userId.asLong());
     }
 
     /**
@@ -165,14 +138,8 @@ public final class DiscordClient {
      * @return A {@link Mono} where, upon successful completion, emits the {@link Message} as represented by the
      * supplied IDs. If an error is received, it is emitted through the {@code Mono}.
      */
-    public Mono<Message> getMessageById(final Snowflake channelId, final Snowflake messageId) {
-        return serviceMediator.getStateHolder().getMessageStore()
-                .find(messageId.asLong())
-                .switchIfEmpty(serviceMediator.getRestClient().getChannelService()
-                        .getMessage(channelId.asLong(), messageId.asLong())
-                        .map(MessageBean::new)
-                        .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex())))
-                .map(messageBean -> new Message(serviceMediator, messageBean));
+    public RestMessage getMessageById(final Snowflake channelId, final Snowflake messageId) {
+        return new RestMessage(coreResources.getRestClient(), channelId.asLong(), messageId.asLong());
     }
 
     /**
@@ -183,16 +150,8 @@ public final class DiscordClient {
      * @return A {@link Mono} where, upon successful completion, emits the {@link Role} as represented by the supplied
      * IDs. If an error is received, it is emitted through the {@code Mono}.
      */
-    public Mono<Role> getRoleById(final Snowflake guildId, final Snowflake roleId) {
-        return serviceMediator.getStateHolder().getRoleStore()
-                .find(roleId.asLong())
-                .switchIfEmpty(serviceMediator.getRestClient().getGuildService()
-                        .getGuildRoles(guildId.asLong())
-                        .filter(response -> response.getId() == roleId.asLong())
-                        .map(RoleBean::new)
-                        .singleOrEmpty()
-                        .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex())))
-                .map(roleBean -> new Role(serviceMediator, roleBean, guildId.asLong()));
+    public RestRole getRoleById(final Snowflake guildId, final Snowflake roleId) {
+        return new RestRole(coreResources.getRestClient(), guildId.asLong(), roleId.asLong());
     }
 
     /**
@@ -202,8 +161,8 @@ public final class DiscordClient {
      * @return A {@link Mono} where, upon successful completion, emits the {@link User} as represented by the supplied
      * ID. If an error is received, it is emitted through the {@code Mono}.
      */
-    public Mono<User> getUserById(final Snowflake userId) {
-        return getUserBean(userId).map(userBean -> new User(serviceMediator, userBean));
+    public RestUser getUserById(final Snowflake userId) {
+        return new RestUser(coreResources.getRestClient(), userId.asLong());
     }
 
     /**
@@ -213,12 +172,8 @@ public final class DiscordClient {
      * @return A {@link Mono} where, upon successful completion, emits the {@link Webhook} as represented by the
      * supplied ID. If an error is received, it is emitted through the {@code Mono}.
      */
-    public Mono<Webhook> getWebhookById(final Snowflake webhookId) {
-        return serviceMediator.getRestClient().getWebhookService()
-                .getWebhook(webhookId.asLong())
-                .map(WebhookBean::new)
-                .map(webhookBean -> new Webhook(serviceMediator, webhookBean))
-                .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex()));
+    public RestWebhook getWebhookById(final Snowflake webhookId) {
+        return new RestWebhook(coreResources.getRestClient(), webhookId.asLong());
     }
 
     /**
@@ -227,12 +182,10 @@ public final class DiscordClient {
      * @return A {@link Mono} where, upon successful completion, emits the {@link ApplicationInfo application info}. If
      * an error is received, it is emitted through the {@code Mono}.
      */
-    public Mono<ApplicationInfo> getApplicationInfo() {
-        return serviceMediator.getRestClient().getApplicationService()
+    public Mono<ApplicationInfoData> getApplicationInfo() {
+        return coreResources.getRestClient().getApplicationService()
                 .getCurrentApplicationInfo()
-                .map(ApplicationInfoBean::new)
-                .map(applicationInfoBean -> new ApplicationInfo(serviceMediator, applicationInfoBean))
-                .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex()));
+                .map(ApplicationInfoData::new);
     }
 
     /**
@@ -241,34 +194,13 @@ public final class DiscordClient {
      * @return A {@link Flux} that continually emits the {@link Guild guilds} that the current client is in. If an error
      * is received, it is emitted through the {@code Flux}.
      */
-    public Flux<Guild> getGuilds() {
+    public Flux<UserGuildData> getGuilds() {
         final Function<Map<String, Object>, Flux<UserGuildResponse>> makeRequest = params ->
-                serviceMediator.getRestClient().getUserService()
-                        .getCurrentUserGuilds(params)
-                        .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex()));
+                coreResources.getRestClient().getUserService()
+                        .getCurrentUserGuilds(params);
 
-        return serviceMediator.getStateHolder().getGuildStore()
-                .values()
-                .cast(BaseGuildBean.class)
-                .switchIfEmpty(PaginationUtil.paginateAfter(makeRequest, UserGuildResponse::getId, 0L, 100)
-                        .map(UserGuildResponse::getId)
-                        .filter(id -> (id >> 22) % getConfig().getShardCount() == getConfig().getShardIndex())
-                        .flatMap(serviceMediator.getRestClient().getGuildService()::getGuild)
-                        .map(BaseGuildBean::new)
-                        .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex())))
-                .map(bean -> new Guild(serviceMediator, bean));
-    }
-
-    /**
-     * Retrieve the currently stored (cached) users.
-     *
-     * @return A {@link Flux} that continually emits the {@link User users} that the current client has stored. If an
-     * error is received, it is emitted through the {@code Flux}.
-     */
-    public Flux<User> getUsers() {
-        return serviceMediator.getStateHolder().getUserStore()
-                .values()
-                .map(bean -> new User(serviceMediator, bean));
+        return PaginationUtil.paginateAfter(makeRequest, UserGuildResponse::getId, 0L, 100)
+                .map(UserGuildData::new);
     }
 
     /**
@@ -277,11 +209,9 @@ public final class DiscordClient {
      * @return A {@link Flux} that continually emits the {@link Region regions} that are available. If an error is
      * received, it is emitted through the {@code Flux}.
      */
-    public Flux<Region> getRegions() {
-        return serviceMediator.getRestClient().getVoiceService().getVoiceRegions()
-                .map(RegionBean::new)
-                .map(bean -> new Region(serviceMediator, bean))
-                .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex()));
+    public Flux<RegionData> getRegions() {
+        return coreResources.getRestClient().getVoiceService().getVoiceRegions()
+                .map(RegionData::new);
     }
 
     /**
@@ -290,92 +220,10 @@ public final class DiscordClient {
      * @return A {@link Mono} where, upon successful completion, emits the bot {@link User user}. If an error is
      * received, it is emitted through the {@code Mono}.
      */
-    public Mono<User> getSelf() {
-        final long selfId = serviceMediator.getStateHolder().getSelfId().get();
-        return Mono.just(selfId)
-                .filter(it -> it != 0)
-                .map(Snowflake::of)
-                .flatMap(this::getUserById)
-                .switchIfEmpty(serviceMediator.getRestClient().getUserService()
-                        .getCurrentUser()
-                        .map(UserBean::new)
-                        .map(bean -> new User(serviceMediator, bean))
-                        .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex())));
-    }
-
-    /**
-     * Gets the bot user's ID. This may not be present if this client is not yet logged in.
-     *
-     * @return The bot user's ID.
-     */
-    public Optional<Snowflake> getSelfId() {
-        return Optional.of(serviceMediator.getStateHolder().getSelfId().get())
-                .filter(it -> it != 0)
-                .map(Snowflake::of);
-    }
-
-    /**
-     * Logs in the client to the gateway.
-     *
-     * @return A {@link Mono} that completes (either successfully or with an error) when the client disconnects from the
-     * gateway without a reconnect attempt. It is recommended to call this from {@code main} and as a final statement
-     * invoke {@link Mono#block()}.
-     */
-    public Mono<Void> login() {
-        return Mono
-                .fromRunnable(() -> {
-                    if (!isDisposed.compareAndSet(true, false)) {
-                        throw new AlreadyConnectedException();
-                    }
-                })
-                .then(serviceMediator.getRestClient().getGatewayService().getGateway())
-                .transform(loginSequence(serviceMediator.getGatewayClient()));
-    }
-
-    private Function<Mono<GatewayResponse>, Mono<Void>> loginSequence(GatewayClient client) {
-        return sequence -> sequence
-                .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex()))
-                .flatMap(response -> client.execute(
-                        RouteUtils.expandQuery(response.getUrl(),
-                                serviceMediator.getClientConfig().getGatewayParameters()),
-                        GatewayObserver.NOOP_LISTENER))
-                .then(serviceMediator.getStateHolder().invalidateStores())
-                .then(serviceMediator.getStoreService().dispose())
-                .doOnCancel(this::setDisposed)
-                .doOnTerminate(this::setDisposed);
-    }
-
-    private void setDisposed() {
-        if (!isDisposed.compareAndSet(false, true)) {
-            log.warn("Shard {} was already disposed", serviceMediator.getClientConfig().getShardIndex());
-        }
-    }
-
-    /**
-     * Logs out the client from the gateway.
-     *
-     * @return a {@link Mono} deferring completion until this client has completely disconnected from the gateway
-     */
-    public Mono<Void> logout() {
-        return serviceMediator.getGatewayClient().close(false);
-    }
-
-    /**
-     * Returns whether this client is currently connected to Discord Gateway.
-     *
-     * @return true if the gateway connection is currently established, false otherwise.
-     */
-    public boolean isConnected() {
-        return serviceMediator.getGatewayClient().isConnected();
-    }
-
-    /**
-     * Gets the amount of time it last took Discord Gateway to respond to a heartbeat with an ack.
-     *
-     * @return the duration which Discord took to respond to the last heartbeat with an ack.
-     */
-    public Duration getResponseTime() {
-        return serviceMediator.getGatewayClient().getResponseTime();
+    public Mono<UserData> getSelf() {
+        return coreResources.getRestClient().getUserService()
+                .getCurrentUser()
+                .map(UserData::new);
     }
 
     /**
@@ -385,27 +233,13 @@ public final class DiscordClient {
      * @return A {@link Mono} where, upon successful completion, emits the created {@link Guild}. If an error is
      * received, it is emitted through the {@code Mono}.
      */
-    public Mono<Guild> createGuild(final Consumer<? super GuildCreateSpec> spec) {
+    public Mono<GuildData> createGuild(final Consumer<? super GuildCreateSpec> spec) {
         final GuildCreateSpec mutatedSpec = new GuildCreateSpec();
         spec.accept(mutatedSpec);
 
-        return serviceMediator.getRestClient().getGuildService()
+        return coreResources.getRestClient().getGuildService()
                 .createGuild(mutatedSpec.asRequest())
-                .map(BaseGuildBean::new)
-                .map(bean -> new Guild(serviceMediator, bean))
-                .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex()));
-    }
-
-    /**
-     * Update this client {@link Presence}.
-     *
-     * @param presence The updated client presence.
-     * @return A {@link Mono} that signals completion upon successful update. If an error is received, it is emitted
-     * through the {@code Mono}.
-     */
-    public Mono<Void> updatePresence(final Presence presence) {
-        return Mono.fromRunnable(() -> serviceMediator.getGatewayClient().sender().next(
-                GatewayPayload.statusUpdate(presence.asStatusUpdate())));
+                .map(GuildData::new);
     }
 
     /**
@@ -415,12 +249,10 @@ public final class DiscordClient {
      * @return A {@link Mono} where, upon successful completion, emits the {@link Invite} as represented by the
      * supplied invite code. If an error is received, it is emitted through the {@code Mono}.
      */
-    public Mono<Invite> getInvite(final String inviteCode) {
-        return serviceMediator.getRestClient().getInviteService()
+    public Mono<InviteData> getInvite(final String inviteCode) {
+        return coreResources.getRestClient().getInviteService()
                 .getInvite(inviteCode)
-                .map(InviteBean::new)
-                .map(bean -> new Invite(serviceMediator, bean))
-                .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex()));
+                .map(InviteData::new);
     }
 
     /**
@@ -430,48 +262,61 @@ public final class DiscordClient {
      * @return A {@link Mono} where, upon successful completion, emits the edited {@link User}. If an error is received,
      * it is emitted through the {@code Mono}.
      */
-    public Mono<User> edit(final Consumer<? super UserEditSpec> spec) {
+    public Mono<UserData> edit(final Consumer<? super UserEditSpec> spec) {
         final UserEditSpec mutatedSpec = new UserEditSpec();
         spec.accept(mutatedSpec);
 
-        return serviceMediator.getRestClient().getUserService()
+        return coreResources.getRestClient().getUserService()
                 .modifyCurrentUser(mutatedSpec.asRequest())
-                .map(UserBean::new)
-                .map(bean -> new User(serviceMediator, bean))
-                .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex()));
+                .map(UserData::new);
     }
 
     /**
-     * Gets the event dispatcher, allowing reactive subscription of client events.
+     * Login the client to the gateway, using the recommended amount of shards, locally coordinated. The derived
+     * {@link GatewayDiscordClient} is capable of managing these shards and providing a single
+     * {@link EventDispatcher} to publish Gateway updates and {@link StoreService} for entity caching.
+     * <p>
+     * To further configure the Gateway connections, such as initial presence, sharding and caching options, see
+     * {@link #gateway()}.
+     * <p>
+     * <strong>Note:</strong> Starting from v3.1, this method will return a {@link Mono} of a
+     * {@link GatewayDiscordClient}, emitting the result once shards have connected. Therefore, <strong>calling
+     * {@link Mono#block()} will now return upon connection instead of disconnection.</strong>
      *
-     * @return an EventDispatcher associated with this client.
+     * @return a {@link Mono} for a handle to maintain a group of shards connected to real-time Discord Gateway,
+     * emitted once all connections have been made. If an error is received, it is emitted through the {@link Mono}.
      */
-    public EventDispatcher getEventDispatcher() {
-        return serviceMediator.getEventDispatcher();
+    public Mono<GatewayDiscordClient> login() {
+        return gateway().connect();
     }
 
     /**
-     * Gets the configuration for this client.
+     * Connect to the Discord Gateway upon subscription to acquire a {@link GatewayDiscordClient} instance and use it
+     * in a declarative manner, releasing the object once the derived usage {@link Function} terminates or is cancelled.
+     * <p>
+     * To further configure the bot features, refer to using {@link #gateway()}.
+     * <p>
+     * Calling this method is useful when you operate on the {@link GatewayDiscordClient} object using reactive API you
+     * can compose within the scope of the given {@link Function}. Using {@link GatewayDiscordClient#onDisconnect()}
+     * within the scope will await for disconnection before releasing resources.
      *
-     * @return The configuration for this client.
+     * @param whileConnectedFunction the {@link Function} to apply the <strong>connected</strong>
+     * {@link GatewayDiscordClient} and trigger a processing pipeline from it.
+     * @param <T> type of the given {@link Function} output
+     * @return the {@link Mono} result of processing the given {@link Function} after all resources have released
      */
-    public ClientConfig getConfig() {
-        return serviceMediator.getClientConfig();
+    public <T> Mono<T> withGateway(Function<GatewayDiscordClient, Mono<T>> whileConnectedFunction) {
+        return gateway().withConnection(whileConnectedFunction);
     }
 
     /**
-     * Requests to retrieve the user bean represented by the supplied ID.
+     * Start bootstrapping a connection to the real-time Discord Gateway. The resulting builder can be configured to
+     * create a {@link GatewayDiscordClient} which groups all connecting shards providing a single
+     * {@link EventDispatcher} to publish Gateway updates and {@link StoreService} for entity caching.
      *
-     * @param userId The ID of the user.
-     * @return A {@link Mono} where, upon successful completion, emits the {@link UserBean} as represented by the
-     * supplied ID. If an error is received, it is emitted through the {@code Mono}.
+     * @return a bootstrap to create {@link GatewayDiscordClient} instances.
      */
-    private Mono<UserBean> getUserBean(final Snowflake userId) {
-        return serviceMediator.getStateHolder().getUserStore()
-                .find(userId.asLong())
-                .switchIfEmpty(serviceMediator.getRestClient().getUserService()
-                        .getUser(userId.asLong())
-                        .map(UserBean::new)
-                        .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex())));
+    public GatewayBootstrap<GatewayOptions> gateway() {
+        return GatewayBootstrap.create(this);
     }
 }

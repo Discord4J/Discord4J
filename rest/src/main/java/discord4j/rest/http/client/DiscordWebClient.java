@@ -39,6 +39,8 @@ import java.util.Optional;
 import java.util.Properties;
 import java.util.function.Consumer;
 
+import static discord4j.common.LogUtil.format;
+
 /**
  * Reactor Netty based HTTP client dedicated to Discord REST API requests.
  */
@@ -46,7 +48,7 @@ public class DiscordWebClient {
 
     private static final Logger log = Loggers.getLogger(DiscordWebClient.class);
 
-    public static final String REQUEST_TIMESTAMP_KEY = "requestTimestamp";
+    public static final String KEY_REQUEST_TIMESTAMP = "discord4j.request.timestamp";
 
     private final HttpClient httpClient;
     private final HttpHeaders defaultHeaders;
@@ -120,20 +122,25 @@ public class DiscordWebClient {
                                    Consumer<HttpClientResponse> responseConsumer) {
         Objects.requireNonNull(responseType);
 
-        HttpHeaders requestHeaders = new DefaultHttpHeaders().add(defaultHeaders).setAll(request.getHeaders());
-        String contentType = requestHeaders.get(HttpHeaderNames.CONTENT_TYPE);
-        HttpClient.RequestSender sender = httpClient
-                .baseUrl(Routes.BASE_URL)
-                .observe((connection, newState) -> log.debug("{} {}", newState, connection))
-                .headers(headers -> headers.setAll(requestHeaders))
-                .request(request.getMethod())
-                .uri(request.getUrl());
-        return exchangeStrategies.writers().stream()
-                .filter(s -> s.canWrite(body != null ? body.getClass() : null, contentType))
-                .findFirst()
-                .map(DiscordWebClient::<R>cast)
-                .map(writer -> writer.write(sender, body))
-                .orElseGet(() -> Mono.error(noWriterException(body, contentType)))
+        return Mono.subscriberContext()
+                .flatMap(ctx -> {
+                    HttpHeaders requestHeaders = new DefaultHttpHeaders()
+                            .add(defaultHeaders)
+                            .setAll(request.getHeaders());
+                    String contentType = requestHeaders.get(HttpHeaderNames.CONTENT_TYPE);
+                    HttpClient.RequestSender sender = httpClient
+                            .baseUrl(Routes.BASE_URL)
+                            .observe((connection, newState) -> log.debug(format(ctx, "{} {}"), newState, connection))
+                            .headers(headers -> headers.setAll(requestHeaders))
+                            .request(request.getMethod())
+                            .uri(request.getUrl());
+                    return exchangeStrategies.writers().stream()
+                            .filter(s -> s.canWrite(body != null ? body.getClass() : null, contentType))
+                            .findFirst()
+                            .map(DiscordWebClient::<R>cast)
+                            .map(writer -> writer.write(sender, body))
+                            .orElseGet(() -> Mono.error(noWriterException(body, contentType)));
+                })
                 .flatMap(receiver -> receiver.responseSingle((response, content) -> {
                     responseConsumer.accept(response);
 
@@ -154,7 +161,7 @@ public class DiscordWebClient {
                                 .orElseGet(() -> Mono.error(noReaderException(responseType, responseContentType)));
                     }
                 }))
-                .subscriberContext(ctx -> ctx.put(REQUEST_TIMESTAMP_KEY, Instant.now().toEpochMilli()));
+                .subscriberContext(ctx -> ctx.put(KEY_REQUEST_TIMESTAMP, Instant.now().toEpochMilli()));
     }
 
     @SuppressWarnings("unchecked")

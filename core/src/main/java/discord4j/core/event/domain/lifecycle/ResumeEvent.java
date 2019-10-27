@@ -16,7 +16,8 @@
  */
 package discord4j.core.event.domain.lifecycle;
 
-import discord4j.core.DiscordClient;
+import discord4j.core.GatewayDiscordClient;
+import discord4j.gateway.ShardInfo;
 
 import java.util.Arrays;
 
@@ -31,8 +32,8 @@ public class ResumeEvent extends GatewayLifecycleEvent {
 
     private final String[] trace;
 
-    public ResumeEvent(DiscordClient client, String[] trace) {
-        super(client);
+    public ResumeEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, String[] trace) {
+        super(gateway, shardInfo);
         this.trace = trace;
     }
 

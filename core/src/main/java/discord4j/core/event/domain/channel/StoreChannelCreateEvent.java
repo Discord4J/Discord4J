@@ -16,8 +16,9 @@
  */
 package discord4j.core.event.domain.channel;
 
-import discord4j.core.DiscordClient;
+import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.channel.StoreChannel;
+import discord4j.gateway.ShardInfo;
 
 /**
  * Dispatched when a {@link StoreChannel} is created in a guild.
@@ -30,8 +31,8 @@ public class StoreChannelCreateEvent extends ChannelEvent {
 
     private final StoreChannel channel;
 
-    public StoreChannelCreateEvent(DiscordClient client, StoreChannel channel) {
-        super(client);
+    public StoreChannelCreateEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, StoreChannel channel) {
+        super(gateway, shardInfo);
         this.channel = channel;
     }
 

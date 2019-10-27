@@ -16,10 +16,11 @@
  */
 package discord4j.core.event.domain.channel;
 
-import discord4j.core.DiscordClient;
+import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.core.object.util.Snowflake;
+import discord4j.gateway.ShardInfo;
 import reactor.core.publisher.Mono;
 
 import java.time.Instant;
@@ -37,8 +38,8 @@ public class TypingStartEvent extends ChannelEvent {
     private final long userId;
     private final Instant startTime;
 
-    public TypingStartEvent(DiscordClient client, long channelId, long userId, Instant startTime) {
-        super(client);
+    public TypingStartEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, long channelId, long userId, Instant startTime) {
+        super(gateway, shardInfo);
         this.channelId = channelId;
         this.userId = userId;
         this.startTime = startTime;

@@ -20,12 +20,11 @@ package discord4j.core.shard;
 import discord4j.store.api.Store;
 
 import java.io.Serializable;
-import java.util.Set;
 
 public interface ShardingStoreRegistry {
 
     boolean containsStore(Class<?> valueClass);
     <V extends Serializable, K extends Comparable<K>> void putStore(Class<V> valueClass, Store<K, V> store);
     <K extends Comparable<K>, V extends Serializable> Store<K, V> getValueStore(Class<K> key, Class<V> value);
-    <K extends Comparable<K>, V extends Serializable> Set<K> getKeyStore(Class<V> valueClass, int shardId);
+    <K extends Comparable<K>, V extends Serializable> ShardKeyStore<K> getKeyStore(Class<V> valueClass);
 }

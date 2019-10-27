@@ -16,10 +16,11 @@
  */
 package discord4j.core.event.domain.guild;
 
-import discord4j.core.DiscordClient;
+import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.util.Snowflake;
+import discord4j.gateway.ShardInfo;
 import reactor.core.publisher.Mono;
 
 import java.util.Set;
@@ -38,8 +39,8 @@ public class MemberChunkEvent extends GuildEvent {
     private final long guildId;
     private final Set<Member> members;
 
-    public MemberChunkEvent(DiscordClient client, long guildId, Set<Member> members) {
-        super(client);
+    public MemberChunkEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, long guildId, Set<Member> members) {
+        super(gateway, shardInfo);
         this.guildId = guildId;
         this.members = members;
     }

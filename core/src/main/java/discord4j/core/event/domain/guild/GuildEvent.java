@@ -16,16 +16,17 @@
  */
 package discord4j.core.event.domain.guild;
 
-import discord4j.core.DiscordClient;
+import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.Event;
 import discord4j.core.object.entity.Guild;
+import discord4j.gateway.ShardInfo;
 
 /**
  * Represents an event related to a {@link Guild}.
  */
 public abstract class GuildEvent extends Event {
 
-    public GuildEvent(DiscordClient client) {
-        super(client);
+    public GuildEvent(GatewayDiscordClient gateway, ShardInfo shardInfo) {
+        super(gateway, shardInfo);
     }
 }

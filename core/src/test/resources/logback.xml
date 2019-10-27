@@ -3,22 +3,23 @@
     <logger name="io.netty" level="INFO"/>
     <logger name="reactor" level="INFO"/>
     <logger name="reactor.retry" level="INFO"/>
-    <logger name="discord4j.core" level="INFO"/>
-    <logger name="discord4j.gateway.client" level="INFO"/>
+    <logger name="discord4j.core" level="DEBUG"/>
+    <logger name="discord4j.gateway.client" level="DEBUG"/>
     <logger name="discord4j.gateway.inbound" level="INFO"/>
     <logger name="discord4j.gateway.outbound" level="INFO"/>
-    <!--<logger name="discord4j.gateway.receiver" level="TRACE"/>-->
-    <!--<logger name="discord4j.gateway.sender" level="TRACE"/>-->
-    <!--<logger name="discord4j.gateway.zip" level="DEBUG"/>-->
+    <logger name="discord4j.gateway.payload.inbound" level="INFO"/>
+    <logger name="discord4j.gateway.payload.outbound" level="INFO"/>
     <logger name="discord4j.rest.http.client.DiscordWebClient" level="INFO"/>
     <!--<logger name="discord4j.rest.http.MultipartWriterStrategy" level="TRACE"/>-->
     <!--<logger name="discord4j.rest.http.JacksonWriterStrategy" level="TRACE"/>-->
     <!--<logger name="discord4j.rest.http.JacksonReaderStrategy" level="TRACE"/>-->
-    <logger name="discord4j.rest.traces" level="INFO"/>
-    <logger name="discord4j.rest.request" level="INFO"/>
-    <logger name="discord4j.rest.response" level="INFO"/>
+    <logger name="discord4j.rest.traces" level="TRACE"/>
+    <logger name="discord4j.rest.request" level="TRACE"/>
+    <logger name="discord4j.rest.response" level="TRACE"/>
     <logger name="discord4j.dispatch" level="INFO"/>
-    <logger name="discord4j.events" level="INFO"/>
+    <logger name="discord4j.events" level="DEBUG"/>
+
+    <logger name="io.rsocket.FrameLogger" level="INFO"/>
 
     <turboFilter class="discord4j.core.logback.GatewayEventFilter">
         <Include>MESSAGE_CREATE</Include>

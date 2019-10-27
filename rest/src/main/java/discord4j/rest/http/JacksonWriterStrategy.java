@@ -33,7 +33,7 @@ import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 
 /**
- * Write to a request from an {@code Object} to a JSON {@code String} using Jackson 2.9.
+ * Write to a request from an {@code Object} to a JSON {@code String} using Jackson.
  */
 public class JacksonWriterStrategy implements WriterStrategy<Object> {
 

@@ -16,18 +16,20 @@
  */
 package discord4j.core.spec;
 
-import discord4j.core.DiscordClient;
-import discord4j.core.ServiceMediator;
+import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.VoiceServerUpdateEvent;
 import discord4j.core.event.domain.VoiceStateUpdateEvent;
 import discord4j.core.object.entity.channel.VoiceChannel;
+import discord4j.gateway.GatewayClient;
 import discord4j.gateway.json.GatewayPayload;
 import discord4j.gateway.json.VoiceStateUpdate;
 import discord4j.voice.AudioProvider;
 import discord4j.voice.AudioReceiver;
+import discord4j.voice.VoiceClient;
 import discord4j.voice.VoiceConnection;
 import reactor.core.publisher.Mono;
 
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -41,11 +43,11 @@ public class VoiceChannelJoinSpec implements Spec<Mono<VoiceConnection>> {
     private boolean selfDeaf;
     private boolean selfMute;
 
-    private final ServiceMediator serviceMediator;
+    private final GatewayDiscordClient gateway;
     private final VoiceChannel voiceChannel;
 
-    public VoiceChannelJoinSpec(final ServiceMediator serviceMediator, final VoiceChannel voiceChannel) {
-        this.serviceMediator = Objects.requireNonNull(serviceMediator);
+    public VoiceChannelJoinSpec(final GatewayDiscordClient gateway, final VoiceChannel voiceChannel) {
+        this.gateway = Objects.requireNonNull(gateway);
         this.voiceChannel = voiceChannel;
     }
 
@@ -98,17 +100,25 @@ public class VoiceChannelJoinSpec implements Spec<Mono<VoiceConnection>> {
 
     @Override
     public Mono<VoiceConnection> asRequest() {
-        final DiscordClient client = voiceChannel.getClient();
         final long guildId = voiceChannel.getGuildId().asLong();
         final long channelId = voiceChannel.getId().asLong();
-        final long selfId = serviceMediator.getStateHolder().getSelfId().get();
+        final long selfId = gateway.getGatewayResources().getStateView().getSelfId();
+
+        Map<Integer, GatewayClient> gatewayClients = voiceChannel.getClient().getGatewayClientMap();
+        int count = gatewayClients.size();
+        int shardId = (int) ((voiceChannel.getGuildId().asLong() >> 22) % count);
+        GatewayClient gatewayClient = gatewayClients.get(shardId);
+        VoiceClient voiceClient = gateway.getVoiceClientMap().get(shardId);
+        if (gatewayClient == null) {
+            return Mono.error(new RuntimeException("Shard id not set"));
+        }
 
         final Mono<Void> sendVoiceStateUpdate = Mono.fromRunnable(() -> {
             final VoiceStateUpdate voiceStateUpdate = new VoiceStateUpdate(guildId, channelId, selfMute, selfDeaf);
-            serviceMediator.getGatewayClient().sender().next(GatewayPayload.voiceStateUpdate(voiceStateUpdate));
+            gatewayClient.sender().next(GatewayPayload.voiceStateUpdate(voiceStateUpdate));
         });
 
-        final Mono<VoiceStateUpdateEvent> waitForVoiceStateUpdate = client.getEventDispatcher()
+        final Mono<VoiceStateUpdateEvent> waitForVoiceStateUpdate = gateway.getEventDispatcher()
                 .on(VoiceStateUpdateEvent.class)
                 .filter(vsu -> {
                     final long vsuUser = vsu.getCurrent().getUserId().asLong();
@@ -117,7 +127,7 @@ public class VoiceChannelJoinSpec implements Spec<Mono<VoiceConnection>> {
                     return (vsuUser == selfId) && (vsuGuild == guildId);
                 }).next();
 
-        final Mono<VoiceServerUpdateEvent> waitForVoiceServerUpdate = client.getEventDispatcher()
+        final Mono<VoiceServerUpdateEvent> waitForVoiceServerUpdate = gateway.getEventDispatcher()
                 .on(VoiceServerUpdateEvent.class)
                 .filter(vsu -> vsu.getGuildId().asLong() == guildId)
                 .filter(vsu -> vsu.getEndpoint() != null) // sometimes Discord sends null here. If so, another VSU
@@ -131,8 +141,7 @@ public class VoiceChannelJoinSpec implements Spec<Mono<VoiceConnection>> {
                     final String session = t.getT1().getCurrent().getSessionId();
                     final String token = t.getT2().getToken();
 
-                    return serviceMediator.getVoiceClient()
-                            .newConnection(guildId, selfId, session, token, endpoint, provider, receiver);
+                    return voiceClient.newConnection(guildId, selfId, session, token, endpoint, provider, receiver);
                 });
     }
 }

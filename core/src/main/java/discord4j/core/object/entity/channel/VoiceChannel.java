@@ -16,7 +16,7 @@
  */
 package discord4j.core.object.entity.channel;
 
-import discord4j.core.ServiceMediator;
+import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.VoiceState;
 import discord4j.core.object.data.stored.ChannelBean;
 import discord4j.core.object.data.stored.VoiceStateBean;
@@ -37,11 +37,11 @@ public final class VoiceChannel extends BaseCategorizableChannel {
     /**
      * Constructs an {@code VoiceChannel} with an associated ServiceMediator and Discord data.
      *
-     * @param serviceMediator The ServiceMediator associated to this object, must be non-null.
+     * @param gateway The {@link GatewayDiscordClient} associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
      */
-    public VoiceChannel(final ServiceMediator serviceMediator, final ChannelBean data) {
-        super(serviceMediator, data);
+    public VoiceChannel(final GatewayDiscordClient gateway, final ChannelBean data) {
+        super(gateway, data);
     }
 
     /**
@@ -73,12 +73,11 @@ public final class VoiceChannel extends BaseCategorizableChannel {
         final VoiceChannelEditSpec mutatedSpec = new VoiceChannelEditSpec();
         spec.accept(mutatedSpec);
 
-        return getServiceMediator().getRestClient().getChannelService()
+        return getClient().getRestClient().getChannelService()
                 .modifyChannel(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason())
                 .map(ChannelBean::new)
-                .map(bean -> EntityUtil.getChannel(getServiceMediator(), bean))
-                .cast(VoiceChannel.class)
-                .subscriberContext(ctx -> ctx.put("shard", getServiceMediator().getClientConfig().getShardIndex()));
+                .map(bean -> EntityUtil.getChannel(getClient(), bean))
+                .cast(VoiceChannel.class);
     }
 
     /**
@@ -87,16 +86,16 @@ public final class VoiceChannel extends BaseCategorizableChannel {
      * @return A {@link Flux} that continually emits the {@link VoiceState voice states} of this voice channel. If an
      * error is received, it is emitted through the {@code Flux}.
      *
-     * @implNote If the underlying {@link discord4j.core.DiscordClientBuilder#getStoreService() store} does not save
+     * @implNote If the underlying store does not save
      * {@link VoiceStateBean} instances <b>OR</b> the bot is currently not logged in then the returned {@code Flux} will
      * always be empty.
      */
     public Flux<VoiceState> getVoiceStates() {
-        return getServiceMediator().getStateHolder().getVoiceStateStore()
+        return getClient().getGatewayResources().getStateView().getVoiceStateStore()
                 .findInRange(LongLongTuple2.of(getGuildId().asLong(), Long.MIN_VALUE),
                         LongLongTuple2.of(getGuildId().asLong(), Long.MAX_VALUE))
                 .filter(bean -> Objects.equals(bean.getChannelId(), getId().asLong()))
-                .map(bean -> new VoiceState(getServiceMediator(), bean));
+                .map(bean -> new VoiceState(getClient(), bean));
     }
 
     /**
@@ -107,7 +106,7 @@ public final class VoiceChannel extends BaseCategorizableChannel {
      * connection to the channel has been established. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<VoiceConnection> join(final Consumer<? super VoiceChannelJoinSpec> spec) {
-        final VoiceChannelJoinSpec mutatedSpec = new VoiceChannelJoinSpec(getServiceMediator(), this);
+        final VoiceChannelJoinSpec mutatedSpec = new VoiceChannelJoinSpec(getClient(), this);
         spec.accept(mutatedSpec);
 
         return mutatedSpec.asRequest();

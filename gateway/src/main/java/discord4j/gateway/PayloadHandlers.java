@@ -20,6 +20,7 @@ import discord4j.common.jackson.Possible;
 import discord4j.gateway.json.*;
 import discord4j.gateway.json.dispatch.Dispatch;
 import discord4j.gateway.json.dispatch.Ready;
+import discord4j.gateway.retry.GatewayException;
 import reactor.util.Logger;
 import reactor.util.Loggers;
 
@@ -27,6 +28,8 @@ import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+
+import static discord4j.common.LogUtil.format;
 
 /**
  * Registry for operating on gateway {@link PayloadData} objects, handling each lifecycle {@link Opcode}.
@@ -73,7 +76,7 @@ public abstract class PayloadHandlers {
     }
 
     private static void handleHeartbeat(PayloadContext<Heartbeat> context) {
-        log(context).debug("Received heartbeat");
+        log.debug(format(context.getContext(), "Received heartbeat"));
         context.getClient().sender().next(GatewayPayload.heartbeat(new Heartbeat(context.getClient().sequence().get())));
     }
 
@@ -89,7 +92,8 @@ public abstract class PayloadHandlers {
                     new Resume(token, client.getSessionId(), client.sequence().get())));
         } else {
             client.resumable().set(false);
-            context.getHandler().error(new RuntimeException("Reconnecting due to non-resumable session invalidation"));
+            context.getHandler().error(new GatewayException(context.getContext(),
+                    "Reconnecting due to non-resumable session invalidation"));
         }
     }
 
@@ -99,7 +103,7 @@ public abstract class PayloadHandlers {
         client.heartbeat().start(interval);
 
         if (client.resumable().get()) {
-            log(context).info("Attempting to RESUME from {}", client.sequence().get());
+            log.debug(format(context.getContext(), "Resuming Gateway session from {}"), client.sequence().get());
             client.sender().next(GatewayPayload.resume(
                     new Resume(client.token(), client.getSessionId(), client.sequence().get())));
         } else {
@@ -109,17 +113,17 @@ public abstract class PayloadHandlers {
             Identify identify = new Identify(client.token(), props, false, 250,
                     Optional.of(shard).map(Possible::of).orElse(Possible.absent()),
                     Optional.ofNullable(options.getInitialStatus()).map(Possible::of).orElse(Possible.absent()));
+            log.debug(format(context.getContext(), "Identifying to Gateway"), client.sequence().get());
             client.sender().next(GatewayPayload.identify(identify));
         }
     }
 
     private static void handleHeartbeatAck(PayloadContext<?> context) {
         context.getClient().ackHeartbeat();
-        log(context).debug("Heartbeat acknowledged after {}", context.getClient().getResponseTime());
+        log.debug(format(context.getContext(), "Heartbeat acknowledged after {}"),
+                context.getClient().getResponseTime());
     }
 
-    private static Logger log(PayloadContext<?> context) {
-        return Loggers.getLogger("discord4j.gateway.handler." + context.getClient().identifyOptions().getShardIndex());
-    }
+    private static final Logger log = Loggers.getLogger("discord4j.gateway.handler");
 
 }

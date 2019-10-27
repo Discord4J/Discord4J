@@ -16,8 +16,7 @@
  */
 package discord4j.core.object;
 
-import discord4j.core.DiscordClient;
-import discord4j.core.ServiceMediator;
+import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.data.BanBean;
 import discord4j.core.object.entity.User;
 
@@ -31,8 +30,8 @@ import java.util.Optional;
  */
 public final class Ban implements DiscordObject {
 
-    /** The ServiceMediator associated to this object. */
-    private final ServiceMediator serviceMediator;
+    /** The gateway associated to this object. */
+    private final GatewayDiscordClient gateway;
 
     /** The raw data as represented by Discord. */
     private final BanBean data;
@@ -40,17 +39,17 @@ public final class Ban implements DiscordObject {
     /**
      * Constructs a {@code Ban} with an associated ServiceMediator and Discord data.
      *
-     * @param serviceMediator The ServiceMediator associated to this object, must be non-null.
+     * @param gateway The {@link GatewayDiscordClient} associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
      */
-    public Ban(final ServiceMediator serviceMediator, final BanBean data) {
-        this.serviceMediator = Objects.requireNonNull(serviceMediator);
+    public Ban(final GatewayDiscordClient gateway, final BanBean data) {
+        this.gateway = Objects.requireNonNull(gateway);
         this.data = Objects.requireNonNull(data);
     }
 
     @Override
-    public DiscordClient getClient() {
-        return serviceMediator.getClient();
+    public GatewayDiscordClient getClient() {
+        return gateway;
     }
 
     /**
@@ -68,7 +67,7 @@ public final class Ban implements DiscordObject {
      * @return The banned user.
      */
     public User getUser() {
-        return new User(serviceMediator, data.getUser());
+        return new User(gateway, data.getUser());
     }
 
     @Override

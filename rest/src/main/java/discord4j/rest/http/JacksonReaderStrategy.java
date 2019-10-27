@@ -30,7 +30,7 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 
 /**
- * Read a response into JSON and convert to an Object of type {@code <Res>} using Jackson 2.9.
+ * Read a response into JSON and convert to an Object of type {@code <Res>} using Jackson.
  *
  * @param <Res> the type of object in the read response
  */

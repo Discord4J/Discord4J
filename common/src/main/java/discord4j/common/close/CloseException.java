@@ -18,6 +18,7 @@
 package discord4j.common.close;
 
 import reactor.util.annotation.Nullable;
+import reactor.util.context.Context;
 
 /**
  * Unchecked exception thrown when a websocket session is closed, in an expected way or not.
@@ -28,14 +29,16 @@ import reactor.util.annotation.Nullable;
 public class CloseException extends RuntimeException {
 
     private final CloseStatus closeStatus;
+    private final Context context;
 
-    public CloseException(CloseStatus closeStatus) {
-        this(closeStatus, null);
+    public CloseException(CloseStatus closeStatus, Context context) {
+        this(closeStatus, context, null);
     }
 
-    public CloseException(CloseStatus closeStatus, @Nullable Throwable cause) {
+    public CloseException(CloseStatus closeStatus, Context context, @Nullable Throwable cause) {
         super(cause);
         this.closeStatus = closeStatus;
+        this.context = context;
     }
 
     public CloseStatus getCloseStatus() {
@@ -51,8 +54,13 @@ public class CloseException extends RuntimeException {
         return closeStatus.getReason();
     }
 
+    public Context getContext() {
+        return context;
+    }
+
     @Override
     public String getMessage() {
-        return "WebSocket closed: " + closeStatus.toString();
+        return "WebSocket closed: " + closeStatus.toString()
+                + (getCause() != null ? " caused by " + getCause().toString() : "");
     }
 }

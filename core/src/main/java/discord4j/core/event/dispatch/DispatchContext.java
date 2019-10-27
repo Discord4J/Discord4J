@@ -17,7 +17,9 @@
 
 package discord4j.core.event.dispatch;
 
-import discord4j.core.ServiceMediator;
+import discord4j.core.GatewayDiscordClient;
+import discord4j.core.StateHolder;
+import discord4j.gateway.ShardInfo;
 import discord4j.gateway.json.dispatch.Dispatch;
 
 /**
@@ -29,22 +31,35 @@ import discord4j.gateway.json.dispatch.Dispatch;
 public class DispatchContext<D extends Dispatch> {
 
     private final D dispatch;
-    private final ServiceMediator serviceMediator;
+    private final GatewayDiscordClient gateway;
+    private final StateHolder stateHolder;
+    private final ShardInfo shardInfo;
 
-    public static <D extends Dispatch> DispatchContext<D> of(D dispatch, ServiceMediator serviceMediator) {
-        return new DispatchContext<>(dispatch, serviceMediator);
+    public static <D extends Dispatch> DispatchContext<D> of(D dispatch, GatewayDiscordClient gateway,
+                                                             StateHolder stateHolder, ShardInfo shardInfo) {
+        return new DispatchContext<>(dispatch, gateway, stateHolder, shardInfo);
     }
 
-    private DispatchContext(D dispatch, ServiceMediator serviceMediator) {
+    private DispatchContext(D dispatch, GatewayDiscordClient gateway, StateHolder stateHolder, ShardInfo shardInfo) {
         this.dispatch = dispatch;
-        this.serviceMediator = serviceMediator;
+        this.gateway = gateway;
+        this.stateHolder = stateHolder;
+        this.shardInfo = shardInfo;
     }
 
     public D getDispatch() {
         return dispatch;
     }
 
-    public ServiceMediator getServiceMediator() {
-        return serviceMediator;
+    public GatewayDiscordClient getGateway() {
+        return gateway;
+    }
+
+    public StateHolder getStateHolder() {
+        return stateHolder;
+    }
+
+    public ShardInfo getShardInfo() {
+        return shardInfo;
     }
 }
