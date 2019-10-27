@@ -27,7 +27,7 @@ import discord4j.common.jackson.UnknownPropertyHandler;
 import java.util.function.Function;
 
 /**
- * Provides a centralized Jackson 2.9 {@link com.fasterxml.jackson.databind.ObjectMapper} allowing customization and
+ * Provides a centralized Jackson 2.10 {@link com.fasterxml.jackson.databind.ObjectMapper} allowing customization and
  * reuse across the application.
  */
 public class JacksonResources {
