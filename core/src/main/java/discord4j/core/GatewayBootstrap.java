@@ -103,7 +103,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
 
     private int shardCount = RECOMMENDED_SHARD_COUNT;
     private Predicate<ShardInfo> shardFilter = shard -> true;
-    private boolean awaitAllShards = false;
+    private boolean awaitConnections = true;
     private ShardCoordinator shardCoordinator = new LocalShardCoordinator();
     private EventDispatcher eventDispatcher = null;
     private StoreService storeService = null;
@@ -141,7 +141,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
         this.client = source.client;
         this.shardCount = source.shardCount;
         this.shardFilter = source.shardFilter;
-        this.awaitAllShards = source.awaitAllShards;
+        this.awaitConnections = source.awaitConnections;
         this.shardCoordinator = source.shardCoordinator;
         this.eventDispatcher = source.eventDispatcher;
         this.storeService = source.storeService;
@@ -200,14 +200,14 @@ public class GatewayBootstrap<O extends GatewayOptions> {
 
     /**
      * Set if the connect {@link Mono} should defer completion until all joining shards have connected. Defaults to
-     * {@code false}.
+     * {@code true}.
      *
-     * @param awaitAllShards {@code true} if connect should wait until all joining shards have connected before
+     * @param awaitConnections {@code true} if connect should wait until all joining shards have connected before
      * completing, or {@code false} to complete immediately
      * @return this builder
      */
-    public GatewayBootstrap<O> setAwaitAllShards(boolean awaitAllShards) {
-        this.awaitAllShards = awaitAllShards;
+    public GatewayBootstrap<O> setAwaitConnections(boolean awaitConnections) {
+        this.awaitConnections = awaitConnections;
         return this;
     }
 
@@ -226,9 +226,9 @@ public class GatewayBootstrap<O extends GatewayOptions> {
 
     /**
      * Set a custom {@link EventDispatcher} to receive {@link Event Events} from all joining shards and publish them to
-     * all subscribers. Defaults to using {@link EventDispatcher#buffering()} if {@code awaitAllShards} is {@code
+     * all subscribers. Defaults to using {@link EventDispatcher#buffering()} if {@code awaitConnections} is {@code
      * true} that will buffer all events until the first subscriber subscribes to the dispatcher, and
-     * {@link EventDispatcher#replayingWithTimeout(Duration)} if {@code awaitAllShards} is {@code false} that will
+     * {@link EventDispatcher#replayingWithTimeout(Duration)} if {@code awaitConnections} is {@code false} that will
      * retain up to 2 minutes worth of events in history.
      *
      * @param eventDispatcher an externally managed {@link EventDispatcher} to publish events
@@ -382,7 +382,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
      * Connect to the Discord Gateway upon subscription to acquire a {@link GatewayDiscordClient} instance and use it
      * in a declarative manner, releasing the object once the derived usage {@link Function} terminates or is cancelled.
      * <p>
-     * The timing of acquiring a {@link GatewayDiscordClient} depends on the {@link #setAwaitAllShards(boolean)}
+     * The timing of acquiring a {@link GatewayDiscordClient} depends on the {@link #setAwaitConnections(boolean)}
      * setting: if {@code true}, when all joining shards have connected; if {@code false}, as soon as it is possible to
      * establish a connection to the Gateway.
      * <p>
@@ -412,7 +412,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
      * configured by this builder. The resulting {@link GatewayDiscordClient} can be externally managed, leaving you
      * in charge of properly releasing its resources by calling {@link GatewayDiscordClient#logout()}.
      * <p>
-     * The timing of acquiring a {@link GatewayDiscordClient} depends on the {@link #setAwaitAllShards(boolean)}
+     * The timing of acquiring a {@link GatewayDiscordClient} depends on the {@link #setAwaitConnections(boolean)}
      * setting: if {@code true}, when all joining shards have connected; if {@code false}, as soon as it is possible
      * to establish a connection to the Gateway.
      * <p>
@@ -422,7 +422,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
      * session it will retry before continuing to the next one.
      *
      * @return a {@link Mono} that upon subscription and depending on the configuration of
-     * {@link #setAwaitAllShards(boolean)}, emits a {@link GatewayDiscordClient}. If an error occurs during the setup
+     * {@link #setAwaitConnections(boolean)}, emits a {@link GatewayDiscordClient}. If an error occurs during the setup
      * sequence, it will be emitted through the {@link Mono}.
      */
     public Mono<GatewayDiscordClient> connect() {
@@ -435,7 +435,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
      * about how the returned {@link Mono} operates.
      *
      * @return a {@link Mono} that upon subscription and depending on the configuration of
-     * {@link #setAwaitAllShards(boolean)}, emits a {@link GatewayDiscordClient}. If an error occurs during the setup
+     * {@link #setAwaitConnections(boolean)}, emits a {@link GatewayDiscordClient}. If an error occurs during the setup
      * sequence, it will be emitted through the {@link Mono}.
      */
     public Mono<GatewayDiscordClient> connect(Function<O, GatewayClient> clientFactory) {
@@ -457,7 +457,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                         .concatMap(shard -> acquireConnection(shard, clientFactory, gateway, stateHolder,
                                 eventDispatcher, gatewayClients, voiceClients, closeProcessor)));
 
-        if (awaitAllShards) {
+        if (awaitConnections) {
             return connections.collectList().thenReturn(gateway);
         } else {
             return Mono.create(sink -> {
@@ -634,7 +634,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
         if (eventDispatcher != null) {
             return eventDispatcher;
         }
-        if (awaitAllShards) {
+        if (awaitConnections) {
             return EventDispatcher.replayingWithTimeout(Duration.ofMinutes(2));
         } else {
             return EventDispatcher.buffering();
