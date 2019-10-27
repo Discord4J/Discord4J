@@ -41,9 +41,9 @@ public class ActivityBean implements Serializable {
     @Nullable
     private String partyId;
     @Nullable
-    private Integer currentPartySize;
+    private Long currentPartySize;
     @Nullable
-    private Integer maxPartySize;
+    private Long maxPartySize;
     @Nullable
     private String largeImage;
     @Nullable
@@ -87,7 +87,7 @@ public class ActivityBean implements Serializable {
             this.maxPartySize = null;
         } else {
             this.partyId = Possible.orElseNull(party.getId());
-            int[] size = Possible.orElseNull(party.getSize());
+            long[] size = Possible.orElseNull(party.getSize());
             if (size == null) {
                 this.currentPartySize = null;
                 this.maxPartySize = null;
@@ -211,20 +211,20 @@ public class ActivityBean implements Serializable {
     }
 
     @Nullable
-    public Integer getCurrentPartySize() {
+    public Long getCurrentPartySize() {
         return currentPartySize;
     }
 
-    public void setCurrentPartySize(@Nullable Integer currentPartySize) {
+    public void setCurrentPartySize(@Nullable Long currentPartySize) {
         this.currentPartySize = currentPartySize;
     }
 
     @Nullable
-    public Integer getMaxPartySize() {
+    public Long getMaxPartySize() {
         return maxPartySize;
     }
 
-    public void setMaxPartySize(@Nullable Integer maxPartySize) {
+    public void setMaxPartySize(@Nullable Long maxPartySize) {
         this.maxPartySize = maxPartySize;
     }
 
