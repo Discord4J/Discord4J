@@ -59,28 +59,30 @@ public class PoolGlobalRateLimiter implements GlobalRateLimiter {
     }
 
     @Override
-    public void rateLimitFor(Duration duration) {
-        limitedUntil = System.nanoTime() + duration.toNanos();
+    public Mono<Void> rateLimitFor(Duration duration) {
+        return Mono.fromRunnable(() -> {
+            limitedUntil = System.nanoTime() + duration.toNanos();
+        });
     }
 
     @Override
-    public Duration getRemaining() {
-        return Duration.ofNanos(limitedUntil - System.nanoTime());
+    public Mono<Duration> getRemaining() {
+        return Mono.just(Duration.ofNanos(limitedUntil - System.nanoTime()));
     }
 
     @Override
     public <T> Flux<T> withLimiter(Publisher<T> stage) {
         return outer.withPoolable(permit -> Mono.subscriberContext()
                 .flatMapMany(ctx -> {
-                    permit.bucket = ctx.getOrDefault("bucket", "<unknown>");
+                    permit.bucket = ctx.getOrDefault("bucket", "default");
                     log.debug("[{}] Acquired permit", permit);
-                    Duration delay = getRemaining();
-                    if (!delay.isNegative() && !delay.isZero()) {
-                        log.debug("[{}] Waiting for {} before processing request", permit, delay);
-                        return Mono.delay(delay).flatMapMany(tick -> Flux.from(stage));
-                    } else {
-                        return stage;
-                    }
+                    return getRemaining()
+                            .filter(delay -> !delay.isNegative() && !delay.isZero())
+                            .flatMapMany(delay -> {
+                                log.debug("[{}] Waiting for {} before processing request", permit, delay);
+                                return Mono.delay(delay).flatMapMany(tick -> Flux.from(stage));
+                            })
+                            .switchIfEmpty(stage);
                 }));
     }
 
@@ -97,7 +99,7 @@ public class PoolGlobalRateLimiter implements GlobalRateLimiter {
 
         @Override
         public String toString() {
-            return id + "-" + bucket;
+            return bucket + ":" + id;
         }
     }
 }
