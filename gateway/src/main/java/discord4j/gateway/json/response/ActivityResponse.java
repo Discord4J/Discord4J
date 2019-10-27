@@ -135,13 +135,13 @@ public class ActivityResponse {
 
     public static class Party {
         private Possible<String> id;
-        private Possible<int[]> size;
+        private Possible<long[]> size;
 
         public Possible<String> getId() {
             return id;
         }
 
-        public Possible<int[]> getSize() {
+        public Possible<long[]> getSize() {
             return size;
         }
 

@@ -23,11 +23,9 @@ import discord4j.rest.http.client.DiscordWebClient;
 import org.reactivestreams.Subscription;
 import reactor.core.publisher.*;
 import reactor.core.scheduler.Scheduler;
+import reactor.core.scheduler.Schedulers;
 import reactor.netty.http.client.HttpClientResponse;
-import reactor.retry.BackoffDelay;
-import reactor.retry.IterationContext;
 import reactor.retry.Retry;
-import reactor.retry.RetryContext;
 import reactor.util.Logger;
 import reactor.util.Loggers;
 
@@ -58,6 +56,7 @@ class RequestStream<T> {
     private final RateLimitStrategy rateLimitStrategy;
     private final Scheduler rateLimitScheduler;
     private final RouterOptions routerOptions;
+    private final RateLimitRetryOperator rateLimitRetryOperator;
 
     RequestStream(BucketKey id, DiscordWebClient httpClient, GlobalRateLimiter globalRateLimiter,
                   RateLimitStrategy rateLimitStrategy, Scheduler rateLimitScheduler, RouterOptions routerOptions) {
@@ -67,48 +66,7 @@ class RequestStream<T> {
         this.rateLimitStrategy = rateLimitStrategy;
         this.rateLimitScheduler = rateLimitScheduler;
         this.routerOptions = routerOptions;
-    }
-
-    /**
-     * The retry function used for reading and completing HTTP requests. The backoff is determined by the rate limit
-     * headers returned by Discord in the event of a 429. If the bot is being globally rate limited, the backoff is
-     * applied to the global rate limiter. Otherwise, it is applied only to this stream.
-     */
-    private Retry<?> rateLimitRetryFactory() {
-        return Retry.onlyIf(this::isRateLimitError).backoff(context -> {
-            if (isRateLimitError(context)) {
-                RetryContext<?> ctx = (RetryContext) context;
-                ClientException clientException = (ClientException) ctx.exception();
-                boolean global = Boolean.parseBoolean(clientException.getHeaders().get("X-RateLimit-Global"));
-                long retryAfter = Long.parseLong(clientException.getHeaders().get("Retry-After"));
-                Duration fixedBackoff = Duration.ofMillis(retryAfter);
-                if (global) {
-                    Duration remaining = globalRateLimiter.getRemaining();
-                    if (!remaining.isNegative() && !remaining.isZero()) {
-                        return new BackoffDelay(remaining);
-                    }
-                    log.debug("Globally rate limited for {}", fixedBackoff);
-                    globalRateLimiter.rateLimitFor(fixedBackoff);
-                }
-                return new BackoffDelay(fixedBackoff);
-            }
-            return new BackoffDelay(Duration.ZERO);
-        }).doOnRetry(ctx -> {
-            if (log.isDebugEnabled()) {
-                log.debug("Retry {} in {} due to {} for {}",
-                        ctx.iteration(), id.toString(), ctx.exception().toString(), ctx.backoff());
-            }
-        });
-    }
-
-    private boolean isRateLimitError(IterationContext<?> context) {
-        RetryContext<?> ctx = (RetryContext) context;
-        Throwable exception = ctx.exception();
-        if (exception instanceof ClientException) {
-            ClientException clientException = (ClientException) exception;
-            return clientException.getStatus().code() == 429;
-        }
-        return false;
+        this.rateLimitRetryOperator = new RateLimitRetryOperator(globalRateLimiter, Schedulers.parallel());
     }
 
     /**
@@ -190,7 +148,7 @@ class RequestStream<T> {
                             .subscriberContext(ctx -> ctx
                                     .putAll(correlation.getContext())
                                     .put(LogUtil.KEY_BUCKET_ID, id.toString()))
-                            .retryWhen(rateLimitRetryFactory())
+                            .retryWhen(rateLimitRetryOperator::apply)
                             .transform(getResponseTransformers(request))
                             .retryWhen(serverErrorRetryFactory())
                             .doFinally(this::next))

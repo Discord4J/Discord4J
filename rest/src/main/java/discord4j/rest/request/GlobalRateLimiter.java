@@ -19,6 +19,7 @@ package discord4j.rest.request;
 
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.time.Duration;
 
@@ -40,7 +41,7 @@ public interface GlobalRateLimiter {
      *
      * @param duration the {@link Duration} every new operation should wait before being used
      */
-    void rateLimitFor(Duration duration);
+    Mono<Void> rateLimitFor(Duration duration);
 
     /**
      * Returns the {@link Duration} remaining until the current global rate limit is completed. Can be negative or
@@ -49,7 +50,7 @@ public interface GlobalRateLimiter {
      * @return a positive {@link Duration} indicating the remaining time a global rate limit is being applied. Zero
      * or negative if no global rate limit is currently active.
      */
-    Duration getRemaining();
+    Mono<Duration> getRemaining();
 
     /**
      * Provides a scope to perform reactive operations under this global rate limiter. Limiter resources are acquired on

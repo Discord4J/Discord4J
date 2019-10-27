@@ -25,7 +25,7 @@ import java.time.Instant;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.Optional;
-import java.util.OptionalInt;
+import java.util.OptionalLong;
 import java.util.stream.Collectors;
 
 public class Activity {
@@ -148,9 +148,9 @@ public class Activity {
      *
      * @return The party's current size, if present.
      */
-    public OptionalInt getCurrentPartySize() {
-        final Integer currentPartySize = data.getCurrentPartySize();
-        return (currentPartySize == null) ? OptionalInt.empty() : OptionalInt.of(currentPartySize);
+    public OptionalLong getCurrentPartySize() {
+        final Long currentPartySize = data.getCurrentPartySize();
+        return (currentPartySize == null) ? OptionalLong.empty() : OptionalLong.of(currentPartySize);
     }
 
     /**
@@ -158,9 +158,9 @@ public class Activity {
      *
      * @return The party's max size, if present.
      */
-    public OptionalInt getMaxPartySize() {
-        final Integer maxPartySize = data.getMaxPartySize();
-        return (maxPartySize == null) ? OptionalInt.empty() : OptionalInt.of(maxPartySize);
+    public OptionalLong getMaxPartySize() {
+        final Long maxPartySize = data.getMaxPartySize();
+        return (maxPartySize == null) ? OptionalLong.empty() : OptionalLong.of(maxPartySize);
     }
 
     /**
@@ -228,6 +228,9 @@ public class Activity {
     /** The type of "action" for an activity. */
     public enum Type {
 
+        /** Unknown type **/
+        UNKNOWN(-1),
+
         /** "Playing {name}" */
         PLAYING(0),
 
@@ -274,7 +277,7 @@ public class Activity {
                 case 1: return STREAMING;
                 case 2: return LISTENING;
                 case 3: return WATCHING;
-                default: return EntityUtil.throwUnsupportedDiscordValue(value);
+                default: return UNKNOWN;
             }
         }
     }
