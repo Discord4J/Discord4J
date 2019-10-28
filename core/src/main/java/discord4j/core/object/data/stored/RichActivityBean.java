@@ -17,6 +17,7 @@
 package discord4j.core.object.data.stored;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import discord4j.common.json.EmojiResponse;
 import discord4j.gateway.json.response.GameAssetsResponse;
 import discord4j.gateway.json.response.GamePartyResponse;
 import discord4j.gateway.json.response.GameResponse;
@@ -45,6 +46,8 @@ public final class RichActivityBean extends ActivityBean implements Serializable
     @Nullable
     private String state;
     @Nullable
+    private EmojiResponse emoji;
+    @Nullable
     private Integer flags;
     @Nullable
     private String partyId;
@@ -72,6 +75,7 @@ public final class RichActivityBean extends ActivityBean implements Serializable
         details = response.getDetails();
         syncId = response.getSyncId();
         state = response.getState();
+        emoji = response.getEmoji();
         flags = response.getFlags();
         final GamePartyResponse party = response.getParty();
         partyId = (party == null) ? null : party.getId();
@@ -152,6 +156,15 @@ public final class RichActivityBean extends ActivityBean implements Serializable
 
     public void setState(@Nullable String state) {
         this.state = state;
+    }
+
+    @Nullable
+    public EmojiResponse getEmoji() {
+        return emoji;
+    }
+
+    public void setState(@Nullable EmojiResponse emoji) {
+        this.emoji = emoji;
     }
 
     @Nullable
@@ -236,6 +249,7 @@ public final class RichActivityBean extends ActivityBean implements Serializable
                 ", details='" + details + '\'' +
                 ", syncId='" + syncId + '\'' +
                 ", state='" + state + '\'' +
+                ", emoji='" + state + '\'' +
                 ", flags=" + flags +
                 ", partyId='" + partyId + '\'' +
                 ", currentPartySize=" + currentPartySize +

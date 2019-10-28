@@ -16,6 +16,7 @@
  */
 package discord4j.core.object.data.stored;
 
+import discord4j.common.json.EmojiResponse;
 import discord4j.gateway.json.response.GameResponse;
 import reactor.util.annotation.Nullable;
 
@@ -29,11 +30,17 @@ public class ActivityBean implements Serializable {
     private int type;
     @Nullable
     private String url;
+    @Nullable
+    private String action;
+    @Nullable
+    private EmojiResponse emoji;
 
     public ActivityBean(final GameResponse response) {
         name = response.getName();
         type = response.getType();
         url = response.getUrl();
+        action = response.getState();
+        emoji = response.getEmoji();
     }
 
     public ActivityBean() {}
@@ -69,6 +76,8 @@ public class ActivityBean implements Serializable {
                 "name='" + name + '\'' +
                 ", type=" + type +
                 ", url='" + url + '\'' +
+                ", action='" + action + '\'' +
+                ", emoji='" + emoji + '\'' +
                 '}';
     }
 }

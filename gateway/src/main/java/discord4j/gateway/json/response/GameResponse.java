@@ -18,6 +18,7 @@ package discord4j.gateway.json.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import discord4j.common.jackson.UnsignedJson;
+import discord4j.common.json.EmojiResponse;
 import reactor.util.annotation.Nullable;
 
 public class GameResponse {
@@ -40,6 +41,8 @@ public class GameResponse {
     @JsonProperty("sync_id")
     @Nullable
     private String syncId;
+    @Nullable
+    private EmojiResponse emoji;
     @Nullable
     private String state;
     @Nullable
@@ -93,6 +96,11 @@ public class GameResponse {
     }
 
     @Nullable
+    public EmojiResponse getEmoji() {
+        return emoji;
+    }
+
+    @Nullable
     public Integer getFlags() {
         return flags;
     }
@@ -119,6 +127,8 @@ public class GameResponse {
                 ", details='" + details + '\'' +
                 ", syncId='" + syncId + '\'' +
                 ", state='" + state + '\'' +
+                ", state='" + emoji + '\'' +
+                ", emoji='" + emoji + '\'' +
                 ", flags=" + flags +
                 ", party=" + party +
                 ", assets=" + assets +
