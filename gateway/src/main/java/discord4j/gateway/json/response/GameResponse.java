@@ -127,7 +127,6 @@ public class GameResponse {
                 ", details='" + details + '\'' +
                 ", syncId='" + syncId + '\'' +
                 ", state='" + state + '\'' +
-                ", state='" + emoji + '\'' +
                 ", emoji='" + emoji + '\'' +
                 ", flags=" + flags +
                 ", party=" + party +

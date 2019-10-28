@@ -38,6 +38,7 @@ public final class PresenceBean implements Serializable {
 
     public PresenceBean(final PresenceResponse response) {
         final GameResponse game = response.getGame();
+
         if (game == null) {
             activity = null;
         } else if (game.getTimestamps() != null || game.getSessionId() != null || game.getApplicationId() != null ||
