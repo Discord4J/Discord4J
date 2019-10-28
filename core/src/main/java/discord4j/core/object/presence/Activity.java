@@ -128,9 +128,9 @@ public class Activity {
     }
 
     /**
-     * Gets the user's current party status, if present.
+     * Gets the user's current party status or custom status text, if present.
      *
-     * @return The user's current party status, if present.
+     * @return The user's current party status or custom status text, if present.
      */
     public Optional<String> getState() {
         return Optional.ofNullable(richData).map(RichActivityBean::getState);
