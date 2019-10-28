@@ -16,6 +16,7 @@
  */
 package discord4j.rest.route;
 
+import discord4j.common.annotations.Experimental;
 import discord4j.common.json.*;
 import discord4j.rest.json.response.*;
 
@@ -241,6 +242,19 @@ public abstract class Routes {
      */
     public static final Route<Void> MESSAGE_DELETE_BULK = Route.post("/channels/{channel.id}/messages/bulk-delete",
             Void.class);
+
+    /**
+     * Enable/disable suppression of embeds on a Message. This endpoint requires the 'MANAGE_MESSAGES' permission to
+     * be present for the current user.
+     * <p>
+     * Returns a 204 empty response on success. Fires a Message Update Gateway event.
+     *
+     * @see <a href="https://discordapp.com/developers/docs/resources/channel#suppress-message-embeds">
+     *         https://discordapp.com/developers/docs/resources/channel#suppress-message-embeds</a>
+     */
+    @Experimental
+    public static final Route<Void> MESSAGE_SUPPRESS_EMBEDS = Route.post(
+            "/channels/{channel.id}/messages/{message.id}/suppress-embeds", Void.class);
 
     /**
      * Edit the channel permission overwrites for a user or role in a channel. Only usable for guild channels. Requires

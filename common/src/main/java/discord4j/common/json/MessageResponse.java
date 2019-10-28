@@ -54,6 +54,11 @@ public class MessageResponse {
     @Nullable
     @UnsignedJson
     private Long webhookId;
+    @Nullable
+    private Integer flags;
+    @JsonProperty("message_reference")
+    @Nullable
+    private MessageReferenceResponse messageReference;
     private int type;
 
     public long getId() {
@@ -124,6 +129,16 @@ public class MessageResponse {
         return webhookId;
     }
 
+    @Nullable
+    public MessageReferenceResponse getMessageReference() {
+        return messageReference;
+    }
+
+    @Nullable
+    public Integer getFlags() {
+        return flags;
+    }
+
     public int getType() {
         return type;
     }
@@ -147,6 +162,8 @@ public class MessageResponse {
                 ", nonce=" + nonce +
                 ", pinned=" + pinned +
                 ", webhookId=" + webhookId +
+                ", messageReference=" + messageReference +
+                ", flags=" + flags +
                 ", type=" + type +
                 '}';
     }

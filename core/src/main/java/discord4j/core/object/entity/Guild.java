@@ -61,6 +61,9 @@ import static discord4j.core.object.util.Image.Format.*;
  */
 public final class Guild implements Entity {
 
+    /** The default value for the maximum number of presences. **/
+    private static final int DEFAULT_MAX_PRESENCES = 5000;
+
     /** The path for guild icon image URLs. */
     private static final String ICON_IMAGE_PATH = "icons/%s/%s";
 
@@ -291,6 +294,15 @@ public final class Guild implements Entity {
     }
 
     /**
+     * Gets the preferred locale of the guild, only set if guild has the "DISCOVERABLE" feature, defaults to en-US.
+     *
+     * @return The preferred locale of the guild, only set if guild has the "DISCOVERABLE" feature, defaults to en-US.
+     */
+    public Locale getPreferredLocale() {
+        return new Locale.Builder().setLanguageTag(data.getPreferredLocale()).build();
+    }
+
+    /**
      * Gets the level of verification required for the guild.
      *
      * @return The level of verification required for the guild.
@@ -398,6 +410,8 @@ public final class Guild implements Entity {
 
     /**
      * Gets the enabled guild features.
+     * <br>
+     * You can see the available <a href="https://discordapp.com/developers/docs/resources/guild#guild-object-guild-features">guild features</a>
      *
      * @return The enabled guild features.
      */
@@ -421,6 +435,16 @@ public final class Guild implements Entity {
      */
     public Optional<Snowflake> getApplicationId() {
         return Optional.ofNullable(data.getApplicationId()).map(Snowflake::of);
+    }
+
+    /**
+     * Gets whether this guild widget is enabled.
+     *
+     * @return {@code true} if the guild widget is enabled, {@code false} otherwise.
+     *
+     */
+    public boolean isWidgetEnabled() {
+        return Optional.ofNullable(data.isWidgetEnabled()).orElse(false);
     }
 
     /**
@@ -487,6 +511,19 @@ public final class Guild implements Entity {
      */
     public Optional<Boolean> isLarge() {
         return getGatewayData().map(GuildBean::getLarge);
+    }
+
+    /**
+     * Gets whether this guild is unavailable, if present.
+     *
+     * @return If present, {@code true} if the guild is unavailable, {@code false} otherwise.
+     *
+     * @implNote If the underlying {@link discord4j.core.DiscordClientBuilder#getStoreService() store} does not save
+     * {@link GuildBean} instances <b>OR</b> the bot is currently not logged in then the returned {@code Optional} will
+     * always be empty.
+     */
+    public Optional<Boolean> isUnavailable() {
+        return getGatewayData().map(GuildBean::getUnavailable);
     }
 
     /**
@@ -629,6 +666,42 @@ public final class Guild implements Entity {
                 .findInRange(LongLongTuple2.of(getId().asLong(), Long.MIN_VALUE),
                              LongLongTuple2.of(getId().asLong(), Long.MAX_VALUE))
                 .map(Presence::new);
+    }
+
+    /**
+     *	Gets the vanity url code of the guild, if present.
+     *
+     * @return The vanity url code of the guild, if present.
+     */
+    public Optional<String> getVanityUrlCode() {
+        return Optional.ofNullable(data.getVanityUrlCode());
+    }
+
+    /**
+     * Gets the description of the guild, if present.
+     *
+     * @return The description of the guild, if present.
+     */
+    public Optional<String> getDescription() {
+        return Optional.ofNullable(data.getDescription());
+    }
+
+    /**
+     * Gets the maximum amount of presences of the guild.
+     *
+     * @return The maximum amount of presences for the guild.
+     */
+    public int getMaxPresences() {
+        return Optional.ofNullable(data.getMaxPresences()).orElse(DEFAULT_MAX_PRESENCES);
+    }
+
+    /**
+     * Gets the maximum amount of members of the guild, if present.
+     *
+     * @return The maximum amount of members for the guild, if present.
+     */
+    public OptionalInt getMaxMembers() {
+        return data.getMaxMembers() == null ? OptionalInt.empty() : OptionalInt.of(data.getMaxMembers());
     }
 
     /**

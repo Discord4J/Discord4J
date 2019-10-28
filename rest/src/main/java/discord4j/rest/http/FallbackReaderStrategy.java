@@ -16,15 +16,19 @@
  */
 package discord4j.rest.http;
 
+import discord4j.rest.json.response.ErrorResponse;
+import io.netty.util.IllegalReferenceCountException;
 import reactor.core.publisher.Mono;
 import reactor.netty.ByteBufMono;
 import reactor.util.annotation.Nullable;
 
+import java.nio.charset.StandardCharsets;
+
 /**
- * Read a response as a {@code String}, regardless of its type and response Content-Type. It serves as a "catch-all"
- * reader.
+ * Read a response as a {@code String} as a catch-all, unless the given response type is {@link ErrorResponse}, in which
+ * case it will attempt to store the response into the {@link ErrorResponse} {@code body} field.
  */
-public class FallbackReaderStrategy implements ReaderStrategy<String> {
+public class FallbackReaderStrategy implements ReaderStrategy<Object> {
 
     @Override
     public boolean canRead(@Nullable Class<?> type, @Nullable String contentType) {
@@ -32,7 +36,21 @@ public class FallbackReaderStrategy implements ReaderStrategy<String> {
     }
 
     @Override
-    public Mono<String> read(ByteBufMono content, Class<String> responseType) {
-        return content.asString();
+    public Mono<Object> read(ByteBufMono content, Class<Object> responseType) {
+        if (ErrorResponse.class.isAssignableFrom(responseType)) {
+            return content.asString()
+                    .map(body -> {
+                        ErrorResponse response = new ErrorResponse();
+                        response.getFields().put("body", body);
+                        return response;
+                    });
+        }
+        return content.handle((buf, sink) -> {
+            try {
+                sink.next(buf.readCharSequence(buf.readableBytes(), StandardCharsets.UTF_8).toString());
+            } catch (IllegalReferenceCountException e) {
+                sink.complete();
+            }
+        });
     }
 }

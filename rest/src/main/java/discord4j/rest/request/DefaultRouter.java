@@ -16,8 +16,6 @@
  */
 package discord4j.rest.request;
 
-import discord4j.common.RateLimiter;
-import discord4j.common.SimpleBucket;
 import discord4j.rest.http.client.DiscordWebClient;
 import discord4j.rest.route.Routes;
 import io.netty.handler.codec.http.HttpHeaders;
@@ -111,7 +109,7 @@ public class DefaultRouter implements Router {
                                         k, request.getRoute().getUriTemplate(), request.getCompleteUri());
                             }
                             RequestStream<T> stream = new RequestStream<>(k, httpClient, globalRateLimiter,
-                                    getRateLimitStrategy(request), routerOptions.getRateLimitScheduler(),
+                                    HEADER_STRATEGY, routerOptions.getRateLimitScheduler(),
                                     routerOptions);
                             stream.start();
                             return stream;
@@ -125,28 +123,6 @@ public class DefaultRouter implements Router {
         return BucketKey.of(request.getRoute().getUriTemplate(), request.getCompleteUri());
     }
 
-    private RequestStream.RateLimitStrategy getRateLimitStrategy(DiscordRequest<?> request) {
-        if (Routes.REACTION_CREATE.equals(request.getRoute())) {
-            return new RateLimiterStrategy(new SimpleBucket(1, Duration.ofMillis(250)));
-        }
-        return HEADER_STRATEGY;
-    }
-
-    static class RateLimiterStrategy implements RequestStream.RateLimitStrategy {
-
-        private final RateLimiter rateLimiter;
-
-        RateLimiterStrategy(RateLimiter rateLimiter) {
-            this.rateLimiter = rateLimiter;
-        }
-
-        @Override
-        public Duration apply(HttpClientResponse response) {
-            rateLimiter.tryConsume(1);
-            return Duration.ofMillis(rateLimiter.delayMillisToConsume(1));
-        }
-    }
-
     static class ResponseHeaderStrategy implements RequestStream.RateLimitStrategy {
 
         @Override
@@ -154,9 +130,9 @@ public class DefaultRouter implements Router {
             HttpHeaders headers = response.responseHeaders();
             int remaining = headers.getInt("X-RateLimit-Remaining", -1);
             if (remaining == 0) {
-                long resetAt = Long.parseLong(headers.get("X-RateLimit-Reset"));
-                long discordTime = headers.getTimeMillis("Date") / 1000;
-                return Duration.ofSeconds(resetAt - discordTime);
+                long resetAt = (long) (Double.parseDouble(headers.get("X-RateLimit-Reset")) * 1000);
+                long discordTime = headers.getTimeMillis("Date");
+                return Duration.ofMillis(resetAt - discordTime);
             }
             return Duration.ZERO;
         }

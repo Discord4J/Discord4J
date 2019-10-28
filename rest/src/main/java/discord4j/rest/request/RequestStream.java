@@ -80,8 +80,8 @@ class RequestStream<T> {
             if (isRateLimitError(context)) {
                 RetryContext<?> ctx = (RetryContext) context;
                 ClientException clientException = (ClientException) ctx.exception();
-                boolean global = Boolean.valueOf(clientException.getHeaders().get("X-RateLimit-Global"));
-                long retryAfter = Long.valueOf(clientException.getHeaders().get("Retry-After"));
+                boolean global = Boolean.parseBoolean(clientException.getHeaders().get("X-RateLimit-Global"));
+                long retryAfter = Long.parseLong(clientException.getHeaders().get("Retry-After"));
                 Duration fixedBackoff = Duration.ofMillis(retryAfter);
                 if (global) {
                     Duration remaining = globalRateLimiter.getRemaining();

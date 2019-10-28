@@ -24,7 +24,7 @@ import reactor.util.annotation.Nullable;
 
 import java.time.Instant;
 import java.util.Optional;
-import java.util.OptionalInt;
+import java.util.OptionalLong;
 
 public class Activity {
 
@@ -149,13 +149,13 @@ public class Activity {
      *
      * @return The party's current size, if present.
      */
-    public OptionalInt getCurrentPartySize() {
+    public OptionalLong getCurrentPartySize() {
         if (richData == null) {
-            return OptionalInt.empty();
+            return OptionalLong.empty();
         }
 
-        final Integer currentPartySize = richData.getCurrentPartySize();
-        return (currentPartySize == null) ? OptionalInt.empty() : OptionalInt.of(currentPartySize);
+        final Long currentPartySize = richData.getCurrentPartySize();
+        return (currentPartySize == null) ? OptionalLong.empty() : OptionalLong.of(currentPartySize);
     }
 
     /**
@@ -163,13 +163,13 @@ public class Activity {
      *
      * @return The party's max size, if present.
      */
-    public OptionalInt getMaxPartySize() {
+    public OptionalLong getMaxPartySize() {
         if (richData == null) {
-            return OptionalInt.empty();
+            return OptionalLong.empty();
         }
 
-        final Integer maxPartySize = richData.getMaxPartySize();
-        return (maxPartySize == null) ? OptionalInt.empty() : OptionalInt.of(maxPartySize);
+        final Long maxPartySize = richData.getMaxPartySize();
+        return (maxPartySize == null) ? OptionalLong.empty() : OptionalLong.of(maxPartySize);
     }
 
     /**
@@ -210,6 +210,9 @@ public class Activity {
 
     /** The type of "action" for an activity. */
     public enum Type {
+
+        /** Unknown type **/
+        UNKNOWN(-1),
 
         /** "Playing {name}" */
         PLAYING(0),
@@ -257,7 +260,7 @@ public class Activity {
                 case 1: return STREAMING;
                 case 2: return LISTENING;
                 case 3: return WATCHING;
-                default: return EntityUtil.throwUnsupportedDiscordValue(value);
+                default: return UNKNOWN;
             }
         }
     }

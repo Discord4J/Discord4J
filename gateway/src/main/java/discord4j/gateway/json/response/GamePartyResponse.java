@@ -25,7 +25,7 @@ public class GamePartyResponse {
     @Nullable
     private String id;
     @Nullable
-    private int[] size;
+    private long[] size;
 
     @Nullable
     public String getId() {
@@ -33,7 +33,7 @@ public class GamePartyResponse {
     }
 
     @Nullable
-    public int[] getSize() {
+    public long[] getSize() {
         return size;
     }
 

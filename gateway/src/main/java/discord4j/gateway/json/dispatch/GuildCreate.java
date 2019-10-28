@@ -53,6 +53,8 @@ public class GuildCreate implements Dispatch {
     private int premiumTier;
     @JsonProperty("premium_subscription_count")
     private int premiumSubcriptionsCount;
+    @JsonProperty("preferred_locale")
+    private String preferredLocale;
     private GuildMemberResponse[] members;
     @JsonProperty("member_count")
     private int memberCount;
@@ -88,6 +90,20 @@ public class GuildCreate implements Dispatch {
     @Nullable
     @UnsignedJson
     private Long widgetChannelId;
+    @JsonProperty("widget_enabled")
+    @Nullable
+    private Boolean widgetEnabled;
+    @JsonProperty("vanity_url_code")
+    @Nullable
+    private String vanityUrlCode;
+    @Nullable
+    private String description;
+    @JsonProperty("max_presences")
+    @Nullable
+    private Integer maxPresences;
+    @JsonProperty("max_members")
+    @Nullable
+    private Integer maxMembers;
 
     public VoiceState[] getVoiceStates() {
         return voiceStates;
@@ -99,6 +115,10 @@ public class GuildCreate implements Dispatch {
 
     public int getPremiumSubcriptionsCount() {
         return premiumSubcriptionsCount;
+    }
+
+    public String getPreferredLocale() {
+        return preferredLocale;
     }
 
     public int getVerificationLevel() {
@@ -214,8 +234,33 @@ public class GuildCreate implements Dispatch {
     }
 
     @Nullable
+    public Boolean isWidgetEnabled() {
+        return widgetEnabled;
+    }
+
+    @Nullable
     public Long getWidgetChannelId() {
         return widgetChannelId;
+    }
+
+    @Nullable
+    public String getVanityUrlCode() {
+        return vanityUrlCode;
+    }
+
+    @Nullable
+    public String getDescription() {
+        return description;
+    }
+
+    @Nullable
+    public Integer getMaxPresences() {
+        return maxPresences;
+    }
+
+    @Nullable
+    public Integer getMaxMembers() {
+        return maxMembers;
     }
 
     @Override
@@ -225,6 +270,7 @@ public class GuildCreate implements Dispatch {
                 ", verificationLevel=" + verificationLevel +
                 ", premiumTier=" + premiumTier +
                 ", premiumSubcriptionsCount=" + premiumSubcriptionsCount +
+                ", preferredLocale=" + preferredLocale +
                 ", unavailable=" + unavailable +
                 ", systemChannelId=" + systemChannelId +
                 ", splash='" + splash + '\'' +
@@ -251,78 +297,85 @@ public class GuildCreate implements Dispatch {
                 ", afkTimeout=" + afkTimeout +
                 ", afkChannelId=" + afkChannelId +
                 ", embedChannelId=" + embedChannelId +
+                ", widgetEnabled=" + widgetEnabled +
                 ", widgetChannelId=" + widgetChannelId +
+                ", vanityUrlCode=" + vanityUrlCode +
+                ", description=" + description +
+                ", maxPresences=" + maxPresences +
+                ", maxMembers=" + maxMembers +
                 '}';
     }
 
     public static class VoiceState {
 
-        @JsonProperty("user_id")
-        @UnsignedJson
-        private long userId;
-        private boolean suppress;
-        @JsonProperty("session_id")
-        private String sessionId;
-        @JsonProperty("self_video")
-        private boolean selfVideo;
-        @JsonProperty("self_mute")
-        private boolean selfMute;
-        @JsonProperty("self_deaf")
-        private boolean selfDeaf;
-        private boolean mute;
-        private boolean deaf;
         @JsonProperty("channel_id")
         @UnsignedJson
         private long channelId;
+        @JsonProperty("user_id")
+        @UnsignedJson
+        private long userId;
+        @JsonProperty("session_id")
+        private String sessionId;
+        private boolean deaf;
+        private boolean mute;
+        @JsonProperty("self_deaf")
+        private boolean selfDeaf;
+        @JsonProperty("self_mute")
+        private boolean selfMute;
+        @JsonProperty("self_stream")
+        @Nullable
+        private Boolean selfStream;
+        private boolean suppress;
+
+        public long getChannelId() {
+            return channelId;
+        }
 
         public long getUserId() {
             return userId;
-        }
-
-        public boolean isSuppress() {
-            return suppress;
         }
 
         public String getSessionId() {
             return sessionId;
         }
 
-        public boolean isSelfVideo() {
-            return selfVideo;
-        }
-
-        public boolean isSelfMute() {
-            return selfMute;
-        }
-
-        public boolean isSelfDeaf() {
-            return selfDeaf;
+        public boolean isDeaf() {
+            return deaf;
         }
 
         public boolean isMute() {
             return mute;
         }
 
-        public boolean isDeaf() {
-            return deaf;
+        public boolean isSelfDeaf() {
+            return selfDeaf;
         }
 
-        public long getChannelId() {
-            return channelId;
+        public boolean isSelfMute() {
+            return selfMute;
+        }
+
+        @Nullable
+        public Boolean isSelfStream() {
+            return selfStream;
+        }
+
+        public boolean isSuppress() {
+            return suppress;
         }
 
         @Override
         public String toString() {
             return "VoiceState{" +
-                    "userId=" + userId +
-                    ", suppress=" + suppress +
+                    "channelId=" + channelId +
+                    ", userId=" + userId +
                     ", sessionId='" + sessionId + '\'' +
-                    ", selfVideo=" + selfVideo +
-                    ", selfMute=" + selfMute +
-                    ", selfDeaf=" + selfDeaf +
-                    ", mute=" + mute +
                     ", deaf=" + deaf +
-                    ", channelId=" + channelId +
+                    ", mute=" + mute +
+                    ", selfDeaf=" + selfDeaf +
+                    ", selfMute=" + selfMute +
+                    ", selfStream=" + selfStream +
+                    ", suppress=" + suppress +
                     '}';
         }
     }
