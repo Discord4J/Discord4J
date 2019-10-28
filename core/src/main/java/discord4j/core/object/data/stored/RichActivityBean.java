@@ -249,7 +249,7 @@ public final class RichActivityBean extends ActivityBean implements Serializable
                 ", details='" + details + '\'' +
                 ", syncId='" + syncId + '\'' +
                 ", state='" + state + '\'' +
-                ", emoji='" + state + '\'' +
+                ", emoji='" + emoji + '\'' +
                 ", flags=" + flags +
                 ", partyId='" + partyId + '\'' +
                 ", currentPartySize=" + currentPartySize +
