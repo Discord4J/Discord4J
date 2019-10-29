@@ -19,7 +19,7 @@ ext {
     project_jdk = '1.8'
 
     // Dependencies
-    reactor_bom_version = 'Dysprosium-RELEASE'
+    reactor_bom_version = 'Dysprosium-SR1'
     jackson_version = '2.10.0'
     jdkstores_version = "$storesVersion"
 
