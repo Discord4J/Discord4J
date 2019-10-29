@@ -73,7 +73,9 @@ public final class DiscordClient {
      * access underlying middleware and resources.
      *
      * @return the current {@link ServiceMediator} for this client
+     * @deprecated for removal in v3.1, {@link ServiceMediator}'s role will be replaced by a number of other components
      */
+    @Deprecated
     public ServiceMediator getServiceMediator() {
         return serviceMediator;
     }
@@ -452,7 +454,9 @@ public final class DiscordClient {
      * Gets the configuration for this client.
      *
      * @return The configuration for this client.
+     * @deprecated for removal in v3.1, as shard info will be available from every event.
      */
+    @Deprecated
     public ClientConfig getConfig() {
         return serviceMediator.getClientConfig();
     }

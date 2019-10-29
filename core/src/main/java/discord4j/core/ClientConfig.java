@@ -21,7 +21,10 @@ import java.util.Map;
 
 /**
  * A set of parameters currently used to establish a connection to the gateway.
+ *
+ * @deprecated for removal in v3.1 since shard info will become available from each event
  */
+@Deprecated
 public final class ClientConfig {
 
     private final String token;
