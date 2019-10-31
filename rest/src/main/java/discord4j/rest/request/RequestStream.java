@@ -32,7 +32,6 @@ import reactor.util.Loggers;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.util.function.Consumer;
 import java.util.function.Function;
 
 import static discord4j.common.LogUtil.format;
@@ -102,23 +101,30 @@ class RequestStream {
     private class RequestSubscriber extends BaseSubscriber<RequestCorrelation<ClientResponse>> {
 
         private volatile Duration sleepTime = Duration.ZERO;
-        private final Consumer<HttpClientResponse> rateLimitHandler;
+        private final Function<ClientResponse, Mono<ClientResponse>> rateLimitHandler;
 
         public RequestSubscriber(RateLimitStrategy strategy) {
             this.rateLimitHandler = response -> {
+                HttpClientResponse httpResponse = response.getHttpResponse();
                 if (log.isDebugEnabled()) {
                     Instant requestTimestamp =
-                            Instant.ofEpochMilli(response.currentContext().get(DiscordWebClient.KEY_REQUEST_TIMESTAMP));
+                            Instant.ofEpochMilli(httpResponse.currentContext().get(DiscordWebClient.KEY_REQUEST_TIMESTAMP));
                     Duration responseTime = Duration.between(requestTimestamp, Instant.now());
-                    log.debug(format(response.currentContext(), "Read {} in {} with headers: {}"),
-                            response.status(), responseTime, response.responseHeaders());
+                    log.debug(format(httpResponse.currentContext(), "Read {} in {} with headers: {}"),
+                            httpResponse.status(), responseTime, httpResponse.responseHeaders());
                 }
-                Duration nextReset = strategy.apply(response);
+                Duration nextReset = strategy.apply(httpResponse);
                 if (!nextReset.isZero()) {
                     if (log.isDebugEnabled()) {
-                        log.debug(format(response.currentContext(), "Delaying next request by {}"), nextReset);
+                        log.debug(format(httpResponse.currentContext(), "Delaying next request by {}"), nextReset);
                     }
                     sleepTime = nextReset;
+                }
+                // if this response is a 429, intercept it
+                if (httpResponse.status().code() == 429) {
+                    return response.createException().flatMap(Mono::error);
+                } else {
+                    return Mono.just(response);
                 }
             };
         }
@@ -142,8 +148,8 @@ class RequestStream {
                     Mono.just(clientRequest)
                             .doOnEach(s -> requestLog.debug(format(s.getContext(), "{}"), s))
                             .flatMap(httpClient::exchange)
+                            .flatMap(rateLimitHandler)
                             .doOnEach(s -> responseLog.debug(format(s.getContext(), "{}"), s))
-                            .doOnNext(res -> rateLimitHandler.accept(res.getResponse()))
                             .subscriberContext(ctx -> ctx
                                     .putAll(correlation.getContext())
                                     .put(LogUtil.KEY_REQUEST_ID, clientRequest.getId())

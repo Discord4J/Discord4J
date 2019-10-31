@@ -63,7 +63,7 @@ public class ClientResponse {
      *
      * @return this response {@link HttpClientResponse}
      */
-    public HttpClientResponse getResponse() {
+    public HttpClientResponse getHttpResponse() {
         return response;
     }
 
@@ -82,7 +82,7 @@ public class ClientResponse {
                     }
                 })
                 .doOnCancel(() -> reject.set(true))
-                .map(ByteBuf::retain)
+                //.map(ByteBuf::retain)
                 .doOnNext(buf -> buf.touch("discord4j.client.response"));
     }
 
@@ -100,21 +100,35 @@ public class ClientResponse {
         Optional<ReaderStrategy<?>> readerStrategy = exchangeStrategies.readers().stream()
                 .filter(s -> s.canRead(responseType, responseContentType))
                 .findFirst();
-        Mono<ByteBuf> content = getBody().doOnDiscard(ByteBuf.class, buf -> {
-            log.info("Releasing buffer on element discard");
-            buf.release();
-        });
         if (response.status().code() >= 400) {
             return Mono.justOrEmpty(readerStrategy)
                     .map(ClientResponse::<ErrorResponse>cast)
-                    .flatMap(s -> s.read(content, ErrorResponse.class))
+                    .flatMap(s -> s.read(getBody(), ErrorResponse.class))
                     .flatMap(s -> Mono.<T>error(clientException(clientRequest, response, s)))
                     .switchIfEmpty(Mono.error(clientException(clientRequest, response, null)));
         } else {
             return readerStrategy.map(ClientResponse::<T>cast)
-                    .map(s -> s.read(content, responseType))
+                    .map(s -> s.read(getBody(), responseType))
                     .orElseGet(() -> Mono.error(noReaderException(responseType, responseContentType)));
         }
+    }
+
+    /**
+     * Create a {@link ClientException} based on the contents of this response. This method will attempt to extract
+     * an {@link ErrorResponse} from the body if possible.
+     *
+     * @return a {@link Mono} of {@link ClientException} from this response
+     */
+    public Mono<ClientException> createException() {
+        String responseContentType = response.responseHeaders().get(HttpHeaderNames.CONTENT_TYPE);
+        Optional<ReaderStrategy<?>> readerStrategy = exchangeStrategies.readers().stream()
+                .filter(s -> s.canRead(ErrorResponse.class, responseContentType))
+                .findFirst();
+        return Mono.justOrEmpty(readerStrategy)
+                .map(ClientResponse::<ErrorResponse>cast)
+                .flatMap(s -> s.read(getBody(), ErrorResponse.class))
+                .flatMap(s -> Mono.just(clientException(clientRequest, response, s)))
+                .switchIfEmpty(Mono.just(clientException(clientRequest, response, null)));
     }
 
     /**
