@@ -28,7 +28,7 @@ public class DiscordWebResponse {
 
     private final Mono<ClientResponse> responseMono;
 
-    DiscordWebResponse(Mono<ClientResponse> responseMono) {
+    public DiscordWebResponse(Mono<ClientResponse> responseMono) {
         this.responseMono = responseMono;
     }
 
