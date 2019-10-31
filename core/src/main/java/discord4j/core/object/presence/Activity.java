@@ -19,11 +19,11 @@ package discord4j.core.object.presence;
 import discord4j.core.object.data.stored.ActivityBean;
 import discord4j.core.object.data.stored.RichActivityBean;
 import discord4j.core.object.util.Snowflake;
-import discord4j.core.util.EntityUtil;
 import reactor.util.annotation.Nullable;
 
 import java.time.Instant;
 import java.util.Optional;
+import java.util.OptionalInt;
 import java.util.OptionalLong;
 
 public class Activity {
@@ -145,11 +145,27 @@ public class Activity {
     }
 
     /**
+     * Gets the party's current size, if present. Returns {@link Integer#MAX_VALUE} if the actual value would
+     * overflow an {@code int}. To obtain the exact value see {@link #getCurrentPartySizeLong()}.
+     *
+     * @return The party's current size, if present.
+     */
+    public OptionalInt getCurrentPartySize() {
+        if (richData == null) {
+            return OptionalInt.empty();
+        }
+
+        final Long currentPartySize = richData.getCurrentPartySize();
+        return (currentPartySize == null) ? OptionalInt.empty() :
+                OptionalInt.of(currentPartySize > Integer.MAX_VALUE ? Integer.MAX_VALUE : currentPartySize.intValue());
+    }
+
+    /**
      * Gets the party's current size, if present.
      *
      * @return The party's current size, if present.
      */
-    public OptionalLong getCurrentPartySize() {
+    public OptionalLong getCurrentPartySizeLong() {
         if (richData == null) {
             return OptionalLong.empty();
         }
@@ -159,11 +175,27 @@ public class Activity {
     }
 
     /**
+     * Gets the party's max size, if present. Returns {@link Integer#MAX_VALUE} if the actual value would
+     * overflow an {@code int}. To obtain the exact value see {@link #getMaxPartySizeLong()}.
+     *
+     * @return The party's max size, if present.
+     */
+    public OptionalInt getMaxPartySize() {
+        if (richData == null) {
+            return OptionalInt.empty();
+        }
+
+        final Long maxPartySize = richData.getMaxPartySize();
+        return (maxPartySize == null) ? OptionalInt.empty() :
+                OptionalInt.of(maxPartySize > Integer.MAX_VALUE ? Integer.MAX_VALUE : maxPartySize.intValue());
+    }
+
+    /**
      * Gets the party's max size, if present.
      *
      * @return The party's max size, if present.
      */
-    public OptionalLong getMaxPartySize() {
+    public OptionalLong getMaxPartySizeLong() {
         if (richData == null) {
             return OptionalLong.empty();
         }
