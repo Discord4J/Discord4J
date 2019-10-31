@@ -16,10 +16,8 @@
  */
 package discord4j.rest.request;
 
-import discord4j.common.LogUtil;
 import discord4j.rest.route.Route;
 import discord4j.rest.util.RouteUtils;
-import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
 
 import java.util.LinkedHashMap;
@@ -30,13 +28,10 @@ import java.util.function.Predicate;
 
 /**
  * Template encoding all of the needed information to make an HTTP request to Discord.
- *
- * @param <T> The response type.
- * @since 3.0
  */
-public class DiscordRequest<T> {
+public class DiscordWebRequest {
 
-    private final Route<T> route;
+    private final Route route;
     private final String completeUri;
     private final Map<String, String> uriVariableMap;
 
@@ -50,12 +45,12 @@ public class DiscordRequest<T> {
     private Map<String, Set<String>> headers;
 
     /**
-     * Create a new {@link DiscordRequest} template based on a {@link Route} and its compiled URI.
+     * Create a new {@link DiscordWebRequest} template based on a {@link Route} and its compiled URI.
      *
      * @param route the API resource targeted by this request
      * @param uriVars the values to expand each template parameter
      */
-    public DiscordRequest(Route<T> route, Object... uriVars) {
+    public DiscordWebRequest(Route route, Object... uriVars) {
         this.route = route;
         this.completeUri = RouteUtils.expand(route.getUriTemplate(), uriVars);
         this.uriVariableMap = RouteUtils.createVariableMap(route.getUriTemplate(), uriVars);
@@ -64,9 +59,9 @@ public class DiscordRequest<T> {
     /**
      * Return the API endpoint targeted by this request.
      *
-     * @return the {@link Route} of this {@link DiscordRequest}
+     * @return the {@link Route} of this {@link DiscordWebRequest}
      */
-    public Route<T> getRoute() {
+    public Route getRoute() {
         return route;
     }
 
@@ -115,7 +110,7 @@ public class DiscordRequest<T> {
      * @param body the object to set as request body
      * @return this request
      */
-    public DiscordRequest<T> body(Object body) {
+    public DiscordWebRequest body(Object body) {
         this.body = body;
         return this;
     }
@@ -127,7 +122,7 @@ public class DiscordRequest<T> {
      * @param value the query parameter value
      * @return this request
      */
-    public DiscordRequest<T> query(String key, Object value) {
+    public DiscordWebRequest query(String key, Object value) {
         if (queryParams == null) {
             queryParams = new LinkedHashMap<>();
         }
@@ -141,7 +136,7 @@ public class DiscordRequest<T> {
      * @param params a map of query parameter names to values
      * @return this request
      */
-    public DiscordRequest<T> query(Map<String, Object> params) {
+    public DiscordWebRequest query(Map<String, Object> params) {
         params.forEach(this::query);
         return this;
     }
@@ -153,7 +148,7 @@ public class DiscordRequest<T> {
      * @param value the header value
      * @return this request
      */
-    public DiscordRequest<T> header(String key, String value) {
+    public DiscordWebRequest header(String key, String value) {
         if (headers == null) {
             headers = new LinkedHashMap<>();
         }
@@ -169,7 +164,7 @@ public class DiscordRequest<T> {
      * @param value the header value
      * @return this request
      */
-    public DiscordRequest<T> optionalHeader(String key, @Nullable String value) {
+    public DiscordWebRequest optionalHeader(String key, @Nullable String value) {
         return (value == null) ? this : header(key, value);
     }
 
@@ -183,9 +178,8 @@ public class DiscordRequest<T> {
      * @param router a router that performs this request
      * @return the result of this request
      */
-    public Mono<T> exchange(Router router) {
-        return router.exchange(this)
-                .subscriberContext(ctx -> ctx.put(LogUtil.KEY_REQUEST_ID, Integer.toHexString(hashCode())));
+    public DiscordWebResponse exchange(Router router) {
+        return router.exchange(this);
     }
 
     @Override

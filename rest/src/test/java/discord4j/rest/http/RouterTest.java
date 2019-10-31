@@ -56,8 +56,8 @@ public class RouterTest {
         Routes.MESSAGE_CREATE.newRequest(channelId)
                 .body(body)
                 .exchange(router)
+                .mono()
                 .subscribe(response -> System.out.println("complete response"));
-
 
         TimeUnit.SECONDS.sleep(1);
     }
@@ -80,6 +80,7 @@ public class RouterTest {
             Routes.MESSAGE_CREATE.newRequest(channelId)
                     .body(body)
                     .exchange(router)
+                    .bodyToMono(MessageResponse.class)
                     .subscribe(response -> System.out.println("response " + a + ": " + response.getContent()));
         }
 
@@ -98,7 +99,8 @@ public class RouterTest {
 
         Mono<MessageResponse> mono = Routes.MESSAGE_CREATE.newRequest(channelId)
                 .body(body)
-                .exchange(router);
+                .exchange(router)
+                .bodyToMono(MessageResponse.class);
 
         mono.subscribe();
         mono.subscribe();
@@ -125,6 +127,7 @@ public class RouterTest {
             Routes.MESSAGE_CREATE.newRequest(channelId)
                     .body(body)
                     .exchange(router)
+                    .bodyToMono(MessageResponse.class)
                     .publishOn(thread)
                     .cancelOn(thread)
                     .subscribeOn(thread)
@@ -149,6 +152,7 @@ public class RouterTest {
         Routes.MESSAGE_CREATE.newRequest(channelId)
                 .body(body0)
                 .exchange(router)
+                .mono()
                 .block();
 
         MessageCreateRequest body1 = new MessageCreateRequest(cid + " 1 at" + Instant.now(), null, false, null);
@@ -156,6 +160,7 @@ public class RouterTest {
         Routes.MESSAGE_CREATE.newRequest(channelId)
                 .body(body1)
                 .exchange(router)
+                .mono()
                 .block();
     }
 }

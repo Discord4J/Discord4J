@@ -16,6 +16,7 @@
  */
 package discord4j.rest.request;
 
+import discord4j.rest.http.client.ClientResponse;
 import discord4j.rest.http.client.DiscordWebClient;
 import discord4j.rest.route.Routes;
 import io.netty.handler.codec.http.HttpHeaders;
@@ -31,7 +32,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Facilitates the routing of {@link discord4j.rest.request.DiscordRequest DiscordRequests} to the proper
+ * Facilitates the routing of {@link DiscordWebRequest DiscordRequests} to the proper
  * {@link discord4j.rest.request.RequestStream RequestStream} according to the bucket in which the request falls.
  * <p>
  * Must be cached using {@link discord4j.rest.request.SingleRouterFactory} if intended for sharding, to properly
@@ -45,7 +46,7 @@ public class DefaultRouter implements Router {
     private final DiscordWebClient httpClient;
     private final RouterOptions routerOptions;
     private final GlobalRateLimiter globalRateLimiter;
-    private final Map<BucketKey, RequestStream<?>> streamMap = new ConcurrentHashMap<>();
+    private final Map<BucketKey, RequestStream> streamMap = new ConcurrentHashMap<>();
 
     /**
      * Create a bucket-aware router using the defaults provided by {@link RouterOptions#create()}.
@@ -85,27 +86,25 @@ public class DefaultRouter implements Router {
     }
 
     @Override
-    public <T> Mono<T> exchange(DiscordRequest<T> request) {
-        return Mono.defer(Mono::subscriberContext)
+    public DiscordWebResponse exchange(DiscordWebRequest request) {
+        return new DiscordWebResponse(Mono.defer(Mono::subscriberContext)
                 .flatMap(ctx -> {
-                    RequestStream<T> stream = getStream(request);
-                    MonoProcessor<T> callback = MonoProcessor.create();
+                    RequestStream stream = getStream(request);
+                    MonoProcessor<ClientResponse> callback = MonoProcessor.create();
                     stream.push(new RequestCorrelation<>(request, callback, ctx));
                     return callback;
                 })
-                .publishOn(routerOptions.getResponseScheduler());
+                .publishOn(routerOptions.getResponseScheduler()));
     }
 
-    @SuppressWarnings("unchecked")
-    private <T> RequestStream<T> getStream(DiscordRequest<T> request) {
-        return (RequestStream<T>)
-                streamMap.computeIfAbsent(computeBucket(request),
+    private RequestStream getStream(DiscordWebRequest request) {
+        return streamMap.computeIfAbsent(computeBucket(request),
                         k -> {
                             if (log.isTraceEnabled()) {
                                 log.trace("Creating RequestStream with key {} for request: {} -> {}",
                                         k, request.getRoute().getUriTemplate(), request.getCompleteUri());
                             }
-                            RequestStream<T> stream = new RequestStream<>(k, httpClient, globalRateLimiter,
+                            RequestStream stream = new RequestStream(k, httpClient, globalRateLimiter,
                                     HEADER_STRATEGY, routerOptions.getRateLimitScheduler(),
                                     routerOptions);
                             stream.start();
@@ -113,7 +112,7 @@ public class DefaultRouter implements Router {
                         });
     }
 
-    private <T> BucketKey computeBucket(DiscordRequest<T> request) {
+    private BucketKey computeBucket(DiscordWebRequest request) {
         if (Routes.MESSAGE_DELETE.equals(request.getRoute())) {
             return BucketKey.of("DELETE " + request.getRoute().getUriTemplate(), request.getCompleteUri());
         }

@@ -29,6 +29,7 @@ public class ApplicationService extends RestService {
 
     public Mono<ApplicationInfoResponse> getCurrentApplicationInfo() {
         return Routes.APPLICATION_INFO_GET.newRequest()
-                .exchange(getRouter());
+                .exchange(getRouter())
+                .bodyToMono(ApplicationInfoResponse.class);
     }
 }

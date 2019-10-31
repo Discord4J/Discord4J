@@ -19,25 +19,19 @@ package discord4j.rest.http.client;
 
 import discord4j.common.GitProperties;
 import discord4j.rest.http.ExchangeStrategies;
-import discord4j.rest.http.ReaderStrategy;
 import discord4j.rest.http.WriterStrategy;
-import discord4j.rest.json.response.ErrorResponse;
 import discord4j.rest.route.Routes;
 import io.netty.handler.codec.http.DefaultHttpHeaders;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpHeaders;
 import reactor.core.publisher.Mono;
 import reactor.netty.http.client.HttpClient;
-import reactor.netty.http.client.HttpClientResponse;
 import reactor.util.Logger;
 import reactor.util.Loggers;
 import reactor.util.annotation.Nullable;
 
 import java.time.Instant;
-import java.util.Objects;
-import java.util.Optional;
 import java.util.Properties;
-import java.util.function.Consumer;
 
 import static discord4j.common.LogUtil.format;
 
@@ -105,23 +99,14 @@ public class DiscordWebClient {
     }
 
     /**
-     * Exchange a request for a {@link reactor.core.publisher.Mono} response of the specified type.
+     * Exchange a request for a {@link Mono} response.
      * <p>
-     * The request will be processed according to the writer strategies and its response according to the reader
-     * strategies available.
+     * The request will be processed according to the writer strategies available.
      *
-     * @param request the method, headers and URI of the client HTTP request
-     * @param body an object representing the body of the request
-     * @param responseType the desired response type
-     * @param responseConsumer the consumer to use while processing the response
-     * @param <R> the type of the request body, can be <code>null</code>
-     * @param <T> the type of the response body, can be {@link java.lang.Void}
-     * @return a {@link reactor.core.publisher.Mono} of {@link T} with the response
+     * @param request the client HTTP request
+     * @return a {@link Mono} with the response in the form of {@link ClientResponse}
      */
-    public <R, T> Mono<T> exchange(ClientRequest request, @Nullable R body, Class<T> responseType,
-                                   Consumer<HttpClientResponse> responseConsumer) {
-        Objects.requireNonNull(responseType);
-
+    public Mono<ClientResponse> exchange(ClientRequest request) {
         return Mono.subscriberContext()
                 .flatMap(ctx -> {
                     HttpHeaders requestHeaders = new DefaultHttpHeaders()
@@ -134,33 +119,17 @@ public class DiscordWebClient {
                             .headers(headers -> headers.setAll(requestHeaders))
                             .request(request.getMethod())
                             .uri(request.getUrl());
+                    Object body = request.getBody();
                     return exchangeStrategies.writers().stream()
                             .filter(s -> s.canWrite(body != null ? body.getClass() : null, contentType))
                             .findFirst()
-                            .map(DiscordWebClient::<R>cast)
+                            .map(DiscordWebClient::cast)
                             .map(writer -> writer.write(sender, body))
                             .orElseGet(() -> Mono.error(noWriterException(body, contentType)));
                 })
-                .flatMap(receiver -> receiver.responseSingle((response, content) -> {
-                    responseConsumer.accept(response);
-
-                    String responseContentType = response.responseHeaders().get(HttpHeaderNames.CONTENT_TYPE);
-                    Optional<ReaderStrategy<?>> readerStrategy = exchangeStrategies.readers().stream()
-                            .filter(s -> s.canRead(responseType, responseContentType))
-                            .findFirst();
-                    int responseStatus = response.status().code();
-                    if (responseStatus >= 400 && responseStatus < 600) {
-                        return Mono.justOrEmpty(readerStrategy)
-                                .map(DiscordWebClient::<ErrorResponse>cast)
-                                .flatMap(s -> s.read(content, ErrorResponse.class))
-                                .flatMap(s -> Mono.<T>error(clientException(request, response, s)))
-                                .switchIfEmpty(Mono.error(clientException(request, response, null)));
-                    } else {
-                        return readerStrategy.map(DiscordWebClient::<T>cast)
-                                .map(s -> s.read(content, responseType))
-                                .orElseGet(() -> Mono.error(noReaderException(responseType, responseContentType)));
-                    }
-                }))
+                .flatMap(receiver -> receiver.responseConnection((response, connection) ->
+                        Mono.just(new ClientResponse(response, connection.inbound(), exchangeStrategies, request)))
+                        .next())
                 .subscriberContext(ctx -> ctx.put(KEY_REQUEST_TIMESTAMP, Instant.now().toEpochMilli()));
     }
 
@@ -169,21 +138,7 @@ public class DiscordWebClient {
         return (WriterStrategy<T>) strategy;
     }
 
-    @SuppressWarnings("unchecked")
-    private static <T> ReaderStrategy<T> cast(ReaderStrategy<?> strategy) {
-        return (ReaderStrategy<T>) strategy;
-    }
-
-    private static ClientException clientException(ClientRequest request, HttpClientResponse response,
-                                                   @Nullable ErrorResponse errorResponse) {
-        return new ClientException(request, response, errorResponse);
-    }
-
     private static RuntimeException noWriterException(@Nullable Object body, String contentType) {
         return new RuntimeException("No strategies to write this request: " + body + " - " + contentType);
-    }
-
-    private static RuntimeException noReaderException(Object body, String contentType) {
-        return new RuntimeException("No strategies to read this response: " + body + " - " + contentType);
     }
 }

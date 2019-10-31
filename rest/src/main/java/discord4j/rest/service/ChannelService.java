@@ -40,54 +40,63 @@ public class ChannelService extends RestService {
 
     public Mono<ChannelResponse> getChannel(long channelId) {
         return Routes.CHANNEL_GET.newRequest(channelId)
-                .exchange(getRouter());
+                .exchange(getRouter())
+                .bodyToMono(ChannelResponse.class);
     }
 
     public Mono<ChannelResponse> modifyChannel(long channelId, ChannelModifyRequest request, @Nullable String reason) {
         return Routes.CHANNEL_MODIFY_PARTIAL.newRequest(channelId)
                 .body(request)
                 .optionalHeader("X-Audit-Log-Reason", reason)
-                .exchange(getRouter());
+                .exchange(getRouter())
+                .bodyToMono(ChannelResponse.class);
     }
 
     public Mono<ChannelResponse> deleteChannel(long channelId, @Nullable String reason) {
         return Routes.CHANNEL_DELETE.newRequest(channelId)
                 .optionalHeader("X-Audit-Log-Reason", reason)
-                .exchange(getRouter());
+                .exchange(getRouter())
+                .bodyToMono(ChannelResponse.class);
     }
 
     public Flux<MessageResponse> getMessages(long channelId, Map<String, Object> queryParams) {
         return Routes.MESSAGES_GET.newRequest(channelId)
                 .query(queryParams)
                 .exchange(getRouter())
+                .bodyToMono(MessageResponse[].class)
                 .flatMapMany(Flux::fromArray);
     }
 
     public Mono<MessageResponse> getMessage(long channelId, long messageId) {
         return Routes.MESSAGE_GET.newRequest(channelId, messageId)
-                .exchange(getRouter());
+                .exchange(getRouter())
+                .bodyToMono(MessageResponse.class);
     }
 
     public Mono<MessageResponse> createMessage(long channelId, MultipartRequest request) {
         return Routes.MESSAGE_CREATE.newRequest(channelId)
                 .header("content-type", request.getFiles().isEmpty() ? "application/json" : "multipart/form-data")
                 .body(Objects.requireNonNull(request.getFiles().isEmpty() ? request.getCreateRequest() : request))
-                .exchange(getRouter());
+                .exchange(getRouter())
+                .bodyToMono(MessageResponse.class);
     }
 
     public Mono<Void> createReaction(long channelId, long messageId, String emoji) {
         return Routes.REACTION_CREATE.newRequest(channelId, messageId, emoji)
-                .exchange(getRouter());
+                .exchange(getRouter())
+                .bodyToMono(Void.class);
     }
 
     public Mono<Void> deleteOwnReaction(long channelId, long messageId, String emoji) {
         return Routes.REACTION_DELETE_OWN.newRequest(channelId, messageId, emoji)
-                .exchange(getRouter());
+                .exchange(getRouter())
+                .bodyToMono(Void.class);
     }
 
     public Mono<Void> deleteReaction(long channelId, long messageId, String emoji, long userId) {
         return Routes.REACTION_DELETE.newRequest(channelId, messageId, emoji, userId)
-                .exchange(getRouter());
+                .exchange(getRouter())
+                .bodyToMono(Void.class);
     }
 
     public Flux<UserResponse> getReactions(long channelId, long messageId, String emoji,
@@ -95,30 +104,35 @@ public class ChannelService extends RestService {
         return Routes.REACTIONS_GET.newRequest(channelId, messageId, emoji)
                 .query(queryParams)
                 .exchange(getRouter())
+                .bodyToMono(UserResponse[].class)
                 .flatMapMany(Flux::fromArray);
     }
 
     public Mono<Void> deleteAllReactions(long channelId, long messageId) {
         return Routes.REACTIONS_DELETE_ALL.newRequest(channelId, messageId)
-                .exchange(getRouter());
+                .exchange(getRouter())
+                .bodyToMono(Void.class);
     }
 
     public Mono<MessageResponse> editMessage(long channelId, long messageId, MessageEditRequest request) {
         return Routes.MESSAGE_EDIT.newRequest(channelId, messageId)
                 .body(request)
-                .exchange(getRouter());
+                .exchange(getRouter())
+                .bodyToMono(MessageResponse.class);
     }
 
     public Mono<Void> deleteMessage(long channelId, long messageId, @Nullable String reason) {
         return Routes.MESSAGE_DELETE.newRequest(channelId, messageId)
                 .optionalHeader("X-Audit-Log-Reason", reason)
-                .exchange(getRouter());
+                .exchange(getRouter())
+                .bodyToMono(Void.class);
     }
 
     public Mono<Void> bulkDeleteMessages(long channelId, BulkDeleteRequest request) {
         return Routes.MESSAGE_DELETE_BULK.newRequest(channelId)
                 .body(request)
-                .exchange(getRouter());
+                .exchange(getRouter())
+                .bodyToMono(Void.class);
     }
 
     @Experimental
@@ -126,19 +140,22 @@ public class ChannelService extends RestService {
         return Routes.MESSAGE_SUPPRESS_EMBEDS.newRequest(channelId,messageId)
                 .header("content-type", "application/json")
                 .body(request)
-                .exchange(getRouter());
+                .exchange(getRouter())
+                .bodyToMono(Void.class);
     }
 
     public Mono<Void> editChannelPermissions(long channelId, long overwriteId, PermissionsEditRequest request, @Nullable String reason) {
         return Routes.CHANNEL_PERMISSIONS_EDIT.newRequest(channelId, overwriteId)
                 .body(request)
                 .optionalHeader("X-Audit-Log-Reason", reason)
-                .exchange(getRouter());
+                .exchange(getRouter())
+                .bodyToMono(Void.class);
     }
 
     public Flux<InviteResponse> getChannelInvites(long channelId) {
         return Routes.CHANNEL_INVITES_GET.newRequest(channelId)
                 .exchange(getRouter())
+                .bodyToMono(InviteResponse[].class)
                 .flatMapMany(Flux::fromArray);
     }
 
@@ -146,44 +163,52 @@ public class ChannelService extends RestService {
         return Routes.CHANNEL_INVITE_CREATE.newRequest(channelId)
                 .body(request)
                 .optionalHeader("X-Audit-Log-Reason", reason)
-                .exchange(getRouter());
+                .exchange(getRouter())
+                .bodyToMono(InviteResponse.class);
     }
 
     public Mono<Void> deleteChannelPermission(long channelId, long overwriteId, @Nullable String reason) {
         return Routes.CHANNEL_PERMISSION_DELETE.newRequest(channelId, overwriteId)
                 .optionalHeader("X-Audit-Log-Reason", reason)
-                .exchange(getRouter());
+                .exchange(getRouter())
+                .bodyToMono(Void.class);
     }
 
     public Mono<Void> triggerTypingIndicator(long channelId) {
         return Routes.TYPING_INDICATOR_TRIGGER.newRequest(channelId)
-                .exchange(getRouter());
+                .exchange(getRouter())
+                .bodyToMono(Void.class);
     }
 
     public Flux<MessageResponse> getPinnedMessages(long channelId) {
         return Routes.MESSAGES_PINNED_GET.newRequest(channelId)
                 .exchange(getRouter())
+                .bodyToMono(MessageResponse[].class)
                 .flatMapMany(Flux::fromArray);
     }
 
     public Mono<Void> addPinnedMessage(long channelId, long messageId) {
         return Routes.MESSAGES_PINNED_ADD.newRequest(channelId, messageId)
-                .exchange(getRouter());
+                .exchange(getRouter())
+                .bodyToMono(Void.class);
     }
 
     public Mono<Void> deletePinnedMessage(long channelId, long messageId) {
         return Routes.MESSAGES_PINNED_DELETE.newRequest(channelId, messageId)
-                .exchange(getRouter());
+                .exchange(getRouter())
+                .bodyToMono(Void.class);
     }
 
     public Mono<Void> addGroupDMRecipient(long channelId, long userId, GroupAddRecipientRequest request) {
         return Routes.GROUP_DM_RECIPIENT_ADD.newRequest(channelId, userId)
                 .body(request)
-                .exchange(getRouter());
+                .exchange(getRouter())
+                .bodyToMono(Void.class);
     }
 
     public Mono<Void> deleteGroupDMRecipient(long channelId, long userId) {
         return Routes.GROUP_DM_RECIPIENT_DELETE.newRequest(channelId, userId)
-                .exchange(getRouter());
+                .exchange(getRouter())
+                .bodyToMono(Void.class);
     }
 }
