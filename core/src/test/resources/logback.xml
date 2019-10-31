@@ -27,19 +27,19 @@
 
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+            <pattern>%d{HH:mm:ss.SSS} %-20.20thread %5p %-36.36logger{36} - %m%n</pattern>
         </encoder>
     </appender>
 
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-            <fileNamePattern>logs/d4j.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <fileNamePattern>logs/%d{yyyy-MM-dd}.%i.log</fileNamePattern>
             <maxFileSize>100MB</maxFileSize>
             <maxHistory>90</maxHistory>
         </rollingPolicy>
         <encoder>
             <charset>UTF-8</charset>
-            <Pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %-40.40logger{39} : %msg%n</Pattern>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %-20.20thread %5p %-36.36logger{36} - %m%n</pattern>
         </encoder>
         <prudent>true</prudent>
     </appender>
