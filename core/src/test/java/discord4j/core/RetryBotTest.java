@@ -153,8 +153,7 @@ public class RetryBotTest {
                         return owner.equals(author);
                     }))
                     .flatMap(testCommands::onMessageCreate)
-                    .doOnError(t -> log.error("Error in event handler", t))
-                    .retry()
+                    .onErrorContinue((t, o) -> log.error("Error while handling: {}", o, t))
                     .then();
         }).block();
 
