@@ -29,6 +29,7 @@ import discord4j.gateway.GatewayOptions;
 import discord4j.rest.entity.*;
 import discord4j.rest.entity.data.*;
 import discord4j.rest.json.response.UserGuildResponse;
+import discord4j.rest.request.RouterOptions;
 import discord4j.store.api.service.StoreService;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -61,7 +62,7 @@ public final class DiscordClient {
      * @return a {@link DiscordClient} configured with the default options
      */
     public static DiscordClient create(String token) {
-        return new DiscordClientBuilder(token).build();
+        return DiscordClientBuilder.create(token).build();
     }
 
     /**
@@ -71,8 +72,8 @@ public final class DiscordClient {
      * @param token the bot token used for authentication
      * @return a {@link DiscordClientBuilder}
      */
-    public static DiscordClientBuilder builder(String token) {
-        return new DiscordClientBuilder(token);
+    public static DiscordClientBuilder<RouterOptions> builder(String token) {
+        return DiscordClientBuilder.create(token);
     }
 
     /**

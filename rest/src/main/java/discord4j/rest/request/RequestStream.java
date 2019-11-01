@@ -21,6 +21,7 @@ import discord4j.rest.http.client.ClientException;
 import discord4j.rest.http.client.ClientRequest;
 import discord4j.rest.http.client.ClientResponse;
 import discord4j.rest.http.client.DiscordWebClient;
+import discord4j.rest.response.ResponseFunction;
 import org.reactivestreams.Subscription;
 import reactor.core.publisher.*;
 import reactor.core.scheduler.Scheduler;
@@ -32,6 +33,7 @@ import reactor.util.Loggers;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.List;
 import java.util.function.Function;
 
 import static discord4j.common.LogUtil.format;
@@ -53,17 +55,18 @@ class RequestStream {
     private final GlobalRateLimiter globalRateLimiter;
     private final RateLimitStrategy rateLimitStrategy;
     private final Scheduler rateLimitScheduler;
-    private final RouterOptions routerOptions;
+    private final List<ResponseFunction> responseFunctions;
     private final RateLimitRetryOperator rateLimitRetryOperator;
 
     RequestStream(BucketKey id, DiscordWebClient httpClient, GlobalRateLimiter globalRateLimiter,
-                  RateLimitStrategy rateLimitStrategy, Scheduler rateLimitScheduler, RouterOptions routerOptions) {
+                  RateLimitStrategy rateLimitStrategy, Scheduler rateLimitScheduler,
+                  List<ResponseFunction> responseFunctions) {
         this.id = id;
         this.httpClient = httpClient;
         this.globalRateLimiter = globalRateLimiter;
         this.rateLimitStrategy = rateLimitStrategy;
         this.rateLimitScheduler = rateLimitScheduler;
-        this.routerOptions = routerOptions;
+        this.responseFunctions = responseFunctions;
         this.rateLimitRetryOperator = new RateLimitRetryOperator(globalRateLimiter, Schedulers.parallel());
     }
 
@@ -163,8 +166,7 @@ class RequestStream {
         }
 
         private Function<Mono<ClientResponse>, Mono<ClientResponse>> getResponseTransformers(DiscordWebRequest discordRequest) {
-            return routerOptions.getResponseTransformers()
-                    .stream()
+            return responseFunctions.stream()
                     .map(rt -> rt.transform(discordRequest))
                     .reduce(Function::andThen)
                     .orElse(mono -> mono);

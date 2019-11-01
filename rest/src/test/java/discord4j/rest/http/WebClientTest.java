@@ -19,10 +19,11 @@ package discord4j.rest.http;
 
 import discord4j.common.JacksonResources;
 import discord4j.common.LogUtil;
-import discord4j.rest.http.client.DiscordWebClient;
+import discord4j.common.ReactorResources;
 import discord4j.rest.request.DefaultRouter;
 import discord4j.rest.request.DiscordWebRequest;
 import discord4j.rest.request.Router;
+import discord4j.rest.request.RouterOptions;
 import discord4j.rest.route.Route;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -31,7 +32,6 @@ import org.junit.Test;
 import reactor.core.publisher.Hooks;
 import reactor.core.publisher.Mono;
 import reactor.netty.DisposableServer;
-import reactor.netty.http.client.HttpClient;
 import reactor.netty.http.server.HttpServer;
 import reactor.util.Logger;
 import reactor.util.Loggers;
@@ -77,10 +77,12 @@ public class WebClientTest {
     @Ignore
     public void htmlResponse() {
         ExchangeStrategies ex2 = ExchangeStrategies.jackson(new JacksonResources().getObjectMapper());
-        DiscordWebClient webClient = new DiscordWebClient(HttpClient.create(),
-                ex2, null); // no token, it's not a discord request
         Route fakeRoute = Route.get("http://0.0.0.0:" + PORT + "/html");
-        Router router = new DefaultRouter(webClient);
+        Router router = new DefaultRouter(RouterOptions.builder()
+                .setToken("")
+                .setExchangeStrategies(ex2)
+                .setReactorResources(new ReactorResources())
+                .build());
         String response = router.exchange(new DiscordWebRequest(fakeRoute))
                 .bodyToMono(String.class)
                 .log()

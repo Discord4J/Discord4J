@@ -23,34 +23,36 @@ import discord4j.common.ReactorResources;
 import discord4j.common.jackson.UnknownPropertyHandler;
 import discord4j.rest.RestClient;
 import discord4j.rest.http.ExchangeStrategies;
-import discord4j.rest.http.client.DiscordWebClient;
-import discord4j.rest.request.DefaultRouterFactory;
-import discord4j.rest.request.Router;
-import discord4j.rest.request.RouterFactory;
-import discord4j.rest.request.RouterOptions;
+import discord4j.rest.request.*;
+import discord4j.rest.response.CompositeTransformer;
 import discord4j.rest.response.ResponseFunction;
+import discord4j.rest.route.Route;
 import reactor.core.publisher.Hooks;
-import reactor.core.scheduler.Scheduler;
 import reactor.netty.http.client.HttpClient;
 import reactor.util.Logger;
 import reactor.util.Loggers;
-import reactor.util.annotation.Nullable;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.Properties;
+import java.util.function.Function;
 
 /**
- * Builder suited for creating a {@link DiscordClient}.
+ * Builder suited for creating a {@link DiscordClient}. To acquire an instance, see {@link #create(String)}.
  */
-public final class DiscordClientBuilder {
+public final class DiscordClientBuilder<O extends RouterOptions> {
 
     private static final Logger log = Loggers.getLogger(DiscordClientBuilder.class);
 
+    private final Function<RouterOptions, O> optionsModifier;
+
     private String token;
-    private ReactorResources reactorResources = null;
-    private JacksonResources jacksonResources = null;
-    private RouterFactory routerFactory = null;
-    private RouterOptions routerOptions = null;
+    private ReactorResources reactorResources;
+    private JacksonResources jacksonResources;
+    private ExchangeStrategies exchangeStrategies;
+    private List<ResponseFunction> responseTransformers = new ArrayList<>();
+    private GlobalRateLimiter globalRateLimiter;
     private boolean debugMode = true;
 
     /**
@@ -58,8 +60,38 @@ public final class DiscordClientBuilder {
      *
      * @param token the bot token used to authenticate to Discord
      */
-    public DiscordClientBuilder(final String token) {
-        this.token = Objects.requireNonNull(token);
+    public static DiscordClientBuilder<RouterOptions> create(String token) {
+        return new DiscordClientBuilder<>(token, Function.identity());
+    }
+
+    DiscordClientBuilder(String token, Function<RouterOptions, O> optionsModifier) {
+        this.token = Objects.requireNonNull(token, "token");
+        this.optionsModifier = Objects.requireNonNull(optionsModifier, "optionsModifier");
+    }
+
+    DiscordClientBuilder(DiscordClientBuilder<?> source, Function<RouterOptions, O> optionsModifier) {
+        this.optionsModifier = optionsModifier;
+
+        this.token = source.token;
+        this.reactorResources = source.reactorResources;
+        this.jacksonResources = source.jacksonResources;
+        this.exchangeStrategies = source.exchangeStrategies;
+        this.responseTransformers = source.responseTransformers;
+        this.globalRateLimiter = source.globalRateLimiter;
+        this.debugMode = source.debugMode;
+    }
+
+    /**
+     * Add a configuration for {@link Router} implementation-specific cases, changing the type of the current
+     * {@link RouterOptions} object passed to the {@link Router} factory in build methods.
+     *
+     * @param optionsModifier {@link Function} to transform the {@link RouterOptions} type to provide custom
+     * {@link Router} implementations a proper configuration object.
+     * @param <O2> new type for the options
+     * @return a new {@link DiscordClientBuilder} that will now work with the new options type.
+     */
+    public <O2 extends RouterOptions> DiscordClientBuilder<O2> setExtraOptions(Function<? super O, O2> optionsModifier) {
+        return new DiscordClientBuilder<>(this, this.optionsModifier.andThen(optionsModifier));
     }
 
     /**
@@ -68,8 +100,8 @@ public final class DiscordClientBuilder {
      * @param token the new bot token
      * @return this builder
      */
-    public DiscordClientBuilder setToken(final String token) {
-        this.token = Objects.requireNonNull(token);
+    public DiscordClientBuilder<O> setToken(final String token) {
+        this.token = Objects.requireNonNull(token, "token");
         return this;
     }
 
@@ -77,11 +109,10 @@ public final class DiscordClientBuilder {
      * Set a new {@link ReactorResources} dedicated to set up a connection pool, an event pool, as well as the
      * supporting {@link HttpClient} used for making rest requests and maintaining gateway connections.
      *
-     * @param reactorResources the new resource provider used for rest and gateway operations, can be {@code
-     * null} to use a default value
+     * @param reactorResources the new resource provider used for rest and gateway operations
      * @return this builder
      */
-    public DiscordClientBuilder setReactorResources(@Nullable ReactorResources reactorResources) {
+    public DiscordClientBuilder<O> setReactorResources(ReactorResources reactorResources) {
         this.reactorResources = reactorResources;
         return this;
     }
@@ -90,49 +121,133 @@ public final class DiscordClientBuilder {
      * Set a new {@link JacksonResources} to this builder, dedicated to provide an {@link ObjectMapper} for
      * serialization and deserialization of data.
      *
-     * @param jacksonResources the new resource provider for serialization and deserialization, use {@code null}
-     * to use a default one
+     * @param jacksonResources the new resource provider for serialization and deserialization
      * @return this builder
      */
-    public DiscordClientBuilder setJacksonResources(@Nullable JacksonResources jacksonResources) {
+    public DiscordClientBuilder<O> setJacksonResources(JacksonResources jacksonResources) {
         this.jacksonResources = jacksonResources;
         return this;
     }
 
     /**
-     * Set a new {@link RouterFactory} used to create a {@link discord4j.rest.request.Router} that executes Discord
-     * REST API requests. The resulting client will utilize the produced Router for every request.
+     * Set the strategies to use when reading or writing HTTP request and response body entities. Defaults to using
+     * {@link #setJacksonResources(JacksonResources)} to build a {@link ExchangeStrategies#jackson(ObjectMapper)} that
+     * is capable of encoding and decoding JSON using Jackson.
      *
-     * @param routerFactory a new RouterFactory to create a Router that performs API requests. Pass {@code null} to
-     * use a default value
+     * @param exchangeStrategies the HTTP exchange strategies to use
      * @return this builder
      */
-    public DiscordClientBuilder setRouterFactory(@Nullable RouterFactory routerFactory) {
-        this.routerFactory = routerFactory;
+    public DiscordClientBuilder<O> setExchangeStrategies(ExchangeStrategies exchangeStrategies) {
+        this.exchangeStrategies = Objects.requireNonNull(exchangeStrategies, "exchangeStrategies");
         return this;
     }
 
     /**
-     * Sets a new {@link RouterOptions} used to configure a {@link RouterFactory}.
+     * Sets a new API response behavior to the supporting {@link Router}, allowing cross-cutting behavior across
+     * all requests made by it.
      * <p>
-     * {@code RouterOptions} instances provide a way to override the {@link Scheduler} used for retrieving API responses
-     * and scheduling rate limiting actions. It also allows changing the behavior associated with API errors through
-     * {@link RouterOptions.Builder#onClientResponse(ResponseFunction)}.
+     * The given {@link ResponseFunction} will be applied after every response. Calling this function multiple
+     * times will result in additive behavior, so care must be taken regarding the <strong>order</strong> in
+     * which multiple calls occur. Transformations will be added to the response pipeline in that order.
      * <p>
-     * If you use a default {@code RouterFactory}, it will use the supplied {@code RouterOptions} to configure itself
-     * while building this client.
+     * Built-in factories are supplied for commonly used behavior:
+     * <ul>
+     * <li>{@link ResponseFunction#emptyIfNotFound()} transforms any HTTP 404 error into an empty sequence.</li>
+     * <li>{@link ResponseFunction#emptyIfNotFound(RouteMatcher)} transforms HTTP 404 errors from the given
+     * {@link Route}s into an empty sequence.</li>
+     * <li>{@link ResponseFunction#emptyOnErrorStatus(RouteMatcher, Integer...)} provides the same behavior as
+     * above but for any given status codes.</li>
+     * <li>{@link ResponseFunction#retryOnceOnErrorStatus(Integer...)} retries once for the given status codes.</li>
+     * <li>{@link ResponseFunction#retryOnceOnErrorStatus(RouteMatcher, Integer...)} provides the same behavior
+     * as above but for any matching {@link Route}.</li>
+     * </ul>
      *
-     * @param routerOptions a new {@code RouterOptions} to configure a {@code RouterFactory}
+     * @param responseFunction the {@link ResponseFunction} to transform the responses from matching requests.
      * @return this builder
      */
-    public DiscordClientBuilder setRouterOptions(@Nullable RouterOptions routerOptions) {
-        this.routerOptions = routerOptions;
+    public DiscordClientBuilder<O> onClientResponse(ResponseFunction responseFunction) {
+        responseTransformers.add(responseFunction);
         return this;
     }
 
-    public DiscordClientBuilder setDebugMode(boolean debugMode) {
+    /**
+     * Define the {@link GlobalRateLimiter} to be applied while configuring the {@link Router} for a client.
+     * {@link GlobalRateLimiter} purpose is to coordinate API requests to properly delay them under global rate
+     * limiting scenarios. A supporting {@link Router} factory (supplied at {@link #build(Function)}) is responsible
+     * for applying the given limiter.
+     *
+     * @param globalRateLimiter the limiter instance to be used while configuring a {@link Router}
+     * @return this builder
+     * @see GlobalRateLimiter
+     */
+    public DiscordClientBuilder<O> setGlobalRateLimiter(GlobalRateLimiter globalRateLimiter) {
+        this.globalRateLimiter = globalRateLimiter;
+        return this;
+    }
+
+    /**
+     * Whether to enable {@link Hooks#onOperatorDebug()} when building a {@link DiscordClient}. This is a global hook to
+     * enrich stack traces in case of errors for easier debugging at a performance cost. In production or higher load
+     * scenarios, we recommend setting this to {@code false} and looking for better alternatives such as the Reactor
+     * debug agent.
+     *
+     * @param debugMode {@code true} to enable debug mode. Setting this to false will not reset the hook if
+     * previously enabled.
+     * @return this builder
+     * @see <a href="https://projectreactor.io/docs/core/release/reference/#reactor-tools-debug">
+     * Production-ready Global Debugging</a> (Reactor Reference)
+     */
+    public DiscordClientBuilder<O> setDebugMode(boolean debugMode) {
         this.debugMode = debugMode;
         return this;
+    }
+
+    /**
+     * Create a client capable of connecting to Discord REST API and to establish Gateway and Voice Gateway connections,
+     * using a {@link DefaultRouter} that is capable of working in monolithic environments.
+     *
+     * @return a configured {@link DiscordClient} based on this builder parameters
+     */
+    public DiscordClient build() {
+        return build(DefaultRouter::new);
+    }
+
+    /**
+     * Create a client capable of connecting to Discord REST API and to establish Gateway and Voice Gateway connections,
+     * using a custom {@link Router} factory. The resulting {@link DiscordClient} will use the produced
+     * {@link Router} for every request.
+     *
+     * @param routerFactory the factory of {@link Router} implementation
+     * @return a configured {@link DiscordClient} based on this builder parameters
+     */
+    public DiscordClient build(Function<O, Router> routerFactory) {
+        if (debugMode) {
+            Hooks.onOperatorDebug();
+        }
+
+        ReactorResources reactor = initReactorResources();
+        JacksonResources jackson = initJacksonResources();
+        RestClient restClient = new RestClient(routerFactory.apply(buildOptions(reactor, jackson)));
+        CoreResources coreResources = new CoreResources(token, restClient, reactor, jackson);
+
+        Properties properties = GitProperties.getProperties();
+        String url = properties.getProperty(GitProperties.APPLICATION_URL, "https://discord4j.com");
+        String name = properties.getProperty(GitProperties.APPLICATION_NAME, "Discord4J");
+        String version = properties.getProperty(GitProperties.APPLICATION_VERSION, "3.1");
+        String gitDescribe = properties.getProperty(GitProperties.GIT_COMMIT_ID_DESCRIBE, version);
+        log.info("{} {} ({})", name, gitDescribe, url);
+        return new DiscordClient(coreResources);
+    }
+
+    private O buildOptions(ReactorResources reactor, JacksonResources jackson) {
+        RouterOptions options = RouterOptions.builder()
+                .setToken(token)
+                .setReactorResources(reactor)
+                .setExchangeStrategies(initExchangeStrategies(jackson))
+                .setGlobalRateLimiter(globalRateLimiter)
+                .onClientResponse(new CompositeTransformer(responseTransformers))
+                .build();
+        return this.optionsModifier.apply(options);
     }
 
     private ReactorResources initReactorResources() {
@@ -149,49 +264,10 @@ public final class DiscordClientBuilder {
         return new JacksonResources(mapper -> mapper.addHandler(new UnknownPropertyHandler(true)));
     }
 
-    private DiscordWebClient initWebClient(HttpClient httpClient, ObjectMapper mapper) {
-        return new DiscordWebClient(httpClient, ExchangeStrategies.jackson(mapper), token);
-    }
-
-    private RouterFactory initRouterFactory() {
-        if (routerFactory != null) {
-            return routerFactory;
+    private ExchangeStrategies initExchangeStrategies(JacksonResources jacksonResources) {
+        if (exchangeStrategies != null) {
+            return exchangeStrategies;
         }
-        return new DefaultRouterFactory();
-    }
-
-    private Router initRouter(RouterFactory factory, DiscordWebClient webClient) {
-        if (routerOptions != null) {
-            return factory.getRouter(webClient, routerOptions);
-        }
-        return factory.getRouter(webClient);
-    }
-
-    /**
-     * Create a client ready to connect to Discord.
-     *
-     * @return a {@link DiscordClient} based on this builder parameters
-     */
-    public DiscordClient build() {
-        if (debugMode) {
-            Hooks.onOperatorDebug();
-        }
-
-        ReactorResources reactor = initReactorResources();
-        JacksonResources jackson = initJacksonResources();
-        HttpClient httpClient = reactor.getHttpClient();
-        DiscordWebClient webClient = initWebClient(httpClient, jackson.getObjectMapper());
-        RouterFactory routerFactory = initRouterFactory();
-        Router router = initRouter(routerFactory, webClient);
-        RestClient restClient = new RestClient(router);
-        CoreResources coreResources = new CoreResources(token, restClient, reactor, jackson);
-
-        Properties properties = GitProperties.getProperties();
-        String url = properties.getProperty(GitProperties.APPLICATION_URL, "https://discord4j.com");
-        String name = properties.getProperty(GitProperties.APPLICATION_NAME, "Discord4J");
-        String version = properties.getProperty(GitProperties.APPLICATION_VERSION, "3.1");
-        String gitDescribe = properties.getProperty(GitProperties.GIT_COMMIT_ID_DESCRIBE, version);
-        log.info("{} {} ({})", name, gitDescribe, url);
-        return new DiscordClient(coreResources);
+        return ExchangeStrategies.jackson(jacksonResources.getObjectMapper());
     }
 }

@@ -34,24 +34,28 @@ public class ReactorResources {
 
     private final HttpClient httpClient;
     private final Scheduler timerTaskScheduler;
+    private final Scheduler blockingTaskScheduler;
 
     /**
-     * Create with a default {@link HttpClient} and {@link Scheduler} for timed tasks instances.
+     * Create with a default {@link HttpClient} and {@link Scheduler}s for timed and blocking tasks.
      */
     public ReactorResources() {
         this.httpClient = HttpClient.create().compress(true);
         this.timerTaskScheduler = Schedulers.parallel();
+        this.blockingTaskScheduler = Schedulers.boundedElastic();
     }
 
     /**
-     * Create with a pre-configured {@link HttpClient} and {@link Scheduler} suited for timed tasks instances.
+     * Create with a pre-configured {@link HttpClient} and {@link Scheduler}s for timed and blocking tasks.
      *
      * @param httpClient the underlying {@link HttpClient} to use
      * @param timerTaskScheduler the time-capable {@link Scheduler} to use
+     * @param blockingTaskScheduler the {@link Scheduler} to use for potentially blocking tasks
      */
-    public ReactorResources(HttpClient httpClient, Scheduler timerTaskScheduler) {
+    public ReactorResources(HttpClient httpClient, Scheduler timerTaskScheduler, Scheduler blockingTaskScheduler) {
         this.httpClient = httpClient;
         this.timerTaskScheduler = timerTaskScheduler;
+        this.blockingTaskScheduler = blockingTaskScheduler;
     }
 
     /**
@@ -70,6 +74,15 @@ public class ReactorResources {
      */
     public Scheduler getTimerTaskScheduler() {
         return timerTaskScheduler;
+    }
+
+    /**
+     * Get the {@link Scheduler} configured by this provider to be used in blocking tasks.
+     *
+     * @return a blocking-capable {@link Scheduler}
+     */
+    public Scheduler getBlockingTaskScheduler() {
+        return blockingTaskScheduler;
     }
 
     /**

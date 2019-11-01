@@ -16,18 +16,20 @@
  */
 package discord4j.rest.request;
 
+import discord4j.common.ReactorResources;
 import discord4j.rest.http.client.ClientResponse;
 import discord4j.rest.http.client.DiscordWebClient;
+import discord4j.rest.response.ResponseFunction;
 import discord4j.rest.route.Routes;
 import io.netty.handler.codec.http.HttpHeaders;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.MonoProcessor;
-import reactor.core.scheduler.Scheduler;
 import reactor.netty.http.client.HttpClientResponse;
 import reactor.util.Logger;
 import reactor.util.Loggers;
 
 import java.time.Duration;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -43,45 +45,22 @@ public class DefaultRouter implements Router {
     private static final Logger log = Loggers.getLogger(DefaultRouter.class);
     private static final ResponseHeaderStrategy HEADER_STRATEGY = new ResponseHeaderStrategy();
 
+    private final ReactorResources reactorResources;
     private final DiscordWebClient httpClient;
-    private final RouterOptions routerOptions;
+    private final List<ResponseFunction> responseFunctions;
     private final GlobalRateLimiter globalRateLimiter;
     private final Map<BucketKey, RequestStream> streamMap = new ConcurrentHashMap<>();
 
     /**
-     * Create a bucket-aware router using the defaults provided by {@link RouterOptions#create()}.
-     *
-     * @param httpClient the web client executing each request instructed by this router
-     */
-    public DefaultRouter(DiscordWebClient httpClient) {
-        this(httpClient, RouterOptions.create());
-    }
-
-    /**
-     * Create a Discord API bucket-aware {@link Router} that uses the given {@link reactor.core.scheduler.Scheduler}.
-     *
-     * @param httpClient the web client executing each request instructed by this router
-     * @param responseScheduler the scheduler used to execute each request
-     * @param rateLimitScheduler the scheduler used to perform delays caused by rate limiting
-     * @deprecated use {@link #DefaultRouter(DiscordWebClient, RouterOptions)}
-     */
-    @Deprecated
-    public DefaultRouter(DiscordWebClient httpClient, Scheduler responseScheduler, Scheduler rateLimitScheduler) {
-        this(httpClient, RouterOptions.builder()
-                .responseScheduler(responseScheduler)
-                .rateLimitScheduler(rateLimitScheduler)
-                .build());
-    }
-
-    /**
      * Create a Discord API bucket-aware {@link Router} configured with the given options.
      *
-     * @param httpClient the web client executing each request instructed by this router
      * @param routerOptions the options that configure this {@link Router}
      */
-    public DefaultRouter(DiscordWebClient httpClient, RouterOptions routerOptions) {
-        this.httpClient = httpClient;
-        this.routerOptions = routerOptions;
+    public DefaultRouter(RouterOptions routerOptions) {
+        this.reactorResources = routerOptions.getReactorResources();
+        this.httpClient = new DiscordWebClient(reactorResources.getHttpClient(),
+                routerOptions.getExchangeStrategies(), routerOptions.getToken());
+        this.responseFunctions = routerOptions.getResponseTransformers();
         this.globalRateLimiter = routerOptions.getGlobalRateLimiter();
     }
 
@@ -94,22 +73,22 @@ public class DefaultRouter implements Router {
                     stream.push(new RequestCorrelation<>(request, callback, ctx));
                     return callback;
                 })
-                .publishOn(routerOptions.getResponseScheduler()));
+                .publishOn(reactorResources.getBlockingTaskScheduler()));
     }
 
     private RequestStream getStream(DiscordWebRequest request) {
         return streamMap.computeIfAbsent(computeBucket(request),
-                        k -> {
-                            if (log.isTraceEnabled()) {
-                                log.trace("Creating RequestStream with key {} for request: {} -> {}",
-                                        k, request.getRoute().getUriTemplate(), request.getCompleteUri());
-                            }
-                            RequestStream stream = new RequestStream(k, httpClient, globalRateLimiter,
-                                    HEADER_STRATEGY, routerOptions.getRateLimitScheduler(),
-                                    routerOptions);
-                            stream.start();
-                            return stream;
-                        });
+                k -> {
+                    if (log.isTraceEnabled()) {
+                        log.trace("Creating RequestStream with key {} for request: {} -> {}",
+                                k, request.getRoute().getUriTemplate(), request.getCompleteUri());
+                    }
+                    RequestStream stream = new RequestStream(k, httpClient, globalRateLimiter,
+                            HEADER_STRATEGY, reactorResources.getTimerTaskScheduler(),
+                            responseFunctions);
+                    stream.start();
+                    return stream;
+                });
     }
 
     private BucketKey computeBucket(DiscordWebRequest request) {

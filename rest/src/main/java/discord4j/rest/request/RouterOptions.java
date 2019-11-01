@@ -17,15 +17,16 @@
 
 package discord4j.rest.request;
 
-import discord4j.common.annotations.Experimental;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import discord4j.common.ReactorResources;
+import discord4j.rest.http.ExchangeStrategies;
 import discord4j.rest.response.ResponseFunction;
 import discord4j.rest.route.Route;
-import reactor.core.scheduler.Scheduler;
-import reactor.core.scheduler.Schedulers;
-import reactor.util.annotation.Nullable;
+import reactor.netty.http.client.HttpClient;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Options used to control the behavior of a {@link Router}.
@@ -33,36 +34,25 @@ import java.util.List;
 public class RouterOptions {
 
     /**
-     * The default {@link Scheduler} to publish responses. Allows blocking usage.
-     */
-    public static final Scheduler DEFAULT_RESPONSE_SCHEDULER = Schedulers.elastic();
-
-    /**
-     * The default {@link Scheduler} to delay rate limited requests.
-     */
-    public static final Scheduler DEFAULT_RATE_LIMIT_SCHEDULER = Schedulers.newParallel("discord4j-worker");
-
-    /**
      * The default number of router requests allowed in parallel.
      */
-    public static final int DEFAULT_REQUEST_PARALLELISM = 8;
+    public static final int DEFAULT_REQUEST_PARALLELISM = 12;
 
-    private final Scheduler responseScheduler;
-    private final Scheduler rateLimitScheduler;
+    private final String token;
+    private final ReactorResources reactorResources;
+    private final ExchangeStrategies exchangeStrategies;
     private final List<ResponseFunction> responseTransformers;
-    private final int requestParallelism;
     private final GlobalRateLimiter globalRateLimiter;
 
     protected RouterOptions(Builder builder) {
-        this.responseScheduler = builder.responseScheduler;
-        this.rateLimitScheduler = builder.rateLimitScheduler;
-        this.responseTransformers = builder.responseTransformers;
+        this.token = Objects.requireNonNull(builder.token, "token");
+        this.reactorResources = Objects.requireNonNull(builder.reactorResources, "reactorResources");
+        this.exchangeStrategies = Objects.requireNonNull(builder.exchangeStrategies, "exchangeStrategies");
+        this.responseTransformers = Objects.requireNonNull(builder.responseTransformers, "responseTransformers");
         if (builder.globalRateLimiter != null) {
-            this.requestParallelism = -1; // @deprecated
             this.globalRateLimiter = builder.globalRateLimiter;
         } else {
-            this.requestParallelism = builder.requestParallelism;
-            this.globalRateLimiter = new PoolGlobalRateLimiter(builder.requestParallelism);
+            this.globalRateLimiter = new PoolGlobalRateLimiter(DEFAULT_REQUEST_PARALLELISM);
         }
     }
 
@@ -76,13 +66,19 @@ public class RouterOptions {
     }
 
     /**
-     * Returns a new {@link RouterOptions} with default settings. See {@link #DEFAULT_RESPONSE_SCHEDULER} and
-     * {@link #DEFAULT_RATE_LIMIT_SCHEDULER} for the default values.
+     * Create a {@link Builder} using the options configured in this instance.
      *
-     * @return a new {@code RouterOptions}
+     * @return a new builder using the current options
      */
-    public static RouterOptions create() {
-        return builder().build();
+    public Builder mutate() {
+        Builder builder = new Builder();
+
+        builder.setToken(getToken())
+                .setReactorResources(getReactorResources())
+                .setExchangeStrategies(getExchangeStrategies())
+                .setGlobalRateLimiter(getGlobalRateLimiter());
+        getResponseTransformers().forEach(builder::onClientResponse);
+        return builder;
     }
 
     /**
@@ -90,36 +86,47 @@ public class RouterOptions {
      */
     public static class Builder {
 
-        private Scheduler responseScheduler = DEFAULT_RESPONSE_SCHEDULER;
-        private Scheduler rateLimitScheduler = DEFAULT_RATE_LIMIT_SCHEDULER;
+        private String token;
+        private ReactorResources reactorResources;
+        private ExchangeStrategies exchangeStrategies;
         private final List<ResponseFunction> responseTransformers = new ArrayList<>();
-        private int requestParallelism = DEFAULT_REQUEST_PARALLELISM;
-        @Nullable
         private GlobalRateLimiter globalRateLimiter;
 
         protected Builder() {
         }
 
         /**
-         * Sets the {@link Scheduler} used to process API responses. Defaults to {@link Schedulers#elastic()}.
+         * Set the token to authenticate a {@link Router} to the Discord REST API.
          *
-         * @param responseScheduler the {@code Scheduler} used to process responses
+         * @param token the bot authentication token
          * @return this builder
          */
-        public Builder responseScheduler(Scheduler responseScheduler) {
-            this.responseScheduler = responseScheduler;
+        public Builder setToken(String token) {
+            this.token = Objects.requireNonNull(token, "token");
             return this;
         }
 
         /**
-         * Sets the {@link Scheduler} used to handle delays introduced by rate limiting. Defaults to
-         * {@link Schedulers#elastic()}.
+         * Set a new {@link ReactorResources} dedicated to set up a connection pool, an event pool, as well as the
+         * supporting {@link HttpClient} used for making rest requests and maintaining gateway connections.
          *
-         * @param rateLimitScheduler the {@code Scheduler} used to handle rate limiting
+         * @param reactorResources the new resource provider used for rest and gateway operations
          * @return this builder
          */
-        public Builder rateLimitScheduler(Scheduler rateLimitScheduler) {
-            this.rateLimitScheduler = rateLimitScheduler;
+        public Builder setReactorResources(ReactorResources reactorResources) {
+            this.reactorResources = Objects.requireNonNull(reactorResources, "reactorResources");
+            return this;
+        }
+
+        /**
+         * Set the strategies to use when reading or writing HTTP request and response body entities.
+         *
+         * @param exchangeStrategies the HTTP exchange strategies to use
+         * @return this builder
+         * @see ExchangeStrategies#jackson(ObjectMapper)
+         */
+        public Builder setExchangeStrategies(ExchangeStrategies exchangeStrategies) {
+            this.exchangeStrategies = Objects.requireNonNull(exchangeStrategies, "exchangeStrategies");
             return this;
         }
 
@@ -146,42 +153,22 @@ public class RouterOptions {
          * @param errorHandler the {@link ResponseFunction} to transform the responses from matching requests.
          * @return this builder
          */
-        @Experimental
         public Builder onClientResponse(ResponseFunction errorHandler) {
-            responseTransformers.add(errorHandler);
-            return this;
-        }
-
-        /**
-         * Define the level of parallel requests the configured {@link Router} should be allowed to make. In-flight
-         * requests beyond the parallelism value will wait until a permit is released.
-         * <p>
-         * Modifying this value can increase the API request throughput at the cost of potentially hitting the global
-         * rate limit. Defaults to {@link #DEFAULT_REQUEST_PARALLELISM}.
-         *
-         * @param requestParallelism the number of parallel requests allowed
-         * @return this builder
-         */
-        public Builder requestParallelism(int requestParallelism) {
-            this.requestParallelism = requestParallelism;
+            responseTransformers.add(Objects.requireNonNull(errorHandler, "errorHandler"));
             return this;
         }
 
         /**
          * Define the {@link GlobalRateLimiter} to be applied while configuring the {@link Router} for a client.
          * {@link GlobalRateLimiter} purpose is to coordinate API requests to properly delay them under global rate
-         * limiting scenarios. {@link RouterFactory} is responsible for applying the given implementation when building
-         * the {@link Router}.
-         * <p>
-         * Setting a limiter here will override any value set on {@link #requestParallelism(int)}.
+         * limiting scenarios.
          *
-         * @param globalRateLimiter the limiter instance to be used while configuring a {@link Router}, if supported by
-         * the used {@link RouterFactory}
+         * @param globalRateLimiter the limiter instance to be used while configuring a {@link Router}
          * @return this builder
          * @see GlobalRateLimiter
          */
-        public Builder globalRateLimiter(GlobalRateLimiter globalRateLimiter) {
-            this.globalRateLimiter = globalRateLimiter;
+        public Builder setGlobalRateLimiter(GlobalRateLimiter globalRateLimiter) {
+            this.globalRateLimiter = Objects.requireNonNull(globalRateLimiter, "globalRateLimiter");
             return this;
         }
 
@@ -196,28 +183,35 @@ public class RouterOptions {
     }
 
     /**
-     * Returns the defined response scheduler. Allows flexibility for blocking usage if a {@link Scheduler} that allows
-     * blocking is set.
+     * Returns the currently configured token.
      *
-     * @return this option's response {@link Scheduler}
+     * @return the configured token
      */
-    public Scheduler getResponseScheduler() {
-        return responseScheduler;
+    public String getToken() {
+        return token;
     }
 
     /**
-     * Returns the defined scheduler for rate limiting delay purposes.
+     * Returns the currently configured {@link ReactorResources}.
      *
-     * @return this option's rate limiting {@link Scheduler}
+     * @return the configured {@link ReactorResources}
      */
-    public Scheduler getRateLimitScheduler() {
-        return rateLimitScheduler;
+    public ReactorResources getReactorResources() {
+        return reactorResources;
+    }
+
+    /**
+     * Returns the currently configured {@link ExchangeStrategies}.
+     *
+     * @return the configured {@link ExchangeStrategies}
+     */
+    public ExchangeStrategies getExchangeStrategies() {
+        return exchangeStrategies;
     }
 
     /**
      * Returns the list of {@link ResponseFunction} transformations that can be applied to every response. They are
-     * to be
-     * processed in the given order.
+     * to be processed in the given order.
      *
      * @return a list of {@link ResponseFunction} objects.
      */
@@ -226,19 +220,7 @@ public class RouterOptions {
     }
 
     /**
-     * Returns the number of allowed parallel requests the configured {@link Router} should adhere to.
-     *
-     * @return the number of allowed parallel requests.
-     * @deprecated for removal, using {@link #getGlobalRateLimiter()} instead
-     */
-    @Deprecated
-    public int getRequestParallelism() {
-        return requestParallelism;
-    }
-
-    /**
-     * Returns the currently configured {@link GlobalRateLimiter}. Defaults to {@link SemaphoreGlobalRateLimiter} with
-     * parallelism of {@link #DEFAULT_REQUEST_PARALLELISM} or the value supplied via the builder.
+     * Returns the currently configured {@link GlobalRateLimiter}.
      *
      * @return the configured {@link GlobalRateLimiter}
      */

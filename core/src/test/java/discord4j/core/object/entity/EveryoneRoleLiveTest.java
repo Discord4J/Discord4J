@@ -11,7 +11,7 @@ public class EveryoneRoleLiveTest {
     public void initialize() {
         String token = System.getenv("token");
 
-        client = new DiscordClientBuilder(token)
+        client = DiscordClientBuilder.create(token)
                 .build();
     }
 

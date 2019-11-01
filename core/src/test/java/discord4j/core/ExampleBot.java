@@ -27,7 +27,6 @@ import discord4j.core.object.util.Image;
 import discord4j.core.object.util.Snowflake;
 import discord4j.rest.entity.data.ApplicationInfoData;
 import discord4j.rest.request.RouteMatcher;
-import discord4j.rest.request.RouterOptions;
 import discord4j.rest.response.ResponseFunction;
 import discord4j.rest.route.Routes;
 import org.junit.BeforeClass;
@@ -68,13 +67,10 @@ public class ExampleBot {
                 .install();
 
         DiscordClient client = DiscordClient.builder(token)
-                .setRouterOptions(RouterOptions.builder()
-                        // globally suppress any not found (404) error
-                        .onClientResponse(ResponseFunction.emptyIfNotFound())
-                        // bad requests (400) while adding reactions will be suppressed
-                        .onClientResponse(ResponseFunction.emptyOnErrorStatus(RouteMatcher.route(Routes.REACTION_CREATE), 400))
-                        .requestParallelism(12)
-                        .build())
+                // globally suppress any not found (404) error
+                .onClientResponse(ResponseFunction.emptyIfNotFound())
+                // bad requests (400) while adding reactions will be suppressed
+                .onClientResponse(ResponseFunction.emptyOnErrorStatus(RouteMatcher.route(Routes.REACTION_CREATE), 400))
                 .build();
 
         // Get the bot owner ID to filter commands

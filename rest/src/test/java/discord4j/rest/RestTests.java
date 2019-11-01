@@ -21,21 +21,23 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
+import discord4j.common.ReactorResources;
 import discord4j.common.jackson.PossibleModule;
 import discord4j.common.jackson.UnknownPropertyHandler;
 import discord4j.rest.http.ExchangeStrategies;
-import discord4j.rest.http.client.DiscordWebClient;
 import discord4j.rest.request.DefaultRouter;
 import discord4j.rest.request.Router;
+import discord4j.rest.request.RouterOptions;
 import discord4j.rest.service.ChannelService;
-import reactor.netty.http.client.HttpClient;
 
 public abstract class RestTests {
 
     public static Router getRouter(String token, ObjectMapper mapper) {
-        DiscordWebClient webClient = new DiscordWebClient(HttpClient.create().compress(true),
-                ExchangeStrategies.jackson(mapper), token);
-        return new DefaultRouter(webClient);
+        return new DefaultRouter(RouterOptions.builder()
+                .setReactorResources(new ReactorResources())
+                .setExchangeStrategies(ExchangeStrategies.jackson(mapper))
+                .setToken(token)
+                .build());
     }
 
     public static ObjectMapper getMapper(boolean ignoreUnknown) {
