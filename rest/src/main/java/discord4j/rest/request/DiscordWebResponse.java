@@ -22,7 +22,7 @@ import discord4j.rest.http.client.ClientResponse;
 import reactor.core.publisher.Mono;
 
 /**
- * Wrapper for a {@link Mono} of {@link ClientResponse} to condense post-exchange calls.
+ * Contract to handle a {@link Mono} of {@link ClientResponse} after a network exchange is done.
  */
 public class DiscordWebResponse {
 

@@ -26,7 +26,7 @@ public interface Router {
      * Queues a request for execution.
      *
      * @param request the request to queue.
-     * @return a mono that receives signals based on the request's response.
+     * @return a {@link DiscordWebResponse} specifying a contract to operate on the response
      */
     DiscordWebResponse exchange(DiscordWebRequest request);
 }
