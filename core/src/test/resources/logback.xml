@@ -10,7 +10,8 @@
     <logger name="discord4j.rest.request" level="DEBUG"/>
     <!--<logger name="discord4j.rest.http" level="TRACE"/>-->
 
-    <logger name="io.rsocket.FrameLogger" level="INFO"/>
+    <logger name="io.rsocket" level="INFO"/>
+    <logger name="io.rsocket.FrameLogger" level="OFF"/>
 
     <turboFilter class="discord4j.core.logback.GatewayEventFilter">
         <Include>MESSAGE_CREATE</Include>

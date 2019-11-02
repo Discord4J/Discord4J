@@ -19,26 +19,35 @@ package discord4j.core.shard;
 
 import discord4j.core.DiscordClient;
 import discord4j.core.event.domain.message.MessageCreateEvent;
-import io.rsocket.transport.netty.server.CloseableChannel;
 import reactor.core.publisher.Mono;
+
+import java.net.InetSocketAddress;
+import java.time.Duration;
 
 public class Leader {
 
     public static void main(String[] args) {
-        CloseableChannel server = RSocketShardCoordinator.startLocalServer(32323).block();
-        assert server != null;
-        DiscordClient.create(System.getenv("token"))
-                .gateway()
-                .setShardCoordinator(new RSocketShardCoordinator("localhost", 32323))
-                .setShardFilter(shard -> shard.getIndex() % 2 == 0)
-                .withConnection(gateway -> {
-                    Mono<Void> exitHandler = gateway.on(MessageCreateEvent.class)
-                            .filter(event -> event.getMessage().getContent().orElse("").equals("Test 0"))
-                            .flatMap(event -> event.getClient().logout())
-                            .then();
-                    return Mono.when(exitHandler, gateway.onDisconnect());
+        InetSocketAddress socketAddress = new InetSocketAddress(32323);
+
+        RSocketShardCoordinatorServer leader = new RSocketShardCoordinatorServer(socketAddress);
+        leader.start()
+                .retryBackoff(Long.MAX_VALUE, Duration.ofSeconds(1), Duration.ofMinutes(1))
+                .flatMap(cc -> DiscordClient.create(System.getenv("token"))
+                        .gateway()
+                        .setShardCoordinator(new RSocketShardCoordinator(socketAddress))
+                        .setShardFilter(shard -> shard.getIndex() % 2 == 0 && shard.getIndex() < 5)
+                        .withConnection(gateway -> {
+                            Mono<Void> exitHandler = gateway.on(MessageCreateEvent.class)
+                                    .filter(event -> event.getMessage().getContent().orElse("").equals("Test 0"))
+                                    .flatMap(event -> event.getClient().logout())
+                                    .then();
+                            return Mono.when(exitHandler, gateway.onDisconnect());
+                        })
+                        .thenReturn(cc))
+                .flatMap(cc -> {
+                    cc.dispose();
+                    return cc.onClose();
                 })
                 .block();
-        server.dispose();
     }
 }

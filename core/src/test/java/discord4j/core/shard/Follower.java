@@ -21,13 +21,17 @@ import discord4j.core.DiscordClient;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import reactor.core.publisher.Mono;
 
+import java.net.InetSocketAddress;
+
 public class Follower {
 
     public static void main(String[] args) {
+        InetSocketAddress socketAddress = new InetSocketAddress(32323);
+
         DiscordClient.create(System.getenv("token"))
                 .gateway()
-                .setShardCoordinator(new RSocketShardCoordinator("localhost", 32323))
-                .setShardFilter(shard -> shard.getIndex() % 2 != 0)
+                .setShardCoordinator(new RSocketShardCoordinator(socketAddress))
+                .setShardFilter(shard -> shard.getIndex() % 2 != 0 && shard.getIndex() < 5)
                 .withConnection(gateway -> {
                     Mono<Void> exitHandler = gateway.on(MessageCreateEvent.class)
                             .filter(event -> event.getMessage().getContent().orElse("").equals("Test 0"))

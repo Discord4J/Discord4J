@@ -26,7 +26,7 @@ import discord4j.core.object.reaction.ReactionEmoji;
 import discord4j.core.object.util.Image;
 import discord4j.core.object.util.Snowflake;
 import discord4j.rest.entity.data.ApplicationInfoData;
-import discord4j.rest.request.RouteMatcher;
+import discord4j.rest.request.*;
 import discord4j.rest.response.ResponseFunction;
 import discord4j.rest.route.Routes;
 import org.junit.BeforeClass;
@@ -42,6 +42,7 @@ import reactor.netty.http.client.HttpClient;
 import reactor.util.Logger;
 import reactor.util.Loggers;
 
+import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -66,13 +67,19 @@ public class ExampleBot {
                 .allowBlockingCallsInside("java.io.FileInputStream", "readBytes")
                 .install();
 
+        InetSocketAddress routerAddress = new InetSocketAddress(12123);
+
+        GlobalRateLimiter limiter = new RSocketGlobalRateLimiter(routerAddress);
+
         DiscordClient client = DiscordClient.builder(token)
                 .setDebugMode(false)
                 // globally suppress any not found (404) error
                 //.onClientResponse(ResponseFunction.emptyIfNotFound())
                 // bad requests (400) while adding reactions will be suppressed
                 .onClientResponse(ResponseFunction.emptyOnErrorStatus(RouteMatcher.route(Routes.REACTION_CREATE), 400))
-                .build();
+                .setGlobalRateLimiter(limiter)
+                .setExtraOptions(options -> new RSocketRouterOptions(options, req -> routerAddress))
+                .build(RSocketRouter::new);
 
         // Get the bot owner ID to filter commands
         Mono<Long> ownerId = client.getApplicationInfo()

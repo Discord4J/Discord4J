@@ -27,6 +27,7 @@ import reactor.util.Loggers;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -50,11 +51,11 @@ public class DefaultRouter implements Router {
      * @param routerOptions the options that configure this {@link Router}
      */
     public DefaultRouter(RouterOptions routerOptions) {
-        this.reactorResources = routerOptions.getReactorResources();
-        this.responseFunctions = routerOptions.getResponseTransformers();
+        this.reactorResources = Objects.requireNonNull(routerOptions.getReactorResources());
+        this.responseFunctions = Objects.requireNonNull(routerOptions.getResponseTransformers());
         this.httpClient = new DiscordWebClient(reactorResources.getHttpClient(),
                 routerOptions.getExchangeStrategies(), routerOptions.getToken(), this.responseFunctions);
-        this.globalRateLimiter = routerOptions.getGlobalRateLimiter();
+        this.globalRateLimiter = Objects.requireNonNull(routerOptions.getGlobalRateLimiter());
     }
 
     @Override
