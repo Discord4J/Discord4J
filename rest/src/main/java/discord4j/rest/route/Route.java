@@ -16,7 +16,7 @@
  */
 package discord4j.rest.route;
 
-import discord4j.rest.request.DiscordRequest;
+import discord4j.rest.request.DiscordWebRequest;
 import io.netty.handler.codec.http.HttpMethod;
 import reactor.util.annotation.Nullable;
 
@@ -24,40 +24,35 @@ import java.util.Objects;
 
 /**
  * Provides a mapping between a Discord API endpoint and its response type.
- *
- * @param <T> the response type
- * @since 3.0
  */
-public class Route<T> {
+public class Route {
 
     private final HttpMethod method;
     private final String uriTemplate;
-    private final Class<T> responseType;
 
-    private Route(HttpMethod method, String uriTemplate, Class<T> responseType) {
+    private Route(HttpMethod method, String uriTemplate) {
         this.method = method;
         this.uriTemplate = uriTemplate;
-        this.responseType = responseType;
     }
 
-    public static <T> Route<T> get(String uri, Class<T> responseType) {
-        return new Route<>(HttpMethod.GET, uri, responseType);
+    public static Route get(String uri) {
+        return new Route(HttpMethod.GET, uri);
     }
 
-    public static <T> Route<T> post(String uri, Class<T> responseType) {
-        return new Route<>(HttpMethod.POST, uri, responseType);
+    public static Route post(String uri) {
+        return new Route(HttpMethod.POST, uri);
     }
 
-    public static <T> Route<T> put(String uri, Class<T> responseType) {
-        return new Route<>(HttpMethod.PUT, uri, responseType);
+    public static Route put(String uri) {
+        return new Route(HttpMethod.PUT, uri);
     }
 
-    public static <T> Route<T> patch(String uri, Class<T> responseType) {
-        return new Route<>(HttpMethod.PATCH, uri, responseType);
+    public static Route patch(String uri) {
+        return new Route(HttpMethod.PATCH, uri);
     }
 
-    public static <T> Route<T> delete(String uri, Class<T> responseType) {
-        return new Route<>(HttpMethod.DELETE, uri, responseType);
+    public static Route delete(String uri) {
+        return new Route(HttpMethod.DELETE, uri);
     }
 
     /**
@@ -70,23 +65,14 @@ public class Route<T> {
     }
 
     /**
-     * Return the route's response type. Can be {@link Void} if the {@link Route} has no response body.
-     *
-     * @return the response type of this {@link Route}
-     */
-    public Class<T> getResponseType() {
-        return responseType;
-    }
-
-    /**
      * Prepare a request, expanding this route template URI with the given parameters.
      *
      * @param uriVars the values to expand each template parameter
      * @return a request that is ready to be routed
-     * @see discord4j.rest.request.DiscordRequest#exchange
+     * @see DiscordWebRequest#exchange
      */
-    public DiscordRequest<T> newRequest(Object... uriVars) {
-        return new DiscordRequest<>(this, uriVars);
+    public DiscordWebRequest newRequest(Object... uriVars) {
+        return new DiscordWebRequest(this, uriVars);
     }
 
     /**
@@ -100,7 +86,7 @@ public class Route<T> {
 
     @Override
     public int hashCode() {
-        return Objects.hash(method, responseType, uriTemplate);
+        return Objects.hash(method, uriTemplate);
     }
 
     @Override
@@ -115,8 +101,7 @@ public class Route<T> {
 
         Route other = (Route) obj;
 
-        return other.method.equals(method) && other.responseType.equals(responseType)
-                && other.uriTemplate.equals(uriTemplate);
+        return other.method.equals(method) && other.uriTemplate.equals(uriTemplate);
     }
 
     @Override
@@ -124,7 +109,6 @@ public class Route<T> {
         return "Route{" +
                 "method=" + method +
                 ", uriTemplate='" + uriTemplate + '\'' +
-                ", responseType=" + responseType +
                 '}';
     }
 }

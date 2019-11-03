@@ -26,23 +26,23 @@ import java.util.Map;
 import java.util.function.Predicate;
 
 /**
- * A predicate that can match a given {@link DiscordRequest}. You can create instances of this class using the
+ * A predicate that can match a given {@link DiscordWebRequest}. You can create instances of this class using the
  * {@link #route(Route)} factory, or through {@link #any()} to provide a catch-all matcher.
  */
 @Experimental
 public class RouteMatcher {
 
     @Nullable
-    private final DiscordRequest<?> request;
+    private final DiscordWebRequest request;
 
     @Nullable
     private final Predicate<Map<String, String>> requestVariableMatcher;
 
-    private RouteMatcher(DiscordRequest<?> request) {
+    private RouteMatcher(DiscordWebRequest request) {
         this(request, null);
     }
 
-    public RouteMatcher(DiscordRequest<?> request, Predicate<Map<String, String>> requestVariableMatcher) {
+    public RouteMatcher(DiscordWebRequest request, Predicate<Map<String, String>> requestVariableMatcher) {
         this.request = request;
         this.requestVariableMatcher = requestVariableMatcher;
     }
@@ -63,7 +63,7 @@ public class RouteMatcher {
      * @param route the {@link Route} to be matched by this instance
      * @return a new {@link RouteMatcher}
      */
-    public static RouteMatcher route(Route<?> route) {
+    public static RouteMatcher route(Route route) {
         return new RouteMatcher(route.newRequest());
     }
 
@@ -72,35 +72,35 @@ public class RouteMatcher {
      * a given {@link Predicate} of URI variables.
      * <p>
      * The given predicate will receive a {@link Map} of {@code String} URI template parameters as keys and {@code
-     * String} values used to compile the URI for a {@link DiscordRequest}. This means you would expect keys as
+     * String} values used to compile the URI for a {@link DiscordWebRequest}. This means you would expect keys as
      * {@code guild.id}, {@code channel.id}, {@code message.id}, {@code user.id}, among others. Refer to the actual
      * {@link Route} instances declared in the {@link Routes} class for the exact template keys used in the requests
      * you want to match.
      *
      * @param route the {@link Route} to be matched by this instance
      * @param requestVariableMatcher a {@link Map} of {@code String} keys and values representing the URI template and
-     * the completed value for a given {@link DiscordRequest}, respectively
+     * the completed value for a given {@link DiscordWebRequest}, respectively
      * @return a new {@link RouteMatcher}
      */
-    public static RouteMatcher route(Route<?> route, Predicate<Map<String, String>> requestVariableMatcher) {
+    public static RouteMatcher route(Route route, Predicate<Map<String, String>> requestVariableMatcher) {
         return new RouteMatcher(route.newRequest(), requestVariableMatcher);
     }
 
     /**
-     * Tests this matcher against the given {@link DiscordRequest}.
+     * Tests this matcher against the given {@link DiscordWebRequest}.
      *
-     * @param otherRequest the {@link DiscordRequest} argument
+     * @param otherRequest the {@link DiscordWebRequest} argument
      * @return {@code true} if the input argument matches the predicate, otherwise {@code false}
      */
-    public boolean matches(DiscordRequest<?> otherRequest) {
+    public boolean matches(DiscordWebRequest otherRequest) {
         return matchesRoute(otherRequest) && matchesVariables(otherRequest);
     }
 
-    private boolean matchesRoute(DiscordRequest<?> otherRequest) {
+    private boolean matchesRoute(DiscordWebRequest otherRequest) {
         return request == null || request.getRoute().equals(otherRequest.getRoute());
     }
 
-    private boolean matchesVariables(DiscordRequest<?> otherRequest) {
+    private boolean matchesVariables(DiscordWebRequest otherRequest) {
         return requestVariableMatcher == null || otherRequest.matchesVariables(requestVariableMatcher);
     }
 }

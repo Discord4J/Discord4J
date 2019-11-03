@@ -17,9 +17,9 @@
 package discord4j.rest.http;
 
 import discord4j.rest.json.response.ErrorResponse;
+import io.netty.buffer.ByteBuf;
 import io.netty.util.IllegalReferenceCountException;
 import reactor.core.publisher.Mono;
-import reactor.netty.ByteBufMono;
 import reactor.util.annotation.Nullable;
 
 import java.nio.charset.StandardCharsets;
@@ -36,21 +36,28 @@ public class FallbackReaderStrategy implements ReaderStrategy<Object> {
     }
 
     @Override
-    public Mono<Object> read(ByteBufMono content, Class<Object> responseType) {
+    public Mono<Object> read(Mono<ByteBuf> content, Class<Object> responseType) {
         if (ErrorResponse.class.isAssignableFrom(responseType)) {
-            return content.asString()
-                    .map(body -> {
-                        ErrorResponse response = new ErrorResponse();
-                        response.getFields().put("body", body);
-                        return response;
-                    });
+            return content.handle((buf, sink) -> {
+                try {
+                    ErrorResponse response = new ErrorResponse();
+                    response.getFields().put("body", asString(buf));
+                    sink.next(response);
+                } catch (IllegalReferenceCountException e) {
+                    sink.complete();
+                }
+            });
         }
         return content.handle((buf, sink) -> {
             try {
-                sink.next(buf.readCharSequence(buf.readableBytes(), StandardCharsets.UTF_8).toString());
+                sink.next(asString(buf));
             } catch (IllegalReferenceCountException e) {
                 sink.complete();
             }
         });
+    }
+
+    private String asString(ByteBuf buf) {
+        return buf.readCharSequence(buf.readableBytes(), StandardCharsets.UTF_8).toString();
     }
 }

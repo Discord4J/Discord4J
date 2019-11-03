@@ -35,36 +35,42 @@ public class WebhookService extends RestService {
         return Routes.CHANNEL_WEBHOOK_CREATE.newRequest(channelId)
                 .body(request)
                 .optionalHeader("X-Audit-Log-Reason", reason)
-                .exchange(getRouter());
+                .exchange(getRouter())
+                .bodyToMono(WebhookResponse.class);
     }
 
     public Flux<WebhookResponse> getChannelWebhooks(long channelId) {
         return Routes.CHANNEL_WEBHOOKS_GET.newRequest(channelId)
                 .exchange(getRouter())
+                .bodyToMono(WebhookResponse[].class)
                 .flatMapMany(Flux::fromArray);
     }
 
     public Flux<WebhookResponse> getGuildWebhooks(long guildId) {
         return Routes.GUILD_WEBHOOKS_GET.newRequest(guildId)
                 .exchange(getRouter())
+                .bodyToMono(WebhookResponse[].class)
                 .flatMapMany(Flux::fromArray);
     }
 
     public Mono<WebhookResponse> getWebhook(long webhookId) {
         return Routes.WEBHOOK_GET.newRequest(webhookId)
-                .exchange(getRouter());
+                .exchange(getRouter())
+                .bodyToMono(WebhookResponse.class);
     }
 
     public Mono<WebhookResponse> modifyWebhook(long webhookId, WebhookModifyRequest request, @Nullable String reason) {
         return Routes.WEBHOOK_MODIFY.newRequest(webhookId)
                 .body(request)
                 .optionalHeader("X-Audit-Log-Reason", reason)
-                .exchange(getRouter());
+                .exchange(getRouter())
+                .bodyToMono(WebhookResponse.class);
     }
 
     public Mono<Void> deleteWebhook(long webhookId, @Nullable String reason) {
         return Routes.WEBHOOK_DELETE.newRequest(webhookId)
                 .optionalHeader("X-Audit-Log-Reason", reason)
-                .exchange(getRouter());
+                .exchange(getRouter())
+                .bodyToMono(Void.class);
     }
 }

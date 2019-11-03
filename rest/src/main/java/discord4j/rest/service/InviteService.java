@@ -30,12 +30,14 @@ public class InviteService extends RestService {
 
     public Mono<InviteResponse> getInvite(String inviteCode) {
         return Routes.INVITE_GET.newRequest(inviteCode)
-                .exchange(getRouter());
+                .exchange(getRouter())
+                .bodyToMono(InviteResponse.class);
     }
 
     public Mono<InviteResponse> deleteInvite(String inviteCode, @Nullable String reason) {
         return Routes.INVITE_DELETE.newRequest(inviteCode)
                 .optionalHeader("X-Audit-Log-Reason", reason)
-                .exchange(getRouter());
+                .exchange(getRouter())
+                .bodyToMono(InviteResponse.class);
     }
 }

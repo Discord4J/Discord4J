@@ -18,7 +18,8 @@
 package discord4j.rest.response;
 
 import discord4j.common.annotations.Experimental;
-import discord4j.rest.request.DiscordRequest;
+import discord4j.rest.http.client.ClientResponse;
+import discord4j.rest.request.DiscordWebRequest;
 import discord4j.rest.request.RouteMatcher;
 import reactor.core.publisher.Mono;
 import reactor.retry.Retry;
@@ -40,7 +41,7 @@ public class RetryingTransformer implements ResponseFunction {
     }
 
     @Override
-    public <T> Function<Mono<T>, Mono<T>> transform(DiscordRequest<T> request) {
+    public Function<Mono<ClientResponse>, Mono<ClientResponse>> transform(DiscordWebRequest request) {
         if (routeMatcher.matches(request)) {
             return mono -> mono.retryWhen(retryFactory);
         }

@@ -24,9 +24,9 @@ import reactor.util.annotation.Nullable;
  * Strategy for encoding an object of type {@code <Req>} and writing the encoded stream of bytes to an {@link
  * reactor.netty.http.client.HttpClientRequest}.
  *
- * @param <Req> the type of object in the body
+ * @param <R> the type of object in the body
  */
-public interface WriterStrategy<Req> {
+public interface WriterStrategy<R> {
 
     /**
      * Whether the given object type is supported by this writer.
@@ -44,5 +44,5 @@ public interface WriterStrategy<Req> {
      * @param body the object to write
      * @return indicates completion or error
      */
-    Mono<HttpClient.ResponseReceiver<?>> write(HttpClient.RequestSender sender, @Nullable Req body);
+    Mono<HttpClient.ResponseReceiver<?>> write(HttpClient.RequestSender sender, @Nullable R body);
 }

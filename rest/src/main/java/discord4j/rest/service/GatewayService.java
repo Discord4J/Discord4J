@@ -29,12 +29,14 @@ public class GatewayService extends RestService {
 
     public Mono<GatewayResponse> getGateway() {
         return Routes.GATEWAY_GET.newRequest()
-                .exchange(getRouter());
+                .exchange(getRouter())
+                .bodyToMono(GatewayResponse.class);
     }
 
     public Mono<GatewayResponse> getGatewayBot() {
         return Routes.GATEWAY_BOT_GET.newRequest()
-                .exchange(getRouter());
+                .exchange(getRouter())
+                .bodyToMono(GatewayResponse.class);
     }
 
 }

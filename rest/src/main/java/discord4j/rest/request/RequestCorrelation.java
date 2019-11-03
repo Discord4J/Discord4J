@@ -22,17 +22,17 @@ import reactor.util.context.Context;
 
 class RequestCorrelation<T> {
 
-    private final DiscordRequest<T> request;
+    private final DiscordWebRequest request;
     private final MonoProcessor<T> response;
     private final Context context;
 
-    RequestCorrelation(DiscordRequest<T> request, MonoProcessor<T> response, Context context) {
+    RequestCorrelation(DiscordWebRequest request, MonoProcessor<T> response, Context context) {
         this.request = request;
         this.response = response;
         this.context = context;
     }
 
-    public DiscordRequest<T> getRequest() {
+    public DiscordWebRequest getRequest() {
         return request;
     }
 

@@ -18,9 +18,10 @@
 package discord4j.rest.http;
 
 import discord4j.common.JacksonResources;
+import discord4j.common.LogUtil;
 import discord4j.rest.http.client.DiscordWebClient;
 import discord4j.rest.request.DefaultRouter;
-import discord4j.rest.request.DiscordRequest;
+import discord4j.rest.request.DiscordWebRequest;
 import discord4j.rest.request.Router;
 import discord4j.rest.route.Route;
 import org.junit.AfterClass;
@@ -78,10 +79,12 @@ public class WebClientTest {
         ExchangeStrategies ex2 = ExchangeStrategies.jackson(new JacksonResources().getObjectMapper());
         DiscordWebClient webClient = new DiscordWebClient(HttpClient.create(),
                 ex2, null); // no token, it's not a discord request
-        Route<String> fakeRoute = Route.get("http://0.0.0.0:" + PORT + "/html", String.class);
+        Route fakeRoute = Route.get("http://0.0.0.0:" + PORT + "/html");
         Router router = new DefaultRouter(webClient);
-        String response = router.exchange(new DiscordRequest<>(fakeRoute))
+        String response = router.exchange(new DiscordWebRequest(fakeRoute))
+                .bodyToMono(String.class)
                 .log()
+                .subscriberContext(ctx -> ctx.put(LogUtil.KEY_SHARD_ID, 123))
                 .block();
         log.info("{}", response);
     }

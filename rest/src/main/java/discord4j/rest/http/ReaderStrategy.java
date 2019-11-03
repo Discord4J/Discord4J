@@ -16,17 +16,17 @@
  */
 package discord4j.rest.http;
 
+import io.netty.buffer.ByteBuf;
 import reactor.core.publisher.Mono;
-import reactor.netty.ByteBufMono;
 import reactor.util.annotation.Nullable;
 
 /**
  * Strategy for reading from a {@link reactor.netty.http.client.HttpClientResponse} and decoding the stream of bytes
  * to an Object of type {@code <Res>}.
  *
- * @param <Res> the type of object in the read response
+ * @param <T> the type of object in the read response
  */
-public interface ReaderStrategy<Res> {
+public interface ReaderStrategy<T> {
 
     /**
      * Whether the given object type is supported by this reader.
@@ -45,5 +45,5 @@ public interface ReaderStrategy<Res> {
      * #canRead(Class, String)}
      * @return a Mono for the resolved response, according to the given response type
      */
-    Mono<Res> read(ByteBufMono content, Class<Res> responseType);
+    Mono<T> read(Mono<ByteBuf> content, Class<T> responseType);
 }

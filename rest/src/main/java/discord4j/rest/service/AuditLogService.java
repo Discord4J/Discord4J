@@ -32,6 +32,7 @@ public class AuditLogService extends RestService {
     public Mono<AuditLogResponse> getAuditLog(long guildId, Map<String, Object> queryParams) {
         return Routes.AUDIT_LOG_GET.newRequest(guildId)
                 .query(queryParams)
-                .exchange(getRouter());
+                .exchange(getRouter())
+                .bodyToMono(AuditLogResponse.class);
     }
 }

@@ -30,6 +30,7 @@ public class VoiceService extends RestService {
     public Flux<VoiceRegionResponse> getVoiceRegions() {
         return Routes.VOICE_REGION_LIST.newRequest()
                 .exchange(getRouter())
+                .bodyToMono(VoiceRegionResponse[].class)
                 .flatMapMany(Flux::fromArray);
     }
 }

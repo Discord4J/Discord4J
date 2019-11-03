@@ -19,6 +19,7 @@ package discord4j.rest.request;
 import discord4j.common.LogUtil;
 import discord4j.rest.http.client.ClientException;
 import discord4j.rest.http.client.ClientRequest;
+import discord4j.rest.http.client.ClientResponse;
 import discord4j.rest.http.client.DiscordWebClient;
 import org.reactivestreams.Subscription;
 import reactor.core.publisher.*;
@@ -31,25 +32,22 @@ import reactor.util.Loggers;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.util.function.Consumer;
 import java.util.function.Function;
 
 import static discord4j.common.LogUtil.format;
 
 /**
- * A stream of {@link DiscordRequest DiscordRequests}. Any number of items may be {@link #push(RequestCorrelation)}
+ * A stream of {@link DiscordWebRequest DiscordRequests}. Any number of items may be {@link #push(RequestCorrelation)}
  * written to the stream. However, the {@link RequestSubscriber} ensures that only one is read at a time. This
  * serialization ensures proper rate limit handling.
  * <p>
  * The flow of a request through the stream is as follows:
  *
  * <img src="{@docRoot}img/RequestStream_Flow.png">
- *
- * @param <T> The type of items in the stream.
  */
-class RequestStream<T> {
+class RequestStream {
 
-    private final EmitterProcessor<RequestCorrelation<T>> backing = EmitterProcessor.create(false);
+    private final EmitterProcessor<RequestCorrelation<ClientResponse>> backing = EmitterProcessor.create(false);
     private final BucketKey id;
     private final DiscordWebClient httpClient;
     private final GlobalRateLimiter globalRateLimiter;
@@ -84,7 +82,7 @@ class RequestStream<T> {
                 });
     }
 
-    void push(RequestCorrelation<T> request) {
+    void push(RequestCorrelation<ClientResponse> request) {
         backing.onNext(request);
     }
 
@@ -100,26 +98,33 @@ class RequestStream<T> {
      * @see #sleepTime
      * @see #rateLimitHandler
      */
-    private class RequestSubscriber extends BaseSubscriber<RequestCorrelation<T>> {
+    private class RequestSubscriber extends BaseSubscriber<RequestCorrelation<ClientResponse>> {
 
         private volatile Duration sleepTime = Duration.ZERO;
-        private final Consumer<HttpClientResponse> rateLimitHandler;
+        private final Function<ClientResponse, Mono<ClientResponse>> rateLimitHandler;
 
         public RequestSubscriber(RateLimitStrategy strategy) {
             this.rateLimitHandler = response -> {
+                HttpClientResponse httpResponse = response.getHttpResponse();
                 if (log.isDebugEnabled()) {
                     Instant requestTimestamp =
-                            Instant.ofEpochMilli(response.currentContext().get(DiscordWebClient.KEY_REQUEST_TIMESTAMP));
+                            Instant.ofEpochMilli(httpResponse.currentContext().get(DiscordWebClient.KEY_REQUEST_TIMESTAMP));
                     Duration responseTime = Duration.between(requestTimestamp, Instant.now());
-                    log.debug(format(response.currentContext(), "Read {} in {} with headers: {}"),
-                            response.status(), responseTime, response.responseHeaders());
+                    log.debug(format(httpResponse.currentContext(), "Read {} in {} with headers: {}"),
+                            httpResponse.status(), responseTime, httpResponse.responseHeaders());
                 }
-                Duration nextReset = strategy.apply(response);
+                Duration nextReset = strategy.apply(httpResponse);
                 if (!nextReset.isZero()) {
                     if (log.isDebugEnabled()) {
-                        log.debug(format(response.currentContext(), "Delaying next request by {}"), nextReset);
+                        log.debug(format(httpResponse.currentContext(), "Delaying next request by {}"), nextReset);
                     }
                     sleepTime = nextReset;
+                }
+                // if this response is a 429, intercept it
+                if (httpResponse.status().code() == 429) {
+                    return response.createException().flatMap(Mono::error);
+                } else {
+                    return Mono.just(response);
                 }
             };
         }
@@ -130,43 +135,34 @@ class RequestStream<T> {
         }
 
         @Override
-        protected void hookOnNext(RequestCorrelation<T> correlation) {
-            DiscordRequest<T> request = correlation.getRequest();
-            MonoProcessor<T> callback = correlation.getResponse();
+        protected void hookOnNext(RequestCorrelation<ClientResponse> correlation) {
+            DiscordWebRequest request = correlation.getRequest();
+            ClientRequest clientRequest = new ClientRequest(request);
+            MonoProcessor<ClientResponse> callback = correlation.getResponse();
 
             if (tracesLog.isDebugEnabled()) {
                 tracesLog.debug("Accepting request in bucket {}: {}", id.toString(), request);
             }
 
-            Class<T> responseType = request.getRoute().getResponseType();
-
             globalRateLimiter.withLimiter(
-                    Mono.fromCallable(() -> new ClientRequest(request))
+                    Mono.just(clientRequest)
                             .doOnEach(s -> requestLog.debug(format(s.getContext(), "{}"), s))
-                            .flatMap(r -> httpClient.exchange(r, request.getBody(), responseType, rateLimitHandler))
+                            .flatMap(httpClient::exchange)
+                            .flatMap(rateLimitHandler)
                             .doOnEach(s -> responseLog.debug(format(s.getContext(), "{}"), s))
                             .subscriberContext(ctx -> ctx
                                     .putAll(correlation.getContext())
+                                    .put(LogUtil.KEY_REQUEST_ID, clientRequest.getId())
                                     .put(LogUtil.KEY_BUCKET_ID, id.toString()))
                             .retryWhen(rateLimitRetryOperator::apply)
                             .transform(getResponseTransformers(request))
                             .retryWhen(serverErrorRetryFactory())
                             .doFinally(this::next))
-                    .materialize()
-                    .subscribe(signal -> {
-                        if (signal.isOnSubscribe()) {
-                            callback.onSubscribe(signal.getSubscription());
-                        } else if (signal.isOnNext()) {
-                            callback.onNext(signal.get());
-                        } else if (signal.isOnError()) {
-                            callback.onError(signal.getThrowable());
-                        } else if (signal.isOnComplete()) {
-                            callback.onComplete();
-                        }
-                    });
+                    .subscribeWith(callback)
+                    .subscribe(null, t -> log.error("Error while processing {}", request, t));
         }
 
-        private Function<Mono<T>, Mono<T>> getResponseTransformers(DiscordRequest<T> discordRequest) {
+        private Function<Mono<ClientResponse>, Mono<ClientResponse>> getResponseTransformers(DiscordWebRequest discordRequest) {
             return routerOptions.getResponseTransformers()
                     .stream()
                     .map(rt -> rt.transform(discordRequest))
