@@ -244,7 +244,7 @@ public final class DiscordClientBuilder<O extends RouterOptions> {
                 .setToken(token)
                 .setReactorResources(reactor)
                 .setExchangeStrategies(initExchangeStrategies(jackson))
-                .setGlobalRateLimiter(globalRateLimiter)
+                .setGlobalRateLimiter(initGlobalRateLimiter())
                 .onClientResponse(new CompositeTransformer(responseTransformers))
                 .build();
         return this.optionsModifier.apply(options);
@@ -269,5 +269,13 @@ public final class DiscordClientBuilder<O extends RouterOptions> {
             return exchangeStrategies;
         }
         return ExchangeStrategies.jackson(jacksonResources.getObjectMapper());
+    }
+
+    private GlobalRateLimiter initGlobalRateLimiter() {
+        if (globalRateLimiter != null) {
+            return globalRateLimiter;
+        }
+        // TODO: improve throughput
+        return new PoolGlobalRateLimiter(12);
     }
 }
