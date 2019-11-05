@@ -677,16 +677,9 @@ public class GatewayBootstrap<O extends GatewayOptions> {
     }
 
     private O buildOptions(IdentifyOptions identify) {
-        GatewayOptions options = GatewayOptions.builder()
-                .setToken(client.getCoreResources().getToken())
-                .setReactorResources(initGatewayReactorResources())
-                .setPayloadReader(initPayloadReader())
-                .setPayloadWriter(initPayloadWriter())
-                .setReconnectOptions(reconnectOptions)
-                .setIdentifyOptions(identify)
-                .setInitialObserver(gatewayObserver)
-                .setIdentifyLimiter(shardCoordinator.getIdentifyLimiter())
-                .build();
+        GatewayOptions options = new GatewayOptions(client.getCoreResources().getToken(),
+                initGatewayReactorResources(), initPayloadReader(), initPayloadWriter(), reconnectOptions, identify,
+                gatewayObserver, shardCoordinator.getIdentifyLimiter());
         return this.optionsModifier.apply(options);
     }
 

@@ -26,18 +26,18 @@ import discord4j.common.jackson.PossibleModule;
 import discord4j.common.jackson.UnknownPropertyHandler;
 import discord4j.rest.http.ExchangeStrategies;
 import discord4j.rest.request.DefaultRouter;
+import discord4j.rest.request.PoolGlobalRateLimiter;
 import discord4j.rest.request.Router;
 import discord4j.rest.request.RouterOptions;
 import discord4j.rest.service.ChannelService;
 
+import java.util.Collections;
+
 public abstract class RestTests {
 
     public static Router getRouter(String token, ObjectMapper mapper) {
-        return new DefaultRouter(RouterOptions.builder()
-                .setReactorResources(new ReactorResources())
-                .setExchangeStrategies(ExchangeStrategies.jackson(mapper))
-                .setToken(token)
-                .build());
+        return new DefaultRouter(new RouterOptions(token, new ReactorResources(), ExchangeStrategies.jackson(mapper),
+                Collections.emptyList(), new PoolGlobalRateLimiter(10)));
     }
 
     public static ObjectMapper getMapper(boolean ignoreUnknown) {

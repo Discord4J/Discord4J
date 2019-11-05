@@ -24,7 +24,6 @@ import discord4j.common.jackson.UnknownPropertyHandler;
 import discord4j.rest.RestClient;
 import discord4j.rest.http.ExchangeStrategies;
 import discord4j.rest.request.*;
-import discord4j.rest.response.CompositeTransformer;
 import discord4j.rest.response.ResponseFunction;
 import discord4j.rest.route.Route;
 import reactor.core.publisher.Hooks;
@@ -240,13 +239,8 @@ public final class DiscordClientBuilder<O extends RouterOptions> {
     }
 
     private O buildOptions(ReactorResources reactor, JacksonResources jackson) {
-        RouterOptions options = RouterOptions.builder()
-                .setToken(token)
-                .setReactorResources(reactor)
-                .setExchangeStrategies(initExchangeStrategies(jackson))
-                .setGlobalRateLimiter(initGlobalRateLimiter())
-                .onClientResponse(new CompositeTransformer(responseTransformers))
-                .build();
+        RouterOptions options = new RouterOptions(token, reactor, initExchangeStrategies(jackson),
+                responseTransformers, initGlobalRateLimiter());
         return this.optionsModifier.apply(options);
     }
 

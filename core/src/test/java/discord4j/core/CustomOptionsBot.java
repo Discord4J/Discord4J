@@ -20,66 +20,51 @@ package discord4j.core;
 import discord4j.gateway.DefaultGatewayClient;
 import discord4j.gateway.GatewayOptions;
 import org.junit.Test;
+import reactor.core.publisher.Mono;
+import reactor.util.Logger;
+import reactor.util.Loggers;
 
 public class CustomOptionsBot {
 
     static class CustomOptions extends GatewayOptions {
 
-        protected CustomOptions(Builder builder) {
-            super(builder);
+        private final String foo;
+
+        public CustomOptions(GatewayOptions parent, String foo) {
+            super(parent.getToken(), parent.getReactorResources(), parent.getPayloadReader(),
+                    parent.getPayloadWriter(), parent.getReconnectOptions(), parent.getIdentifyOptions(),
+                    parent.getInitialObserver(), parent.getIdentifyLimiter());
+            this.foo = foo;
         }
 
-        public static CustomOptions.Builder builder() {
-            return new CustomOptions.Builder();
-        }
-
-        public CustomOptions.Builder mutate() {
-            Builder builder = new Builder();
-            builder.setIdentifyLimiter(getIdentifyLimiter())
-                    .setInitialObserver(getInitialObserver())
-                    .setToken(getToken())
-                    .setReconnectOptions(getReconnectOptions())
-                    .setIdentifyOptions(getIdentifyOptions())
-                    .setPayloadWriter(getPayloadWriter())
-                    .setPayloadReader(getPayloadReader())
-                    .setReactorResources(getReactorResources());
-            return builder;
-        }
-
-        static class Builder extends GatewayOptions.Builder {
-
-            public CustomOptions build() {
-                return new CustomOptions(this);
-            }
-
+        public String getFoo() {
+            return foo;
         }
     }
 
     static class CustomGatewayClient extends DefaultGatewayClient {
 
+        private static final Logger log = Loggers.getLogger(CustomGatewayClient.class);
+
+        private final String foo;
+
         public CustomGatewayClient(CustomOptions options) {
             super(options);
+            this.foo = options.getFoo();
+        }
+
+        @Override
+        public Mono<Void> execute(String gatewayUrl) {
+            log.info("Connecting with foo value: {}", foo);
+            return super.execute(gatewayUrl);
         }
     }
 
     @Test
     public void customBot() {
-        CustomOptions custom = CustomOptions.builder().build();
         DiscordClient.create(System.getenv("token"))
                 .gateway()
-                .setExtraOptions(options -> {
-                    CustomOptions.Builder builder = custom.mutate();
-
-                    return (CustomOptions) builder.setIdentifyLimiter(options.getIdentifyLimiter())
-                            .setInitialObserver(options.getInitialObserver())
-                            .setToken(options.getToken())
-                            .setReconnectOptions(options.getReconnectOptions())
-                            .setIdentifyOptions(options.getIdentifyOptions())
-                            .setPayloadWriter(options.getPayloadWriter())
-                            .setPayloadReader(options.getPayloadReader())
-                            .setReactorResources(options.getReactorResources())
-                            .build();
-                })
+                .setExtraOptions(options -> new CustomOptions(options, "bar"))
                 .connect(CustomGatewayClient::new)
                 .block();
     }

@@ -20,10 +20,7 @@ package discord4j.rest.http;
 import discord4j.common.JacksonResources;
 import discord4j.common.LogUtil;
 import discord4j.common.ReactorResources;
-import discord4j.rest.request.DefaultRouter;
-import discord4j.rest.request.DiscordWebRequest;
-import discord4j.rest.request.Router;
-import discord4j.rest.request.RouterOptions;
+import discord4j.rest.request.*;
 import discord4j.rest.route.Route;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -35,6 +32,8 @@ import reactor.netty.DisposableServer;
 import reactor.netty.http.server.HttpServer;
 import reactor.util.Logger;
 import reactor.util.Loggers;
+
+import java.util.ArrayList;
 
 public class WebClientTest {
 
@@ -78,11 +77,8 @@ public class WebClientTest {
     public void htmlResponse() {
         ExchangeStrategies ex2 = ExchangeStrategies.jackson(new JacksonResources().getObjectMapper());
         Route fakeRoute = Route.get("http://0.0.0.0:" + PORT + "/html");
-        Router router = new DefaultRouter(RouterOptions.builder()
-                .setToken("")
-                .setExchangeStrategies(ex2)
-                .setReactorResources(new ReactorResources())
-                .build());
+        Router router = new DefaultRouter(new RouterOptions("", new ReactorResources(), ex2, new ArrayList<>(),
+                new PoolGlobalRateLimiter(10)));
         String response = router.exchange(new DiscordWebRequest(fakeRoute))
                 .bodyToMono(String.class)
                 .log()

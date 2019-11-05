@@ -24,6 +24,7 @@ import reactor.retry.BackoffDelay;
 import reactor.retry.Jitter;
 
 import java.time.Duration;
+import java.util.Objects;
 
 /**
  * A configuration object to customize the gateway reconnection policy.
@@ -38,12 +39,16 @@ public class ReconnectOptions {
     private final Scheduler backoffScheduler;
 
     protected ReconnectOptions(Builder builder) {
-        this.firstBackoff = builder.firstBackoff;
-        this.maxBackoffInterval = builder.maxBackoffInterval;
+        this.firstBackoff = Objects.requireNonNull(builder.firstBackoff, "firstBackoff");
+        this.maxBackoffInterval = Objects.requireNonNull(builder.maxBackoffInterval, "maxBackoffInterval");
         this.maxRetries = builder.maxRetries;
-        this.backoff = builder.backoff;
-        this.jitter = builder.jitter;
-        this.backoffScheduler = builder.backoffScheduler;
+        this.backoff = Objects.requireNonNull(builder.backoff, "backoff");
+        this.jitter = Objects.requireNonNull(builder.jitter, "jitter");
+        this.backoffScheduler = Objects.requireNonNull(builder.backoffScheduler, "backoffScheduler");
+    }
+
+    public static ReconnectOptions create() {
+        return new Builder().build();
     }
 
     public static ReconnectOptions.Builder builder() {

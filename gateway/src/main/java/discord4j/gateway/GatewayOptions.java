@@ -22,6 +22,8 @@ import discord4j.gateway.payload.PayloadReader;
 import discord4j.gateway.payload.PayloadWriter;
 import discord4j.gateway.retry.ReconnectOptions;
 
+import java.util.Objects;
+
 /**
  * A set of options targeting the configuration of {@link GatewayClient} implementations.
  */
@@ -36,101 +38,18 @@ public class GatewayOptions {
     private final GatewayObserver initialObserver;
     private final PayloadTransformer identifyLimiter;
 
-    protected GatewayOptions(Builder builder) {
-        this.token = builder.token;
-        this.reactorResources = builder.reactorResources;
-        this.payloadReader = builder.payloadReader;
-        this.payloadWriter = builder.payloadWriter;
-        this.reconnectOptions = builder.reconnectOptions;
-        this.identifyOptions = builder.identifyOptions;
-        this.initialObserver = builder.initialObserver;
-        this.identifyLimiter = builder.identifyLimiter;
-    }
-
-    /**
-     * Create a {@link Builder} for {@link GatewayOptions}.
-     *
-     * @return a new builder
-     */
-    public static Builder builder() {
-        return new GatewayOptions.Builder();
-    }
-
-    /**
-     * Create a {@link Builder} using the options configured in this instance.
-     *
-     * @return a new builder using the current options
-     */
-    public Builder mutate() {
-        Builder builder = new Builder();
-        builder.setIdentifyLimiter(getIdentifyLimiter())
-                .setInitialObserver(getInitialObserver())
-                .setToken(getToken())
-                .setReconnectOptions(getReconnectOptions())
-                .setIdentifyOptions(getIdentifyOptions())
-                .setPayloadWriter(getPayloadWriter())
-                .setPayloadReader(getPayloadReader())
-                .setReactorResources(getReactorResources());
-        return builder;
-    }
-
-    public static class Builder {
-
-        private String token;
-        private ReactorResources reactorResources;
-        private PayloadReader payloadReader;
-        private PayloadWriter payloadWriter;
-        private ReconnectOptions reconnectOptions;
-        private IdentifyOptions identifyOptions;
-        private GatewayObserver initialObserver;
-        private PayloadTransformer identifyLimiter;
-
-        protected Builder() {
-        }
-
-        public Builder setToken(String token) {
-            this.token = token;
-            return this;
-        }
-
-        public Builder setReactorResources(ReactorResources reactorResources) {
-            this.reactorResources = reactorResources;
-            return this;
-        }
-
-        public Builder setPayloadReader(PayloadReader payloadReader) {
-            this.payloadReader = payloadReader;
-            return this;
-        }
-
-        public Builder setPayloadWriter(PayloadWriter payloadWriter) {
-            this.payloadWriter = payloadWriter;
-            return this;
-        }
-
-        public Builder setReconnectOptions(ReconnectOptions reconnectOptions) {
-            this.reconnectOptions = reconnectOptions;
-            return this;
-        }
-
-        public Builder setIdentifyOptions(IdentifyOptions identifyOptions) {
-            this.identifyOptions = identifyOptions;
-            return this;
-        }
-
-        public Builder setInitialObserver(GatewayObserver initialObserver) {
-            this.initialObserver = initialObserver;
-            return this;
-        }
-
-        public Builder setIdentifyLimiter(PayloadTransformer identifyLimiter) {
-            this.identifyLimiter = identifyLimiter;
-            return this;
-        }
-
-        public GatewayOptions build() {
-            return new GatewayOptions(this);
-        }
+    public GatewayOptions(String token, ReactorResources reactorResources, PayloadReader payloadReader,
+                          PayloadWriter payloadWriter, ReconnectOptions reconnectOptions,
+                          IdentifyOptions identifyOptions, GatewayObserver initialObserver,
+                          PayloadTransformer identifyLimiter) {
+        this.token = Objects.requireNonNull(token, "token");
+        this.reactorResources = Objects.requireNonNull(reactorResources, "reactorResources");
+        this.payloadReader = Objects.requireNonNull(payloadReader, "payloadReader");
+        this.payloadWriter = Objects.requireNonNull(payloadWriter, "payloadWriter");
+        this.reconnectOptions = Objects.requireNonNull(reconnectOptions, "reconnectOptions");
+        this.identifyOptions = Objects.requireNonNull(identifyOptions, "identifyOptions");
+        this.initialObserver = Objects.requireNonNull(initialObserver, "initialObserver");
+        this.identifyLimiter = Objects.requireNonNull(identifyLimiter, "identifyLimiter");
     }
 
     public String getToken() {

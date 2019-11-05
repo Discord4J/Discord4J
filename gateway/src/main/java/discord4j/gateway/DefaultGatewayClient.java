@@ -145,13 +145,15 @@ public class DefaultGatewayClient implements GatewayClient {
                             .delayUntil(payload -> ping)
                             .flatMap(payload -> Flux.from(payloadWriter.write(payload)))
                             .map(buf -> Tuples.of((GatewayClient) this, buf))
-                            .transform(identifyLimiter);
+                            .transform(identifyLimiter::apply);
+                    PayloadTransformer outLimiter = new PoolingTransformer(outboundLimiterCapacity(),
+                            Duration.ofSeconds(60));
                     Flux<ByteBuf> payloadFlux = outbound.filter(payload -> !Opcode.IDENTIFY.equals(payload.getOp()))
                             .doOnEach(s -> outboundLog.debug(format(context, s.toString())))
                             .flatMap(payload -> Flux.from(payloadWriter.write(payload)))
                             .transform(buf -> Flux.merge(buf, sender))
                             .map(buf -> Tuples.of((GatewayClient) this, buf))
-                            .transform(new PoolingTransformer(outboundLimiterCapacity(), Duration.ofSeconds(60)));
+                            .transform(outLimiter::apply);
                     Flux<ByteBuf> heartbeatFlux =
                             heartbeats.flatMap(payload -> Flux.from(payloadWriter.write(payload)));
                     Flux<ByteBuf> outFlux = Flux.merge(heartbeatFlux, identifyFlux, payloadFlux)

@@ -38,9 +38,8 @@ import java.util.function.Function;
  * specific conditions like an HTTP status code or a given API request route. Usage beyond this concern is not
  * supported and could interfere with downstream operations.
  * <p>
- * Typical {@link ResponseFunction} usage is through {@link RouterOptions} builder option
- * {@link RouterOptions.Builder#onClientResponse(ResponseFunction)}, where it can be applied using one of the static
- * helper methods defined in this class.
+ * Typical {@link ResponseFunction} usage is through {@link RouterOptions}, where it can be applied using one of the
+ * static helper methods defined in this class.
  */
 @Experimental
 public interface ResponseFunction {
