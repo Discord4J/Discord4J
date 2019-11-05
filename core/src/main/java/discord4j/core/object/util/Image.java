@@ -146,6 +146,9 @@ public final class Image {
      */
     public enum Format {
 
+        /** Unknown image format */
+        UNKNOWN("UNKNOWN"),
+
         /** Represents the Joint Photographic Experts Group format. */
         JPEG("jpeg"),
 
@@ -185,7 +188,7 @@ public final class Image {
                 case "image/png": return PNG;
                 case "image/webp": return WEB_P;
                 case "image/gif": return GIF;
-                default: throw new IllegalArgumentException(contentType);
+                default: return UNKNOWN;
             }
         }
     }

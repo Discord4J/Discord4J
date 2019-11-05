@@ -20,6 +20,7 @@ import discord4j.core.util.EntityUtil;
 
 public enum Status {
 
+    UNKNOWN("UNKNOWN"),
     ONLINE("online"),
     DO_NOT_DISTURB("dnd"),
     IDLE("idle"),
@@ -43,7 +44,7 @@ public enum Status {
             case "online": return ONLINE;
             case "invisible": return INVISIBLE;
             case "offline": return OFFLINE;
-            default: return EntityUtil.throwUnsupportedDiscordValue(value);
+            default: return UNKNOWN;
         }
     }
 }

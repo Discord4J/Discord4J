@@ -116,6 +116,9 @@ public class PermissionOverwrite {
     /** The type of entity a {@link PermissionOverwrite} is for. */
     public enum Type {
 
+        /** Unknown type */
+        UNKNOWN("UNKNOWN"),
+
         /** The {@link Role} entity. */
         ROLE("role"),
 
@@ -154,7 +157,7 @@ public class PermissionOverwrite {
             switch (value) {
                 case "role": return ROLE;
                 case "member": return MEMBER;
-                default: return EntityUtil.throwUnsupportedDiscordValue(value);
+                default: return UNKNOWN;
             }
         }
     }
