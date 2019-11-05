@@ -20,6 +20,7 @@ import discord4j.core.util.EntityUtil;
 
 public enum ActionType {
 
+    UNKNOWN(-1),
     GUILD_UPDATE(1),
     CHANNEL_CREATE(10),
     CHANNEL_UPDATE(11),
@@ -75,7 +76,7 @@ public enum ActionType {
             case 61: return EMOJI_UPDATE;
             case 62: return EMOJI_DELETE;
             case 72: return MESSAGE_DELETE;
-            default: return EntityUtil.throwUnsupportedDiscordValue(value);
+            default: return UNKNOWN;
         }
     }
 
