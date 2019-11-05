@@ -74,6 +74,7 @@ public class StoreBotTest {
                 .build();
 
         client.gateway()
+                .setShardIndexSource(count -> Flux.just(0, 2, 4))
                 .setStoreService(MappingStoreService.create()
                         .setMapping(new NoOpStoreService(), MessageBean.class)
                         .setFallback(new JdkStoreService()))

@@ -102,6 +102,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
     private final Function<GatewayOptions, O> optionsModifier;
 
     private int shardCount = RECOMMENDED_SHARD_COUNT;
+    private Function<Integer, Publisher<Integer>> shardIndexSource = count -> Flux.range(0, count);
     private Predicate<ShardInfo> shardFilter = shard -> true;
     private boolean awaitConnections = true;
     private ShardCoordinator shardCoordinator = new LocalShardCoordinator();
@@ -182,6 +183,20 @@ public class GatewayBootstrap<O extends GatewayOptions> {
      */
     public GatewayBootstrap<O> setShardCount(int shardCount) {
         this.shardCount = shardCount;
+        return this;
+    }
+
+    /**
+     * Define the generator function to determine which shards belong to the group created by this builder. To change
+     * the {@code shardCount} parameter, see {@link #setShardCount(int)}. Defaults to {@link Flux#range(int, int)}
+     * from {@code 0} until {@code shardCount} count value.
+     *
+     * @param indexes a {@link Function} from {@link Integer} representing the computed {@code shardCount} value to a
+     * {@link Publisher} of {@link Integer} values representing shard indexes used to create a shard group
+     * @return this builder
+     */
+    public GatewayBootstrap<O> setShardIndexSource(Function<Integer, Publisher<Integer>> indexes) {
+        this.shardIndexSource = Objects.requireNonNull(indexes, "indexes");
         return this;
     }
 
@@ -450,7 +465,8 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                 gatewayClients, voiceClients);
 
         Flux<GatewayConnection> connections = computeShardCount(client.getCoreResources().getRestClient())
-                .flatMapMany(count -> Flux.range(0, count)
+                .flatMapMany(count -> Flux.from(shardIndexSource.apply(count))
+                        .filter(index -> index >= 0 && index < count)
                         .map(index -> new ShardInfo(index, count))
                         .filter(initShardFilter())
                         .transform(shardCoordinator.getConnectOperator())
