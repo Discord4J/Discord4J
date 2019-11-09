@@ -34,11 +34,8 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Facilitates the routing of {@link DiscordWebRequest DiscordRequests} to the proper
- * {@link discord4j.rest.request.RequestStream RequestStream} according to the bucket in which the request falls.
- * <p>
- * Must be cached using {@link discord4j.rest.request.SingleRouterFactory} if intended for sharding, to properly
- * coordinate queueing and rate-limiting across buckets.
+ * Facilitates the routing of {@link DiscordWebRequest} instances to the proper {@link RequestStream} according to
+ * the bucket in which the request falls.
  */
 public class DefaultRouter implements Router {
 
@@ -66,8 +63,8 @@ public class DefaultRouter implements Router {
 
     @Override
     public DiscordWebResponse exchange(DiscordWebRequest request) {
-        return new DiscordWebResponse(Mono.defer(Mono::subscriberContext)
-                .flatMap(ctx -> {
+        return new DiscordWebResponse(Mono.deferWithContext(
+                ctx -> {
                     RequestStream stream = getStream(request);
                     MonoProcessor<ClientResponse> callback = MonoProcessor.create();
                     stream.push(new RequestCorrelation<>(request, callback, ctx));
@@ -105,9 +102,8 @@ public class DefaultRouter implements Router {
             HttpHeaders headers = response.responseHeaders();
             int remaining = headers.getInt("X-RateLimit-Remaining", -1);
             if (remaining == 0) {
-                long resetAt = (long) (Double.parseDouble(headers.get("X-RateLimit-Reset")) * 1000);
-                long discordTime = headers.getTimeMillis("Date");
-                return Duration.ofMillis(resetAt - discordTime);
+                long resetAt = (long) (Double.parseDouble(headers.get("X-RateLimit-Reset-After")) * 1000);
+                return Duration.ofMillis(resetAt);
             }
             return Duration.ZERO;
         }

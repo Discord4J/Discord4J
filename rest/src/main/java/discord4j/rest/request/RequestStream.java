@@ -25,7 +25,6 @@ import discord4j.rest.response.ResponseFunction;
 import org.reactivestreams.Subscription;
 import reactor.core.publisher.*;
 import reactor.core.scheduler.Scheduler;
-import reactor.core.scheduler.Schedulers;
 import reactor.netty.http.client.HttpClientResponse;
 import reactor.retry.Retry;
 import reactor.util.Logger;
@@ -49,25 +48,27 @@ import static discord4j.common.LogUtil.format;
  */
 class RequestStream {
 
+    private static final Logger log = Loggers.getLogger(RequestStream.class);
+
     private final EmitterProcessor<RequestCorrelation<ClientResponse>> backing = EmitterProcessor.create(false);
     private final BucketKey id;
     private final DiscordWebClient httpClient;
     private final GlobalRateLimiter globalRateLimiter;
     private final RateLimitStrategy rateLimitStrategy;
-    private final Scheduler rateLimitScheduler;
+    private final Scheduler timedTaskScheduler;
     private final List<ResponseFunction> responseFunctions;
     private final RateLimitRetryOperator rateLimitRetryOperator;
 
     RequestStream(BucketKey id, DiscordWebClient httpClient, GlobalRateLimiter globalRateLimiter,
-                  RateLimitStrategy rateLimitStrategy, Scheduler rateLimitScheduler,
+                  RateLimitStrategy rateLimitStrategy, Scheduler timedTaskScheduler,
                   List<ResponseFunction> responseFunctions) {
         this.id = id;
         this.httpClient = httpClient;
         this.globalRateLimiter = globalRateLimiter;
         this.rateLimitStrategy = rateLimitStrategy;
-        this.rateLimitScheduler = rateLimitScheduler;
+        this.timedTaskScheduler = timedTaskScheduler;
         this.responseFunctions = responseFunctions;
-        this.rateLimitRetryOperator = new RateLimitRetryOperator(globalRateLimiter, Schedulers.parallel());
+        this.rateLimitRetryOperator = new RateLimitRetryOperator(timedTaskScheduler);
     }
 
     /**
@@ -76,10 +77,11 @@ class RequestStream {
      */
     private Retry<?> serverErrorRetryFactory() {
         return Retry.onlyIf(ClientException.isRetryContextStatusCode(500, 502, 503, 504))
+                .withBackoffScheduler(timedTaskScheduler)
                 .exponentialBackoffWithJitter(Duration.ofSeconds(2), Duration.ofSeconds(30))
                 .doOnRetry(ctx -> {
-                    if (log.isTraceEnabled()) {
-                        log.trace("Retry {} in bucket {} due to {} for {}",
+                    if (log.isDebugEnabled()) {
+                        log.debug("Retry {} in bucket {} due to {} for {}",
                                 ctx.iteration(), id.toString(), ctx.exception().toString(), ctx.backoff());
                     }
                 });
@@ -123,11 +125,21 @@ class RequestStream {
                     }
                     sleepTime = nextReset;
                 }
+                // handle GRL updates
+                boolean global = Boolean.parseBoolean(httpResponse.responseHeaders().get("X-RateLimit-Global"));
+                Mono<Void> action = Mono.empty();
+                if (global) {
+                    long retryAfter = Long.parseLong(httpResponse.responseHeaders().get("Retry-After"));
+                    Duration fixedBackoff = Duration.ofMillis(retryAfter);
+                    action = globalRateLimiter.rateLimitFor(fixedBackoff)
+                            .doOnTerminate(() -> log.debug(format(httpResponse.currentContext(),
+                                    "Globally rate limited for {}"), fixedBackoff));
+                }
                 // if this response is a 429, intercept it
                 if (httpResponse.status().code() == 429) {
-                    return response.createException().flatMap(Mono::error);
+                    return action.then(response.createException().flatMap(Mono::error));
                 } else {
-                    return Mono.just(response);
+                    return action.thenReturn(response);
                 }
             };
         }
@@ -143,24 +155,23 @@ class RequestStream {
             ClientRequest clientRequest = new ClientRequest(request);
             MonoProcessor<ClientResponse> callback = correlation.getResponse();
 
-            if (tracesLog.isDebugEnabled()) {
-                tracesLog.debug("Accepting request in bucket {}: {}", id.toString(), request);
+            if (log.isDebugEnabled()) {
+                log.debug("[B:{}, R:{}] {}", id.toString(), clientRequest.getId(), clientRequest.toRequestString());
             }
 
-            globalRateLimiter.withLimiter(
-                    Mono.just(clientRequest)
-                            .doOnEach(s -> requestLog.debug(format(s.getContext(), "{}"), s))
-                            .flatMap(httpClient::exchange)
-                            .flatMap(rateLimitHandler)
-                            .doOnEach(s -> responseLog.debug(format(s.getContext(), "{}"), s))
-                            .subscriberContext(ctx -> ctx
-                                    .putAll(correlation.getContext())
-                                    .put(LogUtil.KEY_REQUEST_ID, clientRequest.getId())
-                                    .put(LogUtil.KEY_BUCKET_ID, id.toString()))
-                            .retryWhen(rateLimitRetryOperator::apply)
-                            .transform(getResponseTransformers(request))
-                            .retryWhen(serverErrorRetryFactory())
-                            .doFinally(this::next))
+            Mono.just(clientRequest)
+                    .doOnEach(s -> log.trace(format(s.getContext(), ">> {}"), s))
+                    .flatMap(req -> globalRateLimiter.withLimiter(httpClient.exchange(req)
+                            .flatMap(rateLimitHandler))
+                            .next())
+                    .doOnEach(s -> log.trace(format(s.getContext(), "<< {}"), s))
+                    .subscriberContext(ctx -> ctx.putAll(correlation.getContext())
+                            .put(LogUtil.KEY_REQUEST_ID, clientRequest.getId())
+                            .put(LogUtil.KEY_BUCKET_ID, id.toString()))
+                    .retryWhen(rateLimitRetryOperator::apply)
+                    .transform(getResponseTransformers(request))
+                    .retryWhen(serverErrorRetryFactory())
+                    .doFinally(this::next)
                     .subscribeWith(callback)
                     .subscribe(null, t -> log.error("Error while processing {}", request, t));
         }
@@ -173,22 +184,17 @@ class RequestStream {
         }
 
         private void next(SignalType signal) {
-            Mono.delay(sleepTime, rateLimitScheduler).subscribe(l -> {
-                if (tracesLog.isDebugEnabled()) {
-                    tracesLog.debug("Ready to consume next request in bucket {} after {}", id.toString(), signal);
+            Mono.delay(sleepTime, timedTaskScheduler).subscribe(l -> {
+                if (log.isDebugEnabled()) {
+                    log.debug("[B:{}] Ready to consume next request after {}", id.toString(), signal);
                 }
                 sleepTime = Duration.ZERO;
                 request(1);
-            }, t -> tracesLog.error("Error while scheduling next request in bucket {}", id.toString(), t));
+            }, t -> log.error("[B:{}] Error while scheduling next request", id.toString(), t));
         }
     }
 
     @FunctionalInterface
     interface RateLimitStrategy extends Function<HttpClientResponse, Duration> {
     }
-
-    private static final Logger log = Loggers.getLogger("discord4j.rest");
-    private static final Logger tracesLog = Loggers.getLogger("discord4j.rest.traces");
-    private static final Logger requestLog = Loggers.getLogger("discord4j.rest.request");
-    private static final Logger responseLog = Loggers.getLogger("discord4j.rest.response");
 }

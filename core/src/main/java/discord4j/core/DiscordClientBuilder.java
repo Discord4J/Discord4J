@@ -269,7 +269,6 @@ public final class DiscordClientBuilder<O extends RouterOptions> {
         if (globalRateLimiter != null) {
             return globalRateLimiter;
         }
-        // TODO: improve throughput
-        return new PoolGlobalRateLimiter(12);
+        return new ParallelGlobalRateLimiter(16);
     }
 }

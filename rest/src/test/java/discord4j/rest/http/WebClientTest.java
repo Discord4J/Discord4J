@@ -78,7 +78,7 @@ public class WebClientTest {
         ExchangeStrategies ex2 = ExchangeStrategies.jackson(new JacksonResources().getObjectMapper());
         Route fakeRoute = Route.get("http://0.0.0.0:" + PORT + "/html");
         Router router = new DefaultRouter(new RouterOptions("", new ReactorResources(), ex2, new ArrayList<>(),
-                new PoolGlobalRateLimiter(10)));
+                new UnboundedGlobalRateLimiter()));
         String response = router.exchange(new DiscordWebRequest(fakeRoute))
                 .bodyToMono(String.class)
                 .log()

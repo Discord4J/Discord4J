@@ -32,9 +32,9 @@ import java.util.concurrent.atomic.AtomicInteger;
  * configured with the amount of resources the pool should allow before delaying all further acquire attempts until
  * resources become available.
  */
-public class PoolGlobalRateLimiter implements GlobalRateLimiter {
+public class ParallelGlobalRateLimiter implements GlobalRateLimiter {
 
-    private static final Logger log = Loggers.getLogger(PoolGlobalRateLimiter.class);
+    private static final Logger log = Loggers.getLogger(ParallelGlobalRateLimiter.class);
 
     private final Pool<Permit> outer;
     private final AtomicInteger permitId = new AtomicInteger(0);
@@ -46,7 +46,7 @@ public class PoolGlobalRateLimiter implements GlobalRateLimiter {
      *
      * @param parallelism the maximum number of requests that this limiter will allow in parallel
      */
-    public PoolGlobalRateLimiter(int parallelism) {
+    public ParallelGlobalRateLimiter(int parallelism) {
         this.outer = PoolBuilder.from(Mono.fromCallable(this::newPermit))
                 .sizeBetween(1, parallelism)
                 .releaseHandler(resource -> {
@@ -62,14 +62,12 @@ public class PoolGlobalRateLimiter implements GlobalRateLimiter {
 
     @Override
     public Mono<Void> rateLimitFor(Duration duration) {
-        return Mono.fromRunnable(() -> {
-            limitedUntil = System.nanoTime() + duration.toNanos();
-        });
+        return Mono.fromRunnable(() -> limitedUntil = System.nanoTime() + duration.toNanos());
     }
 
     @Override
     public Mono<Duration> getRemaining() {
-        return Mono.just(Duration.ofNanos(limitedUntil - System.nanoTime()));
+        return Mono.fromCallable(() -> Duration.ofNanos(limitedUntil - System.nanoTime()));
     }
 
     @Override
@@ -77,7 +75,7 @@ public class PoolGlobalRateLimiter implements GlobalRateLimiter {
         return outer.withPoolable(permit -> {
             log.trace(format("Acquired permit {}"), permit);
             return getRemaining()
-                    .filter(delay -> !delay.isNegative() && !delay.isZero())
+                    .filter(delay -> delay.getSeconds() > 0)
                     .flatMapMany(delay -> {
                         log.trace(format("Delay permit {} for {}"), permit, delay);
                         return Mono.delay(delay).flatMapMany(tick -> Flux.from(stage));

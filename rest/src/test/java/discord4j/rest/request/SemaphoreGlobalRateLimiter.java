@@ -64,15 +64,18 @@ public class SemaphoreGlobalRateLimiter implements GlobalRateLimiter {
     }
 
     private Mono<Void> notifier() {
-        return getRemaining()
-                .filter(remaining -> !remaining.isNegative() && !remaining.isZero())
-                .flatMap(remaining -> Mono.delay(remaining).then())
-                .switchIfEmpty(Mono.empty());
+        return getRemaining().flatMap(remaining -> {
+            if (!remaining.isNegative() && !remaining.isZero()) {
+                return Mono.delay(remaining).then();
+            } else {
+                return Mono.empty();
+            }
+        });
     }
 
     @Override
     public Mono<Duration> getRemaining() {
-        return Mono.just(Duration.ofNanos(limitedUntil - System.nanoTime()));
+        return Mono.fromCallable(() -> Duration.ofNanos(limitedUntil - System.nanoTime()));
     }
 
     /**
@@ -94,13 +97,13 @@ public class SemaphoreGlobalRateLimiter implements GlobalRateLimiter {
         return Mono.defer(
                 () -> {
                     outer.acquireUninterruptibly();
-                    return getRemaining()
-                            .filter(remaining -> !remaining.isNegative() && !remaining.isZero())
-                            .map(__ -> {
-                                inner.acquireUninterruptibly();
-                                return new Resource(outer, inner);
-                            })
-                            .switchIfEmpty(Mono.fromCallable(() -> new Resource(outer, null)));
+                    return getRemaining().map(remaining -> {
+                        if (!remaining.isNegative() && !remaining.isZero()) {
+                            inner.acquireUninterruptibly();
+                            return new Resource(outer, inner);
+                        }
+                        return new Resource(outer, null);
+                    });
                 })
                 .subscribeOn(Schedulers.elastic())
                 .delayUntil(resource -> onComplete());

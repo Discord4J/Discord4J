@@ -18,30 +18,24 @@
 package discord4j.rest.request;
 
 import discord4j.rest.http.client.ClientException;
+import io.netty.handler.codec.http.HttpHeaders;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Scheduler;
-import reactor.util.Logger;
-import reactor.util.Loggers;
 import reactor.util.context.Context;
 
 import java.time.Duration;
 
 /**
  * The retry function used for reading and completing HTTP requests. The backoff is determined by the rate limit
- * headers returned by Discord in the event of a 429. If the bot is being globally rate limited, the backoff is
- * applied to the global rate limiter.
+ * headers returned by Discord in the event of a 429.
  */
 public class RateLimitRetryOperator {
 
-    private static final Logger log = Loggers.getLogger(RateLimitRetryOperator.class);
-
-    private final GlobalRateLimiter globalRateLimiter;
     private final Scheduler backoffScheduler;
 
-    public RateLimitRetryOperator(GlobalRateLimiter globalRateLimiter, Scheduler backoffScheduler) {
-        this.globalRateLimiter = globalRateLimiter;
+    public RateLimitRetryOperator(Scheduler backoffScheduler) {
         this.backoffScheduler = backoffScheduler;
     }
 
@@ -54,19 +48,16 @@ public class RateLimitRetryOperator {
             return Mono.error(error);
         } else {
             ClientException clientException = (ClientException) error;
-            boolean global = Boolean.parseBoolean(clientException.getHeaders().get("X-RateLimit-Global"));
-            long retryAfter = Long.parseLong(clientException.getHeaders().get("Retry-After"));
-            Duration fixedBackoff = Duration.ofMillis(retryAfter);
+            HttpHeaders headers = clientException.getHeaders();
+            boolean global = Boolean.parseBoolean(headers.get("X-RateLimit-Global"));
             Context context = Context.of("iteration", iteration);
             if (global) {
-                return globalRateLimiter.getRemaining()
-                        .filter(remaining -> !remaining.isNegative() && !remaining.isZero())
-                        .doOnNext(remaining -> log.debug("Retry {} in {}", iteration, remaining))
-                        .flatMap(remaining -> retryMono(remaining).thenReturn(context))
-                        .switchIfEmpty(Mono.defer(() -> globalRateLimiter.rateLimitFor(fixedBackoff))
-                                .doOnTerminate(() -> log.debug("Globally rate limited for {}", fixedBackoff))
-                                .thenReturn(context));
+                long retryAfter = Long.parseLong(headers.get("Retry-After"));
+                Duration fixedBackoff = Duration.ofMillis(retryAfter);
+                return retryMono(fixedBackoff).thenReturn(context);
             } else {
+                long resetAt = (long) (Double.parseDouble(headers.get("X-RateLimit-Reset-After")) * 1000);
+                Duration fixedBackoff = Duration.ofMillis(resetAt);
                 return retryMono(fixedBackoff).thenReturn(context);
             }
         }
