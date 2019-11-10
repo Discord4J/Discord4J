@@ -17,7 +17,6 @@
 package discord4j.gateway;
 
 import discord4j.common.GitProperties;
-import discord4j.common.LogUtil;
 import discord4j.common.ReactorResources;
 import discord4j.common.ResettableInterval;
 import discord4j.common.close.CloseException;
@@ -69,6 +68,8 @@ import static io.netty.handler.codec.http.HttpHeaderNames.USER_AGENT;
  * {@link ByteBuf} payloads mapped in-flight using a specified mapper using {@link #receiver(Function)}.
  */
 public class DefaultGatewayClient implements GatewayClient {
+
+    private static final Logger log = Loggers.getLogger(DefaultGatewayClient.class);
 
     // basic properties
     private final ReactorResources reactorResources;
@@ -149,7 +150,6 @@ public class DefaultGatewayClient implements GatewayClient {
                     PayloadTransformer outLimiter = new PoolingTransformer(outboundLimiterCapacity(),
                             Duration.ofSeconds(60));
                     Flux<ByteBuf> payloadFlux = outbound.filter(payload -> !Opcode.IDENTIFY.equals(payload.getOp()))
-                            .doOnEach(s -> outboundLog.debug(format(context, s.toString())))
                             .flatMap(payload -> Flux.from(payloadWriter.write(payload)))
                             .transform(buf -> Flux.merge(buf, sender))
                             .map(buf -> Tuples.of((GatewayClient) this, buf))
@@ -157,7 +157,7 @@ public class DefaultGatewayClient implements GatewayClient {
                     Flux<ByteBuf> heartbeatFlux =
                             heartbeats.flatMap(payload -> Flux.from(payloadWriter.write(payload)));
                     Flux<ByteBuf> outFlux = Flux.merge(heartbeatFlux, identifyFlux, payloadFlux)
-                            .doOnNext(buf -> logPayload(senderLog, context, buf));
+                            .doOnNext(buf -> logPayload(">> ", context, buf));
 
                     sessionHandler = new DiscordWebSocketHandler(receiverSink, outFlux, context);
 
@@ -191,9 +191,8 @@ public class DefaultGatewayClient implements GatewayClient {
 
                     // Subscribe the receiver to process and transform the inbound payloads into Dispatch events
                     Mono<Void> receiverFuture = receiver
-                            .doOnNext(buf -> logPayload(receiverLog, context, buf))
+                            .doOnNext(buf -> logPayload("<< ", context, buf))
                             .flatMap(payloadReader::read)
-                            .doOnEach(s -> inboundLog.debug(format(context, s.toString())))
                             .doOnNext(payload -> {
                                 if (Opcode.HEARTBEAT_ACK.equals(payload.getOp())) {
                                     ping.onComplete();
@@ -262,9 +261,9 @@ public class DefaultGatewayClient implements GatewayClient {
         return "DiscordBot(" + url + ", " + version + ")";
     }
 
-    private void logPayload(Logger log, Context context, ByteBuf buf) {
-        LogUtil.traceDebug(log, trace -> format(context, LogUtil.formatValue(buf.toString(StandardCharsets.UTF_8)
-                .replaceAll("(\"token\": ?\")([A-Za-z0-9.-]*)(\")", "$1hunter2$3"), !trace)));
+    private void logPayload(String prefix, Context context, ByteBuf buf) {
+        log.trace(format(context, prefix + buf.toString(StandardCharsets.UTF_8)
+                .replaceAll("(\"token\": ?\")([A-Za-z0-9.-]*)(\")", "$1hunter2$3")));
     }
 
     private static boolean isReadyOrResume(Dispatch d) {
@@ -515,8 +514,6 @@ public class DefaultGatewayClient implements GatewayClient {
         return identifyOptions;
     }
 
-    // Initializers to customize internal outbound rate-limiter
-
     /**
      * JVM property that allows modifying the number of outbound payloads permitted before activating the
      * rate-limiter and delaying every following payload for 60 seconds. Default value: 115 permits
@@ -535,10 +532,4 @@ public class DefaultGatewayClient implements GatewayClient {
         }
         return 115;
     }
-
-    private static final Logger log = Loggers.getLogger("discord4j.gateway.client");
-    private static final Logger senderLog = Loggers.getLogger("discord4j.gateway.payload.outbound");
-    private static final Logger receiverLog = Loggers.getLogger("discord4j.gateway.payload.inbound");
-    private static final Logger outboundLog = Loggers.getLogger("discord4j.gateway.outbound");
-    private static final Logger inboundLog = Loggers.getLogger("discord4j.gateway.inbound");
 }

@@ -22,10 +22,10 @@ import reactor.util.annotation.Nullable;
 import reactor.util.context.Context;
 
 /**
- * Represents gateway payload data enriched with context for processing through a
- * {@link discord4j.gateway.PayloadHandler} defined under {@link discord4j.gateway.PayloadHandlers}
+ * Represents gateway payload data enriched with context for processing through a {@link PayloadHandler} defined
+ * under {@link PayloadHandlers}.
  *
- * @param <T> the type of the {@link discord4j.gateway.json.PayloadData}
+ * @param <T> the type of the {@link PayloadData}
  */
 public class PayloadContext<T extends PayloadData> {
 

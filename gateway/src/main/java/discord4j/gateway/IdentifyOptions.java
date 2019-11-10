@@ -23,7 +23,7 @@ import reactor.util.annotation.Nullable;
 /**
  * An object that contains all the parameters used for identifying a bot to Discord gateway.
  * <p>
- * If you register a {@link discord4j.gateway.GatewayObserver} when building a client, you can receive the current
+ * If you register a {@link GatewayObserver} when building a client, you can receive the current
  * {@code IdentifyOptions} with updated values until that point, and used to resume a session.
  */
 public class IdentifyOptions {

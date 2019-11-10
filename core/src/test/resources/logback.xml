@@ -3,19 +3,12 @@
     <logger name="io.netty" level="INFO"/>
     <logger name="reactor" level="INFO"/>
     <logger name="reactor.retry" level="INFO"/>
+
     <logger name="discord4j.core" level="DEBUG"/>
-    <logger name="discord4j.gateway.client" level="DEBUG"/>
-    <logger name="discord4j.gateway.inbound" level="INFO"/>
-    <logger name="discord4j.gateway.outbound" level="INFO"/>
-    <logger name="discord4j.gateway.payload.inbound" level="INFO"/>
-    <logger name="discord4j.gateway.payload.outbound" level="INFO"/>
+    <logger name="discord4j.gateway.DefaultGatewayClient" level="DEBUG"/>
     <logger name="discord4j.rest.http.client.DiscordWebClient" level="INFO"/>
-    <!--<logger name="discord4j.rest.http.MultipartWriterStrategy" level="TRACE"/>-->
-    <!--<logger name="discord4j.rest.http.JacksonWriterStrategy" level="TRACE"/>-->
-    <!--<logger name="discord4j.rest.http.JacksonReaderStrategy" level="TRACE"/>-->
     <logger name="discord4j.rest.request" level="DEBUG"/>
-    <logger name="discord4j.dispatch" level="INFO"/>
-    <logger name="discord4j.events" level="DEBUG"/>
+    <!--<logger name="discord4j.rest.http" level="TRACE"/>-->
 
     <logger name="io.rsocket.FrameLogger" level="INFO"/>
 

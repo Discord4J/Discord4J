@@ -45,10 +45,12 @@ import static discord4j.common.LogUtil.format;
  * This handler uses a {@link FluxSink} of {@link ByteBuf} to push inbound payloads and a {@link Flux} of
  * {@link ByteBuf} to pull outbound payloads.
  * <p>
- * The handler also provides methods to control the lifecycle which perform operations on the current session. It is
+ * The handler also provides methods to control the lifecycle, which perform operations on the current session. It is
  * required to use them to properly release important resources and complete the session.
  */
 public class DiscordWebSocketHandler {
+
+    private static final Logger log = Loggers.getLogger(DiscordWebSocketHandler.class);
 
     private final FluxSink<ByteBuf> inbound;
     private final Flux<ByteBuf> outbound;
@@ -143,6 +145,4 @@ public class DiscordWebSocketHandler {
     public void error(Throwable error) {
         close(DisconnectBehavior.retryAbruptly(error));
     }
-
-    private static final Logger log = Loggers.getLogger("discord4j.gateway.session");
 }

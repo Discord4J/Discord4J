@@ -36,6 +36,7 @@ import static discord4j.common.LogUtil.format;
  */
 public abstract class PayloadHandlers {
 
+    private static final Logger log = Loggers.getLogger(PayloadHandlers.class);
     private static final Map<Opcode<?>, PayloadHandler<?>> handlerMap = new HashMap<>();
 
     static {
@@ -52,7 +53,7 @@ public abstract class PayloadHandlers {
     }
 
     /**
-     * Process a {@link discord4j.gateway.json.PayloadData} object together with its context, reacting to it.
+     * Process a {@link PayloadData} object together with its context, reacting to it.
      *
      * @param context the PayloadContext used with this PayloadData object
      * @param <T> the PayloadData type
@@ -123,7 +124,5 @@ public abstract class PayloadHandlers {
         log.debug(format(context.getContext(), "Heartbeat acknowledged after {}"),
                 context.getClient().getResponseTime());
     }
-
-    private static final Logger log = Loggers.getLogger("discord4j.gateway.handler");
 
 }
