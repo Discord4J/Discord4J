@@ -130,9 +130,8 @@ public class DefaultRouter implements Router {
             HttpHeaders headers = response.responseHeaders();
             int remaining = headers.getInt("X-RateLimit-Remaining", -1);
             if (remaining == 0) {
-                long resetAt = (long) (Double.parseDouble(headers.get("X-RateLimit-Reset")) * 1000);
-                long discordTime = headers.getTimeMillis("Date");
-                return Duration.ofMillis(resetAt - discordTime);
+                long resetAt = (long) (Double.parseDouble(headers.get("X-RateLimit-Reset-After")) * 1000);
+                return Duration.ofMillis(resetAt);
             }
             return Duration.ZERO;
         }
