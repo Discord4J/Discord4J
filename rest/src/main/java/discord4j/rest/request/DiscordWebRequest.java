@@ -182,6 +182,10 @@ public class DiscordWebRequest {
         return router.exchange(this);
     }
 
+    public String getDescription() {
+        return route.getMethod() + " " + completeUri;
+    }
+
     @Override
     public String toString() {
         return "DiscordRequest{" +

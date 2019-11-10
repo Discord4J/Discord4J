@@ -123,8 +123,8 @@ public class ClientRequest {
         return request.getRoute();
     }
 
-    public String toRequestString() {
-        return getMethod() + " " + request.getCompleteUri();
+    public String getDescription() {
+        return request.getDescription();
     }
 
     @Override

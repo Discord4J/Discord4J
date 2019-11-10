@@ -39,8 +39,8 @@ public class DefaultRouter implements Router {
     private static final ResponseHeaderStrategy HEADER_STRATEGY = new ResponseHeaderStrategy();
 
     private final ReactorResources reactorResources;
-    private final DiscordWebClient httpClient;
     private final List<ResponseFunction> responseFunctions;
+    private final DiscordWebClient httpClient;
     private final GlobalRateLimiter globalRateLimiter;
     private final Map<BucketKey, RequestStream> streamMap = new ConcurrentHashMap<>();
 
@@ -51,9 +51,9 @@ public class DefaultRouter implements Router {
      */
     public DefaultRouter(RouterOptions routerOptions) {
         this.reactorResources = routerOptions.getReactorResources();
-        this.httpClient = new DiscordWebClient(reactorResources.getHttpClient(),
-                routerOptions.getExchangeStrategies(), routerOptions.getToken());
         this.responseFunctions = routerOptions.getResponseTransformers();
+        this.httpClient = new DiscordWebClient(reactorResources.getHttpClient(),
+                routerOptions.getExchangeStrategies(), routerOptions.getToken(), this.responseFunctions);
         this.globalRateLimiter = routerOptions.getGlobalRateLimiter();
     }
 
@@ -66,6 +66,7 @@ public class DefaultRouter implements Router {
                     stream.push(new RequestCorrelation<>(request, callback, ctx));
                     return callback;
                 })
+                .checkpoint("Request to " + request.getDescription() + " [DefaultRouter]")
                 .publishOn(reactorResources.getBlockingTaskScheduler()));
     }
 

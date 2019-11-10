@@ -67,8 +67,9 @@ public class ExampleBot {
                 .install();
 
         DiscordClient client = DiscordClient.builder(token)
+                .setDebugMode(false)
                 // globally suppress any not found (404) error
-                .onClientResponse(ResponseFunction.emptyIfNotFound())
+                //.onClientResponse(ResponseFunction.emptyIfNotFound())
                 // bad requests (400) while adding reactions will be suppressed
                 .onClientResponse(ResponseFunction.emptyOnErrorStatus(RouteMatcher.route(Routes.REACTION_CREATE), 400))
                 .build();

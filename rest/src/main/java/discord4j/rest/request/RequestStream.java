@@ -99,24 +99,22 @@ class RequestStream {
      * Reads and completes one request from the stream at a time. If a request fails, it is retried according a retry
      * strategy. The reader may wait in between each request if preemptive rate limiting is necessary according to the
      * response headers.
-     *
-     * @see #sleepTime
-     * @see #rateLimitHandler
      */
     private class RequestSubscriber extends BaseSubscriber<RequestCorrelation<ClientResponse>> {
 
         private volatile Duration sleepTime = Duration.ZERO;
-        private final Function<ClientResponse, Mono<ClientResponse>> rateLimitHandler;
+        private final Function<ClientResponse, Mono<ClientResponse>> responseFunction;
 
         public RequestSubscriber(RateLimitStrategy strategy) {
-            this.rateLimitHandler = response -> {
+            this.responseFunction = response -> {
                 HttpClientResponse httpResponse = response.getHttpResponse();
                 if (log.isDebugEnabled()) {
                     Instant requestTimestamp =
                             Instant.ofEpochMilli(httpResponse.currentContext().get(DiscordWebClient.KEY_REQUEST_TIMESTAMP));
                     Duration responseTime = Duration.between(requestTimestamp, Instant.now());
-                    log.debug(format(httpResponse.currentContext(), "Read {} in {} with headers: {}"),
-                            httpResponse.status(), responseTime, httpResponse.responseHeaders());
+                    LogUtil.traceDebug(log, trace -> format(httpResponse.currentContext(),
+                            "Read " + httpResponse.status() + " in " + responseTime + (!trace ? "" :
+                                    " with headers: " + httpResponse.responseHeaders())));
                 }
                 Duration nextReset = strategy.apply(httpResponse);
                 if (!nextReset.isZero()) {
@@ -125,7 +123,6 @@ class RequestStream {
                     }
                     sleepTime = nextReset;
                 }
-                // handle GRL updates
                 boolean global = Boolean.parseBoolean(httpResponse.responseHeaders().get("X-RateLimit-Global"));
                 Mono<Void> action = Mono.empty();
                 if (global) {
@@ -135,8 +132,7 @@ class RequestStream {
                             .doOnTerminate(() -> log.debug(format(httpResponse.currentContext(),
                                     "Globally rate limited for {}"), fixedBackoff));
                 }
-                // if this response is a 429, intercept it
-                if (httpResponse.status().code() == 429) {
+                if (httpResponse.status().code() >= 400) {
                     return action.then(response.createException().flatMap(Mono::error));
                 } else {
                     return action.thenReturn(response);
@@ -156,13 +152,13 @@ class RequestStream {
             MonoProcessor<ClientResponse> callback = correlation.getResponse();
 
             if (log.isDebugEnabled()) {
-                log.debug("[B:{}, R:{}] {}", id.toString(), clientRequest.getId(), clientRequest.toRequestString());
+                log.debug("[B:{}, R:{}] {}", id.toString(), clientRequest.getId(), clientRequest.getDescription());
             }
 
             Mono.just(clientRequest)
                     .doOnEach(s -> log.trace(format(s.getContext(), ">> {}"), s))
                     .flatMap(req -> globalRateLimiter.withLimiter(httpClient.exchange(req)
-                            .flatMap(rateLimitHandler))
+                            .flatMap(responseFunction))
                             .next())
                     .doOnEach(s -> log.trace(format(s.getContext(), "<< {}"), s))
                     .subscriberContext(ctx -> ctx.putAll(correlation.getContext())
@@ -172,19 +168,23 @@ class RequestStream {
                     .transform(getResponseTransformers(request))
                     .retryWhen(serverErrorRetryFactory())
                     .doFinally(this::next)
+                    .checkpoint("Request to " + clientRequest.getDescription() + " [RequestStream]")
                     .subscribeWith(callback)
-                    .subscribe(null, t -> log.error("Error while processing {}", request, t));
+                    .subscribe(null, t -> log.trace("Error while processing {}: {}", request, t));
         }
 
         private Function<Mono<ClientResponse>, Mono<ClientResponse>> getResponseTransformers(DiscordWebRequest discordRequest) {
             return responseFunctions.stream()
-                    .map(rt -> rt.transform(discordRequest))
+                    .map(rt -> rt.transform(discordRequest)
+                            .andThen(mono -> mono.checkpoint("Apply " + rt + " to " +
+                                    discordRequest.getDescription() + " [RequestStream]")))
                     .reduce(Function::andThen)
                     .orElse(mono -> mono);
         }
 
         private void next(SignalType signal) {
-            Mono.delay(sleepTime, timedTaskScheduler).subscribe(l -> {
+            Mono<Long> timer = sleepTime.isZero() ? Mono.just(0L) : Mono.delay(sleepTime, timedTaskScheduler);
+            timer.subscribe(l -> {
                 if (log.isDebugEnabled()) {
                     log.debug("[B:{}] Ready to consume next request after {}", id.toString(), signal);
                 }

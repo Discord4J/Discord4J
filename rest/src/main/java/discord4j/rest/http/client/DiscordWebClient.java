@@ -20,6 +20,7 @@ package discord4j.rest.http.client;
 import discord4j.common.GitProperties;
 import discord4j.rest.http.ExchangeStrategies;
 import discord4j.rest.http.WriterStrategy;
+import discord4j.rest.response.ResponseFunction;
 import discord4j.rest.route.Routes;
 import io.netty.handler.codec.http.DefaultHttpHeaders;
 import io.netty.handler.codec.http.HttpHeaderNames;
@@ -31,6 +32,7 @@ import reactor.util.Loggers;
 import reactor.util.annotation.Nullable;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Properties;
 
 import static discord4j.common.LogUtil.format;
@@ -47,6 +49,7 @@ public class DiscordWebClient {
     private final HttpClient httpClient;
     private final HttpHeaders defaultHeaders;
     private final ExchangeStrategies exchangeStrategies;
+    private final List<ResponseFunction> responseFunctions;
 
     /**
      * Create a new {@link DiscordWebClient} wrapping HTTP, Discord and encoding/decoding resources.
@@ -54,8 +57,10 @@ public class DiscordWebClient {
      * @param httpClient a Reactor Netty HTTP client
      * @param exchangeStrategies a strategy to transform requests and responses
      * @param token a Discord token for API authorization
+     * @param responseFunctions a list of {@link ResponseFunction} transformations
      */
-    public DiscordWebClient(HttpClient httpClient, ExchangeStrategies exchangeStrategies, String token) {
+    public DiscordWebClient(HttpClient httpClient, ExchangeStrategies exchangeStrategies, String token,
+                            List<ResponseFunction> responseFunctions) {
         final Properties properties = GitProperties.getProperties();
         final String version = properties.getProperty(GitProperties.APPLICATION_VERSION, "3");
         final String url = properties.getProperty(GitProperties.APPLICATION_URL, "https://discord4j.com");
@@ -69,6 +74,7 @@ public class DiscordWebClient {
         this.httpClient = httpClient;
         this.defaultHeaders = defaultHeaders;
         this.exchangeStrategies = exchangeStrategies;
+        this.responseFunctions = responseFunctions;
     }
 
     /**
@@ -128,8 +134,8 @@ public class DiscordWebClient {
                             .orElseGet(() -> Mono.error(noWriterException(body, contentType)));
                 })
                 .flatMap(receiver -> receiver.responseConnection((response, connection) ->
-                        Mono.just(new ClientResponse(response, connection.inbound(), exchangeStrategies, request)))
-                        .next())
+                        Mono.just(new ClientResponse(response, connection.inbound(),
+                                exchangeStrategies, request, responseFunctions))).next())
                 .subscriberContext(ctx -> ctx.put(KEY_REQUEST_TIMESTAMP, Instant.now().toEpochMilli()));
     }
 

@@ -20,6 +20,8 @@ package discord4j.rest.http.client;
 import discord4j.rest.http.ExchangeStrategies;
 import discord4j.rest.http.ReaderStrategy;
 import discord4j.rest.json.response.ErrorResponse;
+import discord4j.rest.request.DiscordWebRequest;
+import discord4j.rest.response.ResponseFunction;
 import io.netty.buffer.ByteBuf;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.util.ReferenceCounted;
@@ -30,8 +32,10 @@ import reactor.util.Logger;
 import reactor.util.Loggers;
 import reactor.util.annotation.Nullable;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Function;
 
 /**
  * An HTTP response encapsulating status, headers and accessors to the response body for consumption.
@@ -47,14 +51,16 @@ public class ClientResponse {
     private final NettyInbound inbound;
     private final ExchangeStrategies exchangeStrategies;
     private final ClientRequest clientRequest;
+    private final List<ResponseFunction> responseFunctions;
     private final AtomicBoolean reject = new AtomicBoolean();
 
     ClientResponse(HttpClientResponse response, NettyInbound inbound, ExchangeStrategies exchangeStrategies,
-                   ClientRequest clientRequest) {
+                   ClientRequest clientRequest, List<ResponseFunction> responseFunctions) {
         this.response = response;
         this.inbound = inbound;
         this.exchangeStrategies = exchangeStrategies;
         this.clientRequest = clientRequest;
+        this.responseFunctions = responseFunctions;
     }
 
     /**
@@ -96,21 +102,34 @@ public class ClientResponse {
      * read error had occurred, it will be emitted through the {@link Mono}.
      */
     public <T> Mono<T> bodyToMono(Class<T> responseType) {
-        String responseContentType = response.responseHeaders().get(HttpHeaderNames.CONTENT_TYPE);
-        Optional<ReaderStrategy<?>> readerStrategy = exchangeStrategies.readers().stream()
-                .filter(s -> s.canRead(responseType, responseContentType))
-                .findFirst();
-        if (response.status().code() >= 400) {
-            return Mono.justOrEmpty(readerStrategy)
-                    .map(ClientResponse::<ErrorResponse>cast)
-                    .flatMap(s -> s.read(getBody(), ErrorResponse.class))
-                    .flatMap(s -> Mono.<T>error(clientException(clientRequest, response, s)))
-                    .switchIfEmpty(Mono.error(clientException(clientRequest, response, null)));
-        } else {
-            return readerStrategy.map(ClientResponse::<T>cast)
-                    .map(s -> s.read(getBody(), responseType))
-                    .orElseGet(() -> Mono.error(noReaderException(responseType, responseContentType)));
-        }
+        return Mono.defer(
+                () -> {
+                    if (response.status().code() >= 400) {
+                        return createException().flatMap(Mono::error);
+                    } else {
+                        return Mono.just(this);
+                    }
+                })
+                .transform(getResponseTransformers(clientRequest.getDiscordRequest()))
+                .flatMap(res -> {
+                    String responseContentType = response.responseHeaders().get(HttpHeaderNames.CONTENT_TYPE);
+                    Optional<ReaderStrategy<?>> readerStrategy = exchangeStrategies.readers().stream()
+                            .filter(s -> s.canRead(responseType, responseContentType))
+                            .findFirst();
+                    return readerStrategy.map(ClientResponse::<T>cast)
+                            .map(s -> s.read(getBody(), responseType))
+                            .orElseGet(() -> Mono.error(noReaderException(responseType, responseContentType)))
+                            .checkpoint("Body from " + clientRequest.getDescription() + " [ClientResponse]");
+                });
+    }
+
+    private Function<Mono<ClientResponse>, Mono<ClientResponse>> getResponseTransformers(DiscordWebRequest discordRequest) {
+        return responseFunctions.stream()
+                .map(rt -> rt.transform(discordRequest)
+                        .andThen(mono -> mono.checkpoint("Apply " + rt + " to " +
+                                discordRequest.getDescription() + " [ClientResponse]")))
+                .reduce(Function::andThen)
+                .orElse(mono -> mono);
     }
 
     /**
@@ -128,7 +147,9 @@ public class ClientResponse {
                 .map(ClientResponse::<ErrorResponse>cast)
                 .flatMap(s -> s.read(getBody(), ErrorResponse.class))
                 .flatMap(s -> Mono.just(clientException(clientRequest, response, s)))
-                .switchIfEmpty(Mono.just(clientException(clientRequest, response, null)));
+                .switchIfEmpty(Mono.just(clientException(clientRequest, response, null)))
+                .checkpoint(response.status().toString() + " from " +
+                        clientRequest.getDescription() + " [ClientResponse]");
     }
 
     /**
