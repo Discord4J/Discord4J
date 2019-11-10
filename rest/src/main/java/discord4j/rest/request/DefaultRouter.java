@@ -20,15 +20,11 @@ import discord4j.common.ReactorResources;
 import discord4j.rest.http.client.ClientResponse;
 import discord4j.rest.http.client.DiscordWebClient;
 import discord4j.rest.response.ResponseFunction;
-import discord4j.rest.route.Routes;
-import io.netty.handler.codec.http.HttpHeaders;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.MonoProcessor;
-import reactor.netty.http.client.HttpClientResponse;
 import reactor.util.Logger;
 import reactor.util.Loggers;
 
-import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -74,7 +70,7 @@ public class DefaultRouter implements Router {
     }
 
     private RequestStream getStream(DiscordWebRequest request) {
-        return streamMap.computeIfAbsent(computeBucket(request),
+        return streamMap.computeIfAbsent(BucketKey.of(request),
                 k -> {
                     if (log.isTraceEnabled()) {
                         log.trace("Creating RequestStream with key {} for request: {} -> {}",
@@ -86,26 +82,5 @@ public class DefaultRouter implements Router {
                     stream.start();
                     return stream;
                 });
-    }
-
-    private BucketKey computeBucket(DiscordWebRequest request) {
-        if (Routes.MESSAGE_DELETE.equals(request.getRoute())) {
-            return BucketKey.of("DELETE " + request.getRoute().getUriTemplate(), request.getCompleteUri());
-        }
-        return BucketKey.of(request.getRoute().getUriTemplate(), request.getCompleteUri());
-    }
-
-    static class ResponseHeaderStrategy implements RequestStream.RateLimitStrategy {
-
-        @Override
-        public Duration apply(HttpClientResponse response) {
-            HttpHeaders headers = response.responseHeaders();
-            int remaining = headers.getInt("X-RateLimit-Remaining", -1);
-            if (remaining == 0) {
-                long resetAt = (long) (Double.parseDouble(headers.get("X-RateLimit-Reset-After")) * 1000);
-                return Duration.ofMillis(resetAt);
-            }
-            return Duration.ZERO;
-        }
     }
 }

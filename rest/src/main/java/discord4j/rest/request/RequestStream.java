@@ -193,8 +193,4 @@ class RequestStream {
             }, t -> log.error("[B:{}] Error while scheduling next request", id.toString(), t));
         }
     }
-
-    @FunctionalInterface
-    interface RateLimitStrategy extends Function<HttpClientResponse, Duration> {
-    }
 }
