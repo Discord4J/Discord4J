@@ -17,6 +17,7 @@
 package discord4j.core.object.presence;
 
 import discord4j.core.object.data.stored.ActivityBean;
+import discord4j.core.object.reaction.ReactionEmoji;
 import discord4j.core.object.util.Snowflake;
 import discord4j.core.util.EntityUtil;
 import reactor.util.annotation.Nullable;
@@ -211,8 +212,24 @@ public class Activity {
         return Optional.ofNullable(data.getMatchSecret());
     }
 
+    /**
+     * Gets the emoji used for a custom status, if present.
+     *
+     * @return The emoji used for a custom status, if present.
+     */
+    public Optional<ReactionEmoji> getEmoji() {
+        return Optional.ofNullable(data.getEmoji())
+                .map(emoji -> ReactionEmoji.of(emoji.getId(), emoji.getName(),
+                        emoji.getAnimated() != null && emoji.getAnimated()));
+    }
+
+    /**
+     * Gets whether or not the activity is an instanced game session.
+     *
+     * @return Whether or not the activity is an instanced game session
+     */
     public boolean isInstance() {
-        return data.getInstance();
+        return Optional.ofNullable(data.getInstance()).orElse(false);
     }
 
     public EnumSet<Flag> getFlags() {
@@ -241,7 +258,10 @@ public class Activity {
         LISTENING(2),
 
         /** "Watching {name}" */
-        WATCHING(3);
+        WATCHING(3),
+
+        /** {emoji} {name} */
+        CUSTOM(4);
 
         /** The underlying value as represented by Discord. */
         private final int value;
@@ -277,6 +297,7 @@ public class Activity {
                 case 1: return STREAMING;
                 case 2: return LISTENING;
                 case 3: return WATCHING;
+                case 4: return CUSTOM;
                 default: return UNKNOWN;
             }
         }

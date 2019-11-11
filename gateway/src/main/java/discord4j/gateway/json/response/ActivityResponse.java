@@ -21,6 +21,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import discord4j.common.jackson.Possible;
 import discord4j.common.jackson.PossibleLong;
 import discord4j.common.jackson.UnsignedJson;
+import discord4j.common.json.EmojiResponse;
 import reactor.util.annotation.Nullable;
 
 public class ActivityResponse {
@@ -40,6 +41,8 @@ public class ActivityResponse {
     private Possible<Party> party = Possible.absent();
     private Possible<Assets> assets = Possible.absent();
     private Possible<Secrets> secrets = Possible.absent();
+    @Nullable
+    private Possible<EmojiResponse> emoji = Possible.absent();
     private Possible<Boolean> instance = Possible.absent();
     private Possible<Integer> flags = Possible.absent();
 
@@ -86,6 +89,11 @@ public class ActivityResponse {
         return secrets;
     }
 
+    @Nullable
+    public Possible<EmojiResponse> getEmoji() {
+        return emoji;
+    }
+
     public Possible<Boolean> getInstance() {
         return instance;
     }
@@ -107,6 +115,7 @@ public class ActivityResponse {
             ", party=" + party +
             ", assets=" + assets +
             ", secrets=" + secrets +
+            ", emoji=" + emoji +
             ", instance=" + instance +
             ", flags=" + flags +
             '}';

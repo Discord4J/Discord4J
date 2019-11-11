@@ -17,6 +17,7 @@
 package discord4j.core.object.data.stored;
 
 import discord4j.common.jackson.Possible;
+import discord4j.common.json.EmojiResponse;
 import discord4j.gateway.json.response.ActivityResponse;
 import reactor.util.annotation.Nullable;
 
@@ -58,7 +59,10 @@ public class ActivityBean implements Serializable {
     private String spectateSecret;
     @Nullable
     private String matchSecret;
-    private boolean instance;
+    @Nullable
+    private EmojiResponse emoji;
+    @Nullable
+    private Boolean instance;
     @Nullable
     private Integer flags;
 
@@ -121,6 +125,7 @@ public class ActivityBean implements Serializable {
             this.matchSecret = Possible.orElseNull(secrets.getMatch());
         }
 
+        this.emoji = Possible.orElseNull(response.getEmoji());
         this.instance = response.getInstance().isAbsent() ? false : response.getInstance().get();
         this.flags = Possible.orElseNull(response.getFlags());
     }
@@ -291,11 +296,21 @@ public class ActivityBean implements Serializable {
         this.matchSecret = matchSecret;
     }
 
-    public boolean getInstance() {
+    @Nullable
+    public EmojiResponse getEmoji() {
+        return emoji;
+    }
+
+    public void setEmoji(@Nullable EmojiResponse emoji) {
+        this.emoji = emoji;
+    }
+
+    @Nullable
+    public Boolean getInstance() {
         return instance;
     }
 
-    public void setInstance(boolean instance) {
+    public void setInstance(@Nullable Boolean instance) {
         this.instance = instance;
     }
 
@@ -331,6 +346,7 @@ public class ActivityBean implements Serializable {
             ", joinSecret='" + joinSecret + '\'' +
             ", spectateSecret='" + spectateSecret + '\'' +
             ", matchSecret='" + matchSecret + '\'' +
+            ", emoji=" + emoji +
             ", instance=" + instance +
             ", flags=" + flags +
             '}';
