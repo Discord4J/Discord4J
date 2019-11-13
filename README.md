@@ -23,7 +23,7 @@ repositories {
 }
 
 dependencies {
-  implementation 'com.discord4j:discord4j-core:3.0.10'
+  implementation 'com.discord4j:discord4j-core:3.0.11'
 }
 ```
 ### Maven
@@ -32,7 +32,7 @@ dependencies {
   <dependency>
     <groupId>com.discord4j</groupId>
     <artifactId>discord4j-core</artifactId>
-    <version>3.0.10</version>
+    <version>3.0.11</version>
   </dependency>
 </dependencies>
 ```
@@ -40,7 +40,7 @@ dependencies {
 ### SBT
 ```scala
 libraryDependencies ++= Seq(
-  "com.discord4j" % "discord4j-core" % "3.0.10"
+  "com.discord4j" % "discord4j-core" % "3.0.11"
 )
 ```
 
@@ -113,9 +113,6 @@ Make sure you have the appropriate repositories:
 
 ```groovy
 repositories {
-  maven { url 'https://oss.sonatype.org/content/repositories/snapshots' }
-  maven { url 'https://repo.spring.io/snapshot' }
-  maven { url 'https://repo.spring.io/milestone' }
   mavenCentral()
 }
 
