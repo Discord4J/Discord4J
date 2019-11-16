@@ -269,7 +269,7 @@ public class Activity {
         /** "Playing {name}" */
         PLAYING(0),
 
-        /** "Streaming {name}" */
+        /** "Streaming {details}" */
         STREAMING(1),
 
         /** "Listening to {name}" */
