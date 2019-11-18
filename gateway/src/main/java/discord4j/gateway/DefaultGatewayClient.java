@@ -97,7 +97,7 @@ public class DefaultGatewayClient implements GatewayClient {
 
     // mutable state, modified here and at PayloadHandlers
     private final AtomicBoolean connected = new AtomicBoolean(false);
-    private final AtomicBoolean resumable = new AtomicBoolean(true);
+    private final AtomicBoolean allowResume = new AtomicBoolean(true);
     private final AtomicInteger sequence = new AtomicInteger(0);
     private final AtomicReference<String> sessionId = new AtomicReference<>("");
     private final AtomicLong lastSent = new AtomicLong(0);
@@ -166,7 +166,7 @@ public class DefaultGatewayClient implements GatewayClient {
                         this.sequence.set(identifyOptions.getResumeSequence());
                         this.sessionId.set(identifyOptions.getResumeSessionId());
                     } else {
-                        resumable.set(false);
+                        allowResume.set(false);
                     }
 
                     Mono<Void> readyHandler = dispatch.filter(DefaultGatewayClient::isReadyOrResume)
@@ -184,7 +184,7 @@ public class DefaultGatewayClient implements GatewayClient {
                                 }
                                 reconnectContext.reset();
                                 identifyOptions.setResumeSessionId(sessionId.get());
-                                resumable.set(true);
+                                allowResume.set(true);
                                 notifyObserver(state, identifyOptions);
                             })
                             .then();
@@ -293,9 +293,9 @@ public class DefaultGatewayClient implements GatewayClient {
                     log.info(format(getContextFromException(retryContext.exception()),
                             "Reconnect attempt {} in {}"), attempt, backoff);
                     if (attempt == 1) {
-                        if (!resumable.get() || !isResumableError(retryContext.exception())) {
+                        if (!allowResume.get() || !canResume(retryContext.exception())) {
                             dispatchSink.next(GatewayStateChange.retryStarted(backoff));
-                            resumable.set(false);
+                            allowResume.set(false);
                             notifyObserver(GatewayObserver.RETRY_STARTED, identifyOptions);
                         } else {
                             dispatchSink.next(GatewayStateChange.retryStartedResume(backoff));
@@ -305,7 +305,7 @@ public class DefaultGatewayClient implements GatewayClient {
                         dispatchSink.next(GatewayStateChange.retryFailed(attempt - 1, backoff));
                         // TODO: add attempt/backoff values to GatewayObserver
                         notifyObserver(GatewayObserver.RETRY_FAILED, identifyOptions);
-                        resumable.set(false);
+                        allowResume.set(false);
                     }
                     retryContext.applicationContext().next();
                 });
@@ -319,7 +319,7 @@ public class DefaultGatewayClient implements GatewayClient {
         return !(t instanceof PartialDisconnectException);
     }
 
-    private boolean isResumableError(Throwable t) {
+    private boolean canResume(Throwable t) {
         if (t instanceof CloseException) {
             CloseException closeException = (CloseException) t;
             return closeException.getCode() < 4000;
@@ -349,7 +349,7 @@ public class DefaultGatewayClient implements GatewayClient {
             notifyObserver(GatewayObserver.DISCONNECTED_RESUME, identifyOptions);
         } else if (behavior.getAction() == DisconnectBehavior.Action.STOP) {
             dispatchSink.next(GatewayStateChange.disconnected());
-            resumable.set(false);
+            allowResume.set(false);
             sequence.set(0);
             sessionId.set("");
             notifyObserver(GatewayObserver.DISCONNECTED, identifyOptions);
@@ -501,8 +501,8 @@ public class DefaultGatewayClient implements GatewayClient {
      *
      * @return an AtomicBoolean representing resume capabilities
      */
-    AtomicBoolean resumable() {
-        return resumable;
+    AtomicBoolean allowResume() {
+        return allowResume;
     }
 
     /**

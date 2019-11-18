@@ -92,7 +92,7 @@ public abstract class PayloadHandlers {
             client.sender().next(GatewayPayload.resume(
                     new Resume(token, client.getSessionId(), client.sequence().get())));
         } else {
-            client.resumable().set(false);
+            client.allowResume().set(false);
             context.getHandler().error(new GatewayException(context.getContext(),
                     "Reconnecting due to non-resumable session invalidation"));
         }
@@ -103,7 +103,7 @@ public abstract class PayloadHandlers {
         DefaultGatewayClient client = context.getClient();
         client.heartbeat().start(interval);
 
-        if (client.resumable().get()) {
+        if (client.allowResume().get()) {
             log.debug(format(context.getContext(), "Resuming Gateway session from {}"), client.sequence().get());
             client.sender().next(GatewayPayload.resume(
                     new Resume(client.token(), client.getSessionId(), client.sequence().get())));
