@@ -18,6 +18,7 @@
 package discord4j.core;
 
 import discord4j.core.event.EventDispatcher;
+import discord4j.core.event.domain.Event;
 import discord4j.core.shard.ShardCoordinator;
 import discord4j.core.state.StateView;
 import discord4j.gateway.GatewayClient;
@@ -31,12 +32,22 @@ public class GatewayResources {
     private final StateView stateView;
     private final EventDispatcher eventDispatcher;
     private final ShardCoordinator shardCoordinator;
+    private final boolean memberRequest;
 
+    /**
+     * Create a new {@link GatewayResources} with the given parameters.
+     *
+     * @param stateView a read-only facade for an entity cache based off {@link StateHolder}
+     * @param eventDispatcher an event bus dedicated to distribute {@link Event} instances
+     * @param shardCoordinator a middleware component to coordinate multiple shard-connecting efforts
+     * @param memberRequest whether to enable large guild member requests from the Gateway (chunking)
+     */
     public GatewayResources(StateView stateView, EventDispatcher eventDispatcher,
-                            ShardCoordinator shardCoordinator) {
+                            ShardCoordinator shardCoordinator, boolean memberRequest) {
         this.stateView = stateView;
         this.eventDispatcher = eventDispatcher;
         this.shardCoordinator = shardCoordinator;
+        this.memberRequest = memberRequest;
     }
 
     /**
@@ -68,5 +79,14 @@ public class GatewayResources {
      */
     public ShardCoordinator getShardCoordinator() {
         return shardCoordinator;
+    }
+
+    /**
+     * Return whether the Gateway should be instructed to request guild members for large guilds.
+     *
+     * @return {@code true} if enabled, {@code false} otherwise
+     */
+    public boolean isMemberRequest() {
+        return memberRequest;
     }
 }

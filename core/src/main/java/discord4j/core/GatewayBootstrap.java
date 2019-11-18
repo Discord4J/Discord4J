@@ -110,6 +110,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
     private EventDispatcher eventDispatcher = null;
     private StoreService storeService = null;
     private Function<StoreService, StoreService> storeServiceMapper = shardAwareStoreService();
+    private boolean memberRequest = true;
     private Function<ShardInfo, Presence> initialPresence = shard -> null;
     private Function<ShardInfo, SessionInfo> resumeOptions = shard -> null;
     private boolean guildSubscriptions = true;
@@ -149,6 +150,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
         this.eventDispatcher = source.eventDispatcher;
         this.storeService = source.storeService;
         this.storeServiceMapper = source.storeServiceMapper;
+        this.memberRequest = source.memberRequest;
         this.initialPresence = source.initialPresence;
         this.resumeOptions = source.resumeOptions;
         this.guildSubscriptions = source.guildSubscriptions;
@@ -177,7 +179,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
     /**
      * Define the shard count value used when identifying to the Gateway. Note that this number is unrelated to the
      * actual number of shards joining while connecting. To further configure the actual shards to join refer to
-     * {@link #setShardFilter(Predicate)}.
+     * {@link #setShardIndexSource(Function)} and {@link #setShardFilter(Predicate)}.
      * <p>
      * The default is to use the recommended shard count given by Discord.
      *
@@ -281,6 +283,19 @@ public class GatewayBootstrap<O extends GatewayOptions> {
      */
     public GatewayBootstrap<O> setStoreServiceMapper(Function<StoreService, StoreService> storeServiceMapper) {
         this.storeServiceMapper = Objects.requireNonNull(storeServiceMapper, "storeServiceMapper");
+        return this;
+    }
+
+    /**
+     * Set if this shard group should request large guild members from the Gateway. Defaults to {@code true}.
+     *
+     * @param memberRequest {@code true} if enabling the large guild member requests, {@code false} otherwise
+     * @return this builder
+     * @see
+     * <a href="https://discordapp.com/developers/docs/topics/gateway#request-guild-members>Request Guild Members</a>
+     */
+    public GatewayBootstrap<O> setMemberRequest(boolean memberRequest) {
+        this.memberRequest = memberRequest;
         return this;
     }
 
@@ -472,7 +487,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
         StateHolder stateHolder = new StateHolder(initStoreService(), new StoreContext(0, MessageBean.class));
         StateView stateView = new StateView(stateHolder);
         EventDispatcher eventDispatcher = initEventDispatcher();
-        GatewayResources resources = new GatewayResources(stateView, eventDispatcher, shardCoordinator);
+        GatewayResources resources = new GatewayResources(stateView, eventDispatcher, shardCoordinator, memberRequest);
         MonoProcessor<Void> closeProcessor = MonoProcessor.create();
         Map<Integer, GatewayClient> gatewayClients = new ConcurrentHashMap<>();
         Map<Integer, VoiceClient> voiceClients = new ConcurrentHashMap<>();

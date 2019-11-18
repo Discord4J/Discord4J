@@ -108,14 +108,15 @@ class GuildDispatchHandlers {
                         .map(presence -> Tuples.of(LongLongTuple2.of(guildBean.getId(), presence.getUser().get("id").asLong()),
                                 new PresenceBean(presence))));
 
-        Mono<Void> startMemberChunk = Mono.just(guildBean)
-                .filter(GuildBean::getLarge)
-                .flatMap(bean -> context.getGateway()
-                        .getGatewayClientMap()
-                        .get(context.getShardInfo().getIndex())
-                        .send(Mono.just(GatewayPayload.requestGuildMembers(
-                                new RequestGuildMembers(bean.getId(), "", 0)))))
-                .then();
+        Mono<Void> startMemberChunk = context.getGateway().getGatewayResources().isMemberRequest() ?
+                Mono.just(guildBean)
+                        .filter(GuildBean::getLarge)
+                        .flatMap(bean -> context.getGateway()
+                                .getGatewayClientMap()
+                                .get(context.getShardInfo().getIndex())
+                                .send(Mono.just(GatewayPayload.requestGuildMembers(
+                                        new RequestGuildMembers(bean.getId(), "", 0)))))
+                        .then() : Mono.empty();
 
         Mono<Void> saveOfflinePresences = Mono.just(guildBean.getMembers())
                 .map(LongStream::of)
