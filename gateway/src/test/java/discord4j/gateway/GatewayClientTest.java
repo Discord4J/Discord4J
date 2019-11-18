@@ -57,7 +57,7 @@ public class GatewayClientTest {
                 reader,
                 writer,
                 reconnectOptions,
-                new IdentifyOptions(new ShardInfo(0, 1), null),
+                new IdentifyOptions(new ShardInfo(0, 1), null, true),
                 GatewayObserver.NOOP_LISTENER,
                 new PoolingTransformer(1, Duration.ofSeconds(6))
         );
@@ -119,7 +119,7 @@ public class GatewayClientTest {
                     new JacksonPayloadReader(mapper),
                     new JacksonPayloadWriter(mapper),
                     reconnectOptions,
-                    new IdentifyOptions(new ShardInfo(i, shardCount), new StatusUpdate(null, "invisible")),
+                    new IdentifyOptions(new ShardInfo(i, shardCount), new StatusUpdate(null, "invisible"), true),
                     (s, o) -> {
                         if (s.equals(GatewayObserver.CONNECTED)) {
                             next.countDown();

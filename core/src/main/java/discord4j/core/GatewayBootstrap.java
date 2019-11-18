@@ -74,11 +74,12 @@ import java.util.stream.Collectors;
 import static discord4j.common.LogUtil.format;
 
 /**
- * A builder to create a {@link GatewayDiscordClient}. The place where resources and many configurations are set before
- * connecting to Discord Gateway. Defaults are set to enable built-in sharding using the recommended amount of shards.
- * Refer to each setter for more details about the default values for each configuration.
+ * Builder to create a shard group connecting to Discord Gateway to produce a {@link GatewayDiscordClient}. A shard
+ * group represents a set of shards for a given bot that will share some key resources like entity caching and event
+ * dispatching. Defaults to creating an automatic sharding group using all shards up to the recommended amount. Refer
+ * to each setter for more details about the default values for each configuration.
  * <p>
- * Discord Gateway connections are not established until one of the following methods is subscribed to:
+ * One of the following methods must be subscribed to in order to begin establishing Discord Gateway connections:
  * <ul>
  *     <li>{@link #connect()} to obtain a {@link Mono} for a {@link GatewayDiscordClient} that can be externally
  *     managed.</li>
@@ -86,9 +87,9 @@ import static discord4j.common.LogUtil.format;
  *     <li>{@link #withConnection(Function)} to work with the {@link GatewayDiscordClient} in a scoped way, providing
  *     a mapping function that will close and release all resources on completion.</li>
  * </ul>
- * For all cases, the produced {@link Mono} result or mapper function call will happen after all joining shards have
- * established a connection. You can configure which shards are joining by specifying a
- * {@link #setShardFilter(Predicate)}.
+ * This bootstrap emits a result depending on the configuration of {@link #setAwaitConnections(boolean)}. Methods
+ * {@link #setShardIndexSource(Function)} and {@link #setShardFilter(Predicate)} can select the shards that belong to
+ * the shard group created by this builder.
  *
  * @param <O> the configuration flavor supplied to the {@link GatewayClient} instances to be built.
  */
@@ -111,6 +112,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
     private Function<StoreService, StoreService> storeServiceMapper = shardAwareStoreService();
     private Function<ShardInfo, Presence> initialPresence = shard -> null;
     private Function<ShardInfo, SessionInfo> resumeOptions = shard -> null;
+    private boolean guildSubscriptions = true;
     private Function<GatewayDiscordClient, Mono<Void>> destroyHandler = shutdownDestroyHandler();
 
     private ReactorResources gatewayReactorResources = null;
@@ -149,6 +151,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
         this.storeServiceMapper = source.storeServiceMapper;
         this.initialPresence = source.initialPresence;
         this.resumeOptions = source.resumeOptions;
+        this.guildSubscriptions = source.guildSubscriptions;
         this.destroyHandler = source.destroyHandler;
         this.gatewayReactorResources = source.gatewayReactorResources;
         this.voiceReactorResources = source.voiceReactorResources;
@@ -318,6 +321,18 @@ public class GatewayBootstrap<O extends GatewayOptions> {
      */
     public GatewayBootstrap<O> setResumeOptions(Function<ShardInfo, SessionInfo> resumeOptions) {
         this.resumeOptions = Objects.requireNonNull(resumeOptions, "resumeOptions");
+        return this;
+    }
+
+    /**
+     * Set if this shard group will subscribe to presence and typing events. Defaults to {@code true}.
+     *
+     * @param guildSubscriptions whether to enable or disable guild subscriptions
+     * @return this builder
+     * @see <a href="https://discordapp.com/developers/docs/topics/gateway#guild-subscriptions">Guild Subscriptions</a>
+     */
+    public GatewayBootstrap<O> setGuildSubscriptions(boolean guildSubscriptions) {
+        this.guildSubscriptions = guildSubscriptions;
         return this;
     }
 
@@ -497,7 +512,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                     StatusUpdate initial = Optional.ofNullable(initialPresence.apply(shard))
                             .map(Presence::asStatusUpdate)
                             .orElse(null);
-                    IdentifyOptions identify = new IdentifyOptions(shard, initial);
+                    IdentifyOptions identify = new IdentifyOptions(shard, initial, guildSubscriptions);
                     SessionInfo resume = resumeOptions.apply(shard);
                     if (resume != null) {
                         identify.setResumeSessionId(resume.getSessionId());

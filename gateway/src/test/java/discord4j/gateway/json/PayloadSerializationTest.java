@@ -71,7 +71,7 @@ public class PayloadSerializationTest {
                 "}").replaceAll("\\s+", "");
 
         Identify identify = new Identify("my_token", new IdentifyProperties("linux", "disco", "disco"), true, 250,
-                Possible.absent(), Possible.absent());
+                Possible.absent(), Possible.absent(), true);
         GatewayPayload<Identify> payload = GatewayPayload.identify(identify);
         String result = mapper.writeValueAsString(payload);
 

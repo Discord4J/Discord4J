@@ -244,7 +244,7 @@ public class RetryBotTest {
                     int id = Integer.parseInt(tokens[0]);
                     int count = Integer.parseInt(tokens[1]);
                     ShardInfo shardInfo = new ShardInfo(id, count);
-                    IdentifyOptions identifyOptions = new IdentifyOptions(shardInfo, null);
+                    IdentifyOptions identifyOptions = new IdentifyOptions(shardInfo, null, true);
                     identifyOptions.setResumeSessionId(tokens[2]);
                     identifyOptions.setResumeSequence(Integer.valueOf(tokens[3]));
                     map.put(shardInfo, identifyOptions);
@@ -260,12 +260,12 @@ public class RetryBotTest {
             // fallback to IDENTIFY case
             for (int id = 0; id < shardCount; id++) {
                 ShardInfo shardInfo = new ShardInfo(id, shardCount);
-                map.put(shardInfo, new IdentifyOptions(shardInfo, null));
+                map.put(shardInfo, new IdentifyOptions(shardInfo, null, true));
             }
         } else if (map.size() < shardCount) {
             for (int id = 0; id < shardCount; id++) {
                 ShardInfo shardInfo = new ShardInfo(id, shardCount);
-                map.computeIfAbsent(shardInfo, k -> new IdentifyOptions(k, null));
+                map.computeIfAbsent(shardInfo, k -> new IdentifyOptions(k, null, true));
             }
         }
         return map;

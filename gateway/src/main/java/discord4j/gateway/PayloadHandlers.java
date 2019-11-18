@@ -113,7 +113,8 @@ public abstract class PayloadHandlers {
             int[] shard = new int[]{options.getShardIndex(), options.getShardCount()};
             Identify identify = new Identify(client.token(), props, false, 250,
                     Optional.of(shard).map(Possible::of).orElse(Possible.absent()),
-                    Optional.ofNullable(options.getInitialStatus()).map(Possible::of).orElse(Possible.absent()));
+                    Optional.ofNullable(options.getInitialStatus()).map(Possible::of).orElse(Possible.absent()),
+                    options.isGuildSubscriptions());
             log.debug(format(context.getContext(), "Identifying to Gateway"), client.sequence().get());
             client.sender().next(GatewayPayload.identify(identify));
         }

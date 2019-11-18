@@ -33,6 +33,8 @@ public class IdentifyOptions {
     @Nullable
     private final StatusUpdate initialStatus;
 
+    private final boolean guildSubscriptions;
+
     @Nullable
     private volatile Integer resumeSequence;
 
@@ -44,10 +46,12 @@ public class IdentifyOptions {
      *
      * @param shardInfo shard index and count the client using this policy will identify with
      * @param initialStatus initial presence status the bot will identify with
+     * @param guildSubscriptions whether to enable presence and typing events while identifying
      */
-    public IdentifyOptions(ShardInfo shardInfo, @Nullable StatusUpdate initialStatus) {
+    public IdentifyOptions(ShardInfo shardInfo, @Nullable StatusUpdate initialStatus, boolean guildSubscriptions) {
         this.shardInfo = shardInfo;
         this.initialStatus = initialStatus;
+        this.guildSubscriptions = guildSubscriptions;
     }
 
     public ShardInfo getShardInfo() {
@@ -80,6 +84,15 @@ public class IdentifyOptions {
     @Nullable
     public StatusUpdate getInitialStatus() {
         return initialStatus;
+    }
+
+    /**
+     * Retrieve whether to enable presence and typing events when identifying.
+     *
+     * @return {@code true} if guild subscriptions should be enabled, {@code false} otherwise
+     */
+    public boolean isGuildSubscriptions() {
+        return guildSubscriptions;
     }
 
     /**
@@ -129,6 +142,7 @@ public class IdentifyOptions {
         return "IdentifyOptions{" +
                 "shardInfo=" + shardInfo +
                 ", initialStatus=" + initialStatus +
+                ", guildSubscriptions=" + guildSubscriptions +
                 '}';
     }
 }
