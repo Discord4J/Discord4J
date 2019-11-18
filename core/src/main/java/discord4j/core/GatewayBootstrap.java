@@ -494,7 +494,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
         GatewayDiscordClient gateway = new GatewayDiscordClient(client, resources, closeProcessor,
                 gatewayClients, voiceClients);
 
-        Flux<GatewayConnection> connections = computeShardCount(client.getCoreResources().getRestClient())
+        Flux<ShardInfo> connections = computeShardCount(client.getCoreResources().getRestClient())
                 .flatMapMany(count -> Flux.from(shardIndexSource.apply(count))
                         .filter(index -> index >= 0 && index < count)
                         .map(index -> new ShardInfo(index, count))
@@ -514,7 +514,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
         }
     }
 
-    private Mono<GatewayConnection> acquireConnection(ShardInfo shard,
+    private Mono<ShardInfo> acquireConnection(ShardInfo shard,
                                                       Function<O, GatewayClient> clientFactory,
                                                       GatewayDiscordClient gateway,
                                                       StateHolder stateHolder,
@@ -523,7 +523,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                                                       Map<Integer, VoiceClient> voiceClients,
                                                       MonoProcessor<Void> closeProcessor) {
         return Mono.subscriberContext()
-                .flatMap(ctx -> Mono.<GatewayConnection>create(sink -> {
+                .flatMap(ctx -> Mono.<ShardInfo>create(sink -> {
                     StatusUpdate initial = Optional.ofNullable(initialPresence.apply(shard))
                             .map(Presence::asStatusUpdate)
                             .orElse(null);
@@ -565,7 +565,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
 
                     // wire internal shard coordinator events
                     // TODO: transition into separate lifecycleSink for these events
-                    MonoProcessor<Void> shardCloseSignal = MonoProcessor.create();
+                    //MonoProcessor<Void> shardCloseSignal = MonoProcessor.create();
                     forCleanup.add(gatewayClient.dispatch()
                             .takeUntilOther(closeProcessor)
                             .map(dispatch -> DispatchContext.of(dispatch, gateway, stateHolder, shard))
@@ -576,11 +576,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                                     case CONNECTED:
                                         log.info(format(ctx, "Shard connected"));
                                         return shardCoordinator.publishConnected(shard)
-                                                .doOnTerminate(() -> {
-                                                    GatewayConnection connection = new GatewayConnection(
-                                                            gateway, identify, shardCloseSignal);
-                                                    sink.success(connection);
-                                                });
+                                                .doOnTerminate(() -> sink.success(shard));
                                     case DISCONNECTED:
                                     case DISCONNECTED_RESUME:
                                         log.info(format(ctx, "Shard disconnected"));
@@ -591,7 +587,6 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                                         return shardCoordinator.publishDisconnected(shard, session)
                                                 .then(stateHolder.invalidateStores())
                                                 .then(Mono.fromRunnable(() -> {
-                                                    shardCloseSignal.onComplete();
                                                     gatewayClients.remove(shard.getIndex());
                                                     voiceClients.remove(shard.getIndex());
                                                 }))
