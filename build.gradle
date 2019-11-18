@@ -1,9 +1,8 @@
 plugins {
-    id 'java'
+    id 'java-library'
     id 'maven-publish'
     id 'signing'
     id 'com.gorylenko.gradle-git-properties' version '2.2.0' apply false
-    id 'io.spring.dependency-management' version '1.0.8.RELEASE' apply false
     id 'com.github.ben-manes.versions' version '0.27.0'
     id 'net.researchgate.release' version '2.8.1'
 }
@@ -13,15 +12,20 @@ ext {
     github_org = 'Discord4J'
     project_name = 'Discord4J'
     artifact_group = 'com.discord4j'
-    project_version = "$version"
+    project_version = "$version".toString()
     project_description = 'Java interface for the Discord API'
     project_url = 'https://discord4j.com'
     project_jdk = '1.8'
+    jdk = JavaVersion.current().majorVersion
+    jdk_javadoc = "https://docs.oracle.com/javase/$jdk/docs/api/".toString()
+    if (JavaVersion.current().isJava11Compatible()) {
+        jdk_javadoc = "https://docs.oracle.com/en/java/javase/$jdk/docs/api/".toString()
+    }
 
     // Dependencies
     reactor_bom_version = 'Californium-SR13'
     jackson_version = '2.10.1'
-    jdkstores_version = "$storesVersion"
+    jdkstores_version = "$storesVersion".toString()
 
     // Test dependencies
     junit_version = '4.12'
@@ -36,8 +40,7 @@ ext {
 }
 
 allprojects {
-    apply plugin: 'java'
-    apply plugin: 'io.spring.dependency-management'
+    apply plugin: 'java-library'
     apply plugin: 'com.github.ben-manes.versions'
     apply plugin: 'maven-publish'
     if (!isJitpack && isRelease) {
@@ -51,10 +54,8 @@ allprojects {
     sourceCompatibility = project_jdk
     targetCompatibility = project_jdk
 
-    dependencyManagement {
-        imports {
-            mavenBom "io.projectreactor:reactor-bom:$reactor_bom_version"
-        }
+    dependencies {
+        api platform("io.projectreactor:reactor-bom:$reactor_bom_version")
     }
 
     repositories {
@@ -75,8 +76,7 @@ allprojects {
             addStringOption 'encoding', 'UTF-8'
             // adding links to javadocs for filling specific classes when not existing inside current javadoc
             links = [
-                    "https://docs.oracle.com/javase/8/docs/api/",
-                    "https://docs.oracle.com/javaee/7/api/",
+                    jdk_javadoc,
                     "https://fasterxml.github.io/jackson-databind/javadoc/2.10/",
                     "http://www.reactive-streams.org/reactive-streams-1.0.3-javadoc/",
                     "https://projectreactor.io/docs/core/release/api/",
@@ -84,6 +84,9 @@ allprojects {
                     "https://projectreactor.io/docs/extra/release/api/",
                     "https://netty.io/4.1/api/"
             ]
+        }
+        if (JavaVersion.current().isJava9Compatible()) {
+            options.addBooleanOption('html5', true)
         }
     }
 
@@ -99,36 +102,13 @@ allprojects {
         }
     }
 
-    task javadocJar(type: Jar, dependsOn: javadoc) {
-        classifier = 'javadoc'
-        from 'build/docs/javadoc'
-    }
-
-    task sourcesJar(type: Jar) {
-        classifier = 'sources'
-        from sourceSets.main.allSource
-    }
-
-    artifacts {
-        archives javadocJar
-        archives sourcesJar
-    }
-
-    if (!isJitpack && isRelease) {
-        signing {
-            def signingKey = findProperty("signingKey")
-            def signingPassword = findProperty("signingPassword")
-            if (signingKey != null && signingPassword != null) {
-                useInMemoryPgpKeys(new String(signingKey.decodeBase64()), signingPassword as String)
-            }
-            sign configurations.archives
-        }
+    java {
+        withJavadocJar()
+        withSourcesJar()
     }
 }
 
 subprojects {
-    apply plugin: 'io.spring.dependency-management'
-
     archivesBaseName = "discord4j-$project.name"
 
     tasks.withType(Javadoc) {
@@ -138,35 +118,46 @@ subprojects {
 
     publishing {
         publications {
-            maven(MavenPublication) {
-                customizePom(pom)
-
+            mavenJava(MavenPublication) {
                 from components.java
                 artifactId archivesBaseName
 
-                artifact sourcesJar
-                artifact javadocJar
+                versionMapping {
+                    usage('java-api') {
+                        fromResolutionOf('runtimeClasspath')
+                    }
+                    usage('java-runtime') {
+                        fromResolutionResult()
+                    }
+                }
 
-                if (!isJitpack && isRelease) {
-                    pom.withXml {
-                        def pomFile = file("${project.buildDir}/generated-pom.xml")
-                        writeTo(pomFile)
-                        def pomAscFile = signing.sign(pomFile).signatureFiles[0]
-                        artifact(pomAscFile) {
-                            classifier = null
-                            extension = 'pom.asc'
+                pom {
+                    name = 'Discord4J'
+                    description = 'A JVM-based REST/WS wrapper for the official Discord Bot API'
+                    url = 'https://github.com/Discord4J/Discord4J'
+                    organization {
+                        name = 'Discord4J'
+                        url = 'https://discord4j.com'
+                    }
+                    issueManagement {
+                        system = 'GitHub'
+                        url = 'https://github.com/Discord4J/Discord4J/issues'
+                    }
+                    licenses {
+                        license {
+                            name = 'LGPL-3.0'
+                            url = 'https://github.com/Discord4J/Discord4J/LICENSE.txt'
+                            distribution = 'repo'
                         }
                     }
-
-                    project.tasks.signArchives.signatureFiles.each {
-                        artifact(it) {
-                            def matcher = it.file =~ /-(sources|javadoc)\.jar\.asc$/
-                            if (matcher.find()) {
-                                classifier = matcher.group(1)
-                            } else {
-                                classifier = null
-                            }
-                            extension = 'jar.asc'
+                    scm {
+                        url = 'https://github.com/Discord4J/Discord4J'
+                        connection = 'scm:git:git://github.com/Discord4J/Discord4J.git'
+                        developerConnection = 'scm:git:ssh://git@github.com:Discord4J/Discord4J.git'
+                    }
+                    developers {
+                        developer {
+                            name = 'The Discord4J Team'
                         }
                     }
                 }
@@ -195,90 +186,15 @@ subprojects {
     }
 
     if (!isJitpack && isRelease) {
-        model {
-            tasks.generatePomFileForMavenPublication {
-                destination = file("$buildDir/generated-pom.xml")
+        signing {
+            def signingKey = findProperty("signingKey")
+            def signingPassword = findProperty("signingPassword")
+            if (signingKey != null && signingPassword != null) {
+                useInMemoryPgpKeys(new String(signingKey.decodeBase64()), signingPassword as String)
             }
-            tasks.publishMavenPublicationToMavenLocal {
-                dependsOn project.tasks.signArchives
-            }
-            tasks.publishMavenPublicationToMavenRepository {
-                dependsOn project.tasks.signArchives
-            }
+            sign publishing.publications.mavenJava
         }
     }
-}
-
-def customizePom(pom) {
-    pom.withXml {
-        def root = asNode()
-
-        root.dependencies.removeAll { dep ->
-            dep.scope == "test"
-        }
-
-        root.children().last() + {
-            resolveStrategy = DELEGATE_FIRST
-
-            description 'A JVM-based REST/WS wrapper for the official Discord Bot API'
-            name 'Discord4J'
-            url 'https://github.com/Discord4J/Discord4J'
-            organization {
-                name 'Discord4J'
-                url 'https://discord4j.com'
-            }
-            issueManagement {
-                system 'GitHub'
-                url 'https://github.com/Discord4J/Discord4J/issues'
-            }
-            licenses {
-                license {
-                    name 'LGPL-3.0'
-                    url 'https://github.com/Discord4J/Discord4J/LICENSE.txt'
-                    distribution 'repo'
-                }
-            }
-            scm {
-                url 'https://github.com/Discord4J/Discord4J'
-                connection 'scm:git:git://github.com/Discord4J/Discord4J.git'
-                developerConnection 'scm:git:ssh://git@github.com:Discord4J/Discord4J.git'
-            }
-            developers {
-                developer {
-                    name 'The Discord4J Team'
-                }
-            }
-        }
-    }
-}
-
-task aggregateJavadoc(type: Javadoc,
-        description: "Generate javadocs from all child projects as if it was a single project",
-        group: JavaBasePlugin.DOCUMENTATION_GROUP
-) {
-    destinationDir file("${rootProject.buildDir}/docs/aggregateJavadoc")
-    failOnError false
-    title = "$project_name ${project_version} API"
-
-    options {
-        windowTitle = "$project_name $project_version"
-        addStringOption "Xdoclint:none", "-quiet"
-        author true
-    }
-
-    subprojects.each { project ->
-        project.tasks.withType(Javadoc.class).each { doc ->
-            source += doc.source
-            classpath += doc.classpath
-            excludes += doc.excludes
-            includes += doc.includes
-        }
-    }
-}
-
-task aggregateJavadocJar(type: Jar, dependsOn: aggregateJavadoc) {
-    classifier = 'javadoc'
-    from aggregateJavadoc.destinationDir
 }
 
 def buildDocsUrl(String project) {
@@ -296,16 +212,6 @@ def buildStoresDocsUrl(String project, boolean offline) {
         return "https://javadoc.jitpack.io/com/discord4j/stores/$project/$storesVersion/javadoc/" as String
     } else {
         return "https://www.javadoc.io/page/com.discord4j/$project/$storesVersion/" as String
-    }
-}
-
-if (isJitpack) {
-    publishing {
-        publications {
-            maven(MavenPublication) {
-                artifact aggregateJavadocJar
-            }
-        }
     }
 }
 

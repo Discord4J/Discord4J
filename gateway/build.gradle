@@ -1,10 +1,10 @@
 dependencies {
-    compile project(':common')
+    api project(':common')
 
-    compile "io.projectreactor.addons:reactor-extra"
+    api "io.projectreactor.addons:reactor-extra"
 
-    testCompile "junit:junit:$junit_version"
-    testCompile "ch.qos.logback:logback-classic:$logback_version"
+    testImplementation "junit:junit:$junit_version"
+    testImplementation "ch.qos.logback:logback-classic:$logback_version"
 }
 
 javadoc {

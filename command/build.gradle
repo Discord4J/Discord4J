@@ -1,5 +1,5 @@
 dependencies {
-    compile project(":core")
+    api project(":core")
 
-    testCompile "junit:junit:$junit_version"
+    testImplementation "junit:junit:$junit_version"
 }
