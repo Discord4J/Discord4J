@@ -99,7 +99,7 @@ public class DiscordWebSocketHandler {
                             return Mono.just(CloseStatus.NORMAL_CLOSE);
                     }
                 })
-                .map(status -> new CloseWebSocketFrame(status.getCode(), status.getReason()));
+                .map(status -> new CloseWebSocketFrame(status.getCode(), status.getReason().orElse(null)));
 
         Mono<CloseStatus> inboundClose = in.receiveCloseStatus()
                 .map(status -> new CloseStatus(status.code(), status.reasonText()));

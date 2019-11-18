@@ -27,7 +27,7 @@ import discord4j.common.jackson.UnknownPropertyHandler;
 import java.util.function.Function;
 
 /**
- * Provides a centralized Jackson 2.10 {@link com.fasterxml.jackson.databind.ObjectMapper} allowing customization and
+ * Provides a centralized Jackson 2.10 {@link ObjectMapper} allowing customization and
  * reuse across the application.
  */
 public class JacksonResources {
@@ -39,7 +39,7 @@ public class JacksonResources {
     private final ObjectMapper objectMapper;
 
     /**
-     * Create a default {@link com.fasterxml.jackson.databind.ObjectMapper} that allows any field visibility,
+     * Create a default {@link ObjectMapper} that allows any field visibility,
      * registers modules to handle Discord4J specific mappings and ignores unknown properties.
      */
     public JacksonResources() {
@@ -57,7 +57,7 @@ public class JacksonResources {
     }
 
     /**
-     * Create with a pre-configured {@link com.fasterxml.jackson.databind.ObjectMapper}. Using this will replace the
+     * Create with a pre-configured {@link ObjectMapper}. Using this will replace the
      * recommended default and can lead to unexpected behavior and errors.
      *
      * @param objectMapper a pre-configured ObjectMapper to use
@@ -67,7 +67,7 @@ public class JacksonResources {
     }
 
     /**
-     * Get the {@link com.fasterxml.jackson.databind.ObjectMapper} configured by this provider.
+     * Get the {@link ObjectMapper} configured by this provider.
      *
      * @return a Jackson ObjectMapper used to map POJOs to and from JSON format
      */

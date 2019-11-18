@@ -41,6 +41,10 @@ import java.util.function.Function;
 /**
  * A high-level abstraction of common Discord4J operations such as entity retrieval through Discord API or the creation
  * of real-time bot clients through Discord Gateway.
+ * <p>
+ * Instances can be obtained by using {@link #create(String)} or through {@link #builder(String)}. A default instance is
+ * capable of performing REST API operations locally and connecting to the Gateway by using {@link #login()},
+ * {@link #withGateway(Function)} or {@link #gateway()}.
  */
 public final class DiscordClient {
 

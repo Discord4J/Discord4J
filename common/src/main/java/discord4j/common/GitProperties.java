@@ -38,11 +38,11 @@ public class GitProperties {
     public static final String GIT_COMMIT_ID_DESCRIBE = "git.commit.id.describe";
 
     /**
-     * Load a {@link java.util.Properties} object with application version data.
+     * Load a {@link Properties} object with application version data.
      *
      * @return a property list with application version details
-     * @see discord4j.common.GitProperties#APPLICATION_VERSION
-     * @see discord4j.common.GitProperties#GIT_COMMIT_ID_DESCRIBE
+     * @see GitProperties#APPLICATION_VERSION
+     * @see GitProperties#GIT_COMMIT_ID_DESCRIBE
      */
     public static Properties getProperties() {
         Properties properties = new Properties();

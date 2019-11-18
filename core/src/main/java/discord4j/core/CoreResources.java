@@ -32,6 +32,14 @@ public class CoreResources {
     private final ReactorResources reactorResources;
     private final JacksonResources jacksonResources;
 
+    /**
+     * Create a {@link CoreResources} instance with the given resources.
+     *
+     * @param token the bot token used to authenticate requests
+     * @param restClient a client to perform REST API actions
+     * @param reactorResources Reactor resources to establish connections and schedule tasks
+     * @param jacksonResources Jackson data-binding resources to map objects
+     */
     public CoreResources(String token, RestClient restClient, ReactorResources reactorResources,
                          JacksonResources jacksonResources) {
         this.token = token;
@@ -40,18 +48,38 @@ public class CoreResources {
         this.jacksonResources = jacksonResources;
     }
 
+    /**
+     * Return the bot token used to authenticate requests.
+     *
+     * @return the bot token
+     */
     public String getToken() {
         return token;
     }
 
+    /**
+     * A client that enables performing REST API requests.
+     *
+     * @return a configured {@link RestClient} instance
+     */
     public RestClient getRestClient() {
         return restClient;
     }
 
+    /**
+     * Return Reactor resources to establish connections and schedule tasks.
+     *
+     * @return a configured {@link ReactorResources} instance
+     */
     public ReactorResources getReactorResources() {
         return reactorResources;
     }
 
+    /**
+     * Return Jackson resources to transform objects.
+     *
+     * @return a configured {@link JacksonResources} instance
+     */
     public JacksonResources getJacksonResources() {
         return jacksonResources;
     }

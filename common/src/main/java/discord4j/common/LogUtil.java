@@ -25,6 +25,9 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+/**
+ * Utility to support logging details.
+ */
 public class LogUtil {
 
     public static final String KEY_BUCKET_ID = "discord4j.bucket";
@@ -32,6 +35,14 @@ public class LogUtil {
     public static final String KEY_GATEWAY_ID = "discord4j.gateway";
     public static final String KEY_SHARD_ID = "discord4j.shard";
 
+    /**
+     * Format a message by unwrapping certain {@link Context} values as metadata, and if they exist, prepend them to
+     * the given message.
+     *
+     * @param context a Reactor context to enrich the logging message
+     * @param msg the logging message
+     * @return a formatted log message
+     */
     public static String format(Context context, String msg) {
         String header = Stream.of(
                 context.getOrEmpty(KEY_BUCKET_ID).map(id -> "B:" + id),
@@ -53,7 +64,14 @@ public class LogUtil {
         }
     }
 
-    public static String formatValue(@Nullable Object value, boolean limitLength) {
+    /**
+     * Format a given {@link Object} to a {@link String}, optionally limiting their length.
+     *
+     * @param value the value to format
+     * @param maxLength maximum length of the formatted value if positive or impose no limit otherwise.
+     * @return a formatted value
+     */
+    public static String formatValue(@Nullable Object value, int maxLength) {
         if (value == null) {
             return "";
         }
@@ -67,9 +85,18 @@ public class LogUtil {
                 str = ex.toString();
             }
         }
-        return (limitLength && str.length() > 100 ? str.substring(0, 100) + "..." : str);
+        return (maxLength > 0 && str.length() > maxLength ? str.substring(0, maxLength) + "..." : str);
     }
 
+    /**
+     * Log a message depending on the enabled level for a given {@link Logger}. The supplied message factory will be
+     * applied with {@code true} if the logger has trace level enabled, given by {@link Logger#isTraceEnabled()}, o
+     * {@code false} otherwise.
+     *
+     * @param logger the logger instance used for logging a message
+     * @param messageFactory a {@link Function} that takes {@code true} value if the given logger has trace level
+     * enabled, {@code false} otherwise, and produces a message to log.
+     */
     public static void traceDebug(Logger logger, Function<Boolean, String> messageFactory) {
         if (logger.isDebugEnabled()) {
             boolean traceEnabled = logger.isTraceEnabled();
