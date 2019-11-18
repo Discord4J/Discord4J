@@ -1,3 +1,5 @@
+rootProject.name = 'Discord4J'
+
 include 'core'
 include 'rest'
 include 'gateway'

@@ -1,19 +1,19 @@
 dependencies {
-    compile project(':rest')
-    compile project(':gateway')
-    compile project(':voice')
+    api project(':rest')
+    api project(':gateway')
+    api project(':voice')
 
-    compile "$storesArtifact:$jdkstores_version"
+    api "$storesArtifact:$jdkstores_version"
 
-    testCompile "junit:junit:$junit_version"
-    testCompile "org.mockito:mockito-core:$mockito_version"
-    testCompile "ch.qos.logback:logback-classic:$logback_version"
-    testCompile "io.projectreactor:reactor-test"
-    testCompile "org.reflections:reflections:$reflections_version"
-    testCompile "com.sedmelluq:lavaplayer:$lavaplayer_version"
-    testCompile "io.projectreactor.tools:blockhound:$blockhound_version"
-    testCompile "io.rsocket:rsocket-core:$rsocket_version"
-    testCompile "io.rsocket:rsocket-transport-netty:$rsocket_version"
+    testImplementation "junit:junit:$junit_version"
+    testImplementation "org.mockito:mockito-core:$mockito_version"
+    testImplementation "ch.qos.logback:logback-classic:$logback_version"
+    testImplementation "io.projectreactor:reactor-test"
+    testImplementation "org.reflections:reflections:$reflections_version"
+    testImplementation "com.sedmelluq:lavaplayer:$lavaplayer_version"
+    testImplementation "io.projectreactor.tools:blockhound:$blockhound_version"
+    testImplementation "io.rsocket:rsocket-core:$rsocket_version"
+    testImplementation "io.rsocket:rsocket-transport-netty:$rsocket_version"
 }
 
 javadoc {

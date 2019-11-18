@@ -134,7 +134,7 @@ class MessageDispatchHandlers {
                         int i;
                         for (i = 0; i < oldBean.getReactions().length; i++) {
                             ReactionBean r = oldBean.getReactions()[i];
-                            if ((emojiId == null && r.getEmojiName().equals(emojiName))
+                            if ((emojiId == null && Objects.equals(r.getEmojiName(), emojiName))
                                     || (emojiId != null && Objects.equals(r.getEmojiId(), emojiId))) {
                                 break;
                             }
@@ -182,7 +182,7 @@ class MessageDispatchHandlers {
                     // noinspection ConstantConditions filter covers getReactions() null case
                     for (i = 0; i < oldBean.getReactions().length; i++) {
                         ReactionBean r = oldBean.getReactions()[i];
-                        if ((emojiId == null && r.getEmojiName().equals(emojiName))
+                        if ((emojiId == null && Objects.equals(r.getEmojiName(), emojiName))
                                 || (emojiId != null && Objects.equals(r.getEmojiId(), emojiId))) {
                             break;
                         }
