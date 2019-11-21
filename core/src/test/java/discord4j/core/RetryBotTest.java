@@ -200,9 +200,9 @@ public class RetryBotTest {
                             gateway.getGatewayClientMap().values()
                                     .forEach(gatewayClient -> gatewayClient.close(true).subscribe());
                         } else if ("!online".equals(content)) {
-                            gateway.updatePresence(0, Presence.online()).subscribe();
+                            gateway.updatePresence(Presence.online()).subscribe();
                         } else if ("!dnd".equals(content)) {
-                            gateway.updatePresence(0, Presence.doNotDisturb()).subscribe();
+                            gateway.updatePresence(Presence.doNotDisturb()).subscribe();
                         } else if (content.startsWith("!raw ")) {
                             gateway.getGatewayClientMap().get(0)
                                     .sendBuffer(Mono.just(

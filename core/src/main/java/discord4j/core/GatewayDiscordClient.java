@@ -398,15 +398,30 @@ public class GatewayDiscordClient {
     }
 
     /**
-     * Update this client {@link Presence}.
+     * Update the bot's {@link Presence} (status) for every shard in this shard group.
      *
      * @param presence The updated client presence.
      * @return A {@link Mono} that signals completion upon successful update. If an error is received, it is emitted
      * through the {@code Mono}.
      */
-    public Mono<Void> updatePresence(final int shardId, final Presence presence) {
-        return getGatewayClientMap().get(shardId).send(
-                Mono.just(GatewayPayload.statusUpdate(presence.asStatusUpdate())));
+    public Mono<Void> updatePresence(final Presence presence) {
+        return Flux.fromIterable(getGatewayClientMap().values())
+                .flatMap(gatewayClient -> gatewayClient.send(
+                        Mono.just(GatewayPayload.statusUpdate(presence.asStatusUpdate()))))
+                .then();
+    }
+
+    /**
+     * Update the bot's {@link Presence} (status) for the given shard index, provided it belongs in this shard group.
+     *
+     * @param presence The updated client presence.
+     * @return A {@link Mono} that signals completion upon successful update. If an error is received, it is emitted
+     * through the {@code Mono}.
+     */
+    public Mono<Void> updatePresence(final Presence presence, final int shardId) {
+        return Mono.justOrEmpty(getGatewayClientMap().get(shardId))
+                .flatMap(gatewayClient -> gatewayClient.send(
+                        Mono.just(GatewayPayload.statusUpdate(presence.asStatusUpdate()))));
     }
 
     /**
