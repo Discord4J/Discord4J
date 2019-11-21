@@ -30,7 +30,7 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 /** A Discord channel that can utilize messages. */
-public interface MessageChannel {
+public interface MessageChannel extends Channel {
 
     /**
      * Gets the ID of the last message sent in this channel, if present.
