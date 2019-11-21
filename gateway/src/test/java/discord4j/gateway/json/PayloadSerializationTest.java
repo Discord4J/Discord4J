@@ -64,7 +64,8 @@ public class PayloadSerializationTest {
                 "            \"$device\": \"disco\"\n" +
                 "        },\n" +
                 "        \"compress\": true,\n" +
-                "        \"large_threshold\": 250\n" +
+                "        \"large_threshold\": 250,\n" +
+                "        \"guild_subscriptions\": true\n" +
                 "    },\n" +
                 "    \"s\":null,\n" +
                 "    \"t\":null\n" +
