@@ -32,6 +32,10 @@ public class AuditLogEntryOptionsResponse {
     @Nullable
     @UnsignedJson
     private Long channelId;
+    @JsonProperty("message_id")
+    @Nullable
+    @UnsignedJson
+    private Long messageId;
     @Nullable
     private String count;
     @Nullable
@@ -56,6 +60,11 @@ public class AuditLogEntryOptionsResponse {
     @Nullable
     public Long getChannelId() {
         return channelId;
+    }
+
+    @Nullable
+    public Long getMessageId() {
+        return messageId;
     }
 
     @Nullable
@@ -84,6 +93,7 @@ public class AuditLogEntryOptionsResponse {
                 "deleteMemberDays='" + deleteMemberDays + '\'' +
                 ", membersRemoved='" + membersRemoved + '\'' +
                 ", channelId=" + channelId +
+                ", messageId=" + messageId +
                 ", count='" + count + '\'' +
                 ", id=" + id +
                 ", type='" + type + '\'' +
