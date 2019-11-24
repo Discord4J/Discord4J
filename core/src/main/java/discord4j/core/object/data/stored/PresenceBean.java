@@ -58,6 +58,8 @@ public final class PresenceBean implements Serializable {
         this.webStatus = webStatus;
     }
 
+    public PresenceBean() {}
+
     @Nullable
     public ActivityBean getActivity() {
         return activity;
