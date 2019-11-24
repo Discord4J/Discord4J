@@ -127,7 +127,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
      * Create a default {@link GatewayBootstrap} based off the given {@link DiscordClient} that provides an instance
      * of {@link CoreResources} used to provide defaults while building a {@link GatewayDiscordClient}.
      *
-     * @param client the {@link DiscordClient} used to setup configuration
+     * @param client the {@link DiscordClient} used to set up configuration
      * @return a default builder to create {@link GatewayDiscordClient}
      */
     public static GatewayBootstrap<GatewayOptions> create(DiscordClient client) {
@@ -515,13 +515,13 @@ public class GatewayBootstrap<O extends GatewayOptions> {
     }
 
     private Mono<ShardInfo> acquireConnection(ShardInfo shard,
-                                                      Function<O, GatewayClient> clientFactory,
-                                                      GatewayDiscordClient gateway,
-                                                      StateHolder stateHolder,
-                                                      EventDispatcher eventDispatcher,
-                                                      Map<Integer, GatewayClient> gatewayClients,
-                                                      Map<Integer, VoiceClient> voiceClients,
-                                                      MonoProcessor<Void> closeProcessor) {
+                                              Function<O, GatewayClient> clientFactory,
+                                              GatewayDiscordClient gateway,
+                                              StateHolder stateHolder,
+                                              EventDispatcher eventDispatcher,
+                                              Map<Integer, GatewayClient> gatewayClients,
+                                              Map<Integer, VoiceClient> voiceClients,
+                                              MonoProcessor<Void> closeProcessor) {
         return Mono.subscriberContext()
                 .flatMap(ctx -> Mono.<ShardInfo>create(sink -> {
                     StatusUpdate initial = Optional.ofNullable(initialPresence.apply(shard))
@@ -717,7 +717,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
     }
 
     /**
-     * A destroy handler that doesn't perform any cleanup task.
+     * Destroy handler that doesn't perform any cleanup task.
      *
      * @return a noop destroy handler
      */
@@ -727,8 +727,8 @@ public class GatewayBootstrap<O extends GatewayOptions> {
 
 
     /**
-     * A destroy handler that calls {@link EventDispatcher#shutdown()} followed by {@link StoreService#dispose()} in an
-     * asynchronous fashion.
+     * Destroy handler that calls {@link EventDispatcher#shutdown()} followed by {@link StoreService#dispose()}
+     * asynchronously.
      *
      * @return a shutdown destroy handler
      */
