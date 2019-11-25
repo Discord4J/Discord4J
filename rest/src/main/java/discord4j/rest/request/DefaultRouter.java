@@ -66,8 +66,7 @@ public class DefaultRouter implements Router {
                     stream.push(new RequestCorrelation<>(request, callback, ctx));
                     return callback;
                 })
-                .checkpoint("Request to " + request.getDescription() + " [DefaultRouter]")
-                .publishOn(reactorResources.getBlockingTaskScheduler()));
+                .checkpoint("Request to " + request.getDescription() + " [DefaultRouter]"), reactorResources);
     }
 
     private RequestStream getStream(DiscordWebRequest request) {

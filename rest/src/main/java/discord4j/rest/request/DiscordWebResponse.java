@@ -17,6 +17,7 @@
 
 package discord4j.rest.request;
 
+import discord4j.common.ReactorResources;
 import discord4j.rest.http.client.ClientException;
 import discord4j.rest.http.client.ClientResponse;
 import reactor.core.publisher.Mono;
@@ -27,9 +28,11 @@ import reactor.core.publisher.Mono;
 public class DiscordWebResponse {
 
     private final Mono<ClientResponse> responseMono;
+    private final ReactorResources reactorResources;
 
-    public DiscordWebResponse(Mono<ClientResponse> responseMono) {
+    public DiscordWebResponse(Mono<ClientResponse> responseMono, ReactorResources reactorResources) {
         this.responseMono = responseMono;
+        this.reactorResources = reactorResources;
     }
 
     /**
@@ -42,7 +45,8 @@ public class DiscordWebResponse {
      * read error had occurred, it will be emitted through the {@link Mono}.
      */
     public <T> Mono<T> bodyToMono(Class<T> responseClass) {
-        return responseMono.flatMap(res -> res.bodyToMono(responseClass));
+        return responseMono.flatMap(res -> res.bodyToMono(responseClass))
+                .publishOn(reactorResources.getBlockingTaskScheduler());
     }
 
     /**
@@ -51,7 +55,8 @@ public class DiscordWebResponse {
      * @return an empty {@link Mono} indicating response body consumption and release
      */
     public Mono<Void> skipBody() {
-        return responseMono.flatMap(ClientResponse::skipBody);
+        return responseMono.flatMap(ClientResponse::skipBody)
+                .publishOn(reactorResources.getBlockingTaskScheduler());
     }
 
     /**
