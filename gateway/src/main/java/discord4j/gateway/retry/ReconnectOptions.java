@@ -77,37 +77,43 @@ public class ReconnectOptions {
         protected Builder() {
         }
 
-        public void setFirstBackoff(Duration firstBackoff) {
+        public Builder setFirstBackoff(Duration firstBackoff) {
             if (firstBackoff.minus(Duration.ofSeconds(2)).isNegative()) {
                 throw new IllegalArgumentException("firstBackoff duration must be at least 2 seconds");
             }
             this.firstBackoff = firstBackoff;
+            return this;
         }
 
-        public void setMaxBackoffInterval(Duration maxBackoffInterval) {
+        public Builder setMaxBackoffInterval(Duration maxBackoffInterval) {
             if (maxBackoffInterval.minus(firstBackoff).isNegative()) {
                 throw new IllegalArgumentException("maxBackoffInterval must be at least the same as firstBackoff");
             }
             this.maxBackoffInterval = maxBackoffInterval;
+            return this;
         }
 
-        public void setMaxRetries(int maxRetries) {
+        public Builder setMaxRetries(int maxRetries) {
             if (maxRetries < 0) {
                 throw new IllegalArgumentException("maxRetries must be a positive integer");
             }
             this.maxRetries = maxRetries;
+            return this;
         }
 
-        public void setBackoff(Backoff backoff) {
+        public Builder setBackoff(Backoff backoff) {
             this.backoff = backoff;
+            return this;
         }
 
-        public void setJitter(Jitter jitter) {
+        public Builder setJitter(Jitter jitter) {
             this.jitter = jitter;
+            return this;
         }
 
-        public void setBackoffScheduler(Scheduler backoffScheduler) {
+        public Builder setBackoffScheduler(Scheduler backoffScheduler) {
             this.backoffScheduler = backoffScheduler;
+            return this;
         }
 
         public ReconnectOptions build() {
