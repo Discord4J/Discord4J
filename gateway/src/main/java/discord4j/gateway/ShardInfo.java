@@ -17,6 +17,9 @@
 
 package discord4j.gateway;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.Objects;
 
 public class ShardInfo {
@@ -24,7 +27,8 @@ public class ShardInfo {
     private final int index;
     private final int count;
 
-    public ShardInfo(int index, int count) {
+    @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
+    public ShardInfo(@JsonProperty("index") int index, @JsonProperty("count") int count) {
         this.index = index;
         this.count = count;
     }

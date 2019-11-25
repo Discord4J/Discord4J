@@ -530,7 +530,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                     IdentifyOptions identify = new IdentifyOptions(shard, initial, guildSubscriptions);
                     SessionInfo resume = resumeOptions.apply(shard);
                     if (resume != null) {
-                        identify.setResumeSessionId(resume.getSessionId());
+                        identify.setResumeSessionId(resume.getId());
                         identify.setResumeSequence(resume.getSequence());
                     }
                     Disposable.Composite forCleanup = Disposables.composite();

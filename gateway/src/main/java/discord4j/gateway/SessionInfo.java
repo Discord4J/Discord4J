@@ -17,20 +17,24 @@
 
 package discord4j.gateway;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.Objects;
 
 public class SessionInfo {
 
-    private final String sessionId;
+    private final String id;
     private final Integer sequence;
 
-    public SessionInfo(String sessionId, Integer sequence) {
-        this.sessionId = sessionId;
+    @JsonCreator
+    public SessionInfo(@JsonProperty("id") String id, @JsonProperty("sequence") Integer sequence) {
+        this.id = id;
         this.sequence = sequence;
     }
 
-    public String getSessionId() {
-        return sessionId;
+    public String getId() {
+        return id;
     }
 
     public Integer getSequence() {
@@ -46,19 +50,19 @@ public class SessionInfo {
             return false;
         }
         SessionInfo that = (SessionInfo) o;
-        return Objects.equals(sessionId, that.sessionId) &&
+        return Objects.equals(id, that.id) &&
                 Objects.equals(sequence, that.sequence);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(sessionId, sequence);
+        return Objects.hash(id, sequence);
     }
 
     @Override
     public String toString() {
         return "SessionInfo{" +
-                "sessionId='" + sessionId + '\'' +
+                "id='" + id + '\'' +
                 ", sequence=" + sequence +
                 '}';
     }
