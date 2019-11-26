@@ -44,6 +44,7 @@ import discord4j.rest.RestClient;
 import discord4j.rest.json.response.GatewayResponse;
 import discord4j.rest.util.RouteUtils;
 import discord4j.store.api.Store;
+import discord4j.store.api.primitive.ForwardingStoreService;
 import discord4j.store.api.service.StoreService;
 import discord4j.store.api.service.StoreServiceLoader;
 import discord4j.store.api.util.StoreContext;
@@ -97,7 +98,14 @@ public class GatewayBootstrap<O extends GatewayOptions> {
 
     private static final Logger log = Loggers.getLogger(GatewayBootstrap.class);
 
+    /**
+     * Indicate that this shard group should use the recommended amount of shards.
+     */
     public static final int RECOMMENDED_SHARD_COUNT = 0;
+    /**
+     * {@link JdkStoreService} is the default store factory. Can be set explicitly to bypass StoreService discovery.
+     */
+    public static final StoreService DEFAULT_STORE = new JdkStoreService();
 
     private final DiscordClient client;
     private final Function<GatewayOptions, O> optionsModifier;
@@ -261,7 +269,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
 
     /**
      * Set a custom {@link StoreService}, an abstract factory to create {@link Store} instances, to cache Gateway
-     * updates. Defaults to using {@link JdkStoreService} unless another factory of higher priority is discovered.
+     * updates. Defaults to using {@link #DEFAULT_STORE} unless another factory of higher priority is discovered.
      *
      * @param storeService an externally managed {@link StoreService} to receive Gateway updates
      * @return this builder
@@ -688,12 +696,23 @@ public class GatewayBootstrap<O extends GatewayOptions> {
     private StoreService initStoreService() {
         if (storeService == null) {
             Map<Class<? extends StoreService>, Integer> priority = new HashMap<>();
-            // We want almost minimum priority, so that jdk can beat no-op but most implementations will beat jdk
+            // We want almost minimum priority, so that jdk can beat no-op, but most implementations will beat jdk
             priority.put(JdkStoreService.class, Integer.MAX_VALUE - 1);
             StoreServiceLoader storeServiceLoader = new StoreServiceLoader(priority);
             storeService = storeServiceLoader.getStoreService();
+            if (storeService instanceof ForwardingStoreService) {
+                ForwardingStoreService forwarding = (ForwardingStoreService) storeService;
+                StoreService delegate = forwarding.getOriginal();
+                if (!(delegate instanceof JdkStoreService)) {
+                    log.info("Found StoreService: {}", delegate);
+                }
+            } else {
+                log.info("Found StoreService: {}", storeService);
+            }
         }
-        return storeServiceMapper.apply(storeService);
+        return storeServiceMapper.compose((StoreService ss) ->
+                !ss.hasLongObjStores() ? new ForwardingStoreService(ss) : ss)
+                .apply(storeService);
     }
 
     private Mono<Integer> computeShardCount(RestClient restClient) {
