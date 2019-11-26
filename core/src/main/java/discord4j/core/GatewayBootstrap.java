@@ -85,7 +85,7 @@ import static discord4j.common.LogUtil.format;
  *     managed.</li>
  *     <li>{@link #connect(Function)} to customize the {@link GatewayClient} instances to build.</li>
  *     <li>{@link #withConnection(Function)} to work with the {@link GatewayDiscordClient} in a scoped way, providing
- *     a mapping function that will close and release all resources on completion.</li>
+ *     a mapping function that will close and release all resources on disconnection.</li>
  * </ul>
  * This bootstrap emits a result depending on the configuration of {@link #setAwaitConnections(boolean)}. Methods
  * {@link #setShardIndexSource(Function)} and {@link #setShardFilter(Predicate)} can select the shards that belong to
@@ -425,23 +425,26 @@ public class GatewayBootstrap<O extends GatewayOptions> {
 
     /**
      * Connect to the Discord Gateway upon subscription to acquire a {@link GatewayDiscordClient} instance and use it
-     * in a declarative manner, releasing the object once the derived usage {@link Function} terminates or is cancelled.
+     * declaratively, releasing the object once the derived usage {@link Function} completes, and the underlying shard
+     * group disconnects, according to {@link GatewayDiscordClient#onDisconnect()}.
      * <p>
      * The timing of acquiring a {@link GatewayDiscordClient} depends on the {@link #setAwaitConnections(boolean)}
      * setting: if {@code true}, when all joining shards have connected; if {@code false}, as soon as it is possible to
      * establish a connection to the Gateway.
      * <p>
      * Calling this method is useful when you operate on the {@link GatewayDiscordClient} object using reactive API you
-     * can compose within the scope of the given {@link Function}. Using {@link GatewayDiscordClient#onDisconnect()}
-     * within the scope will await for disconnection before releasing resources.
+     * can compose within the scope of the given {@link Function}.
      *
      * @param whileConnectedFunction the {@link Function} to apply the <strong>connected</strong>
      * {@link GatewayDiscordClient} and trigger a processing pipeline from it.
-     * @param <T> type of the given {@link Function} output
-     * @return the {@link Mono} result of processing the given {@link Function} after all resources have released
+     * @return an empty {@link Mono} completing after all resources have released
      */
-    public <T> Mono<T> withConnection(Function<GatewayDiscordClient, Mono<T>> whileConnectedFunction) {
-        return Mono.usingWhen(connect(), whileConnectedFunction, closeConnections());
+    public Mono<Void> withConnection(Function<GatewayDiscordClient, Mono<Void>> whileConnectedFunction) {
+        return usingConnection(gateway -> whileConnectedFunction.apply(gateway).then(gateway.onDisconnect()));
+    }
+
+    private <T> Mono<T> usingConnection(Function<GatewayDiscordClient, Mono<T>> onConnectedFunction) {
+        return Mono.usingWhen(connect(), onConnectedFunction, closeConnections());
     }
 
     private Function<GatewayDiscordClient, Publisher<?>> closeConnections() {

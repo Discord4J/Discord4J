@@ -297,20 +297,19 @@ public final class DiscordClient {
 
     /**
      * Connect to the Discord Gateway upon subscription to acquire a {@link GatewayDiscordClient} instance and use it
-     * in a declarative manner, releasing the object once the derived usage {@link Function} terminates or is cancelled.
+     * declaratively, releasing the object once the derived usage {@link Function} completes, and the underlying shard
+     * group disconnects, according to {@link GatewayDiscordClient#onDisconnect()}.
      * <p>
      * To further configure the bot features, refer to using {@link #gateway()}.
      * <p>
      * Calling this method is useful when you operate on the {@link GatewayDiscordClient} object using reactive API you
-     * can compose within the scope of the given {@link Function}. Using {@link GatewayDiscordClient#onDisconnect()}
-     * within the scope will await for disconnection before releasing resources.
+     * can compose within the scope of the given {@link Function}.
      *
      * @param whileConnectedFunction the {@link Function} to apply the <strong>connected</strong>
      * {@link GatewayDiscordClient} and trigger a processing pipeline from it.
-     * @param <T> type of the given {@link Function} output
-     * @return the {@link Mono} result of processing the given {@link Function} after all resources have released
+     * @return an empty {@link Mono} completing after all resources have released
      */
-    public <T> Mono<T> withGateway(Function<GatewayDiscordClient, Mono<T>> whileConnectedFunction) {
+    public Mono<Void> withGateway(Function<GatewayDiscordClient, Mono<Void>> whileConnectedFunction) {
         return gateway().withConnection(whileConnectedFunction);
     }
 
