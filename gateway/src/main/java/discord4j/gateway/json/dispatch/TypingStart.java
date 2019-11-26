@@ -16,9 +16,15 @@
  */
 package discord4j.gateway.json.dispatch;
 
+import com.fasterxml.jackson.annotation.JsonAnyGetter;
+import com.fasterxml.jackson.annotation.JsonAnySetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import discord4j.common.jackson.UnsignedJson;
 import reactor.util.annotation.Nullable;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 public class TypingStart implements Dispatch {
 
@@ -33,6 +39,9 @@ public class TypingStart implements Dispatch {
     @UnsignedJson
     private long userId;
     private int timestamp;
+
+    @JsonIgnore
+    private Map<String, Object> additionalProperties = new LinkedHashMap<>();
 
     public long getChannelId() {
         return channelId;
@@ -49,6 +58,16 @@ public class TypingStart implements Dispatch {
 
     public int getTimestamp() {
         return timestamp;
+    }
+
+    @JsonAnyGetter
+    public Map<String, Object> getAdditionalProperties() {
+        return additionalProperties;
+    }
+
+    @JsonAnySetter
+    public void setAdditionalProperty(String name, Object value) {
+        additionalProperties.put(name, value);
     }
 
     @Override

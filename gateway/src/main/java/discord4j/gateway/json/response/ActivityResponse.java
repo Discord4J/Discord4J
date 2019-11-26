@@ -17,12 +17,18 @@
 package discord4j.gateway.json.response;
 
 
+import com.fasterxml.jackson.annotation.JsonAnyGetter;
+import com.fasterxml.jackson.annotation.JsonAnySetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import discord4j.common.jackson.Possible;
 import discord4j.common.jackson.PossibleLong;
 import discord4j.common.jackson.UnsignedJson;
 import discord4j.common.json.EmojiResponse;
 import reactor.util.annotation.Nullable;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 public class ActivityResponse {
 
@@ -45,6 +51,9 @@ public class ActivityResponse {
     private Possible<EmojiResponse> emoji = Possible.absent();
     private Possible<Boolean> instance = Possible.absent();
     private Possible<Integer> flags = Possible.absent();
+
+    @JsonIgnore
+    private Map<String, Object> additionalProperties = new LinkedHashMap<>();
 
     public String getName() {
         return name;
@@ -100,6 +109,16 @@ public class ActivityResponse {
 
     public Possible<Integer> getFlags() {
         return flags;
+    }
+
+    @JsonAnyGetter
+    public Map<String, Object> getAdditionalProperties() {
+        return additionalProperties;
+    }
+
+    @JsonAnySetter
+    public void setAdditionalProperty(String name, Object value) {
+        additionalProperties.put(name, value);
     }
 
     @Override

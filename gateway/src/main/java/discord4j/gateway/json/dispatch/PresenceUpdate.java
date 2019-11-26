@@ -16,6 +16,9 @@
  */
 package discord4j.gateway.json.dispatch;
 
+import com.fasterxml.jackson.annotation.JsonAnyGetter;
+import com.fasterxml.jackson.annotation.JsonAnySetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 import discord4j.common.jackson.Possible;
@@ -23,6 +26,9 @@ import discord4j.common.jackson.PossibleJson;
 import discord4j.common.jackson.UnsignedJson;
 import discord4j.gateway.json.response.ActivityResponse;
 import reactor.util.annotation.Nullable;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 @PossibleJson
 public class PresenceUpdate implements Dispatch {
@@ -40,6 +46,9 @@ public class PresenceUpdate implements Dispatch {
     private ActivityResponse[] activities;
     @JsonProperty("client_status")
     private ClientStatus clientStatus;
+
+    @JsonIgnore
+    private Map<String, Object> additionalProperties = new LinkedHashMap<>();
 
     public JsonNode getUser() {
         return user;
@@ -69,6 +78,16 @@ public class PresenceUpdate implements Dispatch {
 
     public ClientStatus getClientStatus() {
         return clientStatus;
+    }
+
+    @JsonAnyGetter
+    public Map<String, Object> getAdditionalProperties() {
+        return additionalProperties;
+    }
+
+    @JsonAnySetter
+    public void setAdditionalProperty(String name, Object value) {
+        additionalProperties.put(name, value);
     }
 
     @PossibleJson

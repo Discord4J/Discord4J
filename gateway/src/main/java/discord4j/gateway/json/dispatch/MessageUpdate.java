@@ -16,6 +16,9 @@
  */
 package discord4j.gateway.json.dispatch;
 
+import com.fasterxml.jackson.annotation.JsonAnyGetter;
+import com.fasterxml.jackson.annotation.JsonAnySetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import discord4j.common.jackson.Possible;
 import discord4j.common.jackson.UnsignedJson;
@@ -26,6 +29,8 @@ import discord4j.common.json.UserResponse;
 import reactor.util.annotation.Nullable;
 
 import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 public class MessageUpdate implements Dispatch {
 
@@ -56,6 +61,9 @@ public class MessageUpdate implements Dispatch {
     @UnsignedJson
     @Nullable
     private Long guildId;
+
+    @JsonIgnore
+    private Map<String, Object> additionalProperties = new LinkedHashMap<>();
 
     public int getType() {
         return type;
@@ -125,14 +133,24 @@ public class MessageUpdate implements Dispatch {
         return guildId;
     }
 
+    @JsonAnyGetter
+    public Map<String, Object> getAdditionalProperties() {
+        return additionalProperties;
+    }
+
+    @JsonAnySetter
+    public void setAdditionalProperty(String name, Object value) {
+        additionalProperties.put(name, value);
+    }
+
     @Override
     public String toString() {
         return "MessageUpdate{" +
                 "type=" + type +
                 ", tts=" + tts +
-                ", timestamp='" + timestamp + "\'" +
+                ", timestamp='" + timestamp + "'" +
                 ", pinned=" + pinned +
-                ", nonce='" + nonce + "\'" +
+                ", nonce='" + nonce + "'" +
                 ", mentions=" + (mentions.isAbsent() ? mentions : Arrays.toString(mentions.get())) +
                 ", mentionRoles=" + (mentionRoles.isAbsent() ? mentionRoles : Arrays.toString(mentionRoles.get())) +
                 ", mentionEveryone=" + mentionEveryone +

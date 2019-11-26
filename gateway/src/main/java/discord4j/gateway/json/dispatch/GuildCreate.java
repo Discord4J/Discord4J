@@ -16,16 +16,20 @@
  */
 package discord4j.gateway.json.dispatch;
 
+import com.fasterxml.jackson.annotation.JsonAnyGetter;
+import com.fasterxml.jackson.annotation.JsonAnySetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import discord4j.common.jackson.UnsignedJson;
 import discord4j.common.json.GuildEmojiResponse;
 import discord4j.common.json.GuildMemberResponse;
 import discord4j.common.json.RoleResponse;
-import discord4j.gateway.json.response.ActivityResponse;
 import discord4j.gateway.json.response.GatewayChannelResponse;
 import reactor.util.annotation.Nullable;
 
 import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 public class GuildCreate implements Dispatch {
 
@@ -105,6 +109,9 @@ public class GuildCreate implements Dispatch {
     @JsonProperty("max_members")
     @Nullable
     private Integer maxMembers;
+
+    @JsonIgnore
+    private Map<String, Object> additionalProperties = new LinkedHashMap<>();
 
     public VoiceState[] getVoiceStates() {
         return voiceStates;
@@ -263,6 +270,16 @@ public class GuildCreate implements Dispatch {
     @Nullable
     public Integer getMaxMembers() {
         return maxMembers;
+    }
+
+    @JsonAnyGetter
+    public Map<String, Object> getAdditionalProperties() {
+        return additionalProperties;
+    }
+
+    @JsonAnySetter
+    public void setAdditionalProperty(String name, Object value) {
+        additionalProperties.put(name, value);
     }
 
     @Override

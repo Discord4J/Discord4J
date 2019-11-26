@@ -16,12 +16,17 @@
  */
 package discord4j.gateway.json.dispatch;
 
+import com.fasterxml.jackson.annotation.JsonAnyGetter;
+import com.fasterxml.jackson.annotation.JsonAnySetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import discord4j.common.jackson.UnsignedJson;
 import discord4j.common.json.*;
 import reactor.util.annotation.Nullable;
 
 import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 public class MessageCreate implements Dispatch {
 
@@ -67,6 +72,9 @@ public class MessageCreate implements Dispatch {
     private Activity activity;
     @Nullable
     private Application application;
+
+    @JsonIgnore
+    private Map<String, Object> additionalProperties = new LinkedHashMap<>();
 
     public int getType() {
         return type;
@@ -162,6 +170,16 @@ public class MessageCreate implements Dispatch {
     @Nullable
     public MessageReferenceResponse getMessageReference() {
         return messageReference;
+    }
+
+    @JsonAnyGetter
+    public Map<String, Object> getAdditionalProperties() {
+        return additionalProperties;
+    }
+
+    @JsonAnySetter
+    public void setAdditionalProperty(String name, Object value) {
+        additionalProperties.put(name, value);
     }
 
     @Override

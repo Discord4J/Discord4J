@@ -16,11 +16,16 @@
  */
 package discord4j.common.json;
 
+import com.fasterxml.jackson.annotation.JsonAnyGetter;
+import com.fasterxml.jackson.annotation.JsonAnySetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import discord4j.common.jackson.UnsignedJson;
 import reactor.util.annotation.Nullable;
 
 import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 public class GuildMemberResponse {
 
@@ -35,6 +40,9 @@ public class GuildMemberResponse {
     private String premiumSince;
     private boolean deaf;
     private boolean mute;
+
+    @JsonIgnore
+    private Map<String, Object> additionalProperties = new LinkedHashMap<>();
 
     public UserResponse getUser() {
         return user;
@@ -64,6 +72,16 @@ public class GuildMemberResponse {
 
     public boolean isMute() {
         return mute;
+    }
+
+    @JsonAnyGetter
+    public Map<String, Object> getAdditionalProperties() {
+        return additionalProperties;
+    }
+
+    @JsonAnySetter
+    public void setAdditionalProperty(String name, Object value) {
+        additionalProperties.put(name, value);
     }
 
     @Override

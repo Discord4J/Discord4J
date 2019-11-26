@@ -16,11 +16,16 @@
  */
 package discord4j.gateway.json.dispatch;
 
+import com.fasterxml.jackson.annotation.JsonAnyGetter;
+import com.fasterxml.jackson.annotation.JsonAnySetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import discord4j.common.json.UserResponse;
 import discord4j.gateway.json.response.UnavailableGuildResponse;
 
 import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 public class Ready implements Dispatch {
 
@@ -33,6 +38,9 @@ public class Ready implements Dispatch {
     @JsonProperty("_trace")
     private String[] trace;
     private int[] shard;
+
+    @JsonIgnore
+    private Map<String, Object> additionalProperties = new LinkedHashMap<>();
 
     public int getVersion() {
         return version;
@@ -56,6 +64,16 @@ public class Ready implements Dispatch {
 
     public int[] getShard() {
         return shard;
+    }
+
+    @JsonAnyGetter
+    public Map<String, Object> getAdditionalProperties() {
+        return additionalProperties;
+    }
+
+    @JsonAnySetter
+    public void setAdditionalProperty(String name, Object value) {
+        additionalProperties.put(name, value);
     }
 
     @Override
