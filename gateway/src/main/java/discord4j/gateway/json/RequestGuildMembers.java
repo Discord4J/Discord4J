@@ -16,6 +16,7 @@
  */
 package discord4j.gateway.json;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import discord4j.common.jackson.UnsignedJson;
 
@@ -27,7 +28,10 @@ public class RequestGuildMembers implements PayloadData {
     private final String query;
     private final int limit;
 
-    public RequestGuildMembers(long guildId, String query, int limit) {
+    @JsonCreator
+    public RequestGuildMembers(@JsonProperty("guild_id") long guildId,
+                               @JsonProperty("query") String query,
+                               @JsonProperty("limit") int limit) {
         this.guildId = guildId;
         this.query = query;
         this.limit = limit;
