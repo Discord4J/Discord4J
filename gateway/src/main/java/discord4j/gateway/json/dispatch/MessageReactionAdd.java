@@ -19,6 +19,7 @@ package discord4j.gateway.json.dispatch;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import discord4j.common.jackson.UnsignedJson;
 import discord4j.common.json.EmojiResponse;
+import discord4j.common.json.GuildMemberResponse;
 import reactor.util.annotation.Nullable;
 
 public class MessageReactionAdd implements Dispatch {
@@ -37,6 +38,8 @@ public class MessageReactionAdd implements Dispatch {
     @UnsignedJson
     private long messageId;
     private EmojiResponse emoji;
+    @Nullable
+    private GuildMemberResponse member;
 
     public long getUserId() {
         return userId;
@@ -59,6 +62,11 @@ public class MessageReactionAdd implements Dispatch {
         return emoji;
     }
 
+    @Nullable
+    public GuildMemberResponse getMember() {
+        return this.member;
+    }
+
     @Override
     public String toString() {
         return "MessageReactionAdd{" +
@@ -67,6 +75,7 @@ public class MessageReactionAdd implements Dispatch {
                 ", guildId=" + guildId +
                 ", messageId=" + messageId +
                 ", emoji=" + emoji +
+                ", member=" + member +
                 '}';
     }
 }
