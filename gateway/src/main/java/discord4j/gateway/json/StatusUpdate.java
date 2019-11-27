@@ -66,7 +66,10 @@ public class StatusUpdate implements PayloadData {
         private final int type;
         private final Possible<String> url;
 
-        public Game(String name, int type, Possible<String> url) {
+        @JsonCreator
+        public Game(@JsonProperty("name") String name,
+                    @JsonProperty("type") int type,
+                    @JsonProperty("url") Possible<String> url) {
             this.name = name;
             this.type = type;
             this.url = url;
