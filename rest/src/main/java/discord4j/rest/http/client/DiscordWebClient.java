@@ -121,7 +121,7 @@ public class DiscordWebClient {
                     String contentType = requestHeaders.get(HttpHeaderNames.CONTENT_TYPE);
                     HttpClient.RequestSender sender = httpClient
                             .baseUrl(Routes.BASE_URL)
-                            .observe((connection, newState) -> log.debug(format(ctx, "{} {}"), newState, connection))
+                            .observe((connection, newState) -> log.trace(format(ctx, "{} {}"), newState, connection))
                             .headers(headers -> headers.setAll(requestHeaders))
                             .request(request.getMethod())
                             .uri(request.getUrl());
