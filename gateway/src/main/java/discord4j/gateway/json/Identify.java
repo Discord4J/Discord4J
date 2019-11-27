@@ -53,6 +53,7 @@ public class Identify implements PayloadData {
                 ", largeThreshold=" + largeThreshold +
                 ", shard=" + shard +
                 ", presence=" + presence +
+                ", guildSubscriptions=" + guildSubscriptions +
                 '}';
     }
 }
