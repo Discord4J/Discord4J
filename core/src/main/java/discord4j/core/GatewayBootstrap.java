@@ -629,6 +629,10 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                             .getRestClient()
                             .getGatewayService()
                             .getGateway()
+                            .doOnSubscribe(s -> log.debug(format(ctx,"Acquiring gateway endpoint")))
+                            .retryBackoff(reconnectOptions.getMaxRetries(),
+                                    reconnectOptions.getFirstBackoff(),
+                                    reconnectOptions.getMaxBackoffInterval())
                             .flatMap(response -> gatewayClient.execute(
                                     RouteUtils.expandQuery(response.getUrl(), getGatewayParameters())))
                             .then(stateHolder.invalidateStores())
