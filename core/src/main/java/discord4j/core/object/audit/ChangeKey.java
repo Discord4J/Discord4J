@@ -46,12 +46,14 @@ public final class ChangeKey<T> {
     public static final ChangeKey<Integer> PRUNE_DAYS = changeKey("prune_delete_days");
     public static final ChangeKey<Boolean> WIDGET_ENABLED = changeKey("widget_enabled");
     public static final ChangeKey<Snowflake> WIDGET_CHANNEL = changeKey("widget_channel_id");
+    public static final ChangeKey<Snowflake> SYSTEM_CHANNEL = changeKey("system_channel_id");
     public static final ChangeKey<Integer> POSITION = changeKey("position");
     public static final ChangeKey<String> TOPIC = changeKey("topic");
     public static final ChangeKey<Integer> BITRATE = changeKey("bitrate");
     public static final ChangeKey<Set<ExtendedPermissionOverwrite>> OVERWRITES = changeKey("permission_overwrites");
     public static final ChangeKey<Boolean> NSFW = changeKey("nsfw");
     public static final ChangeKey<Snowflake> APPLICATION_ID = changeKey("application_id");
+    public static final ChangeKey<Integer> RATE_LIMIT_PER_USER = changeKey("rate_limit_per_user");
     public static final ChangeKey<PermissionSet> PERMISSIONS = changeKey("permission");
     public static final ChangeKey<Color> COLOR = changeKey("color");
     public static final ChangeKey<Boolean> HOIST = changeKey("hoist");

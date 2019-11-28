@@ -34,6 +34,9 @@ public enum ActionType {
     MEMBER_BAN_REMOVE(23),
     MEMBER_UPDATE(24),
     MEMBER_ROLE_UPDATE(25),
+    MEMBER_MOVE(26),
+    MEMBER_DISCONNECT(27),
+    BOT_ADD(28),
     ROLE_CREATE(30),
     ROLE_UPDATE(31),
     ROLE_DELETE(32),
@@ -46,7 +49,13 @@ public enum ActionType {
     EMOJI_CREATE(60),
     EMOJI_UPDATE(61),
     EMOJI_DELETE(62),
-    MESSAGE_DELETE(72);
+    MESSAGE_DELETE(72),
+    MESSAGE_BULK_DELETE(73),
+    MESSAGE_PIN(74),
+    MESSAGE_UNPIN(75),
+    INTEGRATION_CREATE(80),
+    INTEGRATION_UPDATE(81),
+    INTEGRATION_DELETE(82);
 
     public static ActionType of(int value) {
         switch (value) {
@@ -63,6 +72,9 @@ public enum ActionType {
             case 23: return MEMBER_BAN_REMOVE;
             case 24: return MEMBER_UPDATE;
             case 25: return MEMBER_ROLE_UPDATE;
+            case 26: return MEMBER_MOVE;
+            case 27: return MEMBER_DISCONNECT;
+            case 28: return BOT_ADD;
             case 30: return ROLE_CREATE;
             case 31: return ROLE_UPDATE;
             case 32: return ROLE_DELETE;
@@ -76,6 +88,12 @@ public enum ActionType {
             case 61: return EMOJI_UPDATE;
             case 62: return EMOJI_DELETE;
             case 72: return MESSAGE_DELETE;
+            case 73: return MESSAGE_BULK_DELETE;
+            case 74: return MESSAGE_PIN;
+            case 75: return MESSAGE_UNPIN;
+            case 80: return INTEGRATION_CREATE;
+            case 81: return INTEGRATION_UPDATE;
+            case 82: return INTEGRATION_DELETE;
             default: return UNKNOWN;
         }
     }
