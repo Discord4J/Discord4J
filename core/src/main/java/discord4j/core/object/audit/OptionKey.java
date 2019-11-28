@@ -23,6 +23,7 @@ public class OptionKey<T> {
     public static final OptionKey<String> DELETE_MEMBER_DAYS = optionKey("delete_member_days");
     public static final OptionKey<String> MEMBERS_REMOVED = optionKey("members_removed");
     public static final OptionKey<Snowflake> CHANNEL_ID = optionKey("channel_id");
+    public static final OptionKey<Snowflake> MESSAGE_ID = optionKey("message_id");
     public static final OptionKey<Integer> COUNT = optionKey("count");
     public static final OptionKey<Snowflake> ID = optionKey("id");
     public static final OptionKey<String> TYPE = optionKey("type");

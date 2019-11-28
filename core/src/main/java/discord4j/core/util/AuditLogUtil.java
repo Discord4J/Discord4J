@@ -45,6 +45,9 @@ public class AuditLogUtil {
         if (options.getChannelId() != null) {
             map.put(OptionKey.CHANNEL_ID.getField(), options.getChannelId());
         }
+        if (options.getMessageId() != null) {
+            map.put(OptionKey.MESSAGE_ID.getField(), options.getMessageId());
+        }
         if (options.getCount() != null) {
             map.put(OptionKey.COUNT.getField(), options.getCount());
         }
