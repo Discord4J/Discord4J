@@ -18,6 +18,7 @@ package discord4j.core.event.dispatch;
 
 import discord4j.common.jackson.Possible;
 import discord4j.common.json.EmbedResponse;
+import discord4j.common.json.GuildMemberResponse;
 import discord4j.common.json.Mention;
 import discord4j.common.json.MessageMember;
 import discord4j.core.DiscordClient;
@@ -125,6 +126,10 @@ class MessageDispatchHandlers {
         long messageId = context.getDispatch().getMessageId();
         Long guildId = context.getDispatch().getGuildId();
 
+        GuildMemberResponse response = context.getDispatch().getMember();
+        MemberBean memberBean = response != null ? new MemberBean(response) : null;
+        UserBean userBean = response != null ? new UserBean(response.getUser()) : null;
+
         Mono<Void> addToMessage = context.getServiceMediator().getStateHolder().getMessageStore()
                 .find(messageId)
                 .map(oldBean -> {
@@ -162,8 +167,11 @@ class MessageDispatchHandlers {
                         context.getServiceMediator().getStateHolder().getMessageStore().save(bean.getId(), bean));
 
         ReactionEmoji emoji = ReactionEmoji.of(emojiId, emojiName, emojiAnimated);
-        return addToMessage.thenReturn(new ReactionAddEvent(client, userId, channelId, messageId, guildId, emoji));
+        Member member = response != null ? new Member(context.getServiceMediator(), memberBean, userBean, guildId) :
+                null;
 
+        return addToMessage.thenReturn(new ReactionAddEvent(client, userId, channelId, messageId, guildId, emoji,
+                member));
     }
 
     static Mono<ReactionRemoveEvent> messageReactionRemove(DispatchContext<MessageReactionRemove> context) {
