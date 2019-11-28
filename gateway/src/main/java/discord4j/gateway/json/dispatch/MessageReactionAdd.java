@@ -64,7 +64,7 @@ public class MessageReactionAdd implements Dispatch {
 
     @Nullable
     public GuildMemberResponse getMember() {
-        return this.member;
+        return member;
     }
 
     @Override
