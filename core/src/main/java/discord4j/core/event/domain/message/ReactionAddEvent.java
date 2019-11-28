@@ -18,6 +18,7 @@ package discord4j.core.event.domain.message;
 
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.Guild;
+import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.MessageChannel;
@@ -46,15 +47,18 @@ public class ReactionAddEvent extends MessageEvent {
     @Nullable
     private final Long guildId;
     private final ReactionEmoji emoji;
+    @Nullable
+    private final Member member;
 
     public ReactionAddEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, long userId, long channelId, long messageId, @Nullable Long guildId,
-                            ReactionEmoji emoji) {
+                            ReactionEmoji emoji, @Nullable Member member) {
         super(gateway, shardInfo);
         this.userId = userId;
         this.channelId = channelId;
         this.messageId = messageId;
         this.guildId = guildId;
         this.emoji = emoji;
+        this.member = member;
     }
 
     /**
@@ -144,6 +148,16 @@ public class ReactionAddEvent extends MessageEvent {
         return emoji;
     }
 
+    /**
+     * Gets the member who reacted, if present.
+     * This may not be available if the reaction is to a {@code Message} in a private channel.
+     *
+     * @return The member who reacted, if present.
+     */
+    public Optional<Member> getMember() {
+        return Optional.ofNullable(member);
+    }
+
     @Override
     public String toString() {
         return "ReactionAddEvent{" +
@@ -152,6 +166,7 @@ public class ReactionAddEvent extends MessageEvent {
                 ", messageId=" + messageId +
                 ", guildId=" + guildId +
                 ", emoji=" + emoji +
+                ", member=" + member +
                 '}';
     }
 }

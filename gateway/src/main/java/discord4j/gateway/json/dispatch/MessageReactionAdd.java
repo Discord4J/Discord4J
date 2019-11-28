@@ -22,6 +22,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import discord4j.common.jackson.UnsignedJson;
 import discord4j.common.json.EmojiResponse;
+import discord4j.common.json.GuildMemberResponse;
 import reactor.util.annotation.Nullable;
 
 import java.util.LinkedHashMap;
@@ -43,6 +44,8 @@ public class MessageReactionAdd implements Dispatch {
     @UnsignedJson
     private long messageId;
     private EmojiResponse emoji;
+    @Nullable
+    private GuildMemberResponse member;
 
     @JsonIgnore
     private Map<String, Object> additionalProperties = new LinkedHashMap<>();
@@ -68,6 +71,11 @@ public class MessageReactionAdd implements Dispatch {
         return emoji;
     }
 
+    @Nullable
+    public GuildMemberResponse getMember() {
+        return this.member;
+    }
+
     @JsonAnyGetter
     public Map<String, Object> getAdditionalProperties() {
         return additionalProperties;
@@ -86,6 +94,7 @@ public class MessageReactionAdd implements Dispatch {
                 ", guildId=" + guildId +
                 ", messageId=" + messageId +
                 ", emoji=" + emoji +
+                ", member=" + member +
                 '}';
     }
 }
