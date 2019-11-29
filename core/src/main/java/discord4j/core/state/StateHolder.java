@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J. If not, see <http://www.gnu.org/licenses/>.
  */
-package discord4j.core;
+package discord4j.core.state;
 
 import discord4j.core.object.data.stored.*;
 import discord4j.store.api.Store;
@@ -60,7 +60,7 @@ public final class StateHolder {
     private final Store<LongLongTuple2, VoiceStateBean> voiceStateStore;
     private final AtomicLong selfId;
 
-    StateHolder(final StoreService service, final StoreContext context) {
+    public StateHolder(final StoreService service, final StoreContext context) {
         storeService = service;
 
         service.init(context);

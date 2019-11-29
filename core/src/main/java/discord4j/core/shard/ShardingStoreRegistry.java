@@ -21,10 +21,48 @@ import discord4j.store.api.Store;
 
 import java.io.Serializable;
 
+/**
+ * Registry that holds all {@link Store} and {@link ShardKeyStore} instances in order to support a
+ * {@link ShardAwareStoreService} creating and invalidating on a per-shard basis.
+ */
 public interface ShardingStoreRegistry {
 
+    /**
+     * Return if this registry contains a {@link Store} instance for the given value class.
+     *
+     * @param valueClass the class to perform a lookup with
+     * @return {@code true} if a {@link Store} for the given class exists, {@code false} otherwise.
+     */
     boolean containsStore(Class<?> valueClass);
+
+    /**
+     * Add a {@link Store} to the registry under its value type.
+     *
+     * @param valueClass the key to used when adding {@code store}
+     * @param store the {@link Store} instance to add to this registry
+     * @param <V> the {@link Store} value type
+     * @param <K> the {@link Store} key type
+     */
     <V extends Serializable, K extends Comparable<K>> void putStore(Class<V> valueClass, Store<K, V> store);
-    <K extends Comparable<K>, V extends Serializable> Store<K, V> getValueStore(Class<K> key, Class<V> value);
+
+    /**
+     * Return the saved {@link Store} with the given key and value type as parameters.
+     *
+     * @param keyClass the target {@link Store} key class
+     * @param valueClass the target {@link Store} value class
+     * @param <K> the type of the given {@code key}
+     * @param <V> the type of the given {@code value}
+     * @return a {@link Store} of the given types
+     */
+    <K extends Comparable<K>, V extends Serializable> Store<K, V> getValueStore(Class<K> keyClass, Class<V> valueClass);
+
+    /**
+     * Return the saved {@link ShardKeyStore} for the given value type.
+     *
+     * @param valueClass the target {@link Store} value class
+     * @param <K> the type of the given {@code key}
+     * @param <V> the type of the given {@code value}
+     * @return a {@link ShardKeyStore} for the given value type
+     */
     <K extends Comparable<K>, V extends Serializable> ShardKeyStore<K> getKeyStore(Class<V> valueClass);
 }

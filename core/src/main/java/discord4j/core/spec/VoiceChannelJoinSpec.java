@@ -20,16 +20,14 @@ import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.VoiceServerUpdateEvent;
 import discord4j.core.event.domain.VoiceStateUpdateEvent;
 import discord4j.core.object.entity.channel.VoiceChannel;
-import discord4j.gateway.GatewayClient;
-import discord4j.gateway.json.GatewayPayload;
+import discord4j.gateway.GatewayClientGroup;
+import discord4j.gateway.json.ShardGatewayPayload;
 import discord4j.gateway.json.VoiceStateUpdate;
 import discord4j.voice.AudioProvider;
 import discord4j.voice.AudioReceiver;
-import discord4j.voice.VoiceClient;
 import discord4j.voice.VoiceConnection;
 import reactor.core.publisher.Mono;
 
-import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -104,19 +102,10 @@ public class VoiceChannelJoinSpec implements Spec<Mono<VoiceConnection>> {
         final long channelId = voiceChannel.getId().asLong();
         final long selfId = gateway.getGatewayResources().getStateView().getSelfId();
 
-        Map<Integer, GatewayClient> gatewayClients = voiceChannel.getClient().getGatewayClientMap();
-        int count = gatewayClients.size();
-        int shardId = (int) ((voiceChannel.getGuildId().asLong() >> 22) % count);
-        GatewayClient gatewayClient = gatewayClients.get(shardId);
-        VoiceClient voiceClient = gateway.getVoiceClientMap().get(shardId);
-        if (gatewayClient == null) {
-            return Mono.error(new RuntimeException("Shard id not set"));
-        }
-
-        final Mono<Void> sendVoiceStateUpdate = Mono.fromRunnable(() -> {
-            final VoiceStateUpdate voiceStateUpdate = new VoiceStateUpdate(guildId, channelId, selfMute, selfDeaf);
-            gatewayClient.sender().next(GatewayPayload.voiceStateUpdate(voiceStateUpdate));
-        });
+        final GatewayClientGroup clientGroup = voiceChannel.getClient().getGatewayClientGroup();
+        final int shardId = (int) ((voiceChannel.getGuildId().asLong() >> 22) % clientGroup.getShardCount());
+        final Mono<Void> sendVoiceStateUpdate = clientGroup.unicast(ShardGatewayPayload.voiceStateUpdate(
+                new VoiceStateUpdate(guildId, channelId, selfMute, selfDeaf), shardId));
 
         final Mono<VoiceStateUpdateEvent> waitForVoiceStateUpdate = gateway.getEventDispatcher()
                 .on(VoiceStateUpdateEvent.class)
@@ -141,7 +130,8 @@ public class VoiceChannelJoinSpec implements Spec<Mono<VoiceConnection>> {
                     final String session = t.getT1().getCurrent().getSessionId();
                     final String token = t.getT2().getToken();
 
-                    return voiceClient.newConnection(guildId, selfId, session, token, endpoint, provider, receiver);
+                    return gateway.getVoiceConnectionFactory().create(guildId, selfId, session, token, endpoint,
+                            provider, receiver);
                 });
     }
 }

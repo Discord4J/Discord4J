@@ -17,28 +17,57 @@
 
 package discord4j.core.shard;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * A repository for the entity keys tracked by each shard.
+ *
+ * @param <K> the type of the keys tracked
+ */
 public class ShardKeyStore<K extends Comparable<K>> {
 
     private Map<Integer, Set<K>> keysByShard = new ConcurrentHashMap<>();
 
-    public boolean add(int shardId, K key) {
-        return keySet(shardId).add(key);
+    /**
+     * Add the given key under a shard index.
+     *
+     * @param shardId the shard index a key will be associated under
+     * @param key the actual key to store
+     */
+    public void add(int shardId, K key) {
+        keySet(shardId).add(key);
     }
 
-    public boolean remove(int shardId, K key) {
-        return keySet(shardId).remove(key);
+    /**
+     * Remove the given key from a shard index.
+     *
+     * @param shardId the shard index a key will be removed from
+     * @param key the actual key to remove
+     */
+    public void remove(int shardId, K key) {
+        keySet(shardId).remove(key);
     }
 
+    /**
+     * Removes all keys stored under a given shard index.
+     *
+     * @param shardId the shard index to remove all keys from
+     */
     public void clear(int shardId) {
         keySet(shardId).clear();
     }
 
+    /**
+     * Return an unmodifiable {@link Set} of keys for the given shard index.
+     *
+     * @param shardId the shard index to obtain its keys from
+     * @return a {@link Set} with keys
+     */
     public Set<K> keys(int shardId) {
-        return keySet(shardId);
+        return Collections.unmodifiableSet(keySet(shardId));
     }
 
     private Set<K> keySet(int shardId) {

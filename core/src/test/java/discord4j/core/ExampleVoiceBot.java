@@ -80,7 +80,7 @@ public class ExampleVoiceBot {
                             }))
                     )
                     .zipWith(leave)
-                    .doOnNext(t2 -> t2.getT1().disconnect())
+                    .flatMap(t2 -> t2.getT1().disconnect())
                     .repeat()
                     .then();
 

@@ -20,26 +20,28 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Scheduler;
 
-import java.util.function.Consumer;
+import java.util.function.Function;
 
-public final class VoiceClient {
+public final class VoiceClient implements VoiceConnectionFactory {
 
     private final Scheduler scheduler;
     private final ObjectMapper mapper;
 
-    private final Consumer<Long> leaveChannel;
+    private final Function<Long, Mono<Void>> leaveChannel;
 
-    public VoiceClient(Scheduler scheduler, ObjectMapper mapper, Consumer<Long> leaveChannel) {
+    public VoiceClient(Scheduler scheduler, ObjectMapper mapper, Function<Long, Mono<Void>> leaveChannel) {
         this.scheduler = scheduler;
         this.mapper = mapper;
         this.leaveChannel = leaveChannel;
     }
 
-    public Mono<VoiceConnection> newConnection(long guildId, long selfId, String session, String token, String gatewayUrl, AudioProvider provider, AudioReceiver receiver) {
+    @Override
+    public Mono<VoiceConnection> create(long guildId, long selfId, String session, String token, String gatewayUrl,
+                                        AudioProvider provider, AudioReceiver receiver) {
         return Mono.create(sink -> {
             VoiceGatewayClient vgw = new VoiceGatewayClient(guildId, selfId, session, token, mapper, scheduler, provider, receiver);
             vgw.start(gatewayUrl, () -> {
-                VoiceConnection connection = new VoiceConnection(vgw, () -> leaveChannel.accept(guildId));
+                VoiceConnection connection = new VoiceConnection(vgw, leaveChannel.apply(guildId));
                 sink.success(connection);
             });
             sink.onCancel(vgw::stop);

@@ -32,16 +32,20 @@ import discord4j.core.object.entity.*;
 import discord4j.core.object.entity.channel.Channel;
 import discord4j.core.object.presence.Presence;
 import discord4j.core.object.util.Snowflake;
+import discord4j.core.shard.GatewayBootstrap;
 import discord4j.core.spec.GuildCreateSpec;
 import discord4j.core.spec.UserEditSpec;
+import discord4j.core.state.StateHolder;
 import discord4j.core.util.EntityUtil;
 import discord4j.core.util.PaginationUtil;
 import discord4j.gateway.GatewayClient;
+import discord4j.gateway.GatewayClientGroup;
 import discord4j.gateway.json.GatewayPayload;
+import discord4j.gateway.json.ShardGatewayPayload;
 import discord4j.rest.RestClient;
 import discord4j.rest.json.response.UserGuildResponse;
 import discord4j.store.api.util.LongLongTuple2;
-import discord4j.voice.VoiceClient;
+import discord4j.voice.VoiceConnectionFactory;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -49,11 +53,10 @@ import reactor.core.publisher.MonoProcessor;
 import reactor.util.Logger;
 import reactor.util.Loggers;
 
-import java.util.Collections;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 /**
  * An aggregation of all dependencies Discord4J requires to operate with the Discord Gateway, REST API and Voice
@@ -77,17 +80,17 @@ public class GatewayDiscordClient {
     private final DiscordClient discordClient;
     private final GatewayResources gatewayResources;
     private final MonoProcessor<Void> closeProcessor;
-    private final Map<Integer, GatewayClient> gatewayClientMap;
-    private final Map<Integer, VoiceClient> voiceClientMap;
+    private final GatewayClientGroup gatewayClientGroup;
+    private final VoiceConnectionFactory voiceConnectionFactory;
 
     public GatewayDiscordClient(DiscordClient discordClient, GatewayResources gatewayResources,
-                                MonoProcessor<Void> closeProcessor, Map<Integer, GatewayClient> gatewayClientMap,
-                                Map<Integer, VoiceClient> voiceClientMap) {
+                                MonoProcessor<Void> closeProcessor, GatewayClientGroup gatewayClientGroup,
+                                VoiceConnectionFactory voiceConnectionFactory) {
         this.discordClient = discordClient;
         this.gatewayResources = gatewayResources;
         this.closeProcessor = closeProcessor;
-        this.gatewayClientMap = gatewayClientMap;
-        this.voiceClientMap = voiceClientMap;
+        this.gatewayClientGroup = gatewayClientGroup;
+        this.voiceConnectionFactory = voiceConnectionFactory;
     }
 
     /**
@@ -132,23 +135,33 @@ public class GatewayDiscordClient {
     }
 
     /**
-     * Returns an unmodifiable view of the {@link GatewayClient} instances created by this
-     * {@link GatewayDiscordClient}. The returned map uses shard index for keys.
+     * Returns a {@link GatewayClient} instance created by this {@link GatewayDiscordClient}, which is associated to
+     * a given shard index.
      *
-     * @return a map of {@link GatewayClient} instances
+     * @param shardId the shard index used to get the client instance
+     * @return a {@link GatewayClient} instance represented by the given shard, if present
      */
-    public Map<Integer, GatewayClient> getGatewayClientMap() {
-        return Collections.unmodifiableMap(gatewayClientMap);
+    public Optional<GatewayClient> getGatewayClient(int shardId) {
+        return gatewayClientGroup.find(shardId);
     }
 
     /**
-     * Returns an unmodifiable view of the {@link VoiceClient} instances created by this
-     * {@link GatewayDiscordClient}. The returned map uses shard index for keys.
+     * Returns the {@link GatewayClientGroup} capable of performing operations across all {@link GatewayClient}
+     * instances created or managed by this {@link GatewayDiscordClient}.
      *
-     * @return a map of {@link VoiceClient} instances
+     * @return a {@link GatewayClientGroup} to aggregate gateway operations
      */
-    public Map<Integer, VoiceClient> getVoiceClientMap() {
-        return Collections.unmodifiableMap(voiceClientMap);
+    public GatewayClientGroup getGatewayClientGroup() {
+        return gatewayClientGroup;
+    }
+
+    /**
+     * Returns the {@link VoiceConnectionFactory} instance created by this {@link GatewayDiscordClient}.
+     *
+     * @return a {@link VoiceConnectionFactory} instance capable of initiating voice connections
+     */
+    public VoiceConnectionFactory getVoiceConnectionFactory() {
+        return voiceConnectionFactory;
     }
 
     /**
@@ -405,10 +418,7 @@ public class GatewayDiscordClient {
      * through the {@code Mono}.
      */
     public Mono<Void> updatePresence(final Presence presence) {
-        return Flux.fromIterable(getGatewayClientMap().values())
-                .flatMap(gatewayClient -> gatewayClient.send(
-                        Mono.just(GatewayPayload.statusUpdate(presence.asStatusUpdate()))))
-                .then();
+        return gatewayClientGroup.multicast(GatewayPayload.statusUpdate(presence.asStatusUpdate()));
     }
 
     /**
@@ -419,9 +429,7 @@ public class GatewayDiscordClient {
      * through the {@code Mono}.
      */
     public Mono<Void> updatePresence(final Presence presence, final int shardId) {
-        return Mono.justOrEmpty(getGatewayClientMap().get(shardId))
-                .flatMap(gatewayClient -> gatewayClient.send(
-                        Mono.just(GatewayPayload.statusUpdate(presence.asStatusUpdate()))));
+        return gatewayClientGroup.unicast(ShardGatewayPayload.statusUpdate(presence.asStatusUpdate(), shardId));
     }
 
     /**
@@ -479,9 +487,7 @@ public class GatewayDiscordClient {
      * {@link GatewayDiscordClient} and complete after all of them have closed.
      */
     public Mono<Void> logout() {
-        return Mono.whenDelayError(gatewayClientMap.values().stream()
-                .map(client -> client.close(false))
-                .collect(Collectors.toList()));
+        return gatewayClientGroup.logout();
     }
 
     /**

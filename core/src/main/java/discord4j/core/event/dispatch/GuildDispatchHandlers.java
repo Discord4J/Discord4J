@@ -20,7 +20,6 @@ import discord4j.common.json.GuildEmojiResponse;
 import discord4j.common.json.GuildMemberResponse;
 import discord4j.common.json.UserResponse;
 import discord4j.core.GatewayDiscordClient;
-import discord4j.core.StateHolder;
 import discord4j.core.event.domain.guild.*;
 import discord4j.core.event.domain.role.RoleCreateEvent;
 import discord4j.core.event.domain.role.RoleDeleteEvent;
@@ -28,9 +27,10 @@ import discord4j.core.event.domain.role.RoleUpdateEvent;
 import discord4j.core.object.data.stored.*;
 import discord4j.core.object.entity.*;
 import discord4j.core.object.util.Snowflake;
+import discord4j.core.state.StateHolder;
 import discord4j.core.util.ArrayUtil;
-import discord4j.gateway.json.GatewayPayload;
 import discord4j.gateway.json.RequestGuildMembers;
+import discord4j.gateway.json.ShardGatewayPayload;
 import discord4j.gateway.json.dispatch.*;
 import discord4j.store.api.util.LongLongTuple2;
 import discord4j.store.api.util.LongObjTuple2;
@@ -105,17 +105,19 @@ class GuildDispatchHandlers {
 
         Mono<Void> savePresences = context.getStateHolder().getPresenceStore()
                 .save(Flux.just(context.getDispatch().getPresences())
-                        .map(presence -> Tuples.of(LongLongTuple2.of(guildBean.getId(), presence.getUser().get("id").asLong()),
+                        .map(presence -> Tuples.of(LongLongTuple2.of(guildBean.getId(),
+                                presence.getUser().get("id").asLong()),
                                 new PresenceBean(presence))));
 
         Mono<Void> startMemberChunk = context.getGateway().getGatewayResources().isMemberRequest() ?
                 Mono.just(guildBean)
                         .filter(GuildBean::getLarge)
-                        .flatMap(bean -> context.getGateway()
-                                .getGatewayClientMap()
-                                .get(context.getShardInfo().getIndex())
-                                .send(Mono.just(GatewayPayload.requestGuildMembers(
-                                        new RequestGuildMembers(bean.getId(), "", 0)))))
+                        .flatMap(bean -> {
+                            int shardId = context.getShardInfo().getIndex();
+                            return context.getGateway().getGatewayClientGroup().unicast(
+                                    ShardGatewayPayload.requestGuildMembers(
+                                            new RequestGuildMembers(bean.getId(), "", 0), shardId));
+                        })
                         .then() : Mono.empty();
 
         Mono<Void> saveOfflinePresences = Mono.just(guildBean.getMembers())
@@ -184,7 +186,8 @@ class GuildDispatchHandlers {
                     Guild guild = new Guild(context.getGateway(), bean);
                     return new GuildDeleteEvent(gateway, context.getShardInfo(), guildId, guild, unavailable);
                 })
-                .switchIfEmpty(deleteGuild.thenReturn(new GuildDeleteEvent(gateway, context.getShardInfo(), guildId, null, unavailable)));
+                .switchIfEmpty(deleteGuild.thenReturn(new GuildDeleteEvent(gateway, context.getShardInfo(), guildId,
+                        null, unavailable)));
     }
 
     static Mono<EmojisUpdateEvent> guildEmojisUpdate(DispatchContext<GuildEmojisUpdate> context) {
@@ -352,11 +355,13 @@ class GuildDispatchHandlers {
 
                     return context.getStateHolder().getMemberStore()
                             .save(key, newBean)
-                            .thenReturn(new MemberUpdateEvent(gateway, context.getShardInfo(), guildId, memberId, old, currentRoles,
+                            .thenReturn(new MemberUpdateEvent(gateway, context.getShardInfo(), guildId, memberId, old
+                                    , currentRoles,
                                     currentNick));
                 });
 
-        return update.defaultIfEmpty(new MemberUpdateEvent(gateway, context.getShardInfo(), guildId, memberId, null, currentRoles,
+        return update.defaultIfEmpty(new MemberUpdateEvent(gateway, context.getShardInfo(), guildId, memberId, null,
+                currentRoles,
                 currentNick));
     }
 
@@ -433,7 +438,8 @@ class GuildDispatchHandlers {
         return context.getStateHolder().getRoleStore()
                 .find(context.getDispatch().getRole().getId())
                 .flatMap(saveNew::thenReturn)
-                .map(old -> new RoleUpdateEvent(gateway, context.getShardInfo(), current, new Role(gateway, old, guildId)))
+                .map(old -> new RoleUpdateEvent(gateway, context.getShardInfo(), current, new Role(gateway, old,
+                        guildId)))
                 .switchIfEmpty(saveNew.thenReturn(new RoleUpdateEvent(gateway, context.getShardInfo(), current, null)));
     }
 

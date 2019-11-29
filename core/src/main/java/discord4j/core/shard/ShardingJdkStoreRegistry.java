@@ -23,6 +23,10 @@ import java.io.Serializable;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * Registry implementation that is backed by JDK collections like {@link Map} instances to hold multiple
+ * {@link Store} and {@link ShardKeyStore}, using the value {@link Class} they hold as key.
+ */
 public class ShardingJdkStoreRegistry implements ShardingStoreRegistry {
 
     private final Map<Class<?>, Store<?, ?>> valueStore = new ConcurrentHashMap<>();

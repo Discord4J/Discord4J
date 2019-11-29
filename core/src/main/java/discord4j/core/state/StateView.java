@@ -16,7 +16,6 @@
  */
 package discord4j.core.state;
 
-import discord4j.core.StateHolder;
 import discord4j.core.object.data.stored.*;
 import discord4j.store.api.service.StoreService;
 import discord4j.store.api.util.LongLongTuple2;

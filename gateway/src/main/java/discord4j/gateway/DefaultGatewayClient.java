@@ -419,6 +419,11 @@ public class DefaultGatewayClient implements GatewayClient {
     }
 
     @Override
+    public int getShardCount() {
+        return identifyOptions.getShardCount();
+    }
+
+    @Override
     public String getSessionId() {
         return sessionId.get();
     }

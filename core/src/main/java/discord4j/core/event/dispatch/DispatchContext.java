@@ -18,7 +18,7 @@
 package discord4j.core.event.dispatch;
 
 import discord4j.core.GatewayDiscordClient;
-import discord4j.core.StateHolder;
+import discord4j.core.state.StateHolder;
 import discord4j.gateway.ShardInfo;
 import discord4j.gateway.json.dispatch.Dispatch;
 

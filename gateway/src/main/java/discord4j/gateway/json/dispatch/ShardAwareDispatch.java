@@ -14,10 +14,30 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J. If not, see <http://www.gnu.org/licenses/>.
  */
-/**
- * Core components for building sharded clients.
- */
-@NonNullApi
-package discord4j.core.shard;
 
-import reactor.util.annotation.NonNullApi;
+package discord4j.gateway.json.dispatch;
+
+public class ShardAwareDispatch implements Dispatch {
+
+    private final int shardIndex;
+    private final int shardCount;
+    private final Dispatch dispatch;
+
+    public ShardAwareDispatch(int shardIndex, int shardCount, Dispatch dispatch) {
+        this.shardIndex = shardIndex;
+        this.shardCount = shardCount;
+        this.dispatch = dispatch;
+    }
+
+    public int getShardIndex() {
+        return shardIndex;
+    }
+
+    public int getShardCount() {
+        return shardCount;
+    }
+
+    public Dispatch getDispatch() {
+        return dispatch;
+    }
+}

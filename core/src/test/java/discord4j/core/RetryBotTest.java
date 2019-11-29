@@ -22,15 +22,13 @@ import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.presence.Presence;
 import discord4j.core.object.util.Snowflake;
+import discord4j.core.shard.ShardingStrategy;
 import discord4j.gateway.IdentifyOptions;
 import discord4j.gateway.SessionInfo;
 import discord4j.gateway.ShardInfo;
-import discord4j.gateway.json.GatewayPayload;
-import discord4j.gateway.json.Opcode;
 import discord4j.rest.entity.data.ApplicationInfoData;
 import discord4j.rest.json.request.MessageCreateRequest;
 import discord4j.rest.util.MultipartRequest;
-import io.netty.buffer.Unpooled;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -42,7 +40,6 @@ import reactor.util.Logger;
 import reactor.util.Loggers;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -77,7 +74,7 @@ public class RetryBotTest {
         DiscordClient.builder(token)
                 .build()
                 .gateway()
-                .setShardCount(shardCount)
+                .setSharding(ShardingStrategy.fixed(shardCount))
                 .setInitialPresence(shard -> Presence.invisible())
                 .withConnection(GatewayDiscordClient::onDisconnect)
                 .block();
@@ -88,7 +85,11 @@ public class RetryBotTest {
     public void testWithConnect() throws InterruptedException {
         GatewayDiscordClient g = DiscordClient.create(token)
                 .gateway()
-                .setShardCount(shardCount)
+                .setSharding(ShardingStrategy.fixed(shardCount))
+                .setSharding(ShardingStrategy.builder()
+                        .indexes(0, 1, 2)
+                        .count(6)
+                        .build())
                 .connect()
                 .block();
 
@@ -192,24 +193,10 @@ public class RetryBotTest {
                     .ifPresent(content -> {
                         if ("!close".equals(content)) {
                             gateway.logout().subscribe();
-                        } else if ("!retry".equals(content)) {
-                            gateway.getGatewayClientMap().values()
-                                    .forEach(gatewayClient -> gatewayClient.sender()
-                                            .next(new GatewayPayload<>(Opcode.RECONNECT, null, null, null)));
-                        } else if ("!disconnect".equals(content)) {
-                            gateway.getGatewayClientMap().values()
-                                    .forEach(gatewayClient -> gatewayClient.close(true).subscribe());
                         } else if ("!online".equals(content)) {
                             gateway.updatePresence(Presence.online()).subscribe();
                         } else if ("!dnd".equals(content)) {
                             gateway.updatePresence(Presence.doNotDisturb()).subscribe();
-                        } else if (content.startsWith("!raw ")) {
-                            gateway.getGatewayClientMap().get(0)
-                                    .sendBuffer(Mono.just(
-                                            Unpooled.wrappedBuffer(
-                                                    content.substring("!raw ".length())
-                                                            .getBytes(StandardCharsets.UTF_8))))
-                                    .subscribe();
                         } else if ("!raise".equals(content)) {
                             // exception if DM
                             Snowflake guildId = message.getGuild().block().getId();
