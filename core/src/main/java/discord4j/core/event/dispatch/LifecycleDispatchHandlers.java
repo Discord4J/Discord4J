@@ -18,6 +18,7 @@ package discord4j.core.event.dispatch;
 
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.lifecycle.*;
+import discord4j.core.object.data.stored.ParameterBean;
 import discord4j.core.object.data.stored.UserBean;
 import discord4j.core.object.entity.User;
 import discord4j.gateway.json.dispatch.Ready;
@@ -44,8 +45,11 @@ class LifecycleDispatchHandlers {
         Mono<Void> saveUser = context.getStateHolder().getUserStore()
                 .save(context.getDispatch().getUser().getId(), userBean);
 
-        Mono<Void> saveSelfId = Mono.fromRunnable(() ->
-                context.getStateHolder().getSelfId().set(userBean.getId()));
+        ParameterBean parameterBean = new ParameterBean();
+        parameterBean.getParameters().put("selfId", userBean.getId());
+
+        Mono<Void> saveSelfId = context.getStateHolder().getParameterStore()
+                .save("discord4j.core", parameterBean);
 
         return saveUser.and(saveSelfId)
                 .thenReturn(new ReadyEvent(gateway, context.getShardInfo(), dispatch.getVersion(), self,

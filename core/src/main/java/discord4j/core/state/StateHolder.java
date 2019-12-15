@@ -26,8 +26,6 @@ import reactor.core.publisher.Mono;
 import reactor.util.Logger;
 import reactor.util.Loggers;
 
-import java.util.concurrent.atomic.AtomicLong;
-
 /**
  * Holder for various pieces of state for use in caching.
  * <p>
@@ -58,7 +56,7 @@ public final class StateHolder {
     private final LongObjStore<RoleBean> roleStore;
     private final LongObjStore<UserBean> userStore;
     private final Store<LongLongTuple2, VoiceStateBean> voiceStateStore;
-    private final AtomicLong selfId;
+    private final Store<String, ParameterBean> parameterStore;
 
     public StateHolder(final StoreService service, final StoreContext context) {
         storeService = service;
@@ -92,7 +90,8 @@ public final class StateHolder {
         voiceStateStore = service.provideGenericStore(LongLongTuple2.class, VoiceStateBean.class);
         log.debug("Voice state storage : {}", voiceStateStore);
 
-        selfId = new AtomicLong();
+        parameterStore = service.provideGenericStore(String.class, ParameterBean.class);
+        log.debug("Parameter storage   : {}", voiceStateStore);
     }
 
     public StoreService getStoreService() {
@@ -135,8 +134,8 @@ public final class StateHolder {
         return voiceStateStore;
     }
 
-    public AtomicLong getSelfId() {
-        return selfId;
+    public Store<String, ParameterBean> getParameterStore() {
+        return parameterStore;
     }
 
     public Mono<Void> invalidateStores() {
@@ -148,6 +147,7 @@ public final class StateHolder {
                 .and(presenceStore.invalidate())
                 .and(roleStore.invalidate())
                 .and(userStore.invalidate())
-                .and(voiceStateStore.invalidate());
+                .and(voiceStateStore.invalidate())
+                .and(parameterStore.invalidate());
     }
 }

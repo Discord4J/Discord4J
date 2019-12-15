@@ -373,10 +373,7 @@ public class GatewayDiscordClient {
      * received, it is emitted through the {@code Mono}.
      */
     public Mono<User> getSelf() {
-        final long selfId = gatewayResources.getStateView().getSelfId();
-        return Mono.just(selfId)
-                .filter(it -> it != 0)
-                .map(Snowflake::of)
+        return getSelfId()
                 .flatMap(this::getUserById)
                 .switchIfEmpty(getRestClient().getUserService()
                         .getCurrentUser()
@@ -389,8 +386,8 @@ public class GatewayDiscordClient {
      *
      * @return The bot user's ID.
      */
-    public Snowflake getSelfId() {
-        return Snowflake.of(gatewayResources.getStateView().getSelfId());
+    public Mono<Snowflake> getSelfId() {
+        return gatewayResources.getStateView().getSelfId().map(Snowflake::of);
     }
 
     /**
