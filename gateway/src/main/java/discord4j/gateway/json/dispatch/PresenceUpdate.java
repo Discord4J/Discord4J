@@ -46,6 +46,12 @@ public class PresenceUpdate implements Dispatch {
     private ActivityResponse[] activities;
     @JsonProperty("client_status")
     private ClientStatus clientStatus;
+    @Nullable
+    @JsonProperty("premium_since")
+    private String premiumSince;
+    @Nullable
+    @JsonProperty("nick")
+    private String nick;
 
     @JsonIgnore
     private Map<String, Object> additionalProperties = new LinkedHashMap<>();
@@ -78,6 +84,16 @@ public class PresenceUpdate implements Dispatch {
 
     public ClientStatus getClientStatus() {
         return clientStatus;
+    }
+
+    @Nullable
+    public String getPremiumSince() {
+        return premiumSince;
+    }
+
+    @Nullable
+    public String getNick() {
+        return nick;
     }
 
     @JsonAnyGetter
