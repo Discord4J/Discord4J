@@ -30,7 +30,7 @@ import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-class DefaultShardingStrategy implements ShardingStrategy {
+public class DefaultShardingStrategy implements ShardingStrategy {
 
     private final int count;
     private final Function<Integer, Publisher<Integer>> indexSource;
