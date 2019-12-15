@@ -29,6 +29,7 @@ public class ActivityBean implements Serializable {
     private int type;
     @Nullable
     private String url;
+    private long createdAt;
     @Nullable
     private Long start;
     @Nullable
@@ -70,6 +71,7 @@ public class ActivityBean implements Serializable {
         this.name = response.getName();
         this.type = response.getType();
         this.url = Possible.orElseNull(response.getUrl());
+        this.createdAt = response.getCreatedAt();
 
         ActivityResponse.Timestamps timestamps = Possible.orElseNull(response.getTimestamps());
         if (timestamps == null) {
@@ -159,6 +161,14 @@ public class ActivityBean implements Serializable {
 
     public void setUrl(@Nullable String url) {
         this.url = url;
+    }
+
+    public long getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(long createdAt) {
+        this.createdAt = createdAt;
     }
 
     @Nullable
@@ -331,6 +341,7 @@ public class ActivityBean implements Serializable {
             "name='" + name + '\'' +
             ", type=" + type +
             ", url='" + url + '\'' +
+            ", createdAt=" + createdAt +
             ", start=" + start +
             ", end=" + end +
             ", applicationId=" + applicationId +

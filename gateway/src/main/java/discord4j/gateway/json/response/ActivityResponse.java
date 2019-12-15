@@ -36,6 +36,8 @@ public class ActivityResponse {
     private int type;
     @Nullable
     private Possible<String> url = Possible.absent();
+    @JsonProperty("created_at")
+    private long createdAt;
     private Possible<Timestamps> timestamps = Possible.absent();
     @JsonProperty("application_id")
     @UnsignedJson
@@ -66,6 +68,10 @@ public class ActivityResponse {
     @Nullable
     public Possible<String> getUrl() {
         return url;
+    }
+
+    public long getCreatedAt() {
+        return createdAt;
     }
 
     public Possible<Timestamps> getTimestamps() {
@@ -127,6 +133,7 @@ public class ActivityResponse {
             "name='" + name + '\'' +
             ", type=" + type +
             ", url=" + url +
+            ", createdAt=" + createdAt +
             ", timestamps=" + timestamps +
             ", applicationId=" + applicationId +
             ", details=" + details +

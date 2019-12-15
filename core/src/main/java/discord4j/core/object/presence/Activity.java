@@ -88,6 +88,15 @@ public class Activity {
     }
 
     /**
+     * Gets the UNIX time of when the activity was added to the user's session.
+     *
+     * @return The UNIX time of when the activity was added to the user's session.
+     */
+    public Instant getCreatedAt() {
+        return Instant.ofEpochMilli(data.getCreatedAt());
+    }
+
+    /**
      * Gets the UNIX time (in milliseconds) of when the activity started, if present.
      *
      * @return The UNIX time (in milliseconds) of when the activity started, if present.
