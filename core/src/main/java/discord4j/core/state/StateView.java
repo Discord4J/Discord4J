@@ -86,9 +86,8 @@ public final class StateView {
     }
 
     public Mono<Long> getSelfId() {
-        return stateHolder.getParameterStore().find("discord4j.core")
+        return stateHolder.getParameterStore().find(StateHolder.CORE_PARAMETER_KEY)
                 .switchIfEmpty(Mono.just(new ParameterBean()))
-                .flatMap(bean -> Mono.justOrEmpty(bean.getParameters().get("selfId")))
-                .ofType(Long.class);
+                .flatMap(bean -> Mono.justOrEmpty(bean.getSelfId()));
     }
 }

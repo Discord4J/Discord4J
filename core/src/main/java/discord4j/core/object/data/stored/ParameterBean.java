@@ -17,19 +17,20 @@
 
 package discord4j.core.object.data.stored;
 
-import java.io.Serializable;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
+import java.io.Serializable;
+
+@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS)
 public class ParameterBean implements Serializable {
 
-    private Map<String, Object> parameters = new LinkedHashMap<>();
+    private Long selfId;
 
-    public Map<String, Object> getParameters() {
-        return parameters;
+    public Long getSelfId() {
+        return selfId;
     }
 
-    public void setParameters(Map<String, Object> parameters) {
-        this.parameters = parameters;
+    public void setSelfId(Long selfId) {
+        this.selfId = selfId;
     }
 }

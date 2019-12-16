@@ -44,6 +44,9 @@ import reactor.util.Loggers;
  */
 public final class StateHolder {
 
+    public static final String CORE_PARAMETER_KEY = "discord4j.core";
+    public static final String SELF_ID_KEY = "selfId";
+
     private static final Logger log = Loggers.getLogger(StateHolder.class);
 
     private final StoreService storeService;
@@ -91,7 +94,7 @@ public final class StateHolder {
         log.debug("Voice state storage : {}", voiceStateStore);
 
         parameterStore = service.provideGenericStore(String.class, ParameterBean.class);
-        log.debug("Parameter storage   : {}", voiceStateStore);
+        log.debug("Parameter storage   : {}", parameterStore);
     }
 
     public StoreService getStoreService() {

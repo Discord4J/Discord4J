@@ -29,6 +29,7 @@ import discord4j.core.object.data.stored.embed.EmbedBean;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.reaction.ReactionEmoji;
+import discord4j.core.state.StateHolder;
 import discord4j.core.util.ArrayUtil;
 import discord4j.gateway.json.dispatch.*;
 import reactor.core.publisher.Flux;
@@ -125,10 +126,10 @@ class MessageDispatchHandlers {
 
         Mono<Void> addToMessage = context.getStateHolder().getMessageStore()
                 .find(messageId)
-                .zipWith(context.getStateHolder().getParameterStore().find("discord4j.core")
+                .zipWith(context.getStateHolder().getParameterStore().find(StateHolder.CORE_PARAMETER_KEY)
                         .switchIfEmpty(Mono.just(new ParameterBean())))
                 .map(t2 -> {
-                    boolean me = Objects.equals(userId, t2.getT2().getParameters().get("selfId"));
+                    boolean me = Objects.equals(userId, t2.getT2().getSelfId());
                     MessageBean oldBean = t2.getT1();
                     MessageBean newBean = new MessageBean(oldBean);
 
@@ -184,7 +185,8 @@ class MessageDispatchHandlers {
         Mono<Void> removeFromMessage = context.getStateHolder().getMessageStore()
                 .find(messageId)
                 .filter(bean -> bean.getReactions() != null)
-                .zipWith(context.getStateHolder().getParameterStore().find("discord4j.core")
+                .zipWith(context.getStateHolder().getParameterStore()
+                        .find(StateHolder.CORE_PARAMETER_KEY)
                         .switchIfEmpty(Mono.just(new ParameterBean())))
                 .map(t2 -> {
                     MessageBean oldBean = t2.getT1();
@@ -206,7 +208,7 @@ class MessageDispatchHandlers {
                         ReactionBean newExisting = new ReactionBean(existing);
                         newExisting.setCount(existing.getCount() - 1);
 
-                        if (Objects.equals(userId, t2.getT2().getParameters().get("selfId"))) {
+                        if (Objects.equals(userId, t2.getT2().getSelfId())) {
                             newExisting.setMe(false);
                         }
 
