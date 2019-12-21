@@ -24,8 +24,6 @@ import discord4j.store.api.service.StoreService;
 import discord4j.store.api.util.StoreContext;
 import reactor.core.publisher.Mono;
 
-import java.io.Serializable;
-
 /**
  * Factory that delegates the creation of the store to a backing factory and then wraps it into a
  * {@link ShardAwareStore}.
@@ -46,8 +44,7 @@ public class ShardAwareStoreService implements StoreService {
     }
 
     @Override
-    public <K extends Comparable<K>, V extends Serializable> Store<K, V> provideGenericStore(Class<K> keyClass,
-            Class<V> valueClass) {
+    public <K extends Comparable<K>, V> Store<K, V> provideGenericStore(Class<K> keyClass, Class<V> valueClass) {
         if (!registry.containsStore(valueClass)) {
             registry.putStore(valueClass, backingStoreService.provideGenericStore(keyClass, valueClass));
         }
@@ -60,7 +57,7 @@ public class ShardAwareStoreService implements StoreService {
     }
 
     @Override
-    public <V extends Serializable> LongObjStore<V> provideLongObjStore(Class<V> valueClass) {
+    public <V> LongObjStore<V> provideLongObjStore(Class<V> valueClass) {
         return new ForwardingStore<>(provideGenericStore(Long.class, valueClass));
     }
 

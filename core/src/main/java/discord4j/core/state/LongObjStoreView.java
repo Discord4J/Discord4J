@@ -23,9 +23,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.function.Tuple2;
 
-import java.io.Serializable;
-
-public class LongObjStoreView<V extends Serializable> {
+public class LongObjStoreView<V> {
 
     private final LongObjStore<V> backing;
 
