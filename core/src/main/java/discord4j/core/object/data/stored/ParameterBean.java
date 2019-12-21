@@ -24,13 +24,13 @@ import java.io.Serializable;
 @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS)
 public class ParameterBean implements Serializable {
 
-    private Long selfId;
+    private Object value;
 
-    public Long getSelfId() {
-        return selfId;
+    public Object getValue() {
+        return value;
     }
 
-    public void setSelfId(Long selfId) {
-        this.selfId = selfId;
+    public void setValue(Object value) {
+        this.value = value;
     }
 }

@@ -35,9 +35,6 @@ public class ShardAwareStoreService implements StoreService {
     private final ShardingStoreRegistry registry;
     private final StoreService backingStoreService;
 
-    volatile Class<?> messageClass;
-    volatile int shardId;
-
     public ShardAwareStoreService(ShardingStoreRegistry registry, StoreService backingStoreService) {
         this.registry = registry;
         this.backingStoreService = backingStoreService;
@@ -70,8 +67,6 @@ public class ShardAwareStoreService implements StoreService {
     @Override
     public void init(StoreContext context) {
         backingStoreService.init(context);
-        messageClass = context.getMessageClass();
-        shardId = context.getShard();
     }
 
     @Override

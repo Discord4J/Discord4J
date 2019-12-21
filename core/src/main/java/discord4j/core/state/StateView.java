@@ -86,8 +86,9 @@ public final class StateView {
     }
 
     public Mono<Long> getSelfId() {
-        return stateHolder.getParameterStore().find(StateHolder.CORE_PARAMETER_KEY)
+        return stateHolder.getParameterStore().find(StateHolder.SELF_ID_PARAMETER_KEY)
                 .switchIfEmpty(Mono.just(new ParameterBean()))
-                .flatMap(bean -> Mono.justOrEmpty(bean.getSelfId()));
+                .flatMap(bean -> Mono.justOrEmpty(bean.getValue()))
+                .ofType(Long.class);
     }
 }

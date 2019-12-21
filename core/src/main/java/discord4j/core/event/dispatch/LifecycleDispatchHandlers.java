@@ -47,10 +47,10 @@ class LifecycleDispatchHandlers {
                 .save(context.getDispatch().getUser().getId(), userBean);
 
         ParameterBean parameterBean = new ParameterBean();
-        parameterBean.setSelfId(userBean.getId());
+        parameterBean.setValue(userBean.getId());
 
         Mono<Void> saveSelfId = context.getStateHolder().getParameterStore()
-                .save(StateHolder.CORE_PARAMETER_KEY, parameterBean);
+                .save(StateHolder.SELF_ID_PARAMETER_KEY, parameterBean);
 
         return saveUser.and(saveSelfId)
                 .thenReturn(new ReadyEvent(gateway, context.getShardInfo(), dispatch.getVersion(), self,

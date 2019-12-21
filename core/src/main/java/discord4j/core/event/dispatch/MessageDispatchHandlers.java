@@ -126,10 +126,10 @@ class MessageDispatchHandlers {
 
         Mono<Void> addToMessage = context.getStateHolder().getMessageStore()
                 .find(messageId)
-                .zipWith(context.getStateHolder().getParameterStore().find(StateHolder.CORE_PARAMETER_KEY)
+                .zipWith(context.getStateHolder().getParameterStore().find(StateHolder.SELF_ID_PARAMETER_KEY)
                         .switchIfEmpty(Mono.just(new ParameterBean())))
                 .map(t2 -> {
-                    boolean me = Objects.equals(userId, t2.getT2().getSelfId());
+                    boolean me = Objects.equals(userId, t2.getT2().getValue());
                     MessageBean oldBean = t2.getT1();
                     MessageBean newBean = new MessageBean(oldBean);
 
@@ -186,7 +186,7 @@ class MessageDispatchHandlers {
                 .find(messageId)
                 .filter(bean -> bean.getReactions() != null)
                 .zipWith(context.getStateHolder().getParameterStore()
-                        .find(StateHolder.CORE_PARAMETER_KEY)
+                        .find(StateHolder.SELF_ID_PARAMETER_KEY)
                         .switchIfEmpty(Mono.just(new ParameterBean())))
                 .map(t2 -> {
                     MessageBean oldBean = t2.getT1();
@@ -208,7 +208,7 @@ class MessageDispatchHandlers {
                         ReactionBean newExisting = new ReactionBean(existing);
                         newExisting.setCount(existing.getCount() - 1);
 
-                        if (Objects.equals(userId, t2.getT2().getSelfId())) {
+                        if (Objects.equals(userId, t2.getT2().getValue())) {
                             newExisting.setMe(false);
                         }
 
