@@ -47,7 +47,10 @@ import discord4j.store.api.service.StoreServiceLoader;
 import discord4j.store.api.util.StoreContext;
 import discord4j.store.jdk.JdkStoreService;
 import discord4j.voice.VoiceClient;
-import reactor.core.publisher.*;
+import reactor.core.publisher.EmitterProcessor;
+import reactor.core.publisher.FluxProcessor;
+import reactor.core.publisher.Hooks;
+import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
 import reactor.netty.http.client.HttpClient;
@@ -114,6 +117,8 @@ public final class DiscordClientBuilder {
 
     @Nullable
     private GatewayObserver gatewayObserver;
+
+    private GatewayObserver extraGatewayObserver = GatewayObserver.NOOP_LISTENER;
 
     @Nullable
     private PayloadTransformer identifyLimiter;
@@ -476,13 +481,18 @@ public final class DiscordClientBuilder {
     @Nullable
     @Deprecated
     public GatewayObserver getGatewayObserver() {
-        return gatewayObserver;
+        if (gatewayObserver != null) {
+            return gatewayObserver.then(extraGatewayObserver);
+        }
+        return null;
     }
 
     /**
-     * Set a new {@link GatewayObserver} to this builder. GatewayObserver is used as a simple event listener for
-     * gateway connection lifecycle. User can be notified of broad lifecycle events like connections, resumes,
-     * reconnects and disconnects but also very specific ones like session sequence updates.
+     * Set a new {@link GatewayObserver} to this builder.
+     * <p>
+     * GatewayObserver is used as a simple event listener for gateway connection lifecycle. User can be notified of
+     * broad lifecycle events like connections, resumes, reconnects and disconnects but also very specific ones like
+     * session sequence updates.
      *
      * @param gatewayObserver a new event listener for gateway lifecycle. Can be chained using
      * {@link GatewayObserver#then(GatewayObserver)} to create a composite of an arbitrary number of listeners. Can
@@ -490,7 +500,11 @@ public final class DiscordClientBuilder {
      * @return this builder
      */
     public DiscordClientBuilder setGatewayObserver(@Nullable GatewayObserver gatewayObserver) {
-        this.gatewayObserver = gatewayObserver;
+        if (this.gatewayObserver instanceof ShardingClientBuilder.ConnectedGatewayObserver) {
+            this.extraGatewayObserver = gatewayObserver;
+        } else {
+            this.gatewayObserver = gatewayObserver;
+        }
         return this;
     }
 
@@ -626,7 +640,7 @@ public final class DiscordClientBuilder {
 
     private GatewayObserver initGatewayObserver() {
         if (gatewayObserver != null) {
-            return gatewayObserver;
+            return gatewayObserver.then(extraGatewayObserver);
         }
         return GatewayObserver.NOOP_LISTENER;
     }

@@ -21,6 +21,7 @@ import discord4j.common.JacksonResourceProvider;
 import discord4j.common.SimpleBucket;
 import discord4j.core.DiscordClientBuilder;
 import discord4j.gateway.GatewayObserver;
+import discord4j.gateway.IdentifyOptions;
 import discord4j.gateway.RateLimiterTransformer;
 import discord4j.rest.RestClient;
 import discord4j.rest.http.ExchangeStrategies;
@@ -36,6 +37,7 @@ import reactor.core.publisher.FluxSink;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.ReplayProcessor;
 import reactor.core.scheduler.Scheduler;
+import reactor.netty.ConnectionObserver;
 import reactor.netty.http.client.HttpClient;
 import reactor.scheduler.forkjoin.ForkJoinPoolScheduler;
 import reactor.util.Logger;
@@ -342,12 +344,7 @@ public class ShardingClientBuilder {
                 .setRouterFactory(new SingleRouterFactory(router))
                 .setIdentifyLimiter(new RateLimiterTransformer(new SimpleBucket(1, Duration.ofSeconds(6))))
                 .setEventScheduler(ForkJoinPoolScheduler.create("discord4j-events"))
-                .setGatewayObserver((s, o) -> {
-                    if (s.equals(GatewayObserver.CONNECTED)) {
-                        log.info("Shard {} connected", o.getShardIndex());
-                        permitSink.next(o.getShardIndex() + 1);
-                    }
-                });
+                .setGatewayObserver(new ConnectedGatewayObserver(permitSink));
 
         return initShardCount(restClient)
                 .flatMapMany(count -> Flux.range(0, count)
@@ -357,5 +354,22 @@ public class ShardingClientBuilder {
                         .map(index -> builder.setStoreService(new ShardAwareStoreService(storeRegistry, storeService))
                                 .setShardIndex(index)
                                 .setShardCount(count)));
+    }
+
+    public static class ConnectedGatewayObserver implements GatewayObserver {
+
+        private final FluxSink<Integer> notificationSink;
+
+        public ConnectedGatewayObserver(FluxSink<Integer> notificationSink) {
+            this.notificationSink = notificationSink;
+        }
+
+        @Override
+        public void onStateChange(ConnectionObserver.State newState, IdentifyOptions identifyOptions) {
+            if (newState.equals(GatewayObserver.CONNECTED)) {
+                log.info("Shard {} connected", identifyOptions.getShardIndex());
+                notificationSink.next(identifyOptions.getShardIndex() + 1);
+            }
+        }
     }
 }
