@@ -64,10 +64,7 @@ import reactor.util.annotation.Nullable;
 import reactor.util.context.Context;
 
 import java.time.Duration;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Function;
 
 import static discord4j.common.LogUtil.format;
@@ -457,8 +454,9 @@ public class GatewayBootstrap<O extends GatewayOptions> {
      * sequence, it will be emitted through the {@link Mono}.
      */
     public Mono<GatewayDiscordClient> connect(Function<O, GatewayClient> clientFactory) {
-        // TODO: remove shard param from StoreContext
-        StateHolder stateHolder = new StateHolder(initStoreService(), new StoreContext(0, MessageBean.class));
+        Map<String, Object> hints = new LinkedHashMap<>();
+        hints.put("messageClass", MessageBean.class);
+        StateHolder stateHolder = new StateHolder(initStoreService(), new StoreContext(hints));
         StateView stateView = new StateView(stateHolder);
         EventDispatcher eventDispatcher = initEventDispatcher();
         GatewayResources resources = new GatewayResources(stateView, eventDispatcher, shardCoordinator, memberRequest);
