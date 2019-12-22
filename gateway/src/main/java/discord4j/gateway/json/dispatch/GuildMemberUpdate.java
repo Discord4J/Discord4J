@@ -19,6 +19,7 @@ package discord4j.gateway.json.dispatch;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import discord4j.common.jackson.UnsignedJson;
 import discord4j.common.json.UserResponse;
+import reactor.util.annotation.Nullable;
 
 import java.util.Arrays;
 
@@ -31,6 +32,9 @@ public class GuildMemberUpdate implements Dispatch {
     private long[] roles;
     private UserResponse user;
     private String nick;
+    @Nullable
+    @JsonProperty("premium_since")
+    private String premiumSince;
 
     public long getGuildId() {
         return guildId;
@@ -48,6 +52,11 @@ public class GuildMemberUpdate implements Dispatch {
         return nick;
     }
 
+    @Nullable
+    public String getPremiumSince() {
+        return premiumSince;
+    }
+
     @Override
     public String toString() {
         return "GuildMemberUpdate{" +
@@ -55,6 +64,7 @@ public class GuildMemberUpdate implements Dispatch {
                 ", roles=" + Arrays.toString(roles) +
                 ", user=" + user +
                 ", nick='" + nick + '\'' +
+                ", premiumSince='" + premiumSince + '\'' +
                 '}';
     }
 }

@@ -338,6 +338,7 @@ class GuildDispatchHandlers {
 
         long[] currentRoles = context.getDispatch().getRoles();
         String currentNick = context.getDispatch().getNick();
+        String currentPremiumSince = context.getDispatch().getPremiumSince();
 
         LongLongTuple2 key = LongLongTuple2.of(guildId, memberId);
 
@@ -352,10 +353,11 @@ class GuildDispatchHandlers {
                     return serviceMediator.getStateHolder().getMemberStore()
                             .save(key, newBean)
                             .thenReturn(new MemberUpdateEvent(client, guildId, memberId, old, currentRoles,
-                                    currentNick));
+                                    currentNick, currentPremiumSince));
                 });
 
-        return update.defaultIfEmpty(new MemberUpdateEvent(client, guildId, memberId, null, currentRoles, currentNick));
+        return update.defaultIfEmpty(new MemberUpdateEvent(client, guildId, memberId, null, currentRoles,
+            currentNick, currentPremiumSince));
     }
 
     static Mono<RoleCreateEvent> guildRoleCreate(DispatchContext<GuildRoleCreate> context) {
