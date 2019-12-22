@@ -17,6 +17,7 @@
 package discord4j.rest.json.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import discord4j.common.jackson.Possible;
 
 public class InviteCreateRequest {
 
@@ -26,12 +27,19 @@ public class InviteCreateRequest {
     private final int maxUses;
     private final boolean temporary;
     private final boolean unique;
+    @JsonProperty("target_user")
+    private final Possible<String> targetUser;
+    @JsonProperty("target_user_type")
+    private final Possible<Integer> targetUserType;
 
-    public InviteCreateRequest(int maxAge, int maxUses, boolean temporary, boolean unique) {
+    public InviteCreateRequest(int maxAge, int maxUses, boolean temporary, boolean unique, Possible<String> targetUser,
+                               Possible<Integer> targetUserType) {
         this.maxAge = maxAge;
         this.maxUses = maxUses;
         this.temporary = temporary;
         this.unique = unique;
+        this.targetUser = targetUser;
+        this.targetUserType = targetUserType;
     }
 
     @Override
@@ -41,6 +49,8 @@ public class InviteCreateRequest {
                 ", maxUses=" + maxUses +
                 ", temporary=" + temporary +
                 ", unique=" + unique +
+                ", targetUser=" + targetUser +
+                ", targetUserType=" + targetUserType +
                 '}';
     }
 }

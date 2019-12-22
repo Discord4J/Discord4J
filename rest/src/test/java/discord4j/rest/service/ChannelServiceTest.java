@@ -209,7 +209,8 @@ public class ChannelServiceTest {
 
     @Test
     public void testCreateChannelInvite() {
-        InviteCreateRequest req = new InviteCreateRequest(1, 0, true, true);
+        InviteCreateRequest req = new InviteCreateRequest(1, 0, true, true,
+            Possible.absent(), Possible.absent());
         getChannelService().createChannelInvite(modifyChannel, req, null).block();
     }
 
