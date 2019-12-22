@@ -106,6 +106,25 @@ public class Invite implements DiscordObject {
     }
 
     /**
+     * Gets the ID of the user who created the invite, if present.
+     *
+     * @return The ID of the user who created the invite, if present.
+     */
+    public final Optional<Snowflake> getInviterId() {
+        return Optional.ofNullable(getData().getInviterId()).map(Snowflake::of);
+    }
+
+    /**
+     * Requests to retrieve the user who created the invite.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits the {@link User user} who created the invite. If
+     * an error is received, it is emitted through the {@code Mono}.
+     */
+    public final Mono<User> getInviter() {
+        return getInviterId().map(getClient()::getUserById).orElse(Mono.empty());
+    }
+
+    /**
      * Gets the ID of the target user this invite is associated to, if present.
      *
      * @return The ID of the target user this invite is associated to, if present.
