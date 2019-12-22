@@ -12,8 +12,6 @@ dependencies {
     testImplementation "org.reflections:reflections:$reflections_version"
     testImplementation "com.sedmelluq:lavaplayer:$lavaplayer_version"
     testImplementation "io.projectreactor.tools:blockhound:$blockhound_version"
-    testImplementation "io.rsocket:rsocket-core:$rsocket_version"
-    testImplementation "io.rsocket:rsocket-transport-netty:$rsocket_version"
 }
 
 javadoc {
