@@ -490,7 +490,13 @@ public final class Message implements Entity {
         IS_CROSSPOST(1),
 
         /** Do not include any embeds when serializing this message. */
-        SUPPRESS_EMBEDS(2);
+        SUPPRESS_EMBEDS(2),
+
+        /** The source message for this crosspost has been deleted (via Channel Following). */
+        SOURCE_MESSAGE_DELETED(3),
+
+        /** This message came from the urgent message system. */
+        URGENT(4);
 
         /** The underlying value as represented by Discord. */
         private final int value;
