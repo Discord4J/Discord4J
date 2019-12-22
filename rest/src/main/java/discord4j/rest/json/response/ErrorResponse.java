@@ -15,24 +15,30 @@
  * along with Discord4J. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package discord4j.rest.entity;
+package discord4j.rest.json.response;
 
-import com.darichey.discordjson.json.UserData;
-import discord4j.rest.RestClient;
-import reactor.core.publisher.Mono;
+import com.fasterxml.jackson.annotation.JsonAnySetter;
 
-public class RestUser {
+import java.util.HashMap;
+import java.util.Map;
 
-    private final RestClient restClient;
-    private final long id;
+public class ErrorResponse {
 
-    public RestUser(RestClient restClient, long id) {
-        this.restClient = restClient;
-        this.id = id;
+    private Map<String, Object> fields = new HashMap<>();
+
+    public Map<String, Object> getFields() {
+        return fields;
     }
 
-    public Mono<UserData> getData() {
-        return restClient.getUserService()
-                .getUser(id);
+    @JsonAnySetter
+    public void anySetter(String key, Object value) {
+        fields.put(key, value);
+    }
+
+    @Override
+    public String toString() {
+        return "ErrorResponse{" +
+            "fields=" + fields +
+            '}';
     }
 }

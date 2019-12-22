@@ -16,9 +16,9 @@
  */
 package discord4j.rest.service;
 
+import com.darichey.discordjson.json.InviteData;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import discord4j.rest.RestTests;
-import discord4j.rest.json.response.InviteResponse;
 import discord4j.rest.request.Router;
 import org.junit.Test;
 
@@ -26,7 +26,6 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Optional;
 
 import static org.junit.Assert.assertEquals;
 
@@ -70,15 +69,15 @@ public class InviteServiceTest {
     @Test
     public void testDeleteInvite() {
         getChannelService().getChannelInvites(modifyChannel)
-                .filter(invite -> invite.getMaxAge() != null)
-                .filter(invite -> Optional.ofNullable(invite.getCreatedAt())
-                        .map(this::asInstant)
-                        .map(ts -> ts.plusSeconds(invite.getMaxAge()))
-                        .map(ts -> ts.isBefore(Instant.now()))
-                        .orElse(false))
-                .map(InviteResponse::getCode)
-                .flatMap(code -> getInviteService().deleteInvite(code, null))
-                .blockLast();
+            .filter(invite -> !invite.maxAge().isAbsent())
+            .filter(invite -> invite.createdAt().toOptional()
+                .map(this::asInstant)
+                .map(ts -> ts.plusSeconds(invite.maxAge().get()))
+                .map(ts -> ts.isBefore(Instant.now()))
+                .orElse(false))
+            .map(InviteData::code)
+            .flatMap(code -> getInviteService().deleteInvite(code, null))
+            .blockLast();
     }
 
     private Instant asInstant(String timestamp) {

@@ -17,8 +17,8 @@
 
 package discord4j.rest.entity;
 
+import com.darichey.discordjson.json.MessageData;
 import discord4j.rest.RestClient;
-import discord4j.rest.entity.data.MessageData;
 import reactor.core.publisher.Mono;
 
 public class RestMessage {
@@ -35,7 +35,6 @@ public class RestMessage {
 
     public Mono<MessageData> getData() {
         return restClient.getChannelService()
-                .getMessage(channelId, id)
-                .map(MessageData::new);
+                .getMessage(channelId, id);
     }
 }

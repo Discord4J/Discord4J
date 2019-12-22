@@ -16,7 +16,7 @@
  */
 package discord4j.rest.service;
 
-import discord4j.rest.json.response.ApplicationInfoResponse;
+import com.darichey.discordjson.json.ApplicationInfoData;
 import discord4j.rest.request.Router;
 import discord4j.rest.route.Routes;
 import reactor.core.publisher.Mono;
@@ -27,9 +27,9 @@ public class ApplicationService extends RestService {
         super(router);
     }
 
-    public Mono<ApplicationInfoResponse> getCurrentApplicationInfo() {
+    public Mono<ApplicationInfoData> getCurrentApplicationInfo() {
         return Routes.APPLICATION_INFO_GET.newRequest()
                 .exchange(getRouter())
-                .bodyToMono(ApplicationInfoResponse.class);
+                .bodyToMono(ApplicationInfoData.class);
     }
 }

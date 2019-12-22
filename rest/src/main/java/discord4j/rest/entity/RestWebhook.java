@@ -17,8 +17,8 @@
 
 package discord4j.rest.entity;
 
+import com.darichey.discordjson.json.WebhookData;
 import discord4j.rest.RestClient;
-import discord4j.rest.entity.data.WebhookData;
 import reactor.core.publisher.Mono;
 
 public class RestWebhook {
@@ -33,7 +33,6 @@ public class RestWebhook {
 
     public Mono<WebhookData> getData() {
         return restClient.getWebhookService()
-                .getWebhook(id)
-                .map(WebhookData::new);
+                .getWebhook(id);
     }
 }

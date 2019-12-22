@@ -17,8 +17,8 @@
 
 package discord4j.rest.entity;
 
+import com.darichey.discordjson.json.EmojiData;
 import discord4j.rest.RestClient;
-import discord4j.rest.entity.data.GuildEmojiData;
 import reactor.core.publisher.Mono;
 
 public class RestGuildEmoji {
@@ -33,9 +33,8 @@ public class RestGuildEmoji {
         this.id = id;
     }
 
-    public Mono<GuildEmojiData> getData() {
+    public Mono<EmojiData> getData() {
         return restClient.getEmojiService()
-                .getGuildEmoji(guildId, id)
-                .map(GuildEmojiData::new);
+                .getGuildEmoji(guildId, id);
     }
 }

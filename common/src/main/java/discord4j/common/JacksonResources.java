@@ -17,11 +17,11 @@
 
 package discord4j.common;
 
+import com.darichey.discordjson.possible.PossibleModule;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
-import discord4j.common.jackson.PossibleModule;
 import discord4j.common.jackson.UnknownPropertyHandler;
 
 import java.util.function.Function;

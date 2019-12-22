@@ -16,11 +16,11 @@
  */
 package discord4j.rest.service;
 
+import com.darichey.discordjson.possible.PossibleModule;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import discord4j.common.jackson.PossibleModule;
 import discord4j.rest.RestTests;
 import discord4j.rest.request.Router;
 import org.junit.Test;

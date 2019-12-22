@@ -16,13 +16,7 @@
  */
 package discord4j.rest.service;
 
-import discord4j.common.json.UserResponse;
-import discord4j.rest.json.request.DMCreateRequest;
-import discord4j.rest.json.request.GroupDMCreateRequest;
-import discord4j.rest.json.request.UserModifyRequest;
-import discord4j.rest.json.response.ChannelResponse;
-import discord4j.rest.json.response.ConnectionResponse;
-import discord4j.rest.json.response.UserGuildResponse;
+import com.darichey.discordjson.json.*;
 import discord4j.rest.request.Router;
 import discord4j.rest.route.Routes;
 import reactor.core.publisher.Flux;
@@ -36,30 +30,30 @@ public class UserService extends RestService {
         super(router);
     }
 
-    public Mono<UserResponse> getCurrentUser() {
+    public Mono<UserData> getCurrentUser() {
         return Routes.CURRENT_USER_GET.newRequest()
                 .exchange(getRouter())
-                .bodyToMono(UserResponse.class);
+                .bodyToMono(UserData.class);
     }
 
-    public Mono<UserResponse> getUser(long userId) {
+    public Mono<UserData> getUser(long userId) {
         return Routes.USER_GET.newRequest(userId)
                 .exchange(getRouter())
-                .bodyToMono(UserResponse.class);
+                .bodyToMono(UserData.class);
     }
 
-    public Mono<UserResponse> modifyCurrentUser(UserModifyRequest request) {
+    public Mono<UserData> modifyCurrentUser(UserModifyRequest request) {
         return Routes.CURRENT_USER_MODIFY.newRequest()
                 .body(request)
                 .exchange(getRouter())
-                .bodyToMono(UserResponse.class);
+                .bodyToMono(UserData.class);
     }
 
-    public Flux<UserGuildResponse> getCurrentUserGuilds(Map<String, Object> queryParams) {
+    public Flux<GuildData> getCurrentUserGuilds(Map<String, Object> queryParams) {
         return Routes.CURRENT_USER_GUILDS_GET.newRequest()
                 .query(queryParams)
                 .exchange(getRouter())
-                .bodyToMono(UserGuildResponse[].class)
+                .bodyToMono(GuildData[].class)
                 .flatMapMany(Flux::fromArray);
     }
 
@@ -69,31 +63,31 @@ public class UserService extends RestService {
                 .bodyToMono(Void.class);
     }
 
-    public Flux<ChannelResponse> getUserDMs() {
+    public Flux<ChannelData> getUserDMs() {
         return Routes.USER_DMS_GET.newRequest()
                 .exchange(getRouter())
-                .bodyToMono(ChannelResponse[].class)
+                .bodyToMono(ChannelData[].class)
                 .flatMapMany(Flux::fromArray);
     }
 
-    public Mono<ChannelResponse> createDM(DMCreateRequest request) {
+    public Mono<ChannelData> createDM(DMCreateRequest request) {
         return Routes.USER_DM_CREATE.newRequest()
                 .body(request)
                 .exchange(getRouter())
-                .bodyToMono(ChannelResponse.class);
+                .bodyToMono(ChannelData.class);
     }
 
-    public Mono<ChannelResponse> createGroupDM(GroupDMCreateRequest request) {
+    public Mono<ChannelData> createGroupDM(GroupDMCreateRequest request) {
         return Routes.GROUP_DM_CREATE.newRequest()
                 .body(request)
                 .exchange(getRouter())
-                .bodyToMono(ChannelResponse.class);
+                .bodyToMono(ChannelData.class);
     }
 
-    public Flux<ConnectionResponse> getUserConnections() {
+    public Flux<ConnectionData> getUserConnections() {
         return Routes.USER_CONNECTIONS_GET.newRequest()
                 .exchange(getRouter())
-                .bodyToMono(ConnectionResponse[].class)
+                .bodyToMono(ConnectionData[].class)
                 .flatMapMany(Flux::fromArray);
     }
 }

@@ -16,7 +16,7 @@
  */
 package discord4j.rest.service;
 
-import discord4j.rest.json.response.InviteResponse;
+import com.darichey.discordjson.json.InviteData;
 import discord4j.rest.request.Router;
 import discord4j.rest.route.Routes;
 import reactor.core.publisher.Mono;
@@ -28,16 +28,16 @@ public class InviteService extends RestService {
         super(router);
     }
 
-    public Mono<InviteResponse> getInvite(String inviteCode) {
+    public Mono<InviteData> getInvite(String inviteCode) {
         return Routes.INVITE_GET.newRequest(inviteCode)
                 .exchange(getRouter())
-                .bodyToMono(InviteResponse.class);
+                .bodyToMono(InviteData.class);
     }
 
-    public Mono<InviteResponse> deleteInvite(String inviteCode, @Nullable String reason) {
+    public Mono<InviteData> deleteInvite(String inviteCode, @Nullable String reason) {
         return Routes.INVITE_DELETE.newRequest(inviteCode)
                 .optionalHeader("X-Audit-Log-Reason", reason)
                 .exchange(getRouter())
-                .bodyToMono(InviteResponse.class);
+                .bodyToMono(InviteData.class);
     }
 }

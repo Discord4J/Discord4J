@@ -17,11 +17,11 @@
 
 package discord4j.rest.entity;
 
+import com.darichey.discordjson.json.ChannelData;
+import com.darichey.discordjson.json.GuildData;
+import com.darichey.discordjson.json.RegionData;
+import com.darichey.discordjson.json.RoleData;
 import discord4j.rest.RestClient;
-import discord4j.rest.entity.data.ChannelData;
-import discord4j.rest.entity.data.GuildData;
-import discord4j.rest.entity.data.RegionData;
-import discord4j.rest.entity.data.RoleData;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -37,25 +37,21 @@ public class RestGuild {
 
     public Mono<GuildData> getData() {
         return restClient.getGuildService()
-                .getGuild(id)
-                .map(GuildData::new);
+                .getGuild(id);
     }
 
     public Flux<RoleData> getRoles() {
         return restClient.getGuildService()
-                .getGuildRoles(id)
-                .map(res -> new RoleData(id, res));
+                .getGuildRoles(id);
     }
 
     public Flux<ChannelData> getChannels() {
         return restClient.getGuildService()
-                .getGuildChannels(id)
-                .map(ChannelData::new);
+                .getGuildChannels(id);
     }
 
     public Flux<RegionData> getRegions() {
         return restClient.getGuildService()
-                .getGuildVoiceRegions(id)
-                .map(RegionData::new);
+                .getGuildVoiceRegions(id);
     }
 }

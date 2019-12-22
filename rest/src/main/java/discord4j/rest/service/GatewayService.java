@@ -16,7 +16,7 @@
  */
 package discord4j.rest.service;
 
-import discord4j.rest.json.response.GatewayResponse;
+import com.darichey.discordjson.json.GatewayData;
 import discord4j.rest.request.Router;
 import discord4j.rest.route.Routes;
 import reactor.core.publisher.Mono;
@@ -27,16 +27,16 @@ public class GatewayService extends RestService {
         super(router);
     }
 
-    public Mono<GatewayResponse> getGateway() {
+    public Mono<GatewayData> getGateway() {
         return Routes.GATEWAY_GET.newRequest()
                 .exchange(getRouter())
-                .bodyToMono(GatewayResponse.class);
+                .bodyToMono(GatewayData.class);
     }
 
-    public Mono<GatewayResponse> getGatewayBot() {
+    public Mono<GatewayData> getGatewayBot() {
         return Routes.GATEWAY_BOT_GET.newRequest()
                 .exchange(getRouter())
-                .bodyToMono(GatewayResponse.class);
+                .bodyToMono(GatewayData.class);
     }
 
 }

@@ -16,11 +16,10 @@
  */
 package discord4j.rest.service;
 
+import com.darichey.discordjson.json.*;
+import com.darichey.discordjson.possible.Possible;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import discord4j.common.jackson.Possible;
-import discord4j.common.json.MessageResponse;
 import discord4j.rest.RestTests;
-import discord4j.rest.json.request.*;
 import discord4j.rest.request.Router;
 import discord4j.rest.util.MultipartRequest;
 import org.junit.Test;
@@ -67,7 +66,9 @@ public class ChannelServiceTest {
 
     @Test
     public void testModifyChannel() {
-        ChannelModifyRequest req = ChannelModifyRequest.builder().topic("test modify").build();
+        ChannelModifyRequest req = ImmutableChannelModifyRequest.builder()
+            .topic(Possible.of("test modify"))
+            .build();
         getChannelService().modifyChannel(modifyChannel, req, null).block();
     }
 
@@ -88,13 +89,17 @@ public class ChannelServiceTest {
 
     @Test
     public void testCreateMessage() {
-        MessageCreateRequest req = new MessageCreateRequest("Hello world", null, false, null);
+        MessageCreateRequest req = ImmutableMessageCreateRequest.builder()
+            .content(Possible.of("Hello world"))
+            .build();
         getChannelService().createMessage(permanentChannel, new MultipartRequest(req)).block();
     }
 
     @Test
     public void testCreateMessageWithFile() throws IOException {
-        MessageCreateRequest req = new MessageCreateRequest("Hello world with file!", null, false, null);
+        MessageCreateRequest req = ImmutableMessageCreateRequest.builder()
+            .content(Possible.of("Hello world with file!"))
+            .build();
         try (InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream("fileTest.txt")) {
             if (inputStream == null) {
                 throw new NullPointerException();
@@ -107,7 +112,9 @@ public class ChannelServiceTest {
 
     @Test
     public void testCreateMessagesWithMultipleFiles() throws IOException {
-        MessageCreateRequest req = new MessageCreateRequest("Hello world with *multiple* files!", null, false, null);
+        MessageCreateRequest req = ImmutableMessageCreateRequest.builder()
+            .content(Possible.of("Hello world with *multiple* files!"))
+            .build();
         try (InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream("fileTest.txt")) {
             if (inputStream == null) {
                 throw new NullPointerException();
@@ -179,16 +186,19 @@ public class ChannelServiceTest {
 
     @Test
     public void testEditMessage() {
-        MessageEditRequest req = new MessageEditRequest(Possible.of("This is a message I can edit."),
-                Possible.absent());
+        MessageEditRequest req = ImmutableMessageEditRequest.builder()
+            .content(Possible.of("This is a message I can edit."))
+            .build();
         getChannelService().editMessage(permanentChannel, editMessage, req).block();
     }
 
     @Test
     public void testDeleteMessage() {
-        MessageCreateRequest req = new MessageCreateRequest("Going to delete this!", null, false, null);
-        MessageResponse response = getChannelService().createMessage(permanentChannel, new MultipartRequest(req)).block();
-        getChannelService().deleteMessage(permanentChannel, response.getId(), "This is just a test!").block();
+        MessageCreateRequest req = ImmutableMessageCreateRequest.builder()
+            .content(Possible.of("Going to delete this!"))
+            .build();
+        MessageData response = getChannelService().createMessage(permanentChannel, new MultipartRequest(req)).block();
+        getChannelService().deleteMessage(permanentChannel, Long.parseUnsignedLong(response.id()), "This is just a test!").block();
     }
 
     @Test
@@ -198,7 +208,7 @@ public class ChannelServiceTest {
 
     @Test
     public void testEditChannelPermissions() {
-        PermissionsEditRequest req = new PermissionsEditRequest(0, 0, "member");
+        PermissionsEditRequest req = ImmutablePermissionsEditRequest.of(0, 0, "member");
         getChannelService().editChannelPermissions(modifyChannel, permanentOverwrite, req, null).block();
     }
 
@@ -209,8 +219,7 @@ public class ChannelServiceTest {
 
     @Test
     public void testCreateChannelInvite() {
-        InviteCreateRequest req = new InviteCreateRequest(1, 0, true, true,
-            Possible.absent(), Possible.absent());
+        InviteCreateRequest req = ImmutableInviteCreateRequest.of(1, 0, true, true);
         getChannelService().createChannelInvite(modifyChannel, req, null).block();
     }
 

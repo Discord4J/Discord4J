@@ -16,9 +16,9 @@
  */
 package discord4j.rest.http;
 
+import com.darichey.discordjson.json.MessageCreateRequest;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import discord4j.rest.json.request.MessageCreateRequest;
 import discord4j.rest.util.MultipartRequest;
 import reactor.core.Exceptions;
 import reactor.core.publisher.Mono;
