@@ -23,7 +23,7 @@ ext {
     }
 
     // Dependencies
-    reactor_bom_version = 'Californium-SR13'
+    reactor_bom_version = 'Californium-SR14'
     jackson_version = '2.10.1'
     jdkstores_version = "$storesVersion".toString()
 
