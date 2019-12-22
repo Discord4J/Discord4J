@@ -145,6 +145,15 @@ public class Invite implements DiscordObject {
     }
 
     /**
+     * Gets the type of target user for this invite, if present.
+     *
+     * @return The type of target user for this invite, if present.
+     */
+    public final Optional<Type> getTargetUserType() {
+        return Optional.ofNullable(data.getTargetUserType()).map(Type::of);
+    }
+
+    /**
      * Gets an approximate count of online members (only present when the target user is set) of the guild this invite
      * is associated to, if present.
      *
@@ -198,6 +207,52 @@ public class Invite implements DiscordObject {
      */
     InviteBean getData() {
         return data;
+    }
+
+    /** Represents the various types of target user for an invite. */
+    public enum Type {
+
+        /** Unknown type */
+        UNKNOWN(-1),
+
+        /** Stream */
+        STREAM(1);
+
+        /** The underlying value as represented by Discord. */
+        private final int value;
+
+        /**
+         * Constructs a {@code Invite.Type}.
+         *
+         * @param value The underlying value as represented by Discord.
+         */
+        Type(final int value) {
+            this.value = value;
+        }
+
+        /**
+         * Gets the underlying value as represented by Discord.
+         *
+         * @return The underlying value as represented by Discord.
+         */
+        public int getValue() {
+            return value;
+        }
+
+        /**
+         * Gets the type of target user. It is guaranteed that invoking {@link #getValue()} from the returned enum
+         * will be equal ({@code ==}) to the supplied {@code value}.
+         *
+         * @param value The underlying value as represented by Discord.
+         * @return The type of target user.
+         */
+        public static Type of(final int value) {
+            switch (value) {
+                case 1: return STREAM;
+                default: return UNKNOWN;
+            }
+        }
+
     }
 
     @Override

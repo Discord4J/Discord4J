@@ -33,6 +33,8 @@ public class InviteBean implements Serializable {
     @Nullable
     private Long targetUserId;
     @Nullable
+    private Integer targetUserType;
+    @Nullable
     private Integer approximatePresenceCount;
     @Nullable
     private Integer approximateMemberCount;
@@ -43,6 +45,7 @@ public class InviteBean implements Serializable {
         channelId = response.getChannel().getId();
         inviterId = response.getInviter() == null ? null : response.getInviter().getId();
         targetUserId = response.getTargetUser() == null ? null : response.getTargetUser().getId();
+        targetUserType = response.getTargetUserType();
         approximatePresenceCount = response.getApproximatePresenceCount();
         approximateMemberCount = response.getApproximateMemberCount();
     }
@@ -92,6 +95,15 @@ public class InviteBean implements Serializable {
     }
 
     @Nullable
+    public Integer getTargetUserType() {
+        return targetUserType;
+    }
+
+    public void setTargetUserType(@Nullable Integer targetUserType) {
+        this.targetUserType = targetUserType;
+    }
+
+    @Nullable
     public final Integer getApproximatePresenceCount() {
         return approximatePresenceCount;
     }
@@ -117,6 +129,7 @@ public class InviteBean implements Serializable {
                 ", channelId=" + channelId +
                 ", inviterId=" + inviterId +
                 ", targetUserId=" + targetUserId +
+                ", targetUserType=" + targetUserType +
                 ", approximatePresenceCount=" + approximatePresenceCount +
                 ", approximateMemberCount=" + approximateMemberCount +
                 '}';

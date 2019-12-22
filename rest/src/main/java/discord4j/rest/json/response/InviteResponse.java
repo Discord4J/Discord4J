@@ -30,6 +30,9 @@ public class InviteResponse {
     @JsonProperty("target_user")
     @Nullable
     private UserResponse targetUser;
+    @JsonProperty("target_user_type")
+    @Nullable
+    private Integer targetUserType;
     @JsonProperty("approximate_presence_count")
     @Nullable
     private Integer approximatePresenceCount;
@@ -70,6 +73,11 @@ public class InviteResponse {
     @Nullable
     public UserResponse getTargetUser() {
         return targetUser;
+    }
+
+    @Nullable
+    public Integer getTargetUserType() {
+        return targetUserType;
     }
 
     @Nullable
@@ -115,6 +123,7 @@ public class InviteResponse {
                 ", channel=" + channel +
                 ", inviter=" + inviter +
                 ", targetUser=" + targetUser +
+                ", targetUserType=" + targetUserType +
                 ", approximatePresenceCount=" + approximatePresenceCount +
                 ", approximateMemberCount=" + approximateMemberCount +
                 ", uses=" + uses +
