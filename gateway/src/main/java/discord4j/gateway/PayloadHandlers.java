@@ -16,10 +16,9 @@
  */
 package discord4j.gateway;
 
-import discord4j.common.jackson.Possible;
+import com.darichey.discordjson.json.gateway.*;
+import com.darichey.discordjson.possible.Possible;
 import discord4j.gateway.json.*;
-import discord4j.gateway.json.dispatch.Dispatch;
-import discord4j.gateway.json.dispatch.Ready;
 import discord4j.gateway.retry.GatewayException;
 import reactor.util.Logger;
 import reactor.util.Loggers;
@@ -68,7 +67,7 @@ public abstract class PayloadHandlers {
 
     private static void handleDispatch(PayloadContext<Dispatch> context) {
         if (context.getData() instanceof Ready) {
-            String newSessionId = ((Ready) context.getData()).getSessionId();
+            String newSessionId = ((Ready) context.getData()).sessionId();
             context.getClient().sessionId().set(newSessionId);
         }
         if (context.getData() != null) {
@@ -78,7 +77,7 @@ public abstract class PayloadHandlers {
 
     private static void handleHeartbeat(PayloadContext<Heartbeat> context) {
         log.debug(format(context.getContext(), "Received heartbeat"));
-        context.getClient().sender().next(GatewayPayload.heartbeat(new Heartbeat(context.getClient().sequence().get())));
+        context.getClient().sender().next(GatewayPayload.heartbeat(ImmutableHeartbeat.of(context.getClient().sequence().get())));
     }
 
     private static void handleReconnect(PayloadContext<?> context) {
@@ -87,10 +86,10 @@ public abstract class PayloadHandlers {
 
     private static void handleInvalidSession(PayloadContext<InvalidSession> context) {
         DefaultGatewayClient client = context.getClient();
-        if (context.getData().isResumable()) {
+        if (context.getData().resumable()) {
             String token = client.token();
             client.sender().next(GatewayPayload.resume(
-                    new Resume(token, client.getSessionId(), client.sequence().get())));
+                    ImmutableResume.of(token, client.getSessionId(), client.sequence().get())));
         } else {
             client.allowResume().set(false);
             context.getHandler().error(new GatewayException(context.getContext(),
@@ -99,22 +98,22 @@ public abstract class PayloadHandlers {
     }
 
     private static void handleHello(PayloadContext<Hello> context) {
-        Duration interval = Duration.ofMillis(context.getData().getHeartbeatInterval());
+        Duration interval = Duration.ofMillis(context.getData().heartbeatInterval());
         DefaultGatewayClient client = context.getClient();
         client.heartbeat().start(interval);
 
         if (client.allowResume().get()) {
             log.debug(format(context.getContext(), "Resuming Gateway session from {}"), client.sequence().get());
             client.sender().next(GatewayPayload.resume(
-                    new Resume(client.token(), client.getSessionId(), client.sequence().get())));
+                    ImmutableResume.of(client.token(), client.getSessionId(), client.sequence().get())));
         } else {
-            IdentifyProperties props = new IdentifyProperties(System.getProperty("os.name"), "Discord4J", "Discord4J");
+            IdentifyProperties props = ImmutableIdentifyProperties.of(System.getProperty("os.name"), "Discord4J", "Discord4J");
             IdentifyOptions options = client.identifyOptions();
             int[] shard = new int[]{options.getShardIndex(), options.getShardCount()};
-            Identify identify = new Identify(client.token(), props, false, 250,
+            Identify identify = ImmutableIdentify.of(client.token(), props, Possible.of(false), 250,
                     Optional.of(shard).map(Possible::of).orElse(Possible.absent()),
                     Optional.ofNullable(options.getInitialStatus()).map(Possible::of).orElse(Possible.absent()),
-                    options.isGuildSubscriptions());
+                    Possible.of(options.isGuildSubscriptions()));
             log.debug(format(context.getContext(), "Identifying to Gateway"), client.sequence().get());
             client.sender().next(GatewayPayload.identify(identify));
         }

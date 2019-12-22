@@ -29,7 +29,6 @@ import discord4j.core.object.data.stored.VoiceStateBean;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.presence.Presence;
-import discord4j.gateway.json.dispatch.*;
 import discord4j.gateway.retry.GatewayStateChange;
 import discord4j.store.api.util.LongLongTuple2;
 import reactor.core.publisher.Mono;
@@ -86,8 +85,8 @@ public abstract class DispatchHandlers {
         addHandler(GatewayStateChange.class, LifecycleDispatchHandlers::gatewayStateChanged);
     }
 
-    private static <D extends Dispatch, E extends Event> void addHandler(Class<D> dispatchType,
-                                                                         DispatchHandler<D, E> dispatchHandler) {
+    private static <D, E extends Event> void addHandler(Class<D> dispatchType,
+                                                        DispatchHandler<D, E> dispatchHandler) {
         handlerMap.put(dispatchType, dispatchHandler);
     }
 
@@ -101,7 +100,7 @@ public abstract class DispatchHandlers {
      * @return an Event mapped from the given Dispatch object, or null if no Event is produced.
      */
     @SuppressWarnings("unchecked")
-    public static <D extends Dispatch, E extends Event> Mono<E> handle(DispatchContext<D> context) {
+    public static <D, E extends Event> Mono<E> handle(DispatchContext<D> context) {
         DispatchHandler<D, E> entry = (DispatchHandler<D, E>) handlerMap.get(context.getDispatch().getClass());
         if (entry == null) {
             return Mono.empty();

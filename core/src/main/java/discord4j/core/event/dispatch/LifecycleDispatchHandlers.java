@@ -22,8 +22,6 @@ import discord4j.core.object.data.stored.ParameterBean;
 import discord4j.core.object.data.stored.UserBean;
 import discord4j.core.object.entity.User;
 import discord4j.core.state.StateHolder;
-import discord4j.gateway.json.dispatch.Ready;
-import discord4j.gateway.json.dispatch.Resumed;
 import discord4j.gateway.retry.GatewayStateChange;
 import reactor.core.publisher.Mono;
 

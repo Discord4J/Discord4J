@@ -16,17 +16,13 @@
  */
 package discord4j.gateway;
 
+import com.darichey.discordjson.json.gateway.*;
 import discord4j.common.GitProperties;
 import discord4j.common.ReactorResources;
 import discord4j.common.ResettableInterval;
 import discord4j.common.close.CloseException;
 import discord4j.common.close.CloseStatus;
 import discord4j.gateway.json.GatewayPayload;
-import discord4j.gateway.json.Heartbeat;
-import discord4j.gateway.json.Opcode;
-import discord4j.gateway.json.dispatch.Dispatch;
-import discord4j.gateway.json.dispatch.Ready;
-import discord4j.gateway.json.dispatch.Resumed;
 import discord4j.gateway.payload.PayloadReader;
 import discord4j.gateway.payload.PayloadWriter;
 import discord4j.gateway.retry.*;
@@ -229,7 +225,7 @@ public class DefaultGatewayClient implements GatewayClient {
                                     log.debug(format(context, "Sending heartbeat {} after last ACK"),
                                             Duration.ofNanos(delay));
                                     lastSent.set(now);
-                                    return Mono.just(GatewayPayload.heartbeat(new Heartbeat(sequence.get())));
+                                    return Mono.just(GatewayPayload.heartbeat(ImmutableHeartbeat.of(sequence.get())));
                                 }
                             })
                             .doOnNext(heartbeatSink::next)

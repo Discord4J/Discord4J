@@ -20,7 +20,6 @@ package discord4j.core.event.dispatch;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.state.StateHolder;
 import discord4j.gateway.ShardInfo;
-import discord4j.gateway.json.dispatch.Dispatch;
 
 /**
  * Represents gateway dispatch data enriched with context for processing through a
@@ -28,15 +27,15 @@ import discord4j.gateway.json.dispatch.Dispatch;
  *
  * @param <D> the type of the {@link discord4j.gateway.json.dispatch.Dispatch} payload
  */
-public class DispatchContext<D extends Dispatch> {
+public class DispatchContext<D> {
 
     private final D dispatch;
     private final GatewayDiscordClient gateway;
     private final StateHolder stateHolder;
     private final ShardInfo shardInfo;
 
-    public static <D extends Dispatch> DispatchContext<D> of(D dispatch, GatewayDiscordClient gateway,
-                                                             StateHolder stateHolder, ShardInfo shardInfo) {
+    public static <D> DispatchContext<D> of(D dispatch, GatewayDiscordClient gateway,
+                                            StateHolder stateHolder, ShardInfo shardInfo) {
         return new DispatchContext<>(dispatch, gateway, stateHolder, shardInfo);
     }
 

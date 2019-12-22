@@ -22,8 +22,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import discord4j.common.jackson.PossibleModule;
 import discord4j.common.jackson.UnknownPropertyHandler;
-import discord4j.gateway.json.dispatch.PresenceUpdate;
-import discord4j.gateway.json.dispatch.Ready;
 import org.junit.Before;
 import org.junit.Test;
 

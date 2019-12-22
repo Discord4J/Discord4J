@@ -22,7 +22,6 @@ import discord4j.core.event.domain.VoiceStateUpdateEvent;
 import discord4j.core.object.entity.channel.VoiceChannel;
 import discord4j.gateway.GatewayClientGroup;
 import discord4j.gateway.json.ShardGatewayPayload;
-import discord4j.gateway.json.VoiceStateUpdate;
 import discord4j.voice.AudioProvider;
 import discord4j.voice.AudioReceiver;
 import discord4j.voice.VoiceConnection;

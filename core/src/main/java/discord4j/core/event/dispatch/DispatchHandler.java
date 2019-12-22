@@ -18,7 +18,6 @@
 package discord4j.core.event.dispatch;
 
 import discord4j.core.event.domain.Event;
-import discord4j.gateway.json.dispatch.Dispatch;
 import reactor.core.publisher.Mono;
 
 /**
@@ -28,7 +27,7 @@ import reactor.core.publisher.Mono;
  * @param <E> the outbound Event type
  */
 @FunctionalInterface
-public interface DispatchHandler<D extends Dispatch, E extends Event> {
+public interface DispatchHandler<D, E extends Event> {
 
     /**
      * Operates and transforms a Dispatch event with its context, from gateway to user-friendly Events, so it may be
