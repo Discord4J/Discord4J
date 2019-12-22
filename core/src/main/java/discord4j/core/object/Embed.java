@@ -19,9 +19,10 @@ package discord4j.core.object;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.data.stored.embed.*;
 
-import java.awt.Color;
+import java.awt.*;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.*;
 import java.util.stream.Collectors;
 

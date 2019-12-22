@@ -17,12 +17,12 @@
 package discord4j.core.event.dispatch;
 
 import discord4j.core.GatewayDiscordClient;
-import discord4j.core.state.StateHolder;
 import discord4j.core.event.domain.Event;
 import discord4j.core.event.domain.channel.*;
 import discord4j.core.object.data.stored.ChannelBean;
 import discord4j.core.object.data.stored.GuildBean;
 import discord4j.core.object.entity.channel.*;
+import discord4j.core.state.StateHolder;
 import discord4j.core.util.ArrayUtil;
 import discord4j.gateway.json.dispatch.ChannelCreate;
 import discord4j.gateway.json.dispatch.ChannelDelete;

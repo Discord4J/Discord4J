@@ -21,7 +21,7 @@ import discord4j.core.object.util.PermissionSet;
 import discord4j.rest.json.request.RoleCreateRequest;
 import reactor.util.annotation.Nullable;
 
-import java.awt.Color;
+import java.awt.*;
 
 /**
  * Spec used to create a new guild {@link Role} entity.

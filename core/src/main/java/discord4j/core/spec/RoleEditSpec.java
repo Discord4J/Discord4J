@@ -21,7 +21,7 @@ import discord4j.core.object.util.PermissionSet;
 import discord4j.rest.json.request.RoleModifyRequest;
 import reactor.util.annotation.Nullable;
 
-import java.awt.Color;
+import java.awt.*;
 
 /**
  * Spec used to modify a guild {@link Role}.

@@ -17,11 +17,11 @@
 
 package discord4j.rest.entity;
 
+import discord4j.rest.RestClient;
 import discord4j.rest.entity.data.ChannelData;
 import discord4j.rest.entity.data.GuildData;
 import discord4j.rest.entity.data.RegionData;
 import discord4j.rest.entity.data.RoleData;
-import discord4j.rest.RestClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 

@@ -17,8 +17,8 @@
 
 package discord4j.rest.entity;
 
-import discord4j.rest.entity.data.GuildEmojiData;
 import discord4j.rest.RestClient;
+import discord4j.rest.entity.data.GuildEmojiData;
 import reactor.core.publisher.Mono;
 
 public class RestGuildEmoji {

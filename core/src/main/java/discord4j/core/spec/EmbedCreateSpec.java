@@ -20,7 +20,7 @@ import discord4j.common.json.EmbedFieldEntity;
 import discord4j.rest.json.request.*;
 import reactor.util.annotation.Nullable;
 
-import java.awt.Color;
+import java.awt.*;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
