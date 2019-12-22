@@ -18,6 +18,7 @@ package discord4j.gateway.json.dispatch;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import discord4j.common.jackson.UnsignedJson;
+import discord4j.common.json.GuildMemberResponse;
 import reactor.util.annotation.Nullable;
 
 public class TypingStart implements Dispatch {
@@ -33,6 +34,8 @@ public class TypingStart implements Dispatch {
     @UnsignedJson
     private long userId;
     private int timestamp;
+    @Nullable
+    private GuildMemberResponse member;
 
     public long getChannelId() {
         return channelId;
@@ -51,6 +54,11 @@ public class TypingStart implements Dispatch {
         return timestamp;
     }
 
+    @Nullable
+    public GuildMemberResponse getMember() {
+        return member;
+    }
+
     @Override
     public String toString() {
         return "TypingStart{" +
@@ -58,6 +66,7 @@ public class TypingStart implements Dispatch {
                 ", guildId=" + guildId +
                 ", userId=" + userId +
                 ", timestamp=" + timestamp +
+                ", member=" + member +
                 '}';
     }
 }
