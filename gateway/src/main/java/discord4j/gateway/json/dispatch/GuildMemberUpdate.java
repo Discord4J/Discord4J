@@ -22,6 +22,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import discord4j.common.jackson.UnsignedJson;
 import discord4j.common.json.UserResponse;
+import reactor.util.annotation.Nullable;
 
 import java.util.Arrays;
 import java.util.LinkedHashMap;
@@ -36,6 +37,9 @@ public class GuildMemberUpdate implements Dispatch {
     private long[] roles;
     private UserResponse user;
     private String nick;
+    @Nullable
+    @JsonProperty("premium_since")
+    private String premiumSince;
 
     @JsonIgnore
     private Map<String, Object> additionalProperties = new LinkedHashMap<>();
@@ -56,6 +60,11 @@ public class GuildMemberUpdate implements Dispatch {
         return nick;
     }
 
+    @Nullable
+    public String getPremiumSince() {
+        return premiumSince;
+    }
+
     @JsonAnyGetter
     public Map<String, Object> getAdditionalProperties() {
         return additionalProperties;
@@ -73,6 +82,7 @@ public class GuildMemberUpdate implements Dispatch {
                 ", roles=" + Arrays.toString(roles) +
                 ", user=" + user +
                 ", nick='" + nick + '\'' +
+                ", premiumSince='" + premiumSince + '\'' +
                 '}';
     }
 }

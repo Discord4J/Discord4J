@@ -24,6 +24,8 @@ import discord4j.gateway.ShardInfo;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
 
+import java.time.Instant;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.Set;
@@ -47,9 +49,12 @@ public class MemberUpdateEvent extends GuildEvent {
     private final long[] currentRoles;
     @Nullable
     private final String currentNickname;
+    @Nullable
+    private final String currentPremiumSince;
 
-    public MemberUpdateEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, long guildId, long memberId, @Nullable Member old,
-                             long[] currentRoles, @Nullable String currentNickname) {
+    public MemberUpdateEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, long guildId, long memberId,
+                             @Nullable Member old, long[] currentRoles, @Nullable String currentNickname,
+                             @Nullable String currentPremiumSince) {
         super(gateway, shardInfo);
 
         this.guildId = guildId;
@@ -57,6 +62,7 @@ public class MemberUpdateEvent extends GuildEvent {
         this.old = old;
         this.currentRoles = currentRoles;
         this.currentNickname = currentNickname;
+        this.currentPremiumSince = currentPremiumSince;
     }
 
     /**
@@ -127,6 +133,16 @@ public class MemberUpdateEvent extends GuildEvent {
         return Optional.ofNullable(currentNickname);
     }
 
+    /**
+     * Gets when the user used their Nitro boost on the guild, if present.
+     *
+     * @return When the user used their Nitro boost on the guild, if present.
+     */
+    public Optional<Instant> getCurrentPremiumSince() {
+        return Optional.ofNullable(currentPremiumSince)
+            .map(timestamp -> DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(timestamp, Instant::from));
+    }
+
     @Override
     public String toString() {
         return "MemberUpdateEvent{" +
@@ -135,6 +151,7 @@ public class MemberUpdateEvent extends GuildEvent {
                 ", old=" + old +
                 ", currentRoles=" + Arrays.toString(currentRoles) +
                 ", currentNickname='" + currentNickname + '\'' +
+                ", currentPremiumSince='" + currentPremiumSince + '\'' +
                 '}';
     }
 }

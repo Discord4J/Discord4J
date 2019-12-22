@@ -342,6 +342,7 @@ class GuildDispatchHandlers {
 
         long[] currentRoles = context.getDispatch().getRoles();
         String currentNick = context.getDispatch().getNick();
+        String currentPremiumSince = context.getDispatch().getPremiumSince();
 
         LongLongTuple2 key = LongLongTuple2.of(guildId, memberId);
 
@@ -355,14 +356,12 @@ class GuildDispatchHandlers {
 
                     return context.getStateHolder().getMemberStore()
                             .save(key, newBean)
-                            .thenReturn(new MemberUpdateEvent(gateway, context.getShardInfo(), guildId, memberId, old
-                                    , currentRoles,
-                                    currentNick));
+                            .thenReturn(new MemberUpdateEvent(gateway, context.getShardInfo(), guildId, memberId, old,
+                                    currentRoles, currentNick, currentPremiumSince));
                 });
 
         return update.defaultIfEmpty(new MemberUpdateEvent(gateway, context.getShardInfo(), guildId, memberId, null,
-                currentRoles,
-                currentNick));
+                currentRoles, currentNick, currentPremiumSince));
     }
 
     static Mono<RoleCreateEvent> guildRoleCreate(DispatchContext<GuildRoleCreate> context) {
