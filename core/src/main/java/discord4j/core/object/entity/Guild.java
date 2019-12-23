@@ -16,7 +16,6 @@
  */
 package discord4j.core.object.entity;
 
-import com.sun.tools.javac.comp.Todo;
 import discord4j.common.json.GuildMemberResponse;
 import discord4j.core.DiscordClient;
 import discord4j.core.ServiceMediator;
