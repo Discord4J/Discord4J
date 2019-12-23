@@ -16,6 +16,7 @@
  */
 package discord4j.core.object.entity;
 
+import com.sun.tools.javac.comp.Todo;
 import discord4j.common.json.GuildMemberResponse;
 import discord4j.core.DiscordClient;
 import discord4j.core.ServiceMediator;
@@ -69,6 +70,9 @@ public final class Guild implements Entity {
 
     /** The path for guild splash image URLs. */
     private static final String SPLASH_IMAGE_PATH = "splashes/%s/%s";
+
+    /** The path for guild discovery splash image URLs. */
+    private static final String DISCOVERY_SPLASH_IMAGE_PATH = "discovery-splashes/%s/%s";
 
     /** The path for guild banner image URLs. */
     private static final String BANNER_IMAGE_PATH = "banners/%s/%s";
@@ -159,6 +163,31 @@ public final class Guild implements Entity {
      */
     public Mono<Image> getSplash(final Image.Format format) {
         return Mono.justOrEmpty(getSplashUrl(format)).flatMap(Image::ofUrl);
+    }
+
+    /**
+     * Gets the discovery splash URL of the guild, if present and in a supported format.
+     *
+     * @param format The format for the URL. Supported format types are {@link Image.Format#PNG PNG},
+     * {@link Image.Format#JPEG JPEG}, and {@link Image.Format#WEB_P WebP}.
+     * @return The discovery splash URL of the guild, if present and in a supported format.
+     */
+    public Optional<String> getDiscoverySplashUrl(final Image.Format format) {
+        return Optional.ofNullable(data.getDiscoverySplash())
+            .filter(ignored -> (format == PNG) || (format == JPEG) || (format == WEB_P))
+            .map(discoverySplash -> ImageUtil.getUrl(String.format(DISCOVERY_SPLASH_IMAGE_PATH, getId().asString(),
+                discoverySplash), format));
+    }
+
+    /**
+     * Gets the discovery splash of the guild.
+     *
+     * @param format The format in which to get the image.
+     * @return A {@link Mono} where, upon successful completion, emits the {@link Image discovery splash} of the guild.
+     * If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Image> getDiscoverySplash(final Image.Format format) {
+        return Mono.justOrEmpty(getDiscoverySplashUrl(format)).flatMap(Image::ofUrl);
     }
 
     /**
@@ -483,6 +512,35 @@ public final class Guild implements Entity {
      */
     public Mono<TextChannel> getSystemChannel() {
         return Mono.justOrEmpty(getSystemChannelId()).flatMap(getClient()::getChannelById).cast(TextChannel.class);
+    }
+
+    /**
+     * Returns the flags of the system {@link TextChannel channel}.
+     *
+     * @return A {@code EnumSet} with the flags of the system {@link TextChannel channel}.
+     */
+    public EnumSet<Flag> getSystemChannelFlags() {
+        return Flag.of(data.getSystemChannelFlags());
+    }
+
+    /**
+     * Gets the ID of the channel in which a discoverable server's rules should be found, if present.
+     *
+     * @return The ID of the channel in which a discoverable server's rules should be found, if present.
+     */
+    public Optional<Snowflake> getRulesChannelId() {
+        return Optional.ofNullable(data.getRulesChannelId()).map(Snowflake::of);
+    }
+
+    /**
+     * Requests to retrieve the channel in which a discoverable server's rules should be found, if present.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits the {@link TextChannel channel} in which a
+     * discoverable server's rules should be found, if present. If an error is received, it is emitted through the
+     * {@code Mono}.
+     */
+    public Mono<TextChannel> getRulesChannel() {
+        return Mono.justOrEmpty(getRulesChannelId()).flatMap(getClient()::getChannelById).cast(TextChannel.class);
     }
 
     /**
@@ -1403,6 +1461,66 @@ public final class Guild implements Entity {
                 case 4: return VERY_HIGH;
                 default: return UNKNOWN;
             }
+        }
+    }
+
+    /** Describes system channel flags. */
+    public enum Flag {
+
+        /** Member join notifications are suppressed. */
+        SUPPRESS_JOIN_NOTIFICATIONS(0),
+
+        /** Server boost notifications are suppressed. */
+        SUPPRESS_PREMIUM_SUBSCRIPTIONS(1);
+
+        /** The underlying value as represented by Discord. */
+        private final int value;
+
+        /** The flag value as represented by Discord. */
+        private final int flag;
+
+        /**
+         * Constructs a {@code Flag}.
+         */
+        Flag(final int value) {
+            this.value = value;
+            this.flag = 1 << value;
+        }
+
+        /**
+         * Gets the underlying value as represented by Discord.
+         *
+         * @return The underlying value as represented by Discord.
+         */
+        public int getValue() {
+            return value;
+        }
+
+        /**
+         * Gets the flag value as represented by Discord.
+         *
+         * @return The flag value as represented by Discord.
+         */
+        public int getFlag() {
+            return flag;
+        }
+
+        /**
+         * Gets the flags of system channel. It is guaranteed that invoking {@link #getValue()} from the returned enum
+         * will be equal ({@code ==}) to the supplied {@code value}.
+         *
+         * @param value The flags value as represented by Discord.
+         * @return The {@link EnumSet} of flags.
+         */
+        public static EnumSet<Flag> of(final int value) {
+            final EnumSet<Flag> flags = EnumSet.noneOf(Flag.class);
+            for (Flag flag : Flag.values()) {
+                long flagValue = flag.getFlag();
+                if ((flagValue & value) == flagValue) {
+                    flags.add(flag);
+                }
+            }
+            return flags;
         }
     }
 

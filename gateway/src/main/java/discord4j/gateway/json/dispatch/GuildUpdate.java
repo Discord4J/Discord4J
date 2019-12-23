@@ -45,7 +45,16 @@ public class GuildUpdate implements Dispatch {
     @Nullable
     @UnsignedJson
     private Long systemChannelId;
+    @JsonProperty("system_channel_flags")
+    private int systemChannelFlags;
+    @JsonProperty("rules_channel_id")
+    @Nullable
+    @UnsignedJson
+    private Long rulesChannelId;
     private String splash;
+    @JsonProperty("discovery_splash")
+    @Nullable
+    private String discoverySplash;
     private String banner;
     private RoleResponse[] roles;
     private String region;
@@ -126,8 +135,22 @@ public class GuildUpdate implements Dispatch {
         return systemChannelId;
     }
 
+    public int getSystemChannelFlags() {
+        return systemChannelFlags;
+    }
+
+    @Nullable
+    public Long getRulesChannelId() {
+        return rulesChannelId;
+    }
+
     public String getSplash() {
         return splash;
+    }
+
+    @Nullable
+    public String getDiscoverySplash() {
+        return discoverySplash;
     }
 
     public String getBanner() {
@@ -233,10 +256,13 @@ public class GuildUpdate implements Dispatch {
                 ", verificationLevel=" + verificationLevel +
                 ", premiumTier=" + premiumTier +
                 ", premiumSubcriptionsCount=" + premiumSubcriptionsCount +
-                ", preferredLocale=" + preferredLocale +
+                ", preferredLocale='" + preferredLocale + '\'' +
                 ", systemChannelId=" + systemChannelId +
+                ", systemChannelFlags=" + systemChannelFlags +
+                ", rulesChannelId=" + rulesChannelId +
                 ", splash='" + splash + '\'' +
-                ", splash='" + banner + '\'' +
+                ", discoverySplash='" + discoverySplash + '\'' +
+                ", banner='" + banner + '\'' +
                 ", roles=" + Arrays.toString(roles) +
                 ", region='" + region + '\'' +
                 ", ownerId=" + ownerId +
@@ -254,8 +280,8 @@ public class GuildUpdate implements Dispatch {
                 ", afkTimeout=" + afkTimeout +
                 ", afkChannelId=" + afkChannelId +
                 ", guildId=" + guildId +
-                ", vanityUrlCode=" + vanityUrlCode +
-                ", description=" + description +
+                ", vanityUrlCode='" + vanityUrlCode + '\'' +
+                ", description='" + description + '\'' +
                 ", maxPresences=" + maxPresences +
                 ", maxMembers=" + maxMembers +
                 '}';

@@ -38,7 +38,16 @@ public class GuildCreate implements Dispatch {
     @Nullable
     @UnsignedJson
     private Long systemChannelId;
+    @JsonProperty("system_channel_flags")
+    private int systemChannelFlags;
+    @JsonProperty("rules_channel_id")
+    @Nullable
+    @UnsignedJson
+    private Long rulesChannelId;
     private String splash;
+    @JsonProperty("discovery_splash")
+    @Nullable
+    private String discoverySplash;
     private String banner;
     private RoleResponse[] roles;
     private String region;
@@ -134,8 +143,22 @@ public class GuildCreate implements Dispatch {
         return systemChannelId;
     }
 
+    public int getSystemChannelFlags() {
+        return systemChannelFlags;
+    }
+
+    @Nullable
+    public Long getRulesChannelId() {
+        return rulesChannelId;
+    }
+
     public String getSplash() {
         return splash;
+    }
+
+    @Nullable
+    public String getDiscoverySplash() {
+        return discoverySplash;
     }
 
     public String getBanner() {
@@ -268,12 +291,12 @@ public class GuildCreate implements Dispatch {
         return "GuildCreate{" +
                 "voiceStates=" + Arrays.toString(voiceStates) +
                 ", verificationLevel=" + verificationLevel +
-                ", premiumTier=" + premiumTier +
-                ", premiumSubcriptionsCount=" + premiumSubcriptionsCount +
-                ", preferredLocale=" + preferredLocale +
                 ", unavailable=" + unavailable +
                 ", systemChannelId=" + systemChannelId +
+                ", systemChannelFlags=" + systemChannelFlags +
+                ", rulesChannelId=" + rulesChannelId +
                 ", splash='" + splash + '\'' +
+                ", discoverySplash='" + discoverySplash + '\'' +
                 ", banner='" + banner + '\'' +
                 ", roles=" + Arrays.toString(roles) +
                 ", region='" + region + '\'' +
@@ -281,6 +304,9 @@ public class GuildCreate implements Dispatch {
                 ", ownerId=" + ownerId +
                 ", name='" + name + '\'' +
                 ", mfaLevel=" + mfaLevel +
+                ", premiumTier=" + premiumTier +
+                ", premiumSubcriptionsCount=" + premiumSubcriptionsCount +
+                ", preferredLocale='" + preferredLocale + '\'' +
                 ", members=" + Arrays.toString(members) +
                 ", memberCount=" + memberCount +
                 ", lazy=" + lazy +
@@ -297,10 +323,10 @@ public class GuildCreate implements Dispatch {
                 ", afkTimeout=" + afkTimeout +
                 ", afkChannelId=" + afkChannelId +
                 ", embedChannelId=" + embedChannelId +
-                ", widgetEnabled=" + widgetEnabled +
                 ", widgetChannelId=" + widgetChannelId +
-                ", vanityUrlCode=" + vanityUrlCode +
-                ", description=" + description +
+                ", widgetEnabled=" + widgetEnabled +
+                ", vanityUrlCode='" + vanityUrlCode + '\'' +
+                ", description='" + description + '\'' +
                 ", maxPresences=" + maxPresences +
                 ", maxMembers=" + maxMembers +
                 '}';

@@ -41,6 +41,12 @@ public class GuildResponse {
     @Nullable
     @UnsignedJson
     private Long systemChannelId;
+    @JsonProperty("system_channel_flags")
+    private int systemChannelFlags;
+    @JsonProperty("rules_channel_id")
+    @Nullable
+    @UnsignedJson
+    private Long rulesChannelId;
     @JsonProperty("widget_channel_id")
     @Nullable
     @UnsignedJson
@@ -55,6 +61,9 @@ public class GuildResponse {
     @JsonProperty("explicit_content_filter")
     private int explicitContentFilter;
     private String splash;
+    @JsonProperty("discovery_splash")
+    @Nullable
+    private String discoverySplash;
     private String banner;
     private String[] features;
     @JsonProperty("afk_channel_id")
@@ -122,6 +131,15 @@ public class GuildResponse {
         return systemChannelId;
     }
 
+    public int getSystemChannelFlags() {
+        return systemChannelFlags;
+    }
+
+    @Nullable
+    public Long getRulesChannelId() {
+        return rulesChannelId;
+    }
+
     @Nullable
     public Long getWidgetChannelId() {
         return widgetChannelId;
@@ -146,6 +164,11 @@ public class GuildResponse {
 
     public String getSplash() {
         return splash;
+    }
+
+    @Nullable
+    public String getDiscoverySplash() {
+        return discoverySplash;
     }
 
     public String getBanner() {
@@ -222,32 +245,35 @@ public class GuildResponse {
     public String toString() {
         return "GuildResponse{" +
                 "mfaLevel=" + mfaLevel +
-                ", premiumTier=" + premiumTier +
-                ", premiumSubcriptionsCount=" + premiumSubcriptionsCount +
-                ", preferredLocale=" + preferredLocale +
                 ", emojis=" + Arrays.toString(emojis) +
                 ", applicationId=" + applicationId +
                 ", name='" + name + '\'' +
                 ", roles=" + Arrays.toString(roles) +
                 ", afkTimeout=" + afkTimeout +
                 ", systemChannelId=" + systemChannelId +
+                ", systemChannelFlags=" + systemChannelFlags +
+                ", rulesChannelId=" + rulesChannelId +
                 ", widgetChannelId=" + widgetChannelId +
                 ", region='" + region + '\'' +
                 ", defaultMessageNotifications=" + defaultMessageNotifications +
                 ", embedChannelId=" + embedChannelId +
                 ", explicitContentFilter=" + explicitContentFilter +
                 ", splash='" + splash + '\'' +
+                ", discoverySplash='" + discoverySplash + '\'' +
                 ", banner='" + banner + '\'' +
                 ", features=" + Arrays.toString(features) +
                 ", afkChannelId=" + afkChannelId +
                 ", widgetEnabled=" + widgetEnabled +
                 ", verificationLevel=" + verificationLevel +
+                ", premiumTier=" + premiumTier +
+                ", premiumSubcriptionsCount=" + premiumSubcriptionsCount +
+                ", preferredLocale='" + preferredLocale + '\'' +
                 ", ownerId=" + ownerId +
                 ", embedEnabled=" + embedEnabled +
                 ", id=" + id +
                 ", icon='" + icon + '\'' +
-                ", vanityUrlCode=" + vanityUrlCode +
-                ", description=" + description +
+                ", vanityUrlCode='" + vanityUrlCode + '\'' +
+                ", description='" + description + '\'' +
                 ", maxPresences=" + maxPresences +
                 ", maxMembers=" + maxMembers +
                 '}';

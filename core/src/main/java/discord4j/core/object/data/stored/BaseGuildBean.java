@@ -37,6 +37,8 @@ public class BaseGuildBean implements Serializable {
     @Nullable
     private String splash;
     @Nullable
+    private String discoverySplash;
+    @Nullable
     private String banner;
     private long ownerId;
     private String region;
@@ -63,6 +65,9 @@ public class BaseGuildBean implements Serializable {
     private Long widgetChannelId;
     @Nullable
     private Long systemChannelId;
+    private int systemChannelFlags;
+    @Nullable
+    private Long rulesChannelId;
     @Nullable
     private String vanityUrlCode;
     @Nullable
@@ -77,6 +82,7 @@ public class BaseGuildBean implements Serializable {
         name = guildCreate.getName();
         icon = guildCreate.getIcon();
         splash = guildCreate.getSplash();
+        discoverySplash = guildCreate.getDiscoverySplash();
         banner = guildCreate.getBanner();
         ownerId = guildCreate.getOwnerId();
         region = guildCreate.getRegion();
@@ -104,6 +110,8 @@ public class BaseGuildBean implements Serializable {
         widgetEnabled = guildCreate.isWidgetEnabled();
         widgetChannelId = guildCreate.getWidgetChannelId();
         systemChannelId = guildCreate.getSystemChannelId();
+        systemChannelFlags = guildCreate.getSystemChannelFlags();
+        rulesChannelId = guildCreate.getRulesChannelId();
         vanityUrlCode = guildCreate.getVanityUrlCode();
         description = guildCreate.getDescription();
         maxPresences = guildCreate.getMaxPresences();
@@ -115,6 +123,7 @@ public class BaseGuildBean implements Serializable {
         name = guildUpdate.getName();
         icon = guildUpdate.getIcon();
         splash = guildUpdate.getSplash();
+        discoverySplash = guildUpdate.getDiscoverySplash();
         banner = guildUpdate.getBanner();
         ownerId = guildUpdate.getOwnerId();
         region = guildUpdate.getRegion();
@@ -141,6 +150,8 @@ public class BaseGuildBean implements Serializable {
         widgetEnabled = guildUpdate.isWidgetEnabled();
         widgetChannelId = guildUpdate.getWidgetChannelId();
         systemChannelId = guildUpdate.getSystemChannelId();
+        systemChannelFlags = guildUpdate.getSystemChannelFlags();
+        rulesChannelId = guildUpdate.getRulesChannelId();
         vanityUrlCode = guildUpdate.getVanityUrlCode();
         description = guildUpdate.getDescription();
         maxPresences = guildUpdate.getMaxPresences();
@@ -152,6 +163,7 @@ public class BaseGuildBean implements Serializable {
         name = response.getName();
         icon = response.getIcon();
         splash = response.getSplash();
+        discoverySplash = response.getDiscoverySplash();
         banner = response.getBanner();
         ownerId = response.getOwnerId();
         region = response.getRegion();
@@ -178,6 +190,8 @@ public class BaseGuildBean implements Serializable {
         widgetEnabled = response.isWidgetEnabled();
         widgetChannelId = response.getWidgetChannelId();
         systemChannelId = response.getSystemChannelId();
+        systemChannelFlags = response.getSystemChannelFlags();
+        rulesChannelId = response.getRulesChannelId();
         vanityUrlCode = response.getVanityUrlCode();
         description = response.getDescription();
         maxPresences = response.getMaxPresences();
@@ -189,6 +203,7 @@ public class BaseGuildBean implements Serializable {
         name = toCopy.getName();
         icon = toCopy.getIcon();
         splash = toCopy.getSplash();
+        discoverySplash = toCopy.getDiscoverySplash();
         banner = toCopy.getBanner();
         ownerId = toCopy.getOwnerId();
         region = toCopy.getRegion();
@@ -210,6 +225,8 @@ public class BaseGuildBean implements Serializable {
         widgetEnabled = toCopy.isWidgetEnabled();
         widgetChannelId = toCopy.getWidgetChannelId();
         systemChannelId = toCopy.getSystemChannelId();
+        systemChannelFlags = toCopy.getSystemChannelFlags();
+        rulesChannelId = toCopy.getRulesChannelId();
         vanityUrlCode = toCopy.getVanityUrlCode();
         description = toCopy.getDescription();
         maxPresences = toCopy.getMaxPresences();
@@ -248,13 +265,22 @@ public class BaseGuildBean implements Serializable {
         return splash;
     }
 
+    public void setSplash(@Nullable final String splash) {
+        this.splash = splash;
+    }
+
+    @Nullable
+    public String getDiscoverySplash() {
+        return discoverySplash;
+    }
+
+    public void setDiscoverySplash(@Nullable String discoverySplash) {
+        this.discoverySplash = discoverySplash;
+    }
+
     @Nullable
     public String getBanner() {
         return banner;
-    }
-
-    public void setSplash(@Nullable final String splash) {
-        this.splash = splash;
     }
 
     public void setBanner(@Nullable final String banner) {
@@ -407,6 +433,23 @@ public class BaseGuildBean implements Serializable {
         this.systemChannelId = systemChannelId;
     }
 
+    public int getSystemChannelFlags() {
+        return systemChannelFlags;
+    }
+
+    public void setSystemChannelFlags(int systemChannelFlags) {
+        this.systemChannelFlags = systemChannelFlags;
+    }
+
+    @Nullable
+    public Long getRulesChannelId() {
+        return rulesChannelId;
+    }
+
+    public void setRulesChannelId(@Nullable Long rulesChannelId) {
+        this.rulesChannelId = rulesChannelId;
+    }
+
     @Nullable
     public String getVanityUrlCode() {
         return vanityUrlCode;
@@ -450,6 +493,7 @@ public class BaseGuildBean implements Serializable {
                 ", name='" + name + '\'' +
                 ", icon='" + icon + '\'' +
                 ", splash='" + splash + '\'' +
+                ", discoverySplash='" + discoverySplash + '\'' +
                 ", banner='" + banner + '\'' +
                 ", ownerId=" + ownerId +
                 ", region='" + region + '\'' +
@@ -457,7 +501,8 @@ public class BaseGuildBean implements Serializable {
                 ", afkTimeout=" + afkTimeout +
                 ", embedChannelId=" + embedChannelId +
                 ", premiumTier=" + premiumTier +
-                ", preferredLocale=" + preferredLocale +
+                ", premiumSubscriptionsCount=" + premiumSubscriptionsCount +
+                ", preferredLocale='" + preferredLocale + '\'' +
                 ", verificationLevel=" + verificationLevel +
                 ", defaultMessageNotifications=" + defaultMessageNotifications +
                 ", explicitContentFilter=" + explicitContentFilter +
@@ -469,8 +514,10 @@ public class BaseGuildBean implements Serializable {
                 ", widgetEnabled=" + widgetEnabled +
                 ", widgetChannelId=" + widgetChannelId +
                 ", systemChannelId=" + systemChannelId +
-                ", vanityUrlCode=" + vanityUrlCode +
-                ", description=" + description +
+                ", systemChannelFlags=" + systemChannelFlags +
+                ", rulesChannelId=" + rulesChannelId +
+                ", vanityUrlCode='" + vanityUrlCode + '\'' +
+                ", description='" + description + '\'' +
                 ", maxPresences=" + maxPresences +
                 ", maxMembers=" + maxMembers +
                 '}';
