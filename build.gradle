@@ -39,6 +39,12 @@ ext {
     isRelease = !version.toString().endsWith('-SNAPSHOT')
 }
 
+if (!isRelease) {
+    configurations.all {
+        resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+    }
+}
+
 allprojects {
     apply plugin: 'java-library'
     apply plugin: 'com.github.ben-manes.versions'
@@ -60,10 +66,13 @@ allprojects {
 
     repositories {
         mavenCentral()
-        jcenter()
+        if (!isRelease) {
+            maven { url 'https://oss.sonatype.org/content/repositories/snapshots' }
+            maven { url 'https://oss.sonatype.org/content/repositories/staging' }
+        }
         maven { url 'https://jitpack.io' }
-        maven { url 'https://oss.sonatype.org/content/repositories/staging' }
         maven { url 'https://repo.spring.io/milestone' }
+        jcenter()
     }
 
     tasks.withType(Javadoc) {
