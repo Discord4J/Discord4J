@@ -643,11 +643,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
         if (eventDispatcher != null) {
             return eventDispatcher;
         }
-        if (awaitConnections) {
-            return EventDispatcher.replayingWithTimeout(Duration.ofMinutes(2));
-        } else {
-            return EventDispatcher.buffering();
-        }
+        return EventDispatcher.buffering();
     }
 
     private StoreService initStoreService() {
