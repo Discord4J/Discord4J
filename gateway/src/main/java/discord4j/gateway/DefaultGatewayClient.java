@@ -287,7 +287,7 @@ public class DefaultGatewayClient implements GatewayClient {
     private void trace(Logger log, ByteBuf buf) {
         if (log.isTraceEnabled()) {
             log.trace(buf.toString(StandardCharsets.UTF_8)
-                    .replaceAll("(\"token\": ?\")([A-Za-z0-9.-]*)(\")", "$1hunter2$3"));
+                    .replaceAll("(\"token\": ?\")([A-Za-z0-9._-]*)(\")", "$1hunter2$3"));
         }
     }
 
