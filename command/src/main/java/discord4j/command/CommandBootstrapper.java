@@ -59,7 +59,6 @@ public final class CommandBootstrapper {
      *
      * @param dispatcher The command dispatcher to be used to emit events from.
      * @param errorHandler The {@link CommandErrorHandler} for the dispatcher.
-     *
      * @see #attach(DiscordClient)
      */
     public CommandBootstrapper(final CommandDispatcher dispatcher, final CommandErrorHandler errorHandler) {
@@ -86,7 +85,11 @@ public final class CommandBootstrapper {
         return client.getEventDispatcher()
                 .on(MessageCreateEvent.class)
                 .filter(event -> event.getMessage().getContent().isPresent())
-                .flatMap(event -> dispatcher.dispatch(event, providers, errorHandler))
+                .flatMap(event -> Flux.from(dispatcher.dispatch(event, providers, errorHandler))
+                        .onErrorResume(t -> {
+                            LOGGER.warn("Error while dispatching command", t);
+                            return Mono.empty();
+                        }))
                 .share();
     }
 
