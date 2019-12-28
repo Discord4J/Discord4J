@@ -45,25 +45,6 @@ public final class ExtendedInvite extends Invite {
     }
 
     /**
-     * Gets the ID of the user who created the invite.
-     *
-     * @return The ID of the user who created the invite.
-     */
-    public Snowflake getInviterId() {
-        return Snowflake.of(getData().getInviterId());
-    }
-
-    /**
-     * Requests to retrieve the user who created the invite.
-     *
-     * @return A {@link Mono} where, upon successful completion, emits the {@link User user} who created the invite. If
-     * an error is received, it is emitted through the {@code Mono}.
-     */
-    public Mono<User> getInviter() {
-        return getClient().getUserById(getInviterId());
-    }
-
-    /**
      * Gets the number of times this invite has been used.
      *
      * @return The number of times this invite has been used.

@@ -25,17 +25,20 @@ public class InviteResponse {
     private String code;
     private GuildResponse guild;
     private ChannelResponse channel;
+    @Nullable
+    private UserResponse inviter;
     @JsonProperty("target_user")
     @Nullable
     private UserResponse targetUser;
+    @JsonProperty("target_user_type")
+    @Nullable
+    private Integer targetUserType;
     @JsonProperty("approximate_presence_count")
     @Nullable
     private Integer approximatePresenceCount;
     @JsonProperty("approximate_member_count")
     @Nullable
     private Integer approximateMemberCount;
-    @Nullable
-    private UserResponse inviter;
     @Nullable
     private Integer uses;
     @JsonProperty("max_uses")
@@ -63,8 +66,18 @@ public class InviteResponse {
     }
 
     @Nullable
+    public UserResponse getInviter() {
+        return inviter;
+    }
+
+    @Nullable
     public UserResponse getTargetUser() {
         return targetUser;
+    }
+
+    @Nullable
+    public Integer getTargetUserType() {
+        return targetUserType;
     }
 
     @Nullable
@@ -75,11 +88,6 @@ public class InviteResponse {
     @Nullable
     public Integer getApproximateMemberCount() {
         return approximateMemberCount;
-    }
-
-    @Nullable
-    public UserResponse getInviter() {
-        return inviter;
     }
 
     @Nullable
@@ -113,10 +121,11 @@ public class InviteResponse {
                 "code='" + code + '\'' +
                 ", guild=" + guild +
                 ", channel=" + channel +
+                ", inviter=" + inviter +
                 ", targetUser=" + targetUser +
+                ", targetUserType=" + targetUserType +
                 ", approximatePresenceCount=" + approximatePresenceCount +
                 ", approximateMemberCount=" + approximateMemberCount +
-                ", inviter=" + inviter +
                 ", uses=" + uses +
                 ", maxUses=" + maxUses +
                 ", maxAge=" + maxAge +

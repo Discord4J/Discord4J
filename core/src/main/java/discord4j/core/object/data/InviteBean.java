@@ -29,7 +29,11 @@ public class InviteBean implements Serializable {
     private long guildId;
     private long channelId;
     @Nullable
+    private Long inviterId;
+    @Nullable
     private Long targetUserId;
+    @Nullable
+    private Integer targetUserType;
     @Nullable
     private Integer approximatePresenceCount;
     @Nullable
@@ -39,7 +43,9 @@ public class InviteBean implements Serializable {
         code = response.getCode();
         guildId = response.getGuild().getId();
         channelId = response.getChannel().getId();
+        inviterId = response.getInviter() == null ? null : response.getInviter().getId();
         targetUserId = response.getTargetUser() == null ? null : response.getTargetUser().getId();
+        targetUserType = response.getTargetUserType();
         approximatePresenceCount = response.getApproximatePresenceCount();
         approximateMemberCount = response.getApproximateMemberCount();
     }
@@ -71,12 +77,30 @@ public class InviteBean implements Serializable {
     }
 
     @Nullable
+    public Long getInviterId() {
+        return inviterId;
+    }
+
+    public void setInviterId(@Nullable Long inviterId) {
+        this.inviterId = inviterId;
+    }
+
+    @Nullable
     public final Long getTargetUserId() {
         return targetUserId;
     }
 
     public final void setTargetUserId(@Nullable final Long targetUserId) {
         this.targetUserId = targetUserId;
+    }
+
+    @Nullable
+    public Integer getTargetUserType() {
+        return targetUserType;
+    }
+
+    public void setTargetUserType(@Nullable Integer targetUserType) {
+        this.targetUserType = targetUserType;
     }
 
     @Nullable
@@ -103,7 +127,9 @@ public class InviteBean implements Serializable {
                 "code='" + code + '\'' +
                 ", guildId=" + guildId +
                 ", channelId=" + channelId +
+                ", inviterId=" + inviterId +
                 ", targetUserId=" + targetUserId +
+                ", targetUserType=" + targetUserType +
                 ", approximatePresenceCount=" + approximatePresenceCount +
                 ", approximateMemberCount=" + approximateMemberCount +
                 '}';
