@@ -67,7 +67,7 @@ public class JacksonReaderStrategy<T> implements ReaderStrategy<T> {
                         return objectMapper.readValue(bytes, responseType);
                     } catch (JsonProcessingException e) {
                         throw Exceptions.propagate(new RuntimeException(e.toString()
-                                .replaceAll("(\"token\": \")([A-Za-z0-9.-]*)(\")", "$1hunter2$3")));
+                                .replaceAll("(\"token\": ?\")([A-Za-z0-9._-]*)(\")", "$1hunter2$3")));
                     } catch (IOException e) {
                         throw Exceptions.propagate(e);
                     }

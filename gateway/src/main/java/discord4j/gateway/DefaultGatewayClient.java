@@ -263,7 +263,7 @@ public class DefaultGatewayClient implements GatewayClient {
 
     private void logPayload(String prefix, Context context, ByteBuf buf) {
         log.trace(format(context, prefix + buf.toString(StandardCharsets.UTF_8)
-                .replaceAll("(\"token\": ?\")([A-Za-z0-9.-]*)(\")", "$1hunter2$3")));
+                .replaceAll("(\"token\": ?\")([A-Za-z0-9._-]*)(\")", "$1hunter2$3")));
     }
 
     private static boolean isReadyOrResume(Dispatch d) {
