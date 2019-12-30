@@ -44,6 +44,16 @@ public interface ShardingStrategy {
     GatewayClientGroupManager getGroupManager();
 
     /**
+     * Return the number of shards that can be identified concurrently. Must be 1 unless your application is authorized
+     * to use the large bot sharding system.
+     *
+     * @return a value determining the sharding factor this strategy has
+     * @see <a href="https://discordapp.com/developers/docs/topics/gateway#sharding-for-very-large-bots">
+     * Sharding for very large bots</a>
+     */
+    int getShardingFactor();
+
+    /**
      * Sharding strategy that retrieves the recommended shard count and creates as many {@link GatewayClient}
      * instances as indexes given by that count.
      *
@@ -62,6 +72,11 @@ public interface ShardingStrategy {
             @Override
             public GatewayClientGroupManager getGroupManager() {
                 return new ShardingGatewayClientGroup();
+            }
+
+            @Override
+            public int getShardingFactor() {
+                return 1;
             }
         };
     }
@@ -83,6 +98,11 @@ public interface ShardingStrategy {
             public GatewayClientGroupManager getGroupManager() {
                 return new ShardingGatewayClientGroup();
             }
+
+            @Override
+            public int getShardingFactor() {
+                return 1;
+            }
         };
     }
 
@@ -102,6 +122,11 @@ public interface ShardingStrategy {
             @Override
             public GatewayClientGroupManager getGroupManager() {
                 return new SingleGatewayClientGroup();
+            }
+
+            @Override
+            public int getShardingFactor() {
+                return 1;
             }
         };
     }

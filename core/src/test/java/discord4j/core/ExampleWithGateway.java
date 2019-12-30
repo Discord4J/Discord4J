@@ -24,8 +24,7 @@ public class ExampleWithGateway {
 
     public static void main(String[] args) {
         BlockHound.install();
-        DiscordClientBuilder.create(System.getenv("token"))
-                .build()
+        DiscordClient.create(System.getenv("token"))
                 .withGateway(client -> BotSupport.create(client).eventHandlers())
                 .block();
     }

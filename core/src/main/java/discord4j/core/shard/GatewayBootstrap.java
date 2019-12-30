@@ -475,9 +475,9 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                 clientGroup, voiceConnectionFactory);
 
         Flux<ShardInfo> connections = shardingStrategy.getShards(client.getCoreResources().getRestClient())
-                .transform(shardCoordinator.getConnectOperator())
-                .concatMap(shard -> acquireConnection(shard, clientFactory, gateway, stateHolder,
-                        eventDispatcher, clientGroup, closeProcessor));
+                .groupBy(shard -> shard.getIndex() % shardingStrategy.getShardingFactor())
+                .flatMap(group -> group.concatMap(shard -> acquireConnection(shard, clientFactory, gateway,
+                        stateHolder, eventDispatcher, clientGroup, closeProcessor)));
 
         if (awaitConnections) {
             return connections.collectList().thenReturn(gateway);
@@ -669,9 +669,10 @@ public class GatewayBootstrap<O extends GatewayOptions> {
     }
 
     private O buildOptions(IdentifyOptions identify) {
+        ShardInfo shardInfo = identify.getShardInfo();
         GatewayOptions options = new GatewayOptions(client.getCoreResources().getToken(),
                 initGatewayReactorResources(), initPayloadReader(), initPayloadWriter(), reconnectOptions, identify,
-                gatewayObserver, shardCoordinator.getIdentifyLimiter());
+                gatewayObserver, shardCoordinator.getIdentifyLimiter(shardInfo, shardingStrategy.getShardingFactor()));
         return this.optionsModifier.apply(options);
     }
 

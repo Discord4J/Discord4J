@@ -35,11 +35,13 @@ public class DefaultShardingStrategy implements ShardingStrategy {
     private final int count;
     private final Function<Integer, Publisher<Integer>> indexSource;
     private final Predicate<ShardInfo> filter;
+    private final int factor;
 
     public DefaultShardingStrategy(Builder builder) {
         this.count = builder.shardCount;
         this.indexSource = builder.shardIndexSource;
         this.filter = builder.shardFilter;
+        this.factor = builder.factor;
     }
 
     @Override
@@ -66,6 +68,11 @@ public class DefaultShardingStrategy implements ShardingStrategy {
         return new ShardingGatewayClientGroup();
     }
 
+    @Override
+    public int getShardingFactor() {
+        return factor;
+    }
+
     /**
      * A {@link ShardingStrategy} builder.
      */
@@ -79,6 +86,7 @@ public class DefaultShardingStrategy implements ShardingStrategy {
         private int shardCount = RECOMMENDED_SHARD_COUNT;
         private Function<Integer, Publisher<Integer>> shardIndexSource = count -> Flux.range(0, count);
         private Predicate<ShardInfo> shardFilter = shard -> true;
+        private int factor = 1;
 
         /**
          * Set the shard count parameter. Defaults to {@link #RECOMMENDED_SHARD_COUNT}. Must not be negative.
@@ -129,6 +137,19 @@ public class DefaultShardingStrategy implements ShardingStrategy {
          */
         public Builder filter(Predicate<ShardInfo> shardFilter) {
             this.shardFilter = Objects.requireNonNull(shardFilter);
+            return this;
+        }
+
+        /**
+         * Set the sharding factor to use when identifying to the Discord Gateway, determining the amount of shards that
+         * will be concurrently identified. Defaults to 1. You should only change this value if your bot is
+         * authorized to use the very large bot sharding system, otherwise you will hit a rate limit on identifying.
+         *
+         * @param factor a positive number indicating the amount of shards that can be identified concurrently.
+         * @return
+         */
+        public Builder factor(int factor) {
+            this.factor = factor;
             return this;
         }
 
