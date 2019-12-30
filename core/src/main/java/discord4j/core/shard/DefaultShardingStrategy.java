@@ -146,9 +146,12 @@ public class DefaultShardingStrategy implements ShardingStrategy {
          * authorized to use the very large bot sharding system, otherwise you will hit a rate limit on identifying.
          *
          * @param factor a positive number indicating the amount of shards that can be identified concurrently.
-         * @return
+         * @return this builder
          */
         public Builder factor(int factor) {
+            if (factor < 1) {
+                throw new IllegalArgumentException("factor < 1");
+            }
             this.factor = factor;
             return this;
         }
