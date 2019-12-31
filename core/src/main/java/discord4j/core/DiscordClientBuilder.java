@@ -194,7 +194,7 @@ public final class DiscordClientBuilder<O extends RouterOptions> {
      * previously enabled.
      * @return this builder
      * @see <a href="https://projectreactor.io/docs/core/release/reference/#reactor-tools-debug">
-     * Production-ready Global Debugging</a> (Reactor Reference)
+     * Reactor Reference: Production-ready Global Debugging</a>
      */
     public DiscordClientBuilder<O> setDebugMode(boolean debugMode) {
         this.debugMode = debugMode;
