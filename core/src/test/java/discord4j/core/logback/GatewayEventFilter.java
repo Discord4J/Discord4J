@@ -21,8 +21,7 @@ import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.turbo.TurboFilter;
 import ch.qos.logback.core.spi.FilterReply;
-import discord4j.gateway.json.GatewayPayload;
-import discord4j.gateway.json.Opcode;
+import discord4j.gateway.DefaultGatewayClient;
 import org.slf4j.Marker;
 
 import java.util.Arrays;
@@ -37,20 +36,15 @@ public class GatewayEventFilter extends TurboFilter {
 
     @Override
     public FilterReply decide(Marker marker, Logger logger, Level level, String format, Object[] params, Throwable t) {
-        if (params != null && logger.getName().startsWith("discord4j.gateway.inbound")) {
-            for (Object param : params) {
-                if (param instanceof GatewayPayload) {
-                    GatewayPayload<?> payload = (GatewayPayload) param;
-                    if (Opcode.DISPATCH.equals(payload.getOp())) {
-                        if (excludedEvents != null) {
-                            if (excludedEvents.contains(payload.getType())) {
-                                return FilterReply.DENY;
-                            }
-                        } else if (includedEvents != null) {
-                            if (!includedEvents.contains(payload.getType())) {
-                                return FilterReply.DENY;
-                            }
-                        }
+        if (logger.getName().startsWith(DefaultGatewayClient.class.getName())) {
+            if (format != null && format.contains("\"t\"")) {
+                if (excludedEvents != null) {
+                    if (excludedEvents.stream().anyMatch(format::contains)) {
+                        return FilterReply.DENY;
+                    }
+                } else if (includedEvents != null) {
+                    if (includedEvents.stream().noneMatch(format::contains)) {
+                        return FilterReply.DENY;
                     }
                 }
             }

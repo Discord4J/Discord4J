@@ -8,11 +8,11 @@
  *
  * Discord4J is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public License
- * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Discord4J. If not, see <http://www.gnu.org/licenses/>.
  */
 package discord4j.core;
 
@@ -48,6 +48,7 @@ public final class StateHolder {
 
     private static final Logger log = Loggers.getLogger(StateHolder.class);
 
+    private final StoreService storeService;
     private final LongObjStore<ChannelBean> channelStore;
     private final LongObjStore<GuildBean> guildStore;
     private final LongObjStore<GuildEmojiBean> guildEmojiStore;
@@ -60,35 +61,42 @@ public final class StateHolder {
     private final AtomicLong selfId;
 
     StateHolder(final StoreService service, final StoreContext context) {
+        storeService = service;
+
         service.init(context);
 
         channelStore = service.provideLongObjStore(ChannelBean.class);
-        log.debug("Using a {} backend for channel storage.", channelStore);
+        log.debug("Channel storage     : {}", channelStore);
 
         guildStore = service.provideLongObjStore(GuildBean.class);
-        log.debug("Using a {} backend for guild storage.", guildStore);
+        log.debug("Guild storage       : {}", guildStore);
 
         guildEmojiStore = service.provideLongObjStore(GuildEmojiBean.class);
-        log.debug("Using a {} backend for guild emoji storage.", guildEmojiStore);
+        log.debug("Guild emoji storage : {}", guildEmojiStore);
 
         memberStore = service.provideGenericStore(LongLongTuple2.class, MemberBean.class);
-        log.debug("Using a {} backend for member storage.", memberStore);
+        log.debug("Member storage      : {}", memberStore);
 
         messageStore = service.provideLongObjStore(MessageBean.class);
-        log.debug("Using a {} backend for message storage.", messageStore);
+        log.debug("Message storage     : {}", messageStore);
 
         presenceStore = service.provideGenericStore(LongLongTuple2.class, PresenceBean.class);
-        log.debug("Using a {} backend for presence storage.", presenceStore);
+        log.debug("Presence storage    : {}", presenceStore);
 
         roleStore = service.provideLongObjStore(RoleBean.class);
-        log.debug("Using a {} backend for role storage.", roleStore);
+        log.debug("Role storage        : {}", roleStore);
 
         userStore = service.provideLongObjStore(UserBean.class);
-        log.debug("Using a {} backend for user storage.", userStore);
+        log.debug("User storage        : {}", userStore);
 
         voiceStateStore = service.provideGenericStore(LongLongTuple2.class, VoiceStateBean.class);
-        log.debug("Using a {} backend for voice state storage.", voiceStateStore);
+        log.debug("Voice state storage : {}", voiceStateStore);
+
         selfId = new AtomicLong();
+    }
+
+    public StoreService getStoreService() {
+        return storeService;
     }
 
     public LongObjStore<ChannelBean> getChannelStore() {

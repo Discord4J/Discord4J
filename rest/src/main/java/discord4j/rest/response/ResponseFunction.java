@@ -19,7 +19,8 @@ package discord4j.rest.response;
 
 import discord4j.common.annotations.Experimental;
 import discord4j.rest.http.client.ClientException;
-import discord4j.rest.request.DiscordRequest;
+import discord4j.rest.http.client.ClientResponse;
+import discord4j.rest.request.DiscordWebRequest;
 import discord4j.rest.request.RouteMatcher;
 import discord4j.rest.request.Router;
 import discord4j.rest.request.RouterOptions;
@@ -30,29 +31,27 @@ import java.time.Duration;
 import java.util.function.Function;
 
 /**
- * A transformation function used while processing {@link DiscordRequest} objects.
+ * A transformation function used while processing {@link DiscordWebRequest} objects.
  * <p>
  * Using {@link ResponseFunction} objects is targeted to supporting {@link Router} implementations that allow enrichment
  * of a response {@link Mono} pipeline, allowing cross-cutting behavior for specialized error handling or retrying under
  * specific conditions like an HTTP status code or a given API request route. Usage beyond this concern is not
  * supported and could interfere with downstream operations.
  * <p>
- * Typical {@link ResponseFunction} usage is through {@link RouterOptions} builder option
- * {@link RouterOptions.Builder#onClientResponse(ResponseFunction)}, where it can be applied using one of the static
- * helper methods defined in this class.
+ * Typical {@link ResponseFunction} usage is through {@link RouterOptions}, where it can be applied using one of the
+ * static helper methods defined in this class.
  */
 @Experimental
 public interface ResponseFunction {
 
     /**
-     * Transform a {@link Mono} pipeline using the given {@link DiscordRequest} as hint for parameterization of the
+     * Transform a {@link Mono} pipeline using the given {@link DiscordWebRequest} as hint for parameterization of the
      * resulting transformation.
      *
      * @param request the {@code DiscordRequest} used for the targeted {@code Mono} sequence
-     * @param <T> the type of the sequence
      * @return a {@link Function} that allows immediately mapping this {@code Mono} into a target {@code Mono} instance
      */
-    <T> Function<Mono<T>, Mono<T>> transform(DiscordRequest<T> request);
+    Function<Mono<ClientResponse>, Mono<ClientResponse>> transform(DiscordWebRequest request);
 
     /**
      * Transform every HTTP 404 status code into an empty response into an empty sequence, effectively suppressing

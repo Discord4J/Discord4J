@@ -54,7 +54,7 @@ public interface ExchangeStrategies {
         writerStrategies.add(new JacksonWriterStrategy(mapper));
         writerStrategies.add(new EmptyWriterStrategy());
         List<ReaderStrategy<?>> readerStrategies = new ArrayList<>();
-        readerStrategies.add(new JacksonReaderStrategy(mapper));
+        readerStrategies.add(new JacksonReaderStrategy<>(mapper));
         readerStrategies.add(new EmptyReaderStrategy());
         readerStrategies.add(new FallbackReaderStrategy());
         return new DefaultExchangeStrategies(writerStrategies, readerStrategies);

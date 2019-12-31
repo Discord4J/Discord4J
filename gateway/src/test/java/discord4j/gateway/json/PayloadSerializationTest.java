@@ -64,14 +64,15 @@ public class PayloadSerializationTest {
                 "            \"$device\": \"disco\"\n" +
                 "        },\n" +
                 "        \"compress\": true,\n" +
-                "        \"large_threshold\": 250\n" +
+                "        \"large_threshold\": 250,\n" +
+                "        \"guild_subscriptions\": true\n" +
                 "    },\n" +
                 "    \"s\":null,\n" +
                 "    \"t\":null\n" +
                 "}").replaceAll("\\s+", "");
 
         Identify identify = new Identify("my_token", new IdentifyProperties("linux", "disco", "disco"), true, 250,
-                Possible.absent(), Possible.absent());
+                Possible.absent(), Possible.absent(), true);
         GatewayPayload<Identify> payload = GatewayPayload.identify(identify);
         String result = mapper.writeValueAsString(payload);
 

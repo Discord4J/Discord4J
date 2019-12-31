@@ -16,11 +16,17 @@
  */
 package discord4j.gateway.json.dispatch;
 
+import com.fasterxml.jackson.annotation.JsonAnyGetter;
+import com.fasterxml.jackson.annotation.JsonAnySetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import discord4j.common.jackson.UnsignedJson;
 import discord4j.common.json.EmojiResponse;
 import discord4j.common.json.GuildMemberResponse;
 import reactor.util.annotation.Nullable;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 public class MessageReactionAdd implements Dispatch {
 
@@ -40,6 +46,9 @@ public class MessageReactionAdd implements Dispatch {
     private EmojiResponse emoji;
     @Nullable
     private GuildMemberResponse member;
+
+    @JsonIgnore
+    private Map<String, Object> additionalProperties = new LinkedHashMap<>();
 
     public long getUserId() {
         return userId;
@@ -65,6 +74,16 @@ public class MessageReactionAdd implements Dispatch {
     @Nullable
     public GuildMemberResponse getMember() {
         return this.member;
+    }
+
+    @JsonAnyGetter
+    public Map<String, Object> getAdditionalProperties() {
+        return additionalProperties;
+    }
+
+    @JsonAnySetter
+    public void setAdditionalProperty(String name, Object value) {
+        additionalProperties.put(name, value);
     }
 
     @Override

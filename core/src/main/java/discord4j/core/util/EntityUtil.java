@@ -16,9 +16,10 @@
  */
 package discord4j.core.util;
 
-import discord4j.core.ServiceMediator;
+import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.data.stored.ChannelBean;
-import discord4j.core.object.entity.*;
+import discord4j.core.object.entity.Entity;
+import discord4j.core.object.entity.channel.*;
 import discord4j.core.object.reaction.ReactionEmoji;
 import reactor.util.annotation.Nullable;
 
@@ -41,18 +42,18 @@ public final class EntityUtil {
      * An utility that converts some instance of {@code ChannelBean} to its associated {@code Channel}
      * {@link Channel.Type type}. That is to say, {@code bean.getType() == Channel#getType().getValue()}.
      *
-     * @param serviceMediator The ServiceMediator associated to this object, must be non-null.
+     * @param gateway The {@link GatewayDiscordClient} associated to this object, must be non-null.
      * @param bean The {@code ChannelBean} to convert.
      * @return The converted {@code Channel}.
      */
-    public static Channel getChannel(final ServiceMediator serviceMediator, final ChannelBean bean) {
+    public static Channel getChannel(final GatewayDiscordClient gateway, final ChannelBean bean) {
         switch (Channel.Type.of(bean.getType())) {
-            case GUILD_TEXT: return new TextChannel(serviceMediator, bean);
-            case DM: return new PrivateChannel(serviceMediator, bean);
-            case GUILD_VOICE: return new VoiceChannel(serviceMediator, bean);
-            case GUILD_CATEGORY: return new Category(serviceMediator, bean);
-            case GUILD_NEWS: return new NewsChannel(serviceMediator, bean);
-            case GUILD_STORE: return new StoreChannel(serviceMediator, bean);
+            case GUILD_TEXT: return new TextChannel(gateway, bean);
+            case DM: return new PrivateChannel(gateway, bean);
+            case GUILD_VOICE: return new VoiceChannel(gateway, bean);
+            case GUILD_CATEGORY: return new Category(gateway, bean);
+            case GUILD_NEWS: return new NewsChannel(gateway, bean);
+            case GUILD_STORE: return new StoreChannel(gateway, bean);
             default: return throwUnsupportedDiscordValue(bean);
         }
     }

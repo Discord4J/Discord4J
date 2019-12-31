@@ -16,7 +16,7 @@
  */
 package discord4j.core.object;
 
-import discord4j.core.ServiceMediator;
+import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.data.ExtendedInviteBean;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.util.Snowflake;
@@ -37,11 +37,11 @@ public final class ExtendedInvite extends Invite {
     /**
      * Constructs a {@code ExtendedInvite} with an associated ServiceMediator and Discord data.
      *
-     * @param serviceMediator The ServiceMediator associated to this object, must be non-null.
+     * @param gateway The {@link GatewayDiscordClient} associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
      */
-    public ExtendedInvite(final ServiceMediator serviceMediator, final ExtendedInviteBean data) {
-        super(serviceMediator, data);
+    public ExtendedInvite(final GatewayDiscordClient gateway, final ExtendedInviteBean data) {
+        super(gateway, data);
     }
 
     /**
@@ -100,15 +100,6 @@ public final class ExtendedInvite extends Invite {
      */
     public Instant getCreation() {
         return DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(getData().getCreatedAt(), Instant::from);
-    }
-
-    /**
-     * Gets whether this invite is revoked.
-     *
-     * @return {@code true} if this invite is revoked, {@code false} otherwise.
-     */
-    public boolean isRevoked() {
-        return getData().isRevoked();
     }
 
     @Override

@@ -16,11 +16,16 @@
  */
 package discord4j.common.json;
 
+import com.fasterxml.jackson.annotation.JsonAnyGetter;
+import com.fasterxml.jackson.annotation.JsonAnySetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import discord4j.common.jackson.UnsignedJson;
 import reactor.util.annotation.Nullable;
 
 import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 public class GuildEmojiResponse {
 
@@ -35,6 +40,9 @@ public class GuildEmojiResponse {
     private boolean requireColons;
     private boolean managed;
     private boolean animated;
+
+    @JsonIgnore
+    private Map<String, Object> additionalProperties = new LinkedHashMap<>();
 
     public long getId() {
         return id;
@@ -63,6 +71,16 @@ public class GuildEmojiResponse {
 
     public boolean isAnimated() {
         return animated;
+    }
+
+    @JsonAnyGetter
+    public Map<String, Object> getAdditionalProperties() {
+        return additionalProperties;
+    }
+
+    @JsonAnySetter
+    public void setAdditionalProperty(String name, Object value) {
+        additionalProperties.put(name, value);
     }
 
     @Override

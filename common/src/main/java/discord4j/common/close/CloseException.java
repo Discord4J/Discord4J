@@ -18,9 +18,12 @@
 package discord4j.common.close;
 
 import reactor.util.annotation.Nullable;
+import reactor.util.context.Context;
+
+import java.util.Optional;
 
 /**
- * Unchecked exception thrown when a websocket session is closed, in an expected way or not.
+ * Unchecked exception thrown when closing a websocket session, expectedly or not.
  * <p>
  * Used to wrap an underlying websocket {@link CloseStatus} so clients can retrieve the
  * status code and perform actions after it.
@@ -28,31 +31,70 @@ import reactor.util.annotation.Nullable;
 public class CloseException extends RuntimeException {
 
     private final CloseStatus closeStatus;
+    private final Context context;
 
-    public CloseException(CloseStatus closeStatus) {
-        this(closeStatus, null);
+    /**
+     * Create a {@link CloseException} with the given status and Reactor context.
+     *
+     * @param closeStatus the {@link CloseStatus} representing this exception
+     * @param context a {@link Context} instance representing metadata related to this exception
+     */
+    public CloseException(CloseStatus closeStatus, Context context) {
+        this(closeStatus, context, null);
     }
 
-    public CloseException(CloseStatus closeStatus, @Nullable Throwable cause) {
+    /**
+     * Create a {@link CloseException} with the given status, Reactor context and cause.
+     *
+     * @param closeStatus the {@link CloseStatus} representing this exception
+     * @param context a {@link Context} instance providing metadata related to this exception
+     * @param cause the cause for this exception
+     */
+    public CloseException(CloseStatus closeStatus, Context context, @Nullable Throwable cause) {
         super(cause);
         this.closeStatus = closeStatus;
+        this.context = context;
     }
 
+    /**
+     * Return the underlying {@link CloseStatus} that triggered this exception.
+     *
+     * @return a close status
+     */
     public CloseStatus getCloseStatus() {
         return closeStatus;
     }
 
+    /**
+     * Return the websocket close code.
+     *
+     * @return a websocket close code
+     */
     public int getCode() {
         return closeStatus.getCode();
     }
 
-    @Nullable
-    public String getReason() {
+    /**
+     * Return a websocket close reason, if present.
+     *
+     * @return an {@link Optional} containing a close reason if present, or empty otherwise
+     */
+    public Optional<String> getReason() {
         return closeStatus.getReason();
+    }
+
+    /**
+     * Return the Reactor {@link Context} providing metadata about this exception.
+     *
+     * @return a Reactor context instance
+     */
+    public Context getContext() {
+        return context;
     }
 
     @Override
     public String getMessage() {
-        return "WebSocket closed: " + closeStatus.toString();
+        return "WebSocket closed: " + closeStatus.toString()
+                + (getCause() != null ? " caused by " + getCause().toString() : "");
     }
 }

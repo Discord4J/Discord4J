@@ -19,15 +19,17 @@ package discord4j.core;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import discord4j.common.JacksonResourceProvider;
+import discord4j.common.JacksonResources;
+import discord4j.core.event.EventDispatcher;
 import discord4j.core.event.domain.Event;
+import discord4j.core.event.domain.lifecycle.GatewayLifecycleEvent;
+import discord4j.core.event.domain.lifecycle.ReadyEvent;
+import discord4j.core.object.data.stored.MessageBean;
 import discord4j.core.object.presence.Presence;
-import discord4j.core.shard.ShardingClientBuilder;
-import discord4j.core.shard.ShardingJdkStoreRegistry;
-import discord4j.core.shard.ShardingStoreRegistry;
+import discord4j.core.state.StateView;
 import discord4j.store.api.mapping.MappingStoreService;
+import discord4j.store.api.noop.NoOpStoreService;
 import discord4j.store.jdk.JdkStoreService;
-
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -42,6 +44,7 @@ import reactor.netty.DisposableServer;
 import reactor.netty.http.server.HttpServer;
 import reactor.util.function.Tuple2;
 
+import java.time.Duration;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
@@ -63,49 +66,52 @@ public class StoreBotTest {
     @Test
     @Ignore("Example code excluded from CI")
     public void testStoreBot() {
-        Map<Integer, DiscordClient> clients = new ConcurrentHashMap<>();
         Map<String, AtomicLong> counts = new ConcurrentHashMap<>();
-        JacksonResourceProvider jackson = new JacksonResourceProvider();
-        startHttpServer(clients, counts, jackson.getObjectMapper());
-        ShardingStoreRegistry registry = new ShardingJdkStoreRegistry();
-        new ShardingClientBuilder(token)
-                .setShardingStoreRegistry(registry)
-                // showcase disabling the cache for messages
+        JacksonResources jackson = new JacksonResources();
+
+        DiscordClient client = DiscordClient.builder(token)
+                .setJacksonResources(jackson)
+                .build();
+
+        client.gateway()
+                .setShardIndexSource(count -> Flux.just(0, 2, 4))
                 .setStoreService(MappingStoreService.create()
-                        //.setMapping(new NoOpStoreService(), MessageBean.class)
+                        .setMapping(new NoOpStoreService(), MessageBean.class)
                         .setFallback(new JdkStoreService()))
-                .build()
-                .map(builder -> builder.setJacksonResourceProvider(jackson)
-                        .setInitialPresence(Presence.invisible()))
-                .map(DiscordClientBuilder::build)
-                .doOnNext(client -> clients.put(client.getConfig().getShardIndex(), client))
-                .doOnNext(client -> subscribeEventCounter(client, counts))
-                .flatMap(DiscordClient::login)
-                .blockLast();
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> clients.forEach((id, client) -> client.logout().block())));
+                .setEventDispatcher(EventDispatcher.replayingWithTimeout(Duration.ofMinutes(2)))
+                .setInitialPresence(shard -> Presence.invisible())
+                .withConnection(gateway -> {
+                    log.info("Start!");
+
+                    Mono<Void> server = startHttpServer(gateway, counts, jackson.getObjectMapper()).then();
+
+                    Mono<Void> listener = gateway.on(GatewayLifecycleEvent.class)
+                            .filter(e -> !e.getClass().equals(ReadyEvent.class))
+                            .doOnNext(e -> log.info("[shard={}] {}", e.getShardInfo().format(), e.toString()))
+                            .then();
+
+                    Mono<Void> eventCounter = Flux.fromIterable(reflections.getSubTypesOf(Event.class))
+                            .filter(cls -> reflections.getSubTypesOf(cls).isEmpty())
+                            .flatMap(type -> gateway.on(type).doOnNext(event -> {
+                                String key = event.getClass().getSimpleName();
+                                counts.computeIfAbsent(key, k -> new AtomicLong()).addAndGet(1);
+                            }))
+                            .then();
+
+                    return Mono.when(server, listener, eventCounter);
+                })
+                .block();
     }
 
-    private void subscribeEventCounter(DiscordClient client, Map<String, AtomicLong> counts) {
-        reflections.getSubTypesOf(Event.class)
-                .stream()
-                .filter(cls -> reflections.getSubTypesOf(cls).isEmpty())
-                .forEach(type -> {
-                    client.getEventDispatcher().on(type)
-                            .map(event -> event.getClass().getSimpleName())
-                            .map(name -> counts.computeIfAbsent(name, k -> new AtomicLong()).addAndGet(1))
-                            .subscribe(null, t -> log.error("Error", t));
-                });
-    }
-
-    private void startHttpServer(Map<Integer, DiscordClient> shards, Map<String, AtomicLong> counts,
-                                 ObjectMapper mapper) {
-        DisposableServer facade = HttpServer.create()
+    private Mono<? extends DisposableServer> startHttpServer(GatewayDiscordClient gateway,
+                                                             Map<String, AtomicLong> counts,
+                                                             ObjectMapper mapper) {
+        return HttpServer.create()
                 .port(0) // use an ephemeral port
                 .route(routes -> routes
                         .get("/counts",
                                 (req, res) -> {
-                                    DiscordClient client = shards.get(0);
-                                    StateHolder stores = client.getServiceMediator().getStateHolder();
+                                    StateView stores = gateway.getGatewayResources().getStateView();
                                     Mono<String> result = Flux.merge(
                                             Mono.just("users").zipWith(stores.getUserStore().count()),
                                             Mono.just("guilds").zipWith(stores.getGuildStore().count()),
@@ -124,25 +130,21 @@ public class StoreBotTest {
                                 }
                         )
                         .get("/events",
-                                (req, res) -> {
-                                    try {
-                                        String json = mapper.writeValueAsString(counts);
-                                        return res.addHeader("content-type", "application/json")
+                                (req, res) -> Mono.fromCallable(() -> mapper.writeValueAsString(counts))
+                                        .flatMap(json -> res.addHeader("content-type", "application/json")
                                                 .chunkedTransfer(false)
-                                                .sendString(Mono.just(json));
-                                    } catch (JsonProcessingException e) {
-                                        return res.status(500).send();
-                                    }
-                                }
+                                                .sendString(Mono.just(json))
+                                                .then()
+                                                .onErrorResume(t -> res.status(500).send()))
                         )
                 )
-                .bindNow();
-
-        log.info("*************************************************************");
-        log.info("Server started at {}:{}", facade.host(), facade.port());
-        log.info("*************************************************************");
-
-        // kill the server on JVM exit
-        Runtime.getRuntime().addShutdownHook(new Thread(facade::disposeNow));
+                .bind()
+                .doOnNext(facade -> {
+                    log.info("*************************************************************");
+                    log.info("Server started at {}:{}", facade.host(), facade.port());
+                    log.info("*************************************************************");
+                    // kill the server on JVM exit
+                    Runtime.getRuntime().addShutdownHook(new Thread(() -> facade.disposeNow()));
+                });
     }
 }

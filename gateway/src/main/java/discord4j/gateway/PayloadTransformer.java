@@ -20,11 +20,20 @@ package discord4j.gateway;
 import io.netty.buffer.ByteBuf;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
-
-import java.util.function.Function;
+import reactor.util.function.Tuple2;
 
 /**
  * A transformation function to a sequence of raw {@link ByteBuf} payloads.
  */
-public interface PayloadTransformer extends Function<Flux<ByteBuf>, Publisher<ByteBuf>> {
+@FunctionalInterface
+public interface PayloadTransformer {
+
+    /**
+     * Transform a sequence of {@link ByteBuf} payloads, along with their parent {@link GatewayClient}, to inject
+     * behavior like delays into the produced sequence of {@link ByteBuf} payloads.
+     *
+     * @param sequence a sequence of payloads
+     * @return the transformed sequence
+     */
+    Publisher<ByteBuf> apply(Flux<Tuple2<GatewayClient, ByteBuf>> sequence);
 }

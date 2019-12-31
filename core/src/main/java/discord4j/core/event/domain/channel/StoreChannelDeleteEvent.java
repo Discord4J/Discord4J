@@ -16,8 +16,9 @@
  */
 package discord4j.core.event.domain.channel;
 
-import discord4j.core.DiscordClient;
-import discord4j.core.object.entity.StoreChannel;
+import discord4j.core.GatewayDiscordClient;
+import discord4j.core.object.entity.channel.StoreChannel;
+import discord4j.gateway.ShardInfo;
 
 /**
  * Dispatched when a {@link StoreChannel} is deleted in a guild.
@@ -30,8 +31,8 @@ public class StoreChannelDeleteEvent extends ChannelEvent {
 
     private final StoreChannel channel;
 
-    public StoreChannelDeleteEvent(DiscordClient client, StoreChannel channel) {
-        super(client);
+    public StoreChannelDeleteEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, StoreChannel channel) {
+        super(gateway, shardInfo);
         this.channel = channel;
     }
 

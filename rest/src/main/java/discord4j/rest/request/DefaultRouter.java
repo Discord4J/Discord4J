@@ -16,124 +16,71 @@
  */
 package discord4j.rest.request;
 
+import discord4j.common.ReactorResources;
+import discord4j.rest.http.client.ClientResponse;
 import discord4j.rest.http.client.DiscordWebClient;
-import discord4j.rest.route.Routes;
-import io.netty.handler.codec.http.HttpHeaders;
+import discord4j.rest.response.ResponseFunction;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.MonoProcessor;
-import reactor.core.scheduler.Scheduler;
-import reactor.netty.http.client.HttpClientResponse;
 import reactor.util.Logger;
 import reactor.util.Loggers;
 
-import java.time.Duration;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Facilitates the routing of {@link discord4j.rest.request.DiscordRequest DiscordRequests} to the proper
- * {@link discord4j.rest.request.RequestStream RequestStream} according to the bucket in which the request falls.
- * <p>
- * Must be cached using {@link discord4j.rest.request.SingleRouterFactory} if intended for sharding, to properly
- * coordinate queueing and rate-limiting across buckets.
+ * Facilitates the routing of {@link DiscordWebRequest} instances to the proper {@link RequestStream} according to
+ * the bucket in which the request falls.
  */
 public class DefaultRouter implements Router {
 
     private static final Logger log = Loggers.getLogger(DefaultRouter.class);
     private static final ResponseHeaderStrategy HEADER_STRATEGY = new ResponseHeaderStrategy();
 
+    private final ReactorResources reactorResources;
+    private final List<ResponseFunction> responseFunctions;
     private final DiscordWebClient httpClient;
-    private final RouterOptions routerOptions;
     private final GlobalRateLimiter globalRateLimiter;
-    private final Map<BucketKey, RequestStream<?>> streamMap = new ConcurrentHashMap<>();
-
-    /**
-     * Create a bucket-aware router using the defaults provided by {@link RouterOptions#create()}.
-     *
-     * @param httpClient the web client executing each request instructed by this router
-     */
-    public DefaultRouter(DiscordWebClient httpClient) {
-        this(httpClient, RouterOptions.create());
-    }
-
-    /**
-     * Create a Discord API bucket-aware {@link Router} that uses the given {@link reactor.core.scheduler.Scheduler}.
-     *
-     * @param httpClient the web client executing each request instructed by this router
-     * @param responseScheduler the scheduler used to execute each request
-     * @param rateLimitScheduler the scheduler used to perform delays caused by rate limiting
-     * @deprecated use {@link #DefaultRouter(DiscordWebClient, RouterOptions)}
-     */
-    @Deprecated
-    public DefaultRouter(DiscordWebClient httpClient, Scheduler responseScheduler, Scheduler rateLimitScheduler) {
-        this(httpClient, RouterOptions.builder()
-                .responseScheduler(responseScheduler)
-                .rateLimitScheduler(rateLimitScheduler)
-                .build());
-    }
+    private final Map<BucketKey, RequestStream> streamMap = new ConcurrentHashMap<>();
 
     /**
      * Create a Discord API bucket-aware {@link Router} configured with the given options.
      *
-     * @param httpClient the web client executing each request instructed by this router
      * @param routerOptions the options that configure this {@link Router}
      */
-    public DefaultRouter(DiscordWebClient httpClient, RouterOptions routerOptions) {
-        this.httpClient = httpClient;
-        this.routerOptions = routerOptions;
+    public DefaultRouter(RouterOptions routerOptions) {
+        this.reactorResources = routerOptions.getReactorResources();
+        this.responseFunctions = routerOptions.getResponseTransformers();
+        this.httpClient = new DiscordWebClient(reactorResources.getHttpClient(),
+                routerOptions.getExchangeStrategies(), routerOptions.getToken(), this.responseFunctions);
         this.globalRateLimiter = routerOptions.getGlobalRateLimiter();
     }
 
     @Override
-    public <T> Mono<T> exchange(DiscordRequest<T> request) {
-        return Mono.defer(Mono::subscriberContext)
-                .flatMap(ctx -> {
-                    RequestStream<T> stream = getStream(request);
-                    MonoProcessor<T> callback = MonoProcessor.create();
-                    String shardId = ctx.getOrEmpty("shard")
-                            .map(Object::toString)
-                            .orElse(null);
-                    stream.push(new RequestCorrelation<>(request, callback, shardId));
+    public DiscordWebResponse exchange(DiscordWebRequest request) {
+        return new DiscordWebResponse(Mono.deferWithContext(
+                ctx -> {
+                    RequestStream stream = getStream(request);
+                    MonoProcessor<ClientResponse> callback = MonoProcessor.create();
+                    stream.push(new RequestCorrelation<>(request, callback, ctx));
                     return callback;
                 })
-                .publishOn(routerOptions.getResponseScheduler());
+                .checkpoint("Request to " + request.getDescription() + " [DefaultRouter]"), reactorResources);
     }
 
-    @SuppressWarnings("unchecked")
-    private <T> RequestStream<T> getStream(DiscordRequest<T> request) {
-        return (RequestStream<T>)
-                streamMap.computeIfAbsent(computeBucket(request),
-                        k -> {
-                            if (log.isTraceEnabled()) {
-                                log.trace("Creating RequestStream with key {} for request: {} -> {}",
-                                        k, request.getRoute().getUriTemplate(), request.getCompleteUri());
-                            }
-                            RequestStream<T> stream = new RequestStream<>(k, httpClient, globalRateLimiter,
-                                    HEADER_STRATEGY, routerOptions.getRateLimitScheduler(),
-                                    routerOptions);
-                            stream.start();
-                            return stream;
-                        });
-    }
-
-    private <T> BucketKey computeBucket(DiscordRequest<T> request) {
-        if (Routes.MESSAGE_DELETE.equals(request.getRoute())) {
-            return BucketKey.of("DELETE " + request.getRoute().getUriTemplate(), request.getCompleteUri());
-        }
-        return BucketKey.of(request.getRoute().getUriTemplate(), request.getCompleteUri());
-    }
-
-    static class ResponseHeaderStrategy implements RequestStream.RateLimitStrategy {
-
-        @Override
-        public Duration apply(HttpClientResponse response) {
-            HttpHeaders headers = response.responseHeaders();
-            int remaining = headers.getInt("X-RateLimit-Remaining", -1);
-            if (remaining == 0) {
-                long resetAt = (long) (Double.parseDouble(headers.get("X-RateLimit-Reset-After")) * 1000);
-                return Duration.ofMillis(resetAt);
-            }
-            return Duration.ZERO;
-        }
+    private RequestStream getStream(DiscordWebRequest request) {
+        return streamMap.computeIfAbsent(BucketKey.of(request),
+                k -> {
+                    if (log.isTraceEnabled()) {
+                        log.trace("Creating RequestStream with key {} for request: {} -> {}",
+                                k, request.getRoute().getUriTemplate(), request.getCompleteUri());
+                    }
+                    RequestStream stream = new RequestStream(k, httpClient, globalRateLimiter,
+                            HEADER_STRATEGY, reactorResources.getTimerTaskScheduler(),
+                            responseFunctions);
+                    stream.start();
+                    return stream;
+                });
     }
 }

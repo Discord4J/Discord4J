@@ -16,16 +16,17 @@
  */
 package discord4j.core.event.domain.message;
 
-import discord4j.core.DiscordClient;
+import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.Event;
 import discord4j.core.object.entity.Message;
+import discord4j.gateway.ShardInfo;
 
 /**
  * Represents an event related to a {@link Message}.
  */
 public abstract class MessageEvent extends Event {
 
-    public MessageEvent(DiscordClient client) {
-        super(client);
+    public MessageEvent(GatewayDiscordClient gateway, ShardInfo shardInfo) {
+        super(gateway, shardInfo);
     }
 }

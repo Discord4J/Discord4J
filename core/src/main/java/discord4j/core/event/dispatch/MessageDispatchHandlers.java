@@ -21,8 +21,7 @@ import discord4j.common.json.EmbedResponse;
 import discord4j.common.json.GuildMemberResponse;
 import discord4j.common.json.Mention;
 import discord4j.common.json.MessageMember;
-import discord4j.core.DiscordClient;
-import discord4j.core.ServiceMediator;
+import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.message.*;
 import discord4j.core.object.Embed;
 import discord4j.core.object.data.stored.MemberBean;
@@ -47,10 +46,9 @@ import java.util.stream.Collectors;
 class MessageDispatchHandlers {
 
     static Mono<MessageCreateEvent> messageCreate(DispatchContext<MessageCreate> context) {
-        DiscordClient client = context.getServiceMediator().getClient();
-
+        GatewayDiscordClient gateway = context.getGateway();
         MessageBean bean = new MessageBean(context.getDispatch());
-        Message message = new Message(context.getServiceMediator(), bean);
+        Message message = new Message(gateway, bean);
 
         Long guildId = context.getDispatch().getGuildId();
         MessageMember memberResponse = context.getDispatch().getMember();
@@ -59,63 +57,61 @@ class MessageDispatchHandlers {
         if (guildId != null && memberResponse != null) {
             UserBean authorUser = new UserBean(context.getDispatch().getAuthor());
             MemberBean authorMember = new MemberBean(context.getDispatch().getMember());
-            member = new Member(context.getServiceMediator(), authorMember, authorUser, guildId);
+            member = new Member(gateway, authorMember, authorUser, guildId);
         }
 
-        Mono<Void> saveMessage = context.getServiceMediator().getStateHolder().getMessageStore()
+        Mono<Void> saveMessage = context.getStateHolder().getMessageStore()
                 .save(bean.getId(), bean);
 
-        Mono<Void> editLastMessageId = context.getServiceMediator().getStateHolder().getChannelStore()
+        Mono<Void> editLastMessageId = context.getStateHolder().getChannelStore()
                 .find(bean.getChannelId())
                 .doOnNext(channelBean -> channelBean.setLastMessageId(bean.getId()))
-                .flatMap(channelBean -> context.getServiceMediator().getStateHolder().getChannelStore()
+                .flatMap(channelBean -> context.getStateHolder().getChannelStore()
                         .save(channelBean.getId(), channelBean));
 
         return saveMessage
                 .and(editLastMessageId)
-                .thenReturn(new MessageCreateEvent(client, message, guildId, member));
+                .thenReturn(new MessageCreateEvent(gateway, context.getShardInfo(), message, guildId, member));
     }
 
     static Mono<MessageDeleteEvent> messageDelete(DispatchContext<MessageDelete> context) {
-        ServiceMediator serviceMediator = context.getServiceMediator();
-        DiscordClient client = serviceMediator.getClient();
+        GatewayDiscordClient gateway = context.getGateway();
         long messageId = context.getDispatch().getId();
         long channelId = context.getDispatch().getChannelId();
 
-        Mono<Void> deleteMessage = serviceMediator.getStateHolder().getMessageStore()
+        Mono<Void> deleteMessage = context.getStateHolder().getMessageStore()
                 .delete(context.getDispatch().getId());
 
-        return serviceMediator.getStateHolder().getMessageStore()
+        return context.getStateHolder().getMessageStore()
                 .find(messageId)
                 .flatMap(deleteMessage::thenReturn)
-                .map(messageBean -> new MessageDeleteEvent(client, messageId, channelId,
-                        new Message(serviceMediator, messageBean)))
-                .defaultIfEmpty(new MessageDeleteEvent(client, messageId, channelId, null));
+                .map(messageBean -> new MessageDeleteEvent(gateway, context.getShardInfo(), messageId, channelId,
+                        new Message(gateway, messageBean)))
+                .defaultIfEmpty(new MessageDeleteEvent(gateway, context.getShardInfo(), messageId, channelId, null));
     }
 
     static Mono<MessageBulkDeleteEvent> messageDeleteBulk(DispatchContext<MessageDeleteBulk> context) {
-        DiscordClient client = context.getServiceMediator().getClient();
+        GatewayDiscordClient gateway = context.getGateway();
         long messageIds[] = context.getDispatch().getIds();
         long channelId = context.getDispatch().getChannelId();
         long guildId = context.getDispatch().getGuildId();
 
-        Mono<Void> deleteMessages = context.getServiceMediator().getStateHolder().getMessageStore()
+        Mono<Void> deleteMessages = context.getStateHolder().getMessageStore()
                 .delete(Flux.fromArray(ArrayUtil.toObject(messageIds)));
 
         return Flux.fromArray(ArrayUtil.toObject(messageIds))
-                .flatMap(context.getServiceMediator().getStateHolder().getMessageStore()::find)
-                .map(messageBean -> new Message(context.getServiceMediator(), messageBean))
+                .flatMap(context.getStateHolder().getMessageStore()::find)
+                .map(messageBean -> new Message(gateway, messageBean))
                 .collect(Collectors.toSet())
                 .flatMap(deleteMessages::thenReturn)
-                .map(messages -> new MessageBulkDeleteEvent(client, messageIds, channelId, guildId, messages))
+                .map(messages -> new MessageBulkDeleteEvent(gateway, context.getShardInfo(), messageIds, channelId, guildId, messages))
                 .defaultIfEmpty(
-                        new MessageBulkDeleteEvent(client, messageIds, channelId, guildId, Collections.emptySet()));
+                        new MessageBulkDeleteEvent(gateway, context.getShardInfo(), messageIds, channelId, guildId, Collections.emptySet()));
 
     }
 
     static Mono<ReactionAddEvent> messageReactionAdd(DispatchContext<MessageReactionAdd> context) {
-        DiscordClient client = context.getServiceMediator().getClient();
-
+        GatewayDiscordClient gateway = context.getGateway();
         Long emojiId = context.getDispatch().getEmoji().getId();
         String emojiName = context.getDispatch().getEmoji().getName();
         boolean emojiAnimated = context.getDispatch().getEmoji().getAnimated() != null
@@ -130,10 +126,10 @@ class MessageDispatchHandlers {
         MemberBean memberBean = response != null ? new MemberBean(response) : null;
         UserBean userBean = response != null ? new UserBean(response.getUser()) : null;
 
-        Mono<Void> addToMessage = context.getServiceMediator().getStateHolder().getMessageStore()
+        Mono<Void> addToMessage = context.getStateHolder().getMessageStore()
                 .find(messageId)
                 .map(oldBean -> {
-                    boolean me = context.getServiceMediator().getStateHolder().getSelfId().get() == userId;
+                    boolean me = context.getStateHolder().getSelfId().get() == userId;
                     MessageBean newBean = new MessageBean(oldBean);
 
                     if (oldBean.getReactions() == null) {
@@ -164,19 +160,17 @@ class MessageDispatchHandlers {
                     return newBean;
                 })
                 .flatMap(bean ->
-                        context.getServiceMediator().getStateHolder().getMessageStore().save(bean.getId(), bean));
+                        context.getStateHolder().getMessageStore().save(bean.getId(), bean));
 
         ReactionEmoji emoji = ReactionEmoji.of(emojiId, emojiName, emojiAnimated);
-        Member member = response != null ? new Member(context.getServiceMediator(), memberBean, userBean, guildId) :
-                null;
+        Member member = response != null ? new Member(gateway, memberBean, userBean, guildId) : null;
 
-        return addToMessage.thenReturn(new ReactionAddEvent(client, userId, channelId, messageId, guildId, emoji,
-                member));
+        return addToMessage.thenReturn(new ReactionAddEvent(gateway, context.getShardInfo(), userId, channelId,
+                messageId, guildId, emoji, member));
     }
 
     static Mono<ReactionRemoveEvent> messageReactionRemove(DispatchContext<MessageReactionRemove> context) {
-        DiscordClient client = context.getServiceMediator().getClient();
-
+        GatewayDiscordClient gateway = context.getGateway();
         Long emojiId = context.getDispatch().getEmoji().getId();
         String emojiName = context.getDispatch().getEmoji().getName();
         boolean emojiAnimated = context.getDispatch().getEmoji().getAnimated() != null
@@ -187,7 +181,7 @@ class MessageDispatchHandlers {
         long messageId = context.getDispatch().getMessageId();
         Long guildId = context.getDispatch().getGuildId();
 
-        Mono<Void> removeFromMessage = context.getServiceMediator().getStateHolder().getMessageStore()
+        Mono<Void> removeFromMessage = context.getStateHolder().getMessageStore()
                 .find(messageId)
                 .filter(bean -> bean.getReactions() != null)
                 .map(oldBean -> {
@@ -209,7 +203,7 @@ class MessageDispatchHandlers {
                         ReactionBean newExisting = new ReactionBean(existing);
                         newExisting.setCount(existing.getCount() - 1);
 
-                        if (context.getServiceMediator().getStateHolder().getSelfId().get() == userId) {
+                        if (context.getStateHolder().getSelfId().get() == userId) {
                             newExisting.setMe(false);
                         }
 
@@ -218,32 +212,31 @@ class MessageDispatchHandlers {
                     return newBean;
                 })
                 .flatMap(bean ->
-                        context.getServiceMediator().getStateHolder().getMessageStore().save(bean.getId(), bean));
+                        context.getStateHolder().getMessageStore().save(bean.getId(), bean));
 
         ReactionEmoji emoji = ReactionEmoji.of(emojiId, emojiName, emojiAnimated);
-        return removeFromMessage.thenReturn(new ReactionRemoveEvent(client, userId, channelId, messageId, guildId,
+        return removeFromMessage.thenReturn(new ReactionRemoveEvent(gateway, context.getShardInfo(), userId, channelId, messageId, guildId,
                                                                     emoji));
     }
 
     static Mono<ReactionRemoveAllEvent> messageReactionRemoveAll(DispatchContext<MessageReactionRemoveAll> context) {
-        DiscordClient client = context.getServiceMediator().getClient();
+        GatewayDiscordClient gateway = context.getGateway();
         long channelId = context.getDispatch().getChannelId();
         long messageId = context.getDispatch().getMessageId();
         Long guildId = context.getDispatch().getGuildId();
 
-        Mono<Void> removeAllFromMessage = context.getServiceMediator().getStateHolder().getMessageStore()
+        Mono<Void> removeAllFromMessage = context.getStateHolder().getMessageStore()
                 .find(messageId)
                 .map(MessageBean::new)
                 .doOnNext(bean -> bean.setReactions(null))
                 .flatMap(bean ->
-                        context.getServiceMediator().getStateHolder().getMessageStore().save(bean.getId(), bean));
+                        context.getStateHolder().getMessageStore().save(bean.getId(), bean));
 
-        return removeAllFromMessage.thenReturn(new ReactionRemoveAllEvent(client, channelId, messageId, guildId));
+        return removeAllFromMessage.thenReturn(new ReactionRemoveAllEvent(gateway, context.getShardInfo(), channelId, messageId, guildId));
     }
 
     static Mono<MessageUpdateEvent> messageUpdate(DispatchContext<MessageUpdate> context) {
-        DiscordClient client = context.getServiceMediator().getClient();
-
+        GatewayDiscordClient gateway = context.getGateway();
         long messageId = context.getDispatch().getId();
         long channelId = context.getDispatch().getChannelId();
         Long guildId = context.getDispatch().getGuildId();
@@ -262,7 +255,7 @@ class MessageDispatchHandlers {
                         .toArray(EmbedBean[]::new);
 
         List<Embed> embedList = Arrays.stream(embedBeans)
-                .map(bean -> new Embed(context.getServiceMediator(), bean))
+                .map(bean -> new Embed(gateway, bean))
                 .collect(Collectors.toList());
 
         Possible<Mention[]> mentions = context.getDispatch().getMentions();
@@ -279,11 +272,11 @@ class MessageDispatchHandlers {
 
         String editedTimestamp = context.getDispatch().getEditedTimestamp();
 
-        Mono<MessageUpdateEvent> update = context.getServiceMediator().getStateHolder().getMessageStore()
+        Mono<MessageUpdateEvent> update = context.getStateHolder().getMessageStore()
                 .find(messageId)
                 .flatMap(oldBean -> {
                     // updating the content and embed of the bean in the store
-                    Message old = new Message(context.getServiceMediator(), oldBean);
+                    Message old = new Message(gateway, oldBean);
                     MessageBean newBean = new MessageBean(oldBean);
 
                     newBean.setContent(currentContent);
@@ -293,15 +286,15 @@ class MessageDispatchHandlers {
                     if (mentionEveryone != null) newBean.setMentionEveryone(mentionEveryone);
                     if (editedTimestamp != null) newBean.setEditedTimestamp(editedTimestamp);
 
-                    MessageUpdateEvent event = new MessageUpdateEvent(client, messageId, channelId, guildId, old,
+                    MessageUpdateEvent event = new MessageUpdateEvent(gateway, context.getShardInfo(), messageId, channelId, guildId, old,
                             contentChanged, currentContent, embedsChanged, embedList);
 
-                    return context.getServiceMediator().getStateHolder().getMessageStore()
+                    return context.getStateHolder().getMessageStore()
                             .save(newBean.getId(), newBean)
                             .thenReturn(event);
                 });
 
-        MessageUpdateEvent event = new MessageUpdateEvent(client, messageId, channelId, guildId, null, contentChanged,
+        MessageUpdateEvent event = new MessageUpdateEvent(gateway, context.getShardInfo(), messageId, channelId, guildId, null, contentChanged,
                 currentContent, embedsChanged, embedList);
 
         return update.defaultIfEmpty(event);

@@ -16,8 +16,7 @@
  */
 package discord4j.core.object.entity;
 
-import discord4j.core.DiscordClient;
-import discord4j.core.ServiceMediator;
+import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.data.ApplicationInfoBean;
 import discord4j.core.object.util.Image;
 import discord4j.core.object.util.Snowflake;
@@ -29,16 +28,14 @@ import reactor.util.annotation.Nullable;
 import java.util.Objects;
 import java.util.Optional;
 
-import static discord4j.core.object.util.Image.Format.*;
-
 /** Represents the Current (typically) Application Information. */
 public final class ApplicationInfo implements Entity {
 
     /** The path for application icon image URLs. */
     private static final String ICON_IMAGE_PATH = "app-icons/%s/%s";
 
-    /** The ServiceMediator associated to this object. */
-    private final ServiceMediator serviceMediator;
+    /** The gateway associated to this object. */
+    private final GatewayDiscordClient gateway;
 
     /** The raw data as represented by Discord. */
     private final ApplicationInfoBean data;
@@ -46,17 +43,17 @@ public final class ApplicationInfo implements Entity {
     /**
      * Constructs a {@code ApplicationInfo} with an associated ServiceMediator and Discord data.
      *
-     * @param serviceMediator The ServiceMediator associated to this object, must be non-null.
+     * @param gateway The {@link GatewayDiscordClient} associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
      */
-    public ApplicationInfo(final ServiceMediator serviceMediator, final ApplicationInfoBean data) {
-        this.serviceMediator = Objects.requireNonNull(serviceMediator);
+    public ApplicationInfo(final GatewayDiscordClient gateway, final ApplicationInfoBean data) {
+        this.gateway = Objects.requireNonNull(gateway);
         this.data = Objects.requireNonNull(data);
     }
 
     @Override
-    public DiscordClient getClient() {
-        return serviceMediator.getClient();
+    public GatewayDiscordClient getClient() {
+        return gateway;
     }
 
     @Override
@@ -74,16 +71,25 @@ public final class ApplicationInfo implements Entity {
     }
 
     /**
-     * Gets the icon URL of the application, if present and in a supported format.
+     * Gets the icon URL of the application, if present.
      *
-     * @param format The format for the URL. Supported format types are {@link Image.Format#PNG PNG},
-     * {@link Image.Format#JPEG JPEG}, and {@link Image.Format#WEB_P WebP}.
-     * @return The icon URL of the application, if present and in a supported format.
+     * @param format The format for the URL.
+     * @return The icon URL of the application, if present.
      */
-    public Optional<String> getIcon(final Image.Format format) {
+    public Optional<String> getIconUrl(final Image.Format format) {
         return Optional.ofNullable(data.getIcon())
-                .filter(ignored -> (format == PNG) || (format == JPEG) || (format == WEB_P))
                 .map(icon -> ImageUtil.getUrl(String.format(ICON_IMAGE_PATH, getId().asString(), icon), format));
+    }
+
+    /**
+     * Gets the icon of the application.
+     *
+     * @param format The format in which to get the icon.
+     * @return A {@link Mono} where, upon successful completion, emits the {@link Image icon} of the application. If an
+     * error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Image> getIcon(final Image.Format format) {
+        return Mono.justOrEmpty(getIconUrl(format)).flatMap(Image::ofUrl);
     }
 
     /**
@@ -130,7 +136,7 @@ public final class ApplicationInfo implements Entity {
      * error is received, it is emitted through the {@code Mono}.
      */
     public Mono<User> getOwner() {
-        return serviceMediator.getClient().getUserById(getOwnerId());
+        return gateway.getUserById(getOwnerId());
     }
 
     @Override

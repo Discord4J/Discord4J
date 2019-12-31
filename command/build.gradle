@@ -1,5 +1,0 @@
-dependencies {
-    api project(":core")
-
-    testImplementation "junit:junit:$junit_version"
-}

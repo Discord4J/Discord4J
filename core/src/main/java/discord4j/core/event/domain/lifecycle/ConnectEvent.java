@@ -17,7 +17,8 @@
 
 package discord4j.core.event.domain.lifecycle;
 
-import discord4j.core.DiscordClient;
+import discord4j.core.GatewayDiscordClient;
+import discord4j.gateway.ShardInfo;
 
 /**
  * Indicates that a gateway connection is successful.
@@ -26,8 +27,8 @@ import discord4j.core.DiscordClient;
  */
 public class ConnectEvent extends GatewayLifecycleEvent {
 
-    public ConnectEvent(DiscordClient client) {
-        super(client);
+    public ConnectEvent(GatewayDiscordClient gateway, ShardInfo shardInfo) {
+        super(gateway, shardInfo);
     }
 
     @Override

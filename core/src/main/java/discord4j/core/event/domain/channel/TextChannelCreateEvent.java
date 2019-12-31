@@ -16,8 +16,9 @@
  */
 package discord4j.core.event.domain.channel;
 
-import discord4j.core.DiscordClient;
-import discord4j.core.object.entity.TextChannel;
+import discord4j.core.GatewayDiscordClient;
+import discord4j.core.object.entity.channel.TextChannel;
+import discord4j.gateway.ShardInfo;
 
 /**
  * Dispatched when a {@link TextChannel} is created in a guild.
@@ -30,8 +31,8 @@ public class TextChannelCreateEvent extends ChannelEvent {
 
     private final TextChannel channel;
 
-    public TextChannelCreateEvent(DiscordClient client, TextChannel channel) {
-        super(client);
+    public TextChannelCreateEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, TextChannel channel) {
+        super(gateway, shardInfo);
         this.channel = channel;
     }
 

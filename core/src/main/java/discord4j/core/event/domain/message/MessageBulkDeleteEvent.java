@@ -16,11 +16,12 @@
  */
 package discord4j.core.event.domain.message;
 
-import discord4j.core.DiscordClient;
+import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Message;
-import discord4j.core.object.entity.MessageChannel;
+import discord4j.core.object.entity.channel.TextChannel;
 import discord4j.core.object.util.Snowflake;
+import discord4j.gateway.ShardInfo;
 import reactor.core.publisher.Mono;
 
 import java.util.Arrays;
@@ -44,9 +45,9 @@ public class MessageBulkDeleteEvent extends MessageEvent {
     private final long guildId;
     private final Set<Message> messages;
 
-    public MessageBulkDeleteEvent(DiscordClient client, long[] messageIds, long channelId, long guildId,
+    public MessageBulkDeleteEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, long[] messageIds, long channelId, long guildId,
                                   Set<Message> messages) {
-        super(client);
+        super(gateway, shardInfo);
         this.messageIds = messageIds;
         this.channelId = channelId;
         this.guildId = guildId;
@@ -74,23 +75,23 @@ public class MessageBulkDeleteEvent extends MessageEvent {
     }
 
     /**
-     * Gets the {@link Snowflake} ID of the {@link MessageChannel} the messages were deleted in.
+     * Gets the {@link Snowflake} ID of the {@link TextChannel} the messages were deleted in.
      *
-     * @return The ID of the {@link MessageChannel} that the messages were deleted in.
+     * @return The ID of the {@link TextChannel} that the messages were deleted in.
      */
     public Snowflake getChannelId() {
         return Snowflake.of(channelId);
     }
 
     /**
-     * Requests to retrieve the {@link MessageChannel} representation of the {@code Channel} the messages were deleted
+     * Requests to retrieve the {@link TextChannel} representation of the {@code Channel} the messages were deleted
      * in.
      *
-     * @return A {@link Mono} where, upon successful completion, emits the {@link MessageChannel} the messages
+     * @return A {@link Mono} where, upon successful completion, emits the {@link TextChannel} the messages
      * were deleted from. If an error is received, it is emitted through the {@code Mono}.
      */
-    public Mono<MessageChannel> getChannel() {
-        return getClient().getChannelById(getChannelId()).cast(MessageChannel.class);
+    public Mono<TextChannel> getChannel() {
+        return getClient().getChannelById(getChannelId()).cast(TextChannel.class);
     }
 
     /**

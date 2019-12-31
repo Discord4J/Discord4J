@@ -20,6 +20,7 @@ package discord4j.gateway;
 import discord4j.gateway.json.GatewayPayload;
 import discord4j.gateway.json.dispatch.Dispatch;
 import io.netty.buffer.ByteBuf;
+import java.time.Duration;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxSink;
@@ -47,15 +48,6 @@ public interface GatewayClient {
      * @return a {@link Mono} signaling completion
      */
     Mono<Void> execute(String gatewayUrl);
-
-    /**
-     * Establish a reconnecting gateway connection to the given URL, allowing an ad-hoc observer to be notified.
-     *
-     * @param gatewayUrl the URL used to establish a websocket connection
-     * @param additionalObserver an additional observer to be notified of events
-     * @return a {@link Mono} signaling completion
-     */
-    Mono<Void> execute(String gatewayUrl, GatewayObserver additionalObserver);
 
     /**
      * Terminates this client's current gateway connection.
@@ -156,7 +148,7 @@ public interface GatewayClient {
     /**
      * Gets the amount of time it last took Discord to respond to a heartbeat with an ack.
      *
-     * @return the time in milliseconds took Discord to respond to the last heartbeat with an ack.
+     * @return the duration which Discord took to respond to the last heartbeat with an ack.
      */
-    long getResponseTime();
+    Duration getResponseTime();
 }

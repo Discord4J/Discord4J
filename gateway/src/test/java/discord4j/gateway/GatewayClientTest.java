@@ -16,13 +16,9 @@
  */
 package discord4j.gateway;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
-import discord4j.common.SimpleBucket;
-import discord4j.common.jackson.PossibleModule;
-import discord4j.common.jackson.UnknownPropertyHandler;
+import discord4j.common.JacksonResources;
+import discord4j.common.ReactorResources;
 import discord4j.gateway.json.StatusUpdate;
 import discord4j.gateway.json.dispatch.MessageCreate;
 import discord4j.gateway.json.dispatch.Ready;
@@ -30,12 +26,11 @@ import discord4j.gateway.payload.JacksonPayloadReader;
 import discord4j.gateway.payload.JacksonPayloadWriter;
 import discord4j.gateway.payload.PayloadReader;
 import discord4j.gateway.payload.PayloadWriter;
-import discord4j.gateway.retry.RetryOptions;
+import discord4j.gateway.retry.ReconnectOptions;
 import org.junit.Ignore;
 import org.junit.Test;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
-import reactor.netty.http.client.HttpClient;
 
 import java.io.IOException;
 import java.time.Duration;
@@ -52,16 +47,21 @@ public class GatewayClientTest {
     public void test() {
         // need to set 1 env vars, token
         String token = System.getenv("token");
-        ObjectMapper mapper = getMapper();
+        ObjectMapper mapper = new JacksonResources().getObjectMapper();
         PayloadReader reader = new JacksonPayloadReader(mapper);
         PayloadWriter writer = new JacksonPayloadWriter(mapper);
-        RetryOptions retryOptions = new RetryOptions(Duration.ofSeconds(5), Duration.ofSeconds(120),
-                Integer.MAX_VALUE, Schedulers.elastic());
-        GatewayClient gatewayClient = new DefaultGatewayClient(HttpClient.create(),
-                reader, writer, retryOptions, token,
-                new IdentifyOptions(0, 1, null), null,
-                new RateLimiterTransformer(new SimpleBucket(1, Duration.ofSeconds(6))));
-
+        ReconnectOptions reconnectOptions = ReconnectOptions.create();
+        GatewayOptions gatewayOptions = new GatewayOptions(
+                token,
+                new ReactorResources(),
+                reader,
+                writer,
+                reconnectOptions,
+                new IdentifyOptions(new ShardInfo(0, 1), null, true),
+                GatewayObserver.NOOP_LISTENER,
+                new PoolingTransformer(1, Duration.ofSeconds(6))
+        );
+        GatewayClient gatewayClient = new DefaultGatewayClient(gatewayOptions);
         gatewayClient.dispatch().subscribe(dispatch -> {
             if (dispatch instanceof Ready) {
                 System.out.println("Test received READY!");
@@ -101,7 +101,7 @@ public class GatewayClientTest {
         // need to set 2 env vars, token and shardCount
         String token = System.getenv("token");
         int shardCount = Integer.parseInt(System.getenv("shardCount"));
-        ObjectMapper mapper = getMapper();
+        ObjectMapper mapper = new JacksonResources().getObjectMapper();
 
         CountDownLatch latch = new CountDownLatch(0);
         List<CountDownLatch> latches = new ArrayList<>();
@@ -109,19 +109,17 @@ public class GatewayClientTest {
         CountDownLatch exit = new CountDownLatch(shardCount);
 
         // we must share the PayloadTransformer across shards to coordinate IDENTIFY requests
-        PayloadTransformer transformer = new RateLimiterTransformer(new SimpleBucket(1, Duration.ofSeconds(6)));
+        PayloadTransformer transformer = new PoolingTransformer(1, Duration.ofSeconds(6));
         for (int i = 0; i < shardCount; i++) {
             CountDownLatch next = new CountDownLatch(1);
-            GatewayClient shard = new DefaultGatewayClient(
-                    HttpClient.create().compress(true),
+            ReconnectOptions reconnectOptions = ReconnectOptions.create();
+            GatewayOptions gatewayOptions = new GatewayOptions(
+                    token,
+                    new ReactorResources(),
                     new JacksonPayloadReader(mapper),
                     new JacksonPayloadWriter(mapper),
-                    // RetryOptions must not be shared as it tracks state for a single shard
-                    new RetryOptions(Duration.ofSeconds(2), Duration.ofSeconds(120), Integer.MAX_VALUE,
-                            Schedulers.elastic()),
-                    token,
-                    new IdentifyOptions(i, shardCount,
-                            new StatusUpdate(null, "invisible")),
+                    reconnectOptions,
+                    new IdentifyOptions(new ShardInfo(i, shardCount), new StatusUpdate(null, "invisible"), true),
                     (s, o) -> {
                         if (s.equals(GatewayObserver.CONNECTED)) {
                             next.countDown();
@@ -129,7 +127,10 @@ public class GatewayClientTest {
                         if (s.equals(GatewayObserver.DISCONNECTED)) {
                             exit.countDown();
                         }
-                    }, transformer);
+                    },
+                    transformer
+            );
+            GatewayClient shard = new DefaultGatewayClient(gatewayOptions);
             latches.add(next);
             int shardIndex = i;
             Schedulers.elastic().schedule(() -> {
@@ -144,12 +145,5 @@ public class GatewayClientTest {
         }
 
         exit.await();
-    }
-
-    private ObjectMapper getMapper() {
-        return new ObjectMapper()
-                .setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
-                .addHandler(new UnknownPropertyHandler(true))
-                .registerModules(new PossibleModule(), new Jdk8Module());
     }
 }

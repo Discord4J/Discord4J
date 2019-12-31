@@ -16,16 +16,20 @@
  */
 package discord4j.gateway.json.dispatch;
 
+import com.fasterxml.jackson.annotation.JsonAnyGetter;
+import com.fasterxml.jackson.annotation.JsonAnySetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import discord4j.common.jackson.UnsignedJson;
 import discord4j.common.json.GuildEmojiResponse;
 import discord4j.common.json.GuildMemberResponse;
 import discord4j.common.json.RoleResponse;
-import discord4j.gateway.json.response.GameResponse;
 import discord4j.gateway.json.response.GatewayChannelResponse;
 import reactor.util.annotation.Nullable;
 
 import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 public class GuildCreate implements Dispatch {
 
@@ -42,7 +46,7 @@ public class GuildCreate implements Dispatch {
     private String banner;
     private RoleResponse[] roles;
     private String region;
-    private Presence[] presences;
+    private PresenceUpdate[] presences;
     @JsonProperty("owner_id")
     @UnsignedJson
     private long ownerId;
@@ -52,7 +56,8 @@ public class GuildCreate implements Dispatch {
     @JsonProperty("premium_tier")
     private int premiumTier;
     @JsonProperty("premium_subscription_count")
-    private int premiumSubcriptionsCount;
+    @Nullable
+    private Integer premiumSubscriptionCount;
     @JsonProperty("preferred_locale")
     private String preferredLocale;
     private GuildMemberResponse[] members;
@@ -105,6 +110,9 @@ public class GuildCreate implements Dispatch {
     @Nullable
     private Integer maxMembers;
 
+    @JsonIgnore
+    private Map<String, Object> additionalProperties = new LinkedHashMap<>();
+
     public VoiceState[] getVoiceStates() {
         return voiceStates;
     }
@@ -113,8 +121,9 @@ public class GuildCreate implements Dispatch {
         return premiumTier;
     }
 
-    public int getPremiumSubcriptionsCount() {
-        return premiumSubcriptionsCount;
+    @Nullable
+    public Integer getPremiumSubscriptionCount() {
+        return premiumSubscriptionCount;
     }
 
     public String getPreferredLocale() {
@@ -150,7 +159,7 @@ public class GuildCreate implements Dispatch {
         return region;
     }
 
-    public Presence[] getPresences() {
+    public PresenceUpdate[] getPresences() {
         return presences;
     }
 
@@ -263,13 +272,23 @@ public class GuildCreate implements Dispatch {
         return maxMembers;
     }
 
+    @JsonAnyGetter
+    public Map<String, Object> getAdditionalProperties() {
+        return additionalProperties;
+    }
+
+    @JsonAnySetter
+    public void setAdditionalProperty(String name, Object value) {
+        additionalProperties.put(name, value);
+    }
+
     @Override
     public String toString() {
         return "GuildCreate{" +
                 "voiceStates=" + Arrays.toString(voiceStates) +
                 ", verificationLevel=" + verificationLevel +
                 ", premiumTier=" + premiumTier +
-                ", premiumSubcriptionsCount=" + premiumSubcriptionsCount +
+                ", premiumSubscriptionCount=" + premiumSubscriptionCount +
                 ", preferredLocale=" + preferredLocale +
                 ", unavailable=" + unavailable +
                 ", systemChannelId=" + systemChannelId +
@@ -376,50 +395,6 @@ public class GuildCreate implements Dispatch {
                     ", selfMute=" + selfMute +
                     ", selfStream=" + selfStream +
                     ", suppress=" + suppress +
-                    '}';
-        }
-    }
-
-    public static class Presence {
-
-        private User user;
-        private String status;
-        private GameResponse game;
-
-        public static class User {
-            @UnsignedJson
-            private long id;
-
-            public long getId() {
-                return id;
-            }
-
-            @Override
-            public String toString() {
-                return "User{" +
-                        "id=" + id +
-                        '}';
-            }
-        }
-
-        public User getUser() {
-            return user;
-        }
-
-        public String getStatus() {
-            return status;
-        }
-
-        public GameResponse getGame() {
-            return game;
-        }
-
-        @Override
-        public String toString() {
-            return "Presence{" +
-                    "user=" + user +
-                    ", status='" + status + '\'' +
-                    ", game=" + game +
                     '}';
         }
     }

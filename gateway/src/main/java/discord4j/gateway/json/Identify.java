@@ -30,15 +30,18 @@ public class Identify implements PayloadData {
     private final int largeThreshold;
     private final Possible<int[]> shard;
     private final Possible<StatusUpdate> presence;
+    @JsonProperty("guild_subscriptions")
+    private final boolean guildSubscriptions;
 
     public Identify(String token, IdentifyProperties properties, boolean compress, int largeThreshold,
-                    Possible<int[]> shard, Possible<StatusUpdate> presence) {
+                    Possible<int[]> shard, Possible<StatusUpdate> presence, boolean guildSubscriptions) {
         this.token = token;
         this.properties = properties;
         this.compress = compress;
         this.largeThreshold = largeThreshold;
         this.shard = shard;
         this.presence = presence;
+        this.guildSubscriptions = guildSubscriptions;
     }
 
     @Override
@@ -50,6 +53,7 @@ public class Identify implements PayloadData {
                 ", largeThreshold=" + largeThreshold +
                 ", shard=" + shard +
                 ", presence=" + presence +
+                ", guildSubscriptions=" + guildSubscriptions +
                 '}';
     }
 }

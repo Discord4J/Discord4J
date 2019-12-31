@@ -17,10 +17,8 @@
 
 package discord4j.rest.request;
 
-import reactor.core.publisher.Mono;
-
 /**
- * Represents a connector executing {@link discord4j.rest.request.DiscordRequest} objects against the Discord REST API.
+ * Represents a connector executing {@link DiscordWebRequest} objects against the Discord REST API.
  */
 public interface Router {
 
@@ -28,8 +26,7 @@ public interface Router {
      * Queues a request for execution.
      *
      * @param request the request to queue.
-     * @param <T> the request's response type.
-     * @return a mono that receives signals based on the request's response.
+     * @return a {@link DiscordWebResponse} specifying a contract to operate on the response
      */
-    <T> Mono<T> exchange(DiscordRequest<T> request);
+    DiscordWebResponse exchange(DiscordWebRequest request);
 }

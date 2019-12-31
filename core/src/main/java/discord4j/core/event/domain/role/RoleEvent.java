@@ -16,16 +16,17 @@
  */
 package discord4j.core.event.domain.role;
 
-import discord4j.core.DiscordClient;
+import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.Event;
 import discord4j.core.object.entity.Role;
+import discord4j.gateway.ShardInfo;
 
 /**
  * Represents an event related to a {@link Role}.
  */
 public abstract class RoleEvent extends Event {
 
-    public RoleEvent(DiscordClient client) {
-        super(client);
+    public RoleEvent(GatewayDiscordClient gateway, ShardInfo shardInfo) {
+        super(gateway, shardInfo);
     }
 }

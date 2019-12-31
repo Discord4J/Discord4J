@@ -21,13 +21,12 @@ import discord4j.store.api.Store;
 
 import java.io.Serializable;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ShardingJdkStoreRegistry implements ShardingStoreRegistry {
 
     private final Map<Class<?>, Store<?, ?>> valueStore = new ConcurrentHashMap<>();
-    private final Map<Integer, Map<Class<?>, Set<?>>> keyStores = new ConcurrentHashMap<>();
+    private final Map<Class<?>, ShardKeyStore<?>> keyStores = new ConcurrentHashMap<>();
 
     @Override
     public boolean containsStore(Class<?> valueClass) {
@@ -47,9 +46,8 @@ public class ShardingJdkStoreRegistry implements ShardingStoreRegistry {
 
     @Override
     @SuppressWarnings("unchecked")
-    public <K extends Comparable<K>, V extends Serializable> Set<K> getKeyStore(Class<V> valueClass, int shardId) {
-        return (Set<K>) keyStores.computeIfAbsent(shardId, k -> new ConcurrentHashMap<>())
-                .computeIfAbsent(valueClass, k -> ConcurrentHashMap.newKeySet());
+    public <K extends Comparable<K>, V extends Serializable> ShardKeyStore<K> getKeyStore(Class<V> valueClass) {
+        return (ShardKeyStore<K>) keyStores.computeIfAbsent(valueClass, k -> new ShardKeyStore<>());
     }
 
 }

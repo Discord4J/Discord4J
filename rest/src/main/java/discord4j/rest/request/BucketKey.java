@@ -17,13 +17,14 @@
 package discord4j.rest.request;
 
 import discord4j.rest.route.Route;
+import discord4j.rest.route.Routes;
 import discord4j.rest.util.RouteUtils;
 import reactor.util.annotation.Nullable;
 
 import java.util.Objects;
 
 /**
- * Used to access the appropriate {@link discord4j.rest.request.RequestStream RequestStream} according to the bucket
+ * Used to access the appropriate {@link RequestStream RequestStream} according to the bucket
  * that requests for the stream fall into.
  * <p>
  * Following the <a href="https://discordapp.com/developers/docs/topics/rate-limits#rate-limits">
@@ -33,7 +34,7 @@ import java.util.Objects;
  * <li>The {@link #majorParam major parameters} are equal.</li>
  * </ul>
  * Note that HTTP method is <b>not</b> considered (requests fall into the same bucket even if the methods are different)
- * in all but one case. Requests on the {@link discord4j.rest.route.Routes#MESSAGE_DELETE message delete route} fall
+ * in all but one case. Requests on the {@link Routes#MESSAGE_DELETE message delete route} fall
  * into a separate bucket.
  * <p>
  * This is a value-based class.
@@ -51,8 +52,15 @@ public final class BucketKey {
         this.majorParam = RouteUtils.getMajorParam(uriTemplate, completeUri);
     }
 
-    static BucketKey of(String uriTemplate, String completeUri) {
+    public static BucketKey of(String uriTemplate, String completeUri) {
         return new BucketKey(uriTemplate, completeUri);
+    }
+
+    public static BucketKey of(DiscordWebRequest request) {
+        if (Routes.MESSAGE_DELETE.equals(request.getRoute())) {
+            return BucketKey.of("DELETE " + request.getRoute().getUriTemplate(), request.getCompleteUri());
+        }
+        return BucketKey.of(request.getRoute().getUriTemplate(), request.getCompleteUri());
     }
 
     @Override

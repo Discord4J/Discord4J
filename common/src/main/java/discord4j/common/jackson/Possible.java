@@ -20,6 +20,7 @@ import reactor.util.annotation.Nullable;
 
 import java.util.NoSuchElementException;
 import java.util.Objects;
+import java.util.function.Function;
 
 /**
  * Represents a JSON property that may be absent, but never null if it's present.
@@ -59,6 +60,19 @@ public class Possible<T> {
     @SuppressWarnings("unchecked")
     public static <T> Possible<T> absent() {
         return (Possible<T>) ABSENT;
+    }
+
+    @Nullable
+    public static <T, U> T orElseNull(@Nullable U container, Function<U, Possible<T>> mapper) {
+        return container != null ? Possible.orElseNull(mapper.apply(container)) : null;
+    }
+
+    @Nullable
+    public static <T> T orElseNull(@Nullable Possible<T> possible) {
+        if (possible == null || possible.isAbsent()) {
+            return null;
+        }
+        return possible.get();
     }
 
     /**

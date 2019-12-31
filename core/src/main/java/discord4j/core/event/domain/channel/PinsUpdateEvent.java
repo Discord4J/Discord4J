@@ -16,9 +16,10 @@
  */
 package discord4j.core.event.domain.channel;
 
-import discord4j.core.DiscordClient;
-import discord4j.core.object.entity.MessageChannel;
+import discord4j.core.GatewayDiscordClient;
+import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.core.object.util.Snowflake;
+import discord4j.gateway.ShardInfo;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
 
@@ -37,8 +38,8 @@ public class PinsUpdateEvent extends ChannelEvent {
     private final long channelId;
     private final Instant lastPinTimestamp;
 
-    public PinsUpdateEvent(DiscordClient client, long channelId, @Nullable Instant lastPinTimestamp) {
-        super(client);
+    public PinsUpdateEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, long channelId, @Nullable Instant lastPinTimestamp) {
+        super(gateway, shardInfo);
         this.channelId = channelId;
         this.lastPinTimestamp = lastPinTimestamp;
     }

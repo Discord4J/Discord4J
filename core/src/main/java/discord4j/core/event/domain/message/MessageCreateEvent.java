@@ -16,11 +16,12 @@
  */
 package discord4j.core.event.domain.message;
 
-import discord4j.core.DiscordClient;
+import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.util.Snowflake;
+import discord4j.gateway.ShardInfo;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
 
@@ -43,8 +44,8 @@ public class MessageCreateEvent extends MessageEvent {
     @Nullable
     private final Member member;
 
-    public MessageCreateEvent(DiscordClient client, Message message, @Nullable Long guildId, @Nullable Member member) {
-        super(client);
+    public MessageCreateEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, Message message, @Nullable Long guildId, @Nullable Member member) {
+        super(gateway, shardInfo);
         this.message = message;
         this.guildId = guildId;
         this.member = member;

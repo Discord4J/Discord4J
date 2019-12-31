@@ -16,6 +16,8 @@
  */
 package discord4j.gateway.json;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import discord4j.common.jackson.Possible;
 import discord4j.common.jackson.PossibleJson;
 import reactor.util.annotation.Nullable;
@@ -29,7 +31,11 @@ public class StatusUpdate implements PayloadData {
     private final String status;
     private final boolean afk;
 
-    public StatusUpdate(@Nullable Long since, @Nullable Game game, String status, boolean afk) {
+    @JsonCreator
+    public StatusUpdate(@JsonProperty("since") @Nullable Long since,
+                        @JsonProperty("game") @Nullable Game game,
+                        @JsonProperty("status") String status,
+                        @JsonProperty("afk") boolean afk) {
         this.since = since;
         this.game = game;
         this.status = status;
@@ -60,7 +66,10 @@ public class StatusUpdate implements PayloadData {
         private final int type;
         private final Possible<String> url;
 
-        public Game(String name, int type, Possible<String> url) {
+        @JsonCreator
+        public Game(@JsonProperty("name") String name,
+                    @JsonProperty("type") int type,
+                    @JsonProperty("url") Possible<String> url) {
             this.name = name;
             this.type = type;
             this.url = url;

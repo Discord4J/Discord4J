@@ -19,6 +19,10 @@ package discord4j.rest;
 import discord4j.rest.request.Router;
 import discord4j.rest.service.*;
 
+/**
+ * An aggregation of all Discord REST API resources available. Each REST resource uses its own class and uses a
+ * common {@link Router} to execute requests.
+ */
 public final class RestClient {
 
     private final ApplicationService applicationService;

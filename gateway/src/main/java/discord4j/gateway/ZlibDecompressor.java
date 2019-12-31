@@ -28,7 +28,7 @@ import java.util.zip.Inflater;
 import java.util.zip.InflaterOutputStream;
 
 /**
- * Implements a zlib inflater on a stream of {@link io.netty.buffer.ByteBuf} elements.
+ * Implements a zlib inflater on a stream of {@link ByteBuf} elements.
  */
 public class ZlibDecompressor {
 

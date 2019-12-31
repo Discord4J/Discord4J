@@ -16,40 +16,67 @@
  */
 package discord4j.rest.request;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
+import reactor.function.TupleUtils;
 import reactor.util.Logger;
 import reactor.util.Loggers;
 
 import java.time.Duration;
-import java.util.Random;
+import java.util.Arrays;
+import java.util.List;
 
 public class GlobalRateLimiterTest {
 
     private static final Logger log = Loggers.getLogger(GlobalRateLimiterTest.class);
 
-    @Test
-    public void testGlobalRateLimiter() {
-        GlobalRateLimiter rateLimiter = new SemaphoreGlobalRateLimiter(8);
-        rateLimiter.rateLimitFor(Duration.ofSeconds(1));
-        rateLimiter.withLimiter(Mono.just("1").doOnNext(log::info)).blockLast();
-        rateLimiter.rateLimitFor(Duration.ofSeconds(1));
-        rateLimiter.withLimiter(Mono.just("2").doOnNext(log::info)).blockLast();
+    private List<GlobalRateLimiter> limiters() {
+        return Arrays.asList(
+                new ClockGlobalRateLimiter(50, Duration.ofSeconds(1), Schedulers.parallel()),
+                new SemaphoreGlobalRateLimiter(16),
+                new ParallelGlobalRateLimiter(16),
+                new UnboundedGlobalRateLimiter(),
+                new PooledGlobalRateLimiter()
+                );
     }
 
     @Test
+    public void testGlobalRateLimiter() {
+        for (GlobalRateLimiter rateLimiter : limiters()) {
+            rateLimiter.rateLimitFor(Duration.ofSeconds(1));
+            rateLimiter.withLimiter(Mono.just("1").doOnNext(log::info)).blockLast();
+            rateLimiter.rateLimitFor(Duration.ofSeconds(1));
+            rateLimiter.withLimiter(Mono.just("2").doOnNext(log::info)).blockLast();
+        }
+    }
+
+    @Test
+    @Ignore
     public void testBurstingRequestsGlobalRateLimiter() {
-        GlobalRateLimiter rateLimiter = new SemaphoreGlobalRateLimiter(8);
-        Random random = new Random();
-        Flux.range(0, 100)
-                .flatMap(index -> rateLimiter.withLimiter(Mono.defer(() -> {
-                    if (random.nextDouble() < 0.1) {
-                        long delay = random.nextInt(500);
-                        rateLimiter.rateLimitFor(Duration.ofMillis(delay));
-                    }
-                    return Mono.just(index);
-                })))
-                .blockLast();
+        for (GlobalRateLimiter rateLimiter : limiters()) {
+            log.info("Testing {}", rateLimiter.getClass().toString());
+            Flux.range(0, 100)
+                    .flatMap(index -> rateLimiter.withLimiter(Mono.defer(() -> {
+                        // simulate a request
+                        return Mono.delay(Duration.ofMillis(50))
+                                .flatMap(tick -> {
+                                    // if this is the 50th index, we trip GRL
+                                    if (index == 50) {
+                                        log.info("Activating global rate limiter");
+                                        return rateLimiter.rateLimitFor(Duration.ofMillis(3000)).thenReturn(index);
+                                    }
+                                    return Mono.just(index);
+                                });
+                    })), 16)
+                    .collectList()
+                    .elapsed()
+                    .doOnNext(TupleUtils.consumer(
+                            (time, list) -> log.info("Sent {} messages in {} milliseconds ({} messages/s)",
+                                    list.size(), time, (list.size() / (double) time) * 1000)))
+                    .block();
+        }
     }
 }

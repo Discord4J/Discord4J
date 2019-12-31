@@ -16,8 +16,8 @@
  */
 package discord4j.rest.http;
 
+import io.netty.buffer.ByteBuf;
 import reactor.core.publisher.Mono;
-import reactor.netty.ByteBufMono;
 import reactor.util.annotation.Nullable;
 
 /**
@@ -27,11 +27,11 @@ public class EmptyReaderStrategy implements ReaderStrategy<Void> {
 
     @Override
     public boolean canRead(@Nullable Class<?> type, @Nullable String contentType) {
-        return type != null && type == Void.class;
+        return type == Void.class;
     }
 
     @Override
-    public Mono<Void> read(ByteBufMono content, Class<Void> responseType) {
+    public Mono<Void> read(Mono<ByteBuf> content, Class<Void> responseType) {
         return Mono.empty();
     }
 }

@@ -18,8 +18,8 @@ package discord4j.core.object.util;
 
 import reactor.core.publisher.Mono;
 import reactor.netty.http.client.HttpClient;
-import reactor.util.annotation.Nullable;
 
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.Objects;
 
@@ -33,12 +33,12 @@ public final class Image {
     /**
      * Constructs an {@code Image} utilizing raw image data.
      *
-     * @param image The raw image data.
+     * @param data The raw image data.
      * @param format The {@link Format} of the data.
      * @return An {@code Image} with raw image data.
      */
-    public static Image ofRaw(final byte[] image, final Format format) {
-        return new Image(Base64.getEncoder().encodeToString(image), format);
+    public static Image ofRaw(final byte[] data, final Format format) {
+        return new Image(data, format);
     }
 
     /**
@@ -58,24 +58,24 @@ public final class Image {
                 }));
     }
 
-    /** The hash of the image. */
-    private final String hash;
+    /** The raw image data. */
+    private final byte[] data;
 
     /** The format of the image. */
     private final Format format;
 
-    private Image(final String hash, final Format format) {
-        this.hash = Objects.requireNonNull(hash);
-        this.format = Objects.requireNonNull(format);
+    private Image(byte[] data, Format format) {
+        this.data = data;
+        this.format = format;
     }
 
     /**
-     * Gets the hash of the image.
+     * Gets the raw data of the image.
      *
-     * @return The hash of the image.
+     * @return The raw data of the image.
      */
-    public String getHash() {
-        return hash;
+    public byte[] getData() {
+        return data;
     }
 
     /**
@@ -88,55 +88,49 @@ public final class Image {
     }
 
     /**
+     * Gets the Base64-encoded data of the image.
+     *
+     * @return The Base64-encoded data of the image.
+     */
+    public String getHash() {
+        return Base64.getEncoder().encodeToString(data);
+    }
+
+    /**
      * Gets a data URI for this image.
      *
      * @return The data URI for this image.
      */
-    public String getData() {
-        return String.format("data:image/%s;base64,%s", format.extension, hash);
+    public String getDataUri() {
+        return String.format("data:image/%s;base64,%s", format.extension, getHash());
     }
 
-    /**
-     * Indicates whether some other object is "equal to" this {@code Image}.
-     * The other object is considered equal if:
-     * <ul>
-     * <li>It is also a {@code Image} and;</li>
-     * <li>Both instances have equal {@link #getData()} data}.</li>
-     * </ul>
-     *
-     * @param obj An object to be tested for equality.
-     * @return {@code true} if the other object is "equal to" this one, false otherwise.
-     */
-    @Override
-    public boolean equals(@Nullable final Object obj) {
-        return (obj instanceof Image) && ((Image) obj).getData().equals(getData());
-    }
-
-    /**
-     * Gets the hash code value of the {@link #getData()} data}.
-     *
-     * @return The hash code value of the {@link #getData()} data}.
-     */
-    @Override
-    public int hashCode() {
-        return getData().hashCode();
-    }
-
-    /**
-     * Gets the String represents of this {@code Image}.
-     * <p>
-     * The format returned by this method is unspecified and may vary between implementations; however, it is guaranteed
-     * to always be non-empty. This method is not suitable for obtaining the data; use {@link #getData()} instead.
-     *
-     * @return The String representation of this {@code Image}.
-     * @see #getData()
-     */
     @Override
     public String toString() {
         return "Image{" +
-                "hash='" + hash + '\'' +
+                "data=" + Arrays.toString(data) +
                 ", format=" + format +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        Image image = (Image) o;
+        return Arrays.equals(data, image.data) &&
+                format == image.format;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = Objects.hash(format);
+        result = 31 * result + Arrays.hashCode(data);
+        return result;
     }
 
     /**

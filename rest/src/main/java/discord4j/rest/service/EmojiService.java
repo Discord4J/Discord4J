@@ -34,31 +34,36 @@ public class EmojiService extends RestService {
     public Flux<GuildEmojiResponse> getGuildEmojis(long guildId) {
         return Routes.GUILD_EMOJIS_GET.newRequest(guildId)
                 .exchange(getRouter())
+                .bodyToMono(GuildEmojiResponse[].class)
                 .flatMapMany(Flux::fromArray);
     }
 
     public Mono<GuildEmojiResponse> getGuildEmoji(long guildId, long emojiID) {
         return Routes.GUILD_EMOJI_GET.newRequest(guildId, emojiID)
-                .exchange(getRouter());
+                .exchange(getRouter())
+                .bodyToMono(GuildEmojiResponse.class);
     }
 
     public Mono<GuildEmojiResponse> createGuildEmoji(long guildId, GuildEmojiCreateRequest request, @Nullable String reason) {
         return Routes.GUILD_EMOJI_CREATE.newRequest(guildId)
                 .body(request)
                 .optionalHeader("X-Audit-Log-Reason", reason)
-                .exchange(getRouter());
+                .exchange(getRouter())
+                .bodyToMono(GuildEmojiResponse.class);
     }
 
     public Mono<GuildEmojiResponse> modifyGuildEmoji(long guildId, long emojiId, GuildEmojiModifyRequest request, @Nullable String reason) {
         return Routes.GUILD_EMOJI_MODIFY.newRequest(guildId, emojiId)
                 .body(request)
                 .optionalHeader("X-Audit-Log-Reason", reason)
-                .exchange(getRouter());
+                .exchange(getRouter())
+                .bodyToMono(GuildEmojiResponse.class);
     }
 
     public Mono<Void> deleteGuildEmoji(long guildId, long emojiId, @Nullable String reason) {
         return Routes.GUILD_EMOJI_DELETE.newRequest(guildId, emojiId)
                 .optionalHeader("X-Audit-Log-Reason", reason)
-                .exchange(getRouter());
+                .exchange(getRouter())
+                .bodyToMono(Void.class);
     }
 }

@@ -17,25 +17,37 @@
 
 package discord4j.core.event.domain;
 
-import discord4j.core.DiscordClient;
+import discord4j.core.GatewayDiscordClient;
+import discord4j.gateway.ShardInfo;
 
 /**
  * Represents a Discord real-time event used to track a client's state.
  */
 public abstract class Event {
 
-    private final DiscordClient client;
+    private final GatewayDiscordClient gateway;
+    private final ShardInfo shardInfo;
 
-    protected Event(DiscordClient client) {
-        this.client = client;
+    protected Event(GatewayDiscordClient gateway, ShardInfo shardInfo) {
+        this.gateway = gateway;
+        this.shardInfo = shardInfo;
     }
 
     /**
-     * Get the {@link DiscordClient} that emitted this {@link Event}.
+     * Get the {@link GatewayDiscordClient} that emitted this {@link Event}.
      *
      * @return The client emitting this event.
      */
-    public DiscordClient getClient() {
-        return client;
+    public GatewayDiscordClient getClient() {
+        return gateway;
+    }
+
+    /**
+     * Retrieve the shard details from this {@link Event}.
+     *
+     * @return a {@link ShardInfo} object reflecting index and count for this event.
+     */
+    public ShardInfo getShardInfo() {
+        return shardInfo;
     }
 }

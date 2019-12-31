@@ -30,7 +30,6 @@ public final class ExtendedInviteBean extends InviteBean {
     private int maxAge;
     private boolean temporary;
     private String createdAt;
-    private boolean revoked;
 
     public ExtendedInviteBean(final InviteResponse response) {
         super(response);
@@ -40,9 +39,6 @@ public final class ExtendedInviteBean extends InviteBean {
         maxAge = Objects.requireNonNull(response.getMaxAge());
         temporary = Objects.requireNonNull(response.getTemporary());
         createdAt = Objects.requireNonNull(response.getCreatedAt());
-        // revoked is optional in contrast with Discord documentation
-        final Boolean revoked = response.getRevoked();
-        this.revoked = revoked == null ? false : revoked;
     }
 
     public ExtendedInviteBean() {}
@@ -95,14 +91,6 @@ public final class ExtendedInviteBean extends InviteBean {
         this.createdAt = createdAt;
     }
 
-    public boolean isRevoked() {
-        return revoked;
-    }
-
-    public void setRevoked(final boolean revoked) {
-        this.revoked = revoked;
-    }
-
     @Override
     public String toString() {
         return "ExtendedInviteBean{" +
@@ -112,7 +100,6 @@ public final class ExtendedInviteBean extends InviteBean {
                 ", maxAge=" + maxAge +
                 ", temporary=" + temporary +
                 ", createdAt='" + createdAt + '\'' +
-                ", revoked=" + revoked +
                 "} " + super.toString();
     }
 }

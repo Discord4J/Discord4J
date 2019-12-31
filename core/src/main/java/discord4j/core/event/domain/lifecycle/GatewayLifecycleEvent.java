@@ -16,15 +16,16 @@
  */
 package discord4j.core.event.domain.lifecycle;
 
-import discord4j.core.DiscordClient;
+import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.Event;
+import discord4j.gateway.ShardInfo;
 
 /**
  * Represents a lifecycle status change for a gateway connection.
  */
 public abstract class GatewayLifecycleEvent extends Event {
 
-    public GatewayLifecycleEvent(DiscordClient client) {
-        super(client);
+    public GatewayLifecycleEvent(GatewayDiscordClient gateway, ShardInfo shardInfo) {
+        super(gateway, shardInfo);
     }
 }

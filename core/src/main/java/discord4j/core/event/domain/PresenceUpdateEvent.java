@@ -17,12 +17,13 @@
 package discord4j.core.event.domain;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import discord4j.core.DiscordClient;
+import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.presence.Presence;
 import discord4j.core.object.util.Snowflake;
+import discord4j.gateway.ShardInfo;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
 
@@ -45,9 +46,9 @@ public class PresenceUpdateEvent extends Event {
     private final Presence current;
     private final Presence old;
 
-    public PresenceUpdateEvent(DiscordClient client, long guildId, @Nullable User oldUser, JsonNode user,
+    public PresenceUpdateEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, long guildId, @Nullable User oldUser, JsonNode user,
                                Presence current, @Nullable Presence old) {
-        super(client);
+        super(gateway, shardInfo);
         this.guildId = guildId;
         this.oldUser = oldUser;
         this.user = user;

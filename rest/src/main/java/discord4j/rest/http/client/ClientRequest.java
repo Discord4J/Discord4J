@@ -17,31 +17,34 @@
 
 package discord4j.rest.http.client;
 
-import discord4j.rest.request.DiscordRequest;
+import discord4j.rest.request.DiscordWebRequest;
 import discord4j.rest.route.Route;
 import discord4j.rest.util.RouteUtils;
 import io.netty.handler.codec.http.DefaultHttpHeaders;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpMethod;
+import reactor.util.annotation.Nullable;
 
 import java.util.Optional;
 
 /**
- * An adapted request definition from an original {@link DiscordRequest}.
+ * An adapted request definition from an original {@link DiscordWebRequest}.
  */
 public class ClientRequest {
 
-    private final DiscordRequest<?> request;
+    private final String id;
+    private final DiscordWebRequest request;
     private final String url;
     private final HttpHeaders headers;
+    private final Object body;
 
     /**
      * Create a new {@link ClientRequest} from the given request template.
      *
-     * @param request the {@link DiscordRequest} template
+     * @param request the {@link DiscordWebRequest} template
      */
-    public ClientRequest(DiscordRequest<?> request) {
+    public ClientRequest(DiscordWebRequest request) {
         this.request = request;
         this.url = RouteUtils.expandQuery(request.getCompleteUri(), request.getQueryParams());
         this.headers = Optional.ofNullable(request.getHeaders())
@@ -52,6 +55,17 @@ public class ClientRequest {
                             return headers;
                         }, HttpHeaders::add))
                 .orElse(new DefaultHttpHeaders());
+        this.body = request.getBody();
+        this.id = Integer.toHexString(System.identityHashCode(this));
+    }
+
+    /**
+     * Return this request's ID for correlation.
+     *
+     * @return this request's ID
+     */
+    public String getId() {
+        return id;
     }
 
     /**
@@ -82,11 +96,21 @@ public class ClientRequest {
     }
 
     /**
+     * Return the body to encode while processing this request.
+     *
+     * @return the request body, can be {@code null}
+     */
+    @Nullable
+    public Object getBody() {
+        return body;
+    }
+
+    /**
      * Return the original request template.
      *
-     * @return the {@link DiscordRequest} template that created this {@link ClientRequest}
+     * @return the {@link DiscordWebRequest} template that created this {@link ClientRequest}
      */
-    public DiscordRequest<?> getDiscordRequest() {
+    public DiscordWebRequest getDiscordRequest() {
         return request;
     }
 
@@ -95,8 +119,12 @@ public class ClientRequest {
      *
      * @return the {@link Route} requested by this {@link ClientRequest}
      */
-    public Route<?> getRoute() {
+    public Route getRoute() {
         return request.getRoute();
+    }
+
+    public String getDescription() {
+        return request.getDescription();
     }
 
     @Override
@@ -105,6 +133,8 @@ public class ClientRequest {
                 "method=" + getMethod() +
                 ", url='" + url + '\'' +
                 ", headers=" + headers.copy().remove(HttpHeaderNames.AUTHORIZATION).toString() +
+                ", body=" + body +
+                ", id=" + id +
                 '}';
     }
 }

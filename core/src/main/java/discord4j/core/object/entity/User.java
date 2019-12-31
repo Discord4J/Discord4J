@@ -16,10 +16,10 @@
  */
 package discord4j.core.object.entity;
 
-import discord4j.core.DiscordClient;
-import discord4j.core.ServiceMediator;
+import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.data.stored.ChannelBean;
 import discord4j.core.object.data.stored.UserBean;
+import discord4j.core.object.entity.channel.PrivateChannel;
 import discord4j.core.object.util.Image;
 import discord4j.core.object.util.Snowflake;
 import discord4j.core.util.EntityUtil;
@@ -31,7 +31,8 @@ import reactor.util.annotation.Nullable;
 import java.util.Objects;
 import java.util.Optional;
 
-import static discord4j.core.object.util.Image.Format.*;
+import static discord4j.core.object.util.Image.Format.GIF;
+import static discord4j.core.object.util.Image.Format.PNG;
 
 /**
  * A Discord user.
@@ -46,8 +47,8 @@ public class User implements Entity {
     /** The path for user avatar image URLs. */
     private static final String AVATAR_IMAGE_PATH = "avatars/%s/%s";
 
-    /** The ServiceMediator associated to this object. */
-    private final ServiceMediator serviceMediator;
+    /** The gateway associated to this object. */
+    private final GatewayDiscordClient gateway;
 
     /** The raw data as represented by Discord. */
     private final UserBean data;
@@ -55,17 +56,17 @@ public class User implements Entity {
     /**
      * Constructs an {@code User} with an associated ServiceMediator and Discord data.
      *
-     * @param serviceMediator The ServiceMediator associated to this object, must be non-null.
+     * @param gateway The {@link GatewayDiscordClient} associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
      */
-    public User(final ServiceMediator serviceMediator, final UserBean data) {
-        this.serviceMediator = Objects.requireNonNull(serviceMediator);
+    public User(final GatewayDiscordClient gateway, final UserBean data) {
+        this.gateway = Objects.requireNonNull(gateway);
         this.data = Objects.requireNonNull(data);
     }
 
     @Override
-    public final DiscordClient getClient() {
-        return serviceMediator.getClient();
+    public final GatewayDiscordClient getClient() {
+        return gateway;
     }
 
     /**
@@ -97,17 +98,13 @@ public class User implements Entity {
     }
 
     /**
-     * Gets the user's avatar URL, if present and in a supported format.
+     * Gets the user's avatar URL, if present.
      *
-     * @param format The format for the URL. Supported format types are {@link Image.Format#GIF GIF} if
-     * {@link #hasAnimatedAvatar() animated}, otherwise {@link Image.Format#PNG PNG} or {@link Image.Format#JPEG JPEG}.
-     * @return The user's avatar URL, if present and in a supported format.
+     * @param format The format for the URL.
+     * @return The user's avatar URL, if present.
      */
     public final Optional<String> getAvatarUrl(final Image.Format format) {
-        final boolean animated = hasAnimatedAvatar();
         return Optional.ofNullable(data.getAvatar())
-                .filter(ignored -> !animated || (format == GIF))
-                .filter(ignored -> (!animated && ((format == PNG) || (format == JPEG))) || animated)
                 .map(avatar -> ImageUtil.getUrl(String.format(AVATAR_IMAGE_PATH, getId().asString(), avatar), format));
     }
 
@@ -186,7 +183,7 @@ public class User implements Entity {
      * is received, it is emitted through the {@code Mono}.
      */
     public Mono<Member> asMember(final Snowflake guildId) {
-        return getClient().getMemberById(guildId, getId());
+        return gateway.getMemberById(guildId, getId());
     }
 
     /**
@@ -196,21 +193,11 @@ public class User implements Entity {
      * this user. If an error is received, it is emitted through the {@code Mono}.
      */
     public final Mono<PrivateChannel> getPrivateChannel() {
-        return serviceMediator.getRestClient().getUserService()
+        return gateway.getRestClient().getUserService()
                 .createDM(new DMCreateRequest(getId().asLong()))
                 .map(ChannelBean::new)
-                .map(bean -> EntityUtil.getChannel(serviceMediator, bean))
-                .cast(PrivateChannel.class)
-                .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex()));
-    }
-
-    /**
-     * Gets the ServiceMediator associated to this object.
-     *
-     * @return The ServiceMediator associated to this object.
-     */
-    final ServiceMediator getServiceMediator() {
-        return serviceMediator;
+                .map(bean -> EntityUtil.getChannel(gateway, bean))
+                .cast(PrivateChannel.class);
     }
 
     @Override

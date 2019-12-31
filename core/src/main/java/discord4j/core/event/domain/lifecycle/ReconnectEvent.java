@@ -17,7 +17,8 @@
 
 package discord4j.core.event.domain.lifecycle;
 
-import discord4j.core.DiscordClient;
+import discord4j.core.GatewayDiscordClient;
+import discord4j.gateway.ShardInfo;
 
 /**
  * Indicates that a gateway connection has correctly reconnected.
@@ -28,8 +29,8 @@ public class ReconnectEvent extends GatewayLifecycleEvent {
 
     private final int currentAttempt;
 
-    public ReconnectEvent(DiscordClient client, int currentAttempt) {
-        super(client);
+    public ReconnectEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, int currentAttempt) {
+        super(gateway, shardInfo);
         this.currentAttempt = currentAttempt;
     }
 

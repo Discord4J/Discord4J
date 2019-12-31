@@ -16,14 +16,15 @@
  */
 package discord4j.core.object.entity;
 
-import discord4j.core.DiscordClient;
-import discord4j.core.ServiceMediator;
+import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.data.stored.RoleBean;
+import discord4j.rest.entity.RestRole;
 import discord4j.core.object.util.PermissionSet;
 import discord4j.core.object.util.Snowflake;
 import discord4j.core.spec.RoleEditSpec;
 import discord4j.core.util.EntityUtil;
-import discord4j.rest.json.request.PositionModifyRequest;
+import discord4j.core.util.OrderUtil;
+import discord4j.rest.RestClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
@@ -42,39 +43,74 @@ public final class Role implements Entity {
     /** The default {@link Color} of a {@code Role}. */
     public static final Color DEFAULT_COLOR = new Color(0, true);
 
-    /** The ServiceMediator associated to this object. */
-    private final ServiceMediator serviceMediator;
+    /** The gateway associated to this object. */
+    private final GatewayDiscordClient gateway;
 
     /** The raw data as represented by Discord. */
     private final RoleBean data;
+
+    /** A handle to make API requests associated to this entity. */
+    private final RestRole rest;
 
     /** The ID of the guild this role is associated to. */
     private final long guildId;
 
     /**
-     * Constructs a {@code Role} with an associated ServiceMediator and Discord data.
+     * Constructs a {@code Role} with an associated {@link GatewayDiscordClient} and Discord data.
      *
-     * @param serviceMediator The ServiceMediator associated to this object, must be non-null.
+     * @param gateway The {@link GatewayDiscordClient} associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
      * @param guildId The ID of the guild this role is associated to.
      */
-    public Role(final ServiceMediator serviceMediator, final RoleBean data, final long guildId) {
-        this.serviceMediator = Objects.requireNonNull(serviceMediator);
+    public Role(final GatewayDiscordClient gateway, final RoleBean data, final long guildId) {
+        this.gateway = Objects.requireNonNull(gateway);
         this.data = Objects.requireNonNull(data);
+        RestClient restClient = gateway.getCoreResources().getRestClient();
+        this.rest = new RestRole(restClient, guildId, data.getId());
         this.guildId = guildId;
     }
 
     @Override
-    public DiscordClient getClient() {
-        return serviceMediator.getClient();
+    public GatewayDiscordClient getClient() {
+        return gateway;
     }
 
     public int getRawPosition() {
         return data.getPosition();
     }
 
+    /**
+     * Requests to retrieve the position of the role relative to other roles in the guild.
+     * <p>
+     * This is determined by the index of this role in the {@link OrderUtil#orderRoles(Flux) sorted} list of roles of
+     * the guild.
+     * <p>
+     * Warning: Because this method must sort the guild roles, it is inefficient to make repeated invocations for the
+     * same set of roles (meaning that roles haven't been added or removed). For example, instead of writing:
+     * <pre>
+     * {@code
+     * guild.getRoles()
+     *   .flatMap(r -> r.getPosition().map(pos -> r.getName() + " : " + pos))
+     * }
+     * </pre>
+     * It would be much more efficient to write:
+     * <pre>
+     * {@code
+     * guild.getRoles()
+     *   .transform(OrderUtil::orderRoles)
+     *   .index((pos, r) -> r.getName() + " : " + pos)
+     * }
+     * </pre>
+     *
+     * @return A {@link Mono} where, upon successful completion, emits the position of the role. If an error is
+     * received, it is emitted through the {@code Mono}.
+     */
     public Mono<Integer> getPosition() {
-        return getGuild().flatMapMany(Guild::getRoles).collectList().map(list -> list.indexOf(this));
+        return getGuild()
+                .flatMapMany(Guild::getRoles)
+                .transform(OrderUtil::orderRoles)
+                .collectList()
+                .map(roles -> roles.indexOf(this));
     }
 
     /**
@@ -156,7 +192,7 @@ public final class Role implements Entity {
      * to. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Guild> getGuild() {
-        return getClient().getGuildById(getGuildId());
+        return gateway.getGuildById(getGuildId());
     }
 
     /**
@@ -185,11 +221,9 @@ public final class Role implements Entity {
         final RoleEditSpec mutatedSpec = new RoleEditSpec();
         spec.accept(mutatedSpec);
 
-        return serviceMediator.getRestClient().getGuildService()
-                .modifyGuildRole(getGuildId().asLong(), getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason())
+        return rest.edit(mutatedSpec.asRequest(), mutatedSpec.getReason())
                 .map(RoleBean::new)
-                .map(bean -> new Role(serviceMediator, bean, getGuildId().asLong()))
-                .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex()));
+                .map(bean -> new Role(gateway, bean, getGuildId().asLong()));
     }
 
     /**
@@ -210,9 +244,7 @@ public final class Role implements Entity {
      * an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Void> delete(@Nullable final String reason) {
-        return serviceMediator.getRestClient().getGuildService()
-                .deleteGuildRole(getGuildId().asLong(), getId().asLong(), reason)
-                .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex()));
+        return rest.delete(reason);
     }
 
     /**
@@ -223,13 +255,9 @@ public final class Role implements Entity {
      * {@link #getGuild() guild}. If an error is received, it is emitted through the {@code Flux}.
      */
     public Flux<Role> changePosition(final int position) {
-        final PositionModifyRequest[] requests = { new PositionModifyRequest(getId().asLong(), position) };
-
-        return serviceMediator.getRestClient().getGuildService()
-                .modifyGuildRolePositions(getGuildId().asLong(), requests)
+        return rest.changePosition(position)
                 .map(RoleBean::new)
-                .map(bean -> new Role(serviceMediator, bean, getGuildId().asLong()))
-                .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex()));
+                .map(bean -> new Role(gateway, bean, getGuildId().asLong()));
     }
 
     @Override

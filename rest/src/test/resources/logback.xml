@@ -1,25 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration scan="true">
-    <timestamp key="bySecond" datePattern="yyyyMMdd'T'HHmmss"/>
-
     <logger name="io.netty" level="INFO"/>
     <logger name="reactor" level="INFO"/>
     <!-- For tracing request stream tests -->
     <!--<logger name="discord4j.rest.request" level="TRACE"/>-->
-    <!--<logger name="discord4j.rest.response" level="TRACE"/>-->
 
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+            <pattern>%d{HH:mm:ss.SSS} %-20.20thread %5p %-36.36logger{36} - %m%n</pattern>
         </encoder>
     </appender>
 
-    <appender name="FILE" class="ch.qos.logback.core.FileAppender">
-        <file>logs/d4j.tests.${bySecond}.log</file>
-        <append>true</append>
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>logs/%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <maxFileSize>100MB</maxFileSize>
+            <maxHistory>90</maxHistory>
+        </rollingPolicy>
         <encoder>
             <charset>UTF-8</charset>
-            <Pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %-40.40logger{39} : %msg%n</Pattern>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %-20.20thread %5p %-36.36logger{36} - %m%n</pattern>
         </encoder>
         <prudent>true</prudent>
     </appender>

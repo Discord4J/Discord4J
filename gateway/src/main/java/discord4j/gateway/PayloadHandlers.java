@@ -20,6 +20,7 @@ import discord4j.common.jackson.Possible;
 import discord4j.gateway.json.*;
 import discord4j.gateway.json.dispatch.Dispatch;
 import discord4j.gateway.json.dispatch.Ready;
+import discord4j.gateway.retry.GatewayException;
 import reactor.util.Logger;
 import reactor.util.Loggers;
 
@@ -28,11 +29,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+import static discord4j.common.LogUtil.format;
+
 /**
  * Registry for operating on gateway {@link PayloadData} objects, handling each lifecycle {@link Opcode}.
  */
 public abstract class PayloadHandlers {
 
+    private static final Logger log = Loggers.getLogger(PayloadHandlers.class);
     private static final Map<Opcode<?>, PayloadHandler<?>> handlerMap = new HashMap<>();
 
     static {
@@ -49,7 +53,7 @@ public abstract class PayloadHandlers {
     }
 
     /**
-     * Process a {@link discord4j.gateway.json.PayloadData} object together with its context, reacting to it.
+     * Process a {@link PayloadData} object together with its context, reacting to it.
      *
      * @param context the PayloadContext used with this PayloadData object
      * @param <T> the PayloadData type
@@ -73,7 +77,7 @@ public abstract class PayloadHandlers {
     }
 
     private static void handleHeartbeat(PayloadContext<Heartbeat> context) {
-        log(context).debug("Received heartbeat");
+        log.debug(format(context.getContext(), "Received heartbeat"));
         context.getClient().sender().next(GatewayPayload.heartbeat(new Heartbeat(context.getClient().sequence().get())));
     }
 
@@ -88,8 +92,9 @@ public abstract class PayloadHandlers {
             client.sender().next(GatewayPayload.resume(
                     new Resume(token, client.getSessionId(), client.sequence().get())));
         } else {
-            client.resumable().set(false);
-            context.getHandler().error(new RuntimeException("Reconnecting due to non-resumable session invalidation"));
+            client.allowResume().set(false);
+            context.getHandler().error(new GatewayException(context.getContext(),
+                    "Reconnecting due to non-resumable session invalidation"));
         }
     }
 
@@ -98,8 +103,8 @@ public abstract class PayloadHandlers {
         DefaultGatewayClient client = context.getClient();
         client.heartbeat().start(interval);
 
-        if (client.resumable().get()) {
-            log(context).info("Attempting to RESUME from {}", client.sequence().get());
+        if (client.allowResume().get()) {
+            log.debug(format(context.getContext(), "Resuming Gateway session from {}"), client.sequence().get());
             client.sender().next(GatewayPayload.resume(
                     new Resume(client.token(), client.getSessionId(), client.sequence().get())));
         } else {
@@ -108,18 +113,17 @@ public abstract class PayloadHandlers {
             int[] shard = new int[]{options.getShardIndex(), options.getShardCount()};
             Identify identify = new Identify(client.token(), props, false, 250,
                     Optional.of(shard).map(Possible::of).orElse(Possible.absent()),
-                    Optional.ofNullable(options.getInitialStatus()).map(Possible::of).orElse(Possible.absent()));
+                    Optional.ofNullable(options.getInitialStatus()).map(Possible::of).orElse(Possible.absent()),
+                    options.isGuildSubscriptions());
+            log.debug(format(context.getContext(), "Identifying to Gateway"), client.sequence().get());
             client.sender().next(GatewayPayload.identify(identify));
         }
     }
 
     private static void handleHeartbeatAck(PayloadContext<?> context) {
         context.getClient().ackHeartbeat();
-        log(context).debug("Heartbeat acknowledged after {}", context.getClient().getResponseTimeDuration());
-    }
-
-    private static Logger log(PayloadContext<?> context) {
-        return Loggers.getLogger("discord4j.gateway.handler." + context.getClient().identifyOptions().getShardIndex());
+        log.debug(format(context.getContext(), "Heartbeat acknowledged after {}"),
+                context.getClient().getResponseTime());
     }
 
 }

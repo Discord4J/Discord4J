@@ -18,7 +18,7 @@ package discord4j.core.spec;
 
 import discord4j.common.json.OverwriteEntity;
 import discord4j.core.object.PermissionOverwrite;
-import discord4j.core.object.entity.TextChannel;
+import discord4j.core.object.entity.channel.TextChannel;
 import discord4j.core.object.util.Permission;
 import discord4j.core.object.util.Snowflake;
 import discord4j.rest.json.request.ChannelModifyRequest;

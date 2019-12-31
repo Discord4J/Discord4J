@@ -18,6 +18,8 @@ package discord4j.common.close;
 
 import reactor.util.annotation.Nullable;
 
+import java.util.Optional;
+
 /**
  * Container for WebSocket "close" status codes and reasons.
  *
@@ -26,6 +28,7 @@ import reactor.util.annotation.Nullable;
 public class CloseStatus {
 
     public static final CloseStatus NORMAL_CLOSE = new CloseStatus(1000, "Logging off");
+    public static final CloseStatus ABNORMAL_CLOSE = new CloseStatus(1006, null);
 
     private final int code;
     @Nullable
@@ -42,13 +45,22 @@ public class CloseStatus {
         this.reason = reason;
     }
 
+    /**
+     * Return the websocket close code.
+     *
+     * @return a websocket close code
+     */
     public int getCode() {
         return code;
     }
 
-    @Nullable
-    public String getReason() {
-        return reason;
+    /**
+     * Return a websocket close reason, if present.
+     *
+     * @return an {@link Optional} containing a close reason if present, or empty otherwise
+     */
+    public Optional<String> getReason() {
+        return Optional.ofNullable(reason);
     }
 
     @Override

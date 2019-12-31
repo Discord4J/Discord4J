@@ -16,10 +16,11 @@
  */
 package discord4j.core.event.domain.guild;
 
-import discord4j.core.DiscordClient;
+import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.util.Snowflake;
+import discord4j.gateway.ShardInfo;
 import reactor.core.publisher.Mono;
 
 /**
@@ -34,8 +35,8 @@ public class UnbanEvent extends GuildEvent {
     private final User user;
     private final long guildId;
 
-    public UnbanEvent(DiscordClient client, User user, long guildId) {
-        super(client);
+    public UnbanEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, User user, long guildId) {
+        super(gateway, shardInfo);
         this.user = user;
         this.guildId = guildId;
     }

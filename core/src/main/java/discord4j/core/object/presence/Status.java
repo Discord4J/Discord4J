@@ -47,4 +47,10 @@ public enum Status {
             default: return UNKNOWN;
         }
     }
+
+    public enum Platform {
+        DESKTOP,
+        MOBILE,
+        WEB
+    }
 }

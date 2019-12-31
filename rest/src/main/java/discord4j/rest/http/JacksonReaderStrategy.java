@@ -19,9 +19,10 @@ package discord4j.rest.http;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.netty.buffer.ByteBuf;
+import io.netty.util.IllegalReferenceCountException;
 import reactor.core.Exceptions;
 import reactor.core.publisher.Mono;
-import reactor.netty.ByteBufMono;
 import reactor.util.Logger;
 import reactor.util.Loggers;
 import reactor.util.annotation.Nullable;
@@ -30,11 +31,11 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 
 /**
- * Read a response into JSON and convert to an Object of type {@code <Res>} using Jackson 2.9.
+ * Read a response into JSON and convert to an Object of type {@code <Res>} using Jackson.
  *
- * @param <Res> the type of object in the read response
+ * @param <T> the type of object in the read response
  */
-public class JacksonReaderStrategy<Res> implements ReaderStrategy<Res> {
+public class JacksonReaderStrategy<T> implements ReaderStrategy<T> {
 
     private static final Logger log = Loggers.getLogger(JacksonReaderStrategy.class);
 
@@ -54,9 +55,13 @@ public class JacksonReaderStrategy<Res> implements ReaderStrategy<Res> {
         return !CharSequence.class.isAssignableFrom(type) && objectMapper.canDeserialize(getJavaType(type));
     }
 
+    private JavaType getJavaType(Type type) {
+        return objectMapper.getTypeFactory().constructType(type);
+    }
+
     @Override
-    public Mono<Res> read(ByteBufMono content, Class<Res> responseType) {
-        return content.asByteArray()
+    public Mono<T> read(Mono<ByteBuf> content, Class<T> responseType) {
+        return content.as(JacksonReaderStrategy::byteArray)
                 .map(bytes -> {
                     try {
                         return objectMapper.readValue(bytes, responseType);
@@ -78,7 +83,15 @@ public class JacksonReaderStrategy<Res> implements ReaderStrategy<Res> {
                 });
     }
 
-    private JavaType getJavaType(Type type) {
-        return objectMapper.getTypeFactory().constructType(type);
+    private static Mono<byte[]> byteArray(Mono<ByteBuf> byteBufMono) {
+        return byteBufMono.handle((buf, sink) -> {
+            try {
+                byte[] bytes = new byte[buf.readableBytes()];
+                buf.readBytes(bytes);
+                sink.next(bytes);
+            } catch (IllegalReferenceCountException e) {
+                sink.complete();
+            }
+        });
     }
 }

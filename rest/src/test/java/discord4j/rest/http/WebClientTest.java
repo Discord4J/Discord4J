@@ -17,11 +17,10 @@
 
 package discord4j.rest.http;
 
-import discord4j.common.JacksonResourceProvider;
-import discord4j.rest.http.client.DiscordWebClient;
-import discord4j.rest.request.DefaultRouter;
-import discord4j.rest.request.DiscordRequest;
-import discord4j.rest.request.Router;
+import discord4j.common.JacksonResources;
+import discord4j.common.LogUtil;
+import discord4j.common.ReactorResources;
+import discord4j.rest.request.*;
 import discord4j.rest.route.Route;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -30,10 +29,11 @@ import org.junit.Test;
 import reactor.core.publisher.Hooks;
 import reactor.core.publisher.Mono;
 import reactor.netty.DisposableServer;
-import reactor.netty.http.client.HttpClient;
 import reactor.netty.http.server.HttpServer;
 import reactor.util.Logger;
 import reactor.util.Loggers;
+
+import java.util.ArrayList;
 
 public class WebClientTest {
 
@@ -75,13 +75,14 @@ public class WebClientTest {
     @Test
     @Ignore
     public void htmlResponse() {
-        ExchangeStrategies ex2 = ExchangeStrategies.jackson(new JacksonResourceProvider().getObjectMapper());
-        DiscordWebClient webClient = new DiscordWebClient(HttpClient.create(),
-                ex2, null); // no token, it's not a discord request
-        Route<String> fakeRoute = Route.get("http://0.0.0.0:" + PORT + "/html", String.class);
-        Router router = new DefaultRouter(webClient);
-        String response = router.exchange(new DiscordRequest<>(fakeRoute))
+        ExchangeStrategies ex2 = ExchangeStrategies.jackson(new JacksonResources().getObjectMapper());
+        Route fakeRoute = Route.get("http://0.0.0.0:" + PORT + "/html");
+        Router router = new DefaultRouter(new RouterOptions("", new ReactorResources(), ex2, new ArrayList<>(),
+                new UnboundedGlobalRateLimiter()));
+        String response = router.exchange(new DiscordWebRequest(fakeRoute))
+                .bodyToMono(String.class)
                 .log()
+                .subscriberContext(ctx -> ctx.put(LogUtil.KEY_SHARD_ID, 123))
                 .block();
         log.info("{}", response);
     }
