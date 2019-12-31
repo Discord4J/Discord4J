@@ -20,16 +20,15 @@ import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.VoiceServerUpdateEvent;
 import discord4j.core.event.domain.VoiceStateUpdateEvent;
 import discord4j.core.object.entity.channel.VoiceChannel;
-import discord4j.gateway.GatewayClient;
-import discord4j.gateway.json.GatewayPayload;
+import discord4j.gateway.GatewayClientGroup;
+import discord4j.gateway.json.ShardGatewayPayload;
 import discord4j.gateway.json.VoiceStateUpdate;
 import discord4j.voice.AudioProvider;
 import discord4j.voice.AudioReceiver;
-import discord4j.voice.VoiceClient;
 import discord4j.voice.VoiceConnection;
 import reactor.core.publisher.Mono;
+import reactor.util.function.Tuple2;
 
-import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -102,30 +101,28 @@ public class VoiceChannelJoinSpec implements Spec<Mono<VoiceConnection>> {
     public Mono<VoiceConnection> asRequest() {
         final long guildId = voiceChannel.getGuildId().asLong();
         final long channelId = voiceChannel.getId().asLong();
-        final long selfId = gateway.getGatewayResources().getStateView().getSelfId();
+        final Mono<Long> selfIdMono = gateway.getGatewayResources().getStateView().getSelfId()
+                .switchIfEmpty(Mono.just(0L))
+                .cache();
 
-        Map<Integer, GatewayClient> gatewayClients = voiceChannel.getClient().getGatewayClientMap();
-        int count = gatewayClients.size();
-        int shardId = (int) ((voiceChannel.getGuildId().asLong() >> 22) % count);
-        GatewayClient gatewayClient = gatewayClients.get(shardId);
-        VoiceClient voiceClient = gateway.getVoiceClientMap().get(shardId);
-        if (gatewayClient == null) {
-            return Mono.error(new RuntimeException("Shard id not set"));
-        }
-
-        final Mono<Void> sendVoiceStateUpdate = Mono.fromRunnable(() -> {
-            final VoiceStateUpdate voiceStateUpdate = new VoiceStateUpdate(guildId, channelId, selfMute, selfDeaf);
-            gatewayClient.sender().next(GatewayPayload.voiceStateUpdate(voiceStateUpdate));
-        });
+        final GatewayClientGroup clientGroup = voiceChannel.getClient().getGatewayClientGroup();
+        final int shardId = (int) ((voiceChannel.getGuildId().asLong() >> 22) % clientGroup.getShardCount());
+        final Mono<Void> sendVoiceStateUpdate = clientGroup.unicast(ShardGatewayPayload.voiceStateUpdate(
+                new VoiceStateUpdate(guildId, channelId, selfMute, selfDeaf), shardId));
 
         final Mono<VoiceStateUpdateEvent> waitForVoiceStateUpdate = gateway.getEventDispatcher()
                 .on(VoiceStateUpdateEvent.class)
-                .filter(vsu -> {
+                .zipWith(selfIdMono)
+                .filter(t2 -> {
+                    VoiceStateUpdateEvent vsu = t2.getT1();
+                    Long selfId = t2.getT2();
                     final long vsuUser = vsu.getCurrent().getUserId().asLong();
                     final long vsuGuild = vsu.getCurrent().getGuildId().asLong();
                     // this update is for the bot (current) user in this guild
                     return (vsuUser == selfId) && (vsuGuild == guildId);
-                }).next();
+                })
+                .map(Tuple2::getT1)
+                .next();
 
         final Mono<VoiceServerUpdateEvent> waitForVoiceServerUpdate = gateway.getEventDispatcher()
                 .on(VoiceServerUpdateEvent.class)
@@ -135,13 +132,14 @@ public class VoiceChannelJoinSpec implements Spec<Mono<VoiceConnection>> {
                 .next();
 
         return sendVoiceStateUpdate
-                .then(Mono.zip(waitForVoiceStateUpdate, waitForVoiceServerUpdate))
-                .flatMap(t -> {
-                    final String endpoint = t.getT2().getEndpoint().replace(":80", ""); // discord sends wrong port...
-                    final String session = t.getT1().getCurrent().getSessionId();
-                    final String token = t.getT2().getToken();
+                .then(Mono.zip(waitForVoiceStateUpdate, waitForVoiceServerUpdate, selfIdMono))
+                .flatMap(t3 -> {
+                    final String endpoint = t3.getT2().getEndpoint().replace(":80", ""); // discord sends wrong port...
+                    final String session = t3.getT1().getCurrent().getSessionId();
+                    final String token = t3.getT2().getToken();
 
-                    return voiceClient.newConnection(guildId, selfId, session, token, endpoint, provider, receiver);
+                    return gateway.getVoiceConnectionFactory().create(guildId, t3.getT3(), session, token, endpoint,
+                            provider, receiver);
                 });
     }
 }

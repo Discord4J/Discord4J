@@ -20,6 +20,7 @@ package discord4j.core;
 import discord4j.core.event.EventDispatcher;
 import discord4j.core.event.domain.Event;
 import discord4j.core.shard.ShardCoordinator;
+import discord4j.core.state.StateHolder;
 import discord4j.core.state.StateView;
 import discord4j.gateway.GatewayClient;
 import discord4j.store.api.Store;

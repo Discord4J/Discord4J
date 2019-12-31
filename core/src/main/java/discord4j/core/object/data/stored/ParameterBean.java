@@ -14,10 +14,23 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J. If not, see <http://www.gnu.org/licenses/>.
  */
-/**
- * Core components for building sharded clients.
- */
-@NonNullApi
-package discord4j.core.shard;
 
-import reactor.util.annotation.NonNullApi;
+package discord4j.core.object.data.stored;
+
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+
+import java.io.Serializable;
+
+@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS)
+public class ParameterBean implements Serializable {
+
+    private Object value;
+
+    public Object getValue() {
+        return value;
+    }
+
+    public void setValue(Object value) {
+        this.value = value;
+    }
+}

@@ -24,14 +24,12 @@ import discord4j.common.json.MessageMember;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.message.*;
 import discord4j.core.object.Embed;
-import discord4j.core.object.data.stored.MemberBean;
-import discord4j.core.object.data.stored.MessageBean;
-import discord4j.core.object.data.stored.ReactionBean;
-import discord4j.core.object.data.stored.UserBean;
+import discord4j.core.object.data.stored.*;
 import discord4j.core.object.data.stored.embed.EmbedBean;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.reaction.ReactionEmoji;
+import discord4j.core.state.StateHolder;
 import discord4j.core.util.ArrayUtil;
 import discord4j.gateway.json.dispatch.*;
 import reactor.core.publisher.Flux;
@@ -128,8 +126,11 @@ class MessageDispatchHandlers {
 
         Mono<Void> addToMessage = context.getStateHolder().getMessageStore()
                 .find(messageId)
-                .map(oldBean -> {
-                    boolean me = context.getStateHolder().getSelfId().get() == userId;
+                .zipWith(context.getStateHolder().getParameterStore().find(StateHolder.SELF_ID_PARAMETER_KEY)
+                        .switchIfEmpty(Mono.just(new ParameterBean())))
+                .map(t2 -> {
+                    boolean me = Objects.equals(userId, t2.getT2().getValue());
+                    MessageBean oldBean = t2.getT1();
                     MessageBean newBean = new MessageBean(oldBean);
 
                     if (oldBean.getReactions() == null) {
@@ -184,7 +185,11 @@ class MessageDispatchHandlers {
         Mono<Void> removeFromMessage = context.getStateHolder().getMessageStore()
                 .find(messageId)
                 .filter(bean -> bean.getReactions() != null)
-                .map(oldBean -> {
+                .zipWith(context.getStateHolder().getParameterStore()
+                        .find(StateHolder.SELF_ID_PARAMETER_KEY)
+                        .switchIfEmpty(Mono.just(new ParameterBean())))
+                .map(t2 -> {
+                    MessageBean oldBean = t2.getT1();
                     int i;
                     // noinspection ConstantConditions filter covers getReactions() null case
                     for (i = 0; i < oldBean.getReactions().length; i++) {
@@ -203,7 +208,7 @@ class MessageDispatchHandlers {
                         ReactionBean newExisting = new ReactionBean(existing);
                         newExisting.setCount(existing.getCount() - 1);
 
-                        if (context.getStateHolder().getSelfId().get() == userId) {
+                        if (Objects.equals(userId, t2.getT2().getValue())) {
                             newExisting.setMe(false);
                         }
 

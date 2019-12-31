@@ -36,6 +36,7 @@ public class GuildMemberResponse {
     private long[] roles;
     @JsonProperty("joined_at")
     private String joinedAt;
+    @Nullable
     @JsonProperty("premium_since")
     private String premiumSince;
     private boolean deaf;

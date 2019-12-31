@@ -21,13 +21,11 @@ import discord4j.gateway.PayloadTransformer;
 import discord4j.gateway.PoolingTransformer;
 import discord4j.gateway.SessionInfo;
 import discord4j.gateway.ShardInfo;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.FluxSink;
 import reactor.core.publisher.Mono;
-import reactor.core.publisher.ReplayProcessor;
 
 import java.time.Duration;
-import java.util.function.Function;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * A centralized local {@link ShardCoordinator} that can operate on a single JVM instance to coordinate Gateway
@@ -35,27 +33,17 @@ import java.util.function.Function;
  */
 public class LocalShardCoordinator implements ShardCoordinator {
 
-    private final PayloadTransformer identifyLimiter = new PoolingTransformer(1, Duration.ofMillis(5500));
-
-    private final ReplayProcessor<Integer> permits = ReplayProcessor.create();
-    private final FluxSink<Integer> permitSink = permits.sink();
+    private final Map<Integer, PayloadTransformer> limiters = new ConcurrentHashMap<>(1);
 
     /**
      * Create a new {@link LocalShardCoordinator} that is able to locally coordinate multiple shards under a single
      * JVM instance.
      */
-    public LocalShardCoordinator() {
-        permitSink.next(0);
-    }
-
-    @Override
-    public Function<Flux<ShardInfo>, Flux<ShardInfo>> getConnectOperator() {
-        return sequence -> sequence.zipWith(permits, (t2, permit) -> t2);
-    }
+    public LocalShardCoordinator() {}
 
     @Override
     public Mono<Void> publishConnected(ShardInfo shardInfo) {
-        return Mono.fromRunnable(() -> permitSink.next(shardInfo.getIndex() + 1));
+        return Mono.empty();
     }
 
     @Override
@@ -64,7 +52,8 @@ public class LocalShardCoordinator implements ShardCoordinator {
     }
 
     @Override
-    public PayloadTransformer getIdentifyLimiter() {
-        return identifyLimiter;
+    public PayloadTransformer getIdentifyLimiter(ShardInfo shardInfo, int shardingFactor) {
+        return limiters.computeIfAbsent(shardInfo.getIndex() % shardingFactor,
+                k -> new PoolingTransformer(1, Duration.ofMillis(5500)));
     }
 }

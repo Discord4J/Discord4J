@@ -20,12 +20,12 @@ package discord4j.gateway;
 import discord4j.gateway.json.GatewayPayload;
 import discord4j.gateway.json.dispatch.Dispatch;
 import io.netty.buffer.ByteBuf;
-import java.time.Duration;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxSink;
 import reactor.core.publisher.Mono;
 
+import java.time.Duration;
 import java.util.function.Function;
 
 /**
@@ -105,7 +105,7 @@ public interface GatewayClient {
      * @param publisher a sequence of outbound payloads
      * @return a {@link Mono} completing when payloads have been sent
      */
-    default Mono<Void> send(Publisher<GatewayPayload<?>> publisher) {
+    default Mono<Void> send(Publisher<? extends GatewayPayload<?>> publisher) {
         return Flux.from(publisher)
                 .doOnNext(payload -> sender().next(payload))
                 .then();
@@ -122,6 +122,13 @@ public interface GatewayClient {
      * @return a {@link Mono} signaling completion, if an error occurs while producing it is emitted through the Mono
      */
     Mono<Void> sendBuffer(Publisher<ByteBuf> publisher);
+
+    /**
+     * Return number of shards this client operates under.
+     *
+     * @return a positive integer representing the number of shards
+     */
+    int getShardCount();
 
     /**
      * Retrieve the ID of the current gateway session.

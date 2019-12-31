@@ -21,6 +21,7 @@ import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import discord4j.common.jackson.UnsignedJson;
+import discord4j.common.json.GuildMemberResponse;
 import reactor.util.annotation.Nullable;
 
 import java.util.LinkedHashMap;
@@ -39,6 +40,8 @@ public class TypingStart implements Dispatch {
     @UnsignedJson
     private long userId;
     private int timestamp;
+    @Nullable
+    private GuildMemberResponse member;
 
     @JsonIgnore
     private Map<String, Object> additionalProperties = new LinkedHashMap<>();
@@ -60,6 +63,11 @@ public class TypingStart implements Dispatch {
         return timestamp;
     }
 
+    @Nullable
+    public GuildMemberResponse getMember() {
+        return member;
+    }
+
     @JsonAnyGetter
     public Map<String, Object> getAdditionalProperties() {
         return additionalProperties;
@@ -77,6 +85,7 @@ public class TypingStart implements Dispatch {
                 ", guildId=" + guildId +
                 ", userId=" + userId +
                 ", timestamp=" + timestamp +
+                ", member=" + member +
                 '}';
     }
 }

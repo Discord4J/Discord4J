@@ -26,9 +26,14 @@ import reactor.core.publisher.Mono;
 import reactor.util.context.Context;
 import reactor.util.function.Tuple2;
 
-import java.io.Serializable;
-
-public class ShardAwareStore<K extends Comparable<K>, V extends Serializable> implements Store<K, V> {
+/**
+ * A custom and generic {@link Store} implementation that keeps track of the shard particular entities are cached, in
+ * order to allow orderly cleanup if a specific shard needs to invalidate their cache.
+ *
+ * @param <K> the delegate {@link Store} key type
+ * @param <V> the delegate {@link Store} value type
+ */
+public class ShardAwareStore<K extends Comparable<K>, V> implements Store<K, V> {
 
     private final Store<K, V> valueStore;
     private final ShardKeyStore<K> keyStore;

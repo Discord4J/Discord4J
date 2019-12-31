@@ -17,13 +17,17 @@
 package discord4j.core.event.domain.channel;
 
 import discord4j.core.GatewayDiscordClient;
+import discord4j.core.object.entity.Guild;
+import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.core.object.util.Snowflake;
 import discord4j.gateway.ShardInfo;
 import reactor.core.publisher.Mono;
+import reactor.util.annotation.Nullable;
 
 import java.time.Instant;
+import java.util.Optional;
 
 /**
  * Dispatched when a user starts typing in a message channel.
@@ -35,14 +39,21 @@ import java.time.Instant;
 public class TypingStartEvent extends ChannelEvent {
 
     private final long channelId;
+    @Nullable
+    private final Long guildId;
     private final long userId;
     private final Instant startTime;
+    @Nullable
+    private final Member member;
 
-    public TypingStartEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, long channelId, long userId, Instant startTime) {
+    public TypingStartEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, long channelId, @Nullable Long guildId,
+                            long userId, Instant startTime, @Nullable Member member) {
         super(gateway, shardInfo);
         this.channelId = channelId;
+        this.guildId = guildId;
         this.userId = userId;
         this.startTime = startTime;
+        this.member = member;
     }
 
     /**
@@ -52,6 +63,15 @@ public class TypingStartEvent extends ChannelEvent {
      */
     public Snowflake getChannelId() {
         return Snowflake.of(channelId);
+    }
+
+    /**
+     * Gets the {@link Snowflake} ID of the {@link Guild} the user has started typing in, if this happened in a guild.
+     *
+     * @return The {@link Snowflake} ID of the {@link Guild} the user has started typing in, if this happened in a guild.
+     */
+    public Optional<Snowflake> getGuildId() {
+       return Optional.ofNullable(guildId).map(Snowflake::of);
     }
 
     /**
@@ -92,12 +112,23 @@ public class TypingStartEvent extends ChannelEvent {
         return startTime;
     }
 
+    /**
+     * Gets the {@link Member} who started typing, if this happened in a guild.
+     *
+     * @return The {@link Member} who started typing, if this happened in a guild.
+     */
+    public Optional<Member> getMember() {
+        return Optional.ofNullable(member);
+    }
+
     @Override
     public String toString() {
         return "TypingStartEvent{" +
                 "channelId=" + channelId +
+                ", guildId=" + guildId +
                 ", userId=" + userId +
                 ", startTime=" + startTime +
+                ", member=" + member +
                 '}';
     }
 }

@@ -19,10 +19,13 @@ package discord4j.core.shard;
 
 import discord4j.store.api.Store;
 
-import java.io.Serializable;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * Registry implementation that is backed by JDK collections like {@link Map} instances to hold multiple
+ * {@link Store} and {@link ShardKeyStore}, using the value {@link Class} they hold as key.
+ */
 public class ShardingJdkStoreRegistry implements ShardingStoreRegistry {
 
     private final Map<Class<?>, Store<?, ?>> valueStore = new ConcurrentHashMap<>();
@@ -34,19 +37,19 @@ public class ShardingJdkStoreRegistry implements ShardingStoreRegistry {
     }
 
     @Override
-    public <V extends Serializable, K extends Comparable<K>> void putStore(Class<V> valueClass, Store<K, V> store) {
+    public <V, K extends Comparable<K>> void putStore(Class<V> valueClass, Store<K, V> store) {
         valueStore.put(valueClass, store);
     }
 
     @Override
     @SuppressWarnings("unchecked")
-    public <K extends Comparable<K>, V extends Serializable> Store<K, V> getValueStore(Class<K> key, Class<V> value) {
+    public <K extends Comparable<K>, V> Store<K, V> getValueStore(Class<K> key, Class<V> value) {
         return (Store<K, V>) valueStore.get(value);
     }
 
     @Override
     @SuppressWarnings("unchecked")
-    public <K extends Comparable<K>, V extends Serializable> ShardKeyStore<K> getKeyStore(Class<V> valueClass) {
+    public <K extends Comparable<K>, V> ShardKeyStore<K> getKeyStore(Class<V> valueClass) {
         return (ShardKeyStore<K>) keyStores.computeIfAbsent(valueClass, k -> new ShardKeyStore<>());
     }
 

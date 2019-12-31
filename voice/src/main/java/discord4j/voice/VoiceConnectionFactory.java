@@ -14,10 +14,15 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J. If not, see <http://www.gnu.org/licenses/>.
  */
-/**
- * Core components for building sharded clients.
- */
-@NonNullApi
-package discord4j.core.shard;
 
-import reactor.util.annotation.NonNullApi;
+package discord4j.voice;
+
+import discord4j.common.annotations.Experimental;
+import reactor.core.publisher.Mono;
+
+@Experimental
+public interface VoiceConnectionFactory {
+
+    Mono<VoiceConnection> create(long guildId, long selfId, String session, String token, String gatewayUrl,
+                                 AudioProvider provider, AudioReceiver receiver);
+}

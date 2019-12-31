@@ -17,13 +17,16 @@
 package discord4j.core.event.dispatch;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import discord4j.common.json.GuildMemberResponse;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.*;
 import discord4j.core.event.domain.channel.TypingStartEvent;
 import discord4j.core.object.VoiceState;
+import discord4j.core.object.data.stored.MemberBean;
 import discord4j.core.object.data.stored.PresenceBean;
 import discord4j.core.object.data.stored.UserBean;
 import discord4j.core.object.data.stored.VoiceStateBean;
+import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.presence.Presence;
 import discord4j.gateway.json.dispatch.*;
@@ -153,10 +156,16 @@ public abstract class DispatchHandlers {
 
     private static Mono<TypingStartEvent> typingStart(DispatchContext<TypingStart> context) {
         long channelId = context.getDispatch().getChannelId();
+        Long guildId = context.getDispatch().getGuildId();
         long userId = context.getDispatch().getUserId();
         Instant startTime = Instant.ofEpochMilli(context.getDispatch().getTimestamp());
 
-        return Mono.just(new TypingStartEvent(context.getGateway(), context.getShardInfo(), channelId, userId, startTime));
+        GuildMemberResponse response = context.getDispatch().getMember();
+        MemberBean memberBean = response != null ? new MemberBean(response) : null;
+        UserBean userBean = response != null ? new UserBean(response.getUser()) : null;
+        Member member = response != null ? new Member(context.getGateway(), memberBean, userBean, guildId) : null;
+
+        return Mono.just(new TypingStartEvent(context.getGateway(), context.getShardInfo(), channelId, guildId, userId, startTime, member));
     }
 
     private static Mono<UserUpdateEvent> userUpdate(DispatchContext<UserUpdate> context) {

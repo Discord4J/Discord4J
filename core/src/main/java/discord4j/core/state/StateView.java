@@ -16,10 +16,10 @@
  */
 package discord4j.core.state;
 
-import discord4j.core.StateHolder;
 import discord4j.core.object.data.stored.*;
 import discord4j.store.api.service.StoreService;
 import discord4j.store.api.util.LongLongTuple2;
+import reactor.core.publisher.Mono;
 
 /**
  * Read-only view for various pieces of state for use in caching.
@@ -85,7 +85,10 @@ public final class StateView {
         return new StoreView<>(stateHolder.getVoiceStateStore());
     }
 
-    public long getSelfId() {
-        return stateHolder.getSelfId().get();
+    public Mono<Long> getSelfId() {
+        return stateHolder.getParameterStore().find(StateHolder.SELF_ID_PARAMETER_KEY)
+                .switchIfEmpty(Mono.just(new ParameterBean()))
+                .flatMap(bean -> Mono.justOrEmpty(bean.getValue()))
+                .ofType(Long.class);
     }
 }

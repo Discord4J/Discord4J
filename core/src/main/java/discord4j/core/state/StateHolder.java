@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J. If not, see <http://www.gnu.org/licenses/>.
  */
-package discord4j.core;
+package discord4j.core.state;
 
 import discord4j.core.object.data.stored.*;
 import discord4j.store.api.Store;
@@ -25,8 +25,6 @@ import discord4j.store.api.util.StoreContext;
 import reactor.core.publisher.Mono;
 import reactor.util.Logger;
 import reactor.util.Loggers;
-
-import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Holder for various pieces of state for use in caching.
@@ -46,6 +44,8 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 public final class StateHolder {
 
+    public static final String SELF_ID_PARAMETER_KEY = "discord4j.core.selfId";
+
     private static final Logger log = Loggers.getLogger(StateHolder.class);
 
     private final StoreService storeService;
@@ -58,9 +58,9 @@ public final class StateHolder {
     private final LongObjStore<RoleBean> roleStore;
     private final LongObjStore<UserBean> userStore;
     private final Store<LongLongTuple2, VoiceStateBean> voiceStateStore;
-    private final AtomicLong selfId;
+    private final Store<String, ParameterBean> parameterStore;
 
-    StateHolder(final StoreService service, final StoreContext context) {
+    public StateHolder(final StoreService service, final StoreContext context) {
         storeService = service;
 
         service.init(context);
@@ -92,7 +92,8 @@ public final class StateHolder {
         voiceStateStore = service.provideGenericStore(LongLongTuple2.class, VoiceStateBean.class);
         log.debug("Voice state storage : {}", voiceStateStore);
 
-        selfId = new AtomicLong();
+        parameterStore = service.provideGenericStore(String.class, ParameterBean.class);
+        log.debug("Parameter storage   : {}", parameterStore);
     }
 
     public StoreService getStoreService() {
@@ -135,8 +136,8 @@ public final class StateHolder {
         return voiceStateStore;
     }
 
-    public AtomicLong getSelfId() {
-        return selfId;
+    public Store<String, ParameterBean> getParameterStore() {
+        return parameterStore;
     }
 
     public Mono<Void> invalidateStores() {
@@ -148,6 +149,7 @@ public final class StateHolder {
                 .and(presenceStore.invalidate())
                 .and(roleStore.invalidate())
                 .and(userStore.invalidate())
-                .and(voiceStateStore.invalidate());
+                .and(voiceStateStore.invalidate())
+                .and(parameterStore.invalidate());
     }
 }

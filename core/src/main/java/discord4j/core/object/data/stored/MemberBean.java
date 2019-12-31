@@ -56,7 +56,7 @@ public final class MemberBean implements Serializable {
         nick = update.getNick();
         roles = update.getRoles();
         joinedAt = toCopy.getJoinedAt();
-        premiumSince = toCopy.getPremiumSince();
+        premiumSince = update.getPremiumSince();
     }
 
     public MemberBean(final MemberBean toCopy) {

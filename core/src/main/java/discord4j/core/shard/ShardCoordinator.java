@@ -20,11 +20,8 @@ package discord4j.core.shard;
 import discord4j.gateway.PayloadTransformer;
 import discord4j.gateway.SessionInfo;
 import discord4j.gateway.ShardInfo;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
-
-import java.util.function.Function;
 
 /**
  * A {@link ShardCoordinator} defines key operations to leverage shard coordination across boundaries.
@@ -32,20 +29,14 @@ import java.util.function.Function;
 public interface ShardCoordinator {
 
     /**
-     * Returns a connection sequence transformation used to coordinate connection acquisition. Can be used to delay
-     * or hold an attempt to acquire a websocket connection to Discord Gateway.
-     *
-     * @return a reactive transform used to coordinate shard authentication
-     */
-    Function<Flux<ShardInfo>, Flux<ShardInfo>> getConnectOperator();
-
-    /**
      * Returns a transformation function for a sequence of payloads that can be held or delayed in order to successfully
      * identify multiple shards in a coordinated manner.
      *
+     * @param shardInfo the shard from where to retrieve the limiter
+     * @param shardingFactor the number of shards that can be concurrently identified
      * @return a {@link PayloadTransformer} allowing IDENTIFY payload coordination across shards
      */
-    PayloadTransformer getIdentifyLimiter();
+    PayloadTransformer getIdentifyLimiter(ShardInfo shardInfo, int shardingFactor);
 
     /**
      * Notifies this coordinator that a given shard has connected successfully. Can be used to signal other shards

@@ -17,7 +17,7 @@
 package discord4j.core.event.dispatch;
 
 import discord4j.core.GatewayDiscordClient;
-import discord4j.core.StateHolder;
+import discord4j.core.state.StateHolder;
 import discord4j.core.event.domain.Event;
 import discord4j.core.event.domain.channel.*;
 import discord4j.core.object.data.stored.ChannelBean;
