@@ -14,35 +14,13 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
-package discord4j.common;
+package discord4j.voice.json;
 
-import org.junit.Test;
-import reactor.core.scheduler.Schedulers;
+public class Resumed extends VoiceGatewayPayload<Object> {
 
-import java.time.Duration;
-import java.util.concurrent.TimeUnit;
+    public static final int OP = 9;
 
-public class ResettableIntervalTest {
-
-    @Test
-    public void test() throws InterruptedException {
-
-        ResettableInterval interval = new ResettableInterval(Schedulers.elastic());
-        interval.ticks().subscribe(System.out::println);
-
-        interval.start(Duration.ZERO, Duration.ofSeconds(1));
-
-        TimeUnit.SECONDS.sleep(5);
-
-        interval.stop();
-
-        TimeUnit.SECONDS.sleep(2);
-
-        interval.start(Duration.ZERO, Duration.ofSeconds(1));
-
-        TimeUnit.SECONDS.sleep(5);
-
-        interval.stop();
+    public Resumed(Object data) {
+        super(OP, data);
     }
-
 }

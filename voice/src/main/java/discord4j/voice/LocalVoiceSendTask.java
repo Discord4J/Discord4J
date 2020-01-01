@@ -16,35 +16,41 @@
  */
 package discord4j.voice;
 
-import discord4j.voice.json.SentSpeaking;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import reactor.core.Disposable;
 import reactor.core.scheduler.Scheduler;
+import reactor.util.Logger;
+import reactor.util.Loggers;
 
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
 
-class VoiceSendTask implements Disposable {
+public class LocalVoiceSendTask implements Disposable {
 
-    private final VoiceGatewayClient client;
+    private static final Logger log = Loggers.getLogger(LocalVoiceSendTask.class);
+
+    private final Consumer<Boolean> speakingSender;
+    private final Consumer<ByteBuf> voiceSender;
     private final AudioProvider provider;
     private final PacketTransformer transformer;
-    private final int ssrc;
     private final Disposable task;
+    private final AtomicBoolean speaking = new AtomicBoolean();
 
-    private boolean speaking = false;
-
-    VoiceSendTask(Scheduler scheduler, VoiceGatewayClient client, AudioProvider provider, PacketTransformer transformer, int ssrc) {
-        this.client = client;
+    public LocalVoiceSendTask(Scheduler scheduler, Consumer<Boolean> speakingSender, Consumer<ByteBuf> voiceSender,
+                              AudioProvider provider, PacketTransformer transformer) {
+        this.speakingSender = speakingSender;
+        this.voiceSender = voiceSender;
         this.provider = provider;
         this.transformer = transformer;
-        this.ssrc = ssrc;
         this.task = scheduler.schedulePeriodically(this::run, 0, Opus.FRAME_TIME, TimeUnit.MILLISECONDS);
     }
 
     @Override
     public void dispose() {
-        if (speaking) {
+        log.info("Disposing send task");
+        if (speaking.compareAndSet(true, false)) {
             changeSpeaking(false);
         }
         task.dispose();
@@ -57,7 +63,7 @@ class VoiceSendTask implements Disposable {
 
     private void run() {
         if (provider.provide()) {
-            if (!speaking) {
+            if (speaking.compareAndSet(false, true)) {
                 changeSpeaking(true);
             }
 
@@ -66,14 +72,13 @@ class VoiceSendTask implements Disposable {
             provider.getBuffer().clear();
             ByteBuf packet = Unpooled.wrappedBuffer(transformer.nextSend(b));
 
-            client.voiceSocket.send(packet);
-        } else if (speaking) {
+            voiceSender.accept(packet);
+        } else if (speaking.compareAndSet(true, false)) {
             changeSpeaking(false);
         }
     }
 
     private void changeSpeaking(boolean speaking) {
-        client.send(new SentSpeaking(speaking, 0, ssrc));
-        this.speaking = speaking;
+        speakingSender.accept(speaking);
     }
 }

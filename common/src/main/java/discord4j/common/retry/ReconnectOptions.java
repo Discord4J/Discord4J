@@ -15,7 +15,7 @@
  * along with Discord4J. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package discord4j.gateway.retry;
+package discord4j.common.retry;
 
 import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;

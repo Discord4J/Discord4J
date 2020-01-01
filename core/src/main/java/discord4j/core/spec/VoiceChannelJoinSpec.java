@@ -16,6 +16,7 @@
  */
 package discord4j.core.spec;
 
+import discord4j.common.LogUtil;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.VoiceServerUpdateEvent;
 import discord4j.core.event.domain.VoiceStateUpdateEvent;
@@ -23,9 +24,7 @@ import discord4j.core.object.entity.channel.VoiceChannel;
 import discord4j.gateway.GatewayClientGroup;
 import discord4j.gateway.json.ShardGatewayPayload;
 import discord4j.gateway.json.VoiceStateUpdate;
-import discord4j.voice.AudioProvider;
-import discord4j.voice.AudioReceiver;
-import discord4j.voice.VoiceConnection;
+import discord4j.voice.*;
 import reactor.core.publisher.Mono;
 import reactor.util.function.Tuple2;
 
@@ -39,6 +38,8 @@ public class VoiceChannelJoinSpec implements Spec<Mono<VoiceConnection>> {
 
     private AudioProvider provider = AudioProvider.NO_OP;
     private AudioReceiver receiver = AudioReceiver.NO_OP;
+    private VoiceSendTaskFactory sendTaskFactory = new LocalVoiceSendTaskFactory();
+    private VoiceReceiveTaskFactory receiveTaskFactory = new LocalVoiceReceiveTaskFactory();
     private boolean selfDeaf;
     private boolean selfMute;
 
@@ -72,6 +73,33 @@ public class VoiceChannelJoinSpec implements Spec<Mono<VoiceConnection>> {
     @Deprecated
     public VoiceChannelJoinSpec setReceiver(final AudioReceiver receiver) {
         this.receiver = receiver;
+        return this;
+    }
+
+    /**
+     * Configure the {@link VoiceSendTaskFactory} to use in the created {@link VoiceConnection}. A send task is created
+     * when establishing a Voice Gateway session and is torn down when disconnecting.
+     *
+     * @param sendTaskFactory provides an audio send system that process outbound packets
+     * @return this spec
+     */
+    public VoiceChannelJoinSpec setSendTaskFactory(VoiceSendTaskFactory sendTaskFactory) {
+        this.sendTaskFactory = sendTaskFactory;
+        return this;
+    }
+
+    /**
+     * Configure the {@link VoiceReceiveTaskFactory} to use in the created {@link VoiceConnection}. A receive task is
+     * created when establishing a Voice Gateway session and is torn down when disconnecting.
+     *
+     * @param receiveTaskFactory provides an audio receive system to process inbound packets
+     * @return this spec
+     * @deprecated Discord does not officially support bots receiving audio. It is not guaranteed that this
+     * functionality works properly. Use at your own risk.
+     */
+    @Deprecated
+    public VoiceChannelJoinSpec setReceiveTaskFactory(VoiceReceiveTaskFactory receiveTaskFactory) {
+        this.receiveTaskFactory = receiveTaskFactory;
         return this;
     }
 
@@ -137,9 +165,27 @@ public class VoiceChannelJoinSpec implements Spec<Mono<VoiceConnection>> {
                     final String endpoint = t3.getT2().getEndpoint().replace(":80", ""); // discord sends wrong port...
                     final String session = t3.getT1().getCurrent().getSessionId();
                     final String token = t3.getT2().getToken();
+                    final long selfId = t3.getT3();
 
-                    return gateway.getVoiceConnectionFactory().create(guildId, t3.getT3(), session, token, endpoint,
-                            provider, receiver);
+                    return gateway.getVoiceConnectionFactory()
+                            .create(guildId, selfId, session, token, endpoint,
+                                    voiceChannel.getClient().getCoreResources().getJacksonResources(),
+                                    voiceChannel.getClient().getGatewayResources().getVoiceReactorResources(),
+                                    voiceChannel.getClient().getGatewayResources().getVoiceReconnectOptions(),
+                                    provider, receiver, sendTaskFactory, receiveTaskFactory,
+                                    onDisconnectTask(voiceChannel.getClient().getGatewayClientGroup()))
+                            .subscriberContext(ctx ->
+                                    ctx.put(LogUtil.KEY_GATEWAY_ID, Integer.toHexString(gateway.hashCode()))
+                                            .put(LogUtil.KEY_SHARD_ID, shardId)
+                                            .put(LogUtil.KEY_GUILD_ID, Long.toUnsignedString(guildId)));
                 });
+    }
+
+    private static VoiceDisconnectTask onDisconnectTask(GatewayClientGroup clientGroup) {
+        return guildId -> {
+            VoiceStateUpdate voiceStateUpdate = new VoiceStateUpdate(guildId, null, false, false);
+            int shardId = (int) ((guildId >> 22) % clientGroup.getShardCount());
+            return clientGroup.unicast(ShardGatewayPayload.voiceStateUpdate(voiceStateUpdate, shardId));
+        };
     }
 }

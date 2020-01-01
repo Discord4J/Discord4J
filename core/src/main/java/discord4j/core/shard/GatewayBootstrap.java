@@ -19,6 +19,7 @@ package discord4j.core.shard;
 
 import discord4j.common.LogUtil;
 import discord4j.common.ReactorResources;
+import discord4j.common.retry.ReconnectOptions;
 import discord4j.core.CoreResources;
 import discord4j.core.DiscordClient;
 import discord4j.core.GatewayDiscordClient;
@@ -32,9 +33,7 @@ import discord4j.core.object.presence.Presence;
 import discord4j.core.state.StateHolder;
 import discord4j.core.state.StateView;
 import discord4j.gateway.*;
-import discord4j.gateway.json.ShardGatewayPayload;
 import discord4j.gateway.json.StatusUpdate;
-import discord4j.gateway.json.VoiceStateUpdate;
 import discord4j.gateway.json.dispatch.Dispatch;
 import discord4j.gateway.json.dispatch.ShardAwareDispatch;
 import discord4j.gateway.payload.JacksonPayloadReader;
@@ -42,7 +41,6 @@ import discord4j.gateway.payload.JacksonPayloadWriter;
 import discord4j.gateway.payload.PayloadReader;
 import discord4j.gateway.payload.PayloadWriter;
 import discord4j.gateway.retry.GatewayStateChange;
-import discord4j.gateway.retry.ReconnectOptions;
 import discord4j.rest.util.RouteUtils;
 import discord4j.store.api.Store;
 import discord4j.store.api.primitive.ForwardingStoreService;
@@ -50,8 +48,7 @@ import discord4j.store.api.service.StoreService;
 import discord4j.store.api.service.StoreServiceLoader;
 import discord4j.store.api.util.StoreContext;
 import discord4j.store.jdk.JdkStoreService;
-import discord4j.voice.VoiceClient;
-import discord4j.voice.VoiceConnectionFactory;
+import discord4j.voice.*;
 import io.netty.buffer.ByteBuf;
 import reactor.core.Disposable;
 import reactor.core.Disposables;
@@ -111,13 +108,14 @@ public class GatewayBootstrap<O extends GatewayOptions> {
     private Function<ShardInfo, SessionInfo> resumeOptions = shard -> null;
     private boolean guildSubscriptions = true;
     private Function<GatewayDiscordClient, Mono<Void>> destroyHandler = shutdownDestroyHandler();
-
-    private ReactorResources gatewayReactorResources = null;
-    private ReactorResources voiceReactorResources = null;
     private PayloadReader payloadReader = null;
     private PayloadWriter payloadWriter = null;
-    private ReconnectOptions reconnectOptions = ReconnectOptions.builder().build();
+    private ReconnectOptions reconnectOptions = ReconnectOptions.create();
+    private ReconnectOptions voiceReconnectOptions = ReconnectOptions.create();
     private GatewayObserver gatewayObserver = GatewayObserver.NOOP_LISTENER;
+    private Function<ReactorResources, ReactorResources> gatewayReactorResources = Function.identity();
+    private Function<ReactorResources, VoiceReactorResources> voiceReactorResources = VoiceReactorResources::new;
+    private VoiceConnectionFactory voiceConnectionFactory = defaultVoiceConnectionFactory();
 
     /**
      * Create a default {@link GatewayBootstrap} based off the given {@link DiscordClient} that provides an instance
@@ -150,12 +148,14 @@ public class GatewayBootstrap<O extends GatewayOptions> {
         this.resumeOptions = source.resumeOptions;
         this.guildSubscriptions = source.guildSubscriptions;
         this.destroyHandler = source.destroyHandler;
-        this.gatewayReactorResources = source.gatewayReactorResources;
-        this.voiceReactorResources = source.voiceReactorResources;
         this.payloadReader = source.payloadReader;
         this.payloadWriter = source.payloadWriter;
         this.reconnectOptions = source.reconnectOptions;
+        this.voiceReconnectOptions = source.voiceReconnectOptions;
         this.gatewayObserver = source.gatewayObserver;
+        this.gatewayReactorResources = source.gatewayReactorResources;
+        this.voiceReactorResources = source.voiceReactorResources;
+        this.voiceConnectionFactory = source.voiceConnectionFactory;
     }
 
     /**
@@ -328,19 +328,6 @@ public class GatewayBootstrap<O extends GatewayOptions> {
     }
 
     /**
-     * Customize the {@link ReactorResources} used exclusively for Gateway-related operations, such as maintaining
-     * the websocket connections and scheduling Gateway tasks. Defaults to using the parent {@link ReactorResources}
-     * inherited from {@link DiscordClient}, which is equivalent to supplying {@code null} as argument.
-     *
-     * @param gatewayReactorResources a {@link ReactorResources} object for Gateway operations
-     * @return this builder
-     */
-    public GatewayBootstrap<O> setGatewayReactorResources(@Nullable ReactorResources gatewayReactorResources) {
-        this.gatewayReactorResources = gatewayReactorResources;
-        return this;
-    }
-
-    /**
      * Customize how inbound Gateway payloads are decoded from {@link ByteBuf}.
      *
      * @param payloadReader a Gateway payload decoder
@@ -364,13 +351,25 @@ public class GatewayBootstrap<O extends GatewayOptions> {
 
     /**
      * Set a custom {@link ReconnectOptions} to configure how Gateway connections will attempt to reconnect every
-     * time a websocket session is closed.
+     * time a websocket session is closed unexpectedly.
      *
      * @param reconnectOptions a {@link ReconnectOptions} policy to use in Gateway connections
      * @return this builder
      */
     public GatewayBootstrap<O> setReconnectOptions(ReconnectOptions reconnectOptions) {
         this.reconnectOptions = Objects.requireNonNull(reconnectOptions);
+        return this;
+    }
+
+    /**
+     * Set a custom {@link ReconnectOptions} to configure how Voice Gateway connections will attempt to reconnect every
+     * time a websocket session is closed unexpectedly.
+     *
+     * @param voiceReconnectOptions a {@link ReconnectOptions} policy to use in Voice Gateway connections
+     * @return this builder
+     */
+    public GatewayBootstrap<O> setVoiceReconnectOptions(ReconnectOptions voiceReconnectOptions) {
+        this.voiceReconnectOptions = Objects.requireNonNull(voiceReconnectOptions);
         return this;
     }
 
@@ -386,16 +385,40 @@ public class GatewayBootstrap<O extends GatewayOptions> {
     }
 
     /**
+     * Customize the {@link ReactorResources} used exclusively for Gateway-related operations, such as maintaining
+     * the websocket connections and scheduling Gateway tasks. Defaults to using the parent {@link ReactorResources}
+     * inherited from {@link DiscordClient}.
+     *
+     * @param gatewayReactorResources a {@link ReactorResources} object for Gateway operations
+     * @return this builder
+     */
+    public GatewayBootstrap<O> setGatewayReactorResources(Function<ReactorResources, ReactorResources> gatewayReactorResources) {
+        this.gatewayReactorResources = Objects.requireNonNull(gatewayReactorResources);
+        return this;
+    }
+
+    /**
      * Customize the {@link ReactorResources} used exclusively for voice-related operations, such as maintaining
      * the Voice Gateway websocket connections, Voice UDP socket connections and scheduling Gateway tasks. Defaults
-     * to using the parent {@link ReactorResources} inherited from {@link DiscordClient}, which is equivalent to
-     * supplying {@code null} as argument.
+     * to using the parent {@link ReactorResources} inherited from {@link DiscordClient}.
      *
      * @param voiceReactorResources a {@link ReactorResources} object for voice operations
      * @return this builder
      */
-    public GatewayBootstrap<O> setVoiceReactorResources(@Nullable ReactorResources voiceReactorResources) {
-        this.voiceReactorResources = voiceReactorResources;
+    public GatewayBootstrap<O> setVoiceReactorResources(Function<ReactorResources, VoiceReactorResources> voiceReactorResources) {
+        this.voiceReactorResources = Objects.requireNonNull(voiceReactorResources);
+        return this;
+    }
+
+    /**
+     * Customize the {@link VoiceConnectionFactory} used to establish and maintain {@link VoiceConnection} instances to
+     * perform voice-related operations. Defaults to {@link #defaultVoiceConnectionFactory()}.
+     *
+     * @param voiceConnectionFactory a factory that can create {@link VoiceConnection} instances.
+     * @return this builder
+     */
+    public GatewayBootstrap<O> setVoiceConnectionFactory(VoiceConnectionFactory voiceConnectionFactory) {
+        this.voiceConnectionFactory = Objects.requireNonNull(voiceConnectionFactory);
         return this;
     }
 
@@ -459,18 +482,10 @@ public class GatewayBootstrap<O extends GatewayOptions> {
         StateHolder stateHolder = new StateHolder(initStoreService(), new StoreContext(hints));
         StateView stateView = new StateView(stateHolder);
         EventDispatcher eventDispatcher = initEventDispatcher();
-        GatewayResources resources = new GatewayResources(stateView, eventDispatcher, shardCoordinator, memberRequest);
+        GatewayResources resources = new GatewayResources(stateView, eventDispatcher, shardCoordinator, memberRequest,
+                initGatewayReactorResources(), initVoiceReactorResources(), voiceReconnectOptions);
         MonoProcessor<Void> closeProcessor = MonoProcessor.create();
         GatewayClientGroupManager clientGroup = shardingStrategy.getGroupManager();
-        // TODO use ReactorResources to build VoiceClient instances (custom HttpClient, UdpClient)
-        VoiceConnectionFactory voiceConnectionFactory = new VoiceClient(
-                initVoiceReactorResources().getTimerTaskScheduler(),
-                client.getCoreResources().getJacksonResources().getObjectMapper(),
-                guildId -> {
-                    VoiceStateUpdate voiceStateUpdate = new VoiceStateUpdate(guildId, null, false, false);
-                    int shardId = (int) ((guildId >> 22) % clientGroup.getShardCount());
-                    return clientGroup.unicast(ShardGatewayPayload.voiceStateUpdate(voiceStateUpdate, shardId));
-                });
         GatewayDiscordClient gateway = new GatewayDiscordClient(client, resources, closeProcessor,
                 clientGroup, voiceConnectionFactory);
 
@@ -509,7 +524,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                         identify.setResumeSequence(resume.getSequence());
                     }
                     Disposable.Composite forCleanup = Disposables.composite();
-                    GatewayClient gatewayClient = clientFactory.apply(buildOptions(identify));
+                    GatewayClient gatewayClient = clientFactory.apply(buildOptions(gateway, identify));
                     clientGroup.add(shard.getIndex(), gatewayClient);
 
                     // wire gateway events to EventDispatcher
@@ -626,17 +641,11 @@ public class GatewayBootstrap<O extends GatewayOptions> {
     }
 
     private ReactorResources initGatewayReactorResources() {
-        if (gatewayReactorResources != null) {
-            return gatewayReactorResources;
-        }
-        return client.getCoreResources().getReactorResources();
+        return gatewayReactorResources.apply(client.getCoreResources().getReactorResources());
     }
 
-    private ReactorResources initVoiceReactorResources() {
-        if (voiceReactorResources != null) {
-            return voiceReactorResources;
-        }
-        return client.getCoreResources().getReactorResources();
+    private VoiceReactorResources initVoiceReactorResources() {
+        return voiceReactorResources.apply(client.getCoreResources().getReactorResources());
     }
 
     private EventDispatcher initEventDispatcher() {
@@ -668,11 +677,12 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                 .apply(storeService);
     }
 
-    private O buildOptions(IdentifyOptions identify) {
+    private O buildOptions(GatewayDiscordClient gateway, IdentifyOptions identify) {
         ShardInfo shardInfo = identify.getShardInfo();
         GatewayOptions options = new GatewayOptions(client.getCoreResources().getToken(),
-                initGatewayReactorResources(), initPayloadReader(), initPayloadWriter(), reconnectOptions, identify,
-                gatewayObserver, shardCoordinator.getIdentifyLimiter(shardInfo, shardingStrategy.getShardingFactor()));
+                gateway.getGatewayResources().getGatewayReactorResources(), initPayloadReader(), initPayloadWriter(),
+                reconnectOptions, identify, gatewayObserver,
+                shardCoordinator.getIdentifyLimiter(shardInfo, shardingStrategy.getShardingFactor()));
         return this.optionsModifier.apply(options);
     }
 
@@ -725,6 +735,25 @@ public class GatewayBootstrap<O extends GatewayOptions> {
      */
     public static Function<StoreService, StoreService> shardAwareStoreService() {
         return storeService -> new ShardAwareStoreService(new ShardingJdkStoreRegistry(), storeService);
+    }
+
+    /**
+     * Create a {@link VoiceConnectionFactory} with reconnecting capabilities.
+     *
+     * @return a default {@link VoiceConnectionFactory}
+     */
+    public static VoiceConnectionFactory defaultVoiceConnectionFactory() {
+        return new DefaultVoiceConnectionFactory();
+    }
+
+    /**
+     * Create a {@link VoiceConnectionFactory} using a finite state machine implementation but currently without
+     * reconnecting capabilities.
+     *
+     * @return a FSM-based {@link VoiceConnectionFactory}
+     */
+    public static VoiceConnectionFactory fsmVoiceConnectionFactory() {
+        return new FSMVoiceConnectionFactory();
     }
 
 }

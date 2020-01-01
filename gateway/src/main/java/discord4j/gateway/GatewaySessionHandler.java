@@ -17,7 +17,8 @@
 package discord4j.gateway;
 
 import discord4j.common.close.CloseStatus;
-import discord4j.gateway.retry.DisconnectBehavior;
+import discord4j.common.close.DisconnectBehavior;
+import discord4j.gateway.retry.GatewayException;
 import discord4j.gateway.retry.PartialDisconnectException;
 import io.netty.buffer.ByteBuf;
 import io.netty.handler.codec.http.websocketx.CloseWebSocketFrame;
@@ -48,9 +49,9 @@ import static discord4j.common.LogUtil.format;
  * The handler also provides methods to control the lifecycle, which perform operations on the current session. It is
  * required to use them to properly release important resources and complete the session.
  */
-public class DiscordWebSocketHandler {
+public class GatewaySessionHandler {
 
-    private static final Logger log = Loggers.getLogger(DiscordWebSocketHandler.class);
+    private static final Logger log = Loggers.getLogger(GatewaySessionHandler.class);
 
     private final FluxSink<ByteBuf> inbound;
     private final Flux<ByteBuf> outbound;
@@ -65,7 +66,7 @@ public class DiscordWebSocketHandler {
      * @param outbound the {@link Flux} of {@link ByteBuf} to process outbound payloads
      * @param context the Reactor {@link Context} that owns this handler, to enrich logging
      */
-    public DiscordWebSocketHandler(FluxSink<ByteBuf> inbound, Flux<ByteBuf> outbound, Context context) {
+    public GatewaySessionHandler(FluxSink<ByteBuf> inbound, Flux<ByteBuf> outbound, Context context) {
         this.inbound = inbound;
         this.outbound = outbound;
         this.sessionClose = MonoProcessor.create();
@@ -102,10 +103,15 @@ public class DiscordWebSocketHandler {
                 .map(status -> new CloseWebSocketFrame(status.getCode(), status.getReason().orElse(null)));
 
         Mono<CloseStatus> inboundClose = in.receiveCloseStatus()
-                .map(status -> new CloseStatus(status.code(), status.reasonText()));
+                .map(status -> new CloseStatus(status.code(), status.reasonText()))
+                .doOnNext(status -> log.info("Received close status: {}", status))
+                .doOnNext(status -> close(DisconnectBehavior.retryAbruptly(
+                        new GatewayException(context, "Inbound close status"))));
 
         Mono<Void> outboundEvents = out.sendObject(Flux.merge(outboundClose, outbound.map(TextWebSocketFrame::new)))
                 .then();
+
+        in.withConnection(c -> c.onDispose(() -> log.info("Connection disposed")));
 
         Mono<Void> inboundEvents = in.aggregateFrames()
                 .receiveFrames()
@@ -114,9 +120,15 @@ public class DiscordWebSocketHandler {
                 .doOnNext(inbound::next)
                 .then();
 
-        return Mono.zip(outboundEvents, inboundEvents)
+        return Mono.zip(
+                outboundEvents.log("gateway.session.out"),
+                inboundEvents.log("gateway.session.in"))
                 .doOnError(this::error)
-                .then(Mono.zip(sessionClose, inboundClose));
+                .onErrorResume(t -> t.getCause() instanceof GatewayException, t -> Mono.empty())
+                .then(Mono.zip(
+                        sessionClose.log("gateway.session.close"),
+                        inboundClose.defaultIfEmpty(CloseStatus.ABNORMAL_CLOSE)
+                                .log("gateway.inbound.close")));
     }
 
     /**
@@ -143,6 +155,7 @@ public class DiscordWebSocketHandler {
      * @param error the cause for this session termination
      */
     public void error(Throwable error) {
+        log.info("Triggering error sequence: {}", error.toString());
         close(DisconnectBehavior.retryAbruptly(error));
     }
 }

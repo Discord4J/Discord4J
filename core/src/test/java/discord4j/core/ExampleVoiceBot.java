@@ -63,44 +63,52 @@ public class ExampleVoiceBot {
         // Bind events and log in
         DiscordClient client = DiscordClient.create(token);
 
-        client.gateway().withConnection(gateway -> {
-            Mono<MessageCreateEvent> leave = gateway.getEventDispatcher().on(MessageCreateEvent.class)
-                    .filter(e -> owner == null || e.getMember().map(Member::getId).map(it -> it.asString().equals(owner)).orElse(false))
-                    .filter(e -> e.getMessage().getContent().map(it -> it.equals("!leave")).orElse(false))
-                    .next();
+        client.gateway()
+//                .setVoiceReactorResources(rr ->
+//                        new VoiceReactorResources(
+//                                HttpClient.create().wiretap(true),
+//                                rr.getTimerTaskScheduler(),
+//                                rr.getBlockingTaskScheduler(),
+//                                UdpClient.create().wiretap(true)))
+                .withConnection(gateway -> {
+                    Mono<MessageCreateEvent> leave = gateway.getEventDispatcher().on(MessageCreateEvent.class)
+                            .filter(e -> owner == null || e.getMember().map(Member::getId).map(it -> it.asString().equals(owner)).orElse(false))
+                            .filter(e -> e.getMessage().getContent().map(it -> it.equals("!leave")).orElse(false))
+                            .next();
 
-            Mono<Void> join = gateway.getEventDispatcher().on(MessageCreateEvent.class)
-                    .filter(e -> owner == null || e.getMember().map(Member::getId).map(it -> it.asString().equals(owner)).orElse(false))
-                    .filter(e -> e.getMessage().getContent().map(it -> it.startsWith("!join")).orElse(false))
-                    .flatMap(e -> Mono.justOrEmpty(e.getMember())
-                            .flatMap(Member::getVoiceState)
-                            .flatMap(VoiceState::getChannel)
-                            .flatMap(channel -> channel.join(spec -> {
-                                spec.setProvider(provider);
-                            }))
-                    )
-                    .zipWith(leave)
-                    .flatMap(t2 -> t2.getT1().disconnect())
-                    .repeat()
-                    .then();
+                    Mono<Void> join = gateway.getEventDispatcher().on(MessageCreateEvent.class)
+                            .filter(e -> owner == null || e.getMember().map(Member::getId).map(it -> it.asString().equals(owner)).orElse(false))
+                            .filter(e -> e.getMessage().getContent().map(it -> it.startsWith("!join")).orElse(false))
+                            .flatMap(e -> Mono.justOrEmpty(e.getMember())
+                                    .flatMap(Member::getVoiceState)
+                                    .flatMap(VoiceState::getChannel)
+                                    .flatMap(channel -> channel.join(spec -> {
+                                        spec.setProvider(provider);
+                                    }))
+                            )
+                            .zipWith(leave)
+                            .flatMap(t2 -> t2.getT1().disconnect())
+                            .repeat()
+                            .then();
 
-            Mono<Void> play = gateway.getEventDispatcher().on(MessageCreateEvent.class)
-                    .filter(e -> owner == null || e.getMember().map(Member::getId).map(it -> it.asString().equals(owner)).orElse(false))
-                    .filter(e -> e.getMessage().getContent().map(it -> it.startsWith("!play ")).orElse(false))
-                    .flatMap(e -> Mono.justOrEmpty(e.getMessage().getContent())
-                            .map(content -> Arrays.asList(content.split(" ")))
-                            .doOnNext(command -> playerManager.loadItem(command.get(1),
-                                    new MyAudioLoadResultHandler(player))))
-                    .then();
+                    Mono<Void> play = gateway.getEventDispatcher().on(MessageCreateEvent.class)
+                            .filter(e -> owner == null || e.getMember().map(Member::getId).map(it -> it.asString().equals(owner)).orElse(false))
+                            .filter(e -> e.getMessage().getContent().map(it -> it.startsWith("!play ")).orElse(false))
+                            .flatMap(e -> Mono.justOrEmpty(e.getMessage().getContent())
+                                    .map(content -> Arrays.asList(content.split(" ")))
+                                    .doOnNext(command -> playerManager.loadItem(command.get(1),
+                                            new MyAudioLoadResultHandler(player))))
+                            .then();
 
-            Mono<Void> stop = gateway.getEventDispatcher().on(MessageCreateEvent.class)
-                    .filter(e -> owner == null || e.getMember().map(Member::getId).map(it -> it.asString().equals(owner)).orElse(false))
-                    .filter(e -> e.getMessage().getContent().map(it -> it.equals("!stop")).orElse(false))
-                    .doOnNext(e -> player.stopTrack())
-                    .then();
+                    Mono<Void> stop = gateway.getEventDispatcher().on(MessageCreateEvent.class)
+                            .filter(e -> owner == null || e.getMember().map(Member::getId).map(it -> it.asString().equals(owner)).orElse(false))
+                            .filter(e -> e.getMessage().getContent().map(it -> it.equals("!stop")).orElse(false))
+                            .doOnNext(e -> player.stopTrack())
+                            .then();
 
-            return Mono.when(join, play, stop);
-        }).block();
+                    return Mono.when(join, play, stop);
+                })
+                .block();
     }
 
     private static class LavaplayerAudioProvider extends AudioProvider {

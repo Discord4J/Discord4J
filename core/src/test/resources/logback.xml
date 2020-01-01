@@ -2,6 +2,7 @@
 <configuration scan="true">
     <logger name="io.netty" level="INFO"/>
     <logger name="reactor" level="INFO"/>
+    <logger name="reactor.netty" level="DEBUG"/>
     <logger name="reactor.retry" level="INFO"/>
 
     <logger name="discord4j.core" level="DEBUG"/>

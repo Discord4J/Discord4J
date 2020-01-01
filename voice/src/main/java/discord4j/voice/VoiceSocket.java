@@ -17,19 +17,26 @@
 package discord4j.voice;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 import reactor.core.publisher.EmitterProcessor;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxSink;
 import reactor.core.publisher.Mono;
 import reactor.netty.udp.UdpClient;
+import reactor.util.Logger;
+import reactor.util.Loggers;
+import reactor.util.context.Context;
 
 import java.io.ByteArrayOutputStream;
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
-import java.util.logging.Level;
+
+import static discord4j.common.LogUtil.format;
 
 public class VoiceSocket {
+
+    private static final Logger log = Loggers.getLogger(VoiceSocket.class);
 
     static final String PROTOCOL = "udp";
     static final String ENCRYPTION_MODE = "xsalsa20_poly1305";
@@ -39,25 +46,35 @@ public class VoiceSocket {
     private final EmitterProcessor<ByteBuf> outbound = EmitterProcessor.create(false);
 
     private final FluxSink<ByteBuf> inboundSink = inbound.sink(FluxSink.OverflowStrategy.LATEST);
+    private final UdpClient udpClient;
+
+    public VoiceSocket(UdpClient udpClient) {
+        this.udpClient = udpClient;
+    }
 
     Mono<Void> setup(String address, int port) {
-        return UdpClient.create()
-                .wiretap(true)
-                .host(address)
-                .port(port)
-                .handle((in, out) -> {
-                    Mono<Void> inboundThen = in.receive().retain()
-                            .log("discord4j.voice.udp.inbound", Level.FINEST)
-                            .doOnNext(this.inboundSink::next)
-                            .then();
+        return Mono.subscriberContext()
+                .flatMap(context -> udpClient.host(address).port(port)
+                        .doOnConnected(c -> log.info("Connected to {}", c.address()))
+                        .doOnDisconnected(c -> log.info("Disconnected from {}", c.address()))
+                        .handle((in, out) -> {
+                            Mono<Void> inboundThen = in.receive().retain()
+                                    .doOnNext(buf -> logPayload("<< ", context, buf))
+                                    .doOnNext(this.inboundSink::next)
+                                    .then();
 
-                    Mono<Void> outboundThen = out.send(outbound.log("discord4j.voice.udp.outbound", Level.FINEST))
-                            .then();
+                            Mono<Void> outboundThen = out.send(outbound
+                                    .doOnNext(buf -> logPayload(">> ", context, buf)))
+                                    .then();
 
-                    return Mono.zip(inboundThen, outboundThen).then();
-                })
-                .connect()
-                .then();
+                            return Mono.zip(inboundThen, outboundThen).then();
+                        })
+                        .connect()
+                        .then());
+    }
+
+    private void logPayload(String prefix, Context context, ByteBuf buf) {
+        log.trace(format(context, prefix + ByteBufUtil.hexDump(buf)));
     }
 
     Mono<InetSocketAddress> performIpDiscovery(int ssrc) {
@@ -71,7 +88,8 @@ public class VoiceSocket {
 
         Mono<InetSocketAddress> parseResponse = inbound.next()
                 .map(buf -> {
-                    String address = getNullTerminatedString(buf, Integer.BYTES); // undocumented: discord replies with the ssrc first, THEN the IP address
+                    // undocumented: discord replies with the ssrc first, THEN the IP address
+                    String address = getNullTerminatedString(buf, Integer.BYTES);
                     int port = buf.getUnsignedShortLE(DISCOVERY_PACKET_LENGTH - Short.BYTES);
                     buf.release();
                     return InetSocketAddress.createUnresolved(address, port);
