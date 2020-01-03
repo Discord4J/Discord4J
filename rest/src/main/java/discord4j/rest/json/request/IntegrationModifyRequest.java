@@ -44,12 +44,12 @@ public class IntegrationModifyRequest {
 
     public static class Builder {
 
-        private Possible<Integer> expireBehvaior = Possible.absent();
+        private Possible<Integer> expireBehavior = Possible.absent();
         private Possible<Integer> expireGracePeriod = Possible.absent();
         private Possible<Boolean> enableEmoticons = Possible.absent();
 
         public Builder expireBehavior(int expireBehavior) {
-            this.expireBehvaior = Possible.of(expireBehavior);
+            this.expireBehavior = Possible.of(expireBehavior);
             return this;
         }
 
@@ -64,7 +64,7 @@ public class IntegrationModifyRequest {
         }
 
         public IntegrationModifyRequest build() {
-            return new IntegrationModifyRequest(expireBehvaior, expireGracePeriod, enableEmoticons);
+            return new IntegrationModifyRequest(expireBehavior, expireGracePeriod, enableEmoticons);
         }
     }
 
