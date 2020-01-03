@@ -18,9 +18,6 @@ package discord4j.core.object;
 
 import discord4j.core.ServiceMediator;
 import discord4j.core.object.data.ExtendedInviteBean;
-import discord4j.core.object.entity.User;
-import discord4j.core.object.util.Snowflake;
-import reactor.core.publisher.Mono;
 
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
