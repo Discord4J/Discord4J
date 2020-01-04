@@ -268,7 +268,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
      * @param memberRequest {@code true} if enabling the large guild member requests, {@code false} otherwise
      * @return this builder
      * @see
-     * <a href="https://discordapp.com/developers/docs/topics/gateway#request-guild-members>Request Guild Members</a>
+     * <a href="https://discordapp.com/developers/docs/topics/gateway#request-guild-members">Request Guild Members</a>
      */
     public GatewayBootstrap<O> setMemberRequest(boolean memberRequest) {
         this.memberRequest = memberRequest;
