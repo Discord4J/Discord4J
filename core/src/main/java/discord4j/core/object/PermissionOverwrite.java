@@ -20,7 +20,6 @@ import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Role;
 import discord4j.core.object.util.PermissionSet;
 import discord4j.core.object.util.Snowflake;
-import discord4j.core.util.EntityUtil;
 
 import java.util.Optional;
 

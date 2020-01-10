@@ -253,19 +253,19 @@ public class ChannelBean implements Serializable {
         return "ChannelBean{" +
                 "id=" + id +
                 ", type=" + type +
+                ", nsfw=" + nsfw +
                 ", guildId=" + guildId +
                 ", position=" + position +
-                ", permissionOverwrites=" + permissionOverwrites +
-                ", name=" + name +
-                ", topic=" + topic +
-                ", nsfw=" + nsfw +
+                ", permissionOverwrites=" + Arrays.toString(permissionOverwrites) +
+                ", name='" + name + '\'' +
+                ", topic='" + topic + '\'' +
                 ", lastMessageId=" + lastMessageId +
                 ", bitrate=" + bitrate +
                 ", userLimit=" + userLimit +
                 ", rateLimitPerUser=" + rateLimitPerUser +
-                ", recipients=" + recipients +
+                ", recipients=" + Arrays.toString(recipients) +
                 ", parentId=" + parentId +
-                ", lastPinTimestamp=" + lastPinTimestamp +
+                ", lastPinTimestamp='" + lastPinTimestamp + '\'' +
                 '}';
     }
 }
