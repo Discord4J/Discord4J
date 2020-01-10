@@ -108,8 +108,8 @@ public class VoiceGatewaySessionHandler {
                 .then();
 
         return Mono.zip(
-                outboundEvents.log("gateway.session.out"),
-                inboundEvents.log("gateway.session.in"))
+                outboundEvents.log("voice.session.out"),
+                inboundEvents.log("voice.session.in"))
                 .doOnError(this::error)
                 .onErrorResume(t -> t.getCause() instanceof VoiceGatewayException, t -> Mono.empty())
                 .then(Mono.zip(

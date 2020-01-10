@@ -20,6 +20,7 @@ import reactor.core.Disposable;
 import reactor.core.Disposables;
 import reactor.core.publisher.EmitterProcessor;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.FluxSink;
 import reactor.core.scheduler.Scheduler;
 
 import java.time.Duration;
@@ -34,6 +35,7 @@ public class ResettableInterval {
     private final Scheduler scheduler;
     private final Disposable.Swap task;
     private final EmitterProcessor<Long> backing = EmitterProcessor.create(false);
+    private final FluxSink<Long> backingSink = backing.sink(FluxSink.OverflowStrategy.LATEST);
 
     /**
      * Create a {@link ResettableInterval} that emits ticks on the given {@link Scheduler} upon calling
@@ -54,7 +56,7 @@ public class ResettableInterval {
      * @see Flux#interval(Duration, Duration, Scheduler)
      */
     public void start(Duration delay, Duration period) {
-        this.task.update(Flux.interval(delay, period, scheduler).subscribe(backing::onNext));
+        this.task.update(Flux.interval(delay, period, scheduler).subscribe(backingSink::next));
     }
 
     /**
