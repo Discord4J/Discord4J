@@ -25,9 +25,9 @@ import discord4j.core.object.util.Snowflake;
 import java.util.Optional;
 
 public class AuditLogEntry implements Entity {
-    
+
     /** The maximum amount of characters that can be in an audit log reason. */
-	public static final int MAX_REASON_LENGTH = 512;
+    public static final int MAX_REASON_LENGTH = 512;
 
     private final ServiceMediator serviceMediator;
     private final AuditLogEntryBean data;

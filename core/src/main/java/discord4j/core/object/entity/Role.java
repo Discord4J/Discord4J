@@ -150,7 +150,7 @@ public final class Role implements Entity {
     }
 
     /**
-     * Requests to retireve the guild this role is associated to.
+     * Requests to retrieve the guild this role is associated to.
      *
      * @return A {@link Mono} where, upon successful completion, emits the {@link Guild guild} this role is associated
      * to. If an error is received, it is emitted through the {@code Mono}.

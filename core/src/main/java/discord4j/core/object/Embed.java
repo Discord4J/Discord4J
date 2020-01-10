@@ -19,7 +19,6 @@ package discord4j.core.object;
 import discord4j.core.DiscordClient;
 import discord4j.core.ServiceMediator;
 import discord4j.core.object.data.stored.embed.*;
-import discord4j.core.util.EntityUtil;
 
 import java.awt.Color;
 import java.time.Instant;
