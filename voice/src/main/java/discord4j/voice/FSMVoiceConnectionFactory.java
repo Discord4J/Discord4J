@@ -35,12 +35,12 @@ public final class FSMVoiceConnectionFactory implements VoiceConnectionFactory {
                                         AudioReceiver receiver,
                                         VoiceSendTaskFactory sendTaskFactory,
                                         VoiceReceiveTaskFactory receiveTaskFactory,
-                                        VoiceDisconnectTask disconnectTask) {
+                                        VoiceDisconnectTask onDisconnectTask) {
         return Mono.create(sink -> {
             FSMVoiceGatewayClient vgw = new FSMVoiceGatewayClient(guildId, selfId, session, token, reactorResources,
-                    jacksonResources.getObjectMapper(), provider, receiver, sendTaskFactory, receiveTaskFactory);
-            vgw.start(gatewayUrl, () -> sink.success(() -> Mono.fromRunnable(vgw::stop)
-                    .then(disconnectTask.onDisconnect(guildId))));
+                    jacksonResources.getObjectMapper(), provider, receiver, sendTaskFactory, receiveTaskFactory,
+                    onDisconnectTask);
+            vgw.start(gatewayUrl, sink);
             sink.onCancel(vgw::stop);
         });
     }

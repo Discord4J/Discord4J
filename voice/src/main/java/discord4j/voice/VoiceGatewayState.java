@@ -17,15 +17,16 @@
 package discord4j.voice;
 
 import reactor.core.Disposable;
+import reactor.core.publisher.MonoSink;
 
 class VoiceGatewayState {
 
     static final class WaitingForHello extends VoiceGatewayState {
 
         final Disposable websocketTask;
-        final Runnable connectedCallback;
+        final MonoSink<VoiceConnection> connectedCallback;
 
-        WaitingForHello(Disposable websocketTask, Runnable connectedCallback) {
+        WaitingForHello(Disposable websocketTask, MonoSink<VoiceConnection> connectedCallback) {
             this.websocketTask = websocketTask;
             this.connectedCallback = connectedCallback;
         }
@@ -34,11 +35,11 @@ class VoiceGatewayState {
     static final class WaitingForReady extends VoiceGatewayState {
 
         final Disposable websocketTask;
-        final Runnable connectedCallback;
+        final MonoSink<VoiceConnection> connectedCallback;
         final Disposable heartbeatTask;
 
-        WaitingForReady(Disposable websocketTask, Runnable connectedCallback,
-                               Disposable heartbeatTask) {
+        WaitingForReady(Disposable websocketTask, MonoSink<VoiceConnection> connectedCallback,
+                        Disposable heartbeatTask) {
             this.websocketTask = websocketTask;
             this.connectedCallback = connectedCallback;
             this.heartbeatTask = heartbeatTask;
@@ -48,12 +49,12 @@ class VoiceGatewayState {
     static final class WaitingForSessionDescription extends VoiceGatewayState {
 
         final Disposable websocketTask;
-        final Runnable connectedCallback;
+        final MonoSink<VoiceConnection> connectedCallback;
         final Disposable heartbeatTask;
         final int ssrc;
         final Disposable udpTask;
 
-        WaitingForSessionDescription(Disposable websocketTask, Runnable connectedCallback,
+        WaitingForSessionDescription(Disposable websocketTask, MonoSink<VoiceConnection> connectedCallback,
                                      Disposable heartbeatTask, int ssrc, Disposable udpTask) {
             this.websocketTask = websocketTask;
             this.connectedCallback = connectedCallback;
@@ -66,7 +67,7 @@ class VoiceGatewayState {
     static final class ReceivingEvents extends VoiceGatewayState {
 
         final Disposable websocketTask;
-        final Runnable connectedCallback;
+        //final Runnable connectedCallback;
         final Disposable heartbeatTask;
         final int ssrc;
         final Disposable udpTask;
@@ -74,11 +75,11 @@ class VoiceGatewayState {
         final Disposable sendingTask;
         final Disposable receivingTask;
 
-        ReceivingEvents(Disposable websocketTask, Runnable connectedCallback,
+        ReceivingEvents(Disposable websocketTask/*, Runnable connectedCallback*/,
                         Disposable heartbeatTask, int ssrc, Disposable udpTask, byte[] secretKey,
                         Disposable sendingTask, Disposable receivingTask) {
             this.websocketTask = websocketTask;
-            this.connectedCallback = connectedCallback;
+            //this.connectedCallback = connectedCallback;
             this.heartbeatTask = heartbeatTask;
             this.ssrc = ssrc;
             this.udpTask = udpTask;
@@ -89,7 +90,9 @@ class VoiceGatewayState {
     }
 
     static final class Stopped extends VoiceGatewayState {
+
         static final Stopped INSTANCE = new Stopped();
+
         private Stopped() {}
     }
 

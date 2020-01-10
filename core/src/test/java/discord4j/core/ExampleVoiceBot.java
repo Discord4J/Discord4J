@@ -31,10 +31,12 @@ import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.VoiceState;
 import discord4j.core.object.entity.Member;
 import discord4j.voice.AudioProvider;
+import discord4j.voice.VoiceConnection;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 import reactor.core.publisher.Mono;
+import reactor.core.publisher.MonoProcessor;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;
@@ -75,6 +77,8 @@ public class ExampleVoiceBot {
                             .filter(e -> owner == null || e.getMember().map(Member::getId).map(it -> it.asString().equals(owner)).orElse(false))
                             .filter(e -> e.getMessage().getContent().map(it -> it.equals("!leave")).orElse(false))
                             .next();
+
+                    MonoProcessor<VoiceConnection> vc = MonoProcessor.create();
 
                     Mono<Void> join = gateway.getEventDispatcher().on(MessageCreateEvent.class)
                             .filter(e -> owner == null || e.getMember().map(Member::getId).map(it -> it.asString().equals(owner)).orElse(false))

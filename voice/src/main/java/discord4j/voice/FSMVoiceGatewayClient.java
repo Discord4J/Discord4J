@@ -31,6 +31,7 @@ import reactor.core.Disposable;
 import reactor.core.publisher.EmitterProcessor;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.publisher.MonoSink;
 import reactor.core.scheduler.Schedulers;
 import reactor.netty.http.client.HttpClient;
 import reactor.netty.http.websocket.WebsocketInbound;
@@ -55,7 +56,8 @@ public class FSMVoiceGatewayClient {
     public FSMVoiceGatewayClient(long serverId, long userId, String sessionId, String token,
                                  VoiceReactorResources reactorResources, ObjectMapper mapper,
                                  AudioProvider provider, AudioReceiver receiver,
-                                 VoiceSendTaskFactory sendTaskFactory, VoiceReceiveTaskFactory receiveTaskFactory) {
+                                 VoiceSendTaskFactory sendTaskFactory, VoiceReceiveTaskFactory receiveTaskFactory,
+                                 VoiceDisconnectTask disconnectTask) {
         this.mapper = mapper;
         this.voiceSocket = new VoiceSocket(reactorResources.getUdpClient());
         this.gatewayFSM = new FiniteStateMachine<VoiceGatewayState, VoiceGatewayEvent>() {{
@@ -121,10 +123,10 @@ public class FSMVoiceGatewayClient {
                                 voiceSocket.getInbound(), transformer, receiver);
 
                         // we're completely connected
-                        curState.connectedCallback.run();
+                        curState.connectedCallback.success(acquireConnection(disconnectTask, serverId));
 
                         log.debug("VoiceGateway State Change: WaitingForSessionDescription -> ReceivingEvents");
-                        return new ReceivingEvents(curState.websocketTask, curState.connectedCallback,
+                        return new ReceivingEvents(curState.websocketTask/*, curState.connectedCallback*/,
                                 curState.heartbeatTask, curState.ssrc, curState.udpTask, secretKey, sendingTask,
                                 receivingTask);
                     });
@@ -157,8 +159,8 @@ public class FSMVoiceGatewayClient {
         }};
     }
 
-    void start(String gatewayUrl, Runnable connectedCallback) { // TODO can this return the Mono<VoiceConnection>?
-        gatewayFSM.onEvent(new Start(gatewayUrl, connectedCallback));
+    void start(String gatewayUrl, MonoSink<VoiceConnection> voiceConnectionSink) {
+        gatewayFSM.onEvent(new Start(gatewayUrl, voiceConnectionSink));
     }
 
     void stop() {
@@ -183,5 +185,45 @@ public class FSMVoiceGatewayClient {
 
     <T> void send(VoiceGatewayPayload<T> payload) {
         sender.onNext(payload);
+    }
+
+    private VoiceConnection acquireConnection(VoiceDisconnectTask disconnectTask, long guildId) {
+        return new VoiceConnection() {
+
+            @Override
+            public Flux<VoiceGatewayEvent> events() {
+                // unsupported
+                return Flux.empty();
+            }
+
+            @Override
+            public boolean isConnected() {
+                return gatewayFSM.getCurrentState() instanceof ReceivingEvents;
+            }
+
+            @Override
+            public State getState() {
+                if (gatewayFSM.getCurrentState() instanceof ReceivingEvents) {
+                    return State.CONNECTED;
+                } else if (gatewayFSM.getCurrentState() instanceof Stopped) {
+                    return State.DISCONNECTED;
+                } else {
+                    // TODO: this implementation is unable to reconnect yet
+                    return State.CONNECTING;
+                }
+            }
+
+            @Override
+            public Mono<Void> disconnect() {
+                return Mono.fromCallable(this::isConnected)
+                        .flatMap(connected -> {
+                            if (connected) {
+                                return Mono.fromRunnable(() -> stop())
+                                        .then(disconnectTask.onDisconnect(guildId));
+                            }
+                            return Mono.empty();
+                        });
+            }
+        };
     }
 }
