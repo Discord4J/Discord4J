@@ -104,12 +104,15 @@ Discord4J's mechanism for storing information received on the gateway is complet
 * [Javadoc](http://javadoc.io/doc/com.discord4j/discord4j-core/)
 * [Reactor 3 Reference Guide](http://projectreactor.io/docs/core/release/reference/)
 
-## Development builds
+## Development builds (v3.1)
+
+### Jitpack
+
 Please follow our instructions at [Using Jitpack](https://github.com/Discord4J/Discord4J/wiki/Using-Jitpack)
 
-### v3.1 development builds
+### Snapshots
 
-Make sure you have the appropriate repositories:
+Make sure you have the appropriate repositories, using Gradle:
 
 ```groovy
 repositories {
@@ -120,4 +123,26 @@ repositories {
 dependencies {
   implementation 'com.discord4j:discord4j-core:3.1.0-SNAPSHOT'
 }
+```
+
+And using Maven:
+
+```xml
+<repositories>
+    <repository>
+        <id>oss.sonatype.org-snapshot</id>
+        <url>http://oss.sonatype.org/content/repositories/snapshots</url>
+        <snapshots>
+            <enabled>true</enabled>
+        </snapshots>
+    </repository>
+</repositories>
+
+<dependencies>
+    <dependency>
+        <groupId>com.discord4j</groupId>
+        <artifactId>discord4j-core</artifactId>
+        <version>3.1.0-SNAPSHOT</version>
+    </dependency>
+</dependencies>
 ```
