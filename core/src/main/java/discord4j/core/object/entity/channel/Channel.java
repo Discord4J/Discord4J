@@ -17,7 +17,6 @@
 package discord4j.core.object.entity.channel;
 
 import discord4j.core.object.entity.Entity;
-import discord4j.core.util.EntityUtil;
 import discord4j.rest.entity.RestChannel;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;

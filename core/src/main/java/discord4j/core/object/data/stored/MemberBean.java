@@ -20,7 +20,6 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import discord4j.common.json.GuildMemberResponse;
 import discord4j.common.json.MessageMember;
 import discord4j.gateway.json.dispatch.GuildMemberUpdate;
-import discord4j.gateway.json.dispatch.MessageCreate;
 import reactor.util.annotation.Nullable;
 
 import java.io.Serializable;

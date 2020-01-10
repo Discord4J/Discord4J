@@ -16,8 +16,6 @@
  */
 package discord4j.core.object.presence;
 
-import discord4j.core.util.EntityUtil;
-
 public enum Status {
 
     UNKNOWN("UNKNOWN"),
