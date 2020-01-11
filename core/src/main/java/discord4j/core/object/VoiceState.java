@@ -16,8 +16,8 @@
  */
 package discord4j.core.object;
 
+import com.darichey.discordjson.json.VoiceStateData;
 import discord4j.core.GatewayDiscordClient;
-import discord4j.core.object.data.stored.VoiceStateBean;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.VoiceChannel;
@@ -38,7 +38,7 @@ public final class VoiceState implements DiscordObject {
     private final GatewayDiscordClient gateway;
 
     /** The raw data as represented by Discord. */
-    private final VoiceStateBean data;
+    private final VoiceStateData data;
 
     /**
      * Constructs a {@code VoiceState} with an associated ServiceMediator and Discord data.
@@ -46,7 +46,7 @@ public final class VoiceState implements DiscordObject {
      * @param gateway The {@link GatewayDiscordClient} associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
      */
-    public VoiceState(final GatewayDiscordClient gateway, final VoiceStateBean data) {
+    public VoiceState(final GatewayDiscordClient gateway, final VoiceStateData data) {
         this.gateway = Objects.requireNonNull(gateway);
         this.data = Objects.requireNonNull(data);
     }
@@ -62,7 +62,8 @@ public final class VoiceState implements DiscordObject {
      * @return The guild ID this voice state is for.
      */
     public Snowflake getGuildId() {
-        return Snowflake.of(data.getGuildId());
+        // FIXME: why is this Possible?
+        return Snowflake.of(data.guildId().get());
     }
 
     /**
@@ -81,7 +82,7 @@ public final class VoiceState implements DiscordObject {
      * @return The channel ID this user is connected to, if present.
      */
     public Optional<Snowflake> getChannelId() {
-        return Optional.ofNullable(data.getChannelId()).map(Snowflake::of);
+        return data.channelId().map(Snowflake::of);
     }
 
     /**
@@ -100,7 +101,7 @@ public final class VoiceState implements DiscordObject {
      * @return The user ID this voice state is for.
      */
     public Snowflake getUserId() {
-        return Snowflake.of(data.getUserId());
+        return Snowflake.of(data.userId());
     }
 
     /**
@@ -119,7 +120,7 @@ public final class VoiceState implements DiscordObject {
      * @return The session ID for this voice state.
      */
     public String getSessionId() {
-        return data.getSessionId();
+        return data.sessionId();
     }
 
     /**
@@ -128,7 +129,7 @@ public final class VoiceState implements DiscordObject {
      * @return {@code true} if the user is deafened by the server, {@code false} otherwise.
      */
     public boolean isDeaf() {
-        return data.isDeaf();
+        return data.deaf();
     }
 
     /**
@@ -137,7 +138,7 @@ public final class VoiceState implements DiscordObject {
      * @return {@code true} if the user is deafened by the server, {@code false} otherwise.
      */
     public boolean isMuted() {
-        return data.isMute();
+        return data.mute();
     }
 
     /**
@@ -146,7 +147,7 @@ public final class VoiceState implements DiscordObject {
      * @return {@code true} if this user is locally deafened, {@code false} otherwise.
      */
     public boolean isSelfDeaf() {
-        return data.isSelfDeaf();
+        return data.selfDeaf();
     }
 
     /**
@@ -155,7 +156,7 @@ public final class VoiceState implements DiscordObject {
      * @return {@code true} if this user is locally muted, {@code false} otherwise.
      */
     public boolean isSelfMuted() {
-        return data.isSelfMute();
+        return data.selfMute();
     }
 
     /**
@@ -164,7 +165,7 @@ public final class VoiceState implements DiscordObject {
      * @return {@code true} if this user is streaming using "Go Live", {@code false} otherwise.
      */
     public boolean isSelfStreaming() {
-        return Optional.ofNullable(data.isSelfStream()).orElse(false);
+        return data.selfStream().toOptional().orElse(false);
     }
 
     /**
@@ -173,7 +174,7 @@ public final class VoiceState implements DiscordObject {
      * @return {@code true} if this user is muted by the current user, {@code false} otherwise.
      */
     public boolean isSuppressed() {
-        return data.isSuppress();
+        return data.suppress();
     }
 
     @Override

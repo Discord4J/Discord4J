@@ -16,9 +16,10 @@
  */
 package discord4j.core.spec;
 
+import com.darichey.discordjson.json.ImmutableRoleCreateRequest;
+import com.darichey.discordjson.json.RoleCreateRequest;
 import discord4j.core.object.entity.Role;
 import discord4j.core.object.util.PermissionSet;
-import discord4j.rest.json.request.RoleCreateRequest;
 import reactor.util.annotation.Nullable;
 
 import java.awt.*;
@@ -106,6 +107,6 @@ public class RoleCreateSpec implements AuditSpec<RoleCreateRequest> {
 
     @Override
     public RoleCreateRequest asRequest() {
-        return new RoleCreateRequest(name, permissions, color, hoist, mentionable);
+        return ImmutableRoleCreateRequest.of(name, permissions, color, hoist, mentionable);
     }
 }

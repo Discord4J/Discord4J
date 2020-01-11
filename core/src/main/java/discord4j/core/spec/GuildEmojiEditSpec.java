@@ -16,13 +16,16 @@
  */
 package discord4j.core.spec;
 
-import discord4j.common.jackson.Possible;
+import com.darichey.discordjson.json.GuildEmojiModifyRequest;
+import com.darichey.discordjson.json.ImmutableGuildEmojiModifyRequest;
+import com.darichey.discordjson.possible.Possible;
 import discord4j.core.object.entity.GuildEmoji;
 import discord4j.core.object.util.Snowflake;
-import discord4j.rest.json.request.GuildEmojiModifyRequest;
 import reactor.util.annotation.Nullable;
 
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Spec used to modify an existing {@link GuildEmoji}.
@@ -32,7 +35,7 @@ import java.util.Set;
 public class GuildEmojiEditSpec implements AuditSpec<GuildEmojiModifyRequest> {
 
     private Possible<String> name = Possible.absent();
-    private Possible<long[]> roles = Possible.absent();
+    private Possible<List<String>> roles = Possible.absent();
     private String reason;
 
     /**
@@ -53,7 +56,7 @@ public class GuildEmojiEditSpec implements AuditSpec<GuildEmojiModifyRequest> {
      * @return This spec.
      */
     public GuildEmojiEditSpec setRoles(Set<Snowflake> roles) {
-        this.roles = Possible.of(roles.stream().mapToLong(Snowflake::asLong).toArray());
+        this.roles = Possible.of(roles.stream().map(Snowflake::asString).collect(Collectors.toList()));
         return this;
     }
 
@@ -71,6 +74,6 @@ public class GuildEmojiEditSpec implements AuditSpec<GuildEmojiModifyRequest> {
 
     @Override
     public GuildEmojiModifyRequest asRequest() {
-        return new GuildEmojiModifyRequest(name, roles);
+        return ImmutableGuildEmojiModifyRequest.of(name, roles);
     }
 }

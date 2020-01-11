@@ -16,10 +16,8 @@
  */
 package discord4j.core.object.entity;
 
-import discord4j.common.json.GuildEmojiResponse;
+import com.darichey.discordjson.json.EmojiData;
 import discord4j.core.GatewayDiscordClient;
-import discord4j.core.object.data.stored.GuildEmojiBean;
-import discord4j.core.object.data.stored.UserBean;
 import discord4j.core.object.util.Image;
 import discord4j.core.object.util.Snowflake;
 import discord4j.core.spec.GuildEmojiEditSpec;
@@ -44,6 +42,7 @@ import static discord4j.core.object.util.Image.Format.PNG;
  * <p>
  * <a href="https://discordapp.com/developers/docs/resources/emoji#emoji-resource">Emoji Resource</a>
  */
+// FIXME so many gets
 public final class GuildEmoji implements Entity {
 
     /** The path for {@code GuildEmoji} image URLs. */
@@ -53,7 +52,7 @@ public final class GuildEmoji implements Entity {
     private final GatewayDiscordClient gateway;
 
     /** The raw data as represented by Discord. */
-    private final GuildEmojiBean data;
+    private final EmojiData data;
 
     /** The ID of the guild this emoji is associated to. */
     private final long guildId;
@@ -65,7 +64,7 @@ public final class GuildEmoji implements Entity {
      * @param data The raw data as represented by Discord, must be non-null.
      * @param guildId The ID of the guild this emoji is associated to.
      */
-    public GuildEmoji(final GatewayDiscordClient gateway, final GuildEmojiBean data, final long guildId) {
+    public GuildEmoji(final GatewayDiscordClient gateway, final EmojiData data, final long guildId) {
         this.gateway = Objects.requireNonNull(gateway);
         this.data = Objects.requireNonNull(data);
         this.guildId = guildId;
@@ -78,7 +77,7 @@ public final class GuildEmoji implements Entity {
 
     @Override
     public Snowflake getId() {
-        return Snowflake.of(data.getId());
+        return Snowflake.of(data.id().get()); // this is safe for guild emojis
     }
 
     /**
@@ -87,7 +86,7 @@ public final class GuildEmoji implements Entity {
      * @return The emoji name.
      */
     public String getName() {
-        return data.getName();
+        return data.name().get();
     }
 
     /**
@@ -96,8 +95,8 @@ public final class GuildEmoji implements Entity {
      * @return The IDs of the roles this emoji is whitelisted to.
      */
     public Set<Snowflake> getRoleIds() {
-        return Arrays.stream(data.getRoles())
-                .mapToObj(Snowflake::of)
+        return data.roles().get().stream()
+                .map(Snowflake::of)
                 .collect(Collectors.toSet());
     }
 
@@ -123,9 +122,7 @@ public final class GuildEmoji implements Entity {
     public Mono<User> getUser() {
         return gateway.getRestClient().getEmojiService()
                 .getGuildEmoji(getGuildId().asLong(), getId().asLong())
-                .map(GuildEmojiResponse::getUser)
-                .map(UserBean::new)
-                .map(bean -> new User(gateway, bean));
+                .map(data -> new User(gateway, data.user().get()));
     }
 
     /**
@@ -134,7 +131,7 @@ public final class GuildEmoji implements Entity {
      * @return {@code true} if this emoji must be wrapped in colons, {@code false} otherwise.
      */
     public boolean requiresColons() {
-        return data.isRequireColons();
+        return data.requireColons().get();
     }
 
     /**
@@ -143,7 +140,7 @@ public final class GuildEmoji implements Entity {
      * @return {@code true} if this emoji is managed, {@code false} otherwise.
      */
     public boolean isManaged() {
-        return data.isManaged();
+        return data.managed().get();
     }
 
     /**
@@ -152,7 +149,7 @@ public final class GuildEmoji implements Entity {
      * @return {@code true} if this emoji is animated, {@code false} otherwise.
      */
     public boolean isAnimated() {
-        return data.isAnimated();
+        return data.animated().get();
     }
 
     /**
@@ -187,8 +184,7 @@ public final class GuildEmoji implements Entity {
 
         return gateway.getRestClient().getEmojiService()
                 .modifyGuildEmoji(getGuildId().asLong(), getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason())
-                .map(GuildEmojiBean::new)
-                .map(bean -> new GuildEmoji(gateway, bean, getGuildId().asLong()));
+                .map(data -> new GuildEmoji(gateway, data, getGuildId().asLong()));
     }
 
     /**

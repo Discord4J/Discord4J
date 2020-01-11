@@ -16,8 +16,8 @@
  */
 package discord4j.core.object.entity.channel;
 
+import com.darichey.discordjson.json.ChannelData;
 import discord4j.core.GatewayDiscordClient;
-import discord4j.core.object.data.stored.ChannelBean;
 import discord4j.core.spec.TextChannelEditSpec;
 import discord4j.core.util.EntityUtil;
 import reactor.core.publisher.Mono;
@@ -25,16 +25,18 @@ import reactor.core.publisher.Mono;
 import java.util.Objects;
 import java.util.function.Consumer;
 
-/** A Discord text channel. */
+/**
+ * A Discord text channel.
+ */
 public final class TextChannel extends BaseGuildMessageChannel {
 
     /**
      * Constructs an {@code TextChannel} with an associated ServiceMediator and Discord data.
      *
      * @param gateway The {@link GatewayDiscordClient} associated to this object, must be non-null.
-     * @param data The raw data as represented by Discord, must be non-null.
+     * @param data    The raw data as represented by Discord, must be non-null.
      */
-    public TextChannel(GatewayDiscordClient gateway, ChannelBean data) {
+    public TextChannel(GatewayDiscordClient gateway, ChannelData data) {
         super(gateway, data);
     }
 
@@ -70,10 +72,9 @@ public final class TextChannel extends BaseGuildMessageChannel {
         spec.accept(mutatedSpec);
 
         return getClient().getRestClient().getChannelService()
-                .modifyChannel(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason())
-                .map(ChannelBean::new)
-                .map(bean -> EntityUtil.getChannel(getClient(), bean))
-                .cast(TextChannel.class);
+            .modifyChannel(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason())
+            .map(bean -> EntityUtil.getChannel(getClient(), bean))
+            .cast(TextChannel.class);
     }
 
     @Override

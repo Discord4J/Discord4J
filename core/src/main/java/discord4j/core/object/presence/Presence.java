@@ -16,9 +16,11 @@
  */
 package discord4j.core.object.presence;
 
-import discord4j.common.jackson.Possible;
-import discord4j.core.object.data.stored.ActivityBean;
-import discord4j.core.object.data.stored.PresenceBean;
+import com.darichey.discordjson.json.ActivityData;
+import com.darichey.discordjson.json.ImmutableActivityData;
+import com.darichey.discordjson.json.gateway.PresenceUpdate;
+import com.darichey.discordjson.json.gateway.StatusUpdate;
+import com.darichey.discordjson.possible.Possible;
 import reactor.util.annotation.Nullable;
 
 import java.util.Optional;
@@ -58,21 +60,14 @@ public final class Presence {
         return new Presence(Status.INVISIBLE, null);
     }
 
-    private final PresenceBean data;
+    private final PresenceUpdate data;
 
-    public Presence(final PresenceBean data) {
+    public Presence(final PresenceUpdate data) {
         this.data = data;
     }
 
-    private Presence(final Status status, @Nullable final Activity activity) {
-        ActivityBean activityBean = activity == null
-            ? null
-            : new ActivityBean(activity.getType().getValue(), activity.getName(), activity.getStreamingUrl().orElse(null));
-        this.data = new PresenceBean(activityBean, status.getValue(), null, null, null);
-    }
-
     public Status getStatus() {
-        return Status.of(data.getStatus());
+        return Status.of(data.status());
     }
 
     public Optional<Status> getStatus(Status.Platform platform) {
@@ -89,14 +84,14 @@ public final class Presence {
     }
 
     public StatusUpdate asStatusUpdate() {
-        final StatusUpdate.Game game = getActivity()
-                .map(activity -> {
-                    Possible<String> url = activity.getStreamingUrl().map(Possible::of).orElse(Possible.absent());
-                    return new StatusUpdate.Game(activity.getName(), activity.getType().getValue(), url);
-                })
-                .orElse(null);
+//        final StatusUpdate.Game game = getActivity()
+//                .map(activity -> {
+//                    Possible<String> url = activity.getStreamingUrl().map(Possible::of).orElse(Possible.absent());
+//                    return new StatusUpdate.Game(activity.getName(), activity.getType().getValue(), url);
+//                })
+//                .orElse(null);
 
-        return new StatusUpdate(game, data.getStatus());
+        return new StatusUpdate(game, data.status());
     }
 
     @Override

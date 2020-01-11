@@ -16,8 +16,8 @@
  */
 package discord4j.core.spec;
 
-import discord4j.common.json.EmbedFieldEntity;
-import discord4j.rest.json.request.*;
+import com.darichey.discordjson.json.*;
+import com.darichey.discordjson.possible.Possible;
 import reactor.util.annotation.Nullable;
 
 import java.awt.*;
@@ -30,10 +30,10 @@ import java.util.List;
  * A spec used to configure and send an embed.
  * @see <a href="https://i.stack.imgur.com/HRWHk.png">Embed Layout</a>
  */
-public class EmbedCreateSpec implements Spec<EmbedRequest> {
+public class EmbedCreateSpec implements Spec<EmbedData> {
 
-    private final EmbedRequest.Builder requestBuilder = EmbedRequest.builder();
-    private final List<EmbedFieldEntity> fields = new ArrayList<>();
+    private final ImmutableEmbedData.Builder requestBuilder = ImmutableEmbedData.builder();
+    private final List<EmbedFiledData> fields = new ArrayList<>();
 
     /**
      * Sets the title of the embed.
@@ -42,7 +42,7 @@ public class EmbedCreateSpec implements Spec<EmbedRequest> {
      * @return This spec.
      */
     public EmbedCreateSpec setTitle(String title) {
-        requestBuilder.title(title);
+        requestBuilder.title(Possible.of(title));
         return this;
     }
 
@@ -53,7 +53,7 @@ public class EmbedCreateSpec implements Spec<EmbedRequest> {
      * @return This spec.
      */
     public EmbedCreateSpec setDescription(String description) {
-        requestBuilder.description(description);
+        requestBuilder.description(Possible.of(description));
         return this;
     }
 
@@ -64,7 +64,7 @@ public class EmbedCreateSpec implements Spec<EmbedRequest> {
      * @return This spec.
      */
     public EmbedCreateSpec setUrl(String url) {
-        requestBuilder.url(url);
+        requestBuilder.url(Possible.of(url));
         return this;
     }
 
@@ -75,7 +75,7 @@ public class EmbedCreateSpec implements Spec<EmbedRequest> {
      * @return This spec.
      */
     public EmbedCreateSpec setTimestamp(Instant timestamp) {
-        requestBuilder.timestamp(DateTimeFormatter.ISO_INSTANT.format(timestamp));
+        requestBuilder.timestamp(Possible.of(DateTimeFormatter.ISO_INSTANT.format(timestamp)));
         return this;
     }
 
@@ -86,7 +86,7 @@ public class EmbedCreateSpec implements Spec<EmbedRequest> {
      * @return This spec.
      */
     public EmbedCreateSpec setColor(final Color color) {
-        requestBuilder.color(color.getRGB() & 0xFFFFFF);
+        requestBuilder.color(Possible.of(color.getRGB() & 0xFFFFFF));
         return this;
     }
 
@@ -98,7 +98,10 @@ public class EmbedCreateSpec implements Spec<EmbedRequest> {
      * @return This spec.
      */
     public EmbedCreateSpec setFooter(String text, @Nullable String iconUrl) {
-        requestBuilder.footer(new EmbedFooterRequest(text, iconUrl));
+        requestBuilder.footer(Possible.of(ImmutableEmbedFooterData.builder()
+            .text(text)
+            .iconUrl(iconUrl == null ? Possible.absent() : Possible.of(iconUrl))
+            .build()));
         return this;
     }
 
@@ -109,7 +112,9 @@ public class EmbedCreateSpec implements Spec<EmbedRequest> {
      * @return This spec.
      */
     public EmbedCreateSpec setImage(String url) {
-        requestBuilder.image(new EmbedImageRequest(url));
+        requestBuilder.image(Possible.of(ImmutableEmbedImageData.builder()
+            .url(Possible.of(url))
+            .build()));
         return this;
     }
 
@@ -120,7 +125,9 @@ public class EmbedCreateSpec implements Spec<EmbedRequest> {
      * @return This spec.
      */
     public EmbedCreateSpec setThumbnail(String url) {
-        requestBuilder.thumbnail(new EmbedThumbnailRequest(url));
+        requestBuilder.thumbnail(Possible.of(ImmutableEmbedThumbnailData.builder()
+            .url(Possible.of(url))
+            .build()));
         return this;
     }
 
@@ -133,7 +140,11 @@ public class EmbedCreateSpec implements Spec<EmbedRequest> {
      * @return This spec.
      */
     public EmbedCreateSpec setAuthor(String name, @Nullable String url, @Nullable String iconUrl) {
-        requestBuilder.author(new EmbedAuthorRequest(name, url, iconUrl));
+        requestBuilder.author(Possible.of(ImmutableEmbedAuthorData.builder()
+            .name(Possible.of(name))
+            .url(url == null ? Possible.absent() : Possible.of(url))
+            .iconUrl(iconUrl == null ? Possible.absent() : Possible.of(iconUrl))
+            .build()));
         return this;
     }
 
@@ -146,13 +157,17 @@ public class EmbedCreateSpec implements Spec<EmbedRequest> {
      * @return This spec.
      */
     public EmbedCreateSpec addField(String name, String value, boolean inline) {
-        this.fields.add(new EmbedFieldEntity(name, value, inline));
+        this.fields.add(ImmutableEmbedFiledData.builder()
+            .name(name)
+            .value(value)
+            .inline(Possible.of(inline))
+            .build());
         return this;
     }
 
     @Override
-    public EmbedRequest asRequest() {
-        requestBuilder.fields(this.fields.toArray(new EmbedFieldEntity[this.fields.size()]));
+    public EmbedData asRequest() {
+        requestBuilder.fields(Possible.of(this.fields));
         return requestBuilder.build();
     }
 }

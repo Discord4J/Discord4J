@@ -16,10 +16,11 @@
  */
 package discord4j.core.spec;
 
-import discord4j.common.jackson.Possible;
+import com.darichey.discordjson.json.ImmutableWebhookModifyRequest;
+import com.darichey.discordjson.json.WebhookModifyRequest;
+import com.darichey.discordjson.possible.Possible;
 import discord4j.core.object.entity.Webhook;
 import discord4j.core.object.util.Image;
-import discord4j.rest.json.request.WebhookModifyRequest;
 import reactor.util.annotation.Nullable;
 
 /**
@@ -69,6 +70,7 @@ public class WebhookEditSpec implements AuditSpec<WebhookModifyRequest> {
 
     @Override
     public WebhookModifyRequest asRequest() {
-        return new WebhookModifyRequest(name, avatar);
+        // FIXME allow channel_id to be set
+        return ImmutableWebhookModifyRequest.of(name, avatar, Possible.absent());
     }
 }

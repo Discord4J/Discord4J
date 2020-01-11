@@ -16,7 +16,8 @@
  */
 package discord4j.core.state;
 
-import discord4j.core.object.data.stored.*;
+import com.darichey.discordjson.json.*;
+import com.darichey.discordjson.json.gateway.PresenceUpdate;
 import discord4j.store.api.service.StoreService;
 import discord4j.store.api.util.LongLongTuple2;
 import reactor.core.publisher.Mono;
@@ -49,39 +50,39 @@ public final class StateView {
         return stateHolder.getStoreService();
     }
 
-    public LongObjStoreView<ChannelBean> getChannelStore() {
+    public LongObjStoreView<ChannelData> getChannelStore() {
         return new LongObjStoreView<>(stateHolder.getChannelStore());
     }
 
-    public LongObjStoreView<GuildBean> getGuildStore() {
+    public LongObjStoreView<ChannelData> getGuildStore() {
         return new LongObjStoreView<>(stateHolder.getGuildStore());
     }
 
-    public LongObjStoreView<GuildEmojiBean> getGuildEmojiStore() {
+    public LongObjStoreView<EmojiData> getGuildEmojiStore() {
         return new LongObjStoreView<>(stateHolder.getGuildEmojiStore());
     }
 
-    public StoreView<LongLongTuple2, MemberBean> getMemberStore() {
+    public StoreView<LongLongTuple2, MemberData> getMemberStore() {
         return new StoreView<>(stateHolder.getMemberStore());
     }
 
-    public LongObjStoreView<MessageBean> getMessageStore() {
+    public LongObjStoreView<MessageData> getMessageStore() {
         return new LongObjStoreView<>(stateHolder.getMessageStore());
     }
 
-    public StoreView<LongLongTuple2, PresenceBean> getPresenceStore() {
+    public StoreView<LongLongTuple2, PresenceUpdate> getPresenceStore() {
         return new StoreView<>(stateHolder.getPresenceStore());
     }
 
-    public LongObjStoreView<RoleBean> getRoleStore() {
+    public LongObjStoreView<RoleData> getRoleStore() {
         return new LongObjStoreView<>(stateHolder.getRoleStore());
     }
 
-    public LongObjStoreView<UserBean> getUserStore() {
+    public LongObjStoreView<UserData> getUserStore() {
         return new LongObjStoreView<>(stateHolder.getUserStore());
     }
 
-    public StoreView<LongLongTuple2, VoiceStateBean> getVoiceStateStore() {
+    public StoreView<LongLongTuple2, VoiceStateData> getVoiceStateStore() {
         return new StoreView<>(stateHolder.getVoiceStateStore());
     }
 

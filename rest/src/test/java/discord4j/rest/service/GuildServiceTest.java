@@ -199,7 +199,7 @@ public class GuildServiceTest {
     @Test
     public void testModifyGuildRole() {
         RoleModifyRequest req = ImmutableRoleModifyRequest.builder()
-            .permissions(Possible.of(0))
+            .permissions(Possible.of(0L))
             .build();
         getGuildService().modifyGuildRole(guild, permanentRole, req, null).block();
     }

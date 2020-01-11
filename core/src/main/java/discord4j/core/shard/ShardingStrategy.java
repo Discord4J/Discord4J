@@ -17,10 +17,11 @@
 
 package discord4j.core.shard;
 
+import com.darichey.discordjson.json.GatewayData;
+import com.darichey.discordjson.possible.Possible;
 import discord4j.gateway.GatewayClient;
 import discord4j.gateway.ShardInfo;
 import discord4j.rest.RestClient;
-import discord4j.rest.json.response.GatewayResponse;
 import reactor.core.publisher.Flux;
 
 /**
@@ -64,9 +65,10 @@ public interface ShardingStrategy {
             @Override
             public Flux<ShardInfo> getShards(RestClient restClient) {
                 return restClient.getGatewayService().getGatewayBot()
-                        .map(GatewayResponse::getShards)
-                        .flatMapMany(count -> Flux.range(0, count)
-                                .map(index -> new ShardInfo(index, count)));
+                    .map(GatewayData::shards)
+                    .map(Possible::get)
+                    .flatMapMany(count -> Flux.range(0, count)
+                        .map(index -> new ShardInfo(index, count)));
             }
 
             @Override

@@ -16,14 +16,20 @@
  */
 package discord4j.core.spec;
 
-import discord4j.common.json.OverwriteEntity;
+import com.darichey.discordjson.json.ChannelModifyRequest;
+import com.darichey.discordjson.json.ImmutableChannelModifyRequest;
+import com.darichey.discordjson.json.ImmutableOverwriteData;
+import com.darichey.discordjson.json.OverwriteData;
+import com.darichey.discordjson.possible.Possible;
 import discord4j.core.object.PermissionOverwrite;
 import discord4j.core.object.entity.channel.NewsChannel;
 import discord4j.core.object.util.Snowflake;
-import discord4j.rest.json.request.ChannelModifyRequest;
 import reactor.util.annotation.Nullable;
 
+import java.util.List;
+import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Spec used to modify a guild {@link NewsChannel} settings.
@@ -32,7 +38,7 @@ import java.util.Set;
  */
 public class NewsChannelEditSpec implements AuditSpec<ChannelModifyRequest> {
 
-    private final ChannelModifyRequest.Builder requestBuilder = ChannelModifyRequest.builder();
+    private final ImmutableChannelModifyRequest.Builder requestBuilder = ImmutableChannelModifyRequest.builder();
     @Nullable
     private String reason;
 
@@ -43,7 +49,7 @@ public class NewsChannelEditSpec implements AuditSpec<ChannelModifyRequest> {
      * @return This spec.
      */
     public NewsChannelEditSpec setName(String name) {
-        requestBuilder.name(name);
+        requestBuilder.name(Possible.of(name));
         return this;
     }
 
@@ -54,7 +60,7 @@ public class NewsChannelEditSpec implements AuditSpec<ChannelModifyRequest> {
      * @return This spec.
      */
     public NewsChannelEditSpec setPosition(int position) {
-        requestBuilder.position(position);
+        requestBuilder.position(Possible.of(position));
         return this;
     }
 
@@ -65,7 +71,7 @@ public class NewsChannelEditSpec implements AuditSpec<ChannelModifyRequest> {
      * @return This spec.
      */
     public NewsChannelEditSpec setTopic(String topic) {
-        requestBuilder.topic(topic);
+        requestBuilder.topic(Possible.of(topic));
         return this;
     }
 
@@ -76,7 +82,7 @@ public class NewsChannelEditSpec implements AuditSpec<ChannelModifyRequest> {
      * @return This spec.
      */
     public NewsChannelEditSpec setNsfw(boolean nsfw) {
-        requestBuilder.nsfw(nsfw);
+        requestBuilder.nsfw(Possible.of(nsfw));
         return this;
     }
 
@@ -87,12 +93,12 @@ public class NewsChannelEditSpec implements AuditSpec<ChannelModifyRequest> {
      * @return This spec.
      */
     public NewsChannelEditSpec setPermissionOverwrites(Set<? extends PermissionOverwrite> permissionOverwrites) {
-        OverwriteEntity[] raw = permissionOverwrites.stream()
-                .map(o -> new OverwriteEntity(o.getTargetId().asLong(), o.getType().getValue(),
+        List<OverwriteData> raw = permissionOverwrites.stream()
+                .map(o -> ImmutableOverwriteData.of(o.getTargetId().asString(), o.getType().getValue(),
                         o.getAllowed().getRawValue(), o.getDenied().getRawValue()))
-                .toArray(OverwriteEntity[]::new);
+                .collect(Collectors.toList());
 
-        requestBuilder.permissionOverwrites(raw);
+        requestBuilder.permissionOverwrites(Possible.of(raw));
         return this;
     }
 
@@ -103,7 +109,7 @@ public class NewsChannelEditSpec implements AuditSpec<ChannelModifyRequest> {
      * @return This spec.
      */
     public NewsChannelEditSpec setParentId(@Nullable Snowflake parentId) {
-        requestBuilder.parentId(parentId == null ? null : parentId.asLong());
+        requestBuilder.parentId(Possible.of(Optional.ofNullable(parentId).map(Snowflake::asString)));
         return this;
     }
 

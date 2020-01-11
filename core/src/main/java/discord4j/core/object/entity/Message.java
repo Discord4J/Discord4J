@@ -16,14 +16,12 @@
  */
 package discord4j.core.object.entity;
 
+import com.darichey.discordjson.json.MessageData;
+import com.darichey.discordjson.json.UserData;
 import discord4j.common.annotations.Experimental;
-import discord4j.common.json.UserResponse;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.Embed;
 import discord4j.core.object.MessageReference;
-import discord4j.core.object.data.stored.MessageBean;
-import discord4j.core.object.data.stored.ReactionBean;
-import discord4j.core.object.data.stored.UserBean;
 import discord4j.core.object.entity.channel.GuildChannel;
 import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.core.object.reaction.Reaction;
@@ -34,7 +32,6 @@ import discord4j.core.util.EntityUtil;
 import discord4j.core.util.PaginationUtil;
 import discord4j.rest.entity.RestChannel;
 import discord4j.rest.entity.RestMessage;
-import discord4j.rest.json.request.SuppressEmbedsRequest;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
@@ -53,28 +50,36 @@ import java.util.stream.Collectors;
  */
 public final class Message implements Entity {
 
-    /** The maximum amount of characters that can be in the contents of a message. */
+    /**
+     * The maximum amount of characters that can be in the contents of a message.
+     */
     public static final int MAX_CONTENT_LENGTH = 2000;
 
-    /** The gateway associated to this object. */
+    /**
+     * The gateway associated to this object.
+     */
     private final GatewayDiscordClient gateway;
 
-    /** The raw data as represented by Discord. */
-    private final MessageBean data;
+    /**
+     * The raw data as represented by Discord.
+     */
+    private final MessageData data;
 
-    /** A handle to execute REST API operations for this entity. */
+    /**
+     * A handle to execute REST API operations for this entity.
+     */
     private final RestMessage rest;
 
     /**
      * Constructs a {@code Message} with an associated ServiceMediator and Discord data.
      *
      * @param gateway The {@link GatewayDiscordClient} associated to this object, must be non-null.
-     * @param data The raw data as represented by Discord, must be non-null.
+     * @param data    The raw data as represented by Discord, must be non-null.
      */
-    public Message(final GatewayDiscordClient gateway, final MessageBean data) {
+    public Message(final GatewayDiscordClient gateway, final MessageData data) {
         this.gateway = Objects.requireNonNull(gateway);
         this.data = Objects.requireNonNull(data);
-        this.rest = new RestMessage(gateway.getRestClient(), data.getChannelId(), data.getId());
+        this.rest = new RestMessage(gateway.getRestClient(), Long.parseUnsignedLong(data.channelId()), Long.parseUnsignedLong(data.id()));
     }
 
     @Override
@@ -84,7 +89,7 @@ public final class Message implements Entity {
 
     @Override
     public Snowflake getId() {
-        return Snowflake.of(data.getId());
+        return Snowflake.of(data.id());
     }
 
     /**
@@ -98,7 +103,7 @@ public final class Message implements Entity {
      * Return a {@link RestChannel} handle to execute REST API operations on the channel of this message.
      */
     public RestChannel getRestChannel() {
-        return new RestChannel(gateway.getRestClient(), data.getChannelId());
+        return new RestChannel(gateway.getRestClient(), Long.parseUnsignedLong(data.channelId()));
     }
 
     /**
@@ -107,7 +112,7 @@ public final class Message implements Entity {
      * @return The ID of the channel the message was sent in.
      */
     public Snowflake getChannelId() {
-        return Snowflake.of(data.getChannelId());
+        return Snowflake.of(data.channelId());
     }
 
     /**
@@ -126,7 +131,7 @@ public final class Message implements Entity {
      * @return The ID of the webhook that generated this message, if present.
      */
     public Optional<Snowflake> getWebhookId() {
-        return Optional.ofNullable(data.getWebhookId()).map(Snowflake::of);
+        return data.webhookId().toOptional().map(Snowflake::of);
     }
 
     /**
@@ -135,7 +140,8 @@ public final class Message implements Entity {
      * @return The author of this message, if present.
      */
     public Optional<User> getAuthor() {
-        return Optional.ofNullable(data.getAuthor()).map(bean -> new User(gateway, bean));
+        // FIXME: when is this null?
+        return Optional.ofNullable(data.author()).map(bean -> new User(gateway, bean));
     }
 
     /**
@@ -147,9 +153,9 @@ public final class Message implements Entity {
      */
     public Mono<Member> getAuthorAsMember() {
         return Mono.justOrEmpty(getAuthor())
-                .flatMap(author -> getGuild()
-                        .map(Guild::getId)
-                        .flatMap(author::asMember));
+            .flatMap(author -> getGuild()
+                .map(Guild::getId)
+                .flatMap(author::asMember));
     }
 
     /**
@@ -158,8 +164,9 @@ public final class Message implements Entity {
      * @return The contents of the message, if present.
      */
     public Optional<String> getContent() {
+        // FIXME nullability
         // Even though the bean / responses say it's not nullable Discord is being stupid atm
-        return Optional.ofNullable(data.getContent()).filter(content -> !content.isEmpty());
+        return Optional.ofNullable(data.content()).filter(content -> !content.isEmpty());
     }
 
     /**
@@ -168,7 +175,7 @@ public final class Message implements Entity {
      * @return When this message was sent.
      */
     public Instant getTimestamp() {
-        return DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(data.getTimestamp(), Instant::from);
+        return DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(data.timestamp(), Instant::from);
     }
 
     /**
@@ -177,8 +184,8 @@ public final class Message implements Entity {
      * @return When this message was edited, if present.
      */
     public Optional<Instant> getEditedTimestamp() {
-        return Optional.ofNullable(data.getEditedTimestamp())
-                .map(timestamp -> DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(timestamp, Instant::from));
+        return data.editedTimestamp()
+            .map(timestamp -> DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(timestamp, Instant::from));
     }
 
     /**
@@ -187,7 +194,7 @@ public final class Message implements Entity {
      * @return {@code true} if this message was a TTS (Text-To-Speech) message, {@code false} otherwise.
      */
     public boolean isTts() {
-        return data.isTts();
+        return data.tts();
     }
 
     /**
@@ -196,7 +203,7 @@ public final class Message implements Entity {
      * @return {@code true} if this message mentions everyone, {@code false} otherwise.
      */
     public boolean mentionsEveryone() {
-        return data.isMentionEveryone();
+        return data.mentionEveryone();
     }
 
     /**
@@ -205,9 +212,11 @@ public final class Message implements Entity {
      * @return The IDs of the users specifically mentioned in this message.
      */
     public Set<Snowflake> getUserMentionIds() {
-        return Arrays.stream(data.getMentions())
-                .mapToObj(Snowflake::of)
-                .collect(Collectors.toSet());
+        // FIXME we throw away member data here
+        return data.mentions().stream()
+            .map(data -> data.member().user().id())
+            .map(Snowflake::of)
+            .collect(Collectors.toSet());
     }
 
     /**
@@ -226,9 +235,9 @@ public final class Message implements Entity {
      * @return The IDs of the roles specifically mentioned in this message.
      */
     public Set<Snowflake> getRoleMentionIds() {
-        return Arrays.stream(data.getMentionRoles())
-                .mapToObj(Snowflake::of)
-                .collect(Collectors.toSet());
+        return data.mentionRoles().stream()
+            .map(Snowflake::of)
+            .collect(Collectors.toSet());
     }
 
     /**
@@ -239,9 +248,9 @@ public final class Message implements Entity {
      */
     public Flux<Role> getRoleMentions() {
         return Flux.fromIterable(getRoleMentionIds())
-                .flatMap(roleId -> getGuild()
-                        .map(Guild::getId)
-                        .flatMap(guildId -> gateway.getRoleById(guildId, roleId)));
+            .flatMap(roleId -> getGuild()
+                .map(Guild::getId)
+                .flatMap(guildId -> gateway.getRoleById(guildId, roleId)));
     }
 
     /**
@@ -250,9 +259,9 @@ public final class Message implements Entity {
      * @return Any attached files.
      */
     public Set<Attachment> getAttachments() {
-        return Arrays.stream(data.getAttachments())
-                .map(bean -> new Attachment(gateway, bean))
-                .collect(Collectors.toSet());
+        return data.attachments().stream()
+            .map(data -> new Attachment(gateway, data))
+            .collect(Collectors.toSet());
     }
 
     /**
@@ -261,9 +270,9 @@ public final class Message implements Entity {
      * @return Any embedded content.
      */
     public List<Embed> getEmbeds() {
-        return Arrays.stream(data.getEmbeds())
-                .map(bean -> new Embed(gateway, bean))
-                .collect(Collectors.toList());
+        return data.embeds().stream()
+            .map(data -> new Embed(gateway, data))
+            .collect(Collectors.toList());
     }
 
     /**
@@ -272,10 +281,10 @@ public final class Message implements Entity {
      * @return The reactions to this message.
      */
     public Set<Reaction> getReactions() {
-        final ReactionBean[] reactions = data.getReactions();
-        return (reactions == null) ? Collections.emptySet() : Arrays.stream(reactions)
-                .map(bean -> new Reaction(gateway, bean))
-                .collect(Collectors.toSet());
+        return data.reactions().toOptional()
+            .map(reactions -> reactions.stream().map(data -> new Reaction(gateway, data)).collect(Collectors.toSet()))
+            .orElse(Collections.emptySet());
+
     }
 
     /**
@@ -286,15 +295,14 @@ public final class Message implements Entity {
      * If an error is received, it is emitted through the {@code Flux}.
      */
     public Flux<User> getReactors(final ReactionEmoji emoji) {
-        final Function<Map<String, Object>, Flux<UserResponse>> makeRequest = params ->
-                gateway.getRestClient().getChannelService()
-                        .getReactions(getChannelId().asLong(), getId().asLong(),
-                                EntityUtil.getEmojiString(emoji),
-                                params);
+        final Function<Map<String, Object>, Flux<UserData>> makeRequest = params ->
+            gateway.getRestClient().getChannelService()
+                .getReactions(getChannelId().asLong(), getId().asLong(),
+                    EntityUtil.getEmojiString(emoji),
+                    params);
 
-        return PaginationUtil.paginateAfter(makeRequest, UserResponse::getId, 0L, 100)
-                .map(UserBean::new)
-                .map(bean -> new User(gateway, bean));
+        return PaginationUtil.paginateAfter(makeRequest, data -> Long.parseUnsignedLong(data.id()), 0L, 100)
+            .map(data -> new User(gateway, data));
     }
 
     /**
@@ -303,7 +311,7 @@ public final class Message implements Entity {
      * @return {@code true} if this message is pinned, {@code false} otherwise.
      */
     public boolean isPinned() {
-        return data.isPinned();
+        return data.pinned();
     }
 
     /**
@@ -322,8 +330,8 @@ public final class Message implements Entity {
      * @return The {@code MessageReference}, if present.
      */
     public Optional<MessageReference> getMessageReference() {
-        return Optional.ofNullable(data.getMessageReference())
-                .map(bean -> new MessageReference(gateway, bean));
+        return data.messageReference().toOptional()
+            .map(data -> new MessageReference(gateway, data));
     }
 
     /**
@@ -332,10 +340,9 @@ public final class Message implements Entity {
      * @return A {@code EnumSet} with the flags of this message.
      */
     public EnumSet<Flag> getFlags() {
-        if (data.getFlags() != null) {
-            return Flag.of(data.getFlags());
-        }
-        return EnumSet.noneOf(Flag.class);
+        return data.flags().toOptional()
+            .map(Flag::of)
+            .orElse(EnumSet.noneOf(Flag.class));
     }
 
     /**
@@ -354,7 +361,7 @@ public final class Message implements Entity {
      * @return The type of message.
      */
     public Type getType() {
-        return Type.of(data.getType());
+        return Type.of(data.type());
     }
 
     /**
@@ -369,9 +376,9 @@ public final class Message implements Entity {
         spec.accept(mutatedSpec);
 
         return gateway.getRestClient().getChannelService()
-                .editMessage(getChannelId().asLong(), getId().asLong(), mutatedSpec.asRequest())
-                .map(MessageBean::new)
-                .map(bean -> new Message(gateway, bean));
+            .editMessage(getChannelId().asLong(), getId().asLong(), mutatedSpec.asRequest())
+            .map(MessageBean::new)
+            .map(bean -> new Message(gateway, bean));
     }
 
     /**
@@ -393,7 +400,7 @@ public final class Message implements Entity {
      */
     public Mono<Void> delete(@Nullable final String reason) {
         return gateway.getRestClient().getChannelService()
-                .deleteMessage(getChannelId().asLong(), getId().asLong(), reason);
+            .deleteMessage(getChannelId().asLong(), getId().asLong(), reason);
     }
 
     /**
@@ -407,7 +414,7 @@ public final class Message implements Entity {
     @Experimental
     public Mono<Void> suppressEmbeds(final boolean suppress) {
         return gateway.getRestClient().getChannelService()
-                .suppressEmbeds(getChannelId().asLong(), getId().asLong(), new SuppressEmbedsRequest(suppress));
+            .suppressEmbeds(getChannelId().asLong(), getId().asLong(), new SuppressEmbedsRequest(suppress));
     }
 
     /**
@@ -419,21 +426,21 @@ public final class Message implements Entity {
      */
     public Mono<Void> addReaction(final ReactionEmoji emoji) {
         return gateway.getRestClient().getChannelService()
-                .createReaction(getChannelId().asLong(), getId().asLong(), EntityUtil.getEmojiString(emoji));
+            .createReaction(getChannelId().asLong(), getId().asLong(), EntityUtil.getEmojiString(emoji));
     }
 
     /**
      * Requests to remove a reaction from a specified user on this message.
      *
-     * @param emoji The reaction to remove on this message.
+     * @param emoji  The reaction to remove on this message.
      * @param userId The user to remove the reaction on this message.
      * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the reaction from the
      * specified user was removed on this message. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Void> removeReaction(final ReactionEmoji emoji, final Snowflake userId) {
         return gateway.getRestClient().getChannelService()
-                .deleteReaction(getChannelId().asLong(), getId().asLong(), EntityUtil.getEmojiString(emoji),
-                        userId.asLong());
+            .deleteReaction(getChannelId().asLong(), getId().asLong(), EntityUtil.getEmojiString(emoji),
+                userId.asLong());
     }
 
     /**
@@ -445,7 +452,7 @@ public final class Message implements Entity {
      */
     public Mono<Void> removeSelfReaction(final ReactionEmoji emoji) {
         return gateway.getRestClient().getChannelService()
-                .deleteOwnReaction(getChannelId().asLong(), getId().asLong(), EntityUtil.getEmojiString(emoji));
+            .deleteOwnReaction(getChannelId().asLong(), getId().asLong(), EntityUtil.getEmojiString(emoji));
     }
 
     /**
@@ -456,7 +463,7 @@ public final class Message implements Entity {
      */
     public Mono<Void> removeAllReactions() {
         return gateway.getRestClient().getChannelService()
-                .deleteAllReactions(getChannelId().asLong(), getId().asLong());
+            .deleteAllReactions(getChannelId().asLong(), getId().asLong());
     }
 
     /**
@@ -467,7 +474,7 @@ public final class Message implements Entity {
      */
     public Mono<Void> pin() {
         return gateway.getRestClient().getChannelService()
-                .addPinnedMessage(getChannelId().asLong(), getId().asLong());
+            .addPinnedMessage(getChannelId().asLong(), getId().asLong());
     }
 
     /**
@@ -478,7 +485,7 @@ public final class Message implements Entity {
      */
     public Mono<Void> unpin() {
         return gateway.getRestClient().getChannelService()
-                .deletePinnedMessage(getChannelId().asLong(), getId().asLong());
+            .deletePinnedMessage(getChannelId().asLong(), getId().asLong());
     }
 
     @Override
@@ -491,16 +498,24 @@ public final class Message implements Entity {
         return EntityUtil.hashCode(this);
     }
 
-    /** Describes extra features of a message. */
+    /**
+     * Describes extra features of a message.
+     */
     public enum Flag {
 
-        /** This message has been published to subscribed channels (via Channel Following). */
+        /**
+         * This message has been published to subscribed channels (via Channel Following).
+         */
         CROSSPOSTED(0),
 
-        /** This message originated from a message in another channel (via Channel Following). */
+        /**
+         * This message originated from a message in another channel (via Channel Following).
+         */
         IS_CROSSPOST(1),
 
-        /** Do not include any embeds when serializing this message. */
+        /**
+         * Do not include any embeds when serializing this message.
+         */
         SUPPRESS_EMBEDS(2),
 
         /** The source message for this crosspost has been deleted (via Channel Following). */
@@ -509,10 +524,14 @@ public final class Message implements Entity {
         /** This message came from the urgent message system. */
         URGENT(4);
 
-        /** The underlying value as represented by Discord. */
+        /**
+         * The underlying value as represented by Discord.
+         */
         private final int value;
 
-        /** The flag value as represented by Discord. */
+        /**
+         * The flag value as represented by Discord.
+         */
         private final int flag;
 
         /**
@@ -560,46 +579,74 @@ public final class Message implements Entity {
         }
     }
 
-    /** Represents the various types of messages. */
+    /**
+     * Represents the various types of messages.
+     */
     public enum Type {
 
-        /** Unknown type */
+        /**
+         * Unknown type
+         */
         UNKNOWN(-1),
 
-        /** A message created by a user. */
+        /**
+         * A message created by a user.
+         */
         DEFAULT(0),
 
-        /** A message created when a recipient was added to a DM. */
+        /**
+         * A message created when a recipient was added to a DM.
+         */
         RECIPIENT_ADD(1),
 
-        /** A message created when a recipient left a DM. */
+        /**
+         * A message created when a recipient left a DM.
+         */
         RECIPIENT_REMOVE(2),
 
-        /** A message created when a call was started. */
+        /**
+         * A message created when a call was started.
+         */
         CALL(3),
 
-        /** A message created when a channel's name changed. */
+        /**
+         * A message created when a channel's name changed.
+         */
         CHANNEL_NAME_CHANGE(4),
 
-        /** A message created when a channel's icon changed. */
+        /**
+         * A message created when a channel's icon changed.
+         */
         CHANNEL_ICON_CHANGE(5),
 
-        /** A message created when a message was pinned. */
+        /**
+         * A message created when a message was pinned.
+         */
         CHANNEL_PINNED_MESSAGE(6),
 
-        /** A message created when an user joins a guild. */
+        /**
+         * A message created when an user joins a guild.
+         */
         GUILD_MEMBER_JOIN(7),
 
-        /** A message created when an user boost a guild. */
+        /**
+         * A message created when an user boost a guild.
+         */
         USER_PREMIUM_GUILD_SUBSCRIPTION(8),
 
-        /** A message created when an user boost a guild and the guild reach the tier 1. */
+        /**
+         * A message created when an user boost a guild and the guild reach the tier 1.
+         */
         USER_PREMIUM_GUILD_SUBSCRIPTION_TIER_1(9),
 
-        /** A message created when an user boost a guild and the guild reach the tier 2. */
+        /**
+         * A message created when an user boost a guild and the guild reach the tier 2.
+         */
         USER_PREMIUM_GUILD_SUBSCRIPTION_TIER_2(10),
 
-        /** A message created when an user boost a guild and the guild reach the tier 3. */
+        /**
+         * A message created when an user boost a guild and the guild reach the tier 3.
+         */
         USER_PREMIUM_GUILD_SUBSCRIPTION_TIER_3(11),
 
         /**
@@ -608,7 +655,9 @@ public final class Message implements Entity {
          */
         CHANNEL_FOLLOW_ADD(12);
 
-        /** The underlying value as represented by Discord. */
+        /**
+         * The underlying value as represented by Discord.
+         */
         private final int value;
 
         /**
@@ -638,20 +687,34 @@ public final class Message implements Entity {
          */
         public static Type of(final int value) {
             switch (value) {
-                case 0: return DEFAULT;
-                case 1: return RECIPIENT_ADD;
-                case 2: return RECIPIENT_REMOVE;
-                case 3: return CALL;
-                case 4: return CHANNEL_NAME_CHANGE;
-                case 5: return CHANNEL_ICON_CHANGE;
-                case 6: return CHANNEL_PINNED_MESSAGE;
-                case 7: return GUILD_MEMBER_JOIN;
-                case 8: return USER_PREMIUM_GUILD_SUBSCRIPTION;
-                case 9: return USER_PREMIUM_GUILD_SUBSCRIPTION_TIER_1;
-                case 10: return USER_PREMIUM_GUILD_SUBSCRIPTION_TIER_2;
-                case 11: return USER_PREMIUM_GUILD_SUBSCRIPTION_TIER_3;
-                case 12: return CHANNEL_FOLLOW_ADD;
-                default: return UNKNOWN;
+                case 0:
+                    return DEFAULT;
+                case 1:
+                    return RECIPIENT_ADD;
+                case 2:
+                    return RECIPIENT_REMOVE;
+                case 3:
+                    return CALL;
+                case 4:
+                    return CHANNEL_NAME_CHANGE;
+                case 5:
+                    return CHANNEL_ICON_CHANGE;
+                case 6:
+                    return CHANNEL_PINNED_MESSAGE;
+                case 7:
+                    return GUILD_MEMBER_JOIN;
+                case 8:
+                    return USER_PREMIUM_GUILD_SUBSCRIPTION;
+                case 9:
+                    return USER_PREMIUM_GUILD_SUBSCRIPTION_TIER_1;
+                case 10:
+                    return USER_PREMIUM_GUILD_SUBSCRIPTION_TIER_2;
+                case 11:
+                    return USER_PREMIUM_GUILD_SUBSCRIPTION_TIER_3;
+                case 12:
+                    return CHANNEL_FOLLOW_ADD;
+                default:
+                    return UNKNOWN;
             }
         }
     }
@@ -659,7 +722,7 @@ public final class Message implements Entity {
     @Override
     public String toString() {
         return "Message{" +
-                "data=" + data +
-                '}';
+            "data=" + data +
+            '}';
     }
 }

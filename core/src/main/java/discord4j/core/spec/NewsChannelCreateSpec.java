@@ -16,12 +16,14 @@
  */
 package discord4j.core.spec;
 
-import discord4j.common.json.OverwriteEntity;
+import com.darichey.discordjson.json.ChannelCreateRequest;
+import com.darichey.discordjson.json.ImmutableChannelCreateRequest;
+import com.darichey.discordjson.json.ImmutableOverwriteData;
+import com.darichey.discordjson.json.OverwriteData;
 import discord4j.core.object.PermissionOverwrite;
 import discord4j.core.object.entity.channel.Channel;
 import discord4j.core.object.entity.channel.NewsChannel;
 import discord4j.core.object.util.Snowflake;
-import discord4j.rest.json.request.ChannelCreateRequest;
 import reactor.util.annotation.Nullable;
 
 import java.util.Set;
@@ -33,7 +35,7 @@ import java.util.Set;
  */
 public class NewsChannelCreateSpec implements AuditSpec<ChannelCreateRequest> {
 
-    private final ChannelCreateRequest.Builder requestBuilder = ChannelCreateRequest.builder()
+    private final ImmutableChannelCreateRequest.Builder requestBuilder = ImmutableChannelCreateRequest.builder()
             .type(Channel.Type.GUILD_NEWS.getValue());
     @Nullable
     private String reason;
@@ -55,7 +57,7 @@ public class NewsChannelCreateSpec implements AuditSpec<ChannelCreateRequest> {
      * @param topic The channel topic.
      * @return This spec.
      */
-    public NewsChannelCreateSpec setTopic(@Nullable String topic) {
+    public NewsChannelCreateSpec setTopic(String topic) {
         requestBuilder.topic(topic);
         return this;
     }
@@ -67,7 +69,7 @@ public class NewsChannelCreateSpec implements AuditSpec<ChannelCreateRequest> {
      * @return This spec.
      */
     public NewsChannelCreateSpec setPosition(int position) {
-        requestBuilder.setPosition(position);
+        requestBuilder.position(position);
         return this;
     }
 
@@ -78,12 +80,13 @@ public class NewsChannelCreateSpec implements AuditSpec<ChannelCreateRequest> {
      * @return This spec.
      */
     public NewsChannelCreateSpec setPermissionOverwrites(Set<? extends PermissionOverwrite> permissionOverwrites) {
-        OverwriteEntity[] raw = permissionOverwrites.stream()
-                .map(o -> new OverwriteEntity(o.getTargetId().asLong(), o.getType().getValue(),
-                        o.getAllowed().getRawValue(), o.getDenied().getRawValue()))
-                .toArray(OverwriteEntity[]::new);
+//        OverwriteData[] raw = permissionOverwrites.stream()
+//                .map(o -> new OverwriteEntity(o.getTargetId().asLong(), o.getType().getValue(),
+//                        o.getAllowed().getRawValue(), o.getDenied().getRawValue()))
+//                .toArray(OverwriteEntity[]::new);
 
-        requestBuilder.permissionOverwrites(raw);
+//        requestBuilder.permissionOverwrites(permissionOverwrites.stream().map(o -> ImmutableOverwriteData.of()))
+        // FIXME
         return this;
     }
 

@@ -16,13 +16,11 @@
  */
 package discord4j.core.spec;
 
+import com.darichey.discordjson.json.*;
 import discord4j.core.object.Region;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.channel.Channel;
 import discord4j.core.object.util.Image;
-import discord4j.rest.json.request.GuildCreateRequest;
-import discord4j.rest.json.request.PartialChannelRequest;
-import discord4j.rest.json.request.RoleCreateRequest;
 import reactor.util.annotation.Nullable;
 
 import java.util.ArrayList;
@@ -47,8 +45,9 @@ public class GuildCreateSpec implements Spec<GuildCreateRequest> {
     private String icon;
     private int verificationLevel;
     private int defaultMessageNotificationLevel;
+    private int explicitContentFilter;
     private final List<RoleCreateRequest> roles = new ArrayList<>();
-    private final List<PartialChannelRequest> channels = new ArrayList<>();
+    private final List<PartialChannelCreateRequest> channels = new ArrayList<>();
 
     /**
      * Sets the name for the created {@link Guild}.
@@ -143,15 +142,13 @@ public class GuildCreateSpec implements Spec<GuildCreateRequest> {
      * @return This spec.
      */
     public GuildCreateSpec addChannel(String name, Channel.Type type) {
-        channels.add(new PartialChannelRequest(name, type.getValue()));
+        channels.add(ImmutablePartialChannelCreateRequest.of(name, type.getValue()));
         return this;
     }
 
     @Override
     public GuildCreateRequest asRequest() {
-        RoleCreateRequest[] roles = this.roles.toArray(new RoleCreateRequest[this.roles.size()]);
-        PartialChannelRequest[] channels = this.channels.toArray(new PartialChannelRequest[this.channels.size()]);
-        return new GuildCreateRequest(name, region, icon, verificationLevel, defaultMessageNotificationLevel, roles,
-                channels);
+        // FIXME: allow for explicit content filter level to be set
+        return ImmutableGuildCreateRequest.of(name, region, icon, verificationLevel, defaultMessageNotificationLevel, 0, roles, channels);
     }
 }

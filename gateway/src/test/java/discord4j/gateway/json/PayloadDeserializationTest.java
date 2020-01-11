@@ -16,11 +16,12 @@
  */
 package discord4j.gateway.json;
 
+import com.darichey.discordjson.json.gateway.*;
+import com.darichey.discordjson.possible.PossibleModule;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
-import discord4j.common.jackson.PossibleModule;
 import discord4j.common.jackson.UnknownPropertyHandler;
 import org.junit.Before;
 import org.junit.Test;
@@ -150,7 +151,7 @@ public class PayloadDeserializationTest {
 
         assertEquals(0, payload.getOp().getRawOp());
         assertNotNull(payload.getData());
-        assertEquals(6, payload.getData().getVersion());
+        assertEquals(6, payload.getData().v());
     }
 
     @Test
@@ -165,7 +166,7 @@ public class PayloadDeserializationTest {
 
         assertEquals(1, payload.getOp().getRawOp());
         assertNotNull(payload.getData());
-        assertEquals(251, payload.getData().getSeq());
+        assertEquals(251, payload.getData().seq());
     }
 
     @Test
@@ -194,7 +195,7 @@ public class PayloadDeserializationTest {
 
         assertEquals(9, payload.getOp().getRawOp());
         assertNotNull(payload.getData());
-        assertEquals(false, payload.getData().isResumable());
+        assertEquals(false, payload.getData().resumable());
     }
 
     @Test
@@ -212,7 +213,7 @@ public class PayloadDeserializationTest {
 
         assertEquals(10, payload.getOp().getRawOp());
         assertNotNull(payload.getData());
-        assertEquals(45000, payload.getData().getHeartbeatInterval());
+        assertEquals(45000, payload.getData().heartbeatInterval());
     }
 
     @Test

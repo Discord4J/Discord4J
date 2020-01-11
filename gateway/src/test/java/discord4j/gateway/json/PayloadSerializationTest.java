@@ -16,18 +16,21 @@
  */
 package discord4j.gateway.json;
 
+import com.darichey.discordjson.json.gateway.*;
+import com.darichey.discordjson.possible.Possible;
+import com.darichey.discordjson.possible.PossibleModule;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import discord4j.common.jackson.Possible;
-import discord4j.common.jackson.PossibleModule;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.util.Optional;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 public class PayloadSerializationTest {
 
@@ -46,7 +49,7 @@ public class PayloadSerializationTest {
     public void testHeartbeat() throws IOException {
         String expected = "{\"op\":1,\"d\":251,\"s\":null,\"t\":null}";
 
-        GatewayPayload<Heartbeat> payload = GatewayPayload.heartbeat(new Heartbeat(251));
+        GatewayPayload<Heartbeat> payload = GatewayPayload.heartbeat(ImmutableHeartbeat.of(251));
         String result = mapper.writeValueAsString(payload);
 
         assertEquals(mapper.readTree(expected), mapper.readTree(result));
@@ -71,8 +74,8 @@ public class PayloadSerializationTest {
                 "    \"t\":null\n" +
                 "}").replaceAll("\\s+", "");
 
-        Identify identify = new Identify("my_token", new IdentifyProperties("linux", "disco", "disco"), true, 250,
-                Possible.absent(), Possible.absent(), true);
+        Identify identify = ImmutableIdentify.of("my_token", ImmutableIdentifyProperties.of("linux", "disco", "disco"),
+            Possible.of(true), 250, Possible.absent(), Possible.absent(), Possible.of(true));
         GatewayPayload<Identify> payload = GatewayPayload.identify(identify);
         String result = mapper.writeValueAsString(payload);
 
@@ -96,12 +99,14 @@ public class PayloadSerializationTest {
                 "    \"t\":null\n" +
                 "}").replaceAll("\\s+", "");
 
-        StatusUpdate statusUpdate = new StatusUpdate(91879201L,
-                new StatusUpdate.Game("some_game", 0, Possible.absent()), "online", false);
-        GatewayPayload<StatusUpdate> payload = GatewayPayload.statusUpdate(statusUpdate);
-        String result = mapper.writeValueAsString(payload);
-
-        assertEquals(expected, result);
+//        StatusUpdate statusUpdate = new StatusUpdate(91879201L,
+//                new StatusUpdate.Game("some_game", 0, Possible.absent()), "online", false);
+//        GatewayPayload<StatusUpdate> payload = GatewayPayload.statusUpdate(statusUpdate);
+//        String result = mapper.writeValueAsString(payload);
+//
+//        assertEquals(expected, result);
+        // FIXME
+        fail();
     }
 
     @Test
@@ -118,7 +123,7 @@ public class PayloadSerializationTest {
                 "    \"t\":null\n" +
                 "}").replaceAll("\\s+", "");
 
-        VoiceStateUpdate voiceStateUpdate = new VoiceStateUpdate(41771983423143937L, 127121515262115840L, false, false);
+        VoiceStateUpdate voiceStateUpdate = ImmutableVoiceStateUpdate.of("41771983423143937", Optional.of("127121515262115840"), false, false);
         GatewayPayload<VoiceStateUpdate> payload = GatewayPayload.voiceStateUpdate(voiceStateUpdate);
         String result = mapper.writeValueAsString(payload);
 
@@ -143,7 +148,7 @@ public class PayloadSerializationTest {
                 "    \"t\":null\n" +
                 "}").replaceAll("\\s+", "");
 
-        Resume resume = new Resume("randomstring", "evenmorerandomstring", 1337);
+        Resume resume = ImmutableResume.of("randomstring", "evenmorerandomstring", 1337);
         GatewayPayload<Resume> payload = GatewayPayload.resume(resume);
         String result = mapper.writeValueAsString(payload);
 
@@ -163,7 +168,7 @@ public class PayloadSerializationTest {
                 "    \"t\":null\n" +
                 "}").replaceAll("\\s+", "");
 
-        RequestGuildMembers requestGuildMembers = new RequestGuildMembers(41771983444115456L, "", 0);
+        RequestGuildMembers requestGuildMembers = ImmutableRequestGuildMembers.of("41771983444115456", Possible.absent(), 0, Possible.absent(), Possible.absent());
         GatewayPayload<RequestGuildMembers> payload = GatewayPayload.requestGuildMembers(requestGuildMembers);
         String result = mapper.writeValueAsString(payload);
 

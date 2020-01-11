@@ -16,13 +16,17 @@
  */
 package discord4j.core.spec;
 
+import com.darichey.discordjson.json.GuildMemberModifyRequest;
+import com.darichey.discordjson.json.ImmutableGuildMemberModifyRequest;
+import com.darichey.discordjson.possible.Possible;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.util.Permission;
 import discord4j.core.object.util.Snowflake;
-import discord4j.rest.json.request.GuildMemberModifyRequest;
 import reactor.util.annotation.Nullable;
 
+import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Spec used to modify guild members.
@@ -31,7 +35,7 @@ import java.util.Set;
  */
 public class GuildMemberEditSpec implements AuditSpec<GuildMemberModifyRequest> {
 
-    private final GuildMemberModifyRequest.Builder builder = GuildMemberModifyRequest.builder();
+    private final ImmutableGuildMemberModifyRequest.Builder builder = ImmutableGuildMemberModifyRequest.builder();
     @Nullable
     private String reason;
 
@@ -43,7 +47,7 @@ public class GuildMemberEditSpec implements AuditSpec<GuildMemberModifyRequest> 
      * @return This spec.
      */
     public GuildMemberEditSpec setNewVoiceChannel(@Nullable Snowflake channel) {
-        builder.channelId(channel == null ? null : channel.asLong());
+        builder.channelId(Optional.ofNullable(channel).map(Snowflake::asString));
         return this;
     }
 
@@ -55,7 +59,7 @@ public class GuildMemberEditSpec implements AuditSpec<GuildMemberModifyRequest> 
      * @return This spec.
      */
     public GuildMemberEditSpec setMute(boolean mute) {
-        builder.mute(mute);
+        builder.mute(Possible.of(mute));
         return this;
     }
 
@@ -67,7 +71,7 @@ public class GuildMemberEditSpec implements AuditSpec<GuildMemberModifyRequest> 
      * @return This spec.
      */
     public GuildMemberEditSpec setDeafen(boolean deaf) {
-        builder.deaf(deaf);
+        builder.deaf(Possible.of(deaf));
         return this;
     }
 
@@ -78,7 +82,7 @@ public class GuildMemberEditSpec implements AuditSpec<GuildMemberModifyRequest> 
      * @return This spec.
      */
     public GuildMemberEditSpec setNickname(@Nullable String nickname) {
-        builder.nick(nickname);
+        builder.nick(nickname == null ? Possible.absent() : Possible.of(nickname));
         return this;
     }
 
@@ -90,7 +94,7 @@ public class GuildMemberEditSpec implements AuditSpec<GuildMemberModifyRequest> 
      * @return This spec.
      */
     public GuildMemberEditSpec setRoles(Set<Snowflake> roles) {
-        builder.roles(roles.stream().mapToLong(Snowflake::asLong).toArray());
+        builder.roles(Possible.of(roles.stream().map(Snowflake::asString).collect(Collectors.toList())));
         return this;
     }
 

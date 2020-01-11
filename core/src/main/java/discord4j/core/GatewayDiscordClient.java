@@ -17,17 +17,13 @@
 
 package discord4j.core;
 
+import com.darichey.discordjson.json.ChannelData;
 import discord4j.common.JacksonResources;
 import discord4j.common.ReactorResources;
 import discord4j.core.event.EventDispatcher;
 import discord4j.core.event.domain.Event;
 import discord4j.core.object.Invite;
 import discord4j.core.object.Region;
-import discord4j.core.object.data.ApplicationInfoBean;
-import discord4j.core.object.data.InviteBean;
-import discord4j.core.object.data.RegionBean;
-import discord4j.core.object.data.WebhookBean;
-import discord4j.core.object.data.stored.*;
 import discord4j.core.object.entity.*;
 import discord4j.core.object.entity.channel.Channel;
 import discord4j.core.object.presence.Presence;
@@ -43,7 +39,6 @@ import discord4j.gateway.GatewayClientGroup;
 import discord4j.gateway.json.GatewayPayload;
 import discord4j.gateway.json.ShardGatewayPayload;
 import discord4j.rest.RestClient;
-import discord4j.rest.json.response.UserGuildResponse;
 import discord4j.store.api.util.LongLongTuple2;
 import discord4j.voice.VoiceConnectionFactory;
 import org.reactivestreams.Publisher;
@@ -181,12 +176,11 @@ public class GatewayDiscordClient {
      * supplied ID. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Channel> getChannelById(final Snowflake channelId) {
-        final Mono<ChannelBean> channel = gatewayResources.getStateView().getChannelStore()
+        final Mono<ChannelData> channel = gatewayResources.getStateView().getChannelStore()
                 .find(channelId.asLong());
 
-        final Mono<ChannelBean> rest = getRestClient().getChannelService()
-                .getChannel(channelId.asLong())
-                .map(ChannelBean::new);
+        final Mono<ChannelData> rest = getRestClient().getChannelService()
+                .getChannel(channelId.asLong());
 
         return channel
                 .switchIfEmpty(rest)

@@ -16,6 +16,7 @@
  */
 package discord4j.core;
 
+import com.darichey.discordjson.json.*;
 import discord4j.core.event.EventDispatcher;
 import discord4j.core.object.Invite;
 import discord4j.core.object.Region;
@@ -28,8 +29,6 @@ import discord4j.core.spec.UserEditSpec;
 import discord4j.core.util.PaginationUtil;
 import discord4j.gateway.GatewayOptions;
 import discord4j.rest.entity.*;
-import discord4j.rest.entity.data.*;
-import discord4j.rest.json.response.UserGuildResponse;
 import discord4j.rest.request.RouterOptions;
 import discord4j.store.api.service.StoreService;
 import reactor.core.publisher.Flux;
@@ -190,8 +189,7 @@ public final class DiscordClient {
      */
     public Mono<ApplicationInfoData> getApplicationInfo() {
         return coreResources.getRestClient().getApplicationService()
-                .getCurrentApplicationInfo()
-                .map(ApplicationInfoData::new);
+                .getCurrentApplicationInfo();
     }
 
     /**
@@ -200,13 +198,12 @@ public final class DiscordClient {
      * @return A {@link Flux} that continually emits the {@link Guild guilds} that the current client is in. If an error
      * is received, it is emitted through the {@code Flux}.
      */
-    public Flux<UserGuildData> getGuilds() {
-        final Function<Map<String, Object>, Flux<UserGuildResponse>> makeRequest = params ->
+    public Flux<GuildData> getGuilds() {
+        final Function<Map<String, Object>, Flux<GuildData>> makeRequest = params ->
                 coreResources.getRestClient().getUserService()
                         .getCurrentUserGuilds(params);
 
-        return PaginationUtil.paginateAfter(makeRequest, UserGuildResponse::getId, 0L, 100)
-                .map(UserGuildData::new);
+        return PaginationUtil.paginateAfter(makeRequest, data -> Long.parseUnsignedLong(data.id()), 0L, 100);
     }
 
     /**
@@ -216,8 +213,7 @@ public final class DiscordClient {
      * received, it is emitted through the {@code Flux}.
      */
     public Flux<RegionData> getRegions() {
-        return coreResources.getRestClient().getVoiceService().getVoiceRegions()
-                .map(RegionData::new);
+        return coreResources.getRestClient().getVoiceService().getVoiceRegions();
     }
 
     /**
@@ -228,8 +224,7 @@ public final class DiscordClient {
      */
     public Mono<UserData> getSelf() {
         return coreResources.getRestClient().getUserService()
-                .getCurrentUser()
-                .map(UserData::new);
+                .getCurrentUser();
     }
 
     /**
@@ -244,8 +239,7 @@ public final class DiscordClient {
         spec.accept(mutatedSpec);
 
         return coreResources.getRestClient().getGuildService()
-                .createGuild(mutatedSpec.asRequest())
-                .map(GuildData::new);
+                .createGuild(mutatedSpec.asRequest());
     }
 
     /**
@@ -257,8 +251,7 @@ public final class DiscordClient {
      */
     public Mono<InviteData> getInvite(final String inviteCode) {
         return coreResources.getRestClient().getInviteService()
-                .getInvite(inviteCode)
-                .map(InviteData::new);
+                .getInvite(inviteCode);
     }
 
     /**
@@ -273,8 +266,7 @@ public final class DiscordClient {
         spec.accept(mutatedSpec);
 
         return coreResources.getRestClient().getUserService()
-                .modifyCurrentUser(mutatedSpec.asRequest())
-                .map(UserData::new);
+                .modifyCurrentUser(mutatedSpec.asRequest());
     }
 
     /**

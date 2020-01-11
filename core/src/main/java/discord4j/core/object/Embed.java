@@ -16,8 +16,8 @@
  */
 package discord4j.core.object;
 
+import com.darichey.discordjson.json.*;
 import discord4j.core.GatewayDiscordClient;
-import discord4j.core.object.data.stored.embed.*;
 
 import java.awt.*;
 import java.time.Instant;
@@ -49,7 +49,7 @@ public final class Embed implements DiscordObject {
     private final GatewayDiscordClient gateway;
 
     /** The raw data as represented by Discord. */
-    private final EmbedBean data;
+    private final EmbedData data;
 
     /**
      * Constructs an {@code Embed} with an associated ServiceMediator and Discord data.
@@ -57,7 +57,7 @@ public final class Embed implements DiscordObject {
      * @param gateway The {@link GatewayDiscordClient} associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
      */
-    public Embed(final GatewayDiscordClient gateway, final EmbedBean data) {
+    public Embed(final GatewayDiscordClient gateway, final EmbedData data) {
         this.gateway = Objects.requireNonNull(gateway);
         this.data = Objects.requireNonNull(data);
     }
@@ -73,7 +73,7 @@ public final class Embed implements DiscordObject {
      * @return The title of the embed, if present.
      */
     public Optional<String> getTitle() {
-        return Optional.ofNullable(data.getTitle());
+        return data.title().toOptional();
     }
 
     /**
@@ -82,7 +82,8 @@ public final class Embed implements DiscordObject {
      * @return The type of embed, if present.
      */
     public Type getType() {
-        return Type.of(data.getType());
+        // FIXME is this actually Possible?
+        return Type.of(data.type().get());
     }
 
     /**
@@ -91,7 +92,7 @@ public final class Embed implements DiscordObject {
      * @return The description of the embed, if present.
      */
     public Optional<String> getDescription() {
-        return Optional.ofNullable(data.getDescription());
+        return data.description().toOptional();
     }
 
     /**
@@ -100,7 +101,7 @@ public final class Embed implements DiscordObject {
      * @return The URL of the embed, if present.
      */
     public Optional<String> getUrl() {
-        return Optional.ofNullable(data.getUrl());
+        return data.url().toOptional();
     }
 
     /**
@@ -109,7 +110,7 @@ public final class Embed implements DiscordObject {
      * @return The timestamp of the embed content, if present.
      */
     public Optional<Instant> getTimestamp() {
-        return Optional.ofNullable(data.getTimestamp())
+        return data.timestamp().toOptional()
                 .map(timestamp -> DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(timestamp, Instant::from));
     }
 
@@ -119,7 +120,7 @@ public final class Embed implements DiscordObject {
      * @return The color of the embed, if present.
      */
     public Optional<Color> getColor() {
-        return Optional.ofNullable(data.getColor()).map(color -> new Color(color, true));
+        return data.color().toOptional().map(color -> new Color(color, true));
     }
 
     /**
@@ -128,7 +129,7 @@ public final class Embed implements DiscordObject {
      * @return The footer information, if present.
      */
     public Optional<Footer> getFooter() {
-        return Optional.ofNullable(data.getFooter()).map(Footer::new);
+        return data.footer().toOptional().map(Footer::new);
     }
 
     /**
@@ -137,7 +138,7 @@ public final class Embed implements DiscordObject {
      * @return The image information, if present.
      */
     public Optional<Image> getImage() {
-        return Optional.ofNullable(data.getImage()).map(Image::new);
+        return data.image().toOptional().map(Image::new);
     }
 
     /**
@@ -146,7 +147,7 @@ public final class Embed implements DiscordObject {
      * @return The thumbnail information, if present.
      */
     public Optional<Thumbnail> getThumbnail() {
-        return Optional.ofNullable(data.getThumbnail()).map(Thumbnail::new);
+        return data.thumbnail().toOptional().map(Thumbnail::new);
     }
 
     /**
@@ -155,7 +156,7 @@ public final class Embed implements DiscordObject {
      * @return The video information, if present.
      */
     public Optional<Video> getVideo() {
-        return Optional.ofNullable(data.getVideo()).map(Video::new);
+        return data.video().toOptional().map(Video::new);
     }
 
     /**
@@ -164,7 +165,7 @@ public final class Embed implements DiscordObject {
      * @return The provider information, if present.
      */
     public Optional<Provider> getProvider() {
-        return Optional.ofNullable(data.getProvider()).map(Provider::new);
+        return data.provider().toOptional().map(Provider::new);
     }
 
     /**
@@ -173,7 +174,7 @@ public final class Embed implements DiscordObject {
      * @return The author information, if present.
      */
     public Optional<Author> getAuthor() {
-        return Optional.ofNullable(data.getAuthor()).map(Author::new);
+        return data.author().toOptional().map(Author::new);
     }
 
     /**
@@ -182,10 +183,9 @@ public final class Embed implements DiscordObject {
      * @return The field information.
      */
     public List<Field> getFields() {
-        final EmbedFieldBean[] fields = data.getFields();
-        return (fields == null) ? Collections.emptyList() : Arrays.stream(fields)
-                .map(Field::new)
-                .collect(Collectors.toList());
+        return data.fields().toOptional()
+            .map(fields -> fields.stream().map(Field::new).collect(Collectors.toList()))
+            .orElse(Collections.emptyList());
     }
 
     /** Represents the various types of embeds. */
@@ -252,14 +252,14 @@ public final class Embed implements DiscordObject {
         public static final int MAX_TEXT_LENGTH = 2048;
 
         /** The raw data as represented by Discord. */
-        private final EmbedFooterBean data;
+        private final EmbedFooterData data;
 
         /**
          * Constructs a {@code Footer} with data as represented by Discord.
          *
          * @param data The raw data as represented by Discord, must be non-null.
          */
-        private Footer(final EmbedFooterBean data) {
+        private Footer(final EmbedFooterData data) {
             this.data = Objects.requireNonNull(data);
         }
 
@@ -278,7 +278,7 @@ public final class Embed implements DiscordObject {
          * @return The footer text.
          */
         public String getText() {
-            return data.getText();
+            return data.text();
         }
 
         /**
@@ -287,7 +287,8 @@ public final class Embed implements DiscordObject {
          * @return The URL of the footer icon (only supports http(s) and attachments).
          */
         public String getIconUrl() {
-            return data.getIconUrl();
+            // FIXME: is this actually Possible?
+            return data.iconUrl().get();
         }
 
         /**
@@ -296,7 +297,8 @@ public final class Embed implements DiscordObject {
          * @return A proxied URL of the footer icon.
          */
         public String getProxyIconUrl() {
-            return data.getProxyIconUrl();
+            // FIXME: is this actually Possible?
+            return data.proxyIconUrl().get();
         }
     }
 
@@ -304,14 +306,14 @@ public final class Embed implements DiscordObject {
     public final class Image {
 
         /** The raw data as represented by Discord. */
-        private final EmbedImageBean data;
+        private final EmbedImageData data;
 
         /**
          * Constructs an {@code Image} with data as represented by Discord.
          *
          * @param data The raw data as represented by Discord, must be non-null.
          */
-        private Image(final EmbedImageBean data) {
+        private Image(final EmbedImageData data) {
             this.data = Objects.requireNonNull(data);
         }
 
@@ -330,7 +332,8 @@ public final class Embed implements DiscordObject {
          * @return The source URL of the image (only supports http(s) and attachments).
          */
         public String getUrl() {
-            return data.getUrl();
+            // FIXME: is this actually Possible?
+            return data.url().get();
         }
 
         /**
@@ -339,7 +342,8 @@ public final class Embed implements DiscordObject {
          * @return A proxied URL of the image.
          */
         public String getProxyUrl() {
-            return data.getProxyUrl();
+            // FIXME: is this actually Possible?
+            return data.proxyUrl().get();
         }
 
         /**
@@ -348,7 +352,8 @@ public final class Embed implements DiscordObject {
          * @return The height of the image.
          */
         public int getHeight() {
-            return data.getHeight();
+            // FIXME: is this actually Possible?
+            return data.height().get();
         }
 
         /**
@@ -357,7 +362,8 @@ public final class Embed implements DiscordObject {
          * @return The width of the image.
          */
         public int getWidth() {
-            return data.getWidth();
+            // FIXME: is this actually Possible?
+            return data.width().get();
         }
     }
 
@@ -365,14 +371,14 @@ public final class Embed implements DiscordObject {
     public final class Thumbnail {
 
         /** The raw data as represented by Discord. */
-        private final EmbedThumbnailBean data;
+        private final EmbedThumbnailData data;
 
         /**
          * Constructs a {@code Thumbnail} with data as represented by Discord.
          *
          * @param data The raw data as represented by Discord, must be non-null.
          */
-        private Thumbnail(final EmbedThumbnailBean data) {
+        private Thumbnail(final EmbedThumbnailData data) {
             this.data = Objects.requireNonNull(data);
         }
 
@@ -391,7 +397,8 @@ public final class Embed implements DiscordObject {
          * @return The source URL of the thumbnail (only supports http(s) and attachments).
          */
         public String getUrl() {
-            return data.getUrl();
+            // FIXME: is this actually Possible?
+            return data.url().get();
         }
 
         /**
@@ -400,7 +407,8 @@ public final class Embed implements DiscordObject {
          * @return A proxied URL of the thumbnail.
          */
         public String getProxyUrl() {
-            return data.getProxyUrl();
+            // FIXME: is this actually Possible?
+            return data.proxyUrl().get();
         }
 
         /**
@@ -409,7 +417,8 @@ public final class Embed implements DiscordObject {
          * @return The height of the thumbnail.
          */
         public int getHeight() {
-            return data.getHeight();
+            // FIXME: is this actually Possible?
+            return data.height().get();
         }
 
         /**
@@ -418,7 +427,8 @@ public final class Embed implements DiscordObject {
          * @return The width of the thumbnail.
          */
         public int getWidth() {
-            return data.getWidth();
+            // FIXME: is this actually Possible?
+            return data.width().get();
         }
     }
 
@@ -426,14 +436,14 @@ public final class Embed implements DiscordObject {
     public final class Video {
 
         /** The raw data as represented by Discord. */
-        private final EmbedVideoBean data;
+        private final EmbedVideoData data;
 
         /**
          * Constructs a {@code Video} with data as represented by Discord.
          *
          * @param data The raw data as represented by Discord, must be non-null.
          */
-        private Video(final EmbedVideoBean data) {
+        private Video(final EmbedVideoData data) {
             this.data = Objects.requireNonNull(data);
         }
 
@@ -452,16 +462,8 @@ public final class Embed implements DiscordObject {
          * @return The source URL of the video.
          */
         public String getUrl() {
-            return data.getUrl();
-        }
-
-        /**
-         * Gets a proxied source URL of the video.
-         *
-         * @return A proxied source URL of the video.
-         */
-        public String getProxyUrl() {
-            return data.getProxyUrl();
+            // FIXME: is this actually Possible?
+            return data.url().get();
         }
 
         /**
@@ -470,7 +472,8 @@ public final class Embed implements DiscordObject {
          * @return The height of the video.
          */
         public int getHeight() {
-            return data.getHeight();
+            // FIXME: is this actually Possible?
+            return data.height().get();
         }
 
         /**
@@ -479,7 +482,8 @@ public final class Embed implements DiscordObject {
          * @return The width of the video.
          */
         public int getWidth() {
-            return data.getWidth();
+            // FIXME: is this actually Possible?
+            return data.width().get();
         }
     }
 
@@ -487,14 +491,14 @@ public final class Embed implements DiscordObject {
     public final class Provider {
 
         /** The raw data as represented by Discord. */
-        private final EmbedProviderBean data;
+        private final EmbedProviderData data;
 
         /**
          * Constructs a {@code Provider} with data as represented by Discord.
          *
          * @param data The raw data as represented by Discord, must be non-null.
          */
-        private Provider(final EmbedProviderBean data) {
+        private Provider(final EmbedProviderData data) {
             this.data = Objects.requireNonNull(data);
         }
 
@@ -513,7 +517,8 @@ public final class Embed implements DiscordObject {
          * @return The name of the provider.
          */
         public String getName() {
-            return data.getName();
+            // FIXME: is this actually Possible?
+            return data.name().get();
         }
 
         /**
@@ -522,7 +527,8 @@ public final class Embed implements DiscordObject {
          * @return The URL of the provider.
          */
         public String getUrl() {
-            return data.getUrl();
+            // FIXME: is this actually Possible?
+            return data.url().get();
         }
     }
 
@@ -533,14 +539,14 @@ public final class Embed implements DiscordObject {
         public static final int MAX_NAME_LENGTH = 256;
 
         /** The raw data as represented by Discord. */
-        private final EmbedAuthorBean data;
+        private final EmbedAuthorData data;
 
         /**
          * Constructs an {@code Author} with data as represented by Discord.
          *
          * @param data The raw data as represented by Discord, must be non-null.
          */
-        private Author(final EmbedAuthorBean data) {
+        private Author(final EmbedAuthorData data) {
             this.data = Objects.requireNonNull(data);
         }
 
@@ -559,7 +565,8 @@ public final class Embed implements DiscordObject {
          * @return The name of the author.
          */
         public String getName() {
-            return data.getName();
+            // FIXME: is this actually Possible?
+            return data.name().get();
         }
 
         /**
@@ -568,7 +575,8 @@ public final class Embed implements DiscordObject {
          * @return The URL of the author.
          */
         public String getUrl() {
-            return data.getUrl();
+            // FIXME: is this actually Possible?
+            return data.url().get();
         }
 
         /**
@@ -577,7 +585,8 @@ public final class Embed implements DiscordObject {
          * @return The URL of the author icon (only supports http(s) and attachments).
          */
         public String getIconUrl() {
-            return data.getIconUrl();
+            // FIXME: is this actually Possible?
+            return data.iconUrl().get();
         }
 
         /**
@@ -586,7 +595,8 @@ public final class Embed implements DiscordObject {
          * @return A proxied URL of the author icon.
          */
         public String getProxyIconUrl() {
-            return data.getProxyIconUrl();
+            // FIXME: is this actually Possible?
+            return data.proxyIconUrl().get();
         }
     }
 
@@ -600,14 +610,14 @@ public final class Embed implements DiscordObject {
         public static final int MAX_VALUE_LENGTH = 1024;
 
         /** The raw data as represented by Discord. */
-        private final EmbedFieldBean data;
+        private final EmbedFiledData data;
 
         /**
          * Constructs a {@code Field} with data as represented by Discord.
          *
          * @param data The raw data as represented by Discord, must be non-null.
          */
-        private Field(final EmbedFieldBean data) {
+        private Field(final EmbedFiledData data) {
             this.data = Objects.requireNonNull(data);
         }
 
@@ -626,7 +636,7 @@ public final class Embed implements DiscordObject {
          * @return The name of the field.
          */
         public String getName() {
-            return data.getName();
+            return data.name();
         }
 
         /**
@@ -635,7 +645,7 @@ public final class Embed implements DiscordObject {
          * @return The value of the field.
          */
         public String getValue() {
-            return data.getValue();
+            return data.value();
         }
 
         /**
@@ -644,7 +654,8 @@ public final class Embed implements DiscordObject {
          * @return {@code true} if this field should display inline, {@code false} otherwise.
          */
         public boolean isInline() {
-            return data.isInline();
+            // FIXME: is this actually Possible?
+            return data.inline().get();
         }
     }
 

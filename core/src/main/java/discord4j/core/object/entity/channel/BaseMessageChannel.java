@@ -16,10 +16,10 @@
  */
 package discord4j.core.object.entity.channel;
 
-import discord4j.common.json.MessageResponse;
+import com.darichey.discordjson.json.ChannelData;
+import com.darichey.discordjson.json.MessageData;
+import com.darichey.discordjson.possible.Possible;
 import discord4j.core.GatewayDiscordClient;
-import discord4j.core.object.data.stored.ChannelBean;
-import discord4j.core.object.data.stored.MessageBean;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.util.Snowflake;
 import discord4j.core.spec.MessageCreateSpec;
@@ -46,13 +46,13 @@ class BaseMessageChannel extends BaseChannel implements MessageChannel {
      * @param gateway The {@link GatewayDiscordClient} associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
      */
-    BaseMessageChannel(final GatewayDiscordClient gateway, final ChannelBean data) {
+    BaseMessageChannel(final GatewayDiscordClient gateway, final ChannelData data) {
         super(gateway, data);
     }
 
     @Override
     public final Optional<Snowflake> getLastMessageId() {
-        return Optional.ofNullable(getData().getLastMessageId()).map(Snowflake::of);
+        return Possible.flatOpt(getData().lastMessageId()).map(Snowflake::of);
     }
 
     @Override
@@ -62,7 +62,7 @@ class BaseMessageChannel extends BaseChannel implements MessageChannel {
 
     @Override
     public final Optional<Instant> getLastPinTimestamp() {
-        return Optional.ofNullable(getData().getLastPinTimestamp())
+        return getData().lastPinTimestamp().toOptional()
                 .map(timestamp -> DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(timestamp, Instant::from));
     }
 
@@ -72,8 +72,7 @@ class BaseMessageChannel extends BaseChannel implements MessageChannel {
         spec.accept(mutatedSpec);
 
         return getRestChannel().createMessage(mutatedSpec.asRequest())
-                .map(MessageBean::new)
-                .map(bean -> new Message(getClient(), bean));
+                .map(data -> new Message(getClient(), data));
     }
 
     @Override
@@ -98,24 +97,22 @@ class BaseMessageChannel extends BaseChannel implements MessageChannel {
 
     @Override
     public final Flux<Message> getMessagesBefore(final Snowflake messageId) {
-        final Function<Map<String, Object>, Flux<MessageResponse>> doRequest = params ->
+        final Function<Map<String, Object>, Flux<MessageData>> doRequest = params ->
                 getClient().getRestClient().getChannelService()
                         .getMessages(getId().asLong(), params);
 
-        return PaginationUtil.paginateBefore(doRequest, MessageResponse::getId, messageId.asLong(), 100)
-                .map(MessageBean::new)
-                .map(bean -> new Message(getClient(), bean));
+        return PaginationUtil.paginateBefore(doRequest, data -> Long.parseUnsignedLong(data.id()), messageId.asLong(), 100)
+                .map(data -> new Message(getClient(), data));
     }
 
     @Override
     public final Flux<Message> getMessagesAfter(final Snowflake messageId) {
-        final Function<Map<String, Object>, Flux<MessageResponse>> doRequest = params ->
+        final Function<Map<String, Object>, Flux<MessageData>> doRequest = params ->
                 getClient().getRestClient().getChannelService()
                         .getMessages(getId().asLong(), params);
 
-        return PaginationUtil.paginateAfter(doRequest, MessageResponse::getId, messageId.asLong(), 100)
-                .map(MessageBean::new)
-                .map(bean -> new Message(getClient(), bean));
+        return PaginationUtil.paginateAfter(doRequest, data -> Long.parseUnsignedLong(data.id()), messageId.asLong(), 100)
+                .map(data -> new Message(getClient(), data));
     }
 
     @Override
@@ -127,8 +124,7 @@ class BaseMessageChannel extends BaseChannel implements MessageChannel {
     public final Flux<Message> getPinnedMessages() {
         return getClient().getRestClient().getChannelService()
                 .getPinnedMessages(getId().asLong())
-                .map(MessageBean::new)
-                .map(bean -> new Message(getClient(), bean));
+                .map(data -> new Message(getClient(), data));
     }
 
     @Override

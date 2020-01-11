@@ -16,7 +16,8 @@
  */
 package discord4j.core.state;
 
-import discord4j.core.object.data.stored.*;
+import com.darichey.discordjson.json.*;
+import com.darichey.discordjson.json.gateway.PresenceUpdate;
 import discord4j.store.api.Store;
 import discord4j.store.api.primitive.LongObjStore;
 import discord4j.store.api.service.StoreService;
@@ -31,15 +32,15 @@ import reactor.util.Loggers;
  * <p>
  * In addition to saving the current bot user ID, the following stores are kept in this class:
  * <ul>
- * <li>Channel store: {@code long} keys and {@link ChannelBean} values.</li>
- * <li>Guild store: {@code long} keys and {@link GuildBean} values.</li>
- * <li>Guild emoji store: {@code long} keys and {@link GuildEmojiBean} values.</li>
- * <li>Member store: {@code long} pair keys and {@link MemberBean} values.</li>
- * <li>Message store: {@code long} keys and {@link MessageBean} values.</li>
- * <li>Presence store: {@code long} pair keys and {@link PresenceBean} values.</li>
- * <li>Role store: {@code long} keys and {@link RoleBean} values.</li>
- * <li>User store: {@code long} keys and {@link UserBean} values.</li>
- * <li>Voice state store: {@code long} pair keys and {@link VoiceStateBean} values.</li>
+ * <li>Channel store: {@code long} keys and {@link ChannelData} values.</li>
+ * <li>Guild store: {@code long} keys and {@link GuildData} values.</li>
+ * <li>Guild emoji store: {@code long} keys and {@link EmojiData} values.</li>
+ * <li>Member store: {@code long} pair keys and {@link MemberData} values.</li>
+ * <li>Message store: {@code long} keys and {@link MessageData} values.</li>
+ * <li>Presence store: {@code long} pair keys and {@link PresenceUpdate} values.</li>
+ * <li>Role store: {@code long} keys and {@link RoleData} values.</li>
+ * <li>User store: {@code long} keys and {@link UserData} values.</li>
+ * <li>Voice state store: {@code long} pair keys and {@link VoiceStateData} values.</li>
  * </ul>
  */
 public final class StateHolder {
@@ -49,50 +50,50 @@ public final class StateHolder {
     private static final Logger log = Loggers.getLogger(StateHolder.class);
 
     private final StoreService storeService;
-    private final LongObjStore<ChannelBean> channelStore;
-    private final LongObjStore<GuildBean> guildStore;
-    private final LongObjStore<GuildEmojiBean> guildEmojiStore;
-    private final Store<LongLongTuple2, MemberBean> memberStore;
-    private final LongObjStore<MessageBean> messageStore;
-    private final Store<LongLongTuple2, PresenceBean> presenceStore;
-    private final LongObjStore<RoleBean> roleStore;
-    private final LongObjStore<UserBean> userStore;
-    private final Store<LongLongTuple2, VoiceStateBean> voiceStateStore;
-    private final Store<String, ParameterBean> parameterStore;
+    private final LongObjStore<ChannelData> channelStore;
+    private final LongObjStore<GuildData> guildStore;
+    private final LongObjStore<EmojiData> guildEmojiStore;
+    private final Store<LongLongTuple2, MemberData> memberStore;
+    private final LongObjStore<MessageData> messageStore;
+    private final Store<LongLongTuple2, PresenceUpdate> presenceStore;
+    private final LongObjStore<RoleData> roleStore;
+    private final LongObjStore<UserData> userStore;
+    private final Store<LongLongTuple2, VoiceStateData> voiceStateStore;
+    private final Store<String, ParameterData> parameterStore;
 
     public StateHolder(final StoreService service, final StoreContext context) {
         storeService = service;
 
         service.init(context);
 
-        channelStore = service.provideLongObjStore(ChannelBean.class);
+        channelStore = service.provideLongObjStore(ChannelData.class);
         log.debug("Channel storage     : {}", channelStore);
 
-        guildStore = service.provideLongObjStore(GuildBean.class);
+        guildStore = service.provideLongObjStore(GuildData.class);
         log.debug("Guild storage       : {}", guildStore);
 
-        guildEmojiStore = service.provideLongObjStore(GuildEmojiBean.class);
+        guildEmojiStore = service.provideLongObjStore(EmojiData.class);
         log.debug("Guild emoji storage : {}", guildEmojiStore);
 
-        memberStore = service.provideGenericStore(LongLongTuple2.class, MemberBean.class);
+        memberStore = service.provideGenericStore(LongLongTuple2.class, MemberData.class);
         log.debug("Member storage      : {}", memberStore);
 
-        messageStore = service.provideLongObjStore(MessageBean.class);
+        messageStore = service.provideLongObjStore(MessageData.class);
         log.debug("Message storage     : {}", messageStore);
 
-        presenceStore = service.provideGenericStore(LongLongTuple2.class, PresenceBean.class);
+        presenceStore = service.provideGenericStore(LongLongTuple2.class, PresenceData.class);
         log.debug("Presence storage    : {}", presenceStore);
 
-        roleStore = service.provideLongObjStore(RoleBean.class);
+        roleStore = service.provideLongObjStore(RoleData.class);
         log.debug("Role storage        : {}", roleStore);
 
-        userStore = service.provideLongObjStore(UserBean.class);
+        userStore = service.provideLongObjStore(UserData.class);
         log.debug("User storage        : {}", userStore);
 
-        voiceStateStore = service.provideGenericStore(LongLongTuple2.class, VoiceStateBean.class);
+        voiceStateStore = service.provideGenericStore(LongLongTuple2.class, VoiceStateData.class);
         log.debug("Voice state storage : {}", voiceStateStore);
 
-        parameterStore = service.provideGenericStore(String.class, ParameterBean.class);
+        parameterStore = service.provideGenericStore(String.class, ParameterData.class);
         log.debug("Parameter storage   : {}", parameterStore);
     }
 
@@ -100,43 +101,43 @@ public final class StateHolder {
         return storeService;
     }
 
-    public LongObjStore<ChannelBean> getChannelStore() {
+    public LongObjStore<ChannelData> getChannelStore() {
         return channelStore;
     }
 
-    public LongObjStore<GuildBean> getGuildStore() {
+    public LongObjStore<GuildData> getGuildStore() {
         return guildStore;
     }
 
-    public LongObjStore<GuildEmojiBean> getGuildEmojiStore() {
+    public LongObjStore<EmojiData> getGuildEmojiStore() {
         return guildEmojiStore;
     }
 
-    public Store<LongLongTuple2, MemberBean> getMemberStore() {
+    public Store<LongLongTuple2, MemberData> getMemberStore() {
         return memberStore;
     }
 
-    public LongObjStore<MessageBean> getMessageStore() {
+    public LongObjStore<MessageData> getMessageStore() {
         return messageStore;
     }
 
-    public Store<LongLongTuple2, PresenceBean> getPresenceStore() {
+    public Store<LongLongTuple2, PresenceUpdate> getPresenceStore() {
         return presenceStore;
     }
 
-    public LongObjStore<RoleBean> getRoleStore() {
+    public LongObjStore<RoleData> getRoleStore() {
         return roleStore;
     }
 
-    public LongObjStore<UserBean> getUserStore() {
+    public LongObjStore<UserData> getUserStore() {
         return userStore;
     }
 
-    public Store<LongLongTuple2, VoiceStateBean> getVoiceStateStore() {
+    public Store<LongLongTuple2, VoiceStateData> getVoiceStateStore() {
         return voiceStateStore;
     }
 
-    public Store<String, ParameterBean> getParameterStore() {
+    public Store<String, ParameterData> getParameterStore() {
         return parameterStore;
     }
 

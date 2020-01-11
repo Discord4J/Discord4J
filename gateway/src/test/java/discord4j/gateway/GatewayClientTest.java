@@ -16,6 +16,9 @@
  */
 package discord4j.gateway;
 
+import com.darichey.discordjson.json.gateway.ImmutableStatusUpdate;
+import com.darichey.discordjson.json.gateway.MessageCreate;
+import com.darichey.discordjson.json.gateway.Ready;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import discord4j.common.JacksonResources;
 import discord4j.common.ReactorResources;
@@ -33,6 +36,7 @@ import java.io.IOException;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 
 public class GatewayClientTest {
@@ -76,7 +80,7 @@ public class GatewayClientTest {
 
         gatewayClient.dispatch().ofType(MessageCreate.class)
                 .subscribe(message -> {
-                    String content = message.getContent();
+                    String content = message.message().content();
                     System.out.println(content);
                     if ("!close".equals(content)) {
                         gatewayClient.close(false).block();
@@ -116,7 +120,7 @@ public class GatewayClientTest {
                     new JacksonPayloadReader(mapper),
                     new JacksonPayloadWriter(mapper),
                     reconnectOptions,
-                    new IdentifyOptions(new ShardInfo(i, shardCount), new StatusUpdate(null, "invisible"), true),
+                    new IdentifyOptions(new ShardInfo(i, shardCount), ImmutableStatusUpdate.of(Optional.empty(), Optional.empty(), "invisible", false), true),
                     (s, o) -> {
                         if (s.equals(GatewayObserver.CONNECTED)) {
                             next.countDown();

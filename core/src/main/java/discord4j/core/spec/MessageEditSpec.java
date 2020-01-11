@@ -16,12 +16,14 @@
  */
 package discord4j.core.spec;
 
-import discord4j.common.jackson.Possible;
+import com.darichey.discordjson.json.EmbedData;
+import com.darichey.discordjson.json.ImmutableMessageEditRequest;
+import com.darichey.discordjson.json.MessageEditRequest;
+import com.darichey.discordjson.possible.Possible;
 import discord4j.core.object.entity.Message;
-import discord4j.rest.json.request.EmbedRequest;
-import discord4j.rest.json.request.MessageEditRequest;
 import reactor.util.annotation.Nullable;
 
+import java.util.Optional;
 import java.util.function.Consumer;
 
 /**
@@ -31,10 +33,8 @@ import java.util.function.Consumer;
  */
 public class MessageEditSpec implements Spec<MessageEditRequest> {
 
-    @Nullable
-    private Possible<String> content = Possible.absent();
-    @Nullable
-    private Possible<EmbedRequest> embed = Possible.absent();
+    private Possible<Optional<String>> content = Possible.absent();
+    private Possible<Optional<EmbedData>> embed = Possible.absent();
 
     /**
      * Sets the new contents for the edited {@link Message}.
@@ -43,7 +43,7 @@ public class MessageEditSpec implements Spec<MessageEditRequest> {
      * @return This spec.
      */
     public MessageEditSpec setContent(@Nullable String content) {
-        this.content = content == null ? null : Possible.of(content);
+        this.content = Possible.of(Optional.ofNullable(content));
         return this;
     }
 
@@ -59,7 +59,7 @@ public class MessageEditSpec implements Spec<MessageEditRequest> {
             spec.accept(mutatedSpec);
             embed = Possible.of(mutatedSpec.asRequest());
         } else {
-            embed = null;
+            embed = Possible.of(Optional.empty());
         }
 
         return this;
@@ -67,6 +67,7 @@ public class MessageEditSpec implements Spec<MessageEditRequest> {
 
     @Override
     public MessageEditRequest asRequest() {
-        return new MessageEditRequest(content, embed);
+        // FIXME: allow flags to be set
+        return ImmutableMessageEditRequest.of(content, embed, Possible.absent());
     }
 }

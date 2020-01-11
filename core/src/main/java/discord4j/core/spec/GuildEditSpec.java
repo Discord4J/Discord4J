@@ -16,12 +16,16 @@
  */
 package discord4j.core.spec;
 
+import com.darichey.discordjson.json.GuildModifyRequest;
+import com.darichey.discordjson.json.ImmutableGuildModifyRequest;
+import com.darichey.discordjson.possible.Possible;
 import discord4j.core.object.Region;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.util.Image;
 import discord4j.core.object.util.Snowflake;
-import discord4j.rest.json.request.GuildModifyRequest;
 import reactor.util.annotation.Nullable;
+
+import java.util.Optional;
 
 /**
  * A spec used to selectively modify properties from a {@link Guild}.
@@ -30,7 +34,7 @@ import reactor.util.annotation.Nullable;
  */
 public class GuildEditSpec implements AuditSpec<GuildModifyRequest> {
 
-    private final GuildModifyRequest.Builder requestBuilder = GuildModifyRequest.builder();
+    private final ImmutableGuildModifyRequest.Builder requestBuilder = ImmutableGuildModifyRequest.builder();
     @Nullable
     private String reason;
 
@@ -41,7 +45,7 @@ public class GuildEditSpec implements AuditSpec<GuildModifyRequest> {
      * @return this spec
      */
     public GuildEditSpec setName(String name) {
-        requestBuilder.name(name);
+        requestBuilder.name(Possible.of(name));
         return this;
     }
 
@@ -52,7 +56,7 @@ public class GuildEditSpec implements AuditSpec<GuildModifyRequest> {
      * @return This spec.
      */
     public GuildEditSpec setRegion(Region region) {
-        requestBuilder.region(region.getId());
+        requestBuilder.region(Possible.of(region.getId()));
         return this;
     }
 
@@ -63,7 +67,7 @@ public class GuildEditSpec implements AuditSpec<GuildModifyRequest> {
      * @return This spec.
      */
     public GuildEditSpec setVerificationLevel(Guild.VerificationLevel verificationLevel) {
-        requestBuilder.verificationLevel(verificationLevel.getValue());
+        requestBuilder.verificationLevel(Possible.of(verificationLevel.getValue()));
         return this;
     }
 
@@ -74,7 +78,7 @@ public class GuildEditSpec implements AuditSpec<GuildModifyRequest> {
      * @return This spec.
      */
     public GuildEditSpec setDefaultMessageNotificationsLevel(Guild.NotificationLevel notificationsLevel) {
-        requestBuilder.defaultMessageNotifications(notificationsLevel.getValue());
+        requestBuilder.defaultMessageNotifications(Possible.of(notificationsLevel.getValue()));
         return this;
     }
 
@@ -85,7 +89,7 @@ public class GuildEditSpec implements AuditSpec<GuildModifyRequest> {
      * @return This spec.
      */
     public GuildEditSpec setAfkChannelId(@Nullable Snowflake afkChannelId) {
-        requestBuilder.afkChannelId(afkChannelId == null ? null : afkChannelId.asLong());
+        requestBuilder.afkChannelId(Possible.of(Optional.ofNullable(afkChannelId).map(Snowflake::asString)));
         return this;
     }
 
@@ -96,7 +100,7 @@ public class GuildEditSpec implements AuditSpec<GuildModifyRequest> {
      * @return This spec.
      */
     public GuildEditSpec setAfkTimeout(int afkTimeout) {
-        requestBuilder.afkTimeout(afkTimeout);
+        requestBuilder.afkTimeout(Possible.of(afkTimeout));
         return this;
     }
 
@@ -107,7 +111,7 @@ public class GuildEditSpec implements AuditSpec<GuildModifyRequest> {
      * @return This spec.
      */
     public GuildEditSpec setIcon(@Nullable Image icon) {
-        requestBuilder.icon((icon == null) ? null : icon.getDataUri());
+        requestBuilder.icon(Possible.of(Optional.ofNullable(icon).map(Image::getDataUri)));
         return this;
     }
 
@@ -118,7 +122,7 @@ public class GuildEditSpec implements AuditSpec<GuildModifyRequest> {
      * @return This spec.
      */
     public GuildEditSpec setOwnerId(Snowflake ownerId) {
-        requestBuilder.ownerId(ownerId.asLong());
+        requestBuilder.ownerId(Possible.of(ownerId.asString()));
         return this;
     }
 
@@ -129,7 +133,7 @@ public class GuildEditSpec implements AuditSpec<GuildModifyRequest> {
      * @return This spec.
      */
     public GuildEditSpec setSplash(@Nullable Image splash) {
-        requestBuilder.splash((splash == null) ? null : splash.getDataUri());
+        requestBuilder.splash(Possible.of(Optional.ofNullable(splash).map(Image::getDataUri)));
         return this;
     }
 
@@ -140,7 +144,7 @@ public class GuildEditSpec implements AuditSpec<GuildModifyRequest> {
      * @return This spec.
      */
     public GuildEditSpec setBanner(@Nullable Image banner) {
-        requestBuilder.banner((banner == null) ? null : banner.getDataUri());
+        requestBuilder.banner(Possible.of(Optional.ofNullable(banner).map(Image::getDataUri)));
         return this;
     }
 

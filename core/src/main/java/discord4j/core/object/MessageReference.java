@@ -1,8 +1,8 @@
 package discord4j.core.object;
 
+import com.darichey.discordjson.json.MessageReferenceData;
 import discord4j.common.annotations.Experimental;
 import discord4j.core.GatewayDiscordClient;
-import discord4j.core.object.data.stored.MessageReferenceBean;
 import discord4j.core.object.util.Snowflake;
 
 import java.util.Objects;
@@ -21,7 +21,7 @@ public class MessageReference implements DiscordObject {
     private final GatewayDiscordClient gateway;
 
     /** The raw data as represented by Discord. */
-    private final MessageReferenceBean data;
+    private final MessageReferenceData data;
 
     /**
      * Constructs a {@code MessageReference} with an associated {@link GatewayDiscordClient} and Discord data.
@@ -29,22 +29,23 @@ public class MessageReference implements DiscordObject {
      * @param gateway The {@link GatewayDiscordClient} associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
      */
-    public MessageReference(final GatewayDiscordClient gateway, final MessageReferenceBean data) {
+    public MessageReference(final GatewayDiscordClient gateway, final MessageReferenceData data) {
         this.gateway = Objects.requireNonNull(gateway);
         this.data = Objects.requireNonNull(data);
     }
 
     public Snowflake getChannelId() {
-        return Snowflake.of(data.getChannelId());
+        // FIXME: is this actually Possible?
+        return Snowflake.of(data.channelId().get());
     }
 
     public Optional<Snowflake> getGuildId() {
-        return Optional.ofNullable(data.getGuildId())
+        return data.guildId().toOptional()
                 .map(Snowflake::of);
     }
 
     public Optional<Snowflake> getMessageId() {
-        return Optional.ofNullable(data.getMessageId())
+        return data.messageId().toOptional()
                 .map(Snowflake::of);
     }
 
