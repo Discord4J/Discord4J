@@ -81,7 +81,8 @@ public class DefaultVoiceGatewayClient {
     private final VoiceSocket voiceSocket;
     private final ResettableInterval heartbeat;
 
-    private final AtomicReference<VoiceConnection.State> state = new AtomicReference<>(VoiceConnection.State.DISCONNECTED);
+    private final AtomicReference<VoiceConnection.State> state =
+            new AtomicReference<>(VoiceConnection.State.DISCONNECTED);
     private final AtomicBoolean connected = new AtomicBoolean(false);
     private final AtomicBoolean allowResume = new AtomicBoolean(false);
     private volatile int ssrc;
@@ -169,8 +170,12 @@ public class DefaultVoiceGatewayClient {
                                     Ready ready = (Ready) payload;
                                     ssrc = ready.getData().ssrc;
                                     cleanup.update(innerCleanup);
-                                    innerCleanup.add(voiceSocket.setup(ready.getData().ip, ready.getData().port)
+                                    innerCleanup.add(Mono.defer(() ->
+                                            voiceSocket.setup(ready.getData().ip, ready.getData().port))
                                             .then(voiceSocket.performIpDiscovery(ready.getData().ssrc))
+                                            .timeout(Duration.ofSeconds(5))
+                                            .doOnError(t -> log.warn("Unable to perform voice setup: {}", t.toString()))
+                                            .retry()
                                             .subscriberContext(context)
                                             .subscribe(address -> {
                                                         String hostName = address.getHostName();
