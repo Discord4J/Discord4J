@@ -23,16 +23,16 @@ ext {
     }
 
     // Dependencies
-    reactor_bom_version = 'Dysprosium-SR1'
-    jackson_version = '2.10.1'
+    reactor_bom_version = 'Dysprosium-SR2'
+    jackson_version = '2.10.2'
     jdkstores_version = "$storesVersion".toString()
 
     // Test dependencies
-    junit_version = '4.12'
+    junit_version = '4.13'
     mockito_version = '3.2.4'
     logback_version = '1.3.0-alpha4'
-    reflections_version = '0.9.11'
-    lavaplayer_version = '1.3.32'
+    reflections_version = '0.9.12'
+    lavaplayer_version = '1.3.33'
     blockhound_version = '1.0.1.RELEASE'
 
     isJitpack = "true" == System.getenv("JITPACK")
@@ -68,9 +68,9 @@ allprojects {
         mavenCentral()
         if (!isRelease) {
             maven { url 'https://oss.sonatype.org/content/repositories/snapshots' }
+            maven { url 'https://oss.sonatype.org/content/repositories/staging' }
         }
         maven { url 'https://jitpack.io' }
-        maven { url 'https://oss.sonatype.org/content/repositories/staging' }
         maven { url 'https://repo.spring.io/milestone' }
         jcenter()
     }
