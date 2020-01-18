@@ -86,7 +86,7 @@ public class InviteCreate implements Dispatch {
             ", maxUses=" + maxUses +
             ", maxAge=" + maxAge +
             ", temporary=" + temporary +
-            ", createdAt='" + createdAt +
+            ", createdAt='" + createdAt + '\'' +
             '}';
     }
 }
