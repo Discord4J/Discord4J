@@ -1,3 +1,19 @@
+/*
+ * This file is part of Discord4J.
+ *
+ * Discord4J is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Discord4J is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package discord4j.core.event.domain;
 
 import discord4j.core.DiscordClient;
@@ -7,8 +23,16 @@ import discord4j.core.object.util.Snowflake;
 import reactor.core.publisher.Mono;
 
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.Optional;
 
-//TODO: Description
+/**
+ * Dispatched when a channel invite is created.
+ * <p>
+ * This event is dispatched by Discord.
+ *
+ * @see <a href="https://discordapp.com/developers/docs/topics/gateway#invite-create">Invite Create</a>
+ */
 public class InviteCreateEvent extends Event {
 
     private final long guildId;
@@ -35,7 +59,7 @@ public class InviteCreateEvent extends Event {
     }
 
     /**
-     * Gets the {@link Snowflake} ID of the guild that had a invite deleted in this event.
+     * Gets the {@link Snowflake} ID of the guild that had a invite created in this event.
      *
      * @return The ID of the guild involved.
      */
@@ -44,7 +68,7 @@ public class InviteCreateEvent extends Event {
     }
 
     /**
-     * Requests to retrieve the {@link Guild} that had a invite deleted in this event.
+     * Requests to retrieve the {@link Guild} that had a invite created in this event.
      *
      * @return A {@link Mono} where, upon successful completion, emits the {@link Guild} involved in the event.
      * If an error is received, it is emitted through the {@code Mono}.
@@ -81,29 +105,65 @@ public class InviteCreateEvent extends Event {
     }
 
     /**
-     * Retrieve the inviter user associated to.
+     * Requests to retrieve the user who created the invite.
      *
-     * @return A {@link Mono} where, upon successful completion, emits the {@link User inviter user}
-     * associated to. If an error is received, it is emitted through the {@code Mono}.
+     * @return A {@link Mono} where, upon successful completion, emits the {@link User user} who created the invite. If
+     * an error is received, it is emitted through the {@code Mono}.
      */
-    public final User getInviter() {
-        return inviter;
+    public Mono<User> getInviter() {
+        return getClient().getUserById(getInviterId());
     }
 
+    /**
+     * Gets the number of times this invite has been used.
+     *
+     * @return The number of times this invite has been used.
+     */
     public int getUses() {
         return uses;
     }
 
+    /**
+     * Gets the max number of times this invite can be used.
+     *
+     * @return The max number of times this invite can be used.
+     */
     public int getMaxUses() {
         return maxUses;
     }
 
+    /**
+     * Gets how long the invite is valid for (in seconds).
+     *
+     * @return how long the invite is valid for (in seconds).
+     */
     public int getMaxAge() {
         return maxAge;
     }
 
     public boolean isTemporary() {
         return temporary;
+    }
+
+    /**
+     * Gets when this invite was created.
+     *
+     * @return When this invite was created.
+     */
+    public Instant getCreation() {
+        return createdAt;
+    }
+
+    /**
+     * Gets the instant this invite expires, if possible.
+     *
+     * @return The instant this invite expires, if possible.
+     */
+    public Optional<Instant> getExpiration() {
+        final boolean temporary = isTemporary();
+        final int maxAge = getMaxAge();
+
+        return temporary ? Optional.of(getCreation().plus(maxAge, ChronoUnit.SECONDS)) : Optional.empty();
     }
 
     @Override
