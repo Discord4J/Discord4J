@@ -14,7 +14,7 @@ public class InviteCreateEvent extends Event {
     private final long guildId;
     private final long channelId;
     private final String code;
-    private User inviter;
+    private final User inviter;
     private final Instant createdAt;
     private final int uses;
     private final int maxUses;
