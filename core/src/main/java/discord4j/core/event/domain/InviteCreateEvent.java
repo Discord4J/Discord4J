@@ -55,7 +55,7 @@ public class InviteCreateEvent extends Event {
     }
 
     /**
-     * Gets the {@link Snowflake} ID of the channel the webhook belongs to.
+     * Gets the {@link Snowflake} ID of the channel invite belongs to.
      *
      * @return The ID of the channel involved.
      */
