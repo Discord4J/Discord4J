@@ -22,7 +22,7 @@ import discord4j.core.object.util.Snowflake;
 import reactor.core.publisher.Mono;
 
 /**
- * Dispatched when a channel invite is delete.
+ * Dispatched when an invite to a channel is deleted.
  * <p>
  * This event is dispatched by Discord.
  *
