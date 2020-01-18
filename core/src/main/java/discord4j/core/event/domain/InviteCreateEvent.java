@@ -135,7 +135,7 @@ public class InviteCreateEvent extends Event {
     /**
      * Gets how long the invite is valid for (in seconds).
      *
-     * @return how long the invite is valid for (in seconds).
+     * @return How long the invite is valid for (in seconds).
      */
     public int getMaxAge() {
         return maxAge;
