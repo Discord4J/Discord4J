@@ -51,7 +51,7 @@ public class InviteDeleteEvent extends Event {
     }
 
     /**
-     * Requests to retrieve the {@link Guild} that had a invite created in this event.
+     * Requests to retrieve the {@link Guild} that had an invite deleted in this event.
      *
      * @return A {@link Mono} where, upon successful completion, emits the {@link Guild} involved in the event.
      * If an error is received, it is emitted through the {@code Mono}.
