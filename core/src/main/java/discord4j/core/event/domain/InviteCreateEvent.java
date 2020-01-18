@@ -21,7 +21,6 @@ public class InviteCreateEvent extends Event {
     private final int maxAge;
     private final boolean temporary;
 
-
     public InviteCreateEvent(DiscordClient client, long guildId, long channelId, String code, User inviter, Instant createdAt, int uses, int maxUses, int maxAge, boolean temporary) {
         super(client);
         this.guildId = guildId;
@@ -91,19 +90,19 @@ public class InviteCreateEvent extends Event {
         return inviter;
     }
 
-    public Integer getUses() {
+    public int getUses() {
         return uses;
     }
 
-    public Integer getMaxUses() {
+    public int getMaxUses() {
         return maxUses;
     }
 
-    public Integer getMaxAge() {
+    public int getMaxAge() {
         return maxAge;
     }
 
-    public Boolean isTemporary() {
+    public boolean isTemporary() {
         return temporary;
     }
 

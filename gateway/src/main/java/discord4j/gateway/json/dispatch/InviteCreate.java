@@ -21,9 +21,7 @@ public class InviteCreate implements Dispatch {
     private int maxUses;
     @JsonProperty("max_age")
     private int maxAge;
-    private Boolean temporary;
-    //TODO: Inviter return null
-    @JsonUnwrapped
+    private boolean temporary;
     private UserResponse inviter;
 
     public UserResponse getInviter() {
@@ -58,7 +56,7 @@ public class InviteCreate implements Dispatch {
         return maxAge;
     }
 
-    public Boolean isTemporary() {
+    public boolean isTemporary() {
         return temporary;
     }
 
