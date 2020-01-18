@@ -16,11 +16,11 @@ public class InviteCreate implements Dispatch {
     private String code;
     @JsonProperty("created_at")
     private String createdAt;
-    private Integer uses;
+    private int uses;
     @JsonProperty("max_uses")
-    private Integer maxUses;
+    private int maxUses;
     @JsonProperty("max_age")
-    private Integer maxAge;
+    private int maxAge;
     private Boolean temporary;
     //TODO: Inviter return null
     @JsonUnwrapped
@@ -46,15 +46,15 @@ public class InviteCreate implements Dispatch {
         return createdAt;
     }
 
-    public Integer getUses() {
+    public int getUses() {
         return uses;
     }
 
-    public Integer getMaxUses() {
+    public int getMaxUses() {
         return maxUses;
     }
 
-    public Integer getMaxAge() {
+    public int getMaxAge() {
         return maxAge;
     }
 
