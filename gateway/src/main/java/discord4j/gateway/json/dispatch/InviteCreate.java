@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import discord4j.common.jackson.UnsignedJson;
 import discord4j.common.json.UserResponse;
-import reactor.util.annotation.Nullable;
 
 public class InviteCreate implements Dispatch {
 
@@ -19,13 +18,11 @@ public class InviteCreate implements Dispatch {
     private String createdAt;
     private Integer uses;
     @JsonProperty("max_uses")
-    @Nullable
     private Integer maxUses;
     @JsonProperty("max_age")
-    @Nullable
     private Integer maxAge;
-    @Nullable
     private Boolean temporary;
+    //TODO: Inviter return null
     @JsonUnwrapped
     private UserResponse inviter;
 
@@ -49,23 +46,19 @@ public class InviteCreate implements Dispatch {
         return createdAt;
     }
 
-    @Nullable
     public Integer getUses() {
         return uses;
     }
 
-    @Nullable
     public Integer getMaxUses() {
         return maxUses;
     }
 
-    @Nullable
     public Integer getMaxAge() {
         return maxAge;
     }
 
-    @Nullable
-    public Boolean getTemporary() {
+    public Boolean isTemporary() {
         return temporary;
     }
 
