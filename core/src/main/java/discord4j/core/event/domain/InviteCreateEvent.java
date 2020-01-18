@@ -118,7 +118,7 @@ public class InviteCreateEvent extends Event {
             ", maxUses=" + maxUses +
             ", maxAge=" + maxAge +
             ", temporary=" + temporary +
-            ", createdAt='" + createdAt +
+            ", createdAt='" + createdAt + '\'' +
             '}';
     }
 }
