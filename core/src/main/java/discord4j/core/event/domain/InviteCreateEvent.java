@@ -78,7 +78,7 @@ public class InviteCreateEvent extends Event {
     }
 
     /**
-     * Gets the {@link Snowflake} ID of the channel invite belongs to.
+     * Gets the {@link Snowflake} ID of the channel the invite is for.
      *
      * @return The ID of the channel involved.
      */
