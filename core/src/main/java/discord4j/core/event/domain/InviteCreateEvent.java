@@ -17,6 +17,7 @@
 package discord4j.core.event.domain;
 
 import discord4j.core.DiscordClient;
+import discord4j.core.object.Invite;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.util.Snowflake;
@@ -105,13 +106,12 @@ public class InviteCreateEvent extends Event {
     }
 
     /**
-     * Requests to retrieve the user who created the invite.
+     * Get the partial user who created the invite.
      *
-     * @return A {@link Mono} where, upon successful completion, emits the {@link User user} who created the invite. If
-     * an error is received, it is emitted through the {@code Mono}.
+     * @return The partial {@link User user} who created the invite.
      */
-    public Mono<User> getInviter() {
-        return getClient().getUserById(getInviterId());
+    public User getInviter() {
+        return inviter;
     }
 
     /**
@@ -164,6 +164,15 @@ public class InviteCreateEvent extends Event {
         final int maxAge = getMaxAge();
 
         return temporary ? Optional.of(getCreation().plus(maxAge, ChronoUnit.SECONDS)) : Optional.empty();
+    }
+
+    /**
+     * Requests to retrieve the invite Created.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits the {@link Invite}. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Invite> getInvite() {
+        return getClient().getInvite(code);
     }
 
     @Override
