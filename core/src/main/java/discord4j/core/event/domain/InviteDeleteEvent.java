@@ -61,7 +61,7 @@ public class InviteDeleteEvent extends Event {
     }
 
     /**
-     * Gets the {@link Snowflake} ID of the channel invite belongs to.
+     * Gets the {@link Snowflake} ID of the {@link Channel} where the invite was deleted.
      *
      * @return The ID of the channel involved.
      */
