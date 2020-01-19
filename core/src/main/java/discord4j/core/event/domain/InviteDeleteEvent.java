@@ -42,7 +42,7 @@ public class InviteDeleteEvent extends Event {
     }
 
     /**
-     * Gets the {@link Snowflake} ID of the guild that had an invite deleted in this event.
+     * Gets the {@link Snowflake} ID of the {@link Guild} involved in the event.
      *
      * @return The ID of the guild involved.
      */
