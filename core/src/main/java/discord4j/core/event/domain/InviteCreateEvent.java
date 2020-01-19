@@ -59,7 +59,7 @@ public class InviteCreateEvent extends Event {
     }
 
     /**
-     * Gets the {@link Snowflake} ID of the guild that had a invite created in this event.
+     * Gets the {@link Snowflake} ID of the {@link Guild} involved in the event.
      *
      * @return The ID of the guild involved.
      */
