@@ -27,7 +27,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 
 /**
- * Dispatched when a channel invite is created.
+ * Dispatched when an invite to a channel is created.
  * <p>
  * This event is dispatched by Discord.
  *
