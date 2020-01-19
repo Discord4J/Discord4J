@@ -117,7 +117,7 @@ public class InviteCreateEvent extends Event {
     /**
      * Gets the number of times this invite has been used (always will be 0).
      *
-     * @return The number of times this invite has been used.
+     * @return The number of times this invite has been used (always will be 0).
      */
     public int getUses() {
         return uses;
