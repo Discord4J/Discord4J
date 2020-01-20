@@ -54,8 +54,8 @@ public class JacksonPayloadReader implements PayloadReader {
                 if (lenient) {
                     // if eof input - just ignore
                     if (payload.readableBytes() > 0) {
-                        log.warn("Error while decoding JSON ({} bytes): {}", payload.readableBytes(),
-                                payload.toString(StandardCharsets.UTF_8), e);
+                        log.debug("Error while decoding JSON ({}): {}", e.toString(),
+                                payload.toString(StandardCharsets.UTF_8));
                     }
                     sink.success();
                 } else {
