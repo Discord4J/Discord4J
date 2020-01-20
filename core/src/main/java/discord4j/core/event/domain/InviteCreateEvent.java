@@ -169,7 +169,8 @@ public class InviteCreateEvent extends Event {
     /**
      * Requests to retrieve the invite Created.
      *
-     * @return A {@link Mono} where, upon successful completion, emits the {@link Invite}. If an error is received, it is emitted through the {@code Mono}.
+     * @return A {@link Mono} where, upon successful completion, emits the {@link Invite}.
+     * If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Invite> getInvite() {
         return getClient().getInvite(code);
