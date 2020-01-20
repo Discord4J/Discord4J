@@ -20,6 +20,7 @@ import discord4j.core.DiscordClient;
 import discord4j.core.ServiceMediator;
 import discord4j.core.object.data.stored.VoiceStateBean;
 import discord4j.core.object.entity.Guild;
+import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.VoiceChannel;
 import discord4j.core.object.util.Snowflake;
@@ -112,6 +113,16 @@ public final class VoiceState implements DiscordObject {
      */
     public Mono<User> getUser() {
         return getClient().getUserById(getUserId());
+    }
+
+    /**
+     * Requests to retrieve the member this voice state is for.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits the {@link Member} this voice state is for. If an
+     * error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Member> getMember() {
+        return getClient().getMemberById(getGuildId(), getUserId());
     }
 
     /**
