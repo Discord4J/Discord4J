@@ -72,7 +72,7 @@ public class GuildCreateRequest {
             return this;
         }
 
-        public Builder icon(String icon) {
+        public Builder icon(@Nullable String icon) {
             this.icon = Possible.of(icon);
             return this;
         }
