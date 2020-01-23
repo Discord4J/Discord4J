@@ -26,6 +26,7 @@ public class GuildCreateRequest {
 
     private final String name;
     private final Possible<String> region;
+    @Nullable
     private final Possible<String> icon;
     @JsonProperty("verification_level")
     private final Possible<Integer> verificationLevel;
@@ -54,6 +55,7 @@ public class GuildCreateRequest {
 
         private String name;
         private Possible<String> region = Possible.absent();
+        @Nullable
         private Possible<String> icon = Possible.absent();
         private Possible<Integer> verificationLevel = Possible.absent();
         private Possible<Integer> defaultMessageNotifications = Possible.absent();
