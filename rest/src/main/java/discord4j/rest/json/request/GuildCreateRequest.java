@@ -35,7 +35,7 @@ public class GuildCreateRequest {
     private final Possible<RoleCreateRequest[]> roles;
     private final Possible<PartialChannelRequest[]> channels;
 
-    public GuildCreateRequest(String name, Possible<String> region, Possible<String> icon,
+    public GuildCreateRequest(String name, Possible<String> region, @Nullable Possible<String> icon,
                               Possible<Integer> verificationLevel, Possible<Integer> defaultMessageNotifications,
                               Possible<RoleCreateRequest[]> roles, Possible<PartialChannelRequest[]> channels) {
         this.name = name;
