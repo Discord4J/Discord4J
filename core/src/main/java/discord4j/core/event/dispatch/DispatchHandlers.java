@@ -107,7 +107,7 @@ public abstract class DispatchHandlers {
         if (entry == null) {
             return Mono.empty();
         }
-        return entry.handle(context);
+        return Mono.defer(() -> entry.handle(context));
     }
 
     private static Mono<PresenceUpdateEvent> presenceUpdate(DispatchContext<PresenceUpdate> context) {

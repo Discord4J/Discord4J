@@ -709,6 +709,7 @@ public final class DiscordClientBuilder {
                 .flatMap(context -> DispatchHandlers.handle(context)
                         .onErrorResume(error -> {
                             dispatchLog.error("Error dispatching {}", context.getDispatch().getClass().getSimpleName(), error);
+                            dispatchLog.trace("Dispatch: {}", context.getDispatch());
                             return Mono.empty();
                         }))
                 .subscribeWith(eventProcessor);
