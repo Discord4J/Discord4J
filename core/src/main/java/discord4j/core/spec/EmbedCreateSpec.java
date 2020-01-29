@@ -86,7 +86,7 @@ public class EmbedCreateSpec implements Spec<EmbedRequest> {
      * @return This spec.
      */
     public EmbedCreateSpec setColor(final Color color) {
-        setColor(color.getRGB());
+        return setColor(color.getRGB());
     }
     
     /**
