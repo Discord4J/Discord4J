@@ -49,9 +49,9 @@ import static discord4j.common.LogUtil.format;
  * The handler also provides methods to control the lifecycle, which perform operations on the current session. It is
  * required to use them to properly release important resources and complete the session.
  */
-public class GatewaySessionHandler {
+public class GatewayWebsocketHandler {
 
-    private static final Logger log = Loggers.getLogger(GatewaySessionHandler.class);
+    private static final Logger log = Loggers.getLogger(GatewayWebsocketHandler.class);
 
     private final FluxSink<ByteBuf> inbound;
     private final Flux<ByteBuf> outbound;
@@ -66,7 +66,7 @@ public class GatewaySessionHandler {
      * @param outbound the {@link Flux} of {@link ByteBuf} to process outbound payloads
      * @param context the Reactor {@link Context} that owns this handler, to enrich logging
      */
-    public GatewaySessionHandler(FluxSink<ByteBuf> inbound, Flux<ByteBuf> outbound, Context context) {
+    public GatewayWebsocketHandler(FluxSink<ByteBuf> inbound, Flux<ByteBuf> outbound, Context context) {
         this.inbound = inbound;
         this.outbound = outbound;
         this.sessionClose = MonoProcessor.create();

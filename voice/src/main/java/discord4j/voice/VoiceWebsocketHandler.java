@@ -38,9 +38,9 @@ import reactor.util.function.Tuple2;
 
 import static discord4j.common.LogUtil.format;
 
-public class VoiceGatewaySessionHandler {
+public class VoiceWebsocketHandler {
 
-    private static final Logger log = Loggers.getLogger(VoiceGatewaySessionHandler.class);
+    private static final Logger log = Loggers.getLogger(VoiceWebsocketHandler.class);
 
     private final FluxSink<ByteBuf> inbound;
     private final Flux<ByteBuf> outbound;
@@ -54,7 +54,7 @@ public class VoiceGatewaySessionHandler {
      * @param outbound the {@link Flux} of {@link ByteBuf} to process outbound payloads
      * @param context the Reactor {@link Context} that owns this handler, to enrich logging
      */
-    public VoiceGatewaySessionHandler(FluxSink<ByteBuf> inbound, Flux<ByteBuf> outbound, Context context) {
+    public VoiceWebsocketHandler(FluxSink<ByteBuf> inbound, Flux<ByteBuf> outbound, Context context) {
         this.inbound = inbound;
         this.outbound = outbound;
         this.sessionClose = MonoProcessor.create();

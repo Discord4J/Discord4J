@@ -62,7 +62,7 @@ import static io.netty.handler.codec.http.HttpHeaderNames.USER_AGENT;
 /**
  * Represents a Discord WebSocket client, called Gateway, implementing its lifecycle.
  * <p>
- * Keeps track of a single websocket session by wrapping an instance of {@link GatewaySessionHandler} each time a
+ * Keeps track of a single websocket session by wrapping an instance of {@link GatewayWebsocketHandler} each time a
  * new WebSocket connection to Discord is made, therefore only one instance of this class is enough to
  * handle the lifecycle of the Gateway operations, that could span multiple WebSocket sessions over time.
  * <p>
@@ -110,7 +110,7 @@ public class DefaultGatewayClient implements GatewayClient {
     private final AtomicLong lastAck = new AtomicLong(0);
     private final AtomicLong responseTime = new AtomicLong(0);
     private volatile MonoProcessor<Void> disconnectNotifier;
-    private volatile GatewaySessionHandler sessionHandler;
+    private volatile GatewayWebsocketHandler sessionHandler;
 
     /**
      * Initializes a new GatewayClient.
@@ -165,7 +165,7 @@ public class DefaultGatewayClient implements GatewayClient {
                     Flux<ByteBuf> outFlux = Flux.merge(heartbeatFlux, identifyFlux, payloadFlux)
                             .doOnNext(buf -> logPayload(">> ", context, buf));
 
-                    sessionHandler = new GatewaySessionHandler(receiverSink, outFlux, context);
+                    sessionHandler = new GatewayWebsocketHandler(receiverSink, outFlux, context);
 
                     Integer resumeSequence = identifyOptions.getResumeSequence();
                     if (resumeSequence != null && resumeSequence > 0) {

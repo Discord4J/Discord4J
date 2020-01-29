@@ -33,7 +33,6 @@ import discord4j.core.object.entity.Member;
 import discord4j.voice.AudioProvider;
 import discord4j.voice.VoiceConnection;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.MonoProcessor;
@@ -53,7 +52,7 @@ public class ExampleVoiceBot {
     }
 
     @Test
-    @Ignore("Example code excluded from CI")
+    //@Ignore("Example code excluded from CI")
     public void testVoiceBot() {
         // Set up LavaPlayer
         AudioPlayerManager playerManager = new DefaultAudioPlayerManager();
@@ -74,14 +73,14 @@ public class ExampleVoiceBot {
 //                                UdpClient.create().wiretap(true)))
                 .withConnection(gateway -> {
                     Mono<MessageCreateEvent> leave = gateway.getEventDispatcher().on(MessageCreateEvent.class)
-                            .filter(e -> owner == null || e.getMember().map(Member::getId).map(it -> it.asString().equals(owner)).orElse(false))
+                            //.filter(e -> owner == null || e.getMember().map(Member::getId).map(it -> it.asString().equals(owner)).orElse(false))
                             .filter(e -> e.getMessage().getContent().map(it -> it.equals("!leave")).orElse(false))
                             .next();
 
                     MonoProcessor<VoiceConnection> vc = MonoProcessor.create();
 
                     Mono<Void> join = gateway.getEventDispatcher().on(MessageCreateEvent.class)
-                            .filter(e -> owner == null || e.getMember().map(Member::getId).map(it -> it.asString().equals(owner)).orElse(false))
+                            //.filter(e -> owner == null || e.getMember().map(Member::getId).map(it -> it.asString().equals(owner)).orElse(false))
                             .filter(e -> e.getMessage().getContent().map(it -> it.startsWith("!join")).orElse(false))
                             .flatMap(e -> Mono.justOrEmpty(e.getMember())
                                     .flatMap(Member::getVoiceState)
@@ -96,7 +95,7 @@ public class ExampleVoiceBot {
                             .then();
 
                     Mono<Void> play = gateway.getEventDispatcher().on(MessageCreateEvent.class)
-                            .filter(e -> owner == null || e.getMember().map(Member::getId).map(it -> it.asString().equals(owner)).orElse(false))
+                            //.filter(e -> owner == null || e.getMember().map(Member::getId).map(it -> it.asString().equals(owner)).orElse(false))
                             .filter(e -> e.getMessage().getContent().map(it -> it.startsWith("!play ")).orElse(false))
                             .flatMap(e -> Mono.justOrEmpty(e.getMessage().getContent())
                                     .map(content -> Arrays.asList(content.split(" ")))
@@ -105,7 +104,7 @@ public class ExampleVoiceBot {
                             .then();
 
                     Mono<Void> stop = gateway.getEventDispatcher().on(MessageCreateEvent.class)
-                            .filter(e -> owner == null || e.getMember().map(Member::getId).map(it -> it.asString().equals(owner)).orElse(false))
+                            //.filter(e -> owner == null || e.getMember().map(Member::getId).map(it -> it.asString().equals(owner)).orElse(false))
                             .filter(e -> e.getMessage().getContent().map(it -> it.equals("!stop")).orElse(false))
                             .doOnNext(e -> player.stopTrack())
                             .then();

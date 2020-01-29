@@ -87,7 +87,7 @@ public class DefaultVoiceGatewayClient {
     private final AtomicBoolean allowResume = new AtomicBoolean(false);
     private volatile int ssrc;
     private volatile MonoProcessor<Void> disconnectNotifier;
-    private volatile VoiceGatewaySessionHandler sessionHandler;
+    private volatile VoiceWebsocketHandler sessionHandler;
     private final Disposable.Swap cleanup = Disposables.swap();
 
     public DefaultVoiceGatewayClient(long guildId, long selfId, String sessionId, String token, ObjectMapper mapper,
@@ -102,6 +102,7 @@ public class DefaultVoiceGatewayClient {
         this.payloadWriter = payload ->
                 Mono.fromCallable(() -> Unpooled.wrappedBuffer(mapper.writeValueAsBytes(payload)));
         this.payloadReader = buf -> Mono.fromCallable(() -> {
+            @SuppressWarnings("UnnecessaryLocalVariable")
             VoiceGatewayPayload<?> payload = mapper.readValue(new ByteBufInputStream(buf),
                     new TypeReference<VoiceGatewayPayload<?>>() {});
             return payload;
@@ -142,7 +143,7 @@ public class DefaultVoiceGatewayClient {
                     Flux<ByteBuf> outFlux = outbound.flatMap(payloadWriter)
                             .doOnNext(buf -> logPayload(">> ", context, buf));
 
-                    sessionHandler = new VoiceGatewaySessionHandler(receiverSink, outFlux, context);
+                    sessionHandler = new VoiceWebsocketHandler(receiverSink, outFlux, context);
 
                     // TODO: validate this resume flow
                     if (allowResume.get()) {
