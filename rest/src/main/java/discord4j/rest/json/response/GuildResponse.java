@@ -43,6 +43,7 @@ public class GuildResponse {
     private Long systemChannelId;
     @JsonProperty("system_channel_flags")
     private int systemChannelFlags;
+    @JsonProperty("widget_channel_id")
     @Nullable
     @UnsignedJson
     private Long widgetChannelId;
