@@ -65,6 +65,7 @@ public class UserService extends RestService {
 
     public Mono<Void> leaveGuild(long guildId) {
         return Routes.GUILD_LEAVE.newRequest(guildId)
+                .header("content-type", "")
                 .exchange(getRouter())
                 .bodyToMono(Void.class);
     }
