@@ -16,10 +16,7 @@
  */
 package discord4j.core.object.entity;
 
-import com.darichey.discordjson.json.EmojiData;
-import com.darichey.discordjson.json.GuildData;
-import com.darichey.discordjson.json.MemberData;
-import com.darichey.discordjson.json.RoleData;
+import com.darichey.discordjson.json.*;
 import com.darichey.discordjson.possible.Possible;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.Ban;
@@ -751,8 +748,7 @@ public final class Guild implements Entity {
 
         return gateway.getRestClient().getGuildService()
                 .createGuildChannel(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason())
-                .map(ChannelBean::new)
-                .map(bean -> EntityUtil.getChannel(gateway, bean))
+                .map(data -> EntityUtil.getChannel(gateway, data))
                 .cast(Category.class);
     }
 
@@ -769,8 +765,7 @@ public final class Guild implements Entity {
 
         return gateway.getRestClient().getGuildService()
                 .createGuildChannel(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason())
-                .map(ChannelBean::new)
-                .map(bean -> EntityUtil.getChannel(gateway, bean))
+                .map(data -> EntityUtil.getChannel(gateway, data))
                 .cast(TextChannel.class);
     }
 
@@ -787,8 +782,7 @@ public final class Guild implements Entity {
 
         return gateway.getRestClient().getGuildService()
                 .createGuildChannel(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason())
-                .map(ChannelBean::new)
-                .map(bean -> EntityUtil.getChannel(gateway, bean))
+                .map(data -> EntityUtil.getChannel(gateway, data))
                 .cast(VoiceChannel.class);
     }
 
@@ -837,8 +831,7 @@ public final class Guild implements Entity {
     public Flux<Ban> getBans() {
         return gateway.getRestClient().getGuildService()
                 .getGuildBans(getId().asLong())
-                .map(BanBean::new)
-                .map(bean -> new Ban(gateway, bean));
+                .map(data -> new Ban(gateway, data));
     }
 
     /**
@@ -851,8 +844,7 @@ public final class Guild implements Entity {
     public Mono<Ban> getBan(final Snowflake userId) {
         return gateway.getRestClient().getGuildService()
                 .getGuildBan(getId().asLong(), userId.asLong())
-                .map(BanBean::new)
-                .map(bean -> new Ban(gateway, bean));
+                .map(data -> new Ban(gateway, data));
     }
 
     /**
@@ -909,7 +901,7 @@ public final class Guild implements Entity {
 
         return gateway.getRestClient().getGuildService()
                 .getGuildPruneCount(getId().asLong(), queryParams)
-                .map(PruneResponse::getPruned);
+                .map(PruneData::pruned);
     }
 
     /**
@@ -940,7 +932,7 @@ public final class Guild implements Entity {
 
         return gateway.getRestClient().getGuildService()
                 .beginGuildPrune(getId().asLong(), queryParams, reason)
-                .map(PruneResponse::getPruned);
+                .map(PruneData::pruned);
     }
 
     /**
@@ -975,22 +967,21 @@ public final class Guild implements Entity {
         final AuditLogQuerySpec mutatedSpec = new AuditLogQuerySpec();
         spec.accept(mutatedSpec);
 
-        final Function<Map<String, Object>, Flux<AuditLogResponse>> makeRequest = params -> {
+        final Function<Map<String, Object>, Flux<AuditLogData>> makeRequest = params -> {
             params.putAll(mutatedSpec.asRequest());
             return gateway.getRestClient().getAuditLogService()
                     .getAuditLog(getId().asLong(), params)
                     .flux();
         };
 
-        final ToLongFunction<AuditLogResponse> getLastEntryId = response -> {
-            final AuditLogEntryResponse[] entries = response.getAuditLogEntries();
-            return (entries.length == 0) ? Long.MAX_VALUE : entries[entries.length - 1].getId();
+        final ToLongFunction<AuditLogData> getLastEntryId = response -> {
+            final List<AuditLogEntryData> entries = response.auditLogEntries();
+            return (entries.size() == 0) ? Long.MAX_VALUE : Long.parseUnsignedLong(entries.get(entries.size() - 1).id());
         };
 
         return PaginationUtil.paginateBefore(makeRequest, getLastEntryId, Long.MAX_VALUE, 100)
-                .flatMap(log -> Flux.fromArray(log.getAuditLogEntries())
-                        .map(AuditLogEntryBean::new)
-                        .map(bean -> new AuditLogEntry(gateway, bean)));
+                .flatMap(log -> Flux.fromIterable(log.auditLogEntries())
+                        .map(data -> new AuditLogEntry(gateway, data)));
     }
 
     /**
@@ -1002,8 +993,7 @@ public final class Guild implements Entity {
     public Flux<Webhook> getWebhooks() {
         return gateway.getRestClient().getWebhookService()
                 .getGuildWebhooks(getId().asLong())
-                .map(WebhookBean::new)
-                .map(bean -> new Webhook(gateway, bean));
+                .map(data -> new Webhook(gateway, data));
     }
 
     /**
@@ -1015,8 +1005,7 @@ public final class Guild implements Entity {
     public Flux<ExtendedInvite> getInvites() {
         return gateway.getRestClient().getGuildService()
                 .getGuildInvites(getId().asLong())
-                .map(ExtendedInviteBean::new)
-                .map(bean -> new ExtendedInvite(gateway, bean));
+                .map(data -> new ExtendedInvite(gateway, data));
     }
 
     /**
@@ -1028,10 +1017,11 @@ public final class Guild implements Entity {
      * is emitted through the {@code Mono}.
      */
     public Mono<String> changeSelfNickname(@Nullable final String nickname) {
+        // FIXME
         return gateway.getRestClient().getGuildService()
-                .modifyOwnNickname(getId().asLong(), new NicknameModifyRequest(nickname))
+                .modifyOwnNickname(getId().asLong(), ImmutableNicknameModifyData.of(nickname))
                 .<String>handle((response, next) -> {
-                    String nick = response.getNick();
+                    String nick = response.nick();
                     if (nick != null) {
                         next.next(nick);
                     } else {

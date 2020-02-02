@@ -16,10 +16,13 @@
  */
 package discord4j.core.spec;
 
+import com.darichey.discordjson.json.ImmutableWebhookCreateRequest;
+import com.darichey.discordjson.json.WebhookCreateRequest;
 import discord4j.core.object.entity.Webhook;
 import discord4j.core.object.util.Image;
-import discord4j.rest.json.request.WebhookCreateRequest;
 import reactor.util.annotation.Nullable;
+
+import java.util.Optional;
 
 /**
  * Spec used to create a {@link Webhook} entity.
@@ -68,6 +71,6 @@ public class WebhookCreateSpec implements AuditSpec<WebhookCreateRequest> {
 
     @Override
     public WebhookCreateRequest asRequest() {
-        return new WebhookCreateRequest(name, avatar);
+        return ImmutableWebhookCreateRequest.of(name, Optional.of(avatar));
     }
 }

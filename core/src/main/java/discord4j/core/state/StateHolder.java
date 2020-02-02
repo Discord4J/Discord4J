@@ -81,7 +81,7 @@ public final class StateHolder {
         messageStore = service.provideLongObjStore(MessageData.class);
         log.debug("Message storage     : {}", messageStore);
 
-        presenceStore = service.provideGenericStore(LongLongTuple2.class, PresenceData.class);
+        presenceStore = service.provideGenericStore(LongLongTuple2.class, PresenceUpdate.class);
         log.debug("Presence storage    : {}", presenceStore);
 
         roleStore = service.provideLongObjStore(RoleData.class);

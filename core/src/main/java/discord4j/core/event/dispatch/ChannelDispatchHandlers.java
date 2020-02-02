@@ -16,16 +16,13 @@
  */
 package discord4j.core.event.dispatch;
 
+import com.darichey.discordjson.json.gateway.ChannelCreate;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.Event;
 import discord4j.core.event.domain.channel.*;
-import discord4j.core.object.data.stored.ChannelBean;
-import discord4j.core.object.data.stored.GuildBean;
 import discord4j.core.object.entity.channel.*;
 import discord4j.core.state.StateHolder;
 import discord4j.core.util.ArrayUtil;
-import discord4j.gateway.json.response.GatewayChannelResponse;
-import discord4j.store.api.primitive.LongObjStore;
 import reactor.core.publisher.Mono;
 
 import java.time.Instant;
@@ -34,7 +31,7 @@ import java.time.format.DateTimeFormatter;
 class ChannelDispatchHandlers {
 
     static Mono<? extends Event> channelCreate(DispatchContext<ChannelCreate> context) {
-        Channel.Type type = Channel.Type.of(context.getDispatch().getChannel().getType());
+        Channel.Type type = Channel.Type.of(context.getDispatch().channel().type());
 
         switch (type) {
             case GUILD_TEXT: return textChannelCreate(context);

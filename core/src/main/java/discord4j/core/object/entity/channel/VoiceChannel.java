@@ -16,10 +16,10 @@
  */
 package discord4j.core.object.entity.channel;
 
+import com.darichey.discordjson.json.ChannelData;
+import com.darichey.discordjson.json.VoiceStateData;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.VoiceState;
-import discord4j.core.object.data.stored.ChannelBean;
-import discord4j.core.object.data.stored.VoiceStateBean;
 import discord4j.core.spec.VoiceChannelEditSpec;
 import discord4j.core.spec.VoiceChannelJoinSpec;
 import discord4j.core.util.EntityUtil;
@@ -40,7 +40,7 @@ public final class VoiceChannel extends BaseCategorizableChannel {
      * @param gateway The {@link GatewayDiscordClient} associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
      */
-    public VoiceChannel(final GatewayDiscordClient gateway, final ChannelBean data) {
+    public VoiceChannel(final GatewayDiscordClient gateway, final ChannelData data) {
         super(gateway, data);
     }
 
@@ -50,7 +50,7 @@ public final class VoiceChannel extends BaseCategorizableChannel {
      * @return Gets the bitrate (in bits) for this voice channel.
      */
     public int getBitrate() {
-        return Objects.requireNonNull(getData().getBitrate());
+        return getData().bitrate().toOptional().orElseThrow(IllegalStateException::new);
     }
 
     /**
@@ -59,7 +59,7 @@ public final class VoiceChannel extends BaseCategorizableChannel {
      * @return The user limit of this voice channel.
      */
     public int getUserLimit() {
-        return Objects.requireNonNull(getData().getUserLimit());
+        return getData().userLimit().toOptional().orElseThrow(IllegalStateException::new);
     }
 
     /**
@@ -75,8 +75,7 @@ public final class VoiceChannel extends BaseCategorizableChannel {
 
         return getClient().getRestClient().getChannelService()
                 .modifyChannel(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason())
-                .map(ChannelBean::new)
-                .map(bean -> EntityUtil.getChannel(getClient(), bean))
+                .map(data -> EntityUtil.getChannel(getClient(), data))
                 .cast(VoiceChannel.class);
     }
 
@@ -87,15 +86,15 @@ public final class VoiceChannel extends BaseCategorizableChannel {
      * error is received, it is emitted through the {@code Flux}.
      *
      * @implNote If the underlying store does not save
-     * {@link VoiceStateBean} instances <b>OR</b> the bot is currently not logged in then the returned {@code Flux} will
+     * {@link VoiceStateData} instances <b>OR</b> the bot is currently not logged in then the returned {@code Flux} will
      * always be empty.
      */
     public Flux<VoiceState> getVoiceStates() {
         return getClient().getGatewayResources().getStateView().getVoiceStateStore()
                 .findInRange(LongLongTuple2.of(getGuildId().asLong(), Long.MIN_VALUE),
                         LongLongTuple2.of(getGuildId().asLong(), Long.MAX_VALUE))
-                .filter(bean -> Objects.equals(bean.getChannelId(), getId().asLong()))
-                .map(bean -> new VoiceState(getClient(), bean));
+                .filter(data -> data.channelId().map(getId().asString()::equals).orElse(false))
+                .map(data -> new VoiceState(getClient(), data));
     }
 
     /**

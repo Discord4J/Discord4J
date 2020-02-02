@@ -16,6 +16,7 @@
  */
 package discord4j.core.object.entity;
 
+import com.darichey.discordjson.json.ImmutableSuppressEmbedsRequest;
 import com.darichey.discordjson.json.MessageData;
 import com.darichey.discordjson.json.UserData;
 import discord4j.common.annotations.Experimental;
@@ -377,8 +378,7 @@ public final class Message implements Entity {
 
         return gateway.getRestClient().getChannelService()
             .editMessage(getChannelId().asLong(), getId().asLong(), mutatedSpec.asRequest())
-            .map(MessageBean::new)
-            .map(bean -> new Message(gateway, bean));
+            .map(data -> new Message(gateway, data));
     }
 
     /**
@@ -414,7 +414,7 @@ public final class Message implements Entity {
     @Experimental
     public Mono<Void> suppressEmbeds(final boolean suppress) {
         return gateway.getRestClient().getChannelService()
-            .suppressEmbeds(getChannelId().asLong(), getId().asLong(), new SuppressEmbedsRequest(suppress));
+            .suppressEmbeds(getChannelId().asLong(), getId().asLong(), ImmutableSuppressEmbedsRequest.of(suppress));
     }
 
     /**

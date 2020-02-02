@@ -16,17 +16,15 @@
  */
 package discord4j.core.object;
 
+import com.darichey.discordjson.json.InviteData;
 import discord4j.core.GatewayDiscordClient;
-import discord4j.core.object.data.ExtendedInviteBean;
-import discord4j.core.object.entity.User;
-import discord4j.core.object.util.Snowflake;
-import reactor.core.publisher.Mono;
 
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 
+// FIXME: invites are generally just kind of a mess rn
 /**
  * Metadata for a Discord invite.
  *
@@ -40,7 +38,7 @@ public final class ExtendedInvite extends Invite {
      * @param gateway The {@link GatewayDiscordClient} associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
      */
-    public ExtendedInvite(final GatewayDiscordClient gateway, final ExtendedInviteBean data) {
+    public ExtendedInvite(final GatewayDiscordClient gateway, final InviteData data) {
         super(gateway, data);
     }
 
@@ -50,7 +48,8 @@ public final class ExtendedInvite extends Invite {
      * @return The number of times this invite has been used.
      */
     public int getUses() {
-        return getData().getUses();
+        return getData().uses().toOptional()
+            .orElseThrow(IllegalStateException::new);
     }
 
     /**
@@ -59,7 +58,8 @@ public final class ExtendedInvite extends Invite {
      * @return The max number of times this invite can be used.
      */
     public int getMaxUses() {
-        return getData().getMaxUses();
+        return getData().maxUses().toOptional()
+            .orElseThrow(IllegalStateException::new);
     }
 
     /**
@@ -68,8 +68,8 @@ public final class ExtendedInvite extends Invite {
      * @return The instant this invite expires, if possible.
      */
     public Optional<Instant> getExpiration() {
-        final boolean temporary = getData().isTemporary();
-        final int maxAge = getData().getMaxAge();
+        final boolean temporary = getData().temporary().toOptional().orElse(false);
+        final int maxAge = getData().maxAge().toOptional().orElseThrow(IllegalStateException::new);
 
         return temporary ? Optional.of(getCreation().plus(maxAge, ChronoUnit.SECONDS)) : Optional.empty();
     }
@@ -80,12 +80,8 @@ public final class ExtendedInvite extends Invite {
      * @return When this invite was created.
      */
     public Instant getCreation() {
-        return DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(getData().getCreatedAt(), Instant::from);
-    }
-
-    @Override
-    ExtendedInviteBean getData() {
-        return (ExtendedInviteBean) super.getData();
+        String createdAt = getData().createdAt().toOptional().orElseThrow(IllegalStateException::new);
+        return DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(createdAt, Instant::from);
     }
 
     @Override

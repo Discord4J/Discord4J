@@ -17,6 +17,11 @@
 
 package discord4j.core.shard;
 
+import com.darichey.discordjson.json.MessageData;
+import com.darichey.discordjson.json.gateway.Dispatch;
+import com.darichey.discordjson.json.gateway.ImmutableVoiceStateUpdate;
+import com.darichey.discordjson.json.gateway.StatusUpdate;
+import com.darichey.discordjson.json.gateway.VoiceStateUpdate;
 import discord4j.common.LogUtil;
 import discord4j.common.ReactorResources;
 import discord4j.core.CoreResources;
@@ -31,6 +36,7 @@ import discord4j.core.object.presence.Presence;
 import discord4j.core.state.StateHolder;
 import discord4j.core.state.StateView;
 import discord4j.gateway.*;
+import discord4j.gateway.json.ShardGatewayPayload;
 import discord4j.gateway.payload.JacksonPayloadReader;
 import discord4j.gateway.payload.JacksonPayloadWriter;
 import discord4j.gateway.payload.PayloadReader;
@@ -449,7 +455,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
      */
     public Mono<GatewayDiscordClient> connect(Function<O, GatewayClient> clientFactory) {
         Map<String, Object> hints = new LinkedHashMap<>();
-        hints.put("messageClass", MessageBean.class);
+        hints.put("messageClass", MessageData.class);
         StateHolder stateHolder = new StateHolder(initStoreService(), new StoreContext(hints));
         StateView stateView = new StateView(stateHolder);
         EventDispatcher eventDispatcher = initEventDispatcher();
@@ -461,7 +467,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                 initVoiceReactorResources().getTimerTaskScheduler(),
                 client.getCoreResources().getJacksonResources().getObjectMapper(),
                 guildId -> {
-                    VoiceStateUpdate voiceStateUpdate = new VoiceStateUpdate(guildId, null, false, false);
+                    VoiceStateUpdate voiceStateUpdate = ImmutableVoiceStateUpdate.of(Long.toUnsignedString(guildId), Optional.empty(), false, false);
                     int shardId = (int) ((guildId >> 22) % clientGroup.getShardCount());
                     return clientGroup.unicast(ShardGatewayPayload.voiceStateUpdate(voiceStateUpdate, shardId));
                 });
@@ -588,7 +594,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                                     reconnectOptions.getFirstBackoff(),
                                     reconnectOptions.getMaxBackoffInterval())
                             .flatMap(response -> gatewayClient.execute(
-                                    RouteUtils.expandQuery(response.getUrl(), getGatewayParameters())))
+                                    RouteUtils.expandQuery(response.url(), getGatewayParameters())))
                             .then(stateHolder.invalidateStores())
                             .subscriberContext(buildContext(gateway, shard))
                             .subscribe(null,

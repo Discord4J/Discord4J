@@ -18,6 +18,9 @@
 package discord4j.core;
 
 import com.darichey.discordjson.json.ChannelData;
+import com.darichey.discordjson.json.GuildData;
+import com.darichey.discordjson.json.MemberData;
+import com.darichey.discordjson.json.UserData;
 import discord4j.common.JacksonResources;
 import discord4j.common.ReactorResources;
 import discord4j.core.event.EventDispatcher;
@@ -197,11 +200,9 @@ public class GatewayDiscordClient {
     public Mono<Guild> getGuildById(final Snowflake guildId) {
         return gatewayResources.getStateView().getGuildStore()
                 .find(guildId.asLong())
-                .cast(BaseGuildBean.class)
                 .switchIfEmpty(getRestClient().getGuildService()
-                        .getGuild(guildId.asLong())
-                        .map(BaseGuildBean::new))
-                .map(baseGuildBean -> new Guild(this, baseGuildBean));
+                        .getGuild(guildId.asLong()))
+                .map(data -> new Guild(this, data));
     }
 
     /**
@@ -216,9 +217,8 @@ public class GatewayDiscordClient {
         return gatewayResources.getStateView().getGuildEmojiStore()
                 .find(emojiId.asLong())
                 .switchIfEmpty(getRestClient().getEmojiService()
-                        .getGuildEmoji(guildId.asLong(), emojiId.asLong())
-                        .map(GuildEmojiBean::new))
-                .map(guildEmojiBean -> new GuildEmoji(this, guildEmojiBean, guildId.asLong()));
+                        .getGuildEmoji(guildId.asLong(), emojiId.asLong()))
+                .map(data -> new GuildEmoji(this, data, guildId.asLong()));
     }
 
     /**
@@ -230,14 +230,12 @@ public class GatewayDiscordClient {
      * IDs. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Member> getMemberById(final Snowflake guildId, final Snowflake userId) {
-        final Mono<MemberBean> member = gatewayResources.getStateView().getMemberStore()
+        final Mono<MemberData> member = gatewayResources.getStateView().getMemberStore()
                 .find(LongLongTuple2.of(guildId.asLong(), userId.asLong()))
                 .switchIfEmpty(getRestClient().getGuildService()
-                        .getGuildMember(guildId.asLong(), userId.asLong())
-                        .map(MemberBean::new));
+                        .getGuildMember(guildId.asLong(), userId.asLong()));
 
-        return member.flatMap(memberBean -> getUserBean(userId).map(userBean ->
-                new Member(this, memberBean, userBean, guildId.asLong())));
+        return member.map(memberData -> new Member(this, memberData, guildId.asLong()));
     }
 
     /**
@@ -252,9 +250,8 @@ public class GatewayDiscordClient {
         return gatewayResources.getStateView().getMessageStore()
                 .find(messageId.asLong())
                 .switchIfEmpty(getRestClient().getChannelService()
-                        .getMessage(channelId.asLong(), messageId.asLong())
-                        .map(MessageBean::new))
-                .map(messageBean -> new Message(this, messageBean));
+                        .getMessage(channelId.asLong(), messageId.asLong()))
+                .map(data -> new Message(this, data));
     }
 
     /**
@@ -270,8 +267,7 @@ public class GatewayDiscordClient {
                 .find(roleId.asLong())
                 .switchIfEmpty(getRestClient().getGuildService()
                         .getGuildRoles(guildId.asLong())
-                        .filter(response -> response.getId() == roleId.asLong())
-                        .map(RoleBean::new)
+                        .filter(response -> response.id().equals(roleId.asString()))
                         .singleOrEmpty())
                 .map(roleBean -> new Role(this, roleBean, guildId.asLong()));
     }
@@ -284,7 +280,7 @@ public class GatewayDiscordClient {
      * ID. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<User> getUserById(final Snowflake userId) {
-        return getUserBean(userId).map(userBean -> new User(this, userBean));
+        return getUserData(userId).map(userBean -> new User(this, userBean));
     }
 
     /**
@@ -297,8 +293,7 @@ public class GatewayDiscordClient {
     public Mono<Webhook> getWebhookById(final Snowflake webhookId) {
         return getRestClient().getWebhookService()
                 .getWebhook(webhookId.asLong())
-                .map(WebhookBean::new)
-                .map(webhookBean -> new Webhook(this, webhookBean));
+                .map(data -> new Webhook(this, data));
     }
 
     /**
@@ -310,8 +305,7 @@ public class GatewayDiscordClient {
     public Mono<ApplicationInfo> getApplicationInfo() {
         return getRestClient().getApplicationService()
                 .getCurrentApplicationInfo()
-                .map(ApplicationInfoBean::new)
-                .map(applicationInfoBean -> new ApplicationInfo(this, applicationInfoBean));
+                .map(data -> new ApplicationInfo(this, data));
     }
 
     /**
@@ -321,19 +315,17 @@ public class GatewayDiscordClient {
      * is received, it is emitted through the {@code Flux}.
      */
     public Flux<Guild> getGuilds() {
-        final Function<Map<String, Object>, Flux<UserGuildResponse>> makeRequest = params ->
+        final Function<Map<String, Object>, Flux<GuildData>> makeRequest = params ->
                 getRestClient().getUserService()
                         .getCurrentUserGuilds(params);
 
         return gatewayResources.getStateView().getGuildStore()
                 .values()
-                .cast(BaseGuildBean.class)
-                .switchIfEmpty(PaginationUtil.paginateAfter(makeRequest, UserGuildResponse::getId, 0L, 100)
-                        .map(UserGuildResponse::getId)
+                .switchIfEmpty(PaginationUtil.paginateAfter(makeRequest, data -> Long.parseUnsignedLong(data.id()), 0L, 100)
+                        .map(GuildData::id)
                         //.filter(id -> (id >> 22) % getConfig().getShardCount() == getConfig().getShardIndex())
-                        .flatMap(getRestClient().getGuildService()::getGuild)
-                        .map(BaseGuildBean::new))
-                .map(bean -> new Guild(this, bean));
+                        .flatMap(id -> getRestClient().getGuildService().getGuild(Long.parseUnsignedLong(id))))
+                .map(data -> new Guild(this, data));
     }
 
     /**
@@ -356,8 +348,7 @@ public class GatewayDiscordClient {
      */
     public Flux<Region> getRegions() {
         return getRestClient().getVoiceService().getVoiceRegions()
-                .map(RegionBean::new)
-                .map(bean -> new Region(this, bean));
+                .map(data -> new Region(this, data));
     }
 
     /**
@@ -371,8 +362,7 @@ public class GatewayDiscordClient {
                 .flatMap(this::getUserById)
                 .switchIfEmpty(getRestClient().getUserService()
                         .getCurrentUser()
-                        .map(UserBean::new)
-                        .map(bean -> new User(this, bean)));
+                        .map(data -> new User(this, data)));
     }
 
     /**
@@ -397,8 +387,7 @@ public class GatewayDiscordClient {
 
         return getRestClient().getGuildService()
                 .createGuild(mutatedSpec.asRequest())
-                .map(BaseGuildBean::new)
-                .map(bean -> new Guild(this, bean));
+                .map(data -> new Guild(this, data));
     }
 
     /**
@@ -433,8 +422,7 @@ public class GatewayDiscordClient {
     public Mono<Invite> getInvite(final String inviteCode) {
         return getRestClient().getInviteService()
                 .getInvite(inviteCode)
-                .map(InviteBean::new)
-                .map(bean -> new Invite(this, bean));
+                .map(data -> new Invite(this, data));
     }
 
     /**
@@ -450,23 +438,21 @@ public class GatewayDiscordClient {
 
         return getRestClient().getUserService()
                 .modifyCurrentUser(mutatedSpec.asRequest())
-                .map(UserBean::new)
-                .map(bean -> new User(this, bean));
+                .map(data -> new User(this, data));
     }
 
     /**
      * Requests to retrieve the user bean represented by the supplied ID.
      *
      * @param userId The ID of the user.
-     * @return A {@link Mono} where, upon successful completion, emits the {@link UserBean} as represented by the
+     * @return A {@link Mono} where, upon successful completion, emits the {@link UserData} as represented by the
      * supplied ID. If an error is received, it is emitted through the {@code Mono}.
      */
-    private Mono<UserBean> getUserBean(final Snowflake userId) {
+    private Mono<UserData> getUserData(final Snowflake userId) {
         return gatewayResources.getStateView().getUserStore()
                 .find(userId.asLong())
                 .switchIfEmpty(getRestClient().getUserService()
-                        .getUser(userId.asLong())
-                        .map(UserBean::new));
+                        .getUser(userId.asLong()));
     }
 
     /**

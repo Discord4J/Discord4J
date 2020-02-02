@@ -57,7 +57,7 @@ public class MessageEditSpec implements Spec<MessageEditRequest> {
         if (spec != null) {
             final EmbedCreateSpec mutatedSpec = new EmbedCreateSpec();
             spec.accept(mutatedSpec);
-            embed = Possible.of(mutatedSpec.asRequest());
+            embed = Possible.of(Optional.of(mutatedSpec.asRequest()));
         } else {
             embed = Possible.of(Optional.empty());
         }

@@ -16,10 +16,10 @@
  */
 package discord4j.core.util;
 
+import com.darichey.discordjson.json.AuditEntryInfoData;
+import com.darichey.discordjson.json.AuditLogChangeData;
 import discord4j.core.object.audit.AuditLogChange;
 import discord4j.core.object.audit.OptionKey;
-import discord4j.rest.json.response.AuditLogChangeResponse;
-import discord4j.rest.json.response.AuditLogEntryOptionsResponse;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -28,37 +28,38 @@ import java.util.stream.Collectors;
 
 public class AuditLogUtil {
 
-    public static Collector<AuditLogChangeResponse, ?, Map<String, AuditLogChange<?>>> changeCollector() {
+    public static Collector<AuditLogChangeData, ?, Map<String, AuditLogChange<?>>> changeCollector() {
         return Collectors.toMap(
-                AuditLogChangeResponse::getKey,
-                change -> new AuditLogChange<>(change.getOldValue(), change.getNewValue()));
+                AuditLogChangeData::key,
+                change -> new AuditLogChange<>(change.oldValue().toOptional().orElse(null), change.newValue().toOptional().orElse(null)));
     }
 
-    public static Map<String, ?> createOptionMap(AuditLogEntryOptionsResponse options) {
+    // FIXME I'm pretty sure this doesn't actually work because type conversion is never done. Asking for a class cast exception somewhere...
+    public static Map<String, ?> createOptionMap(AuditEntryInfoData options) {
         HashMap<String, Object> map = new HashMap<>();
-        if (options.getDeleteMemberDays() != null) {
-            map.put(OptionKey.DELETE_MEMBER_DAYS.getField(), options.getDeleteMemberDays());
+        if (!options.deleteMemberDays().isAbsent()) {
+            map.put(OptionKey.DELETE_MEMBER_DAYS.getField(), options.deleteMemberDays().get());
         }
-        if (options.getMembersRemoved() != null) {
-            map.put(OptionKey.MEMBERS_REMOVED.getField(), options.getMembersRemoved());
+        if (!options.membersRemoved().isAbsent()) {
+            map.put(OptionKey.MEMBERS_REMOVED.getField(), options.membersRemoved().get());
         }
-        if (options.getChannelId() != null) {
-            map.put(OptionKey.CHANNEL_ID.getField(), options.getChannelId());
+        if (!options.channelId().isAbsent()) {
+            map.put(OptionKey.CHANNEL_ID.getField(), options.channelId().get());
         }
-        if (options.getMessageId() != null) {
-            map.put(OptionKey.MESSAGE_ID.getField(), options.getMessageId());
+        if (!options.messageId().isAbsent()) {
+            map.put(OptionKey.MESSAGE_ID.getField(), options.messageId().get());
         }
-        if (options.getCount() != null) {
-            map.put(OptionKey.COUNT.getField(), options.getCount());
+        if (!options.count().isAbsent()) {
+            map.put(OptionKey.COUNT.getField(), options.count().get());
         }
-        if (options.getId() != null) {
-            map.put(OptionKey.ID.getField(), options.getId());
+        if (!options.id().isAbsent()) {
+            map.put(OptionKey.ID.getField(), options.id().get());
         }
-        if (options.getType() != null) {
-            map.put(OptionKey.TYPE.getField(), options.getType());
+        if (!options.type().isAbsent()) {
+            map.put(OptionKey.TYPE.getField(), options.type().get());
         }
-        if (options.getRoleName() != null) {
-            map.put(OptionKey.ROLE_NAME.getField(), options.getRoleName());
+        if (!options.roleName().isAbsent()) {
+            map.put(OptionKey.ROLE_NAME.getField(), options.roleName().get());
         }
         return map;
     }

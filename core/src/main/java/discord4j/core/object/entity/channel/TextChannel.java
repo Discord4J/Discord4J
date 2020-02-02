@@ -48,7 +48,7 @@ public final class TextChannel extends BaseGuildMessageChannel {
      * @return The amount of seconds an user has to wait before sending another message (0-120).
      */
     public int getRateLimitPerUser() {
-        return Objects.requireNonNull(getData().getRateLimitPerUser());
+        return getData().rateLimitPerUser().get();
     }
 
     /**
@@ -57,7 +57,7 @@ public final class TextChannel extends BaseGuildMessageChannel {
      * @return {@code true} if this channel is considered NSFW (Not Safe For Work), {@code false} otherwise.
      */
     public boolean isNsfw() {
-        return getData().isNsfw();
+        return getData().nsfw().get();
     }
 
     /**

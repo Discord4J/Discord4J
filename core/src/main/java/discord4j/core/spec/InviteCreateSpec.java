@@ -16,10 +16,9 @@
  */
 package discord4j.core.spec;
 
-import discord4j.common.jackson.Possible;
+import com.darichey.discordjson.json.ImmutableInviteCreateRequest;
+import com.darichey.discordjson.json.InviteCreateRequest;
 import discord4j.core.object.Invite;
-import discord4j.core.object.util.Snowflake;
-import discord4j.rest.json.request.InviteCreateRequest;
 import reactor.util.annotation.Nullable;
 
 /**
@@ -35,8 +34,9 @@ public class InviteCreateSpec implements AuditSpec<InviteCreateRequest> {
     private boolean temporary;
     private boolean unique;
     private String reason;
-    private Possible<String> targetUser;
-    private Possible<Integer> targetUserType;
+    // FIXME these aren't documented?
+//    private Possible<String> targetUser;
+//    private Possible<Integer> targetUserType;
 
     /**
      * Sets the duration of the created {@link Invite} in seconds before expiration, or {@code 0} to never expire. If
@@ -85,28 +85,28 @@ public class InviteCreateSpec implements AuditSpec<InviteCreateRequest> {
         this.unique = unique;
         return this;
     }
-
-    /**
-     * Sets the target user id for this invite.
-     *
-     * @param targetUser The target user id for this invite.
-     * @return This spec.
-     */
-    public InviteCreateSpec setTargetUser(Snowflake targetUser) {
-        this.targetUser = Possible.of(targetUser.asString());
-        return this;
-    }
-
-    /**
-     * Sets the type of target user for this invite.
-     *
-     * @param type The type of target user for this invite.
-     * @return This spec.
-     */
-    public InviteCreateSpec setTargetUserType(Invite.Type type) {
-        this.targetUserType = Possible.of(type.getValue());
-        return this;
-    }
+//
+//    /**
+//     * Sets the target user id for this invite.
+//     *
+//     * @param targetUser The target user id for this invite.
+//     * @return This spec.
+//     */
+//    public InviteCreateSpec setTargetUser(Snowflake targetUser) {
+//        this.targetUser = Possible.of(targetUser.asString());
+//        return this;
+//    }
+//
+//    /**
+//     * Sets the type of target user for this invite.
+//     *
+//     * @param type The type of target user for this invite.
+//     * @return This spec.
+//     */
+//    public InviteCreateSpec setTargetUserType(Invite.Type type) {
+//        this.targetUserType = Possible.of(type.getValue());
+//        return this;
+//    }
 
     @Override
     public InviteCreateSpec setReason(@Nullable final String reason) {
@@ -122,6 +122,6 @@ public class InviteCreateSpec implements AuditSpec<InviteCreateRequest> {
 
     @Override
     public InviteCreateRequest asRequest() {
-        return new InviteCreateRequest(maxAge, maxUses, temporary, unique, targetUser, targetUserType);
+        return ImmutableInviteCreateRequest.of(maxAge, maxUses, temporary, unique);
     }
 }

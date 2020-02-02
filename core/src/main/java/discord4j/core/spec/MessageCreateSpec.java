@@ -16,13 +16,15 @@
  */
 package discord4j.core.spec;
 
+import com.darichey.discordjson.json.EmbedData;
+import com.darichey.discordjson.json.ImmutableMessageCreateRequest;
+import com.darichey.discordjson.json.MessageCreateRequest;
+import com.darichey.discordjson.possible.Possible;
 import discord4j.core.object.Embed;
 import discord4j.core.object.entity.Attachment;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.core.object.util.Snowflake;
-import discord4j.rest.json.request.EmbedRequest;
-import discord4j.rest.json.request.MessageCreateRequest;
 import discord4j.rest.util.MultipartRequest;
 import reactor.util.annotation.Nullable;
 import reactor.util.function.Tuple2;
@@ -47,7 +49,7 @@ public class MessageCreateSpec implements Spec<MultipartRequest> {
     @Nullable
     private String nonce;
     private boolean tts;
-    private EmbedRequest embed;
+    private EmbedData embed;
     private List<Tuple2<String, InputStream>> files;
 
     /**
@@ -124,7 +126,12 @@ public class MessageCreateSpec implements Spec<MultipartRequest> {
 
     @Override
     public MultipartRequest asRequest() {
-        MessageCreateRequest json = new MessageCreateRequest(content, nonce, tts, embed);
+        MessageCreateRequest json = ImmutableMessageCreateRequest.builder()
+            .content(content == null ? Possible.absent() : Possible.of(content))
+            .nonce(nonce == null ? Possible.absent() : Possible.of(nonce))
+            .tts(Possible.of(tts))
+            .embed(Possible.of(embed))
+            .build();
         return new MultipartRequest(json, files == null ? Collections.emptyList() : files);
     }
 }

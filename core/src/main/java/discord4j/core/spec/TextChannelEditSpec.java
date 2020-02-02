@@ -16,15 +16,21 @@
  */
 package discord4j.core.spec;
 
-import discord4j.common.json.OverwriteEntity;
+import com.darichey.discordjson.json.ChannelModifyRequest;
+import com.darichey.discordjson.json.ImmutableChannelModifyRequest;
+import com.darichey.discordjson.json.ImmutableOverwriteData;
+import com.darichey.discordjson.json.OverwriteData;
+import com.darichey.discordjson.possible.Possible;
 import discord4j.core.object.PermissionOverwrite;
 import discord4j.core.object.entity.channel.TextChannel;
 import discord4j.core.object.util.Permission;
 import discord4j.core.object.util.Snowflake;
-import discord4j.rest.json.request.ChannelModifyRequest;
 import reactor.util.annotation.Nullable;
 
+import java.util.List;
+import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Spec used to modify a guild {@link TextChannel} settings.
@@ -33,7 +39,7 @@ import java.util.Set;
  */
 public class TextChannelEditSpec implements AuditSpec<ChannelModifyRequest> {
 
-    private final ChannelModifyRequest.Builder requestBuilder = ChannelModifyRequest.builder();
+    private final ImmutableChannelModifyRequest.Builder requestBuilder = ImmutableChannelModifyRequest.builder();
     @Nullable
     private String reason;
 
@@ -44,7 +50,7 @@ public class TextChannelEditSpec implements AuditSpec<ChannelModifyRequest> {
      * @return This spec.
      */
     public TextChannelEditSpec setName(String name) {
-        requestBuilder.name(name);
+        requestBuilder.name(Possible.of(name));
         return this;
     }
 
@@ -55,7 +61,7 @@ public class TextChannelEditSpec implements AuditSpec<ChannelModifyRequest> {
      * @return This spec.
      */
     public TextChannelEditSpec setPosition(int position) {
-        requestBuilder.position(position);
+        requestBuilder.position(Possible.of(position));
         return this;
     }
 
@@ -66,7 +72,7 @@ public class TextChannelEditSpec implements AuditSpec<ChannelModifyRequest> {
      * @return This spec.
      */
     public TextChannelEditSpec setTopic(String topic) {
-        requestBuilder.topic(topic);
+        requestBuilder.topic(Possible.of(topic));
         return this;
     }
 
@@ -77,7 +83,7 @@ public class TextChannelEditSpec implements AuditSpec<ChannelModifyRequest> {
      * @return This spec.
      */
     public TextChannelEditSpec setNsfw(boolean nsfw) {
-        requestBuilder.nsfw(nsfw);
+        requestBuilder.nsfw(Possible.of(nsfw));
         return this;
     }
 
@@ -88,12 +94,12 @@ public class TextChannelEditSpec implements AuditSpec<ChannelModifyRequest> {
      * @return This spec.
      */
     public TextChannelEditSpec setPermissionOverwrites(Set<? extends PermissionOverwrite> permissionOverwrites) {
-        OverwriteEntity[] raw = permissionOverwrites.stream()
-                .map(o -> new OverwriteEntity(o.getTargetId().asLong(), o.getType().getValue(),
-                        o.getAllowed().getRawValue(), o.getDenied().getRawValue()))
-                .toArray(OverwriteEntity[]::new);
+        List<OverwriteData> raw = permissionOverwrites.stream()
+            .map(o -> ImmutableOverwriteData.of(o.getTargetId().asString(), o.getType().getValue(),
+                o.getAllowed().getRawValue(), o.getDenied().getRawValue()))
+            .collect(Collectors.toList());
 
-        requestBuilder.permissionOverwrites(raw);
+        requestBuilder.permissionOverwrites(Possible.of(raw));
         return this;
     }
 
@@ -104,7 +110,7 @@ public class TextChannelEditSpec implements AuditSpec<ChannelModifyRequest> {
      * @return This spec.
      */
     public TextChannelEditSpec setParentId(@Nullable Snowflake parentId) {
-        requestBuilder.parentId(parentId == null ? null : parentId.asLong());
+        requestBuilder.parentId(parentId == null ? Possible.of(Optional.empty()) : Possible.of(Optional.of(parentId.asString())));
         return this;
     }
 
@@ -117,7 +123,7 @@ public class TextChannelEditSpec implements AuditSpec<ChannelModifyRequest> {
      * @return This spec.
      */
     public TextChannelEditSpec setRateLimitPerUser(int rateLimitPerUser) {
-        requestBuilder.rateLimitPerUser(rateLimitPerUser);
+        requestBuilder.rateLimitPerUser(Possible.of(rateLimitPerUser));
         return this;
     }
 

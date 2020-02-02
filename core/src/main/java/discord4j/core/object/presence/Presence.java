@@ -25,6 +25,7 @@ import reactor.util.annotation.Nullable;
 
 import java.util.Optional;
 
+// FIXME Presence is just a mess
 /**
  * A Discord presence.
  *

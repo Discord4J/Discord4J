@@ -16,8 +16,8 @@
  */
 package discord4j.core.object.entity.channel;
 
+import com.darichey.discordjson.json.ChannelData;
 import discord4j.core.GatewayDiscordClient;
-import discord4j.core.object.data.stored.ChannelBean;
 import discord4j.core.spec.StoreChannelEditSpec;
 import discord4j.core.util.EntityUtil;
 import reactor.core.publisher.Mono;
@@ -33,7 +33,7 @@ public final class StoreChannel extends BaseCategorizableChannel {
      * @param gateway The {@link GatewayDiscordClient} associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
      */
-    public StoreChannel(GatewayDiscordClient gateway, ChannelBean data) {
+    public StoreChannel(GatewayDiscordClient gateway, ChannelData data) {
         super(gateway, data);
     }
 
@@ -50,8 +50,7 @@ public final class StoreChannel extends BaseCategorizableChannel {
 
         return getClient().getRestClient().getChannelService()
                 .modifyChannel(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason())
-                .map(ChannelBean::new)
-                .map(bean -> EntityUtil.getChannel(getClient(), bean))
+                .map(data -> EntityUtil.getChannel(getClient(), data))
                 .cast(StoreChannel.class);
     }
 

@@ -97,7 +97,7 @@ public class NewsChannelCreateSpec implements AuditSpec<ChannelCreateRequest> {
      * @return This spec.
      */
     public NewsChannelCreateSpec setParentId(@Nullable Snowflake parentId) {
-        requestBuilder.parentId(parentId == null ? null : parentId.asLong());
+        requestBuilder.parentId(parentId == null ? null : parentId.asString()); // FIXME
         return this;
     }
 

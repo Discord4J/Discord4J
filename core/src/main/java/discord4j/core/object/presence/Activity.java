@@ -16,7 +16,8 @@
  */
 package discord4j.core.object.presence;
 
-import discord4j.core.object.data.stored.ActivityBean;
+import com.darichey.discordjson.json.ActivityData;
+import com.darichey.discordjson.possible.Possible;
 import discord4j.core.object.reaction.ReactionEmoji;
 import discord4j.core.object.util.Snowflake;
 import discord4j.core.util.EntityUtil;
@@ -29,36 +30,40 @@ import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.stream.Collectors;
 
+// FIXME: we should probably just differentiate between a received Activity and one we send. They're very different.
+// also just a mess
 public class Activity {
 
-    public static Activity playing(String name) {
-        return new Activity(Type.PLAYING.getValue(), name, null);
-    }
+    // FIXME
+//    public static Activity playing(String name) {
+//        return new Activity(Type.PLAYING.getValue(), name, null);
+//    }
+//
+//    public static Activity streaming(String name, String url) {
+//        return new Activity(Type.STREAMING.getValue(), name, url);
+//    }
+//
+//    public static Activity listening(String name) {
+//        return new Activity(Type.LISTENING.getValue(), name, null);
+//    }
+//
+//    public static Activity watching(String name) {
+//        return new Activity(Type.WATCHING.getValue(), name, null);
+//    }
 
-    public static Activity streaming(String name, String url) {
-        return new Activity(Type.STREAMING.getValue(), name, url);
-    }
+    private final ActivityData data;
 
-    public static Activity listening(String name) {
-        return new Activity(Type.LISTENING.getValue(), name, null);
-    }
-
-    public static Activity watching(String name) {
-        return new Activity(Type.WATCHING.getValue(), name, null);
-    }
-
-    private final ActivityBean data;
-
-    Activity(final ActivityBean data) {
+    Activity(final ActivityData data) {
         this.data = data;
     }
 
-    private Activity(int type, String name, @Nullable String streamingUrl) {
-        this.data = new ActivityBean();
-        this.data.setType(type);
-        this.data.setName(name);
-        this.data.setUrl(streamingUrl);
-    }
+    // FIXME
+//    private Activity(int type, String name, @Nullable String streamingUrl) {
+//        this.data = new ActivityBean();
+//        this.data.setType(type);
+//        this.data.setName(name);
+//        this.data.setUrl(streamingUrl);
+//    }
 
     /**
      * Gets the type for this activity.
@@ -66,7 +71,7 @@ public class Activity {
      * @return The type for this activity.
      */
     public Type getType() {
-        return Type.of(data.getType());
+        return Type.of(data.type());
     }
 
     /**
@@ -75,7 +80,7 @@ public class Activity {
      * @return The activity's name.
      */
     public String getName() {
-        return data.getName();
+        return data.name();
     }
 
     /**
@@ -84,7 +89,7 @@ public class Activity {
      * @return The stream url, if present.
      */
     public Optional<String> getStreamingUrl() {
-        return Optional.ofNullable(data.getUrl());
+        return Possible.flatOpt(data.url());
     }
 
     /**
@@ -93,7 +98,8 @@ public class Activity {
      * @return The UNIX time (in milliseconds) of when the activity started, if present.
      */
     public Optional<Instant> getStart() {
-        return Optional.ofNullable(data.getStart())
+        return data.timestamps().toOptional()
+            .flatMap(timestamps -> timestamps.start().toOptional())
             .map(Instant::ofEpochMilli);
     }
 
@@ -103,7 +109,8 @@ public class Activity {
      * @return The UNIX time (in milliseconds) of when the activity ends, if present.
      */
     public Optional<Instant> getEnd() {
-        return Optional.ofNullable(data.getEnd())
+        return data.timestamps().toOptional()
+            .flatMap(timestamps -> timestamps.end().toOptional())
             .map(Instant::ofEpochMilli);
     }
 
@@ -113,7 +120,7 @@ public class Activity {
      * @return The application ID for the game, if present.
      */
     public Optional<Snowflake> getApplicationId() {
-        return Optional.ofNullable(data.getApplicationId())
+        return data.applicationId().toOptional()
             .map(Snowflake::of);
     }
 
@@ -123,7 +130,7 @@ public class Activity {
      * @return What the player is currently doing, if present.
      */
     public Optional<String> getDetails() {
-        return Optional.ofNullable(data.getDetails());
+        return Possible.flatOpt(data.details());
     }
 
     /**
@@ -132,7 +139,7 @@ public class Activity {
      * @return The user's current party status, if present.
      */
     public Optional<String> getState() {
-        return Optional.ofNullable(data.getState());
+        return Possible.flatOpt(data.state());
     }
 
     /**
@@ -141,7 +148,8 @@ public class Activity {
      * @return The ID of the party, if present.
      */
     public Optional<String> getPartyId() {
-        return Optional.ofNullable(data.getPartyId());
+        return data.party().toOptional()
+            .flatMap(party -> party.id().toOptional());
     }
 
     /**
@@ -150,8 +158,11 @@ public class Activity {
      * @return The party's current size, if present.
      */
     public OptionalLong getCurrentPartySize() {
-        final Long currentPartySize = data.getCurrentPartySize();
-        return (currentPartySize == null) ? OptionalLong.empty() : OptionalLong.of(currentPartySize);
+        return data.party().toOptional()
+            .flatMap(party -> party.size().toOptional())
+            .map(size -> size.get(0))
+            .map(OptionalLong::of)
+            .orElseGet(OptionalLong::empty);
     }
 
     /**
@@ -160,8 +171,11 @@ public class Activity {
      * @return The party's max size, if present.
      */
     public OptionalLong getMaxPartySize() {
-        final Long maxPartySize = data.getMaxPartySize();
-        return (maxPartySize == null) ? OptionalLong.empty() : OptionalLong.of(maxPartySize);
+        return data.party().toOptional()
+            .flatMap(party -> party.size().toOptional())
+            .map(size -> size.get(1))
+            .map(OptionalLong::of)
+            .orElseGet(OptionalLong::empty);
     }
 
     /**
@@ -170,7 +184,8 @@ public class Activity {
      * @return The ID for a large asset of the activity, usually a {@code Snowflake}, if present.
      */
     public Optional<String> getLargeImageId() {
-        return Optional.ofNullable(data.getLargeImage());
+        return data.assets().toOptional()
+            .flatMap(assets -> assets.largeImage().toOptional());
     }
 
     /**
@@ -179,7 +194,8 @@ public class Activity {
      * @return The text displayed when hovering over the large image of the activity, if present.
      */
     public Optional<String> getLargeText() {
-        return Optional.ofNullable(data.getLargeText());
+        return data.assets().toOptional()
+            .flatMap(assets -> assets.largeText().toOptional());
     }
 
     /**
@@ -188,7 +204,8 @@ public class Activity {
      * @return The ID for a small asset of the activity, usually a {@code Snowflake}, if present.
      */
     public Optional<String> getSmallImageId() {
-        return Optional.ofNullable(data.getSmallImage());
+        return data.assets().toOptional()
+            .flatMap(assets -> assets.smallImage().toOptional());
     }
 
     /**
@@ -197,19 +214,23 @@ public class Activity {
      * @return The text displayed when hovering over the small image of the activity, if present.
      */
     public Optional<String> getSmallText() {
-        return Optional.ofNullable(data.getSmallText());
+        return data.assets().toOptional()
+            .flatMap(assets -> assets.smallText().toOptional());
     }
 
     public Optional<String> getJoinSecret() {
-        return Optional.ofNullable(data.getJoinSecret());
+        return data.secrets().toOptional()
+            .flatMap(secrets -> secrets.join().toOptional());
     }
 
     public Optional<String> getSpectateSecret() {
-        return Optional.ofNullable(data.getSpectateSecret());
+        return data.secrets().toOptional()
+            .flatMap(secrets -> secrets.spectate().toOptional());
     }
 
     public Optional<String> getMatchSecret() {
-        return Optional.ofNullable(data.getMatchSecret());
+        return data.secrets().toOptional()
+            .flatMap(secrets -> secrets.match().toOptional());
     }
 
     /**
@@ -218,9 +239,13 @@ public class Activity {
      * @return The emoji used for a custom status, if present.
      */
     public Optional<ReactionEmoji> getEmoji() {
-        return Optional.ofNullable(data.getEmoji())
-                .map(emoji -> ReactionEmoji.of(emoji.getId(), emoji.getName(),
-                        emoji.getAnimated() != null && emoji.getAnimated()));
+        return Possible.flatOpt(data.emoji())
+            .map(emoji -> {
+                // FIXME
+                String sid = emoji.id().toOptional().orElse(null);
+                Long id = sid == null ? null : Long.parseUnsignedLong(sid);
+                return ReactionEmoji.of(id, emoji.name(), emoji.animated().toOptional().orElse(false));
+            });
     }
 
     /**
@@ -229,17 +254,16 @@ public class Activity {
      * @return Whether or not the activity is an instanced game session
      */
     public boolean isInstance() {
-        return Optional.ofNullable(data.getInstance()).orElse(false);
+//        return Optional.ofNullable(data.getInstance()).orElse(false);
+        return data.instance().toOptional().orElse(false);
     }
 
     public EnumSet<Flag> getFlags() {
-        if (data.getFlags() == null) {
-            return EnumSet.noneOf(Flag.class);
-        }
-
-        return Arrays.stream(Flag.values())
-            .filter(f -> (data.getFlags() & f.getValue()) == f.getValue())
-            .collect(Collectors.toCollection(() -> EnumSet.noneOf(Flag.class)));
+        return data.flags().toOptional()
+            .map(flags -> Arrays.stream(Flag.values())
+                .filter(f -> (flags & f.getValue()) == f.getValue())
+                .collect(Collectors.toCollection(() -> EnumSet.noneOf(Flag.class))))
+            .orElse(EnumSet.noneOf(Flag.class));
     }
 
     /** The type of "action" for an activity. */

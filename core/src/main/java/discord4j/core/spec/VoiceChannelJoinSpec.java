@@ -16,6 +16,7 @@
  */
 package discord4j.core.spec;
 
+import com.darichey.discordjson.json.gateway.ImmutableVoiceStateUpdate;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.VoiceServerUpdateEvent;
 import discord4j.core.event.domain.VoiceStateUpdateEvent;
@@ -29,6 +30,7 @@ import reactor.core.publisher.Mono;
 import reactor.util.function.Tuple2;
 
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * Spec used to request a connection to a {@link VoiceChannel} and handle the initialization of the resulting
@@ -107,7 +109,7 @@ public class VoiceChannelJoinSpec implements Spec<Mono<VoiceConnection>> {
         final GatewayClientGroup clientGroup = voiceChannel.getClient().getGatewayClientGroup();
         final int shardId = (int) ((voiceChannel.getGuildId().asLong() >> 22) % clientGroup.getShardCount());
         final Mono<Void> sendVoiceStateUpdate = clientGroup.unicast(ShardGatewayPayload.voiceStateUpdate(
-                new VoiceStateUpdate(guildId, channelId, selfMute, selfDeaf), shardId));
+                ImmutableVoiceStateUpdate.of(Long.toUnsignedString(guildId), Optional.of(Long.toUnsignedString(channelId)), selfMute, selfDeaf), shardId));
 
         final Mono<VoiceStateUpdateEvent> waitForVoiceStateUpdate = gateway.getEventDispatcher()
                 .on(VoiceStateUpdateEvent.class)

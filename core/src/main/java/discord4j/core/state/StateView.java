@@ -54,7 +54,7 @@ public final class StateView {
         return new LongObjStoreView<>(stateHolder.getChannelStore());
     }
 
-    public LongObjStoreView<ChannelData> getGuildStore() {
+    public LongObjStoreView<GuildData> getGuildStore() {
         return new LongObjStoreView<>(stateHolder.getGuildStore());
     }
 
@@ -88,7 +88,7 @@ public final class StateView {
 
     public Mono<Long> getSelfId() {
         return stateHolder.getParameterStore().find(StateHolder.SELF_ID_PARAMETER_KEY)
-                .switchIfEmpty(Mono.just(new ParameterBean()))
+                .switchIfEmpty(Mono.just(new ParameterData()))
                 .flatMap(bean -> Mono.justOrEmpty(bean.getValue()))
                 .ofType(Long.class);
     }

@@ -17,10 +17,10 @@
 
 package discord4j.core.shard;
 
+import com.darichey.discordjson.json.GatewayData;
 import discord4j.gateway.GatewayClient;
 import discord4j.gateway.ShardInfo;
 import discord4j.rest.RestClient;
-import discord4j.rest.json.response.GatewayResponse;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -58,7 +58,7 @@ public class DefaultShardingStrategy implements ShardingStrategy {
             return Mono.just(count);
         } else if (count == 0) {
             return restClient.getGatewayService().getGatewayBot()
-                    .map(GatewayResponse::getShards);
+                    .map(data -> data.shards().get());
         }
         return Mono.error(new RuntimeException("Invalid shard count: " + count));
     }
