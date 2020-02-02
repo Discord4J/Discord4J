@@ -523,26 +523,6 @@ public final class Guild implements Entity {
     }
 
     /**
-     * Gets the ID of the channel in which a discoverable server's rules should be found, if present.
-     *
-     * @return The ID of the channel in which a discoverable server's rules should be found, if present.
-     */
-    public Optional<Snowflake> getRulesChannelId() {
-        return Optional.ofNullable(data.getRulesChannelId()).map(Snowflake::of);
-    }
-
-    /**
-     * Requests to retrieve the channel in which a discoverable server's rules should be found, if present.
-     *
-     * @return A {@link Mono} where, upon successful completion, emits the {@link TextChannel channel} in which a
-     * discoverable server's rules should be found, if present. If an error is received, it is emitted through the
-     * {@code Mono}.
-     */
-    public Mono<TextChannel> getRulesChannel() {
-        return Mono.justOrEmpty(getRulesChannelId()).flatMap(getClient()::getChannelById).cast(TextChannel.class);
-    }
-
-    /**
      * Gets when this guild was joined at, if present.
      *
      * @return When this guild was joined at, if present.

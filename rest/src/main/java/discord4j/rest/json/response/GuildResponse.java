@@ -43,11 +43,6 @@ public class GuildResponse {
     private Long systemChannelId;
     @JsonProperty("system_channel_flags")
     private int systemChannelFlags;
-    @JsonProperty("rules_channel_id")
-    @Nullable
-    @UnsignedJson
-    private Long rulesChannelId;
-    @JsonProperty("widget_channel_id")
     @Nullable
     @UnsignedJson
     private Long widgetChannelId;
@@ -133,11 +128,6 @@ public class GuildResponse {
 
     public int getSystemChannelFlags() {
         return systemChannelFlags;
-    }
-
-    @Nullable
-    public Long getRulesChannelId() {
-        return rulesChannelId;
     }
 
     @Nullable
@@ -252,7 +242,6 @@ public class GuildResponse {
                 ", afkTimeout=" + afkTimeout +
                 ", systemChannelId=" + systemChannelId +
                 ", systemChannelFlags=" + systemChannelFlags +
-                ", rulesChannelId=" + rulesChannelId +
                 ", widgetChannelId=" + widgetChannelId +
                 ", region='" + region + '\'' +
                 ", defaultMessageNotifications=" + defaultMessageNotifications +

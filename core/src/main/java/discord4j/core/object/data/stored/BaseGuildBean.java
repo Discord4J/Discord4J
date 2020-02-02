@@ -67,8 +67,6 @@ public class BaseGuildBean implements Serializable {
     private Long systemChannelId;
     private int systemChannelFlags;
     @Nullable
-    private Long rulesChannelId;
-    @Nullable
     private String vanityUrlCode;
     @Nullable
     private String description;
@@ -111,7 +109,6 @@ public class BaseGuildBean implements Serializable {
         widgetChannelId = guildCreate.getWidgetChannelId();
         systemChannelId = guildCreate.getSystemChannelId();
         systemChannelFlags = guildCreate.getSystemChannelFlags();
-        rulesChannelId = guildCreate.getRulesChannelId();
         vanityUrlCode = guildCreate.getVanityUrlCode();
         description = guildCreate.getDescription();
         maxPresences = guildCreate.getMaxPresences();
@@ -151,7 +148,6 @@ public class BaseGuildBean implements Serializable {
         widgetChannelId = guildUpdate.getWidgetChannelId();
         systemChannelId = guildUpdate.getSystemChannelId();
         systemChannelFlags = guildUpdate.getSystemChannelFlags();
-        rulesChannelId = guildUpdate.getRulesChannelId();
         vanityUrlCode = guildUpdate.getVanityUrlCode();
         description = guildUpdate.getDescription();
         maxPresences = guildUpdate.getMaxPresences();
@@ -191,7 +187,6 @@ public class BaseGuildBean implements Serializable {
         widgetChannelId = response.getWidgetChannelId();
         systemChannelId = response.getSystemChannelId();
         systemChannelFlags = response.getSystemChannelFlags();
-        rulesChannelId = response.getRulesChannelId();
         vanityUrlCode = response.getVanityUrlCode();
         description = response.getDescription();
         maxPresences = response.getMaxPresences();
@@ -226,7 +221,6 @@ public class BaseGuildBean implements Serializable {
         widgetChannelId = toCopy.getWidgetChannelId();
         systemChannelId = toCopy.getSystemChannelId();
         systemChannelFlags = toCopy.getSystemChannelFlags();
-        rulesChannelId = toCopy.getRulesChannelId();
         vanityUrlCode = toCopy.getVanityUrlCode();
         description = toCopy.getDescription();
         maxPresences = toCopy.getMaxPresences();
@@ -442,15 +436,6 @@ public class BaseGuildBean implements Serializable {
     }
 
     @Nullable
-    public Long getRulesChannelId() {
-        return rulesChannelId;
-    }
-
-    public void setRulesChannelId(@Nullable Long rulesChannelId) {
-        this.rulesChannelId = rulesChannelId;
-    }
-
-    @Nullable
     public String getVanityUrlCode() {
         return vanityUrlCode;
     }
@@ -515,7 +500,6 @@ public class BaseGuildBean implements Serializable {
                 ", widgetChannelId=" + widgetChannelId +
                 ", systemChannelId=" + systemChannelId +
                 ", systemChannelFlags=" + systemChannelFlags +
-                ", rulesChannelId=" + rulesChannelId +
                 ", vanityUrlCode='" + vanityUrlCode + '\'' +
                 ", description='" + description + '\'' +
                 ", maxPresences=" + maxPresences +

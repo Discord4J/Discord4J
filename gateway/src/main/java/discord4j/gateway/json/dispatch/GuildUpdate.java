@@ -47,10 +47,6 @@ public class GuildUpdate implements Dispatch {
     private Long systemChannelId;
     @JsonProperty("system_channel_flags")
     private int systemChannelFlags;
-    @JsonProperty("rules_channel_id")
-    @Nullable
-    @UnsignedJson
-    private Long rulesChannelId;
     private String splash;
     @JsonProperty("discovery_splash")
     @Nullable
@@ -137,11 +133,6 @@ public class GuildUpdate implements Dispatch {
 
     public int getSystemChannelFlags() {
         return systemChannelFlags;
-    }
-
-    @Nullable
-    public Long getRulesChannelId() {
-        return rulesChannelId;
     }
 
     public String getSplash() {
@@ -259,7 +250,6 @@ public class GuildUpdate implements Dispatch {
                 ", preferredLocale='" + preferredLocale + '\'' +
                 ", systemChannelId=" + systemChannelId +
                 ", systemChannelFlags=" + systemChannelFlags +
-                ", rulesChannelId=" + rulesChannelId +
                 ", splash='" + splash + '\'' +
                 ", discoverySplash='" + discoverySplash + '\'' +
                 ", banner='" + banner + '\'' +
