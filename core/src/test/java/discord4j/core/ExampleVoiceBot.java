@@ -31,14 +31,15 @@ import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.VoiceState;
 import discord4j.core.object.entity.Member;
 import discord4j.voice.AudioProvider;
-import discord4j.voice.VoiceConnection;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.core.publisher.MonoProcessor;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;
+import java.util.function.Function;
 
 public class ExampleVoiceBot {
 
@@ -52,7 +53,7 @@ public class ExampleVoiceBot {
     }
 
     @Test
-    //@Ignore("Example code excluded from CI")
+    @Ignore("Example code excluded from CI")
     public void testVoiceBot() {
         // Set up LavaPlayer
         AudioPlayerManager playerManager = new DefaultAudioPlayerManager();
@@ -64,23 +65,22 @@ public class ExampleVoiceBot {
         // Bind events and log in
         DiscordClient client = DiscordClient.create(token);
 
+        Function<Flux<MessageCreateEvent>, Flux<MessageCreateEvent>> ownerOnly =
+                sequence -> sequence.filter(e -> owner == null || e.getMember().map(Member::getId)
+                        .map(it -> it.asString().equals(owner))
+                        .orElse(false));
+
         client.gateway()
-//                .setVoiceReactorResources(rr ->
-//                        new VoiceReactorResources(
-//                                HttpClient.create().wiretap(true),
-//                                rr.getTimerTaskScheduler(),
-//                                rr.getBlockingTaskScheduler(),
-//                                UdpClient.create().wiretap(true)))
                 .withConnection(gateway -> {
                     Mono<MessageCreateEvent> leave = gateway.getEventDispatcher().on(MessageCreateEvent.class)
-                            //.filter(e -> owner == null || e.getMember().map(Member::getId).map(it -> it.asString().equals(owner)).orElse(false))
+//                            .transform(ownerOnly)
                             .filter(e -> e.getMessage().getContent().map(it -> it.equals("!leave")).orElse(false))
                             .next();
 
-                    MonoProcessor<VoiceConnection> vc = MonoProcessor.create();
+                    //MonoProcessor<VoiceConnection> vc = MonoProcessor.create();
 
                     Mono<Void> join = gateway.getEventDispatcher().on(MessageCreateEvent.class)
-                            //.filter(e -> owner == null || e.getMember().map(Member::getId).map(it -> it.asString().equals(owner)).orElse(false))
+//                            .transform(ownerOnly)
                             .filter(e -> e.getMessage().getContent().map(it -> it.startsWith("!join")).orElse(false))
                             .flatMap(e -> Mono.justOrEmpty(e.getMember())
                                     .flatMap(Member::getVoiceState)
@@ -95,7 +95,7 @@ public class ExampleVoiceBot {
                             .then();
 
                     Mono<Void> play = gateway.getEventDispatcher().on(MessageCreateEvent.class)
-                            //.filter(e -> owner == null || e.getMember().map(Member::getId).map(it -> it.asString().equals(owner)).orElse(false))
+//                            .transform(ownerOnly)
                             .filter(e -> e.getMessage().getContent().map(it -> it.startsWith("!play ")).orElse(false))
                             .flatMap(e -> Mono.justOrEmpty(e.getMessage().getContent())
                                     .map(content -> Arrays.asList(content.split(" ")))
@@ -104,7 +104,7 @@ public class ExampleVoiceBot {
                             .then();
 
                     Mono<Void> stop = gateway.getEventDispatcher().on(MessageCreateEvent.class)
-                            //.filter(e -> owner == null || e.getMember().map(Member::getId).map(it -> it.asString().equals(owner)).orElse(false))
+//                            .transform(ownerOnly)
                             .filter(e -> e.getMessage().getContent().map(it -> it.equals("!stop")).orElse(false))
                             .doOnNext(e -> player.stopTrack())
                             .then();
