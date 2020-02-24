@@ -1,8 +1,6 @@
 dependencies {
     api project(':common')
 
-    api "io.projectreactor.addons:reactor-extra"
-
     testImplementation "junit:junit:$junit_version"
     testImplementation "ch.qos.logback:logback-classic:$logback_version"
 }

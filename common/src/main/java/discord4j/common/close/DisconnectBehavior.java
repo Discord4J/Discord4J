@@ -15,7 +15,7 @@
  * along with Discord4J. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package discord4j.gateway.retry;
+package discord4j.common.close;
 
 import reactor.util.annotation.Nullable;
 

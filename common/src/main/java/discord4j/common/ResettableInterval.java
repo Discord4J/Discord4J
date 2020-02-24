@@ -20,24 +20,26 @@ import reactor.core.Disposable;
 import reactor.core.Disposables;
 import reactor.core.publisher.EmitterProcessor;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.FluxSink;
 import reactor.core.scheduler.Scheduler;
 
 import java.time.Duration;
 
 /**
- * Emit ticks at a constant rate specified at {@link #start(Duration)} and will continue until {@link #stop()} is called
- * or {@link #start(Duration)} is re-invoked, resetting the previous emitter. The ticks are available from the
- * {@link #ticks()} method.
+ * Emit ticks at a constant rate specified at {@link #start(Duration, Duration)} and will continue until
+ * {@link #stop()} is called or {@link #start(Duration, Duration)} is re-invoked, resetting the previous emitter.
+ * The ticks are available from the {@link #ticks()} method.
  */
 public class ResettableInterval {
 
     private final Scheduler scheduler;
     private final Disposable.Swap task;
     private final EmitterProcessor<Long> backing = EmitterProcessor.create(false);
+    private final FluxSink<Long> backingSink = backing.sink(FluxSink.OverflowStrategy.LATEST);
 
     /**
      * Create a {@link ResettableInterval} that emits ticks on the given {@link Scheduler} upon calling
-     * {@link #start(Duration)}.
+     * {@link #start(Duration, Duration)}.
      *
      * @param scheduler the Reactor {@link Scheduler} to use to emit ticks
      */
@@ -49,11 +51,12 @@ public class ResettableInterval {
     /**
      * Begin producing ticks at the given rate.
      *
+     * @param delay the {@link Duration} to wait before emitting the first tick
      * @param period the period {@link Duration} used to emit ticks.
      * @see Flux#interval(Duration, Duration, Scheduler)
      */
-    public void start(Duration period) {
-        this.task.update(Flux.interval(Duration.ZERO, period, scheduler).subscribe(backing::onNext));
+    public void start(Duration delay, Duration period) {
+        this.task.update(Flux.interval(delay, period, scheduler).subscribe(backingSink::next));
     }
 
     /**
@@ -66,7 +69,7 @@ public class ResettableInterval {
     /**
      * Return a {@link Flux} that emits ticks at the currently configured rate.
      *
-     * @return a {@link Flux} of increasing values since the last {@link #start(Duration)} call
+     * @return a {@link Flux} of increasing values since the last {@link #start(Duration, Duration)} call
      */
     public Flux<Long> ticks() {
         return backing;

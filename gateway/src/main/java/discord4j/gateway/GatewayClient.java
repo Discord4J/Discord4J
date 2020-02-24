@@ -17,6 +17,7 @@
 
 package discord4j.gateway;
 
+import discord4j.gateway.retry.PartialDisconnectException;
 import discord4j.gateway.json.GatewayPayload;
 import discord4j.gateway.json.dispatch.Dispatch;
 import io.netty.buffer.ByteBuf;
@@ -52,8 +53,8 @@ public interface GatewayClient {
     /**
      * Terminates this client's current gateway connection.
      *
-     * @param allowResume if resuming this session after closing is possible. if set to {@code true} the main
-     * execution {@link Mono} will complete with a {@link discord4j.gateway.retry.PartialDisconnectException} you can
+     * @param allowResume if resuming this session after closing is possible. if set to <code>true</code> the main
+     * execution {@link Mono} will complete with a {@link PartialDisconnectException} you can
      * use to perform additional behavior or reconnect.
      * @return a {@link Mono} deferring completion until the disconnection has completed.
      */

@@ -17,12 +17,25 @@
 
 package discord4j.voice;
 
+import discord4j.common.JacksonResources;
 import discord4j.common.annotations.Experimental;
+import discord4j.common.retry.ReconnectOptions;
 import reactor.core.publisher.Mono;
 
 @Experimental
 public interface VoiceConnectionFactory {
 
-    Mono<VoiceConnection> create(long guildId, long selfId, String session, String token, String gatewayUrl,
-                                 AudioProvider provider, AudioReceiver receiver);
+    Mono<VoiceConnection> create(long guildId,
+                                 long selfId,
+                                 String session,
+                                 String token,
+                                 String gatewayUrl,
+                                 JacksonResources jacksonResources,
+                                 VoiceReactorResources reactorResources,
+                                 ReconnectOptions reconnectOptions,
+                                 AudioProvider provider,
+                                 AudioReceiver receiver,
+                                 VoiceSendTaskFactory sendTaskFactory,
+                                 VoiceReceiveTaskFactory receiveTaskFactory,
+                                 VoiceDisconnectTask voiceDisconnectTask);
 }

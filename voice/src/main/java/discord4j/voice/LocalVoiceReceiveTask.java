@@ -20,16 +20,18 @@ import io.netty.buffer.ByteBuf;
 import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Scheduler;
 import reactor.util.Logger;
 import reactor.util.Loggers;
 
-class VoiceReceiveTask implements Disposable {
+public class LocalVoiceReceiveTask implements Disposable {
 
-    private static final Logger log = Loggers.getLogger(VoiceReceiveTask.class);
+    private static final Logger log = Loggers.getLogger(LocalVoiceReceiveTask.class);
 
     private final Disposable task;
 
-    VoiceReceiveTask(Flux<ByteBuf> in, PacketTransformer transformer, AudioReceiver receiver) {
+    public LocalVoiceReceiveTask(Scheduler scheduler, Flux<ByteBuf> in, PacketTransformer transformer,
+                                 AudioReceiver receiver) {
         this.task = in
                 .flatMap(packet -> Mono.justOrEmpty(transformer.nextReceive(packet)))
                 .map(buf -> {
@@ -41,11 +43,13 @@ class VoiceReceiveTask implements Disposable {
                     return buf;
                 })
                 .onErrorContinue((t, o) -> log.error("Error while receiving audio", t))
+                .subscribeOn(scheduler)
                 .subscribe();
     }
 
     @Override
     public void dispose() {
+        log.info("Disposing receive task");
         task.dispose();
     }
 

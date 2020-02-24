@@ -34,6 +34,7 @@ public class LogUtil {
     public static final String KEY_REQUEST_ID = "discord4j.request";
     public static final String KEY_GATEWAY_ID = "discord4j.gateway";
     public static final String KEY_SHARD_ID = "discord4j.shard";
+    public static final String KEY_GUILD_ID = "discord4j.guild";
 
     /**
      * Format a message by unwrapping certain {@link Context} values as metadata, and if they exist, prepend them to
@@ -48,7 +49,8 @@ public class LogUtil {
                 context.getOrEmpty(KEY_BUCKET_ID).map(id -> "B:" + id),
                 context.getOrEmpty(KEY_REQUEST_ID).map(id -> "R:" + id),
                 context.getOrEmpty(KEY_GATEWAY_ID).map(id -> "G:" + id),
-                context.getOrEmpty(KEY_SHARD_ID).map(id -> "S:" + id))
+                context.getOrEmpty(KEY_SHARD_ID).map(id -> "S:" + id),
+                context.getOrEmpty(KEY_GUILD_ID).map(id -> "guildId:" + id))
                 .map(opt -> opt.orElse(""))
                 .filter(str -> !str.isEmpty())
                 .collect(Collectors.joining(", "));
@@ -107,5 +109,13 @@ public class LogUtil {
                 logger.debug(logMessage);
             }
         }
+    }
+
+    public static Function<Context, Context> clearContext() {
+        return ctx -> ctx.delete(KEY_BUCKET_ID)
+                .delete(KEY_REQUEST_ID)
+                .delete(KEY_GATEWAY_ID)
+                .delete(KEY_SHARD_ID)
+                .delete(KEY_GUILD_ID);
     }
 }
