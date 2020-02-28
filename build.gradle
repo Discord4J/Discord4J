@@ -39,7 +39,7 @@ ext {
     isRelease = !version.toString().endsWith('-SNAPSHOT')
 }
 
-if (!isRelease) {
+if (!isRelease || isJitpack) {
     configurations.all {
         resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
     }
@@ -66,7 +66,7 @@ allprojects {
 
     repositories {
         mavenCentral()
-        if (!isRelease) {
+        if (!isRelease || isJitpack) {
             maven { url 'https://oss.sonatype.org/content/repositories/snapshots' }
             maven { url 'https://oss.sonatype.org/content/repositories/staging' }
         }
