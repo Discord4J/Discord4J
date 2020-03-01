@@ -23,13 +23,14 @@ import discord4j.core.object.entity.User;
 import discord4j.core.object.util.Snowflake;
 import discord4j.gateway.ShardInfo;
 import reactor.core.publisher.Mono;
+import reactor.util.annotation.Nullable;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 
 /**
- * Dispatched when an invite to a channel is created.
+ * Dispatched when a new invite to a channel is created.
  * <p>
  * This event is dispatched by Discord.
  *
@@ -40,6 +41,7 @@ public class InviteCreateEvent extends Event {
     private final long guildId;
     private final long channelId;
     private final String code;
+    @Nullable
     private final User inviter;
     private final Instant createdAt;
     private final int uses;
@@ -100,21 +102,21 @@ public class InviteCreateEvent extends Event {
     }
 
     /**
-     * Gets the ID of the target user this invite is associated to, if present.
+     * Gets the ID of the user that created the invite, if present.
      *
-     * @return The ID of the target user this invite is associated to, if present.
+     * @return The ID of the user that created the invite, if present.
      */
-    public final Snowflake getInviterId() {
-        return inviter.getId();
+    public final Optional<Snowflake> getInviterId() {
+        return Optional.ofNullable(inviter).map(User::getId);
     }
 
     /**
-     * Get the partial user who created the invite.
+     * Gets the user that created the invite, if present.
      *
-     * @return The partial {@link User user} who created the invite.
+     * @return The user that created the invite, if present.
      */
-    public User getInviter() {
-        return inviter;
+    public Optional<User> getInviter() {
+        return Optional.ofNullable(inviter);
     }
 
     /**

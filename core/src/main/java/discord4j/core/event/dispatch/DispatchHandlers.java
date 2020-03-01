@@ -232,7 +232,7 @@ public abstract class DispatchHandlers {
         boolean temporary = context.getDispatch().isTemporary();
 
         UserBean bean = new UserBean(context.getDispatch().getInviter());
-        User current = new User(context.getGateway(), bean);
+        User current = bean != null ? new User(context.getGateway(), bean) : null;
 
         return Mono.just(new InviteCreateEvent(context.getGateway(), context.getShardInfo(), guildId, channelId, code,
                 current, createdAt, uses, maxUses, maxAge, temporary));
