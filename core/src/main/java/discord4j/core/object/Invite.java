@@ -16,9 +16,9 @@
  */
 package discord4j.core.object;
 
-import com.darichey.discordjson.json.GuildData;
-import com.darichey.discordjson.json.InviteData;
-import com.darichey.discordjson.json.UserData;
+import discord4j.discordjson.json.GuildData;
+import discord4j.discordjson.json.InviteData;
+import discord4j.discordjson.json.UserData;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.User;

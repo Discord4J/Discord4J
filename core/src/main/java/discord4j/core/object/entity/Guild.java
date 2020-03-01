@@ -16,8 +16,6 @@
  */
 package discord4j.core.object.entity;
 
-import com.darichey.discordjson.json.*;
-import com.darichey.discordjson.possible.Possible;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.Ban;
 import discord4j.core.object.ExtendedInvite;
@@ -33,11 +31,13 @@ import discord4j.core.util.EntityUtil;
 import discord4j.core.util.ImageUtil;
 import discord4j.core.util.OrderUtil;
 import discord4j.core.util.PaginationUtil;
+import discord4j.discordjson.json.*;
+import discord4j.discordjson.json.gateway.PresenceUpdate;
+import discord4j.discordjson.possible.Possible;
 import discord4j.store.api.util.LongLongTuple2;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
-import reactor.util.function.Tuples;
 
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
@@ -46,7 +46,6 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.ToLongFunction;
 import java.util.stream.Collectors;
-import java.util.stream.LongStream;
 
 /**
  * A Discord guild.
@@ -562,7 +561,7 @@ public final class Guild implements Entity {
                         .getGuildMembers(getId().asLong(), params);
 
         Flux<Member> requestMembers =
-                PaginationUtil.paginateAfter(doRequest, data -> Long.parseUnsignedLong(data.user().id()), 0, 100)
+                PaginationUtil.paginateAfter(doRequest, data -> Long.parseUnsignedLong(data.user().get().id()), 0, 100)
                             .map(data -> new Member(gateway, data, getId().asLong()));
 
         return Mono.justOrEmpty(data.members().toOptional())

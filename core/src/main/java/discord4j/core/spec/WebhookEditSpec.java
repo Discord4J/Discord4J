@@ -16,9 +16,9 @@
  */
 package discord4j.core.spec;
 
-import com.darichey.discordjson.json.ImmutableWebhookModifyRequest;
-import com.darichey.discordjson.json.WebhookModifyRequest;
-import com.darichey.discordjson.possible.Possible;
+import discord4j.discordjson.json.ImmutableWebhookModifyRequest;
+import discord4j.discordjson.json.WebhookModifyRequest;
+import discord4j.discordjson.possible.Possible;
 import discord4j.core.object.entity.Webhook;
 import discord4j.core.object.util.Image;
 import reactor.util.annotation.Nullable;

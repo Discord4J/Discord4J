@@ -25,7 +25,7 @@ import discord4j.core.object.entity.channel.TextChannel;
 import discord4j.core.object.reaction.ReactionEmoji;
 import discord4j.core.object.util.Image;
 import discord4j.core.object.util.Snowflake;
-import discord4j.rest.entity.data.ApplicationInfoData;
+import discord4j.discordjson.json.ApplicationInfoData;
 import discord4j.rest.request.RouteMatcher;
 import discord4j.rest.response.ResponseFunction;
 import discord4j.rest.route.Routes;
@@ -74,7 +74,8 @@ public class ExampleBot {
 
         // Get the bot owner ID to filter commands
         Mono<Long> ownerId = client.getApplicationInfo()
-                .map(ApplicationInfoData::getOwnerId)
+                .map(ApplicationInfoData::owner)
+                .map(user -> Long.parseUnsignedLong(user.id()))
                 .cache();
 
         // Create our event handlers
@@ -100,8 +101,7 @@ public class ExampleBot {
                 })
                 .flatMap(id -> Mono.when(eventHandlers.stream()
                         .map(handler -> handler.onMessageCreate(event))
-                        .collect(Collectors.toList()))
-                ))
+                        .collect(Collectors.toList()))))
                 .then();
 
         Mono.when(events, gateway.onDisconnect()).block();

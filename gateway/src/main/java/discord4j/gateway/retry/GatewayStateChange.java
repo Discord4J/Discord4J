@@ -17,7 +17,7 @@
 
 package discord4j.gateway.retry;
 
-import com.darichey.discordjson.json.gateway.Dispatch;
+import discord4j.discordjson.json.gateway.Dispatch;
 import reactor.util.annotation.Nullable;
 
 import java.time.Duration;

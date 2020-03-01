@@ -16,7 +16,7 @@
  */
 package discord4j.gateway.json.jackson;
 
-import com.darichey.discordjson.json.gateway.*;
+import discord4j.discordjson.json.gateway.*;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;

@@ -23,11 +23,13 @@ import discord4j.core.object.entity.Message;
 import discord4j.core.object.presence.Presence;
 import discord4j.core.object.util.Snowflake;
 import discord4j.core.shard.ShardingStrategy;
+import discord4j.discordjson.json.ApplicationInfoData;
+import discord4j.discordjson.json.ImmutableMessageCreateRequest;
+import discord4j.discordjson.json.MessageCreateRequest;
+import discord4j.discordjson.possible.Possible;
 import discord4j.gateway.IdentifyOptions;
 import discord4j.gateway.SessionInfo;
 import discord4j.gateway.ShardInfo;
-import discord4j.rest.entity.data.ApplicationInfoData;
-import discord4j.rest.json.request.MessageCreateRequest;
 import discord4j.rest.util.MultipartRequest;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
@@ -75,7 +77,7 @@ public class RetryBotTest {
                 .build()
                 .gateway()
                 .setSharding(ShardingStrategy.fixed(shardCount))
-                .setInitialPresence(shard -> Presence.invisible())
+                .initialStatus(shard -> Presence.invisible())
                 .withConnection(GatewayDiscordClient::onDisconnect)
                 .block();
     }
@@ -129,7 +131,8 @@ public class RetryBotTest {
 
         // Get the bot owner ID to filter commands
         Mono<Long> ownerId = client.getApplicationInfo()
-                .map(ApplicationInfoData::getOwnerId)
+                .map(ApplicationInfoData::owner)
+                .map(user -> Long.parseUnsignedLong(user.id()))
                 .cache();
 
         Mono<GatewayDiscordClient> login = client.gateway()
@@ -202,9 +205,9 @@ public class RetryBotTest {
                             Snowflake guildId = message.getGuild().block().getId();
                             log.info("Message came from guild: {}", guildId);
                         } else if (content.startsWith("!echo ")) {
-                            MessageCreateRequest request = new MessageCreateRequest(
-                                    content.substring("!echo ".length()),
-                                    null, false, null);
+                            MessageCreateRequest request = ImmutableMessageCreateRequest.builder()
+                                    .content(Possible.of(content.substring("!echo ".length())))
+                                    .build();
                             message.getRestChannel()
                                     .createMessage(new MultipartRequest(request))
                                     .subscribe();

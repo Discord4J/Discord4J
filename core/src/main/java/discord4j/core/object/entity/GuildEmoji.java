@@ -16,7 +16,7 @@
  */
 package discord4j.core.object.entity;
 
-import com.darichey.discordjson.json.EmojiData;
+import discord4j.discordjson.json.EmojiData;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.util.Image;
 import discord4j.core.object.util.Snowflake;

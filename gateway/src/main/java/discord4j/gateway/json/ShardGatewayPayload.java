@@ -16,10 +16,10 @@
  */
 package discord4j.gateway.json;
 
-import com.darichey.discordjson.json.gateway.PayloadData;
-import com.darichey.discordjson.json.gateway.RequestGuildMembers;
-import com.darichey.discordjson.json.gateway.StatusUpdate;
-import com.darichey.discordjson.json.gateway.VoiceStateUpdate;
+import discord4j.discordjson.json.gateway.PayloadData;
+import discord4j.discordjson.json.gateway.RequestGuildMembers;
+import discord4j.discordjson.json.gateway.StatusUpdate;
+import discord4j.discordjson.json.gateway.VoiceStateUpdate;
 import discord4j.gateway.GatewayClient;
 
 /**

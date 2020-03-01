@@ -16,13 +16,12 @@
  */
 package discord4j.core.object.entity.channel;
 
-import com.darichey.discordjson.json.ChannelData;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.spec.TextChannelEditSpec;
 import discord4j.core.util.EntityUtil;
+import discord4j.discordjson.json.ChannelData;
 import reactor.core.publisher.Mono;
 
-import java.util.Objects;
 import java.util.function.Consumer;
 
 /**

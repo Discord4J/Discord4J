@@ -16,7 +16,7 @@
  */
 package discord4j.core.object;
 
-import com.darichey.discordjson.json.OverwriteData;
+import discord4j.discordjson.json.OverwriteData;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Role;

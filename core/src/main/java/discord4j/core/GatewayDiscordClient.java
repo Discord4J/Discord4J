@@ -17,10 +17,10 @@
 
 package discord4j.core;
 
-import com.darichey.discordjson.json.ChannelData;
-import com.darichey.discordjson.json.GuildData;
-import com.darichey.discordjson.json.MemberData;
-import com.darichey.discordjson.json.UserData;
+import discord4j.discordjson.json.ChannelData;
+import discord4j.discordjson.json.GuildData;
+import discord4j.discordjson.json.MemberData;
+import discord4j.discordjson.json.UserData;
 import discord4j.common.JacksonResources;
 import discord4j.common.ReactorResources;
 import discord4j.core.event.EventDispatcher;
@@ -37,6 +37,7 @@ import discord4j.core.spec.UserEditSpec;
 import discord4j.core.state.StateHolder;
 import discord4j.core.util.EntityUtil;
 import discord4j.core.util.PaginationUtil;
+import discord4j.discordjson.json.gateway.StatusUpdate;
 import discord4j.gateway.GatewayClient;
 import discord4j.gateway.GatewayClientGroup;
 import discord4j.gateway.json.GatewayPayload;
@@ -391,14 +392,14 @@ public class GatewayDiscordClient {
     }
 
     /**
-     * Update the bot's {@link Presence} (status) for every shard in this shard group.
+     * Update the bot's {@link Presence} (client status) for every shard in this shard group.
      *
-     * @param presence The updated client presence.
+     * @param statusUpdate The updated client status.
      * @return A {@link Mono} that signals completion upon successful update. If an error is received, it is emitted
      * through the {@code Mono}.
      */
-    public Mono<Void> updatePresence(final Presence presence) {
-        return gatewayClientGroup.multicast(GatewayPayload.statusUpdate(presence.asStatusUpdate()));
+    public Mono<Void> updatePresence(final StatusUpdate statusUpdate) {
+        return gatewayClientGroup.multicast(GatewayPayload.statusUpdate(statusUpdate));
     }
 
     /**

@@ -16,9 +16,9 @@
  */
 package discord4j.core.spec;
 
-import com.darichey.discordjson.json.GuildMemberModifyRequest;
-import com.darichey.discordjson.json.ImmutableGuildMemberModifyRequest;
-import com.darichey.discordjson.possible.Possible;
+import discord4j.discordjson.json.GuildMemberModifyRequest;
+import discord4j.discordjson.json.ImmutableGuildMemberModifyRequest;
+import discord4j.discordjson.possible.Possible;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.util.Permission;
 import discord4j.core.object.util.Snowflake;

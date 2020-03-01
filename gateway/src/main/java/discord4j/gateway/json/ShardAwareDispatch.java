@@ -15,26 +15,31 @@
  * along with Discord4J. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package discord4j.rest.entity;
+package discord4j.gateway.json;
 
-import discord4j.discordjson.json.MemberData;
-import discord4j.rest.RestClient;
-import reactor.core.publisher.Mono;
+import discord4j.discordjson.json.gateway.Dispatch;
 
-public class RestMember {
+public class ShardAwareDispatch implements Dispatch {
 
-    private final RestClient restClient;
-    private final long guildId;
-    private final long id;
+    private final int shardIndex;
+    private final int shardCount;
+    private final Dispatch dispatch;
 
-    public RestMember(RestClient restClient, long guildId, long id) {
-        this.restClient = restClient;
-        this.guildId = guildId;
-        this.id = id;
+    public ShardAwareDispatch(int shardIndex, int shardCount, Dispatch dispatch) {
+        this.shardIndex = shardIndex;
+        this.shardCount = shardCount;
+        this.dispatch = dispatch;
     }
 
-    public Mono<MemberData> getData() {
-        return restClient.getGuildService()
-                .getGuildMember(guildId, id);
+    public int getShardIndex() {
+        return shardIndex;
+    }
+
+    public int getShardCount() {
+        return shardCount;
+    }
+
+    public Dispatch getDispatch() {
+        return dispatch;
     }
 }

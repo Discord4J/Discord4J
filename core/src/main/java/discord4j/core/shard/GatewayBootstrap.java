@@ -17,11 +17,6 @@
 
 package discord4j.core.shard;
 
-import com.darichey.discordjson.json.MessageData;
-import com.darichey.discordjson.json.gateway.Dispatch;
-import com.darichey.discordjson.json.gateway.ImmutableVoiceStateUpdate;
-import com.darichey.discordjson.json.gateway.StatusUpdate;
-import com.darichey.discordjson.json.gateway.VoiceStateUpdate;
 import discord4j.common.LogUtil;
 import discord4j.common.ReactorResources;
 import discord4j.core.CoreResources;
@@ -35,7 +30,13 @@ import discord4j.core.event.domain.Event;
 import discord4j.core.object.presence.Presence;
 import discord4j.core.state.StateHolder;
 import discord4j.core.state.StateView;
+import discord4j.discordjson.json.MessageData;
+import discord4j.discordjson.json.gateway.Dispatch;
+import discord4j.discordjson.json.gateway.ImmutableVoiceStateUpdate;
+import discord4j.discordjson.json.gateway.StatusUpdate;
+import discord4j.discordjson.json.gateway.VoiceStateUpdate;
 import discord4j.gateway.*;
+import discord4j.gateway.json.ShardAwareDispatch;
 import discord4j.gateway.json.ShardGatewayPayload;
 import discord4j.gateway.payload.JacksonPayloadReader;
 import discord4j.gateway.payload.JacksonPayloadWriter;
@@ -107,7 +108,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
     private StoreService storeService = null;
     private Function<StoreService, StoreService> storeServiceMapper = shardAwareStoreService();
     private boolean memberRequest = true;
-    private Function<ShardInfo, Presence> initialPresence = shard -> null;
+    private Function<ShardInfo, StatusUpdate> initialPresence = shard -> null;
     private Function<ShardInfo, SessionInfo> resumeOptions = shard -> null;
     private boolean guildSubscriptions = true;
     private Function<GatewayDiscordClient, Mono<Void>> destroyHandler = shutdownDestroyHandler();
@@ -295,9 +296,24 @@ public class GatewayBootstrap<O extends GatewayOptions> {
      *
      * @param initialPresence a {@link Function} that supplies {@link Presence} instances from a given {@link ShardInfo}
      * @return this builder
+     * @deprecated use {@link #initialStatus(Function)}
      */
-    public GatewayBootstrap<O> setInitialPresence(Function<ShardInfo, Presence> initialPresence) {
+    @Deprecated
+    public GatewayBootstrap<O> setInitialPresence(Function<ShardInfo, StatusUpdate> initialPresence) {
         this.initialPresence = Objects.requireNonNull(initialPresence, "initialPresence");
+        return this;
+    }
+
+    /**
+     * Set a {@link Function} to determine the {@link StatusUpdate} that each joining shard should use when identifying
+     * to the Gateway. Defaults to no status given.
+     *
+     * @param initialStatus a {@link Function} that supplies {@link StatusUpdate} instances from a given
+     * {@link ShardInfo}
+     * @return this builder
+     */
+    public GatewayBootstrap<O> initialStatus(Function<ShardInfo, StatusUpdate> initialStatus) {
+        this.initialPresence = Objects.requireNonNull(initialStatus, "initialStatus");
         return this;
     }
 
@@ -467,7 +483,8 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                 initVoiceReactorResources().getTimerTaskScheduler(),
                 client.getCoreResources().getJacksonResources().getObjectMapper(),
                 guildId -> {
-                    VoiceStateUpdate voiceStateUpdate = ImmutableVoiceStateUpdate.of(Long.toUnsignedString(guildId), Optional.empty(), false, false);
+                    VoiceStateUpdate voiceStateUpdate = ImmutableVoiceStateUpdate.of(Long.toUnsignedString(guildId),
+                            Optional.empty(), false, false);
                     int shardId = (int) ((guildId >> 22) % clientGroup.getShardCount());
                     return clientGroup.unicast(ShardGatewayPayload.voiceStateUpdate(voiceStateUpdate, shardId));
                 });
@@ -499,9 +516,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                                               MonoProcessor<Void> closeProcessor) {
         return Mono.subscriberContext()
                 .flatMap(ctx -> Mono.<ShardInfo>create(sink -> {
-                    StatusUpdate initial = Optional.ofNullable(initialPresence.apply(shard))
-                            .map(Presence::asStatusUpdate)
-                            .orElse(null);
+                    StatusUpdate initial = Optional.ofNullable(initialPresence.apply(shard)).orElse(null);
                     IdentifyOptions identify = new IdentifyOptions(shard, initial, guildSubscriptions);
                     SessionInfo resume = resumeOptions.apply(shard);
                     if (resume != null) {
@@ -515,6 +530,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                     // wire gateway events to EventDispatcher
                     forCleanup.add(gatewayClient.dispatch()
                             .takeUntilOther(closeProcessor)
+                            .checkpoint("Read payload from gateway")
                             .flatMap(dispatch -> {
                                 ShardInfo info;
                                 Dispatch actual;

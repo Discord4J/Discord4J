@@ -16,7 +16,7 @@
  */
 package discord4j.core;
 
-import com.darichey.discordjson.json.*;
+import discord4j.discordjson.json.*;
 import discord4j.core.event.EventDispatcher;
 import discord4j.core.object.Invite;
 import discord4j.core.object.Region;

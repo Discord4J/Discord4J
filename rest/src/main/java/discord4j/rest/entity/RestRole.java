@@ -17,10 +17,10 @@
 
 package discord4j.rest.entity;
 
-import com.darichey.discordjson.json.ImmutablePositionModifyRequest;
-import com.darichey.discordjson.json.PositionModifyRequest;
-import com.darichey.discordjson.json.RoleData;
-import com.darichey.discordjson.json.RoleModifyRequest;
+import discord4j.discordjson.json.ImmutablePositionModifyRequest;
+import discord4j.discordjson.json.PositionModifyRequest;
+import discord4j.discordjson.json.RoleData;
+import discord4j.discordjson.json.RoleModifyRequest;
 import discord4j.rest.RestClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;

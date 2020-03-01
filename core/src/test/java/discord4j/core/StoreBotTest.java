@@ -24,10 +24,10 @@ import discord4j.core.event.EventDispatcher;
 import discord4j.core.event.domain.Event;
 import discord4j.core.event.domain.lifecycle.GatewayLifecycleEvent;
 import discord4j.core.event.domain.lifecycle.ReadyEvent;
-import discord4j.core.object.data.stored.MessageBean;
 import discord4j.core.object.presence.Presence;
 import discord4j.core.shard.ShardingStrategy;
 import discord4j.core.state.StateView;
+import discord4j.discordjson.json.MessageData;
 import discord4j.store.api.mapping.MappingStoreService;
 import discord4j.store.api.noop.NoOpStoreService;
 import discord4j.store.jdk.JdkStoreService;
@@ -77,10 +77,10 @@ public class StoreBotTest {
         client.gateway()
                 .setSharding(ShardingStrategy.builder().indexes(0, 2, 4).build())
                 .setStoreService(MappingStoreService.create()
-                        .setMapping(new NoOpStoreService(), MessageBean.class)
+                        .setMapping(new NoOpStoreService(), MessageData.class)
                         .setFallback(new JdkStoreService()))
                 .setEventDispatcher(EventDispatcher.replayingWithTimeout(Duration.ofMinutes(2)))
-                .setInitialPresence(shard -> Presence.invisible())
+                .initialStatus(shard -> Presence.invisible())
                 .withConnection(gateway -> {
                     log.info("Start!");
 

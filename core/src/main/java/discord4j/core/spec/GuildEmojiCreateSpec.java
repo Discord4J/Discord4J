@@ -16,8 +16,8 @@
  */
 package discord4j.core.spec;
 
-import com.darichey.discordjson.json.GuildEmojiCreateRequest;
-import com.darichey.discordjson.json.ImmutableGuildEmojiCreateRequest;
+import discord4j.discordjson.json.GuildEmojiCreateRequest;
+import discord4j.discordjson.json.ImmutableGuildEmojiCreateRequest;
 import discord4j.core.object.entity.GuildEmoji;
 import discord4j.core.object.util.Image;
 import discord4j.core.object.util.Snowflake;

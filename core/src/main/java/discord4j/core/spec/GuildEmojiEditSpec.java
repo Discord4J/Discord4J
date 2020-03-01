@@ -16,9 +16,9 @@
  */
 package discord4j.core.spec;
 
-import com.darichey.discordjson.json.GuildEmojiModifyRequest;
-import com.darichey.discordjson.json.ImmutableGuildEmojiModifyRequest;
-import com.darichey.discordjson.possible.Possible;
+import discord4j.discordjson.json.GuildEmojiModifyRequest;
+import discord4j.discordjson.json.ImmutableGuildEmojiModifyRequest;
+import discord4j.discordjson.possible.Possible;
 import discord4j.core.object.entity.GuildEmoji;
 import discord4j.core.object.util.Snowflake;
 import reactor.util.annotation.Nullable;

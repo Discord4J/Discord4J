@@ -16,8 +16,8 @@
  */
 package discord4j.core.state;
 
-import com.darichey.discordjson.json.*;
-import com.darichey.discordjson.json.gateway.PresenceUpdate;
+import discord4j.discordjson.json.*;
+import discord4j.discordjson.json.gateway.PresenceUpdate;
 import discord4j.store.api.Store;
 import discord4j.store.api.primitive.LongObjStore;
 import discord4j.store.api.service.StoreService;

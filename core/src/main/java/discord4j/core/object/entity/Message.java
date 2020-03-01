@@ -16,9 +16,6 @@
  */
 package discord4j.core.object.entity;
 
-import com.darichey.discordjson.json.ImmutableSuppressEmbedsRequest;
-import com.darichey.discordjson.json.MessageData;
-import com.darichey.discordjson.json.UserData;
 import discord4j.common.annotations.Experimental;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.Embed;
@@ -31,6 +28,9 @@ import discord4j.core.object.util.Snowflake;
 import discord4j.core.spec.MessageEditSpec;
 import discord4j.core.util.EntityUtil;
 import discord4j.core.util.PaginationUtil;
+import discord4j.discordjson.json.ImmutableSuppressEmbedsRequest;
+import discord4j.discordjson.json.MessageData;
+import discord4j.discordjson.json.UserData;
 import discord4j.rest.entity.RestChannel;
 import discord4j.rest.entity.RestMessage;
 import reactor.core.publisher.Flux;
@@ -75,12 +75,13 @@ public final class Message implements Entity {
      * Constructs a {@code Message} with an associated ServiceMediator and Discord data.
      *
      * @param gateway The {@link GatewayDiscordClient} associated to this object, must be non-null.
-     * @param data    The raw data as represented by Discord, must be non-null.
+     * @param data The raw data as represented by Discord, must be non-null.
      */
     public Message(final GatewayDiscordClient gateway, final MessageData data) {
         this.gateway = Objects.requireNonNull(gateway);
         this.data = Objects.requireNonNull(data);
-        this.rest = new RestMessage(gateway.getRestClient(), Long.parseUnsignedLong(data.channelId()), Long.parseUnsignedLong(data.id()));
+        this.rest = new RestMessage(gateway.getRestClient(), Long.parseUnsignedLong(data.channelId()),
+                Long.parseUnsignedLong(data.id()));
     }
 
     @Override
@@ -142,7 +143,7 @@ public final class Message implements Entity {
      */
     public Optional<User> getAuthor() {
         // FIXME: when is this null?
-        return Optional.ofNullable(data.author()).map(bean -> new User(gateway, bean));
+        return data.author().toOptional().map(userData -> new User(gateway, userData));
     }
 
     /**
@@ -154,9 +155,9 @@ public final class Message implements Entity {
      */
     public Mono<Member> getAuthorAsMember() {
         return Mono.justOrEmpty(getAuthor())
-            .flatMap(author -> getGuild()
-                .map(Guild::getId)
-                .flatMap(author::asMember));
+                .flatMap(author -> getGuild()
+                        .map(Guild::getId)
+                        .flatMap(author::asMember));
     }
 
     /**
@@ -167,7 +168,7 @@ public final class Message implements Entity {
     public Optional<String> getContent() {
         // FIXME nullability
         // Even though the bean / responses say it's not nullable Discord is being stupid atm
-        return Optional.ofNullable(data.content()).filter(content -> !content.isEmpty());
+        return data.content().toOptional().filter(content -> !content.isEmpty());
     }
 
     /**
@@ -176,7 +177,7 @@ public final class Message implements Entity {
      * @return When this message was sent.
      */
     public Instant getTimestamp() {
-        return DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(data.timestamp(), Instant::from);
+        return DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(data.timestamp().get(), Instant::from);
     }
 
     /**
@@ -186,7 +187,7 @@ public final class Message implements Entity {
      */
     public Optional<Instant> getEditedTimestamp() {
         return data.editedTimestamp()
-            .map(timestamp -> DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(timestamp, Instant::from));
+                .map(timestamp -> DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(timestamp, Instant::from));
     }
 
     /**
@@ -195,7 +196,7 @@ public final class Message implements Entity {
      * @return {@code true} if this message was a TTS (Text-To-Speech) message, {@code false} otherwise.
      */
     public boolean isTts() {
-        return data.tts();
+        return data.tts().get();
     }
 
     /**
@@ -204,7 +205,7 @@ public final class Message implements Entity {
      * @return {@code true} if this message mentions everyone, {@code false} otherwise.
      */
     public boolean mentionsEveryone() {
-        return data.mentionEveryone();
+        return data.mentionEveryone().get();
     }
 
     /**
@@ -215,9 +216,9 @@ public final class Message implements Entity {
     public Set<Snowflake> getUserMentionIds() {
         // FIXME we throw away member data here
         return data.mentions().stream()
-            .map(data -> data.member().user().id())
-            .map(Snowflake::of)
-            .collect(Collectors.toSet());
+                .map(data -> data.member().user().get().id())
+                .map(Snowflake::of)
+                .collect(Collectors.toSet());
     }
 
     /**
@@ -237,8 +238,8 @@ public final class Message implements Entity {
      */
     public Set<Snowflake> getRoleMentionIds() {
         return data.mentionRoles().stream()
-            .map(Snowflake::of)
-            .collect(Collectors.toSet());
+                .map(Snowflake::of)
+                .collect(Collectors.toSet());
     }
 
     /**
@@ -249,9 +250,9 @@ public final class Message implements Entity {
      */
     public Flux<Role> getRoleMentions() {
         return Flux.fromIterable(getRoleMentionIds())
-            .flatMap(roleId -> getGuild()
-                .map(Guild::getId)
-                .flatMap(guildId -> gateway.getRoleById(guildId, roleId)));
+                .flatMap(roleId -> getGuild()
+                        .map(Guild::getId)
+                        .flatMap(guildId -> gateway.getRoleById(guildId, roleId)));
     }
 
     /**
@@ -261,8 +262,8 @@ public final class Message implements Entity {
      */
     public Set<Attachment> getAttachments() {
         return data.attachments().stream()
-            .map(data -> new Attachment(gateway, data))
-            .collect(Collectors.toSet());
+                .map(data -> new Attachment(gateway, data))
+                .collect(Collectors.toSet());
     }
 
     /**
@@ -272,8 +273,8 @@ public final class Message implements Entity {
      */
     public List<Embed> getEmbeds() {
         return data.embeds().stream()
-            .map(data -> new Embed(gateway, data))
-            .collect(Collectors.toList());
+                .map(data -> new Embed(gateway, data))
+                .collect(Collectors.toList());
     }
 
     /**
@@ -283,8 +284,8 @@ public final class Message implements Entity {
      */
     public Set<Reaction> getReactions() {
         return data.reactions().toOptional()
-            .map(reactions -> reactions.stream().map(data -> new Reaction(gateway, data)).collect(Collectors.toSet()))
-            .orElse(Collections.emptySet());
+                .map(reactions -> reactions.stream().map(data -> new Reaction(gateway, data)).collect(Collectors.toSet()))
+                .orElse(Collections.emptySet());
 
     }
 
@@ -297,13 +298,13 @@ public final class Message implements Entity {
      */
     public Flux<User> getReactors(final ReactionEmoji emoji) {
         final Function<Map<String, Object>, Flux<UserData>> makeRequest = params ->
-            gateway.getRestClient().getChannelService()
-                .getReactions(getChannelId().asLong(), getId().asLong(),
-                    EntityUtil.getEmojiString(emoji),
-                    params);
+                gateway.getRestClient().getChannelService()
+                        .getReactions(getChannelId().asLong(), getId().asLong(),
+                                EntityUtil.getEmojiString(emoji),
+                                params);
 
         return PaginationUtil.paginateAfter(makeRequest, data -> Long.parseUnsignedLong(data.id()), 0L, 100)
-            .map(data -> new User(gateway, data));
+                .map(data -> new User(gateway, data));
     }
 
     /**
@@ -312,7 +313,7 @@ public final class Message implements Entity {
      * @return {@code true} if this message is pinned, {@code false} otherwise.
      */
     public boolean isPinned() {
-        return data.pinned();
+        return data.pinned().get();
     }
 
     /**
@@ -332,7 +333,7 @@ public final class Message implements Entity {
      */
     public Optional<MessageReference> getMessageReference() {
         return data.messageReference().toOptional()
-            .map(data -> new MessageReference(gateway, data));
+                .map(data -> new MessageReference(gateway, data));
     }
 
     /**
@@ -342,8 +343,8 @@ public final class Message implements Entity {
      */
     public EnumSet<Flag> getFlags() {
         return data.flags().toOptional()
-            .map(Flag::of)
-            .orElse(EnumSet.noneOf(Flag.class));
+                .map(Flag::of)
+                .orElse(EnumSet.noneOf(Flag.class));
     }
 
     /**
@@ -362,7 +363,7 @@ public final class Message implements Entity {
      * @return The type of message.
      */
     public Type getType() {
-        return Type.of(data.type());
+        return Type.of(data.type().get());
     }
 
     /**
@@ -377,8 +378,8 @@ public final class Message implements Entity {
         spec.accept(mutatedSpec);
 
         return gateway.getRestClient().getChannelService()
-            .editMessage(getChannelId().asLong(), getId().asLong(), mutatedSpec.asRequest())
-            .map(data -> new Message(gateway, data));
+                .editMessage(getChannelId().asLong(), getId().asLong(), mutatedSpec.asRequest())
+                .map(data -> new Message(gateway, data));
     }
 
     /**
@@ -400,7 +401,7 @@ public final class Message implements Entity {
      */
     public Mono<Void> delete(@Nullable final String reason) {
         return gateway.getRestClient().getChannelService()
-            .deleteMessage(getChannelId().asLong(), getId().asLong(), reason);
+                .deleteMessage(getChannelId().asLong(), getId().asLong(), reason);
     }
 
     /**
@@ -414,7 +415,7 @@ public final class Message implements Entity {
     @Experimental
     public Mono<Void> suppressEmbeds(final boolean suppress) {
         return gateway.getRestClient().getChannelService()
-            .suppressEmbeds(getChannelId().asLong(), getId().asLong(), ImmutableSuppressEmbedsRequest.of(suppress));
+                .suppressEmbeds(getChannelId().asLong(), getId().asLong(), ImmutableSuppressEmbedsRequest.of(suppress));
     }
 
     /**
@@ -426,21 +427,21 @@ public final class Message implements Entity {
      */
     public Mono<Void> addReaction(final ReactionEmoji emoji) {
         return gateway.getRestClient().getChannelService()
-            .createReaction(getChannelId().asLong(), getId().asLong(), EntityUtil.getEmojiString(emoji));
+                .createReaction(getChannelId().asLong(), getId().asLong(), EntityUtil.getEmojiString(emoji));
     }
 
     /**
      * Requests to remove a reaction from a specified user on this message.
      *
-     * @param emoji  The reaction to remove on this message.
+     * @param emoji The reaction to remove on this message.
      * @param userId The user to remove the reaction on this message.
      * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the reaction from the
      * specified user was removed on this message. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Void> removeReaction(final ReactionEmoji emoji, final Snowflake userId) {
         return gateway.getRestClient().getChannelService()
-            .deleteReaction(getChannelId().asLong(), getId().asLong(), EntityUtil.getEmojiString(emoji),
-                userId.asLong());
+                .deleteReaction(getChannelId().asLong(), getId().asLong(), EntityUtil.getEmojiString(emoji),
+                        userId.asLong());
     }
 
     /**
@@ -452,7 +453,7 @@ public final class Message implements Entity {
      */
     public Mono<Void> removeSelfReaction(final ReactionEmoji emoji) {
         return gateway.getRestClient().getChannelService()
-            .deleteOwnReaction(getChannelId().asLong(), getId().asLong(), EntityUtil.getEmojiString(emoji));
+                .deleteOwnReaction(getChannelId().asLong(), getId().asLong(), EntityUtil.getEmojiString(emoji));
     }
 
     /**
@@ -463,7 +464,7 @@ public final class Message implements Entity {
      */
     public Mono<Void> removeAllReactions() {
         return gateway.getRestClient().getChannelService()
-            .deleteAllReactions(getChannelId().asLong(), getId().asLong());
+                .deleteAllReactions(getChannelId().asLong(), getId().asLong());
     }
 
     /**
@@ -474,7 +475,7 @@ public final class Message implements Entity {
      */
     public Mono<Void> pin() {
         return gateway.getRestClient().getChannelService()
-            .addPinnedMessage(getChannelId().asLong(), getId().asLong());
+                .addPinnedMessage(getChannelId().asLong(), getId().asLong());
     }
 
     /**
@@ -485,7 +486,7 @@ public final class Message implements Entity {
      */
     public Mono<Void> unpin() {
         return gateway.getRestClient().getChannelService()
-            .deletePinnedMessage(getChannelId().asLong(), getId().asLong());
+                .deletePinnedMessage(getChannelId().asLong(), getId().asLong());
     }
 
     @Override
@@ -722,7 +723,7 @@ public final class Message implements Entity {
     @Override
     public String toString() {
         return "Message{" +
-            "data=" + data +
-            '}';
+                "data=" + data +
+                '}';
     }
 }

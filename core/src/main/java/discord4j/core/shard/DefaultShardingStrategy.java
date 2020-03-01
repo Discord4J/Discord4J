@@ -17,7 +17,7 @@
 
 package discord4j.core.shard;
 
-import com.darichey.discordjson.json.GatewayData;
+import discord4j.discordjson.json.GatewayData;
 import discord4j.gateway.GatewayClient;
 import discord4j.gateway.ShardInfo;
 import discord4j.rest.RestClient;

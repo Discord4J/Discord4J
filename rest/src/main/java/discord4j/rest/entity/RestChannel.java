@@ -17,8 +17,8 @@
 
 package discord4j.rest.entity;
 
-import com.darichey.discordjson.json.ChannelData;
-import com.darichey.discordjson.json.MessageData;
+import discord4j.discordjson.json.ChannelData;
+import discord4j.discordjson.json.MessageData;
 import discord4j.rest.RestClient;
 import discord4j.rest.util.MultipartRequest;
 import reactor.core.publisher.Mono;

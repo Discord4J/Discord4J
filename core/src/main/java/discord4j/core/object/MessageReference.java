@@ -1,6 +1,6 @@
 package discord4j.core.object;
 
-import com.darichey.discordjson.json.MessageReferenceData;
+import discord4j.discordjson.json.MessageReferenceData;
 import discord4j.common.annotations.Experimental;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.util.Snowflake;

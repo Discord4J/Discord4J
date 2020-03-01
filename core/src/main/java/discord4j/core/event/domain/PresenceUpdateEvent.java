@@ -16,13 +16,13 @@
  */
 package discord4j.core.event.domain;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.presence.Presence;
 import discord4j.core.object.util.Snowflake;
+import discord4j.discordjson.json.UserData;
 import discord4j.gateway.ShardInfo;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
@@ -42,12 +42,12 @@ public class PresenceUpdateEvent extends Event {
 
     private final long guildId;
     private final User oldUser;
-    private final JsonNode user;
+    private final UserData user;
     private final Presence current;
     private final Presence old;
 
-    public PresenceUpdateEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, long guildId, @Nullable User oldUser, JsonNode user,
-                               Presence current, @Nullable Presence old) {
+    public PresenceUpdateEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, long guildId, @Nullable User oldUser,
+                               UserData user, Presence current, @Nullable Presence old) {
         super(gateway, shardInfo);
         this.guildId = guildId;
         this.oldUser = oldUser;
@@ -91,7 +91,7 @@ public class PresenceUpdateEvent extends Event {
      * @return The {@link User}'s new username, if present.
      */
     public Optional<String> getNewUsername() {
-        return Optional.ofNullable(user.get("username")).map(JsonNode::asText);
+        return user.username().toOptional();
     }
 
     /**
@@ -101,7 +101,7 @@ public class PresenceUpdateEvent extends Event {
      * @return The {@link User}'s new discriminator, if present.
      */
     public Optional<String> getNewDiscriminator() {
-        return Optional.ofNullable(user.get("discriminator")).map(JsonNode::asText);
+        return user.discriminator().toOptional();
     }
 
     /**
@@ -111,9 +111,7 @@ public class PresenceUpdateEvent extends Event {
      * @return The user's new avatar, if present.
      */
     public Optional<String> getNewAvatar() {
-        return Optional.ofNullable(user.get("avatar"))
-                .filter(node -> !node.isNull())
-                .map(JsonNode::asText);
+        return user.avatar().toOptional();
     }
 
     /**
@@ -122,7 +120,7 @@ public class PresenceUpdateEvent extends Event {
      * @return The ID of the {@link User} whose presence has been updated.
      */
     public Snowflake getUserId() {
-        return Snowflake.of(user.get("id").asText());
+        return Snowflake.of(user.id());
     }
 
     /**

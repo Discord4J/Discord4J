@@ -16,8 +16,8 @@
  */
 package discord4j.core.spec;
 
-import com.darichey.discordjson.json.ImmutableWebhookCreateRequest;
-import com.darichey.discordjson.json.WebhookCreateRequest;
+import discord4j.discordjson.json.ImmutableWebhookCreateRequest;
+import discord4j.discordjson.json.WebhookCreateRequest;
 import discord4j.core.object.entity.Webhook;
 import discord4j.core.object.util.Image;
 import reactor.util.annotation.Nullable;

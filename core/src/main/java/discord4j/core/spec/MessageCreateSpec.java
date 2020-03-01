@@ -16,10 +16,10 @@
  */
 package discord4j.core.spec;
 
-import com.darichey.discordjson.json.EmbedData;
-import com.darichey.discordjson.json.ImmutableMessageCreateRequest;
-import com.darichey.discordjson.json.MessageCreateRequest;
-import com.darichey.discordjson.possible.Possible;
+import discord4j.discordjson.json.EmbedData;
+import discord4j.discordjson.json.ImmutableMessageCreateRequest;
+import discord4j.discordjson.json.MessageCreateRequest;
+import discord4j.discordjson.possible.Possible;
 import discord4j.core.object.Embed;
 import discord4j.core.object.entity.Attachment;
 import discord4j.core.object.entity.Message;
@@ -130,7 +130,7 @@ public class MessageCreateSpec implements Spec<MultipartRequest> {
             .content(content == null ? Possible.absent() : Possible.of(content))
             .nonce(nonce == null ? Possible.absent() : Possible.of(nonce))
             .tts(Possible.of(tts))
-            .embed(Possible.of(embed))
+            .embed(embed == null ? Possible.absent() : Possible.of(embed))
             .build();
         return new MultipartRequest(json, files == null ? Collections.emptyList() : files);
     }

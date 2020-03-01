@@ -16,7 +16,6 @@
  */
 package discord4j.core.object.entity;
 
-import com.darichey.discordjson.json.MemberData;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.VoiceState;
 import discord4j.core.object.presence.Presence;
@@ -26,17 +25,20 @@ import discord4j.core.spec.BanQuerySpec;
 import discord4j.core.spec.GuildMemberEditSpec;
 import discord4j.core.util.OrderUtil;
 import discord4j.core.util.PermissionUtil;
+import discord4j.discordjson.json.MemberData;
 import discord4j.store.api.util.LongLongTuple2;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.math.MathFlux;
 import reactor.util.annotation.Nullable;
 
-import java.awt.*;
+import java.awt.Color;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.*;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -62,7 +64,7 @@ public final class Member extends User {
      * @param guildId The ID of the guild this user is associated to.
      */
     public Member(final GatewayDiscordClient gateway, final MemberData data, final long guildId) {
-        super(gateway, data.user());
+        super(gateway, data.user().get());
         this.data = Objects.requireNonNull(data);
         this.guildId = guildId;
     }

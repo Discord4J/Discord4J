@@ -16,8 +16,8 @@
  */
 package discord4j.gateway;
 
-import com.darichey.discordjson.json.gateway.*;
-import com.darichey.discordjson.possible.Possible;
+import discord4j.discordjson.json.gateway.*;
+import discord4j.discordjson.possible.Possible;
 import discord4j.gateway.json.*;
 import discord4j.gateway.retry.GatewayException;
 import reactor.util.Logger;

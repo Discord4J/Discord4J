@@ -16,11 +16,11 @@
  */
 package discord4j.core.spec;
 
-import com.darichey.discordjson.json.ChannelModifyRequest;
-import com.darichey.discordjson.json.ImmutableChannelModifyRequest;
-import com.darichey.discordjson.json.ImmutableOverwriteData;
-import com.darichey.discordjson.json.OverwriteData;
-import com.darichey.discordjson.possible.Possible;
+import discord4j.discordjson.json.ChannelModifyRequest;
+import discord4j.discordjson.json.ImmutableChannelModifyRequest;
+import discord4j.discordjson.json.ImmutableOverwriteData;
+import discord4j.discordjson.json.OverwriteData;
+import discord4j.discordjson.possible.Possible;
 import discord4j.core.object.PermissionOverwrite;
 import discord4j.core.object.entity.channel.Category;
 import discord4j.core.object.entity.channel.VoiceChannel;

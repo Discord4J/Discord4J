@@ -16,7 +16,7 @@
  */
 package discord4j.rest.service;
 
-import com.darichey.discordjson.json.AuditLogData;
+import discord4j.discordjson.json.AuditLogData;
 import discord4j.rest.request.Router;
 import discord4j.rest.route.Routes;
 import reactor.core.publisher.Mono;

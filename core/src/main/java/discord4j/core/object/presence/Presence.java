@@ -16,16 +16,19 @@
  */
 package discord4j.core.object.presence;
 
-import com.darichey.discordjson.json.ActivityData;
-import com.darichey.discordjson.json.ImmutableActivityData;
-import com.darichey.discordjson.json.gateway.PresenceUpdate;
-import com.darichey.discordjson.json.gateway.StatusUpdate;
-import com.darichey.discordjson.possible.Possible;
-import reactor.util.annotation.Nullable;
+import discord4j.discordjson.json.ImmutableActivityData;
+import discord4j.discordjson.json.gateway.ImmutableStatusUpdate;
+import discord4j.discordjson.json.gateway.PresenceUpdate;
+import discord4j.discordjson.json.gateway.StatusUpdate;
+import discord4j.discordjson.possible.Possible;
 
+import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 // FIXME Presence is just a mess
+
 /**
  * A Discord presence.
  *
@@ -33,32 +36,78 @@ import java.util.Optional;
  */
 public final class Presence {
 
-    public static Presence online() {
-        return new Presence(Status.ONLINE, null);
+    public static StatusUpdate online() {
+        return ImmutableStatusUpdate.builder()
+                .status(Status.ONLINE.getValue())
+                .game(Optional.empty())
+                .afk(false)
+                .since(Optional.empty())
+                .build();
     }
 
-    public static Presence online(Activity activity) {
-        return new Presence(Status.ONLINE, activity);
+    public static StatusUpdate online(Activity activity) {
+        return ImmutableStatusUpdate.builder()
+                .status(Status.ONLINE.getValue())
+                .game(ImmutableActivityData.builder()
+                        .name(activity.getName())
+                        .type(activity.getType().getValue())
+                        .build())
+                .afk(false)
+                .since(Optional.empty())
+                .build();
     }
 
-    public static Presence doNotDisturb() {
-        return new Presence(Status.DO_NOT_DISTURB, null);
+    public static StatusUpdate doNotDisturb() {
+        return ImmutableStatusUpdate.builder()
+                .status(Status.DO_NOT_DISTURB.getValue())
+                .game(Optional.empty())
+                .afk(false)
+                .since(Optional.empty())
+                .build();
     }
 
-    public static Presence doNotDisturb(Activity activity) {
-        return new Presence(Status.DO_NOT_DISTURB, activity);
+    public static StatusUpdate doNotDisturb(Activity activity) {
+        return ImmutableStatusUpdate.builder()
+                .status(Status.DO_NOT_DISTURB.getValue())
+                .game(ImmutableActivityData.builder()
+                        .name(activity.getName())
+                        .type(activity.getType().getValue())
+                        .url(Possible.of(activity.getStreamingUrl()))
+                        .build())
+                .afk(false)
+                .since(Optional.empty())
+                .build();
     }
 
-    public static Presence idle() {
-        return new Presence(Status.IDLE, null);
+    public static StatusUpdate idle() {
+        return ImmutableStatusUpdate.builder()
+                .status(Status.IDLE.getValue())
+                .game(Optional.empty())
+                .afk(true)
+                .since(Instant.now().toEpochMilli())
+                .build();
     }
 
-    public static Presence idle(Activity activity) {
-        return new Presence(Status.IDLE, activity);
+    public static StatusUpdate idle(Activity activity) {
+        return ImmutableStatusUpdate.builder()
+                .status(Status.IDLE.getValue())
+                .game(ImmutableActivityData.builder()
+                        .name(activity.getName())
+                        .type(activity.getType().getValue())
+                        .url(Possible.of(activity.getStreamingUrl()))
+                        .build())
+                .afk(true)
+                .since(Instant.now().toEpochMilli())
+                .build();
     }
 
-    public static Presence invisible() {
-        return new Presence(Status.INVISIBLE, null);
+    public static StatusUpdate invisible() {
+        return ImmutableStatusUpdate.builder()
+                .status(Status.INVISIBLE.getValue())
+                .game(Optional.empty())
+                .afk(false)
+                .since(Optional.empty())
+                .build();
     }
 
     private final PresenceUpdate data;
@@ -73,32 +122,41 @@ public final class Presence {
 
     public Optional<Status> getStatus(Status.Platform platform) {
         switch (platform) {
-            case DESKTOP: return Optional.ofNullable(data.getDesktopStatus()).map(Status::of);
-            case MOBILE: return Optional.ofNullable(data.getMobileStatus()).map(Status::of);
-            case WEB: return Optional.ofNullable(data.getWebStatus()).map(Status::of);
+            case DESKTOP: return data.clientStatus().desktop().toOptional().map(Status::of);
+            case MOBILE: return data.clientStatus().mobile().toOptional().map(Status::of);
+            case WEB: return data.clientStatus().web().toOptional().map(Status::of);
             default: throw new AssertionError();
         }
     }
 
     public Optional<Activity> getActivity() {
-        return Optional.ofNullable(data.getActivity()).map(Activity::new);
+        return data.activities().stream().map(Activity::new).findFirst();
+    }
+
+    public List<Activity> getActivities() {
+        return data.activities().stream().map(Activity::new).collect(Collectors.toList());
     }
 
     public StatusUpdate asStatusUpdate() {
-//        final StatusUpdate.Game game = getActivity()
-//                .map(activity -> {
-//                    Possible<String> url = activity.getStreamingUrl().map(Possible::of).orElse(Possible.absent());
-//                    return new StatusUpdate.Game(activity.getName(), activity.getType().getValue(), url);
-//                })
-//                .orElse(null);
-
-        return new StatusUpdate(game, data.status());
+        //        final StatusUpdate.Game game = getActivity()
+        //                .map(activity -> {
+        //                    Possible<String> url = activity.getStreamingUrl().map(Possible::of).orElse(Possible
+        //                    .absent());
+        //                    return new StatusUpdate.Game(activity.getName(), activity.getType().getValue(), url);
+        //                })
+        //                .orElse(null);
+        return ImmutableStatusUpdate.builder()
+                .status(data.status())
+                .game(data.game())
+                .afk(false) // FIXME
+                .since(Optional.empty())  // FIXME
+                .build();
     }
 
     @Override
     public String toString() {
         return "Presence{" +
-            "data=" + data +
-            '}';
+                "data=" + data +
+                '}';
     }
 }

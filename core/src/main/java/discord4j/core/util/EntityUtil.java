@@ -16,7 +16,7 @@
  */
 package discord4j.core.util;
 
-import com.darichey.discordjson.json.ChannelData;
+import discord4j.discordjson.json.ChannelData;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.Entity;
 import discord4j.core.object.entity.channel.*;

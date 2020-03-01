@@ -17,7 +17,7 @@
 
 package discord4j.rest;
 
-import com.darichey.discordjson.possible.PossibleModule;
+import discord4j.discordjson.possible.PossibleModule;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;

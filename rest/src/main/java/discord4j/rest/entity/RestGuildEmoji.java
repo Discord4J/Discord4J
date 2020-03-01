@@ -17,7 +17,7 @@
 
 package discord4j.rest.entity;
 
-import com.darichey.discordjson.json.EmojiData;
+import discord4j.discordjson.json.EmojiData;
 import discord4j.rest.RestClient;
 import reactor.core.publisher.Mono;
 

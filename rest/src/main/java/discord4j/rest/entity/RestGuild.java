@@ -17,10 +17,10 @@
 
 package discord4j.rest.entity;
 
-import com.darichey.discordjson.json.ChannelData;
-import com.darichey.discordjson.json.GuildData;
-import com.darichey.discordjson.json.RegionData;
-import com.darichey.discordjson.json.RoleData;
+import discord4j.discordjson.json.ChannelData;
+import discord4j.discordjson.json.GuildData;
+import discord4j.discordjson.json.RegionData;
+import discord4j.discordjson.json.RoleData;
 import discord4j.rest.RestClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;

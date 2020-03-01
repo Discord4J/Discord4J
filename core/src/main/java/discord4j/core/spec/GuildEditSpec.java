@@ -16,9 +16,9 @@
  */
 package discord4j.core.spec;
 
-import com.darichey.discordjson.json.GuildModifyRequest;
-import com.darichey.discordjson.json.ImmutableGuildModifyRequest;
-import com.darichey.discordjson.possible.Possible;
+import discord4j.discordjson.json.GuildModifyRequest;
+import discord4j.discordjson.json.ImmutableGuildModifyRequest;
+import discord4j.discordjson.possible.Possible;
 import discord4j.core.object.Region;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.util.Image;

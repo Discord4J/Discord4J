@@ -16,14 +16,14 @@
  */
 package discord4j.core.object.entity;
 
-import com.darichey.discordjson.json.ImmutableDMCreateRequest;
-import com.darichey.discordjson.json.UserData;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.channel.PrivateChannel;
 import discord4j.core.object.util.Image;
 import discord4j.core.object.util.Snowflake;
 import discord4j.core.util.EntityUtil;
 import discord4j.core.util.ImageUtil;
+import discord4j.discordjson.json.ImmutableDMCreateRequest;
+import discord4j.discordjson.json.UserData;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
 
@@ -74,7 +74,7 @@ public class User implements Entity {
      * @return The user's username, not unique across the platform.
      */
     public final String getUsername() {
-        return data.username();
+        return data.username().get();
     }
 
     /**
@@ -83,7 +83,7 @@ public class User implements Entity {
      * @return The user's 4-digit discord-tag.
      */
     public final String getDiscriminator() {
-        return data.discriminator();
+        return data.discriminator().get();
     }
 
     /**
@@ -92,7 +92,7 @@ public class User implements Entity {
      * @return {@code true} if the user's avatar is animated, {@code false} otherwise.
      */
     public final boolean hasAnimatedAvatar() {
-        final String avatar = data.avatar().orElse(null);
+        final String avatar = data.avatar().toOptional().orElse(null);
         return (avatar != null) && avatar.startsWith("a_");
     }
 
@@ -103,7 +103,7 @@ public class User implements Entity {
      * @return The user's avatar URL, if present.
      */
     public final Optional<String> getAvatarUrl(final Image.Format format) {
-        return data.avatar()
+        return data.avatar().toOptional()
                 .map(avatar -> ImageUtil.getUrl(String.format(AVATAR_IMAGE_PATH, getId().asString(), avatar), format));
     }
 
@@ -111,10 +111,6 @@ public class User implements Entity {
      * Gets the user's effective avatar URL.
      *
      * @return The user's effective avatar URL.
-     * @implNote This method will first attempt to get the user's {@link #getAvatarUrl(Image.Format) avatar URL}. If the
-     * avatar is {@link #hasAnimatedAvatar() animated}, a {@link Image.Format#GIF GIF} is returned; otherwise a
-     * {@link Image.Format#PNG PNG} is returned. The {@link #getDefaultAvatarUrl() default avatar URL} is returned if no
-     * avatar is set for this user.
      */
     public final String getAvatarUrl() {
         final boolean animated = hasAnimatedAvatar();

@@ -16,12 +16,11 @@
  */
 package discord4j.core.object.presence;
 
-import com.darichey.discordjson.json.ActivityData;
-import com.darichey.discordjson.possible.Possible;
 import discord4j.core.object.reaction.ReactionEmoji;
 import discord4j.core.object.util.Snowflake;
 import discord4j.core.util.EntityUtil;
-import reactor.util.annotation.Nullable;
+import discord4j.discordjson.json.ActivityData;
+import discord4j.discordjson.possible.Possible;
 
 import java.time.Instant;
 import java.util.Arrays;

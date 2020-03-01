@@ -16,8 +16,8 @@
  */
 package discord4j.core.spec;
 
-import com.darichey.discordjson.json.ImmutableInviteCreateRequest;
-import com.darichey.discordjson.json.InviteCreateRequest;
+import discord4j.discordjson.json.ImmutableInviteCreateRequest;
+import discord4j.discordjson.json.InviteCreateRequest;
 import discord4j.core.object.Invite;
 import reactor.util.annotation.Nullable;
 

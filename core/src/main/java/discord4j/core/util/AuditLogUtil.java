@@ -16,8 +16,8 @@
  */
 package discord4j.core.util;
 
-import com.darichey.discordjson.json.AuditEntryInfoData;
-import com.darichey.discordjson.json.AuditLogChangeData;
+import discord4j.discordjson.json.AuditEntryInfoData;
+import discord4j.discordjson.json.AuditLogChangeData;
 import discord4j.core.object.audit.AuditLogChange;
 import discord4j.core.object.audit.OptionKey;
 

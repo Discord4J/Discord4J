@@ -16,9 +16,9 @@
  */
 package discord4j.rest.service;
 
-import com.darichey.discordjson.json.WebhookCreateRequest;
-import com.darichey.discordjson.json.WebhookData;
-import com.darichey.discordjson.json.WebhookModifyRequest;
+import discord4j.discordjson.json.WebhookCreateRequest;
+import discord4j.discordjson.json.WebhookData;
+import discord4j.discordjson.json.WebhookModifyRequest;
 import discord4j.rest.request.Router;
 import discord4j.rest.route.Routes;
 import reactor.core.publisher.Flux;

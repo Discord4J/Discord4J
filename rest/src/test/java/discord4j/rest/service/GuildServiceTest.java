@@ -16,8 +16,8 @@
  */
 package discord4j.rest.service;
 
-import com.darichey.discordjson.json.*;
-import com.darichey.discordjson.possible.Possible;
+import discord4j.discordjson.json.*;
+import discord4j.discordjson.possible.Possible;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import discord4j.rest.RestTests;
 import discord4j.rest.request.Router;

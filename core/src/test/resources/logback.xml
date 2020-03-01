@@ -5,7 +5,7 @@
     <logger name="reactor.retry" level="INFO"/>
 
     <logger name="discord4j.core" level="DEBUG"/>
-    <logger name="discord4j.gateway.DefaultGatewayClient" level="DEBUG"/>
+    <logger name="discord4j.gateway.DefaultGatewayClient" level="TRACE"/>
     <logger name="discord4j.rest.http.client.DiscordWebClient" level="INFO"/>
     <logger name="discord4j.rest.request" level="DEBUG"/>
     <!--<logger name="discord4j.rest.http" level="TRACE"/>-->

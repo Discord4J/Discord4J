@@ -26,7 +26,7 @@ import reactor.util.annotation.Nullable;
 
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -46,14 +46,14 @@ public class MemberUpdateEvent extends GuildEvent {
     @Nullable
     private final Member old;
 
-    private final long[] currentRoles;
+    private final List<Long> currentRoles;
     @Nullable
     private final String currentNickname;
     @Nullable
     private final String currentPremiumSince;
 
     public MemberUpdateEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, long guildId, long memberId,
-                             @Nullable Member old, long[] currentRoles, @Nullable String currentNickname,
+                             @Nullable Member old, List<Long> currentRoles, @Nullable String currentNickname,
                              @Nullable String currentPremiumSince) {
         super(gateway, shardInfo);
 
@@ -119,8 +119,8 @@ public class MemberUpdateEvent extends GuildEvent {
      * @return The IDs of the roles the {@link Member} is assigned.
      */
     public Set<Snowflake> getCurrentRoles() {
-        return Arrays.stream(currentRoles)
-                .mapToObj(Snowflake::of)
+        return currentRoles.stream()
+                .map(Snowflake::of)
                 .collect(Collectors.toSet());
     }
 
@@ -149,7 +149,7 @@ public class MemberUpdateEvent extends GuildEvent {
                 "guildId=" + guildId +
                 ", memberId=" + memberId +
                 ", old=" + old +
-                ", currentRoles=" + Arrays.toString(currentRoles) +
+                ", currentRoles=" + currentRoles +
                 ", currentNickname='" + currentNickname + '\'' +
                 ", currentPremiumSince='" + currentPremiumSince + '\'' +
                 '}';

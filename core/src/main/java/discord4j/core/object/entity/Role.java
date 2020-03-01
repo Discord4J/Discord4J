@@ -16,7 +16,7 @@
  */
 package discord4j.core.object.entity;
 
-import com.darichey.discordjson.json.RoleData;
+import discord4j.discordjson.json.RoleData;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.util.PermissionSet;
 import discord4j.core.object.util.Snowflake;

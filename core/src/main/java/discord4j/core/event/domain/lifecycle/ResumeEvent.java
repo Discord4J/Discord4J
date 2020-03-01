@@ -19,7 +19,7 @@ package discord4j.core.event.domain.lifecycle;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.gateway.ShardInfo;
 
-import java.util.Arrays;
+import java.util.List;
 
 /**
  * Dispatched when the gateway connection is successfully resumed.
@@ -30,9 +30,9 @@ import java.util.Arrays;
  */
 public class ResumeEvent extends GatewayLifecycleEvent {
 
-    private final String[] trace;
+    private final List<String> trace;
 
-    public ResumeEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, String[] trace) {
+    public ResumeEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, List<String> trace) {
         super(gateway, shardInfo);
         this.trace = trace;
     }
@@ -42,14 +42,14 @@ public class ResumeEvent extends GatewayLifecycleEvent {
      *
      * @return The trace provided by Discord, containing the guild the user is in.
      */
-    public String[] getTrace() {
+    public List<String> getTrace() {
         return trace;
     }
 
     @Override
     public String toString() {
         return "ResumeEvent{" +
-                "trace=" + Arrays.toString(trace) +
+                "trace=" + trace +
                 "} " + super.toString();
     }
 }

@@ -16,7 +16,7 @@
  */
 package discord4j.core.spec;
 
-import com.darichey.discordjson.json.*;
+import discord4j.discordjson.json.*;
 import discord4j.core.object.Region;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.channel.Channel;

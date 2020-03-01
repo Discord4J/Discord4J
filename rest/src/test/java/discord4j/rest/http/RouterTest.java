@@ -16,11 +16,11 @@
  */
 package discord4j.rest.http;
 
-import com.darichey.discordjson.json.ImmutableMessageCreateRequest;
-import com.darichey.discordjson.json.MessageCreateRequest;
-import com.darichey.discordjson.json.MessageData;
-import com.darichey.discordjson.possible.Possible;
-import com.darichey.discordjson.possible.PossibleModule;
+import discord4j.discordjson.json.ImmutableMessageCreateRequest;
+import discord4j.discordjson.json.MessageCreateRequest;
+import discord4j.discordjson.json.MessageData;
+import discord4j.discordjson.possible.Possible;
+import discord4j.discordjson.possible.PossibleModule;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.DeserializationFeature;

@@ -16,8 +16,8 @@
  */
 package discord4j.core.object.entity.channel;
 
-import com.darichey.discordjson.json.ChannelData;
-import com.darichey.discordjson.json.UserData;
+import discord4j.discordjson.json.ChannelData;
+import discord4j.discordjson.json.UserData;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.util.Snowflake;

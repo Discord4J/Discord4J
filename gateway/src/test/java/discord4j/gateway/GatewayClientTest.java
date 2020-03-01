@@ -16,9 +16,9 @@
  */
 package discord4j.gateway;
 
-import com.darichey.discordjson.json.gateway.ImmutableStatusUpdate;
-import com.darichey.discordjson.json.gateway.MessageCreate;
-import com.darichey.discordjson.json.gateway.Ready;
+import discord4j.discordjson.json.gateway.ImmutableStatusUpdate;
+import discord4j.discordjson.json.gateway.MessageCreate;
+import discord4j.discordjson.json.gateway.Ready;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import discord4j.common.JacksonResources;
 import discord4j.common.ReactorResources;
@@ -80,7 +80,7 @@ public class GatewayClientTest {
 
         gatewayClient.dispatch().ofType(MessageCreate.class)
                 .subscribe(message -> {
-                    String content = message.message().content();
+                    String content = message.message().content().toOptional().orElse(null);
                     System.out.println(content);
                     if ("!close".equals(content)) {
                         gatewayClient.close(false).block();

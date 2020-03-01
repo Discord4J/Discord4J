@@ -16,7 +16,7 @@
  */
 package discord4j.core.object;
 
-import com.darichey.discordjson.json.BanData;
+import discord4j.discordjson.json.BanData;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.User;
 

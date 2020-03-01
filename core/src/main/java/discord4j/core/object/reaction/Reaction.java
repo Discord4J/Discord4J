@@ -16,7 +16,7 @@
  */
 package discord4j.core.object.reaction;
 
-import com.darichey.discordjson.json.ReactionData;
+import discord4j.discordjson.json.ReactionData;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.DiscordObject;
 

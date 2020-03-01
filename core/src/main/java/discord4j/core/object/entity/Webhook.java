@@ -16,7 +16,7 @@
  */
 package discord4j.core.object.entity;
 
-import com.darichey.discordjson.json.WebhookData;
+import discord4j.discordjson.json.WebhookData;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.channel.GuildMessageChannel;
 import discord4j.core.object.util.Snowflake;

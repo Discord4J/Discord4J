@@ -16,7 +16,7 @@
  */
 package discord4j.rest.service;
 
-import com.darichey.discordjson.json.InviteData;
+import discord4j.discordjson.json.InviteData;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import discord4j.rest.RestTests;
 import discord4j.rest.request.Router;

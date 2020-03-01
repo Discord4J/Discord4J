@@ -16,8 +16,8 @@
  */
 package discord4j.core.spec;
 
-import com.darichey.discordjson.json.*;
-import com.darichey.discordjson.possible.Possible;
+import discord4j.discordjson.json.*;
+import discord4j.discordjson.possible.Possible;
 import reactor.util.annotation.Nullable;
 
 import java.awt.*;

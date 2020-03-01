@@ -16,7 +16,7 @@
  */
 package discord4j.gateway;
 
-import com.darichey.discordjson.json.gateway.*;
+import discord4j.discordjson.json.gateway.*;
 import discord4j.common.GitProperties;
 import discord4j.common.ReactorResources;
 import discord4j.common.ResettableInterval;

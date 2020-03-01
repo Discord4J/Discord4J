@@ -16,10 +16,10 @@
  */
 package discord4j.core.spec;
 
-import com.darichey.discordjson.json.EmbedData;
-import com.darichey.discordjson.json.ImmutableMessageEditRequest;
-import com.darichey.discordjson.json.MessageEditRequest;
-import com.darichey.discordjson.possible.Possible;
+import discord4j.discordjson.json.EmbedData;
+import discord4j.discordjson.json.ImmutableMessageEditRequest;
+import discord4j.discordjson.json.MessageEditRequest;
+import discord4j.discordjson.possible.Possible;
 import discord4j.core.object.entity.Message;
 import reactor.util.annotation.Nullable;
 

@@ -16,8 +16,8 @@
  */
 package discord4j.rest.service;
 
-import com.darichey.discordjson.json.*;
-import com.darichey.discordjson.possible.Possible;
+import discord4j.discordjson.json.*;
+import discord4j.discordjson.possible.Possible;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import discord4j.rest.RestTests;
 import discord4j.rest.request.Router;
@@ -33,6 +33,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 public class ChannelServiceTest {
 
@@ -187,7 +188,7 @@ public class ChannelServiceTest {
     @Test
     public void testEditMessage() {
         MessageEditRequest req = ImmutableMessageEditRequest.builder()
-            .content(Possible.of("This is a message I can edit."))
+            .content(Possible.of(Optional.of("This is a message I can edit.")))
             .build();
         getChannelService().editMessage(permanentChannel, editMessage, req).block();
     }

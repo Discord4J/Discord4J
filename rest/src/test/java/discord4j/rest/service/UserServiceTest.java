@@ -16,11 +16,11 @@
  */
 package discord4j.rest.service;
 
-import com.darichey.discordjson.json.DMCreateRequest;
-import com.darichey.discordjson.json.ImmutableDMCreateRequest;
-import com.darichey.discordjson.json.ImmutableUserModifyRequest;
-import com.darichey.discordjson.json.UserModifyRequest;
-import com.darichey.discordjson.possible.Possible;
+import discord4j.discordjson.json.DMCreateRequest;
+import discord4j.discordjson.json.ImmutableDMCreateRequest;
+import discord4j.discordjson.json.ImmutableUserModifyRequest;
+import discord4j.discordjson.json.UserModifyRequest;
+import discord4j.discordjson.possible.Possible;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import discord4j.rest.RestTests;
 import discord4j.rest.http.client.ClientException;

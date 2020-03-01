@@ -16,7 +16,7 @@
  */
 package discord4j.core.spec;
 
-import com.darichey.discordjson.json.gateway.ImmutableVoiceStateUpdate;
+import discord4j.discordjson.json.gateway.ImmutableVoiceStateUpdate;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.VoiceServerUpdateEvent;
 import discord4j.core.event.domain.VoiceStateUpdateEvent;

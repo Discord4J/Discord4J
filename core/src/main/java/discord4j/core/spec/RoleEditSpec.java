@@ -16,9 +16,9 @@
  */
 package discord4j.core.spec;
 
-import com.darichey.discordjson.json.ImmutableRoleModifyRequest;
-import com.darichey.discordjson.json.RoleModifyRequest;
-import com.darichey.discordjson.possible.Possible;
+import discord4j.discordjson.json.ImmutableRoleModifyRequest;
+import discord4j.discordjson.json.RoleModifyRequest;
+import discord4j.discordjson.possible.Possible;
 import discord4j.core.object.entity.Role;
 import discord4j.core.object.util.PermissionSet;
 import reactor.util.annotation.Nullable;

@@ -62,7 +62,7 @@ allprojects {
 
     dependencies {
         api platform("io.projectreactor:reactor-bom:$reactor_bom_version")
-        api name: 'discord-json-1.0-SNAPSHOT'
+        api "com.discord4j:discord-json:1.0.0-SNAPSHOT"
     }
 
     repositories {
@@ -74,7 +74,6 @@ allprojects {
         maven { url 'https://jitpack.io' }
         maven { url 'https://repo.spring.io/milestone' }
         jcenter()
-        flatDir { dir 'C:\\Users\\David\\Documents\\GDrive\\Development\\Java\\discord-json\\build\\libs' }
     }
 
     tasks.withType(Javadoc) {

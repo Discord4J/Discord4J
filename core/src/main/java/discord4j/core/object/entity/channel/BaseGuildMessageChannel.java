@@ -16,9 +16,9 @@
  */
 package discord4j.core.object.entity.channel;
 
-import com.darichey.discordjson.json.ChannelData;
-import com.darichey.discordjson.json.ImmutableBulkDeleteRequest;
-import com.darichey.discordjson.possible.Possible;
+import discord4j.discordjson.json.ChannelData;
+import discord4j.discordjson.json.ImmutableBulkDeleteRequest;
+import discord4j.discordjson.possible.Possible;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.ExtendedInvite;
 import discord4j.core.object.ExtendedPermissionOverwrite;

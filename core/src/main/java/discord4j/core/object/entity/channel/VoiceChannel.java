@@ -16,8 +16,8 @@
  */
 package discord4j.core.object.entity.channel;
 
-import com.darichey.discordjson.json.ChannelData;
-import com.darichey.discordjson.json.VoiceStateData;
+import discord4j.discordjson.json.ChannelData;
+import discord4j.discordjson.json.VoiceStateData;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.VoiceState;
 import discord4j.core.spec.VoiceChannelEditSpec;

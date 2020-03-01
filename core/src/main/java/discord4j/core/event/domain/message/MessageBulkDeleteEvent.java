@@ -24,7 +24,7 @@ import discord4j.core.object.util.Snowflake;
 import discord4j.gateway.ShardInfo;
 import reactor.core.publisher.Mono;
 
-import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -40,12 +40,12 @@ import java.util.stream.Collectors;
  */
 public class MessageBulkDeleteEvent extends MessageEvent {
 
-    private final long[] messageIds;
+    private final List<Long> messageIds;
     private final long channelId;
     private final long guildId;
     private final Set<Message> messages;
 
-    public MessageBulkDeleteEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, long[] messageIds, long channelId, long guildId,
+    public MessageBulkDeleteEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, List<Long> messageIds, long channelId, long guildId,
                                   Set<Message> messages) {
         super(gateway, shardInfo);
         this.messageIds = messageIds;
@@ -60,8 +60,8 @@ public class MessageBulkDeleteEvent extends MessageEvent {
      * @return a list of IDs of the messages that were deleted.
      */
     public Set<Snowflake> getMessageIds() {
-        return Arrays.stream(messageIds)
-                .mapToObj(Snowflake::of)
+        return messageIds.stream()
+                .map(Snowflake::of)
                 .collect(Collectors.toSet());
     }
 
@@ -116,7 +116,7 @@ public class MessageBulkDeleteEvent extends MessageEvent {
     @Override
     public String toString() {
         return "MessageBulkDeleteEvent{" +
-                "messageIds=" + Arrays.toString(messageIds) +
+                "messageIds=" + messageIds +
                 ", channelId=" + channelId +
                 ", guildId=" + guildId +
                 ", messages=" + messages +

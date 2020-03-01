@@ -16,10 +16,10 @@
  */
 package discord4j.core.spec;
 
-import com.darichey.discordjson.json.ChannelCreateRequest;
-import com.darichey.discordjson.json.ImmutableChannelCreateRequest;
-import com.darichey.discordjson.json.ImmutableOverwriteData;
-import com.darichey.discordjson.json.OverwriteData;
+import discord4j.discordjson.json.ChannelCreateRequest;
+import discord4j.discordjson.json.ImmutableChannelCreateRequest;
+import discord4j.discordjson.json.ImmutableOverwriteData;
+import discord4j.discordjson.json.OverwriteData;
 import discord4j.core.object.PermissionOverwrite;
 import discord4j.core.object.entity.channel.Channel;
 import discord4j.core.object.entity.channel.NewsChannel;
