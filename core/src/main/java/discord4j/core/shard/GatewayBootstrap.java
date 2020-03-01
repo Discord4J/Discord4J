@@ -60,7 +60,6 @@ import reactor.util.Loggers;
 import reactor.util.annotation.Nullable;
 import reactor.util.context.Context;
 
-import java.time.Duration;
 import java.util.*;
 import java.util.function.Function;
 
@@ -222,10 +221,8 @@ public class GatewayBootstrap<O extends GatewayOptions> {
 
     /**
      * Set a custom {@link EventDispatcher} to receive {@link Event Events} from all joining shards and publish them to
-     * all subscribers. Defaults to using {@link EventDispatcher#buffering()} if {@code awaitConnections} is {@code
-     * true} that will buffer all events until the first subscriber subscribes to the dispatcher, and
-     * {@link EventDispatcher#replayingWithTimeout(Duration)} if {@code awaitConnections} is {@code false} that will
-     * retain up to 2 minutes worth of events in history.
+     * all subscribers. Defaults to using {@link EventDispatcher#buffering()} which buffers all events until the
+     * first subscriber subscribes to the dispatcher.
      *
      * @param eventDispatcher an externally managed {@link EventDispatcher} to publish events
      * @return this builder

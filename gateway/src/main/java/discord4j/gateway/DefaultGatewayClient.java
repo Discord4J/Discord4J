@@ -253,6 +253,7 @@ public class DefaultGatewayClient implements GatewayClient {
 
                     return Mono.zip(httpFuture, readyHandler, receiverFuture, senderFuture, heartbeatHandler)
                             .doOnError(t -> log.error(format(context, "{}"), t.toString()))
+                            .doOnError(t -> heartbeat.stop())
                             .doOnCancel(() -> sessionHandler.close())
                             .then();
                 })

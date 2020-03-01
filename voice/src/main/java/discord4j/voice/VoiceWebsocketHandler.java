@@ -36,6 +36,8 @@ import reactor.util.Loggers;
 import reactor.util.context.Context;
 import reactor.util.function.Tuple2;
 
+import java.util.logging.Level;
+
 import static discord4j.common.LogUtil.format;
 
 public class VoiceWebsocketHandler {
@@ -92,14 +94,14 @@ public class VoiceWebsocketHandler {
 
         Mono<CloseStatus> inboundClose = in.receiveCloseStatus()
                 .map(status -> new CloseStatus(status.code(), status.reasonText()))
-                .doOnNext(status -> log.info("Received close status: {}", status))
+                .doOnNext(status -> log.debug(format(context, "Received close status: {}"), status))
                 .doOnNext(status -> close(DisconnectBehavior.retryAbruptly(
                         new VoiceGatewayException(context, "Inbound close status"))));
 
         Mono<Void> outboundEvents = out.sendObject(Flux.merge(outboundClose, outbound.map(TextWebSocketFrame::new)))
                 .then();
 
-        in.withConnection(c -> c.onDispose(() -> log.info("Connection disposed")));
+        in.withConnection(c -> c.onDispose(() -> log.debug(format(context, "Connection disposed"))));
 
         Mono<Void> inboundEvents = in.aggregateFrames()
                 .receiveFrames()
@@ -108,14 +110,14 @@ public class VoiceWebsocketHandler {
                 .then();
 
         return Mono.zip(
-                outboundEvents.log("voice.session.out"),
-                inboundEvents.log("voice.session.in"))
+                outboundEvents.log("voice.session.out", Level.FINE),
+                inboundEvents.log("voice.session.in", Level.FINE))
                 .doOnError(this::error)
                 .onErrorResume(t -> t.getCause() instanceof VoiceGatewayException, t -> Mono.empty())
                 .then(Mono.zip(
-                        sessionClose.log("voice.session.close"),
+                        sessionClose.log("voice.session.close", Level.FINE),
                         inboundClose.defaultIfEmpty(CloseStatus.ABNORMAL_CLOSE)
-                                .log("voice.inbound.close")));
+                                .log("voice.inbound.close", Level.FINE)));
     }
 
     /**
@@ -142,7 +144,7 @@ public class VoiceWebsocketHandler {
      * @param error the cause for this session termination
      */
     public void error(Throwable error) {
-        log.info("Triggering error sequence: {}", error.toString());
+        log.info(format(context, "Triggering error sequence: {}"), error.toString());
         close(DisconnectBehavior.retryAbruptly(error));
     }
 }

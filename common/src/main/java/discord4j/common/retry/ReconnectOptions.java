@@ -58,7 +58,7 @@ public class ReconnectOptions {
     public static class Builder {
 
         private Duration firstBackoff = Duration.ofSeconds(2);
-        private Duration maxBackoffInterval = Duration.ofSeconds(120);
+        private Duration maxBackoffInterval = Duration.ofSeconds(30);
         private int maxRetries = Integer.MAX_VALUE;
         private Backoff backoff = context -> {
             ReconnectContext appContext = (ReconnectContext) context.applicationContext();
