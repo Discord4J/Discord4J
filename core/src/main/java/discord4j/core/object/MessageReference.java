@@ -35,7 +35,7 @@ public class MessageReference implements DiscordObject {
     }
 
     public Snowflake getChannelId() {
-        // FIXME: is this actually Possible?
+        // TODO FIXME: is this actually Possible?
         return Snowflake.of(data.channelId().get());
     }
 

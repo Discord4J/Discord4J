@@ -1016,7 +1016,7 @@ public final class Guild implements Entity {
      * is emitted through the {@code Mono}.
      */
     public Mono<String> changeSelfNickname(@Nullable final String nickname) {
-        // FIXME
+        // TODO FIXME
         return gateway.getRestClient().getGuildService()
                 .modifyOwnNickname(getId().asLong(), ImmutableNicknameModifyData.of(nickname))
                 .<String>handle((response, next) -> {

@@ -142,7 +142,7 @@ public final class Message implements Entity {
      * @return The author of this message, if present.
      */
     public Optional<User> getAuthor() {
-        // FIXME: when is this null?
+        // TODO FIXME: when is this null?
         return data.author().toOptional().map(userData -> new User(gateway, userData));
     }
 
@@ -166,7 +166,7 @@ public final class Message implements Entity {
      * @return The contents of the message, if present.
      */
     public Optional<String> getContent() {
-        // FIXME nullability
+        // TODO FIXME nullability
         // Even though the bean / responses say it's not nullable Discord is being stupid atm
         return data.content().toOptional().filter(content -> !content.isEmpty());
     }
@@ -214,7 +214,7 @@ public final class Message implements Entity {
      * @return The IDs of the users specifically mentioned in this message.
      */
     public Set<Snowflake> getUserMentionIds() {
-        // FIXME we throw away member data here
+        // TODO FIXME we throw away member data here
         return data.mentions().stream()
                 .map(data -> data.member().user().get().id())
                 .map(Snowflake::of)

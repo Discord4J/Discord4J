@@ -62,7 +62,7 @@ public final class VoiceState implements DiscordObject {
      * @return The guild ID this voice state is for.
      */
     public Snowflake getGuildId() {
-        // FIXME: why is this Possible?
+        // TODO FIXME: why is this Possible?
         return Snowflake.of(data.guildId().get());
     }
 

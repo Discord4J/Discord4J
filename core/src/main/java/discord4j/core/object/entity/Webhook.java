@@ -69,7 +69,7 @@ public final class Webhook implements Entity {
      * @return The ID of the guild this webhook is associated to.
      */
     public Snowflake getGuildId() {
-        return Snowflake.of(data.guildId().get()); // FIXME: really Possible?
+        return Snowflake.of(data.guildId().get()); // TODO FIXME: really Possible?
     }
 
     /**
@@ -107,7 +107,7 @@ public final class Webhook implements Entity {
      * @return The ID of the user this webhook was created by.
      */
     public Snowflake getCreatorId() {
-        return Snowflake.of(data.user().get().id()); // FIXME: really Possible?
+        return Snowflake.of(data.user().get().id()); // TODO FIXME: really Possible?
     }
 
     /**
@@ -144,7 +144,7 @@ public final class Webhook implements Entity {
      * @return The secure token of this webhook.
      */
     public String getToken() {
-        return data.token().get(); // FIXME: really Possible?
+        return data.token().get(); // TODO FIXME: really Possible?
     }
 
     /**

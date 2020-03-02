@@ -56,7 +56,7 @@ public class AuditLogEntry implements Entity {
         return ActionType.of(data.actionType());
     }
 
-    // FIXME: reimplement these
+    // TODO FIXME: reimplement these
 //    @SuppressWarnings("unchecked")
 //    public <T> Optional<AuditLogChange<T>> getChange(ChangeKey<T> changeKey) {
 //        return Optional.ofNullable((AuditLogChange<T>) data.changes().get(changeKey.getName()));

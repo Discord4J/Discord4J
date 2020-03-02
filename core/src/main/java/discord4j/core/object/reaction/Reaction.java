@@ -75,7 +75,7 @@ public final class Reaction implements DiscordObject  {
      * @return This reaction's emoji.
      */
     public ReactionEmoji getEmoji() {
-        // FIXME: get()
+        // TODO FIXME: get()
         return ReactionEmoji.of(Long.parseUnsignedLong(data.emoji().id().get()), data.emoji().name().get(), data.emoji().animated().get());
     }
 

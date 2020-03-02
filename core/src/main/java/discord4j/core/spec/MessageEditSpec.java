@@ -67,7 +67,7 @@ public class MessageEditSpec implements Spec<MessageEditRequest> {
 
     @Override
     public MessageEditRequest asRequest() {
-        // FIXME: allow flags to be set
+        // TODO FIXME: allow flags to be set
         return ImmutableMessageEditRequest.of(content, embed, Possible.absent());
     }
 }

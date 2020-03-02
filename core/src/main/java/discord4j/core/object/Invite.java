@@ -78,7 +78,7 @@ public class Invite implements DiscordObject {
         return data.guild().toOptional()
             .map(GuildData::id)
             .map(Snowflake::of)
-            .orElseThrow(AssertionError::new); // FIXME
+            .orElseThrow(AssertionError::new); // TODO FIXME
     }
 
     /**

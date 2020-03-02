@@ -24,7 +24,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 
-// FIXME: invites are generally just kind of a mess rn
+// TODO FIXME: invites are generally just kind of a mess rn
 /**
  * Metadata for a Discord invite.
  *

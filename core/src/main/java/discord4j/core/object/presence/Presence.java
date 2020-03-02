@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-// FIXME Presence is just a mess
+// TODO FIXME Presence is just a mess
 
 /**
  * A Discord presence.
@@ -148,8 +148,8 @@ public final class Presence {
         return ImmutableStatusUpdate.builder()
                 .status(data.status())
                 .game(data.game())
-                .afk(false) // FIXME
-                .since(Optional.empty())  // FIXME
+                .afk(false) // TODO FIXME
+                .since(Optional.empty())  // TODO FIXME
                 .build();
     }
 

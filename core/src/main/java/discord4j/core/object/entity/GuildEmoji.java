@@ -16,7 +16,6 @@
  */
 package discord4j.core.object.entity;
 
-import discord4j.discordjson.json.EmojiData;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.util.Image;
 import discord4j.core.object.util.Snowflake;
@@ -24,11 +23,11 @@ import discord4j.core.spec.GuildEmojiEditSpec;
 import discord4j.core.util.EntityUtil;
 import discord4j.core.util.ImageUtil;
 import discord4j.core.util.OrderUtil;
+import discord4j.discordjson.json.EmojiData;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
 
-import java.util.Arrays;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -42,7 +41,7 @@ import static discord4j.core.object.util.Image.Format.PNG;
  * <p>
  * <a href="https://discordapp.com/developers/docs/resources/emoji#emoji-resource">Emoji Resource</a>
  */
-// FIXME so many gets
+// TODO FIXME so many gets
 public final class GuildEmoji implements Entity {
 
     /** The path for {@code GuildEmoji} image URLs. */

@@ -70,7 +70,7 @@ public class WebhookEditSpec implements AuditSpec<WebhookModifyRequest> {
 
     @Override
     public WebhookModifyRequest asRequest() {
-        // FIXME allow channel_id to be set
+        // TODO FIXME allow channel_id to be set
         return ImmutableWebhookModifyRequest.of(name, avatar, Possible.absent());
     }
 }

@@ -29,11 +29,11 @@ import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.stream.Collectors;
 
-// FIXME: we should probably just differentiate between a received Activity and one we send. They're very different.
+// TODO FIXME: we should probably just differentiate between a received Activity and one we send. They're very different.
 // also just a mess
 public class Activity {
 
-    // FIXME
+    // TODO FIXME
 //    public static Activity playing(String name) {
 //        return new Activity(Type.PLAYING.getValue(), name, null);
 //    }
@@ -56,7 +56,7 @@ public class Activity {
         this.data = data;
     }
 
-    // FIXME
+    // TODO FIXME
 //    private Activity(int type, String name, @Nullable String streamingUrl) {
 //        this.data = new ActivityBean();
 //        this.data.setType(type);
@@ -240,7 +240,7 @@ public class Activity {
     public Optional<ReactionEmoji> getEmoji() {
         return Possible.flatOpt(data.emoji())
             .map(emoji -> {
-                // FIXME
+                // TODO FIXME
                 String sid = emoji.id().toOptional().orElse(null);
                 Long id = sid == null ? null : Long.parseUnsignedLong(sid);
                 return ReactionEmoji.of(id, emoji.name(), emoji.animated().toOptional().orElse(false));

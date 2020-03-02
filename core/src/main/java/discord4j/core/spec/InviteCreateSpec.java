@@ -34,7 +34,7 @@ public class InviteCreateSpec implements AuditSpec<InviteCreateRequest> {
     private boolean temporary;
     private boolean unique;
     private String reason;
-    // FIXME these aren't documented?
+    // TODO FIXME these aren't documented?
 //    private Possible<String> targetUser;
 //    private Possible<Integer> targetUserType;
 

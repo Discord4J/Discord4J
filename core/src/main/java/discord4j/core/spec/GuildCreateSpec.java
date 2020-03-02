@@ -148,7 +148,7 @@ public class GuildCreateSpec implements Spec<GuildCreateRequest> {
 
     @Override
     public GuildCreateRequest asRequest() {
-        // FIXME: allow for explicit content filter level to be set
+        // TODO FIXME: allow for explicit content filter level to be set
         return ImmutableGuildCreateRequest.of(name, region, icon, verificationLevel, defaultMessageNotificationLevel, 0, roles, channels);
     }
 }
