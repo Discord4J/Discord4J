@@ -30,11 +30,11 @@ import reactor.util.context.Context;
 public class PayloadContext<T extends PayloadData> {
 
     private final GatewayPayload<T> payload;
-    private final DiscordWebSocketHandler handler;
+    private final GatewayWebsocketHandler handler;
     private final DefaultGatewayClient client;
     private final Context context;
 
-    public PayloadContext(GatewayPayload<T> payload, DiscordWebSocketHandler handler, DefaultGatewayClient client,
+    public PayloadContext(GatewayPayload<T> payload, GatewayWebsocketHandler handler, DefaultGatewayClient client,
                           Context context) {
         this.payload = payload;
         this.handler = handler;
@@ -51,7 +51,7 @@ public class PayloadContext<T extends PayloadData> {
         return payload.getData();
     }
 
-    public DiscordWebSocketHandler getHandler() {
+    public GatewayWebsocketHandler getHandler() {
         return handler;
     }
 

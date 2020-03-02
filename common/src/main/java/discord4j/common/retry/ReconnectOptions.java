@@ -15,7 +15,7 @@
  * along with Discord4J. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package discord4j.gateway.retry;
+package discord4j.common.retry;
 
 import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
@@ -58,7 +58,7 @@ public class ReconnectOptions {
     public static class Builder {
 
         private Duration firstBackoff = Duration.ofSeconds(2);
-        private Duration maxBackoffInterval = Duration.ofSeconds(120);
+        private Duration maxBackoffInterval = Duration.ofSeconds(30);
         private int maxRetries = Integer.MAX_VALUE;
         private Backoff backoff = context -> {
             ReconnectContext appContext = (ReconnectContext) context.applicationContext();

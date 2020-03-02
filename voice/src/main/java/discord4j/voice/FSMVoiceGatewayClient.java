@@ -31,7 +31,7 @@ import reactor.core.Disposable;
 import reactor.core.publisher.EmitterProcessor;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Scheduler;
+import reactor.core.publisher.MonoSink;
 import reactor.core.scheduler.Schedulers;
 import reactor.netty.http.client.HttpClient;
 import reactor.netty.http.websocket.WebsocketInbound;
@@ -44,19 +44,22 @@ import java.time.Duration;
 
 import static io.netty.handler.codec.http.HttpHeaderNames.USER_AGENT;
 
-public class VoiceGatewayClient {
+public class FSMVoiceGatewayClient {
 
-    private final Logger log = Loggers.getLogger("discord4j.voice.gateway.client");
+    private static final Logger log = Loggers.getLogger(FSMVoiceGatewayClient.class);
     private final FiniteStateMachine<VoiceGatewayState, VoiceGatewayEvent> gatewayFSM;
 
     private final EmitterProcessor<VoiceGatewayPayload<?>> sender = EmitterProcessor.create(false);
     private final ObjectMapper mapper;
     final VoiceSocket voiceSocket;
 
-    public VoiceGatewayClient(long serverId, long userId, String sessionId, String token, ObjectMapper mapper,
-                              Scheduler scheduler, AudioProvider provider, AudioReceiver receiver) {
+    public FSMVoiceGatewayClient(long serverId, long userId, String sessionId, String token,
+                                 VoiceReactorResources reactorResources, ObjectMapper mapper,
+                                 AudioProvider provider, AudioReceiver receiver,
+                                 VoiceSendTaskFactory sendTaskFactory, VoiceReceiveTaskFactory receiveTaskFactory,
+                                 VoiceDisconnectTask disconnectTask) {
         this.mapper = mapper;
-        this.voiceSocket = new VoiceSocket();
+        this.voiceSocket = new VoiceSocket(reactorResources.getUdpClient());
         this.gatewayFSM = new FiniteStateMachine<VoiceGatewayState, VoiceGatewayEvent>() {{
             startWith(Stopped.INSTANCE);
 
@@ -64,10 +67,10 @@ public class VoiceGatewayClient {
                     .on(Start.class, (curState, start) -> {
                         Disposable websocketTask = HttpClient.create()
                                 .wiretap(true)
-                                .headers(headers -> headers.add(USER_AGENT, "DiscordBot(https://discord4j.com, 3)")) // TODO make configurable
+                                .headers(headers -> headers.add(USER_AGENT, "DiscordBot(https://discord4j.com, 3)"))
                                 .websocket(Integer.MAX_VALUE)
                                 .uri(start.gatewayUrl + "?v=3")
-                                .handle(VoiceGatewayClient.this::handle)
+                                .handle(FSMVoiceGatewayClient.this::handle)
                                 .subscribe();
 
                         log.debug("VoiceGateway State Change: Stopped -> WaitingForHello");
@@ -77,11 +80,13 @@ public class VoiceGatewayClient {
             when(WaitingForHello.class)
                     .on(Hello.class, (curState, hello) -> {
                         long heartbeatInterval = (long) (hello.getData().heartbeatInterval * .75); // it's wrong
-                        Disposable heartbeatTask = Flux.interval(Duration.ofMillis(heartbeatInterval), Schedulers.elastic())
+                        Disposable heartbeatTask = Flux.interval(Duration.ofMillis(heartbeatInterval),
+                                Schedulers.elastic())
                                 .map(Heartbeat::new)
-                                .subscribe(VoiceGatewayClient.this::send);
+                                .subscribe(FSMVoiceGatewayClient.this::send);
 
-                        send(new Identify(Long.toUnsignedString(serverId), Long.toUnsignedString(userId), sessionId, token));
+                        send(new Identify(Long.toUnsignedString(serverId), Long.toUnsignedString(userId), sessionId,
+                                token));
 
                         log.debug("VoiceGateway State Change: WaitingForHello -> WaitingForReady");
                         return new WaitingForReady(curState.websocketTask, curState.connectedCallback, heartbeatTask);
@@ -96,11 +101,13 @@ public class VoiceGatewayClient {
                                 .subscribe(ipaddr -> {
                                     String address = ipaddr.getHostName();
                                     int port = ipaddr.getPort();
-                                    send(new SelectProtocol(VoiceSocket.PROTOCOL, address, port, VoiceSocket.ENCRYPTION_MODE));
+                                    send(new SelectProtocol(VoiceSocket.PROTOCOL, address, port,
+                                            VoiceSocket.ENCRYPTION_MODE));
                                 });
 
                         log.debug("VoiceGateway State Change: WaitingForReady -> WaitingForSessionDescription");
-                        return new WaitingForSessionDescription(curState.websocketTask, curState.connectedCallback, curState.heartbeatTask, ssrc, udpTask);
+                        return new WaitingForSessionDescription(curState.websocketTask, curState.connectedCallback,
+                                curState.heartbeatTask, ssrc, udpTask);
                     });
 
             when(WaitingForSessionDescription.class)
@@ -109,14 +116,19 @@ public class VoiceGatewayClient {
                         TweetNaclFast.SecretBox boxer = new TweetNaclFast.SecretBox(secretKey);
                         PacketTransformer transformer = new PacketTransformer(curState.ssrc, boxer);
 
-                        VoiceSendTask sendingTask = new VoiceSendTask(scheduler, VoiceGatewayClient.this, provider, transformer, curState.ssrc);
-                        VoiceReceiveTask receivingTask = new VoiceReceiveTask(voiceSocket.getInbound(), transformer, receiver);
+                        Disposable sendingTask = sendTaskFactory.create(reactorResources.getSendTaskScheduler(),
+                                speaking -> send(new SentSpeaking(speaking, 0, curState.ssrc)),
+                                voiceSocket::send, provider, transformer);
+                        Disposable receivingTask = receiveTaskFactory.create(reactorResources.getReceiveTaskScheduler(),
+                                voiceSocket.getInbound(), transformer, receiver);
 
                         // we're completely connected
-                        curState.connectedCallback.run();
+                        curState.connectedCallback.success(acquireConnection(disconnectTask, serverId));
 
                         log.debug("VoiceGateway State Change: WaitingForSessionDescription -> ReceivingEvents");
-                        return new ReceivingEvents(curState.websocketTask, curState.connectedCallback, curState.heartbeatTask, curState.ssrc, curState.udpTask, secretKey, sendingTask, receivingTask);
+                        return new ReceivingEvents(curState.websocketTask/*, curState.connectedCallback*/,
+                                curState.heartbeatTask, curState.ssrc, curState.udpTask, secretKey, sendingTask,
+                                receivingTask);
                     });
 
             when(ReceivingEvents.class)
@@ -135,7 +147,8 @@ public class VoiceGatewayClient {
                     .on(HeartbeatAck.class, (curState, ack) -> {
                         // TODO
                         return curState;
-                    }).on(Speaking.class, (curState, speaking) -> {
+                    })
+                    .on(Speaking.class, (curState, speaking) -> {
                         // TODO
                         return curState;
                     })
@@ -146,8 +159,8 @@ public class VoiceGatewayClient {
         }};
     }
 
-    void start(String gatewayUrl, Runnable connectedCallback) { // TODO can this return the Mono<VoiceConnection>?
-        gatewayFSM.onEvent(new Start(gatewayUrl, connectedCallback));
+    void start(String gatewayUrl, MonoSink<VoiceConnection> voiceConnectionSink) {
+        gatewayFSM.onEvent(new Start(gatewayUrl, voiceConnectionSink));
     }
 
     void stop() {
@@ -172,5 +185,45 @@ public class VoiceGatewayClient {
 
     <T> void send(VoiceGatewayPayload<T> payload) {
         sender.onNext(payload);
+    }
+
+    private VoiceConnection acquireConnection(VoiceDisconnectTask disconnectTask, long guildId) {
+        return new VoiceConnection() {
+
+            @Override
+            public Flux<VoiceGatewayEvent> events() {
+                // unsupported
+                return Flux.empty();
+            }
+
+            @Override
+            public boolean isConnected() {
+                return gatewayFSM.getCurrentState() instanceof ReceivingEvents;
+            }
+
+            @Override
+            public State getState() {
+                if (gatewayFSM.getCurrentState() instanceof ReceivingEvents) {
+                    return State.CONNECTED;
+                } else if (gatewayFSM.getCurrentState() instanceof Stopped) {
+                    return State.DISCONNECTED;
+                } else {
+                    // TODO: this implementation is unable to reconnect yet
+                    return State.CONNECTING;
+                }
+            }
+
+            @Override
+            public Mono<Void> disconnect() {
+                return Mono.fromCallable(this::isConnected)
+                        .flatMap(connected -> {
+                            if (connected) {
+                                return Mono.fromRunnable(() -> stop())
+                                        .then(disconnectTask.onDisconnect(guildId));
+                            }
+                            return Mono.empty();
+                        });
+            }
+        };
     }
 }

@@ -86,7 +86,17 @@ public class EmbedCreateSpec implements Spec<EmbedData> {
      * @return This spec.
      */
     public EmbedCreateSpec setColor(final Color color) {
-        requestBuilder.color(Possible.of(color.getRGB() & 0xFFFFFF));
+        return setColor(color.getRGB());
+    }
+
+    /**
+     * Sets the color of the embed.
+     *
+     * @param color An RGB color to display on the embed.
+     * @return This spec.
+     */
+    public EmbedCreateSpec setColor(int color) {
+        requestBuilder.color(Possible.of(color & 0xFFFFFF));
         return this;
     }
 

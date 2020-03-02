@@ -18,14 +18,20 @@ package discord4j.gateway;
 
 import discord4j.discordjson.json.gateway.*;
 import discord4j.common.GitProperties;
+import discord4j.common.LogUtil;
 import discord4j.common.ReactorResources;
 import discord4j.common.ResettableInterval;
 import discord4j.common.close.CloseException;
 import discord4j.common.close.CloseStatus;
+import discord4j.common.close.DisconnectBehavior;
+import discord4j.common.retry.ReconnectContext;
+import discord4j.common.retry.ReconnectOptions;
 import discord4j.gateway.json.GatewayPayload;
 import discord4j.gateway.payload.PayloadReader;
 import discord4j.gateway.payload.PayloadWriter;
-import discord4j.gateway.retry.*;
+import discord4j.gateway.retry.GatewayException;
+import discord4j.gateway.retry.GatewayStateChange;
+import discord4j.gateway.retry.PartialDisconnectException;
 import io.netty.buffer.ByteBuf;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.*;
@@ -52,7 +58,7 @@ import static io.netty.handler.codec.http.HttpHeaderNames.USER_AGENT;
 /**
  * Represents a Discord WebSocket client, called Gateway, implementing its lifecycle.
  * <p>
- * Keeps track of a single websocket session by wrapping an instance of {@link DiscordWebSocketHandler} each time a
+ * Keeps track of a single websocket session by wrapping an instance of {@link GatewayWebsocketHandler} each time a
  * new WebSocket connection to Discord is made, therefore only one instance of this class is enough to
  * handle the lifecycle of the Gateway operations, that could span multiple WebSocket sessions over time.
  * <p>
@@ -100,7 +106,7 @@ public class DefaultGatewayClient implements GatewayClient {
     private final AtomicLong lastAck = new AtomicLong(0);
     private final AtomicLong responseTime = new AtomicLong(0);
     private volatile MonoProcessor<Void> disconnectNotifier;
-    private volatile DiscordWebSocketHandler sessionHandler;
+    private volatile GatewayWebsocketHandler sessionHandler;
 
     /**
      * Initializes a new GatewayClient.
@@ -155,7 +161,7 @@ public class DefaultGatewayClient implements GatewayClient {
                     Flux<ByteBuf> outFlux = Flux.merge(heartbeatFlux, identifyFlux, payloadFlux)
                             .doOnNext(buf -> logPayload(">> ", context, buf));
 
-                    sessionHandler = new DiscordWebSocketHandler(receiverSink, outFlux, context);
+                    sessionHandler = new GatewayWebsocketHandler(receiverSink, outFlux, context);
 
                     Integer resumeSequence = identifyOptions.getResumeSequence();
                     if (resumeSequence != null && resumeSequence > 0) {
@@ -237,11 +243,13 @@ public class DefaultGatewayClient implements GatewayClient {
                             .websocket(Integer.MAX_VALUE)
                             .uri(gatewayUrl)
                             .handle(sessionHandler::handle)
-                            .flatMap(t2 -> handleClose(t2.getT1(), t2.getT2(), context))
+                            .subscriberContext(LogUtil.clearContext())
+                            .flatMap(t2 -> handleClose(t2.getT1(), t2.getT2()))
                             .then();
 
                     return Mono.zip(httpFuture, readyHandler, receiverFuture, senderFuture, heartbeatHandler)
                             .doOnError(t -> log.error(format(context, "{}"), t.toString()))
+                            .doOnError(t -> heartbeat.stop())
                             .doOnCancel(() -> sessionHandler.close())
                             .then();
                 })
@@ -333,34 +341,37 @@ public class DefaultGatewayClient implements GatewayClient {
         return Context.empty();
     }
 
-    private Mono<CloseStatus> handleClose(DisconnectBehavior behavior, CloseStatus closeStatus, Context context) {
-        reconnectContext.clear();
-        connected.set(false);
-        lastSent.set(0);
-        lastAck.set(0);
-        responseTime.set(0);
+    private Mono<CloseStatus> handleClose(DisconnectBehavior behavior, CloseStatus closeStatus) {
+        return Mono.deferWithContext(ctx -> {
+            log.info(format(ctx, "Handling close {} with behavior: {}"), closeStatus, behavior);
+            reconnectContext.clear();
+            connected.set(false);
+            lastSent.set(0);
+            lastAck.set(0);
+            responseTime.set(0);
 
-        if (behavior.getAction() == DisconnectBehavior.Action.STOP_ABRUPTLY) {
-            dispatchSink.next(GatewayStateChange.disconnectedResume());
-            notifyObserver(GatewayObserver.DISCONNECTED_RESUME, identifyOptions);
-        } else if (behavior.getAction() == DisconnectBehavior.Action.STOP) {
-            dispatchSink.next(GatewayStateChange.disconnected());
-            allowResume.set(false);
-            sequence.set(0);
-            sessionId.set("");
-            notifyObserver(GatewayObserver.DISCONNECTED, identifyOptions);
-        }
+            if (behavior.getAction() == DisconnectBehavior.Action.STOP_ABRUPTLY) {
+                dispatchSink.next(GatewayStateChange.disconnectedResume());
+                notifyObserver(GatewayObserver.DISCONNECTED_RESUME, identifyOptions);
+            } else if (behavior.getAction() == DisconnectBehavior.Action.STOP) {
+                dispatchSink.next(GatewayStateChange.disconnected());
+                allowResume.set(false);
+                sequence.set(0);
+                sessionId.set("");
+                notifyObserver(GatewayObserver.DISCONNECTED, identifyOptions);
+            }
 
-        switch (behavior.getAction()) {
-            case STOP_ABRUPTLY:
-            case STOP:
-                disconnectNotifier.onComplete();
-                return Mono.just(closeStatus);
-            case RETRY_ABRUPTLY:
-            case RETRY:
-            default:
-                return Mono.error(new CloseException(closeStatus, context, behavior.getCause()));
-        }
+            switch (behavior.getAction()) {
+                case STOP_ABRUPTLY:
+                case STOP:
+                    disconnectNotifier.onComplete();
+                    return Mono.just(closeStatus);
+                case RETRY_ABRUPTLY:
+                case RETRY:
+                default:
+                    return Mono.error(new CloseException(closeStatus, ctx, behavior.getCause()));
+            }
+        });
     }
 
     private ConnectionObserver getObserver(Context context) {

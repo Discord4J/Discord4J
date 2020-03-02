@@ -36,6 +36,7 @@ import reactor.util.Loggers;
 import reactor.util.function.Tuples;
 
 import java.time.Instant;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -81,6 +82,8 @@ public abstract class DispatchHandlers {
         addHandler(VoiceServerUpdate.class, DispatchHandlers::voiceServerUpdate);
         addHandler(VoiceStateUpdateDispatch.class, DispatchHandlers::voiceStateUpdateDispatch);
         addHandler(WebhooksUpdate.class, DispatchHandlers::webhooksUpdate);
+        addHandler(InviteCreate.class, DispatchHandlers::inviteCreate);
+        addHandler(InviteDelete.class, DispatchHandlers::inviteDelete);
 
         addHandler(GatewayStateChange.class, LifecycleDispatchHandlers::gatewayStateChanged);
     }
@@ -226,5 +229,31 @@ public abstract class DispatchHandlers {
         long channelId = Long.parseUnsignedLong(context.getDispatch().channelId());
 
         return Mono.just(new WebhooksUpdateEvent(context.getGateway(), context.getShardInfo(), guildId, channelId));
+    }
+
+    private static Mono<InviteCreateEvent> inviteCreate(DispatchContext<InviteCreate> context) {
+        long guildId = Long.parseUnsignedLong(context.getDispatch().guildId());
+        long channelId = Long.parseUnsignedLong(context.getDispatch().channelId());
+        String code = context.getDispatch().code();
+        Instant createdAt = DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(context.getDispatch().createdAt(), Instant::from);
+        int uses = context.getDispatch().uses();
+        int maxUses = context.getDispatch().maxUses();
+        int maxAge = context.getDispatch().maxAge();
+        boolean temporary = context.getDispatch().temporary();
+
+        User current = context.getDispatch().inviter().toOptional()
+                .map(userData -> new User(context.getGateway(), userData))
+                .orElse(null);
+
+        return Mono.just(new InviteCreateEvent(context.getGateway(), context.getShardInfo(), guildId, channelId, code,
+                current, createdAt, uses, maxUses, maxAge, temporary));
+    }
+
+    private static Mono<InviteDeleteEvent> inviteDelete(DispatchContext<InviteDelete> context) {
+        long guildId = Long.parseUnsignedLong(context.getDispatch().guildId());
+        long channelId = Long.parseUnsignedLong(context.getDispatch().channelId());
+        String code = context.getDispatch().code();
+
+        return Mono.just(new InviteDeleteEvent(context.getGateway(), context.getShardInfo(), guildId, channelId, code));
     }
 }

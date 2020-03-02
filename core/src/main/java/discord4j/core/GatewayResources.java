@@ -17,6 +17,8 @@
 
 package discord4j.core;
 
+import discord4j.common.ReactorResources;
+import discord4j.common.retry.ReconnectOptions;
 import discord4j.core.event.EventDispatcher;
 import discord4j.core.event.domain.Event;
 import discord4j.core.shard.ShardCoordinator;
@@ -24,6 +26,7 @@ import discord4j.core.state.StateHolder;
 import discord4j.core.state.StateView;
 import discord4j.gateway.GatewayClient;
 import discord4j.store.api.Store;
+import discord4j.voice.VoiceReactorResources;
 
 /**
  * A set of dependencies required to build and coordinate multiple {@link GatewayClient} instances.
@@ -34,6 +37,9 @@ public class GatewayResources {
     private final EventDispatcher eventDispatcher;
     private final ShardCoordinator shardCoordinator;
     private final boolean memberRequest;
+    private final ReactorResources gatewayReactorResources;
+    private final VoiceReactorResources voiceReactorResources;
+    private final ReconnectOptions voiceReconnectOptions;
 
     /**
      * Create a new {@link GatewayResources} with the given parameters.
@@ -42,13 +48,21 @@ public class GatewayResources {
      * @param eventDispatcher an event bus dedicated to distribute {@link Event} instances
      * @param shardCoordinator a middleware component to coordinate multiple shard-connecting efforts
      * @param memberRequest whether to enable large guild member requests from the Gateway (chunking)
+     * @param gatewayReactorResources a custom set of Reactor resources targeting Gateway operations
+     * @param voiceReactorResources a set of Reactor resources targeting Voice Gateway operations
+     * @param voiceReconnectOptions a reconnection policy for Voice Gateway connections
      */
     public GatewayResources(StateView stateView, EventDispatcher eventDispatcher,
-                            ShardCoordinator shardCoordinator, boolean memberRequest) {
+                            ShardCoordinator shardCoordinator, boolean memberRequest,
+                            ReactorResources gatewayReactorResources, VoiceReactorResources voiceReactorResources,
+                            ReconnectOptions voiceReconnectOptions) {
         this.stateView = stateView;
         this.eventDispatcher = eventDispatcher;
         this.shardCoordinator = shardCoordinator;
         this.memberRequest = memberRequest;
+        this.gatewayReactorResources = gatewayReactorResources;
+        this.voiceReactorResources = voiceReactorResources;
+        this.voiceReconnectOptions = voiceReconnectOptions;
     }
 
     /**
@@ -89,5 +103,32 @@ public class GatewayResources {
      */
     public boolean isMemberRequest() {
         return memberRequest;
+    }
+
+    /**
+     * Return the {@link ReactorResources} used to perform Gateway-related operations.
+     *
+     * @return the Gateway Reactor resources
+     */
+    public ReactorResources getGatewayReactorResources() {
+        return gatewayReactorResources;
+    }
+
+    /**
+     * Return the {@link VoiceReactorResources} used to perform Voice Gateway-related operations.
+     *
+     * @return the Voice Gateway Reactor resources
+     */
+    public VoiceReactorResources getVoiceReactorResources() {
+        return voiceReactorResources;
+    }
+
+    /**
+     * Return the reconnect policy used to retry a connection to the Voice Gateway.
+     *
+     * @return a reconnection policy
+     */
+    public ReconnectOptions getVoiceReconnectOptions() {
+        return voiceReconnectOptions;
     }
 }

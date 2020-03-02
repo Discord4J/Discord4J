@@ -2,8 +2,8 @@ plugins {
     id 'java-library'
     id 'maven-publish'
     id 'signing'
-    id 'com.gorylenko.gradle-git-properties' version '2.2.0' apply false
-    id 'com.github.ben-manes.versions' version '0.27.0'
+    id 'com.gorylenko.gradle-git-properties' version '2.2.2' apply false
+    id 'com.github.ben-manes.versions' version '0.28.0'
     id 'net.researchgate.release' version '2.8.1'
 }
 
@@ -23,23 +23,23 @@ ext {
     }
 
     // Dependencies
-    reactor_bom_version = 'Dysprosium-SR2'
+    reactor_bom_version = 'Dysprosium-SR5'
     jackson_version = '2.10.2'
     jdkstores_version = "$storesVersion".toString()
 
     // Test dependencies
     junit_version = '4.13'
-    mockito_version = '3.2.4'
+    mockito_version = '3.3.1'
     logback_version = '1.3.0-alpha4'
     reflections_version = '0.9.12'
-    lavaplayer_version = '1.3.33'
-    blockhound_version = '1.0.1.RELEASE'
+    lavaplayer_version = '1.3.34'
+    blockhound_version = '1.0.2.RELEASE'
 
     isJitpack = "true" == System.getenv("JITPACK")
     isRelease = !version.toString().endsWith('-SNAPSHOT')
 }
 
-if (!isRelease) {
+if (!isRelease || isJitpack) {
     configurations.all {
         resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
     }
@@ -67,7 +67,7 @@ allprojects {
 
     repositories {
         mavenCentral()
-        if (!isRelease) {
+        if (!isRelease || isJitpack) {
             maven { url 'https://oss.sonatype.org/content/repositories/snapshots' }
             maven { url 'https://oss.sonatype.org/content/repositories/staging' }
         }

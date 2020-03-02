@@ -19,6 +19,7 @@ package discord4j.core.object;
 import discord4j.discordjson.json.VoiceStateData;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.Guild;
+import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.VoiceChannel;
 import discord4j.core.object.util.Snowflake;
@@ -112,6 +113,16 @@ public final class VoiceState implements DiscordObject {
      */
     public Mono<User> getUser() {
         return gateway.getUserById(getUserId());
+    }
+
+    /**
+     * Requests to retrieve the member this voice state is for.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits the {@link Member} this voice state is for. If an
+     * error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Member> getMember() {
+        return gateway.getMemberById(getGuildId(), getUserId());
     }
 
     /**

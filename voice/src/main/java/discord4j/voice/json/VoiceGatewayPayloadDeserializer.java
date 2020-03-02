@@ -40,7 +40,7 @@ public class VoiceGatewayPayloadDeserializer extends StdDeserializer<VoiceGatewa
     public VoiceGatewayPayload<?> deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
         JsonNode json = p.getCodec().readTree(p);
         int op = json.get("op").asInt();
-        JsonNode d =json.get("d");
+        JsonNode d = json.get("d");
 
         switch (op) {
             case Hello.OP:
@@ -57,8 +57,10 @@ public class VoiceGatewayPayloadDeserializer extends StdDeserializer<VoiceGatewa
                 return new Speaking(d.get("user_id").asText(), d.get("ssrc").asInt(), d.get("speaking").asBoolean());
             case VoiceDisconnect.OP:
                 return new VoiceDisconnect(d.get("user_id").asText());
+            case Resumed.OP:
+                return new Resumed(d.asText()); // actually "d": null
             default:
-                LOG.trace("Received voice gateway payload with unhandled OP: {}", op);
+                LOG.warn("Received voice gateway payload with unhandled OP: {}", op);
                 return null;
         }
     }

@@ -100,7 +100,7 @@ public abstract class PayloadHandlers {
     private static void handleHello(PayloadContext<Hello> context) {
         Duration interval = Duration.ofMillis(context.getData().heartbeatInterval());
         DefaultGatewayClient client = context.getClient();
-        client.heartbeat().start(interval);
+        client.heartbeat().start(Duration.ZERO, interval);
 
         if (client.allowResume().get()) {
             log.debug(format(context.getContext(), "Resuming Gateway session from {}"), client.sequence().get());

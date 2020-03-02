@@ -54,6 +54,6 @@ public class LocalShardCoordinator implements ShardCoordinator {
     @Override
     public PayloadTransformer getIdentifyLimiter(ShardInfo shardInfo, int shardingFactor) {
         return limiters.computeIfAbsent(shardInfo.getIndex() % shardingFactor,
-                k -> new PoolingTransformer(1, Duration.ofMillis(5500)));
+                k -> new PoolingTransformer(1, Duration.ofSeconds(6)));
     }
 }
