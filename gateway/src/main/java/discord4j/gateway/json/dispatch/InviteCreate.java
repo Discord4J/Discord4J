@@ -19,6 +19,7 @@ package discord4j.gateway.json.dispatch;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import discord4j.common.jackson.UnsignedJson;
 import discord4j.common.json.UserResponse;
+import reactor.util.annotation.Nullable;
 
 public class InviteCreate implements Dispatch {
 
@@ -37,8 +38,10 @@ public class InviteCreate implements Dispatch {
     @JsonProperty("max_age")
     private int maxAge;
     private boolean temporary;
+    @Nullable
     private UserResponse inviter;
 
+    @Nullable
     public UserResponse getInviter() {
         return inviter;
     }

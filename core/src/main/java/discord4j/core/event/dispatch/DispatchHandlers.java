@@ -18,6 +18,7 @@ package discord4j.core.event.dispatch;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import discord4j.common.json.GuildMemberResponse;
+import discord4j.common.json.UserResponse;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.*;
 import discord4j.core.event.domain.channel.TypingStartEvent;
@@ -231,8 +232,9 @@ public abstract class DispatchHandlers {
         int maxAge = context.getDispatch().getMaxAge();
         boolean temporary = context.getDispatch().isTemporary();
 
-        UserBean bean = new UserBean(context.getDispatch().getInviter());
-        User current = new User(context.getGateway(), bean);
+        UserResponse response = context.getDispatch().getInviter();
+        UserBean bean = response != null ? new UserBean(response) : null;
+        User current = bean != null ? new User(context.getGateway(), bean) : null;
 
         return Mono.just(new InviteCreateEvent(context.getGateway(), context.getShardInfo(), guildId, channelId, code,
                 current, createdAt, uses, maxUses, maxAge, temporary));
