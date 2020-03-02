@@ -17,6 +17,7 @@
 package discord4j.rest.json.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import discord4j.common.jackson.Possible;
 import reactor.util.annotation.Nullable;
 
 import java.util.Arrays;
@@ -24,19 +25,19 @@ import java.util.Arrays;
 public class GuildCreateRequest {
 
     private final String name;
-    private final String region;
+    private final Possible<String> region;
     @Nullable
-    private final String icon;
+    private final Possible<String> icon;
     @JsonProperty("verification_level")
-    private final int verificationLevel;
+    private final Possible<Integer> verificationLevel;
     @JsonProperty("default_message_notifications")
-    private final int defaultMessageNotifications;
-    private final RoleCreateRequest[] roles;
-    private final PartialChannelRequest[] channels;
+    private final Possible<Integer> defaultMessageNotifications;
+    private final Possible<RoleCreateRequest[]> roles;
+    private final Possible<PartialChannelRequest[]> channels;
 
-    public GuildCreateRequest(String name, String region, @Nullable String icon, int verificationLevel,
-                              int defaultMessageNotifications, RoleCreateRequest[] roles,
-                              PartialChannelRequest[] channels) {
+    public GuildCreateRequest(String name, Possible<String> region, @Nullable Possible<String> icon,
+                              Possible<Integer> verificationLevel, Possible<Integer> defaultMessageNotifications,
+                              Possible<RoleCreateRequest[]> roles, Possible<PartialChannelRequest[]> channels) {
         this.name = name;
         this.region = region;
         this.icon = icon;
@@ -46,16 +47,72 @@ public class GuildCreateRequest {
         this.channels = channels;
     }
 
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static class Builder {
+
+        private String name;
+        private Possible<String> region = Possible.absent();
+        @Nullable
+        private Possible<String> icon = Possible.absent();
+        private Possible<Integer> verificationLevel = Possible.absent();
+        private Possible<Integer> defaultMessageNotifications = Possible.absent();
+        private Possible<RoleCreateRequest[]> roles = Possible.absent();
+        private Possible<PartialChannelRequest[]> channels = Possible.absent();
+
+        public Builder name(String name) {
+            this.name = name;
+            return this;
+        }
+
+        public Builder region(String region) {
+            this.region = Possible.of(region);
+            return this;
+        }
+
+        public Builder icon(@Nullable String icon) {
+            this.icon = Possible.of(icon);
+            return this;
+        }
+
+        public Builder verificationLevel(int verificationLevel) {
+            this.verificationLevel = Possible.of(verificationLevel);
+            return this;
+        }
+
+        public Builder defaultMessageNotifications(int defaultMessageNotifications) {
+            this.defaultMessageNotifications = Possible.of(defaultMessageNotifications);
+            return this;
+        }
+
+        public Builder roles(RoleCreateRequest[] roles) {
+            this.roles = Possible.of(roles);
+            return this;
+        }
+
+        public Builder channels(PartialChannelRequest[] channels) {
+            this.channels = Possible.of(channels);
+            return this;
+        }
+
+        public GuildCreateRequest build() {
+            return new GuildCreateRequest(name, region, icon, verificationLevel, defaultMessageNotifications, roles,
+                    channels);
+        }
+    }
+
     @Override
     public String toString() {
         return "GuildCreateRequest{" +
                 "name='" + name + '\'' +
-                ", region='" + region + '\'' +
-                ", icon='" + icon + '\'' +
+                ", region=" + region +
+                ", icon=" + icon +
                 ", verificationLevel=" + verificationLevel +
                 ", defaultMessageNotifications=" + defaultMessageNotifications +
-                ", roles=" + Arrays.toString(roles) +
-                ", channels=" + Arrays.toString(channels) +
+                ", roles=" + roles +
+                ", channels=" + channels +
                 '}';
     }
 }
