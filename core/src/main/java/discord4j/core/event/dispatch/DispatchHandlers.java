@@ -18,6 +18,7 @@ package discord4j.core.event.dispatch;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import discord4j.common.json.GuildMemberResponse;
+import discord4j.common.json.UserResponse;
 import discord4j.core.DiscordClient;
 import discord4j.core.ServiceMediator;
 import discord4j.core.event.domain.*;
@@ -236,8 +237,9 @@ public abstract class DispatchHandlers {
         ServiceMediator serviceMediator = context.getServiceMediator();
         DiscordClient client = serviceMediator.getClient();
 
-        UserBean bean = new UserBean(context.getDispatch().getInviter());
-        User current = new User(serviceMediator, bean);
+        UserResponse response = context.getDispatch().getInviter();
+        UserBean bean = response != null ? new UserBean(response) : null;
+        User current = bean != null ? new User(serviceMediator, bean) : null;
 
         return Mono.just(new InviteCreateEvent(client, guildId, channelId, code, current, createdAt, uses, maxUses, maxAge, temporary));
     }
