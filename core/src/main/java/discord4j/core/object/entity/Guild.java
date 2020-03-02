@@ -299,11 +299,11 @@ public final class Guild implements Entity {
      * @return The level of verification required for the guild.
      */
     public VerificationLevel getVerificationLevel() {
-        return VerificationLevel.of(data.verificationLevel());
+        return VerificationLevel.of(data.verificationLevel().get());
     }
 
     /**
-     * Gets the default message notification level.
+     * Gets the default message notification level..
      *
      * @return The default message notification level.
      */

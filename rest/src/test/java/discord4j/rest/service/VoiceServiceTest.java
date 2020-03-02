@@ -16,10 +16,6 @@
  */
 package discord4j.rest.service;
 
-import discord4j.discordjson.possible.PossibleModule;
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.PropertyAccessor;
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import discord4j.rest.RestTests;
 import discord4j.rest.request.Router;
@@ -41,13 +37,6 @@ public class VoiceServiceTest {
         Router router = RestTests.getRouter(token, mapper);
 
         return voiceService = new VoiceService(router);
-    }
-
-    private ObjectMapper getMapper() {
-        return new ObjectMapper()
-                .setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
-                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true)
-                .registerModule(new PossibleModule());
     }
 
     @Test

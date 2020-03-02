@@ -33,22 +33,3 @@ libraryDependencies ++= Seq(
 
 ## Development builds
 Please follow our instructions at [Using Jitpack](https://github.com/Discord4J/Discord4J/wiki/Using-Jitpack)
-
-## Example Usage
-```java
-ObjectMapper mapper = new ObjectMapper()
-        .setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
-        .addHandler(new UnknownPropertyHandler(true))
-        .registerModules(new PossibleModule(), new Jdk8Module());
-
-DiscordWebClient webClient = new DiscordWebClient(HttpClient.create().compress(true),
-        ExchangeStrategies.jackson(mapper), token);
-
-Router router = new DefaultRouter(webClient, Schedulers.elastic(), Schedulers.elastic());
-
-RestClient restClient = new RestClient(router);
-
-restClient.getApplicationService().getCurrentApplicationInfo()
-        .map(ApplicationInfoResponse::getName)
-        .subscribe(name -> System.out.println("My name is " + name));
-```

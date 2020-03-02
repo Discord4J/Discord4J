@@ -16,15 +16,12 @@
  */
 package discord4j.rest.http;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import discord4j.common.JacksonResources;
 import discord4j.discordjson.json.ImmutableMessageCreateRequest;
 import discord4j.discordjson.json.MessageCreateRequest;
 import discord4j.discordjson.json.MessageData;
 import discord4j.discordjson.possible.Possible;
-import discord4j.discordjson.possible.PossibleModule;
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.PropertyAccessor;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import discord4j.rest.RestTests;
 import discord4j.rest.request.Router;
 import discord4j.rest.route.Routes;
@@ -39,10 +36,7 @@ import java.util.concurrent.TimeUnit;
 public class RouterTest {
 
     private ObjectMapper getMapper() {
-        return new ObjectMapper()
-                .setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
-                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true)
-                .registerModule(new PossibleModule());
+        return new JacksonResources().getObjectMapper();
     }
 
     @Test
