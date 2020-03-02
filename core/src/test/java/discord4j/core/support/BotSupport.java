@@ -115,8 +115,12 @@ public class BotSupport {
                             return Presence.online();
                         } else if (status.equalsIgnoreCase("dnd")) {
                             return Presence.doNotDisturb();
-                        } else {
+                        } else if (status.equalsIgnoreCase("idle")) {
                             return Presence.idle();
+                        } else if (status.equalsIgnoreCase("invisible")) {
+                            return Presence.invisible();
+                        } else {
+                            throw new IllegalArgumentException("Invalid argument");
                         }
                     })
                     .flatMap(presence -> event.getClient().updatePresence(presence))

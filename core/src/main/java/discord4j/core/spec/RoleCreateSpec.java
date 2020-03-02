@@ -20,6 +20,7 @@ import discord4j.discordjson.json.ImmutableRoleCreateRequest;
 import discord4j.discordjson.json.RoleCreateRequest;
 import discord4j.core.object.entity.Role;
 import discord4j.core.object.util.PermissionSet;
+import discord4j.discordjson.possible.Possible;
 import reactor.util.annotation.Nullable;
 
 import java.awt.*;
@@ -32,10 +33,10 @@ import java.awt.*;
 public class RoleCreateSpec implements AuditSpec<RoleCreateRequest> {
 
     private String name;
-    private long permissions;
-    private int color;
-    private boolean hoist;
-    private boolean mentionable;
+    private Long permissions;
+    private Integer color;
+    private Boolean hoist;
+    private Boolean mentionable;
     private String reason;
 
     /**
@@ -107,6 +108,12 @@ public class RoleCreateSpec implements AuditSpec<RoleCreateRequest> {
 
     @Override
     public RoleCreateRequest asRequest() {
-        return ImmutableRoleCreateRequest.of(name, permissions, color, hoist, mentionable);
+        return ImmutableRoleCreateRequest.builder()
+                .name(name == null ? Possible.absent() : Possible.of(name))
+                .permissions(permissions == null ? Possible.absent() : Possible.of(permissions))
+                .color(color == null ? Possible.absent() : Possible.of(color))
+                .hoist(hoist == null ? Possible.absent() : Possible.of(hoist))
+                .mentionable(mentionable == null ? Possible.absent() : Possible.of(mentionable))
+                .build();
     }
 }

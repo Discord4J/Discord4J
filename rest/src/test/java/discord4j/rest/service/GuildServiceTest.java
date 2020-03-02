@@ -93,7 +93,7 @@ public class GuildServiceTest {
         String randomName = Long.toHexString(Double.doubleToLongBits(Math.random()));
         ChannelCreateRequest req = ImmutableChannelCreateRequest.builder()
             .name(randomName)
-            .parentId(Long.toUnsignedString(trashCategory))
+            .parentId(Possible.of(Long.toUnsignedString(trashCategory)))
             .build();
         getGuildService().createGuildChannel(guild, req, null).block();
     }
@@ -186,7 +186,7 @@ public class GuildServiceTest {
     public void testCreateGuildRole() {
         String randomName = "test_" + Long.toHexString(Double.doubleToLongBits(Math.random()));
         RoleCreateRequest req = ImmutableRoleCreateRequest.builder()
-            .name(randomName)
+            .name(Possible.of(randomName))
             .build();
         getGuildService().createGuildRole(guild, req, null).block();
     }

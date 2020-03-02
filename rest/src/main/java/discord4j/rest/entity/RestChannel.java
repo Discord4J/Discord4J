@@ -18,6 +18,8 @@
 package discord4j.rest.entity;
 
 import discord4j.discordjson.json.ChannelData;
+import discord4j.discordjson.json.ChannelModifyRequest;
+import discord4j.discordjson.json.MessageCreateRequest;
 import discord4j.discordjson.json.MessageData;
 import discord4j.rest.RestClient;
 import discord4j.rest.util.MultipartRequest;
@@ -35,26 +37,47 @@ public class RestChannel {
     }
 
     public Mono<ChannelData> getData() {
-        return restClient.getChannelService()
-                .getChannel(id);
+        return restClient.getChannelService().getChannel(id);
+    }
+
+    /**
+     * Requests to create a message using a given {@link MessageCreateRequest} as body.
+     *
+     * @param request request body used to create a new message
+     * @return A {@link Mono} where, upon successful completion, emits the created {@link MessageData}. If an
+     * error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<MessageData> createMessage(MessageCreateRequest request) {
+        return restClient.getChannelService().createMessage(id, new MultipartRequest(request));
     }
 
     /**
      * Requests to create a message using a given {@link MultipartRequest} as body.
      *
-     * @param request The request body used to create a new message
+     * @param request request body used to create a new message
      * @return A {@link Mono} where, upon successful completion, emits the created {@link MessageData}. If an
-     * error is
-     * received, it is emitted through the {@code Mono}.
+     * error is received, it is emitted through the {@code Mono}.
      */
     public Mono<MessageData> createMessage(MultipartRequest request) {
         return restClient.getChannelService().createMessage(id, request);
     }
 
     /**
+     * Requests to edit this text channel using a given {@link ChannelModifyRequest} as body and optionally, a reason.
+     *
+     * @param request request body used to create a new message
+     * @param reason a reason for this action, can be {@code null}
+     * @return a {@link Mono} where, upon successful completion, emits the edited {@link ChannelData}. If an error is
+     * received, it is emitted through the {@code Mono}.
+     */
+    public Mono<ChannelData> edit(ChannelModifyRequest request, @Nullable String reason) {
+        return restClient.getChannelService().modifyChannel(id, request, reason);
+    }
+
+    /**
      * Requests to delete this channel while optionally specifying a reason.
      *
-     * @param reason The reason, if present.
+     * @param reason a reason for this action, can be {@code null}
      * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the channel has been deleted.
      * If an error is received, it is emitted through the {@code Mono}.
      */

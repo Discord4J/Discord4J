@@ -16,16 +16,17 @@
  */
 package discord4j.core.spec;
 
-import discord4j.discordjson.json.ChannelCreateRequest;
-import discord4j.discordjson.json.ImmutableChannelCreateRequest;
-import discord4j.discordjson.json.ImmutableOverwriteData;
-import discord4j.discordjson.json.OverwriteData;
 import discord4j.core.object.PermissionOverwrite;
 import discord4j.core.object.entity.channel.Category;
 import discord4j.core.object.entity.channel.Channel;
 import discord4j.core.object.entity.channel.VoiceChannel;
 import discord4j.core.object.util.Permission;
 import discord4j.core.object.util.Snowflake;
+import discord4j.discordjson.json.ChannelCreateRequest;
+import discord4j.discordjson.json.ImmutableChannelCreateRequest;
+import discord4j.discordjson.json.ImmutableOverwriteData;
+import discord4j.discordjson.json.OverwriteData;
+import discord4j.discordjson.possible.Possible;
 import reactor.util.annotation.Nullable;
 
 import java.util.List;
@@ -36,7 +37,7 @@ import java.util.stream.Collectors;
 public class VoiceChannelCreateSpec implements AuditSpec<ChannelCreateRequest> {
 
     private final ImmutableChannelCreateRequest.Builder requestBuilder = ImmutableChannelCreateRequest.builder()
-            .type(Channel.Type.GUILD_VOICE.getValue());
+            .type(Possible.of(Channel.Type.GUILD_VOICE.getValue()));
     @Nullable
     private String reason;
 
@@ -59,7 +60,7 @@ public class VoiceChannelCreateSpec implements AuditSpec<ChannelCreateRequest> {
      * @return This spec.
      */
     public VoiceChannelCreateSpec setBitrate(int bitrate) {
-        requestBuilder.bitrate(bitrate);
+        requestBuilder.bitrate(Possible.of(bitrate));
         return this;
     }
 
@@ -73,7 +74,7 @@ public class VoiceChannelCreateSpec implements AuditSpec<ChannelCreateRequest> {
      * @return This spec.
      */
     public VoiceChannelCreateSpec setUserLimit(int userLimit) {
-        requestBuilder.userLimit(userLimit);
+        requestBuilder.userLimit(Possible.of(userLimit));
         return this;
     }
 
@@ -84,7 +85,7 @@ public class VoiceChannelCreateSpec implements AuditSpec<ChannelCreateRequest> {
      * @return This spec.
      */
     public VoiceChannelCreateSpec setPosition(int position) {
-        requestBuilder.position(position);
+        requestBuilder.position(Possible.of(position));
         return this;
     }
 
@@ -100,7 +101,7 @@ public class VoiceChannelCreateSpec implements AuditSpec<ChannelCreateRequest> {
                 o.getAllowed().getRawValue(), o.getDenied().getRawValue()))
             .collect(Collectors.toList());
 
-        requestBuilder.permissionOverwrites(raw);
+        requestBuilder.permissionOverwrites(Possible.of(raw));
         return this;
     }
 
@@ -114,7 +115,7 @@ public class VoiceChannelCreateSpec implements AuditSpec<ChannelCreateRequest> {
      * @return This spec.
      */
     public VoiceChannelCreateSpec setParentId(@Nullable Snowflake parentId) {
-        requestBuilder.parentId(parentId == null ? null : parentId.asString()); // FIXME
+        requestBuilder.parentId(parentId == null ? Possible.absent() : Possible.of(parentId.asString()));
         return this;
     }
 

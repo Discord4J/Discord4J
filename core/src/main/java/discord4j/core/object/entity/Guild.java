@@ -174,7 +174,7 @@ public final class Guild implements Entity {
      * @return The ID of the owner of the guild.
      */
     public Snowflake getOwnerId() {
-        return Snowflake.of(data.ownerId());
+        return Snowflake.of(data.ownerId().get());
     }
 
     /**
@@ -193,7 +193,7 @@ public final class Guild implements Entity {
      * @return The voice region ID for the guild.
      */
     public String getRegionId() {
-        return data.region();
+        return data.region().get();
     }
 
     /**
@@ -243,7 +243,7 @@ public final class Guild implements Entity {
      * @return The AFK timeout in seconds.
      */
     public int getAfkTimeout() {
-        return data.afkTimeout();
+        return data.afkTimeout().get();
     }
 
     /**
@@ -271,7 +271,7 @@ public final class Guild implements Entity {
      * @return The Premium Tier for the guild.
      */
     public PremiumTier getPremiumTier() {
-        return PremiumTier.of(data.premiumTier());
+        return PremiumTier.of(data.premiumTier().get());
     }
 
     /**
@@ -290,7 +290,7 @@ public final class Guild implements Entity {
      * @return The preferred locale of the guild, only set if guild has the "DISCOVERABLE" feature, defaults to en-US.
      */
     public Locale getPreferredLocale() {
-        return new Locale.Builder().setLanguageTag(data.preferredLocale()).build();
+        return new Locale.Builder().setLanguageTag(data.preferredLocale().get()).build();
     }
 
     /**
@@ -308,7 +308,7 @@ public final class Guild implements Entity {
      * @return The default message notification level.
      */
     public NotificationLevel getNotificationLevel() {
-        return NotificationLevel.of(data.defaultMessageNotifications());
+        return NotificationLevel.of(data.defaultMessageNotifications().get());
     }
 
     /**
@@ -317,7 +317,7 @@ public final class Guild implements Entity {
      * @return The default explicit content filter level.
      */
     public ContentFilterLevel getContentFilterLevel() {
-        return ContentFilterLevel.of(data.explicitContentFilter());
+        return ContentFilterLevel.of(data.explicitContentFilter().get());
     }
 
     /**
@@ -417,7 +417,7 @@ public final class Guild implements Entity {
      * @return The required MFA level for the guild.
      */
     public MfaLevel getMfaLevel() {
-        return MfaLevel.of(data.mfaLevel());
+        return MfaLevel.of(data.mfaLevel().get());
     }
 
     /**

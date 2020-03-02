@@ -17,12 +17,14 @@
 
 package discord4j.common;
 
-import discord4j.discordjson.possible.PossibleModule;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import discord4j.common.jackson.UnknownPropertyHandler;
+import discord4j.discordjson.possible.PossibleFilter;
+import discord4j.discordjson.possible.PossibleModule;
 
 import java.util.function.Function;
 
@@ -34,7 +36,9 @@ public class JacksonResources {
 
     private static final Function<ObjectMapper, ObjectMapper> initializer = mapper -> mapper
             .setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
-            .registerModules(new PossibleModule(), new Jdk8Module());
+            .registerModules(new PossibleModule(), new Jdk8Module())
+            .setDefaultPropertyInclusion(JsonInclude.Value.construct(JsonInclude.Include.CUSTOM,
+                    JsonInclude.Include.ALWAYS, PossibleFilter.class, null));
 
     private final ObjectMapper objectMapper;
 

@@ -16,15 +16,16 @@
  */
 package discord4j.core.spec;
 
-import discord4j.discordjson.json.ChannelCreateRequest;
-import discord4j.discordjson.json.ImmutableChannelCreateRequest;
-import discord4j.discordjson.json.ImmutableOverwriteData;
-import discord4j.discordjson.json.OverwriteData;
 import discord4j.core.object.PermissionOverwrite;
 import discord4j.core.object.entity.channel.Channel;
 import discord4j.core.object.entity.channel.TextChannel;
 import discord4j.core.object.util.Permission;
 import discord4j.core.object.util.Snowflake;
+import discord4j.discordjson.json.ChannelCreateRequest;
+import discord4j.discordjson.json.ImmutableChannelCreateRequest;
+import discord4j.discordjson.json.ImmutableOverwriteData;
+import discord4j.discordjson.json.OverwriteData;
+import discord4j.discordjson.possible.Possible;
 import reactor.util.annotation.Nullable;
 
 import java.util.List;
@@ -39,7 +40,7 @@ import java.util.stream.Collectors;
 public class TextChannelCreateSpec implements AuditSpec<ChannelCreateRequest> {
 
     private final ImmutableChannelCreateRequest.Builder requestBuilder = ImmutableChannelCreateRequest.builder()
-            .type(Channel.Type.GUILD_TEXT.getValue());
+            .type(Possible.of(Channel.Type.GUILD_TEXT.getValue()));
     @Nullable
     private String reason;
 
@@ -61,7 +62,7 @@ public class TextChannelCreateSpec implements AuditSpec<ChannelCreateRequest> {
      * @return This spec.
      */
     public TextChannelCreateSpec setTopic(@Nullable String topic) {
-        requestBuilder.topic(topic); // FIXME
+        requestBuilder.topic(topic == null ? Possible.absent() : Possible.of(topic));
         return this;
     }
 
@@ -74,7 +75,7 @@ public class TextChannelCreateSpec implements AuditSpec<ChannelCreateRequest> {
      * @return This spec.
      */
     public TextChannelCreateSpec setRateLimitPerUser(int rateLimitPerUser) {
-        requestBuilder.rateLimitPerUser(rateLimitPerUser);
+        requestBuilder.rateLimitPerUser(Possible.of(rateLimitPerUser));
         return this;
     }
 
@@ -85,7 +86,7 @@ public class TextChannelCreateSpec implements AuditSpec<ChannelCreateRequest> {
      * @return This spec.
      */
     public TextChannelCreateSpec setPosition(int position) {
-        requestBuilder.position(position);
+        requestBuilder.position(Possible.of(position));
         return this;
     }
 
@@ -101,7 +102,7 @@ public class TextChannelCreateSpec implements AuditSpec<ChannelCreateRequest> {
                 o.getAllowed().getRawValue(), o.getDenied().getRawValue()))
             .collect(Collectors.toList());
 
-        requestBuilder.permissionOverwrites(raw);
+        requestBuilder.permissionOverwrites(Possible.of(raw));
         return this;
     }
 
@@ -112,7 +113,7 @@ public class TextChannelCreateSpec implements AuditSpec<ChannelCreateRequest> {
      * @return This spec.
      */
     public TextChannelCreateSpec setParentId(@Nullable Snowflake parentId) {
-        requestBuilder.parentId(parentId == null ? null : parentId.asString()); // FIXME
+        requestBuilder.parentId(parentId == null ? Possible.absent() : Possible.of(parentId.asString()));
         return this;
     }
 
@@ -123,7 +124,7 @@ public class TextChannelCreateSpec implements AuditSpec<ChannelCreateRequest> {
      * @return This spec.
      */
     public TextChannelCreateSpec setNsfw(boolean nsfw) {
-        requestBuilder.nsfw(nsfw);
+        requestBuilder.nsfw(Possible.of(nsfw));
         return this;
     }
 
