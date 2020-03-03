@@ -19,12 +19,14 @@ package discord4j.gateway.json.dispatch;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import discord4j.common.jackson.UnsignedJson;
 import discord4j.common.json.UserResponse;
+import reactor.util.annotation.Nullable;
 
 public class InviteCreate implements Dispatch {
 
+    @Nullable
     @JsonProperty("guild_id")
     @UnsignedJson
-    private long guildId;
+    private Long guildId;
     @JsonProperty("channel_id")
     @UnsignedJson
     private long channelId;
@@ -43,7 +45,8 @@ public class InviteCreate implements Dispatch {
         return inviter;
     }
 
-    public long getGuildId() {
+    @Nullable
+    public Long getGuildId() {
         return guildId;
     }
 

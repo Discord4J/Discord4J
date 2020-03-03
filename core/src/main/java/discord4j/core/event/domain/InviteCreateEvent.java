@@ -22,6 +22,7 @@ import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.util.Snowflake;
 import reactor.core.publisher.Mono;
+import reactor.util.annotation.Nullable;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -36,7 +37,8 @@ import java.util.Optional;
  */
 public class InviteCreateEvent extends Event {
 
-    private final long guildId;
+    @Nullable
+    private final Long guildId;
     private final long channelId;
     private final String code;
     private final User inviter;
@@ -46,7 +48,7 @@ public class InviteCreateEvent extends Event {
     private final int maxAge;
     private final boolean temporary;
 
-    public InviteCreateEvent(DiscordClient client, long guildId, long channelId, String code, User inviter, Instant createdAt, int uses, int maxUses, int maxAge, boolean temporary) {
+    public InviteCreateEvent(DiscordClient client, Long guildId, long channelId, String code, User inviter, Instant createdAt, int uses, int maxUses, int maxAge, boolean temporary) {
         super(client);
         this.guildId = guildId;
         this.channelId = channelId;
@@ -60,12 +62,12 @@ public class InviteCreateEvent extends Event {
     }
 
     /**
-     * Gets the {@link Snowflake} ID of the {@link Guild} involved in the event.
+     * Gets the {@link Snowflake} ID of the {@link Guild} involved in the event, if present.
      *
-     * @return The ID of the guild involved.
+     * @return The ID of the guild involved, if present.
      */
-    public Snowflake getGuildId() {
-        return Snowflake.of(guildId);
+    public Optional<Snowflake> getGuildId() {
+        return Optional.ofNullable(guildId).map(Snowflake::of);
     }
 
     /**
@@ -75,7 +77,7 @@ public class InviteCreateEvent extends Event {
      * If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Guild> getGuild() {
-        return getClient().getGuildById(getGuildId());
+        return Mono.justOrEmpty(getGuildId()).flatMap(getClient()::getGuildById);
     }
 
     /**

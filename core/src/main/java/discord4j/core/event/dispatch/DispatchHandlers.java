@@ -224,7 +224,7 @@ public abstract class DispatchHandlers {
     }
 
     private static Mono<InviteCreateEvent> inviteCreate(DispatchContext<InviteCreate> context) {
-        long guildId = context.getDispatch().getGuildId();
+        Long guildId = context.getDispatch().getGuildId();
         long channelId = context.getDispatch().getChannelId();
         String code = context.getDispatch().getCode();
         Instant createdAt = DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(context.getDispatch().getCreatedAt(), Instant::from);
@@ -243,7 +243,7 @@ public abstract class DispatchHandlers {
     }
 
     private static Mono<InviteDeleteEvent> inviteDelete(DispatchContext<InviteDelete> context) {
-        long guildId = context.getDispatch().getGuildId();
+        Long guildId = context.getDispatch().getGuildId();
         long channelId = context.getDispatch().getChannelId();
         String code = context.getDispatch().getCode();
 
