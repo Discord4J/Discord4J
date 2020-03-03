@@ -25,7 +25,7 @@ import reactor.util.annotation.Nullable;
 import java.util.Optional;
 
 /**
- * Dispatched when an invite is deleted.
+ * Dispatched when an invite to a channel is deleted.
  * <p>
  * This event is dispatched by Discord.
  *
