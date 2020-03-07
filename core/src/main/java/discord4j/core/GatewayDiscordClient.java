@@ -18,6 +18,7 @@
 package discord4j.core;
 
 import discord4j.common.JacksonResources;
+import discord4j.common.LogUtil;
 import discord4j.common.ReactorResources;
 import discord4j.core.event.EventDispatcher;
 import discord4j.core.event.domain.Event;
@@ -528,7 +529,8 @@ public class GatewayDiscordClient {
      * @return a new {@link reactor.core.publisher.Flux} with the requested events
      */
     public <E extends Event> Flux<E> on(Class<E> eventClass) {
-        return getEventDispatcher().on(eventClass);
+        return getEventDispatcher().on(eventClass)
+                .subscriberContext(ctx -> ctx.put(LogUtil.KEY_GATEWAY_ID, Integer.toHexString(hashCode())));
     }
 
     /**
