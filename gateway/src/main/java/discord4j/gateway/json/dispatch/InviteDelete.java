@@ -18,18 +18,21 @@ package discord4j.gateway.json.dispatch;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import discord4j.common.jackson.UnsignedJson;
+import reactor.util.annotation.Nullable;
 
 public class InviteDelete implements Dispatch {
 
+    @Nullable
     @JsonProperty("guild_id")
     @UnsignedJson
-    private long guildId;
+    private Long guildId;
     @JsonProperty("channel_id")
     @UnsignedJson
     private long channelId;
     private String code;
 
-    public long getGuildId() {
+    @Nullable
+    public Long getGuildId() {
         return guildId;
     }
 
