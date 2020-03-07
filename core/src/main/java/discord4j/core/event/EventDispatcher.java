@@ -161,7 +161,7 @@ public class EventDispatcher {
      */
     public <E extends Event, T> Flux<T> on(Class<E> eventClass, Function<E, Publisher<T>> mapper) {
         return on(eventClass)
-                .flatMap(event -> Flux.from(mapper.apply(event))
+                .flatMap(event -> Flux.defer(() -> mapper.apply(event))
                         .onErrorResume(t -> {
                             int shard = event.getClient().getConfig().getShardIndex();
                             logger(eventClass, shard).warn("Error while handling event", t);
