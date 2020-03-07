@@ -564,7 +564,7 @@ public class GatewayDiscordClient {
      */
     public <E extends Event, T> Flux<T> on(Class<E> eventClass, Function<E, Publisher<T>> mapper) {
         return on(eventClass)
-                .flatMap(event -> Flux.from(mapper.apply(event))
+                .flatMap(event -> Flux.defer(() -> mapper.apply(event))
                         .onErrorResume(t -> {
                             log.warn("Error while handling {} in shard [{}]", eventClass.getSimpleName(),
                                     event.getShardInfo().format(), t);

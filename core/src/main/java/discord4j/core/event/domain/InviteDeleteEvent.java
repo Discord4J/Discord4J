@@ -22,6 +22,9 @@ import discord4j.core.object.entity.channel.Channel;
 import discord4j.core.object.util.Snowflake;
 import discord4j.gateway.ShardInfo;
 import reactor.core.publisher.Mono;
+import reactor.util.annotation.Nullable;
+
+import java.util.Optional;
 
 /**
  * Dispatched when an invite to a channel is deleted.
@@ -32,11 +35,12 @@ import reactor.core.publisher.Mono;
  */
 public class InviteDeleteEvent extends Event {
 
-    private final long guildId;
+    @Nullable
+    private final Long guildId;
     private final long channelId;
     private final String code;
 
-    public InviteDeleteEvent(GatewayDiscordClient client, ShardInfo shardInfo, long guildId, long channelId, String code) {
+    public InviteDeleteEvent(GatewayDiscordClient client, ShardInfo shardInfo, Long guildId, long channelId, String code) {
         super(client, shardInfo);
         this.guildId = guildId;
         this.channelId = channelId;
@@ -44,12 +48,12 @@ public class InviteDeleteEvent extends Event {
     }
 
     /**
-     * Gets the {@link Snowflake} ID of the {@link Guild} involved in the event.
+     * Gets the {@link Snowflake} ID of the {@link Guild} involved in the event, if present.
      *
-     * @return The ID of the guild involved.
+     * @return The ID of the guild involved, if present.
      */
-    public Snowflake getGuildId() {
-        return Snowflake.of(guildId);
+    public Optional<Snowflake> getGuildId() {
+        return Optional.ofNullable(guildId).map(Snowflake::of);
     }
 
     /**
@@ -59,7 +63,7 @@ public class InviteDeleteEvent extends Event {
      * If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Guild> getGuild() {
-        return getClient().getGuildById(getGuildId());
+        return Mono.justOrEmpty(getGuildId()).flatMap(getClient()::getGuildById);
     }
 
     /**

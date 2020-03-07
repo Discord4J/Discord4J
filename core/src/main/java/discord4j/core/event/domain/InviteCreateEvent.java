@@ -38,7 +38,8 @@ import java.util.Optional;
  */
 public class InviteCreateEvent extends Event {
 
-    private final long guildId;
+    @Nullable
+    private final Long guildId;
     private final long channelId;
     private final String code;
     @Nullable
@@ -49,7 +50,7 @@ public class InviteCreateEvent extends Event {
     private final int maxAge;
     private final boolean temporary;
 
-    public InviteCreateEvent(GatewayDiscordClient client, ShardInfo shardInfo, long guildId, long channelId,
+    public InviteCreateEvent(GatewayDiscordClient client, ShardInfo shardInfo, Long guildId, long channelId,
                              String code, @Nullable User inviter, Instant createdAt, int uses, int maxUses, int maxAge,
                              boolean temporary) {
         super(client, shardInfo);
@@ -65,12 +66,12 @@ public class InviteCreateEvent extends Event {
     }
 
     /**
-     * Gets the {@link Snowflake} ID of the {@link Guild} involved in the event.
+     * Gets the {@link Snowflake} ID of the {@link Guild} involved in the event, if present.
      *
-     * @return The ID of the guild involved.
+     * @return The ID of the guild involved, if present.
      */
-    public Snowflake getGuildId() {
-        return Snowflake.of(guildId);
+    public Optional<Snowflake> getGuildId() {
+        return Optional.ofNullable(guildId).map(Snowflake::of);
     }
 
     /**
@@ -80,7 +81,7 @@ public class InviteCreateEvent extends Event {
      * If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Guild> getGuild() {
-        return getClient().getGuildById(getGuildId());
+        return Mono.justOrEmpty(getGuildId()).flatMap(getClient()::getGuildById);
     }
 
     /**
