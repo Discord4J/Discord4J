@@ -56,7 +56,6 @@ import static discord4j.common.LogUtil.format;
 public class DefaultEventDispatcher implements EventDispatcher {
 
     private static final Logger log = Loggers.getLogger(DefaultEventDispatcher.class);
-    private static final Integer MAX_LENGTH = 100;
 
     private final FluxProcessor<Event, Event> processor;
     private final FluxSink<Event> sink;
@@ -84,15 +83,9 @@ public class DefaultEventDispatcher implements EventDispatcher {
         return processor.publishOn(scheduler)
                 .ofType(eventClass)
                 .<E>handle((event, sink) -> {
-                    if (log.isDebugEnabled()) {
-                        LogUtil.traceDebug(log, isTrace -> {
-                            String str = event.toString();
-                            if (!isTrace && str.length() > MAX_LENGTH) {
-                                str = str.substring(0, MAX_LENGTH) + "... (truncated " + (str.length() - MAX_LENGTH) + " characters)";
-                            }
-                            return format(sink.currentContext()
-                                    .put(LogUtil.KEY_SHARD_ID, event.getShardInfo().getIndex()), str);
-                        });
+                    if (log.isTraceEnabled()) {
+                        log.trace(format(sink.currentContext().put(LogUtil.KEY_SHARD_ID,
+                                event.getShardInfo().getIndex()), "{}"), event.toString());
                     }
                     sink.next(event);
                 })
