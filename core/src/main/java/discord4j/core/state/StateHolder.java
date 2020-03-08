@@ -17,6 +17,7 @@
 package discord4j.core.state;
 
 import discord4j.core.object.data.stored.*;
+import discord4j.core.shard.CachingStore;
 import discord4j.store.api.Store;
 import discord4j.store.api.primitive.LongObjStore;
 import discord4j.store.api.service.StoreService;
@@ -25,6 +26,8 @@ import discord4j.store.api.util.StoreContext;
 import reactor.core.publisher.Mono;
 import reactor.util.Logger;
 import reactor.util.Loggers;
+
+import java.time.Duration;
 
 /**
  * Holder for various pieces of state for use in caching.
@@ -92,7 +95,8 @@ public final class StateHolder {
         voiceStateStore = service.provideGenericStore(LongLongTuple2.class, VoiceStateBean.class);
         log.debug("Voice state storage : {}", voiceStateStore);
 
-        parameterStore = service.provideGenericStore(String.class, ParameterBean.class);
+        parameterStore = new CachingStore<>(service.provideGenericStore(String.class, ParameterBean.class),
+                key -> SELF_ID_PARAMETER_KEY.equals(key) ? Duration.ofHours(1) : Duration.ZERO);
         log.debug("Parameter storage   : {}", parameterStore);
     }
 
