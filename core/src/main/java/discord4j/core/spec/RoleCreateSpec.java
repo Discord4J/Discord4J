@@ -19,7 +19,7 @@ package discord4j.core.spec;
 import discord4j.discordjson.json.ImmutableRoleCreateRequest;
 import discord4j.discordjson.json.RoleCreateRequest;
 import discord4j.core.object.entity.Role;
-import discord4j.core.object.util.PermissionSet;
+import discord4j.rest.util.PermissionSet;
 import discord4j.discordjson.possible.Possible;
 import reactor.util.annotation.Nullable;
 

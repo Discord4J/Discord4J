@@ -26,6 +26,8 @@ import discord4j.core.object.reaction.ReactionEmoji;
 import discord4j.core.object.util.Image;
 import discord4j.core.object.util.Snowflake;
 import discord4j.discordjson.json.ApplicationInfoData;
+import discord4j.discordjson.json.ImmutableMessageCreateRequest;
+import discord4j.discordjson.possible.Possible;
 import discord4j.rest.request.RouteMatcher;
 import discord4j.rest.response.ResponseFunction;
 import discord4j.rest.route.Routes;
@@ -94,9 +96,7 @@ public class ExampleBot {
 
         Mono<Void> events = gateway.on(MessageCreateEvent.class, event -> ownerId
                 .filter(owner -> {
-                    Long author = event.getMessage().getAuthor()
-                            .map(u -> u.getId().asLong())
-                            .orElse(null);
+                    Long author = event.getMessage().getAuthor().getId().asLong();
                     return owner.equals(author);
                 })
                 .flatMap(id -> Mono.when(eventHandlers.stream()
@@ -141,12 +141,15 @@ public class ExampleBot {
         @Override
         public Mono<Void> onMessageCreate(MessageCreateEvent event) {
             Message message = event.getMessage();
-            return Mono.justOrEmpty(message.getContent())
-                    .filter(content -> content.startsWith("!echo "))
-                    .map(content -> content.substring("!echo ".length()))
-                    .flatMap(source -> message.getChannel()
-                            .flatMap(channel -> channel.createMessage(source)))
-                    .then();
+            String content = message.getContent();
+            if (content.startsWith("!echo ")) {
+                return message.getRestChannel().createMessage(
+                        ImmutableMessageCreateRequest.builder()
+                                .content(Possible.of(content.substring("!echo ".length())))
+                                .build())
+                        .then();
+            }
+            return Mono.empty();
         }
     }
 
@@ -155,9 +158,7 @@ public class ExampleBot {
         @Override
         public Mono<Void> onMessageCreate(MessageCreateEvent event) {
             Message message = event.getMessage();
-            if (message.getContent()
-                    .filter(content -> content.startsWith("!user "))
-                    .isPresent()) {
+            if (message.getContent().startsWith("!user ")) {
                 return Mono.justOrEmpty(message.getContent())
                         .map(content -> content.split(" ", 2))
                         .flatMap(tokens -> message.getClient().getUserById(Snowflake.of(tokens[1])))
@@ -185,9 +186,7 @@ public class ExampleBot {
         @Override
         public Mono<Void> onMessageCreate(MessageCreateEvent event) {
             Message message = event.getMessage();
-            if (message.getContent()
-                    .filter(content -> content.startsWith("!log "))
-                    .isPresent()) {
+            if (message.getContent().startsWith("!log ")) {
                 return Mono.justOrEmpty(message.getContent())
                         .map(content -> content.split(" ", 3))
                         .doOnNext(tokens -> {
@@ -249,23 +248,21 @@ public class ExampleBot {
         @Override
         public Mono<Void> onMessageCreate(MessageCreateEvent event) {
             Message message = event.getMessage();
-            return message.getContent()
-                    .filter(content -> content.startsWith("!react"))
-                    .map(content -> {
-                        String rawCount = content.substring("!react".length());
-                        int count = 1;
-                        if (!rawCount.isEmpty()) {
-                            try {
-                                count = Math.max(1, Math.min(20, Integer.parseInt(rawCount.trim())));
-                            } catch (NumberFormatException e) {
-                                throw Exceptions.propagate(e);
-                            }
-                        }
-                        return Flux.fromIterable(fetch(count))
-                                .flatMap(emoji -> message.addReaction(ReactionEmoji.unicode(emoji)))
-                                .then();
-                    })
-                    .orElseGet(Mono::empty);
+            if (message.getContent().startsWith("!react")) {
+                String rawCount = message.getContent().substring("!react".length());
+                int count = 1;
+                if (!rawCount.isEmpty()) {
+                    try {
+                        count = Math.max(1, Math.min(20, Integer.parseInt(rawCount.trim())));
+                    } catch (NumberFormatException e) {
+                        throw Exceptions.propagate(e);
+                    }
+                }
+                return Flux.fromIterable(fetch(count))
+                        .flatMap(emoji -> message.addReaction(ReactionEmoji.unicode(emoji)))
+                        .then();
+            }
+            return Mono.empty();
         }
 
         private List<String> fetch(int count) {
@@ -284,9 +281,7 @@ public class ExampleBot {
         @Override
         public Mono<Void> onMessageCreate(MessageCreateEvent event) {
             Message message = event.getMessage();
-            if (message.getContent()
-                    .filter(content -> content.equals("!avatar"))
-                    .isPresent()) {
+            if (message.getContent().equals("!avatar")) {
                 for (Attachment attachment : message.getAttachments()) {
                     // This code is very optimistic as it does not check for status codes or file types
                     return HttpClient.create()
@@ -306,7 +301,7 @@ public class ExampleBot {
 
         @Override
         public Mono<Void> onMessageCreate(MessageCreateEvent event) {
-            if (!event.getMessage().getContent().orElse("").startsWith("!burstmessages")) {
+            if (!event.getMessage().getContent().startsWith("!burstmessages")) {
                 return Mono.empty();
             }
             return event.getGuild()

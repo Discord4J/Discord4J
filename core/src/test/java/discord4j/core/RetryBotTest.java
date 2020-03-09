@@ -20,6 +20,7 @@ package discord4j.core;
 import discord4j.core.event.domain.lifecycle.ReadyEvent;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.Message;
+import discord4j.core.object.entity.User;
 import discord4j.core.object.presence.Presence;
 import discord4j.core.object.util.Snowflake;
 import discord4j.core.shard.ShardingStrategy;
@@ -104,7 +105,7 @@ public class RetryBotTest {
 
         g.getEventDispatcher()
                 .on(MessageCreateEvent.class)
-                .filter(event -> event.getMessage().getContent().orElse("").equals("9988"))
+                .filter(event -> event.getMessage().getContent().equals("9988"))
                 .doOnNext(event -> log.info("Proceeding to exit!!!"))
                 .flatMap(event -> event.getClient().logout())
                 .subscribe();
@@ -151,9 +152,7 @@ public class RetryBotTest {
             TestCommands testCommands = new TestCommands(gateway);
             return gateway.getEventDispatcher().on(MessageCreateEvent.class)
                     .filterWhen(event -> ownerId.map(owner -> {
-                        Long author = event.getMessage().getAuthor()
-                                .map(u -> u.getId().asLong())
-                                .orElse(null);
+                        Long author = event.getMessage().getAuthor().getId().asLong();
                         return owner.equals(author);
                     }))
                     .flatMap(testCommands::onMessageCreate)
@@ -190,29 +189,26 @@ public class RetryBotTest {
 
         public Mono<Void> onMessageCreate(MessageCreateEvent event) {
             Message message = event.getMessage();
-
-            message.getAuthor()
-                    .flatMap(__ -> message.getContent())
-                    .ifPresent(content -> {
-                        if ("!close".equals(content)) {
-                            gateway.logout().subscribe();
-                        } else if ("!online".equals(content)) {
-                            gateway.updatePresence(Presence.online()).subscribe();
-                        } else if ("!dnd".equals(content)) {
-                            gateway.updatePresence(Presence.doNotDisturb()).subscribe();
-                        } else if ("!raise".equals(content)) {
-                            // exception if DM
-                            Snowflake guildId = message.getGuild().block().getId();
-                            log.info("Message came from guild: {}", guildId);
-                        } else if (content.startsWith("!echo ")) {
-                            MessageCreateRequest request = ImmutableMessageCreateRequest.builder()
-                                    .content(Possible.of(content.substring("!echo ".length())))
-                                    .build();
-                            message.getRestChannel()
-                                    .createMessage(new MultipartRequest(request))
-                                    .subscribe();
-                        }
-                    });
+            User user = message.getAuthor();
+            String content = message.getContent();
+            if ("!close".equals(content)) {
+                gateway.logout().subscribe();
+            } else if ("!online".equals(content)) {
+                gateway.updatePresence(Presence.online()).subscribe();
+            } else if ("!dnd".equals(content)) {
+                gateway.updatePresence(Presence.doNotDisturb()).subscribe();
+            } else if ("!raise".equals(content)) {
+                // exception if DM
+                Snowflake guildId = message.getGuild().block().getId();
+                log.info("Message came from guild: {}", guildId);
+            } else if (content.startsWith("!echo ")) {
+                MessageCreateRequest request = ImmutableMessageCreateRequest.builder()
+                        .content(Possible.of(content.substring("!echo ".length())))
+                        .build();
+                message.getRestChannel()
+                        .createMessage(new MultipartRequest(request))
+                        .subscribe();
+            }
             return Mono.empty();
         }
     }

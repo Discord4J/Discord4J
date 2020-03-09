@@ -55,7 +55,7 @@ public final class StateHolder {
     private final LongObjStore<EmojiData> guildEmojiStore;
     private final Store<LongLongTuple2, MemberData> memberStore;
     private final LongObjStore<MessageData> messageStore;
-    private final Store<LongLongTuple2, PresenceUpdate> presenceStore;
+    private final Store<LongLongTuple2, PresenceData> presenceStore;
     private final LongObjStore<RoleData> roleStore;
     private final LongObjStore<UserData> userStore;
     private final Store<LongLongTuple2, VoiceStateData> voiceStateStore;
@@ -81,7 +81,7 @@ public final class StateHolder {
         messageStore = service.provideLongObjStore(MessageData.class);
         log.debug("Message storage     : {}", messageStore);
 
-        presenceStore = service.provideGenericStore(LongLongTuple2.class, PresenceUpdate.class);
+        presenceStore = service.provideGenericStore(LongLongTuple2.class, PresenceData.class);
         log.debug("Presence storage    : {}", presenceStore);
 
         roleStore = service.provideLongObjStore(RoleData.class);
@@ -121,7 +121,7 @@ public final class StateHolder {
         return messageStore;
     }
 
-    public Store<LongLongTuple2, PresenceUpdate> getPresenceStore() {
+    public Store<LongLongTuple2, PresenceData> getPresenceStore() {
         return presenceStore;
     }
 

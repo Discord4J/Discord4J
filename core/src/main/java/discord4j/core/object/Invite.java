@@ -16,14 +16,14 @@
  */
 package discord4j.core.object;
 
-import discord4j.discordjson.json.GuildData;
-import discord4j.discordjson.json.InviteData;
-import discord4j.discordjson.json.UserData;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.CategorizableChannel;
 import discord4j.core.object.util.Snowflake;
+import discord4j.discordjson.json.InviteData;
+import discord4j.discordjson.json.PartialGuildData;
+import discord4j.discordjson.json.UserData;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
 
@@ -74,21 +74,20 @@ public class Invite implements DiscordObject {
      *
      * @return The ID of the guild this invite is associated to.
      */
-    public final Snowflake getGuildId() {
+    public final Optional<Snowflake> getGuildId() {
         return data.guild().toOptional()
-            .map(GuildData::id)
-            .map(Snowflake::of)
-            .orElseThrow(AssertionError::new); // TODO FIXME
+            .map(PartialGuildData::id)
+            .map(Snowflake::of);
     }
 
     /**
-     * Requests to retrieve the guild this invite is associated to.
+     * Requests to retrieve the guild this invite is associated to, if present.
      *
      * @return A {@link Mono} where, upon successful completion, emits the {@link Guild guild} this invite is associated
      * to. If an error is received, it is emitted through the {@code Mono}.
      */
     public final Mono<Guild> getGuild() {
-        return gateway.getGuildById(getGuildId());
+        return getGuildId().map(gateway::getGuildById).orElse(Mono.empty());
     }
 
     /**

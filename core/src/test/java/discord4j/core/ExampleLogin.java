@@ -17,16 +17,28 @@
 
 package discord4j.core;
 
+import discord4j.common.JacksonResources;
 import discord4j.core.support.BotSupport;
-import reactor.blockhound.BlockHound;
+import discord4j.store.redis.ByteArrayRedisSerializer;
+import discord4j.store.redis.ByteArrayRedisStoreService;
+import discord4j.store.redis.StoreRedisCodec;
+import discord4j.store.redis.StringSerializer;
+import io.lettuce.core.RedisClient;
+import io.lettuce.core.codec.RedisCodec;
 
 public class ExampleLogin {
 
     public static void main(String[] args) {
-        BlockHound.install();
+        JacksonResources jackson = new JacksonResources();
+        RedisClient redisClient = RedisClient.create("redis://localhost:6379");
+        RedisCodec<String, byte[]> codec = new StoreRedisCodec<>(new StringSerializer(),
+                new ByteArrayRedisSerializer());
         GatewayDiscordClient client = DiscordClientBuilder.create(System.getenv("token"))
                 .build()
-                .login()
+                .gateway()
+                .setStoreService(new ByteArrayRedisStoreService(redisClient, codec, jackson.getObjectMapper(),
+                        "discord4j:store:"))
+                .connect()
                 .blockOptional()
                 .orElseThrow(RuntimeException::new);
         BotSupport.create(client).eventHandlers().block();

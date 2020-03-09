@@ -17,11 +17,8 @@
 
 package discord4j.core;
 
-import discord4j.discordjson.json.ChannelData;
-import discord4j.discordjson.json.GuildData;
-import discord4j.discordjson.json.MemberData;
-import discord4j.discordjson.json.UserData;
 import discord4j.common.JacksonResources;
+import discord4j.common.LogUtil;
 import discord4j.common.ReactorResources;
 import discord4j.core.event.EventDispatcher;
 import discord4j.core.event.domain.Event;
@@ -36,7 +33,11 @@ import discord4j.core.spec.GuildCreateSpec;
 import discord4j.core.spec.UserEditSpec;
 import discord4j.core.state.StateHolder;
 import discord4j.core.util.EntityUtil;
-import discord4j.core.util.PaginationUtil;
+import discord4j.rest.util.PaginationUtil;
+import discord4j.discordjson.json.ChannelData;
+import discord4j.discordjson.json.GuildData;
+import discord4j.discordjson.json.MemberData;
+import discord4j.discordjson.json.UserData;
 import discord4j.discordjson.json.gateway.StatusUpdate;
 import discord4j.gateway.GatewayClient;
 import discord4j.gateway.GatewayClientGroup;
@@ -509,7 +510,8 @@ public class GatewayDiscordClient {
      * @return a new {@link reactor.core.publisher.Flux} with the requested events
      */
     public <E extends Event> Flux<E> on(Class<E> eventClass) {
-        return getEventDispatcher().on(eventClass);
+        return getEventDispatcher().on(eventClass)
+                .subscriberContext(ctx -> ctx.put(LogUtil.KEY_GATEWAY_ID, Integer.toHexString(hashCode())));
     }
 
     /**
@@ -545,7 +547,7 @@ public class GatewayDiscordClient {
      */
     public <E extends Event, T> Flux<T> on(Class<E> eventClass, Function<E, Publisher<T>> mapper) {
         return on(eventClass)
-                .flatMap(event -> Flux.from(mapper.apply(event))
+                .flatMap(event -> Flux.defer(() -> mapper.apply(event))
                         .onErrorResume(t -> {
                             log.warn("Error while handling {} in shard [{}]", eventClass.getSimpleName(),
                                     event.getShardInfo().format(), t);

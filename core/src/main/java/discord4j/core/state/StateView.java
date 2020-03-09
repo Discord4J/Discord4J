@@ -17,7 +17,6 @@
 package discord4j.core.state;
 
 import discord4j.discordjson.json.*;
-import discord4j.discordjson.json.gateway.PresenceUpdate;
 import discord4j.store.api.service.StoreService;
 import discord4j.store.api.util.LongLongTuple2;
 import reactor.core.publisher.Mono;
@@ -27,15 +26,15 @@ import reactor.core.publisher.Mono;
  * <p>
  * In addition to saving the current bot user ID, the following stores are kept in this class:
  * <ul>
- * <li>Channel store: {@code long} keys and {@link ChannelBean} values.</li>
- * <li>Guild store: {@code long} keys and {@link GuildBean} values.</li>
- * <li>Guild emoji store: {@code long} keys and {@link GuildEmojiBean} values.</li>
- * <li>Member store: {@code long} pair keys and {@link MemberBean} values.</li>
- * <li>Message store: {@code long} keys and {@link MessageBean} values.</li>
- * <li>Presence store: {@code long} pair keys and {@link PresenceBean} values.</li>
- * <li>Role store: {@code long} keys and {@link RoleBean} values.</li>
- * <li>User store: {@code long} keys and {@link UserBean} values.</li>
- * <li>Voice state store: {@code long} pair keys and {@link VoiceStateBean} values.</li>
+ * <li>Channel store: {@code long} keys and {@link ChannelData} values.</li>
+ * <li>Guild store: {@code long} keys and {@link GuildData} values.</li>
+ * <li>Guild emoji store: {@code long} keys and {@link EmojiData} values.</li>
+ * <li>Member store: {@code long} pair keys and {@link MemberData} values.</li>
+ * <li>Message store: {@code long} keys and {@link MessageData} values.</li>
+ * <li>Presence store: {@code long} pair keys and {@link PresenceData} values.</li>
+ * <li>Role store: {@code long} keys and {@link RoleData} values.</li>
+ * <li>User store: {@code long} keys and {@link UserData} values.</li>
+ * <li>Voice state store: {@code long} pair keys and {@link VoiceStateData} values.</li>
  * </ul>
  */
 public final class StateView {
@@ -70,7 +69,7 @@ public final class StateView {
         return new LongObjStoreView<>(stateHolder.getMessageStore());
     }
 
-    public StoreView<LongLongTuple2, PresenceUpdate> getPresenceStore() {
+    public StoreView<LongLongTuple2, PresenceData> getPresenceStore() {
         return new StoreView<>(stateHolder.getPresenceStore());
     }
 

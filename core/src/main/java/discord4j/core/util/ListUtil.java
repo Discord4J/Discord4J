@@ -37,6 +37,12 @@ public class ListUtil {
         }
     }
 
+    public static <T> List<T> add(List<T> source, T element) {
+        List<T> list = new ArrayList<>(source);
+        list.add(element);
+        return Collections.unmodifiableList(list);
+    }
+
     public static <T> Possible<List<T>> addAll(Possible<List<T>> source, List<T> elements) {
         if (source.isAbsent()) {
             return Possible.of(Collections.unmodifiableList(elements));
@@ -45,6 +51,12 @@ public class ListUtil {
             list.addAll(elements);
             return Possible.of(Collections.unmodifiableList(list));
         }
+    }
+
+    public static <T> List<T> addAll(List<T> source, List<T> elements) {
+        List<T> list = new ArrayList<>(source);
+        list.addAll(elements);
+        return Collections.unmodifiableList(list);
     }
 
     public static <T> Possible<List<T>> remove(Possible<List<T>> source, Predicate<T> filter) {

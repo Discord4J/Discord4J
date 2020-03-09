@@ -19,13 +19,15 @@ package discord4j.core.object.entity;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.VoiceState;
 import discord4j.core.object.presence.Presence;
-import discord4j.core.object.util.PermissionSet;
+import discord4j.rest.util.PermissionSet;
 import discord4j.core.object.util.Snowflake;
 import discord4j.core.spec.BanQuerySpec;
 import discord4j.core.spec.GuildMemberEditSpec;
 import discord4j.core.util.OrderUtil;
 import discord4j.core.util.PermissionUtil;
 import discord4j.discordjson.json.MemberData;
+import discord4j.discordjson.json.PresenceData;
+import discord4j.discordjson.json.VoiceStateData;
 import discord4j.store.api.util.LongLongTuple2;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -64,7 +66,7 @@ public final class Member extends User {
      * @param guildId The ID of the guild this user is associated to.
      */
     public Member(final GatewayDiscordClient gateway, final MemberData data, final long guildId) {
-        super(gateway, data.user().get());
+        super(gateway, data.user());
         this.data = Objects.requireNonNull(data);
         this.guildId = guildId;
     }

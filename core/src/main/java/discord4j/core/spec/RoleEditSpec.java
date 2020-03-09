@@ -20,7 +20,7 @@ import discord4j.discordjson.json.ImmutableRoleModifyRequest;
 import discord4j.discordjson.json.RoleModifyRequest;
 import discord4j.discordjson.possible.Possible;
 import discord4j.core.object.entity.Role;
-import discord4j.core.object.util.PermissionSet;
+import discord4j.rest.util.PermissionSet;
 import reactor.util.annotation.Nullable;
 
 import java.awt.*;

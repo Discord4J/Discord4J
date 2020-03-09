@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration scan="true">
     <logger name="io.netty" level="INFO"/>
+    <logger name="io.lettuce" level="INFO"/>
     <logger name="reactor" level="INFO"/>
     <logger name="reactor.netty" level="DEBUG"/>
     <logger name="reactor.retry" level="INFO"/>
@@ -12,7 +13,7 @@
     <!--<logger name="discord4j.rest.http" level="TRACE"/>-->
 
     <turboFilter class="discord4j.core.logback.GatewayEventFilter">
-        <Include>MESSAGE_CREATE</Include>
+        <Exclude>PRESENCE_UPDATE</Exclude>
     </turboFilter>
 
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">

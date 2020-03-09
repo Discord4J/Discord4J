@@ -24,7 +24,7 @@ import discord4j.discordjson.possible.Possible;
 import discord4j.core.object.PermissionOverwrite;
 import discord4j.core.object.entity.channel.Category;
 import discord4j.core.object.entity.channel.VoiceChannel;
-import discord4j.core.object.util.Permission;
+import discord4j.rest.util.Permission;
 import discord4j.core.object.util.Snowflake;
 import reactor.util.annotation.Nullable;
 

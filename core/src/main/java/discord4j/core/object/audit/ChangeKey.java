@@ -20,7 +20,7 @@ import discord4j.core.object.ExtendedPermissionOverwrite;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Role;
 import discord4j.core.object.entity.channel.Channel;
-import discord4j.core.object.util.PermissionSet;
+import discord4j.rest.util.PermissionSet;
 import discord4j.core.object.util.Snowflake;
 
 import java.awt.*;

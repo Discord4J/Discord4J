@@ -23,11 +23,8 @@ import discord4j.core.object.VoiceState;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.presence.Presence;
-import discord4j.discordjson.json.ImmutableUserData;
-import discord4j.discordjson.json.UserData;
-import discord4j.discordjson.json.VoiceStateData;
+import discord4j.discordjson.json.*;
 import discord4j.discordjson.json.gateway.*;
-import discord4j.discordjson.possible.Possible;
 import discord4j.gateway.retry.GatewayStateChange;
 import discord4j.store.api.util.LongLongTuple2;
 import reactor.core.publisher.Mono;
@@ -122,22 +119,23 @@ public abstract class DispatchHandlers {
     private static Mono<PresenceUpdateEvent> presenceUpdate(DispatchContext<PresenceUpdate> context) {
         GatewayDiscordClient gateway = context.getGateway();
 
-        long guildId = Long.parseUnsignedLong(context.getDispatch().guildId().get());
-        UserData userData = context.getDispatch().user();
+        long guildId = Long.parseUnsignedLong(context.getDispatch().guildId());
+        PartialUserData userData = context.getDispatch().user();
         long userId = Long.parseUnsignedLong(userData.id());
         LongLongTuple2 key = LongLongTuple2.of(guildId, userId);
-        Presence current = new Presence(context.getDispatch());
+        PresenceData presenceData = createPresence(context.getDispatch());
+        Presence current = new Presence(presenceData);
 
-        Mono<Void> saveNew = context.getStateHolder().getPresenceStore().save(key, context.getDispatch());
+        Mono<Void> saveNew = context.getStateHolder().getPresenceStore().save(key, presenceData);
 
         Mono<Optional<User>> saveUser = context.getStateHolder().getUserStore()
                 .find(userId)
                 .map(oldUserData -> {
                     UserData newUserData = ImmutableUserData.builder()
                             .from(oldUserData)
-                            .username(newPossibleIfPresent(oldUserData.username(), userData.username()))
-                            .discriminator(newPossibleIfPresent(oldUserData.discriminator(), userData.discriminator()))
-                            .avatar(newPossibleIfPresent(oldUserData.avatar(), userData.avatar()))
+                            .username(userData.username().toOptional().orElse(oldUserData.username()))
+                            .discriminator(userData.discriminator().toOptional().orElse(oldUserData.discriminator()))
+                            .avatar(userData.avatar().toOptional().orElse(oldUserData.avatar()))
                             .build();
 
                     return Tuples.of(oldUserData, newUserData);
@@ -159,8 +157,17 @@ public abstract class DispatchHandlers {
                                 guildId, oldUser.orElse(null), userData, current, null))));
     }
 
-    static <T> Possible<T> newPossibleIfPresent(Possible<T> oldPossible, Possible<T> newPossible) {
-        return newPossible.isAbsent() ? oldPossible : newPossible;
+    private static PresenceData createPresence(PresenceUpdate update) {
+        return ImmutablePresenceData.builder()
+                .user(update.user())
+                .roles(update.roles())
+                .game(update.game())
+                .status(update.status())
+                .activities(update.activities())
+                .clientStatus(update.clientStatus())
+                .premiumSince(update.premiumSince())
+                .nick(update.nick())
+                .build();
     }
 
     private static Mono<TypingStartEvent> typingStart(DispatchContext<TypingStart> context) {

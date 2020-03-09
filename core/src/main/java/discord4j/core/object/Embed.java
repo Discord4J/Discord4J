@@ -610,14 +610,14 @@ public final class Embed implements DiscordObject {
         public static final int MAX_VALUE_LENGTH = 1024;
 
         /** The raw data as represented by Discord. */
-        private final EmbedFiledData data;
+        private final EmbedFieldData data;
 
         /**
          * Constructs a {@code Field} with data as represented by Discord.
          *
          * @param data The raw data as represented by Discord, must be non-null.
          */
-        private Field(final EmbedFiledData data) {
+        private Field(final EmbedFieldData data) {
             this.data = Objects.requireNonNull(data);
         }
 

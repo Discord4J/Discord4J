@@ -16,9 +16,11 @@
  */
 package discord4j.core.object.util;
 
+import discord4j.rest.util.Permission;
+import discord4j.rest.util.PermissionSet;
 import org.junit.Test;
 
-import static discord4j.core.object.util.Permission.*;
+import static discord4j.rest.util.Permission.*;
 import static org.junit.Assert.*;
 
 public class PermissionSetTest {

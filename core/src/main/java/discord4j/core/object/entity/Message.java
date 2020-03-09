@@ -27,7 +27,7 @@ import discord4j.core.object.reaction.ReactionEmoji;
 import discord4j.core.object.util.Snowflake;
 import discord4j.core.spec.MessageEditSpec;
 import discord4j.core.util.EntityUtil;
-import discord4j.core.util.PaginationUtil;
+import discord4j.rest.util.PaginationUtil;
 import discord4j.discordjson.json.ImmutableSuppressEmbedsRequest;
 import discord4j.discordjson.json.MessageData;
 import discord4j.discordjson.json.UserData;
@@ -137,13 +137,13 @@ public final class Message implements Entity {
     }
 
     /**
-     * Gets the author of this message, if present.
+     * Gets the author of this message.
      *
-     * @return The author of this message, if present.
+     * @return The author of this message.
      */
-    public Optional<User> getAuthor() {
-        // TODO FIXME: when is this null?
-        return data.author().toOptional().map(userData -> new User(gateway, userData));
+    public User getAuthor() {
+        // TODO handle case if data.webhookId is present
+        return new User(gateway, data.author());
     }
 
     /**
@@ -165,10 +165,8 @@ public final class Message implements Entity {
      *
      * @return The contents of the message, if present.
      */
-    public Optional<String> getContent() {
-        // TODO FIXME nullability
-        // Even though the bean / responses say it's not nullable Discord is being stupid atm
-        return data.content().toOptional().filter(content -> !content.isEmpty());
+    public String getContent() {
+        return data.content();
     }
 
     /**
@@ -177,7 +175,7 @@ public final class Message implements Entity {
      * @return When this message was sent.
      */
     public Instant getTimestamp() {
-        return DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(data.timestamp().get(), Instant::from);
+        return DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(data.timestamp(), Instant::from);
     }
 
     /**
@@ -196,7 +194,7 @@ public final class Message implements Entity {
      * @return {@code true} if this message was a TTS (Text-To-Speech) message, {@code false} otherwise.
      */
     public boolean isTts() {
-        return data.tts().get();
+        return data.tts();
     }
 
     /**
@@ -205,7 +203,7 @@ public final class Message implements Entity {
      * @return {@code true} if this message mentions everyone, {@code false} otherwise.
      */
     public boolean mentionsEveryone() {
-        return data.mentionEveryone().get();
+        return data.mentionEveryone();
     }
 
     /**
@@ -216,7 +214,7 @@ public final class Message implements Entity {
     public Set<Snowflake> getUserMentionIds() {
         // TODO FIXME we throw away member data here
         return data.mentions().stream()
-                .map(data -> data.member().user().get().id())
+                .map(data -> data.member().user().id())
                 .map(Snowflake::of)
                 .collect(Collectors.toSet());
     }
@@ -313,7 +311,7 @@ public final class Message implements Entity {
      * @return {@code true} if this message is pinned, {@code false} otherwise.
      */
     public boolean isPinned() {
-        return data.pinned().get();
+        return data.pinned();
     }
 
     /**
@@ -363,7 +361,7 @@ public final class Message implements Entity {
      * @return The type of message.
      */
     public Type getType() {
-        return Type.of(data.type().get());
+        return Type.of(data.type());
     }
 
     /**

@@ -30,7 +30,7 @@ import discord4j.core.spec.*;
 import discord4j.core.util.EntityUtil;
 import discord4j.core.util.ImageUtil;
 import discord4j.core.util.OrderUtil;
-import discord4j.core.util.PaginationUtil;
+import discord4j.rest.util.PaginationUtil;
 import discord4j.discordjson.json.*;
 import discord4j.discordjson.json.gateway.PresenceUpdate;
 import discord4j.discordjson.possible.Possible;
@@ -174,7 +174,7 @@ public final class Guild implements Entity {
      * @return The ID of the owner of the guild.
      */
     public Snowflake getOwnerId() {
-        return Snowflake.of(data.ownerId().get());
+        return Snowflake.of(data.ownerId());
     }
 
     /**
@@ -193,7 +193,7 @@ public final class Guild implements Entity {
      * @return The voice region ID for the guild.
      */
     public String getRegionId() {
-        return data.region().get();
+        return data.region();
     }
 
     /**
@@ -243,7 +243,7 @@ public final class Guild implements Entity {
      * @return The AFK timeout in seconds.
      */
     public int getAfkTimeout() {
-        return data.afkTimeout().get();
+        return data.afkTimeout();
     }
 
     /**
@@ -252,7 +252,7 @@ public final class Guild implements Entity {
      * @return The ID of the embedded channel, if present.
      */
     public Optional<Snowflake> getEmbedChannelId() {
-        return data.embedChannelId().toOptional().map(Snowflake::of);
+        return data.embedChannelId().get().map(Snowflake::of);
     }
 
     /**
@@ -271,7 +271,7 @@ public final class Guild implements Entity {
      * @return The Premium Tier for the guild.
      */
     public PremiumTier getPremiumTier() {
-        return PremiumTier.of(data.premiumTier().get());
+        return PremiumTier.of(data.premiumTier());
     }
 
     /**
@@ -290,7 +290,7 @@ public final class Guild implements Entity {
      * @return The preferred locale of the guild, only set if guild has the "DISCOVERABLE" feature, defaults to en-US.
      */
     public Locale getPreferredLocale() {
-        return new Locale.Builder().setLanguageTag(data.preferredLocale().get()).build();
+        return new Locale.Builder().setLanguageTag(data.preferredLocale()).build();
     }
 
     /**
@@ -299,7 +299,7 @@ public final class Guild implements Entity {
      * @return The level of verification required for the guild.
      */
     public VerificationLevel getVerificationLevel() {
-        return VerificationLevel.of(data.verificationLevel().get());
+        return VerificationLevel.of(data.verificationLevel());
     }
 
     /**
@@ -308,7 +308,7 @@ public final class Guild implements Entity {
      * @return The default message notification level.
      */
     public NotificationLevel getNotificationLevel() {
-        return NotificationLevel.of(data.defaultMessageNotifications().get());
+        return NotificationLevel.of(data.defaultMessageNotifications());
     }
 
     /**
@@ -317,7 +317,7 @@ public final class Guild implements Entity {
      * @return The default explicit content filter level.
      */
     public ContentFilterLevel getContentFilterLevel() {
-        return ContentFilterLevel.of(data.explicitContentFilter().get());
+        return ContentFilterLevel.of(data.explicitContentFilter());
     }
 
     /**
@@ -417,7 +417,7 @@ public final class Guild implements Entity {
      * @return The required MFA level for the guild.
      */
     public MfaLevel getMfaLevel() {
-        return MfaLevel.of(data.mfaLevel().get());
+        return MfaLevel.of(data.mfaLevel());
     }
 
     /**
@@ -445,7 +445,7 @@ public final class Guild implements Entity {
      * @return The channel ID for the server widget, if present.
      */
     public Optional<Snowflake> getWidgetChannelId() {
-        return data.widgetChannelId().toOptional().map(Snowflake::of);
+        return data.widgetChannelId().get().map(Snowflake::of);
     }
 
     /**
@@ -561,7 +561,7 @@ public final class Guild implements Entity {
                         .getGuildMembers(getId().asLong(), params);
 
         Flux<Member> requestMembers =
-                PaginationUtil.paginateAfter(doRequest, data -> Long.parseUnsignedLong(data.user().get().id()), 0, 100)
+                PaginationUtil.paginateAfter(doRequest, data -> Long.parseUnsignedLong(data.user().id()), 0, 100)
                             .map(data -> new Member(gateway, data, getId().asLong()));
 
         return Mono.justOrEmpty(data.members().toOptional())

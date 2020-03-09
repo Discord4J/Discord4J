@@ -46,11 +46,21 @@ class MessageDispatchHandlers {
         long channelId = Long.parseUnsignedLong(message.channelId());
 
         Possible<String> maybeGuildId = context.getDispatch().message().guildId();
+
         Optional<Member> maybeMember = maybeGuildId.toOptional()
                 .map(Long::parseUnsignedLong)
                 .flatMap(guildId -> message.member().toOptional()
                         .map(memberData -> new Member(gateway, ImmutableMemberData.builder()
-                                .from(memberData)
+                                .from(ImmutableMemberData.builder()
+                                        .user(message.author())
+                                        .nick(memberData.nick())
+                                        .roles(memberData.roles())
+                                        .joinedAt(memberData.joinedAt())
+                                        .premiumSince(memberData.premiumSince())
+                                        .hoistedRole(memberData.hoistedRole())
+                                        .deaf(memberData.deaf())
+                                        .mute(memberData.mute())
+                                        .build())
                                 .user(message.author())
                                 .build(), guildId)));
 
@@ -279,7 +289,7 @@ class MessageDispatchHandlers {
 
     static Mono<MessageUpdateEvent> messageUpdate(DispatchContext<MessageUpdate> context) {
         GatewayDiscordClient gateway = context.getGateway();
-        MessageData messageData = context.getDispatch().message();
+        PartialMessageData messageData = context.getDispatch().message();
 
         long channelId = Long.parseUnsignedLong(messageData.channelId());
         long messageId = Long.parseUnsignedLong(messageData.id());
@@ -303,15 +313,13 @@ class MessageDispatchHandlers {
                     boolean contentChanged = !Objects.equals(oldMessageData.content(), messageData.content());
                     boolean embedsChanged = !Objects.equals(oldMessageData.embeds(), messageData.embeds());
 
-                    // TODO: please verify this implementation
                     MessageData newMessageData = ImmutableMessageData.builder()
                             .from(oldMessageData)
-                            .content(newPossibleIfPresent(oldMessageData.content(), messageData.content()))
+                            .content(messageData.content().toOptional().orElse(oldMessageData.content()))
                             .embeds(messageData.embeds())
                             .mentions(messageData.mentions())
                             .mentionRoles(messageData.mentionRoles())
-                            .mentionEveryone(newPossibleIfPresent(oldMessageData.mentionEveryone(),
-                                    messageData.mentionEveryone()))
+                            .mentionEveryone(messageData.mentionEveryone().toOptional().orElse(oldMessageData.mentionEveryone()))
                             .editedTimestamp(messageData.editedTimestamp())
                             .build();
 

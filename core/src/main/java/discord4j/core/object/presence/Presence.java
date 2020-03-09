@@ -17,8 +17,8 @@
 package discord4j.core.object.presence;
 
 import discord4j.discordjson.json.ImmutableActivityData;
+import discord4j.discordjson.json.PresenceData;
 import discord4j.discordjson.json.gateway.ImmutableStatusUpdate;
-import discord4j.discordjson.json.gateway.PresenceUpdate;
 import discord4j.discordjson.json.gateway.StatusUpdate;
 import discord4j.discordjson.possible.Possible;
 
@@ -110,9 +110,9 @@ public final class Presence {
                 .build();
     }
 
-    private final PresenceUpdate data;
+    private final PresenceData data;
 
-    public Presence(final PresenceUpdate data) {
+    public Presence(final PresenceData data) {
         this.data = data;
     }
 

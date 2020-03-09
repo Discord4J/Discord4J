@@ -74,7 +74,7 @@ public class User implements Entity {
      * @return The user's username, not unique across the platform.
      */
     public final String getUsername() {
-        return data.username().get();
+        return data.username();
     }
 
     /**
@@ -83,7 +83,7 @@ public class User implements Entity {
      * @return The user's 4-digit discord-tag.
      */
     public final String getDiscriminator() {
-        return data.discriminator().get();
+        return data.discriminator();
     }
 
     /**
@@ -92,7 +92,7 @@ public class User implements Entity {
      * @return {@code true} if the user's avatar is animated, {@code false} otherwise.
      */
     public final boolean hasAnimatedAvatar() {
-        final String avatar = data.avatar().toOptional().orElse(null);
+        final String avatar = data.avatar().orElse(null);
         return (avatar != null) && avatar.startsWith("a_");
     }
 
@@ -103,8 +103,8 @@ public class User implements Entity {
      * @return The user's avatar URL, if present.
      */
     public final Optional<String> getAvatarUrl(final Image.Format format) {
-        return data.avatar().toOptional()
-                .map(avatar -> ImageUtil.getUrl(String.format(AVATAR_IMAGE_PATH, getId().asString(), avatar), format));
+        return data.avatar().map(avatar -> ImageUtil.getUrl(
+                String.format(AVATAR_IMAGE_PATH, getId().asString(), avatar), format));
     }
 
     /**

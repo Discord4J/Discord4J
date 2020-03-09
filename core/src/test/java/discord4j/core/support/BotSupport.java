@@ -6,6 +6,8 @@ import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.presence.Presence;
 import discord4j.discordjson.json.ApplicationInfoData;
+import discord4j.discordjson.json.ImmutableMessageCreateRequest;
+import discord4j.discordjson.possible.Possible;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 import reactor.util.Logger;
@@ -51,17 +53,16 @@ public class BotSupport {
         eventHandlers.add(new StatusEmbed());
         eventHandlers.add(new Exit());
 
-        return client.on(MessageCreateEvent.class, event -> ownerId
-                .filter(owner -> {
-                    Long author = event.getMessage().getAuthor()
-                            .map(u -> u.getId().asLong())
-                            .orElse(null);
-                    return owner.equals(author);
-                })
-                .flatMap(id -> Mono.when(eventHandlers.stream()
-                        .map(handler -> handler.onMessageCreate(event))
-                        .collect(Collectors.toList()))
-                ))
+        return client.on(MessageCreateEvent.class,
+                event -> ownerId.filter(
+                        owner -> {
+                            Long author = event.getMessage().getAuthor().getId().asLong();
+                            return owner.equals(author);
+                        })
+                        .flatMap(id -> Mono.when(eventHandlers.stream()
+                                .map(handler -> handler.onMessageCreate(event))
+                                .collect(Collectors.toList()))
+                        ))
                 .then();
     }
 
@@ -70,12 +71,15 @@ public class BotSupport {
         @Override
         public Mono<Void> onMessageCreate(MessageCreateEvent event) {
             Message message = event.getMessage();
-            return Mono.justOrEmpty(message.getContent())
-                    .filter(content -> content.startsWith("!echo "))
-                    .map(content -> content.substring("!echo ".length()))
-                    .flatMap(source -> message.getChannel()
-                            .flatMap(channel -> channel.createMessage(source)))
-                    .then();
+            String content = message.getContent();
+            if (content.startsWith("!echo ")) {
+                return message.getRestChannel().createMessage(
+                        ImmutableMessageCreateRequest.builder()
+                                .content(Possible.of(content.substring("!echo ".length())))
+                                .build())
+                        .then();
+            }
+            return Mono.empty();
         }
     }
 
@@ -141,6 +145,7 @@ public class BotSupport {
     }
 
     public abstract static class EventHandler {
+
         public abstract Mono<Void> onMessageCreate(MessageCreateEvent event);
     }
 }

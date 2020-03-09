@@ -95,11 +95,11 @@ class GuildDispatchHandlers {
         Mono<Void> saveMembers = context.getStateHolder().getMemberStore()
                 .save(Flux.fromIterable(guild.members().get())
                         .map(member -> Tuples.of(LongLongTuple2.of(guildId,
-                                Long.parseUnsignedLong(member.user().get().id())), member)));
+                                Long.parseUnsignedLong(member.user().id())), member)));
 
         Mono<Void> saveUsers = context.getStateHolder().getUserStore()
                 .save(Flux.fromIterable(guild.members().get())
-                        .map(memberData -> memberData.user().get())
+                        .map(MemberData::user)
                         .map(user -> Tuples.of(Long.parseUnsignedLong(user.id()), user)));
 
         Mono<Void> saveVoiceStates = context.getStateHolder().getVoiceStateStore()
@@ -129,21 +129,12 @@ class GuildDispatchHandlers {
 
         Mono<Void> saveOfflinePresences = Flux.fromIterable(guild.members().get())
                 .filterWhen(member -> context.getStateHolder().getPresenceStore()
-                        .find(LongLongTuple2.of(guildId, Long.parseUnsignedLong(member.user().get().id())))
+                        .find(LongLongTuple2.of(guildId, Long.parseUnsignedLong(member.user().id())))
                         .hasElement()
                         .map(id -> !id))
                 .flatMap(member -> context.getStateHolder().getPresenceStore()
-                        .save(LongLongTuple2.of(guildId, Long.parseUnsignedLong(member.user().get().id())),
-                                ImmutablePresenceUpdate.builder()
-                                        .user(member.user().get())
-                                        .guildId(Possible.of(guild.id()))
-                                        .status(Status.OFFLINE.getValue())
-                                        .clientStatus(ImmutableClientStatusData.builder()
-                                                .desktop(Possible.absent())
-                                                .mobile(Possible.absent())
-                                                .web(Possible.absent())
-                                                .build())
-                                        .build()))
+                        .save(LongLongTuple2.of(guildId, Long.parseUnsignedLong(member.user().id())),
+                                createPresence(member)))
                 .then();
 
         return saveGuild
@@ -157,6 +148,31 @@ class GuildDispatchHandlers {
                 .and(saveOfflinePresences)
                 .and(startMemberChunk)
                 .thenReturn(new GuildCreateEvent(gateway, context.getShardInfo(), new Guild(gateway, guild)));
+    }
+
+    private static PresenceData createPresence(MemberData member) {
+        return ImmutablePresenceData.builder()
+                .user(ImmutablePartialUserData.builder()
+                        .id(member.user().id())
+                        .username(Possible.of(member.user().username()))
+                        .discriminator(Possible.of(member.user().discriminator()))
+                        .avatar(Possible.of(member.user().avatar()))
+                        .bot(member.user().bot())
+                        .system(member.user().system())
+                        .mfaEnabled(member.user().mfaEnabled())
+                        .locale(member.user().locale())
+                        .verified(member.user().verified())
+                        .email(member.user().email())
+                        .flags(member.user().flags())
+                        .premiumType(member.user().premiumType())
+                        .build())
+                .status(Status.OFFLINE.getValue())
+                .clientStatus(ImmutableClientStatusData.builder()
+                        .desktop(Possible.absent())
+                        .mobile(Possible.absent())
+                        .web(Possible.absent())
+                        .build())
+                .build();
     }
 
     static Mono<GuildDeleteEvent> guildDelete(DispatchContext<GuildDelete> context) {
@@ -243,7 +259,7 @@ class GuildDispatchHandlers {
         GatewayDiscordClient gateway = context.getGateway();
         long guildId = Long.parseUnsignedLong(context.getDispatch().guild());
         MemberData member = context.getDispatch().member();
-        UserData user = member.user().get();
+        UserData user = member.user();
         long userId = Long.parseUnsignedLong(user.id());
 
         Mono<Void> addMemberId = context.getStateHolder().getGuildStore()
@@ -280,7 +296,7 @@ class GuildDispatchHandlers {
                 .find(guildId)
                 .map(guild -> ImmutableGuildData.builder()
                         .from(guild)
-                        .members(ListUtil.remove(guild.members(), member -> member.user().get().id().equals(user.id())))
+                        .members(ListUtil.remove(guild.members(), member -> member.user().id().equals(user.id())))
                         .memberCount(guild.memberCount().toOptional()
                                 .map(count -> Possible.of(count - 1))
                                 .orElse(Possible.of(0)))
@@ -307,11 +323,11 @@ class GuildDispatchHandlers {
         List<MemberData> members = context.getDispatch().members();
 
         Flux<Tuple2<LongLongTuple2, MemberData>> memberPairs = Flux.fromIterable(members)
-                .map(data -> Tuples.of(LongLongTuple2.of(guildId, Long.parseUnsignedLong(data.user().get().id())),
+                .map(data -> Tuples.of(LongLongTuple2.of(guildId, Long.parseUnsignedLong(data.user().id())),
                         data));
 
         Flux<Tuple2<Long, UserData>> userPairs = Flux.fromIterable(members)
-                .map(data -> Tuples.of(Long.parseUnsignedLong(data.user().get().id()), data.user().get()));
+                .map(data -> Tuples.of(Long.parseUnsignedLong(data.user().id()), data.user()));
 
         Mono<Void> addMemberIds = context.getStateHolder().getGuildStore()
                 .find(guildId)
@@ -327,21 +343,12 @@ class GuildDispatchHandlers {
 
         Mono<Void> saveOfflinePresences = Flux.fromIterable(members)
                 .filterWhen(member -> context.getStateHolder().getPresenceStore()
-                        .find(LongLongTuple2.of(guildId, Long.parseUnsignedLong(member.user().get().id())))
+                        .find(LongLongTuple2.of(guildId, Long.parseUnsignedLong(member.user().id())))
                         .hasElement()
                         .map(identity -> !identity))
                 .flatMap(member -> context.getStateHolder().getPresenceStore()
-                        .save(LongLongTuple2.of(guildId, Long.parseUnsignedLong(member.user().get().id())),
-                                ImmutablePresenceUpdate.builder()
-                                        .user(member.user().get())
-                                        .guildId(Possible.of(context.getDispatch().guildId()))
-                                        .status(Status.OFFLINE.getValue())
-                                        .clientStatus(ImmutableClientStatusData.builder()
-                                                .desktop(Possible.absent())
-                                                .mobile(Possible.absent())
-                                                .web(Possible.absent())
-                                                .build())
-                                        .build()))
+                        .save(LongLongTuple2.of(guildId, Long.parseUnsignedLong(member.user().id())),
+                                createPresence(member)))
                 .then();
 
         return addMemberIds
@@ -440,7 +447,7 @@ class GuildDispatchHandlers {
                 .find(guildId)
                 .flatMapMany(guild -> Flux.fromIterable(guild.members().toOptional()
                         .map(memberList -> memberList.stream()
-                                .map(member -> Long.parseUnsignedLong(member.user().get().id()))
+                                .map(member -> Long.parseUnsignedLong(member.user().id()))
                                 .collect(Collectors.toList()))
                         .orElse(Collections.emptyList())))
                 .flatMap(memberId -> context.getStateHolder().getMemberStore()
@@ -452,7 +459,7 @@ class GuildDispatchHandlers {
                                 role -> role.equals(context.getDispatch().roleId())))
                         .build())
                 .flatMap(member -> context.getStateHolder().getMemberStore()
-                        .save(LongLongTuple2.of(guildId, Long.parseUnsignedLong(member.user().get().id())), member))
+                        .save(LongLongTuple2.of(guildId, Long.parseUnsignedLong(member.user().id())), member))
                 .then();
 
         return context.getStateHolder().getRoleStore()
@@ -498,13 +505,13 @@ class GuildDispatchHandlers {
 
     static Mono<GuildUpdateEvent> guildUpdate(DispatchContext<GuildUpdate> context) {
         GatewayDiscordClient gateway = context.getGateway();
-        GuildData guild = context.getDispatch().guild();
+        GuildData guild = toGuildData(context.getDispatch().guild());
         long guildId = Long.parseUnsignedLong(guild.id());
 
         Mono<GuildUpdateEvent> update = context.getStateHolder().getGuildStore()
                 .find(guildId)
-                .flatMap(oldBean -> {
-                    Guild old = new Guild(gateway, oldBean);
+                .flatMap(oldGuildData -> {
+                    Guild old = new Guild(gateway, oldGuildData);
                     Guild current = new Guild(gateway, guild);
 
                     return context.getStateHolder().getGuildStore()
@@ -514,6 +521,46 @@ class GuildDispatchHandlers {
 
         return update.defaultIfEmpty(new GuildUpdateEvent(gateway, context.getShardInfo(),
                 new Guild(gateway, guild), null));
+    }
+
+    private static GuildData toGuildData(PartialGuildData guild) {
+        return ImmutableGuildData.builder()
+                .id(guild.id())
+                .name(guild.name())
+                .icon(guild.icon())
+                .splash(guild.splash())
+                .discoverySplash(guild.discoverySplash())
+                .owner(guild.owner())
+                .ownerId(guild.ownerId())
+                .permissions(guild.permissions())
+                .region(guild.region())
+                .afkChannelId(guild.afkChannelId())
+                .afkTimeout(guild.afkTimeout())
+                .embedEnabled(guild.embedEnabled())
+                .embedChannelId(guild.embedChannelId())
+                .verificationLevel(guild.verificationLevel())
+                .defaultMessageNotifications(guild.defaultMessageNotifications())
+                .explicitContentFilter(guild.explicitContentFilter())
+                .roles(guild.roles())
+                .emojis(guild.emojis())
+                .features(guild.features())
+                .mfaLevel(guild.mfaLevel())
+                .applicationId(guild.applicationId())
+                .widgetEnabled(guild.widgetEnabled())
+                .widgetChannelId(guild.widgetChannelId())
+                .systemChannelId(guild.systemChannelId())
+                .systemChannelFlags(guild.systemChannelFlags())
+                .rulesChannelId(guild.rulesChannelId())
+                .maxPresences(guild.maxPresences())
+                .maxMembers(guild.maxMembers())
+                .vanityUrlCode(guild.vanityUrlCode())
+                .description(guild.description())
+                .banner(guild.banner())
+                .premiumTier(guild.premiumTier())
+                .premiumSubscriptionCount(guild.premiumSubscriptionCount())
+                .preferredLocale(guild.preferredLocale())
+                .publicUpdatesChannelId(guild.publicUpdatesChannelId())
+                .build();
     }
 
 }

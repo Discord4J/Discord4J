@@ -74,14 +74,14 @@ public class ExampleVoiceBot {
                 .withConnection(gateway -> {
                     Mono<MessageCreateEvent> leave = gateway.getEventDispatcher().on(MessageCreateEvent.class)
 //                            .transform(ownerOnly)
-                            .filter(e -> e.getMessage().getContent().map(it -> it.equals("!leave")).orElse(false))
+                            .filter(e -> e.getMessage().getContent().equals("!leave"))
                             .next();
 
                     //MonoProcessor<VoiceConnection> vc = MonoProcessor.create();
 
                     Mono<Void> join = gateway.getEventDispatcher().on(MessageCreateEvent.class)
 //                            .transform(ownerOnly)
-                            .filter(e -> e.getMessage().getContent().map(it -> it.startsWith("!join")).orElse(false))
+                            .filter(e -> e.getMessage().getContent().startsWith("!join"))
                             .flatMap(e -> Mono.justOrEmpty(e.getMember())
                                     .flatMap(Member::getVoiceState)
                                     .flatMap(VoiceState::getChannel)
@@ -96,7 +96,7 @@ public class ExampleVoiceBot {
 
                     Mono<Void> play = gateway.getEventDispatcher().on(MessageCreateEvent.class)
 //                            .transform(ownerOnly)
-                            .filter(e -> e.getMessage().getContent().map(it -> it.startsWith("!play ")).orElse(false))
+                            .filter(e -> e.getMessage().getContent().startsWith("!play "))
                             .flatMap(e -> Mono.justOrEmpty(e.getMessage().getContent())
                                     .map(content -> Arrays.asList(content.split(" ")))
                                     .doOnNext(command -> playerManager.loadItem(command.get(1),
@@ -105,7 +105,7 @@ public class ExampleVoiceBot {
 
                     Mono<Void> stop = gateway.getEventDispatcher().on(MessageCreateEvent.class)
 //                            .transform(ownerOnly)
-                            .filter(e -> e.getMessage().getContent().map(it -> it.equals("!stop")).orElse(false))
+                            .filter(e -> e.getMessage().getContent().equals("!stop"))
                             .doOnNext(e -> player.stopTrack())
                             .then();
 

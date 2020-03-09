@@ -26,7 +26,7 @@ import discord4j.core.object.util.Snowflake;
 import discord4j.core.shard.GatewayBootstrap;
 import discord4j.core.spec.GuildCreateSpec;
 import discord4j.core.spec.UserEditSpec;
-import discord4j.core.util.PaginationUtil;
+import discord4j.rest.util.PaginationUtil;
 import discord4j.gateway.GatewayOptions;
 import discord4j.rest.entity.*;
 import discord4j.rest.request.RouterOptions;

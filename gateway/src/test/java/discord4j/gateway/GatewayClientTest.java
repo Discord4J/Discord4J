@@ -80,7 +80,7 @@ public class GatewayClientTest {
 
         gatewayClient.dispatch().ofType(MessageCreate.class)
                 .subscribe(message -> {
-                    String content = message.message().content().toOptional().orElse(null);
+                    String content = message.message().content();
                     System.out.println(content);
                     if ("!close".equals(content)) {
                         gatewayClient.close(false).block();

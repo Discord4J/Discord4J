@@ -33,7 +33,7 @@ import java.util.List;
 public class EmbedCreateSpec implements Spec<EmbedData> {
 
     private final ImmutableEmbedData.Builder requestBuilder = ImmutableEmbedData.builder();
-    private final List<EmbedFiledData> fields = new ArrayList<>();
+    private final List<EmbedFieldData> fields = new ArrayList<>();
 
     /**
      * Sets the title of the embed.
@@ -167,7 +167,7 @@ public class EmbedCreateSpec implements Spec<EmbedData> {
      * @return This spec.
      */
     public EmbedCreateSpec addField(String name, String value, boolean inline) {
-        this.fields.add(ImmutableEmbedFiledData.builder()
+        this.fields.add(ImmutableEmbedFieldData.builder()
             .name(name)
             .value(value)
             .inline(Possible.of(inline))

@@ -17,11 +17,19 @@
 
 package discord4j.core.event;
 
+import discord4j.common.LogUtil;
 import discord4j.core.event.domain.Event;
+import org.reactivestreams.Subscription;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxProcessor;
 import reactor.core.publisher.FluxSink;
 import reactor.core.scheduler.Scheduler;
+import reactor.util.Logger;
+import reactor.util.Loggers;
+
+import java.util.concurrent.atomic.AtomicReference;
+
+import static discord4j.common.LogUtil.format;
 
 /**
  * Distributes events to subscribers. {@link Event} instances can be published over this class and dispatched to all
@@ -47,6 +55,8 @@ import reactor.core.scheduler.Scheduler;
  */
 public class DefaultEventDispatcher implements EventDispatcher {
 
+    private static final Logger log = Loggers.getLogger(DefaultEventDispatcher.class);
+
     private final FluxProcessor<Event, Event> processor;
     private final FluxSink<Event> sink;
     private final Scheduler scheduler;
@@ -68,8 +78,30 @@ public class DefaultEventDispatcher implements EventDispatcher {
     }
 
     @Override
-    public <T extends Event> Flux<T> on(Class<T> eventClass) {
-        return processor.publishOn(scheduler).ofType(eventClass);
+    public <E extends Event> Flux<E> on(Class<E> eventClass) {
+        AtomicReference<Subscription> subscription = new AtomicReference<>();
+        return processor.publishOn(scheduler)
+                .ofType(eventClass)
+                .<E>handle((event, sink) -> {
+                    if (log.isTraceEnabled()) {
+                        log.trace(format(sink.currentContext().put(LogUtil.KEY_SHARD_ID,
+                                event.getShardInfo().getIndex()), "{}"), event.toString());
+                    }
+                    sink.next(event);
+                })
+                .doOnSubscribe(sub -> {
+                    subscription.set(sub);
+                    if (log.isDebugEnabled()) {
+                        log.debug("Subscription {} to {} created", Integer.toHexString(sub.hashCode()),
+                                eventClass.getSimpleName());
+                    }
+                })
+                .doFinally(signal -> {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Subscription {} to {} disposed due to {}",
+                                Integer.toHexString(subscription.get().hashCode()), eventClass.getSimpleName(), signal);
+                    }
+                });
     }
 
     @Override
