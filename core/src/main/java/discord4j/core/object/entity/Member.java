@@ -170,7 +170,7 @@ public final class Member extends User {
      * @return The user's guild nickname (if one is set).
      */
     public Optional<String> getNickname() {
-        return data.nick().toOptional();
+        return data.nick().get();
     }
 
     /**

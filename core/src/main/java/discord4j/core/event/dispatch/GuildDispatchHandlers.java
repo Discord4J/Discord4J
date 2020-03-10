@@ -162,7 +162,8 @@ class GuildDispatchHandlers {
                         .mfaEnabled(member.user().mfaEnabled())
                         .locale(member.user().locale())
                         .verified(member.user().verified())
-                        .email(member.user().email())
+                        .email(member.user().email().isAbsent() ? Possible.absent() :
+                                member.user().email().get().map(Possible::of).orElse(Possible.absent()))
                         .flags(member.user().flags())
                         .premiumType(member.user().premiumType())
                         .build())
@@ -372,8 +373,7 @@ class GuildDispatchHandlers {
                 .map(Long::parseUnsignedLong)
                 .collect(Collectors.toList());
         String currentNick = context.getDispatch().nick().orElse(null);
-        // TODO: GuildMemberUpdate missing premium_since support
-        //String currentPremiumSince = context.getDispatch().premiumSince();
+        String currentPremiumSince = context.getDispatch().premiumSince().orElse(null);
 
         LongLongTuple2 key = LongLongTuple2.of(guildId, memberId);
 
@@ -384,16 +384,15 @@ class GuildDispatchHandlers {
 
                     MemberData newMember = ImmutableMemberData.builder()
                             .from(oldMember)
-                            .nick(context.getDispatch().nick().map(Possible::of).orElse(Possible.absent()))
+                            .nick(Possible.of(context.getDispatch().nick()))
                             .roles(context.getDispatch().roles())
-                            //.premiumSince(context.getDispatch().premiumSince())
+                            .premiumSince(context.getDispatch().premiumSince())
                             .build();
 
                     return context.getStateHolder().getMemberStore()
                             .save(key, newMember)
-                            // TODO: fix premium_since support
                             .thenReturn(new MemberUpdateEvent(gateway, context.getShardInfo(), guildId, memberId, old,
-                                    currentRoles, currentNick, null));
+                                    currentRoles, currentNick, currentPremiumSince));
                 });
 
         // TODO: fix premium_since support

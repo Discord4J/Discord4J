@@ -17,9 +17,6 @@
 
 package discord4j.core.state;
 
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
-
-@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS)
 public class ParameterData {
 
     private Object value;
