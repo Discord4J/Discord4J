@@ -19,25 +19,17 @@ package discord4j.core;
 
 import discord4j.common.JacksonResources;
 import discord4j.core.support.BotSupport;
-import discord4j.store.redis.ByteArrayRedisSerializer;
 import discord4j.store.redis.ByteArrayRedisStoreService;
-import discord4j.store.redis.StoreRedisCodec;
-import discord4j.store.redis.StringSerializer;
-import io.lettuce.core.RedisClient;
-import io.lettuce.core.codec.RedisCodec;
+import discord4j.store.redis.GenericJacksonRedisSerializerFactory;
 
 public class ExampleLogin {
 
     public static void main(String[] args) {
         JacksonResources jackson = new JacksonResources();
-        RedisClient redisClient = RedisClient.create("redis://localhost:6379");
-        RedisCodec<String, byte[]> codec = new StoreRedisCodec<>(new StringSerializer(),
-                new ByteArrayRedisSerializer());
         GatewayDiscordClient client = DiscordClientBuilder.create(System.getenv("token"))
                 .build()
                 .gateway()
-                .setStoreService(new ByteArrayRedisStoreService(redisClient, codec, jackson.getObjectMapper(),
-                        "discord4j:store:"))
+                .setStoreService(ByteArrayRedisStoreService.builder(new GenericJacksonRedisSerializerFactory(jackson.getObjectMapper())).build())
                 .connect()
                 .blockOptional()
                 .orElseThrow(RuntimeException::new);

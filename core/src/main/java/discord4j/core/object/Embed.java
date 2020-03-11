@@ -526,7 +526,7 @@ public final class Embed implements DiscordObject {
          *
          * @return The URL of the provider.
          */
-        public String getUrl() {
+        public Optional<String> getUrl() {
             // TODO FIXME: is this actually Possible?
             return data.url().get();
         }

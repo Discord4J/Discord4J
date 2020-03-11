@@ -214,7 +214,7 @@ public final class Message implements Entity {
     public Set<Snowflake> getUserMentionIds() {
         // TODO FIXME we throw away member data here
         return data.mentions().stream()
-                .map(data -> data.member().user().id())
+                .map(UserData::id)
                 .map(Snowflake::of)
                 .collect(Collectors.toSet());
     }
