@@ -138,7 +138,7 @@ public class GuildServiceTest {
 
     @Test
     public void testModifyOwnNickname() {
-        NicknameModifyData req = ImmutableNicknameModifyData.of("nickanme");
+        NicknameModifyData req = ImmutableNicknameModifyData.builder().nick("nickname").build();
         getGuildService().modifyOwnNickname(guild, req).block();
     }
 
