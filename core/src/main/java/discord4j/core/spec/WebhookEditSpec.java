@@ -16,6 +16,7 @@
  */
 package discord4j.core.spec;
 
+import discord4j.core.object.util.Snowflake;
 import discord4j.discordjson.json.ImmutableWebhookModifyRequest;
 import discord4j.discordjson.json.WebhookModifyRequest;
 import discord4j.discordjson.possible.Possible;
@@ -33,6 +34,7 @@ public class WebhookEditSpec implements AuditSpec<WebhookModifyRequest> {
     private Possible<String> name = Possible.absent();
     private Possible<String> avatar = Possible.absent();
     private String reason;
+    private Possible<String> channelId = Possible.absent();
 
     /**
      * Sets the name of the modified {@link Webhook}.
@@ -56,6 +58,17 @@ public class WebhookEditSpec implements AuditSpec<WebhookModifyRequest> {
         return this;
     }
 
+    /**
+     * Sets the channel ID of the modified {@link Webhook}.
+     *
+     * @param id the new channel id this webhook should be moved to
+     * @return This spec.
+     */
+    public WebhookEditSpec setChannel(@Nullable Snowflake id) {
+        this.channelId = id == null ? Possible.absent() : Possible.of(id.asString());
+        return this;
+    }
+
     @Override
     public WebhookEditSpec setReason(final String reason) {
         this.reason = reason;
@@ -70,7 +83,6 @@ public class WebhookEditSpec implements AuditSpec<WebhookModifyRequest> {
 
     @Override
     public WebhookModifyRequest asRequest() {
-        // TODO FIXME allow channel_id to be set
-        return ImmutableWebhookModifyRequest.of(name, avatar, Possible.absent());
+        return ImmutableWebhookModifyRequest.of(name, avatar, channelId);
     }
 }

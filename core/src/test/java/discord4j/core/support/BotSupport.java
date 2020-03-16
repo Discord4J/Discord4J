@@ -4,7 +4,9 @@ import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.lifecycle.ReadyEvent;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.Message;
+import discord4j.core.object.entity.User;
 import discord4j.core.object.presence.Presence;
+import discord4j.core.object.util.Snowflake;
 import discord4j.discordjson.json.ApplicationInfoData;
 import discord4j.discordjson.json.ImmutableMessageCreateRequest;
 import discord4j.discordjson.possible.Possible;
@@ -56,7 +58,10 @@ public class BotSupport {
         return client.on(MessageCreateEvent.class,
                 event -> ownerId.filter(
                         owner -> {
-                            Long author = event.getMessage().getAuthor().getId().asLong();
+                            Long author = event.getMessage().getAuthor()
+                                    .map(User::getId)
+                                    .map(Snowflake::asLong)
+                                    .orElse(null);
                             return owner.equals(author);
                         })
                         .flatMap(id -> Mono.when(eventHandlers.stream()
@@ -142,10 +147,5 @@ public class BotSupport {
                     .flatMap(presence -> event.getClient().logout())
                     .then();
         }
-    }
-
-    public abstract static class EventHandler {
-
-        public abstract Mono<Void> onMessageCreate(MessageCreateEvent event);
     }
 }

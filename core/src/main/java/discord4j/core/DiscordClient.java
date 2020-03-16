@@ -16,7 +16,6 @@
  */
 package discord4j.core;
 
-import discord4j.discordjson.json.*;
 import discord4j.core.event.EventDispatcher;
 import discord4j.core.object.Invite;
 import discord4j.core.object.Region;
@@ -26,10 +25,11 @@ import discord4j.core.object.util.Snowflake;
 import discord4j.core.shard.GatewayBootstrap;
 import discord4j.core.spec.GuildCreateSpec;
 import discord4j.core.spec.UserEditSpec;
-import discord4j.rest.util.PaginationUtil;
+import discord4j.discordjson.json.*;
 import discord4j.gateway.GatewayOptions;
 import discord4j.rest.entity.*;
 import discord4j.rest.request.RouterOptions;
+import discord4j.rest.util.PaginationUtil;
 import discord4j.store.api.service.StoreService;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -104,8 +104,8 @@ public final class DiscordClient {
      * Requests to retrieve the guild represented by the supplied ID.
      *
      * @param guildId The ID of the guild.
-     * @return A {@link Mono} where, upon successful completion, emits the {@link Guild} as represented by the supplied
-     * ID. If an error is received, it is emitted through the {@code Mono}.
+     * @return A {@link Mono} where, upon successful completion, emits the {@link RestGuild} as represented by the
+     * supplied ID. If an error is received, it is emitted through the {@code Mono}.
      */
     public RestGuild getGuildById(final Snowflake guildId) {
         return new RestGuild(coreResources.getRestClient(), guildId.asLong());
@@ -195,11 +195,11 @@ public final class DiscordClient {
     /**
      * Requests to retrieve the guilds the current client is in.
      *
-     * @return A {@link Flux} that continually emits the {@link Guild guilds} that the current client is in. If an error
-     * is received, it is emitted through the {@code Flux}.
+     * @return A {@link Flux} that continually emits the {@link PartialGuildData guilds} that the current client is
+     * in. If an error is received, it is emitted through the {@code Flux}.
      */
-    public Flux<GuildData> getGuilds() {
-        final Function<Map<String, Object>, Flux<GuildData>> makeRequest = params ->
+    public Flux<PartialGuildData> getGuilds() {
+        final Function<Map<String, Object>, Flux<PartialGuildData>> makeRequest = params ->
                 coreResources.getRestClient().getUserService()
                         .getCurrentUserGuilds(params);
 
@@ -231,10 +231,10 @@ public final class DiscordClient {
      * Requests to create a guild.
      *
      * @param spec A {@link Consumer} that provides a "blank" {@link GuildCreateSpec} to be operated on.
-     * @return A {@link Mono} where, upon successful completion, emits the created {@link Guild}. If an error is
-     * received, it is emitted through the {@code Mono}.
+     * @return A {@link Mono} where, upon successful completion, emits the created {@link PartialGuildData}. If an
+     * error is received, it is emitted through the {@code Mono}.
      */
-    public Mono<GuildData> createGuild(final Consumer<? super GuildCreateSpec> spec) {
+    public Mono<PartialGuildData> createGuild(final Consumer<? super GuildCreateSpec> spec) {
         final GuildCreateSpec mutatedSpec = new GuildCreateSpec();
         spec.accept(mutatedSpec);
 

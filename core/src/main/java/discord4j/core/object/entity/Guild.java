@@ -30,10 +30,9 @@ import discord4j.core.spec.*;
 import discord4j.core.util.EntityUtil;
 import discord4j.core.util.ImageUtil;
 import discord4j.core.util.OrderUtil;
-import discord4j.rest.util.PaginationUtil;
 import discord4j.discordjson.json.*;
-import discord4j.discordjson.json.gateway.PresenceUpdate;
 import discord4j.discordjson.possible.Possible;
+import discord4j.rest.util.PaginationUtil;
 import discord4j.store.api.util.LongLongTuple2;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -154,7 +153,7 @@ public final class Guild implements Entity {
      */
     public Optional<String> getBannerUrl(final Image.Format format) {
         return data.banner()
-            .map(splash -> ImageUtil.getUrl(String.format(BANNER_IMAGE_PATH, getId().asString(), splash), format));
+                .map(splash -> ImageUtil.getUrl(String.format(BANNER_IMAGE_PATH, getId().asString(), splash), format));
     }
 
     /**
@@ -281,11 +280,12 @@ public final class Guild implements Entity {
      */
     public OptionalInt getPremiumSubscriptionCount() {
         return data.premiumSubscriptionCount().toOptional()
-            .map(OptionalInt::of)
-            .orElse(OptionalInt.empty());
+                .map(OptionalInt::of)
+                .orElse(OptionalInt.empty());
     }
 
-    /** Gets the preferred locale of the guild, only set if guild has the "DISCOVERABLE" feature, defaults to en-US.
+    /**
+     * Gets the preferred locale of the guild, only set if guild has the "DISCOVERABLE" feature, defaults to en-US.
      *
      * @return The preferred locale of the guild, only set if guild has the "DISCOVERABLE" feature, defaults to en-US.
      */
@@ -326,10 +326,7 @@ public final class Guild implements Entity {
      * @return The guild's roles' IDs.
      */
     public Set<Snowflake> getRoleIds() {
-        return data.roles().stream()
-                .map(RoleData::id)
-                .map(Snowflake::of)
-                .collect(Collectors.toSet());
+        return data.roles().stream().map(Snowflake::of).collect(Collectors.toSet());
     }
 
     /**
@@ -373,10 +370,7 @@ public final class Guild implements Entity {
      * @return The guild's emoji's IDs.
      */
     public Set<Snowflake> getEmojiIds() {
-        return data.emojis().stream()
-                .map(data -> data.id().get()) // this is safe for guild emojis
-                .map(Snowflake::of)
-                .collect(Collectors.toSet());
+        return data.emojis().stream().map(Snowflake::of).collect(Collectors.toSet());
     }
 
     /**
@@ -403,7 +397,8 @@ public final class Guild implements Entity {
     /**
      * Gets the enabled guild features.
      * <br>
-     * You can see the available <a href="https://discordapp.com/developers/docs/resources/guild#guild-object-guild-features">guild features</a>
+     * You can see the available
+     * <a href="https://discordapp.com/developers/docs/resources/guild#guild-object-guild-features">guild features</a>
      *
      * @return The enabled guild features.
      */
@@ -433,7 +428,6 @@ public final class Guild implements Entity {
      * Gets whether this guild widget is enabled.
      *
      * @return {@code true} if the guild widget is enabled, {@code false} otherwise.
-     *
      */
     public boolean isWidgetEnabled() {
         return data.widgetEnabled().toOptional().orElse(false);
@@ -478,58 +472,39 @@ public final class Guild implements Entity {
     }
 
     /**
-     * Gets when this guild was joined at, if present.
+     * Gets when this guild was joined at.
      *
-     * @return When this guild was joined at, if present.
-     *
-     * @implNote If the underlying store does not save
-     * {@link GuildData} instances <b>OR</b> the bot is currently not logged in then the returned {@code Optional} will
-     * always be empty.
+     * @return When this guild was joined at.
      */
-    public Optional<Instant> getJoinTime() {
-        return data.joinedAt().toOptional()
-            .map(timestamp -> DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(timestamp, Instant::from));
+    public Instant getJoinTime() {
+        return DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(data.joinedAt(), Instant::from);
     }
 
     /**
-     * Gets whether this guild is considered large, if present.
+     * Gets whether this guild is considered large.
      *
      * @return If present, {@code true} if the guild is considered large, {@code false} otherwise.
-     *
-     * @implNote If the underlying store does not save
-     * {@link GuildData} instances <b>OR</b> the bot is currently not logged in then the returned {@code Optional} will
-     * always be empty.
      */
-    public Optional<Boolean> isLarge() {
-        return data.large().toOptional();
+    public boolean isLarge() {
+        return data.large();
     }
 
     /**
-     * Gets whether this guild is unavailable, if present.
+     * Gets whether this guild is unavailable.
      *
      * @return If present, {@code true} if the guild is unavailable, {@code false} otherwise.
-     *
-     * @implNote If the underlying store does not save
-     * {@link GuildData} instances <b>OR</b> the bot is currently not logged in then the returned {@code Optional} will
-     * always be empty.
      */
-    public Optional<Boolean> isUnavailable() {
-        return data.unavailable().toOptional();
+    public boolean isUnavailable() {
+        return data.unavailable();
     }
 
     /**
-     * Gets the total number of members in the guild, if present.
+     * Gets the total number of members in the guild.
      *
-     * @return The total number of members in the guild, if present.
-     *
-     * @implNote If the underlying store does not save
-     * {@link GuildData} instances <b>OR</b> the bot is currently not logged in then the returned {@code Optional} will
-     * always be empty.
+     * @return The total number of members in the guild.
      */
-    public OptionalInt getMemberCount() {
-        return data.memberCount().toOptional()
-            .map(OptionalInt::of)
-            .orElseGet(OptionalInt::empty);
+    public int getMemberCount() {
+        return data.memberCount();
     }
 
     /**
@@ -537,15 +512,11 @@ public final class Guild implements Entity {
      *
      * @return A {@link Flux} that continually emits the {@link VoiceState voice states} of the guild. If an error is
      * received, it is emitted through the {@code Flux}.
-     *
-     * @implNote If the underlying store does not save
-     * {@link VoiceStateData} instances <b>OR</b> the bot is currently not logged in then the returned {@code Flux} will
-     * always be empty.
      */
     public Flux<VoiceState> getVoiceStates() {
         return gateway.getGatewayResources().getStateView().getVoiceStateStore()
                 .findInRange(LongLongTuple2.of(getId().asLong(), Long.MIN_VALUE),
-                             LongLongTuple2.of(getId().asLong(), Long.MAX_VALUE))
+                        LongLongTuple2.of(getId().asLong(), Long.MAX_VALUE))
                 .map(data -> new VoiceState(gateway, data));
     }
 
@@ -562,11 +533,13 @@ public final class Guild implements Entity {
 
         Flux<Member> requestMembers =
                 PaginationUtil.paginateAfter(doRequest, data -> Long.parseUnsignedLong(data.user().id()), 0, 100)
-                            .map(data -> new Member(gateway, data, getId().asLong()));
+                        .map(data -> new Member(gateway, data, getId().asLong()));
 
-        return Mono.justOrEmpty(data.members().toOptional())
+        return Mono.justOrEmpty(data.members())
                 .flatMapMany(Flux::fromIterable)
-                .map(memberData -> new Member(gateway, memberData, getId().asLong()))
+                .flatMap(id -> gateway.getGatewayResources().getStateView().getMemberStore()
+                        .find(LongLongTuple2.of(getId().asLong(), Long.parseUnsignedLong(id))))
+                .map(member -> new Member(gateway, member, getId().asLong()))
                 .switchIfEmpty(requestMembers);
     }
 
@@ -584,21 +557,24 @@ public final class Guild implements Entity {
     /**
      * Requests to retrieve the guild's channels.
      * <p>
-     * The order of items emitted by the returned {@code Flux} is unspecified. Use {@link OrderUtil#orderGuildChannels(Flux)}
+     * The order of items emitted by the returned {@code Flux} is unspecified. Use
+     * {@link OrderUtil#orderGuildChannels(Flux)}
      * to consistently order channels.
      *
-     * @return A {@link Flux} that continually emits the guild's {@link GuildChannel channels}. If an error is received, it is
+     * @return A {@link Flux} that continually emits the guild's {@link GuildChannel channels}. If an error is
+     * received, it is
      * emitted through the {@code Flux}.
      */
     public Flux<GuildChannel> getChannels() {
-        return Mono.justOrEmpty(data.channels().toOptional())
-            .flatMapMany(Flux::fromIterable)
-            .map(channelData -> EntityUtil.getChannel(gateway, channelData))
-            .cast(GuildChannel.class)
-            .switchIfEmpty(gateway.getRestClient().getGuildService()
-                .getGuildChannels(getId().asLong())
-                .map(data -> EntityUtil.getChannel(gateway, data))
-                .cast(GuildChannel.class));
+        return Flux.fromIterable(data.channels())
+                .flatMap(id -> gateway.getGatewayResources().getStateView().getChannelStore()
+                        .find(Long.parseUnsignedLong(id)))
+                .map(channelData -> EntityUtil.getChannel(gateway, channelData))
+                .cast(GuildChannel.class)
+                .switchIfEmpty(gateway.getRestClient().getGuildService()
+                        .getGuildChannels(getId().asLong())
+                        .map(data -> EntityUtil.getChannel(gateway, data))
+                        .cast(GuildChannel.class));
     }
 
     /**
@@ -619,20 +595,16 @@ public final class Guild implements Entity {
      *
      * @return A {@link Flux} that continually emits the {@link Presence presences} of the guild. If an error is
      * received, it is emitted through the {@code Flux}.
-     *
-     * @implNote If the underlying store does not save
-     * {@link PresenceUpdate} instances <b>OR</b> the bot is currently not logged in then the returned {@code Flux} will
-     * always be empty.
      */
     public Flux<Presence> getPresences() {
         return gateway.getGatewayResources().getStateView().getPresenceStore()
                 .findInRange(LongLongTuple2.of(getId().asLong(), Long.MIN_VALUE),
-                             LongLongTuple2.of(getId().asLong(), Long.MAX_VALUE))
+                        LongLongTuple2.of(getId().asLong(), Long.MAX_VALUE))
                 .map(Presence::new);
     }
 
     /**
-     *	Gets the vanity url code of the guild, if present.
+     * Gets the vanity url code of the guild, if present.
      *
      * @return The vanity url code of the guild, if present.
      */
@@ -665,8 +637,8 @@ public final class Guild implements Entity {
      */
     public OptionalInt getMaxMembers() {
         return data.maxMembers().toOptional()
-            .map(OptionalInt::of)
-            .orElseGet(OptionalInt::empty);
+                .map(OptionalInt::of)
+                .orElseGet(OptionalInt::empty);
     }
 
     /**
@@ -682,7 +654,10 @@ public final class Guild implements Entity {
 
         return gateway.getRestClient().getGuildService()
                 .modifyGuild(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason())
-                .map(data -> new Guild(gateway, data));
+                .map(data -> new Guild(gateway, ImmutableGuildData.builder()
+                        .from(this.data)
+                        .from(data)
+                        .build()));
     }
 
     /**
@@ -812,7 +787,6 @@ public final class Guild implements Entity {
      *
      * @param userId The ID of the user to kick from this guild.
      * @param reason The reason, if present.
-     *
      * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the specified user was kicked
      * from this guild. If an error is received, it is emitted through the {@code Mono}.
      */
@@ -921,7 +895,6 @@ public final class Guild implements Entity {
      *
      * @param days The number of days since an user must have been seen to avoid being kicked.
      * @param reason The reason, if present.
-     *
      * @return A {@link Mono} where, upon successful completion, emits the number of users who were pruned. If an error
      * is received, it is emitted through the {@code Mono}.
      */
@@ -975,7 +948,8 @@ public final class Guild implements Entity {
 
         final ToLongFunction<AuditLogData> getLastEntryId = response -> {
             final List<AuditLogEntryData> entries = response.auditLogEntries();
-            return (entries.size() == 0) ? Long.MAX_VALUE : Long.parseUnsignedLong(entries.get(entries.size() - 1).id());
+            return (entries.size() == 0) ? Long.MAX_VALUE :
+                    Long.parseUnsignedLong(entries.get(entries.size() - 1).id());
         };
 
         return PaginationUtil.paginateBefore(makeRequest, getLastEntryId, Long.MAX_VALUE, 100)
@@ -1016,15 +990,14 @@ public final class Guild implements Entity {
      * is emitted through the {@code Mono}.
      */
     public Mono<String> changeSelfNickname(@Nullable final String nickname) {
-        // TODO FIXME
         return gateway.getRestClient().getGuildService()
-                .modifyOwnNickname(getId().asLong(), ImmutableNicknameModifyData.of(nickname))
-                .<String>handle((response, next) -> {
-                    String nick = response.nick();
+                .modifyOwnNickname(getId().asLong(), ImmutableNicknameModifyData.of(Optional.ofNullable(nickname)))
+                .handle((data, sink) -> {
+                    String nick = data.nick().orElse(null);
                     if (nick != null) {
-                        next.next(nick);
+                        sink.next(nick);
                     } else {
-                        next.complete();
+                        sink.complete();
                     }
                 });
     }
@@ -1198,8 +1171,10 @@ public final class Guild implements Entity {
 
     /**
      * Represent the server Premium Tier (aka boost level) of the {@link Guild}
+     *
      * @see <a href="https://support.discordapp.com/hc/en/articles/360028038352">Server Boost info</a>
-     * @see <a href="https://discordapp.com/developers/docs/resources/guild#guild-object-premium-tier">Premium Tier docs</a>
+     * @see
+     * <a href="https://discordapp.com/developers/docs/resources/guild#guild-object-premium-tier">Premium Tier docs</a>
      */
     public enum PremiumTier {
 
@@ -1240,7 +1215,8 @@ public final class Guild implements Entity {
         }
 
         /**
-         * Gets the Premium Tier (aka boost level) of the Guild. It is guaranteed that invoking {@link #getValue()} from the
+         * Gets the Premium Tier (aka boost level) of the Guild. It is guaranteed that invoking {@link #getValue()}
+         * from the
          * returned enum will equal ({@code ==}) the supplied {@code value}.
          *
          * @param value The underlying value as represented by Discord.

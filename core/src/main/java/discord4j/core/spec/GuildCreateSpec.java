@@ -105,6 +105,17 @@ public class GuildCreateSpec implements Spec<GuildCreateRequest> {
     }
 
     /**
+     * Sets the explicit content filter level for the created {@link Guild}.
+     *
+     * @param explicitContentFilter The explicit content filter level for the guild.
+     * @return This spec.
+     */
+    public GuildCreateSpec setExplicitContentFilter(Guild.ContentFilterLevel explicitContentFilter) {
+        this.explicitContentFilter = explicitContentFilter.getValue();
+        return this;
+    }
+
+    /**
      * Adds the role spec to the list of roles for the created {@link Guild}.
      *
      * @param roleSpec The role spec to add to the list of roles.
@@ -148,7 +159,6 @@ public class GuildCreateSpec implements Spec<GuildCreateRequest> {
 
     @Override
     public GuildCreateRequest asRequest() {
-        // TODO FIXME: allow for explicit content filter level to be set
-        return ImmutableGuildCreateRequest.of(name, region, icon, verificationLevel, defaultMessageNotificationLevel, 0, roles, channels);
+        return ImmutableGuildCreateRequest.of(name, region, icon, verificationLevel, defaultMessageNotificationLevel, explicitContentFilter, roles, channels);
     }
 }

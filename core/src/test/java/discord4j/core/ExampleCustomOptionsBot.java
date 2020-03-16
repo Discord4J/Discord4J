@@ -19,12 +19,11 @@ package discord4j.core;
 
 import discord4j.gateway.DefaultGatewayClient;
 import discord4j.gateway.GatewayOptions;
-import org.junit.Test;
 import reactor.core.publisher.Mono;
 import reactor.util.Logger;
 import reactor.util.Loggers;
 
-public class CustomOptionsBot {
+public class ExampleCustomOptionsBot {
 
     static class CustomOptions extends GatewayOptions {
 
@@ -60,12 +59,14 @@ public class CustomOptionsBot {
         }
     }
 
-    @Test
-    public void customBot() {
+    public static void main(String[] args) {
         DiscordClient.create(System.getenv("token"))
                 .gateway()
                 .setExtraOptions(options -> new CustomOptions(options, "bar"))
                 .connect(CustomGatewayClient::new)
+                .blockOptional()
+                .orElseThrow(RuntimeException::new)
+                .onDisconnect()
                 .block();
     }
 }

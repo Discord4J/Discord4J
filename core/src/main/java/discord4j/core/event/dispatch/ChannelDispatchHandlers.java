@@ -124,7 +124,7 @@ class ChannelDispatchHandlers {
         return guildStore.find(Long.parseUnsignedLong(channel.guildId().get()))
                 .map(guildData -> ImmutableGuildData.builder()
                         .from(guildData)
-                        .channels(ListUtil.add(guildData.channels(), channel))
+                        .channels(ListUtil.add(guildData.channels(), channel.id()))
                         .build())
                 .flatMap(guild -> guildStore.save(Long.parseUnsignedLong(guild.id()), guild));
     }
@@ -222,7 +222,7 @@ class ChannelDispatchHandlers {
         return guildStore.find(Long.parseUnsignedLong(channel.guildId().get()))
                 .map(guildData -> ImmutableGuildData.builder()
                         .from(guildData)
-                        .channels(ListUtil.remove(guildData.channels(), ch -> channel.id().equals(ch.id())))
+                        .channels(ListUtil.remove(guildData.channels(), ch -> channel.id().equals(ch)))
                         .build())
                 .flatMap(guild -> guildStore.save(Long.parseUnsignedLong(guild.id()), guild));
     }

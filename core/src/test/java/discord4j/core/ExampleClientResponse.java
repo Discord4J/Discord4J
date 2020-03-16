@@ -18,18 +18,24 @@
 package discord4j.core;
 
 import discord4j.core.support.BotSupport;
-import discord4j.store.redis.RedisStoreService;
+import discord4j.core.support.ExtraBotSupport;
+import discord4j.rest.request.RouteMatcher;
+import discord4j.rest.response.ResponseFunction;
+import discord4j.rest.route.Routes;
+import reactor.core.publisher.Mono;
 
-public class ExampleLogin {
+public class ExampleClientResponse {
 
     public static void main(String[] args) {
-        GatewayDiscordClient client = DiscordClientBuilder.create(System.getenv("token"))
+        DiscordClient.builder(System.getenv("token"))
+                // globally suppress any not found (404) error
+                //.onClientResponse(ResponseFunction.emptyIfNotFound())
+                // bad requests (400) while adding reactions will be suppressed
+                .onClientResponse(ResponseFunction.emptyOnErrorStatus(RouteMatcher.route(Routes.REACTION_CREATE), 400))
                 .build()
-                .gateway()
-                .setStoreService(new RedisStoreService())
-                .connect()
-                .blockOptional()
-                .orElseThrow(RuntimeException::new);
-        BotSupport.create(client).eventHandlers().block();
+                .withGateway(client -> Mono.when(
+                        BotSupport.create(client).eventHandlers(),
+                        ExtraBotSupport.create(client).eventHandlers()
+                ));
     }
 }

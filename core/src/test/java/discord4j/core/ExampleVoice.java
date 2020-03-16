@@ -18,9 +18,11 @@
 package discord4j.core;
 
 import discord4j.core.support.BotSupport;
+import discord4j.core.support.VoiceSupport;
 import discord4j.store.redis.RedisStoreService;
+import reactor.core.publisher.Mono;
 
-public class ExampleLogin {
+public class ExampleVoice {
 
     public static void main(String[] args) {
         GatewayDiscordClient client = DiscordClientBuilder.create(System.getenv("token"))
@@ -30,6 +32,6 @@ public class ExampleLogin {
                 .connect()
                 .blockOptional()
                 .orElseThrow(RuntimeException::new);
-        BotSupport.create(client).eventHandlers().block();
+        Mono.when(BotSupport.create(client).eventHandlers(), VoiceSupport.create(client).eventHandlers()).block();
     }
 }

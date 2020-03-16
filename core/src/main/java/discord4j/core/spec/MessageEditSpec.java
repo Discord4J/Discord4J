@@ -16,13 +16,14 @@
  */
 package discord4j.core.spec;
 
+import discord4j.core.object.entity.Message;
 import discord4j.discordjson.json.EmbedData;
 import discord4j.discordjson.json.ImmutableMessageEditRequest;
 import discord4j.discordjson.json.MessageEditRequest;
 import discord4j.discordjson.possible.Possible;
-import discord4j.core.object.entity.Message;
 import reactor.util.annotation.Nullable;
 
+import java.util.Arrays;
 import java.util.Optional;
 import java.util.function.Consumer;
 
@@ -35,6 +36,7 @@ public class MessageEditSpec implements Spec<MessageEditRequest> {
 
     private Possible<Optional<String>> content = Possible.absent();
     private Possible<Optional<EmbedData>> embed = Possible.absent();
+    private Possible<Integer> flags = Possible.absent();
 
     /**
      * Sets the new contents for the edited {@link Message}.
@@ -57,17 +59,29 @@ public class MessageEditSpec implements Spec<MessageEditRequest> {
         if (spec != null) {
             final EmbedCreateSpec mutatedSpec = new EmbedCreateSpec();
             spec.accept(mutatedSpec);
-            embed = Possible.of(Optional.of(mutatedSpec.asRequest()));
+            this.embed = Possible.of(Optional.of(mutatedSpec.asRequest()));
         } else {
-            embed = Possible.of(Optional.empty());
+            this.embed = Possible.of(Optional.empty());
         }
 
         return this;
     }
 
+    /**
+     * Set the flags for the edited {@link Message}.
+     *
+     * @param flags an array of {@link Message.Flag} to set on the edited message.
+     * @return this spec
+     */
+    public MessageEditSpec setFlags(Message.Flag... flags) {
+        this.flags = Possible.of(Arrays.stream(flags)
+                .mapToInt(Message.Flag::getValue)
+                .reduce(0, (left, right) -> left | right));
+        return this;
+    }
+
     @Override
     public MessageEditRequest asRequest() {
-        // TODO FIXME: allow flags to be set
-        return ImmutableMessageEditRequest.of(content, embed, Possible.absent());
+        return ImmutableMessageEditRequest.of(content, embed, flags);
     }
 }

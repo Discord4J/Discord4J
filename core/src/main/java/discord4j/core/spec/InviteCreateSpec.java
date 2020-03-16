@@ -34,9 +34,6 @@ public class InviteCreateSpec implements AuditSpec<InviteCreateRequest> {
     private boolean temporary;
     private boolean unique;
     private String reason;
-    // TODO FIXME these aren't documented?
-//    private Possible<String> targetUser;
-//    private Possible<Integer> targetUserType;
 
     /**
      * Sets the duration of the created {@link Invite} in seconds before expiration, or {@code 0} to never expire. If
@@ -85,28 +82,6 @@ public class InviteCreateSpec implements AuditSpec<InviteCreateRequest> {
         this.unique = unique;
         return this;
     }
-//
-//    /**
-//     * Sets the target user id for this invite.
-//     *
-//     * @param targetUser The target user id for this invite.
-//     * @return This spec.
-//     */
-//    public InviteCreateSpec setTargetUser(Snowflake targetUser) {
-//        this.targetUser = Possible.of(targetUser.asString());
-//        return this;
-//    }
-//
-//    /**
-//     * Sets the type of target user for this invite.
-//     *
-//     * @param type The type of target user for this invite.
-//     * @return This spec.
-//     */
-//    public InviteCreateSpec setTargetUserType(Invite.Type type) {
-//        this.targetUserType = Possible.of(type.getValue());
-//        return this;
-//    }
 
     @Override
     public InviteCreateSpec setReason(@Nullable final String reason) {

@@ -97,8 +97,8 @@ public final class ApplicationInfo implements Entity {
      *
      * @return The description of the app, if present.
      */
-    public Optional<String> getDescription() {
-        return Optional.ofNullable(data.description()); // TODO FIXME
+    public String getDescription() {
+        return data.description();
     }
 
     /**

@@ -20,67 +20,43 @@ package discord4j.core;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import discord4j.common.JacksonResources;
-import discord4j.core.event.EventDispatcher;
 import discord4j.core.event.domain.Event;
 import discord4j.core.event.domain.lifecycle.GatewayLifecycleEvent;
 import discord4j.core.event.domain.lifecycle.ReadyEvent;
-import discord4j.core.object.presence.Presence;
-import discord4j.core.shard.ShardingStrategy;
 import discord4j.core.state.StateView;
 import discord4j.discordjson.json.MessageData;
 import discord4j.store.api.mapping.MappingStoreService;
 import discord4j.store.api.noop.NoOpStoreService;
 import discord4j.store.jdk.JdkStoreService;
-import org.junit.BeforeClass;
-import org.junit.Ignore;
-import org.junit.Test;
 import org.reflections.Reflections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import reactor.core.Exceptions;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Hooks;
 import reactor.core.publisher.Mono;
 import reactor.netty.DisposableServer;
 import reactor.netty.http.server.HttpServer;
 import reactor.util.function.Tuple2;
 
-import java.time.Duration;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
-public class StoreBotTest {
+public class ExampleStore {
 
-    private static final Logger log = LoggerFactory.getLogger(StoreBotTest.class);
+    private static final Logger log = LoggerFactory.getLogger(ExampleStore.class);
+    private static final Reflections reflections = new Reflections(Event.class);
 
-    private static String token;
-    private static Reflections reflections;
-
-    @BeforeClass
-    public static void initialize() {
-        Hooks.onOperatorDebug();
-        token = System.getenv("token");
-        reflections = new Reflections(Event.class);
-    }
-
-    @Test
-    @Ignore("Example code excluded from CI")
-    public void testStoreBot() {
-        Map<String, AtomicLong> counts = new ConcurrentHashMap<>();
+    public static void main(String[] args) {
         JacksonResources jackson = new JacksonResources();
-
-        DiscordClient client = DiscordClient.builder(token)
+        Map<String, AtomicLong> counts = new ConcurrentHashMap<>();
+        DiscordClientBuilder.create(System.getenv("token"))
                 .setJacksonResources(jackson)
-                .build();
-
-        client.gateway()
-                .setSharding(ShardingStrategy.builder().indexes(0, 2, 4).build())
+                .build()
+                .gateway()
                 .setStoreService(MappingStoreService.create()
                         .setMapping(new NoOpStoreService(), MessageData.class)
                         .setFallback(new JdkStoreService()))
-                .setEventDispatcher(EventDispatcher.replayingWithTimeout(Duration.ofMinutes(2)))
-                .initialStatus(shard -> Presence.invisible())
                 .withConnection(gateway -> {
                     log.info("Start!");
 
@@ -104,9 +80,9 @@ public class StoreBotTest {
                 .block();
     }
 
-    private Mono<? extends DisposableServer> startHttpServer(GatewayDiscordClient gateway,
-                                                             Map<String, AtomicLong> counts,
-                                                             ObjectMapper mapper) {
+    private static Mono<? extends DisposableServer> startHttpServer(GatewayDiscordClient gateway,
+                                                                    Map<String, AtomicLong> counts,
+                                                                    ObjectMapper mapper) {
         return HttpServer.create()
                 .port(0) // use an ephemeral port
                 .route(routes -> routes

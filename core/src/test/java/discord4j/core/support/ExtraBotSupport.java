@@ -1,24 +1,8 @@
-/*
- * This file is part of Discord4J.
- *
- * Discord4J is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Discord4J is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with Discord4J. If not, see <http://www.gnu.org/licenses/>.
- */
-
-package discord4j.core;
+package discord4j.core.support;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.LoggerContext;
+import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.*;
 import discord4j.core.object.entity.channel.TextChannel;
@@ -26,16 +10,7 @@ import discord4j.core.object.reaction.ReactionEmoji;
 import discord4j.core.object.util.Image;
 import discord4j.core.object.util.Snowflake;
 import discord4j.discordjson.json.ApplicationInfoData;
-import discord4j.discordjson.json.ImmutableMessageCreateRequest;
-import discord4j.discordjson.possible.Possible;
-import discord4j.rest.request.RouteMatcher;
-import discord4j.rest.response.ResponseFunction;
-import discord4j.rest.route.Routes;
-import org.junit.BeforeClass;
-import org.junit.Ignore;
-import org.junit.Test;
 import org.slf4j.LoggerFactory;
-import reactor.blockhound.BlockHound;
 import reactor.core.Exceptions;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -50,61 +25,52 @@ import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
 
-public class ExampleBot {
+public class ExtraBotSupport {
 
-    private static final Logger log = Loggers.getLogger(ExampleBot.class);
+    private static final Logger log = Loggers.getLogger(ExtraBotSupport.class);
 
-    private static String token;
+    private final GatewayDiscordClient client;
 
-    @BeforeClass
-    public static void initialize() {
-        token = System.getenv("token");
+    public static ExtraBotSupport create(GatewayDiscordClient client) {
+        return new ExtraBotSupport(client);
     }
 
-    @Test
-    @Ignore("Example code excluded from CI")
-    public void testCommandBot() {
-        BlockHound.install();
+    ExtraBotSupport(GatewayDiscordClient client) {
+        this.client = client;
+    }
 
-        DiscordClient client = DiscordClient.builder(token)
-                .setDebugMode(false)
-                // globally suppress any not found (404) error
-                //.onClientResponse(ResponseFunction.emptyIfNotFound())
-                // bad requests (400) while adding reactions will be suppressed
-                .onClientResponse(ResponseFunction.emptyOnErrorStatus(RouteMatcher.route(Routes.REACTION_CREATE), 400))
-                .build();
+    public Mono<Void> eventHandlers() {
+        return commandHandler(client);
+    }
 
-        // Get the bot owner ID to filter commands
-        Mono<Long> ownerId = client.getApplicationInfo()
+    public static Mono<Void> commandHandler(GatewayDiscordClient client) {
+        Mono<Long> ownerId = client.rest().getApplicationInfo()
                 .map(ApplicationInfoData::owner)
                 .map(user -> Long.parseUnsignedLong(user.id()))
                 .cache();
 
-        // Create our event handlers
         List<EventHandler> eventHandlers = new ArrayList<>();
         eventHandlers.add(new AddRole());
-        eventHandlers.add(new Echo());
-        eventHandlers.add(new UserInfo());
+        eventHandlers.add(new BurstMessages());
+        eventHandlers.add(new ChangeAvatar());
         eventHandlers.add(new LogLevelChange());
         eventHandlers.add(new Reactor());
-        eventHandlers.add(new ChangeAvatar());
-        eventHandlers.add(new BurstMessages());
+        eventHandlers.add(new UserInfo());
 
-        // Build a safe event-processing pipeline
-        GatewayDiscordClient gateway = client.login().block();
-        assert gateway != null;
-
-        Mono<Void> events = gateway.on(MessageCreateEvent.class, event -> ownerId
-                .filter(owner -> {
-                    Long author = event.getMessage().getAuthor().getId().asLong();
-                    return owner.equals(author);
-                })
-                .flatMap(id -> Mono.when(eventHandlers.stream()
-                        .map(handler -> handler.onMessageCreate(event))
-                        .collect(Collectors.toList()))))
+        return client.on(MessageCreateEvent.class,
+                event -> ownerId.filter(
+                        owner -> {
+                            Long author = event.getMessage().getAuthor()
+                                    .map(User::getId)
+                                    .map(Snowflake::asLong)
+                                    .orElse(null);
+                            return owner.equals(author);
+                        })
+                        .flatMap(id -> Mono.when(eventHandlers.stream()
+                                .map(handler -> handler.onMessageCreate(event))
+                                .collect(Collectors.toList()))
+                        ))
                 .then();
-
-        Mono.when(events, gateway.onDisconnect()).block();
     }
 
     public static class AddRole extends EventHandler {
@@ -133,23 +99,6 @@ public class ExampleBot {
                         return Mono.empty();
                     })
                     .then();
-        }
-    }
-
-    public static class Echo extends EventHandler {
-
-        @Override
-        public Mono<Void> onMessageCreate(MessageCreateEvent event) {
-            Message message = event.getMessage();
-            String content = message.getContent();
-            if (content.startsWith("!echo ")) {
-                return message.getRestChannel().createMessage(
-                        ImmutableMessageCreateRequest.builder()
-                                .content(Possible.of(content.substring("!echo ".length())))
-                                .build())
-                        .then();
-            }
-            return Mono.empty();
         }
     }
 
@@ -321,10 +270,5 @@ public class ExampleBot {
                             .subscribe()) // Separate subscribe in order to improve accuracy of elapsed time
                     .then();
         }
-    }
-
-    public static abstract class EventHandler {
-
-        public abstract Mono<Void> onMessageCreate(MessageCreateEvent event);
     }
 }

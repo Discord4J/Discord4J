@@ -17,10 +17,7 @@
 
 package discord4j.rest.entity;
 
-import discord4j.discordjson.json.ChannelData;
-import discord4j.discordjson.json.GuildData;
-import discord4j.discordjson.json.RegionData;
-import discord4j.discordjson.json.RoleData;
+import discord4j.discordjson.json.*;
 import discord4j.rest.RestClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -35,7 +32,7 @@ public class RestGuild {
         this.id = id;
     }
 
-    public Mono<GuildData> getData() {
+    public Mono<PartialGuildData> getData() {
         return restClient.getGuildService()
                 .getGuild(id);
     }

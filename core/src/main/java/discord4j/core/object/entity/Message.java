@@ -137,13 +137,12 @@ public final class Message implements Entity {
     }
 
     /**
-     * Gets the author of this message.
+     * Gets the author of this message, if present.
      *
-     * @return The author of this message.
+     * @return The author of this message, if present.
      */
-    public User getAuthor() {
-        // TODO handle case if data.webhookId is present
-        return new User(gateway, data.author());
+    public Optional<User> getAuthor() {
+        return data.webhookId().isAbsent() ? Optional.of(new User(gateway, data.author())) : Optional.empty();
     }
 
     /**
@@ -158,6 +157,16 @@ public final class Message implements Entity {
                 .flatMap(author -> getGuild()
                         .map(Guild::getId)
                         .flatMap(author::asMember));
+    }
+
+    /**
+     * Gets the raw author data of this message.
+     *
+     * @return The raw author data of this message.
+     */
+    @Experimental
+    public UserData getUserData() {
+        return data.author();
     }
 
     /**

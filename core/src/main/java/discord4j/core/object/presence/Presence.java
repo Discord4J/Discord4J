@@ -16,7 +16,8 @@
  */
 package discord4j.core.object.presence;
 
-import discord4j.discordjson.json.ImmutableActivityData;
+import discord4j.discordjson.json.ActivityUpdateRequest;
+import discord4j.discordjson.json.ImmutableActivityUpdateRequest;
 import discord4j.discordjson.json.PresenceData;
 import discord4j.discordjson.json.gateway.ImmutableStatusUpdate;
 import discord4j.discordjson.json.gateway.StatusUpdate;
@@ -27,10 +28,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-// TODO FIXME Presence is just a mess
-
 /**
- * A Discord presence.
+ * Presence is the current state of a user on a guild.
  *
  * @see <a href="https://discordapp.com/developers/docs/topics/gateway#presence">Presence</a>
  */
@@ -45,13 +44,10 @@ public final class Presence {
                 .build();
     }
 
-    public static StatusUpdate online(Activity activity) {
+    public static StatusUpdate online(ActivityUpdateRequest activity) {
         return ImmutableStatusUpdate.builder()
                 .status(Status.ONLINE.getValue())
-                .game(ImmutableActivityData.builder()
-                        .name(activity.getName())
-                        .type(activity.getType().getValue())
-                        .build())
+                .game(activity)
                 .afk(false)
                 .since(Optional.empty())
                 .build();
@@ -66,14 +62,10 @@ public final class Presence {
                 .build();
     }
 
-    public static StatusUpdate doNotDisturb(Activity activity) {
+    public static StatusUpdate doNotDisturb(ActivityUpdateRequest activity) {
         return ImmutableStatusUpdate.builder()
                 .status(Status.DO_NOT_DISTURB.getValue())
-                .game(ImmutableActivityData.builder()
-                        .name(activity.getName())
-                        .type(activity.getType().getValue())
-                        .url(Possible.of(activity.getStreamingUrl()))
-                        .build())
+                .game(activity)
                 .afk(false)
                 .since(Optional.empty())
                 .build();
@@ -88,14 +80,10 @@ public final class Presence {
                 .build();
     }
 
-    public static StatusUpdate idle(Activity activity) {
+    public static StatusUpdate idle(ActivityUpdateRequest activity) {
         return ImmutableStatusUpdate.builder()
                 .status(Status.IDLE.getValue())
-                .game(ImmutableActivityData.builder()
-                        .name(activity.getName())
-                        .type(activity.getType().getValue())
-                        .url(Possible.of(activity.getStreamingUrl()))
-                        .build())
+                .game(activity)
                 .afk(true)
                 .since(Instant.now().toEpochMilli())
                 .build();
@@ -138,18 +126,16 @@ public final class Presence {
     }
 
     public StatusUpdate asStatusUpdate() {
-        //        final StatusUpdate.Game game = getActivity()
-        //                .map(activity -> {
-        //                    Possible<String> url = activity.getStreamingUrl().map(Possible::of).orElse(Possible
-        //                    .absent());
-        //                    return new StatusUpdate.Game(activity.getName(), activity.getType().getValue(), url);
-        //                })
-        //                .orElse(null);
         return ImmutableStatusUpdate.builder()
                 .status(data.status())
-                .game(data.game())
-                .afk(false) // TODO FIXME
-                .since(Optional.empty())  // TODO FIXME
+                .game(data.activities().stream().findFirst()
+                        .map(activity -> ImmutableActivityUpdateRequest.builder()
+                                .from(activity)
+                                .url(Possible.flatOpt(activity.url()))
+                                .build()))
+                .afk(data.status().equals(Status.IDLE.getValue()))
+                .since(data.status().equals(Status.IDLE.getValue()) ?
+                        Optional.of(Instant.now().toEpochMilli()) : Optional.empty())
                 .build();
     }
 

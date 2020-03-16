@@ -15,21 +15,12 @@
  * along with Discord4J. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package discord4j.core;
+package discord4j.core.support;
 
-import discord4j.core.support.BotSupport;
-import discord4j.store.redis.RedisStoreService;
+import discord4j.core.event.domain.message.MessageCreateEvent;
+import reactor.core.publisher.Mono;
 
-public class ExampleLogin {
+public abstract class EventHandler {
 
-    public static void main(String[] args) {
-        GatewayDiscordClient client = DiscordClientBuilder.create(System.getenv("token"))
-                .build()
-                .gateway()
-                .setStoreService(new RedisStoreService())
-                .connect()
-                .blockOptional()
-                .orElseThrow(RuntimeException::new);
-        BotSupport.create(client).eventHandlers().block();
-    }
+    public abstract Mono<Void> onMessageCreate(MessageCreateEvent event);
 }

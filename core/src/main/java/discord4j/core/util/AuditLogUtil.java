@@ -34,7 +34,6 @@ public class AuditLogUtil {
                 change -> new AuditLogChange<>(change.oldValue().toOptional().orElse(null), change.newValue().toOptional().orElse(null)));
     }
 
-    // TODO FIXME I'm pretty sure this doesn't actually work because type conversion is never done. Asking for a class cast exception somewhere...
     public static Map<String, ?> createOptionMap(AuditEntryInfoData options) {
         HashMap<String, Object> map = new HashMap<>();
         if (!options.deleteMemberDays().isAbsent()) {

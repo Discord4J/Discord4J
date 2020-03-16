@@ -21,11 +21,13 @@ import discord4j.core.event.domain.guild.*;
 import discord4j.core.event.domain.role.RoleCreateEvent;
 import discord4j.core.event.domain.role.RoleDeleteEvent;
 import discord4j.core.event.domain.role.RoleUpdateEvent;
+import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.*;
 import discord4j.core.object.presence.Status;
 import discord4j.core.state.StateHolder;
 import discord4j.core.util.ListUtil;
 import discord4j.discordjson.json.*;
+import discord4j.discordjson.json.gateway.GuildCreate;
 import discord4j.discordjson.json.gateway.*;
 import discord4j.discordjson.possible.Possible;
 import discord4j.gateway.json.ShardGatewayPayload;
@@ -57,26 +59,39 @@ class GuildDispatchHandlers {
 
     static Mono<GuildCreateEvent> guildCreate(DispatchContext<GuildCreate> context) {
         GatewayDiscordClient gateway = context.getGateway();
-
+        GuildCreateData createData;
         GuildData guild;
-        if (context.getDispatch().guild().large().get()) {
+        if (context.getDispatch().guild().large()) {
             // Solves https://github.com/Discord4J/Discord4J/issues/429
             // Member store cannot have duplicates because keys cannot
             // be duplicated, but array addition in GuildBean can
             //guildBean.setMembers(new long[0]);
-            guild = ImmutableGuildData.builder()
+            createData = ImmutableGuildCreateData.builder()
                     .from(context.getDispatch().guild())
-                    .members(Possible.of(Collections.emptyList()))
+                    .members(Collections.emptyList())
+                    .build();
+            guild = ImmutableGuildData.builder()
+                    .from(createData)
+                    .roles(createData.roles().stream().map(RoleData::id).collect(Collectors.toList()))
+                    .emojis(createData.emojis().stream().map(EmojiData::id).filter(Optional::isPresent).map(Optional::get).collect(Collectors.toList()))
+                    .channels(createData.channels().stream().map(ChannelData::id).collect(Collectors.toList()))
                     .build();
         } else {
-            guild = context.getDispatch().guild();
+            createData = context.getDispatch().guild();
+            guild = ImmutableGuildData.builder()
+                    .from(createData)
+                    .roles(createData.roles().stream().map(RoleData::id).collect(Collectors.toList()))
+                    .emojis(createData.emojis().stream().map(EmojiData::id).filter(Optional::isPresent).map(Optional::get).collect(Collectors.toList()))
+                    .members(createData.members().stream().map(data -> data.user().id()).collect(Collectors.toList()))
+                    .channels(createData.channels().stream().map(ChannelData::id).collect(Collectors.toList()))
+                    .build();
         }
 
         long guildId = Long.parseUnsignedLong(guild.id());
 
         Mono<Void> saveGuild = context.getStateHolder().getGuildStore().save(guildId, guild);
         // TODO optimize to separate into three Publisher<Channel> and saveAll to limit store hits
-        Mono<Void> saveChannels = Flux.fromIterable(guild.channels().get())
+        Mono<Void> saveChannels = Flux.fromIterable(createData.channels())
                 .flatMap(channel -> context.getStateHolder().getChannelStore()
                         .save(Long.parseUnsignedLong(channel.id()), ImmutableChannelData.builder()
                                 .from(channel)
@@ -85,36 +100,36 @@ class GuildDispatchHandlers {
                 .then();
 
         Mono<Void> saveRoles = context.getStateHolder().getRoleStore()
-                .save(Flux.fromIterable(guild.roles())
+                .save(Flux.fromIterable(createData.roles())
                         .map(role -> Tuples.of(Long.parseUnsignedLong(role.id()), role)));
 
         Mono<Void> saveEmojis = context.getStateHolder().getGuildEmojiStore()
-                .save(Flux.fromIterable(guild.emojis())
+                .save(Flux.fromIterable(createData.emojis())
                         .map(emoji -> Tuples.of(Long.parseUnsignedLong(emoji.id().orElseThrow(NoSuchElementException::new)), emoji)));
 
         Mono<Void> saveMembers = context.getStateHolder().getMemberStore()
-                .save(Flux.fromIterable(guild.members().get())
+                .save(Flux.fromIterable(createData.members())
                         .map(member -> Tuples.of(LongLongTuple2.of(guildId,
                                 Long.parseUnsignedLong(member.user().id())), member)));
 
         Mono<Void> saveUsers = context.getStateHolder().getUserStore()
-                .save(Flux.fromIterable(guild.members().get())
+                .save(Flux.fromIterable(createData.members())
                         .map(MemberData::user)
                         .map(user -> Tuples.of(Long.parseUnsignedLong(user.id()), user)));
 
         Mono<Void> saveVoiceStates = context.getStateHolder().getVoiceStateStore()
-                .save(Flux.fromIterable(guild.voiceStates().get())
+                .save(Flux.fromIterable(createData.voiceStates())
                         .map(voiceState -> Tuples.of(LongLongTuple2.of(guildId,
                                 Long.parseUnsignedLong(voiceState.userId())), voiceState)));
 
         Mono<Void> savePresences = context.getStateHolder().getPresenceStore()
-                .save(Flux.fromIterable(guild.presences().get())
+                .save(Flux.fromIterable(createData.presences())
                         .map(presence -> Tuples.of(LongLongTuple2.of(guildId,
                                 Long.parseUnsignedLong(presence.user().id())), presence)));
 
         Mono<Void> startMemberChunk = context.getGateway().getGatewayResources().isMemberRequest() ?
-                Mono.just(guild)
-                        .filter(data -> data.large().get())
+                Mono.just(createData)
+                        .filter(data -> data.large())
                         .flatMap(data -> {
                             int shardId = context.getShardInfo().getIndex();
                             return context.getGateway().getGatewayClientGroup().unicast(
@@ -127,7 +142,7 @@ class GuildDispatchHandlers {
                         })
                         .then() : Mono.empty();
 
-        Mono<Void> saveOfflinePresences = Flux.fromIterable(guild.members().get())
+        Mono<Void> saveOfflinePresences = Flux.fromIterable(createData.members())
                 .filterWhen(member -> context.getStateHolder().getPresenceStore()
                         .find(LongLongTuple2.of(guildId, Long.parseUnsignedLong(member.user().id())))
                         .hasElement()
@@ -187,12 +202,9 @@ class GuildDispatchHandlers {
 
         return stateHolder.getGuildStore().find(guildId)
                 .flatMap(guild -> {
-                    Flux<Long> channels = Flux.fromIterable(guild.channels().get())
-                            .map(it -> Long.parseUnsignedLong(it.id()));
-                    Flux<Long> roles = Flux.fromIterable(guild.roles())
-                            .map(it -> Long.parseUnsignedLong(it.id()));
-                    Flux<Long> emojis = Flux.fromIterable(guild.emojis())
-                            .map(it -> Long.parseUnsignedLong(it.id().orElseThrow(NoSuchElementException::new)));
+                    Flux<Long> channels = Flux.fromIterable(guild.channels()).map(Long::parseUnsignedLong);
+                    Flux<Long> roles = Flux.fromIterable(guild.roles()).map(Long::parseUnsignedLong);
+                    Flux<Long> emojis = Flux.fromIterable(guild.emojis()).map(Long::parseUnsignedLong);
 
                     Mono<Void> deleteChannels = stateHolder.getChannelStore().delete(channels);
                     Mono<Void> deleteRoles = stateHolder.getRoleStore().delete(roles);
@@ -231,7 +243,11 @@ class GuildDispatchHandlers {
                 .find(guildId)
                 .map(guild -> ImmutableGuildData.builder()
                         .from(guild)
-                        .emojis(context.getDispatch().emojis())
+                        .emojis(context.getDispatch().emojis().stream()
+                                .map(EmojiData::id)
+                                .filter(Optional::isPresent)
+                                .map(Optional::get)
+                                .collect(Collectors.toList()))
                         .build())
                 .flatMap(guild -> context.getStateHolder().getGuildStore().save(guildId, guild));
 
@@ -267,10 +283,8 @@ class GuildDispatchHandlers {
                 .find(guildId)
                 .map(guild -> ImmutableGuildData.builder()
                         .from(guild)
-                        .members(ListUtil.add(guild.members(), member))
-                        .memberCount(guild.memberCount().toOptional()
-                                .map(count -> Possible.of(count + 1))
-                                .orElse(Possible.of(1)))
+                        .members(ListUtil.add(guild.members(), member.user().id()))
+                        .memberCount(guild.memberCount() + 1)
                         .build())
                 .flatMap(guild -> context.getStateHolder().getGuildStore().save(guildId, guild));
 
@@ -297,10 +311,8 @@ class GuildDispatchHandlers {
                 .find(guildId)
                 .map(guild -> ImmutableGuildData.builder()
                         .from(guild)
-                        .members(ListUtil.remove(guild.members(), member -> member.user().id().equals(user.id())))
-                        .memberCount(guild.memberCount().toOptional()
-                                .map(count -> Possible.of(count - 1))
-                                .orElse(Possible.of(0)))
+                        .members(ListUtil.remove(guild.members(), member -> member.equals(user.id())))
+                        .memberCount(guild.memberCount() - 1)
                         .build())
                 .flatMap(guild -> context.getStateHolder().getGuildStore().save(guildId, guild));
 
@@ -334,7 +346,9 @@ class GuildDispatchHandlers {
                 .find(guildId)
                 .map(guild -> ImmutableGuildData.builder()
                         .from(guild)
-                        .members(ListUtil.addAll(guild.members(), members))
+                        .members(ListUtil.addAll(guild.members(), members.stream()
+                                .map(data -> data.user().id())
+                                .collect(Collectors.toList())))
                         .build())
                 .flatMap(guild -> context.getStateHolder().getGuildStore().save(guildId, guild));
 
@@ -395,9 +409,8 @@ class GuildDispatchHandlers {
                                     currentRoles, currentNick, currentPremiumSince));
                 });
 
-        // TODO: fix premium_since support
         return update.defaultIfEmpty(new MemberUpdateEvent(gateway, context.getShardInfo(), guildId, memberId, null,
-                currentRoles, currentNick, null));
+                currentRoles, currentNick, currentPremiumSince));
     }
 
     static Mono<RoleCreateEvent> guildRoleCreate(DispatchContext<GuildRoleCreate> context) {
@@ -409,7 +422,7 @@ class GuildDispatchHandlers {
                 .find(guildId)
                 .map(guild -> ImmutableGuildData.builder()
                         .from(guild)
-                        .addRoles(role)
+                        .addRoles(role.id())
                         .build())
                 .flatMap(guild -> context.getStateHolder().getGuildStore().save(guildId, guild));
 
@@ -430,12 +443,9 @@ class GuildDispatchHandlers {
         @SuppressWarnings("ReactorUnusedPublisher")
         Mono<Void> removeRoleId = context.getStateHolder().getGuildStore()
                 .find(guildId)
-                .zipWhen(guild -> Mono.just(removeRoleFromGuildMember(guild.members(), context.getDispatch().roleId())))
-                .map(t2 -> ImmutableGuildData.builder()
-                        .from(t2.getT1())
-                        .roles(ListUtil.remove(t2.getT1().roles(),
-                                role -> role.id().equals(context.getDispatch().roleId())))
-                        .members(Possible.of(t2.getT2()))
+                .map(guild -> ImmutableGuildData.builder()
+                        .from(guild)
+                        .roles(ListUtil.remove(guild.roles(), role -> role.equals(context.getDispatch().roleId())))
                         .build())
                 .flatMap(guild -> context.getStateHolder().getGuildStore().save(guildId, guild));
 
@@ -444,11 +454,8 @@ class GuildDispatchHandlers {
         @SuppressWarnings("ReactorUnusedPublisher")
         Mono<Void> removeRoleFromMembers = context.getStateHolder().getGuildStore()
                 .find(guildId)
-                .flatMapMany(guild -> Flux.fromIterable(guild.members().toOptional()
-                        .map(memberList -> memberList.stream()
-                                .map(member -> Long.parseUnsignedLong(member.user().id()))
-                                .collect(Collectors.toList()))
-                        .orElse(Collections.emptyList())))
+                .flatMapMany(guild -> Flux.fromIterable(guild.members())
+                        .map(Long::parseUnsignedLong))
                 .flatMap(memberId -> context.getStateHolder().getMemberStore()
                         .find(LongLongTuple2.of(guildId, memberId)))
                 .filter(member -> member.roles().contains(context.getDispatch().roleId()))
@@ -504,62 +511,43 @@ class GuildDispatchHandlers {
 
     static Mono<GuildUpdateEvent> guildUpdate(DispatchContext<GuildUpdate> context) {
         GatewayDiscordClient gateway = context.getGateway();
-        GuildData guild = toGuildData(context.getDispatch().guild());
-        long guildId = Long.parseUnsignedLong(guild.id());
+        long guildId = Long.parseUnsignedLong(context.getDispatch().guild().id());
 
-        Mono<GuildUpdateEvent> update = context.getStateHolder().getGuildStore()
+        return context.getStateHolder().getGuildStore()
                 .find(guildId)
                 .flatMap(oldGuildData -> {
+                    GuildData newGuildData = ImmutableGuildData.builder()
+                            .from(oldGuildData)
+                            .from(context.getDispatch().guild())
+                            .roles(context.getDispatch().guild().roles().stream()
+                                    .map(RoleData::id)
+                                    .collect(Collectors.toList()))
+                            .emojis(context.getDispatch().guild().emojis().stream()
+                                    .map(EmojiData::id)
+                                    .filter(Optional::isPresent)
+                                    .map(Optional::get)
+                                    .collect(Collectors.toList()))
+                            .build();
+
                     Guild old = new Guild(gateway, oldGuildData);
-                    Guild current = new Guild(gateway, guild);
+                    Guild current = new Guild(gateway, newGuildData);
 
                     return context.getStateHolder().getGuildStore()
-                            .save(guildId, guild)
+                            .save(guildId, newGuildData)
                             .thenReturn(new GuildUpdateEvent(gateway, context.getShardInfo(), current, old));
-                });
-
-        return update.defaultIfEmpty(new GuildUpdateEvent(gateway, context.getShardInfo(),
-                new Guild(gateway, guild), null));
-    }
-
-    private static GuildData toGuildData(PartialGuildData guild) {
-        return ImmutableGuildData.builder()
-                .id(guild.id())
-                .name(guild.name())
-                .icon(guild.icon())
-                .splash(guild.splash())
-                .discoverySplash(guild.discoverySplash())
-                .owner(guild.owner())
-                .ownerId(guild.ownerId())
-                .permissions(guild.permissions())
-                .region(guild.region())
-                .afkChannelId(guild.afkChannelId())
-                .afkTimeout(guild.afkTimeout())
-                .embedEnabled(guild.embedEnabled())
-                .embedChannelId(guild.embedChannelId())
-                .verificationLevel(guild.verificationLevel())
-                .defaultMessageNotifications(guild.defaultMessageNotifications())
-                .explicitContentFilter(guild.explicitContentFilter())
-                .roles(guild.roles())
-                .emojis(guild.emojis())
-                .features(guild.features())
-                .mfaLevel(guild.mfaLevel())
-                .applicationId(guild.applicationId())
-                .widgetEnabled(guild.widgetEnabled())
-                .widgetChannelId(guild.widgetChannelId())
-                .systemChannelId(guild.systemChannelId())
-                .systemChannelFlags(guild.systemChannelFlags())
-                .rulesChannelId(guild.rulesChannelId())
-                .maxPresences(guild.maxPresences())
-                .maxMembers(guild.maxMembers())
-                .vanityUrlCode(guild.vanityUrlCode())
-                .description(guild.description())
-                .banner(guild.banner())
-                .premiumTier(guild.premiumTier())
-                .premiumSubscriptionCount(guild.premiumSubscriptionCount())
-                .preferredLocale(guild.preferredLocale())
-                .publicUpdatesChannelId(guild.publicUpdatesChannelId())
-                .build();
+                })
+                .switchIfEmpty(Mono.fromCallable(() -> new GuildUpdateEvent(gateway, context.getShardInfo(),
+                        new Guild(gateway, ImmutableGuildData.builder()
+                                .from(context.getDispatch().guild())
+                                .roles(context.getDispatch().guild().roles().stream()
+                                        .map(RoleData::id)
+                                        .collect(Collectors.toList()))
+                                .emojis(context.getDispatch().guild().emojis().stream()
+                                        .map(EmojiData::id)
+                                        .filter(Optional::isPresent)
+                                        .map(Optional::get)
+                                        .collect(Collectors.toList()))
+                                .build()), null)));
     }
 
 }

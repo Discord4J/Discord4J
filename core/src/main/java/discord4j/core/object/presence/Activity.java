@@ -20,6 +20,8 @@ import discord4j.core.object.reaction.ReactionEmoji;
 import discord4j.core.object.util.Snowflake;
 import discord4j.core.util.EntityUtil;
 import discord4j.discordjson.json.ActivityData;
+import discord4j.discordjson.json.ActivityUpdateRequest;
+import discord4j.discordjson.json.ImmutableActivityUpdateRequest;
 import discord4j.discordjson.possible.Possible;
 
 import java.time.Instant;
@@ -29,40 +31,29 @@ import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.stream.Collectors;
 
-// TODO FIXME: we should probably just differentiate between a received Activity and one we send. They're very different.
-// also just a mess
 public class Activity {
 
-    // TODO FIXME
-//    public static Activity playing(String name) {
-//        return new Activity(Type.PLAYING.getValue(), name, null);
-//    }
-//
-//    public static Activity streaming(String name, String url) {
-//        return new Activity(Type.STREAMING.getValue(), name, url);
-//    }
-//
-//    public static Activity listening(String name) {
-//        return new Activity(Type.LISTENING.getValue(), name, null);
-//    }
-//
-//    public static Activity watching(String name) {
-//        return new Activity(Type.WATCHING.getValue(), name, null);
-//    }
+    public static ActivityUpdateRequest playing(String name) {
+        return ImmutableActivityUpdateRequest.of(name, Type.PLAYING.getValue(), Optional.empty());
+    }
+
+    public static ActivityUpdateRequest streaming(String name, String url) {
+        return ImmutableActivityUpdateRequest.of(name, Type.STREAMING.getValue(), Optional.of(url));
+    }
+
+    public static ActivityUpdateRequest listening(String name) {
+        return ImmutableActivityUpdateRequest.of(name, Type.LISTENING.getValue(), Optional.empty());
+    }
+
+    public static ActivityUpdateRequest watching(String name) {
+        return ImmutableActivityUpdateRequest.of(name, Type.WATCHING.getValue(), Optional.empty());
+    }
 
     private final ActivityData data;
 
     Activity(final ActivityData data) {
         this.data = data;
     }
-
-    // TODO FIXME
-//    private Activity(int type, String name, @Nullable String streamingUrl) {
-//        this.data = new ActivityBean();
-//        this.data.setType(type);
-//        this.data.setName(name);
-//        this.data.setUrl(streamingUrl);
-//    }
 
     /**
      * Gets the type for this activity.

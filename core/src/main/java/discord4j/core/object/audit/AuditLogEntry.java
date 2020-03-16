@@ -16,10 +16,11 @@
  */
 package discord4j.core.object.audit;
 
-import discord4j.discordjson.json.AuditLogEntryData;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.Entity;
 import discord4j.core.object.util.Snowflake;
+import discord4j.core.util.AuditLogUtil;
+import discord4j.discordjson.json.AuditLogEntryData;
 
 import java.util.Optional;
 
@@ -56,16 +57,29 @@ public class AuditLogEntry implements Entity {
         return ActionType.of(data.actionType());
     }
 
-    // TODO FIXME: reimplement these
-//    @SuppressWarnings("unchecked")
-//    public <T> Optional<AuditLogChange<T>> getChange(ChangeKey<T> changeKey) {
-//        return Optional.ofNullable((AuditLogChange<T>) data.changes().get(changeKey.getName()));
-//    }
-//
-//    @SuppressWarnings("unchecked")
-//    public <T> Optional<T> getOption(OptionKey<T> optionKey) {
-//        return Optional.ofNullable((T) data.getOptions().get(optionKey.getField()));
-//    }
+    public <T> Optional<AuditLogChange<T>> getChange(ChangeKey<T> changeKey) {
+        return data.changes().toOptional()
+                .map(list -> list.stream().collect(AuditLogUtil.changeCollector()))
+                .map(map -> map.get(changeKey.getName()))
+                .map(AuditLogEntry::cast);
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <T> AuditLogChange<T> cast(AuditLogChange<?> strategy) {
+        return (AuditLogChange<T>) strategy;
+    }
+
+    public <T> Optional<T> getOption(OptionKey<T> optionKey) {
+        return data.options().toOptional()
+                .map(AuditLogUtil::createOptionMap)
+                .map(map -> map.get(optionKey.getField()))
+                .map(AuditLogEntry::cast);
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <T> T cast(Object value) {
+        return (T) value;
+    }
 
     @Override
     public Snowflake getId() {
