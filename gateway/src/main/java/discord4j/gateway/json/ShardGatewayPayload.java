@@ -16,6 +16,7 @@
  */
 package discord4j.gateway.json;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import discord4j.discordjson.json.gateway.PayloadData;
 import discord4j.discordjson.json.gateway.RequestGuildMembers;
 import discord4j.discordjson.json.gateway.StatusUpdate;
@@ -31,6 +32,7 @@ import discord4j.gateway.GatewayClient;
  */
 public class ShardGatewayPayload<T extends PayloadData> extends GatewayPayload<T> {
 
+    @JsonIgnore
     private final int shardIndex;
 
     public ShardGatewayPayload(GatewayPayload<T> payload, int shardIndex) {
@@ -55,6 +57,7 @@ public class ShardGatewayPayload<T extends PayloadData> extends GatewayPayload<T
      *
      * @return a 0-based shard index
      */
+    @JsonIgnore
     public int getShardIndex() {
         return shardIndex;
     }
