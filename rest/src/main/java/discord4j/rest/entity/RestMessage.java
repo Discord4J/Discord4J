@@ -32,6 +32,12 @@ public class RestMessage {
     private final long channelId;
     private final long id;
 
+    private RestMessage(RestClient restClient, long channelId, long id) {
+        this.restClient = restClient;
+        this.channelId = channelId;
+        this.id = id;
+    }
+
     /**
      * Create a {@link RestMessage} with the given parameters.
      *
@@ -39,10 +45,12 @@ public class RestMessage {
      * @param channelId the ID of the channel this messages belongs to
      * @param id the ID of this message
      */
-    public RestMessage(RestClient restClient, long channelId, long id) {
-        this.restClient = restClient;
-        this.channelId = channelId;
-        this.id = id;
+    public static RestMessage create(RestClient restClient, long channelId, long id) {
+        return new RestMessage(restClient, channelId, id);
+    }
+
+    public RestChannel channel() {
+        return RestChannel.create(restClient, channelId);
     }
 
     /**

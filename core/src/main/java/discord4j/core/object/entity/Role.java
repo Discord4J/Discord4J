@@ -66,7 +66,7 @@ public final class Role implements Entity {
         this.gateway = Objects.requireNonNull(gateway);
         this.data = Objects.requireNonNull(data);
         RestClient restClient = gateway.getCoreResources().getRestClient();
-        this.rest = new RestRole(restClient, guildId, Long.parseUnsignedLong(data.id()));
+        this.rest = RestRole.create(restClient, guildId, Long.parseUnsignedLong(data.id()));
         this.guildId = guildId;
     }
 

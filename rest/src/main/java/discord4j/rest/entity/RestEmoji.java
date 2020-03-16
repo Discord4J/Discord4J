@@ -17,32 +17,41 @@
 
 package discord4j.rest.entity;
 
-import discord4j.discordjson.json.MemberData;
+import discord4j.discordjson.json.EmojiData;
+import discord4j.discordjson.json.GuildEmojiModifyRequest;
 import discord4j.rest.RestClient;
 import reactor.core.publisher.Mono;
+import reactor.util.annotation.Nullable;
 
-public class RestMember {
+public class RestEmoji {
 
     private final RestClient restClient;
     private final long guildId;
     private final long id;
 
-    private RestMember(RestClient restClient, long guildId, long id) {
+    private RestEmoji(RestClient restClient, long guildId, long id) {
         this.restClient = restClient;
         this.guildId = guildId;
         this.id = id;
     }
 
-    public static RestMember create(RestClient restClient, long guildId, long id) {
-        return new RestMember(restClient, guildId, id);
+    public static RestEmoji create(RestClient restClient, long guildId, long id) {
+        return new RestEmoji(restClient, guildId, id);
     }
 
     public RestGuild guild() {
         return RestGuild.create(restClient, guildId);
     }
 
-    public Mono<MemberData> getData() {
-        return restClient.getGuildService()
-                .getGuildMember(guildId, id);
+    public Mono<EmojiData> getData() {
+        return restClient.getEmojiService().getGuildEmoji(guildId, id);
+    }
+
+    public Mono<EmojiData> modify(GuildEmojiModifyRequest request, @Nullable String reason) {
+        return restClient.getEmojiService().modifyGuildEmoji(guildId, id, request, reason);
+    }
+
+    public Mono<Void> delete(@Nullable String reason) {
+        return restClient.getEmojiService().deleteGuildEmoji(guildId, id, reason);
     }
 }

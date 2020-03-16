@@ -80,7 +80,7 @@ public final class Message implements Entity {
     public Message(final GatewayDiscordClient gateway, final MessageData data) {
         this.gateway = Objects.requireNonNull(gateway);
         this.data = Objects.requireNonNull(data);
-        this.rest = new RestMessage(gateway.getRestClient(), Long.parseUnsignedLong(data.channelId()),
+        this.rest = RestMessage.create(gateway.getRestClient(), Long.parseUnsignedLong(data.channelId()),
                 Long.parseUnsignedLong(data.id()));
     }
 
@@ -105,7 +105,7 @@ public final class Message implements Entity {
      * Return a {@link RestChannel} handle to execute REST API operations on the channel of this message.
      */
     public RestChannel getRestChannel() {
-        return new RestChannel(gateway.getRestClient(), Long.parseUnsignedLong(data.channelId()));
+        return RestChannel.create(gateway.getRestClient(), Long.parseUnsignedLong(data.channelId()));
     }
 
     /**

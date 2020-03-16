@@ -47,7 +47,7 @@ class BaseChannel implements Channel {
     BaseChannel(final GatewayDiscordClient gateway, final ChannelData data) {
         this.gateway = Objects.requireNonNull(gateway);
         this.data = Objects.requireNonNull(data);
-        this.rest = new RestChannel(gateway.getRestClient(), Long.parseUnsignedLong(data.id()));
+        this.rest = RestChannel.create(gateway.getRestClient(), Long.parseUnsignedLong(data.id()));
     }
 
     @Override

@@ -38,8 +38,8 @@ public class EmojiService extends RestService {
                 .flatMapMany(Flux::fromArray);
     }
 
-    public Mono<EmojiData> getGuildEmoji(long guildId, long emojiID) {
-        return Routes.GUILD_EMOJI_GET.newRequest(guildId, emojiID)
+    public Mono<EmojiData> getGuildEmoji(long guildId, long emojiId) {
+        return Routes.GUILD_EMOJI_GET.newRequest(guildId, emojiId)
                 .exchange(getRouter())
                 .bodyToMono(EmojiData.class);
     }

@@ -32,10 +32,18 @@ public class RestRole {
     private final long guildId;
     private final long id;
 
-    public RestRole(RestClient restClient, long guildId, long id) {
+    private RestRole(RestClient restClient, long guildId, long id) {
         this.restClient = restClient;
         this.guildId = guildId;
         this.id = id;
+    }
+
+    public static RestRole create(RestClient restClient, long guildId, long id) {
+        return new RestRole(restClient, guildId, id);
+    }
+
+    public RestGuild guild() {
+        return RestGuild.create(restClient, guildId);
     }
 
     /**
@@ -69,7 +77,8 @@ public class RestRole {
      * guild. If an error is received, it is emitted through the {@code Flux}.
      */
     public Flux<RoleData> changePosition(final int position) {
-        final PositionModifyRequest[] requests = {ImmutablePositionModifyRequest.of(Long.toUnsignedString(id), position) };
+        final PositionModifyRequest[] requests = {ImmutablePositionModifyRequest.of(Long.toUnsignedString(id),
+                position)};
         return restClient.getGuildService().modifyGuildRolePositions(guildId, requests);
     }
 

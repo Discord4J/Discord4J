@@ -97,7 +97,7 @@ public final class DiscordClient {
      * supplied ID. If an error is received, it is emitted through the {@code Mono}.
      */
     public RestChannel getChannelById(final Snowflake channelId) {
-        return new RestChannel(coreResources.getRestClient(), channelId.asLong());
+        return RestChannel.create(coreResources.getRestClient(), channelId.asLong());
     }
 
     /**
@@ -108,7 +108,7 @@ public final class DiscordClient {
      * supplied ID. If an error is received, it is emitted through the {@code Mono}.
      */
     public RestGuild getGuildById(final Snowflake guildId) {
-        return new RestGuild(coreResources.getRestClient(), guildId.asLong());
+        return RestGuild.create(coreResources.getRestClient(), guildId.asLong());
     }
 
     /**
@@ -119,8 +119,8 @@ public final class DiscordClient {
      * @return A {@link Mono} where, upon successful completion, emits the {@link GuildEmoji} as represented by the
      * supplied IDs. If an error is received, it is emitted through the {@code Mono}.
      */
-    public RestGuildEmoji getGuildEmojiById(final Snowflake guildId, final Snowflake emojiId) {
-        return new RestGuildEmoji(coreResources.getRestClient(), guildId.asLong(), emojiId.asLong());
+    public RestEmoji getGuildEmojiById(final Snowflake guildId, final Snowflake emojiId) {
+        return RestEmoji.create(coreResources.getRestClient(), guildId.asLong(), emojiId.asLong());
     }
 
     /**
@@ -132,7 +132,7 @@ public final class DiscordClient {
      * IDs. If an error is received, it is emitted through the {@code Mono}.
      */
     public RestMember getMemberById(final Snowflake guildId, final Snowflake userId) {
-        return new RestMember(coreResources.getRestClient(), guildId.asLong(), userId.asLong());
+        return RestMember.create(coreResources.getRestClient(), guildId.asLong(), userId.asLong());
     }
 
     /**
@@ -144,7 +144,7 @@ public final class DiscordClient {
      * supplied IDs. If an error is received, it is emitted through the {@code Mono}.
      */
     public RestMessage getMessageById(final Snowflake channelId, final Snowflake messageId) {
-        return new RestMessage(coreResources.getRestClient(), channelId.asLong(), messageId.asLong());
+        return RestMessage.create(coreResources.getRestClient(), channelId.asLong(), messageId.asLong());
     }
 
     /**
@@ -156,7 +156,7 @@ public final class DiscordClient {
      * IDs. If an error is received, it is emitted through the {@code Mono}.
      */
     public RestRole getRoleById(final Snowflake guildId, final Snowflake roleId) {
-        return new RestRole(coreResources.getRestClient(), guildId.asLong(), roleId.asLong());
+        return RestRole.create(coreResources.getRestClient(), guildId.asLong(), roleId.asLong());
     }
 
     /**
@@ -167,7 +167,7 @@ public final class DiscordClient {
      * ID. If an error is received, it is emitted through the {@code Mono}.
      */
     public RestUser getUserById(final Snowflake userId) {
-        return new RestUser(coreResources.getRestClient(), userId.asLong());
+        return RestUser.create(coreResources.getRestClient(), userId.asLong());
     }
 
     /**
@@ -178,7 +178,7 @@ public final class DiscordClient {
      * supplied ID. If an error is received, it is emitted through the {@code Mono}.
      */
     public RestWebhook getWebhookById(final Snowflake webhookId) {
-        return new RestWebhook(coreResources.getRestClient(), webhookId.asLong());
+        return RestWebhook.create(coreResources.getRestClient(), webhookId.asLong());
     }
 
     /**

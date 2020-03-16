@@ -18,21 +18,34 @@
 package discord4j.rest.entity;
 
 import discord4j.discordjson.json.WebhookData;
+import discord4j.discordjson.json.WebhookModifyRequest;
 import discord4j.rest.RestClient;
 import reactor.core.publisher.Mono;
+import reactor.util.annotation.Nullable;
 
 public class RestWebhook {
 
     private final RestClient restClient;
     private final long id;
 
-    public RestWebhook(RestClient restClient, long id) {
+    private RestWebhook(RestClient restClient, long id) {
         this.restClient = restClient;
         this.id = id;
     }
 
+    public static RestWebhook create(RestClient restClient, long id) {
+        return new RestWebhook(restClient, id);
+    }
+
     public Mono<WebhookData> getData() {
-        return restClient.getWebhookService()
-                .getWebhook(id);
+        return restClient.getWebhookService().getWebhook(id);
+    }
+
+    public Mono<WebhookData> modify(WebhookModifyRequest request, @Nullable String reason) {
+        return restClient.getWebhookService().modifyWebhook(id, request, reason);
+    }
+
+    public Mono<Void> delete(@Nullable String reason) {
+        return restClient.getWebhookService().deleteWebhook(id, reason);
     }
 }

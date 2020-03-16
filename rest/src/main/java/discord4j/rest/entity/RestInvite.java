@@ -17,24 +17,31 @@
 
 package discord4j.rest.entity;
 
-import discord4j.discordjson.json.EmojiData;
+import discord4j.discordjson.json.InviteData;
 import discord4j.rest.RestClient;
 import reactor.core.publisher.Mono;
+import reactor.util.annotation.Nullable;
 
-public class RestGuildEmoji {
+public class RestInvite {
 
     private final RestClient restClient;
-    private final long guildId;
-    private final long id;
+    private final String code;
 
-    public RestGuildEmoji(RestClient restClient, long guildId, long id) {
+    private RestInvite(RestClient restClient, String code) {
         this.restClient = restClient;
-        this.guildId = guildId;
-        this.id = id;
+        this.code = code;
     }
 
-    public Mono<EmojiData> getData() {
-        return restClient.getEmojiService()
-                .getGuildEmoji(guildId, id);
+    public static RestInvite create(RestClient restClient, String code) {
+        return new RestInvite(restClient, code);
     }
+
+    public Mono<InviteData> getData() {
+        return restClient.getInviteService().getInvite(code);
+    }
+
+    public Mono<InviteData> delete(@Nullable String reason) {
+        return restClient.getInviteService().deleteInvite(code, reason);
+    }
+
 }

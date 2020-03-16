@@ -43,15 +43,19 @@ public class RestChannel {
     private final RestClient restClient;
     private final long id;
 
+    private RestChannel(RestClient restClient, long id) {
+        this.restClient = restClient;
+        this.id = id;
+    }
+
     /**
      * Create a {@link RestChannel} with the given parameters.
      *
      * @param restClient REST API resources
      * @param id the ID of this channel
      */
-    public RestChannel(RestClient restClient, long id) {
-        this.restClient = restClient;
-        this.id = id;
+    public static RestChannel create(RestClient restClient, long id) {
+        return new RestChannel(restClient, id);
     }
 
     /**
@@ -63,6 +67,10 @@ public class RestChannel {
      */
     public Mono<ChannelData> getData() {
         return restClient.getChannelService().getChannel(id);
+    }
+
+    public RestMessage message(long messageId) {
+        return RestMessage.create(restClient, id, messageId);
     }
 
     /**
@@ -143,7 +151,7 @@ public class RestChannel {
      * @return a {@link RestMessage} facade for the given message under this channel to perform actions on it
      */
     public RestMessage getRestMessage(long messageId) {
-        return new RestMessage(restClient, id, messageId);
+        return RestMessage.create(restClient, id, messageId);
     }
 
     /**
@@ -289,9 +297,41 @@ public class RestChannel {
      * @return a {@link Flux} that continually emits all the pinned messages for this channel. If an error is received,
      * it is emitted through the {@code Flux}.
      * @see
-     * <a href="https://discordapp.com/developers/docs/resources/channel#get-pinned-messages>Get Pinned Messages</a>
+     * <a href="https://discordapp.com/developers/docs/resources/channel#get-pinned-messages">Get Pinned Messages</a>
      */
     public Flux<MessageData> getPinnedMessages() {
         return restClient.getChannelService().getPinnedMessages(id);
+    }
+
+    /**
+     * Request to pin a message in this channel.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the messaged was pinned. If
+     * an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Void> addPinnedMessage(long messageId) {
+        return restClient.getChannelService().addPinnedMessage(id, messageId);
+    }
+
+    /**
+     * Request to unpin a message in this channel.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the message was unpinned. If
+     * an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Void> deletePinnedMessage(long messageId) {
+        return restClient.getChannelService().deletePinnedMessage(id, messageId);
+    }
+
+    public Mono<Void> addGroupDMRecipient(long userId, GroupAddRecipientRequest request) {
+        return restClient.getChannelService().addGroupDMRecipient(id, userId, request);
+    }
+
+    public Mono<Void> deleteGroupDMRecipient(long userId) {
+        return restClient.getChannelService().deleteGroupDMRecipient(id, userId);
+    }
+
+    public Flux<WebhookData> getWebhooks() {
+        return restClient.getWebhookService().getChannelWebhooks(id);
     }
 }
