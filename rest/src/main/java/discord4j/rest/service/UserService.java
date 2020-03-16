@@ -49,11 +49,11 @@ public class UserService extends RestService {
                 .bodyToMono(UserData.class);
     }
 
-    public Flux<PartialGuildData> getCurrentUserGuilds(Map<String, Object> queryParams) {
+    public Flux<UserGuildData> getCurrentUserGuilds(Map<String, Object> queryParams) {
         return Routes.CURRENT_USER_GUILDS_GET.newRequest()
                 .query(queryParams)
                 .exchange(getRouter())
-                .bodyToMono(PartialGuildData[].class)
+                .bodyToMono(UserGuildData[].class)
                 .flatMapMany(Flux::fromArray);
     }
 

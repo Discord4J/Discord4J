@@ -66,7 +66,7 @@ public class GuildServiceTest {
 
     @Test
     public void testGetGuild() {
-        PartialGuildData response = getGuildService().getGuild(guild).block();
+        GuildUpdateData response = getGuildService().getGuild(guild).block();
         System.out.println(response.id());
     }
 

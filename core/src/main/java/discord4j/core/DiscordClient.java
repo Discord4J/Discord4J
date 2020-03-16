@@ -198,8 +198,8 @@ public final class DiscordClient {
      * @return A {@link Flux} that continually emits the {@link PartialGuildData guilds} that the current client is
      * in. If an error is received, it is emitted through the {@code Flux}.
      */
-    public Flux<PartialGuildData> getGuilds() {
-        final Function<Map<String, Object>, Flux<PartialGuildData>> makeRequest = params ->
+    public Flux<UserGuildData> getGuilds() {
+        final Function<Map<String, Object>, Flux<UserGuildData>> makeRequest = params ->
                 coreResources.getRestClient().getUserService()
                         .getCurrentUserGuilds(params);
 
@@ -234,7 +234,7 @@ public final class DiscordClient {
      * @return A {@link Mono} where, upon successful completion, emits the created {@link PartialGuildData}. If an
      * error is received, it is emitted through the {@code Mono}.
      */
-    public Mono<PartialGuildData> createGuild(final Consumer<? super GuildCreateSpec> spec) {
+    public Mono<GuildUpdateData> createGuild(final Consumer<? super GuildCreateSpec> spec) {
         final GuildCreateSpec mutatedSpec = new GuildCreateSpec();
         spec.accept(mutatedSpec);
 

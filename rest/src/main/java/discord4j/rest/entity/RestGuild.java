@@ -44,7 +44,7 @@ public class RestGuild {
         return new RestGuild(restClient, id);
     }
 
-    public Mono<PartialGuildData> getData() {
+    public Mono<GuildUpdateData> getData() {
         return restClient.getGuildService().getGuild(id);
     }
 
@@ -60,7 +60,7 @@ public class RestGuild {
         return RestRole.create(restClient, id, roleId);
     }
 
-    public Mono<PartialGuildData> modify(GuildModifyRequest request, @Nullable String reason) {
+    public Mono<GuildUpdateData> modify(GuildModifyRequest request, @Nullable String reason) {
         return restClient.getGuildService().modifyGuild(id, request, reason);
     }
 

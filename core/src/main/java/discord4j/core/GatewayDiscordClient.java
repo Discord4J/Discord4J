@@ -24,7 +24,6 @@ import discord4j.core.event.EventDispatcher;
 import discord4j.core.event.domain.Event;
 import discord4j.core.object.Invite;
 import discord4j.core.object.Region;
-import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.*;
 import discord4j.core.object.entity.channel.Channel;
 import discord4j.core.object.presence.Presence;
@@ -439,15 +438,14 @@ public class GatewayDiscordClient {
      */
     @Deprecated
     public Flux<Guild> getGuilds() {
-        final Function<Map<String, Object>, Flux<PartialGuildData>> makeRequest = params ->
-                getRestClient().getUserService()
-                        .getCurrentUserGuilds(params);
+        final Function<Map<String, Object>, Flux<UserGuildData>> makeRequest = params ->
+                getRestClient().getUserService().getCurrentUserGuilds(params);
 
         return gatewayResources.getStateView().getGuildStore()
                 .values()
                 .switchIfEmpty(PaginationUtil.paginateAfter(makeRequest, data -> Long.parseUnsignedLong(data.id()),
                         0L, 100)
-                        .map(PartialGuildData::id)
+                        .map(UserGuildData::id)
                         //.filter(id -> (id >> 22) % getConfig().getShardCount() == getConfig().getShardIndex())
                         .flatMap(id -> getRestClient().getGuildService().getGuild(Long.parseUnsignedLong(id)))
                         .flatMap(this::toGuildData))
@@ -676,7 +674,7 @@ public class GatewayDiscordClient {
                         }));
     }
 
-    private Mono<GuildData> toGuildData(PartialGuildData guild) {
+    private Mono<GuildData> toGuildData(GuildUpdateData guild) {
         return gatewayResources.getStateView().getGuildStore()
                 .find(Long.parseUnsignedLong(guild.id()))
                 .map(current -> ImmutableGuildData.builder()

@@ -31,25 +31,25 @@ public class GuildService extends RestService {
         super(router);
     }
 
-    public Mono<PartialGuildData> createGuild(GuildCreateRequest request) {
+    public Mono<GuildUpdateData> createGuild(GuildCreateRequest request) {
         return Routes.GUILD_CREATE.newRequest()
                 .body(request)
                 .exchange(getRouter())
-                .bodyToMono(PartialGuildData.class);
+                .bodyToMono(GuildUpdateData.class);
     }
 
-    public Mono<PartialGuildData> getGuild(long guildId) {
+    public Mono<GuildUpdateData> getGuild(long guildId) {
         return Routes.GUILD_GET.newRequest(guildId)
                 .exchange(getRouter())
-                .bodyToMono(PartialGuildData.class);
+                .bodyToMono(GuildUpdateData.class);
     }
 
-    public Mono<PartialGuildData> modifyGuild(long guildId, GuildModifyRequest request, @Nullable String reason) {
+    public Mono<GuildUpdateData> modifyGuild(long guildId, GuildModifyRequest request, @Nullable String reason) {
         return Routes.GUILD_MODIFY.newRequest(guildId)
                 .body(request)
                 .optionalHeader("X-Audit-Log-Reason", reason)
                 .exchange(getRouter())
-                .bodyToMono(PartialGuildData.class);
+                .bodyToMono(GuildUpdateData.class);
     }
 
     public Mono<Void> deleteGuild(long guildId) {
