@@ -29,6 +29,7 @@ import reactor.util.annotation.Nullable;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Read a response into JSON and convert to an Object of type {@code <Res>} using Jackson.
@@ -62,7 +63,10 @@ public class JacksonReaderStrategy<T> implements ReaderStrategy<T> {
     @Override
     public Mono<T> read(Mono<ByteBuf> content, Class<T> responseType) {
         return content.as(JacksonReaderStrategy::byteArray)
-                .map(bytes -> {
+                .flatMap(bytes -> Mono.deferWithContext(ctx -> Mono.fromCallable(() -> {
+                    if (log.isTraceEnabled()) {
+                        log.trace("{}", new String(bytes, StandardCharsets.UTF_8));
+                    }
                     try {
                         return objectMapper.readValue(bytes, responseType);
                     } catch (JsonProcessingException e) {
@@ -71,16 +75,7 @@ public class JacksonReaderStrategy<T> implements ReaderStrategy<T> {
                     } catch (IOException e) {
                         throw Exceptions.propagate(e);
                     }
-                })
-                .doOnNext(response -> {
-                    if (log.isTraceEnabled()) {
-                        try {
-                            log.trace("{}", objectMapper.writeValueAsString(response));
-                        } catch (JsonProcessingException e) {
-                            log.trace("Error while printing debug response: {}", response, e);
-                        }
-                    }
-                });
+                })));
     }
 
     private static Mono<byte[]> byteArray(Mono<ByteBuf> byteBufMono) {
