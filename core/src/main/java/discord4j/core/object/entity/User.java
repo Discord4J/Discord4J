@@ -87,6 +87,15 @@ public class User implements Entity {
     }
 
     /**
+     * Gets the user's username and discriminator seperated by a #
+     * This is unique across the discord platform, but may changes.
+     * @return {@link User#getUsername()}#{@link User#getDiscriminator()}
+     */
+    public final String getAsTag() {
+        return getUsername() + "#" + getDiscriminator();
+    }
+
+    /**
      * Gets if the user's avatar is animated.
      *
      * @return {@code true} if the user's avatar is animated, {@code false} otherwise.
