@@ -91,7 +91,7 @@ public class User implements Entity {
      * This is unique across the discord platform, but may changes.
      * @return {@link User#getUsername()}#{@link User#getDiscriminator()}
      */
-    public final String getAsTag() {
+    public final String getTag() {
         return getUsername() + "#" + getDiscriminator();
     }
 
