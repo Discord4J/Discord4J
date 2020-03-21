@@ -80,7 +80,7 @@ public class BotSupport {
             if (content.startsWith("!echo ")) {
                 return message.getRestChannel().createMessage(
                         ImmutableMessageCreateRequest.builder()
-                                .content(Possible.of(content.substring("!echo ".length())))
+                                .content(Possible.of("<@" + message.getUserData().id() + "> " + content.substring("!echo ".length())))
                                 .build())
                         .then();
             }
