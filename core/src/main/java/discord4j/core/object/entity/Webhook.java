@@ -16,8 +16,8 @@
  */
 package discord4j.core.object.entity;
 
+import discord4j.discordjson.json.WebhookData;
 import discord4j.core.GatewayDiscordClient;
-import discord4j.core.object.data.WebhookBean;
 import discord4j.core.object.entity.channel.GuildMessageChannel;
 import discord4j.core.object.util.Snowflake;
 import discord4j.core.spec.WebhookEditSpec;
@@ -40,7 +40,7 @@ public final class Webhook implements Entity {
     private final GatewayDiscordClient gateway;
 
     /** The raw data as represented by Discord. */
-    private final WebhookBean data;
+    private final WebhookData data;
 
     /**
      * Constructs a {@code Webhook} with an associated ServiceMediator and Discord data.
@@ -48,7 +48,7 @@ public final class Webhook implements Entity {
      * @param gateway The {@link GatewayDiscordClient} associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
      */
-    public Webhook(final GatewayDiscordClient gateway, final WebhookBean data) {
+    public Webhook(final GatewayDiscordClient gateway, final WebhookData data) {
         this.gateway = Objects.requireNonNull(gateway);
         this.data = Objects.requireNonNull(data);
     }
@@ -60,7 +60,7 @@ public final class Webhook implements Entity {
 
     @Override
     public Snowflake getId() {
-        return Snowflake.of(data.getId());
+        return Snowflake.of(data.id());
     }
 
     /**
@@ -69,7 +69,7 @@ public final class Webhook implements Entity {
      * @return The ID of the guild this webhook is associated to.
      */
     public Snowflake getGuildId() {
-        return Snowflake.of(data.getGuildId());
+        return Snowflake.of(data.guildId().get()); // TODO FIXME: really Possible?
     }
 
     /**
@@ -88,7 +88,7 @@ public final class Webhook implements Entity {
      * @return The ID of the channel this webhook is associated to.
      */
     public Snowflake getChannelId() {
-        return Snowflake.of(data.getChannelId());
+        return Snowflake.of(data.channelId());
     }
 
     /**
@@ -107,7 +107,7 @@ public final class Webhook implements Entity {
      * @return The ID of the user this webhook was created by.
      */
     public Snowflake getCreatorId() {
-        return Snowflake.of(data.getUser());
+        return Snowflake.of(data.user().get().id()); // TODO FIXME: really Possible?
     }
 
     /**
@@ -126,7 +126,7 @@ public final class Webhook implements Entity {
      * @return The default name of the webhook.
      */
     public Optional<String> getName() {
-        return Optional.ofNullable(data.getName());
+        return data.name();
     }
 
     /**
@@ -135,7 +135,7 @@ public final class Webhook implements Entity {
      * @return The avatar of this webhook, if present.
      */
     public Optional<String> getAvatar() {
-        return Optional.ofNullable(data.getAvatar());
+        return data.avatar();
     }
 
     /**
@@ -144,7 +144,7 @@ public final class Webhook implements Entity {
      * @return The secure token of this webhook.
      */
     public String getToken() {
-        return data.getToken();
+        return data.token().get(); // TODO FIXME: really Possible?
     }
 
     /**
@@ -182,8 +182,7 @@ public final class Webhook implements Entity {
 
         return gateway.getRestClient().getWebhookService()
                 .modifyWebhook(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason())
-                .map(WebhookBean::new)
-                .map(bean -> new Webhook(gateway, bean));
+                .map(data -> new Webhook(gateway, data));
     }
 
     @Override

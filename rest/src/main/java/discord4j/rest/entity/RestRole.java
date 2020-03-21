@@ -17,11 +17,11 @@
 
 package discord4j.rest.entity;
 
-import discord4j.common.json.RoleResponse;
+import discord4j.discordjson.json.ImmutablePositionModifyRequest;
+import discord4j.discordjson.json.PositionModifyRequest;
+import discord4j.discordjson.json.RoleData;
+import discord4j.discordjson.json.RoleModifyRequest;
 import discord4j.rest.RestClient;
-import discord4j.rest.entity.data.RoleData;
-import discord4j.rest.json.request.PositionModifyRequest;
-import discord4j.rest.json.request.RoleModifyRequest;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
@@ -32,10 +32,18 @@ public class RestRole {
     private final long guildId;
     private final long id;
 
-    public RestRole(RestClient restClient, long guildId, long id) {
+    private RestRole(RestClient restClient, long guildId, long id) {
         this.restClient = restClient;
         this.guildId = guildId;
         this.id = id;
+    }
+
+    public static RestRole create(RestClient restClient, long guildId, long id) {
+        return new RestRole(restClient, guildId, id);
+    }
+
+    public RestGuild guild() {
+        return RestGuild.create(restClient, guildId);
     }
 
     /**
@@ -43,10 +51,10 @@ public class RestRole {
      *
      * @param request A {@link RoleModifyRequest} to parameterize this request.
      * @param reason The reason, if present.
-     * @return A {@link Mono} where, upon successful completion, emits the edited {@link RoleResponse}. If an error
+     * @return A {@link Mono} where, upon successful completion, emits the edited {@link RoleData}. If an error
      * is received, it is emitted through the {@code Mono}.
      */
-    public Mono<RoleResponse> edit(final RoleModifyRequest request, @Nullable String reason) {
+    public Mono<RoleData> edit(final RoleModifyRequest request, @Nullable String reason) {
         return restClient.getGuildService().modifyGuildRole(guildId, id, request, reason);
     }
 
@@ -65,19 +73,19 @@ public class RestRole {
      * Requests to change this role's position.
      *
      * @param position The position to change for this role.
-     * @return A {@link Flux} that continually emits all the {@link RoleResponse roles} associated to this role's
+     * @return A {@link Flux} that continually emits all the {@link RoleData roles} associated to this role's
      * guild. If an error is received, it is emitted through the {@code Flux}.
      */
-    public Flux<RoleResponse> changePosition(final int position) {
-        final PositionModifyRequest[] requests = {new PositionModifyRequest(id, position)};
+    public Flux<RoleData> changePosition(final int position) {
+        final PositionModifyRequest[] requests = {ImmutablePositionModifyRequest.of(Long.toUnsignedString(id),
+                position)};
         return restClient.getGuildService().modifyGuildRolePositions(guildId, requests);
     }
 
     public Mono<RoleData> getData() {
         return restClient.getGuildService()
                 .getGuildRoles(guildId)
-                .filter(response -> response.getId() == id)
-                .map(res -> new RoleData(guildId, res))
+                .filter(response -> Long.parseUnsignedLong(response.id()) == id)
                 .singleOrEmpty();
     }
 }

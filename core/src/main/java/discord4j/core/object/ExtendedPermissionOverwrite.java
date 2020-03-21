@@ -16,8 +16,8 @@
  */
 package discord4j.core.object;
 
+import discord4j.discordjson.json.OverwriteData;
 import discord4j.core.GatewayDiscordClient;
-import discord4j.core.object.data.stored.PermissionOverwriteBean;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Role;
 import discord4j.core.object.entity.User;
@@ -52,9 +52,9 @@ public final class ExtendedPermissionOverwrite extends PermissionOverwrite imple
      * @param guildId The ID of the guild associated to this overwrite.
      * @param channelId The ID of the channel associated to this overwrite.
      */
-    public ExtendedPermissionOverwrite(final GatewayDiscordClient gateway, final PermissionOverwriteBean data,
+    public ExtendedPermissionOverwrite(final GatewayDiscordClient gateway, final OverwriteData data,
                                        final long guildId, final long channelId) {
-        super(data.getAllow(), data.getDeny(), data.getId(), Type.of(data.getType()));
+        super(data.allow(), data.deny(), Long.parseUnsignedLong(data.id()), Type.of(data.type()));
         this.gateway = Objects.requireNonNull(gateway);
         this.guildId = guildId;
         this.channelId = channelId;

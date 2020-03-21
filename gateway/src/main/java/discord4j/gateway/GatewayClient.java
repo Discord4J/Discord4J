@@ -17,9 +17,9 @@
 
 package discord4j.gateway;
 
+import discord4j.discordjson.json.gateway.Dispatch;
 import discord4j.gateway.retry.PartialDisconnectException;
 import discord4j.gateway.json.GatewayPayload;
-import discord4j.gateway.json.dispatch.Dispatch;
 import io.netty.buffer.ByteBuf;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;

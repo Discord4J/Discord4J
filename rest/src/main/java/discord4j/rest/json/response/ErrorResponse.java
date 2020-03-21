@@ -38,7 +38,7 @@ public class ErrorResponse {
     @Override
     public String toString() {
         return "ErrorResponse{" +
-                "fields=" + fields +
-                '}';
+            "fields=" + fields +
+            '}';
     }
 }

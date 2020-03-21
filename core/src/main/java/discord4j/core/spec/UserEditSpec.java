@@ -16,9 +16,10 @@
  */
 package discord4j.core.spec;
 
-import discord4j.common.jackson.Possible;
+import discord4j.discordjson.json.ImmutableUserModifyRequest;
+import discord4j.discordjson.json.UserModifyRequest;
+import discord4j.discordjson.possible.Possible;
 import discord4j.core.object.util.Image;
-import discord4j.rest.json.request.UserModifyRequest;
 import reactor.util.annotation.Nullable;
 
 /**
@@ -55,6 +56,6 @@ public class UserEditSpec implements Spec<UserModifyRequest> {
 
     @Override
     public UserModifyRequest asRequest() {
-        return new UserModifyRequest(username, avatar);
+        return ImmutableUserModifyRequest.of(username, avatar);
     }
 }

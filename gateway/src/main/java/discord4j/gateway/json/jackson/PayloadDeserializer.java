@@ -16,13 +16,12 @@
  */
 package discord4j.gateway.json.jackson;
 
+import discord4j.discordjson.json.gateway.*;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import discord4j.gateway.json.GatewayPayload;
-import discord4j.gateway.json.Opcode;
-import discord4j.gateway.json.PayloadData;
 import discord4j.gateway.json.dispatch.*;
 import reactor.util.annotation.Nullable;
 

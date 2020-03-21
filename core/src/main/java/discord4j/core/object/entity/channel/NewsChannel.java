@@ -16,8 +16,8 @@
  */
 package discord4j.core.object.entity.channel;
 
+import discord4j.discordjson.json.ChannelData;
 import discord4j.core.GatewayDiscordClient;
-import discord4j.core.object.data.stored.ChannelBean;
 import discord4j.core.spec.NewsChannelEditSpec;
 import discord4j.core.util.EntityUtil;
 import reactor.core.publisher.Mono;
@@ -33,7 +33,7 @@ public final class NewsChannel extends BaseGuildMessageChannel {
      * @param gateway The {@link GatewayDiscordClient} associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
      */
-    public NewsChannel(GatewayDiscordClient gateway, ChannelBean data) {
+    public NewsChannel(GatewayDiscordClient gateway, ChannelData data) {
         super(gateway, data);
     }
 
@@ -50,8 +50,7 @@ public final class NewsChannel extends BaseGuildMessageChannel {
 
         return getClient().getRestClient().getChannelService()
                 .modifyChannel(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason())
-                .map(ChannelBean::new)
-                .map(bean -> EntityUtil.getChannel(getClient(), bean))
+                .map(data -> EntityUtil.getChannel(getClient(), data))
                 .cast(NewsChannel.class);
     }
 

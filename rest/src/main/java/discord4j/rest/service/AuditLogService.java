@@ -16,7 +16,7 @@
  */
 package discord4j.rest.service;
 
-import discord4j.rest.json.response.AuditLogResponse;
+import discord4j.discordjson.json.AuditLogData;
 import discord4j.rest.request.Router;
 import discord4j.rest.route.Routes;
 import reactor.core.publisher.Mono;
@@ -29,10 +29,10 @@ public class AuditLogService extends RestService {
         super(router);
     }
 
-    public Mono<AuditLogResponse> getAuditLog(long guildId, Map<String, Object> queryParams) {
+    public Mono<AuditLogData> getAuditLog(long guildId, Map<String, Object> queryParams) {
         return Routes.AUDIT_LOG_GET.newRequest(guildId)
                 .query(queryParams)
                 .exchange(getRouter())
-                .bodyToMono(AuditLogResponse.class);
+                .bodyToMono(AuditLogData.class);
     }
 }

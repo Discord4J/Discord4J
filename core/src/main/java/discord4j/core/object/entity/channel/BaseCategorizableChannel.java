@@ -16,10 +16,10 @@
  */
 package discord4j.core.object.entity.channel;
 
+import discord4j.discordjson.json.ChannelData;
+import discord4j.discordjson.possible.Possible;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.ExtendedInvite;
-import discord4j.core.object.data.ExtendedInviteBean;
-import discord4j.core.object.data.stored.ChannelBean;
 import discord4j.core.object.util.Snowflake;
 import discord4j.core.spec.InviteCreateSpec;
 import reactor.core.publisher.Flux;
@@ -30,13 +30,14 @@ import java.util.function.Consumer;
 
 class BaseCategorizableChannel extends BaseGuildChannel implements CategorizableChannel {
 
-    BaseCategorizableChannel(GatewayDiscordClient gateway, ChannelBean data) {
+    BaseCategorizableChannel(GatewayDiscordClient gateway, ChannelData data) {
         super(gateway, data);
     }
 
     @Override
     public Optional<Snowflake> getCategoryId() {
-        return Optional.ofNullable(getData().getParentId()).map(Snowflake::of);
+        return Possible.flatOpt(getData().parentId())
+            .map(Snowflake::of);
     }
 
     @Override
@@ -51,15 +52,13 @@ class BaseCategorizableChannel extends BaseGuildChannel implements Categorizable
 
         return getClient().getRestClient().getChannelService()
                 .createChannelInvite(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason())
-                .map(ExtendedInviteBean::new)
-                .map(bean -> new ExtendedInvite(getClient(), bean));
+                .map(data -> new ExtendedInvite(getClient(), data));
     }
 
     @Override
     public Flux<ExtendedInvite> getInvites() {
         return getClient().getRestClient().getChannelService()
                 .getChannelInvites(getId().asLong())
-                .map(ExtendedInviteBean::new)
-                .map(bean -> new ExtendedInvite(getClient(), bean));
+                .map(data -> new ExtendedInvite(getClient(), data));
     }
 }

@@ -62,9 +62,11 @@ allprojects {
 
     dependencies {
         api platform("io.projectreactor:reactor-bom:$reactor_bom_version")
+        api "com.discord4j:discord-json:1.0.0-SNAPSHOT"
     }
 
     repositories {
+        mavenLocal()
         mavenCentral()
         if (!isRelease || isJitpack) {
             maven { url 'https://oss.sonatype.org/content/repositories/snapshots' }

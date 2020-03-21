@@ -16,13 +16,14 @@
  */
 package discord4j.rest.service;
 
+import discord4j.discordjson.json.DMCreateRequest;
+import discord4j.discordjson.json.ImmutableDMCreateRequest;
+import discord4j.discordjson.json.ImmutableUserModifyRequest;
+import discord4j.discordjson.json.UserModifyRequest;
+import discord4j.discordjson.possible.Possible;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import discord4j.common.jackson.Possible;
 import discord4j.rest.RestTests;
 import discord4j.rest.http.client.ClientException;
-import discord4j.rest.json.request.DMCreateRequest;
-import discord4j.rest.json.request.UserModifyRequest;
-import discord4j.rest.json.response.ErrorResponse;
 import discord4j.rest.request.Router;
 import org.junit.Test;
 
@@ -69,7 +70,9 @@ public class UserServiceTest {
 
     @Test
     public void testModifyCurrentUser() {
-        UserModifyRequest req = new UserModifyRequest(Possible.of("Discord4J 3 Test Bot"), Possible.absent());
+        UserModifyRequest req = ImmutableUserModifyRequest.builder()
+            .username(Possible.of("Discord4J 3 Test Bot"))
+            .build();
         getUserService().modifyCurrentUser(req).block();
     }
 
@@ -90,7 +93,7 @@ public class UserServiceTest {
 
     @Test
     public void testCreateDM() {
-        DMCreateRequest req = new DMCreateRequest(user);
+        DMCreateRequest req = ImmutableDMCreateRequest.of(Long.toUnsignedString(user));
         getUserService().createDM(req).block();
     }
 

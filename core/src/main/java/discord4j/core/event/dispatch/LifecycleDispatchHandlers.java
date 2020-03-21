@@ -18,16 +18,15 @@ package discord4j.core.event.dispatch;
 
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.lifecycle.*;
-import discord4j.core.object.data.stored.ParameterBean;
-import discord4j.core.object.data.stored.UserBean;
 import discord4j.core.object.entity.User;
+import discord4j.core.state.ParameterData;
 import discord4j.core.state.StateHolder;
-import discord4j.gateway.json.dispatch.Ready;
-import discord4j.gateway.json.dispatch.Resumed;
+import discord4j.discordjson.json.UserData;
+import discord4j.discordjson.json.gateway.Ready;
+import discord4j.discordjson.json.gateway.Resumed;
 import discord4j.gateway.retry.GatewayStateChange;
 import reactor.core.publisher.Mono;
 
-import java.util.Arrays;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -36,29 +35,32 @@ class LifecycleDispatchHandlers {
     static Mono<ReadyEvent> ready(DispatchContext<Ready> context) {
         GatewayDiscordClient gateway = context.getGateway();
         Ready dispatch = context.getDispatch();
-        UserBean userBean = new UserBean(dispatch.getUser());
+        UserData userData = dispatch.user();
+        long userId = Long.parseUnsignedLong(userData.id());
 
-        User self = new User(gateway, userBean);
-        Set<ReadyEvent.Guild> guilds = Arrays.stream(dispatch.getGuilds())
-                .map(g -> new ReadyEvent.Guild(g.getId(), !g.isUnavailable()))
+        User self = new User(gateway, userData);
+        Set<ReadyEvent.Guild> guilds = dispatch.guilds()
+                .stream()
+                .map(g -> new ReadyEvent.Guild(Long.parseUnsignedLong(g.id()), !g.unavailable().get()))
                 .collect(Collectors.toSet());
 
         Mono<Void> saveUser = context.getStateHolder().getUserStore()
-                .save(context.getDispatch().getUser().getId(), userBean);
+                .save(userId, userData);
 
-        ParameterBean parameterBean = new ParameterBean();
-        parameterBean.setValue(userBean.getId());
+        ParameterData parameterData = new ParameterData();
+        parameterData.setValue(userId);
 
         Mono<Void> saveSelfId = context.getStateHolder().getParameterStore()
-                .save(StateHolder.SELF_ID_PARAMETER_KEY, parameterBean);
+                .save(StateHolder.SELF_ID_PARAMETER_KEY, parameterData);
 
         return saveUser.and(saveSelfId)
-                .thenReturn(new ReadyEvent(gateway, context.getShardInfo(), dispatch.getVersion(), self,
-                        guilds, dispatch.getSessionId(), dispatch.getTrace()));
+                .thenReturn(new ReadyEvent(gateway, context.getShardInfo(), dispatch.v(), self, guilds,
+                        dispatch.sessionId(), dispatch.trace()));
     }
 
     static Mono<ResumeEvent> resumed(DispatchContext<Resumed> context) {
-        return Mono.just(new ResumeEvent(context.getGateway(), context.getShardInfo(), context.getDispatch().getTrace()));
+        return Mono.just(new ResumeEvent(context.getGateway(), context.getShardInfo(),
+                context.getDispatch().trace()));
     }
 
     static Mono<? extends GatewayLifecycleEvent> gatewayStateChanged(DispatchContext<GatewayStateChange> context) {

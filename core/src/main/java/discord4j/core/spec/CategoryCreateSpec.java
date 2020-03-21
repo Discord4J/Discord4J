@@ -16,20 +16,25 @@
  */
 package discord4j.core.spec;
 
-import discord4j.common.json.OverwriteEntity;
 import discord4j.core.object.PermissionOverwrite;
-import discord4j.core.object.entity.channel.Channel;
 import discord4j.core.object.entity.channel.Category;
-import discord4j.rest.json.request.ChannelCreateRequest;
+import discord4j.core.object.entity.channel.Channel;
+import discord4j.discordjson.json.ChannelCreateRequest;
+import discord4j.discordjson.json.ImmutableChannelCreateRequest;
+import discord4j.discordjson.json.ImmutableOverwriteData;
+import discord4j.discordjson.json.OverwriteData;
+import discord4j.discordjson.possible.Possible;
 import reactor.util.annotation.Nullable;
 
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /** A spec used to configure and create a {@link Category}. */
 public class CategoryCreateSpec implements AuditSpec<ChannelCreateRequest> {
 
-    private final ChannelCreateRequest.Builder requestBuilder = ChannelCreateRequest.builder()
-            .type(Channel.Type.GUILD_CATEGORY.getValue());
+    private final ImmutableChannelCreateRequest.Builder requestBuilder = ImmutableChannelCreateRequest.builder()
+            .type(Possible.of(Channel.Type.GUILD_CATEGORY.getValue()));
     @Nullable
     private String reason;
 
@@ -51,7 +56,7 @@ public class CategoryCreateSpec implements AuditSpec<ChannelCreateRequest> {
      * @return This spec.
      */
     public CategoryCreateSpec setPosition(int position) {
-        requestBuilder.setPosition(position);
+        requestBuilder.position(Possible.of(position));
         return this;
     }
 
@@ -62,12 +67,12 @@ public class CategoryCreateSpec implements AuditSpec<ChannelCreateRequest> {
      * @return This spec.
      */
     public CategoryCreateSpec setPermissionOverwrites(Set<? extends PermissionOverwrite> permissionOverwrites) {
-        OverwriteEntity[] raw = permissionOverwrites.stream()
-                .map(o -> new OverwriteEntity(o.getTargetId().asLong(), o.getType().getValue(),
-                        o.getAllowed().getRawValue(), o.getDenied().getRawValue()))
-                .toArray(OverwriteEntity[]::new);
+        List<OverwriteData> raw = permissionOverwrites.stream()
+            .map(o -> ImmutableOverwriteData.of(o.getTargetId().asString(), o.getType().getValue(),
+                o.getAllowed().getRawValue(), o.getDenied().getRawValue()))
+            .collect(Collectors.toList());
 
-        requestBuilder.permissionOverwrites(raw);
+        requestBuilder.permissionOverwrites(Possible.of(raw));
         return this;
     }
 

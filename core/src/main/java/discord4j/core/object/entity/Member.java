@@ -18,17 +18,16 @@ package discord4j.core.object.entity;
 
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.VoiceState;
-import discord4j.core.object.data.stored.MemberBean;
-import discord4j.core.object.data.stored.PresenceBean;
-import discord4j.core.object.data.stored.UserBean;
-import discord4j.core.object.data.stored.VoiceStateBean;
 import discord4j.core.object.presence.Presence;
-import discord4j.core.object.util.PermissionSet;
+import discord4j.rest.util.PermissionSet;
 import discord4j.core.object.util.Snowflake;
 import discord4j.core.spec.BanQuerySpec;
 import discord4j.core.spec.GuildMemberEditSpec;
 import discord4j.core.util.OrderUtil;
 import discord4j.core.util.PermissionUtil;
+import discord4j.discordjson.json.MemberData;
+import discord4j.discordjson.json.PresenceData;
+import discord4j.discordjson.json.VoiceStateData;
 import discord4j.store.api.util.LongLongTuple2;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -38,7 +37,10 @@ import reactor.util.annotation.Nullable;
 import java.awt.Color;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -51,7 +53,7 @@ import java.util.stream.Collectors;
 public final class Member extends User {
 
     /** The raw data as represented by Discord. */
-    private final MemberBean data;
+    private final MemberData data;
 
     /** The ID of the guild this user is associated to. */
     private final long guildId;
@@ -61,12 +63,10 @@ public final class Member extends User {
      *
      * @param gateway The {@link GatewayDiscordClient} associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
-     * @param userData The user data as represented by Discord, must be non-null.
      * @param guildId The ID of the guild this user is associated to.
      */
-    public Member(final GatewayDiscordClient gateway, final MemberBean data, final UserBean userData,
-                  final long guildId) {
-        super(gateway, userData);
+    public Member(final GatewayDiscordClient gateway, final MemberData data, final long guildId) {
+        super(gateway, data.user());
         this.data = Objects.requireNonNull(data);
         this.guildId = guildId;
     }
@@ -84,8 +84,8 @@ public final class Member extends User {
      * @return The user's guild roles' IDs.
      */
     public Set<Snowflake> getRoleIds() {
-        return Arrays.stream(data.getRoles())
-                .mapToObj(Snowflake::of)
+        return data.roles().stream()
+                .map(Snowflake::of)
                 .collect(Collectors.toSet());
     }
 
@@ -123,7 +123,7 @@ public final class Member extends User {
      * @return When the user joined the guild.
      */
     public Instant getJoinTime() {
-        return DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(data.getJoinedAt(), Instant::from);
+        return DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(data.joinedAt(), Instant::from);
     }
 
     /**
@@ -132,7 +132,7 @@ public final class Member extends User {
      * @return When the user boost the guild, if present.
      */
     public Optional<Instant> getPremiumTime() {
-        return Optional.ofNullable(data.getPremiumSince())
+        return data.premiumSince()
                 .map(timestamp -> DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(timestamp, Instant::from));
     }
 
@@ -170,7 +170,7 @@ public final class Member extends User {
      * @return The user's guild nickname (if one is set).
      */
     public Optional<String> getNickname() {
-        return Optional.ofNullable(data.getNick());
+        return data.nick().get();
     }
 
     /**
@@ -190,7 +190,7 @@ public final class Member extends User {
      * for this guild. If an error is received, it is emitted through the {@code Mono}.
      *
      * @implNote If the underlying store does not save
-     * {@link VoiceStateBean} instances <b>OR</b> the bot is currently not logged in then the returned {@code Mono} will
+     * {@link VoiceStateData} instances <b>OR</b> the bot is currently not logged in then the returned {@code Mono} will
      * always be empty.
      */
     public Mono<VoiceState> getVoiceState() {
@@ -206,7 +206,7 @@ public final class Member extends User {
      * this guild. If an error is received, it is emitted through the {@code Mono}.
      *
      * @implNote If the underlying store does not save
-     * {@link PresenceBean} instances <b>OR</b> the bot is currently not logged in then the returned {@code Mono} will
+     * {@link PresenceData} instances <b>OR</b> the bot is currently not logged in then the returned {@code Mono} will
      * always be empty.
      */
     public Mono<Presence> getPresence() {

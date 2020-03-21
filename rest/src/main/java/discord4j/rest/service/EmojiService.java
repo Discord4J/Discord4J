@@ -16,9 +16,9 @@
  */
 package discord4j.rest.service;
 
-import discord4j.common.json.GuildEmojiResponse;
-import discord4j.rest.json.request.GuildEmojiCreateRequest;
-import discord4j.rest.json.request.GuildEmojiModifyRequest;
+import discord4j.discordjson.json.EmojiData;
+import discord4j.discordjson.json.GuildEmojiCreateRequest;
+import discord4j.discordjson.json.GuildEmojiModifyRequest;
 import discord4j.rest.request.Router;
 import discord4j.rest.route.Routes;
 import reactor.core.publisher.Flux;
@@ -31,33 +31,33 @@ public class EmojiService extends RestService {
         super(router);
     }
 
-    public Flux<GuildEmojiResponse> getGuildEmojis(long guildId) {
+    public Flux<EmojiData> getGuildEmojis(long guildId) {
         return Routes.GUILD_EMOJIS_GET.newRequest(guildId)
                 .exchange(getRouter())
-                .bodyToMono(GuildEmojiResponse[].class)
+                .bodyToMono(EmojiData[].class)
                 .flatMapMany(Flux::fromArray);
     }
 
-    public Mono<GuildEmojiResponse> getGuildEmoji(long guildId, long emojiID) {
-        return Routes.GUILD_EMOJI_GET.newRequest(guildId, emojiID)
+    public Mono<EmojiData> getGuildEmoji(long guildId, long emojiId) {
+        return Routes.GUILD_EMOJI_GET.newRequest(guildId, emojiId)
                 .exchange(getRouter())
-                .bodyToMono(GuildEmojiResponse.class);
+                .bodyToMono(EmojiData.class);
     }
 
-    public Mono<GuildEmojiResponse> createGuildEmoji(long guildId, GuildEmojiCreateRequest request, @Nullable String reason) {
+    public Mono<EmojiData> createGuildEmoji(long guildId, GuildEmojiCreateRequest request, @Nullable String reason) {
         return Routes.GUILD_EMOJI_CREATE.newRequest(guildId)
                 .body(request)
                 .optionalHeader("X-Audit-Log-Reason", reason)
                 .exchange(getRouter())
-                .bodyToMono(GuildEmojiResponse.class);
+                .bodyToMono(EmojiData.class);
     }
 
-    public Mono<GuildEmojiResponse> modifyGuildEmoji(long guildId, long emojiId, GuildEmojiModifyRequest request, @Nullable String reason) {
+    public Mono<EmojiData> modifyGuildEmoji(long guildId, long emojiId, GuildEmojiModifyRequest request, @Nullable String reason) {
         return Routes.GUILD_EMOJI_MODIFY.newRequest(guildId, emojiId)
                 .body(request)
                 .optionalHeader("X-Audit-Log-Reason", reason)
                 .exchange(getRouter())
-                .bodyToMono(GuildEmojiResponse.class);
+                .bodyToMono(EmojiData.class);
     }
 
     public Mono<Void> deleteGuildEmoji(long guildId, long emojiId, @Nullable String reason) {

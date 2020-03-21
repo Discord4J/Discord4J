@@ -16,8 +16,8 @@
  */
 package discord4j.core.util;
 
+import discord4j.discordjson.json.ChannelData;
 import discord4j.core.GatewayDiscordClient;
-import discord4j.core.object.data.stored.ChannelBean;
 import discord4j.core.object.entity.Entity;
 import discord4j.core.object.entity.channel.*;
 import discord4j.core.object.reaction.ReactionEmoji;
@@ -40,21 +40,21 @@ public final class EntityUtil {
 
     /**
      * An utility that converts some instance of {@code ChannelBean} to its associated {@code Channel}
-     * {@link Channel.Type type}. That is to say, {@code bean.getType() == Channel#getType().getValue()}.
+     * {@link Channel.Type type}. That is to say, {@code data.getType() == Channel#getType().getValue()}.
      *
      * @param gateway The {@link GatewayDiscordClient} associated to this object, must be non-null.
-     * @param bean The {@code ChannelBean} to convert.
+     * @param data The {@code ChannelBean} to convert.
      * @return The converted {@code Channel}.
      */
-    public static Channel getChannel(final GatewayDiscordClient gateway, final ChannelBean bean) {
-        switch (Channel.Type.of(bean.getType())) {
-            case GUILD_TEXT: return new TextChannel(gateway, bean);
-            case DM: return new PrivateChannel(gateway, bean);
-            case GUILD_VOICE: return new VoiceChannel(gateway, bean);
-            case GUILD_CATEGORY: return new Category(gateway, bean);
-            case GUILD_NEWS: return new NewsChannel(gateway, bean);
-            case GUILD_STORE: return new StoreChannel(gateway, bean);
-            default: return throwUnsupportedDiscordValue(bean);
+    public static Channel getChannel(final GatewayDiscordClient gateway, final ChannelData data) {
+        switch (Channel.Type.of(data.type())) {
+            case GUILD_TEXT: return new TextChannel(gateway, data);
+            case DM: return new PrivateChannel(gateway, data);
+            case GUILD_VOICE: return new VoiceChannel(gateway, data);
+            case GUILD_CATEGORY: return new Category(gateway, data);
+            case GUILD_NEWS: return new NewsChannel(gateway, data);
+            case GUILD_STORE: return new StoreChannel(gateway, data);
+            default: return throwUnsupportedDiscordValue(data);
         }
     }
 

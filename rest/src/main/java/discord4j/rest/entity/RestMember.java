@@ -17,8 +17,8 @@
 
 package discord4j.rest.entity;
 
+import discord4j.discordjson.json.MemberData;
 import discord4j.rest.RestClient;
-import discord4j.rest.entity.data.MemberData;
 import reactor.core.publisher.Mono;
 
 public class RestMember {
@@ -27,15 +27,22 @@ public class RestMember {
     private final long guildId;
     private final long id;
 
-    public RestMember(RestClient restClient, long guildId, long id) {
+    private RestMember(RestClient restClient, long guildId, long id) {
         this.restClient = restClient;
         this.guildId = guildId;
         this.id = id;
     }
 
+    public static RestMember create(RestClient restClient, long guildId, long id) {
+        return new RestMember(restClient, guildId, id);
+    }
+
+    public RestGuild guild() {
+        return RestGuild.create(restClient, guildId);
+    }
+
     public Mono<MemberData> getData() {
         return restClient.getGuildService()
-                .getGuildMember(guildId, id)
-                .map(MemberData::new);
+                .getGuildMember(guildId, id);
     }
 }

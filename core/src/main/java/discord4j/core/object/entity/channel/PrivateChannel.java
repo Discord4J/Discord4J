@@ -16,13 +16,15 @@
  */
 package discord4j.core.object.entity.channel;
 
+import discord4j.discordjson.json.ChannelData;
+import discord4j.discordjson.json.UserData;
 import discord4j.core.GatewayDiscordClient;
-import discord4j.core.object.data.stored.ChannelBean;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.util.Snowflake;
 import reactor.core.publisher.Flux;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -36,7 +38,7 @@ public final class PrivateChannel extends BaseMessageChannel {
      * @param gateway The {@link GatewayDiscordClient} associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
      */
-    public PrivateChannel(final GatewayDiscordClient gateway, final ChannelBean data) {
+    public PrivateChannel(final GatewayDiscordClient gateway, final ChannelData data) {
         super(gateway, data);
     }
 
@@ -46,9 +48,12 @@ public final class PrivateChannel extends BaseMessageChannel {
      * @return The IDs of the recipients for this private channel.
      */
     public Set<Snowflake> getRecipientIds() {
-        return Arrays.stream(Objects.requireNonNull(getData().getRecipients()))
-                .mapToObj(Snowflake::of)
-                .collect(Collectors.toSet());
+        return getData().recipients().toOptional()
+            .map(recipients -> recipients.stream()
+                .map(UserData::id)
+                .map(Snowflake::of)
+                .collect(Collectors.toSet()))
+            .orElse(Collections.emptySet());
     }
 
     /**

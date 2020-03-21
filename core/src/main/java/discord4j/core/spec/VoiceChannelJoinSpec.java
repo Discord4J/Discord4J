@@ -21,14 +21,16 @@ import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.VoiceServerUpdateEvent;
 import discord4j.core.event.domain.VoiceStateUpdateEvent;
 import discord4j.core.object.entity.channel.VoiceChannel;
+import discord4j.discordjson.json.gateway.ImmutableVoiceStateUpdate;
+import discord4j.discordjson.json.gateway.VoiceStateUpdate;
 import discord4j.gateway.GatewayClientGroup;
 import discord4j.gateway.json.ShardGatewayPayload;
-import discord4j.gateway.json.VoiceStateUpdate;
 import discord4j.voice.*;
 import reactor.core.publisher.Mono;
 import reactor.util.function.Tuple2;
 
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * Spec used to request a connection to a {@link VoiceChannel} and handle the initialization of the resulting
@@ -136,7 +138,7 @@ public class VoiceChannelJoinSpec implements Spec<Mono<VoiceConnection>> {
         final GatewayClientGroup clientGroup = voiceChannel.getClient().getGatewayClientGroup();
         final int shardId = (int) ((voiceChannel.getGuildId().asLong() >> 22) % clientGroup.getShardCount());
         final Mono<Void> sendVoiceStateUpdate = clientGroup.unicast(ShardGatewayPayload.voiceStateUpdate(
-                new VoiceStateUpdate(guildId, channelId, selfMute, selfDeaf), shardId));
+                ImmutableVoiceStateUpdate.of(Long.toUnsignedString(guildId), Optional.of(Long.toUnsignedString(channelId)), selfMute, selfDeaf), shardId));
 
         final Mono<VoiceStateUpdateEvent> waitForVoiceStateUpdate = gateway.getEventDispatcher()
                 .on(VoiceStateUpdateEvent.class)
@@ -183,7 +185,7 @@ public class VoiceChannelJoinSpec implements Spec<Mono<VoiceConnection>> {
 
     private static VoiceDisconnectTask onDisconnectTask(GatewayClientGroup clientGroup) {
         return guildId -> {
-            VoiceStateUpdate voiceStateUpdate = new VoiceStateUpdate(guildId, null, false, false);
+            VoiceStateUpdate voiceStateUpdate = ImmutableVoiceStateUpdate.of(String.valueOf(guildId), Optional.empty(), false, false);
             int shardId = (int) ((guildId >> 22) % clientGroup.getShardCount());
             return clientGroup.unicast(ShardGatewayPayload.voiceStateUpdate(voiceStateUpdate, shardId));
         };

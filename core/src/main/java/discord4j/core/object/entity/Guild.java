@@ -16,15 +16,12 @@
  */
 package discord4j.core.object.entity;
 
-import discord4j.common.json.GuildMemberResponse;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.Ban;
 import discord4j.core.object.ExtendedInvite;
 import discord4j.core.object.Region;
 import discord4j.core.object.VoiceState;
 import discord4j.core.object.audit.AuditLogEntry;
-import discord4j.core.object.data.*;
-import discord4j.core.object.data.stored.*;
 import discord4j.core.object.entity.channel.*;
 import discord4j.core.object.presence.Presence;
 import discord4j.core.object.util.Image;
@@ -33,16 +30,13 @@ import discord4j.core.spec.*;
 import discord4j.core.util.EntityUtil;
 import discord4j.core.util.ImageUtil;
 import discord4j.core.util.OrderUtil;
-import discord4j.core.util.PaginationUtil;
-import discord4j.rest.json.request.NicknameModifyRequest;
-import discord4j.rest.json.response.AuditLogEntryResponse;
-import discord4j.rest.json.response.AuditLogResponse;
-import discord4j.rest.json.response.PruneResponse;
+import discord4j.discordjson.json.*;
+import discord4j.discordjson.possible.Possible;
+import discord4j.rest.util.PaginationUtil;
 import discord4j.store.api.util.LongLongTuple2;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
-import reactor.util.function.Tuples;
 
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
@@ -51,7 +45,6 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.ToLongFunction;
 import java.util.stream.Collectors;
-import java.util.stream.LongStream;
 
 /**
  * A Discord guild.
@@ -76,7 +69,7 @@ public final class Guild implements Entity {
     private final GatewayDiscordClient gateway;
 
     /** The raw data as represented by Discord. */
-    private final BaseGuildBean data;
+    private final GuildData data;
 
     /**
      * Constructs an {@code Guild} with an associated ServiceMediator and Discord data.
@@ -84,7 +77,7 @@ public final class Guild implements Entity {
      * @param gateway The {@link GatewayDiscordClient} associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
      */
-    public Guild(final GatewayDiscordClient gateway, final BaseGuildBean data) {
+    public Guild(final GatewayDiscordClient gateway, final GuildData data) {
         this.gateway = Objects.requireNonNull(gateway);
         this.data = Objects.requireNonNull(data);
     }
@@ -96,11 +89,7 @@ public final class Guild implements Entity {
 
     @Override
     public Snowflake getId() {
-        return Snowflake.of(data.getId());
-    }
-
-    private Optional<GuildBean> getGatewayData() {
-        return (data instanceof GuildBean) ? Optional.of((GuildBean) data) : Optional.empty();
+        return Snowflake.of(data.id());
     }
 
     /**
@@ -109,7 +98,7 @@ public final class Guild implements Entity {
      * @return The guild name.
      */
     public String getName() {
-        return data.getName();
+        return data.name();
     }
 
     /**
@@ -119,7 +108,7 @@ public final class Guild implements Entity {
      * @return The icon URL of the guild, if present.
      */
     public Optional<String> getIconUrl(final Image.Format format) {
-        return Optional.ofNullable(data.getIcon())
+        return data.icon()
                 .map(icon -> ImageUtil.getUrl(String.format(ICON_IMAGE_PATH, getId().asString(), icon), format));
     }
 
@@ -141,7 +130,7 @@ public final class Guild implements Entity {
      * @return The splash URL of the guild, if present.
      */
     public Optional<String> getSplashUrl(final Image.Format format) {
-        return Optional.ofNullable(data.getSplash())
+        return data.splash()
                 .map(splash -> ImageUtil.getUrl(String.format(SPLASH_IMAGE_PATH, getId().asString(), splash), format));
     }
 
@@ -163,8 +152,8 @@ public final class Guild implements Entity {
      * @return The banner URL of the guild, if present.
      */
     public Optional<String> getBannerUrl(final Image.Format format) {
-        return Optional.ofNullable(data.getBanner())
-            .map(splash -> ImageUtil.getUrl(String.format(BANNER_IMAGE_PATH, getId().asString(), splash), format));
+        return data.banner()
+                .map(splash -> ImageUtil.getUrl(String.format(BANNER_IMAGE_PATH, getId().asString(), splash), format));
     }
 
     /**
@@ -184,7 +173,7 @@ public final class Guild implements Entity {
      * @return The ID of the owner of the guild.
      */
     public Snowflake getOwnerId() {
-        return Snowflake.of(data.getOwnerId());
+        return Snowflake.of(data.ownerId());
     }
 
     /**
@@ -203,7 +192,7 @@ public final class Guild implements Entity {
      * @return The voice region ID for the guild.
      */
     public String getRegionId() {
-        return data.getRegion();
+        return data.region();
     }
 
     /**
@@ -225,8 +214,7 @@ public final class Guild implements Entity {
     public Flux<Region> getRegions() {
         return gateway.getRestClient().getGuildService()
                 .getGuildVoiceRegions(getId().asLong())
-                .map(RegionBean::new)
-                .map(bean -> new Region(gateway, bean));
+                .map(data -> new Region(gateway, data));
     }
 
     /**
@@ -235,7 +223,7 @@ public final class Guild implements Entity {
      * @return The ID of the AFK channel, if present.
      */
     public Optional<Snowflake> getAfkChannelId() {
-        return Optional.ofNullable(data.getAfkChannelId()).map(Snowflake::of);
+        return data.afkChannelId().map(Snowflake::of);
     }
 
     /**
@@ -254,7 +242,7 @@ public final class Guild implements Entity {
      * @return The AFK timeout in seconds.
      */
     public int getAfkTimeout() {
-        return data.getAfkTimeout();
+        return data.afkTimeout();
     }
 
     /**
@@ -263,7 +251,7 @@ public final class Guild implements Entity {
      * @return The ID of the embedded channel, if present.
      */
     public Optional<Snowflake> getEmbedChannelId() {
-        return Optional.ofNullable(data.getEmbedChannelId()).map(Snowflake::of);
+        return data.embedChannelId().get().map(Snowflake::of);
     }
 
     /**
@@ -282,7 +270,7 @@ public final class Guild implements Entity {
      * @return The Premium Tier for the guild.
      */
     public PremiumTier getPremiumTier() {
-        return PremiumTier.of(data.getPremiumTier());
+        return PremiumTier.of(data.premiumTier());
     }
 
     /**
@@ -291,17 +279,18 @@ public final class Guild implements Entity {
      * @return The total number of users currently boosting this server, if present.
      */
     public OptionalInt getPremiumSubscriptionCount() {
-        return Optional.ofNullable(data.getPremiumSubscriptionCount())
-            .map(OptionalInt::of)
-            .orElse(OptionalInt.empty());
+        return data.premiumSubscriptionCount().toOptional()
+                .map(OptionalInt::of)
+                .orElse(OptionalInt.empty());
     }
 
-    /** Gets the preferred locale of the guild, only set if guild has the "DISCOVERABLE" feature, defaults to en-US.
+    /**
+     * Gets the preferred locale of the guild, only set if guild has the "DISCOVERABLE" feature, defaults to en-US.
      *
      * @return The preferred locale of the guild, only set if guild has the "DISCOVERABLE" feature, defaults to en-US.
      */
     public Locale getPreferredLocale() {
-        return new Locale.Builder().setLanguageTag(data.getPreferredLocale()).build();
+        return new Locale.Builder().setLanguageTag(data.preferredLocale()).build();
     }
 
     /**
@@ -310,16 +299,16 @@ public final class Guild implements Entity {
      * @return The level of verification required for the guild.
      */
     public VerificationLevel getVerificationLevel() {
-        return VerificationLevel.of(data.getVerificationLevel());
+        return VerificationLevel.of(data.verificationLevel());
     }
 
     /**
-     * Gets the default message notification level.
+     * Gets the default message notification level..
      *
      * @return The default message notification level.
      */
     public NotificationLevel getNotificationLevel() {
-        return NotificationLevel.of(data.getDefaultMessageNotifications());
+        return NotificationLevel.of(data.defaultMessageNotifications());
     }
 
     /**
@@ -328,7 +317,7 @@ public final class Guild implements Entity {
      * @return The default explicit content filter level.
      */
     public ContentFilterLevel getContentFilterLevel() {
-        return ContentFilterLevel.of(data.getExplicitContentFilter());
+        return ContentFilterLevel.of(data.explicitContentFilter());
     }
 
     /**
@@ -337,9 +326,7 @@ public final class Guild implements Entity {
      * @return The guild's roles' IDs.
      */
     public Set<Snowflake> getRoleIds() {
-        return Arrays.stream(data.getRoles())
-                .mapToObj(Snowflake::of)
-                .collect(Collectors.toSet());
+        return data.roles().stream().map(Snowflake::of).collect(Collectors.toSet());
     }
 
     /**
@@ -383,9 +370,7 @@ public final class Guild implements Entity {
      * @return The guild's emoji's IDs.
      */
     public Set<Snowflake> getEmojiIds() {
-        return Arrays.stream(data.getEmojis())
-                .mapToObj(Snowflake::of)
-                .collect(Collectors.toSet());
+        return data.emojis().stream().map(Snowflake::of).collect(Collectors.toSet());
     }
 
     /**
@@ -412,12 +397,13 @@ public final class Guild implements Entity {
     /**
      * Gets the enabled guild features.
      * <br>
-     * You can see the available <a href="https://discordapp.com/developers/docs/resources/guild#guild-object-guild-features">guild features</a>
+     * You can see the available
+     * <a href="https://discordapp.com/developers/docs/resources/guild#guild-object-guild-features">guild features</a>
      *
      * @return The enabled guild features.
      */
     public Set<String> getFeatures() {
-        return Arrays.stream(data.getFeatures()).collect(Collectors.toSet());
+        return new HashSet<>(data.features());
     }
 
     /**
@@ -426,7 +412,7 @@ public final class Guild implements Entity {
      * @return The required MFA level for the guild.
      */
     public MfaLevel getMfaLevel() {
-        return MfaLevel.of(data.getMfaLevel());
+        return MfaLevel.of(data.mfaLevel());
     }
 
     /**
@@ -435,17 +421,16 @@ public final class Guild implements Entity {
      * @return The application ID of the guild creator if it is bot-created.
      */
     public Optional<Snowflake> getApplicationId() {
-        return Optional.ofNullable(data.getApplicationId()).map(Snowflake::of);
+        return data.applicationId().map(Snowflake::of);
     }
 
     /**
      * Gets whether this guild widget is enabled.
      *
      * @return {@code true} if the guild widget is enabled, {@code false} otherwise.
-     *
      */
     public boolean isWidgetEnabled() {
-        return Optional.ofNullable(data.isWidgetEnabled()).orElse(false);
+        return data.widgetEnabled().toOptional().orElse(false);
     }
 
     /**
@@ -454,7 +439,7 @@ public final class Guild implements Entity {
      * @return The channel ID for the server widget, if present.
      */
     public Optional<Snowflake> getWidgetChannelId() {
-        return Optional.ofNullable(data.getWidgetChannelId()).map(Snowflake::of);
+        return data.widgetChannelId().get().map(Snowflake::of);
     }
 
     /**
@@ -473,7 +458,7 @@ public final class Guild implements Entity {
      * @return The ID of the channel to which system messages are sent, if present.
      */
     public Optional<Snowflake> getSystemChannelId() {
-        return Optional.ofNullable(data.getSystemChannelId()).map(Snowflake::of);
+        return data.systemChannelId().map(Snowflake::of);
     }
 
     /**
@@ -487,59 +472,39 @@ public final class Guild implements Entity {
     }
 
     /**
-     * Gets when this guild was joined at, if present.
+     * Gets when this guild was joined at.
      *
-     * @return When this guild was joined at, if present.
-     *
-     * @implNote If the underlying store does not save
-     * {@link GuildBean} instances <b>OR</b> the bot is currently not logged in then the returned {@code Optional} will
-     * always be empty.
+     * @return When this guild was joined at.
      */
-    public Optional<Instant> getJoinTime() {
-        return getGatewayData()
-                .map(GuildBean::getJoinedAt)
-                .map(timestamp -> DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(timestamp, Instant::from));
+    public Instant getJoinTime() {
+        return DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(data.joinedAt(), Instant::from);
     }
 
     /**
-     * Gets whether this guild is considered large, if present.
+     * Gets whether this guild is considered large.
      *
      * @return If present, {@code true} if the guild is considered large, {@code false} otherwise.
-     *
-     * @implNote If the underlying store does not save
-     * {@link GuildBean} instances <b>OR</b> the bot is currently not logged in then the returned {@code Optional} will
-     * always be empty.
      */
-    public Optional<Boolean> isLarge() {
-        return getGatewayData().map(GuildBean::getLarge);
+    public boolean isLarge() {
+        return data.large();
     }
 
     /**
-     * Gets whether this guild is unavailable, if present.
+     * Gets whether this guild is unavailable.
      *
      * @return If present, {@code true} if the guild is unavailable, {@code false} otherwise.
-     *
-     * @implNote If the underlying store does not save
-     * {@link GuildBean} instances <b>OR</b> the bot is currently not logged in then the returned {@code Optional} will
-     * always be empty.
      */
-    public Optional<Boolean> isUnavailable() {
-        return getGatewayData().map(GuildBean::getUnavailable);
+    public boolean isUnavailable() {
+        return data.unavailable();
     }
 
     /**
-     * Gets the total number of members in the guild, if present.
+     * Gets the total number of members in the guild.
      *
-     * @return The total number of members in the guild, if present.
-     *
-     * @implNote If the underlying store does not save
-     * {@link GuildBean} instances <b>OR</b> the bot is currently not logged in then the returned {@code Optional} will
-     * always be empty.
+     * @return The total number of members in the guild.
      */
-    public OptionalInt getMemberCount() {
-        return getGatewayData()
-                .map(guildBean -> OptionalInt.of(guildBean.getMemberCount()))
-                .orElseGet(OptionalInt::empty);
+    public int getMemberCount() {
+        return data.memberCount();
     }
 
     /**
@@ -547,16 +512,12 @@ public final class Guild implements Entity {
      *
      * @return A {@link Flux} that continually emits the {@link VoiceState voice states} of the guild. If an error is
      * received, it is emitted through the {@code Flux}.
-     *
-     * @implNote If the underlying store does not save
-     * {@link VoiceStateBean} instances <b>OR</b> the bot is currently not logged in then the returned {@code Flux} will
-     * always be empty.
      */
     public Flux<VoiceState> getVoiceStates() {
         return gateway.getGatewayResources().getStateView().getVoiceStateStore()
                 .findInRange(LongLongTuple2.of(getId().asLong(), Long.MIN_VALUE),
-                             LongLongTuple2.of(getId().asLong(), Long.MAX_VALUE))
-                .map(bean -> new VoiceState(gateway, bean));
+                        LongLongTuple2.of(getId().asLong(), Long.MAX_VALUE))
+                .map(data -> new VoiceState(gateway, data));
     }
 
     /**
@@ -566,22 +527,19 @@ public final class Guild implements Entity {
      * it is emitted through the {@code Flux}.
      */
     public Flux<Member> getMembers() {
-        Function<Map<String, Object>, Flux<GuildMemberResponse>> doRequest = params ->
+        Function<Map<String, Object>, Flux<MemberData>> doRequest = params ->
                 gateway.getRestClient().getGuildService()
                         .getGuildMembers(getId().asLong(), params);
 
         Flux<Member> requestMembers =
-                PaginationUtil.paginateAfter(doRequest, response -> response.getUser().getId(), 0, 100)
-                        .map(response -> Tuples.of(new MemberBean(response), new UserBean(response.getUser())))
-                        .map(tuple -> new Member(gateway, tuple.getT1(), tuple.getT2(), getId().asLong()));
+                PaginationUtil.paginateAfter(doRequest, data -> Long.parseUnsignedLong(data.user().id()), 0, 100)
+                        .map(data -> new Member(gateway, data, getId().asLong()));
 
-        return Mono.justOrEmpty(getGatewayData())
-                .map(GuildBean::getMembers)
-                .map(Arrays::stream)
-                .map(LongStream::boxed)
-                .flatMapMany(Flux::fromStream)
-                .map(Snowflake::of)
-                .flatMap(memberId -> gateway.getMemberById(getId(), memberId))
+        return Mono.justOrEmpty(data.members())
+                .flatMapMany(Flux::fromIterable)
+                .flatMap(id -> gateway.getGatewayResources().getStateView().getMemberStore()
+                        .find(LongLongTuple2.of(getId().asLong(), Long.parseUnsignedLong(id))))
+                .map(member -> new Member(gateway, member, getId().asLong()))
                 .switchIfEmpty(requestMembers);
     }
 
@@ -599,25 +557,23 @@ public final class Guild implements Entity {
     /**
      * Requests to retrieve the guild's channels.
      * <p>
-     * The order of items emitted by the returned {@code Flux} is unspecified. Use {@link OrderUtil#orderGuildChannels(Flux)}
+     * The order of items emitted by the returned {@code Flux} is unspecified. Use
+     * {@link OrderUtil#orderGuildChannels(Flux)}
      * to consistently order channels.
      *
-     * @return A {@link Flux} that continually emits the guild's {@link GuildChannel channels}. If an error is received, it is
+     * @return A {@link Flux} that continually emits the guild's {@link GuildChannel channels}. If an error is
+     * received, it is
      * emitted through the {@code Flux}.
      */
     public Flux<GuildChannel> getChannels() {
-        return Mono.justOrEmpty(getGatewayData())
-                .map(GuildBean::getChannels)
-                .map(Arrays::stream)
-                .map(LongStream::boxed)
-                .flatMapMany(Flux::fromStream)
-                .map(Snowflake::of)
-                .flatMap(gateway::getChannelById)
+        return Flux.fromIterable(data.channels())
+                .flatMap(id -> gateway.getGatewayResources().getStateView().getChannelStore()
+                        .find(Long.parseUnsignedLong(id)))
+                .map(channelData -> EntityUtil.getChannel(gateway, channelData))
                 .cast(GuildChannel.class)
                 .switchIfEmpty(gateway.getRestClient().getGuildService()
                         .getGuildChannels(getId().asLong())
-                        .map(ChannelBean::new)
-                        .map(bean -> EntityUtil.getChannel(gateway, bean))
+                        .map(data -> EntityUtil.getChannel(gateway, data))
                         .cast(GuildChannel.class));
     }
 
@@ -639,25 +595,21 @@ public final class Guild implements Entity {
      *
      * @return A {@link Flux} that continually emits the {@link Presence presences} of the guild. If an error is
      * received, it is emitted through the {@code Flux}.
-     *
-     * @implNote If the underlying store does not save
-     * {@link PresenceBean} instances <b>OR</b> the bot is currently not logged in then the returned {@code Flux} will
-     * always be empty.
      */
     public Flux<Presence> getPresences() {
         return gateway.getGatewayResources().getStateView().getPresenceStore()
                 .findInRange(LongLongTuple2.of(getId().asLong(), Long.MIN_VALUE),
-                             LongLongTuple2.of(getId().asLong(), Long.MAX_VALUE))
+                        LongLongTuple2.of(getId().asLong(), Long.MAX_VALUE))
                 .map(Presence::new);
     }
 
     /**
-     *	Gets the vanity url code of the guild, if present.
+     * Gets the vanity url code of the guild, if present.
      *
      * @return The vanity url code of the guild, if present.
      */
     public Optional<String> getVanityUrlCode() {
-        return Optional.ofNullable(data.getVanityUrlCode());
+        return data.vanityUrlCode();
     }
 
     /**
@@ -666,7 +618,7 @@ public final class Guild implements Entity {
      * @return The description of the guild, if present.
      */
     public Optional<String> getDescription() {
-        return Optional.ofNullable(data.getDescription());
+        return data.description();
     }
 
     /**
@@ -675,7 +627,7 @@ public final class Guild implements Entity {
      * @return The maximum amount of presences for the guild.
      */
     public int getMaxPresences() {
-        return Optional.ofNullable(data.getMaxPresences()).orElse(DEFAULT_MAX_PRESENCES);
+        return Possible.flatOpt(data.maxPresences()).orElse(DEFAULT_MAX_PRESENCES);
     }
 
     /**
@@ -684,7 +636,9 @@ public final class Guild implements Entity {
      * @return The maximum amount of members for the guild, if present.
      */
     public OptionalInt getMaxMembers() {
-        return data.getMaxMembers() == null ? OptionalInt.empty() : OptionalInt.of(data.getMaxMembers());
+        return data.maxMembers().toOptional()
+                .map(OptionalInt::of)
+                .orElseGet(OptionalInt::empty);
     }
 
     /**
@@ -700,8 +654,10 @@ public final class Guild implements Entity {
 
         return gateway.getRestClient().getGuildService()
                 .modifyGuild(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason())
-                .map(BaseGuildBean::new)
-                .map(bean -> new Guild(gateway, bean));
+                .map(data -> new Guild(gateway, ImmutableGuildData.builder()
+                        .from(this.data)
+                        .from(data)
+                        .build()));
     }
 
     /**
@@ -717,8 +673,7 @@ public final class Guild implements Entity {
 
         return gateway.getRestClient().getEmojiService()
                 .createGuildEmoji(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason())
-                .map(GuildEmojiBean::new)
-                .map(bean -> new GuildEmoji(gateway, bean, getId().asLong()));
+                .map(data -> new GuildEmoji(gateway, data, getId().asLong()));
     }
 
     /**
@@ -734,8 +689,7 @@ public final class Guild implements Entity {
 
         return gateway.getRestClient().getGuildService()
                 .createGuildRole(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason())
-                .map(RoleBean::new)
-                .map(bean -> new Role(gateway, bean, getId().asLong()));
+                .map(data -> new Role(gateway, data, getId().asLong()));
     }
 
     /**
@@ -751,8 +705,7 @@ public final class Guild implements Entity {
 
         return gateway.getRestClient().getGuildService()
                 .createGuildChannel(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason())
-                .map(ChannelBean::new)
-                .map(bean -> EntityUtil.getChannel(gateway, bean))
+                .map(data -> EntityUtil.getChannel(gateway, data))
                 .cast(NewsChannel.class);
     }
 
@@ -769,8 +722,7 @@ public final class Guild implements Entity {
 
         return gateway.getRestClient().getGuildService()
                 .createGuildChannel(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason())
-                .map(ChannelBean::new)
-                .map(bean -> EntityUtil.getChannel(gateway, bean))
+                .map(data -> EntityUtil.getChannel(gateway, data))
                 .cast(Category.class);
     }
 
@@ -787,8 +739,7 @@ public final class Guild implements Entity {
 
         return gateway.getRestClient().getGuildService()
                 .createGuildChannel(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason())
-                .map(ChannelBean::new)
-                .map(bean -> EntityUtil.getChannel(gateway, bean))
+                .map(data -> EntityUtil.getChannel(gateway, data))
                 .cast(TextChannel.class);
     }
 
@@ -805,8 +756,7 @@ public final class Guild implements Entity {
 
         return gateway.getRestClient().getGuildService()
                 .createGuildChannel(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason())
-                .map(ChannelBean::new)
-                .map(bean -> EntityUtil.getChannel(gateway, bean))
+                .map(data -> EntityUtil.getChannel(gateway, data))
                 .cast(VoiceChannel.class);
     }
 
@@ -837,7 +787,6 @@ public final class Guild implements Entity {
      *
      * @param userId The ID of the user to kick from this guild.
      * @param reason The reason, if present.
-     *
      * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the specified user was kicked
      * from this guild. If an error is received, it is emitted through the {@code Mono}.
      */
@@ -855,8 +804,7 @@ public final class Guild implements Entity {
     public Flux<Ban> getBans() {
         return gateway.getRestClient().getGuildService()
                 .getGuildBans(getId().asLong())
-                .map(BanBean::new)
-                .map(bean -> new Ban(gateway, bean));
+                .map(data -> new Ban(gateway, data));
     }
 
     /**
@@ -869,8 +817,7 @@ public final class Guild implements Entity {
     public Mono<Ban> getBan(final Snowflake userId) {
         return gateway.getRestClient().getGuildService()
                 .getGuildBan(getId().asLong(), userId.asLong())
-                .map(BanBean::new)
-                .map(bean -> new Ban(gateway, bean));
+                .map(data -> new Ban(gateway, data));
     }
 
     /**
@@ -927,7 +874,7 @@ public final class Guild implements Entity {
 
         return gateway.getRestClient().getGuildService()
                 .getGuildPruneCount(getId().asLong(), queryParams)
-                .map(PruneResponse::getPruned);
+                .map(PruneData::pruned);
     }
 
     /**
@@ -948,7 +895,6 @@ public final class Guild implements Entity {
      *
      * @param days The number of days since an user must have been seen to avoid being kicked.
      * @param reason The reason, if present.
-     *
      * @return A {@link Mono} where, upon successful completion, emits the number of users who were pruned. If an error
      * is received, it is emitted through the {@code Mono}.
      */
@@ -958,7 +904,7 @@ public final class Guild implements Entity {
 
         return gateway.getRestClient().getGuildService()
                 .beginGuildPrune(getId().asLong(), queryParams, reason)
-                .map(PruneResponse::getPruned);
+                .map(PruneData::pruned);
     }
 
     /**
@@ -993,22 +939,22 @@ public final class Guild implements Entity {
         final AuditLogQuerySpec mutatedSpec = new AuditLogQuerySpec();
         spec.accept(mutatedSpec);
 
-        final Function<Map<String, Object>, Flux<AuditLogResponse>> makeRequest = params -> {
+        final Function<Map<String, Object>, Flux<AuditLogData>> makeRequest = params -> {
             params.putAll(mutatedSpec.asRequest());
             return gateway.getRestClient().getAuditLogService()
                     .getAuditLog(getId().asLong(), params)
                     .flux();
         };
 
-        final ToLongFunction<AuditLogResponse> getLastEntryId = response -> {
-            final AuditLogEntryResponse[] entries = response.getAuditLogEntries();
-            return (entries.length == 0) ? Long.MAX_VALUE : entries[entries.length - 1].getId();
+        final ToLongFunction<AuditLogData> getLastEntryId = response -> {
+            final List<AuditLogEntryData> entries = response.auditLogEntries();
+            return (entries.size() == 0) ? Long.MAX_VALUE :
+                    Long.parseUnsignedLong(entries.get(entries.size() - 1).id());
         };
 
         return PaginationUtil.paginateBefore(makeRequest, getLastEntryId, Long.MAX_VALUE, 100)
-                .flatMap(log -> Flux.fromArray(log.getAuditLogEntries())
-                        .map(AuditLogEntryBean::new)
-                        .map(bean -> new AuditLogEntry(gateway, bean)));
+                .flatMap(log -> Flux.fromIterable(log.auditLogEntries())
+                        .map(data -> new AuditLogEntry(gateway, data)));
     }
 
     /**
@@ -1020,8 +966,7 @@ public final class Guild implements Entity {
     public Flux<Webhook> getWebhooks() {
         return gateway.getRestClient().getWebhookService()
                 .getGuildWebhooks(getId().asLong())
-                .map(WebhookBean::new)
-                .map(bean -> new Webhook(gateway, bean));
+                .map(data -> new Webhook(gateway, data));
     }
 
     /**
@@ -1033,8 +978,7 @@ public final class Guild implements Entity {
     public Flux<ExtendedInvite> getInvites() {
         return gateway.getRestClient().getGuildService()
                 .getGuildInvites(getId().asLong())
-                .map(ExtendedInviteBean::new)
-                .map(bean -> new ExtendedInvite(gateway, bean));
+                .map(data -> new ExtendedInvite(gateway, data));
     }
 
     /**
@@ -1047,13 +991,13 @@ public final class Guild implements Entity {
      */
     public Mono<String> changeSelfNickname(@Nullable final String nickname) {
         return gateway.getRestClient().getGuildService()
-                .modifyOwnNickname(getId().asLong(), new NicknameModifyRequest(nickname))
-                .<String>handle((response, next) -> {
-                    String nick = response.getNick();
+                .modifyOwnNickname(getId().asLong(), ImmutableNicknameModifyData.of(Optional.ofNullable(nickname)))
+                .handle((data, sink) -> {
+                    String nick = data.nick().orElse(null);
                     if (nick != null) {
-                        next.next(nick);
+                        sink.next(nick);
                     } else {
-                        next.complete();
+                        sink.complete();
                     }
                 });
     }
@@ -1227,8 +1171,10 @@ public final class Guild implements Entity {
 
     /**
      * Represent the server Premium Tier (aka boost level) of the {@link Guild}
+     *
      * @see <a href="https://support.discordapp.com/hc/en/articles/360028038352">Server Boost info</a>
-     * @see <a href="https://discordapp.com/developers/docs/resources/guild#guild-object-premium-tier">Premium Tier docs</a>
+     * @see
+     * <a href="https://discordapp.com/developers/docs/resources/guild#guild-object-premium-tier">Premium Tier docs</a>
      */
     public enum PremiumTier {
 
@@ -1269,7 +1215,8 @@ public final class Guild implements Entity {
         }
 
         /**
-         * Gets the Premium Tier (aka boost level) of the Guild. It is guaranteed that invoking {@link #getValue()} from the
+         * Gets the Premium Tier (aka boost level) of the Guild. It is guaranteed that invoking {@link #getValue()}
+         * from the
          * returned enum will equal ({@code ==}) the supplied {@code value}.
          *
          * @param value The underlying value as represented by Discord.

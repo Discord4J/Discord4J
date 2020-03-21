@@ -16,11 +16,10 @@
  */
 package discord4j.rest.service;
 
+import discord4j.discordjson.json.*;
+import discord4j.discordjson.possible.Possible;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import discord4j.rest.RestTests;
-import discord4j.rest.json.request.*;
-import discord4j.rest.json.response.ChannelResponse;
-import discord4j.rest.json.response.GuildResponse;
 import discord4j.rest.request.Router;
 import org.junit.Before;
 import org.junit.Test;
@@ -67,13 +66,15 @@ public class GuildServiceTest {
 
     @Test
     public void testGetGuild() {
-        GuildResponse response = getGuildService().getGuild(guild).block();
-        System.out.println(response.getId());
+        GuildUpdateData response = getGuildService().getGuild(guild).block();
+        System.out.println(response.id());
     }
 
     @Test
     public void testModifyGuild() {
-        GuildModifyRequest req = GuildModifyRequest.builder().region("us-south").build();
+        GuildModifyRequest req = ImmutableGuildModifyRequest.builder()
+            .region(Possible.of("us-south"))
+            .build();
         getGuildService().modifyGuild(guild, req, null).block();
     }
 
@@ -90,18 +91,21 @@ public class GuildServiceTest {
     @Test
     public void testCreateGuildChannel() {
         String randomName = Long.toHexString(Double.doubleToLongBits(Math.random()));
-        ChannelCreateRequest req = ChannelCreateRequest.builder().name(randomName).parentId(trashCategory).build();
+        ChannelCreateRequest req = ImmutableChannelCreateRequest.builder()
+            .name(randomName)
+            .parentId(Possible.of(Long.toUnsignedString(trashCategory)))
+            .build();
         getGuildService().createGuildChannel(guild, req, null).block();
     }
 
     @Test
     public void testDeleteGuildChannels() {
         getGuildService().getGuildChannels(guild)
-                .filter(res -> res.getParentId() != null && trashCategory == res.getParentId())
-                .map(ChannelResponse::getId)
-                .flatMap(id -> getChannelService().deleteChannel(id, null))
-                .then()
-                .block();
+            .filter(data -> data.parentId().get().map(parentId -> Long.parseUnsignedLong(parentId) == trashCategory).orElse(false))
+            .map(ChannelData::id)
+            .flatMap(id -> getChannelService().deleteChannel(Long.parseUnsignedLong(id), null))
+            .then()
+            .block();
     }
 
     @Test
@@ -126,13 +130,15 @@ public class GuildServiceTest {
 
     @Test
     public void testModifyGuildMember() {
-        GuildMemberModifyRequest req = GuildMemberModifyRequest.builder().nick("nickname").build();
+        GuildMemberModifyRequest req = ImmutableGuildMemberModifyRequest.builder()
+            .nick(Possible.of("nickname"))
+            .build();
         getGuildService().modifyGuildMember(guild, member, req, null).block();
     }
 
     @Test
     public void testModifyOwnNickname() {
-        NicknameModifyRequest req = new NicknameModifyRequest("nickname");
+        NicknameModifyData req = ImmutableNicknameModifyData.builder().nick("nickname").build();
         getGuildService().modifyOwnNickname(guild, req).block();
     }
 
@@ -179,7 +185,9 @@ public class GuildServiceTest {
     @Test
     public void testCreateGuildRole() {
         String randomName = "test_" + Long.toHexString(Double.doubleToLongBits(Math.random()));
-        RoleCreateRequest req = new RoleCreateRequest(randomName, 0, 0, false, false);
+        RoleCreateRequest req = ImmutableRoleCreateRequest.builder()
+            .name(Possible.of(randomName))
+            .build();
         getGuildService().createGuildRole(guild, req, null).block();
     }
 
@@ -190,17 +198,19 @@ public class GuildServiceTest {
 
     @Test
     public void testModifyGuildRole() {
-        RoleModifyRequest req = RoleModifyRequest.builder().permissions(0).build();
+        RoleModifyRequest req = ImmutableRoleModifyRequest.builder()
+            .permissions(Possible.of(0L))
+            .build();
         getGuildService().modifyGuildRole(guild, permanentRole, req, null).block();
     }
 
     @Test
     public void testDeleteGuildRole() {
         getGuildService().getGuildRoles(guild)
-                .filter(role -> role.getName().startsWith("test_") || role.getName().startsWith("3f"))
-                .limitRequest(5)
-                .flatMap(role -> getGuildService().deleteGuildRole(guild, role.getId(), null))
-                .blockLast();
+            .filter(role -> role.name().startsWith("test_") || role.name().startsWith("3f"))
+            .limitRequest(5)
+            .flatMap(role -> getGuildService().deleteGuildRole(guild, Long.parseUnsignedLong(role.id()), null))
+            .blockLast();
     }
 
     @Test

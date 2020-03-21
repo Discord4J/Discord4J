@@ -16,18 +16,18 @@
  */
 package discord4j.core.object.entity.channel;
 
+import discord4j.discordjson.json.ChannelData;
+import discord4j.discordjson.json.ImmutablePermissionsEditRequest;
+import discord4j.discordjson.json.PermissionsEditRequest;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.ExtendedPermissionOverwrite;
 import discord4j.core.object.PermissionOverwrite;
-import discord4j.core.object.data.stored.ChannelBean;
-import discord4j.core.object.data.stored.PermissionOverwriteBean;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Member;
-import discord4j.core.object.util.PermissionSet;
+import discord4j.rest.util.PermissionSet;
 import discord4j.core.object.util.Snowflake;
 import discord4j.core.util.OrderUtil;
 import discord4j.core.util.PermissionUtil;
-import discord4j.rest.json.request.PermissionsEditRequest;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
 
@@ -44,13 +44,15 @@ class BaseGuildChannel extends BaseChannel implements GuildChannel {
      * @param gateway The {@link GatewayDiscordClient} associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
      */
-    BaseGuildChannel(final GatewayDiscordClient gateway, final ChannelBean data) {
+    BaseGuildChannel(final GatewayDiscordClient gateway, final ChannelData data) {
         super(gateway, data);
     }
 
     @Override
     public final Snowflake getGuildId() {
-        return Snowflake.of(Objects.requireNonNull(getData().getGuildId()));
+        return getData().guildId().toOptional()
+            .map(Snowflake::of)
+            .orElseThrow(IllegalStateException::new); // TODO
     }
 
     @Override
@@ -60,16 +62,15 @@ class BaseGuildChannel extends BaseChannel implements GuildChannel {
 
     @Override
     public final Set<ExtendedPermissionOverwrite> getPermissionOverwrites() {
-        final PermissionOverwriteBean[] permissionOverwrites = getData().getPermissionOverwrites();
-        if (permissionOverwrites == null) {
-            return Collections.emptySet();
-        } else {
-            long guildId = getGuildId().asLong();
-            long channelId = getId().asLong();
-            return Arrays.stream(permissionOverwrites)
-                    .map(bean -> new ExtendedPermissionOverwrite(getClient(), bean, guildId, channelId))
+        return getData().permissionOverwrites().toOptional()
+            .map(permissionOverwrites -> {
+                long guildId = getGuildId().asLong();
+                long channelId = getId().asLong();
+                return permissionOverwrites.stream()
+                    .map(overwriteData -> new ExtendedPermissionOverwrite(getClient(), overwriteData, guildId, channelId))
                     .collect(Collectors.toSet());
-        }
+            })
+            .orElse(Collections.emptySet());
     }
 
     @Override
@@ -106,12 +107,14 @@ class BaseGuildChannel extends BaseChannel implements GuildChannel {
 
     @Override
     public final String getName() {
-        return getData().getName();
+        return getData().name().toOptional()
+            .orElseThrow(IllegalStateException::new);
     }
 
     @Override
     public int getRawPosition() {
-        return Objects.requireNonNull(getData().getPosition());
+        return getData().position().toOptional()
+            .orElseThrow(IllegalStateException::new);
     }
 
     @Override
@@ -127,7 +130,7 @@ class BaseGuildChannel extends BaseChannel implements GuildChannel {
     public Mono<Void> addMemberOverwrite(Snowflake memberId, PermissionOverwrite overwrite, @Nullable String reason) {
         PermissionSet allow = overwrite.getAllowed();
         PermissionSet deny = overwrite.getDenied();
-        PermissionsEditRequest request = new PermissionsEditRequest(allow.getRawValue(), deny.getRawValue(), "member");
+        PermissionsEditRequest request = ImmutablePermissionsEditRequest.of(allow.getRawValue(), deny.getRawValue(), "member");
 
         return getClient().getRestClient().getChannelService()
                 .editChannelPermissions(getId().asLong(), memberId.asLong(), request, reason);
@@ -137,7 +140,7 @@ class BaseGuildChannel extends BaseChannel implements GuildChannel {
     public Mono<Void> addRoleOverwrite(Snowflake roleId, PermissionOverwrite overwrite, @Nullable String reason) {
         PermissionSet allow = overwrite.getAllowed();
         PermissionSet deny = overwrite.getDenied();
-        PermissionsEditRequest request = new PermissionsEditRequest(allow.getRawValue(), deny.getRawValue(), "role");
+        PermissionsEditRequest request = ImmutablePermissionsEditRequest.of(allow.getRawValue(), deny.getRawValue(), "role");
 
         return getClient().getRestClient().getChannelService()
                 .editChannelPermissions(getId().asLong(), roleId.asLong(), request, reason);

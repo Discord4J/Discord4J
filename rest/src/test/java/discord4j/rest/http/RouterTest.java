@@ -16,14 +16,13 @@
  */
 package discord4j.rest.http;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.PropertyAccessor;
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import discord4j.common.jackson.PossibleModule;
-import discord4j.common.json.MessageResponse;
+import discord4j.common.JacksonResources;
+import discord4j.discordjson.json.ImmutableMessageCreateRequest;
+import discord4j.discordjson.json.MessageCreateRequest;
+import discord4j.discordjson.json.MessageData;
+import discord4j.discordjson.possible.Possible;
 import discord4j.rest.RestTests;
-import discord4j.rest.json.request.MessageCreateRequest;
 import discord4j.rest.request.Router;
 import discord4j.rest.route.Routes;
 import org.junit.Test;
@@ -37,10 +36,7 @@ import java.util.concurrent.TimeUnit;
 public class RouterTest {
 
     private ObjectMapper getMapper() {
-        return new ObjectMapper()
-                .setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
-                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true)
-                .registerModule(new PossibleModule());
+        return new JacksonResources().getObjectMapper();
     }
 
     @Test
@@ -51,7 +47,9 @@ public class RouterTest {
         ObjectMapper mapper = getMapper();
         Router router = RestTests.getRouter(token, mapper);
 
-        MessageCreateRequest body = new MessageCreateRequest("hello at" + Instant.now(), null, false, null);
+        MessageCreateRequest body = ImmutableMessageCreateRequest.builder()
+            .content(Possible.of("hello at " + Instant.now()))
+            .build();
 
         Routes.MESSAGE_CREATE.newRequest(channelId)
                 .body(body)
@@ -75,13 +73,15 @@ public class RouterTest {
         for (int i = 0; i < 10; i++) {
             final int a = i;
 
-            MessageCreateRequest body = new MessageCreateRequest(cid + " " + a, null, false, null);
+            MessageCreateRequest body = ImmutableMessageCreateRequest.builder()
+                .content(Possible.of(cid + " " + a))
+                .build();
 
             Routes.MESSAGE_CREATE.newRequest(channelId)
                     .body(body)
                     .exchange(router)
-                    .bodyToMono(MessageResponse.class)
-                    .subscribe(response -> System.out.println("response " + a + ": " + response.getContent()));
+                    .bodyToMono(MessageData.class)
+                    .subscribe(response -> System.out.println("response " + a + ": " + response.content()));
         }
 
         TimeUnit.SECONDS.sleep(10);
@@ -95,12 +95,14 @@ public class RouterTest {
         ObjectMapper mapper = getMapper();
         Router router = RestTests.getRouter(token, mapper);
 
-        MessageCreateRequest body = new MessageCreateRequest("hi", null, false, null);
+        MessageCreateRequest body = ImmutableMessageCreateRequest.builder()
+            .content(Possible.of("hi"))
+            .build();
 
-        Mono<MessageResponse> mono = Routes.MESSAGE_CREATE.newRequest(channelId)
+        Mono<MessageData> mono = Routes.MESSAGE_CREATE.newRequest(channelId)
                 .body(body)
                 .exchange(router)
-                .bodyToMono(MessageResponse.class);
+                .bodyToMono(MessageData.class);
 
         mono.subscribe();
         mono.subscribe();
@@ -122,16 +124,18 @@ public class RouterTest {
         for (int i = 0; i < 6; i++) {
             final int a = i;
 
-            MessageCreateRequest body = new MessageCreateRequest(cid + " " + a, null, false, null);
+            MessageCreateRequest body = ImmutableMessageCreateRequest.builder()
+                .content(Possible.of(cid + " " + a))
+                .build();
 
             Routes.MESSAGE_CREATE.newRequest(channelId)
                     .body(body)
                     .exchange(router)
-                    .bodyToMono(MessageResponse.class)
+                    .bodyToMono(MessageData.class)
                     .publishOn(thread)
                     .cancelOn(thread)
                     .subscribeOn(thread)
-                    .subscribe(response -> System.out.println("response " + a + ": " + response.getContent()));
+                    .subscribe(response -> System.out.println("response " + a + ": " + response.content()));
         }
 
         TimeUnit.SECONDS.sleep(10);
@@ -147,7 +151,9 @@ public class RouterTest {
 
         String cid = Integer.toHexString(this.hashCode());
 
-        MessageCreateRequest body0 = new MessageCreateRequest(cid + " 0 at" + Instant.now(), null, false, null);
+        MessageCreateRequest body0 = ImmutableMessageCreateRequest.builder()
+            .content(Possible.of(cid + " 0 at" + Instant.now()))
+            .build();
 
         Routes.MESSAGE_CREATE.newRequest(channelId)
                 .body(body0)
@@ -155,7 +161,9 @@ public class RouterTest {
                 .mono()
                 .block();
 
-        MessageCreateRequest body1 = new MessageCreateRequest(cid + " 1 at" + Instant.now(), null, false, null);
+        MessageCreateRequest body1 = ImmutableMessageCreateRequest.builder()
+            .content(Possible.of(cid + " 1 at" + Instant.now()))
+            .build();
 
         Routes.MESSAGE_CREATE.newRequest(channelId)
                 .body(body1)

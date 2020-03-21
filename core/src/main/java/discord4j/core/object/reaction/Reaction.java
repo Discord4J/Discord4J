@@ -16,9 +16,9 @@
  */
 package discord4j.core.object.reaction;
 
+import discord4j.discordjson.json.ReactionData;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.DiscordObject;
-import discord4j.core.object.data.stored.ReactionBean;
 
 import java.util.Objects;
 
@@ -33,7 +33,7 @@ public final class Reaction implements DiscordObject  {
     private final GatewayDiscordClient gateway;
 
     /** The raw data as represented by Discord. */
-    private final ReactionBean data;
+    private final ReactionData data;
 
     /**
      * Constructs a {@code Reaction} with an associated ServiceMediator and Discord data.
@@ -41,7 +41,7 @@ public final class Reaction implements DiscordObject  {
      * @param gateway The {@link GatewayDiscordClient} associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
      */
-    public Reaction(final GatewayDiscordClient gateway, final ReactionBean data) {
+    public Reaction(final GatewayDiscordClient gateway, final ReactionData data) {
         this.gateway = Objects.requireNonNull(gateway);
         this.data = Objects.requireNonNull(data);
     }
@@ -57,7 +57,7 @@ public final class Reaction implements DiscordObject  {
      * @return The number of people who reacted with this reaction's emoji.
      */
     public int getCount() {
-        return data.getCount();
+        return data.count();
     }
 
     /**
@@ -66,7 +66,7 @@ public final class Reaction implements DiscordObject  {
      * @return Whether the current bot user reacted using this reaction's emoji.
      */
     public boolean selfReacted() {
-        return data.isMe();
+        return data.me();
     }
 
     /**
@@ -75,7 +75,8 @@ public final class Reaction implements DiscordObject  {
      * @return This reaction's emoji.
      */
     public ReactionEmoji getEmoji() {
-        return ReactionEmoji.of(data.getEmojiId(), data.getEmojiName(), data.isEmojiAnimated());
+        // TODO FIXME: get()
+        return ReactionEmoji.of(Long.parseUnsignedLong(data.emoji().id().get()), data.emoji().name().get(), data.emoji().animated().get());
     }
 
     @Override

@@ -17,7 +17,7 @@
 package discord4j.core.util;
 
 import discord4j.core.object.PermissionOverwrite;
-import discord4j.core.object.util.PermissionSet;
+import discord4j.rest.util.PermissionSet;
 import discord4j.core.object.util.Snowflake;
 import org.junit.Test;
 
@@ -25,7 +25,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static discord4j.core.object.util.Permission.*;
+import static discord4j.rest.util.Permission.*;
 import static org.junit.Assert.assertEquals;
 
 public class PermissionUtilTest {

@@ -28,14 +28,14 @@ import discord4j.core.event.EventDispatcher;
 import discord4j.core.event.dispatch.DispatchContext;
 import discord4j.core.event.dispatch.DispatchHandlers;
 import discord4j.core.event.domain.Event;
-import discord4j.core.object.data.stored.MessageBean;
 import discord4j.core.object.presence.Presence;
 import discord4j.core.state.StateHolder;
 import discord4j.core.state.StateView;
+import discord4j.discordjson.json.MessageData;
+import discord4j.discordjson.json.gateway.Dispatch;
+import discord4j.discordjson.json.gateway.StatusUpdate;
 import discord4j.gateway.*;
-import discord4j.gateway.json.StatusUpdate;
-import discord4j.gateway.json.dispatch.Dispatch;
-import discord4j.gateway.json.dispatch.ShardAwareDispatch;
+import discord4j.gateway.json.ShardAwareDispatch;
 import discord4j.gateway.payload.JacksonPayloadReader;
 import discord4j.gateway.payload.JacksonPayloadWriter;
 import discord4j.gateway.payload.PayloadReader;
@@ -103,7 +103,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
     private StoreService storeService = null;
     private Function<StoreService, StoreService> storeServiceMapper = shardAwareStoreService();
     private boolean memberRequest = true;
-    private Function<ShardInfo, Presence> initialPresence = shard -> null;
+    private Function<ShardInfo, StatusUpdate> initialPresence = shard -> null;
     private Function<ShardInfo, SessionInfo> resumeOptions = shard -> null;
     private boolean guildSubscriptions = true;
     private Function<GatewayDiscordClient, Mono<Void>> destroyHandler = shutdownDestroyHandler();
@@ -292,9 +292,24 @@ public class GatewayBootstrap<O extends GatewayOptions> {
      *
      * @param initialPresence a {@link Function} that supplies {@link Presence} instances from a given {@link ShardInfo}
      * @return this builder
+     * @deprecated use {@link #setInitialStatus(Function)}
      */
-    public GatewayBootstrap<O> setInitialPresence(Function<ShardInfo, Presence> initialPresence) {
+    @Deprecated
+    public GatewayBootstrap<O> setInitialPresence(Function<ShardInfo, StatusUpdate> initialPresence) {
         this.initialPresence = Objects.requireNonNull(initialPresence, "initialPresence");
+        return this;
+    }
+
+    /**
+     * Set a {@link Function} to determine the {@link StatusUpdate} that each joining shard should use when identifying
+     * to the Gateway. Defaults to no status given.
+     *
+     * @param initialStatus a {@link Function} that supplies {@link StatusUpdate} instances from a given
+     * {@link ShardInfo}
+     * @return this builder
+     */
+    public GatewayBootstrap<O> setInitialStatus(Function<ShardInfo, StatusUpdate> initialStatus) {
+        this.initialPresence = Objects.requireNonNull(initialStatus, "initialStatus");
         return this;
     }
 
@@ -475,7 +490,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
      */
     public Mono<GatewayDiscordClient> connect(Function<O, GatewayClient> clientFactory) {
         Map<String, Object> hints = new LinkedHashMap<>();
-        hints.put("messageClass", MessageBean.class);
+        hints.put("messageClass", MessageData.class);
         StateHolder stateHolder = new StateHolder(initStoreService(), new StoreContext(hints));
         StateView stateView = new StateView(stateHolder);
         EventDispatcher eventDispatcher = initEventDispatcher();
@@ -511,9 +526,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                                               MonoProcessor<Void> closeProcessor) {
         return Mono.subscriberContext()
                 .flatMap(ctx -> Mono.<ShardInfo>create(sink -> {
-                    StatusUpdate initial = Optional.ofNullable(initialPresence.apply(shard))
-                            .map(Presence::asStatusUpdate)
-                            .orElse(null);
+                    StatusUpdate initial = Optional.ofNullable(initialPresence.apply(shard)).orElse(null);
                     IdentifyOptions identify = new IdentifyOptions(shard, initial, guildSubscriptions);
                     SessionInfo resume = resumeOptions.apply(shard);
                     if (resume != null) {
@@ -527,6 +540,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                     // wire gateway events to EventDispatcher
                     forCleanup.add(gatewayClient.dispatch()
                             .takeUntilOther(closeProcessor)
+                            .checkpoint("Read payload from gateway")
                             .flatMap(dispatch -> {
                                 ShardInfo info;
                                 Dispatch actual;
@@ -606,7 +620,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                                     reconnectOptions.getFirstBackoff(),
                                     reconnectOptions.getMaxBackoffInterval())
                             .flatMap(response -> gatewayClient.execute(
-                                    RouteUtils.expandQuery(response.getUrl(), getGatewayParameters())))
+                                    RouteUtils.expandQuery(response.url(), getGatewayParameters())))
                             .then(stateHolder.invalidateStores())
                             .subscriberContext(buildContext(gateway, shard))
                             .subscribe(null,

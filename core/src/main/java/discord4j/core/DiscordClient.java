@@ -25,12 +25,11 @@ import discord4j.core.object.util.Snowflake;
 import discord4j.core.shard.GatewayBootstrap;
 import discord4j.core.spec.GuildCreateSpec;
 import discord4j.core.spec.UserEditSpec;
-import discord4j.core.util.PaginationUtil;
+import discord4j.discordjson.json.*;
 import discord4j.gateway.GatewayOptions;
 import discord4j.rest.entity.*;
-import discord4j.rest.entity.data.*;
-import discord4j.rest.json.response.UserGuildResponse;
 import discord4j.rest.request.RouterOptions;
+import discord4j.rest.util.PaginationUtil;
 import discord4j.store.api.service.StoreService;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -98,18 +97,18 @@ public final class DiscordClient {
      * supplied ID. If an error is received, it is emitted through the {@code Mono}.
      */
     public RestChannel getChannelById(final Snowflake channelId) {
-        return new RestChannel(coreResources.getRestClient(), channelId.asLong());
+        return RestChannel.create(coreResources.getRestClient(), channelId.asLong());
     }
 
     /**
      * Requests to retrieve the guild represented by the supplied ID.
      *
      * @param guildId The ID of the guild.
-     * @return A {@link Mono} where, upon successful completion, emits the {@link Guild} as represented by the supplied
-     * ID. If an error is received, it is emitted through the {@code Mono}.
+     * @return A {@link Mono} where, upon successful completion, emits the {@link RestGuild} as represented by the
+     * supplied ID. If an error is received, it is emitted through the {@code Mono}.
      */
     public RestGuild getGuildById(final Snowflake guildId) {
-        return new RestGuild(coreResources.getRestClient(), guildId.asLong());
+        return RestGuild.create(coreResources.getRestClient(), guildId.asLong());
     }
 
     /**
@@ -120,8 +119,8 @@ public final class DiscordClient {
      * @return A {@link Mono} where, upon successful completion, emits the {@link GuildEmoji} as represented by the
      * supplied IDs. If an error is received, it is emitted through the {@code Mono}.
      */
-    public RestGuildEmoji getGuildEmojiById(final Snowflake guildId, final Snowflake emojiId) {
-        return new RestGuildEmoji(coreResources.getRestClient(), guildId.asLong(), emojiId.asLong());
+    public RestEmoji getGuildEmojiById(final Snowflake guildId, final Snowflake emojiId) {
+        return RestEmoji.create(coreResources.getRestClient(), guildId.asLong(), emojiId.asLong());
     }
 
     /**
@@ -133,7 +132,7 @@ public final class DiscordClient {
      * IDs. If an error is received, it is emitted through the {@code Mono}.
      */
     public RestMember getMemberById(final Snowflake guildId, final Snowflake userId) {
-        return new RestMember(coreResources.getRestClient(), guildId.asLong(), userId.asLong());
+        return RestMember.create(coreResources.getRestClient(), guildId.asLong(), userId.asLong());
     }
 
     /**
@@ -145,7 +144,7 @@ public final class DiscordClient {
      * supplied IDs. If an error is received, it is emitted through the {@code Mono}.
      */
     public RestMessage getMessageById(final Snowflake channelId, final Snowflake messageId) {
-        return new RestMessage(coreResources.getRestClient(), channelId.asLong(), messageId.asLong());
+        return RestMessage.create(coreResources.getRestClient(), channelId.asLong(), messageId.asLong());
     }
 
     /**
@@ -157,7 +156,7 @@ public final class DiscordClient {
      * IDs. If an error is received, it is emitted through the {@code Mono}.
      */
     public RestRole getRoleById(final Snowflake guildId, final Snowflake roleId) {
-        return new RestRole(coreResources.getRestClient(), guildId.asLong(), roleId.asLong());
+        return RestRole.create(coreResources.getRestClient(), guildId.asLong(), roleId.asLong());
     }
 
     /**
@@ -168,7 +167,7 @@ public final class DiscordClient {
      * ID. If an error is received, it is emitted through the {@code Mono}.
      */
     public RestUser getUserById(final Snowflake userId) {
-        return new RestUser(coreResources.getRestClient(), userId.asLong());
+        return RestUser.create(coreResources.getRestClient(), userId.asLong());
     }
 
     /**
@@ -179,7 +178,7 @@ public final class DiscordClient {
      * supplied ID. If an error is received, it is emitted through the {@code Mono}.
      */
     public RestWebhook getWebhookById(final Snowflake webhookId) {
-        return new RestWebhook(coreResources.getRestClient(), webhookId.asLong());
+        return RestWebhook.create(coreResources.getRestClient(), webhookId.asLong());
     }
 
     /**
@@ -190,23 +189,21 @@ public final class DiscordClient {
      */
     public Mono<ApplicationInfoData> getApplicationInfo() {
         return coreResources.getRestClient().getApplicationService()
-                .getCurrentApplicationInfo()
-                .map(ApplicationInfoData::new);
+                .getCurrentApplicationInfo();
     }
 
     /**
      * Requests to retrieve the guilds the current client is in.
      *
-     * @return A {@link Flux} that continually emits the {@link Guild guilds} that the current client is in. If an error
-     * is received, it is emitted through the {@code Flux}.
+     * @return A {@link Flux} that continually emits the {@link PartialGuildData guilds} that the current client is
+     * in. If an error is received, it is emitted through the {@code Flux}.
      */
     public Flux<UserGuildData> getGuilds() {
-        final Function<Map<String, Object>, Flux<UserGuildResponse>> makeRequest = params ->
+        final Function<Map<String, Object>, Flux<UserGuildData>> makeRequest = params ->
                 coreResources.getRestClient().getUserService()
                         .getCurrentUserGuilds(params);
 
-        return PaginationUtil.paginateAfter(makeRequest, UserGuildResponse::getId, 0L, 100)
-                .map(UserGuildData::new);
+        return PaginationUtil.paginateAfter(makeRequest, data -> Long.parseUnsignedLong(data.id()), 0L, 100);
     }
 
     /**
@@ -216,8 +213,7 @@ public final class DiscordClient {
      * received, it is emitted through the {@code Flux}.
      */
     public Flux<RegionData> getRegions() {
-        return coreResources.getRestClient().getVoiceService().getVoiceRegions()
-                .map(RegionData::new);
+        return coreResources.getRestClient().getVoiceService().getVoiceRegions();
     }
 
     /**
@@ -228,24 +224,22 @@ public final class DiscordClient {
      */
     public Mono<UserData> getSelf() {
         return coreResources.getRestClient().getUserService()
-                .getCurrentUser()
-                .map(UserData::new);
+                .getCurrentUser();
     }
 
     /**
      * Requests to create a guild.
      *
      * @param spec A {@link Consumer} that provides a "blank" {@link GuildCreateSpec} to be operated on.
-     * @return A {@link Mono} where, upon successful completion, emits the created {@link Guild}. If an error is
-     * received, it is emitted through the {@code Mono}.
+     * @return A {@link Mono} where, upon successful completion, emits the created {@link PartialGuildData}. If an
+     * error is received, it is emitted through the {@code Mono}.
      */
-    public Mono<GuildData> createGuild(final Consumer<? super GuildCreateSpec> spec) {
+    public Mono<GuildUpdateData> createGuild(final Consumer<? super GuildCreateSpec> spec) {
         final GuildCreateSpec mutatedSpec = new GuildCreateSpec();
         spec.accept(mutatedSpec);
 
         return coreResources.getRestClient().getGuildService()
-                .createGuild(mutatedSpec.asRequest())
-                .map(GuildData::new);
+                .createGuild(mutatedSpec.asRequest());
     }
 
     /**
@@ -257,8 +251,7 @@ public final class DiscordClient {
      */
     public Mono<InviteData> getInvite(final String inviteCode) {
         return coreResources.getRestClient().getInviteService()
-                .getInvite(inviteCode)
-                .map(InviteData::new);
+                .getInvite(inviteCode);
     }
 
     /**
@@ -273,8 +266,7 @@ public final class DiscordClient {
         spec.accept(mutatedSpec);
 
         return coreResources.getRestClient().getUserService()
-                .modifyCurrentUser(mutatedSpec.asRequest())
-                .map(UserData::new);
+                .modifyCurrentUser(mutatedSpec.asRequest());
     }
 
     /**

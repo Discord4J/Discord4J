@@ -16,13 +16,18 @@
  */
 package discord4j.core.spec;
 
-import discord4j.common.json.OverwriteEntity;
+import discord4j.discordjson.json.ChannelModifyRequest;
+import discord4j.discordjson.json.ImmutableChannelModifyRequest;
+import discord4j.discordjson.json.ImmutableOverwriteData;
+import discord4j.discordjson.json.OverwriteData;
+import discord4j.discordjson.possible.Possible;
 import discord4j.core.object.PermissionOverwrite;
 import discord4j.core.object.entity.channel.StoreChannel;
-import discord4j.rest.json.request.ChannelModifyRequest;
 import reactor.util.annotation.Nullable;
 
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Spec used to modify a guild {@link StoreChannel} settings.
@@ -31,7 +36,7 @@ import java.util.Set;
  */
 public class StoreChannelEditSpec implements AuditSpec<ChannelModifyRequest> {
 
-    private final ChannelModifyRequest.Builder requestBuilder = ChannelModifyRequest.builder();
+    private final ImmutableChannelModifyRequest.Builder requestBuilder = ImmutableChannelModifyRequest.builder();
     @Nullable
     private String reason;
 
@@ -42,7 +47,7 @@ public class StoreChannelEditSpec implements AuditSpec<ChannelModifyRequest> {
      * @return This spec.
      */
     public StoreChannelEditSpec setName(String name) {
-        requestBuilder.name(name);
+        requestBuilder.name(Possible.of(name));
         return this;
     }
 
@@ -53,7 +58,7 @@ public class StoreChannelEditSpec implements AuditSpec<ChannelModifyRequest> {
      * @return This spec.
      */
     public StoreChannelEditSpec setPosition(int position) {
-        requestBuilder.position(position);
+        requestBuilder.position(Possible.of(position));
         return this;
     }
 
@@ -64,12 +69,12 @@ public class StoreChannelEditSpec implements AuditSpec<ChannelModifyRequest> {
      * @return This spec.
      */
     public StoreChannelEditSpec setPermissionOverwrites(Set<? extends PermissionOverwrite> permissionOverwrites) {
-        OverwriteEntity[] raw = permissionOverwrites.stream()
-                .map(o -> new OverwriteEntity(o.getTargetId().asLong(), o.getType().getValue(),
-                        o.getAllowed().getRawValue(), o.getDenied().getRawValue()))
-                .toArray(OverwriteEntity[]::new);
+        List<OverwriteData> raw = permissionOverwrites.stream()
+            .map(o -> ImmutableOverwriteData.of(o.getTargetId().asString(), o.getType().getValue(),
+                o.getAllowed().getRawValue(), o.getDenied().getRawValue()))
+            .collect(Collectors.toList());
 
-        requestBuilder.permissionOverwrites(raw);
+        requestBuilder.permissionOverwrites(Possible.of(raw));
         return this;
     }
 

@@ -16,8 +16,8 @@
  */
 package discord4j.core.object.entity.channel;
 
+import discord4j.discordjson.json.ChannelData;
 import discord4j.core.GatewayDiscordClient;
-import discord4j.core.object.data.stored.ChannelBean;
 import discord4j.core.object.util.Snowflake;
 import discord4j.core.util.EntityUtil;
 import discord4j.rest.entity.RestChannel;
@@ -30,7 +30,7 @@ import java.util.Objects;
 class BaseChannel implements Channel {
 
     /** The raw data as represented by Discord. */
-    private final ChannelBean data;
+    private final ChannelData data;
 
     /** The gateway associated to this object. */
     private final GatewayDiscordClient gateway;
@@ -44,10 +44,10 @@ class BaseChannel implements Channel {
      * @param gateway The {@link GatewayDiscordClient} associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
      */
-    BaseChannel(final GatewayDiscordClient gateway, final ChannelBean data) {
+    BaseChannel(final GatewayDiscordClient gateway, final ChannelData data) {
         this.gateway = Objects.requireNonNull(gateway);
         this.data = Objects.requireNonNull(data);
-        this.rest = new RestChannel(gateway.getRestClient(), data.getId());
+        this.rest = RestChannel.create(gateway.getRestClient(), Long.parseUnsignedLong(data.id()));
     }
 
     @Override
@@ -57,7 +57,7 @@ class BaseChannel implements Channel {
 
     @Override
     public final Snowflake getId() {
-        return Snowflake.of(data.getId());
+        return Snowflake.of(data.id());
     }
 
     @Override
@@ -67,7 +67,7 @@ class BaseChannel implements Channel {
 
     @Override
     public final Type getType() {
-        return Type.of(data.getType());
+        return Type.of(data.type());
     }
 
     @Override
@@ -80,7 +80,7 @@ class BaseChannel implements Channel {
      *
      * @return The raw data as represented by Discord.
      */
-    ChannelBean getData() {
+    ChannelData getData() {
         return data;
     }
 

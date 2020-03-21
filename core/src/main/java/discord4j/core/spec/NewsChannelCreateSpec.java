@@ -16,15 +16,20 @@
  */
 package discord4j.core.spec;
 
-import discord4j.common.json.OverwriteEntity;
 import discord4j.core.object.PermissionOverwrite;
 import discord4j.core.object.entity.channel.Channel;
 import discord4j.core.object.entity.channel.NewsChannel;
 import discord4j.core.object.util.Snowflake;
-import discord4j.rest.json.request.ChannelCreateRequest;
+import discord4j.discordjson.json.ChannelCreateRequest;
+import discord4j.discordjson.json.ImmutableChannelCreateRequest;
+import discord4j.discordjson.json.ImmutableOverwriteData;
+import discord4j.discordjson.json.OverwriteData;
+import discord4j.discordjson.possible.Possible;
 import reactor.util.annotation.Nullable;
 
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Spec used to create guild {@link NewsChannel} entities.
@@ -33,8 +38,8 @@ import java.util.Set;
  */
 public class NewsChannelCreateSpec implements AuditSpec<ChannelCreateRequest> {
 
-    private final ChannelCreateRequest.Builder requestBuilder = ChannelCreateRequest.builder()
-            .type(Channel.Type.GUILD_NEWS.getValue());
+    private final ImmutableChannelCreateRequest.Builder requestBuilder = ImmutableChannelCreateRequest.builder()
+            .type(Possible.of(Channel.Type.GUILD_NEWS.getValue()));
     @Nullable
     private String reason;
 
@@ -55,8 +60,8 @@ public class NewsChannelCreateSpec implements AuditSpec<ChannelCreateRequest> {
      * @param topic The channel topic.
      * @return This spec.
      */
-    public NewsChannelCreateSpec setTopic(@Nullable String topic) {
-        requestBuilder.topic(topic);
+    public NewsChannelCreateSpec setTopic(String topic) {
+        requestBuilder.topic(Possible.of(topic));
         return this;
     }
 
@@ -67,7 +72,7 @@ public class NewsChannelCreateSpec implements AuditSpec<ChannelCreateRequest> {
      * @return This spec.
      */
     public NewsChannelCreateSpec setPosition(int position) {
-        requestBuilder.setPosition(position);
+        requestBuilder.position(Possible.of(position));
         return this;
     }
 
@@ -78,12 +83,12 @@ public class NewsChannelCreateSpec implements AuditSpec<ChannelCreateRequest> {
      * @return This spec.
      */
     public NewsChannelCreateSpec setPermissionOverwrites(Set<? extends PermissionOverwrite> permissionOverwrites) {
-        OverwriteEntity[] raw = permissionOverwrites.stream()
-                .map(o -> new OverwriteEntity(o.getTargetId().asLong(), o.getType().getValue(),
+        List<OverwriteData> raw = permissionOverwrites.stream()
+                .map(o -> ImmutableOverwriteData.of(o.getTargetId().asString(), o.getType().getValue(),
                         o.getAllowed().getRawValue(), o.getDenied().getRawValue()))
-                .toArray(OverwriteEntity[]::new);
+                .collect(Collectors.toList());
 
-        requestBuilder.permissionOverwrites(raw);
+        requestBuilder.permissionOverwrites(Possible.of(raw));
         return this;
     }
 
@@ -94,7 +99,7 @@ public class NewsChannelCreateSpec implements AuditSpec<ChannelCreateRequest> {
      * @return This spec.
      */
     public NewsChannelCreateSpec setParentId(@Nullable Snowflake parentId) {
-        requestBuilder.parentId(parentId == null ? null : parentId.asLong());
+        requestBuilder.parentId(parentId == null ? Possible.absent() : Possible.of(parentId.asString()));
         return this;
     }
 
@@ -105,7 +110,7 @@ public class NewsChannelCreateSpec implements AuditSpec<ChannelCreateRequest> {
      * @return This spec.
      */
     public NewsChannelCreateSpec setNsfw(boolean nsfw) {
-        requestBuilder.nsfw(nsfw);
+        requestBuilder.nsfw(Possible.of(nsfw));
         return this;
     }
 

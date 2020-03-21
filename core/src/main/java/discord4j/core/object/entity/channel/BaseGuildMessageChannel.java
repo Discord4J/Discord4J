@@ -16,21 +16,21 @@
  */
 package discord4j.core.object.entity.channel;
 
+import discord4j.discordjson.json.ChannelData;
+import discord4j.discordjson.json.ImmutableBulkDeleteRequest;
+import discord4j.discordjson.possible.Possible;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.ExtendedInvite;
 import discord4j.core.object.ExtendedPermissionOverwrite;
 import discord4j.core.object.PermissionOverwrite;
-import discord4j.core.object.data.WebhookBean;
-import discord4j.core.object.data.stored.ChannelBean;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.Webhook;
-import discord4j.core.object.util.PermissionSet;
+import discord4j.rest.util.PermissionSet;
 import discord4j.core.object.util.Snowflake;
 import discord4j.core.spec.InviteCreateSpec;
 import discord4j.core.spec.MessageCreateSpec;
 import discord4j.core.spec.WebhookCreateSpec;
-import discord4j.rest.json.request.BulkDeleteRequest;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -61,7 +61,7 @@ class BaseGuildMessageChannel extends BaseChannel implements GuildMessageChannel
      * @param gateway The {@link GatewayDiscordClient} associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
      */
-    BaseGuildMessageChannel(final GatewayDiscordClient gateway, final ChannelBean data) {
+    BaseGuildMessageChannel(final GatewayDiscordClient gateway, final ChannelData data) {
         super(gateway, data);
         guildChannel = new BaseGuildChannel(gateway, data);
         messageChannel = new BaseMessageChannel(gateway, data);
@@ -200,7 +200,7 @@ class BaseGuildMessageChannel extends BaseChannel implements GuildMessageChannel
      * @return The channel topic, if present.
      */
     public Optional<String> getTopic() {
-        return Optional.ofNullable(getData().getTopic());
+        return Possible.flatOpt(getData().topic());
     }
 
     /**
@@ -238,9 +238,8 @@ class BaseGuildMessageChannel extends BaseChannel implements GuildMessageChannel
                 .map(Snowflake::asString)
                 .buffer(100) // REST accepts 100 IDs
                 .filterWhen(filterMessageIdChunk)
-                .map(messageIdChunk -> messageIdChunk.toArray(new String[messageIdChunk.size()]))
                 .flatMap(messageIdChunk -> getClient().getRestClient().getChannelService()
-                        .bulkDeleteMessages(getId().asLong(), new BulkDeleteRequest(messageIdChunk)))
+                        .bulkDeleteMessages(getId().asLong(), ImmutableBulkDeleteRequest.of(messageIdChunk)))
                 .thenMany(Flux.fromIterable(ignoredMessageIds));
     }
 
@@ -257,8 +256,7 @@ class BaseGuildMessageChannel extends BaseChannel implements GuildMessageChannel
 
         return getClient().getRestClient().getWebhookService()
                 .createWebhook(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason())
-                .map(WebhookBean::new)
-                .map(bean -> new Webhook(getClient(), bean));
+                .map(data -> new Webhook(getClient(), data));
     }
 
     /**
@@ -270,8 +268,7 @@ class BaseGuildMessageChannel extends BaseChannel implements GuildMessageChannel
     public Flux<Webhook> getWebhooks() {
         return getClient().getRestClient().getWebhookService()
                 .getChannelWebhooks(getId().asLong())
-                .map(WebhookBean::new)
-                .map(bean -> new Webhook(getClient(), bean));
+                .map(data -> new Webhook(getClient(), data));
     }
 
     @Override

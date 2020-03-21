@@ -16,94 +16,133 @@
  */
 package discord4j.core.object.presence;
 
-import discord4j.common.jackson.Possible;
-import discord4j.core.object.data.stored.ActivityBean;
-import discord4j.core.object.data.stored.PresenceBean;
-import discord4j.gateway.json.StatusUpdate;
-import reactor.util.annotation.Nullable;
+import discord4j.discordjson.json.ActivityUpdateRequest;
+import discord4j.discordjson.json.ImmutableActivityUpdateRequest;
+import discord4j.discordjson.json.PresenceData;
+import discord4j.discordjson.json.gateway.ImmutableStatusUpdate;
+import discord4j.discordjson.json.gateway.StatusUpdate;
+import discord4j.discordjson.possible.Possible;
 
+import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
- * A Discord presence.
+ * Presence is the current state of a user on a guild.
  *
  * @see <a href="https://discordapp.com/developers/docs/topics/gateway#presence">Presence</a>
  */
 public final class Presence {
 
-    public static Presence online() {
-        return new Presence(Status.ONLINE, null);
+    public static StatusUpdate online() {
+        return ImmutableStatusUpdate.builder()
+                .status(Status.ONLINE.getValue())
+                .game(Optional.empty())
+                .afk(false)
+                .since(Optional.empty())
+                .build();
     }
 
-    public static Presence online(Activity activity) {
-        return new Presence(Status.ONLINE, activity);
+    public static StatusUpdate online(ActivityUpdateRequest activity) {
+        return ImmutableStatusUpdate.builder()
+                .status(Status.ONLINE.getValue())
+                .game(activity)
+                .afk(false)
+                .since(Optional.empty())
+                .build();
     }
 
-    public static Presence doNotDisturb() {
-        return new Presence(Status.DO_NOT_DISTURB, null);
+    public static StatusUpdate doNotDisturb() {
+        return ImmutableStatusUpdate.builder()
+                .status(Status.DO_NOT_DISTURB.getValue())
+                .game(Optional.empty())
+                .afk(false)
+                .since(Optional.empty())
+                .build();
     }
 
-    public static Presence doNotDisturb(Activity activity) {
-        return new Presence(Status.DO_NOT_DISTURB, activity);
+    public static StatusUpdate doNotDisturb(ActivityUpdateRequest activity) {
+        return ImmutableStatusUpdate.builder()
+                .status(Status.DO_NOT_DISTURB.getValue())
+                .game(activity)
+                .afk(false)
+                .since(Optional.empty())
+                .build();
     }
 
-    public static Presence idle() {
-        return new Presence(Status.IDLE, null);
+    public static StatusUpdate idle() {
+        return ImmutableStatusUpdate.builder()
+                .status(Status.IDLE.getValue())
+                .game(Optional.empty())
+                .afk(true)
+                .since(Instant.now().toEpochMilli())
+                .build();
     }
 
-    public static Presence idle(Activity activity) {
-        return new Presence(Status.IDLE, activity);
+    public static StatusUpdate idle(ActivityUpdateRequest activity) {
+        return ImmutableStatusUpdate.builder()
+                .status(Status.IDLE.getValue())
+                .game(activity)
+                .afk(true)
+                .since(Instant.now().toEpochMilli())
+                .build();
     }
 
-    public static Presence invisible() {
-        return new Presence(Status.INVISIBLE, null);
+    public static StatusUpdate invisible() {
+        return ImmutableStatusUpdate.builder()
+                .status(Status.INVISIBLE.getValue())
+                .game(Optional.empty())
+                .afk(false)
+                .since(Optional.empty())
+                .build();
     }
 
-    private final PresenceBean data;
+    private final PresenceData data;
 
-    public Presence(final PresenceBean data) {
+    public Presence(final PresenceData data) {
         this.data = data;
     }
 
-    private Presence(final Status status, @Nullable final Activity activity) {
-        ActivityBean activityBean = activity == null
-            ? null
-            : new ActivityBean(activity.getType().getValue(), activity.getName(), activity.getStreamingUrl().orElse(null));
-        this.data = new PresenceBean(activityBean, status.getValue(), null, null, null);
-    }
-
     public Status getStatus() {
-        return Status.of(data.getStatus());
+        return Status.of(data.status());
     }
 
     public Optional<Status> getStatus(Status.Platform platform) {
         switch (platform) {
-            case DESKTOP: return Optional.ofNullable(data.getDesktopStatus()).map(Status::of);
-            case MOBILE: return Optional.ofNullable(data.getMobileStatus()).map(Status::of);
-            case WEB: return Optional.ofNullable(data.getWebStatus()).map(Status::of);
+            case DESKTOP: return data.clientStatus().desktop().toOptional().map(Status::of);
+            case MOBILE: return data.clientStatus().mobile().toOptional().map(Status::of);
+            case WEB: return data.clientStatus().web().toOptional().map(Status::of);
             default: throw new AssertionError();
         }
     }
 
     public Optional<Activity> getActivity() {
-        return Optional.ofNullable(data.getActivity()).map(Activity::new);
+        return data.activities().stream().map(Activity::new).findFirst();
+    }
+
+    public List<Activity> getActivities() {
+        return data.activities().stream().map(Activity::new).collect(Collectors.toList());
     }
 
     public StatusUpdate asStatusUpdate() {
-        final StatusUpdate.Game game = getActivity()
-                .map(activity -> {
-                    Possible<String> url = activity.getStreamingUrl().map(Possible::of).orElse(Possible.absent());
-                    return new StatusUpdate.Game(activity.getName(), activity.getType().getValue(), url);
-                })
-                .orElse(null);
-
-        return new StatusUpdate(game, data.getStatus());
+        return ImmutableStatusUpdate.builder()
+                .status(data.status())
+                .game(data.activities().stream().findFirst()
+                        .map(activity -> ImmutableActivityUpdateRequest.builder()
+                                .from(activity)
+                                .url(Possible.flatOpt(activity.url()))
+                                .build()))
+                .afk(data.status().equals(Status.IDLE.getValue()))
+                .since(data.status().equals(Status.IDLE.getValue()) ?
+                        Optional.of(Instant.now().toEpochMilli()) : Optional.empty())
+                .build();
     }
 
     @Override
     public String toString() {
         return "Presence{" +
-            "data=" + data +
-            '}';
+                "data=" + data +
+                '}';
     }
 }

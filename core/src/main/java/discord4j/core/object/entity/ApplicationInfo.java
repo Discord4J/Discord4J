@@ -16,8 +16,8 @@
  */
 package discord4j.core.object.entity;
 
+import discord4j.discordjson.json.ApplicationInfoData;
 import discord4j.core.GatewayDiscordClient;
-import discord4j.core.object.data.ApplicationInfoBean;
 import discord4j.core.object.util.Image;
 import discord4j.core.object.util.Snowflake;
 import discord4j.core.util.EntityUtil;
@@ -38,7 +38,7 @@ public final class ApplicationInfo implements Entity {
     private final GatewayDiscordClient gateway;
 
     /** The raw data as represented by Discord. */
-    private final ApplicationInfoBean data;
+    private final ApplicationInfoData data;
 
     /**
      * Constructs a {@code ApplicationInfo} with an associated ServiceMediator and Discord data.
@@ -46,7 +46,7 @@ public final class ApplicationInfo implements Entity {
      * @param gateway The {@link GatewayDiscordClient} associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
      */
-    public ApplicationInfo(final GatewayDiscordClient gateway, final ApplicationInfoBean data) {
+    public ApplicationInfo(final GatewayDiscordClient gateway, final ApplicationInfoData data) {
         this.gateway = Objects.requireNonNull(gateway);
         this.data = Objects.requireNonNull(data);
     }
@@ -58,7 +58,7 @@ public final class ApplicationInfo implements Entity {
 
     @Override
     public Snowflake getId() {
-        return Snowflake.of(data.getId());
+        return Snowflake.of(data.id());
     }
 
     /**
@@ -67,7 +67,7 @@ public final class ApplicationInfo implements Entity {
      * @return The name of the app.
      */
     public String getName() {
-        return data.getName();
+        return data.name();
     }
 
     /**
@@ -77,7 +77,7 @@ public final class ApplicationInfo implements Entity {
      * @return The icon URL of the application, if present.
      */
     public Optional<String> getIconUrl(final Image.Format format) {
-        return Optional.ofNullable(data.getIcon())
+        return data.icon()
                 .map(icon -> ImageUtil.getUrl(String.format(ICON_IMAGE_PATH, getId().asString(), icon), format));
     }
 
@@ -97,8 +97,8 @@ public final class ApplicationInfo implements Entity {
      *
      * @return The description of the app, if present.
      */
-    public Optional<String> getDescription() {
-        return Optional.ofNullable(data.getDescription());
+    public String getDescription() {
+        return data.description();
     }
 
     /**
@@ -107,7 +107,7 @@ public final class ApplicationInfo implements Entity {
      * @return {@code true} if only the app owner can join the app's bot to guilds, {@code false} otherwise.
      */
     public boolean isPublic() {
-        return data.isBotPublic();
+        return data.botPublic();
     }
 
     /**
@@ -117,7 +117,7 @@ public final class ApplicationInfo implements Entity {
      * {@code false} otherwise.
      */
     public boolean requireCodeGrant() {
-        return data.isBotRequireCodeGrant();
+        return data.botRequireCodeGrant();
     }
 
     /**
@@ -126,7 +126,7 @@ public final class ApplicationInfo implements Entity {
      * @return The ID of the owner of the application.
      */
     public Snowflake getOwnerId() {
-        return Snowflake.of(data.getOwnerId());
+        return Snowflake.of(data.owner().id());
     }
 
     /**

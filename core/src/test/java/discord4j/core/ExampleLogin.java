@@ -18,15 +18,16 @@
 package discord4j.core;
 
 import discord4j.core.support.BotSupport;
-import reactor.blockhound.BlockHound;
+import discord4j.store.redis.RedisStoreService;
 
 public class ExampleLogin {
 
     public static void main(String[] args) {
-        BlockHound.install();
         GatewayDiscordClient client = DiscordClientBuilder.create(System.getenv("token"))
                 .build()
-                .login()
+                .gateway()
+                .setStoreService(new RedisStoreService())
+                .connect()
                 .blockOptional()
                 .orElseThrow(RuntimeException::new);
         BotSupport.create(client).eventHandlers().block();

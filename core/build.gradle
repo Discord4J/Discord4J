@@ -12,6 +12,7 @@ dependencies {
     testImplementation "org.reflections:reflections:$reflections_version"
     testImplementation "com.sedmelluq:lavaplayer:$lavaplayer_version"
     testImplementation "io.projectreactor.tools:blockhound:$blockhound_version"
+    testImplementation "com.discord4j:stores-redis:3.1.0-SNAPSHOT"
 }
 
 javadoc {

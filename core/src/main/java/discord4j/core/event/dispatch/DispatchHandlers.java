@@ -16,24 +16,20 @@
  */
 package discord4j.core.event.dispatch;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import discord4j.common.json.GuildMemberResponse;
-import discord4j.common.json.UserResponse;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.*;
 import discord4j.core.event.domain.channel.TypingStartEvent;
 import discord4j.core.object.VoiceState;
-import discord4j.core.object.data.stored.MemberBean;
-import discord4j.core.object.data.stored.PresenceBean;
-import discord4j.core.object.data.stored.UserBean;
-import discord4j.core.object.data.stored.VoiceStateBean;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.presence.Presence;
-import discord4j.gateway.json.dispatch.*;
+import discord4j.discordjson.json.*;
+import discord4j.discordjson.json.gateway.*;
 import discord4j.gateway.retry.GatewayStateChange;
 import discord4j.store.api.util.LongLongTuple2;
 import reactor.core.publisher.Mono;
+import reactor.util.Logger;
+import reactor.util.Loggers;
 import reactor.util.function.Tuples;
 
 import java.time.Instant;
@@ -43,8 +39,7 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- * Registry for {@link discord4j.gateway.json.dispatch.Dispatch} to {@link discord4j.core.event.domain.Event}
- * mapping operations.
+ * Registry for {@link Dispatch} to {@link Event} mapping operations.
  */
 public abstract class DispatchHandlers {
 
@@ -90,14 +85,15 @@ public abstract class DispatchHandlers {
         addHandler(GatewayStateChange.class, LifecycleDispatchHandlers::gatewayStateChanged);
     }
 
-    private static <D extends Dispatch, E extends Event> void addHandler(Class<D> dispatchType,
-                                                                         DispatchHandler<D, E> dispatchHandler) {
+    private static <D, E extends Event> void addHandler(Class<D> dispatchType,
+                                                        DispatchHandler<D, E> dispatchHandler) {
         handlerMap.put(dispatchType, dispatchHandler);
     }
 
+    private static final Logger log = Loggers.getLogger(DispatchHandlers.class);
+
     /**
-     * Process a {@link discord4j.gateway.json.dispatch.Dispatch} object wrapped with its context to
-     * potentially obtain an {@link discord4j.core.event.domain.Event}.
+     * Process a {@link Dispatch} object wrapped with its context to potentially obtain an {@link Event}.
      *
      * @param context the DispatchContext used with this Dispatch object
      * @param <D> the Dispatch type
@@ -105,41 +101,44 @@ public abstract class DispatchHandlers {
      * @return an Event mapped from the given Dispatch object, or null if no Event is produced.
      */
     @SuppressWarnings("unchecked")
-    public static <D extends Dispatch, E extends Event> Mono<E> handle(DispatchContext<D> context) {
-        DispatchHandler<D, E> entry = (DispatchHandler<D, E>) handlerMap.get(context.getDispatch().getClass());
-        if (entry == null) {
+    public static <D, E extends Event> Mono<E> handle(DispatchContext<D> context) {
+        DispatchHandler<D, E> handler = (DispatchHandler<D, E>) handlerMap.entrySet()
+                .stream()
+                .filter(entry -> entry.getKey().isAssignableFrom(context.getDispatch().getClass()))
+                .map(Map.Entry::getValue)
+                .findFirst()
+                .orElse(null);
+        if (handler == null) {
+            log.warn("Handler not found from: {}", context.getDispatch().getClass());
             return Mono.empty();
         }
-        return Mono.defer(() -> entry.handle(context));
+        return Mono.defer(() -> handler.handle(context))
+                .checkpoint("Dispatch handled for " + context.getDispatch().getClass());
     }
 
     private static Mono<PresenceUpdateEvent> presenceUpdate(DispatchContext<PresenceUpdate> context) {
         GatewayDiscordClient gateway = context.getGateway();
 
-        long guildId = context.getDispatch().getGuildId();
-        JsonNode user = context.getDispatch().getUser();
-        long userId = Long.parseUnsignedLong(user.get("id").asText());
+        long guildId = Long.parseUnsignedLong(context.getDispatch().guildId());
+        PartialUserData userData = context.getDispatch().user();
+        long userId = Long.parseUnsignedLong(userData.id());
         LongLongTuple2 key = LongLongTuple2.of(guildId, userId);
-        PresenceBean bean = new PresenceBean(context.getDispatch());
-        Presence current = new Presence(bean);
+        PresenceData presenceData = createPresence(context.getDispatch());
+        Presence current = new Presence(presenceData);
 
-        Mono<Void> saveNew = context.getStateHolder().getPresenceStore().save(key, bean);
+        Mono<Void> saveNew = context.getStateHolder().getPresenceStore().save(key, presenceData);
 
         Mono<Optional<User>> saveUser = context.getStateHolder().getUserStore()
                 .find(userId)
-                .map(oldBean -> {
-                    UserBean newBean = new UserBean(oldBean);
-                    JsonNode username = user.get("username");
-                    JsonNode discriminator = user.get("discriminator");
-                    JsonNode avatar = user.get("avatar");
+                .map(oldUserData -> {
+                    UserData newUserData = ImmutableUserData.builder()
+                            .from(oldUserData)
+                            .username(userData.username().toOptional().orElse(oldUserData.username()))
+                            .discriminator(userData.discriminator().toOptional().orElse(oldUserData.discriminator()))
+                            .avatar(userData.avatar().toOptional().orElse(oldUserData.avatar()))
+                            .build();
 
-                    newBean.setUsername((username == null) ? oldBean.getUsername() : username.asText());
-                    newBean.setDiscriminator((discriminator == null) ? oldBean.getDiscriminator() :
-                            discriminator.asText());
-                    newBean.setAvatar((avatar == null) ? oldBean.getAvatar() : (avatar.isNull() ? null :
-                            avatar.asText()));
-
-                    return Tuples.of(oldBean, newBean);
+                    return Tuples.of(oldUserData, newUserData);
                 })
                 .flatMap(tuple -> context.getStateHolder().getUserStore()
                         .save(userId, tuple.getT2())
@@ -152,98 +151,115 @@ public abstract class DispatchHandlers {
                 context.getStateHolder().getPresenceStore()
                         .find(key)
                         .flatMap(saveNew::thenReturn)
-                        .map(old -> new PresenceUpdateEvent(gateway, context.getShardInfo(), guildId, oldUser.orElse(null), user, current,
-                                new Presence(old)))
-                        .switchIfEmpty(saveNew.thenReturn(new PresenceUpdateEvent(gateway, context.getShardInfo(), guildId,
-                                oldUser.orElse(null), user, current, null))));
+                        .map(old -> new PresenceUpdateEvent(gateway, context.getShardInfo(), guildId,
+                                oldUser.orElse(null), userData, current, new Presence(old)))
+                        .switchIfEmpty(saveNew.thenReturn(new PresenceUpdateEvent(gateway, context.getShardInfo(),
+                                guildId, oldUser.orElse(null), userData, current, null))));
+    }
+
+    private static PresenceData createPresence(PresenceUpdate update) {
+        return ImmutablePresenceData.builder()
+                .user(update.user())
+                .roles(update.roles())
+                .game(update.game())
+                .status(update.status())
+                .activities(update.activities())
+                .clientStatus(update.clientStatus())
+                .premiumSince(update.premiumSince())
+                .nick(update.nick())
+                .build();
     }
 
     private static Mono<TypingStartEvent> typingStart(DispatchContext<TypingStart> context) {
-        long channelId = context.getDispatch().getChannelId();
-        Long guildId = context.getDispatch().getGuildId();
-        long userId = context.getDispatch().getUserId();
-        Instant startTime = Instant.ofEpochMilli(context.getDispatch().getTimestamp());
+        long channelId = Long.parseUnsignedLong(context.getDispatch().channelId());
+        Long guildId = context.getDispatch().guildId().toOptional().map(Long::parseUnsignedLong).orElse(null);
+        long userId = Long.parseUnsignedLong(context.getDispatch().userId());
+        Instant startTime = Instant.ofEpochSecond(context.getDispatch().timestamp());
 
-        GuildMemberResponse response = context.getDispatch().getMember();
-        MemberBean memberBean = response != null ? new MemberBean(response) : null;
-        UserBean userBean = response != null ? new UserBean(response.getUser()) : null;
-        Member member = response != null ? new Member(context.getGateway(), memberBean, userBean, guildId) : null;
+        Member member = context.getDispatch().member().toOptional()
+                .filter(__ -> guildId != null)
+                .map(memberData -> new Member(context.getGateway(), memberData, guildId))
+                .orElse(null);
 
-        return Mono.just(new TypingStartEvent(context.getGateway(), context.getShardInfo(), channelId, guildId, userId, startTime, member));
+        return Mono.just(new TypingStartEvent(context.getGateway(), context.getShardInfo(), channelId, guildId,
+                userId, startTime, member));
     }
 
     private static Mono<UserUpdateEvent> userUpdate(DispatchContext<UserUpdate> context) {
         GatewayDiscordClient gateway = context.getGateway();
+        UserData userData = context.getDispatch().user();
+        long userId = Long.parseUnsignedLong(userData.id());
+        User current = new User(gateway, userData);
 
-        UserBean bean = new UserBean(context.getDispatch().getUser());
-        User current = new User(gateway, bean);
-
-        Mono<Void> saveNew = context.getStateHolder().getUserStore().save(bean.getId(), bean);
+        Mono<Void> saveNew = context.getStateHolder().getUserStore().save(userId, userData);
 
         return context.getStateHolder().getUserStore()
-                .find(context.getDispatch().getUser().getId())
+                .find(userId)
                 .flatMap(saveNew::thenReturn)
                 .map(old -> new UserUpdateEvent(gateway, context.getShardInfo(), current, new User(gateway, old)))
                 .switchIfEmpty(saveNew.thenReturn(new UserUpdateEvent(gateway, context.getShardInfo(), current, null)));
     }
 
     private static Mono<Event> voiceServerUpdate(DispatchContext<VoiceServerUpdate> context) {
-        String token = context.getDispatch().getToken();
-        long guildId = context.getDispatch().getGuildId();
-        String endpoint = context.getDispatch().getEndpoint();
+        String token = context.getDispatch().token();
+        long guildId = Long.parseUnsignedLong(context.getDispatch().guildId());
+        String endpoint = context.getDispatch().endpoint();
 
-        return Mono.just(new VoiceServerUpdateEvent(context.getGateway(), context.getShardInfo(), token, guildId, endpoint));
+        return Mono.just(new VoiceServerUpdateEvent(context.getGateway(), context.getShardInfo(), token, guildId,
+                endpoint));
     }
 
     private static Mono<VoiceStateUpdateEvent> voiceStateUpdateDispatch(
             DispatchContext<VoiceStateUpdateDispatch> context) {
         GatewayDiscordClient gateway = context.getGateway();
+        VoiceStateData voiceStateData = context.getDispatch().voiceState();
 
-        long guildId = context.getDispatch().getVoiceState().getGuildId();
-        long userId = context.getDispatch().getVoiceState().getUserId();
+        long guildId = Long.parseUnsignedLong(voiceStateData.guildId().get());
+        long userId = Long.parseUnsignedLong(voiceStateData.userId());
 
         LongLongTuple2 key = LongLongTuple2.of(guildId, userId);
-        VoiceStateBean bean = new VoiceStateBean(context.getDispatch().getVoiceState());
-        VoiceState current = new VoiceState(gateway, bean);
+        VoiceState current = new VoiceState(gateway, voiceStateData);
 
-        Mono<Void> saveNew = context.getStateHolder().getVoiceStateStore().save(key, bean);
+        Mono<Void> saveNew = context.getStateHolder().getVoiceStateStore().save(key, voiceStateData);
 
         return context.getStateHolder().getVoiceStateStore()
                 .find(key)
                 .flatMap(saveNew::thenReturn)
-                .map(old -> new VoiceStateUpdateEvent(gateway, context.getShardInfo(), current, new VoiceState(gateway, old)))
-                .switchIfEmpty(saveNew.thenReturn(new VoiceStateUpdateEvent(gateway, context.getShardInfo(), current, null)));
+                .map(old -> new VoiceStateUpdateEvent(gateway, context.getShardInfo(), current,
+                        new VoiceState(gateway, old)))
+                .switchIfEmpty(saveNew.thenReturn(new VoiceStateUpdateEvent(gateway, context.getShardInfo(), current,
+                        null)));
     }
 
     private static Mono<Event> webhooksUpdate(DispatchContext<WebhooksUpdate> context) {
-        long guildId = context.getDispatch().getGuildId();
-        long channelId = context.getDispatch().getChannelId();
+        long guildId = Long.parseUnsignedLong(context.getDispatch().guildId());
+        long channelId = Long.parseUnsignedLong(context.getDispatch().channelId());
 
         return Mono.just(new WebhooksUpdateEvent(context.getGateway(), context.getShardInfo(), guildId, channelId));
     }
 
     private static Mono<InviteCreateEvent> inviteCreate(DispatchContext<InviteCreate> context) {
-        Long guildId = context.getDispatch().getGuildId();
-        long channelId = context.getDispatch().getChannelId();
-        String code = context.getDispatch().getCode();
-        Instant createdAt = DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(context.getDispatch().getCreatedAt(), Instant::from);
-        int uses = context.getDispatch().getUses();
-        int maxUses = context.getDispatch().getMaxUses();
-        int maxAge = context.getDispatch().getMaxAge();
-        boolean temporary = context.getDispatch().isTemporary();
+        long guildId = Long.parseUnsignedLong(context.getDispatch().guildId());
+        long channelId = Long.parseUnsignedLong(context.getDispatch().channelId());
+        String code = context.getDispatch().code();
+        Instant createdAt = DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(context.getDispatch().createdAt(), Instant::from);
+        int uses = context.getDispatch().uses();
+        int maxUses = context.getDispatch().maxUses();
+        int maxAge = context.getDispatch().maxAge();
+        boolean temporary = context.getDispatch().temporary();
 
-        UserResponse response = context.getDispatch().getInviter();
-        UserBean bean = response != null ? new UserBean(response) : null;
-        User current = bean != null ? new User(context.getGateway(), bean) : null;
+        User current = context.getDispatch().inviter().toOptional()
+                .map(userData -> new User(context.getGateway(), userData))
+                .orElse(null);
 
         return Mono.just(new InviteCreateEvent(context.getGateway(), context.getShardInfo(), guildId, channelId, code,
                 current, createdAt, uses, maxUses, maxAge, temporary));
     }
 
     private static Mono<InviteDeleteEvent> inviteDelete(DispatchContext<InviteDelete> context) {
-        Long guildId = context.getDispatch().getGuildId();
-        long channelId = context.getDispatch().getChannelId();
-        String code = context.getDispatch().getCode();
+        long guildId = Long.parseUnsignedLong(context.getDispatch().guildId());
+        long channelId = Long.parseUnsignedLong(context.getDispatch().channelId());
+        String code = context.getDispatch().code();
 
         return Mono.just(new InviteDeleteEvent(context.getGateway(), context.getShardInfo(), guildId, channelId, code));
     }

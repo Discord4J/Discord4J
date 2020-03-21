@@ -22,7 +22,7 @@ import discord4j.core.object.util.Snowflake;
 import discord4j.gateway.ShardInfo;
 import reactor.util.annotation.Nullable;
 
-import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
@@ -39,10 +39,10 @@ public class ReadyEvent extends GatewayLifecycleEvent {
     private final User self;
     private final Set<Guild> guilds;
     private final String sessionId;
-    private final String[] trace;
+    private final List<String> trace;
 
-    public ReadyEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, int gatewayVersion, User self, Set<Guild> guilds, String sessionId,
-                      String[] trace) {
+    public ReadyEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, int gatewayVersion, User self,
+                      Set<Guild> guilds, String sessionId, List<String> trace) {
         super(gateway, shardInfo);
         this.gatewayVersion = gatewayVersion;
         this.self = self;
@@ -73,11 +73,9 @@ public class ReadyEvent extends GatewayLifecycleEvent {
      * Gets a set of Unavailable {@link Guild}. These {@code Guilds} have not yet been provided via a
      * {@link discord4j.core.event.domain.guild.GuildCreateEvent}
      *
-     *
-     * @see <a href="https://discordapp.com/developers/docs/resources/guild#unavailable-guild-object">
-     *     Unavailable Guild Object</a>
-     *
      * @return A set of unavailable {@code Guilds}.
+     * @see <a href="https://discordapp.com/developers/docs/resources/guild#unavailable-guild-object">
+     * Unavailable Guild Object</a>
      */
     public Set<Guild> getGuilds() {
         return guilds;
@@ -97,7 +95,7 @@ public class ReadyEvent extends GatewayLifecycleEvent {
      *
      * @return The trace provided by Discord.
      */
-    public String[] getTrace() {
+    public List<String> getTrace() {
         return trace;
     }
 
@@ -167,7 +165,7 @@ public class ReadyEvent extends GatewayLifecycleEvent {
                 ", self=" + self +
                 ", guilds=" + guilds +
                 ", sessionId='" + sessionId + '\'' +
-                ", trace=" + Arrays.toString(trace) +
+                ", trace=" + trace +
                 "}";
     }
 }

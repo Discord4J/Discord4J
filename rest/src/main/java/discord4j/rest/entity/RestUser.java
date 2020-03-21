@@ -17,8 +17,8 @@
 
 package discord4j.rest.entity;
 
+import discord4j.discordjson.json.UserData;
 import discord4j.rest.RestClient;
-import discord4j.rest.entity.data.UserData;
 import reactor.core.publisher.Mono;
 
 public class RestUser {
@@ -26,14 +26,16 @@ public class RestUser {
     private final RestClient restClient;
     private final long id;
 
-    public RestUser(RestClient restClient, long id) {
+    private RestUser(RestClient restClient, long id) {
         this.restClient = restClient;
         this.id = id;
     }
 
+    public static RestUser create(RestClient restClient, long id) {
+        return new RestUser(restClient, id);
+    }
+
     public Mono<UserData> getData() {
-        return restClient.getUserService()
-                .getUser(id)
-                .map(UserData::new);
+        return restClient.getUserService().getUser(id);
     }
 }

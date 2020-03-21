@@ -17,9 +17,10 @@
 package discord4j.core.object.audit;
 
 import discord4j.core.GatewayDiscordClient;
-import discord4j.core.object.data.AuditLogEntryBean;
 import discord4j.core.object.entity.Entity;
 import discord4j.core.object.util.Snowflake;
+import discord4j.core.util.AuditLogUtil;
+import discord4j.discordjson.json.AuditLogEntryData;
 
 import java.util.Optional;
 
@@ -31,42 +32,58 @@ public class AuditLogEntry implements Entity {
     /** The gateway associated to this object. */
     private final GatewayDiscordClient gateway;
 
-    private final AuditLogEntryBean data;
+    private final AuditLogEntryData data;
 
-    public AuditLogEntry(final GatewayDiscordClient gateway, final AuditLogEntryBean data) {
+    public AuditLogEntry(final GatewayDiscordClient gateway, final AuditLogEntryData data) {
         this.gateway = gateway;
         this.data = data;
     }
 
     public Optional<Snowflake> getTargetId() {
-        return data.getTargetId() == 0 ? Optional.empty() : Optional.of(Snowflake.of(data.getTargetId()));
+        return data.targetId()
+            .filter(it -> !it.equals("0"))
+            .map(Snowflake::of);
     }
 
     public Snowflake getResponsibleUserId() {
-        return Snowflake.of(data.getResponsibleUserId());
+        return Snowflake.of(data.userId());
     }
 
     public Optional<String> getReason() {
-        return Optional.ofNullable(data.getReason());
+        return data.reason().toOptional();
     }
 
     public ActionType getActionType() {
-        return ActionType.of(data.getActionType());
+        return ActionType.of(data.actionType());
     }
 
-    @SuppressWarnings("unchecked")
     public <T> Optional<AuditLogChange<T>> getChange(ChangeKey<T> changeKey) {
-        return Optional.ofNullable((AuditLogChange<T>) data.getChanges().get(changeKey.getName()));
+        return data.changes().toOptional()
+                .map(list -> list.stream().collect(AuditLogUtil.changeCollector()))
+                .map(map -> map.get(changeKey.getName()))
+                .map(AuditLogEntry::cast);
     }
 
     @SuppressWarnings("unchecked")
+    private static <T> AuditLogChange<T> cast(AuditLogChange<?> strategy) {
+        return (AuditLogChange<T>) strategy;
+    }
+
     public <T> Optional<T> getOption(OptionKey<T> optionKey) {
-        return Optional.ofNullable((T) data.getOptions().get(optionKey.getField()));
+        return data.options().toOptional()
+                .map(AuditLogUtil::createOptionMap)
+                .map(map -> map.get(optionKey.getField()))
+                .map(AuditLogEntry::cast);
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <T> T cast(Object value) {
+        return (T) value;
     }
 
     @Override
     public Snowflake getId() {
-        return Snowflake.of(data.getId());
+        return Snowflake.of(data.id());
     }
 
     @Override

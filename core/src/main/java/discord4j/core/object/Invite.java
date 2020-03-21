@@ -17,11 +17,13 @@
 package discord4j.core.object;
 
 import discord4j.core.GatewayDiscordClient;
-import discord4j.core.object.data.InviteBean;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.CategorizableChannel;
 import discord4j.core.object.util.Snowflake;
+import discord4j.discordjson.json.InviteData;
+import discord4j.discordjson.json.PartialGuildData;
+import discord4j.discordjson.json.UserData;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
 
@@ -40,7 +42,7 @@ public class Invite implements DiscordObject {
     private final GatewayDiscordClient gateway;
 
     /** The raw data as represented by Discord. */
-    private final InviteBean data;
+    private final InviteData data;
 
     /**
      * Constructs a {@code Invite} with an associated ServiceMediator and Discord data.
@@ -48,7 +50,7 @@ public class Invite implements DiscordObject {
      * @param gateway The {@link GatewayDiscordClient} associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
      */
-    public Invite(final GatewayDiscordClient gateway, final InviteBean data) {
+    public Invite(final GatewayDiscordClient gateway, final InviteData data) {
         this.gateway = Objects.requireNonNull(gateway);
         this.data = Objects.requireNonNull(data);
     }
@@ -64,7 +66,7 @@ public class Invite implements DiscordObject {
      * @return The invite code (unique ID).
      */
     public final String getCode() {
-        return data.getCode();
+        return data.code();
     }
 
     /**
@@ -72,18 +74,20 @@ public class Invite implements DiscordObject {
      *
      * @return The ID of the guild this invite is associated to.
      */
-    public final Snowflake getGuildId() {
-        return Snowflake.of(data.getGuildId());
+    public final Optional<Snowflake> getGuildId() {
+        return data.guild().toOptional()
+            .map(PartialGuildData::id)
+            .map(Snowflake::of);
     }
 
     /**
-     * Requests to retrieve the guild this invite is associated to.
+     * Requests to retrieve the guild this invite is associated to, if present.
      *
      * @return A {@link Mono} where, upon successful completion, emits the {@link Guild guild} this invite is associated
      * to. If an error is received, it is emitted through the {@code Mono}.
      */
     public final Mono<Guild> getGuild() {
-        return gateway.getGuildById(getGuildId());
+        return getGuildId().map(gateway::getGuildById).orElse(Mono.empty());
     }
 
     /**
@@ -92,7 +96,7 @@ public class Invite implements DiscordObject {
      * @return The ID of the channel this invite is associated to.
      */
     public final Snowflake getChannelId() {
-        return Snowflake.of(data.getChannelId());
+        return Snowflake.of(data.channel().id());
     }
 
     /**
@@ -111,7 +115,9 @@ public class Invite implements DiscordObject {
      * @return The ID of the user who created the invite, if present.
      */
     public final Optional<Snowflake> getInviterId() {
-        return Optional.ofNullable(getData().getInviterId()).map(Snowflake::of);
+        return data.inviter().toOptional()
+            .map(UserData::id)
+            .map(Snowflake::of);
     }
 
     /**
@@ -130,7 +136,8 @@ public class Invite implements DiscordObject {
      * @return The ID of the target user this invite is associated to, if present.
      */
     public final Optional<Snowflake> getTargetUserId() {
-        return Optional.ofNullable(data.getTargetUserId())
+        return data.targetUser().toOptional()
+            .map(UserData::id)
             .map(Snowflake::of);
     }
 
@@ -150,7 +157,8 @@ public class Invite implements DiscordObject {
      * @return The type of target user for this invite, if present.
      */
     public final Optional<Type> getTargetUserType() {
-        return Optional.ofNullable(data.getTargetUserType()).map(Type::of);
+        return data.targetUserType().toOptional()
+            .map(Type::of);
     }
 
     /**
@@ -161,7 +169,7 @@ public class Invite implements DiscordObject {
      * invite is associated to, if present.
      */
     public final OptionalInt getApproximatePresenceCount() {
-        return Optional.ofNullable(data.getApproximatePresenceCount())
+        return data.approximatePresenceCount().toOptional()
             .map(OptionalInt::of)
             .orElse(OptionalInt.empty());
     }
@@ -172,7 +180,7 @@ public class Invite implements DiscordObject {
      * @return An approximate count of total members of the guild this invite is associated to, if present.
      */
     public final OptionalInt getApproximateMemberCount() {
-        return Optional.ofNullable(data.getApproximateMemberCount())
+        return data.approximateMemberCount().toOptional()
             .map(OptionalInt::of)
             .orElse(OptionalInt.empty());
     }
@@ -205,7 +213,7 @@ public class Invite implements DiscordObject {
      *
      * @return The raw data as represented by Discord.
      */
-    InviteBean getData() {
+    InviteData getData() {
         return data;
     }
 
