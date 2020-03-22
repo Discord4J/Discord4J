@@ -78,12 +78,23 @@ public class User implements Entity {
     }
 
     /**
-     * Gets the user's 4-digit discord-tag.
+     * Gets the user's 4-digit discriminator
+     * The discriminator is unique number to distinct one among all users with the same username.
+     * The discriminator is randomly generated, but can be changed if the user has a nitro subscription.
      *
-     * @return The user's 4-digit discord-tag.
+     * @return The user's 4-digit discriminator.
      */
     public final String getDiscriminator() {
         return data.discriminator();
+    }
+
+    /**
+     * Gets the user's username and discriminator separated by a #
+     * This is unique across the discord platform, but may change.
+     * @return {@link User#getUsername()}#{@link User#getDiscriminator()}
+     */
+    public final String getTag() {
+        return getUsername() + "#" + getDiscriminator();
     }
 
     /**
