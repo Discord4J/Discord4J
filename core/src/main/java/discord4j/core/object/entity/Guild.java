@@ -251,7 +251,7 @@ public final class Guild implements Entity {
      * @return The ID of the embedded channel, if present.
      */
     public Optional<Snowflake> getEmbedChannelId() {
-        return data.embedChannelId().get().map(Snowflake::of);
+        return Possible.flatOpt(data.embedChannelId()).map(Snowflake::of);
     }
 
     /**
@@ -439,7 +439,7 @@ public final class Guild implements Entity {
      * @return The channel ID for the server widget, if present.
      */
     public Optional<Snowflake> getWidgetChannelId() {
-        return data.widgetChannelId().get().map(Snowflake::of);
+        return Possible.flatOpt(data.widgetChannelId()).map(Snowflake::of);
     }
 
     /**

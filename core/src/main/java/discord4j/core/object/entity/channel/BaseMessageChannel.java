@@ -62,7 +62,7 @@ class BaseMessageChannel extends BaseChannel implements MessageChannel {
 
     @Override
     public final Optional<Instant> getLastPinTimestamp() {
-        return getData().lastPinTimestamp().get()
+        return Possible.flatOpt(getData().lastPinTimestamp())
                 .map(timestamp -> DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(timestamp, Instant::from));
     }
 
