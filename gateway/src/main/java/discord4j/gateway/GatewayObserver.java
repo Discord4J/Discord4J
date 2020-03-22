@@ -32,18 +32,18 @@ public interface GatewayObserver {
     }
 
     /**
-     * React on websocket state change
+     * React on websocket state change.
      *
-     * @param newState the new State
-     * @param identifyOptions the current shard session and sequence
+     * @param newState The new State.
+     * @param identifyOptions The current shard session and sequence.
      */
     void onStateChange(ConnectionObserver.State newState, IdentifyOptions identifyOptions);
 
     /**
-     * Chain together another {@link GatewayObserver}
+     * Chain together another {@link GatewayObserver}.
      *
-     * @param other the next {@link GatewayObserver}
-     * @return a new composite {@link GatewayObserver}
+     * @param other The next {@link GatewayObserver}.
+     * @return A new composite {@link GatewayObserver}.
      */
     default GatewayObserver then(GatewayObserver other) {
         return CompositeGatewayObserver.compose(this, other);

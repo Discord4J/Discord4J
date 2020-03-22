@@ -259,7 +259,7 @@ public class Activity {
     /** The type of "action" for an activity. */
     public enum Type {
 
-        /** Unknown type **/
+        /** Unknown type. **/
         UNKNOWN(-1),
 
         /** "Playing {name}" */

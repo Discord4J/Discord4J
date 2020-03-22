@@ -23,9 +23,9 @@ import discord4j.gateway.ShardInfo;
 
 /**
  * Represents gateway dispatch data enriched with context for processing through a
- * {@link DispatchHandler} defined under {@link DispatchHandlers}
+ * {@link DispatchHandler} defined under {@link DispatchHandlers}.
  *
- * @param <D> the type of the payload
+ * @param <D> The type of the payload.
  */
 public class DispatchContext<D> {
 

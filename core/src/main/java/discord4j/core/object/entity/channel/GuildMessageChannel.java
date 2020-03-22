@@ -29,7 +29,7 @@ import java.util.function.Consumer;
 public interface GuildMessageChannel extends CategorizableChannel, MessageChannel {
 
     /**
-     * Gets the channel topic, if present
+     * Gets the channel topic, if present.
      *
      * @return The channel topic, if present.
      */

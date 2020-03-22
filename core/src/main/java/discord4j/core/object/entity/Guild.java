@@ -265,7 +265,7 @@ public final class Guild implements Entity {
     }
 
     /**
-     * Gets the Premium Tier for the guild
+     * Gets the Premium Tier for the guild.
      *
      * @return The Premium Tier for the guild.
      */
@@ -1015,7 +1015,7 @@ public final class Guild implements Entity {
     /** Automatically scan and delete messages sent in the server that contain explicit content. */
     public enum ContentFilterLevel {
 
-        /** Unknown content filter level */
+        /** Unknown content filter level. */
         UNKNOWN(-1),
 
         /** Don't scan any messages. */
@@ -1071,7 +1071,7 @@ public final class Guild implements Entity {
      */
     public enum MfaLevel {
 
-        /** Unknown MFA level */
+        /** Unknown MFA level. */
         UNKNOWN(-1),
 
         /** Disabled 2FA requirement. */
@@ -1123,7 +1123,7 @@ public final class Guild implements Entity {
      */
     public enum NotificationLevel {
 
-        /** Unknown notification level */
+        /** Unknown notification level. */
         UNKNOWN(-1),
 
         /** Receive a notification for all messages. */
@@ -1170,7 +1170,7 @@ public final class Guild implements Entity {
     }
 
     /**
-     * Represent the server Premium Tier (aka boost level) of the {@link Guild}
+     * Represent the server Premium Tier (aka boost level) of the {@link Guild}.
      *
      * @see <a href="https://support.discordapp.com/hc/en/articles/360028038352">Server Boost info</a>
      * @see
@@ -1178,19 +1178,19 @@ public final class Guild implements Entity {
      */
     public enum PremiumTier {
 
-        /** Unknown Premium Tier */
+        /** Unknown Premium Tier. */
         UNKNOWN(-1),
 
-        /** no Premium Tier **/
+        /** No Premium Tier. **/
         NONE(0),
 
-        /** Premium Tier 1 (Boost Level 1) **/
+        /** Premium Tier 1 (Boost Level 1). **/
         TIER_1(1),
 
-        /** Premium Tier 2 (Boost Level 2) **/
+        /** Premium Tier 2 (Boost Level 2). **/
         TIER_2(2),
 
-        /** Premium Tier 3 (Boost Level 3) **/
+        /** Premium Tier 3 (Boost Level 3). **/
         TIER_3(3);
 
         /** The underlying value as represented by Discord. */
@@ -1239,7 +1239,7 @@ public final class Guild implements Entity {
      */
     public enum VerificationLevel {
 
-        /** Unknown verification level */
+        /** Unknown verification level. */
         UNKNOWN(-1),
 
         /** Unrestricted. */

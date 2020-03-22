@@ -195,7 +195,7 @@ class BaseGuildMessageChannel extends BaseChannel implements GuildMessageChannel
     }
 
     /**
-     * Gets the channel topic, if present
+     * Gets the channel topic, if present.
      *
      * @return The channel topic, if present.
      */

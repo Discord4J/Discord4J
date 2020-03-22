@@ -96,7 +96,7 @@ public class DiscordWebClient {
     }
 
     /**
-     * Return the strategy used for request and response conversion
+     * Return the strategy used for request and response conversion.
      *
      * @return the {@link ExchangeStrategies} used by this {@link DiscordWebClient} in every request
      */
