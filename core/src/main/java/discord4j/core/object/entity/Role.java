@@ -75,6 +75,11 @@ public final class Role implements Entity {
         return gateway;
     }
 
+    /**
+     * Gets the sorting position of the role.
+     *
+     * @return The sorting position of the role.
+     */
     public int getRawPosition() {
         return data.position();
     }

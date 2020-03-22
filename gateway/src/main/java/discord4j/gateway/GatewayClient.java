@@ -53,7 +53,7 @@ public interface GatewayClient {
     /**
      * Terminates this client's current gateway connection.
      *
-     * @param allowResume if resuming this session after closing is possible. if set to <code>true</code> the main
+     * @param allowResume if resuming this session after closing is possible. if set to {@code true} the main
      * execution {@link Mono} will complete with a {@link PartialDisconnectException} you can
      * use to perform additional behavior or reconnect.
      * @return a {@link Mono} deferring completion until the disconnection has completed.

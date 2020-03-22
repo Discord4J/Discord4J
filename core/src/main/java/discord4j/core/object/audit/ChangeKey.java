@@ -84,6 +84,11 @@ public final class ChangeKey<T> {
         this.name = name;
     }
 
+    /**
+     * Gets the name of audit log change key.
+     *
+     * @return The name of audit log change key.
+     */
     public String getName() {
         return name;
     }

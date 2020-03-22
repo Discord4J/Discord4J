@@ -39,20 +39,40 @@ public class AuditLogEntry implements Entity {
         this.data = data;
     }
 
+    /**
+     * Gets the id of the affected entity (webhook, user, role, etc.), if present.
+     *
+     * @return The id of the affected entity (webhook, user, role, etc.), if present.
+     */
     public Optional<Snowflake> getTargetId() {
         return data.targetId()
             .filter(it -> !it.equals("0"))
             .map(Snowflake::of);
     }
 
+    /**
+     * Gets the user who made the changes.
+     *
+     * @return The user who made the changes.
+     */
     public Snowflake getResponsibleUserId() {
         return Snowflake.of(data.userId());
     }
 
+    /**
+     * Gets the reason for the change, if present.
+     * 
+     * @return The reason for the change, if present.
+     */
     public Optional<String> getReason() {
         return data.reason().toOptional();
     }
 
+    /**
+     * Gets type of action that occurred.
+     *
+     * @return The type of action that occurred.
+     */
     public ActionType getActionType() {
         return ActionType.of(data.actionType());
     }

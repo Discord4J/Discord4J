@@ -71,7 +71,7 @@ public class RestMessage {
      * Unicode characters.
      * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the reaction was added on
      * this message. If an error is received, it is emitted through the {@code Mono}.
-     * @see <a href="https://discordapp.com/developers/docs/resources/channel#create-reaction>Create Reaction</a>
+     * @see <a href="https://discordapp.com/developers/docs/resources/channel#create-reaction">Create Reaction</a>
      */
     public Mono<Void> createReaction(String emoji) {
         return restClient.getChannelService().createReaction(channelId, id, emoji);
@@ -121,7 +121,7 @@ public class RestMessage {
     /**
      * Requests to edit this message.
      *
-     * @param request request body used to create a new message
+     * @param request The request body used to create a new message.
      * @return A {@link Mono} where, upon successful completion, emits the edited {@link MessageData}. If an error is
      * received, it is emitted through the {@code Mono}.
      * @see <a href="https://discordapp.com/developers/docs/resources/channel#edit-message">Edit Message</a>
@@ -136,7 +136,7 @@ public class RestMessage {
      * @param reason The reason, if present.
      * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the message has been deleted.
      * If an error is received, it is emitted through the {@code Mono}.
-     * @see <a href="https://discordapp.com/developers/docs/resources/channel#delete-message>Delete Message</a>
+     * @see <a href="https://discordapp.com/developers/docs/resources/channel#delete-message">Delete Message</a>
      */
     public Mono<Void> delete(@Nullable String reason) {
         return restClient.getChannelService().deleteMessage(channelId, id, reason);
