@@ -19,6 +19,7 @@ package discord4j.core.object.entity;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.VoiceState;
 import discord4j.core.object.presence.Presence;
+import discord4j.discordjson.possible.Possible;
 import discord4j.rest.util.PermissionSet;
 import discord4j.core.object.util.Snowflake;
 import discord4j.core.spec.BanQuerySpec;
@@ -170,7 +171,7 @@ public final class Member extends User {
      * @return The user's guild nickname (if one is set).
      */
     public Optional<String> getNickname() {
-        return data.nick().get();
+        return Possible.flatOpt(data.nick());
     }
 
     /**
