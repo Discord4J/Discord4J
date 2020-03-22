@@ -61,7 +61,7 @@ public class AuditLogEntry implements Entity {
 
     /**
      * Gets the reason for the change, if present.
-     * 
+     *
      * @return The reason for the change, if present.
      */
     public Optional<String> getReason() {
