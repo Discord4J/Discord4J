@@ -285,9 +285,9 @@ public final class Guild implements Entity {
     }
 
     /**
-     * Gets the preferred locale of the guild, only set if guild has the "PUBLIC" feature, defaults to en-US.
+     * Gets the preferred locale of a "PUBLIC" guild used in server discovery and notices from Discord; defaults to "en-US".
      *
-     * @return The preferred locale of the guild, only set if guild has the "PUBLIC" feature, defaults to en-US.
+     * @return The preferred locale of a "PUBLIC" guild used in server discovery and notices from Discord; defaults to "en-US".
      */
     public Locale getPreferredLocale() {
         return new Locale.Builder().setLanguageTag(data.preferredLocale()).build();
@@ -453,9 +453,9 @@ public final class Guild implements Entity {
     }
 
     /**
-     * Gets the ID of the channel to which system messages are sent, if present.
+     * Gets the ID of the channel where guild notices such as welcome messages and boost events are posted, if present.
      *
-     * @return The ID of the channel to which system messages are sent, if present.
+     * @return The ID of the channel where guild notices such as welcome messages and boost events are posted, if present.
      */
     public Optional<Snowflake> getSystemChannelId() {
         return data.systemChannelId().map(Snowflake::of);
