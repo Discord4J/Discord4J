@@ -54,13 +54,16 @@ import java.util.stream.Collectors;
 public final class Guild implements Entity {
 
     /** The default value for the maximum number of presences. **/
-    private static final int DEFAULT_MAX_PRESENCES = 5000;
+    private static final int DEFAULT_MAX_PRESENCES = 25000;
 
     /** The path for guild icon image URLs. */
     private static final String ICON_IMAGE_PATH = "icons/%s/%s";
 
     /** The path for guild splash image URLs. */
     private static final String SPLASH_IMAGE_PATH = "splashes/%s/%s";
+
+    /** The path for guild discovery splash image URLs. */
+    private static final String DISCOVERY_SPLASH_IMAGE_PATH = "discovery-splashes/%s/%s";
 
     /** The path for guild banner image URLs. */
     private static final String BANNER_IMAGE_PATH = "banners/%s/%s";
@@ -143,6 +146,28 @@ public final class Guild implements Entity {
      */
     public Mono<Image> getSplash(final Image.Format format) {
         return Mono.justOrEmpty(getSplashUrl(format)).flatMap(Image::ofUrl);
+    }
+
+    /**
+     * Gets the discovery splash URL of the guild, if present.
+     *
+     * @param format The format for the URL.
+     * @return The discovery splash URL of the guild, if present.
+     */
+    public Optional<String> getDiscoverySplashUrl(final Image.Format format) {
+        return data.discoverySplash()
+                .map(splash -> ImageUtil.getUrl(String.format(DISCOVERY_SPLASH_IMAGE_PATH, getId().asString(), splash), format));
+    }
+
+    /**
+     * Gets the discovery splash of the guild.
+     *
+     * @param format The format in which to get the image.
+     * @return A {@link Mono} where, upon successful completion, emits the {@link Image discovery splash} of the guild.
+     * If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Image> getDiscoverySplash(final Image.Format format) {
+        return Mono.justOrEmpty(getDiscoverySplashUrl(format)).flatMap(Image::ofUrl);
     }
 
     /**
@@ -469,6 +494,15 @@ public final class Guild implements Entity {
      */
     public Mono<TextChannel> getSystemChannel() {
         return Mono.justOrEmpty(getSystemChannelId()).flatMap(gateway::getChannelById).cast(TextChannel.class);
+    }
+
+    /**
+     * Returns the flags of the system {@link TextChannel channel}.
+     *
+     * @return A {@code EnumSet} with the flags of the system {@link TextChannel channel}.
+     */
+    public EnumSet<Flag> getSystemChannelFlags() {
+        return Flag.of(data.systemChannelFlags().orElse(0));
     }
 
     /**
@@ -1294,6 +1328,66 @@ public final class Guild implements Entity {
                 case 4: return VERY_HIGH;
                 default: return UNKNOWN;
             }
+        }
+    }
+
+    /** Describes system channel flags. */
+    public enum Flag {
+
+        /** Member join notifications are suppressed. */
+        SUPPRESS_JOIN_NOTIFICATIONS(0),
+
+        /** Server boost notifications are suppressed. */
+        SUPPRESS_PREMIUM_SUBSCRIPTIONS(1);
+
+        /** The underlying value as represented by Discord. */
+        private final int value;
+
+        /** The flag value as represented by Discord. */
+        private final int flag;
+
+        /**
+         * Constructs a {@code Flag}.
+         */
+        Flag(final int value) {
+            this.value = value;
+            this.flag = 1 << value;
+        }
+
+        /**
+         * Gets the underlying value as represented by Discord.
+         *
+         * @return The underlying value as represented by Discord.
+         */
+        public int getValue() {
+            return value;
+        }
+
+        /**
+         * Gets the flag value as represented by Discord.
+         *
+         * @return The flag value as represented by Discord.
+         */
+        public int getFlag() {
+            return flag;
+        }
+
+        /**
+         * Gets the flags of system channel. It is guaranteed that invoking {@link #getValue()} from the returned enum
+         * will be equal ({@code ==}) to the supplied {@code value}.
+         *
+         * @param value The flags value as represented by Discord.
+         * @return The {@link EnumSet} of flags.
+         */
+        public static EnumSet<Flag> of(final int value) {
+            final EnumSet<Flag> flags = EnumSet.noneOf(Flag.class);
+            for (Flag flag : Flag.values()) {
+                long flagValue = flag.getFlag();
+                if ((flagValue & value) == flagValue) {
+                    flags.add(flag);
+                }
+            }
+            return flags;
         }
     }
 
