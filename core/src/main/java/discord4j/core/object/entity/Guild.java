@@ -279,7 +279,7 @@ public final class Guild implements Entity {
      * @return The total number of users currently boosting this server, if present.
      */
     public OptionalInt getPremiumSubscriptionCount() {
-        return data.premiumSubscriptionCount().toOptional()
+        return Possible.flatOpt(data.premiumSubscriptionCount())
                 .map(OptionalInt::of)
                 .orElse(OptionalInt.empty());
     }
