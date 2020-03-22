@@ -285,9 +285,9 @@ public final class Guild implements Entity {
     }
 
     /**
-     * Gets the preferred locale of the guild, only set if guild has the "DISCOVERABLE" feature, defaults to en-US.
+     * Gets the preferred locale of the guild, only set if guild has the "PUBLIC" feature, defaults to en-US.
      *
-     * @return The preferred locale of the guild, only set if guild has the "DISCOVERABLE" feature, defaults to en-US.
+     * @return The preferred locale of the guild, only set if guild has the "PUBLIC" feature, defaults to en-US.
      */
     public Locale getPreferredLocale() {
         return new Locale.Builder().setLanguageTag(data.preferredLocale()).build();
