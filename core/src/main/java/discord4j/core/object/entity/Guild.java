@@ -265,18 +265,18 @@ public final class Guild implements Entity {
     }
 
     /**
-     * Gets the Premium Tier for the guild.
+     * Gets the Premium Tier (Server Boost level) for the guild.
      *
-     * @return The Premium Tier for the guild.
+     * @return The Premium Tier (Server Boost level) for the guild.
      */
     public PremiumTier getPremiumTier() {
         return PremiumTier.of(data.premiumTier());
     }
 
     /**
-     * Gets the total number of users currently boosting this server, if present.
+     * Gets the number of boosts this server currently has, if present.
      *
-     * @return The total number of users currently boosting this server, if present.
+     * @return The number of boosts this server currently has, if present.
      */
     public OptionalInt getPremiumSubscriptionCount() {
         return data.premiumSubscriptionCount().toOptional()

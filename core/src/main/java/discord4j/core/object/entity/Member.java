@@ -127,9 +127,9 @@ public final class Member extends User {
     }
 
     /**
-     * Gets when the user boost the guild, if present.
+     * Gets when the user started boosting the server, if present.
      *
-     * @return When the user boost the guild, if present.
+     * @return When the user started boosting the server, if present.
      */
     public Optional<Instant> getPremiumTime() {
         return data.premiumSince()
