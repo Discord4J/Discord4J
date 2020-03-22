@@ -18,6 +18,7 @@ package discord4j.core.object;
 
 import discord4j.discordjson.json.*;
 import discord4j.core.GatewayDiscordClient;
+import discord4j.discordjson.possible.Possible;
 
 import java.awt.*;
 import java.time.Instant;
@@ -528,7 +529,7 @@ public final class Embed implements DiscordObject {
          */
         public Optional<String> getUrl() {
             // TODO FIXME: is this actually Possible?
-            return data.url().get();
+            return Possible.flatOpt(data.url());
         }
     }
 

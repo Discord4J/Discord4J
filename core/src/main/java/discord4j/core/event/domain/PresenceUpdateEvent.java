@@ -23,6 +23,7 @@ import discord4j.core.object.entity.User;
 import discord4j.core.object.presence.Presence;
 import discord4j.core.object.util.Snowflake;
 import discord4j.discordjson.json.PartialUserData;
+import discord4j.discordjson.possible.Possible;
 import discord4j.gateway.ShardInfo;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
@@ -111,7 +112,7 @@ public class PresenceUpdateEvent extends Event {
      * @return The user's new avatar, if present.
      */
     public Optional<String> getNewAvatar() {
-        return user.avatar().get();
+        return Possible.flatOpt(user.avatar());
     }
 
     /**
