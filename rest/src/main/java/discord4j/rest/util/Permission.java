@@ -80,6 +80,9 @@ public enum Permission {
     /** Allows the usage of custom emojis from other servers. */
     USE_EXTERNAL_EMOJIS(0x00040000, false),
 
+    /** Allows for viewing guild insights. */
+    VIEW_GUILD_INSIGHTS(0x00080000, false),
+
     /** Allows for joining of a voice channel. */
     CONNECT(0x00100000, false),
 
