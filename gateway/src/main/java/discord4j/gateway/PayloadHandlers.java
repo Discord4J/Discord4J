@@ -110,10 +110,15 @@ public abstract class PayloadHandlers {
             IdentifyProperties props = ImmutableIdentifyProperties.of(System.getProperty("os.name"), "Discord4J", "Discord4J");
             IdentifyOptions options = client.identifyOptions();
             int[] shard = new int[]{options.getShardIndex(), options.getShardCount()};
-            Identify identify = ImmutableIdentify.of(client.token(), props, Possible.of(false), 250,
-                    Optional.of(shard).map(Possible::of).orElse(Possible.absent()),
-                    Optional.ofNullable(options.getInitialStatus()).map(Possible::of).orElse(Possible.absent()),
-                    Possible.of(options.isGuildSubscriptions()));
+            Identify identify = ImmutableIdentify.builder()
+                    .token(client.token())
+                    .properties(props)
+                    .compress(Possible.of(false))
+                    .largeThreshold(250)
+                    .shard(Optional.of(shard).map(Possible::of).orElse(Possible.absent()))
+                    .presence(Optional.ofNullable(options.getInitialStatus()).map(Possible::of).orElse(Possible.absent()))
+                    .guildSubscriptions(Possible.of(options.isGuildSubscriptions()))
+                    .build();
             log.debug(format(context.getContext(), "Identifying to Gateway"), client.sequence().get());
             client.sender().next(GatewayPayload.identify(identify));
         }
