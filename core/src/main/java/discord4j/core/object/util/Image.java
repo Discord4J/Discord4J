@@ -140,7 +140,7 @@ public final class Image {
      */
     public enum Format {
 
-        /** Unknown image format */
+        /** Unknown image format. */
         UNKNOWN("UNKNOWN"),
 
         /** Represents the Joint Photographic Experts Group format. */

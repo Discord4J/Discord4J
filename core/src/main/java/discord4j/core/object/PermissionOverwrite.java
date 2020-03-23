@@ -115,7 +115,7 @@ public class PermissionOverwrite {
     /** The type of entity a {@link PermissionOverwrite} is for. */
     public enum Type {
 
-        /** Unknown type */
+        /** Unknown type. */
         UNKNOWN("UNKNOWN"),
 
         /** The {@link Role} entity. */

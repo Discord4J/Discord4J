@@ -100,7 +100,7 @@ public class ReadyEvent extends GatewayLifecycleEvent {
     }
 
     /**
-     * An incomplete Guild provided by Discord upon the ready event
+     * An incomplete Guild provided by Discord upon the ready event.
      */
     public static class Guild {
 

@@ -71,7 +71,7 @@ public interface Channel extends Entity {
     /** Represents the various types of channels. */
     enum Type {
 
-        /** Unknown type */
+        /** Unknown type. */
         UNKNOWN(-1),
 
         /** Represents a {@link TextChannel}. */

@@ -103,14 +103,29 @@ public abstract class ReactionEmoji {
             this.isAnimated = isAnimated;
         }
 
+        /**
+         * Gets the id of the emoji.
+         *
+         * @return The id of the emoji.
+         */
         public Snowflake getId() {
             return Snowflake.of(id);
         }
 
+        /**
+         * Gets the name of the emoji.
+         *
+         * @return The name of the emoji.
+         */
         public String getName() {
             return name;
         }
 
+        /**
+         * Gets whether this emoji is animated.
+         *
+         * @return Whether this emoji is animated.
+         */
         public boolean isAnimated() {
             return isAnimated;
         }

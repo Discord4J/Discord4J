@@ -161,7 +161,7 @@ public class RestChannel {
      * @param request request body used to create a new message
      * @return a {@link Mono} where, upon successful completion, emits the created {@link MessageData}. If an
      * error is received, it is emitted through the {@code Mono}.
-     * @see <a href="https://discordapp.com/developers/docs/resources/channel#create-message>Create Message</a>
+     * @see <a href="https://discordapp.com/developers/docs/resources/channel#create-message">Create Message</a>
      */
     public Mono<MessageData> createMessage(MessageCreateRequest request) {
         return restClient.getChannelService().createMessage(id, new MultipartRequest(request));
@@ -174,7 +174,7 @@ public class RestChannel {
      * @param request request body used to create a new message
      * @return a {@link Mono} where, upon successful completion, emits the created {@link MessageData}. If an
      * error is received, it is emitted through the {@code Mono}.
-     * @see <a href="https://discordapp.com/developers/docs/resources/channel#create-message>Create Message</a>
+     * @see <a href="https://discordapp.com/developers/docs/resources/channel#create-message">Create Message</a>
      */
     public Mono<MessageData> createMessage(MultipartRequest request) {
         // TODO: improve API to create MultipartRequest objects

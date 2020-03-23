@@ -134,9 +134,9 @@ public class MemberUpdateEvent extends GuildEvent {
     }
 
     /**
-     * Gets when the user used their Nitro boost on the guild, if present.
+     * Gets when the user started boosting the guild, if present.
      *
-     * @return When the user used their Nitro boost on the guild, if present.
+     * @return When the user started boosting the guild, if present.
      */
     public Optional<Instant> getCurrentPremiumSince() {
         return Optional.ofNullable(currentPremiumSince)

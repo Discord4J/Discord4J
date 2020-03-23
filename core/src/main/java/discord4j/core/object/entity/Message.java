@@ -593,7 +593,7 @@ public final class Message implements Entity {
     public enum Type {
 
         /**
-         * Unknown type
+         * Unknown type.
          */
         UNKNOWN(-1),
 

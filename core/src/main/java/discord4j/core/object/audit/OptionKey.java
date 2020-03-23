@@ -20,13 +20,21 @@ import discord4j.core.object.util.Snowflake;
 
 public class OptionKey<T> {
 
+    /** Number of days after which inactive members were kicked. */
     public static final OptionKey<String> DELETE_MEMBER_DAYS = optionKey("delete_member_days");
+    /** Number of members removed by the prune. */
     public static final OptionKey<String> MEMBERS_REMOVED = optionKey("members_removed");
+    /** Channel in which the entities were targeted. */
     public static final OptionKey<Snowflake> CHANNEL_ID = optionKey("channel_id");
+    /** Id of the message that was targeted. */
     public static final OptionKey<Snowflake> MESSAGE_ID = optionKey("message_id");
+    /** Number of entities that were targeted. */
     public static final OptionKey<Integer> COUNT = optionKey("count");
+    /** Id of the overwritten entity. */
     public static final OptionKey<Snowflake> ID = optionKey("id");
+    /** Type of overwritten entity ("member" or "role"). */
     public static final OptionKey<String> TYPE = optionKey("type");
+    /** Name of the role if type is "role". */
     public static final OptionKey<String> ROLE_NAME = optionKey("role_name");
 
     private static <T> OptionKey<T> optionKey(String field) {

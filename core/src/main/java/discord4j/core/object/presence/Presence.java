@@ -104,6 +104,11 @@ public final class Presence {
         this.data = data;
     }
 
+    /**
+     * Gets the user's status.
+     *
+     * @return The user's status.
+     */
     public Status getStatus() {
         return Status.of(data.status());
     }
@@ -121,6 +126,11 @@ public final class Presence {
         return data.activities().stream().map(Activity::new).findFirst();
     }
 
+    /**
+     * Gets the user's current activities.
+     *
+     * @return The user's current activities.
+     */
     public List<Activity> getActivities() {
         return data.activities().stream().map(Activity::new).collect(Collectors.toList());
     }

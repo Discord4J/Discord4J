@@ -220,10 +220,10 @@ public class Invite implements DiscordObject {
     /** Represents the various types of target user for an invite. */
     public enum Type {
 
-        /** Unknown type */
+        /** Unknown type. */
         UNKNOWN(-1),
 
-        /** Stream */
+        /** Stream. */
         STREAM(1);
 
         /** The underlying value as represented by Discord. */

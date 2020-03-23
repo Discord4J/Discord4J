@@ -290,18 +290,18 @@ public final class Guild implements Entity {
     }
 
     /**
-     * Gets the Premium Tier for the guild
+     * Gets the Premium Tier (Server Boost level) for the guild.
      *
-     * @return The Premium Tier for the guild.
+     * @return The Premium Tier (Server Boost level) for the guild.
      */
     public PremiumTier getPremiumTier() {
         return PremiumTier.of(data.premiumTier());
     }
 
     /**
-     * Gets the total number of users currently boosting this server, if present.
+     * Gets the number of boosts this server currently has, if present.
      *
-     * @return The total number of users currently boosting this server, if present.
+     * @return The number of boosts this server currently has, if present.
      */
     public OptionalInt getPremiumSubscriptionCount() {
         return Possible.flatOpt(data.premiumSubscriptionCount())
@@ -310,9 +310,9 @@ public final class Guild implements Entity {
     }
 
     /**
-     * Gets the preferred locale of the guild, only set if guild has the "DISCOVERABLE" feature, defaults to en-US.
+     * Gets the preferred locale of a "PUBLIC" guild used in server discovery and notices from Discord; defaults to "en-US".
      *
-     * @return The preferred locale of the guild, only set if guild has the "DISCOVERABLE" feature, defaults to en-US.
+     * @return The preferred locale of a "PUBLIC" guild used in server discovery and notices from Discord; defaults to "en-US".
      */
     public Locale getPreferredLocale() {
         return new Locale.Builder().setLanguageTag(data.preferredLocale()).build();
@@ -478,9 +478,9 @@ public final class Guild implements Entity {
     }
 
     /**
-     * Gets the ID of the channel to which system messages are sent, if present.
+     * Gets the ID of the channel where guild notices such as welcome messages and boost events are posted, if present.
      *
-     * @return The ID of the channel to which system messages are sent, if present.
+     * @return The ID of the channel where guild notices such as welcome messages and boost events are posted, if present.
      */
     public Optional<Snowflake> getSystemChannelId() {
         return data.systemChannelId().map(Snowflake::of);
@@ -1049,7 +1049,7 @@ public final class Guild implements Entity {
     /** Automatically scan and delete messages sent in the server that contain explicit content. */
     public enum ContentFilterLevel {
 
-        /** Unknown content filter level */
+        /** Unknown content filter level. */
         UNKNOWN(-1),
 
         /** Don't scan any messages. */
@@ -1105,7 +1105,7 @@ public final class Guild implements Entity {
      */
     public enum MfaLevel {
 
-        /** Unknown MFA level */
+        /** Unknown MFA level. */
         UNKNOWN(-1),
 
         /** Disabled 2FA requirement. */
@@ -1157,7 +1157,7 @@ public final class Guild implements Entity {
      */
     public enum NotificationLevel {
 
-        /** Unknown notification level */
+        /** Unknown notification level. */
         UNKNOWN(-1),
 
         /** Receive a notification for all messages. */
@@ -1204,7 +1204,7 @@ public final class Guild implements Entity {
     }
 
     /**
-     * Represent the server Premium Tier (aka boost level) of the {@link Guild}
+     * Represent the server Premium Tier (aka boost level) of the {@link Guild}.
      *
      * @see <a href="https://support.discordapp.com/hc/en/articles/360028038352">Server Boost info</a>
      * @see
@@ -1212,19 +1212,19 @@ public final class Guild implements Entity {
      */
     public enum PremiumTier {
 
-        /** Unknown Premium Tier */
+        /** Unknown Premium Tier. */
         UNKNOWN(-1),
 
-        /** no Premium Tier **/
+        /** No Premium Tier. **/
         NONE(0),
 
-        /** Premium Tier 1 (Boost Level 1) **/
+        /** Premium Tier 1 (Boost Level 1). **/
         TIER_1(1),
 
-        /** Premium Tier 2 (Boost Level 2) **/
+        /** Premium Tier 2 (Boost Level 2). **/
         TIER_2(2),
 
-        /** Premium Tier 3 (Boost Level 3) **/
+        /** Premium Tier 3 (Boost Level 3). **/
         TIER_3(3);
 
         /** The underlying value as represented by Discord. */
@@ -1273,7 +1273,7 @@ public final class Guild implements Entity {
      */
     public enum VerificationLevel {
 
-        /** Unknown verification level */
+        /** Unknown verification level. */
         UNKNOWN(-1),
 
         /** Unrestricted. */

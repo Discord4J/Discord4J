@@ -138,6 +138,11 @@ public class InviteCreateEvent extends Event {
         return maxAge;
     }
 
+    /**
+     * Gets whether or not the invite is temporary (invited users will be kicked on disconnect unless they're assigned a role).
+     *
+     * @return Whether or not the invite is temporary.
+     */
     public boolean isTemporary() {
         return temporary;
     }
