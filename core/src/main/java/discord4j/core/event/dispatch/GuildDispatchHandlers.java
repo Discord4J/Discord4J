@@ -196,7 +196,7 @@ class GuildDispatchHandlers {
         StateHolder stateHolder = context.getStateHolder();
 
         long guildId = Long.parseUnsignedLong(context.getDispatch().guild().id());
-        boolean unavailable = context.getDispatch().guild().unavailable().get();
+        boolean unavailable = context.getDispatch().guild().unavailable().toOptional().orElse(false);
 
         Mono<Void> deleteGuild = stateHolder.getGuildStore().delete(guildId);
 
