@@ -82,7 +82,7 @@ class GuildDispatchHandlers {
                     .from(createData)
                     .roles(createData.roles().stream().map(RoleData::id).collect(Collectors.toList()))
                     .emojis(createData.emojis().stream().map(EmojiData::id).filter(Optional::isPresent).map(Optional::get).collect(Collectors.toList()))
-                    .members(createData.members().stream().map(data -> data.user().id()).collect(Collectors.toList()))
+                    .members(createData.members().stream().map(data -> data.user().id()).distinct().collect(Collectors.toList()))
                     .channels(createData.channels().stream().map(ChannelData::id).collect(Collectors.toList()))
                     .build();
         }
