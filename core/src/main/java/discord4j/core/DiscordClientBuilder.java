@@ -610,7 +610,7 @@ public final class DiscordClientBuilder {
     }
 
     private HttpClient initHttpClient() {
-        return HttpClient.create().compress(true);
+        return HttpClient.create().compress(true).followRedirect(true);
     }
 
     private DiscordWebClient initWebClient(HttpClient httpClient, ObjectMapper mapper) {
