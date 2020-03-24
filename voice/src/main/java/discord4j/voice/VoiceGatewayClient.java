@@ -65,6 +65,7 @@ public class VoiceGatewayClient {
                     .on(Start.class, (curState, start) -> {
                         Disposable websocketTask = HttpClient.create()
                                 .wiretap(true)
+                                .followRedirect(true)
                                 .headers(headers -> headers.add(USER_AGENT, "DiscordBot(https://discord4j.com, 3)")) // TODO make configurable
                                 .websocket(Integer.MAX_VALUE)
                                 .uri(start.gatewayUrl + "?v=3")
