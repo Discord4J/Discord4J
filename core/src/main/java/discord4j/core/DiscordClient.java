@@ -69,6 +69,27 @@ public final class DiscordClient {
     }
 
     /**
+     * Create a {@link DiscordClient} with default options, using the given token for authentication.
+     *
+     * @param token the bot token used for authentication
+     * @return a {@link DiscordClient} configured with the default options
+     */
+    public static DiscordClient create(String token) {
+        return DiscordClientBuilder.create(token).build();
+    }
+
+    /**
+     * Obtain a {@link DiscordClientBuilder} able to create {@link DiscordClient} instances, using the given token
+     * for authentication.
+     *
+     * @param token the bot token used for authentication
+     * @return a {@link DiscordClientBuilder}
+     */
+    public static DiscordClientBuilder builder(String token) {
+        return DiscordClientBuilder.create(token);
+    }
+
+    /**
      * Obtain the {@link ServiceMediator} associated with this {@link DiscordClient}. This is an advanced method to
      * access underlying middleware and resources.
      *

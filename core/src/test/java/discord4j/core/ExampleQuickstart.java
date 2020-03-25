@@ -24,7 +24,7 @@ import discord4j.core.object.entity.Message;
 public class ExampleQuickstart {
 
     public static void main(String[] args) {
-        DiscordClient client = new DiscordClientBuilder(System.getenv("token")).build();
+        DiscordClient client = DiscordClientBuilder.create(System.getenv("token")).build();
 
         client.getEventDispatcher().on(ReadyEvent.class)
                 .subscribe(ready -> System.out.println("Logged in as " + ready.getSelf().getUsername()));

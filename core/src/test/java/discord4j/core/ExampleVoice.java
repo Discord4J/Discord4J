@@ -24,7 +24,7 @@ import reactor.core.publisher.Mono;
 public class ExampleVoice {
 
     public static void main(String[] args) {
-        DiscordClient client = new DiscordClientBuilder(System.getenv("token")).build();
+        DiscordClient client = DiscordClientBuilder.create(System.getenv("token")).build();
         Mono.zip(
                 BotSupport.create(client).eventHandlers(),
                 VoiceSupport.create(client).eventHandlers(),

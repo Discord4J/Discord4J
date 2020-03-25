@@ -28,7 +28,7 @@ import reactor.core.publisher.Mono;
 public class ExampleClientResponse {
 
     public static void main(String[] args) {
-        DiscordClient client = new DiscordClientBuilder(System.getenv("token"))
+        DiscordClient client = DiscordClientBuilder.create(System.getenv("token"))
                 .setRouterOptions(RouterOptions.builder()
                         // globally suppress any not found (404) error
                         //.onClientResponse(ResponseFunction.emptyIfNotFound())

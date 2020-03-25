@@ -23,7 +23,7 @@ import reactor.core.publisher.Mono;
 public class ExampleLogin {
 
     public static void main(String[] args) {
-        DiscordClient client = new DiscordClientBuilder(System.getenv("token")).build();
+        DiscordClient client = DiscordClientBuilder.create(System.getenv("token")).build();
         Mono.zip(
                 BotSupport.create(client).eventHandlers().log("botSupport"),
                 client.login().log("login")

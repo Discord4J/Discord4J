@@ -129,9 +129,20 @@ public final class DiscordClientBuilder {
      * Initialize a new builder with the given token.
      *
      * @param token the bot token used to authenticate to Discord
+     * @deprecated to be made package-private in 3.1, please use {@link DiscordClientBuilder#create(String)}.
      */
+    @Deprecated
     public DiscordClientBuilder(final String token) {
         this.token = Objects.requireNonNull(token);
+    }
+
+    /**
+     * Initialize a new builder with the given token.
+     *
+     * @param token the bot token used to authenticate to Discord
+     */
+    public static DiscordClientBuilder create(String token) {
+        return new DiscordClientBuilder(token);
     }
 
     /**
