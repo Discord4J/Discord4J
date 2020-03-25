@@ -19,19 +19,12 @@ package discord4j.core;
 
 import discord4j.core.support.BotSupport;
 import discord4j.core.support.VoiceSupport;
-import discord4j.store.redis.RedisStoreService;
 import reactor.core.publisher.Mono;
 
 public class ExampleVoice {
 
     public static void main(String[] args) {
-        GatewayDiscordClient client = DiscordClientBuilder.create(System.getenv("token"))
-                .build()
-                .gateway()
-                .setStoreService(new RedisStoreService())
-                .connect()
-                .blockOptional()
-                .orElseThrow(RuntimeException::new);
+        GatewayDiscordClient client = DiscordClient.create(System.getenv("token")).login().block();
         Mono.when(BotSupport.create(client).eventHandlers(), VoiceSupport.create(client).eventHandlers()).block();
     }
 }

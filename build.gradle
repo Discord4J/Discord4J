@@ -33,7 +33,6 @@ ext {
     logback_version = '1.3.0-alpha4'
     reflections_version = '0.9.12'
     lavaplayer_version = '1.3.34'
-    blockhound_version = '1.0.2.RELEASE'
 
     isJitpack = "true" == System.getenv("JITPACK")
     isRelease = !version.toString().endsWith('-SNAPSHOT')
