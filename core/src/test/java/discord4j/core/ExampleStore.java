@@ -27,16 +27,11 @@ import discord4j.core.shard.ShardingJdkStoreRegistry;
 import discord4j.core.shard.ShardingStoreRegistry;
 import discord4j.store.api.mapping.MappingStoreService;
 import discord4j.store.jdk.JdkStoreService;
-
-import org.junit.BeforeClass;
-import org.junit.Ignore;
-import org.junit.Test;
 import org.reflections.Reflections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import reactor.core.Exceptions;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Hooks;
 import reactor.core.publisher.Mono;
 import reactor.netty.DisposableServer;
 import reactor.netty.http.server.HttpServer;
@@ -46,29 +41,18 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
-public class StoreBotTest {
+public class ExampleStore {
 
-    private static final Logger log = LoggerFactory.getLogger(StoreBotTest.class);
+    private static final Logger log = LoggerFactory.getLogger(ExampleStore.class);
+    private static final Reflections reflections = new Reflections(Event.class);
 
-    private static String token;
-    private static Reflections reflections;
-
-    @BeforeClass
-    public static void initialize() {
-        Hooks.onOperatorDebug();
-        token = System.getenv("token");
-        reflections = new Reflections(Event.class);
-    }
-
-    @Test
-    @Ignore("Example code excluded from CI")
-    public void testStoreBot() {
+    public static void main(String[] args) {
         Map<Integer, DiscordClient> clients = new ConcurrentHashMap<>();
         Map<String, AtomicLong> counts = new ConcurrentHashMap<>();
         JacksonResourceProvider jackson = new JacksonResourceProvider();
         startHttpServer(clients, counts, jackson.getObjectMapper());
         ShardingStoreRegistry registry = new ShardingJdkStoreRegistry();
-        new ShardingClientBuilder(token)
+        new ShardingClientBuilder(System.getenv("token"))
                 .setShardingStoreRegistry(registry)
                 // showcase disabling the cache for messages
                 .setStoreService(MappingStoreService.create()
@@ -85,7 +69,7 @@ public class StoreBotTest {
         Runtime.getRuntime().addShutdownHook(new Thread(() -> clients.forEach((id, client) -> client.logout().block())));
     }
 
-    private void subscribeEventCounter(DiscordClient client, Map<String, AtomicLong> counts) {
+    private static void subscribeEventCounter(DiscordClient client, Map<String, AtomicLong> counts) {
         reflections.getSubTypesOf(Event.class)
                 .stream()
                 .filter(cls -> reflections.getSubTypesOf(cls).isEmpty())
@@ -97,8 +81,8 @@ public class StoreBotTest {
                 });
     }
 
-    private void startHttpServer(Map<Integer, DiscordClient> shards, Map<String, AtomicLong> counts,
-                                 ObjectMapper mapper) {
+    private static void startHttpServer(Map<Integer, DiscordClient> shards, Map<String, AtomicLong> counts,
+                                        ObjectMapper mapper) {
         DisposableServer facade = HttpServer.create()
                 .port(0) // use an ephemeral port
                 .route(routes -> routes

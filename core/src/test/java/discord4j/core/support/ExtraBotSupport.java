@@ -1,40 +1,14 @@
-/*
- * This file is part of Discord4J.
- *
- * Discord4J is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Discord4J is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with Discord4J. If not, see <http://www.gnu.org/licenses/>.
- */
-
-package discord4j.core;
+package discord4j.core.support;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.LoggerContext;
-import discord4j.core.event.domain.lifecycle.ReadyEvent;
-import discord4j.core.event.domain.lifecycle.ResumeEvent;
+import discord4j.core.DiscordClient;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.*;
 import discord4j.core.object.reaction.ReactionEmoji;
 import discord4j.core.object.util.Image;
 import discord4j.core.object.util.Snowflake;
-import discord4j.rest.request.RouteMatcher;
-import discord4j.rest.request.RouterOptions;
-import discord4j.rest.response.ResponseFunction;
-import discord4j.rest.route.Routes;
-import org.junit.BeforeClass;
-import org.junit.Ignore;
-import org.junit.Test;
 import org.slf4j.LoggerFactory;
-import reactor.blockhound.BlockHound;
 import reactor.core.Exceptions;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -47,76 +21,54 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
-public class ExampleBot {
+public class ExtraBotSupport {
 
-    private static final Logger log = Loggers.getLogger(ExampleBot.class);
+    private static final Logger log = Loggers.getLogger(ExtraBotSupport.class);
 
-    private static String token;
+    private final DiscordClient client;
 
-    @BeforeClass
-    public static void initialize() {
-        token = System.getenv("token");
+    public static ExtraBotSupport create(DiscordClient client) {
+        return new ExtraBotSupport(client);
     }
 
-    @Test
-    @Ignore("Example code excluded from CI")
-    public void testCommandBot() {
-        BlockHound.builder()
-                .allowBlockingCallsInside("java.io.FileInputStream", "readBytes")
-                .install();
+    ExtraBotSupport(DiscordClient client) {
+        this.client = client;
+    }
 
-        DiscordClient client = new DiscordClientBuilder(token)
-                .setRouterOptions(RouterOptions.builder()
-                        // globally suppress any not found (404) error
-                        .onClientResponse(ResponseFunction.emptyIfNotFound())
-                        // bad requests (400) while adding reactions will be suppressed
-                        .onClientResponse(ResponseFunction.emptyOnErrorStatus(RouteMatcher.route(Routes.REACTION_CREATE), 400))
-                        .requestParallelism(14)
-                        .build())
-                .build();
+    public Mono<Void> eventHandlers() {
+        return commandHandler(client);
+    }
 
-        // Get the bot owner ID to filter commands
-        AtomicLong ownerId = new AtomicLong();
-        Flux.first(client.getEventDispatcher().on(ReadyEvent.class),
-                client.getEventDispatcher().on(ResumeEvent.class))
-                .next()
-                .flatMap(evt -> client.getApplicationInfo())
-                .map(ApplicationInfo::getOwnerId)
-                .map(Snowflake::asLong)
-                .subscribe(ownerId::set);
+    public static Mono<Void> commandHandler(DiscordClient client) {
+        Mono<Long> ownerId = client.getApplicationInfo()
+                .flatMap(ApplicationInfo::getOwner)
+                .map(user -> user.getId().asLong())
+                .cache();
 
-        // Create our event handlers
         List<EventHandler> eventHandlers = new ArrayList<>();
         eventHandlers.add(new AddRole());
-        eventHandlers.add(new Echo());
-        eventHandlers.add(new UserInfo());
+        eventHandlers.add(new BurstMessages());
+        eventHandlers.add(new ChangeAvatar());
         eventHandlers.add(new LogLevelChange());
         eventHandlers.add(new Reactor());
-        eventHandlers.add(new ChangeAvatar());
-        eventHandlers.add(new BurstMessages());
+        eventHandlers.add(new UserInfo());
 
-        // Build a safe event-processing pipeline
-        Mono<Void> events = client.getEventDispatcher()
-                .on(MessageCreateEvent.class, event -> {
-                    boolean fromOwner = event.getMessage().getAuthor()
-                            .map(User::getId)
-                            .map(Snowflake::asLong)
-                            .filter(id -> ownerId.get() == id)
-                            .isPresent();
-                    if (fromOwner) {
-                        return Mono.whenDelayError(eventHandlers.stream()
+        return client.getEventDispatcher().on(MessageCreateEvent.class,
+                event -> ownerId.filter(
+                        owner -> {
+                            Long author = event.getMessage().getAuthor()
+                                    .map(User::getId)
+                                    .map(Snowflake::asLong)
+                                    .orElse(null);
+                            return owner.equals(author);
+                        })
+                        .flatMap(id -> Mono.when(eventHandlers.stream()
                                 .map(handler -> handler.onMessageCreate(event))
-                                .collect(Collectors.toList()));
-                    } else {
-                        return Mono.empty();
-                    }
-                })
+                                .collect(Collectors.toList()))
+                        ))
                 .then();
-
-        Mono.when(events, client.login()).block();
     }
 
     public static class AddRole extends EventHandler {
@@ -144,20 +96,6 @@ public class ExampleBot {
                         }
                         return Mono.empty();
                     })
-                    .then();
-        }
-    }
-
-    public static class Echo extends EventHandler {
-
-        @Override
-        public Mono<Void> onMessageCreate(MessageCreateEvent event) {
-            Message message = event.getMessage();
-            return Mono.justOrEmpty(message.getContent())
-                    .filter(content -> content.startsWith("!echo "))
-                    .map(content -> content.substring("!echo ".length()))
-                    .flatMap(source -> message.getChannel()
-                            .flatMap(channel -> channel.createMessage(source)))
                     .then();
         }
     }
@@ -338,10 +276,5 @@ public class ExampleBot {
                             .subscribe()) // Separate subscribe in order to improve accuracy of elapsed time
                     .then();
         }
-    }
-
-    public static abstract class EventHandler {
-
-        public abstract Mono<Void> onMessageCreate(MessageCreateEvent event);
     }
 }

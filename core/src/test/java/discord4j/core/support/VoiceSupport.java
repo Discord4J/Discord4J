@@ -1,20 +1,4 @@
-/*
- * This file is part of Discord4J.
- *
- * Discord4J is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Discord4J is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
- */
-package discord4j.core;
+package discord4j.core.support;
 
 import com.sedmelluq.discord.lavaplayer.format.StandardAudioDataFormats;
 import com.sedmelluq.discord.lavaplayer.player.AudioLoadResultHandler;
@@ -27,78 +11,74 @@ import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import com.sedmelluq.discord.lavaplayer.track.playback.MutableAudioFrame;
 import com.sedmelluq.discord.lavaplayer.track.playback.NonAllocatingAudioFrameBuffer;
+import discord4j.core.DiscordClient;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.VoiceState;
 import discord4j.core.object.entity.Member;
 import discord4j.voice.AudioProvider;
-import org.junit.BeforeClass;
-import org.junit.Ignore;
-import org.junit.Test;
 import reactor.core.publisher.Mono;
+import reactor.util.Logger;
+import reactor.util.Loggers;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 
-public class ExampleVoiceBot {
+public class VoiceSupport {
 
-    private static String token;
-    private static String owner;
+    private static final Logger log = Loggers.getLogger(VoiceSupport.class);
 
-    @BeforeClass
-    public static void initialize() {
-        token = System.getenv("token");
-        owner = System.getenv("owner");
+    private final DiscordClient client;
+
+    public static VoiceSupport create(DiscordClient client) {
+        return new VoiceSupport(client);
     }
 
-    @Test
-    @Ignore("Example code excluded from CI")
-    public void testVoiceBot() {
-        // Set up LavaPlayer
+    VoiceSupport(DiscordClient client) {
+        this.client = client;
+    }
+
+    public Mono<Void> eventHandlers() {
+        return voiceHandler(client);
+    }
+
+    public static Mono<Void> voiceHandler(DiscordClient client) {
         AudioPlayerManager playerManager = new DefaultAudioPlayerManager();
         playerManager.getConfiguration().setFrameBufferFactory(NonAllocatingAudioFrameBuffer::new);
         AudioSourceManagers.registerRemoteSources(playerManager);
         AudioPlayer player = playerManager.createPlayer();
         AudioProvider provider = new LavaplayerAudioProvider(player);
 
-        // Bind events and log in
-        DiscordClient client = new DiscordClientBuilder(token).build();
-
         Mono<MessageCreateEvent> leaveMessage = client.getEventDispatcher().on(MessageCreateEvent.class)
-                .filter(e -> owner == null || e.getMember().map(Member::getId).map(it -> it.asString().equals(owner)).orElse(false))
                 .filter(e -> e.getMessage().getContent().map(it -> it.equals("!leave")).orElse(false))
                 .next();
 
-        client.getEventDispatcher().on(MessageCreateEvent.class)
-                .filter(e -> owner == null || e.getMember().map(Member::getId).map(it -> it.asString().equals(owner)).orElse(false))
+        Mono<Void> join = client.getEventDispatcher().on(MessageCreateEvent.class)
                 .filter(e -> e.getMessage().getContent().map(it -> it.startsWith("!join")).orElse(false))
                 .flatMap(e -> Mono.justOrEmpty(e.getMember())
                         .flatMap(Member::getVoiceState)
                         .flatMap(VoiceState::getChannel)
                         .flatMap(channel -> channel.join(spec -> {
                             spec.setProvider(provider);
-                        }))
-                )
+                        })))
                 .zipWith(leaveMessage)
                 .doOnNext(t2 -> t2.getT1().disconnect())
                 .repeat()
-                .subscribe();
+                .then();
 
-        client.getEventDispatcher().on(MessageCreateEvent.class)
-                .filter(e -> owner == null || e.getMember().map(Member::getId).map(it -> it.asString().equals(owner)).orElse(false))
+        Mono<Void> play = client.getEventDispatcher().on(MessageCreateEvent.class)
                 .filter(e -> e.getMessage().getContent().map(it -> it.startsWith("!play ")).orElse(false))
                 .flatMap(e -> Mono.justOrEmpty(e.getMessage().getContent())
                         .map(content -> Arrays.asList(content.split(" ")))
                         .doOnNext(command -> playerManager.loadItem(command.get(1),
                                 new MyAudioLoadResultHandler(player))))
-                .subscribe();
+                .then();
 
-        client.getEventDispatcher().on(MessageCreateEvent.class)
-                .filter(e -> owner == null || e.getMember().map(Member::getId).map(it -> it.asString().equals(owner)).orElse(false))
+        Mono<Void> stop = client.getEventDispatcher().on(MessageCreateEvent.class)
                 .filter(e -> e.getMessage().getContent().map(it -> it.equals("!stop")).orElse(false))
                 .doOnNext(e -> player.stopTrack())
-                .subscribe();
+                .then();
 
-        client.login().block();
+        return Mono.when(join, play, stop);
     }
 
     private static class LavaplayerAudioProvider extends AudioProvider {
@@ -115,7 +95,9 @@ public class ExampleVoiceBot {
         @Override
         public boolean provide() {
             boolean didProvide = player.provide(frame);
-            if (didProvide) getBuffer().flip();
+            if (didProvide) {
+                getBuffer().flip();
+            }
             return didProvide;
         }
     }
