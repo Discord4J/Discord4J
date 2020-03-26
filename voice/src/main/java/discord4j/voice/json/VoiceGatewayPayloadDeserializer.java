@@ -60,7 +60,7 @@ public class VoiceGatewayPayloadDeserializer extends StdDeserializer<VoiceGatewa
             case Resumed.OP:
                 return new Resumed(d.asText()); // actually "d": null
             default:
-                LOG.warn("Received voice gateway payload with unhandled OP: {}", op);
+                LOG.debug("Received voice gateway payload with unhandled OP: {}", op);
                 return null;
         }
     }
