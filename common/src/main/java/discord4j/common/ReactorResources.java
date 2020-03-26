@@ -40,7 +40,7 @@ public class ReactorResources {
      * Create with a default {@link HttpClient} and {@link Scheduler}s for timed and blocking tasks.
      */
     public ReactorResources() {
-        this.httpClient = HttpClient.create().compress(true);
+        this.httpClient = HttpClient.create().compress(true).followRedirect(true);
         this.timerTaskScheduler = Schedulers.parallel();
         this.blockingTaskScheduler = Schedulers.boundedElastic();
     }
