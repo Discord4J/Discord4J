@@ -21,6 +21,7 @@ import discord4j.discordjson.json.*;
 import discord4j.rest.RestClient;
 import discord4j.rest.util.MultipartRequest;
 import discord4j.rest.util.PaginationUtil;
+import discord4j.rest.util.Snowflake;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -46,6 +47,16 @@ public class RestChannel {
     private RestChannel(RestClient restClient, long id) {
         this.restClient = restClient;
         this.id = id;
+    }
+
+    /**
+     * Create a {@link RestChannel} with the given parameters.
+     *
+     * @param restClient REST API resources
+     * @param id the ID of this channel
+     */
+    public static RestChannel create(RestClient restClient, Snowflake id) {
+        return new RestChannel(restClient, id.asLong());
     }
 
     /**

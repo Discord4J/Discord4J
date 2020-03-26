@@ -19,6 +19,7 @@ package discord4j.rest.entity;
 
 import discord4j.discordjson.json.MemberData;
 import discord4j.rest.RestClient;
+import discord4j.rest.util.Snowflake;
 import reactor.core.publisher.Mono;
 
 public class RestMember {
@@ -33,12 +34,20 @@ public class RestMember {
         this.id = id;
     }
 
+    public static RestMember create(RestClient restClient, Snowflake guildId, Snowflake id) {
+        return new RestMember(restClient, guildId.asLong(), id.asLong());
+    }
+
     public static RestMember create(RestClient restClient, long guildId, long id) {
         return new RestMember(restClient, guildId, id);
     }
 
     public RestGuild guild() {
         return RestGuild.create(restClient, guildId);
+    }
+
+    public RestUser user() {
+        return RestUser.create(restClient, id);
     }
 
     public Mono<MemberData> getData() {

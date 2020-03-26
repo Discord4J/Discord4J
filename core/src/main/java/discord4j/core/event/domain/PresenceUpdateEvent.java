@@ -21,7 +21,7 @@ import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.presence.Presence;
-import discord4j.core.object.util.Snowflake;
+import discord4j.rest.util.Snowflake;
 import discord4j.discordjson.json.PartialUserData;
 import discord4j.discordjson.possible.Possible;
 import discord4j.gateway.ShardInfo;

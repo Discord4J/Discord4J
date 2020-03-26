@@ -21,7 +21,7 @@ import discord4j.discordjson.json.MessageData;
 import discord4j.discordjson.possible.Possible;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.Message;
-import discord4j.core.object.util.Snowflake;
+import discord4j.rest.util.Snowflake;
 import discord4j.core.spec.MessageCreateSpec;
 import discord4j.rest.util.PaginationUtil;
 import org.reactivestreams.Publisher;

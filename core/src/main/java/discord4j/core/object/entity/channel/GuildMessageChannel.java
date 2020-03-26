@@ -17,7 +17,7 @@
 package discord4j.core.object.entity.channel;
 
 import discord4j.core.object.entity.Webhook;
-import discord4j.core.object.util.Snowflake;
+import discord4j.rest.util.Snowflake;
 import discord4j.core.spec.WebhookCreateSpec;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;

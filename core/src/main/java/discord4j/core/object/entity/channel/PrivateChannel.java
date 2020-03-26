@@ -20,12 +20,10 @@ import discord4j.discordjson.json.ChannelData;
 import discord4j.discordjson.json.UserData;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.User;
-import discord4j.core.object.util.Snowflake;
+import discord4j.rest.util.Snowflake;
 import reactor.core.publisher.Flux;
 
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 

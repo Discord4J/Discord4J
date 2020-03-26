@@ -27,7 +27,7 @@ import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.Webhook;
 import discord4j.rest.util.PermissionSet;
-import discord4j.core.object.util.Snowflake;
+import discord4j.rest.util.Snowflake;
 import discord4j.core.spec.InviteCreateSpec;
 import discord4j.core.spec.MessageCreateSpec;
 import discord4j.core.spec.WebhookCreateSpec;

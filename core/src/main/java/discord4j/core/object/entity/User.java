@@ -18,8 +18,8 @@ package discord4j.core.object.entity;
 
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.channel.PrivateChannel;
-import discord4j.core.object.util.Image;
-import discord4j.core.object.util.Snowflake;
+import discord4j.rest.util.Image;
+import discord4j.rest.util.Snowflake;
 import discord4j.core.util.EntityUtil;
 import discord4j.core.util.ImageUtil;
 import discord4j.discordjson.json.ImmutableDMCreateRequest;
@@ -30,8 +30,8 @@ import reactor.util.annotation.Nullable;
 import java.util.Objects;
 import java.util.Optional;
 
-import static discord4j.core.object.util.Image.Format.GIF;
-import static discord4j.core.object.util.Image.Format.PNG;
+import static discord4j.rest.util.Image.Format.GIF;
+import static discord4j.rest.util.Image.Format.PNG;
 
 /**
  * A Discord user.

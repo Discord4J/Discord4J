@@ -20,6 +20,7 @@ package discord4j.rest.entity;
 import discord4j.discordjson.json.*;
 import discord4j.rest.RestClient;
 import discord4j.rest.util.PaginationUtil;
+import discord4j.rest.util.Snowflake;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
@@ -38,6 +39,10 @@ public class RestGuild {
     private RestGuild(RestClient restClient, long id) {
         this.restClient = restClient;
         this.id = id;
+    }
+
+    public static RestGuild create(RestClient restClient, Snowflake id) {
+        return new RestGuild(restClient, id.asLong());
     }
 
     public static RestGuild create(RestClient restClient, long id) {

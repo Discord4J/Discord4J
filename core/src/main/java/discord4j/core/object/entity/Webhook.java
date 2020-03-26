@@ -19,7 +19,7 @@ package discord4j.core.object.entity;
 import discord4j.discordjson.json.WebhookData;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.channel.GuildMessageChannel;
-import discord4j.core.object.util.Snowflake;
+import discord4j.rest.util.Snowflake;
 import discord4j.core.spec.WebhookEditSpec;
 import discord4j.core.util.EntityUtil;
 import reactor.core.publisher.Mono;

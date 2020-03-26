@@ -18,7 +18,7 @@ package discord4j.core.util;
 
 import discord4j.core.object.PermissionOverwrite;
 import discord4j.rest.util.PermissionSet;
-import discord4j.core.object.util.Snowflake;
+import discord4j.rest.util.Snowflake;
 import org.junit.Test;
 
 import java.util.Arrays;

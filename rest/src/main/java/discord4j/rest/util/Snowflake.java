@@ -8,15 +8,14 @@
  *
  * Discord4J is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public License
- * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Discord4J. If not, see <http://www.gnu.org/licenses/>.
  */
-package discord4j.core.object.util;
+package discord4j.rest.util;
 
-import discord4j.core.util.EntityUtil;
 import reactor.util.annotation.Nullable;
 
 import java.math.BigInteger;
@@ -29,6 +28,9 @@ import java.time.Instant;
  * @see <a href="https://discordapp.com/developers/docs/reference#snowflake-ids">Snowflake IDs</a>
  */
 public final class Snowflake implements Comparable<Snowflake> {
+
+    /** The UNIX time that represents Discord's epoch (January 1, 2015). */
+    public static final long DISCORD_EPOCH = 1420070400000L;
 
     /**
      * Constructs a {@code Snowflake} utilizing an <i>unsigned</i> ID.
@@ -59,7 +61,7 @@ public final class Snowflake implements Comparable<Snowflake> {
      * @return A constructed {@code Snowflake} with the timestamp.
      */
     public static Snowflake of(final Instant timestamp) {
-        return of((timestamp.toEpochMilli() - EntityUtil.DISCORD_EPOCH) << 22);
+        return of((timestamp.toEpochMilli() - DISCORD_EPOCH) << 22);
     }
 
     /**
@@ -70,6 +72,28 @@ public final class Snowflake implements Comparable<Snowflake> {
      */
     public static Snowflake of(final BigInteger id) {
         return of(id.longValue());
+    }
+
+    /**
+     * Constructs a {@code Snowflake} represented as a {@code long} utilizing an <i>unsigned</i> ID.
+     *
+     * @param id The <i>unsigned</i> ID to construct a {@code Snowflake}. Must be non-null.
+     * @return A constructed {@code Snowflake} with the <i>unsigned</i> ID.
+     * @throws NumberFormatException If {@code id} is not an <i>unsigned</i> ID.
+     */
+    public static long asLong(final String id) {
+        return Long.parseUnsignedLong(id);
+    }
+
+    /**
+     * Constructs a {@code Snowflake} represented as a {@link String} utilizing an <i>unsigned</i> ID.
+     *
+     * @param id The <i>unsigned</i> ID to construct a {@code Snowflake}. Must be non-null.
+     * @return A constructed {@code Snowflake} with the <i>unsigned</i> ID.
+     * @throws NumberFormatException If {@code id} is not an <i>unsigned</i> ID.
+     */
+    public static String asString(final long id) {
+        return Long.toUnsignedString(id);
     }
 
     /** The <i>unsigned</i> ID. */
@@ -108,7 +132,7 @@ public final class Snowflake implements Comparable<Snowflake> {
      * @return The timestamp of this {@code Snowflake}.
      */
     public Instant getTimestamp() {
-        return Instant.ofEpochMilli(EntityUtil.DISCORD_EPOCH + (id >>> 22));
+        return Instant.ofEpochMilli(DISCORD_EPOCH + (id >>> 22));
     }
 
     /**

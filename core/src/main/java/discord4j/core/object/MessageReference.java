@@ -3,7 +3,7 @@ package discord4j.core.object;
 import discord4j.discordjson.json.MessageReferenceData;
 import discord4j.common.annotations.Experimental;
 import discord4j.core.GatewayDiscordClient;
-import discord4j.core.object.util.Snowflake;
+import discord4j.rest.util.Snowflake;
 
 import java.util.Objects;
 import java.util.Optional;

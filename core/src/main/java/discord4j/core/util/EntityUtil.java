@@ -16,17 +16,23 @@
  */
 package discord4j.core.util;
 
-import discord4j.discordjson.json.ChannelData;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.Entity;
 import discord4j.core.object.entity.channel.*;
 import discord4j.core.object.reaction.ReactionEmoji;
+import discord4j.discordjson.json.ChannelData;
+import discord4j.rest.util.Snowflake;
 import reactor.util.annotation.Nullable;
 
 /** An utility class for entity processing. */
 public final class EntityUtil {
 
-    /** The UNIX time that represents Discord's epoch (January 1, 2015). */
+    /**
+     * The UNIX time that represents Discord's epoch (January 1, 2015).
+     *
+     * @deprecated Use {@link Snowflake#DISCORD_EPOCH}.
+     */
+    @Deprecated
     public static final long DISCORD_EPOCH = 1420070400000L;
 
     public static String getEmojiString(ReactionEmoji emoji) {

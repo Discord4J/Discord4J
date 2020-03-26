@@ -20,6 +20,7 @@ package discord4j.rest.entity;
 import discord4j.discordjson.json.WebhookData;
 import discord4j.discordjson.json.WebhookModifyRequest;
 import discord4j.rest.RestClient;
+import discord4j.rest.util.Snowflake;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
 
@@ -31,6 +32,10 @@ public class RestWebhook {
     private RestWebhook(RestClient restClient, long id) {
         this.restClient = restClient;
         this.id = id;
+    }
+
+    public static RestWebhook create(RestClient restClient, Snowflake id) {
+        return new RestWebhook(restClient, id.asLong());
     }
 
     public static RestWebhook create(RestClient restClient, long id) {

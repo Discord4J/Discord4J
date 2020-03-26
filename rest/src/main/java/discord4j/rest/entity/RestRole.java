@@ -22,10 +22,14 @@ import discord4j.discordjson.json.PositionModifyRequest;
 import discord4j.discordjson.json.RoleData;
 import discord4j.discordjson.json.RoleModifyRequest;
 import discord4j.rest.RestClient;
+import discord4j.rest.util.Snowflake;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
 
+/**
+ * Roles represent a set of permissions, unique per guild, attached to a group of users.
+ */
 public class RestRole {
 
     private final RestClient restClient;
@@ -38,10 +42,19 @@ public class RestRole {
         this.id = id;
     }
 
+    public static RestRole create(RestClient restClient, Snowflake guildId, Snowflake id) {
+        return new RestRole(restClient, guildId.asLong(), id.asLong());
+    }
+
     public static RestRole create(RestClient restClient, long guildId, long id) {
         return new RestRole(restClient, guildId, id);
     }
 
+    /**
+     * Return the guild tied to this role as a REST operations handle.
+     *
+     * @return the parent guild for this role
+     */
     public RestGuild guild() {
         return RestGuild.create(restClient, guildId);
     }

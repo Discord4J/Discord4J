@@ -20,6 +20,7 @@ package discord4j.rest.entity;
 import discord4j.discordjson.json.MessageData;
 import discord4j.discordjson.json.MessageEditRequest;
 import discord4j.rest.RestClient;
+import discord4j.rest.util.Snowflake;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
 
@@ -36,6 +37,17 @@ public class RestMessage {
         this.restClient = restClient;
         this.channelId = channelId;
         this.id = id;
+    }
+
+    /**
+     * Create a {@link RestMessage} with the given parameters.
+     *
+     * @param restClient REST API resources
+     * @param channelId the ID of the channel this messages belongs to
+     * @param id the ID of this message
+     */
+    public static RestMessage create(RestClient restClient, Snowflake channelId, Snowflake id) {
+        return new RestMessage(restClient, channelId.asLong(), id.asLong());
     }
 
     /**

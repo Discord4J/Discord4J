@@ -21,7 +21,7 @@ import discord4j.core.object.VoiceState;
 import discord4j.core.object.presence.Presence;
 import discord4j.discordjson.possible.Possible;
 import discord4j.rest.util.PermissionSet;
-import discord4j.core.object.util.Snowflake;
+import discord4j.rest.util.Snowflake;
 import discord4j.core.spec.BanQuerySpec;
 import discord4j.core.spec.GuildMemberEditSpec;
 import discord4j.core.util.OrderUtil;

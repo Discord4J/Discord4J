@@ -17,7 +17,7 @@
 package discord4j.core.object.entity.channel;
 
 import discord4j.core.object.entity.Message;
-import discord4j.core.object.util.Snowflake;
+import discord4j.rest.util.Snowflake;
 import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.core.spec.MessageCreateSpec;
 import org.reactivestreams.Publisher;

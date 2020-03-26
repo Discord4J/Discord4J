@@ -16,7 +16,7 @@
  */
 package discord4j.core.util;
 
-import discord4j.core.object.util.Image;
+import discord4j.rest.util.Image;
 
 /** An utility class for image processing. */
 public final class ImageUtil {

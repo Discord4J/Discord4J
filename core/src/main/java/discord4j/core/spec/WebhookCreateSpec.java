@@ -19,7 +19,7 @@ package discord4j.core.spec;
 import discord4j.discordjson.json.ImmutableWebhookCreateRequest;
 import discord4j.discordjson.json.WebhookCreateRequest;
 import discord4j.core.object.entity.Webhook;
-import discord4j.core.object.util.Image;
+import discord4j.rest.util.Image;
 import reactor.util.annotation.Nullable;
 
 import java.util.Optional;

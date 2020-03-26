@@ -18,7 +18,7 @@ package discord4j.core.event.domain.lifecycle;
 
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.User;
-import discord4j.core.object.util.Snowflake;
+import discord4j.rest.util.Snowflake;
 import discord4j.gateway.ShardInfo;
 import reactor.util.annotation.Nullable;
 

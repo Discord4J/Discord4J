@@ -21,7 +21,7 @@ import discord4j.discordjson.json.ImmutableGuildMemberModifyRequest;
 import discord4j.discordjson.possible.Possible;
 import discord4j.core.object.entity.Member;
 import discord4j.rest.util.Permission;
-import discord4j.core.object.util.Snowflake;
+import discord4j.rest.util.Snowflake;
 import reactor.util.annotation.Nullable;
 
 import java.util.Optional;

@@ -16,7 +16,7 @@
  */
 package discord4j.core.object.audit;
 
-import discord4j.core.object.util.Snowflake;
+import discord4j.rest.util.Snowflake;
 
 public class OptionKey<T> {
 

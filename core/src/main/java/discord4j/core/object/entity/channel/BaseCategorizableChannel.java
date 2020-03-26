@@ -20,7 +20,7 @@ import discord4j.discordjson.json.ChannelData;
 import discord4j.discordjson.possible.Possible;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.ExtendedInvite;
-import discord4j.core.object.util.Snowflake;
+import discord4j.rest.util.Snowflake;
 import discord4j.core.spec.InviteCreateSpec;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;

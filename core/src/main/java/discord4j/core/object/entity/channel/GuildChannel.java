@@ -20,7 +20,7 @@ import discord4j.core.object.ExtendedPermissionOverwrite;
 import discord4j.core.object.PermissionOverwrite;
 import discord4j.core.object.entity.Guild;
 import discord4j.rest.util.PermissionSet;
-import discord4j.core.object.util.Snowflake;
+import discord4j.rest.util.Snowflake;
 import discord4j.core.util.OrderUtil;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;

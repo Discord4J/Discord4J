@@ -20,7 +20,7 @@ import discord4j.discordjson.json.*;
 import discord4j.core.object.Region;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.channel.Channel;
-import discord4j.core.object.util.Image;
+import discord4j.rest.util.Image;
 import reactor.util.annotation.Nullable;
 
 import java.util.ArrayList;

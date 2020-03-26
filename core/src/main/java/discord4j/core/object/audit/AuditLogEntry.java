@@ -18,7 +18,7 @@ package discord4j.core.object.audit;
 
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.Entity;
-import discord4j.core.object.util.Snowflake;
+import discord4j.rest.util.Snowflake;
 import discord4j.core.util.AuditLogUtil;
 import discord4j.discordjson.json.AuditLogEntryData;
 

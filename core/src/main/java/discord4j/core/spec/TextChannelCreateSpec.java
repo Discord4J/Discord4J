@@ -20,7 +20,7 @@ import discord4j.core.object.PermissionOverwrite;
 import discord4j.core.object.entity.channel.Channel;
 import discord4j.core.object.entity.channel.TextChannel;
 import discord4j.rest.util.Permission;
-import discord4j.core.object.util.Snowflake;
+import discord4j.rest.util.Snowflake;
 import discord4j.discordjson.json.ChannelCreateRequest;
 import discord4j.discordjson.json.ImmutableChannelCreateRequest;
 import discord4j.discordjson.json.ImmutableOverwriteData;

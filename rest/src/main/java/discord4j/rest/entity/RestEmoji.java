@@ -20,6 +20,7 @@ package discord4j.rest.entity;
 import discord4j.discordjson.json.EmojiData;
 import discord4j.discordjson.json.GuildEmojiModifyRequest;
 import discord4j.rest.RestClient;
+import discord4j.rest.util.Snowflake;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
 
@@ -33,6 +34,10 @@ public class RestEmoji {
         this.restClient = restClient;
         this.guildId = guildId;
         this.id = id;
+    }
+
+    public static RestEmoji create(RestClient restClient, Snowflake guildId, Snowflake id) {
+        return new RestEmoji(restClient, guildId.asLong(), id.asLong());
     }
 
     public static RestEmoji create(RestClient restClient, long guildId, long id) {

@@ -17,7 +17,7 @@
 package discord4j.core.object.presence;
 
 import discord4j.core.object.reaction.ReactionEmoji;
-import discord4j.core.object.util.Snowflake;
+import discord4j.rest.util.Snowflake;
 import discord4j.core.util.EntityUtil;
 import discord4j.discordjson.json.ActivityData;
 import discord4j.discordjson.json.ActivityUpdateRequest;

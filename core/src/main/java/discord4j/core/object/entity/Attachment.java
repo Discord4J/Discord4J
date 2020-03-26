@@ -18,7 +18,7 @@ package discord4j.core.object.entity;
 
 import discord4j.discordjson.json.AttachmentData;
 import discord4j.core.GatewayDiscordClient;
-import discord4j.core.object.util.Snowflake;
+import discord4j.rest.util.Snowflake;
 import discord4j.core.util.EntityUtil;
 import reactor.util.annotation.Nullable;
 

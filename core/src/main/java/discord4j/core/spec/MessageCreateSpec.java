@@ -24,7 +24,7 @@ import discord4j.core.object.Embed;
 import discord4j.core.object.entity.Attachment;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.MessageChannel;
-import discord4j.core.object.util.Snowflake;
+import discord4j.rest.util.Snowflake;
 import discord4j.rest.util.MultipartRequest;
 import reactor.util.annotation.Nullable;
 import reactor.util.function.Tuple2;
