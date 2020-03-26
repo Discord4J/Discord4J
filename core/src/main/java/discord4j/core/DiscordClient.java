@@ -75,7 +75,7 @@ public final class DiscordClient {
      * @param token the bot token used for authentication
      * @return a {@link DiscordClientBuilder}
      */
-    public static DiscordClientBuilder<RouterOptions> builder(String token) {
+    public static DiscordClientBuilder<DiscordClient, RouterOptions> builder(String token) {
         return DiscordClientBuilder.create(token);
     }
 
@@ -92,22 +92,40 @@ public final class DiscordClient {
      * Requests to retrieve the channel represented by the supplied ID.
      *
      * @param channelId The ID of the channel.
-     * @return A {@link Mono} where, upon successful completion, emits the {@link Channel} as represented by the
-     * supplied ID. If an error is received, it is emitted through the {@code Mono}.
+     * @return A {@link RestChannel} as represented by the supplied ID.
      */
     public RestChannel getChannelById(final Snowflake channelId) {
         return RestChannel.create(coreResources.getRestClient(), channelId.asLong());
     }
 
     /**
+     * Requests to retrieve the channel represented by the supplied {@link ChannelData}.
+     *
+     * @param data The data of the channel.
+     * @return A {@link RestChannel} as represented by the supplied data.
+     */
+    public RestChannel restChannel(ChannelData data) {
+        return RestChannel.create(coreResources.getRestClient(), Snowflake.asLong(data.id()));
+    }
+
+    /**
      * Requests to retrieve the guild represented by the supplied ID.
      *
      * @param guildId The ID of the guild.
-     * @return A {@link Mono} where, upon successful completion, emits the {@link RestGuild} as represented by the
-     * supplied ID. If an error is received, it is emitted through the {@code Mono}.
+     * @return A {@link RestGuild} as represented by the supplied ID.
      */
     public RestGuild getGuildById(final Snowflake guildId) {
         return RestGuild.create(coreResources.getRestClient(), guildId.asLong());
+    }
+
+    /**
+     * Requests to retrieve the guild represented by the supplied {@link GuildData}.
+     *
+     * @param data The data of the guild.
+     * @return A {@link RestGuild} as represented by the supplied data.
+     */
+    public RestGuild restGuild(GuildData data) {
+        return RestGuild.create(coreResources.getRestClient(), Snowflake.asLong(data.id()));
     }
 
     /**
@@ -115,11 +133,22 @@ public final class DiscordClient {
      *
      * @param guildId The ID of the guild.
      * @param emojiId The ID of the emoji.
-     * @return A {@link Mono} where, upon successful completion, emits the {@link GuildEmoji} as represented by the
-     * supplied IDs. If an error is received, it is emitted through the {@code Mono}.
+     * @return A {@link RestEmoji} as represented by the supplied IDs.
      */
     public RestEmoji getGuildEmojiById(final Snowflake guildId, final Snowflake emojiId) {
         return RestEmoji.create(coreResources.getRestClient(), guildId.asLong(), emojiId.asLong());
+    }
+
+    /**
+     * Requests to retrieve the guild emoji represented by the supplied ID and {@link EmojiData}.
+     *
+     * @param guildId The ID of the guild.
+     * @param data The data of the emoji.
+     * @return A {@link RestEmoji} as represented by the supplied parameters.
+     */
+    public RestEmoji restGuildEmoji(Snowflake guildId, EmojiData data) {
+        return RestEmoji.create(coreResources.getRestClient(), guildId.asLong(),
+                Snowflake.asLong(data.id().orElseThrow(() -> new IllegalArgumentException("Not a guild emoji"))));
     }
 
     /**
@@ -127,11 +156,21 @@ public final class DiscordClient {
      *
      * @param guildId The ID of the guild.
      * @param userId The ID of the user.
-     * @return A {@link Mono} where, upon successful completion, emits the {@link Member} as represented by the supplied
-     * IDs. If an error is received, it is emitted through the {@code Mono}.
+     * @return A {@link RestMember} as represented by the supplied IDs.
      */
     public RestMember getMemberById(final Snowflake guildId, final Snowflake userId) {
         return RestMember.create(coreResources.getRestClient(), guildId.asLong(), userId.asLong());
+    }
+
+    /**
+     * Requests to retrieve the member represented by the supplied ID and {@link MemberData}
+     *
+     * @param guildId The ID of the guild.
+     * @param data The data of the user.
+     * @return A {@link RestMember} as represented by the supplied parameters.
+     */
+    public RestMember restMember(Snowflake guildId, MemberData data) {
+        return RestMember.create(coreResources.getRestClient(), guildId.asLong(), Snowflake.asLong(data.user().id()));
     }
 
     /**
@@ -139,11 +178,21 @@ public final class DiscordClient {
      *
      * @param channelId The ID of the channel.
      * @param messageId The ID of the message.
-     * @return A {@link Mono} where, upon successful completion, emits the {@link Message} as represented by the
-     * supplied IDs. If an error is received, it is emitted through the {@code Mono}.
+     * @return A {@link RestMessage} as represented by the supplied IDs.
      */
     public RestMessage getMessageById(final Snowflake channelId, final Snowflake messageId) {
         return RestMessage.create(coreResources.getRestClient(), channelId.asLong(), messageId.asLong());
+    }
+
+    /**
+     * Requests to retrieve the message represented by the supplied {@link MessageData}.
+     *
+     * @param data The data of the channel.
+     * @return A {@link RestMessage} as represented by the supplied data.
+     */
+    public RestMessage restMessage(MessageData data) {
+        return RestMessage.create(coreResources.getRestClient(), Snowflake.asLong(data.channelId()),
+                Snowflake.asLong(data.id()));
     }
 
     /**
@@ -151,39 +200,67 @@ public final class DiscordClient {
      *
      * @param guildId The ID of the guild.
      * @param roleId The ID of the role.
-     * @return A {@link Mono} where, upon successful completion, emits the {@link Role} as represented by the supplied
-     * IDs. If an error is received, it is emitted through the {@code Mono}.
+     * @return A {@link RestRole} as represented by the supplied IDs.
      */
     public RestRole getRoleById(final Snowflake guildId, final Snowflake roleId) {
         return RestRole.create(coreResources.getRestClient(), guildId.asLong(), roleId.asLong());
     }
 
     /**
+     * Requests to retrieve the role represented by the supplied ID and {@link RoleData}.
+     *
+     * @param guildId The ID of the guild.
+     * @param data The data of the role.
+     * @return A {@link RestRole} as represented by the supplied parameters.
+     */
+    public RestRole restRole(Snowflake guildId, RoleData data) {
+        return RestRole.create(coreResources.getRestClient(), guildId.asLong(), Snowflake.asLong(data.id()));
+    }
+
+    /**
      * Requests to retrieve the user represented by the supplied ID.
      *
      * @param userId The ID of the user.
-     * @return A {@link Mono} where, upon successful completion, emits the {@link User} as represented by the supplied
-     * ID. If an error is received, it is emitted through the {@code Mono}.
+     * @return A {@link RestUser} as represented by the supplied ID.
      */
     public RestUser getUserById(final Snowflake userId) {
         return RestUser.create(coreResources.getRestClient(), userId.asLong());
     }
 
     /**
+     * Requests to retrieve the user represented by the supplied {@link UserData}.
+     *
+     * @param data The data of the user.
+     * @return A {@link RestUser} as represented by the supplied data.
+     */
+    public RestUser restUser(UserData data) {
+        return RestUser.create(coreResources.getRestClient(), Snowflake.asLong(data.id()));
+    }
+
+    /**
      * Requests to retrieve the webhook represented by the supplied ID.
      *
      * @param webhookId The ID of the webhook.
-     * @return A {@link Mono} where, upon successful completion, emits the {@link Webhook} as represented by the
-     * supplied ID. If an error is received, it is emitted through the {@code Mono}.
+     * @return A {@link RestWebhook} as represented by the supplied ID.
      */
     public RestWebhook getWebhookById(final Snowflake webhookId) {
         return RestWebhook.create(coreResources.getRestClient(), webhookId.asLong());
     }
 
     /**
+     * Requests to retrieve the webhook represented by the supplied {@link WebhookData}.
+     *
+     * @param data The data of the webhook.
+     * @return A {@link RestWebhook} as represented by the supplied ID.
+     */
+    public RestWebhook restWebhook(WebhookData data) {
+        return RestWebhook.create(coreResources.getRestClient(), Snowflake.asLong(data.id()));
+    }
+
+    /**
      * Requests to retrieve the application info.
      *
-     * @return A {@link Mono} where, upon successful completion, emits the {@link ApplicationInfo application info}. If
+     * @return A {@link Mono} where, upon successful completion, emits the {@link ApplicationInfoData}. If
      * an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<ApplicationInfoData> getApplicationInfo() {
@@ -194,7 +271,7 @@ public final class DiscordClient {
     /**
      * Requests to retrieve the guilds the current client is in.
      *
-     * @return A {@link Flux} that continually emits the {@link PartialGuildData guilds} that the current client is
+     * @return A {@link Flux} that continually emits the {@link UserGuildData guilds} that the current client is
      * in. If an error is received, it is emitted through the {@code Flux}.
      */
     public Flux<UserGuildData> getGuilds() {
@@ -230,7 +307,7 @@ public final class DiscordClient {
      * Requests to create a guild.
      *
      * @param spec A {@link Consumer} that provides a "blank" {@link GuildCreateSpec} to be operated on.
-     * @return A {@link Mono} where, upon successful completion, emits the created {@link PartialGuildData}. If an
+     * @return A {@link Mono} where, upon successful completion, emits the created {@link GuildUpdateData}. If an
      * error is received, it is emitted through the {@code Mono}.
      */
     public Mono<GuildUpdateData> createGuild(final Consumer<? super GuildCreateSpec> spec) {
