@@ -94,9 +94,14 @@ public class VoiceWebsocketHandler {
 
         Mono<CloseStatus> inboundClose = in.receiveCloseStatus()
                 .map(status -> new CloseStatus(status.code(), status.reasonText()))
-                .doOnNext(status -> log.debug(format(context, "Received close status: {}"), status))
-                .doOnNext(status -> close(DisconnectBehavior.retryAbruptly(
-                        new VoiceGatewayException(context, "Inbound close status"))));
+                .doOnNext(status -> {
+                    log.debug(format(context, "Received close status: {}"), status);
+                    if (status.getCode() == 4014) {
+                        close(DisconnectBehavior.stop(new VoiceGatewayException(context, "Disconnected")));
+                    } else {
+                        close(DisconnectBehavior.retryAbruptly(new VoiceGatewayException(context, "Inbound close status")));
+                    }
+                });
 
         Mono<Void> outboundEvents = out.sendObject(Flux.merge(outboundClose, outbound.map(TextWebSocketFrame::new)))
                 .then();
