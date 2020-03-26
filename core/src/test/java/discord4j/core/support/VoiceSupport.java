@@ -78,7 +78,7 @@ public class VoiceSupport {
                 .doOnNext(e -> player.stopTrack())
                 .then();
 
-        return Mono.when(join, play, stop);
+        return Mono.zip(join, play, stop).then();
     }
 
     private static class LavaplayerAudioProvider extends AudioProvider {
