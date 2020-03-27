@@ -27,7 +27,6 @@ import discord4j.core.object.Region;
 import discord4j.core.object.entity.*;
 import discord4j.core.object.entity.channel.Channel;
 import discord4j.core.object.presence.Presence;
-import discord4j.rest.util.Snowflake;
 import discord4j.core.shard.GatewayBootstrap;
 import discord4j.core.spec.GuildCreateSpec;
 import discord4j.core.spec.UserEditSpec;
@@ -39,7 +38,9 @@ import discord4j.gateway.GatewayClientGroup;
 import discord4j.gateway.json.GatewayPayload;
 import discord4j.gateway.json.ShardGatewayPayload;
 import discord4j.rest.RestClient;
+import discord4j.rest.RestResources;
 import discord4j.rest.util.PaginationUtil;
+import discord4j.rest.util.Snowflake;
 import discord4j.store.api.util.LongLongTuple2;
 import discord4j.voice.VoiceConnectionFactory;
 import org.reactivestreams.Publisher;
@@ -102,7 +103,7 @@ public class GatewayDiscordClient {
      * scheduling and API communication, like the {@link RestClient}, {@link JacksonResources} and
      * {@link ReactorResources}.
      *
-     * @return the {@link CoreResources} for the parent {@link DiscordClient}
+     * @return the {@link RestResources} for the parent {@link DiscordClient}
      */
     public CoreResources getCoreResources() {
         return discordClient.getCoreResources();
@@ -162,10 +163,10 @@ public class GatewayDiscordClient {
     /**
      * Returns the {@link RestClient} used to execute REST API requests.
      *
-     * @return the {@link RestClient} tied to the parent {@link DiscordClient} through {@link CoreResources}
+     * @return the {@link RestClient} tied to this Gateway client.
      */
     public RestClient getRestClient() {
-        return getCoreResources().getRestClient();
+        return rest();
     }
 
     /**

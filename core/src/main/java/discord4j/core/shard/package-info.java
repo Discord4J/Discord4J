@@ -15,7 +15,7 @@
  * along with Discord4J. If not, see <http://www.gnu.org/licenses/>.
  */
 /**
- * Core components for building sharded clients.
+ * Core components for building grouped shard clients.
  */
 @NonNullApi
 package discord4j.core.shard;

@@ -501,7 +501,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
         GatewayDiscordClient gateway = new GatewayDiscordClient(client, resources, closeProcessor,
                 clientGroup, voiceConnectionFactory);
 
-        Flux<ShardInfo> connections = shardingStrategy.getShards(client.getCoreResources().getRestClient())
+        Flux<ShardInfo> connections = shardingStrategy.getShards(client)
                 .groupBy(shard -> shard.getIndex() % shardingStrategy.getShardingFactor())
                 .flatMap(group -> group.concatMap(shard -> acquireConnection(shard, clientFactory, gateway,
                         stateHolder, eventDispatcher, clientGroup, closeProcessor)));
@@ -611,9 +611,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                                     t -> log.error(format(ctx, "Lifecycle listener terminated with an error"), t),
                                     () -> log.debug(format(ctx, "Lifecycle listener completed"))));
 
-                    forCleanup.add(this.client.getCoreResources()
-                            .getRestClient()
-                            .getGatewayService()
+                    forCleanup.add(this.client.getGatewayService()
                             .getGateway()
                             .doOnSubscribe(s -> log.debug(format(ctx, "Acquiring gateway endpoint")))
                             .retryBackoff(reconnectOptions.getMaxRetries(),

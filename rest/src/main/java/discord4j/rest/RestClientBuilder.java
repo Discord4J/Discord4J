@@ -24,8 +24,6 @@ import discord4j.rest.request.*;
 import discord4j.rest.response.ResponseFunction;
 import discord4j.rest.route.Route;
 import reactor.netty.http.client.HttpClient;
-import reactor.util.Logger;
-import reactor.util.Loggers;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -38,9 +36,7 @@ import java.util.function.Function;
  */
 public class RestClientBuilder<C, O extends RouterOptions> {
 
-    private static final Logger log = Loggers.getLogger(RestClientBuilder.class);
-
-    protected final Function<Config, C> allocator;
+    protected final Function<Config, C> clientFactory;
     protected final Function<RouterOptions, O> optionsModifier;
 
     protected String token;
@@ -56,20 +52,22 @@ public class RestClientBuilder<C, O extends RouterOptions> {
      * @param token the bot token used to authenticate to Discord
      */
     public static RestClientBuilder<RestClient, RouterOptions> createRest(String token) {
-        Function<Config, RestClient> allocator = config -> new RestClient(config.router);
-        return new RestClientBuilder<>(token, allocator, Function.identity());
+        Function<Config, RestClient> clientFactory = config -> new RestClient(config.getRouter());
+        return new RestClientBuilder<>(token, clientFactory, Function.identity());
     }
 
-    protected RestClientBuilder(String token, Function<Config, C> allocator,
+    protected RestClientBuilder(String token,
+                                Function<Config, C> clientFactory,
                                 Function<RouterOptions, O> optionsModifier) {
         this.token = Objects.requireNonNull(token, "token");
-        this.allocator = Objects.requireNonNull(allocator, "allocator");
+        this.clientFactory = Objects.requireNonNull(clientFactory, "clientFactory");
         this.optionsModifier = Objects.requireNonNull(optionsModifier, "optionsModifier");
     }
 
-    protected RestClientBuilder(RestClientBuilder<?, ?> source, Function<Config, C> allocator, Function<RouterOptions
-            , O> optionsModifier) {
-        this.allocator = allocator;
+    protected RestClientBuilder(RestClientBuilder<?, ?> source,
+                                Function<Config, C> clientFactory,
+                                Function<RouterOptions, O> optionsModifier) {
+        this.clientFactory = clientFactory;
         this.optionsModifier = optionsModifier;
 
         this.token = source.token;
@@ -90,7 +88,7 @@ public class RestClientBuilder<C, O extends RouterOptions> {
      * @return a new {@link RestClientBuilder} that will now work with the new options type.
      */
     public <O2 extends RouterOptions> RestClientBuilder<C, O2> setExtraOptions(Function<? super O, O2> optionsModifier) {
-        return new RestClientBuilder<>(this, this.allocator, this.optionsModifier.andThen(optionsModifier));
+        return new RestClientBuilder<>(this, this.clientFactory, this.optionsModifier.andThen(optionsModifier));
     }
 
     /**
@@ -208,7 +206,7 @@ public class RestClientBuilder<C, O extends RouterOptions> {
         Router router = routerFactory.apply(options);
         Config config = new Config(token, reactor, jackson, initExchangeStrategies(jackson),
                 Collections.unmodifiableList(responseTransformers), globalRateLimiter, router);
-        return allocator.apply(config);
+        return clientFactory.apply(config);
     }
 
     private O buildOptions(ReactorResources reactor, JacksonResources jackson) {

@@ -16,20 +16,19 @@
  */
 package discord4j.core.object.entity;
 
-import discord4j.discordjson.json.RoleData;
 import discord4j.core.GatewayDiscordClient;
-import discord4j.rest.util.PermissionSet;
-import discord4j.rest.util.Snowflake;
 import discord4j.core.spec.RoleEditSpec;
 import discord4j.core.util.EntityUtil;
 import discord4j.core.util.OrderUtil;
-import discord4j.rest.RestClient;
+import discord4j.discordjson.json.RoleData;
 import discord4j.rest.entity.RestRole;
+import discord4j.rest.util.PermissionSet;
+import discord4j.rest.util.Snowflake;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
 
-import java.awt.*;
+import java.awt.Color;
 import java.util.Objects;
 import java.util.function.Consumer;
 
@@ -65,8 +64,7 @@ public final class Role implements Entity {
     public Role(final GatewayDiscordClient gateway, final RoleData data, final long guildId) {
         this.gateway = Objects.requireNonNull(gateway);
         this.data = Objects.requireNonNull(data);
-        RestClient restClient = gateway.getCoreResources().getRestClient();
-        this.rest = RestRole.create(restClient, guildId, Long.parseUnsignedLong(data.id()));
+        this.rest = RestRole.create(gateway.rest(), guildId, Long.parseUnsignedLong(data.id()));
         this.guildId = guildId;
     }
 

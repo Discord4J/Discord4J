@@ -17,7 +17,6 @@
 package discord4j.core;
 
 import discord4j.common.GitProperties;
-import discord4j.rest.RestClient;
 import discord4j.rest.RestClientBuilder;
 import discord4j.rest.request.DefaultRouter;
 import discord4j.rest.request.Router;
@@ -44,10 +43,9 @@ public final class DiscordClientBuilder<C, O extends RouterOptions> extends Rest
      * @param token the bot token used to authenticate to Discord
      */
     public static DiscordClientBuilder<DiscordClient, RouterOptions> create(String token) {
-        Function<Config, DiscordClient> allocator = config -> {
-            RestClient restClient = new RestClient(config.getRouter());
-            CoreResources coreResources = new CoreResources(config.getToken(), restClient,
-                    config.getReactorResources(), config.getJacksonResources());
+        Function<Config, DiscordClient> clientFactory = config -> {
+            CoreResources coreResources = new CoreResources(config.getToken(), config.getReactorResources(),
+                    config.getJacksonResources(), config.getRouter());
             Properties properties = GitProperties.getProperties();
             String url = properties.getProperty(GitProperties.APPLICATION_URL, "https://discord4j.com");
             String name = properties.getProperty(GitProperties.APPLICATION_NAME, "Discord4J");
@@ -56,7 +54,7 @@ public final class DiscordClientBuilder<C, O extends RouterOptions> extends Rest
             log.info("{} {} ({})", name, gitDescribe, url);
             return new DiscordClient(coreResources);
         };
-        return new DiscordClientBuilder<>(token, allocator, Function.identity());
+        return new DiscordClientBuilder<>(token, clientFactory, Function.identity());
     }
 
     DiscordClientBuilder(String token, Function<Config, C> allocator, Function<RouterOptions, O> optionsModifier) {

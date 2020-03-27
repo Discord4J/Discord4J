@@ -33,7 +33,7 @@ import java.util.function.Function;
  * An aggregation of all Discord REST API resources available. Each REST resource uses its own class and uses a
  * common {@link Router} to execute requests.
  */
-public final class RestClient {
+public class RestClient {
 
     private final ApplicationService applicationService;
     private final AuditLogService auditLogService;
@@ -50,21 +50,21 @@ public final class RestClient {
         return RestClientBuilder.createRest(token).build();
     }
 
-    public static RestClientBuilder<RestClient, RouterOptions> builder(String token) {
+    public static RestClientBuilder<RestClient, RouterOptions> restBuilder(String token) {
         return RestClientBuilder.createRest(token);
     }
 
     public RestClient(final Router router) {
-        applicationService = new ApplicationService(router);
-        auditLogService = new AuditLogService(router);
-        channelService = new ChannelService(router);
-        emojiService = new EmojiService(router);
-        gatewayService = new GatewayService(router);
-        guildService = new GuildService(router);
-        inviteService = new InviteService(router);
-        userService = new UserService(router);
-        voiceService = new VoiceService(router);
-        webhookService = new WebhookService(router);
+        this.applicationService = new ApplicationService(router);
+        this.auditLogService = new AuditLogService(router);
+        this.channelService = new ChannelService(router);
+        this.emojiService = new EmojiService(router);
+        this.gatewayService = new GatewayService(router);
+        this.guildService = new GuildService(router);
+        this.inviteService = new InviteService(router);
+        this.userService = new UserService(router);
+        this.voiceService = new VoiceService(router);
+        this.webhookService = new WebhookService(router);
     }
 
     /**
