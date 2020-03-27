@@ -17,7 +17,6 @@
 
 package discord4j.core.shard;
 
-import discord4j.discordjson.json.GatewayData;
 import discord4j.gateway.GatewayClient;
 import discord4j.gateway.ShardInfo;
 import discord4j.rest.RestClient;
@@ -103,26 +102,54 @@ public class DefaultShardingStrategy implements ShardingStrategy {
         }
 
         /**
-         * Set the list of shard indexes to identify to Discord Gateway. Defaults to identifying all shards. Any
-         * invocation of this method will also replace the previously set value at {@link #indexes(Function)}.
+         * Set the list of shard indices to identify to Discord Gateway. Defaults to identifying all shards. Any
+         * invocation of this method will also replace the previously set value at {@link #indices(Function)}.
          *
-         * @param shardIndexes the list of shard indexes to identify
+         * @param shardIndices the list of shard indices to identify
+         * @return this builder
+         * @deprecated use {@link #indices(int...)}
+         */
+        @Deprecated
+        public Builder indexes(int... shardIndices) {
+            return indices(shardIndices);
+        }
+
+        /**
+         * Set the list of shard indices to identify to Discord Gateway. Defaults to identifying all shards. Any
+         * invocation of this method will also replace the previously set value at {@link #indices(Function)}.
+         *
+         * @param shardIndices the list of shard indices to identify
          * @return this builder
          */
-        public Builder indexes(int... shardIndexes) {
-            this.shardIndexSource = count -> Flux.fromStream(Arrays.stream(shardIndexes).boxed());
+        public Builder indices(int... shardIndices) {
+            this.shardIndexSource = count -> Flux.fromStream(Arrays.stream(shardIndices).boxed());
             return this;
         }
 
         /**
-         * Set a generator function to derive a {@link Publisher} of shard indexes to identify to Discord Gateway.
+         * Set a generator function to derive a {@link Publisher} of shard indices to identify to Discord Gateway.
          * Defaults to identify all shards. Any invocation of this method will also replace the previously set value
-         * at {@link #indexes(int...)}.
+         * at {@link #indices(int...)}.
+         *
+         * @param shardIndexSource the generator function to determine the shards to identify
+         * @return this builder
+         * @deprecated use {@link #indices(Function)}
+         */
+        @Deprecated
+        public Builder indexes(Function<Integer, Publisher<Integer>> shardIndexSource) {
+            this.shardIndexSource = Objects.requireNonNull(shardIndexSource);
+            return this;
+        }
+
+        /**
+         * Set a generator function to derive a {@link Publisher} of shard indices to identify to Discord Gateway.
+         * Defaults to identify all shards. Any invocation of this method will also replace the previously set value
+         * at {@link #indices(int...)}.
          *
          * @param shardIndexSource the generator function to determine the shards to identify
          * @return this builder
          */
-        public Builder indexes(Function<Integer, Publisher<Integer>> shardIndexSource) {
+        public Builder indices(Function<Integer, Publisher<Integer>> shardIndexSource) {
             this.shardIndexSource = Objects.requireNonNull(shardIndexSource);
             return this;
         }
