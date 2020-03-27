@@ -65,7 +65,6 @@ allprojects {
     }
 
     repositories {
-        mavenLocal()
         mavenCentral()
         if (!isRelease || isJitpack) {
             maven { url 'https://oss.sonatype.org/content/repositories/snapshots' }
