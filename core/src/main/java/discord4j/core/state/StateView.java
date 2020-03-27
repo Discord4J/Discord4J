@@ -21,6 +21,8 @@ import discord4j.store.api.Store;
 import discord4j.store.api.service.StoreService;
 import discord4j.store.api.util.LongLongTuple2;
 import discord4j.store.api.util.StoreContext;
+import discord4j.store.api.view.LongObjStoreView;
+import discord4j.store.api.view.StoreView;
 import reactor.core.publisher.Mono;
 
 import java.util.Collections;

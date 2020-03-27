@@ -15,7 +15,7 @@
  * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
 /**
- * Components to safely expose entity caches.
+ * Components to hold and safely expose entity caches.
  */
 @NonNullApi
 package discord4j.core.state;

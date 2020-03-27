@@ -16,7 +16,6 @@
  */
 package discord4j.core.state;
 
-import discord4j.core.shard.CachingStore;
 import discord4j.discordjson.json.*;
 import discord4j.discordjson.json.gateway.PresenceUpdate;
 import discord4j.store.api.Store;
@@ -24,6 +23,7 @@ import discord4j.store.api.primitive.LongObjStore;
 import discord4j.store.api.service.StoreService;
 import discord4j.store.api.util.LongLongTuple2;
 import discord4j.store.api.util.StoreContext;
+import discord4j.store.jdk.JdkCachingStore;
 import reactor.core.publisher.Mono;
 import reactor.util.Logger;
 import reactor.util.Loggers;
@@ -96,7 +96,7 @@ public final class StateHolder {
         voiceStateStore = service.provideGenericStore(LongLongTuple2.class, VoiceStateData.class);
         log.debug("Voice state storage : {}", voiceStateStore);
 
-        parameterStore = new CachingStore<>(service.provideGenericStore(String.class, ParameterData.class),
+        parameterStore = new JdkCachingStore<>(service.provideGenericStore(String.class, ParameterData.class),
                 key -> SELF_ID_PARAMETER_KEY.equals(key) ? Duration.ofHours(1) : Duration.ZERO);
         log.debug("Parameter storage   : {}", parameterStore);
     }
