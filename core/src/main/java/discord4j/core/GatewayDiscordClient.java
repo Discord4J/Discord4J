@@ -444,11 +444,11 @@ public class GatewayDiscordClient {
 
         return gatewayResources.getStateView().getGuildStore()
                 .values()
-                .switchIfEmpty(PaginationUtil.paginateAfter(makeRequest, data -> Long.parseUnsignedLong(data.id()),
+                .switchIfEmpty(PaginationUtil.paginateAfter(makeRequest, data -> Snowflake.asLong(data.id()),
                         0L, 100)
                         .map(UserGuildData::id)
                         //.filter(id -> (id >> 22) % getConfig().getShardCount() == getConfig().getShardIndex())
-                        .flatMap(id -> getRestClient().getGuildService().getGuild(Long.parseUnsignedLong(id)))
+                        .flatMap(id -> getRestClient().getGuildService().getGuild(Snowflake.asLong(id)))
                         .flatMap(this::toGuildData))
                 .map(data -> new Guild(this, data));
     }
@@ -677,7 +677,7 @@ public class GatewayDiscordClient {
 
     private Mono<GuildData> toGuildData(GuildUpdateData guild) {
         return gatewayResources.getStateView().getGuildStore()
-                .find(Long.parseUnsignedLong(guild.id()))
+                .find(Snowflake.asLong(guild.id()))
                 .map(current -> ImmutableGuildData.builder()
                         .from(guild)
                         .roles(guild.roles().stream()

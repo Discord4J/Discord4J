@@ -101,7 +101,7 @@ class BaseMessageChannel extends BaseChannel implements MessageChannel {
                 getClient().getRestClient().getChannelService()
                         .getMessages(getId().asLong(), params);
 
-        return PaginationUtil.paginateBefore(doRequest, data -> Long.parseUnsignedLong(data.id()), messageId.asLong(), 100)
+        return PaginationUtil.paginateBefore(doRequest, data -> Snowflake.asLong(data.id()), messageId.asLong(), 100)
                 .map(data -> new Message(getClient(), data));
     }
 
@@ -111,7 +111,7 @@ class BaseMessageChannel extends BaseChannel implements MessageChannel {
                 getClient().getRestClient().getChannelService()
                         .getMessages(getId().asLong(), params);
 
-        return PaginationUtil.paginateAfter(doRequest, data -> Long.parseUnsignedLong(data.id()), messageId.asLong(), 100)
+        return PaginationUtil.paginateAfter(doRequest, data -> Snowflake.asLong(data.id()), messageId.asLong(), 100)
                 .map(data -> new Message(getClient(), data));
     }
 

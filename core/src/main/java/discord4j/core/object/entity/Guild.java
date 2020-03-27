@@ -566,13 +566,13 @@ public final class Guild implements Entity {
                         .getGuildMembers(getId().asLong(), params);
 
         Flux<Member> requestMembers =
-                PaginationUtil.paginateAfter(doRequest, data -> Long.parseUnsignedLong(data.user().id()), 0, 100)
+                PaginationUtil.paginateAfter(doRequest, data -> Snowflake.asLong(data.user().id()), 0, 100)
                         .map(data -> new Member(gateway, data, getId().asLong()));
 
         return Mono.justOrEmpty(data.members())
                 .flatMapMany(Flux::fromIterable)
                 .flatMap(id -> gateway.getGatewayResources().getStateView().getMemberStore()
-                        .find(LongLongTuple2.of(getId().asLong(), Long.parseUnsignedLong(id))))
+                        .find(LongLongTuple2.of(getId().asLong(), Snowflake.asLong(id))))
                 .map(member -> new Member(gateway, member, getId().asLong()))
                 .switchIfEmpty(requestMembers);
     }
@@ -602,7 +602,7 @@ public final class Guild implements Entity {
     public Flux<GuildChannel> getChannels() {
         return Flux.fromIterable(data.channels())
                 .flatMap(id -> gateway.getGatewayResources().getStateView().getChannelStore()
-                        .find(Long.parseUnsignedLong(id)))
+                        .find(Snowflake.asLong(id)))
                 .map(channelData -> EntityUtil.getChannel(gateway, channelData))
                 .cast(GuildChannel.class)
                 .switchIfEmpty(gateway.getRestClient().getGuildService()
@@ -983,7 +983,7 @@ public final class Guild implements Entity {
         final ToLongFunction<AuditLogData> getLastEntryId = response -> {
             final List<AuditLogEntryData> entries = response.auditLogEntries();
             return (entries.size() == 0) ? Long.MAX_VALUE :
-                    Long.parseUnsignedLong(entries.get(entries.size() - 1).id());
+                    Snowflake.asLong(entries.get(entries.size() - 1).id());
         };
 
         return PaginationUtil.paginateBefore(makeRequest, getLastEntryId, Long.MAX_VALUE, 100)

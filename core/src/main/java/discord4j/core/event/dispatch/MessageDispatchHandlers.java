@@ -28,6 +28,7 @@ import discord4j.core.util.ListUtil;
 import discord4j.discordjson.json.*;
 import discord4j.discordjson.json.gateway.*;
 import discord4j.discordjson.possible.Possible;
+import discord4j.rest.util.Snowflake;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -42,8 +43,8 @@ class MessageDispatchHandlers {
     static Mono<MessageCreateEvent> messageCreate(DispatchContext<MessageCreate> context) {
         GatewayDiscordClient gateway = context.getGateway();
         MessageData message = context.getDispatch().message();
-        long messageId = Long.parseUnsignedLong(message.id());
-        long channelId = Long.parseUnsignedLong(message.channelId());
+        long messageId = Snowflake.asLong(message.id());
+        long channelId = Snowflake.asLong(message.channelId());
 
         Possible<String> maybeGuildId = context.getDispatch().message().guildId();
 
@@ -86,8 +87,8 @@ class MessageDispatchHandlers {
 
     static Mono<MessageDeleteEvent> messageDelete(DispatchContext<MessageDelete> context) {
         GatewayDiscordClient gateway = context.getGateway();
-        long messageId = Long.parseUnsignedLong(context.getDispatch().id());
-        long channelId = Long.parseUnsignedLong(context.getDispatch().channelId());
+        long messageId = Snowflake.asLong(context.getDispatch().id());
+        long channelId = Snowflake.asLong(context.getDispatch().channelId());
 
         Mono<Void> deleteMessage = context.getStateHolder().getMessageStore().delete(messageId);
 
@@ -104,8 +105,8 @@ class MessageDispatchHandlers {
         List<Long> messageIds = context.getDispatch().ids().stream()
                 .map(Long::parseUnsignedLong)
                 .collect(Collectors.toList());
-        long channelId = Long.parseUnsignedLong(context.getDispatch().channelId());
-        long guildId = Long.parseUnsignedLong(context.getDispatch().guildId().get()); // always present
+        long channelId = Snowflake.asLong(context.getDispatch().channelId());
+        long guildId = Snowflake.asLong(context.getDispatch().guildId().get()); // always present
 
         Mono<Void> deleteMessages = context.getStateHolder().getMessageStore()
                 .delete(Flux.fromIterable(messageIds));
@@ -123,9 +124,9 @@ class MessageDispatchHandlers {
 
     static Mono<ReactionAddEvent> messageReactionAdd(DispatchContext<MessageReactionAdd> context) {
         GatewayDiscordClient gateway = context.getGateway();
-        long userId = Long.parseUnsignedLong(context.getDispatch().userId());
-        long channelId = Long.parseUnsignedLong(context.getDispatch().channelId());
-        long messageId = Long.parseUnsignedLong(context.getDispatch().messageId());
+        long userId = Snowflake.asLong(context.getDispatch().userId());
+        long channelId = Snowflake.asLong(context.getDispatch().channelId());
+        long messageId = Snowflake.asLong(context.getDispatch().messageId());
         Long guildId = context.getDispatch().guildId()
                 .toOptional()
                 .map(Long::parseUnsignedLong)
@@ -205,9 +206,9 @@ class MessageDispatchHandlers {
 
     static Mono<ReactionRemoveEvent> messageReactionRemove(DispatchContext<MessageReactionRemove> context) {
         GatewayDiscordClient gateway = context.getGateway();
-        long userId = Long.parseUnsignedLong(context.getDispatch().userId());
-        long channelId = Long.parseUnsignedLong(context.getDispatch().channelId());
-        long messageId = Long.parseUnsignedLong(context.getDispatch().messageId());
+        long userId = Snowflake.asLong(context.getDispatch().userId());
+        long channelId = Snowflake.asLong(context.getDispatch().channelId());
+        long messageId = Snowflake.asLong(context.getDispatch().messageId());
         Long guildId = context.getDispatch().guildId()
                 .toOptional()
                 .map(Long::parseUnsignedLong)
@@ -268,8 +269,8 @@ class MessageDispatchHandlers {
 
     static Mono<ReactionRemoveAllEvent> messageReactionRemoveAll(DispatchContext<MessageReactionRemoveAll> context) {
         GatewayDiscordClient gateway = context.getGateway();
-        long channelId = Long.parseUnsignedLong(context.getDispatch().channelId());
-        long messageId = Long.parseUnsignedLong(context.getDispatch().messageId());
+        long channelId = Snowflake.asLong(context.getDispatch().channelId());
+        long messageId = Snowflake.asLong(context.getDispatch().messageId());
         Long guildId = context.getDispatch().guildId()
                 .toOptional()
                 .map(Long::parseUnsignedLong)
@@ -291,8 +292,8 @@ class MessageDispatchHandlers {
         GatewayDiscordClient gateway = context.getGateway();
         PartialMessageData messageData = context.getDispatch().message();
 
-        long channelId = Long.parseUnsignedLong(messageData.channelId());
-        long messageId = Long.parseUnsignedLong(messageData.id());
+        long channelId = Snowflake.asLong(messageData.channelId());
+        long messageId = Snowflake.asLong(messageData.id());
         Long guildId = messageData.guildId()
                 .toOptional()
                 .map(Long::parseUnsignedLong)

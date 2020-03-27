@@ -54,7 +54,7 @@ public final class ExtendedPermissionOverwrite extends PermissionOverwrite imple
      */
     public ExtendedPermissionOverwrite(final GatewayDiscordClient gateway, final OverwriteData data,
                                        final long guildId, final long channelId) {
-        super(data.allow(), data.deny(), Long.parseUnsignedLong(data.id()), Type.of(data.type()));
+        super(data.allow(), data.deny(), Snowflake.asLong(data.id()), Type.of(data.type()));
         this.gateway = Objects.requireNonNull(gateway);
         this.guildId = guildId;
         this.channelId = channelId;

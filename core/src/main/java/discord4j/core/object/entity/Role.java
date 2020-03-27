@@ -64,7 +64,7 @@ public final class Role implements Entity {
     public Role(final GatewayDiscordClient gateway, final RoleData data, final long guildId) {
         this.gateway = Objects.requireNonNull(gateway);
         this.data = Objects.requireNonNull(data);
-        this.rest = RestRole.create(gateway.rest(), guildId, Long.parseUnsignedLong(data.id()));
+        this.rest = RestRole.create(gateway.rest(), guildId, Snowflake.asLong(data.id()));
         this.guildId = guildId;
     }
 

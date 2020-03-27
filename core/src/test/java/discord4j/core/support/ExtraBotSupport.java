@@ -46,7 +46,7 @@ public class ExtraBotSupport {
     public static Mono<Void> commandHandler(GatewayDiscordClient client) {
         Mono<Long> ownerId = client.rest().getApplicationInfo()
                 .map(ApplicationInfoData::owner)
-                .map(user -> Long.parseUnsignedLong(user.id()))
+                .map(user -> Snowflake.asLong(user.id()))
                 .cache();
 
         List<EventHandler> eventHandlers = new ArrayList<>();

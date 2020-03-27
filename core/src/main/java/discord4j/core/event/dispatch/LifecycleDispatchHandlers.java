@@ -25,6 +25,7 @@ import discord4j.discordjson.json.UserData;
 import discord4j.discordjson.json.gateway.Ready;
 import discord4j.discordjson.json.gateway.Resumed;
 import discord4j.gateway.retry.GatewayStateChange;
+import discord4j.rest.util.Snowflake;
 import reactor.core.publisher.Mono;
 
 import java.util.Set;
@@ -36,12 +37,12 @@ class LifecycleDispatchHandlers {
         GatewayDiscordClient gateway = context.getGateway();
         Ready dispatch = context.getDispatch();
         UserData userData = dispatch.user();
-        long userId = Long.parseUnsignedLong(userData.id());
+        long userId = Snowflake.asLong(userData.id());
 
         User self = new User(gateway, userData);
         Set<ReadyEvent.Guild> guilds = dispatch.guilds()
                 .stream()
-                .map(g -> new ReadyEvent.Guild(Long.parseUnsignedLong(g.id()), !g.unavailable().get()))
+                .map(g -> new ReadyEvent.Guild(Snowflake.asLong(g.id()), !g.unavailable().get()))
                 .collect(Collectors.toSet());
 
         Mono<Void> saveUser = context.getStateHolder().getUserStore()

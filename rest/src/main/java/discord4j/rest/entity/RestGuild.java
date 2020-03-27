@@ -93,7 +93,7 @@ public class RestGuild {
     public Flux<MemberData> getMembers() {
         Function<Map<String, Object>, Flux<MemberData>> doRequest =
                 params -> restClient.getGuildService().getGuildMembers(id, params);
-        return PaginationUtil.paginateAfter(doRequest, data -> Long.parseUnsignedLong(data.user().id()), 0, 100);
+        return PaginationUtil.paginateAfter(doRequest, data -> Snowflake.asLong(data.user().id()), 0, 100);
     }
 
     public Mono<MemberData> addMember(long userId, GuildMemberAddRequest request) {

@@ -26,6 +26,7 @@ import discord4j.core.object.presence.Presence;
 import discord4j.discordjson.json.*;
 import discord4j.discordjson.json.gateway.*;
 import discord4j.gateway.retry.GatewayStateChange;
+import discord4j.rest.util.Snowflake;
 import discord4j.store.api.util.LongLongTuple2;
 import reactor.core.publisher.Mono;
 import reactor.util.Logger;
@@ -119,9 +120,9 @@ public abstract class DispatchHandlers {
     private static Mono<PresenceUpdateEvent> presenceUpdate(DispatchContext<PresenceUpdate> context) {
         GatewayDiscordClient gateway = context.getGateway();
 
-        long guildId = Long.parseUnsignedLong(context.getDispatch().guildId());
+        long guildId = Snowflake.asLong(context.getDispatch().guildId());
         PartialUserData userData = context.getDispatch().user();
-        long userId = Long.parseUnsignedLong(userData.id());
+        long userId = Snowflake.asLong(userData.id());
         LongLongTuple2 key = LongLongTuple2.of(guildId, userId);
         PresenceData presenceData = createPresence(context.getDispatch());
         Presence current = new Presence(presenceData);
@@ -171,9 +172,9 @@ public abstract class DispatchHandlers {
     }
 
     private static Mono<TypingStartEvent> typingStart(DispatchContext<TypingStart> context) {
-        long channelId = Long.parseUnsignedLong(context.getDispatch().channelId());
+        long channelId = Snowflake.asLong(context.getDispatch().channelId());
         Long guildId = context.getDispatch().guildId().toOptional().map(Long::parseUnsignedLong).orElse(null);
-        long userId = Long.parseUnsignedLong(context.getDispatch().userId());
+        long userId = Snowflake.asLong(context.getDispatch().userId());
         Instant startTime = Instant.ofEpochSecond(context.getDispatch().timestamp());
 
         Member member = context.getDispatch().member().toOptional()
@@ -188,7 +189,7 @@ public abstract class DispatchHandlers {
     private static Mono<UserUpdateEvent> userUpdate(DispatchContext<UserUpdate> context) {
         GatewayDiscordClient gateway = context.getGateway();
         UserData userData = context.getDispatch().user();
-        long userId = Long.parseUnsignedLong(userData.id());
+        long userId = Snowflake.asLong(userData.id());
         User current = new User(gateway, userData);
 
         Mono<Void> saveNew = context.getStateHolder().getUserStore().save(userId, userData);
@@ -202,7 +203,7 @@ public abstract class DispatchHandlers {
 
     private static Mono<Event> voiceServerUpdate(DispatchContext<VoiceServerUpdate> context) {
         String token = context.getDispatch().token();
-        long guildId = Long.parseUnsignedLong(context.getDispatch().guildId());
+        long guildId = Snowflake.asLong(context.getDispatch().guildId());
         String endpoint = context.getDispatch().endpoint();
 
         return Mono.just(new VoiceServerUpdateEvent(context.getGateway(), context.getShardInfo(), token, guildId,
@@ -214,8 +215,8 @@ public abstract class DispatchHandlers {
         GatewayDiscordClient gateway = context.getGateway();
         VoiceStateData voiceStateData = context.getDispatch().voiceState();
 
-        long guildId = Long.parseUnsignedLong(voiceStateData.guildId().get());
-        long userId = Long.parseUnsignedLong(voiceStateData.userId());
+        long guildId = Snowflake.asLong(voiceStateData.guildId().get());
+        long userId = Snowflake.asLong(voiceStateData.userId());
 
         LongLongTuple2 key = LongLongTuple2.of(guildId, userId);
         VoiceState current = new VoiceState(gateway, voiceStateData);
@@ -232,15 +233,15 @@ public abstract class DispatchHandlers {
     }
 
     private static Mono<Event> webhooksUpdate(DispatchContext<WebhooksUpdate> context) {
-        long guildId = Long.parseUnsignedLong(context.getDispatch().guildId());
-        long channelId = Long.parseUnsignedLong(context.getDispatch().channelId());
+        long guildId = Snowflake.asLong(context.getDispatch().guildId());
+        long channelId = Snowflake.asLong(context.getDispatch().channelId());
 
         return Mono.just(new WebhooksUpdateEvent(context.getGateway(), context.getShardInfo(), guildId, channelId));
     }
 
     private static Mono<InviteCreateEvent> inviteCreate(DispatchContext<InviteCreate> context) {
-        long guildId = Long.parseUnsignedLong(context.getDispatch().guildId());
-        long channelId = Long.parseUnsignedLong(context.getDispatch().channelId());
+        long guildId = Snowflake.asLong(context.getDispatch().guildId());
+        long channelId = Snowflake.asLong(context.getDispatch().channelId());
         String code = context.getDispatch().code();
         Instant createdAt = DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(context.getDispatch().createdAt(), Instant::from);
         int uses = context.getDispatch().uses();
@@ -257,8 +258,8 @@ public abstract class DispatchHandlers {
     }
 
     private static Mono<InviteDeleteEvent> inviteDelete(DispatchContext<InviteDelete> context) {
-        long guildId = Long.parseUnsignedLong(context.getDispatch().guildId());
-        long channelId = Long.parseUnsignedLong(context.getDispatch().channelId());
+        long guildId = Snowflake.asLong(context.getDispatch().guildId());
+        long channelId = Snowflake.asLong(context.getDispatch().channelId());
         String code = context.getDispatch().code();
 
         return Mono.just(new InviteDeleteEvent(context.getGateway(), context.getShardInfo(), guildId, channelId, code));

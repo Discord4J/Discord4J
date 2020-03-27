@@ -257,7 +257,7 @@ public class Activity {
             .map(emoji -> {
                 // TODO FIXME
                 String sid = emoji.id().toOptional().orElse(null);
-                Long id = sid == null ? null : Long.parseUnsignedLong(sid);
+                Long id = sid == null ? null : Snowflake.asLong(sid);
                 return ReactionEmoji.of(id, emoji.name(), emoji.animated().toOptional().orElse(false));
             });
     }

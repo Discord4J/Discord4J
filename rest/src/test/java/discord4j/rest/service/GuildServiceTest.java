@@ -16,11 +16,12 @@
  */
 package discord4j.rest.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import discord4j.discordjson.json.*;
 import discord4j.discordjson.possible.Possible;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import discord4j.rest.RestTests;
 import discord4j.rest.request.Router;
+import discord4j.rest.util.Snowflake;
 import org.junit.Before;
 import org.junit.Test;
 import reactor.util.Logger;
@@ -93,7 +94,7 @@ public class GuildServiceTest {
         String randomName = Long.toHexString(Double.doubleToLongBits(Math.random()));
         ChannelCreateRequest req = ImmutableChannelCreateRequest.builder()
             .name(randomName)
-            .parentId(Possible.of(Long.toUnsignedString(trashCategory)))
+            .parentId(Possible.of(Snowflake.asString(trashCategory)))
             .build();
         getGuildService().createGuildChannel(guild, req, null).block();
     }

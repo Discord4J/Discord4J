@@ -25,6 +25,7 @@ import discord4j.discordjson.json.gateway.ImmutableVoiceStateUpdate;
 import discord4j.discordjson.json.gateway.VoiceStateUpdate;
 import discord4j.gateway.GatewayClientGroup;
 import discord4j.gateway.json.ShardGatewayPayload;
+import discord4j.rest.util.Snowflake;
 import discord4j.voice.*;
 import reactor.core.publisher.Mono;
 import reactor.util.function.Tuple2;
@@ -138,7 +139,7 @@ public class VoiceChannelJoinSpec implements Spec<Mono<VoiceConnection>> {
         final GatewayClientGroup clientGroup = voiceChannel.getClient().getGatewayClientGroup();
         final int shardId = (int) ((voiceChannel.getGuildId().asLong() >> 22) % clientGroup.getShardCount());
         final Mono<Void> sendVoiceStateUpdate = clientGroup.unicast(ShardGatewayPayload.voiceStateUpdate(
-                ImmutableVoiceStateUpdate.of(Long.toUnsignedString(guildId), Optional.of(Long.toUnsignedString(channelId)), selfMute, selfDeaf), shardId));
+                ImmutableVoiceStateUpdate.of(Snowflake.asString(guildId), Optional.of(Snowflake.asString(channelId)), selfMute, selfDeaf), shardId));
 
         final Mono<VoiceStateUpdateEvent> waitForVoiceStateUpdate = gateway.getEventDispatcher()
                 .on(VoiceStateUpdateEvent.class)
@@ -179,7 +180,7 @@ public class VoiceChannelJoinSpec implements Spec<Mono<VoiceConnection>> {
                             .subscriberContext(ctx ->
                                     ctx.put(LogUtil.KEY_GATEWAY_ID, Integer.toHexString(gateway.hashCode()))
                                             .put(LogUtil.KEY_SHARD_ID, shardId)
-                                            .put(LogUtil.KEY_GUILD_ID, Long.toUnsignedString(guildId)));
+                                            .put(LogUtil.KEY_GUILD_ID, Snowflake.asString(guildId)));
                 });
     }
 

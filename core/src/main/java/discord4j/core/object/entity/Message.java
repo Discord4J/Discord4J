@@ -80,8 +80,8 @@ public final class Message implements Entity {
     public Message(final GatewayDiscordClient gateway, final MessageData data) {
         this.gateway = Objects.requireNonNull(gateway);
         this.data = Objects.requireNonNull(data);
-        this.rest = RestMessage.create(gateway.getRestClient(), Long.parseUnsignedLong(data.channelId()),
-                Long.parseUnsignedLong(data.id()));
+        this.rest = RestMessage.create(gateway.getRestClient(), Snowflake.asLong(data.channelId()),
+                Snowflake.asLong(data.id()));
     }
 
     @Override
@@ -105,7 +105,7 @@ public final class Message implements Entity {
      * Return a {@link RestChannel} handle to execute REST API operations on the channel of this message.
      */
     public RestChannel getRestChannel() {
-        return RestChannel.create(gateway.getRestClient(), Long.parseUnsignedLong(data.channelId()));
+        return RestChannel.create(gateway.getRestClient(), Snowflake.asLong(data.channelId()));
     }
 
     /**
@@ -310,7 +310,7 @@ public final class Message implements Entity {
                                 EntityUtil.getEmojiString(emoji),
                                 params);
 
-        return PaginationUtil.paginateAfter(makeRequest, data -> Long.parseUnsignedLong(data.id()), 0L, 100)
+        return PaginationUtil.paginateAfter(makeRequest, data -> Snowflake.asLong(data.id()), 0L, 100)
                 .map(data -> new User(gateway, data));
     }
 

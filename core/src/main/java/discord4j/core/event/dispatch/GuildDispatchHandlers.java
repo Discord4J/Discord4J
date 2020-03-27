@@ -21,16 +21,15 @@ import discord4j.core.event.domain.guild.*;
 import discord4j.core.event.domain.role.RoleCreateEvent;
 import discord4j.core.event.domain.role.RoleDeleteEvent;
 import discord4j.core.event.domain.role.RoleUpdateEvent;
-import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.*;
 import discord4j.core.object.presence.Status;
 import discord4j.core.state.StateHolder;
 import discord4j.core.util.ListUtil;
 import discord4j.discordjson.json.*;
-import discord4j.discordjson.json.gateway.GuildCreate;
 import discord4j.discordjson.json.gateway.*;
 import discord4j.discordjson.possible.Possible;
 import discord4j.gateway.json.ShardGatewayPayload;
+import discord4j.rest.util.Snowflake;
 import discord4j.store.api.util.LongLongTuple2;
 import discord4j.store.api.util.LongObjTuple2;
 import reactor.core.publisher.Flux;
@@ -45,14 +44,14 @@ class GuildDispatchHandlers {
 
     static Mono<BanEvent> guildBanAdd(DispatchContext<GuildBanAdd> context) {
         User user = new User(context.getGateway(), context.getDispatch().user());
-        long guildId = Long.parseUnsignedLong(context.getDispatch().guild());
+        long guildId = Snowflake.asLong(context.getDispatch().guild());
 
         return Mono.just(new BanEvent(context.getGateway(), context.getShardInfo(), user, guildId));
     }
 
     static Mono<UnbanEvent> guildBanRemove(DispatchContext<GuildBanRemove> context) {
         User user = new User(context.getGateway(), context.getDispatch().user());
-        long guildId = Long.parseUnsignedLong(context.getDispatch().guild());
+        long guildId = Snowflake.asLong(context.getDispatch().guild());
 
         return Mono.just(new UnbanEvent(context.getGateway(), context.getShardInfo(), user, guildId));
     }
@@ -87,13 +86,13 @@ class GuildDispatchHandlers {
                     .build();
         }
 
-        long guildId = Long.parseUnsignedLong(guild.id());
+        long guildId = Snowflake.asLong(guild.id());
 
         Mono<Void> saveGuild = context.getStateHolder().getGuildStore().save(guildId, guild);
         // TODO optimize to separate into three Publisher<Channel> and saveAll to limit store hits
         Mono<Void> saveChannels = Flux.fromIterable(createData.channels())
                 .flatMap(channel -> context.getStateHolder().getChannelStore()
-                        .save(Long.parseUnsignedLong(channel.id()), ImmutableChannelData.builder()
+                        .save(Snowflake.asLong(channel.id()), ImmutableChannelData.builder()
                                 .from(channel)
                                 .guildId(Possible.of(guild.id()))
                                 .build()))
@@ -101,31 +100,31 @@ class GuildDispatchHandlers {
 
         Mono<Void> saveRoles = context.getStateHolder().getRoleStore()
                 .save(Flux.fromIterable(createData.roles())
-                        .map(role -> Tuples.of(Long.parseUnsignedLong(role.id()), role)));
+                        .map(role -> Tuples.of(Snowflake.asLong(role.id()), role)));
 
         Mono<Void> saveEmojis = context.getStateHolder().getGuildEmojiStore()
                 .save(Flux.fromIterable(createData.emojis())
-                        .map(emoji -> Tuples.of(Long.parseUnsignedLong(emoji.id().orElseThrow(NoSuchElementException::new)), emoji)));
+                        .map(emoji -> Tuples.of(Snowflake.asLong(emoji.id().orElseThrow(NoSuchElementException::new)), emoji)));
 
         Mono<Void> saveMembers = context.getStateHolder().getMemberStore()
                 .save(Flux.fromIterable(createData.members())
                         .map(member -> Tuples.of(LongLongTuple2.of(guildId,
-                                Long.parseUnsignedLong(member.user().id())), member)));
+                                Snowflake.asLong(member.user().id())), member)));
 
         Mono<Void> saveUsers = context.getStateHolder().getUserStore()
                 .save(Flux.fromIterable(createData.members())
                         .map(MemberData::user)
-                        .map(user -> Tuples.of(Long.parseUnsignedLong(user.id()), user)));
+                        .map(user -> Tuples.of(Snowflake.asLong(user.id()), user)));
 
         Mono<Void> saveVoiceStates = context.getStateHolder().getVoiceStateStore()
                 .save(Flux.fromIterable(createData.voiceStates())
                         .map(voiceState -> Tuples.of(LongLongTuple2.of(guildId,
-                                Long.parseUnsignedLong(voiceState.userId())), voiceState)));
+                                Snowflake.asLong(voiceState.userId())), voiceState)));
 
         Mono<Void> savePresences = context.getStateHolder().getPresenceStore()
                 .save(Flux.fromIterable(createData.presences())
                         .map(presence -> Tuples.of(LongLongTuple2.of(guildId,
-                                Long.parseUnsignedLong(presence.user().id())), presence)));
+                                Snowflake.asLong(presence.user().id())), presence)));
 
         Mono<Void> startMemberChunk = context.getGateway().getGatewayResources().isMemberRequest() ?
                 Mono.just(createData)
@@ -144,11 +143,11 @@ class GuildDispatchHandlers {
 
         Mono<Void> saveOfflinePresences = Flux.fromIterable(createData.members())
                 .filterWhen(member -> context.getStateHolder().getPresenceStore()
-                        .find(LongLongTuple2.of(guildId, Long.parseUnsignedLong(member.user().id())))
+                        .find(LongLongTuple2.of(guildId, Snowflake.asLong(member.user().id())))
                         .hasElement()
                         .map(id -> !id))
                 .flatMap(member -> context.getStateHolder().getPresenceStore()
-                        .save(LongLongTuple2.of(guildId, Long.parseUnsignedLong(member.user().id())),
+                        .save(LongLongTuple2.of(guildId, Snowflake.asLong(member.user().id())),
                                 createPresence(member)))
                 .then();
 
@@ -195,7 +194,7 @@ class GuildDispatchHandlers {
         GatewayDiscordClient gateway = context.getGateway();
         StateHolder stateHolder = context.getStateHolder();
 
-        long guildId = Long.parseUnsignedLong(context.getDispatch().guild().id());
+        long guildId = Snowflake.asLong(context.getDispatch().guild().id());
         boolean unavailable = context.getDispatch().guild().unavailable().toOptional().orElse(false);
 
         Mono<Void> deleteGuild = stateHolder.getGuildStore().delete(guildId);
@@ -237,7 +236,7 @@ class GuildDispatchHandlers {
 
     static Mono<EmojisUpdateEvent> guildEmojisUpdate(DispatchContext<GuildEmojisUpdate> context) {
         GatewayDiscordClient gateway = context.getGateway();
-        long guildId = Long.parseUnsignedLong(context.getDispatch().guild());
+        long guildId = Snowflake.asLong(context.getDispatch().guild());
 
         Mono<Void> updateGuildBean = context.getStateHolder().getGuildStore()
                 .find(guildId)
@@ -269,15 +268,15 @@ class GuildDispatchHandlers {
 
     static Mono<IntegrationsUpdateEvent> guildIntegrationsUpdate(DispatchContext<GuildIntegrationsUpdate> context) {
         return Mono.just(new IntegrationsUpdateEvent(context.getGateway(), context.getShardInfo(),
-                Long.parseUnsignedLong(context.getDispatch().guild())));
+                Snowflake.asLong(context.getDispatch().guild())));
     }
 
     static Mono<MemberJoinEvent> guildMemberAdd(DispatchContext<GuildMemberAdd> context) {
         GatewayDiscordClient gateway = context.getGateway();
-        long guildId = Long.parseUnsignedLong(context.getDispatch().guild());
+        long guildId = Snowflake.asLong(context.getDispatch().guild());
         MemberData member = context.getDispatch().member();
         UserData user = member.user();
-        long userId = Long.parseUnsignedLong(user.id());
+        long userId = Snowflake.asLong(user.id());
 
         Mono<Void> addMemberId = context.getStateHolder().getGuildStore()
                 .find(guildId)
@@ -303,9 +302,9 @@ class GuildDispatchHandlers {
 
     static Mono<MemberLeaveEvent> guildMemberRemove(DispatchContext<GuildMemberRemove> context) {
         GatewayDiscordClient gateway = context.getGateway();
-        long guildId = Long.parseUnsignedLong(context.getDispatch().guild());
+        long guildId = Snowflake.asLong(context.getDispatch().guild());
         UserData user = context.getDispatch().user();
-        long userId = Long.parseUnsignedLong(user.id());
+        long userId = Snowflake.asLong(user.id());
 
         Mono<Void> removeMemberId = context.getStateHolder().getGuildStore()
                 .find(guildId)
@@ -332,15 +331,15 @@ class GuildDispatchHandlers {
 
     static Mono<MemberChunkEvent> guildMembersChunk(DispatchContext<GuildMembersChunk> context) {
         GatewayDiscordClient gateway = context.getGateway();
-        long guildId = Long.parseUnsignedLong(context.getDispatch().guildId());
+        long guildId = Snowflake.asLong(context.getDispatch().guildId());
         List<MemberData> members = context.getDispatch().members();
 
         Flux<Tuple2<LongLongTuple2, MemberData>> memberPairs = Flux.fromIterable(members)
-                .map(data -> Tuples.of(LongLongTuple2.of(guildId, Long.parseUnsignedLong(data.user().id())),
+                .map(data -> Tuples.of(LongLongTuple2.of(guildId, Snowflake.asLong(data.user().id())),
                         data));
 
         Flux<Tuple2<Long, UserData>> userPairs = Flux.fromIterable(members)
-                .map(data -> Tuples.of(Long.parseUnsignedLong(data.user().id()), data.user()));
+                .map(data -> Tuples.of(Snowflake.asLong(data.user().id()), data.user()));
 
         Mono<Void> addMemberIds = context.getStateHolder().getGuildStore()
                 .find(guildId)
@@ -358,11 +357,11 @@ class GuildDispatchHandlers {
 
         Mono<Void> saveOfflinePresences = Flux.fromIterable(members)
                 .filterWhen(member -> context.getStateHolder().getPresenceStore()
-                        .find(LongLongTuple2.of(guildId, Long.parseUnsignedLong(member.user().id())))
+                        .find(LongLongTuple2.of(guildId, Snowflake.asLong(member.user().id())))
                         .hasElement()
                         .map(identity -> !identity))
                 .flatMap(member -> context.getStateHolder().getPresenceStore()
-                        .save(LongLongTuple2.of(guildId, Long.parseUnsignedLong(member.user().id())),
+                        .save(LongLongTuple2.of(guildId, Snowflake.asLong(member.user().id())),
                                 createPresence(member)))
                 .then();
 
@@ -379,8 +378,8 @@ class GuildDispatchHandlers {
     static Mono<MemberUpdateEvent> guildMemberUpdate(DispatchContext<GuildMemberUpdate> context) {
         GatewayDiscordClient gateway = context.getGateway();
 
-        long guildId = Long.parseUnsignedLong(context.getDispatch().guildId());
-        long memberId = Long.parseUnsignedLong(context.getDispatch().user().id());
+        long guildId = Snowflake.asLong(context.getDispatch().guildId());
+        long memberId = Snowflake.asLong(context.getDispatch().user().id());
 
         List<Long> currentRoles = context.getDispatch().roles()
                 .stream()
@@ -415,7 +414,7 @@ class GuildDispatchHandlers {
 
     static Mono<RoleCreateEvent> guildRoleCreate(DispatchContext<GuildRoleCreate> context) {
         GatewayDiscordClient gateway = context.getGateway();
-        long guildId = Long.parseUnsignedLong(context.getDispatch().guildId());
+        long guildId = Snowflake.asLong(context.getDispatch().guildId());
         RoleData role = context.getDispatch().role();
 
         Mono<Void> addRoleId = context.getStateHolder().getGuildStore()
@@ -427,7 +426,7 @@ class GuildDispatchHandlers {
                 .flatMap(guild -> context.getStateHolder().getGuildStore().save(guildId, guild));
 
         Mono<Void> saveRole = context.getStateHolder().getRoleStore()
-                .save(Long.parseUnsignedLong(role.id()), role);
+                .save(Snowflake.asLong(role.id()), role);
 
         return addRoleId
                 .and(saveRole)
@@ -437,8 +436,8 @@ class GuildDispatchHandlers {
 
     static Mono<RoleDeleteEvent> guildRoleDelete(DispatchContext<GuildRoleDelete> context) {
         GatewayDiscordClient gateway = context.getGateway();
-        long guildId = Long.parseUnsignedLong(context.getDispatch().guildId());
-        long roleId = Long.parseUnsignedLong(context.getDispatch().roleId());
+        long guildId = Snowflake.asLong(context.getDispatch().guildId());
+        long roleId = Snowflake.asLong(context.getDispatch().roleId());
 
         @SuppressWarnings("ReactorUnusedPublisher")
         Mono<Void> removeRoleId = context.getStateHolder().getGuildStore()
@@ -465,7 +464,7 @@ class GuildDispatchHandlers {
                                 role -> role.equals(context.getDispatch().roleId())))
                         .build())
                 .flatMap(member -> context.getStateHolder().getMemberStore()
-                        .save(LongLongTuple2.of(guildId, Long.parseUnsignedLong(member.user().id())), member))
+                        .save(LongLongTuple2.of(guildId, Snowflake.asLong(member.user().id())), member))
                 .then();
 
         return context.getStateHolder().getRoleStore()
@@ -494,9 +493,9 @@ class GuildDispatchHandlers {
 
     static Mono<RoleUpdateEvent> guildRoleUpdate(DispatchContext<GuildRoleUpdate> context) {
         GatewayDiscordClient gateway = context.getGateway();
-        long guildId = Long.parseUnsignedLong(context.getDispatch().guildId());
+        long guildId = Snowflake.asLong(context.getDispatch().guildId());
         RoleData role = context.getDispatch().role();
-        long roleId = Long.parseUnsignedLong(role.id());
+        long roleId = Snowflake.asLong(role.id());
         Role current = new Role(gateway, role, guildId);
 
         Mono<Void> saveNew = context.getStateHolder().getRoleStore().save(roleId, role);
@@ -511,7 +510,7 @@ class GuildDispatchHandlers {
 
     static Mono<GuildUpdateEvent> guildUpdate(DispatchContext<GuildUpdate> context) {
         GatewayDiscordClient gateway = context.getGateway();
-        long guildId = Long.parseUnsignedLong(context.getDispatch().guild().id());
+        long guildId = Snowflake.asLong(context.getDispatch().guild().id());
 
         return context.getStateHolder().getGuildStore()
                 .find(guildId)

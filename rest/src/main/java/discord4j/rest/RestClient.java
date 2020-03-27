@@ -46,15 +46,33 @@ public class RestClient {
     private final VoiceService voiceService;
     private final WebhookService webhookService;
 
+    /**
+     * Create a {@link RestClient} with default options, using the given token for authentication.
+     *
+     * @param token the bot token used for authentication
+     * @return a {@link RestClient} configured with the default options
+     */
     public static RestClient create(String token) {
         return RestClientBuilder.createRest(token).build();
     }
 
+    /**
+     * Obtain a {@link RestClientBuilder} able to create {@link RestClient} instances, using the given token for
+     * authentication.
+     *
+     * @param token the bot token used for authentication
+     * @return a {@link RestClientBuilder}
+     */
     public static RestClientBuilder<RestClient, RouterOptions> restBuilder(String token) {
         return RestClientBuilder.createRest(token);
     }
 
-    public RestClient(final Router router) {
+    /**
+     * Create a new {@link RestClient} using the given {@link Router} as connector to perform requests.
+     *
+     * @param router a connector to perform requests
+     */
+    protected RestClient(final Router router) {
         this.applicationService = new ApplicationService(router);
         this.auditLogService = new AuditLogService(router);
         this.channelService = new ChannelService(router);
@@ -258,7 +276,7 @@ public class RestClient {
                 this.getUserService()
                         .getCurrentUserGuilds(params);
 
-        return PaginationUtil.paginateAfter(makeRequest, data -> Long.parseUnsignedLong(data.id()), 0L, 100);
+        return PaginationUtil.paginateAfter(makeRequest, data -> Snowflake.asLong(data.id()), 0L, 100);
     }
 
     /**
@@ -314,42 +332,103 @@ public class RestClient {
         return userService.modifyCurrentUser(request);
     }
 
+    /**
+     * Access a low-level representation of the API endpoints for the Application resource.
+     *
+     * @return a handle to perform low-level requests to the API
+     */
     public ApplicationService getApplicationService() {
         return applicationService;
     }
 
+    /**
+     * Access a low-level representation of the API endpoints for the Audit Log resource.
+     *
+     * @return a handle to perform low-level requests to the API
+     */
     public AuditLogService getAuditLogService() {
         return auditLogService;
     }
 
+    /**
+     * Access a low-level representation of the API endpoints for the Channel resource. It is recommended you use
+     * methods like {@link #getChannelById(Snowflake)}, {@link #restChannel(ChannelData)} or
+     * {@link RestChannel#create(RestClient, Snowflake)}.
+     *
+     * @return a handle to perform low-level requests to the API
+     */
     public ChannelService getChannelService() {
         return channelService;
     }
 
+    /**
+     * Access a low-level representation of the API endpoints for the Guild Emoji resource. It is recommended you use
+     * methods like {@link #getGuildEmojiById(Snowflake, Snowflake)}, {@link #restGuildEmoji(Snowflake, EmojiData)} or
+     * {@link RestEmoji#create(RestClient, Snowflake, Snowflake)}.
+     *
+     * @return a handle to perform low-level requests to the API
+     */
     public EmojiService getEmojiService() {
         return emojiService;
     }
 
+    /**
+     * Access a low-level representation of the API endpoints for the Gateway resource.
+     *
+     * @return a handle to perform low-level requests to the API
+     */
     public GatewayService getGatewayService() {
         return gatewayService;
     }
 
+    /**
+     * Access a low-level representation of the API endpoints for the Guild resource. It is recommended you use
+     * methods like {@link #getGuildById(Snowflake)}, {@link #restGuild(GuildData)} or
+     * {@link RestGuild#create(RestClient, Snowflake)}.
+     *
+     * @return a handle to perform low-level requests to the API
+     */
     public GuildService getGuildService() {
         return guildService;
     }
 
+    /**
+     * Access a low-level representation of the API endpoints for the Invite resource. It is recommended you use
+     * methods like {@link #getInvite(String)}, or {@link RestInvite#create(RestClient, String)}.
+     *
+     * @return a handle to perform low-level requests to the API
+     */
     public InviteService getInviteService() {
         return inviteService;
     }
 
+    /**
+     * Access a low-level representation of the API endpoints for the User resource. It is recommended you use
+     * methods like {@link #getUserById(Snowflake)}, {@link #restUser(UserData)} or
+     * {@link RestUser#create(RestClient, Snowflake)}.
+     *
+     * @return a handle to perform low-level requests to the API
+     */
     public UserService getUserService() {
         return userService;
     }
 
+    /**
+     * Access a low-level representation of the API endpoints for the Voice Region resource.
+     *
+     * @return a handle to perform low-level requests to the API
+     */
     public VoiceService getVoiceService() {
         return voiceService;
     }
 
+    /**
+     * Access a low-level representation of the API endpoints for the Webhook resource. It is recommended you use
+     * methods like {@link #getWebhookById(Snowflake)}, {@link #restWebhook(WebhookData)} or
+     * {@link RestWebhook#create(RestClient, Snowflake)}.
+     *
+     * @return a handle to perform low-level requests to the API
+     */
     public WebhookService getWebhookService() {
         return webhookService;
     }

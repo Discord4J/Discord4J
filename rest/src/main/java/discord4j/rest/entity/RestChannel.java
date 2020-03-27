@@ -129,7 +129,7 @@ public class RestChannel {
     public Flux<MessageData> getMessagesBefore(long messageId) {
         Function<Map<String, Object>, Flux<MessageData>> doRequest =
                 params -> restClient.getChannelService().getMessages(id, params);
-        return PaginationUtil.paginateBefore(doRequest, data -> Long.parseUnsignedLong(data.id()), messageId, 100);
+        return PaginationUtil.paginateBefore(doRequest, data -> Snowflake.asLong(data.id()), messageId, 100);
     }
 
     /**
@@ -151,7 +151,7 @@ public class RestChannel {
     public Flux<MessageData> getMessagesAfter(long messageId) {
         Function<Map<String, Object>, Flux<MessageData>> doRequest = params ->
                 restClient.getChannelService().getMessages(id, params);
-        return PaginationUtil.paginateAfter(doRequest, data -> Long.parseUnsignedLong(data.id()), messageId, 100);
+        return PaginationUtil.paginateAfter(doRequest, data -> Snowflake.asLong(data.id()), messageId, 100);
     }
 
     /**

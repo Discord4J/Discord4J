@@ -90,15 +90,14 @@ public class RestRole {
      * guild. If an error is received, it is emitted through the {@code Flux}.
      */
     public Flux<RoleData> changePosition(final int position) {
-        final PositionModifyRequest[] requests = {ImmutablePositionModifyRequest.of(Long.toUnsignedString(id),
-                position)};
+        final PositionModifyRequest[] requests = {ImmutablePositionModifyRequest.of(Snowflake.asString(id), position)};
         return restClient.getGuildService().modifyGuildRolePositions(guildId, requests);
     }
 
     public Mono<RoleData> getData() {
         return restClient.getGuildService()
                 .getGuildRoles(guildId)
-                .filter(response -> Long.parseUnsignedLong(response.id()) == id)
+                .filter(response -> Snowflake.asLong(response.id()) == id)
                 .singleOrEmpty();
     }
 }
