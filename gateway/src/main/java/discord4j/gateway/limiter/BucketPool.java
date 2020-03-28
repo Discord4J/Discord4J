@@ -15,7 +15,7 @@
  * along with Discord4J. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package discord4j.gateway;
+package discord4j.gateway.limiter;
 
 import reactor.core.publisher.Mono;
 import reactor.pool.Pool;
@@ -86,8 +86,12 @@ public class BucketPool {
         return Duration.ofNanos(nextRefillAt.get() - now);
     }
 
+    public String id() {
+        return Integer.toHexString(hashCode());
+    }
+
     private String format(String message) {
-        return "[pool-" + Integer.toHexString(hashCode()) + "] " + message;
+        return "[pool:" + id() + "] " + message;
     }
 
     private class Permit {
@@ -101,7 +105,7 @@ public class BucketPool {
 
         @Override
         public String toString() {
-            return "[id: " + id + ", 0x" + Integer.toHexString(hashCode()) + ']';
+            return String.valueOf(id);
         }
     }
 }

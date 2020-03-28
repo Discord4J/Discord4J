@@ -15,25 +15,26 @@
  * along with Discord4J. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package discord4j.gateway;
+package discord4j.gateway.limiter;
 
-import io.netty.buffer.ByteBuf;
+import discord4j.gateway.limiter.BucketPool;
+import discord4j.gateway.limiter.SupplierTransformer;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
-import reactor.util.function.Tuple2;
 
-/**
- * A transformation function to a sequence of raw {@link ByteBuf} payloads.
- */
-@FunctionalInterface
-public interface PayloadTransformer {
+import java.time.Duration;
+import java.util.function.Supplier;
 
-    /**
-     * Transform a sequence of {@link ByteBuf} payloads, along with their parent {@link GatewayClient}, to inject
-     * behavior like delays into the produced sequence of {@link ByteBuf} payloads.
-     *
-     * @param sequence a sequence of payloads
-     * @return the transformed sequence
-     */
-    Publisher<ByteBuf> apply(Flux<Tuple2<GatewayClient, ByteBuf>> sequence);
+public class BucketPoolTransformer<T> implements SupplierTransformer<T, Duration, T> {
+
+    private final BucketPool pool;
+
+    public BucketPoolTransformer(int capacity, Duration refillPeriod) {
+        this.pool = new BucketPool(capacity, refillPeriod);
+    }
+
+    @Override
+    public Publisher<T> apply(Flux<T> sequence, Supplier<Duration> supplier) {
+        return sequence.flatMap(t2 -> this.pool.acquire(supplier.get()).thenReturn(t2));
+    }
 }

@@ -15,26 +15,15 @@
  * along with Discord4J. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package discord4j.gateway;
+package discord4j.gateway.limiter;
 
 import io.netty.buffer.ByteBuf;
-import org.reactivestreams.Publisher;
-import reactor.core.publisher.Flux;
-import reactor.util.function.Tuple2;
 
 import java.time.Duration;
 
-public class PoolingTransformer implements PayloadTransformer {
-
-    private final BucketPool pool;
-
-    public PoolingTransformer(int capacity, Duration refillPeriod) {
-        this.pool = new BucketPool(capacity, refillPeriod);
-    }
-
-    @Override
-    public Publisher<ByteBuf> apply(Flux<Tuple2<GatewayClient, ByteBuf>> publisher) {
-        return publisher.flatMap(t2 -> this.pool.acquire(t2.getT1().getResponseTime())
-                .thenReturn(t2.getT2()));
-    }
+/**
+ * A transformation function to a sequence of raw {@link ByteBuf} payloads.
+ */
+@FunctionalInterface
+public interface PayloadTransformer extends SupplierTransformer<ByteBuf, Duration, ByteBuf> {
 }

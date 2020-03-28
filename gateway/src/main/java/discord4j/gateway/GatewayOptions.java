@@ -18,6 +18,7 @@
 package discord4j.gateway;
 
 import discord4j.common.ReactorResources;
+import discord4j.gateway.limiter.PayloadTransformer;
 import discord4j.gateway.payload.PayloadReader;
 import discord4j.gateway.payload.PayloadWriter;
 import discord4j.common.retry.ReconnectOptions;

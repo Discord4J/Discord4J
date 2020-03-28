@@ -22,6 +22,8 @@ import discord4j.discordjson.json.gateway.Ready;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import discord4j.common.JacksonResources;
 import discord4j.common.ReactorResources;
+import discord4j.gateway.limiter.PayloadTransformer;
+import discord4j.gateway.limiter.PoolingTransformer;
 import discord4j.gateway.payload.JacksonPayloadReader;
 import discord4j.gateway.payload.JacksonPayloadWriter;
 import discord4j.gateway.payload.PayloadReader;

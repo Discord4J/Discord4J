@@ -16,7 +16,6 @@
  */
 package discord4j.gateway;
 
-import discord4j.discordjson.json.gateway.*;
 import discord4j.common.GitProperties;
 import discord4j.common.LogUtil;
 import discord4j.common.ReactorResources;
@@ -26,7 +25,10 @@ import discord4j.common.close.CloseStatus;
 import discord4j.common.close.DisconnectBehavior;
 import discord4j.common.retry.ReconnectContext;
 import discord4j.common.retry.ReconnectOptions;
+import discord4j.discordjson.json.gateway.*;
 import discord4j.gateway.json.GatewayPayload;
+import discord4j.gateway.limiter.PayloadTransformer;
+import discord4j.gateway.limiter.PoolingTransformer;
 import discord4j.gateway.payload.PayloadReader;
 import discord4j.gateway.payload.PayloadWriter;
 import discord4j.gateway.retry.GatewayException;
@@ -40,7 +42,6 @@ import reactor.retry.Retry;
 import reactor.util.Logger;
 import reactor.util.Loggers;
 import reactor.util.context.Context;
-import reactor.util.function.Tuples;
 
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
@@ -147,15 +148,13 @@ public class DefaultGatewayClient implements GatewayClient {
                     Flux<ByteBuf> identifyFlux = outbound.filter(payload -> Opcode.IDENTIFY.equals(payload.getOp()))
                             .delayUntil(payload -> ping)
                             .flatMap(payload -> Flux.from(payloadWriter.write(payload)))
-                            .map(buf -> Tuples.of((GatewayClient) this, buf))
-                            .transform(identifyLimiter::apply);
+                            .transform(flux -> identifyLimiter.apply(flux, this::getResponseTime));
                     PayloadTransformer outLimiter = new PoolingTransformer(outboundLimiterCapacity(),
                             Duration.ofSeconds(60));
                     Flux<ByteBuf> payloadFlux = outbound.filter(payload -> !Opcode.IDENTIFY.equals(payload.getOp()))
                             .flatMap(payload -> Flux.from(payloadWriter.write(payload)))
                             .transform(buf -> Flux.merge(buf, sender))
-                            .map(buf -> Tuples.of((GatewayClient) this, buf))
-                            .transform(outLimiter::apply);
+                            .transform(flux -> outLimiter.apply(flux, this::getResponseTime));
                     Flux<ByteBuf> heartbeatFlux =
                             heartbeats.flatMap(payload -> Flux.from(payloadWriter.write(payload)));
                     Flux<ByteBuf> outFlux = Flux.merge(heartbeatFlux, identifyFlux, payloadFlux)

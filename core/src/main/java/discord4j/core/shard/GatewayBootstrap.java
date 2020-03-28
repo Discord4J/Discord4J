@@ -98,7 +98,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
 
     private ShardingStrategy shardingStrategy = ShardingStrategy.recommended();
     private boolean awaitConnections = true;
-    private ShardCoordinator shardCoordinator = new LocalShardCoordinator();
+    private ShardCoordinator shardCoordinator = LocalShardCoordinator.create();
     private EventDispatcher eventDispatcher = null;
     private StoreService storeService = null;
     private Function<StoreService, StoreService> storeServiceMapper = shardAwareStoreService();
