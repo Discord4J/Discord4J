@@ -50,7 +50,7 @@ import java.util.logging.Level;
  */
 class RequestStream<T> {
 
-    private final EmitterProcessor<RequestCorrelation<T>> backing = EmitterProcessor.create(false);
+    private final RequestQueue<RequestCorrelation<T>> requestQueue;
     private final BucketKey id;
     private final Logger log;
     private final DiscordWebClient httpClient;
@@ -61,6 +61,7 @@ class RequestStream<T> {
 
     RequestStream(BucketKey id, DiscordWebClient httpClient, GlobalRateLimiter globalRateLimiter,
                   RateLimitStrategy rateLimitStrategy, Scheduler rateLimitScheduler, RouterOptions routerOptions) {
+        this.requestQueue = routerOptions.getRequestQueueFactory().create();
         this.id = id;
         this.log = Loggers.getLogger("discord4j.rest.traces." + id);
         this.httpClient = httpClient;
@@ -127,11 +128,11 @@ class RequestStream<T> {
     }
 
     void push(RequestCorrelation<T> request) {
-        backing.onNext(request);
+        requestQueue.push(request);
     }
 
     void start() {
-        backing.subscribe(new RequestSubscriber(rateLimitStrategy));
+        requestQueue.requests().subscribe(new RequestSubscriber(rateLimitStrategy));
     }
 
     /**
