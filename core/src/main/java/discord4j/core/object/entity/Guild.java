@@ -315,7 +315,7 @@ public final class Guild implements Entity {
      * @return The preferred locale of a "PUBLIC" guild used in server discovery and notices from Discord; defaults to "en-US".
      */
     public Locale getPreferredLocale() {
-        return new Locale.Builder().setLanguageTag(data.preferredLocale()).build();
+        return new Locale.Builder().setLanguageTag(data.preferredLocale().orElse("en-US")).build();
     }
 
     /**
@@ -529,7 +529,7 @@ public final class Guild implements Entity {
      * @return If present, {@code true} if the guild is unavailable, {@code false} otherwise.
      */
     public boolean isUnavailable() {
-        return data.unavailable();
+        return data.unavailable().toOptional().orElse(false);
     }
 
     /**
