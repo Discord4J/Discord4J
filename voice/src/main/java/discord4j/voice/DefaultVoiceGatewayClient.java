@@ -55,6 +55,8 @@ import static io.netty.handler.codec.http.HttpHeaderNames.USER_AGENT;
 public class DefaultVoiceGatewayClient {
 
     private static final Logger log = Loggers.getLogger(DefaultVoiceGatewayClient.class);
+    private static final Logger senderLog = Loggers.getLogger("discord4j.voice.protocol.sender");
+    private static final Logger receiverLog = Loggers.getLogger("discord4j.voice.protocol.receiver");
 
     // reactive pipelines
     private final EmitterProcessor<ByteBuf> receiver = EmitterProcessor.create(false);
@@ -141,7 +143,7 @@ public class DefaultVoiceGatewayClient {
                     disconnectNotifier = MonoProcessor.create();
 
                     Flux<ByteBuf> outFlux = outbound.flatMap(payloadWriter)
-                            .doOnNext(buf -> logPayload(">> ", context, buf));
+                            .doOnNext(buf -> logPayload(senderLog, context, buf));
 
                     sessionHandler = new VoiceWebsocketHandler(receiverSink, outFlux, context);
 
@@ -155,7 +157,7 @@ public class DefaultVoiceGatewayClient {
 
                     Disposable.Composite innerCleanup = Disposables.composite();
 
-                    Mono<Void> receiverFuture = receiver.doOnNext(buf -> logPayload("<< ", context, buf))
+                    Mono<Void> receiverFuture = receiver.doOnNext(buf -> logPayload(receiverLog, context, buf))
                             .flatMap(payloadReader)
                             .doOnNext(payload -> {
                                 if (!allowResume.get() && payload instanceof Hello) {
@@ -282,8 +284,8 @@ public class DefaultVoiceGatewayClient {
         });
     }
 
-    private void logPayload(String prefix, Context context, ByteBuf buf) {
-        log.trace(format(context, prefix + buf.toString(StandardCharsets.UTF_8)
+    private void logPayload(Logger logger, Context context, ByteBuf buf) {
+        logger.trace(format(context, buf.toString(StandardCharsets.UTF_8)
                 .replaceAll("(\"token\": ?\")([A-Za-z0-9._-]*)(\")", "$1hunter2$3")));
     }
 

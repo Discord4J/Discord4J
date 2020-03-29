@@ -73,6 +73,8 @@ import static io.netty.handler.codec.http.HttpHeaderNames.USER_AGENT;
 public class DefaultGatewayClient implements GatewayClient {
 
     private static final Logger log = Loggers.getLogger(DefaultGatewayClient.class);
+    private static final Logger senderLog = Loggers.getLogger("discord4j.gateway.protocol.sender");
+    private static final Logger receiverLog = Loggers.getLogger("discord4j.gateway.protocol.receiver");
 
     // basic properties
     private final ReactorResources reactorResources;
@@ -158,7 +160,7 @@ public class DefaultGatewayClient implements GatewayClient {
                     Flux<ByteBuf> heartbeatFlux =
                             heartbeats.flatMap(payload -> Flux.from(payloadWriter.write(payload)));
                     Flux<ByteBuf> outFlux = Flux.merge(heartbeatFlux, identifyFlux, payloadFlux)
-                            .doOnNext(buf -> logPayload(">> ", context, buf));
+                            .doOnNext(buf -> logPayload(senderLog, context, buf));
 
                     sessionHandler = new GatewayWebsocketHandler(receiverSink, outFlux, context);
 
@@ -192,7 +194,7 @@ public class DefaultGatewayClient implements GatewayClient {
 
                     // Subscribe the receiver to process and transform the inbound payloads into Dispatch events
                     Mono<Void> receiverFuture = receiver
-                            .doOnNext(buf -> logPayload("<< ", context, buf))
+                            .doOnNext(buf -> logPayload(receiverLog, context, buf))
                             .flatMap(payloadReader::read)
                             .doOnNext(payload -> {
                                 if (Opcode.HEARTBEAT_ACK.equals(payload.getOp())) {
@@ -264,8 +266,8 @@ public class DefaultGatewayClient implements GatewayClient {
         return "DiscordBot(" + url + ", " + version + ")";
     }
 
-    private void logPayload(String prefix, Context context, ByteBuf buf) {
-        log.trace(format(context, prefix + buf.toString(StandardCharsets.UTF_8)
+    private void logPayload(Logger logger, Context context, ByteBuf buf) {
+        logger.trace(format(context, buf.toString(StandardCharsets.UTF_8)
                 .replaceAll("(\"token\": ?\")([A-Za-z0-9._-]*)(\")", "$1hunter2$3")));
     }
 

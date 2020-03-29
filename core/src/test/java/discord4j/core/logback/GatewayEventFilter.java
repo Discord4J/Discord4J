@@ -21,7 +21,6 @@ import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.turbo.TurboFilter;
 import ch.qos.logback.core.spi.FilterReply;
-import discord4j.gateway.DefaultGatewayClient;
 import org.slf4j.Marker;
 
 import java.util.Arrays;
@@ -36,7 +35,7 @@ public class GatewayEventFilter extends TurboFilter {
 
     @Override
     public FilterReply decide(Marker marker, Logger logger, Level level, String format, Object[] params, Throwable t) {
-        if (logger.getName().startsWith(DefaultGatewayClient.class.getName())) {
+        if (logger.getName().endsWith("protocol.sender") || logger.getName().endsWith("protocol.receiver")) {
             if (format != null && format.contains("\"t\"")) {
                 if (excludedEvents != null) {
                     if (excludedEvents.stream().anyMatch(format::contains)) {
