@@ -18,12 +18,13 @@
 package discord4j.gateway.limiter;
 
 import io.netty.buffer.ByteBuf;
+import org.reactivestreams.Publisher;
 
-import java.time.Duration;
+import java.util.function.Function;
 
 /**
  * A transformation function to a sequence of raw {@link ByteBuf} payloads.
  */
 @FunctionalInterface
-public interface PayloadTransformer extends SupplierTransformer<ByteBuf, Duration, ByteBuf> {
+public interface PayloadTransformer extends Function<Publisher<ByteBuf>, Publisher<ByteBuf>> {
 }

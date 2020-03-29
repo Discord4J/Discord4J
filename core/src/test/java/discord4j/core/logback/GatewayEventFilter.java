@@ -28,15 +28,19 @@ import java.util.List;
 
 public class GatewayEventFilter extends TurboFilter {
 
+    private String logger;
     private String include;
     private String exclude;
     private List<String> includedEvents;
     private List<String> excludedEvents;
 
     @Override
-    public FilterReply decide(Marker marker, Logger logger, Level level, String format, Object[] params, Throwable t) {
-        if (logger.getName().endsWith("protocol.sender") || logger.getName().endsWith("protocol.receiver")) {
-            if (format != null && format.contains("\"t\"")) {
+    public FilterReply decide(Marker marker, Logger log, Level level, String format, Object[] params,
+                              Throwable t) {
+        String logName = log.getName();
+        if (logName.equals(logger) ||
+                (logger == null && logName.endsWith("protocol.sender") || logName.endsWith("protocol.receiver"))) {
+            if (format != null) {
                 if (excludedEvents != null) {
                     if (excludedEvents.stream().anyMatch(format::contains)) {
                         return FilterReply.DENY;
@@ -49,6 +53,10 @@ public class GatewayEventFilter extends TurboFilter {
             }
         }
         return FilterReply.NEUTRAL;
+    }
+
+    public void setLogger(String logger) {
+        this.logger = logger;
     }
 
     public void setInclude(String include) {

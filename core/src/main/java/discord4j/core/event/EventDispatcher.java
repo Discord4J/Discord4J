@@ -91,9 +91,9 @@ public interface EventDispatcher {
 
     /**
      * Create an {@link EventDispatcher} that will buffer incoming events to retain all startup events as each
-     * shard connects at the cost of increased memory usage. Since this factory uses {@link EmitterProcessor}, it will
-     * only buffer events until the first subscriber. After that, late subscribers will only see events after it, so
-     * this is recommended if you have a single subscription.
+     * shard connects at the cost of increased memory usage and potential {@link OutOfMemoryError} if events are not
+     * consumed. Since this factory uses {@link EmitterProcessor}, it will only buffer events until the first
+     * subscriber.
      *
      * @return a buffering {@link EventDispatcher} backed by an {@link EmitterProcessor}
      */

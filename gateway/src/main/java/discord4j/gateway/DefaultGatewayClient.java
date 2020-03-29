@@ -23,12 +23,12 @@ import discord4j.common.ResettableInterval;
 import discord4j.common.close.CloseException;
 import discord4j.common.close.CloseStatus;
 import discord4j.common.close.DisconnectBehavior;
+import discord4j.common.operator.RateLimitOperator;
 import discord4j.common.retry.ReconnectContext;
 import discord4j.common.retry.ReconnectOptions;
 import discord4j.discordjson.json.gateway.*;
 import discord4j.gateway.json.GatewayPayload;
 import discord4j.gateway.limiter.PayloadTransformer;
-import discord4j.gateway.limiter.PoolingTransformer;
 import discord4j.gateway.payload.PayloadReader;
 import discord4j.gateway.payload.PayloadWriter;
 import discord4j.gateway.retry.GatewayException;
@@ -138,8 +138,8 @@ public class DefaultGatewayClient implements GatewayClient {
 
     @Override
     public Mono<Void> execute(String gatewayUrl) {
-        return Mono.subscriberContext()
-                .flatMap(context -> {
+        return Mono.deferWithContext(
+                context -> {
                     disconnectNotifier = MonoProcessor.create();
                     lastAck.set(0);
                     lastSent.set(0);
@@ -150,13 +150,13 @@ public class DefaultGatewayClient implements GatewayClient {
                     Flux<ByteBuf> identifyFlux = outbound.filter(payload -> Opcode.IDENTIFY.equals(payload.getOp()))
                             .delayUntil(payload -> ping)
                             .flatMap(payload -> Flux.from(payloadWriter.write(payload)))
-                            .transform(flux -> identifyLimiter.apply(flux, this::getResponseTime));
-                    PayloadTransformer outLimiter = new PoolingTransformer(outboundLimiterCapacity(),
-                            Duration.ofSeconds(60));
+                            .transform(identifyLimiter);
+                    RateLimitOperator<ByteBuf> outLimiter =
+                            new RateLimitOperator<>(outboundLimiterCapacity(), Duration.ofSeconds(60));
                     Flux<ByteBuf> payloadFlux = outbound.filter(payload -> !Opcode.IDENTIFY.equals(payload.getOp()))
                             .flatMap(payload -> Flux.from(payloadWriter.write(payload)))
                             .transform(buf -> Flux.merge(buf, sender))
-                            .transform(flux -> outLimiter.apply(flux, this::getResponseTime));
+                            .transform(outLimiter);
                     Flux<ByteBuf> heartbeatFlux =
                             heartbeats.flatMap(payload -> Flux.from(payloadWriter.write(payload)));
                     Flux<ByteBuf> outFlux = Flux.merge(heartbeatFlux, identifyFlux, payloadFlux)

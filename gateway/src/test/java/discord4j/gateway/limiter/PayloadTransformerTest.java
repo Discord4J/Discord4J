@@ -17,50 +17,75 @@
 
 package discord4j.gateway.limiter;
 
+import discord4j.common.operator.RateLimitOperator;
+import org.junit.Ignore;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 import reactor.util.Logger;
 import reactor.util.Loggers;
 
 import java.time.Duration;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class PayloadTransformerTest {
 
     private static final Logger log = Loggers.getLogger(PayloadTransformerTest.class);
 
-    private final Map<Integer, BucketPoolTransformer<String>> limiters = new ConcurrentHashMap<>(1);
-
     @Test
+    @Ignore
     public void testIdentifySequence() {
-        int factor = 1;
+        final int factor = 1;
+        final Map<Integer, RateLimitOperator<String>> limiters = new ConcurrentHashMap<>(factor);
+        final Map<Integer, AtomicLong> lastIdentify = new ConcurrentHashMap<>(factor);
 
-        Flux<Integer> connections = Flux.range(0, factor * 50)
+        Flux<Integer> connections = Flux.range(0, factor * 8)
                 .groupBy(shard -> shard % factor)
-                .flatMap(group -> group.concatMap(index -> acquire(index, getIdentifyLimiter(index, factor))));
+                .flatMap(group -> group.concatMap(index -> {
+                    RateLimitOperator<String> limiter = limiters.computeIfAbsent(index % factor,
+                            k -> new RateLimitOperator<>(1, Duration.ofSeconds(5)));
+                    AtomicLong lastIdentifyAt = lastIdentify.computeIfAbsent(index % factor,
+                            k -> new AtomicLong(0));
+
+                    return Flux.just("identify: " + index)
+                            .transform(limiter)
+                            .doOnNext(it -> {
+                                long now = System.nanoTime();
+                                if (Duration.ofNanos(lastIdentifyAt.get()).plusSeconds(5).toNanos() > now) {
+                                    log.warn("OP 9 !!! identified too quickly");
+                                }
+                                log.info(">> {}", it);
+                                lastIdentifyAt.set(now);
+                            })
+                            .then()
+                            .thenReturn(index);
+                }));
 
         connections.blockLast();
-
     }
 
-    public BucketPoolTransformer<String> getIdentifyLimiter(int index, int shardingFactor) {
-        return limiters.computeIfAbsent(index % shardingFactor,
-                k -> new BucketPoolTransformer<>(1, Duration.ofSeconds(6)));
+    @Test
+    @Ignore
+    public void testIdentifyLimiter() {
+        RateLimitOperator<Integer> limiter = new RateLimitOperator<>(1, Duration.ofSeconds(5));
+
+        Flux<Integer> outbound = Flux.range(0, 10)
+                .transform(limiter)
+                .doOnNext(value -> log.info(">> {}", value));
+
+        outbound.blockLast();
     }
 
-    private Mono<Integer> acquire(Integer index, BucketPoolTransformer<String> limiter) {
-        return Mono.deferWithContext(ctx -> {
-            log.info("{}", index);
+    @Test
+    @Ignore
+    public void testOutboundLimiter() {
+        RateLimitOperator<Integer> limiter = new RateLimitOperator<>(120, Duration.ofMinutes(1));
 
-            Flux<String> identify = Flux.just("identify")
-                    .transform(seq -> limiter.apply(seq, () -> Duration.ZERO));
+        Flux<Integer> outbound = Flux.range(0, 200)
+                .transform(limiter)
+                .doOnNext(value -> log.info(">> {}", value));
 
-            return identify.doOnNext(it -> log.info(">> {}", it))
-                    .flatMap(res -> Mono.delay(Duration.ofSeconds(5)))
-                    .then()
-                    .thenReturn(index);
-        });
+        outbound.blockLast();
     }
 }

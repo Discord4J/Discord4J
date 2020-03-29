@@ -3,17 +3,20 @@
     <logger name="io.netty" level="INFO"/>
     <logger name="io.lettuce" level="INFO"/>
     <logger name="reactor" level="INFO"/>
-    <logger name="reactor.netty" level="DEBUG"/>
+<!--    <logger name="reactor.netty" level="DEBUG"/>-->
     <logger name="reactor.retry" level="INFO"/>
 
-    <logger name="discord4j.core" level="DEBUG"/>
-    <logger name="discord4j.gateway.DefaultGatewayClient" level="TRACE"/>
+    <logger name="discord4j.core" level="INFO"/>
+    <logger name="discord4j.gateway.protocol.sender" level="TRACE"/>
+    <logger name="discord4j.gateway.protocol.receiver" level="TRACE"/>
     <logger name="discord4j.rest.http.client.DiscordWebClient" level="INFO"/>
     <logger name="discord4j.rest.request" level="DEBUG"/>
     <!--<logger name="discord4j.rest.http" level="TRACE"/>-->
 
     <turboFilter class="discord4j.core.logback.GatewayEventFilter">
-        <Exclude>PRESENCE_UPDATE</Exclude>
+        <Logger>discord4j.gateway.protocol.receiver</Logger>
+        <Include>"t":"READY"</Include>
+        <Include>"op":9</Include>
     </turboFilter>
 
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">

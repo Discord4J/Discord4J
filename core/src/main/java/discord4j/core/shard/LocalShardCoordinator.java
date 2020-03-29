@@ -17,10 +17,10 @@
 
 package discord4j.core.shard;
 
-import discord4j.gateway.limiter.PayloadTransformer;
-import discord4j.gateway.limiter.PoolingTransformer;
 import discord4j.gateway.SessionInfo;
 import discord4j.gateway.ShardInfo;
+import discord4j.gateway.limiter.PayloadTransformer;
+import discord4j.gateway.limiter.RateLimitTransformer;
 import reactor.core.publisher.Mono;
 
 import java.time.Duration;
@@ -34,6 +34,9 @@ import java.util.function.Supplier;
  */
 public class LocalShardCoordinator implements ShardCoordinator {
 
+    public static final Supplier<PayloadTransformer> DEFAULT_IDENTIFY_LIMITER_FACTORY =
+            () -> new RateLimitTransformer(1, Duration.ofSeconds(6));
+
     private final Map<Integer, PayloadTransformer> limiters = new ConcurrentHashMap<>(1);
     private final Supplier<PayloadTransformer> identifyLimiterFactory;
 
@@ -45,7 +48,7 @@ public class LocalShardCoordinator implements ShardCoordinator {
      */
     @Deprecated
     public LocalShardCoordinator() {
-        this(() -> new PoolingTransformer(1, Duration.ofSeconds(6)));
+        this(DEFAULT_IDENTIFY_LIMITER_FACTORY);
     }
 
     private LocalShardCoordinator(Supplier<PayloadTransformer> identifyLimiterFactory) {
@@ -57,7 +60,7 @@ public class LocalShardCoordinator implements ShardCoordinator {
      * JVM instance.
      */
     public static LocalShardCoordinator create() {
-        return new LocalShardCoordinator(() -> new PoolingTransformer(1, Duration.ofSeconds(6)));
+        return new LocalShardCoordinator(DEFAULT_IDENTIFY_LIMITER_FACTORY);
     }
 
     /**

@@ -240,7 +240,7 @@ public class RestClientBuilder<C, O extends RouterOptions> {
         if (globalRateLimiter != null) {
             return globalRateLimiter;
         }
-        return new ParallelGlobalRateLimiter(16);
+        return BucketGlobalRateLimiter.create();
     }
 
     protected static class Config {

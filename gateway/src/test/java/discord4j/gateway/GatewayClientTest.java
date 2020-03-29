@@ -23,7 +23,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import discord4j.common.JacksonResources;
 import discord4j.common.ReactorResources;
 import discord4j.gateway.limiter.PayloadTransformer;
-import discord4j.gateway.limiter.PoolingTransformer;
+import discord4j.gateway.limiter.RateLimitTransformer;
 import discord4j.gateway.payload.JacksonPayloadReader;
 import discord4j.gateway.payload.JacksonPayloadWriter;
 import discord4j.gateway.payload.PayloadReader;
@@ -62,7 +62,7 @@ public class GatewayClientTest {
                 reconnectOptions,
                 new IdentifyOptions(new ShardInfo(0, 1), null, true),
                 GatewayObserver.NOOP_LISTENER,
-                new PoolingTransformer(1, Duration.ofSeconds(6))
+                new RateLimitTransformer(1, Duration.ofSeconds(6))
         );
         GatewayClient gatewayClient = new DefaultGatewayClient(gatewayOptions);
         gatewayClient.dispatch().subscribe(dispatch -> {
@@ -112,7 +112,7 @@ public class GatewayClientTest {
         CountDownLatch exit = new CountDownLatch(shardCount);
 
         // we must share the PayloadTransformer across shards to coordinate IDENTIFY requests
-        PayloadTransformer transformer = new PoolingTransformer(1, Duration.ofSeconds(6));
+        PayloadTransformer transformer = new RateLimitTransformer(1, Duration.ofSeconds(6));
         for (int i = 0; i < shardCount; i++) {
             CountDownLatch next = new CountDownLatch(1);
             ReconnectOptions reconnectOptions = ReconnectOptions.create();

@@ -578,11 +578,11 @@ public class GatewayDiscordClient {
     }
 
     /**
-     * Disconnects this {@link GatewayDiscordClient} from Discord upon subscribing. All joining {@link GatewayClient
-     * GatewayClients} will attempt to gracefully close and complete this {@link Mono} after all of them have
-     * disconnected.
+     * Disconnects this {@link GatewayDiscordClient} from Discord upon subscribing. All {@link GatewayClient}
+     * instances in this shard group will attempt to close their current Gateway session and complete this
+     * {@link Mono} after all of them have disconnected.
      *
-     * @return A {@link Mono} that upon subscription, will disconnect each connection established by this
+     * @return A {@link Mono} that upon subscription, will disconnect each Gateway connection established by this
      * {@link GatewayDiscordClient} and complete after all of them have closed.
      */
     public Mono<Void> logout() {
@@ -590,11 +590,11 @@ public class GatewayDiscordClient {
     }
 
     /**
-     * Return a {@link Mono} that signals completion when all joining {@link GatewayClient GatewayClients} have
+     * Return a {@link Mono} that signals completion when all {@link GatewayClient} instances in this shard group have
      * disconnected.
      *
-     * @return a {@link Mono} that will complete once all {@link GatewayClient} instances connected to this
-     * {@link GatewayDiscordClient} have disconnected.
+     * @return a {@link Mono} that will complete once all {@link GatewayClient} instances in this shard group have
+     * disconnected.
      */
     public Mono<Void> onDisconnect() {
         return closeProcessor;

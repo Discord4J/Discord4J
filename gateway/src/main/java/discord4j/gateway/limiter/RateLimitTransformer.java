@@ -17,24 +17,28 @@
 
 package discord4j.gateway.limiter;
 
-import discord4j.gateway.limiter.BucketPool;
-import discord4j.gateway.limiter.SupplierTransformer;
+import discord4j.common.operator.RateLimitOperator;
+import io.netty.buffer.ByteBuf;
 import org.reactivestreams.Publisher;
-import reactor.core.publisher.Flux;
+import reactor.core.scheduler.Scheduler;
+import reactor.core.scheduler.Schedulers;
 
 import java.time.Duration;
-import java.util.function.Supplier;
 
-public class BucketPoolTransformer<T> implements SupplierTransformer<T, Duration, T> {
+public class RateLimitTransformer implements PayloadTransformer {
 
-    private final BucketPool pool;
+    private final RateLimitOperator<ByteBuf> operator;
 
-    public BucketPoolTransformer(int capacity, Duration refillPeriod) {
-        this.pool = new BucketPool(capacity, refillPeriod);
+    public RateLimitTransformer(int capacity, Duration refillPeriod) {
+        this(capacity, refillPeriod, Schedulers.parallel());
+    }
+
+    public RateLimitTransformer(int capacity, Duration refillPeriod, Scheduler delayScheduler) {
+        this.operator = new RateLimitOperator<>(capacity, refillPeriod, delayScheduler);
     }
 
     @Override
-    public Publisher<T> apply(Flux<T> sequence, Supplier<Duration> supplier) {
-        return sequence.flatMap(t2 -> this.pool.acquire(supplier.get()).thenReturn(t2));
+    public Publisher<ByteBuf> apply(Publisher<ByteBuf> sequence) {
+        return operator.apply(sequence);
     }
 }
