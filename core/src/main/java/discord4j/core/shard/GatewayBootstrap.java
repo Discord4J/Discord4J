@@ -287,10 +287,19 @@ public class GatewayBootstrap<O extends GatewayOptions> {
     }
 
     /**
-     * Set a {@link Function} to determine the {@link Presence} that each joining shard should use when identifying
-     * to the Gateway. Defaults to no presence given.
+     * Set a {@link Function} to determine the {@link StatusUpdate} that each joining shard should use when identifying
+     * to the Gateway. Defaults to no status given.
+     * <p>
+     * {@link StatusUpdate} instances can be built through factories in {@link Presence}:
+     * <ul>
+     *     <li>{@link Presence#online()} and {@link Presence#online(ActivityUpdateRequest)}</li>
+     *     <li>{@link Presence#idle()} and {@link Presence#idle(ActivityUpdateRequest)}</li>
+     *     <li>{@link Presence#doNotDisturb()} and {@link Presence#doNotDisturb(ActivityUpdateRequest)}</li>
+     *     <li>{@link Presence#invisible()}</li>
+     * </ul>
      *
-     * @param initialPresence a {@link Function} that supplies {@link Presence} instances from a given {@link ShardInfo}
+     * @param initialPresence a {@link Function} that supplies {@link StatusUpdate} instances from a given
+     * {@link ShardInfo}
      * @return this builder
      * @deprecated use {@link #setInitialStatus(Function)}
      */
@@ -303,6 +312,14 @@ public class GatewayBootstrap<O extends GatewayOptions> {
     /**
      * Set a {@link Function} to determine the {@link StatusUpdate} that each joining shard should use when identifying
      * to the Gateway. Defaults to no status given.
+     * <p>
+     * {@link StatusUpdate} instances can be built through factories in {@link Presence}:
+     * <ul>
+     *     <li>{@link Presence#online()} and {@link Presence#online(ActivityUpdateRequest)}</li>
+     *     <li>{@link Presence#idle()} and {@link Presence#idle(ActivityUpdateRequest)}</li>
+     *     <li>{@link Presence#doNotDisturb()} and {@link Presence#doNotDisturb(ActivityUpdateRequest)}</li>
+     *     <li>{@link Presence#invisible()}</li>
+     * </ul>
      *
      * @param initialStatus a {@link Function} that supplies {@link StatusUpdate} instances from a given
      * {@link ShardInfo}

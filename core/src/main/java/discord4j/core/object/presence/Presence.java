@@ -30,11 +30,24 @@ import java.util.stream.Collectors;
 
 /**
  * Presence is the current state of a user on a guild.
+ * <p>
+ * Factories exist to build an {@link StatusUpdate} object to update the bot's status:
+ * <ul>
+ *     <li>{@link Presence#online()} and {@link Presence#online(ActivityUpdateRequest)}</li>
+ *     <li>{@link Presence#idle()} and {@link Presence#idle(ActivityUpdateRequest)}</li>
+ *     <li>{@link Presence#doNotDisturb()} and {@link Presence#doNotDisturb(ActivityUpdateRequest)}</li>
+ *     <li>{@link Presence#invisible()}</li>
+ * </ul>
  *
  * @see <a href="https://discordapp.com/developers/docs/topics/gateway#presence">Presence</a>
  */
 public final class Presence {
 
+    /**
+     * Create a status update to display an online status.
+     *
+     * @return a {@link StatusUpdate} for the ONLINE status
+     */
     public static StatusUpdate online() {
         return ImmutableStatusUpdate.builder()
                 .status(Status.ONLINE.getValue())
@@ -44,6 +57,12 @@ public final class Presence {
                 .build();
     }
 
+    /**
+     * Create a status update to display an online status along with a custom activity. Refer to
+     * {@link ImmutableActivityUpdateRequest} to create one.
+     *
+     * @return a {@link StatusUpdate} for the ONLINE status
+     */
     public static StatusUpdate online(ActivityUpdateRequest activity) {
         return ImmutableStatusUpdate.builder()
                 .status(Status.ONLINE.getValue())
@@ -53,6 +72,11 @@ public final class Presence {
                 .build();
     }
 
+    /**
+     * Create a status update to display a do-not-disturb status.
+     *
+     * @return a {@link StatusUpdate} for the DO_NOT_DISTURB status
+     */
     public static StatusUpdate doNotDisturb() {
         return ImmutableStatusUpdate.builder()
                 .status(Status.DO_NOT_DISTURB.getValue())
@@ -62,6 +86,12 @@ public final class Presence {
                 .build();
     }
 
+    /**
+     * Create a status update to display a do-not-disturb status along with a custom activity. Refer to
+     * {@link ImmutableActivityUpdateRequest} to create one.
+     *
+     * @return a {@link StatusUpdate} for the DO_NOT_DISTURB status
+     */
     public static StatusUpdate doNotDisturb(ActivityUpdateRequest activity) {
         return ImmutableStatusUpdate.builder()
                 .status(Status.DO_NOT_DISTURB.getValue())
@@ -71,6 +101,11 @@ public final class Presence {
                 .build();
     }
 
+    /**
+     * Create a status update to display an idle status.
+     *
+     * @return a {@link StatusUpdate} for the IDLE status
+     */
     public static StatusUpdate idle() {
         return ImmutableStatusUpdate.builder()
                 .status(Status.IDLE.getValue())
@@ -80,6 +115,12 @@ public final class Presence {
                 .build();
     }
 
+    /**
+     * Create a status update to display an idle status along with a custom activity. Refer to
+     * {@link ImmutableActivityUpdateRequest} to create one.
+     *
+     * @return a {@link StatusUpdate} for the IDLE status
+     */
     public static StatusUpdate idle(ActivityUpdateRequest activity) {
         return ImmutableStatusUpdate.builder()
                 .status(Status.IDLE.getValue())
@@ -89,6 +130,11 @@ public final class Presence {
                 .build();
     }
 
+    /**
+     * Create a status update to display an invisible status.
+     *
+     * @return a {@link StatusUpdate} for the INVISIBLE status
+     */
     public static StatusUpdate invisible() {
         return ImmutableStatusUpdate.builder()
                 .status(Status.INVISIBLE.getValue())
@@ -105,7 +151,7 @@ public final class Presence {
     }
 
     /**
-     * Gets the user's status.
+     * Get the user's status.
      *
      * @return The user's status.
      */
@@ -113,6 +159,12 @@ public final class Presence {
         return Status.of(data.status());
     }
 
+    /**
+     * Get the user's status for the given platform, if present.
+     *
+     * @param platform the platform to obtain a user status
+     * @return an {@link Optional} with the user's status for a given platform, or empty if not present.
+     */
     public Optional<Status> getStatus(Status.Platform platform) {
         switch (platform) {
             case DESKTOP: return data.clientStatus().desktop().toOptional().map(Status::of);
@@ -122,12 +174,17 @@ public final class Presence {
         }
     }
 
+    /**
+     * Get a user's current activity, if present.
+     *
+     * @return an {@link Optional} with the user's activity, or empty if not present.
+     */
     public Optional<Activity> getActivity() {
         return data.activities().stream().map(Activity::new).findFirst();
     }
 
     /**
-     * Gets the user's current activities.
+     * Get the user's current activities.
      *
      * @return The user's current activities.
      */
@@ -135,6 +192,11 @@ public final class Presence {
         return data.activities().stream().map(Activity::new).collect(Collectors.toList());
     }
 
+    /**
+     * Convert a received {@link Presence} into a {@link StatusUpdate} that can be used for sending an update.
+     *
+     * @return a {@link StatusUpdate} with the contents of the current {@link Presence} data.
+     */
     public StatusUpdate asStatusUpdate() {
         return ImmutableStatusUpdate.builder()
                 .status(data.status())
