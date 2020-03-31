@@ -20,12 +20,15 @@ package discord4j.rest.request;
 import discord4j.common.annotations.Experimental;
 import discord4j.rest.response.ResponseFunction;
 import discord4j.rest.route.Route;
+import reactor.core.publisher.FluxSink;
+import reactor.core.publisher.EmitterProcessor;
 import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
 import reactor.util.annotation.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 
 /**
  * Options used to control the behavior of a {@link Router}.
@@ -46,12 +49,16 @@ public class RouterOptions {
      * The default number of router requests allowed in parallel.
      */
     public static final int DEFAULT_REQUEST_PARALLELISM = 8;
+    
+    public static final RequestQueueFactory DEFAULT_REQUEST_QUEUE_FACTORY = RequestQueueFactory
+            .backedByProcessor(() -> EmitterProcessor.create(false), FluxSink.OverflowStrategy.BUFFER);
 
     private final Scheduler responseScheduler;
     private final Scheduler rateLimitScheduler;
     private final List<ResponseFunction> responseTransformers;
     private final int requestParallelism;
     private final GlobalRateLimiter globalRateLimiter;
+    private final RequestQueueFactory requestQueueFactory;
 
     protected RouterOptions(Builder builder) {
         this.responseScheduler = builder.responseScheduler;
@@ -64,6 +71,7 @@ public class RouterOptions {
             this.requestParallelism = builder.requestParallelism;
             this.globalRateLimiter = new SemaphoreGlobalRateLimiter(builder.requestParallelism);
         }
+        this.requestQueueFactory = builder.requestQueueFactory;
     }
 
     /**
@@ -96,6 +104,7 @@ public class RouterOptions {
         private int requestParallelism = DEFAULT_REQUEST_PARALLELISM;
         @Nullable
         private GlobalRateLimiter globalRateLimiter;
+        private RequestQueueFactory requestQueueFactory = DEFAULT_REQUEST_QUEUE_FACTORY;
 
         protected Builder() {
         }
@@ -186,6 +195,23 @@ public class RouterOptions {
         }
 
         /**
+         * Sets the {@link RequestQueueFactory} that will provide {@link RequestQueue} instances for the router.
+         *
+         * <p>
+         * If not set, it will use a {@link RequestQueueFactory} providing request queues backed by an
+         * {@link EmitterProcessor} with buffering overflow strategy.
+         * </p>
+         *
+         * @param requestQueueFactory the factory that will provide {@link RequestQueue} instances for the router
+         * @return this builder
+         * @see RequestQueueFactory#backedByProcessor(Supplier, FluxSink.OverflowStrategy)
+         */
+        public Builder requestQueueFactory(RequestQueueFactory requestQueueFactory) {
+            this.requestQueueFactory = requestQueueFactory;
+            return this;
+        }
+
+        /**
          * Creates the {@link RouterOptions} object.
          *
          * @return the resulting {@link RouterOptions}
@@ -244,5 +270,14 @@ public class RouterOptions {
      */
     public GlobalRateLimiter getGlobalRateLimiter() {
         return globalRateLimiter;
+    }
+
+    /**
+     * Returns the {@link RequestQueueFactory} to use for creating {@link RequestQueue} instances.
+     *
+     * @return the configured {@link RequestQueueFactory}
+     */
+    public RequestQueueFactory getRequestQueueFactory() {
+        return requestQueueFactory;
     }
 }
