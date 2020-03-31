@@ -23,6 +23,8 @@ import reactor.netty.http.client.HttpClient;
 import reactor.netty.resources.ConnectionProvider;
 import reactor.netty.resources.LoopResources;
 
+import java.util.Objects;
+
 /**
  * Provides Reactor Netty resources like an {@link HttpClient} and {@link Scheduler} instances that can be customized
  * and reused across the application.
@@ -56,6 +58,70 @@ public class ReactorResources {
         this.httpClient = httpClient;
         this.timerTaskScheduler = timerTaskScheduler;
         this.blockingTaskScheduler = blockingTaskScheduler;
+    }
+
+    protected ReactorResources(Builder builder) {
+        this.httpClient = Objects.requireNonNull(builder.httpClient, "httpClient");
+        this.timerTaskScheduler = Objects.requireNonNull(builder.timerTaskScheduler, "timerTaskScheduler");
+        this.blockingTaskScheduler = Objects.requireNonNull(builder.blockingTaskScheduler, "blockingTaskScheduler");
+    }
+
+    public static ReactorResources create() {
+        return new Builder().build();
+    }
+
+    public static ReactorResources.Builder builder() {
+        return new Builder();
+    }
+
+    public static class Builder {
+
+        private HttpClient httpClient = HttpClient.create().compress(true).followRedirect(true);
+        private Scheduler timerTaskScheduler = Schedulers.parallel();
+        private Scheduler blockingTaskScheduler = Schedulers.boundedElastic();
+
+        protected Builder() {
+        }
+
+        /**
+         * Sets the underlying {@link HttpClient} to use.
+         *
+         * @return This builder, for chaining.
+         */
+        public Builder httpClient(HttpClient httpClient) {
+            this.httpClient = httpClient;
+            return this;
+        }
+
+        /**
+         * Sets the time-capable {@link Scheduler} to use.
+         *
+         * @return This builder, for chaining.
+         */
+        public Builder timerTaskScheduler(Scheduler timerTaskScheduler) {
+            this.timerTaskScheduler = timerTaskScheduler;
+            return this;
+        }
+
+        /**
+         * Sets the {@link Scheduler} to use for potentially blocking tasks.
+         *
+         * @return This builder, for chaining.
+         */
+        public Builder blockingTaskScheduler(Scheduler blockingTaskScheduler) {
+            this.blockingTaskScheduler = blockingTaskScheduler;
+            return this;
+        }
+
+        /**
+         * Create the {@link ReactorResources}.
+         *
+         * @return A custom {@link ReactorResources}.
+         */
+        public ReactorResources build() {
+            return new ReactorResources(this);
+        }
+
     }
 
     /**
