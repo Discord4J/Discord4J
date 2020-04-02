@@ -22,6 +22,7 @@ import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Role;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.GuildChannel;
+import discord4j.core.retriever.EntityRetrievalStrategy;
 import discord4j.rest.util.Snowflake;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
@@ -76,6 +77,19 @@ public final class ExtendedPermissionOverwrite extends PermissionOverwrite imple
     }
 
     /**
+     * Requests to retrieve the role this overwrite is associated to, if present, using the given retrieval strategy.
+     *
+     * @param retrievalStrategy the strategy to use to get the role
+     * @return A {@link Mono} where, upon successful completion, emits the {@link Role} this overwrite is associated to,
+     * if present. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Role> getRole(EntityRetrievalStrategy retrievalStrategy) {
+        return Mono.justOrEmpty(getRoleId())
+                .flatMap(id -> gateway.withRetrievalStrategy(retrievalStrategy)
+                        .getRoleById(getGuildId(), id));
+    }
+
+    /**
      * Requests to retrieve the user this overwrite is associated to, if present.
      *
      * @return A {@link Mono} where, upon successful completion, emits the {@link User} this overwrite is associated to,
@@ -83,6 +97,18 @@ public final class ExtendedPermissionOverwrite extends PermissionOverwrite imple
      */
     public Mono<User> getUser() {
         return Mono.justOrEmpty(getMemberId()).flatMap(gateway::getUserById);
+    }
+
+    /**
+     * Requests to retrieve the user this overwrite is associated to, if present, using the given retrieval strategy.
+     *
+     * @param retrievalStrategy the strategy to use to get the user
+     * @return A {@link Mono} where, upon successful completion, emits the {@link User} this overwrite is associated to,
+     * if present. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<User> getUser(EntityRetrievalStrategy retrievalStrategy) {
+        return Mono.justOrEmpty(getMemberId())
+                .flatMap(id -> gateway.withRetrievalStrategy(retrievalStrategy).getUserById(id));
     }
 
     /**
@@ -105,6 +131,17 @@ public final class ExtendedPermissionOverwrite extends PermissionOverwrite imple
     }
 
     /**
+     * Requests to retrieve the guild associated to this overwrite, using the given retrieval strategy.
+     *
+     * @param retrievalStrategy the strategy to use to get the guild
+     * @return A {@link Mono} where, upon successful completion, emits the {@link Guild} associated to this overwrite.
+     * If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Guild> getGuild(EntityRetrievalStrategy retrievalStrategy) {
+        return gateway.withRetrievalStrategy(retrievalStrategy).getGuildById(getGuildId());
+    }
+
+    /**
      * Gets the ID of the channel associated to this overwrite.
      *
      * @return The ID of the channel associated to this overwrite.
@@ -121,6 +158,19 @@ public final class ExtendedPermissionOverwrite extends PermissionOverwrite imple
      */
     public Mono<GuildChannel> getChannel() {
         return gateway.getChannelById(getChannelId()).cast(GuildChannel.class);
+    }
+
+    /**
+     * Requests to retrieve the channel associated to this overwrite, using the given retrieval strategy.
+     *
+     * @param retrievalStrategy the strategy to use to get the channel
+     * @return A {@link Mono} where, upon successful completion, emits the {@link GuildChannel} associated to this
+     * overwrite. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<GuildChannel> getChannel(EntityRetrievalStrategy retrievalStrategy) {
+        return gateway.withRetrievalStrategy(retrievalStrategy)
+                .getChannelById(getChannelId())
+                .cast(GuildChannel.class);
     }
 
     /**

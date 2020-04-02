@@ -22,6 +22,7 @@ import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.VoiceChannel;
+import discord4j.core.retriever.EntityRetrievalStrategy;
 import discord4j.rest.util.Snowflake;
 import reactor.core.publisher.Mono;
 
@@ -78,6 +79,17 @@ public final class VoiceState implements DiscordObject {
     }
 
     /**
+     * Requests to retrieve the guild this voice state is for, using the given retrieval strategy.
+     *
+     * @param retrievalStrategy the strategy to use to get the guild
+     * @return A {@link Mono} where, upon successful completion, emits the {@link Guild} this voice state is for. If an
+     * error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Guild> getGuild(EntityRetrievalStrategy retrievalStrategy) {
+        return gateway.withRetrievalStrategy(retrievalStrategy).getGuildById(getGuildId());
+    }
+
+    /**
      * Gets the channel ID this user is connected to, if present.
      *
      * @return The channel ID this user is connected to, if present.
@@ -94,6 +106,19 @@ public final class VoiceState implements DiscordObject {
      */
     public Mono<VoiceChannel> getChannel() {
         return Mono.justOrEmpty(getChannelId()).flatMap(gateway::getChannelById).cast(VoiceChannel.class);
+    }
+
+    /**
+     * Requests to retrieve the channel this user is connected to, if present, using the given retrieval strategy.
+     *
+     * @param retrievalStrategy the strategy to use to get the channel
+     * @return A {@link Mono} where, upon successful completion, emits the {@link VoiceChannel} this user is connected
+     * to, if present. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<VoiceChannel> getChannel(EntityRetrievalStrategy retrievalStrategy) {
+        return Mono.justOrEmpty(getChannelId())
+                .flatMap(id -> gateway.withRetrievalStrategy(retrievalStrategy).getChannelById(id))
+                .cast(VoiceChannel.class);
     }
 
     /**
@@ -116,6 +141,17 @@ public final class VoiceState implements DiscordObject {
     }
 
     /**
+     * Requests to retrieve the user this voice state is for, using the given retrieval strategy.
+     *
+     * @param retrievalStrategy the strategy to use to get the user
+     * @return A {@link Mono} where, upon successful completion, emits the {@link User} this voice state is for. If an
+     * error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<User> getUser(EntityRetrievalStrategy retrievalStrategy) {
+        return gateway.withRetrievalStrategy(retrievalStrategy).getUserById(getUserId());
+    }
+
+    /**
      * Requests to retrieve the member this voice state is for.
      *
      * @return A {@link Mono} where, upon successful completion, emits the {@link Member} this voice state is for. If an
@@ -123,6 +159,17 @@ public final class VoiceState implements DiscordObject {
      */
     public Mono<Member> getMember() {
         return gateway.getMemberById(getGuildId(), getUserId());
+    }
+
+    /**
+     * Requests to retrieve the member this voice state is for, using the given retrieval strategy.
+     *
+     * @param retrievalStrategy the strategy to use to get the member
+     * @return A {@link Mono} where, upon successful completion, emits the {@link Member} this voice state is for. If an
+     * error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Member> getMember(EntityRetrievalStrategy retrievalStrategy) {
+        return gateway.withRetrievalStrategy(retrievalStrategy).getMemberById(getGuildId(), getUserId());
     }
 
     /**

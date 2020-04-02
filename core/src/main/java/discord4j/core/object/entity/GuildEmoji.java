@@ -17,6 +17,7 @@
 package discord4j.core.object.entity;
 
 import discord4j.core.GatewayDiscordClient;
+import discord4j.core.retriever.EntityRetrievalStrategy;
 import discord4j.rest.util.Image;
 import discord4j.rest.util.Snowflake;
 import discord4j.core.spec.GuildEmojiEditSpec;
@@ -113,7 +114,22 @@ public final class GuildEmoji implements Entity {
     }
 
     /**
-     * Requests to retrieve the user that created this emoji.
+     * Requests to retrieve the roles this emoji is whitelisted to, using the given retrieval strategy.
+     * <p>
+     * The order of items emitted by the returned {@code Flux} is unspecified. Use {@link OrderUtil#orderRoles(Flux)}
+     * to consistently order roles.
+     *
+     * @param retrievalStrategy the strategy to use to get the roles
+     * @return A {@link Flux} that continually emits the {@link Role roles} this emoji is whitelisted for. if an error
+     * is received, it is emitted through the {@code Flux}.
+     */
+    public Flux<Role> getRoles(EntityRetrievalStrategy retrievalStrategy) {
+        return Flux.fromIterable(getRoleIds())
+                .flatMap(id -> gateway.withRetrievalStrategy(retrievalStrategy).getRoleById(getGuildId(), id));
+    }
+
+    /**
+     * Requests to retrieve the user that created this emoji. This method will always hit the REST API.
      *
      * @return A {@link Mono} where, upon successful completion, emits the {@link User user} that created this emoji. If
      * an error is received, it is emitted through the {@code Mono}.
@@ -168,6 +184,17 @@ public final class GuildEmoji implements Entity {
      */
     public Mono<Guild> getGuild() {
         return gateway.getGuildById(getGuildId());
+    }
+
+    /**
+     * Requests to retrieve the guild this emoji is associated to, using the given retrieval strategy.
+     *
+     * @param retrievalStrategy the strategy to use to get the guild
+     * @return A {@link Mono} where, upon successful completion, emits the {@link Guild guild} this emoji is associated
+     * to. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Guild> getGuild(EntityRetrievalStrategy retrievalStrategy) {
+        return gateway.withRetrievalStrategy(retrievalStrategy).getGuildById(getGuildId());
     }
 
     /**

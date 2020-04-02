@@ -19,6 +19,7 @@ package discord4j.core.object.entity.channel;
 import discord4j.core.object.ExtendedPermissionOverwrite;
 import discord4j.core.object.PermissionOverwrite;
 import discord4j.core.object.entity.Guild;
+import discord4j.core.retriever.EntityRetrievalStrategy;
 import discord4j.rest.util.PermissionSet;
 import discord4j.rest.util.Snowflake;
 import discord4j.core.util.OrderUtil;
@@ -45,6 +46,15 @@ public interface GuildChannel extends Channel {
      * associated to. If an error is received, it is emitted through the {@code Mono}.
      */
     Mono<Guild> getGuild();
+
+    /**
+     * Requests to retrieve the guild this channel is associated to, using the given retrieval strategy.
+     *
+     * @param retrievalStrategy the strategy to use to get the guild
+     * @return A {@link Mono} where, upon successful completion, emits the {@link Guild guild} this channel is
+     * associated to. If an error is received, it is emitted through the {@code Mono}.
+     */
+    Mono<Guild> getGuild(EntityRetrievalStrategy retrievalStrategy);
 
     /**
      * Gets the permission overwrites for this channel.

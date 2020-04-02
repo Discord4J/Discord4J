@@ -19,6 +19,7 @@ package discord4j.core.object.entity;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.VoiceState;
 import discord4j.core.object.presence.Presence;
+import discord4j.core.retriever.EntityRetrievalStrategy;
 import discord4j.discordjson.possible.Possible;
 import discord4j.rest.util.PermissionSet;
 import discord4j.rest.util.Snowflake;
@@ -105,6 +106,21 @@ public final class Member extends User {
     }
 
     /**
+     * Requests to retrieve the user's guild roles, using the given retrieval strategy.
+     * <p>
+     * The order of items emitted by the returned {@code Flux} is unspecified. Use {@link OrderUtil#orderRoles(Flux)}
+     * to consistently order roles.
+     *
+     * @param retrievalStrategy the strategy to use to get the roles
+     * @return A {@link Flux} that continually emits the user's guild {@link Role roles}. If an error is received, it is
+     * emitted through the {@code Flux}.
+     */
+    public Flux<Role> getRoles(EntityRetrievalStrategy retrievalStrategy) {
+        return Flux.fromIterable(getRoleIds())
+                .flatMap(id -> getClient().withRetrievalStrategy(retrievalStrategy).getRoleById(getGuildId(), id));
+    }
+
+    /**
      * Requests to retrieve the user's highest guild role.
      * <p>
      * The highest role is defined to be the role with the highest position, based on Discord's ordering. This is the
@@ -115,6 +131,22 @@ public final class Member extends User {
      */
     public Mono<Role> getHighestRole() {
         return MathFlux.max(Flux.fromIterable(getRoleIds()).flatMap(id -> getClient().getRoleById(getGuildId(), id)),
+                            OrderUtil.ROLE_ORDER);
+    }
+
+    /**
+     * Requests to retrieve the user's highest guild role, using the given retrieval strategy.
+     * <p>
+     * The highest role is defined to be the role with the highest position, based on Discord's ordering. This is the
+     * role that appears at the <b>top</b> in Discord's UI.
+     *
+     * @param retrievalStrategy the strategy to use to get the highest role
+     * @return A {@link Mono} where, upon successful completion, emits the user's highest {@link Role role}. If an error
+     * is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Role> getHighestRole(EntityRetrievalStrategy retrievalStrategy) {
+        return MathFlux.max(Flux.fromIterable(getRoleIds())
+                .flatMap(id -> getClient().withRetrievalStrategy(retrievalStrategy).getRoleById(getGuildId(), id)),
                             OrderUtil.ROLE_ORDER);
     }
 
@@ -154,6 +186,17 @@ public final class Member extends User {
      */
     public Mono<Guild> getGuild() {
         return getClient().getGuildById(getGuildId());
+    }
+
+    /**
+     * Requests to retrieve the guild this user is associated to, using the given retrieval strategy.
+     *
+     * @param retrievalStrategy the strategy to use to get the guild
+     * @return A {@link Mono} where, upon successful completion, emits the {@link Guild guild} this user is associated
+     * to. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Guild> getGuild(EntityRetrievalStrategy retrievalStrategy) {
+        return getClient().withRetrievalStrategy(retrievalStrategy).getGuildById(getGuildId());
     }
 
     /**

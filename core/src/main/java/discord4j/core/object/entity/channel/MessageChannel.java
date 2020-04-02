@@ -17,6 +17,7 @@
 package discord4j.core.object.entity.channel;
 
 import discord4j.core.object.entity.Message;
+import discord4j.core.retriever.EntityRetrievalStrategy;
 import discord4j.rest.util.Snowflake;
 import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.core.spec.MessageCreateSpec;
@@ -46,6 +47,15 @@ public interface MessageChannel extends Channel {
      * channel, if present. If an error is received, it is emitted through the {@code Mono}.
      */
     Mono<Message> getLastMessage();
+
+    /**
+     * Requests to retrieve the last message sent in this channel, if present, using the given retrieval strategy.
+     *
+     * @param retrievalStrategy the strategy to use to get the last message
+     * @return A {@link Mono} where, upon successful completion, emits the last {@link Message message} sent in this
+     * channel, if present. If an error is received, it is emitted through the {@code Mono}.
+     */
+    Mono<Message> getLastMessage(EntityRetrievalStrategy retrievalStrategy);
 
     /**
      * Gets when the last pinned message was pinned, if present.
@@ -167,6 +177,16 @@ public interface MessageChannel extends Channel {
      * supplied ID. If an error is received, it is emitted through the {@code Mono}.
      */
     Mono<Message> getMessageById(Snowflake id);
+
+    /**
+     * Requests to retrieve the message as represented by the supplied ID, using the given retrieval strategy.
+     *
+     * @param id The ID of the message.
+     * @param retrievalStrategy the strategy to use to get the message
+     * @return A {@link Mono} where, upon successful completion, emits the {@link Message} as represented by the
+     * supplied ID. If an error is received, it is emitted through the {@code Mono}.
+     */
+    Mono<Message> getMessageById(Snowflake id, EntityRetrievalStrategy retrievalStrategy);
 
     /**
      * Requests to retrieve all the pinned messages for this channel.

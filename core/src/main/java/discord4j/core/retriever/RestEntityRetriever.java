@@ -16,11 +16,6 @@
  */
 package discord4j.core.retriever;
 
-import java.util.Map;
-import java.util.Optional;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.GuildEmoji;
@@ -29,11 +24,13 @@ import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.Role;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.Channel;
+import discord4j.core.object.entity.channel.GuildChannel;
 import discord4j.core.util.EntityUtil;
 import discord4j.discordjson.json.EmojiData;
 import discord4j.discordjson.json.GuildData;
 import discord4j.discordjson.json.GuildUpdateData;
 import discord4j.discordjson.json.ImmutableGuildData;
+import discord4j.discordjson.json.MemberData;
 import discord4j.discordjson.json.RoleData;
 import discord4j.discordjson.json.UserGuildData;
 import discord4j.rest.RestClient;
@@ -41,6 +38,11 @@ import discord4j.rest.util.PaginationUtil;
 import discord4j.rest.util.Snowflake;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.util.Map;
+import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 class RestEntityRetriever implements EntityRetriever {
 
@@ -119,6 +121,31 @@ class RestEntityRetriever implements EntityRetriever {
     @Override
     public Mono<User> getSelf() {
         return rest.getUserService().getCurrentUser().map(data -> new User(gateway, data));
+    }
+
+    @Override
+    public Flux<Member> getGuildMembers(Snowflake guildId) {
+        Function<Map<String, Object>, Flux<MemberData>> doRequest = params ->
+                gateway.getRestClient().getGuildService()
+                        .getGuildMembers(guildId.asLong(), params);
+
+       return PaginationUtil.paginateAfter(doRequest, data -> Snowflake.asLong(data.user().id()), 0, 100)
+                        .map(data -> new Member(gateway, data, guildId.asLong()));
+    }
+
+    @Override
+    public Flux<GuildChannel> getGuildChannels(Snowflake guildId) {
+        return rest.getGuildService()
+                .getGuildChannels(guildId.asLong())
+                .map(data -> EntityUtil.getChannel(gateway, data))
+                .cast(GuildChannel.class);
+    }
+
+    @Override
+    public Flux<Role> getGuildRoles(Snowflake guildId) {
+        return rest.getGuildService()
+                .getGuildRoles(guildId.asLong())
+                .map(data -> new Role(gateway, data, guildId.asLong()));
     }
 
     private Mono<GuildData> toGuildData(GuildUpdateData guild) {

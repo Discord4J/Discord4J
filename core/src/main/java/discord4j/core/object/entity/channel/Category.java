@@ -19,6 +19,7 @@ package discord4j.core.object.entity.channel;
 import discord4j.discordjson.json.ChannelData;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.Guild;
+import discord4j.core.retriever.EntityRetrievalStrategy;
 import discord4j.core.spec.CategoryEditSpec;
 import discord4j.core.util.EntityUtil;
 import reactor.core.publisher.Flux;
@@ -47,6 +48,20 @@ public final class Category extends BaseGuildChannel {
      */
     public Flux<CategorizableChannel> getChannels() {
         return getGuild().flatMapMany(Guild::getChannels)
+                .ofType(CategorizableChannel.class)
+                .filter(channel -> channel.getCategoryId().map(getId()::equals).orElse(false));
+    }
+
+    /**
+     * Requests to retrieve the channels residing in this category, using the given retrieval strategy.
+     *
+     * @param retrievalStrategy the strategy to use to get the channels
+     * @return A {@link Flux} that continually emits the {@link CategorizableChannel channels} residing in this category. If an
+     * error is received, it is emitted through the {@code Flux}.
+     */
+    public Flux<CategorizableChannel> getChannels(EntityRetrievalStrategy retrievalStrategy) {
+        return getGuild(retrievalStrategy)
+                .flatMapMany(guild -> guild.getChannels(retrievalStrategy))
                 .ofType(CategorizableChannel.class)
                 .filter(channel -> channel.getCategoryId().map(getId()::equals).orElse(false));
     }

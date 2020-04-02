@@ -27,6 +27,7 @@ import discord4j.core.object.Invite;
 import discord4j.core.object.Region;
 import discord4j.core.object.entity.*;
 import discord4j.core.object.entity.channel.Channel;
+import discord4j.core.object.entity.channel.GuildChannel;
 import discord4j.core.object.presence.Presence;
 import discord4j.core.retriever.EntityRetrievalStrategy;
 import discord4j.core.retriever.EntityRetriever;
@@ -420,7 +421,6 @@ public class GatewayDiscordClient implements EntityRetriever {
     public EntityRetriever withRetrievalStrategy(EntityRetrievalStrategy retrievalStrategy) {
         return retrievalStrategy.apply(this);
     }
-
     @Override
     public Mono<Channel> getChannelById(Snowflake channelId) {
         return entityRetriever.getChannelById(channelId);
@@ -464,5 +464,20 @@ public class GatewayDiscordClient implements EntityRetriever {
     @Override
     public Mono<User> getSelf() {
         return entityRetriever.getSelf();
+    }
+
+    @Override
+    public Flux<Member> getGuildMembers(Snowflake guildId) {
+        return entityRetriever.getGuildMembers(guildId);
+    }
+
+    @Override
+    public Flux<GuildChannel> getGuildChannels(Snowflake guildId) {
+        return entityRetriever.getGuildChannels(guildId);
+    }
+
+    @Override
+    public Flux<Role> getGuildRoles(Snowflake guildId) {
+        return entityRetriever.getGuildRoles(guildId);
     }
 }

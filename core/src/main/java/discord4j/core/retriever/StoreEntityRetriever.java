@@ -24,6 +24,7 @@ import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.Role;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.Channel;
+import discord4j.core.object.entity.channel.GuildChannel;
 import discord4j.core.state.StateView;
 import discord4j.core.util.EntityUtil;
 import discord4j.rest.util.Snowflake;
@@ -98,5 +99,31 @@ class StoreEntityRetriever implements EntityRetriever {
     @Override
     public Mono<User> getSelf() {
         return stateView.getSelfId().map(Snowflake::of).flatMap(this::getUserById);
+    }
+
+    @Override
+    public Flux<Member> getGuildMembers(Snowflake guildId) {
+        return stateView.getGuildStore().find(guildId.asLong())
+                .flatMapMany(guildData -> Flux.fromIterable(guildData.members())
+                        .flatMap(memberId -> stateView.getMemberStore()
+                                .find(LongLongTuple2.of(guildId.asLong(), Snowflake.asLong(memberId))))
+                        .map(member -> new Member(gateway, member, guildId.asLong())));
+    }
+
+    @Override
+    public Flux<GuildChannel> getGuildChannels(Snowflake guildId) {
+        return stateView.getGuildStore().find(guildId.asLong())
+                .flatMapMany(guildData -> Flux.fromIterable(guildData.channels())
+                        .flatMap(channelId -> stateView.getChannelStore().find(Snowflake.asLong(channelId)))
+                        .map(channelData -> EntityUtil.getChannel(gateway, channelData))
+                        .cast(GuildChannel.class));
+    }
+
+    @Override
+    public Flux<Role> getGuildRoles(Snowflake guildId) {
+        return stateView.getGuildStore().find(guildId.asLong())
+                .flatMapMany(guildData -> Flux.fromIterable(guildData.roles())
+                        .flatMap(roleId -> stateView.getRoleStore().find(Snowflake.asLong(roleId)))
+                        .map(roleData -> new Role(gateway, roleData, guildId.asLong())));
     }
 }

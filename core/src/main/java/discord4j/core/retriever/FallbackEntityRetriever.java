@@ -23,6 +23,7 @@ import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.Role;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.Channel;
+import discord4j.core.object.entity.channel.GuildChannel;
 import discord4j.rest.util.Snowflake;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -80,5 +81,20 @@ class FallbackEntityRetriever implements EntityRetriever {
     @Override
     public Mono<User> getSelf() {
         return first.getSelf().switchIfEmpty(fallback.getSelf());
+    }
+
+    @Override
+    public Flux<Member> getGuildMembers(Snowflake guildId) {
+        return first.getGuildMembers(guildId).switchIfEmpty(fallback.getGuildMembers(guildId));
+    }
+
+    @Override
+    public Flux<GuildChannel> getGuildChannels(Snowflake guildId) {
+        return first.getGuildChannels(guildId).switchIfEmpty(fallback.getGuildChannels(guildId));
+    }
+
+    @Override
+    public Flux<Role> getGuildRoles(Snowflake guildId) {
+        return first.getGuildRoles(guildId).switchIfEmpty(fallback.getGuildRoles(guildId));
     }
 }

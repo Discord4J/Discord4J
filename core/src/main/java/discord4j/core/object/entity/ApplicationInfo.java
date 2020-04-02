@@ -18,6 +18,7 @@ package discord4j.core.object.entity;
 
 import discord4j.discordjson.json.ApplicationInfoData;
 import discord4j.core.GatewayDiscordClient;
+import discord4j.core.retriever.EntityRetrievalStrategy;
 import discord4j.rest.util.Image;
 import discord4j.rest.util.Snowflake;
 import discord4j.core.util.EntityUtil;
@@ -137,6 +138,17 @@ public final class ApplicationInfo implements Entity {
      */
     public Mono<User> getOwner() {
         return gateway.getUserById(getOwnerId());
+    }
+
+    /**
+     * Requests to retrieve the owner of the application, using the given retrieval strategy.
+     *
+     * @param retrievalStrategy the strategy to use to get the owner
+     * @return A {@link Mono} where, upon successful completion, emits the {@link User owner} of the application. If an
+     * error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<User> getOwner(EntityRetrievalStrategy retrievalStrategy) {
+        return gateway.withRetrievalStrategy(retrievalStrategy).getUserById(getOwnerId());
     }
 
     @Override

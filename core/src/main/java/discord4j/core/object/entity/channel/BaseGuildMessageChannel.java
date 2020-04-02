@@ -26,6 +26,7 @@ import discord4j.core.object.PermissionOverwrite;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.Webhook;
+import discord4j.core.retriever.EntityRetrievalStrategy;
 import discord4j.rest.util.PermissionSet;
 import discord4j.rest.util.Snowflake;
 import discord4j.core.spec.InviteCreateSpec;
@@ -76,6 +77,11 @@ class BaseGuildMessageChannel extends BaseChannel implements GuildMessageChannel
     @Override
     public Mono<Guild> getGuild() {
         return guildChannel.getGuild();
+    }
+
+    @Override
+    public Mono<Guild> getGuild(EntityRetrievalStrategy retrievalStrategy) {
+        return guildChannel.getGuild(retrievalStrategy);
     }
 
     @Override
@@ -135,6 +141,11 @@ class BaseGuildMessageChannel extends BaseChannel implements GuildMessageChannel
     }
 
     @Override
+    public Mono<Message> getLastMessage(EntityRetrievalStrategy retrievalStrategy) {
+        return messageChannel.getLastMessage(retrievalStrategy);
+    }
+
+    @Override
     public Optional<Instant> getLastPinTimestamp() {
         return messageChannel.getLastPinTimestamp();
     }
@@ -170,6 +181,11 @@ class BaseGuildMessageChannel extends BaseChannel implements GuildMessageChannel
     }
 
     @Override
+    public Mono<Message> getMessageById(Snowflake id, EntityRetrievalStrategy retrievalStrategy) {
+        return messageChannel.getMessageById(id, retrievalStrategy);
+    }
+
+    @Override
     public Flux<Message> getPinnedMessages() {
         return messageChannel.getPinnedMessages();
     }
@@ -182,6 +198,11 @@ class BaseGuildMessageChannel extends BaseChannel implements GuildMessageChannel
     @Override
     public Mono<Category> getCategory() {
         return categorizableChannel.getCategory();
+    }
+
+    @Override
+    public Mono<Category> getCategory(EntityRetrievalStrategy retrievalStrategy) {
+        return categorizableChannel.getCategory(retrievalStrategy);
     }
 
     @Override

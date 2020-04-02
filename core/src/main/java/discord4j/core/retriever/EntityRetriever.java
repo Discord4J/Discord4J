@@ -23,6 +23,8 @@ import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.Role;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.Channel;
+import discord4j.core.object.entity.channel.GuildChannel;
+import discord4j.core.util.OrderUtil;
 import discord4j.rest.util.Snowflake;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -114,4 +116,36 @@ public interface EntityRetriever {
      *         received, it is emitted through the {@code Mono}.
      */
     Mono<User> getSelf();
+
+    /**
+     * Requests to retrieve the members of the guild.
+     *
+     * @param guildId   the ID of the guild.
+     * @return A {@link Flux} that continually emits the {@link Member members} of the guild. If an error is received,
+     *         it is emitted through the {@code Flux}.
+     */
+    Flux<Member> getGuildMembers(Snowflake guildId);
+
+    /**
+     * Requests to retrieve the guild's channels.
+     * <p>
+     * The order of items emitted by the returned {@code Flux} is unspecified. Use
+     * {@link OrderUtil#orderGuildChannels(Flux)} to consistently order channels.
+     *
+     * @param guildId the ID of the guild.
+     * @return A {@link Flux} that continually emits the guild's {@link GuildChannel channels}. If an error is received,
+     *         it is emitted through the {@code Flux}.
+     */
+    Flux<GuildChannel> getGuildChannels(Snowflake guildId);
+
+    /**
+     * Requests to retrieve the guild's roles.
+     * <p>
+     * The order of items emitted by the returned {@code Flux} is unspecified. Use {@link OrderUtil#orderRoles(Flux)}
+     * to consistently order roles.
+     *
+     * @return A {@link Flux} that continually emits the guild's {@link Role roles}. If an error is received, it is
+     * emitted through the {@code Flux}.
+     */
+    Flux<Role> getGuildRoles(Snowflake guildId);
 }

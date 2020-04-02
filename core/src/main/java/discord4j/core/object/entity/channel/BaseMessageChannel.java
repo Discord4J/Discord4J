@@ -21,6 +21,7 @@ import discord4j.discordjson.json.MessageData;
 import discord4j.discordjson.possible.Possible;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.Message;
+import discord4j.core.retriever.EntityRetrievalStrategy;
 import discord4j.rest.util.Snowflake;
 import discord4j.core.spec.MessageCreateSpec;
 import discord4j.rest.util.PaginationUtil;
@@ -58,6 +59,12 @@ class BaseMessageChannel extends BaseChannel implements MessageChannel {
     @Override
     public final Mono<Message> getLastMessage() {
         return Mono.justOrEmpty(getLastMessageId()).flatMap(id -> getClient().getMessageById(getId(), id));
+    }
+
+    @Override
+    public Mono<Message> getLastMessage(EntityRetrievalStrategy retrievalStrategy) {
+        return Mono.justOrEmpty(getLastMessageId())
+                .flatMap(id -> getClient().withRetrievalStrategy(retrievalStrategy).getMessageById(getId(), id));
     }
 
     @Override
@@ -118,6 +125,11 @@ class BaseMessageChannel extends BaseChannel implements MessageChannel {
     @Override
     public final Mono<Message> getMessageById(final Snowflake id) {
         return getClient().getMessageById(getId(), id);
+    }
+
+    @Override
+    public Mono<Message> getMessageById(Snowflake id, EntityRetrievalStrategy retrievalStrategy) {
+        return getClient().withRetrievalStrategy(retrievalStrategy).getMessageById(getId(), id);
     }
 
     @Override

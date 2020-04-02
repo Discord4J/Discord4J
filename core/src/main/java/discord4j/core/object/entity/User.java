@@ -18,6 +18,7 @@ package discord4j.core.object.entity;
 
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.channel.PrivateChannel;
+import discord4j.core.retriever.EntityRetrievalStrategy;
 import discord4j.rest.util.Image;
 import discord4j.rest.util.Snowflake;
 import discord4j.core.util.EntityUtil;
@@ -190,6 +191,18 @@ public class User implements Entity {
      */
     public Mono<Member> asMember(final Snowflake guildId) {
         return gateway.getMemberById(guildId, getId());
+    }
+
+    /**
+     * Requests to retrieve this user as a {@link Member}, using the given retrieval strategy.
+     *
+     * @param guildId The ID of the guild to associate this user as a {@link Member}.
+     * @param retrievalStrategy the strategy to use to get the member
+     * @return A {@link Mono} where, upon successful completion, emits this user as a {@link Member member}. If an error
+     * is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Member> asMember(final Snowflake guildId, EntityRetrievalStrategy retrievalStrategy) {
+        return gateway.withRetrievalStrategy(retrievalStrategy).getMemberById(guildId, getId());
     }
 
     /**

@@ -28,7 +28,6 @@ import discord4j.voice.VoiceConnection;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.Objects;
 import java.util.function.Consumer;
 
 /** A Discord voice channel. */
