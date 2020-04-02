@@ -29,6 +29,7 @@ import discord4j.core.event.dispatch.DispatchContext;
 import discord4j.core.event.dispatch.DispatchHandlers;
 import discord4j.core.event.domain.Event;
 import discord4j.core.object.presence.Presence;
+import discord4j.core.retriever.EntityRetrievalStrategy;
 import discord4j.core.state.StateHolder;
 import discord4j.core.state.StateView;
 import discord4j.discordjson.json.ActivityUpdateRequest;
@@ -119,6 +120,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
     private Function<ReactorResources, ReactorResources> gatewayReactorResources = Function.identity();
     private Function<ReactorResources, VoiceReactorResources> voiceReactorResources = VoiceReactorResources::new;
     private VoiceConnectionFactory voiceConnectionFactory = defaultVoiceConnectionFactory();
+    private EntityRetrievalStrategy entityRetrievalStrategy = null;
 
     /**
      * Create a default {@link GatewayBootstrap} based off the given {@link DiscordClient} that provides an instance
@@ -456,6 +458,17 @@ public class GatewayBootstrap<O extends GatewayOptions> {
     }
 
     /**
+     * Customize the {@link EntityRetrievalStrategy} to use by default in order to retrieve Discord entities.
+     *
+     * @param entityRetrievalStrategy a strategy to use to retrieve entities
+     * @return this builder
+     */
+    public GatewayBootstrap<O> setEntityRetrievalStrategy(@Nullable EntityRetrievalStrategy entityRetrievalStrategy) {
+        this.entityRetrievalStrategy = entityRetrievalStrategy;
+        return this;
+    }
+
+    /**
      * Connect to the Discord Gateway upon subscription to acquire a {@link GatewayDiscordClient} instance and use it
      * declaratively, releasing the object once the derived usage {@link Function} completes, and the underlying shard
      * group disconnects, according to {@link GatewayDiscordClient#onDisconnect()}.
@@ -521,8 +534,9 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                 gatewayReactorResources, initVoiceReactorResources(), voiceReconnectOptions);
         MonoProcessor<Void> closeProcessor = MonoProcessor.create();
         GatewayClientGroupManager clientGroup = shardingStrategy.getGroupManager();
+        EntityRetrievalStrategy entityRetrievalStrategy = initEntityRetrievalStrategy();
         GatewayDiscordClient gateway = new GatewayDiscordClient(client, resources, closeProcessor,
-                clientGroup, voiceConnectionFactory);
+                clientGroup, voiceConnectionFactory, entityRetrievalStrategy);
 
         Flux<ShardInfo> connections = shardingStrategy.getShards(client)
                 .groupBy(shard -> shard.getIndex() % shardingStrategy.getShardingFactor())
@@ -718,6 +732,13 @@ public class GatewayBootstrap<O extends GatewayOptions> {
         return storeServiceMapper.compose((StoreService ss) ->
                 !ss.hasLongObjStores() ? new ForwardingStoreService(ss) : ss)
                 .apply(storeService);
+    }
+
+    private EntityRetrievalStrategy initEntityRetrievalStrategy() {
+        if (entityRetrievalStrategy != null) {
+            return entityRetrievalStrategy;
+        }
+        return EntityRetrievalStrategy.STORE;
     }
 
     private O buildOptions(GatewayDiscordClient gateway, IdentifyOptions identify, PayloadTransformer identifyLimiter) {
