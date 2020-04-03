@@ -51,6 +51,7 @@ import reactor.core.publisher.MonoProcessor;
 import reactor.util.Logger;
 import reactor.util.Loggers;
 
+import java.util.Collections;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -241,7 +242,7 @@ public class GatewayDiscordClient implements EntityRetriever {
 
         return getRestClient().getGuildService()
                 .createGuild(mutatedSpec.asRequest())
-                .flatMap(this::toGuildData)
+                .map(this::toGuildData)
                 .map(data -> new Guild(this, data));
     }
 
@@ -394,22 +395,20 @@ public class GatewayDiscordClient implements EntityRetriever {
                         }));
     }
 
-    private Mono<GuildData> toGuildData(GuildUpdateData guild) {
-        return gatewayResources.getStateView().getGuildStore()
-                .find(Snowflake.asLong(guild.id()))
-                .map(current -> ImmutableGuildData.builder()
-                        .from(guild)
-                        .roles(guild.roles().stream()
-                                .map(RoleData::id)
-                                .collect(Collectors.toList()))
-                        .emojis(guild.emojis().stream()
-                                .map(EmojiData::id)
-                                .filter(Optional::isPresent)
-                                .map(Optional::get)
-                                .collect(Collectors.toList()))
-                        .channels(current.channels())
-                        .members(current.members())
-                        .build());
+    private GuildData toGuildData(GuildUpdateData guild) {
+        return ImmutableGuildData.builder()
+                .from(guild)
+                .roles(guild.roles().stream()
+                        .map(RoleData::id)
+                        .collect(Collectors.toList()))
+                .emojis(guild.emojis().stream()
+                        .map(EmojiData::id)
+                        .filter(Optional::isPresent)
+                        .map(Optional::get)
+                        .collect(Collectors.toList()))
+                .channels(Collections.emptyList())
+                .members(Collections.emptyList())
+                .build();
     }
 
     /**

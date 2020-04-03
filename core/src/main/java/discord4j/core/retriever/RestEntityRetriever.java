@@ -39,6 +39,7 @@ import discord4j.rest.util.Snowflake;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
@@ -65,7 +66,7 @@ class RestEntityRetriever implements EntityRetriever {
     public Mono<Guild> getGuildById(Snowflake guildId) {
         return rest.getGuildService()
                 .getGuild(guildId.asLong())
-                .flatMap(this::toGuildData)
+                .map(this::toGuildData)
                 .map(data -> new Guild(gateway, data));
     }
 
@@ -114,7 +115,7 @@ class RestEntityRetriever implements EntityRetriever {
                 .map(UserGuildData::id)
                 //.filter(id -> (id >> 22) % getConfig().getShardCount() == getConfig().getShardIndex())
                 .flatMap(id -> rest.getGuildService().getGuild(Snowflake.asLong(id)))
-                .flatMap(this::toGuildData)
+                .map(this::toGuildData)
                 .map(data -> new Guild(gateway, data));
     }
 
@@ -148,21 +149,19 @@ class RestEntityRetriever implements EntityRetriever {
                 .map(data -> new Role(gateway, data, guildId.asLong()));
     }
 
-    private Mono<GuildData> toGuildData(GuildUpdateData guild) {
-        return gateway.getGatewayResources().getStateView().getGuildStore()
-                .find(Snowflake.asLong(guild.id()))
-                .map(current -> ImmutableGuildData.builder()
-                        .from(guild)
-                        .roles(guild.roles().stream()
-                                .map(RoleData::id)
-                                .collect(Collectors.toList()))
-                        .emojis(guild.emojis().stream()
-                                .map(EmojiData::id)
-                                .filter(Optional::isPresent)
-                                .map(Optional::get)
-                                .collect(Collectors.toList()))
-                        .channels(current.channels())
-                        .members(current.members())
-                        .build());
+    private GuildData toGuildData(GuildUpdateData guild) {
+        return ImmutableGuildData.builder()
+                .from(guild)
+                .roles(guild.roles().stream()
+                        .map(RoleData::id)
+                        .collect(Collectors.toList()))
+                .emojis(guild.emojis().stream()
+                        .map(EmojiData::id)
+                        .filter(Optional::isPresent)
+                        .map(Optional::get)
+                        .collect(Collectors.toList()))
+                .channels(Collections.emptyList()) // Can be retrieved with getGuildChannels(id)
+                .members(Collections.emptyList()) // Can be retrieved with getGuildMembers(id)
+                .build();
     }
 }
