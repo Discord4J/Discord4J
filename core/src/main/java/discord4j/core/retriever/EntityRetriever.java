@@ -118,7 +118,7 @@ public interface EntityRetriever {
     Mono<User> getSelf();
 
     /**
-     * Requests to retrieve the members of the guild.
+     * Requests to retrieve the guild's members.
      *
      * @param guildId   the ID of the guild.
      * @return A {@link Flux} that continually emits the {@link Member members} of the guild. If an error is received,
@@ -148,4 +148,12 @@ public interface EntityRetriever {
      * emitted through the {@code Flux}.
      */
     Flux<Role> getGuildRoles(Snowflake guildId);
+
+    /**
+     * Requests to retrieve the guild's emojis.
+     *
+     * @return A {@link Flux} that continually emits the guild's {@link GuildEmoji emojis}. If an error is received,
+     * it is emitted through the {@code Flux}.
+     */
+    Flux<GuildEmoji> getGuildEmojis(Snowflake guildId);
 }

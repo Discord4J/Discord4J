@@ -127,8 +127,7 @@ class RestEntityRetriever implements EntityRetriever {
     @Override
     public Flux<Member> getGuildMembers(Snowflake guildId) {
         Function<Map<String, Object>, Flux<MemberData>> doRequest = params ->
-                gateway.getRestClient().getGuildService()
-                        .getGuildMembers(guildId.asLong(), params);
+                rest.getGuildService().getGuildMembers(guildId.asLong(), params);
 
        return PaginationUtil.paginateAfter(doRequest, data -> Snowflake.asLong(data.user().id()), 0, 100)
                         .map(data -> new Member(gateway, data, guildId.asLong()));
@@ -147,6 +146,13 @@ class RestEntityRetriever implements EntityRetriever {
         return rest.getGuildService()
                 .getGuildRoles(guildId.asLong())
                 .map(data -> new Role(gateway, data, guildId.asLong()));
+    }
+
+    @Override
+    public Flux<GuildEmoji> getGuildEmojis(Snowflake guildId) {
+        return rest.getEmojiService()
+                .getGuildEmojis(guildId.asLong())
+                .map(data -> new GuildEmoji(gateway, data, guildId.asLong()));
     }
 
     private GuildData toGuildData(GuildUpdateData guild) {

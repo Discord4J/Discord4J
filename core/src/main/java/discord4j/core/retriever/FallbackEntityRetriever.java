@@ -97,4 +97,9 @@ class FallbackEntityRetriever implements EntityRetriever {
     public Flux<Role> getGuildRoles(Snowflake guildId) {
         return first.getGuildRoles(guildId).switchIfEmpty(fallback.getGuildRoles(guildId));
     }
+
+    @Override
+    public Flux<GuildEmoji> getGuildEmojis(Snowflake guildId) {
+        return first.getGuildEmojis(guildId).switchIfEmpty(fallback.getGuildEmojis(guildId));
+    }
 }

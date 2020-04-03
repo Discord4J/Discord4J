@@ -126,4 +126,12 @@ class StoreEntityRetriever implements EntityRetriever {
                         .flatMap(roleId -> stateView.getRoleStore().find(Snowflake.asLong(roleId)))
                         .map(roleData -> new Role(gateway, roleData, guildId.asLong())));
     }
+
+    @Override
+    public Flux<GuildEmoji> getGuildEmojis(Snowflake guildId) {
+        return stateView.getGuildStore().find(guildId.asLong())
+                .flatMapMany(guildData -> Flux.fromIterable(guildData.emojis())
+                        .flatMap(emojiId -> stateView.getGuildEmojiStore().find(Snowflake.asLong(emojiId)))
+                        .map(emojiData -> new GuildEmoji(gateway, emojiData, guildId.asLong())));
+    }
 }

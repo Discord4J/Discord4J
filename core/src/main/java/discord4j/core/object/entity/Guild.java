@@ -468,7 +468,7 @@ public final class Guild implements Entity {
      * emitted through the {@code Flux}.
      */
     public Flux<GuildEmoji> getEmojis() {
-        return Flux.fromIterable(getEmojiIds()).flatMap(id -> gateway.getGuildEmojiById(getId(), id));
+        return gateway.getGuildEmojis(getId());
     }
 
     /**
@@ -479,8 +479,7 @@ public final class Guild implements Entity {
      * emitted through the {@code Flux}.
      */
     public Flux<GuildEmoji> getEmojis(EntityRetrievalStrategy retrievalStrategy) {
-        return Flux.fromIterable(getEmojiIds())
-                .flatMap(id -> gateway.withRetrievalStrategy(retrievalStrategy).getGuildEmojiById(getId(), id));
+        return gateway.withRetrievalStrategy(retrievalStrategy).getGuildEmojis(getId());
     }
 
     /**

@@ -479,4 +479,9 @@ public class GatewayDiscordClient implements EntityRetriever {
     public Flux<Role> getGuildRoles(Snowflake guildId) {
         return entityRetriever.getGuildRoles(guildId);
     }
+
+    @Override
+    public Flux<GuildEmoji> getGuildEmojis(Snowflake guildId) {
+        return entityRetriever.getGuildEmojis(guildId);
+    }
 }
