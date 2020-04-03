@@ -208,13 +208,15 @@ public abstract class DispatchHandlers {
         VoiceStateBean bean = new VoiceStateBean(context.getDispatch().getVoiceState());
         VoiceState current = new VoiceState(serviceMediator, bean);
 
-        Mono<Void> saveNew = serviceMediator.getStateHolder().getVoiceStateStore().save(key, bean);
+        Mono<Void> saveNewOrRemove = bean.getChannelId() != null
+                ? serviceMediator.getStateHolder().getVoiceStateStore().save(key, bean)
+                : serviceMediator.getStateHolder().getVoiceStateStore().delete(key);
 
         return serviceMediator.getStateHolder().getVoiceStateStore()
                 .find(key)
-                .flatMap(saveNew::thenReturn)
+                .flatMap(saveNewOrRemove::thenReturn)
                 .map(old -> new VoiceStateUpdateEvent(client, current, new VoiceState(serviceMediator, old)))
-                .switchIfEmpty(saveNew.thenReturn(new VoiceStateUpdateEvent(client, current, null)));
+                .switchIfEmpty(saveNewOrRemove.thenReturn(new VoiceStateUpdateEvent(client, current, null)));
     }
 
     private static Mono<Event> webhooksUpdate(DispatchContext<WebhooksUpdate> context) {
