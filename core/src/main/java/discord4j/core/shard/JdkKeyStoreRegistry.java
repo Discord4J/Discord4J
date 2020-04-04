@@ -24,12 +24,12 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Registry implementation that is backed by JDK collections like {@link Map} instances to hold multiple
- * {@link Store} and {@link ShardKeyStore}, using the value {@link Class} they hold as key.
+ * {@link Store} and {@link JdkKeyStore}, using the value {@link Class} they hold as key.
  */
-public class ShardingJdkStoreRegistry implements ShardingStoreRegistry {
+public class JdkKeyStoreRegistry implements KeyStoreRegistry {
 
     private final Map<Class<?>, Store<?, ?>> valueStore = new ConcurrentHashMap<>();
-    private final Map<Class<?>, ShardKeyStore<?>> keyStores = new ConcurrentHashMap<>();
+    private final Map<Class<?>, KeyStore<?>> keyStores = new ConcurrentHashMap<>();
 
     @Override
     public boolean containsStore(Class<?> valueClass) {
@@ -49,8 +49,8 @@ public class ShardingJdkStoreRegistry implements ShardingStoreRegistry {
 
     @Override
     @SuppressWarnings("unchecked")
-    public <K extends Comparable<K>, V> ShardKeyStore<K> getKeyStore(Class<V> valueClass) {
-        return (ShardKeyStore<K>) keyStores.computeIfAbsent(valueClass, k -> new ShardKeyStore<>());
+    public <K extends Comparable<K>, V> KeyStore<K> getKeyStore(Class<V> valueClass) {
+        return (KeyStore<K>) keyStores.computeIfAbsent(valueClass, k -> new JdkKeyStore<>());
     }
 
 }

@@ -27,45 +27,26 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * @param <K> the type of the keys tracked
  */
-public class ShardKeyStore<K extends Comparable<K>> {
+public class JdkKeyStore<K extends Comparable<K>> implements KeyStore<K> {
 
-    private Map<Integer, Set<K>> keysByShard = new ConcurrentHashMap<>();
+    private final Map<Integer, Set<K>> keysByShard = new ConcurrentHashMap<>();
 
-    /**
-     * Add the given key under a shard index.
-     *
-     * @param shardId the shard index a key will be associated under
-     * @param key the actual key to store
-     */
+    @Override
     public void add(int shardId, K key) {
         keySet(shardId).add(key);
     }
 
-    /**
-     * Remove the given key from a shard index.
-     *
-     * @param shardId the shard index a key will be removed from
-     * @param key the actual key to remove
-     */
+    @Override
     public void remove(int shardId, K key) {
         keySet(shardId).remove(key);
     }
 
-    /**
-     * Removes all keys stored under a given shard index.
-     *
-     * @param shardId the shard index to remove all keys from
-     */
+    @Override
     public void clear(int shardId) {
         keySet(shardId).clear();
     }
 
-    /**
-     * Return an unmodifiable {@link Set} of keys for the given shard index.
-     *
-     * @param shardId the shard index to obtain its keys from
-     * @return a {@link Set} with keys
-     */
+    @Override
     public Set<K> keys(int shardId) {
         return Collections.unmodifiableSet(keySet(shardId));
     }

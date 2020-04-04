@@ -30,10 +30,10 @@ import reactor.core.publisher.Mono;
  */
 public class ShardAwareStoreService implements StoreService {
 
-    private final ShardingStoreRegistry registry;
+    private final KeyStoreRegistry registry;
     private final StoreService backingStoreService;
 
-    public ShardAwareStoreService(ShardingStoreRegistry registry, StoreService backingStoreService) {
+    public ShardAwareStoreService(KeyStoreRegistry registry, StoreService backingStoreService) {
         this.registry = registry;
         this.backingStoreService = backingStoreService;
     }

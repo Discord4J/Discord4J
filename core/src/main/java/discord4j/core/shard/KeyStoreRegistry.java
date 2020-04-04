@@ -20,10 +20,10 @@ package discord4j.core.shard;
 import discord4j.store.api.Store;
 
 /**
- * Registry that holds all {@link Store} and {@link ShardKeyStore} instances in order to support a
+ * Registry that holds all {@link Store} and {@link KeyStore} instances in order to support a
  * {@link ShardAwareStoreService} creating and invalidating on a per-shard basis.
  */
-public interface ShardingStoreRegistry {
+public interface KeyStoreRegistry {
 
     /**
      * Return if this registry contains a {@link Store} instance for the given value class.
@@ -55,12 +55,12 @@ public interface ShardingStoreRegistry {
     <K extends Comparable<K>, V> Store<K, V> getValueStore(Class<K> keyClass, Class<V> valueClass);
 
     /**
-     * Return the saved {@link ShardKeyStore} for the given value type.
+     * Return the saved {@link KeyStore} for the given value type.
      *
      * @param valueClass the target {@link Store} value class
      * @param <K> the type of the given {@code key}
      * @param <V> the type of the given {@code value}
-     * @return a {@link ShardKeyStore} for the given value type
+     * @return a {@link KeyStore} for the given value type
      */
-    <K extends Comparable<K>, V> ShardKeyStore<K> getKeyStore(Class<V> valueClass);
+    <K extends Comparable<K>, V> KeyStore<K> getKeyStore(Class<V> valueClass);
 }

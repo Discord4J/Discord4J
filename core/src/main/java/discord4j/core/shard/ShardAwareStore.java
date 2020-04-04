@@ -36,9 +36,9 @@ import reactor.util.function.Tuple2;
 public class ShardAwareStore<K extends Comparable<K>, V> implements Store<K, V> {
 
     private final Store<K, V> valueStore;
-    private final ShardKeyStore<K> keyStore;
+    private final KeyStore<K> keyStore;
 
-    public ShardAwareStore(Store<K, V> valueStore, ShardKeyStore<K> keyStore) {
+    public ShardAwareStore(Store<K, V> valueStore, KeyStore<K> keyStore) {
         this.valueStore = valueStore;
         this.keyStore = keyStore;
     }

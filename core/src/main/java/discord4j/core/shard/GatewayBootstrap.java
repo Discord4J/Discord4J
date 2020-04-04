@@ -106,7 +106,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
     private ShardCoordinator shardCoordinator = null;
     private EventDispatcher eventDispatcher = null;
     private StoreService storeService = null;
-    private Function<StoreService, StoreService> storeServiceMapper = shardAwareStoreService();
+    private InvalidationStrategy invalidationStrategy = InvalidationStrategy.disable();
     private boolean memberRequest = true;
     private Function<ShardInfo, StatusUpdate> initialPresence = shard -> null;
     private Function<ShardInfo, SessionInfo> resumeOptions = shard -> null;
@@ -147,7 +147,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
         this.shardCoordinator = source.shardCoordinator;
         this.eventDispatcher = source.eventDispatcher;
         this.storeService = source.storeService;
-        this.storeServiceMapper = source.storeServiceMapper;
+        this.invalidationStrategy = source.invalidationStrategy;
         this.memberRequest = source.memberRequest;
         this.initialPresence = source.initialPresence;
         this.resumeOptions = source.resumeOptions;
@@ -259,9 +259,25 @@ public class GatewayBootstrap<O extends GatewayOptions> {
      *
      * @param storeServiceMapper a {@link Function} to transform a {@link StoreService}
      * @return this builder
+     * @deprecated use {@link #setInvalidationStrategy(InvalidationStrategy)}
      */
+    @Deprecated
     public GatewayBootstrap<O> setStoreServiceMapper(Function<StoreService, StoreService> storeServiceMapper) {
-        this.storeServiceMapper = Objects.requireNonNull(storeServiceMapper, "storeServiceMapper");
+        return setInvalidationStrategy(new InvalidationStrategy() {
+            @Override
+            public StoreService adaptStoreService(StoreService storeService) {
+                return storeServiceMapper.apply(storeService);
+            }
+
+            @Override
+            public Mono<Void> invalidate(ShardInfo shardInfo, StateHolder stateHolder) {
+                return stateHolder.invalidateStores();
+            }
+        });
+    }
+
+    public GatewayBootstrap<O> setInvalidationStrategy(InvalidationStrategy invalidationStrategy) {
+        this.invalidationStrategy = Objects.requireNonNull(invalidationStrategy, "invalidationStrategy");
         return this;
     }
 
@@ -625,7 +641,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                                                 new SessionInfo(gatewayClient.getSessionId(),
                                                         gatewayClient.getSequence()) : null;
                                         return shardCoordinator.publishDisconnected(shard, session)
-                                                .then(stateHolder.invalidateStores())
+                                                .then(invalidationStrategy.invalidate(shard, stateHolder))
                                                 .then(Mono.fromRunnable(() -> clientGroup.remove(shard.getIndex())))
                                                 .then(Mono.defer(() -> {
                                                     if (clientGroup.getShardCount() == 0) {
@@ -729,9 +745,8 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                 log.info("Found StoreService: {}", storeService);
             }
         }
-        return storeServiceMapper.compose((StoreService ss) ->
-                !ss.hasLongObjStores() ? new ForwardingStoreService(ss) : ss)
-                .apply(storeService);
+        return invalidationStrategy.adaptStoreService(storeService.hasLongObjStores() ?
+                storeService : new ForwardingStoreService(storeService));
     }
 
     private EntityRetrievalStrategy initEntityRetrievalStrategy() {
@@ -783,20 +798,25 @@ public class GatewayBootstrap<O extends GatewayOptions> {
      * A {@link StoreService} mapper that doesn't modify the input.
      *
      * @return a noop {@link StoreService} mapper
+     * @deprecated use {@link IdentityInvalidationStrategy} if you want to disable store invalidation
      */
+    @Deprecated
     public static Function<StoreService, StoreService> identityStoreService() {
         return storeService -> storeService;
     }
 
     /**
      * A {@link StoreService} mapper that will wrap the input with a {@link ShardAwareStoreService} using a
-     * {@link ShardingJdkStoreRegistry} that will track shard index of saved entities to allow for cleanup on shard
+     * {@link JdkKeyStoreRegistry} that will track shard index of saved entities to allow for cleanup on shard
      * invalidation.
      *
      * @return a shard-aware {@link StoreService} mapper
+     * @deprecated use {@link KeyStoreInvalidationStrategy} to use a dedicated key store to invalidate the store on
+     * shard invalidation
      */
+    @Deprecated
     public static Function<StoreService, StoreService> shardAwareStoreService() {
-        return storeService -> new ShardAwareStoreService(new ShardingJdkStoreRegistry(), storeService);
+        return storeService -> new ShardAwareStoreService(new JdkKeyStoreRegistry(), storeService);
     }
 
     /**
