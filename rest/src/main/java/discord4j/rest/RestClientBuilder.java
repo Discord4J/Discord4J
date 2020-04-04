@@ -23,6 +23,8 @@ import discord4j.rest.http.ExchangeStrategies;
 import discord4j.rest.request.*;
 import discord4j.rest.response.ResponseFunction;
 import discord4j.rest.route.Route;
+import reactor.core.publisher.EmitterProcessor;
+import reactor.core.publisher.FluxSink;
 import reactor.netty.http.client.HttpClient;
 
 import java.util.ArrayList;
@@ -30,6 +32,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 /**
  * Builder suited for creating a {@link RestClient}. To acquire an instance, see {@link #createRest(String)}.
@@ -45,6 +48,7 @@ public class RestClientBuilder<C, O extends RouterOptions> {
     protected ExchangeStrategies exchangeStrategies;
     protected List<ResponseFunction> responseTransformers = new ArrayList<>();
     protected GlobalRateLimiter globalRateLimiter;
+    protected RequestQueueFactory requestQueueFactory;
 
     /**
      * Initialize a new builder with the given token.
@@ -76,6 +80,7 @@ public class RestClientBuilder<C, O extends RouterOptions> {
         this.exchangeStrategies = source.exchangeStrategies;
         this.responseTransformers = source.responseTransformers;
         this.globalRateLimiter = source.globalRateLimiter;
+        this.requestQueueFactory = source.requestQueueFactory;
     }
 
     /**
@@ -183,6 +188,23 @@ public class RestClientBuilder<C, O extends RouterOptions> {
     }
 
     /**
+     * Sets the {@link RequestQueueFactory} that will provide {@link RequestQueue} instances for the router.
+     *
+     * <p>
+     * If not set, it will use a {@link RequestQueueFactory} providing request queues backed by an
+     * {@link EmitterProcessor} with buffering overflow strategy.
+     * </p>
+     *
+     * @param requestQueueFactory the factory that will provide {@link RequestQueue} instances for the router
+     * @return this builder
+     * @see RequestQueueFactory#backedByProcessor(Supplier, FluxSink.OverflowStrategy)
+     */
+    public RestClientBuilder<C, O> setRequestQueueFactory(RequestQueueFactory requestQueueFactory) {
+        this.requestQueueFactory = requestQueueFactory;
+        return this;
+    }
+
+    /**
      * Create a client capable of connecting to Discord REST API using a {@link DefaultRouter} that is capable of
      * working in monolithic environments.
      *
@@ -211,7 +233,7 @@ public class RestClientBuilder<C, O extends RouterOptions> {
 
     private O buildOptions(ReactorResources reactor, JacksonResources jackson) {
         RouterOptions options = new RouterOptions(token, reactor, initExchangeStrategies(jackson),
-                responseTransformers, initGlobalRateLimiter());
+                responseTransformers, initGlobalRateLimiter(), initRequestQueueFactory());
         return this.optionsModifier.apply(options);
     }
 
@@ -241,6 +263,13 @@ public class RestClientBuilder<C, O extends RouterOptions> {
             return globalRateLimiter;
         }
         return BucketGlobalRateLimiter.create();
+    }
+
+    private RequestQueueFactory initRequestQueueFactory() {
+        if (requestQueueFactory != null) {
+            return requestQueueFactory;
+        }
+        return RequestQueueFactory.buffering();
     }
 
     protected static class Config {
