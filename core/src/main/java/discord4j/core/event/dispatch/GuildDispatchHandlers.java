@@ -269,11 +269,21 @@ class GuildDispatchHandlers {
         Mono<Void> deleteMember = serviceMediator.getStateHolder().getMemberStore()
                 .delete(LongLongTuple2.of(guildId, response.getId()));
 
+        Mono<Void> deletePresence = serviceMediator.getStateHolder().getPresenceStore()
+                .delete(LongLongTuple2.of(guildId, response.getId()));
+
+        Mono<Void> deleteOrphanUser = serviceMediator.getStateHolder().getMemberStore()
+                .keys().filter(key -> key.getT1() != guildId && key.getT2() == response.getId())
+                .hasElements()
+                .flatMap(hasMutualServers -> Mono.just(response.getId())
+                        .filter(__ -> !hasMutualServers)
+                        .flatMap(serviceMediator.getStateHolder().getUserStore()::delete));
+
         User user = new User(serviceMediator, new UserBean(response));
 
         return member.map(Optional::of)
                 .defaultIfEmpty(Optional.empty())
-                .flatMap(Mono.when(removeMemberId, deleteMember)::thenReturn)
+                .flatMap(Mono.when(removeMemberId, deleteMember, deletePresence, deleteOrphanUser)::thenReturn)
                 .map(m -> new MemberLeaveEvent(serviceMediator.getClient(), user, guildId, m.orElse(null)));
     }
 
