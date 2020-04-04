@@ -20,13 +20,17 @@ package discord4j.core.event;
 import discord4j.common.LogUtil;
 import discord4j.core.event.domain.Event;
 import org.reactivestreams.Subscription;
+import reactor.core.publisher.EmitterProcessor;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxProcessor;
 import reactor.core.publisher.FluxSink;
 import reactor.core.scheduler.Scheduler;
+import reactor.scheduler.forkjoin.ForkJoinPoolScheduler;
 import reactor.util.Logger;
 import reactor.util.Loggers;
+import reactor.util.concurrent.Queues;
 
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static discord4j.common.LogUtil.format;
@@ -57,30 +61,31 @@ public class DefaultEventDispatcher implements EventDispatcher {
 
     private static final Logger log = Loggers.getLogger(DefaultEventDispatcher.class);
 
-    private final FluxProcessor<Event, Event> processor;
+    private final FluxProcessor<Event, Event> eventProcessor;
     private final FluxSink<Event> sink;
-    private final Scheduler scheduler;
+    private final Scheduler eventScheduler;
 
     /**
      * Creates a new event dispatcher using the given {@link FluxProcessor}, backpressure-handling strategy and
      * threading model.
      *
-     * @param processor a {@link FluxProcessor} of {@link Event}, used to bridge gateway events to the dispatcher
+     * @param eventProcessor a {@link FluxProcessor} of {@link Event}, used to bridge gateway events to the dispatcher
      * subscribers
      * @param overflowStrategy an overflow strategy, see {@link FluxSink.OverflowStrategy} for the available strategies
-     * @param scheduler a {@link Scheduler} to ensure a certain thread model on each published signal
+     * @param eventScheduler a {@link Scheduler} to ensure a certain thread model on each published signal
      */
-    public DefaultEventDispatcher(FluxProcessor<Event, Event> processor, FluxSink.OverflowStrategy overflowStrategy,
-                                  Scheduler scheduler) {
-        this.processor = processor;
-        this.sink = processor.sink(overflowStrategy);
-        this.scheduler = scheduler;
+    public DefaultEventDispatcher(FluxProcessor<Event, Event> eventProcessor,
+                                  FluxSink.OverflowStrategy overflowStrategy,
+                                  Scheduler eventScheduler) {
+        this.eventProcessor = eventProcessor;
+        this.sink = eventProcessor.sink(overflowStrategy);
+        this.eventScheduler = eventScheduler;
     }
 
     @Override
     public <E extends Event> Flux<E> on(Class<E> eventClass) {
         AtomicReference<Subscription> subscription = new AtomicReference<>();
-        return processor.publishOn(scheduler)
+        return eventProcessor.publishOn(eventScheduler)
                 .ofType(eventClass)
                 .<E>handle((event, sink) -> {
                     if (log.isTraceEnabled()) {
@@ -112,5 +117,48 @@ public class DefaultEventDispatcher implements EventDispatcher {
     @Override
     public void shutdown() {
         sink.complete();
+    }
+
+    /**
+     * A builder to create {@link EventDispatcher} instances.
+     */
+    public static class Builder implements EventDispatcher.Builder {
+
+        protected FluxProcessor<Event, Event> eventProcessor;
+        protected FluxSink.OverflowStrategy overflowStrategy = FluxSink.OverflowStrategy.BUFFER;
+        protected Scheduler eventScheduler;
+
+        protected Builder() {
+        }
+
+        @Override
+        public Builder eventProcessor(FluxProcessor<Event, Event> eventProcessor) {
+            this.eventProcessor = Objects.requireNonNull(eventProcessor);
+            return this;
+        }
+
+        @Override
+        public Builder overflowStrategy(FluxSink.OverflowStrategy overflowStrategy) {
+            this.overflowStrategy = Objects.requireNonNull(overflowStrategy);
+            return this;
+        }
+
+        @Override
+        public Builder eventScheduler(Scheduler eventScheduler) {
+            this.eventScheduler = Objects.requireNonNull(eventScheduler);
+            return this;
+        }
+
+        @Override
+        public EventDispatcher build() {
+            if (eventProcessor == null) {
+                eventProcessor = EmitterProcessor.create(Queues.SMALL_BUFFER_SIZE, false);
+            }
+            if (eventScheduler == null) {
+                eventScheduler = ForkJoinPoolScheduler.create("discord4j-events");
+            }
+            return new DefaultEventDispatcher(eventProcessor, overflowStrategy, eventScheduler);
+        }
+
     }
 }
