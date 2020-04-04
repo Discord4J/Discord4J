@@ -303,14 +303,14 @@ class GuildDispatchHandlers {
     static Mono<MemberLeaveEvent> guildMemberRemove(DispatchContext<GuildMemberRemove> context) {
         GatewayDiscordClient gateway = context.getGateway();
         long guildId = Snowflake.asLong(context.getDispatch().guild());
-        UserData user = context.getDispatch().user();
-        long userId = Snowflake.asLong(user.id());
+        UserData userData = context.getDispatch().user();
+        long userId = Snowflake.asLong(userData.id());
 
         Mono<Void> removeMemberId = context.getStateHolder().getGuildStore()
                 .find(guildId)
                 .map(guild -> ImmutableGuildData.builder()
                         .from(guild)
-                        .members(ListUtil.remove(guild.members(), member -> member.equals(user.id())))
+                        .members(ListUtil.remove(guild.members(), member -> member.equals(userData.id())))
                         .memberCount(guild.memberCount() - 1)
                         .build())
                 .flatMap(guild -> context.getStateHolder().getGuildStore().save(guildId, guild));
@@ -322,11 +322,22 @@ class GuildDispatchHandlers {
         Mono<Void> deleteMember = context.getStateHolder().getMemberStore()
                 .delete(LongLongTuple2.of(guildId, userId));
 
+        Mono<Void> deletePresence = context.getStateHolder().getPresenceStore()
+                .delete(LongLongTuple2.of(guildId, userId));
+
+        Mono<Void> deleteOrphanUser = context.getStateHolder().getMemberStore()
+                .keys().filter(key -> key.getT1() != guildId && key.getT2() == userId)
+                .hasElements()
+                .flatMap(hasMutualServers -> Mono.just(userId)
+                        .filter(__ -> !hasMutualServers)
+                        .flatMap(context.getStateHolder().getUserStore()::delete));
+
+        User user = new User(gateway, userData);
+
         return member.map(Optional::of)
                 .defaultIfEmpty(Optional.empty())
-                .flatMap(value -> Mono.when(removeMemberId, deleteMember).thenReturn(value))
-                .map(m -> new MemberLeaveEvent(gateway, context.getShardInfo(),
-                        new User(gateway, user), guildId, m.orElse(null)));
+                .flatMap(value -> Mono.when(removeMemberId, deleteMember, deletePresence, deleteOrphanUser).thenReturn(value))
+                .map(m -> new MemberLeaveEvent(gateway, context.getShardInfo(), user, guildId, m.orElse(null)));
     }
 
     static Mono<MemberChunkEvent> guildMembersChunk(DispatchContext<GuildMembersChunk> context) {

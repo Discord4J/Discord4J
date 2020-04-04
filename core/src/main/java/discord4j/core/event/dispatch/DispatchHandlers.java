@@ -210,8 +210,7 @@ public abstract class DispatchHandlers {
                 endpoint));
     }
 
-    private static Mono<VoiceStateUpdateEvent> voiceStateUpdateDispatch(
-            DispatchContext<VoiceStateUpdateDispatch> context) {
+    private static Mono<VoiceStateUpdateEvent> voiceStateUpdateDispatch(DispatchContext<VoiceStateUpdateDispatch> context) {
         GatewayDiscordClient gateway = context.getGateway();
         VoiceStateData voiceStateData = context.getDispatch().voiceState();
 
@@ -221,15 +220,17 @@ public abstract class DispatchHandlers {
         LongLongTuple2 key = LongLongTuple2.of(guildId, userId);
         VoiceState current = new VoiceState(gateway, voiceStateData);
 
-        Mono<Void> saveNew = context.getStateHolder().getVoiceStateStore().save(key, voiceStateData);
+        Mono<Void> saveNewOrRemove = voiceStateData.channelId().isPresent()
+                ? context.getStateHolder().getVoiceStateStore().save(key, voiceStateData)
+                : context.getStateHolder().getVoiceStateStore().delete(key);
 
         return context.getStateHolder().getVoiceStateStore()
                 .find(key)
-                .flatMap(saveNew::thenReturn)
+                .flatMap(saveNewOrRemove::thenReturn)
                 .map(old -> new VoiceStateUpdateEvent(gateway, context.getShardInfo(), current,
                         new VoiceState(gateway, old)))
-                .switchIfEmpty(saveNew.thenReturn(new VoiceStateUpdateEvent(gateway, context.getShardInfo(), current,
-                        null)));
+                .switchIfEmpty(saveNewOrRemove.thenReturn(
+                        new VoiceStateUpdateEvent(gateway, context.getShardInfo(), current, null)));
     }
 
     private static Mono<Event> webhooksUpdate(DispatchContext<WebhooksUpdate> context) {
@@ -243,7 +244,8 @@ public abstract class DispatchHandlers {
         long guildId = Snowflake.asLong(context.getDispatch().guildId());
         long channelId = Snowflake.asLong(context.getDispatch().channelId());
         String code = context.getDispatch().code();
-        Instant createdAt = DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(context.getDispatch().createdAt(), Instant::from);
+        Instant createdAt = DateTimeFormatter.ISO_OFFSET_DATE_TIME
+                .parse(context.getDispatch().createdAt(), Instant::from);
         int uses = context.getDispatch().uses();
         int maxUses = context.getDispatch().maxUses();
         int maxAge = context.getDispatch().maxAge();
