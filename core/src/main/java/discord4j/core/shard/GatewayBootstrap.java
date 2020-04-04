@@ -486,8 +486,8 @@ public class GatewayBootstrap<O extends GatewayOptions> {
 
     /**
      * Connect to the Discord Gateway upon subscription to acquire a {@link GatewayDiscordClient} instance and use it
-     * declaratively, releasing the object once the derived usage {@link Function} completes, and the underlying shard
-     * group disconnects, according to {@link GatewayDiscordClient#onDisconnect()}.
+     * in a declarative way, releasing the object once the derived usage {@link Function} completes, and the underlying
+     * shard group disconnects, according to {@link GatewayDiscordClient#onDisconnect()}.
      * <p>
      * The timing of acquiring a {@link GatewayDiscordClient} depends on the {@link #setAwaitConnections(boolean)}
      * setting: if {@code true}, when all joining shards have connected; if {@code false}, as soon as it is possible to
@@ -525,8 +525,42 @@ public class GatewayBootstrap<O extends GatewayOptions> {
      * {@link #setAwaitConnections(boolean)}, emits a {@link GatewayDiscordClient}. If an error occurs during the setup
      * sequence, it will be emitted through the {@link Mono}.
      */
+    public Mono<GatewayDiscordClient> login() {
+        return connect(DefaultGatewayClient::new);
+    }
+
+    /**
+     * Connect to the Discord Gateway upon subscription to build a {@link GatewayClient} from the set of options
+     * configured by this builder. The resulting {@link GatewayDiscordClient} can be externally managed, leaving you
+     * in charge of properly releasing its resources by calling {@link GatewayDiscordClient#logout()}.
+     * <p>
+     * The timing of acquiring a {@link GatewayDiscordClient} depends on the {@link #setAwaitConnections(boolean)}
+     * setting: if {@code true}, when all joining shards have connected; if {@code false}, as soon as it is possible
+     * to establish a connection to the Gateway.
+     * <p>
+     * All joining shards will attempt to serially connect to Discord Gateway, coordinated by the current
+     * {@link ShardCoordinator}. If one of the shards fail to connect due to a retryable problem like invalid session
+     * it will retry before continuing to the next one.
+     *
+     * @return a {@link Mono} that upon subscription and depending on the configuration of
+     * {@link #setAwaitConnections(boolean)}, emits a {@link GatewayDiscordClient}. If an error occurs during the setup
+     * sequence, it will be emitted through the {@link Mono}.
+     */
     public Mono<GatewayDiscordClient> connect() {
         return connect(DefaultGatewayClient::new);
+    }
+
+    /**
+     * Connect to the Discord Gateway upon subscription using a custom {@link Function factory} to build a
+     * {@link GatewayClient} from the set of options configured by this builder. See {@link #connect()} for more details
+     * about how the returned {@link Mono} operates.
+     *
+     * @return a {@link Mono} that upon subscription and depending on the configuration of
+     * {@link #setAwaitConnections(boolean)}, emits a {@link GatewayDiscordClient}. If an error occurs during the setup
+     * sequence, it will be emitted through the {@link Mono}.
+     */
+    public Mono<GatewayDiscordClient> login(Function<O, GatewayClient> clientFactory) {
+        return connect(clientFactory);
     }
 
     /**

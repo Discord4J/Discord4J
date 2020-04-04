@@ -94,13 +94,13 @@ public final class DiscordClient extends RestClient {
      * emitted once all connections have been made. If an error is received, it is emitted through the {@link Mono}.
      */
     public Mono<GatewayDiscordClient> login() {
-        return gateway().connect();
+        return gateway().login();
     }
 
     /**
      * Connect to the Discord Gateway upon subscription to acquire a {@link GatewayDiscordClient} instance and use it
-     * declaratively, releasing the object once the derived usage {@link Function} completes, and the underlying shard
-     * group disconnects, according to {@link GatewayDiscordClient#onDisconnect()}.
+     * in a declarative way, releasing the object once the derived usage {@link Function} completes, and the underlying
+     * shard group disconnects, according to {@link GatewayDiscordClient#onDisconnect()}.
      * <p>
      * To further configure the bot features, refer to using {@link #gateway()}.
      * <p>
