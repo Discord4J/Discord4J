@@ -738,7 +738,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
         if (entityRetrievalStrategy != null) {
             return entityRetrievalStrategy;
         }
-        return EntityRetrievalStrategy.STORE;
+        return EntityRetrievalStrategy.STORE_FALLBACK_REST;
     }
 
     private O buildOptions(GatewayDiscordClient gateway, IdentifyOptions identify, PayloadTransformer identifyLimiter) {
