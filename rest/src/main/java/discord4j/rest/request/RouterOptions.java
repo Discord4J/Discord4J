@@ -34,14 +34,17 @@ public class RouterOptions {
     private final ExchangeStrategies exchangeStrategies;
     private final List<ResponseFunction> responseTransformers;
     private final GlobalRateLimiter globalRateLimiter;
+    private final RequestQueueFactory requestQueueFactory;
 
     public RouterOptions(String token, ReactorResources reactorResources, ExchangeStrategies exchangeStrategies,
-                         List<ResponseFunction> responseTransformers, GlobalRateLimiter globalRateLimiter) {
+                         List<ResponseFunction> responseTransformers, GlobalRateLimiter globalRateLimiter,
+                         RequestQueueFactory requestQueueFactory) {
         this.token = Objects.requireNonNull(token, "token");
         this.reactorResources = Objects.requireNonNull(reactorResources, "reactorResources");
         this.exchangeStrategies = Objects.requireNonNull(exchangeStrategies, "exchangeStrategies");
         this.responseTransformers = Objects.requireNonNull(responseTransformers, "responseTransformers");
         this.globalRateLimiter = Objects.requireNonNull(globalRateLimiter, "globalRateLimiter");
+        this.requestQueueFactory = Objects.requireNonNull(requestQueueFactory, "requestQueueFactory");
     }
 
     /**
@@ -88,5 +91,14 @@ public class RouterOptions {
      */
     public GlobalRateLimiter getGlobalRateLimiter() {
         return globalRateLimiter;
+    }
+
+    /**
+     * Returns the {@link RequestQueueFactory} to use for creating {@link RequestQueue} instances.
+     *
+     * @return the configured {@link RequestQueueFactory}
+     */
+    public RequestQueueFactory getRequestQueueFactory() {
+        return requestQueueFactory;
     }
 }

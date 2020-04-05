@@ -23,7 +23,10 @@ import discord4j.rest.http.client.ClientResponse;
 import discord4j.rest.http.client.DiscordWebClient;
 import discord4j.rest.response.ResponseFunction;
 import org.reactivestreams.Subscription;
-import reactor.core.publisher.*;
+import reactor.core.publisher.BaseSubscriber;
+import reactor.core.publisher.Mono;
+import reactor.core.publisher.MonoProcessor;
+import reactor.core.publisher.SignalType;
 import reactor.core.scheduler.Scheduler;
 import reactor.netty.http.client.HttpClientResponse;
 import reactor.retry.Retry;
@@ -50,24 +53,24 @@ class RequestStream {
 
     private static final Logger log = Loggers.getLogger(RequestStream.class);
 
-    private final EmitterProcessor<RequestCorrelation<ClientResponse>> backing = EmitterProcessor.create(false);
     private final BucketKey id;
-    private final DiscordWebClient httpClient;
+    private final RequestQueue<RequestCorrelation<ClientResponse>> requestQueue;
     private final GlobalRateLimiter globalRateLimiter;
-    private final RateLimitStrategy rateLimitStrategy;
     private final Scheduler timedTaskScheduler;
     private final List<ResponseFunction> responseFunctions;
+    private final DiscordWebClient httpClient;
+    private final RateLimitStrategy rateLimitStrategy;
     private final RateLimitRetryOperator rateLimitRetryOperator;
 
-    RequestStream(BucketKey id, DiscordWebClient httpClient, GlobalRateLimiter globalRateLimiter,
-                  RateLimitStrategy rateLimitStrategy, Scheduler timedTaskScheduler,
-                  List<ResponseFunction> responseFunctions) {
+    RequestStream(BucketKey id, RouterOptions routerOptions, DiscordWebClient httpClient,
+                  RateLimitStrategy rateLimitStrategy) {
         this.id = id;
+        this.requestQueue = routerOptions.getRequestQueueFactory().create();
+        this.globalRateLimiter = routerOptions.getGlobalRateLimiter();
+        this.timedTaskScheduler = routerOptions.getReactorResources().getTimerTaskScheduler();
+        this.responseFunctions = routerOptions.getResponseTransformers();
         this.httpClient = httpClient;
-        this.globalRateLimiter = globalRateLimiter;
         this.rateLimitStrategy = rateLimitStrategy;
-        this.timedTaskScheduler = timedTaskScheduler;
-        this.responseFunctions = responseFunctions;
         this.rateLimitRetryOperator = new RateLimitRetryOperator(timedTaskScheduler);
     }
 
@@ -88,11 +91,11 @@ class RequestStream {
     }
 
     void push(RequestCorrelation<ClientResponse> request) {
-        backing.onNext(request);
+        requestQueue.push(request);
     }
 
     void start() {
-        backing.subscribe(new RequestSubscriber(rateLimitStrategy));
+        requestQueue.requests().subscribe(new RequestSubscriber(rateLimitStrategy));
     }
 
     /**

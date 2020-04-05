@@ -22,6 +22,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.Objects;
 
+/**
+ * A container to express a shard index and count.
+ */
 public class ShardInfo {
 
     private final int index;
@@ -33,10 +36,20 @@ public class ShardInfo {
         this.count = count;
     }
 
+    /**
+     * Return the shard index represented by this {@link ShardInfo}.
+     *
+     * @return the shard number (0-based)
+     */
     public int getIndex() {
         return index;
     }
 
+    /**
+     * Return the shard count represented by this {@link ShardInfo}.
+     *
+     * @return the number of shards
+     */
     public int getCount() {
         return count;
     }
@@ -59,6 +72,11 @@ public class ShardInfo {
         return Objects.hash(index, count);
     }
 
+    /**
+     * Return a string form of this {@link ShardInfo} using the following pattern: {@code index,count}
+     *
+     * @return a formatted string representing this object
+     */
     public String format() {
         return index + "," + count;
     }

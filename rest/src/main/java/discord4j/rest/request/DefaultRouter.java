@@ -43,6 +43,7 @@ public class DefaultRouter implements Router {
     private final DiscordWebClient httpClient;
     private final GlobalRateLimiter globalRateLimiter;
     private final Map<BucketKey, RequestStream> streamMap = new ConcurrentHashMap<>();
+    private final RouterOptions routerOptions;
 
     /**
      * Create a Discord API bucket-aware {@link Router} configured with the given options.
@@ -50,6 +51,7 @@ public class DefaultRouter implements Router {
      * @param routerOptions the options that configure this {@link Router}
      */
     public DefaultRouter(RouterOptions routerOptions) {
+        this.routerOptions = routerOptions;
         this.reactorResources = routerOptions.getReactorResources();
         this.responseFunctions = routerOptions.getResponseTransformers();
         this.httpClient = new DiscordWebClient(reactorResources.getHttpClient(),
@@ -76,9 +78,7 @@ public class DefaultRouter implements Router {
                         log.trace("Creating RequestStream with key {} for request: {} -> {}",
                                 k, request.getRoute().getUriTemplate(), request.getCompleteUri());
                     }
-                    RequestStream stream = new RequestStream(k, httpClient, globalRateLimiter,
-                            HEADER_STRATEGY, reactorResources.getTimerTaskScheduler(),
-                            responseFunctions);
+                    RequestStream stream = new RequestStream(k, routerOptions, httpClient, HEADER_STRATEGY);
                     stream.start();
                     return stream;
                 });

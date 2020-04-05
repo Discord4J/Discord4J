@@ -33,7 +33,7 @@ import reactor.netty.http.server.HttpServer;
 import reactor.util.Logger;
 import reactor.util.Loggers;
 
-import java.util.ArrayList;
+import java.util.Collections;
 
 public class WebClientTest {
 
@@ -77,8 +77,8 @@ public class WebClientTest {
     public void htmlResponse() {
         ExchangeStrategies ex2 = ExchangeStrategies.jackson(new JacksonResources().getObjectMapper());
         Route fakeRoute = Route.get("http://0.0.0.0:" + PORT + "/html");
-        Router router = new DefaultRouter(new RouterOptions("", new ReactorResources(), ex2, new ArrayList<>(),
-                new UnboundedGlobalRateLimiter()));
+        Router router = new DefaultRouter(new RouterOptions("", ReactorResources.create(), ex2, Collections.emptyList(),
+                BucketGlobalRateLimiter.create(), RequestQueueFactory.buffering()));
         String response = router.exchange(new DiscordWebRequest(fakeRoute))
                 .bodyToMono(String.class)
                 .log()

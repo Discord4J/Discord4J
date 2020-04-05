@@ -22,6 +22,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.Objects;
 
+/**
+ * A container to represent the current state of a Gateway session.
+ */
 public class SessionInfo {
 
     private final String id;
@@ -33,10 +36,20 @@ public class SessionInfo {
         this.sequence = sequence;
     }
 
+    /**
+     * Return the identifier of the session represented by this {@link SessionInfo}.
+     *
+     * @return the session identifier
+     */
     public String getId() {
         return id;
     }
 
+    /**
+     * Return the sequence number of the session represented by this {@link SessionInfo}.
+     *
+     * @return the session sequence
+     */
     public Integer getSequence() {
         return sequence;
     }

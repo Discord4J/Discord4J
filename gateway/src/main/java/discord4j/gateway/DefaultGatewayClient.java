@@ -224,7 +224,8 @@ public class DefaultGatewayClient implements GatewayClient {
                                 lastAck.compareAndSet(0, now);
                                 long delay = now - lastAck.get();
                                 if (lastSent.get() - lastAck.get() > 0) {
-                                    log.warn(format(context, "Missing heartbeat ACK for {}"), Duration.ofNanos(delay));
+                                    log.warn(format(context, "Missing heartbeat ACK for {} (tick: {}, seq: {})"),
+                                            Duration.ofNanos(delay), t, sequence.get());
                                     sessionHandler.error(new GatewayException(context,
                                             "Reconnecting due to zombie or failed connection"));
                                     return Mono.empty();

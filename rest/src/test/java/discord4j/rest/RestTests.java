@@ -22,10 +22,7 @@ import discord4j.common.JacksonResources;
 import discord4j.common.ReactorResources;
 import discord4j.common.jackson.UnknownPropertyHandler;
 import discord4j.rest.http.ExchangeStrategies;
-import discord4j.rest.request.DefaultRouter;
-import discord4j.rest.request.Router;
-import discord4j.rest.request.RouterOptions;
-import discord4j.rest.request.UnboundedGlobalRateLimiter;
+import discord4j.rest.request.*;
 import discord4j.rest.service.ChannelService;
 
 import java.util.Collections;
@@ -33,8 +30,8 @@ import java.util.Collections;
 public abstract class RestTests {
 
     public static Router getRouter(String token, ObjectMapper mapper) {
-        return new DefaultRouter(new RouterOptions(token, new ReactorResources(), ExchangeStrategies.jackson(mapper),
-                Collections.emptyList(), new UnboundedGlobalRateLimiter()));
+        return new DefaultRouter(new RouterOptions(token, ReactorResources.create(), ExchangeStrategies.jackson(mapper),
+                Collections.emptyList(), BucketGlobalRateLimiter.create(), RequestQueueFactory.buffering()));
     }
 
     public static ObjectMapper getMapper(boolean ignoreUnknown) {

@@ -2,7 +2,6 @@ apply plugin: 'com.gorylenko.gradle-git-properties'
 
 dependencies {
     api "io.projectreactor.netty:reactor-netty"
-    api "io.projectreactor.addons:reactor-pool"
     api "io.projectreactor.addons:reactor-extra"
     api "com.fasterxml.jackson.core:jackson-databind:$jackson_version"
     api "com.fasterxml.jackson.datatype:jackson-datatype-jdk8:$jackson_version"
