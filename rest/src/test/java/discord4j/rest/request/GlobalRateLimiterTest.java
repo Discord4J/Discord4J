@@ -37,9 +37,7 @@ public class GlobalRateLimiterTest {
         return Arrays.asList(
                 new ClockGlobalRateLimiter(50, Duration.ofSeconds(1), Schedulers.parallel()),
                 new SemaphoreGlobalRateLimiter(16),
-                new ParallelGlobalRateLimiter(16),
-                new UnboundedGlobalRateLimiter(),
-                new PooledGlobalRateLimiter()
+                new UnboundedGlobalRateLimiter()
                 );
     }
 
