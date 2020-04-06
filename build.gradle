@@ -32,7 +32,7 @@ ext {
     mockito_version = '3.3.3'
     logback_version = '1.3.0-alpha4'
     reflections_version = '0.9.12'
-    lavaplayer_version = '1.3.43'
+    lavaplayer_version = '1.3.44'
 
     isJitpack = "true" == System.getenv("JITPACK")
     isRelease = !version.toString().endsWith('-SNAPSHOT')
