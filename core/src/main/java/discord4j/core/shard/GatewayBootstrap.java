@@ -537,7 +537,9 @@ public class GatewayBootstrap<O extends GatewayOptions> {
      * @param whileConnectedFunction the {@link Function} to apply the <strong>connected</strong>
      * {@link GatewayDiscordClient} and trigger a processing pipeline from it.
      * @return an empty {@link Mono} completing after all resources have released
+     * @deprecated use {@link #withGateway(Function)}
      */
+    @Deprecated
     public Mono<Void> withConnection(Function<GatewayDiscordClient, Mono<Void>> whileConnectedFunction) {
         return usingConnection(gateway -> whileConnectedFunction.apply(gateway).then(gateway.onDisconnect()));
     }
@@ -583,7 +585,9 @@ public class GatewayBootstrap<O extends GatewayOptions> {
      * @return a {@link Mono} that upon subscription and depending on the configuration of
      * {@link #setAwaitConnections(boolean)}, emits a {@link GatewayDiscordClient}. If an error occurs during the setup
      * sequence, it will be emitted through the {@link Mono}.
+     * @deprecated use {@link #login()}
      */
+    @Deprecated
     public Mono<GatewayDiscordClient> connect() {
         return connect(DefaultGatewayClient::new);
     }
@@ -609,7 +613,9 @@ public class GatewayBootstrap<O extends GatewayOptions> {
      * @return a {@link Mono} that upon subscription and depending on the configuration of
      * {@link #setAwaitConnections(boolean)}, emits a {@link GatewayDiscordClient}. If an error occurs during the setup
      * sequence, it will be emitted through the {@link Mono}.
+     * @deprecated use {@link #login(Function)}
      */
+    @Deprecated
     public Mono<GatewayDiscordClient> connect(Function<O, GatewayClient> clientFactory) {
         Map<String, Object> hints = new LinkedHashMap<>();
         hints.put("messageClass", MessageData.class);
