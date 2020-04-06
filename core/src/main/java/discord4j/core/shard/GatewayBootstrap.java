@@ -106,7 +106,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
     private ShardCoordinator shardCoordinator = null;
     private EventDispatcher eventDispatcher = null;
     private StoreService storeService = null;
-    private InvalidationStrategy invalidationStrategy = InvalidationStrategy.disable();
+    private InvalidationStrategy invalidationStrategy = InvalidationStrategy.withJdkRegistry();
     private boolean memberRequest = true;
     private Function<ShardInfo, StatusUpdate> initialPresence = shard -> null;
     private Function<ShardInfo, SessionInfo> resumeOptions = shard -> null;
@@ -161,6 +161,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
         this.gatewayReactorResources = source.gatewayReactorResources;
         this.voiceReactorResources = source.voiceReactorResources;
         this.voiceConnectionFactory = source.voiceConnectionFactory;
+        this.entityRetrievalStrategy = source.entityRetrievalStrategy;
     }
 
     /**
@@ -276,6 +277,23 @@ public class GatewayBootstrap<O extends GatewayOptions> {
         });
     }
 
+    /**
+     * Set the {@link InvalidationStrategy} this shard group should use on shard session termination. Discord Gateway
+     * sends real-time updates that are cached by Discord4J. When a Gateway session is terminated, any update beyond
+     * that point is lost and therefore the cache, represented by the {@link Store} abstraction, is outdated. Reacting
+     * to this event is called "invalidation" and can be configured through this method.
+     * <p>
+     * Defaults to using {@link InvalidationStrategy#withJdkRegistry()}, an in-memory registry to keep track of the
+     * source shard of each update for a fast removal on invalidation, at the cost of increased memory footprint.
+     * <ul>
+     *     <li>For a custom registry use {@link InvalidationStrategy#withCustomRegistry(KeyStoreRegistry)}</li>
+     *     <li>To disable this feature use {@link InvalidationStrategy#disable()}</li>
+     *     <li>If this group only contains one shard, use {@link InvalidationStrategy#identity()}</li>
+     * </ul>
+     *
+     * @param invalidationStrategy an {@link InvalidationStrategy} to apply to this shard group
+     * @return this builder
+     */
     public GatewayBootstrap<O> setInvalidationStrategy(InvalidationStrategy invalidationStrategy) {
         this.invalidationStrategy = Objects.requireNonNull(invalidationStrategy, "invalidationStrategy");
         return this;

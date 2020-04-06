@@ -83,7 +83,8 @@ public class GatewayDiscordClient implements EntityRetriever {
 
     public GatewayDiscordClient(DiscordClient discordClient, GatewayResources gatewayResources,
                                 MonoProcessor<Void> closeProcessor, GatewayClientGroup gatewayClientGroup,
-                                VoiceConnectionFactory voiceConnectionFactory, EntityRetrievalStrategy entityRetrievalStrategy) {
+                                VoiceConnectionFactory voiceConnectionFactory,
+                                EntityRetrievalStrategy entityRetrievalStrategy) {
         this.discordClient = discordClient;
         this.gatewayResources = gatewayResources;
         this.closeProcessor = closeProcessor;
@@ -420,6 +421,7 @@ public class GatewayDiscordClient implements EntityRetriever {
     public EntityRetriever withRetrievalStrategy(EntityRetrievalStrategy retrievalStrategy) {
         return retrievalStrategy.apply(this);
     }
+
     @Override
     public Mono<Channel> getChannelById(Snowflake channelId) {
         return entityRetriever.getChannelById(channelId);
