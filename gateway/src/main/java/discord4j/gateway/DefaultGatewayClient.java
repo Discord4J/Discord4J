@@ -251,13 +251,12 @@ public class DefaultGatewayClient implements GatewayClient {
 
                     return Mono.zip(httpFuture, readyHandler, receiverFuture, senderFuture, heartbeatHandler)
                             .doOnError(t -> log.error(format(context, "{}"), t.toString()))
-                            .doOnError(t -> heartbeat.stop())
+                            .doOnTerminate(heartbeat::stop)
                             .doOnCancel(() -> sessionHandler.close())
                             .then();
                 })
                 .retryWhen(retryFactory())
-                .then(Mono.defer(() -> disconnectNotifier))
-                .doOnTerminate(heartbeat::stop);
+                .then(Mono.defer(() -> disconnectNotifier));
     }
 
     private String initUserAgent() {
@@ -346,6 +345,7 @@ public class DefaultGatewayClient implements GatewayClient {
     private Mono<CloseStatus> handleClose(DisconnectBehavior behavior, CloseStatus closeStatus) {
         return Mono.deferWithContext(ctx -> {
             log.info(format(ctx, "Handling close {} with behavior: {}"), closeStatus, behavior);
+            heartbeat.stop();
             reconnectContext.clear();
             connected.set(false);
             lastSent.set(0);

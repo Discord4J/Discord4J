@@ -235,12 +235,12 @@ public class DefaultVoiceGatewayClient {
 
                     return Mono.zip(httpFuture, receiverFuture, heartbeatHandler)
                             .doOnError(t -> log.error(format(context, "{}"), t.toString()))
+                            .doOnTerminate(heartbeat::stop)
                             .doOnCancel(() -> sessionHandler.close())
                             .then();
                 })
                 .retryWhen(retryFactory())
-                .then(Mono.defer(() -> disconnectNotifier))
-                .doOnTerminate(heartbeat::stop);
+                .then(Mono.defer(() -> disconnectNotifier));
     }
 
     private VoiceConnection acquireConnection() {
@@ -345,6 +345,7 @@ public class DefaultVoiceGatewayClient {
     private Mono<CloseStatus> handleClose(DisconnectBehavior behavior, CloseStatus closeStatus) {
         return Mono.deferWithContext(ctx -> {
             log.info(format(ctx, "Handling close {} with behavior: {}"), closeStatus, behavior);
+            heartbeat.stop();
             state.set(VoiceConnection.State.DISCONNECTED);
             reconnectContext.clear();
             connected.set(false);
