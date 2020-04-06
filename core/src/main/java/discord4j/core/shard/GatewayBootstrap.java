@@ -78,10 +78,10 @@ import static discord4j.common.LogUtil.format;
  * <p>
  * One of the following methods must be subscribed to in order to begin establishing Discord Gateway connections:
  * <ul>
- *     <li>{@link #connect()} to obtain a {@link Mono} for a {@link GatewayDiscordClient} that can be externally
+ *     <li>{@link #login()} to obtain a {@link Mono} for a {@link GatewayDiscordClient} that can be externally
  *     managed.</li>
- *     <li>{@link #connect(Function)} to customize the {@link GatewayClient} instances to build.</li>
- *     <li>{@link #withConnection(Function)} to work with the {@link GatewayDiscordClient} in a scoped way, providing
+ *     <li>{@link #login(Function)} to customize the {@link GatewayClient} instances to build.</li>
+ *     <li>{@link #withGateway(Function)} to work with the {@link GatewayDiscordClient} in a scoped way, providing
  *     a mapping function that will close and release all resources on disconnection.</li>
  * </ul>
  * This bootstrap emits a result depending on the configuration of {@link #setAwaitConnections(boolean)}. Use
@@ -500,6 +500,26 @@ public class GatewayBootstrap<O extends GatewayOptions> {
     public GatewayBootstrap<O> setEntityRetrievalStrategy(@Nullable EntityRetrievalStrategy entityRetrievalStrategy) {
         this.entityRetrievalStrategy = entityRetrievalStrategy;
         return this;
+    }
+
+    /**
+     * Connect to the Discord Gateway upon subscription to acquire a {@link GatewayDiscordClient} instance and use it
+     * in a declarative way, releasing the object once the derived usage {@link Function} completes, and the underlying
+     * shard group disconnects, according to {@link GatewayDiscordClient#onDisconnect()}.
+     * <p>
+     * The timing of acquiring a {@link GatewayDiscordClient} depends on the {@link #setAwaitConnections(boolean)}
+     * setting: if {@code true}, when all joining shards have connected; if {@code false}, as soon as it is possible to
+     * establish a connection to the Gateway.
+     * <p>
+     * Calling this method is useful when you operate on the {@link GatewayDiscordClient} object using reactive API you
+     * can compose within the scope of the given {@link Function}.
+     *
+     * @param whileConnectedFunction the {@link Function} to apply the <strong>connected</strong>
+     * {@link GatewayDiscordClient} and trigger a processing pipeline from it.
+     * @return an empty {@link Mono} completing after all resources have released
+     */
+    public Mono<Void> withGateway(Function<GatewayDiscordClient, Mono<Void>> whileConnectedFunction) {
+        return usingConnection(gateway -> whileConnectedFunction.apply(gateway).then(gateway.onDisconnect()));
     }
 
     /**

@@ -63,7 +63,7 @@ public class ExampleCustomOptionsBot {
         DiscordClient.create(System.getenv("token"))
                 .gateway()
                 .setExtraOptions(options -> new CustomOptions(options, "bar"))
-                .connect(CustomGatewayClient::new)
+                .login(CustomGatewayClient::new)
                 .blockOptional()
                 .orElseThrow(RuntimeException::new)
                 .onDisconnect()

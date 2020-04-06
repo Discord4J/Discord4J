@@ -112,7 +112,7 @@ public final class DiscordClient extends RestClient {
      * @return an empty {@link Mono} completing after all resources have released
      */
     public Mono<Void> withGateway(Function<GatewayDiscordClient, Mono<Void>> whileConnectedFunction) {
-        return gateway().withConnection(whileConnectedFunction);
+        return gateway().withGateway(whileConnectedFunction);
     }
 
     /**

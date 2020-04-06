@@ -57,7 +57,7 @@ public class ExampleStore {
                 .setStoreService(MappingStoreService.create()
                         .setMapping(new NoOpStoreService(), MessageData.class)
                         .setFallback(new JdkStoreService()))
-                .withConnection(gateway -> {
+                .withGateway(gateway -> {
                     log.info("Start!");
 
                     Mono<Void> server = startHttpServer(gateway, counts, jackson.getObjectMapper()).then();
