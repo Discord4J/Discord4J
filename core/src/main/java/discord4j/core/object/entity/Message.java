@@ -24,6 +24,7 @@ import discord4j.core.object.entity.channel.GuildChannel;
 import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.core.object.reaction.Reaction;
 import discord4j.core.object.reaction.ReactionEmoji;
+import discord4j.core.retriever.EntityRetrievalStrategy;
 import discord4j.core.spec.MessageEditSpec;
 import discord4j.core.util.EntityUtil;
 import discord4j.discordjson.json.ImmutableSuppressEmbedsRequest;
@@ -125,6 +126,17 @@ public final class Message implements Entity {
      */
     public Mono<MessageChannel> getChannel() {
         return gateway.getChannelById(getChannelId()).cast(MessageChannel.class);
+    }
+
+    /**
+     * Requests to retrieve the channel the message was sent in, using the given retrieval strategy.
+     *
+     * @param retrievalStrategy the strategy to use to get the channel
+     * @return A {@link Mono} where, upon successful completion, emits the {@link MessageChannel channel} the message
+     * was sent in. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<MessageChannel> getChannel(EntityRetrievalStrategy retrievalStrategy) {
+        return gateway.withRetrievalStrategy(retrievalStrategy).getChannelById(getChannelId()).cast(MessageChannel.class);
     }
 
     /**
@@ -239,6 +251,18 @@ public final class Message implements Entity {
     }
 
     /**
+     * Requests to retrieve the users specifically mentioned in this message, using the given retrieval strategy.
+     *
+     * @param retrievalStrategy the strategy to use to get the users
+     * @return A {@link Flux} that continually emits {@link User users} specifically mentioned in this message. If an
+     * error is received, it is emitted through the {@code Flux}.
+     */
+    public Flux<User> getUserMentions(EntityRetrievalStrategy retrievalStrategy) {
+        return Flux.fromIterable(getUserMentionIds())
+                .flatMap(id -> gateway.withRetrievalStrategy(retrievalStrategy).getUserById(id));
+    }
+
+    /**
      * Gets the IDs of the roles specifically mentioned in this message.
      *
      * @return The IDs of the roles specifically mentioned in this message.
@@ -260,6 +284,21 @@ public final class Message implements Entity {
                 .flatMap(roleId -> getGuild()
                         .map(Guild::getId)
                         .flatMap(guildId -> gateway.getRoleById(guildId, roleId)));
+    }
+
+    /**
+     * Requests to retrieve the roles specifically mentioned in this message, using the given retrieval strategy.
+     *
+     * @param retrievalStrategy the strategy to use to get the roles
+     * @return A {@link Flux} that continually emits {@link Role roles} specifically mentioned in this message. If an
+     * error is received, it is emitted through the {@code Flux}.
+     */
+    public Flux<Role> getRoleMentions(EntityRetrievalStrategy retrievalStrategy) {
+        return Flux.fromIterable(getRoleMentionIds())
+                .flatMap(roleId -> getGuild()
+                        .map(Guild::getId)
+                        .flatMap(guildId -> gateway.withRetrievalStrategy(retrievalStrategy)
+                                .getRoleById(guildId, roleId)));
     }
 
     /**
@@ -362,6 +401,18 @@ public final class Message implements Entity {
      */
     public Mono<Guild> getGuild() {
         return getChannel().ofType(GuildChannel.class).flatMap(GuildChannel::getGuild);
+    }
+
+    /**
+     * Requests to retrieve the guild this message is associated to, if present, using the given retrieval strategy.
+     *
+     * @param retrievalStrategy the strategy to use to get the guild
+     * @return A {@link Mono} where, upon successful completion, emits the {@link Guild} this message is associated to,
+     * if present. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Guild> getGuild(EntityRetrievalStrategy retrievalStrategy) {
+        return getChannel(retrievalStrategy).ofType(GuildChannel.class)
+                .flatMap(guildChannel -> guildChannel.getGuild(retrievalStrategy));
     }
 
     /**

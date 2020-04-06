@@ -19,6 +19,7 @@ package discord4j.core.object.entity;
 import discord4j.discordjson.json.WebhookData;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.channel.GuildMessageChannel;
+import discord4j.core.retriever.EntityRetrievalStrategy;
 import discord4j.rest.util.Snowflake;
 import discord4j.core.spec.WebhookEditSpec;
 import discord4j.core.util.EntityUtil;
@@ -83,6 +84,17 @@ public final class Webhook implements Entity {
     }
 
     /**
+     * Requests to retrieve the guild this webhook is associated to, using the given retrieval strategy.
+     *
+     * @param retrievalStrategy the strategy to use to get the guild
+     * @return A {@link Mono} where, upon successful completion, emits the {@link Guild guild} this webhook is
+     * associated to. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Guild> getGuild(EntityRetrievalStrategy retrievalStrategy) {
+        return gateway.withRetrievalStrategy(retrievalStrategy).getGuildById(getGuildId());
+    }
+
+    /**
      * Gets the ID of the channel this webhook is associated to.
      *
      * @return The ID of the channel this webhook is associated to.
@@ -102,6 +114,19 @@ public final class Webhook implements Entity {
     }
 
     /**
+     * Requests to retrieve the channel this webhook is associated to, using the given retrieval strategy.
+     *
+     * @param retrievalStrategy the strategy to use to get the channel
+     * @return A {@link Mono} where, upon successful completion, emits the {@link GuildMessageChannel channel} this webhook is
+     * associated to. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<GuildMessageChannel> getChannel(EntityRetrievalStrategy retrievalStrategy) {
+        return gateway.withRetrievalStrategy(retrievalStrategy)
+                .getChannelById(getChannelId())
+                .cast(GuildMessageChannel.class);
+    }
+
+    /**
      * Gets the ID of the user this webhook was created by.
      *
      * @return The ID of the user this webhook was created by.
@@ -118,6 +143,17 @@ public final class Webhook implements Entity {
      */
     public Mono<User> getCreator() {
         return gateway.getUserById(getCreatorId());
+    }
+
+    /**
+     * Requests to retrieve the user this webhook was created by, if present, using the given retrieval strategy.
+     *
+     * @param retrievalStrategy the strategy to use to get the creator
+     * @return A {@link Mono} where, upon successful completion, emits the {@link User user} this webhook was created
+     * by, if present. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<User> getCreator(EntityRetrievalStrategy retrievalStrategy) {
+        return gateway.withRetrievalStrategy(retrievalStrategy).getUserById(getCreatorId());
     }
 
     /**

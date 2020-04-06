@@ -20,6 +20,7 @@ import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.CategorizableChannel;
+import discord4j.core.retriever.EntityRetrievalStrategy;
 import discord4j.rest.util.Snowflake;
 import discord4j.discordjson.json.InviteData;
 import discord4j.discordjson.json.PartialGuildData;
@@ -91,6 +92,19 @@ public class Invite implements DiscordObject {
     }
 
     /**
+     * Requests to retrieve the guild this invite is associated to, if present, using the given retrieval strategy.
+     *
+     * @param retrievalStrategy the strategy to use to get the guild
+     * @return A {@link Mono} where, upon successful completion, emits the {@link Guild guild} this invite is associated
+     * to. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public final Mono<Guild> getGuild(EntityRetrievalStrategy retrievalStrategy) {
+        return getGuildId()
+                .map(id -> gateway.withRetrievalStrategy(retrievalStrategy).getGuildById(id))
+                .orElse(Mono.empty());
+    }
+
+    /**
      * Gets the ID of the channel this invite is associated to.
      *
      * @return The ID of the channel this invite is associated to.
@@ -107,6 +121,19 @@ public class Invite implements DiscordObject {
      */
     public final Mono<CategorizableChannel> getChannel() {
         return gateway.getChannelById(getChannelId()).cast(CategorizableChannel.class);
+    }
+
+    /**
+     * Requests to retrieve the channel this invite is associated to, using the given retrieval strategy.
+     *
+     * @param retrievalStrategy the strategy to use to get the channel
+     * @return A {@link Mono} where, upon successful completion, emits the {@link CategorizableChannel channel} this invite is
+     * associated to. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public final Mono<CategorizableChannel> getChannel(EntityRetrievalStrategy retrievalStrategy) {
+        return gateway.withRetrievalStrategy(retrievalStrategy)
+                .getChannelById(getChannelId())
+                .cast(CategorizableChannel.class);
     }
 
     /**
@@ -127,7 +154,20 @@ public class Invite implements DiscordObject {
      * an error is received, it is emitted through the {@code Mono}.
      */
     public final Mono<User> getInviter() {
-        return getInviterId().map(getClient()::getUserById).orElse(Mono.empty());
+        return getInviterId().map(gateway::getUserById).orElse(Mono.empty());
+    }
+
+    /**
+     * Requests to retrieve the user who created the invite, using the given retrieval strategy.
+     *
+     * @param retrievalStrategy the strategy to use to get the inviter
+     * @return A {@link Mono} where, upon successful completion, emits the {@link User user} who created the invite. If
+     * an error is received, it is emitted through the {@code Mono}.
+     */
+    public final Mono<User> getInviter(EntityRetrievalStrategy retrievalStrategy) {
+        return getInviterId()
+                .map(id -> gateway.withRetrievalStrategy(retrievalStrategy).getUserById(id))
+                .orElse(Mono.empty());
     }
 
     /**
@@ -149,6 +189,19 @@ public class Invite implements DiscordObject {
      */
     public final Mono<User> getTargetUser() {
         return getTargetUserId().map(gateway::getUserById).orElse(Mono.empty());
+    }
+
+    /**
+     * Requests to retrieve the target user this invite is associated to, using the given retrieval strategy.
+     *
+     * @param retrievalStrategy the strategy to use to get the target user
+     * @return A {@link Mono} where, upon successful completion, emits the {@link User target user} this invite is
+     * associated to. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public final Mono<User> getTargetUser(EntityRetrievalStrategy retrievalStrategy) {
+        return getTargetUserId()
+                .map(id -> gateway.withRetrievalStrategy(retrievalStrategy).getUserById(id))
+                .orElse(Mono.empty());
     }
 
     /**

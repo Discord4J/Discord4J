@@ -24,6 +24,7 @@ import discord4j.core.object.VoiceState;
 import discord4j.core.object.audit.AuditLogEntry;
 import discord4j.core.object.entity.channel.*;
 import discord4j.core.object.presence.Presence;
+import discord4j.core.retriever.EntityRetrievalStrategy;
 import discord4j.rest.util.Image;
 import discord4j.rest.util.Snowflake;
 import discord4j.core.spec.*;
@@ -262,6 +263,19 @@ public final class Guild implements Entity {
     }
 
     /**
+     * Requests to retrieve the AFK channel, if present, using the given retrieval strategy.
+     *
+     * @param retrievalStrategy the strategy to use to get the AFK channel
+     * @return A {@link Mono} where, upon successful completion, emits the AFK {@link VoiceChannel channel}, if present.
+     * If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<VoiceChannel> getAfkChannel(EntityRetrievalStrategy retrievalStrategy) {
+        return Mono.justOrEmpty(getAfkChannelId())
+                .flatMap(id -> gateway.withRetrievalStrategy(retrievalStrategy).getChannelById(id))
+                .cast(VoiceChannel.class);
+    }
+
+    /**
      * Gets the AFK timeout in seconds.
      *
      * @return The AFK timeout in seconds.
@@ -287,6 +301,19 @@ public final class Guild implements Entity {
      */
     public Mono<GuildChannel> getEmbedChannel() {
         return Mono.justOrEmpty(getEmbedChannelId()).flatMap(gateway::getChannelById).cast(GuildChannel.class);
+    }
+
+    /**
+     * Requests to retrieve the embedded channel, if present, using the given retrieval strategy.
+     *
+     * @param retrievalStrategy the strategy to use to get the embedded channel
+     * @return A {@link Mono} where, upon successful completion, emits the embedded {@link GuildChannel channel}, if
+     * present. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<GuildChannel> getEmbedChannel(EntityRetrievalStrategy retrievalStrategy) {
+        return Mono.justOrEmpty(getEmbedChannelId())
+                .flatMap(id -> gateway.withRetrievalStrategy(retrievalStrategy).getChannelById(id))
+                .cast(GuildChannel.class);
     }
 
     /**
@@ -364,8 +391,21 @@ public final class Guild implements Entity {
      * emitted through the {@code Flux}.
      */
     public Flux<Role> getRoles() {
-        return Flux.fromIterable(getRoleIds())
-                .flatMap(id -> gateway.getRoleById(getId(), id));
+        return gateway.getGuildRoles(getId());
+    }
+
+    /**
+     * Requests to retrieve the guild's roles, using the given retrieval strategy.
+     * <p>
+     * The order of items emitted by the returned {@code Flux} is unspecified. Use {@link OrderUtil#orderRoles(Flux)}
+     * to consistently order roles.
+     *
+     * @param retrievalStrategy the strategy to use to get the roles
+     * @return A {@link Flux} that continually emits the guild's {@link Role roles}. If an error is received, it is
+     * emitted through the {@code Flux}.
+     */
+    public Flux<Role> getRoles(EntityRetrievalStrategy retrievalStrategy) {
+        return gateway.withRetrievalStrategy(retrievalStrategy).getGuildRoles(getId());
     }
 
     /**
@@ -380,6 +420,18 @@ public final class Guild implements Entity {
     }
 
     /**
+     * Requests to retrieve the role as represented by the supplied ID, using the given retrieval strategy.
+     *
+     * @param id The ID of the role.
+     * @param retrievalStrategy the strategy to use to get the role
+     * @return A {@link Mono} where, upon successful completion, emits the {@link Role} as represented by the supplied
+     * ID. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Role> getRoleById(final Snowflake id, EntityRetrievalStrategy retrievalStrategy) {
+        return gateway.withRetrievalStrategy(retrievalStrategy).getRoleById(getId(), id);
+    }
+
+    /**
      * Requests to retrieve the guild's @everyone {@link Role}.
      *
      * @return A {@link Mono} where, upon successful completion, emits the @everyone {@link Role}, if
@@ -387,6 +439,17 @@ public final class Guild implements Entity {
      */
     public Mono<Role> getEveryoneRole() {
         return gateway.getRoleById(getId(), getId());
+    }
+
+    /**
+     * Requests to retrieve the guild's @everyone {@link Role}, using the given retrieval strategy.
+     *
+     * @param retrievalStrategy the strategy to use to get the everyone role
+     * @return A {@link Mono} where, upon successful completion, emits the @everyone {@link Role}, if
+     * present. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Role> getEveryoneRole(EntityRetrievalStrategy retrievalStrategy) {
+        return gateway.withRetrievalStrategy(retrievalStrategy).getRoleById(getId(), getId());
     }
 
     /**
@@ -405,7 +468,18 @@ public final class Guild implements Entity {
      * emitted through the {@code Flux}.
      */
     public Flux<GuildEmoji> getEmojis() {
-        return Flux.fromIterable(getEmojiIds()).flatMap(id -> gateway.getGuildEmojiById(getId(), id));
+        return gateway.getGuildEmojis(getId());
+    }
+
+    /**
+     * Requests to retrieve the guild's emojis, using the given retrieval strategy.
+     *
+     * @param retrievalStrategy the strategy to use to get the emojis
+     * @return A {@link Flux} that continually emits guild's {@link GuildEmoji emojis}. If an error is received, it is
+     * emitted through the {@code Flux}.
+     */
+    public Flux<GuildEmoji> getEmojis(EntityRetrievalStrategy retrievalStrategy) {
+        return gateway.withRetrievalStrategy(retrievalStrategy).getGuildEmojis(getId());
     }
 
     /**
@@ -417,6 +491,18 @@ public final class Guild implements Entity {
      */
     public Mono<GuildEmoji> getGuildEmojiById(final Snowflake id) {
         return gateway.getGuildEmojiById(getId(), id);
+    }
+
+    /**
+     * Requests to retrieve the guild emoji as represented by the supplied ID, using the given retrieval strategy.
+     *
+     * @param id The ID of the guild emoji.
+     * @param retrievalStrategy the strategy to use to get the guild emoji
+     * @return A {@link Mono} where, upon successful completion, emits the {@link GuildEmoji} as represented by the
+     * supplied ID. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<GuildEmoji> getGuildEmojiById(final Snowflake id, EntityRetrievalStrategy retrievalStrategy) {
+        return gateway.withRetrievalStrategy(retrievalStrategy).getGuildEmojiById(getId(), id);
     }
 
     /**
@@ -478,6 +564,19 @@ public final class Guild implements Entity {
     }
 
     /**
+     * Requests to retrieve the channel for the server widget, if present, using the given retrieval strategy.
+     *
+     * @param retrievalStrategy the strategy to use to get the widget channel
+     * @return A {@link Mono} where, upon successful completion, emits the {@link GuildChannel channel} for the server
+     * widget, if present. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<GuildChannel> getWidgetChannel(EntityRetrievalStrategy retrievalStrategy) {
+        return Mono.justOrEmpty(getWidgetChannelId())
+                .flatMap(id -> gateway.withRetrievalStrategy(retrievalStrategy).getChannelById(id))
+                .cast(GuildChannel.class);
+    }
+
+    /**
      * Gets the ID of the channel where guild notices such as welcome messages and boost events are posted, if present.
      *
      * @return The ID of the channel where guild notices such as welcome messages and boost events are posted, if present.
@@ -494,6 +593,20 @@ public final class Guild implements Entity {
      */
     public Mono<TextChannel> getSystemChannel() {
         return Mono.justOrEmpty(getSystemChannelId()).flatMap(gateway::getChannelById).cast(TextChannel.class);
+    }
+
+    /**
+     * Requests to retrieve the channel to which system messages are sent, if present, using the given retrieval
+     * strategy.
+     *
+     * @param retrievalStrategy the strategy to use to get the system channel
+     * @return A {@link Mono} where, upon successful completion, emits the {@link TextChannel channel} to which system
+     * messages are sent, if present. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<TextChannel> getSystemChannel(EntityRetrievalStrategy retrievalStrategy) {
+        return Mono.justOrEmpty(getSystemChannelId())
+                .flatMap(id -> gateway.withRetrievalStrategy(retrievalStrategy).getChannelById(id))
+                .cast(TextChannel.class);
     }
 
     /**
@@ -561,20 +674,18 @@ public final class Guild implements Entity {
      * it is emitted through the {@code Flux}.
      */
     public Flux<Member> getMembers() {
-        Function<Map<String, Object>, Flux<MemberData>> doRequest = params ->
-                gateway.getRestClient().getGuildService()
-                        .getGuildMembers(getId().asLong(), params);
+        return gateway.getGuildMembers(getId());
+    }
 
-        Flux<Member> requestMembers =
-                PaginationUtil.paginateAfter(doRequest, data -> Snowflake.asLong(data.user().id()), 0, 100)
-                        .map(data -> new Member(gateway, data, getId().asLong()));
-
-        return Mono.justOrEmpty(data.members())
-                .flatMapMany(Flux::fromIterable)
-                .flatMap(id -> gateway.getGatewayResources().getStateView().getMemberStore()
-                        .find(LongLongTuple2.of(getId().asLong(), Snowflake.asLong(id))))
-                .map(member -> new Member(gateway, member, getId().asLong()))
-                .switchIfEmpty(requestMembers);
+    /**
+     * Requests to retrieve the members of the guild, using the given retrieval strategy.
+     *
+     * @param retrievalStrategy the strategy to use to get the members
+     * @return A {@link Flux} that continually emits the {@link Member members} of the guild. If an error is received,
+     * it is emitted through the {@code Flux}.
+     */
+    public Flux<Member> getMembers(EntityRetrievalStrategy retrievalStrategy) {
+        return gateway.withRetrievalStrategy(retrievalStrategy).getGuildMembers(getId());
     }
 
     /**
@@ -589,6 +700,18 @@ public final class Guild implements Entity {
     }
 
     /**
+     * Requests to retrieve the member as represented by the supplied ID, using the given retrieval strategy.
+     *
+     * @param id The ID of the member.
+     * @param retrievalStrategy the strategy to use to get the member
+     * @return A {@link Mono} where, upon successful completion, emits the {@link Member} as represented by the supplied
+     * ID. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Member> getMemberById(final Snowflake id, EntityRetrievalStrategy retrievalStrategy) {
+        return gateway.withRetrievalStrategy(retrievalStrategy).getMemberById(getId(), id);
+    }
+
+    /**
      * Requests to retrieve the guild's channels.
      * <p>
      * The order of items emitted by the returned {@code Flux} is unspecified. Use
@@ -600,15 +723,23 @@ public final class Guild implements Entity {
      * emitted through the {@code Flux}.
      */
     public Flux<GuildChannel> getChannels() {
-        return Flux.fromIterable(data.channels())
-                .flatMap(id -> gateway.getGatewayResources().getStateView().getChannelStore()
-                        .find(Snowflake.asLong(id)))
-                .map(channelData -> EntityUtil.getChannel(gateway, channelData))
-                .cast(GuildChannel.class)
-                .switchIfEmpty(gateway.getRestClient().getGuildService()
-                        .getGuildChannels(getId().asLong())
-                        .map(data -> EntityUtil.getChannel(gateway, data))
-                        .cast(GuildChannel.class));
+        return gateway.getGuildChannels(getId());
+    }
+
+    /**
+     * Requests to retrieve the guild's channels, using the given retrieval strategy.
+     * <p>
+     * The order of items emitted by the returned {@code Flux} is unspecified. Use
+     * {@link OrderUtil#orderGuildChannels(Flux)}
+     * to consistently order channels.
+     *
+     * @param retrievalStrategy the strategy to use to get the channels
+     * @return A {@link Flux} that continually emits the guild's {@link GuildChannel channels}. If an error is
+     * received, it is
+     * emitted through the {@code Flux}.
+     */
+    public Flux<GuildChannel> getChannels(EntityRetrievalStrategy retrievalStrategy) {
+        return gateway.withRetrievalStrategy(retrievalStrategy).getGuildChannels(getId());
     }
 
     /**
@@ -620,6 +751,20 @@ public final class Guild implements Entity {
      */
     public Mono<GuildChannel> getChannelById(final Snowflake id) {
         return gateway.getChannelById(id)
+                .cast(GuildChannel.class)
+                .filter(channel -> channel.getGuildId().equals(getId()));
+    }
+
+    /**
+     * Requests to retrieve the channel as represented by the supplied ID, using the given retrieval strategy.
+     *
+     * @param id The ID of the channel.
+     * @param retrievalStrategy the strategy to use to get the channel
+     * @return A {@link Mono} where, upon successful completion, emits the {@link GuildChannel} as represented by the
+     * supplied ID. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<GuildChannel> getChannelById(final Snowflake id, EntityRetrievalStrategy retrievalStrategy) {
+        return gateway.withRetrievalStrategy(retrievalStrategy).getChannelById(id)
                 .cast(GuildChannel.class)
                 .filter(channel -> channel.getGuildId().equals(getId()));
     }

@@ -24,6 +24,7 @@ import discord4j.core.object.ExtendedPermissionOverwrite;
 import discord4j.core.object.PermissionOverwrite;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Member;
+import discord4j.core.retriever.EntityRetrievalStrategy;
 import discord4j.rest.util.PermissionSet;
 import discord4j.rest.util.Snowflake;
 import discord4j.core.util.OrderUtil;
@@ -58,6 +59,11 @@ class BaseGuildChannel extends BaseChannel implements GuildChannel {
     @Override
     public final Mono<Guild> getGuild() {
         return getClient().getGuildById(getGuildId());
+    }
+
+    @Override
+    public Mono<Guild> getGuild(EntityRetrievalStrategy retrievalStrategy) {
+        return getClient().withRetrievalStrategy(retrievalStrategy).getGuildById(getGuildId());
     }
 
     @Override

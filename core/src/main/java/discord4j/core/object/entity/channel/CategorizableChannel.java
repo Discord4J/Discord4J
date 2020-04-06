@@ -17,6 +17,7 @@
 package discord4j.core.object.entity.channel;
 
 import discord4j.core.object.ExtendedInvite;
+import discord4j.core.retriever.EntityRetrievalStrategy;
 import discord4j.rest.util.Snowflake;
 import discord4j.core.spec.InviteCreateSpec;
 import reactor.core.publisher.Flux;
@@ -42,6 +43,15 @@ public interface CategorizableChannel extends GuildChannel {
      * present. If an error is received, it is emitted through the {@code Mono}.
      */
     Mono<Category> getCategory();
+
+    /**
+     * Requests to retrieve the category for this channel, if present, using the given retrieval strategy.
+     *
+     * @param retrievalStrategy the strategy to use to get the category
+     * @return A {@link Mono} where, upon successful completion, emits the {@link Category category} this channel, if
+     * present. If an error is received, it is emitted through the {@code Mono}.
+     */
+    Mono<Category> getCategory(EntityRetrievalStrategy retrievalStrategy);
 
     /**
      * Requests to create an invite.

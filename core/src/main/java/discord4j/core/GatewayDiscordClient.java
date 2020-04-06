@@ -17,6 +17,7 @@
 
 package discord4j.core;
 
+
 import discord4j.common.JacksonResources;
 import discord4j.common.LogUtil;
 import discord4j.common.ReactorResources;
@@ -26,11 +27,13 @@ import discord4j.core.object.Invite;
 import discord4j.core.object.Region;
 import discord4j.core.object.entity.*;
 import discord4j.core.object.entity.channel.Channel;
+import discord4j.core.object.entity.channel.GuildChannel;
 import discord4j.core.object.presence.Presence;
+import discord4j.core.retriever.EntityRetrievalStrategy;
+import discord4j.core.retriever.EntityRetriever;
 import discord4j.core.shard.GatewayBootstrap;
 import discord4j.core.spec.GuildCreateSpec;
 import discord4j.core.spec.UserEditSpec;
-import discord4j.core.util.EntityUtil;
 import discord4j.discordjson.json.*;
 import discord4j.discordjson.json.gateway.StatusUpdate;
 import discord4j.gateway.GatewayClient;
@@ -39,9 +42,7 @@ import discord4j.gateway.json.GatewayPayload;
 import discord4j.gateway.json.ShardGatewayPayload;
 import discord4j.rest.RestClient;
 import discord4j.rest.RestResources;
-import discord4j.rest.util.PaginationUtil;
 import discord4j.rest.util.Snowflake;
-import discord4j.store.api.util.LongLongTuple2;
 import discord4j.voice.VoiceConnectionFactory;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
@@ -50,7 +51,7 @@ import reactor.core.publisher.MonoProcessor;
 import reactor.util.Logger;
 import reactor.util.Loggers;
 
-import java.util.Map;
+import java.util.Collections;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -69,7 +70,7 @@ import java.util.stream.Collectors;
  *     <li>Access to {@link EventDispatcher} publishing events from all participating shards.</li>
  * </ul>
  */
-public class GatewayDiscordClient {
+public class GatewayDiscordClient implements EntityRetriever {
 
     private static final Logger log = Loggers.getLogger(GatewayDiscordClient.class);
 
@@ -78,15 +79,17 @@ public class GatewayDiscordClient {
     private final MonoProcessor<Void> closeProcessor;
     private final GatewayClientGroup gatewayClientGroup;
     private final VoiceConnectionFactory voiceConnectionFactory;
+    private final EntityRetriever entityRetriever;
 
     public GatewayDiscordClient(DiscordClient discordClient, GatewayResources gatewayResources,
                                 MonoProcessor<Void> closeProcessor, GatewayClientGroup gatewayClientGroup,
-                                VoiceConnectionFactory voiceConnectionFactory) {
+                                VoiceConnectionFactory voiceConnectionFactory, EntityRetrievalStrategy entityRetrievalStrategy) {
         this.discordClient = discordClient;
         this.gatewayResources = gatewayResources;
         this.closeProcessor = closeProcessor;
         this.gatewayClientGroup = gatewayClientGroup;
         this.voiceConnectionFactory = voiceConnectionFactory;
+        this.entityRetriever = entityRetrievalStrategy.apply(this);
     }
 
     /**
@@ -170,243 +173,6 @@ public class GatewayDiscordClient {
     }
 
     /**
-     * Requests to retrieve the channel represented by the supplied ID. If the channel is not found in the store, an
-     * attempt to query the REST API will be made. If this behavior is not desired, see {@link #getChannel(Snowflake)}.
-     *
-     * @param channelId The ID of the channel.
-     * @return A {@link Mono} where, upon successful completion, emits the {@link Channel} as represented by the
-     * supplied ID. If an error is received, it is emitted through the {@code Mono}.
-     */
-    @Deprecated
-    public Mono<Channel> getChannelById(final Snowflake channelId) {
-        final Mono<ChannelData> channel = gatewayResources.getStateView().getChannelStore()
-                .find(channelId.asLong());
-
-        final Mono<ChannelData> rest = getRestClient().getChannelService()
-                .getChannel(channelId.asLong());
-
-        return channel
-                .switchIfEmpty(rest)
-                .map(channelBean -> EntityUtil.getChannel(this, channelBean));
-    }
-
-    /**
-     * Requests to retrieve the channel represented by the supplied ID. If the channel is not found in the store, the
-     * resulting {@link Mono} will be empty.
-     *
-     * @param channelId The ID of the channel.
-     * @return A {@link Mono} where, upon successful completion, emits the {@link Channel} as represented by the
-     * supplied ID. If an error is received, it is emitted through the {@code Mono}.
-     */
-    public Mono<Channel> getChannel(final Snowflake channelId) {
-        return gatewayResources.getStateView().getChannelStore()
-                .find(channelId.asLong())
-                .map(channelBean -> EntityUtil.getChannel(this, channelBean));
-    }
-
-    /**
-     * Requests to retrieve the guild represented by the supplied ID. If the channel is not found in the store, an
-     * attempt to query the REST API will be made. If this behavior is not desired, see {@link #getChannel(Snowflake)}.
-     *
-     * @param guildId The ID of the guild.
-     * @return A {@link Mono} where, upon successful completion, emits the {@link Guild} as represented by the supplied
-     * ID. If an error is received, it is emitted through the {@code Mono}.
-     */
-    @Deprecated
-    public Mono<Guild> getGuildById(final Snowflake guildId) {
-        return gatewayResources.getStateView().getGuildStore()
-                .find(guildId.asLong())
-                .switchIfEmpty(getRestClient().getGuildService()
-                        .getGuild(guildId.asLong())
-                        .flatMap(this::toGuildData))
-                .map(data -> new Guild(this, data));
-    }
-
-    /**
-     * Requests to retrieve the guild represented by the supplied ID. If the guild is not found in the store, the
-     * resulting {@link Mono} will be empty.
-     *
-     * @param guildId The ID of the guild.
-     * @return A {@link Mono} where, upon successful completion, emits the {@link Guild} as represented by the supplied
-     * ID. If an error is received, it is emitted through the {@code Mono}.
-     */
-    public Mono<Guild> getGuild(final Snowflake guildId) {
-        return gatewayResources.getStateView().getGuildStore()
-                .find(guildId.asLong())
-                .map(data -> new Guild(this, data));
-    }
-
-    /**
-     * Requests to retrieve the guild emoji represented by the supplied IDs. If the emoji is not found in the store,
-     * an attempt to query the REST API will be made. If this behavior is not desired, see
-     * {@link #getGuildEmoji(Snowflake, Snowflake)}.
-     *
-     * @param guildId The ID of the guild.
-     * @param emojiId The ID of the emoji.
-     * @return A {@link Mono} where, upon successful completion, emits the {@link GuildEmoji} as represented by the
-     * supplied IDs. If an error is received, it is emitted through the {@code Mono}.
-     */
-    @Deprecated
-    public Mono<GuildEmoji> getGuildEmojiById(final Snowflake guildId, final Snowflake emojiId) {
-        return gatewayResources.getStateView().getGuildEmojiStore()
-                .find(emojiId.asLong())
-                .switchIfEmpty(getRestClient().getEmojiService()
-                        .getGuildEmoji(guildId.asLong(), emojiId.asLong()))
-                .map(data -> new GuildEmoji(this, data, guildId.asLong()));
-    }
-
-    /**
-     * Requests to retrieve the guild emoji represented by the supplied IDs. If the emoji is not found in the store,
-     * the resulting {@link Mono} will be empty.
-     *
-     * @param guildId The ID of the guild.
-     * @param emojiId The ID of the emoji.
-     * @return A {@link Mono} where, upon successful completion, emits the {@link GuildEmoji} as represented by the
-     * supplied IDs. If an error is received, it is emitted through the {@code Mono}.
-     */
-    public Mono<GuildEmoji> getGuildEmoji(final Snowflake guildId, final Snowflake emojiId) {
-        return gatewayResources.getStateView().getGuildEmojiStore()
-                .find(emojiId.asLong())
-                .map(data -> new GuildEmoji(this, data, guildId.asLong()));
-    }
-
-    /**
-     * Requests to retrieve the member represented by the supplied IDs. If the member is not found in the store, an
-     * attempt to query the REST API will be made. If this behavior is not desired, see
-     * {@link #getMember(Snowflake, Snowflake)}
-     *
-     * @param guildId The ID of the guild.
-     * @param userId The ID of the user.
-     * @return A {@link Mono} where, upon successful completion, emits the {@link Member} as represented by the supplied
-     * IDs. If an error is received, it is emitted through the {@code Mono}.
-     */
-    @Deprecated
-    public Mono<Member> getMemberById(final Snowflake guildId, final Snowflake userId) {
-        final Mono<MemberData> member = gatewayResources.getStateView().getMemberStore()
-                .find(LongLongTuple2.of(guildId.asLong(), userId.asLong()))
-                .switchIfEmpty(getRestClient().getGuildService()
-                        .getGuildMember(guildId.asLong(), userId.asLong()));
-
-        return member.map(memberData -> new Member(this, memberData, guildId.asLong()));
-    }
-
-    /**
-     * Requests to retrieve the member represented by the supplied IDs. If the member is not found in the store, the
-     * resulting {@link Mono} will be empty.
-     *
-     * @param guildId The ID of the guild.
-     * @param userId The ID of the user.
-     * @return A {@link Mono} where, upon successful completion, emits the {@link Member} as represented by the supplied
-     * IDs. If an error is received, it is emitted through the {@code Mono}.
-     */
-    public Mono<Member> getMember(final Snowflake guildId, final Snowflake userId) {
-        return gatewayResources.getStateView().getMemberStore()
-                .find(LongLongTuple2.of(guildId.asLong(), userId.asLong()))
-                .map(memberData -> new Member(this, memberData, guildId.asLong()));
-    }
-
-    /**
-     * Requests to retrieve the message represented by the supplied IDs. If the message is not found in the store, an
-     * attempt to query the REST API will be made. If this behavior is not desired, see
-     * {@link #getMessage(Snowflake, Snowflake)}
-     *
-     * @param channelId The ID of the channel.
-     * @param messageId The ID of the message.
-     * @return A {@link Mono} where, upon successful completion, emits the {@link Message} as represented by the
-     * supplied IDs. If an error is received, it is emitted through the {@code Mono}.
-     */
-    @Deprecated
-    public Mono<Message> getMessageById(final Snowflake channelId, final Snowflake messageId) {
-        return gatewayResources.getStateView().getMessageStore()
-                .find(messageId.asLong())
-                .switchIfEmpty(getRestClient().getChannelService()
-                        .getMessage(channelId.asLong(), messageId.asLong()))
-                .map(data -> new Message(this, data));
-    }
-
-    /**
-     * Requests to retrieve the message represented by the supplied IDs. If the message is not found in the store, the
-     * resulting {@link Mono} will be empty.
-     *
-     * @param channelId The ID of the channel.
-     * @param messageId The ID of the message.
-     * @return A {@link Mono} where, upon successful completion, emits the {@link Message} as represented by the
-     * supplied IDs. If an error is received, it is emitted through the {@code Mono}.
-     */
-    public Mono<Message> getMessage(final Snowflake channelId, final Snowflake messageId) {
-        return gatewayResources.getStateView().getMessageStore()
-                .find(messageId.asLong())
-                .map(data -> new Message(this, data));
-    }
-
-    /**
-     * Requests to retrieve the role represented by the supplied IDs. If the role is not found in the store, an
-     * attempt to query the REST API will be made. If this behavior is not desired, see
-     * {@link #getRole(Snowflake, Snowflake)}
-     *
-     * @param guildId The ID of the guild.
-     * @param roleId The ID of the role.
-     * @return A {@link Mono} where, upon successful completion, emits the {@link Role} as represented by the supplied
-     * IDs. If an error is received, it is emitted through the {@code Mono}.
-     */
-    @Deprecated
-    public Mono<Role> getRoleById(final Snowflake guildId, final Snowflake roleId) {
-        return gatewayResources.getStateView().getRoleStore()
-                .find(roleId.asLong())
-                .switchIfEmpty(getRestClient().getGuildService()
-                        .getGuildRoles(guildId.asLong())
-                        .filter(response -> response.id().equals(roleId.asString()))
-                        .singleOrEmpty())
-                .map(roleBean -> new Role(this, roleBean, guildId.asLong()));
-    }
-
-    /**
-     * Requests to retrieve the role represented by the supplied IDs. If the role is not found in the store, the
-     * resulting {@link Mono} will be empty.
-     *
-     * @param guildId The ID of the guild.
-     * @param roleId The ID of the role.
-     * @return A {@link Mono} where, upon successful completion, emits the {@link Role} as represented by the supplied
-     * IDs. If an error is received, it is emitted through the {@code Mono}.
-     */
-    public Mono<Role> getRole(final Snowflake guildId, final Snowflake roleId) {
-        return gatewayResources.getStateView().getRoleStore()
-                .find(roleId.asLong())
-                .map(roleBean -> new Role(this, roleBean, guildId.asLong()));
-    }
-
-    /**
-     * Requests to retrieve the user represented by the supplied ID. If the user is not found in the store, an
-     * attempt to query the REST API will be made. If this behavior is not desired, see {@link #getUser(Snowflake)}
-     *
-     * @param userId The ID of the user.
-     * @return A {@link Mono} where, upon successful completion, emits the {@link User} as represented by the supplied
-     * ID. If an error is received, it is emitted through the {@code Mono}.
-     */
-    @Deprecated
-    public Mono<User> getUserById(final Snowflake userId) {
-        return gatewayResources.getStateView().getUserStore()
-                .find(userId.asLong())
-                .switchIfEmpty(getRestClient().getUserService()
-                        .getUser(userId.asLong()))
-                .map(userBean -> new User(this, userBean));
-    }
-
-    /**
-     * Requests to retrieve the user represented by the supplied ID. If the user is not found in the store, the
-     * resulting {@link Mono} will be empty.
-     *
-     * @param userId The ID of the user.
-     * @return A {@link Mono} where, upon successful completion, emits the {@link User} as represented by the supplied
-     * ID. If an error is received, it is emitted through the {@code Mono}.
-     */
-    public Mono<User> getUser(final Snowflake userId) {
-        return gatewayResources.getStateView().getUserStore()
-                .find(userId.asLong())
-                .map(userBean -> new User(this, userBean));
-    }
-
-    /**
      * Requests to retrieve the webhook represented by the supplied ID.
      *
      * @param webhookId The ID of the webhook.
@@ -429,38 +195,6 @@ public class GatewayDiscordClient {
         return getRestClient().getApplicationService()
                 .getCurrentApplicationInfo()
                 .map(data -> new ApplicationInfo(this, data));
-    }
-
-    /**
-     * Requests to retrieve the guilds the current client is in.
-     *
-     * @return A {@link Flux} that continually emits the {@link Guild guilds} that the current client is in. If an error
-     * is received, it is emitted through the {@code Flux}.
-     */
-    @Deprecated
-    public Flux<Guild> getGuilds() {
-        final Function<Map<String, Object>, Flux<UserGuildData>> makeRequest = params ->
-                getRestClient().getUserService().getCurrentUserGuilds(params);
-
-        return gatewayResources.getStateView().getGuildStore()
-                .values()
-                .switchIfEmpty(PaginationUtil.paginateAfter(makeRequest, data -> Snowflake.asLong(data.id()),
-                        0L, 100)
-                        .map(UserGuildData::id)
-                        //.filter(id -> (id >> 22) % getConfig().getShardCount() == getConfig().getShardIndex())
-                        .flatMap(id -> getRestClient().getGuildService().getGuild(Snowflake.asLong(id)))
-                        .flatMap(this::toGuildData))
-                .map(data -> new Guild(this, data));
-    }
-
-    /**
-     * Requests to retrieve the guilds the current client is in that are cached in the guild store.
-     *
-     * @return A {@link Flux} that continually emits the {@link Guild guilds} that the current client is in. If an error
-     * is received, it is emitted through the {@code Flux}.
-     */
-    public Flux<Guild> getGuildsFromStore() {
-        return gatewayResources.getStateView().getGuildStore().values().map(data -> new Guild(this, data));
     }
 
     /**
@@ -487,20 +221,6 @@ public class GatewayDiscordClient {
     }
 
     /**
-     * Requests to retrieve the bot user.
-     *
-     * @return A {@link Mono} where, upon successful completion, emits the bot {@link User user}. If an error is
-     * received, it is emitted through the {@code Mono}.
-     */
-    public Mono<User> getSelf() {
-        return getSelfId()
-                .flatMap(this::getUserById)
-                .switchIfEmpty(getRestClient().getUserService()
-                        .getCurrentUser()
-                        .map(data -> new User(this, data)));
-    }
-
-    /**
      * Gets the bot user's ID.
      *
      * @return The bot user's ID.
@@ -522,7 +242,7 @@ public class GatewayDiscordClient {
 
         return getRestClient().getGuildService()
                 .createGuild(mutatedSpec.asRequest())
-                .flatMap(this::toGuildData)
+                .map(this::toGuildData)
                 .map(data -> new Guild(this, data));
     }
 
@@ -675,21 +395,93 @@ public class GatewayDiscordClient {
                         }));
     }
 
-    private Mono<GuildData> toGuildData(GuildUpdateData guild) {
-        return gatewayResources.getStateView().getGuildStore()
-                .find(Snowflake.asLong(guild.id()))
-                .map(current -> ImmutableGuildData.builder()
-                        .from(guild)
-                        .roles(guild.roles().stream()
-                                .map(RoleData::id)
-                                .collect(Collectors.toList()))
-                        .emojis(guild.emojis().stream()
-                                .map(EmojiData::id)
-                                .filter(Optional::isPresent)
-                                .map(Optional::get)
-                                .collect(Collectors.toList()))
-                        .channels(current.channels())
-                        .members(current.members())
-                        .build());
+    private GuildData toGuildData(GuildUpdateData guild) {
+        return ImmutableGuildData.builder()
+                .from(guild)
+                .roles(guild.roles().stream()
+                        .map(RoleData::id)
+                        .collect(Collectors.toList()))
+                .emojis(guild.emojis().stream()
+                        .map(EmojiData::id)
+                        .filter(Optional::isPresent)
+                        .map(Optional::get)
+                        .collect(Collectors.toList()))
+                .channels(Collections.emptyList())
+                .members(Collections.emptyList())
+                .build();
+    }
+
+    /**
+     * Applies the given strategy to retrieve entities using this {@link GatewayDiscordClient}.
+     *
+     * @param retrievalStrategy the strategy to apply
+     * @return an EntityRetriever able to retrieve entities using the given strategy
+     */
+    public EntityRetriever withRetrievalStrategy(EntityRetrievalStrategy retrievalStrategy) {
+        return retrievalStrategy.apply(this);
+    }
+    @Override
+    public Mono<Channel> getChannelById(Snowflake channelId) {
+        return entityRetriever.getChannelById(channelId);
+    }
+
+    @Override
+    public Mono<Guild> getGuildById(Snowflake guildId) {
+        return entityRetriever.getGuildById(guildId);
+    }
+
+    @Override
+    public Mono<GuildEmoji> getGuildEmojiById(Snowflake guildId, Snowflake emojiId) {
+        return entityRetriever.getGuildEmojiById(guildId, emojiId);
+    }
+
+    @Override
+    public Mono<Member> getMemberById(Snowflake guildId, Snowflake userId) {
+        return entityRetriever.getMemberById(guildId, userId);
+    }
+
+    @Override
+    public Mono<Message> getMessageById(Snowflake channelId, Snowflake messageId) {
+        return entityRetriever.getMessageById(channelId, messageId);
+    }
+
+    @Override
+    public Mono<Role> getRoleById(Snowflake guildId, Snowflake roleId) {
+        return entityRetriever.getRoleById(guildId, roleId);
+    }
+
+    @Override
+    public Mono<User> getUserById(Snowflake userId) {
+        return entityRetriever.getUserById(userId);
+    }
+
+    @Override
+    public Flux<Guild> getGuilds() {
+        return entityRetriever.getGuilds();
+    }
+
+    @Override
+    public Mono<User> getSelf() {
+        return entityRetriever.getSelf();
+    }
+
+    @Override
+    public Flux<Member> getGuildMembers(Snowflake guildId) {
+        return entityRetriever.getGuildMembers(guildId);
+    }
+
+    @Override
+    public Flux<GuildChannel> getGuildChannels(Snowflake guildId) {
+        return entityRetriever.getGuildChannels(guildId);
+    }
+
+    @Override
+    public Flux<Role> getGuildRoles(Snowflake guildId) {
+        return entityRetriever.getGuildRoles(guildId);
+    }
+
+    @Override
+    public Flux<GuildEmoji> getGuildEmojis(Snowflake guildId) {
+        return entityRetriever.getGuildEmojis(guildId);
     }
 }

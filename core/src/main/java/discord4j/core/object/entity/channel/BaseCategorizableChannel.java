@@ -20,6 +20,7 @@ import discord4j.discordjson.json.ChannelData;
 import discord4j.discordjson.possible.Possible;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.ExtendedInvite;
+import discord4j.core.retriever.EntityRetrievalStrategy;
 import discord4j.rest.util.Snowflake;
 import discord4j.core.spec.InviteCreateSpec;
 import reactor.core.publisher.Flux;
@@ -43,6 +44,13 @@ class BaseCategorizableChannel extends BaseGuildChannel implements Categorizable
     @Override
     public Mono<Category> getCategory() {
         return Mono.justOrEmpty(getCategoryId()).flatMap(getClient()::getChannelById).cast(Category.class);
+    }
+
+    @Override
+    public Mono<Category> getCategory(EntityRetrievalStrategy retrievalStrategy) {
+        return Mono.justOrEmpty(getCategoryId())
+                .flatMap(id -> getClient().withRetrievalStrategy(retrievalStrategy).getChannelById(id))
+                .cast(Category.class);
     }
 
     @Override

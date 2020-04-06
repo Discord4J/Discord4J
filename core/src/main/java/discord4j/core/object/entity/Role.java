@@ -17,6 +17,7 @@
 package discord4j.core.object.entity;
 
 import discord4j.core.GatewayDiscordClient;
+import discord4j.core.retriever.EntityRetrievalStrategy;
 import discord4j.core.spec.RoleEditSpec;
 import discord4j.core.util.EntityUtil;
 import discord4j.core.util.OrderUtil;
@@ -117,6 +118,42 @@ public final class Role implements Entity {
     }
 
     /**
+     * Requests to retrieve the position of the role relative to other roles in the guild, using the given retrieval
+     * strategy.
+     * <p>
+     * This is determined by the index of this role in the {@link OrderUtil#orderRoles(Flux) sorted} list of roles of
+     * the guild.
+     * <p>
+     * Warning: Because this method must sort the guild roles, it is inefficient to make repeated invocations for the
+     * same set of roles (meaning that roles haven't been added or removed). For example, instead of writing:
+     * <pre>
+     * {@code
+     * guild.getRoles()
+     *   .flatMap(r -> r.getPosition().map(pos -> r.getName() + " : " + pos))
+     * }
+     * </pre>
+     * It would be much more efficient to write:
+     * <pre>
+     * {@code
+     * guild.getRoles()
+     *   .transform(OrderUtil::orderRoles)
+     *   .index((pos, r) -> r.getName() + " : " + pos)
+     * }
+     * </pre>
+     *
+     * @param retrievalStrategy the strategy to use to get the guild and the other roles
+     * @return A {@link Mono} where, upon successful completion, emits the position of the role. If an error is
+     * received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Integer> getPosition(EntityRetrievalStrategy retrievalStrategy) {
+        return getGuild(retrievalStrategy)
+                .flatMapMany(guild -> guild.getRoles(retrievalStrategy))
+                .transform(OrderUtil::orderRoles)
+                .collectList()
+                .map(roles -> roles.indexOf(this));
+    }
+
+    /**
      * Gets the role name.
      *
      * @return The role name.
@@ -196,6 +233,17 @@ public final class Role implements Entity {
      */
     public Mono<Guild> getGuild() {
         return gateway.getGuildById(getGuildId());
+    }
+
+    /**
+     * Requests to retrieve the guild this role is associated to, using the given retrieval strategy.
+     *
+     * @param retrievalStrategy the strategy to use to get the guild
+     * @return A {@link Mono} where, upon successful completion, emits the {@link Guild guild} this role is associated
+     * to. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Guild> getGuild(EntityRetrievalStrategy retrievalStrategy) {
+        return gateway.withRetrievalStrategy(retrievalStrategy).getGuildById(getGuildId());
     }
 
     /**
