@@ -23,32 +23,26 @@ import ch.qos.logback.classic.turbo.TurboFilter;
 import ch.qos.logback.core.spi.FilterReply;
 import org.slf4j.Marker;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 
 public class GatewayEventFilter extends TurboFilter {
 
     private String logger;
-    private String include;
-    private String exclude;
-    private List<String> includedEvents;
-    private List<String> excludedEvents;
+    private final List<String> includedEvents = new ArrayList<>();
+    private final List<String> excludedEvents = new ArrayList<>();
 
     @Override
-    public FilterReply decide(Marker marker, Logger log, Level level, String format, Object[] params,
-                              Throwable t) {
+    public FilterReply decide(Marker marker, Logger log, Level level, String format, Object[] params, Throwable t) {
         String logName = log.getName();
         if (logName.equals(logger) ||
                 (logger == null && logName.endsWith("protocol.sender") || logName.endsWith("protocol.receiver"))) {
             if (format != null) {
-                if (excludedEvents != null) {
-                    if (excludedEvents.stream().anyMatch(format::contains)) {
-                        return FilterReply.DENY;
-                    }
-                } else if (includedEvents != null) {
-                    if (includedEvents.stream().noneMatch(format::contains)) {
-                        return FilterReply.DENY;
-                    }
+                if (!excludedEvents.isEmpty() && excludedEvents.stream().anyMatch(format::contains)) {
+                    return FilterReply.DENY;
+                }
+                if (!includedEvents.isEmpty() && includedEvents.stream().noneMatch(format::contains)) {
+                    return FilterReply.DENY;
                 }
             }
         }
@@ -59,22 +53,12 @@ public class GatewayEventFilter extends TurboFilter {
         this.logger = logger;
     }
 
-    public void setInclude(String include) {
-        this.include = include;
+    public void addInclude(String include) {
+        this.includedEvents.add(include);
     }
 
-    public void setExclude(String exclude) {
-        this.exclude = exclude;
+    public void addExclude(String exclude) {
+        this.excludedEvents.add(exclude);
     }
 
-    @Override
-    public void start() {
-        if (exclude != null && exclude.trim().length() > 0) {
-            excludedEvents = Arrays.asList(exclude.split("[;,]"));
-            super.start();
-        } else if (include != null && include.trim().length() > 0) {
-            includedEvents = Arrays.asList(include.split("[;,]"));
-            super.start();
-        }
-    }
 }
