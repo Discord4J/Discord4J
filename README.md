@@ -23,7 +23,7 @@ repositories {
 }
 
 dependencies {
-  implementation 'com.discord4j:discord4j-core:3.1.0.M1'
+  implementation 'com.discord4j:discord4j-core:3.0.14'
 }
 ```
 ### Maven
@@ -32,7 +32,7 @@ dependencies {
   <dependency>
     <groupId>com.discord4j</groupId>
     <artifactId>discord4j-core</artifactId>
-    <version>3.1.0.M1</version>
+    <version>3.0.14</version>
   </dependency>
 </dependencies>
 ```
@@ -40,7 +40,7 @@ dependencies {
 ### SBT
 ```scala
 libraryDependencies ++= Seq(
-  "com.discord4j" % "discord4j-core" % "3.1.0.M1"
+  "com.discord4j" % "discord4j-core" % "3.0.14"
 )
 ```
 
@@ -109,6 +109,29 @@ Discord4J's mechanism for storing information received on the gateway is complet
 ### Jitpack
 
 Please follow our instructions at [Using Jitpack](https://github.com/Discord4J/Discord4J/wiki/Using-Jitpack)
+
+### Pre-releases
+
+### Gradle
+```groovy
+repositories {
+  mavenCentral()
+}
+
+dependencies {
+  implementation 'com.discord4j:discord4j-core:3.1.0.M1'
+}
+```
+### Maven
+```xml
+<dependencies>
+  <dependency>
+    <groupId>com.discord4j</groupId>
+    <artifactId>discord4j-core</artifactId>
+    <version>3.1.0.M1</version>
+  </dependency>
+</dependencies>
+```
 
 ### Snapshots
 

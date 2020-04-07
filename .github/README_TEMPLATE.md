@@ -110,6 +110,29 @@ Discord4J's mechanism for storing information received on the gateway is complet
 
 Please follow our instructions at [Using Jitpack](https://github.com/Discord4J/Discord4J/wiki/Using-Jitpack)
 
+### Pre-releases
+
+### Gradle
+```groovy
+repositories {
+  mavenCentral()
+}
+
+dependencies {
+  implementation 'com.discord4j:discord4j-core:3.1.0.M1'
+}
+```
+### Maven
+```xml
+<dependencies>
+  <dependency>
+    <groupId>com.discord4j</groupId>
+    <artifactId>discord4j-core</artifactId>
+    <version>3.1.0.M1</version>
+  </dependency>
+</dependencies>
+```
+
 ### Snapshots
 
 Make sure you have the appropriate repositories, using Gradle:
