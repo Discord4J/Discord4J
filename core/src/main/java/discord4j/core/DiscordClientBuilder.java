@@ -35,7 +35,7 @@ public final class DiscordClientBuilder<C, O extends RouterOptions> extends Rest
 
     private static final Logger log = Loggers.getLogger(DiscordClientBuilder.class);
 
-    private boolean debugMode = true;
+    private boolean debugMode = false;
 
     /**
      * Initialize a new builder with the given token.
