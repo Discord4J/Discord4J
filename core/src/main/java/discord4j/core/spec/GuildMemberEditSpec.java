@@ -47,7 +47,7 @@ public class GuildMemberEditSpec implements AuditSpec<GuildMemberModifyRequest> 
      * @return This spec.
      */
     public GuildMemberEditSpec setNewVoiceChannel(@Nullable Snowflake channel) {
-        builder.channelId(Optional.ofNullable(channel).map(Snowflake::asString));
+        builder.channelId(Possible.of(Optional.ofNullable(channel).map(Snowflake::asString)));
         return this;
     }
 
