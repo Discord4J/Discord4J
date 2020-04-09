@@ -138,8 +138,7 @@ class RequestStream<T> {
     }
 
     private void onDiscard(RequestCorrelation<?> requestCorrelation) {
-        requestCorrelation.getResponse().onComplete();
-        log.debug("Request completed early due to backpressure: {}", requestCorrelation.getRequest());
+        requestCorrelation.getResponse().onError(new DiscardedRequestException(requestCorrelation.getRequest()));
     }
 
     /**
