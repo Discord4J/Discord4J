@@ -52,4 +52,12 @@ public class GlobalRateLimiterTest {
                 })))
                 .blockLast();
     }
+
+    @Test
+    public void testRateLimitOperator() {
+        GlobalRateLimiter grl = BucketGlobalRateLimiter.create();
+        Flux.range(0, 2000) // Test with 2000 concurrent requests
+                .flatMap(i -> grl.withLimiter(Mono.just(i)), 2000)
+                .blockLast();
+    }
 }
