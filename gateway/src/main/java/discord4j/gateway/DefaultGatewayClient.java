@@ -18,7 +18,6 @@ package discord4j.gateway;
 
 import discord4j.common.GitProperties;
 import discord4j.common.LogUtil;
-import discord4j.common.ReactorResources;
 import discord4j.common.ResettableInterval;
 import discord4j.common.close.CloseException;
 import discord4j.common.close.CloseStatus;
@@ -77,7 +76,7 @@ public class DefaultGatewayClient implements GatewayClient {
     private static final Logger receiverLog = Loggers.getLogger("discord4j.gateway.protocol.receiver");
 
     // basic properties
-    private final ReactorResources reactorResources;
+    private final GatewayReactorResources reactorResources;
     private final PayloadReader payloadReader;
     private final PayloadWriter payloadWriter;
     private final ReconnectOptions reconnectOptions;
@@ -158,7 +157,8 @@ public class DefaultGatewayClient implements GatewayClient {
                             .transform(buf -> Flux.merge(buf, sender));
                     RateLimitOperator<ByteBuf> outLimiter =
                             new RateLimitOperator<>(outboundLimiterCapacity(), Duration.ofSeconds(60),
-                                    reactorResources.getTimerTaskScheduler());
+                                    reactorResources.getTimerTaskScheduler(),
+                                    reactorResources.getPayloadSenderScheduler());
                     Flux<ByteBuf> outFlux = Flux.merge(heartbeatFlux, identifyFlux, payloadFlux)
                             .transform(outLimiter)
                             .doOnNext(buf -> logPayload(senderLog, context, buf));

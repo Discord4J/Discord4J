@@ -120,8 +120,8 @@ public class GatewayBootstrap<O extends GatewayOptions> {
     private ReconnectOptions reconnectOptions = ReconnectOptions.create();
     private ReconnectOptions voiceReconnectOptions = ReconnectOptions.create();
     private GatewayObserver gatewayObserver = GatewayObserver.NOOP_LISTENER;
-    private Function<ReactorResources, ReactorResources> gatewayReactorResources = Function.identity();
-    private Function<ReactorResources, VoiceReactorResources> voiceReactorResources = VoiceReactorResources::new;
+    private Function<ReactorResources, GatewayReactorResources> gatewayReactorResources = null;
+    private Function<ReactorResources, VoiceReactorResources> voiceReactorResources = null;
     private VoiceConnectionFactory voiceConnectionFactory = defaultVoiceConnectionFactory();
     private EntityRetrievalStrategy entityRetrievalStrategy = null;
 
@@ -490,7 +490,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
      * @param gatewayReactorResources a {@link ReactorResources} object for Gateway operations
      * @return this builder
      */
-    public GatewayBootstrap<O> setGatewayReactorResources(Function<ReactorResources, ReactorResources> gatewayReactorResources) {
+    public GatewayBootstrap<O> setGatewayReactorResources(Function<ReactorResources, GatewayReactorResources> gatewayReactorResources) {
         this.gatewayReactorResources = Objects.requireNonNull(gatewayReactorResources);
         return this;
     }
@@ -651,7 +651,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
         StateHolder stateHolder = new StateHolder(initStoreService(), new StoreContext(hints));
         StateView stateView = new StateView(stateHolder);
         EventDispatcher eventDispatcher = initEventDispatcher();
-        ReactorResources gatewayReactorResources = initGatewayReactorResources();
+        GatewayReactorResources gatewayReactorResources = initGatewayReactorResources();
         ShardCoordinator shardCoordinator = initShardCoordinator(gatewayReactorResources);
         GatewayResources resources = new GatewayResources(stateView, eventDispatcher, shardCoordinator, memberRequest,
                 gatewayReactorResources, initVoiceReactorResources(), voiceReconnectOptions);
@@ -812,11 +812,17 @@ public class GatewayBootstrap<O extends GatewayOptions> {
         return new JacksonPayloadWriter(client.getCoreResources().getJacksonResources().getObjectMapper());
     }
 
-    private ReactorResources initGatewayReactorResources() {
+    private GatewayReactorResources initGatewayReactorResources() {
+        if (gatewayReactorResources == null) {
+            gatewayReactorResources = GatewayReactorResources::new;
+        }
         return gatewayReactorResources.apply(client.getCoreResources().getReactorResources());
     }
 
     private VoiceReactorResources initVoiceReactorResources() {
+        if (voiceReactorResources == null) {
+            voiceReactorResources = VoiceReactorResources::new;
+        }
         return voiceReactorResources.apply(client.getCoreResources().getReactorResources());
     }
 

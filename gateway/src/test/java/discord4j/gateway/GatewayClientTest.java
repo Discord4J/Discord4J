@@ -16,12 +16,12 @@
  */
 package discord4j.gateway;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import discord4j.common.JacksonResources;
+import discord4j.common.retry.ReconnectOptions;
 import discord4j.discordjson.json.gateway.ImmutableStatusUpdate;
 import discord4j.discordjson.json.gateway.MessageCreate;
 import discord4j.discordjson.json.gateway.Ready;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import discord4j.common.JacksonResources;
-import discord4j.common.ReactorResources;
 import discord4j.discordjson.possible.Possible;
 import discord4j.gateway.limiter.PayloadTransformer;
 import discord4j.gateway.limiter.RateLimitTransformer;
@@ -29,7 +29,6 @@ import discord4j.gateway.payload.JacksonPayloadReader;
 import discord4j.gateway.payload.JacksonPayloadWriter;
 import discord4j.gateway.payload.PayloadReader;
 import discord4j.gateway.payload.PayloadWriter;
-import discord4j.common.retry.ReconnectOptions;
 import org.junit.Ignore;
 import org.junit.Test;
 import reactor.core.publisher.Mono;
@@ -57,7 +56,7 @@ public class GatewayClientTest {
         ReconnectOptions reconnectOptions = ReconnectOptions.create();
         GatewayOptions gatewayOptions = new GatewayOptions(
                 token,
-                new ReactorResources(),
+                GatewayReactorResources.create(),
                 reader,
                 writer,
                 reconnectOptions,
@@ -119,7 +118,7 @@ public class GatewayClientTest {
             ReconnectOptions reconnectOptions = ReconnectOptions.create();
             GatewayOptions gatewayOptions = new GatewayOptions(
                     token,
-                    new ReactorResources(),
+                    GatewayReactorResources.create(),
                     new JacksonPayloadReader(mapper),
                     new JacksonPayloadWriter(mapper),
                     reconnectOptions,

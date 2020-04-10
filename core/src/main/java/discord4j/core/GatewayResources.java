@@ -17,7 +17,6 @@
 
 package discord4j.core;
 
-import discord4j.common.ReactorResources;
 import discord4j.common.retry.ReconnectOptions;
 import discord4j.core.event.EventDispatcher;
 import discord4j.core.event.domain.Event;
@@ -25,6 +24,7 @@ import discord4j.core.shard.ShardCoordinator;
 import discord4j.core.state.StateHolder;
 import discord4j.core.state.StateView;
 import discord4j.gateway.GatewayClient;
+import discord4j.gateway.GatewayReactorResources;
 import discord4j.store.api.Store;
 import discord4j.voice.VoiceReactorResources;
 
@@ -37,7 +37,7 @@ public class GatewayResources {
     private final EventDispatcher eventDispatcher;
     private final ShardCoordinator shardCoordinator;
     private final boolean memberRequest;
-    private final ReactorResources gatewayReactorResources;
+    private final GatewayReactorResources gatewayReactorResources;
     private final VoiceReactorResources voiceReactorResources;
     private final ReconnectOptions voiceReconnectOptions;
 
@@ -54,7 +54,8 @@ public class GatewayResources {
      */
     public GatewayResources(StateView stateView, EventDispatcher eventDispatcher,
                             ShardCoordinator shardCoordinator, boolean memberRequest,
-                            ReactorResources gatewayReactorResources, VoiceReactorResources voiceReactorResources,
+                            GatewayReactorResources gatewayReactorResources,
+                            VoiceReactorResources voiceReactorResources,
                             ReconnectOptions voiceReconnectOptions) {
         this.stateView = stateView;
         this.eventDispatcher = eventDispatcher;
@@ -106,11 +107,11 @@ public class GatewayResources {
     }
 
     /**
-     * Return the {@link ReactorResources} used to perform Gateway-related operations.
+     * Return the {@link GatewayReactorResources} used to perform Gateway-related operations.
      *
      * @return the Gateway Reactor resources
      */
-    public ReactorResources getGatewayReactorResources() {
+    public GatewayReactorResources getGatewayReactorResources() {
         return gatewayReactorResources;
     }
 

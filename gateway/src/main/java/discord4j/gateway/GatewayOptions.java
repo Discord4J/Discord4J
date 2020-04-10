@@ -17,11 +17,10 @@
 
 package discord4j.gateway;
 
-import discord4j.common.ReactorResources;
+import discord4j.common.retry.ReconnectOptions;
 import discord4j.gateway.limiter.PayloadTransformer;
 import discord4j.gateway.payload.PayloadReader;
 import discord4j.gateway.payload.PayloadWriter;
-import discord4j.common.retry.ReconnectOptions;
 
 import java.util.Objects;
 
@@ -31,7 +30,7 @@ import java.util.Objects;
 public class GatewayOptions {
 
     private final String token;
-    private final ReactorResources reactorResources;
+    private final GatewayReactorResources reactorResources;
     private final PayloadReader payloadReader;
     private final PayloadWriter payloadWriter;
     private final ReconnectOptions reconnectOptions;
@@ -39,7 +38,7 @@ public class GatewayOptions {
     private final GatewayObserver initialObserver;
     private final PayloadTransformer identifyLimiter;
 
-    public GatewayOptions(String token, ReactorResources reactorResources, PayloadReader payloadReader,
+    public GatewayOptions(String token, GatewayReactorResources reactorResources, PayloadReader payloadReader,
                           PayloadWriter payloadWriter, ReconnectOptions reconnectOptions,
                           IdentifyOptions identifyOptions, GatewayObserver initialObserver,
                           PayloadTransformer identifyLimiter) {
@@ -57,7 +56,7 @@ public class GatewayOptions {
         return token;
     }
 
-    public ReactorResources getReactorResources() {
+    public GatewayReactorResources getReactorResources() {
         return reactorResources;
     }
 
