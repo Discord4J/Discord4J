@@ -14,25 +14,18 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package discord4j.rest.request;
 
-import org.junit.Test;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.util.Logger;
-import reactor.util.Loggers;
 
-import java.time.Duration;
+public class NonBlockingLimiterTestApp {
 
-public class GlobalRateLimiterTest {
-
-    private static final Logger log = Loggers.getLogger(GlobalRateLimiterTest.class);
-
-    @Test
-    public void testGlobalRateLimiter() {
-        GlobalRateLimiter rateLimiter = new SemaphoreGlobalRateLimiter(8);
-        rateLimiter.rateLimitFor(Duration.ofSeconds(1));
-        rateLimiter.withLimiter(Mono.just("1").doOnNext(log::info)).blockLast();
-        rateLimiter.rateLimitFor(Duration.ofSeconds(1));
-        rateLimiter.withLimiter(Mono.just("2").doOnNext(log::info)).blockLast();
+    public static void main(String[] args) {
+        GlobalRateLimiter grl = BucketGlobalRateLimiter.create();
+        Flux.range(0, 2000) // Test with 2000 concurrent requests
+                .flatMap(i -> grl.withLimiter(Mono.just(i)), 2000)
+                .blockLast();
     }
 }
