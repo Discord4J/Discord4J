@@ -22,7 +22,6 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxSink;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.ReplayProcessor;
-import reactor.core.publisher.SignalType;
 import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
 import reactor.util.Logger;
@@ -31,7 +30,7 @@ import reactor.util.Loggers;
 import java.time.Duration;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
-import java.util.logging.Level;
+import java.util.function.Supplier;
 
 /**
  * A rate limiting operator based off the token bucket algorithm. From
@@ -41,10 +40,11 @@ import java.util.logging.Level;
  */
 public class RateLimitOperator<T> implements Function<Publisher<T>, Publisher<T>> {
 
+    private static final Logger log = Loggers.getLogger("discord4j.limiter");
     private static final AtomicInteger ID_GENERATOR = new AtomicInteger();
+    private static final Supplier<Scheduler> DEFAULT_PUBLISH_SCHEDULER = () ->
+            Schedulers.newSingle("d4j-limiter-" + ID_GENERATOR.incrementAndGet(), true);
 
-    private final int id;
-    private final Logger log;
     private final AtomicInteger tokens;
     private final Duration refillPeriod;
     private final Scheduler delayScheduler;
@@ -52,26 +52,37 @@ public class RateLimitOperator<T> implements Function<Publisher<T>, Publisher<T>
     private final FluxSink<Integer> tokenChangedSink;
     private final Scheduler tokenPublishScheduler;
 
+    @Deprecated
     public RateLimitOperator(int capacity, Duration refillPeriod) {
         this(capacity, refillPeriod, Schedulers.parallel());
     }
 
     public RateLimitOperator(int capacity, Duration refillPeriod, Scheduler delayScheduler) {
-        this.id = ID_GENERATOR.incrementAndGet();
-        this.log = Loggers.getLogger("discord4j.limiter." + id);
+        this(capacity, refillPeriod, delayScheduler, DEFAULT_PUBLISH_SCHEDULER.get());
+    }
+
+    public RateLimitOperator(int capacity, Duration refillPeriod, Scheduler delayScheduler, Scheduler publishScheduler) {
         this.tokens = new AtomicInteger(capacity);
         this.refillPeriod = refillPeriod;
         this.delayScheduler = delayScheduler;
         this.tokenChanged = ReplayProcessor.cacheLastOrDefault(capacity);
         this.tokenChangedSink = tokenChanged.sink(FluxSink.OverflowStrategy.LATEST);
-        this.tokenPublishScheduler = Schedulers.newSingle("d4j-limiter-" + id);
+        this.tokenPublishScheduler = publishScheduler;
+    }
+
+    private String id() {
+        return Integer.toHexString(hashCode());
     }
 
     @Override
     public Publisher<T> apply(Publisher<T> source) {
         return Flux.from(source).flatMap(value -> availableTokens()
                 .take(1)
-                .log(log, Level.FINEST, false, SignalType.ON_SUBSCRIBE, SignalType.ON_NEXT)
+                .doOnSubscribe(s -> {
+                    if (log.isTraceEnabled()) {
+                        log.trace("[{}] Subscribed to limiter", id());
+                    }
+                })
                 .map(token -> {
                     acquire();
                     Mono.delay(refillPeriod, delayScheduler).subscribe(__ -> release());
@@ -82,7 +93,7 @@ public class RateLimitOperator<T> implements Function<Publisher<T>, Publisher<T>
     private void acquire() {
         int token = tokens.decrementAndGet();
         if (log.isTraceEnabled()) {
-            log.trace("Acquired a token, {} tokens remaining", token);
+            log.trace("[{}] Acquired a token, {} tokens remaining", id(), token);
         }
         tokenChangedSink.next(token);
     }
@@ -90,7 +101,7 @@ public class RateLimitOperator<T> implements Function<Publisher<T>, Publisher<T>
     private void release() {
         int token = tokens.incrementAndGet();
         if (log.isTraceEnabled()) {
-            log.trace("Released a token, {} tokens remaining", token);
+            log.trace("[{}] Released a token, {} tokens remaining", id(), token);
         }
         tokenChangedSink.next(token);
     }
