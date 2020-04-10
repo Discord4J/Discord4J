@@ -112,6 +112,7 @@ public abstract class PayloadHandlers {
             int[] shard = new int[]{options.getShardIndex(), options.getShardCount()};
             Identify identify = ImmutableIdentify.builder()
                     .token(client.token())
+                    .intents(options.getIntents())
                     .properties(props)
                     .compress(Possible.of(false))
                     .largeThreshold(250)

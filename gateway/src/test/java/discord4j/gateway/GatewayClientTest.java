@@ -22,6 +22,7 @@ import discord4j.discordjson.json.gateway.Ready;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import discord4j.common.JacksonResources;
 import discord4j.common.ReactorResources;
+import discord4j.discordjson.possible.Possible;
 import discord4j.gateway.limiter.PayloadTransformer;
 import discord4j.gateway.limiter.RateLimitTransformer;
 import discord4j.gateway.payload.JacksonPayloadReader;
@@ -60,7 +61,7 @@ public class GatewayClientTest {
                 reader,
                 writer,
                 reconnectOptions,
-                new IdentifyOptions(new ShardInfo(0, 1), null, true),
+                new IdentifyOptions(new ShardInfo(0, 1), null, Possible.absent(), true),
                 GatewayObserver.NOOP_LISTENER,
                 new RateLimitTransformer(1, Duration.ofSeconds(6))
         );
@@ -122,7 +123,7 @@ public class GatewayClientTest {
                     new JacksonPayloadReader(mapper),
                     new JacksonPayloadWriter(mapper),
                     reconnectOptions,
-                    new IdentifyOptions(new ShardInfo(i, shardCount), ImmutableStatusUpdate.of(Optional.empty(), Optional.empty(), "invisible", false), true),
+                    new IdentifyOptions(new ShardInfo(i, shardCount), ImmutableStatusUpdate.of(Optional.empty(), Optional.empty(), "invisible", false), Possible.absent(), true),
                     (s, o) -> {
                         if (s.equals(GatewayObserver.CONNECTED)) {
                             next.countDown();

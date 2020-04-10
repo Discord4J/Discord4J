@@ -36,7 +36,9 @@ import discord4j.discordjson.json.ActivityUpdateRequest;
 import discord4j.discordjson.json.MessageData;
 import discord4j.discordjson.json.gateway.Dispatch;
 import discord4j.discordjson.json.gateway.StatusUpdate;
+import discord4j.discordjson.possible.Possible;
 import discord4j.gateway.*;
+import discord4j.gateway.intent.IntentSet;
 import discord4j.gateway.json.ShardAwareDispatch;
 import discord4j.gateway.limiter.PayloadTransformer;
 import discord4j.gateway.limiter.RateLimitTransformer;
@@ -110,6 +112,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
     private boolean memberRequest = true;
     private Function<ShardInfo, StatusUpdate> initialPresence = shard -> null;
     private Function<ShardInfo, SessionInfo> resumeOptions = shard -> null;
+    private Possible<IntentSet> intents = Possible.absent();
     private boolean guildSubscriptions = true;
     private Function<GatewayDiscordClient, Mono<Void>> destroyHandler = shutdownDestroyHandler();
     private PayloadReader payloadReader = null;
@@ -151,6 +154,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
         this.memberRequest = source.memberRequest;
         this.initialPresence = source.initialPresence;
         this.resumeOptions = source.resumeOptions;
+        this.intents = source.intents;
         this.guildSubscriptions = source.guildSubscriptions;
         this.destroyHandler = source.destroyHandler;
         this.payloadReader = source.payloadReader;
@@ -381,6 +385,31 @@ public class GatewayBootstrap<O extends GatewayOptions> {
      */
     public GatewayBootstrap<O> setResumeOptions(Function<ShardInfo, SessionInfo> resumeOptions) {
         this.resumeOptions = Objects.requireNonNull(resumeOptions, "resumeOptions");
+        return this;
+    }
+
+    /**
+     * Set the intents to subscribe from the gateway for this shard.
+     * Intents will not be used, when this method is not called.
+     *
+     * @param intents set of intents to subscribe
+     * @return this builder
+     */
+    public GatewayBootstrap<O> setEnabledIntents(IntentSet intents) {
+        this.intents = Possible.of(intents);
+        return this;
+    }
+
+    /**
+     * Set the intents which should not be subscribed from the gateway for this shard.
+     * This method computes by {@code IntentSet.all()} - the provided intents
+     * Intents will not be used, when this method is not called.
+     *
+     * @param intents set of intents which should not be subscribed
+     * @return this builder
+     */
+    public GatewayBootstrap<O> setDisabledIntents(IntentSet intents) {
+        this.intents = Possible.of(IntentSet.all().andNot(intents));
         return this;
     }
 
@@ -659,7 +688,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
         return Mono.subscriberContext()
                 .flatMap(ctx -> Mono.<ShardInfo>create(sink -> {
                     StatusUpdate initial = Optional.ofNullable(initialPresence.apply(shard)).orElse(null);
-                    IdentifyOptions identify = new IdentifyOptions(shard, initial, guildSubscriptions);
+                    IdentifyOptions identify = new IdentifyOptions(shard, initial, intents, guildSubscriptions);
                     SessionInfo resume = resumeOptions.apply(shard);
                     if (resume != null) {
                         identify.setResumeSessionId(resume.getId());

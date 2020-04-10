@@ -18,6 +18,8 @@
 package discord4j.gateway;
 
 import discord4j.discordjson.json.gateway.StatusUpdate;
+import discord4j.discordjson.possible.Possible;
+import discord4j.gateway.intent.IntentSet;
 import reactor.util.annotation.Nullable;
 
 /**
@@ -33,6 +35,8 @@ public class IdentifyOptions {
     @Nullable
     private final StatusUpdate initialStatus;
 
+    private final Possible<Long> intents;
+
     private final boolean guildSubscriptions;
 
     @Nullable
@@ -46,11 +50,17 @@ public class IdentifyOptions {
      *
      * @param shardInfo shard index and count the client using this policy will identify with
      * @param initialStatus initial presence status the bot will identify with
+     * @param intents intents to subscribe from the gateway or just {@code Possible.absent()}
      * @param guildSubscriptions whether to enable presence and typing events while identifying
      */
-    public IdentifyOptions(ShardInfo shardInfo, @Nullable StatusUpdate initialStatus, boolean guildSubscriptions) {
+    public IdentifyOptions(ShardInfo shardInfo, @Nullable StatusUpdate initialStatus, Possible<IntentSet> intents, boolean guildSubscriptions) {
         this.shardInfo = shardInfo;
         this.initialStatus = initialStatus;
+        if(!intents.isAbsent()) {
+            this.intents = Possible.of(intents.get().getRawValue());
+        } else {
+            this.intents = Possible.absent();
+        }
         this.guildSubscriptions = guildSubscriptions;
     }
 
@@ -84,6 +94,15 @@ public class IdentifyOptions {
     @Nullable
     public StatusUpdate getInitialStatus() {
         return initialStatus;
+    }
+
+    /**
+     * Retrieve the intents which should be subscribed from the gateway when identifying.
+     *
+     * @return {@code Possible.absent()} when no intents are set or the raw intent value which should be subscribed
+     */
+    public Possible<Long> getIntents() {
+        return intents;
     }
 
     /**
