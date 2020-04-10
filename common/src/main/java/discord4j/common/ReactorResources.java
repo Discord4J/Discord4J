@@ -40,7 +40,7 @@ public class ReactorResources {
     protected static final Supplier<HttpClient> DEFAULT_HTTP_CLIENT =
             () -> HttpClient.create().compress(true).followRedirect(true);
     protected static final Supplier<Scheduler> DEFAULT_TIMER_TASK_SCHEDULER = () ->
-            Schedulers.newParallel("d4j-parallel-" + ID.incrementAndGet());
+            Schedulers.newParallel("d4j-parallel-" + ID.incrementAndGet(), Schedulers.DEFAULT_POOL_SIZE, true);
     protected static final Supplier<Scheduler> DEFAULT_BLOCKING_TASK_SCHEDULER = Schedulers::boundedElastic;
 
     private final HttpClient httpClient;
