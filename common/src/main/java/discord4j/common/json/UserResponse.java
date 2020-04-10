@@ -16,8 +16,14 @@
  */
 package discord4j.common.json;
 
+import com.fasterxml.jackson.annotation.JsonAnyGetter;
+import com.fasterxml.jackson.annotation.JsonAnySetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import discord4j.common.jackson.UnsignedJson;
 import reactor.util.annotation.Nullable;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 public class UserResponse {
 
@@ -29,6 +35,9 @@ public class UserResponse {
     private String avatar;
     @Nullable
     private Boolean bot;
+
+    @JsonIgnore
+    private Map<String, Object> additionalProperties;
 
     public long getId() {
         return id;
@@ -52,6 +61,24 @@ public class UserResponse {
         return bot;
     }
 
+    private void checkAdditionalProperties() {
+        if (this.additionalProperties == null) {
+            this.additionalProperties = new LinkedHashMap<>();
+        }
+    }
+
+    @JsonAnyGetter
+    public Map<String, Object> getAdditionalProperties() {
+        checkAdditionalProperties();
+        return this.additionalProperties;
+    }
+
+    @JsonAnySetter
+    public void setAdditionalProperty(String name, Object value) {
+        checkAdditionalProperties();
+        this.additionalProperties.put(name, value);
+    }
+
     @Override
     public String toString() {
         return "UserResponse{" +
@@ -60,6 +87,7 @@ public class UserResponse {
                 ", discriminator='" + discriminator + '\'' +
                 ", avatar='" + avatar + '\'' +
                 ", bot=" + bot +
+                ", additionalProperties=" + additionalProperties +
                 '}';
     }
 }
