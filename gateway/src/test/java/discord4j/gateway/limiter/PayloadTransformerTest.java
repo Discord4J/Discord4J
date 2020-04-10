@@ -21,6 +21,7 @@ import discord4j.common.operator.RateLimitOperator;
 import org.junit.Ignore;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
+import reactor.core.scheduler.Schedulers;
 import reactor.util.Logger;
 import reactor.util.Loggers;
 
@@ -44,7 +45,7 @@ public class PayloadTransformerTest {
                 .groupBy(shard -> shard % factor)
                 .flatMap(group -> group.concatMap(index -> {
                     RateLimitOperator<String> limiter = limiters.computeIfAbsent(index % factor,
-                            k -> new RateLimitOperator<>(1, Duration.ofSeconds(5)));
+                            k -> new RateLimitOperator<>(1, Duration.ofSeconds(5), Schedulers.parallel()));
                     AtomicLong lastIdentifyAt = lastIdentify.computeIfAbsent(index % factor,
                             k -> new AtomicLong(0));
 
@@ -68,7 +69,7 @@ public class PayloadTransformerTest {
     @Test
     @Ignore
     public void testIdentifyLimiter() {
-        RateLimitOperator<Integer> limiter = new RateLimitOperator<>(1, Duration.ofSeconds(5));
+        RateLimitOperator<Integer> limiter = new RateLimitOperator<>(1, Duration.ofSeconds(5), Schedulers.parallel());
 
         Flux<Integer> outbound = Flux.range(0, 10)
                 .transform(limiter)
@@ -80,7 +81,7 @@ public class PayloadTransformerTest {
     @Test
     @Ignore
     public void testOutboundLimiter() {
-        RateLimitOperator<Integer> limiter = new RateLimitOperator<>(120, Duration.ofMinutes(1));
+        RateLimitOperator<Integer> limiter = new RateLimitOperator<>(120, Duration.ofMinutes(1), Schedulers.parallel());
 
         Flux<Integer> outbound = Flux.range(0, 200)
                 .transform(limiter)

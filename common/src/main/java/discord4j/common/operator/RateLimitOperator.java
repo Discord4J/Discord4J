@@ -52,11 +52,6 @@ public class RateLimitOperator<T> implements Function<Publisher<T>, Publisher<T>
     private final FluxSink<Integer> tokenChangedSink;
     private final Scheduler tokenPublishScheduler;
 
-    @Deprecated
-    public RateLimitOperator(int capacity, Duration refillPeriod) {
-        this(capacity, refillPeriod, Schedulers.parallel());
-    }
-
     public RateLimitOperator(int capacity, Duration refillPeriod, Scheduler delayScheduler) {
         this(capacity, refillPeriod, delayScheduler, DEFAULT_PUBLISH_SCHEDULER.get());
     }
