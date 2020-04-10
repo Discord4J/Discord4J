@@ -27,6 +27,7 @@ import reactor.core.publisher.EmitterProcessor;
 import reactor.core.publisher.FluxSink;
 import reactor.netty.http.client.HttpClient;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -233,7 +234,7 @@ public class RestClientBuilder<C, O extends RouterOptions> {
 
     private O buildOptions(ReactorResources reactor, JacksonResources jackson) {
         RouterOptions options = new RouterOptions(token, reactor, initExchangeStrategies(jackson),
-                responseTransformers, initGlobalRateLimiter(), initRequestQueueFactory());
+                responseTransformers, initGlobalRateLimiter(reactor), initRequestQueueFactory());
         return this.optionsModifier.apply(options);
     }
 
@@ -258,11 +259,11 @@ public class RestClientBuilder<C, O extends RouterOptions> {
         return ExchangeStrategies.jackson(jacksonResources.getObjectMapper());
     }
 
-    private GlobalRateLimiter initGlobalRateLimiter() {
+    private GlobalRateLimiter initGlobalRateLimiter(ReactorResources reactorResources) {
         if (globalRateLimiter != null) {
             return globalRateLimiter;
         }
-        return BucketGlobalRateLimiter.create();
+        return BucketGlobalRateLimiter.create(50, Duration.ofSeconds(1), reactorResources.getTimerTaskScheduler());
     }
 
     private RequestQueueFactory initRequestQueueFactory() {

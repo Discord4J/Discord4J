@@ -23,7 +23,8 @@ import reactor.netty.http.client.HttpClient;
 import reactor.netty.resources.ConnectionProvider;
 import reactor.netty.resources.LoopResources;
 
-import java.util.Objects;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Supplier;
 
 /**
  * Provides Reactor Netty resources like an {@link HttpClient} and {@link Scheduler} instances that can be customized
@@ -34,6 +35,14 @@ import java.util.Objects;
  */
 public class ReactorResources {
 
+    private static final AtomicInteger ID = new AtomicInteger();
+
+    protected static final Supplier<HttpClient> DEFAULT_HTTP_CLIENT =
+            () -> HttpClient.create().compress(true).followRedirect(true);
+    protected static final Supplier<Scheduler> DEFAULT_TIMER_TASK_SCHEDULER = () ->
+            Schedulers.newParallel("d4j-parallel-" + ID.incrementAndGet());
+    protected static final Supplier<Scheduler> DEFAULT_BLOCKING_TASK_SCHEDULER = Schedulers::boundedElastic;
+
     private final HttpClient httpClient;
     private final Scheduler timerTaskScheduler;
     private final Scheduler blockingTaskScheduler;
@@ -42,9 +51,9 @@ public class ReactorResources {
      * Create with a default {@link HttpClient} and {@link Scheduler}s for timed and blocking tasks.
      */
     public ReactorResources() {
-        this.httpClient = HttpClient.create().compress(true).followRedirect(true);
-        this.timerTaskScheduler = Schedulers.parallel();
-        this.blockingTaskScheduler = Schedulers.boundedElastic();
+        this.httpClient = DEFAULT_HTTP_CLIENT.get();
+        this.timerTaskScheduler = DEFAULT_TIMER_TASK_SCHEDULER.get();
+        this.blockingTaskScheduler = DEFAULT_BLOCKING_TASK_SCHEDULER.get();
     }
 
     /**
@@ -61,9 +70,11 @@ public class ReactorResources {
     }
 
     protected ReactorResources(Builder builder) {
-        this.httpClient = Objects.requireNonNull(builder.httpClient, "httpClient");
-        this.timerTaskScheduler = Objects.requireNonNull(builder.timerTaskScheduler, "timerTaskScheduler");
-        this.blockingTaskScheduler = Objects.requireNonNull(builder.blockingTaskScheduler, "blockingTaskScheduler");
+        this.httpClient = builder.httpClient == null ? DEFAULT_HTTP_CLIENT.get() : builder.httpClient;
+        this.timerTaskScheduler = builder.timerTaskScheduler == null ?
+                DEFAULT_TIMER_TASK_SCHEDULER.get() : builder.timerTaskScheduler;
+        this.blockingTaskScheduler = builder.blockingTaskScheduler == null ?
+                DEFAULT_BLOCKING_TASK_SCHEDULER.get() : builder.blockingTaskScheduler;
     }
 
     public static ReactorResources create() {
@@ -76,9 +87,9 @@ public class ReactorResources {
 
     public static class Builder {
 
-        private HttpClient httpClient = HttpClient.create().compress(true).followRedirect(true);
-        private Scheduler timerTaskScheduler = Schedulers.parallel();
-        private Scheduler blockingTaskScheduler = Schedulers.boundedElastic();
+        private HttpClient httpClient;
+        private Scheduler timerTaskScheduler;
+        private Scheduler blockingTaskScheduler;
 
         protected Builder() {
         }
@@ -160,6 +171,7 @@ public class ReactorResources {
      *
      * @param provider the connection pool provider to use
      * @param resources the set of event loop threads to use
+     * @return an {@link HttpClient} configured with custom resources
      */
     public static HttpClient newHttpClient(ConnectionProvider provider, LoopResources resources) {
         return HttpClient.create(provider).tcpConfiguration(tcpClient -> tcpClient.runOn(resources));
