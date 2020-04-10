@@ -473,7 +473,8 @@ public final class Message implements Entity {
     @Experimental
     public Mono<Void> suppressEmbeds(final boolean suppress) {
         return gateway.getRestClient().getChannelService()
-                .suppressEmbeds(getChannelId().asLong(), getId().asLong(), ImmutableSuppressEmbedsRequest.of(suppress));
+                .suppressEmbeds(getChannelId().asLong(), getId().asLong(),
+                        ImmutableSuppressEmbedsRequest.builder().suppress(suppress).build());
     }
 
     /**

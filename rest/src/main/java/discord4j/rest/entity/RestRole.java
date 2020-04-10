@@ -90,7 +90,10 @@ public class RestRole {
      * guild. If an error is received, it is emitted through the {@code Flux}.
      */
     public Flux<RoleData> changePosition(final int position) {
-        final PositionModifyRequest[] requests = {ImmutablePositionModifyRequest.of(Snowflake.asString(id), position)};
+        final PositionModifyRequest[] requests = {ImmutablePositionModifyRequest.builder()
+                .id(Snowflake.asString(id))
+                .position(position)
+                .build()};
         return restClient.getGuildService().modifyGuildRolePositions(guildId, requests);
     }
 
