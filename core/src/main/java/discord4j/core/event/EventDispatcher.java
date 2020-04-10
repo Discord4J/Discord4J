@@ -24,6 +24,7 @@ import reactor.scheduler.forkjoin.ForkJoinPoolScheduler;
 
 import java.time.Duration;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 /**
  * Distributes events to subscribers. {@link Event} instances can be published over this class and dispatched to all
@@ -44,6 +45,8 @@ import java.util.function.Function;
  * </pre>
  */
 public interface EventDispatcher {
+
+    Supplier<Scheduler> DEFAULT_EVENT_SCHEDULER = () -> ForkJoinPoolScheduler.create("d4j-events");
 
     /**
      * Retrieves a {@link Flux} with elements of the given {@link Event} type.
@@ -157,7 +160,7 @@ public interface EventDispatcher {
         return new DefaultEventDispatcher(
                 ReplayProcessor.createTimeout(maxAge),
                 FluxSink.OverflowStrategy.IGNORE,
-                ForkJoinPoolScheduler.create("discord4j-events"));
+                DEFAULT_EVENT_SCHEDULER.get());
     }
 
     /**
@@ -173,7 +176,7 @@ public interface EventDispatcher {
         return new DefaultEventDispatcher(
                 ReplayProcessor.create(historySize),
                 FluxSink.OverflowStrategy.IGNORE,
-                ForkJoinPoolScheduler.create("discord4j-events"));
+                DEFAULT_EVENT_SCHEDULER.get());
     }
 
     interface Builder {

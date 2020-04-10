@@ -25,7 +25,6 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxProcessor;
 import reactor.core.publisher.FluxSink;
 import reactor.core.scheduler.Scheduler;
-import reactor.scheduler.forkjoin.ForkJoinPoolScheduler;
 import reactor.util.Logger;
 import reactor.util.Loggers;
 import reactor.util.concurrent.Queues;
@@ -155,7 +154,7 @@ public class DefaultEventDispatcher implements EventDispatcher {
                 eventProcessor = EmitterProcessor.create(Queues.SMALL_BUFFER_SIZE, false);
             }
             if (eventScheduler == null) {
-                eventScheduler = ForkJoinPoolScheduler.create("discord4j-events");
+                eventScheduler = DEFAULT_EVENT_SCHEDULER.get();
             }
             return new DefaultEventDispatcher(eventProcessor, overflowStrategy, eventScheduler);
         }
