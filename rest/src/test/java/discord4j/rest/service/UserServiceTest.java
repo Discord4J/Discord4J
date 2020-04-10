@@ -93,7 +93,7 @@ public class UserServiceTest {
 
     @Test
     public void testCreateDM() {
-        DMCreateRequest req = ImmutableDMCreateRequest.of(Long.toUnsignedString(user));
+        DMCreateRequest req = ImmutableDMCreateRequest.builder().recipientId(Long.toUnsignedString(user)).build();
         getUserService().createDM(req).block();
     }
 

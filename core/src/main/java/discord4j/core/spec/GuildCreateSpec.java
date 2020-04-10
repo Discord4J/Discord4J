@@ -153,12 +153,26 @@ public class GuildCreateSpec implements Spec<GuildCreateRequest> {
      * @return This spec.
      */
     public GuildCreateSpec addChannel(String name, Channel.Type type) {
-        channels.add(ImmutablePartialChannelCreateRequest.of(name, type.getValue()));
+        channels.add(ImmutablePartialChannelCreateRequest
+                .builder()
+                .name(name)
+                .type(type.getValue())
+                .build());
         return this;
     }
 
     @Override
     public GuildCreateRequest asRequest() {
-        return ImmutableGuildCreateRequest.of(name, region, icon, verificationLevel, defaultMessageNotificationLevel, explicitContentFilter, roles, channels);
+        return ImmutableGuildCreateRequest
+                .builder()
+                .name(name)
+                .region(region)
+                .icon(icon)
+                .verificationLevel(verificationLevel)
+                .defaultMessageNotifications(defaultMessageNotificationLevel)
+                .explicitContentFilter(explicitContentFilter)
+                .roles(roles)
+                .channels(channels)
+                .build();
     }
 }

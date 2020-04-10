@@ -53,6 +53,6 @@ public class RestUser {
      * this user. If an error is received, it is emitted through the {@code Mono}.
      */
     public final Mono<ChannelData> getPrivateChannel() {
-        return restClient.getUserService().createDM(ImmutableDMCreateRequest.of(Snowflake.asString(id)));
+        return restClient.getUserService().createDM(ImmutableDMCreateRequest.builder().recipientId(Snowflake.asString(id)).build());
     }
 }

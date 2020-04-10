@@ -209,7 +209,12 @@ public class ChannelServiceTest {
 
     @Test
     public void testEditChannelPermissions() {
-        PermissionsEditRequest req = ImmutablePermissionsEditRequest.of(0, 0, "member");
+        PermissionsEditRequest req = ImmutablePermissionsEditRequest
+                .builder()
+                .allow(0)
+                .deny(0)
+                .type("member")
+                .build();
         getChannelService().editChannelPermissions(modifyChannel, permanentOverwrite, req, null).block();
     }
 
@@ -220,7 +225,13 @@ public class ChannelServiceTest {
 
     @Test
     public void testCreateChannelInvite() {
-        InviteCreateRequest req = ImmutableInviteCreateRequest.of(1, 0, true, true);
+        InviteCreateRequest req = ImmutableInviteCreateRequest
+                .builder()
+                .maxAge(1)
+                .maxUses(0)
+                .temporary(true)
+                .unique(true)
+                .build();
         getChannelService().createChannelInvite(modifyChannel, req, null).block();
     }
 

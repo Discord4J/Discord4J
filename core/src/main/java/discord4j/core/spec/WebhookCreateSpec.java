@@ -71,6 +71,10 @@ public class WebhookCreateSpec implements AuditSpec<WebhookCreateRequest> {
 
     @Override
     public WebhookCreateRequest asRequest() {
-        return ImmutableWebhookCreateRequest.of(name, Optional.of(avatar));
+        return ImmutableWebhookCreateRequest
+                .builder()
+                .name(name)
+                .avatar(avatar)
+                .build();
     }
 }

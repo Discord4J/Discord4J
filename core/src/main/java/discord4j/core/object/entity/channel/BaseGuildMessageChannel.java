@@ -260,7 +260,7 @@ class BaseGuildMessageChannel extends BaseChannel implements GuildMessageChannel
                 .buffer(100) // REST accepts 100 IDs
                 .filterWhen(filterMessageIdChunk)
                 .flatMap(messageIdChunk -> getClient().getRestClient().getChannelService()
-                        .bulkDeleteMessages(getId().asLong(), ImmutableBulkDeleteRequest.of(messageIdChunk)))
+                        .bulkDeleteMessages(getId().asLong(), ImmutableBulkDeleteRequest.builder().messages(messageIdChunk).build()))
                 .thenMany(Flux.fromIterable(ignoredMessageIds));
     }
 

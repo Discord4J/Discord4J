@@ -66,8 +66,12 @@ public class CategoryEditSpec implements AuditSpec<ChannelModifyRequest> {
      */
     public CategoryEditSpec setPermissionOverwrites(Set<? extends PermissionOverwrite> permissionOverwrites) {
         List<OverwriteData> raw = permissionOverwrites.stream()
-            .map(o -> ImmutableOverwriteData.of(o.getTargetId().asString(), o.getType().getValue(),
-                o.getAllowed().getRawValue(), o.getDenied().getRawValue()))
+            .map(o -> ImmutableOverwriteData.builder()
+                    .id(o.getTargetId().asString())
+                    .type(o.getType().getValue())
+                    .allow(o.getAllowed().getRawValue())
+                    .deny(o.getDenied().getRawValue())
+                    .build())
             .collect(Collectors.toList());
 
         requestBuilder.permissionOverwrites(Possible.of(raw));

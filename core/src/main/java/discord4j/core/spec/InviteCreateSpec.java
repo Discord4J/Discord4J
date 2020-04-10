@@ -97,6 +97,12 @@ public class InviteCreateSpec implements AuditSpec<InviteCreateRequest> {
 
     @Override
     public InviteCreateRequest asRequest() {
-        return ImmutableInviteCreateRequest.of(maxAge, maxUses, temporary, unique);
+        return ImmutableInviteCreateRequest
+                .builder()
+                .maxAge(maxAge)
+                .maxUses(maxUses)
+                .temporary(temporary)
+                .unique(unique)
+                .build();
     }
 }

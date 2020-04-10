@@ -82,6 +82,10 @@ public class MessageEditSpec implements Spec<MessageEditRequest> {
 
     @Override
     public MessageEditRequest asRequest() {
-        return ImmutableMessageEditRequest.of(content, embed, flags);
+        return ImmutableMessageEditRequest.builder()
+                .content(content)
+                .embed(embed)
+                .flags(flags)
+                .build();
     }
 }

@@ -213,7 +213,7 @@ public class User implements Entity {
      */
     public final Mono<PrivateChannel> getPrivateChannel() {
         return gateway.getRestClient().getUserService()
-                .createDM(ImmutableDMCreateRequest.of(Snowflake.asString(getId().asLong())))
+                .createDM(ImmutableDMCreateRequest.builder().recipientId(Snowflake.asString(getId().asLong())).build())
                 .map(data -> EntityUtil.getChannel(gateway, data))
                 .cast(PrivateChannel.class);
     }

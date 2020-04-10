@@ -56,6 +56,9 @@ public class UserEditSpec implements Spec<UserModifyRequest> {
 
     @Override
     public UserModifyRequest asRequest() {
-        return ImmutableUserModifyRequest.of(username, avatar);
+        return ImmutableUserModifyRequest.builder()
+                .username(username)
+                .avatar(avatar)
+                .build();
     }
 }
