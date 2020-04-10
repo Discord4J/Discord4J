@@ -95,7 +95,13 @@ class RequestStream {
     }
 
     void start() {
-        requestQueue.requests().subscribe(new RequestSubscriber(rateLimitStrategy));
+        requestQueue.requests()
+                .doOnDiscard(RequestCorrelation.class, this::onDiscard)
+                .subscribe(new RequestSubscriber(rateLimitStrategy));
+    }
+
+    private void onDiscard(RequestCorrelation<?> requestCorrelation) {
+        requestCorrelation.getResponse().onError(new DiscardedRequestException(requestCorrelation.getRequest()));
     }
 
     /**

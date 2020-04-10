@@ -16,12 +16,9 @@
  */
 package discord4j.rest.request;
 
-import org.junit.Ignore;
 import org.junit.Test;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
-import reactor.function.TupleUtils;
 import reactor.util.Logger;
 import reactor.util.Loggers;
 
@@ -48,33 +45,6 @@ public class GlobalRateLimiterTest {
             rateLimiter.withLimiter(Mono.just("1").doOnNext(log::info)).blockLast();
             rateLimiter.rateLimitFor(Duration.ofSeconds(1));
             rateLimiter.withLimiter(Mono.just("2").doOnNext(log::info)).blockLast();
-        }
-    }
-
-    @Test
-    @Ignore
-    public void testBurstingRequestsGlobalRateLimiter() {
-        for (GlobalRateLimiter rateLimiter : limiters()) {
-            log.info("Testing {}", rateLimiter.getClass().toString());
-            Flux.range(0, 100)
-                    .flatMap(index -> rateLimiter.withLimiter(Mono.defer(() -> {
-                        // simulate a request
-                        return Mono.delay(Duration.ofMillis(50))
-                                .flatMap(tick -> {
-                                    // if this is the 50th index, we trip GRL
-                                    if (index == 50) {
-                                        log.info("Activating global rate limiter");
-                                        return rateLimiter.rateLimitFor(Duration.ofMillis(3000)).thenReturn(index);
-                                    }
-                                    return Mono.just(index);
-                                });
-                    })), 16)
-                    .collectList()
-                    .elapsed()
-                    .doOnNext(TupleUtils.consumer(
-                            (time, list) -> log.info("Sent {} messages in {} milliseconds ({} messages/s)",
-                                    list.size(), time, (list.size() / (double) time) * 1000)))
-                    .block();
         }
     }
 }

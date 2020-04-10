@@ -4,6 +4,8 @@
     <logger name="reactor" level="INFO"/>
     <!-- For tracing request stream tests -->
     <!--<logger name="discord4j.rest.request" level="TRACE"/>-->
+    <!--<logger name="discord4j.rest.response" level="TRACE"/>-->
+    <logger name="discord4j.limiter" level="TRACE"/>
 
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>

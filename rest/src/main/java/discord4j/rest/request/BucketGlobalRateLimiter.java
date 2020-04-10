@@ -35,7 +35,7 @@ public class BucketGlobalRateLimiter implements GlobalRateLimiter {
 
     private static final Logger log = Loggers.getLogger(BucketGlobalRateLimiter.class);
 
-    private final RateLimitOperator<?> operator;
+    private final RateLimitOperator<Integer> operator;
 
     private volatile long limitedUntil = 0;
 
@@ -77,18 +77,14 @@ public class BucketGlobalRateLimiter implements GlobalRateLimiter {
 
     @Override
     public <T> Flux<T> withLimiter(Publisher<T> stage) {
-        return getRemaining()
-                .transform(getRateLimitOperator())
+        return Mono.just(0)
+                .transform(operator)
+                .then(getRemaining())
                 .filter(delay -> delay.getSeconds() > 0)
                 .flatMapMany(delay -> {
                     log.trace("[{}] Delaying for {}", Integer.toHexString(hashCode()), delay);
                     return Mono.delay(delay).flatMapMany(tick -> Flux.from(stage));
                 })
                 .switchIfEmpty(stage);
-    }
-
-    @SuppressWarnings("unchecked")
-    private <T> RateLimitOperator<T> getRateLimitOperator() {
-        return (RateLimitOperator<T>) operator;
     }
 }

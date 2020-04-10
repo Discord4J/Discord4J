@@ -38,7 +38,7 @@ class ProcessorRequestQueueFactory implements RequestQueueFactory {
         return new RequestQueue<T>() {
 
             private final FluxProcessor<Object, Object> processor = processorSupplier.get();
-            private final FluxSink<Object> sink = processor.sink(overflowStrategy);
+            private final FluxSink<Object> sink = processor.sink(FluxSink.OverflowStrategy.BUFFER);
 
             @Override
             public void push(T request) {
@@ -48,7 +48,7 @@ class ProcessorRequestQueueFactory implements RequestQueueFactory {
             @SuppressWarnings("unchecked")
             @Override
             public Flux<T> requests() {
-                return (Flux<T>) processor; // Safe because elements can only be inserted via push(T)
+                return (Flux<T>) Flux.create(sink -> processor.subscribe(sink::next), overflowStrategy);
             }
         };
     }
