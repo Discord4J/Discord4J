@@ -171,6 +171,7 @@ public class DefaultShardingStrategy implements ShardingStrategy {
          * Set the sharding factor to use when identifying to the Discord Gateway, determining the amount of shards that
          * will be concurrently identified. Defaults to 1. You should only change this value if your bot is
          * authorized to use the very large bot sharding system, otherwise you will hit a rate limit on identifying.
+         * The factor always needs to be a power of 2 and must not be lower than one.
          *
          * @param factor a positive number indicating the amount of shards that can be identified concurrently.
          * @return this builder
@@ -178,6 +179,9 @@ public class DefaultShardingStrategy implements ShardingStrategy {
         public Builder factor(int factor) {
             if (factor < 1) {
                 throw new IllegalArgumentException("factor < 1");
+            }
+            if ((factor & (factor - 1)) != 0) {
+                throw new IllegalArgumentException("factor must be a power of 2");
             }
             this.factor = factor;
             return this;
