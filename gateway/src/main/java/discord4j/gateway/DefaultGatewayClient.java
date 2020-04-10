@@ -147,19 +147,20 @@ public class DefaultGatewayClient implements GatewayClient {
                     MonoProcessor<Void> ping = MonoProcessor.create();
 
                     // Setup the sending logic from multiple sources into one merged Flux
+                    Flux<ByteBuf> heartbeatFlux =
+                            heartbeats.flatMap(payload -> Flux.from(payloadWriter.write(payload)));
                     Flux<ByteBuf> identifyFlux = outbound.filter(payload -> Opcode.IDENTIFY.equals(payload.getOp()))
                             .delayUntil(payload -> ping)
                             .flatMap(payload -> Flux.from(payloadWriter.write(payload)))
                             .transform(identifyLimiter);
-                    RateLimitOperator<ByteBuf> outLimiter =
-                            new RateLimitOperator<>(outboundLimiterCapacity(), Duration.ofSeconds(60));
                     Flux<ByteBuf> payloadFlux = outbound.filter(payload -> !Opcode.IDENTIFY.equals(payload.getOp()))
                             .flatMap(payload -> Flux.from(payloadWriter.write(payload)))
-                            .transform(buf -> Flux.merge(buf, sender))
-                            .transform(outLimiter);
-                    Flux<ByteBuf> heartbeatFlux =
-                            heartbeats.flatMap(payload -> Flux.from(payloadWriter.write(payload)));
+                            .transform(buf -> Flux.merge(buf, sender));
+                    RateLimitOperator<ByteBuf> outLimiter =
+                            new RateLimitOperator<>(outboundLimiterCapacity(), Duration.ofSeconds(60),
+                                    reactorResources.getTimerTaskScheduler());
                     Flux<ByteBuf> outFlux = Flux.merge(heartbeatFlux, identifyFlux, payloadFlux)
+                            .transform(outLimiter)
                             .doOnNext(buf -> logPayload(senderLog, context, buf));
 
                     sessionHandler = new GatewayWebsocketHandler(receiverSink, outFlux, context);
@@ -544,6 +545,6 @@ public class DefaultGatewayClient implements GatewayClient {
                 log.warn("Invalid custom outbound limiter capacity: {}", capacityValue);
             }
         }
-        return 115;
+        return 120;
     }
 }
