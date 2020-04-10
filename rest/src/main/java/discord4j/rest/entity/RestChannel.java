@@ -231,7 +231,7 @@ public class RestChannel {
                 .buffer(100) // REST accepts 100 IDs
                 .filterWhen(filterMessageIdChunk)
                 .flatMap(messageIdChunk -> restClient.getChannelService()
-                        .bulkDeleteMessages(id, ImmutableBulkDeleteRequest.of(messageIdChunk)))
+                        .bulkDeleteMessages(id, ImmutableBulkDeleteRequest.builder().messages(messageIdChunk).build()))
                 .thenMany(Flux.fromIterable(ignoredMessageIds));
     }
 

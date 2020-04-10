@@ -83,6 +83,11 @@ public class WebhookEditSpec implements AuditSpec<WebhookModifyRequest> {
 
     @Override
     public WebhookModifyRequest asRequest() {
-        return ImmutableWebhookModifyRequest.of(name, avatar, channelId);
+        return ImmutableWebhookModifyRequest
+                .builder()
+                .name(name)
+                .avatar(avatar)
+                .channelId(channelId)
+                .build();
     }
 }

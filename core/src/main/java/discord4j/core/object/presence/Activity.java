@@ -34,19 +34,36 @@ import java.util.stream.Collectors;
 public class Activity {
 
     public static ActivityUpdateRequest playing(String name) {
-        return ImmutableActivityUpdateRequest.of(name, Type.PLAYING.getValue(), Optional.empty());
+        return ImmutableActivityUpdateRequest
+                .builder()
+                .name(name)
+                .type(Type.PLAYING.getValue())
+                .build();
     }
 
     public static ActivityUpdateRequest streaming(String name, String url) {
-        return ImmutableActivityUpdateRequest.of(name, Type.STREAMING.getValue(), Optional.of(url));
+        return ImmutableActivityUpdateRequest
+                .builder()
+                .name(name)
+                .type(Type.STREAMING.getValue())
+                .url(url)
+                .build();
     }
 
     public static ActivityUpdateRequest listening(String name) {
-        return ImmutableActivityUpdateRequest.of(name, Type.LISTENING.getValue(), Optional.empty());
+        return ImmutableActivityUpdateRequest
+                .builder()
+                .name(name)
+                .type(Type.LISTENING.getValue())
+                .build();
     }
 
     public static ActivityUpdateRequest watching(String name) {
-        return ImmutableActivityUpdateRequest.of(name, Type.WATCHING.getValue(), Optional.empty());
+        return ImmutableActivityUpdateRequest
+                .builder()
+                .name(name)
+                .type(Type.WATCHING.getValue())
+                .build();
     }
 
     private final ActivityData data;

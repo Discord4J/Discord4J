@@ -86,6 +86,11 @@ public class GuildEmojiCreateSpec implements AuditSpec<GuildEmojiCreateRequest> 
 
     @Override
     public GuildEmojiCreateRequest asRequest() {
-        return ImmutableGuildEmojiCreateRequest.of(name, image, roles.stream().map(Snowflake::asString).collect(Collectors.toList()));
+        return ImmutableGuildEmojiCreateRequest
+                .builder()
+                .name(name)
+                .image(image)
+                .roles(roles.stream().map(Snowflake::asString).collect(Collectors.toList()))
+                .build();
     }
 }

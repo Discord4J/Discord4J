@@ -74,6 +74,10 @@ public class GuildEmojiEditSpec implements AuditSpec<GuildEmojiModifyRequest> {
 
     @Override
     public GuildEmojiModifyRequest asRequest() {
-        return ImmutableGuildEmojiModifyRequest.of(name, roles);
+        return ImmutableGuildEmojiModifyRequest
+                .builder()
+                .name(name)
+                .roles(roles)
+                .build();
     }
 }

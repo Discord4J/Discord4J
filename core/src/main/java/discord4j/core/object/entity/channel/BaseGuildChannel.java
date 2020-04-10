@@ -136,7 +136,12 @@ class BaseGuildChannel extends BaseChannel implements GuildChannel {
     public Mono<Void> addMemberOverwrite(Snowflake memberId, PermissionOverwrite overwrite, @Nullable String reason) {
         PermissionSet allow = overwrite.getAllowed();
         PermissionSet deny = overwrite.getDenied();
-        PermissionsEditRequest request = ImmutablePermissionsEditRequest.of(allow.getRawValue(), deny.getRawValue(), "member");
+        PermissionsEditRequest request = ImmutablePermissionsEditRequest
+                .builder()
+                .allow(allow.getRawValue())
+                .deny(deny.getRawValue())
+                .type("member")
+                .build();
 
         return getClient().getRestClient().getChannelService()
                 .editChannelPermissions(getId().asLong(), memberId.asLong(), request, reason);
@@ -146,7 +151,12 @@ class BaseGuildChannel extends BaseChannel implements GuildChannel {
     public Mono<Void> addRoleOverwrite(Snowflake roleId, PermissionOverwrite overwrite, @Nullable String reason) {
         PermissionSet allow = overwrite.getAllowed();
         PermissionSet deny = overwrite.getDenied();
-        PermissionsEditRequest request = ImmutablePermissionsEditRequest.of(allow.getRawValue(), deny.getRawValue(), "role");
+        PermissionsEditRequest request = ImmutablePermissionsEditRequest
+                .builder()
+                .allow(allow.getRawValue())
+                .deny(deny.getRawValue())
+                .type("role")
+                .build();
 
         return getClient().getRestClient().getChannelService()
                 .editChannelPermissions(getId().asLong(), roleId.asLong(), request, reason);
