@@ -44,6 +44,8 @@ import reactor.util.context.Context;
 
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -317,10 +319,19 @@ public class DefaultGatewayClient implements GatewayClient {
                 });
     }
 
+    private static final List<Integer> nonRetryableStatusCodes = Arrays.asList(
+        4004, // Authentication failed
+        4010, // Invalid shard
+        4011, // Sharding required
+        4012, // Invalid API version
+        4013, // Invalid intent(s)
+        4014 // Disallowed intent(s)
+    );
+
     private boolean isRetryable(Throwable t) {
         if (t instanceof CloseException) {
             CloseException closeException = (CloseException) t;
-            return closeException.getCode() != 4004;
+            return !nonRetryableStatusCodes.contains(closeException.getCode());
         }
         return !(t instanceof PartialDisconnectException);
     }
