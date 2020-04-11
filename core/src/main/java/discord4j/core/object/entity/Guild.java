@@ -25,15 +25,15 @@ import discord4j.core.object.audit.AuditLogEntry;
 import discord4j.core.object.entity.channel.*;
 import discord4j.core.object.presence.Presence;
 import discord4j.core.retriever.EntityRetrievalStrategy;
-import discord4j.rest.util.Image;
-import discord4j.rest.util.Snowflake;
 import discord4j.core.spec.*;
 import discord4j.core.util.EntityUtil;
 import discord4j.core.util.ImageUtil;
 import discord4j.core.util.OrderUtil;
 import discord4j.discordjson.json.*;
 import discord4j.discordjson.possible.Possible;
+import discord4j.rest.util.Image;
 import discord4j.rest.util.PaginationUtil;
+import discord4j.rest.util.Snowflake;
 import discord4j.store.api.util.LongLongTuple2;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -41,6 +41,7 @@ import reactor.util.annotation.Nullable;
 
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -157,7 +158,8 @@ public final class Guild implements Entity {
      */
     public Optional<String> getDiscoverySplashUrl(final Image.Format format) {
         return data.discoverySplash()
-                .map(splash -> ImageUtil.getUrl(String.format(DISCOVERY_SPLASH_IMAGE_PATH, getId().asString(), splash), format));
+                .map(splash -> ImageUtil.getUrl(String.format(DISCOVERY_SPLASH_IMAGE_PATH, getId().asString(),
+                        splash), format));
     }
 
     /**
@@ -337,9 +339,11 @@ public final class Guild implements Entity {
     }
 
     /**
-     * Gets the preferred locale of a "PUBLIC" guild used in server discovery and notices from Discord; defaults to "en-US".
+     * Gets the preferred locale of a "PUBLIC" guild used in server discovery and notices from Discord; defaults to
+     * "en-US".
      *
-     * @return The preferred locale of a "PUBLIC" guild used in server discovery and notices from Discord; defaults to "en-US".
+     * @return The preferred locale of a "PUBLIC" guild used in server discovery and notices from Discord; defaults
+     * to "en-US".
      */
     public Locale getPreferredLocale() {
         return new Locale.Builder().setLanguageTag(data.preferredLocale().orElse("en-US")).build();
@@ -579,7 +583,8 @@ public final class Guild implements Entity {
     /**
      * Gets the ID of the channel where guild notices such as welcome messages and boost events are posted, if present.
      *
-     * @return The ID of the channel where guild notices such as welcome messages and boost events are posted, if present.
+     * @return The ID of the channel where guild notices such as welcome messages and boost events are posted, if
+     * present.
      */
     public Optional<Snowflake> getSystemChannelId() {
         return data.systemChannelId().map(Snowflake::of);
@@ -619,7 +624,8 @@ public final class Guild implements Entity {
     }
 
     /**
-     * Gets when this guild was joined at.
+     * Gets when this guild was joined at. If this {@link Guild} object was {@link EntityRetrievalStrategy retrieved}
+     * using REST API, then calling this method will throw {@link DateTimeParseException}.
      *
      * @return When this guild was joined at.
      */
@@ -628,7 +634,8 @@ public final class Guild implements Entity {
     }
 
     /**
-     * Gets whether this guild is considered large.
+     * Gets whether this guild is considered large. If this {@link Guild} object was {@link EntityRetrievalStrategy
+     * retrieved} using REST API, then calling this method will always return {@code false}.
      *
      * @return If present, {@code true} if the guild is considered large, {@code false} otherwise.
      */
@@ -646,7 +653,9 @@ public final class Guild implements Entity {
     }
 
     /**
-     * Gets the total number of members in the guild.
+     * Gets the total number of members in the guild. If this {@link Guild} object was
+     * {@link EntityRetrievalStrategy retrieved} using REST API, then calling this method will always return the same
+     * value.
      *
      * @return The total number of members in the guild.
      */

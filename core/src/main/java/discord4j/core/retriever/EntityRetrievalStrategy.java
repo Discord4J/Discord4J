@@ -17,28 +17,39 @@
 package discord4j.core.retriever;
 
 import discord4j.core.GatewayDiscordClient;
+import reactor.core.publisher.Mono;
 
 import java.util.function.Function;
 
 /**
  * Defines the entity retrieval strategy to use for a given {@link GatewayDiscordClient}.
+ * <p>
+ * This class pre-defines some factories according to its main modes of operations:
+ * <ul>
+ *     <li>{@link EntityRetrievalStrategy#STORE} to <strong>exclusively</strong> fetch data from the state cache.</li>
+ *     <li>{@link EntityRetrievalStrategy#REST} to fetch data directly from the REST API.</li>
+ *     <li>{@link EntityRetrievalStrategy#STORE_FALLBACK_REST} to attempt fetching from the state cache, and if not
+ *     successful, fetch from REST. This the default mode.</li>
+ * </ul>
  */
 @FunctionalInterface
 public interface EntityRetrievalStrategy extends Function<GatewayDiscordClient, EntityRetriever> {
 
     /**
-     * Strategy that consists of retrieving entities from stores.
+     * Strategy that consists of retrieving entities from stores. Avoids making REST API requests in case the object
+     * is not present in the cache. If you want to perform actions when a requested entity is missing, use operators
+     * such as {@link Mono#switchIfEmpty(Mono)}.
      */
-    static final EntityRetrievalStrategy STORE = StoreEntityRetriever::new;
+    EntityRetrievalStrategy STORE = StoreEntityRetriever::new;
 
     /**
      * Strategy that consists of retrieving entities from REST API.
      */
-    static final EntityRetrievalStrategy REST = RestEntityRetriever::new;
+    EntityRetrievalStrategy REST = RestEntityRetriever::new;
 
     /**
      * Strategy that consists of retrieving entities from stores first, then hit the REST API if not found.
      */
-    static final EntityRetrievalStrategy STORE_FALLBACK_REST = gateway -> new FallbackEntityRetriever(
+    EntityRetrievalStrategy STORE_FALLBACK_REST = gateway -> new FallbackEntityRetriever(
             new StoreEntityRetriever(gateway), new RestEntityRetriever(gateway));
 }

@@ -168,6 +168,9 @@ class RestEntityRetriever implements EntityRetriever {
                         .collect(Collectors.toList()))
                 .channels(Collections.emptyList()) // Can be retrieved with getGuildChannels(id)
                 .members(Collections.emptyList()) // Can be retrieved with getGuildMembers(id)
+                .joinedAt("") // unable to retrieve this data
+                .large(false) // unable to retrieve this data
+                .memberCount(0) // unable to retrieve this data
                 .build();
     }
 }

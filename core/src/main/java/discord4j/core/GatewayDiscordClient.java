@@ -51,6 +51,8 @@ import reactor.core.publisher.MonoProcessor;
 import reactor.util.Logger;
 import reactor.util.Loggers;
 
+import java.time.Instant;
+import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -409,6 +411,9 @@ public class GatewayDiscordClient implements EntityRetriever {
                         .collect(Collectors.toList()))
                 .channels(Collections.emptyList())
                 .members(Collections.emptyList())
+                .joinedAt(DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(Instant.now())) // we just created this
+                .large(false)
+                .memberCount(1)
                 .build();
     }
 
