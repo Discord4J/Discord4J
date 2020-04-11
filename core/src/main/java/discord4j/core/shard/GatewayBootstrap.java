@@ -26,7 +26,7 @@ import discord4j.core.GatewayDiscordClient;
 import discord4j.core.GatewayResources;
 import discord4j.core.event.EventDispatcher;
 import discord4j.core.event.dispatch.DispatchContext;
-import discord4j.core.event.dispatch.DispatchHandlers;
+import discord4j.core.event.dispatch.DispatchEventMapper;
 import discord4j.core.event.domain.Event;
 import discord4j.core.object.presence.Presence;
 import discord4j.core.retriever.EntityRetrievalStrategy;
@@ -124,6 +124,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
     private Function<ReactorResources, VoiceReactorResources> voiceReactorResources = null;
     private VoiceConnectionFactory voiceConnectionFactory = defaultVoiceConnectionFactory();
     private EntityRetrievalStrategy entityRetrievalStrategy = null;
+    private DispatchEventMapper dispatchEventMapper = null;
 
     /**
      * Create a default {@link GatewayBootstrap} based off the given {@link DiscordClient} that provides an instance
@@ -166,6 +167,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
         this.voiceReactorResources = source.voiceReactorResources;
         this.voiceConnectionFactory = source.voiceConnectionFactory;
         this.entityRetrievalStrategy = source.entityRetrievalStrategy;
+        this.dispatchEventMapper = source.dispatchEventMapper;
     }
 
     /**
@@ -532,6 +534,19 @@ public class GatewayBootstrap<O extends GatewayOptions> {
     }
 
     /**
+     * Customize the {@link DispatchEventMapper} used to convert Gateway Dispatch into {@link Event} instances.
+     * Defaults to using {@link DispatchEventMapper#emitEvents()} that will process payloads and save its updates to
+     * the appropriate {@link Store}, then generate the right {@link Event} instance.
+     *
+     * @param dispatchEventMapper a factory to derive {@link Event Events} from Gateway
+     * @return this builder
+     */
+    public GatewayBootstrap<O> setDispatchEventMapper(DispatchEventMapper dispatchEventMapper) {
+        this.dispatchEventMapper = Objects.requireNonNull(dispatchEventMapper);
+        return this;
+    }
+
+    /**
      * Connect to the Discord Gateway upon subscription to acquire a {@link GatewayDiscordClient} instance and use it
      * in a declarative way, releasing the object once the derived usage {@link Function} completes, and the underlying
      * shard group disconnects, according to {@link GatewayDiscordClient#onDisconnect()}.
@@ -660,11 +675,12 @@ public class GatewayBootstrap<O extends GatewayOptions> {
         EntityRetrievalStrategy entityRetrievalStrategy = initEntityRetrievalStrategy();
         GatewayDiscordClient gateway = new GatewayDiscordClient(client, resources, closeProcessor,
                 clientGroup, voiceConnectionFactory, entityRetrievalStrategy);
+        DispatchEventMapper dispatchMapper = initDispatchEventMapper();
 
         Flux<ShardInfo> connections = shardingStrategy.getShards(client)
                 .groupBy(shard -> shard.getIndex() % shardingStrategy.getShardingFactor())
                 .flatMap(group -> group.concatMap(shard -> acquireConnection(shard, clientFactory, gateway,
-                        shardCoordinator, stateHolder, eventDispatcher, clientGroup, closeProcessor)));
+                        shardCoordinator, stateHolder, eventDispatcher, clientGroup, closeProcessor, dispatchMapper)));
 
         if (awaitConnections) {
             return connections.then(Mono.just(gateway));
@@ -684,7 +700,8 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                                               StateHolder stateHolder,
                                               EventDispatcher eventDispatcher,
                                               GatewayClientGroupManager clientGroup,
-                                              MonoProcessor<Void> closeProcessor) {
+                                              MonoProcessor<Void> closeProcessor,
+                                              DispatchEventMapper dispatchMapper) {
         return Mono.subscriberContext()
                 .flatMap(ctx -> Mono.<ShardInfo>create(sink -> {
                     StatusUpdate initial = Optional.ofNullable(initialPresence.apply(shard)).orElse(null);
@@ -715,7 +732,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                                     info = shard;
                                     actual = dispatch;
                                 }
-                                return DispatchHandlers.handle(DispatchContext.of(actual, gateway, stateHolder, info))
+                                return dispatchMapper.handle(DispatchContext.of(actual, gateway, stateHolder, info))
                                         .subscriberContext(c -> c.put(LogUtil.KEY_SHARD_ID, info.getIndex()))
                                         .onErrorResume(error -> {
                                             log.error(format(ctx, "Error dispatching event"), error);
@@ -867,6 +884,13 @@ public class GatewayBootstrap<O extends GatewayOptions> {
             return entityRetrievalStrategy;
         }
         return EntityRetrievalStrategy.STORE_FALLBACK_REST;
+    }
+
+    private DispatchEventMapper initDispatchEventMapper() {
+        if (dispatchEventMapper != null) {
+            return dispatchEventMapper;
+        }
+        return DispatchEventMapper.emitEvents();
     }
 
     private O buildOptions(GatewayDiscordClient gateway, IdentifyOptions identify, PayloadTransformer identifyLimiter) {

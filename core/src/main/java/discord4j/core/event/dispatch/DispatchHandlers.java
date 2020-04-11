@@ -42,7 +42,7 @@ import java.util.Optional;
 /**
  * Registry for {@link Dispatch} to {@link Event} mapping operations.
  */
-public abstract class DispatchHandlers {
+public class DispatchHandlers implements DispatchEventMapper {
 
     private static final Map<Class<?>, DispatchHandler<?, ?>> handlerMap = new HashMap<>();
 
@@ -102,7 +102,7 @@ public abstract class DispatchHandlers {
      * @return an Event mapped from the given Dispatch object, or null if no Event is produced.
      */
     @SuppressWarnings("unchecked")
-    public static <D, E extends Event> Mono<E> handle(DispatchContext<D> context) {
+    public <D, E extends Event> Mono<E> handle(DispatchContext<D> context) {
         DispatchHandler<D, E> handler = (DispatchHandler<D, E>) handlerMap.entrySet()
                 .stream()
                 .filter(entry -> entry.getKey().isAssignableFrom(context.getDispatch().getClass()))
