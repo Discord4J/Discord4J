@@ -504,6 +504,18 @@ public final class Message implements Entity {
     }
 
     /**
+     * Requests to remove all reactions of a specific emoji on this message.
+     *
+     * @param emoji The reaction to remove on this message
+     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the reaction from the
+     * specified user was removed on this message. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Void> removeReactions(final ReactionEmoji emoji) {
+        return gateway.getRestClient().getChannelService()
+            .deleteReactions(getChannelId().asLong(), getId().asLong(), EntityUtil.getEmojiString(emoji));
+    }
+
+    /**
      * Requests to remove a reaction from the current user on this message.
      *
      * @param emoji The reaction to remove on this message.

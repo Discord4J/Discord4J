@@ -90,9 +90,15 @@ public class ChannelService extends RestService {
     }
 
     public Mono<Void> deleteReaction(long channelId, long messageId, String emoji, long userId) {
-        return Routes.REACTION_DELETE.newRequest(channelId, messageId, emoji, userId)
+        return Routes.REACTION_DELETE_USER.newRequest(channelId, messageId, emoji, userId)
                 .exchange(getRouter())
                 .bodyToMono(Void.class);
+    }
+
+    public Mono<Void> deleteReactions(long channelId, long messageId, String emoji) {
+        return Routes.REACTION_DELETE.newRequest(channelId, messageId, emoji)
+            .exchange(getRouter())
+            .bodyToMono(Void.class);
     }
 
     public Flux<UserData> getReactions(long channelId, long messageId, String emoji,

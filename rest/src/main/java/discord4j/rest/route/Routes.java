@@ -171,7 +171,16 @@ public abstract class Routes {
      * @see <a href="https://discordapp.com/developers/docs/resources/channel#delete-user-reaction">
      *         https://discordapp.com/developers/docs/resources/channel#delete-user-reaction</a>
      */
-    public static final Route REACTION_DELETE = Route.delete("/channels/{channel.id}/messages/{message.id}/reactions/{emoji}/{user.id}");
+    public static final Route REACTION_DELETE_USER = Route.delete("/channels/{channel.id}/messages/{message.id}/reactions/{emoji}/{user.id}");
+
+    /**
+     * Deletes all the reactions for a given emoji on a message. This endpoint requires the 'MANAGE_MESSAGES' permission
+     * to be present on the current user.
+     *
+     * @see <a href="https://discordapp.com/developers/docs/resources/channel#delete-all-reactions-for-emoji">
+     *         https://discordapp.com/developers/docs/resources/channel#delete-all-reactions-for-emoji</a>
+     */
+    public static final Route REACTION_DELETE = Route.delete("/channels/{channel.id}/messages/{message.id}/reactions/{emoji}");
 
     /**
      * Get a list of users that reacted with this emoji. Returns an array of user objects on success.
