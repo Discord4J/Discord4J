@@ -62,7 +62,8 @@ public class GatewayClientTest {
                 reconnectOptions,
                 new IdentifyOptions(new ShardInfo(0, 1), null, Possible.absent(), true),
                 GatewayObserver.NOOP_LISTENER,
-                new RateLimitTransformer(1, Duration.ofSeconds(6))
+                new RateLimitTransformer(1, Duration.ofSeconds(6)),
+                1
         );
         GatewayClient gatewayClient = new DefaultGatewayClient(gatewayOptions);
         gatewayClient.dispatch().subscribe(dispatch -> {
@@ -131,7 +132,8 @@ public class GatewayClientTest {
                             exit.countDown();
                         }
                     },
-                    transformer
+                    transformer,
+                    1
             );
             GatewayClient shard = new DefaultGatewayClient(gatewayOptions);
             latches.add(next);

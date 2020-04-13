@@ -88,6 +88,7 @@ public class DefaultGatewayClient implements GatewayClient {
     private final GatewayObserver observer;
     private final PayloadTransformer identifyLimiter;
     private final ResettableInterval heartbeat;
+    private final int maxMissedHeartbeatAck;
 
     // reactive pipelines
     private final EmitterProcessor<ByteBuf> receiver = EmitterProcessor.create(false);
@@ -108,6 +109,7 @@ public class DefaultGatewayClient implements GatewayClient {
     private final AtomicReference<String> sessionId = new AtomicReference<>("");
     private final AtomicLong lastSent = new AtomicLong(0);
     private final AtomicLong lastAck = new AtomicLong(0);
+    private final AtomicInteger missedAck = new AtomicInteger(0);
     private final AtomicLong responseTime = new AtomicLong(0);
     private volatile MonoProcessor<Void> disconnectNotifier;
     private volatile GatewayWebsocketHandler sessionHandler;
@@ -128,6 +130,7 @@ public class DefaultGatewayClient implements GatewayClient {
         this.identifyOptions = Objects.requireNonNull(options.getIdentifyOptions());
         this.observer = options.getInitialObserver();
         this.identifyLimiter = Objects.requireNonNull(options.getIdentifyLimiter());
+        this.maxMissedHeartbeatAck = Math.max(0, options.getMaxMissedHeartbeatAck());
         // TODO: consider exposing OverflowStrategy to GatewayOptions
         this.receiverSink = receiver.sink(FluxSink.OverflowStrategy.BUFFER);
         this.senderSink = sender.sink(FluxSink.OverflowStrategy.ERROR);
@@ -144,6 +147,7 @@ public class DefaultGatewayClient implements GatewayClient {
                     disconnectNotifier = MonoProcessor.create();
                     lastAck.set(0);
                     lastSent.set(0);
+                    missedAck.set(0);
 
                     MonoProcessor<Void> ping = MonoProcessor.create();
 
@@ -227,17 +231,18 @@ public class DefaultGatewayClient implements GatewayClient {
                                 lastAck.compareAndSet(0, now);
                                 long delay = now - lastAck.get();
                                 if (lastSent.get() - lastAck.get() > 0) {
-                                    log.warn(format(context, "Missing heartbeat ACK for {} (tick: {}, seq: {})"),
-                                            Duration.ofNanos(delay), t, sequence.get());
-                                    sessionHandler.error(new GatewayException(context,
-                                            "Reconnecting due to zombie or failed connection"));
-                                    return Mono.empty();
-                                } else {
-                                    log.debug(format(context, "Sending heartbeat {} after last ACK"),
-                                            Duration.ofNanos(delay));
-                                    lastSent.set(now);
-                                    return Mono.just(GatewayPayload.heartbeat(ImmutableHeartbeat.of(sequence.get())));
+                                    if (missedAck.incrementAndGet() > maxMissedHeartbeatAck) {
+                                        log.warn(format(context, "Missing heartbeat ACK for {} (tick: {}, seq: {})"),
+                                                Duration.ofNanos(delay), t, sequence.get());
+                                        sessionHandler.error(new GatewayException(context,
+                                                "Reconnecting due to zombie or failed connection"));
+                                        return Mono.empty();
+                                    }
                                 }
+                                log.debug(format(context, "Sending heartbeat {} after last ACK"),
+                                        Duration.ofNanos(delay));
+                                lastSent.set(now);
+                                return Mono.just(GatewayPayload.heartbeat(ImmutableHeartbeat.of(sequence.get())));
                             })
                             .doOnNext(heartbeatSink::next)
                             .then();
@@ -320,12 +325,12 @@ public class DefaultGatewayClient implements GatewayClient {
     }
 
     private static final List<Integer> nonRetryableStatusCodes = Arrays.asList(
-        4004, // Authentication failed
-        4010, // Invalid shard
-        4011, // Sharding required
-        4012, // Invalid API version
-        4013, // Invalid intent(s)
-        4014 // Disallowed intent(s)
+            4004, // Authentication failed
+            4010, // Invalid shard
+            4011, // Sharding required
+            4012, // Invalid API version
+            4013, // Invalid intent(s)
+            4014 // Disallowed intent(s)
     );
 
     private boolean isRetryable(Throwable t) {
@@ -469,6 +474,7 @@ public class DefaultGatewayClient implements GatewayClient {
     /////////////////////////////////
 
     void ackHeartbeat() {
+        missedAck.set(0);
         responseTime.set(lastAck.updateAndGet(x -> System.nanoTime()) - lastSent.get());
     }
 

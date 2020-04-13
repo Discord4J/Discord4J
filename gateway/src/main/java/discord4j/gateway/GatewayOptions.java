@@ -37,11 +37,12 @@ public class GatewayOptions {
     private final IdentifyOptions identifyOptions;
     private final GatewayObserver initialObserver;
     private final PayloadTransformer identifyLimiter;
+    private final int maxMissedHeartbeatAck;
 
     public GatewayOptions(String token, GatewayReactorResources reactorResources, PayloadReader payloadReader,
                           PayloadWriter payloadWriter, ReconnectOptions reconnectOptions,
                           IdentifyOptions identifyOptions, GatewayObserver initialObserver,
-                          PayloadTransformer identifyLimiter) {
+                          PayloadTransformer identifyLimiter, int maxMissedHeartbeatAck) {
         this.token = Objects.requireNonNull(token, "token");
         this.reactorResources = Objects.requireNonNull(reactorResources, "reactorResources");
         this.payloadReader = Objects.requireNonNull(payloadReader, "payloadReader");
@@ -50,6 +51,7 @@ public class GatewayOptions {
         this.identifyOptions = Objects.requireNonNull(identifyOptions, "identifyOptions");
         this.initialObserver = Objects.requireNonNull(initialObserver, "initialObserver");
         this.identifyLimiter = Objects.requireNonNull(identifyLimiter, "identifyLimiter");
+        this.maxMissedHeartbeatAck = maxMissedHeartbeatAck;
     }
 
     public String getToken() {
@@ -82,5 +84,9 @@ public class GatewayOptions {
 
     public PayloadTransformer getIdentifyLimiter() {
         return identifyLimiter;
+    }
+
+    public int getMaxMissedHeartbeatAck() {
+        return maxMissedHeartbeatAck;
     }
 }

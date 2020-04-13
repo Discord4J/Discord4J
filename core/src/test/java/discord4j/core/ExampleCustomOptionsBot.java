@@ -32,7 +32,7 @@ public class ExampleCustomOptionsBot {
         public CustomOptions(GatewayOptions parent, String foo) {
             super(parent.getToken(), parent.getReactorResources(), parent.getPayloadReader(),
                     parent.getPayloadWriter(), parent.getReconnectOptions(), parent.getIdentifyOptions(),
-                    parent.getInitialObserver(), parent.getIdentifyLimiter());
+                    parent.getInitialObserver(), parent.getIdentifyLimiter(), parent.getMaxMissedHeartbeatAck());
             this.foo = foo;
         }
 

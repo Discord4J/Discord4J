@@ -125,6 +125,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
     private VoiceConnectionFactory voiceConnectionFactory = defaultVoiceConnectionFactory();
     private EntityRetrievalStrategy entityRetrievalStrategy = null;
     private DispatchEventMapper dispatchEventMapper = null;
+    private int maxMissedHeartbeatAck = 1;
 
     /**
      * Create a default {@link GatewayBootstrap} based off the given {@link DiscordClient} that provides an instance
@@ -168,6 +169,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
         this.voiceConnectionFactory = source.voiceConnectionFactory;
         this.entityRetrievalStrategy = source.entityRetrievalStrategy;
         this.dispatchEventMapper = source.dispatchEventMapper;
+        this.maxMissedHeartbeatAck = source.maxMissedHeartbeatAck;
     }
 
     /**
@@ -547,6 +549,19 @@ public class GatewayBootstrap<O extends GatewayOptions> {
     }
 
     /**
+     * Set the maximum number of missed heartbeat acknowledge payloads each connection to Gateway will allow before
+     * triggering an automatic reconnect. A missed acknowledge is counted if a client does not receive a heartbeat
+     * ACK between its attempts at sending heartbeats.
+     *
+     * @param maxMissedHeartbeatAck a non-negative number representing the maximum number of allowed
+     * @return this builder
+     */
+    public GatewayBootstrap<O> setMaxMissedHeartbeatAck(int maxMissedHeartbeatAck) {
+        this.maxMissedHeartbeatAck = Math.max(0, maxMissedHeartbeatAck);
+        return this;
+    }
+
+    /**
      * Connect to the Discord Gateway upon subscription to acquire a {@link GatewayDiscordClient} instance and use it
      * in a declarative way, releasing the object once the derived usage {@link Function} completes, and the underlying
      * shard group disconnects, according to {@link GatewayDiscordClient#onDisconnect()}.
@@ -896,7 +911,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
     private O buildOptions(GatewayDiscordClient gateway, IdentifyOptions identify, PayloadTransformer identifyLimiter) {
         GatewayOptions options = new GatewayOptions(client.getCoreResources().getToken(),
                 gateway.getGatewayResources().getGatewayReactorResources(), initPayloadReader(), initPayloadWriter(),
-                reconnectOptions, identify, gatewayObserver, identifyLimiter);
+                reconnectOptions, identify, gatewayObserver, identifyLimiter, maxMissedHeartbeatAck);
         return this.optionsModifier.apply(options);
     }
 
