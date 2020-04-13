@@ -5,6 +5,7 @@ public enum Intent {
     /**
      * Events which will be received by subscribing to GUILDS
      * - GUILD_CREATE
+     * - GUILD_UPDATE
      * - GUILD_DELETE
      * - GUILD_ROLE_CREATE
      * - GUILD_ROLE_UPDATE
@@ -73,6 +74,7 @@ public enum Intent {
      * - MESSAGE_CREATE
      * - MESSAGE_UPDATE
      * - MESSAGE_DELETE
+     * - MESSAGE_DELETE_BULK
      */
     GUILD_MESSAGES(9),
 
