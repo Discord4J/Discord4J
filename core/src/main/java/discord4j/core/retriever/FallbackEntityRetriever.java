@@ -28,12 +28,12 @@ import discord4j.rest.util.Snowflake;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-class FallbackEntityRetriever implements EntityRetriever {
+public class FallbackEntityRetriever implements EntityRetriever {
 
     private final EntityRetriever first;
     private final EntityRetriever fallback;
 
-    FallbackEntityRetriever(EntityRetriever first, EntityRetriever fallback) {
+    public FallbackEntityRetriever(EntityRetriever first, EntityRetriever fallback) {
         this.first = first;
         this.fallback = fallback;
     }
