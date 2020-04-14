@@ -166,17 +166,8 @@ class GuildDispatchHandlers {
     
     private static VoiceStateData wrapVoiceState(VoiceStateData voiceState, String guildId) {
     	return ImmutableVoiceStateData.builder()
+    			.from(voiceState)
     			.guildId(Possible.of(guildId))
-    			.channelId(voiceState.channelId())
-    			.userId(voiceState.userId())
-    			.member(voiceState.member())
-    			.sessionId(voiceState.sessionId())
-    			.deaf(voiceState.deaf())
-    			.mute(voiceState.mute())
-    			.selfDeaf(voiceState.selfDeaf())
-    			.selfMute(voiceState.selfMute())
-    			.selfStream(voiceState.selfStream())
-    			.suppress(voiceState.suppress())
     			.build();
     }
 
