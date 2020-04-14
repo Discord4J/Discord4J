@@ -38,12 +38,6 @@ ext {
     isRelease = !version.toString().endsWith('-SNAPSHOT')
 }
 
-if (!isRelease || isJitpack) {
-    configurations.all {
-        resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
-    }
-}
-
 allprojects {
     apply plugin: 'java-library'
     apply plugin: 'com.github.ben-manes.versions'
@@ -73,6 +67,10 @@ allprojects {
         maven { url 'https://jitpack.io' }
         maven { url 'https://repo.spring.io/milestone' }
         jcenter()
+    }
+
+    configurations.all {
+        resolutionStrategy.cacheChangingModulesFor 600, 'seconds'
     }
 
     tasks.withType(Javadoc) {
