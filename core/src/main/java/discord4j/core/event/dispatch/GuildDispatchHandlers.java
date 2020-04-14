@@ -119,7 +119,7 @@ class GuildDispatchHandlers {
         Mono<Void> saveVoiceStates = context.getStateHolder().getVoiceStateStore()
                 .save(Flux.fromIterable(createData.voiceStates())
                         .map(voiceState -> Tuples.of(LongLongTuple2.of(guildId,
-                                Snowflake.asLong(voiceState.userId())), voiceState)));
+                                Snowflake.asLong(voiceState.userId())), wrapVoiceState(voiceState, guild.id()))));
 
         Mono<Void> savePresences = context.getStateHolder().getPresenceStore()
                 .save(Flux.fromIterable(createData.presences())
@@ -162,6 +162,22 @@ class GuildDispatchHandlers {
                 .and(saveOfflinePresences)
                 .and(startMemberChunk)
                 .thenReturn(new GuildCreateEvent(gateway, context.getShardInfo(), new Guild(gateway, guild)));
+    }
+    
+    private static VoiceStateData wrapVoiceState(VoiceStateData voiceState, String guildId) {
+    	return ImmutableVoiceStateData.builder()
+    			.guildId(Possible.of(guildId))
+    			.channelId(voiceState.channelId())
+    			.userId(voiceState.userId())
+    			.member(voiceState.member())
+    			.sessionId(voiceState.sessionId())
+    			.deaf(voiceState.deaf())
+    			.mute(voiceState.mute())
+    			.selfDeaf(voiceState.selfDeaf())
+    			.selfMute(voiceState.selfMute())
+    			.selfStream(voiceState.selfStream())
+    			.suppress(voiceState.suppress())
+    			.build();
     }
 
     private static PresenceData createPresence(MemberData member) {
