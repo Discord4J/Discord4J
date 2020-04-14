@@ -238,17 +238,19 @@ class MessageDispatchHandlers {
                         }
                     }
 
-                    ReactionData existing = reactions.get(i);
-                    if (existing.count() - 1 == 0) {
-                        newMessageBuilder.reactions(ListUtil.remove(oldMessage.reactions(),
-                                reaction -> reaction.equals(existing)));
-                    } else {
-                        ReactionData newExisting = ImmutableReactionData.builder()
-                                .from(existing)
-                                .count(existing.count() - 1)
-                                .me(!me && existing.me())
-                                .build();
-                        newMessageBuilder.reactions(ListUtil.replace(oldMessage.reactions(), existing, newExisting));
+                    if (i < reactions.size()) {
+                        ReactionData existing = reactions.get(i);
+                        if (existing.count() - 1 == 0) {
+                            newMessageBuilder.reactions(ListUtil.remove(oldMessage.reactions(),
+                                    reaction -> reaction.equals(existing)));
+                        } else {
+                            ReactionData newExisting = ImmutableReactionData.builder()
+                                    .from(existing)
+                                    .count(existing.count() - 1)
+                                    .me(!me && existing.me())
+                                    .build();
+                            newMessageBuilder.reactions(ListUtil.replace(oldMessage.reactions(), existing, newExisting));
+                        }
                     }
                     return newMessageBuilder.build();
                 })
