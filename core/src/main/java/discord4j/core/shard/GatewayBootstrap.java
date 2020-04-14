@@ -109,7 +109,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
     private EventDispatcher eventDispatcher = null;
     private StoreService storeService = null;
     private InvalidationStrategy invalidationStrategy = InvalidationStrategy.withJdkRegistry();
-    private boolean memberRequest = true;
+    private MemberRequestFilter memberRequestFilter = MemberRequestFilter.withLargeGuilds();
     private Function<ShardInfo, StatusUpdate> initialPresence = shard -> null;
     private Function<ShardInfo, SessionInfo> resumeOptions = shard -> null;
     private Possible<IntentSet> intents = Possible.absent();
@@ -153,7 +153,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
         this.eventDispatcher = source.eventDispatcher;
         this.storeService = source.storeService;
         this.invalidationStrategy = source.invalidationStrategy;
-        this.memberRequest = source.memberRequest;
+        this.memberRequestFilter = source.memberRequestFilter;
         this.initialPresence = source.initialPresence;
         this.resumeOptions = source.resumeOptions;
         this.intents = source.intents;
@@ -308,15 +308,38 @@ public class GatewayBootstrap<O extends GatewayOptions> {
     }
 
     /**
-     * Set if this shard group should request large guild members from the Gateway. Defaults to {@code true}.
+     * Set a {@link MemberRequestFilter} to determine how this shard group should request guild members. The provided
+     * filter is applied on each GUILD_CREATE payload and if returns {@code true}, members will be requested for the
+     * given guild. Defaults to loading members from all large guilds immediately after a GUILD_CREATE.
+     *
+     * @param memberRequestFilter the filter indicating how to load guild members
+     * @return this builder
+     * @see
+     * <a href="https://discordapp.com/developers/docs/topics/gateway#request-guild-members">Request Guild Members</a>
+     */
+    public GatewayBootstrap<O> setMemberRequestFilter(MemberRequestFilter memberRequestFilter) {
+        this.memberRequestFilter = memberRequestFilter;
+        return this;
+    }
+
+    /**
+     * Set if this shard group should request large guild members from the Gateway.
      *
      * @param memberRequest {@code true} if enabling the large guild member requests, {@code false} otherwise
      * @return this builder
      * @see
      * <a href="https://discordapp.com/developers/docs/topics/gateway#request-guild-members">Request Guild Members</a>
+     * @deprecated use {@link #setMemberRequestFilter(MemberRequestFilter)}. Calling this method using {@code true} is
+     * equivalent to using {@link MemberRequestFilter#withLargeGuilds()} and using {@code false} is the same as using
+     * {@link MemberRequestFilter#none()}
      */
+    @Deprecated
     public GatewayBootstrap<O> setMemberRequest(boolean memberRequest) {
-        this.memberRequest = memberRequest;
+        if (memberRequest) {
+            this.memberRequestFilter = MemberRequestFilter.withLargeGuilds();
+        } else {
+            this.memberRequestFilter = MemberRequestFilter.none();
+        }
         return this;
     }
 
@@ -683,8 +706,8 @@ public class GatewayBootstrap<O extends GatewayOptions> {
         EventDispatcher eventDispatcher = initEventDispatcher();
         GatewayReactorResources gatewayReactorResources = initGatewayReactorResources();
         ShardCoordinator shardCoordinator = initShardCoordinator(gatewayReactorResources);
-        GatewayResources resources = new GatewayResources(stateView, eventDispatcher, shardCoordinator, memberRequest,
-                gatewayReactorResources, initVoiceReactorResources(), voiceReconnectOptions);
+        GatewayResources resources = new GatewayResources(stateView, eventDispatcher, shardCoordinator,
+                memberRequestFilter, gatewayReactorResources, initVoiceReactorResources(), voiceReconnectOptions);
         MonoProcessor<Void> closeProcessor = MonoProcessor.create();
         GatewayClientGroupManager clientGroup = shardingStrategy.getGroupManager();
         EntityRetrievalStrategy entityRetrievalStrategy = initEntityRetrievalStrategy();

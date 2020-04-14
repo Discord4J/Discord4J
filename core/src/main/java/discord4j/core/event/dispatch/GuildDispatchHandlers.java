@@ -16,6 +16,7 @@
  */
 package discord4j.core.event.dispatch;
 
+import discord4j.common.LogUtil;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.guild.*;
 import discord4j.core.event.domain.role.RoleCreateEvent;
@@ -32,15 +33,23 @@ import discord4j.gateway.json.ShardGatewayPayload;
 import discord4j.rest.util.Snowflake;
 import discord4j.store.api.util.LongLongTuple2;
 import discord4j.store.api.util.LongObjTuple2;
+import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.util.Logger;
+import reactor.util.Loggers;
+import reactor.util.context.Context;
 import reactor.util.function.Tuple2;
 import reactor.util.function.Tuples;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static discord4j.common.LogUtil.format;
+
 class GuildDispatchHandlers {
+
+    private static final Logger log = Loggers.getLogger(GuildDispatchHandlers.class);
 
     static Mono<BanEvent> guildBanAdd(DispatchContext<GuildBanAdd> context) {
         User user = new User(context.getGateway(), context.getDispatch().user());
@@ -104,7 +113,8 @@ class GuildDispatchHandlers {
 
         Mono<Void> saveEmojis = context.getStateHolder().getGuildEmojiStore()
                 .save(Flux.fromIterable(createData.emojis())
-                        .map(emoji -> Tuples.of(Snowflake.asLong(emoji.id().orElseThrow(NoSuchElementException::new)), emoji)));
+                        .map(emoji -> Tuples.of(Snowflake.asLong(emoji.id().orElseThrow(NoSuchElementException::new))
+                                , emoji)));
 
         Mono<Void> saveMembers = context.getStateHolder().getMemberStore()
                 .save(Flux.fromIterable(createData.members())
@@ -126,21 +136,6 @@ class GuildDispatchHandlers {
                         .map(presence -> Tuples.of(LongLongTuple2.of(guildId,
                                 Snowflake.asLong(presence.user().id())), presence)));
 
-        Mono<Void> startMemberChunk = context.getGateway().getGatewayResources().isMemberRequest() ?
-                Mono.just(createData)
-                        .filter(data -> data.large())
-                        .flatMap(data -> {
-                            int shardId = context.getShardInfo().getIndex();
-                            return context.getGateway().getGatewayClientGroup().unicast(
-                                    ShardGatewayPayload.requestGuildMembers(
-                                            ImmutableRequestGuildMembers.builder()
-                                                    .guildId(data.id())
-                                                    .query(Possible.of(""))
-                                                    .limit(0)
-                                                    .build(), shardId));
-                        })
-                        .then() : Mono.empty();
-
         Mono<Void> saveOfflinePresences = Flux.fromIterable(createData.members())
                 .filterWhen(member -> context.getStateHolder().getPresenceStore()
                         .find(LongLongTuple2.of(guildId, Snowflake.asLong(member.user().id())))
@@ -151,6 +146,28 @@ class GuildDispatchHandlers {
                                 createPresence(member)))
                 .then();
 
+        Mono<Void> asyncMemberChunk = Mono.create(sink -> sink.onRequest(__ -> {
+            Context ctx = Context.of(LogUtil.KEY_GATEWAY_ID, Integer.toHexString(gateway.hashCode()),
+                    LogUtil.KEY_SHARD_ID, context.getShardInfo().getIndex());
+            Disposable memberChunkTask = Mono.just(createData)
+                    .filterWhen(context.getGateway().getGatewayResources().getMemberRequestFilter()::apply)
+                    .flatMap(data -> {
+                        int shardId = context.getShardInfo().getIndex();
+                        return context.getGateway().getGatewayClientGroup().unicast(
+                                ShardGatewayPayload.requestGuildMembers(
+                                        ImmutableRequestGuildMembers.builder()
+                                                .guildId(data.id())
+                                                .query(Possible.of(""))
+                                                .limit(0)
+                                                .build(), shardId));
+                    })
+                    .then()
+                    .subscribe(null, t -> log.warn(format(ctx, "Member request errored for {}"), createData.id(), t),
+                            () -> log.debug(format(ctx, "Member request sent for {}"), createData.id()));
+            sink.onCancel(memberChunkTask);
+            sink.success();
+        }));
+
         return saveGuild
                 .and(saveChannels)
                 .and(saveRoles)
@@ -160,7 +177,7 @@ class GuildDispatchHandlers {
                 .and(saveVoiceStates)
                 .and(savePresences)
                 .and(saveOfflinePresences)
-                .and(startMemberChunk)
+                .then(asyncMemberChunk)
                 .thenReturn(new GuildCreateEvent(gateway, context.getShardInfo(), new Guild(gateway, guild)));
     }
 
