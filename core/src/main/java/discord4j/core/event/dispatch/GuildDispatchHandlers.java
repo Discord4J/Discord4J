@@ -396,8 +396,8 @@ class GuildDispatchHandlers {
                 .stream()
                 .map(Long::parseUnsignedLong)
                 .collect(Collectors.toList());
-        String currentNick = context.getDispatch().nick().orElse(null);
-        String currentPremiumSince = context.getDispatch().premiumSince().orElse(null);
+        String currentNick = Possible.flatOpt(context.getDispatch().nick()).orElse(null);
+        String currentPremiumSince = Possible.flatOpt(context.getDispatch().premiumSince()).orElse(null);
 
         LongLongTuple2 key = LongLongTuple2.of(guildId, memberId);
 
@@ -408,9 +408,9 @@ class GuildDispatchHandlers {
 
                     MemberData newMember = ImmutableMemberData.builder()
                             .from(oldMember)
-                            .nick(Possible.of(context.getDispatch().nick()))
+                            .nick(context.getDispatch().nick())
                             .roles(context.getDispatch().roles())
-                            .premiumSince(context.getDispatch().premiumSince())
+                            .premiumSince(Possible.flatOpt(context.getDispatch().premiumSince()))
                             .build();
 
                     return context.getStateHolder().getMemberStore()
