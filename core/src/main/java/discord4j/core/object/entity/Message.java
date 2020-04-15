@@ -610,7 +610,7 @@ public final class Message implements Entity {
          */
         CHANNEL_FOLLOW_ADD(12),
 
-        /** A message created when the Guild its disqualified for Discovery Feature **/
+        /** A message created when the Guild is disqualified for Discovery Feature **/
         GUILD_DISCOVERY_DISQUALIFIED(14),
 
         /** A message created when the Guild its requalified for Discovery Feature **/
