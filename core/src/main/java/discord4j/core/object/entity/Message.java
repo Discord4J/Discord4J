@@ -470,6 +470,18 @@ public final class Message implements Entity {
                 .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex()));
     }
 
+    /**
+     * Requests to crosspost this message if the {@code Channel} is a the type News.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the message was crossposted. If
+     * an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Void> crosspost() {
+        return serviceMediator.getRestClient().getChannelService()
+            .crosspostMessage(getChannelId().asLong(), getId().asLong())
+            .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex()));
+    }
+
     @Override
     public boolean equals(@Nullable final Object obj) {
         return EntityUtil.equals(this, obj);
@@ -595,7 +607,13 @@ public final class Message implements Entity {
          * A message created when a user follows a channel from another guild into specific channel (
          * <a href="https://support.discordapp.com/hc/en-us/articles/360028384531-Server-Following-FAQ">Server Following</a>).
          */
-        CHANNEL_FOLLOW_ADD(12);
+        CHANNEL_FOLLOW_ADD(12),
+
+        /** A message created when the Guild its disqualified for Discovery Feature **/
+        GUILD_DISCOVERY_DISQUALIFIED(14),
+
+        /** A message created when the Guild its requalified for Discovery Feature **/
+        GUILD_DISCOVERY_REQUALIFIED(15);
 
         /** The underlying value as represented by Discord. */
         private final int value;
@@ -640,6 +658,8 @@ public final class Message implements Entity {
                 case 10: return USER_PREMIUM_GUILD_SUBSCRIPTION_TIER_2;
                 case 11: return USER_PREMIUM_GUILD_SUBSCRIPTION_TIER_3;
                 case 12: return CHANNEL_FOLLOW_ADD;
+                case 14: return GUILD_DISCOVERY_DISQUALIFIED;
+                case 15: return GUILD_DISCOVERY_REQUALIFIED;
                 default: return UNKNOWN;
             }
         }
