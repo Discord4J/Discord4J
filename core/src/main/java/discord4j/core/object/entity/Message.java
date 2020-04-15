@@ -471,7 +471,7 @@ public final class Message implements Entity {
     }
 
     /**
-     * Requests to crosspost this message if the {@code Channel} is a the type News.
+     * Requests to crosspost this message if the {@code channel} is of type 'news'.
      *
      * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the message was crossposted. If
      * an error is received, it is emitted through the {@code Mono}.
