@@ -476,6 +476,7 @@ public final class Message implements Entity {
      * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the message was crossposted. If
      * an error is received, it is emitted through the {@code Mono}.
      */
+    @Experimental
     public Mono<Void> crosspost() {
         return serviceMediator.getRestClient().getChannelService()
             .crosspostMessage(getChannelId().asLong(), getId().asLong())
