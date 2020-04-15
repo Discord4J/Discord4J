@@ -613,7 +613,7 @@ public final class Message implements Entity {
         /** A message created when the Guild is disqualified for Discovery Feature **/
         GUILD_DISCOVERY_DISQUALIFIED(14),
 
-        /** A message created when the Guild its requalified for Discovery Feature **/
+        /** A message created when the Guild is requalified for Discovery Feature **/
         GUILD_DISCOVERY_REQUALIFIED(15);
 
         /** The underlying value as represented by Discord. */
