@@ -257,13 +257,10 @@ public abstract class Routes {
             "/channels/{channel.id}/messages/{message.id}/suppress-embeds", Void.class);
 
     /**
-     * Enable/disable suppression of embeds on a Message. This endpoint requires the 'MANAGE_MESSAGES' permission to
-     * be present for the current user.
+     * Crosspost a Message into all guilds what follow the news channel indicated. This endpoint requires the 'DISCOVERY' feature to
+     * be present for the guild.
      * <p>
-     * Returns a 204 empty response on success. Fires a Message Update Gateway event.
-     *
-     * @see <a href="https://discordapp.com/developers/docs/resources/channel#suppress-message-embeds">
-     *         https://discordapp.com/developers/docs/resources/channel#suppress-message-embeds</a>
+     * Returns a 204 empty response on success.
      */
     @Experimental
     public static final Route<Void> CROSSPOST_MESSAGE = Route.post(
