@@ -43,7 +43,7 @@ libraryDependencies ++= Seq(
 
 ## Quick Example (Reactive and Blocking)
 ```java
-final DiscordClient client = new DiscordClientBuilder("token").build();
+final DiscordClient client = DiscordClientBuilder.create("token").build();
 
 client.getEventDispatcher().on(ReadyEvent.class)
         .subscribe(ready -> System.out.println("Logged in as " + ready.getSelf().getUsername()));
@@ -58,7 +58,7 @@ client.getEventDispatcher().on(MessageCreateEvent.class)
 client.login().block();
 ```
 ```java
-final DiscordClient client = new DiscordClientBuilder("token").build();
+final DiscordClient client = DiscordClientBuilder.create("token").build();
 
 client.getEventDispatcher().on(ReadyEvent.class)
         .subscribe(ready -> System.out.println("Logged in as " + ready.getSelf().getUsername()));
