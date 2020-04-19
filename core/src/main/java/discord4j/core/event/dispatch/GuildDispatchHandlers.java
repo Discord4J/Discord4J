@@ -65,11 +65,11 @@ class GuildDispatchHandlers {
             // Member store cannot have duplicates because keys cannot
             // be duplicated, but array addition in GuildBean can
             //guildBean.setMembers(new long[0]);
-            createData = ImmutableGuildCreateData.builder()
+            createData = GuildCreateData.builder()
                     .from(context.getDispatch().guild())
                     .members(Collections.emptyList())
                     .build();
-            guild = ImmutableGuildData.builder()
+            guild = GuildData.builder()
                     .from(createData)
                     .roles(createData.roles().stream().map(RoleData::id).collect(Collectors.toList()))
                     .emojis(createData.emojis().stream().map(EmojiData::id).filter(Optional::isPresent).map(Optional::get).collect(Collectors.toList()))
@@ -77,7 +77,7 @@ class GuildDispatchHandlers {
                     .build();
         } else {
             createData = context.getDispatch().guild();
-            guild = ImmutableGuildData.builder()
+            guild = GuildData.builder()
                     .from(createData)
                     .roles(createData.roles().stream().map(RoleData::id).collect(Collectors.toList()))
                     .emojis(createData.emojis().stream().map(EmojiData::id).filter(Optional::isPresent).map(Optional::get).collect(Collectors.toList()))
@@ -92,9 +92,9 @@ class GuildDispatchHandlers {
         // TODO optimize to separate into three Publisher<Channel> and saveAll to limit store hits
         Mono<Void> saveChannels = Flux.fromIterable(createData.channels())
                 .flatMap(channel -> context.getStateHolder().getChannelStore()
-                        .save(Snowflake.asLong(channel.id()), ImmutableChannelData.builder()
+                        .save(Snowflake.asLong(channel.id()), ChannelData.builder()
                                 .from(channel)
-                                .guildId(Possible.of(guild.id()))
+                                .guildId(guild.id())
                                 .build()))
                 .then();
 
@@ -133,9 +133,9 @@ class GuildDispatchHandlers {
                             int shardId = context.getShardInfo().getIndex();
                             return context.getGateway().getGatewayClientGroup().unicast(
                                     ShardGatewayPayload.requestGuildMembers(
-                                            ImmutableRequestGuildMembers.builder()
+                                            RequestGuildMembers.builder()
                                                     .guildId(data.id())
-                                                    .query(Possible.of(""))
+                                                    .query("")
                                                     .limit(0)
                                                     .build(), shardId));
                         })
@@ -165,18 +165,18 @@ class GuildDispatchHandlers {
     }
     
     private static VoiceStateData wrapVoiceState(VoiceStateData voiceState, String guildId) {
-    	return ImmutableVoiceStateData.builder()
+    	return VoiceStateData.builder()
     			.from(voiceState)
-    			.guildId(Possible.of(guildId))
+    			.guildId(guildId)
     			.build();
     }
 
     private static PresenceData createPresence(MemberData member) {
-        return ImmutablePresenceData.builder()
-                .user(ImmutablePartialUserData.builder()
+        return PresenceData.builder()
+                .user(PartialUserData.builder()
                         .id(member.user().id())
-                        .username(Possible.of(member.user().username()))
-                        .discriminator(Possible.of(member.user().discriminator()))
+                        .username(member.user().username())
+                        .discriminator(member.user().discriminator())
                         .avatar(Possible.of(member.user().avatar()))
                         .bot(member.user().bot())
                         .system(member.user().system())
@@ -189,7 +189,7 @@ class GuildDispatchHandlers {
                         .premiumType(member.user().premiumType())
                         .build())
                 .status(Status.OFFLINE.getValue())
-                .clientStatus(ImmutableClientStatusData.builder()
+                .clientStatus(ClientStatusData.builder()
                         .desktop(Possible.absent())
                         .mobile(Possible.absent())
                         .web(Possible.absent())
@@ -247,7 +247,7 @@ class GuildDispatchHandlers {
 
         Mono<Void> updateGuildBean = context.getStateHolder().getGuildStore()
                 .find(guildId)
-                .map(guild -> ImmutableGuildData.builder()
+                .map(guild -> GuildData.builder()
                         .from(guild)
                         .emojis(context.getDispatch().emojis().stream()
                                 .map(EmojiData::id)
@@ -287,7 +287,7 @@ class GuildDispatchHandlers {
 
         Mono<Void> addMemberId = context.getStateHolder().getGuildStore()
                 .find(guildId)
-                .map(guild -> ImmutableGuildData.builder()
+                .map(guild -> GuildData.builder()
                         .from(guild)
                         .members(ListUtil.add(guild.members(), member.user().id()))
                         .memberCount(guild.memberCount() + 1)
@@ -315,7 +315,7 @@ class GuildDispatchHandlers {
 
         Mono<Void> removeMemberId = context.getStateHolder().getGuildStore()
                 .find(guildId)
-                .map(guild -> ImmutableGuildData.builder()
+                .map(guild -> GuildData.builder()
                         .from(guild)
                         .members(ListUtil.remove(guild.members(), member -> member.equals(userData.id())))
                         .memberCount(guild.memberCount() - 1)
@@ -361,7 +361,7 @@ class GuildDispatchHandlers {
 
         Mono<Void> addMemberIds = context.getStateHolder().getGuildStore()
                 .find(guildId)
-                .map(guild -> ImmutableGuildData.builder()
+                .map(guild -> GuildData.builder()
                         .from(guild)
                         .members(ListUtil.addAll(guild.members(), members.stream()
                                 .map(data -> data.user().id())
@@ -413,7 +413,7 @@ class GuildDispatchHandlers {
                 .flatMap(oldMember -> {
                     Member old = new Member(gateway, oldMember, guildId);
 
-                    MemberData newMember = ImmutableMemberData.builder()
+                    MemberData newMember = MemberData.builder()
                             .from(oldMember)
                             .nick(context.getDispatch().nick())
                             .roles(context.getDispatch().roles())
@@ -437,7 +437,7 @@ class GuildDispatchHandlers {
 
         Mono<Void> addRoleId = context.getStateHolder().getGuildStore()
                 .find(guildId)
-                .map(guild -> ImmutableGuildData.builder()
+                .map(guild -> GuildData.builder()
                         .from(guild)
                         .addRoles(role.id())
                         .build())
@@ -457,10 +457,10 @@ class GuildDispatchHandlers {
         long guildId = Snowflake.asLong(context.getDispatch().guildId());
         long roleId = Snowflake.asLong(context.getDispatch().roleId());
 
-        @SuppressWarnings("ReactorUnusedPublisher")
+        @SuppressWarnings("ReactiveStreamsUnusedPublisher")
         Mono<Void> removeRoleId = context.getStateHolder().getGuildStore()
                 .find(guildId)
-                .map(guild -> ImmutableGuildData.builder()
+                .map(guild -> GuildData.builder()
                         .from(guild)
                         .roles(ListUtil.remove(guild.roles(), role -> role.equals(context.getDispatch().roleId())))
                         .build())
@@ -468,7 +468,7 @@ class GuildDispatchHandlers {
 
         Mono<Void> deleteRole = context.getStateHolder().getRoleStore().delete(roleId);
 
-        @SuppressWarnings("ReactorUnusedPublisher")
+        @SuppressWarnings("ReactiveStreamsUnusedPublisher")
         Mono<Void> removeRoleFromMembers = context.getStateHolder().getGuildStore()
                 .find(guildId)
                 .flatMapMany(guild -> Flux.fromIterable(guild.members())
@@ -476,7 +476,7 @@ class GuildDispatchHandlers {
                 .flatMap(memberId -> context.getStateHolder().getMemberStore()
                         .find(LongLongTuple2.of(guildId, memberId)))
                 .filter(member -> member.roles().contains(context.getDispatch().roleId()))
-                .map(member -> ImmutableMemberData.builder()
+                .map(member -> MemberData.builder()
                         .from(member)
                         .roles(ListUtil.remove(member.roles(),
                                 role -> role.equals(context.getDispatch().roleId())))
@@ -493,20 +493,6 @@ class GuildDispatchHandlers {
                 .map(role -> new RoleDeleteEvent(gateway, context.getShardInfo(), guildId, roleId,
                         new Role(gateway, role, guildId)))
                 .defaultIfEmpty(new RoleDeleteEvent(gateway, context.getShardInfo(), guildId, roleId, null));
-    }
-
-    static List<MemberData> removeRoleFromGuildMember(Possible<List<MemberData>> members, String roleId) {
-        if (members.isAbsent()) {
-            return Collections.emptyList();
-        } else {
-            return members.get().stream()
-                    .filter(member -> member.roles().contains(roleId))
-                    .map(member -> ImmutableMemberData.builder()
-                            .from(member)
-                            .roles(ListUtil.remove(member.roles(), role -> role.equals(roleId)))
-                            .build())
-                    .collect(Collectors.toList());
-        }
     }
 
     static Mono<RoleUpdateEvent> guildRoleUpdate(DispatchContext<GuildRoleUpdate> context) {
@@ -554,7 +540,7 @@ class GuildDispatchHandlers {
                             .thenReturn(new GuildUpdateEvent(gateway, context.getShardInfo(), current, old));
                 })
                 .switchIfEmpty(Mono.fromCallable(() -> new GuildUpdateEvent(gateway, context.getShardInfo(),
-                        new Guild(gateway, ImmutableGuildData.builder()
+                        new Guild(gateway, GuildData.builder()
                                 .from(context.getDispatch().guild())
                                 .roles(context.getDispatch().guild().roles().stream()
                                         .map(RoleData::id)

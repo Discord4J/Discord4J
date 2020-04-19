@@ -51,8 +51,8 @@ class MessageDispatchHandlers {
         Optional<Member> maybeMember = maybeGuildId.toOptional()
                 .map(Long::parseUnsignedLong)
                 .flatMap(guildId -> message.member().toOptional()
-                        .map(memberData -> new Member(gateway, ImmutableMemberData.builder()
-                                .from(ImmutableMemberData.builder()
+                        .map(memberData -> new Member(gateway, MemberData.builder()
+                                .from(MemberData.builder()
                                         .user(message.author())
                                         .nick(memberData.nick())
                                         .roles(memberData.roles())
@@ -70,9 +70,9 @@ class MessageDispatchHandlers {
 
         Mono<Void> editLastMessageId = context.getStateHolder().getChannelStore()
                 .find(channelId)
-                .map(channel -> ImmutableChannelData.builder()
+                .map(channel -> ChannelData.builder()
                         .from(channel)
-                        .lastMessageId(Possible.of(Optional.of(message.id())))
+                        .lastMessageId(message.id())
                         .build())
                 .flatMap(channelBean -> context.getStateHolder().getChannelStore().save(channelId, channelBean));
 
@@ -141,15 +141,14 @@ class MessageDispatchHandlers {
                 .map(t2 -> {
                     boolean me = Objects.equals(userId, t2.getT2().getValue());
                     MessageData oldMessage = t2.getT1();
-                    ImmutableMessageData.Builder newMessageBuilder = ImmutableMessageData.builder().from(oldMessage);
+                    ImmutableMessageData.Builder newMessageBuilder = MessageData.builder().from(oldMessage);
 
                     if (oldMessage.reactions().isAbsent()) {
-                        newMessageBuilder.reactions(Possible.of(Collections.singletonList(
-                                ImmutableReactionData.builder()
-                                        .count(1)
-                                        .me(me)
-                                        .emoji(context.getDispatch().emoji())
-                                        .build())));
+                        newMessageBuilder.addReaction(ReactionData.builder()
+                                .count(1)
+                                .me(me)
+                                .emoji(context.getDispatch().emoji())
+                                .build());
                     } else {
                         List<ReactionData> reactions = oldMessage.reactions().get();
                         int i;
@@ -166,21 +165,21 @@ class MessageDispatchHandlers {
                         if (i < reactions.size()) {
                             // message already has this reaction: bump 1
                             ReactionData oldExisting = reactions.get(i);
-                            ReactionData newExisting = ImmutableReactionData.builder()
+                            ReactionData newExisting = ReactionData.builder()
                                     .from(oldExisting)
                                     .me(oldExisting.me() || me)
                                     .count(oldExisting.count() + 1)
                                     .build();
-                            newMessageBuilder.reactions(ListUtil.replace(oldMessage.reactions(),
+                            newMessageBuilder.reactions(ListUtil.replace(reactions,
                                     oldExisting, newExisting));
                         } else {
                             // message doesn't have this reaction: create
-                            ReactionData reaction = ImmutableReactionData.builder()
+                            ReactionData reaction = ReactionData.builder()
                                     .emoji(context.getDispatch().emoji())
                                     .me(me)
                                     .count(1)
                                     .build();
-                            newMessageBuilder.reactions(ListUtil.add(oldMessage.reactions(), reaction));
+                            newMessageBuilder.reactions(ListUtil.add(reactions, reaction));
                         }
                     }
 
@@ -223,7 +222,7 @@ class MessageDispatchHandlers {
                 .map(t2 -> {
                     boolean me = Objects.equals(userId, t2.getT2().getValue());
                     MessageData oldMessage = t2.getT1();
-                    ImmutableMessageData.Builder newMessageBuilder = ImmutableMessageData.builder().from(oldMessage);
+                    ImmutableMessageData.Builder newMessageBuilder = MessageData.builder().from(oldMessage);
 
                     List<ReactionData> reactions = oldMessage.reactions().get();
                     int i;
@@ -241,15 +240,15 @@ class MessageDispatchHandlers {
                     if (i < reactions.size()) {
                         ReactionData existing = reactions.get(i);
                         if (existing.count() - 1 == 0) {
-                            newMessageBuilder.reactions(ListUtil.remove(oldMessage.reactions(),
+                            newMessageBuilder.reactions(ListUtil.remove(reactions,
                                     reaction -> reaction.equals(existing)));
                         } else {
-                            ReactionData newExisting = ImmutableReactionData.builder()
+                            ReactionData newExisting = ReactionData.builder()
                                     .from(existing)
                                     .count(existing.count() - 1)
                                     .me(!me && existing.me())
                                     .build();
-                            newMessageBuilder.reactions(ListUtil.replace(oldMessage.reactions(), existing, newExisting));
+                            newMessageBuilder.reactions(ListUtil.replace(reactions, existing, newExisting));
                         }
                     }
                     return newMessageBuilder.build();
@@ -280,7 +279,7 @@ class MessageDispatchHandlers {
 
         Mono<Void> removeAllFromMessage = context.getStateHolder().getMessageStore()
                 .find(messageId)
-                .map(message -> ImmutableMessageData.builder()
+                .map(message -> MessageData.builder()
                         .from(message)
                         .reactions(Possible.absent())
                         .build())
@@ -313,10 +312,11 @@ class MessageDispatchHandlers {
                     // updating the content and embed of the bean in the store
                     Message oldMessage = new Message(gateway, oldMessageData);
 
-                    boolean contentChanged = !Objects.equals(oldMessageData.content(), messageData.content());
+                    boolean contentChanged = !messageData.content().isAbsent() &&
+                            !Objects.equals(oldMessageData.content(), messageData.content().get());
                     boolean embedsChanged = !Objects.equals(oldMessageData.embeds(), messageData.embeds());
 
-                    MessageData newMessageData = ImmutableMessageData.builder()
+                    MessageData newMessageData = MessageData.builder()
                             .from(oldMessageData)
                             .content(messageData.content().toOptional().orElse(oldMessageData.content()))
                             .embeds(messageData.embeds())

@@ -25,6 +25,7 @@ import discord4j.core.object.entity.User;
 import discord4j.core.object.presence.Presence;
 import discord4j.discordjson.json.*;
 import discord4j.discordjson.json.gateway.*;
+import discord4j.discordjson.possible.Possible;
 import discord4j.gateway.retry.GatewayStateChange;
 import discord4j.rest.util.Snowflake;
 import discord4j.store.api.util.LongLongTuple2;
@@ -37,7 +38,9 @@ import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 /**
  * Registry for {@link Dispatch} to {@link Event} mapping operations.
@@ -132,11 +135,11 @@ public class DispatchHandlers implements DispatchEventMapper {
         Mono<Optional<User>> saveUser = context.getStateHolder().getUserStore()
                 .find(userId)
                 .map(oldUserData -> {
-                    UserData newUserData = ImmutableUserData.builder()
+                    UserData newUserData = UserData.builder()
                             .from(oldUserData)
                             .username(userData.username().toOptional().orElse(oldUserData.username()))
                             .discriminator(userData.discriminator().toOptional().orElse(oldUserData.discriminator()))
-                            .avatar(userData.avatar().toOptional().orElse(oldUserData.avatar()))
+                            .avatar(or(Possible.flatOpt(userData.avatar()), oldUserData::avatar))
                             .build();
 
                     return Tuples.of(oldUserData, newUserData);
@@ -158,8 +161,20 @@ public class DispatchHandlers implements DispatchEventMapper {
                                 guildId, oldUser.orElse(null), userData, current, null))));
     }
 
+    // JDK 9
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+    private static <T> Optional<T> or(Optional<T> first, Supplier<Optional<T>> supplier) {
+        Objects.requireNonNull(supplier);
+        if (first.isPresent()) {
+            return first;
+        } else {
+            Optional<T> r = supplier.get();
+            return Objects.requireNonNull(r);
+        }
+    }
+
     private static PresenceData createPresence(PresenceUpdate update) {
-        return ImmutablePresenceData.builder()
+        return PresenceData.builder()
                 .user(update.user())
                 .roles(update.roles())
                 .game(update.game())

@@ -17,8 +17,6 @@
 
 package discord4j.core.util;
 
-import discord4j.discordjson.possible.Possible;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -27,46 +25,16 @@ import java.util.function.Predicate;
 
 public class ListUtil {
 
-    public static <T> Possible<List<T>> add(Possible<List<T>> source, T element) {
-        if (source.isAbsent()) {
-            return Possible.of(Collections.singletonList(element));
-        } else {
-            List<T> list = new ArrayList<>(source.get());
-            list.add(element);
-            return Possible.of(Collections.unmodifiableList(list));
-        }
-    }
-
     public static <T> List<T> add(List<T> source, T element) {
         List<T> list = new ArrayList<>(source);
         list.add(element);
         return Collections.unmodifiableList(list);
     }
 
-    public static <T> Possible<List<T>> addAll(Possible<List<T>> source, List<T> elements) {
-        if (source.isAbsent()) {
-            return Possible.of(Collections.unmodifiableList(elements));
-        } else {
-            List<T> list = new ArrayList<>(source.get());
-            list.addAll(elements);
-            return Possible.of(Collections.unmodifiableList(list));
-        }
-    }
-
     public static <T> List<T> addAll(List<T> source, List<T> elements) {
         List<T> list = new ArrayList<>(source);
         list.addAll(elements);
         return Collections.unmodifiableList(list);
-    }
-
-    public static <T> Possible<List<T>> remove(Possible<List<T>> source, Predicate<T> filter) {
-        if (source.isAbsent()) {
-            return source;
-        } else {
-            List<T> list = new ArrayList<>(source.get());
-            list.removeIf(filter);
-            return Possible.of(Collections.unmodifiableList(list));
-        }
     }
 
     public static <T> List<T> remove(List<T> source, Predicate<T> filter) {
@@ -79,17 +47,13 @@ public class ListUtil {
         }
     }
 
-    public static <T> Possible<List<T>> replace(Possible<List<T>> source, T old, T replacement) {
-        if (source.isAbsent()) {
-            return source;
-        } else {
-            List<T> list = new ArrayList<>(source.get());
-            for (int i = 0; i < list.size(); i++) {
-                if (Objects.equals(list.get(i), old)) {
-                    list.set(i, replacement);
-                }
+    public static <T> List<T> replace(List<T> source, T old, T replacement) {
+        List<T> list = new ArrayList<>(source);
+        for (int i = 0; i < list.size(); i++) {
+            if (Objects.equals(list.get(i), old)) {
+                list.set(i, replacement);
             }
-            return Possible.of(Collections.unmodifiableList(list));
         }
+        return Collections.unmodifiableList(list);
     }
 }
