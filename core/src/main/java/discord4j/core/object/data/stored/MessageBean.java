@@ -176,7 +176,6 @@ public final class MessageBean implements Serializable {
         this.author = author;
     }
 
-    @Nullable
     public String getContent() {
         return content;
     }
