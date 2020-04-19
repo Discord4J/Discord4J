@@ -16,14 +16,13 @@
  */
 package discord4j.core.spec;
 
+import discord4j.core.object.entity.Role;
 import discord4j.discordjson.json.ImmutableRoleModifyRequest;
 import discord4j.discordjson.json.RoleModifyRequest;
-import discord4j.discordjson.possible.Possible;
-import discord4j.core.object.entity.Role;
 import discord4j.rest.util.PermissionSet;
 import reactor.util.annotation.Nullable;
 
-import java.awt.*;
+import java.awt.Color;
 
 /**
  * Spec used to modify a guild {@link Role}.
@@ -32,7 +31,7 @@ import java.awt.*;
  */
 public class RoleEditSpec implements AuditSpec<RoleModifyRequest> {
 
-    private final ImmutableRoleModifyRequest.Builder requestBuilder = ImmutableRoleModifyRequest.builder();
+    private final ImmutableRoleModifyRequest.Builder requestBuilder = RoleModifyRequest.builder();
     @Nullable
     private String reason;
 
@@ -43,7 +42,7 @@ public class RoleEditSpec implements AuditSpec<RoleModifyRequest> {
      * @return This spec.
      */
     public RoleEditSpec setName(String name) {
-        requestBuilder.name(Possible.of(name));
+        requestBuilder.name(name);
         return this;
     }
 
@@ -54,7 +53,7 @@ public class RoleEditSpec implements AuditSpec<RoleModifyRequest> {
      * @return This spec.
      */
     public RoleEditSpec setPermissions(PermissionSet permissions) {
-        requestBuilder.permissions(Possible.of(permissions.getRawValue()));
+        requestBuilder.permissions(permissions.getRawValue());
         return this;
     }
 
@@ -65,7 +64,7 @@ public class RoleEditSpec implements AuditSpec<RoleModifyRequest> {
      * @return This spec.
      */
     public RoleEditSpec setColor(Color color) {
-        requestBuilder.color(Possible.of(color.getRGB() & 0xFFFFFF));
+        requestBuilder.color(color.getRGB() & 0xFFFFFF);
         return this;
     }
 
@@ -76,7 +75,7 @@ public class RoleEditSpec implements AuditSpec<RoleModifyRequest> {
      * @return This spec.
      */
     public RoleEditSpec setHoist(boolean hoist) {
-        requestBuilder.hoist(Possible.of(hoist));
+        requestBuilder.hoist(hoist);
         return this;
     }
 
@@ -87,7 +86,7 @@ public class RoleEditSpec implements AuditSpec<RoleModifyRequest> {
      * @return This spec.
      */
     public RoleEditSpec setMentionable(boolean mentionable) {
-        requestBuilder.mentionable(Possible.of(mentionable));
+        requestBuilder.mentionable(mentionable);
         return this;
     }
 

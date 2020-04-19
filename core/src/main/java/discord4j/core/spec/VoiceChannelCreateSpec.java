@@ -20,13 +20,12 @@ import discord4j.core.object.PermissionOverwrite;
 import discord4j.core.object.entity.channel.Category;
 import discord4j.core.object.entity.channel.Channel;
 import discord4j.core.object.entity.channel.VoiceChannel;
-import discord4j.rest.util.Permission;
-import discord4j.rest.util.Snowflake;
 import discord4j.discordjson.json.ChannelCreateRequest;
 import discord4j.discordjson.json.ImmutableChannelCreateRequest;
-import discord4j.discordjson.json.ImmutableOverwriteData;
 import discord4j.discordjson.json.OverwriteData;
 import discord4j.discordjson.possible.Possible;
+import discord4j.rest.util.Permission;
+import discord4j.rest.util.Snowflake;
 import reactor.util.annotation.Nullable;
 
 import java.util.List;
@@ -36,8 +35,8 @@ import java.util.stream.Collectors;
 /** A spec used to configure and create a {@link VoiceChannel}. */
 public class VoiceChannelCreateSpec implements AuditSpec<ChannelCreateRequest> {
 
-    private final ImmutableChannelCreateRequest.Builder requestBuilder = ImmutableChannelCreateRequest.builder()
-            .type(Possible.of(Channel.Type.GUILD_VOICE.getValue()));
+    private final ImmutableChannelCreateRequest.Builder requestBuilder = ChannelCreateRequest.builder()
+            .type(Channel.Type.GUILD_VOICE.getValue());
     @Nullable
     private String reason;
 
@@ -60,7 +59,7 @@ public class VoiceChannelCreateSpec implements AuditSpec<ChannelCreateRequest> {
      * @return This spec.
      */
     public VoiceChannelCreateSpec setBitrate(int bitrate) {
-        requestBuilder.bitrate(Possible.of(bitrate));
+        requestBuilder.bitrate(bitrate);
         return this;
     }
 
@@ -74,7 +73,7 @@ public class VoiceChannelCreateSpec implements AuditSpec<ChannelCreateRequest> {
      * @return This spec.
      */
     public VoiceChannelCreateSpec setUserLimit(int userLimit) {
-        requestBuilder.userLimit(Possible.of(userLimit));
+        requestBuilder.userLimit(userLimit);
         return this;
     }
 
@@ -85,7 +84,7 @@ public class VoiceChannelCreateSpec implements AuditSpec<ChannelCreateRequest> {
      * @return This spec.
      */
     public VoiceChannelCreateSpec setPosition(int position) {
-        requestBuilder.position(Possible.of(position));
+        requestBuilder.position(position);
         return this;
     }
 
@@ -97,11 +96,15 @@ public class VoiceChannelCreateSpec implements AuditSpec<ChannelCreateRequest> {
      */
     public VoiceChannelCreateSpec setPermissionOverwrites(Set<? extends PermissionOverwrite> permissionOverwrites) {
         List<OverwriteData> raw = permissionOverwrites.stream()
-            .map(o -> ImmutableOverwriteData.of(o.getTargetId().asString(), o.getType().getValue(),
-                o.getAllowed().getRawValue(), o.getDenied().getRawValue()))
-            .collect(Collectors.toList());
+                .map(o -> OverwriteData.builder()
+                        .id(o.getTargetId().asString())
+                        .type(o.getType().getValue())
+                        .allow(o.getAllowed().getRawValue())
+                        .deny(o.getDenied().getRawValue())
+                        .build())
+                .collect(Collectors.toList());
 
-        requestBuilder.permissionOverwrites(Possible.of(raw));
+        requestBuilder.permissionOverwrites(raw);
         return this;
     }
 

@@ -16,12 +16,12 @@
  */
 package discord4j.rest.service;
 
-import discord4j.discordjson.json.*;
-import discord4j.discordjson.possible.Possible;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import discord4j.discordjson.json.*;
 import discord4j.rest.RestTests;
 import discord4j.rest.request.Router;
 import discord4j.rest.util.MultipartRequest;
+import discord4j.rest.util.Snowflake;
 import org.junit.Test;
 import reactor.util.function.Tuple2;
 import reactor.util.function.Tuples;
@@ -33,16 +33,15 @@ import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
 public class ChannelServiceTest {
 
-    private static final long permanentChannel = Long.parseUnsignedLong(System.getenv("permanentChannel"));
-    private static final long permanentMessage = Long.parseUnsignedLong(System.getenv("permanentMessage"));
-    private static final long modifyChannel = Long.parseUnsignedLong(System.getenv("modifyChannel"));
-    private static final long reactionMessage = Long.parseUnsignedLong(System.getenv("reactionMessage"));
-    private static final long editMessage = Long.parseUnsignedLong(System.getenv("editMessage"));
-    private static final long permanentOverwrite = Long.parseUnsignedLong(System.getenv("permanentOverwrite"));
+    private static final long permanentChannel = Snowflake.asLong(System.getenv("permanentChannel"));
+    private static final long permanentMessage = Snowflake.asLong(System.getenv("permanentMessage"));
+    private static final long modifyChannel = Snowflake.asLong(System.getenv("modifyChannel"));
+    private static final long reactionMessage = Snowflake.asLong(System.getenv("reactionMessage"));
+    private static final long editMessage = Snowflake.asLong(System.getenv("editMessage"));
+    private static final long permanentOverwrite = Snowflake.asLong(System.getenv("permanentOverwrite"));
 
     private ChannelService channelService = null;
 
@@ -67,9 +66,9 @@ public class ChannelServiceTest {
 
     @Test
     public void testModifyChannel() {
-        ChannelModifyRequest req = ImmutableChannelModifyRequest.builder()
-            .topic(Possible.of("test modify"))
-            .build();
+        ChannelModifyRequest req = ChannelModifyRequest.builder()
+                .topic("test modify")
+                .build();
         getChannelService().modifyChannel(modifyChannel, req, null).block();
     }
 
@@ -90,17 +89,17 @@ public class ChannelServiceTest {
 
     @Test
     public void testCreateMessage() {
-        MessageCreateRequest req = ImmutableMessageCreateRequest.builder()
-            .content(Possible.of("Hello world"))
-            .build();
+        MessageCreateRequest req = MessageCreateRequest.builder()
+                .content("Hello world")
+                .build();
         getChannelService().createMessage(permanentChannel, new MultipartRequest(req)).block();
     }
 
     @Test
     public void testCreateMessageWithFile() throws IOException {
-        MessageCreateRequest req = ImmutableMessageCreateRequest.builder()
-            .content(Possible.of("Hello world with file!"))
-            .build();
+        MessageCreateRequest req = MessageCreateRequest.builder()
+                .content("Hello world with file!")
+                .build();
         try (InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream("fileTest.txt")) {
             if (inputStream == null) {
                 throw new NullPointerException();
@@ -113,9 +112,9 @@ public class ChannelServiceTest {
 
     @Test
     public void testCreateMessagesWithMultipleFiles() throws IOException {
-        MessageCreateRequest req = ImmutableMessageCreateRequest.builder()
-            .content(Possible.of("Hello world with *multiple* files!"))
-            .build();
+        MessageCreateRequest req = MessageCreateRequest.builder()
+                .content("Hello world with *multiple* files!")
+                .build();
         try (InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream("fileTest.txt")) {
             if (inputStream == null) {
                 throw new NullPointerException();
@@ -187,19 +186,20 @@ public class ChannelServiceTest {
 
     @Test
     public void testEditMessage() {
-        MessageEditRequest req = ImmutableMessageEditRequest.builder()
-            .content(Possible.of(Optional.of("This is a message I can edit.")))
-            .build();
+        MessageEditRequest req = MessageEditRequest.builder()
+                .content("This is a message I can edit.")
+                .build();
         getChannelService().editMessage(permanentChannel, editMessage, req).block();
     }
 
     @Test
     public void testDeleteMessage() {
-        MessageCreateRequest req = ImmutableMessageCreateRequest.builder()
-            .content(Possible.of("Going to delete this!"))
-            .build();
+        MessageCreateRequest req = MessageCreateRequest.builder()
+                .content("Going to delete this!")
+                .build();
         MessageData response = getChannelService().createMessage(permanentChannel, new MultipartRequest(req)).block();
-        getChannelService().deleteMessage(permanentChannel, Long.parseUnsignedLong(response.id()), "This is just a test!").block();
+        getChannelService().deleteMessage(permanentChannel, Snowflake.asLong(response.id()), "This is just a " +
+                "test!").block();
     }
 
     @Test
@@ -209,8 +209,7 @@ public class ChannelServiceTest {
 
     @Test
     public void testEditChannelPermissions() {
-        PermissionsEditRequest req = ImmutablePermissionsEditRequest
-                .builder()
+        PermissionsEditRequest req = PermissionsEditRequest.builder()
                 .allow(0)
                 .deny(0)
                 .type("member")
@@ -225,8 +224,7 @@ public class ChannelServiceTest {
 
     @Test
     public void testCreateChannelInvite() {
-        InviteCreateRequest req = ImmutableInviteCreateRequest
-                .builder()
+        InviteCreateRequest req = InviteCreateRequest.builder()
                 .maxAge(1)
                 .maxUses(0)
                 .temporary(true)

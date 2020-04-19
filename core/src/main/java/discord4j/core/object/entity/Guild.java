@@ -842,7 +842,7 @@ public final class Guild implements Entity {
 
         return gateway.getRestClient().getGuildService()
                 .modifyGuild(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason())
-                .map(data -> new Guild(gateway, ImmutableGuildData.builder()
+                .map(data -> new Guild(gateway, GuildData.builder()
                         .from(this.data)
                         .from(data)
                         .build()));
@@ -1179,7 +1179,9 @@ public final class Guild implements Entity {
      */
     public Mono<String> changeSelfNickname(@Nullable final String nickname) {
         return gateway.getRestClient().getGuildService()
-                .modifyOwnNickname(getId().asLong(), ImmutableNicknameModifyData.of(Optional.ofNullable(nickname)))
+                .modifyOwnNickname(getId().asLong(), NicknameModifyData.builder()
+                        .nick(Optional.ofNullable(nickname))
+                        .build())
                 .handle((data, sink) -> {
                     String nick = data.nick().orElse(null);
                     if (nick != null) {

@@ -16,23 +16,25 @@
  */
 package discord4j.core.object.entity.channel;
 
-import discord4j.discordjson.json.ChannelData;
-import discord4j.discordjson.json.ImmutablePermissionsEditRequest;
-import discord4j.discordjson.json.PermissionsEditRequest;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.ExtendedPermissionOverwrite;
 import discord4j.core.object.PermissionOverwrite;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Member;
 import discord4j.core.retriever.EntityRetrievalStrategy;
-import discord4j.rest.util.PermissionSet;
-import discord4j.rest.util.Snowflake;
 import discord4j.core.util.OrderUtil;
 import discord4j.core.util.PermissionUtil;
+import discord4j.discordjson.json.ChannelData;
+import discord4j.discordjson.json.PermissionsEditRequest;
+import discord4j.rest.util.PermissionSet;
+import discord4j.rest.util.Snowflake;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -136,8 +138,7 @@ class BaseGuildChannel extends BaseChannel implements GuildChannel {
     public Mono<Void> addMemberOverwrite(Snowflake memberId, PermissionOverwrite overwrite, @Nullable String reason) {
         PermissionSet allow = overwrite.getAllowed();
         PermissionSet deny = overwrite.getDenied();
-        PermissionsEditRequest request = ImmutablePermissionsEditRequest
-                .builder()
+        PermissionsEditRequest request = PermissionsEditRequest.builder()
                 .allow(allow.getRawValue())
                 .deny(deny.getRawValue())
                 .type("member")
@@ -151,8 +152,7 @@ class BaseGuildChannel extends BaseChannel implements GuildChannel {
     public Mono<Void> addRoleOverwrite(Snowflake roleId, PermissionOverwrite overwrite, @Nullable String reason) {
         PermissionSet allow = overwrite.getAllowed();
         PermissionSet deny = overwrite.getDenied();
-        PermissionsEditRequest request = ImmutablePermissionsEditRequest
-                .builder()
+        PermissionsEditRequest request = PermissionsEditRequest.builder()
                 .allow(allow.getRawValue())
                 .deny(deny.getRawValue())
                 .type("role")

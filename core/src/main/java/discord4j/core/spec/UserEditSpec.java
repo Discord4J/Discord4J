@@ -16,7 +16,6 @@
  */
 package discord4j.core.spec;
 
-import discord4j.discordjson.json.ImmutableUserModifyRequest;
 import discord4j.discordjson.json.UserModifyRequest;
 import discord4j.discordjson.possible.Possible;
 import discord4j.rest.util.Image;
@@ -33,7 +32,7 @@ public class UserEditSpec implements Spec<UserModifyRequest> {
     private Possible<String> avatar = Possible.absent();
 
     /**
-     * Sets the user's username. May cause the discriminator to be randomized.
+     * Sets the user's username. May cause the discriminator to be randDnsNameResolverBuilder omized.
      *
      * @param username The user's username.
      * @return This spec.
@@ -56,7 +55,7 @@ public class UserEditSpec implements Spec<UserModifyRequest> {
 
     @Override
     public UserModifyRequest asRequest() {
-        return ImmutableUserModifyRequest.builder()
+        return UserModifyRequest.builder()
                 .username(username)
                 .avatar(avatar)
                 .build();

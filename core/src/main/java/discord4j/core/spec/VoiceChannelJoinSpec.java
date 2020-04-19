@@ -21,7 +21,6 @@ import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.VoiceServerUpdateEvent;
 import discord4j.core.event.domain.VoiceStateUpdateEvent;
 import discord4j.core.object.entity.channel.VoiceChannel;
-import discord4j.discordjson.json.gateway.ImmutableVoiceStateUpdate;
 import discord4j.discordjson.json.gateway.VoiceStateUpdate;
 import discord4j.gateway.GatewayClientGroup;
 import discord4j.gateway.json.ShardGatewayPayload;
@@ -31,7 +30,6 @@ import reactor.core.publisher.Mono;
 import reactor.util.function.Tuple2;
 
 import java.util.Objects;
-import java.util.Optional;
 
 /**
  * Spec used to request a connection to a {@link VoiceChannel} and handle the initialization of the resulting
@@ -139,7 +137,12 @@ public class VoiceChannelJoinSpec implements Spec<Mono<VoiceConnection>> {
         final GatewayClientGroup clientGroup = voiceChannel.getClient().getGatewayClientGroup();
         final int shardId = (int) ((voiceChannel.getGuildId().asLong() >> 22) % clientGroup.getShardCount());
         final Mono<Void> sendVoiceStateUpdate = clientGroup.unicast(ShardGatewayPayload.voiceStateUpdate(
-                ImmutableVoiceStateUpdate.of(Snowflake.asString(guildId), Optional.of(Snowflake.asString(channelId)), selfMute, selfDeaf), shardId));
+                VoiceStateUpdate.builder()
+                        .guildId(Snowflake.asString(guildId))
+                        .channelId(Snowflake.asString(channelId))
+                        .selfMute(selfMute)
+                        .selfDeaf(selfDeaf)
+                        .build(), shardId));
 
         final Mono<VoiceStateUpdateEvent> waitForVoiceStateUpdate = gateway.getEventDispatcher()
                 .on(VoiceStateUpdateEvent.class)
@@ -186,7 +189,11 @@ public class VoiceChannelJoinSpec implements Spec<Mono<VoiceConnection>> {
 
     private static VoiceDisconnectTask onDisconnectTask(GatewayClientGroup clientGroup) {
         return guildId -> {
-            VoiceStateUpdate voiceStateUpdate = ImmutableVoiceStateUpdate.of(String.valueOf(guildId), Optional.empty(), false, false);
+            VoiceStateUpdate voiceStateUpdate = VoiceStateUpdate.builder()
+                    .guildId(Snowflake.asString(guildId))
+                    .selfMute(false)
+                    .selfDeaf(false)
+                    .build();
             int shardId = (int) ((guildId >> 22) % clientGroup.getShardCount());
             return clientGroup.unicast(ShardGatewayPayload.voiceStateUpdate(voiceStateUpdate, shardId));
         };

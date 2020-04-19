@@ -16,14 +16,13 @@
  */
 package discord4j.core.spec;
 
-import discord4j.discordjson.json.ChannelModifyRequest;
-import discord4j.discordjson.json.ImmutableChannelModifyRequest;
-import discord4j.discordjson.json.ImmutableOverwriteData;
-import discord4j.discordjson.json.OverwriteData;
-import discord4j.discordjson.possible.Possible;
 import discord4j.core.object.PermissionOverwrite;
 import discord4j.core.object.entity.channel.Category;
 import discord4j.core.object.entity.channel.VoiceChannel;
+import discord4j.discordjson.json.ChannelModifyRequest;
+import discord4j.discordjson.json.ImmutableChannelModifyRequest;
+import discord4j.discordjson.json.OverwriteData;
+import discord4j.discordjson.possible.Possible;
 import discord4j.rest.util.Permission;
 import discord4j.rest.util.Snowflake;
 import reactor.util.annotation.Nullable;
@@ -40,7 +39,7 @@ import java.util.stream.Collectors;
  */
 public class VoiceChannelEditSpec implements AuditSpec<ChannelModifyRequest> {
 
-    private final ImmutableChannelModifyRequest.Builder requestBuilder = ImmutableChannelModifyRequest.builder();
+    private final ImmutableChannelModifyRequest.Builder requestBuilder = ChannelModifyRequest.builder();
     @Nullable
     private String reason;
 
@@ -51,7 +50,7 @@ public class VoiceChannelEditSpec implements AuditSpec<ChannelModifyRequest> {
      * @return This spec.
      */
     public VoiceChannelEditSpec setName(String name) {
-        requestBuilder.name(Possible.of(name));
+        requestBuilder.name(name);
         return this;
     }
 
@@ -62,7 +61,7 @@ public class VoiceChannelEditSpec implements AuditSpec<ChannelModifyRequest> {
      * @return This spec.
      */
     public VoiceChannelEditSpec setPosition(int position) {
-        requestBuilder.position(Possible.of(position));
+        requestBuilder.position(position);
         return this;
     }
 
@@ -74,11 +73,15 @@ public class VoiceChannelEditSpec implements AuditSpec<ChannelModifyRequest> {
      */
     public VoiceChannelEditSpec setPermissionOverwrites(Set<? extends PermissionOverwrite> permissionOverwrites) {
         List<OverwriteData> raw = permissionOverwrites.stream()
-            .map(o -> ImmutableOverwriteData.of(o.getTargetId().asString(), o.getType().getValue(),
-                o.getAllowed().getRawValue(), o.getDenied().getRawValue()))
-            .collect(Collectors.toList());
+                .map(o -> OverwriteData.builder()
+                        .id(o.getTargetId().asString())
+                        .type(o.getType().getValue())
+                        .allow(o.getAllowed().getRawValue())
+                        .deny(o.getDenied().getRawValue())
+                        .build())
+                .collect(Collectors.toList());
 
-        requestBuilder.permissionOverwrites(Possible.of(raw));
+        requestBuilder.permissionOverwrites(raw);
         return this;
     }
 
@@ -103,7 +106,7 @@ public class VoiceChannelEditSpec implements AuditSpec<ChannelModifyRequest> {
      * @return This spec.
      */
     public VoiceChannelEditSpec setBitrate(int bitrate) {
-        requestBuilder.bitrate(Possible.of(bitrate));
+        requestBuilder.bitrate(bitrate);
         return this;
     }
 
@@ -117,7 +120,7 @@ public class VoiceChannelEditSpec implements AuditSpec<ChannelModifyRequest> {
      * @return This spec.
      */
     public VoiceChannelEditSpec setUserLimit(int userLimit) {
-        requestBuilder.userLimit(Possible.of(userLimit));
+        requestBuilder.userLimit(userLimit);
         return this;
     }
 

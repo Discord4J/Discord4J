@@ -519,7 +519,7 @@ class GuildDispatchHandlers {
         return context.getStateHolder().getGuildStore()
                 .find(guildId)
                 .flatMap(oldGuildData -> {
-                    GuildData newGuildData = ImmutableGuildData.builder()
+                    GuildData newGuildData = GuildData.builder()
                             .from(oldGuildData)
                             .from(context.getDispatch().guild())
                             .roles(context.getDispatch().guild().roles().stream()

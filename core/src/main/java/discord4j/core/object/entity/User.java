@@ -19,12 +19,12 @@ package discord4j.core.object.entity;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.channel.PrivateChannel;
 import discord4j.core.retriever.EntityRetrievalStrategy;
-import discord4j.rest.util.Image;
-import discord4j.rest.util.Snowflake;
 import discord4j.core.util.EntityUtil;
 import discord4j.core.util.ImageUtil;
-import discord4j.discordjson.json.ImmutableDMCreateRequest;
+import discord4j.discordjson.json.DMCreateRequest;
 import discord4j.discordjson.json.UserData;
+import discord4j.rest.util.Image;
+import discord4j.rest.util.Snowflake;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
 
@@ -213,7 +213,7 @@ public class User implements Entity {
      */
     public final Mono<PrivateChannel> getPrivateChannel() {
         return gateway.getRestClient().getUserService()
-                .createDM(ImmutableDMCreateRequest.builder().recipientId(Snowflake.asString(getId().asLong())).build())
+                .createDM(DMCreateRequest.builder().recipientId(Snowflake.asString(getId().asLong())).build())
                 .map(data -> EntityUtil.getChannel(gateway, data))
                 .cast(PrivateChannel.class);
     }

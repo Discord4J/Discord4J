@@ -16,11 +16,11 @@
  */
 package discord4j.core.spec;
 
+import discord4j.core.object.Region;
+import discord4j.core.object.entity.Guild;
 import discord4j.discordjson.json.GuildModifyRequest;
 import discord4j.discordjson.json.ImmutableGuildModifyRequest;
 import discord4j.discordjson.possible.Possible;
-import discord4j.core.object.Region;
-import discord4j.core.object.entity.Guild;
 import discord4j.rest.util.Image;
 import discord4j.rest.util.Snowflake;
 import reactor.util.annotation.Nullable;
@@ -34,7 +34,7 @@ import java.util.Optional;
  */
 public class GuildEditSpec implements AuditSpec<GuildModifyRequest> {
 
-    private final ImmutableGuildModifyRequest.Builder requestBuilder = ImmutableGuildModifyRequest.builder();
+    private final ImmutableGuildModifyRequest.Builder requestBuilder = GuildModifyRequest.builder();
     @Nullable
     private String reason;
 
@@ -45,7 +45,7 @@ public class GuildEditSpec implements AuditSpec<GuildModifyRequest> {
      * @return this spec
      */
     public GuildEditSpec setName(String name) {
-        requestBuilder.name(Possible.of(name));
+        requestBuilder.name(name);
         return this;
     }
 
@@ -56,7 +56,7 @@ public class GuildEditSpec implements AuditSpec<GuildModifyRequest> {
      * @return This spec.
      */
     public GuildEditSpec setRegion(Region region) {
-        requestBuilder.region(Possible.of(region.getId()));
+        requestBuilder.region(region.getId());
         return this;
     }
 
@@ -67,7 +67,7 @@ public class GuildEditSpec implements AuditSpec<GuildModifyRequest> {
      * @return This spec.
      */
     public GuildEditSpec setVerificationLevel(Guild.VerificationLevel verificationLevel) {
-        requestBuilder.verificationLevel(Possible.of(verificationLevel.getValue()));
+        requestBuilder.verificationLevel(verificationLevel.getValue());
         return this;
     }
 
@@ -78,7 +78,7 @@ public class GuildEditSpec implements AuditSpec<GuildModifyRequest> {
      * @return This spec.
      */
     public GuildEditSpec setDefaultMessageNotificationsLevel(Guild.NotificationLevel notificationsLevel) {
-        requestBuilder.defaultMessageNotifications(Possible.of(notificationsLevel.getValue()));
+        requestBuilder.defaultMessageNotifications(notificationsLevel.getValue());
         return this;
     }
 
@@ -100,7 +100,7 @@ public class GuildEditSpec implements AuditSpec<GuildModifyRequest> {
      * @return This spec.
      */
     public GuildEditSpec setAfkTimeout(int afkTimeout) {
-        requestBuilder.afkTimeout(Possible.of(afkTimeout));
+        requestBuilder.afkTimeout(afkTimeout);
         return this;
     }
 
@@ -122,7 +122,7 @@ public class GuildEditSpec implements AuditSpec<GuildModifyRequest> {
      * @return This spec.
      */
     public GuildEditSpec setOwnerId(Snowflake ownerId) {
-        requestBuilder.ownerId(Possible.of(ownerId.asString()));
+        requestBuilder.ownerId(ownerId.asString());
         return this;
     }
 

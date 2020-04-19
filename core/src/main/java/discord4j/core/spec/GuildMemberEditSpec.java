@@ -35,7 +35,7 @@ import java.util.stream.Collectors;
  */
 public class GuildMemberEditSpec implements AuditSpec<GuildMemberModifyRequest> {
 
-    private final ImmutableGuildMemberModifyRequest.Builder builder = ImmutableGuildMemberModifyRequest.builder();
+    private final ImmutableGuildMemberModifyRequest.Builder builder = GuildMemberModifyRequest.builder();
     @Nullable
     private String reason;
 
@@ -59,7 +59,7 @@ public class GuildMemberEditSpec implements AuditSpec<GuildMemberModifyRequest> 
      * @return This spec.
      */
     public GuildMemberEditSpec setMute(boolean mute) {
-        builder.mute(Possible.of(mute));
+        builder.mute(mute);
         return this;
     }
 
@@ -71,7 +71,7 @@ public class GuildMemberEditSpec implements AuditSpec<GuildMemberModifyRequest> 
      * @return This spec.
      */
     public GuildMemberEditSpec setDeafen(boolean deaf) {
-        builder.deaf(Possible.of(deaf));
+        builder.deaf(deaf);
         return this;
     }
 
@@ -94,7 +94,7 @@ public class GuildMemberEditSpec implements AuditSpec<GuildMemberModifyRequest> 
      * @return This spec.
      */
     public GuildMemberEditSpec setRoles(Set<Snowflake> roles) {
-        builder.roles(Possible.of(roles.stream().map(Snowflake::asString).collect(Collectors.toList())));
+        builder.roles(roles.stream().map(Snowflake::asString).collect(Collectors.toList()));
         return this;
     }
 

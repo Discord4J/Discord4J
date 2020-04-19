@@ -399,7 +399,7 @@ public class GatewayDiscordClient implements EntityRetriever {
     }
 
     private GuildData toGuildData(GuildUpdateData guild) {
-        return ImmutableGuildData.builder()
+        return GuildData.builder()
                 .from(guild)
                 .roles(guild.roles().stream()
                         .map(RoleData::id)

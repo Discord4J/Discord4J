@@ -16,9 +16,6 @@
  */
 package discord4j.core.object.entity.channel;
 
-import discord4j.discordjson.json.ChannelData;
-import discord4j.discordjson.json.ImmutableBulkDeleteRequest;
-import discord4j.discordjson.possible.Possible;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.ExtendedInvite;
 import discord4j.core.object.ExtendedPermissionOverwrite;
@@ -27,11 +24,14 @@ import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.Webhook;
 import discord4j.core.retriever.EntityRetrievalStrategy;
-import discord4j.rest.util.PermissionSet;
-import discord4j.rest.util.Snowflake;
 import discord4j.core.spec.InviteCreateSpec;
 import discord4j.core.spec.MessageCreateSpec;
 import discord4j.core.spec.WebhookCreateSpec;
+import discord4j.discordjson.json.BulkDeleteRequest;
+import discord4j.discordjson.json.ChannelData;
+import discord4j.discordjson.possible.Possible;
+import discord4j.rest.util.PermissionSet;
+import discord4j.rest.util.Snowflake;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -260,7 +260,7 @@ class BaseGuildMessageChannel extends BaseChannel implements GuildMessageChannel
                 .buffer(100) // REST accepts 100 IDs
                 .filterWhen(filterMessageIdChunk)
                 .flatMap(messageIdChunk -> getClient().getRestClient().getChannelService()
-                        .bulkDeleteMessages(getId().asLong(), ImmutableBulkDeleteRequest.builder().messages(messageIdChunk).build()))
+                        .bulkDeleteMessages(getId().asLong(), BulkDeleteRequest.builder().messages(messageIdChunk).build()))
                 .thenMany(Flux.fromIterable(ignoredMessageIds));
     }
 

@@ -19,12 +19,11 @@ package discord4j.core.spec;
 import discord4j.core.object.PermissionOverwrite;
 import discord4j.core.object.entity.channel.Channel;
 import discord4j.core.object.entity.channel.NewsChannel;
-import discord4j.rest.util.Snowflake;
 import discord4j.discordjson.json.ChannelCreateRequest;
 import discord4j.discordjson.json.ImmutableChannelCreateRequest;
-import discord4j.discordjson.json.ImmutableOverwriteData;
 import discord4j.discordjson.json.OverwriteData;
 import discord4j.discordjson.possible.Possible;
+import discord4j.rest.util.Snowflake;
 import reactor.util.annotation.Nullable;
 
 import java.util.List;
@@ -38,8 +37,8 @@ import java.util.stream.Collectors;
  */
 public class NewsChannelCreateSpec implements AuditSpec<ChannelCreateRequest> {
 
-    private final ImmutableChannelCreateRequest.Builder requestBuilder = ImmutableChannelCreateRequest.builder()
-            .type(Possible.of(Channel.Type.GUILD_NEWS.getValue()));
+    private final ImmutableChannelCreateRequest.Builder requestBuilder = ChannelCreateRequest.builder()
+            .type(Channel.Type.GUILD_NEWS.getValue());
     @Nullable
     private String reason;
 
@@ -61,7 +60,7 @@ public class NewsChannelCreateSpec implements AuditSpec<ChannelCreateRequest> {
      * @return This spec.
      */
     public NewsChannelCreateSpec setTopic(String topic) {
-        requestBuilder.topic(Possible.of(topic));
+        requestBuilder.topic(topic);
         return this;
     }
 
@@ -72,7 +71,7 @@ public class NewsChannelCreateSpec implements AuditSpec<ChannelCreateRequest> {
      * @return This spec.
      */
     public NewsChannelCreateSpec setPosition(int position) {
-        requestBuilder.position(Possible.of(position));
+        requestBuilder.position(position);
         return this;
     }
 
@@ -84,11 +83,15 @@ public class NewsChannelCreateSpec implements AuditSpec<ChannelCreateRequest> {
      */
     public NewsChannelCreateSpec setPermissionOverwrites(Set<? extends PermissionOverwrite> permissionOverwrites) {
         List<OverwriteData> raw = permissionOverwrites.stream()
-                .map(o -> ImmutableOverwriteData.of(o.getTargetId().asString(), o.getType().getValue(),
-                        o.getAllowed().getRawValue(), o.getDenied().getRawValue()))
+                .map(o -> OverwriteData.builder()
+                        .id(o.getTargetId().asString())
+                        .type(o.getType().getValue())
+                        .allow(o.getAllowed().getRawValue())
+                        .deny(o.getDenied().getRawValue())
+                        .build())
                 .collect(Collectors.toList());
 
-        requestBuilder.permissionOverwrites(Possible.of(raw));
+        requestBuilder.permissionOverwrites(raw);
         return this;
     }
 
@@ -110,7 +113,7 @@ public class NewsChannelCreateSpec implements AuditSpec<ChannelCreateRequest> {
      * @return This spec.
      */
     public NewsChannelCreateSpec setNsfw(boolean nsfw) {
-        requestBuilder.nsfw(Possible.of(nsfw));
+        requestBuilder.nsfw(nsfw);
         return this;
     }
 
