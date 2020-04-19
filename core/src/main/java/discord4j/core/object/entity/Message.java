@@ -471,13 +471,13 @@ public final class Message implements Entity {
     }
 
     /**
-     * Requests to crosspost this message if the {@code channel} is of type 'news'.
+     * Requests to publish (crosspost) this message if the {@code channel} is of type 'news'.
      *
-     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the message was crossposted. If
+     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the message was published (crossposted) in the guilds. If
      * an error is received, it is emitted through the {@code Mono}.
      */
     @Experimental
-    public Mono<Void> crosspost() {
+    public Mono<Void> publish() {
         return serviceMediator.getRestClient().getChannelService()
             .crosspostMessage(getChannelId().asLong(), getId().asLong())
             .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex()));
