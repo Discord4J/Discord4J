@@ -20,6 +20,7 @@ package discord4j.core;
 import discord4j.common.retry.ReconnectOptions;
 import discord4j.core.event.EventDispatcher;
 import discord4j.core.event.domain.Event;
+import discord4j.core.shard.MemberRequestFilter;
 import discord4j.core.shard.ShardCoordinator;
 import discord4j.core.state.StateHolder;
 import discord4j.core.state.StateView;
@@ -36,7 +37,7 @@ public class GatewayResources {
     private final StateView stateView;
     private final EventDispatcher eventDispatcher;
     private final ShardCoordinator shardCoordinator;
-    private final boolean memberRequest;
+    private final MemberRequestFilter memberRequestFilter;
     private final GatewayReactorResources gatewayReactorResources;
     private final VoiceReactorResources voiceReactorResources;
     private final ReconnectOptions voiceReconnectOptions;
@@ -47,20 +48,20 @@ public class GatewayResources {
      * @param stateView a read-only facade for an entity cache based off {@link StateHolder}
      * @param eventDispatcher an event bus dedicated to distribute {@link Event} instances
      * @param shardCoordinator a middleware component to coordinate multiple shard-connecting efforts
-     * @param memberRequest whether to enable large guild member requests from the Gateway (chunking)
+     * @param memberRequestFilter a strategy to determine whether guild members should be requested
      * @param gatewayReactorResources a custom set of Reactor resources targeting Gateway operations
      * @param voiceReactorResources a set of Reactor resources targeting Voice Gateway operations
      * @param voiceReconnectOptions a reconnection policy for Voice Gateway connections
      */
     public GatewayResources(StateView stateView, EventDispatcher eventDispatcher,
-                            ShardCoordinator shardCoordinator, boolean memberRequest,
+                            ShardCoordinator shardCoordinator, MemberRequestFilter memberRequestFilter,
                             GatewayReactorResources gatewayReactorResources,
                             VoiceReactorResources voiceReactorResources,
                             ReconnectOptions voiceReconnectOptions) {
         this.stateView = stateView;
         this.eventDispatcher = eventDispatcher;
         this.shardCoordinator = shardCoordinator;
-        this.memberRequest = memberRequest;
+        this.memberRequestFilter = memberRequestFilter;
         this.gatewayReactorResources = gatewayReactorResources;
         this.voiceReactorResources = voiceReactorResources;
         this.voiceReconnectOptions = voiceReconnectOptions;
@@ -98,12 +99,24 @@ public class GatewayResources {
     }
 
     /**
+     * Return a {@link MemberRequestFilter} indicating whether this shard group should be requesting guild members.
+     *
+     * @return the {@link MemberRequestFilter} configured in this {@link GatewayResources}
+     */
+    public MemberRequestFilter getMemberRequestFilter() {
+        return memberRequestFilter;
+    }
+
+    /**
      * Return whether the Gateway should be instructed to request guild members for large guilds.
      *
-     * @return {@code true} if enabled, {@code false} otherwise
+     * @return {@code true} if using the default (enabled for large guilds), {@code false} otherwise
+     * @deprecated this method only returns {@code true} if using {@link MemberRequestFilter#DEFAULT}. Use
+     * {@link #getMemberRequestFilter()}
      */
+    @Deprecated
     public boolean isMemberRequest() {
-        return memberRequest;
+        return memberRequestFilter == MemberRequestFilter.DEFAULT;
     }
 
     /**
