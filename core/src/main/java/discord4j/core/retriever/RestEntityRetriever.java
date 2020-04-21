@@ -17,22 +17,11 @@
 package discord4j.core.retriever;
 
 import discord4j.core.GatewayDiscordClient;
-import discord4j.core.object.entity.Guild;
-import discord4j.core.object.entity.GuildEmoji;
-import discord4j.core.object.entity.Member;
-import discord4j.core.object.entity.Message;
-import discord4j.core.object.entity.Role;
-import discord4j.core.object.entity.User;
+import discord4j.core.object.entity.*;
 import discord4j.core.object.entity.channel.Channel;
 import discord4j.core.object.entity.channel.GuildChannel;
 import discord4j.core.util.EntityUtil;
-import discord4j.discordjson.json.EmojiData;
-import discord4j.discordjson.json.GuildData;
-import discord4j.discordjson.json.GuildUpdateData;
-import discord4j.discordjson.json.ImmutableGuildData;
-import discord4j.discordjson.json.MemberData;
-import discord4j.discordjson.json.RoleData;
-import discord4j.discordjson.json.UserGuildData;
+import discord4j.discordjson.json.*;
 import discord4j.rest.RestClient;
 import discord4j.rest.util.PaginationUtil;
 import discord4j.rest.util.Snowflake;
@@ -156,7 +145,7 @@ class RestEntityRetriever implements EntityRetriever {
     }
 
     private GuildData toGuildData(GuildUpdateData guild) {
-        return ImmutableGuildData.builder()
+        return GuildData.builder()
                 .from(guild)
                 .roles(guild.roles().stream()
                         .map(RoleData::id)

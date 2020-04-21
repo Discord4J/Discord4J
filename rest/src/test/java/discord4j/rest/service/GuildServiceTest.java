@@ -18,7 +18,6 @@ package discord4j.rest.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import discord4j.discordjson.json.*;
-import discord4j.discordjson.possible.Possible;
 import discord4j.rest.RestTests;
 import discord4j.rest.request.Router;
 import discord4j.rest.util.Snowflake;
@@ -73,8 +72,8 @@ public class GuildServiceTest {
 
     @Test
     public void testModifyGuild() {
-        GuildModifyRequest req = ImmutableGuildModifyRequest.builder()
-            .region(Possible.of("us-south"))
+        GuildModifyRequest req = GuildModifyRequest.builder()
+            .region("us-south")
             .build();
         getGuildService().modifyGuild(guild, req, null).block();
     }
@@ -92,9 +91,9 @@ public class GuildServiceTest {
     @Test
     public void testCreateGuildChannel() {
         String randomName = Long.toHexString(Double.doubleToLongBits(Math.random()));
-        ChannelCreateRequest req = ImmutableChannelCreateRequest.builder()
+        ChannelCreateRequest req = ChannelCreateRequest.builder()
             .name(randomName)
-            .parentId(Possible.of(Snowflake.asString(trashCategory)))
+            .parentId(Snowflake.asString(trashCategory))
             .build();
         getGuildService().createGuildChannel(guild, req, null).block();
     }
@@ -131,15 +130,15 @@ public class GuildServiceTest {
 
     @Test
     public void testModifyGuildMember() {
-        GuildMemberModifyRequest req = ImmutableGuildMemberModifyRequest.builder()
-            .nick(Possible.of("nickname"))
+        GuildMemberModifyRequest req = GuildMemberModifyRequest.builder()
+            .nick("nickname")
             .build();
         getGuildService().modifyGuildMember(guild, member, req, null).block();
     }
 
     @Test
     public void testModifyOwnNickname() {
-        NicknameModifyData req = ImmutableNicknameModifyData.builder().nick("nickname").build();
+        NicknameModifyData req = NicknameModifyData.builder().nick("nickname").build();
         getGuildService().modifyOwnNickname(guild, req).block();
     }
 
@@ -186,8 +185,8 @@ public class GuildServiceTest {
     @Test
     public void testCreateGuildRole() {
         String randomName = "test_" + Long.toHexString(Double.doubleToLongBits(Math.random()));
-        RoleCreateRequest req = ImmutableRoleCreateRequest.builder()
-            .name(Possible.of(randomName))
+        RoleCreateRequest req = RoleCreateRequest.builder()
+            .name(randomName)
             .build();
         getGuildService().createGuildRole(guild, req, null).block();
     }
@@ -199,8 +198,8 @@ public class GuildServiceTest {
 
     @Test
     public void testModifyGuildRole() {
-        RoleModifyRequest req = ImmutableRoleModifyRequest.builder()
-            .permissions(Possible.of(0L))
+        RoleModifyRequest req = RoleModifyRequest.builder()
+            .permissions(0L)
             .build();
         getGuildService().modifyGuildRole(guild, permanentRole, req, null).block();
     }

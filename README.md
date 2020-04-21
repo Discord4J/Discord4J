@@ -46,7 +46,7 @@ libraryDependencies ++= Seq(
 
 ## Quick Example (Reactive and Blocking)
 ```java
-final DiscordClient client = new DiscordClientBuilder("token").build();
+final DiscordClient client = DiscordClientBuilder.create("token").build();
 
 client.getEventDispatcher().on(ReadyEvent.class)
         .subscribe(ready -> System.out.println("Logged in as " + ready.getSelf().getUsername()));
@@ -61,7 +61,7 @@ client.getEventDispatcher().on(MessageCreateEvent.class)
 client.login().block();
 ```
 ```java
-final DiscordClient client = new DiscordClientBuilder("token").build();
+final DiscordClient client = DiscordClientBuilder.create("token").build();
 
 client.getEventDispatcher().on(ReadyEvent.class)
         .subscribe(ready -> System.out.println("Logged in as " + ready.getSelf().getUsername()));
@@ -105,6 +105,8 @@ Discord4J's mechanism for storing information received on the gateway is complet
 * [Reactor 3 Reference Guide](http://projectreactor.io/docs/core/release/reference/)
 
 ## Development builds (v3.1)
+
+Check out some [examples](https://github.com/Discord4J/Discord4J/tree/master/core/src/test/java/discord4j/core) on how to use it.
 
 ### Jitpack
 

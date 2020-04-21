@@ -16,15 +16,13 @@
  */
 package discord4j.rest.service;
 
-import discord4j.discordjson.json.DMCreateRequest;
-import discord4j.discordjson.json.ImmutableDMCreateRequest;
-import discord4j.discordjson.json.ImmutableUserModifyRequest;
-import discord4j.discordjson.json.UserModifyRequest;
-import discord4j.discordjson.possible.Possible;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import discord4j.discordjson.json.DMCreateRequest;
+import discord4j.discordjson.json.UserModifyRequest;
 import discord4j.rest.RestTests;
 import discord4j.rest.http.client.ClientException;
 import discord4j.rest.request.Router;
+import discord4j.rest.util.Snowflake;
 import org.junit.Test;
 
 import java.util.Collections;
@@ -70,8 +68,8 @@ public class UserServiceTest {
 
     @Test
     public void testModifyCurrentUser() {
-        UserModifyRequest req = ImmutableUserModifyRequest.builder()
-            .username(Possible.of("Discord4J 3 Test Bot"))
+        UserModifyRequest req = UserModifyRequest.builder()
+            .username("Discord4J 3 Test Bot")
             .build();
         getUserService().modifyCurrentUser(req).block();
     }
@@ -93,7 +91,7 @@ public class UserServiceTest {
 
     @Test
     public void testCreateDM() {
-        DMCreateRequest req = ImmutableDMCreateRequest.builder().recipientId(Long.toUnsignedString(user)).build();
+        DMCreateRequest req = DMCreateRequest.builder().recipientId(Snowflake.asString(user)).build();
         getUserService().createDM(req).block();
     }
 

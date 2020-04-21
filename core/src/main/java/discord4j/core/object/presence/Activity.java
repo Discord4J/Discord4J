@@ -17,12 +17,11 @@
 package discord4j.core.object.presence;
 
 import discord4j.core.object.reaction.ReactionEmoji;
-import discord4j.rest.util.Snowflake;
 import discord4j.core.util.EntityUtil;
 import discord4j.discordjson.json.ActivityData;
 import discord4j.discordjson.json.ActivityUpdateRequest;
-import discord4j.discordjson.json.ImmutableActivityUpdateRequest;
 import discord4j.discordjson.possible.Possible;
+import discord4j.rest.util.Snowflake;
 
 import java.time.Instant;
 import java.util.Arrays;
@@ -34,16 +33,14 @@ import java.util.stream.Collectors;
 public class Activity {
 
     public static ActivityUpdateRequest playing(String name) {
-        return ImmutableActivityUpdateRequest
-                .builder()
+        return ActivityUpdateRequest.builder()
                 .name(name)
                 .type(Type.PLAYING.getValue())
                 .build();
     }
 
     public static ActivityUpdateRequest streaming(String name, String url) {
-        return ImmutableActivityUpdateRequest
-                .builder()
+        return ActivityUpdateRequest.builder()
                 .name(name)
                 .type(Type.STREAMING.getValue())
                 .url(url)
@@ -51,16 +48,14 @@ public class Activity {
     }
 
     public static ActivityUpdateRequest listening(String name) {
-        return ImmutableActivityUpdateRequest
-                .builder()
+        return ActivityUpdateRequest.builder()
                 .name(name)
                 .type(Type.LISTENING.getValue())
                 .build();
     }
 
     public static ActivityUpdateRequest watching(String name) {
-        return ImmutableActivityUpdateRequest
-                .builder()
+        return ActivityUpdateRequest.builder()
                 .name(name)
                 .type(Type.WATCHING.getValue())
                 .build();
@@ -115,8 +110,8 @@ public class Activity {
      */
     public Optional<Instant> getStart() {
         return data.timestamps().toOptional()
-            .flatMap(timestamps -> timestamps.start().toOptional())
-            .map(Instant::ofEpochMilli);
+                .flatMap(timestamps -> timestamps.start().toOptional())
+                .map(Instant::ofEpochMilli);
     }
 
     /**
@@ -126,8 +121,8 @@ public class Activity {
      */
     public Optional<Instant> getEnd() {
         return data.timestamps().toOptional()
-            .flatMap(timestamps -> timestamps.end().toOptional())
-            .map(Instant::ofEpochMilli);
+                .flatMap(timestamps -> timestamps.end().toOptional())
+                .map(Instant::ofEpochMilli);
     }
 
     /**
@@ -137,7 +132,7 @@ public class Activity {
      */
     public Optional<Snowflake> getApplicationId() {
         return data.applicationId().toOptional()
-            .map(Snowflake::of);
+                .map(Snowflake::of);
     }
 
     /**
@@ -165,7 +160,7 @@ public class Activity {
      */
     public Optional<String> getPartyId() {
         return data.party().toOptional()
-            .flatMap(party -> party.id().toOptional());
+                .flatMap(party -> party.id().toOptional());
     }
 
     /**
@@ -175,10 +170,10 @@ public class Activity {
      */
     public OptionalLong getCurrentPartySize() {
         return data.party().toOptional()
-            .flatMap(party -> party.size().toOptional())
-            .map(size -> size.get(0))
-            .map(OptionalLong::of)
-            .orElseGet(OptionalLong::empty);
+                .flatMap(party -> party.size().toOptional())
+                .map(size -> size.get(0))
+                .map(OptionalLong::of)
+                .orElseGet(OptionalLong::empty);
     }
 
     /**
@@ -188,10 +183,10 @@ public class Activity {
      */
     public OptionalLong getMaxPartySize() {
         return data.party().toOptional()
-            .flatMap(party -> party.size().toOptional())
-            .map(size -> size.get(1))
-            .map(OptionalLong::of)
-            .orElseGet(OptionalLong::empty);
+                .flatMap(party -> party.size().toOptional())
+                .map(size -> size.get(1))
+                .map(OptionalLong::of)
+                .orElseGet(OptionalLong::empty);
     }
 
     /**
@@ -201,7 +196,7 @@ public class Activity {
      */
     public Optional<String> getLargeImageId() {
         return data.assets().toOptional()
-            .flatMap(assets -> assets.largeImage().toOptional());
+                .flatMap(assets -> assets.largeImage().toOptional());
     }
 
     /**
@@ -211,7 +206,7 @@ public class Activity {
      */
     public Optional<String> getLargeText() {
         return data.assets().toOptional()
-            .flatMap(assets -> assets.largeText().toOptional());
+                .flatMap(assets -> assets.largeText().toOptional());
     }
 
     /**
@@ -221,7 +216,7 @@ public class Activity {
      */
     public Optional<String> getSmallImageId() {
         return data.assets().toOptional()
-            .flatMap(assets -> assets.smallImage().toOptional());
+                .flatMap(assets -> assets.smallImage().toOptional());
     }
 
     /**
@@ -231,7 +226,7 @@ public class Activity {
      */
     public Optional<String> getSmallText() {
         return data.assets().toOptional()
-            .flatMap(assets -> assets.smallText().toOptional());
+                .flatMap(assets -> assets.smallText().toOptional());
     }
 
     /**
@@ -241,7 +236,7 @@ public class Activity {
      */
     public Optional<String> getJoinSecret() {
         return data.secrets().toOptional()
-            .flatMap(secrets -> secrets.join().toOptional());
+                .flatMap(secrets -> secrets.join().toOptional());
     }
 
     /**
@@ -251,7 +246,7 @@ public class Activity {
      */
     public Optional<String> getSpectateSecret() {
         return data.secrets().toOptional()
-            .flatMap(secrets -> secrets.spectate().toOptional());
+                .flatMap(secrets -> secrets.spectate().toOptional());
     }
 
     /**
@@ -261,7 +256,7 @@ public class Activity {
      */
     public Optional<String> getMatchSecret() {
         return data.secrets().toOptional()
-            .flatMap(secrets -> secrets.match().toOptional());
+                .flatMap(secrets -> secrets.match().toOptional());
     }
 
     /**
@@ -271,12 +266,12 @@ public class Activity {
      */
     public Optional<ReactionEmoji> getEmoji() {
         return Possible.flatOpt(data.emoji())
-            .map(emoji -> {
-                // TODO FIXME
-                String sid = emoji.id().toOptional().orElse(null);
-                Long id = sid == null ? null : Snowflake.asLong(sid);
-                return ReactionEmoji.of(id, emoji.name(), emoji.animated().toOptional().orElse(false));
-            });
+                .map(emoji -> {
+                    // TODO FIXME
+                    String sid = emoji.id().toOptional().orElse(null);
+                    Long id = sid == null ? null : Snowflake.asLong(sid);
+                    return ReactionEmoji.of(id, emoji.name(), emoji.animated().toOptional().orElse(false));
+                });
     }
 
     /**
@@ -290,10 +285,10 @@ public class Activity {
 
     public EnumSet<Flag> getFlags() {
         return data.flags().toOptional()
-            .map(flags -> Arrays.stream(Flag.values())
-                .filter(f -> (flags & f.getValue()) == f.getValue())
-                .collect(Collectors.toCollection(() -> EnumSet.noneOf(Flag.class))))
-            .orElse(EnumSet.noneOf(Flag.class));
+                .map(flags -> Arrays.stream(Flag.values())
+                        .filter(f -> (flags & f.getValue()) == f.getValue())
+                        .collect(Collectors.toCollection(() -> EnumSet.noneOf(Flag.class))))
+                .orElse(EnumSet.noneOf(Flag.class));
     }
 
     /** The type of "action" for an activity. */
@@ -392,7 +387,7 @@ public class Activity {
     @Override
     public String toString() {
         return "Activity{" +
-            "data=" + data +
-            '}';
+                "data=" + data +
+                '}';
     }
 }

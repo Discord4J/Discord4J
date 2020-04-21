@@ -16,9 +16,8 @@
  */
 package discord4j.core.spec;
 
-import discord4j.discordjson.json.ImmutableInviteCreateRequest;
-import discord4j.discordjson.json.InviteCreateRequest;
 import discord4j.core.object.Invite;
+import discord4j.discordjson.json.InviteCreateRequest;
 import reactor.util.annotation.Nullable;
 
 /**
@@ -97,8 +96,7 @@ public class InviteCreateSpec implements AuditSpec<InviteCreateRequest> {
 
     @Override
     public InviteCreateRequest asRequest() {
-        return ImmutableInviteCreateRequest
-                .builder()
+        return InviteCreateRequest.builder()
                 .maxAge(maxAge)
                 .maxUses(maxUses)
                 .temporary(temporary)

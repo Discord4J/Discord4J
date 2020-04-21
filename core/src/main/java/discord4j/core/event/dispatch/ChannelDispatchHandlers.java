@@ -24,7 +24,6 @@ import discord4j.core.state.StateHolder;
 import discord4j.core.util.ListUtil;
 import discord4j.discordjson.json.ChannelData;
 import discord4j.discordjson.json.GuildData;
-import discord4j.discordjson.json.ImmutableGuildData;
 import discord4j.discordjson.json.gateway.ChannelCreate;
 import discord4j.discordjson.json.gateway.ChannelDelete;
 import discord4j.discordjson.json.gateway.ChannelPinsUpdate;
@@ -123,7 +122,7 @@ class ChannelDispatchHandlers {
 
     private static Mono<Void> addChannelToGuild(LongObjStore<GuildData> guildStore, ChannelData channel) {
         return guildStore.find(Snowflake.asLong(channel.guildId().get()))
-                .map(guildData -> ImmutableGuildData.builder()
+                .map(guildData -> GuildData.builder()
                         .from(guildData)
                         .channels(ListUtil.add(guildData.channels(), channel.id()))
                         .build())
@@ -221,7 +220,7 @@ class ChannelDispatchHandlers {
 
     private static Mono<Void> removeChannelFromGuild(LongObjStore<GuildData> guildStore, ChannelData channel) {
         return guildStore.find(Snowflake.asLong(channel.guildId().get()))
-                .map(guildData -> ImmutableGuildData.builder()
+                .map(guildData -> GuildData.builder()
                         .from(guildData)
                         .channels(ListUtil.remove(guildData.channels(), ch -> channel.id().equals(ch)))
                         .build())

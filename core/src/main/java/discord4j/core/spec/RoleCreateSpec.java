@@ -16,14 +16,13 @@
  */
 package discord4j.core.spec;
 
-import discord4j.discordjson.json.ImmutableRoleCreateRequest;
-import discord4j.discordjson.json.RoleCreateRequest;
 import discord4j.core.object.entity.Role;
-import discord4j.rest.util.PermissionSet;
+import discord4j.discordjson.json.RoleCreateRequest;
 import discord4j.discordjson.possible.Possible;
+import discord4j.rest.util.PermissionSet;
 import reactor.util.annotation.Nullable;
 
-import java.awt.*;
+import java.awt.Color;
 
 /**
  * Spec used to create a new guild {@link Role} entity.
@@ -108,7 +107,7 @@ public class RoleCreateSpec implements AuditSpec<RoleCreateRequest> {
 
     @Override
     public RoleCreateRequest asRequest() {
-        return ImmutableRoleCreateRequest.builder()
+        return RoleCreateRequest.builder()
                 .name(name == null ? Possible.absent() : Possible.of(name))
                 .permissions(permissions == null ? Possible.absent() : Possible.of(permissions))
                 .color(color == null ? Possible.absent() : Possible.of(color))

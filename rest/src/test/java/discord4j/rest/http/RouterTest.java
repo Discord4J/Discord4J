@@ -18,10 +18,8 @@ package discord4j.rest.http;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import discord4j.common.JacksonResources;
-import discord4j.discordjson.json.ImmutableMessageCreateRequest;
 import discord4j.discordjson.json.MessageCreateRequest;
 import discord4j.discordjson.json.MessageData;
-import discord4j.discordjson.possible.Possible;
 import discord4j.rest.RestTests;
 import discord4j.rest.request.Router;
 import discord4j.rest.route.Routes;
@@ -47,8 +45,8 @@ public class RouterTest {
         ObjectMapper mapper = getMapper();
         Router router = RestTests.getRouter(token, mapper);
 
-        MessageCreateRequest body = ImmutableMessageCreateRequest.builder()
-            .content(Possible.of("hello at " + Instant.now()))
+        MessageCreateRequest body = MessageCreateRequest.builder()
+            .content("hello at " + Instant.now())
             .build();
 
         Routes.MESSAGE_CREATE.newRequest(channelId)
@@ -73,8 +71,8 @@ public class RouterTest {
         for (int i = 0; i < 10; i++) {
             final int a = i;
 
-            MessageCreateRequest body = ImmutableMessageCreateRequest.builder()
-                .content(Possible.of(cid + " " + a))
+            MessageCreateRequest body = MessageCreateRequest.builder()
+                .content(cid + " " + a)
                 .build();
 
             Routes.MESSAGE_CREATE.newRequest(channelId)
@@ -95,8 +93,8 @@ public class RouterTest {
         ObjectMapper mapper = getMapper();
         Router router = RestTests.getRouter(token, mapper);
 
-        MessageCreateRequest body = ImmutableMessageCreateRequest.builder()
-            .content(Possible.of("hi"))
+        MessageCreateRequest body = MessageCreateRequest.builder()
+            .content("hi")
             .build();
 
         Mono<MessageData> mono = Routes.MESSAGE_CREATE.newRequest(channelId)
@@ -124,8 +122,8 @@ public class RouterTest {
         for (int i = 0; i < 6; i++) {
             final int a = i;
 
-            MessageCreateRequest body = ImmutableMessageCreateRequest.builder()
-                .content(Possible.of(cid + " " + a))
+            MessageCreateRequest body = MessageCreateRequest.builder()
+                .content(cid + " " + a)
                 .build();
 
             Routes.MESSAGE_CREATE.newRequest(channelId)
@@ -151,8 +149,8 @@ public class RouterTest {
 
         String cid = Integer.toHexString(this.hashCode());
 
-        MessageCreateRequest body0 = ImmutableMessageCreateRequest.builder()
-            .content(Possible.of(cid + " 0 at" + Instant.now()))
+        MessageCreateRequest body0 = MessageCreateRequest.builder()
+            .content(cid + " 0 at" + Instant.now())
             .build();
 
         Routes.MESSAGE_CREATE.newRequest(channelId)
@@ -161,8 +159,8 @@ public class RouterTest {
                 .mono()
                 .block();
 
-        MessageCreateRequest body1 = ImmutableMessageCreateRequest.builder()
-            .content(Possible.of(cid + " 1 at" + Instant.now()))
+        MessageCreateRequest body1 = MessageCreateRequest.builder()
+            .content(cid + " 1 at" + Instant.now())
             .build();
 
         Routes.MESSAGE_CREATE.newRequest(channelId)

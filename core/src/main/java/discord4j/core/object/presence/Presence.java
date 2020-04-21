@@ -17,9 +17,7 @@
 package discord4j.core.object.presence;
 
 import discord4j.discordjson.json.ActivityUpdateRequest;
-import discord4j.discordjson.json.ImmutableActivityUpdateRequest;
 import discord4j.discordjson.json.PresenceData;
-import discord4j.discordjson.json.gateway.ImmutableStatusUpdate;
 import discord4j.discordjson.json.gateway.StatusUpdate;
 import discord4j.discordjson.possible.Possible;
 
@@ -49,7 +47,7 @@ public final class Presence {
      * @return a {@link StatusUpdate} for the ONLINE status
      */
     public static StatusUpdate online() {
-        return ImmutableStatusUpdate.builder()
+        return StatusUpdate.builder()
                 .status(Status.ONLINE.getValue())
                 .game(Optional.empty())
                 .afk(false)
@@ -59,12 +57,12 @@ public final class Presence {
 
     /**
      * Create a status update to display an online status along with a custom activity. Refer to
-     * {@link ImmutableActivityUpdateRequest} to create one.
+     * {@link ActivityUpdateRequest#builder()} to create one.
      *
      * @return a {@link StatusUpdate} for the ONLINE status
      */
     public static StatusUpdate online(ActivityUpdateRequest activity) {
-        return ImmutableStatusUpdate.builder()
+        return StatusUpdate.builder()
                 .status(Status.ONLINE.getValue())
                 .game(activity)
                 .afk(false)
@@ -78,7 +76,7 @@ public final class Presence {
      * @return a {@link StatusUpdate} for the DO_NOT_DISTURB status
      */
     public static StatusUpdate doNotDisturb() {
-        return ImmutableStatusUpdate.builder()
+        return StatusUpdate.builder()
                 .status(Status.DO_NOT_DISTURB.getValue())
                 .game(Optional.empty())
                 .afk(false)
@@ -88,12 +86,12 @@ public final class Presence {
 
     /**
      * Create a status update to display a do-not-disturb status along with a custom activity. Refer to
-     * {@link ImmutableActivityUpdateRequest} to create one.
+     * {@link ActivityUpdateRequest#builder()} to create one.
      *
      * @return a {@link StatusUpdate} for the DO_NOT_DISTURB status
      */
     public static StatusUpdate doNotDisturb(ActivityUpdateRequest activity) {
-        return ImmutableStatusUpdate.builder()
+        return StatusUpdate.builder()
                 .status(Status.DO_NOT_DISTURB.getValue())
                 .game(activity)
                 .afk(false)
@@ -107,7 +105,7 @@ public final class Presence {
      * @return a {@link StatusUpdate} for the IDLE status
      */
     public static StatusUpdate idle() {
-        return ImmutableStatusUpdate.builder()
+        return StatusUpdate.builder()
                 .status(Status.IDLE.getValue())
                 .game(Optional.empty())
                 .afk(true)
@@ -117,12 +115,12 @@ public final class Presence {
 
     /**
      * Create a status update to display an idle status along with a custom activity. Refer to
-     * {@link ImmutableActivityUpdateRequest} to create one.
+     * {@link ActivityUpdateRequest#builder()} to create one.
      *
      * @return a {@link StatusUpdate} for the IDLE status
      */
     public static StatusUpdate idle(ActivityUpdateRequest activity) {
-        return ImmutableStatusUpdate.builder()
+        return StatusUpdate.builder()
                 .status(Status.IDLE.getValue())
                 .game(activity)
                 .afk(true)
@@ -136,7 +134,7 @@ public final class Presence {
      * @return a {@link StatusUpdate} for the INVISIBLE status
      */
     public static StatusUpdate invisible() {
-        return ImmutableStatusUpdate.builder()
+        return StatusUpdate.builder()
                 .status(Status.INVISIBLE.getValue())
                 .game(Optional.empty())
                 .afk(false)
@@ -198,10 +196,10 @@ public final class Presence {
      * @return a {@link StatusUpdate} with the contents of the current {@link Presence} data.
      */
     public StatusUpdate asStatusUpdate() {
-        return ImmutableStatusUpdate.builder()
+        return StatusUpdate.builder()
                 .status(data.status())
                 .game(data.activities().stream().findFirst()
-                        .map(activity -> ImmutableActivityUpdateRequest.builder()
+                        .map(activity -> ActivityUpdateRequest.builder()
                                 .from(activity)
                                 .url(Possible.flatOpt(activity.url()))
                                 .build()))

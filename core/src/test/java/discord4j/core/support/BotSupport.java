@@ -7,8 +7,7 @@ import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.presence.Presence;
 import discord4j.discordjson.json.ApplicationInfoData;
-import discord4j.discordjson.json.ImmutableMessageCreateRequest;
-import discord4j.discordjson.possible.Possible;
+import discord4j.discordjson.json.MessageCreateRequest;
 import discord4j.rest.util.Snowflake;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
@@ -79,8 +78,8 @@ public class BotSupport {
             String content = message.getContent();
             if (content.startsWith("!echo ")) {
                 return message.getRestChannel().createMessage(
-                        ImmutableMessageCreateRequest.builder()
-                                .content(Possible.of("<@" + message.getUserData().id() + "> " + content.substring("!echo ".length())))
+                        MessageCreateRequest.builder()
+                                .content("<@" + message.getUserData().id() + "> " + content.substring("!echo ".length()))
                                 .build())
                         .then();
             }

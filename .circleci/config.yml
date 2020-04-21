@@ -14,7 +14,7 @@ executors:
   jdk11:
     <<: *defaults
     docker:
-      - image: circleci/openjdk:11-jdk
+      - image: circleci/openjdk:11.0.7-jdk-buster
 
 jobs:
   build-jdk8:

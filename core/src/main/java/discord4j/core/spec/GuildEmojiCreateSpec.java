@@ -16,9 +16,8 @@
  */
 package discord4j.core.spec;
 
-import discord4j.discordjson.json.GuildEmojiCreateRequest;
-import discord4j.discordjson.json.ImmutableGuildEmojiCreateRequest;
 import discord4j.core.object.entity.GuildEmoji;
+import discord4j.discordjson.json.GuildEmojiCreateRequest;
 import discord4j.rest.util.Image;
 import discord4j.rest.util.Snowflake;
 import reactor.util.annotation.Nullable;
@@ -86,8 +85,7 @@ public class GuildEmojiCreateSpec implements AuditSpec<GuildEmojiCreateRequest> 
 
     @Override
     public GuildEmojiCreateRequest asRequest() {
-        return ImmutableGuildEmojiCreateRequest
-                .builder()
+        return GuildEmojiCreateRequest.builder()
                 .name(name)
                 .image(image)
                 .roles(roles.stream().map(Snowflake::asString).collect(Collectors.toList()))

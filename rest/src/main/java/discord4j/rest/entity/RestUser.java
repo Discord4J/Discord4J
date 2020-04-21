@@ -18,7 +18,7 @@
 package discord4j.rest.entity;
 
 import discord4j.discordjson.json.ChannelData;
-import discord4j.discordjson.json.ImmutableDMCreateRequest;
+import discord4j.discordjson.json.DMCreateRequest;
 import discord4j.discordjson.json.UserData;
 import discord4j.rest.RestClient;
 import discord4j.rest.util.Snowflake;
@@ -53,6 +53,6 @@ public class RestUser {
      * this user. If an error is received, it is emitted through the {@code Mono}.
      */
     public final Mono<ChannelData> getPrivateChannel() {
-        return restClient.getUserService().createDM(ImmutableDMCreateRequest.builder().recipientId(Snowflake.asString(id)).build());
+        return restClient.getUserService().createDM(DMCreateRequest.builder().recipientId(Snowflake.asString(id)).build());
     }
 }

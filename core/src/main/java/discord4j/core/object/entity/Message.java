@@ -27,8 +27,8 @@ import discord4j.core.object.reaction.ReactionEmoji;
 import discord4j.core.retriever.EntityRetrievalStrategy;
 import discord4j.core.spec.MessageEditSpec;
 import discord4j.core.util.EntityUtil;
-import discord4j.discordjson.json.ImmutableSuppressEmbedsRequest;
 import discord4j.discordjson.json.MessageData;
+import discord4j.discordjson.json.SuppressEmbedsRequest;
 import discord4j.discordjson.json.UserData;
 import discord4j.rest.entity.RestChannel;
 import discord4j.rest.entity.RestMessage;
@@ -474,7 +474,7 @@ public final class Message implements Entity {
     public Mono<Void> suppressEmbeds(final boolean suppress) {
         return gateway.getRestClient().getChannelService()
                 .suppressEmbeds(getChannelId().asLong(), getId().asLong(),
-                        ImmutableSuppressEmbedsRequest.builder().suppress(suppress).build());
+                        SuppressEmbedsRequest.builder().suppress(suppress).build());
     }
 
     /**

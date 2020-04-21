@@ -66,4 +66,18 @@ public interface DispatchEventMapper {
             }
         };
     }
+
+    /**
+     * Create a {@link DispatchEventMapper} that doesn't process any dispatches
+     *
+     * @return a {@link DispatchEventMapper} that does nothing
+     */
+    static DispatchEventMapper noOp() {
+        return new DispatchEventMapper() {
+            @Override
+            public <D, E extends Event> Mono<E> handle(DispatchContext<D> context) {
+                return Mono.empty();
+            }
+        };
+    }
 }

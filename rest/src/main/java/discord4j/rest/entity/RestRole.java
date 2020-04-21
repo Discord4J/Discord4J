@@ -17,7 +17,6 @@
 
 package discord4j.rest.entity;
 
-import discord4j.discordjson.json.ImmutablePositionModifyRequest;
 import discord4j.discordjson.json.PositionModifyRequest;
 import discord4j.discordjson.json.RoleData;
 import discord4j.discordjson.json.RoleModifyRequest;
@@ -90,7 +89,7 @@ public class RestRole {
      * guild. If an error is received, it is emitted through the {@code Flux}.
      */
     public Flux<RoleData> changePosition(final int position) {
-        final PositionModifyRequest[] requests = {ImmutablePositionModifyRequest.builder()
+        final PositionModifyRequest[] requests = {PositionModifyRequest.builder()
                 .id(Snowflake.asString(id))
                 .position(position)
                 .build()};

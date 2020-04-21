@@ -15,6 +15,7 @@ import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.VoiceState;
 import discord4j.core.object.entity.Member;
+import discord4j.discordjson.json.MessageCreateRequest;
 import discord4j.voice.AudioProvider;
 import reactor.core.publisher.Mono;
 import reactor.util.Logger;
@@ -78,7 +79,17 @@ public class VoiceSupport {
                 .doOnNext(e -> player.stopTrack())
                 .then();
 
-        return Mono.zip(join, play, stop).then();
+        Mono<Void> currentGuild = client.getEventDispatcher().on(MessageCreateEvent.class)
+                .filter(e -> e.getMessage().getContent().equals("!vcguild"))
+                .flatMap(e -> Mono.justOrEmpty(e.getMember())
+                        .flatMap(Member::getVoiceState)
+                        .flatMap(vs -> e.getMessage().getRestChannel().createMessage(
+                                MessageCreateRequest.builder()
+                                        .content(vs.getGuildId().asString())
+                                        .build())))
+                .then();
+
+        return Mono.zip(join, play, stop, currentGuild).then();
     }
 
     private static class LavaplayerAudioProvider extends AudioProvider {

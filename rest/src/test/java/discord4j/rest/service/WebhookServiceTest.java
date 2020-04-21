@@ -16,10 +16,8 @@
  */
 package discord4j.rest.service;
 
-import discord4j.discordjson.json.ImmutableWebhookModifyRequest;
-import discord4j.discordjson.json.WebhookModifyRequest;
-import discord4j.discordjson.possible.Possible;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import discord4j.discordjson.json.WebhookModifyRequest;
 import discord4j.rest.RestTests;
 import discord4j.rest.request.Router;
 import org.junit.Test;
@@ -68,8 +66,8 @@ public class WebhookServiceTest {
 
     @Test
     public void testModifyWebhook() {
-        WebhookModifyRequest req = ImmutableWebhookModifyRequest.builder()
-            .name(Possible.of("Permanent Webhook"))
+        WebhookModifyRequest req = WebhookModifyRequest.builder()
+            .name("Permanent Webhook")
             .build();
         getWebhookService().modifyWebhook(permanentWebhook, req, null).block();
     }

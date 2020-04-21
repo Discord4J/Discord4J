@@ -16,10 +16,12 @@
  */
 package discord4j.core.spec;
 
-import discord4j.discordjson.json.*;
 import discord4j.core.object.Region;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.channel.Channel;
+import discord4j.discordjson.json.GuildCreateRequest;
+import discord4j.discordjson.json.PartialChannelCreateRequest;
+import discord4j.discordjson.json.RoleCreateRequest;
 import discord4j.rest.util.Image;
 import reactor.util.annotation.Nullable;
 
@@ -153,8 +155,7 @@ public class GuildCreateSpec implements Spec<GuildCreateRequest> {
      * @return This spec.
      */
     public GuildCreateSpec addChannel(String name, Channel.Type type) {
-        channels.add(ImmutablePartialChannelCreateRequest
-                .builder()
+        channels.add(PartialChannelCreateRequest.builder()
                 .name(name)
                 .type(type.getValue())
                 .build());
@@ -163,8 +164,7 @@ public class GuildCreateSpec implements Spec<GuildCreateRequest> {
 
     @Override
     public GuildCreateRequest asRequest() {
-        return ImmutableGuildCreateRequest
-                .builder()
+        return GuildCreateRequest.builder()
                 .name(name)
                 .region(region)
                 .icon(icon)

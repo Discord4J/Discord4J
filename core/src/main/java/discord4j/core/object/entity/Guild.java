@@ -721,6 +721,16 @@ public final class Guild implements Entity {
     }
 
     /**
+     * Requests to retrieve the member as represented by the bot user's ID.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits the {@link Member} as represented by the bot
+     * user's ID. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Member> getSelfMember() {
+        return gateway.getSelfId().flatMap(this::getMemberById);
+    }
+
+    /**
      * Requests to retrieve the guild's channels.
      * <p>
      * The order of items emitted by the returned {@code Flux} is unspecified. Use
@@ -842,7 +852,7 @@ public final class Guild implements Entity {
 
         return gateway.getRestClient().getGuildService()
                 .modifyGuild(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason())
-                .map(data -> new Guild(gateway, ImmutableGuildData.builder()
+                .map(data -> new Guild(gateway, GuildData.builder()
                         .from(this.data)
                         .from(data)
                         .build()));
@@ -1179,7 +1189,9 @@ public final class Guild implements Entity {
      */
     public Mono<String> changeSelfNickname(@Nullable final String nickname) {
         return gateway.getRestClient().getGuildService()
-                .modifyOwnNickname(getId().asLong(), ImmutableNicknameModifyData.of(Optional.ofNullable(nickname)))
+                .modifyOwnNickname(getId().asLong(), NicknameModifyData.builder()
+                        .nick(Optional.ofNullable(nickname))
+                        .build())
                 .handle((data, sink) -> {
                     String nick = data.nick().orElse(null);
                     if (nick != null) {

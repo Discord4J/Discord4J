@@ -18,7 +18,6 @@ package discord4j.core.spec;
 
 import discord4j.core.object.entity.Message;
 import discord4j.discordjson.json.EmbedData;
-import discord4j.discordjson.json.ImmutableMessageEditRequest;
 import discord4j.discordjson.json.MessageEditRequest;
 import discord4j.discordjson.possible.Possible;
 import reactor.util.annotation.Nullable;
@@ -82,7 +81,7 @@ public class MessageEditSpec implements Spec<MessageEditRequest> {
 
     @Override
     public MessageEditRequest asRequest() {
-        return ImmutableMessageEditRequest.builder()
+        return MessageEditRequest.builder()
                 .content(content)
                 .embed(embed)
                 .flags(flags)

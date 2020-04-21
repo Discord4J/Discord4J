@@ -16,10 +16,9 @@
  */
 package discord4j.core.spec;
 
-import discord4j.discordjson.json.GuildEmojiModifyRequest;
-import discord4j.discordjson.json.ImmutableGuildEmojiModifyRequest;
-import discord4j.discordjson.possible.Possible;
 import discord4j.core.object.entity.GuildEmoji;
+import discord4j.discordjson.json.GuildEmojiModifyRequest;
+import discord4j.discordjson.possible.Possible;
 import discord4j.rest.util.Snowflake;
 import reactor.util.annotation.Nullable;
 
@@ -74,8 +73,7 @@ public class GuildEmojiEditSpec implements AuditSpec<GuildEmojiModifyRequest> {
 
     @Override
     public GuildEmojiModifyRequest asRequest() {
-        return ImmutableGuildEmojiModifyRequest
-                .builder()
+        return GuildEmojiModifyRequest.builder()
                 .name(name)
                 .roles(roles)
                 .build();
