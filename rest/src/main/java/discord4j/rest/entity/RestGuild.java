@@ -83,16 +83,23 @@ public class RestGuild {
 
     public Flux<RoleData> modifyChannelPositions(List<PositionModifyRequest> requests) {
         return restClient.getGuildService()
-                .modifyGuildChannelPositions(id, requests.toArray(new PositionModifyRequest[0]));
+            .modifyGuildChannelPositions(id, requests.toArray(new PositionModifyRequest[0]));
     }
 
     public Mono<MemberData> getMember(long userId) {
         return restClient.getGuildService().getGuildMember(id, userId);
     }
 
+    public Mono<MemberData> getSelfMember() {
+        return restClient.getSelf()
+            .map(UserData::id)
+            .map(Long::parseLong)
+            .flatMap(this::getMember);
+    }
+
     public Flux<MemberData> getMembers() {
         Function<Map<String, Object>, Flux<MemberData>> doRequest =
-                params -> restClient.getGuildService().getGuildMembers(id, params);
+            params -> restClient.getGuildService().getGuildMembers(id, params);
         return PaginationUtil.paginateAfter(doRequest, data -> Snowflake.asLong(data.user().id()), 0, 100);
     }
 
