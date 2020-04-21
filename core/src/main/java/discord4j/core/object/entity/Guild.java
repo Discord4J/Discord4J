@@ -557,6 +557,44 @@ public final class Guild implements Entity {
     }
 
     /**
+     * Gets the ID of the channel to which discord updates/announces messages are sent, if present.
+     *
+     * @return The ID of the channel to which discord updates/announces messages are sent, if present.
+     */
+    public Optional<Snowflake> getPublicUpdatesChannelId() {
+        return Optional.ofNullable(data.getPublicUpdatesChannelId()).map(Snowflake::of);
+    }
+
+    /**
+     * Requests to retrieve the channel to which discord updates/announces messages are sent, if present.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits the {@link TextChannel channel} to which discord updates/announces
+     * messages are sent, if present. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<TextChannel> getPublicUpdatesChannel() {
+        return Mono.justOrEmpty(getPublicUpdatesChannelId()).flatMap(getClient()::getChannelById).cast(TextChannel.class);
+    }
+
+    /**
+     * Gets the ID of the channel of rules set in the Guild, if present.
+     *
+     * @return The ID of the channel of rules set in the Guild, if present.
+     */
+    public Optional<Snowflake> getRulesChannelId() {
+        return Optional.ofNullable(data.getRulesChannelId()).map(Snowflake::of);
+    }
+
+    /**
+     * Requests to retrieve the channel to which of rules set in the Guild, if present.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits the {@link TextChannel channel} to which of rules set
+     * in the Guild, if present. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<TextChannel> getRulesChannel() {
+        return Mono.justOrEmpty(getRulesChannelId()).flatMap(getClient()::getChannelById).cast(TextChannel.class);
+    }
+
+    /**
      * Requests to retrieve the voice states of the guild.
      *
      * @return A {@link Flux} that continually emits the {@link VoiceState voice states} of the guild. If an error is

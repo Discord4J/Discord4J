@@ -29,6 +29,14 @@ public class GuildUpdate implements Dispatch {
     @JsonProperty("widget_enabled")
     @Nullable
     private Boolean widgetEnabled;
+    @JsonProperty("rules_channel_id")
+    @Nullable
+    @UnsignedJson
+    private Long rulesChannelId;
+    @JsonProperty("public_updates_channel_id")
+    @Nullable
+    @UnsignedJson
+    private Long publicUpdatesChannelId;
     @JsonProperty("widget_channel_id")
     @Nullable
     @UnsignedJson
@@ -119,6 +127,16 @@ public class GuildUpdate implements Dispatch {
 
     public int getVerificationLevel() {
         return verificationLevel;
+    }
+
+    @Nullable
+    public Long getRulesChannelId() {
+        return rulesChannelId;
+    }
+
+    @Nullable
+    public Long getPublicUpdatesChannelId() {
+        return publicUpdatesChannelId;
     }
 
     @Nullable
