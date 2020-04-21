@@ -73,6 +73,7 @@ public class DispatchHandlers implements DispatchEventMapper {
         addHandler(MessageDeleteBulk.class, MessageDispatchHandlers::messageDeleteBulk);
         addHandler(MessageReactionAdd.class, MessageDispatchHandlers::messageReactionAdd);
         addHandler(MessageReactionRemove.class, MessageDispatchHandlers::messageReactionRemove);
+        addHandler(MessageReactionRemoveEmoji.class, MessageDispatchHandlers::messageReactionRemoveEmoji);
         addHandler(MessageReactionRemoveAll.class, MessageDispatchHandlers::messageReactionRemoveAll);
         addHandler(MessageUpdate.class, MessageDispatchHandlers::messageUpdate);
         addHandler(PresenceUpdate.class, DispatchHandlers::presenceUpdate);
