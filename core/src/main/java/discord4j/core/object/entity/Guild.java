@@ -719,15 +719,6 @@ public final class Guild implements Entity {
     }
 
     /**
-     * Gets whether or not the bot is the owner of the guild.
-     *
-     * @return Whether or not the bot is the owner of the guild.
-     */
-    public boolean isOwner() {
-        return data.owner().toOptional().orElse(false);
-    }
-
-    /**
      * Gets whether this guild is embeddable (e.g. widget).
      *
      * @return Whether this guild is embeddable (e.g. widget).
