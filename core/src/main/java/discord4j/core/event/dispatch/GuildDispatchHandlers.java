@@ -152,6 +152,7 @@ class GuildDispatchHandlers {
             Disposable memberChunkTask = Mono.just(createData)
                     .filterWhen(context.getGateway().getGatewayResources().getMemberRequestFilter()::apply)
                     .flatMap(data -> {
+                        log.debug(format(ctx, "Requesting members for guild {}"), createData.id());
                         int shardId = context.getShardInfo().getIndex();
                         return context.getGateway().getGatewayClientGroup().unicast(
                                 ShardGatewayPayload.requestGuildMembers(
@@ -161,9 +162,7 @@ class GuildDispatchHandlers {
                                                 .limit(0)
                                                 .build(), shardId));
                     })
-                    .then()
-                    .subscribe(null, t -> log.warn(format(ctx, "Member request errored for {}"), createData.id(), t),
-                            () -> log.debug(format(ctx, "Member request sent for {}"), createData.id()));
+                    .subscribe(null, t -> log.warn(format(ctx, "Member request errored for {}"), createData.id(), t));
             sink.onCancel(memberChunkTask);
             sink.success();
         }));
