@@ -794,7 +794,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                                     case CONNECTED:
                                         log.info(format(ctx, "Shard connected"));
                                         return shardCoordinator.publishConnected(shard)
-                                                .doOnTerminate(() -> sink.success(shard));
+                                                .doFinally(__ -> sink.success(shard));
                                     case DISCONNECTED:
                                     case DISCONNECTED_RESUME:
                                         log.info(format(ctx, "Shard disconnected"));
@@ -820,7 +820,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                                     case RETRY_STARTED:
                                     case RETRY_FAILED:
                                         log.debug(format(ctx, "Invalidating stores for shard"));
-                                        return stateHolder.invalidateStores();
+                                        return invalidationStrategy.invalidate(shard, stateHolder);
                                 }
                                 return Mono.empty();
                             })
@@ -837,7 +837,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                                     reconnectOptions.getMaxBackoffInterval())
                             .flatMap(response -> gatewayClient.execute(
                                     RouteUtils.expandQuery(response.url(), getGatewayParameters())))
-                            .then(stateHolder.invalidateStores())
+                            .doFinally(__ -> sink.success())
                             .subscriberContext(buildContext(gateway, shard))
                             .subscribe(null,
                                     t -> log.error(format(ctx, "Gateway terminated with an error"), t),

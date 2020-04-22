@@ -40,6 +40,7 @@ import reactor.netty.ConnectionObserver;
 import reactor.retry.Retry;
 import reactor.util.Logger;
 import reactor.util.Loggers;
+import reactor.util.annotation.Nullable;
 import reactor.util.context.Context;
 
 import java.nio.charset.StandardCharsets;
@@ -333,7 +334,7 @@ public class DefaultGatewayClient implements GatewayClient {
             4014 // Disallowed intent(s)
     );
 
-    private boolean isRetryable(Throwable t) {
+    private boolean isRetryable(@Nullable Throwable t) {
         if (t instanceof CloseException) {
             CloseException closeException = (CloseException) t;
             return !nonRetryableStatusCodes.contains(closeException.getCode());
@@ -359,8 +360,15 @@ public class DefaultGatewayClient implements GatewayClient {
         return Context.empty();
     }
 
-    private Mono<CloseStatus> handleClose(DisconnectBehavior behavior, CloseStatus closeStatus) {
+    private Mono<CloseStatus> handleClose(DisconnectBehavior sourceBehavior, CloseStatus closeStatus) {
         return Mono.deferWithContext(ctx -> {
+            DisconnectBehavior behavior;
+            if (nonRetryableStatusCodes.contains(closeStatus.getCode())) {
+                // non-retryable close codes are non-transient errors therefore stopping is the only choice
+                behavior = DisconnectBehavior.stop(sourceBehavior.getCause());
+            } else {
+                behavior = sourceBehavior;
+            }
             log.info(format(ctx, "Handling close {} with behavior: {}"), closeStatus, behavior);
             heartbeat.stop();
             reconnectContext.clear();
