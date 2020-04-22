@@ -540,9 +540,9 @@ public final class Guild implements Entity {
     }
 
     /**
-     * Gets whether this guild widget is enabled.
+     * Gets whether or not the server widget is enabled.
      *
-     * @return {@code true} if the guild widget is enabled, {@code false} otherwise.
+     * @return Whether or not the server widget is enabled.
      */
     public boolean isWidgetEnabled() {
         return data.widgetEnabled().toOptional().orElse(false);
@@ -624,6 +624,72 @@ public final class Guild implements Entity {
     }
 
     /**
+     * Gets the id of the channel where "PUBLIC" guilds display rules and/or guidelines, if present.
+     *
+     * @return The id of the channel where "PUBLIC" guilds display rules and/or guidelines, if present.
+     */
+    public Optional<Snowflake> getRulesChannelId() {
+        return data.rulesChannelId().map(Snowflake::of);
+    }
+
+    /**
+     * Requests to retrieve the channel where "PUBLIC" guilds display rules and/or guidelines, if present.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits the {@link TextChannel channel} where "PUBLIC"
+     * guilds display rules and/or guidelines, if present. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<TextChannel> getRulesChannel() {
+        return Mono.justOrEmpty(getRulesChannelId()).flatMap(gateway::getChannelById).cast(TextChannel.class);
+    }
+
+    /**
+     * Requests to retrieve the channel where "PUBLIC" guilds display rules and/or guidelines, if present, using
+     * the given retrieval strategy.
+     *
+     * @param retrievalStrategy the strategy to use to get the rules channel
+     * @return A {@link Mono} where, upon successful completion, emits the {@link TextChannel channel} where "PUBLIC" guilds
+     * display rules and/or guidelines, if present. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<TextChannel> getRulesChannel(EntityRetrievalStrategy retrievalStrategy) {
+        return Mono.justOrEmpty(getRulesChannelId())
+                .flatMap(id -> gateway.withRetrievalStrategy(retrievalStrategy).getChannelById(id))
+                .cast(TextChannel.class);
+    }
+
+    /**
+     * Gets the id of the channel where admins and moderators of "PUBLIC" guilds receive notices from Discord, if present.
+     *
+     * @return The id of the channel where admins and moderators of "PUBLIC" guilds receive notices from Discord, if present.
+     */
+    public Optional<Snowflake> getPublicUpdatesChannelId() {
+        return data.publicUpdatesChannelId().map(Snowflake::of);
+    }
+
+    /**
+     * Requests to retrieve the channel where admins and moderators of "PUBLIC" guilds receive notices from Discord, if present.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits the {@link TextChannel channel} where admins and moderators of
+     * "PUBLIC" guilds receive notices from Discord, if present. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<TextChannel> getPublicUpdatesChannel() {
+        return Mono.justOrEmpty(getPublicUpdatesChannelId()).flatMap(gateway::getChannelById).cast(TextChannel.class);
+    }
+
+    /**
+     * Requests to retrieve the channel where admins and moderators of "PUBLIC" guilds receive notices from Discord, if present,
+     * using the given retrieval strategy.
+     *
+     * @param retrievalStrategy the strategy to use to get the rules channel
+     * @return A {@link Mono} where, upon successful completion, emits the {@link TextChannel channel} where admins and moderators
+     * of "PUBLIC" guilds receive notices from Discord, if present. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<TextChannel> getPublicUpdatesChannel(EntityRetrievalStrategy retrievalStrategy) {
+        return Mono.justOrEmpty(getPublicUpdatesChannelId())
+                .flatMap(id -> gateway.withRetrievalStrategy(retrievalStrategy).getChannelById(id))
+                .cast(TextChannel.class);
+    }
+
+    /**
      * Gets when this guild was joined at. If this {@link Guild} object was {@link EntityRetrievalStrategy retrieved}
      * using REST API, then calling this method will throw {@link DateTimeParseException}.
      *
@@ -650,6 +716,24 @@ public final class Guild implements Entity {
      */
     public boolean isUnavailable() {
         return data.unavailable().toOptional().orElse(false);
+    }
+
+    /**
+     * Gets whether or not the bot is the owner of the guild.
+     *
+     * @return Whether or not the bot is the owner of the guild.
+     */
+    public boolean isOwner() {
+        return data.owner().toOptional().orElse(false);
+    }
+
+    /**
+     * Gets whether this guild is embeddable (e.g. widget).
+     *
+     * @return Whether this guild is embeddable (e.g. widget).
+     */
+    public boolean isEmbedEnabled() {
+        return data.embedEnabled().toOptional().orElse(false);
     }
 
     /**
