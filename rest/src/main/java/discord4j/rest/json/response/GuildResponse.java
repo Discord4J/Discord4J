@@ -49,6 +49,8 @@ public class GuildResponse {
     @Nullable
     @UnsignedJson
     private Long systemChannelId;
+    @JsonProperty("system_channel_flags")
+    private int systemChannelFlags;
     @JsonProperty("widget_channel_id")
     @Nullable
     @UnsignedJson
@@ -138,6 +140,10 @@ public class GuildResponse {
     @Nullable
     public Long getSystemChannelId() {
         return systemChannelId;
+    }
+
+    public int getSystemChannelFlags() {
+        return systemChannelFlags;
     }
 
     @Nullable

@@ -53,6 +53,8 @@ public class GuildUpdate implements Dispatch {
     @Nullable
     @UnsignedJson
     private Long systemChannelId;
+    @JsonProperty("system_channel_flags")
+    private int systemChannelFlags;
     private String splash;
     private String banner;
     private RoleResponse[] roles;
@@ -142,6 +144,10 @@ public class GuildUpdate implements Dispatch {
     @Nullable
     public Long getSystemChannelId() {
         return systemChannelId;
+    }
+
+    public int getSystemChannelFlags() {
+        return systemChannelFlags;
     }
 
     public String getSplash() {

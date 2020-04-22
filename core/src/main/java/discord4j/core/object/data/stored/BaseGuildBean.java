@@ -16,6 +16,7 @@
  */
 package discord4j.core.object.data.stored;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import discord4j.common.json.GuildEmojiResponse;
 import discord4j.common.json.RoleResponse;
 import discord4j.gateway.json.dispatch.GuildCreate;
@@ -68,6 +69,7 @@ public class BaseGuildBean implements Serializable {
     private Long widgetChannelId;
     @Nullable
     private Long systemChannelId;
+    private int systemChannelFlags;
     @Nullable
     private String vanityUrlCode;
     @Nullable
@@ -110,6 +112,7 @@ public class BaseGuildBean implements Serializable {
         widgetEnabled = guildCreate.isWidgetEnabled();
         widgetChannelId = guildCreate.getWidgetChannelId();
         systemChannelId = guildCreate.getSystemChannelId();
+        systemChannelFlags = guildCreate.getSystemChannelFlags();
         publicUpdatesChannelId = guildCreate.getPublicUpdatesChannelId();
         rulesChannelId = guildCreate.getRulesChannelId();
         vanityUrlCode = guildCreate.getVanityUrlCode();
@@ -150,6 +153,7 @@ public class BaseGuildBean implements Serializable {
         widgetEnabled = guildUpdate.isWidgetEnabled();
         widgetChannelId = guildUpdate.getWidgetChannelId();
         systemChannelId = guildUpdate.getSystemChannelId();
+        systemChannelFlags = guildUpdate.getSystemChannelFlags();
         publicUpdatesChannelId = guildUpdate.getPublicUpdatesChannelId();
         rulesChannelId = guildUpdate.getRulesChannelId();
         vanityUrlCode = guildUpdate.getVanityUrlCode();
@@ -190,6 +194,7 @@ public class BaseGuildBean implements Serializable {
         widgetEnabled = response.isWidgetEnabled();
         widgetChannelId = response.getWidgetChannelId();
         systemChannelId = response.getSystemChannelId();
+        systemChannelFlags = response.getSystemChannelFlags();
         publicUpdatesChannelId = response.getPublicUpdatesChannelId();
         rulesChannelId = response.getRulesChannelId();
         vanityUrlCode = response.getVanityUrlCode();
@@ -225,6 +230,7 @@ public class BaseGuildBean implements Serializable {
         widgetEnabled = toCopy.isWidgetEnabled();
         widgetChannelId = toCopy.getWidgetChannelId();
         systemChannelId = toCopy.getSystemChannelId();
+        systemChannelFlags = toCopy.getSystemChannelFlags();
         publicUpdatesChannelId = toCopy.getPublicUpdatesChannelId();
         rulesChannelId = toCopy.getRulesChannelId();
         vanityUrlCode = toCopy.getVanityUrlCode();
@@ -444,6 +450,14 @@ public class BaseGuildBean implements Serializable {
 
     public void setSystemChannelId(@Nullable final Long systemChannelId) {
         this.systemChannelId = systemChannelId;
+    }
+
+    public int getSystemChannelFlags() {
+        return systemChannelFlags;
+    }
+
+    public void setSystemChannelFlags(int systemChannelFlags) {
+        this.systemChannelFlags = systemChannelFlags;
     }
 
     @Nullable

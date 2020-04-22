@@ -1152,6 +1152,15 @@ public final class Guild implements Entity {
                 .subscriberContext(ctx -> ctx.put("shard", serviceMediator.getClientConfig().getShardIndex()));
     }
 
+    /**
+     * Returns the flags of the System Channel set in Guild, describing its options.
+     *
+     * @return A {@code EnumSet} with the flags of the System Channel.
+     */
+    public EnumSet<Guild.SystemChannelFlag> getSystemChannelFlags() {
+        return Guild.SystemChannelFlag.of(data.getSystemChannelFlags());
+    }
+
     @Override
     public boolean equals(@Nullable final Object obj) {
         return EntityUtil.equals(this, obj);
@@ -1160,6 +1169,66 @@ public final class Guild implements Entity {
     @Override
     public int hashCode() {
         return EntityUtil.hashCode(this);
+    }
+
+    /** Describes the options for the System Channel in Guild. */
+    public enum SystemChannelFlag {
+
+        /** Suppress the announce of new Members in the Guild. */
+        SUPPRESS_JOIN_NOTIFICATIONS(0),
+
+        /** Suppress the announce of new Booster in the Guild. */
+        SUPPRESS_PREMIUM_SUBSCRIPTIONS(1);
+
+        /** The underlying value as represented by Discord. */
+        private final int value;
+
+        /** The flag value as represented by Discord. */
+        private final int flag;
+
+        /**
+         * Constructs a {@code Guild.SystemChannelFlag}.
+         */
+        SystemChannelFlag(final int value) {
+            this.value = value;
+            this.flag = 1 << value;
+        }
+
+        /**
+         * Gets the underlying value as represented by Discord.
+         *
+         * @return The underlying value as represented by Discord.
+         */
+        public int getValue() {
+            return value;
+        }
+
+        /**
+         * Gets the flag value as represented by Discord.
+         *
+         * @return The flag value as represented by Discord.
+         */
+        public int getFlag() {
+            return flag;
+        }
+
+        /**
+         * Gets the flags of System Channel in the Guild. It is guaranteed that invoking {@link #getValue()} from the returned enum will be
+         * equal ({@code ==}) to the supplied {@code value}.
+         *
+         * @param value The flags value as represented by Discord.
+         * @return The {@link EnumSet} of flags.
+         */
+        public static EnumSet<Guild.SystemChannelFlag> of(final int value) {
+            final EnumSet<Guild.SystemChannelFlag> guildSystemChannelFlags = EnumSet.noneOf(Guild.SystemChannelFlag.class);
+            for (Guild.SystemChannelFlag flag : Guild.SystemChannelFlag.values()) {
+                long flagValue = flag.getFlag();
+                if ((flagValue & value) == flagValue) {
+                    guildSystemChannelFlags.add(flag);
+                }
+            }
+            return guildSystemChannelFlags;
+        }
     }
 
     /** Automatically scan and delete messages sent in the server that contain explicit content. */
