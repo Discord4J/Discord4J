@@ -18,11 +18,16 @@
 package discord4j.core;
 
 import discord4j.core.support.BotSupport;
+import discord4j.store.redis.RedisStoreService;
 
 public class ExampleLogin {
 
     public static void main(String[] args) {
-        GatewayDiscordClient client = DiscordClient.create(System.getenv("token")).login().block();
+        GatewayDiscordClient client = DiscordClient.create(System.getenv("token"))
+                .gateway()
+                .setStoreService(RedisStoreService.builder().build())
+                //.setInitialStatus(s -> Presence.invisible())
+                .login().block();
         BotSupport.create(client).eventHandlers().block();
     }
 }

@@ -16,18 +16,19 @@
  */
 package discord4j.core.object;
 
-import discord4j.discordjson.json.VoiceStateData;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.VoiceChannel;
 import discord4j.core.retriever.EntityRetrievalStrategy;
+import discord4j.discordjson.json.VoiceStateData;
 import discord4j.rest.util.Snowflake;
 import reactor.core.publisher.Mono;
 
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Function;
 
 /**
  * A Discord voice state.
@@ -223,7 +224,7 @@ public final class VoiceState implements DiscordObject {
      * @return {@code true} if this user is streaming using "Go Live", {@code false} otherwise.
      */
     public boolean isSelfStreaming() {
-        return data.selfStream().toOptional().orElse(false);
+        return data.selfStream().toOptional().map(Function.<Boolean>identity()).orElse(false);
     }
 
     /**

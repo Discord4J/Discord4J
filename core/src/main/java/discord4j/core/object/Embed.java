@@ -16,15 +16,18 @@
  */
 package discord4j.core.object;
 
-import discord4j.discordjson.json.*;
 import discord4j.core.GatewayDiscordClient;
+import discord4j.discordjson.json.*;
 import discord4j.discordjson.possible.Possible;
 
-import java.awt.*;
+import java.awt.Color;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
+import java.util.Collections;
 import java.util.List;
-import java.util.*;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -74,7 +77,7 @@ public final class Embed implements DiscordObject {
      * @return The title of the embed, if present.
      */
     public Optional<String> getTitle() {
-        return data.title().toOptional();
+        return data.title().toOptional().map(Function.identity());
     }
 
     /**
@@ -93,7 +96,7 @@ public final class Embed implements DiscordObject {
      * @return The description of the embed, if present.
      */
     public Optional<String> getDescription() {
-        return data.description().toOptional();
+        return data.description().toOptional().map(Function.identity());
     }
 
     /**
@@ -102,7 +105,7 @@ public final class Embed implements DiscordObject {
      * @return The URL of the embed, if present.
      */
     public Optional<String> getUrl() {
-        return data.url().toOptional();
+        return data.url().toOptional().map(Function.identity());
     }
 
     /**
@@ -185,8 +188,8 @@ public final class Embed implements DiscordObject {
      */
     public List<Field> getFields() {
         return data.fields().toOptional()
-            .map(fields -> fields.stream().map(Field::new).collect(Collectors.toList()))
-            .orElse(Collections.emptyList());
+                .map(fields -> fields.stream().map(Field::new).collect(Collectors.toList()))
+                .orElse(Collections.emptyList());
     }
 
     /** Represents the various types of embeds. */

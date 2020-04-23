@@ -28,6 +28,7 @@ import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.Optional;
 import java.util.OptionalLong;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class Activity {
@@ -160,7 +161,7 @@ public class Activity {
      */
     public Optional<String> getPartyId() {
         return data.party().toOptional()
-                .flatMap(party -> party.id().toOptional());
+                .flatMap(party -> party.id().toOptional().map(Function.identity()));
     }
 
     /**
@@ -196,7 +197,7 @@ public class Activity {
      */
     public Optional<String> getLargeImageId() {
         return data.assets().toOptional()
-                .flatMap(assets -> assets.largeImage().toOptional());
+                .flatMap(assets -> assets.largeImage().toOptional().map(Function.identity()));
     }
 
     /**
@@ -206,7 +207,7 @@ public class Activity {
      */
     public Optional<String> getLargeText() {
         return data.assets().toOptional()
-                .flatMap(assets -> assets.largeText().toOptional());
+                .flatMap(assets -> assets.largeText().toOptional().map(Function.identity()));
     }
 
     /**
@@ -216,7 +217,7 @@ public class Activity {
      */
     public Optional<String> getSmallImageId() {
         return data.assets().toOptional()
-                .flatMap(assets -> assets.smallImage().toOptional());
+                .flatMap(assets -> assets.smallImage().toOptional().map(Function.identity()));
     }
 
     /**
@@ -226,7 +227,7 @@ public class Activity {
      */
     public Optional<String> getSmallText() {
         return data.assets().toOptional()
-                .flatMap(assets -> assets.smallText().toOptional());
+                .flatMap(assets -> assets.smallText().toOptional().map(Function.identity()));
     }
 
     /**
@@ -236,7 +237,7 @@ public class Activity {
      */
     public Optional<String> getJoinSecret() {
         return data.secrets().toOptional()
-                .flatMap(secrets -> secrets.join().toOptional());
+                .flatMap(secrets -> secrets.join().toOptional().map(Function.identity()));
     }
 
     /**
@@ -246,7 +247,7 @@ public class Activity {
      */
     public Optional<String> getSpectateSecret() {
         return data.secrets().toOptional()
-                .flatMap(secrets -> secrets.spectate().toOptional());
+                .flatMap(secrets -> secrets.spectate().toOptional().map(Function.identity()));
     }
 
     /**
@@ -256,7 +257,7 @@ public class Activity {
      */
     public Optional<String> getMatchSecret() {
         return data.secrets().toOptional()
-                .flatMap(secrets -> secrets.match().toOptional());
+                .flatMap(secrets -> secrets.match().toOptional().map(Function.identity()));
     }
 
     /**
@@ -270,7 +271,8 @@ public class Activity {
                     // TODO FIXME
                     String sid = emoji.id().toOptional().orElse(null);
                     Long id = sid == null ? null : Snowflake.asLong(sid);
-                    return ReactionEmoji.of(id, emoji.name(), emoji.animated().toOptional().orElse(false));
+                    return ReactionEmoji.of(id, emoji.name(),
+                            emoji.animated().toOptional().map(Function.<Boolean>identity()).orElse(false));
                 });
     }
 
@@ -280,7 +282,7 @@ public class Activity {
      * @return Whether or not the activity is an instanced game session.
      */
     public boolean isInstance() {
-        return data.instance().toOptional().orElse(false);
+        return data.instance().toOptional().map(Function.<Boolean>identity()).orElse(false);
     }
 
     public EnumSet<Flag> getFlags() {

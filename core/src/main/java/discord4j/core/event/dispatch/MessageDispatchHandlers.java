@@ -36,6 +36,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 class MessageDispatchHandlers {
@@ -46,9 +47,7 @@ class MessageDispatchHandlers {
         long messageId = Snowflake.asLong(message.id());
         long channelId = Snowflake.asLong(message.channelId());
 
-        Possible<String> maybeGuildId = context.getDispatch().message().guildId();
-
-        Optional<Member> maybeMember = maybeGuildId.toOptional()
+        Optional<Member> maybeMember = context.getDispatch().message().guildId().toOptional()
                 .map(Long::parseUnsignedLong)
                 .flatMap(guildId -> message.member().toOptional()
                         .map(memberData -> new Member(gateway, MemberData.builder()
@@ -79,7 +78,7 @@ class MessageDispatchHandlers {
         return saveMessage
                 .and(editLastMessageId)
                 .thenReturn(new MessageCreateEvent(gateway, context.getShardInfo(), new Message(gateway, message),
-                        maybeGuildId.toOptional()
+                        context.getDispatch().message().guildId().toOptional()
                                 .map(Long::parseUnsignedLong)
                                 .orElse(null),
                         maybeMember.orElse(null)));
@@ -194,6 +193,7 @@ class MessageDispatchHandlers {
                 .orElse(null);
         boolean emojiAnimated = context.getDispatch().emoji().animated()
                 .toOptional()
+                .map(Function.<Boolean>identity())
                 .orElse(false);
         ReactionEmoji emoji = ReactionEmoji.of(emojiId, emojiName, emojiAnimated);
         @SuppressWarnings("ConstantConditions")
@@ -262,6 +262,7 @@ class MessageDispatchHandlers {
                 .orElse(null);
         boolean emojiAnimated = context.getDispatch().emoji().animated()
                 .toOptional()
+                .map(Function.<Boolean>identity())
                 .orElse(false);
         ReactionEmoji emoji = ReactionEmoji.of(emojiId, emojiName, emojiAnimated);
         return removeFromMessage.thenReturn(new ReactionRemoveEvent(gateway, context.getShardInfo(), userId,
@@ -368,11 +369,15 @@ class MessageDispatchHandlers {
 
                     MessageData newMessageData = MessageData.builder()
                             .from(oldMessageData)
-                            .content(messageData.content().toOptional().orElse(oldMessageData.content()))
+                            .content(messageData.content().toOptional()
+                                    .map(Function.<String>identity())
+                                    .orElse(oldMessageData.content()))
                             .embeds(messageData.embeds())
                             .mentions(messageData.mentions())
                             .mentionRoles(messageData.mentionRoles())
-                            .mentionEveryone(messageData.mentionEveryone().toOptional().orElse(oldMessageData.mentionEveryone()))
+                            .mentionEveryone(messageData.mentionEveryone().toOptional()
+                                    .map(Function.<Boolean>identity())
+                                    .orElse(oldMessageData.mentionEveryone()))
                             .editedTimestamp(messageData.editedTimestamp())
                             .build();
 

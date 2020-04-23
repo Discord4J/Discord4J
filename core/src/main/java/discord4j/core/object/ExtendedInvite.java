@@ -16,15 +16,17 @@
  */
 package discord4j.core.object;
 
-import discord4j.discordjson.json.InviteData;
 import discord4j.core.GatewayDiscordClient;
+import discord4j.discordjson.json.InviteData;
 
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
+import java.util.function.Function;
 
 // TODO FIXME: invites are generally just kind of a mess rn
+
 /**
  * Metadata for a Discord invite.
  *
@@ -49,7 +51,7 @@ public final class ExtendedInvite extends Invite {
      */
     public int getUses() {
         return getData().uses().toOptional()
-            .orElseThrow(IllegalStateException::new);
+                .orElseThrow(IllegalStateException::new);
     }
 
     /**
@@ -59,7 +61,7 @@ public final class ExtendedInvite extends Invite {
      */
     public int getMaxUses() {
         return getData().maxUses().toOptional()
-            .orElseThrow(IllegalStateException::new);
+                .orElseThrow(IllegalStateException::new);
     }
 
     /**
@@ -68,7 +70,7 @@ public final class ExtendedInvite extends Invite {
      * @return The instant this invite expires, if possible.
      */
     public Optional<Instant> getExpiration() {
-        final boolean temporary = getData().temporary().toOptional().orElse(false);
+        final boolean temporary = getData().temporary().toOptional().map(Function.<Boolean>identity()).orElse(false);
         final int maxAge = getData().maxAge().toOptional().orElseThrow(IllegalStateException::new);
 
         return temporary ? Optional.of(getCreation().plus(maxAge, ChronoUnit.SECONDS)) : Optional.empty();

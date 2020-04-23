@@ -23,7 +23,10 @@ import discord4j.core.object.VoiceState;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.presence.Presence;
-import discord4j.discordjson.json.*;
+import discord4j.discordjson.json.PartialUserData;
+import discord4j.discordjson.json.PresenceData;
+import discord4j.discordjson.json.UserData;
+import discord4j.discordjson.json.VoiceStateData;
 import discord4j.discordjson.json.gateway.*;
 import discord4j.discordjson.possible.Possible;
 import discord4j.gateway.retry.GatewayStateChange;
@@ -40,6 +43,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
@@ -138,8 +142,12 @@ public class DispatchHandlers implements DispatchEventMapper {
                 .map(oldUserData -> {
                     UserData newUserData = UserData.builder()
                             .from(oldUserData)
-                            .username(userData.username().toOptional().orElse(oldUserData.username()))
-                            .discriminator(userData.discriminator().toOptional().orElse(oldUserData.discriminator()))
+                            .username(userData.username().toOptional()
+                                    .map(Function.<String>identity())
+                                    .orElse(oldUserData.username()))
+                            .discriminator(userData.discriminator().toOptional()
+                                    .map(Function.<String>identity())
+                                    .orElse(oldUserData.discriminator()))
                             .avatar(or(Possible.flatOpt(userData.avatar()), oldUserData::avatar))
                             .build();
 

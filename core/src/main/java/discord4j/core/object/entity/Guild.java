@@ -545,7 +545,7 @@ public final class Guild implements Entity {
      * @return {@code true} if the guild widget is enabled, {@code false} otherwise.
      */
     public boolean isWidgetEnabled() {
-        return data.widgetEnabled().toOptional().orElse(false);
+        return data.widgetEnabled().toOptional().map(Function.<Boolean>identity()).orElse(false);
     }
 
     /**
@@ -649,7 +649,7 @@ public final class Guild implements Entity {
      * @return If present, {@code true} if the guild is unavailable, {@code false} otherwise.
      */
     public boolean isUnavailable() {
-        return data.unavailable().toOptional().orElse(false);
+        return data.unavailable().toOptional().map(Function.<Boolean>identity()).orElse(false);
     }
 
     /**

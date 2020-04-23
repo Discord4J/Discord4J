@@ -29,6 +29,7 @@ import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
 
 import java.util.Optional;
+import java.util.function.Function;
 
 /**
  * Dispatched when a user's presence changes.
@@ -92,7 +93,7 @@ public class PresenceUpdateEvent extends Event {
      * @return The {@link User}'s new username, if present.
      */
     public Optional<String> getNewUsername() {
-        return user.username().toOptional();
+        return user.username().toOptional().map(Function.identity());
     }
 
     /**
@@ -102,7 +103,7 @@ public class PresenceUpdateEvent extends Event {
      * @return The {@link User}'s new discriminator, if present.
      */
     public Optional<String> getNewDiscriminator() {
-        return user.discriminator().toOptional();
+        return user.discriminator().toOptional().map(Function.identity());
     }
 
     /**

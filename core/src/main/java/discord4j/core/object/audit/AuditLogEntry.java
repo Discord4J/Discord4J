@@ -18,11 +18,12 @@ package discord4j.core.object.audit;
 
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.Entity;
-import discord4j.rest.util.Snowflake;
 import discord4j.core.util.AuditLogUtil;
 import discord4j.discordjson.json.AuditLogEntryData;
+import discord4j.rest.util.Snowflake;
 
 import java.util.Optional;
+import java.util.function.Function;
 
 public class AuditLogEntry implements Entity {
 
@@ -65,7 +66,7 @@ public class AuditLogEntry implements Entity {
      * @return The reason for the change, if present.
      */
     public Optional<String> getReason() {
-        return data.reason().toOptional();
+        return data.reason().toOptional().map(Function.identity());
     }
 
     /**
