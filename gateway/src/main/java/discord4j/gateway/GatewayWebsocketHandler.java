@@ -20,6 +20,7 @@ import discord4j.common.close.CloseStatus;
 import discord4j.common.close.DisconnectBehavior;
 import discord4j.gateway.retry.GatewayException;
 import discord4j.gateway.retry.PartialDisconnectException;
+import discord4j.gateway.retry.ReconnectException;
 import io.netty.buffer.ByteBuf;
 import io.netty.handler.codec.http.websocketx.CloseWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
@@ -150,7 +151,9 @@ public class GatewayWebsocketHandler {
      * @param error the cause for this session termination
      */
     public void error(Throwable error) {
-        log.info(format(context, "Triggering error sequence: {}"), error.toString());
+        if (!(error instanceof ReconnectException)) {
+            log.info(format(context, "Triggering error sequence: {}"), error.toString());
+        }
         close(DisconnectBehavior.retryAbruptly(error));
     }
 }

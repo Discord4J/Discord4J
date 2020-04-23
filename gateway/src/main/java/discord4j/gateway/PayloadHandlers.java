@@ -18,8 +18,9 @@ package discord4j.gateway;
 
 import discord4j.discordjson.json.gateway.*;
 import discord4j.discordjson.possible.Possible;
-import discord4j.gateway.json.*;
+import discord4j.gateway.json.GatewayPayload;
 import discord4j.gateway.retry.GatewayException;
+import discord4j.gateway.retry.ReconnectException;
 import reactor.util.Logger;
 import reactor.util.Loggers;
 
@@ -81,7 +82,7 @@ public abstract class PayloadHandlers {
     }
 
     private static void handleReconnect(PayloadContext<?> context) {
-        context.getHandler().error(new RuntimeException("Reconnecting due to reconnect packet received"));
+        context.getHandler().error(new ReconnectException("Reconnecting due to reconnect packet received"));
     }
 
     private static void handleInvalidSession(PayloadContext<InvalidSession> context) {
@@ -107,7 +108,8 @@ public abstract class PayloadHandlers {
             client.sender().next(GatewayPayload.resume(
                     ImmutableResume.of(client.token(), client.getSessionId(), client.sequence().get())));
         } else {
-            IdentifyProperties props = ImmutableIdentifyProperties.of(System.getProperty("os.name"), "Discord4J", "Discord4J");
+            IdentifyProperties props = ImmutableIdentifyProperties.of(System.getProperty("os.name"), "Discord4J",
+                    "Discord4J");
             IdentifyOptions options = client.identifyOptions();
             int[] shard = new int[]{options.getShardIndex(), options.getShardCount()};
             Identify identify = Identify.builder()
@@ -118,7 +120,8 @@ public abstract class PayloadHandlers {
                     .largeThreshold(250)
                     .shard(shard)
                     .presence(Optional.ofNullable(options.getInitialStatus()).map(Possible::of).orElse(Possible.absent()))
-                    .guildSubscriptions(options.getIntents().isAbsent() ? Possible.of(options.isGuildSubscriptions()) : Possible.absent())
+                    .guildSubscriptions(options.getIntents().isAbsent() ?
+                            Possible.of(options.isGuildSubscriptions()) : Possible.absent())
                     .build();
             log.debug(format(context.getContext(), "Identifying to Gateway"), client.sequence().get());
             client.sender().next(GatewayPayload.identify(identify));
