@@ -66,6 +66,9 @@ public class AllowedMentions {
         if (!roleIds.isAbsent()) {
             builder.roles(mapSetToList(roleIds.get(), Snowflake::asString));
         }
+        if (parse.isAbsent() && userIds.isAbsent() && roleIds.isAbsent()) {
+            builder.parse(Collections.emptyList()); // this empty list is required to work
+        }
         return builder.build();
     }
 
