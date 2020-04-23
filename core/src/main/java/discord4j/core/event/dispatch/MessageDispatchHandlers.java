@@ -313,6 +313,7 @@ class MessageDispatchHandlers {
                 .orElse(null);
         boolean emojiAnimated = context.getDispatch().emoji().animated()
                 .toOptional()
+                .map(Function.<Boolean>identity())
                 .orElse(false);
         ReactionEmoji emoji = ReactionEmoji.of(emojiId, emojiName, emojiAnimated);
         return removeFromMessage.thenReturn(new ReactionRemoveEmojiEvent(gateway, context.getShardInfo(), channelId,
