@@ -268,6 +268,56 @@ class MessageDispatchHandlers {
                 channelId, messageId, guildId, emoji));
     }
 
+    static Mono<ReactionRemoveEmojiEvent> messageReactionRemoveEmoji(DispatchContext<MessageReactionRemoveEmoji> context) {
+        GatewayDiscordClient gateway = context.getGateway();
+        long channelId = Snowflake.asLong(context.getDispatch().channelId());
+        long messageId = Snowflake.asLong(context.getDispatch().messageId());
+        Long guildId = context.getDispatch().guildId()
+                .toOptional()
+                .map(Long::parseUnsignedLong)
+                .orElse(null);
+
+        Mono<Void> removeFromMessage = context.getStateHolder().getMessageStore()
+                .find(messageId)
+                .filter(message -> !message.reactions().isAbsent())
+                .map(oldMessage -> {
+                    ImmutableMessageData.Builder newMessageBuilder = MessageData.builder().from(oldMessage);
+
+                    List<ReactionData> reactions = oldMessage.reactions().get();
+                    int i;
+                    // filter covers getReactions() null case
+                    for (i = 0; i < reactions.size(); i++) {
+                        ReactionData r = reactions.get(i);
+                        // (non-null id && matching id) OR (null id && matching name)
+                        boolean emojiHasId = context.getDispatch().emoji().id().isPresent();
+                        if ((emojiHasId && context.getDispatch().emoji().id().equals(r.emoji().id()))
+                                || (!emojiHasId && context.getDispatch().emoji().name().equals(r.emoji().name()))) {
+                            break;
+                        }
+                    }
+
+                    if (i < reactions.size()) {
+                        ReactionData existing = reactions.get(i);
+                        newMessageBuilder.reactions(ListUtil.remove(reactions,
+                                reaction -> reaction.equals(existing)));
+                    }
+                    return newMessageBuilder.build();
+                })
+                .flatMap(message -> context.getStateHolder().getMessageStore().save(messageId, message));
+
+        Long emojiId = context.getDispatch().emoji().id()
+                .map(Long::parseUnsignedLong)
+                .orElse(null);
+        String emojiName = context.getDispatch().emoji().name()
+                .orElse(null);
+        boolean emojiAnimated = context.getDispatch().emoji().animated()
+                .toOptional()
+                .orElse(false);
+        ReactionEmoji emoji = ReactionEmoji.of(emojiId, emojiName, emojiAnimated);
+        return removeFromMessage.thenReturn(new ReactionRemoveEmojiEvent(gateway, context.getShardInfo(), channelId,
+                messageId, guildId, emoji));
+    }
+
     static Mono<ReactionRemoveAllEvent> messageReactionRemoveAll(DispatchContext<MessageReactionRemoveAll> context) {
         GatewayDiscordClient gateway = context.getGateway();
         long channelId = Snowflake.asLong(context.getDispatch().channelId());
