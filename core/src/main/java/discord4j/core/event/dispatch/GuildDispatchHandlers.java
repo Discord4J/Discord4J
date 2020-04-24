@@ -370,8 +370,8 @@ class GuildDispatchHandlers {
         GatewayDiscordClient gateway = context.getGateway();
         long guildId = Snowflake.asLong(context.getDispatch().guildId());
         List<MemberData> members = context.getDispatch().members();
-        int chunkIndex = context.getDispatch().getChunkIndex();
-        int chunkCount = context.getDispatch().getChunkCount();
+        int chunkIndex = context.getDispatch().chunkIndex();
+        int chunkCount = context.getDispatch().chunkCount();
         List<Snowflake> notFound = context.getDispatch().notFound()
                 .toOptional()
                 .orElse(Collections.emptyList())
