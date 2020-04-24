@@ -33,6 +33,7 @@ import discord4j.gateway.payload.PayloadWriter;
 import discord4j.gateway.retry.GatewayException;
 import discord4j.gateway.retry.GatewayStateChange;
 import discord4j.gateway.retry.PartialDisconnectException;
+import discord4j.gateway.retry.ReconnectException;
 import io.netty.buffer.ByteBuf;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.*;
@@ -259,7 +260,13 @@ public class DefaultGatewayClient implements GatewayClient {
                             .then();
 
                     return Mono.zip(httpFuture, readyHandler, receiverFuture, senderFuture, heartbeatHandler)
-                            .doOnError(t -> log.error(format(context, "{}"), t.toString()))
+                            .doOnError(t -> {
+                                if(t instanceof ReconnectException) {
+                                    log.info(format(context, "{}"), t.getMessage());
+                                } else {
+                                    log.error(format(context, "{}"), t.toString());
+                                }
+                            })
                             .doOnTerminate(heartbeat::stop)
                             .doOnCancel(() -> sessionHandler.close())
                             .then();
