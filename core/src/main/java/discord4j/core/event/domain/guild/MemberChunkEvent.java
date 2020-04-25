@@ -131,6 +131,7 @@ public class MemberChunkEvent extends GuildEvent {
                 ", chunkIndex=" + chunkIndex +
                 ", chunkCount=" + chunkCount +
                 ", notFound=" + notFound +
+                ", nonce='" + nonce + '\'' +
                 '}';
     }
 }
