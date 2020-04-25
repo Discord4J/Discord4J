@@ -705,6 +705,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
      */
     @Deprecated
     public Mono<GatewayDiscordClient> connect(Function<O, GatewayClient> clientFactory) {
+        GatewayBootstrap<O> b = new GatewayBootstrap<>(this, this.optionsModifier);
         Map<String, Object> hints = new LinkedHashMap<>();
         hints.put("messageClass", MessageData.class);
         StateHolder stateHolder = new StateHolder(initStoreService(), new StoreContext(hints));
@@ -713,17 +714,17 @@ public class GatewayBootstrap<O extends GatewayOptions> {
         GatewayReactorResources gatewayReactorResources = initGatewayReactorResources();
         ShardCoordinator shardCoordinator = initShardCoordinator(gatewayReactorResources);
         GatewayResources resources = new GatewayResources(stateView, eventDispatcher, shardCoordinator,
-                memberRequestFilter, gatewayReactorResources, initVoiceReactorResources(), voiceReconnectOptions);
+                b.memberRequestFilter, gatewayReactorResources, initVoiceReactorResources(), b.voiceReconnectOptions);
         MonoProcessor<Void> closeProcessor = MonoProcessor.create();
-        GatewayClientGroupManager clientGroup = shardingStrategy.getGroupManager();
+        GatewayClientGroupManager clientGroup = b.shardingStrategy.getGroupManager();
         EntityRetrievalStrategy entityRetrievalStrategy = initEntityRetrievalStrategy();
-        GatewayDiscordClient gateway = new GatewayDiscordClient(client, resources, closeProcessor,
-                clientGroup, voiceConnectionFactory, entityRetrievalStrategy);
+        GatewayDiscordClient gateway = new GatewayDiscordClient(b.client, resources, closeProcessor,
+                clientGroup, b.voiceConnectionFactory, entityRetrievalStrategy);
         DispatchEventMapper dispatchMapper = initDispatchEventMapper();
 
-        Flux<ShardInfo> connections = shardingStrategy.getShards(client)
-                .groupBy(shard -> shard.getIndex() % shardingStrategy.getShardingFactor())
-                .flatMap(group -> group.concatMap(shard -> acquireConnection(shard, clientFactory, gateway,
+        Flux<ShardInfo> connections = b.shardingStrategy.getShards(b.client)
+                .groupBy(shard -> shard.getIndex() % b.shardingStrategy.getShardingFactor())
+                .flatMap(group -> group.concatMap(shard -> acquireConnection(b, shard, clientFactory, gateway,
                         shardCoordinator, stateHolder, eventDispatcher, clientGroup, closeProcessor, dispatchMapper)));
 
         if (awaitConnections) {
@@ -737,7 +738,8 @@ public class GatewayBootstrap<O extends GatewayOptions> {
         }
     }
 
-    private Mono<ShardInfo> acquireConnection(ShardInfo shard,
+    private Mono<ShardInfo> acquireConnection(GatewayBootstrap<O> b,
+                                              ShardInfo shard,
                                               Function<O, GatewayClient> clientFactory,
                                               GatewayDiscordClient gateway,
                                               ShardCoordinator shardCoordinator,
@@ -746,17 +748,17 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                                               GatewayClientGroupManager clientGroup,
                                               MonoProcessor<Void> closeProcessor,
                                               DispatchEventMapper dispatchMapper) {
-        return Mono.subscriberContext()
-                .flatMap(ctx -> Mono.<ShardInfo>create(sink -> {
-                    StatusUpdate initial = Optional.ofNullable(initialPresence.apply(shard)).orElse(null);
-                    IdentifyOptions identify = new IdentifyOptions(shard, initial, intents, guildSubscriptions);
-                    SessionInfo resume = resumeOptions.apply(shard);
+        return Mono.deferWithContext(ctx ->
+                Mono.<ShardInfo>create(sink -> {
+                    StatusUpdate initial = Optional.ofNullable(b.initialPresence.apply(shard)).orElse(null);
+                    IdentifyOptions identify = new IdentifyOptions(shard, initial, b.intents, b.guildSubscriptions);
+                    SessionInfo resume = b.resumeOptions.apply(shard);
                     if (resume != null) {
                         identify.setResumeSessionId(resume.getId());
                         identify.setResumeSequence(resume.getSequence());
                     }
                     PayloadTransformer limiter = shardCoordinator.getIdentifyLimiter(shard,
-                            shardingStrategy.getShardingFactor());
+                            b.shardingStrategy.getShardingFactor());
                     Disposable.Composite forCleanup = Disposables.composite();
                     GatewayClient gatewayClient = clientFactory.apply(buildOptions(gateway, identify, limiter));
                     clientGroup.add(shard.getIndex(), gatewayClient);
@@ -808,7 +810,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                                     case DISCONNECTED:
                                         log.info(format(ctx, "Shard disconnected"));
                                         return shardCoordinator.publishDisconnected(shard, session)
-                                                .then(invalidationStrategy.invalidate(shard, stateHolder))
+                                                .then(b.invalidationStrategy.invalidate(shard, stateHolder))
                                                 .then(Mono.fromRunnable(() -> clientGroup.remove(shard.getIndex())))
                                                 .then(shardCoordinator.getConnectedCount()
                                                         .filter(count -> count == 0 && !closeProcessor.isDisposed())
@@ -824,7 +826,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                                     case RETRY_STARTED:
                                     case RETRY_FAILED:
                                         log.debug(format(ctx, "Invalidating stores for shard"));
-                                        return invalidationStrategy.invalidate(shard, stateHolder);
+                                        return b.invalidationStrategy.invalidate(shard, stateHolder);
                                 }
                                 return Mono.empty();
                             })
@@ -833,12 +835,12 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                                     t -> log.error(format(ctx, "Lifecycle listener terminated with an error"), t),
                                     () -> log.debug(format(ctx, "Lifecycle listener completed"))));
 
-                    forCleanup.add(this.client.getGatewayService()
+                    forCleanup.add(b.client.getGatewayService()
                             .getGateway()
                             .doOnSubscribe(s -> log.debug(format(ctx, "Acquiring gateway endpoint")))
-                            .retryBackoff(reconnectOptions.getMaxRetries(),
-                                    reconnectOptions.getFirstBackoff(),
-                                    reconnectOptions.getMaxBackoffInterval())
+                            .retryBackoff(b.reconnectOptions.getMaxRetries(),
+                                    b.reconnectOptions.getFirstBackoff(),
+                                    b.reconnectOptions.getMaxBackoffInterval())
                             .flatMap(response -> gatewayClient.execute(
                                     RouteUtils.expandQuery(response.url(), getGatewayParameters())))
                             .doFinally(__ -> {
