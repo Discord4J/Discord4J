@@ -22,8 +22,10 @@ import discord4j.core.object.entity.Member;
 import discord4j.rest.util.Snowflake;
 import discord4j.gateway.ShardInfo;
 import reactor.core.publisher.Mono;
+import reactor.util.annotation.Nullable;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -42,15 +44,18 @@ public class MemberChunkEvent extends GuildEvent {
     private final int chunkIndex;
     private final int chunkCount;
     private final List<Snowflake> notFound;
+    @Nullable
+    private final String nonce;
 
     public MemberChunkEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, long guildId, Set<Member> members,
-                            int chunkIndex, int chunkCount, List<Snowflake> notFound) {
+                            int chunkIndex, int chunkCount, List<Snowflake> notFound, @Nullable String nonce) {
         super(gateway, shardInfo);
         this.guildId = guildId;
         this.members = members;
         this.chunkIndex = chunkIndex;
         this.chunkCount = chunkCount;
         this.notFound = notFound;
+        this.nonce = nonce;
     }
 
     /**
@@ -107,6 +112,15 @@ public class MemberChunkEvent extends GuildEvent {
      */
     public List<Snowflake> getNotFound() {
         return notFound;
+    }
+
+    /**
+     * Gets the nonce used in the Guild Members Request, if present.
+     *
+     * @return The nonce used in the Guild Members Request, if present.
+     */
+    public Optional<String> getNonce() {
+        return Optional.ofNullable(nonce);
     }
 
     @Override
