@@ -370,6 +370,15 @@ class GuildDispatchHandlers {
         GatewayDiscordClient gateway = context.getGateway();
         long guildId = Snowflake.asLong(context.getDispatch().guildId());
         List<MemberData> members = context.getDispatch().members();
+        int chunkIndex = context.getDispatch().chunkIndex();
+        int chunkCount = context.getDispatch().chunkCount();
+        List<Snowflake> notFound = context.getDispatch().notFound()
+                .toOptional()
+                .orElse(Collections.emptyList())
+                .stream()
+                .map(Snowflake::of)
+                .collect(Collectors.toList());
+        String nonce = context.getDispatch().nonce().toOptional().orElse(null);
 
         Flux<Tuple2<LongLongTuple2, MemberData>> memberPairs = Flux.fromIterable(members)
                 .map(data -> Tuples.of(LongLongTuple2.of(guildId, Snowflake.asLong(data.user().id())),
@@ -409,7 +418,8 @@ class GuildDispatchHandlers {
                 .thenReturn(new MemberChunkEvent(gateway, context.getShardInfo(), guildId,
                         members.stream()
                                 .map(member -> new Member(gateway, member, guildId))
-                                .collect(Collectors.toSet())));
+                                .collect(Collectors.toSet()),
+                        chunkIndex, chunkCount, notFound, nonce));
     }
 
     static Mono<MemberUpdateEvent> guildMemberUpdate(DispatchContext<GuildMemberUpdate> context) {

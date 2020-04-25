@@ -22,7 +22,10 @@ import discord4j.core.object.entity.Member;
 import discord4j.rest.util.Snowflake;
 import discord4j.gateway.ShardInfo;
 import reactor.core.publisher.Mono;
+import reactor.util.annotation.Nullable;
 
+import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -38,11 +41,21 @@ public class MemberChunkEvent extends GuildEvent {
 
     private final long guildId;
     private final Set<Member> members;
+    private final int chunkIndex;
+    private final int chunkCount;
+    private final List<Snowflake> notFound;
+    @Nullable
+    private final String nonce;
 
-    public MemberChunkEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, long guildId, Set<Member> members) {
+    public MemberChunkEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, long guildId, Set<Member> members,
+                            int chunkIndex, int chunkCount, List<Snowflake> notFound, @Nullable String nonce) {
         super(gateway, shardInfo);
         this.guildId = guildId;
         this.members = members;
+        this.chunkIndex = chunkIndex;
+        this.chunkCount = chunkCount;
+        this.notFound = notFound;
+        this.nonce = nonce;
     }
 
     /**
@@ -74,11 +87,51 @@ public class MemberChunkEvent extends GuildEvent {
         return members;
     }
 
+    /**
+     * Gets the chunk index in the expected chunks for this response (0 <= chunk_index < chunk_count).
+     *
+     * @return The chunk index in the expected chunks for this response (0 <= chunk_index < chunk_count).
+     */
+    public int getChunkIndex() {
+        return chunkIndex;
+    }
+
+    /**
+     * Gets the total number of expected chunks for this response.
+     *
+     * @return The total number of expected chunks for this response.
+     */
+    public int getChunkCount() {
+        return chunkCount;
+    }
+
+    /**
+     * Gets invalid id passed to `REQUEST_GUILD_MEMBERS`, if any.
+     *
+     * @return Gets invalid id passed to `REQUEST_GUILD_MEMBERS`, if any.
+     */
+    public List<Snowflake> getNotFound() {
+        return notFound;
+    }
+
+    /**
+     * Gets the nonce used in the Guild Members Request, if present.
+     *
+     * @return The nonce used in the Guild Members Request, if present.
+     */
+    public Optional<String> getNonce() {
+        return Optional.ofNullable(nonce);
+    }
+
     @Override
     public String toString() {
         return "MemberChunkEvent{" +
                 "guildId=" + guildId +
                 ", members=" + members +
+                ", chunkIndex=" + chunkIndex +
+                ", chunkCount=" + chunkCount +
+                ", notFound=" + notFound +
+                ", nonce='" + nonce + '\'' +
                 '}';
     }
 }
