@@ -26,6 +26,7 @@ import reactor.core.publisher.Mono;
 import java.time.Duration;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 
 /**
@@ -39,6 +40,7 @@ public class LocalShardCoordinator implements ShardCoordinator {
 
     private final Map<Integer, PayloadTransformer> limiters = new ConcurrentHashMap<>(1);
     private final Supplier<PayloadTransformer> identifyLimiterFactory;
+    private final AtomicInteger connected = new AtomicInteger(0);
 
     /**
      * Create a new {@link LocalShardCoordinator} that is able to locally coordinate multiple shards under a single
@@ -76,16 +78,21 @@ public class LocalShardCoordinator implements ShardCoordinator {
 
     @Override
     public Mono<Void> publishConnected(ShardInfo shardInfo) {
-        return Mono.empty();
+        return Mono.fromCallable(connected::incrementAndGet).then();
     }
 
     @Override
     public Mono<Void> publishDisconnected(ShardInfo shardInfo, SessionInfo sessionInfo) {
-        return Mono.empty();
+        return Mono.fromCallable(connected::decrementAndGet).then();
     }
 
     @Override
     public PayloadTransformer getIdentifyLimiter(ShardInfo shardInfo, int shardingFactor) {
         return limiters.computeIfAbsent(shardInfo.getIndex() % shardingFactor, k -> identifyLimiterFactory.get());
+    }
+
+    @Override
+    public Mono<Integer> getConnectedCount() {
+        return Mono.fromCallable(connected::get);
     }
 }

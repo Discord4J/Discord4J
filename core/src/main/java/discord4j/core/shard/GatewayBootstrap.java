@@ -76,7 +76,14 @@ import static discord4j.common.LogUtil.format;
  * Builder to create a shard group connecting to Discord Gateway to produce a {@link GatewayDiscordClient}. A shard
  * group represents a set of shards for a given bot that will share some key resources like entity caching and event
  * dispatching. Defaults to creating an automatic sharding group using all shards up to the recommended amount. Refer
- * to each setter for more details about the default values for each configuration.
+ * to each setter for more details about the default values for each configuration. Some of the commonly used ones are:
+ * <ul>
+ *     <li>Setting the number of shards to connect through the
+ *     {@link #setSharding(ShardingStrategy)} method.</li>
+ *     <li>Setting the initial status of the bot depending on the shard, through
+ *     {@link #setInitialStatus(Function)}</li>
+ *     <li>Customize the entity cache using {@link #setStoreService(StoreService)}</li>
+ * </ul>
  * <p>
  * One of the following methods must be subscribed to in order to begin establishing Discord Gateway connections:
  * <ul>
@@ -86,8 +93,7 @@ import static discord4j.common.LogUtil.format;
  *     <li>{@link #withGateway(Function)} to work with the {@link GatewayDiscordClient} in a scoped way, providing
  *     a mapping function that will close and release all resources on disconnection.</li>
  * </ul>
- * This bootstrap emits a result depending on the configuration of {@link #setAwaitConnections(boolean)}. Use
- * {@link #setSharding(ShardingStrategy)} can select the shards that belong to the shard group created by this builder.
+ * This bootstrap emits a result depending on the configuration of {@link #setAwaitConnections(boolean)}.
  *
  * @param <O> the configuration flavor supplied to the {@link GatewayClient} instances to be built.
  */
@@ -194,7 +200,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
      * to create and connect to Gateway by using:
      * <pre>
      * .setSharding(ShardingStrategy.builder()
-     *                 .indexes(0, 2, 4)
+     *                 .indices(0, 2, 4)
      *                 .count(6)
      *                 .build())
      * </pre>
@@ -790,29 +796,27 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                             .filter(context -> context.getDispatch().getClass() == GatewayStateChange.class)
                             .flatMap(context -> {
                                 GatewayStateChange event = (GatewayStateChange) context.getDispatch();
+                                SessionInfo session = null;
                                 switch (event.getState()) {
                                     case CONNECTED:
                                         log.info(format(ctx, "Shard connected"));
                                         return shardCoordinator.publishConnected(shard)
                                                 .doFinally(__ -> sink.success(shard));
-                                    case DISCONNECTED:
                                     case DISCONNECTED_RESUME:
+                                        session = new SessionInfo(gatewayClient.getSessionId(),
+                                                gatewayClient.getSequence());
+                                    case DISCONNECTED:
                                         log.info(format(ctx, "Shard disconnected"));
-                                        boolean allowResume = event.getState() != GatewayStateChange.State.DISCONNECTED;
-                                        SessionInfo session = allowResume ?
-                                                new SessionInfo(gatewayClient.getSessionId(),
-                                                        gatewayClient.getSequence()) : null;
                                         return shardCoordinator.publishDisconnected(shard, session)
                                                 .then(invalidationStrategy.invalidate(shard, stateHolder))
                                                 .then(Mono.fromRunnable(() -> clientGroup.remove(shard.getIndex())))
-                                                .then(Mono.defer(() -> {
-                                                    if (clientGroup.getShardCount() == 0) {
-                                                        log.info(format(ctx, "All shards disconnected"));
-                                                        return destroyHandler.apply(gateway)
-                                                                .doOnTerminate(closeProcessor::onComplete);
-                                                    }
-                                                    return Mono.empty();
-                                                }))
+                                                .then(shardCoordinator.getConnectedCount()
+                                                        .filter(count -> count == 0 && !closeProcessor.isDisposed())
+                                                        .flatMap(__ -> {
+                                                            log.info(format(ctx, "All shards disconnected"));
+                                                            return destroyHandler.apply(gateway)
+                                                                    .doOnTerminate(closeProcessor::onComplete);
+                                                        }))
                                                 .onErrorResume(t -> {
                                                     log.warn(format(ctx, "Error while releasing resources"), t);
                                                     return Mono.empty();
@@ -837,7 +841,10 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                                     reconnectOptions.getMaxBackoffInterval())
                             .flatMap(response -> gatewayClient.execute(
                                     RouteUtils.expandQuery(response.url(), getGatewayParameters())))
-                            .doFinally(__ -> sink.success())
+                            .doFinally(__ -> {
+                                sink.success();
+                                closeProcessor.onComplete();
+                            })
                             .subscriberContext(buildContext(gateway, shard))
                             .subscribe(null,
                                     t -> log.error(format(ctx, "Gateway terminated with an error"), t),

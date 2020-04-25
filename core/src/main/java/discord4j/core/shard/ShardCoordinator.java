@@ -17,9 +17,9 @@
 
 package discord4j.core.shard;
 
-import discord4j.gateway.limiter.PayloadTransformer;
 import discord4j.gateway.SessionInfo;
 import discord4j.gateway.ShardInfo;
+import discord4j.gateway.limiter.PayloadTransformer;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
 
@@ -43,6 +43,7 @@ public interface ShardCoordinator {
      * for authentication.
      *
      * @param shardInfo the connected shard details
+     * @return a {@link Mono} indicating when this operation has completed
      */
     Mono<Void> publishConnected(ShardInfo shardInfo);
 
@@ -51,7 +52,15 @@ public interface ShardCoordinator {
      *
      * @param shardInfo the disconnected shard details
      * @param sessionInfo the disconnected shard session details to resume, or {@code null} if resume is not
-     * available.
+     * available
+     * @return a {@link Mono} indicating when this operation has completed
      */
     Mono<Void> publishDisconnected(ShardInfo shardInfo, @Nullable SessionInfo sessionInfo);
+
+    /**
+     * Return the number of currently connected shards.
+     *
+     * @return a {@link Mono} with the number of connected shards
+     */
+    Mono<Integer> getConnectedCount();
 }

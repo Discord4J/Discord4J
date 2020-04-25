@@ -49,7 +49,10 @@ class ShardingGatewayClientGroup implements GatewayClientGroupManager {
 
     @Override
     public int getShardCount() {
-        return map.size();
+        return map.values().stream()
+                .findAny()
+                .map(GatewayClient::getShardCount)
+                .orElse(0);
     }
 
     @Override

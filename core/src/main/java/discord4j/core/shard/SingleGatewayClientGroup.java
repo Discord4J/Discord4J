@@ -57,6 +57,7 @@ class SingleGatewayClientGroup implements GatewayClientGroupManager {
 
     @Override
     public int getShardCount() {
+        // in a distributed architecture, this number varies according to the latest gateway packet a worker reads
         return instance()
                 .map(GatewayClient::getShardCount)
                 .orElseThrow(() -> new IllegalStateException("Missing shard count information"));
