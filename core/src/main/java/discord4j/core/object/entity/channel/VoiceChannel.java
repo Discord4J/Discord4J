@@ -22,7 +22,6 @@ import discord4j.core.spec.VoiceChannelEditSpec;
 import discord4j.core.spec.VoiceChannelJoinSpec;
 import discord4j.core.util.EntityUtil;
 import discord4j.discordjson.json.ChannelData;
-import discord4j.discordjson.json.VoiceStateData;
 import discord4j.discordjson.json.gateway.VoiceStateUpdate;
 import discord4j.gateway.GatewayClientGroup;
 import discord4j.gateway.json.ShardGatewayPayload;
@@ -109,6 +108,15 @@ public final class VoiceChannel extends BaseCategorizableChannel {
         return mutatedSpec.asRequest();
     }
 
+    /**
+     * Sends a join request to the gateway
+     * <p>
+     * This method does not trigger any logic and requires external state handling
+     *
+     * @param selfMute if the client should be mutes
+     * @param selfDeaf if the client should be deaf
+     * @return An empty mono which completes when the payload was sent to the gateway
+     */
     public Mono<Void> sendWebsocketConnect(final boolean selfMute, final boolean selfDeaf) {
         final GatewayClientGroup clientGroup = getClient().getGatewayClientGroup();
         final int shardId = (int) ((getGuildId().asLong() >> 22) % clientGroup.getShardCount());
@@ -121,6 +129,15 @@ public final class VoiceChannel extends BaseCategorizableChannel {
                         .build(), shardId));
     }
 
+
+    /**
+     * Sends a leave request to the gateway
+     * <p>
+     * This method does not replace {@link VoiceConnection#disconnect()} when the channel was joined by using
+     * {@link VoiceChannel#join(Consumer)}
+     *
+     * @return An empty mono which completes when the payload was sent to the gateway
+     */
     public Mono<Void> sendWebsocketDisconnect() {
         final GatewayClientGroup clientGroup = getClient().getGatewayClientGroup();
         final int shardId = (int) ((getGuildId().asLong() >> 22) % clientGroup.getShardCount());
