@@ -53,6 +53,7 @@ public class BotSupport {
         eventHandlers.add(new Status());
         eventHandlers.add(new StatusEmbed());
         eventHandlers.add(new Exit());
+        eventHandlers.add(new RequestMembers());
 
         return client.on(MessageCreateEvent.class,
                 event -> ownerId.filter(
@@ -145,6 +146,26 @@ public class BotSupport {
                     .filter(content -> content.equals("!exit"))
                     .flatMap(presence -> event.getClient().logout())
                     .then();
+        }
+    }
+
+    public static class RequestMembers extends EventHandler {
+
+        @Override
+        public Mono<Void> onMessageCreate(MessageCreateEvent event) {
+            Message message = event.getMessage();
+            String content = message.getContent();
+            if (content.startsWith("!members ")) {
+                String guildId = content.substring("!members ".length());
+                return event.getClient().requestMembers(Snowflake.of(guildId))
+                        .doOnNext(member -> log.info("{}", member))
+                        .then(message.getRestChannel().createMessage(
+                                MessageCreateRequest.builder()
+                                        .content("<@" + message.getUserData().id() + "> Done!")
+                                        .build()))
+                        .then();
+            }
+            return Mono.empty();
         }
     }
 }

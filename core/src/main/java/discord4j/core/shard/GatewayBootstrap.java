@@ -793,11 +793,11 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                     // wire internal shard coordinator events
                     // TODO: transition into separate lifecycleSink for these events
                     forCleanup.add(gatewayClient.dispatch()
+                            .ofType(GatewayStateChange.class)
                             .takeUntilOther(closeProcessor)
                             .map(dispatch -> DispatchContext.of(dispatch, gateway, stateHolder, shard))
-                            .filter(context -> context.getDispatch().getClass() == GatewayStateChange.class)
                             .flatMap(context -> {
-                                GatewayStateChange event = (GatewayStateChange) context.getDispatch();
+                                GatewayStateChange event = context.getDispatch();
                                 SessionInfo session = null;
                                 switch (event.getState()) {
                                     case CONNECTED:

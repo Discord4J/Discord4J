@@ -34,7 +34,12 @@ import discord4j.core.retriever.EntityRetriever;
 import discord4j.core.shard.GatewayBootstrap;
 import discord4j.core.spec.GuildCreateSpec;
 import discord4j.core.spec.UserEditSpec;
-import discord4j.discordjson.json.*;
+import discord4j.discordjson.json.EmojiData;
+import discord4j.discordjson.json.GuildData;
+import discord4j.discordjson.json.GuildUpdateData;
+import discord4j.discordjson.json.RoleData;
+import discord4j.discordjson.json.gateway.GuildMembersChunk;
+import discord4j.discordjson.json.gateway.RequestGuildMembers;
 import discord4j.discordjson.json.gateway.StatusUpdate;
 import discord4j.gateway.GatewayClient;
 import discord4j.gateway.GatewayClientGroup;
@@ -55,8 +60,10 @@ import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 /**
@@ -249,6 +256,25 @@ public class GatewayDiscordClient implements EntityRetriever {
                 .map(data -> new Guild(this, data));
     }
 
+    private GuildData toGuildData(GuildUpdateData guild) {
+        return GuildData.builder()
+                .from(guild)
+                .roles(guild.roles().stream()
+                        .map(RoleData::id)
+                        .collect(Collectors.toList()))
+                .emojis(guild.emojis().stream()
+                        .map(EmojiData::id)
+                        .filter(Optional::isPresent)
+                        .map(Optional::get)
+                        .collect(Collectors.toList()))
+                .channels(Collections.emptyList())
+                .members(Collections.emptyList())
+                .joinedAt(DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(Instant.now())) // we just created this
+                .large(false)
+                .memberCount(1)
+                .build();
+    }
+
     /**
      * Update the bot's {@link Presence} (client status) for every shard in this shard group.
      *
@@ -386,7 +412,7 @@ public class GatewayDiscordClient implements EntityRetriever {
      * you can return {@code Mono.empty()}.
      * @param <E> the type of the event class
      * @param <T> the type of the event mapper function
-     * @return a new {@link reactor.core.publisher.Flux} with the type resulting from the given event mapper
+     * @return a new {@link Flux} with the type resulting from the given event mapper
      */
     public <E extends Event, T> Flux<T> on(Class<E> eventClass, Function<E, Publisher<T>> mapper) {
         return on(eventClass)
@@ -398,23 +424,73 @@ public class GatewayDiscordClient implements EntityRetriever {
                         }));
     }
 
-    private GuildData toGuildData(GuildUpdateData guild) {
-        return GuildData.builder()
-                .from(guild)
-                .roles(guild.roles().stream()
-                        .map(RoleData::id)
-                        .collect(Collectors.toList()))
-                .emojis(guild.emojis().stream()
-                        .map(EmojiData::id)
-                        .filter(Optional::isPresent)
-                        .map(Optional::get)
-                        .collect(Collectors.toList()))
-                .channels(Collections.emptyList())
-                .members(Collections.emptyList())
-                .joinedAt(DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(Instant.now())) // we just created this
-                .large(false)
-                .memberCount(1)
-                .build();
+    /**
+     * Return all {@link Member members} from the given {@link Guild guildId} using the current Gateway connection.
+     * This method performs a check to validate whether the given guild's data can be obtained from this
+     * {@link GatewayDiscordClient}.
+     *
+     * @param guildId the {@link Snowflake} of the guild to obtain members from
+     * @return a {@link Flux} of {@link Member} for the given {@link Guild}. If an error occurs, it is emitted through
+     * the {@link Flux}.
+     */
+    public Flux<Member> requestMembers(Snowflake guildId) {
+        return requestMembers(RequestGuildMembers.builder()
+                .guildId(guildId.asString())
+                .query("")
+                .limit(0)
+                .build());
+    }
+
+    /**
+     * Return a set of {@link Member members} from the given {@link Guild guildId} using the current Gateway connection.
+     * This method performs a check to validate whether the given guild's data can be obtained from this
+     * {@link GatewayDiscordClient}.
+     *
+     * @param guildId the {@link Snowflake} of the guild to obtain members from
+     * @param userIds the {@link Snowflake} set of users to request
+     * @return a {@link Flux} of {@link Member} for the given {@link Guild}. If an error occurs, it is emitted through
+     * the {@link Flux}.
+     */
+    public Flux<Member> requestMembers(Snowflake guildId, Set<Snowflake> userIds) {
+        return requestMembers(RequestGuildMembers.builder()
+                .guildId(guildId.asString())
+                .userIds(userIds.stream().map(Snowflake::asString).collect(Collectors.toList()))
+                .limit(0)
+                .build());
+    }
+
+    /**
+     * Submit a {@link RequestGuildMembers} payload using the current Gateway connection and wait for its completion,
+     * delivering {@link Member} elements asynchronously through a {@link Flux}. This method performs a check to
+     * validate whether the given guild's data can be obtained from this {@link GatewayDiscordClient}.
+     *
+     * @param request the member request to submit. Create one using {@link RequestGuildMembers#builder()}.
+     * @return a {@link Flux} of {@link Member} for the given {@link Guild}. If an error occurs, it is emitted through
+     * the {@link Flux}.
+     */
+    public Flux<Member> requestMembers(RequestGuildMembers request) {
+        Snowflake guildId = Snowflake.of(request.guildId());
+        int shardId = (int) ((guildId.asLong() >> 22) % gatewayClientGroup.getShardCount());
+        String nonce = String.valueOf(System.nanoTime());
+        Supplier<Flux<Member>> incomingMembers = () -> gatewayClientGroup.find(shardId)
+                .map(gatewayClient -> gatewayClient.dispatch()
+                        .ofType(GuildMembersChunk.class)
+                        .takeUntilOther(closeProcessor)
+                        .filter(chunk -> chunk.nonce().toOptional()
+                                .map(s -> s.equals(nonce))
+                                .orElse(false))
+                        .takeUntil(chunk -> chunk.chunkIndex() + 1 == chunk.chunkCount())
+                        .flatMapIterable(chunk -> chunk.members().stream()
+                                .map(data -> new Member(this, data, guildId.asLong()))
+                                .collect(Collectors.toList())))
+                .orElseThrow(() -> new IllegalStateException("Unable to find gateway client"));
+        return getGuildById(guildId) // check if this operation is valid otherwise request+waiting will hang
+                .then(gatewayClientGroup.unicast(ShardGatewayPayload.requestGuildMembers(
+                        RequestGuildMembers.builder()
+                                .from(request)
+                                .nonce(nonce)
+                                .build(), shardId)))
+                .thenMany(Flux.defer(incomingMembers));
     }
 
     /**

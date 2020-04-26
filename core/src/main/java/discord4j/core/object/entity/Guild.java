@@ -698,6 +698,16 @@ public final class Guild implements Entity {
     }
 
     /**
+     * Return all {@link Member members} from this {@link Guild} using the current Gateway connection.
+     *
+     * @return a {@link Flux} of {@link Member} for the given {@link Guild}. If an error occurs, it is emitted through
+     * the {@link Flux}.
+     */
+    public Flux<Member> requestMembers() {
+        return gateway.requestMembers(getId());
+    }
+
+    /**
      * Requests to retrieve the member as represented by the supplied ID.
      *
      * @param id The ID of the member.

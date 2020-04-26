@@ -17,12 +17,7 @@
 package discord4j.core.retriever;
 
 import discord4j.core.GatewayDiscordClient;
-import discord4j.core.object.entity.Guild;
-import discord4j.core.object.entity.GuildEmoji;
-import discord4j.core.object.entity.Member;
-import discord4j.core.object.entity.Message;
-import discord4j.core.object.entity.Role;
-import discord4j.core.object.entity.User;
+import discord4j.core.object.entity.*;
 import discord4j.core.object.entity.channel.Channel;
 import discord4j.core.object.entity.channel.GuildChannel;
 import discord4j.core.state.StateView;
@@ -107,7 +102,8 @@ class StoreEntityRetriever implements EntityRetriever {
                 .flatMapMany(guildData -> Flux.fromIterable(guildData.members())
                         .flatMap(memberId -> stateView.getMemberStore()
                                 .find(LongLongTuple2.of(guildId.asLong(), Snowflake.asLong(memberId))))
-                        .map(member -> new Member(gateway, member, guildId.asLong())));
+                        .map(member -> new Member(gateway, member, guildId.asLong())))
+                .switchIfEmpty(gateway.requestMembers(guildId));
     }
 
     @Override
