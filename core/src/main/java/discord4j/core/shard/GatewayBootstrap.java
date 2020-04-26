@@ -716,26 +716,31 @@ public class GatewayBootstrap<O extends GatewayOptions> {
         GatewayResources resources = new GatewayResources(stateView, eventDispatcher, shardCoordinator,
                 b.memberRequestFilter, gatewayReactorResources, initVoiceReactorResources(), b.voiceReconnectOptions);
         MonoProcessor<Void> closeProcessor = MonoProcessor.create();
-        GatewayClientGroupManager clientGroup = b.shardingStrategy.getGroupManager();
         EntityRetrievalStrategy entityRetrievalStrategy = initEntityRetrievalStrategy();
-        GatewayDiscordClient gateway = new GatewayDiscordClient(b.client, resources, closeProcessor,
-                clientGroup, b.voiceConnectionFactory, entityRetrievalStrategy);
         DispatchEventMapper dispatchMapper = initDispatchEventMapper();
 
-        Flux<ShardInfo> connections = b.shardingStrategy.getShards(b.client)
-                .groupBy(shard -> shard.getIndex() % b.shardingStrategy.getShardingFactor())
-                .flatMap(group -> group.concatMap(shard -> acquireConnection(b, shard, clientFactory, gateway,
-                        shardCoordinator, stateHolder, eventDispatcher, clientGroup, closeProcessor, dispatchMapper)));
+        return b.shardingStrategy.getShardCount(b.client)
+                .flatMap(count -> {
+                    GatewayClientGroupManager clientGroup = b.shardingStrategy.getGroupManager(count);
+                    GatewayDiscordClient gateway = new GatewayDiscordClient(b.client, resources, closeProcessor,
+                            clientGroup, b.voiceConnectionFactory, entityRetrievalStrategy);
 
-        if (awaitConnections) {
-            return connections.then(Mono.just(gateway));
-        } else {
-            return Mono.create(sink -> {
-                sink.onCancel(connections.subscribe(null,
-                        t -> log.error("Connection handler terminated with an error", t)));
-                sink.success(gateway);
-            });
-        }
+                    Flux<ShardInfo> connections = b.shardingStrategy.getShards(count)
+                            .groupBy(shard -> shard.getIndex() % b.shardingStrategy.getShardingFactor())
+                            .flatMap(group -> group.concatMap(shard -> acquireConnection(b, shard, clientFactory,
+                                    gateway, shardCoordinator, stateHolder, eventDispatcher, clientGroup,
+                                    closeProcessor, dispatchMapper)));
+
+                    if (awaitConnections) {
+                        return connections.then(Mono.just(gateway));
+                    } else {
+                        return Mono.create(sink -> {
+                            sink.onCancel(connections.subscribe(null,
+                                    t -> log.error("Connection handler terminated with an error", t)));
+                            sink.success(gateway);
+                        });
+                    }
+                });
     }
 
     private Mono<ShardInfo> acquireConnection(GatewayBootstrap<O> b,

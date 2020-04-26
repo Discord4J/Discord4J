@@ -23,6 +23,7 @@ import discord4j.gateway.GatewayClient;
 import discord4j.gateway.ShardInfo;
 import discord4j.rest.RestClient;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 /**
  * Strategy to build sharding {@link GatewayClient} instances.
@@ -30,19 +31,30 @@ import reactor.core.publisher.Flux;
 public interface ShardingStrategy {
 
     /**
-     * Return the shard factory used to create a group of sharded clients.
+     * Return the shard count used to create a group of sharded clients.
      *
      * @param restClient a handle to consume REST API resources, typically to retrieve the number of recommended shards
+     * @return a shard count as a {@link Mono} to obtain this number asynchronously.
+     */
+    Mono<Integer> getShardCount(RestClient restClient);
+
+    /**
+     * Return the shard factory used to create a group of sharded clients.
+     *
+     * @param shardCount the total number of shards
      * @return a shard factory as a sequence of {@link ShardInfo} items.
      */
-    Flux<ShardInfo> getShards(RestClient restClient);
+    default Flux<ShardInfo> getShards(int shardCount) {
+        return Flux.range(0, shardCount).map(index -> new ShardInfo(index, shardCount));
+    }
 
     /**
      * Return the {@link GatewayClientGroupManager} to maintain each gateway client in the created group.
      *
+     * @param shardCount the total number of shards
      * @return a {@link GatewayClientGroupManager} used by this strategy
      */
-    GatewayClientGroupManager getGroupManager();
+    GatewayClientGroupManager getGroupManager(int shardCount);
 
     /**
      * Return the number of shards that can be identified concurrently. Must be 1 unless your application is authorized
@@ -62,18 +74,17 @@ public interface ShardingStrategy {
      */
     static ShardingStrategy recommended() {
         return new ShardingStrategy() {
+
             @Override
-            public Flux<ShardInfo> getShards(RestClient restClient) {
+            public Mono<Integer> getShardCount(RestClient restClient) {
                 return restClient.getGatewayService().getGatewayBot()
-                    .map(GatewayData::shards)
-                    .map(Possible::get)
-                    .flatMapMany(count -> Flux.range(0, count)
-                        .map(index -> new ShardInfo(index, count)));
+                        .map(GatewayData::shards)
+                        .map(Possible::get);
             }
 
             @Override
-            public GatewayClientGroupManager getGroupManager() {
-                return new ShardingGatewayClientGroup();
+            public GatewayClientGroupManager getGroupManager(int shardCount) {
+                return new ShardingGatewayClientGroup(shardCount);
             }
 
             @Override
@@ -91,14 +102,15 @@ public interface ShardingStrategy {
      */
     static ShardingStrategy fixed(int count) {
         return new ShardingStrategy() {
+
             @Override
-            public Flux<ShardInfo> getShards(RestClient restClient) {
-                return Flux.range(0, count).map(index -> new ShardInfo(index, count));
+            public Mono<Integer> getShardCount(RestClient restClient) {
+                return Mono.just(count);
             }
 
             @Override
-            public GatewayClientGroupManager getGroupManager() {
-                return new ShardingGatewayClientGroup();
+            public GatewayClientGroupManager getGroupManager(int shardCount) {
+                return new ShardingGatewayClientGroup(shardCount);
             }
 
             @Override
@@ -116,13 +128,14 @@ public interface ShardingStrategy {
      */
     static ShardingStrategy single() {
         return new ShardingStrategy() {
+
             @Override
-            public Flux<ShardInfo> getShards(RestClient restClient) {
-                return Flux.just(new ShardInfo(0, 1));
+            public Mono<Integer> getShardCount(RestClient restClient) {
+                return Mono.just(1);
             }
 
             @Override
-            public GatewayClientGroupManager getGroupManager() {
+            public GatewayClientGroupManager getGroupManager(int shardCount) {
                 return new SingleGatewayClientGroup();
             }
 

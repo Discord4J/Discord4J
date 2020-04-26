@@ -31,6 +31,11 @@ import java.util.stream.Collectors;
 class ShardingGatewayClientGroup implements GatewayClientGroupManager {
 
     private final Map<Integer, GatewayClient> map = new ConcurrentHashMap<>();
+    private final int shardCount;
+
+    ShardingGatewayClientGroup(int shardCount) {
+        this.shardCount = shardCount;
+    }
 
     @Override
     public void add(int key, GatewayClient gatewayClient) {
@@ -49,10 +54,7 @@ class ShardingGatewayClientGroup implements GatewayClientGroupManager {
 
     @Override
     public int getShardCount() {
-        return map.values().stream()
-                .findAny()
-                .map(GatewayClient::getShardCount)
-                .orElse(0);
+        return shardCount;
     }
 
     @Override

@@ -44,15 +44,7 @@ public class DefaultShardingStrategy implements ShardingStrategy {
     }
 
     @Override
-    public Flux<ShardInfo> getShards(RestClient restClient) {
-        return computeShardCount(restClient)
-                .flatMapMany(count -> Flux.from(indexSource.apply(count))
-                        .filter(index -> index >= 0 && index < count) // sanitize
-                        .map(index -> new ShardInfo(index, count))
-                        .filter(filter));
-    }
-
-    private Mono<Integer> computeShardCount(RestClient restClient) {
+    public Mono<Integer> getShardCount(RestClient restClient) {
         if (count > 0) {
             return Mono.just(count);
         } else if (count == 0) {
@@ -63,8 +55,16 @@ public class DefaultShardingStrategy implements ShardingStrategy {
     }
 
     @Override
-    public GatewayClientGroupManager getGroupManager() {
-        return new ShardingGatewayClientGroup();
+    public Flux<ShardInfo> getShards(int shardCount) {
+        return Flux.from(indexSource.apply(shardCount))
+                .filter(index -> index >= 0 && index < count) // sanitize
+                .map(index -> new ShardInfo(index, count))
+                .filter(filter);
+    }
+
+    @Override
+    public GatewayClientGroupManager getGroupManager(int count) {
+        return new ShardingGatewayClientGroup(count);
     }
 
     @Override
