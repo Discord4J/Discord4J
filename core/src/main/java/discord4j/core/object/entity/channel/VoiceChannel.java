@@ -16,13 +16,16 @@
  */
 package discord4j.core.object.entity.channel;
 
-import discord4j.discordjson.json.ChannelData;
-import discord4j.discordjson.json.VoiceStateData;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.VoiceState;
 import discord4j.core.spec.VoiceChannelEditSpec;
 import discord4j.core.spec.VoiceChannelJoinSpec;
 import discord4j.core.util.EntityUtil;
+import discord4j.discordjson.json.ChannelData;
+import discord4j.discordjson.json.VoiceStateData;
+import discord4j.discordjson.json.gateway.VoiceStateUpdate;
+import discord4j.gateway.GatewayClientGroup;
+import discord4j.gateway.json.ShardGatewayPayload;
 import discord4j.store.api.util.LongLongTuple2;
 import discord4j.voice.VoiceConnection;
 import reactor.core.publisher.Flux;
@@ -83,10 +86,6 @@ public final class VoiceChannel extends BaseCategorizableChannel {
      *
      * @return A {@link Flux} that continually emits the {@link VoiceState voice states} of this voice channel. If an
      * error is received, it is emitted through the {@code Flux}.
-     *
-     * @implNote If the underlying store does not save
-     * {@link VoiceStateData} instances <b>OR</b> the bot is currently not logged in then the returned {@code Flux} will
-     * always be empty.
      */
     public Flux<VoiceState> getVoiceStates() {
         return getClient().getGatewayResources().getStateView().getVoiceStateStore()
@@ -108,6 +107,29 @@ public final class VoiceChannel extends BaseCategorizableChannel {
         spec.accept(mutatedSpec);
 
         return mutatedSpec.asRequest();
+    }
+
+    public Mono<Void> sendWebsocketConnect(final boolean selfMute, final boolean selfDeaf) {
+        final GatewayClientGroup clientGroup = getClient().getGatewayClientGroup();
+        final int shardId = (int) ((getGuildId().asLong() >> 22) % clientGroup.getShardCount());
+        return clientGroup.unicast(ShardGatewayPayload.voiceStateUpdate(
+                VoiceStateUpdate.builder()
+                        .guildId(getGuildId().asString())
+                        .channelId(getId().asString())
+                        .selfMute(selfMute)
+                        .selfDeaf(selfDeaf)
+                        .build(), shardId));
+    }
+
+    public Mono<Void> sendWebsocketDisconnect() {
+        final GatewayClientGroup clientGroup = getClient().getGatewayClientGroup();
+        final int shardId = (int) ((getGuildId().asLong() >> 22) % clientGroup.getShardCount());
+        return clientGroup.unicast(ShardGatewayPayload.voiceStateUpdate(
+                VoiceStateUpdate.builder()
+                        .guildId(getGuildId().asString())
+                        .selfMute(false)
+                        .selfDeaf(false)
+                        .build(), shardId));
     }
 
     @Override
