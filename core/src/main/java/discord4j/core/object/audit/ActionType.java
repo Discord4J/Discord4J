@@ -16,6 +16,11 @@
  */
 package discord4j.core.object.audit;
 
+/**
+ * Represents the various type of audit log action.
+ * See <a href="https://discordapp.com/developers/docs/resources/audit-log#audit-log-entry-object-audit-log-events">
+ *     Audit Log Events</a>
+ */
 public enum ActionType {
 
     UNKNOWN(-1),
@@ -55,6 +60,13 @@ public enum ActionType {
     INTEGRATION_UPDATE(81),
     INTEGRATION_DELETE(82);
 
+    /**
+     * Gets the type of action. It is guaranteed that invoking {@link #getValue()} from the returned enum will equal
+     * ({@link #equals(Object)}) the supplied {@code value}.
+     *
+     * @param value The underlying value as represented by Discord.
+     * @return The type of action.
+     */
     public static ActionType of(int value) {
         switch (value) {
             case 1: return GUILD_UPDATE;
@@ -96,12 +108,23 @@ public enum ActionType {
         }
     }
 
+    /** The underlying value as represented by Discord. */
     private final int value;
 
+    /**
+     * Constructs an {@code ActionType}.
+     *
+     * @param value The underlying value as represented by Discord.
+     */
     ActionType(int value) {
         this.value = value;
     }
 
+    /**
+     * Gets the underlying value as represented by Discord.
+     *
+     * @return The underlying value as represented by Discord.
+     */
     public int getValue() {
         return value;
     }
