@@ -29,6 +29,7 @@ import discord4j.voice.*;
 import reactor.core.publisher.Mono;
 import reactor.util.function.Tuple2;
 
+import java.time.Duration;
 import java.util.Objects;
 
 /**
@@ -37,6 +38,10 @@ import java.util.Objects;
  */
 public class VoiceChannelJoinSpec implements Spec<Mono<VoiceConnection>> {
 
+    /** The default maximum amount of time in seconds to wait before the connection to the voice channel timeouts. */
+    private static final int DEFAULT_TIMEOUT = 5;
+
+    private Duration timeout = Duration.ofSeconds(DEFAULT_TIMEOUT);
     private AudioProvider provider = AudioProvider.NO_OP;
     private AudioReceiver receiver = AudioReceiver.NO_OP;
     private VoiceSendTaskFactory sendTaskFactory = new LocalVoiceSendTaskFactory();
@@ -126,6 +131,19 @@ public class VoiceChannelJoinSpec implements Spec<Mono<VoiceConnection>> {
         return this;
     }
 
+    /**
+     * Sets the maximum amount of time to wait before the connection to the voice channel timeouts.
+     * For example, the connection may get stuck when the bot does not have {@link discord4j.rest.util.Permission.VIEW_CHANNEL}.
+     * The default value is {@value #DEFAULT_TIMEOUT} seconds.
+     *
+     * @param timeout The maximum amount of time to wait before the connection to the voice channel timeouts.
+     * @return This spec.
+     */
+    public VoiceChannelJoinSpec setTimeout(Duration timeout) {
+        this.timeout = timeout;
+        return this;
+    }
+
     @Override
     public Mono<VoiceConnection> asRequest() {
         final long guildId = voiceChannel.getGuildId().asLong();
@@ -184,7 +202,8 @@ public class VoiceChannelJoinSpec implements Spec<Mono<VoiceConnection>> {
                                     ctx.put(LogUtil.KEY_GATEWAY_ID, Integer.toHexString(gateway.hashCode()))
                                             .put(LogUtil.KEY_SHARD_ID, shardId)
                                             .put(LogUtil.KEY_GUILD_ID, Snowflake.asString(guildId)));
-                });
+                })
+                .timeout(timeout);
     }
 
     private static VoiceDisconnectTask onDisconnectTask(GatewayClientGroup clientGroup) {
