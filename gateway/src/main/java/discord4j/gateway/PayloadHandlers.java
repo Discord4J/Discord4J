@@ -19,6 +19,7 @@ package discord4j.gateway;
 import discord4j.discordjson.json.gateway.*;
 import discord4j.discordjson.possible.Possible;
 import discord4j.gateway.json.GatewayPayload;
+import discord4j.gateway.json.dispatch.EventNames;
 import discord4j.gateway.retry.GatewayException;
 import discord4j.gateway.retry.ReconnectException;
 import reactor.util.Logger;
@@ -67,11 +68,11 @@ public abstract class PayloadHandlers {
     }
 
     private static void handleDispatch(PayloadContext<Dispatch> context) {
-        if (context.getData() instanceof Ready) {
+        if (context.getPayload().getType() != null && context.getPayload().getType().equals(EventNames.READY)) {
             String newSessionId = ((Ready) context.getData()).sessionId();
             context.getClient().sessionId().set(newSessionId);
         }
-        if (context.getData() != null) {
+        if (context.getPayload().isDataPresent()) {
             context.getClient().dispatchSink().next(new LazyDispatch<>(context.getPayload(), null));
         }
     }

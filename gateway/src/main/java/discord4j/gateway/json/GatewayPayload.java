@@ -85,6 +85,10 @@ public class GatewayPayload<T extends PayloadData> {
         return data;
     }
 
+    public boolean isDataPresent() {
+        return data != null;
+    }
+
     @Nullable
     public Integer getSequence() {
         return sequence;
