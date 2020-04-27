@@ -133,7 +133,8 @@ public class VoiceChannelJoinSpec implements Spec<Mono<VoiceConnection>> {
 
     /**
      * Sets the maximum amount of time to wait before the connection to the voice channel timeouts.
-     * For example, the connection may get stuck when the bot does not have {@link discord4j.rest.util.Permission.VIEW_CHANNEL}.
+     * For example, the connection may get stuck when the bot does not have {@link discord4j.rest.util.Permission.VIEW_CHANNEL} or
+     * when the voice channel is full.
      * The default value is {@value #DEFAULT_TIMEOUT} seconds.
      *
      * @param timeout The maximum amount of time to wait before the connection to the voice channel timeouts.
