@@ -129,6 +129,12 @@ public class ChannelService extends RestService {
                 .exchange(getRouter());
     }
 
+    @Experimental
+    public Mono<Void> crosspostMessage(long channelId, long messageId) {
+        return Routes.CROSSPOST_MESSAGE.newRequest(channelId,messageId)
+            .exchange(getRouter());
+    }
+
     public Mono<Void> editChannelPermissions(long channelId, long overwriteId, PermissionsEditRequest request, @Nullable String reason) {
         return Routes.CHANNEL_PERMISSIONS_EDIT.newRequest(channelId, overwriteId)
                 .body(request)
