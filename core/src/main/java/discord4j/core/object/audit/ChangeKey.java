@@ -26,52 +26,103 @@ import discord4j.rest.util.Snowflake;
 import java.awt.*;
 import java.util.Set;
 
+/**
+ * Represents the various audit log change key.
+ * See <a href="https://discordapp.com/developers/docs/resources/audit-log#audit-log-change-object-audit-log-change-key">
+ *     Audit Log Change Key</a>
+ * @param <T> The type of the audit log change key.
+ */
 public final class ChangeKey<T> {
 
+    /** Name changed */
     public static final ChangeKey<String> NAME = changeKey("name");
+    /** Icon changed */
     public static final ChangeKey<String> ICON = changeKey("icon_hash");
+    /** Invite splash page artwork changed */
     public static final ChangeKey<String> SPLASH = changeKey("splash_hash");
+    /** Banner changed */
     public static final ChangeKey<String> BANNER = changeKey("banner_hash");
+    /** Owner changed */
     public static final ChangeKey<Snowflake> OWNER = changeKey("owner_id");
+    /** Region changed */
     public static final ChangeKey<String> REGION = changeKey("region");
+    /** Afk channel changed */
     public static final ChangeKey<Snowflake> AFK_CHANNEL = changeKey("afk_channel_id");
+    /** Afk timeout duration changed */
     public static final ChangeKey<Integer> AFK_TIMEOUT = changeKey("afk_timeout");
+    /** Two-factor auth requirement changed */
     public static final ChangeKey<Guild.MfaLevel> MFA_LEVEL = changeKey("mfa_level");
+    /** Required verification level changed */
     public static final ChangeKey<Guild.VerificationLevel> VERIFICATION_LEVEL = changeKey("verification_level");
+    /** Change in whose messages are scanned and deleted for explicit content in the server */
     public static final ChangeKey<Guild.ContentFilterLevel> CONTENT_FILTER_LEVEL = changeKey("explicit_content_filter");
+    /** Default message notification level changed */
     public static final ChangeKey<Guild.NotificationLevel> NOTIFICATION_LEVEL = changeKey("default_message_notifications");
+    /** Guild invite vanity url changed */
     public static final ChangeKey<String> VANITY_URL = changeKey("vanity_url_code");
+    /** New role added */
     public static final ChangeKey<Set<Role>> ROLES_ADD = changeKey("$add");
+    /** Role removed */
     public static final ChangeKey<Set<Role>> ROLES_REMOVE = changeKey("$remove");
+    /** Change in number of days after which inactive and role-unassigned members are kicked */
     public static final ChangeKey<Integer> PRUNE_DAYS = changeKey("prune_delete_days");
+    /** Server widget enabled/disable */
     public static final ChangeKey<Boolean> WIDGET_ENABLED = changeKey("widget_enabled");
+    /** Channel id of the server widget changed */
     public static final ChangeKey<Snowflake> WIDGET_CHANNEL = changeKey("widget_channel_id");
+    /** Id of the system channel changed */
     public static final ChangeKey<Snowflake> SYSTEM_CHANNEL = changeKey("system_channel_id");
+    /** Text or voice channel position changed */
     public static final ChangeKey<Integer> POSITION = changeKey("position");
+    /** Text channel topic changed */
     public static final ChangeKey<String> TOPIC = changeKey("topic");
+    /** Voice channel bitrate changed */
     public static final ChangeKey<Integer> BITRATE = changeKey("bitrate");
+    /** Permissions on a channel changed */
     public static final ChangeKey<Set<ExtendedPermissionOverwrite>> OVERWRITES = changeKey("permission_overwrites");
+    /** Channel nsfw restriction changed */
     public static final ChangeKey<Boolean> NSFW = changeKey("nsfw");
+    /** Application id of the added or removed webhook or bot */
     public static final ChangeKey<Snowflake> APPLICATION_ID = changeKey("application_id");
+    /** Amount of seconds a user has to wait before sending another message changed */
     public static final ChangeKey<Integer> RATE_LIMIT_PER_USER = changeKey("rate_limit_per_user");
+    /** Permissions for a role changed */
     public static final ChangeKey<PermissionSet> PERMISSIONS = changeKey("permission");
+    /** Role color changed */
     public static final ChangeKey<Color> COLOR = changeKey("color");
+    /** Role is now displayed/no longer displayed separate from online users */
     public static final ChangeKey<Boolean> HOIST = changeKey("hoist");
+    /** Role is now mentionable/unmentionable */
     public static final ChangeKey<Boolean> MENTIONABLE = changeKey("mentionable");
+    /** A permission on a text or voice channel was allowed for a role */
     public static final ChangeKey<PermissionSet> ALLOW = changeKey("allow");
+    /** A permission on a text or voice channel was denied for a role */
     public static final ChangeKey<PermissionSet> DENY = changeKey("deny");
+    /** Invite code changed */
     public static final ChangeKey<String> INVITE_CODE = changeKey("invite_code");
+    /** Channel for invite code changed */
     public static final ChangeKey<Snowflake> INVITE_CHANNEL_ID = changeKey("channel_id");
+    /** Person who created invite code changed */
     public static final ChangeKey<Snowflake> INVITER_ID = changeKey("inviter_id");
+    /** Change to max number of times invite code can be used */
     public static final ChangeKey<Integer> INVITE_MAX_USES = changeKey("max_uses");
+    /** Number of times invite code used changed */
     public static final ChangeKey<Integer> INVITE_USES = changeKey("uses");
+    /** How long invite code lasts changed */
     public static final ChangeKey<Integer> INVITE_MAX_AGE = changeKey("max_age");
+    /** Invite code is temporary/never expires*/
     public static final ChangeKey<Boolean> INVITE_TEMPORARY = changeKey("temporary");
+    /** User server deafened/undeafened */
     public static final ChangeKey<Boolean> USER_DEAFENED = changeKey("deaf");
+    /** User server muted/unmuted */
     public static final ChangeKey<Boolean> USER_MUTED = changeKey("mute");
+    /** User nickname changed */
     public static final ChangeKey<String> USER_NICK = changeKey("nick");
+    /** User avatar changed */
     public static final ChangeKey<String> USER_AVATAR = changeKey("avatar_hash");
+    /** The id of the changed entity - sometimes used in conjunction with other keys */
     public static final ChangeKey<Snowflake> ID = changeKey("id");
+    /** Type of entity created */
     public static final ChangeKey<Channel.Type> CHANNEL_TYPE = changeKey("type");
 
     private static <T> ChangeKey<T> changeKey(String name) {
