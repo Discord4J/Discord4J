@@ -16,6 +16,7 @@
  */
 package discord4j.core.object.data.stored;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import discord4j.common.json.GuildEmojiResponse;
 import discord4j.common.json.RoleResponse;
 import discord4j.gateway.json.dispatch.GuildCreate;
@@ -46,7 +47,8 @@ public class BaseGuildBean implements Serializable {
     @Nullable
     private Long embedChannelId;
     private int premiumTier;
-    private int premiumSubscriptionsCount;
+    @Nullable
+    private Integer premiumSubscriptionsCount;
     private String preferredLocale;
     private int verificationLevel;
     private int defaultMessageNotifications;
@@ -60,9 +62,14 @@ public class BaseGuildBean implements Serializable {
     @Nullable
     private Boolean widgetEnabled;
     @Nullable
+    private Long rulesChannelId;
+    @Nullable
+    private Long publicUpdatesChannelId;
+    @Nullable
     private Long widgetChannelId;
     @Nullable
     private Long systemChannelId;
+    private int systemChannelFlags;
     @Nullable
     private String vanityUrlCode;
     @Nullable
@@ -85,6 +92,7 @@ public class BaseGuildBean implements Serializable {
         embedChannelId = guildCreate.getEmbedChannelId();
         verificationLevel = guildCreate.getVerificationLevel();
         premiumTier = guildCreate.getPremiumTier();
+        premiumSubscriptionsCount = guildCreate.getPremiumSubcriptionsCount();
         preferredLocale = guildCreate.getPreferredLocale();
 
         defaultMessageNotifications = guildCreate.getDefaultMessageNotifications();
@@ -104,6 +112,9 @@ public class BaseGuildBean implements Serializable {
         widgetEnabled = guildCreate.isWidgetEnabled();
         widgetChannelId = guildCreate.getWidgetChannelId();
         systemChannelId = guildCreate.getSystemChannelId();
+        systemChannelFlags = guildCreate.getSystemChannelFlags();
+        publicUpdatesChannelId = guildCreate.getPublicUpdatesChannelId();
+        rulesChannelId = guildCreate.getRulesChannelId();
         vanityUrlCode = guildCreate.getVanityUrlCode();
         description = guildCreate.getDescription();
         maxPresences = guildCreate.getMaxPresences();
@@ -123,6 +134,7 @@ public class BaseGuildBean implements Serializable {
         embedChannelId = guildUpdate.getEmbedChannelId();
         verificationLevel = guildUpdate.getVerificationLevel();
         premiumTier = guildUpdate.getPremiumTier();
+        premiumSubscriptionsCount = guildUpdate.getPremiumSubcriptionsCount();
         preferredLocale = guildUpdate.getPreferredLocale();
         defaultMessageNotifications = guildUpdate.getDefaultMessageNotifications();
         explicitContentFilter = guildUpdate.getExplicitContentFilter();
@@ -141,6 +153,9 @@ public class BaseGuildBean implements Serializable {
         widgetEnabled = guildUpdate.isWidgetEnabled();
         widgetChannelId = guildUpdate.getWidgetChannelId();
         systemChannelId = guildUpdate.getSystemChannelId();
+        systemChannelFlags = guildUpdate.getSystemChannelFlags();
+        publicUpdatesChannelId = guildUpdate.getPublicUpdatesChannelId();
+        rulesChannelId = guildUpdate.getRulesChannelId();
         vanityUrlCode = guildUpdate.getVanityUrlCode();
         description = guildUpdate.getDescription();
         maxPresences = guildUpdate.getMaxPresences();
@@ -160,6 +175,7 @@ public class BaseGuildBean implements Serializable {
         embedChannelId = response.getEmbedChannelId();
         verificationLevel = response.getVerificationLevel();
         premiumTier = response.getPremiumTier();
+        premiumSubscriptionsCount = response.getPremiumSubcriptionsCount();
         preferredLocale = response.getPreferredLocale();
         defaultMessageNotifications = response.getDefaultMessageNotifications();
         explicitContentFilter = response.getExplicitContentFilter();
@@ -178,6 +194,9 @@ public class BaseGuildBean implements Serializable {
         widgetEnabled = response.isWidgetEnabled();
         widgetChannelId = response.getWidgetChannelId();
         systemChannelId = response.getSystemChannelId();
+        systemChannelFlags = response.getSystemChannelFlags();
+        publicUpdatesChannelId = response.getPublicUpdatesChannelId();
+        rulesChannelId = response.getRulesChannelId();
         vanityUrlCode = response.getVanityUrlCode();
         description = response.getDescription();
         maxPresences = response.getMaxPresences();
@@ -197,6 +216,7 @@ public class BaseGuildBean implements Serializable {
         embedChannelId = toCopy.getEmbedChannelId();
         verificationLevel = toCopy.getVerificationLevel();
         premiumTier = toCopy.getPremiumTier();
+        premiumSubscriptionsCount = toCopy.getPremiumSubcriptionsCount();
         preferredLocale = toCopy.getPreferredLocale();
         defaultMessageNotifications = toCopy.getDefaultMessageNotifications();
         explicitContentFilter = toCopy.getExplicitContentFilter();
@@ -210,6 +230,9 @@ public class BaseGuildBean implements Serializable {
         widgetEnabled = toCopy.isWidgetEnabled();
         widgetChannelId = toCopy.getWidgetChannelId();
         systemChannelId = toCopy.getSystemChannelId();
+        systemChannelFlags = toCopy.getSystemChannelFlags();
+        publicUpdatesChannelId = toCopy.getPublicUpdatesChannelId();
+        rulesChannelId = toCopy.getRulesChannelId();
         vanityUrlCode = toCopy.getVanityUrlCode();
         description = toCopy.getDescription();
         maxPresences = toCopy.getMaxPresences();
@@ -315,6 +338,10 @@ public class BaseGuildBean implements Serializable {
         return premiumTier;
     }
 
+    public Integer getPremiumSubcriptionsCount() {
+        return premiumSubscriptionsCount;
+    }
+
     public String getPreferredLocale() {
         return preferredLocale;
     }
@@ -399,12 +426,38 @@ public class BaseGuildBean implements Serializable {
     }
 
     @Nullable
+    public Long getRulesChannelId() {
+        return rulesChannelId;
+    }
+
+    public void setRulesChannelId(@Nullable final Long rulesChannelId) {
+        this.rulesChannelId = rulesChannelId;
+    }
+
+    @Nullable
+    public Long getPublicUpdatesChannelId() {
+        return publicUpdatesChannelId;
+    }
+
+    public void setPublicUpdatesChannelId(@Nullable final Long publicUpdatesChannelId) {
+        this.publicUpdatesChannelId = publicUpdatesChannelId;
+    }
+
+    @Nullable
     public Long getSystemChannelId() {
         return systemChannelId;
     }
 
     public void setSystemChannelId(@Nullable final Long systemChannelId) {
         this.systemChannelId = systemChannelId;
+    }
+
+    public int getSystemChannelFlags() {
+        return systemChannelFlags;
+    }
+
+    public void setSystemChannelFlags(int systemChannelFlags) {
+        this.systemChannelFlags = systemChannelFlags;
     }
 
     @Nullable

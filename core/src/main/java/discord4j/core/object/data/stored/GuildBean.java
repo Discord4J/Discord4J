@@ -22,6 +22,7 @@ import discord4j.common.json.UserResponse;
 import discord4j.gateway.json.dispatch.GuildCreate;
 import discord4j.gateway.json.dispatch.GuildUpdate;
 import discord4j.gateway.json.response.GatewayChannelResponse;
+import reactor.util.annotation.Nullable;
 
 import java.util.Arrays;
 
@@ -32,7 +33,8 @@ public final class GuildBean extends BaseGuildBean {
 
     private String joinedAt;
     private boolean large;
-    private int premiumSubscriptionsCount;
+    @Nullable
+    private Integer premiumSubscriptionsCount;
     private boolean unavailable;
     private int memberCount;
     private long[] members;

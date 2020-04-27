@@ -29,6 +29,14 @@ public class GuildUpdate implements Dispatch {
     @JsonProperty("widget_enabled")
     @Nullable
     private Boolean widgetEnabled;
+    @JsonProperty("rules_channel_id")
+    @Nullable
+    @UnsignedJson
+    private Long rulesChannelId;
+    @JsonProperty("public_updates_channel_id")
+    @Nullable
+    @UnsignedJson
+    private Long publicUpdatesChannelId;
     @JsonProperty("widget_channel_id")
     @Nullable
     @UnsignedJson
@@ -45,6 +53,8 @@ public class GuildUpdate implements Dispatch {
     @Nullable
     @UnsignedJson
     private Long systemChannelId;
+    @JsonProperty("system_channel_flags")
+    private int systemChannelFlags;
     private String splash;
     private String banner;
     private RoleResponse[] roles;
@@ -122,8 +132,22 @@ public class GuildUpdate implements Dispatch {
     }
 
     @Nullable
+    public Long getRulesChannelId() {
+        return rulesChannelId;
+    }
+
+    @Nullable
+    public Long getPublicUpdatesChannelId() {
+        return publicUpdatesChannelId;
+    }
+
+    @Nullable
     public Long getSystemChannelId() {
         return systemChannelId;
+    }
+
+    public int getSystemChannelFlags() {
+        return systemChannelFlags;
     }
 
     public String getSplash() {

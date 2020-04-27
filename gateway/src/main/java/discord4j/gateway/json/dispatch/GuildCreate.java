@@ -34,10 +34,20 @@ public class GuildCreate implements Dispatch {
     @JsonProperty("verification_level")
     private int verificationLevel;
     private boolean unavailable;
+    @JsonProperty("rules_channel_id")
+    @Nullable
+    @UnsignedJson
+    private Long rulesChannelId;
+    @JsonProperty("public_updates_channel_id")
+    @Nullable
+    @UnsignedJson
+    private Long publicUpdatesChannelId;
     @JsonProperty("system_channel_id")
     @Nullable
     @UnsignedJson
     private Long systemChannelId;
+    @JsonProperty("system_channel_flags")
+    private int systemChannelFlags;
     private String splash;
     private String banner;
     private RoleResponse[] roles;
@@ -52,7 +62,8 @@ public class GuildCreate implements Dispatch {
     @JsonProperty("premium_tier")
     private int premiumTier;
     @JsonProperty("premium_subscription_count")
-    private int premiumSubcriptionsCount;
+    @Nullable
+    private Integer premiumSubcriptionsCount;
     @JsonProperty("preferred_locale")
     private String preferredLocale;
     private GuildMemberResponse[] members;
@@ -113,7 +124,8 @@ public class GuildCreate implements Dispatch {
         return premiumTier;
     }
 
-    public int getPremiumSubcriptionsCount() {
+    @Nullable
+    public Integer getPremiumSubcriptionsCount() {
         return premiumSubcriptionsCount;
     }
 
@@ -130,8 +142,22 @@ public class GuildCreate implements Dispatch {
     }
 
     @Nullable
+    public Long getRulesChannelId() {
+        return rulesChannelId;
+    }
+
+    @Nullable
+    public Long getPublicUpdatesChannelId() {
+        return publicUpdatesChannelId;
+    }
+
+    @Nullable
     public Long getSystemChannelId() {
         return systemChannelId;
+    }
+
+    public int getSystemChannelFlags() {
+        return systemChannelFlags;
     }
 
     public String getSplash() {

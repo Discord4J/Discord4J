@@ -37,10 +37,20 @@ public class GuildResponse {
     private RoleResponse[] roles;
     @JsonProperty("afk_timeout")
     private int afkTimeout;
+    @JsonProperty("rules_channel_id")
+    @Nullable
+    @UnsignedJson
+    private Long rulesChannelId;
+    @JsonProperty("public_updates_channel_id")
+    @Nullable
+    @UnsignedJson
+    private Long publicUpdatesChannelId;
     @JsonProperty("system_channel_id")
     @Nullable
     @UnsignedJson
     private Long systemChannelId;
+    @JsonProperty("system_channel_flags")
+    private int systemChannelFlags;
     @JsonProperty("widget_channel_id")
     @Nullable
     @UnsignedJson
@@ -118,8 +128,22 @@ public class GuildResponse {
     }
 
     @Nullable
+    public Long getRulesChannelId() {
+        return rulesChannelId;
+    }
+
+    @Nullable
+    public Long getPublicUpdatesChannelId() {
+        return publicUpdatesChannelId;
+    }
+
+    @Nullable
     public Long getSystemChannelId() {
         return systemChannelId;
+    }
+
+    public int getSystemChannelFlags() {
+        return systemChannelFlags;
     }
 
     @Nullable
