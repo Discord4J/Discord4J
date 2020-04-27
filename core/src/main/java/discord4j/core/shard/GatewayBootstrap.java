@@ -101,16 +101,11 @@ public class GatewayBootstrap<O extends GatewayOptions> {
 
     private static final Logger log = Loggers.getLogger(GatewayBootstrap.class);
 
-    /**
-     * {@link JdkStoreService} is the default store factory. Can be set explicitly to bypass StoreService discovery.
-     */
-    public static final StoreService DEFAULT_STORE = new JdkStoreService();
-
     private final DiscordClient client;
     private final Function<GatewayOptions, O> optionsModifier;
 
     private ShardingStrategy shardingStrategy = ShardingStrategy.recommended();
-    private boolean awaitConnections = true;
+    private boolean awaitConnections = false;
     private ShardCoordinator shardCoordinator = null;
     private EventDispatcher eventDispatcher = null;
     private StoreService storeService = null;
@@ -216,7 +211,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
 
     /**
      * Set if the connect {@link Mono} should defer completion until all joining shards have connected. Defaults to
-     * {@code true}.
+     * {@code false}.
      *
      * @param awaitConnections {@code true} if connect should wait until all joining shards have connected before
      * completing, or {@code false} to complete immediately
@@ -255,7 +250,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
 
     /**
      * Set a custom {@link StoreService}, an abstract factory to create {@link Store} instances, to cache Gateway
-     * updates. Defaults to using {@link #DEFAULT_STORE} unless another factory of higher priority is discovered.
+     * updates. Defaults to using {@link JdkStoreService} unless another factory of higher priority is discovered.
      *
      * @param storeService an externally managed {@link StoreService} to receive Gateway updates
      * @return this builder
