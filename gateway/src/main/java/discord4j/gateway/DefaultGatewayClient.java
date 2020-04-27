@@ -27,6 +27,7 @@ import discord4j.common.retry.ReconnectContext;
 import discord4j.common.retry.ReconnectOptions;
 import discord4j.discordjson.json.gateway.*;
 import discord4j.gateway.json.GatewayPayload;
+import discord4j.gateway.json.dispatch.EventNames;
 import discord4j.gateway.limiter.PayloadTransformer;
 import discord4j.gateway.payload.PayloadReader;
 import discord4j.gateway.payload.PayloadWriter;
@@ -95,12 +96,12 @@ public class DefaultGatewayClient implements GatewayClient {
     // reactive pipelines
     private final EmitterProcessor<ByteBuf> receiver = EmitterProcessor.create(false);
     private final EmitterProcessor<ByteBuf> sender = EmitterProcessor.create(false);
-    private final EmitterProcessor<Dispatch> dispatch = EmitterProcessor.create(false);
+    private final EmitterProcessor<LazyDispatch<Dispatch>> dispatch = EmitterProcessor.create(false);
     private final EmitterProcessor<GatewayPayload<?>> outbound = EmitterProcessor.create(false);
     private final EmitterProcessor<GatewayPayload<Heartbeat>> heartbeats = EmitterProcessor.create(false);
     private final FluxSink<ByteBuf> receiverSink;
     private final FluxSink<ByteBuf> senderSink;
-    private final FluxSink<Dispatch> dispatchSink;
+    private final FluxSink<LazyDispatch<Dispatch>> dispatchSink;
     private final FluxSink<GatewayPayload<?>> outboundSink;
     private final FluxSink<GatewayPayload<Heartbeat>> heartbeatSink;
 
@@ -187,11 +188,12 @@ public class DefaultGatewayClient implements GatewayClient {
                                 ConnectionObserver.State state;
                                 if (reconnectContext.getResetCount() == 0) {
                                     log.info(format(context, "Connected to Gateway"));
-                                    dispatchSink.next(GatewayStateChange.connected());
+                                    dispatchSink.next(new LazyDispatch<>(null, GatewayStateChange.connected()));
                                     state = GatewayObserver.CONNECTED;
                                 } else {
                                     log.info(format(context, "Reconnected to Gateway"));
-                                    dispatchSink.next(GatewayStateChange.retrySucceeded(reconnectContext.getAttempts()));
+                                    dispatchSink.next(new LazyDispatch<>(null,
+                                            GatewayStateChange.retrySucceeded(reconnectContext.getAttempts())));
                                     state = GatewayObserver.RETRY_SUCCEEDED;
                                 }
                                 reconnectContext.reset();
@@ -261,7 +263,7 @@ public class DefaultGatewayClient implements GatewayClient {
 
                     return Mono.zip(httpFuture, readyHandler, receiverFuture, senderFuture, heartbeatHandler)
                             .doOnError(t -> {
-                                if(t instanceof ReconnectException) {
+                                if (t instanceof ReconnectException) {
                                     log.info(format(context, "{}"), t.getMessage());
                                 } else {
                                     log.error(format(context, "{}"), t.toString());
@@ -287,8 +289,17 @@ public class DefaultGatewayClient implements GatewayClient {
                 .replaceAll("(\"token\": ?\")([A-Za-z0-9._-]*)(\")", "$1hunter2$3")));
     }
 
-    private static boolean isReadyOrResume(Dispatch d) {
-        return Ready.class.isAssignableFrom(d.getClass()) || Resumed.class.isAssignableFrom(d.getClass());
+    private static boolean isReadyOrResume(LazyDispatch<Dispatch> d) {
+        if (d.getSource() != null) {
+            if (d.getSource().getType() == null) {
+                return false;
+            }
+            return d.getSource().getType().equals(EventNames.READY) || d.getSource().getType().equals(EventNames.RESUMED);
+        } else if (d.getData() != null) {
+            return Ready.class.isAssignableFrom(d.getData().getClass()) || Resumed.class.isAssignableFrom(d.getData().getClass());
+        } else {
+            return false;
+        }
     }
 
     private GatewayPayload<?> updateSequence(GatewayPayload<?> payload) {
@@ -315,15 +326,17 @@ public class DefaultGatewayClient implements GatewayClient {
                             "Reconnect attempt {} in {}"), attempt, backoff);
                     if (attempt == 1) {
                         if (!allowResume.get() || !canResume(retryContext.exception())) {
-                            dispatchSink.next(GatewayStateChange.retryStarted(backoff));
+                            dispatchSink.next(new LazyDispatch<>(null, GatewayStateChange.retryStarted(backoff)));
                             allowResume.set(false);
                             notifyObserver(GatewayObserver.RETRY_STARTED, identifyOptions);
                         } else {
-                            dispatchSink.next(GatewayStateChange.retryStartedResume(backoff));
+                            dispatchSink.next(new LazyDispatch<>(null,
+                                    GatewayStateChange.retryStartedResume(backoff)));
                             notifyObserver(GatewayObserver.RETRY_RESUME_STARTED, identifyOptions);
                         }
                     } else {
-                        dispatchSink.next(GatewayStateChange.retryFailed(attempt - 1, backoff));
+                        dispatchSink.next(new LazyDispatch<>(null, GatewayStateChange.retryFailed(attempt - 1,
+                                backoff)));
                         // TODO: add attempt/backoff values to GatewayObserver
                         notifyObserver(GatewayObserver.RETRY_FAILED, identifyOptions);
                         allowResume.set(false);
@@ -385,10 +398,10 @@ public class DefaultGatewayClient implements GatewayClient {
             responseTime.set(0);
 
             if (behavior.getAction() == DisconnectBehavior.Action.STOP_ABRUPTLY) {
-                dispatchSink.next(GatewayStateChange.disconnectedResume());
+                dispatchSink.next(new LazyDispatch<>(null, GatewayStateChange.disconnectedResume()));
                 notifyObserver(GatewayObserver.DISCONNECTED_RESUME, identifyOptions);
             } else if (behavior.getAction() == DisconnectBehavior.Action.STOP) {
-                dispatchSink.next(GatewayStateChange.disconnected());
+                dispatchSink.next(new LazyDispatch<>(null, GatewayStateChange.disconnected()));
                 allowResume.set(false);
                 sequence.set(0);
                 sessionId.set("");
@@ -435,7 +448,7 @@ public class DefaultGatewayClient implements GatewayClient {
     }
 
     @Override
-    public Flux<Dispatch> dispatch() {
+    public Flux<LazyDispatch<Dispatch>> dispatch() {
         return dispatch;
     }
 
@@ -503,7 +516,7 @@ public class DefaultGatewayClient implements GatewayClient {
      * @return a {@link FluxSink} for {@link Dispatch}
      * objects
      */
-    FluxSink<Dispatch> dispatchSink() {
+    FluxSink<LazyDispatch<Dispatch>> dispatchSink() {
         return dispatchSink;
     }
 

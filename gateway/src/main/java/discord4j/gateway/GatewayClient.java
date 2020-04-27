@@ -73,7 +73,7 @@ public interface GatewayClient {
      *
      * @return a {@link Flux} of {@link Dispatch} values
      */
-    Flux<Dispatch> dispatch();
+    Flux<LazyDispatch<Dispatch>> dispatch();
 
     /**
      * Obtains the {@link Flux} of raw payloads inbound from the gateway connection made by this client.

@@ -72,7 +72,7 @@ public abstract class PayloadHandlers {
             context.getClient().sessionId().set(newSessionId);
         }
         if (context.getData() != null) {
-            context.getClient().dispatchSink().next(context.getData());
+            context.getClient().dispatchSink().next(new LazyDispatch<>(context.getPayload(), null));
         }
     }
 

@@ -41,6 +41,7 @@ import discord4j.discordjson.json.RoleData;
 import discord4j.discordjson.json.gateway.GuildMembersChunk;
 import discord4j.discordjson.json.gateway.RequestGuildMembers;
 import discord4j.discordjson.json.gateway.StatusUpdate;
+import discord4j.gateway.LazyDispatch;
 import discord4j.gateway.GatewayClient;
 import discord4j.gateway.GatewayClientGroup;
 import discord4j.gateway.json.GatewayPayload;
@@ -474,6 +475,7 @@ public class GatewayDiscordClient implements EntityRetriever {
         String nonce = String.valueOf(System.nanoTime());
         Supplier<Flux<Member>> incomingMembers = () -> gatewayClientGroup.find(shardId)
                 .map(gatewayClient -> gatewayClient.dispatch()
+                        .map(LazyDispatch::getData)
                         .ofType(GuildMembersChunk.class)
                         .takeUntilOther(closeProcessor)
                         .filter(chunk -> chunk.nonce().toOptional()

@@ -34,7 +34,6 @@ import discord4j.core.state.StateHolder;
 import discord4j.core.state.StateView;
 import discord4j.discordjson.json.ActivityUpdateRequest;
 import discord4j.discordjson.json.MessageData;
-import discord4j.discordjson.json.gateway.Dispatch;
 import discord4j.discordjson.json.gateway.StatusUpdate;
 import discord4j.discordjson.possible.Possible;
 import discord4j.gateway.*;
@@ -774,11 +773,11 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                             .checkpoint("Read payload from gateway")
                             .flatMap(dispatch -> {
                                 ShardInfo info;
-                                Dispatch actual;
-                                if (dispatch instanceof ShardAwareDispatch) {
-                                    ShardAwareDispatch shardDispatch = (ShardAwareDispatch) dispatch;
+                                LazyDispatch<?> actual;
+                                if (dispatch.isShardAware()) {
+                                    ShardAwareDispatch shardDispatch = (ShardAwareDispatch) dispatch.getData();
                                     info = new ShardInfo(shardDispatch.getShardIndex(), shardDispatch.getShardCount());
-                                    actual = shardDispatch.getDispatch();
+                                    actual = new LazyDispatch(null, shardDispatch.getDispatch());
                                 } else {
                                     info = shard;
                                     actual = dispatch;
@@ -798,6 +797,8 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                     // wire internal shard coordinator events
                     // TODO: transition into separate lifecycleSink for these events
                     forCleanup.add(gatewayClient.dispatch()
+                            .filter(dispatch -> !dispatch.isFromGateway())
+                            .map(LazyDispatch::getData)
                             .ofType(GatewayStateChange.class)
                             .takeUntilOther(closeProcessor)
                             .map(dispatch -> DispatchContext.of(dispatch, gateway, stateHolder, shard))

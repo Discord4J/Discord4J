@@ -19,6 +19,8 @@ package discord4j.core.event.dispatch;
 
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.state.StateHolder;
+import discord4j.discordjson.json.gateway.PayloadData;
+import discord4j.gateway.LazyDispatch;
 import discord4j.gateway.ShardInfo;
 
 /**
@@ -27,19 +29,24 @@ import discord4j.gateway.ShardInfo;
  *
  * @param <D> The type of the payload.
  */
-public class DispatchContext<D> {
+public class DispatchContext<D extends PayloadData> {
 
-    private final D dispatch;
+    private final LazyDispatch<D> dispatch;
     private final GatewayDiscordClient gateway;
     private final StateHolder stateHolder;
     private final ShardInfo shardInfo;
 
-    public static <D> DispatchContext<D> of(D dispatch, GatewayDiscordClient gateway,
-                                            StateHolder stateHolder, ShardInfo shardInfo) {
+    public static <D extends PayloadData> DispatchContext<D> of(LazyDispatch<D> dispatch, GatewayDiscordClient gateway,
+                                                                StateHolder stateHolder, ShardInfo shardInfo) {
         return new DispatchContext<>(dispatch, gateway, stateHolder, shardInfo);
     }
 
-    private DispatchContext(D dispatch, GatewayDiscordClient gateway, StateHolder stateHolder, ShardInfo shardInfo) {
+    public static <D extends PayloadData> DispatchContext<D> of(D dispatch, GatewayDiscordClient gateway,
+                                                                StateHolder stateHolder, ShardInfo shardInfo) {
+        return new DispatchContext<>(new LazyDispatch<>(null, dispatch), gateway, stateHolder, shardInfo);
+    }
+
+    private DispatchContext(LazyDispatch<D> dispatch, GatewayDiscordClient gateway, StateHolder stateHolder, ShardInfo shardInfo) {
         this.dispatch = dispatch;
         this.gateway = gateway;
         this.stateHolder = stateHolder;
@@ -47,7 +54,7 @@ public class DispatchContext<D> {
     }
 
     public D getDispatch() {
-        return dispatch;
+        return dispatch.getData();
     }
 
     public GatewayDiscordClient getGateway() {

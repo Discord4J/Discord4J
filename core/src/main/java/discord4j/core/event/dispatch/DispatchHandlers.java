@@ -94,7 +94,7 @@ public class DispatchHandlers implements DispatchEventMapper {
         addHandler(GatewayStateChange.class, LifecycleDispatchHandlers::gatewayStateChanged);
     }
 
-    private static <D, E extends Event> void addHandler(Class<D> dispatchType,
+    private static <D extends PayloadData, E extends Event> void addHandler(Class<D> dispatchType,
                                                         DispatchHandler<D, E> dispatchHandler) {
         handlerMap.put(dispatchType, dispatchHandler);
     }
@@ -110,7 +110,7 @@ public class DispatchHandlers implements DispatchEventMapper {
      * @return an Event mapped from the given Dispatch object, or null if no Event is produced.
      */
     @SuppressWarnings("unchecked")
-    public <D, E extends Event> Mono<E> handle(DispatchContext<D> context) {
+    public <D extends PayloadData, E extends Event> Mono<E> handle(DispatchContext<D> context) {
         DispatchHandler<D, E> handler = (DispatchHandler<D, E>) handlerMap.entrySet()
                 .stream()
                 .filter(entry -> entry.getKey().isAssignableFrom(context.getDispatch().getClass()))

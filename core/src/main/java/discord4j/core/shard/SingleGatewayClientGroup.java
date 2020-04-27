@@ -19,6 +19,7 @@ package discord4j.core.shard;
 
 import discord4j.discordjson.json.gateway.Dispatch;
 import discord4j.gateway.GatewayClient;
+import discord4j.gateway.LazyDispatch;
 import discord4j.gateway.json.GatewayPayload;
 import discord4j.gateway.json.ShardGatewayPayload;
 import io.netty.buffer.ByteBuf;
@@ -115,7 +116,7 @@ class SingleGatewayClientGroup implements GatewayClientGroupManager {
         }
 
         @Override
-        public Flux<Dispatch> dispatch() {
+        public Flux<LazyDispatch<Dispatch>> dispatch() {
             return client.dispatch();
         }
 
