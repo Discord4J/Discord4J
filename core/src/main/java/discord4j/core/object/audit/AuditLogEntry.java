@@ -78,6 +78,13 @@ public class AuditLogEntry implements Entity {
         return ActionType.of(data.actionType());
     }
 
+    /**
+     * Gets the changes made to the target id, if present.
+     *
+     * @param changeKey The audit log change key.
+     * @param <T> The type of the audit log change key.
+     * @return The changes made to the target id, if present.
+     */
     public <T> Optional<AuditLogChange<T>> getChange(ChangeKey<T> changeKey) {
         return data.changes().toOptional()
                 .map(list -> list.stream().collect(AuditLogUtil.changeCollector()))
