@@ -96,14 +96,14 @@ public final class Message implements Entity {
     }
 
     /**
-     * Return a {@link RestMessage} handle to execute REST API operations on this entity.
+     * @return A {@link RestMessage} handle to execute REST API operations on this entity.
      */
     public RestMessage getRestMessage() {
         return rest;
     }
 
     /**
-     * Return a {@link RestChannel} handle to execute REST API operations on the channel of this message.
+     * @return A {@link RestChannel} handle to execute REST API operations on the channel of this message.
      */
     public RestChannel getRestChannel() {
         return RestChannel.create(gateway.getRestClient(), Snowflake.asLong(data.channelId()));
