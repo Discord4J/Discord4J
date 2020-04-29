@@ -17,11 +17,13 @@
 package discord4j.core.object.reaction;
 
 import discord4j.core.object.entity.GuildEmoji;
+import discord4j.discordjson.json.ReactionData;
 import discord4j.rest.util.Snowflake;
 import reactor.util.annotation.Nullable;
 
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Function;
 
 /**
  * An emoji used for {@link Reaction message reactions}, provides factory methods such as {@link #unicode(String)}
@@ -71,6 +73,21 @@ public abstract class ReactionEmoji {
      */
     public static ReactionEmoji of(@Nullable Long id, String name, boolean isAnimated) {
         return id == null ? unicode(name) : custom(Snowflake.of(id), name, isAnimated);
+    }
+
+    /**
+     * Constructs a {@code ReactionEmoji} from a {@link ReactionData} representation.
+     *
+     * @param data the {@link ReactionData} wrapper.
+     * @return a reaction emoji using the given information.
+     */
+    public static ReactionEmoji of(ReactionData data) {
+        if (data.emoji().id().isPresent()) {
+            return custom(Snowflake.of(data.emoji().id().get()),
+                    data.emoji().name().orElseThrow(IllegalArgumentException::new),
+                    data.emoji().animated().toOptional().map(Function.<Boolean>identity()).orElse(false));
+        }
+        return unicode(data.emoji().name().orElseThrow(IllegalArgumentException::new));
     }
 
     /**

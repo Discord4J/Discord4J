@@ -19,7 +19,6 @@ package discord4j.core.object.reaction;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.DiscordObject;
 import discord4j.discordjson.json.ReactionData;
-import discord4j.rest.util.Snowflake;
 
 import java.util.Objects;
 
@@ -76,8 +75,7 @@ public final class Reaction implements DiscordObject  {
      * @return This reaction's emoji.
      */
     public ReactionEmoji getEmoji() {
-        // TODO FIXME: get()
-        return ReactionEmoji.of(Snowflake.asLong(data.emoji().id().get()), data.emoji().name().get(), data.emoji().animated().get());
+        return ReactionEmoji.of(data);
     }
 
     @Override
