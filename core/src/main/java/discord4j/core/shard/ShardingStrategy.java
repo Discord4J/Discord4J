@@ -45,7 +45,7 @@ public interface ShardingStrategy {
      * @return a shard factory as a sequence of {@link ShardInfo} items.
      */
     default Flux<ShardInfo> getShards(int shardCount) {
-        return Flux.range(0, shardCount).map(index -> new ShardInfo(index, shardCount));
+        return Flux.range(0, shardCount).map(index -> ShardInfo.create(index, shardCount));
     }
 
     /**

@@ -19,21 +19,31 @@ package discord4j.gateway;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import reactor.util.function.Tuple2;
+import reactor.util.function.Tuples;
 
+import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * A container to express a shard index and count.
  */
 public class ShardInfo {
 
+    private static final Map<Tuple2<Integer, Integer>, ShardInfo> CACHE = new ConcurrentHashMap<>();
+
     private final int index;
     private final int count;
 
-    @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
-    public ShardInfo(@JsonProperty("index") int index, @JsonProperty("count") int count) {
+    private ShardInfo(int index, int count) {
         this.index = index;
         this.count = count;
+    }
+
+    @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
+    public static ShardInfo create(@JsonProperty("index") int index, @JsonProperty("count") int count) {
+        return CACHE.computeIfAbsent(Tuples.of(index, count), t2 -> new ShardInfo(t2.getT1(), t2.getT2()));
     }
 
     /**
@@ -63,8 +73,7 @@ public class ShardInfo {
             return false;
         }
         ShardInfo shardInfo = (ShardInfo) o;
-        return index == shardInfo.index &&
-                count == shardInfo.count;
+        return index == shardInfo.index && count == shardInfo.count;
     }
 
     @Override
