@@ -72,7 +72,7 @@ public abstract class PayloadHandlers {
             String newSessionId = ((Ready) context.getData()).sessionId();
             context.getClient().sessionId().set(newSessionId);
         }
-        if (context.getPayload().isDataPresent()) {
+        if (context.getPayload().isDataPresent()) { // this should avoid "null" gateway payloads in lazy dispatches
             context.getClient().dispatchSink().next(new LazyDispatch<>(context.getPayload(), null));
         }
     }

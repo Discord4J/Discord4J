@@ -31,11 +31,15 @@ public class LazyDispatch<T extends PayloadData> {
         return source != null;
     }
 
-    @Nullable
     public T getData() {
-        if (isFromGateway()) {
-            return source.getData();
+        if (source != null) {
+            final T data = source.getData();
+            if(data == null)
+                throw new IllegalStateException("LazyDispatch is from gateway, source.getData is null");
+            return data;
         } else {
+            if(data == null)
+                throw new IllegalStateException("LazyDispatch is from other source, data is null");
             return data;
         }
     }

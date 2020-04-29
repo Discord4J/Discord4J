@@ -777,7 +777,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                                 if (dispatch.isShardAware()) {
                                     ShardAwareDispatch shardDispatch = (ShardAwareDispatch) dispatch.getData();
                                     info = new ShardInfo(shardDispatch.getShardIndex(), shardDispatch.getShardCount());
-                                    actual = new LazyDispatch(null, shardDispatch.getDispatch());
+                                    actual = new LazyDispatch<>(null, shardDispatch.getDispatch());
                                 } else {
                                     info = shard;
                                     actual = dispatch;
