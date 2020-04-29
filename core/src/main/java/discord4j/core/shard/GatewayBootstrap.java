@@ -105,7 +105,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
     private final Function<GatewayOptions, O> optionsModifier;
 
     private ShardingStrategy shardingStrategy = ShardingStrategy.recommended();
-    private boolean awaitConnections = false;
+    private Boolean awaitConnections = null;
     private ShardCoordinator shardCoordinator = null;
     private EventDispatcher eventDispatcher = null;
     private StoreService storeService = null;
@@ -211,7 +211,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
 
     /**
      * Set if the connect {@link Mono} should defer completion until all joining shards have connected. Defaults to
-     * {@code false}.
+     * {@code true} if running a single shard, otherwise {@code false}.
      *
      * @param awaitConnections {@code true} if connect should wait until all joining shards have connected before
      * completing, or {@code false} to complete immediately
@@ -730,7 +730,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                                     gateway, shardCoordinator, stateHolder, eventDispatcher, clientGroup,
                                     closeProcessor, dispatchMapper, invalidationStrategy)));
 
-                    if (awaitConnections) {
+                    if (awaitConnections == null ? count == 1 : awaitConnections) {
                         return connections.then(Mono.just(gateway));
                     } else {
                         return Mono.create(sink -> {
