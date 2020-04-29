@@ -117,7 +117,7 @@ public final class VoiceChannel extends BaseCategorizableChannel {
      * @param selfDeaf if the client should be deaf
      * @return An empty mono which completes when the payload was sent to the gateway
      */
-    public Mono<Void> sendWebsocketConnect(final boolean selfMute, final boolean selfDeaf) {
+    public Mono<Void> sendConnectVoiceState(final boolean selfMute, final boolean selfDeaf) {
         final GatewayClientGroup clientGroup = getClient().getGatewayClientGroup();
         final int shardId = (int) ((getGuildId().asLong() >> 22) % clientGroup.getShardCount());
         return clientGroup.unicast(ShardGatewayPayload.voiceStateUpdate(
@@ -138,7 +138,7 @@ public final class VoiceChannel extends BaseCategorizableChannel {
      *
      * @return An empty mono which completes when the payload was sent to the gateway
      */
-    public Mono<Void> sendWebsocketDisconnect() {
+    public Mono<Void> sendDisconnectVoiceState() {
         final GatewayClientGroup clientGroup = getClient().getGatewayClientGroup();
         final int shardId = (int) ((getGuildId().asLong() >> 22) % clientGroup.getShardCount());
         return clientGroup.unicast(ShardGatewayPayload.voiceStateUpdate(
