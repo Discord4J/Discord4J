@@ -36,7 +36,7 @@ public final class OrderUtil {
      * In Discord, two orderable entities may have the same "raw position," the position as reported by the "position" field.
      * This conflict is resolved by comparing the creation time of the entities, reflected in their {@link Snowflake IDs}.
      */
-    public static Comparator<Role> ROLE_ORDER =
+    public static final Comparator<Role> ROLE_ORDER =
             Comparator.comparing(Role::getRawPosition).thenComparing(Role::getId);
 
     /**
@@ -48,7 +48,7 @@ public final class OrderUtil {
      * Note that this order is only applicable to channels if they are of the same type and in the same category. See
      * {@link #BUCKETED_CHANNEL_ORDER} for ordering between different channel types.
      */
-    public static Comparator<GuildChannel> CHANNEL_ORDER =
+    public static final Comparator<GuildChannel> CHANNEL_ORDER =
             Comparator.comparing(GuildChannel::getRawPosition).thenComparing(GuildChannel::getId);
 
     /**
@@ -60,7 +60,7 @@ public final class OrderUtil {
      * <p>
      * Note that this order is only applicable to channels if they are in the same category.
      */
-    public static Comparator<CategorizableChannel> BUCKETED_CHANNEL_ORDER =
+    public static final Comparator<CategorizableChannel> BUCKETED_CHANNEL_ORDER =
             Comparator.<CategorizableChannel>comparingInt(c -> {
                 if (c instanceof VoiceChannel) {
                     return 1;
