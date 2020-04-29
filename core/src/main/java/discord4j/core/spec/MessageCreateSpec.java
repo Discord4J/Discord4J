@@ -19,7 +19,9 @@ package discord4j.core.spec;
 import discord4j.core.object.Embed;
 import discord4j.core.object.entity.Attachment;
 import discord4j.core.object.entity.Message;
+import discord4j.core.object.entity.channel.AllowedMentions;
 import discord4j.core.object.entity.channel.MessageChannel;
+import discord4j.discordjson.json.AllowedMentionsData;
 import discord4j.discordjson.json.EmbedData;
 import discord4j.discordjson.json.MessageCreateRequest;
 import discord4j.discordjson.possible.Possible;
@@ -50,6 +52,7 @@ public class MessageCreateSpec implements Spec<MultipartRequest> {
     private boolean tts;
     private EmbedData embed;
     private List<Tuple2<String, InputStream>> files;
+    private AllowedMentionsData allowedMentionsData;
 
     /**
      * Sets the created {@link Message} contents, up to 2000 characters.
@@ -123,6 +126,16 @@ public class MessageCreateSpec implements Spec<MultipartRequest> {
         return addFile(Attachment.SPOILER_PREFIX + fileName, file);
     }
 
+    /**
+     * Adds an allowed mentions object to the message spec.
+     * @param allowedMentions the allowed mentions to add.
+     * @return this spec.
+     */
+    public MessageCreateSpec setAllowedMentions(AllowedMentions allowedMentions) {
+        this.allowedMentionsData = allowedMentions.toData();
+        return this;
+    }
+
     @Override
     public MultipartRequest asRequest() {
         MessageCreateRequest json = MessageCreateRequest.builder()
@@ -130,6 +143,7 @@ public class MessageCreateSpec implements Spec<MultipartRequest> {
                 .nonce(nonce == null ? Possible.absent() : Possible.of(nonce))
                 .tts(tts)
                 .embed(embed == null ? Possible.absent() : Possible.of(embed))
+                .allowedMentions(allowedMentionsData == null ? Possible.absent() : Possible.of(allowedMentionsData))
                 .build();
         return new MultipartRequest(json, files == null ? Collections.emptyList() : files);
     }

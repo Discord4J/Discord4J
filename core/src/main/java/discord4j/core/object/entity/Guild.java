@@ -540,9 +540,9 @@ public final class Guild implements Entity {
     }
 
     /**
-     * Gets whether this guild widget is enabled.
+     * Gets whether or not the server widget is enabled.
      *
-     * @return {@code true} if the guild widget is enabled, {@code false} otherwise.
+     * @return Whether or not the server widget is enabled.
      */
     public boolean isWidgetEnabled() {
         return data.widgetEnabled().toOptional().map(Function.<Boolean>identity()).orElse(false);
@@ -619,8 +619,74 @@ public final class Guild implements Entity {
      *
      * @return A {@code EnumSet} with the flags of the system {@link TextChannel channel}.
      */
-    public EnumSet<Flag> getSystemChannelFlags() {
-        return Flag.of(data.systemChannelFlags().orElse(0));
+    public EnumSet<SystemChannelFlag> getSystemChannelFlags() {
+        return SystemChannelFlag.of(data.systemChannelFlags().orElse(0));
+    }
+
+    /**
+     * Gets the id of the channel where "PUBLIC" guilds display rules and/or guidelines, if present.
+     *
+     * @return The id of the channel where "PUBLIC" guilds display rules and/or guidelines, if present.
+     */
+    public Optional<Snowflake> getRulesChannelId() {
+        return data.rulesChannelId().map(Snowflake::of);
+    }
+
+    /**
+     * Requests to retrieve the channel where "PUBLIC" guilds display rules and/or guidelines, if present.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits the {@link TextChannel channel} where "PUBLIC"
+     * guilds display rules and/or guidelines, if present. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<TextChannel> getRulesChannel() {
+        return Mono.justOrEmpty(getRulesChannelId()).flatMap(gateway::getChannelById).cast(TextChannel.class);
+    }
+
+    /**
+     * Requests to retrieve the channel where "PUBLIC" guilds display rules and/or guidelines, if present, using
+     * the given retrieval strategy.
+     *
+     * @param retrievalStrategy the strategy to use to get the rules channel
+     * @return A {@link Mono} where, upon successful completion, emits the {@link TextChannel channel} where "PUBLIC" guilds
+     * display rules and/or guidelines, if present. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<TextChannel> getRulesChannel(EntityRetrievalStrategy retrievalStrategy) {
+        return Mono.justOrEmpty(getRulesChannelId())
+                .flatMap(id -> gateway.withRetrievalStrategy(retrievalStrategy).getChannelById(id))
+                .cast(TextChannel.class);
+    }
+
+    /**
+     * Gets the id of the channel where admins and moderators of "PUBLIC" guilds receive notices from Discord, if present.
+     *
+     * @return The id of the channel where admins and moderators of "PUBLIC" guilds receive notices from Discord, if present.
+     */
+    public Optional<Snowflake> getPublicUpdatesChannelId() {
+        return data.publicUpdatesChannelId().map(Snowflake::of);
+    }
+
+    /**
+     * Requests to retrieve the channel where admins and moderators of "PUBLIC" guilds receive notices from Discord, if present.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits the {@link TextChannel channel} where admins and moderators of
+     * "PUBLIC" guilds receive notices from Discord, if present. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<TextChannel> getPublicUpdatesChannel() {
+        return Mono.justOrEmpty(getPublicUpdatesChannelId()).flatMap(gateway::getChannelById).cast(TextChannel.class);
+    }
+
+    /**
+     * Requests to retrieve the channel where admins and moderators of "PUBLIC" guilds receive notices from Discord, if present,
+     * using the given retrieval strategy.
+     *
+     * @param retrievalStrategy the strategy to use to get the rules channel
+     * @return A {@link Mono} where, upon successful completion, emits the {@link TextChannel channel} where admins and moderators
+     * of "PUBLIC" guilds receive notices from Discord, if present. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<TextChannel> getPublicUpdatesChannel(EntityRetrievalStrategy retrievalStrategy) {
+        return Mono.justOrEmpty(getPublicUpdatesChannelId())
+                .flatMap(id -> gateway.withRetrievalStrategy(retrievalStrategy).getChannelById(id))
+                .cast(TextChannel.class);
     }
 
     /**
@@ -650,6 +716,15 @@ public final class Guild implements Entity {
      */
     public boolean isUnavailable() {
         return data.unavailable().toOptional().map(Function.<Boolean>identity()).orElse(false);
+    }
+
+    /**
+     * Gets whether this guild is embeddable (e.g. widget).
+     *
+     * @return Whether this guild is embeddable (e.g. widget).
+     */
+    public boolean isEmbedEnabled() {
+        return data.embedEnabled().toOptional().map(Function.<Boolean>identity()).orElse(false);
     }
 
     /**
@@ -1508,7 +1583,7 @@ public final class Guild implements Entity {
     }
 
     /** Describes system channel flags. */
-    public enum Flag {
+    public enum SystemChannelFlag {
 
         /** Member join notifications are suppressed. */
         SUPPRESS_JOIN_NOTIFICATIONS(0),
@@ -1525,7 +1600,7 @@ public final class Guild implements Entity {
         /**
          * Constructs a {@code Flag}.
          */
-        Flag(final int value) {
+        SystemChannelFlag(final int value) {
             this.value = value;
             this.flag = 1 << value;
         }
@@ -1555,9 +1630,9 @@ public final class Guild implements Entity {
          * @param value The flags value as represented by Discord.
          * @return The {@link EnumSet} of flags.
          */
-        public static EnumSet<Flag> of(final int value) {
-            final EnumSet<Flag> flags = EnumSet.noneOf(Flag.class);
-            for (Flag flag : Flag.values()) {
+        public static EnumSet<SystemChannelFlag> of(final int value) {
+            final EnumSet<SystemChannelFlag> flags = EnumSet.noneOf(SystemChannelFlag.class);
+            for (SystemChannelFlag flag : SystemChannelFlag.values()) {
                 long flagValue = flag.getFlag();
                 if ((flagValue & value) == flagValue) {
                     flags.add(flag);

@@ -16,8 +16,8 @@
  */
 package discord4j.rest.service;
 
-import discord4j.discordjson.json.*;
 import discord4j.common.annotations.Experimental;
+import discord4j.discordjson.json.*;
 import discord4j.rest.request.Router;
 import discord4j.rest.route.Routes;
 import discord4j.rest.util.MultipartRequest;
@@ -97,8 +97,8 @@ public class ChannelService extends RestService {
 
     public Mono<Void> deleteReactions(long channelId, long messageId, String emoji) {
         return Routes.REACTION_DELETE.newRequest(channelId, messageId, emoji)
-            .exchange(getRouter())
-            .bodyToMono(Void.class);
+                .exchange(getRouter())
+                .bodyToMono(Void.class);
     }
 
     public Flux<UserData> getReactions(long channelId, long messageId, String emoji,
@@ -139,14 +139,22 @@ public class ChannelService extends RestService {
 
     @Experimental
     public Mono<Void> suppressEmbeds(long channelId, long messageId, SuppressEmbedsRequest request) {
-        return Routes.MESSAGE_SUPPRESS_EMBEDS.newRequest(channelId,messageId)
+        return Routes.MESSAGE_SUPPRESS_EMBEDS.newRequest(channelId, messageId)
                 .header("content-type", "application/json")
                 .body(request)
                 .exchange(getRouter())
                 .bodyToMono(Void.class);
     }
 
-    public Mono<Void> editChannelPermissions(long channelId, long overwriteId, PermissionsEditRequest request, @Nullable String reason) {
+    @Experimental
+    public Mono<Void> publishMessage(long channelId, long messageId) {
+        return Routes.CROSSPOST_MESSAGE.newRequest(channelId, messageId)
+                .exchange(getRouter())
+                .bodyToMono(Void.class);
+    }
+
+    public Mono<Void> editChannelPermissions(long channelId, long overwriteId, PermissionsEditRequest request,
+                                             @Nullable String reason) {
         return Routes.CHANNEL_PERMISSIONS_EDIT.newRequest(channelId, overwriteId)
                 .body(request)
                 .optionalHeader("X-Audit-Log-Reason", reason)

@@ -248,6 +248,15 @@ public abstract class Routes {
     public static final Route MESSAGE_SUPPRESS_EMBEDS = Route.post("/channels/{channel.id}/messages/{message.id}/suppress-embeds");
 
     /**
+     * Crosspost a Message into all guilds what follow the news channel indicated. This endpoint requires the
+     * 'DISCOVERY' feature to be present for the guild.
+     * <p>
+     * Returns a 204 empty response on success.
+     */
+    @Experimental
+    public static final Route CROSSPOST_MESSAGE = Route.post("/channels/{channel.id}/messages/{message.id}/crosspost");
+
+    /**
      * Edit the channel permission overwrites for a user or role in a channel. Only usable for guild channels. Requires
      * the 'MANAGE_ROLES' permission. Returns a 204 empty response on success. For more information about permissions,
      * see permissions.

@@ -21,20 +21,21 @@ import discord4j.core.event.domain.lifecycle.ReadyEvent;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.Message;
 
-public class ExampleQuickstart {
+public class ExampleQuickstartBlocking {
 
     public static void main(String[] args) {
         DiscordClient.create(System.getenv("token"))
                 .withGateway(client -> {
-                    client.getEventDispatcher().on(ReadyEvent.class)
+                    client.on(ReadyEvent.class)
                             .subscribe(ready -> System.out.println("Logged in as " + ready.getSelf().getUsername()));
 
-                    client.getEventDispatcher().on(MessageCreateEvent.class)
-                            .map(MessageCreateEvent::getMessage)
-                            .filter(msg -> msg.getContent().equals("!ping"))
-                            .flatMap(Message::getChannel)
-                            .flatMap(channel -> channel.createMessage("Pong!"))
-                            .subscribe();
+                    client.on(MessageCreateEvent.class)
+                            .subscribe(event -> {
+                                Message message = event.getMessage();
+                                if (message.getContent().equals("!ping")) {
+                                    message.getChannel().block().createMessage("Pong!").block();
+                                }
+                            });
 
                     return client.onDisconnect();
                 })

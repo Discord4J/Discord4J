@@ -58,7 +58,7 @@ public class DefaultShardingStrategy implements ShardingStrategy {
     public Flux<ShardInfo> getShards(int shardCount) {
         return Flux.from(indexSource.apply(shardCount))
                 .filter(index -> index >= 0 && index < count) // sanitize
-                .map(index -> new ShardInfo(index, count))
+                .map(index -> ShardInfo.create(index, count))
                 .filter(filter);
     }
 

@@ -17,6 +17,7 @@
 
 package discord4j.rest.entity;
 
+import discord4j.common.annotations.Experimental;
 import discord4j.discordjson.json.MessageData;
 import discord4j.discordjson.json.MessageEditRequest;
 import discord4j.rest.RestClient;
@@ -152,5 +153,16 @@ public class RestMessage {
      */
     public Mono<Void> delete(@Nullable String reason) {
         return restClient.getChannelService().deleteMessage(channelId, id, reason);
+    }
+
+    /**
+     * Requests to publish (crosspost) this message if the {@code channel} is of type 'news'.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the message was published
+     * (crossposted) in the guilds. If an error is received, it is emitted through the {@code Mono}.
+     */
+    @Experimental
+    public Mono<Void> publish() {
+        return restClient.getChannelService().publishMessage(channelId, id);
     }
 }

@@ -100,20 +100,15 @@ public class GatewayBootstrap<O extends GatewayOptions> {
 
     private static final Logger log = Loggers.getLogger(GatewayBootstrap.class);
 
-    /**
-     * {@link JdkStoreService} is the default store factory. Can be set explicitly to bypass StoreService discovery.
-     */
-    public static final StoreService DEFAULT_STORE = new JdkStoreService();
-
     private final DiscordClient client;
     private final Function<GatewayOptions, O> optionsModifier;
 
     private ShardingStrategy shardingStrategy = ShardingStrategy.recommended();
-    private boolean awaitConnections = true;
+    private Boolean awaitConnections = null;
     private ShardCoordinator shardCoordinator = null;
     private EventDispatcher eventDispatcher = null;
     private StoreService storeService = null;
-    private InvalidationStrategy invalidationStrategy = InvalidationStrategy.withJdkRegistry();
+    private InvalidationStrategy invalidationStrategy = null;
     private MemberRequestFilter memberRequestFilter = MemberRequestFilter.withLargeGuilds();
     private Function<ShardInfo, StatusUpdate> initialPresence = shard -> null;
     private Function<ShardInfo, SessionInfo> resumeOptions = shard -> null;
@@ -215,7 +210,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
 
     /**
      * Set if the connect {@link Mono} should defer completion until all joining shards have connected. Defaults to
-     * {@code true}.
+     * {@code true} if running a single shard, otherwise {@code false}.
      *
      * @param awaitConnections {@code true} if connect should wait until all joining shards have connected before
      * completing, or {@code false} to complete immediately
@@ -254,7 +249,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
 
     /**
      * Set a custom {@link StoreService}, an abstract factory to create {@link Store} instances, to cache Gateway
-     * updates. Defaults to using {@link #DEFAULT_STORE} unless another factory of higher priority is discovered.
+     * updates. Defaults to using {@link JdkStoreService} unless another factory of higher priority is discovered.
      *
      * @param storeService an externally managed {@link StoreService} to receive Gateway updates
      * @return this builder
@@ -296,9 +291,10 @@ public class GatewayBootstrap<O extends GatewayOptions> {
      * that point is lost and therefore the cache, represented by the {@link Store} abstraction, is outdated. Reacting
      * to this event is called "invalidation" and can be configured through this method.
      * <p>
-     * Defaults to using {@link InvalidationStrategy#withJdkRegistry()}, an in-memory registry to keep track of the
-     * source shard of each update for a fast removal on invalidation, at the cost of increased memory footprint.
+     * Defaults to using {@link InvalidationStrategy#disable()} unless you are under a single shard setup, where
+     * {@link InvalidationStrategy#identity()} is used. Common possible options are:
      * <ul>
+     *     <li>Using an in-memory registry through {@link InvalidationStrategy#withJdkRegistry()}</li>
      *     <li>For a custom registry use {@link InvalidationStrategy#withCustomRegistry(KeyStoreRegistry)}</li>
      *     <li>To disable this feature use {@link InvalidationStrategy#disable()}</li>
      *     <li>If this group only contains one shard, use {@link InvalidationStrategy#identity()}</li>
@@ -705,21 +701,24 @@ public class GatewayBootstrap<O extends GatewayOptions> {
     @Deprecated
     public Mono<GatewayDiscordClient> connect(Function<O, GatewayClient> clientFactory) {
         GatewayBootstrap<O> b = new GatewayBootstrap<>(this, this.optionsModifier);
-        Map<String, Object> hints = new LinkedHashMap<>();
-        hints.put("messageClass", MessageData.class);
-        StateHolder stateHolder = new StateHolder(initStoreService(), new StoreContext(hints));
-        StateView stateView = new StateView(stateHolder);
-        EventDispatcher eventDispatcher = initEventDispatcher();
-        GatewayReactorResources gatewayReactorResources = initGatewayReactorResources();
-        ShardCoordinator shardCoordinator = initShardCoordinator(gatewayReactorResources);
-        GatewayResources resources = new GatewayResources(stateView, eventDispatcher, shardCoordinator,
-                b.memberRequestFilter, gatewayReactorResources, initVoiceReactorResources(), b.voiceReconnectOptions);
-        MonoProcessor<Void> closeProcessor = MonoProcessor.create();
-        EntityRetrievalStrategy entityRetrievalStrategy = initEntityRetrievalStrategy();
-        DispatchEventMapper dispatchMapper = initDispatchEventMapper();
-
         return b.shardingStrategy.getShardCount(b.client)
                 .flatMap(count -> {
+                    InvalidationStrategy invalidationStrategy = b.initInvalidationStrategy(count);
+                    Map<String, Object> hints = new LinkedHashMap<>();
+                    hints.put("messageClass", MessageData.class);
+                    StateHolder stateHolder = new StateHolder(b.initStoreService(invalidationStrategy),
+                            new StoreContext(hints));
+                    StateView stateView = new StateView(stateHolder);
+                    EventDispatcher eventDispatcher = b.initEventDispatcher();
+                    GatewayReactorResources gatewayReactorResources = b.initGatewayReactorResources();
+                    ShardCoordinator shardCoordinator = b.initShardCoordinator(gatewayReactorResources);
+                    GatewayResources resources = new GatewayResources(stateView, eventDispatcher, shardCoordinator,
+                            b.memberRequestFilter, gatewayReactorResources, b.initVoiceReactorResources(),
+                            b.voiceReconnectOptions);
+                    MonoProcessor<Void> closeProcessor = MonoProcessor.create();
+                    EntityRetrievalStrategy entityRetrievalStrategy = b.initEntityRetrievalStrategy();
+                    DispatchEventMapper dispatchMapper = b.initDispatchEventMapper();
+
                     GatewayClientGroupManager clientGroup = b.shardingStrategy.getGroupManager(count);
                     GatewayDiscordClient gateway = new GatewayDiscordClient(b.client, resources, closeProcessor,
                             clientGroup, b.voiceConnectionFactory, entityRetrievalStrategy);
@@ -728,9 +727,9 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                             .groupBy(shard -> shard.getIndex() % b.shardingStrategy.getShardingFactor())
                             .flatMap(group -> group.concatMap(shard -> acquireConnection(b, shard, clientFactory,
                                     gateway, shardCoordinator, stateHolder, eventDispatcher, clientGroup,
-                                    closeProcessor, dispatchMapper)));
+                                    closeProcessor, dispatchMapper, invalidationStrategy)));
 
-                    if (awaitConnections) {
+                    if (awaitConnections == null ? count == 1 : awaitConnections) {
                         return connections.then(Mono.just(gateway));
                     } else {
                         return Mono.create(sink -> {
@@ -751,7 +750,8 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                                               EventDispatcher eventDispatcher,
                                               GatewayClientGroupManager clientGroup,
                                               MonoProcessor<Void> closeProcessor,
-                                              DispatchEventMapper dispatchMapper) {
+                                              DispatchEventMapper dispatchMapper,
+                                              InvalidationStrategy invalidationStrategy) {
         return Mono.deferWithContext(ctx ->
                 Mono.<ShardInfo>create(sink -> {
                     StatusUpdate initial = Optional.ofNullable(b.initialPresence.apply(shard)).orElse(null);
@@ -776,7 +776,8 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                                 LazyDispatch<?> actual;
                                 if (dispatch.isShardAware()) {
                                     ShardAwareDispatch shardDispatch = (ShardAwareDispatch) dispatch.getData();
-                                    info = new ShardInfo(shardDispatch.getShardIndex(), shardDispatch.getShardCount());
+                                    info = ShardInfo.create(shardDispatch.getShardIndex(),
+                                            shardDispatch.getShardCount());
                                     actual = new LazyDispatch<>(null, shardDispatch.getDispatch());
                                 } else {
                                     info = shard;
@@ -816,7 +817,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                                     case DISCONNECTED:
                                         log.info(format(ctx, "Shard disconnected"));
                                         return shardCoordinator.publishDisconnected(shard, session)
-                                                .then(b.invalidationStrategy.invalidate(shard, stateHolder))
+                                                .then(invalidationStrategy.invalidate(shard, stateHolder))
                                                 .then(Mono.fromRunnable(() -> clientGroup.remove(shard.getIndex())))
                                                 .then(shardCoordinator.getConnectedCount()
                                                         .filter(count -> count == 0 && !closeProcessor.isDisposed())
@@ -832,7 +833,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                                     case RETRY_STARTED:
                                     case RETRY_FAILED:
                                         log.debug(format(ctx, "Invalidating stores for shard"));
-                                        return b.invalidationStrategy.invalidate(shard, stateHolder);
+                                        return invalidationStrategy.invalidate(shard, stateHolder);
                                 }
                                 return Mono.empty();
                             })
@@ -911,7 +912,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                 new RateLimitTransformer(1, Duration.ofSeconds(6), reactorResources.getTimerTaskScheduler()));
     }
 
-    private StoreService initStoreService() {
+    private StoreService initStoreService(InvalidationStrategy invalidationStrategy) {
         if (storeService == null) {
             Map<Class<? extends StoreService>, Integer> priority = new HashMap<>();
             // We want almost minimum priority, so that jdk can beat no-op, but most implementations will beat jdk
@@ -944,6 +945,13 @@ public class GatewayBootstrap<O extends GatewayOptions> {
             return dispatchEventMapper;
         }
         return DispatchEventMapper.emitEvents();
+    }
+
+    private InvalidationStrategy initInvalidationStrategy(int shardCount) {
+        if (invalidationStrategy != null) {
+            return invalidationStrategy;
+        }
+        return shardCount == 1 ? InvalidationStrategy.identity() : InvalidationStrategy.disable();
     }
 
     private O buildOptions(GatewayDiscordClient gateway, IdentifyOptions identify, PayloadTransformer identifyLimiter) {

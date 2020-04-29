@@ -512,7 +512,7 @@ public final class Message implements Entity {
      */
     public Mono<Void> removeReactions(final ReactionEmoji emoji) {
         return gateway.getRestClient().getChannelService()
-            .deleteReactions(getChannelId().asLong(), getId().asLong(), EntityUtil.getEmojiString(emoji));
+                .deleteReactions(getChannelId().asLong(), getId().asLong(), EntityUtil.getEmojiString(emoji));
     }
 
     /**
@@ -558,6 +558,18 @@ public final class Message implements Entity {
     public Mono<Void> unpin() {
         return gateway.getRestClient().getChannelService()
                 .deletePinnedMessage(getChannelId().asLong(), getId().asLong());
+    }
+
+    /**
+     * Requests to publish (crosspost) this message if the {@code channel} is of type 'news'.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the message was published
+     * (crossposted) in the guilds. If an error is received, it is emitted through the {@code Mono}.
+     */
+    @Experimental
+    public Mono<Void> publish() {
+        return gateway.getRestClient().getChannelService()
+                .publishMessage(getChannelId().asLong(), getId().asLong());
     }
 
     @Override
@@ -725,7 +737,13 @@ public final class Message implements Entity {
          * A message created when a user follows a channel from another guild into specific channel (
          * <a href="https://support.discordapp.com/hc/en-us/articles/360028384531-Server-Following-FAQ">Server Following</a>).
          */
-        CHANNEL_FOLLOW_ADD(12);
+        CHANNEL_FOLLOW_ADD(12),
+
+        /** A message created when the Guild is disqualified for Discovery Feature **/
+        GUILD_DISCOVERY_DISQUALIFIED(14),
+
+        /** A message created when the Guild is requalified for Discovery Feature **/
+        GUILD_DISCOVERY_REQUALIFIED(15);
 
         /**
          * The underlying value as represented by Discord.
@@ -785,6 +803,10 @@ public final class Message implements Entity {
                     return USER_PREMIUM_GUILD_SUBSCRIPTION_TIER_3;
                 case 12:
                     return CHANNEL_FOLLOW_ADD;
+                case 14:
+                    return GUILD_DISCOVERY_DISQUALIFIED;
+                case 15:
+                    return GUILD_DISCOVERY_REQUALIFIED;
                 default:
                     return UNKNOWN;
             }

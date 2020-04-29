@@ -14,68 +14,94 @@ Built with [Reactor](https://projectreactor.io/), [Netty](https://netty.io/), an
 
 ## Installation
 
-Our current stable line is [`3.0.x`](https://github.com/Discord4J/Discord4J/tree/3.0.x)
+**Current stable releases** are from [`3.0.x`](https://github.com/Discord4J/Discord4J/tree/3.0.x). Check the [branch]((https://github.com/Discord4J/Discord4J/tree/3.0.x)) for instructions.
 
-### Gradle
+Instructions to use our latest pre-releases from `master` branch (3.1.x):
+
+##### Gradle
+
 ```groovy
 repositories {
   mavenCentral()
 }
 
 dependencies {
-  implementation 'com.discord4j:discord4j-core:3.0.14'
+  implementation 'com.discord4j:discord4j-core:3.1.0.M2'
 }
 ```
-### Maven
+
+##### Maven
+
 ```xml
 <dependencies>
   <dependency>
     <groupId>com.discord4j</groupId>
     <artifactId>discord4j-core</artifactId>
-    <version>3.0.14</version>
+    <version>3.1.0.M2</version>
   </dependency>
 </dependencies>
 ```
 
-### SBT
+##### SBT
+
 ```scala
 libraryDependencies ++= Seq(
-  "com.discord4j" % "discord4j-core" % "3.0.14"
+  "com.discord4j" % "discord4j-core" % "3.1.0.M2"
 )
 ```
 
-## Quick Example (Reactive and Blocking)
+### Dependencies
+
+- [Reactor Core](https://github.com/reactor/reactor-core) 3.3
+- [Reactor Netty](https://github.com/reactor/reactor-netty) 0.9
+- [Jackson Databind](https://github.com/FasterXML/jackson-databind) 2.11
+
+## Quick Example
+
+Coming from v3.0.x? Check our [Migration Guide](https://github.com/Discord4J/Discord4J/wiki/Migrating-from-v3.0-to-v3.1) (work in progress)
+
+##### Reactive
+
 ```java
-final DiscordClient client = DiscordClientBuilder.create("token").build();
+DiscordClient.create(System.getenv("token"))
+        .withGateway(client -> {
+            client.getEventDispatcher().on(ReadyEvent.class)
+                    .subscribe(ready -> System.out.println("Logged in as " + ready.getSelf().getUsername()));
 
-client.getEventDispatcher().on(ReadyEvent.class)
-        .subscribe(ready -> System.out.println("Logged in as " + ready.getSelf().getUsername()));
+            client.getEventDispatcher().on(MessageCreateEvent.class)
+                    .map(MessageCreateEvent::getMessage)
+                    .filter(msg -> msg.getContent().equals("!ping"))
+                    .flatMap(Message::getChannel)
+                    .flatMap(channel -> channel.createMessage("Pong!"))
+                    .subscribe();
 
-client.getEventDispatcher().on(MessageCreateEvent.class)
-        .map(MessageCreateEvent::getMessage)
-        .filter(msg -> msg.getContent().map("!ping"::equals).orElse(false))
-        .flatMap(Message::getChannel)
-        .flatMap(channel -> channel.createMessage("Pong!"))
-        .subscribe();
-
-client.login().block();
+            return client.onDisconnect();
+        })
+        .block();
 ```
+
+##### Blocking
+
 ```java
-final DiscordClient client = DiscordClientBuilder.create("token").build();
+DiscordClient.create(System.getenv("token"))
+        .withGateway(client -> {
+            client.on(ReadyEvent.class)
+                    .subscribe(ready -> System.out.println("Logged in as " + ready.getSelf().getUsername()));
 
-client.getEventDispatcher().on(ReadyEvent.class)
-        .subscribe(ready -> System.out.println("Logged in as " + ready.getSelf().getUsername()));
+            client.on(MessageCreateEvent.class)
+                    .subscribe(event -> {
+                        Message message = event.getMessage();
+                        if (message.getContent().equals("!ping")) {
+                            message.getChannel().block().createMessage("Pong!").block();
+                        }
+                    });
 
-client.getEventDispatcher().on(MessageCreateEvent.class)
-        .subscribe(event -> {
-            Message message = event.getMessage();
-            if (message.getContent().map("!ping"::equals).orElse(false)) {
-                message.getChannel().block().createMessage("Pong!").block();
-            }
-         });
-
-client.login().block();
+            return client.onDisconnect();
+        })
+        .block();
 ```
+
+Check out more examples [here](https://github.com/Discord4J/Discord4J/tree/master/core/src/test/java/discord4j/core)
 
 ## Modules
 Discord4J is highly oriented towards customizability. To achieve this, the project is divided into several "modules" which can be used separately depending on your use case.
@@ -104,40 +130,13 @@ Discord4J's mechanism for storing information received on the gateway is complet
 * [Javadoc](http://javadoc.io/doc/com.discord4j/discord4j-core/)
 * [Reactor 3 Reference Guide](http://projectreactor.io/docs/core/release/reference/)
 
-## Development builds (v3.1)
+## Snapshots
 
-Check out some [examples](https://github.com/Discord4J/Discord4J/tree/master/core/src/test/java/discord4j/core) on how to use it.
-
-### Jitpack
-
-Please follow our instructions at [Using Jitpack](https://github.com/Discord4J/Discord4J/wiki/Using-Jitpack)
-
-### Pre-releases
-
-### Gradle
-```groovy
-repositories {
-  mavenCentral()
-}
-
-dependencies {
-  implementation 'com.discord4j:discord4j-core:3.1.0.M1'
-}
-```
-### Maven
-```xml
-<dependencies>
-  <dependency>
-    <groupId>com.discord4j</groupId>
-    <artifactId>discord4j-core</artifactId>
-    <version>3.1.0.M1</version>
-  </dependency>
-</dependencies>
-```
-
-### Snapshots
+Development builds can be obtained from Sonatype Snapshots repository or [Jitpack](https://github.com/Discord4J/Discord4J/wiki/Using-Jitpack).
 
 Make sure you have the appropriate repositories, using Gradle:
+
+##### Gradle
 
 ```groovy
 repositories {
@@ -150,7 +149,7 @@ dependencies {
 }
 ```
 
-And using Maven:
+##### Maven
 
 ```xml
 <repositories>
