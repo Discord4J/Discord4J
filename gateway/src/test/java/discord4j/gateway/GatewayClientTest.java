@@ -60,7 +60,7 @@ public class GatewayClientTest {
                 reader,
                 writer,
                 reconnectOptions,
-                new IdentifyOptions(new ShardInfo(0, 1), null, Possible.absent(), true),
+                new IdentifyOptions(ShardInfo.create(0, 1), null, Possible.absent(), true),
                 GatewayObserver.NOOP_LISTENER,
                 new RateLimitTransformer(1, Duration.ofSeconds(6)),
                 1
@@ -123,7 +123,7 @@ public class GatewayClientTest {
                     new JacksonPayloadReader(mapper),
                     new JacksonPayloadWriter(mapper),
                     reconnectOptions,
-                    new IdentifyOptions(new ShardInfo(i, shardCount), ImmutableStatusUpdate.of(Optional.empty(), Optional.empty(), "invisible", false), Possible.absent(), true),
+                    new IdentifyOptions(ShardInfo.create(i, shardCount), ImmutableStatusUpdate.of(Optional.empty(), Optional.empty(), "invisible", false), Possible.absent(), true),
                     (s, o) -> {
                         if (s.equals(GatewayObserver.CONNECTED)) {
                             next.countDown();

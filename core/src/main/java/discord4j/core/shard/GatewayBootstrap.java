@@ -772,7 +772,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                                 Dispatch actual;
                                 if (dispatch instanceof ShardAwareDispatch) {
                                     ShardAwareDispatch shardDispatch = (ShardAwareDispatch) dispatch;
-                                    info = new ShardInfo(shardDispatch.getShardIndex(), shardDispatch.getShardCount());
+                                    info = ShardInfo.create(shardDispatch.getShardIndex(), shardDispatch.getShardCount());
                                     actual = shardDispatch.getDispatch();
                                 } else {
                                     info = shard;
