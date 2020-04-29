@@ -38,6 +38,7 @@ import io.netty.buffer.ByteBuf;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.*;
 import reactor.netty.ConnectionObserver;
+import reactor.netty.http.client.WebsocketClientSpec;
 import reactor.retry.Retry;
 import reactor.util.Logger;
 import reactor.util.Loggers;
@@ -252,7 +253,9 @@ public class DefaultGatewayClient implements GatewayClient {
                     Mono<Void> httpFuture = reactorResources.getHttpClient()
                             .headers(headers -> headers.add(USER_AGENT, initUserAgent()))
                             .observe(getObserver(context))
-                            .websocket(Integer.MAX_VALUE)
+                            .websocket(WebsocketClientSpec.builder()
+                                    .maxFramePayloadLength(Integer.MAX_VALUE)
+                                    .build())
                             .uri(gatewayUrl)
                             .handle(sessionHandler::handle)
                             .subscriberContext(LogUtil.clearContext())

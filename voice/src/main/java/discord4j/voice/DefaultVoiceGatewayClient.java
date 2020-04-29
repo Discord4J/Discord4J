@@ -36,6 +36,7 @@ import io.netty.buffer.Unpooled;
 import reactor.core.Disposable;
 import reactor.core.Disposables;
 import reactor.core.publisher.*;
+import reactor.netty.http.client.WebsocketClientSpec;
 import reactor.retry.Retry;
 import reactor.util.Logger;
 import reactor.util.Loggers;
@@ -226,7 +227,9 @@ public class DefaultVoiceGatewayClient {
 
                     Mono<Void> httpFuture = reactorResources.getHttpClient()
                             .headers(headers -> headers.add(USER_AGENT, "DiscordBot(https://discord4j.com, 3)"))
-                            .websocket(Integer.MAX_VALUE)
+                            .websocket(WebsocketClientSpec.builder()
+                                    .maxFramePayloadLength(Integer.MAX_VALUE)
+                                    .build())
                             .uri(gatewayUrl + "?v=4")
                             .handle(sessionHandler::handle)
                             .subscriberContext(LogUtil.clearContext())

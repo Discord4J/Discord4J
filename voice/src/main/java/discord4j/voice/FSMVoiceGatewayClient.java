@@ -34,6 +34,7 @@ import reactor.core.publisher.Mono;
 import reactor.core.publisher.MonoSink;
 import reactor.core.scheduler.Schedulers;
 import reactor.netty.http.client.HttpClient;
+import reactor.netty.http.client.WebsocketClientSpec;
 import reactor.netty.http.websocket.WebsocketInbound;
 import reactor.netty.http.websocket.WebsocketOutbound;
 import reactor.util.Logger;
@@ -68,7 +69,9 @@ public class FSMVoiceGatewayClient {
                         Disposable websocketTask = HttpClient.create()
                                 .wiretap(true)
                                 .headers(headers -> headers.add(USER_AGENT, "DiscordBot(https://discord4j.com, 3)"))
-                                .websocket(Integer.MAX_VALUE)
+                                .websocket(WebsocketClientSpec.builder()
+                                        .maxFramePayloadLength(Integer.MAX_VALUE)
+                                        .build())
                                 .uri(start.gatewayUrl + "?v=3")
                                 .handle(FSMVoiceGatewayClient.this::handle)
                                 .subscribe();
