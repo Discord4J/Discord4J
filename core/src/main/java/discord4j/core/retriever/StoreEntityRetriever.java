@@ -62,7 +62,10 @@ class StoreEntityRetriever implements EntityRetriever {
     public Mono<Member> getMemberById(Snowflake guildId, Snowflake userId) {
         return stateView.getMemberStore()
                 .find(LongLongTuple2.of(guildId.asLong(), userId.asLong()))
-                .map(data -> new Member(gateway, data, guildId.asLong()));
+                .map(data -> new Member(gateway, data, guildId.asLong()))
+                .switchIfEmpty(gateway.requestMembers(guildId)
+                        .filter(member -> member.getId().equals(userId))
+                        .next());
     }
 
     @Override
