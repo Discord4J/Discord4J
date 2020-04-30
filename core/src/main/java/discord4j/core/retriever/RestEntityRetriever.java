@@ -34,7 +34,7 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-class RestEntityRetriever implements EntityRetriever {
+public class RestEntityRetriever implements EntityRetriever {
 
     private final GatewayDiscordClient gateway;
     private final RestClient rest;

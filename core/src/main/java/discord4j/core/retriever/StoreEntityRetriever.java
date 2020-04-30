@@ -27,7 +27,7 @@ import discord4j.store.api.util.LongLongTuple2;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-class StoreEntityRetriever implements EntityRetriever {
+public class StoreEntityRetriever implements EntityRetriever {
 
     private final GatewayDiscordClient gateway;
     private final StateView stateView;
