@@ -30,7 +30,7 @@ import reactor.core.publisher.Mono;
 import java.util.Collections;
 import java.util.Set;
 
-class StoreEntityRetriever implements EntityRetriever {
+public class StoreEntityRetriever implements EntityRetriever {
 
     private final GatewayDiscordClient gateway;
     private final StateView stateView;
