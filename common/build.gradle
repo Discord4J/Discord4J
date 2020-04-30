@@ -17,3 +17,11 @@ gitProperties {
     customProperty 'application.description', project_description
     customProperty 'application.url', project_url
 }
+
+jar {
+    manifest {
+        attributes 'Implementation-Title': archivesBaseName,
+                'Implementation-Version': archiveVersion,
+                'Automatic-Module-Name': 'discord4j.common'
+    }
+}

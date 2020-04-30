@@ -26,3 +26,11 @@ javadoc {
     options.linksOffline rootProject.buildStoresDocsUrl('stores-api', false), rootProject.buildStoresDocsUrl('stores-api', true)
     options.linksOffline rootProject.buildStoresDocsUrl('stores-jdk', false), rootProject.buildStoresDocsUrl('stores-jdk', true)
 }
+
+jar {
+    manifest {
+        attributes 'Implementation-Title': archivesBaseName,
+                'Implementation-Version': archiveVersion,
+                'Automatic-Module-Name': 'discord4j.core'
+    }
+}
