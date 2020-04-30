@@ -27,6 +27,8 @@ import discord4j.store.api.util.LongLongTuple2;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.Set;
+
 class StoreEntityRetriever implements EntityRetriever {
 
     private final GatewayDiscordClient gateway;
@@ -63,7 +65,7 @@ class StoreEntityRetriever implements EntityRetriever {
         return stateView.getMemberStore()
                 .find(LongLongTuple2.of(guildId.asLong(), userId.asLong()))
                 .map(data -> new Member(gateway, data, guildId.asLong()))
-                .switchIfEmpty(gateway.requestMembers(guildId)
+                .switchIfEmpty(gateway.requestMembers(guildId, Set.of(userId))
                         .filter(member -> member.getId().equals(userId))
                         .next());
     }
