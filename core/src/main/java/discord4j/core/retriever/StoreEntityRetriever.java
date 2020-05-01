@@ -28,14 +28,13 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.Collections;
-import java.util.Set;
 
 public class StoreEntityRetriever implements EntityRetriever {
 
     private final GatewayDiscordClient gateway;
     private final StateView stateView;
 
-    StoreEntityRetriever(GatewayDiscordClient gateway) {
+    public StoreEntityRetriever(GatewayDiscordClient gateway) {
         this.gateway = gateway;
         this.stateView = gateway.getGatewayResources().getStateView();
     }

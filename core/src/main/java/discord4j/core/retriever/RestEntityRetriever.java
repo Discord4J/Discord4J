@@ -39,7 +39,7 @@ public class RestEntityRetriever implements EntityRetriever {
     private final GatewayDiscordClient gateway;
     private final RestClient rest;
 
-    RestEntityRetriever(GatewayDiscordClient gateway) {
+    public RestEntityRetriever(GatewayDiscordClient gateway) {
         this.gateway = gateway;
         this.rest = gateway.rest();
     }
