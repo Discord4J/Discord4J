@@ -139,8 +139,8 @@ public class DefaultVoiceGatewayClient {
     }
 
     private Mono<Void> connect(String gatewayUrl, MonoSink<VoiceConnection> voiceConnectionSink) {
-        return Mono.subscriberContext()
-                .flatMap(context -> {
+        return Mono.deferWithContext(
+                context -> {
                     disconnectNotifier = MonoProcessor.create();
 
                     Flux<ByteBuf> outFlux = outbound.flatMap(payloadWriter)
@@ -177,20 +177,20 @@ public class DefaultVoiceGatewayClient {
                                     innerCleanup.add(Mono.defer(() ->
                                             voiceSocket.setup(ready.getData().ip, ready.getData().port))
                                             .then(voiceSocket.performIpDiscovery(ready.getData().ssrc))
-                                            .timeout(Duration.ofSeconds(5))
+                                            .timeout(Duration.ofSeconds(5)) // TODO parameterize
                                             .doOnError(t -> log.warn("Unable to perform voice setup: {}", t.toString()))
-                                            .retry()
+                                            .retryWhen(reactor.util.retry.Retry.maxInARow(1)) // TODO parameterize
                                             .subscriberContext(context)
-                                            .subscribe(address -> {
+                                            .subscribe(
+                                                    address -> {
                                                         String hostName = address.getHostName();
                                                         int port = address.getPort();
                                                         outboundSink.next(new SelectProtocol(VoiceSocket.PROTOCOL,
                                                                 hostName,
                                                                 port, VoiceSocket.ENCRYPTION_MODE));
-                                                    }, t -> log.error(format(context,
-                                                    "Voice socket terminated with an error"), t),
-                                                    () -> log.debug(format(context,
-                                                            "Voice socket setup completed"))));
+                                                    },
+                                                    t -> log.error(format(context, "Voice socket setup error"), t),
+                                                    () -> log.debug(format(context, "Voice socket setup complete"))));
                                 } else if (payload instanceof SessionDescription) {
                                     log.info(format(context, "Receiving events"));
                                     state.set(VoiceConnection.State.CONNECTED);
@@ -247,6 +247,7 @@ public class DefaultVoiceGatewayClient {
     }
 
     private VoiceConnection acquireConnection() {
+        // TODO improve VoiceConnection API
         return new VoiceConnection() {
 
             @Override
@@ -266,13 +267,7 @@ public class DefaultVoiceGatewayClient {
 
             @Override
             public Mono<Void> disconnect() {
-                return Mono.fromCallable(this::isConnected)
-                        .flatMap(connected -> {
-                            if (connected) {
-                                return stop().then(disconnectTask.onDisconnect(guildId));
-                            }
-                            return Mono.empty();
-                        });
+                return Mono.fromCallable(this::isConnected).flatMap(connected -> connected ? stop() : Mono.empty());
             }
         };
     }
@@ -365,7 +360,7 @@ public class DefaultVoiceGatewayClient {
                 case STOP_ABRUPTLY:
                 case STOP:
                     disconnectNotifier.onComplete();
-                    return Mono.just(closeStatus);
+                    return disconnectTask.onDisconnect(guildId).thenReturn(closeStatus);
                 case RETRY_ABRUPTLY:
                 case RETRY:
                 default:
