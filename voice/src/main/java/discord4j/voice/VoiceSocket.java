@@ -53,10 +53,10 @@ public class VoiceSocket {
     }
 
     Mono<Void> setup(String address, int port) {
-        return Mono.subscriberContext()
-                .flatMap(context -> udpClient.host(address).port(port)
-                        .doOnConnected(c -> log.info("Connected to {}", c.address()))
-                        .doOnDisconnected(c -> log.info("Disconnected from {}", c.address()))
+        return Mono.deferWithContext(
+                context -> udpClient.host(address).port(port)
+                        .doOnConnected(c -> log.info(format(context, "Connected to {}"), c.address()))
+                        .doOnDisconnected(c -> log.info(format(context,"Disconnected from {}"), c.address()))
                         .handle((in, out) -> {
                             Mono<Void> inboundThen = in.receive().retain()
                                     .doOnNext(buf -> logPayload("<< ", context, buf))
@@ -78,6 +78,7 @@ public class VoiceSocket {
     }
 
     Mono<InetSocketAddress> performIpDiscovery(int ssrc) {
+        // TODO validate this implementation
         Mono<Void> sendDiscoveryPacket = Mono.fromRunnable(() -> {
             ByteBuf discoveryPacket = Unpooled.buffer(DISCOVERY_PACKET_LENGTH)
                     .writeInt(ssrc)
