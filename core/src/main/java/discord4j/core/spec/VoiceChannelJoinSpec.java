@@ -24,6 +24,7 @@ import discord4j.core.object.entity.channel.VoiceChannel;
 import discord4j.discordjson.json.gateway.VoiceStateUpdate;
 import discord4j.gateway.GatewayClientGroup;
 import discord4j.gateway.json.ShardGatewayPayload;
+import discord4j.rest.util.Permission;
 import discord4j.rest.util.Snowflake;
 import discord4j.voice.*;
 import reactor.core.publisher.Mono;
@@ -133,7 +134,7 @@ public class VoiceChannelJoinSpec implements Spec<Mono<VoiceConnection>> {
 
     /**
      * Sets the maximum amount of time to wait before the connection to the voice channel timeouts.
-     * For example, the connection may get stuck when the bot does not have {@link discord4j.rest.util.Permission.VIEW_CHANNEL} or
+     * For example, the connection may get stuck when the bot does not have {@link Permission#VIEW_CHANNEL} or
      * when the voice channel is full.
      * The default value is {@value #DEFAULT_TIMEOUT} seconds.
      *
@@ -141,7 +142,7 @@ public class VoiceChannelJoinSpec implements Spec<Mono<VoiceConnection>> {
      * @return This spec.
      */
     public VoiceChannelJoinSpec setTimeout(Duration timeout) {
-        this.timeout = timeout;
+        this.timeout = Objects.requireNonNull(timeout);
         return this;
     }
 
@@ -150,7 +151,7 @@ public class VoiceChannelJoinSpec implements Spec<Mono<VoiceConnection>> {
         final long guildId = voiceChannel.getGuildId().asLong();
         final long channelId = voiceChannel.getId().asLong();
         final Mono<Long> selfIdMono = gateway.getGatewayResources().getStateView().getSelfId()
-                .switchIfEmpty(Mono.just(0L))
+                .switchIfEmpty(Mono.error(new IllegalStateException("Missing self id")))
                 .cache();
 
         final GatewayClientGroup clientGroup = voiceChannel.getClient().getGatewayClientGroup();
@@ -184,6 +185,8 @@ public class VoiceChannelJoinSpec implements Spec<Mono<VoiceConnection>> {
                 // should arrive afterwards
                 .next();
 
+        final VoiceDisconnectTask disconnectTask = onDisconnectTask(voiceChannel.getClient().getGatewayClientGroup());
+
         return sendVoiceStateUpdate
                 .then(Mono.zip(waitForVoiceStateUpdate, waitForVoiceServerUpdate, selfIdMono))
                 .flatMap(t3 -> {
@@ -197,14 +200,14 @@ public class VoiceChannelJoinSpec implements Spec<Mono<VoiceConnection>> {
                                     voiceChannel.getClient().getCoreResources().getJacksonResources(),
                                     voiceChannel.getClient().getGatewayResources().getVoiceReactorResources(),
                                     voiceChannel.getClient().getGatewayResources().getVoiceReconnectOptions(),
-                                    provider, receiver, sendTaskFactory, receiveTaskFactory,
-                                    onDisconnectTask(voiceChannel.getClient().getGatewayClientGroup()))
+                                    provider, receiver, sendTaskFactory, receiveTaskFactory, disconnectTask)
                             .subscriberContext(ctx ->
                                     ctx.put(LogUtil.KEY_GATEWAY_ID, Integer.toHexString(gateway.hashCode()))
                                             .put(LogUtil.KEY_SHARD_ID, shardId)
                                             .put(LogUtil.KEY_GUILD_ID, Snowflake.asString(guildId)));
                 })
-                .timeout(timeout);
+                .timeout(timeout)
+                .onErrorResume(t -> disconnectTask.onDisconnect(guildId).then(Mono.error(t)));
     }
 
     private static VoiceDisconnectTask onDisconnectTask(GatewayClientGroup clientGroup) {
