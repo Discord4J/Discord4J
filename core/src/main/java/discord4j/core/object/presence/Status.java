@@ -16,6 +16,11 @@
  */
 package discord4j.core.object.presence;
 
+/**
+ * Represents the various type of status.
+ * See <a href="https://discordapp.com/developers/docs/topics/gateway#update-status-status-types">
+ *     Status Types</a>
+ */
 public enum Status {
 
     UNKNOWN("UNKNOWN"),
@@ -25,16 +30,34 @@ public enum Status {
     INVISIBLE("invisible"),
     OFFLINE("offline");
 
+    /** The underlying value as represented by Discord. */
     private final String value;
 
+    /**
+     * Constructs a {@code Status}.
+     *
+     * @param value The underlying value as represented by Discord.
+     */
     Status(String value) {
         this.value = value;
     }
 
+    /**
+     * Gets the underlying value as represented by Discord.
+     *
+     * @return The underlying value as represented by Discord.
+     */
     public String getValue() {
         return value;
     }
 
+    /**
+     * Gets the type of status. It is guaranteed that invoking {@link #getValue()} from the returned enum will equal
+     * ({@link #equals(Object)}) the supplied {@code value}.
+     *
+     * @param value The underlying value as represented by Discord.
+     * @return The type of status.
+     */
     public static Status of(final String value) {
         switch (value) {
             case "idle": return IDLE;
