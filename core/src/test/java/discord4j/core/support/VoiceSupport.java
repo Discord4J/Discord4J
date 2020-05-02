@@ -17,6 +17,7 @@ import discord4j.core.object.VoiceState;
 import discord4j.core.object.entity.Member;
 import discord4j.discordjson.json.MessageCreateRequest;
 import discord4j.voice.AudioProvider;
+import discord4j.voice.VoiceConnection;
 import reactor.core.publisher.Mono;
 import reactor.util.Logger;
 import reactor.util.Loggers;
@@ -49,25 +50,27 @@ public class VoiceSupport {
         AudioPlayer player = playerManager.createPlayer();
         AudioProvider provider = new LavaplayerAudioProvider(player);
 
-        Mono<MessageCreateEvent> leave = client.getEventDispatcher().on(MessageCreateEvent.class)
-                .filter(e -> e.getMessage().getContent().equals("!leave"))
-                .next();
-
         Mono<Void> join = client.getEventDispatcher().on(MessageCreateEvent.class)
-                .filter(e -> e.getMessage().getContent().startsWith("!join"))
+                .filter(e -> e.getMessage().getContent().equals("!join"))
                 .flatMap(e -> Mono.justOrEmpty(e.getMember())
                         .flatMap(Member::getVoiceState)
                         .flatMap(VoiceState::getChannel)
                         .flatMap(channel -> channel.join(spec -> {
                             spec.setProvider(provider);
                         })))
-                .zipWith(leave)
-                .flatMap(t2 -> t2.getT1().disconnect())
                 .onErrorResume(t -> {
                     log.error("Failed to join vc", t);
                     return Mono.empty();
                 })
-                .repeat()
+                .then();
+
+        Mono<Void> leave = client.getEventDispatcher().on(MessageCreateEvent.class)
+                .filter(e -> e.getMessage().getContent().equals("!leave"))
+                .flatMap(e -> Mono.justOrEmpty(e.getMember())
+                        .flatMap(Member::getVoiceState)
+                        .flatMap(vs -> client.getVoiceConnectionRegistry()
+                                .getVoiceConnection(vs.getGuildId().asLong()))
+                        .flatMap(VoiceConnection::disconnect))
                 .then();
 
         Mono<Void> play = client.getEventDispatcher().on(MessageCreateEvent.class)
@@ -93,7 +96,7 @@ public class VoiceSupport {
                                         .build())))
                 .then();
 
-        return Mono.zip(join, play, stop, currentGuild, client.onDisconnect()).then();
+        return Mono.zip(join, leave, play, stop, currentGuild, client.onDisconnect()).then();
     }
 
     private static class LavaplayerAudioProvider extends AudioProvider {

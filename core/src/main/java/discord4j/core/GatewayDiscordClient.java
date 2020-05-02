@@ -48,7 +48,10 @@ import discord4j.gateway.json.ShardGatewayPayload;
 import discord4j.rest.RestClient;
 import discord4j.rest.RestResources;
 import discord4j.rest.util.Snowflake;
+import discord4j.voice.LocalVoiceConnectionRegistry;
+import discord4j.voice.VoiceConnection;
 import discord4j.voice.VoiceConnectionFactory;
+import discord4j.voice.VoiceConnectionRegistry;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -88,6 +91,7 @@ public class GatewayDiscordClient implements EntityRetriever {
     private final MonoProcessor<Void> closeProcessor;
     private final GatewayClientGroup gatewayClientGroup;
     private final VoiceConnectionFactory voiceConnectionFactory;
+    private final VoiceConnectionRegistry voiceConnectionRegistry;
     private final EntityRetriever entityRetriever;
 
     public GatewayDiscordClient(DiscordClient discordClient, GatewayResources gatewayResources,
@@ -99,6 +103,7 @@ public class GatewayDiscordClient implements EntityRetriever {
         this.closeProcessor = closeProcessor;
         this.gatewayClientGroup = gatewayClientGroup;
         this.voiceConnectionFactory = voiceConnectionFactory;
+        this.voiceConnectionRegistry = new LocalVoiceConnectionRegistry();
         this.entityRetriever = entityRetrievalStrategy.apply(this);
     }
 
@@ -171,6 +176,16 @@ public class GatewayDiscordClient implements EntityRetriever {
      */
     public VoiceConnectionFactory getVoiceConnectionFactory() {
         return voiceConnectionFactory;
+    }
+
+    /**
+     * Return the {@link VoiceConnectionRegistry} for this {@link GatewayDiscordClient}. This allows you to retrieve
+     * currently registered {@link VoiceConnection} instances.
+     *
+     * @return a {@link VoiceConnectionRegistry} for voice connections
+     */
+    public VoiceConnectionRegistry getVoiceConnectionRegistry() {
+        return voiceConnectionRegistry;
     }
 
     /**

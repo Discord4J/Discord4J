@@ -188,21 +188,25 @@ public class VoiceChannelJoinSpec implements Spec<Mono<VoiceConnection>> {
                 // should arrive afterwards
                 .next();
 
-        final VoiceDisconnectTask disconnectTask = onDisconnectTask(gateway.getGatewayClientGroup());
+        final VoiceDisconnectTask disconnectTask = onDisconnectTask(gateway);
+        final VoiceServerUpdateTask serverUpdateTask = onServerUpdateTask(gateway);
 
-        return sendVoiceStateUpdate
+        Mono<VoiceConnection> newConnection = sendVoiceStateUpdate
                 .then(Mono.zip(waitForVoiceStateUpdate, waitForVoiceServerUpdate, selfIdSupplier.next()))
                 .flatMap(TupleUtils.function((voiceState, voiceServer, selfId) -> {
-                    final String endpoint = voiceServer.getEndpoint().replace(":80", ""); // discord sends wrong port...
                     final String session = voiceState.getCurrent().getSessionId();
-                    final String token = voiceServer.getToken();
+                    @SuppressWarnings("ConstantConditions")
+                    final VoiceServerOptions voiceServerOptions = new VoiceServerOptions(voiceServer.getToken(),
+                            voiceServer.getEndpoint());
 
                     return gateway.getVoiceConnectionFactory()
-                            .create(guildId, selfId, session, token, endpoint,
+                            .create(guildId, selfId, session, voiceServerOptions,
                                     gateway.getCoreResources().getJacksonResources(),
                                     gateway.getGatewayResources().getVoiceReactorResources(),
                                     gateway.getGatewayResources().getVoiceReconnectOptions(),
-                                    provider, receiver, sendTaskFactory, receiveTaskFactory, disconnectTask)
+                                    provider, receiver, sendTaskFactory, receiveTaskFactory, disconnectTask,
+                                    serverUpdateTask)
+                            .flatMap(vc -> gateway.getVoiceConnectionRegistry().registerVoiceConnection(guildId, vc).thenReturn(vc))
                             .subscriberContext(ctx ->
                                     ctx.put(LogUtil.KEY_GATEWAY_ID, Integer.toHexString(gateway.hashCode()))
                                             .put(LogUtil.KEY_SHARD_ID, shardId)
@@ -210,17 +214,35 @@ public class VoiceChannelJoinSpec implements Spec<Mono<VoiceConnection>> {
                 }))
                 .timeout(timeout)
                 .onErrorResume(t -> disconnectTask.onDisconnect(guildId).then(Mono.error(t)));
+
+        return gateway.getVoiceConnectionRegistry().getVoiceConnection(guildId)
+                .flatMap(existing -> sendVoiceStateUpdate.then(waitForVoiceStateUpdate).thenReturn(existing))
+                .switchIfEmpty(newConnection);
     }
 
-    private static VoiceDisconnectTask onDisconnectTask(GatewayClientGroup clientGroup) {
+    private static VoiceDisconnectTask onDisconnectTask(GatewayDiscordClient gateway) {
         return guildId -> {
             VoiceStateUpdate voiceStateUpdate = VoiceStateUpdate.builder()
                     .guildId(Snowflake.asString(guildId))
                     .selfMute(false)
                     .selfDeaf(false)
                     .build();
+            GatewayClientGroup clientGroup = gateway.getGatewayClientGroup();
             int shardId = (int) ((guildId >> 22) % clientGroup.getShardCount());
-            return clientGroup.unicast(ShardGatewayPayload.voiceStateUpdate(voiceStateUpdate, shardId));
+            return clientGroup.unicast(ShardGatewayPayload.voiceStateUpdate(voiceStateUpdate, shardId))
+                    .then(gateway.getVoiceConnectionRegistry().disconnect(guildId));
+        };
+    }
+
+    private static VoiceServerUpdateTask onServerUpdateTask(GatewayDiscordClient gateway) {
+        return guildId -> {
+            //noinspection ConstantConditions
+            return gateway.getEventDispatcher()
+                    .on(VoiceServerUpdateEvent.class)
+                    .filter(vsu -> vsu.getGuildId().asLong() == guildId)
+                    .filter(vsu -> vsu.getEndpoint() != null)
+                    .map(vsu -> new VoiceServerOptions(vsu.getToken(), vsu.getEndpoint()))
+                    .next();
         };
     }
 }

@@ -27,8 +27,7 @@ public class DefaultVoiceConnectionFactory implements VoiceConnectionFactory {
     public Mono<VoiceConnection> create(long guildId,
                                         long selfId,
                                         String session,
-                                        String token,
-                                        String gatewayUrl,
+                                        VoiceServerOptions voiceServerOptions,
                                         JacksonResources jacksonResources,
                                         VoiceReactorResources reactorResources,
                                         ReconnectOptions reconnectOptions,
@@ -36,10 +35,11 @@ public class DefaultVoiceConnectionFactory implements VoiceConnectionFactory {
                                         AudioReceiver receiver,
                                         VoiceSendTaskFactory sendTaskFactory,
                                         VoiceReceiveTaskFactory receiveTaskFactory,
-                                        VoiceDisconnectTask onDisconnectTask) {
-        DefaultVoiceGatewayClient vgw = new DefaultVoiceGatewayClient(guildId, selfId, session, token,
+                                        VoiceDisconnectTask onDisconnectTask,
+                                        VoiceServerUpdateTask serverUpdateTask) {
+        DefaultVoiceGatewayClient vgw = new DefaultVoiceGatewayClient(guildId, selfId, session,
                 jacksonResources.getObjectMapper(), reactorResources, reconnectOptions,
-                provider, receiver, sendTaskFactory, receiveTaskFactory, onDisconnectTask);
-        return vgw.start(gatewayUrl);
+                provider, receiver, sendTaskFactory, receiveTaskFactory, onDisconnectTask, serverUpdateTask);
+        return vgw.start(voiceServerOptions);
     }
 }

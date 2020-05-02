@@ -25,11 +25,11 @@ import reactor.core.publisher.Mono;
 @Experimental
 public interface VoiceConnectionFactory {
 
+    // TODO refactor into VoiceGatewayOptions
     Mono<VoiceConnection> create(long guildId,
                                  long selfId,
                                  String session,
-                                 String token,
-                                 String gatewayUrl,
+                                 VoiceServerOptions voiceServerOptions,
                                  JacksonResources jacksonResources,
                                  VoiceReactorResources reactorResources,
                                  ReconnectOptions reconnectOptions,
@@ -37,5 +37,6 @@ public interface VoiceConnectionFactory {
                                  AudioReceiver receiver,
                                  VoiceSendTaskFactory sendTaskFactory,
                                  VoiceReceiveTaskFactory receiveTaskFactory,
-                                 VoiceDisconnectTask voiceDisconnectTask);
+                                 VoiceDisconnectTask voiceDisconnectTask,
+                                 VoiceServerUpdateTask voiceServerUpdateTask);
 }
