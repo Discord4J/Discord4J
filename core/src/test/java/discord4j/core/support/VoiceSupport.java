@@ -63,6 +63,10 @@ public class VoiceSupport {
                         })))
                 .zipWith(leave)
                 .flatMap(t2 -> t2.getT1().disconnect())
+                .onErrorResume(t -> {
+                    log.error("Failed to join vc", t);
+                    return Mono.empty();
+                })
                 .repeat()
                 .then();
 
@@ -89,7 +93,7 @@ public class VoiceSupport {
                                         .build())))
                 .then();
 
-        return Mono.zip(join, play, stop, currentGuild).then();
+        return Mono.zip(join, play, stop, currentGuild, client.onDisconnect()).then();
     }
 
     private static class LavaplayerAudioProvider extends AudioProvider {
