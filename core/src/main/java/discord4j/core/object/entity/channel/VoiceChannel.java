@@ -102,10 +102,12 @@ public final class VoiceChannel extends BaseCategorizableChannel {
      * connection to the channel has been established. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<VoiceConnection> join(final Consumer<? super VoiceChannelJoinSpec> spec) {
-        final VoiceChannelJoinSpec mutatedSpec = new VoiceChannelJoinSpec(getClient(), this);
-        spec.accept(mutatedSpec);
+        return Mono.defer(() -> {
+            final VoiceChannelJoinSpec mutatedSpec = new VoiceChannelJoinSpec(getClient(), this);
+            spec.accept(mutatedSpec);
 
-        return mutatedSpec.asRequest();
+            return mutatedSpec.asRequest();
+        });
     }
 
     /**

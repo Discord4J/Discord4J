@@ -27,7 +27,9 @@ import discord4j.gateway.json.ShardGatewayPayload;
 import discord4j.rest.util.Permission;
 import discord4j.rest.util.Snowflake;
 import discord4j.voice.*;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.function.TupleUtils;
 import reactor.util.function.Tuple2;
 
 import java.time.Duration;
@@ -150,9 +152,10 @@ public class VoiceChannelJoinSpec implements Spec<Mono<VoiceConnection>> {
     public Mono<VoiceConnection> asRequest() {
         final long guildId = voiceChannel.getGuildId().asLong();
         final long channelId = voiceChannel.getId().asLong();
-        final Mono<Long> selfIdMono = gateway.getGatewayResources().getStateView().getSelfId()
+        final Flux<Long> selfIdSupplier = gateway.getGatewayResources().getStateView().getSelfId()
                 .switchIfEmpty(Mono.error(new IllegalStateException("Missing self id")))
-                .cache();
+                .cache()
+                .repeat();
 
         final GatewayClientGroup clientGroup = voiceChannel.getClient().getGatewayClientGroup();
         final int shardId = (int) ((voiceChannel.getGuildId().asLong() >> 22) % clientGroup.getShardCount());
@@ -166,7 +169,7 @@ public class VoiceChannelJoinSpec implements Spec<Mono<VoiceConnection>> {
 
         final Mono<VoiceStateUpdateEvent> waitForVoiceStateUpdate = gateway.getEventDispatcher()
                 .on(VoiceStateUpdateEvent.class)
-                .zipWith(selfIdMono)
+                .zipWith(selfIdSupplier)
                 .filter(t2 -> {
                     VoiceStateUpdateEvent vsu = t2.getT1();
                     Long selfId = t2.getT2();
@@ -185,27 +188,26 @@ public class VoiceChannelJoinSpec implements Spec<Mono<VoiceConnection>> {
                 // should arrive afterwards
                 .next();
 
-        final VoiceDisconnectTask disconnectTask = onDisconnectTask(voiceChannel.getClient().getGatewayClientGroup());
+        final VoiceDisconnectTask disconnectTask = onDisconnectTask(gateway.getGatewayClientGroup());
 
         return sendVoiceStateUpdate
-                .then(Mono.zip(waitForVoiceStateUpdate, waitForVoiceServerUpdate, selfIdMono))
-                .flatMap(t3 -> {
-                    final String endpoint = t3.getT2().getEndpoint().replace(":80", ""); // discord sends wrong port...
-                    final String session = t3.getT1().getCurrent().getSessionId();
-                    final String token = t3.getT2().getToken();
-                    final long selfId = t3.getT3();
+                .then(Mono.zip(waitForVoiceStateUpdate, waitForVoiceServerUpdate, selfIdSupplier.next()))
+                .flatMap(TupleUtils.function((voiceState, voiceServer, selfId) -> {
+                    final String endpoint = voiceServer.getEndpoint().replace(":80", ""); // discord sends wrong port...
+                    final String session = voiceState.getCurrent().getSessionId();
+                    final String token = voiceServer.getToken();
 
                     return gateway.getVoiceConnectionFactory()
                             .create(guildId, selfId, session, token, endpoint,
-                                    voiceChannel.getClient().getCoreResources().getJacksonResources(),
-                                    voiceChannel.getClient().getGatewayResources().getVoiceReactorResources(),
-                                    voiceChannel.getClient().getGatewayResources().getVoiceReconnectOptions(),
+                                    gateway.getCoreResources().getJacksonResources(),
+                                    gateway.getGatewayResources().getVoiceReactorResources(),
+                                    gateway.getGatewayResources().getVoiceReconnectOptions(),
                                     provider, receiver, sendTaskFactory, receiveTaskFactory, disconnectTask)
                             .subscriberContext(ctx ->
                                     ctx.put(LogUtil.KEY_GATEWAY_ID, Integer.toHexString(gateway.hashCode()))
                                             .put(LogUtil.KEY_SHARD_ID, shardId)
                                             .put(LogUtil.KEY_GUILD_ID, Snowflake.asString(guildId)));
-                })
+                }))
                 .timeout(timeout)
                 .onErrorResume(t -> disconnectTask.onDisconnect(guildId).then(Mono.error(t)));
     }
