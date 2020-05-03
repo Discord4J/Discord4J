@@ -43,7 +43,6 @@ import reactor.util.function.Tuple2;
 import reactor.util.function.Tuples;
 
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static discord4j.common.LogUtil.format;
@@ -220,7 +219,6 @@ class GuildDispatchHandlers {
 
         long guildId = Snowflake.asLong(context.getDispatch().guild().id());
         boolean unavailable = context.getDispatch().guild().unavailable().toOptional()
-                .map(Function.<Boolean>identity())
                 .orElse(false);
 
         Mono<Void> deleteGuild = stateHolder.getGuildStore().delete(guildId);

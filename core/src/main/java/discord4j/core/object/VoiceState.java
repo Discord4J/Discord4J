@@ -28,7 +28,6 @@ import reactor.core.publisher.Mono;
 
 import java.util.Objects;
 import java.util.Optional;
-import java.util.function.Function;
 
 /**
  * A Discord voice state.
@@ -224,7 +223,7 @@ public final class VoiceState implements DiscordObject {
      * @return {@code true} if this user is streaming using "Go Live", {@code false} otherwise.
      */
     public boolean isSelfStreaming() {
-        return data.selfStream().toOptional().map(Function.<Boolean>identity()).orElse(false);
+        return data.selfStream().toOptional().orElse(false);
     }
 
     /**

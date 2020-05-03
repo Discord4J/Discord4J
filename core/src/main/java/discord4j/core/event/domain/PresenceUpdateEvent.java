@@ -21,15 +21,14 @@ import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.presence.Presence;
-import discord4j.rest.util.Snowflake;
 import discord4j.discordjson.json.PartialUserData;
 import discord4j.discordjson.possible.Possible;
 import discord4j.gateway.ShardInfo;
+import discord4j.rest.util.Snowflake;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
 
 import java.util.Optional;
-import java.util.function.Function;
 
 /**
  * Dispatched when a user's presence changes.
@@ -93,7 +92,7 @@ public class PresenceUpdateEvent extends Event {
      * @return The {@link User}'s new username, if present.
      */
     public Optional<String> getNewUsername() {
-        return user.username().toOptional().map(Function.identity());
+        return user.username().toOptional();
     }
 
     /**
@@ -103,7 +102,7 @@ public class PresenceUpdateEvent extends Event {
      * @return The {@link User}'s new discriminator, if present.
      */
     public Optional<String> getNewDiscriminator() {
-        return user.discriminator().toOptional().map(Function.identity());
+        return user.discriminator().toOptional();
     }
 
     /**

@@ -23,7 +23,6 @@ import reactor.util.annotation.Nullable;
 
 import java.util.Objects;
 import java.util.Optional;
-import java.util.function.Function;
 
 /**
  * An emoji used for {@link Reaction message reactions}, provides factory methods such as {@link #unicode(String)}
@@ -85,7 +84,7 @@ public abstract class ReactionEmoji {
         if (data.emoji().id().isPresent()) {
             return custom(Snowflake.of(data.emoji().id().get()),
                     data.emoji().name().orElseThrow(IllegalArgumentException::new),
-                    data.emoji().animated().toOptional().map(Function.<Boolean>identity()).orElse(false));
+                    data.emoji().animated().toOptional().orElse(false));
         }
         return unicode(data.emoji().name().orElseThrow(IllegalArgumentException::new));
     }

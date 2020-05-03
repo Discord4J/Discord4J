@@ -36,7 +36,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 class MessageDispatchHandlers {
@@ -193,7 +192,6 @@ class MessageDispatchHandlers {
                 .orElse(null);
         boolean emojiAnimated = context.getDispatch().emoji().animated()
                 .toOptional()
-                .map(Function.<Boolean>identity())
                 .orElse(false);
         ReactionEmoji emoji = ReactionEmoji.of(emojiId, emojiName, emojiAnimated);
         @SuppressWarnings("ConstantConditions")
@@ -262,7 +260,6 @@ class MessageDispatchHandlers {
                 .orElse(null);
         boolean emojiAnimated = context.getDispatch().emoji().animated()
                 .toOptional()
-                .map(Function.<Boolean>identity())
                 .orElse(false);
         ReactionEmoji emoji = ReactionEmoji.of(emojiId, emojiName, emojiAnimated);
         return removeFromMessage.thenReturn(new ReactionRemoveEvent(gateway, context.getShardInfo(), userId,
@@ -313,7 +310,6 @@ class MessageDispatchHandlers {
                 .orElse(null);
         boolean emojiAnimated = context.getDispatch().emoji().animated()
                 .toOptional()
-                .map(Function.<Boolean>identity())
                 .orElse(false);
         ReactionEmoji emoji = ReactionEmoji.of(emojiId, emojiName, emojiAnimated);
         return removeFromMessage.thenReturn(new ReactionRemoveEmojiEvent(gateway, context.getShardInfo(), channelId,
@@ -371,13 +367,11 @@ class MessageDispatchHandlers {
                     MessageData newMessageData = MessageData.builder()
                             .from(oldMessageData)
                             .content(messageData.content().toOptional()
-                                    .map(Function.<String>identity())
                                     .orElse(oldMessageData.content()))
                             .embeds(messageData.embeds())
                             .mentions(messageData.mentions())
                             .mentionRoles(messageData.mentionRoles())
                             .mentionEveryone(messageData.mentionEveryone().toOptional()
-                                    .map(Function.<Boolean>identity())
                                     .orElse(oldMessageData.mentionEveryone()))
                             .editedTimestamp(messageData.editedTimestamp())
                             .build();

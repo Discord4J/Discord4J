@@ -43,7 +43,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
@@ -143,10 +142,8 @@ public class DispatchHandlers implements DispatchEventMapper {
                     UserData newUserData = UserData.builder()
                             .from(oldUserData)
                             .username(userData.username().toOptional()
-                                    .map(Function.<String>identity())
                                     .orElse(oldUserData.username()))
                             .discriminator(userData.discriminator().toOptional()
-                                    .map(Function.<String>identity())
                                     .orElse(oldUserData.discriminator()))
                             .avatar(or(Possible.flatOpt(userData.avatar()), oldUserData::avatar))
                             .build();

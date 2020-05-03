@@ -23,7 +23,6 @@ import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
-import java.util.function.Function;
 
 // TODO FIXME: invites are generally just kind of a mess rn
 
@@ -70,7 +69,7 @@ public final class ExtendedInvite extends Invite {
      * @return The instant this invite expires, if possible.
      */
     public Optional<Instant> getExpiration() {
-        final boolean temporary = getData().temporary().toOptional().map(Function.<Boolean>identity()).orElse(false);
+        final boolean temporary = getData().temporary().toOptional().orElse(false);
         final int maxAge = getData().maxAge().toOptional().orElseThrow(IllegalStateException::new);
 
         return temporary ? Optional.of(getCreation().plus(maxAge, ChronoUnit.SECONDS)) : Optional.empty();

@@ -545,7 +545,7 @@ public final class Guild implements Entity {
      * @return Whether or not the server widget is enabled.
      */
     public boolean isWidgetEnabled() {
-        return data.widgetEnabled().toOptional().map(Function.<Boolean>identity()).orElse(false);
+        return data.widgetEnabled().toOptional().orElse(false);
     }
 
     /**
@@ -715,7 +715,7 @@ public final class Guild implements Entity {
      * @return If present, {@code true} if the guild is unavailable, {@code false} otherwise.
      */
     public boolean isUnavailable() {
-        return data.unavailable().toOptional().map(Function.<Boolean>identity()).orElse(false);
+        return data.unavailable().toOptional().orElse(false);
     }
 
     /**
@@ -724,7 +724,7 @@ public final class Guild implements Entity {
      * @return Whether this guild is embeddable (e.g. widget).
      */
     public boolean isEmbedEnabled() {
-        return data.embedEnabled().toOptional().map(Function.<Boolean>identity()).orElse(false);
+        return data.embedEnabled().toOptional().orElse(false);
     }
 
     /**

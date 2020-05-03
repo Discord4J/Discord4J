@@ -30,7 +30,6 @@ import reactor.util.annotation.Nullable;
 
 import java.util.Objects;
 import java.util.Optional;
-import java.util.function.Function;
 
 import static discord4j.rest.util.Image.Format.GIF;
 import static discord4j.rest.util.Image.Format.PNG;
@@ -165,7 +164,7 @@ public class User implements Entity {
      * @return {@code true} if this user is a bot, {@code false} otherwise.
      */
     public boolean isBot() {
-        return data.bot().toOptional().map(Function.<Boolean>identity()).orElse(false);
+        return data.bot().toOptional().orElse(false);
     }
 
     /**

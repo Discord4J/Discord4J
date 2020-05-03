@@ -27,7 +27,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -77,7 +76,7 @@ public final class Embed implements DiscordObject {
      * @return The title of the embed, if present.
      */
     public Optional<String> getTitle() {
-        return data.title().toOptional().map(Function.identity());
+        return data.title().toOptional();
     }
 
     /**
@@ -96,7 +95,7 @@ public final class Embed implements DiscordObject {
      * @return The description of the embed, if present.
      */
     public Optional<String> getDescription() {
-        return data.description().toOptional().map(Function.identity());
+        return data.description().toOptional();
     }
 
     /**
@@ -105,7 +104,7 @@ public final class Embed implements DiscordObject {
      * @return The URL of the embed, if present.
      */
     public Optional<String> getUrl() {
-        return data.url().toOptional().map(Function.identity());
+        return data.url().toOptional();
     }
 
     /**
