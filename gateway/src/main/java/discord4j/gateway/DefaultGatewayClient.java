@@ -267,7 +267,11 @@ public class DefaultGatewayClient implements GatewayClient {
                                 if (t instanceof ReconnectException) {
                                     log.info(format(context, "{}"), t.getMessage());
                                 } else {
-                                    log.error(format(context, "Gateway client error"), t);
+                                    if (log.isDebugEnabled()) {
+                                        log.error(format(context, "Gateway client error"), t);
+                                    } else {
+                                        log.error(format(context, "{}"), t.toString());
+                                    }
                                 }
                             })
                             .doOnTerminate(heartbeat::stop)
