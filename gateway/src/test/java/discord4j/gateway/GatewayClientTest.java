@@ -29,6 +29,7 @@ import discord4j.gateway.payload.JacksonPayloadReader;
 import discord4j.gateway.payload.JacksonPayloadWriter;
 import discord4j.gateway.payload.PayloadReader;
 import discord4j.gateway.payload.PayloadWriter;
+import io.netty.buffer.ByteBufUtil;
 import org.junit.Ignore;
 import org.junit.Test;
 import reactor.core.publisher.Mono;
@@ -74,7 +75,7 @@ public class GatewayClientTest {
 
         gatewayClient.receiver(byteBuf -> Mono.fromRunnable(() -> {
             try {
-                String json = mapper.writeValueAsString(mapper.readTree(byteBuf.array()));
+                String json = mapper.writeValueAsString(mapper.readTree(ByteBufUtil.getBytes(byteBuf)));
                 System.out.println(json);
             } catch (IOException e) {
                 e.printStackTrace();

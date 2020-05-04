@@ -264,10 +264,10 @@ public class DefaultGatewayClient implements GatewayClient {
 
                     return Mono.zip(httpFuture, readyHandler, receiverFuture, senderFuture, heartbeatHandler)
                             .doOnError(t -> {
-                                if(t instanceof ReconnectException) {
+                                if (t instanceof ReconnectException) {
                                     log.info(format(context, "{}"), t.getMessage());
                                 } else {
-                                    log.error(format(context, "{}"), t.toString());
+                                    log.error(format(context, "Gateway client error"), t);
                                 }
                             })
                             .doOnTerminate(heartbeat::stop)

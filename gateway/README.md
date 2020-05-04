@@ -55,7 +55,7 @@ gatewayClient.dispatch().subscribe(dispatch -> {
 
 gatewayClient.receiver(byteBuf -> Mono.fromRunnable(() -> {
     try {
-        String json = mapper.writeValueAsString(mapper.readTree(byteBuf.array()));
+        String json = mapper.writeValueAsString(mapper.readTree(ByteBufUtil.getBytes(byteBuf)));
         System.out.println(json);
     } catch (IOException e) {
         e.printStackTrace();

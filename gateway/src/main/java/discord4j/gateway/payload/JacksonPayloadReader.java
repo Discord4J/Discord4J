@@ -20,6 +20,8 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import discord4j.gateway.json.GatewayPayload;
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufUtil;
+import io.netty.util.ReferenceCountUtil;
 import reactor.core.Exceptions;
 import reactor.core.publisher.Mono;
 import reactor.util.Logger;
@@ -48,19 +50,22 @@ public class JacksonPayloadReader implements PayloadReader {
     public Mono<GatewayPayload<?>> read(ByteBuf payload) {
         return Mono.create(sink -> {
             try {
-                GatewayPayload<?> value = mapper.readValue(payload.array(), new TypeReference<GatewayPayload<?>>() {});
+                GatewayPayload<?> value = mapper.readValue(ByteBufUtil.getBytes(payload),
+                        new TypeReference<GatewayPayload<?>>() {});
                 sink.success(value);
             } catch (IOException | IllegalArgumentException e) {
                 if (lenient) {
                     // if eof input - just ignore
                     if (payload.readableBytes() > 0) {
                         log.debug("Error while decoding JSON ({}): {}", e.toString(),
-                                payload.toString(StandardCharsets.UTF_8));
+                                new String(ByteBufUtil.getBytes(payload), StandardCharsets.UTF_8));
                     }
                     sink.success();
                 } else {
                     sink.error(Exceptions.propagate(e));
                 }
+            } finally {
+                ReferenceCountUtil.release(payload);
             }
         });
     }

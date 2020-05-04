@@ -20,7 +20,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import discord4j.gateway.json.GatewayPayload;
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
+import io.netty.buffer.ByteBufAllocator;
 import reactor.core.Exceptions;
 import reactor.core.publisher.Mono;
 
@@ -36,7 +36,7 @@ public class JacksonPayloadWriter implements PayloadWriter {
     public Mono<ByteBuf> write(GatewayPayload<?> payload) {
         return Mono.create(sink -> {
             try {
-                sink.success(Unpooled.wrappedBuffer(mapper.writeValueAsBytes(payload)));
+                sink.success(ByteBufAllocator.DEFAULT.buffer().writeBytes(mapper.writeValueAsBytes(payload)));
             } catch (JsonProcessingException e) {
                 sink.error(Exceptions.propagate(e));
             }

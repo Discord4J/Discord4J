@@ -17,7 +17,9 @@
 package discord4j.gateway;
 
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
+import io.netty.buffer.ByteBufAllocator;
+import io.netty.buffer.ByteBufUtil;
+import io.netty.buffer.CompositeByteBuf;
 import reactor.core.Exceptions;
 import reactor.core.publisher.Flux;
 
@@ -36,20 +38,31 @@ public class ZlibDecompressor {
     private static final Predicate<ByteBuf> windowPredicate = payload ->
             payload.readableBytes() >= 4 && payload.getInt(payload.readableBytes() - 4) == ZLIB_SUFFIX;
 
+    private final ByteBufAllocator allocator;
     private final Inflater context = new Inflater();
+
+    public ZlibDecompressor(ByteBufAllocator allocator) {
+        this.allocator = allocator;
+    }
 
     public Flux<ByteBuf> completeMessages(Flux<ByteBuf> payloads) {
         return payloads.windowUntil(windowPredicate)
                 .flatMap(Flux::collectList)
                 .map(list -> {
-                    ByteBuf buf = Unpooled.wrappedBuffer(list.toArray(new ByteBuf[0]));
-                    byte[] bytes = new byte[buf.readableBytes()];
-                    buf.readBytes(bytes);
-
+                    final ByteBuf buf;
+                    if (list.size() == 1) {
+                        buf = list.get(0);
+                    } else {
+                        CompositeByteBuf composite = allocator.compositeBuffer(list.size());
+                        for (ByteBuf component : list) {
+                            composite.addComponent(true, component);
+                        }
+                        buf = composite;
+                    }
                     ByteArrayOutputStream out = new ByteArrayOutputStream();
                     try (InflaterOutputStream inflater = new InflaterOutputStream(out, context)) {
-                        inflater.write(bytes);
-                        return Unpooled.wrappedBuffer(out.toByteArray());
+                        inflater.write(ByteBufUtil.getBytes(buf));
+                        return allocator.buffer().writeBytes(out.toByteArray());
                     } catch (IOException e) {
                         throw Exceptions.propagate(e);
                     }

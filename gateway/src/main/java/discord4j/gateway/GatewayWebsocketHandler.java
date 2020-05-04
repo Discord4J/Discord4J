@@ -57,7 +57,6 @@ public class GatewayWebsocketHandler {
     private final FluxSink<ByteBuf> inbound;
     private final Flux<ByteBuf> outbound;
     private final MonoProcessor<DisconnectBehavior> sessionClose;
-    private final ZlibDecompressor decompressor = new ZlibDecompressor();
     private final Context context;
 
     /**
@@ -87,6 +86,8 @@ public class GatewayWebsocketHandler {
      * {@link CloseStatus}.
      */
     public Mono<Tuple2<DisconnectBehavior, CloseStatus>> handle(WebsocketInbound in, WebsocketOutbound out) {
+        ZlibDecompressor decompressor = new ZlibDecompressor(out.alloc());
+
         Mono<CloseWebSocketFrame> outboundClose = sessionClose
                 .doOnNext(behavior -> log.debug(format(context, "Closing session with behavior: {}"), behavior))
                 .flatMap(behavior -> {
