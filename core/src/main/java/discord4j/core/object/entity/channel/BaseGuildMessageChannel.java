@@ -21,6 +21,7 @@ import discord4j.core.object.ExtendedInvite;
 import discord4j.core.object.ExtendedPermissionOverwrite;
 import discord4j.core.object.PermissionOverwrite;
 import discord4j.core.object.entity.Guild;
+import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.Webhook;
 import discord4j.core.retriever.EntityRetrievalStrategy;
@@ -30,6 +31,7 @@ import discord4j.core.spec.WebhookCreateSpec;
 import discord4j.discordjson.json.BulkDeleteRequest;
 import discord4j.discordjson.json.ChannelData;
 import discord4j.discordjson.possible.Possible;
+import discord4j.rest.util.Permission;
 import discord4j.rest.util.PermissionSet;
 import discord4j.rest.util.Snowflake;
 import org.reactivestreams.Publisher;
@@ -220,6 +222,7 @@ class BaseGuildMessageChannel extends BaseChannel implements GuildMessageChannel
      *
      * @return The channel topic, if present.
      */
+    @Override
     public Optional<String> getTopic() {
         return Possible.flatOpt(getData().topic());
     }
@@ -231,6 +234,7 @@ class BaseGuildMessageChannel extends BaseChannel implements GuildMessageChannel
      * @return A {@link Flux} that continually emits {@link Snowflake message IDs} that were <b>not</b> bulk deleted
      * (typically if the ID was older than 2 weeks). If an error is received, it is emitted through the {@code Flux}.
      */
+    @Override
     public Flux<Snowflake> bulkDelete(final Publisher<Snowflake> messageIds) {
         final Instant timeLimit = Instant.now().minus(Duration.ofDays(14L));
         final Collection<Snowflake> ignoredMessageIds = new ArrayList<>(0);
@@ -260,7 +264,8 @@ class BaseGuildMessageChannel extends BaseChannel implements GuildMessageChannel
                 .buffer(100) // REST accepts 100 IDs
                 .filterWhen(filterMessageIdChunk)
                 .flatMap(messageIdChunk -> getClient().getRestClient().getChannelService()
-                        .bulkDeleteMessages(getId().asLong(), BulkDeleteRequest.builder().messages(messageIdChunk).build()))
+                        .bulkDeleteMessages(getId().asLong(),
+                                BulkDeleteRequest.builder().messages(messageIdChunk).build()))
                 .thenMany(Flux.fromIterable(ignoredMessageIds));
     }
 
@@ -271,6 +276,7 @@ class BaseGuildMessageChannel extends BaseChannel implements GuildMessageChannel
      * @return A {@link Mono} where, upon successful completion, emits the created {@link Webhook}. If an error
      * is received, it is emitted through the {@code Mono}.
      */
+    @Override
     public Mono<Webhook> createWebhook(final Consumer<? super WebhookCreateSpec> spec) {
         final WebhookCreateSpec mutatedSpec = new WebhookCreateSpec();
         spec.accept(mutatedSpec);
@@ -286,10 +292,25 @@ class BaseGuildMessageChannel extends BaseChannel implements GuildMessageChannel
      * @return A {@link Flux} that continually emits the {@link Webhook webhooks} of the channel. If an error is
      * received, it is emitted through the {@code Flux}.
      */
+    @Override
     public Flux<Webhook> getWebhooks() {
         return getClient().getRestClient().getWebhookService()
                 .getChannelWebhooks(getId().asLong())
                 .map(data -> new Webhook(getClient(), data));
+    }
+
+    /**
+     * Returns all members in the guild which have access to <b>view</b> this channel.
+     *
+     * @return A {@link Flux} that continually emits all members from {@link Guild#getMembers()} which have access to
+     * view this channel {@link discord4j.rest.util.Permission#VIEW_CHANNEL}
+     */
+    @Override
+    public Flux<Member> getMembers() {
+        return getGuild()
+                .flatMapMany(Guild::getMembers)
+                .filterWhen(member -> getEffectivePermissions(member.getId())
+                        .map(permissions -> permissions.contains(Permission.VIEW_CHANNEL)));
     }
 
     @Override

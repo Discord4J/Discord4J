@@ -16,9 +16,11 @@
  */
 package discord4j.core.object.entity.channel;
 
+import discord4j.core.object.entity.Guild;
+import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Webhook;
-import discord4j.rest.util.Snowflake;
 import discord4j.core.spec.WebhookCreateSpec;
+import discord4j.rest.util.Snowflake;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -60,4 +62,12 @@ public interface GuildMessageChannel extends CategorizableChannel, MessageChanne
      * received, it is emitted through the {@code Flux}.
      */
     Flux<Webhook> getWebhooks();
+
+    /**
+     * Returns all members in the guild which have access to <b>view</b> this channel.
+     *
+     * @return A {@link Flux} that continually emits all members from {@link Guild#getMembers()} which have access to
+     * view this channel {@link discord4j.rest.util.Permission#VIEW_CHANNEL}
+     */
+    Flux<Member> getMembers();
 }
