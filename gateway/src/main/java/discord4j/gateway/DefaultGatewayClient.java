@@ -203,7 +203,7 @@ public class DefaultGatewayClient implements GatewayClient {
                             .then();
 
                     // Subscribe the receiver to process and transform the inbound payloads into Dispatch events
-                    Mono<Void> receiverFuture = receiver
+                    Mono<Void> receiverFuture = receiver.map(ByteBuf::retain)
                             .doOnNext(buf -> logPayload(receiverLog, context, buf))
                             .flatMap(payloadReader::read)
                             .doOnNext(payload -> {
@@ -448,12 +448,15 @@ public class DefaultGatewayClient implements GatewayClient {
 
     @Override
     public Flux<GatewayPayload<?>> receiver() {
-        return receiver.flatMap(payloadReader::read);
+        return receiver(payloadReader::read);
     }
 
     @Override
     public <T> Flux<T> receiver(Function<ByteBuf, Publisher<? extends T>> mapper) {
-        return receiver.flatMap(mapper);
+        return receiver.flatMap(payload -> {
+            payload.retain();
+            return mapper.apply(payload);
+        });
     }
 
     @Override

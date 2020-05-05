@@ -25,6 +25,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.handler.codec.http.websocketx.CloseWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
+import io.netty.util.ReferenceCounted;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxSink;
 import reactor.core.publisher.Mono;
@@ -120,6 +121,7 @@ public class GatewayWebsocketHandler {
                 .map(WebSocketFrame::content)
                 .transformDeferred(decompressor::completeMessages)
                 .doOnNext(inbound::next)
+                .map(ReferenceCounted::release)
                 .then();
 
         return Mono.zip(outboundEvents, inboundEvents)
