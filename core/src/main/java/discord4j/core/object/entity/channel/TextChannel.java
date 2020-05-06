@@ -56,7 +56,7 @@ public final class TextChannel extends BaseGuildMessageChannel {
      * @return {@code true} if this channel is considered NSFW (Not Safe For Work), {@code false} otherwise.
      */
     public boolean isNsfw() {
-        return getData().nsfw().get();
+        return getData().nsfw().toOptional().orElse(false);
     }
 
     /**
