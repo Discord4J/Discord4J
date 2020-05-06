@@ -59,8 +59,10 @@ import reactor.core.publisher.MonoProcessor;
 import reactor.util.Logger;
 import reactor.util.Loggers;
 
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
@@ -93,6 +95,7 @@ public class GatewayDiscordClient implements EntityRetriever {
     private final VoiceConnectionFactory voiceConnectionFactory;
     private final VoiceConnectionRegistry voiceConnectionRegistry;
     private final EntityRetriever entityRetriever;
+    private final long selfId;
 
     public GatewayDiscordClient(DiscordClient discordClient, GatewayResources gatewayResources,
                                 MonoProcessor<Void> closeProcessor, GatewayClientGroup gatewayClientGroup,
@@ -105,6 +108,8 @@ public class GatewayDiscordClient implements EntityRetriever {
         this.voiceConnectionFactory = voiceConnectionFactory;
         this.voiceConnectionRegistry = new LocalVoiceConnectionRegistry();
         this.entityRetriever = entityRetrievalStrategy.apply(this);
+        this.selfId = Long.parseLong(new String(Base64.getDecoder()
+                .decode(discordClient.getCoreResources().getToken().split("\\.")[0]), StandardCharsets.UTF_8));
     }
 
     /**
@@ -250,8 +255,8 @@ public class GatewayDiscordClient implements EntityRetriever {
      *
      * @return The bot user's ID.
      */
-    public Mono<Snowflake> getSelfId() {
-        return gatewayResources.getStateView().getSelfId().map(Snowflake::of);
+    public Snowflake getSelfId() {
+        return Snowflake.of(selfId);
     }
 
     /**

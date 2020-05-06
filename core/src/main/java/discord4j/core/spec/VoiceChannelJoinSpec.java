@@ -153,8 +153,7 @@ public class VoiceChannelJoinSpec implements Spec<Mono<VoiceConnection>> {
     public Mono<VoiceConnection> asRequest() {
         final long guildId = voiceChannel.getGuildId().asLong();
         final long channelId = voiceChannel.getId().asLong();
-        final Flux<Long> selfIdSupplier = gateway.getGatewayResources().getStateView().getSelfId()
-                .switchIfEmpty(Mono.error(new IllegalStateException("Missing self id")))
+        final Flux<Long> selfIdSupplier = Flux.just(gateway.getSelfId().asLong())
                 .cache()
                 .repeat();
 
@@ -217,7 +216,7 @@ public class VoiceChannelJoinSpec implements Spec<Mono<VoiceConnection>> {
                 .timeout(timeout)
                 .onErrorResume(TimeoutException.class,
                         t -> gateway.getVoiceConnectionRegistry().getVoiceConnection(guildId)
-                        .switchIfEmpty(voiceChannel.sendDisconnectVoiceState().then(Mono.error(t))));
+                                .switchIfEmpty(voiceChannel.sendDisconnectVoiceState().then(Mono.error(t))));
 
         return gateway.getVoiceConnectionRegistry().getVoiceConnection(guildId)
                 .flatMap(existing -> sendVoiceStateUpdate.then(waitForVoiceStateUpdate).thenReturn(existing))

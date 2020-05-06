@@ -98,7 +98,7 @@ public class StoreEntityRetriever implements EntityRetriever {
 
     @Override
     public Mono<User> getSelf() {
-        return stateView.getSelfId().map(Snowflake::of).flatMap(this::getUserById);
+        return getUserById(gateway.getSelfId());
     }
 
     @Override
