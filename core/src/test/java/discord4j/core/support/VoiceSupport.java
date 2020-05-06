@@ -52,25 +52,37 @@ public class VoiceSupport {
 
         Mono<Void> join = client.getEventDispatcher().on(MessageCreateEvent.class)
                 .filter(e -> e.getMessage().getContent().equals("!join"))
+                .doOnNext(e -> log.info("Received voice join request"))
                 .flatMap(e -> Mono.justOrEmpty(e.getMember())
                         .flatMap(Member::getVoiceState)
                         .flatMap(VoiceState::getChannel)
                         .flatMap(channel -> channel.join(spec -> {
                             spec.setProvider(provider);
-                        })))
-                .onErrorResume(t -> {
-                    log.error("Failed to join vc", t);
-                    return Mono.empty();
-                })
+                        }))
+                        .onErrorResume(t -> {
+                            log.error("Failed to join voice channel", t);
+                            return Mono.empty();
+                        }))
                 .then();
 
         Mono<Void> leave = client.getEventDispatcher().on(MessageCreateEvent.class)
                 .filter(e -> e.getMessage().getContent().equals("!leave"))
+                .doOnNext(e -> log.info("Received voice leave request"))
                 .flatMap(e -> Mono.justOrEmpty(e.getMember())
                         .flatMap(Member::getVoiceState)
                         .flatMap(vs -> client.getVoiceConnectionRegistry()
                                 .getVoiceConnection(vs.getGuildId().asLong()))
                         .flatMap(VoiceConnection::disconnect))
+                .then();
+
+        Mono<Void> reconnect = client.getEventDispatcher().on(MessageCreateEvent.class)
+                .filter(e -> e.getMessage().getContent().equals("!vcretry"))
+                .flatMap(e -> Mono.justOrEmpty(e.getMember())
+                        .flatMap(Member::getVoiceState)
+                        .flatMap(vs -> client.getVoiceConnectionRegistry()
+                                .getVoiceConnection(vs.getGuildId().asLong()))
+                        .flatMap(VoiceConnection::reconnect)
+                        .doFinally(s -> log.info("Reconnect event handle complete")))
                 .then();
 
         Mono<Void> play = client.getEventDispatcher().on(MessageCreateEvent.class)
@@ -96,7 +108,7 @@ public class VoiceSupport {
                                         .build())))
                 .then();
 
-        return Mono.zip(join, leave, play, stop, currentGuild, client.onDisconnect()).then();
+        return Mono.zip(join, leave, reconnect, play, stop, currentGuild, client.onDisconnect()).then();
     }
 
     private static class LavaplayerAudioProvider extends AudioProvider {
