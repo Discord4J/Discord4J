@@ -195,30 +195,33 @@ public class FSMVoiceGatewayClient {
 
             @Override
             public Flux<VoiceGatewayEvent> events() {
-                // unsupported
-                return Flux.empty();
+                return Flux.error(new UnsupportedOperationException("Voice event stream not implemented"));
             }
 
             @Override
-            public boolean isConnected() {
-                return gatewayFSM.getCurrentState() instanceof ReceivingEvents;
+            public Mono<Boolean> isConnected() {
+                return Mono.fromCallable(() -> gatewayFSM.getCurrentState() instanceof ReceivingEvents);
             }
 
             @Override
-            public State getState() {
-                if (gatewayFSM.getCurrentState() instanceof ReceivingEvents) {
-                    return State.CONNECTED;
-                } else if (gatewayFSM.getCurrentState() instanceof Stopped) {
-                    return State.DISCONNECTED;
-                } else {
-                    // TODO: this implementation is unable to reconnect yet
-                    return State.CONNECTING;
-                }
+            public Flux<State> stateEvents() {
+                // limited support
+                return Mono.fromCallable(
+                        () -> {
+                            if (gatewayFSM.getCurrentState() instanceof ReceivingEvents) {
+                                return State.CONNECTED;
+                            } else if (gatewayFSM.getCurrentState() instanceof Stopped) {
+                                return State.DISCONNECTED;
+                            } else {
+                                return State.CONNECTING;
+                            }
+                        })
+                        .flux();
             }
 
             @Override
             public Mono<Void> disconnect() {
-                return Mono.fromCallable(this::isConnected)
+                return isConnected()
                         .flatMap(connected -> {
                             if (connected) {
                                 return Mono.fromRunnable(() -> stop())
@@ -226,6 +229,16 @@ public class FSMVoiceGatewayClient {
                             }
                             return Mono.empty();
                         });
+            }
+
+            @Override
+            public long getGuildId() {
+                return 0;
+            }
+
+            @Override
+            public Mono<Void> reconnect() {
+                return Mono.error(new UnsupportedOperationException("Reconnect not implemented"));
             }
         };
     }

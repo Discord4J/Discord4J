@@ -19,26 +19,9 @@ package discord4j.voice.retry;
 
 import reactor.util.context.Context;
 
-public class VoiceGatewayException extends RuntimeException {
+public class VoiceServerUpdateReconnectException extends VoiceGatewayReconnectException {
 
-    private final Context context;
-
-    public VoiceGatewayException(Context context) {
-        this.context = context;
-    }
-
-    public VoiceGatewayException(Context context, String message) {
-        super(message);
-        this.context = context;
-    }
-
-    public Context getContext() {
-        return context;
-    }
-
-    @Override
-    public String toString() {
-        return "Exception in Voice Gateway with context: " + context +
-                (getMessage() != null ? " and message: " + getMessage() : "");
+    public VoiceServerUpdateReconnectException(Context context) {
+        super(context);
     }
 }

@@ -10,11 +10,17 @@ public interface VoiceConnection {
 
     Flux<VoiceGatewayEvent> events();
 
-    boolean isConnected();
+    default Mono<Boolean> isConnected() {
+        return stateEvents().next().filter(s -> s.equals(State.CONNECTED)).hasElement();
+    }
 
-    State getState();
+    Flux<State> stateEvents();
 
     Mono<Void> disconnect();
+
+    long getGuildId();
+
+    Mono<Void> reconnect();
 
     enum State {
         CONNECTING, CONNECTED, DISCONNECTED, RECONNECTING

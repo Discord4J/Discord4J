@@ -43,6 +43,7 @@ public class LocalVoiceConnectionRegistry implements VoiceConnectionRegistry {
     @Override
     public Mono<Void> disconnect(long guildId) {
         VoiceConnection connection = voiceConnections.get(guildId);
-        return connection == null ? Mono.empty() : connection.disconnect();
+        return connection == null ? Mono.empty() :
+                connection.disconnect().doFinally(s -> voiceConnections.remove(guildId));
     }
 }

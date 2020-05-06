@@ -34,6 +34,7 @@ import reactor.util.function.Tuple2;
 
 import java.time.Duration;
 import java.util.Objects;
+import java.util.concurrent.TimeoutException;
 
 /**
  * Spec used to request a connection to a {@link VoiceChannel} and handle the initialization of the resulting
@@ -188,7 +189,8 @@ public class VoiceChannelJoinSpec implements Spec<Mono<VoiceConnection>> {
                 // should arrive afterwards
                 .next();
 
-        final VoiceDisconnectTask disconnectTask = onDisconnectTask(gateway);
+        final VoiceDisconnectTask disconnectTask = guild -> voiceChannel.sendDisconnectVoiceState()
+                .then(gateway.getVoiceConnectionRegistry().disconnect(guildId));
         final VoiceServerUpdateTask serverUpdateTask = onServerUpdateTask(gateway);
 
         Mono<VoiceConnection> newConnection = sendVoiceStateUpdate
@@ -213,25 +215,13 @@ public class VoiceChannelJoinSpec implements Spec<Mono<VoiceConnection>> {
                                             .put(LogUtil.KEY_GUILD_ID, Snowflake.asString(guildId)));
                 }))
                 .timeout(timeout)
-                .onErrorResume(t -> disconnectTask.onDisconnect(guildId).then(Mono.error(t)));
+                .onErrorResume(TimeoutException.class,
+                        t -> gateway.getVoiceConnectionRegistry().getVoiceConnection(guildId)
+                        .switchIfEmpty(voiceChannel.sendDisconnectVoiceState().then(Mono.error(t))));
 
         return gateway.getVoiceConnectionRegistry().getVoiceConnection(guildId)
                 .flatMap(existing -> sendVoiceStateUpdate.then(waitForVoiceStateUpdate).thenReturn(existing))
                 .switchIfEmpty(newConnection);
-    }
-
-    private static VoiceDisconnectTask onDisconnectTask(GatewayDiscordClient gateway) {
-        return guildId -> {
-            VoiceStateUpdate voiceStateUpdate = VoiceStateUpdate.builder()
-                    .guildId(Snowflake.asString(guildId))
-                    .selfMute(false)
-                    .selfDeaf(false)
-                    .build();
-            GatewayClientGroup clientGroup = gateway.getGatewayClientGroup();
-            int shardId = (int) ((guildId >> 22) % clientGroup.getShardCount());
-            return clientGroup.unicast(ShardGatewayPayload.voiceStateUpdate(voiceStateUpdate, shardId))
-                    .then(gateway.getVoiceConnectionRegistry().disconnect(guildId));
-        };
     }
 
     private static VoiceServerUpdateTask onServerUpdateTask(GatewayDiscordClient gateway) {

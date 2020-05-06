@@ -19,9 +19,15 @@ package discord4j.voice;
 
 import discord4j.common.JacksonResources;
 import discord4j.common.retry.ReconnectOptions;
+import org.reactivestreams.Subscription;
 import reactor.core.publisher.Mono;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 public class DefaultVoiceConnectionFactory implements VoiceConnectionFactory {
+
+    private final Map<Long, Subscription> onHandshake = new ConcurrentHashMap<>();
 
     @Override
     public Mono<VoiceConnection> create(long guildId,
@@ -37,9 +43,16 @@ public class DefaultVoiceConnectionFactory implements VoiceConnectionFactory {
                                         VoiceReceiveTaskFactory receiveTaskFactory,
                                         VoiceDisconnectTask onDisconnectTask,
                                         VoiceServerUpdateTask serverUpdateTask) {
-        DefaultVoiceGatewayClient vgw = new DefaultVoiceGatewayClient(guildId, selfId, session,
+        return Mono.fromCallable(() -> new DefaultVoiceGatewayClient(guildId, selfId, session,
                 jacksonResources.getObjectMapper(), reactorResources, reconnectOptions,
-                provider, receiver, sendTaskFactory, receiveTaskFactory, onDisconnectTask, serverUpdateTask);
-        return vgw.start(voiceServerOptions);
+                provider, receiver, sendTaskFactory, receiveTaskFactory, onDisconnectTask, serverUpdateTask))
+                .flatMap(client -> client.start(voiceServerOptions))
+                .doOnSubscribe(s -> onHandshake.compute(guildId, (id, existing) -> {
+                    if (existing != null) {
+                        throw new IllegalStateException("Concurrent voice handshakes are not allowed for guild " + guildId);
+                    }
+                    return s;
+                }))
+                .doOnNext(vc -> onHandshake.remove(guildId));
     }
 }
