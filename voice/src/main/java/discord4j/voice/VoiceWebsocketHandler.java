@@ -36,8 +36,6 @@ import reactor.util.Loggers;
 import reactor.util.context.Context;
 import reactor.util.function.Tuple2;
 
-import java.util.logging.Level;
-
 import static discord4j.common.LogUtil.format;
 
 public class VoiceWebsocketHandler {
@@ -99,7 +97,8 @@ public class VoiceWebsocketHandler {
                     if (status.getCode() == 4014) {
                         close(DisconnectBehavior.stop(new VoiceGatewayException(context, "Disconnected")));
                     } else {
-                        close(DisconnectBehavior.retryAbruptly(new VoiceGatewayException(context, "Inbound close status")));
+                        close(DisconnectBehavior.retryAbruptly(
+                                new VoiceGatewayException(context, "Inbound close status")));
                     }
                 });
 
@@ -114,15 +113,10 @@ public class VoiceWebsocketHandler {
                 .doOnNext(inbound::next)
                 .then();
 
-        return Mono.zip(
-                outboundEvents.log("voice.session.out", Level.FINE),
-                inboundEvents.log("voice.session.in", Level.FINE))
+        return Mono.zip(outboundEvents, inboundEvents)
                 .doOnError(this::error)
                 .onErrorResume(t -> t.getCause() instanceof VoiceGatewayException, t -> Mono.empty())
-                .then(Mono.zip(
-                        sessionClose.log("voice.session.close", Level.FINE),
-                        inboundClose.defaultIfEmpty(CloseStatus.ABNORMAL_CLOSE)
-                                .log("voice.inbound.close", Level.FINE)));
+                .then(Mono.zip(sessionClose, inboundClose.defaultIfEmpty(CloseStatus.ABNORMAL_CLOSE)));
     }
 
     /**

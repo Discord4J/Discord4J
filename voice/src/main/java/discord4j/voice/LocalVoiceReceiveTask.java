@@ -49,7 +49,6 @@ public class LocalVoiceReceiveTask implements Disposable {
 
     @Override
     public void dispose() {
-        log.info("Disposing receive task");
         task.dispose();
     }
 

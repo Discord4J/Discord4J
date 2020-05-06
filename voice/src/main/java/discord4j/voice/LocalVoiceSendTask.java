@@ -49,7 +49,6 @@ public class LocalVoiceSendTask implements Disposable {
 
     @Override
     public void dispose() {
-        log.info("Disposing send task");
         if (speaking.compareAndSet(true, false)) {
             changeSpeaking(false);
         }
