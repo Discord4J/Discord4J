@@ -43,7 +43,7 @@ import java.util.concurrent.TimeoutException;
 public class VoiceChannelJoinSpec implements Spec<Mono<VoiceConnection>> {
 
     /** The default maximum amount of time in seconds to wait before the connection to the voice channel timeouts. */
-    private static final int DEFAULT_TIMEOUT = 5;
+    private static final int DEFAULT_TIMEOUT = 10;
 
     private Duration timeout = Duration.ofSeconds(DEFAULT_TIMEOUT);
     private AudioProvider provider = AudioProvider.NO_OP;
