@@ -46,10 +46,11 @@ public final class ExtendedInvite extends Invite {
     }
 
     /**
-     * Gets the ID of the user who created the invite, if present.
+     * Gets the ID of the user who created the invite.
      *
-     * @deprecated Actually this can throw a NullPointerException, in 3.1 this is fixed
-     * @return The ID of the user who created the invite, if present.
+     * @deprecated Actually this can throw a NullPointerException, in 3.1 this is fixed.
+     * @throws NullPointerException If the inviterId is null.
+     * @return The ID of the user who created the invite.
      */
     @Deprecated
     public Snowflake getInviterId() {
