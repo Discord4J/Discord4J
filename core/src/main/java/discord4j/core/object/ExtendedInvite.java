@@ -45,12 +45,13 @@ public final class ExtendedInvite extends Invite {
     }
 
     /**
-     * Gets the ID of the user who created the invite.
+     * Gets the ID of the user who created the invite, if present.
      *
-     * @return The ID of the user who created the invite.
+     * @return The ID of the user who created the invite, if present.
      */
-    public Snowflake getInviterId() {
-        return Snowflake.of(getData().getInviterId());
+    public Optional<Snowflake> getInviterId() {
+        return Optional.ofNullable(getData().getTargetUserId())
+            .map(Snowflake::of);
     }
 
     /**
@@ -60,7 +61,7 @@ public final class ExtendedInvite extends Invite {
      * an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<User> getInviter() {
-        return getClient().getUserById(getInviterId());
+        return getInviterId().map(getClient()::getUserById).orElse(Mono.empty());
     }
 
     /**

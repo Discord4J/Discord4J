@@ -24,7 +24,7 @@ public final class ExtendedInviteBean extends InviteBean {
 
     private static final long serialVersionUID = -3024688485065214682L;
 
-    private long inviterId;
+    private Long inviterId;
     private int uses;
     private int maxUses;
     private int maxAge;
@@ -34,7 +34,7 @@ public final class ExtendedInviteBean extends InviteBean {
 
     public ExtendedInviteBean(final InviteResponse response) {
         super(response);
-        inviterId = Objects.requireNonNull(response.getInviter()).getId();
+        inviterId = response.getInviter() == null ? null : response.getInviter().getId();
         uses = Objects.requireNonNull(response.getUses());
         maxUses = Objects.requireNonNull(response.getMaxUses());
         maxAge = Objects.requireNonNull(response.getMaxAge());
@@ -47,7 +47,7 @@ public final class ExtendedInviteBean extends InviteBean {
 
     public ExtendedInviteBean() {}
 
-    public long getInviterId() {
+    public Long getInviterId() {
         return inviterId;
     }
 
