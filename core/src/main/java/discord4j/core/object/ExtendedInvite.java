@@ -16,6 +16,7 @@
  */
 package discord4j.core.object;
 
+import discord4j.common.annotations.Experimental;
 import discord4j.core.ServiceMediator;
 import discord4j.core.object.data.ExtendedInviteBean;
 import discord4j.core.object.entity.User;
@@ -47,9 +48,21 @@ public final class ExtendedInvite extends Invite {
     /**
      * Gets the ID of the user who created the invite, if present.
      *
+     * @deprecated Actually this can throw a NullPointerException, in 3.1 this is fixed
      * @return The ID of the user who created the invite, if present.
      */
-    public Optional<Snowflake> getInviterId() {
+    @Deprecated
+    public Snowflake getInviterId() {
+        return Snowflake.of(getData().getInviterId());
+    }
+
+    /**
+     * Gets the ID of the user who created the invite, if present.
+     *
+     * @return The ID of the user who created the invite, if present.
+     */
+    @Experimental
+    public Optional<Snowflake> getOptionalInviterId() {
         return Optional.ofNullable(getData().getTargetUserId())
             .map(Snowflake::of);
     }
@@ -61,7 +74,7 @@ public final class ExtendedInvite extends Invite {
      * an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<User> getInviter() {
-        return getInviterId().map(getClient()::getUserById).orElse(Mono.empty());
+        return getOptionalInviterId().map(getClient()::getUserById).orElse(Mono.empty());
     }
 
     /**

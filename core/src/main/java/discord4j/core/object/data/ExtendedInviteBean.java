@@ -17,6 +17,7 @@
 package discord4j.core.object.data;
 
 import discord4j.rest.json.response.InviteResponse;
+import reactor.util.annotation.Nullable;
 
 import java.util.Objects;
 
@@ -47,6 +48,7 @@ public final class ExtendedInviteBean extends InviteBean {
 
     public ExtendedInviteBean() {}
 
+    @Nullable
     public Long getInviterId() {
         return inviterId;
     }
