@@ -453,10 +453,7 @@ public class DefaultGatewayClient implements GatewayClient {
 
     @Override
     public <T> Flux<T> receiver(Function<ByteBuf, Publisher<? extends T>> mapper) {
-        return receiver.flatMap(payload -> {
-            payload.retain();
-            return mapper.apply(payload);
-        });
+        return receiver.flatMap(payload -> mapper.compose((Function<ByteBuf, ByteBuf>) ByteBuf::retain).apply(payload));
     }
 
     @Override

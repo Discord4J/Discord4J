@@ -49,24 +49,25 @@ public class JacksonPayloadReader implements PayloadReader {
     @Override
     public Mono<GatewayPayload<?>> read(ByteBuf payload) {
         return Mono.create(sink -> {
-            try {
-                GatewayPayload<?> value = mapper.readValue(ByteBufUtil.getBytes(payload),
-                        new TypeReference<GatewayPayload<?>>() {});
-                sink.success(value);
-            } catch (IOException | IllegalArgumentException e) {
-                if (lenient) {
-                    // if eof input - just ignore
-                    if (payload.readableBytes() > 0) {
-                        log.debug("Error while decoding JSON ({}): {}", e.toString(),
-                                new String(ByteBufUtil.getBytes(payload), StandardCharsets.UTF_8));
+            sink.onRequest(__ -> {
+                try {
+                    GatewayPayload<?> value = mapper.readValue(ByteBufUtil.getBytes(payload),
+                            new TypeReference<GatewayPayload<?>>() {});
+                    sink.success(value);
+                } catch (IOException | IllegalArgumentException e) {
+                    if (lenient) {
+                        // if eof input - just ignore
+                        if (payload.readableBytes() > 0) {
+                            log.debug("Error while decoding JSON ({}): {}", e.toString(),
+                                    new String(ByteBufUtil.getBytes(payload), StandardCharsets.UTF_8));
+                        }
+                        sink.success();
+                    } else {
+                        sink.error(Exceptions.propagate(e));
                     }
-                    sink.success();
-                } else {
-                    sink.error(Exceptions.propagate(e));
                 }
-            } finally {
-                ReferenceCountUtil.release(payload);
-            }
+            });
+            sink.onDispose(() -> ReferenceCountUtil.release(payload));
         });
     }
 }
