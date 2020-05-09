@@ -35,6 +35,7 @@ import discord4j.gateway.retry.GatewayStateChange;
 import discord4j.gateway.retry.PartialDisconnectException;
 import discord4j.gateway.retry.ReconnectException;
 import io.netty.buffer.ByteBuf;
+import io.netty.util.IllegalReferenceCountException;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.*;
 import reactor.netty.ConnectionObserver;
@@ -204,6 +205,7 @@ public class DefaultGatewayClient implements GatewayClient {
 
                     // Subscribe the receiver to process and transform the inbound payloads into Dispatch events
                     Mono<Void> receiverFuture = receiver.map(ByteBuf::retain)
+                            .doOnDiscard(ByteBuf.class, DefaultGatewayClient::safeRelease)
                             .doOnNext(buf -> logPayload(receiverLog, context, buf))
                             .flatMap(payloadReader::read)
                             .doOnNext(payload -> {
@@ -453,7 +455,21 @@ public class DefaultGatewayClient implements GatewayClient {
 
     @Override
     public <T> Flux<T> receiver(Function<ByteBuf, Publisher<? extends T>> mapper) {
-        return receiver.flatMap(payload -> mapper.compose((Function<ByteBuf, ByteBuf>) ByteBuf::retain).apply(payload));
+        return receiver.map(ByteBuf::retainedDuplicate)
+                .doOnDiscard(ByteBuf.class, DefaultGatewayClient::safeRelease)
+                .flatMap(buf -> Flux.from(mapper.apply(buf)));
+    }
+
+    private static void safeRelease(ByteBuf buf) {
+        if (buf.refCnt() > 0) {
+            try {
+                buf.release();
+            } catch (IllegalReferenceCountException e) {
+                if (log.isDebugEnabled()) {
+                    log.debug("", e);
+                }
+            }
+        }
     }
 
     @Override
