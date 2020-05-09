@@ -47,19 +47,20 @@ public class JacksonPayloadReader implements PayloadReader {
     }
 
     @Override
-    public Mono<GatewayPayload<?>> read(ByteBuf payload) {
+    public Mono<GatewayPayload<?>> read(ByteBuf buf) {
         return Mono.create(sink -> {
             sink.onRequest(__ -> {
                 try {
-                    GatewayPayload<?> value = mapper.readValue(ByteBufUtil.getBytes(payload),
+                    GatewayPayload<?> value = mapper.readValue(
+                            ByteBufUtil.getBytes(buf, buf.readerIndex(), buf.readableBytes(), false),
                             new TypeReference<GatewayPayload<?>>() {});
                     sink.success(value);
                 } catch (IOException | IllegalArgumentException e) {
                     if (lenient) {
                         // if eof input - just ignore
-                        if (payload.readableBytes() > 0) {
+                        if (buf.readableBytes() > 0) {
                             log.debug("Error while decoding JSON ({}): {}", e.toString(),
-                                    new String(ByteBufUtil.getBytes(payload), StandardCharsets.UTF_8));
+                                    new String(ByteBufUtil.getBytes(buf), StandardCharsets.UTF_8));
                         }
                         sink.success();
                     } else {
@@ -67,7 +68,7 @@ public class JacksonPayloadReader implements PayloadReader {
                     }
                 }
             });
-            sink.onDispose(() -> ReferenceCountUtil.release(payload));
+            sink.onDispose(() -> ReferenceCountUtil.release(buf));
         });
     }
 }
