@@ -457,7 +457,7 @@ public class DefaultGatewayClient implements GatewayClient {
     public <T> Flux<T> receiver(Function<ByteBuf, Publisher<? extends T>> mapper) {
         return receiver.map(ByteBuf::retainedDuplicate)
                 .doOnDiscard(ByteBuf.class, DefaultGatewayClient::safeRelease)
-                .flatMap(buf -> Flux.from(mapper.apply(buf)));
+                .flatMap(mapper);
     }
 
     private static void safeRelease(ByteBuf buf) {
