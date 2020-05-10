@@ -77,9 +77,6 @@ public class Color {
      * @param hasalpha Whether value includes the alpha.
      */
     public Color(int value, boolean hasalpha) {
-        // NoteSystemColor calls this constructor, setting falpha to 0; but
-        // code in getRGBComponents correctly reports falpha as 1.0 to the user
-        // for all instances of SystemColor since frgbvalue is left null here.
         if (hasalpha) {
             falpha = ((value & ALPHA_MASK) >> 24) / 255f;
         } else {
