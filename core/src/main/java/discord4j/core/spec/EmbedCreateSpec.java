@@ -18,9 +18,9 @@ package discord4j.core.spec;
 
 import discord4j.discordjson.json.*;
 import discord4j.discordjson.possible.Possible;
+import discord4j.rest.util.Color;
 import reactor.util.annotation.Nullable;
 
-import java.awt.Color;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
