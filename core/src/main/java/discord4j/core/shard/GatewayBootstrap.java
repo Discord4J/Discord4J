@@ -1025,14 +1025,4 @@ public class GatewayBootstrap<O extends GatewayOptions> {
         return new DefaultVoiceConnectionFactory();
     }
 
-    /**
-     * Create a {@link VoiceConnectionFactory} using a finite state machine implementation but currently without
-     * reconnecting capabilities.
-     *
-     * @return a FSM-based {@link VoiceConnectionFactory}
-     */
-    public static VoiceConnectionFactory fsmVoiceConnectionFactory() {
-        return new FSMVoiceConnectionFactory();
-    }
-
 }
