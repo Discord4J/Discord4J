@@ -17,11 +17,10 @@
 
 package discord4j.voice;
 
-import discord4j.common.annotations.Experimental;
 import reactor.core.publisher.Mono;
 
-@Experimental
-public interface VoiceConnectionFactory {
+@FunctionalInterface
+public interface VoiceChannelRetrieveTask {
 
-    Mono<VoiceConnection> create(VoiceGatewayOptions options);
+    Mono<Long> onRequest();
 }

@@ -14,11 +14,17 @@ public interface VoiceConnection {
         return stateEvents().next().filter(s -> s.equals(State.CONNECTED)).hasElement();
     }
 
+    default Mono<State> onConnectOrDisconnect() {
+        return stateEvents().filter(s -> s.equals(State.CONNECTED) || s.equals(State.DISCONNECTED)).next();
+    }
+
     Flux<State> stateEvents();
 
     Mono<Void> disconnect();
 
     long getGuildId();
+
+    Mono<Long> getChannelId();
 
     Mono<Void> reconnect();
 

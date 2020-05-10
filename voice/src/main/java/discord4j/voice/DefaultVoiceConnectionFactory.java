@@ -17,9 +17,6 @@
 
 package discord4j.voice;
 
-import discord4j.common.JacksonResources;
-import discord4j.common.retry.ReconnectOptions;
-import org.reactivestreams.Subscription;
 import reactor.core.publisher.Mono;
 
 import java.util.Map;
@@ -27,32 +24,20 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class DefaultVoiceConnectionFactory implements VoiceConnectionFactory {
 
-    private final Map<Long, Subscription> onHandshake = new ConcurrentHashMap<>();
+    private final Map<Long, Mono<VoiceConnection>> onHandshake = new ConcurrentHashMap<>();
 
     @Override
-    public Mono<VoiceConnection> create(long guildId,
-                                        long selfId,
-                                        String session,
-                                        VoiceServerOptions voiceServerOptions,
-                                        JacksonResources jacksonResources,
-                                        VoiceReactorResources reactorResources,
-                                        ReconnectOptions reconnectOptions,
-                                        AudioProvider provider,
-                                        AudioReceiver receiver,
-                                        VoiceSendTaskFactory sendTaskFactory,
-                                        VoiceReceiveTaskFactory receiveTaskFactory,
-                                        VoiceDisconnectTask onDisconnectTask,
-                                        VoiceServerUpdateTask serverUpdateTask) {
-        return Mono.fromCallable(() -> new DefaultVoiceGatewayClient(guildId, selfId, session,
-                jacksonResources.getObjectMapper(), reactorResources, reconnectOptions,
-                provider, receiver, sendTaskFactory, receiveTaskFactory, onDisconnectTask, serverUpdateTask))
-                .flatMap(client -> client.start(voiceServerOptions))
-                .doOnSubscribe(s -> onHandshake.compute(guildId, (id, existing) -> {
+    public Mono<VoiceConnection> create(VoiceGatewayOptions options) {
+        return Mono.defer(
+                () -> onHandshake.compute(options.getGuildId(), (id, existing) -> {
                     if (existing != null) {
-                        throw new IllegalStateException("Concurrent voice handshakes are not allowed for guild " + guildId);
+                        return existing;
                     }
-                    return s;
-                }))
-                .doOnNext(vc -> onHandshake.remove(guildId));
+                    return Mono.fromCallable(() -> new DefaultVoiceGatewayClient(options))
+                            .flatMap(client -> client.start(options.getVoiceServerOptions()))
+                            .doFinally(s -> onHandshake.remove(options.getGuildId()))
+                            .cache()
+                            .publish(mono -> mono.flatMap(vc -> vc.onConnectOrDisconnect().thenReturn(vc)));
+                }));
     }
 }
