@@ -162,24 +162,4 @@ public class Color {
         return Objects.hash(value);
     }
 
-    /**
-     * Converts float values to integer value.
-     *
-     * @param red The red value.
-     * @param green The green value.
-     * @param blue The blue value.
-     * @param alpha The alpha value.
-     * @return The integer value made of 8-bit sections.
-     */
-    private static int convert(float red, float green, float blue, float alpha) {
-        if (red < 0 || red > 1 || green < 0 || green > 1 || blue < 0 || blue > 1
-                || alpha < 0 || alpha > 1) {
-            throw new IllegalArgumentException("Bad RGB values");
-        }
-        int redval = Math.round(255 * red);
-        int greenval = Math.round(255 * green);
-        int blueval = Math.round(255 * blue);
-        int alphaval = Math.round(255 * alpha);
-        return (alphaval << 24) | (redval << 16) | (greenval << 8) | blueval;
-    }
 }
