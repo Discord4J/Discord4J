@@ -690,6 +690,15 @@ public final class Guild implements Entity {
     }
 
     /**
+     * Gets the maximum amount of users in a video channel, if present.
+     *
+     * @return The maximum amount of users in a video channel, if present.
+     */
+    public Optional<Integer> getMaxVideoChannelUsers() {
+        return data.maxVideoChannelUsers().toOptional();
+    }
+
+    /**
      * Gets when this guild was joined at. If this {@link Guild} object was {@link EntityRetrievalStrategy retrieved}
      * using REST API, then calling this method will throw {@link DateTimeParseException}.
      *
