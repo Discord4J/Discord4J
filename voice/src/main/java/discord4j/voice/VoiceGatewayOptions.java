@@ -38,17 +38,19 @@ public class VoiceGatewayOptions {
     private final VoiceReceiveTaskFactory receiveTaskFactory;
     private final VoiceDisconnectTask disconnectTask;
     private final VoiceServerUpdateTask serverUpdateTask;
+    private final VoiceStateUpdateTask stateUpdateTask;
     private final VoiceChannelRetrieveTask channelRetrieveTask;
     private final Duration ipDiscoveryTimeout;
     private final RetrySpec ipDiscoveryRetrySpec;
 
     public VoiceGatewayOptions(long guildId, long selfId, String session, VoiceServerOptions voiceServerOptions,
                                JacksonResources jacksonResources, VoiceReactorResources reactorResources,
-                               ReconnectOptions reconnectOptions, AudioProvider audioProvider, AudioReceiver audioReceiver,
+                               ReconnectOptions reconnectOptions, AudioProvider audioProvider,
+                               AudioReceiver audioReceiver,
                                VoiceSendTaskFactory sendTaskFactory, VoiceReceiveTaskFactory receiveTaskFactory,
                                VoiceDisconnectTask disconnectTask, VoiceServerUpdateTask serverUpdateTask,
-                               VoiceChannelRetrieveTask channelRetrieveTask, Duration ipDiscoveryTimeout,
-                               RetrySpec ipDiscoveryRetrySpec) {
+                               VoiceStateUpdateTask stateUpdateTask, VoiceChannelRetrieveTask channelRetrieveTask,
+                               Duration ipDiscoveryTimeout, RetrySpec ipDiscoveryRetrySpec) {
         this.guildId = guildId;
         this.selfId = selfId;
         this.session = session;
@@ -62,6 +64,7 @@ public class VoiceGatewayOptions {
         this.receiveTaskFactory = receiveTaskFactory;
         this.disconnectTask = disconnectTask;
         this.serverUpdateTask = serverUpdateTask;
+        this.stateUpdateTask = stateUpdateTask;
         this.channelRetrieveTask = channelRetrieveTask;
         this.ipDiscoveryTimeout = ipDiscoveryTimeout;
         this.ipDiscoveryRetrySpec = ipDiscoveryRetrySpec;
@@ -117,6 +120,10 @@ public class VoiceGatewayOptions {
 
     public VoiceServerUpdateTask getServerUpdateTask() {
         return serverUpdateTask;
+    }
+
+    public VoiceStateUpdateTask getStateUpdateTask() {
+        return stateUpdateTask;
     }
 
     public VoiceChannelRetrieveTask getChannelRetrieveTask() {

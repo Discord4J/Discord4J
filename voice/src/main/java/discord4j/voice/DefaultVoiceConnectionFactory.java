@@ -34,7 +34,7 @@ public class DefaultVoiceConnectionFactory implements VoiceConnectionFactory {
                         return existing;
                     }
                     return Mono.fromCallable(() -> new DefaultVoiceGatewayClient(options))
-                            .flatMap(client -> client.start(options.getVoiceServerOptions()))
+                            .flatMap(client -> client.start(options.getVoiceServerOptions(), options.getSession()))
                             .doFinally(s -> onHandshake.remove(options.getGuildId()))
                             .cache()
                             .publish(mono -> mono.flatMap(vc -> vc.onConnectOrDisconnect().thenReturn(vc)));

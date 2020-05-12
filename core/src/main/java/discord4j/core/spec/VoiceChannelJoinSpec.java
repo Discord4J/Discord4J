@@ -188,11 +188,6 @@ public class VoiceChannelJoinSpec implements Spec<Mono<VoiceConnection>> {
     public Mono<VoiceConnection> asRequest() {
         final long guildId = voiceChannel.getGuildId().asLong();
         final long channelId = voiceChannel.getId().asLong();
-        final Flux<Long> selfIdSupplier = gateway.getGatewayResources().getStateView().getSelfId()
-                .switchIfEmpty(Mono.error(new IllegalStateException("Missing self id")))
-                .cache()
-                .repeat();
-
         final GatewayClientGroup clientGroup = voiceChannel.getClient().getGatewayClientGroup();
         final int shardId = (int) ((voiceChannel.getGuildId().asLong() >> 22) % clientGroup.getShardCount());
         final Mono<Void> sendVoiceStateUpdate = clientGroup.unicast(ShardGatewayPayload.voiceStateUpdate(
@@ -203,36 +198,17 @@ public class VoiceChannelJoinSpec implements Spec<Mono<VoiceConnection>> {
                         .selfDeaf(selfDeaf)
                         .build(), shardId));
 
-        final Mono<VoiceStateUpdateEvent> waitForVoiceStateUpdate = gateway.getEventDispatcher()
-                .on(VoiceStateUpdateEvent.class)
-                .zipWith(selfIdSupplier)
-                .filter(t2 -> {
-                    VoiceStateUpdateEvent vsu = t2.getT1();
-                    Long selfId = t2.getT2();
-                    final long vsuUser = vsu.getCurrent().getUserId().asLong();
-                    final long vsuGuild = vsu.getCurrent().getGuildId().asLong();
-                    // this update is for the bot (current) user in this guild
-                    return (vsuUser == selfId) && (vsuGuild == guildId);
-                })
-                .map(Tuple2::getT1)
-                .next();
-
-        final Mono<VoiceServerUpdateEvent> waitForVoiceServerUpdate = gateway.getEventDispatcher()
-                .on(VoiceServerUpdateEvent.class)
-                .filter(vsu -> vsu.getGuildId().asLong() == guildId)
-                .filter(vsu -> vsu.getEndpoint() != null) // sometimes Discord sends null here. If so, another VSU
-                // should arrive afterwards
-                .next();
+        final Flux<Long> selfIdSupplier = selfIdSupplier(gateway);
+        final Mono<VoiceStateUpdateEvent> waitForVoiceStateUpdate = onVoiceStateUpdates(gateway, guildId).next();
+        final Mono<VoiceServerUpdateEvent> waitForVoiceServerUpdate = onVoiceServerUpdate(gateway, guildId);
 
         final VoiceDisconnectTask disconnectTask = id -> voiceChannel.sendDisconnectVoiceState()
                 .then(gateway.getVoiceConnectionRegistry().disconnect(id));
         //noinspection ConstantConditions
-        final VoiceServerUpdateTask serverUpdateTask = id -> gateway.getEventDispatcher()
-                .on(VoiceServerUpdateEvent.class)
-                .filter(vsu -> vsu.getGuildId().asLong() == id)
-                .filter(vsu -> vsu.getEndpoint() != null)
-                .map(vsu -> new VoiceServerOptions(vsu.getToken(), vsu.getEndpoint()))
-                .next();
+        final VoiceServerUpdateTask serverUpdateTask = id -> onVoiceServerUpdate(gateway, id)
+                .map(vsu -> new VoiceServerOptions(vsu.getToken(), vsu.getEndpoint()));
+        final VoiceStateUpdateTask stateUpdateTask = id -> onVoiceStateUpdates(gateway, id)
+                .map(stateUpdateEvent -> stateUpdateEvent.getCurrent().getSessionId());
         final VoiceChannelRetrieveTask channelRetrieveTask = () -> selfIdSupplier.next()
                 .flatMap(selfId -> gateway.getMemberById(voiceChannel.getGuildId(), Snowflake.of(selfId)))
                 .flatMap(Member::getVoiceState)
@@ -251,7 +227,8 @@ public class VoiceChannelJoinSpec implements Spec<Mono<VoiceConnection>> {
                             gateway.getGatewayResources().getVoiceReactorResources(),
                             gateway.getGatewayResources().getVoiceReconnectOptions(),
                             provider, receiver, sendTaskFactory, receiveTaskFactory, disconnectTask,
-                            serverUpdateTask, channelRetrieveTask, ipDiscoveryTimeout, ipDiscoveryRetrySpec);
+                            serverUpdateTask, stateUpdateTask, channelRetrieveTask,
+                            ipDiscoveryTimeout, ipDiscoveryRetrySpec);
 
                     return gateway.getVoiceConnectionFactory()
                             .create(voiceGatewayOptions)
@@ -269,5 +246,36 @@ public class VoiceChannelJoinSpec implements Spec<Mono<VoiceConnection>> {
         return gateway.getVoiceConnectionRegistry().getVoiceConnection(guildId)
                 .flatMap(existing -> sendVoiceStateUpdate.then(waitForVoiceStateUpdate).thenReturn(existing))
                 .switchIfEmpty(newConnection);
+    }
+
+    static Flux<Long> selfIdSupplier(GatewayDiscordClient gateway) {
+        return gateway.getGatewayResources().getStateView().getSelfId()
+                .switchIfEmpty(Mono.error(new IllegalStateException("Missing self id")))
+                .cache()
+                .repeat();
+    }
+
+    static Flux<VoiceStateUpdateEvent> onVoiceStateUpdates(GatewayDiscordClient gateway, long guildId) {
+        return gateway.getEventDispatcher()
+                .on(VoiceStateUpdateEvent.class)
+                .zipWith(selfIdSupplier(gateway))
+                .filter(t2 -> {
+                    VoiceStateUpdateEvent vsu = t2.getT1();
+                    Long selfId = t2.getT2();
+                    final long vsuUser = vsu.getCurrent().getUserId().asLong();
+                    final long vsuGuild = vsu.getCurrent().getGuildId().asLong();
+                    // this update is for the bot (current) user in this guild
+                    return (vsuUser == selfId) && (vsuGuild == guildId);
+                })
+                .map(Tuple2::getT1);
+    }
+
+    static Mono<VoiceServerUpdateEvent> onVoiceServerUpdate(GatewayDiscordClient gateway, long guildId) {
+        return gateway.getEventDispatcher()
+                .on(VoiceServerUpdateEvent.class)
+                .filter(vsu -> vsu.getGuildId().asLong() == guildId)
+                .filter(vsu -> vsu.getEndpoint() != null) // sometimes Discord sends null here. If so, another VSU
+                // should arrive afterwards
+                .next();
     }
 }
