@@ -38,6 +38,17 @@ import reactor.util.function.Tuple2;
 
 import static discord4j.common.LogUtil.format;
 
+/**
+ * Represents a WebSocket handler specialized for Discord voice gateway operations.
+ * <p>
+ * Capable of handling closing events that normally occur in its lifecycle.
+ * <p>
+ * This handler uses a {@link FluxSink} of {@link ByteBuf} to push inbound payloads and a {@link Flux} of
+ * {@link ByteBuf} to pull outbound payloads.
+ * <p>
+ * The handler also provides methods to control the lifecycle, which perform operations on the current session. It is
+ * required to use them to properly release important resources and complete the session.
+ */
 public class VoiceWebsocketHandler {
 
     private static final Logger log = Loggers.getLogger(VoiceWebsocketHandler.class);

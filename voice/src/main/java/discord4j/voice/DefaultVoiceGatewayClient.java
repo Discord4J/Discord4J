@@ -58,6 +58,12 @@ import java.util.function.Function;
 import static discord4j.common.LogUtil.format;
 import static io.netty.handler.codec.http.HttpHeaderNames.USER_AGENT;
 
+/**
+ * A default implementation for client that is able to connect to Discord Voice Gateway and establish a
+ * {@link VoiceConnection} capable of sending and receiving audio.
+ *
+ * @see <a href="https://discord.com/developers/docs/topics/voice-connections">Voice</a>
+ */
 public class DefaultVoiceGatewayClient {
 
     private static final Logger log = Loggers.getLogger(DefaultVoiceGatewayClient.class);

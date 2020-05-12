@@ -20,16 +20,15 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import reactor.core.Disposable;
 import reactor.core.scheduler.Scheduler;
-import reactor.util.Logger;
-import reactor.util.Loggers;
 
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
+/**
+ * A send task that can derive packets from an {@link AudioProvider} and submit audio packets locally.
+ */
 public class LocalVoiceSendTask implements Disposable {
-
-    private static final Logger log = Loggers.getLogger(LocalVoiceSendTask.class);
 
     private final Consumer<Boolean> speakingSender;
     private final Consumer<ByteBuf> voiceSender;

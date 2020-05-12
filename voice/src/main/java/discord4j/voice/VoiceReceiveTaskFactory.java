@@ -22,8 +22,21 @@ import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
 import reactor.core.scheduler.Scheduler;
 
+/**
+ * A factory to create a task that receives audio packets from a source and processes them through a given
+ * {@link AudioReceiver}.
+ */
 public interface VoiceReceiveTaskFactory {
 
+    /**
+     * Create a task that is capable of handling incoming audio packets.
+     *
+     * @param scheduler a dedicated {@link Scheduler} that can be used to run the task
+     * @param in a sequence of raw incoming audio {@link ByteBuf} packets
+     * @param transformer a strategy to decode a packet from a raw {@link ByteBuf}
+     * @param receiver a strategy to consume decoded audio packets
+     * @return a task that can receive audio and process it
+     */
     Disposable create(Scheduler scheduler, Flux<ByteBuf> in, PacketTransformer transformer, AudioReceiver receiver);
 
 }

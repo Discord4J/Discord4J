@@ -21,6 +21,11 @@ import discord4j.common.ReactorResources;
 import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
 
+/**
+ * Provides an extra level of configuration for {@link ReactorResources}, tailored for the Gateway operations.
+ * <p>
+ * Allows customizing the {@link Scheduler} used to send gateway payloads.
+ */
 public class GatewayReactorResources extends ReactorResources {
 
     private final Scheduler payloadSenderScheduler;

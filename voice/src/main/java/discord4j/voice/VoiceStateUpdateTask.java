@@ -20,6 +20,9 @@ package discord4j.voice;
 import discord4j.common.annotations.Experimental;
 import reactor.core.publisher.Flux;
 
+/**
+ * A listener to derive a potentially new session ID from a VOICE_STATE_UPDATE gateway event.
+ */
 @FunctionalInterface
 @Experimental
 public interface VoiceStateUpdateTask {

@@ -16,6 +16,9 @@
  */
 package discord4j.voice;
 
+/**
+ * Opus constants.
+ */
 public final class Opus {
 
     public static final int SAMPLE_RATE = 48_000; // Hz

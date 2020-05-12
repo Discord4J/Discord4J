@@ -23,6 +23,9 @@ import reactor.util.retry.RetrySpec;
 
 import java.time.Duration;
 
+/**
+ * A set of options required to establish and customize building {@link VoiceConnection} instances.
+ */
 public class VoiceGatewayOptions {
 
     private final long guildId;

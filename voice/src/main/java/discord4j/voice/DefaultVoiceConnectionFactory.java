@@ -22,6 +22,11 @@ import reactor.core.publisher.Mono;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * Default implementation for a {@link VoiceConnectionFactory}. It uses a {@link DefaultVoiceGatewayClient} to create
+ * {@link VoiceConnection} instances. Protects against concurrent {@link #create(VoiceGatewayOptions)} calls by sharing
+ * the {@link Mono} subscription that actually establishes a voice connection.
+ */
 public class DefaultVoiceConnectionFactory implements VoiceConnectionFactory {
 
     private final Map<Long, Mono<VoiceConnection>> onHandshake = new ConcurrentHashMap<>();

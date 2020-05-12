@@ -19,6 +19,9 @@ package discord4j.voice;
 
 import reactor.core.publisher.Mono;
 
+/**
+ * A supplier to obtain a channel ID.
+ */
 @FunctionalInterface
 public interface VoiceChannelRetrieveTask {
 
