@@ -294,7 +294,7 @@ public final class Guild implements Entity {
      */
     @Deprecated
     public Optional<Snowflake> getEmbedChannelId() {
-        return this.getWidgetChannelId();
+        return getWidgetChannelId();
     }
 
     /**
@@ -747,7 +747,7 @@ public final class Guild implements Entity {
      */
     @Deprecated
     public boolean isEmbedEnabled() {
-        return this.isWidgetEnabled();
+        return isWidgetEnabled();
     }
 
     /**
