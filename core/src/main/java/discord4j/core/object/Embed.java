@@ -19,8 +19,8 @@ package discord4j.core.object;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.discordjson.json.*;
 import discord4j.discordjson.possible.Possible;
+import discord4j.rest.util.Color;
 
-import java.awt.Color;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;

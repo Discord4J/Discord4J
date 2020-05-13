@@ -21,6 +21,7 @@ import discord4j.core.object.VoiceState;
 import discord4j.core.object.presence.Presence;
 import discord4j.core.retriever.EntityRetrievalStrategy;
 import discord4j.discordjson.possible.Possible;
+import discord4j.rest.util.Color;
 import discord4j.rest.util.PermissionSet;
 import discord4j.rest.util.Snowflake;
 import discord4j.core.spec.BanQuerySpec;
@@ -36,7 +37,6 @@ import reactor.core.publisher.Mono;
 import reactor.math.MathFlux;
 import reactor.util.annotation.Nullable;
 
-import java.awt.Color;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
