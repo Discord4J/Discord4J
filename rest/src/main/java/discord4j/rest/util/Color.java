@@ -88,12 +88,6 @@ public final class Color {
         return of((red << 16) | (green << 8) | blue);
     }
 
-    private static void checkComponent(final int component, final String type) {
-        if ((component & 0xFF) != component) {
-            throw new IllegalArgumentException("Bad " + type + " Value: 0x" + Integer.toHexString(component));
-        }
-    }
-
     /**
      * Initializes a new instance of {@link Color} using the specified RGB value. The blue value is in bits 0-7, green
      * in bits 8-15, and red in bits 16-23.
