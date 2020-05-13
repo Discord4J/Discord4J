@@ -71,7 +71,7 @@ public class RateLimitOperator<T> implements Function<Publisher<T>, Publisher<T>
     @Override
     public Publisher<T> apply(Publisher<T> source) {
         return Flux.from(source).flatMap(value -> availableTokens()
-                .take(1)
+                .next()
                 .doOnSubscribe(s -> {
                     if (log.isTraceEnabled()) {
                         log.trace("[{}] Subscribed to limiter", id());
