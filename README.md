@@ -36,7 +36,15 @@ public final class ExampleBot {
 
 ## 💎 Benefits
 
-when im not tired
+* 🚀 **Reactive** - Discord4J follows the [reactive-streams](http://www.reactive-streams.org/) protocol to ensure Discord bots run smoothly and efficiently regardless of size.
+
+* 📜 **Official** - Automatic rate limiting, automatic reconnection strategies, and consistent naming conventions are among the many features Discord4J offers to ensure your Discord bots run up to Discord's specifications and to provide the least amount of surprises when interacting with our library.
+
+* 🛠️ **Modular** - Discord4J breaks itself into modules to allow advanced users to interact with our API at lower levels to build minimal and fast runtimes or even add their own abstractions.
+
+* ⚔️ **Powerful** - Discord4J can be used to develop any bot, big or small. We offer many tools for developing large-scale bots from [custom distribution frameworks](https://github.com/Discord4J/connect), [off-heap caching](https://github.com/Discord4J/Stores/tree/master/redis), and its interaction with Reactor allows complete integration with frameworks such as Spring and Micronaut.
+
+* 🏫 **Community** - We pride ourselves on our inclusive community and are willing to help whenever challenges arise; or if you just want to chat! We offer help ranging from Discord4J specific problems, to general programming and web development help, and even Reactor-specific questions. Be sure to visit us on our [Discord server](https://discord.gg/NxGAeCY)!
 
 ## 📦 Installation
 
@@ -84,6 +92,12 @@ libraryDependencies ++= Seq(
   "com.discord4j" % "discord4j-core" % "3.1.0.M2"
 )
 ```
+
+## 🔀 Discord4J 3.0.x
+
+Discord4J 3.1.x introduces performance and API enhancements, a plethora of new features, and dependency upgrades. A [Migration Guide](https://github.com/Discord4J/Discord4J/wiki/Migrating-from-v3.0-to-v3.1) is provided to aide users and ensure a smooth and readily available transition.
+
+Discord4J 3.0.x installation instructions and examples can be found on the [3.0.x branch](https://github.com/Discord4J/Discord4J/tree/3.0.x).
 
 ## ⚛️ Reactive
 
@@ -156,13 +170,14 @@ Discord4J provides full support for voice connections and the ability to send au
 To get started, you will first need to instantiate and configure an, conventionally global, `AudioPlayerManager`.
 
 ```java
-public final static AudioPlayerManager playerManager;
+public static final AudioPlayerManager PLAYER_MANAGER;
 
 static {
-  playerManager = new DefaultAudioPlayerManager();
+  PLAYER_MANAGER = new DefaultAudioPlayerManager();
   // This is an optimization strategy that Discord4J can utilize to minimize allocations
-  playerManager.getConfiguration().setFrameBufferFactory(NonAllocatingAudioFrameBuffer::new);
-  AudioSourceManagers.registerRemoteSources(playerManager);
+  PLAYER_MANAGER.getConfiguration().setFrameBufferFactory(NonAllocatingAudioFrameBuffer::new);
+  AudioSourceManagers.registerRemoteSources(PLAYER_MANAGER);
+  AudioSourceManagers.registerLocalSource(PLAYER_MANAGER);
 }
 ```
 
@@ -197,10 +212,87 @@ public final class LavaPlayerAudioProvider extends AudioProvider {
 }
 ```
 
-too tired will finish later
+Typically, audio players will have queues or internal playlists for users to be able to automatically cycle through songs as they are finished or requested to be skipped over. We can manage this queue externally and pass it to other areas of our code to allow tracks to be viewed, queued, or skipped over by creating an `AudioTrackScheduler`.
 
-## 🔀 Discord4J 3.0.x
+```java
+public final class AudioTrackScheduler extends AudioEventAdapter {
 
-Discord4J 3.1.x introduces performance and API enhancements, a plethora of new features, and dependency upgrades. A [Migration Guide](https://github.com/Discord4J/Discord4J/wiki/Migrating-from-v3.0-to-v3.1) is provided to aide users and ensure a smooth and readily available transition.
+  private final List<AudioTrack> queue;
+  private final AudioPlayer player;
 
-Discord4J 3.0.x installation instructions and examples can be found on the [3.0.x branch](https://github.com/Discord4J/Discord4J/tree/3.0.x).
+  public AudioTrackScheduler(final AudioPlayer player) {
+    // The queue may be modifed by different threads so guarantee memory safety
+    // This does not, however, remove several race conditions currently present
+    queue = Collections.synchronizedList(new LinkedList<>());
+    this.player = player;
+  }
+
+  public List<AudioTrack> getQueue() {
+    return queue;
+  }
+
+  public boolean play(final AudioTrack track) {
+    return play(track, false);
+  }
+
+  public boolean play(final AudioTrack track, final boolean force) {
+    final boolean playing = player.startTrack(track, !force);
+
+    if (!playing) {
+      queue.add(track);
+    }
+
+    return playing;
+  }
+
+  public boolean skip() {
+    return !queue.isEmpty() && play(queue.remove(0), true);
+  }
+
+  @Override
+  public void onTrackEnd(final AudioPlayer player, final AudioTrack track, final AudioTrackEndReason endReason) {
+    // Advance the player if the track completed naturally (FINISHED) or if the track cannot play (LOAD_FAILED)
+    if (endReason.mayStartNext) {
+      skip();
+    }
+  }
+}
+```
+
+Currently, Discord only allows 1 voice connection per server. Working within this limitation, it is logical to think of the 3 components we have worked with thus far (`AudioPlayer`, `LavaPlayerAudioProvider`, and `AudioTrackScheduler`) to be correlated to a specific `Guild`, naturally unique by some `Snowflake`. Logically, it makes sense to combine these objects into one, so that they can be put into a `Map` for easier retrieval when connecting to a voice channel or when working with commands.
+
+```java
+public final class GuildAudioManager {
+
+  private static final Map<Snowflake, GuildAudioManager> MANAGERS = new ConcurrentHashMap<>();
+
+  public static GuildAudioManager of(final Snowflake id) {
+    return MANAGERS.computeIfAbsent(id, ignored -> new GuildAudioManager());
+  }
+
+  private final AudioPlayer player;
+  private final AudioTrackScheduler scheduler;
+  private final LavaPlayerAudioProvider provider;
+
+  private GuildAudioManager() {
+    player = PLAYER_MANAGER.createPlayer();
+    scheduler = new AudioTrackScheduler(player);
+    provider = new LavaPlayerAudioProvider(player);
+
+    player.addListener(scheduler);
+  }
+
+  // getters
+}
+```
+
+Finally, we need to connect to the voice channel. After connecting you are given a `VoiceConnection` object where you can utilize it later to disconnect from the voice channel by calling `VoiceConnection#disconnect`.
+
+```java
+final VoiceChannel channel = ...
+final AudioProvider provider = GuildAudioManager.of(channel.getGuildId()).getProvider();
+final VoiceConnection connection = channel.join(spec -> spec.setProvider(provider)).block();
+
+// In the AudioLoadResultHandler, add AudioTrack instances to the AudioTrackScheduler (and send notifications to users)
+PLAYER_MANAGER.loadItem("https://www.youtube.com/watch?v=dQw4w9WgXcQ", new AudioLoadResultHandler() { /* overrides */ })
+```
