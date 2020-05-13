@@ -551,9 +551,9 @@ public final class Guild implements Entity {
     }
 
     /**
-     * Gets the channel ID for the server widget, if present.
+     * Gets the channel ID that the widget will generate an invite to, if present.
      *
-     * @return The channel ID for the server widget, if present.
+     * @return The channel ID that the widget will generate an invite to, if present.
      */
     public Optional<Snowflake> getWidgetChannelId() {
         return Possible.flatOpt(data.widgetChannelId()).map(Snowflake::of);
