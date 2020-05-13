@@ -64,7 +64,7 @@ public class RoleEditSpec implements AuditSpec<RoleModifyRequest> {
      * @return This spec.
      */
     public RoleEditSpec setColor(Color color) {
-        requestBuilder.color(color.getRGB() & 0xFFFFFF);
+        requestBuilder.color(color.getRGB());
         return this;
     }
 

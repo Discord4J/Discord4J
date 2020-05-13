@@ -16,90 +16,114 @@
  */
 package discord4j.rest.util;
 
-import java.util.Objects;
+public final class Color {
 
-public class Color {
+    /** The color white. */
+    public static final Color WHITE = of(255, 255, 255);
 
-    /** Internal mask for red. */
-    private static final int RED_MASK = 255 << 16;
-    /** Internal mask for green. */
-    private static final int GREEN_MASK = 255 << 8;
-    /** Internal mask for blue. */
-    private static final int BLUE_MASK = 255;
-    /** Internal mask for alpha. */
-    private static final int ALPHA_MASK = 255 << 24;
+    /** The color light gray. */
+    public static final Color LIGHT_GRAY = of(192, 192, 192);
 
-    /** The color value, in sRGB. */
-    private final int value;
-    /** The alpha value. This is in the range 0.0f - 1.0f. */
-    private final float falpha;
+    /** The color gray. */
+    public static final Color GRAY = of(128, 128, 128);
+
+    /** The color dark gray. */
+    public static final Color DARK_GRAY = of(64, 64, 64);
+
+    /** The color black. */
+    public static final Color BLACK = of(0, 0, 0);
+
+    /** The color red. */
+    public static final Color RED = of(255, 0, 0);
+
+    /** The color pink. */
+    public static final Color PINK = of(255, 175, 175);
+
+    /** The color orange. */
+    public static final Color ORANGE = of(255, 200, 0);
+
+    /** The color yellow. */
+    public static final Color YELLOW = of(255, 255, 0);
+
+    /** The color green. */
+    public static final Color GREEN = of(0, 255, 0);
+
+    /** The color magenta. */
+    public static final Color MAGENTA = of(255, 0, 255);
+
+    /** The color cyan. */
+    public static final Color CYAN = of(0, 255, 255);
+
+    /** The color blue. */
+    public static final Color BLUE = of(0, 0, 255);
 
     /**
-     * Initializes a new instance of {@link Color} using the specified
-     * red, green, and blue values, which must be given as integers in the
-     * range of 0-255. Alpha will default to 255 (opaque).
+     * Initializes a new instance of {@link Color} using the specified red, green, and blue values, which must be given
+     * as floats in the range of 0.0F-255.0F.
      *
      * @param red The red component of the RGB value.
      * @param green The green component of the RGB value.
      * @param blue The blue component of the RGB value.
      */
-    public Color(int red, int green, int blue) {
-        this(red, green, blue, 255);
+    public static Color of(final float red, final float green, final float blue) {
+        return of((int) (red * 255.0F + 0.5F), (int) (green * 255.0F + 0.5F), (int) (blue * 255.0F + 0.5F));
     }
 
     /**
-     * Initializes a new instance of {@link Color} using the specified
-     * red, green, blue, and alpha values, which must be given as integers in
-     * the range of 0-255.
+     * Initializes a new instance of {@link Color} using the specified red, green, and blue values, which must be given
+     * as integers in the range of 0-255.
      *
      * @param red The red component of the RGB value.
      * @param green The green component of the RGB value.
      * @param blue The blue component of the RGB value.
-     * @param alpha The alpha value of the color.
      */
-    public Color(int red, int green, int blue, int alpha) {
-        if ((red & 255) != red || (green & 255) != green || (blue & 255) != blue
-                || (alpha & 255) != alpha) {
-            throw new IllegalArgumentException("Bad RGB values"
-                    + " red=0x" + Integer.toHexString(red)
-                    + " green=0x" + Integer.toHexString(green)
-                    + " blue=0x" + Integer.toHexString(blue)
-                    + " alpha=0x" + Integer.toHexString(alpha));
+    public static Color of(final int red, final int green, final int blue) {
+        if ((red & 0xFF) != red || (green & 0xFF) != green || (blue & 0xFF) != blue) {
+            throw new IllegalArgumentException("Illegal RGB arguments" +
+                " red=0x" + Integer.toHexString(red) +
+                " green=0x" + Integer.toHexString(green) +
+                " blue=0x" + Integer.toHexString(blue));
         }
 
-        value = (alpha << 24) | (red << 16) | (green << 8) | blue;
-        falpha = 1;
+        return of((red << 16) | (green << 8) | blue);
+    }
+
+    private static void checkComponent(final int component, final String type) {
+        if ((component & 0xFF) != component) {
+            throw new IllegalArgumentException("Bad " + type + " Value: 0x" + Integer.toHexString(component));
+        }
     }
 
     /**
-     * Initializes a new instance of {@link Color} using the specified
-     * RGB value. The blue value is in bits 0-7, green in bits 8-15, and
-     * red in bits 16-23. The other bits are ignored. The alpha value is set
-     * to 255 (opaque).
+     * Initializes a new instance of {@link Color} using the specified RGB value. The blue value is in bits 0-7, green
+     * in bits 8-15, and red in bits 16-23.
      *
-     * @param value The RGB value.
+     * @param rgb The RGB value.
      */
-    public Color(int value) {
-        this(value, false);
+    public static Color of(final int rgb) {
+        return new Color(rgb & 0xFFFFFF);
+    }
+
+    /** The color value, in RGB. */
+    private final int rgb;
+
+    /**
+     * Initializes a new instance of {@link Color} using the specified RGB value. The blue value is in bits 0-7, green
+     * in bits 8-15, and red in bits 16-23.
+     *
+     * @param rgb The RGB value.
+     */
+    private Color(final int rgb) {
+        this.rgb = rgb;
     }
 
     /**
-     * Initializes a new instance of {@link Color} using the specified
-     * RGB value. The blue value is in bits 0-7, green in bits 8-15, and
-     * red in bits 16-23. The alpha value is in bits 24-31, unless hasalpha
-     * is false, in which case alpha is set to 255.
+     * Returns the RGB value for this color. The blue value will be in bits 0-7, green in 8-15, and red in 16-23.
      *
-     * @param value The RGB value.
-     * @param hasalpha Whether value includes the alpha.
+     * @return The RGB value for this color.
      */
-    public Color(int value, boolean hasalpha) {
-        if (hasalpha) {
-            falpha = ((value & ALPHA_MASK) >> 24) / 255f;
-        } else {
-            value |= ALPHA_MASK;
-            falpha = 1;
-        }
-        this.value = value;
+    public int getRGB() {
+        return rgb;
     }
 
     /**
@@ -108,7 +132,7 @@ public class Color {
      * @return The red value for this color.
      */
     public int getRed() {
-        return (getRGB() & RED_MASK) >> 16;
+        return (rgb >> 16) & 0xFF;
     }
 
     /**
@@ -117,7 +141,7 @@ public class Color {
      * @return The green value for this color.
      */
     public int getGreen() {
-        return (getRGB() & GREEN_MASK) >> 8;
+        return (rgb >> 8) & 0xFF;
     }
 
     /**
@@ -126,53 +150,23 @@ public class Color {
      * @return The blue value for this color.
      */
     public int getBlue() {
-        return getRGB() & BLUE_MASK;
-    }
-
-    /**
-     * Returns the alpha value for this color, as an integer in the range 0-255.
-     *
-     * @return The alpha value for this color.
-     */
-    public int getAlpha() {
-        return (getRGB() & ALPHA_MASK) >>> 24;
-    }
-
-    /**
-     * Returns the RGB value for this color, in the sRGB color space. The blue
-     * value will be in bits 0-7, green in 8-15, red in 16-23, and alpha value in
-     * 24-31.
-     *
-     * @return The RGB value for this color.
-     */
-    public int getRGB() {
-        return value;
+        return rgb & 0xFF;
     }
 
     @Override
     public String toString() {
         return "Color{" +
-                "r=" + getRed() +
-                "g=" + getGreen() +
-                "b=" + getBlue() +
-                '}';
+            "red=" + getRed() +
+            ", green=" + getGreen() +
+            ", blue=" + getBlue() +
+            '}';
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        Color color = (Color) o;
-        return value == color.value;
+    public boolean equals(final Object obj) {
+        return obj instanceof Color && ((Color) obj).getRGB() == getRGB();
     }
 
-    @Override
     public int hashCode() {
-        return Objects.hash(value);
+        return getRGB();
     }
-
 }
