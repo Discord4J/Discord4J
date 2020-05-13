@@ -27,7 +27,7 @@ import reactor.util.annotation.Nullable;
 /**
  * Spec used to modify a guild {@link Role}.
  *
- * @see <a href="https://discordapp.com/developers/docs/resources/guild#modify-guild-role">Modify Guild Role</a>
+ * @see <a href="https://discord.com/developers/docs/resources/guild#modify-guild-role">Modify Guild Role</a>
  */
 public class RoleEditSpec implements AuditSpec<RoleModifyRequest> {
 

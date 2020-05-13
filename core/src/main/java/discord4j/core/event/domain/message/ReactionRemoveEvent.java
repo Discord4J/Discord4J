@@ -36,7 +36,7 @@ import java.util.Optional;
  * <p>
  * This event is dispatched by Discord.
  *
- * @see <a href="https://discordapp.com/developers/docs/topics/gateway#message-reaction-remove">Message Reaction
+ * @see <a href="https://discord.com/developers/docs/topics/gateway#message-reaction-remove">Message Reaction
  * Remove</a>
  */
 public class ReactionRemoveEvent extends MessageEvent {

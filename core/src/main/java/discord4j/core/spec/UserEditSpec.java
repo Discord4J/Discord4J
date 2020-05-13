@@ -24,7 +24,7 @@ import reactor.util.annotation.Nullable;
 /**
  * Spec used to modify the current user.
  *
- * @see <a href="https://discordapp.com/developers/docs/resources/user#modify-current-user">Modify Current User</a>
+ * @see <a href="https://discord.com/developers/docs/resources/user#modify-current-user">Modify Current User</a>
  */
 public class UserEditSpec implements Spec<UserModifyRequest> {
 

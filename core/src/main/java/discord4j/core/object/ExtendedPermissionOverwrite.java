@@ -32,7 +32,7 @@ import java.util.Objects;
 /**
  * A Discord permission overwrite.
  *
- * @see <a href="https://discordapp.com/developers/docs/resources/channel#overwrite-object">Overwrite Object</a>
+ * @see <a href="https://discord.com/developers/docs/resources/channel#overwrite-object">Overwrite Object</a>
  */
 public final class ExtendedPermissionOverwrite extends PermissionOverwrite implements DiscordObject {
 

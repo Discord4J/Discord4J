@@ -26,7 +26,7 @@ import reactor.util.annotation.Nullable;
 /**
  * Spec to modify a {@link Webhook} entity.
  *
- * @see <a href="https://discordapp.com/developers/docs/resources/webhook#modify-webhook">Modify Webhook</a>
+ * @see <a href="https://discord.com/developers/docs/resources/webhook#modify-webhook">Modify Webhook</a>
  */
 public class WebhookEditSpec implements AuditSpec<WebhookModifyRequest> {
 

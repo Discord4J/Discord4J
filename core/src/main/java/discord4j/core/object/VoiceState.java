@@ -32,7 +32,7 @@ import java.util.Optional;
 /**
  * A Discord voice state.
  *
- * @see <a href="https://discordapp.com/developers/docs/resources/voice#voice-resource">Voice Resource</a>
+ * @see <a href="https://discord.com/developers/docs/resources/voice#voice-resource">Voice Resource</a>
  */
 public final class VoiceState implements DiscordObject {
 

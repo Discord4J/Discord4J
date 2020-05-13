@@ -33,7 +33,7 @@ import java.util.function.Consumer;
 /**
  * A Discord webhook.
  *
- * @see <a href="https://discordapp.com/developers/docs/resources/webhook">Webhook Resource</a>
+ * @see <a href="https://discord.com/developers/docs/resources/webhook">Webhook Resource</a>
  */
 public final class Webhook implements Entity {
 

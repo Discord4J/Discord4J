@@ -51,7 +51,7 @@ import java.util.stream.Collectors;
 /**
  * A Discord guild.
  *
- * @see <a href="https://discordapp.com/developers/docs/resources/guild">Guild Resource</a>
+ * @see <a href="https://discord.com/developers/docs/resources/guild">Guild Resource</a>
  */
 public final class Guild implements Entity {
 
@@ -513,7 +513,7 @@ public final class Guild implements Entity {
      * Gets the enabled guild features.
      * <br>
      * You can see the available
-     * <a href="https://discordapp.com/developers/docs/resources/guild#guild-object-guild-features">guild features</a>
+     * <a href="https://discord.com/developers/docs/resources/guild#guild-object-guild-features">guild features</a>
      *
      * @return The enabled guild features.
      */
@@ -1492,9 +1492,9 @@ public final class Guild implements Entity {
     /**
      * Represent the server Premium Tier (aka boost level) of the {@link Guild}.
      *
-     * @see <a href="https://support.discordapp.com/hc/en/articles/360028038352">Server Boost info</a>
+     * @see <a href="https://support.discord.com/hc/en/articles/360028038352">Server Boost info</a>
      * @see
-     * <a href="https://discordapp.com/developers/docs/resources/guild#guild-object-premium-tier">Premium Tier docs</a>
+     * <a href="https://discord.com/developers/docs/resources/guild#guild-object-premium-tier">Premium Tier docs</a>
      */
     public enum PremiumTier {
 

@@ -36,7 +36,7 @@ import java.util.stream.Collectors;
  * <p>
  * This event is dispatched by Discord.
  *
- * @see <a href="https://discordapp.com/developers/docs/topics/gateway#guild-member-update">Guild Member Update</a>
+ * @see <a href="https://discord.com/developers/docs/topics/gateway#guild-member-update">Guild Member Update</a>
  */
 public class MemberUpdateEvent extends GuildEvent {
 

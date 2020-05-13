@@ -37,7 +37,7 @@ import static discord4j.rest.util.Image.Format.PNG;
 /**
  * A Discord user.
  *
- * @see <a href="https://discordapp.com/developers/docs/resources/user">Users Resource</a>
+ * @see <a href="https://discord.com/developers/docs/resources/user">Users Resource</a>
  */
 public class User implements Entity {
 

@@ -27,7 +27,7 @@ import java.util.Objects;
  * Used to access the appropriate {@link RequestStream RequestStream} according to the bucket
  * that requests for the stream fall into.
  * <p>
- * Following the <a href="https://discordapp.com/developers/docs/topics/rate-limits#rate-limits">
+ * Following the <a href="https://discord.com/developers/docs/topics/rate-limits#rate-limits">
  * Discord documentation</a>, requests belong to the same bucket if:
  * <ul>
  * <li>The {@link Route#getUriTemplate()} are equal.</li>

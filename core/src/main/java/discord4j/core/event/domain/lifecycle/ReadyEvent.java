@@ -31,7 +31,7 @@ import java.util.Set;
  * <p>
  * This event is dispatched by Discord.
  *
- * @see <a href="https://discordapp.com/developers/docs/topics/gateway#ready">Ready</a>
+ * @see <a href="https://discord.com/developers/docs/topics/gateway#ready">Ready</a>
  */
 public class ReadyEvent extends GatewayLifecycleEvent {
 
@@ -74,7 +74,7 @@ public class ReadyEvent extends GatewayLifecycleEvent {
      * {@link discord4j.core.event.domain.guild.GuildCreateEvent}
      *
      * @return A set of unavailable {@code Guilds}.
-     * @see <a href="https://discordapp.com/developers/docs/resources/guild#unavailable-guild-object">
+     * @see <a href="https://discord.com/developers/docs/resources/guild#unavailable-guild-object">
      * Unavailable Guild Object</a>
      */
     public Set<Guild> getGuilds() {

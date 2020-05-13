@@ -29,7 +29,7 @@ import java.util.function.Consumer;
 /**
  * Spec used to edit {@link Message} entities this client has sent before.
  *
- * @see <a href="https://discordapp.com/developers/docs/resources/channel#edit-message">Edit Message</a>
+ * @see <a href="https://discord.com/developers/docs/resources/channel#edit-message">Edit Message</a>
  */
 public class MessageEditSpec implements Spec<MessageEditRequest> {
 

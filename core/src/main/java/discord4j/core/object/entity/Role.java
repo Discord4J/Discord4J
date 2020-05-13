@@ -36,7 +36,7 @@ import java.util.function.Consumer;
 /**
  * A Discord role.
  *
- * @see <a href="https://discordapp.com/developers/docs/topics/permissions#role-object">Role Object</a>
+ * @see <a href="https://discord.com/developers/docs/topics/permissions#role-object">Role Object</a>
  */
 public final class Role implements Entity {
 

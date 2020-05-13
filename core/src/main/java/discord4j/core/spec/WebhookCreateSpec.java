@@ -24,7 +24,7 @@ import reactor.util.annotation.Nullable;
 /**
  * Spec used to create a {@link Webhook} entity.
  *
- * @see <a href="https://discordapp.com/developers/docs/resources/webhook#create-webhook">Create Webhook</a>
+ * @see <a href="https://discord.com/developers/docs/resources/webhook#create-webhook">Create Webhook</a>
  */
 public class WebhookCreateSpec implements AuditSpec<WebhookCreateRequest> {
 
