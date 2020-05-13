@@ -278,11 +278,13 @@ class BaseGuildMessageChannel extends BaseChannel implements GuildMessageChannel
      */
     @Override
     public Mono<Webhook> createWebhook(final Consumer<? super WebhookCreateSpec> spec) {
-        final WebhookCreateSpec mutatedSpec = new WebhookCreateSpec();
-        spec.accept(mutatedSpec);
-
-        return getClient().getRestClient().getWebhookService()
-                .createWebhook(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason())
+        return Mono.defer(
+                () -> {
+                    WebhookCreateSpec mutatedSpec = new WebhookCreateSpec();
+                    spec.accept(mutatedSpec);
+                    return getClient().getRestClient().getWebhookService()
+                            .createWebhook(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason());
+                })
                 .map(data -> new Webhook(getClient(), data));
     }
 

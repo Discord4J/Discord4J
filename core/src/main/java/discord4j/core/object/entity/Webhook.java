@@ -16,13 +16,13 @@
  */
 package discord4j.core.object.entity;
 
-import discord4j.discordjson.json.WebhookData;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.channel.GuildMessageChannel;
 import discord4j.core.retriever.EntityRetrievalStrategy;
-import discord4j.rest.util.Snowflake;
 import discord4j.core.spec.WebhookEditSpec;
 import discord4j.core.util.EntityUtil;
+import discord4j.discordjson.json.WebhookData;
+import discord4j.rest.util.Snowflake;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
 
@@ -213,11 +213,13 @@ public final class Webhook implements Entity {
      * received, it is emitted through the {@code Mono}.
      */
     public Mono<Webhook> edit(final Consumer<? super WebhookEditSpec> spec) {
-        final WebhookEditSpec mutatedSpec = new WebhookEditSpec();
-        spec.accept(mutatedSpec);
-
-        return gateway.getRestClient().getWebhookService()
-                .modifyWebhook(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason())
+        return Mono.defer(
+                () -> {
+                    WebhookEditSpec mutatedSpec = new WebhookEditSpec();
+                    spec.accept(mutatedSpec);
+                    return gateway.getRestClient().getWebhookService()
+                            .modifyWebhook(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason());
+                })
                 .map(data -> new Webhook(gateway, data));
     }
 

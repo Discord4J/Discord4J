@@ -16,12 +16,12 @@
  */
 package discord4j.core.object.entity.channel;
 
-import discord4j.discordjson.json.ChannelData;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.retriever.EntityRetrievalStrategy;
 import discord4j.core.spec.CategoryEditSpec;
 import discord4j.core.util.EntityUtil;
+import discord4j.discordjson.json.ChannelData;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -74,11 +74,13 @@ public final class Category extends BaseGuildChannel {
      * received, it is emitted through the {@code Mono}.
      */
     public Mono<Category> edit(final Consumer<? super CategoryEditSpec> spec) {
-        final CategoryEditSpec mutatedSpec = new CategoryEditSpec();
-        spec.accept(mutatedSpec);
-
-        return getClient().getRestClient().getChannelService()
-                .modifyChannel(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason())
+        return Mono.defer(
+                () -> {
+                    CategoryEditSpec mutatedSpec = new CategoryEditSpec();
+                    spec.accept(mutatedSpec);
+                    return getClient().getRestClient().getChannelService()
+                            .modifyChannel(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason());
+                })
                 .map(data -> EntityUtil.getChannel(getClient(), data))
                 .cast(Category.class);
     }

@@ -432,11 +432,13 @@ public final class Message implements Entity {
      * received, it is emitted through the {@code Mono}.
      */
     public Mono<Message> edit(final Consumer<? super MessageEditSpec> spec) {
-        final MessageEditSpec mutatedSpec = new MessageEditSpec();
-        spec.accept(mutatedSpec);
-
-        return gateway.getRestClient().getChannelService()
-                .editMessage(getChannelId().asLong(), getId().asLong(), mutatedSpec.asRequest())
+        return Mono.defer(
+                () -> {
+                    MessageEditSpec mutatedSpec = new MessageEditSpec();
+                    spec.accept(mutatedSpec);
+                    return gateway.getRestClient().getChannelService()
+                            .editMessage(getChannelId().asLong(), getId().asLong(), mutatedSpec.asRequest());
+                })
                 .map(data -> new Message(gateway, data));
     }
 

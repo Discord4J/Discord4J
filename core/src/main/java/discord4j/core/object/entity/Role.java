@@ -269,11 +269,13 @@ public final class Role implements Entity {
      * it is emitted through the {@code Mono}.
      */
     public Mono<Role> edit(final Consumer<? super RoleEditSpec> spec) {
-        final RoleEditSpec mutatedSpec = new RoleEditSpec();
-        spec.accept(mutatedSpec);
-
-        return rest.edit(mutatedSpec.asRequest(), mutatedSpec.getReason())
-                .map(bean -> new Role(gateway, bean, getGuildId().asLong()));
+        return Mono.defer(
+                () -> {
+                    RoleEditSpec mutatedSpec = new RoleEditSpec();
+                    spec.accept(mutatedSpec);
+                    return rest.edit(mutatedSpec.asRequest(), mutatedSpec.getReason())
+                            .map(bean -> new Role(gateway, bean, getGuildId().asLong()));
+                });
     }
 
     /**

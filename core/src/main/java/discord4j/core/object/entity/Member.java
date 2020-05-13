@@ -20,17 +20,15 @@ import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.VoiceState;
 import discord4j.core.object.presence.Presence;
 import discord4j.core.retriever.EntityRetrievalStrategy;
-import discord4j.discordjson.possible.Possible;
-import discord4j.rest.util.Color;
-import discord4j.rest.util.PermissionSet;
-import discord4j.rest.util.Snowflake;
 import discord4j.core.spec.BanQuerySpec;
 import discord4j.core.spec.GuildMemberEditSpec;
 import discord4j.core.util.OrderUtil;
 import discord4j.core.util.PermissionUtil;
 import discord4j.discordjson.json.MemberData;
-import discord4j.discordjson.json.PresenceData;
-import discord4j.discordjson.json.VoiceStateData;
+import discord4j.discordjson.possible.Possible;
+import discord4j.rest.util.Color;
+import discord4j.rest.util.PermissionSet;
+import discord4j.rest.util.Snowflake;
 import discord4j.store.api.util.LongLongTuple2;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -131,7 +129,7 @@ public final class Member extends User {
      */
     public Mono<Role> getHighestRole() {
         return MathFlux.max(Flux.fromIterable(getRoleIds()).flatMap(id -> getClient().getRoleById(getGuildId(), id)),
-                            OrderUtil.ROLE_ORDER);
+                OrderUtil.ROLE_ORDER);
     }
 
     /**
@@ -146,8 +144,9 @@ public final class Member extends User {
      */
     public Mono<Role> getHighestRole(EntityRetrievalStrategy retrievalStrategy) {
         return MathFlux.max(Flux.fromIterable(getRoleIds())
-                .flatMap(id -> getClient().withRetrievalStrategy(retrievalStrategy).getRoleById(getGuildId(), id)),
-                            OrderUtil.ROLE_ORDER);
+                        .flatMap(id -> getClient().withRetrievalStrategy(retrievalStrategy).getRoleById(getGuildId(),
+                                id)),
+                OrderUtil.ROLE_ORDER);
     }
 
     /**
@@ -232,10 +231,6 @@ public final class Member extends User {
      *
      * @return A {@link Mono} where, upon successful completion, emits a {@link VoiceState voice state} for this user
      * for this guild. If an error is received, it is emitted through the {@code Mono}.
-     *
-     * @implNote If the underlying store does not save
-     * {@link VoiceStateData} instances <b>OR</b> the bot is currently not logged in then the returned {@code Mono} will
-     * always be empty.
      */
     public Mono<VoiceState> getVoiceState() {
         return getClient().getGatewayResources().getStateView().getVoiceStateStore()
@@ -248,10 +243,6 @@ public final class Member extends User {
      *
      * @return A {@link Mono} where, upon successful completion, emits a {@link Presence presence} for this user for
      * this guild. If an error is received, it is emitted through the {@code Mono}.
-     *
-     * @implNote If the underlying store does not save
-     * {@link PresenceData} instances <b>OR</b> the bot is currently not logged in then the returned {@code Mono} will
-     * always be empty.
      */
     public Mono<Presence> getPresence() {
         return getClient().getGatewayResources().getStateView().getPresenceStore()
@@ -289,11 +280,14 @@ public final class Member extends User {
      * error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Void> ban(final Consumer<? super BanQuerySpec> spec) {
-        final BanQuerySpec mutatedSpec = new BanQuerySpec();
-        spec.accept(mutatedSpec);
-
-        return getClient().getRestClient().getGuildService()
-                .createGuildBan(getGuildId().asLong(), getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason());
+        return Mono.defer(
+                () -> {
+                    BanQuerySpec mutatedSpec = new BanQuerySpec();
+                    spec.accept(mutatedSpec);
+                    return getClient().getRestClient().getGuildService()
+                            .createGuildBan(getGuildId().asLong(), getId().asLong(), mutatedSpec.asRequest(),
+                                    mutatedSpec.getReason());
+                });
     }
 
     /**
@@ -334,7 +328,6 @@ public final class Member extends User {
      *
      * @param roleId The ID of the role to add to this member.
      * @param reason The reason, if present.
-     *
      * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the role was added to this
      * member. If an error is received, it is emitted through the {@code Mono}.
      */
@@ -359,7 +352,6 @@ public final class Member extends User {
      *
      * @param roleId The ID of the role to remove from this member.
      * @param reason The reason, if present.
-     *
      * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the role was removed from
      * this member. If an error is received, it is emitted through the {@code Mono}.
      */
@@ -493,11 +485,14 @@ public final class Member extends User {
      * If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Void> edit(final Consumer<? super GuildMemberEditSpec> spec) {
-        final GuildMemberEditSpec mutatedSpec = new GuildMemberEditSpec();
-        spec.accept(mutatedSpec);
-
-        return getClient().getRestClient().getGuildService()
-                .modifyGuildMember(getGuildId().asLong(), getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason());
+        return Mono.defer(
+                () -> {
+                    GuildMemberEditSpec mutatedSpec = new GuildMemberEditSpec();
+                    spec.accept(mutatedSpec);
+                    return getClient().getRestClient().getGuildService()
+                            .modifyGuildMember(getGuildId().asLong(), getId().asLong(), mutatedSpec.asRequest(),
+                                    mutatedSpec.getReason());
+                });
     }
 
     @Override

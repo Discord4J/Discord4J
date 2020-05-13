@@ -636,7 +636,8 @@ public final class Guild implements Entity {
      * Requests to retrieve the channel where "PUBLIC" guilds display rules and/or guidelines, if present.
      *
      * @return A {@link Mono} where, upon successful completion, emits the {@link TextChannel channel} where "PUBLIC"
-     * guilds display rules and/or guidelines, if present. If an error is received, it is emitted through the {@code Mono}.
+     * guilds display rules and/or guidelines, if present. If an error is received, it is emitted through the {@code
+     * Mono}.
      */
     public Mono<TextChannel> getRulesChannel() {
         return Mono.justOrEmpty(getRulesChannelId()).flatMap(gateway::getChannelById).cast(TextChannel.class);
@@ -647,7 +648,8 @@ public final class Guild implements Entity {
      * the given retrieval strategy.
      *
      * @param retrievalStrategy the strategy to use to get the rules channel
-     * @return A {@link Mono} where, upon successful completion, emits the {@link TextChannel channel} where "PUBLIC" guilds
+     * @return A {@link Mono} where, upon successful completion, emits the {@link TextChannel channel} where "PUBLIC"
+     * guilds
      * display rules and/or guidelines, if present. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<TextChannel> getRulesChannel(EntityRetrievalStrategy retrievalStrategy) {
@@ -657,31 +659,39 @@ public final class Guild implements Entity {
     }
 
     /**
-     * Gets the id of the channel where admins and moderators of "PUBLIC" guilds receive notices from Discord, if present.
+     * Gets the id of the channel where admins and moderators of "PUBLIC" guilds receive notices from Discord, if
+     * present.
      *
-     * @return The id of the channel where admins and moderators of "PUBLIC" guilds receive notices from Discord, if present.
+     * @return The id of the channel where admins and moderators of "PUBLIC" guilds receive notices from Discord, if
+     * present.
      */
     public Optional<Snowflake> getPublicUpdatesChannelId() {
         return data.publicUpdatesChannelId().map(Snowflake::of);
     }
 
     /**
-     * Requests to retrieve the channel where admins and moderators of "PUBLIC" guilds receive notices from Discord, if present.
+     * Requests to retrieve the channel where admins and moderators of "PUBLIC" guilds receive notices from Discord,
+     * if present.
      *
-     * @return A {@link Mono} where, upon successful completion, emits the {@link TextChannel channel} where admins and moderators of
-     * "PUBLIC" guilds receive notices from Discord, if present. If an error is received, it is emitted through the {@code Mono}.
+     * @return A {@link Mono} where, upon successful completion, emits the {@link TextChannel channel} where admins
+     * and moderators of
+     * "PUBLIC" guilds receive notices from Discord, if present. If an error is received, it is emitted through the
+     * {@code Mono}.
      */
     public Mono<TextChannel> getPublicUpdatesChannel() {
         return Mono.justOrEmpty(getPublicUpdatesChannelId()).flatMap(gateway::getChannelById).cast(TextChannel.class);
     }
 
     /**
-     * Requests to retrieve the channel where admins and moderators of "PUBLIC" guilds receive notices from Discord, if present,
+     * Requests to retrieve the channel where admins and moderators of "PUBLIC" guilds receive notices from Discord,
+     * if present,
      * using the given retrieval strategy.
      *
      * @param retrievalStrategy the strategy to use to get the rules channel
-     * @return A {@link Mono} where, upon successful completion, emits the {@link TextChannel channel} where admins and moderators
-     * of "PUBLIC" guilds receive notices from Discord, if present. If an error is received, it is emitted through the {@code Mono}.
+     * @return A {@link Mono} where, upon successful completion, emits the {@link TextChannel channel} where admins
+     * and moderators
+     * of "PUBLIC" guilds receive notices from Discord, if present. If an error is received, it is emitted through
+     * the {@code Mono}.
      */
     public Mono<TextChannel> getPublicUpdatesChannel(EntityRetrievalStrategy retrievalStrategy) {
         return Mono.justOrEmpty(getPublicUpdatesChannelId())
@@ -941,11 +951,13 @@ public final class Guild implements Entity {
      * received, it is emitted through the {@code Mono}.
      */
     public Mono<Guild> edit(final Consumer<? super GuildEditSpec> spec) {
-        final GuildEditSpec mutatedSpec = new GuildEditSpec();
-        spec.accept(mutatedSpec);
-
-        return gateway.getRestClient().getGuildService()
-                .modifyGuild(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason())
+        return Mono.defer(
+                () -> {
+                    GuildEditSpec mutatedSpec = new GuildEditSpec();
+                    spec.accept(mutatedSpec);
+                    return gateway.getRestClient().getGuildService()
+                            .modifyGuild(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason());
+                })
                 .map(data -> new Guild(gateway, GuildData.builder()
                         .from(this.data)
                         .from(data)
@@ -960,11 +972,13 @@ public final class Guild implements Entity {
      * received, it is emitted through the {@code Mono}.
      */
     public Mono<GuildEmoji> createEmoji(final Consumer<? super GuildEmojiCreateSpec> spec) {
-        final GuildEmojiCreateSpec mutatedSpec = new GuildEmojiCreateSpec();
-        spec.accept(mutatedSpec);
-
-        return gateway.getRestClient().getEmojiService()
-                .createGuildEmoji(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason())
+        return Mono.defer(
+                () -> {
+                    GuildEmojiCreateSpec mutatedSpec = new GuildEmojiCreateSpec();
+                    spec.accept(mutatedSpec);
+                    return gateway.getRestClient().getEmojiService()
+                            .createGuildEmoji(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason());
+                })
                 .map(data -> new GuildEmoji(gateway, data, getId().asLong()));
     }
 
@@ -976,11 +990,13 @@ public final class Guild implements Entity {
      * received, it is emitted through the {@code Mono}.
      */
     public Mono<Role> createRole(final Consumer<? super RoleCreateSpec> spec) {
-        final RoleCreateSpec mutatedSpec = new RoleCreateSpec();
-        spec.accept(mutatedSpec);
-
-        return gateway.getRestClient().getGuildService()
-                .createGuildRole(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason())
+        return Mono.defer(
+                () -> {
+                    RoleCreateSpec mutatedSpec = new RoleCreateSpec();
+                    spec.accept(mutatedSpec);
+                    return gateway.getRestClient().getGuildService()
+                            .createGuildRole(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason());
+                })
                 .map(data -> new Role(gateway, data, getId().asLong()));
     }
 
@@ -992,11 +1008,13 @@ public final class Guild implements Entity {
      * received, it is emitted through the {@code Mono}.
      */
     public Mono<NewsChannel> createNewsChannel(final Consumer<? super NewsChannelCreateSpec> spec) {
-        final NewsChannelCreateSpec mutatedSpec = new NewsChannelCreateSpec();
-        spec.accept(mutatedSpec);
-
-        return gateway.getRestClient().getGuildService()
-                .createGuildChannel(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason())
+        return Mono.defer(
+                () -> {
+                    NewsChannelCreateSpec mutatedSpec = new NewsChannelCreateSpec();
+                    spec.accept(mutatedSpec);
+                    return gateway.getRestClient().getGuildService()
+                            .createGuildChannel(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason());
+                })
                 .map(data -> EntityUtil.getChannel(gateway, data))
                 .cast(NewsChannel.class);
     }
@@ -1009,11 +1027,13 @@ public final class Guild implements Entity {
      * received, it is emitted through the {@code Mono}.
      */
     public Mono<Category> createCategory(final Consumer<? super CategoryCreateSpec> spec) {
-        final CategoryCreateSpec mutatedSpec = new CategoryCreateSpec();
-        spec.accept(mutatedSpec);
-
-        return gateway.getRestClient().getGuildService()
-                .createGuildChannel(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason())
+        return Mono.defer(
+                () -> {
+                    CategoryCreateSpec mutatedSpec = new CategoryCreateSpec();
+                    spec.accept(mutatedSpec);
+                    return gateway.getRestClient().getGuildService()
+                            .createGuildChannel(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason());
+                })
                 .map(data -> EntityUtil.getChannel(gateway, data))
                 .cast(Category.class);
     }
@@ -1026,11 +1046,13 @@ public final class Guild implements Entity {
      * received, it is emitted through the {@code Mono}.
      */
     public Mono<TextChannel> createTextChannel(final Consumer<? super TextChannelCreateSpec> spec) {
-        final TextChannelCreateSpec mutatedSpec = new TextChannelCreateSpec();
-        spec.accept(mutatedSpec);
-
-        return gateway.getRestClient().getGuildService()
-                .createGuildChannel(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason())
+        return Mono.defer(
+                () -> {
+                    TextChannelCreateSpec mutatedSpec = new TextChannelCreateSpec();
+                    spec.accept(mutatedSpec);
+                    return gateway.getRestClient().getGuildService()
+                            .createGuildChannel(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason());
+                })
                 .map(data -> EntityUtil.getChannel(gateway, data))
                 .cast(TextChannel.class);
     }
@@ -1043,11 +1065,13 @@ public final class Guild implements Entity {
      * received, it is emitted through the {@code Mono}.
      */
     public Mono<VoiceChannel> createVoiceChannel(final Consumer<? super VoiceChannelCreateSpec> spec) {
-        final VoiceChannelCreateSpec mutatedSpec = new VoiceChannelCreateSpec();
-        spec.accept(mutatedSpec);
-
-        return gateway.getRestClient().getGuildService()
-                .createGuildChannel(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason())
+        return Mono.defer(
+                () -> {
+                    VoiceChannelCreateSpec mutatedSpec = new VoiceChannelCreateSpec();
+                    spec.accept(mutatedSpec);
+                    return gateway.getRestClient().getGuildService()
+                            .createGuildChannel(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason());
+                })
                 .map(data -> EntityUtil.getChannel(gateway, data))
                 .cast(VoiceChannel.class);
     }
@@ -1121,11 +1145,14 @@ public final class Guild implements Entity {
      * banned. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Void> ban(final Snowflake userId, final Consumer<? super BanQuerySpec> spec) {
-        final BanQuerySpec mutatedSpec = new BanQuerySpec();
-        spec.accept(mutatedSpec);
-
-        return gateway.getRestClient().getGuildService()
-                .createGuildBan(getId().asLong(), userId.asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason());
+        return Mono.defer(
+                () -> {
+                    BanQuerySpec mutatedSpec = new BanQuerySpec();
+                    spec.accept(mutatedSpec);
+                    return gateway.getRestClient().getGuildService()
+                            .createGuildBan(getId().asLong(), userId.asLong(), mutatedSpec.asRequest(),
+                                    mutatedSpec.getReason());
+                });
     }
 
     /**
@@ -1228,10 +1255,9 @@ public final class Guild implements Entity {
      * emitted through the {@code Flux}.
      */
     public Flux<AuditLogEntry> getAuditLog(final Consumer<? super AuditLogQuerySpec> spec) {
-        final AuditLogQuerySpec mutatedSpec = new AuditLogQuerySpec();
-        spec.accept(mutatedSpec);
-
         final Function<Map<String, Object>, Flux<AuditLogData>> makeRequest = params -> {
+            final AuditLogQuerySpec mutatedSpec = new AuditLogQuerySpec();
+            spec.accept(mutatedSpec);
             params.putAll(mutatedSpec.asRequest());
             return gateway.getRestClient().getAuditLogService()
                     .getAuditLog(getId().asLong(), params)

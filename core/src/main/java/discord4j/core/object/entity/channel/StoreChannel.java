@@ -16,10 +16,10 @@
  */
 package discord4j.core.object.entity.channel;
 
-import discord4j.discordjson.json.ChannelData;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.spec.StoreChannelEditSpec;
 import discord4j.core.util.EntityUtil;
+import discord4j.discordjson.json.ChannelData;
 import reactor.core.publisher.Mono;
 
 import java.util.function.Consumer;
@@ -45,11 +45,13 @@ public final class StoreChannel extends BaseCategorizableChannel {
      * received, it is emitted through the {@code Mono}.
      */
     public Mono<StoreChannel> edit(final Consumer<? super StoreChannelEditSpec> spec) {
-        final StoreChannelEditSpec mutatedSpec = new StoreChannelEditSpec();
-        spec.accept(mutatedSpec);
-
-        return getClient().getRestClient().getChannelService()
-                .modifyChannel(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason())
+        return Mono.defer(
+                () -> {
+                    StoreChannelEditSpec mutatedSpec = new StoreChannelEditSpec();
+                    spec.accept(mutatedSpec);
+                    return getClient().getRestClient().getChannelService()
+                            .modifyChannel(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason());
+                })
                 .map(data -> EntityUtil.getChannel(getClient(), data))
                 .cast(StoreChannel.class);
     }
