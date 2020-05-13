@@ -22,6 +22,7 @@ import discord4j.gateway.GatewayOptions;
 import discord4j.rest.RestClient;
 import discord4j.rest.request.RouterOptions;
 import discord4j.store.api.service.StoreService;
+import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
 
 import java.util.function.Function;
@@ -111,7 +112,7 @@ public final class DiscordClient extends RestClient {
      * {@link GatewayDiscordClient} and trigger a processing pipeline from it.
      * @return an empty {@link Mono} completing after all resources have released
      */
-    public Mono<Void> withGateway(Function<GatewayDiscordClient, Mono<Void>> whileConnectedFunction) {
+    public Mono<Void> withGateway(Function<GatewayDiscordClient, Publisher<?>> whileConnectedFunction) {
         return gateway().withGateway(whileConnectedFunction);
     }
 
