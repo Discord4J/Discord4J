@@ -35,7 +35,7 @@ import java.util.OptionalInt;
 /**
  * A Discord invite.
  *
- * @see <a href="https://discordapp.com/developers/docs/resources/invite">Invite Resource</a>
+ * @see <a href="https://discord.com/developers/docs/resources/invite">Invite Resource</a>
  */
 public class Invite implements DiscordObject {
 

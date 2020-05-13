@@ -1,5 +1,5 @@
 # Discord4J Rest
-The `rest` module provides a low-level HTTP client specifically for Discord which properly handles Discord's [ratelimiting system](https://discordapp.com/developers/docs/topics/rate-limits).
+The `rest` module provides a low-level HTTP client specifically for Discord which properly handles Discord's [ratelimiting system](https://discord.com/developers/docs/topics/rate-limits).
 
 ## Installation
 Just replace `@VERSION@` with the latest given by ![](https://img.shields.io/maven-central/v/com.discord4j/discord4j-rest.svg?style=flat-square)

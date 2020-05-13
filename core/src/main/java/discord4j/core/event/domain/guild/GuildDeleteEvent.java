@@ -33,7 +33,7 @@ import java.util.Optional;
  * <p>
  * This event is dispatched by Discord.
  *
- * @see <a href="https://discordapp.com/developers/docs/topics/gateway#guild-delete">Guild Delete</a>
+ * @see <a href="https://discord.com/developers/docs/topics/gateway#guild-delete">Guild Delete</a>
  */
 public class GuildDeleteEvent extends GuildEvent {
 

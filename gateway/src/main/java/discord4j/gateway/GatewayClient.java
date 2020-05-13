@@ -38,7 +38,7 @@ import java.util.function.Function;
  * Additionally, supports low-level {@link ByteBuf} based communication through {@link #receiver(Function)} and
  * {@link #sendBuffer(Publisher)}.
  *
- * @see <a href="https://discordapp.com/developers/docs/topics/gateway">Gateway</a>
+ * @see <a href="https://discord.com/developers/docs/topics/gateway">Gateway</a>
  */
 public interface GatewayClient {
 

@@ -27,7 +27,7 @@ import reactor.util.annotation.Nullable;
 /**
  * Spec used to create a new guild {@link Role} entity.
  *
- * @see <a href="https://discordapp.com/developers/docs/resources/guild#create-guild-role">Create Guild Role</a>
+ * @see <a href="https://discord.com/developers/docs/resources/guild#create-guild-role">Create Guild Role</a>
  */
 public class RoleCreateSpec implements AuditSpec<RoleCreateRequest> {
 

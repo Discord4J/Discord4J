@@ -8,7 +8,7 @@
 [![CircleCI branch](https://img.shields.io/circleci/project/github/Discord4J/Discord4J/master.svg?label=circleci&logo=circleci&style=flat-square)](https://circleci.com/gh/Discord4J/Discord4J/tree/master)
 
 
-A fast, reactive Java wrapper for the official [Discord Bot API](https://discordapp.com/developers/docs/intro).
+A fast, reactive Java wrapper for the official [Discord Bot API](https://discord.com/developers/docs/intro).
 
 Built with [Reactor](https://projectreactor.io/), [Netty](https://netty.io/), and a focus on flexibility, Discord4J provides an effective, non-blocking interface for creating Discord bots. The [reactive](https://www.reactivemanifesto.org/) and asynchronous nature of the library allows for scalability through backpressure handling and the efficient use of resources. Its [modularized](#modules) structure gives the user the ability to tailor their experience to different levels of abstraction and pick the right tools for the job.
 
@@ -110,13 +110,13 @@ Discord4J is highly oriented towards customizability. To achieve this, the proje
 The `core` module combines the other modules to form high-level abstractions for the entire Discord Bot API. This is the module most users will want when making bots.
 
 ### [Rest](./rest/README.md)
-The `rest` module provides a low-level HTTP client specifically for Discord which properly handles Discord's [ratelimiting system](https://discordapp.com/developers/docs/topics/rate-limits).
+The `rest` module provides a low-level HTTP client specifically for Discord which properly handles Discord's [ratelimiting system](https://discord.com/developers/docs/topics/rate-limits).
 
 ### [Gateway](./gateway/README.md)
-The `gateway` module provides a low-level WebSocket client for interacting with the [Discord Gateway](https://discordapp.com/developers/docs/topics/gateway).
+The `gateway` module provides a low-level WebSocket client for interacting with the [Discord Gateway](https://discord.com/developers/docs/topics/gateway).
 
 ### [Voice](./voice/README.md)
-The `voice` module provides a client to manipulate audio through [Voice Connections](https://discordapp.com/developers/docs/topics/voice-connections).
+The `voice` module provides a client to manipulate audio through [Voice Connections](https://discord.com/developers/docs/topics/voice-connections).
 
 ### [Common](./common/README.md)
 The `common` module contains base utilities and models useful for other modules.

@@ -32,7 +32,7 @@ import java.util.stream.Collectors;
 /**
  * A Discord embed.
  *
- * @see <a href="https://discordapp.com/developers/docs/resources/channel#embed-object">Embed Object</a>
+ * @see <a href="https://discord.com/developers/docs/resources/channel#embed-object">Embed Object</a>
  */
 public final class Embed implements DiscordObject {
 

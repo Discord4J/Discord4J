@@ -12,7 +12,7 @@ import java.util.*;
  * {@code IntentSet} may have unpredictable results and should be avoided.
  * The {@code equals} method should be used for comparisons.
  *
- * @see <a href="https://discordapp.com/developers/docs/topics/intents">Discord Intents</a>
+ * @see <a href="https://discord.com/developers/docs/topics/intents">Discord Intents</a>
  */
 public final class IntentSet extends AbstractSet<Intent> {
 

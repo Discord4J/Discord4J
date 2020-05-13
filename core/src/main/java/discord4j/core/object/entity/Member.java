@@ -48,7 +48,7 @@ import java.util.stream.Collectors;
 /**
  * A Discord guild member.
  *
- * @see <a href="https://discordapp.com/developers/docs/resources/guild#guild-member-object">Guild Member Object</a>
+ * @see <a href="https://discord.com/developers/docs/resources/guild#guild-member-object">Guild Member Object</a>
  */
 public final class Member extends User {
 

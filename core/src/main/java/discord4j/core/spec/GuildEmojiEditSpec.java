@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
 /**
  * Spec used to modify an existing {@link GuildEmoji}.
  *
- * @see <a href="https://discordapp.com/developers/docs/resources/emoji#modify-guild-emoji">Modify Guild Emoji</a>
+ * @see <a href="https://discord.com/developers/docs/resources/emoji#modify-guild-emoji">Modify Guild Emoji</a>
  */
 public class GuildEmojiEditSpec implements AuditSpec<GuildEmojiModifyRequest> {
 

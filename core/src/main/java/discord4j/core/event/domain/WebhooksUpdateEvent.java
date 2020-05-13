@@ -30,7 +30,7 @@ import reactor.core.publisher.Mono;
  * <p>
  * This event is dispatched by Discord.
  *
- * @see <a href="https://discordapp.com/developers/docs/topics/gateway#webhooks-update">Webhooks Update</a>
+ * @see <a href="https://discord.com/developers/docs/topics/gateway#webhooks-update">Webhooks Update</a>
  */
 public class WebhooksUpdateEvent extends Event {
 

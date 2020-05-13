@@ -37,7 +37,7 @@ import java.util.Optional;
  * <p>
  * This event is dispatched by Discord.
  *
- * @see <a href="https://discordapp.com/developers/docs/topics/gateway#message-reaction-add">Message Reaction Add</a>
+ * @see <a href="https://discord.com/developers/docs/topics/gateway#message-reaction-add">Message Reaction Add</a>
  */
 public class ReactionAddEvent extends MessageEvent {
 
