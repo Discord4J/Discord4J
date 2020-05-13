@@ -41,9 +41,8 @@ import java.util.function.Supplier;
 public class RateLimitOperator<T> implements Function<Publisher<T>, Publisher<T>> {
 
     private static final Logger log = Loggers.getLogger("discord4j.limiter");
-    private static final AtomicInteger ID_GENERATOR = new AtomicInteger();
     private static final Supplier<Scheduler> DEFAULT_PUBLISH_SCHEDULER = () ->
-            Schedulers.newSingle("d4j-limiter-" + ID_GENERATOR.incrementAndGet(), true);
+            Schedulers.newSingle("d4j-limiter", true);
 
     private final AtomicInteger tokens;
     private final Duration refillPeriod;
