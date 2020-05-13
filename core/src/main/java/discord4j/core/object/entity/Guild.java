@@ -290,9 +290,11 @@ public final class Guild implements Entity {
      * Gets the ID of the embedded channel, if present.
      *
      * @return The ID of the embedded channel, if present.
+     * @deprecated Use {@code Guild#getWidgetChannel} instead.
      */
+    @Deprecated
     public Optional<Snowflake> getEmbedChannelId() {
-        return Possible.flatOpt(data.embedChannelId()).map(Snowflake::of);
+        return this.getWidgetChannelId();
     }
 
     /**
@@ -741,9 +743,11 @@ public final class Guild implements Entity {
      * Gets whether this guild is embeddable (e.g. widget).
      *
      * @return Whether this guild is embeddable (e.g. widget).
+     * @deprecated Use {@code Guild#isWidgetEnabled} instead
      */
+    @Deprecated
     public boolean isEmbedEnabled() {
-        return data.embedEnabled().toOptional().orElse(false);
+        return this.isWidgetEnabled();
     }
 
     /**
