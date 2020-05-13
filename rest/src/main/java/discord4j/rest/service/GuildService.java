@@ -266,8 +266,16 @@ public class GuildService extends RestService {
                 .bodyToMono(Void.class);
     }
 
+    /**
+     * @deprecated Use {@code GuildService#getGuildWidget} instead.
+     */
+    @Deprecated
     public Mono<GuildEmbedData> getGuildEmbed(long guildId) {
-        return Routes.GUILD_EMBED_GET.newRequest(guildId)
+        return getGuildWidget(guildId);
+    }
+
+    public Mono<GuildEmbedData> getGuildWidget(long guildId) {
+        return Routes.GUILD_WIDGET_GET.newRequest(guildId)
                 .exchange(getRouter())
                 .bodyToMono(GuildEmbedData.class);
     }
