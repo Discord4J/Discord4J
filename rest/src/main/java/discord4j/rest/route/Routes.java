@@ -692,7 +692,7 @@ public abstract class Routes {
      *
      * @see <a href="https://discordapp.com/developers/docs/resources/guild#get-guild-embed">
      *         https://discordapp.com/developers/docs/resources/guild#get-guild-embed</a>
-     * @deprecated Use {@code Routes.GUILD_WIDGET_GET} instead
+     * @deprecated Use {@code Routes.GUILD_WIDGET_GET} instead.
      */
     @Deprecated
     public static final Route GUILD_EMBED_GET = Route.get("/guilds/{guild.id}/embed");
