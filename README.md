@@ -7,7 +7,7 @@
 [![Javadocs](https://www.javadoc.io/badge/com.discord4j/discord4j-core.svg?color=blue&style=flat-square)](https://www.javadoc.io/doc/com.discord4j/discord4j-core)
 [![CircleCI branch](https://img.shields.io/circleci/project/github/Discord4J/Discord4J/master.svg?label=circleci&logo=circleci&style=flat-square)](https://circleci.com/gh/Discord4J/Discord4J/tree/master)
 
-Discord4J is a fast, powerful, unopinionated, reactive library to enable quick and easy development of Discord bots for Java, Kotlin, and other JVM languages around the official [Discord Bot API](https://discord.com/developers/docs/intro).
+Discord4J is a fast, powerful, unopinionated, reactive library to enable quick and easy development of Discord bots for Java, Kotlin, and other JVM languages using the official [Discord Bot API](https://discord.com/developers/docs/intro).
 
 ## 🏃 Quick Example
 
@@ -33,6 +33,10 @@ public final class ExampleBot {
   }
 }
 ```
+
+## 💎 Benefits
+
+when im not tired
 
 ## 📦 Installation
 
@@ -81,18 +85,9 @@ libraryDependencies ++= Seq(
 )
 ```
 
-## 🔀 Discord4J 3.0.x
-
-Discord4J 3.1.x introduces performance and API enhancements, a plethora of new features, and dependency upgrades. A [Migration Guide](https://github.com/Discord4J/Discord4J/wiki/Migrating-from-v3.0-to-v3.1) is provided to aide users and ensure a smooth and readily available transition.
-
-Discord4J 3.0.x installation instructions and examples can be found on the [3.0.x branch](https://github.com/Discord4J/Discord4J/tree/3.0.x)
-
 ## ⚛️ Reactive
 
-Discord4J uses [Project Reactor](https://projectreactor.io/) as the foundation for our asynchronous framework. Reactor provides a simple yet extremely powerful API for users to reduce resources (CPU/RAM) and increase performance.
-
-
-In this example, whenever an user sends a `!ping` message the bot will immediately respond with `Pong!`.
+Discord4J uses [Project Reactor](https://projectreactor.io/) as the foundation for our asynchronous framework. Reactor provides a simple yet extremely powerful API that enables users to reduce resources and increase performance.
 
 ```java
 public final class ExampleBot {
@@ -131,7 +126,7 @@ client.withGateway(gateway -> {
   }).block();
 ```
 
-## 🧵 Kotlin Support
+## 🧵 Kotlin
 
 By utilizing Reactor, Discord4J has native integration with [Kotlin coroutines](https://kotlinlang.org/docs/reference/coroutines-overview.html) when paired with the [kotlinx-coroutines-reactor](https://github.com/Kotlin/kotlinx.coroutines/tree/master/reactive/kotlinx-coroutines-reactor) library.
 
@@ -153,3 +148,59 @@ client.withGateway {
   }
 }
 ```
+
+## 🎵 Voice and Music
+
+Discord4J provides full support for voice connections and the ability to send audio to other users connected to the same channel. Discord4J can accept any [Opus](https://opus-codec.org/) audio source with [LavaPlayer](https://github.com/sedmelluq/lavaplayer) being the preferred solution for downloading and encoding audio from YouTube, SoundCloud, and other providers.
+
+To get started, you will first need to instantiate and configure an, conventionally global, `AudioPlayerManager`.
+
+```java
+public final static AudioPlayerManager playerManager;
+
+static {
+  playerManager = new DefaultAudioPlayerManager();
+  // This is an optimization strategy that Discord4J can utilize to minimize allocations
+  playerManager.getConfiguration().setFrameBufferFactory(NonAllocatingAudioFrameBuffer::new);
+  AudioSourceManagers.registerRemoteSources(playerManager);
+}
+```
+
+Next, we need to allow Discord4J to read from an `AudioPlayer` to an `AudioProvider`.
+
+```java
+public final class LavaPlayerAudioProvider extends AudioProvider {
+
+  private final AudioPlayer player;
+  private final MutableAudioFrame frame;
+
+  public LavaPlayerAudioProvider(final AudioPlayer player) {
+    // Allocate a ByteBuffer for Discord4J's AudioProvider to hold audio data for Discord
+    super(ByteBuffer.allocate(StandardAudioDataFormats.DISCORD_OPUS.maximumChunkSize()));
+    // Set LavaPlayer's AudioFrame to use the same buffer as Discord4J's
+    frame = new MutableAudioFrame();
+    frame.setBuffer(getBuffer());
+    this.player = player;
+  }
+
+  @Override
+  public boolean provide() {
+    // AudioPlayer writes audio data to the AudioFrame
+    final boolean didProvide = player.provide(frame);
+
+    if (didProvide) {
+      getBuffer().flip();
+    }
+
+    return didProvide;
+  }
+}
+```
+
+too tired will finish later
+
+## 🔀 Discord4J 3.0.x
+
+Discord4J 3.1.x introduces performance and API enhancements, a plethora of new features, and dependency upgrades. A [Migration Guide](https://github.com/Discord4J/Discord4J/wiki/Migrating-from-v3.0-to-v3.1) is provided to aide users and ensure a smooth and readily available transition.
+
+Discord4J 3.0.x installation instructions and examples can be found on the [3.0.x branch](https://github.com/Discord4J/Discord4J/tree/3.0.x).
