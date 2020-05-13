@@ -209,12 +209,28 @@ public class RestGuild {
         return restClient.getGuildService().syncGuildIntegration(id, integrationId);
     }
 
+    /**
+     * @deprecated Use {RestGuild#getWidget} instead.
+     */
+    @Deprecated
     public Mono<GuildEmbedData> getEmbed() {
         return restClient.getGuildService().getGuildEmbed(id);
     }
 
+    /**
+     * @deprecated Use {RestGuild#modifyWidget} instead.
+     */
+    @Deprecated
     public Mono<GuildEmbedData> modifyEmbed(GuildEmbedModifyRequest request) {
         return restClient.getGuildService().modifyGuildEmbed(id, request);
+    }
+
+    public Mono<GuildWidgetData> getWidget() {
+        return restClient.getGuildService().getGuildWidget(id);
+    }
+
+    public Mono<GuildWidgetData> modifyWidget(GuildWidgetModifyRequest request) {
+        return restClient.getGuildService().modifyGuildWidget(id, request);
     }
 
     // TODO add Get Guild Vanity URL

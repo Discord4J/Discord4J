@@ -271,13 +271,15 @@ public class GuildService extends RestService {
      */
     @Deprecated
     public Mono<GuildEmbedData> getGuildEmbed(long guildId) {
-        return getGuildWidget(guildId);
-    }
-
-    public Mono<GuildEmbedData> getGuildWidget(long guildId) {
-        return Routes.GUILD_WIDGET_GET.newRequest(guildId)
+        return Routes.GUILD_EMBED_GET.newRequest(guildId)
                 .exchange(getRouter())
                 .bodyToMono(GuildEmbedData.class);
+    }
+
+    public Mono<GuildWidgetData> getGuildWidget(long guildId) {
+        return Routes.GUILD_WIDGET_GET.newRequest(guildId)
+                .exchange(getRouter())
+                .bodyToMono(GuildWidgetData.class);
     }
 
     /**
@@ -291,10 +293,10 @@ public class GuildService extends RestService {
                 .bodyToMono(GuildEmbedData.class);
     }
 
-    public Mono<GuildEmbedData> modifyGuildWidget(long guildId, GuildEmbedModifyRequest request) {
+    public Mono<GuildWidgetData> modifyGuildWidget(long guildId, GuildWidgetModifyRequest request) {
         return Routes.GUILD_WIDGET_MODIFY.newRequest(guildId)
                 .body(request)
                 .exchange(getRouter())
-                .bodyToMono(GuildEmbedData.class);
+                .bodyToMono(GuildWidgetData.class);
     }
 }
