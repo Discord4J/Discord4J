@@ -25,7 +25,7 @@ import java.time.Instant;
  * An <i>unsigned</i> 64-bit ID that is guaranteed to be unique across all of Discord, except in some unique scenarios
  * in which child objects share their parent's ID.
  *
- * @see <a href="https://discordapp.com/developers/docs/reference#snowflake-ids">Snowflake IDs</a>
+ * @see <a href="https://discord.com/developers/docs/reference#snowflake-ids">Snowflake IDs</a>
  */
 public final class Snowflake implements Comparable<Snowflake> {
 

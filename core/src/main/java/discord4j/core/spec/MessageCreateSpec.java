@@ -41,7 +41,7 @@ import java.util.function.Consumer;
  * Spec used to create {@link Message Messages} to {@link MessageChannel MessageChannels}. Clients using this spec must
  * have connected to gateway at least once.
  *
- * @see <a href="https://discordapp.com/developers/docs/resources/channel#create-message">Create Message</a>
+ * @see <a href="https://discord.com/developers/docs/resources/channel#create-message">Create Message</a>
  */
 public class MessageCreateSpec implements Spec<MultipartRequest> {
 

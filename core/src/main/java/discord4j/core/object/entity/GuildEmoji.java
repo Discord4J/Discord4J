@@ -40,7 +40,7 @@ import static discord4j.rest.util.Image.Format.PNG;
 /**
  * A Discord guild emoji.
  * <p>
- * <a href="https://discordapp.com/developers/docs/resources/emoji#emoji-resource">Emoji Resource</a>
+ * <a href="https://discord.com/developers/docs/resources/emoji#emoji-resource">Emoji Resource</a>
  */
 // TODO FIXME so many gets
 public final class GuildEmoji implements Entity {

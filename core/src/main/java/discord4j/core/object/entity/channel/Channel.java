@@ -24,7 +24,7 @@ import reactor.util.annotation.Nullable;
 /**
  * A Discord channel.
  *
- * @see <a href="https://discordapp.com/developers/docs/resources/channel">Channel Resource</a>
+ * @see <a href="https://discord.com/developers/docs/resources/channel">Channel Resource</a>
  */
 public interface Channel extends Entity {
 

@@ -25,7 +25,7 @@ import java.time.Duration;
 
 /**
  * Used to prevent requests from being sent while the bot is
- * <a href="https://discordapp.com/developers/docs/topics/rate-limits#exceeding-a-rate-limit">globally rate limited</a>.
+ * <a href="https://discord.com/developers/docs/topics/rate-limits#exceeding-a-rate-limit">globally rate limited</a>.
  * <p>
  * Provides resources that can be acquired through the use of {@link #withLimiter(Publisher)}, and held until the
  * supplied stage completes or terminates with an error. If the limiter resources are exhausted, it will limit all

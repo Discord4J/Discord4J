@@ -318,7 +318,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
      * @param memberRequestFilter the filter indicating how to load guild members
      * @return this builder
      * @see
-     * <a href="https://discordapp.com/developers/docs/topics/gateway#request-guild-members">Request Guild Members</a>
+     * <a href="https://discord.com/developers/docs/topics/gateway#request-guild-members">Request Guild Members</a>
      */
     public GatewayBootstrap<O> setMemberRequestFilter(MemberRequestFilter memberRequestFilter) {
         this.memberRequestFilter = memberRequestFilter;
@@ -331,7 +331,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
      * @param memberRequest {@code true} if enabling the large guild member requests, {@code false} otherwise
      * @return this builder
      * @see
-     * <a href="https://discordapp.com/developers/docs/topics/gateway#request-guild-members">Request Guild Members</a>
+     * <a href="https://discord.com/developers/docs/topics/gateway#request-guild-members">Request Guild Members</a>
      * @deprecated use {@link #setMemberRequestFilter(MemberRequestFilter)}. Calling this method using {@code true} is
      * equivalent to using {@link MemberRequestFilter#withLargeGuilds()} and using {@code false} is the same as using
      * {@link MemberRequestFilter#none()}
@@ -448,7 +448,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
      *
      * @param guildSubscriptions whether to enable or disable guild subscriptions
      * @return this builder
-     * @see <a href="https://discordapp.com/developers/docs/topics/gateway#guild-subscriptions">Guild Subscriptions</a>
+     * @see <a href="https://discord.com/developers/docs/topics/gateway#guild-subscriptions">Guild Subscriptions</a>
      */
     public GatewayBootstrap<O> setGuildSubscriptions(boolean guildSubscriptions) {
         this.guildSubscriptions = guildSubscriptions;

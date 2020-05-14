@@ -61,7 +61,7 @@ public interface ShardingStrategy {
      * to use the large bot sharding system.
      *
      * @return a value determining the sharding factor this strategy has
-     * @see <a href="https://discordapp.com/developers/docs/topics/gateway#sharding-for-very-large-bots">
+     * @see <a href="https://discord.com/developers/docs/topics/gateway#sharding-for-very-large-bots">
      * Sharding for very large bots</a>
      */
     int getShardingFactor();

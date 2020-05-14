@@ -28,7 +28,7 @@ import java.util.OptionalInt;
 /**
  * A Discord attachment.
  *
- * @see <a href="https://discordapp.com/developers/docs/resources/channel#attachment-object">Attachment Object</a>
+ * @see <a href="https://discord.com/developers/docs/resources/channel#attachment-object">Attachment Object</a>
  */
 public final class Attachment implements Entity {
 

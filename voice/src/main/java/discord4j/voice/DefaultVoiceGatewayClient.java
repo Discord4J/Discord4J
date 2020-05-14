@@ -44,11 +44,14 @@ import reactor.netty.http.client.WebsocketClientSpec;
 import reactor.retry.Retry;
 import reactor.util.Logger;
 import reactor.util.Loggers;
+import reactor.util.annotation.Nullable;
 import reactor.util.context.Context;
 import reactor.util.retry.RetrySpec;
 
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
@@ -251,6 +254,7 @@ public class DefaultVoiceGatewayClient {
                                                             new VoiceServerUpdateReconnectException(context)));
                                                 }
                                             }));
+                                    // TODO consider for removal if we shouldn't do anything on these
                                     innerCleanup.add(stateUpdateTask.onVoiceStateUpdate(guildId)
                                             .subscribe(newValue -> {
                                                 String current = session.get();
@@ -366,7 +370,7 @@ public class DefaultVoiceGatewayClient {
     }
 
     private Retry<ReconnectContext> retryFactory() {
-        return Retry.<ReconnectContext>onlyIf(t -> isRetryable(t.exception()))
+        return Retry.<ReconnectContext>onlyIf(t -> isRetriable(t.exception()))
                 .withApplicationContext(reconnectContext)
                 .withBackoffScheduler(reconnectOptions.getBackoffScheduler())
                 .backoff(reconnectOptions.getBackoff())
@@ -391,10 +395,17 @@ public class DefaultVoiceGatewayClient {
                 });
     }
 
-    private boolean isRetryable(Throwable t) {
+    private static final List<Integer> nonRetriableStatusCodes = Arrays.asList(
+            4004, // Authentication failed
+            4006, // Session no longer valid
+            4014, // Disconnected
+            4016 // Unknown encryption mode
+    );
+
+    private boolean isRetriable(@Nullable Throwable t) {
         if (t instanceof CloseException) {
             CloseException closeException = (CloseException) t;
-            return closeException.getCode() != 4004 && closeException.getCode() != 4014;
+            return !nonRetriableStatusCodes.contains(closeException.getCode());
         }
         return !(t instanceof PartialDisconnectException);
     }
@@ -417,8 +428,15 @@ public class DefaultVoiceGatewayClient {
         return Context.empty();
     }
 
-    private Mono<CloseStatus> handleClose(DisconnectBehavior behavior, CloseStatus closeStatus) {
+    private Mono<CloseStatus> handleClose(DisconnectBehavior sourceBehavior, CloseStatus closeStatus) {
         return Mono.deferWithContext(ctx -> {
+            DisconnectBehavior behavior;
+            if (nonRetriableStatusCodes.contains(closeStatus.getCode())) {
+                // non-retryable close codes are non-transient errors therefore stopping is the only choice
+                behavior = DisconnectBehavior.stop(sourceBehavior.getCause());
+            } else {
+                behavior = sourceBehavior;
+            }
             log.info(format(ctx, "Handling close {} with behavior: {}"), closeStatus, behavior);
             heartbeat.stop();
 

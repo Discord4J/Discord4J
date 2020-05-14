@@ -26,7 +26,7 @@ import java.util.Optional;
 /**
  * A Discord ban.
  *
- * @see <a href="https://discordapp.com/developers/docs/resources/guild#ban-object">Ban Object</a>
+ * @see <a href="https://discord.com/developers/docs/resources/guild#ban-object">Ban Object</a>
  */
 public final class Ban implements DiscordObject {
 

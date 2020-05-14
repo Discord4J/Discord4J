@@ -37,7 +37,7 @@ import java.util.function.Consumer;
  * {@link #addEveryoneRole} or {@link #addRole}, will automatically be set as the default @everyone role. Each
  * subsequent call to {@link #addEveryoneRole} will not override the first role but shift all other roles down.
  *
- * @see <a href="https://discordapp.com/developers/docs/resources/guild#create-guild">Create Guild</a>
+ * @see <a href="https://discord.com/developers/docs/resources/guild#create-guild">Create Guild</a>
  */
 public class GuildCreateSpec implements Spec<GuildCreateRequest> {
 

@@ -28,7 +28,7 @@ import java.util.*;
  * {@code PermissionSet} may have unpredictable results and should be avoided.
  * The {@code equals} method should be used for comparisons.
  *
- * @see <a href="https://discordapp.com/developers/docs/topics/permissions">Discord Permissions</a>
+ * @see <a href="https://discord.com/developers/docs/topics/permissions">Discord Permissions</a>
  */
 public final class PermissionSet extends AbstractSet<Permission> {
 

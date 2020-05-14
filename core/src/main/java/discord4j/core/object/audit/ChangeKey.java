@@ -28,7 +28,7 @@ import java.util.Set;
 
 /**
  * Represents the various audit log change key.
- * See <a href="https://discordapp.com/developers/docs/resources/audit-log#audit-log-change-object-audit-log-change-key">
+ * See <a href="https://discord.com/developers/docs/resources/audit-log#audit-log-change-object-audit-log-change-key">
  *     Audit Log Change Key</a>
  * @param <T> The type of the audit log change key.
  */

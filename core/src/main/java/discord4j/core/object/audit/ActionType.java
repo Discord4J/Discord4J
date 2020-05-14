@@ -18,7 +18,7 @@ package discord4j.core.object.audit;
 
 /**
  * Represents the various type of audit log action.
- * See <a href="https://discordapp.com/developers/docs/resources/audit-log#audit-log-entry-object-audit-log-events">
+ * See <a href="https://discord.com/developers/docs/resources/audit-log#audit-log-entry-object-audit-log-events">
  *     Audit Log Events</a>
  */
 public enum ActionType {

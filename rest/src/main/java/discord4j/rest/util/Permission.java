@@ -19,7 +19,7 @@ package discord4j.rest.util;
 /**
  * Permissions are a way to limit and grant certain abilities to users.
  *
- * @see <a href="https://discordapp.com/developers/docs/topics/permissions#permissions">Permissions</a>
+ * @see <a href="https://discord.com/developers/docs/topics/permissions#permissions">Permissions</a>
  */
 public enum Permission {
 

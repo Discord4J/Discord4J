@@ -26,7 +26,7 @@ import java.util.Objects;
 /**
  * Represents a Discord image.
  *
- * @see <a href="https://discordapp.com/developers/docs/reference#image-formatting">Image Formatting</a>
+ * @see <a href="https://discord.com/developers/docs/reference#image-formatting">Image Formatting</a>
  */
 public final class Image {
 
@@ -136,7 +136,7 @@ public final class Image {
     /**
      * The format of an image. This enum represents all the types supported by Discord.
      *
-     * @see <a href="https://discordapp.com/developers/docs/reference#image-formatting-image-formats">Image Formats</a>
+     * @see <a href="https://discord.com/developers/docs/reference#image-formatting-image-formats">Image Formats</a>
      */
     public enum Format {
 

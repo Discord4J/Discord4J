@@ -24,7 +24,7 @@ import java.util.Objects;
 /**
  * A Discord voice region.
  *
- * @see <a href="https://discordapp.com/developers/docs/resources/voice#voice-region-object">Voice Region Object</a>
+ * @see <a href="https://discord.com/developers/docs/resources/voice#voice-region-object">Voice Region Object</a>
  */
 public final class Region implements DiscordObject {
 

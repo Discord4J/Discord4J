@@ -31,7 +31,7 @@ import java.util.Optional;
  * <p>
  * This event is dispatched by Discord.
  *
- * @see <a href="https://discordapp.com/developers/docs/topics/gateway#invite-delete">Invite Delete</a>
+ * @see <a href="https://discord.com/developers/docs/topics/gateway#invite-delete">Invite Delete</a>
  */
 public class InviteDeleteEvent extends Event {
 
