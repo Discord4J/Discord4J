@@ -67,7 +67,7 @@ public class RoleCreateSpec implements AuditSpec<RoleCreateRequest> {
      * @return This spec.
      */
     public RoleCreateSpec setColor(Color color) {
-        this.color = color.getRGB() & 0xFFFFFF;
+        this.color = color.getRGB();
         return this;
     }
 

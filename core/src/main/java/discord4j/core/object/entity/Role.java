@@ -41,7 +41,7 @@ import java.util.function.Consumer;
 public final class Role implements Entity {
 
     /** The default {@link Color} of a {@code Role}. */
-    public static final Color DEFAULT_COLOR = new Color(0, true);
+    public static final Color DEFAULT_COLOR = Color.of(0);
 
     /** The gateway associated to this object. */
     private final GatewayDiscordClient gateway;
@@ -168,7 +168,7 @@ public final class Role implements Entity {
      * @return The color assigned to this role.
      */
     public Color getColor() {
-        return new Color(data.color(), true);
+        return Color.of(data.color());
     }
 
     /**

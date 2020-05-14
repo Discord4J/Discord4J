@@ -123,7 +123,7 @@ public final class Embed implements DiscordObject {
      * @return The color of the embed, if present.
      */
     public Optional<Color> getColor() {
-        return data.color().toOptional().map(color -> new Color(color, true));
+        return data.color().toOptional().map(Color::of);
     }
 
     /**
