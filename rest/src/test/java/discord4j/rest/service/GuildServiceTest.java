@@ -260,8 +260,8 @@ public class GuildServiceTest {
     }
 
     @Test
-    public void testGetGuildEmbed() {
-        getGuildService().getGuildEmbed(guild).block();
+    public void testGetGuildWidget() {
+        getGuildService().getGuildWidget(guild).block();
     }
 
     @Test

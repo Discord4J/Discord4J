@@ -692,8 +692,18 @@ public abstract class Routes {
      *
      * @see <a href="https://discord.com/developers/docs/resources/guild#get-guild-embed">
      *         https://discord.com/developers/docs/resources/guild#get-guild-embed</a>
+	 * @deprecated Use {@code Routes.GUILD_WIDGET_GET} instead.
      */
+    @Deprecated
     public static final Route GUILD_EMBED_GET = Route.get("/guilds/{guild.id}/embed");
+
+    /**
+     * Returns the guild widget object. Requires the 'MANAGE_GUILD' permission.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/guild#get-guild-widget">
+     *         https://discord.com/developers/docs/resources/guild#get-guild-widget</a>
+     */
+    public static final Route GUILD_WIDGET_GET = Route.get("/guilds/{guild.id}/widget");
 
     /**
      * Modify a guild embed object for the guild. All attributes may be passed in with JSON and modified. Requires the
@@ -701,8 +711,19 @@ public abstract class Routes {
      *
      * @see <a href="https://discord.com/developers/docs/resources/guild#modify-guild-embed">
      *         https://discord.com/developers/docs/resources/guild#modify-guild-embed</a>
+	 * @deprecated Use {@code Routes.GUILD_WIDGET_MODIFY} instead.
      */
+    @Deprecated
     public static final Route GUILD_EMBED_MODIFY = Route.patch("/guilds/{guild.id}/embed");
+
+    /**
+     * Modify a guild widget object for the guild. All attributes may be passed in with JSON and modified. Requires the
+     * 'MANAGE_GUILD' permission. Returns the updated guild widget object.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/guild#modify-guild-widget">
+     *         https://discord.com/developers/docs/resources/guild#modify-guild-widget</a>
+     */
+    public static final Route GUILD_WIDGET_MODIFY = Route.patch("/guilds/{guild.id}/widget");
 
     /////////////////////////////////////////////
     ////////////// Invite Resource //////////////
