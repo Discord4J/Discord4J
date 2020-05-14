@@ -57,6 +57,66 @@ public final class Color {
     /** The color blue. */
     public static final Color BLUE = of(0, 0, 255);
 
+    /** The color light sea green. This is a Discord color present. */
+    public static final Color LIGHT_SEA_GREEN = of(0x1ABC9C);
+
+    /** The color medium sea green. This is a Discord color present. */
+    public static final Color MEDIUM_SEA_GREEN = of(0x2ECC71);
+
+    /** The color summer sky. This is a Discord color present. */
+    public static final Color SUMMER_SKY = of(0x3498DB);
+
+    /** The color deep lilac. This is a Discord color present. */
+    public static final Color DEEP_LILAC = of(0x9B59B6);
+
+    /** The color ruby. This is a Discord color present. */
+    public static final Color RUBY = of(0xE91E63);
+
+    /** The color moon yellow. This is a Discord color present. */
+    public static final Color MOON_YELLOW = of(0xF1C40F);
+
+    /** The color tahiti gold. This is a Discord color present. */
+    public static final Color TAHITI_GOLD = of(0xE67E22);
+
+    /** The color cinnabar. This is a Discord color present. */
+    public static final Color CINNABAR = of(0xE74C3C);
+
+    /** The color submarine. This is a Discord color present. */
+    public static final Color SUBMARINE = of(0x95A5A6);
+
+    /** The color hoki. This is a Discord color present. */
+    public static final Color HOKI = of(0x607D8B);
+
+    /** The color deep sea. This is a Discord color present. */
+    public static final Color DEEP_SEA = of(0x11806A);
+
+    /** The color sea green. This is a Discord color present. */
+    public static final Color SEA_GREEN = of(0x1F8B4C);
+
+    /** The color endeavour. This is a Discord color present. */
+    public static final Color ENDEAVOUR = of(0x206694);
+
+    /** The color vivid violet. This is a Discord color present. */
+    public static final Color VIVID_VIOLET = of(0x71368A);
+
+    /** The color jazzberry jam. This is a Discord color present. */
+    public static final Color JAZZBERRY_JAM = of(0xAD1457);
+
+    /** The color dark goldenrod. This is a Discord color present. */
+    public static final Color DARK_GOLDENROD = of(0xC27C0E);
+
+    /** The color rust. This is a Discord color present. */
+    public static final Color RUST = of(0xA84300);
+
+    /** The color brown. This is a Discord color present. */
+    public static final Color BROWN = of(0x992D22);
+
+    /** The color gray chateau. This is a Discord color present. */
+    public static final Color GRAY_CHATEAU = of(0x979C9F);
+
+    /** The color bismark. This is a Discord color present. */
+    public static final Color BISMARK = of(0x546E7A);
+
     /**
      * Initializes a new instance of {@link Color} using the specified red, green, and blue values, which must be given
      * as floats in the range of 0.0F-255.0F.
