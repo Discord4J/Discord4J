@@ -701,7 +701,7 @@ public abstract class Routes {
      * Returns the guild widget object. Requires the 'MANAGE_GUILD' permission.
      *
      * @see <a href="https://discord.com/developers/docs/resources/guild#get-guild-widget">
-     *         https://discordapp.com/developers/docs/resources/guild#get-guild-widget</a>
+     *         https://discord.com/developers/docs/resources/guild#get-guild-widget</a>
      */
     public static final Route GUILD_WIDGET_GET = Route.get("/guilds/{guild.id}/widget");
 
@@ -721,7 +721,7 @@ public abstract class Routes {
      * 'MANAGE_GUILD' permission. Returns the updated guild widget object.
      *
      * @see <a href="https://discord.com/developers/docs/resources/guild#modify-guild-widget">
-     *         https://discordapp.com/developers/docs/resources/guild#modify-guild-widget</a>
+     *         https://discord.com/developers/docs/resources/guild#modify-guild-widget</a>
      */
     public static final Route GUILD_WIDGET_MODIFY = Route.patch("/guilds/{guild.id}/widget");
 
