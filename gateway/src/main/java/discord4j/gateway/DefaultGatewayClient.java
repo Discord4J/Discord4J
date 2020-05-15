@@ -260,7 +260,6 @@ public class DefaultGatewayClient implements GatewayClient {
                                     .build())
                             .uri(gatewayUrl)
                             .handle(sessionHandler::handle)
-                            .subscriberContext(LogUtil.clearContext())
                             .flatMap(t2 -> handleClose(t2.getT1(), t2.getT2()))
                             .then();
 
@@ -280,6 +279,7 @@ public class DefaultGatewayClient implements GatewayClient {
                             .doOnCancel(() -> sessionHandler.close())
                             .then();
                 })
+                .subscriberContext(ctx -> ctx.put(LogUtil.KEY_SHARD_ID, identifyOptions.getShardIndex()))
                 .retryWhen(retryFactory())
                 .then(Mono.defer(() -> disconnectNotifier));
     }
