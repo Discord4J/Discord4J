@@ -36,6 +36,7 @@ import java.util.Optional;
 public class PinsUpdateEvent extends ChannelEvent {
 
     private final long channelId;
+    @Nullable
     private final Instant lastPinTimestamp;
 
     public PinsUpdateEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, long channelId, @Nullable Instant lastPinTimestamp) {
