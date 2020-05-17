@@ -105,7 +105,7 @@ public class StoreEntityRetriever implements EntityRetriever {
     @Override
     public Flux<Member> getGuildMembers(Snowflake guildId) {
         return stateView.getGuildStore().find(guildId.asLong())
-            .filterWhen(guild -> Mono.justOrEmpty(gateway.getGatewayResources().getIntents().toOptional())
+                .filterWhen(guild -> Mono.justOrEmpty(gateway.getGatewayResources().getIntents().toOptional())
                         .filter(intents -> intents.contains(Intent.GUILDS))
                         .flatMap(intents -> new Guild(gateway, guild).getVoiceStates().count())
                         .map(count -> guild.memberCount() - count == 1)
