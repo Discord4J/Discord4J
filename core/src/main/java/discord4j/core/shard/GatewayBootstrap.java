@@ -716,7 +716,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                     ShardCoordinator shardCoordinator = b.initShardCoordinator(gatewayReactorResources);
                     GatewayResources resources = new GatewayResources(stateView, eventDispatcher, shardCoordinator,
                             b.memberRequestFilter, gatewayReactorResources, b.initVoiceReactorResources(),
-                            b.voiceReconnectOptions);
+                            b.voiceReconnectOptions, b.intents);
                     MonoProcessor<Void> closeProcessor = MonoProcessor.create();
                     EntityRetrievalStrategy entityRetrievalStrategy = b.initEntityRetrievalStrategy();
                     DispatchEventMapper dispatchMapper = b.initDispatchEventMapper();
