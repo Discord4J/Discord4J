@@ -22,12 +22,14 @@ import discord4j.core.object.entity.channel.Channel;
 import discord4j.core.object.entity.channel.GuildChannel;
 import discord4j.core.state.StateView;
 import discord4j.core.util.EntityUtil;
+import discord4j.gateway.intent.Intent;
 import discord4j.rest.util.Snowflake;
 import discord4j.store.api.util.LongLongTuple2;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.Collections;
+import java.util.List;
 
 public class StoreEntityRetriever implements EntityRetriever {
 
@@ -104,6 +106,11 @@ public class StoreEntityRetriever implements EntityRetriever {
     @Override
     public Flux<Member> getGuildMembers(Snowflake guildId) {
         return stateView.getGuildStore().find(guildId.asLong())
+                .filterWhen(guild -> new Guild(gateway, guild).getVoiceStates()
+                        .collectList()
+                        .map(List::size)
+                        .map(size -> gateway.getGatewayResources().getIntents().get().contains(Intent.GUILDS) &&
+                                guild.memberCount() - size == 1))
                 .flatMapMany(guildData -> Flux.fromIterable(guildData.members())
                         .flatMap(memberId -> stateView.getMemberStore()
                                 .find(LongLongTuple2.of(guildId.asLong(), Snowflake.asLong(memberId))))
