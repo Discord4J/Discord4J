@@ -119,7 +119,7 @@ public final class Color {
 
     /**
      * Initializes a new instance of {@link Color} using the specified red, green, and blue values, which must be given
-     * as floats in the range of 0.0F-255.0F.
+     * as floats in the range of 0.0F-1.0F.
      *
      * @param red The red component of the RGB value.
      * @param green The green component of the RGB value.
