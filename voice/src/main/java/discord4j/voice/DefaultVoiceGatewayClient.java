@@ -238,7 +238,7 @@ public class DefaultVoiceGatewayClient {
                                     PacketTransformer transformer = new PacketTransformer(ssrc, boxer);
                                     Consumer<Boolean> speakingSender = speaking ->
                                             outboundSink.next(new SentSpeaking(speaking, 0, ssrc));
-                                    innerCleanup.add(() -> log.info(format(context, "Disposing voice tasks")));
+                                    innerCleanup.add(() -> log.debug(format(context, "Disposing voice tasks")));
                                     innerCleanup.add(sendTaskFactory.create(reactorResources.getSendTaskScheduler(),
                                             speakingSender, voiceSocket::send, audioProvider, transformer));
                                     innerCleanup.add(receiveTaskFactory.create(reactorResources.getReceiveTaskScheduler(),
@@ -247,7 +247,7 @@ public class DefaultVoiceGatewayClient {
                                             .subscribe(newValue -> {
                                                 VoiceServerOptions current = serverOptions.get();
                                                 if (!current.getEndpoint().equals(newValue.getEndpoint())) {
-                                                    log.info(format(context, "Voice server endpoint change: {}"),
+                                                    log.debug(format(context, "Voice server endpoint change: {}"),
                                                             current.getEndpoint(), newValue.getEndpoint());
                                                     serverOptions.set(newValue);
                                                     sessionHandler.close(DisconnectBehavior.retryAbruptly(
