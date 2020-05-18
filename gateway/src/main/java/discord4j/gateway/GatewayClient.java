@@ -18,8 +18,8 @@
 package discord4j.gateway;
 
 import discord4j.discordjson.json.gateway.Dispatch;
-import discord4j.gateway.retry.PartialDisconnectException;
 import discord4j.gateway.json.GatewayPayload;
+import discord4j.gateway.retry.PartialDisconnectException;
 import io.netty.buffer.ByteBuf;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
@@ -46,7 +46,8 @@ public interface GatewayClient {
      * Establish a reconnecting gateway connection to the given URL.
      *
      * @param gatewayUrl the URL used to establish a websocket connection
-     * @return a {@link Mono} signaling completion
+     * @return a {@link Mono} signaling completion of the session. If a non-recoverable error terminates the session,
+     * it is emitted as an error through this Mono.
      */
     Mono<Void> execute(String gatewayUrl);
 
@@ -56,7 +57,8 @@ public interface GatewayClient {
      * @param allowResume if resuming this session after closing is possible. if set to {@code true} the main
      * execution {@link Mono} will complete with a {@link PartialDisconnectException} you can
      * use to perform additional behavior or reconnect.
-     * @return a {@link Mono} deferring completion until the disconnection has completed.
+     * @return a {@link Mono} deferring completion until the disconnection has completed. If this client closed due
+     * to an error it is emitted through the Mono.
      */
     Mono<Void> close(boolean allowResume);
 

@@ -115,7 +115,7 @@ public class DefaultGatewayClient implements GatewayClient {
     private final AtomicLong lastAck = new AtomicLong(0);
     private final AtomicInteger missedAck = new AtomicInteger(0);
     private final AtomicLong responseTime = new AtomicLong(0);
-    private volatile MonoProcessor<Void> disconnectNotifier;
+    private volatile MonoProcessor<CloseStatus> disconnectNotifier;
     private volatile GatewayWebsocketHandler sessionHandler;
 
     /**
@@ -260,6 +260,7 @@ public class DefaultGatewayClient implements GatewayClient {
                                     .build())
                             .uri(gatewayUrl)
                             .handle(sessionHandler::handle)
+                            .subscriberContext(LogUtil.clearContext())
                             .flatMap(t2 -> handleClose(t2.getT1(), t2.getT2()))
                             .then();
 
@@ -268,7 +269,7 @@ public class DefaultGatewayClient implements GatewayClient {
                                 if (t instanceof ReconnectException) {
                                     log.info(format(context, "{}"), t.getMessage());
                                 } else {
-                                    if (log.isDebugEnabled()) {
+                                    if (log.isTraceEnabled()) {
                                         log.error(format(context, "Gateway client error"), t);
                                     } else {
                                         log.error(format(context, "{}"), t.toString());
@@ -281,7 +282,12 @@ public class DefaultGatewayClient implements GatewayClient {
                 })
                 .subscriberContext(ctx -> ctx.put(LogUtil.KEY_SHARD_ID, identifyOptions.getShardIndex()))
                 .retryWhen(retryFactory())
-                .then(Mono.defer(() -> disconnectNotifier));
+                .then(Mono.defer(() -> disconnectNotifier.then()))
+                .doOnSubscribe(s -> {
+                    if (disconnectNotifier != null) {
+                        throw new IllegalStateException("execute can only be subscribed once");
+                    }
+                });
     }
 
     private String initUserAgent() {
@@ -407,8 +413,14 @@ public class DefaultGatewayClient implements GatewayClient {
             switch (behavior.getAction()) {
                 case STOP_ABRUPTLY:
                 case STOP:
-                    disconnectNotifier.onComplete();
-                    return Mono.just(closeStatus);
+                    if (behavior.getCause() != null) {
+                        return Mono.just(new CloseException(closeStatus, ctx, behavior.getCause()))
+                                .flatMap(ex -> {
+                                    disconnectNotifier.onError(ex);
+                                    return Mono.error(ex);
+                                });
+                    }
+                    return Mono.just(closeStatus).doOnNext(status -> disconnectNotifier.onNext(closeStatus));
                 case RETRY_ABRUPTLY:
                 case RETRY:
                 default:
@@ -434,12 +446,14 @@ public class DefaultGatewayClient implements GatewayClient {
             if (sessionHandler == null || disconnectNotifier == null) {
                 return Mono.error(new IllegalStateException("Gateway client is not active!"));
             }
-            if (allowResume) {
-                sessionHandler.close(DisconnectBehavior.stopAbruptly(null));
-            } else {
-                sessionHandler.close(DisconnectBehavior.stop(null));
+            if (!disconnectNotifier.isTerminated()) {
+                if (allowResume) {
+                    sessionHandler.close(DisconnectBehavior.stopAbruptly(null));
+                } else {
+                    sessionHandler.close(DisconnectBehavior.stop(null));
+                }
             }
-            return disconnectNotifier;
+            return disconnectNotifier.then();
         });
     }
 

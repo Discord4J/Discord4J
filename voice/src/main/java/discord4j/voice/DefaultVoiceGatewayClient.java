@@ -111,7 +111,7 @@ public class DefaultVoiceGatewayClient {
     private final AtomicReference<String> session = new AtomicReference<>();
 
     private volatile int ssrc;
-    private volatile MonoProcessor<Void> disconnectNotifier;
+    private volatile MonoProcessor<CloseStatus> disconnectNotifier;
     private volatile Context currentContext;
     private volatile VoiceWebsocketHandler sessionHandler;
 
@@ -159,7 +159,7 @@ public class DefaultVoiceGatewayClient {
             Disposable connect = connect(voiceServerOptions, session, sink)
                     .subscriberContext(sink.currentContext())
                     .subscribe(null,
-                            t -> log.error(format(sink.currentContext(), "Voice gateway terminated with an error"), t),
+                            t -> log.debug(format(sink.currentContext(), "Voice gateway error: {}"), t),
                             () -> log.debug(format(sink.currentContext(), "Voice gateway completed")));
             sink.onCancel(connect);
         }));
@@ -299,7 +299,12 @@ public class DefaultVoiceGatewayClient {
                             .then();
                 })
                 .retryWhen(retryFactory())
-                .then(Mono.defer(() -> disconnectNotifier));
+                .then(Mono.defer(() -> disconnectNotifier.then()))
+                .doOnSubscribe(s -> {
+                    if (disconnectNotifier != null) {
+                        throw new IllegalStateException("connect can only be subscribed once");
+                    }
+                });
     }
 
     private ConnectionObserver getObserver(Context context) {
@@ -359,8 +364,10 @@ public class DefaultVoiceGatewayClient {
             if (sessionHandler == null || disconnectNotifier == null) {
                 return Mono.error(new IllegalStateException("Gateway client is not active!"));
             }
-            sessionHandler.close(DisconnectBehavior.stop(null));
-            return disconnectNotifier;
+            if (!disconnectNotifier.isTerminated()) {
+                sessionHandler.close(DisconnectBehavior.stop(null));
+            }
+            return disconnectNotifier.then();
         });
     }
 
@@ -370,7 +377,7 @@ public class DefaultVoiceGatewayClient {
     }
 
     private Retry<ReconnectContext> retryFactory() {
-        return Retry.<ReconnectContext>onlyIf(t -> isRetriable(t.exception()))
+        return Retry.<ReconnectContext>onlyIf(t -> isRetryable(t.exception()))
                 .withApplicationContext(reconnectContext)
                 .withBackoffScheduler(reconnectOptions.getBackoffScheduler())
                 .backoff(reconnectOptions.getBackoff())
@@ -395,17 +402,17 @@ public class DefaultVoiceGatewayClient {
                 });
     }
 
-    private static final List<Integer> nonRetriableStatusCodes = Arrays.asList(
+    private static final List<Integer> nonRetryableStatusCodes = Arrays.asList(
             4004, // Authentication failed
             4006, // Session no longer valid
             4014, // Disconnected
             4016 // Unknown encryption mode
     );
 
-    private boolean isRetriable(@Nullable Throwable t) {
+    private boolean isRetryable(@Nullable Throwable t) {
         if (t instanceof CloseException) {
             CloseException closeException = (CloseException) t;
-            return !nonRetriableStatusCodes.contains(closeException.getCode());
+            return !nonRetryableStatusCodes.contains(closeException.getCode());
         }
         return !(t instanceof PartialDisconnectException);
     }
@@ -431,7 +438,7 @@ public class DefaultVoiceGatewayClient {
     private Mono<CloseStatus> handleClose(DisconnectBehavior sourceBehavior, CloseStatus closeStatus) {
         return Mono.deferWithContext(ctx -> {
             DisconnectBehavior behavior;
-            if (nonRetriableStatusCodes.contains(closeStatus.getCode())) {
+            if (nonRetryableStatusCodes.contains(closeStatus.getCode())) {
                 // non-retryable close codes are non-transient errors therefore stopping is the only choice
                 behavior = DisconnectBehavior.stop(sourceBehavior.getCause());
             } else {
@@ -451,9 +458,20 @@ public class DefaultVoiceGatewayClient {
             switch (behavior.getAction()) {
                 case STOP_ABRUPTLY:
                 case STOP:
-                    stateChanges.next(VoiceConnection.State.DISCONNECTED);
-                    disconnectNotifier.onComplete();
-                    return disconnectTask.onDisconnect(guildId).thenReturn(closeStatus);
+                    if (behavior.getCause() != null) {
+                        return Mono.just(new CloseException(closeStatus, ctx, behavior.getCause()))
+                                .flatMap(ex -> {
+                                    stateChanges.next(VoiceConnection.State.DISCONNECTED);
+                                    disconnectNotifier.onError(ex);
+                                    return disconnectTask.onDisconnect(guildId).then(Mono.error(ex));
+                                });
+                    }
+                    return Mono.just(closeStatus)
+                            .flatMap(status -> {
+                                stateChanges.next(VoiceConnection.State.DISCONNECTED);
+                                disconnectNotifier.onNext(closeStatus);
+                                return disconnectTask.onDisconnect(guildId).thenReturn(closeStatus);
+                            });
                 case RETRY_ABRUPTLY:
                 case RETRY:
                 default:
