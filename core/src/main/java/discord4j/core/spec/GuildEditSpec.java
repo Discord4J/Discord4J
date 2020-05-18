@@ -30,7 +30,7 @@ import java.util.Optional;
 /**
  * A spec used to selectively modify properties from a {@link Guild}.
  *
- * @see <a href="https://discordapp.com/developers/docs/resources/guild#modify-guild">Modify Guild</a>
+ * @see <a href="https://discord.com/developers/docs/resources/guild#modify-guild">Modify Guild</a>
  */
 public class GuildEditSpec implements AuditSpec<GuildModifyRequest> {
 

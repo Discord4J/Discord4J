@@ -23,25 +23,25 @@ import discord4j.core.util.EntityUtil;
 import discord4j.core.util.OrderUtil;
 import discord4j.discordjson.json.RoleData;
 import discord4j.rest.entity.RestRole;
+import discord4j.rest.util.Color;
 import discord4j.rest.util.PermissionSet;
 import discord4j.rest.util.Snowflake;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
 
-import java.awt.Color;
 import java.util.Objects;
 import java.util.function.Consumer;
 
 /**
  * A Discord role.
  *
- * @see <a href="https://discordapp.com/developers/docs/topics/permissions#role-object">Role Object</a>
+ * @see <a href="https://discord.com/developers/docs/topics/permissions#role-object">Role Object</a>
  */
 public final class Role implements Entity {
 
     /** The default {@link Color} of a {@code Role}. */
-    public static final Color DEFAULT_COLOR = new Color(0, true);
+    public static final Color DEFAULT_COLOR = Color.of(0);
 
     /** The gateway associated to this object. */
     private final GatewayDiscordClient gateway;
@@ -168,7 +168,7 @@ public final class Role implements Entity {
      * @return The color assigned to this role.
      */
     public Color getColor() {
-        return new Color(data.color(), true);
+        return Color.of(data.color());
     }
 
     /**
@@ -269,11 +269,13 @@ public final class Role implements Entity {
      * it is emitted through the {@code Mono}.
      */
     public Mono<Role> edit(final Consumer<? super RoleEditSpec> spec) {
-        final RoleEditSpec mutatedSpec = new RoleEditSpec();
-        spec.accept(mutatedSpec);
-
-        return rest.edit(mutatedSpec.asRequest(), mutatedSpec.getReason())
-                .map(bean -> new Role(gateway, bean, getGuildId().asLong()));
+        return Mono.defer(
+                () -> {
+                    RoleEditSpec mutatedSpec = new RoleEditSpec();
+                    spec.accept(mutatedSpec);
+                    return rest.edit(mutatedSpec.asRequest(), mutatedSpec.getReason())
+                            .map(bean -> new Role(gateway, bean, getGuildId().asLong()));
+                });
     }
 
     /**

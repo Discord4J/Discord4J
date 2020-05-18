@@ -32,7 +32,7 @@ import discord4j.gateway.ShardInfo;
  * <p>
  * This event is dispatched by Discord.
  *
- * @see <a href="https://discordapp.com/developers/docs/topics/gateway#guild-create">Guild Create</a>
+ * @see <a href="https://discord.com/developers/docs/topics/gateway#guild-create">Guild Create</a>
  */
 public class GuildCreateEvent extends GuildEvent {
 

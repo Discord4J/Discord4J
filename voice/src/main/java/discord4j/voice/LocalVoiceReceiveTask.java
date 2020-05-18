@@ -24,6 +24,9 @@ import reactor.core.scheduler.Scheduler;
 import reactor.util.Logger;
 import reactor.util.Loggers;
 
+/**
+ * A receive task that can locally consume audio packets and pass them to an {@link AudioReceiver}.
+ */
 public class LocalVoiceReceiveTask implements Disposable {
 
     private static final Logger log = Loggers.getLogger(LocalVoiceReceiveTask.class);
@@ -49,7 +52,6 @@ public class LocalVoiceReceiveTask implements Disposable {
 
     @Override
     public void dispose() {
-        log.info("Disposing receive task");
         task.dispose();
     }
 

@@ -35,7 +35,7 @@ import java.util.stream.Collectors;
 /**
  * Spec used to modify a {@link VoiceChannel} entity.
  *
- * @see <a href="https://discordapp.com/developers/docs/resources/channel#modify-channel">Modify Channel</a>
+ * @see <a href="https://discord.com/developers/docs/resources/channel#modify-channel">Modify Channel</a>
  */
 public class VoiceChannelEditSpec implements AuditSpec<ChannelModifyRequest> {
 

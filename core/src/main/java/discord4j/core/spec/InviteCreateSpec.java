@@ -24,7 +24,7 @@ import reactor.util.annotation.Nullable;
  * Spec used to create guild channel {@link Invite} objects.
  *
  * @see
- * <a href="https://discordapp.com/developers/docs/resources/channel#create-channel-invite">Create Channel Invite</a>
+ * <a href="https://discord.com/developers/docs/resources/channel#create-channel-invite">Create Channel Invite</a>
  */
 public class InviteCreateSpec implements AuditSpec<InviteCreateRequest> {
 

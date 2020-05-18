@@ -28,15 +28,14 @@ import java.util.List;
 
 public class GatewayEventFilter extends TurboFilter {
 
-    private String logger;
+    private final List<String> loggers = new ArrayList<>();
     private final List<String> includedEvents = new ArrayList<>();
     private final List<String> excludedEvents = new ArrayList<>();
 
     @Override
     public FilterReply decide(Marker marker, Logger log, Level level, String format, Object[] params, Throwable t) {
         String logName = log.getName();
-        if (logName.equals(logger) ||
-                (logger == null && logName.endsWith("protocol.sender") || logName.endsWith("protocol.receiver"))) {
+        if (loggers.contains(logName)) {
             if (format != null) {
                 if (!excludedEvents.isEmpty() && excludedEvents.stream().anyMatch(format::contains)) {
                     return FilterReply.DENY;
@@ -49,8 +48,8 @@ public class GatewayEventFilter extends TurboFilter {
         return FilterReply.NEUTRAL;
     }
 
-    public void setLogger(String logger) {
-        this.logger = logger;
+    public void addLogger(String logger) {
+        this.loggers.add(logger);
     }
 
     public void addInclude(String include) {

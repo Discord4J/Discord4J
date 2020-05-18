@@ -37,7 +37,7 @@ import java.util.stream.Collectors;
  *     <li>{@link Presence#invisible()}</li>
  * </ul>
  *
- * @see <a href="https://discordapp.com/developers/docs/topics/gateway#presence">Presence</a>
+ * @see <a href="https://discord.com/developers/docs/topics/gateway#presence">Presence</a>
  */
 public final class Presence {
 

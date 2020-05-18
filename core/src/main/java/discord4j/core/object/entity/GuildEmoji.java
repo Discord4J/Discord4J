@@ -40,7 +40,7 @@ import static discord4j.rest.util.Image.Format.PNG;
 /**
  * A Discord guild emoji.
  * <p>
- * <a href="https://discordapp.com/developers/docs/resources/emoji#emoji-resource">Emoji Resource</a>
+ * <a href="https://discord.com/developers/docs/resources/emoji#emoji-resource">Emoji Resource</a>
  */
 // TODO FIXME so many gets
 public final class GuildEmoji implements Entity {
@@ -205,11 +205,13 @@ public final class GuildEmoji implements Entity {
      * received, it is emitted through the {@code Mono}.
      */
     public Mono<GuildEmoji> edit(final Consumer<? super GuildEmojiEditSpec> spec) {
-        final GuildEmojiEditSpec mutatedSpec = new GuildEmojiEditSpec();
-        spec.accept(mutatedSpec);
-
-        return gateway.getRestClient().getEmojiService()
-                .modifyGuildEmoji(getGuildId().asLong(), getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason())
+        return Mono.defer(
+                () -> {
+                    GuildEmojiEditSpec mutatedSpec = new GuildEmojiEditSpec();
+                    spec.accept(mutatedSpec);
+                    return gateway.getRestClient().getEmojiService()
+                            .modifyGuildEmoji(getGuildId().asLong(), getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason());
+                })
                 .map(data -> new GuildEmoji(gateway, data, getGuildId().asLong()));
     }
 

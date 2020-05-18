@@ -25,6 +25,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.handler.codec.http.websocketx.CloseWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
+import io.netty.util.IllegalReferenceCountException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxSink;
 import reactor.core.publisher.Mono;
@@ -120,6 +121,7 @@ public class GatewayWebsocketHandler {
                 .map(WebSocketFrame::content)
                 .transformDeferred(decompressor::completeMessages)
                 .doOnNext(inbound::next)
+                .doOnNext(GatewayWebsocketHandler::safeRelease)
                 .then();
 
         return Mono.zip(outboundEvents, inboundEvents)
@@ -156,5 +158,17 @@ public class GatewayWebsocketHandler {
             log.info(format(context, "Triggering error sequence: {}"), error.toString());
         }
         close(DisconnectBehavior.retryAbruptly(error));
+    }
+
+    private static void safeRelease(ByteBuf buf) {
+        if (buf.refCnt() > 0) {
+            try {
+                buf.release();
+            } catch (IllegalReferenceCountException e) {
+                if (log.isDebugEnabled()) {
+                    log.debug("", e);
+                }
+            }
+        }
     }
 }

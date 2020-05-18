@@ -9,6 +9,10 @@
     <logger name="discord4j.core" level="INFO"/>
     <logger name="discord4j.gateway.protocol.sender" level="TRACE"/>
     <logger name="discord4j.gateway.protocol.receiver" level="TRACE"/>
+    <logger name="discord4j.voice.protocol.sender" level="TRACE"/>
+    <logger name="discord4j.voice.protocol.receiver" level="TRACE"/>
+<!--    <logger name="discord4j.voice.protocol.udp.sender" level="TRACE"/>-->
+    <logger name="discord4j.voice.protocol.udp.receiver" level="TRACE"/>
     <logger name="discord4j.rest.http.client.DiscordWebClient" level="INFO"/>
     <logger name="discord4j.rest.request" level="DEBUG"/>
     <!--<logger name="discord4j.rest.http" level="TRACE"/>-->
@@ -17,6 +21,8 @@
         <Logger>discord4j.gateway.protocol.receiver</Logger>
         <Include>"t":"READY"</Include>
         <Include>"op":9</Include>
+        <Include>"op":4</Include>
+        <Include>"t":"VOICE_SERVER_UPDATE"</Include>
     </turboFilter>
 
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">

@@ -1,5 +1,5 @@
 # Discord4J Gateway
-The `gateway` module provides a low-level WebSocket client for interacting with the [Discord Gateway](https://discordapp.com/developers/docs/topics/gateway).
+The `gateway` module provides a low-level WebSocket client for interacting with the [Discord Gateway](https://discord.com/developers/docs/topics/gateway).
 
 ## Installation
 Just replace `@VERSION@` with the latest given by ![](https://img.shields.io/maven-central/v/com.discord4j/discord4j-gateway.svg?style=flat-square)

@@ -262,13 +262,13 @@ public class GatewayDiscordClient implements EntityRetriever {
      * received, it is emitted through the {@code Mono}.
      */
     public Mono<Guild> createGuild(final Consumer<? super GuildCreateSpec> spec) {
-        final GuildCreateSpec mutatedSpec = new GuildCreateSpec();
-        spec.accept(mutatedSpec);
-
-        return getRestClient().getGuildService()
-                .createGuild(mutatedSpec.asRequest())
-                .map(this::toGuildData)
-                .map(data -> new Guild(this, data));
+        return Mono.defer(
+                () -> {
+                    GuildCreateSpec mutatedSpec = new GuildCreateSpec();
+                    spec.accept(mutatedSpec);
+                    return getRestClient().getGuildService().createGuild(mutatedSpec.asRequest());
+                })
+                .map(data -> new Guild(this, toGuildData(data)));
     }
 
     private GuildData toGuildData(GuildUpdateData guild) {
@@ -333,11 +333,12 @@ public class GatewayDiscordClient implements EntityRetriever {
      * it is emitted through the {@code Mono}.
      */
     public Mono<User> edit(final Consumer<? super UserEditSpec> spec) {
-        final UserEditSpec mutatedSpec = new UserEditSpec();
-        spec.accept(mutatedSpec);
-
-        return getRestClient().getUserService()
-                .modifyCurrentUser(mutatedSpec.asRequest())
+        return Mono.defer(
+                () -> {
+                    UserEditSpec mutatedSpec = new UserEditSpec();
+                    spec.accept(mutatedSpec);
+                    return getRestClient().getUserService().modifyCurrentUser(mutatedSpec.asRequest());
+                })
                 .map(data -> new User(this, data));
     }
 

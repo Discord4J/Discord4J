@@ -19,15 +19,15 @@ package discord4j.core.spec;
 import discord4j.core.object.entity.Role;
 import discord4j.discordjson.json.ImmutableRoleModifyRequest;
 import discord4j.discordjson.json.RoleModifyRequest;
+import discord4j.rest.util.Color;
 import discord4j.rest.util.PermissionSet;
 import reactor.util.annotation.Nullable;
 
-import java.awt.Color;
 
 /**
  * Spec used to modify a guild {@link Role}.
  *
- * @see <a href="https://discordapp.com/developers/docs/resources/guild#modify-guild-role">Modify Guild Role</a>
+ * @see <a href="https://discord.com/developers/docs/resources/guild#modify-guild-role">Modify Guild Role</a>
  */
 public class RoleEditSpec implements AuditSpec<RoleModifyRequest> {
 
@@ -64,7 +64,7 @@ public class RoleEditSpec implements AuditSpec<RoleModifyRequest> {
      * @return This spec.
      */
     public RoleEditSpec setColor(Color color) {
-        requestBuilder.color(color.getRGB() & 0xFFFFFF);
+        requestBuilder.color(color.getRGB());
         return this;
     }
 

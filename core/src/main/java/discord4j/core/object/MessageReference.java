@@ -11,7 +11,7 @@ import java.util.Optional;
 /**
  * A Message Reference used by the Server Following feature.
  *
- * @see <a href="https://discordapp.com/developers/docs/resources/channel#message-object-message-structure">
+ * @see <a href="https://discord.com/developers/docs/resources/channel#message-object-message-structure">
  * MessageReference Object</a>
  */
 @Experimental

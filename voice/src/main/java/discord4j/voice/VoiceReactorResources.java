@@ -22,6 +22,12 @@ import reactor.core.scheduler.Scheduler;
 import reactor.netty.http.client.HttpClient;
 import reactor.netty.udp.UdpClient;
 
+/**
+ * Provides an extra level of configuration for {@link ReactorResources}, tailored for the Voice Gateway operations.
+ * <p>
+ * Allows customizing the {@link Scheduler} used to send and receive voice packets and also the {@link UdpClient}
+ * template for establishing UDP connections.
+ */
 public class VoiceReactorResources extends ReactorResources {
 
     private final UdpClient udpClient;

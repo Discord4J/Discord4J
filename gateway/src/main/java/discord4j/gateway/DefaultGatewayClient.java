@@ -35,6 +35,7 @@ import discord4j.gateway.retry.GatewayStateChange;
 import discord4j.gateway.retry.PartialDisconnectException;
 import discord4j.gateway.retry.ReconnectException;
 import io.netty.buffer.ByteBuf;
+import io.netty.util.IllegalReferenceCountException;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.*;
 import reactor.netty.ConnectionObserver;
@@ -114,7 +115,7 @@ public class DefaultGatewayClient implements GatewayClient {
     private final AtomicLong lastAck = new AtomicLong(0);
     private final AtomicInteger missedAck = new AtomicInteger(0);
     private final AtomicLong responseTime = new AtomicLong(0);
-    private volatile MonoProcessor<Void> disconnectNotifier;
+    private volatile MonoProcessor<CloseStatus> disconnectNotifier;
     private volatile GatewayWebsocketHandler sessionHandler;
 
     /**
@@ -203,7 +204,8 @@ public class DefaultGatewayClient implements GatewayClient {
                             .then();
 
                     // Subscribe the receiver to process and transform the inbound payloads into Dispatch events
-                    Mono<Void> receiverFuture = receiver
+                    Mono<Void> receiverFuture = receiver.map(ByteBuf::retain)
+                            .doOnDiscard(ByteBuf.class, DefaultGatewayClient::safeRelease)
                             .doOnNext(buf -> logPayload(receiverLog, context, buf))
                             .flatMap(payloadReader::read)
                             .doOnNext(payload -> {
@@ -267,7 +269,7 @@ public class DefaultGatewayClient implements GatewayClient {
                                 if (t instanceof ReconnectException) {
                                     log.info(format(context, "{}"), t.getMessage());
                                 } else {
-                                    if (log.isDebugEnabled()) {
+                                    if (log.isTraceEnabled()) {
                                         log.error(format(context, "Gateway client error"), t);
                                     } else {
                                         log.error(format(context, "{}"), t.toString());
@@ -278,8 +280,14 @@ public class DefaultGatewayClient implements GatewayClient {
                             .doOnCancel(() -> sessionHandler.close())
                             .then();
                 })
+                .subscriberContext(ctx -> ctx.put(LogUtil.KEY_SHARD_ID, identifyOptions.getShardIndex()))
                 .retryWhen(retryFactory())
-                .then(Mono.defer(() -> disconnectNotifier));
+                .then(Mono.defer(() -> disconnectNotifier.then()))
+                .doOnSubscribe(s -> {
+                    if (disconnectNotifier != null) {
+                        throw new IllegalStateException("execute can only be subscribed once");
+                    }
+                });
     }
 
     private String initUserAgent() {
@@ -405,8 +413,14 @@ public class DefaultGatewayClient implements GatewayClient {
             switch (behavior.getAction()) {
                 case STOP_ABRUPTLY:
                 case STOP:
-                    disconnectNotifier.onComplete();
-                    return Mono.just(closeStatus);
+                    if (behavior.getCause() != null) {
+                        return Mono.just(new CloseException(closeStatus, ctx, behavior.getCause()))
+                                .flatMap(ex -> {
+                                    disconnectNotifier.onError(ex);
+                                    return Mono.error(ex);
+                                });
+                    }
+                    return Mono.just(closeStatus).doOnNext(status -> disconnectNotifier.onNext(closeStatus));
                 case RETRY_ABRUPTLY:
                 case RETRY:
                 default:
@@ -432,12 +446,14 @@ public class DefaultGatewayClient implements GatewayClient {
             if (sessionHandler == null || disconnectNotifier == null) {
                 return Mono.error(new IllegalStateException("Gateway client is not active!"));
             }
-            if (allowResume) {
-                sessionHandler.close(DisconnectBehavior.stopAbruptly(null));
-            } else {
-                sessionHandler.close(DisconnectBehavior.stop(null));
+            if (!disconnectNotifier.isTerminated()) {
+                if (allowResume) {
+                    sessionHandler.close(DisconnectBehavior.stopAbruptly(null));
+                } else {
+                    sessionHandler.close(DisconnectBehavior.stop(null));
+                }
             }
-            return disconnectNotifier;
+            return disconnectNotifier.then();
         });
     }
 
@@ -448,12 +464,26 @@ public class DefaultGatewayClient implements GatewayClient {
 
     @Override
     public Flux<GatewayPayload<?>> receiver() {
-        return receiver.flatMap(payloadReader::read);
+        return receiver(payloadReader::read);
     }
 
     @Override
     public <T> Flux<T> receiver(Function<ByteBuf, Publisher<? extends T>> mapper) {
-        return receiver.flatMap(mapper);
+        return receiver.map(ByteBuf::retainedDuplicate)
+                .doOnDiscard(ByteBuf.class, DefaultGatewayClient::safeRelease)
+                .flatMap(mapper);
+    }
+
+    private static void safeRelease(ByteBuf buf) {
+        if (buf.refCnt() > 0) {
+            try {
+                buf.release();
+            } catch (IllegalReferenceCountException e) {
+                if (log.isDebugEnabled()) {
+                    log.debug("", e);
+                }
+            }
+        }
     }
 
     @Override

@@ -1,5 +1,5 @@
 # Discord4J Voice
-The `voice` module provides a client to manipulate audio through [Voice Connections](https://discordapp.com/developers/docs/topics/voice-connections).
+The `voice` module provides a client to manipulate audio through [Voice Connections](https://discord.com/developers/docs/topics/voice-connections).
 ## Installation
 Just replace `@VERSION@` with the latest given by ![](https://img.shields.io/maven-central/v/com.discord4j/discord4j-voice.svg?style=flat-square)
 ### Gradle

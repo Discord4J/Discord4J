@@ -23,6 +23,8 @@ import reactor.core.publisher.EmitterProcessor;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxSink;
 import reactor.core.publisher.Mono;
+import reactor.netty.Connection;
+import reactor.netty.ConnectionObserver;
 import reactor.netty.udp.UdpClient;
 import reactor.util.Logger;
 import reactor.util.Loggers;
@@ -34,9 +36,14 @@ import java.nio.charset.StandardCharsets;
 
 import static discord4j.common.LogUtil.format;
 
+/**
+ * A UDP client abstraction dedicated to handling the transport of raw voice packets.
+ */
 public class VoiceSocket {
 
     private static final Logger log = Loggers.getLogger(VoiceSocket.class);
+    private static final Logger senderLog = Loggers.getLogger("discord4j.voice.protocol.udp.sender");
+    private static final Logger receiverLog = Loggers.getLogger("discord4j.voice.protocol.udp.receiver");
 
     static final String PROTOCOL = "udp";
     static final String ENCRYPTION_MODE = "xsalsa20_poly1305";
@@ -52,29 +59,35 @@ public class VoiceSocket {
         this.udpClient = udpClient;
     }
 
-    Mono<Void> setup(String address, int port) {
+    Mono<Connection> setup(String address, int port) {
         return Mono.deferWithContext(
                 context -> udpClient.host(address).port(port)
-                        .doOnConnected(c -> log.info(format(context, "Connected to {}"), c.address()))
-                        .doOnDisconnected(c -> log.info(format(context,"Disconnected from {}"), c.address()))
+                        .observe(getObserver(context))
+                        .doOnConnected(c -> log.debug(format(context, "Connected to {}"), c.address()))
+                        .doOnDisconnected(c -> log.debug(format(context, "Disconnected from {}"), c.address()))
                         .handle((in, out) -> {
                             Mono<Void> inboundThen = in.receive().retain()
-                                    .doOnNext(buf -> logPayload("<< ", context, buf))
+                                    .doOnNext(buf -> logPayload(receiverLog, context, buf))
                                     .doOnNext(this.inboundSink::next)
                                     .then();
 
                             Mono<Void> outboundThen = out.send(outbound
-                                    .doOnNext(buf -> logPayload(">> ", context, buf)))
+                                    .doOnNext(buf -> logPayload(senderLog, context, buf)))
                                     .then();
+
+                            in.withConnection(c -> c.onDispose(() -> log.debug(format(context, "Connection disposed"))));
 
                             return Mono.zip(inboundThen, outboundThen).then();
                         })
-                        .connect()
-                        .then());
+                        .connect());
     }
 
-    private void logPayload(String prefix, Context context, ByteBuf buf) {
-        log.trace(format(context, prefix + ByteBufUtil.hexDump(buf)));
+    private ConnectionObserver getObserver(Context context) {
+        return (connection, newState) -> log.debug(format(context, "{} {}"), newState, connection);
+    }
+
+    private void logPayload(Logger logger, Context context, ByteBuf buf) {
+        logger.trace(format(context, ByteBufUtil.hexDump(buf)));
     }
 
     Mono<InetSocketAddress> performIpDiscovery(int ssrc) {

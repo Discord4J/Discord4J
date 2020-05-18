@@ -35,7 +35,7 @@ import java.util.Set;
  * <p>
  * This event is dispatched by Discord.
  *
- * @see <a href="https://discordapp.com/developers/docs/topics/gateway#guild-members-chunk">Guild Members Chunk</a>
+ * @see <a href="https://discord.com/developers/docs/topics/gateway#guild-members-chunk">Guild Members Chunk</a>
  */
 public class MemberChunkEvent extends GuildEvent {
 

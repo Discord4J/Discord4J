@@ -1,9 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration scan="true">
     <logger name="io.netty" level="INFO"/>
+    <logger name="io.lettuce" level="INFO"/>
     <logger name="reactor" level="INFO"/>
-    <logger name="discord4j.gateway.client" level="DEBUG"/>
-    <!--<logger name="discord4j.gateway.sender" level="TRACE"/>-->
+    <!--    <logger name="reactor.netty" level="DEBUG"/>-->
+    <logger name="reactor.retry" level="INFO"/>
+
+    <logger name="discord4j.gateway.protocol.sender" level="TRACE"/>
+    <logger name="discord4j.gateway.protocol.receiver" level="TRACE"/>
+
+    <turboFilter class="discord4j.gateway.logback.GatewayEventFilter">
+        <Logger>discord4j.gateway.protocol.receiver</Logger>
+        <Include>"t":"READY"</Include>
+    </turboFilter>
 
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
@@ -24,8 +33,13 @@
         <prudent>true</prudent>
     </appender>
 
-    <root level="INFO">
+    <appender name="ASYNC" class="ch.qos.logback.classic.AsyncAppender">
+        <queueSize>512</queueSize>
+        <appender-ref ref="FILE"/>
+    </appender>
+
+    <root level="DEBUG">
         <appender-ref ref="CONSOLE"/>
-        <!--<appender-ref ref="ASYNC"/>-->
+        <appender-ref ref="ASYNC"/>
     </root>
 </configuration>

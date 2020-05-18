@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
 /**
  * Spec used to modify a guild {@link StoreChannel} settings.
  *
- * @see <a href="https://discordapp.com/developers/docs/resources/channel#modify-channel">Modify Channel</a>
+ * @see <a href="https://discord.com/developers/docs/resources/channel#modify-channel">Modify Channel</a>
  */
 public class StoreChannelEditSpec implements AuditSpec<ChannelModifyRequest> {
 

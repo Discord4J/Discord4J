@@ -29,7 +29,7 @@ import java.util.Optional;
 /**
  * Metadata for a Discord invite.
  *
- * @see <a href="https://discordapp.com/developers/docs/resources/invite#invite-metadata-object">Metadata Object</a>
+ * @see <a href="https://discord.com/developers/docs/resources/invite#invite-metadata-object">Metadata Object</a>
  */
 public final class ExtendedInvite extends Invite {
 

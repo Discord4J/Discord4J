@@ -34,7 +34,7 @@ import java.util.stream.Collectors;
 /**
  * Spec used to create guild {@link TextChannel} entities.
  *
- * @see <a href="https://discordapp.com/developers/docs/resources/guild#create-guild-channel">Create Guild Channel</a>
+ * @see <a href="https://discord.com/developers/docs/resources/guild#create-guild-channel">Create Guild Channel</a>
  */
 public class TextChannelCreateSpec implements AuditSpec<ChannelCreateRequest> {
 

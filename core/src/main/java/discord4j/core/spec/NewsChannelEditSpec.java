@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
 /**
  * Spec used to modify a guild {@link NewsChannel} settings.
  *G
- * @see <a href="https://discordapp.com/developers/docs/resources/channel#modify-channel">Modify Channel</a>
+ * @see <a href="https://discord.com/developers/docs/resources/channel#modify-channel">Modify Channel</a>
  */
 public class NewsChannelEditSpec implements AuditSpec<ChannelModifyRequest> {
 

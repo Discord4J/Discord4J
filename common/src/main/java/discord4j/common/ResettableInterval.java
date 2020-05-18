@@ -63,7 +63,9 @@ public class ResettableInterval {
      * Dispose the current emitter task without completing or cancelling existing subscriptions to {@link #ticks()}.
      */
     public void stop() {
-        task.get().dispose();
+        if (task.get() != null) {
+            task.get().dispose();
+        }
     }
 
     /**

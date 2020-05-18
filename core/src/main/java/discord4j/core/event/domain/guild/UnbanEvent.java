@@ -28,7 +28,7 @@ import reactor.core.publisher.Mono;
  * <p>
  * This event is dispatched by Discord.
  *
- * @see <a href="https://discordapp.com/developers/docs/topics/gateway#guild-ban-remove">Guild Ban Remove</a>
+ * @see <a href="https://discord.com/developers/docs/topics/gateway#guild-ban-remove">Guild Ban Remove</a>
  */
 public class UnbanEvent extends GuildEvent {
 

@@ -18,9 +18,9 @@ package discord4j.core.spec;
 
 import discord4j.discordjson.json.*;
 import discord4j.discordjson.possible.Possible;
+import discord4j.rest.util.Color;
 import reactor.util.annotation.Nullable;
 
-import java.awt.Color;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -87,17 +87,7 @@ public class EmbedCreateSpec implements Spec<EmbedData> {
      * @return This spec.
      */
     public EmbedCreateSpec setColor(final Color color) {
-        return setColor(color.getRGB());
-    }
-
-    /**
-     * Sets the color of the embed.
-     *
-     * @param color An RGB color to display on the embed.
-     * @return This spec.
-     */
-    public EmbedCreateSpec setColor(int color) {
-        requestBuilder.color(color & 0xFFFFFF);
+        requestBuilder.color(color.getRGB());
         return this;
     }
 

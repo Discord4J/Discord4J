@@ -18,7 +18,7 @@ package discord4j.core.object.presence;
 
 /**
  * Represents the various type of status.
- * See <a href="https://discordapp.com/developers/docs/topics/gateway#update-status-status-types">
+ * See <a href="https://discord.com/developers/docs/topics/gateway#update-status-status-types">
  *     Status Types</a>
  */
 public enum Status {

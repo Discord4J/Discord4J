@@ -36,10 +36,19 @@ import reactor.util.Loggers;
 import reactor.util.context.Context;
 import reactor.util.function.Tuple2;
 
-import java.util.logging.Level;
-
 import static discord4j.common.LogUtil.format;
 
+/**
+ * Represents a WebSocket handler specialized for Discord voice gateway operations.
+ * <p>
+ * Capable of handling closing events that normally occur in its lifecycle.
+ * <p>
+ * This handler uses a {@link FluxSink} of {@link ByteBuf} to push inbound payloads and a {@link Flux} of
+ * {@link ByteBuf} to pull outbound payloads.
+ * <p>
+ * The handler also provides methods to control the lifecycle, which perform operations on the current session. It is
+ * required to use them to properly release important resources and complete the session.
+ */
 public class VoiceWebsocketHandler {
 
     private static final Logger log = Loggers.getLogger(VoiceWebsocketHandler.class);
@@ -99,7 +108,8 @@ public class VoiceWebsocketHandler {
                     if (status.getCode() == 4014) {
                         close(DisconnectBehavior.stop(new VoiceGatewayException(context, "Disconnected")));
                     } else {
-                        close(DisconnectBehavior.retryAbruptly(new VoiceGatewayException(context, "Inbound close status")));
+                        close(DisconnectBehavior.retryAbruptly(
+                                new VoiceGatewayException(context, "Inbound close status")));
                     }
                 });
 
@@ -114,15 +124,10 @@ public class VoiceWebsocketHandler {
                 .doOnNext(inbound::next)
                 .then();
 
-        return Mono.zip(
-                outboundEvents.log("voice.session.out", Level.FINE),
-                inboundEvents.log("voice.session.in", Level.FINE))
+        return Mono.zip(outboundEvents, inboundEvents)
                 .doOnError(this::error)
                 .onErrorResume(t -> t.getCause() instanceof VoiceGatewayException, t -> Mono.empty())
-                .then(Mono.zip(
-                        sessionClose.log("voice.session.close", Level.FINE),
-                        inboundClose.defaultIfEmpty(CloseStatus.ABNORMAL_CLOSE)
-                                .log("voice.inbound.close", Level.FINE)));
+                .then(Mono.zip(sessionClose, inboundClose.defaultIfEmpty(CloseStatus.ABNORMAL_CLOSE)));
     }
 
     /**

@@ -32,7 +32,21 @@ public class VoiceGatewayException extends RuntimeException {
         this.context = context;
     }
 
+    public VoiceGatewayException(Context context, String message, Throwable cause) {
+        super(message, cause);
+        this.context = context;
+    }
+
     public Context getContext() {
         return context;
     }
+
+    @Override
+    public String toString() {
+        String prefix = "Voice gateway exception";
+        String message = getMessage();
+        return (message != null) ? (prefix + ": " + message) : prefix;
+    }
+
+
 }

@@ -19,6 +19,9 @@ package discord4j.voice;
 
 import reactor.core.publisher.Mono;
 
+/**
+ * A task to encapsulate actions needed to terminate a voice connection on a given guild.
+ */
 @FunctionalInterface
 public interface VoiceDisconnectTask {
 

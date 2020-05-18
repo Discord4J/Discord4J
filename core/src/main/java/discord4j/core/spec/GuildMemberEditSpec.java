@@ -31,7 +31,7 @@ import java.util.stream.Collectors;
 /**
  * Spec used to modify guild members.
  *
- * @see <a href="https://discordapp.com/developers/docs/resources/guild#modify-guild-member">Modify Guild Member</a>
+ * @see <a href="https://discord.com/developers/docs/resources/guild#modify-guild-member">Modify Guild Member</a>
  */
 public class GuildMemberEditSpec implements AuditSpec<GuildMemberModifyRequest> {
 

@@ -33,7 +33,7 @@ public final class TextChannel extends BaseGuildMessageChannel {
      * Constructs an {@code TextChannel} with an associated ServiceMediator and Discord data.
      *
      * @param gateway The {@link GatewayDiscordClient} associated to this object, must be non-null.
-     * @param data    The raw data as represented by Discord, must be non-null.
+     * @param data The raw data as represented by Discord, must be non-null.
      */
     public TextChannel(GatewayDiscordClient gateway, ChannelData data) {
         super(gateway, data);
@@ -56,7 +56,7 @@ public final class TextChannel extends BaseGuildMessageChannel {
      * @return {@code true} if this channel is considered NSFW (Not Safe For Work), {@code false} otherwise.
      */
     public boolean isNsfw() {
-        return getData().nsfw().get();
+        return getData().nsfw().toOptional().orElse(false);
     }
 
     /**
@@ -67,13 +67,15 @@ public final class TextChannel extends BaseGuildMessageChannel {
      * received, it is emitted through the {@code Mono}.
      */
     public Mono<TextChannel> edit(final Consumer<? super TextChannelEditSpec> spec) {
-        final TextChannelEditSpec mutatedSpec = new TextChannelEditSpec();
-        spec.accept(mutatedSpec);
-
-        return getClient().getRestClient().getChannelService()
-            .modifyChannel(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason())
-            .map(bean -> EntityUtil.getChannel(getClient(), bean))
-            .cast(TextChannel.class);
+        return Mono.defer(
+                () -> {
+                    TextChannelEditSpec mutatedSpec = new TextChannelEditSpec();
+                    spec.accept(mutatedSpec);
+                    return getClient().getRestClient().getChannelService()
+                            .modifyChannel(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason());
+                })
+                .map(bean -> EntityUtil.getChannel(getClient(), bean))
+                .cast(TextChannel.class);
     }
 
     @Override
