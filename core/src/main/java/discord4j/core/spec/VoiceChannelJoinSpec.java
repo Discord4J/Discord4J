@@ -235,8 +235,7 @@ public class VoiceChannelJoinSpec implements Spec<Mono<VoiceConnection>> {
                             .flatMap(vc -> gateway.getVoiceConnectionRegistry().registerVoiceConnection(guildId, vc).thenReturn(vc))
                             .subscriberContext(ctx ->
                                     ctx.put(LogUtil.KEY_GATEWAY_ID, Integer.toHexString(gateway.hashCode()))
-                                            .put(LogUtil.KEY_SHARD_ID, shardId)
-                                            .put(LogUtil.KEY_GUILD_ID, Snowflake.asString(guildId)));
+                                            .put(LogUtil.KEY_SHARD_ID, shardId));
                 }))
                 .timeout(timeout)
                 .onErrorResume(TimeoutException.class,
