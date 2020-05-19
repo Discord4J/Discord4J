@@ -159,7 +159,7 @@ public class DefaultVoiceGatewayClient {
             Disposable connect = connect(voiceServerOptions, session, sink)
                     .subscriberContext(sink.currentContext())
                     .subscribe(null,
-                            t -> log.debug(format(sink.currentContext(), "Voice gateway error: {}"), t),
+                            t -> log.debug(format(sink.currentContext(), "Voice gateway error: {}"), t.toString()),
                             () -> log.debug(format(sink.currentContext(), "Voice gateway completed")));
             sink.onCancel(connect);
         }));

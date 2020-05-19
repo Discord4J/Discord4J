@@ -198,12 +198,11 @@ public interface EventDispatcher {
         /**
          * Set the {@link FluxSink.OverflowStrategy} for dealing with overflow scenarios where too many events are
          * being published. Defaults to using {@link FluxSink.OverflowStrategy#BUFFER} to ensure all events are
-         * delivered
-         * at the cost of higher memory footprint and potential {@link OutOfMemoryError} scenarios.
+         * delivered at the cost of higher memory footprint and potential {@link OutOfMemoryError} scenarios.
          * <p>
          * To only keep the earliest events you can use {@link FluxSink.OverflowStrategy#DROP}, and to only keep the
          * most recent events, use {@link FluxSink.OverflowStrategy#LATEST}. The number of events that can be queued
-         * until
+         * until this strategy is applied depends on the underlying processor implementation.
          *
          * @param overflowStrategy the custom backpressure strategy
          * @return this builder

@@ -19,6 +19,7 @@ package discord4j.core.shard;
 
 import discord4j.common.LogUtil;
 import discord4j.common.ReactorResources;
+import discord4j.common.annotations.Experimental;
 import discord4j.common.retry.ReconnectOptions;
 import discord4j.core.CoreResources;
 import discord4j.core.DiscordClient;
@@ -131,6 +132,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
     private EntityRetrievalStrategy entityRetrievalStrategy = null;
     private DispatchEventMapper dispatchEventMapper = null;
     private int maxMissedHeartbeatAck = 1;
+    private Function<EventDispatcher, Publisher<?>> dispatcherFunction;
 
     /**
      * Create a default {@link GatewayBootstrap} based off the given {@link DiscordClient} that provides an instance
@@ -175,6 +177,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
         this.entityRetrievalStrategy = source.entityRetrievalStrategy;
         this.dispatchEventMapper = source.dispatchEventMapper;
         this.maxMissedHeartbeatAck = source.maxMissedHeartbeatAck;
+        this.dispatcherFunction = source.dispatcherFunction;
     }
 
     /**
@@ -589,6 +592,20 @@ public class GatewayBootstrap<O extends GatewayOptions> {
     }
 
     /**
+     * Set an initial subscriber to the bootstrapped {@link EventDispatcher} to gain access to early startup events. The
+     * subscriber is derived from the given {@link Function} which returns a {@link Publisher} that is subscribed early
+     * in the Gateway connection process.
+     *
+     * @param dispatcherFunction an {@link EventDispatcher} mapper that derives an asynchronous listener
+     * @return this builder
+     */
+    @Experimental
+    public GatewayBootstrap<O> withEventDispatcher(Function<EventDispatcher, Publisher<?>> dispatcherFunction) {
+        this.dispatcherFunction = Objects.requireNonNull(dispatcherFunction);
+        return this;
+    }
+
+    /**
      * Connect to the Discord Gateway upon subscription to acquire a {@link GatewayDiscordClient} instance and use it
      * in a declarative way, releasing the object once the derived usage {@link Function} completes, and the underlying
      * shard group disconnects, according to {@link GatewayDiscordClient#onDisconnect()}.
@@ -732,14 +749,32 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                                     gateway, shardCoordinator, stateHolder, eventDispatcher, clientGroup,
                                     closeProcessor, dispatchMapper, invalidationStrategy)));
 
-                    if (awaitConnections == null ? count == 1 : awaitConnections) {
+                    if (b.awaitConnections == null ? count == 1 : b.awaitConnections) {
+                        if (b.dispatcherFunction != null) {
+                            return Mono.create(sink -> {
+                                Disposable.Composite cleanup = Disposables.composite();
+                                cleanup.add(Flux.from(b.dispatcherFunction.apply(eventDispatcher))
+                                        .subscribeOn(gatewayReactorResources.getBlockingTaskScheduler())
+                                        .subscribe(null, t -> log.warn("Error in dispatcher function", t)));
+                                cleanup.add(connections.then(Mono.just(gateway))
+                                        .subscribe(sink::success, sink::error));
+                                sink.onCancel(cleanup);
+                            });
+                        }
                         return connections.then(Mono.just(gateway));
                     } else {
-                        return Mono.create(sink -> sink.onCancel(connections
-                                .doOnNext(shard -> sink.success(gateway))
-                                .doOnError(sink::error)
-                                .subscribe(null,
-                                        t -> log.debug("Unable to establish gateway connections: {}", t))));
+                        if (b.dispatcherFunction != null) {
+                            return Mono.create(sink -> {
+                                Disposable.Composite cleanup = Disposables.composite();
+                                cleanup.add(Flux.from(b.dispatcherFunction.apply(eventDispatcher))
+                                        .subscribeOn(gatewayReactorResources.getBlockingTaskScheduler())
+                                        .subscribe(null, t -> log.warn("Error in dispatcher function", t)));
+                                cleanup.add(connections.subscribe(__ -> sink.success(gateway), sink::error));
+                                sink.onCancel(cleanup);
+                            });
+                        }
+                        return Mono.create(sink ->
+                                sink.onCancel(connections.subscribe(__ -> sink.success(gateway), sink::error)));
                     }
                 });
     }
