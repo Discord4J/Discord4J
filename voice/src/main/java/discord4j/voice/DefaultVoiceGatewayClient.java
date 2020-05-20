@@ -464,7 +464,9 @@ public class DefaultVoiceGatewayClient {
                                 .flatMap(ex -> {
                                     stateChanges.next(VoiceConnection.State.DISCONNECTED);
                                     disconnectNotifier.onError(ex);
-                                    return disconnectTask.onDisconnect(guildId).then(Mono.error(ex));
+                                    Mono<CloseStatus> thenMono = closeStatus.getCode() == 4014 ?
+                                            Mono.just(closeStatus) : Mono.error(ex);
+                                    return disconnectTask.onDisconnect(guildId).then(thenMono);
                                 });
                     }
                     return Mono.just(closeStatus)
