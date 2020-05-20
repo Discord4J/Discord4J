@@ -60,7 +60,7 @@ repositories {
 }
 
 dependencies {
-  implementation 'com.discord4j:discord4j-core:3.1.0.M2'
+  implementation 'com.discord4j:discord4j-core:3.1.0.RC1'
 }
 ```
 
@@ -71,7 +71,7 @@ repositories {
 }
 
 dependencies {
-  implementation("com.discord4j:discord4j-core:3.1.0.M2")
+  implementation("com.discord4j:discord4j-core:3.1.0.RC1")
 }
 ```
 
@@ -81,7 +81,7 @@ dependencies {
   <dependency>
     <groupId>com.discord4j</groupId>
     <artifactId>discord4j-core</artifactId>
-    <version>3.1.0.M2</version>
+    <version>3.1.0.RC1</version>
   </dependency>
 </dependencies>
 ```
@@ -89,7 +89,7 @@ dependencies {
 ### SBT
 ```scala
 libraryDependencies ++= Seq(
-  "com.discord4j" % "discord4j-core" % "3.1.0.M2"
+  "com.discord4j" % "discord4j-core" % "3.1.0.RC1"
 )
 ```
 
@@ -98,6 +98,17 @@ libraryDependencies ++= Seq(
 Discord4J 3.1.x introduces performance and API enhancements, a plethora of new features, and dependency upgrades. A [Migration Guide](https://github.com/Discord4J/Discord4J/wiki/Migrating-from-v3.0-to-v3.1) is provided to aide users and ensure a smooth and readily available transition.
 
 Discord4J 3.0.x installation instructions and examples can be found on the [3.0.x branch](https://github.com/Discord4J/Discord4J/tree/3.0.x).
+
+## ⛰️ Large Bots
+
+Here are some real-world examples of large bots using Discord4J:
+
+* [Groovy](https://groovy.bot/) - An easy to use music bot used by more than 4 million servers.
+* [ZeroTwo](https://zerotwo.bot/) - An anime multi-purpose bot used in more than 250K servers.
+* [DisCal](https://www.discalbot.com/) - Implements Google Calendar into Discord as seamlessly and comprehensively as possible; serving nearly 14K servers.
+* [Shadbot](https://github.com/Shadorc/Shadbot) - A configurable multipurpose bot with music, gambling mini-games, video game stats, and more; serving almost 12K servers.
+
+Do you own a large bot using Discord4J? Ask an admin in our Discord or submit a pull request to add your bot to the list!
 
 ## ⚛️ Reactive
 
