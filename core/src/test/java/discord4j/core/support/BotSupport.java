@@ -9,7 +9,7 @@ import discord4j.core.object.entity.User;
 import discord4j.core.object.presence.Presence;
 import discord4j.discordjson.json.ApplicationInfoData;
 import discord4j.discordjson.json.MessageCreateRequest;
-import discord4j.rest.util.Snowflake;
+import discord4j.common.util.Snowflake;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 import reactor.util.Logger;

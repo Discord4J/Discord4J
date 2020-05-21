@@ -18,7 +18,7 @@
 package discord4j.core.shard;
 
 import discord4j.discordjson.json.GuildCreateData;
-import discord4j.rest.util.Snowflake;
+import discord4j.common.util.Snowflake;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 

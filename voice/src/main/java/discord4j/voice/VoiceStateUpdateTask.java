@@ -18,6 +18,7 @@
 package discord4j.voice;
 
 import discord4j.common.annotations.Experimental;
+import discord4j.common.util.Snowflake;
 import reactor.core.publisher.Flux;
 
 /**
@@ -27,5 +28,5 @@ import reactor.core.publisher.Flux;
 @Experimental
 public interface VoiceStateUpdateTask {
 
-    Flux<String> onVoiceStateUpdate(long guildId);
+    Flux<String> onVoiceStateUpdate(Snowflake guildId);
 }

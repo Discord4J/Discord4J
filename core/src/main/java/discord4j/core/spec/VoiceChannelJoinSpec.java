@@ -26,7 +26,7 @@ import discord4j.discordjson.json.gateway.VoiceStateUpdate;
 import discord4j.gateway.GatewayClientGroup;
 import discord4j.gateway.json.ShardGatewayPayload;
 import discord4j.rest.util.Permission;
-import discord4j.rest.util.Snowflake;
+import discord4j.common.util.Snowflake;
 import discord4j.voice.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -186,19 +186,19 @@ public class VoiceChannelJoinSpec implements Spec<Mono<VoiceConnection>> {
 
     @Override
     public Mono<VoiceConnection> asRequest() {
-        final long guildId = voiceChannel.getGuildId().asLong();
-        final long channelId = voiceChannel.getId().asLong();
+        final Snowflake guildId = voiceChannel.getGuildId();
+        final Snowflake channelId = voiceChannel.getId();
         final GatewayClientGroup clientGroup = voiceChannel.getClient().getGatewayClientGroup();
         final int shardId = (int) ((voiceChannel.getGuildId().asLong() >> 22) % clientGroup.getShardCount());
         final Mono<Void> sendVoiceStateUpdate = clientGroup.unicast(ShardGatewayPayload.voiceStateUpdate(
                 VoiceStateUpdate.builder()
-                        .guildId(Snowflake.asString(guildId))
-                        .channelId(Snowflake.asString(channelId))
+                        .guildId(guildId.asString())
+                        .channelId(channelId.asString())
                         .selfMute(selfMute)
                         .selfDeaf(selfDeaf)
                         .build(), shardId));
 
-        final Flux<Long> selfIdSupplier = selfIdSupplier(gateway);
+        final Flux<Snowflake> selfIdSupplier = selfIdSupplier(gateway);
         final Mono<VoiceStateUpdateEvent> waitForVoiceStateUpdate = onVoiceStateUpdates(gateway, guildId).next();
         final Mono<VoiceServerUpdateEvent> waitForVoiceServerUpdate = onVoiceServerUpdate(gateway, guildId);
 
@@ -210,9 +210,9 @@ public class VoiceChannelJoinSpec implements Spec<Mono<VoiceConnection>> {
         final VoiceStateUpdateTask stateUpdateTask = id -> onVoiceStateUpdates(gateway, id)
                 .map(stateUpdateEvent -> stateUpdateEvent.getCurrent().getSessionId());
         final VoiceChannelRetrieveTask channelRetrieveTask = () -> selfIdSupplier.next()
-                .flatMap(selfId -> gateway.getMemberById(voiceChannel.getGuildId(), Snowflake.of(selfId)))
+                .flatMap(selfId -> gateway.getMemberById(voiceChannel.getGuildId(), selfId))
                 .flatMap(Member::getVoiceState)
-                .flatMap(voiceState -> Mono.justOrEmpty(voiceState.getChannelId().map(Snowflake::asLong)));
+                .flatMap(voiceState -> Mono.justOrEmpty(voiceState.getChannelId()));
 
         Mono<VoiceConnection> newConnection = sendVoiceStateUpdate
                 .then(Mono.zip(waitForVoiceStateUpdate, waitForVoiceServerUpdate, selfIdSupplier.next()))
@@ -247,32 +247,33 @@ public class VoiceChannelJoinSpec implements Spec<Mono<VoiceConnection>> {
                 .switchIfEmpty(newConnection);
     }
 
-    static Flux<Long> selfIdSupplier(GatewayDiscordClient gateway) {
+    static Flux<Snowflake> selfIdSupplier(GatewayDiscordClient gateway) {
         return gateway.getGatewayResources().getStateView().getSelfId()
+                .map(Snowflake::of)
                 .switchIfEmpty(Mono.error(new IllegalStateException("Missing self id")))
                 .cache()
                 .repeat();
     }
 
-    static Flux<VoiceStateUpdateEvent> onVoiceStateUpdates(GatewayDiscordClient gateway, long guildId) {
+    static Flux<VoiceStateUpdateEvent> onVoiceStateUpdates(GatewayDiscordClient gateway, Snowflake guildId) {
         return gateway.getEventDispatcher()
                 .on(VoiceStateUpdateEvent.class)
                 .zipWith(selfIdSupplier(gateway))
                 .filter(t2 -> {
                     VoiceStateUpdateEvent vsu = t2.getT1();
-                    Long selfId = t2.getT2();
-                    final long vsuUser = vsu.getCurrent().getUserId().asLong();
-                    final long vsuGuild = vsu.getCurrent().getGuildId().asLong();
+                    Snowflake selfId = t2.getT2();
+                    final Snowflake vsuUser = vsu.getCurrent().getUserId();
+                    final Snowflake vsuGuild = vsu.getCurrent().getGuildId();
                     // this update is for the bot (current) user in this guild
-                    return (vsuUser == selfId) && (vsuGuild == guildId);
+                    return vsuUser.equals(selfId) && vsuGuild.equals(guildId);
                 })
                 .map(Tuple2::getT1);
     }
 
-    static Mono<VoiceServerUpdateEvent> onVoiceServerUpdate(GatewayDiscordClient gateway, long guildId) {
+    static Mono<VoiceServerUpdateEvent> onVoiceServerUpdate(GatewayDiscordClient gateway, Snowflake guildId) {
         return gateway.getEventDispatcher()
                 .on(VoiceServerUpdateEvent.class)
-                .filter(vsu -> vsu.getGuildId().asLong() == guildId)
+                .filter(vsu -> vsu.getGuildId().equals(guildId))
                 .filter(vsu -> vsu.getEndpoint() != null) // sometimes Discord sends null here. If so, another VSU
                 // should arrive afterwards
                 .next();

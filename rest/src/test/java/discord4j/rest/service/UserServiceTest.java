@@ -22,14 +22,14 @@ import discord4j.discordjson.json.UserModifyRequest;
 import discord4j.rest.RestTests;
 import discord4j.rest.http.client.ClientException;
 import discord4j.rest.request.Router;
-import discord4j.rest.util.Snowflake;
+import discord4j.common.util.Snowflake;
 import org.junit.Test;
 
 import java.util.Collections;
 
 public class UserServiceTest {
 
-    private static final long user = Long.parseUnsignedLong(System.getenv("member"));
+    private static final long user = Snowflake.asLong(System.getenv("member"));
 
     private UserService userService = null;
 

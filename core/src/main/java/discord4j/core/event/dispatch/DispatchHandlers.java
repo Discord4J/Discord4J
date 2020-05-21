@@ -30,7 +30,7 @@ import discord4j.discordjson.json.VoiceStateData;
 import discord4j.discordjson.json.gateway.*;
 import discord4j.discordjson.possible.Possible;
 import discord4j.gateway.retry.GatewayStateChange;
-import discord4j.rest.util.Snowflake;
+import discord4j.common.util.Snowflake;
 import discord4j.store.api.util.LongLongTuple2;
 import reactor.core.publisher.Mono;
 import reactor.util.Logger;
@@ -194,7 +194,7 @@ public class DispatchHandlers implements DispatchEventMapper {
 
     private static Mono<TypingStartEvent> typingStart(DispatchContext<TypingStart> context) {
         long channelId = Snowflake.asLong(context.getDispatch().channelId());
-        Long guildId = context.getDispatch().guildId().toOptional().map(Long::parseUnsignedLong).orElse(null);
+        Long guildId = context.getDispatch().guildId().toOptional().map(Snowflake::asLong).orElse(null);
         long userId = Snowflake.asLong(context.getDispatch().userId());
         Instant startTime = Instant.ofEpochSecond(context.getDispatch().timestamp());
 

@@ -17,6 +17,7 @@
 
 package discord4j.voice;
 
+import discord4j.common.util.Snowflake;
 import reactor.core.publisher.Mono;
 
 import java.util.Map;
@@ -30,14 +31,14 @@ public class LocalVoiceConnectionRegistry implements VoiceConnectionRegistry {
     private final Map<Long, VoiceConnection> voiceConnections = new ConcurrentHashMap<>();
 
     @Override
-    public Mono<VoiceConnection> getVoiceConnection(long guildId) {
-        return Mono.fromCallable(() -> voiceConnections.get(guildId));
+    public Mono<VoiceConnection> getVoiceConnection(Snowflake guildId) {
+        return Mono.fromCallable(() -> voiceConnections.get(guildId.asLong()));
     }
 
     @SuppressWarnings("ReactiveStreamsNullableInLambdaInTransform")
     @Override
-    public Mono<Void> registerVoiceConnection(long guildId, VoiceConnection voiceConnection) {
-        return Mono.fromCallable(() -> voiceConnections.put(guildId, voiceConnection))
+    public Mono<Void> registerVoiceConnection(Snowflake guildId, VoiceConnection voiceConnection) {
+        return Mono.fromCallable(() -> voiceConnections.put(guildId.asLong(), voiceConnection))
                 .flatMap(previous -> {
                     if (previous != null && !previous.equals(voiceConnection)) {
                         return previous.disconnect();
@@ -47,8 +48,8 @@ public class LocalVoiceConnectionRegistry implements VoiceConnectionRegistry {
     }
 
     @Override
-    public Mono<Void> disconnect(long guildId) {
+    public Mono<Void> disconnect(Snowflake guildId) {
         return getVoiceConnection(guildId)
-                .flatMap(connection -> connection.disconnect().doFinally(s -> voiceConnections.remove(guildId)));
+                .flatMap(connection -> connection.disconnect().doFinally(s -> voiceConnections.remove(guildId.asLong())));
     }
 }

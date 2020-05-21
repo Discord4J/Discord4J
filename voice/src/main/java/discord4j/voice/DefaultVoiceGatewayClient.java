@@ -27,6 +27,7 @@ import discord4j.common.close.CloseStatus;
 import discord4j.common.close.DisconnectBehavior;
 import discord4j.common.retry.ReconnectContext;
 import discord4j.common.retry.ReconnectOptions;
+import discord4j.common.util.Snowflake;
 import discord4j.voice.json.*;
 import discord4j.voice.retry.PartialDisconnectException;
 import discord4j.voice.retry.VoiceGatewayException;
@@ -81,8 +82,8 @@ public class DefaultVoiceGatewayClient {
     private final FluxSink<VoiceGatewayPayload<?>> outboundSink;
     private final FluxSink<VoiceGatewayEvent> eventSink;
 
-    private final long guildId;
-    private final long selfId;
+    private final Snowflake guildId;
+    private final Snowflake selfId;
     private final Function<VoiceGatewayPayload<?>, Mono<ByteBuf>> payloadWriter;
     private final Function<ByteBuf, Mono<? super VoiceGatewayPayload<?>>> payloadReader;
     private final VoiceReactorResources reactorResources;
@@ -183,8 +184,7 @@ public class DefaultVoiceGatewayClient {
                     if (allowResume.get()) {
                         stateChanges.next(VoiceConnection.State.CONNECTING);
                         log.info(format(context, "Attempting to resume"));
-                        outboundSink.next(new Resume(Long.toUnsignedString(guildId),
-                                Long.toUnsignedString(selfId), session.get()));
+                        outboundSink.next(new Resume(guildId.asString(), selfId.asString(), session.get()));
                     }
 
                     Disposable.Composite innerCleanup = Disposables.composite();
@@ -198,8 +198,7 @@ public class DefaultVoiceGatewayClient {
                                     Duration interval = Duration.ofMillis(hello.getData().heartbeatInterval);
                                     heartbeat.start(interval, interval);
                                     log.info(format(context, "Identifying"));
-                                    outboundSink.next(new Identify(Long.toUnsignedString(guildId),
-                                            Long.toUnsignedString(selfId), session.get(),
+                                    outboundSink.next(new Identify(guildId.asString(), selfId.asString(), session.get(),
                                             serverOptions.get().getToken()));
                                 } else if (payload instanceof Ready) {
                                     log.info(format(context, "Waiting for session description"));
@@ -334,12 +333,12 @@ public class DefaultVoiceGatewayClient {
             }
 
             @Override
-            public long getGuildId() {
+            public Snowflake getGuildId() {
                 return guildId;
             }
 
             @Override
-            public Mono<Long> getChannelId() {
+            public Mono<Snowflake> getChannelId() {
                 return onConnectOrDisconnect()
                         .flatMap(s -> s.equals(State.CONNECTED) ? channelRetrieveTask.onRequest() : Mono.empty());
             }

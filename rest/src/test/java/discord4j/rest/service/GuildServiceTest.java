@@ -20,7 +20,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import discord4j.discordjson.json.*;
 import discord4j.rest.RestTests;
 import discord4j.rest.request.Router;
-import discord4j.rest.util.Snowflake;
+import discord4j.common.util.Snowflake;
 import org.junit.Before;
 import org.junit.Test;
 import reactor.util.Logger;
@@ -32,11 +32,11 @@ public class GuildServiceTest {
 
     private static final Logger log = Loggers.getLogger(GuildServiceTest.class);
 
-    private static final long guild = Long.parseUnsignedLong(System.getenv("guild"));
-    private static final long member = Long.parseUnsignedLong(System.getenv("member"));
-    private static final long permanentRole = Long.parseUnsignedLong(System.getenv("permanentRole"));
-    private static final long trashCategory = Long.parseUnsignedLong(System.getenv("trashCategory"));
-    private static final long bannedUser = Long.parseUnsignedLong(System.getenv("bannedUser"));
+    private static final long guild = Snowflake.asLong(System.getenv("guild"));
+    private static final long member = Snowflake.asLong(System.getenv("member"));
+    private static final long permanentRole = Snowflake.asLong(System.getenv("permanentRole"));
+    private static final long trashCategory = Snowflake.asLong(System.getenv("trashCategory"));
+    private static final long bannedUser = Snowflake.asLong(System.getenv("bannedUser"));
 
     private GuildService guildService;
     private ChannelService channelService;
@@ -101,9 +101,9 @@ public class GuildServiceTest {
     @Test
     public void testDeleteGuildChannels() {
         getGuildService().getGuildChannels(guild)
-            .filter(data -> data.parentId().get().map(parentId -> Long.parseUnsignedLong(parentId) == trashCategory).orElse(false))
+            .filter(data -> data.parentId().get().map(parentId -> Snowflake.asLong(parentId) == trashCategory).orElse(false))
             .map(ChannelData::id)
-            .flatMap(id -> getChannelService().deleteChannel(Long.parseUnsignedLong(id), null))
+            .flatMap(id -> getChannelService().deleteChannel(Snowflake.asLong(id), null))
             .then()
             .block();
     }
@@ -209,7 +209,7 @@ public class GuildServiceTest {
         getGuildService().getGuildRoles(guild)
             .filter(role -> role.name().startsWith("test_") || role.name().startsWith("3f"))
             .limitRequest(5)
-            .flatMap(role -> getGuildService().deleteGuildRole(guild, Long.parseUnsignedLong(role.id()), null))
+            .flatMap(role -> getGuildService().deleteGuildRole(guild, Snowflake.asLong(role.id()), null))
             .blockLast();
     }
 

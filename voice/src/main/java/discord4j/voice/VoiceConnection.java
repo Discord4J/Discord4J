@@ -1,5 +1,6 @@
 package discord4j.voice;
 
+import discord4j.common.util.Snowflake;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -55,7 +56,7 @@ public interface VoiceConnection {
      *
      * @return the guild ID of this connection
      */
-    long getGuildId();
+    Snowflake getGuildId();
 
     /**
      * Return the current channel ID associated with this {@link VoiceConnection}, if available from caching sources.
@@ -64,7 +65,7 @@ public interface VoiceConnection {
      * @return a {@link Mono} that, upon subscription, returns the channel ID this connection is currently pointing to,
      * if available
      */
-    Mono<Long> getChannelId();
+    Mono<Snowflake> getChannelId();
 
     /**
      * Instruct a reconnect procedure on this voice connection.

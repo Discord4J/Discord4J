@@ -25,7 +25,7 @@ import discord4j.discordjson.json.RoleData;
 import discord4j.rest.entity.RestRole;
 import discord4j.rest.util.Color;
 import discord4j.rest.util.PermissionSet;
-import discord4j.rest.util.Snowflake;
+import discord4j.common.util.Snowflake;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;

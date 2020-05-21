@@ -3,7 +3,7 @@ package discord4j.core.object.entity.channel;
 import discord4j.discordjson.json.AllowedMentionsData;
 import discord4j.discordjson.json.ImmutableAllowedMentionsData;
 import discord4j.discordjson.possible.Possible;
-import discord4j.rest.util.Snowflake;
+import discord4j.common.util.Snowflake;
 
 import java.util.*;
 import java.util.function.Function;

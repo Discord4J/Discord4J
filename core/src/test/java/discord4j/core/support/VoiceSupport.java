@@ -74,7 +74,7 @@ public class VoiceSupport {
                 .flatMap(e -> Mono.justOrEmpty(e.getMember())
                         .flatMap(Member::getVoiceState)
                         .flatMap(vs -> client.getVoiceConnectionRegistry()
-                                .getVoiceConnection(vs.getGuildId().asLong())
+                                .getVoiceConnection(vs.getGuildId())
                                 .doOnSuccess(vc -> {
                                     if (vc == null) {
                                         log.info("No voice connection to leave!");
@@ -88,7 +88,7 @@ public class VoiceSupport {
                 .flatMap(e -> Mono.justOrEmpty(e.getMember())
                         .flatMap(Member::getVoiceState)
                         .flatMap(vs -> client.getVoiceConnectionRegistry()
-                                .getVoiceConnection(vs.getGuildId().asLong()))
+                                .getVoiceConnection(vs.getGuildId()))
                         .flatMap(VoiceConnection::reconnect)
                         .doFinally(s -> log.info("Reconnect event handle complete")))
                 .then();

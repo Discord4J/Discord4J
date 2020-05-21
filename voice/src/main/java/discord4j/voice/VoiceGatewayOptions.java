@@ -19,6 +19,7 @@ package discord4j.voice;
 
 import discord4j.common.JacksonResources;
 import discord4j.common.retry.ReconnectOptions;
+import discord4j.common.util.Snowflake;
 import reactor.util.retry.RetrySpec;
 
 import java.time.Duration;
@@ -28,8 +29,8 @@ import java.time.Duration;
  */
 public class VoiceGatewayOptions {
 
-    private final long guildId;
-    private final long selfId;
+    private final Snowflake guildId;
+    private final Snowflake selfId;
     private final String session;
     private final VoiceServerOptions voiceServerOptions;
     private final JacksonResources jacksonResources;
@@ -46,7 +47,7 @@ public class VoiceGatewayOptions {
     private final Duration ipDiscoveryTimeout;
     private final RetrySpec ipDiscoveryRetrySpec;
 
-    public VoiceGatewayOptions(long guildId, long selfId, String session, VoiceServerOptions voiceServerOptions,
+    public VoiceGatewayOptions(Snowflake guildId, Snowflake selfId, String session, VoiceServerOptions voiceServerOptions,
                                JacksonResources jacksonResources, VoiceReactorResources reactorResources,
                                ReconnectOptions reconnectOptions, AudioProvider audioProvider,
                                AudioReceiver audioReceiver,
@@ -73,11 +74,11 @@ public class VoiceGatewayOptions {
         this.ipDiscoveryRetrySpec = ipDiscoveryRetrySpec;
     }
 
-    public long getGuildId() {
+    public Snowflake getGuildId() {
         return guildId;
     }
 
-    public long getSelfId() {
+    public Snowflake getSelfId() {
         return selfId;
     }
 

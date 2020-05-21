@@ -34,13 +34,13 @@ public class DefaultVoiceConnectionFactory implements VoiceConnectionFactory {
     @Override
     public Mono<VoiceConnection> create(VoiceGatewayOptions options) {
         return Mono.defer(
-                () -> onHandshake.compute(options.getGuildId(), (id, existing) -> {
+                () -> onHandshake.compute(options.getGuildId().asLong(), (id, existing) -> {
                     if (existing != null) {
                         return existing;
                     }
                     return Mono.fromCallable(() -> new DefaultVoiceGatewayClient(options))
                             .flatMap(client -> client.start(options.getVoiceServerOptions(), options.getSession()))
-                            .doFinally(s -> onHandshake.remove(options.getGuildId()))
+                            .doFinally(s -> onHandshake.remove(options.getGuildId().asLong()))
                             .cache()
                             .publish(mono -> mono.flatMap(vc -> vc.onConnectOrDisconnect().thenReturn(vc)));
                 }));

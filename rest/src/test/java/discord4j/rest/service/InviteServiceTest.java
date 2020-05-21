@@ -16,8 +16,9 @@
  */
 package discord4j.rest.service;
 
-import discord4j.discordjson.json.InviteData;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import discord4j.common.util.Snowflake;
+import discord4j.discordjson.json.InviteData;
 import discord4j.rest.RestTests;
 import discord4j.rest.request.Router;
 import org.junit.Test;
@@ -32,7 +33,7 @@ import static org.junit.Assert.assertEquals;
 public class InviteServiceTest {
 
     private static final String inviteCode = System.getenv("inviteCode");
-    private static final long modifyChannel = Long.parseUnsignedLong(System.getenv("modifyChannel"));
+    private static final long modifyChannel = Snowflake.asLong(System.getenv("modifyChannel"));
 
     private InviteService inviteService = null;
 

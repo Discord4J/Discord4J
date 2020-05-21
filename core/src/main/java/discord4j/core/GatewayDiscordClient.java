@@ -47,7 +47,7 @@ import discord4j.gateway.json.GatewayPayload;
 import discord4j.gateway.json.ShardGatewayPayload;
 import discord4j.rest.RestClient;
 import discord4j.rest.RestResources;
-import discord4j.rest.util.Snowflake;
+import discord4j.common.util.Snowflake;
 import discord4j.voice.LocalVoiceConnectionRegistry;
 import discord4j.voice.VoiceConnection;
 import discord4j.voice.VoiceConnectionFactory;

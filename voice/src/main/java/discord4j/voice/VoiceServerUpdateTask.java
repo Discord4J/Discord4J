@@ -17,6 +17,7 @@
 
 package discord4j.voice;
 
+import discord4j.common.util.Snowflake;
 import reactor.core.publisher.Mono;
 
 /**
@@ -25,5 +26,5 @@ import reactor.core.publisher.Mono;
 @FunctionalInterface
 public interface VoiceServerUpdateTask {
 
-    Mono<VoiceServerOptions> onVoiceServerUpdate(long guildId);
+    Mono<VoiceServerOptions> onVoiceServerUpdate(Snowflake guildId);
 }

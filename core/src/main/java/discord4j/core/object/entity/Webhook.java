@@ -22,7 +22,7 @@ import discord4j.core.retriever.EntityRetrievalStrategy;
 import discord4j.core.spec.WebhookEditSpec;
 import discord4j.core.util.EntityUtil;
 import discord4j.discordjson.json.WebhookData;
-import discord4j.rest.util.Snowflake;
+import discord4j.common.util.Snowflake;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
 

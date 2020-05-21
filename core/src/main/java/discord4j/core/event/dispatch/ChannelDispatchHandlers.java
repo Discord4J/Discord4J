@@ -29,7 +29,7 @@ import discord4j.discordjson.json.gateway.ChannelDelete;
 import discord4j.discordjson.json.gateway.ChannelPinsUpdate;
 import discord4j.discordjson.json.gateway.ChannelUpdate;
 import discord4j.discordjson.possible.Possible;
-import discord4j.rest.util.Snowflake;
+import discord4j.common.util.Snowflake;
 import discord4j.store.api.primitive.LongObjStore;
 import reactor.core.publisher.Mono;
 

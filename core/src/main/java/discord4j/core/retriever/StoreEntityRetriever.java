@@ -23,7 +23,7 @@ import discord4j.core.object.entity.channel.GuildChannel;
 import discord4j.core.state.StateView;
 import discord4j.core.util.EntityUtil;
 import discord4j.gateway.intent.Intent;
-import discord4j.rest.util.Snowflake;
+import discord4j.common.util.Snowflake;
 import discord4j.store.api.util.LongLongTuple2;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;

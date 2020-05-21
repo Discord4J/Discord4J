@@ -17,6 +17,7 @@
 
 package discord4j.voice;
 
+import discord4j.common.util.Snowflake;
 import reactor.core.publisher.Mono;
 
 /**
@@ -25,5 +26,5 @@ import reactor.core.publisher.Mono;
 @FunctionalInterface
 public interface VoiceDisconnectTask {
 
-    Mono<Void> onDisconnect(Long guildId);
+    Mono<Void> onDisconnect(Snowflake guildId);
 }

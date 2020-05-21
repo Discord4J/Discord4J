@@ -24,7 +24,7 @@ import discord4j.core.util.ImageUtil;
 import discord4j.discordjson.json.DMCreateRequest;
 import discord4j.discordjson.json.UserData;
 import discord4j.rest.util.Image;
-import discord4j.rest.util.Snowflake;
+import discord4j.common.util.Snowflake;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
 
