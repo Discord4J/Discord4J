@@ -389,7 +389,7 @@ class GuildDispatchHandlers {
                 .find(guildId)
                 .map(guild -> GuildData.builder()
                         .from(guild)
-                        .members(ListUtil.addAll(guild.members(), members.stream()
+                        .members(ListUtil.addAllDistinct(guild.members(), members.stream()
                                 .map(data -> data.user().id())
                                 .collect(Collectors.toList())))
                         .build())

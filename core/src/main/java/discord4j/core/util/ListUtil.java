@@ -17,10 +17,7 @@
 
 package discord4j.core.util;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.Predicate;
 
 public class ListUtil {
@@ -31,10 +28,10 @@ public class ListUtil {
         return Collections.unmodifiableList(list);
     }
 
-    public static <T> List<T> addAll(List<T> source, List<T> elements) {
-        List<T> list = new ArrayList<>(source);
-        list.addAll(elements);
-        return Collections.unmodifiableList(list);
+    public static <T> Collection<T> addAllDistinct(List<T> source, List<T> elements) {
+        Set<T> set = new LinkedHashSet<>(source);
+        set.addAll(elements);
+        return Collections.unmodifiableCollection(set);
     }
 
     public static <T> List<T> remove(List<T> source, Predicate<T> filter) {
