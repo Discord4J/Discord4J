@@ -18,11 +18,15 @@
 package discord4j.core;
 
 import discord4j.gateway.DefaultGatewayClient;
+import discord4j.gateway.GatewayClient;
 import discord4j.gateway.GatewayOptions;
 import reactor.core.publisher.Mono;
 import reactor.util.Logger;
 import reactor.util.Loggers;
 
+/**
+ * Advanced example showcasing how to customize the set of options passed to a potentially custom {@link GatewayClient}.
+ */
 public class ExampleCustomOptionsBot {
 
     static class CustomOptions extends GatewayOptions {

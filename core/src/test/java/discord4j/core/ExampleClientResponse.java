@@ -24,6 +24,10 @@ import discord4j.rest.response.ResponseFunction;
 import discord4j.rest.route.Routes;
 import reactor.core.publisher.Mono;
 
+/**
+ * An example bot showcasing how to implement global handlers against some API responses. See
+ * {@link DiscordClientBuilder#onClientResponse(ResponseFunction)} docs for more details.
+ */
 public class ExampleClientResponse {
 
     public static void main(String[] args) {

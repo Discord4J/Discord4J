@@ -25,23 +25,26 @@ public class ExampleAllowedMentions {
     private static Mono<Message> sendAllowedMentionsMessage(MessageCreateEvent event) {
         final User author = event.getMessage().getAuthor().get();
         return event.getMessage().getChannel()
-                .flatMap(messageChannel -> messageChannel.createMessage(messageCreateSpec -> {
-                    messageCreateSpec.setContent("Hello " + author.getMention() + ", get pinged!");
-                    messageCreateSpec.setAllowedMentions(AllowedMentions.builder()
-                            .allowUser(author.getId())
-                            .build());
-                }).thenReturn(messageChannel))
-                .flatMap(messageChannel -> messageChannel.createMessage(messageCreateSpec -> {
-                    messageCreateSpec.setContent("Hello " + author.getMention() + ", get (not) pinged!");
-                    messageCreateSpec.setAllowedMentions(AllowedMentions.builder().build());
-                }).thenReturn(messageChannel))
-                .flatMap(messageChannel -> messageChannel.createMessage(messageCreateSpec -> {
-                    messageCreateSpec.setContent("This is invalid")
-                            .setAllowedMentions(AllowedMentions.builder()
-                                    .parseType(AllowedMentions.Type.USER)
+                .flatMap(channel ->
+                        channel.createMessage(spec -> {
+                            spec.setContent("Hello " + author.getMention() + ", get pinged!");
+                            spec.setAllowedMentions(AllowedMentions.builder()
                                     .allowUser(author.getId())
                                     .build());
-                }));
+                        }).thenReturn(channel))
+                .flatMap(channel ->
+                        channel.createMessage(spec -> {
+                            spec.setContent("Hello " + author.getMention() + ", get (not) pinged!");
+                            spec.setAllowedMentions(AllowedMentions.builder().build());
+                        }).thenReturn(channel))
+                .flatMap(channel ->
+                        channel.createMessage(spec -> {
+                            spec.setContent("This is invalid")
+                                    .setAllowedMentions(AllowedMentions.builder()
+                                            .parseType(AllowedMentions.Type.USER)
+                                            .allowUser(author.getId())
+                                            .build());
+                        }));
     }
 
 }
