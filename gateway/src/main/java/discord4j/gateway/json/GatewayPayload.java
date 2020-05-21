@@ -16,6 +16,7 @@
  */
 package discord4j.gateway.json;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import discord4j.discordjson.json.gateway.*;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -83,6 +84,11 @@ public class GatewayPayload<T extends PayloadData> {
     @Nullable
     public T getData() {
         return data;
+    }
+
+    @JsonIgnore
+    public boolean isDataPresent() {
+        return data != null;
     }
 
     @Nullable
