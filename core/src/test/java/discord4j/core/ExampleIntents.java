@@ -1,9 +1,9 @@
 package discord4j.core;
 
+import discord4j.common.util.Snowflake;
 import discord4j.core.object.entity.Member;
 import discord4j.gateway.intent.Intent;
 import discord4j.gateway.intent.IntentSet;
-import discord4j.rest.util.Snowflake;
 
 import java.util.List;
 
