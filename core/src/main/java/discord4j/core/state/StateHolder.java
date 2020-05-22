@@ -45,8 +45,6 @@ import reactor.util.Loggers;
  */
 public final class StateHolder {
 
-    public static final String SELF_ID_PARAMETER_KEY = "discord4j.core.selfId";
-
     private static final Logger log = Loggers.getLogger(StateHolder.class);
 
     private final StoreService storeService;
