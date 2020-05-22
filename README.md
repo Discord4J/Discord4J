@@ -11,7 +11,7 @@ Discord4J is a fast, powerful, unopinionated, reactive library to enable quick a
 
 ## 🏃 Quick Example
 
-In this example, whenever an user sends a `!ping` message the bot will immediately respond with `Pong!`.
+In this example, whenever a user sends a `!ping` message the bot will immediately respond with `Pong!`.
 
 ```java
 public final class ExampleBot {
@@ -60,7 +60,7 @@ repositories {
 }
 
 dependencies {
-  implementation 'com.discord4j:discord4j-core:3.1.0.RC1'
+  implementation 'com.discord4j:discord4j-core:3.1.0-SNAPSHOT'
 }
 ```
 
@@ -71,7 +71,7 @@ repositories {
 }
 
 dependencies {
-  implementation("com.discord4j:discord4j-core:3.1.0.RC1")
+  implementation("com.discord4j:discord4j-core:3.1.0-SNAPSHOT")
 }
 ```
 
@@ -81,7 +81,7 @@ dependencies {
   <dependency>
     <groupId>com.discord4j</groupId>
     <artifactId>discord4j-core</artifactId>
-    <version>3.1.0.RC1</version>
+    <version>3.1.0-SNAPSHOT</version>
   </dependency>
 </dependencies>
 ```
@@ -89,7 +89,7 @@ dependencies {
 ### SBT
 ```scala
 libraryDependencies ++= Seq(
-  "com.discord4j" % "discord4j-core" % "3.1.0.RC1"
+  "com.discord4j" % "discord4j-core" % "3.1.0-SNAPSHOT"
 )
 ```
 

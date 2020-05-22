@@ -11,7 +11,7 @@ Discord4J is a fast, powerful, unopinionated, reactive library to enable quick a
 
 ## 🏃 Quick Example
 
-In this example, whenever an user sends a `!ping` message the bot will immediately respond with `Pong!`.
+In this example, whenever a user sends a `!ping` message the bot will immediately respond with `Pong!`.
 
 ```java
 public final class ExampleBot {
