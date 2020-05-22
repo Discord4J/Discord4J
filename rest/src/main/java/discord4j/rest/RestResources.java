@@ -19,7 +19,9 @@ package discord4j.rest;
 
 import discord4j.common.JacksonResources;
 import discord4j.common.ReactorResources;
+import discord4j.common.util.Snowflake;
 import discord4j.rest.request.Router;
+import discord4j.rest.util.DiscordUtils;
 
 /**
  * A set of resources required for key Discord4J features like entity manipulation and API communication.
@@ -30,6 +32,7 @@ public class RestResources {
     private final ReactorResources reactorResources;
     private final JacksonResources jacksonResources;
     private final Router router;
+    private final long selfId;
 
     /**
      * Create a {@link RestResources} instance with the given resources.
@@ -45,6 +48,7 @@ public class RestResources {
         this.reactorResources = reactorResources;
         this.jacksonResources = jacksonResources;
         this.router = router;
+        this.selfId = DiscordUtils.getSelfId(token);
     }
 
     /**
@@ -81,5 +85,14 @@ public class RestResources {
      */
     public Router getRouter() {
         return router;
+    }
+
+    /**
+     * Gets the bot user's ID.
+     *
+     * @return The bot user's ID.
+     */
+    public Snowflake getSelfId() {
+        return Snowflake.of(selfId);
     }
 }

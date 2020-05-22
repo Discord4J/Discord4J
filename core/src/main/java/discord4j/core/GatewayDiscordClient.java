@@ -21,6 +21,7 @@ package discord4j.core;
 import discord4j.common.JacksonResources;
 import discord4j.common.LogUtil;
 import discord4j.common.ReactorResources;
+import discord4j.common.util.Snowflake;
 import discord4j.core.event.EventDispatcher;
 import discord4j.core.event.domain.Event;
 import discord4j.core.object.Invite;
@@ -47,7 +48,6 @@ import discord4j.gateway.json.GatewayPayload;
 import discord4j.gateway.json.ShardGatewayPayload;
 import discord4j.rest.RestClient;
 import discord4j.rest.RestResources;
-import discord4j.common.util.Snowflake;
 import discord4j.voice.LocalVoiceConnectionRegistry;
 import discord4j.voice.VoiceConnection;
 import discord4j.voice.VoiceConnectionFactory;
@@ -59,10 +59,8 @@ import reactor.core.publisher.MonoProcessor;
 import reactor.util.Logger;
 import reactor.util.Loggers;
 
-import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
-import java.util.Base64;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
@@ -95,7 +93,6 @@ public class GatewayDiscordClient implements EntityRetriever {
     private final VoiceConnectionFactory voiceConnectionFactory;
     private final VoiceConnectionRegistry voiceConnectionRegistry;
     private final EntityRetriever entityRetriever;
-    private final long selfId;
 
     public GatewayDiscordClient(DiscordClient discordClient, GatewayResources gatewayResources,
                                 MonoProcessor<Void> closeProcessor, GatewayClientGroup gatewayClientGroup,
@@ -108,8 +105,6 @@ public class GatewayDiscordClient implements EntityRetriever {
         this.voiceConnectionFactory = voiceConnectionFactory;
         this.voiceConnectionRegistry = new LocalVoiceConnectionRegistry();
         this.entityRetriever = entityRetrievalStrategy.apply(this);
-        this.selfId = Long.parseLong(new String(Base64.getDecoder()
-                .decode(discordClient.getCoreResources().getToken().split("\\.")[0]), StandardCharsets.UTF_8));
     }
 
     /**
@@ -256,7 +251,7 @@ public class GatewayDiscordClient implements EntityRetriever {
      * @return The bot user's ID.
      */
     public Snowflake getSelfId() {
-        return Snowflake.of(selfId);
+        return getCoreResources().getSelfId();
     }
 
     /**
