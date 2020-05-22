@@ -34,6 +34,7 @@ import discord4j.core.retriever.EntityRetriever;
 import discord4j.core.shard.GatewayBootstrap;
 import discord4j.core.spec.GuildCreateSpec;
 import discord4j.core.spec.UserEditSpec;
+import discord4j.core.util.ValidationUtil;
 import discord4j.discordjson.json.EmojiData;
 import discord4j.discordjson.json.GuildData;
 import discord4j.discordjson.json.GuildUpdateData;
@@ -485,6 +486,11 @@ public class GatewayDiscordClient implements EntityRetriever {
      * the {@link Flux}.
      */
     public Flux<Member> requestMembers(RequestGuildMembers request) {
+        try {
+            ValidationUtil.validateRequestGuildMembers(request, gatewayResources.getIntents());
+        } catch (Throwable t) {
+            return Flux.error(t);
+        }
         Snowflake guildId = Snowflake.of(request.guildId());
         int shardId = gatewayClientGroup.computeShardIndex(guildId);
         String nonce = String.valueOf(System.nanoTime());
