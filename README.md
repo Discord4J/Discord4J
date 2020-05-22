@@ -174,7 +174,36 @@ client.withGateway {
 }
 ```
 
-## 🎵 Voice and Music
+## 📚 Examples
+
+### 📑 Message Embeds
+
+<img align="right" src="https://user-images.githubusercontent.com/6114565/82622174-b44a5900-9ba2-11ea-9bc1-2f558958f4cb.png" width=50%>
+
+```java
+// IMAGE_URL = https://cdn.betterttv.net/emote/55028cd2135896936880fdd7/3x
+// ANY_URL = https://www.youtube.com/watch?v=5zwY50-necw
+final MessageChannel channel = ...
+channel.createEmbed(spec -> {
+  spec.setColor(Color.RED);
+  spec.setAuthor("setAuthor", ANY_URL, IMAGE_URL);
+  spec.setImage(IMAGE_URL);
+  spec.setTitle("setTitle/setUrl");
+  spec.setUrl(ANY_URL);
+  spec.setDescription("setDescription\n" +
+    "big D: is setImage\n" +
+    "small D: is setThumbnail\n" +
+    "<-- setColor");
+  spec.addField("addField", "inline = true", true);
+  spec.addField("addFIeld", "inline = true", true);
+  spec.addField("addFile", "inline = false", false);
+  spec.setThumbnail(IMAGE_URL);
+  spec.setFooter("setFooter --> setTimestamp", IMAGE_URL);
+  spec.setTimestamp(Instant.now());
+}).block();
+```
+
+### 🎵 Voice and Music
 
 Discord4J provides full support for voice connections and the ability to send audio to other users connected to the same channel. Discord4J can accept any [Opus](https://opus-codec.org/) audio source with [LavaPlayer](https://github.com/sedmelluq/lavaplayer) being the preferred solution for downloading and encoding audio from YouTube, SoundCloud, and other providers.
 
