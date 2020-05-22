@@ -64,6 +64,15 @@ public class ShardInfo {
         return count;
     }
 
+    /**
+     * Return this {@link ShardInfo} object in array representation: [index, count]
+     *
+     * @return an array with 2 elements, {@code index} and {@code count}
+     */
+    public int[] asArray() {
+        return new int[]{index, count};
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {

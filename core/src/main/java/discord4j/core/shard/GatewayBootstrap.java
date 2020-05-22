@@ -119,7 +119,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
     private Function<ShardInfo, StatusUpdate> initialPresence = shard -> null;
     private Function<ShardInfo, SessionInfo> resumeOptions = shard -> null;
     private Possible<IntentSet> intents = Possible.absent();
-    private boolean guildSubscriptions = true;
+    private Boolean guildSubscriptions = null;
     private Function<GatewayDiscordClient, Mono<Void>> destroyHandler = shutdownDestroyHandler();
     private PayloadReader payloadReader = null;
     private PayloadWriter payloadWriter = null;
@@ -793,12 +793,12 @@ public class GatewayBootstrap<O extends GatewayOptions> {
         return Mono.deferWithContext(ctx ->
                 Mono.<ShardInfo>create(sink -> {
                     StatusUpdate initial = Optional.ofNullable(b.initialPresence.apply(shard)).orElse(null);
-                    IdentifyOptions identify = new IdentifyOptions(shard, initial, b.intents, b.guildSubscriptions);
-                    SessionInfo resume = b.resumeOptions.apply(shard);
-                    if (resume != null) {
-                        identify.setResumeSessionId(resume.getId());
-                        identify.setResumeSequence(resume.getSequence());
-                    }
+                    IdentifyOptions identify = IdentifyOptions.builder(shard)
+                            .initialStatus(initial)
+                            .intents(b.intents.toOptional().orElse(null))
+                            .guildSubscriptions(b.guildSubscriptions)
+                            .resumeSession(b.resumeOptions.apply(shard))
+                            .build();
                     PayloadTransformer limiter = shardCoordinator.getIdentifyLimiter(shard,
                             b.shardingStrategy.getShardingFactor());
                     Disposable.Composite forCleanup = Disposables.composite();
@@ -848,7 +848,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                                         return shardCoordinator.publishConnected(shard)
                                                 .doFinally(__ -> sink.success(shard));
                                     case DISCONNECTED_RESUME:
-                                        session = new SessionInfo(gatewayClient.getSessionId(),
+                                        session = SessionInfo.create(gatewayClient.getSessionId(),
                                                 gatewayClient.getSequence());
                                     case DISCONNECTED:
                                         log.info(format(ctx, "Shard disconnected"));

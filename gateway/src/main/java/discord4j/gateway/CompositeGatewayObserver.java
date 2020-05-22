@@ -28,9 +28,9 @@ class CompositeGatewayObserver implements GatewayObserver {
     }
 
     @Override
-    public void onStateChange(ConnectionObserver.State newState, IdentifyOptions identifyOptions) {
+    public void onStateChange(ConnectionObserver.State newState, GatewayClient gatewayClient) {
         for (GatewayObserver observer : observers) {
-            observer.onStateChange(newState, identifyOptions);
+            observer.onStateChange(newState, gatewayClient);
         }
     }
 

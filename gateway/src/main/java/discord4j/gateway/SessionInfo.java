@@ -28,12 +28,16 @@ import java.util.Objects;
 public class SessionInfo {
 
     private final String id;
-    private final Integer sequence;
+    private final int sequence;
 
-    @JsonCreator
-    public SessionInfo(@JsonProperty("id") String id, @JsonProperty("sequence") Integer sequence) {
-        this.id = id;
+    private SessionInfo(String id, int sequence) {
+        this.id = Objects.requireNonNull(id);
         this.sequence = sequence;
+    }
+
+    @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
+    public static SessionInfo create(@JsonProperty("id") String id, @JsonProperty("sequence") int sequence) {
+        return new SessionInfo(id, sequence);
     }
 
     /**
@@ -50,7 +54,7 @@ public class SessionInfo {
      *
      * @return the session sequence
      */
-    public Integer getSequence() {
+    public int getSequence() {
         return sequence;
     }
 

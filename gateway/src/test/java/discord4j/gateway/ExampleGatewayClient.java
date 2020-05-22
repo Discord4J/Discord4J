@@ -21,7 +21,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import discord4j.common.JacksonResources;
 import discord4j.common.ReactorResources;
 import discord4j.common.retry.ReconnectOptions;
-import discord4j.discordjson.possible.Possible;
 import discord4j.gateway.intent.IntentSet;
 import discord4j.gateway.payload.JacksonPayloadReader;
 import discord4j.gateway.payload.JacksonPayloadWriter;
@@ -49,12 +48,9 @@ public class ExampleGatewayClient {
 
         ReconnectOptions reconnectOptions = ReconnectOptions.create();
 
-        IdentifyOptions identifyOptions = new IdentifyOptions(
-                ShardInfo.create(0, 1),
-                null,
-                Possible.of(IntentSet.of(GUILDS, GUILD_MESSAGES, GUILD_MESSAGE_REACTIONS, GUILD_VOICE_STATES)),
-                false
-        );
+        IdentifyOptions identifyOptions = IdentifyOptions.builder(0, 1)
+                .intents(IntentSet.of(GUILDS, GUILD_MESSAGES, GUILD_MESSAGE_REACTIONS, GUILD_VOICE_STATES))
+                .build();
 
         GatewayOptions gatewayOptions = new GatewayOptions(
                 System.getenv("token"),

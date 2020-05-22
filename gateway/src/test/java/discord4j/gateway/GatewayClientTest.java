@@ -19,10 +19,8 @@ package discord4j.gateway;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import discord4j.common.JacksonResources;
 import discord4j.common.retry.ReconnectOptions;
-import discord4j.discordjson.json.gateway.ImmutableStatusUpdate;
 import discord4j.discordjson.json.gateway.MessageCreate;
 import discord4j.discordjson.json.gateway.Ready;
-import discord4j.discordjson.possible.Possible;
 import discord4j.gateway.limiter.PayloadTransformer;
 import discord4j.gateway.limiter.RateLimitTransformer;
 import discord4j.gateway.payload.JacksonPayloadReader;
@@ -39,7 +37,6 @@ import java.io.IOException;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 
 public class GatewayClientTest {
@@ -61,7 +58,7 @@ public class GatewayClientTest {
                 reader,
                 writer,
                 reconnectOptions,
-                new IdentifyOptions(ShardInfo.create(0, 1), null, Possible.absent(), true),
+                IdentifyOptions.create(0, 1),
                 GatewayObserver.NOOP_LISTENER,
                 new RateLimitTransformer(1, Duration.ofSeconds(6)),
                 1
@@ -124,8 +121,8 @@ public class GatewayClientTest {
                     new JacksonPayloadReader(mapper),
                     new JacksonPayloadWriter(mapper),
                     reconnectOptions,
-                    new IdentifyOptions(ShardInfo.create(i, shardCount), ImmutableStatusUpdate.of(Optional.empty(), Optional.empty(), "invisible", false), Possible.absent(), true),
-                    (s, o) -> {
+                    IdentifyOptions.create(i, shardCount),
+                    (s, c) -> {
                         if (s.equals(GatewayObserver.CONNECTED)) {
                             next.countDown();
                         }

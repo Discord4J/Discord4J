@@ -25,7 +25,7 @@ import reactor.netty.ConnectionObserver;
 @FunctionalInterface
 public interface GatewayObserver {
 
-    GatewayObserver NOOP_LISTENER = (newState, identifyOptions) -> {};
+    GatewayObserver NOOP_LISTENER = (newState, client) -> {};
 
     static GatewayObserver emptyListener() {
         return NOOP_LISTENER;
@@ -34,16 +34,16 @@ public interface GatewayObserver {
     /**
      * React on websocket state change.
      *
-     * @param newState The new State.
-     * @param identifyOptions The current shard session and sequence.
+     * @param newState the new state
+     * @param client the gateway client observing this change
      */
-    void onStateChange(ConnectionObserver.State newState, IdentifyOptions identifyOptions);
+    void onStateChange(ConnectionObserver.State newState, GatewayClient client);
 
     /**
      * Chain together another {@link GatewayObserver}.
      *
-     * @param other The next {@link GatewayObserver}.
-     * @return A new composite {@link GatewayObserver}.
+     * @param other the next {@link GatewayObserver}
+     * @return a new composite {@link GatewayObserver}
      */
     default GatewayObserver then(GatewayObserver other) {
         return CompositeGatewayObserver.compose(this, other);

@@ -175,10 +175,10 @@ public class DefaultGatewayClient implements GatewayClient {
 
                     sessionHandler = new GatewayWebsocketHandler(receiverSink, outFlux, context);
 
-                    Integer resumeSequence = identifyOptions.getResumeSequence();
-                    if (resumeSequence != null && resumeSequence > 0) {
-                        this.sequence.set(identifyOptions.getResumeSequence());
-                        this.sessionId.set(identifyOptions.getResumeSessionId());
+                    SessionInfo resumeSession = identifyOptions.getResumeSession().orElse(null);
+                    if (resumeSession != null) {
+                        this.sequence.set(resumeSession.getSequence());
+                        this.sessionId.set(resumeSession.getId());
                     } else {
                         allowResume.set(false);
                     }
@@ -197,9 +197,8 @@ public class DefaultGatewayClient implements GatewayClient {
                                     state = GatewayObserver.RETRY_SUCCEEDED;
                                 }
                                 reconnectContext.reset();
-                                identifyOptions.setResumeSessionId(sessionId.get());
                                 allowResume.set(true);
-                                notifyObserver(state, identifyOptions);
+                                notifyObserver(state);
                             })
                             .then();
 
@@ -280,7 +279,7 @@ public class DefaultGatewayClient implements GatewayClient {
                             .doOnCancel(() -> sessionHandler.close())
                             .then();
                 })
-                .subscriberContext(ctx -> ctx.put(LogUtil.KEY_SHARD_ID, identifyOptions.getShardIndex()))
+                .subscriberContext(ctx -> ctx.put(LogUtil.KEY_SHARD_ID, identifyOptions.getShardInfo().getIndex()))
                 .retryWhen(retryFactory())
                 .then(Mono.defer(() -> disconnectNotifier.then()))
                 .doOnSubscribe(s -> {
@@ -309,8 +308,7 @@ public class DefaultGatewayClient implements GatewayClient {
     private GatewayPayload<?> updateSequence(GatewayPayload<?> payload) {
         if (payload.getSequence() != null) {
             sequence.set(payload.getSequence());
-            identifyOptions.setResumeSequence(sequence.get());
-            notifyObserver(GatewayObserver.SEQUENCE, identifyOptions);
+            notifyObserver(GatewayObserver.SEQUENCE);
         }
         return payload;
     }
@@ -332,15 +330,14 @@ public class DefaultGatewayClient implements GatewayClient {
                         if (!allowResume.get() || !canResume(retryContext.exception())) {
                             dispatchSink.next(GatewayStateChange.retryStarted(backoff));
                             allowResume.set(false);
-                            notifyObserver(GatewayObserver.RETRY_STARTED, identifyOptions);
+                            notifyObserver(GatewayObserver.RETRY_STARTED);
                         } else {
                             dispatchSink.next(GatewayStateChange.retryStartedResume(backoff));
-                            notifyObserver(GatewayObserver.RETRY_RESUME_STARTED, identifyOptions);
+                            notifyObserver(GatewayObserver.RETRY_RESUME_STARTED);
                         }
                     } else {
                         dispatchSink.next(GatewayStateChange.retryFailed(attempt - 1, backoff));
-                        // TODO: add attempt/backoff values to GatewayObserver
-                        notifyObserver(GatewayObserver.RETRY_FAILED, identifyOptions);
+                        notifyObserver(GatewayObserver.RETRY_FAILED);
                         allowResume.set(false);
                     }
                     retryContext.applicationContext().next();
@@ -401,13 +398,13 @@ public class DefaultGatewayClient implements GatewayClient {
 
             if (behavior.getAction() == DisconnectBehavior.Action.STOP_ABRUPTLY) {
                 dispatchSink.next(GatewayStateChange.disconnectedResume());
-                notifyObserver(GatewayObserver.DISCONNECTED_RESUME, identifyOptions);
+                notifyObserver(GatewayObserver.DISCONNECTED_RESUME);
             } else if (behavior.getAction() == DisconnectBehavior.Action.STOP) {
                 dispatchSink.next(GatewayStateChange.disconnected());
                 allowResume.set(false);
                 sequence.set(0);
                 sessionId.set("");
-                notifyObserver(GatewayObserver.DISCONNECTED, identifyOptions);
+                notifyObserver(GatewayObserver.DISCONNECTED);
             }
 
             switch (behavior.getAction()) {
@@ -432,12 +429,12 @@ public class DefaultGatewayClient implements GatewayClient {
     private ConnectionObserver getObserver(Context context) {
         return (connection, newState) -> {
             log.debug(format(context, "{} {}"), newState, connection);
-            notifyObserver(newState, identifyOptions);
+            notifyObserver(newState);
         };
     }
 
-    private void notifyObserver(ConnectionObserver.State state, IdentifyOptions options) {
-        observer.onStateChange(state, options);
+    private void notifyObserver(ConnectionObserver.State state) {
+        observer.onStateChange(state, this);
     }
 
     @Override
@@ -498,7 +495,7 @@ public class DefaultGatewayClient implements GatewayClient {
 
     @Override
     public int getShardCount() {
-        return identifyOptions.getShardCount();
+        return identifyOptions.getShardInfo().getCount();
     }
 
     @Override
