@@ -102,7 +102,6 @@ public class RestEntityRetriever implements EntityRetriever {
                 rest.getUserService().getCurrentUserGuilds(params);
         return PaginationUtil.paginateAfter(makeRequest, data -> Snowflake.asLong(data.id()), 0L, 100)
                 .map(UserGuildData::id)
-                //.filter(id -> (id >> 22) % getConfig().getShardCount() == getConfig().getShardIndex())
                 .flatMap(id -> rest.getGuildService().getGuild(Snowflake.asLong(id)))
                 .map(this::toGuildData)
                 .map(data -> new Guild(gateway, data));

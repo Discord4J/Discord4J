@@ -486,7 +486,7 @@ public class GatewayDiscordClient implements EntityRetriever {
      */
     public Flux<Member> requestMembers(RequestGuildMembers request) {
         Snowflake guildId = Snowflake.of(request.guildId());
-        int shardId = (int) ((guildId.asLong() >> 22) % gatewayClientGroup.getShardCount());
+        int shardId = gatewayClientGroup.computeShardIndex(guildId);
         String nonce = String.valueOf(System.nanoTime());
         Supplier<Flux<Member>> incomingMembers = () -> gatewayClientGroup.find(shardId)
                 .map(gatewayClient -> gatewayClient.dispatch()

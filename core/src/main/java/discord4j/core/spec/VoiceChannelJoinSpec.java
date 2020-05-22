@@ -189,7 +189,7 @@ public class VoiceChannelJoinSpec implements Spec<Mono<VoiceConnection>> {
         final Snowflake guildId = voiceChannel.getGuildId();
         final Snowflake channelId = voiceChannel.getId();
         final GatewayClientGroup clientGroup = voiceChannel.getClient().getGatewayClientGroup();
-        final int shardId = (int) ((voiceChannel.getGuildId().asLong() >> 22) % clientGroup.getShardCount());
+        final int shardId = clientGroup.computeShardIndex(guildId);
         final Mono<Void> sendVoiceStateUpdate = clientGroup.unicast(ShardGatewayPayload.voiceStateUpdate(
                 VoiceStateUpdate.builder()
                         .guildId(guildId.asString())

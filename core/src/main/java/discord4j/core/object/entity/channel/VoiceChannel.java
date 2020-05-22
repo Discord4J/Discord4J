@@ -123,7 +123,7 @@ public final class VoiceChannel extends BaseCategorizableChannel {
      */
     public Mono<Void> sendConnectVoiceState(final boolean selfMute, final boolean selfDeaf) {
         final GatewayClientGroup clientGroup = getClient().getGatewayClientGroup();
-        final int shardId = (int) ((getGuildId().asLong() >> 22) % clientGroup.getShardCount());
+        final int shardId = clientGroup.computeShardIndex(getGuildId());
         return clientGroup.unicast(ShardGatewayPayload.voiceStateUpdate(
                 VoiceStateUpdate.builder()
                         .guildId(getGuildId().asString())
@@ -144,7 +144,7 @@ public final class VoiceChannel extends BaseCategorizableChannel {
      */
     public Mono<Void> sendDisconnectVoiceState() {
         final GatewayClientGroup clientGroup = getClient().getGatewayClientGroup();
-        final int shardId = (int) ((getGuildId().asLong() >> 22) % clientGroup.getShardCount());
+        final int shardId = clientGroup.computeShardIndex(getGuildId());
         return clientGroup.unicast(ShardGatewayPayload.voiceStateUpdate(
                 VoiceStateUpdate.builder()
                         .guildId(getGuildId().asString())
