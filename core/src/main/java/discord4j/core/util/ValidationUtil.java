@@ -7,7 +7,7 @@ import discord4j.gateway.intent.IntentSet;
 
 public class ValidationUtil {
     /**
-     * Throws if the request is not invalid given the current intents.
+     * Throws if the request is invalid given the current intents.
      *
      * @param request The request to validate
      * @param possibleIntents The current intents
