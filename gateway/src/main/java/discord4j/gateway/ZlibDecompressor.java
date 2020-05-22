@@ -61,8 +61,8 @@ public class ZlibDecompressor {
                     }
                     ByteArrayOutputStream out = new ByteArrayOutputStream();
                     try (InflaterOutputStream inflater = new InflaterOutputStream(out, context)) {
-                        inflater.write(ByteBufUtil.getBytes(buf));
-                        return allocator.buffer().writeBytes(out.toByteArray());
+                        inflater.write(ByteBufUtil.getBytes(buf, buf.readerIndex(), buf.readableBytes(), false));
+                        return allocator.buffer().writeBytes(out.toByteArray()).asReadOnly();
                     } catch (IOException e) {
                         throw Exceptions.propagate(e);
                     }

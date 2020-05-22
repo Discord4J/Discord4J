@@ -18,6 +18,7 @@
 package discord4j.voice;
 
 import discord4j.common.annotations.Experimental;
+import discord4j.common.util.Snowflake;
 import reactor.core.publisher.Mono;
 
 /**
@@ -32,7 +33,7 @@ public interface VoiceConnectionRegistry {
      * @param guildId the guild ID to fetch the current voice connection
      * @return a {@link Mono} of {@link VoiceConnection} for the given guild if present, empty otherwise.
      */
-    Mono<VoiceConnection> getVoiceConnection(long guildId);
+    Mono<VoiceConnection> getVoiceConnection(Snowflake guildId);
 
     /**
      * Register a {@link VoiceConnection} for a given {@code guildId}, replacing any existing one.
@@ -42,7 +43,7 @@ public interface VoiceConnectionRegistry {
      * @return a {@link Mono} indicating completion of the registration process, if an error happens it is emitted
      * through the {@link Mono}.
      */
-    Mono<Void> registerVoiceConnection(long guildId, VoiceConnection voiceConnection);
+    Mono<Void> registerVoiceConnection(Snowflake guildId, VoiceConnection voiceConnection);
 
     /**
      * Disconnect a {@link VoiceConnection} for given {@code guildId} and remove it from the registry. If no connection
@@ -52,5 +53,5 @@ public interface VoiceConnectionRegistry {
      * @return a {@link Mono} indicating completion of the disconnection process, if an error happens it is emitted
      * through the {@link Mono}.
      */
-    Mono<Void> disconnect(long guildId);
+    Mono<Void> disconnect(Snowflake guildId);
 }

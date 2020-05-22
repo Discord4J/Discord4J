@@ -21,13 +21,23 @@ import discord4j.common.ReactorResources;
 import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
 
+import java.util.function.Supplier;
+
+/**
+ * Provides an extra level of configuration for {@link ReactorResources}, tailored for the Gateway operations.
+ * <p>
+ * Allows customizing the {@link Scheduler} used to send gateway payloads.
+ */
 public class GatewayReactorResources extends ReactorResources {
+
+    protected static final Supplier<Scheduler> DEFAULT_PAYLOAD_SENDER_SCHEDULER = () ->
+            Schedulers.newSingle("d4j-gateway", true);
 
     private final Scheduler payloadSenderScheduler;
 
     public GatewayReactorResources(ReactorResources parent) {
         super(parent.getHttpClient(), parent.getTimerTaskScheduler(), parent.getBlockingTaskScheduler());
-        this.payloadSenderScheduler = Schedulers.newSingle("d4j-gateway", true);
+        this.payloadSenderScheduler = DEFAULT_PAYLOAD_SENDER_SCHEDULER.get();
     }
 
     public GatewayReactorResources(ReactorResources parent, Scheduler payloadSenderScheduler) {

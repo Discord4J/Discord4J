@@ -24,7 +24,7 @@ import discord4j.core.util.EntityUtil;
 import discord4j.discordjson.json.*;
 import discord4j.rest.RestClient;
 import discord4j.rest.util.PaginationUtil;
-import discord4j.rest.util.Snowflake;
+import discord4j.common.util.Snowflake;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -102,7 +102,6 @@ public class RestEntityRetriever implements EntityRetriever {
                 rest.getUserService().getCurrentUserGuilds(params);
         return PaginationUtil.paginateAfter(makeRequest, data -> Snowflake.asLong(data.id()), 0L, 100)
                 .map(UserGuildData::id)
-                //.filter(id -> (id >> 22) % getConfig().getShardCount() == getConfig().getShardIndex())
                 .flatMap(id -> rest.getGuildService().getGuild(Snowflake.asLong(id)))
                 .map(this::toGuildData)
                 .map(data -> new Guild(gateway, data));

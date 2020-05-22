@@ -3,12 +3,13 @@ package discord4j.core.support;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.lifecycle.ReadyEvent;
 import discord4j.core.event.domain.message.MessageCreateEvent;
+import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.presence.Presence;
 import discord4j.discordjson.json.ApplicationInfoData;
 import discord4j.discordjson.json.MessageCreateRequest;
-import discord4j.rest.util.Snowflake;
+import discord4j.common.util.Snowflake;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 import reactor.util.Logger;
@@ -54,6 +55,7 @@ public class BotSupport {
         eventHandlers.add(new StatusEmbed());
         eventHandlers.add(new Exit());
         eventHandlers.add(new RequestMembers());
+        eventHandlers.add(new GetMembers());
 
         return client.on(MessageCreateEvent.class,
                 event -> ownerId.filter(
@@ -165,6 +167,23 @@ public class BotSupport {
                                 MessageCreateRequest.builder()
                                         .content("<@" + message.getUserData().id() + "> Done!")
                                         .build()))
+                        .then();
+            }
+            return Mono.empty();
+        }
+    }
+
+    public static class GetMembers extends EventHandler {
+
+        @Override
+        public Mono<Void> onMessageCreate(MessageCreateEvent event) {
+            Message message = event.getMessage();
+            String content = message.getContent();
+            if (content.startsWith("!getMembers ")) {
+                String guildId = content.substring("!getMembers ".length());
+                return event.getClient().getGuildById(Snowflake.of(guildId))
+		                .flatMapMany(Guild::getMembers)
+                        .doOnNext(member -> log.info("{}", member.getTag()))
                         .then();
             }
             return Mono.empty();

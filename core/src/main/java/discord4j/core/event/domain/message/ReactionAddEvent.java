@@ -23,7 +23,7 @@ import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.core.object.reaction.ReactionEmoji;
-import discord4j.rest.util.Snowflake;
+import discord4j.common.util.Snowflake;
 import discord4j.gateway.ShardInfo;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
@@ -37,7 +37,7 @@ import java.util.Optional;
  * <p>
  * This event is dispatched by Discord.
  *
- * @see <a href="https://discordapp.com/developers/docs/topics/gateway#message-reaction-add">Message Reaction Add</a>
+ * @see <a href="https://discord.com/developers/docs/topics/gateway#message-reaction-add">Message Reaction Add</a>
  */
 public class ReactionAddEvent extends MessageEvent {
 

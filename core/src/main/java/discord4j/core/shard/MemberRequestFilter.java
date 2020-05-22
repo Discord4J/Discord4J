@@ -18,7 +18,7 @@
 package discord4j.core.shard;
 
 import discord4j.discordjson.json.GuildCreateData;
-import discord4j.rest.util.Snowflake;
+import discord4j.common.util.Snowflake;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -27,6 +27,14 @@ import java.util.function.Function;
 /**
  * A filter to customize the guild member request strategy. Applied on each GUILD_CREATE returning a potentially
  * delayed {@link Mono} that, if containing {@code true}, guild members should be requested.
+ * <p>
+ * The following built-in factories exist:
+ * <ul>
+ *     <li>{@link #all()} to use a filter requesting ALL members on startup</li>
+ *     <li>{@link #none()} to disable this feature</li>
+ *     <li>{@link #withLargeGuilds()} ()} to only request from large guilds (default)</li>
+ *     <li>{@link #withGuilds(Snowflake...)} to request from specific guilds</li>
+ * </ul>
  */
 @FunctionalInterface
 public interface MemberRequestFilter {

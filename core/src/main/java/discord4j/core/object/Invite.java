@@ -21,7 +21,7 @@ import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.CategorizableChannel;
 import discord4j.core.retriever.EntityRetrievalStrategy;
-import discord4j.rest.util.Snowflake;
+import discord4j.common.util.Snowflake;
 import discord4j.discordjson.json.InviteData;
 import discord4j.discordjson.json.PartialGuildData;
 import discord4j.discordjson.json.UserData;
@@ -35,7 +35,7 @@ import java.util.OptionalInt;
 /**
  * A Discord invite.
  *
- * @see <a href="https://discordapp.com/developers/docs/resources/invite">Invite Resource</a>
+ * @see <a href="https://discord.com/developers/docs/resources/invite">Invite Resource</a>
  */
 public class Invite implements DiscordObject {
 

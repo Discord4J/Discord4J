@@ -33,7 +33,7 @@ import discord4j.discordjson.json.ChannelData;
 import discord4j.discordjson.possible.Possible;
 import discord4j.rest.util.Permission;
 import discord4j.rest.util.PermissionSet;
-import discord4j.rest.util.Snowflake;
+import discord4j.common.util.Snowflake;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -278,11 +278,13 @@ class BaseGuildMessageChannel extends BaseChannel implements GuildMessageChannel
      */
     @Override
     public Mono<Webhook> createWebhook(final Consumer<? super WebhookCreateSpec> spec) {
-        final WebhookCreateSpec mutatedSpec = new WebhookCreateSpec();
-        spec.accept(mutatedSpec);
-
-        return getClient().getRestClient().getWebhookService()
-                .createWebhook(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason())
+        return Mono.defer(
+                () -> {
+                    WebhookCreateSpec mutatedSpec = new WebhookCreateSpec();
+                    spec.accept(mutatedSpec);
+                    return getClient().getRestClient().getWebhookService()
+                            .createWebhook(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason());
+                })
                 .map(data -> new Webhook(getClient(), data));
     }
 

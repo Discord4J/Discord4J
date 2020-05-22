@@ -30,7 +30,7 @@ import java.util.Optional;
  * <p>
  * This event is Dispatched by Discord.
  *
- * @see <a href="https://discordapp.com/developers/docs/topics/gateway#guild-update">Guild Update</a>
+ * @see <a href="https://discord.com/developers/docs/topics/gateway#guild-update">Guild Update</a>
  */
 public class GuildUpdateEvent extends GuildEvent {
 

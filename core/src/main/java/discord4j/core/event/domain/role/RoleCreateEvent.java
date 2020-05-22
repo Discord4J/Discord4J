@@ -19,7 +19,7 @@ package discord4j.core.event.domain.role;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Role;
-import discord4j.rest.util.Snowflake;
+import discord4j.common.util.Snowflake;
 import discord4j.gateway.ShardInfo;
 import reactor.core.publisher.Mono;
 
@@ -28,7 +28,7 @@ import reactor.core.publisher.Mono;
  * <p>
  * This event is dispatched by Discord.
  *
- * @see <a href="https://discordapp.com/developers/docs/topics/gateway#guild-role-create">Guild Role Create</a>
+ * @see <a href="https://discord.com/developers/docs/topics/gateway#guild-role-create">Guild Role Create</a>
  */
 public class RoleCreateEvent extends RoleEvent {
 

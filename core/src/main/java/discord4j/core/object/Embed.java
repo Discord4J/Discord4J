@@ -19,8 +19,8 @@ package discord4j.core.object;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.discordjson.json.*;
 import discord4j.discordjson.possible.Possible;
+import discord4j.rest.util.Color;
 
-import java.awt.Color;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
@@ -32,7 +32,7 @@ import java.util.stream.Collectors;
 /**
  * A Discord embed.
  *
- * @see <a href="https://discordapp.com/developers/docs/resources/channel#embed-object">Embed Object</a>
+ * @see <a href="https://discord.com/developers/docs/resources/channel#embed-object">Embed Object</a>
  */
 public final class Embed implements DiscordObject {
 
@@ -123,7 +123,7 @@ public final class Embed implements DiscordObject {
      * @return The color of the embed, if present.
      */
     public Optional<Color> getColor() {
-        return data.color().toOptional().map(color -> new Color(color, true));
+        return data.color().toOptional().map(Color::of);
     }
 
     /**

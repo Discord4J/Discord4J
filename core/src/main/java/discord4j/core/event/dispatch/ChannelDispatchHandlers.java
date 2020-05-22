@@ -28,7 +28,8 @@ import discord4j.discordjson.json.gateway.ChannelCreate;
 import discord4j.discordjson.json.gateway.ChannelDelete;
 import discord4j.discordjson.json.gateway.ChannelPinsUpdate;
 import discord4j.discordjson.json.gateway.ChannelUpdate;
-import discord4j.rest.util.Snowflake;
+import discord4j.discordjson.possible.Possible;
+import discord4j.common.util.Snowflake;
 import discord4j.store.api.primitive.LongObjStore;
 import reactor.core.publisher.Mono;
 
@@ -229,7 +230,7 @@ class ChannelDispatchHandlers {
 
     static Mono<PinsUpdateEvent> channelPinsUpdate(DispatchContext<ChannelPinsUpdate> context) {
         long channelId = Snowflake.asLong(context.getDispatch().channelId());
-        Instant timestamp = context.getDispatch().lastPinTimestamp().toOptional()
+        Instant timestamp = Possible.flatOpt(context.getDispatch().lastPinTimestamp())
                 .map(text -> DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(text, Instant::from))
                 .orElse(null);
 

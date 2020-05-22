@@ -25,7 +25,7 @@ import discord4j.discordjson.json.UserData;
 import discord4j.discordjson.json.gateway.Ready;
 import discord4j.discordjson.json.gateway.Resumed;
 import discord4j.gateway.retry.GatewayStateChange;
-import discord4j.rest.util.Snowflake;
+import discord4j.common.util.Snowflake;
 import reactor.core.publisher.Mono;
 
 import java.util.Set;

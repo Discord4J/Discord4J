@@ -17,26 +17,22 @@
 
 package discord4j.voice;
 
-import discord4j.common.JacksonResources;
 import discord4j.common.annotations.Experimental;
-import discord4j.common.retry.ReconnectOptions;
 import reactor.core.publisher.Mono;
 
+/**
+ * A factory to create {@link VoiceConnection} instances using a set of {@link VoiceGatewayOptions}.
+ */
 @Experimental
 public interface VoiceConnectionFactory {
 
-    // TODO refactor into VoiceGatewayOptions
-    Mono<VoiceConnection> create(long guildId,
-                                 long selfId,
-                                 String session,
-                                 VoiceServerOptions voiceServerOptions,
-                                 JacksonResources jacksonResources,
-                                 VoiceReactorResources reactorResources,
-                                 ReconnectOptions reconnectOptions,
-                                 AudioProvider provider,
-                                 AudioReceiver receiver,
-                                 VoiceSendTaskFactory sendTaskFactory,
-                                 VoiceReceiveTaskFactory receiveTaskFactory,
-                                 VoiceDisconnectTask voiceDisconnectTask,
-                                 VoiceServerUpdateTask voiceServerUpdateTask);
+    /**
+     * Return a {@link Mono} that, upon subscription, is able to obtain a {@link VoiceConnection} from the given
+     * {@link VoiceGatewayOptions}. The resulting connection can be an existing one if it's still active for a guild.
+     *
+     * @param options the set of options to configure voice connections
+     * @return a {@link Mono} that, upon subscription, can return a {@link VoiceConnection}. In case an error occurs,
+     * it is emitted through the {@link Mono}.
+     */
+    Mono<VoiceConnection> create(VoiceGatewayOptions options);
 }

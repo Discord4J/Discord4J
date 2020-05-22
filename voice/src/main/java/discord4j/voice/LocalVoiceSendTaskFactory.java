@@ -23,6 +23,9 @@ import reactor.core.scheduler.Scheduler;
 
 import java.util.function.Consumer;
 
+/**
+ * A local implementation of a {@link VoiceSendTaskFactory}, performing all actions in the same JVM instance.
+ */
 public class LocalVoiceSendTaskFactory implements VoiceSendTaskFactory {
 
     @Override

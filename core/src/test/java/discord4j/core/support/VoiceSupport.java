@@ -59,6 +59,9 @@ public class VoiceSupport {
                         .flatMap(channel -> channel.join(spec -> {
                             spec.setProvider(provider);
                         }))
+                        .flatMap(VoiceConnection::getChannelId)
+                        .doOnNext(chId -> log.info("Voice connected to channel {}", chId))
+                        .doFinally(s -> log.info("Finalized join request after {}", s))
                         .onErrorResume(t -> {
                             log.error("Failed to join voice channel", t);
                             return Mono.empty();
@@ -71,7 +74,12 @@ public class VoiceSupport {
                 .flatMap(e -> Mono.justOrEmpty(e.getMember())
                         .flatMap(Member::getVoiceState)
                         .flatMap(vs -> client.getVoiceConnectionRegistry()
-                                .getVoiceConnection(vs.getGuildId().asLong()))
+                                .getVoiceConnection(vs.getGuildId())
+                                .doOnSuccess(vc -> {
+                                    if (vc == null) {
+                                        log.info("No voice connection to leave!");
+                                    }
+                                }))
                         .flatMap(VoiceConnection::disconnect))
                 .then();
 
@@ -80,7 +88,7 @@ public class VoiceSupport {
                 .flatMap(e -> Mono.justOrEmpty(e.getMember())
                         .flatMap(Member::getVoiceState)
                         .flatMap(vs -> client.getVoiceConnectionRegistry()
-                                .getVoiceConnection(vs.getGuildId().asLong()))
+                                .getVoiceConnection(vs.getGuildId()))
                         .flatMap(VoiceConnection::reconnect)
                         .doFinally(s -> log.info("Reconnect event handle complete")))
                 .then();

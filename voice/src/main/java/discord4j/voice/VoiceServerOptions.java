@@ -17,6 +17,9 @@
 
 package discord4j.voice;
 
+/**
+ * A set of options required to identify a voice server, for identifying.
+ */
 public class VoiceServerOptions {
 
     private final String token;

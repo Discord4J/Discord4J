@@ -23,7 +23,7 @@ import discord4j.discordjson.json.ImmutableChannelModifyRequest;
 import discord4j.discordjson.json.OverwriteData;
 import discord4j.discordjson.possible.Possible;
 import discord4j.rest.util.Permission;
-import discord4j.rest.util.Snowflake;
+import discord4j.common.util.Snowflake;
 import reactor.util.annotation.Nullable;
 
 import java.util.List;
@@ -34,7 +34,7 @@ import java.util.stream.Collectors;
 /**
  * Spec used to modify a guild {@link TextChannel} settings.
  *
- * @see <a href="https://discordapp.com/developers/docs/resources/channel#modify-channel">Modify Channel</a>
+ * @see <a href="https://discord.com/developers/docs/resources/channel#modify-channel">Modify Channel</a>
  */
 public class TextChannelEditSpec implements AuditSpec<ChannelModifyRequest> {
 

@@ -22,7 +22,7 @@ import discord4j.discordjson.json.GuildModifyRequest;
 import discord4j.discordjson.json.ImmutableGuildModifyRequest;
 import discord4j.discordjson.possible.Possible;
 import discord4j.rest.util.Image;
-import discord4j.rest.util.Snowflake;
+import discord4j.common.util.Snowflake;
 import reactor.util.annotation.Nullable;
 
 import java.util.Optional;
@@ -30,7 +30,7 @@ import java.util.Optional;
 /**
  * A spec used to selectively modify properties from a {@link Guild}.
  *
- * @see <a href="https://discordapp.com/developers/docs/resources/guild#modify-guild">Modify Guild</a>
+ * @see <a href="https://discord.com/developers/docs/resources/guild#modify-guild">Modify Guild</a>
  */
 public class GuildEditSpec implements AuditSpec<GuildModifyRequest> {
 

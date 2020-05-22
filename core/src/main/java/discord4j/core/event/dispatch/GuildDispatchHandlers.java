@@ -30,7 +30,7 @@ import discord4j.discordjson.json.*;
 import discord4j.discordjson.json.gateway.*;
 import discord4j.discordjson.possible.Possible;
 import discord4j.gateway.json.ShardGatewayPayload;
-import discord4j.rest.util.Snowflake;
+import discord4j.common.util.Snowflake;
 import discord4j.store.api.util.LongLongTuple2;
 import discord4j.store.api.util.LongObjTuple2;
 import reactor.core.Disposable;
@@ -225,9 +225,9 @@ class GuildDispatchHandlers {
 
         return stateHolder.getGuildStore().find(guildId)
                 .flatMap(guild -> {
-                    Flux<Long> channels = Flux.fromIterable(guild.channels()).map(Long::parseUnsignedLong);
-                    Flux<Long> roles = Flux.fromIterable(guild.roles()).map(Long::parseUnsignedLong);
-                    Flux<Long> emojis = Flux.fromIterable(guild.emojis()).map(Long::parseUnsignedLong);
+                    Flux<Long> channels = Flux.fromIterable(guild.channels()).map(Snowflake::asLong);
+                    Flux<Long> roles = Flux.fromIterable(guild.roles()).map(Snowflake::asLong);
+                    Flux<Long> emojis = Flux.fromIterable(guild.emojis()).map(Snowflake::asLong);
 
                     Mono<Void> deleteChannels = stateHolder.getChannelStore().delete(channels);
                     Mono<Void> deleteRoles = stateHolder.getRoleStore().delete(roles);
@@ -277,7 +277,7 @@ class GuildDispatchHandlers {
         Mono<Void> saveEmojis = context.getStateHolder().getGuildEmojiStore()
                 .saveWithLong(Flux.fromIterable(context.getDispatch().emojis())
                         .map(emoji -> LongObjTuple2.of(emoji.id()
-                                .map(Long::parseUnsignedLong)
+                                .map(Snowflake::asLong)
                                 .orElseThrow(NoSuchElementException::new), emoji)));
 
         Set<GuildEmoji> emojis = context.getDispatch().emojis()
@@ -389,7 +389,7 @@ class GuildDispatchHandlers {
                 .find(guildId)
                 .map(guild -> GuildData.builder()
                         .from(guild)
-                        .members(ListUtil.addAll(guild.members(), members.stream()
+                        .members(ListUtil.addAllDistinct(guild.members(), members.stream()
                                 .map(data -> data.user().id())
                                 .collect(Collectors.toList())))
                         .build())
@@ -428,7 +428,7 @@ class GuildDispatchHandlers {
 
         List<Long> currentRoles = context.getDispatch().roles()
                 .stream()
-                .map(Long::parseUnsignedLong)
+                .map(Snowflake::asLong)
                 .collect(Collectors.toList());
         String currentNick = Possible.flatOpt(context.getDispatch().nick()).orElse(null);
         String currentPremiumSince = Possible.flatOpt(context.getDispatch().premiumSince()).orElse(null);
@@ -499,7 +499,7 @@ class GuildDispatchHandlers {
         Mono<Void> removeRoleFromMembers = context.getStateHolder().getGuildStore()
                 .find(guildId)
                 .flatMapMany(guild -> Flux.fromIterable(guild.members())
-                        .map(Long::parseUnsignedLong))
+                        .map(Snowflake::asLong))
                 .flatMap(memberId -> context.getStateHolder().getMemberStore()
                         .find(LongLongTuple2.of(guildId, memberId)))
                 .filter(member -> member.roles().contains(context.getDispatch().roleId()))

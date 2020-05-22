@@ -71,11 +71,13 @@ public final class VoiceChannel extends BaseCategorizableChannel {
      * received, it is emitted through the {@code Mono}.
      */
     public Mono<VoiceChannel> edit(final Consumer<? super VoiceChannelEditSpec> spec) {
-        final VoiceChannelEditSpec mutatedSpec = new VoiceChannelEditSpec();
-        spec.accept(mutatedSpec);
-
-        return getClient().getRestClient().getChannelService()
-                .modifyChannel(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason())
+        return Mono.defer(
+                () -> {
+                    VoiceChannelEditSpec mutatedSpec = new VoiceChannelEditSpec();
+                    spec.accept(mutatedSpec);
+                    return getClient().getRestClient().getChannelService()
+                            .modifyChannel(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason());
+                })
                 .map(data -> EntityUtil.getChannel(getClient(), data))
                 .cast(VoiceChannel.class);
     }
@@ -121,7 +123,7 @@ public final class VoiceChannel extends BaseCategorizableChannel {
      */
     public Mono<Void> sendConnectVoiceState(final boolean selfMute, final boolean selfDeaf) {
         final GatewayClientGroup clientGroup = getClient().getGatewayClientGroup();
-        final int shardId = (int) ((getGuildId().asLong() >> 22) % clientGroup.getShardCount());
+        final int shardId = clientGroup.computeShardIndex(getGuildId());
         return clientGroup.unicast(ShardGatewayPayload.voiceStateUpdate(
                 VoiceStateUpdate.builder()
                         .guildId(getGuildId().asString())
@@ -142,7 +144,7 @@ public final class VoiceChannel extends BaseCategorizableChannel {
      */
     public Mono<Void> sendDisconnectVoiceState() {
         final GatewayClientGroup clientGroup = getClient().getGatewayClientGroup();
-        final int shardId = (int) ((getGuildId().asLong() >> 22) % clientGroup.getShardCount());
+        final int shardId = clientGroup.computeShardIndex(getGuildId());
         return clientGroup.unicast(ShardGatewayPayload.voiceStateUpdate(
                 VoiceStateUpdate.builder()
                         .guildId(getGuildId().asString())

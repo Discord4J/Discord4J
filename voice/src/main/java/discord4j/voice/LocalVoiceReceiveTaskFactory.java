@@ -22,6 +22,9 @@ import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
 import reactor.core.scheduler.Scheduler;
 
+/**
+ * A local implementation of a {@link VoiceReceiveTaskFactory}, performing all actions in the same JVM instance.
+ */
 public class LocalVoiceReceiveTaskFactory implements VoiceReceiveTaskFactory {
 
     @Override

@@ -18,7 +18,7 @@ package discord4j.core.event.domain.guild;
 
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.Guild;
-import discord4j.rest.util.Snowflake;
+import discord4j.common.util.Snowflake;
 import discord4j.gateway.ShardInfo;
 import reactor.util.annotation.Nullable;
 
@@ -33,7 +33,7 @@ import java.util.Optional;
  * <p>
  * This event is dispatched by Discord.
  *
- * @see <a href="https://discordapp.com/developers/docs/topics/gateway#guild-delete">Guild Delete</a>
+ * @see <a href="https://discord.com/developers/docs/topics/gateway#guild-delete">Guild Delete</a>
  */
 public class GuildDeleteEvent extends GuildEvent {
 

@@ -18,72 +18,208 @@
 package discord4j.gateway;
 
 import discord4j.discordjson.json.gateway.StatusUpdate;
-import discord4j.discordjson.possible.Possible;
 import discord4j.gateway.intent.IntentSet;
 import reactor.util.annotation.Nullable;
 
+import java.util.Optional;
+
 /**
- * An object that contains all the parameters used for identifying a bot to Discord gateway.
- * <p>
- * If you register a {@link GatewayObserver} when building a client, you can receive the current
- * {@code IdentifyOptions} with updated values until that point, and used to resume a session.
+ * An object that contains parameters used for authenticating a bot to Discord gateway.
  */
 public class IdentifyOptions {
 
     private final ShardInfo shardInfo;
-
     @Nullable
     private final StatusUpdate initialStatus;
-
-    private final Possible<Long> intents;
-
-    private final boolean guildSubscriptions;
-
     @Nullable
-    private volatile Integer resumeSequence;
-
+    private final IntentSet intents;
     @Nullable
-    private volatile String resumeSessionId;
+    private final Boolean guildSubscriptions;
+    private final int largeThreshold;
+    @Nullable
+    private final SessionInfo resumeSession;
 
     /**
-     * Create a new identifying policy.
+     * Create a new Gateway authentication policy.
      *
-     * @param shardInfo shard index and count the client using this policy will identify with
-     * @param initialStatus initial presence status the bot will identify with
-     * @param intents intents to subscribe from the gateway or just {@code Possible.absent()}
-     * @param guildSubscriptions whether to enable presence and typing events while identifying
+     * @param builder a builder used to configure this object
      */
-    public IdentifyOptions(ShardInfo shardInfo, @Nullable StatusUpdate initialStatus, Possible<IntentSet> intents, boolean guildSubscriptions) {
-        this.shardInfo = shardInfo;
-        this.initialStatus = initialStatus;
-        if(!intents.isAbsent()) {
-            this.intents = Possible.of(intents.get().getRawValue());
-        } else {
-            this.intents = Possible.absent();
-        }
-        this.guildSubscriptions = guildSubscriptions;
+    protected IdentifyOptions(Builder builder) {
+        this.shardInfo = builder.shardInfo;
+        this.initialStatus = builder.initialStatus;
+        this.intents = builder.intents;
+        this.guildSubscriptions = builder.guildSubscriptions;
+        this.largeThreshold = builder.largeThreshold;
+        this.resumeSession = builder.resumeSession;
     }
 
+    /**
+     * Create a default {@link IdentifyOptions} using the given shard index and count.
+     *
+     * @param shardIndex the shard index for authentication
+     * @param shardCount the shard count for authentication
+     * @return a default authentication policy
+     */
+    public static IdentifyOptions create(int shardIndex, int shardCount) {
+        return builder(ShardInfo.create(shardIndex, shardCount)).build();
+    }
+
+    /**
+     * Create a default {@link IdentifyOptions} using the given shard information.
+     *
+     * @param shardInfo the shard index and count to be used when authenticating
+     * @return a default authentication policy
+     */
+    public static IdentifyOptions create(ShardInfo shardInfo) {
+        return builder(shardInfo).build();
+    }
+
+    /**
+     * Create a builder to create an {@link IdentifyOptions} using the given shard information.
+     *
+     * @param shardIndex the shard index for authentication
+     * @param shardCount the shard count for authentication
+     * @return a {@link Builder}
+     */
+    public static Builder builder(int shardIndex, int shardCount) {
+        return new Builder(ShardInfo.create(shardIndex, shardCount));
+    }
+
+    /**
+     * Create a builder to create an {@link IdentifyOptions} using the given shard information.
+     *
+     * @param shardInfo the shard index and count to be used when authenticating
+     * @return a {@link Builder}
+     */
+    public static Builder builder(ShardInfo shardInfo) {
+        return new Builder(shardInfo);
+    }
+
+    /**
+     * Builder to create {@link IdentifyOptions}. Requires specifying the shard information.
+     */
+    public static class Builder {
+
+        private final ShardInfo shardInfo;
+        private StatusUpdate initialStatus;
+        private IntentSet intents;
+        private Boolean guildSubscriptions;
+        private int largeThreshold = 250;
+        private SessionInfo resumeSession;
+
+        /**
+         * Create a builder using the given shard information.
+         *
+         * @param shardInfo the shard index and count to be used when authenticating
+         */
+        protected Builder(ShardInfo shardInfo) {
+            this.shardInfo = ShardInfo.create(shardInfo.getIndex(), shardInfo.getCount());
+        }
+
+        /**
+         * Set the initial presence status the bot will identify with.
+         *
+         * @param initialStatus a {@link StatusUpdate} to be used when authenticating
+         * @return this builder
+         */
+        public Builder initialStatus(@Nullable StatusUpdate initialStatus) {
+            this.initialStatus = initialStatus;
+            return this;
+        }
+
+        /**
+         * Set the Gateway intents to use when authenticating.
+         *
+         * @param intents an {@link IntentSet} for authenticating, or {@code null} if not using this capability
+         * @return this builder
+         */
+        public Builder intents(@Nullable IntentSet intents) {
+            this.intents = intents;
+            return this;
+        }
+
+        /**
+         * Set whether to enable presence and typing events while identifying.
+         *
+         * @param guildSubscriptions {@code true} if enabling this feature, {@code false} to disable it, or {@code
+         * null} if this attribute should be ignored when authenticating
+         * @return this builder
+         */
+        public Builder guildSubscriptions(@Nullable Boolean guildSubscriptions) {
+            this.guildSubscriptions = guildSubscriptions;
+            return this;
+        }
+
+        /**
+         * Set the number of members a guild must have to be considered "large". Defaults to 250.
+         *
+         * @param largeThreshold the number of guild members to identify a large guild
+         * @return this builder
+         */
+        public Builder largeThreshold(int largeThreshold) {
+            this.largeThreshold = largeThreshold;
+            return this;
+        }
+
+        /**
+         * Set information about a Gateway session to be resumed. If not specified, a normal authentication is
+         * performed, creating a fresh session to the Gateway.
+         *
+         * @param resumeSession a {@link SessionInfo} for resumption, or {@code null} if not using this capability
+         * @return this builder
+         */
+        public Builder resumeSession(@Nullable SessionInfo resumeSession) {
+            this.resumeSession = resumeSession;
+            return this;
+        }
+
+        /**
+         * Construct the authentication policy.
+         *
+         * @return a built {@link IdentifyOptions}
+         */
+        public IdentifyOptions build() {
+            return new IdentifyOptions(this);
+        }
+    }
+
+    /**
+     * Derive a {@link Builder} from this object, reusing all properties.
+     *
+     * @return a {@link Builder} for further configuration
+     */
+    public Builder mutate() {
+        return new Builder(shardInfo)
+                .initialStatus(initialStatus)
+                .intents(intents)
+                .guildSubscriptions(guildSubscriptions)
+                .largeThreshold(largeThreshold)
+                .resumeSession(resumeSession);
+    }
+
+    /**
+     * Derive a {@link Builder} from this object, targeting a different {@link ShardInfo} but reusing all other
+     * properties.
+     *
+     * @param shardInfo the shard information for authentication to be used in the builder
+     * @return a {@link Builder} for further configuration
+     */
+    public Builder mutate(ShardInfo shardInfo) {
+        return new Builder(shardInfo)
+                .initialStatus(initialStatus)
+                .intents(intents)
+                .guildSubscriptions(guildSubscriptions)
+                .largeThreshold(largeThreshold)
+                .resumeSession(resumeSession);
+    }
+
+    /**
+     * Retrieve the {@link ShardInfo} to be used when authenticating, specifying shard index and count.
+     *
+     * @return the shard information used by this object
+     */
     public ShardInfo getShardInfo() {
         return shardInfo;
-    }
-
-    /**
-     * Retrieve the shard index in this policy.
-     *
-     * @return an identifier indicating the shard number used by this policy
-     */
-    public int getShardIndex() {
-        return shardInfo.getIndex();
-    }
-
-    /**
-     * Retrieve the number of shards used by this policy.
-     *
-     * @return number of shards the client using this policy will identify with
-     */
-    public int getShardCount() {
-        return shardInfo.getCount();
     }
 
     /**
@@ -91,9 +227,8 @@ public class IdentifyOptions {
      *
      * @return the presence used to identify bots
      */
-    @Nullable
-    public StatusUpdate getInitialStatus() {
-        return initialStatus;
+    public Optional<StatusUpdate> getInitialStatus() {
+        return Optional.ofNullable(initialStatus);
     }
 
     /**
@@ -101,8 +236,8 @@ public class IdentifyOptions {
      *
      * @return {@code Possible.absent()} when no intents are set or the raw intent value which should be subscribed
      */
-    public Possible<Long> getIntents() {
-        return intents;
+    public Optional<IntentSet> getIntents() {
+        return Optional.ofNullable(intents);
     }
 
     /**
@@ -110,50 +245,27 @@ public class IdentifyOptions {
      *
      * @return {@code true} if guild subscriptions should be enabled, {@code false} otherwise
      */
-    public boolean isGuildSubscriptions() {
-        return guildSubscriptions;
+    public Optional<Boolean> getGuildSubscriptions() {
+        return Optional.ofNullable(guildSubscriptions);
     }
 
     /**
-     * Retrieve the last gateway sequence observed by the client using this policy. It is one of the two required
-     * values required to resume a gateway session, the other one being {@link #getResumeSessionId()}.
+     * Retrieve the number of members used to determine if a guild is "large". Gateway will not send offline member
+     * information for a large guild member list.
      *
-     * @return the last observed gateway sequence number
+     * @return the value used to determine if a guild is considered large
      */
-    @Nullable
-    public Integer getResumeSequence() {
-        return resumeSequence;
+    public int getLargeThreshold() {
+        return largeThreshold;
     }
 
     /**
-     * Set a new value representing the last observed gateway sequence. Modifying this value after a connection has
-     * been established will lead to unexpected behavior.
+     * Retrieve the {@link SessionInfo} that should be used to resume a Gateway session.
      *
-     * @param resumeSequence the new observed gateway sequence
+     * @return the session details for resumption
      */
-    public void setResumeSequence(@Nullable Integer resumeSequence) {
-        this.resumeSequence = resumeSequence;
-    }
-
-    /**
-     * Retrieve the unique gateway session identifier for the current session. It is one of the two required
-     * values required to resume a gateway session, the other one being {@link #getResumeSequence()}.
-     *
-     * @return the current session id
-     */
-    @Nullable
-    public String getResumeSessionId() {
-        return resumeSessionId;
-    }
-
-    /**
-     * Set a new session id for the client using this policy. Modifying this value after a connection has been
-     * established will lead to unexpected behavior.
-     *
-     * @param resumeSessionId the new session id
-     */
-    public void setResumeSessionId(@Nullable String resumeSessionId) {
-        this.resumeSessionId = resumeSessionId;
+    public Optional<SessionInfo> getResumeSession() {
+        return Optional.ofNullable(resumeSession);
     }
 
     @Override
@@ -161,7 +273,10 @@ public class IdentifyOptions {
         return "IdentifyOptions{" +
                 "shardInfo=" + shardInfo +
                 ", initialStatus=" + initialStatus +
+                ", intents=" + intents +
                 ", guildSubscriptions=" + guildSubscriptions +
+                ", largeThreshold=" + largeThreshold +
+                ", resumeSession=" + resumeSession +
                 '}';
     }
 }

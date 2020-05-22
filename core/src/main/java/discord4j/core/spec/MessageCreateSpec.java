@@ -26,7 +26,7 @@ import discord4j.discordjson.json.EmbedData;
 import discord4j.discordjson.json.MessageCreateRequest;
 import discord4j.discordjson.possible.Possible;
 import discord4j.rest.util.MultipartRequest;
-import discord4j.rest.util.Snowflake;
+import discord4j.common.util.Snowflake;
 import reactor.util.annotation.Nullable;
 import reactor.util.function.Tuple2;
 import reactor.util.function.Tuples;
@@ -41,7 +41,7 @@ import java.util.function.Consumer;
  * Spec used to create {@link Message Messages} to {@link MessageChannel MessageChannels}. Clients using this spec must
  * have connected to gateway at least once.
  *
- * @see <a href="https://discordapp.com/developers/docs/resources/channel#create-message">Create Message</a>
+ * @see <a href="https://discord.com/developers/docs/resources/channel#create-message">Create Message</a>
  */
 public class MessageCreateSpec implements Spec<MultipartRequest> {
 

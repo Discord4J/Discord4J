@@ -23,7 +23,7 @@ import discord4j.core.object.entity.Role;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.GuildChannel;
 import discord4j.core.retriever.EntityRetrievalStrategy;
-import discord4j.rest.util.Snowflake;
+import discord4j.common.util.Snowflake;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
 
@@ -32,7 +32,7 @@ import java.util.Objects;
 /**
  * A Discord permission overwrite.
  *
- * @see <a href="https://discordapp.com/developers/docs/resources/channel#overwrite-object">Overwrite Object</a>
+ * @see <a href="https://discord.com/developers/docs/resources/channel#overwrite-object">Overwrite Object</a>
  */
 public final class ExtendedPermissionOverwrite extends PermissionOverwrite implements DiscordObject {
 

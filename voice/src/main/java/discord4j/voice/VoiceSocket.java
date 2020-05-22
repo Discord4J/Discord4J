@@ -36,6 +36,9 @@ import java.nio.charset.StandardCharsets;
 
 import static discord4j.common.LogUtil.format;
 
+/**
+ * A UDP client abstraction dedicated to handling the transport of raw voice packets.
+ */
 public class VoiceSocket {
 
     private static final Logger log = Loggers.getLogger(VoiceSocket.class);

@@ -33,7 +33,7 @@ import discord4j.discordjson.json.UserData;
 import discord4j.rest.entity.RestChannel;
 import discord4j.rest.entity.RestMessage;
 import discord4j.rest.util.PaginationUtil;
-import discord4j.rest.util.Snowflake;
+import discord4j.common.util.Snowflake;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
@@ -48,7 +48,7 @@ import java.util.stream.Collectors;
 /**
  * A Discord message.
  * <p>
- * <a href="https://discordapp.com/developers/docs/resources/channel#message-object">Message Object</a>
+ * <a href="https://discord.com/developers/docs/resources/channel#message-object">Message Object</a>
  */
 public final class Message implements Entity {
 
@@ -432,11 +432,13 @@ public final class Message implements Entity {
      * received, it is emitted through the {@code Mono}.
      */
     public Mono<Message> edit(final Consumer<? super MessageEditSpec> spec) {
-        final MessageEditSpec mutatedSpec = new MessageEditSpec();
-        spec.accept(mutatedSpec);
-
-        return gateway.getRestClient().getChannelService()
-                .editMessage(getChannelId().asLong(), getId().asLong(), mutatedSpec.asRequest())
+        return Mono.defer(
+                () -> {
+                    MessageEditSpec mutatedSpec = new MessageEditSpec();
+                    spec.accept(mutatedSpec);
+                    return gateway.getRestClient().getChannelService()
+                            .editMessage(getChannelId().asLong(), getId().asLong(), mutatedSpec.asRequest());
+                })
                 .map(data -> new Message(gateway, data));
     }
 
@@ -735,7 +737,7 @@ public final class Message implements Entity {
 
         /**
          * A message created when a user follows a channel from another guild into specific channel (
-         * <a href="https://support.discordapp.com/hc/en-us/articles/360028384531-Server-Following-FAQ">Server Following</a>).
+         * <a href="https://support.discord.com/hc/en-us/articles/360028384531-Server-Following-FAQ">Server Following</a>).
          */
         CHANNEL_FOLLOW_ADD(12),
 

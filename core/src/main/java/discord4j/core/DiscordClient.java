@@ -22,6 +22,7 @@ import discord4j.gateway.GatewayOptions;
 import discord4j.rest.RestClient;
 import discord4j.rest.request.RouterOptions;
 import discord4j.store.api.service.StoreService;
+import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
 
 import java.util.function.Function;
@@ -91,7 +92,8 @@ public final class DiscordClient extends RestClient {
      * {@link Mono#block()} will now return upon connection instead of disconnection.</strong>
      *
      * @return a {@link Mono} for a handle to maintain a group of shards connected to real-time Discord Gateway,
-     * emitted once all connections have been made. If an error is received, it is emitted through the {@link Mono}.
+     * emitted once at least one connection has been made. This behavior can be configured through
+     * {@code gateway().setAwaitConnections(true)}. If an error is received, it is emitted through the {@link Mono}.
      */
     public Mono<GatewayDiscordClient> login() {
         return gateway().login();
@@ -111,7 +113,7 @@ public final class DiscordClient extends RestClient {
      * {@link GatewayDiscordClient} and trigger a processing pipeline from it.
      * @return an empty {@link Mono} completing after all resources have released
      */
-    public Mono<Void> withGateway(Function<GatewayDiscordClient, Mono<Void>> whileConnectedFunction) {
+    public Mono<Void> withGateway(Function<GatewayDiscordClient, Publisher<?>> whileConnectedFunction) {
         return gateway().withGateway(whileConnectedFunction);
     }
 
@@ -119,6 +121,21 @@ public final class DiscordClient extends RestClient {
      * Start bootstrapping a connection to the real-time Discord Gateway. The resulting builder can be configured to
      * create a {@link GatewayDiscordClient} which groups all connecting shards providing a single
      * {@link EventDispatcher} to publish Gateway updates and {@link StoreService} for entity caching.
+     * <p>
+     * The following are some of the features configured by this builder:
+     * <ul>
+     *     <li>Sharding configuration</li>
+     *     <li>Initial event listeners and customization</li>
+     *     <li>Gateway intents</li>
+     *     <li>Initial bot status</li>
+     *     <li>Custom entity cache factory</li>
+     *     <li>Distributed architecture options</li>
+     *     <li>Member caching options</li>
+     *     <li>Guild subscriptions</li>
+     *     <li>Threading model customization</li>
+     *     <li>Entity fetching strategy</li>
+     *     <li>Gateway and voice connection options</li>
+     * </ul>
      *
      * @return a bootstrap to create {@link GatewayDiscordClient} instances.
      */

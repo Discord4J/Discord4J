@@ -3,7 +3,7 @@ package discord4j.core.object;
 import discord4j.discordjson.json.MessageReferenceData;
 import discord4j.common.annotations.Experimental;
 import discord4j.core.GatewayDiscordClient;
-import discord4j.rest.util.Snowflake;
+import discord4j.common.util.Snowflake;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -11,7 +11,7 @@ import java.util.Optional;
 /**
  * A Message Reference used by the Server Following feature.
  *
- * @see <a href="https://discordapp.com/developers/docs/resources/channel#message-object-message-structure">
+ * @see <a href="https://discord.com/developers/docs/resources/channel#message-object-message-structure">
  * MessageReference Object</a>
  */
 @Experimental

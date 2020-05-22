@@ -35,6 +35,7 @@ import discord4j.gateway.retry.GatewayStateChange;
 import discord4j.gateway.retry.PartialDisconnectException;
 import discord4j.gateway.retry.ReconnectException;
 import io.netty.buffer.ByteBuf;
+import io.netty.util.IllegalReferenceCountException;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.*;
 import reactor.netty.ConnectionObserver;
@@ -114,7 +115,7 @@ public class DefaultGatewayClient implements GatewayClient {
     private final AtomicLong lastAck = new AtomicLong(0);
     private final AtomicInteger missedAck = new AtomicInteger(0);
     private final AtomicLong responseTime = new AtomicLong(0);
-    private volatile MonoProcessor<Void> disconnectNotifier;
+    private volatile MonoProcessor<CloseStatus> disconnectNotifier;
     private volatile GatewayWebsocketHandler sessionHandler;
 
     /**
@@ -174,10 +175,10 @@ public class DefaultGatewayClient implements GatewayClient {
 
                     sessionHandler = new GatewayWebsocketHandler(receiverSink, outFlux, context);
 
-                    Integer resumeSequence = identifyOptions.getResumeSequence();
-                    if (resumeSequence != null && resumeSequence > 0) {
-                        this.sequence.set(identifyOptions.getResumeSequence());
-                        this.sessionId.set(identifyOptions.getResumeSessionId());
+                    SessionInfo resumeSession = identifyOptions.getResumeSession().orElse(null);
+                    if (resumeSession != null) {
+                        this.sequence.set(resumeSession.getSequence());
+                        this.sessionId.set(resumeSession.getId());
                     } else {
                         allowResume.set(false);
                     }
@@ -196,14 +197,14 @@ public class DefaultGatewayClient implements GatewayClient {
                                     state = GatewayObserver.RETRY_SUCCEEDED;
                                 }
                                 reconnectContext.reset();
-                                identifyOptions.setResumeSessionId(sessionId.get());
                                 allowResume.set(true);
-                                notifyObserver(state, identifyOptions);
+                                notifyObserver(state);
                             })
                             .then();
 
                     // Subscribe the receiver to process and transform the inbound payloads into Dispatch events
                     Mono<Void> receiverFuture = receiver.map(ByteBuf::retain)
+                            .doOnDiscard(ByteBuf.class, DefaultGatewayClient::safeRelease)
                             .doOnNext(buf -> logPayload(receiverLog, context, buf))
                             .flatMap(payloadReader::read)
                             .doOnNext(payload -> {
@@ -267,7 +268,7 @@ public class DefaultGatewayClient implements GatewayClient {
                                 if (t instanceof ReconnectException) {
                                     log.info(format(context, "{}"), t.getMessage());
                                 } else {
-                                    if (log.isDebugEnabled()) {
+                                    if (log.isTraceEnabled()) {
                                         log.error(format(context, "Gateway client error"), t);
                                     } else {
                                         log.error(format(context, "{}"), t.toString());
@@ -278,8 +279,14 @@ public class DefaultGatewayClient implements GatewayClient {
                             .doOnCancel(() -> sessionHandler.close())
                             .then();
                 })
+                .subscriberContext(ctx -> ctx.put(LogUtil.KEY_SHARD_ID, identifyOptions.getShardInfo().getIndex()))
                 .retryWhen(retryFactory())
-                .then(Mono.defer(() -> disconnectNotifier));
+                .then(Mono.defer(() -> disconnectNotifier.then()))
+                .doOnSubscribe(s -> {
+                    if (disconnectNotifier != null) {
+                        throw new IllegalStateException("execute can only be subscribed once");
+                    }
+                });
     }
 
     private String initUserAgent() {
@@ -301,8 +308,7 @@ public class DefaultGatewayClient implements GatewayClient {
     private GatewayPayload<?> updateSequence(GatewayPayload<?> payload) {
         if (payload.getSequence() != null) {
             sequence.set(payload.getSequence());
-            identifyOptions.setResumeSequence(sequence.get());
-            notifyObserver(GatewayObserver.SEQUENCE, identifyOptions);
+            notifyObserver(GatewayObserver.SEQUENCE);
         }
         return payload;
     }
@@ -324,15 +330,14 @@ public class DefaultGatewayClient implements GatewayClient {
                         if (!allowResume.get() || !canResume(retryContext.exception())) {
                             dispatchSink.next(GatewayStateChange.retryStarted(backoff));
                             allowResume.set(false);
-                            notifyObserver(GatewayObserver.RETRY_STARTED, identifyOptions);
+                            notifyObserver(GatewayObserver.RETRY_STARTED);
                         } else {
                             dispatchSink.next(GatewayStateChange.retryStartedResume(backoff));
-                            notifyObserver(GatewayObserver.RETRY_RESUME_STARTED, identifyOptions);
+                            notifyObserver(GatewayObserver.RETRY_RESUME_STARTED);
                         }
                     } else {
                         dispatchSink.next(GatewayStateChange.retryFailed(attempt - 1, backoff));
-                        // TODO: add attempt/backoff values to GatewayObserver
-                        notifyObserver(GatewayObserver.RETRY_FAILED, identifyOptions);
+                        notifyObserver(GatewayObserver.RETRY_FAILED);
                         allowResume.set(false);
                     }
                     retryContext.applicationContext().next();
@@ -393,20 +398,26 @@ public class DefaultGatewayClient implements GatewayClient {
 
             if (behavior.getAction() == DisconnectBehavior.Action.STOP_ABRUPTLY) {
                 dispatchSink.next(GatewayStateChange.disconnectedResume());
-                notifyObserver(GatewayObserver.DISCONNECTED_RESUME, identifyOptions);
+                notifyObserver(GatewayObserver.DISCONNECTED_RESUME);
             } else if (behavior.getAction() == DisconnectBehavior.Action.STOP) {
                 dispatchSink.next(GatewayStateChange.disconnected());
                 allowResume.set(false);
                 sequence.set(0);
                 sessionId.set("");
-                notifyObserver(GatewayObserver.DISCONNECTED, identifyOptions);
+                notifyObserver(GatewayObserver.DISCONNECTED);
             }
 
             switch (behavior.getAction()) {
                 case STOP_ABRUPTLY:
                 case STOP:
-                    disconnectNotifier.onComplete();
-                    return Mono.just(closeStatus);
+                    if (behavior.getCause() != null) {
+                        return Mono.just(new CloseException(closeStatus, ctx, behavior.getCause()))
+                                .flatMap(ex -> {
+                                    disconnectNotifier.onError(ex);
+                                    return Mono.error(ex);
+                                });
+                    }
+                    return Mono.just(closeStatus).doOnNext(status -> disconnectNotifier.onNext(closeStatus));
                 case RETRY_ABRUPTLY:
                 case RETRY:
                 default:
@@ -418,12 +429,12 @@ public class DefaultGatewayClient implements GatewayClient {
     private ConnectionObserver getObserver(Context context) {
         return (connection, newState) -> {
             log.debug(format(context, "{} {}"), newState, connection);
-            notifyObserver(newState, identifyOptions);
+            notifyObserver(newState);
         };
     }
 
-    private void notifyObserver(ConnectionObserver.State state, IdentifyOptions options) {
-        observer.onStateChange(state, options);
+    private void notifyObserver(ConnectionObserver.State state) {
+        observer.onStateChange(state, this);
     }
 
     @Override
@@ -432,12 +443,14 @@ public class DefaultGatewayClient implements GatewayClient {
             if (sessionHandler == null || disconnectNotifier == null) {
                 return Mono.error(new IllegalStateException("Gateway client is not active!"));
             }
-            if (allowResume) {
-                sessionHandler.close(DisconnectBehavior.stopAbruptly(null));
-            } else {
-                sessionHandler.close(DisconnectBehavior.stop(null));
+            if (!disconnectNotifier.isTerminated()) {
+                if (allowResume) {
+                    sessionHandler.close(DisconnectBehavior.stopAbruptly(null));
+                } else {
+                    sessionHandler.close(DisconnectBehavior.stop(null));
+                }
             }
-            return disconnectNotifier;
+            return disconnectNotifier.then();
         });
     }
 
@@ -453,10 +466,21 @@ public class DefaultGatewayClient implements GatewayClient {
 
     @Override
     public <T> Flux<T> receiver(Function<ByteBuf, Publisher<? extends T>> mapper) {
-        return receiver.flatMap(payload -> {
-            payload.retain();
-            return mapper.apply(payload);
-        });
+        return receiver.map(ByteBuf::retainedDuplicate)
+                .doOnDiscard(ByteBuf.class, DefaultGatewayClient::safeRelease)
+                .flatMap(mapper);
+    }
+
+    private static void safeRelease(ByteBuf buf) {
+        if (buf.refCnt() > 0) {
+            try {
+                buf.release();
+            } catch (IllegalReferenceCountException e) {
+                if (log.isDebugEnabled()) {
+                    log.debug("", e);
+                }
+            }
+        }
     }
 
     @Override
@@ -471,7 +495,7 @@ public class DefaultGatewayClient implements GatewayClient {
 
     @Override
     public int getShardCount() {
-        return identifyOptions.getShardCount();
+        return identifyOptions.getShardInfo().getCount();
     }
 
     @Override

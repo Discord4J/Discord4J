@@ -20,13 +20,13 @@ import discord4j.core.object.entity.Webhook;
 import discord4j.discordjson.json.WebhookModifyRequest;
 import discord4j.discordjson.possible.Possible;
 import discord4j.rest.util.Image;
-import discord4j.rest.util.Snowflake;
+import discord4j.common.util.Snowflake;
 import reactor.util.annotation.Nullable;
 
 /**
  * Spec to modify a {@link Webhook} entity.
  *
- * @see <a href="https://discordapp.com/developers/docs/resources/webhook#modify-webhook">Modify Webhook</a>
+ * @see <a href="https://discord.com/developers/docs/resources/webhook#modify-webhook">Modify Webhook</a>
  */
 public class WebhookEditSpec implements AuditSpec<WebhookModifyRequest> {
 

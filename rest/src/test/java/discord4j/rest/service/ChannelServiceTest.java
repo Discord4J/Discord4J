@@ -21,7 +21,7 @@ import discord4j.discordjson.json.*;
 import discord4j.rest.RestTests;
 import discord4j.rest.request.Router;
 import discord4j.rest.util.MultipartRequest;
-import discord4j.rest.util.Snowflake;
+import discord4j.common.util.Snowflake;
 import org.junit.Test;
 import reactor.util.function.Tuple2;
 import reactor.util.function.Tuples;

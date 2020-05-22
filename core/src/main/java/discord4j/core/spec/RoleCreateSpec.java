@@ -19,15 +19,15 @@ package discord4j.core.spec;
 import discord4j.core.object.entity.Role;
 import discord4j.discordjson.json.RoleCreateRequest;
 import discord4j.discordjson.possible.Possible;
+import discord4j.rest.util.Color;
 import discord4j.rest.util.PermissionSet;
 import reactor.util.annotation.Nullable;
 
-import java.awt.Color;
 
 /**
  * Spec used to create a new guild {@link Role} entity.
  *
- * @see <a href="https://discordapp.com/developers/docs/resources/guild#create-guild-role">Create Guild Role</a>
+ * @see <a href="https://discord.com/developers/docs/resources/guild#create-guild-role">Create Guild Role</a>
  */
 public class RoleCreateSpec implements AuditSpec<RoleCreateRequest> {
 
@@ -67,7 +67,7 @@ public class RoleCreateSpec implements AuditSpec<RoleCreateRequest> {
      * @return This spec.
      */
     public RoleCreateSpec setColor(Color color) {
-        this.color = color.getRGB() & 0xFFFFFF;
+        this.color = color.getRGB();
         return this;
     }
 

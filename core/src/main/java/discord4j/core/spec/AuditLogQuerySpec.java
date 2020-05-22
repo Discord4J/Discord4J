@@ -17,7 +17,7 @@
 package discord4j.core.spec;
 
 import discord4j.core.object.audit.ActionType;
-import discord4j.rest.util.Snowflake;
+import discord4j.common.util.Snowflake;
 
 import java.util.HashMap;
 import java.util.Map;

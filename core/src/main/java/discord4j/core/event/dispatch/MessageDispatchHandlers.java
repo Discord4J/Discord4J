@@ -26,7 +26,7 @@ import discord4j.core.util.ListUtil;
 import discord4j.discordjson.json.*;
 import discord4j.discordjson.json.gateway.*;
 import discord4j.discordjson.possible.Possible;
-import discord4j.rest.util.Snowflake;
+import discord4j.common.util.Snowflake;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -45,7 +45,7 @@ class MessageDispatchHandlers {
         long channelId = Snowflake.asLong(message.channelId());
 
         Optional<Member> maybeMember = context.getDispatch().message().guildId().toOptional()
-                .map(Long::parseUnsignedLong)
+                .map(Snowflake::asLong)
                 .flatMap(guildId -> message.member().toOptional()
                         .map(memberData -> new Member(gateway, MemberData.builder()
                                 .from(MemberData.builder()
@@ -76,7 +76,7 @@ class MessageDispatchHandlers {
                 .and(editLastMessageId)
                 .thenReturn(new MessageCreateEvent(gateway, context.getShardInfo(), new Message(gateway, message),
                         context.getDispatch().message().guildId().toOptional()
-                                .map(Long::parseUnsignedLong)
+                                .map(Snowflake::asLong)
                                 .orElse(null),
                         maybeMember.orElse(null)));
     }
@@ -99,7 +99,7 @@ class MessageDispatchHandlers {
     static Mono<MessageBulkDeleteEvent> messageDeleteBulk(DispatchContext<MessageDeleteBulk> context) {
         GatewayDiscordClient gateway = context.getGateway();
         List<Long> messageIds = context.getDispatch().ids().stream()
-                .map(Long::parseUnsignedLong)
+                .map(Snowflake::asLong)
                 .collect(Collectors.toList());
         long channelId = Snowflake.asLong(context.getDispatch().channelId());
         long guildId = Snowflake.asLong(context.getDispatch().guildId().get()); // always present
@@ -125,7 +125,7 @@ class MessageDispatchHandlers {
         long messageId = Snowflake.asLong(context.getDispatch().messageId());
         Long guildId = context.getDispatch().guildId()
                 .toOptional()
-                .map(Long::parseUnsignedLong)
+                .map(Snowflake::asLong)
                 .orElse(null);
 
         MemberData memberData = context.getDispatch().member().toOptional().orElse(null);
@@ -181,7 +181,7 @@ class MessageDispatchHandlers {
                 .flatMap(message -> context.getStateHolder().getMessageStore().save(messageId, message));
 
         Long emojiId = context.getDispatch().emoji().id()
-                .map(Long::parseUnsignedLong)
+                .map(Snowflake::asLong)
                 .orElse(null);
         String emojiName = context.getDispatch().emoji().name()
                 .orElse(null);
@@ -203,7 +203,7 @@ class MessageDispatchHandlers {
         long messageId = Snowflake.asLong(context.getDispatch().messageId());
         Long guildId = context.getDispatch().guildId()
                 .toOptional()
-                .map(Long::parseUnsignedLong)
+                .map(Snowflake::asLong)
                 .orElse(null);
 
         Mono<Void> removeFromMessage = context.getStateHolder().getMessageStore()
@@ -245,7 +245,7 @@ class MessageDispatchHandlers {
                 .flatMap(message -> context.getStateHolder().getMessageStore().save(messageId, message));
 
         Long emojiId = context.getDispatch().emoji().id()
-                .map(Long::parseUnsignedLong)
+                .map(Snowflake::asLong)
                 .orElse(null);
         String emojiName = context.getDispatch().emoji().name()
                 .orElse(null);
@@ -263,7 +263,7 @@ class MessageDispatchHandlers {
         long messageId = Snowflake.asLong(context.getDispatch().messageId());
         Long guildId = context.getDispatch().guildId()
                 .toOptional()
-                .map(Long::parseUnsignedLong)
+                .map(Snowflake::asLong)
                 .orElse(null);
 
         Mono<Void> removeFromMessage = context.getStateHolder().getMessageStore()
@@ -295,7 +295,7 @@ class MessageDispatchHandlers {
                 .flatMap(message -> context.getStateHolder().getMessageStore().save(messageId, message));
 
         Long emojiId = context.getDispatch().emoji().id()
-                .map(Long::parseUnsignedLong)
+                .map(Snowflake::asLong)
                 .orElse(null);
         String emojiName = context.getDispatch().emoji().name()
                 .orElse(null);
@@ -313,7 +313,7 @@ class MessageDispatchHandlers {
         long messageId = Snowflake.asLong(context.getDispatch().messageId());
         Long guildId = context.getDispatch().guildId()
                 .toOptional()
-                .map(Long::parseUnsignedLong)
+                .map(Snowflake::asLong)
                 .orElse(null);
 
         Mono<Void> removeAllFromMessage = context.getStateHolder().getMessageStore()
@@ -336,7 +336,7 @@ class MessageDispatchHandlers {
         long messageId = Snowflake.asLong(messageData.id());
         Long guildId = messageData.guildId()
                 .toOptional()
-                .map(Long::parseUnsignedLong)
+                .map(Snowflake::asLong)
                 .orElse(null);
 
         String currentContent = messageData.content().toOptional().orElse(null);

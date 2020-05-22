@@ -20,7 +20,7 @@ package discord4j.rest.entity;
 import discord4j.discordjson.json.WebhookData;
 import discord4j.discordjson.json.WebhookModifyRequest;
 import discord4j.rest.RestClient;
-import discord4j.rest.util.Snowflake;
+import discord4j.common.util.Snowflake;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
 

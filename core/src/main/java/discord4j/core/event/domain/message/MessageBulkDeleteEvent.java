@@ -20,7 +20,7 @@ import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.TextChannel;
-import discord4j.rest.util.Snowflake;
+import discord4j.common.util.Snowflake;
 import discord4j.gateway.ShardInfo;
 import reactor.core.publisher.Mono;
 
@@ -36,7 +36,7 @@ import java.util.stream.Collectors;
  * <p>
  * This event is dispatched by Discord.
  *
- * @see <a href="https://discordapp.com/developers/docs/topics/gateway#message-delete-bulk">Message Delete Bulk</a>
+ * @see <a href="https://discord.com/developers/docs/topics/gateway#message-delete-bulk">Message Delete Bulk</a>
  */
 public class MessageBulkDeleteEvent extends MessageEvent {
 

@@ -19,7 +19,7 @@ package discord4j.core.event.domain.guild;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Member;
-import discord4j.rest.util.Snowflake;
+import discord4j.common.util.Snowflake;
 import discord4j.gateway.ShardInfo;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
@@ -35,7 +35,7 @@ import java.util.Set;
  * <p>
  * This event is dispatched by Discord.
  *
- * @see <a href="https://discordapp.com/developers/docs/topics/gateway#guild-members-chunk">Guild Members Chunk</a>
+ * @see <a href="https://discord.com/developers/docs/topics/gateway#guild-members-chunk">Guild Members Chunk</a>
  */
 public class MemberChunkEvent extends GuildEvent {
 

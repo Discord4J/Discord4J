@@ -23,8 +23,22 @@ import reactor.core.scheduler.Scheduler;
 
 import java.util.function.Consumer;
 
+/**
+ * A factory to create a task that reads audio packets from an {@link AudioProvider}, encodes them and then sends them
+ * through a given raw packet sink.
+ */
 public interface VoiceSendTaskFactory {
 
+    /**
+     * Create a task that is capable of handling outbound audio packets.
+     *
+     * @param scheduler a dedicated {@link Scheduler} that can be used to run the task
+     * @param speakingSender a sink capable to signaling speaking status to Discord
+     * @param voiceSender a sink capable of sending outbound audio to Discord
+     * @param provider a strategy to produce audio packets that can be encoded
+     * @param transformer a strategy to encode a packet into a raw buffer
+     * @return a task that can process audio and send it
+     */
     Disposable create(Scheduler scheduler, Consumer<Boolean> speakingSender, Consumer<ByteBuf> voiceSender,
                       AudioProvider provider, PacketTransformer transformer);
 

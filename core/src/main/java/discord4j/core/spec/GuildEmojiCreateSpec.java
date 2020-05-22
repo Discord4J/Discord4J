@@ -19,7 +19,7 @@ package discord4j.core.spec;
 import discord4j.core.object.entity.GuildEmoji;
 import discord4j.discordjson.json.GuildEmojiCreateRequest;
 import discord4j.rest.util.Image;
-import discord4j.rest.util.Snowflake;
+import discord4j.common.util.Snowflake;
 import reactor.util.annotation.Nullable;
 
 import java.util.HashSet;
@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
 /**
  * Spec used to create {@link GuildEmoji} objects. Emojis and animated emojis have a maximum file size of 256kb.
  *
- * @see <a href="https://discordapp.com/developers/docs/resources/emoji#create-guild-emoji">Create Guild Emoji</a>
+ * @see <a href="https://discord.com/developers/docs/resources/emoji#create-guild-emoji">Create Guild Emoji</a>
  */
 public class GuildEmojiCreateSpec implements AuditSpec<GuildEmojiCreateRequest> {
 

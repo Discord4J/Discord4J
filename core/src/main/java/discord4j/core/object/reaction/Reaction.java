@@ -25,7 +25,7 @@ import java.util.Objects;
 /**
  * A Discord message reaction.
  *
- * @see <a href="https://discordapp.com/developers/docs/resources/channel#reaction-object">Reaction Object</a>
+ * @see <a href="https://discord.com/developers/docs/resources/channel#reaction-object">Reaction Object</a>
  */
 public final class Reaction implements DiscordObject  {
 

@@ -20,7 +20,7 @@ import discord4j.discordjson.json.ApplicationInfoData;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.retriever.EntityRetrievalStrategy;
 import discord4j.rest.util.Image;
-import discord4j.rest.util.Snowflake;
+import discord4j.common.util.Snowflake;
 import discord4j.core.util.EntityUtil;
 import discord4j.core.util.ImageUtil;
 import reactor.core.publisher.Mono;

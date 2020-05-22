@@ -20,17 +20,19 @@ import discord4j.common.LogUtil;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.VoiceServerUpdateEvent;
 import discord4j.core.event.domain.VoiceStateUpdateEvent;
+import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.channel.VoiceChannel;
 import discord4j.discordjson.json.gateway.VoiceStateUpdate;
 import discord4j.gateway.GatewayClientGroup;
 import discord4j.gateway.json.ShardGatewayPayload;
 import discord4j.rest.util.Permission;
-import discord4j.rest.util.Snowflake;
+import discord4j.common.util.Snowflake;
 import discord4j.voice.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.function.TupleUtils;
 import reactor.util.function.Tuple2;
+import reactor.util.retry.RetrySpec;
 
 import java.time.Duration;
 import java.util.Objects;
@@ -42,8 +44,11 @@ import java.util.concurrent.TimeoutException;
  */
 public class VoiceChannelJoinSpec implements Spec<Mono<VoiceConnection>> {
 
-    /** The default maximum amount of time in seconds to wait before the connection to the voice channel timeouts. */
-    private static final int DEFAULT_TIMEOUT = 5;
+    /** Default maximum amount of time in seconds to wait before the connection to the voice channel times out. */
+    private static final int DEFAULT_TIMEOUT = 10;
+
+    /** Default maximum amount of time in seconds to wait before a single IP discovery attempt times out. */
+    private static final int DEFAULT_DISCOVERY_TIMEOUT = 5;
 
     private Duration timeout = Duration.ofSeconds(DEFAULT_TIMEOUT);
     private AudioProvider provider = AudioProvider.NO_OP;
@@ -52,6 +57,8 @@ public class VoiceChannelJoinSpec implements Spec<Mono<VoiceConnection>> {
     private VoiceReceiveTaskFactory receiveTaskFactory = new LocalVoiceReceiveTaskFactory();
     private boolean selfDeaf;
     private boolean selfMute;
+    private Duration ipDiscoveryTimeout = Duration.ofSeconds(DEFAULT_DISCOVERY_TIMEOUT);
+    private RetrySpec ipDiscoveryRetrySpec = RetrySpec.maxInARow(1);
 
     private final GatewayDiscordClient gateway;
     private final VoiceChannel voiceChannel;
@@ -114,10 +121,10 @@ public class VoiceChannelJoinSpec implements Spec<Mono<VoiceConnection>> {
     }
 
     /**
-     * Sets whether to deafen this client when establishing a {@link VoiceConnection}.
+     * Set whether to deafen this client when establishing a {@link VoiceConnection}.
      *
-     * @param selfDeaf If this client is deafened.
-     * @return This spec.
+     * @param selfDeaf if this client is deafened
+     * @return this spec
      */
     public VoiceChannelJoinSpec setSelfDeaf(final boolean selfDeaf) {
         this.selfDeaf = selfDeaf;
@@ -125,10 +132,10 @@ public class VoiceChannelJoinSpec implements Spec<Mono<VoiceConnection>> {
     }
 
     /**
-     * Sets whether to mute this client when establishing a {@link VoiceConnection}.
+     * Set whether to mute this client when establishing a {@link VoiceConnection}.
      *
-     * @param selfMute If this client is muted.
-     * @return This spec.
+     * @param selfMute if this client is muted
+     * @return this spec
      */
     public VoiceChannelJoinSpec setSelfMute(final boolean selfMute) {
         this.selfMute = selfMute;
@@ -136,82 +143,97 @@ public class VoiceChannelJoinSpec implements Spec<Mono<VoiceConnection>> {
     }
 
     /**
-     * Sets the maximum amount of time to wait before the connection to the voice channel timeouts.
+     * Set the maximum amount of time to wait before the connection to the voice channel timeouts.
      * For example, the connection may get stuck when the bot does not have {@link Permission#VIEW_CHANNEL} or
      * when the voice channel is full.
      * The default value is {@value #DEFAULT_TIMEOUT} seconds.
      *
-     * @param timeout The maximum amount of time to wait before the connection to the voice channel timeouts.
-     * @return This spec.
+     * @param timeout the maximum amount of time to wait before the connection to the voice channel timeouts
+     * @return this spec
      */
     public VoiceChannelJoinSpec setTimeout(Duration timeout) {
         this.timeout = Objects.requireNonNull(timeout);
         return this;
     }
 
+    /**
+     * Set the maximum amount of time to wait for a single attempt at performing the IP discovery procedure. For more
+     * information about this procedure check
+     * <a href="https://discord.com/developers/docs/topics/voice-connections#ip-discovery">IP discovery</a>.
+     * The default value is {@link #DEFAULT_DISCOVERY_TIMEOUT} seconds.
+     *
+     * @param ipDiscoveryTimeout the maximum amount of time to wait in a single attempt at IP discovery
+     * @return this spec
+     */
+    public VoiceChannelJoinSpec setIpDiscoveryTimeout(Duration ipDiscoveryTimeout) {
+        this.ipDiscoveryTimeout = Objects.requireNonNull(ipDiscoveryTimeout);
+        return this;
+    }
+
+    /**
+     * Set the retry policy to apply when performing IP discovery. For more
+     * information about this procedure check
+     * <a href="https://discord.com/developers/docs/topics/voice-connections#ip-discovery">IP discovery</a>.
+     * The default value is retrying once before exiting.
+     *
+     * @param ipDiscoveryRetrySpec the maximum amount of time to wait in a single attempt at IP discovery
+     * @return this spec
+     */
+    public VoiceChannelJoinSpec setIpDiscoveryRetrySpec(RetrySpec ipDiscoveryRetrySpec) {
+        this.ipDiscoveryRetrySpec = Objects.requireNonNull(ipDiscoveryRetrySpec);
+        return this;
+    }
+
     @Override
     public Mono<VoiceConnection> asRequest() {
-        final long guildId = voiceChannel.getGuildId().asLong();
-        final long channelId = voiceChannel.getId().asLong();
-        final Flux<Long> selfIdSupplier = Flux.just(gateway.getSelfId().asLong())
-                .cache()
-                .repeat();
-
+        final Snowflake guildId = voiceChannel.getGuildId();
+        final Snowflake channelId = voiceChannel.getId();
         final GatewayClientGroup clientGroup = voiceChannel.getClient().getGatewayClientGroup();
-        final int shardId = (int) ((voiceChannel.getGuildId().asLong() >> 22) % clientGroup.getShardCount());
+        final int shardId = clientGroup.computeShardIndex(guildId);
         final Mono<Void> sendVoiceStateUpdate = clientGroup.unicast(ShardGatewayPayload.voiceStateUpdate(
                 VoiceStateUpdate.builder()
-                        .guildId(Snowflake.asString(guildId))
-                        .channelId(Snowflake.asString(channelId))
+                        .guildId(guildId.asString())
+                        .channelId(channelId.asString())
                         .selfMute(selfMute)
                         .selfDeaf(selfDeaf)
                         .build(), shardId));
 
-        final Mono<VoiceStateUpdateEvent> waitForVoiceStateUpdate = gateway.getEventDispatcher()
-                .on(VoiceStateUpdateEvent.class)
-                .zipWith(selfIdSupplier)
-                .filter(t2 -> {
-                    VoiceStateUpdateEvent vsu = t2.getT1();
-                    Long selfId = t2.getT2();
-                    final long vsuUser = vsu.getCurrent().getUserId().asLong();
-                    final long vsuGuild = vsu.getCurrent().getGuildId().asLong();
-                    // this update is for the bot (current) user in this guild
-                    return (vsuUser == selfId) && (vsuGuild == guildId);
-                })
-                .map(Tuple2::getT1)
-                .next();
+        final Mono<VoiceStateUpdateEvent> waitForVoiceStateUpdate = onVoiceStateUpdates(gateway, guildId).next();
+        final Mono<VoiceServerUpdateEvent> waitForVoiceServerUpdate = onVoiceServerUpdate(gateway, guildId);
 
-        final Mono<VoiceServerUpdateEvent> waitForVoiceServerUpdate = gateway.getEventDispatcher()
-                .on(VoiceServerUpdateEvent.class)
-                .filter(vsu -> vsu.getGuildId().asLong() == guildId)
-                .filter(vsu -> vsu.getEndpoint() != null) // sometimes Discord sends null here. If so, another VSU
-                // should arrive afterwards
-                .next();
-
-        final VoiceDisconnectTask disconnectTask = guild -> voiceChannel.sendDisconnectVoiceState()
-                .then(gateway.getVoiceConnectionRegistry().disconnect(guildId));
-        final VoiceServerUpdateTask serverUpdateTask = onServerUpdateTask(gateway);
+        final VoiceDisconnectTask disconnectTask = id -> voiceChannel.sendDisconnectVoiceState()
+                .then(gateway.getVoiceConnectionRegistry().disconnect(id));
+        //noinspection ConstantConditions
+        final VoiceServerUpdateTask serverUpdateTask = id -> onVoiceServerUpdate(gateway, id)
+                .map(vsu -> new VoiceServerOptions(vsu.getToken(), vsu.getEndpoint()));
+        final VoiceStateUpdateTask stateUpdateTask = id -> onVoiceStateUpdates(gateway, id)
+                .map(stateUpdateEvent -> stateUpdateEvent.getCurrent().getSessionId());
+        final VoiceChannelRetrieveTask channelRetrieveTask = () -> gateway.getMemberById(voiceChannel.getGuildId(), gateway.getSelfId())
+                .flatMap(Member::getVoiceState)
+                .flatMap(voiceState -> Mono.justOrEmpty(voiceState.getChannelId()));
 
         Mono<VoiceConnection> newConnection = sendVoiceStateUpdate
-                .then(Mono.zip(waitForVoiceStateUpdate, waitForVoiceServerUpdate, selfIdSupplier.next()))
-                .flatMap(TupleUtils.function((voiceState, voiceServer, selfId) -> {
+                .then(Mono.zip(waitForVoiceStateUpdate, waitForVoiceServerUpdate))
+                .flatMap(TupleUtils.function((voiceState, voiceServer) -> {
                     final String session = voiceState.getCurrent().getSessionId();
-                    @SuppressWarnings("ConstantConditions")
-                    final VoiceServerOptions voiceServerOptions = new VoiceServerOptions(voiceServer.getToken(),
-                            voiceServer.getEndpoint());
+                    //noinspection ConstantConditions
+                    final VoiceServerOptions voiceServerOptions = new VoiceServerOptions(
+                            voiceServer.getToken(), voiceServer.getEndpoint());
+                    final VoiceGatewayOptions voiceGatewayOptions = new VoiceGatewayOptions(
+                            guildId, gateway.getSelfId(), session, voiceServerOptions,
+                            gateway.getCoreResources().getJacksonResources(),
+                            gateway.getGatewayResources().getVoiceReactorResources(),
+                            gateway.getGatewayResources().getVoiceReconnectOptions(),
+                            provider, receiver, sendTaskFactory, receiveTaskFactory, disconnectTask,
+                            serverUpdateTask, stateUpdateTask, channelRetrieveTask,
+                            ipDiscoveryTimeout, ipDiscoveryRetrySpec);
 
                     return gateway.getVoiceConnectionFactory()
-                            .create(guildId, selfId, session, voiceServerOptions,
-                                    gateway.getCoreResources().getJacksonResources(),
-                                    gateway.getGatewayResources().getVoiceReactorResources(),
-                                    gateway.getGatewayResources().getVoiceReconnectOptions(),
-                                    provider, receiver, sendTaskFactory, receiveTaskFactory, disconnectTask,
-                                    serverUpdateTask)
+                            .create(voiceGatewayOptions)
                             .flatMap(vc -> gateway.getVoiceConnectionRegistry().registerVoiceConnection(guildId, vc).thenReturn(vc))
                             .subscriberContext(ctx ->
                                     ctx.put(LogUtil.KEY_GATEWAY_ID, Integer.toHexString(gateway.hashCode()))
-                                            .put(LogUtil.KEY_SHARD_ID, shardId)
-                                            .put(LogUtil.KEY_GUILD_ID, Snowflake.asString(guildId)));
+                                            .put(LogUtil.KEY_SHARD_ID, shardId));
                 }))
                 .timeout(timeout)
                 .onErrorResume(TimeoutException.class,
@@ -223,15 +245,23 @@ public class VoiceChannelJoinSpec implements Spec<Mono<VoiceConnection>> {
                 .switchIfEmpty(newConnection);
     }
 
-    private static VoiceServerUpdateTask onServerUpdateTask(GatewayDiscordClient gateway) {
-        return guildId -> {
-            //noinspection ConstantConditions
-            return gateway.getEventDispatcher()
-                    .on(VoiceServerUpdateEvent.class)
-                    .filter(vsu -> vsu.getGuildId().asLong() == guildId)
-                    .filter(vsu -> vsu.getEndpoint() != null)
-                    .map(vsu -> new VoiceServerOptions(vsu.getToken(), vsu.getEndpoint()))
-                    .next();
-        };
+    static Flux<VoiceStateUpdateEvent> onVoiceStateUpdates(GatewayDiscordClient gateway, Snowflake guildId) {
+        return gateway.getEventDispatcher()
+                .on(VoiceStateUpdateEvent.class)
+                .filter(vsu -> {
+                    final Snowflake vsuUser = vsu.getCurrent().getUserId();
+                    final Snowflake vsuGuild = vsu.getCurrent().getGuildId();
+                    // this update is for the bot (current) user in this guild
+                    return vsuUser.equals(gateway.getSelfId()) && vsuGuild.equals(guildId);
+                });
+    }
+
+    static Mono<VoiceServerUpdateEvent> onVoiceServerUpdate(GatewayDiscordClient gateway, Snowflake guildId) {
+        return gateway.getEventDispatcher()
+                .on(VoiceServerUpdateEvent.class)
+                .filter(vsu -> vsu.getGuildId().equals(guildId))
+                .filter(vsu -> vsu.getEndpoint() != null) // sometimes Discord sends null here. If so, another VSU
+                // should arrive afterwards
+                .next();
     }
 }

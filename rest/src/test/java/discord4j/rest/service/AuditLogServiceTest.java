@@ -17,6 +17,7 @@
 package discord4j.rest.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import discord4j.common.util.Snowflake;
 import discord4j.rest.RestTests;
 import discord4j.rest.request.Router;
 import org.junit.Test;
@@ -25,7 +26,7 @@ import java.util.Collections;
 
 public class AuditLogServiceTest {
 
-    private static final long guild = Long.parseUnsignedLong(System.getenv("guild"));
+    private static final long guild = Snowflake.asLong(System.getenv("guild"));
 
     private AuditLogService auditLogService = null;
 

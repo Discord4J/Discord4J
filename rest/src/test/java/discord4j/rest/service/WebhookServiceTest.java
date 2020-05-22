@@ -17,6 +17,7 @@
 package discord4j.rest.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import discord4j.common.util.Snowflake;
 import discord4j.discordjson.json.WebhookModifyRequest;
 import discord4j.rest.RestTests;
 import discord4j.rest.request.Router;
@@ -24,9 +25,9 @@ import org.junit.Test;
 
 public class WebhookServiceTest {
 
-    private static final long permanentChannel = Long.parseUnsignedLong(System.getenv("permanentChannel"));
-    private static final long guild = Long.parseUnsignedLong(System.getenv("guild"));
-    private static final long permanentWebhook = Long.parseUnsignedLong(System.getenv("permanentWebhook"));
+    private static final long permanentChannel = Snowflake.asLong(System.getenv("permanentChannel"));
+    private static final long guild = Snowflake.asLong(System.getenv("guild"));
+    private static final long permanentWebhook = Snowflake.asLong(System.getenv("permanentWebhook"));
 
     private WebhookService webhookService = null;
 

@@ -17,6 +17,7 @@
 
 package discord4j.gateway;
 
+import discord4j.common.util.Snowflake;
 import discord4j.gateway.json.GatewayPayload;
 import discord4j.gateway.json.ShardGatewayPayload;
 import reactor.core.publisher.Mono;
@@ -69,5 +70,14 @@ public interface GatewayClientGroup {
      * through this {@link Mono}.
      */
     Mono<Void> logout();
+
+    /**
+     * Return the shard index according to the shard count given by this {@link GatewayClientGroup}.
+     * @param guildId the input guild ID to compute the shard index
+     * @return the shard index for a given guild ID
+     */
+    default int computeShardIndex(Snowflake guildId) {
+        return (int) ((guildId.asLong() >> 22) % getShardCount());
+    }
 
 }

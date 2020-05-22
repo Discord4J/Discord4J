@@ -19,6 +19,7 @@ package discord4j.core.shard;
 
 import discord4j.common.LogUtil;
 import discord4j.common.ReactorResources;
+import discord4j.common.annotations.Experimental;
 import discord4j.common.retry.ReconnectOptions;
 import discord4j.core.CoreResources;
 import discord4j.core.DiscordClient;
@@ -54,8 +55,12 @@ import discord4j.store.api.service.StoreService;
 import discord4j.store.api.service.StoreServiceLoader;
 import discord4j.store.api.util.StoreContext;
 import discord4j.store.jdk.JdkStoreService;
-import discord4j.voice.*;
+import discord4j.voice.DefaultVoiceConnectionFactory;
+import discord4j.voice.VoiceConnection;
+import discord4j.voice.VoiceConnectionFactory;
+import discord4j.voice.VoiceReactorResources;
 import io.netty.buffer.ByteBuf;
+import org.reactivestreams.Publisher;
 import reactor.core.Disposable;
 import reactor.core.Disposables;
 import reactor.core.publisher.Flux;
@@ -114,7 +119,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
     private Function<ShardInfo, StatusUpdate> initialPresence = shard -> null;
     private Function<ShardInfo, SessionInfo> resumeOptions = shard -> null;
     private Possible<IntentSet> intents = Possible.absent();
-    private boolean guildSubscriptions = true;
+    private Boolean guildSubscriptions = null;
     private Function<GatewayDiscordClient, Mono<Void>> destroyHandler = shutdownDestroyHandler();
     private PayloadReader payloadReader = null;
     private PayloadWriter payloadWriter = null;
@@ -127,6 +132,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
     private EntityRetrievalStrategy entityRetrievalStrategy = null;
     private DispatchEventMapper dispatchEventMapper = null;
     private int maxMissedHeartbeatAck = 1;
+    private Function<EventDispatcher, Publisher<?>> dispatcherFunction;
 
     /**
      * Create a default {@link GatewayBootstrap} based off the given {@link DiscordClient} that provides an instance
@@ -171,6 +177,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
         this.entityRetrievalStrategy = source.entityRetrievalStrategy;
         this.dispatchEventMapper = source.dispatchEventMapper;
         this.maxMissedHeartbeatAck = source.maxMissedHeartbeatAck;
+        this.dispatcherFunction = source.dispatcherFunction;
     }
 
     /**
@@ -316,8 +323,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
      *
      * @param memberRequestFilter the filter indicating how to load guild members
      * @return this builder
-     * @see
-     * <a href="https://discordapp.com/developers/docs/topics/gateway#request-guild-members">Request Guild Members</a>
+     * @see <a href="https://discord.com/developers/docs/topics/gateway#request-guild-members">Request Guild Members</a>
      */
     public GatewayBootstrap<O> setMemberRequestFilter(MemberRequestFilter memberRequestFilter) {
         this.memberRequestFilter = memberRequestFilter;
@@ -329,8 +335,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
      *
      * @param memberRequest {@code true} if enabling the large guild member requests, {@code false} otherwise
      * @return this builder
-     * @see
-     * <a href="https://discordapp.com/developers/docs/topics/gateway#request-guild-members">Request Guild Members</a>
+     * @see <a href="https://discord.com/developers/docs/topics/gateway#request-guild-members">Request Guild Members</a>
      * @deprecated use {@link #setMemberRequestFilter(MemberRequestFilter)}. Calling this method using {@code true} is
      * equivalent to using {@link MemberRequestFilter#withLargeGuilds()} and using {@code false} is the same as using
      * {@link MemberRequestFilter#none()}
@@ -447,7 +452,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
      *
      * @param guildSubscriptions whether to enable or disable guild subscriptions
      * @return this builder
-     * @see <a href="https://discordapp.com/developers/docs/topics/gateway#guild-subscriptions">Guild Subscriptions</a>
+     * @see <a href="https://discord.com/developers/docs/topics/gateway#guild-subscriptions">Guild Subscriptions</a>
      */
     public GatewayBootstrap<O> setGuildSubscriptions(boolean guildSubscriptions) {
         this.guildSubscriptions = guildSubscriptions;
@@ -587,6 +592,20 @@ public class GatewayBootstrap<O extends GatewayOptions> {
     }
 
     /**
+     * Set an initial subscriber to the bootstrapped {@link EventDispatcher} to gain access to early startup events. The
+     * subscriber is derived from the given {@link Function} which returns a {@link Publisher} that is subscribed early
+     * in the Gateway connection process.
+     *
+     * @param dispatcherFunction an {@link EventDispatcher} mapper that derives an asynchronous listener
+     * @return this builder
+     */
+    @Experimental
+    public GatewayBootstrap<O> withEventDispatcher(Function<EventDispatcher, Publisher<?>> dispatcherFunction) {
+        this.dispatcherFunction = Objects.requireNonNull(dispatcherFunction);
+        return this;
+    }
+
+    /**
      * Connect to the Discord Gateway upon subscription to acquire a {@link GatewayDiscordClient} instance and use it
      * in a declarative way, releasing the object once the derived usage {@link Function} completes, and the underlying
      * shard group disconnects, according to {@link GatewayDiscordClient#onDisconnect()}.
@@ -602,8 +621,8 @@ public class GatewayBootstrap<O extends GatewayOptions> {
      * {@link GatewayDiscordClient} and trigger a processing pipeline from it.
      * @return an empty {@link Mono} completing after all resources have released
      */
-    public Mono<Void> withGateway(Function<GatewayDiscordClient, Mono<Void>> whileConnectedFunction) {
-        return usingConnection(gateway -> whileConnectedFunction.apply(gateway).then(gateway.onDisconnect()));
+    public Mono<Void> withGateway(Function<GatewayDiscordClient, Publisher<?>> whileConnectedFunction) {
+        return usingConnection(gateway -> Flux.from(whileConnectedFunction.apply(gateway)).then(gateway.onDisconnect()));
     }
 
     /**
@@ -715,7 +734,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                     ShardCoordinator shardCoordinator = b.initShardCoordinator(gatewayReactorResources);
                     GatewayResources resources = new GatewayResources(stateView, eventDispatcher, shardCoordinator,
                             b.memberRequestFilter, gatewayReactorResources, b.initVoiceReactorResources(),
-                            b.voiceReconnectOptions);
+                            b.voiceReconnectOptions, b.intents);
                     MonoProcessor<Void> closeProcessor = MonoProcessor.create();
                     EntityRetrievalStrategy entityRetrievalStrategy = b.initEntityRetrievalStrategy();
                     DispatchEventMapper dispatchMapper = b.initDispatchEventMapper();
@@ -730,14 +749,32 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                                     gateway, shardCoordinator, stateHolder, eventDispatcher, clientGroup,
                                     closeProcessor, dispatchMapper, invalidationStrategy)));
 
-                    if (awaitConnections == null ? count == 1 : awaitConnections) {
+                    if (b.awaitConnections == null ? count == 1 : b.awaitConnections) {
+                        if (b.dispatcherFunction != null) {
+                            return Mono.create(sink -> {
+                                Disposable.Composite cleanup = Disposables.composite();
+                                cleanup.add(Flux.from(b.dispatcherFunction.apply(eventDispatcher))
+                                        .subscribeOn(gatewayReactorResources.getBlockingTaskScheduler())
+                                        .subscribe(null, t -> log.warn("Error in dispatcher function", t)));
+                                cleanup.add(connections.then(Mono.just(gateway))
+                                        .subscribe(sink::success, sink::error));
+                                sink.onCancel(cleanup);
+                            });
+                        }
                         return connections.then(Mono.just(gateway));
                     } else {
-                        return Mono.create(sink -> {
-                            sink.onCancel(connections.subscribe(null,
-                                    t -> log.error("Connection handler terminated with an error", t)));
-                            sink.success(gateway);
-                        });
+                        if (b.dispatcherFunction != null) {
+                            return Mono.create(sink -> {
+                                Disposable.Composite cleanup = Disposables.composite();
+                                cleanup.add(Flux.from(b.dispatcherFunction.apply(eventDispatcher))
+                                        .subscribeOn(gatewayReactorResources.getBlockingTaskScheduler())
+                                        .subscribe(null, t -> log.warn("Error in dispatcher function", t)));
+                                cleanup.add(connections.subscribe(__ -> sink.success(gateway), sink::error));
+                                sink.onCancel(cleanup);
+                            });
+                        }
+                        return Mono.create(sink ->
+                                sink.onCancel(connections.subscribe(__ -> sink.success(gateway), sink::error)));
                     }
                 });
     }
@@ -756,12 +793,12 @@ public class GatewayBootstrap<O extends GatewayOptions> {
         return Mono.deferWithContext(ctx ->
                 Mono.<ShardInfo>create(sink -> {
                     StatusUpdate initial = Optional.ofNullable(b.initialPresence.apply(shard)).orElse(null);
-                    IdentifyOptions identify = new IdentifyOptions(shard, initial, b.intents, b.guildSubscriptions);
-                    SessionInfo resume = b.resumeOptions.apply(shard);
-                    if (resume != null) {
-                        identify.setResumeSessionId(resume.getId());
-                        identify.setResumeSequence(resume.getSequence());
-                    }
+                    IdentifyOptions identify = IdentifyOptions.builder(shard)
+                            .initialStatus(initial)
+                            .intents(b.intents.toOptional().orElse(null))
+                            .guildSubscriptions(b.guildSubscriptions)
+                            .resumeSession(b.resumeOptions.apply(shard))
+                            .build();
                     PayloadTransformer limiter = shardCoordinator.getIdentifyLimiter(shard,
                             b.shardingStrategy.getShardingFactor());
                     Disposable.Composite forCleanup = Disposables.composite();
@@ -811,7 +848,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                                         return shardCoordinator.publishConnected(shard)
                                                 .doFinally(__ -> sink.success(shard));
                                     case DISCONNECTED_RESUME:
-                                        session = new SessionInfo(gatewayClient.getSessionId(),
+                                        session = SessionInfo.create(gatewayClient.getSessionId(),
                                                 gatewayClient.getSequence());
                                     case DISCONNECTED:
                                         log.info(format(ctx, "Shard disconnected"));
@@ -849,13 +886,14 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                                     b.reconnectOptions.getMaxBackoffInterval())
                             .flatMap(response -> gatewayClient.execute(
                                     RouteUtils.expandQuery(response.url(), getGatewayParameters())))
+                            .doOnError(sink::error) // only useful for startup errors
                             .doFinally(__ -> {
-                                sink.success();
+                                sink.success(); // no-op if we completed it before
                                 closeProcessor.onComplete();
                             })
                             .subscriberContext(buildContext(gateway, shard))
                             .subscribe(null,
-                                    t -> log.error(format(ctx, "Gateway terminated with an error"), t),
+                                    t -> log.debug(format(ctx, "Gateway terminated with an error: {}"), t),
                                     () -> log.debug(format(ctx, "Gateway completed"))));
 
                     sink.onCancel(forCleanup);
@@ -1023,16 +1061,6 @@ public class GatewayBootstrap<O extends GatewayOptions> {
      */
     public static VoiceConnectionFactory defaultVoiceConnectionFactory() {
         return new DefaultVoiceConnectionFactory();
-    }
-
-    /**
-     * Create a {@link VoiceConnectionFactory} using a finite state machine implementation but currently without
-     * reconnecting capabilities.
-     *
-     * @return a FSM-based {@link VoiceConnectionFactory}
-     */
-    public static VoiceConnectionFactory fsmVoiceConnectionFactory() {
-        return new FSMVoiceConnectionFactory();
     }
 
 }

@@ -21,7 +21,7 @@ import discord4j.discordjson.json.*;
 import discord4j.rest.RestClient;
 import discord4j.rest.util.MultipartRequest;
 import discord4j.rest.util.PaginationUtil;
-import discord4j.rest.util.Snowflake;
+import discord4j.common.util.Snowflake;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -74,7 +74,7 @@ public class RestChannel {
      *
      * @return a {@link Mono} where, upon successful completion, emits the {@link ChannelData} belonging to this
      * channel. If an error is received, it is emitted through the {@code Mono}.
-     * @see <a href="https://discordapp.com/developers/docs/resources/channel#get-channel">Get Channel</a>
+     * @see <a href="https://discord.com/developers/docs/resources/channel#get-channel">Get Channel</a>
      */
     public Mono<ChannelData> getData() {
         return restClient.getChannelService().getChannel(id);
@@ -91,7 +91,7 @@ public class RestChannel {
      * @param reason a reason for this action, can be {@code null}
      * @return a {@link Mono} where, upon successful completion, emits the edited {@link ChannelData}. If an error is
      * received, it is emitted through the {@code Mono}.
-     * @see <a href="https://discordapp.com/developers/docs/resources/channel#modify-channel">Modify Channel</a>
+     * @see <a href="https://discord.com/developers/docs/resources/channel#modify-channel">Modify Channel</a>
      */
     public Mono<ChannelData> modify(ChannelModifyRequest request, @Nullable String reason) {
         return restClient.getChannelService().modifyChannel(id, request, reason);
@@ -104,7 +104,7 @@ public class RestChannel {
      * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the channel has been deleted.
      * If an error is received, it is emitted through the {@code Mono}.
      * @see
-     * <a href="https://discordapp.com/developers/docs/resources/channel#deleteclose-channel">Delete/Close Channel</a>
+     * <a href="https://discord.com/developers/docs/resources/channel#deleteclose-channel">Delete/Close Channel</a>
      */
     public Mono<Void> delete(@Nullable String reason) {
         return restClient.getChannelService().deleteChannel(id, reason).then();
@@ -124,7 +124,7 @@ public class RestChannel {
      * @return A {@link Flux} that continually emits <i>all</i> {@link MessageData messages} <i>before</i> the
      * specified ID. If an error is received, it is emitted through the {@code Flux}.
      * @see
-     * <a href="https://discordapp.com/developers/docs/resources/channel#get-channel-messages">Get Channel Messages</a>
+     * <a href="https://discord.com/developers/docs/resources/channel#get-channel-messages">Get Channel Messages</a>
      */
     public Flux<MessageData> getMessagesBefore(long messageId) {
         Function<Map<String, Object>, Flux<MessageData>> doRequest =
@@ -146,7 +146,7 @@ public class RestChannel {
      * @return a {@link Flux} that continually emits <i>all</i> {@link MessageData messages} <i>after</i> the
      * specified ID. If an error is received, it is emitted through the {@code Flux}.
      * @see
-     * <a href="https://discordapp.com/developers/docs/resources/channel#get-channel-messages">Get Channel Messages</a>
+     * <a href="https://discord.com/developers/docs/resources/channel#get-channel-messages">Get Channel Messages</a>
      */
     public Flux<MessageData> getMessagesAfter(long messageId) {
         Function<Map<String, Object>, Flux<MessageData>> doRequest = params ->
@@ -172,7 +172,7 @@ public class RestChannel {
      * @param request request body used to create a new message
      * @return a {@link Mono} where, upon successful completion, emits the created {@link MessageData}. If an
      * error is received, it is emitted through the {@code Mono}.
-     * @see <a href="https://discordapp.com/developers/docs/resources/channel#create-message">Create Message</a>
+     * @see <a href="https://discord.com/developers/docs/resources/channel#create-message">Create Message</a>
      */
     public Mono<MessageData> createMessage(MessageCreateRequest request) {
         return restClient.getChannelService().createMessage(id, new MultipartRequest(request));
@@ -185,7 +185,7 @@ public class RestChannel {
      * @param request request body used to create a new message
      * @return a {@link Mono} where, upon successful completion, emits the created {@link MessageData}. If an
      * error is received, it is emitted through the {@code Mono}.
-     * @see <a href="https://discordapp.com/developers/docs/resources/channel#create-message">Create Message</a>
+     * @see <a href="https://discord.com/developers/docs/resources/channel#create-message">Create Message</a>
      */
     public Mono<MessageData> createMessage(MultipartRequest request) {
         // TODO: improve API to create MultipartRequest objects
@@ -199,7 +199,7 @@ public class RestChannel {
      * @return a {@link Flux} that continually emits {@link Long message IDs} that were <b>not</b> bulk deleted
      * (typically if the ID was older than 2 weeks). If an error is received, it is emitted through the {@code Flux}.
      * @see
-     * <a href="https://discordapp.com/developers/docs/resources/channel#bulk-delete-messages">Bulk Delete Messages</a>
+     * <a href="https://discord.com/developers/docs/resources/channel#bulk-delete-messages">Bulk Delete Messages</a>
      */
     public Flux<Long> bulkDelete(Publisher<Long> messageIds) {
         Instant timeLimit = Instant.now().minus(Duration.ofDays(14L));
@@ -244,7 +244,7 @@ public class RestChannel {
      * @return a {@link Mono} where, upon successful completion, emits nothing; If an error is received, it is emitted
      * through the {@code Mono}
      * @see
-     * <a href="https://discordapp.com/developers/docs/resources/channel#edit-channel-permissions">Edit Channel Permissions</a>
+     * <a href="https://discord.com/developers/docs/resources/channel#edit-channel-permissions">Edit Channel Permissions</a>
      */
     public Mono<Void> editChannelPermissions(long targetId, PermissionsEditRequest request, @Nullable String reason) {
         return restClient.getChannelService().editChannelPermissions(id, targetId, request, reason);
@@ -256,7 +256,7 @@ public class RestChannel {
      * @return a {@link Flux} that continually emits this channel's {@link InviteData invites}. If an error is
      * received, it is emitted through the {@code Flux}.
      * @see
-     * <a href="https://discordapp.com/developers/docs/resources/channel#get-channel-invites">Get Channel Invites</a>
+     * <a href="https://discord.com/developers/docs/resources/channel#get-channel-invites">Get Channel Invites</a>
      */
     public Flux<InviteData> getInvites() {
         return restClient.getChannelService().getChannelInvites(id);
@@ -270,7 +270,7 @@ public class RestChannel {
      * @return a {@link Mono} where, upon successful completion, emits the created {@link InviteData}. If an error
      * is received, it is emitted through the {@code Mono}.
      * @see
-     * <a href="https://discordapp.com/developers/docs/resources/channel#create-channel-invite">Create Channel Invite</a>
+     * <a href="https://discord.com/developers/docs/resources/channel#create-channel-invite">Create Channel Invite</a>
      */
     public Mono<InviteData> createInvite(InviteCreateRequest request, @Nullable String reason) {
         return restClient.getChannelService().createChannelInvite(id, request, reason);
@@ -283,7 +283,7 @@ public class RestChannel {
      * @return a {@link Mono} where, upon successful completion, emits nothing; indicating the permission overwrite has
      * been deleted. If an error is received, it is emitted through the {@code Mono}.
      * @see
-     * <a href="https://discordapp.com/developers/docs/resources/channel#delete-channel-permission">Delete Channel Permission</a>
+     * <a href="https://discord.com/developers/docs/resources/channel#delete-channel-permission">Delete Channel Permission</a>
      */
     public Mono<Void> deleteChannelPermission(long targetId, @Nullable final String reason) {
         return restClient.getChannelService().deleteChannelPermission(id, targetId, reason);
@@ -296,7 +296,7 @@ public class RestChannel {
      * @return a {@link Mono} which completes upon successful triggering of the typing indicator in this channel. If
      * an error is received, it is emitted through the {@code Mono}.
      * @see
-     * <a href="https://discordapp.com/developers/docs/resources/channel#trigger-typing-indicator">Trigger Typing Indicator</a>
+     * <a href="https://discord.com/developers/docs/resources/channel#trigger-typing-indicator">Trigger Typing Indicator</a>
      */
     public Mono<Void> type() {
         return restClient.getChannelService().triggerTypingIndicator(id);
@@ -308,7 +308,7 @@ public class RestChannel {
      * @return a {@link Flux} that continually emits all the pinned messages for this channel. If an error is received,
      * it is emitted through the {@code Flux}.
      * @see
-     * <a href="https://discordapp.com/developers/docs/resources/channel#get-pinned-messages">Get Pinned Messages</a>
+     * <a href="https://discord.com/developers/docs/resources/channel#get-pinned-messages">Get Pinned Messages</a>
      */
     public Flux<MessageData> getPinnedMessages() {
         return restClient.getChannelService().getPinnedMessages(id);

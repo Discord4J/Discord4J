@@ -23,7 +23,7 @@ import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.VoiceChannel;
 import discord4j.core.retriever.EntityRetrievalStrategy;
 import discord4j.discordjson.json.VoiceStateData;
-import discord4j.rest.util.Snowflake;
+import discord4j.common.util.Snowflake;
 import reactor.core.publisher.Mono;
 
 import java.util.Objects;
@@ -32,7 +32,7 @@ import java.util.Optional;
 /**
  * A Discord voice state.
  *
- * @see <a href="https://discordapp.com/developers/docs/resources/voice#voice-resource">Voice Resource</a>
+ * @see <a href="https://discord.com/developers/docs/resources/voice#voice-resource">Voice Resource</a>
  */
 public final class VoiceState implements DiscordObject {
 

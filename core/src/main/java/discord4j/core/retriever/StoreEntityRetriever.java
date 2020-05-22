@@ -22,7 +22,8 @@ import discord4j.core.object.entity.channel.Channel;
 import discord4j.core.object.entity.channel.GuildChannel;
 import discord4j.core.state.StateView;
 import discord4j.core.util.EntityUtil;
-import discord4j.rest.util.Snowflake;
+import discord4j.gateway.intent.Intent;
+import discord4j.common.util.Snowflake;
 import discord4j.store.api.util.LongLongTuple2;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -104,6 +105,11 @@ public class StoreEntityRetriever implements EntityRetriever {
     @Override
     public Flux<Member> getGuildMembers(Snowflake guildId) {
         return stateView.getGuildStore().find(guildId.asLong())
+                .filterWhen(guild -> Mono.justOrEmpty(gateway.getGatewayResources().getIntents().toOptional())
+                        .filter(intents -> intents.contains(Intent.GUILDS))
+                        .flatMap(intents -> new Guild(gateway, guild).getVoiceStates().count())
+                        .map(count -> guild.memberCount() - count == 1)
+                        .defaultIfEmpty(true)) // Fix for https://github.com/Discord4J/Discord4J/issues/708
                 .flatMapMany(guildData -> Flux.fromIterable(guildData.members())
                         .flatMap(memberId -> stateView.getMemberStore()
                                 .find(LongLongTuple2.of(guildId.asLong(), Snowflake.asLong(memberId))))

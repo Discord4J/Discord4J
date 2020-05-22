@@ -17,10 +17,14 @@
 
 package discord4j.voice;
 
+import discord4j.common.util.Snowflake;
 import reactor.core.publisher.Mono;
 
+/**
+ * A listener to derive a potentially new {@link VoiceServerOptions} from a VOICE_SERVER_UPDATE gateway event.
+ */
 @FunctionalInterface
 public interface VoiceServerUpdateTask {
 
-    Mono<VoiceServerOptions> onVoiceServerUpdate(long guildId);
+    Mono<VoiceServerOptions> onVoiceServerUpdate(Snowflake guildId);
 }

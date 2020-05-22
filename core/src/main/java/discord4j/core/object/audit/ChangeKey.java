@@ -21,14 +21,14 @@ import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Role;
 import discord4j.core.object.entity.channel.Channel;
 import discord4j.rest.util.PermissionSet;
-import discord4j.rest.util.Snowflake;
+import discord4j.common.util.Snowflake;
 
 import java.awt.*;
 import java.util.Set;
 
 /**
  * Represents the various audit log change key.
- * See <a href="https://discordapp.com/developers/docs/resources/audit-log#audit-log-change-object-audit-log-change-key">
+ * See <a href="https://discord.com/developers/docs/resources/audit-log#audit-log-change-object-audit-log-change-key">
  *     Audit Log Change Key</a>
  * @param <T> The type of the audit log change key.
  */

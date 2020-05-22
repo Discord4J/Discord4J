@@ -47,7 +47,7 @@ import discord4j.gateway.json.GatewayPayload;
 import discord4j.gateway.json.ShardGatewayPayload;
 import discord4j.rest.RestClient;
 import discord4j.rest.RestResources;
-import discord4j.rest.util.Snowflake;
+import discord4j.common.util.Snowflake;
 import discord4j.voice.LocalVoiceConnectionRegistry;
 import discord4j.voice.VoiceConnection;
 import discord4j.voice.VoiceConnectionFactory;
@@ -267,13 +267,13 @@ public class GatewayDiscordClient implements EntityRetriever {
      * received, it is emitted through the {@code Mono}.
      */
     public Mono<Guild> createGuild(final Consumer<? super GuildCreateSpec> spec) {
-        final GuildCreateSpec mutatedSpec = new GuildCreateSpec();
-        spec.accept(mutatedSpec);
-
-        return getRestClient().getGuildService()
-                .createGuild(mutatedSpec.asRequest())
-                .map(this::toGuildData)
-                .map(data -> new Guild(this, data));
+        return Mono.defer(
+                () -> {
+                    GuildCreateSpec mutatedSpec = new GuildCreateSpec();
+                    spec.accept(mutatedSpec);
+                    return getRestClient().getGuildService().createGuild(mutatedSpec.asRequest());
+                })
+                .map(data -> new Guild(this, toGuildData(data)));
     }
 
     private GuildData toGuildData(GuildUpdateData guild) {
@@ -338,11 +338,12 @@ public class GatewayDiscordClient implements EntityRetriever {
      * it is emitted through the {@code Mono}.
      */
     public Mono<User> edit(final Consumer<? super UserEditSpec> spec) {
-        final UserEditSpec mutatedSpec = new UserEditSpec();
-        spec.accept(mutatedSpec);
-
-        return getRestClient().getUserService()
-                .modifyCurrentUser(mutatedSpec.asRequest())
+        return Mono.defer(
+                () -> {
+                    UserEditSpec mutatedSpec = new UserEditSpec();
+                    spec.accept(mutatedSpec);
+                    return getRestClient().getUserService().modifyCurrentUser(mutatedSpec.asRequest());
+                })
                 .map(data -> new User(this, data));
     }
 
@@ -490,7 +491,7 @@ public class GatewayDiscordClient implements EntityRetriever {
      */
     public Flux<Member> requestMembers(RequestGuildMembers request) {
         Snowflake guildId = Snowflake.of(request.guildId());
-        int shardId = (int) ((guildId.asLong() >> 22) % gatewayClientGroup.getShardCount());
+        int shardId = gatewayClientGroup.computeShardIndex(guildId);
         String nonce = String.valueOf(System.nanoTime());
         Supplier<Flux<Member>> incomingMembers = () -> gatewayClientGroup.find(shardId)
                 .map(gatewayClient -> gatewayClient.dispatch()

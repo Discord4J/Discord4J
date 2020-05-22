@@ -18,7 +18,7 @@ package discord4j.core.event.domain;
 
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.Guild;
-import discord4j.rest.util.Snowflake;
+import discord4j.common.util.Snowflake;
 import discord4j.gateway.ShardInfo;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
@@ -28,7 +28,7 @@ import reactor.util.annotation.Nullable;
  * <p>
  * This event is dispatched by Discord.
  *
- * @see <a href="https://discordapp.com/developers/docs/topics/gateway#voice-server-update">Voice Server Update</a>
+ * @see <a href="https://discord.com/developers/docs/topics/gateway#voice-server-update">Voice Server Update</a>
  */
 public class VoiceServerUpdateEvent extends Event {
 
