@@ -21,7 +21,7 @@ import discord4j.common.JacksonResources;
 import discord4j.common.ReactorResources;
 import discord4j.common.util.Snowflake;
 import discord4j.rest.request.Router;
-import discord4j.rest.util.DiscordUtils;
+import discord4j.common.util.TokenUtil;
 
 /**
  * A set of resources required for key Discord4J features like entity manipulation and API communication.
@@ -48,7 +48,7 @@ public class RestResources {
         this.reactorResources = reactorResources;
         this.jacksonResources = jacksonResources;
         this.router = router;
-        this.selfId = DiscordUtils.getSelfId(token);
+        this.selfId = TokenUtil.getSelfId(token);
     }
 
     /**

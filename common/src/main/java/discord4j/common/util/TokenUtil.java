@@ -14,12 +14,12 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
  */
-package discord4j.rest.util;
+package discord4j.common.util;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
-public final class DiscordUtils {
+public final class TokenUtil {
 
     /**
      * Extracts the bot user's ID from the token used to authenticate requests.
