@@ -297,7 +297,7 @@ public class DefaultVoiceGatewayClient {
                             .doOnCancel(() -> sessionHandler.close())
                             .then();
                 })
-                .subscriberContext(ctx -> ctx.put(LogUtil.KEY_GUILD_ID, guildId))
+                .subscriberContext(ctx -> ctx.put(LogUtil.KEY_GUILD_ID, guildId.asString()))
                 .retryWhen(retryFactory())
                 .then(Mono.defer(() -> disconnectNotifier.then()))
                 .doOnSubscribe(s -> {
