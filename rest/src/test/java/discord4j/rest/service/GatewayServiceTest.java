@@ -16,29 +16,28 @@
  */
 package discord4j.rest.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import discord4j.rest.DiscordTest;
 import discord4j.rest.RestTests;
-import discord4j.rest.request.Router;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.TestInstance;
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class GatewayServiceTest {
 
-    private GatewayService getGatewayService() {
-        String token = System.getenv("token");
-        boolean ignoreUnknown = !Boolean.parseBoolean(System.getenv("failUnknown"));
-        ObjectMapper mapper = RestTests.getMapper(ignoreUnknown);
-        Router router = RestTests.getRouter(token, mapper);
+    private GatewayService gatewayService;
 
-        return new GatewayService(router);
+    @BeforeAll
+    public void setup() {
+        gatewayService = new GatewayService(RestTests.defaultRouter());
     }
 
-    @Test
+    @DiscordTest
     public void testGetGateway() {
-        getGatewayService().getGateway().block();
+        gatewayService.getGateway().block();
     }
 
-    @Test
+    @DiscordTest
     public void testGetGatewayBot() {
-        getGatewayService().getGatewayBot().block();
+        gatewayService.getGatewayBot().block();
     }
 }

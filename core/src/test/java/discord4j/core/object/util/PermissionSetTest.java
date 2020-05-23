@@ -16,10 +16,10 @@
  */
 package discord4j.core.object.util;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static discord4j.core.object.util.Permission.*;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class PermissionSetTest {
 

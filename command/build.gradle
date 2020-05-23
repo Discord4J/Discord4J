@@ -1,5 +1,5 @@
 dependencies {
     api project(":core")
 
-    testImplementation "junit:junit:$junit_version"
+    testImplementation "org.junit.jupiter:junit-jupiter-engine:$junit_version"
 }

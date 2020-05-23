@@ -16,32 +16,27 @@
  */
 package discord4j.common;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import reactor.test.StepVerifier;
 
 import java.time.Duration;
-import java.util.concurrent.TimeUnit;
 
 public class ResettableIntervalTest {
 
     @Test
-    public void test() throws InterruptedException {
-
+    public void test() {
         ResettableInterval interval = new ResettableInterval();
-        interval.ticks().subscribe(System.out::println);
-
-        interval.start(Duration.ofSeconds(1));
-
-        TimeUnit.SECONDS.sleep(5);
-
-        interval.stop();
-
-        TimeUnit.SECONDS.sleep(2);
-
-        interval.start(Duration.ofSeconds(1));
-
-        TimeUnit.SECONDS.sleep(5);
-
-        interval.stop();
+        StepVerifier.withVirtualTime(() -> interval.ticks()
+                .doOnSubscribe(s -> interval.start(Duration.ofSeconds(1))))
+                .expectSubscription()
+                .expectNoEvent(Duration.ofSeconds(1))
+                .expectNext(0L)
+                .then(interval::stop)
+                .then(() -> interval.start(Duration.ofSeconds(2)))
+                .expectNoEvent(Duration.ofSeconds(2))
+                .expectNext(1L)
+                .thenCancel()
+                .verify();
     }
 
 }

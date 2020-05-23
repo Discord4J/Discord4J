@@ -24,19 +24,21 @@ import discord4j.common.jackson.PossibleModule;
 import discord4j.common.jackson.UnknownPropertyHandler;
 import discord4j.gateway.json.dispatch.PresenceUpdate;
 import discord4j.gateway.json.dispatch.Ready;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 
 import java.io.IOException;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class PayloadDeserializationTest {
 
     private ObjectMapper mapper;
 
-    @Before
-    public void init() {
+    @BeforeAll
+    public void setup() {
         mapper = new ObjectMapper()
                 .setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
                 .addHandler(new UnknownPropertyHandler(true))
@@ -196,7 +198,7 @@ public class PayloadDeserializationTest {
 
         assertEquals(9, payload.getOp().getRawOp());
         assertNotNull(payload.getData());
-        assertEquals(false, payload.getData().isResumable());
+        assertFalse(payload.getData().isResumable());
     }
 
     @Test

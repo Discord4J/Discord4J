@@ -17,7 +17,7 @@
 
 package discord4j.common;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import reactor.core.publisher.EmitterProcessor;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxSink;

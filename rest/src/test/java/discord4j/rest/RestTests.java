@@ -27,29 +27,28 @@ import discord4j.rest.http.ExchangeStrategies;
 import discord4j.rest.http.client.DiscordWebClient;
 import discord4j.rest.request.DefaultRouter;
 import discord4j.rest.request.Router;
-import discord4j.rest.service.ChannelService;
 import reactor.netty.http.client.HttpClient;
+
+import java.util.Objects;
 
 public abstract class RestTests {
 
-    public static Router getRouter(String token, ObjectMapper mapper) {
+    private static Router DEFAULT_ROUTER;
+
+    public static Router defaultRouter() {
+        if (DEFAULT_ROUTER == null) {
+            DEFAULT_ROUTER = createDefaultRouter(Objects.requireNonNull(System.getenv("token")));
+        }
+        return DEFAULT_ROUTER;
+    }
+
+    private static Router createDefaultRouter(String token) {
+        ObjectMapper mapper = new ObjectMapper()
+                .setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
+                .addHandler(new UnknownPropertyHandler(true))
+                .registerModules(new PossibleModule(), new Jdk8Module());
         DiscordWebClient webClient = new DiscordWebClient(HttpClient.create().compress(true),
                 ExchangeStrategies.jackson(mapper), token);
         return new DefaultRouter(webClient);
-    }
-
-    public static ObjectMapper getMapper(boolean ignoreUnknown) {
-        return new ObjectMapper()
-                .setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
-                .addHandler(new UnknownPropertyHandler(ignoreUnknown))
-                .registerModules(new PossibleModule(), new Jdk8Module());
-    }
-
-    public static ChannelService getChannelService() {
-        String token = System.getenv("token");
-        boolean ignoreUnknown = !Boolean.parseBoolean(System.getenv("failUnknown"));
-        ObjectMapper mapper = getMapper(ignoreUnknown);
-        Router router = getRouter(token, mapper);
-        return new ChannelService(router);
     }
 }

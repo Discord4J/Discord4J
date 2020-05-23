@@ -3,8 +3,9 @@ dependencies {
 
     api "io.projectreactor.addons:reactor-extra"
 
-    testImplementation "junit:junit:$junit_version"
+    testImplementation "org.junit.jupiter:junit-jupiter-engine:$junit_version"
     testImplementation "ch.qos.logback:logback-classic:$logback_version"
+    testImplementation "io.projectreactor:reactor-test"
 }
 
 javadoc {

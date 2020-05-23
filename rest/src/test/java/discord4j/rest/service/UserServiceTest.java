@@ -16,52 +16,44 @@
  */
 package discord4j.rest.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import discord4j.common.jackson.Possible;
+import discord4j.rest.DiscordTest;
 import discord4j.rest.RestTests;
 import discord4j.rest.http.client.ClientException;
 import discord4j.rest.json.request.DMCreateRequest;
 import discord4j.rest.json.request.UserModifyRequest;
 import discord4j.rest.json.response.ErrorResponse;
-import discord4j.rest.request.Router;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.TestInstance;
 
 import java.util.Collections;
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class UserServiceTest {
 
     private static final long user = Long.parseUnsignedLong(System.getenv("member"));
 
-    private UserService userService = null;
+    private UserService userService;
 
-    private UserService getUserService() {
-
-        if (userService != null) {
-            return userService;
-        }
-
-        String token = System.getenv("token");
-        boolean ignoreUnknown = !Boolean.parseBoolean(System.getenv("failUnknown"));
-        ObjectMapper mapper = RestTests.getMapper(ignoreUnknown);
-        Router router = RestTests.getRouter(token, mapper);
-
-        return userService = new UserService(router);
+    @BeforeAll
+    public void setup() {
+        userService = new UserService(RestTests.defaultRouter());
     }
 
-    @Test
+    @DiscordTest
     public void testGetCurrentUser() {
-        getUserService().getCurrentUser().block();
+        userService.getCurrentUser().block();
     }
 
-    @Test
+    @DiscordTest
     public void testGetUser() {
-        getUserService().getUser(user).block();
+        userService.getUser(user).block();
     }
 
-    @Test
+    @DiscordTest
     public void testGetInvalidUser() {
         try {
-            getUserService().getUser(1111222).block(); // should throw ClientException
+            userService.getUser(1111222).block(); // should throw ClientException
         } catch (ClientException e) {
             ErrorResponse response = e.getErrorResponse();
             System.out.println("Error code: " + response.getFields().get("code"));
@@ -69,39 +61,39 @@ public class UserServiceTest {
         }
     }
 
-    @Test
+    @DiscordTest
     public void testModifyCurrentUser() {
         UserModifyRequest req = new UserModifyRequest(Possible.of("Discord4J 3 Test Bot"), Possible.absent());
-        getUserService().modifyCurrentUser(req).block();
+        userService.modifyCurrentUser(req).block();
     }
 
-    @Test
+    @DiscordTest
     public void testGetCurrentUserGuilds() {
-        getUserService().getCurrentUserGuilds(Collections.emptyMap()).then().block();
+        userService.getCurrentUserGuilds(Collections.emptyMap()).then().block();
     }
 
-    @Test
+    @DiscordTest
     public void testLeaveGuild() {
         // TODO
     }
 
-    @Test
+    @DiscordTest
     public void testGetUserDMs() {
-        getUserService().getUserDMs().then().block();
+        userService.getUserDMs().then().block();
     }
 
-    @Test
+    @DiscordTest
     public void testCreateDM() {
         DMCreateRequest req = new DMCreateRequest(user);
-        getUserService().createDM(req).block();
+        userService.createDM(req).block();
     }
 
-    @Test
+    @DiscordTest
     public void testCreateGroupDM() {
         // TODO
     }
 
-    @Test
+    @DiscordTest
     public void testGetUserConnections() {
         // TODO
     }

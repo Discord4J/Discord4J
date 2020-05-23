@@ -22,19 +22,21 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import discord4j.common.jackson.Possible;
 import discord4j.common.jackson.PossibleModule;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 
 import java.io.IOException;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class PayloadSerializationTest {
 
     private ObjectMapper mapper;
 
-    @Before
-    public void init() {
+    @BeforeAll
+    public void setup() {
         mapper = new ObjectMapper()
                 .setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
                 .configure(DeserializationFeature.FAIL_ON_MISSING_EXTERNAL_TYPE_ID_PROPERTY, false) // required

@@ -24,80 +24,26 @@ import discord4j.common.SimpleBucket;
 import discord4j.common.jackson.PossibleModule;
 import discord4j.common.jackson.UnknownPropertyHandler;
 import discord4j.gateway.json.StatusUpdate;
-import discord4j.gateway.json.dispatch.MessageCreate;
-import discord4j.gateway.json.dispatch.Ready;
 import discord4j.gateway.payload.JacksonPayloadReader;
 import discord4j.gateway.payload.JacksonPayloadWriter;
-import discord4j.gateway.payload.PayloadReader;
-import discord4j.gateway.payload.PayloadWriter;
 import discord4j.gateway.retry.RetryOptions;
-import org.junit.Ignore;
-import org.junit.Test;
-import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 import reactor.netty.http.client.HttpClient;
 
-import java.io.IOException;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
-public class GatewayClientTest {
+public class ExampleGatewayClientShards {
 
     private static final String gatewayUrl = "wss://gateway.discord.gg?v=6&encoding=json&compress=zlib-stream";
-
-    @Test
-    @Ignore("Example code not under CI")
-    public void test() {
-        // need to set 1 env vars, token
-        String token = System.getenv("token");
-        ObjectMapper mapper = getMapper();
-        PayloadReader reader = new JacksonPayloadReader(mapper);
-        PayloadWriter writer = new JacksonPayloadWriter(mapper);
-        RetryOptions retryOptions = new RetryOptions(Duration.ofSeconds(5), Duration.ofSeconds(120),
-                Integer.MAX_VALUE, Schedulers.elastic());
-        GatewayClient gatewayClient = new DefaultGatewayClient(HttpClient.create(),
-                reader, writer, retryOptions, token,
-                new IdentifyOptions(0, 1, null), null,
-                new RateLimiterTransformer(new SimpleBucket(1, Duration.ofSeconds(6))));
-
-        gatewayClient.dispatch().subscribe(dispatch -> {
-            if (dispatch instanceof Ready) {
-                System.out.println("Test received READY!");
-            }
-        });
-
-        gatewayClient.receiver(byteBuf -> Mono.fromRunnable(() -> {
-            try {
-                String json = mapper.writeValueAsString(mapper.readTree(byteBuf.array()));
-                System.out.println(json);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        })).subscribe();
-
-        gatewayClient.dispatch().ofType(MessageCreate.class)
-                .subscribe(message -> {
-                    String content = message.getContent();
-                    System.out.println(content);
-                    if ("!close".equals(content)) {
-                        gatewayClient.close(false).block();
-                    } else if ("!retry".equals(content)) {
-                        gatewayClient.close(true).block();
-                    }
-                });
-
-        gatewayClient.execute(gatewayUrl).block();
-    }
 
     /*
      * Example code showcasing raw gateway module usage to launch an arbitrary number of shards, coordinating their
      * connection process using CountDownLatch objects.
      */
-    @Test
-    @Ignore("Example code not under CI")
-    public void testShards() throws InterruptedException {
+    public static void main(String[] args) throws InterruptedException {
         // need to set 2 env vars, token and shardCount
         String token = System.getenv("token");
         int shardCount = Integer.parseInt(System.getenv("shardCount"));
@@ -146,7 +92,7 @@ public class GatewayClientTest {
         exit.await();
     }
 
-    private ObjectMapper getMapper() {
+    private static ObjectMapper getMapper() {
         return new ObjectMapper()
                 .setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
                 .addHandler(new UnknownPropertyHandler(true))

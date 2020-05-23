@@ -16,17 +16,14 @@
  */
 package discord4j.rest.http;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.PropertyAccessor;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import discord4j.common.jackson.PossibleModule;
 import discord4j.common.json.MessageResponse;
+import discord4j.rest.DiscordTest;
 import discord4j.rest.RestTests;
 import discord4j.rest.json.request.MessageCreateRequest;
 import discord4j.rest.request.Router;
 import discord4j.rest.route.Routes;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.TestInstance;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
@@ -34,23 +31,20 @@ import reactor.core.scheduler.Schedulers;
 import java.time.Instant;
 import java.util.concurrent.TimeUnit;
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class RouterTest {
 
-    private ObjectMapper getMapper() {
-        return new ObjectMapper()
-                .setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
-                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true)
-                .registerModule(new PossibleModule());
+    private static final String channelId = System.getenv("channel");
+
+    private Router router;
+
+    @BeforeAll
+    public void setup() {
+        router = RestTests.defaultRouter();
     }
 
-    @Test
+    @DiscordTest
     public void test() throws Exception {
-        String token = System.getenv("token");
-        String channelId = System.getenv("channel");
-
-        ObjectMapper mapper = getMapper();
-        Router router = RestTests.getRouter(token, mapper);
-
         MessageCreateRequest body = new MessageCreateRequest("hello at" + Instant.now(), null, false, null);
 
         Routes.MESSAGE_CREATE.newRequest(channelId)
@@ -58,18 +52,11 @@ public class RouterTest {
                 .exchange(router)
                 .subscribe(response -> System.out.println("complete response"));
 
-
         TimeUnit.SECONDS.sleep(1);
     }
 
-    @Test
+    @DiscordTest
     public void orderingTest() throws Exception {
-        String token = System.getenv("token");
-        String channelId = System.getenv("channel");
-
-        ObjectMapper mapper = getMapper();
-        Router router = RestTests.getRouter(token, mapper);
-
         String cid = Integer.toHexString(this.hashCode());
 
         for (int i = 0; i < 10; i++) {
@@ -86,14 +73,8 @@ public class RouterTest {
         TimeUnit.SECONDS.sleep(10);
     }
 
-    @Test
+    @DiscordTest
     public void testMultiSub() throws Exception {
-        String token = System.getenv("token");
-        String channelId = System.getenv("channel");
-
-        ObjectMapper mapper = getMapper();
-        Router router = RestTests.getRouter(token, mapper);
-
         MessageCreateRequest body = new MessageCreateRequest("hi", null, false, null);
 
         Mono<MessageResponse> mono = Routes.MESSAGE_CREATE.newRequest(channelId)
@@ -106,13 +87,8 @@ public class RouterTest {
         TimeUnit.SECONDS.sleep(2);
     }
 
-    @Test
+    @DiscordTest
     public void testCustomThreadingModel() throws Exception {
-        String token = System.getenv("token");
-        String channelId = System.getenv("channel");
-
-        ObjectMapper mapper = getMapper();
-        Router router = RestTests.getRouter(token, mapper);
         Scheduler thread = Schedulers.single();
 
         String cid = Integer.toHexString(this.hashCode());
@@ -134,14 +110,8 @@ public class RouterTest {
         TimeUnit.SECONDS.sleep(10);
     }
 
-    @Test
+    @DiscordTest
     public void testBlocking() {
-        String token = System.getenv("token");
-        String channelId = System.getenv("channel");
-
-        ObjectMapper mapper = getMapper();
-        Router router = RestTests.getRouter(token, mapper);
-
         String cid = Integer.toHexString(this.hashCode());
 
         MessageCreateRequest body0 = new MessageCreateRequest(cid + " 0 at" + Instant.now(), null, false, null);
