@@ -336,3 +336,35 @@ final VoiceConnection connection = channel.join(spec -> spec.setProvider(provide
 // In the AudioLoadResultHandler, add AudioTrack instances to the AudioTrackScheduler (and send notifications to users)
 PLAYER_MANAGER.loadItem("https://www.youtube.com/watch?v=dQw4w9WgXcQ", new AudioLoadResultHandler() { /* overrides */ })
 ```
+
+### ❌ Disconnecting from a Voice Channel Automatically
+
+Typically, after everyone has left a voice channel, the bot should disconnect automatically as users typically forget to disconnect the bot manually. The example below uses a reactive approach to showcase the fluidity of a reactive solution to such problems.
+
+```java
+final VoiceChannel channel = ...
+Mono<Void> onDisconnect = channel.join(spec -> { /* TODO Initialize */ })
+    .flatMap(connection -> {
+        // The bot itself has a VoiceState; 1 VoiceState signals bot is alone
+        final Publisher<Boolean> voiceStateCounter = channel.getVoiceStates()
+            .count()
+            .map(count -> 1L == count);
+
+        // Every 10 seconds, check if the bot is alone. This is useful if
+        // the bot joined alone, but no one else joined since connecting
+        final Mono<Void> onInterval = Flux.interval(Duration.ofSeconds(10))
+            .filterWhen(ignored -> voiceStateCounter)
+            .next()
+            .then();
+
+        // As people join/leave this specific voice channel, check if the bot is alone
+        final Mono<Void> onEvent = channel.getClient().getEventDispatcher().on(VoiceStateUpdateEvent.class)
+            .filter(event -> event.getCurrent().getChannelId().map(channel.getId()::equals).orElse(false))
+            .filterWhen(ignored -> voiceStateCounter)
+            .next()
+            .then();
+
+        // Disconnect the bot if either onInterval or onEvent happen!
+        return Mono.first(onInterval, onEvent).then(connection.disconnect());
+    });
+```
