@@ -17,13 +17,11 @@
 package discord4j.rest.request;
 
 import discord4j.rest.route.Route;
+import discord4j.rest.util.Multimap;
 import discord4j.rest.util.RouteUtils;
 import reactor.util.annotation.Nullable;
 
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Predicate;
 
 /**
@@ -39,7 +37,7 @@ public class DiscordWebRequest {
     private Object body;
 
     @Nullable
-    private Map<String, Object> queryParams;
+    private Multimap<String, Object> queryParams;
 
     @Nullable
     private Map<String, Set<String>> headers;
@@ -90,7 +88,7 @@ public class DiscordWebRequest {
      * @return a map representing query parameters, or {@code null} if none are defined
      */
     @Nullable
-    public Map<String, Object> getQueryParams() {
+    public Multimap<String, Object> getQueryParams() {
         return queryParams;
     }
 
@@ -124,9 +122,9 @@ public class DiscordWebRequest {
      */
     public DiscordWebRequest query(String key, Object value) {
         if (queryParams == null) {
-            queryParams = new LinkedHashMap<>();
+            queryParams = new Multimap<>();
         }
-        queryParams.put(key, value);
+        queryParams.add(key, value);
         return this;
     }
 

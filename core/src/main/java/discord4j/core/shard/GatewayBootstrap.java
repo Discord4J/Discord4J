@@ -48,6 +48,7 @@ import discord4j.gateway.payload.JacksonPayloadWriter;
 import discord4j.gateway.payload.PayloadReader;
 import discord4j.gateway.payload.PayloadWriter;
 import discord4j.gateway.retry.GatewayStateChange;
+import discord4j.rest.util.Multimap;
 import discord4j.rest.util.RouteUtils;
 import discord4j.store.api.Store;
 import discord4j.store.api.primitive.ForwardingStoreService;
@@ -998,11 +999,11 @@ public class GatewayBootstrap<O extends GatewayOptions> {
         return this.optionsModifier.apply(options);
     }
 
-    private Map<String, Object> getGatewayParameters() {
-        final Map<String, Object> parameters = new HashMap<>(3);
-        parameters.put("compress", "zlib-stream");
-        parameters.put("encoding", "json");
-        parameters.put("v", 6);
+    private Multimap<String, Object> getGatewayParameters() {
+        final Multimap<String, Object> parameters = new Multimap<>(3);
+        parameters.add("compress", "zlib-stream");
+        parameters.add("encoding", "json");
+        parameters.add("v", 6);
         return parameters;
     }
 

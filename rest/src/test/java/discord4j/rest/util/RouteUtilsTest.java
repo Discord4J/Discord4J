@@ -18,9 +18,6 @@ package discord4j.rest.util;
 
 import org.junit.jupiter.api.Test;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class RouteUtilsTest {
@@ -49,12 +46,12 @@ public class RouteUtilsTest {
     public void testUriWithOneVariableAndOneQueryParameter() {
         String template = "/channels/{channel.id}/messages";
         String expected = "/channels/123456789/messages?after=101010";
-        Map<String, Object> map = new LinkedHashMap<>();
-        map.put("after", 101010);
+        Multimap<String, Object> map = new Multimap<>();
+        map.add("after", 101010);
         assertEquals(expected, RouteUtils.expandQuery(RouteUtils.expand(template, 123456789), map));
 
-        Map<String, Object> map2 = new LinkedHashMap<>();
-        map2.put("after", 101010);
+        Multimap<String, Object> map2 = new Multimap<>();
+        map2.add("after", 101010);
         assertEquals(expected, RouteUtils.expandQuery(RouteUtils.expand(template, 123456789), map2));
     }
 
@@ -62,24 +59,24 @@ public class RouteUtilsTest {
     public void testUriWithOneVariableAndTwoQueryParameters() {
         String template = "/channels/{channel.id}/messages";
         String expected = "/channels/123456789/messages?after=101010&before=151515";
-        Map<String, Object> map = new LinkedHashMap<>();
-        map.put("after", 101010);
-        map.put("before", 151515);
+        Multimap<String, Object> map = new Multimap<>();
+        map.add("after", 101010);
+        map.add("before", 151515);
         assertEquals(expected, RouteUtils.expandQuery(RouteUtils.expand(template, 123456789), map));
 
-        Map<String, Object> map2 = new LinkedHashMap<>();
-        map2.put("after", 101010);
-        map2.put("before", 151515);
+        Multimap<String, Object> map2 = new Multimap<>();
+        map2.add("after", 101010);
+        map2.add("before", 151515);
         assertEquals(expected, RouteUtils.expandQuery(RouteUtils.expand(template, 123456789), map2));
     }
 
     @Test
     public void testUriWithQueryParameterRequiringEscape() {
         String template = "/guilds/{guild.id}/bans/{user.id}";
-        String expected = "/guilds/123456789/bans/987654321?reason=you're%20a%20bad%20boi:%20gtfo%20;%3E&delete-message-days=7";
-        Map<String, Object> map = new LinkedHashMap<>();
-        map.put("reason", "you're a bad boi: gtfo ;>");
-        map.put("delete-message-days", 7);
+        String expected = "/guilds/123456789/bans/987654321?reason=you%27re%20a%20bad%20boi%3A%20gtfo%20%3B%3E&delete-message-days=7";
+        Multimap<String, Object> map = new Multimap<>();
+        map.add("reason", "you're a bad boi: gtfo ;>");
+        map.add("delete-message-days", 7);
         assertEquals(expected, RouteUtils.expandQuery(RouteUtils.expand(template, 123456789, 987654321), map));
     }
 }
