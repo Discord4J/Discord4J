@@ -140,6 +140,17 @@ public class DiscordWebRequest {
     }
 
     /**
+     * Add the given names and values as request query parameters.
+     *
+     * @param params a map of query parameter names to values
+     * @return this request
+     */
+    public DiscordWebRequest query(Multimap<String, Object> params) {
+        params.forEach(this::query);
+        return this;
+    }
+
+    /**
      * Adds the given key and value to the headers of this request.
      *
      * @param key the header key

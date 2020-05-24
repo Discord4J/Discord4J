@@ -30,34 +30,81 @@ public class Multimap<K, V> implements Map<K, List<V>> {
 
     private final Map<K, List<V>> map;
 
+    /**
+     * Create an empty Multimap.
+     */
     public Multimap() {
         this.map = new LinkedHashMap<>();
     }
 
+    /**
+     * Create an empty Multimap with a given initial capacity.
+     *
+     * @param initialCapacity the initial capacity
+     */
     public Multimap(int initialCapacity) {
         this.map = new LinkedHashMap<>(initialCapacity);
     }
 
+    /**
+     * Add a value to the list of values under the given key.
+     *
+     * @param key the key
+     * @param value the value to add
+     */
     public void add(K key, V value) {
         map.computeIfAbsent(key, k -> new LinkedList<>()).add(value);
     }
 
-    public void addAll(K key, List<? extends V> values) {
+    /**
+     * Add multiple values to the list of values under the given key.
+     *
+     * @param key the key
+     * @param values the values to add
+     */
+    public void addAll(K key, Collection<? extends V> values) {
         map.computeIfAbsent(key, k -> new LinkedList<>()).addAll(values);
     }
 
+    /**
+     * Add all values from the given {@link Multimap} to the current ones.
+     *
+     * @param values the values to add
+     */
     public void addAll(Multimap<K, V> values) {
         values.forEach(this::addAll);
     }
 
+    /**
+     * Set a value under the given key, replacing any existing single or multiple values.
+     *
+     * @param key the key
+     * @param value the value to set
+     */
     public void set(K key, V value) {
         List<V> list = new LinkedList<>();
         list.add(value);
         map.put(key, list);
     }
 
+    /**
+     * Set multiple values under the given key, replacing any existing single or multiple values.
+     *
+     * @param values the values to set
+     */
     public void setAll(Map<K, V> values) {
         values.forEach(this::set);
+    }
+
+    /**
+     * Clone this {@link Multimap} using a deep copy, including each stored value list.
+     *
+     * @return a deep copy of this {@code Multimap}
+     */
+    public Multimap<K, V> deepCopy() {
+        Multimap<K, V> copy = new Multimap<>(map.size());
+        map.forEach((key, value) -> copy.put(key, new LinkedList<>(value)));
+        return copy;
     }
 
     @Override
