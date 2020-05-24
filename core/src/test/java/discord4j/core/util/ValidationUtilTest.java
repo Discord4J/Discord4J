@@ -20,8 +20,9 @@ package discord4j.core.util;
 import discord4j.discordjson.json.gateway.RequestGuildMembers;
 import discord4j.discordjson.possible.Possible;
 import discord4j.gateway.intent.IntentSet;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class ValidationUtilTest {
 
@@ -45,12 +46,12 @@ public class ValidationUtilTest {
             Possible.absent()
         );
 
-        Assert.assertThrows(IllegalArgumentException.class, () -> ValidationUtil.validateRequestGuildMembers(
+        assertThrows(IllegalArgumentException.class, () -> ValidationUtil.validateRequestGuildMembers(
             RequestGuildMembers.builder().guildId("1234").query("prefix").addUserId("5678").limit(0).build(),
             Possible.absent()
         ));
 
-        Assert.assertThrows(IllegalArgumentException.class, () -> ValidationUtil.validateRequestGuildMembers(
+        assertThrows(IllegalArgumentException.class, () -> ValidationUtil.validateRequestGuildMembers(
             RequestGuildMembers.builder().guildId("1234").limit(0).build(),
             Possible.absent()
         ));
@@ -71,7 +72,7 @@ public class ValidationUtilTest {
             Possible.of(IntentSet.none())
         );
 
-        Assert.assertThrows(IllegalArgumentException.class, () -> ValidationUtil.validateRequestGuildMembers(
+        assertThrows(IllegalArgumentException.class, () -> ValidationUtil.validateRequestGuildMembers(
             RequestGuildMembers.builder().guildId("1234").query("").limit(0).build(),
             Possible.of(IntentSet.none())
         ));
