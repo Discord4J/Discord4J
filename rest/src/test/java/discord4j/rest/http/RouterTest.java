@@ -18,12 +18,13 @@ package discord4j.rest.http;
 
 import discord4j.discordjson.json.MessageCreateRequest;
 import discord4j.discordjson.json.MessageData;
-import discord4j.rest.DiscordTest;
 import discord4j.rest.RestTests;
 import discord4j.rest.request.Router;
 import discord4j.rest.route.Routes;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
@@ -32,6 +33,7 @@ import java.time.Instant;
 import java.util.concurrent.TimeUnit;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@EnabledIfEnvironmentVariable(named = "D4J_TEST_DISCORD", matches = "true")
 public class RouterTest {
 
     private static final String channelId = System.getenv("channel");
@@ -43,7 +45,7 @@ public class RouterTest {
         router = RestTests.defaultRouter();
     }
 
-    @DiscordTest
+    @Test
     public void test() throws Exception {
         MessageCreateRequest body = MessageCreateRequest.builder()
             .content("hello at " + Instant.now())
@@ -58,7 +60,7 @@ public class RouterTest {
         TimeUnit.SECONDS.sleep(1);
     }
 
-    @DiscordTest
+    @Test
     public void orderingTest() throws Exception {
         String cid = Integer.toHexString(this.hashCode());
 
@@ -79,7 +81,7 @@ public class RouterTest {
         TimeUnit.SECONDS.sleep(10);
     }
 
-    @DiscordTest
+    @Test
     public void testMultiSub() throws Exception {
         MessageCreateRequest body = MessageCreateRequest.builder()
             .content("hi")
@@ -96,7 +98,7 @@ public class RouterTest {
         TimeUnit.SECONDS.sleep(2);
     }
 
-    @DiscordTest
+    @Test
     public void testCustomThreadingModel() throws Exception {
         Scheduler thread = Schedulers.single();
 
@@ -122,7 +124,7 @@ public class RouterTest {
         TimeUnit.SECONDS.sleep(10);
     }
 
-    @DiscordTest
+    @Test
     public void testBlocking() {
         String cid = Integer.toHexString(this.hashCode());
 

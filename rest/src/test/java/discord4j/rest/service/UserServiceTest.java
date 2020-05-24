@@ -18,16 +18,18 @@ package discord4j.rest.service;
 
 import discord4j.discordjson.json.DMCreateRequest;
 import discord4j.discordjson.json.UserModifyRequest;
-import discord4j.rest.DiscordTest;
 import discord4j.rest.RestTests;
 import discord4j.rest.http.client.ClientException;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import discord4j.common.util.Snowflake;
 
 import java.util.Collections;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@EnabledIfEnvironmentVariable(named = "D4J_TEST_DISCORD", matches = "true")
 public class UserServiceTest {
 
     private static final long user = Snowflake.asLong(System.getenv("member"));
@@ -39,17 +41,17 @@ public class UserServiceTest {
         userService = new UserService(RestTests.defaultRouter());
     }
 
-    @DiscordTest
+    @Test
     public void testGetCurrentUser() {
         userService.getCurrentUser().block();
     }
 
-    @DiscordTest
+    @Test
     public void testGetUser() {
         userService.getUser(user).block();
     }
 
-    @DiscordTest
+    @Test
     public void testGetInvalidUser() {
         try {
             userService.getUser(1111222).block(); // should throw ClientException
@@ -58,7 +60,7 @@ public class UserServiceTest {
         }
     }
 
-    @DiscordTest
+    @Test
     public void testModifyCurrentUser() {
         UserModifyRequest req = UserModifyRequest.builder()
             .username("Discord4J 3 Test Bot")
@@ -66,33 +68,33 @@ public class UserServiceTest {
         userService.modifyCurrentUser(req).block();
     }
 
-    @DiscordTest
+    @Test
     public void testGetCurrentUserGuilds() {
         userService.getCurrentUserGuilds(Collections.emptyMap()).then().block();
     }
 
-    @DiscordTest
+    @Test
     public void testLeaveGuild() {
         // TODO
     }
 
-    @DiscordTest
+    @Test
     public void testGetUserDMs() {
         userService.getUserDMs().then().block();
     }
 
-    @DiscordTest
+    @Test
     public void testCreateDM() {
         DMCreateRequest req = DMCreateRequest.builder().recipientId(Snowflake.asString(user)).build();
         userService.createDM(req).block();
     }
 
-    @DiscordTest
+    @Test
     public void testCreateGroupDM() {
         // TODO
     }
 
-    @DiscordTest
+    @Test
     public void testGetUserConnections() {
         // TODO
     }

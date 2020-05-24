@@ -16,15 +16,17 @@
  */
 package discord4j.rest.service;
 
-import discord4j.rest.DiscordTest;
 import discord4j.common.util.Snowflake;
 import discord4j.rest.RestTests;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 
 import java.util.Collections;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@EnabledIfEnvironmentVariable(named = "D4J_TEST_DISCORD", matches = "true")
 public class AuditLogServiceTest {
 
     private static final long guild = Snowflake.asLong(System.getenv("guild"));
@@ -36,7 +38,7 @@ public class AuditLogServiceTest {
         auditLogService = new AuditLogService(RestTests.defaultRouter());
     }
 
-    @DiscordTest
+    @Test
     public void testGetAuditLog() {
         auditLogService.getAuditLog(guild, Collections.emptyMap()).block();
     }

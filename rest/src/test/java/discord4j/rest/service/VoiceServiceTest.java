@@ -16,12 +16,14 @@
  */
 package discord4j.rest.service;
 
-import discord4j.rest.DiscordTest;
 import discord4j.rest.RestTests;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@EnabledIfEnvironmentVariable(named = "D4J_TEST_DISCORD", matches = "true")
 public class VoiceServiceTest {
 
     private VoiceService voiceService;
@@ -31,7 +33,7 @@ public class VoiceServiceTest {
         voiceService = new VoiceService(RestTests.defaultRouter());
     }
 
-    @DiscordTest
+    @Test
     public void testGetVoiceRegions() {
         voiceService.getVoiceRegions().then().block();
     }

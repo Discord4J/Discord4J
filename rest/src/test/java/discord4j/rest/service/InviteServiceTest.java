@@ -16,17 +16,19 @@
  */
 package discord4j.rest.service;
 
-import discord4j.rest.DiscordTest;
 import discord4j.common.util.Snowflake;
 import discord4j.discordjson.json.InviteData;
 import discord4j.rest.RestTests;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@EnabledIfEnvironmentVariable(named = "D4J_TEST_DISCORD", matches = "true")
 public class InviteServiceTest {
 
     private static final String inviteCode = System.getenv("inviteCode");
@@ -41,12 +43,12 @@ public class InviteServiceTest {
         channelService = new ChannelService(RestTests.defaultRouter());
     }
 
-    @DiscordTest
+    @Test
     public void testGetInvite() {
         inviteService.getInvite(inviteCode).block();
     }
 
-    @DiscordTest
+    @Test
     public void testDeleteInvite() {
         channelService.getChannelInvites(modifyChannel)
             .filter(invite -> !invite.maxAge().isAbsent())

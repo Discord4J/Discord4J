@@ -1,0 +1,56 @@
+name: Java CI
+
+on:
+  push:
+    branches:
+      - '**'
+    tags-ignore:
+      - '*.*'
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  build:
+    name: Build for JDK ${{ matrix.java }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        java: [ 8, 11 ]
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/cache@v1
+        with:
+          path: ~/.gradle/caches
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+      - name: Set up JDK ${{ matrix.java }}
+        uses: actions/setup-java@v1
+        with:
+          java-version: ${{ matrix.java }}
+      - name: Build with Gradle
+        run: ./gradlew build
+  release:
+    name: Publish artifacts
+    runs-on: ubuntu-latest
+    if: github.event_name != 'pull_request'
+    needs: build
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/cache@v1
+        with:
+          path: ~/.gradle/caches
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+      - name: Set up JDK
+        uses: actions/setup-java@v1
+        with:
+          java-version: 8
+      - name: Publish with Gradle
+        run: ./gradlew -x test publish
+        env:
+          ORG_GRADLE_PROJECT_signingKey: ${{ secrets.signingKey }}
+          ORG_GRADLE_PROJECT_signingPassword: ${{ secrets.signingPassword }}
+          ORG_GRADLE_PROJECT_sonatypeUsername: ${{ secrets.sonatypeUsername }}
+          ORG_GRADLE_PROJECT_sonatypePassword: ${{ secrets.sonatypePassword }}
