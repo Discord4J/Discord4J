@@ -18,12 +18,13 @@ package discord4j.rest.service;
 
 import discord4j.common.jackson.Possible;
 import discord4j.common.json.MessageResponse;
-import discord4j.rest.DiscordTest;
 import discord4j.rest.RestTests;
 import discord4j.rest.json.request.*;
 import discord4j.rest.util.MultipartRequest;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import reactor.util.function.Tuple2;
 import reactor.util.function.Tuples;
 
@@ -36,6 +37,7 @@ import java.util.Collections;
 import java.util.List;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@EnabledIfEnvironmentVariable(named = "D4J_TEST_DISCORD", matches = "true")
 public class ChannelServiceTest {
 
     private static final long permanentChannel = Long.parseUnsignedLong(System.getenv("permanentChannel"));
@@ -52,39 +54,39 @@ public class ChannelServiceTest {
         channelService = new ChannelService(RestTests.defaultRouter());
     }
 
-    @DiscordTest
+    @Test
     public void testGetChannel() {
         channelService.getChannel(permanentChannel).block();
     }
 
-    @DiscordTest
+    @Test
     public void testModifyChannel() {
         ChannelModifyRequest req = ChannelModifyRequest.builder().topic("test modify").build();
         channelService.modifyChannel(modifyChannel, req, null).block();
     }
 
-    @DiscordTest
+    @Test
     public void testDeleteChannel() {
         // TODO
     }
 
-    @DiscordTest
+    @Test
     public void testGetMessages() {
         channelService.getMessages(permanentChannel, Collections.emptyMap()).then().block();
     }
 
-    @DiscordTest
+    @Test
     public void testGetMessage() {
         channelService.getMessage(permanentChannel, permanentMessage).block();
     }
 
-    @DiscordTest
+    @Test
     public void testCreateMessage() {
         MessageCreateRequest req = new MessageCreateRequest("Hello world", null, false, null);
         channelService.createMessage(permanentChannel, new MultipartRequest(req)).block();
     }
 
-    @DiscordTest
+    @Test
     public void testCreateMessageWithFile() throws IOException {
         MessageCreateRequest req = new MessageCreateRequest("Hello world with file!", null, false, null);
         try (InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream("fileTest.txt")) {
@@ -97,7 +99,7 @@ public class ChannelServiceTest {
         }
     }
 
-    @DiscordTest
+    @Test
     public void testCreateMessagesWithMultipleFiles() throws IOException {
         MessageCreateRequest req = new MessageCreateRequest("Hello world with *multiple* files!", null, false, null);
         try (InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream("fileTest.txt")) {
@@ -143,99 +145,99 @@ public class ChannelServiceTest {
         return (capacity == nread) ? buf : Arrays.copyOf(buf, nread);
     }
 
-    @DiscordTest
+    @Test
     public void testCreateReaction() {
         channelService.createReaction(permanentChannel, reactionMessage, "❤").block();
     }
 
-    @DiscordTest
+    @Test
     public void testDeleteOwnReaction() {
         // TODO
     }
 
-    @DiscordTest
+    @Test
     public void testDeleteReaction() {
         // TODO
     }
 
-    @DiscordTest
+    @Test
     public void testGetReactions() throws UnsupportedEncodingException {
         channelService.getReactions(permanentChannel, permanentMessage, "❤", Collections.emptyMap()).then()
                 .block();
     }
 
-    @DiscordTest
+    @Test
     public void testDeleteAllReactions() {
         // TODO
     }
 
-    @DiscordTest
+    @Test
     public void testEditMessage() {
         MessageEditRequest req = new MessageEditRequest(Possible.of("This is a message I can edit."),
                 Possible.absent());
         channelService.editMessage(permanentChannel, editMessage, req).block();
     }
 
-    @DiscordTest
+    @Test
     public void testDeleteMessage() {
         MessageCreateRequest req = new MessageCreateRequest("Going to delete this!", null, false, null);
         MessageResponse response = channelService.createMessage(permanentChannel, new MultipartRequest(req)).block();
         channelService.deleteMessage(permanentChannel, response.getId(), "This is just a test!").block();
     }
 
-    @DiscordTest
+    @Test
     public void testBulkDeleteMessages() {
         // TODO
     }
 
-    @DiscordTest
+    @Test
     public void testEditChannelPermissions() {
         PermissionsEditRequest req = new PermissionsEditRequest(0, 0, "member");
         channelService.editChannelPermissions(modifyChannel, permanentOverwrite, req, null).block();
     }
 
-    @DiscordTest
+    @Test
     public void testGetChannelInvites() {
         channelService.getChannelInvites(permanentChannel).then().block();
     }
 
-    @DiscordTest
+    @Test
     public void testCreateChannelInvite() {
         InviteCreateRequest req = new InviteCreateRequest(1, 0, true, true);
         channelService.createChannelInvite(modifyChannel, req, null).block();
     }
 
-    @DiscordTest
+    @Test
     public void testDeleteChannelPermission() {
         // TODO
     }
 
-    @DiscordTest
+    @Test
     public void testTriggerTypingIndicator() {
         channelService.triggerTypingIndicator(permanentChannel).block();
     }
 
-    @DiscordTest
+    @Test
     public void testGetPinnedMessages() {
         channelService.getPinnedMessages(permanentChannel).then().block();
     }
 
-    @DiscordTest
+    @Test
     public void testAddPinnedMessage() {
         // TODO
     }
 
-    @DiscordTest
+    @Test
     public void testDeletePinnedMessage() {
         // TODO
     }
 
-    @DiscordTest
+    @Test
     public void testAddGroupDMRecipient() {
         // TODO
     }
 
-    @DiscordTest
+    @Test
     public void testDeleteGroupDMRecipient() {
         // TODO
     }

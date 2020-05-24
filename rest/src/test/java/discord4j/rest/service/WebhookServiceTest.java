@@ -17,13 +17,15 @@
 package discord4j.rest.service;
 
 import discord4j.common.jackson.Possible;
-import discord4j.rest.DiscordTest;
 import discord4j.rest.RestTests;
 import discord4j.rest.json.request.WebhookModifyRequest;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@EnabledIfEnvironmentVariable(named = "D4J_TEST_DISCORD", matches = "true")
 public class WebhookServiceTest {
 
     private static final long permanentChannel = Long.parseUnsignedLong(System.getenv("permanentChannel"));
@@ -37,33 +39,33 @@ public class WebhookServiceTest {
         webhookService = new WebhookService(RestTests.defaultRouter());
     }
 
-    @DiscordTest
+    @Test
     public void testCreateWebhook() {
         // TODO
     }
 
-    @DiscordTest
+    @Test
     public void testGetChannelWebhooks() {
         webhookService.getChannelWebhooks(permanentChannel).then().block();
     }
 
-    @DiscordTest
+    @Test
     public void testGetGuildWebhooks() {
         webhookService.getGuildWebhooks(guild).then().block();
     }
 
-    @DiscordTest
+    @Test
     public void testGetWebhook() {
         webhookService.getWebhook(permanentWebhook).block();
     }
 
-    @DiscordTest
+    @Test
     public void testModifyWebhook() {
         WebhookModifyRequest req = new WebhookModifyRequest(Possible.of("Permanent Webhook"), Possible.absent());
         webhookService.modifyWebhook(permanentWebhook, req, null).block();
     }
 
-    @DiscordTest
+    @Test
     public void testDeleteWebhook() {
         // TODO
     }

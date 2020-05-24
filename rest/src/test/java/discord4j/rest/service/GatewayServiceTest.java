@@ -16,12 +16,14 @@
  */
 package discord4j.rest.service;
 
-import discord4j.rest.DiscordTest;
 import discord4j.rest.RestTests;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@EnabledIfEnvironmentVariable(named = "D4J_TEST_DISCORD", matches = "true")
 public class GatewayServiceTest {
 
     private GatewayService gatewayService;
@@ -31,12 +33,12 @@ public class GatewayServiceTest {
         gatewayService = new GatewayService(RestTests.defaultRouter());
     }
 
-    @DiscordTest
+    @Test
     public void testGetGateway() {
         gatewayService.getGateway().block();
     }
 
-    @DiscordTest
+    @Test
     public void testGetGatewayBot() {
         gatewayService.getGatewayBot().block();
     }

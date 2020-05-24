@@ -16,17 +16,19 @@
  */
 package discord4j.rest.service;
 
-import discord4j.rest.DiscordTest;
 import discord4j.rest.RestTests;
 import discord4j.rest.json.request.*;
 import discord4j.rest.json.response.ChannelResponse;
 import discord4j.rest.json.response.GuildResponse;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 
 import java.util.Collections;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@EnabledIfEnvironmentVariable(named = "D4J_TEST_DISCORD", matches = "true")
 public class GuildServiceTest {
 
     private static final long guild = Long.parseUnsignedLong(System.getenv("guild"));
@@ -44,40 +46,40 @@ public class GuildServiceTest {
         channelService = new ChannelService(RestTests.defaultRouter());
     }
 
-    @DiscordTest
+    @Test
     public void testCreateGuild() {
         // TODO
     }
 
-    @DiscordTest
+    @Test
     public void testGetGuild() {
         GuildResponse response = guildService.getGuild(guild).block();
     }
 
-    @DiscordTest
+    @Test
     public void testModifyGuild() {
         GuildModifyRequest req = GuildModifyRequest.builder().region("us-south").build();
         guildService.modifyGuild(guild, req, null).block();
     }
 
-    @DiscordTest
+    @Test
     public void testDeleteGuild() {
         // TODO
     }
 
-    @DiscordTest
+    @Test
     public void testGetGuildChannels() {
         guildService.getGuildChannels(guild).then().block();
     }
 
-    @DiscordTest
+    @Test
     public void testCreateGuildChannel() {
         String randomName = Long.toHexString(Double.doubleToLongBits(Math.random()));
         ChannelCreateRequest req = ChannelCreateRequest.builder().name(randomName).parentId(trashCategory).build();
         guildService.createGuildChannel(guild, req, null).block();
     }
 
-    @DiscordTest
+    @Test
     public void testDeleteGuildChannels() {
         guildService.getGuildChannels(guild)
                 .filter(res -> res.getParentId() != null && trashCategory == res.getParentId())
@@ -87,97 +89,97 @@ public class GuildServiceTest {
                 .block();
     }
 
-    @DiscordTest
+    @Test
     public void testModifyGuildChannelPositions() {
         // TODO
     }
 
-    @DiscordTest
+    @Test
     public void testGetGuildMember() {
         guildService.getGuildMember(guild, member).block();
     }
 
-    @DiscordTest
+    @Test
     public void testGetGuildMembers() {
         guildService.getGuildMembers(guild, Collections.emptyMap()).then().block();
     }
 
-    @DiscordTest
+    @Test
     public void testAddGuildMember() {
         // TODO
     }
 
-    @DiscordTest
+    @Test
     public void testModifyGuildMember() {
         GuildMemberModifyRequest req = GuildMemberModifyRequest.builder().nick("nickname").build();
         guildService.modifyGuildMember(guild, member, req, null).block();
     }
 
-    @DiscordTest
+    @Test
     public void testModifyOwnNickname() {
         NicknameModifyRequest req = new NicknameModifyRequest("nickname");
         guildService.modifyOwnNickname(guild, req).block();
     }
 
-    @DiscordTest
+    @Test
     public void testAddGuildMemberRole() {
         // TODO
     }
 
-    @DiscordTest
+    @Test
     public void testRemoveGuildMemberRole() {
         // TODO
     }
 
-    @DiscordTest
+    @Test
     public void testRemoveGuildMember() {
         // TODO
     }
 
-    @DiscordTest
+    @Test
     public void testGetGuildBans() {
         guildService.getGuildBans(guild).then().block();
     }
 
-    @DiscordTest
+    @Test
     public void testGetGuildBan() {
         guildService.getGuildBan(guild, bannedUser).block();
     }
 
-    @DiscordTest
+    @Test
     public void testCreateGuildBan() {
         // TODO
     }
 
-    @DiscordTest
+    @Test
     public void testRemoveGuildBan() {
         // TODO
     }
 
-    @DiscordTest
+    @Test
     public void testGetGuildRoles() {
         guildService.getGuildRoles(guild).then().block();
     }
 
-    @DiscordTest
+    @Test
     public void testCreateGuildRole() {
         String randomName = "test_" + Long.toHexString(Double.doubleToLongBits(Math.random()));
         RoleCreateRequest req = new RoleCreateRequest(randomName, 0, 0, false, false);
         guildService.createGuildRole(guild, req, null).block();
     }
 
-    @DiscordTest
+    @Test
     public void testModifyGuildRolePositions() {
         // TODO
     }
 
-    @DiscordTest
+    @Test
     public void testModifyGuildRole() {
         RoleModifyRequest req = RoleModifyRequest.builder().permissions(0).build();
         guildService.modifyGuildRole(guild, permanentRole, req, null).block();
     }
 
-    @DiscordTest
+    @Test
     public void testDeleteGuildRole() {
         guildService.getGuildRoles(guild)
                 .filter(role -> role.getName().startsWith("test_") || role.getName().startsWith("3f"))
@@ -186,58 +188,58 @@ public class GuildServiceTest {
                 .blockLast();
     }
 
-    @DiscordTest
+    @Test
     public void testGetGuildPruneCount() {
         guildService.getGuildPruneCount(guild, Collections.emptyMap()).block();
     }
 
-    @DiscordTest
+    @Test
     public void testBeginGuildPrune() {
         // shouldn't actually prune anyone because everyone in test server should have a role
         guildService.beginGuildPrune(guild, Collections.emptyMap(), null).block();
     }
 
-    @DiscordTest
+    @Test
     public void testGetGuildVoiceRegions() {
         guildService.getGuildVoiceRegions(guild).then().block();
     }
 
-    @DiscordTest
+    @Test
     public void testGetGuildInvites() {
         guildService.getGuildInvites(guild).then().block();
     }
 
-    @DiscordTest
+    @Test
     public void testGetGuildIntegrations() {
         guildService.getGuildIntegrations(guild).then().block();
     }
 
-    @DiscordTest
+    @Test
     public void testCreateGuildIntegration() {
         // TODO
     }
 
-    @DiscordTest
+    @Test
     public void testModifyGuildIntegration() {
         // TODO
     }
 
-    @DiscordTest
+    @Test
     public void testDeleteGuildIntegration() {
         // TODO
     }
 
-    @DiscordTest
+    @Test
     public void testSyncGuildIntegration() {
         // TODO
     }
 
-    @DiscordTest
+    @Test
     public void testGetGuildEmbed() {
         guildService.getGuildEmbed(guild).block();
     }
 
-    @DiscordTest
+    @Test
     public void testModifyGuildEmbed() {
         // TODO
     }

@@ -17,18 +17,20 @@
 package discord4j.rest.service;
 
 import discord4j.common.jackson.Possible;
-import discord4j.rest.DiscordTest;
 import discord4j.rest.RestTests;
 import discord4j.rest.http.client.ClientException;
 import discord4j.rest.json.request.DMCreateRequest;
 import discord4j.rest.json.request.UserModifyRequest;
 import discord4j.rest.json.response.ErrorResponse;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 
 import java.util.Collections;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@EnabledIfEnvironmentVariable(named = "D4J_TEST_DISCORD", matches = "true")
 public class UserServiceTest {
 
     private static final long user = Long.parseUnsignedLong(System.getenv("member"));
@@ -40,17 +42,17 @@ public class UserServiceTest {
         userService = new UserService(RestTests.defaultRouter());
     }
 
-    @DiscordTest
+    @Test
     public void testGetCurrentUser() {
         userService.getCurrentUser().block();
     }
 
-    @DiscordTest
+    @Test
     public void testGetUser() {
         userService.getUser(user).block();
     }
 
-    @DiscordTest
+    @Test
     public void testGetInvalidUser() {
         try {
             userService.getUser(1111222).block(); // should throw ClientException
@@ -61,39 +63,39 @@ public class UserServiceTest {
         }
     }
 
-    @DiscordTest
+    @Test
     public void testModifyCurrentUser() {
         UserModifyRequest req = new UserModifyRequest(Possible.of("Discord4J 3 Test Bot"), Possible.absent());
         userService.modifyCurrentUser(req).block();
     }
 
-    @DiscordTest
+    @Test
     public void testGetCurrentUserGuilds() {
         userService.getCurrentUserGuilds(Collections.emptyMap()).then().block();
     }
 
-    @DiscordTest
+    @Test
     public void testLeaveGuild() {
         // TODO
     }
 
-    @DiscordTest
+    @Test
     public void testGetUserDMs() {
         userService.getUserDMs().then().block();
     }
 
-    @DiscordTest
+    @Test
     public void testCreateDM() {
         DMCreateRequest req = new DMCreateRequest(user);
         userService.createDM(req).block();
     }
 
-    @DiscordTest
+    @Test
     public void testCreateGroupDM() {
         // TODO
     }
 
-    @DiscordTest
+    @Test
     public void testGetUserConnections() {
         // TODO
     }

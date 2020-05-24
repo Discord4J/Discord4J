@@ -16,12 +16,14 @@
  */
 package discord4j.rest.service;
 
-import discord4j.rest.DiscordTest;
 import discord4j.rest.RestTests;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@EnabledIfEnvironmentVariable(named = "D4J_TEST_DISCORD", matches = "true")
 public class EmojiServiceTest {
 
     private static final long guild = Long.parseUnsignedLong(System.getenv("guild"));
@@ -34,27 +36,27 @@ public class EmojiServiceTest {
         emojiService = new EmojiService(RestTests.defaultRouter());
     }
 
-    @DiscordTest
+    @Test
     public void testGetGuildEmojis() {
         emojiService.getGuildEmojis(guild).then().block();
     }
 
-    @DiscordTest
+    @Test
     public void testGetGuildEmoji() {
         emojiService.getGuildEmoji(guild, permanentEmoji).block();
     }
 
-    @DiscordTest
+    @Test
     public void testCreateGuildEmoji() {
         // TODO
     }
 
-    @DiscordTest
+    @Test
     public void testModifyGuildEmoji() {
         // TODO
     }
 
-    @DiscordTest
+    @Test
     public void testDeleteGuildEmoji() {
         // TODO
     }
