@@ -5,7 +5,7 @@ dependencies {
 
     api "$storesArtifact:$jdkstores_version"
 
-    testImplementation "junit:junit:$junit_version"
+    testImplementation "org.junit.jupiter:junit-jupiter-engine:$junit_version"
     testImplementation "org.mockito:mockito-core:$mockito_version"
     testImplementation "ch.qos.logback:logback-classic:$logback_version"
     testImplementation "io.projectreactor:reactor-test"

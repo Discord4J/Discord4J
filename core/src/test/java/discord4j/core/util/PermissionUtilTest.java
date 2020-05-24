@@ -19,14 +19,14 @@ package discord4j.core.util;
 import discord4j.core.object.PermissionOverwrite;
 import discord4j.rest.util.PermissionSet;
 import discord4j.common.util.Snowflake;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 import static discord4j.rest.util.Permission.*;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class PermissionUtilTest {
 
@@ -50,9 +50,8 @@ public class PermissionUtilTest {
     public void testNoOverwritesYieldsOriginal() {
         PermissionSet base = PermissionSet.of(SEND_MESSAGES);
         List<PermissionOverwrite> roleOverwrites = Collections.emptyList();
-        PermissionOverwrite memberOverwrite = null;
 
-        PermissionSet actual = PermissionUtil.computePermissions(base, null, roleOverwrites, memberOverwrite);
+        PermissionSet actual = PermissionUtil.computePermissions(base, null, roleOverwrites, null);
         PermissionSet expected = PermissionSet.of(SEND_MESSAGES);
 
         assertEquals(expected, actual);
@@ -62,9 +61,8 @@ public class PermissionUtilTest {
     public void testRoleOverwriteAllows() {
         PermissionSet base = PermissionSet.of(SEND_MESSAGES);
         List<PermissionOverwrite> roleOverwrites = Collections.singletonList(overwrite(PermissionSet.of(PRIORITY_SPEAKER), PermissionSet.none()));
-        PermissionOverwrite memberOverwrite = null;
 
-        PermissionSet actual = PermissionUtil.computePermissions(base, null, roleOverwrites, memberOverwrite);
+        PermissionSet actual = PermissionUtil.computePermissions(base, null, roleOverwrites, null);
         PermissionSet expected = PermissionSet.of(SEND_MESSAGES, PRIORITY_SPEAKER);
 
         assertEquals(expected, actual);
@@ -86,9 +84,8 @@ public class PermissionUtilTest {
     public void testRoleOverwriteDenies() {
         PermissionSet base = PermissionSet.of(SEND_MESSAGES);
         List<PermissionOverwrite> roleOverwrites = Collections.singletonList(overwrite(PermissionSet.none(), PermissionSet.of(SEND_MESSAGES)));
-        PermissionOverwrite memberOverwrite = null;
 
-        PermissionSet actual = PermissionUtil.computePermissions(base, null, roleOverwrites, memberOverwrite);
+        PermissionSet actual = PermissionUtil.computePermissions(base, null, roleOverwrites, null);
         PermissionSet expected = PermissionSet.none();
 
         assertEquals(expected, actual);
@@ -122,9 +119,8 @@ public class PermissionUtilTest {
     public void testAdminGrantsAll() {
         PermissionSet base = PermissionSet.of(ADMINISTRATOR);
         List<PermissionOverwrite> roleOverwrites = Collections.emptyList();
-        PermissionOverwrite memberOverwrite = null;
 
-        PermissionSet actual = PermissionUtil.computePermissions(base, null, roleOverwrites, memberOverwrite);
+        PermissionSet actual = PermissionUtil.computePermissions(base, null, roleOverwrites, null);
         PermissionSet expected = PermissionSet.all();
 
         assertEquals(expected, actual);

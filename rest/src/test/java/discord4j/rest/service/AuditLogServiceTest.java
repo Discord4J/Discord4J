@@ -16,36 +16,28 @@
  */
 package discord4j.rest.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import discord4j.rest.DiscordTest;
 import discord4j.common.util.Snowflake;
 import discord4j.rest.RestTests;
-import discord4j.rest.request.Router;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.TestInstance;
 
 import java.util.Collections;
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class AuditLogServiceTest {
 
     private static final long guild = Snowflake.asLong(System.getenv("guild"));
 
-    private AuditLogService auditLogService = null;
+    private AuditLogService auditLogService;
 
-    private AuditLogService getAuditLogService() {
-
-        if (auditLogService != null) {
-            return auditLogService;
-        }
-
-        String token = System.getenv("token");
-        boolean ignoreUnknown = !Boolean.parseBoolean(System.getenv("failUnknown"));
-        ObjectMapper mapper = RestTests.getMapper(ignoreUnknown);
-        Router router = RestTests.getRouter(token, mapper);
-
-        return auditLogService = new AuditLogService(router);
+    @BeforeAll
+    public void setup() {
+        auditLogService = new AuditLogService(RestTests.defaultRouter());
     }
 
-    @Test
+    @DiscordTest
     public void testGetAuditLog() {
-        getAuditLogService().getAuditLog(guild, Collections.emptyMap()).block();
+        auditLogService.getAuditLog(guild, Collections.emptyMap()).block();
     }
 }

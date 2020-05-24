@@ -16,32 +16,24 @@
  */
 package discord4j.rest.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import discord4j.rest.DiscordTest;
 import discord4j.rest.RestTests;
-import discord4j.rest.request.Router;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.TestInstance;
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class VoiceServiceTest {
 
-    private VoiceService voiceService = null;
+    private VoiceService voiceService;
 
-    private VoiceService getVoiceService() {
-
-        if (voiceService != null) {
-            return voiceService;
-        }
-
-        String token = System.getenv("token");
-        boolean ignoreUnknown = !Boolean.parseBoolean(System.getenv("failUnknown"));
-        ObjectMapper mapper = RestTests.getMapper(ignoreUnknown);
-        Router router = RestTests.getRouter(token, mapper);
-
-        return voiceService = new VoiceService(router);
+    @BeforeAll
+    public void setup() {
+        voiceService = new VoiceService(RestTests.defaultRouter());
     }
 
-    @Test
+    @DiscordTest
     public void testGetVoiceRegions() {
-        getVoiceService().getVoiceRegions().then().block();
+        voiceService.getVoiceRegions().then().block();
     }
 
 }

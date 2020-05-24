@@ -16,64 +16,56 @@
  */
 package discord4j.rest.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import discord4j.common.util.Snowflake;
 import discord4j.discordjson.json.WebhookModifyRequest;
+import discord4j.rest.DiscordTest;
 import discord4j.rest.RestTests;
-import discord4j.rest.request.Router;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.TestInstance;
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class WebhookServiceTest {
 
     private static final long permanentChannel = Snowflake.asLong(System.getenv("permanentChannel"));
     private static final long guild = Snowflake.asLong(System.getenv("guild"));
     private static final long permanentWebhook = Snowflake.asLong(System.getenv("permanentWebhook"));
 
-    private WebhookService webhookService = null;
+    private WebhookService webhookService;
 
-    private WebhookService getWebhookService() {
-
-        if (webhookService != null) {
-            return webhookService;
-        }
-
-        String token = System.getenv("token");
-        boolean ignoreUnknown = !Boolean.parseBoolean(System.getenv("failUnknown"));
-        ObjectMapper mapper = RestTests.getMapper(ignoreUnknown);
-        Router router = RestTests.getRouter(token, mapper);
-
-        return webhookService = new WebhookService(router);
+    @BeforeAll
+    public void setup() {
+        webhookService = new WebhookService(RestTests.defaultRouter());
     }
 
-    @Test
+    @DiscordTest
     public void testCreateWebhook() {
         // TODO
     }
 
-    @Test
+    @DiscordTest
     public void testGetChannelWebhooks() {
-        getWebhookService().getChannelWebhooks(permanentChannel).then().block();
+        webhookService.getChannelWebhooks(permanentChannel).then().block();
     }
 
-    @Test
+    @DiscordTest
     public void testGetGuildWebhooks() {
-        getWebhookService().getGuildWebhooks(guild).then().block();
+        webhookService.getGuildWebhooks(guild).then().block();
     }
 
-    @Test
+    @DiscordTest
     public void testGetWebhook() {
-        getWebhookService().getWebhook(permanentWebhook).block();
+        webhookService.getWebhook(permanentWebhook).block();
     }
 
-    @Test
+    @DiscordTest
     public void testModifyWebhook() {
         WebhookModifyRequest req = WebhookModifyRequest.builder()
             .name("Permanent Webhook")
             .build();
-        getWebhookService().modifyWebhook(permanentWebhook, req, null).block();
+        webhookService.modifyWebhook(permanentWebhook, req, null).block();
     }
 
-    @Test
+    @DiscordTest
     public void testDeleteWebhook() {
         // TODO
     }

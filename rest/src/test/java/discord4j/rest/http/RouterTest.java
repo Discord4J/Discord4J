@@ -16,14 +16,14 @@
  */
 package discord4j.rest.http;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import discord4j.common.JacksonResources;
 import discord4j.discordjson.json.MessageCreateRequest;
 import discord4j.discordjson.json.MessageData;
+import discord4j.rest.DiscordTest;
 import discord4j.rest.RestTests;
 import discord4j.rest.request.Router;
 import discord4j.rest.route.Routes;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.TestInstance;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
@@ -31,20 +31,20 @@ import reactor.core.scheduler.Schedulers;
 import java.time.Instant;
 import java.util.concurrent.TimeUnit;
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class RouterTest {
 
-    private ObjectMapper getMapper() {
-        return new JacksonResources().getObjectMapper();
+    private static final String channelId = System.getenv("channel");
+
+    private Router router;
+
+    @BeforeAll
+    public void setup() {
+        router = RestTests.defaultRouter();
     }
 
-    @Test
+    @DiscordTest
     public void test() throws Exception {
-        String token = System.getenv("token");
-        String channelId = System.getenv("channel");
-
-        ObjectMapper mapper = getMapper();
-        Router router = RestTests.getRouter(token, mapper);
-
         MessageCreateRequest body = MessageCreateRequest.builder()
             .content("hello at " + Instant.now())
             .build();
@@ -58,14 +58,8 @@ public class RouterTest {
         TimeUnit.SECONDS.sleep(1);
     }
 
-    @Test
+    @DiscordTest
     public void orderingTest() throws Exception {
-        String token = System.getenv("token");
-        String channelId = System.getenv("channel");
-
-        ObjectMapper mapper = getMapper();
-        Router router = RestTests.getRouter(token, mapper);
-
         String cid = Integer.toHexString(this.hashCode());
 
         for (int i = 0; i < 10; i++) {
@@ -85,14 +79,8 @@ public class RouterTest {
         TimeUnit.SECONDS.sleep(10);
     }
 
-    @Test
+    @DiscordTest
     public void testMultiSub() throws Exception {
-        String token = System.getenv("token");
-        String channelId = System.getenv("channel");
-
-        ObjectMapper mapper = getMapper();
-        Router router = RestTests.getRouter(token, mapper);
-
         MessageCreateRequest body = MessageCreateRequest.builder()
             .content("hi")
             .build();
@@ -108,13 +96,8 @@ public class RouterTest {
         TimeUnit.SECONDS.sleep(2);
     }
 
-    @Test
+    @DiscordTest
     public void testCustomThreadingModel() throws Exception {
-        String token = System.getenv("token");
-        String channelId = System.getenv("channel");
-
-        ObjectMapper mapper = getMapper();
-        Router router = RestTests.getRouter(token, mapper);
         Scheduler thread = Schedulers.single();
 
         String cid = Integer.toHexString(this.hashCode());
@@ -139,14 +122,8 @@ public class RouterTest {
         TimeUnit.SECONDS.sleep(10);
     }
 
-    @Test
+    @DiscordTest
     public void testBlocking() {
-        String token = System.getenv("token");
-        String channelId = System.getenv("channel");
-
-        ObjectMapper mapper = getMapper();
-        Router router = RestTests.getRouter(token, mapper);
-
         String cid = Integer.toHexString(this.hashCode());
 
         MessageCreateRequest body0 = MessageCreateRequest.builder()

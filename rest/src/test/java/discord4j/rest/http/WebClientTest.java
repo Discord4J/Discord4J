@@ -18,42 +18,36 @@
 package discord4j.rest.http;
 
 import discord4j.common.JacksonResources;
-import discord4j.common.LogUtil;
 import discord4j.common.ReactorResources;
+import discord4j.rest.http.client.ClientException;
 import discord4j.rest.request.*;
 import discord4j.rest.route.Route;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Ignore;
-import org.junit.Test;
-import reactor.core.publisher.Hooks;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import reactor.core.publisher.Mono;
 import reactor.netty.DisposableServer;
 import reactor.netty.http.server.HttpServer;
-import reactor.util.Logger;
-import reactor.util.Loggers;
+import reactor.test.StepVerifier;
 
 import java.util.Collections;
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class WebClientTest {
 
-    private static final Logger log = Loggers.getLogger(WebClientTest.class);
+    private DisposableServer server;
+    private int port;
 
-    private static DisposableServer SERVER;
-    private static int PORT;
-
-    @BeforeClass
-    public static void setup() {
-        Hooks.onOperatorDebug();
-        SERVER = HttpServer.create()
+    @BeforeAll
+    public void setup() {
+        server = HttpServer.create()
                 .host("0.0.0.0")
                 .port(0)
                 .route(r -> r
-                        .get("/html", (req, res) -> {
-                            log.info("Hit /html endpoint");
+                        .get("/html/bad-request", (req, res) -> {
                             return res.header("content-type", "text/html")
-                                    .header("retry-after", "9999")
-                                    .status(429)
+                                    .status(400)
                                     .sendString(Mono.just("<!doctype html>\n" +
                                             "<html>\n" +
                                             "  <head>\n" +
@@ -65,30 +59,25 @@ public class WebClientTest {
                                             "</html>"));
                         }))
                 .bind()
-                .doOnNext(server -> {
-                    log.info("Server started on: {}", server.address());
-                    PORT = server.port();
-                })
+                .doOnNext(server -> port = server.port())
                 .block();
     }
 
     @Test
-    @Ignore
-    public void htmlResponse() {
-        ExchangeStrategies ex2 = ExchangeStrategies.jackson(new JacksonResources().getObjectMapper());
-        Route fakeRoute = Route.get("http://0.0.0.0:" + PORT + "/html");
-        Router router = new DefaultRouter(new RouterOptions("", ReactorResources.create(), ex2, Collections.emptyList(),
+    public void shouldErrorWithClientExceptionOnHtmlBadRequest() {
+        ExchangeStrategies strategies = ExchangeStrategies.jackson(new JacksonResources().getObjectMapper());
+        Route badRequestRoute = Route.get("http://0.0.0.0:" + port + "/html/bad-request");
+        Router router = new DefaultRouter(new RouterOptions("", ReactorResources.create(), strategies,
+                Collections.emptyList(),
                 BucketGlobalRateLimiter.create(), RequestQueueFactory.buffering()));
-        String response = router.exchange(new DiscordWebRequest(fakeRoute))
-                .bodyToMono(String.class)
-                .log()
-                .subscriberContext(ctx -> ctx.put(LogUtil.KEY_SHARD_ID, 123))
-                .block();
-        log.info("{}", response);
+        StepVerifier.create(router.exchange(new DiscordWebRequest(badRequestRoute))
+                .bodyToMono(String.class))
+                .expectSubscription()
+                .verifyError(ClientException.class);
     }
 
-    @AfterClass
-    public static void dispose() {
-        SERVER.disposeNow();
+    @AfterAll
+    public void dispose() {
+        server.disposeNow();
     }
 }

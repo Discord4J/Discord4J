@@ -6,7 +6,7 @@ dependencies {
     api "com.fasterxml.jackson.core:jackson-databind:$jackson_version"
     api "com.fasterxml.jackson.datatype:jackson-datatype-jdk8:$jackson_version"
 
-    testImplementation "junit:junit:$junit_version"
+    testImplementation "org.junit.jupiter:junit-jupiter-engine:$junit_version"
     testImplementation "io.projectreactor:reactor-test"
 }
 

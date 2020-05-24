@@ -18,10 +18,10 @@ package discord4j.core.object.util;
 
 import discord4j.rest.util.Permission;
 import discord4j.rest.util.PermissionSet;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static discord4j.rest.util.Permission.*;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class PermissionSetTest {
 

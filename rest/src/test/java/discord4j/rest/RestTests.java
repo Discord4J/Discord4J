@@ -17,33 +17,30 @@
 
 package discord4j.rest;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import discord4j.common.JacksonResources;
 import discord4j.common.ReactorResources;
 import discord4j.common.jackson.UnknownPropertyHandler;
 import discord4j.rest.http.ExchangeStrategies;
 import discord4j.rest.request.*;
-import discord4j.rest.service.ChannelService;
 
 import java.util.Collections;
+import java.util.Objects;
 
 public abstract class RestTests {
 
-    public static Router getRouter(String token, ObjectMapper mapper) {
-        return new DefaultRouter(new RouterOptions(token, ReactorResources.create(), ExchangeStrategies.jackson(mapper),
+    private static Router DEFAULT_ROUTER;
+
+    public static Router defaultRouter() {
+        if (DEFAULT_ROUTER == null) {
+            DEFAULT_ROUTER = createDefaultRouter(Objects.requireNonNull(System.getenv("token")));
+        }
+        return DEFAULT_ROUTER;
+    }
+
+    private static Router createDefaultRouter(String token) {
+        return new DefaultRouter(new RouterOptions(token, ReactorResources.create(),
+                ExchangeStrategies.jackson(new JacksonResources(
+                        mapper -> mapper.addHandler(new UnknownPropertyHandler(true))).getObjectMapper()),
                 Collections.emptyList(), BucketGlobalRateLimiter.create(), RequestQueueFactory.buffering()));
-    }
-
-    public static ObjectMapper getMapper(boolean ignoreUnknown) {
-        return new JacksonResources(mapper -> mapper.addHandler(new UnknownPropertyHandler(ignoreUnknown)))
-                .getObjectMapper();
-    }
-
-    public static ChannelService getChannelService() {
-        String token = System.getenv("token");
-        boolean ignoreUnknown = !Boolean.parseBoolean(System.getenv("failUnknown"));
-        ObjectMapper mapper = getMapper(ignoreUnknown);
-        Router router = getRouter(token, mapper);
-        return new ChannelService(router);
     }
 }

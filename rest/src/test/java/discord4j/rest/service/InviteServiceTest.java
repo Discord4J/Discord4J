@@ -16,60 +16,39 @@
  */
 package discord4j.rest.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import discord4j.rest.DiscordTest;
 import discord4j.common.util.Snowflake;
 import discord4j.discordjson.json.InviteData;
 import discord4j.rest.RestTests;
-import discord4j.rest.request.Router;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.TestInstance;
 
 import java.time.Instant;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 
-import static org.junit.Assert.assertEquals;
-
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class InviteServiceTest {
 
     private static final String inviteCode = System.getenv("inviteCode");
     private static final long modifyChannel = Snowflake.asLong(System.getenv("modifyChannel"));
 
-    private InviteService inviteService = null;
+    private InviteService inviteService;
+    private ChannelService channelService;
 
-    private ChannelService channelService = null;
-
-    private InviteService getInviteService() {
-
-        if (inviteService != null) {
-            return inviteService;
-        }
-
-        String token = System.getenv("token");
-        boolean ignoreUnknown = !Boolean.parseBoolean(System.getenv("failUnknown"));
-        ObjectMapper mapper = RestTests.getMapper(ignoreUnknown);
-        Router router = RestTests.getRouter(token, mapper);
-
-        return inviteService = new InviteService(router);
+    @BeforeAll
+    public void setup() {
+        inviteService = new InviteService(RestTests.defaultRouter());
+        channelService = new ChannelService(RestTests.defaultRouter());
     }
 
-    private ChannelService getChannelService() {
-
-        if (channelService != null) {
-            return channelService;
-        }
-
-        return channelService = RestTests.getChannelService();
-    }
-
-    @Test
+    @DiscordTest
     public void testGetInvite() {
-        getInviteService().getInvite(inviteCode).block();
+        inviteService.getInvite(inviteCode).block();
     }
 
-    @Test
+    @DiscordTest
     public void testDeleteInvite() {
-        getChannelService().getChannelInvites(modifyChannel)
+        channelService.getChannelInvites(modifyChannel)
             .filter(invite -> !invite.maxAge().isAbsent())
             .filter(invite -> invite.createdAt().toOptional()
                 .map(this::asInstant)
@@ -77,19 +56,12 @@ public class InviteServiceTest {
                 .map(ts -> ts.isBefore(Instant.now()))
                 .orElse(false))
             .map(InviteData::code)
-            .flatMap(code -> getInviteService().deleteInvite(code, null))
+            .flatMap(code -> inviteService.deleteInvite(code, null))
             .blockLast();
     }
 
     private Instant asInstant(String timestamp) {
         return DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(timestamp, Instant::from);
-    }
-
-    @Test
-    public void discordTimestampToInstant() {
-        String timestamp = "2018-06-01T16:40:45.991000+00:00";
-        Instant expected = ZonedDateTime.of(2018, 6, 1, 16, 40, 45, 991_000_000, ZoneId.of("Z")).toInstant();
-        assertEquals(expected, asInstant(timestamp));
     }
 
 }

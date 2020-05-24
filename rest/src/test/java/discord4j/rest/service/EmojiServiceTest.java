@@ -16,54 +16,46 @@
  */
 package discord4j.rest.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import discord4j.rest.DiscordTest;
 import discord4j.common.util.Snowflake;
 import discord4j.rest.RestTests;
-import discord4j.rest.request.Router;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.TestInstance;
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class EmojiServiceTest {
 
     private static final long guild = Snowflake.asLong(System.getenv("guild"));
     private static final long permanentEmoji = Snowflake.asLong(System.getenv("permanentEmoji"));
 
-    private EmojiService emojiService = null;
+    private EmojiService emojiService;
 
-    private EmojiService getEmojiService() {
-
-        if (emojiService != null) {
-            return emojiService;
-        }
-
-        String token = System.getenv("token");
-        boolean ignoreUnknown = !Boolean.parseBoolean(System.getenv("failUnknown"));
-        ObjectMapper mapper = RestTests.getMapper(ignoreUnknown);
-        Router router = RestTests.getRouter(token, mapper);
-
-        return emojiService = new EmojiService(router);
+    @BeforeAll
+    public void setup() {
+        emojiService = new EmojiService(RestTests.defaultRouter());
     }
 
-    @Test
+    @DiscordTest
     public void testGetGuildEmojis() {
-        getEmojiService().getGuildEmojis(guild).then().block();
+        emojiService.getGuildEmojis(guild).then().block();
     }
 
-    @Test
+    @DiscordTest
     public void testGetGuildEmoji() {
-        getEmojiService().getGuildEmoji(guild, permanentEmoji).block();
+        emojiService.getGuildEmoji(guild, permanentEmoji).block();
     }
 
-    @Test
+    @DiscordTest
     public void testCreateGuildEmoji() {
         // TODO
     }
 
-    @Test
+    @DiscordTest
     public void testModifyGuildEmoji() {
         // TODO
     }
 
-    @Test
+    @DiscordTest
     public void testDeleteGuildEmoji() {
         // TODO
     }

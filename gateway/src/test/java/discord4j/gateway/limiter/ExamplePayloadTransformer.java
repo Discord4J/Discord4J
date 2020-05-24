@@ -18,8 +18,6 @@
 package discord4j.gateway.limiter;
 
 import discord4j.common.operator.RateLimitOperator;
-import org.junit.Ignore;
-import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.scheduler.Schedulers;
 import reactor.util.Logger;
@@ -30,13 +28,11 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
-public class PayloadTransformerTest {
+public class ExamplePayloadTransformer {
 
-    private static final Logger log = Loggers.getLogger(PayloadTransformerTest.class);
+    private static final Logger log = Loggers.getLogger(ExamplePayloadTransformer.class);
 
-    @Test
-    @Ignore
-    public void testIdentifySequence() {
+    public static void main(String[] args) {
         final int factor = 1;
         final Map<Integer, RateLimitOperator<String>> limiters = new ConcurrentHashMap<>(factor);
         final Map<Integer, AtomicLong> lastIdentify = new ConcurrentHashMap<>(factor);
@@ -54,7 +50,7 @@ public class PayloadTransformerTest {
                             .doOnNext(it -> {
                                 long now = System.nanoTime();
                                 if (Duration.ofNanos(lastIdentifyAt.get()).plusSeconds(5).toNanos() > now) {
-                                    log.warn("OP 9 !!! identified too quickly");
+                                    log.warn("Identified too quickly");
                                 }
                                 log.info(">> {}", it);
                                 lastIdentifyAt.set(now);
@@ -64,29 +60,5 @@ public class PayloadTransformerTest {
                 }));
 
         connections.blockLast();
-    }
-
-    @Test
-    @Ignore
-    public void testIdentifyLimiter() {
-        RateLimitOperator<Integer> limiter = new RateLimitOperator<>(1, Duration.ofSeconds(5), Schedulers.parallel());
-
-        Flux<Integer> outbound = Flux.range(0, 10)
-                .transform(limiter)
-                .doOnNext(value -> log.info(">> {}", value));
-
-        outbound.blockLast();
-    }
-
-    @Test
-    @Ignore
-    public void testOutboundLimiter() {
-        RateLimitOperator<Integer> limiter = new RateLimitOperator<>(120, Duration.ofMinutes(1), Schedulers.parallel());
-
-        Flux<Integer> outbound = Flux.range(0, 200)
-                .transform(limiter)
-                .doOnNext(value -> log.info(">> {}", value));
-
-        outbound.blockLast();
     }
 }
