@@ -198,7 +198,6 @@ public class VoiceChannelJoinSpec implements Spec<Mono<VoiceConnection>> {
                         .selfDeaf(selfDeaf)
                         .build(), shardId));
 
-        final Flux<Snowflake> selfIdSupplier = selfIdSupplier(gateway);
         final Mono<VoiceStateUpdateEvent> waitForVoiceStateUpdate = onVoiceStateUpdates(gateway, guildId).next();
         final Mono<VoiceServerUpdateEvent> waitForVoiceServerUpdate = onVoiceServerUpdate(gateway, guildId);
 
@@ -209,20 +208,20 @@ public class VoiceChannelJoinSpec implements Spec<Mono<VoiceConnection>> {
                 .map(vsu -> new VoiceServerOptions(vsu.getToken(), vsu.getEndpoint()));
         final VoiceStateUpdateTask stateUpdateTask = id -> onVoiceStateUpdates(gateway, id)
                 .map(stateUpdateEvent -> stateUpdateEvent.getCurrent().getSessionId());
-        final VoiceChannelRetrieveTask channelRetrieveTask = () -> selfIdSupplier.next()
-                .flatMap(selfId -> gateway.getMemberById(voiceChannel.getGuildId(), selfId))
+        final VoiceChannelRetrieveTask channelRetrieveTask = () -> gateway
+                .getMemberById(voiceChannel.getGuildId(), gateway.getSelfId())
                 .flatMap(Member::getVoiceState)
                 .flatMap(voiceState -> Mono.justOrEmpty(voiceState.getChannelId()));
 
         Mono<VoiceConnection> newConnection = sendVoiceStateUpdate
-                .then(Mono.zip(waitForVoiceStateUpdate, waitForVoiceServerUpdate, selfIdSupplier.next()))
-                .flatMap(TupleUtils.function((voiceState, voiceServer, selfId) -> {
+                .then(Mono.zip(waitForVoiceStateUpdate, waitForVoiceServerUpdate))
+                .flatMap(TupleUtils.function((voiceState, voiceServer) -> {
                     final String session = voiceState.getCurrent().getSessionId();
                     //noinspection ConstantConditions
                     final VoiceServerOptions voiceServerOptions = new VoiceServerOptions(
                             voiceServer.getToken(), voiceServer.getEndpoint());
                     final VoiceGatewayOptions voiceGatewayOptions = new VoiceGatewayOptions(
-                            guildId, selfId, session, voiceServerOptions,
+                            guildId, gateway.getSelfId(), session, voiceServerOptions,
                             gateway.getCoreResources().getJacksonResources(),
                             gateway.getGatewayResources().getVoiceReactorResources(),
                             gateway.getGatewayResources().getVoiceReconnectOptions(),
@@ -247,27 +246,15 @@ public class VoiceChannelJoinSpec implements Spec<Mono<VoiceConnection>> {
                 .switchIfEmpty(newConnection);
     }
 
-    static Flux<Snowflake> selfIdSupplier(GatewayDiscordClient gateway) {
-        return gateway.getGatewayResources().getStateView().getSelfId()
-                .map(Snowflake::of)
-                .switchIfEmpty(Mono.error(new IllegalStateException("Missing self id")))
-                .cache()
-                .repeat();
-    }
-
     static Flux<VoiceStateUpdateEvent> onVoiceStateUpdates(GatewayDiscordClient gateway, Snowflake guildId) {
         return gateway.getEventDispatcher()
                 .on(VoiceStateUpdateEvent.class)
-                .zipWith(selfIdSupplier(gateway))
-                .filter(t2 -> {
-                    VoiceStateUpdateEvent vsu = t2.getT1();
-                    Snowflake selfId = t2.getT2();
+                .filter(vsu -> {
                     final Snowflake vsuUser = vsu.getCurrent().getUserId();
                     final Snowflake vsuGuild = vsu.getCurrent().getGuildId();
                     // this update is for the bot (current) user in this guild
-                    return vsuUser.equals(selfId) && vsuGuild.equals(guildId);
-                })
-                .map(Tuple2::getT1);
+                    return vsuUser.equals(gateway.getSelfId()) && vsuGuild.equals(guildId);
+                });
     }
 
     static Mono<VoiceServerUpdateEvent> onVoiceServerUpdate(GatewayDiscordClient gateway, Snowflake guildId) {

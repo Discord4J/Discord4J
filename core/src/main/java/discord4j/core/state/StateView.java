@@ -23,7 +23,6 @@ import discord4j.store.api.util.LongLongTuple2;
 import discord4j.store.api.util.StoreContext;
 import discord4j.store.api.view.LongObjStoreView;
 import discord4j.store.api.view.StoreView;
-import reactor.core.publisher.Mono;
 
 import java.util.Collections;
 
@@ -101,10 +100,4 @@ public final class StateView {
         return new StoreView<>(stateHolder.getVoiceStateStore());
     }
 
-    public Mono<Long> getSelfId() {
-        return stateHolder.getParameterStore().find(StateHolder.SELF_ID_PARAMETER_KEY)
-                .switchIfEmpty(Mono.just(new ParameterData()))
-                .flatMap(bean -> Mono.justOrEmpty(bean.getValue()))
-                .ofType(Long.class);
-    }
 }

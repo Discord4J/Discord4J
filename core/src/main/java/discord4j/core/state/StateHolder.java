@@ -23,12 +23,9 @@ import discord4j.store.api.primitive.LongObjStore;
 import discord4j.store.api.service.StoreService;
 import discord4j.store.api.util.LongLongTuple2;
 import discord4j.store.api.util.StoreContext;
-import discord4j.store.jdk.JdkCachingStore;
 import reactor.core.publisher.Mono;
 import reactor.util.Logger;
 import reactor.util.Loggers;
-
-import java.time.Duration;
 
 /**
  * Holder for various pieces of state for use in caching.
@@ -48,8 +45,6 @@ import java.time.Duration;
  */
 public final class StateHolder {
 
-    public static final String SELF_ID_PARAMETER_KEY = "discord4j.core.selfId";
-
     private static final Logger log = Loggers.getLogger(StateHolder.class);
 
     private final StoreService storeService;
@@ -62,7 +57,6 @@ public final class StateHolder {
     private final LongObjStore<RoleData> roleStore;
     private final LongObjStore<UserData> userStore;
     private final Store<LongLongTuple2, VoiceStateData> voiceStateStore;
-    private final Store<String, ParameterData> parameterStore;
 
     public StateHolder(final StoreService service, final StoreContext context) {
         storeService = service;
@@ -95,10 +89,6 @@ public final class StateHolder {
 
         voiceStateStore = service.provideGenericStore(LongLongTuple2.class, VoiceStateData.class);
         log.debug("Voice state storage : {}", voiceStateStore);
-
-        parameterStore = new JdkCachingStore<>(service.provideGenericStore(String.class, ParameterData.class),
-                key -> SELF_ID_PARAMETER_KEY.equals(key) ? Duration.ofHours(1) : Duration.ZERO);
-        log.debug("Parameter storage   : {}", parameterStore);
     }
 
     public StoreService getStoreService() {
@@ -141,10 +131,6 @@ public final class StateHolder {
         return voiceStateStore;
     }
 
-    public Store<String, ParameterData> getParameterStore() {
-        return parameterStore;
-    }
-
     public Mono<Void> invalidateStores() {
         return channelStore.invalidate()
                 .and(guildStore.invalidate())
@@ -154,7 +140,6 @@ public final class StateHolder {
                 .and(presenceStore.invalidate())
                 .and(roleStore.invalidate())
                 .and(userStore.invalidate())
-                .and(voiceStateStore.invalidate())
-                .and(parameterStore.invalidate());
+                .and(voiceStateStore.invalidate());
     }
 }

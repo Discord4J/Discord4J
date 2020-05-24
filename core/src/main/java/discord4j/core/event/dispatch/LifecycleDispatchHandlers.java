@@ -48,13 +48,7 @@ class LifecycleDispatchHandlers {
         Mono<Void> saveUser = context.getStateHolder().getUserStore()
                 .save(userId, userData);
 
-        ParameterData parameterData = new ParameterData();
-        parameterData.setValue(userId);
-
-        Mono<Void> saveSelfId = context.getStateHolder().getParameterStore()
-                .save(StateHolder.SELF_ID_PARAMETER_KEY, parameterData);
-
-        return saveUser.and(saveSelfId)
+        return saveUser
                 .thenReturn(new ReadyEvent(gateway, context.getShardInfo(), dispatch.v(), self, guilds,
                         dispatch.sessionId(), dispatch.trace()));
     }

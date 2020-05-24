@@ -22,8 +22,6 @@ import discord4j.core.object.Embed;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.reaction.ReactionEmoji;
-import discord4j.core.state.ParameterData;
-import discord4j.core.state.StateHolder;
 import discord4j.core.util.ListUtil;
 import discord4j.discordjson.json.*;
 import discord4j.discordjson.json.gateway.*;
@@ -134,11 +132,8 @@ class MessageDispatchHandlers {
 
         Mono<Void> addToMessage = context.getStateHolder().getMessageStore()
                 .find(messageId)
-                .zipWith(context.getStateHolder().getParameterStore().find(StateHolder.SELF_ID_PARAMETER_KEY)
-                        .switchIfEmpty(Mono.just(new ParameterData())))
-                .map(t2 -> {
-                    boolean me = Objects.equals(userId, t2.getT2().getValue());
-                    MessageData oldMessage = t2.getT1();
+                .map(oldMessage -> {
+                    boolean me = Objects.equals(userId, gateway.getSelfId().asLong());
                     ImmutableMessageData.Builder newMessageBuilder = MessageData.builder().from(oldMessage);
 
                     if (oldMessage.reactions().isAbsent()) {
@@ -214,12 +209,8 @@ class MessageDispatchHandlers {
         Mono<Void> removeFromMessage = context.getStateHolder().getMessageStore()
                 .find(messageId)
                 .filter(message -> !message.reactions().isAbsent())
-                .zipWith(context.getStateHolder().getParameterStore()
-                        .find(StateHolder.SELF_ID_PARAMETER_KEY)
-                        .switchIfEmpty(Mono.just(new ParameterData())))
-                .map(t2 -> {
-                    boolean me = Objects.equals(userId, t2.getT2().getValue());
-                    MessageData oldMessage = t2.getT1();
+                .map(oldMessage -> {
+                    boolean me = Objects.equals(userId, gateway.getSelfId().asLong());
                     ImmutableMessageData.Builder newMessageBuilder = MessageData.builder().from(oldMessage);
 
                     List<ReactionData> reactions = oldMessage.reactions().get();

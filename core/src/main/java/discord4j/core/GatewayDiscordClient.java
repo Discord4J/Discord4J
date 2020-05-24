@@ -21,6 +21,7 @@ package discord4j.core;
 import discord4j.common.JacksonResources;
 import discord4j.common.LogUtil;
 import discord4j.common.ReactorResources;
+import discord4j.common.util.Snowflake;
 import discord4j.core.event.EventDispatcher;
 import discord4j.core.event.domain.Event;
 import discord4j.core.object.Invite;
@@ -47,7 +48,6 @@ import discord4j.gateway.json.GatewayPayload;
 import discord4j.gateway.json.ShardGatewayPayload;
 import discord4j.rest.RestClient;
 import discord4j.rest.RestResources;
-import discord4j.common.util.Snowflake;
 import discord4j.voice.LocalVoiceConnectionRegistry;
 import discord4j.voice.VoiceConnection;
 import discord4j.voice.VoiceConnectionFactory;
@@ -250,8 +250,8 @@ public class GatewayDiscordClient implements EntityRetriever {
      *
      * @return The bot user's ID.
      */
-    public Mono<Snowflake> getSelfId() {
-        return gatewayResources.getStateView().getSelfId().map(Snowflake::of);
+    public Snowflake getSelfId() {
+        return getCoreResources().getSelfId();
     }
 
     /**
