@@ -339,32 +339,33 @@ PLAYER_MANAGER.loadItem("https://www.youtube.com/watch?v=dQw4w9WgXcQ", new Audio
 
 ### ❌ Disconnecting from a Voice Channel Automatically
 
-Typically, after everyone has left a voice channel, the bot should disconnect automatically as users typically forget to disconnect the bot manually. The example below uses a reactive approach to showcase the fluidity of a reactive solution to such problems.
+Typically, after everyone has left a voice channel, the bot should disconnect automatically as users typically forget to disconnect the bot manually. The example below uses a reactive approach to showcase the fluidity of a reactive approach to solve such problems.
 
 ```java
 final VoiceChannel channel = ...
-Mono<Void> onDisconnect = channel.join(spec -> { /* TODO Initialize */ })
-    .flatMap(connection -> {
-        // The bot itself has a VoiceState; 1 VoiceState signals bot is alone
-        final Publisher<Boolean> voiceStateCounter = channel.getVoiceStates()
-            .count()
-            .map(count -> 1L == count);
+final Mono<Void> onDisconnect = channel.join(spec -> { /* TODO Initialize */ })
+  .flatMap(connection -> {
+    // The bot itself has a VoiceState; 1 VoiceState signals bot is alone
+    final Publisher<Boolean> voiceStateCounter = channel.getVoiceStates()
+      .count()
+      .map(count -> 1L == count);
 
-        // Every 10 seconds, check if the bot is alone. This is useful if
-        // the bot joined alone, but no one else joined since connecting
-        final Mono<Void> onInterval = Flux.interval(Duration.ofSeconds(10))
-            .filterWhen(ignored -> voiceStateCounter)
-            .next()
-            .then();
+    // After 10 seconds, check if the bot is alone. This is useful if
+    // the bot joined alone, but no one else joined since connecting
+    final Mono<Void> onDelay = Mono.delay(Duration.ofSeconds(10L))
+      .filterWhen(ignored -> voiceStateCounter)
+      .switchIfEmpty(Mono.never())
+      .then();
 
-        // As people join/leave this specific voice channel, check if the bot is alone
-        final Mono<Void> onEvent = channel.getClient().getEventDispatcher().on(VoiceStateUpdateEvent.class)
-            .filter(event -> event.getCurrent().getChannelId().map(channel.getId()::equals).orElse(false))
-            .filterWhen(ignored -> voiceStateCounter)
-            .next()
-            .then();
+    // As people join and leave `channel`, check if the bot is alone.
+    // Note the first filter is not strictly necessary, but it does prevent many unnecessary cache calls
+    final Mono<Void> onEvent = channel.getClient().getEventDispatcher().on(VoiceStateUpdateEvent.class)
+      .filter(event -> event.getOld().flatMap(VoiceState::getChannelId).map(channel.getId()::equals).orElse(false))
+      .filterWhen(ignored -> voiceStateCounter)
+      .next()
+      .then();
 
-        // Disconnect the bot if either onInterval or onEvent happen!
-        return Mono.first(onInterval, onEvent).then(connection.disconnect());
-    });
+    // Disconnect the bot if either onDelay or onEvent are completed!
+    return Mono.first(onDelay, onEvent).then(connection.disconnect());
+  });
 ```
