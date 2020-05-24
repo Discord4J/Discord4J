@@ -19,6 +19,7 @@ package discord4j.rest.service;
 import discord4j.discordjson.json.*;
 import discord4j.rest.request.Router;
 import discord4j.rest.route.Routes;
+import discord4j.rest.util.Multimap;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
@@ -204,6 +205,7 @@ public class GuildService extends RestService {
                 .bodyToMono(Void.class);
     }
 
+    @Deprecated
     public Mono<PruneData> getGuildPruneCount(long guildId, Map<String, Object> queryParams) {
         return Routes.GUILD_PRUNE_COUNT_GET.newRequest(guildId)
                 .query(queryParams)
@@ -211,9 +213,25 @@ public class GuildService extends RestService {
                 .bodyToMono(PruneData.class);
     }
 
+    public Mono<PruneData> getGuildPruneCount(long guildId, Multimap<String, Object> params) {
+        return Routes.GUILD_PRUNE_COUNT_GET.newRequest(guildId)
+                .query(params)
+                .exchange(getRouter())
+                .bodyToMono(PruneData.class);
+    }
+
+    @Deprecated
     public Mono<PruneData> beginGuildPrune(long guildId, Map<String, Object> queryParams, @Nullable String reason) {
         return Routes.GUILD_PRUNE_BEGIN.newRequest(guildId)
                 .query(queryParams)
+                .optionalHeader("X-Audit-Log-Reason", reason)
+                .exchange(getRouter())
+                .bodyToMono(PruneData.class);
+    }
+
+    public Mono<PruneData> beginGuildPrune(long guildId, Multimap<String, Object> params, @Nullable String reason) {
+        return Routes.GUILD_PRUNE_BEGIN.newRequest(guildId)
+                .query(params)
                 .optionalHeader("X-Audit-Log-Reason", reason)
                 .exchange(getRouter())
                 .bodyToMono(PruneData.class);
