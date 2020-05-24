@@ -1197,7 +1197,7 @@ public final class Guild implements Entity {
 
         return gateway.getRestClient().getGuildService()
                 .getGuildPruneCount(getId().asLong(), queryParams)
-                .map(PruneData::pruned);
+                .flatMap(data -> Mono.justOrEmpty(data.pruned()));
     }
 
     /**
@@ -1227,7 +1227,7 @@ public final class Guild implements Entity {
 
         return gateway.getRestClient().getGuildService()
                 .beginGuildPrune(getId().asLong(), queryParams, reason)
-                .map(PruneData::pruned);
+                .flatMap(data -> Mono.justOrEmpty(data.pruned()));
     }
 
     /**
