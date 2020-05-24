@@ -45,6 +45,7 @@ public abstract class EventNames {
     public static final String MESSAGE_REACTION_ADD = "MESSAGE_REACTION_ADD";
     public static final String MESSAGE_REACTION_REMOVE = "MESSAGE_REACTION_REMOVE";
     public static final String MESSAGE_REACTION_REMOVE_ALL = "MESSAGE_REACTION_REMOVE_ALL";
+    public static final String MESSAGE_REACTION_REMOVE_EMOJI = "MESSAGE_REACTION_REMOVE_EMOJI";
     public static final String PRESENCE_UPDATE = "PRESENCE_UPDATE";
     public static final String TYPING_START = "TYPING_START";
     public static final String USER_UPDATE = "USER_UPDATE";

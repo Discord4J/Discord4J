@@ -85,7 +85,7 @@ public class BotSupport {
                                 .content("<@" + message.getUserData().id() + "> " + content.substring("!echo ".length()))
                                 .build())
                         .flatMap(data -> event.getClient().rest().restMessage(data)
-                                .createReaction("\uD83C\uDF89"))
+                                .createReaction("✅"))
                         .then();
             }
             return Mono.empty();

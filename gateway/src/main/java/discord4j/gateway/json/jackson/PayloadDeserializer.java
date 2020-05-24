@@ -66,6 +66,7 @@ public class PayloadDeserializer extends StdDeserializer<GatewayPayload<?>> {
         dispatchTypes.put(EventNames.MESSAGE_REACTION_ADD, MessageReactionAdd.class);
         dispatchTypes.put(EventNames.MESSAGE_REACTION_REMOVE, MessageReactionRemove.class);
         dispatchTypes.put(EventNames.MESSAGE_REACTION_REMOVE_ALL, MessageReactionRemoveAll.class);
+        dispatchTypes.put(EventNames.MESSAGE_REACTION_REMOVE_EMOJI, MessageReactionRemoveEmoji.class);
         dispatchTypes.put(EventNames.PRESENCE_UPDATE, PresenceUpdate.class);
         dispatchTypes.put(EventNames.TYPING_START, TypingStart.class);
         dispatchTypes.put(EventNames.USER_UPDATE, UserUpdate.class);

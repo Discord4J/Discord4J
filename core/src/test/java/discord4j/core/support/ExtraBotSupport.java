@@ -56,6 +56,7 @@ public class ExtraBotSupport {
         eventHandlers.add(new LogLevelChange());
         eventHandlers.add(new Reactor());
         eventHandlers.add(new UserInfo());
+        eventHandlers.add(new ReactionRemove());
 
         return client.on(MessageCreateEvent.class,
                 event -> ownerId.filter(
@@ -269,6 +270,20 @@ public class ExtraBotSupport {
                                             list.size(), time, (list.size() / (double) time) * 1000)))
                             .subscribe()) // Separate subscribe in order to improve accuracy of elapsed time
                     .then();
+        }
+    }
+
+    public static class ReactionRemove extends EventHandler {
+
+        @Override
+        public Mono<Void> onMessageCreate(MessageCreateEvent event) {
+            Message message = event.getMessage();
+            if (message.getContent().startsWith("!rr ")) {
+                String[] tokens = message.getContent().split(" ");
+                return event.getClient().getMessageById(Snowflake.of(tokens[1]), Snowflake.of(tokens[2]))
+                        .flatMap(m -> m.removeReactions(ReactionEmoji.unicode("✅")));
+            }
+            return Mono.empty();
         }
     }
 }
