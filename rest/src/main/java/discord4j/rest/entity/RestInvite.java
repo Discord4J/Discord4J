@@ -22,6 +22,9 @@ import discord4j.rest.RestClient;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
 
+/**
+ * Represents a code that can be used to add a user to a guild.
+ */
 public class RestInvite {
 
     private final RestClient restClient;
@@ -32,6 +35,13 @@ public class RestInvite {
         this.code = code;
     }
 
+    /**
+     * Create a {@link RestInvite} with the given parameters. This method does not perform any API request.
+     *
+     * @param restClient REST API resources
+     * @param code the ID of this entity
+     * @return a {@code RestInvite} represented by the given parameters.
+     */
     public static RestInvite create(RestClient restClient, String code) {
         return new RestInvite(restClient, code);
     }

@@ -38,11 +38,18 @@ public class RestWebhook {
         this.id = id;
     }
 
+    /**
+     * Create a {@link RestWebhook} for a given ID. This method does not perform any API request.
+     *
+     * @param restClient the client to make API requests
+     * @param id the ID of this entity
+     * @return a {@code RestWebhook} represented by this {@code id}.
+     */
     public static RestWebhook create(RestClient restClient, Snowflake id) {
         return new RestWebhook(restClient, id.asLong());
     }
 
-    public static RestWebhook create(RestClient restClient, long id) {
+    static RestWebhook create(RestClient restClient, long id) {
         return new RestWebhook(restClient, id);
     }
 
@@ -70,10 +77,12 @@ public class RestWebhook {
     }
 
     /**
+     * Delete a webhook permanently. Requires the {@link Permission#MANAGE_WEBHOOKS} permission. Returns empty on
+     * success.
      *
-     *
-     * @param reason
-     * @return
+     * @param reason an optional reason for the audit log
+     * @return a {@link Mono} where, upon subscription, emits a complete signal on success. If an error is received, it
+     * is emitted through the {@code Mono}.
      */
     public Mono<Void> delete(@Nullable String reason) {
         return restClient.getWebhookService().deleteWebhook(id, reason);

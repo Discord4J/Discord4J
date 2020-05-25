@@ -17,13 +17,17 @@
 
 package discord4j.rest.entity;
 
+import discord4j.common.util.Snowflake;
 import discord4j.discordjson.json.EmojiData;
 import discord4j.discordjson.json.GuildEmojiModifyRequest;
 import discord4j.rest.RestClient;
-import discord4j.common.util.Snowflake;
+import discord4j.rest.util.Permission;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
 
+/**
+ * Represents a guild emoji entity in Discord.
+ */
 public class RestEmoji {
 
     private final RestClient restClient;
@@ -36,6 +40,14 @@ public class RestEmoji {
         this.id = id;
     }
 
+    /**
+     * Create a {@link RestEmoji} with the given parameters. This method does not perform any API request.
+     *
+     * @param restClient REST API resources
+     * @param guildId the ID of the guild this emoji belongs to
+     * @param id the ID of this member
+     * @return a {@code RestEmoji} represented by the given parameters.
+     */
     public static RestEmoji create(RestClient restClient, Snowflake guildId, Snowflake id) {
         return new RestEmoji(restClient, guildId.asLong(), id.asLong());
     }
@@ -44,18 +56,45 @@ public class RestEmoji {
         return new RestEmoji(restClient, guildId, id);
     }
 
+    /**
+     * Return this emoji's parent {@link RestGuild}. This method does not perform any API request.
+     *
+     * @return the parent {@code RestGuild} of this guild emoji.
+     */
     public RestGuild guild() {
         return RestGuild.create(restClient, guildId);
     }
 
+    /**
+     * Retrieve this guild emoji's data upon subscription.
+     *
+     * @return a {@link Mono} where, upon successful completion, emits the {@link EmojiData} belonging to this entity.
+     * If an error is received, it is emitted through the {@code Mono}.
+     */
     public Mono<EmojiData> getData() {
         return restClient.getEmojiService().getGuildEmoji(guildId, id);
     }
 
+    /**
+     * Modify this guild emoji. Requires the {@link Permission#MANAGE_EMOJIS} permission. Returns the updated emoji
+     * object on success.
+     *
+     * @param request the guild emoji modify request
+     * @param reason an optional reason for the audit log
+     * @return a {@link Mono} where, upon subscription, emits the updated {@link EmojiData} on success. If an error
+     * is received, it is emitted through the {@code Mono}.
+     */
     public Mono<EmojiData> modify(GuildEmojiModifyRequest request, @Nullable String reason) {
         return restClient.getEmojiService().modifyGuildEmoji(guildId, id, request, reason);
     }
 
+    /**
+     * Delete this guild emoji. Requires the {@link Permission#MANAGE_EMOJIS} permission. Returns empty on success.
+     *
+     * @param reason an optional reason for the audit log
+     * @return a {@link Mono} where, upon subscription, emits a complete signal on success. If an error is received, it
+     * is emitted through the {@code Mono}.
+     */
     public Mono<Void> delete(@Nullable String reason) {
         return restClient.getEmojiService().deleteGuildEmoji(guildId, id, reason);
     }

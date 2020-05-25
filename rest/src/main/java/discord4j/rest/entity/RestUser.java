@@ -38,6 +38,13 @@ public class RestUser {
         this.id = id;
     }
 
+    /**
+     * Create a {@link RestUser} for a given ID. This method does not perform any API request.
+     *
+     * @param restClient the client to make API requests
+     * @param id the ID of this entity
+     * @return a {@code RestUser} represented by this {@code id}.
+     */
     public static RestUser create(RestClient restClient, Snowflake id) {
         return new RestUser(restClient, id.asLong());
     }

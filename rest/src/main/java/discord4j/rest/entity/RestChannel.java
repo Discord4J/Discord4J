@@ -74,6 +74,12 @@ public class RestChannel {
         return restClient.getChannelService().getChannel(id);
     }
 
+    /**
+     * Return a {@link RestMessage} belonging to this channel. This method does not perform any API request.
+     *
+     * @param messageId the message ID under this channel
+     * @return a {@code RestMessage} represented by the given parameters.
+     */
     public RestMessage message(Snowflake messageId) {
         return RestMessage.create(restClient, id, messageId.asLong());
     }
@@ -238,7 +244,8 @@ public class RestChannel {
      * @see
      * <a href="https://discord.com/developers/docs/resources/channel#edit-channel-permissions">Edit Channel Permissions</a>
      */
-    public Mono<Void> editChannelPermissions(Snowflake targetId, PermissionsEditRequest request, @Nullable String reason) {
+    public Mono<Void> editChannelPermissions(Snowflake targetId, PermissionsEditRequest request,
+                                             @Nullable String reason) {
         return restClient.getChannelService().editChannelPermissions(id, targetId.asLong(), request, reason);
     }
 

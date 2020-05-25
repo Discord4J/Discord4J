@@ -18,10 +18,10 @@
 package discord4j.rest.entity;
 
 import discord4j.common.annotations.Experimental;
+import discord4j.common.util.Snowflake;
 import discord4j.discordjson.json.MessageData;
 import discord4j.discordjson.json.MessageEditRequest;
 import discord4j.rest.RestClient;
-import discord4j.common.util.Snowflake;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
 
@@ -41,11 +41,12 @@ public class RestMessage {
     }
 
     /**
-     * Create a {@link RestMessage} with the given parameters.
+     * Create a {@link RestMessage} with the given parameters. This method does not perform any API request.
      *
      * @param restClient REST API resources
      * @param channelId the ID of the channel this messages belongs to
      * @param id the ID of this message
+     * @return a {@code RestMessage} represented by the given parameters.
      */
     public static RestMessage create(RestClient restClient, Snowflake channelId, Snowflake id) {
         return new RestMessage(restClient, channelId.asLong(), id.asLong());
@@ -89,8 +90,7 @@ public class RestMessage {
      * @param emoji The reaction to remove on this message.
      * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the reaction from the current
      * user was removed on this message. If an error is received, it is emitted through the {@code Mono}.
-     * @see
-     * <a href="https://discord.com/developers/docs/resources/channel#delete-own-reaction">Delete Own Reaction</a>
+     * @see <a href="https://discord.com/developers/docs/resources/channel#delete-own-reaction">Delete Own Reaction</a>
      */
     public Mono<Void> deleteOwnReaction(String emoji) {
         return restClient.getChannelService().deleteOwnReaction(channelId, id, emoji);

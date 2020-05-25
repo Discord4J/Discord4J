@@ -21,6 +21,7 @@ import discord4j.common.util.Snowflake;
 import discord4j.discordjson.json.*;
 import discord4j.rest.RestClient;
 import discord4j.rest.util.PaginationUtil;
+import discord4j.rest.util.Permission;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
@@ -31,6 +32,10 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 
+/**
+ * Represents a guild entity in Discord. Guilds in Discord represent an isolated collection of users and channels,
+ * and are often referred to as "servers" in the UI.
+ */
 public class RestGuild {
 
     private final RestClient restClient;
@@ -41,6 +46,13 @@ public class RestGuild {
         this.id = id;
     }
 
+    /**
+     * Create a {@link RestGuild} for a given ID. This method does not perform any API request.
+     *
+     * @param restClient the client to make API requests
+     * @param id the ID of this entity
+     * @return a {@code RestGuild} represented by this {@code id}.
+     */
     public static RestGuild create(RestClient restClient, Snowflake id) {
         return new RestGuild(restClient, id.asLong());
     }
@@ -49,34 +61,87 @@ public class RestGuild {
         return new RestGuild(restClient, id);
     }
 
+    /**
+     * Retrieve this guild's data upon subscription.
+     *
+     * @return a {@link Mono} where, upon successful completion, emits the {@link GuildUpdateData} belonging to this
+     * entity. If an error is received, it is emitted through the {@code Mono}.
+     */
     public Mono<GuildUpdateData> getData() {
         return restClient.getGuildService().getGuild(id);
     }
 
+    /**
+     * Return a {@link RestEmoji} representation under this guild. This method does not perform any API request.
+     *
+     * @param emojiId the entity ID
+     * @return a {@code RestEmoji} with the given ID, under this guild
+     */
     public RestEmoji emoji(Snowflake emojiId) {
         return RestEmoji.create(restClient, id, emojiId.asLong());
     }
 
+    /**
+     * Return a {@link RestMember} representation under this guild. This method does not perform any API request.
+     *
+     * @param memberId the entity ID
+     * @return a {@code RestMember} with the given ID, under this guild
+     */
     public RestMember member(Snowflake memberId) {
         return RestMember.create(restClient, id, memberId.asLong());
     }
 
+    /**
+     * Return a {@link RestRole} representation under this guild. This method does not perform any API request.
+     *
+     * @param roleId the entity ID
+     * @return a {@code RestRole} with the given ID, under this guild
+     */
     public RestRole role(Snowflake roleId) {
         return RestRole.create(restClient, id, roleId.asLong());
     }
 
+    /**
+     * Modify a guild's settings. Requires the {@link Permission#MANAGE_GUILD} permission. Returns the updated guild
+     * object on success.
+     *
+     * @param request the modify request body
+     * @param reason an optional reason for the audit log
+     * @return a {@link Mono} where, upon subscription, emits the updated {@link GuildUpdateData} on success. If an
+     * error is received, it is emitted through the {@code Mono}.
+     */
     public Mono<GuildUpdateData> modify(GuildModifyRequest request, @Nullable String reason) {
         return restClient.getGuildService().modifyGuild(id, request, reason);
     }
 
+    /**
+     * Delete a guild permanently. Requires the {@link Permission#MANAGE_GUILD} permission. Returns empty on success.
+     *
+     * @return a {@link Mono} where, upon subscription, emits a complete signal on success. If an error is received, it
+     * is emitted through the {@code Mono}.
+     */
     public Mono<Void> delete() {
         return restClient.getGuildService().deleteGuild(id);
     }
 
+    /**
+     * Return a {@link Flux} of guild channels.
+     *
+     * @return a sequence of this guild channels
+     */
     public Flux<ChannelData> getChannels() {
         return restClient.getGuildService().getGuildChannels(id);
     }
 
+    /**
+     * Create a new channel object for the guild. Requires the {@link Permission#MANAGE_CHANNELS} permission. Returns
+     * the new channel object on success.
+     *
+     * @param request the request body
+     * @param reason an optional reason for the audit log
+     * @return a {@link Mono} where, upon subscription, emits the created {@link ChannelData} on success. If an error
+     * is received, it is emitted through the {@code Mono}.
+     */
     public Mono<ChannelData> createChannel(ChannelCreateRequest request, @Nullable String reason) {
         return restClient.getGuildService().createGuildChannel(id, request, reason);
     }

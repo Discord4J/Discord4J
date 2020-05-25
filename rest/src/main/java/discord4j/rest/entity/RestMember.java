@@ -22,6 +22,9 @@ import discord4j.rest.RestClient;
 import discord4j.common.util.Snowflake;
 import reactor.core.publisher.Mono;
 
+/**
+ * Represents a user (bot or normal) that is member of a specific guild.
+ */
 public class RestMember {
 
     private final RestClient restClient;
@@ -34,6 +37,14 @@ public class RestMember {
         this.id = id;
     }
 
+    /**
+     * Create a {@link RestMember} with the given parameters. This method does not perform any API request.
+     *
+     * @param restClient REST API resources
+     * @param guildId the ID of the guild this member belongs to
+     * @param id the ID of this member
+     * @return a {@code RestMember} represented by the given parameters.
+     */
     public static RestMember create(RestClient restClient, Snowflake guildId, Snowflake id) {
         return new RestMember(restClient, guildId.asLong(), id.asLong());
     }
