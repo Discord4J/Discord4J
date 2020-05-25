@@ -249,7 +249,7 @@ public class RestClientBuilder<C, O extends RouterOptions> {
         if (jacksonResources != null) {
             return jacksonResources;
         }
-        return new JacksonResources();
+        return JacksonResources.create();
     }
 
     private ExchangeStrategies initExchangeStrategies(JacksonResources jacksonResources) {

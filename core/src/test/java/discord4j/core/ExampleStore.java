@@ -48,7 +48,7 @@ public class ExampleStore {
     private static final Reflections reflections = new Reflections(Event.class);
 
     public static void main(String[] args) {
-        JacksonResources jackson = new JacksonResources();
+        JacksonResources jackson = JacksonResources.create();
         Map<String, AtomicLong> counts = new ConcurrentHashMap<>();
         DiscordClientBuilder.create(System.getenv("token"))
                 .setJacksonResources(jackson)

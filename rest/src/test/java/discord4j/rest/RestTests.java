@@ -19,7 +19,6 @@ package discord4j.rest;
 
 import discord4j.common.JacksonResources;
 import discord4j.common.ReactorResources;
-import discord4j.common.jackson.UnknownPropertyHandler;
 import discord4j.rest.http.ExchangeStrategies;
 import discord4j.rest.request.*;
 
@@ -39,8 +38,7 @@ public abstract class RestTests {
 
     private static Router createDefaultRouter(String token) {
         return new DefaultRouter(new RouterOptions(token, ReactorResources.create(),
-                ExchangeStrategies.jackson(new JacksonResources(
-                        mapper -> mapper.addHandler(new UnknownPropertyHandler(true))).getObjectMapper()),
+                ExchangeStrategies.jackson(JacksonResources.create().getObjectMapper()),
                 Collections.emptyList(), BucketGlobalRateLimiter.create(), RequestQueueFactory.buffering()));
     }
 }

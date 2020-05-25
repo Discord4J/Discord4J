@@ -65,7 +65,7 @@ public class WebClientTest {
 
     @Test
     public void shouldErrorWithClientExceptionOnHtmlBadRequest() {
-        ExchangeStrategies strategies = ExchangeStrategies.jackson(new JacksonResources().getObjectMapper());
+        ExchangeStrategies strategies = ExchangeStrategies.jackson(JacksonResources.create().getObjectMapper());
         Route badRequestRoute = Route.get("http://0.0.0.0:" + port + "/html/bad-request");
         Router router = new DefaultRouter(new RouterOptions("", ReactorResources.create(), strategies,
                 Collections.emptyList(),

@@ -37,9 +37,9 @@ public class ExampleGatewayClient {
     private static final Logger log = Loggers.getLogger(ExampleGatewayClient.class);
 
     public static void main(String[] args) {
-        ReactorResources reactorResources = new ReactorResources();
+        ReactorResources reactorResources = ReactorResources.create();
         GatewayReactorResources gatewayReactorResources = new GatewayReactorResources(reactorResources);
-        JacksonResources jacksonResources = new JacksonResources();
+        JacksonResources jacksonResources = JacksonResources.create();
 
         ObjectMapper objectMapper = jacksonResources.getObjectMapper();
 
