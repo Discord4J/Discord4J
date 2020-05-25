@@ -40,7 +40,7 @@ public class RestEmoji {
         return new RestEmoji(restClient, guildId.asLong(), id.asLong());
     }
 
-    public static RestEmoji create(RestClient restClient, long guildId, long id) {
+    static RestEmoji create(RestClient restClient, long guildId, long id) {
         return new RestEmoji(restClient, guildId, id);
     }
 

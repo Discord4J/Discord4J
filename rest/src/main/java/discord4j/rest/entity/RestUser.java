@@ -17,13 +17,17 @@
 
 package discord4j.rest.entity;
 
+import discord4j.common.util.Snowflake;
 import discord4j.discordjson.json.ChannelData;
 import discord4j.discordjson.json.DMCreateRequest;
 import discord4j.discordjson.json.UserData;
 import discord4j.rest.RestClient;
-import discord4j.common.util.Snowflake;
 import reactor.core.publisher.Mono;
 
+/**
+ * Represents a user (bot or normal) entity in Discord. Users can spawn across the entire platform, be members of
+ * guilds, participate in text and voice chat, and much more.
+ */
 public class RestUser {
 
     private final RestClient restClient;
@@ -38,10 +42,16 @@ public class RestUser {
         return new RestUser(restClient, id.asLong());
     }
 
-    public static RestUser create(RestClient restClient, long id) {
+    static RestUser create(RestClient restClient, long id) {
         return new RestUser(restClient, id);
     }
 
+    /**
+     * Retrieve this user's data upon subscription.
+     *
+     * @return a {@link Mono} where, upon successful completion, emits the {@link UserData} belonging to this user.
+     * If an error is received, it is emitted through the {@code Mono}.
+     */
     public Mono<UserData> getData() {
         return restClient.getUserService().getUser(id);
     }

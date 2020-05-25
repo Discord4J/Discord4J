@@ -17,11 +17,11 @@
 
 package discord4j.rest.entity;
 
+import discord4j.common.util.Snowflake;
 import discord4j.discordjson.json.*;
 import discord4j.rest.RestClient;
 import discord4j.rest.util.MultipartRequest;
 import discord4j.rest.util.PaginationUtil;
-import discord4j.common.util.Snowflake;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -59,13 +59,7 @@ public class RestChannel {
         return new RestChannel(restClient, id.asLong());
     }
 
-    /**
-     * Create a {@link RestChannel} with the given parameters.
-     *
-     * @param restClient REST API resources
-     * @param id the ID of this channel
-     */
-    public static RestChannel create(RestClient restClient, long id) {
+    static RestChannel create(RestClient restClient, long id) {
         return new RestChannel(restClient, id);
     }
 
@@ -80,8 +74,8 @@ public class RestChannel {
         return restClient.getChannelService().getChannel(id);
     }
 
-    public RestMessage message(long messageId) {
-        return RestMessage.create(restClient, id, messageId);
+    public RestMessage message(Snowflake messageId) {
+        return RestMessage.create(restClient, id, messageId.asLong());
     }
 
     /**
@@ -103,8 +97,7 @@ public class RestChannel {
      * @param reason a reason for this action, can be {@code null}
      * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the channel has been deleted.
      * If an error is received, it is emitted through the {@code Mono}.
-     * @see
-     * <a href="https://discord.com/developers/docs/resources/channel#deleteclose-channel">Delete/Close Channel</a>
+     * @see <a href="https://discord.com/developers/docs/resources/channel#deleteclose-channel">Delete/Close Channel</a>
      */
     public Mono<Void> delete(@Nullable String reason) {
         return restClient.getChannelService().deleteChannel(id, reason).then();
@@ -126,10 +119,10 @@ public class RestChannel {
      * @see
      * <a href="https://discord.com/developers/docs/resources/channel#get-channel-messages">Get Channel Messages</a>
      */
-    public Flux<MessageData> getMessagesBefore(long messageId) {
+    public Flux<MessageData> getMessagesBefore(Snowflake messageId) {
         Function<Map<String, Object>, Flux<MessageData>> doRequest =
                 params -> restClient.getChannelService().getMessages(id, params);
-        return PaginationUtil.paginateBefore(doRequest, data -> Snowflake.asLong(data.id()), messageId, 100);
+        return PaginationUtil.paginateBefore(doRequest, data -> Snowflake.asLong(data.id()), messageId.asLong(), 100);
     }
 
     /**
@@ -148,10 +141,10 @@ public class RestChannel {
      * @see
      * <a href="https://discord.com/developers/docs/resources/channel#get-channel-messages">Get Channel Messages</a>
      */
-    public Flux<MessageData> getMessagesAfter(long messageId) {
+    public Flux<MessageData> getMessagesAfter(Snowflake messageId) {
         Function<Map<String, Object>, Flux<MessageData>> doRequest = params ->
                 restClient.getChannelService().getMessages(id, params);
-        return PaginationUtil.paginateAfter(doRequest, data -> Snowflake.asLong(data.id()), messageId, 100);
+        return PaginationUtil.paginateAfter(doRequest, data -> Snowflake.asLong(data.id()), messageId.asLong(), 100);
     }
 
     /**
@@ -161,8 +154,8 @@ public class RestChannel {
      * @param messageId the message's ID
      * @return a {@link RestMessage} facade for the given message under this channel to perform actions on it
      */
-    public RestMessage getRestMessage(long messageId) {
-        return RestMessage.create(restClient, id, messageId);
+    public RestMessage getRestMessage(Snowflake messageId) {
+        return RestMessage.create(restClient, id, messageId.asLong());
     }
 
     /**
@@ -201,13 +194,12 @@ public class RestChannel {
      * @see
      * <a href="https://discord.com/developers/docs/resources/channel#bulk-delete-messages">Bulk Delete Messages</a>
      */
-    public Flux<Long> bulkDelete(Publisher<Long> messageIds) {
-        Instant timeLimit = Instant.now().minus(Duration.ofDays(14L));
-        Collection<Long> ignoredMessageIds = new ArrayList<>(0);
-        Function<Long, Instant> asTimestamp = id -> Instant.ofEpochMilli(1420070400000L + (id >>> 22));
+    public Flux<Snowflake> bulkDelete(Publisher<Snowflake> messageIds) {
+        final Instant timeLimit = Instant.now().minus(Duration.ofDays(14L));
+        final Collection<Snowflake> ignoredMessageIds = new ArrayList<>(0);
 
-        Predicate<Long> filterMessageId = messageId -> {
-            if (timeLimit.isAfter(asTimestamp.apply(messageId))) { // REST accepts 2 week old IDs
+        final Predicate<Snowflake> filterMessageId = messageId -> {
+            if (timeLimit.isAfter(messageId.getTimestamp())) { // REST accepts 2 week old IDs
                 ignoredMessageIds.add(messageId);
                 return false;
             }
@@ -215,7 +207,7 @@ public class RestChannel {
             return true;
         };
 
-        Function<List<String>, Mono<Boolean>> filterMessageIdChunk = messageIdChunk ->
+        final Function<List<String>, Mono<Boolean>> filterMessageIdChunk = messageIdChunk ->
                 Mono.just(messageIdChunk.get(0)) // REST accepts 2 or more items
                         .filter(ignore -> messageIdChunk.size() == 1)
                         .flatMap(id -> restClient.getChannelService()
@@ -227,7 +219,7 @@ public class RestChannel {
         return Flux.defer(() -> messageIds)
                 .distinct()
                 .filter(filterMessageId)
-                .map(String::valueOf)
+                .map(Snowflake::asString)
                 .buffer(100) // REST accepts 100 IDs
                 .filterWhen(filterMessageIdChunk)
                 .flatMap(messageIdChunk -> restClient.getChannelService()
@@ -246,8 +238,8 @@ public class RestChannel {
      * @see
      * <a href="https://discord.com/developers/docs/resources/channel#edit-channel-permissions">Edit Channel Permissions</a>
      */
-    public Mono<Void> editChannelPermissions(long targetId, PermissionsEditRequest request, @Nullable String reason) {
-        return restClient.getChannelService().editChannelPermissions(id, targetId, request, reason);
+    public Mono<Void> editChannelPermissions(Snowflake targetId, PermissionsEditRequest request, @Nullable String reason) {
+        return restClient.getChannelService().editChannelPermissions(id, targetId.asLong(), request, reason);
     }
 
     /**
@@ -255,8 +247,7 @@ public class RestChannel {
      *
      * @return a {@link Flux} that continually emits this channel's {@link InviteData invites}. If an error is
      * received, it is emitted through the {@code Flux}.
-     * @see
-     * <a href="https://discord.com/developers/docs/resources/channel#get-channel-invites">Get Channel Invites</a>
+     * @see <a href="https://discord.com/developers/docs/resources/channel#get-channel-invites">Get Channel Invites</a>
      */
     public Flux<InviteData> getInvites() {
         return restClient.getChannelService().getChannelInvites(id);
@@ -285,8 +276,8 @@ public class RestChannel {
      * @see
      * <a href="https://discord.com/developers/docs/resources/channel#delete-channel-permission">Delete Channel Permission</a>
      */
-    public Mono<Void> deleteChannelPermission(long targetId, @Nullable final String reason) {
-        return restClient.getChannelService().deleteChannelPermission(id, targetId, reason);
+    public Mono<Void> deleteChannelPermission(Snowflake targetId, @Nullable final String reason) {
+        return restClient.getChannelService().deleteChannelPermission(id, targetId.asLong(), reason);
     }
 
     /**
@@ -307,8 +298,7 @@ public class RestChannel {
      *
      * @return a {@link Flux} that continually emits all the pinned messages for this channel. If an error is received,
      * it is emitted through the {@code Flux}.
-     * @see
-     * <a href="https://discord.com/developers/docs/resources/channel#get-pinned-messages">Get Pinned Messages</a>
+     * @see <a href="https://discord.com/developers/docs/resources/channel#get-pinned-messages">Get Pinned Messages</a>
      */
     public Flux<MessageData> getPinnedMessages() {
         return restClient.getChannelService().getPinnedMessages(id);
@@ -320,8 +310,8 @@ public class RestChannel {
      * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the messaged was pinned. If
      * an error is received, it is emitted through the {@code Mono}.
      */
-    public Mono<Void> addPinnedMessage(long messageId) {
-        return restClient.getChannelService().addPinnedMessage(id, messageId);
+    public Mono<Void> addPinnedMessage(Snowflake messageId) {
+        return restClient.getChannelService().addPinnedMessage(id, messageId.asLong());
     }
 
     /**
@@ -330,16 +320,16 @@ public class RestChannel {
      * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the message was unpinned. If
      * an error is received, it is emitted through the {@code Mono}.
      */
-    public Mono<Void> deletePinnedMessage(long messageId) {
-        return restClient.getChannelService().deletePinnedMessage(id, messageId);
+    public Mono<Void> deletePinnedMessage(Snowflake messageId) {
+        return restClient.getChannelService().deletePinnedMessage(id, messageId.asLong());
     }
 
-    public Mono<Void> addGroupDMRecipient(long userId, GroupAddRecipientRequest request) {
-        return restClient.getChannelService().addGroupDMRecipient(id, userId, request);
+    public Mono<Void> addGroupDMRecipient(Snowflake userId, GroupAddRecipientRequest request) {
+        return restClient.getChannelService().addGroupDMRecipient(id, userId.asLong(), request);
     }
 
-    public Mono<Void> deleteGroupDMRecipient(long userId) {
-        return restClient.getChannelService().deleteGroupDMRecipient(id, userId);
+    public Mono<Void> deleteGroupDMRecipient(Snowflake userId) {
+        return restClient.getChannelService().deleteGroupDMRecipient(id, userId.asLong());
     }
 
     public Flux<WebhookData> getWebhooks() {

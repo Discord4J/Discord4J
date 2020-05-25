@@ -17,6 +17,7 @@
 package discord4j.core.object.entity;
 
 import discord4j.common.annotations.Experimental;
+import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.Embed;
 import discord4j.core.object.MessageReference;
@@ -33,7 +34,6 @@ import discord4j.discordjson.json.UserData;
 import discord4j.rest.entity.RestChannel;
 import discord4j.rest.entity.RestMessage;
 import discord4j.rest.util.PaginationUtil;
-import discord4j.common.util.Snowflake;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
@@ -81,8 +81,8 @@ public final class Message implements Entity {
     public Message(final GatewayDiscordClient gateway, final MessageData data) {
         this.gateway = Objects.requireNonNull(gateway);
         this.data = Objects.requireNonNull(data);
-        this.rest = RestMessage.create(gateway.getRestClient(), Snowflake.asLong(data.channelId()),
-                Snowflake.asLong(data.id()));
+        this.rest = RestMessage.create(gateway.getRestClient(), Snowflake.of(data.channelId()),
+                Snowflake.of(data.id()));
     }
 
     @Override
@@ -106,7 +106,7 @@ public final class Message implements Entity {
      * @return A {@link RestChannel} handle to execute REST API operations on the channel of this message.
      */
     public RestChannel getRestChannel() {
-        return RestChannel.create(gateway.getRestClient(), Snowflake.asLong(data.channelId()));
+        return RestChannel.create(gateway.getRestClient(), Snowflake.of(data.channelId()));
     }
 
     /**

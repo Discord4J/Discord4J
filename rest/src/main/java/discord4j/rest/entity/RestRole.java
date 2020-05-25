@@ -17,11 +17,11 @@
 
 package discord4j.rest.entity;
 
+import discord4j.common.util.Snowflake;
 import discord4j.discordjson.json.PositionModifyRequest;
 import discord4j.discordjson.json.RoleData;
 import discord4j.discordjson.json.RoleModifyRequest;
 import discord4j.rest.RestClient;
-import discord4j.common.util.Snowflake;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
@@ -45,7 +45,7 @@ public class RestRole {
         return new RestRole(restClient, guildId.asLong(), id.asLong());
     }
 
-    public static RestRole create(RestClient restClient, long guildId, long id) {
+    static RestRole create(RestClient restClient, long guildId, long id) {
         return new RestRole(restClient, guildId, id);
     }
 
@@ -96,6 +96,12 @@ public class RestRole {
         return restClient.getGuildService().modifyGuildRolePositions(guildId, requests);
     }
 
+    /**
+     * Retrieve this role's data upon subscription.
+     *
+     * @return a {@link Mono} where, upon successful completion, emits the {@link RoleData} belonging to this role.
+     * If an error is received, it is emitted through the {@code Mono}.
+     */
     public Mono<RoleData> getData() {
         return restClient.getGuildService()
                 .getGuildRoles(guildId)

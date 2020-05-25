@@ -47,7 +47,7 @@ class BaseChannel implements Channel {
     BaseChannel(final GatewayDiscordClient gateway, final ChannelData data) {
         this.gateway = Objects.requireNonNull(gateway);
         this.data = Objects.requireNonNull(data);
-        this.rest = RestChannel.create(gateway.getRestClient(), Snowflake.asLong(data.id()));
+        this.rest = RestChannel.create(gateway.getRestClient(), Snowflake.of(data.id()));
     }
 
     @Override

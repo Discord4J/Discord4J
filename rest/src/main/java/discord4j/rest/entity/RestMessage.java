@@ -51,14 +51,7 @@ public class RestMessage {
         return new RestMessage(restClient, channelId.asLong(), id.asLong());
     }
 
-    /**
-     * Create a {@link RestMessage} with the given parameters.
-     *
-     * @param restClient REST API resources
-     * @param channelId the ID of the channel this messages belongs to
-     * @param id the ID of this message
-     */
-    public static RestMessage create(RestClient restClient, long channelId, long id) {
+    static RestMessage create(RestClient restClient, long channelId, long id) {
         return new RestMessage(restClient, channelId, id);
     }
 
@@ -113,8 +106,8 @@ public class RestMessage {
      * @see
      * <a href="https://discord.com/developers/docs/resources/channel#delete-user-reaction">Delete User Reaction</a>
      */
-    public Mono<Void> deleteUserReaction(String emoji, long userId) {
-        return restClient.getChannelService().deleteReaction(channelId, id, emoji, userId);
+    public Mono<Void> deleteUserReaction(String emoji, Snowflake userId) {
+        return restClient.getChannelService().deleteReaction(channelId, id, emoji, userId.asLong());
     }
 
     /**

@@ -16,13 +16,13 @@
  */
 package discord4j.rest;
 
+import discord4j.common.util.Snowflake;
 import discord4j.discordjson.json.*;
 import discord4j.rest.entity.*;
 import discord4j.rest.request.Router;
 import discord4j.rest.request.RouterOptions;
 import discord4j.rest.service.*;
 import discord4j.rest.util.PaginationUtil;
-import discord4j.common.util.Snowflake;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -92,7 +92,7 @@ public class RestClient {
      * @return A {@link RestChannel} as represented by the supplied ID.
      */
     public RestChannel getChannelById(final Snowflake channelId) {
-        return RestChannel.create(this, channelId.asLong());
+        return RestChannel.create(this, channelId);
     }
 
     /**
@@ -102,7 +102,7 @@ public class RestClient {
      * @return A {@link RestChannel} as represented by the supplied data.
      */
     public RestChannel restChannel(ChannelData data) {
-        return RestChannel.create(this, Snowflake.asLong(data.id()));
+        return RestChannel.create(this, Snowflake.of(data.id()));
     }
 
     /**
@@ -112,7 +112,7 @@ public class RestClient {
      * @return A {@link RestGuild} as represented by the supplied ID.
      */
     public RestGuild getGuildById(final Snowflake guildId) {
-        return RestGuild.create(this, guildId.asLong());
+        return RestGuild.create(this, guildId);
     }
 
     /**
@@ -122,7 +122,7 @@ public class RestClient {
      * @return A {@link RestGuild} as represented by the supplied data.
      */
     public RestGuild restGuild(GuildData data) {
-        return RestGuild.create(this, Snowflake.asLong(data.id()));
+        return RestGuild.create(this, Snowflake.of(data.id()));
     }
 
     /**
@@ -133,7 +133,7 @@ public class RestClient {
      * @return A {@link RestEmoji} as represented by the supplied IDs.
      */
     public RestEmoji getGuildEmojiById(final Snowflake guildId, final Snowflake emojiId) {
-        return RestEmoji.create(this, guildId.asLong(), emojiId.asLong());
+        return RestEmoji.create(this, guildId, emojiId);
     }
 
     /**
@@ -144,8 +144,8 @@ public class RestClient {
      * @return A {@link RestEmoji} as represented by the supplied parameters.
      */
     public RestEmoji restGuildEmoji(Snowflake guildId, EmojiData data) {
-        return RestEmoji.create(this, guildId.asLong(),
-                Snowflake.asLong(data.id().orElseThrow(() -> new IllegalArgumentException("Not a guild emoji"))));
+        return RestEmoji.create(this, guildId,
+                Snowflake.of(data.id().orElseThrow(() -> new IllegalArgumentException("Not a guild emoji"))));
     }
 
     /**
@@ -156,7 +156,7 @@ public class RestClient {
      * @return A {@link RestMember} as represented by the supplied IDs.
      */
     public RestMember getMemberById(final Snowflake guildId, final Snowflake userId) {
-        return RestMember.create(this, guildId.asLong(), userId.asLong());
+        return RestMember.create(this, guildId, userId);
     }
 
     /**
@@ -167,7 +167,7 @@ public class RestClient {
      * @return A {@link RestMember} as represented by the supplied parameters.
      */
     public RestMember restMember(Snowflake guildId, MemberData data) {
-        return RestMember.create(this, guildId.asLong(), Snowflake.asLong(data.user().id()));
+        return RestMember.create(this, guildId, Snowflake.of(data.user().id()));
     }
 
     /**
@@ -178,7 +178,7 @@ public class RestClient {
      * @return A {@link RestMessage} as represented by the supplied IDs.
      */
     public RestMessage getMessageById(final Snowflake channelId, final Snowflake messageId) {
-        return RestMessage.create(this, channelId.asLong(), messageId.asLong());
+        return RestMessage.create(this, channelId, messageId);
     }
 
     /**
@@ -188,8 +188,7 @@ public class RestClient {
      * @return A {@link RestMessage} as represented by the supplied data.
      */
     public RestMessage restMessage(MessageData data) {
-        return RestMessage.create(this, Snowflake.asLong(data.channelId()),
-                Snowflake.asLong(data.id()));
+        return RestMessage.create(this, Snowflake.of(data.channelId()), Snowflake.of(data.id()));
     }
 
     /**
@@ -200,7 +199,7 @@ public class RestClient {
      * @return A {@link RestRole} as represented by the supplied IDs.
      */
     public RestRole getRoleById(final Snowflake guildId, final Snowflake roleId) {
-        return RestRole.create(this, guildId.asLong(), roleId.asLong());
+        return RestRole.create(this, guildId, roleId);
     }
 
     /**
@@ -211,7 +210,7 @@ public class RestClient {
      * @return A {@link RestRole} as represented by the supplied parameters.
      */
     public RestRole restRole(Snowflake guildId, RoleData data) {
-        return RestRole.create(this, guildId.asLong(), Snowflake.asLong(data.id()));
+        return RestRole.create(this, guildId, Snowflake.of(data.id()));
     }
 
     /**
@@ -221,7 +220,7 @@ public class RestClient {
      * @return A {@link RestUser} as represented by the supplied ID.
      */
     public RestUser getUserById(final Snowflake userId) {
-        return RestUser.create(this, userId.asLong());
+        return RestUser.create(this, userId);
     }
 
     /**
@@ -231,7 +230,7 @@ public class RestClient {
      * @return A {@link RestUser} as represented by the supplied data.
      */
     public RestUser restUser(UserData data) {
-        return RestUser.create(this, Snowflake.asLong(data.id()));
+        return RestUser.create(this, Snowflake.of(data.id()));
     }
 
     /**

@@ -17,10 +17,10 @@
 
 package discord4j.rest.entity;
 
+import discord4j.common.util.Snowflake;
 import discord4j.discordjson.json.*;
 import discord4j.rest.RestClient;
 import discord4j.rest.util.PaginationUtil;
-import discord4j.common.util.Snowflake;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
@@ -45,7 +45,7 @@ public class RestGuild {
         return new RestGuild(restClient, id.asLong());
     }
 
-    public static RestGuild create(RestClient restClient, long id) {
+    static RestGuild create(RestClient restClient, long id) {
         return new RestGuild(restClient, id);
     }
 
@@ -53,16 +53,16 @@ public class RestGuild {
         return restClient.getGuildService().getGuild(id);
     }
 
-    public RestEmoji emoji(long emojiId) {
-        return RestEmoji.create(restClient, id, emojiId);
+    public RestEmoji emoji(Snowflake emojiId) {
+        return RestEmoji.create(restClient, id, emojiId.asLong());
     }
 
-    public RestMember member(long memberId) {
-        return RestMember.create(restClient, id, memberId);
+    public RestMember member(Snowflake memberId) {
+        return RestMember.create(restClient, id, memberId.asLong());
     }
 
-    public RestRole role(long roleId) {
-        return RestRole.create(restClient, id, roleId);
+    public RestRole role(Snowflake roleId) {
+        return RestRole.create(restClient, id, roleId.asLong());
     }
 
     public Mono<GuildUpdateData> modify(GuildModifyRequest request, @Nullable String reason) {
@@ -83,67 +83,67 @@ public class RestGuild {
 
     public Flux<RoleData> modifyChannelPositions(List<PositionModifyRequest> requests) {
         return restClient.getGuildService()
-            .modifyGuildChannelPositions(id, requests.toArray(new PositionModifyRequest[0]));
+                .modifyGuildChannelPositions(id, requests.toArray(new PositionModifyRequest[0]));
     }
 
-    public Mono<MemberData> getMember(long userId) {
-        return restClient.getGuildService().getGuildMember(id, userId);
+    public Mono<MemberData> getMember(Snowflake userId) {
+        return restClient.getGuildService().getGuildMember(id, userId.asLong());
     }
 
     public Mono<MemberData> getSelfMember() {
         return restClient.getSelf()
-            .map(UserData::id)
-            .map(Long::parseLong)
-            .flatMap(this::getMember);
+                .map(UserData::id)
+                .map(Snowflake::of)
+                .flatMap(this::getMember);
     }
 
     public Flux<MemberData> getMembers() {
         Function<Map<String, Object>, Flux<MemberData>> doRequest =
-            params -> restClient.getGuildService().getGuildMembers(id, params);
+                params -> restClient.getGuildService().getGuildMembers(id, params);
         return PaginationUtil.paginateAfter(doRequest, data -> Snowflake.asLong(data.user().id()), 0, 100);
     }
 
-    public Mono<MemberData> addMember(long userId, GuildMemberAddRequest request) {
-        return restClient.getGuildService().addGuildMember(id, userId, request);
+    public Mono<MemberData> addMember(Snowflake userId, GuildMemberAddRequest request) {
+        return restClient.getGuildService().addGuildMember(id, userId.asLong(), request);
     }
 
-    public Mono<Void> modifyMember(long userId, GuildMemberModifyRequest request, @Nullable String reason) {
-        return restClient.getGuildService().modifyGuildMember(id, userId, request, reason);
+    public Mono<Void> modifyMember(Snowflake userId, GuildMemberModifyRequest request, @Nullable String reason) {
+        return restClient.getGuildService().modifyGuildMember(id, userId.asLong(), request, reason);
     }
 
     public Mono<NicknameModifyData> modifyOwnNickname(NicknameModifyData request) {
         return restClient.getGuildService().modifyOwnNickname(id, request);
     }
 
-    public Mono<Void> addMemberRole(long userId, long roleId, @Nullable String reason) {
-        return restClient.getGuildService().addGuildMemberRole(id, userId, roleId, reason);
+    public Mono<Void> addMemberRole(Snowflake userId, Snowflake roleId, @Nullable String reason) {
+        return restClient.getGuildService().addGuildMemberRole(id, userId.asLong(), roleId.asLong(), reason);
     }
 
-    public Mono<Void> removeMemberRole(long userId, long roleId, @Nullable String reason) {
-        return restClient.getGuildService().removeGuildMemberRole(id, userId, roleId, reason);
+    public Mono<Void> removeMemberRole(Snowflake userId, Snowflake roleId, @Nullable String reason) {
+        return restClient.getGuildService().removeGuildMemberRole(id, userId.asLong(), roleId.asLong(), reason);
     }
 
-    public Mono<Void> removeGuildMember(long userId, @Nullable String reason) {
-        return restClient.getGuildService().removeGuildMember(id, userId, reason);
+    public Mono<Void> removeGuildMember(Snowflake userId, @Nullable String reason) {
+        return restClient.getGuildService().removeGuildMember(id, userId.asLong(), reason);
     }
 
     public Flux<BanData> getBans() {
         return restClient.getGuildService().getGuildBans(id);
     }
 
-    public Mono<BanData> getBan(long userId) {
-        return restClient.getGuildService().getGuildBan(id, userId);
+    public Mono<BanData> getBan(Snowflake userId) {
+        return restClient.getGuildService().getGuildBan(id, userId.asLong());
     }
 
-    public Mono<Void> createBan(long userId, @Nullable Integer deleteMessageDays, @Nullable String reason) {
+    public Mono<Void> createBan(Snowflake userId, @Nullable Integer deleteMessageDays, @Nullable String reason) {
         Map<String, Object> queryParams = new HashMap<>();
         Optional.ofNullable(deleteMessageDays).ifPresent(value -> queryParams.put("delete-message-days", value));
         Optional.ofNullable(reason).ifPresent(value -> queryParams.put("reason", value));
-        return restClient.getGuildService().createGuildBan(id, userId, queryParams, reason);
+        return restClient.getGuildService().createGuildBan(id, userId.asLong(), queryParams, reason);
     }
 
-    public Mono<Void> removeGuildBan(long userId, @Nullable String reason) {
-        return restClient.getGuildService().removeGuildBan(id, userId, reason);
+    public Mono<Void> removeGuildBan(Snowflake userId, @Nullable String reason) {
+        return restClient.getGuildService().removeGuildBan(id, userId.asLong(), reason);
     }
 
     public Flux<RoleData> getRoles() {
@@ -159,12 +159,12 @@ public class RestGuild {
                 requests.toArray(new PositionModifyRequest[0]));
     }
 
-    public Mono<RoleData> modifyRole(long roleId, RoleModifyRequest request, @Nullable String reason) {
-        return restClient.getGuildService().modifyGuildRole(id, roleId, request, reason);
+    public Mono<RoleData> modifyRole(Snowflake roleId, RoleModifyRequest request, @Nullable String reason) {
+        return restClient.getGuildService().modifyGuildRole(id, roleId.asLong(), request, reason);
     }
 
-    public Mono<Void> deleteRole(long roleId, @Nullable String reason) {
-        return restClient.getGuildService().deleteGuildRole(id, roleId, reason);
+    public Mono<Void> deleteRole(Snowflake roleId, @Nullable String reason) {
+        return restClient.getGuildService().deleteGuildRole(id, roleId.asLong(), reason);
     }
 
     public Mono<PruneData> getPruneCount(@Nullable Integer days) {
@@ -173,7 +173,7 @@ public class RestGuild {
         return restClient.getGuildService().getGuildPruneCount(id, queryParams);
     }
 
-    public Mono<PruneData> beginGuildPrune(long guildId, @Nullable Integer days, @Nullable Boolean computePruneCount,
+    public Mono<PruneData> beginGuildPrune(@Nullable Integer days, @Nullable Boolean computePruneCount,
                                            @Nullable String reason) {
         Map<String, Object> queryParams = new HashMap<>();
         Optional.ofNullable(days).ifPresent(value -> queryParams.put("days", value));
@@ -197,16 +197,16 @@ public class RestGuild {
         return restClient.getGuildService().createGuildIntegration(id, request);
     }
 
-    public Mono<Void> modifyIntegration(long integrationId, IntegrationModifyRequest request) {
-        return restClient.getGuildService().modifyGuildIntegration(id, integrationId, request);
+    public Mono<Void> modifyIntegration(Snowflake integrationId, IntegrationModifyRequest request) {
+        return restClient.getGuildService().modifyGuildIntegration(id, integrationId.asLong(), request);
     }
 
-    public Mono<Void> deleteIntegration(long integrationId) {
-        return restClient.getGuildService().deleteGuildIntegration(id, integrationId);
+    public Mono<Void> deleteIntegration(Snowflake integrationId) {
+        return restClient.getGuildService().deleteGuildIntegration(id, integrationId.asLong());
     }
 
-    public Mono<Void> syncIntegration(long integrationId) {
-        return restClient.getGuildService().syncGuildIntegration(id, integrationId);
+    public Mono<Void> syncIntegration(Snowflake integrationId) {
+        return restClient.getGuildService().syncGuildIntegration(id, integrationId.asLong());
     }
 
     /**

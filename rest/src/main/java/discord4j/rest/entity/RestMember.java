@@ -38,7 +38,7 @@ public class RestMember {
         return new RestMember(restClient, guildId.asLong(), id.asLong());
     }
 
-    public static RestMember create(RestClient restClient, long guildId, long id) {
+    static RestMember create(RestClient restClient, long guildId, long id) {
         return new RestMember(restClient, guildId, id);
     }
 

@@ -17,13 +17,17 @@
 
 package discord4j.rest.entity;
 
+import discord4j.common.util.Snowflake;
 import discord4j.discordjson.json.WebhookData;
 import discord4j.discordjson.json.WebhookModifyRequest;
 import discord4j.rest.RestClient;
-import discord4j.common.util.Snowflake;
+import discord4j.rest.util.Permission;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
 
+/**
+ * Represents a webhook entity in Discord. Webhooks are a low-effort way to post messages to channels in Discord.
+ */
 public class RestWebhook {
 
     private final RestClient restClient;
@@ -42,14 +46,35 @@ public class RestWebhook {
         return new RestWebhook(restClient, id);
     }
 
+    /**
+     * Retrieve this webhook's data upon subscription.
+     *
+     * @return a {@link Mono} where, upon successful completion, emits the {@link WebhookData} belonging to this entity.
+     * If an error is received, it is emitted through the {@code Mono}.
+     */
     public Mono<WebhookData> getData() {
         return restClient.getWebhookService().getWebhook(id);
     }
 
+    /**
+     * Modify a webhook. Requires the {@link Permission#MANAGE_WEBHOOKS} permission. Returns the updated webhook
+     * object on success.
+     *
+     * @param request a request to modify the webhook
+     * @param reason an optional reason for the audit log
+     * @return a {@link Mono} where, upon subscription, emits the updated {@link WebhookData} on success. If an error
+     * is received, it is emitted through the {@code Mono}.
+     */
     public Mono<WebhookData> modify(WebhookModifyRequest request, @Nullable String reason) {
         return restClient.getWebhookService().modifyWebhook(id, request, reason);
     }
 
+    /**
+     *
+     *
+     * @param reason
+     * @return
+     */
     public Mono<Void> delete(@Nullable String reason) {
         return restClient.getWebhookService().deleteWebhook(id, reason);
     }
