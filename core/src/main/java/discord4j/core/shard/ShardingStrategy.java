@@ -64,7 +64,7 @@ public interface ShardingStrategy {
      * @see <a href="https://discord.com/developers/docs/topics/gateway#sharding-for-very-large-bots">
      * Sharding for very large bots</a>
      */
-    int getShardingFactor();
+    int getMaxConcurrency();
 
     /**
      * Sharding strategy that retrieves the recommended shard count and creates as many {@link GatewayClient}
@@ -88,7 +88,7 @@ public interface ShardingStrategy {
             }
 
             @Override
-            public int getShardingFactor() {
+            public int getMaxConcurrency() {
                 return 1;
             }
         };
@@ -114,7 +114,7 @@ public interface ShardingStrategy {
             }
 
             @Override
-            public int getShardingFactor() {
+            public int getMaxConcurrency() {
                 return 1;
             }
         };
@@ -140,7 +140,7 @@ public interface ShardingStrategy {
             }
 
             @Override
-            public int getShardingFactor() {
+            public int getMaxConcurrency() {
                 return 1;
             }
         };

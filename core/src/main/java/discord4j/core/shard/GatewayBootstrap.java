@@ -745,7 +745,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                             clientGroup, b.voiceConnectionFactory, entityRetrievalStrategy);
 
                     Flux<ShardInfo> connections = b.shardingStrategy.getShards(count)
-                            .groupBy(shard -> shard.getIndex() % b.shardingStrategy.getShardingFactor())
+                            .groupBy(shard -> shard.getIndex() % b.shardingStrategy.getMaxConcurrency())
                             .flatMap(group -> group.concatMap(shard -> acquireConnection(b, shard, clientFactory,
                                     gateway, shardCoordinator, stateHolder, eventDispatcher, clientGroup,
                                     closeProcessor, dispatchMapper, invalidationStrategy)));
@@ -801,7 +801,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                             .resumeSession(b.resumeOptions.apply(shard))
                             .build();
                     PayloadTransformer limiter = shardCoordinator.getIdentifyLimiter(shard,
-                            b.shardingStrategy.getShardingFactor());
+                            b.shardingStrategy.getMaxConcurrency());
                     Disposable.Composite forCleanup = Disposables.composite();
                     GatewayClient gatewayClient = clientFactory.apply(buildOptions(gateway, identify, limiter));
                     clientGroup.add(shard.getIndex(), gatewayClient);

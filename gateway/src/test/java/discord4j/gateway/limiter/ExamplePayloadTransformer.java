@@ -33,16 +33,16 @@ public class ExamplePayloadTransformer {
     private static final Logger log = Loggers.getLogger(ExamplePayloadTransformer.class);
 
     public static void main(String[] args) {
-        final int factor = 1;
-        final Map<Integer, RateLimitOperator<String>> limiters = new ConcurrentHashMap<>(factor);
-        final Map<Integer, AtomicLong> lastIdentify = new ConcurrentHashMap<>(factor);
+        final int maxConcurrency = 1;
+        final Map<Integer, RateLimitOperator<String>> limiters = new ConcurrentHashMap<>(maxConcurrency);
+        final Map<Integer, AtomicLong> lastIdentify = new ConcurrentHashMap<>(maxConcurrency);
 
-        Flux<Integer> connections = Flux.range(0, factor * 8)
-                .groupBy(shard -> shard % factor)
+        Flux<Integer> connections = Flux.range(0, maxConcurrency * 8)
+                .groupBy(shard -> shard % maxConcurrency)
                 .flatMap(group -> group.concatMap(index -> {
-                    RateLimitOperator<String> limiter = limiters.computeIfAbsent(index % factor,
+                    RateLimitOperator<String> limiter = limiters.computeIfAbsent(index % maxConcurrency,
                             k -> new RateLimitOperator<>(1, Duration.ofSeconds(5), Schedulers.parallel()));
-                    AtomicLong lastIdentifyAt = lastIdentify.computeIfAbsent(index % factor,
+                    AtomicLong lastIdentifyAt = lastIdentify.computeIfAbsent(index % maxConcurrency,
                             k -> new AtomicLong(0));
 
                     return Flux.just("identify: " + index)

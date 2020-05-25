@@ -34,13 +34,13 @@ public class DefaultShardingStrategy implements ShardingStrategy {
     private final int count;
     private final Function<Integer, Publisher<Integer>> indexSource;
     private final Predicate<ShardInfo> filter;
-    private final int factor;
+    private final int maxConcurrency;
 
     public DefaultShardingStrategy(Builder builder) {
         this.count = builder.shardCount;
         this.indexSource = builder.shardIndexSource;
         this.filter = builder.shardFilter;
-        this.factor = builder.factor;
+        this.maxConcurrency = builder.maxConcurrency;
     }
 
     @Override
@@ -68,8 +68,8 @@ public class DefaultShardingStrategy implements ShardingStrategy {
     }
 
     @Override
-    public int getShardingFactor() {
-        return factor;
+    public int getMaxConcurrency() {
+        return maxConcurrency;
     }
 
     /**
@@ -85,7 +85,7 @@ public class DefaultShardingStrategy implements ShardingStrategy {
         private int shardCount = RECOMMENDED_SHARD_COUNT;
         private Function<Integer, Publisher<Integer>> shardIndexSource = count -> Flux.range(0, count);
         private Predicate<ShardInfo> shardFilter = shard -> true;
-        private int factor = 1;
+        private int maxConcurrency = 1;
 
         /**
          * Set the shard count parameter. Defaults to {@link #RECOMMENDED_SHARD_COUNT}. Must not be negative.
@@ -168,22 +168,22 @@ public class DefaultShardingStrategy implements ShardingStrategy {
         }
 
         /**
-         * Set the sharding factor to use when identifying to the Discord Gateway, determining the amount of shards that
-         * will be concurrently identified. Defaults to 1. You should only change this value if your bot is
-         * authorized to use the very large bot sharding system, otherwise you will hit a rate limit on identifying.
-         * The factor always needs to be a power of 2 and must not be lower than one.
+         * Set the sharding maximum concurrency to use when identifying to the Discord Gateway, determining the
+         * amount of shards that will be concurrently identified. Defaults to 1. You should only change this value
+         * if your bot is authorized to use the very large bot sharding system, otherwise you will hit a rate limit on
+         * identifying. {@code maxConcurrency} always needs to be a power of 2 and must not be lower than one.
          *
-         * @param factor a positive number indicating the amount of shards that can be identified concurrently.
+         * @param maxConcurrency a positive number indicating the amount of shards that can be identified concurrently.
          * @return this builder
          */
-        public Builder factor(int factor) {
-            if (factor < 1) {
-                throw new IllegalArgumentException("factor < 1");
+        public Builder maxConcurrency(int maxConcurrency) {
+            if (maxConcurrency < 1) {
+                throw new IllegalArgumentException("maxConcurrency < 1");
             }
-            if ((factor & (factor - 1)) != 0) {
-                throw new IllegalArgumentException("factor must be a power of 2");
+            if ((maxConcurrency & (maxConcurrency - 1)) != 0) {
+                throw new IllegalArgumentException("maxConcurrency must be a power of 2");
             }
-            this.factor = factor;
+            this.maxConcurrency = maxConcurrency;
             return this;
         }
 
