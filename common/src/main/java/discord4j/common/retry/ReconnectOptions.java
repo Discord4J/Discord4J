@@ -25,11 +25,15 @@ import reactor.retry.Jitter;
 
 import java.time.Duration;
 import java.util.Objects;
+import java.util.function.Supplier;
 
 /**
  * A configuration object to customize the gateway reconnection policy.
  */
 public class ReconnectOptions {
+
+    public static final Supplier<Scheduler> DEFAULT_BACKOFF_SCHEDULER = () ->
+            Schedulers.newParallel("d4j-backoff", Schedulers.DEFAULT_POOL_SIZE, true);
 
     private final Duration firstBackoff;
     private final Duration maxBackoffInterval;
@@ -44,7 +48,11 @@ public class ReconnectOptions {
         this.maxRetries = builder.maxRetries;
         this.backoff = Objects.requireNonNull(builder.backoff, "backoff");
         this.jitter = Objects.requireNonNull(builder.jitter, "jitter");
-        this.backoffScheduler = Objects.requireNonNull(builder.backoffScheduler, "backoffScheduler");
+        if (builder.backoffScheduler == null) {
+            this.backoffScheduler = DEFAULT_BACKOFF_SCHEDULER.get();
+        } else {
+            this.backoffScheduler = builder.backoffScheduler;
+        }
     }
 
     public static ReconnectOptions create() {
@@ -72,7 +80,7 @@ public class ReconnectOptions {
             return new BackoffDelay(appContext.getFirstBackoff(), appContext.getMaxBackoffInterval(), nextBackoff);
         };
         private Jitter jitter = Jitter.random();
-        private Scheduler backoffScheduler = Schedulers.parallel();
+        private Scheduler backoffScheduler = null;
 
         protected Builder() {
         }

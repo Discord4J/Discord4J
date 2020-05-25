@@ -124,8 +124,8 @@ public class GatewayBootstrap<O extends GatewayOptions> {
     private Function<GatewayDiscordClient, Mono<Void>> destroyHandler = shutdownDestroyHandler();
     private PayloadReader payloadReader = null;
     private PayloadWriter payloadWriter = null;
-    private ReconnectOptions reconnectOptions = ReconnectOptions.create();
-    private ReconnectOptions voiceReconnectOptions = ReconnectOptions.create();
+    private ReconnectOptions reconnectOptions = null;
+    private ReconnectOptions voiceReconnectOptions = null;
     private GatewayObserver gatewayObserver = GatewayObserver.NOOP_LISTENER;
     private Function<ReactorResources, GatewayReactorResources> gatewayReactorResources = null;
     private Function<ReactorResources, VoiceReactorResources> voiceReactorResources = null;
@@ -627,9 +627,11 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                     EventDispatcher eventDispatcher = b.initEventDispatcher();
                     GatewayReactorResources gatewayReactorResources = b.initGatewayReactorResources();
                     ShardCoordinator shardCoordinator = b.initShardCoordinator(gatewayReactorResources);
+
+                    VoiceReactorResources voiceReactorResources = b.initVoiceReactorResources();
                     GatewayResources resources = new GatewayResources(stateView, eventDispatcher, shardCoordinator,
                             b.memberRequestFilter, gatewayReactorResources, b.initVoiceReactorResources(),
-                            b.voiceReconnectOptions, b.intents);
+                            b.initReconnectOptions(voiceReactorResources), b.intents);
                     MonoProcessor<Void> closeProcessor = MonoProcessor.create();
                     EntityRetrievalStrategy entityRetrievalStrategy = b.initEntityRetrievalStrategy();
                     DispatchEventMapper dispatchMapper = b.initDispatchEventMapper();
@@ -696,11 +698,16 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                             .build();
                     PayloadTransformer limiter = shardCoordinator.getIdentifyLimiter(shard,
                             b.shardingStrategy.getMaxConcurrency());
-                    Disposable.Composite forCleanup = Disposables.composite();
-                    GatewayClient gatewayClient = clientFactory.apply(buildOptions(gateway, identify, limiter));
+                    GatewayReactorResources resources = gateway.getGatewayResources().getGatewayReactorResources();
+                    ReconnectOptions reconnectOptions = initReconnectOptions(resources);
+                    GatewayOptions options = new GatewayOptions(client.getCoreResources().getToken(),
+                            resources, initPayloadReader(), initPayloadWriter(), reconnectOptions,
+                            identify, gatewayObserver, limiter, maxMissedHeartbeatAck);
+                    GatewayClient gatewayClient = clientFactory.apply(this.optionsModifier.apply(options));
                     clientGroup.add(shard.getIndex(), gatewayClient);
 
                     // wire gateway events to EventDispatcher
+                    Disposable.Composite forCleanup = Disposables.composite();
                     forCleanup.add(gatewayClient.dispatch()
                             .takeUntilOther(closeProcessor)
                             .checkpoint("Read payload from gateway")
@@ -776,9 +783,9 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                     forCleanup.add(b.client.getGatewayService()
                             .getGateway()
                             .doOnSubscribe(s -> log.debug(format(ctx, "Acquiring gateway endpoint")))
-                            .retryBackoff(b.reconnectOptions.getMaxRetries(),
-                                    b.reconnectOptions.getFirstBackoff(),
-                                    b.reconnectOptions.getMaxBackoffInterval())
+                            .retryBackoff(reconnectOptions.getMaxRetries(),
+                                    reconnectOptions.getFirstBackoff(),
+                                    reconnectOptions.getMaxBackoffInterval())
                             .flatMap(response -> gatewayClient.execute(
                                     RouteUtils.expandQuery(response.url(), getGatewayParameters())))
                             .doOnError(sink::error) // only useful for startup errors
@@ -813,6 +820,24 @@ public class GatewayBootstrap<O extends GatewayOptions> {
             return payloadWriter;
         }
         return new JacksonPayloadWriter(client.getCoreResources().getJacksonResources().getObjectMapper());
+    }
+
+    private ReconnectOptions initReconnectOptions(GatewayReactorResources resources) {
+        if (reconnectOptions != null) {
+            return reconnectOptions;
+        }
+        return ReconnectOptions.builder()
+                .setBackoffScheduler(resources.getTimerTaskScheduler())
+                .build();
+    }
+
+    private ReconnectOptions initReconnectOptions(VoiceReactorResources resources) {
+        if (reconnectOptions != null) {
+            return reconnectOptions;
+        }
+        return ReconnectOptions.builder()
+                .setBackoffScheduler(resources.getTimerTaskScheduler())
+                .build();
     }
 
     private GatewayReactorResources initGatewayReactorResources() {
@@ -884,13 +909,6 @@ public class GatewayBootstrap<O extends GatewayOptions> {
             return invalidationStrategy;
         }
         return shardCount == 1 ? InvalidationStrategy.identity() : InvalidationStrategy.disable();
-    }
-
-    private O buildOptions(GatewayDiscordClient gateway, IdentifyOptions identify, PayloadTransformer identifyLimiter) {
-        GatewayOptions options = new GatewayOptions(client.getCoreResources().getToken(),
-                gateway.getGatewayResources().getGatewayReactorResources(), initPayloadReader(), initPayloadWriter(),
-                reconnectOptions, identify, gatewayObserver, identifyLimiter, maxMissedHeartbeatAck);
-        return this.optionsModifier.apply(options);
     }
 
     private Multimap<String, Object> getGatewayParameters() {
