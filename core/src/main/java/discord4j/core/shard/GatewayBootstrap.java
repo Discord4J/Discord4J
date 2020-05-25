@@ -269,32 +269,6 @@ public class GatewayBootstrap<O extends GatewayOptions> {
     }
 
     /**
-     * Set a transformation function to modify or enrich the given or auto-detected {@link StoreService}.
-     * <p>
-     * Defaults to {@link #shardAwareStoreService()} that wraps the service with a {@link ShardAwareStoreService}
-     * that is capable of tracking the shard index of a given entity and properly disposing them on shard invalidation.
-     * To disable this behavior you can set {@link #identityStoreService()} as argument.
-     *
-     * @param storeServiceMapper a {@link Function} to transform a {@link StoreService}
-     * @return this builder
-     * @deprecated use {@link #setInvalidationStrategy(InvalidationStrategy)}
-     */
-    @Deprecated
-    public GatewayBootstrap<O> setStoreServiceMapper(Function<StoreService, StoreService> storeServiceMapper) {
-        return setInvalidationStrategy(new InvalidationStrategy() {
-            @Override
-            public StoreService adaptStoreService(StoreService storeService) {
-                return storeServiceMapper.apply(storeService);
-            }
-
-            @Override
-            public Mono<Void> invalidate(ShardInfo shardInfo, StateHolder stateHolder) {
-                return stateHolder.invalidateStores();
-            }
-        });
-    }
-
-    /**
      * Set the {@link InvalidationStrategy} this shard group should use on shard session termination. Discord Gateway
      * sends real-time updates that are cached by Discord4J. When a Gateway session is terminated, any update beyond
      * that point is lost and therefore the cache, represented by the {@link Store} abstraction, is outdated. Reacting
@@ -328,26 +302,6 @@ public class GatewayBootstrap<O extends GatewayOptions> {
      */
     public GatewayBootstrap<O> setMemberRequestFilter(MemberRequestFilter memberRequestFilter) {
         this.memberRequestFilter = memberRequestFilter;
-        return this;
-    }
-
-    /**
-     * Set if this shard group should request large guild members from the Gateway.
-     *
-     * @param memberRequest {@code true} if enabling the large guild member requests, {@code false} otherwise
-     * @return this builder
-     * @see <a href="https://discord.com/developers/docs/topics/gateway#request-guild-members">Request Guild Members</a>
-     * @deprecated use {@link #setMemberRequestFilter(MemberRequestFilter)}. Calling this method using {@code true} is
-     * equivalent to using {@link MemberRequestFilter#withLargeGuilds()} and using {@code false} is the same as using
-     * {@link MemberRequestFilter#none()}
-     */
-    @Deprecated
-    public GatewayBootstrap<O> setMemberRequest(boolean memberRequest) {
-        if (memberRequest) {
-            this.memberRequestFilter = MemberRequestFilter.withLargeGuilds();
-        } else {
-            this.memberRequestFilter = MemberRequestFilter.none();
-        }
         return this;
     }
 
@@ -626,30 +580,8 @@ public class GatewayBootstrap<O extends GatewayOptions> {
         return usingConnection(gateway -> Flux.from(whileConnectedFunction.apply(gateway)).then(gateway.onDisconnect()));
     }
 
-    /**
-     * Connect to the Discord Gateway upon subscription to acquire a {@link GatewayDiscordClient} instance and use it
-     * in a declarative way, releasing the object once the derived usage {@link Function} completes, and the underlying
-     * shard group disconnects, according to {@link GatewayDiscordClient#onDisconnect()}.
-     * <p>
-     * The timing of acquiring a {@link GatewayDiscordClient} depends on the {@link #setAwaitConnections(boolean)}
-     * setting: if {@code true}, when all joining shards have connected; if {@code false}, as soon as it is possible to
-     * establish a connection to the Gateway.
-     * <p>
-     * Calling this method is useful when you operate on the {@link GatewayDiscordClient} object using reactive API you
-     * can compose within the scope of the given {@link Function}.
-     *
-     * @param whileConnectedFunction the {@link Function} to apply the <strong>connected</strong>
-     * {@link GatewayDiscordClient} and trigger a processing pipeline from it.
-     * @return an empty {@link Mono} completing after all resources have released
-     * @deprecated use {@link #withGateway(Function)}
-     */
-    @Deprecated
-    public Mono<Void> withConnection(Function<GatewayDiscordClient, Mono<Void>> whileConnectedFunction) {
-        return usingConnection(gateway -> whileConnectedFunction.apply(gateway).then(gateway.onDisconnect()));
-    }
-
     private <T> Mono<T> usingConnection(Function<GatewayDiscordClient, Mono<T>> onConnectedFunction) {
-        return Mono.usingWhen(connect(), onConnectedFunction, GatewayDiscordClient::logout);
+        return Mono.usingWhen(login(), onConnectedFunction, GatewayDiscordClient::logout);
     }
 
     /**
@@ -670,35 +602,12 @@ public class GatewayBootstrap<O extends GatewayOptions> {
      * sequence, it will be emitted through the {@link Mono}.
      */
     public Mono<GatewayDiscordClient> login() {
-        return connect(DefaultGatewayClient::new);
-    }
-
-    /**
-     * Connect to the Discord Gateway upon subscription to build a {@link GatewayClient} from the set of options
-     * configured by this builder. The resulting {@link GatewayDiscordClient} can be externally managed, leaving you
-     * in charge of properly releasing its resources by calling {@link GatewayDiscordClient#logout()}.
-     * <p>
-     * The timing of acquiring a {@link GatewayDiscordClient} depends on the {@link #setAwaitConnections(boolean)}
-     * setting: if {@code true}, when all joining shards have connected; if {@code false}, as soon as it is possible
-     * to establish a connection to the Gateway.
-     * <p>
-     * All joining shards will attempt to serially connect to Discord Gateway, coordinated by the current
-     * {@link ShardCoordinator}. If one of the shards fail to connect due to a retryable problem like invalid session
-     * it will retry before continuing to the next one.
-     *
-     * @return a {@link Mono} that upon subscription and depending on the configuration of
-     * {@link #setAwaitConnections(boolean)}, emits a {@link GatewayDiscordClient}. If an error occurs during the setup
-     * sequence, it will be emitted through the {@link Mono}.
-     * @deprecated use {@link #login()}
-     */
-    @Deprecated
-    public Mono<GatewayDiscordClient> connect() {
-        return connect(DefaultGatewayClient::new);
+        return login(DefaultGatewayClient::new);
     }
 
     /**
      * Connect to the Discord Gateway upon subscription using a custom {@link Function factory} to build a
-     * {@link GatewayClient} from the set of options configured by this builder. See {@link #connect()} for more details
+     * {@link GatewayClient} from the set of options configured by this builder. See {@link #login()} for more details
      * about how the returned {@link Mono} operates.
      *
      * @return a {@link Mono} that upon subscription and depending on the configuration of
@@ -706,21 +615,6 @@ public class GatewayBootstrap<O extends GatewayOptions> {
      * sequence, it will be emitted through the {@link Mono}.
      */
     public Mono<GatewayDiscordClient> login(Function<O, GatewayClient> clientFactory) {
-        return connect(clientFactory);
-    }
-
-    /**
-     * Connect to the Discord Gateway upon subscription using a custom {@link Function factory} to build a
-     * {@link GatewayClient} from the set of options configured by this builder. See {@link #connect()} for more details
-     * about how the returned {@link Mono} operates.
-     *
-     * @return a {@link Mono} that upon subscription and depending on the configuration of
-     * {@link #setAwaitConnections(boolean)}, emits a {@link GatewayDiscordClient}. If an error occurs during the setup
-     * sequence, it will be emitted through the {@link Mono}.
-     * @deprecated use {@link #login(Function)}
-     */
-    @Deprecated
-    public Mono<GatewayDiscordClient> connect(Function<O, GatewayClient> clientFactory) {
         GatewayBootstrap<O> b = new GatewayBootstrap<>(this, this.optionsModifier);
         return b.shardingStrategy.getShardCount(b.client)
                 .flatMap(count -> {
@@ -1028,31 +922,6 @@ public class GatewayBootstrap<O extends GatewayOptions> {
             gateway.getEventDispatcher().shutdown();
             return gateway.getGatewayResources().getStateView().getStoreService().dispose();
         };
-    }
-
-    /**
-     * A {@link StoreService} mapper that doesn't modify the input.
-     *
-     * @return a noop {@link StoreService} mapper
-     * @deprecated use {@link IdentityInvalidationStrategy} if you want to disable store invalidation
-     */
-    @Deprecated
-    public static Function<StoreService, StoreService> identityStoreService() {
-        return storeService -> storeService;
-    }
-
-    /**
-     * A {@link StoreService} mapper that will wrap the input with a {@link ShardAwareStoreService} using a
-     * {@link JdkKeyStoreRegistry} that will track shard index of saved entities to allow for cleanup on shard
-     * invalidation.
-     *
-     * @return a shard-aware {@link StoreService} mapper
-     * @deprecated use {@link KeyStoreInvalidationStrategy} to use a dedicated key store to invalidate the store on
-     * shard invalidation
-     */
-    @Deprecated
-    public static Function<StoreService, StoreService> shardAwareStoreService() {
-        return storeService -> new ShardAwareStoreService(new JdkKeyStoreRegistry(), storeService);
     }
 
     /**

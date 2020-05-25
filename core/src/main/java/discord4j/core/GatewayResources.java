@@ -121,18 +121,6 @@ public class GatewayResources {
     }
 
     /**
-     * Return whether the Gateway should be instructed to request guild members for large guilds.
-     *
-     * @return {@code true} if using the default (enabled for large guilds), {@code false} otherwise
-     * @deprecated this method only returns {@code true} if using {@link MemberRequestFilter#DEFAULT}. Use
-     * {@link #getMemberRequestFilter()}
-     */
-    @Deprecated
-    public boolean isMemberRequest() {
-        return memberRequestFilter == MemberRequestFilter.DEFAULT;
-    }
-
-    /**
      * Return the {@link GatewayReactorResources} used to perform Gateway-related operations.
      *
      * @return the Gateway Reactor resources

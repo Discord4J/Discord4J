@@ -21,7 +21,6 @@ import discord4j.rest.RestClientBuilder;
 import discord4j.rest.request.DefaultRouter;
 import discord4j.rest.request.Router;
 import discord4j.rest.request.RouterOptions;
-import reactor.core.publisher.Hooks;
 import reactor.util.Logger;
 import reactor.util.Loggers;
 
@@ -34,8 +33,6 @@ import java.util.function.Function;
 public final class DiscordClientBuilder<C, O extends RouterOptions> extends RestClientBuilder<C, O> {
 
     private static final Logger log = Loggers.getLogger(DiscordClientBuilder.class);
-
-    private boolean debugMode = false;
 
     /**
      * Initialize a new builder with the given token.
@@ -64,26 +61,6 @@ public final class DiscordClientBuilder<C, O extends RouterOptions> extends Rest
     DiscordClientBuilder(DiscordClientBuilder<?, ?> source, Function<Config, C> allocator,
                          Function<RouterOptions, O> optionsModifier) {
         super(source, allocator, optionsModifier);
-        this.debugMode = source.debugMode;
-    }
-
-    /**
-     * Whether to enable {@link Hooks#onOperatorDebug()} when building a {@link DiscordClient}. This is a global hook to
-     * enrich stack traces in case of errors for easier debugging at a performance cost. In production or higher load
-     * scenarios, we recommend setting this to {@code false} and looking for better alternatives such as the Reactor
-     * debug agent.
-     *
-     * @param debugMode {@code true} to enable debug mode. Setting this to false will not reset the hook if
-     * previously enabled.
-     * @return this builder
-     * @see <a href="https://projectreactor.io/docs/core/release/reference/#reactor-tools-debug">
-     * Reactor Reference: Production-ready Global Debugging</a>
-     * @deprecated for removal, please use {@link Hooks#onOperatorDebug()} at the start of your application
-     */
-    @Deprecated
-    public DiscordClientBuilder<C, O> setDebugMode(boolean debugMode) {
-        this.debugMode = debugMode;
-        return this;
     }
 
     /**
@@ -105,9 +82,6 @@ public final class DiscordClientBuilder<C, O extends RouterOptions> extends Rest
      * @return a configured {@link DiscordClient} based on this builder parameters
      */
     public C build(Function<O, Router> routerFactory) {
-        if (debugMode) {
-            Hooks.onOperatorDebug();
-        }
         return super.build(routerFactory);
     }
 }

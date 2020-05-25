@@ -293,7 +293,7 @@ public final class Guild implements Entity {
      * Gets the ID of the embedded channel, if present.
      *
      * @return The ID of the embedded channel, if present.
-     * @deprecated Use {@code Guild#getWidgetChannelId} instead.
+     * @deprecated Use {@code Guild#getWidgetChannelId} instead. For removal in v3.2
      */
     @Deprecated
     public Optional<Snowflake> getEmbedChannelId() {

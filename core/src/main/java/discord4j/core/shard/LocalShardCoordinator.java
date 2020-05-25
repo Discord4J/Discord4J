@@ -42,17 +42,6 @@ public class LocalShardCoordinator implements ShardCoordinator {
     private final Supplier<PayloadTransformer> identifyLimiterFactory;
     private final AtomicInteger connected = new AtomicInteger(0);
 
-    /**
-     * Create a new {@link LocalShardCoordinator} that is able to locally coordinate multiple shards under a single
-     * JVM instance.
-     *
-     * @deprecated use {@link #create()} or {@link #create(Supplier)}
-     */
-    @Deprecated
-    public LocalShardCoordinator() {
-        this(DEFAULT_IDENTIFY_LIMITER_FACTORY);
-    }
-
     private LocalShardCoordinator(Supplier<PayloadTransformer> identifyLimiterFactory) {
         this.identifyLimiterFactory = identifyLimiterFactory;
     }
