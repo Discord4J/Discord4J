@@ -16,6 +16,7 @@
  */
 package discord4j.core.object.entity.channel;
 
+import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.Message;
 import discord4j.core.retriever.EntityRetrievalStrategy;
@@ -24,11 +25,10 @@ import discord4j.discordjson.json.ChannelData;
 import discord4j.discordjson.json.MessageData;
 import discord4j.discordjson.possible.Possible;
 import discord4j.rest.util.PaginationUtil;
-import discord4j.common.util.Snowflake;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Schedulers;
+import reactor.core.scheduler.Scheduler;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -93,7 +93,8 @@ class BaseMessageChannel extends BaseChannel implements MessageChannel {
 
     @Override
     public final Flux<Long> typeUntil(final Publisher<?> until) {
-        Flux<Long> repeatUntilOther = Flux.interval(Duration.ofSeconds(8L), Schedulers.elastic()) // 8 to avoid
+        Scheduler delayScheduler = getClient().getCoreResources().getReactorResources().getTimerTaskScheduler();
+        Flux<Long> repeatUntilOther = Flux.interval(Duration.ofSeconds(8L), delayScheduler) // 8 to avoid
                 // choppiness
                 .flatMap(tick -> type().thenReturn(tick + 1)) // add 1 to offset the separate type() request
                 .takeUntilOther(until);
