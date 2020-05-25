@@ -240,7 +240,7 @@ public class RestClient {
      * @return A {@link RestWebhook} as represented by the supplied ID.
      */
     public RestWebhook getWebhookById(final Snowflake webhookId) {
-        return RestWebhook.create(this, webhookId.asLong());
+        return RestWebhook.create(this, webhookId);
     }
 
     /**
@@ -250,7 +250,7 @@ public class RestClient {
      * @return A {@link RestWebhook} as represented by the supplied ID.
      */
     public RestWebhook restWebhook(WebhookData data) {
-        return RestWebhook.create(this, Snowflake.asLong(data.id()));
+        return RestWebhook.create(this, Snowflake.of(data.id()));
     }
 
     /**
