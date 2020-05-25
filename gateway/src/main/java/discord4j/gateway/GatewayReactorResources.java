@@ -30,7 +30,7 @@ import java.util.function.Supplier;
  */
 public class GatewayReactorResources extends ReactorResources {
 
-    protected static final Supplier<Scheduler> DEFAULT_PAYLOAD_SENDER_SCHEDULER = () ->
+    public static final Supplier<Scheduler> DEFAULT_PAYLOAD_SENDER_SCHEDULER = () ->
             Schedulers.newSingle("d4j-gateway", true);
 
     private final Scheduler payloadSenderScheduler;
