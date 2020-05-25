@@ -71,6 +71,13 @@ public class JacksonResources {
     }
 
     /**
+     * Create with a pre-configured {@link ObjectMapper} for all Discord4J related operations.
+     */
+    public static JacksonResources create() {
+        return new JacksonResources(mapper -> mapper.addHandler(new UnknownPropertyHandler(true)));
+    }
+
+    /**
      * Get the {@link ObjectMapper} configured by this provider.
      *
      * @return a Jackson ObjectMapper used to map POJOs to and from JSON format
