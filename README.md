@@ -60,7 +60,7 @@ repositories {
 }
 
 dependencies {
-  implementation 'com.discord4j:discord4j-core:3.1.0.RC1'
+  implementation 'com.discord4j:discord4j-core:3.1.0.RC2'
 }
 ```
 
@@ -71,7 +71,7 @@ repositories {
 }
 
 dependencies {
-  implementation("com.discord4j:discord4j-core:3.1.0.RC1")
+  implementation("com.discord4j:discord4j-core:3.1.0.RC2")
 }
 ```
 
@@ -81,7 +81,7 @@ dependencies {
   <dependency>
     <groupId>com.discord4j</groupId>
     <artifactId>discord4j-core</artifactId>
-    <version>3.1.0.RC1</version>
+    <version>3.1.0.RC2</version>
   </dependency>
 </dependencies>
 ```
@@ -89,7 +89,7 @@ dependencies {
 ### SBT
 ```scala
 libraryDependencies ++= Seq(
-  "com.discord4j" % "discord4j-core" % "3.1.0.RC1"
+  "com.discord4j" % "discord4j-core" % "3.1.0.RC2"
 )
 ```
 
