@@ -203,6 +203,35 @@ channel.createEmbed(spec ->
 ).block();
 ```
 
+### 🏷️ Find Members by Role Name
+
+Users typically prefer working with names instead of IDs. This example will demonstrate how to search for all members that have a role with a specific name.
+
+```java
+final Guild guild = ...
+final Set<Member> roleMembers = new HashSet<>();
+
+for (final Member member : guild.getMembers().toIterable()) {
+  for (final Role role : member.getRoles().toIterable()) {
+    if ("Developers".equalsIgnoreCase(role.getName())) {
+      roleMembers.add(member);
+      break;
+    }
+  }
+}
+
+return roleMembers;
+```
+
+Alternatively, using Reactor:
+```java
+final Guild guild = ...
+return guild.getMembers()
+  .filterWhen(member -> member.getRoles()
+    .map(Role::getName)
+    .any("Developers"::equalsIgnoreCase));
+```
+
 ### 🎵 Voice and Music
 
 Discord4J provides full support for voice connections and the ability to send audio to other users connected to the same channel. Discord4J can accept any [Opus](https://opus-codec.org/) audio source with [LavaPlayer](https://github.com/sedmelluq/lavaplayer) being the preferred solution for downloading and encoding audio from YouTube, SoundCloud, and other providers.
@@ -339,7 +368,7 @@ PLAYER_MANAGER.loadItem("https://www.youtube.com/watch?v=dQw4w9WgXcQ", new Audio
 
 ### ❌ Disconnecting from a Voice Channel Automatically
 
-Typically, after everyone has left a voice channel, the bot should disconnect automatically as users typically forget to disconnect the bot manually. The example below uses a reactive approach to showcase the fluidity of a reactive approach to solve such problems.
+Typically, after everyone has left a voice channel, the bot should disconnect automatically as users typically forget to disconnect the bot manually. This problem can be solved rather elegantly using a reactive approach over an imperative one as the example below demonstrates.
 
 ```java
 final VoiceChannel channel = ...
