@@ -108,7 +108,7 @@ public class DefaultGatewayClient implements GatewayClient {
 
     // mutable state, modified here and at PayloadHandlers
     private final AtomicBoolean connected = new AtomicBoolean(false);
-    private final AtomicBoolean allowResume = new AtomicBoolean(true);
+    private final AtomicBoolean allowResume = new AtomicBoolean(false);
     private final AtomicInteger sequence = new AtomicInteger(0);
     private final AtomicReference<String> sessionId = new AtomicReference<>("");
     private final AtomicLong lastSent = new AtomicLong(0);
@@ -129,8 +129,8 @@ public class DefaultGatewayClient implements GatewayClient {
         this.payloadReader = Objects.requireNonNull(options.getPayloadReader());
         this.payloadWriter = Objects.requireNonNull(options.getPayloadWriter());
         this.reconnectOptions = options.getReconnectOptions();
-        this.reconnectContext = new ReconnectContext(reconnectOptions.getFirstBackoff(),
-                reconnectOptions.getMaxBackoffInterval());
+        this.reconnectContext = new ReconnectContext(
+                this.reconnectOptions.getFirstBackoff(), this.reconnectOptions.getMaxBackoffInterval());
         this.identifyOptions = Objects.requireNonNull(options.getIdentifyOptions());
         this.observer = options.getInitialObserver();
         this.identifyLimiter = Objects.requireNonNull(options.getIdentifyLimiter());
@@ -141,7 +141,12 @@ public class DefaultGatewayClient implements GatewayClient {
         this.dispatchSink = dispatch.sink(FluxSink.OverflowStrategy.BUFFER);
         this.outboundSink = outbound.sink(FluxSink.OverflowStrategy.ERROR);
         this.heartbeatSink = heartbeats.sink(FluxSink.OverflowStrategy.ERROR);
-        this.heartbeat = new ResettableInterval(reactorResources.getTimerTaskScheduler());
+        this.heartbeat = new ResettableInterval(this.reactorResources.getTimerTaskScheduler());
+        this.identifyOptions.getResumeSession().ifPresent(resumeSession -> {
+            this.allowResume.set(true);
+            this.sequence.set(resumeSession.getSequence());
+            this.sessionId.set(resumeSession.getId());
+        });
     }
 
     @Override
@@ -174,14 +179,6 @@ public class DefaultGatewayClient implements GatewayClient {
                             .doOnNext(buf -> logPayload(senderLog, context, buf));
 
                     sessionHandler = new GatewayWebsocketHandler(receiverSink, outFlux, context);
-
-                    SessionInfo resumeSession = identifyOptions.getResumeSession().orElse(null);
-                    if (resumeSession != null) {
-                        this.sequence.set(resumeSession.getSequence());
-                        this.sessionId.set(resumeSession.getId());
-                    } else {
-                        allowResume.set(false);
-                    }
 
                     Mono<Void> readyHandler = dispatch.filter(DefaultGatewayClient::isReadyOrResume)
                             .doOnNext(event -> {
