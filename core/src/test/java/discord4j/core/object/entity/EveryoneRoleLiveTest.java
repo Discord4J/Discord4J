@@ -1,10 +1,10 @@
 package discord4j.core.object.entity;
 
 import discord4j.core.DiscordClient;
-import discord4j.core.DiscordTest;
 import discord4j.core.GatewayDiscordClient;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 
@@ -25,7 +25,7 @@ public class EveryoneRoleLiveTest {
         client = DiscordClient.create(token).login().block();
     }
 
-    @DiscordTest
+    @Test
     public void testEveryoneRolesLive() {
         List<Guild> guilds = client.getGuilds().collectList().block();
 
