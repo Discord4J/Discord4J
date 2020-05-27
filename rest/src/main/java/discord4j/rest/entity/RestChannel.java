@@ -203,7 +203,7 @@ public class RestChannel {
     }
 
     /**
-     * Wrapper for {@link RestChannel#createMessage(MessageCreateRequest)} taking an embed only
+     * Wrapper for {@link RestChannel#createMessage(MessageCreateRequest)} taking an embed only.
      *
      * @param embed The embed of the message
      * @return a {@link Mono} where, upon successful completion, emits the created {@link MessageData}. If an
