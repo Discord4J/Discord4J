@@ -192,7 +192,7 @@ public class RestChannel {
     }
 
     /**
-     * Wrapper for {@link RestChannel#createMessage(MessageCreateRequest)} taking only message content
+     * Wrapper for {@link RestChannel#createMessage(MessageCreateRequest)} taking only message content.
      *
      * @param content The content of the message
      * @return a {@link Mono} where, upon successful completion, emits the created {@link MessageData}. If an
