@@ -192,6 +192,28 @@ public class RestChannel {
     }
 
     /**
+     * Wrapper for {@link RestChannel#createMessage(MessageCreateRequest)} taking only message content.
+     *
+     * @param content The content of the message
+     * @return a {@link Mono} where, upon successful completion, emits the created {@link MessageData}. If an
+     * error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<MessageData> createMessage(String content) {
+        return createMessage(MessageCreateRequest.builder().content(content).build());
+    }
+
+    /**
+     * Wrapper for {@link RestChannel#createMessage(MessageCreateRequest)} taking an embed only.
+     *
+     * @param embed The embed of the message
+     * @return a {@link Mono} where, upon successful completion, emits the created {@link MessageData}. If an
+     * error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<MessageData> createMessage(EmbedData embed) {
+        return createMessage(MessageCreateRequest.builder().embed(embed).build());
+    }
+
+    /**
      * Request to bulk delete the supplied message IDs.
      *
      * @param messageIds a {@link Publisher} to supply the message IDs to bulk delete.
