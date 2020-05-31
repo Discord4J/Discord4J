@@ -56,10 +56,12 @@ public class DiscordWebClient {
      *
      * @param httpClient a Reactor Netty HTTP client
      * @param exchangeStrategies a strategy to transform requests and responses
+     * @param authorizationScheme scheme to use with the authorization header, like "Bot" or "Bearer"
      * @param token a Discord token for API authorization
      * @param responseFunctions a list of {@link ResponseFunction} transformations
      */
-    public DiscordWebClient(HttpClient httpClient, ExchangeStrategies exchangeStrategies, String token,
+    public DiscordWebClient(HttpClient httpClient, ExchangeStrategies exchangeStrategies,
+                            String authorizationScheme, String token,
                             List<ResponseFunction> responseFunctions) {
         final Properties properties = GitProperties.getProperties();
         final String version = properties.getProperty(GitProperties.APPLICATION_VERSION, "3");
@@ -67,7 +69,7 @@ public class DiscordWebClient {
 
         final HttpHeaders defaultHeaders = new DefaultHttpHeaders();
         defaultHeaders.add(HttpHeaderNames.CONTENT_TYPE, "application/json");
-        defaultHeaders.add(HttpHeaderNames.AUTHORIZATION, "Bot " + token);
+        defaultHeaders.add(HttpHeaderNames.AUTHORIZATION, authorizationScheme + " " + token);
         defaultHeaders.add(HttpHeaderNames.USER_AGENT, "DiscordBot(" + url + ", " + version + ")");
         defaultHeaders.add("X-RateLimit-Precision", "millisecond");
 

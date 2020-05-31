@@ -19,13 +19,11 @@ package discord4j.rest.request;
 import discord4j.common.ReactorResources;
 import discord4j.rest.http.client.ClientResponse;
 import discord4j.rest.http.client.DiscordWebClient;
-import discord4j.rest.response.ResponseFunction;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.MonoProcessor;
 import reactor.util.Logger;
 import reactor.util.Loggers;
 
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -39,9 +37,7 @@ public class DefaultRouter implements Router {
     private static final ResponseHeaderStrategy HEADER_STRATEGY = new ResponseHeaderStrategy();
 
     private final ReactorResources reactorResources;
-    private final List<ResponseFunction> responseFunctions;
     private final DiscordWebClient httpClient;
-    private final GlobalRateLimiter globalRateLimiter;
     private final Map<BucketKey, RequestStream> streamMap = new ConcurrentHashMap<>();
     private final RouterOptions routerOptions;
 
@@ -53,10 +49,9 @@ public class DefaultRouter implements Router {
     public DefaultRouter(RouterOptions routerOptions) {
         this.routerOptions = routerOptions;
         this.reactorResources = routerOptions.getReactorResources();
-        this.responseFunctions = routerOptions.getResponseTransformers();
         this.httpClient = new DiscordWebClient(reactorResources.getHttpClient(),
-                routerOptions.getExchangeStrategies(), routerOptions.getToken(), this.responseFunctions);
-        this.globalRateLimiter = routerOptions.getGlobalRateLimiter();
+                routerOptions.getExchangeStrategies(), "Bot", routerOptions.getToken(),
+                routerOptions.getResponseTransformers());
     }
 
     @Override
