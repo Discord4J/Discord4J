@@ -795,7 +795,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                             })
                             .subscriberContext(buildContext(gateway, shard))
                             .subscribe(null,
-                                    t -> log.debug(format(ctx, "Gateway terminated with an error: {}"), t),
+                                    t -> log.debug(format(ctx, "Gateway terminated with an error: {}"), t.toString()),
                                     () -> log.debug(format(ctx, "Gateway completed"))));
 
                     sink.onCancel(forCleanup);
