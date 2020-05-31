@@ -76,8 +76,8 @@ public class LocalShardCoordinator implements ShardCoordinator {
     }
 
     @Override
-    public PayloadTransformer getIdentifyLimiter(ShardInfo shardInfo, int shardingFactor) {
-        return limiters.computeIfAbsent(shardInfo.getIndex() % shardingFactor, k -> identifyLimiterFactory.get());
+    public PayloadTransformer getIdentifyLimiter(ShardInfo shardInfo, int maxConcurrency) {
+        return limiters.computeIfAbsent(shardInfo.getIndex() % maxConcurrency, k -> identifyLimiterFactory.get());
     }
 
     @Override

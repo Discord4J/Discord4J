@@ -33,10 +33,10 @@ public interface ShardCoordinator {
      * identify multiple shards in a coordinated manner.
      *
      * @param shardInfo the shard from where to retrieve the limiter
-     * @param shardingFactor the number of shards that can be concurrently identified
+     * @param maxConcurrency the number of shards that can be concurrently identified
      * @return a {@link PayloadTransformer} allowing IDENTIFY payload coordination across shards
      */
-    PayloadTransformer getIdentifyLimiter(ShardInfo shardInfo, int shardingFactor);
+    PayloadTransformer getIdentifyLimiter(ShardInfo shardInfo, int maxConcurrency);
 
     /**
      * Notifies this coordinator that a given shard has connected successfully. Can be used to signal other shards

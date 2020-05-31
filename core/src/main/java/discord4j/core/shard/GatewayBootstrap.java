@@ -639,12 +639,17 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                     GatewayClientGroupManager clientGroup = b.shardingStrategy.getGroupManager(count);
                     GatewayDiscordClient gateway = new GatewayDiscordClient(b.client, resources, closeProcessor,
                             clientGroup, b.voiceConnectionFactory, entityRetrievalStrategy);
+                    Mono<Void> destroySequence = Mono.deferWithContext(ctx -> destroyHandler.apply(gateway)
+                            .doFinally(s -> log.info(format(ctx, "All shards disconnected"))))
+                            .doOnTerminate(closeProcessor::onComplete)
+                            .cache();
 
                     Flux<ShardInfo> connections = b.shardingStrategy.getShards(count)
                             .groupBy(shard -> shard.getIndex() % b.shardingStrategy.getMaxConcurrency())
                             .flatMap(group -> group.concatMap(shard -> acquireConnection(b, shard, clientFactory,
                                     gateway, shardCoordinator, stateHolder, eventDispatcher, clientGroup,
-                                    closeProcessor, dispatchMapper, invalidationStrategy)));
+                                    closeProcessor, dispatchMapper, invalidationStrategy,
+                                    destroySequence.subscriberContext(buildContext(gateway, shard)))));
 
                     if (b.awaitConnections == null ? count == 1 : b.awaitConnections) {
                         if (b.dispatcherFunction != null) {
@@ -686,7 +691,8 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                                               GatewayClientGroupManager clientGroup,
                                               MonoProcessor<Void> closeProcessor,
                                               DispatchEventMapper dispatchMapper,
-                                              InvalidationStrategy invalidationStrategy) {
+                                              InvalidationStrategy invalidationStrategy,
+                                              Mono<Void> destroySequence) {
         return Mono.deferWithContext(ctx ->
                 Mono.<ShardInfo>create(sink -> {
                     StatusUpdate initial = Optional.ofNullable(b.initialPresence.apply(shard)).orElse(null);
@@ -758,12 +764,8 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                                                 .then(invalidationStrategy.invalidate(shard, stateHolder))
                                                 .then(Mono.fromRunnable(() -> clientGroup.remove(shard.getIndex())))
                                                 .then(shardCoordinator.getConnectedCount()
-                                                        .filter(count -> count == 0 && !closeProcessor.isDisposed())
-                                                        .flatMap(__ -> {
-                                                            log.info(format(ctx, "All shards disconnected"));
-                                                            return destroyHandler.apply(gateway)
-                                                                    .doOnTerminate(closeProcessor::onComplete);
-                                                        }))
+                                                        .filter(count -> count == 0)
+                                                        .flatMap(__ -> destroySequence))
                                                 .onErrorResume(t -> {
                                                     log.warn(format(ctx, "Error while releasing resources"), t);
                                                     return Mono.empty();
