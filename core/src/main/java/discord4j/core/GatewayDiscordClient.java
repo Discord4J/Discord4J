@@ -29,6 +29,7 @@ import discord4j.core.object.Region;
 import discord4j.core.object.entity.*;
 import discord4j.core.object.entity.channel.Channel;
 import discord4j.core.object.entity.channel.GuildChannel;
+import discord4j.core.object.presence.Activity;
 import discord4j.core.object.presence.Presence;
 import discord4j.core.retriever.EntityRetrievalStrategy;
 import discord4j.core.retriever.EntityRetriever;
@@ -36,6 +37,7 @@ import discord4j.core.shard.GatewayBootstrap;
 import discord4j.core.spec.GuildCreateSpec;
 import discord4j.core.spec.UserEditSpec;
 import discord4j.core.util.ValidationUtil;
+import discord4j.discordjson.json.ActivityUpdateRequest;
 import discord4j.discordjson.json.EmojiData;
 import discord4j.discordjson.json.GuildData;
 import discord4j.discordjson.json.GuildUpdateData;
@@ -293,6 +295,22 @@ public class GatewayDiscordClient implements EntityRetriever {
 
     /**
      * Update the bot's {@link Presence} (client status) for every shard in this shard group.
+     * <p>
+     * Factories exist to build an {@link StatusUpdate} object to update the bot's status:
+     * <ul>
+     *     <li>{@link Presence#online()} and {@link Presence#online(ActivityUpdateRequest)}</li>
+     *     <li>{@link Presence#idle()} and {@link Presence#idle(ActivityUpdateRequest)}</li>
+     *     <li>{@link Presence#doNotDisturb()} and {@link Presence#doNotDisturb(ActivityUpdateRequest)}</li>
+     *     <li>{@link Presence#invisible()}</li>
+     * </ul>
+     * <p>
+     * Factories exist to build an {@link ActivityUpdateRequest} object for {@link StatusUpdate}:
+     * <ul>
+     *     <li>{@link Activity#listening(String)}</li>
+     *     <li>{@link Activity#playing(String)}</li>
+     *     <li>{@link Activity#streaming(String, String)}</li>
+     *     <li>{@link Activity#watching(String)}</li>
+     * </ul>
      *
      * @param statusUpdate The updated client status.
      * @return A {@link Mono} that signals completion upon successful update. If an error is received, it is emitted
@@ -304,13 +322,29 @@ public class GatewayDiscordClient implements EntityRetriever {
 
     /**
      * Update the bot's {@link Presence} (status) for the given shard index, provided it belongs in this shard group.
+     * <p>
+     * Factories exist to build an {@link StatusUpdate} object to update the bot's status:
+     * <ul>
+     *     <li>{@link Presence#online()} and {@link Presence#online(ActivityUpdateRequest)}</li>
+     *     <li>{@link Presence#idle()} and {@link Presence#idle(ActivityUpdateRequest)}</li>
+     *     <li>{@link Presence#doNotDisturb()} and {@link Presence#doNotDisturb(ActivityUpdateRequest)}</li>
+     *     <li>{@link Presence#invisible()}</li>
+     * </ul>
+     * <p>
+     * Factories exist to build an {@link ActivityUpdateRequest} object for {@link StatusUpdate}:
+     * <ul>
+     *     <li>{@link Activity#listening(String)}</li>
+     *     <li>{@link Activity#playing(String)}</li>
+     *     <li>{@link Activity#streaming(String, String)}</li>
+     *     <li>{@link Activity#watching(String)}</li>
+     * </ul>
      *
-     * @param presence The updated client presence.
+     * @param statusUpdate The updated client presence.
      * @return A {@link Mono} that signals completion upon successful update. If an error is received, it is emitted
      * through the {@code Mono}.
      */
-    public Mono<Void> updatePresence(final Presence presence, final int shardId) {
-        return gatewayClientGroup.unicast(ShardGatewayPayload.statusUpdate(presence.asStatusUpdate(), shardId));
+    public Mono<Void> updatePresence(final StatusUpdate statusUpdate, final int shardId) {
+        return gatewayClientGroup.unicast(ShardGatewayPayload.statusUpdate(statusUpdate, shardId));
     }
 
     /**
