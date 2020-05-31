@@ -24,7 +24,8 @@ import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
 
 /**
- * Dispatched when initially connecting to a voice channel.
+ * Dispatched when the current user is initially connecting to a voice channel, and when the current voice instance
+ * fails over to a new server (guild's voice server is updated).
  * <p>
  * This event is dispatched by Discord.
  *
