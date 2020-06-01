@@ -169,13 +169,11 @@ public class DefaultGatewayClient implements GatewayClient {
                             .transform(identifyLimiter);
                     Flux<ByteBuf> payloadFlux = outbound.filter(payload -> !Opcode.IDENTIFY.equals(payload.getOp()))
                             .flatMap(payload -> Flux.from(payloadWriter.write(payload)))
-                            .transform(buf -> Flux.merge(buf, sender));
-                    RateLimitOperator<ByteBuf> outLimiter =
-                            new RateLimitOperator<>(outboundLimiterCapacity(), Duration.ofSeconds(60),
+                            .transform(buf -> Flux.merge(buf, sender))
+                            .transform(new RateLimitOperator<>(outboundLimiterCapacity(), Duration.ofSeconds(60),
                                     reactorResources.getTimerTaskScheduler(),
-                                    reactorResources.getPayloadSenderScheduler());
+                                    reactorResources.getPayloadSenderScheduler()));
                     Flux<ByteBuf> outFlux = Flux.merge(heartbeatFlux, identifyFlux, payloadFlux)
-                            .transform(outLimiter)
                             .doOnNext(buf -> logPayload(senderLog, context, buf));
 
                     sessionHandler = new GatewayWebsocketHandler(receiverSink, outFlux, context);
@@ -608,6 +606,6 @@ public class DefaultGatewayClient implements GatewayClient {
                 log.warn("Invalid custom outbound limiter capacity: {}", capacityValue);
             }
         }
-        return 120;
+        return 115;
     }
 }
