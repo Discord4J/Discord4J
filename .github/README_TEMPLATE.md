@@ -99,6 +99,15 @@ Discord4J 3.1.x introduces performance and API enhancements, a plethora of new f
 
 Discord4J 3.0.x installation instructions and examples can be found on the [3.0.x branch](https://github.com/Discord4J/Discord4J/tree/3.0.x).
 
+## 🎉 Sponsors
+
+We would like to give a special thanks to all of our sponsors for providing us the funding to continue developing and hosting repository resources as well as driving forward initiatives for community programs. In particular, we would like to give a special shoutout to these wonderful individuals:
+
+* [decyg](https://github.com/decyg)
+* [nikammerlaan](https://github.com/nikammerlaan)
+* [ByteAlex](https://github.com/ByteAlex)
+* [Shadorc](https://github.com/Shadorc)
+
 ## ⛰️ Large Bots
 
 Here are some real-world examples of large bots using Discord4J:
