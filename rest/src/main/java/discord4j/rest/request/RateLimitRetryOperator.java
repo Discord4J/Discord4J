@@ -23,6 +23,8 @@ import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Scheduler;
+import reactor.util.Logger;
+import reactor.util.Loggers;
 import reactor.util.context.Context;
 
 import java.time.Duration;
@@ -32,6 +34,8 @@ import java.time.Duration;
  * headers returned by Discord in the event of a 429.
  */
 public class RateLimitRetryOperator {
+
+    private static final Logger log = Loggers.getLogger(RateLimitRetryOperator.class);
 
     private final Scheduler backoffScheduler;
 
@@ -49,16 +53,25 @@ public class RateLimitRetryOperator {
         } else {
             ClientException clientException = (ClientException) error;
             HttpHeaders headers = clientException.getHeaders();
-            boolean global = Boolean.parseBoolean(headers.get("X-RateLimit-Global"));
-            Context context = Context.of("iteration", iteration);
-            if (global) {
-                long retryAfter = Long.parseLong(headers.get("Retry-After"));
-                Duration fixedBackoff = Duration.ofMillis(retryAfter);
-                return retryMono(fixedBackoff).thenReturn(context);
-            } else {
-                long resetAt = (long) (Double.parseDouble(headers.get("X-RateLimit-Reset-After")) * 1000);
-                Duration fixedBackoff = Duration.ofMillis(resetAt);
-                return retryMono(fixedBackoff).thenReturn(context);
+            try {
+                boolean global = Boolean.parseBoolean(headers.get("X-RateLimit-Global"));
+                Context context = Context.of("iteration", iteration);
+                String retryAfter = headers.get("Retry-After");
+                String resetAfter = headers.get("X-RateLimit-Reset-After");
+                if (global) {
+                    Duration fixedBackoff = Duration.ofMillis(Long.parseLong(retryAfter));
+                    return retryMono(fixedBackoff).thenReturn(context);
+                } else if (resetAfter != null) {
+                    long resetAt = (long) (Double.parseDouble(resetAfter) * 1000);
+                    Duration fixedBackoff = Duration.ofMillis(resetAt);
+                    return retryMono(fixedBackoff).thenReturn(context);
+                } else {
+                    Duration fixedBackoff = Duration.ofSeconds(Long.parseLong(retryAfter));
+                    return retryMono(fixedBackoff).thenReturn(context);
+                }
+            } catch (Exception e) {
+                log.error("Unable to parse rate limit headers: {}", headers);
+                return Mono.error(e);
             }
         }
     }
