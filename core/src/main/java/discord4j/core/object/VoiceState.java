@@ -227,6 +227,15 @@ public final class VoiceState implements DiscordObject {
     }
 
     /**
+     * Gets whether this user's camera is enabled.
+     *
+     * @return {@code true} if this user's camera is enabled, {@code false} otherwise.
+     */
+    public boolean isSelfVideoEnabled() {
+        return data.selfVideo();
+    }
+
+    /**
      * Gets whether this user is muted by the current user.
      *
      * @return {@code true} if this user is muted by the current user, {@code false} otherwise.
