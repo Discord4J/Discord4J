@@ -17,6 +17,7 @@
 package discord4j.core.event.domain.message;
 
 import discord4j.core.GatewayDiscordClient;
+import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.common.util.Snowflake;
@@ -40,12 +41,15 @@ public class MessageDeleteEvent extends MessageEvent {
     private final long messageId;
     private final long channelId;
     @Nullable
+    private final Long guildId;
+    @Nullable
     private final Message message;
 
-    public MessageDeleteEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, long messageId, long channelId, @Nullable Message message) {
+    public MessageDeleteEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, long messageId, long channelId, @Nullable Long guildId, @Nullable Message message) {
         super(gateway, shardInfo);
         this.messageId = messageId;
         this.channelId = channelId;
+        this.guildId = guildId;
         this.message = message;
     }
 
@@ -85,6 +89,29 @@ public class MessageDeleteEvent extends MessageEvent {
      */
     public Mono<MessageChannel> getChannel() {
         return getClient().getChannelById(getChannelId()).cast(MessageChannel.class);
+    }
+
+    /**
+     * Gets the {@link Snowflake} ID of the {@link Guild} the
+     * {@link discord4j.core.object.entity.Message} was deleted from, if present.
+     * This may not be available if the deleted {@code Message} was from a private channel.
+     *
+     * @return The ID of the {@link Guild} involved, if present.
+     */
+    public Optional<Snowflake> getGuildId() {
+        return Optional.ofNullable(guildId).map(Snowflake::of);
+    }
+
+    /**
+     * Requests to retrieve the {@link Guild} the
+     * {@link discord4j.core.object.entity.Message} was deleted from, if present.
+     * This may not be available if the deleted {@code Message} was from a private channel.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits the {@link Guild} that contained the
+     * {@link Message} involved, if present. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Guild> getGuild() {
+        return Mono.justOrEmpty(getGuildId()).flatMap(getClient()::getGuildById);
     }
 
     @Override

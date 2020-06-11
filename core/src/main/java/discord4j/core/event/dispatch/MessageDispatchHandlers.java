@@ -85,15 +85,19 @@ class MessageDispatchHandlers {
         GatewayDiscordClient gateway = context.getGateway();
         long messageId = Snowflake.asLong(context.getDispatch().id());
         long channelId = Snowflake.asLong(context.getDispatch().channelId());
+        Long guildId = context.getDispatch().guildId()
+            .toOptional()
+            .map(Snowflake::asLong)
+            .orElse(null);
 
         Mono<Void> deleteMessage = context.getStateHolder().getMessageStore().delete(messageId);
 
         return context.getStateHolder().getMessageStore()
                 .find(messageId)
                 .flatMap(deleteMessage::thenReturn)
-                .map(messageBean -> new MessageDeleteEvent(gateway, context.getShardInfo(), messageId, channelId,
+                .map(messageBean -> new MessageDeleteEvent(gateway, context.getShardInfo(), messageId, channelId, guildId,
                         new Message(gateway, messageBean)))
-                .defaultIfEmpty(new MessageDeleteEvent(gateway, context.getShardInfo(), messageId, channelId, null));
+                .defaultIfEmpty(new MessageDeleteEvent(gateway, context.getShardInfo(), messageId, channelId, guildId, null));
     }
 
     static Mono<MessageBulkDeleteEvent> messageDeleteBulk(DispatchContext<MessageDeleteBulk> context) {
