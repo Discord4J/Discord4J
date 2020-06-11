@@ -34,6 +34,12 @@ public final class ExampleBot {
 }
 ```
 
+## 🔗 Quick Links
+
+* [Javadocs](https://www.javadoc.io/doc/com.discord4j/discord4j-core)
+* [Wiki](https://github.com/Discord4J/Discord4J/wiki)
+* [Discord](https://discord.gg/NxGAeCY)
+
 ## 💎 Benefits
 
 * 🚀 **Reactive** - Discord4J follows the [reactive-streams](http://www.reactive-streams.org/) protocol to ensure Discord bots run smoothly and efficiently regardless of size.
