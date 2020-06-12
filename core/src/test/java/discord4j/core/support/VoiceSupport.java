@@ -12,20 +12,17 @@ import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import com.sedmelluq.discord.lavaplayer.track.playback.MutableAudioFrame;
 import com.sedmelluq.discord.lavaplayer.track.playback.NonAllocatingAudioFrameBuffer;
 import discord4j.core.GatewayDiscordClient;
-import discord4j.core.event.domain.VoiceStateUpdateEvent;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.VoiceState;
 import discord4j.core.object.entity.Member;
 import discord4j.discordjson.json.MessageCreateRequest;
 import discord4j.voice.AudioProvider;
 import discord4j.voice.VoiceConnection;
-import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
 import reactor.util.Logger;
 import reactor.util.Loggers;
 
 import java.nio.ByteBuffer;
-import java.time.Duration;
 import java.util.Arrays;
 
 public class VoiceSupport {
@@ -59,35 +56,12 @@ public class VoiceSupport {
                 .flatMap(e -> Mono.justOrEmpty(e.getMember())
                         .flatMap(Member::getVoiceState)
                         .flatMap(VoiceState::getChannel)
-                        .flatMap(channel -> channel.join(spec -> spec.setProvider(provider))
-                                .flatMap(connection -> {
-                                    // The bot itself has a VoiceState; 1 VoiceState signals bot is alone
-                                    final Publisher<Boolean> voiceStateCounter = channel.getVoiceStates()
-                                            .count()
-                                            .map(count -> 1L == count);
-
-                                    // After 10 seconds, check if the bot is alone. This is useful if
-                                    // the bot joined alone, but no one else joined since connecting
-                                    final Mono<Void> onInterval = Mono.delay(Duration.ofSeconds(5L))
-                                            .filterWhen(ignored -> voiceStateCounter)
-                                            .switchIfEmpty(Mono.never())
-                                            .then();
-
-                                    // As people join/leave this specific voice channel, check if the bot is alone
-                                    final Mono<Void> onEvent =
-                                            channel.getClient().getEventDispatcher().on(VoiceStateUpdateEvent.class)
-                                                    .filterWhen(ignored -> voiceStateCounter)
-                                                    .next()
-                                                    .then();
-
-                                    // Disconnect the bot if either onInterval or onEvent happen!
-                                    return Mono.first(onInterval, onEvent).then(connection.disconnect());
-                                })
-                                .doFinally(s -> log.info("Finalized join request after {}", s))
-                                .onErrorResume(t -> {
-                                    log.error("Failed to join voice channel", t);
-                                    return Mono.empty();
-                                })))
+                        .flatMap(channel -> channel.join(spec -> spec.setProvider(provider)))
+                        .doFinally(s -> log.info("Finalized join request after {}", s))
+                        .onErrorResume(t -> {
+                            log.error("Failed to join voice channel", t);
+                            return Mono.empty();
+                        }))
                 .then();
 
         Mono<Void> leave = client.getEventDispatcher().on(MessageCreateEvent.class)

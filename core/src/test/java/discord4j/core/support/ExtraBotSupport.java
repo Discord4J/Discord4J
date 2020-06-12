@@ -2,14 +2,14 @@ package discord4j.core.support;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.LoggerContext;
+import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.*;
 import discord4j.core.object.entity.channel.TextChannel;
 import discord4j.core.object.reaction.ReactionEmoji;
-import discord4j.rest.util.Image;
-import discord4j.common.util.Snowflake;
 import discord4j.discordjson.json.ApplicationInfoData;
+import discord4j.rest.util.Image;
 import org.slf4j.LoggerFactory;
 import reactor.core.Exceptions;
 import reactor.core.publisher.Flux;
@@ -80,8 +80,8 @@ public class ExtraBotSupport {
         public Mono<Void> onMessageCreate(MessageCreateEvent event) {
             Message message = event.getMessage();
             return Mono.justOrEmpty(message.getContent())
-                    .filterWhen(content -> message.getGuild().hasElement())
                     .filter(content -> content.startsWith("!addrole "))
+                    .filterWhen(content -> message.getGuild().hasElement())
                     .flatMap(content -> {
                         // !addrole userId roleName
                         String[] tokens = content.split(" ", 3);
