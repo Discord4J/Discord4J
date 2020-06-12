@@ -15,7 +15,7 @@
  * along with Discord4J. If not, see <http://www.gnu.org/licenses/>.
  */
 /**
- * Mappers between {@link discord4j.gateway.json.dispatch.Dispatch} and {@link discord4j.core.event.domain.Event}.
+ * Mappers between {@link discord4j.discordjson.json.gateway.Dispatch} and {@link discord4j.core.event.domain.Event}.
  */
 @NonNullApi
 package discord4j.core.event.dispatch;

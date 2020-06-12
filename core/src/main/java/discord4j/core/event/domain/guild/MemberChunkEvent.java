@@ -88,9 +88,9 @@ public class MemberChunkEvent extends GuildEvent {
     }
 
     /**
-     * Gets the chunk index in the expected chunks for this response (0 <= chunk_index < chunk_count).
+     * Gets the chunk index in the expected chunks for this response (0 &lt;= chunk_index &lt; chunk_count).
      *
-     * @return The chunk index in the expected chunks for this response (0 <= chunk_index < chunk_count).
+     * @return The chunk index in the expected chunks for this response (0 &lt;= chunk_index &lt; chunk_count).
      */
     public int getChunkIndex() {
         return chunkIndex;
