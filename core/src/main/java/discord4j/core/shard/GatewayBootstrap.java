@@ -26,6 +26,7 @@ import discord4j.core.DiscordClient;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.GatewayResources;
 import discord4j.core.event.EventDispatcher;
+import discord4j.core.event.ReplayingEventDispatcher;
 import discord4j.core.event.dispatch.DispatchContext;
 import discord4j.core.event.dispatch.DispatchEventMapper;
 import discord4j.core.event.domain.Event;
@@ -624,7 +625,8 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                     StateHolder stateHolder = new StateHolder(b.initStoreService(invalidationStrategy),
                             new StoreContext(hints));
                     StateView stateView = new StateView(stateHolder);
-                    EventDispatcher eventDispatcher = b.initEventDispatcher();
+                    EventDispatcher eventDispatcher =
+                            b.initEventDispatcher(client.getCoreResources().getReactorResources());
                     GatewayReactorResources gatewayReactorResources = b.initGatewayReactorResources();
                     ShardCoordinator shardCoordinator = b.initShardCoordinator(gatewayReactorResources);
 
@@ -856,11 +858,13 @@ public class GatewayBootstrap<O extends GatewayOptions> {
         return voiceReactorResources.apply(client.getCoreResources().getReactorResources());
     }
 
-    private EventDispatcher initEventDispatcher() {
+    private EventDispatcher initEventDispatcher(ReactorResources reactorResources) {
         if (eventDispatcher != null) {
             return eventDispatcher;
         }
-        return EventDispatcher.buffering();
+        return ReplayingEventDispatcher.builder()
+                .timedTaskScheduler(reactorResources.getTimerTaskScheduler())
+                .build();
     }
 
     private ShardCoordinator initShardCoordinator(ReactorResources reactorResources) {

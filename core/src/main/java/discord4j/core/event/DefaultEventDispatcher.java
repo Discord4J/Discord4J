@@ -35,26 +35,11 @@ import java.util.concurrent.atomic.AtomicReference;
 import static discord4j.common.LogUtil.format;
 
 /**
- * Distributes events to subscribers. {@link Event} instances can be published over this class and dispatched to all
- * subscribers.
+ * Distributes events to subscribers using a Reactor {@link FluxProcessor} as backend.
  * <p>
- * Individual events can be published to subscribers using {@link #publish(Event)} while they can be used to consumed
- * through {@link #on(Class)} giving the proper {@link Event} class as argument.
- * <p>
- * Uses an underlying {@link FluxProcessor} that can be configured at construction time. Thread affinity can also
- * be configured by supplying a {@link Scheduler}, while an {@link FluxSink.OverflowStrategy} is applied to handle
+ * The underlying processor can be configured at construction time. Thread affinity can also be configured by
+ * supplying a {@link Scheduler}, while an {@link FluxSink.OverflowStrategy} is applied to handle
  * back-pressure of inbound Events, especially during startup.
- * <p>
- * Each event can be consumed using the following pattern:
- * <pre>
- *     dispatcher.on(MessageCreatedEvent.class)
- *           .subscribe(event -&gt; event.getMessage());
- * </pre>
- * While events can be published through:
- * <pre>
- *     fluxOfEvents.doOnNext(dispatcher::publish)
- *           .subscribe();
- * </pre>
  */
 public class DefaultEventDispatcher implements EventDispatcher {
 

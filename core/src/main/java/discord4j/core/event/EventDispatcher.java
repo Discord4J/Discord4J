@@ -18,6 +18,8 @@
 package discord4j.core.event;
 
 import discord4j.core.event.domain.Event;
+import discord4j.core.event.domain.guild.GuildCreateEvent;
+import discord4j.core.event.domain.lifecycle.GatewayLifecycleEvent;
 import reactor.core.publisher.*;
 import reactor.core.scheduler.Scheduler;
 import reactor.scheduler.forkjoin.ForkJoinPoolScheduler;
@@ -144,6 +146,23 @@ public interface EventDispatcher {
                 .eventProcessor(EmitterProcessor.create(bufferSize, false))
                 .overflowStrategy(FluxSink.OverflowStrategy.LATEST)
                 .build();
+    }
+
+    /**
+     * Create an {@link EventDispatcher} that is capable of replaying up to 2 minutes worth of important events like
+     * {@link GuildCreateEvent} and {@link GatewayLifecycleEvent} that arrive while no subscribers are connected to
+     * all late subscribers, as long as they subscribe within the replay window of 5 seconds. After the replay window
+     * has closed, it behaves like an emitter event dispatcher.
+     * <p>
+     * This allows controlling the memory overhead of dispatchers like {@link #buffering()} while still keeping a record
+     * of important events to all late subscribers, even after login has completed.
+     * <p>
+     * This dispatcher can be customized through the use of {@link ReplayingEventDispatcher#builder()}.
+     *
+     * @return an {@link EventDispatcher} that is capable of replaying events to late subscribers
+     */
+    static EventDispatcher replaying() {
+        return ReplayingEventDispatcher.create();
     }
 
     /**
