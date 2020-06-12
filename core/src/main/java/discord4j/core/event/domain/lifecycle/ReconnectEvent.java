@@ -27,9 +27,9 @@ import discord4j.gateway.ShardInfo;
  */
 public class ReconnectEvent extends GatewayLifecycleEvent {
 
-    private final int currentAttempt;
+    private final long currentAttempt;
 
-    public ReconnectEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, int currentAttempt) {
+    public ReconnectEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, long currentAttempt) {
         super(gateway, shardInfo);
         this.currentAttempt = currentAttempt;
     }
@@ -39,7 +39,7 @@ public class ReconnectEvent extends GatewayLifecycleEvent {
      *
      * @return The current reconnect attempt.
      */
-    public int getCurrentAttempt() {
+    public long getCurrentAttempt() {
         return currentAttempt;
     }
 

@@ -148,12 +148,20 @@ public interface GatewayClient {
     int getSequence();
 
     /**
+     * Return a sequence of the {@link GatewayConnection.State} transitions this client receives.
+     *
+     * @return a {@link Flux} of state elements
+     */
+    Flux<GatewayConnection.State> stateEvents();
+
+    /**
      * Returns whether this GatewayClient is currently connected to Discord Gateway therefore capable to send and
      * receive payloads.
      *
-     * @return true if the gateway connection is currently established, false otherwise.
+     * @return a {@link Mono} that upon subscription, returns true if the gateway connection is currently
+     * established, false otherwise.
      */
-    boolean isConnected();
+    Mono<Boolean> isConnected();
 
     /**
      * Gets the amount of time it last took Discord to respond to a heartbeat with an ack.

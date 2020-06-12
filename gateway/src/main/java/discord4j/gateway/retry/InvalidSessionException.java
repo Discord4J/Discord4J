@@ -14,23 +14,18 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J. If not, see <http://www.gnu.org/licenses/>.
  */
-package discord4j.gateway;
 
-import discord4j.discordjson.json.gateway.PayloadData;
-import reactor.core.publisher.Mono;
+package discord4j.gateway.retry;
 
-/**
- * Handler for a gateway payload.
- *
- * @param <T> the type of the payload data
- */
-@FunctionalInterface
-public interface PayloadHandler<T extends PayloadData> {
+import reactor.util.context.Context;
 
-    /**
-     * Perform an action on a payload together with its context, which allows access to various gateway resources.
-     *
-     * @param context the payload's gateway context
-     */
-    Mono<Void> handle(PayloadContext<T> context);
+public class InvalidSessionException extends GatewayException {
+
+    public InvalidSessionException(Context context) {
+        super(context);
+    }
+
+    public InvalidSessionException(Context context, String message) {
+        super(context, message);
+    }
 }

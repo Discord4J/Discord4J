@@ -1,12 +1,14 @@
 package discord4j.gateway.retry;
 
-/**
- * An exception class to handle gateway reconnects via reconnect opcode
- */
-public class ReconnectException extends RuntimeException {
+import reactor.util.context.Context;
 
-    public ReconnectException(String message) {
-        super(message);
+/**
+ * An exception class to handle gateway reconnects via reconnect opcode.
+ */
+public class ReconnectException extends GatewayException {
+
+    public ReconnectException(Context context, String message) {
+        super(context, message);
     }
 }
 

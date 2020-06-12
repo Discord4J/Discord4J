@@ -37,10 +37,11 @@ public class ReconnectOptions {
 
     private final Duration firstBackoff;
     private final Duration maxBackoffInterval;
-    private final int maxRetries;
+    private final long maxRetries;
     private final Backoff backoff;
     private final Jitter jitter;
     private final Scheduler backoffScheduler;
+    private final double jitterFactor;
 
     protected ReconnectOptions(Builder builder) {
         this.firstBackoff = Objects.requireNonNull(builder.firstBackoff, "firstBackoff");
@@ -53,12 +54,23 @@ public class ReconnectOptions {
         } else {
             this.backoffScheduler = builder.backoffScheduler;
         }
+        this.jitterFactor = builder.jitterFactor;
     }
 
+    /**
+     * Create a default {@link ReconnectOptions}.
+     *
+     * @return a new reconnect options configured with all defaults
+     */
     public static ReconnectOptions create() {
         return new Builder().build();
     }
 
+    /**
+     * Create a new builder for {@link ReconnectOptions}.
+     *
+     * @return a new builder
+     */
     public static ReconnectOptions.Builder builder() {
         return new Builder();
     }
@@ -67,7 +79,7 @@ public class ReconnectOptions {
 
         private Duration firstBackoff = Duration.ofSeconds(2);
         private Duration maxBackoffInterval = Duration.ofSeconds(30);
-        private int maxRetries = Integer.MAX_VALUE;
+        private long maxRetries = Long.MAX_VALUE;
         private Backoff backoff = context -> {
             ReconnectContext appContext = (ReconnectContext) context.applicationContext();
             Duration nextBackoff;
@@ -81,10 +93,17 @@ public class ReconnectOptions {
         };
         private Jitter jitter = Jitter.random();
         private Scheduler backoffScheduler = null;
+        private double jitterFactor = 0.5d;
 
         protected Builder() {
         }
 
+        /**
+         * Set the first {@link Duration} to be applied when computing a backoff. Defaults to 2 seconds.
+         *
+         * @param firstBackoff the minimum duration to be applied as backoff
+         * @return this builder
+         */
         public Builder setFirstBackoff(Duration firstBackoff) {
             if (firstBackoff.minus(Duration.ofSeconds(2)).isNegative()) {
                 throw new IllegalArgumentException("firstBackoff duration must be at least 2 seconds");
@@ -93,6 +112,12 @@ public class ReconnectOptions {
             return this;
         }
 
+        /**
+         * Set the maximum {@link Duration} to be applied when computing a backoff. Defaults to 30 seconds.
+         *
+         * @param maxBackoffInterval the maximum duration to be applied as backoff
+         * @return this builder
+         */
         public Builder setMaxBackoffInterval(Duration maxBackoffInterval) {
             if (maxBackoffInterval.minus(firstBackoff).isNegative()) {
                 throw new IllegalArgumentException("maxBackoffInterval must be at least the same as firstBackoff");
@@ -101,7 +126,14 @@ public class ReconnectOptions {
             return this;
         }
 
-        public Builder setMaxRetries(int maxRetries) {
+        /**
+         * Set the maximum number of iterations to retry before rethrowing the error as exhausted attempts. Defaults
+         * to Long.MAX_VALUE (unlimited retries).
+         *
+         * @param maxRetries the maximum number of retries
+         * @return this builder
+         */
+        public Builder setMaxRetries(long maxRetries) {
             if (maxRetries < 0) {
                 throw new IllegalArgumentException("maxRetries must be a positive integer");
             }
@@ -109,18 +141,59 @@ public class ReconnectOptions {
             return this;
         }
 
+        /**
+         * Set the backoff function given by reactor-extra {@link Backoff} type. Defaults to an exponential backoff
+         * strategy that uses a context object for obtaining the actual iteration.
+         *
+         * @param backoff a backoff function to apply on retries
+         * @return this builder
+         * @deprecated only select implementations will use this value. Moving forward, consider assuming an
+         * exponential backoff function bounded by {@link #getFirstBackoff()} and {@link #getMaxBackoffInterval()}
+         */
+        @Deprecated
         public Builder setBackoff(Backoff backoff) {
             this.backoff = backoff;
             return this;
         }
 
+        /**
+         * Set the jitter function given by reactor-extra {@link Jitter} type. Defaults to 50% randomness.
+         *
+         * @param jitter a jitter function to apply on retries
+         * @return this builder
+         * @deprecated only select implementations will use this value. Moving forward, consider using
+         * {@link #setJitterFactor(double)}}
+         */
+        @Deprecated
         public Builder setJitter(Jitter jitter) {
             this.jitter = jitter;
             return this;
         }
 
+        /**
+         * Set the {@link Scheduler} to be used when building delayed sequences as backoff. Defaults to dedicated
+         * parallel scheduler {@link #DEFAULT_BACKOFF_SCHEDULER}.
+         *
+         * @param backoffScheduler a reactor scheduler used for backoff delays
+         * @return this builder
+         */
         public Builder setBackoffScheduler(Scheduler backoffScheduler) {
             this.backoffScheduler = backoffScheduler;
+            return this;
+        }
+
+        /**
+         * Set a jitter factor for exponential backoff that adds randomness to each backoff. Defaults to {@code 0.5}
+         * (a jitter of at most 50% of the computed delay)
+         *
+         * @param jitterFactor the new jitter factor as a {@code double} between {@code 0d} and {@code 1d}
+         * @return this builder
+         */
+        public Builder setJitterFactor(double jitterFactor) {
+            if (jitterFactor < 0d || jitterFactor > 1d) {
+                throw new IllegalArgumentException("Invalid jitter factor value");
+            }
+            this.jitterFactor = jitterFactor;
             return this;
         }
 
@@ -129,10 +202,20 @@ public class ReconnectOptions {
         }
     }
 
+    /**
+     * Return the minimum backoff duration.
+     *
+     * @return minimum backoff duration
+     */
     public Duration getFirstBackoff() {
         return firstBackoff;
     }
 
+    /**
+     * Return the maximum backoff duration.
+     *
+     * @return maximum backoff duration
+     */
     public Duration getMaxBackoffInterval() {
         return maxBackoffInterval;
     }
@@ -142,7 +225,7 @@ public class ReconnectOptions {
      *
      * @return number of retries
      */
-    public int getMaxRetries() {
+    public long getMaxRetries() {
         return maxRetries;
     }
 
@@ -151,7 +234,10 @@ public class ReconnectOptions {
      * delay.
      *
      * @return a Backoff function
+     * @deprecated only select implementations will use this value. Moving forward, consider assuming an exponential
+     * backoff function bounded by {@link #getFirstBackoff()} and {@link #getMaxBackoffInterval()}
      */
+    @Deprecated
     public Backoff getBackoff() {
         return backoff;
     }
@@ -160,7 +246,10 @@ public class ReconnectOptions {
      * Retrieve the jitter to be applied on each backoff delay.
      *
      * @return a Jitter function
+     * @deprecated only select implementations will use this value. Moving forward, consider also using
+     * {@link #getJitterFactor()}
      */
+    @Deprecated
     public Jitter getJitter() {
         return jitter;
     }
@@ -172,5 +261,14 @@ public class ReconnectOptions {
      */
     public Scheduler getBackoffScheduler() {
         return backoffScheduler;
+    }
+
+    /**
+     * Retrieve the jitter factor to be applied on each backoff delay.
+     *
+     * @return a jitter factor value between {@code 0d} and {@code 1d}
+     */
+    public double getJitterFactor() {
+        return jitterFactor;
     }
 }

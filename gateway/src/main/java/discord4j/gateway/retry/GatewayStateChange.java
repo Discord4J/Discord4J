@@ -48,19 +48,19 @@ public class GatewayStateChange implements Dispatch {
         return new GatewayStateChange(State.RETRY_RESUME_STARTED, 1, nextAttemptBackoff);
     }
 
-    public static GatewayStateChange retrySucceeded(int currentAttempt) {
+    public static GatewayStateChange retrySucceeded(long currentAttempt) {
         return new GatewayStateChange(State.RETRY_SUCCEEDED, currentAttempt, null);
     }
 
-    public static GatewayStateChange retryFailed(int currentAttempt, Duration nextAttemptBackoff) {
+    public static GatewayStateChange retryFailed(long currentAttempt, Duration nextAttemptBackoff) {
         return new GatewayStateChange(State.RETRY_FAILED, currentAttempt, nextAttemptBackoff);
     }
 
     private final State state;
-    private final int currentAttempt;
+    private final long currentAttempt;
     private final Duration backoff;
 
-    private GatewayStateChange(State state, int currentAttempt, @Nullable Duration backoff) {
+    private GatewayStateChange(State state, long currentAttempt, @Nullable Duration backoff) {
         this.state = state;
         this.currentAttempt = currentAttempt;
         this.backoff = backoff;
@@ -70,7 +70,7 @@ public class GatewayStateChange implements Dispatch {
         return state;
     }
 
-    public int getCurrentAttempt() {
+    public long getCurrentAttempt() {
         return currentAttempt;
     }
 

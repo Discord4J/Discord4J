@@ -19,6 +19,7 @@ package discord4j.core.shard;
 
 import discord4j.discordjson.json.gateway.Dispatch;
 import discord4j.gateway.GatewayClient;
+import discord4j.gateway.GatewayConnection;
 import discord4j.gateway.json.GatewayPayload;
 import discord4j.gateway.json.ShardGatewayPayload;
 import io.netty.buffer.ByteBuf;
@@ -162,7 +163,12 @@ class SingleGatewayClientGroup implements GatewayClientGroupManager {
         }
 
         @Override
-        public boolean isConnected() {
+        public Flux<GatewayConnection.State> stateEvents() {
+            return client.stateEvents();
+        }
+
+        @Override
+        public Mono<Boolean> isConnected() {
             return client.isConnected();
         }
 
