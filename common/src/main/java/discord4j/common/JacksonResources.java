@@ -34,30 +34,43 @@ import java.util.function.Function;
  */
 public class JacksonResources {
 
-    private static final Function<ObjectMapper, ObjectMapper> initializer = mapper -> mapper
+    /**
+     * A mapper of {@link ObjectMapper} with all the required options for Discord4J operations.
+     */
+    public static final Function<ObjectMapper, ObjectMapper> INITIALIZER = mapper -> mapper
             .setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
             .registerModules(new PossibleModule(), new Jdk8Module())
             .setDefaultPropertyInclusion(JsonInclude.Value.construct(JsonInclude.Include.CUSTOM,
                     JsonInclude.Include.ALWAYS, PossibleFilter.class, null));
+
+    /**
+     * A mapper of {@link ObjectMapper} to handle unknown properties without throwing errors.
+     */
+    public static final Function<ObjectMapper, ObjectMapper> HANDLE_UNKNOWN_PROPERTIES =
+            mapper -> mapper.addHandler(new UnknownPropertyHandler(true));
 
     private final ObjectMapper objectMapper;
 
     /**
      * Create a default {@link ObjectMapper} that allows any field visibility,
      * registers modules to handle Discord4J specific mappings and ignores unknown properties.
+     *
+     * @deprecated use {@link #create()}
      */
+    @Deprecated
     public JacksonResources() {
-        this(mapper -> mapper.addHandler(new UnknownPropertyHandler(true)));
+        this(HANDLE_UNKNOWN_PROPERTIES);
     }
 
     /**
-     * Create a custom {@link com.fasterxml.jackson.databind.ObjectMapper}, based on the defaults given by
-     * {@link #JacksonResources()}
+     * Create a custom {@link ObjectMapper}, based on the defaults given by {@link #JacksonResources()}.
      *
      * @param mapper a Function to customize the ObjectMapper to be created
+     * @deprecated use one of the static factories and then call {@link #withMapperFunction(Function)}
      */
+    @Deprecated
     public JacksonResources(Function<ObjectMapper, ObjectMapper> mapper) {
-        this.objectMapper = initializer.andThen(mapper).apply(new ObjectMapper());
+        this.objectMapper = INITIALIZER.andThen(mapper).apply(new ObjectMapper());
     }
 
     /**
@@ -65,7 +78,10 @@ public class JacksonResources {
      * recommended default and can lead to unexpected behavior and errors.
      *
      * @param objectMapper a pre-configured ObjectMapper to use
+     * @deprecated use {@link #createFromObjectMapper(ObjectMapper)} instead, but consider all Discord4J-related
+     * transformations are applied on the given {@code ObjectMapper}
      */
+    @Deprecated
     public JacksonResources(ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
     }
@@ -74,7 +90,24 @@ public class JacksonResources {
      * Create with a pre-configured {@link ObjectMapper} for all Discord4J related operations.
      */
     public static JacksonResources create() {
-        return new JacksonResources(mapper -> mapper.addHandler(new UnknownPropertyHandler(true)));
+        return new JacksonResources(HANDLE_UNKNOWN_PROPERTIES);
+    }
+
+    /**
+     * Create based on {@link ObjectMapper} applying on it all changes required for Discord4J related operations.
+     */
+    public static JacksonResources createFromObjectMapper(ObjectMapper objectMapper) {
+        return new JacksonResources(INITIALIZER.andThen(HANDLE_UNKNOWN_PROPERTIES).apply(objectMapper));
+    }
+
+    /**
+     * Return a new {@link JacksonResources} based on this current {@link ObjectMapper} but applying the given function.
+     *
+     * @param transformer a mapper to enrich the current {@link ObjectMapper}
+     * @return a new instance with the {@code transformer} applied
+     */
+    public JacksonResources withMapperFunction(Function<ObjectMapper, ObjectMapper> transformer) {
+        return new JacksonResources(transformer.apply(objectMapper));
     }
 
     /**
