@@ -88,13 +88,17 @@ public interface VoiceConnection {
          */
         CONNECTED,
         /**
-         * A voice connection that has disconnected.
+         * A voice connection that is scheduled for a resume attempt.
          */
-        DISCONNECTED,
+        RESUMING,
         /**
          * A voice connection that is scheduled for a reconnect attempt.
          */
-        RECONNECTING
+        RECONNECTING,
+        /**
+         * A voice connection that has disconnected.
+         */
+        DISCONNECTED
     }
 
 }

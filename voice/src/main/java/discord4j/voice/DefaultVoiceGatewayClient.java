@@ -29,9 +29,9 @@ import discord4j.common.retry.ReconnectContext;
 import discord4j.common.retry.ReconnectOptions;
 import discord4j.common.util.Snowflake;
 import discord4j.voice.json.*;
-import discord4j.voice.retry.PartialDisconnectException;
 import discord4j.voice.retry.VoiceGatewayException;
 import discord4j.voice.retry.VoiceGatewayReconnectException;
+import discord4j.voice.retry.VoiceGatewayRetrySpec;
 import discord4j.voice.retry.VoiceServerUpdateReconnectException;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufInputStream;
@@ -42,19 +42,15 @@ import reactor.core.publisher.*;
 import reactor.function.TupleUtils;
 import reactor.netty.ConnectionObserver;
 import reactor.netty.http.client.WebsocketClientSpec;
-import reactor.retry.Retry;
 import reactor.util.Logger;
 import reactor.util.Loggers;
-import reactor.util.annotation.Nullable;
 import reactor.util.context.Context;
+import reactor.util.retry.Retry;
 import reactor.util.retry.RetrySpec;
 
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -107,7 +103,6 @@ public class DefaultVoiceGatewayClient {
     private final ReplayProcessor<VoiceConnection.State> state;
     private final FluxSink<VoiceConnection.State> stateChanges;
 
-    private final AtomicBoolean allowResume = new AtomicBoolean(false);
     private final AtomicReference<VoiceServerOptions> serverOptions = new AtomicReference<>();
     private final AtomicReference<String> session = new AtomicReference<>();
 
@@ -180,19 +175,19 @@ public class DefaultVoiceGatewayClient {
 
                     sessionHandler = new VoiceWebsocketHandler(receiverSink, outFlux, context);
 
-                    // TODO: validate this resume flow
-                    if (allowResume.get()) {
-                        stateChanges.next(VoiceConnection.State.CONNECTING);
-                        log.info(format(context, "Attempting to resume"));
-                        outboundSink.next(new Resume(guildId.asString(), selfId.asString(), session.get()));
-                    }
+                    Mono<?> maybeResume = state.next()
+                            .filter(s -> s == VoiceConnection.State.RESUMING)
+                            .doOnNext(s -> {
+                                log.info(format(context, "Attempting to resume"));
+                                outboundSink.next(new Resume(guildId.asString(), selfId.asString(), session.get()));
+                            });
 
                     Disposable.Composite innerCleanup = Disposables.composite();
 
                     Mono<Void> receiverFuture = receiver.doOnNext(buf -> logPayload(receiverLog, context, buf))
                             .flatMap(payloadReader)
                             .doOnNext(payload -> {
-                                if (!allowResume.get() && payload instanceof Hello) {
+                                if (payload instanceof Hello) {
                                     stateChanges.next(VoiceConnection.State.CONNECTING);
                                     Hello hello = (Hello) payload;
                                     Duration interval = Duration.ofMillis(hello.getData().heartbeatInterval);
@@ -229,7 +224,6 @@ public class DefaultVoiceGatewayClient {
                                 } else if (payload instanceof SessionDescription) {
                                     log.info(format(context, "Receiving events"));
                                     stateChanges.next(VoiceConnection.State.CONNECTED);
-                                    allowResume.set(true);
                                     reconnectContext.reset();
                                     SessionDescription sessionDescription = (SessionDescription) payload;
                                     byte[] secretKey = sessionDescription.getData().secretKey;
@@ -267,7 +261,6 @@ public class DefaultVoiceGatewayClient {
                                 } else if (payload instanceof Resumed) {
                                     log.info(format(context, "Resumed"));
                                     stateChanges.next(VoiceConnection.State.CONNECTED);
-                                    allowResume.set(true);
                                     reconnectContext.reset();
                                 }
                                 eventSink.next((VoiceGatewayEvent) payload);
@@ -291,7 +284,7 @@ public class DefaultVoiceGatewayClient {
                             .flatMap(t2 -> handleClose(t2.getT1(), t2.getT2()))
                             .then();
 
-                    return Mono.zip(httpFuture, receiverFuture, heartbeatHandler)
+                    return maybeResume.then(Mono.zip(httpFuture, receiverFuture, heartbeatHandler))
                             .doOnError(t -> log.error(format(context, "{}"), t.toString()))
                             .doOnTerminate(heartbeat::stop)
                             .doOnCancel(() -> sessionHandler.close())
@@ -376,53 +369,15 @@ public class DefaultVoiceGatewayClient {
                 .replaceAll("(\"token\": ?\")([A-Za-z0-9._-]*)(\")", "$1hunter2$3")));
     }
 
-    private Retry<ReconnectContext> retryFactory() {
-        return Retry.<ReconnectContext>onlyIf(t -> isRetryable(t.exception()))
-                .withApplicationContext(reconnectContext)
-                .withBackoffScheduler(reconnectOptions.getBackoffScheduler())
-                .backoff(reconnectOptions.getBackoff())
-                .jitter(reconnectOptions.getJitter())
-                .retryMax(reconnectOptions.getMaxRetries())
-                .doOnRetry(retryContext -> {
-                    stateChanges.next(VoiceConnection.State.RECONNECTING);
-                    int attempt = retryContext.applicationContext().getAttempts();
-                    Duration backoff = retryContext.backoff();
-                    log.info(format(getContextFromException(retryContext.exception()),
-                            "Reconnect attempt {} in {}"), attempt, backoff);
-                    if (attempt == 1) {
-                        if (!allowResume.get() || !canResume(retryContext.exception())) {
-                            allowResume.set(false);
-                        } else {
-                            log.info(format(getContextFromException(retryContext.exception()), "Resume is available"));
-                        }
-                    } else {
-                        allowResume.set(false);
-                    }
-                    retryContext.applicationContext().next();
+    private Retry retryFactory() {
+        return VoiceGatewayRetrySpec.create(reconnectOptions, reconnectContext)
+                .doBeforeRetry(retry -> {
+                    stateChanges.next(retry.nextState());
+                    long attempt = retry.iteration();
+                    Duration backoff = retry.nextBackoff();
+                    log.debug(format(getContextFromException(retry.failure()),
+                            "{} in {} (attempts: {})"), retry.nextState(), backoff, attempt);
                 });
-    }
-
-    private static final List<Integer> nonRetryableStatusCodes = Arrays.asList(
-            4004, // Authentication failed
-            4006, // Session no longer valid
-            4014, // Disconnected
-            4016 // Unknown encryption mode
-    );
-
-    private boolean isRetryable(@Nullable Throwable t) {
-        if (t instanceof CloseException) {
-            CloseException closeException = (CloseException) t;
-            return !nonRetryableStatusCodes.contains(closeException.getCode());
-        }
-        return !(t instanceof PartialDisconnectException);
-    }
-
-    private boolean canResume(Throwable t) {
-        if (t instanceof CloseException) {
-            CloseException closeException = (CloseException) t;
-            return closeException.getCode() < 4000;
-        }
-        return !(t instanceof VoiceGatewayReconnectException);
     }
 
     private Context getContextFromException(Throwable t) {
@@ -438,20 +393,16 @@ public class DefaultVoiceGatewayClient {
     private Mono<CloseStatus> handleClose(DisconnectBehavior sourceBehavior, CloseStatus closeStatus) {
         return Mono.deferWithContext(ctx -> {
             DisconnectBehavior behavior;
-            if (nonRetryableStatusCodes.contains(closeStatus.getCode())) {
+            if (VoiceGatewayRetrySpec.NON_RETRYABLE_STATUS_CODES.contains(closeStatus.getCode())) {
                 // non-retryable close codes are non-transient errors therefore stopping is the only choice
                 behavior = DisconnectBehavior.stop(sourceBehavior.getCause());
             } else {
                 behavior = sourceBehavior;
             }
-            log.info(format(ctx, "Handling close {} with behavior: {}"), closeStatus, behavior);
+            log.debug(format(ctx, "Closing and {} with status {}"), behavior, closeStatus);
             heartbeat.stop();
 
             if (behavior.getAction() == DisconnectBehavior.Action.STOP) {
-                allowResume.set(false);
-            }
-
-            if (!allowResume.get()) {
                 cleanup.dispose();
             }
 
