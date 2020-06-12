@@ -657,28 +657,52 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                         if (b.dispatcherFunction != null) {
                             return Mono.create(sink -> {
                                 Disposable.Composite cleanup = Disposables.composite();
+                                // subscribe to the dispatcher function, log but ignore errors
                                 cleanup.add(Flux.from(b.dispatcherFunction.apply(eventDispatcher))
                                         .subscribeOn(gatewayReactorResources.getBlockingTaskScheduler())
                                         .subscribe(null, t -> log.warn("Error in dispatcher function", t)));
+                                // tie the connections Flux completion to the completion/error of this MonoSink
                                 cleanup.add(connections.then(Mono.just(gateway))
                                         .subscribe(sink::success, sink::error));
                                 sink.onCancel(cleanup);
                             });
                         }
+                        // tie the connections Flux completion to the completion/error of this MonoSink
                         return connections.then(Mono.just(gateway));
                     } else {
                         if (b.dispatcherFunction != null) {
                             return Mono.create(sink -> {
                                 Disposable.Composite cleanup = Disposables.composite();
+                                // subscribe to the dispatcher function, log but ignore errors
                                 cleanup.add(Flux.from(b.dispatcherFunction.apply(eventDispatcher))
                                         .subscribeOn(gatewayReactorResources.getBlockingTaskScheduler())
                                         .subscribe(null, t -> log.warn("Error in dispatcher function", t)));
-                                cleanup.add(connections.subscribe(__ -> sink.success(gateway), sink::error));
+                                // tie the connections Flux first signal to the completion/error of this MonoSink
+                                cleanup.add(connections.switchOnFirst(
+                                        (first, flux) -> {
+                                            if (first.hasValue()) {
+                                                sink.success(gateway);
+                                            } else if (first.hasError()) {
+                                                sink.error(Objects.requireNonNull(first.getThrowable()));
+                                            }
+                                            return flux;
+                                        })
+                                        .subscribe(null, t -> log.warn("Error in connections function", t)));
                                 sink.onCancel(cleanup);
                             });
                         }
                         return Mono.create(sink ->
-                                sink.onCancel(connections.subscribe(__ -> sink.success(gateway), sink::error)));
+                                // tie the connections Flux first signal to the completion/error of this MonoSink
+                                sink.onCancel(connections.switchOnFirst(
+                                        (first, flux) -> {
+                                            if (first.hasValue()) {
+                                                sink.success(gateway);
+                                            } else if (first.hasError()) {
+                                                sink.error(Objects.requireNonNull(first.getThrowable()));
+                                            }
+                                            return flux;
+                                        })
+                                        .subscribe(null, t -> log.warn("Error in connections function", t))));
                     }
                 });
     }
