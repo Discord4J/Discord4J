@@ -53,14 +53,14 @@ class GuildDispatchHandlers {
 
     static Mono<BanEvent> guildBanAdd(DispatchContext<GuildBanAdd> context) {
         User user = new User(context.getGateway(), context.getDispatch().user());
-        long guildId = Snowflake.asLong(context.getDispatch().guild());
+        long guildId = Snowflake.asLong(context.getDispatch().guildId());
 
         return Mono.just(new BanEvent(context.getGateway(), context.getShardInfo(), user, guildId));
     }
 
     static Mono<UnbanEvent> guildBanRemove(DispatchContext<GuildBanRemove> context) {
         User user = new User(context.getGateway(), context.getDispatch().user());
-        long guildId = Snowflake.asLong(context.getDispatch().guild());
+        long guildId = Snowflake.asLong(context.getDispatch().guildId());
 
         return Mono.just(new UnbanEvent(context.getGateway(), context.getShardInfo(), user, guildId));
     }
@@ -260,7 +260,7 @@ class GuildDispatchHandlers {
 
     static Mono<EmojisUpdateEvent> guildEmojisUpdate(DispatchContext<GuildEmojisUpdate> context) {
         GatewayDiscordClient gateway = context.getGateway();
-        long guildId = Snowflake.asLong(context.getDispatch().guild());
+        long guildId = Snowflake.asLong(context.getDispatch().guildId());
 
         Mono<Void> updateGuildBean = context.getStateHolder().getGuildStore()
                 .find(guildId)
@@ -292,12 +292,12 @@ class GuildDispatchHandlers {
 
     static Mono<IntegrationsUpdateEvent> guildIntegrationsUpdate(DispatchContext<GuildIntegrationsUpdate> context) {
         return Mono.just(new IntegrationsUpdateEvent(context.getGateway(), context.getShardInfo(),
-                Snowflake.asLong(context.getDispatch().guild())));
+                Snowflake.asLong(context.getDispatch().guildId())));
     }
 
     static Mono<MemberJoinEvent> guildMemberAdd(DispatchContext<GuildMemberAdd> context) {
         GatewayDiscordClient gateway = context.getGateway();
-        long guildId = Snowflake.asLong(context.getDispatch().guild());
+        long guildId = Snowflake.asLong(context.getDispatch().guildId());
         MemberData member = context.getDispatch().member();
         UserData user = member.user();
         long userId = Snowflake.asLong(user.id());
@@ -326,7 +326,7 @@ class GuildDispatchHandlers {
 
     static Mono<MemberLeaveEvent> guildMemberRemove(DispatchContext<GuildMemberRemove> context) {
         GatewayDiscordClient gateway = context.getGateway();
-        long guildId = Snowflake.asLong(context.getDispatch().guild());
+        long guildId = Snowflake.asLong(context.getDispatch().guildId());
         UserData userData = context.getDispatch().user();
         long userId = Snowflake.asLong(userData.id());
 
