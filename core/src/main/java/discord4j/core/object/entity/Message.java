@@ -394,6 +394,15 @@ public final class Message implements Entity {
     }
 
     /**
+     * Gets the ID of the guild this message is associated to, if present.
+     *
+     * @return The ID of the guild this message is associated to, if present.
+     */
+    public Optional<Snowflake> getGuildId() {
+        return data.guildId().toOptional().map(Snowflake::of);
+    }
+
+    /**
      * Requests to retrieve the guild this message is associated to, if present.
      *
      * @return A {@link Mono} where, upon successful completion, emits the {@link Guild} this message is associated to,

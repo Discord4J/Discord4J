@@ -230,11 +230,16 @@ class ChannelDispatchHandlers {
 
     static Mono<PinsUpdateEvent> channelPinsUpdate(DispatchContext<ChannelPinsUpdate> context) {
         long channelId = Snowflake.asLong(context.getDispatch().channelId());
+        Long guildId = context.getDispatch().guildId()
+            .toOptional()
+            .map(Snowflake::asLong)
+            .orElse(null);
+
         Instant timestamp = Possible.flatOpt(context.getDispatch().lastPinTimestamp())
                 .map(text -> DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(text, Instant::from))
                 .orElse(null);
 
-        return Mono.just(new PinsUpdateEvent(context.getGateway(), context.getShardInfo(), channelId, timestamp));
+        return Mono.just(new PinsUpdateEvent(context.getGateway(), context.getShardInfo(), channelId, guildId, timestamp));
     }
 
     static Mono<? extends Event> channelUpdate(DispatchContext<ChannelUpdate> context) {
