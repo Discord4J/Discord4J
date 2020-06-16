@@ -187,6 +187,7 @@ client.withGateway {
       }
   }
 }
+.block()
 ```
 
 ## 📚 Examples
