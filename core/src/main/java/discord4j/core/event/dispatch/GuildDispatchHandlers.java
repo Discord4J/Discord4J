@@ -17,6 +17,7 @@
 package discord4j.core.event.dispatch;
 
 import discord4j.common.LogUtil;
+import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.guild.*;
 import discord4j.core.event.domain.role.RoleCreateEvent;
@@ -30,7 +31,6 @@ import discord4j.discordjson.json.*;
 import discord4j.discordjson.json.gateway.*;
 import discord4j.discordjson.possible.Possible;
 import discord4j.gateway.json.ShardGatewayPayload;
-import discord4j.common.util.Snowflake;
 import discord4j.store.api.util.LongLongTuple2;
 import discord4j.store.api.util.LongObjTuple2;
 import reactor.core.Disposable;
@@ -42,6 +42,8 @@ import reactor.util.context.Context;
 import reactor.util.function.Tuple2;
 import reactor.util.function.Tuples;
 
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -577,6 +579,10 @@ class GuildDispatchHandlers {
                                         .filter(Optional::isPresent)
                                         .map(Optional::get)
                                         .collect(Collectors.toList()))
+                                // TODO fix this: signature requires Guild but we only have partial information
+                                .joinedAt(DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(ZonedDateTime.now()))
+                                .large(false)
+                                .memberCount(context.getDispatch().guild().approximateMemberCount().toOptional().orElse(1))
                                 .build()), null)));
     }
 
