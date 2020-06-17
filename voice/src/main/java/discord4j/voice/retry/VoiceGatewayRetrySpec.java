@@ -120,7 +120,7 @@ public class VoiceGatewayRetrySpec extends Retry {
                 if (iteration == 1) {
                     nextBackoff = Duration.ZERO;
                 } else {
-                    nextBackoff = computeBackoff(iteration - 1, minBackoff, maxBackoff); // -1 due to 1-index
+                    nextBackoff = computeBackoff(iteration - 2, minBackoff, maxBackoff);
                 }
                 nextState = VoiceConnection.State.RESUMING;
             } else {
