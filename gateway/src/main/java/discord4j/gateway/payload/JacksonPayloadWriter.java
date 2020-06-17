@@ -34,12 +34,12 @@ public class JacksonPayloadWriter implements PayloadWriter {
 
     @Override
     public Mono<ByteBuf> write(GatewayPayload<?> payload) {
-        return Mono.create(sink -> {
+        return Mono.create(sink -> sink.onRequest(__ -> {
             try {
                 sink.success(ByteBufAllocator.DEFAULT.buffer().writeBytes(mapper.writeValueAsBytes(payload)));
             } catch (JsonProcessingException e) {
                 sink.error(Exceptions.propagate(e));
             }
-        });
+        }));
     }
 }
