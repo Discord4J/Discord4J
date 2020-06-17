@@ -279,12 +279,12 @@ public class DefaultVoiceGatewayClient {
                                     .maxFramePayloadLength(Integer.MAX_VALUE)
                                     .build())
                             .uri(serverOptions.get().getEndpoint() + "?v=4")
-                            .handle(sessionHandler::handle)
+                            .handle((in, out) -> maybeResume.then(sessionHandler.handle(in, out)))
                             .subscriberContext(LogUtil.clearContext())
                             .flatMap(t2 -> handleClose(t2.getT1(), t2.getT2()))
                             .then();
 
-                    return maybeResume.then(Mono.zip(httpFuture, receiverFuture, heartbeatHandler))
+                    return Mono.zip(httpFuture, receiverFuture, heartbeatHandler)
                             .doOnError(t -> log.error(format(context, "{}"), t.toString()))
                             .doOnTerminate(heartbeat::stop)
                             .doOnCancel(() -> sessionHandler.close())
