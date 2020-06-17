@@ -164,8 +164,7 @@ public final class VoiceChannel extends BaseCategorizableChannel {
     public Mono<Boolean> isMemberConnected(final Snowflake memberId) {
         return getVoiceStates()
                 .map(VoiceState::getUserId)
-                .filter(memberId::equals)
-                .hasElements();
+                .any(memberId::equals);
     }
 
     @Override
