@@ -76,10 +76,10 @@ public class RouteUtilsTest {
     @Test
     public void testUriWithQueryParameterRequiringEscape() {
         String template = "/guilds/{guild.id}/bans/{user.id}";
-        String expected = "/guilds/123456789/bans/987654321?reason=you're%20a%20bad%20boi:%20gtfo%20;%3E&delete-message-days=7";
+        String expected = "/guilds/123456789/bans/987654321?reason=you're%20a%20bad%20boi:%20gtfo%20;%3E&delete_message_days=7";
         Map<String, Object> map = new LinkedHashMap<>();
         map.put("reason", "you're a bad boi: gtfo ;>");
-        map.put("delete-message-days", 7);
+        map.put("delete_message_days", 7);
         assertEquals(expected, RouteUtils.expandQuery(RouteUtils.expand(template, 123456789, 987654321), map));
     }
 }
