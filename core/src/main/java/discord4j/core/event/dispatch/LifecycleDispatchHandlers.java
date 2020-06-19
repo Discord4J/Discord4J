@@ -73,7 +73,8 @@ class LifecycleDispatchHandlers {
                 return Mono.just(new ReconnectEvent(gateway, context.getShardInfo(), dispatch.getCurrentAttempt()));
             case DISCONNECTED:
             case DISCONNECTED_RESUME:
-                return Mono.just(new DisconnectEvent(gateway, context.getShardInfo()));
+                GatewayStateChange.ClosingStateChange c = (GatewayStateChange.ClosingStateChange) context.getDispatch();
+                return Mono.just(new DisconnectEvent(gateway, context.getShardInfo(), c.getStatus(), c.getBehavior().getCause()));
         }
         return Mono.empty();
     }

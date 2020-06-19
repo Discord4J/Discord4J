@@ -17,8 +17,13 @@
 
 package discord4j.core.event.domain.lifecycle;
 
+import discord4j.common.close.CloseStatus;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.gateway.ShardInfo;
+import discord4j.gateway.retry.GatewayStateChange;
+import reactor.util.annotation.Nullable;
+
+import java.util.Optional;
 
 /**
  * Indicates that a gateway connection is disconnected.
@@ -26,9 +31,21 @@ import discord4j.gateway.ShardInfo;
  * This event is dispatched by Discord4J.
  */
 public class DisconnectEvent extends GatewayLifecycleEvent {
+    private final CloseStatus status;
+    private final Throwable cause;
 
-    public DisconnectEvent(GatewayDiscordClient gateway, ShardInfo shardInfo) {
+    public DisconnectEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, CloseStatus status, @Nullable Throwable cause) {
         super(gateway, shardInfo);
+        this.status = status;
+        this.cause = cause;
+    }
+
+    public CloseStatus getStatus() {
+        return status;
+    }
+
+    public Optional<Throwable> getCause() {
+        return Optional.ofNullable(cause);
     }
 
     @Override
