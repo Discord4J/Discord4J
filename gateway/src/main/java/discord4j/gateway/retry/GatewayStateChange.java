@@ -62,7 +62,7 @@ public class GatewayStateChange implements Dispatch {
     private final long currentAttempt;
     private final Duration backoff;
 
-    private GatewayStateChange(State state, long currentAttempt, @Nullable Duration backoff) {
+    protected GatewayStateChange(State state, long currentAttempt, @Nullable Duration backoff) {
         this.state = state;
         this.currentAttempt = currentAttempt;
         this.backoff = backoff;
@@ -88,24 +88,5 @@ public class GatewayStateChange implements Dispatch {
                 ", currentAttempt=" + currentAttempt +
                 ", backoff=" + backoff +
                 ']';
-    }
-
-    public static class ClosingStateChange extends GatewayStateChange {
-        private final DisconnectBehavior behavior;
-        private final CloseStatus status;
-
-        private ClosingStateChange(DisconnectBehavior behavior, CloseStatus status) {
-            super(State.DISCONNECTED, 0, null);
-            this.behavior = behavior;
-            this.status = status;
-        }
-
-        public DisconnectBehavior getBehavior() {
-            return behavior;
-        }
-
-        public CloseStatus getStatus() {
-            return status;
-        }
     }
 }
