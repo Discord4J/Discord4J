@@ -17,14 +17,10 @@
 package discord4j.core.state;
 
 import discord4j.discordjson.json.*;
-import discord4j.store.api.Store;
 import discord4j.store.api.service.StoreService;
 import discord4j.store.api.util.LongLongTuple2;
-import discord4j.store.api.util.StoreContext;
 import discord4j.store.api.view.LongObjStoreView;
 import discord4j.store.api.view.StoreView;
-
-import java.util.Collections;
 
 /**
  * Read-only view for various pieces of state for use in caching.
@@ -45,16 +41,6 @@ import java.util.Collections;
 public final class StateView {
 
     private final StateHolder stateHolder;
-
-    /**
-     * Create a {@link StateView} from a {@link StoreService}.
-     *
-     * @param storeService a {@link Store} factory to provide the backend for the resulting view
-     * @return a view backed by the data exposed by the given parameter
-     */
-    public static StateView create(StoreService storeService) {
-        return new StateView(new StateHolder(storeService, new StoreContext(Collections.emptyMap())));
-    }
 
     public StateView(StateHolder stateHolder) {
         this.stateHolder = stateHolder;

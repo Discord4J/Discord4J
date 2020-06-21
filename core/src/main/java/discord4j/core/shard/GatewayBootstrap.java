@@ -623,7 +623,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                     Map<String, Object> hints = new LinkedHashMap<>();
                     hints.put("messageClass", MessageData.class);
                     StateHolder stateHolder = new StateHolder(b.initStoreService(invalidationStrategy),
-                            new StoreContext(hints));
+                            new StoreContext(hints), b.intents);
                     StateView stateView = new StateView(stateHolder);
                     EventDispatcher eventDispatcher =
                             b.initEventDispatcher(client.getCoreResources().getReactorResources());

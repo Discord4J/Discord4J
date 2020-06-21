@@ -18,7 +18,12 @@ package discord4j.core.state;
 
 import discord4j.discordjson.json.*;
 import discord4j.discordjson.json.gateway.PresenceUpdate;
+import discord4j.discordjson.possible.Possible;
+import discord4j.gateway.intent.Intent;
+import discord4j.gateway.intent.IntentSet;
 import discord4j.store.api.Store;
+import discord4j.store.api.noop.NoOpLongObjStore;
+import discord4j.store.api.noop.NoOpStore;
 import discord4j.store.api.primitive.LongObjStore;
 import discord4j.store.api.service.StoreService;
 import discord4j.store.api.util.LongLongTuple2;
@@ -26,6 +31,8 @@ import discord4j.store.api.util.StoreContext;
 import reactor.core.publisher.Mono;
 import reactor.util.Logger;
 import reactor.util.Loggers;
+
+import java.util.Optional;
 
 /**
  * Holder for various pieces of state for use in caching.
@@ -58,10 +65,12 @@ public final class StateHolder {
     private final LongObjStore<UserData> userStore;
     private final Store<LongLongTuple2, VoiceStateData> voiceStateStore;
 
-    public StateHolder(final StoreService service, final StoreContext context) {
+    public StateHolder(final StoreService service, final StoreContext context, final Possible<IntentSet> intentSet) {
         storeService = service;
 
         service.init(context);
+
+        Optional<IntentSet> intents = intentSet.toOptional();
 
         channelStore = service.provideLongObjStore(ChannelData.class);
         log.debug("Channel storage     : {}", channelStore);
@@ -69,8 +78,13 @@ public final class StateHolder {
         guildStore = service.provideLongObjStore(GuildData.class);
         log.debug("Guild storage       : {}", guildStore);
 
-        guildEmojiStore = service.provideLongObjStore(EmojiData.class);
-        log.debug("Guild emoji storage : {}", guildEmojiStore);
+        if (intents.map(set -> !set.contains(Intent.GUILD_EMOJIS)).orElse(false)) {
+            guildEmojiStore = new NoOpLongObjStore<>();
+            log.debug("Guild emoji storage : Disabled due to missing GUILD_EMOJIS intent");
+        } else {
+            guildEmojiStore = service.provideLongObjStore(EmojiData.class);
+            log.debug("Guild emoji storage : {}", guildEmojiStore);
+        }
 
         memberStore = service.provideGenericStore(LongLongTuple2.class, MemberData.class);
         log.debug("Member storage      : {}", memberStore);
@@ -78,8 +92,13 @@ public final class StateHolder {
         messageStore = service.provideLongObjStore(MessageData.class);
         log.debug("Message storage     : {}", messageStore);
 
-        presenceStore = service.provideGenericStore(LongLongTuple2.class, PresenceData.class);
-        log.debug("Presence storage    : {}", presenceStore);
+        if (intents.map(set -> !set.contains(Intent.GUILD_PRESENCES)).orElse(false)) {
+            presenceStore = new NoOpStore<>();
+            log.debug("Presence storage    : Disabled due to missing GUILD_PRESENCES intent");
+        } else {
+            presenceStore = service.provideGenericStore(LongLongTuple2.class, PresenceData.class);
+            log.debug("Presence storage    : {}", presenceStore);
+        }
 
         roleStore = service.provideLongObjStore(RoleData.class);
         log.debug("Role storage        : {}", roleStore);
@@ -87,8 +106,13 @@ public final class StateHolder {
         userStore = service.provideLongObjStore(UserData.class);
         log.debug("User storage        : {}", userStore);
 
-        voiceStateStore = service.provideGenericStore(LongLongTuple2.class, VoiceStateData.class);
-        log.debug("Voice state storage : {}", voiceStateStore);
+        if (intents.map(set -> !set.contains(Intent.GUILD_VOICE_STATES)).orElse(false)) {
+            voiceStateStore = new NoOpStore<>();
+            log.debug("Voice state storage : Disabled due to missing GUILD_VOICE_STATES intent");
+        } else {
+            voiceStateStore = service.provideGenericStore(LongLongTuple2.class, VoiceStateData.class);
+            log.debug("Voice state storage : {}", voiceStateStore);
+        }
     }
 
     public StoreService getStoreService() {
