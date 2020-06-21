@@ -100,14 +100,11 @@ class GuildDispatchHandlers {
         long guildId = Snowflake.asLong(guild.id());
 
         Mono<Void> saveGuild = context.getStateHolder().getGuildStore().save(guildId, guild);
-        // TODO optimize to separate into three Publisher<Channel> and saveAll to limit store hits
-        Mono<Void> saveChannels = Flux.fromIterable(createData.channels())
-                .flatMap(channel -> context.getStateHolder().getChannelStore()
-                        .save(Snowflake.asLong(channel.id()), ChannelData.builder()
-                                .from(channel)
-                                .guildId(guild.id())
-                                .build()))
-                .then();
+
+        Mono<Void> saveChannels = context.getStateHolder().getChannelStore()
+                .save(Flux.fromIterable(createData.channels())
+                        .map(channel -> Tuples.of(Snowflake.asLong(channel.id()),
+                                ChannelData.builder().from(channel).guildId(guild.id()).build())));
 
         Mono<Void> saveRoles = context.getStateHolder().getRoleStore()
                 .save(Flux.fromIterable(createData.roles())
