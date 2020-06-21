@@ -33,7 +33,7 @@ public final class BanQuerySpec implements AuditSpec<Map<String, Object>> {
      * @return This spec.
      */
     public BanQuerySpec setDeleteMessageDays(final int days) {
-        request.put("delete-message-days", days);
+        request.put("delete_message_days", days);
         return this;
     }
 

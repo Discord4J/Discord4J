@@ -76,7 +76,7 @@ public class RouteUtilsTest {
         String expected = "/guilds/123456789/bans/987654321?reason=you%27re%20a%20bad%20boi%3A%20gtfo%20%3B%3E&delete-message-days=7";
         Multimap<String, Object> map = new Multimap<>();
         map.add("reason", "you're a bad boi: gtfo ;>");
-        map.add("delete-message-days", 7);
+        map.add("delete_message_days", 7);
         assertEquals(expected, RouteUtils.expandQuery(RouteUtils.expand(template, 123456789, 987654321), map));
     }
 }
