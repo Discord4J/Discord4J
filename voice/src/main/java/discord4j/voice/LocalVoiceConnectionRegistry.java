@@ -35,12 +35,11 @@ public class LocalVoiceConnectionRegistry implements VoiceConnectionRegistry {
         return Mono.fromCallable(() -> voiceConnections.get(guildId.asLong()));
     }
 
-    @SuppressWarnings("ReactiveStreamsNullableInLambdaInTransform")
     @Override
     public Mono<Void> registerVoiceConnection(Snowflake guildId, VoiceConnection voiceConnection) {
         return Mono.fromCallable(() -> voiceConnections.put(guildId.asLong(), voiceConnection))
                 .flatMap(previous -> {
-                    if (previous != null && !previous.equals(voiceConnection)) {
+                    if (!previous.equals(voiceConnection)) {
                         return previous.disconnect();
                     }
                     return Mono.empty();
