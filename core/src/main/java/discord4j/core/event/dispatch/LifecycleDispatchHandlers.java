@@ -19,11 +19,10 @@ package discord4j.core.event.dispatch;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.lifecycle.*;
 import discord4j.core.object.entity.User;
-import discord4j.core.state.ParameterData;
-import discord4j.core.state.StateHolder;
 import discord4j.discordjson.json.UserData;
 import discord4j.discordjson.json.gateway.Ready;
 import discord4j.discordjson.json.gateway.Resumed;
+import discord4j.gateway.retry.ClosingStateChange;
 import discord4j.gateway.retry.GatewayStateChange;
 import discord4j.common.util.Snowflake;
 import reactor.core.publisher.Mono;
@@ -73,7 +72,8 @@ class LifecycleDispatchHandlers {
                 return Mono.just(new ReconnectEvent(gateway, context.getShardInfo(), dispatch.getCurrentAttempt()));
             case DISCONNECTED:
             case DISCONNECTED_RESUME:
-                return Mono.just(new DisconnectEvent(gateway, context.getShardInfo()));
+                ClosingStateChange c = (ClosingStateChange) context.getDispatch();
+                return Mono.just(new DisconnectEvent(gateway, context.getShardInfo(), c.getStatus(), c.getBehavior().getCause()));
         }
         return Mono.empty();
     }

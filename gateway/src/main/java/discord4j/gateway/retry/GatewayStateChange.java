@@ -17,6 +17,8 @@
 
 package discord4j.gateway.retry;
 
+import discord4j.common.close.CloseStatus;
+import discord4j.common.close.DisconnectBehavior;
 import discord4j.discordjson.json.gateway.Dispatch;
 import reactor.util.annotation.Nullable;
 
@@ -32,8 +34,8 @@ public class GatewayStateChange implements Dispatch {
         return new GatewayStateChange(State.CONNECTED, 0, null);
     }
 
-    public static GatewayStateChange disconnected() {
-        return new GatewayStateChange(State.DISCONNECTED, 0, null);
+    public static ClosingStateChange disconnected(DisconnectBehavior behavior, CloseStatus status) {
+        return new ClosingStateChange(behavior, status);
     }
 
     public static GatewayStateChange disconnectedResume() {
@@ -60,7 +62,7 @@ public class GatewayStateChange implements Dispatch {
     private final long currentAttempt;
     private final Duration backoff;
 
-    private GatewayStateChange(State state, long currentAttempt, @Nullable Duration backoff) {
+    protected GatewayStateChange(State state, long currentAttempt, @Nullable Duration backoff) {
         this.state = state;
         this.currentAttempt = currentAttempt;
         this.backoff = backoff;

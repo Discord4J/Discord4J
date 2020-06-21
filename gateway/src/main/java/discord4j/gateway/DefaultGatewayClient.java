@@ -363,7 +363,7 @@ public class DefaultGatewayClient implements GatewayClient {
                 dispatchSink.next(GatewayStateChange.disconnectedResume());
                 notifyObserver(GatewayObserver.DISCONNECTED_RESUME);
             } else if (behavior.getAction() == DisconnectBehavior.Action.STOP) {
-                dispatchSink.next(GatewayStateChange.disconnected());
+                dispatchSink.next(GatewayStateChange.disconnected(sourceBehavior, closeStatus));
                 sequence.set(0);
                 sessionId.set("");
                 notifyObserver(GatewayObserver.DISCONNECTED);
