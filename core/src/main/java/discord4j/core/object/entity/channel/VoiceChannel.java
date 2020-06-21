@@ -16,6 +16,7 @@
  */
 package discord4j.core.object.entity.channel;
 
+import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.VoiceState;
 import discord4j.core.spec.VoiceChannelEditSpec;
@@ -133,7 +134,6 @@ public final class VoiceChannel extends BaseCategorizableChannel {
                         .build(), shardId));
     }
 
-
     /**
      * Sends a leave request to the gateway
      * <p>
@@ -151,6 +151,20 @@ public final class VoiceChannel extends BaseCategorizableChannel {
                         .selfMute(false)
                         .selfDeaf(false)
                         .build(), shardId));
+    }
+
+    /**
+     * Requests to determine if the member represented by the provided {@link Snowflake} is connected to this voice channel.
+     *
+     * @param memberId The ID of the member to check.
+     * @return A {@link Mono} where, upon successful completion, emits {@code true} if the member represented by the provided
+     * {@link Snowflake} is connected to this voice channel, {@code false} otherwise. If an error is received, it is emitted
+     * through the {@code Mono}.
+     */
+    public Mono<Boolean> isMemberConnected(final Snowflake memberId) {
+        return getVoiceStates()
+                .map(VoiceState::getUserId)
+                .any(memberId::equals);
     }
 
     @Override
