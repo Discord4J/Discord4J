@@ -30,6 +30,7 @@ import discord4j.core.util.ListUtil;
 import discord4j.discordjson.json.*;
 import discord4j.discordjson.json.gateway.*;
 import discord4j.discordjson.possible.Possible;
+import discord4j.gateway.ShardInfo;
 import discord4j.gateway.json.ShardGatewayPayload;
 import discord4j.store.api.util.LongLongTuple2;
 import discord4j.store.api.util.LongObjTuple2;
@@ -69,6 +70,7 @@ class GuildDispatchHandlers {
 
     static Mono<GuildCreateEvent> guildCreate(DispatchContext<GuildCreate> context) {
         GatewayDiscordClient gateway = context.getGateway();
+        Context c = buildContext(gateway, context.getShardInfo());
         GuildCreateData createData;
         GuildData guild;
         if (context.getDispatch().guild().large()) {
@@ -99,7 +101,9 @@ class GuildDispatchHandlers {
 
         long guildId = Snowflake.asLong(guild.id());
 
-        Mono<Void> saveGuild = context.getStateHolder().getGuildStore().save(guildId, guild);
+        Mono<Void> saveGuild = context.getStateHolder().getGuildStore().save(guildId, guild)
+                .doOnSubscribe(s -> log.trace(format(c, "GuildCreate doOnSubscribe {}"), guildId))
+                .doFinally(s -> log.trace(format(c, "GuildCreate doFinally {}: {}"), guildId, s));
 
         Mono<Void> saveChannels = context.getStateHolder().getChannelStore()
                 .save(Flux.fromIterable(createData.channels())
@@ -260,6 +264,7 @@ class GuildDispatchHandlers {
     static Mono<EmojisUpdateEvent> guildEmojisUpdate(DispatchContext<GuildEmojisUpdate> context) {
         GatewayDiscordClient gateway = context.getGateway();
         long guildId = Snowflake.asLong(context.getDispatch().guildId());
+        Context c = buildContext(gateway, context.getShardInfo());
 
         Mono<Void> updateGuildBean = context.getStateHolder().getGuildStore()
                 .find(guildId)
@@ -271,7 +276,9 @@ class GuildDispatchHandlers {
                                 .map(Optional::get)
                                 .collect(Collectors.toList()))
                         .build())
-                .flatMap(guild -> context.getStateHolder().getGuildStore().save(guildId, guild));
+                .flatMap(guild -> context.getStateHolder().getGuildStore().save(guildId, guild))
+                .doOnSubscribe(s -> log.trace(format(c, "GuildEmojisUpdate doOnSubscribe {}"), guildId))
+                .doFinally(s -> log.trace(format(c, "GuildEmojisUpdate doFinally {}: {}"), guildId, s));
 
         Mono<Void> saveEmojis = context.getStateHolder().getGuildEmojiStore()
                 .saveWithLong(Flux.fromIterable(context.getDispatch().emojis())
@@ -300,6 +307,7 @@ class GuildDispatchHandlers {
         MemberData member = context.getDispatch().member();
         UserData user = member.user();
         long userId = Snowflake.asLong(user.id());
+        Context c = buildContext(gateway, context.getShardInfo());
 
         Mono<Void> addMemberId = context.getStateHolder().getGuildStore()
                 .find(guildId)
@@ -308,7 +316,9 @@ class GuildDispatchHandlers {
                         .members(ListUtil.add(guild.members(), member.user().id()))
                         .memberCount(guild.memberCount() + 1)
                         .build())
-                .flatMap(guild -> context.getStateHolder().getGuildStore().save(guildId, guild));
+                .flatMap(guild -> context.getStateHolder().getGuildStore().save(guildId, guild))
+                .doOnSubscribe(s -> log.trace(format(c, "GuildMemberAdd doOnSubscribe {}"), guildId))
+                .doFinally(s -> log.trace(format(c, "GuildMemberAdd doFinally {}: {}"), guildId, s));
 
         Mono<Void> saveMember = context.getStateHolder().getMemberStore()
                 .save(LongLongTuple2.of(guildId, userId), member);
@@ -328,6 +338,7 @@ class GuildDispatchHandlers {
         long guildId = Snowflake.asLong(context.getDispatch().guildId());
         UserData userData = context.getDispatch().user();
         long userId = Snowflake.asLong(userData.id());
+        Context c = buildContext(gateway, context.getShardInfo());
 
         Mono<Void> removeMemberId = context.getStateHolder().getGuildStore()
                 .find(guildId)
@@ -336,7 +347,9 @@ class GuildDispatchHandlers {
                         .members(ListUtil.remove(guild.members(), member -> member.equals(userData.id())))
                         .memberCount(guild.memberCount() - 1)
                         .build())
-                .flatMap(guild -> context.getStateHolder().getGuildStore().save(guildId, guild));
+                .flatMap(guild -> context.getStateHolder().getGuildStore().save(guildId, guild))
+                .doOnSubscribe(s -> log.trace(format(c, "GuildMemberRemove doOnSubscribe {}"), guildId))
+                .doFinally(s -> log.trace(format(c, "GuildMemberRemove doFinally {}: {}"), guildId, s));
 
         Mono<Member> member = context.getStateHolder().getMemberStore()
                 .find(LongLongTuple2.of(guildId, userId))
@@ -376,6 +389,7 @@ class GuildDispatchHandlers {
                 .map(Snowflake::of)
                 .collect(Collectors.toList());
         String nonce = context.getDispatch().nonce().toOptional().orElse(null);
+        Context c = buildContext(gateway, context.getShardInfo());
 
         Flux<Tuple2<LongLongTuple2, MemberData>> memberPairs = Flux.fromIterable(members)
                 .map(data -> Tuples.of(LongLongTuple2.of(guildId, Snowflake.asLong(data.user().id())),
@@ -392,7 +406,9 @@ class GuildDispatchHandlers {
                                 .map(data -> data.user().id())
                                 .collect(Collectors.toList())))
                         .build())
-                .flatMap(guild -> context.getStateHolder().getGuildStore().save(guildId, guild));
+                .flatMap(guild -> context.getStateHolder().getGuildStore().save(guildId, guild))
+                .doOnSubscribe(s -> log.trace(format(c, "GuildMembersChunk doOnSubscribe {}"), guildId))
+                .doFinally(s -> log.trace(format(c, "GuildMembersChunk doFinally {}: {}"), guildId, s));
 
         Mono<Void> saveMembers = context.getStateHolder().getMemberStore().save(memberPairs);
 
@@ -460,6 +476,7 @@ class GuildDispatchHandlers {
         GatewayDiscordClient gateway = context.getGateway();
         long guildId = Snowflake.asLong(context.getDispatch().guildId());
         RoleData role = context.getDispatch().role();
+        Context c = buildContext(gateway, context.getShardInfo());
 
         Mono<Void> addRoleId = context.getStateHolder().getGuildStore()
                 .find(guildId)
@@ -467,7 +484,9 @@ class GuildDispatchHandlers {
                         .from(guild)
                         .addRoles(role.id())
                         .build())
-                .flatMap(guild -> context.getStateHolder().getGuildStore().save(guildId, guild));
+                .flatMap(guild -> context.getStateHolder().getGuildStore().save(guildId, guild))
+                .doOnSubscribe(s -> log.trace(format(c, "GuildRoleCreate doOnSubscribe {}"), guildId))
+                .doFinally(s -> log.trace(format(c, "GuildRoleCreate doFinally {}: {}"), guildId, s));
 
         Mono<Void> saveRole = context.getStateHolder().getRoleStore()
                 .save(Snowflake.asLong(role.id()), role);
@@ -482,6 +501,7 @@ class GuildDispatchHandlers {
         GatewayDiscordClient gateway = context.getGateway();
         long guildId = Snowflake.asLong(context.getDispatch().guildId());
         long roleId = Snowflake.asLong(context.getDispatch().roleId());
+        Context c = buildContext(gateway, context.getShardInfo());
 
         @SuppressWarnings("ReactiveStreamsUnusedPublisher")
         Mono<Void> removeRoleId = context.getStateHolder().getGuildStore()
@@ -490,7 +510,9 @@ class GuildDispatchHandlers {
                         .from(guild)
                         .roles(ListUtil.remove(guild.roles(), role -> role.equals(context.getDispatch().roleId())))
                         .build())
-                .flatMap(guild -> context.getStateHolder().getGuildStore().save(guildId, guild));
+                .flatMap(guild -> context.getStateHolder().getGuildStore().save(guildId, guild))
+                .doOnSubscribe(s -> log.trace(format(c, "GuildRoleDelete doOnSubscribe {}"), guildId))
+                .doFinally(s -> log.trace(format(c, "GuildRoleDelete doFinally {}: {}"), guildId, s));
 
         Mono<Void> deleteRole = context.getStateHolder().getRoleStore().delete(roleId);
 
@@ -541,6 +563,7 @@ class GuildDispatchHandlers {
     static Mono<GuildUpdateEvent> guildUpdate(DispatchContext<GuildUpdate> context) {
         GatewayDiscordClient gateway = context.getGateway();
         long guildId = Snowflake.asLong(context.getDispatch().guild().id());
+        Context c = buildContext(gateway, context.getShardInfo());
 
         return context.getStateHolder().getGuildStore()
                 .find(guildId)
@@ -563,6 +586,8 @@ class GuildDispatchHandlers {
 
                     return context.getStateHolder().getGuildStore()
                             .save(guildId, newGuildData)
+                            .doOnSubscribe(s -> log.trace(format(c, "GuildUpdate doOnSubscribe {}"), guildId))
+                            .doFinally(s -> log.trace(format(c, "GuildUpdate doFinally {}: {}"), guildId, s))
                             .thenReturn(new GuildUpdateEvent(gateway, context.getShardInfo(), current, old));
                 })
                 .switchIfEmpty(Mono.fromCallable(() -> new GuildUpdateEvent(gateway, context.getShardInfo(),
@@ -581,6 +606,11 @@ class GuildDispatchHandlers {
                                 .large(false)
                                 .memberCount(context.getDispatch().guild().approximateMemberCount().toOptional().orElse(1))
                                 .build()), null)));
+    }
+
+    private static Context buildContext(GatewayDiscordClient gateway, ShardInfo shard) {
+        return Context.of(LogUtil.KEY_GATEWAY_ID, Integer.toHexString(gateway.hashCode()))
+                .put(LogUtil.KEY_SHARD_ID, shard.getIndex());
     }
 
 }

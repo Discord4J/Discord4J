@@ -20,7 +20,7 @@ package discord4j.core;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import discord4j.common.JacksonResources;
-import discord4j.core.event.domain.Event;
+import discord4j.core.event.domain.guild.GuildEvent;
 import discord4j.core.event.domain.lifecycle.GatewayLifecycleEvent;
 import discord4j.core.event.domain.lifecycle.ReadyEvent;
 import discord4j.core.state.StateView;
@@ -45,7 +45,7 @@ import java.util.concurrent.atomic.AtomicLong;
 public class ExampleStore {
 
     private static final Logger log = LoggerFactory.getLogger(ExampleStore.class);
-    private static final Reflections reflections = new Reflections(Event.class);
+    private static final Reflections reflections = new Reflections(GuildEvent.class);
 
     public static void main(String[] args) {
         JacksonResources jackson = JacksonResources.create();
@@ -67,7 +67,7 @@ public class ExampleStore {
                             .doOnNext(e -> log.info("[shard={}] {}", e.getShardInfo().format(), e.toString()))
                             .then();
 
-                    Mono<Void> eventCounter = Flux.fromIterable(reflections.getSubTypesOf(Event.class))
+                    Mono<Void> eventCounter = Flux.fromIterable(reflections.getSubTypesOf(GuildEvent.class))
                             .filter(cls -> reflections.getSubTypesOf(cls).isEmpty())
                             .flatMap(type -> gateway.on(type).doOnNext(event -> {
                                 String key = event.getClass().getSimpleName();
