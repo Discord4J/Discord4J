@@ -120,7 +120,7 @@ public class DiscordWebClient {
                                    Consumer<HttpClientResponse> responseConsumer) {
         Objects.requireNonNull(responseType);
 
-        HttpHeaders requestHeaders = new DefaultHttpHeaders().add(defaultHeaders).setAll(request.getHeaders());
+        HttpHeaders requestHeaders = buildHttpHeaders(request, body);
         String contentType = requestHeaders.get(HttpHeaderNames.CONTENT_TYPE);
         HttpClient.RequestSender sender = httpClient
                 .baseUrl(Routes.BASE_URL)
@@ -155,6 +155,14 @@ public class DiscordWebClient {
                     }
                 }))
                 .subscriberContext(ctx -> ctx.put(REQUEST_TIMESTAMP_KEY, Instant.now().toEpochMilli()));
+    }
+
+    private <R> HttpHeaders buildHttpHeaders(ClientRequest request, @Nullable R body) {
+        HttpHeaders headers = new DefaultHttpHeaders().add(defaultHeaders).setAll(request.getHeaders());
+        if (body == null) {
+            headers.remove(HttpHeaderNames.CONTENT_TYPE);
+        }
+        return headers;
     }
 
     @SuppressWarnings("unchecked")
