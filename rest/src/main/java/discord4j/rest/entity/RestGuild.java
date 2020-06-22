@@ -202,7 +202,7 @@ public class RestGuild {
 
     public Mono<Void> createBan(Snowflake userId, @Nullable Integer deleteMessageDays, @Nullable String reason) {
         Map<String, Object> queryParams = new HashMap<>();
-        Optional.ofNullable(deleteMessageDays).ifPresent(value -> queryParams.put("delete-message-days", value));
+        Optional.ofNullable(deleteMessageDays).ifPresent(value -> queryParams.put("delete_message_days", value));
         Optional.ofNullable(reason).ifPresent(value -> queryParams.put("reason", value));
         return restClient.getGuildService().createGuildBan(id, userId.asLong(), queryParams, reason);
     }
