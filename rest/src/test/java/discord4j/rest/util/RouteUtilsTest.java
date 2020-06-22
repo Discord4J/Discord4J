@@ -73,7 +73,7 @@ public class RouteUtilsTest {
     @Test
     public void testUriWithQueryParameterRequiringEscape() {
         String template = "/guilds/{guild.id}/bans/{user.id}";
-        String expected = "/guilds/123456789/bans/987654321?reason=you%27re%20a%20bad%20boi%3A%20gtfo%20%3B%3E&delete-message-days=7";
+        String expected = "/guilds/123456789/bans/987654321?reason=you%27re%20a%20bad%20boi%3A%20gtfo%20%3B%3E&delete_message_days=7";
         Multimap<String, Object> map = new Multimap<>();
         map.add("reason", "you're a bad boi: gtfo ;>");
         map.add("delete_message_days", 7);
