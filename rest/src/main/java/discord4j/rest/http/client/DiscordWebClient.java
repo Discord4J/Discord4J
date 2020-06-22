@@ -117,9 +117,7 @@ public class DiscordWebClient {
     public Mono<ClientResponse> exchange(ClientRequest request) {
         return Mono.subscriberContext()
                 .flatMap(ctx -> {
-                    HttpHeaders requestHeaders = new DefaultHttpHeaders()
-                            .add(defaultHeaders)
-                            .setAll(request.getHeaders());
+                    HttpHeaders requestHeaders = buildHttpHeaders(request);
                     String contentType = requestHeaders.get(HttpHeaderNames.CONTENT_TYPE);
                     HttpClient.RequestSender sender = httpClient
                             .baseUrl(Routes.BASE_URL)
@@ -139,6 +137,14 @@ public class DiscordWebClient {
                         Mono.just(new ClientResponse(response, connection.inbound(),
                                 exchangeStrategies, request, responseFunctions))).next())
                 .subscriberContext(ctx -> ctx.put(KEY_REQUEST_TIMESTAMP, Instant.now().toEpochMilli()));
+    }
+
+    private <R> HttpHeaders buildHttpHeaders(ClientRequest request) {
+        HttpHeaders headers = new DefaultHttpHeaders().add(defaultHeaders).setAll(request.getHeaders());
+        if (request.getBody() == null) {
+            headers.remove(HttpHeaderNames.CONTENT_TYPE);
+        }
+        return headers;
     }
 
     @SuppressWarnings("unchecked")
