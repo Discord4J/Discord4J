@@ -141,6 +141,7 @@ public class GuildService extends RestService {
         return Routes.GUILD_BAN_CREATE.newRequest(guildId, userId)
                 .query(queryParams)
                 .optionalHeader("X-Audit-Log-Reason", reason)
+                .header("content-type", "")
                 .exchange(getRouter());
     }
 
