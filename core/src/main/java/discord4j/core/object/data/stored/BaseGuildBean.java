@@ -16,7 +16,6 @@
  */
 package discord4j.core.object.data.stored;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import discord4j.common.json.GuildEmojiResponse;
 import discord4j.common.json.RoleResponse;
 import discord4j.gateway.json.dispatch.GuildCreate;
@@ -216,7 +215,7 @@ public class BaseGuildBean implements Serializable {
         embedChannelId = toCopy.getEmbedChannelId();
         verificationLevel = toCopy.getVerificationLevel();
         premiumTier = toCopy.getPremiumTier();
-        premiumSubscriptionsCount = toCopy.getPremiumSubcriptionsCount();
+        premiumSubscriptionsCount = toCopy.getPremiumSubscriptionsCount();
         preferredLocale = toCopy.getPreferredLocale();
         defaultMessageNotifications = toCopy.getDefaultMessageNotifications();
         explicitContentFilter = toCopy.getExplicitContentFilter();
@@ -338,7 +337,8 @@ public class BaseGuildBean implements Serializable {
         return premiumTier;
     }
 
-    public Integer getPremiumSubcriptionsCount() {
+    @Nullable
+    public Integer getPremiumSubscriptionsCount() {
         return premiumSubscriptionsCount;
     }
 
