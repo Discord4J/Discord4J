@@ -57,17 +57,21 @@ public abstract class AbstractCommandDispatcher implements CommandDispatcher {
                     final String commandName = trimmed.substring(0, endIndex);
                     final String remaining = trimmed.substring(commandName.length()).trim();
                     return Tuples.of(commandName, content.get().length() - remaining.length());
-                }).cache()
+                })
+                .cache()
                 .zipWith(Flux.fromIterable(providers))
                 .concatMap(context -> {
                     final Tuple2<String, Integer> hints = context.getT1();
                     final CommandProvider<?> provider = context.getT2();
-                    return Flux.defer(() -> provider.provide(event, hints.getT1(), hints.getT2(), content.get().length()))
+                    return Flux.defer(
+                            () -> provider.provide(event, hints.getT1(), hints.getT2(), content.get().length()))
                             .onErrorResume(error -> errorHandler.handle(event, error)
                                     .then(Mono.empty()));
-                }).flatMap(context -> context.getCommand().execute(event, context.getContext().orElse(null))
-                        .onErrorResume(error -> errorHandler.handle(event, error))
-                        .thenReturn(context.getCommand()));
+                })
+                .flatMap(context ->
+                        Mono.defer(() -> context.getCommand().execute(event, context.getContext().orElse(null)))
+                                .onErrorResume(error -> errorHandler.handle(event, error))
+                                .thenReturn(context.getCommand()));
     }
 
     /**
