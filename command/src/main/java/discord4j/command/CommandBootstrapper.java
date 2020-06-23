@@ -85,7 +85,7 @@ public final class CommandBootstrapper {
         return client.getEventDispatcher()
                 .on(MessageCreateEvent.class)
                 .filter(event -> event.getMessage().getContent().isPresent())
-                .flatMap(event -> Flux.from(dispatcher.dispatch(event, providers, errorHandler))
+                .flatMap(event -> Flux.defer(() -> dispatcher.dispatch(event, providers, errorHandler))
                         .onErrorResume(t -> {
                             LOGGER.warn("Error while dispatching command", t);
                             return Mono.empty();
