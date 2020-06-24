@@ -60,14 +60,7 @@ public class CloseStatus {
      * @return an {@link Optional} containing a close reason if present, or empty otherwise
      */
     public Optional<String> getReason() {
-        if (reason != null) {
-            if (reason.equals(""))
-                return Optional.empty();
-
-            return Optional.of(reason);
-        }
-
-        return Optional.empty();
+        return Optional.ofNullable(reason).filter(String::isEmpty);
     }
 
     @Override
