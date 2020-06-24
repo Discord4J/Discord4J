@@ -37,7 +37,7 @@ public class CloseStatus {
     /**
      * Create a new {@link CloseStatus} instance.
      *
-     * @param code   the status code
+     * @param code the status code
      * @param reason the reason
      */
     public CloseStatus(int code, @Nullable String reason) {
