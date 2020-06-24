@@ -100,7 +100,8 @@ public final class GuildBean extends BaseGuildBean {
         this.large = large;
     }
 
-    public int getPremiumSubscriptionsCount() {
+    @Nullable
+    public Integer getPremiumSubscriptionsCount() {
         return premiumSubscriptionsCount;
     }
 
