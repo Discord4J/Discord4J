@@ -37,7 +37,7 @@ public class CloseStatus {
     /**
      * Create a new {@link CloseStatus} instance.
      *
-     * @param code the status code
+     * @param code   the status code
      * @param reason the reason
      */
     public CloseStatus(int code, @Nullable String reason) {
@@ -60,7 +60,14 @@ public class CloseStatus {
      * @return an {@link Optional} containing a close reason if present, or empty otherwise
      */
     public Optional<String> getReason() {
-        return Optional.ofNullable(reason);
+        if (reason != null) {
+            if (reason.equals(""))
+                return Optional.empty();
+
+            return Optional.of(reason);
+        }
+
+        return Optional.empty();
     }
 
     @Override
