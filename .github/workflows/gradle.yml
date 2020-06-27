@@ -18,6 +18,8 @@ jobs:
         java: [ 8, 11 ]
     steps:
       - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
       - uses: actions/cache@v1
         with:
           path: ~/.gradle/caches
