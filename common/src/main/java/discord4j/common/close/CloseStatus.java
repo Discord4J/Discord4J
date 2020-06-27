@@ -60,7 +60,7 @@ public class CloseStatus {
      * @return an {@link Optional} containing a close reason if present, or empty otherwise
      */
     public Optional<String> getReason() {
-        return Optional.ofNullable(reason);
+        return Optional.ofNullable(reason).filter(r -> !r.isEmpty());
     }
 
     @Override
