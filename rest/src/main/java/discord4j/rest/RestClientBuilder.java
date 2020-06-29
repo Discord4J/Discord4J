@@ -19,6 +19,7 @@ package discord4j.rest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import discord4j.common.JacksonResources;
 import discord4j.common.ReactorResources;
+import discord4j.discordjson.json.AllowedMentionsData;
 import discord4j.rest.http.ExchangeStrategies;
 import discord4j.rest.request.*;
 import discord4j.rest.response.ResponseFunction;
@@ -26,12 +27,10 @@ import discord4j.rest.route.Route;
 import reactor.core.publisher.EmitterProcessor;
 import reactor.core.publisher.FluxSink;
 import reactor.netty.http.client.HttpClient;
+import reactor.util.annotation.Nullable;
 
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -50,6 +49,8 @@ public class RestClientBuilder<C, O extends RouterOptions> {
     protected List<ResponseFunction> responseTransformers = new ArrayList<>();
     protected GlobalRateLimiter globalRateLimiter;
     protected RequestQueueFactory requestQueueFactory;
+    @Nullable
+    protected AllowedMentionsData allowedMentionsData;
 
     /**
      * Initialize a new builder with the given token.
@@ -95,6 +96,11 @@ public class RestClientBuilder<C, O extends RouterOptions> {
      */
     public <O2 extends RouterOptions> RestClientBuilder<C, O2> setExtraOptions(Function<? super O, O2> optionsModifier) {
         return new RestClientBuilder<>(this, this.clientFactory, this.optionsModifier.andThen(optionsModifier));
+    }
+
+    public RestClientBuilder<C, O> setDefaultAllowedMentions(final AllowedMentionsData allowedMentionsData) {
+        this.allowedMentionsData = allowedMentionsData;
+        return this;
     }
 
     /**
@@ -228,7 +234,7 @@ public class RestClientBuilder<C, O extends RouterOptions> {
         O options = buildOptions(reactor, jackson);
         Router router = routerFactory.apply(options);
         Config config = new Config(token, reactor, jackson, initExchangeStrategies(jackson),
-                Collections.unmodifiableList(responseTransformers), globalRateLimiter, router);
+                Collections.unmodifiableList(responseTransformers), globalRateLimiter, router, allowedMentionsData);
         return clientFactory.apply(config);
     }
 
@@ -282,10 +288,12 @@ public class RestClientBuilder<C, O extends RouterOptions> {
         private final List<ResponseFunction> responseTransformers;
         private final GlobalRateLimiter globalRateLimiter;
         private final Router router;
+        @Nullable
+        private final AllowedMentionsData allowedMentions;
 
         public Config(String token, ReactorResources reactorResources, JacksonResources jacksonResources,
                       ExchangeStrategies exchangeStrategies, List<ResponseFunction> responseTransformers,
-                      GlobalRateLimiter globalRateLimiter, Router router) {
+                      GlobalRateLimiter globalRateLimiter, Router router, @Nullable AllowedMentionsData allowedMentionsData) {
             this.token = token;
             this.reactorResources = reactorResources;
             this.jacksonResources = jacksonResources;
@@ -293,6 +301,7 @@ public class RestClientBuilder<C, O extends RouterOptions> {
             this.responseTransformers = responseTransformers;
             this.globalRateLimiter = globalRateLimiter;
             this.router = router;
+            this.allowedMentions = allowedMentionsData;
         }
 
         public String getToken() {
@@ -321,6 +330,10 @@ public class RestClientBuilder<C, O extends RouterOptions> {
 
         public Router getRouter() {
             return router;
+        }
+
+        public Optional<AllowedMentionsData> getAllowedMentions() {
+            return Optional.ofNullable(allowedMentions);
         }
     }
 }

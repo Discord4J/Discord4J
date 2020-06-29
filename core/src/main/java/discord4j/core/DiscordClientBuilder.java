@@ -17,12 +17,14 @@
 package discord4j.core;
 
 import discord4j.common.GitProperties;
+import discord4j.core.object.entity.channel.AllowedMentions;
 import discord4j.rest.RestClientBuilder;
 import discord4j.rest.request.DefaultRouter;
 import discord4j.rest.request.Router;
 import discord4j.rest.request.RouterOptions;
 import reactor.util.Logger;
 import reactor.util.Loggers;
+import reactor.util.annotation.Nullable;
 
 import java.util.Properties;
 import java.util.function.Function;
@@ -42,7 +44,7 @@ public final class DiscordClientBuilder<C, O extends RouterOptions> extends Rest
     public static DiscordClientBuilder<DiscordClient, RouterOptions> create(String token) {
         Function<Config, DiscordClient> clientFactory = config -> {
             CoreResources coreResources = new CoreResources(config.getToken(), config.getReactorResources(),
-                    config.getJacksonResources(), config.getRouter());
+                    config.getJacksonResources(), config.getRouter(), config.getAllowedMentions().orElse(null));
             Properties properties = GitProperties.getProperties();
             String url = properties.getProperty(GitProperties.APPLICATION_URL, "https://discord4j.com");
             String name = properties.getProperty(GitProperties.APPLICATION_NAME, "Discord4J");

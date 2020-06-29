@@ -52,7 +52,12 @@ public class MessageCreateSpec implements Spec<MultipartRequest> {
     private boolean tts;
     private EmbedData embed;
     private List<Tuple2<String, InputStream>> files;
+    @Nullable
     private AllowedMentionsData allowedMentionsData;
+
+    public MessageCreateSpec(@Nullable AllowedMentionsData allowedMentionsData) {
+        this.allowedMentionsData = allowedMentionsData;
+    }
 
     /**
      * Sets the created {@link Message} contents, up to 2000 characters.

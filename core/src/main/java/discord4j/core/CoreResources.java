@@ -19,14 +19,22 @@ package discord4j.core;
 
 import discord4j.common.JacksonResources;
 import discord4j.common.ReactorResources;
+import discord4j.core.object.entity.channel.AllowedMentions;
+import discord4j.discordjson.json.AllowedMentionsData;
 import discord4j.rest.RestResources;
 import discord4j.rest.request.Router;
+import reactor.util.annotation.Nullable;
+
+import java.util.Optional;
 
 /**
  * A set of resources required to build {@link DiscordClient} instances and are used for core Discord4J operations
  * like entity manipulation and API communication.
  */
 public class CoreResources extends RestResources {
+
+    @Nullable
+    private final AllowedMentionsData allowedMentionsData;
 
     /**
      * Create a {@link CoreResources} instance with the given resources.
@@ -35,9 +43,20 @@ public class CoreResources extends RestResources {
      * @param reactorResources Reactor resources to establish connections and schedule tasks
      * @param jacksonResources Jackson data-binding resources to map objects
      * @param router a connector to perform requests against Discord API
+     * @param allowedMentionsData the default {@link AllowedMentionsData} value to use when creating messages
      */
     public CoreResources(String token, ReactorResources reactorResources, JacksonResources jacksonResources,
-                         Router router) {
+                         Router router, @Nullable AllowedMentionsData allowedMentionsData) {
         super(token, reactorResources, jacksonResources, router);
+        this.allowedMentionsData = allowedMentionsData;
+    }
+
+    /**
+     * Get the default AllowedMentions value used when creating messages
+     *
+     * @return Returns the default {@link AllowedMentions} value
+     */
+    public Optional<AllowedMentionsData> getAllowedMentionsData() {
+        return Optional.ofNullable(allowedMentionsData);
     }
 }
