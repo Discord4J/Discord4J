@@ -38,8 +38,10 @@ public class JacksonResources {
      * A mapper of {@link ObjectMapper} with all the required options for Discord4J operations.
      */
     public static final Function<ObjectMapper, ObjectMapper> INITIALIZER = mapper -> mapper
-            .setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
-            .registerModules(new PossibleModule(), new Jdk8Module())
+            .registerModule(new PossibleModule())
+            .registerModule(new Jdk8Module())
+            .setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE)
+            .setVisibility(PropertyAccessor.GETTER, JsonAutoDetect.Visibility.PUBLIC_ONLY)
             .setDefaultPropertyInclusion(JsonInclude.Value.construct(JsonInclude.Include.CUSTOM,
                     JsonInclude.Include.ALWAYS, PossibleFilter.class, null));
 
