@@ -17,7 +17,7 @@ jobs:
       matrix:
         java: [ 8, 11 ]
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
       - uses: actions/cache@v1
         with:
           path: ~/.gradle/caches
@@ -36,7 +36,9 @@ jobs:
     if: github.event_name != 'pull_request'
     needs: build
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
       - uses: actions/cache@v1
         with:
           path: ~/.gradle/caches
