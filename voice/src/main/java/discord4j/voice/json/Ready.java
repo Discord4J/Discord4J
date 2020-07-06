@@ -30,14 +30,26 @@ public class Ready extends VoiceGatewayPayload<Ready.Data> {
 
     public static class Data {
 
-        public int ssrc;
-        public String ip;
-        public int port;
+        private final int ssrc;
+        private final String ip;
+        private final int port;
 
         public Data(int ssrc, String ip, int port) {
             this.ssrc = ssrc;
             this.ip = ip;
             this.port = port;
+        }
+
+        public int getSsrc() {
+            return ssrc;
+        }
+
+        public String getIp() {
+            return ip;
+        }
+
+        public int getPort() {
+            return port;
         }
     }
 }

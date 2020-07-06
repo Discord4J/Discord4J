@@ -30,12 +30,20 @@ public class SessionDescription extends VoiceGatewayPayload<SessionDescription.D
 
     public static class Data {
 
-        public String mode;
-        public byte[] secretKey;
+        private final String mode;
+        private final byte[] secretKey;
 
         public Data(String mode, byte[] secretKey) {
             this.mode = mode;
             this.secretKey = secretKey;
+        }
+
+        public String getMode() {
+            return mode;
+        }
+
+        public byte[] getSecretKey() {
+            return secretKey;
         }
     }
 }

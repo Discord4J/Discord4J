@@ -190,7 +190,7 @@ public class DefaultVoiceGatewayClient {
                                 if (payload instanceof Hello) {
                                     stateChanges.next(VoiceConnection.State.CONNECTING);
                                     Hello hello = (Hello) payload;
-                                    Duration interval = Duration.ofMillis(hello.getData().heartbeatInterval);
+                                    Duration interval = Duration.ofMillis(hello.getData().getHeartbeatInterval());
                                     heartbeat.start(interval, interval);
                                     log.info(format(context, "Identifying"));
                                     outboundSink.next(new Identify(guildId.asString(), selfId.asString(), session.get(),
@@ -198,11 +198,11 @@ public class DefaultVoiceGatewayClient {
                                 } else if (payload instanceof Ready) {
                                     log.info(format(context, "Waiting for session description"));
                                     Ready ready = (Ready) payload;
-                                    ssrc = ready.getData().ssrc;
+                                    ssrc = ready.getData().getSsrc();
                                     cleanup.update(innerCleanup);
                                     innerCleanup.add(Mono.defer(() ->
-                                            voiceSocket.setup(ready.getData().ip, ready.getData().port))
-                                            .zipWith(voiceSocket.performIpDiscovery(ready.getData().ssrc))
+                                            voiceSocket.setup(ready.getData().getIp(), ready.getData().getPort()))
+                                            .zipWith(voiceSocket.performIpDiscovery(ready.getData().getSsrc()))
                                             .timeout(ipDiscoveryTimeout)
                                             .retryWhen(ipDiscoveryRetrySpec)
                                             .subscriberContext(context)
@@ -226,7 +226,7 @@ public class DefaultVoiceGatewayClient {
                                     stateChanges.next(VoiceConnection.State.CONNECTED);
                                     reconnectContext.reset();
                                     SessionDescription sessionDescription = (SessionDescription) payload;
-                                    byte[] secretKey = sessionDescription.getData().secretKey;
+                                    byte[] secretKey = sessionDescription.getData().getSecretKey();
                                     TweetNaclFast.SecretBox boxer = new TweetNaclFast.SecretBox(secretKey);
                                     PacketTransformer transformer = new PacketTransformer(ssrc, boxer);
                                     Consumer<Boolean> speakingSender = speaking ->

@@ -30,10 +30,14 @@ public class VoiceDisconnect extends VoiceGatewayPayload<VoiceDisconnect.Data> {
 
     public static class Data {
 
-        public final String userId;
+        private final String userId;
 
         public Data(String userId) {
             this.userId = userId;
+        }
+
+        public String getUserId() {
+            return userId;
         }
     }
 }

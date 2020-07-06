@@ -32,19 +32,35 @@ public class Identify extends VoiceGatewayPayload<Identify.Data> {
 
     public static class Data {
 
-        @JsonProperty("server_id")
-        public String serverId;
-        @JsonProperty("user_id")
-        public String userId;
-        @JsonProperty("session_id")
-        public String sessionId;
-        public String token;
+        private final String serverId;
+        private final String userId;
+        private final String sessionId;
+        private final String token;
 
         public Data(String serverId, String userId, String sessionId, String token) {
             this.serverId = serverId;
             this.userId = userId;
             this.sessionId = sessionId;
             this.token = token;
+        }
+
+        @JsonProperty("server_id")
+        public String getServerId() {
+            return serverId;
+        }
+
+        @JsonProperty("user_id")
+        public String getUserId() {
+            return userId;
+        }
+
+        @JsonProperty("session_id")
+        public String getSessionId() {
+            return sessionId;
+        }
+
+        public String getToken() {
+            return token;
         }
     }
 }

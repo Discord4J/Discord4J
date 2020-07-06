@@ -16,6 +16,8 @@
  */
 package discord4j.voice.json;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class SentSpeaking extends VoiceGatewayPayload<SentSpeaking.Data> {
 
     public SentSpeaking(boolean speaking, int delay, int ssrc) {
@@ -24,14 +26,27 @@ public class SentSpeaking extends VoiceGatewayPayload<SentSpeaking.Data> {
 
     public static class Data {
 
-        public boolean speaking;
-        public int delay;
-        public int ssrc;
+        private final boolean speaking;
+        private final int delay;
+        private final int ssrc;
 
         public Data(boolean speaking, int delay, int ssrc) {
             this.speaking = speaking;
             this.delay = delay;
             this.ssrc = ssrc;
+        }
+
+        @JsonProperty("speaking")
+        public boolean isSpeaking() {
+            return speaking;
+        }
+
+        public int getDelay() {
+            return delay;
+        }
+
+        public int getSsrc() {
+            return ssrc;
         }
     }
 }

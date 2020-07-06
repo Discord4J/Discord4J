@@ -32,16 +32,28 @@ public class Resume extends VoiceGatewayPayload<Resume.Data> {
 
     public static class Data {
 
-        @JsonProperty("server_id")
-        public String serverId;
-        @JsonProperty("session_id")
-        public String sessionId;
-        public String token;
+        private final String serverId;
+        private final String sessionId;
+        private final String token;
 
         public Data(String serverId, String sessionId, String token) {
             this.serverId = serverId;
             this.sessionId = sessionId;
             this.token = token;
+        }
+
+        @JsonProperty("server_id")
+        public String getServerId() {
+            return serverId;
+        }
+
+        @JsonProperty("session_id")
+        public String getSessionId() {
+            return sessionId;
+        }
+
+        public String getToken() {
+            return token;
         }
     }
 }

@@ -30,14 +30,26 @@ public class Speaking extends VoiceGatewayPayload<Speaking.Data> {
 
     public static class Data {
 
-        public final String userId;
-        public final int ssrc;
-        public final boolean speaking;
+        private final String userId;
+        private final int ssrc;
+        private final boolean speaking;
 
         Data(String userId, int ssrc, boolean speaking) {
             this.userId = userId;
             this.ssrc = ssrc;
             this.speaking = speaking;
+        }
+
+        public String getUserId() {
+            return userId;
+        }
+
+        public int getSsrc() {
+            return ssrc;
+        }
+
+        public boolean isSpeaking() {
+            return speaking;
         }
     }
 }

@@ -30,24 +30,44 @@ public class SelectProtocol extends VoiceGatewayPayload<SelectProtocol.Data> {
 
     public static class Data {
 
-        public String protocol;
-        public Inner data;
+        private final String protocol;
+        private final Inner data;
 
         public Data(String protocol, Inner data) {
             this.protocol = protocol;
             this.data = data;
         }
 
+        public String getProtocol() {
+            return protocol;
+        }
+
+        public Inner getData() {
+            return data;
+        }
+
         public static class Inner {
 
-            public String address;
-            public int port;
-            public String mode;
+            private final String address;
+            private final int port;
+            private final String mode;
 
             public Inner(String address, int port, String mode) {
                 this.address = address;
                 this.port = port;
                 this.mode = mode;
+            }
+
+            public String getAddress() {
+                return address;
+            }
+
+            public int getPort() {
+                return port;
+            }
+
+            public String getMode() {
+                return mode;
             }
         }
     }
