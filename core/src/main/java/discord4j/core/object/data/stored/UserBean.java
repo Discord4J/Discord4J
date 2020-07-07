@@ -33,7 +33,7 @@ public final class UserBean implements Serializable {
     @Nullable
     private String avatar;
     private boolean isBot;
-    private int publicFlags;
+    private Integer publicFlags;
 
     public UserBean(final UserResponse response) {
         id = response.getId();
@@ -41,7 +41,7 @@ public final class UserBean implements Serializable {
         discriminator = response.getDiscriminator();
         avatar = response.getAvatar();
         isBot = response.isBot() != null && response.isBot();
-        publicFlags = (response.getPublicFlags() != null) ? response.getPublicFlags() : 0;
+        publicFlags = response.getPublicFlags();
     }
 
     public UserBean(final UserBean toCopy) {
@@ -96,7 +96,8 @@ public final class UserBean implements Serializable {
         isBot = bot;
     }
 
-    public int getPublicFlags() {
+    @Nullable
+    public Integer getPublicFlags() {
         return publicFlags;
     }
 

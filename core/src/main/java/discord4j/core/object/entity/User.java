@@ -211,10 +211,10 @@ public class User implements Entity {
      * @return A {@code EnumSet} with the public flags of this user.
      */
     public EnumSet<User.PublicFlag> getPublicFlags() {
-        if (data.getPublicFlags() != 0) {
+        if (data.getPublicFlags() != null && data.getPublicFlags() != 0) {
             return User.PublicFlag.of(data.getPublicFlags());
         }
-        return EnumSet.of(PublicFlag.NONE);
+        return EnumSet.noneOf(PublicFlag.class);
     }
 
     /**
@@ -238,8 +238,6 @@ public class User implements Entity {
 
     /** Describes public flags of a user. */
     public enum PublicFlag {
-        NONE(-1),
-
         DISCORD_EMPLOYEE(0),
 
         DISCORD_PARTNER(1),
@@ -308,9 +306,6 @@ public class User implements Entity {
         public static EnumSet<User.PublicFlag> of(final int value) {
             final EnumSet<User.PublicFlag> userPublicFlags = EnumSet.noneOf(User.PublicFlag.class);
             for (User.PublicFlag flag : User.PublicFlag.values()) {
-                if(flag.equals(User.PublicFlag.NONE)) {
-                    continue;
-                }
                 long flagValue = flag.getFlag();
                 if ((flagValue & value) == flagValue) {
                     userPublicFlags.add(flag);
