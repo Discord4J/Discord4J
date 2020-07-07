@@ -19,6 +19,7 @@ package discord4j.common.json;
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import discord4j.common.jackson.UnsignedJson;
 import reactor.util.annotation.Nullable;
 
@@ -35,6 +36,9 @@ public class UserResponse {
     private String avatar;
     @Nullable
     private Boolean bot;
+    @JsonProperty("public_flags")
+    @Nullable
+    private Integer publicFlags;
 
     @JsonIgnore
     private Map<String, Object> additionalProperties;
@@ -59,6 +63,11 @@ public class UserResponse {
     @Nullable
     public Boolean isBot() {
         return bot;
+    }
+
+    @Nullable
+    public Integer getPublicFlags() {
+        return publicFlags;
     }
 
     private void checkAdditionalProperties() {
@@ -87,6 +96,7 @@ public class UserResponse {
                 ", discriminator='" + discriminator + '\'' +
                 ", avatar='" + avatar + '\'' +
                 ", bot=" + bot +
+                ", publicFlags=" + publicFlags +
                 ", additionalProperties=" + additionalProperties +
                 '}';
     }
