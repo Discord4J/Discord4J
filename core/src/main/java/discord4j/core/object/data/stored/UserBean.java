@@ -33,6 +33,7 @@ public final class UserBean implements Serializable {
     @Nullable
     private String avatar;
     private boolean isBot;
+    @Nullable
     private Integer publicFlags;
 
     public UserBean(final UserResponse response) {
