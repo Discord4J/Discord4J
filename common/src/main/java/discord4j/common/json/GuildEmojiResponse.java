@@ -35,6 +35,7 @@ public class GuildEmojiResponse {
     private boolean requireColons;
     private boolean managed;
     private boolean animated;
+    private boolean available;
 
     public long getId() {
         return id;
@@ -63,6 +64,10 @@ public class GuildEmojiResponse {
 
     public boolean isAnimated() {
         return animated;
+    }
+
+    public boolean isAvailable() {
+        return available;
     }
 
     @Override

@@ -33,6 +33,7 @@ public final class GuildEmojiBean implements Serializable {
     private boolean requireColons;
     private boolean managed;
     private boolean animated;
+    private boolean available;
 
     public GuildEmojiBean(final GuildEmojiResponse response) {
         id = response.getId();
@@ -41,6 +42,7 @@ public final class GuildEmojiBean implements Serializable {
         requireColons = response.isRequireColons();
         managed = response.isManaged();
         animated = response.isAnimated();
+        available = response.isAvailable();
     }
 
     public GuildEmojiBean() {}
@@ -91,6 +93,14 @@ public final class GuildEmojiBean implements Serializable {
 
     public void setAnimated(final boolean animated) {
         this.animated = animated;
+    }
+
+    public boolean isAvailable() {
+        return available;
+    }
+
+    public void setAvailable(final boolean available) {
+        this.available = available;
     }
 
     @Override
