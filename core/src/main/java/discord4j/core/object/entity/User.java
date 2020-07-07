@@ -210,11 +210,11 @@ public class User implements Entity {
      *
      * @return A {@code EnumSet} with the public flags of this user.
      */
-    public EnumSet<User.PublicFlag> getPublicFlags() {
+    public EnumSet<Flag> getPublicFlags() {
         if (data.getPublicFlags() != null && data.getPublicFlags() != 0) {
-            return User.PublicFlag.of(data.getPublicFlags());
+            return Flag.of(data.getPublicFlags());
         }
-        return EnumSet.noneOf(PublicFlag.class);
+        return EnumSet.noneOf(Flag.class);
     }
 
     /**
@@ -236,8 +236,8 @@ public class User implements Entity {
         return EntityUtil.hashCode(this);
     }
 
-    /** Describes public flags of a user. */
-    public enum PublicFlag {
+    /** Describes the flags of a user. */
+    public enum Flag {
         DISCORD_EMPLOYEE(0),
 
         DISCORD_PARTNER(1),
@@ -273,7 +273,7 @@ public class User implements Entity {
         /**
          * Constructs a {@code User.PublicFlag}.
          */
-        PublicFlag(final int value) {
+        Flag(final int value) {
             this.value = value;
             this.flag = 1 << value;
         }
@@ -297,21 +297,21 @@ public class User implements Entity {
         }
 
         /**
-         * Gets the public flags of user. It is guaranteed that invoking {@link #getValue()} from the returned enum will be
+         * Gets the flags of user. It is guaranteed that invoking {@link #getValue()} from the returned enum will be
          * equal ({@code ==}) to the supplied {@code value}.
          *
          * @param value The flags value as represented by Discord.
          * @return The {@link EnumSet} of flags.
          */
-        public static EnumSet<User.PublicFlag> of(final int value) {
-            final EnumSet<User.PublicFlag> userPublicFlags = EnumSet.noneOf(User.PublicFlag.class);
-            for (User.PublicFlag flag : User.PublicFlag.values()) {
+        public static EnumSet<Flag> of(final int value) {
+            final EnumSet<Flag> userFlags = EnumSet.noneOf(Flag.class);
+            for (Flag flag : Flag.values()) {
                 long flagValue = flag.getFlag();
                 if ((flagValue & value) == flagValue) {
-                    userPublicFlags.add(flag);
+                    userFlags.add(flag);
                 }
             }
-            return userPublicFlags;
+            return userFlags;
         }
     }
 
