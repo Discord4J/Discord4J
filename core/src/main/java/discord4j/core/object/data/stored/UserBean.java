@@ -102,7 +102,7 @@ public final class UserBean implements Serializable {
     }
 
     public void setPublicFlags(@Nullable Integer publicFlags) {
-        this.publicFlags = (publicFlags != null) ? publicFlags : 0;
+        this.publicFlags = publicFlags;
     }
 
     @Override
