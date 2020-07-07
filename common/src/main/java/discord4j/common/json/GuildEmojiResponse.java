@@ -80,6 +80,7 @@ public class GuildEmojiResponse {
                 ", requireColons=" + requireColons +
                 ", managed=" + managed +
                 ", animated=" + animated +
+                ", available=" + available +
                 '}';
     }
 }

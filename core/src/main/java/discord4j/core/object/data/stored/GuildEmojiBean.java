@@ -112,6 +112,7 @@ public final class GuildEmojiBean implements Serializable {
                 ", requireColons=" + requireColons +
                 ", managed=" + managed +
                 ", animated=" + animated +
+                ", available=" + available +
                 '}';
     }
 }
