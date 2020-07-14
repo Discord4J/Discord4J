@@ -27,27 +27,34 @@ import java.util.Collections;
 import java.util.List;
 
 public class MultipartRequest {
-
-    private final MessageCreateRequest createRequest;
+    @Nullable
+    private final Object jsonPayload;
     private final List<Tuple2<String, InputStream>> files;
 
-    public MultipartRequest(MessageCreateRequest createRequest) {
-        this(createRequest, Collections.emptyList());
+    public MultipartRequest(@Nullable Object jsonPayload) {
+        this(jsonPayload, Collections.emptyList());
     }
 
-    public MultipartRequest(MessageCreateRequest createRequest, String fileName, InputStream file) {
-        this(createRequest, Collections.singletonList(Tuples.of(fileName, file)));
+    public MultipartRequest(@Nullable Object jsonPayload, String fileName, InputStream file) {
+        this(jsonPayload, Collections.singletonList(Tuples.of(fileName, file)));
     }
 
-    public MultipartRequest(MessageCreateRequest createRequest, List<Tuple2<String, InputStream>> files) {
-        this.createRequest = createRequest;
+    public MultipartRequest(@Nullable Object jsonPayload, List<Tuple2<String, InputStream>> files) {
+        this.jsonPayload = jsonPayload;
         this.files = files;
     }
 
+    /**
+     * @deprecated Use {@link #getJsonPayload()} instead.
+     */
+    @Deprecated
     @Nullable
     public MessageCreateRequest getCreateRequest() {
-        return createRequest;
+        return (MessageCreateRequest) jsonPayload;
     }
+
+    @Nullable
+    public Object getJsonPayload() { return jsonPayload; }
 
     public List<Tuple2<String, InputStream>> getFiles() {
         return files;

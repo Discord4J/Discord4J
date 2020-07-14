@@ -16,7 +16,6 @@
  */
 package discord4j.rest.http;
 
-import discord4j.discordjson.json.MessageCreateRequest;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import discord4j.rest.util.MultipartRequest;
@@ -58,7 +57,7 @@ public class MultipartWriterStrategy implements WriterStrategy<MultipartRequest>
         if (body == null) {
             return Mono.empty(); // or .error() ?
         }
-        final MessageCreateRequest createRequest = body.getCreateRequest();
+        final Object createRequest = body.getJsonPayload();
         final List<Tuple2<String, InputStream>> files = body.getFiles();
         return Mono.fromCallable(() -> send.sendForm((request, form) -> {
             form.multipart(true);
