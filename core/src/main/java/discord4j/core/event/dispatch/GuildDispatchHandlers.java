@@ -459,7 +459,7 @@ class GuildDispatchHandlers {
                             .from(oldMember)
                             .nick(context.getDispatch().nick())
                             .roles(context.getDispatch().roles())
-                            .premiumSince(Possible.flatOpt(context.getDispatch().premiumSince()))
+                            .premiumSince(context.getDispatch().premiumSince())
                             .build();
 
                     return context.getStateHolder().getMemberStore()
