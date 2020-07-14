@@ -151,7 +151,7 @@ public class WebhookExecuteSpec implements Spec<MultipartRequest> {
                         .builder()
                         .content(content)
                         .username(username)
-                        .avatar_url(avatarUrl)
+                        .avatarUrl(avatarUrl)
                         .tts(tts)
                         .embeds(embeds == null ? Possible.absent() : Possible.of(embeds))
                         .allowedMentions(allowedMentions)
