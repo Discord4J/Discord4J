@@ -267,7 +267,7 @@ public class User implements Entity {
         private final int flag;
 
         /**
-         * Constructs a {@code User.PublicFlag}.
+         * Constructs a {@code User.Flag}.
          */
         Flag(final int value) {
             this.value = value;
