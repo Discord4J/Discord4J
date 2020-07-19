@@ -619,7 +619,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
         GatewayBootstrap<O> b = new GatewayBootstrap<>(this, this.optionsModifier);
         return b.shardingStrategy.getShardCount(b.client)
                 .flatMap(count -> {
-                    InvalidationStrategy invalidationStrategy = b.initInvalidationStrategy(count);
+                    InvalidationStrategy invalidationStrategy = b.initInvalidationStrategy();
                     Map<String, Object> hints = new LinkedHashMap<>();
                     hints.put("messageClass", MessageData.class);
                     StateHolder stateHolder = new StateHolder(b.initStoreService(invalidationStrategy),
@@ -787,7 +787,6 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                                     case DISCONNECTED:
                                         log.info(format(ctx, "Shard disconnected"));
                                         return shardCoordinator.publishDisconnected(shard, session)
-                                                .then(invalidationStrategy.invalidate(shard, stateHolder))
                                                 .then(Mono.fromRunnable(() -> clientGroup.remove(shard.getIndex())))
                                                 .then(shardCoordinator.getConnectedCount()
                                                         .filter(count -> count == 0)
@@ -796,7 +795,6 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                                                     log.warn(format(ctx, "Error while releasing resources"), t);
                                                     return Mono.empty();
                                                 });
-                                    case RETRY_STARTED:
                                     case RETRY_FAILED:
                                         log.debug(format(ctx, "Invalidating stores for shard"));
                                         return invalidationStrategy.invalidate(shard, stateHolder);
@@ -934,11 +932,11 @@ public class GatewayBootstrap<O extends GatewayOptions> {
         return DispatchEventMapper.emitEvents();
     }
 
-    private InvalidationStrategy initInvalidationStrategy(int shardCount) {
+    private InvalidationStrategy initInvalidationStrategy() {
         if (invalidationStrategy != null) {
             return invalidationStrategy;
         }
-        return shardCount == 1 ? InvalidationStrategy.identity() : InvalidationStrategy.disable();
+        return InvalidationStrategy.disable();
     }
 
     private Multimap<String, Object> getGatewayParameters() {
