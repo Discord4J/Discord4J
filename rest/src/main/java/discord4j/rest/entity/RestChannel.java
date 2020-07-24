@@ -23,15 +23,13 @@ import discord4j.rest.RestClient;
 import discord4j.rest.util.MultipartRequest;
 import discord4j.rest.util.PaginationUtil;
 import org.reactivestreams.Publisher;
+import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -222,37 +220,34 @@ public class RestChannel {
      * @see
      * <a href="https://discord.com/developers/docs/resources/channel#bulk-delete-messages">Bulk Delete Messages</a>
      */
-    public Flux<Snowflake> bulkDelete(Publisher<Snowflake> messageIds) {
+    public Flux<Snowflake> bulkDelete(final Publisher<Snowflake> messageIds) {
         final Instant timeLimit = Instant.now().minus(Duration.ofDays(14L));
-        final Collection<Snowflake> ignoredMessageIds = new ArrayList<>(0);
 
-        final Predicate<Snowflake> filterMessageId = messageId -> {
-            if (timeLimit.isAfter(messageId.getTimestamp())) { // REST accepts 2 week old IDs
-                ignoredMessageIds.add(messageId);
-                return false;
-            }
+        return Flux.create(sink -> {
+            final Disposable disposable = Flux.from(messageIds)
+                .distinct() // REST requires unique IDs
+                .filter(id -> { // REST requires IDs that are younger than 2 weeks
+                    final boolean ignored = timeLimit.isAfter(id.getTimestamp());
+                    if (ignored) {
+                        sink.next(id);
+                    }
 
-            return true;
-        };
+                    return !ignored;
+                }).map(Snowflake::asString)
+                .buffer(100) // REST requires N <= 100 IDs
+                .filter(chunk -> { // REST requires N >= 2 IDs
+                    final boolean ignored = chunk.size() == 1;
+                    if (ignored) {
+                        sink.next(Snowflake.of(chunk.get(0)));
+                    }
 
-        final Function<List<String>, Mono<Boolean>> filterMessageIdChunk = messageIdChunk ->
-                Mono.just(messageIdChunk.get(0)) // REST accepts 2 or more items
-                        .filter(ignore -> messageIdChunk.size() == 1)
-                        .flatMap(id -> restClient.getChannelService()
-                                .deleteMessage(this.id, Long.parseLong(id), null)
-                                .thenReturn(id))
-                        .hasElement()
-                        .map(identity -> !identity);
+                    return !ignored;
+                }).flatMap(chunk -> restClient.getChannelService()
+                    .bulkDeleteMessages(id, BulkDeleteRequest.builder().messages(chunk).build()))
+                .subscribe(null, sink::error, sink::complete, sink.currentContext());
 
-        return Flux.defer(() -> messageIds)
-                .distinct()
-                .filter(filterMessageId)
-                .map(Snowflake::asString)
-                .buffer(100) // REST accepts 100 IDs
-                .filterWhen(filterMessageIdChunk)
-                .flatMap(messageIdChunk -> restClient.getChannelService()
-                        .bulkDeleteMessages(id, BulkDeleteRequest.builder().messages(messageIdChunk).build()))
-                .thenMany(Flux.fromIterable(ignoredMessageIds));
+            sink.onDispose(disposable);
+        });
     }
 
     /**
