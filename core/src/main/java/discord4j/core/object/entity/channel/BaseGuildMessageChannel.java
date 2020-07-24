@@ -241,7 +241,7 @@ class BaseGuildMessageChannel extends BaseChannel implements GuildMessageChannel
 
         return Flux.create(sink -> {
             final Disposable disposable = Flux.from(messages)
-                .distinct(Message::getId) // REST requires unique IDs.
+                .distinct(message -> message.getId().asLong()) // REST requires unique IDs
                 .filter(message -> { // REST requires IDs that are younger than 2 weeks
                     final boolean ignored = timeLimit.isAfter(message.getId().getTimestamp());
                     if (ignored) {
@@ -249,7 +249,7 @@ class BaseGuildMessageChannel extends BaseChannel implements GuildMessageChannel
                     }
 
                     return !ignored;
-                }).buffer(100) // REST requires N <= IDs
+                }).buffer(100) // REST requires N <= 100 IDs
                 .filter(chunk -> { // REST requires N >= 2 IDs
                     final boolean ignored = chunk.size() == 1;
                     if (ignored) {

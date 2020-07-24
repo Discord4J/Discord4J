@@ -225,7 +225,7 @@ public class RestChannel {
 
         return Flux.create(sink -> {
             final Disposable disposable = Flux.from(messageIds)
-                .distinct() // REST requires unique IDs
+                .distinct(Snowflake::asLong) // REST requires unique IDs
                 .filter(id -> { // REST requires IDs that are younger than 2 weeks
                     final boolean ignored = timeLimit.isAfter(id.getTimestamp());
                     if (ignored) {
