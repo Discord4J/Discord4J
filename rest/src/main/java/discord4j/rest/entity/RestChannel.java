@@ -23,7 +23,6 @@ import discord4j.rest.RestClient;
 import discord4j.rest.util.MultipartRequest;
 import discord4j.rest.util.PaginationUtil;
 import org.reactivestreams.Publisher;
-import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
@@ -226,37 +225,33 @@ public class RestChannel {
     public Flux<Snowflake> bulkDelete(final Publisher<Snowflake> messageIds) {
         final Instant timeLimit = Instant.now().minus(Duration.ofDays(14L));
 
-        return Flux.create(sink -> {
-            final Disposable disposable = Flux.from(messageIds)
-                .distinct()
-                .buffer(100)
-                .flatMap(ids -> {
-                    final List<String> eligibleIds = new ArrayList<>(0);
-                    final Collection<Snowflake> ineligibleIds = new ArrayList<>(0);
+        return Flux.from(messageIds)
+            .distinct()
+            .buffer(100)
+            .flatMap(ids -> {
+                final List<String> eligibleIds = new ArrayList<>(0);
+                final Collection<Snowflake> ineligibleIds = new ArrayList<>(0);
 
-                    for (final Snowflake id : ids) {
-                        if (id.getTimestamp().isBefore(timeLimit)) {
-                            ineligibleIds.add(id);
+                for (final Snowflake id : ids) {
+                    if (id.getTimestamp().isBefore(timeLimit)) {
+                        ineligibleIds.add(id);
 
-                        } else {
-                            eligibleIds.add(id.asString());
-                        }
+                    } else {
+                        eligibleIds.add(id.asString());
                     }
+                }
 
-                    if (eligibleIds.size() == 1) {
-                        ineligibleIds.add(Snowflake.of(eligibleIds.get(0)));
-                        eligibleIds.clear();
-                    }
+                if (eligibleIds.size() == 1) {
+                    ineligibleIds.add(Snowflake.of(eligibleIds.get(0)));
+                    eligibleIds.clear();
+                }
 
-                    return Mono.just(eligibleIds)
-                        .filter(chunk -> !chunk.isEmpty())
-                        .flatMap(chunk -> restClient.getChannelService()
-                            .bulkDeleteMessages(id, BulkDeleteRequest.builder().messages(chunk).build()))
-                        .thenMany(Flux.fromIterable(ineligibleIds));
-                }).subscribe(sink::next, sink::error, sink::complete, sink.currentContext());
-
-            sink.onDispose(disposable);
-        });
+                return Mono.just(eligibleIds)
+                    .filter(chunk -> !chunk.isEmpty())
+                    .flatMap(chunk -> restClient.getChannelService()
+                        .bulkDeleteMessages(id, BulkDeleteRequest.builder().messages(chunk).build()))
+                    .thenMany(Flux.fromIterable(ineligibleIds));
+            });
     }
 
     /**

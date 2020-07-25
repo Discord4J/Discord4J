@@ -35,7 +35,6 @@ import discord4j.rest.util.Permission;
 import discord4j.rest.util.PermissionSet;
 import discord4j.common.util.Snowflake;
 import org.reactivestreams.Publisher;
-import reactor.core.Disposable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
@@ -239,43 +238,39 @@ class BaseGuildMessageChannel extends BaseChannel implements GuildMessageChannel
         //  bulkDelete, but no implementation has been found that can do so in a performant manner.
         final Instant timeLimit = Instant.now().minus(Duration.ofDays(14L));
 
-        return Flux.create(sink -> {
-            final Disposable disposable = Flux.from(messages)
-                .distinct(Message::getId)
-                .buffer(100)
-                .flatMap(allMessages -> {
-                    final List<Message> eligibleMessages = new ArrayList<>(0);
-                    final Collection<Message> ineligibleMessages = new ArrayList<>(0);
+        return Flux.from(messages)
+            .distinct(Message::getId)
+            .buffer(100)
+            .flatMap(allMessages -> {
+                final List<Message> eligibleMessages = new ArrayList<>(0);
+                final Collection<Message> ineligibleMessages = new ArrayList<>(0);
 
-                    for (final Message message : allMessages) {
-                        if (message.getId().getTimestamp().isBefore(timeLimit)) {
-                            ineligibleMessages.add(message);
+                for (final Message message : allMessages) {
+                    if (message.getId().getTimestamp().isBefore(timeLimit)) {
+                        ineligibleMessages.add(message);
 
-                        } else {
-                            eligibleMessages.add(message);
-                        }
+                    } else {
+                        eligibleMessages.add(message);
                     }
+                }
 
-                    if (eligibleMessages.size() == 1) {
-                        ineligibleMessages.add(eligibleMessages.get(0));
-                        eligibleMessages.clear();
-                    }
+                if (eligibleMessages.size() == 1) {
+                    ineligibleMessages.add(eligibleMessages.get(0));
+                    eligibleMessages.clear();
+                }
 
-                    final Collection<String> eligibleIds = eligibleMessages.stream()
-                        .map(Message::getId)
-                        .map(Snowflake::asString)
-                        .collect(Collectors.toList());
+                final Collection<String> eligibleIds = eligibleMessages.stream()
+                    .map(Message::getId)
+                    .map(Snowflake::asString)
+                    .collect(Collectors.toList());
 
-                    return Mono.just(eligibleIds)
-                        .filter(chunk -> !chunk.isEmpty())
-                        .flatMap(chunk -> getClient().getRestClient()
-                            .getChannelService()
-                            .bulkDeleteMessages(getId().asLong(), BulkDeleteRequest.builder().messages(chunk).build()))
-                        .thenMany(Flux.fromIterable(ineligibleMessages));
-                }).subscribe(sink::next, sink::error, sink::complete, sink.currentContext());
-
-            sink.onDispose(disposable);
-        });
+                return Mono.just(eligibleIds)
+                    .filter(chunk -> !chunk.isEmpty())
+                    .flatMap(chunk -> getClient().getRestClient()
+                        .getChannelService()
+                        .bulkDeleteMessages(getId().asLong(), BulkDeleteRequest.builder().messages(chunk).build()))
+                    .thenMany(Flux.fromIterable(ineligibleMessages));
+            });
     }
 
     /**
