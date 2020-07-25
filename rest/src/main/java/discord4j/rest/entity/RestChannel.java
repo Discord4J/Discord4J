@@ -30,6 +30,9 @@ import reactor.util.annotation.Nullable;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -225,26 +228,32 @@ public class RestChannel {
 
         return Flux.create(sink -> {
             final Disposable disposable = Flux.from(messageIds)
-                .distinct(Snowflake::asLong) // REST requires unique IDs
-                .filter(id -> { // REST requires IDs that are younger than 2 weeks
-                    final boolean ignored = timeLimit.isAfter(id.getTimestamp());
-                    if (ignored) {
-                        sink.next(id);
+                .distinct()
+                .buffer(100)
+                .flatMap(ids -> {
+                    final List<String> eligibleIds = new ArrayList<>(0);
+                    final Collection<Snowflake> ineligibleIds = new ArrayList<>(0);
+
+                    for (final Snowflake id : ids) {
+                        if (id.getTimestamp().isBefore(timeLimit)) {
+                            ineligibleIds.add(id);
+
+                        } else {
+                            eligibleIds.add(id.asString());
+                        }
                     }
 
-                    return !ignored;
-                }).map(Snowflake::asString)
-                .buffer(100) // REST requires N <= 100 IDs
-                .filter(chunk -> { // REST requires N >= 2 IDs
-                    final boolean ignored = chunk.size() == 1;
-                    if (ignored) {
-                        sink.next(Snowflake.of(chunk.get(0)));
+                    if (eligibleIds.size() == 1) {
+                        ineligibleIds.add(Snowflake.of(eligibleIds.get(0)));
+                        eligibleIds.clear();
                     }
 
-                    return !ignored;
-                }).flatMap(chunk -> restClient.getChannelService()
-                    .bulkDeleteMessages(id, BulkDeleteRequest.builder().messages(chunk).build()))
-                .subscribe(null, sink::error, sink::complete, sink.currentContext());
+                    return Mono.just(eligibleIds)
+                        .filter(chunk -> !chunk.isEmpty())
+                        .flatMap(chunk -> restClient.getChannelService()
+                            .bulkDeleteMessages(id, BulkDeleteRequest.builder().messages(chunk).build()))
+                        .thenMany(Flux.fromIterable(ineligibleIds));
+                }).subscribe(sink::next, sink::error, sink::complete, sink.currentContext());
 
             sink.onDispose(disposable);
         });

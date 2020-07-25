@@ -241,29 +241,38 @@ class BaseGuildMessageChannel extends BaseChannel implements GuildMessageChannel
 
         return Flux.create(sink -> {
             final Disposable disposable = Flux.from(messages)
-                .distinct(message -> message.getId().asLong()) // REST requires unique IDs
-                .filter(message -> { // REST requires IDs that are younger than 2 weeks
-                    final boolean ignored = timeLimit.isAfter(message.getId().getTimestamp());
-                    if (ignored) {
-                        sink.next(message);
+                .distinct(Message::getId)
+                .buffer(100)
+                .flatMap(allMessages -> {
+                    final List<Message> eligibleMessages = new ArrayList<>(0);
+                    final Collection<Message> ineligibleMessages = new ArrayList<>(0);
+
+                    for (final Message message : allMessages) {
+                        if (message.getId().getTimestamp().isBefore(timeLimit)) {
+                            ineligibleMessages.add(message);
+
+                        } else {
+                            eligibleMessages.add(message);
+                        }
                     }
 
-                    return !ignored;
-                }).buffer(100) // REST requires N <= 100 IDs
-                .filter(chunk -> { // REST requires N >= 2 IDs
-                    final boolean ignored = chunk.size() == 1;
-                    if (ignored) {
-                        sink.next(chunk.get(0));
+                    if (eligibleMessages.size() == 1) {
+                        ineligibleMessages.add(eligibleMessages.get(0));
+                        eligibleMessages.clear();
                     }
 
-                    return !ignored;
-                }).map(chunk -> chunk.stream()
-                    .map(Message::getId)
-                    .map(Snowflake::asString)
-                    .collect(Collectors.toList()))
-                .flatMap(chunk -> getClient().getRestClient().getChannelService()
-                    .bulkDeleteMessages(getId().asLong(), BulkDeleteRequest.builder().messages(chunk).build()))
-                .subscribe(null, sink::error, sink::complete, sink.currentContext());
+                    final Collection<String> eligibleIds = eligibleMessages.stream()
+                        .map(Message::getId)
+                        .map(Snowflake::asString)
+                        .collect(Collectors.toList());
+
+                    return Mono.just(eligibleIds)
+                        .filter(chunk -> !chunk.isEmpty())
+                        .flatMap(chunk -> getClient().getRestClient()
+                            .getChannelService()
+                            .bulkDeleteMessages(getId().asLong(), BulkDeleteRequest.builder().messages(chunk).build()))
+                        .thenMany(Flux.fromIterable(ineligibleMessages));
+                }).subscribe(sink::next, sink::error, sink::complete, sink.currentContext());
 
             sink.onDispose(disposable);
         });
