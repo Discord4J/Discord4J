@@ -18,6 +18,7 @@ package discord4j.core.object.entity.channel;
 
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Member;
+import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.Webhook;
 import discord4j.core.spec.WebhookCreateSpec;
 import discord4j.common.util.Snowflake;
@@ -39,12 +40,49 @@ public interface GuildMessageChannel extends CategorizableChannel, MessageChanne
 
     /**
      * Requests to bulk delete the supplied message IDs.
+     * <p>
+     * Typically this method is paired with a call from {@link #getMessagesBefore(Snowflake)} or
+     * {@link #getMessagesAfter(Snowflake)} to delete some or (potentially) all messages from a channel.
+     *
+     * <pre>
+     * {@code
+     * channel.getMessagesBefore(Snowflake.of(Instant.now()))
+     *     .take(420)
+     *     .map(Message::getId)
+     *     .transform(channel::bulkDelete)
+     * }
+     * </pre>
+     *
+     * If you have a {@code Publisher<Message>}, consider {@link #bulkDeleteMessages(Publisher)}.
      *
      * @param messageIds A {@link Publisher} to supply the message IDs to bulk delete.
      * @return A {@link Flux} that continually emits {@link Snowflake message IDs} that were <b>not</b> bulk deleted
      * (typically if the ID was older than 2 weeks). If an error is received, it is emitted through the {@code Flux}.
      */
-    Flux<Snowflake> bulkDelete(final Publisher<Snowflake> messageIds);
+    Flux<Snowflake> bulkDelete(Publisher<Snowflake> messageIds);
+
+    /**
+     * Requests to bulk delete the supplied messages.
+     * <p>
+     * Typically this method is paired with a call from {@link #getMessagesBefore(Snowflake)} or
+     * {@link #getMessagesAfter(Snowflake)} to delete some or (potentially) all messages from a channel.
+     *
+     * <pre>
+     * {@code
+     * channel.getMessagesBefore(Snowflake.of(Instant.now()))
+     *     .take(420)
+     *     .transform(channel::bulkDeleteMessages)
+     * }
+     * </pre>
+     *
+     * If you have a {@code Publisher<Snowflake>}, consider {@link #bulkDelete(Publisher)}.
+     *
+     * @param messages A {@link Publisher} to supply the messages to bulk delete.
+     * @return A {@link Flux} that continually emits {@link Message messages} that were <b>not</b> bulk deleted
+     * (typically if the message was older than 2 weeks). If an error is received, it is emitted through the
+     * {@code Flux}.
+     */
+    Flux<Message> bulkDeleteMessages(Publisher<Message> messages);
 
     /**
      * Requests to create a webhook.
