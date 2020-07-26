@@ -22,7 +22,7 @@ import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.VoiceState;
 import discord4j.core.object.presence.Presence;
 import discord4j.core.retriever.EntityRetrievalStrategy;
-import discord4j.core.spec.BanQuerySpec;
+import discord4j.core.spec.BanMono;
 import discord4j.core.spec.GuildMemberEditSpec;
 import discord4j.core.util.OrderUtil;
 import discord4j.core.util.PermissionUtil;
@@ -316,21 +316,23 @@ public final class Member extends User {
     }
 
     /**
-     * Requests to ban this user.
+     * Requests to ban this member.
+     * <p>
+     * The reason and number of days to delete the banned users' messages are configurable by the {@link BanMono}.
      *
-     * @param spec A {@link Consumer} that provides a "blank" {@link BanQuerySpec} to be operated on.
-     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating this user was banned. If an
-     * error is received, it is emitted through the {@code Mono}.
+     * <pre>
+     * {@code
+     * member.ban()
+     *     .withReason("rekt")
+     *     .withDeleteMessageDays(5)
+     * }
+     * </pre>
+     *
+     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the specified user was
+     * banned. If an error is received, it is emitted through the {@code Mono}.
      */
-    public Mono<Void> ban(final Consumer<? super BanQuerySpec> spec) {
-        return Mono.defer(
-                () -> {
-                    BanQuerySpec mutatedSpec = new BanQuerySpec();
-                    spec.accept(mutatedSpec);
-                    return getClient().getRestClient().getGuildService()
-                            .createGuildBan(getGuildId().asLong(), getId().asLong(), mutatedSpec.asRequest(),
-                                    mutatedSpec.getReason());
-                });
+    public BanMono ban() {
+        return new BanMono(getClient(), getGuildId().asLong(), getId().asLong());
     }
 
     /**

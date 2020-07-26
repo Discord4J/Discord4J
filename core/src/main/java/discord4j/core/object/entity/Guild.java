@@ -1130,21 +1130,23 @@ public final class Guild implements Entity {
 
     /**
      * Requests to ban the specified user.
+     * <p>
+     * The reason and number of days to delete the banned users' messages are configurable by the {@link BanMono}.
+     *
+     * <pre>
+     * {@code
+     * guild.ban(toBan)
+     *     .withReason("rekt")
+     *     .withDeleteMessageDays(5)
+     * }
+     * </pre>
      *
      * @param userId The ID of the user to ban.
-     * @param spec A {@link Consumer} that provides a "blank" {@link BanQuerySpec} to be operated on.
      * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the specified user was
      * banned. If an error is received, it is emitted through the {@code Mono}.
      */
-    public Mono<Void> ban(final Snowflake userId, final Consumer<? super BanQuerySpec> spec) {
-        return Mono.defer(
-                () -> {
-                    BanQuerySpec mutatedSpec = new BanQuerySpec();
-                    spec.accept(mutatedSpec);
-                    return gateway.getRestClient().getGuildService()
-                            .createGuildBan(getId().asLong(), userId.asLong(), mutatedSpec.asRequest(),
-                                    mutatedSpec.getReason());
-                });
+    public BanMono ban(final Snowflake userId) {
+        return new BanMono(getClient(), getId().asLong(), userId.asLong());
     }
 
     /**
