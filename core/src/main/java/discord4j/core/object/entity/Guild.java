@@ -1287,40 +1287,21 @@ public final class Guild implements Entity {
 
     /**
      * Requests to retrieve the audit log for this guild.
+     * <p>
+     * The entries to retrieve can be configured by the {@link AuditLogFlux}.
      *
-     * @return A {@link Flux} that continually emits entries for this guild's audit log. If an error is received, it is
-     * emitted through the {@code Flux}.
-     */
-    public Flux<AuditLogEntry> getAuditLog() {
-        return getAuditLog(ignored -> {});
-    }
-
-    /**
-     * Requests to retrieve the audit log for this guild.
+     * <pre>
+     * {@code
+     * guild.getAuditLog()
+     *     .withActionType(ActionType.MEMBER_BAN_ADD)
+     *     .take(20)
+     * }
+     * </pre>
      *
-     * @param spec A {@link Consumer} that provides a "blank" {@link AuditLogQuerySpec} to be operated on.
-     * @return A {@link Flux} that continually emits entries for this guild's audit log. If an error is received, it is
-     * emitted through the {@code Flux}.
+     * @return A {@link Flux} that continually emits entries for this guild's audit log.
      */
-    public Flux<AuditLogEntry> getAuditLog(final Consumer<? super AuditLogQuerySpec> spec) {
-        final Function<Map<String, Object>, Flux<AuditLogData>> makeRequest = params -> {
-            final AuditLogQuerySpec mutatedSpec = new AuditLogQuerySpec();
-            spec.accept(mutatedSpec);
-            params.putAll(mutatedSpec.asRequest());
-            return gateway.getRestClient().getAuditLogService()
-                    .getAuditLog(getId().asLong(), params)
-                    .flux();
-        };
-
-        final ToLongFunction<AuditLogData> getLastEntryId = response -> {
-            final List<AuditLogEntryData> entries = response.auditLogEntries();
-            return (entries.size() == 0) ? Long.MAX_VALUE :
-                    Snowflake.asLong(entries.get(entries.size() - 1).id());
-        };
-
-        return PaginationUtil.paginateBefore(makeRequest, getLastEntryId, Long.MAX_VALUE, 100)
-                .flatMap(log -> Flux.fromIterable(log.auditLogEntries())
-                        .map(data -> new AuditLogEntry(gateway, data)));
+    public AuditLogFlux getAuditLog() {
+        return new AuditLogFlux(gateway, getId().asLong());
     }
 
     /**
