@@ -28,6 +28,7 @@ import discord4j.common.util.Snowflake;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
 
+import java.util.EnumSet;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -218,6 +219,19 @@ public class User implements Entity {
                 .cast(PrivateChannel.class);
     }
 
+    /**
+     * Returns the public flags of this {@link User}, describing its features.
+     *
+     * @return A {@code EnumSet} with the public flags of this user.
+     */
+    public EnumSet<Flag> getPublicFlags() {
+        int publicFlags = data.publicFlags().toOptional().orElse(0);
+        if (publicFlags != 0) {
+            return Flag.of(publicFlags);
+        }
+        return EnumSet.noneOf(Flag.class);
+    }
+
     @Override
     public final boolean equals(@Nullable final Object obj) {
         return EntityUtil.equals(this, obj);
@@ -226,6 +240,85 @@ public class User implements Entity {
     @Override
     public final int hashCode() {
         return EntityUtil.hashCode(this);
+    }
+
+    /** Describes the flags of a user. */
+    public enum Flag {
+        DISCORD_EMPLOYEE(0),
+
+        DISCORD_PARTNER(1),
+
+        HYPESQUAD_EVENTS(2),
+
+        BUG_HUNTER_LEVEL_1(3),
+
+        HOUSE_BRAVERY(6),
+
+        HOUSE_BRILLIANCE(7),
+
+        HOUSE_BALANCE(8),
+
+        EARLY_SUPPORTER(9),
+
+        TEAM_USER(10),
+
+        SYSTEM(12),
+
+        BUG_HUNTER_LEVEL_2(14),
+
+        VERIFIED_BOT(16),
+
+        VERIFIED_BOT_DEVELOPER(17);
+
+        /** The underlying value as represented by Discord. */
+        private final int value;
+
+        /** The flag value as represented by Discord. */
+        private final int flag;
+
+        /**
+         * Constructs a {@code User.Flag}.
+         */
+        Flag(final int value) {
+            this.value = value;
+            this.flag = 1 << value;
+        }
+
+        /**
+         * Gets the underlying value as represented by Discord.
+         *
+         * @return The underlying value as represented by Discord.
+         */
+        public int getValue() {
+            return value;
+        }
+
+        /**
+         * Gets the flag value as represented by Discord.
+         *
+         * @return The flag value as represented by Discord.
+         */
+        public int getFlag() {
+            return flag;
+        }
+
+        /**
+         * Gets the flags of user. It is guaranteed that invoking {@link #getValue()} from the returned enum will be
+         * equal ({@code ==}) to the supplied {@code value}.
+         *
+         * @param value The flags value as represented by Discord.
+         * @return The {@link EnumSet} of flags.
+         */
+        public static EnumSet<Flag> of(final int value) {
+            final EnumSet<Flag> userFlags = EnumSet.noneOf(Flag.class);
+            for (Flag flag : Flag.values()) {
+                long flagValue = flag.getFlag();
+                if ((flagValue & value) == flagValue) {
+                    userFlags.add(flag);
+                }
+            }
+            return userFlags;
+        }
     }
 
     @Override

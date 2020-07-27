@@ -20,7 +20,7 @@ import discord4j.common.util.Snowflake;
 import discord4j.core.object.Embed;
 import discord4j.core.object.entity.Attachment;
 import discord4j.core.object.entity.Message;
-import discord4j.core.object.entity.channel.AllowedMentions;
+import discord4j.rest.util.AllowedMentions;
 import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.discordjson.json.AllowedMentionsData;
 import discord4j.discordjson.json.EmbedData;

@@ -168,6 +168,15 @@ public final class GuildEmoji implements Entity {
     }
 
     /**
+     * Gets whether this emoji is available for use.
+     *
+     * @return {@code true} if this emoji is available, {@code false} otherwise (due to loss of Server Boosts for example).
+     */
+    public boolean isAvailable() {
+        return data.available().get();
+    }
+
+    /**
      * Gets the ID of the guild this emoji is associated to.
      *
      * @return The ID of the guild this emoji is associated to.

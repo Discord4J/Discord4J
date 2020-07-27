@@ -56,8 +56,15 @@ public final class Presence {
     }
 
     /**
-     * Create a status update to display an online status along with a custom activity. Refer to
-     * {@link ActivityUpdateRequest#builder()} to create one.
+     * Create a status update to display an online status along with a custom activity.
+     * <p>
+     * Factories exist to build an {@link ActivityUpdateRequest} object for {@link StatusUpdate}:
+     * <ul>
+     *     <li>{@link Activity#listening(String)}</li>
+     *     <li>{@link Activity#playing(String)}</li>
+     *     <li>{@link Activity#streaming(String, String)}</li>
+     *     <li>{@link Activity#watching(String)}</li>
+     * </ul>
      *
      * @return a {@link StatusUpdate} for the ONLINE status
      */
@@ -85,8 +92,15 @@ public final class Presence {
     }
 
     /**
-     * Create a status update to display a do-not-disturb status along with a custom activity. Refer to
-     * {@link ActivityUpdateRequest#builder()} to create one.
+     * Create a status update to display a do-not-disturb status along with a custom activity.
+     * <p>
+     * Factories exist to build an {@link ActivityUpdateRequest} object for {@link StatusUpdate}:
+     * <ul>
+     *     <li>{@link Activity#listening(String)}</li>
+     *     <li>{@link Activity#playing(String)}</li>
+     *     <li>{@link Activity#streaming(String, String)}</li>
+     *     <li>{@link Activity#watching(String)}</li>
+     * </ul>
      *
      * @return a {@link StatusUpdate} for the DO_NOT_DISTURB status
      */
@@ -114,8 +128,15 @@ public final class Presence {
     }
 
     /**
-     * Create a status update to display an idle status along with a custom activity. Refer to
-     * {@link ActivityUpdateRequest#builder()} to create one.
+     * Create a status update to display an idle status along with a custom activity.
+     * <p>
+     * Factories exist to build an {@link ActivityUpdateRequest} object for {@link StatusUpdate}:
+     * <ul>
+     *     <li>{@link Activity#listening(String)}</li>
+     *     <li>{@link Activity#playing(String)}</li>
+     *     <li>{@link Activity#streaming(String, String)}</li>
+     *     <li>{@link Activity#watching(String)}</li>
+     * </ul>
      *
      * @return a {@link StatusUpdate} for the IDLE status
      */

@@ -213,6 +213,93 @@ public class RestChannel {
         return createMessage(MessageCreateRequest.builder().embed(embed).build());
     }
 
+    /*
+     * This is the tale of a woman who spent way too much time implementing this and, in the end, ~~it didn't even
+     * matter~~ it's only somewhat okay. This comment will go into lengthy detail on how the current implementation was
+     * derived and hopefully what we can expect out of Reactor in the future to make it better or even perfect.
+     *
+     * Bulk deleting for Discord is tricky. Discord itself has 3 limitations we need to work around; messages cannot be
+     * older than 2 weeks, you cannot bulk delete more than 100 messages, and you must supply 2 or more messages. In
+     * addition to these limitations, there are limitations the implementation needs to impose on itself. For one,
+     * messageIds cannot be cached as the source can be effectively infinite for large channels and cause a OOME. The
+     * second limitation is messageIds should not be subscribed multiple times (per subscription of bulkDelete) for the
+     * same reason and will likely hit rate limits due to the sheer amount of message fetching if the source is coming
+     * from a getMessagesBefore or getMessagesAfter call (the most common use case for this method).
+     *
+     * With these limitations in mind our options become rather limited. Let's also add that our goal is to be
+     * "efficient" which we will define as doing the least amount of bulk delete requests as possible and to be
+     * "accurate" which means every eligible message for bulk delete is bulk deleted. Let's consider the options
+     * I have thought of and explain why they won't work.
+     *
+     * The original implementation of this method was the most "efficient" and "accurate". What it did was iterate
+     * through messageIds and put all ineligible ones into some Collection then buffer the eligible ones up to 100 then
+     * bulk deleted them. After iterating through all messageIds the outstanding buffer is bulk deleted (if there was a
+     * collection of 1 left over it was put into ineligible) then it would send out all the ineligible IDs at once. We
+     * are "efficient" by only doing requests once we've filled our buffers and we are "accurate" in that no eligible
+     * message was counted as ineligible.
+     *
+     * Splendid!...so why was it changed? Well, the big problem comes from that external Collection. For one, because of
+     * how it was setup the insertion wasn't (and couldn't be) done in a thread-safe manner. For List implementations
+     * there is no real efficient way to guarantee memory-safety except for copying (CopyOnWriteArrayList, way too much
+     * memory and costly performance wise) or synchronizing (which is introducing blocking locks in a reactive
+     * environment). The second problem is a lot more damning, for large channels it would OOME. Since for any long-term
+     * channel most messages will be older than 2 weeks, so the vast majority of IDs will be put into that Collection.
+     * If the source is from an unbounded getMessagesBefore, for example, then for any sufficiently large channel the
+     * bot would certainly OOME with no real obvious reason. With these two limitations, this was scraped.
+     *
+     * The second implementation is almost like the first, but with a small tweak. Instead of a Collection that would
+     * hold ineligible IDs and dump them in the end, it was a sink so as ineligible IDs are found they are just
+     * immediately sent downstream. Cool! We just solved both of the previous problems at once! But then a new problem
+     * arrived, early termination of the chain and thus dropping buffered eligible IDs. Take the following:
+     *
+     * channel.getMessagesBefore(Snowflake.of(Instant.now()))
+     *     .map(Message::getId)
+     *     .transform(channel::bulkDelete)
+     *     .take(100)
+     *
+     * The snippet says "keep bulk deleting messages until 100 ineligible messages arrive". Let us assume the channel
+     * has 23 eligible messages but has many thousands of ineligible ones. In the implementation I described what would
+     * happen is we buffer up the 23 eligible messages, but then we start sending ineligible ones downstream. Once we
+     * sent 100, the chain is rightfully cancelled and the buffer just...goes away. We never even bulk deleted! Because
+     * once the chain is cancelled you cannot follow it up with another reactive action (the bulk delete) as that
+     * doesn't make sense. Now let's say you have 123 eligible messages, you get 100 bulk deleted correctly, but then
+     * drop the remaining 23...one can see how this would be incredibly annoying for the end-user. They wouldn't even
+     * come back through the Flux! They are just lost...forever.
+     *
+     * Which leads us to this implementation. Instead of buffering up only eligible IDs instead let's buffer *all* IDs.
+     * Once you have a buffer, separate out the eligible ones from the ineligible, do a bulk delete, then send out the
+     * ineligible ones. This implementation...works. But it's not the most "accurate" nor "efficient" theoretical way to
+     * do this. Let's go into detail why.
+     *
+     * For the earlier snippet this implementation is perfectly "efficient" and "accurate". Since the messages are
+     * ordered (reverse chronologically) all eligible IDs are grouped at once and thus bulk deleted as expected. The
+     * rest are sent downstream to be terminated early with little memory penalty. Perfect, and for most users, the use
+     * case of using this with a getMessagesBefore is the most common one.
+     *
+     * For getMessagesAfter it is "efficient", but not really "accurate", but it's only "inaccurate" for a very fringe
+     * case. Consider having 152 messages and the first 99 are ineligible, and the rest are eligible. What will happen
+     * is the 100th message in the buffer, seeing as it's only 1 message, will be counted as ineligible, when it could
+     * have, optimally, been put with the other 51 messages in the next chunk and be bulk deleted. However, the
+     * implementation is still "efficient" as bulk deleted messages will be grouped together (just at the end rather
+     * than the start).
+     *
+     * For random cases, yeah, the "accuracy" and "efficiency" will be all over the place. Assuming even distribution of
+     * 50 ineligible messages and 50 eligible messages per buffer then our "efficiency" is twice as worse than it could
+     * be (doing bulk deletes in sets of 50s instead of 100s). And because eligible messages are not grouped, there can
+     * be many cases of lone eligible messages in buffers that will then be counted as ineligible. That said, the chance
+     * of the source of messageIds being completely random is a rather fringe case, and the API *does* work as it is
+     * stated in the documentation. So I think despite these potential problems, this is acceptable behavior given our
+     * goals and many limitations.
+     *
+     * So how could this all be improved? If simply there was an operation in Reactor where for some buffer operation,
+     * if a cancellation happened, whatever is in the buffer is sent out in some capacity and can be worked on in some
+     * reactive manner. We could then go back to the second implementation of this method and be perfectly "efficient"
+     * and "accurate" with no consequences.
+     *
+     * And that's it. Wow that was long. Hope you all enjoyed that needlessly large explanation of my rationale that
+     * very few will likely read. Oh well. Hope you enjoy fixing this mess. -Dannie
+     */
+
     /**
      * Request to bulk delete the supplied message IDs.
      *
@@ -222,37 +309,36 @@ public class RestChannel {
      * @see
      * <a href="https://discord.com/developers/docs/resources/channel#bulk-delete-messages">Bulk Delete Messages</a>
      */
-    public Flux<Snowflake> bulkDelete(Publisher<Snowflake> messageIds) {
+    public Flux<Snowflake> bulkDelete(final Publisher<Snowflake> messageIds) {
         final Instant timeLimit = Instant.now().minus(Duration.ofDays(14L));
-        final Collection<Snowflake> ignoredMessageIds = new ArrayList<>(0);
 
-        final Predicate<Snowflake> filterMessageId = messageId -> {
-            if (timeLimit.isAfter(messageId.getTimestamp())) { // REST accepts 2 week old IDs
-                ignoredMessageIds.add(messageId);
-                return false;
-            }
+        return Flux.from(messageIds)
+            .distinct()
+            .buffer(100)
+            .flatMap(ids -> {
+                final List<String> eligibleIds = new ArrayList<>(0);
+                final Collection<Snowflake> ineligibleIds = new ArrayList<>(0);
 
-            return true;
-        };
+                for (final Snowflake id : ids) {
+                    if (id.getTimestamp().isBefore(timeLimit)) {
+                        ineligibleIds.add(id);
 
-        final Function<List<String>, Mono<Boolean>> filterMessageIdChunk = messageIdChunk ->
-                Mono.just(messageIdChunk.get(0)) // REST accepts 2 or more items
-                        .filter(ignore -> messageIdChunk.size() == 1)
-                        .flatMap(id -> restClient.getChannelService()
-                                .deleteMessage(this.id, Long.parseLong(id), null)
-                                .thenReturn(id))
-                        .hasElement()
-                        .map(identity -> !identity);
+                    } else {
+                        eligibleIds.add(id.asString());
+                    }
+                }
 
-        return Flux.defer(() -> messageIds)
-                .distinct()
-                .filter(filterMessageId)
-                .map(Snowflake::asString)
-                .buffer(100) // REST accepts 100 IDs
-                .filterWhen(filterMessageIdChunk)
-                .flatMap(messageIdChunk -> restClient.getChannelService()
-                        .bulkDeleteMessages(id, BulkDeleteRequest.builder().messages(messageIdChunk).build()))
-                .thenMany(Flux.fromIterable(ignoredMessageIds));
+                if (eligibleIds.size() == 1) {
+                    ineligibleIds.add(Snowflake.of(eligibleIds.get(0)));
+                    eligibleIds.clear();
+                }
+
+                return Mono.just(eligibleIds)
+                    .filter(chunk -> !chunk.isEmpty())
+                    .flatMap(chunk -> restClient.getChannelService()
+                        .bulkDeleteMessages(id, BulkDeleteRequest.builder().messages(chunk).build()))
+                    .thenMany(Flux.fromIterable(ineligibleIds));
+            });
     }
 
     /**

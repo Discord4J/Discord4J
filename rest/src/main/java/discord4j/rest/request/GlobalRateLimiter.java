@@ -17,6 +17,7 @@
 
 package discord4j.rest.request;
 
+import discord4j.rest.RestClient;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -35,6 +36,16 @@ import java.time.Duration;
  * duration a resource holder must wait before processing starts.
  */
 public interface GlobalRateLimiter {
+
+    /**
+     * Create a default limiter based off {@link BucketGlobalRateLimiter} that can be shared across multiple
+     * {@link RestClient} for coordinated global rate limit actions.
+     *
+     * @return a default {@link GlobalRateLimiter}
+     */
+    static GlobalRateLimiter create() {
+        return BucketGlobalRateLimiter.create();
+    }
 
     /**
      * Sets a new rate limit that will be applied to every operation performed using {@link #withLimiter(Publisher)}.

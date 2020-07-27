@@ -164,7 +164,7 @@ public final class Member extends User {
      * @return When the user started boosting the server, if present.
      */
     public Optional<Instant> getPremiumTime() {
-        return data.premiumSince()
+        return Possible.flatOpt(data.premiumSince())
                 .map(timestamp -> DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(timestamp, Instant::from));
     }
 
