@@ -52,9 +52,10 @@ public class ExampleWebhook {
                 .block();
 
         assert gateway != null;
+
         gateway.getWebhookById(webhookId)
                 .flatMap(webhook -> webhook.execute(spec -> {
-                    spec.setContent("hello from a sneaky webhook.");
+                    spec.setContent("A webhook can upload multiple files.");
                     try {
                         spec.addFile("first file.txt", new FileInputStream(file1));
                         spec.addFile("second file.png", new FileInputStream(file2));
@@ -73,11 +74,11 @@ public class ExampleWebhook {
         gateway.getWebhookById(
                 webhookId
         ).flatMap(webhook -> webhook.execute(spec -> {
-            spec.setContent("hello from a sneaky webhook.");
+            spec.setContent("A webhook can create several embeds.");
             for (int i = 0; i < 10; i++) {
-                int j = i;
+                final int finalI = i;
                 spec.addEmbed(embed ->
-                        embed.setDescription("I can create a lot of embeds at once too. #" + (j + 1))
+                        embed.setDescription("I can create a lot of embeds at once too. #" + (finalI + 1))
                 );
             }
         })).block();
@@ -85,11 +86,11 @@ public class ExampleWebhook {
 
         gateway.getChannelById(webhookChannel)
                 .flatMap(channel -> ((TextChannel) channel).createWebhook(webhook ->
-                        webhook.setReason("testing").setName("A testy boi")))
+                        webhook.setReason("testing").setName("A webhook for testing")))
                 .flatMap(hook -> hook.executeAndWait(spec ->
-                        spec.setContent("you can execute webhook after you create them.")
+                        spec.setContent("you can execute webhooks after you create them.")
                 ).thenReturn(hook))
-                .flatMap(hook -> hook.delete("good bye"))
+                .flatMap(hook -> hook.delete("deleting test webhook"))
                 .block();
     }
 }
