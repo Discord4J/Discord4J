@@ -197,8 +197,8 @@ public class GatewayDiscordClient implements EntityRetriever {
     }
 
     /**
-     * Requests to retrieve the webhook represented by the supplied ID. The return webhook is populated with its token
-     * if the bot has the MANAGE_WEBHOOKS permission.
+     * Requests to retrieve the webhook represented by the supplied ID. The bot must have the MANAGE_WEBHOOKS
+     * permission in the webhook's channel.
      *
      * @param webhookId The ID of the webhook.
      * @return A {@link Mono} where, upon successful completion, emits the {@link Webhook} as represented by the
@@ -212,8 +212,7 @@ public class GatewayDiscordClient implements EntityRetriever {
 
     /**
      * Requests to retrieve the webhook represented by the supplied ID and token. Doesn't
-     * return the user in the webhook object. Doesn't require the bot to share a channel with the webhook.
-     * The webhook is populated with the token.
+     * return the user who created the webhook object. Doesn't require the bot to have the MANAGE_WEBHOOKS permission.
      *
      * @param webhookId The ID of the webhook.
      * @param token The authentication token of the webhook.

@@ -78,12 +78,11 @@ public class WebhookService extends RestService {
     public Mono<WebhookData> modifyWebhookWithToken(
             long webhookId,
             String token,
-            WebhookModifyRequest request,
-            @Nullable String reason
+            WebhookModifyRequest request
     ) {
+        // The reason is ignored when updating a webhook using the token.
         return Routes.WEBHOOK_TOKEN_MODIFY.newRequest(webhookId, token)
                 .body(request)
-                .optionalHeader("X-Audit-Log-Reason", reason)
                 .exchange(getRouter())
                 .bodyToMono(WebhookData.class);
     }
@@ -95,9 +94,9 @@ public class WebhookService extends RestService {
                 .bodyToMono(Void.class);
     }
 
-    public Mono<Void> deleteWebhookWithToken(long webhookId, String token, @Nullable String reason) {
+    public Mono<Void> deleteWebhookWithToken(long webhookId, String token) {
+        // The reason is ignored when deleting a webhook using the token.
         return Routes.WEBHOOK_TOKEN_DELETE.newRequest(webhookId, token)
-                .optionalHeader("X-Audit-Log-Reason", reason)
                 .exchange(getRouter())
                 .bodyToMono(Void.class);
     }

@@ -65,6 +65,46 @@ public final class Webhook implements Entity {
         return Snowflake.of(data.id());
     }
 
+    public enum Type {
+        /**
+         * Incoming Webhooks can post messages to channels with a generated token
+         */
+        Incoming(1),
+        /**
+         * Channel Follower Webhooks are internal webhooks used with Channel Following
+         * to post new messages into channels
+         */
+        ChannelFollower(2);
+
+        private final int value;
+
+        Type(int value) {this.value = value;}
+
+        public int getValue() {
+            return value;
+        }
+
+        public static Type fromValue(int value) {
+            switch (value) {
+                case 1:
+                    return Type.Incoming;
+                case 2:
+                    return Type.ChannelFollower;
+                default:
+                    throw new IllegalArgumentException("Unexpected webhook type.");
+            }
+        }
+    }
+
+    /**
+     * Gets the type of this webhook.
+     *
+     * @return The type of this webhook.
+     */
+    public Type getType() {
+        return Type.fromValue(data.type());
+    }
+
     /**
      * Gets the ID of the guild this webhook is associated to.
      *
@@ -129,11 +169,12 @@ public final class Webhook implements Entity {
 
     /**
      * Gets the ID of the user this webhook was created by.
+     * Returns no creator id if the webhook was retrieved using a token.
      *
      * @return The ID of the user this webhook was created by.
      */
-    public Snowflake getCreatorId() {
-        return Snowflake.of(data.user().get().id()); // TODO FIXME: really Possible?
+    public Optional<Snowflake> getCreatorId() {
+        return data.user().toOptional().map(user -> Snowflake.of(user.id()));
     }
 
     /**
@@ -143,7 +184,7 @@ public final class Webhook implements Entity {
      * by, if present. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<User> getCreator() {
-        return gateway.getUserById(getCreatorId());
+        return Mono.justOrEmpty(getCreatorId()).flatMap(gateway::getUserById);
     }
 
     /**
@@ -154,7 +195,7 @@ public final class Webhook implements Entity {
      * by, if present. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<User> getCreator(EntityRetrievalStrategy retrievalStrategy) {
-        return gateway.withRetrievalStrategy(retrievalStrategy).getUserById(getCreatorId());
+        return Mono.justOrEmpty(getCreatorId()).flatMap(id -> gateway.withRetrievalStrategy(retrievalStrategy).getUserById(id));
     }
 
     /**
@@ -176,7 +217,7 @@ public final class Webhook implements Entity {
     }
 
     /**
-     * Gets the secure token of this webhook.
+     * Gets the secure token of this webhook. The token is present for Incoming Webhooks.
      *
      * @return The secure token of this webhook.
      */
@@ -213,23 +254,12 @@ public final class Webhook implements Entity {
      * If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Void> deleteWithToken() {
-        return deleteWithToken(null);
-    }
-
-    /**
-     * Requests to delete this webhook while optionally specifying a reason.
-     *
-     * @param reason The reason, if present.
-     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the webhook has been deleted.
-     * If an error is received, it is emitted through the {@code Mono}.
-     */
-    public Mono<Void> deleteWithToken(@Nullable final String reason) {
         return Mono.defer(() -> {
             if (!getToken().isPresent()) {
                 throw new IllegalStateException("Missing token");
             }
             return gateway.getRestClient().getWebhookService()
-                    .deleteWebhookWithToken(getId().asLong(), getToken().get(), reason);
+                    .deleteWebhookWithToken(getId().asLong(), getToken().get());
         });
     }
 
@@ -253,6 +283,8 @@ public final class Webhook implements Entity {
 
     /**
      * Requests to edit this webhook.
+     * Does not require the MANAGE_WEBHOOKS permission.
+     * The channel and reason are ignored.
      *
      * @param spec A {@link Consumer} that provides a "blank" {@link WebhookEditSpec} to be operated on.
      * @return A {@link Mono} where, upon successful completion, emits the edited {@link Guild}. If an error is
@@ -262,12 +294,12 @@ public final class Webhook implements Entity {
         return Mono.defer(
                 () -> {
                     if (!getToken().isPresent()) {
-                        throw new IllegalStateException("Missing token");
+                        throw new IllegalStateException("Can't edit webhook.");
                     }
                     WebhookEditSpec mutatedSpec = new WebhookEditSpec();
                     spec.accept(mutatedSpec);
                     return gateway.getRestClient().getWebhookService()
-                            .modifyWebhookWithToken(getId().asLong(), getToken().get(), mutatedSpec.asRequest(), mutatedSpec.getReason());
+                            .modifyWebhookWithToken(getId().asLong(), getToken().get(), mutatedSpec.asRequest());
                 })
                 .map(data -> new Webhook(gateway, data));
     }
@@ -296,7 +328,7 @@ public final class Webhook implements Entity {
         return Mono.defer(
                 () -> {
                     if (!getToken().isPresent()) {
-                        throw new IllegalArgumentException("No token for the current webhook.");
+                        throw new IllegalArgumentException("Can't execute webhook.");
                     }
                     WebhookExecuteSpec mutatedSpec = new WebhookExecuteSpec();
                     spec.accept(mutatedSpec);

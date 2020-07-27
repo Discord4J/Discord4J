@@ -274,8 +274,7 @@ class BaseGuildMessageChannel extends BaseChannel implements GuildMessageChannel
     }
 
     /**
-     * Requests to create a webhook. Requires the MANAGE_WEBHOOKS permission. The returned webhook includes the
-     * token.
+     * Requests to create a webhook. Requires the MANAGE_WEBHOOKS permission.
      *
      * @param spec A {@link Consumer} that provides a "blank" {@link WebhookCreateSpec} to be operated on.
      * @return A {@link Mono} where, upon successful completion, emits the created {@link Webhook}. If an error
@@ -294,8 +293,7 @@ class BaseGuildMessageChannel extends BaseChannel implements GuildMessageChannel
     }
 
     /**
-     * Requests to retrieve the webhooks of the channel. Requires the MANAGE_WEBHOOKS permission. The returned
-     * webhook includes the token.
+     * Requests to retrieve the webhooks of the channel. Requires the MANAGE_WEBHOOKS permission.
      *
      * @return A {@link Flux} that continually emits the {@link Webhook webhooks} of the channel. If an error is
      * received, it is emitted through the {@code Flux}.

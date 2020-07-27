@@ -18,11 +18,11 @@
 package discord4j.core.spec;
 
 import discord4j.core.object.entity.Attachment;
-import discord4j.core.object.entity.channel.AllowedMentions;
 import discord4j.discordjson.json.AllowedMentionsData;
 import discord4j.discordjson.json.EmbedData;
 import discord4j.discordjson.json.WebhookExecuteRequest;
 import discord4j.discordjson.possible.Possible;
+import discord4j.rest.util.AllowedMentions;
 import discord4j.rest.util.MultipartRequest;
 import reactor.util.function.Tuple2;
 import reactor.util.function.Tuples;
