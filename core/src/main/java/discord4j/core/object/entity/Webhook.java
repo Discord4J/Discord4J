@@ -66,19 +66,22 @@ public final class Webhook implements Entity {
     }
 
     public enum Type {
+        UNKNOWN(-1),
         /**
          * Incoming Webhooks can post messages to channels with a generated token
          */
-        Incoming(1),
+        INCOMING(1),
         /**
          * Channel Follower Webhooks are internal webhooks used with Channel Following
          * to post new messages into channels
          */
-        ChannelFollower(2);
+        CHANNEL_FOLLOWER(2);
 
         private final int value;
 
-        Type(int value) {this.value = value;}
+        Type(int value) {
+            this.value = value;
+        }
 
         public int getValue() {
             return value;
@@ -87,11 +90,11 @@ public final class Webhook implements Entity {
         public static Type fromValue(int value) {
             switch (value) {
                 case 1:
-                    return Type.Incoming;
+                    return Type.INCOMING;
                 case 2:
-                    return Type.ChannelFollower;
+                    return Type.CHANNEL_FOLLOWER;
                 default:
-                    throw new IllegalArgumentException("Unexpected webhook type.");
+                    return Type.UNKNOWN;
             }
         }
     }
