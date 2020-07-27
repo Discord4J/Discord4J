@@ -35,8 +35,7 @@ public class MessageReference implements DiscordObject {
     }
 
     public Snowflake getChannelId() {
-        // TODO FIXME: is this actually Possible?
-        return Snowflake.of(data.channelId().get());
+        return Snowflake.of(data.channelId().toOptional().orElseThrow(IllegalStateException::new));
     }
 
     public Optional<Snowflake> getGuildId() {

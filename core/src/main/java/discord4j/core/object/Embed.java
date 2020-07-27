@@ -20,6 +20,7 @@ import discord4j.core.GatewayDiscordClient;
 import discord4j.discordjson.json.*;
 import discord4j.discordjson.possible.Possible;
 import discord4j.rest.util.Color;
+import reactor.util.annotation.Nullable;
 
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
@@ -84,9 +85,11 @@ public final class Embed implements DiscordObject {
      *
      * @return The type of embed, if present.
      */
+    @Nullable
     public Type getType() {
-        // TODO FIXME is this actually Possible?
-        return Type.of(data.type().get());
+        return data.type().toOptional()
+                .map(Type::of)
+                .orElse(null);
     }
 
     /**
@@ -289,9 +292,9 @@ public final class Embed implements DiscordObject {
          *
          * @return The URL of the footer icon (only supports http(s) and attachments).
          */
+        @Nullable
         public String getIconUrl() {
-            // TODO FIXME: is this actually Possible?
-            return data.iconUrl().get();
+            return data.iconUrl().toOptional().orElse(null);
         }
 
         /**
@@ -299,9 +302,9 @@ public final class Embed implements DiscordObject {
          *
          * @return A proxied URL of the footer icon.
          */
+        @Nullable
         public String getProxyIconUrl() {
-            // TODO FIXME: is this actually Possible?
-            return data.proxyIconUrl().get();
+            return data.proxyIconUrl().toOptional().orElse(null);
         }
     }
 
@@ -334,9 +337,9 @@ public final class Embed implements DiscordObject {
          *
          * @return The source URL of the image (only supports http(s) and attachments).
          */
+        @Nullable
         public String getUrl() {
-            // TODO FIXME: is this actually Possible?
-            return data.url().get();
+            return data.url().toOptional().orElse(null);
         }
 
         /**
@@ -344,9 +347,9 @@ public final class Embed implements DiscordObject {
          *
          * @return A proxied URL of the image.
          */
+        @Nullable
         public String getProxyUrl() {
-            // TODO FIXME: is this actually Possible?
-            return data.proxyUrl().get();
+            return data.proxyUrl().toOptional().orElse(null);
         }
 
         /**
@@ -355,8 +358,8 @@ public final class Embed implements DiscordObject {
          * @return The height of the image.
          */
         public int getHeight() {
-            // TODO FIXME: is this actually Possible?
-            return data.height().get();
+            return data.height().toOptional()
+                    .orElseThrow(IllegalStateException::new);
         }
 
         /**
@@ -365,8 +368,8 @@ public final class Embed implements DiscordObject {
          * @return The width of the image.
          */
         public int getWidth() {
-            // TODO FIXME: is this actually Possible?
-            return data.width().get();
+            return data.width().toOptional()
+                    .orElseThrow(IllegalStateException::new);
         }
     }
 
@@ -399,9 +402,9 @@ public final class Embed implements DiscordObject {
          *
          * @return The source URL of the thumbnail (only supports http(s) and attachments).
          */
+        @Nullable
         public String getUrl() {
-            // TODO FIXME: is this actually Possible?
-            return data.url().get();
+            return data.url().toOptional().orElse(null);
         }
 
         /**
@@ -409,9 +412,9 @@ public final class Embed implements DiscordObject {
          *
          * @return A proxied URL of the thumbnail.
          */
+        @Nullable
         public String getProxyUrl() {
-            // TODO FIXME: is this actually Possible?
-            return data.proxyUrl().get();
+            return data.proxyUrl().toOptional().orElse(null);
         }
 
         /**
@@ -420,8 +423,8 @@ public final class Embed implements DiscordObject {
          * @return The height of the thumbnail.
          */
         public int getHeight() {
-            // TODO FIXME: is this actually Possible?
-            return data.height().get();
+            return data.height().toOptional()
+                    .orElseThrow(IllegalStateException::new);
         }
 
         /**
@@ -430,8 +433,8 @@ public final class Embed implements DiscordObject {
          * @return The width of the thumbnail.
          */
         public int getWidth() {
-            // TODO FIXME: is this actually Possible?
-            return data.width().get();
+            return data.width().toOptional()
+                    .orElseThrow(IllegalStateException::new);
         }
     }
 
@@ -464,9 +467,9 @@ public final class Embed implements DiscordObject {
          *
          * @return The source URL of the video.
          */
+        @Nullable
         public String getUrl() {
-            // TODO FIXME: is this actually Possible?
-            return data.url().get();
+            return data.url().toOptional().orElse(null);
         }
 
         /**
@@ -475,8 +478,8 @@ public final class Embed implements DiscordObject {
          * @return The height of the video.
          */
         public int getHeight() {
-            // TODO FIXME: is this actually Possible?
-            return data.height().get();
+            return data.height().toOptional()
+                    .orElseThrow(IllegalStateException::new);
         }
 
         /**
@@ -485,8 +488,8 @@ public final class Embed implements DiscordObject {
          * @return The width of the video.
          */
         public int getWidth() {
-            // TODO FIXME: is this actually Possible?
-            return data.width().get();
+            return data.width().toOptional()
+                    .orElseThrow(IllegalStateException::new);
         }
     }
 
@@ -519,9 +522,9 @@ public final class Embed implements DiscordObject {
          *
          * @return The name of the provider.
          */
+        @Nullable
         public String getName() {
-            // TODO FIXME: is this actually Possible?
-            return data.name().get();
+            return data.name().toOptional().orElse(null);
         }
 
         /**
@@ -530,7 +533,6 @@ public final class Embed implements DiscordObject {
          * @return The URL of the provider.
          */
         public Optional<String> getUrl() {
-            // TODO FIXME: is this actually Possible?
             return Possible.flatOpt(data.url());
         }
     }
@@ -567,9 +569,9 @@ public final class Embed implements DiscordObject {
          *
          * @return The name of the author.
          */
+        @Nullable
         public String getName() {
-            // TODO FIXME: is this actually Possible?
-            return data.name().get();
+            return data.name().toOptional().orElse(null);
         }
 
         /**
@@ -577,9 +579,9 @@ public final class Embed implements DiscordObject {
          *
          * @return The URL of the author.
          */
+        @Nullable
         public String getUrl() {
-            // TODO FIXME: is this actually Possible?
-            return data.url().get();
+            return data.url().toOptional().orElse(null);
         }
 
         /**
@@ -587,9 +589,9 @@ public final class Embed implements DiscordObject {
          *
          * @return The URL of the author icon (only supports http(s) and attachments).
          */
+        @Nullable
         public String getIconUrl() {
-            // TODO FIXME: is this actually Possible?
-            return data.iconUrl().get();
+            return data.iconUrl().toOptional().orElse(null);
         }
 
         /**
@@ -597,9 +599,9 @@ public final class Embed implements DiscordObject {
          *
          * @return A proxied URL of the author icon.
          */
+        @Nullable
         public String getProxyIconUrl() {
-            // TODO FIXME: is this actually Possible?
-            return data.proxyIconUrl().get();
+            return data.proxyIconUrl().toOptional().orElse(null);
         }
     }
 
@@ -657,8 +659,8 @@ public final class Embed implements DiscordObject {
          * @return {@code true} if this field should display inline, {@code false} otherwise.
          */
         public boolean isInline() {
-            // TODO FIXME: is this actually Possible?
-            return data.inline().get();
+            return data.inline().toOptional()
+                    .orElseThrow(IllegalStateException::new);
         }
     }
 

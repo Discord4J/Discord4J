@@ -47,7 +47,8 @@ public final class TextChannel extends BaseGuildMessageChannel {
      * @return The amount of seconds an user has to wait before sending another message (0-120).
      */
     public int getRateLimitPerUser() {
-        return getData().rateLimitPerUser().get();
+        return getData().rateLimitPerUser().toOptional()
+                .orElseThrow(IllegalStateException::new); // this should be safe for all TextChannels
     }
 
     /**
