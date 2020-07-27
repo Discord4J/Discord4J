@@ -18,6 +18,7 @@
 package discord4j.rest.util;
 
 import discord4j.discordjson.json.MessageCreateRequest;
+import discord4j.discordjson.json.MessageSendRequestBase;
 import reactor.util.annotation.Nullable;
 import reactor.util.function.Tuple2;
 import reactor.util.function.Tuples;
@@ -26,20 +27,19 @@ import java.io.InputStream;
 import java.util.Collections;
 import java.util.List;
 
-public class MultipartRequest {
-    @Nullable
-    private final Object jsonPayload;
+public class MultipartRequest<T extends MessageSendRequestBase> {
+    private final T jsonPayload;
     private final List<Tuple2<String, InputStream>> files;
 
-    public MultipartRequest(@Nullable Object jsonPayload) {
+    public MultipartRequest(T jsonPayload) {
         this(jsonPayload, Collections.emptyList());
     }
 
-    public MultipartRequest(@Nullable Object jsonPayload, String fileName, InputStream file) {
+    public MultipartRequest(T jsonPayload, String fileName, InputStream file) {
         this(jsonPayload, Collections.singletonList(Tuples.of(fileName, file)));
     }
 
-    public MultipartRequest(@Nullable Object jsonPayload, List<Tuple2<String, InputStream>> files) {
+    public MultipartRequest(T jsonPayload, List<Tuple2<String, InputStream>> files) {
         this.jsonPayload = jsonPayload;
         this.files = files;
     }
@@ -54,7 +54,7 @@ public class MultipartRequest {
     }
 
     @Nullable
-    public Object getJsonPayload() { return jsonPayload; }
+    public T getJsonPayload() { return jsonPayload; }
 
     public List<Tuple2<String, InputStream>> getFiles() {
         return files;

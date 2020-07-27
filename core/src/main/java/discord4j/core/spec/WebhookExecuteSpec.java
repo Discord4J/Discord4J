@@ -38,7 +38,7 @@ import java.util.function.Consumer;
  *
  * @see <a href="https://discord.com/developers/docs/resources/webhook#execute-webhook">Execute webhook</a>
  */
-public class WebhookExecuteSpec implements Spec<MultipartRequest> {
+public class WebhookExecuteSpec implements Spec<MultipartRequest<WebhookExecuteRequest>> {
 
     private Possible<String> content = Possible.absent();
     private Possible<String> username = Possible.absent();
@@ -145,8 +145,8 @@ public class WebhookExecuteSpec implements Spec<MultipartRequest> {
     }
 
     @Override
-    public MultipartRequest asRequest() {
-        return new MultipartRequest(
+    public MultipartRequest<WebhookExecuteRequest> asRequest() {
+        return new MultipartRequest<>(
                 WebhookExecuteRequest
                         .builder()
                         .content(content)

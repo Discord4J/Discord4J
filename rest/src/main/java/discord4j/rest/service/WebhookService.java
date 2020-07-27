@@ -16,10 +16,7 @@
  */
 package discord4j.rest.service;
 
-import discord4j.discordjson.json.MessageData;
-import discord4j.discordjson.json.WebhookCreateRequest;
-import discord4j.discordjson.json.WebhookData;
-import discord4j.discordjson.json.WebhookModifyRequest;
+import discord4j.discordjson.json.*;
 import discord4j.rest.request.DiscordWebRequest;
 import discord4j.rest.request.DiscordWebResponse;
 import discord4j.rest.request.Router;
@@ -89,7 +86,7 @@ public class WebhookService extends RestService {
     public Mono<MessageData> executeWebhook(
             long webhookId,
             String token,
-            MultipartRequest request,
+            MultipartRequest<WebhookExecuteRequest> request,
             @Nullable Boolean wait
     ) {
         DiscordWebRequest webRequest = Routes.WEBHOOK_EXECUTE.newRequest(webhookId, token);
