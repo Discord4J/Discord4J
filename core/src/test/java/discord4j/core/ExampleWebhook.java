@@ -33,7 +33,7 @@ public class ExampleWebhook {
         // The ID of a webhook in a channel the bot has MANAGE_WEBHOOKS permission in.
         Snowflake webhookId = Snowflake.of(System.getenv("webhook_id"));
 
-        // The ID and token of a webhook in a channel the bot does not have the MANAGE_WEBHOOKS permission but otherwise does have access to.
+        // The ID and token of a webhook in a channel the bot does not have the MANAGE_WEBHOOKS permission.
         Snowflake secretWebhookId = Snowflake.of(System.getenv("secret_webhook_id"));
         String secretWebhookToken = System.getenv("secret_webhook_token");
 
