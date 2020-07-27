@@ -32,10 +32,8 @@ public class ExampleWebhook {
                 .block();
 
         assert gateway != null;
-        gateway.executeWebhookById(
-                Snowflake.of(System.getenv("webhook_id")),
-                System.getenv("webhook_token"),
-                spec -> {
+        gateway.getWebhookById(Snowflake.of(System.getenv("webhook_id")))
+                .flatMap(webhook -> webhook.execute(spec -> {
                     spec.setContent("hello from a sneaky webhook.");
                     try {
                         spec.addFile("first file.txt", new FileInputStream(System.getenv("webhook_file1")));
@@ -43,27 +41,28 @@ public class ExampleWebhook {
                     } catch (FileNotFoundException e) {
                         e.printStackTrace();
                     }
-                }).block();
+                })).block();
 
-        gateway.executeWebhookById(
+        gateway.getWebhookByIdWithToken(
                 Snowflake.of(System.getenv("webhook_id")),
-                System.getenv("webhook_token"),
-                spec -> {
-                    spec.setContent("hello from a sneaky webhook.");
-                    for (int i = 0; i < 10; i++) {
-                        int j = i;
-                        spec.addEmbed(embed ->
-                                embed.setDescription("I can create a lot of embeds at once too. #" + (j + 1))
-                        );
-                    }
-                }).block();
+                System.getenv("webhook_token")
+        ).flatMap(webhook -> webhook.execute(spec -> {
+            spec.setContent("hello from a sneaky webhook.");
+            for (int i = 0; i < 10; i++) {
+                int j = i;
+                spec.addEmbed(embed ->
+                        embed.setDescription("I can create a lot of embeds at once too. #" + (j + 1))
+                );
+            }
+        })).block();
 
 
         gateway.getChannelById(Snowflake.of(System.getenv("webhook_channel")))
-                .flatMap(channel -> ((TextChannel) channel).createWebhook(webhook -> webhook.setReason(
-                        "testing").setName("A testy boi")))
-                .flatMap(hook -> hook.executeAndWait(spec -> spec.setContent("you can execute webhooks " +
-                        "from webhook objects as well.")).thenReturn(hook))
+                .flatMap(channel -> ((TextChannel) channel).createWebhook(webhook ->
+                        webhook.setReason("testing").setName("A testy boi")))
+                .flatMap(hook -> hook.executeAndWait(spec ->
+                        spec.setContent("you can execute webhooks from webhook objects as well.")
+                ).thenReturn(hook))
                 .flatMap(hook -> hook.delete("good bye"))
                 .block();
     }

@@ -36,7 +36,6 @@ import discord4j.core.retriever.EntityRetriever;
 import discord4j.core.shard.GatewayBootstrap;
 import discord4j.core.spec.GuildCreateSpec;
 import discord4j.core.spec.UserEditSpec;
-import discord4j.core.spec.WebhookExecuteSpec;
 import discord4j.core.util.ValidationUtil;
 import discord4j.discordjson.json.*;
 import discord4j.discordjson.json.gateway.GuildMembersChunk;
@@ -58,7 +57,6 @@ import reactor.core.publisher.Mono;
 import reactor.core.publisher.MonoProcessor;
 import reactor.util.Logger;
 import reactor.util.Loggers;
-import reactor.util.annotation.Nullable;
 
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -199,7 +197,8 @@ public class GatewayDiscordClient implements EntityRetriever {
     }
 
     /**
-     * Requests to retrieve the webhook represented by the supplied ID.
+     * Requests to retrieve the webhook represented by the supplied ID. The return webhook is populated with its token
+     * if the bot has the MANAGE_WEBHOOKS permission.
      *
      * @param webhookId The ID of the webhook.
      * @return A {@link Mono} where, upon successful completion, emits the {@link Webhook} as represented by the
@@ -212,57 +211,22 @@ public class GatewayDiscordClient implements EntityRetriever {
     }
 
     /**
-     * Executes this webhook without waiting for a confirmation that a message was created.
+     * Requests to retrieve the webhook represented by the supplied ID and token. Doesn't
+     * return the user in the webhook object. Doesn't require the bot to share a channel with the webhook.
+     * The webhook is populated with the token.
      *
-     * @param webhookId The id of the webhook.
-     * @param webhookToken The token of the webhook.
-     * @param spec A {@link Consumer} that provides a "blank" {@link discord4j.core.spec.WebhookExecuteSpec} to be
-     * operated on.
-     * @return A {@link Mono} where, upon successful webhook execution, completes. If the message fails to save,
-     * an error IS NOT emitted through the {@code Mono}.
+     * @param webhookId The ID of the webhook.
+     * @param token The authentication token of the webhook.
+     * @return A {@link Mono} where, upon successful completion, emits the {@link Webhook} as represented by the
+     * supplied ID without the user field and with the token field. If an error is received,
+     * it is emitted through the {@code Mono}.
      */
-    public Mono<Void> executeWebhookById(Snowflake webhookId, String webhookToken,
-                              final Consumer<? super WebhookExecuteSpec> spec) {
-        return executeWebhookById(webhookId, webhookToken, spec, null).cast(Void.class);
+    public Mono<Webhook> getWebhookByIdWithToken(final Snowflake webhookId, final String token) {
+        return getRestClient().getWebhookService()
+                .getWebhookWithToken(webhookId.asLong(), token)
+                .map(data -> new Webhook(this, data));
     }
 
-    /**
-     * Executes this webhook.
-     *
-     * @param webhookId The id of the webhook.
-     * @param webhookToken The token of the webhook.
-     * @param spec A {@link Consumer} that provides a "blank" {@link WebhookExecuteSpec} to be operated on.
-     * @param wait True to specify to wait for server confirmation that the message was saved or
-     * there was an error saving the message.
-     * @return A {@link Mono} where, upon successful webhook execution, emits a Message if {@code wait = true}.
-     * If the message fails to save, an error is emitted through the {@code Mono} only if {@code wait = true}.
-     */
-    public Mono<Message> executeWebhookById(Snowflake webhookId, String webhookToken,
-                                 final Consumer<? super WebhookExecuteSpec> spec, @Nullable Boolean wait) {
-        return Mono.defer(
-                () -> {
-                    WebhookExecuteSpec mutatedSpec = new WebhookExecuteSpec();
-                    spec.accept(mutatedSpec);
-                    return getRestClient().getWebhookService()
-                            .executeWebhook(webhookId.asLong(), webhookToken, mutatedSpec.asRequest(), wait)
-                            .map(data -> new Message(this, data));
-                }
-        );
-    }
-
-    /**
-     * Executes this webhook and waits for server confirmation for the message to save.
-     *
-     * @param webhookId The id of the webhook.
-     * @param webhookToken The token of the webhook.
-     * @param spec A {@link Consumer} that provides a "blank" {@link WebhookExecuteSpec} to be operated on.
-     * @return A {@link Mono} where, upon successful webhook execution, emits a Message.
-     * If the message fails to save, an error is emitted through the {@code Mono}.
-     */
-    public Mono<Message> executeWebhookByIdAndWait(Snowflake webhookId, String webhookToken, final Consumer<?
-            super WebhookExecuteSpec> spec) {
-        return executeWebhookById(webhookId, webhookToken, spec, true);
-    }
 
     /**
      * Requests to retrieve the application info.

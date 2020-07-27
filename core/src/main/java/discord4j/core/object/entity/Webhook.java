@@ -185,7 +185,7 @@ public final class Webhook implements Entity {
     }
 
     /**
-     * Requests to delete this webhook.
+     * Requests to delete this webhook. Requires the MANAGE_WEBHOOKS permission.
      *
      * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the webhook has been deleted.
      * If an error is received, it is emitted through the {@code Mono}.
@@ -195,7 +195,7 @@ public final class Webhook implements Entity {
     }
 
     /**
-     * Requests to delete this webhook while optionally specifying a reason.
+     * Requests to delete this webhook while optionally specifying a reason. Requires the MANAGE_WEBHOOKS permission.
      *
      * @param reason The reason, if present.
      * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the webhook has been deleted.
@@ -207,7 +207,34 @@ public final class Webhook implements Entity {
     }
 
     /**
-     * Requests to edit this webhook.
+     * Requests to delete this webhook while optionally specifying a reason.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the webhook has been deleted.
+     * If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Void> deleteWithToken() {
+        return deleteWithToken(null);
+    }
+
+    /**
+     * Requests to delete this webhook while optionally specifying a reason.
+     *
+     * @param reason The reason, if present.
+     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the webhook has been deleted.
+     * If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Void> deleteWithToken(@Nullable final String reason) {
+        return Mono.defer(() -> {
+            if (!getToken().isPresent()) {
+                throw new IllegalStateException("Missing token");
+            }
+            return gateway.getRestClient().getWebhookService()
+                    .deleteWebhookWithToken(getId().asLong(), getToken().get(), reason);
+        });
+    }
+
+    /**
+     * Requests to edit this webhook. Requires the MANAGE_WEBHOOKS permission.
      *
      * @param spec A {@link Consumer} that provides a "blank" {@link WebhookEditSpec} to be operated on.
      * @return A {@link Mono} where, upon successful completion, emits the edited {@link Guild}. If an error is
@@ -225,6 +252,27 @@ public final class Webhook implements Entity {
     }
 
     /**
+     * Requests to edit this webhook.
+     *
+     * @param spec A {@link Consumer} that provides a "blank" {@link WebhookEditSpec} to be operated on.
+     * @return A {@link Mono} where, upon successful completion, emits the edited {@link Guild}. If an error is
+     * received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Webhook> editWithToken(final Consumer<? super WebhookEditSpec> spec) {
+        return Mono.defer(
+                () -> {
+                    if (!getToken().isPresent()) {
+                        throw new IllegalStateException("Missing token");
+                    }
+                    WebhookEditSpec mutatedSpec = new WebhookEditSpec();
+                    spec.accept(mutatedSpec);
+                    return gateway.getRestClient().getWebhookService()
+                            .modifyWebhookWithToken(getId().asLong(), getToken().get(), mutatedSpec.asRequest(), mutatedSpec.getReason());
+                })
+                .map(data -> new Webhook(gateway, data));
+    }
+
+    /**
      * Executes this webhook without waiting for a confirmation that a message was created.
      *
      * @param spec A {@link Consumer} that provides a "blank" {@link WebhookExecuteSpec} to be operated on.
@@ -232,7 +280,7 @@ public final class Webhook implements Entity {
      * an error IS NOT emitted through the {@code Mono}.
      */
     public Mono<Void> execute(final Consumer<? super WebhookExecuteSpec> spec) {
-        return execute(spec, null).cast(Void.class);
+        return execute(spec, false).cast(Void.class);
     }
 
     /**
@@ -244,7 +292,7 @@ public final class Webhook implements Entity {
      * @return A {@link Mono} where, upon successful webhook execution, emits a Message if {@code wait = true}.
      * If the message fails to save, an error is emitted through the {@code Mono} only if {@code wait = true}.
      */
-    public Mono<Message> execute(final Consumer<? super WebhookExecuteSpec> spec, @Nullable Boolean wait) {
+    public Mono<Message> execute(final Consumer<? super WebhookExecuteSpec> spec, boolean wait) {
         return Mono.defer(
                 () -> {
                     if (!getToken().isPresent()) {

@@ -17,7 +17,6 @@
 package discord4j.rest.service;
 
 import discord4j.discordjson.json.*;
-import discord4j.rest.request.DiscordWebRequest;
 import discord4j.rest.request.DiscordWebResponse;
 import discord4j.rest.request.Router;
 import discord4j.rest.route.Routes;
@@ -62,8 +61,27 @@ public class WebhookService extends RestService {
                 .bodyToMono(WebhookData.class);
     }
 
+    public Mono<WebhookData> getWebhookWithToken(long webhookId, String token) {
+        return Routes.WEBHOOK_TOKEN_GET.newRequest(webhookId, token)
+                .exchange(getRouter())
+                .bodyToMono(WebhookData.class);
+    }
+
     public Mono<WebhookData> modifyWebhook(long webhookId, WebhookModifyRequest request, @Nullable String reason) {
         return Routes.WEBHOOK_MODIFY.newRequest(webhookId)
+                .body(request)
+                .optionalHeader("X-Audit-Log-Reason", reason)
+                .exchange(getRouter())
+                .bodyToMono(WebhookData.class);
+    }
+
+    public Mono<WebhookData> modifyWebhookWithToken(
+            long webhookId,
+            String token,
+            WebhookModifyRequest request,
+            @Nullable String reason
+    ) {
+        return Routes.WEBHOOK_TOKEN_MODIFY.newRequest(webhookId, token)
                 .body(request)
                 .optionalHeader("X-Audit-Log-Reason", reason)
                 .exchange(getRouter())
@@ -77,28 +95,35 @@ public class WebhookService extends RestService {
                 .bodyToMono(Void.class);
     }
 
+    public Mono<Void> deleteWebhookWithToken(long webhookId, String token, @Nullable String reason) {
+        return Routes.WEBHOOK_TOKEN_DELETE.newRequest(webhookId, token)
+                .optionalHeader("X-Audit-Log-Reason", reason)
+                .exchange(getRouter())
+                .bodyToMono(Void.class);
+    }
+
     /**
+     * Executes the specified webhook.
+     *
      * @param wait true if you want to return message data and errors for the webhook.
      * @return If wait is true, a mono that contains the message information of the execution or an
-     * error if the webhook is unsuccessful. If wait is false or null, the mono completes as soon as the request
+     * error if the webhook is unsuccessful. If wait is false, the mono completes as soon as the request
      * is finished sending, and DOES NOT result in an error if the message is not saved.
      */
     public Mono<MessageData> executeWebhook(
             long webhookId,
             String token,
             MultipartRequest<WebhookExecuteRequest> request,
-            @Nullable Boolean wait
+            boolean wait
     ) {
-        DiscordWebRequest webRequest = Routes.WEBHOOK_EXECUTE.newRequest(webhookId, token);
-        if (wait != null) {
-            webRequest.query("wait", wait);
-        }
-        DiscordWebResponse response = webRequest
+        DiscordWebResponse response = Routes.WEBHOOK_EXECUTE
+                .newRequest(webhookId, token)
+                .query("wait", wait)
                 .header("content-type", request.getFiles().isEmpty() ? "application/json" : "multipart/form-data")
                 .body(Objects.requireNonNull(request.getFiles().isEmpty() ? request.getJsonPayload() : request))
                 .exchange(getRouter());
 
-        if (wait != null && wait) {
+        if (wait) {
             return response.bodyToMono(MessageData.class);
         } else {
             return response.bodyToMono(Void.class).cast(MessageData.class);
