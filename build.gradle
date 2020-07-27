@@ -55,7 +55,7 @@ allprojects {
 
     dependencies {
         api platform("io.projectreactor:reactor-bom:$reactor_bom_version")
-        api "com.github.TheNumberOne:discord-json:master-SNAPSHOT"
+        api "com.discord4j:discord-json:$discordJsonVersion"
     }
 
     repositories {
