@@ -112,8 +112,8 @@ public class WebhookService extends RestService {
     public Mono<MessageData> executeWebhook(
             long webhookId,
             String token,
-            MultipartRequest<WebhookExecuteRequest> request,
-            boolean wait
+            boolean wait,
+            MultipartRequest<WebhookExecuteRequest> request
     ) {
         DiscordWebResponse response = Routes.WEBHOOK_EXECUTE
                 .newRequest(webhookId, token)

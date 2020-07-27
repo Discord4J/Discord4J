@@ -312,19 +312,19 @@ public final class Webhook implements Entity {
      * an error IS NOT emitted through the {@code Mono}.
      */
     public Mono<Void> execute(final Consumer<? super WebhookExecuteSpec> spec) {
-        return execute(spec, false).cast(Void.class);
+        return execute(false, spec).cast(Void.class);
     }
 
     /**
      * Executes this webhook.
      *
-     * @param spec A {@link Consumer} that provides a "blank" {@link WebhookExecuteSpec} to be operated on.
      * @param wait True to specify to wait for server confirmation that the message was saved or
      * there was an error saving the message.
+     * @param spec A {@link java.util.function.Consumer} that provides a "blank" {@link discord4j.core.spec.WebhookExecuteSpec} to be operated on.
      * @return A {@link Mono} where, upon successful webhook execution, emits a Message if {@code wait = true}.
      * If the message fails to save, an error is emitted through the {@code Mono} only if {@code wait = true}.
      */
-    public Mono<Message> execute(final Consumer<? super WebhookExecuteSpec> spec, boolean wait) {
+    public Mono<Message> execute(boolean wait, final Consumer<? super WebhookExecuteSpec> spec) {
         return Mono.defer(
                 () -> {
                     if (!getToken().isPresent()) {
@@ -333,7 +333,7 @@ public final class Webhook implements Entity {
                     WebhookExecuteSpec mutatedSpec = new WebhookExecuteSpec();
                     spec.accept(mutatedSpec);
                     return gateway.getRestClient().getWebhookService()
-                            .executeWebhook(getId().asLong(), getToken().get(), mutatedSpec.asRequest(), wait)
+                            .executeWebhook(getId().asLong(), getToken().get(), wait, mutatedSpec.asRequest())
                             .map(data -> new Message(gateway, data));
                 }
         );
@@ -347,7 +347,7 @@ public final class Webhook implements Entity {
      * If the message fails to save, an error is emitted through the {@code Mono}.
      */
     public Mono<Message> executeAndWait(final Consumer<? super WebhookExecuteSpec> spec) {
-        return execute(spec, true);
+        return execute(true, spec);
     }
 
     @Override
