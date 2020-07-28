@@ -64,8 +64,10 @@ public final class VoiceState implements DiscordObject {
      * @return The guild ID this voice state is for.
      */
     public Snowflake getGuildId() {
-        // TODO FIXME: why is this Possible?
-        return Snowflake.of(data.guildId().get());
+        // Even though Discord's raw Voice State structure does not include the guild_id key when sent in the
+        // voice_states for a guild_create, we manually populate the field in GuildDispatchHandlers.guildCreate, so
+        // it should always be present, making this safe.
+        return Snowflake.of(data.guildId().toOptional().orElseThrow(IllegalStateException::new));
     }
 
     /**

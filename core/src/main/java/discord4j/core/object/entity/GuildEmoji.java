@@ -18,6 +18,7 @@ package discord4j.core.object.entity;
 
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.retriever.EntityRetrievalStrategy;
+import discord4j.discordjson.json.UserData;
 import discord4j.rest.util.Image;
 import discord4j.common.util.Snowflake;
 import discord4j.core.spec.GuildEmojiEditSpec;
@@ -42,7 +43,6 @@ import static discord4j.rest.util.Image.Format.PNG;
  * <p>
  * <a href="https://discord.com/developers/docs/resources/emoji#emoji-resource">Emoji Resource</a>
  */
-// TODO FIXME so many gets
 public final class GuildEmoji implements Entity {
 
     /** The path for {@code GuildEmoji} image URLs. */
@@ -77,7 +77,9 @@ public final class GuildEmoji implements Entity {
 
     @Override
     public Snowflake getId() {
-        return Snowflake.of(data.id().get()); // this is safe for guild emojis
+        return data.id()
+                .map(Snowflake::of)
+                .orElseThrow(IllegalStateException::new); // this should be safe for guild emojis
     }
 
     /**
@@ -86,7 +88,8 @@ public final class GuildEmoji implements Entity {
      * @return The emoji name.
      */
     public String getName() {
-        return data.name().get();
+        return data.name()
+                .orElseThrow(IllegalStateException::new); // this should be safe for guild emojis
     }
 
     /**
@@ -95,9 +98,11 @@ public final class GuildEmoji implements Entity {
      * @return The IDs of the roles this emoji is whitelisted to.
      */
     public Set<Snowflake> getRoleIds() {
-        return data.roles().get().stream()
-                .map(Snowflake::of)
-                .collect(Collectors.toSet());
+        return data.roles().toOptional()
+                .map(roles -> roles.stream()
+                        .map(Snowflake::of)
+                        .collect(Collectors.toSet()))
+                .orElseThrow(IllegalStateException::new); // this should be safe for guild emojis
     }
 
     /**
@@ -135,9 +140,12 @@ public final class GuildEmoji implements Entity {
      * an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<User> getUser() {
+        UserData user = data.user().toOptional()
+                .orElseThrow(IllegalStateException::new); // this should be safe for guild emojis
+
         return gateway.getRestClient().getEmojiService()
                 .getGuildEmoji(getGuildId().asLong(), getId().asLong())
-                .map(data -> new User(gateway, data.user().get()));
+                .map(data -> new User(gateway, user));
     }
 
     /**
@@ -146,7 +154,8 @@ public final class GuildEmoji implements Entity {
      * @return {@code true} if this emoji must be wrapped in colons, {@code false} otherwise.
      */
     public boolean requiresColons() {
-        return data.requireColons().get();
+        return data.requireColons().toOptional()
+                .orElseThrow(IllegalStateException::new); // this should be safe for guild emojis
     }
 
     /**
@@ -155,7 +164,8 @@ public final class GuildEmoji implements Entity {
      * @return {@code true} if this emoji is managed, {@code false} otherwise.
      */
     public boolean isManaged() {
-        return data.managed().get();
+        return data.managed().toOptional()
+                .orElseThrow(IllegalStateException::new); // this should be safe for guild emojis
     }
 
     /**
@@ -164,7 +174,8 @@ public final class GuildEmoji implements Entity {
      * @return {@code true} if this emoji is animated, {@code false} otherwise.
      */
     public boolean isAnimated() {
-        return data.animated().get();
+        return data.animated().toOptional()
+                .orElseThrow(IllegalStateException::new); // this should be safe for guild emojis
     }
 
     /**
@@ -173,7 +184,8 @@ public final class GuildEmoji implements Entity {
      * @return {@code true} if this emoji is available, {@code false} otherwise (due to loss of Server Boosts for example).
      */
     public boolean isAvailable() {
-        return data.available().get();
+        return data.available().toOptional()
+                .orElseThrow(IllegalStateException::new); // this should be safe for guild emojis
     }
 
     /**
