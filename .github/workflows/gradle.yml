@@ -33,7 +33,7 @@ jobs:
   release:
     name: Publish artifacts
     runs-on: ubuntu-latest
-    if: github.event_name != 'pull_request' && github.repository == 'Discord4J/Discord4J'
+    if: github.event_name != 'pull_request'
     needs: build
     steps:
       - uses: actions/checkout@v2

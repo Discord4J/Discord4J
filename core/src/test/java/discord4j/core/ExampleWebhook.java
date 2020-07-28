@@ -62,26 +62,26 @@ public class ExampleWebhook {
                     } catch (FileNotFoundException e) {
                         e.printStackTrace();
                     }
-                })).block();
+                }))
+                .block();
 
-        gateway.getWebhookByIdWithToken(
-                secretWebhookId,
-                secretWebhookToken
-        ).flatMap(webhook -> webhook.execute(spec -> {
-            spec.setContent("A webhook can execute in channels the bot doesn't have access to.");
-        })).block();
+        gateway.getWebhookByIdWithToken(secretWebhookId, secretWebhookToken)
+                .flatMap(webhook -> webhook.execute(spec -> {
+                    spec.setContent("A webhook can execute in channels the bot doesn't have access to.");
+                }))
+                .block();
 
-        gateway.getWebhookById(
-                webhookId
-        ).flatMap(webhook -> webhook.execute(spec -> {
-            spec.setContent("A webhook can create several embeds.");
-            for (int i = 0; i < 10; i++) {
-                final int finalI = i;
-                spec.addEmbed(embed ->
-                        embed.setDescription("I can create a lot of embeds at once too. #" + (finalI + 1))
-                );
-            }
-        })).block();
+        gateway.getWebhookById(webhookId)
+                .flatMap(webhook -> webhook.execute(spec -> {
+                    spec.setContent("A webhook can create several embeds.");
+                    for (int i = 0; i < 10; i++) {
+                        final int finalI = i;
+                        spec.addEmbed(embed ->
+                                embed.setDescription("I can create a lot of embeds at once too. #" + (finalI + 1))
+                        );
+                    }
+                }))
+                .block();
 
 
         gateway.getChannelById(webhookChannel)

@@ -75,11 +75,8 @@ public class WebhookService extends RestService {
                 .bodyToMono(WebhookData.class);
     }
 
-    public Mono<WebhookData> modifyWebhookWithToken(
-            long webhookId,
-            String token,
-            WebhookModifyRequest request
-    ) {
+    public Mono<WebhookData> modifyWebhookWithToken(long webhookId, String token,
+                                                    WebhookModifyWithTokenRequest request) {
         // The reason is ignored when updating a webhook using the token.
         return Routes.WEBHOOK_TOKEN_MODIFY.newRequest(webhookId, token)
                 .body(request)
@@ -109,12 +106,8 @@ public class WebhookService extends RestService {
      * error if the webhook is unsuccessful. If wait is false, the mono completes as soon as the request
      * is finished sending, and DOES NOT result in an error if the message is not saved.
      */
-    public Mono<MessageData> executeWebhook(
-            long webhookId,
-            String token,
-            boolean wait,
-            MultipartRequest<WebhookExecuteRequest> request
-    ) {
+    public Mono<MessageData> executeWebhook(long webhookId, String token, boolean wait,
+                                            MultipartRequest<WebhookExecuteRequest> request) {
         DiscordWebResponse response = Routes.WEBHOOK_EXECUTE
                 .newRequest(webhookId, token)
                 .query("wait", wait)

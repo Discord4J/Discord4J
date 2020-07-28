@@ -21,6 +21,7 @@ import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.channel.GuildMessageChannel;
 import discord4j.core.retriever.EntityRetrievalStrategy;
 import discord4j.core.spec.WebhookEditSpec;
+import discord4j.core.spec.WebhookEditWithTokenSpec;
 import discord4j.core.spec.WebhookExecuteSpec;
 import discord4j.core.util.EntityUtil;
 import discord4j.discordjson.json.WebhookData;
@@ -171,34 +172,14 @@ public final class Webhook implements Entity {
     }
 
     /**
-     * Gets the ID of the user this webhook was created by.
-     * Returns no creator id if the webhook was retrieved using a token.
-     *
-     * @return The ID of the user this webhook was created by.
-     */
-    public Optional<Snowflake> getCreatorId() {
-        return data.user().toOptional().map(user -> Snowflake.of(user.id()));
-    }
-
-    /**
-     * Requests to retrieve the user this webhook was created by, if present.
+     * Requests to retrieve the user this webhook was created by, if present.\
+     * Returns no creator if the webhook was retrieved using a token.
      *
      * @return A {@link Mono} where, upon successful completion, emits the {@link User user} this webhook was created
      * by, if present. If an error is received, it is emitted through the {@code Mono}.
      */
-    public Mono<User> getCreator() {
-        return Mono.justOrEmpty(getCreatorId()).flatMap(gateway::getUserById);
-    }
-
-    /**
-     * Requests to retrieve the user this webhook was created by, if present, using the given retrieval strategy.
-     *
-     * @param retrievalStrategy the strategy to use to get the creator
-     * @return A {@link Mono} where, upon successful completion, emits the {@link User user} this webhook was created
-     * by, if present. If an error is received, it is emitted through the {@code Mono}.
-     */
-    public Mono<User> getCreator(EntityRetrievalStrategy retrievalStrategy) {
-        return Mono.justOrEmpty(getCreatorId()).flatMap(id -> gateway.withRetrievalStrategy(retrievalStrategy).getUserById(id));
+    public Optional<User> getCreator() {
+        return data.user().toOptional().map(userData -> new User(gateway, userData));
     }
 
     /**
@@ -220,7 +201,7 @@ public final class Webhook implements Entity {
     }
 
     /**
-     * Gets the secure token of this webhook. The token is present for Incoming Webhooks.
+     * Gets the secure token of this webhook. The token is present for {@link Type#INCOMING} webhooks.
      *
      * @return The secure token of this webhook.
      */
@@ -287,19 +268,18 @@ public final class Webhook implements Entity {
     /**
      * Requests to edit this webhook.
      * Does not require the MANAGE_WEBHOOKS permission.
-     * The channel and reason are ignored.
      *
      * @param spec A {@link Consumer} that provides a "blank" {@link WebhookEditSpec} to be operated on.
      * @return A {@link Mono} where, upon successful completion, emits the edited {@link Guild}. If an error is
      * received, it is emitted through the {@code Mono}.
      */
-    public Mono<Webhook> editWithToken(final Consumer<? super WebhookEditSpec> spec) {
+    public Mono<Webhook> editWithToken(final Consumer<? super WebhookEditWithTokenSpec> spec) {
         return Mono.defer(
                 () -> {
                     if (!getToken().isPresent()) {
                         throw new IllegalStateException("Can't edit webhook.");
                     }
-                    WebhookEditSpec mutatedSpec = new WebhookEditSpec();
+                    WebhookEditWithTokenSpec mutatedSpec = new WebhookEditWithTokenSpec();
                     spec.accept(mutatedSpec);
                     return gateway.getRestClient().getWebhookService()
                             .modifyWebhookWithToken(getId().asLong(), getToken().get(), mutatedSpec.asRequest());
@@ -323,7 +303,8 @@ public final class Webhook implements Entity {
      *
      * @param wait True to specify to wait for server confirmation that the message was saved or
      * there was an error saving the message.
-     * @param spec A {@link java.util.function.Consumer} that provides a "blank" {@link discord4j.core.spec.WebhookExecuteSpec} to be operated on.
+     * @param spec A {@link java.util.function.Consumer} that provides a "blank"
+     * {@link discord4j.core.spec.WebhookExecuteSpec} to be operated on.
      * @return A {@link Mono} where, upon successful webhook execution, emits a Message if {@code wait = true}.
      * If the message fails to save, an error is emitted through the {@code Mono} only if {@code wait = true}.
      */
