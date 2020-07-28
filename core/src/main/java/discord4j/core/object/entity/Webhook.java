@@ -172,11 +172,11 @@ public final class Webhook implements Entity {
     }
 
     /**
-     * Requests to retrieve the user this webhook was created by, if present.\
+     * Requests to retrieve the user this webhook was created by, if present.
      * Returns no creator if the webhook was retrieved using a token.
      *
-     * @return A {@link Mono} where, upon successful completion, emits the {@link User user} this webhook was created
-     * by, if present. If an error is received, it is emitted through the {@code Mono}.
+     * @return An {@link Optional} with the {@link User user} this webhook was created
+     * by, if present.
      */
     public Optional<User> getCreator() {
         return data.user().toOptional().map(userData -> new User(gateway, userData));
