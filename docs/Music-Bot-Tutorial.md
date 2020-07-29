@@ -20,7 +20,7 @@ It is expected to complete this tutorial in under 15 minutes.
 ### Requirements
 * You should already have your bot created and its token ready for use. If you do not, go to this [link](https://discordapp.com/developers/applications/), create an application, obtain the bot token, and the Client ID.
 * JDK 8 or above should already be downloaded and/or installed on your system.
-* This tutorial assumes you are familiar with Java 8 or above concepts with a special emphasis in lambdas. If you are unfamiliar with lambdas, please visit our [Lambda Tutorial](https://github.com/Discord4J/Discord4J/wiki/Lambda-Tutorial).
+* This tutorial assumes you are familiar with Java 8 or above concepts with a special emphasis in lambdas. If you are unfamiliar with lambdas, please visit our [Lambda Tutorial](Lambda-Tutorial.md).
 * This tutorial uses [IntelliJ](https://www.jetbrains.com/idea/) to setup the programming environment and it is assumed to already be installed on your system. Eclipse, Netbeans, and other IDEs have similar, but slightly different, setup processes. Please consult the documentation for your specific IDE as it is necessary.
 
 ### Setting Up IntelliJ
@@ -62,7 +62,7 @@ Before coding, we need to create and setup a project with Discord4J installed. T
 
 ***
 
-6. IntelliJ will automatically open the *pom.xml* after it has created the project. Maven uses the *pom.xml* to control the project's structure and it's how we will be telling Maven to install Discord4J. As you can see [here](https://github.com/Discord4J/Discord4J/wiki#maven), Discord4J provides a set of "coordinates" that tells Maven how to find Discord4J. You may have noticed these coordinates contain a *GroupId*, *ArtifactId*, and *Version*; just like the attributes we have provided earlier! The coordinates is how Maven uniquely identifies a project, picks out a specific version, finds it, and eventually installs it for us.
+6. IntelliJ will automatically open the *pom.xml* after it has created the project. Maven uses the *pom.xml* to control the project's structure and it's how we will be telling Maven to install Discord4J. As you can see [here](Home.md), Discord4J provides a set of "coordinates" that tells Maven how to find Discord4J. You may have noticed these coordinates contain a *GroupId*, *ArtifactId*, and *Version*; just like the attributes we have provided earlier! The coordinates is how Maven uniquely identifies a project, picks out a specific version, finds it, and eventually installs it for us.
 
    **Add** the coordinates to the root of the *pom.xml*. If the text is red, that is OK! Give IntelliJ and Maven a few seconds or a minute to download and add Discord4J to our project. The text will eventually turn completely white.
 

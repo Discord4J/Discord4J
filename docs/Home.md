@@ -42,10 +42,10 @@ libraryDependencies ++= Seq(
   "com.discord4j" % "discord4j-core" % "VERSION"
 )
 ```
-If you prefer using experimental, "bleeding-edge", unstable builds, refer to [Using Jitpack](https://github.com/Discord4J/Discord4J/wiki/Using-Jitpack).
+If you prefer using experimental, "bleeding-edge", unstable builds, refer to [Using Jitpack](Using-Jitpack.md).
 
 ## Logging
-While optional, we do recommend installing and configuring a logging implementation to aide in debugging and provide useful information for day-to-day operations; plus, it's [good practice](https://softwareengineering.stackexchange.com/questions/37294/logging-why-and-what). Discord4J uses Reactor's [logging implementation](https://projectreactor.io/docs/core/release/reference/#_logging_a_sequence), which is compatible with any [SLF4J](https://www.slf4j.org/) implementation. We recommend using [Logback](https://logback.qos.ch/) for maximum flexibility and customization; check our dedicated [Logging](https://github.com/Discord4J/Discord4J/wiki/Logging) guide for details.
+While optional, we do recommend installing and configuring a logging implementation to aide in debugging and provide useful information for day-to-day operations; plus, it's [good practice](https://softwareengineering.stackexchange.com/questions/37294/logging-why-and-what). Discord4J uses Reactor's [logging implementation](https://projectreactor.io/docs/core/release/reference/#_logging_a_sequence), which is compatible with any [SLF4J](https://www.slf4j.org/) implementation. We recommend using [Logback](https://logback.qos.ch/) for maximum flexibility and customization; check our dedicated [Logging](Logging.md) guide for details.
 ### Maven
 ```xml
 <dependencies>

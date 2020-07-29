@@ -28,7 +28,7 @@ In general, Discord4J uses the least specific type of channel it can. For exampl
 # Reactor
 "What the heck is a Mono?"
 
-Discord4J uses a library called Reactor to facilitate reactive programming in Java. Both the concepts and the library itself can be intimidating at first. As this is a very broad topic, we have split off this documentation into other pages and defer to Reactor docs. Please see our [Reactive (Reactor) Tutorial](https://github.com/Discord4J/Discord4J/wiki/Reactive-(Reactor)-Tutorial) and the awesome [Reactor Reference Guide](https://projectreactor.io/docs/core/release/reference/).
+Discord4J uses a library called Reactor to facilitate reactive programming in Java. Both the concepts and the library itself can be intimidating at first. As this is a very broad topic, we have split off this documentation into other pages and defer to Reactor docs. Please see our [Reactive (Reactor) Tutorial](Reactive-(Reactor)-Tutorial.md) and the awesome [Reactor Reference Guide](https://projectreactor.io/docs/core/release/reference/).
 
 ## Do I use map or flatMap?
 

@@ -2,7 +2,7 @@
 Discord4J v3 is a completely different programming paradigm compared to v2. Rather than it being focused around synchronous, blocking invocations; everything is handled in an asynchronous, reactive context. The API has also been completely refactored, allowing D4J to provide a much cleaner, richer, consistent, and flexible approach to bot development.
 
 ## Blocking
-The core of Discord4J's design is centered around [reactive programming](https://github.com/Discord4J/Discord4J/wiki/Reactive-(Reactor)-Tutorial), using Reactor as its implementation. This is primarily focused around 2 classes, `Mono` and `Flux`. While `Mono` and `Flux` are designed for asynchronous computations, they do offer synchronous conversions for more traditional imperative programming that will be familiar to v2 developers.
+The core of Discord4J's design is centered around [reactive programming](Reactive-(Reactor)-Tutorial.md), using Reactor as its implementation. This is primarily focused around 2 classes, `Mono` and `Flux`. While `Mono` and `Flux` are designed for asynchronous computations, they do offer synchronous conversions for more traditional imperative programming that will be familiar to v2 developers.
 
 ###### ⚠️ Warning ⚠️
 > Blocking completely eliminates any and all benefits of reactive programming. We ***highly*** recommend that you learn more about reactive programming and eventually convert your code to be more reactive after the initial migration for better performance and scalability.
@@ -78,7 +78,7 @@ Everything. Its problems stem from being the oldest of the 3 major libraries (wr
 
 5. v2 is riddled with inconsistencies across its API. Some methods return `null`, others throw an exception, while others return `Optional`. v3 has been heavily focused on staying consistent across its entire API to prevent any unexpected behaviors or lopsided functionality. If something can be "absent", it'll return `Optional`. If it can make a request to Discord, it returns either a `Mono` or `Flux`. There are no surprises on what a method may attempt to accomplish or inconsistencies with handling specific cases.
 
-6. Manipulating entities in v2 is both inefficient and cumbersome. Most entities when being created or edited can set multiple properties at once. For instance, when you create a channel you can set the name, type, position, permission overwrites, etc. all in one request, however, in v2 this is impossible. In order to create/edit with multiple properties you must call individual methods one at a time which makes an entire request to Discord on each and every single invocation. This is tremendously wasteful and quickly makes your bot approach a rate limit. v3 fixes this by utilizing [Specs](https://github.com/Discord4J/Discord4J/wiki/Specs).
+6. Manipulating entities in v2 is both inefficient and cumbersome. Most entities when being created or edited can set multiple properties at once. For instance, when you create a channel you can set the name, type, position, permission overwrites, etc. all in one request, however, in v2 this is impossible. In order to create/edit with multiple properties you must call individual methods one at a time which makes an entire request to Discord on each and every single invocation. This is tremendously wasteful and quickly makes your bot approach a rate limit. v3 fixes this by utilizing [Specs](Specs.md).
 
 7. While it is "possible" to disable the cache in v2, it instantly causes a crash on startup when attempted. v3 was designed with caches being disabled in mind, allowing very lightweight configurations if desired. We have tested v3 running on some of [Tatsumaki](https://tatsumaki.xyz/)'s shards, and v3 was able to stay under 10MB of RAM usage. v3's Store API is also far more flexible, allowing other configurations such as off-heap caching to be possible.
 
@@ -91,95 +91,3 @@ Everything. Its problems stem from being the oldest of the 3 major libraries (wr
 
 #### Where is `MessageHistory`?
 `MessageHistory` has been completely removed in v3. A "message history" can be obtained by calling either [MessageChannel#getMessagesBefore](https://jitpack.io/com/discord4j/discord4j/discord4j-core/v3-SNAPSHOT/javadoc/discord4j/core/object/entity/MessageChannel.html#getMessagesBefore-discord4j.core.object.util.Snowflake-) or [MessageChannel#getMessagesAfter](https://jitpack.io/com/discord4j/discord4j/discord4j-core/v3-SNAPSHOT/javadoc/discord4j/core/object/entity/MessageChannel.html#getMessagesAfter-discord4j.core.object.util.Snowflake-).
-
-## Migration steps
-
-Important: This section is focused on the upcoming Discord4J v3.1 rather than v3.0.
-
-### Client building
-
-1. The main utility class `Discord4J` was removed. If you used `Discord4J::enableJettyLogging` you should read up on [Logging](https://github.com/Discord4J/Discord4J/wiki/Logging).
-1. `DiscordException` is not used anymore and you should attempt to migrate towards reactive [Error handling](https://github.com/Discord4J/Discord4J/wiki/Error-Handling) or if you decide to block, catch `RuntimeException` or `ClientException`.
-1. If your login flow consisted in obtaining an `IDiscordClient` instance, you should now either expect `GatewayDiscordClient` or `DiscordClient`
-1. `ClientBuilder` is now replaced with `DiscordClientBuilder`. Several options don't exist anymore or have replacements elsewhere. It comes with default options to allow a monolithic multi-shard bot to function. You can start with `DiscordClient::create` or `DiscordClient::builder`.
-1. `ClientBuilder::setDaemon` does not have an equivalent as it uses Reactor threading. Check the [Threading](https://github.com/Discord4J/Discord4J/wiki/Threading) page for more information.
-1. `ClientBuilder::withPingTimeout` is now called `setMaxMissedHeartbeatAck` and can be set at `DiscordClient::gateway`.
-1. `ClientBuilder::setMaxReconnectAttempts` now live under `ReconnectOptions` which can be set at `DiscordClient::gateway`. See [v3.1 Migration Guide](https://github.com/Discord4J/Discord4J/wiki/Migrating-from-v3.0-to-v3.1)
-1. Shard options like `ClientBuilder::withShards`, `::setShard` and `::withRecommendedShardCount` are present under `DiscordClient::gateway`. See [v3.1 Migration Guide](https://github.com/Discord4J/Discord4J/wiki/Migrating-from-v3.0-to-v3.1)
-1. `ClientBuilder` cache-related options like `setMaxMessageCacheCount` and `setCacheProvider` now live under the Stores abstraction and can be replaced using a combination of `MappingStoreService` and `CaffeineStoreService`. These options are set under `DiscordClient::gateway`. See also [Stores-Caffeine](https://github.com/Discord4J/Stores/tree/master/caffeine)
-1. `ClientBuilder::registerListener` variants are moved to `GatewayDiscordClient::on` method, or `GatewayDiscordClient::getEventDispatcher`.
-1. `ClientBuilder::set5xxRetryCount` is now abstracted to `DiscordClientBuilder::onClientResponse` where you can set a custom retrying policy. Discord4J retries most 5xx errors by default.
-1. Event processing options now live under `EventDispatcher` abstraction and can be replaced at `DiscordClient::gateway`, then `GatewayBootstrap::setEventDispatcher`. See `EventDispatcher` class for some built-in factories.
-1. Setting an initial presence/status is done at `DiscordClient::gateway` then `GatewayBootstrap::setInitialPresence`.
-1. Calling `DiscordClient::login` directly uses all defaults for Gateway. To customize go through `DiscordClient::gateway`, customize the given `GatewayBootstrap` and then call `GatewayBootstrap::login`.
-
-```java
-// v2.10.x
-IDiscordClient client = new ClientBuilder()
-    .withToken(bot.getToken())
-    .setDaemon(bot.isDaemon())
-    .withPingTimeout(bot.getMaxMissedPings())
-    .setMaxReconnectAttempts(bot.getMaxReconnectAttempts())
-    .login();
-// v3.1.x
-GatewayDiscordClient client = DiscordClient.create(bot.getToken())
-    .login()
-    .block();
-```
-
-### Event dispatching
-1. Use `GatewayDiscordClient::on` to attach a subscriber to receive all events for that type.
-1. If you relied heavily upon `@EventSubscriber` from v2 you can create an [`EventSubscriberAdapter`](https://gist.github.com/quanticc/57ca056ace9c557dc2303ef1e6549253) class yourself and use it in the following way:
-```java
-GatewayDiscordClient client = DiscordClient.create(token).login().block();
-EventSubscriberAdapter adapter = new EventSubscriberAdapter() {
-
-    @Override
-    public void onMessageCreate(MessageCreateEvent event) {
-        log.info("> {}", event.getMessage().getContent().orElse(""));
-    }
-};
-client.on(Event.class)
-    .as(adapter::listener)
-    .subscribe();
-    
-gateway.onDisconnect().block(); // we should block until it disconnects
-```
-Since `@EventSubscriber` was removed you can use that pattern, overriding the methods you wish to get notified. There is also a reactive alternative [`ReactiveEventAdapter`](https://gist.github.com/quanticc/b9c04f16ffdd925b845e3d4851fb10bd) you can use in a similar fashion.
-1. If you previously used `IListener<E>` you can also migrate it to `EventSubscriberAdapter`
-1. Events now live under the `discord4j.core.event` package.
-1. `ReconnectSuccessEvent` -> `ReconnectEvent`
-1. `ReconnectFailureEvent` -> `ReconnectFailEvent`
-1. `DisconnectedEvent` has split into `ReconnectStartEvent` and `DisconnectEvent`
-1. `UserBanEvent` -> `BanEvent`
-1. `UserPardonEvent` -> `UnbanEvent`
-1. `MessageReceivedEvent` -> `MessageCreateEvent`
-
-### Event processing
-1. In general, if an `Event` returns a `Mono` or `Flux`, it means it involves a request that might incur latency and therefore we use Reactor to properly route and schedule that action asynchronously. Such methods are safe to call `Mono::block` or `Flux::blockLast` upon to use the contained type in a blocking way.
-1. All entities have different names now but the correlation should be easy to follow, for example: `IMessage` -> `Message`
-1. Checking if a `MessageChannel` is private can be done through `instanceof PrivateChannel` or using `getType` after blocking, or `.ofType(PrivateChannel.class)` before blocking.
-1. `DiscordClient::getOurUser` -> `GatewayDiscordClient::getSelf` and optionally block
-
-### Working with permissions
-Consider the following call:
-```java
-boolean hasPermission = message.getChannel().getModifiedPermissions(message.getAuthor())
-                    .containsAll(EnumSet.of(Permission.MANAGE_MESSAGES));
-```
-To migrate this you should know:
-1. To work with `PermissionSet` rather than `EnumSet<Permission>`. Build one using `PermissionSet::of`.
-1. Since `Message::getChannel` returns a `Mono<MessageChannel>` and calls like this only make sense under Guild channels, you must ensure first that the actual type is `GuildChannel`: `message.getChannel().ofType(GuildChannel.class)`
-1. If you block such a `Mono` and the underlying channel is not a guild one, it will return `null`. There is also `Mono::blockOptional` to get an `Optional`
-1. After blocking you can then call `GuildChannel::getEffectivePermissions` using the `Snowflake` for a member or role
-The resulting code should look like:
-```java
-Snowflake authorId = message.getAuthor()
-        .map(User::getId)
-        .orElseThrow(IllegalArgumentException::new);
-boolean hasPermission = message.getChannel().ofType(GuildChannel.class)
-        .flatMap(channel -> channel.getEffectivePermissions(authorId))
-        .map(set -> set.containsAll(PermissionSet.of(Permission.MANAGE_MESSAGES)))
-        .blockOptional()
-        .orElse(false);
-```
