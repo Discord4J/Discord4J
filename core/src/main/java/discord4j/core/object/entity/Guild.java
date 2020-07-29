@@ -1028,21 +1028,22 @@ public final class Guild implements Entity {
 
     /**
      * Requests to create a category.
+     * <p>
+     * The properties of the category are configurable by the {@link CategoryCreateMono}.
      *
-     * @param spec A {@link Consumer} that provides a "blank" {@link CategoryCreateSpec} to be operated on.
+     * <pre>
+     * {@code
+     * guild.createCategory()
+     *     .withName("My Category")
+     *     .withPosition(5)
+     * }
+     * </pre>
+     *
      * @return A {@link Mono} where, upon successful completion, emits the created {@link Category}. If an error is
      * received, it is emitted through the {@code Mono}.
      */
-    public Mono<Category> createCategory(final Consumer<? super CategoryCreateSpec> spec) {
-        return Mono.defer(
-                () -> {
-                    CategoryCreateSpec mutatedSpec = new CategoryCreateSpec();
-                    spec.accept(mutatedSpec);
-                    return gateway.getRestClient().getGuildService()
-                            .createGuildChannel(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason());
-                })
-                .map(data -> EntityUtil.getChannel(gateway, data))
-                .cast(Category.class);
+    public CategoryCreateMono createCategory() {
+        return new CategoryCreateMono(gateway, getId().asLong());
     }
 
     /**
