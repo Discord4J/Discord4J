@@ -188,6 +188,7 @@ DiscordClient client = new DiscordClientBuilder(token)
 ```
 
 Each time `onClientResponse` is called, you're adding a strategy to transform each response made by the `DiscordClient`. If an error occurs, Discord4J processes the error through the following handlers:
+
 1. Handle rate limiting errors (429), these cannot be modified.
 2. Handle the errors using the ones installed by `onClientResponse`.
 3. Handle server errors (500s) and retry them using exponential backoff.

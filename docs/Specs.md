@@ -1,5 +1,6 @@
 ## Introduction
 Specs, short for Specification(s), are an unique design philosophy adopted by Discord4J to handle requests that contain multiple *optional* properties. They are very similar to the common [builder pattern](https://en.wikipedia.org/wiki/Builder_pattern), but with two very important differentiating characteristics:
+
 1) The end-user does **not** construct the builder.
 2) The end-user does **not** construct the finalized object.
 
