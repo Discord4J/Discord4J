@@ -3,7 +3,8 @@ name: Java CI
 on:
   push:
     branches:
-      - '**'
+      - 'master'
+      - '3.0.x'
     tags-ignore:
       - '*.*'
   pull_request:
