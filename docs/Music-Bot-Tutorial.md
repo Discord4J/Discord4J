@@ -26,17 +26,17 @@ It is expected to complete this tutorial in under 15 minutes.
 ### Setting Up IntelliJ
 Before coding, we need to create and setup a project with Discord4J installed. This section will cover what Maven is, how to create a Maven project using IntelliJ, and how to use Maven to install Discord4J.
 
-***
+#### Step 1
 
-1. Open IntelliJ and select **Create New Project**.
+Open IntelliJ and select **Create New Project**.
 <img src="https://i.imgur.com/XTdxTej.png">
 
 ***
 
-2. Select **Maven**. [Maven](https://maven.apache.org/) is a software project management and comprehension tool. Alongside its main competitor [Gradle](https://gradle.org/), Maven is practically required and essential for all Java development projects both personal and professional. It is what will enable us to install Discord4J and its dependencies along with any other dependencies and dependencies of those dependencies easily and with minimal effort.
-<img src="https://i.imgur.com/0tZFxk9.png">
+#### Step 2
 
-***
+Select **Maven**. [Maven](https://maven.apache.org/) is a software project management and comprehension tool. Alongside its main competitor [Gradle](https://gradle.org/), Maven is practically required and essential for all Java development projects both personal and professional. It is what will enable us to install Discord4J and its dependencies along with any other dependencies and dependencies of those dependencies easily and with minimal effort.
+<img src="https://i.imgur.com/0tZFxk9.png">
 
 ⚠️ If *Project SDK* is blank, click **New** and navigate to a directory where a JDK is present and click **OK**.
 
@@ -45,24 +45,32 @@ Before coding, we need to create and setup a project with Discord4J installed. T
 
 ***
 
-3. Click **Next** and you'll be required to provide a *GroupId*, *ArtifactId*, and *Version*. Refer to this [link](https://maven.apache.org/guides/mini/guide-naming-conventions.html) for a detailed explanation of each of these attributes. After you are done providing your attributes, select **Next**.
+#### Step 3
+
+Click **Next** and you'll be required to provide a *GroupId*, *ArtifactId*, and *Version*. Refer to this [link](https://maven.apache.org/guides/mini/guide-naming-conventions.html) for a detailed explanation of each of these attributes. After you are done providing your attributes, select **Next**.
 
    I will be using the reverse domain name of GitHub as my *GroupId* with an addition of my username and the name of the project (DMusic, for Discord Music). The *ArtifactId* will be "dmusic" as I expect an outputted jar to be referred to as "dmusic.jar". Finally, as for the *Version*, since this is an application, not a library, I prefer using a date-based versioning scheme, particularly `YEAR.MONTH.DAY`.
 <img src="https://i.imgur.com/mwvUpQS.png">
 
 ***
 
-4. This page will ask for a *Project Name*. You may leave it as the default (it automatically takes from the *ArtifactId*), but I personally prefer having proper capitalization when working in IntelliJ. After you have chosen, select **Finish**.
+#### Step 4
+
+This page will ask for a *Project Name*. You may leave it as the default (it automatically takes from the *ArtifactId*), but I personally prefer having proper capitalization when working in IntelliJ. After you have chosen, select **Finish**.
 <img src="https://i.imgur.com/KSBpCBD.png">
 
 ***
 
-5. Once IntelliJ has created the project, a dialog box will appear in the bottom-right corner. Select **Enable Auto-Import**. This will have IntelliJ automatically install dependencies like Discord4J after we request for them, rather than needing to manually refresh the project.
+#### Step 5
+
+Once IntelliJ has created the project, a dialog box will appear in the bottom-right corner. Select **Enable Auto-Import**. This will have IntelliJ automatically install dependencies like Discord4J after we request for them, rather than needing to manually refresh the project.
 <img src="https://i.imgur.com/cgMEOoq.png">
 
 ***
 
-6. IntelliJ will automatically open the *pom.xml* after it has created the project. Maven uses the *pom.xml* to control the project's structure and it's how we will be telling Maven to install Discord4J. As you can see [here](Home.md), Discord4J provides a set of "coordinates" that tells Maven how to find Discord4J. You may have noticed these coordinates contain a *GroupId*, *ArtifactId*, and *Version*; just like the attributes we have provided earlier! The coordinates is how Maven uniquely identifies a project, picks out a specific version, finds it, and eventually installs it for us.
+#### Step 6
+
+IntelliJ will automatically open the *pom.xml* after it has created the project. Maven uses the *pom.xml* to control the project's structure and it's how we will be telling Maven to install Discord4J. As you can see [here](index.md), Discord4J provides a set of "coordinates" that tells Maven how to find Discord4J. You may have noticed these coordinates contain a *GroupId*, *ArtifactId*, and *Version*; just like the attributes we have provided earlier! The coordinates is how Maven uniquely identifies a project, picks out a specific version, finds it, and eventually installs it for us.
 
    **Add** the coordinates to the root of the *pom.xml*. If the text is red, that is OK! Give IntelliJ and Maven a few seconds or a minute to download and add Discord4J to our project. The text will eventually turn completely white.
 
@@ -74,37 +82,50 @@ Important: Version numbers shown in these images might be outdated, always prefe
 
 ***
 
-7. Under **External Libraries** on the navigation pane, `discord4j-core` should be present. This means Discord4J has been properly imported and we are ready to utilize it in our project!
+#### Step 7
+
+Under **External Libraries** on the navigation pane, `discord4j-core` should be present. This means Discord4J has been properly imported and we are ready to utilize it in our project!
 <img src="https://i.imgur.com/WltBhd1.png">
 
 ***
 
 ### Creating a Bot
+
 Now that IntelliJ is configured for Maven with Discord4J installed we can finally start coding! This section will cover how to make your bot appear online once you start the program.
 
 ***
 
-7. **Right click** on **src/main/java** in the *Project View* and **select** the **New -> Package** option. This will allow us to create a base package for us to work with and acts as a starting point to help organize our code.
+#### Step 8
+
+**Right click** on **src/main/java** in the *Project View* and **select** the **New -> Package** option. This will allow us to create a base package for us to work with and acts as a starting point to help organize our code.
 <img src="https://i.imgur.com/MN6yr15.png">
 
 ***
 
-8. You should choose a package structure equal to the *GroupId* that you provided back in Step 3.
+#### Step 9
+
+You should choose a package structure equal to the *GroupId* that you provided back in Step 3.
 <img src="https://i.imgur.com/TuyeVDq.png">
 
 ***
 
-9. **Right click** on the last folder of your package structure and **select** the **New -> Java Class** option. We will now refer to this specific folder as the *root package*. For example, `dmusic` for my project is considered the *root package*.
+#### Step 10
+
+**Right click** on the last folder of your package structure and **select** the **New -> Java Class** option. We will now refer to this specific folder as the *root package*. For example, `dmusic` for my project is considered the *root package*.
 <img src="https://i.imgur.com/chCvXjn.png">
 
 ***
 
-10. Choose a class name. This class will contain our main method and as a personal preference I like having such classes equal the name of my application.
+#### Step 11
+
+Choose a class name. This class will contain our main method and as a personal preference I like having such classes equal the name of my application.
 <img src="https://i.imgur.com/1L39wRQ.png">
 
 ***
 
-11. Create a main method and add the code below. Assume `args` refers to the String array that is standard on all main methods, i.e., `String[] args`.
+#### Step 12
+
+Create a main method and add the code below. Assume `args` refers to the String array that is standard on all main methods, i.e., `String[] args`.
 
 ###### Using Discord4J v3.0.x
 ```java
@@ -118,7 +139,7 @@ Once we have our `DiscordClient` instance we now call `login`. However, `login` 
 
 **v3.0 behavior:** `login` will not "finish" until the bot is completely disconnected, i.e., calling `logout` at some point in the future.
 
-###### Using Discord4J v3.1.x
+###### Using Discord4J v3.1.x and above
 ```java
 final GatewayDiscordClient client = DiscordClientBuilder.create(args[0]).build()
     .login()
@@ -130,22 +151,30 @@ client.onDisconnect().block();
 
 ***
 
-12. **Click** on the **green arrow** next to the **main** method and **select** the **Run** option.
+#### Step 13
+
+**Click** on the **green arrow** next to the **main** method and **select** the **Run** option.
 <img src="https://i.imgur.com/TvanW7u.png">
 
 ***
 
-13. After IntelliJ compiles your program and starts, you'll immediately encounter an `ArrayIndexOutOfBoundsException`. This is because we haven't provided any arguments for our program yet so `args[0]` is invalid! So let's fix that. In the **top right** corner go into the **Edit Configurations...** menu.
+#### Step 14
+
+After IntelliJ compiles your program and starts, you'll immediately encounter an `ArrayIndexOutOfBoundsException`. This is because we haven't provided any arguments for our program yet so `args[0]` is invalid! So let's fix that. In the **top right** corner go into the **Edit Configurations...** menu.
 <img src="https://i.imgur.com/zxgSGhQ.png">
 
 ***
 
-14. **Add** your bot token to *Program arguments* and click **Apply** then **OK**.
+#### Step 15
+
+**Add** your bot token to *Program arguments* and click **Apply** then **OK**.
 <img src="https://i.imgur.com/GQRFTT2.png">
 
 ***
 
-15. **Rerun** the program, you should now see a bunch of output to the console. Congratulations, your bot is now online! If you invite your bot using the link below, replacing `CLIENTID` with the Client ID, then you will see your bot green and ready. If you wish to disconnect your bot, **click** on the **Exit** button in the console.
+#### Step 16
+
+**Rerun** the program, you should now see a bunch of output to the console. Congratulations, your bot is now online! If you invite your bot using the link below, replacing `CLIENTID` with the Client ID, then you will see your bot green and ready. If you wish to disconnect your bot, **click** on the **Exit** button in the console.
 
 `https://discordapp.com/oauth2/authorize?client_id=CLIENTID&scope=bot`
 
@@ -163,9 +192,11 @@ As outlined by the introduction, this tutorial will focus on two paradigms of pr
 
 ***
 
-16. There are many approaches to implementing a command system that have different trade-offs in abstraction, ease-of-use, ease-of-implementation, etc. In this tutorial we will be implementing a map-based, interface-bound command system. It is not the best solution, but you will have a functioning command system up and running very quickly and it is very simple to understand.
+#### Step 17
 
-    First, **create** an **interface** named `Command` with a **single method** that accepts a `MessageCreateEvent`. As the name suggest, this event is fired whenever a message is created. We will be using this interface to represent any given "command", i.e., `execute` will only fire if we received the particular command that the implementation represents.
+There are many approaches to implementing a command system that have different trade-offs in abstraction, ease-of-use, ease-of-implementation, etc. In this tutorial we will be implementing a map-based, interface-bound command system. It is not the best solution, but you will have a functioning command system up and running very quickly and it is very simple to understand.
+
+First, **create** an **interface** named `Command` with a **single method** that accepts a `MessageCreateEvent`. As the name suggest, this event is fired whenever a message is created. We will be using this interface to represent any given "command", i.e., `execute` will only fire if we received the particular command that the implementation represents.
 
 ###### Imperative Approach
 ```java
@@ -184,16 +215,20 @@ interface Command {
 
 ***
 
-17. Next, we need a way to have all our commands in one place so we can choose which one we want to fire for any given `MessageCreateEvent`, if any. The simplest way is to have a `Map`, where the keys represent the *name* of the command, with the values being `Command` instances.
+#### Step 18
 
-    **Add** the following inside your **main class**:
+Next, we need a way to have all our commands in one place so we can choose which one we want to fire for any given `MessageCreateEvent`, if any. The simplest way is to have a `Map`, where the keys represent the *name* of the command, with the values being `Command` instances.
+
+**Add** the following inside your **main class**:
 ```java
 private static final Map<String, Command> commands = new HashMap<>();
 ```
 
 ***
 
-18. Let's populate this map with a simple "ping pong" command just as a demonstration that the system works. **Add** the following inside your **main class**:
+#### Step 19
+
+Let's populate this map with a simple "ping pong" command just as a demonstration that the system works. **Add** the following inside your **main class**:
 ###### Imperative Approach
 ```java
 static {
@@ -215,9 +250,11 @@ All this code does is add a mapping to "ping" where the bot will create a new me
 
 ***
 
-19. Finally, we need a way to hook up our command system to Discord4J's event system. All of Discord4J's events are dispatched through the `EventDispatcher` that is attached to the `DiscordClient` instance. `EventDispatcher` has a single method, `on`, which determines which type of event the dispatcher should provide us.
+#### Step 20
 
-    After having an event, we need to do some basic filtering to make sure we are executing the right commands for the right messages. To do this, we will simply iterate through all our commands, check if the contents of the message starts with a prefix plus the command we are checking against and, if it does, execute the command.
+Finally, we need a way to hook up our command system to Discord4J's event system. All of Discord4J's events are dispatched through the `EventDispatcher` that is attached to the `DiscordClient` instance. `EventDispatcher` has a single method, `on`, which determines which type of event the dispatcher should provide us.
+
+After having an event, we need to do some basic filtering to make sure we are executing the right commands for the right messages. To do this, we will simply iterate through all our commands, check if the contents of the message starts with a prefix plus the command we are checking against and, if it does, execute the command.
 
 **Discord4J v3.0.x**: **Add** the following code **after** building the `DiscordClient`, but **before** `login`:
 **Discord4J v3.1.x**: **Add** the following code **after** building the `GatewayDiscordClient`, but **before** `onDisconnect`:
@@ -282,7 +319,9 @@ client.getEventDispatcher().on(MessageCreateEvent.class)
 
 ***
 
-20. **Rerun** the bot and type "!ping" to any channel the bot can read and it will promptly respond with "Pong!". Congratulations, you have successfully created your first command and expandable command system. If we need to add a new command, we just simply add another mapping to `commands` in the `static` block that we made in step 18.
+#### Step 21
+
+**Rerun** the bot and type "!ping" to any channel the bot can read and it will promptly respond with "Pong!". Congratulations, you have successfully created your first command and expandable command system. If we need to add a new command, we just simply add another mapping to `commands` in the `static` block that we made in step 18.
 
 ***
 
@@ -291,7 +330,9 @@ Now that we know how to implement commands, let's add a few more with the added 
 
 ***
 
-21. In order to playback audio from a YouTube link we need to be able to extract audio from a YouTube link in a format Discord will recognize. One of the easiest solutions for this is by utilizing [LavaPlayer](https://github.com/sedmelluq/lavaplayer). So in your *pom.xml*, **add** the **Maven coordinates** that **LavaPlayer's README** specifies.
+#### Step 22
+
+In order to playback audio from a YouTube link we need to be able to extract audio from a YouTube link in a format Discord will recognize. One of the easiest solutions for this is by utilizing [LavaPlayer](https://github.com/sedmelluq/lavaplayer). So in your *pom.xml*, **add** the **Maven coordinates** that **LavaPlayer's README** specifies.
 
 Important: Version numbers shown in these images might be outdated, always prefer using the latest version:
 
@@ -303,7 +344,9 @@ For `lavaplayer`: [![Bintray](https://api.bintray.com/packages/sedmelluq/com.sed
 
 ***
 
-22. **Add** the following code at the start of your main class, **before** building the `DiscordClient`.
+#### Step 23
+
+**Add** the following code at the start of your main class, **before** building the `DiscordClient`.
 ```java
 // Creates AudioPlayer instances and translates URLs to AudioTrack instances
 final AudioPlayerManager playerManager = new DefaultAudioPlayerManager();
@@ -319,7 +362,9 @@ AudioProvider provider = new LavaPlayerAudioProvider(player);
 
 ***
 
-23. **Create** the following class:
+#### Step 24
+
+**Create** the following class:
 ```java
 public final class LavaPlayerAudioProvider extends AudioProvider {
 
@@ -349,9 +394,12 @@ public final class LavaPlayerAudioProvider extends AudioProvider {
 
 ***
 
-24. Now that Discord4J and LavaPlayer are linked together, we need to have our bot be able to join voice channels to playback music. As a very simple demonstration, we will be adding a "join" command where the bot will join the voice channel of the user who made the request.
+#### Step 25
 
-    **Add** the following code after creating the `AudioProvider` instance from step 22.
+Now that Discord4J and LavaPlayer are linked together, we need to have our bot be able to join voice channels to playback music. As a very simple demonstration, we will be adding a "join" command where the bot will join the voice channel of the user who made the request.
+
+**Add** the following code after creating the `AudioProvider` instance from step 23.
+
 ###### Imperative Approach
 ```java
 commands.put("join", event -> {
@@ -382,9 +430,12 @@ commands.put("join", event -> Mono.justOrEmpty(event.getMember())
 
 ***
 
-25. Finally, let's add a command that takes a YouTube link, extracts audio from it, and plays it back to the channel. First, we need to make a class that takes processed `AudioTrack` instances and loads them into an `AudioPlayer`. The class this tutorial will make is the most basic implementation, but it is possible to design a "queue" system rather than an overriding system with a bit more requisite knowledge outside the scope of this tutorial.
+#### Step 26
 
-    **Create** the following class:
+Finally, let's add a command that takes a YouTube link, extracts audio from it, and plays it back to the channel. First, we need to make a class that takes processed `AudioTrack` instances and loads them into an `AudioPlayer`. The class this tutorial will make is the most basic implementation, but it is possible to design a "queue" system rather than an overriding system with a bit more requisite knowledge outside the scope of this tutorial.
+
+**Create** the following class:
+
 ```java
 public final class TrackScheduler implements AudioLoadResultHandler {
 
@@ -419,9 +470,12 @@ public final class TrackScheduler implements AudioLoadResultHandler {
 
 ***
 
-26. Now, let's add the command. We are going to add a "play" command, but with an additional technique to extract arguments from it. We will not be doing any sort of validation (i.e., check if the argument exists or if there are more than 1 arguments), but it would likely be a good idea to do so at a later date.
+#### Step 27
 
-    **Add** the following code right after your "join" command.
+Now, let's add the command. We are going to add a "play" command, but with an additional technique to extract arguments from it. We will not be doing any sort of validation (i.e., check if the argument exists or if there are more than 1 arguments), but it would likely be a good idea to do so at a later date.
+
+**Add** the following code right after your "join" command.
+
 ###### Imperative Approach
 ```java
 final TrackScheduler scheduler = new TrackScheduler(player);
@@ -442,6 +496,8 @@ commands.put("play", event -> Mono.justOrEmpty(event.getMessage().getContent())
 
 ***
 
-27. **Rerun** your bot and join a voice channel that the bot can also join. Type `!join` and then type `!play https://www.youtube.com/watch?v=dQw4w9WgXcQ`. Congratulations! You now have a bot that can parse commands, have an expandable command system, can join voice channels, and playback audio from YouTube (and other sources LavaPlayer supports).
+#### Step 28
 
-    That is the conclusion of this tutorial! If you have any questions or issues, you may ask in the [Discord4J Discord server](https://discord.gg/NxGAeCY). Feedback is also welcomed, and thank you for your interest in learning Discord4J.
+**Rerun** your bot and join a voice channel that the bot can also join. Type `!join` and then type `!play https://www.youtube.com/watch?v=dQw4w9WgXcQ`. Congratulations! You now have a bot that can parse commands, have an expandable command system, can join voice channels, and playback audio from YouTube (and other sources LavaPlayer supports).
+
+That is the conclusion of this tutorial! If you have any questions or issues, you may ask in the [Discord4J Discord server](https://discord.gg/NxGAeCY). Feedback is also welcomed, and thank you for your interest in learning Discord4J.
