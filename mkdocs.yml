@@ -10,8 +10,11 @@ nav:
     - 'Music Bot Tutorial (v3.0+)': 'Music-Bot-Tutorial.md'
     - 'Frequently Asked Questions': 'Frequently-Asked-Questions.md'
     - 'Migrating from v2.x to v3.1': 'Migrating-from-v2.x-to-v3.1.md'
+    - 'Migrating from v3.0 to v3.1': 'Migrating-from-v3.0-to-v3.1.md'
   - 'Exploring the API':
     - 'Specs': 'Specs.md'
+    - 'What''s new in v3.1': 'What''s-new-in-v3.1.md'
+    - 'Glossary': 'Glossary.md'
   - 'Advanced':
     - 'Sharding': 'Sharding.md'
     - 'Logging': 'Logging.md'
