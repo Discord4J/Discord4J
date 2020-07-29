@@ -62,7 +62,7 @@ Before coding, we need to create and setup a project with Discord4J installed. T
 
 ***
 
-6. IntelliJ will automatically open the *pom.xml* after it has created the project. Maven uses the *pom.xml* to control the project's structure and it's how we will be telling Maven to install Discord4J. As you can see [here](Home.md), Discord4J provides a set of "coordinates" that tells Maven how to find Discord4J. You may have noticed these coordinates contain a *GroupId*, *ArtifactId*, and *Version*; just like the attributes we have provided earlier! The coordinates is how Maven uniquely identifies a project, picks out a specific version, finds it, and eventually installs it for us.
+6. IntelliJ will automatically open the *pom.xml* after it has created the project. Maven uses the *pom.xml* to control the project's structure and it's how we will be telling Maven to install Discord4J. As you can see [here](index.md), Discord4J provides a set of "coordinates" that tells Maven how to find Discord4J. You may have noticed these coordinates contain a *GroupId*, *ArtifactId*, and *Version*; just like the attributes we have provided earlier! The coordinates is how Maven uniquely identifies a project, picks out a specific version, finds it, and eventually installs it for us.
 
    **Add** the coordinates to the root of the *pom.xml*. If the text is red, that is OK! Give IntelliJ and Maven a few seconds or a minute to download and add Discord4J to our project. The text will eventually turn completely white.
 
