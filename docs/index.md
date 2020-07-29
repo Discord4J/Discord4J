@@ -7,6 +7,7 @@ programming, how to utilize the Discord4J library effectively, and common exampl
 
 ## Download / Installation
 The recommended way to get Discord4J is to use a build automation tool like [Maven](https://maven.apache.org/) or [Gradle](https://gradle.org/). To setup Maven or Gradle, refer to the documentation for your specific IDE:
+
 * [IntelliJ / Maven](https://www.jetbrains.com/help/idea/maven-support.html)
 * [IntelliJ / Gradle](https://www.jetbrains.com/help/idea/getting-started-with-gradle.html)
 * [Eclipse / Maven](http://www.vogella.com/tutorials/EclipseMaven/article.html)

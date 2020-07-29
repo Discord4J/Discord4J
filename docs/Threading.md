@@ -18,6 +18,7 @@ Since Reactor gives the control to its users regarding threading, it is our goal
 #### Overriding `EventDispatcher` thread model
 
 Pass a `Scheduler` instance to `DiscordClientBuilder#setEventScheduler(Scheduler)`, these are our recommendations:
+
 - If you perform a lot of blocking and slow operations, switch to `Schedulers.elastic()`.
 - If you **never** call block, perform operations that park threads like blocking HTTP libraries nor blocking I/O in general, try using `Schedulers.immediate()` to minimize thread switching.
 - The current default is: `ForkJoinPoolScheduler.create("events")` providing a fair balance between the two options.
@@ -33,6 +34,7 @@ DiscordClient client = builder.setRouterFactory(routerFactory)
 ```
 
 The first parameter is to schedule each API response, and the second one is to set Scheduler for rate limits:
+
 - Use `Schedulers.elastic()` or `ForkJoinPoolScheduler` if you do blocking operations.
 - Same as the previous tip, try `Schedulers.immediate()` if you **never** block, as you would get an error if a blocking operation is detected on a network thread.
 - Use `Schedulers.parallel()` as the **second** parameter to go back to the Reactor default for delayed operations.
