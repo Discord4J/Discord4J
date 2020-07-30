@@ -18,7 +18,7 @@ package discord4j.core.object.entity;
 
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.retriever.EntityRetrievalStrategy;
-import discord4j.core.spec.RoleEditSpec;
+import discord4j.core.spec.RoleEditMono;
 import discord4j.core.util.EntityUtil;
 import discord4j.core.util.OrderUtil;
 import discord4j.discordjson.json.RoleData;
@@ -31,7 +31,6 @@ import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
 
 import java.util.Objects;
-import java.util.function.Consumer;
 
 /**
  * A Discord role.
@@ -263,19 +262,22 @@ public final class Role implements Entity {
 
     /**
      * Requests to edit this role.
+     * <p>
+     * The properties of the category are configurable by the {@link RoleEditMono}.
      *
-     * @param spec A {@link Consumer} that provides a "blank" {@link RoleEditSpec} to be operated on.
+     * <pre>
+     * {@code
+     * role.edit()
+     *     .withName("New Role Name")
+     *     .withColor(Color.MOON_YELLOW)))
+     * }
+     * </pre>
+     *
      * @return A {@link Mono} where, upon successful completion, emits the edited {@link Role}. If an error is received,
      * it is emitted through the {@code Mono}.
      */
-    public Mono<Role> edit(final Consumer<? super RoleEditSpec> spec) {
-        return Mono.defer(
-                () -> {
-                    RoleEditSpec mutatedSpec = new RoleEditSpec();
-                    spec.accept(mutatedSpec);
-                    return rest.edit(mutatedSpec.asRequest(), mutatedSpec.getReason())
-                            .map(bean -> new Role(gateway, bean, getGuildId().asLong()));
-                });
+    public RoleEditMono edit() {
+        return new RoleEditMono(gateway, getId().asLong(), guildId);
     }
 
     /**
