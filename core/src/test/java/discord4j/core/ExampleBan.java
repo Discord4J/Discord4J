@@ -9,7 +9,7 @@ import java.util.Objects;
 public class ExampleBan {
 
     public static void main(String[] args) {
-        Snowflake toBan = Objects.requireNonNull(Snowflake.of(System.getenv("toBan")));
+        Snowflake toBan = Snowflake.of(Objects.requireNonNull(System.getenv("toBan")));
 
         DiscordClient.create(System.getenv("token"))
                 .withGateway(client -> client.getEventDispatcher().on(MessageCreateEvent.class)
