@@ -59,7 +59,7 @@ public final class CategoryEditMono extends AuditableRequest<Category, Immutable
     }
 
     @Override
-    CategoryEditMono withReason(String reason) {
+    public CategoryEditMono withReason(String reason) {
         return new CategoryEditMono(requestBuilder, reason, gateway, categoryId);
     }
 
