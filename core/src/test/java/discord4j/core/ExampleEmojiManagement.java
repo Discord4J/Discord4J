@@ -4,7 +4,7 @@ import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.Message;
 import discord4j.rest.util.Image;
 
-public class ExampleEmojiCreate {
+public class ExampleEmojiManagement {
 
     public static void main(String[] args) {
         DiscordClient.create(System.getenv("token"))
@@ -17,7 +17,14 @@ public class ExampleEmojiCreate {
                                         .flatMap(image ->
                                                 guild.createEmoji()
                                                         .withName("d4j")
-                                                        .withImage(image)))
+                                                        .withImage(image))
+                        )
+                        .flatMap(emoji -> client.getEventDispatcher().on(MessageCreateEvent.class)
+                                .map(MessageCreateEvent::getMessage)
+                                .filter(msg -> msg.getContent().equals("!editEmoji"))
+                                .next()
+                                .then(emoji.edit().withName("new_name"))
+                        )
                 )
                 .block();
     }
