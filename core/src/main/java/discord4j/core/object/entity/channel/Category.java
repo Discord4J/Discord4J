@@ -19,13 +19,10 @@ package discord4j.core.object.entity.channel;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.retriever.EntityRetrievalStrategy;
-import discord4j.core.spec.CategoryEditSpec;
-import discord4j.core.util.EntityUtil;
+import discord4j.core.spec.CategoryEditMono;
 import discord4j.discordjson.json.ChannelData;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
-import java.util.function.Consumer;
 
 /** A Discord category. */
 public final class Category extends BaseGuildChannel {
@@ -68,21 +65,22 @@ public final class Category extends BaseGuildChannel {
 
     /**
      * Requests to edit this category.
+     * <p>
+     * The properties of the category are configurable by the {@link CategoryEditMono}.
      *
-     * @param spec A {@link Consumer} that provides a "blank" {@link CategoryEditSpec} to be operated on.
+     * <pre>
+     * {@code
+     * category.edit()
+     *     .withName("My Category")
+     *     .withReason("I wanted to")
+     * }
+     * </pre>
+     *
      * @return A {@link Mono} where, upon successful completion, emits the edited {@link Category}. If an error is
      * received, it is emitted through the {@code Mono}.
      */
-    public Mono<Category> edit(final Consumer<? super CategoryEditSpec> spec) {
-        return Mono.defer(
-                () -> {
-                    CategoryEditSpec mutatedSpec = new CategoryEditSpec();
-                    spec.accept(mutatedSpec);
-                    return getClient().getRestClient().getChannelService()
-                            .modifyChannel(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason());
-                })
-                .map(data -> EntityUtil.getChannel(getClient(), data))
-                .cast(Category.class);
+    public CategoryEditMono edit() {
+        return new CategoryEditMono(getClient(), getId().asLong());
     }
 
     @Override
