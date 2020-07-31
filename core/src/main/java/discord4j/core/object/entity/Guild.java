@@ -937,23 +937,22 @@ public final class Guild implements Entity {
 
     /**
      * Requests to edit this guild.
+     * <p>
+     * The properties of the category are configurable by the {@link GuildEditMono}.
      *
-     * @param spec A {@link Consumer} that provides a "blank" {@link GuildEditSpec} to be operated on.
+     * <pre>
+     * {@code
+     * guild.edit()
+     *     .withVerificationLevel(VerificationLevel.VERY_HIGH)
+     *     .withReason("Raid!")
+     * }
+     * </pre>
+     *
      * @return A {@link Mono} where, upon successful completion, emits the edited {@link Guild}. If an error is
      * received, it is emitted through the {@code Mono}.
      */
-    public Mono<Guild> edit(final Consumer<? super GuildEditSpec> spec) {
-        return Mono.defer(
-                () -> {
-                    GuildEditSpec mutatedSpec = new GuildEditSpec();
-                    spec.accept(mutatedSpec);
-                    return gateway.getRestClient().getGuildService()
-                            .modifyGuild(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason());
-                })
-                .map(data -> new Guild(gateway, GuildData.builder()
-                        .from(this.data)
-                        .from(data)
-                        .build()));
+    public GuildEditMono edit() {
+        return new GuildEditMono(gateway, getId().asLong(), data);
     }
 
     /**
