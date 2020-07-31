@@ -55,6 +55,7 @@ public final class RoleEditMono extends AuditableRequest<Role, ImmutableRoleModi
         return withBuilder(it -> it.mentionable(true));
     }
 
+    @Override
     public RoleEditMono withReason(String reason) {
         return new RoleEditMono(gateway, roleId, guildId, requestBuilder, reason);
     }

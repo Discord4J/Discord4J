@@ -14,5 +14,5 @@ abstract class AuditableRequest<T, B, SELF extends AuditableRequest<T, B, SELF>>
         this.reason = reason;
     }
 
-    abstract SELF withReason(String reason);
+    public abstract SELF withReason(String reason);
 }
