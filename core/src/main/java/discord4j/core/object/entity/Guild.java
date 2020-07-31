@@ -972,20 +972,23 @@ public final class Guild implements Entity {
 
     /**
      * Requests to create an emoji.
+     * The properties of the category are configurable by the {@link GuildEmojiCreateMono}.
      *
-     * @param spec A {@link Consumer} that provides a "blank" {@link GuildEmojiCreateSpec} to be operated on.
+     * <pre>
+     * {@code
+     * Image.ofUrl("https://cdn.discordapp.com/emojis/546687597246939136.png")
+     *     .flatMap(image ->
+     *         guild.createEmoji()
+     *             .withName("d4j")
+     *             .withImage(image))
+     * }
+     * </pre>
+     *
      * @return A {@link Mono} where, upon successful completion, emits the created {@link GuildEmoji}. If an error is
      * received, it is emitted through the {@code Mono}.
      */
-    public Mono<GuildEmoji> createEmoji(final Consumer<? super GuildEmojiCreateSpec> spec) {
-        return Mono.defer(
-                () -> {
-                    GuildEmojiCreateSpec mutatedSpec = new GuildEmojiCreateSpec();
-                    spec.accept(mutatedSpec);
-                    return gateway.getRestClient().getEmojiService()
-                            .createGuildEmoji(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason());
-                })
-                .map(data -> new GuildEmoji(gateway, data, getId().asLong()));
+    public GuildEmojiCreateMono createEmoji() {
+        return new GuildEmojiCreateMono(gateway, getId().asLong());
     }
 
     /**
