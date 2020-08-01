@@ -97,6 +97,9 @@ public class FollowedChannel implements DiscordObject {
      * Requests to retrieve the webhook that has been created when following the news channel. Requires
      * 'MANAGE_WEBHOOKS' permission.
      *
+     * <p>
+     * Note that the returned webhook cannot be executed, but can be deleted.
+     *
      * @return A {@link Mono} where, upon successful completion, emits the {@link Webhook webhook} that has been created
      * when following the news channel. If an error is received, it is emitted through the {@code Mono}.
      */
