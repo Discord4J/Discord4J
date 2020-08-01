@@ -184,6 +184,13 @@ public class ChannelService extends RestService {
                 .bodyToMono(Void.class);
     }
 
+    public Mono<FollowedChannelData> followNewsChannel(long channelId, NewsChannelFollowRequest request) {
+        return Routes.FOLLOW_NEWS_CHANNEL.newRequest(channelId)
+                .body(request)
+                .exchange(getRouter())
+                .bodyToMono(FollowedChannelData.class);
+    }
+
     public Mono<Void> triggerTypingIndicator(long channelId) {
         return Routes.TYPING_INDICATOR_TRIGGER.newRequest(channelId)
                 .exchange(getRouter())

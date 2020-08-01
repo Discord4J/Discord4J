@@ -16,10 +16,13 @@
  */
 package discord4j.core.object.entity.channel;
 
+import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
+import discord4j.core.object.FollowedChannel;
 import discord4j.core.spec.NewsChannelEditSpec;
 import discord4j.core.util.EntityUtil;
 import discord4j.discordjson.json.ChannelData;
+import discord4j.discordjson.json.NewsChannelFollowRequest;
 import reactor.core.publisher.Mono;
 
 import java.util.function.Consumer;
@@ -54,6 +57,21 @@ public final class NewsChannel extends BaseGuildMessageChannel {
                 })
                 .map(data -> EntityUtil.getChannel(getClient(), data))
                 .cast(NewsChannel.class);
+    }
+
+    /**
+     * Requests to follow this news channel. Following will create a webhook in the channel which ID is specified.
+     * Requires 'MANAGE_WEBHOOKS' permission.
+     *
+     * @param targetChannelId the ID of the channel where to create the follow webhook
+     * @return
+     */
+    public Mono<FollowedChannel> follow(Snowflake targetChannelId) {
+        return getClient().getRestClient().getChannelService()
+                .followNewsChannel(getId().asLong(), NewsChannelFollowRequest.builder()
+                        .webhookChannelId(targetChannelId.asString())
+                        .build())
+                .map(data -> new FollowedChannel(getClient(), data));
     }
 
     @Override
