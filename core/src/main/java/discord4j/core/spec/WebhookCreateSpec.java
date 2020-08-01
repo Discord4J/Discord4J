@@ -21,6 +21,8 @@ import discord4j.discordjson.json.WebhookCreateRequest;
 import discord4j.rest.util.Image;
 import reactor.util.annotation.Nullable;
 
+import java.util.Optional;
+
 /**
  * Spec used to create a {@link Webhook} entity.
  *
@@ -70,7 +72,7 @@ public class WebhookCreateSpec implements AuditSpec<WebhookCreateRequest> {
     public WebhookCreateRequest asRequest() {
         return WebhookCreateRequest.builder()
                 .name(name)
-                .avatar(avatar)
+                .avatar(Optional.ofNullable(avatar))
                 .build();
     }
 }

@@ -1324,7 +1324,7 @@ public final class Guild implements Entity {
     }
 
     /**
-     * Requests to retrieve the webhooks of the guild.
+     * Requests to retrieve the webhooks of the guild. Requires the MANAGE_WEBHOOKS permission.
      *
      * @return A {@link Flux} that continually emits the {@link Webhook webhooks} of the guild. If an error is
      * received, it is emitted through the {@code Flux}.

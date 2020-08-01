@@ -16,6 +16,7 @@
  */
 package discord4j.core.object.entity.channel;
 
+import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.ExtendedInvite;
 import discord4j.core.object.ExtendedPermissionOverwrite;
@@ -33,7 +34,6 @@ import discord4j.discordjson.json.ChannelData;
 import discord4j.discordjson.possible.Possible;
 import discord4j.rest.util.Permission;
 import discord4j.rest.util.PermissionSet;
-import discord4j.common.util.Snowflake;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -274,7 +274,7 @@ class BaseGuildMessageChannel extends BaseChannel implements GuildMessageChannel
     }
 
     /**
-     * Requests to create a webhook.
+     * Requests to create a webhook. Requires the MANAGE_WEBHOOKS permission.
      *
      * @param spec A {@link Consumer} that provides a "blank" {@link WebhookCreateSpec} to be operated on.
      * @return A {@link Mono} where, upon successful completion, emits the created {@link Webhook}. If an error
@@ -293,7 +293,7 @@ class BaseGuildMessageChannel extends BaseChannel implements GuildMessageChannel
     }
 
     /**
-     * Requests to retrieve the webhooks of the channel.
+     * Requests to retrieve the webhooks of the channel. Requires the MANAGE_WEBHOOKS permission.
      *
      * @return A {@link Flux} that continually emits the {@link Webhook webhooks} of the channel. If an error is
      * received, it is emitted through the {@code Flux}.

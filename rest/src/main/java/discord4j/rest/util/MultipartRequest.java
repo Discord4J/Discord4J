@@ -18,6 +18,7 @@
 package discord4j.rest.util;
 
 import discord4j.discordjson.json.MessageCreateRequest;
+import discord4j.discordjson.json.MessageSendRequestBase;
 import reactor.util.annotation.Nullable;
 import reactor.util.function.Tuple2;
 import reactor.util.function.Tuples;
@@ -26,28 +27,34 @@ import java.io.InputStream;
 import java.util.Collections;
 import java.util.List;
 
-public class MultipartRequest {
-
-    private final MessageCreateRequest createRequest;
+public class MultipartRequest<T extends MessageSendRequestBase> {
+    private final T jsonPayload;
     private final List<Tuple2<String, InputStream>> files;
 
-    public MultipartRequest(MessageCreateRequest createRequest) {
-        this(createRequest, Collections.emptyList());
+    public MultipartRequest(T jsonPayload) {
+        this(jsonPayload, Collections.emptyList());
     }
 
-    public MultipartRequest(MessageCreateRequest createRequest, String fileName, InputStream file) {
-        this(createRequest, Collections.singletonList(Tuples.of(fileName, file)));
+    public MultipartRequest(T jsonPayload, String fileName, InputStream file) {
+        this(jsonPayload, Collections.singletonList(Tuples.of(fileName, file)));
     }
 
-    public MultipartRequest(MessageCreateRequest createRequest, List<Tuple2<String, InputStream>> files) {
-        this.createRequest = createRequest;
+    public MultipartRequest(T jsonPayload, List<Tuple2<String, InputStream>> files) {
+        this.jsonPayload = jsonPayload;
         this.files = files;
     }
 
+    /**
+     * @deprecated Use {@link #getJsonPayload()} instead.
+     */
+    @Deprecated
     @Nullable
     public MessageCreateRequest getCreateRequest() {
-        return createRequest;
+        return (MessageCreateRequest) jsonPayload;
     }
+
+    @Nullable
+    public T getJsonPayload() { return jsonPayload; }
 
     public List<Tuple2<String, InputStream>> getFiles() {
         return files;
