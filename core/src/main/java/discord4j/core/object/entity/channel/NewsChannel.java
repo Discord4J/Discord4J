@@ -16,6 +16,7 @@
  */
 package discord4j.core.object.entity.channel;
 
+import discord4j.common.annotations.Experimental;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.FollowedChannel;
@@ -66,6 +67,7 @@ public final class NewsChannel extends BaseGuildMessageChannel {
      * @param targetChannelId the ID of the channel where to create the follow webhook
      * @return
      */
+    @Experimental
     public Mono<FollowedChannel> follow(Snowflake targetChannelId) {
         return getClient().getRestClient().getChannelService()
                 .followNewsChannel(getId().asLong(), NewsChannelFollowRequest.builder()
