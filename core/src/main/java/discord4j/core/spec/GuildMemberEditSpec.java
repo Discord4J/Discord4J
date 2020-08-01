@@ -82,7 +82,11 @@ public class GuildMemberEditSpec implements AuditSpec<GuildMemberModifyRequest> 
      * @return This spec.
      */
     public GuildMemberEditSpec setNickname(@Nullable String nickname) {
-        builder.nick(nickname == null ? Possible.absent() : Possible.of(nickname));
+        if (nickname != null) {
+            builder.nick(nickname);
+        } else {
+            builder.nick(Possible.absent());
+        }
         return this;
     }
 
