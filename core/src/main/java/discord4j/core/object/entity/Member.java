@@ -23,7 +23,7 @@ import discord4j.core.object.VoiceState;
 import discord4j.core.object.presence.Presence;
 import discord4j.core.retriever.EntityRetrievalStrategy;
 import discord4j.core.spec.BanMono;
-import discord4j.core.spec.GuildMemberEditSpec;
+import discord4j.core.spec.GuildMemberEditMono;
 import discord4j.core.util.OrderUtil;
 import discord4j.core.util.PermissionUtil;
 import discord4j.discordjson.json.MemberData;
@@ -43,7 +43,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -524,7 +523,18 @@ public final class Member extends User {
 
     /**
      * Requests to edit this member.
+     * <p>
+     * The properties of the category are configurable by the {@link GuildMemberEditMono}.
      *
+     * <pre>
+     * {@code
+     * member.edit()
+     *     .withNickname("Foo")
+     *     .withMute(true)
+     * }
+     * </pre>
+     *
+<<<<<<< HEAD
      * @param spec A {@link Consumer} that provides a "blank" {@link GuildMemberEditSpec} to be operated on.
      * @return A {@link Mono} where, upon successful completion, emits the modified {@link Member}. If an error is
      * received, it is emitted through the {@code Mono}.
@@ -539,6 +549,13 @@ public final class Member extends User {
                                     mutatedSpec.getReason())
                             .map(data -> new Member(getClient(), data, guildId));
                 });
+=======
+     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the member has been edited.
+     * If an error is received, it is emitted through the {@code Mono}.
+     */
+    public GuildMemberEditMono edit() {
+        return new GuildMemberEditMono(getClient(), guildId, getId().asLong());
+>>>>>>> Add GuildMemberEditMono
     }
 
     @Override
