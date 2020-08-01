@@ -19,7 +19,7 @@ package discord4j.core.object.entity.channel;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.ExtendedInvite;
 import discord4j.core.retriever.EntityRetrievalStrategy;
-import discord4j.core.spec.InviteCreateSpec;
+import discord4j.core.spec.InviteCreateMono;
 import discord4j.discordjson.json.ChannelData;
 import discord4j.discordjson.possible.Possible;
 import discord4j.common.util.Snowflake;
@@ -27,7 +27,6 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.Optional;
-import java.util.function.Consumer;
 
 class BaseCategorizableChannel extends BaseGuildChannel implements CategorizableChannel {
 
@@ -54,15 +53,8 @@ class BaseCategorizableChannel extends BaseGuildChannel implements Categorizable
     }
 
     @Override
-    public Mono<ExtendedInvite> createInvite(Consumer<? super InviteCreateSpec> spec) {
-        return Mono.defer(
-                () -> {
-                    InviteCreateSpec mutatedSpec = new InviteCreateSpec();
-                    spec.accept(mutatedSpec);
-                    return getClient().getRestClient().getChannelService()
-                            .createChannelInvite(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason());
-                })
-                .map(data -> new ExtendedInvite(getClient(), data));
+    public InviteCreateMono createInvite() {
+        return new InviteCreateMono(getClient(), getId().asLong());
     }
 
     @Override

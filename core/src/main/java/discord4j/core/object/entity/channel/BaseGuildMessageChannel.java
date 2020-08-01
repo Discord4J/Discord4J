@@ -26,7 +26,7 @@ import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.Webhook;
 import discord4j.core.retriever.EntityRetrievalStrategy;
-import discord4j.core.spec.InviteCreateSpec;
+import discord4j.core.spec.InviteCreateMono;
 import discord4j.core.spec.MessageCreateSpec;
 import discord4j.core.spec.WebhookCreateSpec;
 import discord4j.discordjson.json.BulkDeleteRequest;
@@ -207,8 +207,8 @@ class BaseGuildMessageChannel extends BaseChannel implements GuildMessageChannel
     }
 
     @Override
-    public Mono<ExtendedInvite> createInvite(final Consumer<? super InviteCreateSpec> spec) {
-        return categorizableChannel.createInvite(spec);
+    public InviteCreateMono createInvite() {
+        return categorizableChannel.createInvite();
     }
 
     @Override

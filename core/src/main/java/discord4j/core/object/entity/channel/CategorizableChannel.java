@@ -19,12 +19,11 @@ package discord4j.core.object.entity.channel;
 import discord4j.core.object.ExtendedInvite;
 import discord4j.core.retriever.EntityRetrievalStrategy;
 import discord4j.common.util.Snowflake;
-import discord4j.core.spec.InviteCreateSpec;
+import discord4j.core.spec.InviteCreateMono;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.Optional;
-import java.util.function.Consumer;
 
 /** A Discord channel which can be categorized into a {@link Category}. These channels can also have invites. */
 public interface CategorizableChannel extends GuildChannel {
@@ -55,12 +54,21 @@ public interface CategorizableChannel extends GuildChannel {
 
     /**
      * Requests to create an invite.
+     * <p>
+     * The properties of the invite are configurable by the {@link InviteCreateMono}.
      *
-     * @param spec A {@link Consumer} that provides a "blank" {@link InviteCreateSpec} to be operated on.
+     * <pre>
+     * {@code
+     * channel.createInvite()
+     *     .withMaxAge(1)
+     *     .withMaxUses(5)
+     * }
+     * </pre>
+     *
      * @return A {@link Mono} where, upon successful completion, emits the created {@link ExtendedInvite}. If an error
      * is received, it is emitted through the {@code Mono}.
      */
-    Mono<ExtendedInvite> createInvite(final Consumer<? super InviteCreateSpec> spec);
+    InviteCreateMono createInvite();
 
     /**
      * Requests to retrieve this channel's invites.
