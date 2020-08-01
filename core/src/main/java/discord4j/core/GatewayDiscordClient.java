@@ -37,11 +37,7 @@ import discord4j.core.shard.GatewayBootstrap;
 import discord4j.core.spec.GuildCreateSpec;
 import discord4j.core.spec.UserEditSpec;
 import discord4j.core.util.ValidationUtil;
-import discord4j.discordjson.json.ActivityUpdateRequest;
-import discord4j.discordjson.json.EmojiData;
-import discord4j.discordjson.json.GuildData;
-import discord4j.discordjson.json.GuildUpdateData;
-import discord4j.discordjson.json.RoleData;
+import discord4j.discordjson.json.*;
 import discord4j.discordjson.json.gateway.GuildMembersChunk;
 import discord4j.discordjson.json.gateway.RequestGuildMembers;
 import discord4j.discordjson.json.gateway.StatusUpdate;
@@ -201,7 +197,8 @@ public class GatewayDiscordClient implements EntityRetriever {
     }
 
     /**
-     * Requests to retrieve the webhook represented by the supplied ID.
+     * Requests to retrieve the webhook represented by the supplied ID. The bot must have the MANAGE_WEBHOOKS
+     * permission in the webhook's channel.
      *
      * @param webhookId The ID of the webhook.
      * @return A {@link Mono} where, upon successful completion, emits the {@link Webhook} as represented by the
@@ -212,6 +209,23 @@ public class GatewayDiscordClient implements EntityRetriever {
                 .getWebhook(webhookId.asLong())
                 .map(data -> new Webhook(this, data));
     }
+
+    /**
+     * Requests to retrieve the webhook represented by the supplied ID and token. Doesn't
+     * return the user who created the webhook object. Doesn't require the bot to have the MANAGE_WEBHOOKS permission.
+     *
+     * @param webhookId The ID of the webhook.
+     * @param token The authentication token of the webhook.
+     * @return A {@link Mono} where, upon successful completion, emits the {@link Webhook} as represented by the
+     * supplied ID without the user field and with the token field. If an error is received,
+     * it is emitted through the {@code Mono}.
+     */
+    public Mono<Webhook> getWebhookByIdWithToken(final Snowflake webhookId, final String token) {
+        return getRestClient().getWebhookService()
+                .getWebhookWithToken(webhookId.asLong(), token)
+                .map(data -> new Webhook(this, data));
+    }
+
 
     /**
      * Requests to retrieve the application info.

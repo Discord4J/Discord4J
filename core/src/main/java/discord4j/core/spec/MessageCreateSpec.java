@@ -16,6 +16,7 @@
  */
 package discord4j.core.spec;
 
+import discord4j.common.util.Snowflake;
 import discord4j.core.object.Embed;
 import discord4j.core.object.entity.Attachment;
 import discord4j.core.object.entity.Message;
@@ -26,7 +27,6 @@ import discord4j.discordjson.json.EmbedData;
 import discord4j.discordjson.json.MessageCreateRequest;
 import discord4j.discordjson.possible.Possible;
 import discord4j.rest.util.MultipartRequest;
-import discord4j.common.util.Snowflake;
 import reactor.util.annotation.Nullable;
 import reactor.util.function.Tuple2;
 import reactor.util.function.Tuples;
@@ -43,7 +43,7 @@ import java.util.function.Consumer;
  *
  * @see <a href="https://discord.com/developers/docs/resources/channel#create-message">Create Message</a>
  */
-public class MessageCreateSpec implements Spec<MultipartRequest> {
+public class MessageCreateSpec implements Spec<MultipartRequest<MessageCreateRequest>> {
 
     @Nullable
     private String content;
@@ -137,7 +137,7 @@ public class MessageCreateSpec implements Spec<MultipartRequest> {
     }
 
     @Override
-    public MultipartRequest asRequest() {
+    public MultipartRequest<MessageCreateRequest> asRequest() {
         MessageCreateRequest json = MessageCreateRequest.builder()
                 .content(content == null ? Possible.absent() : Possible.of(content))
                 .nonce(nonce == null ? Possible.absent() : Possible.of(nonce))
@@ -145,6 +145,6 @@ public class MessageCreateSpec implements Spec<MultipartRequest> {
                 .embed(embed == null ? Possible.absent() : Possible.of(embed))
                 .allowedMentions(allowedMentionsData == null ? Possible.absent() : Possible.of(allowedMentionsData))
                 .build();
-        return new MultipartRequest(json, files == null ? Collections.emptyList() : files);
+        return new MultipartRequest<>(json, files == null ? Collections.emptyList() : files);
     }
 }
