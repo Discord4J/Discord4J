@@ -16,14 +16,16 @@
  */
 package discord4j.rest.service;
 
-import discord4j.discordjson.json.WebhookCreateRequest;
-import discord4j.discordjson.json.WebhookData;
-import discord4j.discordjson.json.WebhookModifyRequest;
+import discord4j.discordjson.json.*;
+import discord4j.rest.request.DiscordWebResponse;
 import discord4j.rest.request.Router;
 import discord4j.rest.route.Routes;
+import discord4j.rest.util.MultipartRequest;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
+
+import java.util.Objects;
 
 public class WebhookService extends RestService {
 
@@ -59,10 +61,25 @@ public class WebhookService extends RestService {
                 .bodyToMono(WebhookData.class);
     }
 
+    public Mono<WebhookData> getWebhookWithToken(long webhookId, String token) {
+        return Routes.WEBHOOK_TOKEN_GET.newRequest(webhookId, token)
+                .exchange(getRouter())
+                .bodyToMono(WebhookData.class);
+    }
+
     public Mono<WebhookData> modifyWebhook(long webhookId, WebhookModifyRequest request, @Nullable String reason) {
         return Routes.WEBHOOK_MODIFY.newRequest(webhookId)
                 .body(request)
                 .optionalHeader("X-Audit-Log-Reason", reason)
+                .exchange(getRouter())
+                .bodyToMono(WebhookData.class);
+    }
+
+    public Mono<WebhookData> modifyWebhookWithToken(long webhookId, String token,
+                                                    WebhookModifyWithTokenRequest request) {
+        // The reason is ignored when updating a webhook using the token.
+        return Routes.WEBHOOK_TOKEN_MODIFY.newRequest(webhookId, token)
+                .body(request)
                 .exchange(getRouter())
                 .bodyToMono(WebhookData.class);
     }
@@ -72,5 +89,36 @@ public class WebhookService extends RestService {
                 .optionalHeader("X-Audit-Log-Reason", reason)
                 .exchange(getRouter())
                 .bodyToMono(Void.class);
+    }
+
+    public Mono<Void> deleteWebhookWithToken(long webhookId, String token) {
+        // The reason is ignored when deleting a webhook using the token.
+        return Routes.WEBHOOK_TOKEN_DELETE.newRequest(webhookId, token)
+                .exchange(getRouter())
+                .bodyToMono(Void.class);
+    }
+
+    /**
+     * Executes the specified webhook.
+     *
+     * @param wait true if you want to return message data and errors for the webhook.
+     * @return If wait is true, a mono that contains the message information of the execution or an
+     * error if the webhook is unsuccessful. If wait is false, the mono completes as soon as the request
+     * is finished sending, and DOES NOT result in an error if the message is not saved.
+     */
+    public Mono<MessageData> executeWebhook(long webhookId, String token, boolean wait,
+                                            MultipartRequest<WebhookExecuteRequest> request) {
+        DiscordWebResponse response = Routes.WEBHOOK_EXECUTE
+                .newRequest(webhookId, token)
+                .query("wait", wait)
+                .header("content-type", request.getFiles().isEmpty() ? "application/json" : "multipart/form-data")
+                .body(Objects.requireNonNull(request.getFiles().isEmpty() ? request.getJsonPayload() : request))
+                .exchange(getRouter());
+
+        if (wait) {
+            return response.bodyToMono(MessageData.class);
+        } else {
+            return response.bodyToMono(Void.class).cast(MessageData.class);
+        }
     }
 }
