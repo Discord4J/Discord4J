@@ -396,6 +396,18 @@ public class RestChannel {
     }
 
     /**
+     * Requests to follow this channel. Only works if this channel represents a news channel. Following this channel
+     * will create a webhook in a chosen target channel where 'MANAGE_WEBHOOKS' permission is granted.
+     *
+     * @param request the request to follow this channel
+     * @return A {@link Mono} where, upon successful completion, emits the data indicating that the channel has been
+     * followed. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<FollowedChannelData> follow(NewsChannelFollowRequest request) {
+        return restClient.getChannelService().followNewsChannel(id, request);
+    }
+
+    /**
      * Request to trigger the typing indicator in this channel. A single invocation of this method will trigger the
      * indicator for 10 seconds or until the bot sends a message in this channel.
      *

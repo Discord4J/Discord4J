@@ -296,6 +296,13 @@ public abstract class Routes {
     public static final Route CHANNEL_PERMISSION_DELETE = Route.delete("/channels/{channel.id}/permissions/{overwrite.id}");
 
     /**
+     * Follow a News Channel to send messages to a target channel. Requires the `MANAGE_WEBHOOKS` permission in the
+     * target channel. Returns a followed channel object.
+     */
+    @Experimental
+    public static final Route FOLLOW_NEWS_CHANNEL = Route.post("/channels/{channel.id}/followers");
+
+    /**
      * Post a typing indicator for the specified channel. Generally bots should not implement this route. However, if a
      * bot is responding to a command and expects the computation to take a few seconds, this endpoint may be called to
      * let the user know that the bot is processing their message. Returns a 204 empty response on success. Fires a
