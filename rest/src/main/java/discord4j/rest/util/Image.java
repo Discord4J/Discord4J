@@ -18,6 +18,7 @@ package discord4j.rest.util;
 
 import reactor.core.publisher.Mono;
 import reactor.netty.http.client.HttpClient;
+import reactor.util.annotation.Nullable;
 
 import java.util.Arrays;
 import java.util.Base64;
@@ -114,7 +115,7 @@ public final class Image {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         if (this == o) {
             return true;
         }

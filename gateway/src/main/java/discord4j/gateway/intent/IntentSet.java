@@ -1,5 +1,7 @@
 package discord4j.gateway.intent;
 
+import reactor.util.annotation.Nullable;
+
 import java.util.*;
 
 /**
@@ -230,7 +232,7 @@ public final class IntentSet extends AbstractSet<Intent> {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         if (this == o) {
             return true;
         }
