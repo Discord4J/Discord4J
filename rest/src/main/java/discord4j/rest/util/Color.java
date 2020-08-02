@@ -16,6 +16,8 @@
  */
 package discord4j.rest.util;
 
+import reactor.util.annotation.Nullable;
+
 public final class Color {
 
     /** The color white <span style="color: #FFFFFF">\u25A0</span>. */
@@ -216,7 +218,7 @@ public final class Color {
             '}';
     }
 
-    public boolean equals(final Object obj) {
+    public boolean equals(@Nullable final Object obj) {
         return obj instanceof Color && ((Color) obj).getRGB() == getRGB();
     }
 
