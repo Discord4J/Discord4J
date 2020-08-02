@@ -978,20 +978,23 @@ public final class Guild implements Entity {
 
     /**
      * Requests to create a role.
+     * <p>
+     * The properties of the role are configurable by the {@link RoleCreateMono}.
      *
-     * @param spec A {@link Consumer} that provides a "blank" {@link RoleCreateSpec} to be operated on.
+     * <pre>
+     * {@code
+     * guild.createRole()
+     *     .withName("My role")
+     *     .withHoist(true)
+     *     .withMentionable(false)
+     * }
+     * </pre>
+     *
      * @return A {@link Mono} where, upon successful completion, emits the created {@link Role}. If an error is
      * received, it is emitted through the {@code Mono}.
      */
-    public Mono<Role> createRole(final Consumer<? super RoleCreateSpec> spec) {
-        return Mono.defer(
-                () -> {
-                    RoleCreateSpec mutatedSpec = new RoleCreateSpec();
-                    spec.accept(mutatedSpec);
-                    return gateway.getRestClient().getGuildService()
-                            .createGuildRole(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason());
-                })
-                .map(data -> new Role(gateway, data, getId().asLong()));
+    public RoleCreateMono createRole() {
+        return new RoleCreateMono(gateway, getId().asLong());
     }
 
     /**
