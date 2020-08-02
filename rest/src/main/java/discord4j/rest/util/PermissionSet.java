@@ -16,6 +16,8 @@
  */
 package discord4j.rest.util;
 
+import reactor.util.annotation.Nullable;
+
 import java.util.*;
 
 /**
@@ -263,7 +265,7 @@ public final class PermissionSet extends AbstractSet<Permission> {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         if (this == o) {
             return true;
         }
