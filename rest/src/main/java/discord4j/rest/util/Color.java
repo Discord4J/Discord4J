@@ -16,7 +16,7 @@
  */
 package discord4j.rest.util;
 
-import jdk.internal.jline.internal.Nullable;
+import reactor.util.annotation.Nullable;
 
 public final class Color {
 
