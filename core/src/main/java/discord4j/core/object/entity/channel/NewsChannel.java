@@ -65,7 +65,8 @@ public final class NewsChannel extends BaseGuildMessageChannel {
      * Requires 'MANAGE_WEBHOOKS' permission.
      *
      * @param targetChannelId the ID of the channel where to create the follow webhook
-     * @return
+     * @return a {@link FollowedChannel} object containing a reference to this news channel and allowing to retrieve the
+     * webhook created.
      */
     @Experimental
     public Mono<FollowedChannel> follow(Snowflake targetChannelId) {
