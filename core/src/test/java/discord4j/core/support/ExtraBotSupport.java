@@ -2,6 +2,7 @@ package discord4j.core.support;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.LoggerContext;
+import discord4j.common.ReactorResources;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.message.MessageCreateEvent;
@@ -15,7 +16,6 @@ import reactor.core.Exceptions;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.function.TupleUtils;
-import reactor.netty.http.client.HttpClient;
 import reactor.util.Logger;
 import reactor.util.Loggers;
 
@@ -234,7 +234,7 @@ public class ExtraBotSupport {
             if (message.getContent().equals("!avatar")) {
                 for (Attachment attachment : message.getAttachments()) {
                     // This code is very optimistic as it does not check for status codes or file types
-                    return HttpClient.create()
+                    return ReactorResources.DEFAULT_HTTP_CLIENT.get()
                             .get()
                             .uri(attachment.getUrl())
                             .responseSingle((res, mono) -> mono.asByteArray())
