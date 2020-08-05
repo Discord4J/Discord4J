@@ -16,8 +16,8 @@
  */
 package discord4j.rest.util;
 
+import discord4j.common.ReactorResources;
 import reactor.core.publisher.Mono;
-import reactor.netty.http.client.HttpClient;
 import reactor.util.annotation.Nullable;
 
 import java.util.Arrays;
@@ -50,7 +50,7 @@ public final class Image {
      * error is received, it is emitted through the {@code Mono}.
      */
     public static Mono<Image> ofUrl(final String url) {
-        return HttpClient.create()
+        return ReactorResources.DEFAULT_HTTP_CLIENT.get()
                 .get()
                 .uri(url)
                 .responseSingle((res, body) -> body.asByteArray().map(image -> {

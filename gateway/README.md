@@ -2,7 +2,7 @@
 The `gateway` module provides a low-level WebSocket client for interacting with the [Discord Gateway](https://discord.com/developers/docs/topics/gateway).
 
 ## Installation
-Just replace `@VERSION@` with the latest given by ![](https://img.shields.io/maven-central/v/com.discord4j/discord4j-gateway.svg?style=flat-square)
+Just replace `@VERSION@` with the latest given by ![](https://img.shields.io/maven-central/v/com.discord4j/discord4j-gateway/3.0.svg?style=flat-square)
 ### Gradle
 ```groovy
 repositories {
@@ -42,7 +42,7 @@ PayloadReader reader = new JacksonPayloadReader(mapper);
 PayloadWriter writer = new JacksonPayloadWriter(mapper);
 RetryOptions retryOptions = new RetryOptions(Duration.ofSeconds(5), Duration.ofSeconds(120),
         Integer.MAX_VALUE, Schedulers.elastic());
-GatewayClient gatewayClient = new DefaultGatewayClient(HttpClient.create(),
+GatewayClient gatewayClient = new DefaultGatewayClient(ReactorResources.DEFAULT_HTTP_CLIENT.get(),
         reader, writer, retryOptions, token,
         new IdentifyOptions(0, 1, null), null,
         new RateLimiterTransformer(new SimpleBucket(1, Duration.ofSeconds(6))));

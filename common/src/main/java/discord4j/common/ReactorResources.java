@@ -38,7 +38,7 @@ public class ReactorResources {
     private static final AtomicInteger ID = new AtomicInteger();
 
     public static final Supplier<HttpClient> DEFAULT_HTTP_CLIENT =
-            () -> HttpClient.create().compress(true).followRedirect(true);
+            () -> HttpClient.create().compress(true).followRedirect(true).secure();
     public static final Supplier<Scheduler> DEFAULT_TIMER_TASK_SCHEDULER = () ->
             Schedulers.newParallel("d4j-parallel-" + ID.incrementAndGet(), Schedulers.DEFAULT_POOL_SIZE, true);
     public static final Supplier<Scheduler> DEFAULT_BLOCKING_TASK_SCHEDULER = Schedulers::boundedElastic;
