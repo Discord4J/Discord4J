@@ -20,6 +20,7 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
+import discord4j.common.ReactorResources;
 import discord4j.common.SimpleBucket;
 import discord4j.common.jackson.PossibleModule;
 import discord4j.common.jackson.UnknownPropertyHandler;
@@ -32,7 +33,6 @@ import discord4j.gateway.payload.PayloadWriter;
 import discord4j.gateway.retry.RetryOptions;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
-import reactor.netty.http.client.HttpClient;
 
 import java.io.IOException;
 import java.time.Duration;
@@ -49,7 +49,7 @@ public class ExampleGatewayClient {
         PayloadWriter writer = new JacksonPayloadWriter(mapper);
         RetryOptions retryOptions = new RetryOptions(Duration.ofSeconds(5), Duration.ofSeconds(120),
                 Integer.MAX_VALUE, Schedulers.elastic());
-        GatewayClient gatewayClient = new DefaultGatewayClient(HttpClient.create(),
+        GatewayClient gatewayClient = new DefaultGatewayClient(ReactorResources.DEFAULT_HTTP_CLIENT.get(),
                 reader, writer, retryOptions, token,
                 new IdentifyOptions(0, 1, null), null,
                 new RateLimiterTransformer(new SimpleBucket(1, Duration.ofSeconds(6))));

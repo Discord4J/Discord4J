@@ -21,13 +21,13 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
+import discord4j.common.ReactorResources;
 import discord4j.common.jackson.PossibleModule;
 import discord4j.common.jackson.UnknownPropertyHandler;
 import discord4j.rest.http.ExchangeStrategies;
 import discord4j.rest.http.client.DiscordWebClient;
 import discord4j.rest.request.DefaultRouter;
 import discord4j.rest.request.Router;
-import reactor.netty.http.client.HttpClient;
 
 import java.util.Objects;
 
@@ -47,7 +47,7 @@ public abstract class RestTests {
                 .setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY)
                 .addHandler(new UnknownPropertyHandler(true))
                 .registerModules(new PossibleModule(), new Jdk8Module());
-        DiscordWebClient webClient = new DiscordWebClient(HttpClient.create().compress(true),
+        DiscordWebClient webClient = new DiscordWebClient(ReactorResources.DEFAULT_HTTP_CLIENT.get(),
                 ExchangeStrategies.jackson(mapper), token);
         return new DefaultRouter(webClient);
     }

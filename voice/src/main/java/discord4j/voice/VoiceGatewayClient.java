@@ -19,6 +19,7 @@ package discord4j.voice;
 import com.discord4j.fsm.FiniteStateMachine;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.iwebpp.crypto.TweetNaclFast;
+import discord4j.common.ReactorResources;
 import discord4j.voice.VoiceGatewayEvent.Start;
 import discord4j.voice.VoiceGatewayEvent.Stop;
 import discord4j.voice.VoiceGatewayState.*;
@@ -34,7 +35,6 @@ import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
 import reactor.netty.NettyPipeline;
-import reactor.netty.http.client.HttpClient;
 import reactor.netty.http.websocket.WebsocketInbound;
 import reactor.netty.http.websocket.WebsocketOutbound;
 import reactor.util.Logger;
@@ -63,9 +63,7 @@ public class VoiceGatewayClient {
 
             when(Stopped.class)
                     .on(Start.class, (curState, start) -> {
-                        Disposable websocketTask = HttpClient.create()
-                                .wiretap(true)
-                                .followRedirect(true)
+                        Disposable websocketTask = ReactorResources.DEFAULT_HTTP_CLIENT.get()
                                 .headers(headers -> headers.add(USER_AGENT, "DiscordBot(https://discord4j.com, 3)")) // TODO make configurable
                                 .websocket(Integer.MAX_VALUE)
                                 .uri(start.gatewayUrl + "?v=3")

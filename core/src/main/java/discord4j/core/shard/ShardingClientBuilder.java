@@ -18,6 +18,7 @@
 package discord4j.core.shard;
 
 import discord4j.common.JacksonResourceProvider;
+import discord4j.common.ReactorResources;
 import discord4j.common.SimpleBucket;
 import discord4j.core.DiscordClientBuilder;
 import discord4j.gateway.GatewayObserver;
@@ -38,7 +39,6 @@ import reactor.core.publisher.Mono;
 import reactor.core.publisher.ReplayProcessor;
 import reactor.core.scheduler.Scheduler;
 import reactor.netty.ConnectionObserver;
-import reactor.netty.http.client.HttpClient;
 import reactor.scheduler.forkjoin.ForkJoinPoolScheduler;
 import reactor.util.Logger;
 import reactor.util.Loggers;
@@ -327,7 +327,7 @@ public class ShardingClientBuilder {
      */
     public Flux<DiscordClientBuilder> build() {
         final JacksonResourceProvider jackson = new JacksonResourceProvider();
-        final DiscordWebClient webClient = new DiscordWebClient(HttpClient.create().compress(true),
+        final DiscordWebClient webClient = new DiscordWebClient(ReactorResources.DEFAULT_HTTP_CLIENT.get(),
                 ExchangeStrategies.jackson(jackson.getObjectMapper()), token);
         final RouterFactory routerFactory = initRouterFactory();
         final Router router = initRouter(routerFactory, webClient);

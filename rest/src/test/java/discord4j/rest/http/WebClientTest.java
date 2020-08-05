@@ -18,6 +18,7 @@
 package discord4j.rest.http;
 
 import discord4j.common.JacksonResourceProvider;
+import discord4j.common.ReactorResources;
 import discord4j.rest.http.client.ClientException;
 import discord4j.rest.http.client.DiscordWebClient;
 import discord4j.rest.request.DefaultRouter;
@@ -30,7 +31,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import reactor.core.publisher.Mono;
 import reactor.netty.DisposableServer;
-import reactor.netty.http.client.HttpClient;
 import reactor.netty.http.server.HttpServer;
 import reactor.test.StepVerifier;
 
@@ -67,7 +67,7 @@ public class WebClientTest {
     @Test
     public void shouldErrorWithClientExceptionOnHtmlBadRequest() {
         ExchangeStrategies strategies = ExchangeStrategies.jackson(new JacksonResourceProvider().getObjectMapper());
-        DiscordWebClient webClient = new DiscordWebClient(HttpClient.create(), strategies, "");
+        DiscordWebClient webClient = new DiscordWebClient(ReactorResources.DEFAULT_HTTP_CLIENT.get(), strategies, "");
         Route<?> badRequestRoute = Route.get("http://0.0.0.0:" + port + "/html/bad-request", Object.class);
         Router router = new DefaultRouter(webClient);
         StepVerifier.create(router.exchange(new DiscordRequest<>(badRequestRoute)))

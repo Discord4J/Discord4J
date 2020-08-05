@@ -41,7 +41,7 @@ ObjectMapper mapper = new ObjectMapper()
         .addHandler(new UnknownPropertyHandler(true))
         .registerModules(new PossibleModule(), new Jdk8Module());
 
-DiscordWebClient webClient = new DiscordWebClient(HttpClient.create().compress(true),
+DiscordWebClient webClient = new DiscordWebClient(ReactorResources.DEFAULT_HTTP_CLIENT.get(),
         ExchangeStrategies.jackson(mapper), token);
 
 Router router = new DefaultRouter(webClient, Schedulers.elastic(), Schedulers.elastic());

@@ -20,6 +20,7 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
+import discord4j.common.ReactorResources;
 import discord4j.common.SimpleBucket;
 import discord4j.common.jackson.PossibleModule;
 import discord4j.common.jackson.UnknownPropertyHandler;
@@ -28,7 +29,6 @@ import discord4j.gateway.payload.JacksonPayloadReader;
 import discord4j.gateway.payload.JacksonPayloadWriter;
 import discord4j.gateway.retry.RetryOptions;
 import reactor.core.scheduler.Schedulers;
-import reactor.netty.http.client.HttpClient;
 
 import java.time.Duration;
 import java.util.ArrayList;
@@ -59,7 +59,7 @@ public class ExampleGatewayClientShards {
         for (int i = 0; i < shardCount; i++) {
             CountDownLatch next = new CountDownLatch(1);
             GatewayClient shard = new DefaultGatewayClient(
-                    HttpClient.create().compress(true),
+                    ReactorResources.DEFAULT_HTTP_CLIENT.get(),
                     new JacksonPayloadReader(mapper),
                     new JacksonPayloadWriter(mapper),
                     // RetryOptions must not be shared as it tracks state for a single shard

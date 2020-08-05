@@ -19,6 +19,7 @@ package discord4j.core;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import discord4j.common.GitProperties;
 import discord4j.common.JacksonResourceProvider;
+import discord4j.common.ReactorResources;
 import discord4j.common.SimpleBucket;
 import discord4j.common.jackson.UnknownPropertyHandler;
 import discord4j.core.event.EventDispatcher;
@@ -621,7 +622,7 @@ public final class DiscordClientBuilder {
     }
 
     private HttpClient initHttpClient() {
-        return HttpClient.create().compress(true).followRedirect(true);
+        return ReactorResources.DEFAULT_HTTP_CLIENT.get();
     }
 
     private DiscordWebClient initWebClient(HttpClient httpClient, ObjectMapper mapper) {
