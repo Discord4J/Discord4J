@@ -20,7 +20,6 @@ package discord4j.rest.http.client;
 import discord4j.rest.json.response.ErrorResponse;
 import discord4j.rest.response.ResponseFunction;
 import discord4j.rest.route.Route;
-import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import org.reactivestreams.Publisher;
@@ -130,16 +129,6 @@ public class ClientException extends RuntimeException {
      */
     public Optional<ErrorResponse> getErrorResponse() {
         return Optional.ofNullable(errorResponse);
-    }
-
-    @Override
-    public String toString() {
-        return "ClientException{" +
-                "request=" + request +
-                ", status=" + status +
-                ", headers=" + headers.copy().remove(HttpHeaderNames.AUTHORIZATION).toString() +
-                ", errorResponse=" + errorResponse +
-                "}";
     }
 
     /**
