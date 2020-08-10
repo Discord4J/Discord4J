@@ -85,11 +85,10 @@ public final class Embed implements DiscordObject {
      *
      * @return The type of embed, if present.
      */
-    @Nullable
     public Type getType() {
         return data.type().toOptional()
                 .map(Type::of)
-                .orElse(null);
+                .orElseThrow(IllegalStateException::new); // type should always be present on received embeds
     }
 
     /**
@@ -292,9 +291,8 @@ public final class Embed implements DiscordObject {
          *
          * @return The URL of the footer icon (only supports http(s) and attachments).
          */
-        @Nullable
-        public String getIconUrl() {
-            return data.iconUrl().toOptional().orElse(null);
+        public Optional<String> getIconUrl() {
+            return data.iconUrl().toOptional();
         }
 
         /**
@@ -302,9 +300,8 @@ public final class Embed implements DiscordObject {
          *
          * @return A proxied URL of the footer icon.
          */
-        @Nullable
-        public String getProxyIconUrl() {
-            return data.proxyIconUrl().toOptional().orElse(null);
+        public Optional<String> getProxyIconUrl() {
+            return data.proxyIconUrl().toOptional();
         }
     }
 
@@ -337,9 +334,9 @@ public final class Embed implements DiscordObject {
          *
          * @return The source URL of the image (only supports http(s) and attachments).
          */
-        @Nullable
         public String getUrl() {
-            return data.url().toOptional().orElse(null);
+            return data.url().toOptional()
+                    .orElseThrow(IllegalStateException::new); // image url should always be present on received embeds
         }
 
         /**
@@ -347,9 +344,9 @@ public final class Embed implements DiscordObject {
          *
          * @return A proxied URL of the image.
          */
-        @Nullable
         public String getProxyUrl() {
-            return data.proxyUrl().toOptional().orElse(null);
+            return data.proxyUrl().toOptional()
+                    .orElseThrow(IllegalStateException::new); // image url should always be present on received embeds
         }
 
         /**
@@ -402,9 +399,9 @@ public final class Embed implements DiscordObject {
          *
          * @return The source URL of the thumbnail (only supports http(s) and attachments).
          */
-        @Nullable
         public String getUrl() {
-            return data.url().toOptional().orElse(null);
+            return data.url().toOptional()
+                    .orElseThrow(IllegalStateException::new); // thumbnail url should always be present on received embeds
         }
 
         /**
@@ -412,9 +409,9 @@ public final class Embed implements DiscordObject {
          *
          * @return A proxied URL of the thumbnail.
          */
-        @Nullable
         public String getProxyUrl() {
-            return data.proxyUrl().toOptional().orElse(null);
+            return data.proxyUrl().toOptional()
+                    .orElseThrow(IllegalStateException::new); // thumbnail url should always be present on received embeds
         }
 
         /**
@@ -467,9 +464,9 @@ public final class Embed implements DiscordObject {
          *
          * @return The source URL of the video.
          */
-        @Nullable
         public String getUrl() {
-            return data.url().toOptional().orElse(null);
+            return data.url().toOptional()
+                    .orElseThrow(IllegalStateException::new); // video url should always be present on received embeds
         }
 
         /**
@@ -522,9 +519,8 @@ public final class Embed implements DiscordObject {
          *
          * @return The name of the provider.
          */
-        @Nullable
-        public String getName() {
-            return data.name().toOptional().orElse(null);
+        public Optional<String> getName() {
+            return data.name().toOptional();
         }
 
         /**
@@ -569,9 +565,8 @@ public final class Embed implements DiscordObject {
          *
          * @return The name of the author.
          */
-        @Nullable
-        public String getName() {
-            return data.name().toOptional().orElse(null);
+        public Optional<String> getName() {
+            return data.name().toOptional();
         }
 
         /**
@@ -579,9 +574,8 @@ public final class Embed implements DiscordObject {
          *
          * @return The URL of the author.
          */
-        @Nullable
-        public String getUrl() {
-            return data.url().toOptional().orElse(null);
+        public Optional<String> getUrl() {
+            return data.url().toOptional();
         }
 
         /**
@@ -589,9 +583,8 @@ public final class Embed implements DiscordObject {
          *
          * @return The URL of the author icon (only supports http(s) and attachments).
          */
-        @Nullable
-        public String getIconUrl() {
-            return data.iconUrl().toOptional().orElse(null);
+        public Optional<String> getIconUrl() {
+            return data.iconUrl().toOptional();
         }
 
         /**
@@ -599,9 +592,8 @@ public final class Embed implements DiscordObject {
          *
          * @return A proxied URL of the author icon.
          */
-        @Nullable
-        public String getProxyIconUrl() {
-            return data.proxyIconUrl().toOptional().orElse(null);
+        public Optional<String> getProxyIconUrl() {
+            return data.proxyIconUrl().toOptional();
         }
     }
 
