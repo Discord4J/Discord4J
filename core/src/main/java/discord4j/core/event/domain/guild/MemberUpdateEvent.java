@@ -49,12 +49,13 @@ public class MemberUpdateEvent extends GuildEvent {
     private final List<Long> currentRoles;
     @Nullable
     private final String currentNickname;
+    private final String currentJoinedAt;
     @Nullable
     private final String currentPremiumSince;
 
     public MemberUpdateEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, long guildId, long memberId,
                              @Nullable Member old, List<Long> currentRoles, @Nullable String currentNickname,
-                             @Nullable String currentPremiumSince) {
+                             String currentJoinedAt, @Nullable String currentPremiumSince) {
         super(gateway, shardInfo);
 
         this.guildId = guildId;
@@ -62,6 +63,7 @@ public class MemberUpdateEvent extends GuildEvent {
         this.old = old;
         this.currentRoles = currentRoles;
         this.currentNickname = currentNickname;
+        this.currentJoinedAt = currentJoinedAt;
         this.currentPremiumSince = currentPremiumSince;
     }
 
@@ -134,6 +136,15 @@ public class MemberUpdateEvent extends GuildEvent {
     }
 
     /**
+     * Gets the current join time of the {@link Member} involved in this event.
+     *
+     * @return The current join time of the {@link Member} involved in this event.
+     */
+    public Instant getJoinTime() {
+        return DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(currentJoinedAt, Instant::from);
+    }
+
+    /**
      * Gets when the user started boosting the guild, if present.
      *
      * @return When the user started boosting the guild, if present.
@@ -151,6 +162,7 @@ public class MemberUpdateEvent extends GuildEvent {
                 ", old=" + old +
                 ", currentRoles=" + currentRoles +
                 ", currentNickname='" + currentNickname + '\'' +
+                ", currentJoinedAt='" + currentJoinedAt + '\'' +
                 ", currentPremiumSince='" + currentPremiumSince + '\'' +
                 '}';
     }
