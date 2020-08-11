@@ -72,6 +72,7 @@ import reactor.util.Logger;
 import reactor.util.Loggers;
 import reactor.util.annotation.Nullable;
 import reactor.util.context.Context;
+import reactor.util.retry.Retry;
 
 import java.time.Duration;
 import java.util.*;
@@ -809,9 +810,9 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                     forCleanup.add(b.client.getGatewayService()
                             .getGateway()
                             .doOnSubscribe(s -> log.debug(format(ctx, "Acquiring gateway endpoint")))
-                            .retryBackoff(reconnectOptions.getMaxRetries(),
-                                    reconnectOptions.getFirstBackoff(),
-                                    reconnectOptions.getMaxBackoffInterval())
+                            .retryWhen(Retry.backoff(
+                                    reconnectOptions.getMaxRetries(), reconnectOptions.getFirstBackoff())
+                                    .maxBackoff(reconnectOptions.getMaxBackoffInterval()))
                             .flatMap(response -> gatewayClient.execute(
                                     RouteUtils.expandQuery(response.url(), getGatewayParameters())))
                             .doOnError(sink::error) // only useful for startup errors

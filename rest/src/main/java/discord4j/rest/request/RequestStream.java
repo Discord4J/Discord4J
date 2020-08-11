@@ -29,9 +29,9 @@ import reactor.core.publisher.MonoProcessor;
 import reactor.core.publisher.SignalType;
 import reactor.core.scheduler.Scheduler;
 import reactor.netty.http.client.HttpClientResponse;
-import reactor.retry.Retry;
 import reactor.util.Logger;
 import reactor.util.Loggers;
+import reactor.util.retry.Retry;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -78,8 +78,8 @@ class RequestStream {
      * This retry function is used for reading and completing HTTP requests in the event of a server error (codes
      * 500, 502, 503 and 504). The delay is calculated using exponential backoff with jitter.
      */
-    private Retry<?> serverErrorRetryFactory() {
-        return Retry.onlyIf(ClientException.isRetryContextStatusCode(500, 502, 503, 504))
+    private reactor.util.retry.Retry serverErrorRetryFactory() {
+        return Retry.withThrowable(reactor.retry.Retry.onlyIf(ClientException.isRetryContextStatusCode(500, 502, 503, 504))
                 .withBackoffScheduler(timedTaskScheduler)
                 .exponentialBackoffWithJitter(Duration.ofSeconds(2), Duration.ofSeconds(30))
                 .doOnRetry(ctx -> {
@@ -87,7 +87,7 @@ class RequestStream {
                         log.debug("Retry {} in bucket {} due to {} for {}",
                                 ctx.iteration(), id.toString(), ctx.exception().toString(), ctx.backoff());
                     }
-                });
+                }));
     }
 
     void push(RequestCorrelation<ClientResponse> request) {
@@ -173,7 +173,7 @@ class RequestStream {
                     .subscriberContext(ctx -> ctx.putAll(correlation.getContext())
                             .put(LogUtil.KEY_REQUEST_ID, clientRequest.getId())
                             .put(LogUtil.KEY_BUCKET_ID, id.toString()))
-                    .retryWhen(rateLimitRetryOperator::apply)
+                    .retryWhen(Retry.withThrowable(rateLimitRetryOperator::apply))
                     .transform(getResponseTransformers(request))
                     .retryWhen(serverErrorRetryFactory())
                     .doFinally(this::next)

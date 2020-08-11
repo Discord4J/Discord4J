@@ -46,7 +46,7 @@ public final class DiscordClientBuilder<C, O extends RouterOptions> extends Rest
             Properties properties = GitProperties.getProperties();
             String url = properties.getProperty(GitProperties.APPLICATION_URL, "https://discord4j.com");
             String name = properties.getProperty(GitProperties.APPLICATION_NAME, "Discord4J");
-            String version = properties.getProperty(GitProperties.APPLICATION_VERSION, "3.1");
+            String version = properties.getProperty(GitProperties.APPLICATION_VERSION, "3.2");
             String gitDescribe = properties.getProperty(GitProperties.GIT_COMMIT_ID_DESCRIBE, version);
             log.info("{} {} ({})", name, gitDescribe, url);
             return new DiscordClient(coreResources);

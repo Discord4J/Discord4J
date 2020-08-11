@@ -25,10 +25,9 @@ import io.netty.handler.codec.http.HttpResponseStatus;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
 import reactor.netty.http.client.HttpClientResponse;
-import reactor.retry.Backoff;
-import reactor.retry.Retry;
 import reactor.retry.RetryContext;
 import reactor.util.annotation.Nullable;
+import reactor.util.retry.Retry;
 
 import java.time.Duration;
 import java.util.Arrays;
@@ -125,7 +124,7 @@ public class ClientException extends RuntimeException {
      * is a common object that contains an internal status code and messages, and could be used to further clarify
      * the source of the API error.
      *
-     * @return the Discord error response, if present.
+     * @return the Discord error response, if present
      */
     public Optional<ErrorResponse> getErrorResponse() {
         return Optional.ofNullable(errorResponse);
@@ -137,7 +136,7 @@ public class ClientException extends RuntimeException {
      *
      * @param code the status code for which this {@link Predicate} should return {@code true}
      * @return a {@link Predicate} that returns {@code true} if the given {@link Throwable} is a {@link ClientException}
-     * containing the given HTTP status code.
+     * containing the given HTTP status code
      */
     public static Predicate<Throwable> isStatusCode(int code) {
         return t -> {
@@ -155,7 +154,7 @@ public class ClientException extends RuntimeException {
      *
      * @param codes the status codes for which this {@link Predicate} should return {@code true}
      * @return a {@link Predicate} that returns {@code true} if the given {@link Throwable} is a {@link ClientException}
-     * containing the given HTTP status code.
+     * containing the given HTTP status code
      */
     public static Predicate<Throwable> isStatusCode(Integer... codes) {
         return t -> {
@@ -170,11 +169,11 @@ public class ClientException extends RuntimeException {
     /**
      * {@link Predicate} helper to further classify a {@link ClientException}, while creating a {@link Retry}
      * factory, depending on the underlying HTTP status code. A {@link Retry} factory can be created through methods
-     * like {@link Retry#onlyIf(Predicate)} where this method can be used as argument.
+     * like {@link reactor.retry.Retry#onlyIf(Predicate)} where this method can be used as argument.
      *
      * @param code the status code for which this {@link Predicate} should return {@code true}
      * @return a {@link Predicate} that returns {@code true} if the given {@link RetryContext} exception is a
-     * {@link ClientException} containing the given HTTP status code.
+     * {@link ClientException} containing the given HTTP status code
      */
     public static Predicate<RetryContext<?>> isRetryContextStatusCode(int code) {
         return ctx -> isStatusCode(code).test(ctx.exception());
@@ -183,11 +182,11 @@ public class ClientException extends RuntimeException {
     /**
      * {@link Predicate} helper to further classify a {@link ClientException}, while creating a {@link Retry}
      * factory, depending on the underlying HTTP status code. A {@link Retry} factory can be created through methods
-     * like {@link Retry#onlyIf(Predicate)} where this method can be used as argument.
+     * like {@link reactor.retry.Retry#onlyIf(Predicate)} where this method can be used as argument.
      *
      * @param codes the status codes for which this {@link Predicate} should return {@code true}
      * @return a {@link Predicate} that returns {@code true} if the given {@link Throwable} is a {@link ClientException}
-     * containing the given HTTP status code.
+     * containing the given HTTP status code
      */
     public static Predicate<RetryContext<?>> isRetryContextStatusCode(Integer... codes) {
         return ctx -> isStatusCode(codes).test(ctx.exception());
@@ -195,12 +194,13 @@ public class ClientException extends RuntimeException {
 
     /**
      * Transformation function that can be used within an operator such as {@link Mono#transform(Function)} or
-     * {@link Mono#compose(Function)} to turn an error sequence matching the given HTTP status code, into an empty
+     * {@link Mono#transformDeferred(Function)} to turn an error sequence matching the given HTTP status code, into
+     * an empty
      * sequence, effectively suppressing the original error.
      *
      * @param code the status code that should be transformed into empty sequences
      * @param <T> the type of the response
-     * @return a transformation function that converts error sequences into empty sequences.
+     * @return a transformation function that converts error sequences into empty sequences
      */
     public static <T> Function<Mono<T>, Publisher<T>> emptyOnStatus(int code) {
         return mono -> mono.onErrorResume(isStatusCode(code), t -> Mono.empty());
@@ -208,16 +208,15 @@ public class ClientException extends RuntimeException {
 
     /**
      * Transformation function that can be used within an operator such as {@link Mono#transform(Function)} or
-     * {@link Mono#compose(Function)} to apply a retrying strategy in case of an error matching the given HTTP status
+     * {@link Mono#transformDeferred(Function)} to apply a retrying strategy in case of an error matching the given
+     * HTTP status
      * code. The provided retrying strategy will wait 1 second, and then retry once.
      *
      * @param code the status code that should be retried
      * @param <T> the type of the response
-     * @return a transformation function that retries error sequences.
+     * @return a transformation function that retries error sequences
      */
     public static <T> Function<Mono<T>, Publisher<T>> retryOnceOnStatus(int code) {
-        return mono -> mono.retryWhen(Retry.onlyIf(isRetryContextStatusCode(code))
-                .backoff(Backoff.fixed(Duration.ofSeconds(1)))
-                .retryOnce());
+        return mono -> mono.retryWhen(Retry.backoff(1, Duration.ofSeconds(1)).filter(isStatusCode(code)));
     }
 }
