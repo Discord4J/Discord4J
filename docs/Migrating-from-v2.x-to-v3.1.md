@@ -48,7 +48,7 @@ eventDispatcher.on(listener.getEventType()).subscribe(listener::execute);
 ```
 
 ## ReadyEvent
-`ReadyEvent` in v3 now represents Discord's [ReadyEvent](https://discordapp.com/developers/docs/topics/gateway#ready), which is sent before any `GuildCreateEvent`. This is different compared to v2 where `ReadyEvent` was defined when the bot was "ready", meaning all guilds have been received. In exchange, however, v3 does not require the bot to be "ready" to execute any actions (such as sending a message). This, consequently, also means v3 does not require the bot to be *logged in* to perform actions to Discord.
+`ReadyEvent` in v3 now represents Discord's [ReadyEvent](https://discord.com/developers/docs/topics/gateway#ready), which is sent before any `GuildCreateEvent`. This is different compared to v2 where `ReadyEvent` was defined when the bot was "ready", meaning all guilds have been received. In exchange, however, v3 does not require the bot to be "ready" to execute any actions (such as sending a message). This, consequently, also means v3 does not require the bot to be *logged in* to perform actions to Discord.
 
 To mimic v2's `ReadyEvent`, i.e. know when all guilds have been received, you may use the following example:
 
