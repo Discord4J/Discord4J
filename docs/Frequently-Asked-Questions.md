@@ -16,7 +16,7 @@ If you have an `Event` and want to get an entity related to that event, more tha
 ## Without an event
 "...outside of an event handler."
 
-If you don't have an `Event` or there isn't a way to get the entity you want from the event, you can use the fact that all entities have a unique ID associated to them called a `Snowflake`. You can [obtain](https://support.discordapp.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID-) this ID in the Discord client and pass it to one of the many `getXById(Snowflake)` methods of `DiscordClient`.
+If you don't have an `Event` or there isn't a way to get the entity you want from the event, you can use the fact that all entities have a unique ID associated to them called a `Snowflake`. You can [obtain](https://support.discord.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID-) this ID in the Discord client and pass it to one of the many `getXById(Snowflake)` methods of `DiscordClient`.
 
 # Channel types
 "I can't send a message to a `Channel`, what gives?"

@@ -18,7 +18,7 @@ It is expected to complete this tutorial in under 15 minutes.
 | [Adding Music](#adding-music)               |
 
 ### Requirements
-* You should already have your bot created and its token ready for use. If you do not, go to this [link](https://discordapp.com/developers/applications/), create an application, obtain the bot token, and the Client ID.
+* You should already have your bot created and its token ready for use. If you do not, go to this [link](https://discord.com/developers/applications/), create an application, obtain the bot token, and the Client ID.
 * JDK 8 or above should already be downloaded and/or installed on your system.
 * This tutorial assumes you are familiar with Java 8 or above concepts with a special emphasis in lambdas. If you are unfamiliar with lambdas, please visit our [Lambda Tutorial](Lambda-Tutorial.md).
 * This tutorial uses [IntelliJ](https://www.jetbrains.com/idea/) to setup the programming environment and it is assumed to already be installed on your system. Eclipse, Netbeans, and other IDEs have similar, but slightly different, setup processes. Please consult the documentation for your specific IDE as it is necessary.
@@ -176,7 +176,7 @@ After IntelliJ compiles your program and starts, you'll immediately encounter an
 
 **Rerun** the program, you should now see a bunch of output to the console. Congratulations, your bot is now online! If you invite your bot using the link below, replacing `CLIENTID` with the Client ID, then you will see your bot green and ready. If you wish to disconnect your bot, **click** on the **Exit** button in the console.
 
-`https://discordapp.com/oauth2/authorize?client_id=CLIENTID&scope=bot`
+`https://discord.com/oauth2/authorize?client_id=CLIENTID&scope=bot`
 
 <img src="https://i.imgur.com/kBu1zoP.png">
 
