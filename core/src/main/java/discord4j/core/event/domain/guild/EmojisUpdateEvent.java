@@ -21,8 +21,10 @@ import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.GuildEmoji;
 import discord4j.common.util.Snowflake;
 import discord4j.gateway.ShardInfo;
+import jdk.internal.jline.internal.Nullable;
 import reactor.core.publisher.Mono;
 
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -38,10 +40,14 @@ public class EmojisUpdateEvent extends GuildEvent {
     private final long guildId;
     private final Set<GuildEmoji> emojis;
 
-    public EmojisUpdateEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, long guildId, Set<GuildEmoji> emojis) {
+    @Nullable
+    private final Set<GuildEmoji> old;
+
+    public EmojisUpdateEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, long guildId, Set<GuildEmoji> emojis, Set<GuildEmoji> old) {
         super(gateway, shardInfo);
         this.guildId = guildId;
         this.emojis = emojis;
+        this.old = old;
     }
 
     /**
@@ -72,11 +78,22 @@ public class EmojisUpdateEvent extends GuildEvent {
         return emojis;
     }
 
+    /**
+     * Gets a list of ALL old emojis of the {@link Guild}, if present.
+     * This may not be available if {@code GuildEmojis} are not stored.
+     *
+     * @return A list of ALL old emojis of the {@link Guild}.
+     */
+    public Optional<Set<GuildEmoji>> getOld() {
+        return Optional.ofNullable(old);
+    }
+
     @Override
     public String toString() {
         return "EmojisUpdateEvent{" +
                 "guildId=" + guildId +
                 ", emojis=" + emojis +
+                ", old=" + old +
                 '}';
     }
 }
