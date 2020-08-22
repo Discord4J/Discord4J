@@ -21,7 +21,7 @@ import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.GuildEmoji;
 import discord4j.common.util.Snowflake;
 import discord4j.gateway.ShardInfo;
-import jdk.internal.jline.internal.Nullable;
+import reactor.util.annotation.Nullable;
 import reactor.core.publisher.Mono;
 
 import java.util.Optional;
