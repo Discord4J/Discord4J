@@ -768,7 +768,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                                     () -> log.debug(format(ctx, "Event mapper completed"))));
 
                     // wire internal shard coordinator events
-                    // TODO: transition into separate lifecycleSink for these events
+                    // TODO: migrate to GatewayClient::stateEvents
                     forCleanup.add(gatewayClient.dispatch()
                             .ofType(GatewayStateChange.class)
                             .takeUntilOther(closeProcessor)
@@ -778,14 +778,14 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                                 SessionInfo session = null;
                                 switch (event.getState()) {
                                     case CONNECTED:
-                                        log.info(format(ctx, "Shard connected"));
+                                    case RETRY_SUCCEEDED:
+                                        // TODO: ensure this sink is only pushed to once and avoid dropping signals
                                         return shardCoordinator.publishConnected(shard)
                                                 .doFinally(__ -> sink.success(shard));
                                     case DISCONNECTED_RESUME:
                                         session = SessionInfo.create(gatewayClient.getSessionId(),
                                                 gatewayClient.getSequence());
                                     case DISCONNECTED:
-                                        log.info(format(ctx, "Shard disconnected"));
                                         return shardCoordinator.publishDisconnected(shard, session)
                                                 .then(Mono.fromRunnable(() -> clientGroup.remove(shard.getIndex())))
                                                 .then(shardCoordinator.getConnectedCount()
