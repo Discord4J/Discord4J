@@ -1214,21 +1214,13 @@ public final class Guild implements Entity {
     /**
      * Requests to retrieve the number of users that will be pruned. Users are pruned if they have not been seen within
      * the past specified amount of days, with roles optionally included in the prune count if specified through
-     * {@link GuildPruneCountSpec#addRole(Snowflake)} or {@link GuildPruneCountSpec#addRoles(Collection)}.
+     * {@link GuildPruneCountMono#addRole(Snowflake)} or {@link GuildPruneCountMono#addRoles(Collection)}.
      *
-     * @param spec A {@link Consumer} that provides a "blank" {@link GuildPruneCountSpec} to be operated on.
-     * @return A {@link Mono} where, upon successful completion, emits the number of users that will be pruned. If an
+     * @return A {@link GuildPruneCountMono} where, upon successful completion, emits the number of users that will be pruned. If an
      * error is received, it is emitted through the {@code Mono}.
      */
-    public Mono<Integer> getPruneCount(final Consumer<? super GuildPruneCountSpec> spec) {
-        return Mono.defer(
-                () -> {
-                    GuildPruneCountSpec mutatedSpec = new GuildPruneCountSpec();
-                    spec.accept(mutatedSpec);
-                    return gateway.getRestClient().getGuildService()
-                            .getGuildPruneCount(getId().asLong(), mutatedSpec.asRequest())
-                            .flatMap(data -> Mono.justOrEmpty(data.pruned()));
-                });
+    public GuildPruneCountMono getPruneCount() {
+        return new GuildPruneCountMono(gateway, getId().asLong());
     }
 
     /**
