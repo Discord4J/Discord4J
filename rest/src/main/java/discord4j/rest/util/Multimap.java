@@ -18,6 +18,7 @@
 package discord4j.rest.util;
 
 import java.util.*;
+import java.util.function.BiConsumer;
 
 /**
  * A simple multi-valued map that wraps a {@link LinkedHashMap} with {@link LinkedList} to store multiple values.
@@ -105,6 +106,31 @@ public class Multimap<K, V> implements Map<K, List<V>> {
         Multimap<K, V> copy = new Multimap<>(map.size());
         map.forEach((key, value) -> copy.put(key, new LinkedList<>(value)));
         return copy;
+    }
+
+    /**
+     * Performs the given action for each element, meaning once per each K-V entry in this Multimap, until all
+     * entries have been processed or the action throws an exception.
+     *
+     * @param action The action to be performed for each entry
+     * @throws NullPointerException if the specified action is null
+     * @throws ConcurrentModificationException if an entry is found to be
+     * removed during iteration
+     * @since 3.1.1
+     */
+    public void forEachElement(BiConsumer<? super K, ? super V> action) {
+        Objects.requireNonNull(action);
+        for (Map.Entry<K, List<V>> entry : entrySet()) {
+            K k;
+            try {
+                for (V v : entry.getValue()) {
+                    k = entry.getKey();
+                    action.accept(k, v);
+                }
+            } catch (IllegalStateException ise) {
+                throw new ConcurrentModificationException(ise);
+            }
+        }
     }
 
     @Override

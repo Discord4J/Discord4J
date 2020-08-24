@@ -146,7 +146,7 @@ public class DiscordWebRequest {
      * @return this request
      */
     public DiscordWebRequest query(Multimap<String, Object> params) {
-        params.forEach(this::query);
+        params.forEachElement(this::query);
         return this;
     }
 
