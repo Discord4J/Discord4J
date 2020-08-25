@@ -19,9 +19,8 @@ package discord4j.core.object.entity.channel;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.VoiceState;
-import discord4j.core.spec.VoiceChannelEditSpec;
+import discord4j.core.spec.VoiceChannelEditMono;
 import discord4j.core.spec.VoiceChannelJoinSpec;
-import discord4j.core.util.EntityUtil;
 import discord4j.discordjson.json.ChannelData;
 import discord4j.discordjson.json.gateway.VoiceStateUpdate;
 import discord4j.gateway.GatewayClientGroup;
@@ -67,20 +66,11 @@ public final class VoiceChannel extends BaseCategorizableChannel {
     /**
      * Requests to edit a voice channel.
      *
-     * @param spec A {@link Consumer} that provides a "blank" {@link VoiceChannelEditSpec} to be operated on.
      * @return A {@link Mono} where, upon successful completion, emits the edited {@link VoiceChannel}. If an error is
      * received, it is emitted through the {@code Mono}.
      */
-    public Mono<VoiceChannel> edit(final Consumer<? super VoiceChannelEditSpec> spec) {
-        return Mono.defer(
-                () -> {
-                    VoiceChannelEditSpec mutatedSpec = new VoiceChannelEditSpec();
-                    spec.accept(mutatedSpec);
-                    return getClient().getRestClient().getChannelService()
-                            .modifyChannel(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason());
-                })
-                .map(data -> EntityUtil.getChannel(getClient(), data))
-                .cast(VoiceChannel.class);
+    public VoiceChannelEditMono edit() {
+        return new VoiceChannelEditMono(getClient(), getId().asLong());
     }
 
     /**
