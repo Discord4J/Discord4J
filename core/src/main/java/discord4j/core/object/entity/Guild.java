@@ -1015,20 +1015,11 @@ public final class Guild implements Entity {
     /**
      * Requests to create a news channel.
      *
-     * @param spec A {@link Consumer} that provides a "blank" {@link NewsChannelCreateSpec} to be operated on.
      * @return A {@link Mono} where, upon successful completion, emits the created {@link NewsChannel}. If an error is
      * received, it is emitted through the {@code Mono}.
      */
-    public Mono<NewsChannel> createNewsChannel(final Consumer<? super NewsChannelCreateSpec> spec) {
-        return Mono.defer(
-                () -> {
-                    NewsChannelCreateSpec mutatedSpec = new NewsChannelCreateSpec();
-                    spec.accept(mutatedSpec);
-                    return gateway.getRestClient().getGuildService()
-                            .createGuildChannel(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason());
-                })
-                .map(data -> EntityUtil.getChannel(gateway, data))
-                .cast(NewsChannel.class);
+    public NewsChannelCreateMono createNewsChannel() {
+        return new NewsChannelCreateMono(getClient(), getId().asLong());
     }
 
     /**
