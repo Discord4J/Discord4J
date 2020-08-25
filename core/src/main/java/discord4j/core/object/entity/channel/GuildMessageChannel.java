@@ -20,14 +20,13 @@ import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.Webhook;
-import discord4j.core.spec.WebhookCreateSpec;
 import discord4j.common.util.Snowflake;
+import discord4j.core.spec.WebhookCreateMono;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.Optional;
-import java.util.function.Consumer;
 
 public interface GuildMessageChannel extends CategorizableChannel, MessageChannel {
 
@@ -52,7 +51,6 @@ public interface GuildMessageChannel extends CategorizableChannel, MessageChanne
      *     .transform(channel::bulkDelete)
      * }
      * </pre>
-     *
      * If you have a {@code Publisher<Message>}, consider {@link #bulkDeleteMessages(Publisher)}.
      *
      * @param messageIds A {@link Publisher} to supply the message IDs to bulk delete.
@@ -74,7 +72,6 @@ public interface GuildMessageChannel extends CategorizableChannel, MessageChanne
      *     .transform(channel::bulkDeleteMessages)
      * }
      * </pre>
-     *
      * If you have a {@code Publisher<Snowflake>}, consider {@link #bulkDelete(Publisher)}.
      *
      * @param messages A {@link Publisher} to supply the messages to bulk delete.
@@ -87,11 +84,10 @@ public interface GuildMessageChannel extends CategorizableChannel, MessageChanne
     /**
      * Requests to create a webhook.
      *
-     * @param spec A {@link Consumer} that provides a "blank" {@link WebhookCreateSpec} to be operated on.
      * @return A {@link Mono} where, upon successful completion, emits the created {@link Webhook}. If an error
      * is received, it is emitted through the {@code Mono}.
      */
-    Mono<Webhook> createWebhook(final Consumer<? super WebhookCreateSpec> spec);
+    WebhookCreateMono createWebhook();
 
     /**
      * Requests to retrieve the webhooks of the channel.
