@@ -17,12 +17,9 @@
 package discord4j.core.object.entity.channel;
 
 import discord4j.core.GatewayDiscordClient;
-import discord4j.core.spec.StoreChannelEditSpec;
-import discord4j.core.util.EntityUtil;
+import discord4j.core.spec.StoreChannelEditMono;
 import discord4j.discordjson.json.ChannelData;
 import reactor.core.publisher.Mono;
-
-import java.util.function.Consumer;
 
 /** A Discord store channel. */
 public final class StoreChannel extends BaseCategorizableChannel {
@@ -40,20 +37,11 @@ public final class StoreChannel extends BaseCategorizableChannel {
     /**
      * Requests to edit this store channel.
      *
-     * @param spec A {@link Consumer} that provides a "blank" {@link StoreChannelEditSpec} to be operated on.
      * @return A {@link Mono} where, upon successful completion, emits the edited {@link StoreChannel}. If an error is
      * received, it is emitted through the {@code Mono}.
      */
-    public Mono<StoreChannel> edit(final Consumer<? super StoreChannelEditSpec> spec) {
-        return Mono.defer(
-                () -> {
-                    StoreChannelEditSpec mutatedSpec = new StoreChannelEditSpec();
-                    spec.accept(mutatedSpec);
-                    return getClient().getRestClient().getChannelService()
-                            .modifyChannel(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason());
-                })
-                .map(data -> EntityUtil.getChannel(getClient(), data))
-                .cast(StoreChannel.class);
+    public StoreChannelEditMono edit() {
+        return new StoreChannelEditMono(getClient(), getId().asLong());
     }
 
     @Override
