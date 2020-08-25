@@ -239,7 +239,7 @@ public class ExtraBotSupport {
                             .uri(attachment.getUrl())
                             .responseSingle((res, mono) -> mono.asByteArray())
                             .flatMap(input -> message.getClient()
-                                    .edit(spec -> spec.setAvatar(Image.ofRaw(input, Image.Format.PNG))))
+                                    .edit().withAvatar(Image.ofRaw(input, Image.Format.PNG)))
                             .then();
                 }
             }

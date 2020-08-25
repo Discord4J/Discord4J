@@ -35,7 +35,7 @@ import discord4j.core.retriever.EntityRetrievalStrategy;
 import discord4j.core.retriever.EntityRetriever;
 import discord4j.core.shard.GatewayBootstrap;
 import discord4j.core.spec.GuildCreateSpec;
-import discord4j.core.spec.UserEditSpec;
+import discord4j.core.spec.UserEditMono;
 import discord4j.core.util.ValidationUtil;
 import discord4j.discordjson.json.ActivityUpdateRequest;
 import discord4j.discordjson.json.EmojiData;
@@ -363,18 +363,11 @@ public class GatewayDiscordClient implements EntityRetriever {
     /**
      * Requests to edit this client (i.e., modify the current bot user).
      *
-     * @param spec A {@link Consumer} that provides a "blank" {@link UserEditSpec} to be operated on.
      * @return A {@link Mono} where, upon successful completion, emits the edited {@link User}. If an error is received,
      * it is emitted through the {@code Mono}.
      */
-    public Mono<User> edit(final Consumer<? super UserEditSpec> spec) {
-        return Mono.defer(
-                () -> {
-                    UserEditSpec mutatedSpec = new UserEditSpec();
-                    spec.accept(mutatedSpec);
-                    return getRestClient().getUserService().modifyCurrentUser(mutatedSpec.asRequest());
-                })
-                .map(data -> new User(this, data));
+    public UserEditMono edit() {
+        return new UserEditMono(this);
     }
 
     /**
