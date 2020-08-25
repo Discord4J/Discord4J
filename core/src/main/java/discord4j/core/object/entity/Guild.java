@@ -1055,20 +1055,11 @@ public final class Guild implements Entity {
     /**
      * Requests to create a voice channel.
      *
-     * @param spec A {@link Consumer} that provides a "blank" {@link VoiceChannelCreateSpec} to be operated on.
      * @return A {@link Mono} where, upon successful completion, emits the created {@link VoiceChannel}. If an error is
      * received, it is emitted through the {@code Mono}.
      */
-    public Mono<VoiceChannel> createVoiceChannel(final Consumer<? super VoiceChannelCreateSpec> spec) {
-        return Mono.defer(
-                () -> {
-                    VoiceChannelCreateSpec mutatedSpec = new VoiceChannelCreateSpec();
-                    spec.accept(mutatedSpec);
-                    return gateway.getRestClient().getGuildService()
-                            .createGuildChannel(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason());
-                })
-                .map(data -> EntityUtil.getChannel(gateway, data))
-                .cast(VoiceChannel.class);
+    public VoiceChannelCreateMono createVoiceChannel() {
+        return new VoiceChannelCreateMono(getClient(), getId().asLong());
     }
 
     /**
