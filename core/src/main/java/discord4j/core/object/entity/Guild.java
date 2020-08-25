@@ -1054,20 +1054,11 @@ public final class Guild implements Entity {
     /**
      * Requests to create a text channel.
      *
-     * @param spec A {@link Consumer} that provides a "blank" {@link TextChannelCreateSpec} to be operated on.
      * @return A {@link Mono} where, upon successful completion, emits the created {@link TextChannel}. If an error is
      * received, it is emitted through the {@code Mono}.
      */
-    public Mono<TextChannel> createTextChannel(final Consumer<? super TextChannelCreateSpec> spec) {
-        return Mono.defer(
-                () -> {
-                    TextChannelCreateSpec mutatedSpec = new TextChannelCreateSpec();
-                    spec.accept(mutatedSpec);
-                    return gateway.getRestClient().getGuildService()
-                            .createGuildChannel(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason());
-                })
-                .map(data -> EntityUtil.getChannel(gateway, data))
-                .cast(TextChannel.class);
+    public TextChannelCreateMono createTextChannel() {
+        return new TextChannelCreateMono(getClient(), getId().asLong());
     }
 
     /**
