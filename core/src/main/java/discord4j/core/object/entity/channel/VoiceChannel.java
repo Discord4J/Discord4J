@@ -20,7 +20,7 @@ import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.VoiceState;
 import discord4j.core.spec.VoiceChannelEditMono;
-import discord4j.core.spec.VoiceChannelJoinSpec;
+import discord4j.core.spec.VoiceChannelJoinMono;
 import discord4j.discordjson.json.ChannelData;
 import discord4j.discordjson.json.gateway.VoiceStateUpdate;
 import discord4j.gateway.GatewayClientGroup;
@@ -90,17 +90,11 @@ public final class VoiceChannel extends BaseCategorizableChannel {
     /**
      * Requests to the join this voice channel.
      *
-     * @param spec A {@link Consumer} that provides a "blank" {@link VoiceChannelJoinSpec} to be operated on.
      * @return A {@link Mono} where, upon successful completion, emits a {@link VoiceConnection}, indicating a
      * connection to the channel has been established. If an error is received, it is emitted through the {@code Mono}.
      */
-    public Mono<VoiceConnection> join(final Consumer<? super VoiceChannelJoinSpec> spec) {
-        return Mono.defer(() -> {
-            final VoiceChannelJoinSpec mutatedSpec = new VoiceChannelJoinSpec(getClient(), this);
-            spec.accept(mutatedSpec);
-
-            return mutatedSpec.asRequest();
-        });
+    public VoiceChannelJoinMono join() {
+        return new VoiceChannelJoinMono(getClient(), this);
     }
 
     /**

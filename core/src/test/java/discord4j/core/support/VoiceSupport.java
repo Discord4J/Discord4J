@@ -56,7 +56,7 @@ public class VoiceSupport {
                 .flatMap(e -> Mono.justOrEmpty(e.getMember())
                         .flatMap(Member::getVoiceState)
                         .flatMap(VoiceState::getChannel)
-                        .flatMap(channel -> channel.join(spec -> spec.setProvider(provider)))
+                        .flatMap(channel -> channel.join().withProvider(provider))
                         .doFinally(s -> log.info("Finalized join request after {}", s))
                         .onErrorResume(t -> {
                             log.error("Failed to join voice channel", t);
