@@ -19,7 +19,7 @@ package discord4j.core.object.entity;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.channel.GuildMessageChannel;
 import discord4j.core.retriever.EntityRetrievalStrategy;
-import discord4j.core.spec.WebhookEditSpec;
+import discord4j.core.spec.WebhookEditMono;
 import discord4j.core.util.EntityUtil;
 import discord4j.discordjson.json.WebhookData;
 import discord4j.common.util.Snowflake;
@@ -28,7 +28,6 @@ import reactor.util.annotation.Nullable;
 
 import java.util.Objects;
 import java.util.Optional;
-import java.util.function.Consumer;
 
 /**
  * A Discord webhook.
@@ -208,19 +207,11 @@ public final class Webhook implements Entity {
     /**
      * Requests to edit this webhook.
      *
-     * @param spec A {@link Consumer} that provides a "blank" {@link WebhookEditSpec} to be operated on.
      * @return A {@link Mono} where, upon successful completion, emits the edited {@link Guild}. If an error is
      * received, it is emitted through the {@code Mono}.
      */
-    public Mono<Webhook> edit(final Consumer<? super WebhookEditSpec> spec) {
-        return Mono.defer(
-                () -> {
-                    WebhookEditSpec mutatedSpec = new WebhookEditSpec();
-                    spec.accept(mutatedSpec);
-                    return gateway.getRestClient().getWebhookService()
-                            .modifyWebhook(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason());
-                })
-                .map(data -> new Webhook(gateway, data));
+    public WebhookEditMono edit() {
+        return new WebhookEditMono(getClient(), getId().asLong());
     }
 
     @Override
