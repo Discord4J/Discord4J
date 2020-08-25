@@ -17,12 +17,9 @@
 package discord4j.core.object.entity.channel;
 
 import discord4j.core.GatewayDiscordClient;
-import discord4j.core.spec.TextChannelEditSpec;
-import discord4j.core.util.EntityUtil;
+import discord4j.core.spec.TextChannelEditMono;
 import discord4j.discordjson.json.ChannelData;
 import reactor.core.publisher.Mono;
-
-import java.util.function.Consumer;
 
 /**
  * A Discord text channel.
@@ -62,20 +59,11 @@ public final class TextChannel extends BaseGuildMessageChannel {
     /**
      * Requests to edit this text channel.
      *
-     * @param spec A {@link Consumer} that provides a "blank" {@link TextChannelEditSpec} to be operated on.
      * @return A {@link Mono} where, upon successful completion, emits the edited {@link TextChannel}. If an error is
      * received, it is emitted through the {@code Mono}.
      */
-    public Mono<TextChannel> edit(final Consumer<? super TextChannelEditSpec> spec) {
-        return Mono.defer(
-                () -> {
-                    TextChannelEditSpec mutatedSpec = new TextChannelEditSpec();
-                    spec.accept(mutatedSpec);
-                    return getClient().getRestClient().getChannelService()
-                            .modifyChannel(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason());
-                })
-                .map(bean -> EntityUtil.getChannel(getClient(), bean))
-                .cast(TextChannel.class);
+    public TextChannelEditMono edit() {
+        return new TextChannelEditMono(getClient(), getId().asLong());
     }
 
     @Override
