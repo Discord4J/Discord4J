@@ -19,6 +19,7 @@ package discord4j.core.object.entity.channel;
 import discord4j.core.object.entity.Message;
 import discord4j.core.retriever.EntityRetrievalStrategy;
 import discord4j.common.util.Snowflake;
+import discord4j.core.spec.EmbedCreateMono;
 import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.core.spec.MessageCreateSpec;
 import org.reactivestreams.Publisher;
@@ -95,6 +96,10 @@ public interface MessageChannel extends Channel {
      */
     default Mono<Message> createEmbed(final Consumer<? super EmbedCreateSpec> spec) {
         return createMessage(messageSpec -> messageSpec.setEmbed(spec));
+    }
+
+    default EmbedCreateMono createEmbed() {
+        return new EmbedCreateMono(getClient(), getRestChannel());
     }
 
     /**
