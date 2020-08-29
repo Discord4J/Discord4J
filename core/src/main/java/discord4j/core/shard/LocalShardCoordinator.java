@@ -22,6 +22,8 @@ import discord4j.gateway.ShardInfo;
 import discord4j.gateway.limiter.PayloadTransformer;
 import discord4j.gateway.limiter.RateLimitTransformer;
 import reactor.core.publisher.Mono;
+import reactor.util.Logger;
+import reactor.util.Loggers;
 
 import java.time.Duration;
 import java.util.Map;
@@ -29,11 +31,15 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
+import static discord4j.common.LogUtil.format;
+
 /**
  * A centralized local {@link ShardCoordinator} that can operate on a single JVM instance to coordinate Gateway
  * connection and identifying attempts across multiple shards.
  */
 public class LocalShardCoordinator implements ShardCoordinator {
+
+    private static final Logger log = Loggers.getLogger(LocalShardCoordinator.class);
 
     public static final Supplier<PayloadTransformer> DEFAULT_IDENTIFY_LIMITER_FACTORY =
             () -> new RateLimitTransformer(1, Duration.ofSeconds(6));
@@ -67,12 +73,24 @@ public class LocalShardCoordinator implements ShardCoordinator {
 
     @Override
     public Mono<Void> publishConnected(ShardInfo shardInfo) {
-        return Mono.fromRunnable(() -> shards.add(shardInfo.getIndex()));
+        return Mono.deferWithContext(ctx -> {
+            boolean isNew = shards.add(shardInfo.getIndex());
+            if (isNew) {
+                log.info(format(ctx, "Shard connected"));
+            }
+            return Mono.empty();
+        });
     }
 
     @Override
     public Mono<Void> publishDisconnected(ShardInfo shardInfo, SessionInfo sessionInfo) {
-        return Mono.fromRunnable(() -> shards.remove(shardInfo.getIndex()));
+        return Mono.deferWithContext(ctx -> {
+            boolean wasRemoved = shards.remove(shardInfo.getIndex());
+            if (wasRemoved) {
+                log.info(format(ctx, "Shard disconnected"));
+            }
+            return Mono.empty();
+        });
     }
 
     @Override
