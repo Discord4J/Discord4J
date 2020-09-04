@@ -164,26 +164,24 @@ Flux.interval(Duration.ofMillis(10))
 
 ## Handling errors across multiple requests using Discord4J
 
-Until now we have seen examples that deal with error handling on particular sequences, and while you should continue to use these patterns for most use cases, you might find yourself applying the same operator to a lot of requests. For those cases, Discord4J provides a way to install an error handler across many or all requests made by a `DiscordClient`.
+Until now, we have seen examples that deal with error handling on particular sequences, and while you should continue to use these patterns for most use cases, you might find yourself applying the same operator to a lot of requests. For those cases, Discord4J provides a way to install an error handler across many or all requests made by a `DiscordClient`.
 
-When you build a Discord4J client through `DiscordClientBuilder` or `ShardingClientBuilder` you'll notice that there are many setters for a variety of customization. You can handle errors in multiple requests by providing a custom [`RouterOptions`](https://static.javadoc.io/com.discord4j/discord4j-rest/3.0.4/discord4j/rest/request/RouterOptions.html) object through `setRouterOptions` method.
+When you build a Discord4J client through `DiscordClientBuilder` you'll notice that there are many setters for a variety of customization. You can handle errors in multiple requests by providing a custom `ResponseFunction` through `onClientResponse` method.
 
 You could, for example, build your clients this way:
 
 ```java
 DiscordClient client = new DiscordClientBuilder(token)
-        .setRouterOptions(RouterOptions.builder()
-                // globally suppress any not found (404) error
-                .onClientResponse(ResponseFunction.emptyIfNotFound())
-                // bad requests (400) while adding reactions will be suppressed
-                .onClientResponse(ResponseFunction.emptyOnErrorStatus(RouteMatcher.route(Routes.REACTION_CREATE), 400))
-                // server error (500) while creating a message will be retried, with backoff, until it succeeds
-                .onClientResponse(ResponseFunction.retryWhen(RouteMatcher.route(Routes.MESSAGE_CREATE),
-                        Retry.onlyIf(ClientException.isRetryContextStatusCode(500))
-                                .exponentialBackoffWithJitter(Duration.ofSeconds(2), Duration.ofSeconds(10))))
-                // wait 1 second and retry any server error (500)
-                .onClientResponse(ResponseFunction.retryOnceOnErrorStatus(500))
-                .build())
+        // globally suppress any not found (404) error
+        .onClientResponse(ResponseFunction.emptyIfNotFound())
+        // bad requests (400) while adding reactions will be suppressed
+        .onClientResponse(ResponseFunction.emptyOnErrorStatus(RouteMatcher.route(Routes.REACTION_CREATE), 400))
+        // server error (500) while creating a message will be retried, with backoff, until it succeeds
+        .onClientResponse(ResponseFunction.retryWhen(RouteMatcher.route(Routes.MESSAGE_CREATE),
+                Retry.onlyIf(ClientException.isRetryContextStatusCode(500))
+                        .exponentialBackoffWithJitter(Duration.ofSeconds(2), Duration.ofSeconds(10))))
+        // wait 1 second and retry any server error (500)
+        .onClientResponse(ResponseFunction.retryOnceOnErrorStatus(500))
         .build();
 ```
 
@@ -195,4 +193,4 @@ Each time `onClientResponse` is called, you're adding a strategy to transform ea
 
 The first handler that matches will consume the error and apply its strategy, meaning that the order of declaration is important.
 
-You can look at the [`ResponseFunction`](https://www.javadoc.io/doc/com.discord4j/discord4j-rest/3.1.0/discord4j/rest/response/ResponseFunction.html) class for commonly used error handlers. A version covering all requests is available, but also a version allowing you to apply the handler to only some API Routes, with the support of [`RouteMatcher`](https://www.javadoc.io/doc/com.discord4j/discord4j-rest/3.1.0/discord4j/rest/request/RouteMatcher.html). Explore the [Javadocs](https://www.javadoc.io/doc/com.discord4j/discord4j-rest/latest/index.html) for the rest module to understand more.
+You can look at the `ResponseFunction`(https://www.javadoc.io/static/com.discord4j/discord4j-rest/3.1.0/discord4j/rest/response/ResponseFunction.html) class for commonly used error handlers. A version covering all requests is available, but also a version allowing you to apply the handler to only some API Routes, with the support of [`RouteMatcher`](https://www.javadoc.io/doc/com.discord4j/discord4j-rest/3.1.0/discord4j/rest/request/RouteMatcher.html). Explore the [Javadocs](https://www.javadoc.io/doc/com.discord4j/discord4j-rest/latest/index.html) for the rest module to understand more.
