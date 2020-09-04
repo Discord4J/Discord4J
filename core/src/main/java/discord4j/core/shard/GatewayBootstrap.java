@@ -78,6 +78,7 @@ import java.util.*;
 import java.util.function.Function;
 
 import static discord4j.common.LogUtil.format;
+import static reactor.function.TupleUtils.function;
 
 /**
  * Builder to create a shard group connecting to Discord Gateway to produce a {@link GatewayDiscordClient}. A shard
@@ -616,9 +617,9 @@ public class GatewayBootstrap<O extends GatewayOptions> {
      * sequence, it will be emitted through the {@link Mono}.
      */
     public Mono<GatewayDiscordClient> login(Function<O, GatewayClient> clientFactory) {
-        GatewayBootstrap<O> b = new GatewayBootstrap<>(this, this.optionsModifier);
-        return b.shardingStrategy.getShardCount(b.client)
-                .flatMap(count -> {
+        return Mono.fromCallable(() -> new GatewayBootstrap<>(this, this.optionsModifier))
+                .zipWhen(b -> b.shardingStrategy.getShardCount(b.client))
+                .flatMap(function((b, count) -> {
                     InvalidationStrategy invalidationStrategy = b.initInvalidationStrategy();
                     Map<String, Object> hints = new LinkedHashMap<>();
                     hints.put("messageClass", MessageData.class);
@@ -626,7 +627,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                             new StoreContext(hints), b.intents);
                     StateView stateView = new StateView(stateHolder);
                     EventDispatcher eventDispatcher =
-                            b.initEventDispatcher(client.getCoreResources().getReactorResources());
+                            b.initEventDispatcher(b.client.getCoreResources().getReactorResources());
                     GatewayReactorResources gatewayReactorResources = b.initGatewayReactorResources();
                     ShardCoordinator shardCoordinator = b.initShardCoordinator(gatewayReactorResources);
 
@@ -641,7 +642,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                     GatewayClientGroupManager clientGroup = b.shardingStrategy.getGroupManager(count);
                     GatewayDiscordClient gateway = new GatewayDiscordClient(b.client, resources, closeProcessor,
                             clientGroup, b.voiceConnectionFactory, entityRetrievalStrategy);
-                    Mono<Void> destroySequence = Mono.deferWithContext(ctx -> destroyHandler.apply(gateway)
+                    Mono<Void> destroySequence = Mono.deferWithContext(ctx -> b.destroyHandler.apply(gateway)
                             .doFinally(s -> log.info(format(ctx, "All shards disconnected"))))
                             .doOnTerminate(closeProcessor::onComplete)
                             .cache();
@@ -704,7 +705,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                                         })
                                         .subscribe(null, t -> log.warn("Error in connections function", t))));
                     }
-                });
+                }));
     }
 
     private Mono<ShardInfo> acquireConnection(GatewayBootstrap<O> b,
