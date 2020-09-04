@@ -291,9 +291,16 @@ class GuildDispatchHandlers {
                 .map(emoji -> new GuildEmoji(gateway, emoji, guildId))
                 .collect(Collectors.toSet());
 
-        return updateGuildBean
-                .and(saveEmojis)
-                .thenReturn(new EmojisUpdateEvent(gateway, context.getShardInfo(), guildId, emojis));
+        return context.getStateHolder().getGuildStore()
+                .find(guildId)
+                .flatMap(guild -> Flux.fromIterable(guild.emojis()).map(Snowflake::asLong)
+                        .flatMap(id -> context.getStateHolder().getGuildEmojiStore().find(id))
+                        .map(emoji -> new GuildEmoji(gateway, emoji, guildId))
+                        .collect(Collectors.toSet())
+                ).flatMap(old -> updateGuildBean
+                        .and(saveEmojis)
+                        .thenReturn(new EmojisUpdateEvent(gateway, context.getShardInfo(), guildId, emojis, old)))
+                .defaultIfEmpty(new EmojisUpdateEvent(gateway, context.getShardInfo(), guildId, emojis, null));
     }
 
     static Mono<IntegrationsUpdateEvent> guildIntegrationsUpdate(DispatchContext<GuildIntegrationsUpdate> context) {
