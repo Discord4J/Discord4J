@@ -3,7 +3,7 @@
 ## Core classes
 
 ### DiscordClient
-Main REST API wrapper and an entry point to spawn Gateway connections. Can be obtained by calling `getClient().rest()` from most objects.
+Main REST API wrapper, and an entry point to spawn Gateway connections. Can be obtained by calling `getClient().rest()` from most objects.
 
 ### CoreResources
 A mediator for resources essential to operate on `DiscordClient`, like the `RestClient`, `JacksonResources` and `ReactorResources`.
@@ -30,7 +30,7 @@ A manager in charge of relaying lifecycle events for sharding. It is used to not
 The same component as in v3.0, it stores all entity updates from the Gateway. In v3.1 though, it will receive updates from all joining shards.
 
 ### EventDispatcher
-The same component as in v3.0, it publishes Gateway events to the user. In v3.1 the events are coming from all shards so a single instance is enough for a `GatewayDiscordClient`.
+The same component as in v3.0, it publishes Gateway events to the user. In v3.1 the events are coming from all shards, so a single instance is enough for a `GatewayDiscordClient`.
 
 ### ReactorResources
 Encapsulates Reactor Netty HttpClient and Scheduler for blocking and timed tasks, can be customized.

@@ -1,5 +1,5 @@
 ## Implementation
-Discord4J utilizes logging throughout their modules that will be forwarded to your implementation of choice, according to Reactor [``Loggers``](https://projectreactor.io/docs/core/release/api/reactor/util/Loggers.html) class which picks up common logging frameworks at startup and configures logging appropriately.
+Discord4J utilizes logging throughout their modules that will be forwarded to your implementation of choice, according to Reactor [``Loggers``](https://projectreactor.io/docs/core/release/api/reactor/util/Loggers.html) class which picks up common logging frameworks on the startup and configures logging appropriately.
 
 - If you have any [SLF4J](https://www.slf4j.org/) implementation available, it will be picked up first.
 - As a fallback, it will log to the console, using `System.err` for the `WARN` and `ERROR` log levels and `System.out` for the rest.
@@ -9,12 +9,12 @@ Discord4J utilizes logging throughout their modules that will be forwarded to yo
 ```
 
 ## Logging a Stream
-You have the ability to log events in a reactive sequence, like those coming from Discord4J. The `log()` operator is able to do that, peeking at every signal that goes through a sequence. You can learn more about this operator on the Reactor reference guide [here](http://projectreactor.io/docs/core/release/reference/#_logging_a_stream).
+You have the ability to log events in a reactive sequence, like those coming from Discord4J. The `log()` operator is able to do that, peeking at every signal going through a sequence. You can learn more about this operator on the Reactor reference guide [here](http://projectreactor.io/docs/core/release/reference/#_logging_a_stream).
 
 ## Configuration
 
 ### SLF4J Simple
-SLF4J Simple is a basic implementation that outputs INFO and higher logging directly to System.err. It's easy to use and requires no additional files. Check it out [here](https://mvnrepository.com/artifact/org.slf4j/slf4j-simple/1.8.0-beta2).
+SLF4J Simple is a basic implementation that outputs INFO and higher logging directly to System.err. It's easy to use and requires no additional files. Check it out [here](https://mvnrepository.com/artifact/org.slf4j/slf4j-simple/1.7.30).
 
 ### Logback
 [Logback](https://logback.qos.ch/) is an SLF4J implementation you can use with Discord4J to further configure logging. The following is an example to use it. First add [this dependency](https://search.maven.org/artifact/ch.qos.logback/logback-classic/1.2.3/jar) to your project. Then create a file under `src/main/resources` named `logback.xml` with the following content:
@@ -111,7 +111,7 @@ The following table shows the levels you can set each logger to obtain your pref
 ### Advanced filtering using Logback
 If you're looking to filter out certain gateway event types, you could copy [this custom TurboFilter](https://github.com/Discord4J/Discord4J/blob/master/core/src/test/java/discord4j/core/logback/GatewayEventFilter.java) to your project or as a start point for your own.
 
-And then apply it to your `logback.xml`, for example the following would only show created message events:
+Afterwards, apply it to your `logback.xml`, for example the following would only show created message events:
 ```xml
 <configuration>
     <turboFilter class="discord4j.core.logback.GatewayEventFilter">
@@ -129,7 +129,7 @@ While this one would show all events except presence updates:
 ```
 The value like `PRESENCE_UPDATE` must match from the ones in [this](https://github.com/Discord4J/Discord4J/blob/master/gateway/src/main/java/discord4j/gateway/json/dispatch/EventNames.java) file.
 
-For complete control over what you want to filter in a declarative manner, use JaninoEvaluator. First add [janino](https://search.maven.org/artifact/org.codehaus.janino/janino/3.0.10/jar) as a dependency and then apply the following to your `logback.xml`:
+For complete control over what you want to filter, use JaninoEvaluator. First add [janino](https://search.maven.org/artifact/org.codehaus.janino/janino/3.0.10/jar) as a dependency and then apply the following to your `logback.xml`:
 
 ```xml
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">

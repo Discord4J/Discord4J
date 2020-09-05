@@ -1,6 +1,6 @@
 # Beginnings
 
-Making your first bot is very simple. This tutorial will walk you through how to make a basic bot that responds to a ping command and listens to some other events. The final bot can be found at [the github.](https://github.com/xaanit/D4JExampleBot)
+Making your first bot is very simple. This tutorial will walk you through how to make a basic bot that responds to a ping command and listens to some other events.
 
 ## Constructing the client
 
@@ -19,10 +19,10 @@ public class Bot {
 ```
 
 ###### 🛈 Important Links 🛈
-- [DiscordClientBuilder Javadocs](https://www.javadoc.io/doc/com.discord4j/discord4j-core/3.1.0/discord4j/core/DiscordClientBuilder.html)
-- [DiscordClient Javadocs](https://www.javadoc.io/doc/com.discord4j/discord4j-core/3.1.0/discord4j/core/DiscordClient.html)
-- [GatewayBootstrap Javadocs](https://www.javadoc.io/static/com.discord4j/discord4j-core/3.1.0/discord4j/core/shard/GatewayBootstrap.html)
-- [GatewayDiscordClient Javadocs](https://www.javadoc.io/static/com.discord4j/discord4j-core/3.1.0/discord4j/core/GatewayDiscordClient.html)
+- [DiscordClientBuilder Javadocs](https://www.javadoc.io/doc/com.discord4j/discord4j-core/latest/discord4j/core/DiscordClientBuilder.html)
+- [DiscordClient Javadocs](https://www.javadoc.io/doc/com.discord4j/discord4j-core/latest/discord4j/core/DiscordClient.html)
+- [GatewayBootstrap Javadocs](https://www.javadoc.io/static/com.discord4j/discord4j-core/latest/discord4j/core/shard/GatewayBootstrap.html)
+- [GatewayDiscordClient Javadocs](https://www.javadoc.io/static/com.discord4j/discord4j-core/latest/discord4j/core/GatewayDiscordClient.html)
 
 
 ```java
@@ -146,8 +146,8 @@ This creates the message with the content `Pong!`
 >`         .subscribe();
 `
 
-And this tells it to execute!
+Telling it to execute!
 
 ## Finale
 
-Now that you have a basic bot up and running, you can continue to build off of it. Including making your own system so all events aren't in the same class where you construct the client.
+Now you have a basic bot up and running, you can continue to build on it. Including making your own system so all events aren't in the same class where you construct the client.

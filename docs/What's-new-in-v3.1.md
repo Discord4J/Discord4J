@@ -24,7 +24,7 @@ Moving forward, the new `GatewayDiscordClient` represents the place to fetch and
 
 One of the main goals for this release is to lay the groundwork to build distributed bot architectures, a model where bot components are split across multiple processes.
 
-Since an array of configurations exist, we decided to orient the creation of `GatewayDiscordClient` towards "shard groups" that encapsulate caches and events around an arbitrary number of shards. A brand new `GatewayBootstrap` API provides creating simple, sharded, monolithic or distributed bots from a single place.
+Since many configurations exist, we decided to orient the creation of `GatewayDiscordClient` towards "shard groups" that encapsulate caches and events around an arbitrary number of shards. A brand new `GatewayBootstrap` API provides creating simple, sharded, monolithic or distributed bots from a single place.
 
 ## One EventDispatcher publishes for a shard group
 
@@ -104,19 +104,18 @@ A new abstraction is created to support coordination of Gateway IDENTIFY request
 
 ## More sharding configurations supported
 
-A builder to configure how a shard group creates shards is available through `ShardingStrategy` and can be set at `GatewayBootstrap`. The total shard count can be fixed or used as recommended by Discord, connect specific shards by index and also support a sharding concurrency value or "very large bot sharding system".
-
+A builder to configure how a shard group creates shards is available through `ShardingStrategy` and can be set at `GatewayBootstrap`. The total shard count can be fixed or used as recommended by Discord, connect specific shards by index, and support a sharding concurrency value or "very large bot sharding system".
 ## Improved rate limiting implementations
 
 Provide a new approach to rate limit which increases throughput without locking structures. This is used across all of Discord4J: REST request queue, REST global rate limiter, Gateway identify limit and Gateway outbound limit.
 
-## Custom max missed heartbeat ACK
+## Custom maximum missed heartbeat ACK
 
-Bring back a setting from v2 to help dealing with connection instability by avoiding detecting zombie connections too early.
+Bring back a setting from v2 to help deal with connection instability by avoiding detecting zombie connections too early.
 
 ## Custom Voice Gateway connection factory
 
-Provide new API to customize Voice operations and tasks, in an effort to help integrating it with other tools and frameworks.
+Provide new API to customize Voice operations and tasks, in an effort to help integrate it with other tools and frameworks.
 
 ## Custom Gateway invalidation strategy
 
@@ -128,7 +127,7 @@ Allow customizing the actions that should occur when logging out a shard group f
 
 ## Custom Gateway to Event mapping
 
-Allow customizing how are `Event` instances created from the Gateway updates, potentially enriching or disabling some of the original handling.
+Allow customizing how are `Event` instances created from the Gateway updates, potentially enriching or disabling the original handling.
 
 ## Custom or extend Gateway configuration
 

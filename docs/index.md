@@ -2,11 +2,10 @@
 
 <img align="right" src="https://raw.githubusercontent.com/Discord4J/discord4j-web/master/public/logo.svg?sanitize=true" width=27%>
 
-Welcome to the Discord4J wiki! Discord4J is a [reactive](https://www.reactivemanifesto.org/) Java wrapper for the official [Discord Bot API](https://discordapp.com/developers/docs/intro). This wiki will cover all the basics on reactive
-programming, how to utilize the Discord4J library effectively, and common examples in reactive and blocking contexts. Feel free to explore the various topics this wiki covers using the links in the sidebar.
+Welcome to the Discord4J wiki! Discord4J is a [reactive](https://www.reactivemanifesto.org/) Java wrapper for the official [Discord Bot API](https://discordapp.com/developers/docs/intro). This wiki will cover all the basics on reactive programming, how to utilize the Discord4J library effectively, and common examples in reactive and blocking contexts. Feel free to explore the various topics this wiki covers using the links in the sidebar.
 
 ## Download / Installation
-The recommended way to get Discord4J is to use a build automation tool like [Maven](https://maven.apache.org/) or [Gradle](https://gradle.org/). To setup Maven or Gradle, refer to the documentation for your specific IDE:
+The recommended way to get Discord4J is to use a build automation tool like [Maven](https://maven.apache.org/) or [Gradle](https://gradle.org/). To set up Maven or Gradle, refer to the documentation for your specific IDE:
 
 * [IntelliJ / Maven](https://www.jetbrains.com/help/idea/maven-support.html)
 * [IntelliJ / Gradle](https://www.jetbrains.com/help/idea/getting-started-with-gradle.html)
@@ -46,7 +45,7 @@ libraryDependencies ++= Seq(
 If you prefer using experimental, "bleeding-edge", unstable builds, refer to [Using Jitpack](Using-Jitpack.md).
 
 ## Logging
-While optional, we do recommend installing and configuring a logging implementation to aide in debugging and provide useful information for day-to-day operations; plus, it's [good practice](https://softwareengineering.stackexchange.com/questions/37294/logging-why-and-what). Discord4J uses Reactor's [logging implementation](https://projectreactor.io/docs/core/release/reference/#_logging_a_sequence), which is compatible with any [SLF4J](https://www.slf4j.org/) implementation. We recommend using [Logback](https://logback.qos.ch/) for maximum flexibility and customization; check our dedicated [Logging](Logging.md) guide for details.
+While optional, we do recommend installing and configuring a logging implementation to aid in debugging and provide useful information for day-to-day operations; plus, it's [good practice](https://softwareengineering.stackexchange.com/questions/37294/logging-why-and-what). Discord4J uses Reactor's [logging implementation](https://projectreactor.io/docs/core/release/reference/#_logging_a_sequence), which is compatible with any [SLF4J](https://www.slf4j.org/) implementation. We recommend using [Logback](https://logback.qos.ch/) for maximum flexibility and customization; check our dedicated [Logging](Logging.md) guide for details.
 ### Maven
 ```xml
 <dependencies>

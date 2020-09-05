@@ -103,19 +103,17 @@ client.getEventDispatcher().on(MessageCreateEvent.class)
 
 #### `onErrorContinue`
 
-⚠️ This only works **on supporting operators**: `flatMap`, `map` and `filter`, among others according to their javadocs. This operator goes beyond the Reactive Streams spec and uses the Reactor Context to work, therefore it is prone to issues when combining it with unsupporting operators. Only use this operator if you understand the consequences or you're familiar with how Reactor Context works.
+⚠️ This only works **on supporting operators**: `flatMap`, `map` and `filter`, among others according to their javadocs. This operator goes beyond the Reactive Streams spec and uses the Reactor Context to work, therefore it is prone to issues when combining it with unsupported operators. Only use this operator if you understand the consequences, or you're familiar with how Reactor Context works.
 
-Applying `onErrorContinue` on a `Flux` will change the default behavior of treating errors as terminal events to discarding erroring elements and keeping the same sequence active.
+Applying `onErrorContinue` on a `Flux` will change the default behavior of treating errors as terminal events to discarding erroneous elements and keeping the same sequence active.
 
 If an error occurs, _supporting operators_ will look for the continue strategy flag before reaching other operators.
 
 Around `Mono` sequences, **we generally recommend sticking with resuming if you already use it**, unless you want a catch-all behavior that can override other `onError*` calls.
 
-👷 🏗 TODO: Include examples
-
 #### `onErrorStop`
 
-Using `onErrorStop` will revert the behavior to treating errors as terminal events. This can be used to accurately scope the continue strategy and avoid surprises, specially when combining it with `onErrorResume`.
+Using `onErrorStop` will revert the behavior to treating errors as terminal events. This can be used to accurately scope continue strategy and avoid surprises, specially when combining it with `onErrorResume`.
 
 ## Error Sources
 Typical Reactor operators will throw errors if you:
@@ -171,18 +169,31 @@ When you build a Discord4J client through `DiscordClientBuilder` you'll notice t
 You could, for example, build your clients this way:
 
 ```java
-DiscordClient client = new DiscordClientBuilder(token)
-        // globally suppress any not found (404) error
-        .onClientResponse(ResponseFunction.emptyIfNotFound())
-        // bad requests (400) while adding reactions will be suppressed
-        .onClientResponse(ResponseFunction.emptyOnErrorStatus(RouteMatcher.route(Routes.REACTION_CREATE), 400))
-        // server error (500) while creating a message will be retried, with backoff, until it succeeds
-        .onClientResponse(ResponseFunction.retryWhen(RouteMatcher.route(Routes.MESSAGE_CREATE),
-                Retry.onlyIf(ClientException.isRetryContextStatusCode(500))
-                        .exponentialBackoffWithJitter(Duration.ofSeconds(2), Duration.ofSeconds(10))))
-        // wait 1 second and retry any server error (500)
-        .onClientResponse(ResponseFunction.retryOnceOnErrorStatus(500))
-        .build();
+import discord4j.rest.http.client.ClientException;
+import discord4j.rest.request.RouteMatcher;
+import discord4j.rest.response.ResponseFunction;
+import discord4j.rest.route.Routes;
+import reactor.retry.Retry;
+
+import java.time.Duration;
+
+public class ExampleClientResponse {
+
+    public static void main(String[] args) {
+        DiscordClient client = DiscordClientBuilder.create(token)
+                // globally suppress any not found (404) error
+                .onClientResponse(ResponseFunction.emptyIfNotFound())
+                // bad requests (400) while adding reactions will be suppressed
+                .onClientResponse(ResponseFunction.emptyOnErrorStatus(RouteMatcher.route(Routes.REACTION_CREATE), 400))
+                // server error (500) while creating a message will be retried, with backoff, until it succeeds
+                .onClientResponse(ResponseFunction.retryWhen(RouteMatcher.route(Routes.MESSAGE_CREATE),
+                        Retry.onlyIf(ClientException.isRetryContextStatusCode(500))
+                                .exponentialBackoffWithJitter(Duration.ofSeconds(2), Duration.ofSeconds(10))))
+                // wait 1 second and retry any server error (500)
+                .onClientResponse(ResponseFunction.retryOnceOnErrorStatus(500))
+                .build();
+    }
+}
 ```
 
 Each time `onClientResponse` is called, you're adding a strategy to transform each response made by the `DiscordClient`. If an error occurs, Discord4J processes the error through the following handlers:
@@ -193,4 +204,4 @@ Each time `onClientResponse` is called, you're adding a strategy to transform ea
 
 The first handler that matches will consume the error and apply its strategy, meaning that the order of declaration is important.
 
-You can look at the `ResponseFunction`(https://www.javadoc.io/static/com.discord4j/discord4j-rest/3.1.0/discord4j/rest/response/ResponseFunction.html) class for commonly used error handlers. A version covering all requests is available, but also a version allowing you to apply the handler to only some API Routes, with the support of [`RouteMatcher`](https://www.javadoc.io/doc/com.discord4j/discord4j-rest/3.1.0/discord4j/rest/request/RouteMatcher.html). Explore the [Javadocs](https://www.javadoc.io/doc/com.discord4j/discord4j-rest/latest/index.html) for the rest module to understand more.
+You can look at the [`ResponseFunction`](https://www.javadoc.io/static/com.discord4j/discord4j-rest/latest/discord4j/rest/response/ResponseFunction.html) class for commonly used error handlers. A version covering all requests is available, but also a version allowing you to apply the handler to only some API Routes, with the support of [`RouteMatcher`](https://www.javadoc.io/doc/com.discord4j/discord4j-rest/3.1.0/discord4j/rest/request/RouteMatcher.html). Explore the [Javadocs](https://www.javadoc.io/doc/com.discord4j/discord4j-rest/latest/index.html) for the rest module to understand more.

@@ -47,7 +47,7 @@ dependencies {
 }
 ```
 
-And finally, add the dependency as normal, without needing to specify the version:
+Finally, add the dependency as normal, without needing to specify the version:
 
 ```groovy
 dependencies {

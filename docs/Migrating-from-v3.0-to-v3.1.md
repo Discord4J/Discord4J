@@ -173,7 +173,7 @@ Get a builder with `client.gateway()` and then call `setSharding(ShardingStrateg
 
 * `ShardingStrategy.recommended()` will provide the recommended amount of shards and include all of them in the group
 * `ShardingStrategy.fixed(n)` will use the given `shardCount` and include all shards `0..N` in the group
-* `ShardingStrategy.single()` will use a simple `[0,1]` configuration, for small bots and also [distributed bot architectures](https://github.com/Discord4J/connect)
+* `ShardingStrategy.single()` will use a simple `[0,1]` configuration, for small bots and [distributed bot architectures](https://github.com/Discord4J/connect)
 
 You can also customize the strategy using `ShardingStrategy.builder()` allowing you to configure:
 
@@ -211,13 +211,13 @@ The current default is a `ReplayingEventDispatcher`, created using `ReplayingEve
 Use `login(Function)` overload after calling `client.gateway()`. Used to build distributed bot architectures.
 
 ### Migrating from `setRetryOptions`
-Use `setReconnectOptions` after calling `client.gateway()`. By default Discord4J will always attempt to reconnect using an exponential backoff with jitter strategy.
+Use `setReconnectOptions` after calling `client.gateway()`. By default, Discord4J will always attempt to reconnect using an exponential backoff with jitter strategy.
 
 ### Migrating from `setGatewayObserver`
 Use `setGatewayObserver` after calling `client.gateway()`.
 
 ### Migrating from `setIdentifyLimiter`
-Discord4J v3.1 introduced a new API called `ShardCoordinator` which groups all options related to coordinating multiple shard identification. We supply `LocalShardCoordinator` by default and can be replaced by one that is capable of working with a distributed bot architecture.
+Discord4J v3.1 introduced a new API called `ShardCoordinator` which groups all options related to coordinating multiple shard identification. We supply `LocalShardCoordinator` by default and can be replaced by one capable of working with a distributed bot architecture.
 
 ### Migrating from `setVoiceConnectionScheduler`
 Use `setVoiceReactorResources` after calling `client.gateway()`. It takes a `ReactorResource` object that will replace the one set at the `DiscordClientBuilder` level only for voice. A similar override exists for gateway in `setGatewayReactorResources`.
