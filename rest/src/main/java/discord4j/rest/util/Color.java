@@ -20,8 +20,14 @@ import reactor.util.annotation.Nullable;
 
 public final class Color {
 
-    /** The color white <span style="color: #FFFFFF">\u25A0</span>. */
+    /** The color white <span style="color: #FFFFFF">\u25A0</span>. Use {@link #DISCORD_WHITE} for embeds. */
     public static final Color WHITE = of(255, 255, 255);
+
+    /**
+     * The color white <span style="color: #FFFFFE">\u25A0</span> that can be used for Discord embeds.
+     * Passing {@link #WHITE} to embed is ignored by Discord.
+     */
+    public static final Color DISCORD_WHITE = of(255, 255, 254);
 
     /** The color light gray <span style="color: #C0C0C0">\u25A0</span>. */
     public static final Color LIGHT_GRAY = of(192, 192, 192);
@@ -32,8 +38,14 @@ public final class Color {
     /** The color dark gray <span style="color: #404040">\u25A0</span>. */
     public static final Color DARK_GRAY = of(64, 64, 64);
 
-    /** The color black <span style="color: #000000">\u25A0</span>. */
+    /** The color black <span style="color: #000000">\u25A0</span>. Use {@link #DISCORD_BLACK} for roles. */
     public static final Color BLACK = of(0, 0, 0);
+
+    /**
+     * The color black <span style="color: #000001">\u25A0</span> that can be used for Discord roles. Passing
+     * {@link #BLACK} as role color is ignored by Discord.
+     */
+    public static final Color DISCORD_BLACK = of(0, 0, 1);
 
     /** The color red <span style="color: #FF0000">\u25A0</span>. */
     public static final Color RED = of(255, 0, 0);
@@ -142,9 +154,9 @@ public final class Color {
     public static Color of(final int red, final int green, final int blue) {
         if ((red & 0xFF) != red || (green & 0xFF) != green || (blue & 0xFF) != blue) {
             throw new IllegalArgumentException("Illegal RGB arguments" +
-                " red=0x" + Integer.toHexString(red) +
-                " green=0x" + Integer.toHexString(green) +
-                " blue=0x" + Integer.toHexString(blue));
+                    " red=0x" + Integer.toHexString(red) +
+                    " green=0x" + Integer.toHexString(green) +
+                    " blue=0x" + Integer.toHexString(blue));
         }
 
         return of((red << 16) | (green << 8) | blue);
@@ -212,10 +224,10 @@ public final class Color {
     @Override
     public String toString() {
         return "Color{" +
-            "red=" + getRed() +
-            ", green=" + getGreen() +
-            ", blue=" + getBlue() +
-            '}';
+                "red=" + getRed() +
+                ", green=" + getGreen() +
+                ", blue=" + getBlue() +
+                '}';
     }
 
     public boolean equals(@Nullable final Object obj) {
