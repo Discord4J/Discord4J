@@ -573,6 +573,7 @@ public class DefaultGatewayClient implements GatewayClient {
             try {
                 int capacity = Integer.parseInt(capacityValue);
                 log.info("Overriding default outbound limiter capacity: {}", capacity);
+                return capacity;
             } catch (NumberFormatException e) {
                 log.warn("Invalid custom outbound limiter capacity: {}", capacityValue);
             }
