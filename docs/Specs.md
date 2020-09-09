@@ -1,5 +1,5 @@
 ## Introduction
-Specs, short for Specification(s), are an unique design philosophy adopted by Discord4J to handle requests that contain multiple *optional* properties. They are very similar to the common [builder pattern](https://en.wikipedia.org/wiki/Builder_pattern), but with two very important differentiating characteristics:
+Specs, short for Specification(s), are a unique design philosophy adopted by Discord4J to handle requests that contain multiple *optional* properties. They are very similar to the common [builder pattern](https://en.wikipedia.org/wiki/Builder_pattern), but with two very important differentiating characteristics:
 
 1) The end-user does **not** construct the builder.
 2) The end-user does **not** construct the finalized object.
@@ -7,7 +7,7 @@ Specs, short for Specification(s), are an unique design philosophy adopted by Di
 These two characteristics provide Discord4J with tremendous flexibility when it comes to constructing requests without breaking the API at a future date. Different requests to Discord may require different procedures and Specs allows Discord4J to "construct" these requests in an implementation-dependent manner while still providing the end-user control in "building" the request parameters using a singular syntax that is consistent across the API.
 
 ### Example
-All Specs that an end-user interacts with will be provided via a `Consumer`. For example, for `MessageChannel#createMessage`:
+All Specs that an end user interacts with will be provided via a `Consumer`. For example, for `MessageChannel#createMessage`:
 ```java
 messageChannel.createMessage(spec -> /* manipulate the spec */)
 ```

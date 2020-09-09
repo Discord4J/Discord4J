@@ -16,7 +16,7 @@ Some operations create exclusive Schedulers for serializing calls like emitting 
 
 # Customization
 
-Since Reactor gives the control to its users regarding threading, it is our goal to extend that flexibility to you as well. While you're still under control using operators such as [`publishOn`](https://projectreactor.io/docs/core/release/reference/#_publishon) and [`subscribeOn`](https://projectreactor.io/docs/core/release/reference/#_subscribeon) you can also override some of the defaults we set above.
+Since Reactor gives the control to its users regarding threading, it is our goal to extend that flexibility to you as well. While you're still under control using operators such as [`publishOn`](https://projectreactor.io/docs/core/release/reference/#_publishon) and [`subscribeOn`](https://projectreactor.io/docs/core/release/reference/#_subscribeon) you can also override some defaults we set above.
 
 ## ReactorResources
 
@@ -78,7 +78,7 @@ GatewayDiscordClient client = DiscordClient.create("TOKEN")
 
 A `GatewayReactorResources` has an extra scheduler for dedicated Gateway payload sending. If not overridden, it will use a dedicated single scheduler called `d4j-gateway`. Can be created through `GatewayReactorResources::DEFAULT_PAYLOAD_SENDER_SCHEDULER`.
 
-And the same can be done for voice:
+The same can be done for voice:
 
 ```java
 GatewayDiscordClient client = DiscordClient.create("TOKEN")
@@ -88,14 +88,14 @@ GatewayDiscordClient client = DiscordClient.create("TOKEN")
         .block();
 ```
 
-A `VoiceGatewayResources` requires extra parameters due to all concurrent tasks it need to keep. Among them:
+A `VoiceGatewayResources` requires extra parameters due to all concurrent tasks it needs to keep. Among them:
 
 - Scheduling Voice send task (defaults to `timerTaskScheduler` if not replaced)
 - Scheduling Voice receive task (defaults to `timerTaskScheduler` if not replaced)
 
 ## EventDispatcher
 
-The `EventDispatcher` is a key element in the Discord4J Core architecture. Since v3.1.0 a wide range of customization is possible on this component, in particular: the backing Processor, its back-pressure (flow control) strategy and the Scheduler used for publishing events.
+The `EventDispatcher` is a key element in the Discord4J Core architecture. Since v3.1.0 a wide range of customization is possible on this component, in particular: the backing Processor, its back-pressure (flow control) strategy, and the Scheduler used for publishing events.
 
 ### Replacing thread model
 

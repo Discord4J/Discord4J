@@ -2,7 +2,7 @@
 
 Sharding is the process a bot guilds are split into multiple connections to the Discord Gateway. Discord requires you to have a max of 2,500 guilds per shard, but the recommended is 1 shard per thousand guilds, so as your bot scales you'll eventually need to switch to a sharding scheme.
 
-Since v3.1, Discord4J takes a different approach to Sharding: a single `GatewayDiscordClient`, created from a `DiscordClient`, represents a **shard group** where 1..N Gateway connections are established, each connection represents a shard and will receive updates from a subset of the bot guilds, however, they will be published to a single `EventDispatcher` and `StoreService`. This capability, combined with the modular nature of all Gateway-related components, allows for multiple bot architecture configurations.
+Since v3.1, Discord4J takes a different approach to Sharding: a single `GatewayDiscordClient`, created from a `DiscordClient`, represents a **shard group** where 1 to N Gateway connections are established, each connection represents a shard and will receive updates from a subset of the bot guilds, however, they will be published to a single `EventDispatcher` and `StoreService`. This capability, combined with the modular nature of all Gateway-related components, allows for multiple bot architecture configurations.
 
 # Enabling the feature
 
@@ -29,7 +29,7 @@ You can also customize it entirely using `ShardingStrategy.builder()` for featur
 - Set the total number of shards: `count(int)`
 - Define the shard ID source (defaults from ID 0 to `shardCount - 1`): statically by `indices(int...)` or based on a `Publisher` using `indices(Function<Integer, Publisher<Integer>>)`
 - Include only a subset of shard IDs using `filter(Predicate<ShardInfo>)`
-- [If your bot supports it](https://discord.com/developers/docs/topics/gateway#sharding-for-very-large-bots), allow concurrent Gateway handshakes using `maxConcurrency(int)`
+- [If your bot supports it](https://discord.com/developers/docs/topics/gateway#sharding-for-very-large-bots) allow concurrent Gateway handshakes using `maxConcurrency(int)`
 
 # Supported architectures
 
@@ -112,7 +112,7 @@ If you plan to run your bot infrastructure across multiple machines, your bot ru
 
 Connect uses the concept of **Leader** and **Worker** to express a Discord4J bot topology:
 
-- Leaders will establish a websocket connection to Discord Gateway so they are responsible of handling its lifecycle and delivering payloads to a middleware
+- Leaders will establish a websocket connection to Discord Gateway, so they are in charge of handling its lifecycle and delivering payloads to a middleware
 - Workers are not connecting to Discord Gateway directly and instead receive payloads from the middleware, connecting to it on startup
 - Middleware is the set of components that need to work in a distributed fashion to communicate to an arbitrary number of Leaders and Workers
 
@@ -126,7 +126,7 @@ A typical Middleware is required to provide the following distributed functional
 
 Connect project is attempting to provide implementations for each of the previous elements. Technologies such as RSocket, RabbitMQ and redis are used, and more are planned to offer a multitude of options to choose from.
 
-Please check the [examples folder](https://github.com/Discord4J/connect/tree/master/examples) for information about how to setup a distributed bot using connect.
+Please check the [examples folder](https://github.com/Discord4J/connect/tree/master/examples) for information about how to set up a distributed bot using connect.
 
 ### Writing leaders, reading stateless workers
 
@@ -146,5 +146,5 @@ Please check the [examples folder](https://github.com/Discord4J/connect/tree/mas
 
 ### Dedicated voice workers
 
-It is planned that Discord4J Connect supports distributed audio processing. The interfaces in the voice module exist but they lack a distributed-capable implementation.
+It is planned that Discord4J Connect supports distributed audio processing. The interfaces in the voice module exist, but they lack a distributed-capable implementation.
 

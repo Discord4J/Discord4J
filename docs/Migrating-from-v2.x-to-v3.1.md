@@ -66,7 +66,7 @@ discordClient.getEventDispatcher().on(ReadyEvent.class) // Listen for ReadyEvent
 #### What is wrong with v2?
 Everything. Its problems stem from being the oldest of the 3 major libraries (written before a time the bot API existed) and its developer(s) having inadequate knowledge of Java conventions/practices and lacking OOP concepts.
 
-1. v2 is a completely blocking API. This means threads must "wait" for actions to be completed before continuing. This wastes a tremendous amount of resources at scale as threads could be accomplishing various other tasks as they "wait" for previous tasks to finish. As noted by [this chart](https://i.imgur.com/dioE0Fh.png), even wasting a millisecond, in relative terms, is a huge waste of time for a computer and a typical Discord request is about 50 milliseconds. v3, thanks to Reactor, can maximize the usage of this wasted computing power to utilize less resources to accomplish more tasks.
+1. v2 is a completely blocking API. This means threads must "wait" for actions to be completed before continuing. This wastes a tremendous amount of resources at scale as threads could be accomplishing various other tasks as they "wait" for previous tasks to finish. As noted by [this chart](https://i.imgur.com/dioE0Fh.png), even wasting a millisecond, in relative terms, is a huge waste of time for a computer, and a typical Discord request is about 50 milliseconds. v3, thanks to Reactor, can maximize the usage of this wasted computing power to utilize less resources to accomplish more tasks.
 
    Of course, you do not have to utilize Reactor's asynchronous features. As previously discussed, blocking with Reactor can be easily accomplished to achieve the previous paradigm.
 
@@ -80,17 +80,17 @@ Everything. Its problems stem from being the oldest of the 3 major libraries (wr
 
 6. Manipulating entities in v2 is both inefficient and cumbersome. Most entities when being created or edited can set multiple properties at once. For instance, when you create a channel you can set the name, type, position, permission overwrites, etc. all in one request, however, in v2 this is impossible. In order to create/edit with multiple properties you must call individual methods one at a time which makes an entire request to Discord on each and every single invocation. This is tremendously wasteful and quickly makes your bot approach a rate limit. v3 fixes this by utilizing [Specs](Specs.md).
 
-7. While it is "possible" to disable the cache in v2, it instantly causes a crash on startup when attempted. v3 was designed with caches being disabled in mind, allowing very lightweight configurations if desired. We have tested v3 running on some of [Tatsumaki](https://tatsumaki.xyz/)'s shards, and v3 was able to stay under 10MB of RAM usage. v3's Store API is also far more flexible, allowing other configurations such as off-heap caching to be possible.
+7. While it is "possible" to disable the cache in v2, it instantly causes a crash on startup when attempted. v3 was designed with caches being disabled in mind, allowing very lightweight configurations if desired. We have tested v3 running on some of [Tatsumaki](https://tatsumaki.xyz/)'s shards, and v3 was able to stay under 10 MB of RAM usage. v3's Store API is also far more flexible, allowing other configurations such as off-heap caching to be possible.
 
 8. v2 is completely mutable which is susceptible to many race conditions that are incredibly hard to replicate, track down, and/or fix. v3 attempts to be as immutable as possible which has [numerous benefits](https://www.ibm.com/developerworks/library/j-ft4/index.html) for us as a library and you as a user.
 
-9. v2 follows some unusual conventions. `I` prefixes for interfaces (which is a C# convention, but not a Java one), as well as a questionable package hierarchy structure (most events are under `impl`, for example). v3's follows proper Java industry conventions and a package hierarchy that makes intuitive sense.
+9. v2 follows some unusual conventions. `I` prefixes for interfaces (which is a C# convention, but not a Java one), as well as a questionable package hierarchy structure (most events are under `impl`, for example). v3's follows proper Java industry conventions, and a package hierarchy that makes intuitive sense.
 
 #### Where is `RequestBuffer`/`RequestBuilder`?
-`RequestBuffer` and `RequestBuilder` have been completely removed in v3. By default, v3 will execute requests in order and handle rate limits.
+Classes like `RequestBuffer` and `RequestBuilder` have been completely removed in v3. By default, v3 will execute requests in order and handle rate limits.
 
 #### Where is `MessageHistory`?
-`MessageHistory` has been completely removed in v3. A "message history" can be obtained by calling either [MessageChannel#getMessagesBefore](https://jitpack.io/com/discord4j/discord4j/discord4j-core/v3-SNAPSHOT/javadoc/discord4j/core/object/entity/MessageChannel.html#getMessagesBefore-discord4j.core.object.util.Snowflake-) or [MessageChannel#getMessagesAfter](https://jitpack.io/com/discord4j/discord4j/discord4j-core/v3-SNAPSHOT/javadoc/discord4j/core/object/entity/MessageChannel.html#getMessagesAfter-discord4j.core.object.util.Snowflake-).
+`MessageHistory` has been completely removed in v3. A "message history" can be obtained by calling either [MessageChannel#getMessagesBefore](https://www.javadoc.io/doc/com.discord4j/discord4j-core/latest/discord4j/core/object/entity/channel/MessageChannel.html#getMessagesBefore-discord4j.common.util.Snowflake-) or [MessageChannel#getMessagesAfter](https://www.javadoc.io/doc/com.discord4j/discord4j-core/latest/discord4j/core/object/entity/channel/MessageChannel.html#getMessagesAfter-discord4j.common.util.Snowflake-).
 
 ## Migration steps
 
@@ -104,7 +104,7 @@ Important: This section focuses on Discord4J v3.1 rather than v3.0.
 1. `ClientBuilder` is now replaced with `DiscordClientBuilder`. Several options don't exist anymore or have replacements elsewhere. It comes with default options to allow a monolithic multi-shard bot to function. You can start with `DiscordClient::create` or `DiscordClient::builder`.
 1. `ClientBuilder::setDaemon` does not have an equivalent as it uses Reactor threading. Check the [Threading](Threading.md) page for more information.
 1. `ClientBuilder::withPingTimeout` is now called `setMaxMissedHeartbeatAck` and can be set at `DiscordClient::gateway`.
-1. `ClientBuilder::setMaxReconnectAttempts` now live under `ReconnectOptions` which can be set at `DiscordClient::gateway`. See [v3.1 Migration Guide](Migrating-from-v3.0-to-v3.1)
+1. `ClientBuilder::setMaxReconnectAttempts` now live under `ReconnectOptions` which can be set at `DiscordClient::gateway`. See [v3.1 Migration Guide](Migrating-from-v3.0-to-v3.1.md)
 1. Shard options like `ClientBuilder::withShards`, `::setShard` and `::withRecommendedShardCount` are present under `DiscordClient::gateway`. See [v3.1 Migration Guide](Migrating-from-v3.0-to-v3.1.md)
 1. `ClientBuilder` cache-related options like `setMaxMessageCacheCount` and `setCacheProvider` now live under the Stores abstraction and can be replaced using a combination of `MappingStoreService` and `CaffeineStoreService`. These options are set under `DiscordClient::gateway`. See also [Stores-Caffeine](https://github.com/Discord4J/Stores/tree/master/caffeine)
 1. `ClientBuilder::registerListener` variants are moved to `GatewayDiscordClient::on` method, or `GatewayDiscordClient::getEventDispatcher`.
@@ -145,7 +145,7 @@ client.on(Event.class)
     
 gateway.onDisconnect().block(); // we should block until it disconnects
 ```
-Since `@EventSubscriber` was removed you can use that pattern, overriding the methods you wish to get notified. There is also a reactive alternative [`ReactiveEventAdapter`](https://gist.github.com/quanticc/b9c04f16ffdd925b845e3d4851fb10bd) you can use in a similar fashion.
+Since `@EventSubscriber` was removed you can use that pattern, overriding the methods you wish to get notified. There is also a reactive alternative [`ReactiveEventAdapter`](https://gist.github.com/quanticc/b9c04f16ffdd925b845e3d4851fb10bd) you can use similarly.
 1. If you previously used `IListener<E>` you can also migrate it to `EventSubscriberAdapter`
 1. Events now live under the `discord4j.core.event` package.
 1. `ReconnectSuccessEvent` -> `ReconnectEvent`
@@ -157,7 +157,7 @@ Since `@EventSubscriber` was removed you can use that pattern, overriding the me
 
 ### Event processing
 1. In general, if an `Event` returns a `Mono` or `Flux`, it means it involves a request that might incur latency and therefore we use Reactor to properly route and schedule that action asynchronously. Such methods are safe to call `Mono::block` or `Flux::blockLast` upon to use the contained type in a blocking way.
-1. All entities have different names now but the correlation should be easy to follow, for example: `IMessage` -> `Message`
+1. All entities have different names now, but the correlation should be easy to follow, for example: `IMessage` -> `Message`
 1. Checking if a `MessageChannel` is private can be done through `instanceof PrivateChannel` or using `getType` after blocking, or `.ofType(PrivateChannel.class)` before blocking.
 1. `DiscordClient::getOurUser` -> `GatewayDiscordClient::getSelf` and optionally block
 
@@ -169,9 +169,10 @@ boolean hasPermission = message.getChannel().getModifiedPermissions(message.getA
 ```
 To migrate this you should know:
 1. To work with `PermissionSet` rather than `EnumSet<Permission>`. Build one using `PermissionSet::of`.
-1. Since `Message::getChannel` returns a `Mono<MessageChannel>` and calls like this only make sense under Guild channels, you must ensure first that the actual type is `GuildChannel`: `message.getChannel().ofType(GuildChannel.class)`
+1. Since `Message::getChannel` returns a `Mono<MessageChannel>` and calls like this only make sense under Guild channels, you must ensure first the actual type is `GuildChannel`: `message.getChannel().ofType(GuildChannel.class)`
 1. If you block such a `Mono` and the underlying channel is not a guild one, it will return `null`. There is also `Mono::blockOptional` to get an `Optional`
-1. After blocking you can then call `GuildChannel::getEffectivePermissions` using the `Snowflake` for a member or role
+1. After blocking, you can then call `GuildChannel::getEffectivePermissions` using the `Snowflake` for a member or role
+
 The resulting code should look like:
 ```java
 Snowflake authorId = message.getAuthor()

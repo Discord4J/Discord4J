@@ -13,15 +13,15 @@ A `Publisher` is actually a `reactive-streams` concept, and is even part of the 
 A `Subscriber` is also a `reactive-streams` concept, and is also part of the [Flow API](https://docs.oracle.com/javase/9/docs/api/java/util/concurrent/Flow.Subscriber.html). A `Subscriber` "subscribes" or "consumes" data from a stream. In Discord, the "subscriber" is us, the users; we take the data *published* to us from Discord and process it in a way to monitor activity or respond in some fashion. All data ends at a `Subscriber`.
 
 ### Subscription
-Also a `reactive-streams` concept and part of the [Flow API](https://docs.oracle.com/javase/9/docs/api/java/util/concurrent/Flow.Subscription.html) a `Subscription` describes a link between a `Publisher` and a `Subscriber`. A `Subscriber` *requests* data from a `Publisher` and the amount of data the `Publisher` *pushes* to the `Subscriber` is dependent on how much data the `Subscriber` requested. Additionally, the `Subscriber` can cancel the `Subscription` at any time.
+A `reactive-streams` concept and part of the [Flow API](https://docs.oracle.com/javase/9/docs/api/java/util/concurrent/Flow.Subscription.html) a `Subscription` describes a link between a `Publisher` and a `Subscriber`. A `Subscriber` *requests* data from a `Publisher` and the amount of data the `Publisher` *pushes* to the `Subscriber` is dependent on how much data the `Subscriber` requested. Additionally, the `Subscriber` can cancel the `Subscription` at any time.
 
 While you as a programmer using Reactor will not see `Subscription` often, it is useful to know how data flows from a `Publisher` to a `Subscriber`. Without a `Subscription`, data is never *requested*, thus data never *flows* from a `Publisher` to a `Subscriber`.
 
 ### Mono
-A [Mono](https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html) represents a stream of data that either has an element, or not. It is the reactive equivalent of an [Optional](https://docs.oracle.com/javase/8/docs/api/java/util/Optional.html). Since `Mono` is a "provider" or a "source" of data, it is also an implementation of `Publisher`.
+A [Mono](https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Mono.html) represents a stream of data that either has an element, or not. It is the reactive equivalent of an [Optional](https://docs.oracle.com/javase/8/docs/api/java/util/Optional.html). Since `Mono` is a "provider", or a "source" of data, it is also an implementation of `Publisher`.
 
 ### Flux
-A [Flux](https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Flux.html) represents a stream of possibly unlimited data. It is the reactive equivalent of a [Stream](https://docs.oracle.com/javase/8/docs/api/java/util/stream/Stream.html). Since `Flux` is a "provider" or a "source" of data, it is also an implementation of `Publisher`.
+A [Flux](https://projectreactor.io/docs/core/release/api/reactor/core/publisher/Flux.html) represents a stream of possibly unlimited data. It is the reactive equivalent of a [Stream](https://docs.oracle.com/javase/8/docs/api/java/util/stream/Stream.html). Since `Flux` is a "provider", or a "source" of data, it is also an implementation of `Publisher`.
 
 ### Basic Usage
 Let's print a simple "Hello World" reactively.
@@ -30,11 +30,11 @@ Mono.just("Hello World").subscribe(System.out::println);
 // or
 Flux.just('H', 'e', 'l', 'l', 'o', ' ', 'W', 'o', 'r', 'l', 'd', '\n').subscribe(System.out::print);
 ```
-Let's breakdown the first line:
+Breaking down the first line:
 1. We create a `Mono` that will have a single element, a String `Hello World`.
 2. We *subscribe* to this data, which creates a `Subscription` (that implicitly requests data from the `Publisher` (`Mono` in this case)), which allows the data to flow to our `System.out::println` method reference which consumes the data.
 
-Let's breakdown the second line:
+Breaking down the second line:
 1. We create a `Flux` that will have multiple elements that eventually spell out the String "Hello World" with a newline character.
 2. We *subscribe* to this data, which creates a `Subscription` (that implicitly requests data from the `Publisher` (`Flux` in this case), which allows the data to flow to our `System.out::print` method reference which consumes the data.
 
@@ -89,7 +89,7 @@ For the `Mono` example, since the only element is "Hello World", which does **NO
 For the `Flux` example, since "World" does **NOT** equal "Hello", it was *filtered* out of the stream, thus, only "Hello" remained which resulted in the only thing being printed.
 
 #### `filterWhen`
-`filterWhen` is to `filter` as `flatMap` is to `map`. Rather than a `Predicate`, which is essentially a transformation from a type `T` to a `boolean`, `filterWhen` expects a transformation of type `T` to some `Publisher<Boolean>`, which will decide whether or not data should continue to flow downstream. For example:
+`filterWhen` is to `filter` as `flatMap` is to `map`. Rather than a `Predicate`, which is essentially a transformation from a type `T` to a `boolean`, `filterWhen` expects a transformation of type `T` to some `Publisher<Boolean>`, which will decide whether data should continue to flow downstream. For example:
 ```java
 Mono.just("Hello World")
     .filterWhen(aString -> Mono.just(aString.equals("Hello")))
