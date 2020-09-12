@@ -36,7 +36,9 @@ public class JacksonPayloadWriter implements PayloadWriter {
     public Mono<ByteBuf> write(GatewayPayload<?> payload) {
         return Mono.create(sink -> sink.onRequest(__ -> {
             try {
-                sink.success(ByteBufAllocator.DEFAULT.buffer().writeBytes(mapper.writeValueAsBytes(payload)));
+                sink.success(ByteBufAllocator.DEFAULT.buffer()
+                        .touch("discord4j.gateway.payload")
+                        .writeBytes(mapper.writeValueAsBytes(payload)));
             } catch (JsonProcessingException e) {
                 sink.error(Exceptions.propagate(e));
             }

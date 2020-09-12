@@ -62,8 +62,8 @@ public class JacksonReaderStrategy<T> implements ReaderStrategy<T> {
 
     @Override
     public Mono<T> read(Mono<ByteBuf> content, Class<T> responseType) {
-        return content.as(JacksonReaderStrategy::byteArray)
-                .flatMap(bytes -> Mono.deferWithContext(ctx -> Mono.fromCallable(() -> {
+        return content.<Mono<byte[]>>as(JacksonReaderStrategy::byteArray)
+                .map(bytes -> {
                     if (log.isTraceEnabled()) {
                         log.trace("{}", new String(bytes, StandardCharsets.UTF_8));
                     }
@@ -75,7 +75,7 @@ public class JacksonReaderStrategy<T> implements ReaderStrategy<T> {
                     } catch (IOException e) {
                         throw Exceptions.propagate(e);
                     }
-                })));
+                });
     }
 
     private static Mono<byte[]> byteArray(Mono<ByteBuf> byteBufMono) {
