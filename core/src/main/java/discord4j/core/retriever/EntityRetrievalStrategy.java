@@ -39,6 +39,11 @@ public interface EntityRetrievalStrategy extends Function<GatewayDiscordClient, 
      * Strategy that consists of retrieving entities from stores. Avoids making REST API requests in case the object
      * is not present in the cache. If you want to perform actions when a requested entity is missing, use operators
      * such as {@link Mono#switchIfEmpty(Mono)}.
+     * <p>
+     * Note that using this strategy can have some unintended consequences like being unable to fetch some entities not
+     * cached by the gateway, for example, private channels. If that is your use case, locally apply a method like
+     * {@link GatewayDiscordClient#withRetrievalStrategy(EntityRetrievalStrategy)} using
+     * {@link EntityRetrievalStrategy#REST}.
      */
     EntityRetrievalStrategy STORE = StoreEntityRetriever::new;
 
