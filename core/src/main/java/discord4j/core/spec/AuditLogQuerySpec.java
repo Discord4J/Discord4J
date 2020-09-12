@@ -25,7 +25,7 @@ import java.util.Map;
 /** A spec used to query audit log entries that match the specified filter. */
 public final class AuditLogQuerySpec implements Spec<Map<String, Object>> {
 
-    private final Map<String, Object> request = new HashMap<>(2);
+    private final Map<String, Object> request = new HashMap<>(4);
 
     /**
      * Sets the query to only return entries where the user specified is responsible for the action.
@@ -46,6 +46,28 @@ public final class AuditLogQuerySpec implements Spec<Map<String, Object>> {
      */
     public AuditLogQuerySpec setActionType(final ActionType actionType) {
         request.put("action_type", actionType.getValue());
+        return this;
+    }
+
+    /**
+     * Sets the query to return entries before a certain entry id.
+     *
+     * @param beforeId The {@code Snowflake} of the audit log id to filter by before of.
+     * @return This spec.
+     */
+    public AuditLogQuerySpec setBefore(final Snowflake beforeId) {
+        request.put("before", beforeId.asString());
+        return this;
+    }
+
+    /**
+     * Sets the query to return a max of entries.
+     *
+     * @param limit The limit of the audit log entries to filter by.
+     * @return This spec.
+     */
+    public AuditLogQuerySpec setLimit(final int limit) {
+        request.put("limit", limit);
         return this;
     }
 
