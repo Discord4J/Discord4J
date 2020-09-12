@@ -38,11 +38,11 @@ public class RouteMatcher {
     @Nullable
     private final Predicate<Map<String, String>> requestVariableMatcher;
 
-    private RouteMatcher(DiscordWebRequest request) {
+    private RouteMatcher(@Nullable DiscordWebRequest request) {
         this(request, null);
     }
 
-    public RouteMatcher(DiscordWebRequest request, Predicate<Map<String, String>> requestVariableMatcher) {
+    public RouteMatcher(@Nullable DiscordWebRequest request, @Nullable Predicate<Map<String, String>> requestVariableMatcher) {
         this.request = request;
         this.requestVariableMatcher = requestVariableMatcher;
     }
