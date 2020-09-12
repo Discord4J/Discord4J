@@ -29,9 +29,9 @@ import reactor.core.publisher.MonoProcessor;
 import reactor.core.publisher.SignalType;
 import reactor.core.scheduler.Scheduler;
 import reactor.netty.http.client.HttpClientResponse;
-import reactor.retry.Retry;
 import reactor.util.Logger;
 import reactor.util.Loggers;
+import reactor.util.retry.Retry;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -78,8 +78,8 @@ class RequestStream {
      * This retry function is used for reading and completing HTTP requests in the event of a server error (codes
      * 500, 502, 503 and 504). The delay is calculated using exponential backoff with jitter.
      */
-    private Retry<?> serverErrorRetryFactory() {
-        return Retry.onlyIf(ClientException.isRetryContextStatusCode(500, 502, 503, 504))
+    private reactor.retry.Retry<?> serverErrorRetryFactory() {
+        return reactor.retry.Retry.onlyIf(ClientException.isRetryContextStatusCode(500, 502, 503, 504))
                 .withBackoffScheduler(timedTaskScheduler)
                 .exponentialBackoffWithJitter(Duration.ofSeconds(2), Duration.ofSeconds(30))
                 .doOnRetry(ctx -> {
@@ -173,9 +173,9 @@ class RequestStream {
                     .subscriberContext(ctx -> ctx.putAll(correlation.getContext())
                             .put(LogUtil.KEY_REQUEST_ID, clientRequest.getId())
                             .put(LogUtil.KEY_BUCKET_ID, id.toString()))
-                    .retryWhen(rateLimitRetryOperator::apply)
+                    .retryWhen(Retry.withThrowable(rateLimitRetryOperator::apply))
                     .transform(getResponseTransformers(request))
-                    .retryWhen(serverErrorRetryFactory())
+                    .retryWhen(Retry.withThrowable(serverErrorRetryFactory()))
                     .doFinally(this::next)
                     .checkpoint("Request to " + clientRequest.getDescription() + " [RequestStream]")
                     .subscribeWith(callback)

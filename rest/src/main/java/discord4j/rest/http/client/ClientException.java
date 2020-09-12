@@ -26,9 +26,9 @@ import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
 import reactor.netty.http.client.HttpClientResponse;
 import reactor.retry.Backoff;
-import reactor.retry.Retry;
 import reactor.retry.RetryContext;
 import reactor.util.annotation.Nullable;
+import reactor.util.retry.Retry;
 
 import java.time.Duration;
 import java.util.Arrays;
@@ -170,7 +170,7 @@ public class ClientException extends RuntimeException {
     /**
      * {@link Predicate} helper to further classify a {@link ClientException}, while creating a {@link Retry}
      * factory, depending on the underlying HTTP status code. A {@link Retry} factory can be created through methods
-     * like {@link Retry#onlyIf(Predicate)} where this method can be used as argument.
+     * like {@link reactor.retry.Retry#onlyIf(Predicate)} where this method can be used as argument.
      *
      * @param code the status code for which this {@link Predicate} should return {@code true}
      * @return a {@link Predicate} that returns {@code true} if the given {@link RetryContext} exception is a
@@ -183,7 +183,7 @@ public class ClientException extends RuntimeException {
     /**
      * {@link Predicate} helper to further classify a {@link ClientException}, while creating a {@link Retry}
      * factory, depending on the underlying HTTP status code. A {@link Retry} factory can be created through methods
-     * like {@link Retry#onlyIf(Predicate)} where this method can be used as argument.
+     * like {@link reactor.retry.Retry#onlyIf(Predicate)} where this method can be used as argument.
      *
      * @param codes the status codes for which this {@link Predicate} should return {@code true}
      * @return a {@link Predicate} that returns {@code true} if the given {@link Throwable} is a {@link ClientException}
@@ -218,8 +218,8 @@ public class ClientException extends RuntimeException {
      * @return a transformation function that retries error sequences
      */
     public static <T> Function<Mono<T>, Publisher<T>> retryOnceOnStatus(int code) {
-        return mono -> mono.retryWhen(Retry.onlyIf(isRetryContextStatusCode(code))
+        return mono -> mono.retryWhen(Retry.withThrowable(reactor.retry.Retry.onlyIf(isRetryContextStatusCode(code))
                 .backoff(Backoff.fixed(Duration.ofSeconds(1)))
-                .retryOnce());
+                .retryOnce()));
     }
 }
