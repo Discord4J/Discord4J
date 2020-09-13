@@ -253,7 +253,6 @@ public abstract class Routes {
      * <p>
      * Returns a 204 empty response on success.
      */
-    @Experimental
     public static final Route CROSSPOST_MESSAGE = Route.post("/channels/{channel.id}/messages/{message.id}/crosspost");
 
     /**

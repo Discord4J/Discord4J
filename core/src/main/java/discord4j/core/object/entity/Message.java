@@ -574,13 +574,14 @@ public final class Message implements Entity {
     /**
      * Requests to publish (crosspost) this message if the {@code channel} is of type 'news'.
      *
-     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the message was published
-     * (crossposted) in the guilds. If an error is received, it is emitted through the {@code Mono}.
+     * @return A {@link Mono} where, upon successful completion, emits the published {@link Message} in the guilds. If an error is
+     * received, it is emitted through the {@code Mono}.
+     *
      */
-    @Experimental
-    public Mono<Void> publish() {
+    public Mono<Message> publish() {
         return gateway.getRestClient().getChannelService()
-                .publishMessage(getChannelId().asLong(), getId().asLong());
+            .publishMessage(getChannelId().asLong(), getId().asLong())
+            .map(data -> new Message(gateway, data));
     }
 
     @Override

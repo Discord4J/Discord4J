@@ -151,11 +151,10 @@ public class RestMessage {
     /**
      * Requests to publish (crosspost) this message if the {@code channel} is of type 'news'.
      *
-     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the message was published
+     * @return A {@link Mono} where, upon successful completion, emits the published {@link MessageData}
      * (crossposted) in the guilds. If an error is received, it is emitted through the {@code Mono}.
      */
-    @Experimental
-    public Mono<Void> publish() {
+    public Mono<MessageData> publish() {
         return restClient.getChannelService().publishMessage(channelId, id);
     }
 }
