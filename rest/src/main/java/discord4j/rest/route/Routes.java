@@ -249,9 +249,13 @@ public abstract class Routes {
 
     /**
      * Crosspost a Message into all guilds what follow the news channel indicated. This endpoint requires the
-     * 'DISCOVERY' feature to be present for the guild.
+     * 'DISCOVERY' feature to be present for the guild and requires the 'SEND_MESSAGES' permission, if the current user
+     * sent the message, or additionally the 'MANAGE_MESSAGES' permission, for all other messages, to be present for the current user.
      * <p>
      * Returns a 204 empty response on success.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/channel#crosspost-message">
+     *         https://discord.com/developers/docs/resources/channel#crosspost-message</a>
      */
     public static final Route CROSSPOST_MESSAGE = Route.post("/channels/{channel.id}/messages/{message.id}/crosspost");
 
@@ -297,8 +301,10 @@ public abstract class Routes {
     /**
      * Follow a News Channel to send messages to a target channel. Requires the `MANAGE_WEBHOOKS` permission in the
      * target channel. Returns a followed channel object.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/channel#follow-news-channel">
+     *         https://discord.com/developers/docs/resources/channel#follow-news-channel</a>
      */
-    @Experimental
     public static final Route FOLLOW_NEWS_CHANNEL = Route.post("/channels/{channel.id}/followers");
 
     /**
