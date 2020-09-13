@@ -183,7 +183,6 @@ public class ChannelService extends RestService {
                 .bodyToMono(Void.class);
     }
 
-    @Experimental
     public Mono<FollowedChannelData> followNewsChannel(long channelId, NewsChannelFollowRequest request) {
         return Routes.FOLLOW_NEWS_CHANNEL.newRequest(channelId)
                 .body(request)
