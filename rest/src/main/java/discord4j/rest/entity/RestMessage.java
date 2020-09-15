@@ -122,7 +122,18 @@ public class RestMessage {
         return restClient.getChannelService().deleteAllReactions(channelId, id);
     }
 
-    // TODO: add Delete All Reactions for Emoji route/restService/rest method/core method
+    /**
+     * Requests to remove a specified reaction on this message.
+     *
+     * @param emoji The reaction to remove on this message.
+     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the reaction from the
+     * specified user was removed on this message. If an error is received, it is emitted through the {@code Mono}.
+     * @see
+     * <a href="https://discord.com/developers/docs/resources/channel#delete-all-reactions-for-emoji">Delete All Reactions for Emoji</a>
+     */
+    public Mono<Void> deleteReactions(String emoji) {
+        return restClient.getChannelService().deleteReactions(channelId, id, emoji);
+    }
 
     /**
      * Requests to edit this message.
