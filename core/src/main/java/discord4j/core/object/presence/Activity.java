@@ -61,6 +61,13 @@ public class Activity {
                 .build();
     }
 
+    public static ActivityUpdateRequest competing(String name) {
+        return ActivityUpdateRequest.builder()
+            .name(name)
+            .type(Type.COMPETING.getValue())
+            .build();
+    }
+
     private final ActivityData data;
 
     Activity(final ActivityData data) {
@@ -311,7 +318,10 @@ public class Activity {
         WATCHING(3),
 
         /** {emoji} {name} */
-        CUSTOM(4);
+        CUSTOM(4),
+
+        /** "Competing in {name}" */
+        COMPETING(5);
 
         /** The underlying value as represented by Discord. */
         private final int value;
@@ -348,6 +358,7 @@ public class Activity {
                 case 2: return LISTENING;
                 case 3: return WATCHING;
                 case 4: return CUSTOM;
+                case 5: return COMPETING;
                 default: return UNKNOWN;
             }
         }
