@@ -64,6 +64,7 @@ public final class Presence {
      *     <li>{@link Activity#playing(String)}</li>
      *     <li>{@link Activity#streaming(String, String)}</li>
      *     <li>{@link Activity#watching(String)}</li>
+     *     <li>{@link Activity#competing(String)}</li>
      * </ul>
      *
      * @return a {@link StatusUpdate} for the ONLINE status
@@ -100,6 +101,7 @@ public final class Presence {
      *     <li>{@link Activity#playing(String)}</li>
      *     <li>{@link Activity#streaming(String, String)}</li>
      *     <li>{@link Activity#watching(String)}</li>
+     *     <li>{@link Activity#competing(String)}</li>
      * </ul>
      *
      * @return a {@link StatusUpdate} for the DO_NOT_DISTURB status
@@ -136,6 +138,7 @@ public final class Presence {
      *     <li>{@link Activity#playing(String)}</li>
      *     <li>{@link Activity#streaming(String, String)}</li>
      *     <li>{@link Activity#watching(String)}</li>
+     *     <li>{@link Activity#competing(String)}</li>
      * </ul>
      *
      * @return a {@link StatusUpdate} for the IDLE status

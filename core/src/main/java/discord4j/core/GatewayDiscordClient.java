@@ -324,6 +324,7 @@ public class GatewayDiscordClient implements EntityRetriever {
      *     <li>{@link Activity#playing(String)}</li>
      *     <li>{@link Activity#streaming(String, String)}</li>
      *     <li>{@link Activity#watching(String)}</li>
+     *     <li>{@link Activity#competing(String)}</li>
      * </ul>
      *
      * @param statusUpdate The updated client status.
@@ -351,6 +352,7 @@ public class GatewayDiscordClient implements EntityRetriever {
      *     <li>{@link Activity#playing(String)}</li>
      *     <li>{@link Activity#streaming(String, String)}</li>
      *     <li>{@link Activity#watching(String)}</li>
+     *     <li>{@link Activity#competing(String)}</li>
      * </ul>
      *
      * @param statusUpdate The updated client presence.
