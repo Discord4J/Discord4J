@@ -737,6 +737,68 @@ public abstract class Routes {
      */
     public static final Route GUILD_WIDGET_MODIFY = Route.patch("/guilds/{guild.id}/widget");
 
+    /**
+     * Returns the guild discovery metadata object. Requires the 'MANAGE_GUILD' permission.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/guild#get-guild-discovery-metadata">
+     *         https://discord.com/developers/docs/resources/guild#get-guild-discovery-metadata</a>
+     */
+    @Experimental
+    public static final Route GUILD_DISCOVERY_METADATA_GET = Route.get("/guilds/{guild.id}/discovery-metadata");
+
+    /**
+     * Modify the guild discovery metadata object for the guild. All attributes may be passed in with JSON and modified. Requires the
+     * 'MANAGE_GUILD' permission. Returns the updated guild discovery metadata object.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/guild#modify-guild-discovery-metadata">
+     *         https://discord.com/developers/docs/resources/guild#modify-guild-discovery-metadata</a>
+     */
+    @Experimental
+    public static final Route GUILD_DISCOVERY_METADATA_MODIFY = Route.patch("/guilds/{guild.id}/discovery-metadata");
+
+    /**
+     * Add a the guild discovery subcategory object for the guild. All attributes may be passed in with JSON and modified. Requires the
+     * 'MANAGE_GUILD' permission. Returns the added guild discovery subcategory object.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/guild#add-guild-discovery-subcategory">
+     *         https://discord.com/developers/docs/resources/guild#add-guild-discovery-subcategory</a>
+     */
+    @Experimental
+    public static final Route GUILD_DISCOVERY_SUBCATEGORY_CREATE = Route.post("/guilds/{guild.id}/discovery-categories");
+
+    /**
+     * Delete the guild discovery subcategory object for the guild. All attributes may be passed in with JSON and modified. Requires the
+     * 'MANAGE_GUILD' permission.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/guild#remove-guild-discovery-subcategory">
+     *         https://discord.com/developers/docs/resources/guild#remove-guild-discovery-subcategory</a>
+     */
+    @Experimental
+    public static final Route GUILD_DISCOVERY_SUBCATEGORY_DELETE = Route.delete("/guilds/{guild.id}/discovery-categories");
+
+    //////////////////////////////////////////////
+    ////////////// Discovery Resource ////////////
+    //////////////////////////////////////////////
+
+    /**
+     * Get a list of all available categories for discovery. All attributes may be passed in with JSON and modified.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/discovery#list-discovery-categories">
+     *         https://discord.com/developers/docs/resources/discovery#list-discovery-categories</a>
+     */
+    @Experimental
+    public static final Route DISCOVERY_CATEGORIES_LIST = Route.get("/discovery/categories");
+
+    /**
+     * Delete the guild discovery subcategory object for the guild. All attributes may be passed in with JSON and modified. Requires the
+     * 'MANAGE_GUILD' permission.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/discovery#validate-discovery-search-term">
+     *         https://discord.com/developers/docs/resources/discovery#validate-discovery-search-term</a>
+     */
+    @Experimental
+    public static final Route DISCOVERY_VALIDATE_SEARCH_TERM = Route.get("/discovery/valid-term");
+
     /////////////////////////////////////////////
     ////////////// Invite Resource //////////////
     /////////////////////////////////////////////
