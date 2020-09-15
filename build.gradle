@@ -3,7 +3,7 @@ plugins {
     id 'maven-publish'
     id 'signing'
     id 'com.gorylenko.gradle-git-properties' version '2.2.3' apply false
-    id 'com.github.ben-manes.versions' version '0.30.0'
+    id 'com.github.ben-manes.versions' version '0.33.0'
     id 'net.researchgate.release' version '2.8.1'
 }
 
@@ -23,7 +23,7 @@ ext {
     }
 
     // Dependencies
-    reactor_bom_version = '2020.0.0-M2'
+    reactor_bom_version = '2020.0.0-RC1'
     jackson_version = '2.11.2'
     jdkstores_version = "$storesVersion".toString()
 
