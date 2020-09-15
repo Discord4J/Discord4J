@@ -161,12 +161,13 @@ public class RestMessage {
 
     /**
      * Requests to publish (crosspost) this message if the {@code channel} is of type 'news'.
+     * Requires 'SEND_MESSAGES' permission if the current user sent the message, or additionally the 'MANAGE_MESSAGES' permission, for all other messages, to be present for the current user.
      *
-     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the message was published
+     * @return A {@link Mono} where, upon successful completion, emits the published {@link MessageData}
      * (crossposted) in the guilds. If an error is received, it is emitted through the {@code Mono}.
+     * @see <a href="https://discord.com/developers/docs/resources/channel#crosspost-message">Crosspost Message</a>
      */
-    @Experimental
-    public Mono<Void> publish() {
+    public Mono<MessageData> publish() {
         return restClient.getChannelService().publishMessage(channelId, id);
     }
 }

@@ -146,11 +146,10 @@ public class ChannelService extends RestService {
                 .bodyToMono(Void.class);
     }
 
-    @Experimental
-    public Mono<Void> publishMessage(long channelId, long messageId) {
+    public Mono<MessageData> publishMessage(long channelId, long messageId) {
         return Routes.CROSSPOST_MESSAGE.newRequest(channelId, messageId)
                 .exchange(getRouter())
-                .bodyToMono(Void.class);
+                .bodyToMono(MessageData.class);
     }
 
     public Mono<Void> editChannelPermissions(long channelId, long overwriteId, PermissionsEditRequest request,
@@ -184,7 +183,6 @@ public class ChannelService extends RestService {
                 .bodyToMono(Void.class);
     }
 
-    @Experimental
     public Mono<FollowedChannelData> followNewsChannel(long channelId, NewsChannelFollowRequest request) {
         return Routes.FOLLOW_NEWS_CHANNEL.newRequest(channelId)
                 .body(request)

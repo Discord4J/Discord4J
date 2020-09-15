@@ -68,7 +68,6 @@ public final class NewsChannel extends BaseGuildMessageChannel {
      * @return a {@link FollowedChannel} object containing a reference to this news channel and allowing to retrieve the
      * webhook created.
      */
-    @Experimental
     public Mono<FollowedChannel> follow(Snowflake targetChannelId) {
         return getClient().getRestClient().getChannelService()
                 .followNewsChannel(getId().asLong(), NewsChannelFollowRequest.builder()
