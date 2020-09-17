@@ -32,6 +32,7 @@ public class WebhookEditSpec implements AuditSpec<WebhookModifyRequest> {
 
     private Possible<String> name = Possible.absent();
     private Possible<String> avatar = Possible.absent();
+    @Nullable
     private String reason;
     private Possible<String> channelId = Possible.absent();
 

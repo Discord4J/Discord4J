@@ -36,6 +36,7 @@ public class RoleCreateSpec implements AuditSpec<RoleCreateRequest> {
     private Integer color;
     private Boolean hoist;
     private Boolean mentionable;
+    @Nullable
     private String reason;
 
     /**

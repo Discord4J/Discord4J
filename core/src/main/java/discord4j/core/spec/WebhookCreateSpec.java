@@ -31,7 +31,9 @@ import java.util.Optional;
 public class WebhookCreateSpec implements AuditSpec<WebhookCreateRequest> {
 
     private String name;
+    @Nullable
     private String avatar;
+    @Nullable
     private String reason;
 
     /**

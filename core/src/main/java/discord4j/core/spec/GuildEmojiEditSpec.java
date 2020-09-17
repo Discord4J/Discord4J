@@ -35,6 +35,7 @@ public class GuildEmojiEditSpec implements AuditSpec<GuildEmojiModifyRequest> {
 
     private Possible<String> name = Possible.absent();
     private Possible<List<String>> roles = Possible.absent();
+    @Nullable
     private String reason;
 
     /**

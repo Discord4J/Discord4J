@@ -36,6 +36,7 @@ public class GuildEmojiCreateSpec implements AuditSpec<GuildEmojiCreateRequest> 
     private String name;
     private String image;
     private final Set<Snowflake> roles = new HashSet<>();
+    @Nullable
     private String reason;
 
     /**
