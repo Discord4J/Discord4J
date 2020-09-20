@@ -17,6 +17,7 @@
 package discord4j.core.spec;
 
 import discord4j.common.LogUtil;
+import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.VoiceServerUpdateEvent;
 import discord4j.core.event.domain.VoiceStateUpdateEvent;
@@ -26,23 +27,27 @@ import discord4j.discordjson.json.gateway.VoiceStateUpdate;
 import discord4j.gateway.GatewayClientGroup;
 import discord4j.gateway.json.ShardGatewayPayload;
 import discord4j.rest.util.Permission;
-import discord4j.common.util.Snowflake;
 import discord4j.voice.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.function.TupleUtils;
-import reactor.util.function.Tuple2;
+import reactor.util.Logger;
+import reactor.util.Loggers;
 import reactor.util.retry.RetrySpec;
 
 import java.time.Duration;
 import java.util.Objects;
 import java.util.concurrent.TimeoutException;
 
+import static discord4j.common.LogUtil.format;
+
 /**
  * Spec used to request a connection to a {@link VoiceChannel} and handle the initialization of the resulting
  * {@link VoiceConnection}.
  */
 public class VoiceChannelJoinSpec implements Spec<Mono<VoiceConnection>> {
+
+    private static final Logger log = Loggers.getLogger(VoiceChannelJoinSpec.class);
 
     /** Default maximum amount of time in seconds to wait before the connection to the voice channel times out. */
     private static final int DEFAULT_TIMEOUT = 10;
@@ -231,12 +236,23 @@ public class VoiceChannelJoinSpec implements Spec<Mono<VoiceConnection>> {
 
                     return gateway.getVoiceConnectionFactory()
                             .create(voiceGatewayOptions)
-                            .flatMap(vc -> gateway.getVoiceConnectionRegistry().registerVoiceConnection(guildId, vc).thenReturn(vc))
+                            .flatMap(vc -> gateway.getVoiceConnectionRegistry()
+                                    .registerVoiceConnection(guildId, vc)
+                                    .thenReturn(vc))
+                            .doOnEach(signal -> {
+                                if (signal.isOnSubscribe()) {
+                                    log.debug(format(signal.getContext(), "Creating voice connection"));
+                                }
+                            })
                             .subscriberContext(ctx ->
                                     ctx.put(LogUtil.KEY_GATEWAY_ID, Integer.toHexString(gateway.hashCode()))
-                                            .put(LogUtil.KEY_SHARD_ID, shardId));
+                                            .put(LogUtil.KEY_SHARD_ID, shardId)
+                                            .put(LogUtil.KEY_GUILD_ID, guildId.asLong()));
                 }))
                 .timeout(timeout)
+                .doFinally(signal -> log.debug("Voice connection handshake to guild {} done after {}",
+                        guildId.asLong(), signal))
+                // send disconnecting voice state to Discord and forward the timeout error signal
                 .onErrorResume(TimeoutException.class,
                         t -> gateway.getVoiceConnectionRegistry().getVoiceConnection(guildId)
                                 .switchIfEmpty(voiceChannel.sendDisconnectVoiceState().then(Mono.error(t))));
@@ -260,9 +276,7 @@ public class VoiceChannelJoinSpec implements Spec<Mono<VoiceConnection>> {
     static Mono<VoiceServerUpdateEvent> onVoiceServerUpdate(GatewayDiscordClient gateway, Snowflake guildId) {
         return gateway.getEventDispatcher()
                 .on(VoiceServerUpdateEvent.class)
-                .filter(vsu -> vsu.getGuildId().equals(guildId))
-                .filter(vsu -> vsu.getEndpoint() != null) // sometimes Discord sends null here. If so, another VSU
-                // should arrive afterwards
+                .filter(vsu -> vsu.getGuildId().equals(guildId) && vsu.getEndpoint() != null)
                 .next();
     }
 }

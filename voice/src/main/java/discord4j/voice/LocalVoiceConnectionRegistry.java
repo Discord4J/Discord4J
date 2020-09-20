@@ -19,6 +19,8 @@ package discord4j.voice;
 
 import discord4j.common.util.Snowflake;
 import reactor.core.publisher.Mono;
+import reactor.util.Logger;
+import reactor.util.Loggers;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -28,11 +30,19 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class LocalVoiceConnectionRegistry implements VoiceConnectionRegistry {
 
+    private static final Logger log = Loggers.getLogger(LocalVoiceConnectionRegistry.class);
+
     private final Map<Long, VoiceConnection> voiceConnections = new ConcurrentHashMap<>();
 
     @Override
     public Mono<VoiceConnection> getVoiceConnection(Snowflake guildId) {
-        return Mono.fromCallable(() -> voiceConnections.get(guildId.asLong()));
+        return Mono.fromCallable(() -> voiceConnections.get(guildId.asLong()))
+                .flatMap(vc -> vc.stateEvents().next()
+                        .doOnNext(state -> log.debug("Connection found to guild {} with state: {}",
+                                guildId.asLong(), state))
+                        .thenReturn(vc))
+                .switchIfEmpty(Mono.<VoiceConnection>empty()
+                        .doOnSubscribe(s -> log.debug("No connection in registry to guild {}", guildId.asLong())));
     }
 
     @Override
@@ -40,15 +50,23 @@ public class LocalVoiceConnectionRegistry implements VoiceConnectionRegistry {
         return Mono.fromCallable(() -> voiceConnections.put(guildId.asLong(), voiceConnection))
                 .flatMap(previous -> {
                     if (!previous.equals(voiceConnection)) {
+                        log.debug("Removing previous guild {} connection from registry", guildId.asLong());
                         return previous.disconnect();
                     }
                     return Mono.empty();
-                });
+                })
+                .doFinally(signal -> log.debug("Connection registry to guild {} done after {}",
+                        guildId.asLong(), signal));
     }
 
     @Override
     public Mono<Void> disconnect(Snowflake guildId) {
         return getVoiceConnection(guildId)
-                .flatMap(connection -> connection.disconnect().doFinally(s -> voiceConnections.remove(guildId.asLong())));
+                .flatMap(connection -> connection.disconnect()
+                        .doFinally(signal -> {
+                            // TODO: verify if remove is the right approach on (complete|error|cancel)
+                            voiceConnections.remove(guildId.asLong());
+                            log.debug("Connection registry to guild {} removed after {}", guildId.asLong(), signal);
+                        }));
     }
 }
