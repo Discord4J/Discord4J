@@ -91,7 +91,6 @@ public class DefaultVoiceGatewayClient {
     private final VoiceReceiveTaskFactory receiveTaskFactory;
     private final VoiceDisconnectTask disconnectTask;
     private final VoiceServerUpdateTask serverUpdateTask;
-    private final VoiceStateUpdateTask stateUpdateTask;
     private final VoiceChannelRetrieveTask channelRetrieveTask;
     private final Duration ipDiscoveryTimeout;
     private final RetrySpec ipDiscoveryRetrySpec;
@@ -134,7 +133,6 @@ public class DefaultVoiceGatewayClient {
         this.receiveTaskFactory = Objects.requireNonNull(options.getReceiveTaskFactory());
         this.disconnectTask = Objects.requireNonNull(options.getDisconnectTask());
         this.serverUpdateTask = Objects.requireNonNull(options.getServerUpdateTask());
-        this.stateUpdateTask = Objects.requireNonNull(options.getStateUpdateTask());
         this.channelRetrieveTask = Objects.requireNonNull(options.getChannelRetrieveTask());
         this.ipDiscoveryTimeout = Objects.requireNonNull(options.getIpDiscoveryTimeout());
         this.ipDiscoveryRetrySpec = Objects.requireNonNull(options.getIpDiscoveryRetrySpec());
@@ -245,16 +243,6 @@ public class DefaultVoiceGatewayClient {
                                                     serverOptions.set(newValue);
                                                     sessionHandler.close(DisconnectBehavior.retryAbruptly(
                                                             new VoiceServerUpdateReconnectException(context)));
-                                                }
-                                            }));
-                                    // TODO consider for removal if we shouldn't do anything on these
-                                    innerCleanup.add(stateUpdateTask.onVoiceStateUpdate(guildId)
-                                            .subscribe(newValue -> {
-                                                String current = session.get();
-                                                if (!newValue.equals(current)) {
-                                                    log.info(format(context, "Voice session updated"));
-                                                    session.set(newValue);
-                                                    // TODO if disposing the session turn this into a Mono
                                                 }
                                             }));
                                     voiceConnectionSink.success(acquireConnection());
