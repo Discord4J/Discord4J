@@ -18,6 +18,8 @@ import discord4j.core.object.entity.Member;
 import discord4j.discordjson.json.MessageCreateRequest;
 import discord4j.voice.AudioProvider;
 import discord4j.voice.VoiceConnection;
+import discord4j.voice.retry.VoiceGatewayReconnectException;
+import discord4j.voice.retry.VoiceGatewayResumeException;
 import reactor.core.publisher.Mono;
 import reactor.util.Logger;
 import reactor.util.Loggers;
@@ -85,7 +87,17 @@ public class VoiceSupport {
                         .flatMap(Member::getVoiceState)
                         .flatMap(vs -> client.getVoiceConnectionRegistry()
                                 .getVoiceConnection(vs.getGuildId()))
-                        .flatMap(VoiceConnection::reconnect)
+                        .flatMap(vc -> vc.reconnect(VoiceGatewayReconnectException::new))
+                        .doFinally(s -> log.info("Reconnect event handle complete")))
+                .then();
+
+        Mono<Void> resume = client.getEventDispatcher().on(MessageCreateEvent.class)
+                .filter(e -> e.getMessage().getContent().equals("!vcresume"))
+                .flatMap(e -> Mono.justOrEmpty(e.getMember())
+                        .flatMap(Member::getVoiceState)
+                        .flatMap(vs -> client.getVoiceConnectionRegistry()
+                                .getVoiceConnection(vs.getGuildId()))
+                        .flatMap(vc -> vc.reconnect(VoiceGatewayResumeException::new))
                         .doFinally(s -> log.info("Reconnect event handle complete")))
                 .then();
 
@@ -112,7 +124,7 @@ public class VoiceSupport {
                                         .build())))
                 .then();
 
-        return Mono.zip(join, leave, reconnect, play, stop, currentGuild, client.onDisconnect()).then();
+        return Mono.zip(join, leave, reconnect, resume, play, stop, currentGuild, client.onDisconnect()).then();
     }
 
     private static class LavaplayerAudioProvider extends AudioProvider {
