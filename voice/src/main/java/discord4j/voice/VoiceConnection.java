@@ -3,6 +3,9 @@ package discord4j.voice;
 import discord4j.common.util.Snowflake;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.util.context.Context;
+
+import java.util.function.Function;
 
 /**
  * Allows for manipulation of an already-established voice connection.
@@ -74,6 +77,18 @@ public interface VoiceConnection {
      * parameters currently associated to this instance
      */
     Mono<Void> reconnect();
+
+    /**
+     * Instruct a reconnect procedure on this voice connection, using a custom {@link Throwable} as cause.
+     * Implementations can use this to differentiate between a RESUME action (that does not tear down UDP resources)
+     * or a full RECONNECT.
+     *
+     * @return a {@link Mono} that, upon subscription, attempts to reconnect to the voice gateway, maintaining the same
+     * parameters currently associated to this instance
+     */
+    default Mono<Void> reconnect(Function<Context, Throwable> errorCause) {
+        return reconnect();
+    }
 
     /**
      * States of a voice connection.

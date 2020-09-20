@@ -394,7 +394,8 @@ public final class Message implements Entity {
     }
 
     /**
-     * Gets the ID of the guild this message is associated to, if present.
+     * Gets the ID of the guild this message is associated to, if this {@code Message} was built from Gateway data,
+     * like an incoming event. If requested from REST API, this field will be empty.
      *
      * @return The ID of the guild this message is associated to, if present.
      */

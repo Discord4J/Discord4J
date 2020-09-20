@@ -91,7 +91,6 @@ public class DefaultVoiceGatewayClient {
     private final VoiceReceiveTaskFactory receiveTaskFactory;
     private final VoiceDisconnectTask disconnectTask;
     private final VoiceServerUpdateTask serverUpdateTask;
-    private final VoiceStateUpdateTask stateUpdateTask;
     private final VoiceChannelRetrieveTask channelRetrieveTask;
     private final Duration ipDiscoveryTimeout;
     private final RetrySpec ipDiscoveryRetrySpec;
@@ -134,7 +133,6 @@ public class DefaultVoiceGatewayClient {
         this.receiveTaskFactory = Objects.requireNonNull(options.getReceiveTaskFactory());
         this.disconnectTask = Objects.requireNonNull(options.getDisconnectTask());
         this.serverUpdateTask = Objects.requireNonNull(options.getServerUpdateTask());
-        this.stateUpdateTask = Objects.requireNonNull(options.getStateUpdateTask());
         this.channelRetrieveTask = Objects.requireNonNull(options.getChannelRetrieveTask());
         this.ipDiscoveryTimeout = Objects.requireNonNull(options.getIpDiscoveryTimeout());
         this.ipDiscoveryRetrySpec = Objects.requireNonNull(options.getIpDiscoveryRetrySpec());
@@ -175,11 +173,18 @@ public class DefaultVoiceGatewayClient {
 
                     sessionHandler = new VoiceWebsocketHandler(receiverSink, outFlux, context);
 
-                    Mono<?> maybeResume = state.next()
-                            .filter(s -> s == VoiceConnection.State.RESUMING)
+                    Mono<?> onOpen = state.next()
                             .doOnNext(s -> {
-                                log.info(format(context, "Attempting to resume"));
-                                outboundSink.next(new Resume(guildId.asString(), selfId.asString(), session.get()));
+                                if (s == VoiceConnection.State.RESUMING) {
+                                    log.info(format(context, "Attempting to resume"));
+                                    outboundSink.next(new Resume(guildId.asString(), session.get(),
+                                            serverOptions.get().getToken()));
+                                } else {
+                                    stateChanges.next(VoiceConnection.State.CONNECTING);
+                                    log.info(format(context, "Identifying"));
+                                    outboundSink.next(new Identify(guildId.asString(), selfId.asString(), session.get(),
+                                            serverOptions.get().getToken()));
+                                }
                             });
 
                     Disposable.Composite innerCleanup = Disposables.composite();
@@ -188,13 +193,9 @@ public class DefaultVoiceGatewayClient {
                             .flatMap(payloadReader)
                             .doOnNext(payload -> {
                                 if (payload instanceof Hello) {
-                                    stateChanges.next(VoiceConnection.State.CONNECTING);
                                     Hello hello = (Hello) payload;
                                     Duration interval = Duration.ofMillis(hello.getData().getHeartbeatInterval());
                                     heartbeat.start(interval, interval);
-                                    log.info(format(context, "Identifying"));
-                                    outboundSink.next(new Identify(guildId.asString(), selfId.asString(), session.get(),
-                                            serverOptions.get().getToken()));
                                 } else if (payload instanceof Ready) {
                                     log.info(format(context, "Waiting for session description"));
                                     Ready ready = (Ready) payload;
@@ -247,16 +248,6 @@ public class DefaultVoiceGatewayClient {
                                                             new VoiceServerUpdateReconnectException(context)));
                                                 }
                                             }));
-                                    // TODO consider for removal if we shouldn't do anything on these
-                                    innerCleanup.add(stateUpdateTask.onVoiceStateUpdate(guildId)
-                                            .subscribe(newValue -> {
-                                                String current = session.get();
-                                                if (!newValue.equals(current)) {
-                                                    log.info(format(context, "Voice session updated"));
-                                                    session.set(newValue);
-                                                    // TODO if disposing the session turn this into a Mono
-                                                }
-                                            }));
                                     voiceConnectionSink.success(acquireConnection());
                                 } else if (payload instanceof Resumed) {
                                     log.info(format(context, "Resumed"));
@@ -279,7 +270,7 @@ public class DefaultVoiceGatewayClient {
                                     .maxFramePayloadLength(Integer.MAX_VALUE)
                                     .build())
                             .uri(serverOptions.get().getEndpoint() + "?v=4")
-                            .handle((in, out) -> maybeResume.then(sessionHandler.handle(in, out)))
+                            .handle((in, out) -> onOpen.then(sessionHandler.handle(in, out)))
                             .subscriberContext(LogUtil.clearContext())
                             .flatMap(t2 -> handleClose(t2.getT1(), t2.getT2()))
                             .then();
@@ -338,11 +329,16 @@ public class DefaultVoiceGatewayClient {
 
             @Override
             public Mono<Void> reconnect() {
+                return reconnect(VoiceGatewayReconnectException::new);
+            }
+
+            @Override
+            public Mono<Void> reconnect(Function<Context, Throwable> errorCause) {
                 return onConnectOrDisconnect()
                         .flatMap(s -> s.equals(State.CONNECTED) ?
                                 Mono.fromRunnable(() -> sessionHandler.close(
                                         DisconnectBehavior.retryAbruptly(
-                                                new VoiceGatewayReconnectException(currentContext))))
+                                                errorCause.apply(currentContext))))
                                         .then(stateEvents()
                                                 .filter(ss -> ss.equals(State.CONNECTED))
                                                 .next()) :
