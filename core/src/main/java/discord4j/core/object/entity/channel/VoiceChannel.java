@@ -28,6 +28,7 @@ import discord4j.gateway.GatewayClientGroup;
 import discord4j.gateway.json.ShardGatewayPayload;
 import discord4j.store.api.util.LongLongTuple2;
 import discord4j.voice.VoiceConnection;
+import discord4j.voice.VoiceConnectionRegistry;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -98,7 +99,9 @@ public final class VoiceChannel extends BaseCategorizableChannel {
     }
 
     /**
-     * Requests to the join this voice channel.
+     * Request to join this voice channel upon subscription. The resulting {@link VoiceConnection} will be available
+     * to you from the {@code Mono} but also through a {@link VoiceConnectionRegistry} and can be obtained through
+     * {@link GatewayDiscordClient#getVoiceConnectionRegistry()}.
      *
      * @param spec A {@link Consumer} that provides a "blank" {@link VoiceChannelJoinSpec} to be operated on.
      * @return A {@link Mono} where, upon successful completion, emits a {@link VoiceConnection}, indicating a
@@ -154,12 +157,13 @@ public final class VoiceChannel extends BaseCategorizableChannel {
     }
 
     /**
-     * Requests to determine if the member represented by the provided {@link Snowflake} is connected to this voice channel.
+     * Requests to determine if the member represented by the provided {@link Snowflake} is connected to this voice
+     * channel.
      *
      * @param memberId The ID of the member to check.
-     * @return A {@link Mono} where, upon successful completion, emits {@code true} if the member represented by the provided
-     * {@link Snowflake} is connected to this voice channel, {@code false} otherwise. If an error is received, it is emitted
-     * through the {@code Mono}.
+     * @return A {@link Mono} where, upon successful completion, emits {@code true} if the member represented by the
+     * provided {@link Snowflake} is connected to this voice channel, {@code false} otherwise. If an error is received,
+     * it is emitted through the {@code Mono}.
      */
     public Mono<Boolean> isMemberConnected(final Snowflake memberId) {
         return getVoiceStates()
