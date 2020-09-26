@@ -35,6 +35,12 @@ public final class IntentSet extends AbstractSet<Intent> {
     private static final IntentSet NONE = new IntentSet(NONE_RAW);
 
     /**
+     * Common instance for {@code nonPrivileged()}.
+     */
+    private static final IntentSet NON_PRIVILEGED =
+            ALL.andNot(IntentSet.of(Intent.GUILD_PRESENCES, Intent.GUILD_MEMBERS));
+
+    /**
      * Returns a {@code IntentSet} containing all intents.
      *
      * @return A {@code IntentSet} containing all intents.
@@ -50,6 +56,15 @@ public final class IntentSet extends AbstractSet<Intent> {
      */
     public static IntentSet none() {
         return NONE;
+    }
+
+    /**
+     * Returns a {@code IntentSet} containing non-privileged intents.
+     *
+     * @return A {@code IntentSet} containing non-privileged intents.
+     */
+    public static IntentSet nonPrivileged() {
+        return NON_PRIVILEGED;
     }
 
     /**
