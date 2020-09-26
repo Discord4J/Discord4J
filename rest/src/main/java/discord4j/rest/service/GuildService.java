@@ -103,12 +103,12 @@ public class GuildService extends RestService {
                 .bodyToMono(MemberData.class);
     }
 
-    public Mono<Void> modifyGuildMember(long guildId, long userId, GuildMemberModifyRequest request, @Nullable String reason) {
+    public Mono<MemberData> modifyGuildMember(long guildId, long userId, GuildMemberModifyRequest request, @Nullable String reason) {
         return Routes.GUILD_MEMBER_MODIFY.newRequest(guildId, userId)
                 .body(request)
                 .optionalHeader("X-Audit-Log-Reason", reason)
                 .exchange(getRouter())
-                .bodyToMono(Void.class);
+                .bodyToMono(MemberData.class);
     }
 
     public Mono<NicknameModifyData> modifyOwnNickname(long guildId, NicknameModifyData request) {

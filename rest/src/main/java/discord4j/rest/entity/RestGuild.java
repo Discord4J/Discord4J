@@ -172,7 +172,7 @@ public class RestGuild {
         return restClient.getGuildService().addGuildMember(id, userId.asLong(), request);
     }
 
-    public Mono<Void> modifyMember(Snowflake userId, GuildMemberModifyRequest request, @Nullable String reason) {
+    public Mono<MemberData> modifyMember(Snowflake userId, GuildMemberModifyRequest request, @Nullable String reason) {
         return restClient.getGuildService().modifyGuildMember(id, userId.asLong(), request, reason);
     }
 

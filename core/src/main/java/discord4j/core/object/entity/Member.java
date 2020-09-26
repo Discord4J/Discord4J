@@ -16,6 +16,7 @@
  */
 package discord4j.core.object.entity;
 
+import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.VoiceState;
 import discord4j.core.object.presence.Presence;
@@ -28,7 +29,6 @@ import discord4j.discordjson.json.MemberData;
 import discord4j.discordjson.possible.Possible;
 import discord4j.rest.util.Color;
 import discord4j.rest.util.PermissionSet;
-import discord4j.common.util.Snowflake;
 import discord4j.store.api.util.LongLongTuple2;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -481,17 +481,18 @@ public final class Member extends User {
      * Requests to edit this member.
      *
      * @param spec A {@link Consumer} that provides a "blank" {@link GuildMemberEditSpec} to be operated on.
-     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the member has been edited.
-     * If an error is received, it is emitted through the {@code Mono}.
+     * @return A {@link Mono} where, upon successful completion, emits the modified {@link Member}. If an error is
+     * received, it is emitted through the {@code Mono}.
      */
-    public Mono<Void> edit(final Consumer<? super GuildMemberEditSpec> spec) {
+    public Mono<Member> edit(final Consumer<? super GuildMemberEditSpec> spec) {
         return Mono.defer(
                 () -> {
                     GuildMemberEditSpec mutatedSpec = new GuildMemberEditSpec();
                     spec.accept(mutatedSpec);
                     return getClient().getRestClient().getGuildService()
                             .modifyGuildMember(getGuildId().asLong(), getId().asLong(), mutatedSpec.asRequest(),
-                                    mutatedSpec.getReason());
+                                    mutatedSpec.getReason())
+                            .map(data -> new Member(getClient(), data, guildId));
                 });
     }
 
