@@ -122,7 +122,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
     private MemberRequestFilter memberRequestFilter = MemberRequestFilter.withLargeGuilds();
     private Function<ShardInfo, StatusUpdate> initialPresence = shard -> null;
     private Function<ShardInfo, SessionInfo> resumeOptions = shard -> null;
-    private Possible<IntentSet> intents = Possible.absent();
+    private Possible<IntentSet> intents = Possible.of(IntentSet.nonPrivileged());
     private Boolean guildSubscriptions = null;
     private Function<GatewayDiscordClient, Mono<Void>> destroyHandler = shutdownDestroyHandler();
     private PayloadReader payloadReader = null;
@@ -945,7 +945,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
         final Multimap<String, Object> parameters = new Multimap<>(3);
         parameters.add("compress", "zlib-stream");
         parameters.add("encoding", "json");
-        parameters.add("v", 6);
+        parameters.add("v", 8);
         return parameters;
     }
 
