@@ -19,6 +19,7 @@ package discord4j.core.object.entity.channel;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.VoiceState;
+import discord4j.core.object.entity.Guild;
 import discord4j.core.spec.VoiceChannelEditSpec;
 import discord4j.core.spec.VoiceChannelJoinSpec;
 import discord4j.core.util.EntityUtil;
@@ -101,7 +102,9 @@ public final class VoiceChannel extends BaseCategorizableChannel {
     /**
      * Request to join this voice channel upon subscription. The resulting {@link VoiceConnection} will be available
      * to you from the {@code Mono} but also through a {@link VoiceConnectionRegistry} and can be obtained through
-     * {@link GatewayDiscordClient#getVoiceConnectionRegistry()}.
+     * {@link GatewayDiscordClient#getVoiceConnectionRegistry()}. Additionally, the resulting {@code VoiceConnection}
+     * can be retrieved from the associated guild through {@link Guild#getVoiceConnection()} and through
+     * {@link #getVoiceConnection()}.
      *
      * @param spec A {@link Consumer} that provides a "blank" {@link VoiceChannelJoinSpec} to be operated on.
      * @return A {@link Mono} where, upon successful completion, emits a {@link VoiceConnection}, indicating a
@@ -169,6 +172,18 @@ public final class VoiceChannel extends BaseCategorizableChannel {
         return getVoiceStates()
                 .map(VoiceState::getUserId)
                 .any(memberId::equals);
+    }
+
+    /**
+     * Requests to retrieve the voice connection that the client is propagating in this voice channel.
+     *
+     * @return A {@link Mono} that emits the voice connection associated with this voice channel, if present and if
+     * available from caching sources, or an empty {@link Mono} otherwise.
+     */
+    public Mono<VoiceConnection> getVoiceConnection() {
+        return getGuild()
+            .flatMap(Guild::getVoiceConnection)
+            .filterWhen(voiceConnection -> voiceConnection.getChannelId().map(channelId -> channelId.equals(getId())));
     }
 
     @Override
