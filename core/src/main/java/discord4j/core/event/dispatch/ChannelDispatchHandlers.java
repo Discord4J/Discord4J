@@ -16,25 +16,23 @@
  */
 package discord4j.core.event.dispatch;
 
+import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.Event;
 import discord4j.core.event.domain.channel.*;
 import discord4j.core.object.entity.channel.*;
-import discord4j.core.state.StateHolder;
-import discord4j.core.util.ListUtil;
 import discord4j.discordjson.json.ChannelData;
-import discord4j.discordjson.json.GuildData;
 import discord4j.discordjson.json.gateway.ChannelCreate;
 import discord4j.discordjson.json.gateway.ChannelDelete;
 import discord4j.discordjson.json.gateway.ChannelPinsUpdate;
 import discord4j.discordjson.json.gateway.ChannelUpdate;
 import discord4j.discordjson.possible.Possible;
-import discord4j.common.util.Snowflake;
-import discord4j.store.api.primitive.LongObjStore;
 import reactor.core.publisher.Mono;
 
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
+
+import static discord4j.core.newstoresapi.EntityMetadata.channel;
 
 class ChannelDispatchHandlers {
 
@@ -58,11 +56,12 @@ class ChannelDispatchHandlers {
         GatewayDiscordClient gateway = context.getGateway();
         ChannelData channel = context.getDispatch().channel();
 
-        Mono<TextChannelCreateEvent> saveChannel = context.getStateHolder().getChannelStore()
-                .save(Snowflake.asLong(channel.id()), channel)
+        Mono<TextChannelCreateEvent> saveChannel = context.getStore()
+                .save(channel(Snowflake.of(channel.id()), context.getShardTag()), channel)
                 .thenReturn(new TextChannelCreateEvent(gateway, context.getShardInfo(), new TextChannel(gateway, channel)));
 
-        return addChannelToGuild(context.getStateHolder().getGuildStore(), channel)
+        return context.getStore().getEntityPatcher()
+                .addChannelIdToGuild(context.getDispatch())
                 .then(saveChannel);
     }
 
@@ -77,11 +76,12 @@ class ChannelDispatchHandlers {
         GatewayDiscordClient gateway = context.getGateway();
         ChannelData channel = context.getDispatch().channel();
 
-        Mono<VoiceChannelCreateEvent> saveChannel = context.getStateHolder().getChannelStore()
-                .save(Snowflake.asLong(channel.id()), channel)
+        Mono<VoiceChannelCreateEvent> saveChannel = context.getStore()
+                .save(channel(Snowflake.of(channel.id()), context.getShardTag()), channel)
                 .thenReturn(new VoiceChannelCreateEvent(gateway, context.getShardInfo(), new VoiceChannel(gateway, channel)));
 
-        return addChannelToGuild(context.getStateHolder().getGuildStore(), channel)
+        return context.getStore().getEntityPatcher()
+                .addChannelIdToGuild(context.getDispatch())
                 .then(saveChannel);
     }
 
@@ -89,11 +89,12 @@ class ChannelDispatchHandlers {
         GatewayDiscordClient gateway = context.getGateway();
         ChannelData channel = context.getDispatch().channel();
 
-        Mono<CategoryCreateEvent> saveChannel = context.getStateHolder().getChannelStore()
-                .save(Snowflake.asLong(channel.id()), channel)
+        Mono<CategoryCreateEvent> saveChannel = context.getStore()
+                .save(channel(Snowflake.of(channel.id()), context.getShardTag()), channel)
                 .thenReturn(new CategoryCreateEvent(gateway, context.getShardInfo(), new Category(gateway, channel)));
 
-        return addChannelToGuild(context.getStateHolder().getGuildStore(), channel)
+        return context.getStore().getEntityPatcher()
+                .addChannelIdToGuild(context.getDispatch())
                 .then(saveChannel);
     }
 
@@ -101,11 +102,12 @@ class ChannelDispatchHandlers {
         GatewayDiscordClient gateway = context.getGateway();
         ChannelData channel = context.getDispatch().channel();
 
-        Mono<NewsChannelCreateEvent> saveChannel = context.getStateHolder().getChannelStore()
-                .save(Snowflake.asLong(channel.id()), channel)
+        Mono<NewsChannelCreateEvent> saveChannel = context.getStore()
+                .save(channel(Snowflake.of(channel.id()), context.getShardTag()), channel)
                 .thenReturn(new NewsChannelCreateEvent(gateway, context.getShardInfo(), new NewsChannel(gateway, channel)));
 
-        return addChannelToGuild(context.getStateHolder().getGuildStore(), channel)
+        return context.getStore().getEntityPatcher()
+                .addChannelIdToGuild(context.getDispatch())
                 .then(saveChannel);
     }
 
@@ -113,21 +115,13 @@ class ChannelDispatchHandlers {
         GatewayDiscordClient gateway = context.getGateway();
         ChannelData channel = context.getDispatch().channel();
 
-        Mono<StoreChannelCreateEvent> saveChannel = context.getStateHolder().getChannelStore()
-                .save(Snowflake.asLong(channel.id()), channel)
+        Mono<StoreChannelCreateEvent> saveChannel = context.getStore()
+                .save(channel(Snowflake.of(channel.id()), context.getShardTag()), channel)
                 .thenReturn(new StoreChannelCreateEvent(gateway, context.getShardInfo(), new StoreChannel(gateway, channel)));
 
-        return addChannelToGuild(context.getStateHolder().getGuildStore(), channel)
+        return context.getStore().getEntityPatcher()
+                .addChannelIdToGuild(context.getDispatch())
                 .then(saveChannel);
-    }
-
-    private static Mono<Void> addChannelToGuild(LongObjStore<GuildData> guildStore, ChannelData channel) {
-        return guildStore.find(Snowflake.asLong(channel.guildId().get()))
-                .map(guildData -> GuildData.builder()
-                        .from(guildData)
-                        .channels(ListUtil.add(guildData.channels(), channel.id()))
-                        .build())
-                .flatMap(guild -> guildStore.save(Snowflake.asLong(guild.id()), guild));
     }
 
     static Mono<? extends Event> channelDelete(DispatchContext<ChannelDelete> context) {
@@ -148,14 +142,14 @@ class ChannelDispatchHandlers {
 
     private static Mono<TextChannelDeleteEvent> textChannelDelete(DispatchContext<ChannelDelete> context) {
         GatewayDiscordClient gateway = context.getGateway();
-        StateHolder stateHolder = context.getStateHolder();
         ChannelData channel = context.getDispatch().channel();
 
-        Mono<TextChannelDeleteEvent> deleteChannel = stateHolder.getChannelStore()
-                .delete(Snowflake.asLong(channel.id()))
+        Mono<TextChannelDeleteEvent> deleteChannel = context.getStore()
+                .delete(channel(Snowflake.of(channel.id()), context.getShardTag()))
                 .thenReturn(new TextChannelDeleteEvent(gateway, context.getShardInfo(), new TextChannel(gateway, channel)));
 
-        return removeChannelFromGuild(stateHolder.getGuildStore(), channel)
+        return context.getStore().getEntityPatcher()
+                .removeChannelIdFromGuild(context.getDispatch())
                 .then(deleteChannel);
     }
 
@@ -169,63 +163,54 @@ class ChannelDispatchHandlers {
 
     private static Mono<VoiceChannelDeleteEvent> voiceChannelDelete(DispatchContext<ChannelDelete> context) {
         GatewayDiscordClient gateway = context.getGateway();
-        StateHolder stateHolder = context.getStateHolder();
         ChannelData channel = context.getDispatch().channel();
 
-        Mono<VoiceChannelDeleteEvent> deleteChannel = stateHolder.getChannelStore()
-                .delete(Snowflake.asLong(channel.id()))
+        Mono<VoiceChannelDeleteEvent> deleteChannel = context.getStore()
+                .delete(channel(Snowflake.of(channel.id()), context.getShardTag()))
                 .thenReturn(new VoiceChannelDeleteEvent(gateway, context.getShardInfo(), new VoiceChannel(gateway, channel)));
 
-        return removeChannelFromGuild(stateHolder.getGuildStore(), channel)
+        return context.getStore().getEntityPatcher()
+                .removeChannelIdFromGuild(context.getDispatch())
                 .then(deleteChannel);
     }
 
     private static Mono<CategoryDeleteEvent> categoryDelete(DispatchContext<ChannelDelete> context) {
         GatewayDiscordClient gateway = context.getGateway();
-        StateHolder stateHolder = context.getStateHolder();
         ChannelData channel = context.getDispatch().channel();
 
-        Mono<CategoryDeleteEvent> deleteChannel = stateHolder.getChannelStore()
-                .delete(Snowflake.asLong(channel.id()))
+        Mono<CategoryDeleteEvent> deleteChannel = context.getStore()
+                .delete(channel(Snowflake.of(channel.id()), context.getShardTag()))
                 .thenReturn(new CategoryDeleteEvent(gateway, context.getShardInfo(), new Category(gateway, channel)));
 
-        return removeChannelFromGuild(stateHolder.getGuildStore(), channel)
+        return context.getStore().getEntityPatcher()
+                .removeChannelIdFromGuild(context.getDispatch())
                 .then(deleteChannel);
     }
 
     private static Mono<NewsChannelDeleteEvent> newsChannelDelete(DispatchContext<ChannelDelete> context) {
         GatewayDiscordClient gateway = context.getGateway();
-        StateHolder stateHolder = context.getStateHolder();
         ChannelData channel = context.getDispatch().channel();
 
-        Mono<NewsChannelDeleteEvent> deleteChannel = stateHolder.getChannelStore()
-                .delete(Snowflake.asLong(channel.id()))
+        Mono<NewsChannelDeleteEvent> deleteChannel = context.getStore()
+                .delete(channel(Snowflake.of(channel.id()), context.getShardTag()))
                 .thenReturn(new NewsChannelDeleteEvent(gateway, context.getShardInfo(), new NewsChannel(gateway, channel)));
 
-        return removeChannelFromGuild(stateHolder.getGuildStore(), channel)
+        return context.getStore().getEntityPatcher()
+                .removeChannelIdFromGuild(context.getDispatch())
                 .then(deleteChannel);
     }
 
     private static Mono<StoreChannelDeleteEvent> storeChannelDelete(DispatchContext<ChannelDelete> context) {
         GatewayDiscordClient gateway = context.getGateway();
-        StateHolder stateHolder = context.getStateHolder();
         ChannelData channel = context.getDispatch().channel();
 
-        Mono<StoreChannelDeleteEvent> deleteChannel = stateHolder.getChannelStore()
-                .delete(Snowflake.asLong(channel.id()))
+        Mono<StoreChannelDeleteEvent> deleteChannel = context.getStore()
+                .delete(channel(Snowflake.of(channel.id()), context.getShardTag()))
                 .thenReturn(new StoreChannelDeleteEvent(gateway, context.getShardInfo(), new StoreChannel(gateway, channel)));
 
-        return removeChannelFromGuild(stateHolder.getGuildStore(), channel)
+        return context.getStore().getEntityPatcher()
+                .removeChannelIdFromGuild(context.getDispatch())
                 .then(deleteChannel);
-    }
-
-    private static Mono<Void> removeChannelFromGuild(LongObjStore<GuildData> guildStore, ChannelData channel) {
-        return guildStore.find(Snowflake.asLong(channel.guildId().get()))
-                .map(guildData -> GuildData.builder()
-                        .from(guildData)
-                        .channels(ListUtil.remove(guildData.channels(), ch -> channel.id().equals(ch)))
-                        .build())
-                .flatMap(guild -> guildStore.save(Snowflake.asLong(guild.id()), guild));
     }
 
     static Mono<PinsUpdateEvent> channelPinsUpdate(DispatchContext<ChannelPinsUpdate> context) {
@@ -264,73 +249,54 @@ class ChannelDispatchHandlers {
         ChannelData channel = context.getDispatch().channel();
         GuildMessageChannel current = getConvertibleChannel(gateway, channel);
 
-        Mono<Void> saveNew = context.getStateHolder().getChannelStore().save(Snowflake.asLong(channel.id()), channel);
-
-        return context.getStateHolder().getChannelStore()
-                .find(Snowflake.asLong(channel.id()))
-                .flatMap(saveNew::thenReturn)
+        return context.getStore().getEntityPatcher()
+                .updateChannel(context.getDispatch())
                 .map(old -> new TextChannelUpdateEvent(gateway, context.getShardInfo(), current, new TextChannel(gateway, old)))
-                .switchIfEmpty(saveNew.thenReturn(new TextChannelUpdateEvent(gateway, context.getShardInfo(), current, null)));
+                .defaultIfEmpty(new TextChannelUpdateEvent(gateway, context.getShardInfo(), current, null));
     }
 
     private static Mono<VoiceChannelUpdateEvent> voiceChannelUpdate(DispatchContext<ChannelUpdate> context) {
         GatewayDiscordClient gateway = context.getGateway();
         ChannelData channel = context.getDispatch().channel();
         VoiceChannel current = new VoiceChannel(gateway, channel);
-        long id = Snowflake.asLong(channel.id());
 
-        Mono<Void> saveNew = context.getStateHolder().getChannelStore().save(id, channel);
-
-        return context.getStateHolder().getChannelStore()
-                .find(id)
-                .flatMap(saveNew::thenReturn)
+        return context.getStore().getEntityPatcher()
+                .updateChannel(context.getDispatch())
                 .map(old -> new VoiceChannelUpdateEvent(gateway, context.getShardInfo(), current, new VoiceChannel(gateway, old)))
-                .switchIfEmpty(saveNew.thenReturn(new VoiceChannelUpdateEvent(gateway, context.getShardInfo(), current, null)));
+                .defaultIfEmpty(new VoiceChannelUpdateEvent(gateway, context.getShardInfo(), current, null));
     }
 
     private static Mono<CategoryUpdateEvent> categoryUpdate(DispatchContext<ChannelUpdate> context) {
         GatewayDiscordClient gateway = context.getGateway();
         ChannelData channel = context.getDispatch().channel();
         Category current = new Category(gateway, channel);
-        long id = Snowflake.asLong(channel.id());
 
-        Mono<Void> saveNew = context.getStateHolder().getChannelStore().save(id, channel);
-
-        return context.getStateHolder().getChannelStore()
-                .find(id)
-                .flatMap(saveNew::thenReturn)
+        return context.getStore().getEntityPatcher()
+                .updateChannel(context.getDispatch())
                 .map(old -> new CategoryUpdateEvent(gateway, context.getShardInfo(), current, new Category(gateway, old)))
-                .switchIfEmpty(saveNew.thenReturn(new CategoryUpdateEvent(gateway, context.getShardInfo(), current, null)));
+                .defaultIfEmpty(new CategoryUpdateEvent(gateway, context.getShardInfo(), current, null));
     }
 
     private static Mono<NewsChannelUpdateEvent> newsChannelUpdate(DispatchContext<ChannelUpdate> context) {
         GatewayDiscordClient gateway = context.getGateway();
         ChannelData channel = context.getDispatch().channel();
         GuildMessageChannel current = getConvertibleChannel(gateway, channel);
-        long id = Snowflake.asLong(channel.id());
 
-        Mono<Void> saveNew = context.getStateHolder().getChannelStore().save(id, channel);
-
-        return context.getStateHolder().getChannelStore()
-                .find(id)
-                .flatMap(saveNew::thenReturn)
+        return context.getStore().getEntityPatcher()
+                .updateChannel(context.getDispatch())
                 .map(old -> new NewsChannelUpdateEvent(gateway, context.getShardInfo(), current, new NewsChannel(gateway, old)))
-                .switchIfEmpty(saveNew.thenReturn(new NewsChannelUpdateEvent(gateway, context.getShardInfo(), current, null)));
+                .defaultIfEmpty(new NewsChannelUpdateEvent(gateway, context.getShardInfo(), current, null));
     }
 
     private static Mono<StoreChannelUpdateEvent> storeChannelUpdate(DispatchContext<ChannelUpdate> context) {
         GatewayDiscordClient gateway = context.getGateway();
         ChannelData channel = context.getDispatch().channel();
         StoreChannel current = new StoreChannel(gateway, channel);
-        long id = Snowflake.asLong(channel.id());
 
-        Mono<Void> saveNew = context.getStateHolder().getChannelStore().save(id, channel);
-
-        return context.getStateHolder().getChannelStore()
-                .find(id)
-                .flatMap(saveNew::thenReturn)
+        return context.getStore().getEntityPatcher()
+                .updateChannel(context.getDispatch())
                 .map(old -> new StoreChannelUpdateEvent(gateway, context.getShardInfo(), current, new StoreChannel(gateway, old)))
-                .switchIfEmpty(saveNew.thenReturn(new StoreChannelUpdateEvent(gateway, context.getShardInfo(), current, null)));
+                .defaultIfEmpty(new StoreChannelUpdateEvent(gateway, context.getShardInfo(), current, null));
     }
 
     private static GuildMessageChannel getConvertibleChannel(GatewayDiscordClient gateway, ChannelData channel) {

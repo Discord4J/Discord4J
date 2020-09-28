@@ -18,7 +18,7 @@
 package discord4j.core.event.dispatch;
 
 import discord4j.core.GatewayDiscordClient;
-import discord4j.core.state.StateHolder;
+import discord4j.core.newstoresapi.Store;
 import discord4j.gateway.ShardInfo;
 
 /**
@@ -31,18 +31,18 @@ public class DispatchContext<D> {
 
     private final D dispatch;
     private final GatewayDiscordClient gateway;
-    private final StateHolder stateHolder;
+    private final Store store;
     private final ShardInfo shardInfo;
 
     public static <D> DispatchContext<D> of(D dispatch, GatewayDiscordClient gateway,
-                                            StateHolder stateHolder, ShardInfo shardInfo) {
-        return new DispatchContext<>(dispatch, gateway, stateHolder, shardInfo);
+                                            Store store, ShardInfo shardInfo) {
+        return new DispatchContext<>(dispatch, gateway, store, shardInfo);
     }
 
-    private DispatchContext(D dispatch, GatewayDiscordClient gateway, StateHolder stateHolder, ShardInfo shardInfo) {
+    private DispatchContext(D dispatch, GatewayDiscordClient gateway, Store store, ShardInfo shardInfo) {
         this.dispatch = dispatch;
         this.gateway = gateway;
-        this.stateHolder = stateHolder;
+        this.store = store;
         this.shardInfo = shardInfo;
     }
 
@@ -54,11 +54,15 @@ public class DispatchContext<D> {
         return gateway;
     }
 
-    public StateHolder getStateHolder() {
-        return stateHolder;
+    public Store getStore() {
+        return store;
     }
 
     public ShardInfo getShardInfo() {
         return shardInfo;
+    }
+
+    public String getShardTag() {
+        return "shard/" + shardInfo.getIndex();
     }
 }
