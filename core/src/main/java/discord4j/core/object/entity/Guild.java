@@ -290,40 +290,6 @@ public final class Guild implements Entity {
     }
 
     /**
-     * Gets the ID of the embedded channel, if present.
-     *
-     * @return The ID of the embedded channel, if present.
-     * @deprecated Use {@code Guild#getWidgetChannelId} instead. For removal in v3.2
-     */
-    @Deprecated
-    public Optional<Snowflake> getEmbedChannelId() {
-        return getWidgetChannelId();
-    }
-
-    /**
-     * Requests to retrieve the embedded channel, if present.
-     *
-     * @return A {@link Mono} where, upon successful completion, emits the embedded {@link GuildChannel channel}, if
-     * present. If an error is received, it is emitted through the {@code Mono}.
-     */
-    public Mono<GuildChannel> getEmbedChannel() {
-        return Mono.justOrEmpty(getEmbedChannelId()).flatMap(gateway::getChannelById).cast(GuildChannel.class);
-    }
-
-    /**
-     * Requests to retrieve the embedded channel, if present, using the given retrieval strategy.
-     *
-     * @param retrievalStrategy the strategy to use to get the embedded channel
-     * @return A {@link Mono} where, upon successful completion, emits the embedded {@link GuildChannel channel}, if
-     * present. If an error is received, it is emitted through the {@code Mono}.
-     */
-    public Mono<GuildChannel> getEmbedChannel(EntityRetrievalStrategy retrievalStrategy) {
-        return Mono.justOrEmpty(getEmbedChannelId())
-                .flatMap(id -> gateway.withRetrievalStrategy(retrievalStrategy).getChannelById(id))
-                .cast(GuildChannel.class);
-    }
-
-    /**
      * Gets the Premium Tier (Server Boost level) for the guild.
      *
      * @return The Premium Tier (Server Boost level) for the guild.
