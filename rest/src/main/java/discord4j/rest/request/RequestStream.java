@@ -136,7 +136,7 @@ class RequestStream {
                 Mono<Void> action = Mono.empty();
                 if (global) {
                     long retryAfter = Long.parseLong(httpResponse.responseHeaders().get("Retry-After"));
-                    Duration fixedBackoff = Duration.ofMillis(retryAfter);
+                    Duration fixedBackoff = Duration.ofSeconds(retryAfter);
                     action = globalRateLimiter.rateLimitFor(fixedBackoff)
                             .doOnTerminate(() -> log.debug(format(httpResponse.currentContext(),
                                     "Globally rate limited for {}"), fixedBackoff));
