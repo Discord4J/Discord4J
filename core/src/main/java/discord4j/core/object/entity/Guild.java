@@ -1372,10 +1372,9 @@ public final class Guild implements Entity {
     }
 
     /**
-     * Requests to retrieve the voice connection that the client is propagating in this guild.
+     * Returns the current voice connection registered for this guild.
      *
-     * @return A {@link Mono} that emits the voice connection that the client is propagating in this guild, if present,
-     * or an empty {@link Mono} otherwise.
+     * @return A {@link Mono} of {@link VoiceConnection} for this guild if present, or empty otherwise.
      */
     public Mono<VoiceConnection> getVoiceConnection() {
         return gateway.getVoiceConnectionRegistry().getVoiceConnection(getId());
