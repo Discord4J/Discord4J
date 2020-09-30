@@ -175,10 +175,11 @@ public final class VoiceChannel extends BaseCategorizableChannel {
     }
 
     /**
-     * Requests to retrieve the voice connection that the client is propagating in this voice channel.
+     * Returns the current voice connection registered for this voice channel's guild.
      *
-     * @return A {@link Mono} that emits the voice connection associated with this voice channel, if present and if
-     * available from caching sources, or an empty {@link Mono} otherwise.
+     * @return A {@link Mono} of {@link VoiceConnection} for this voice channel's guild if present, or empty otherwise.
+     * The resulting {@code Mono} will also complete empty if the registered voice connection is not associated with
+     * this voice channel.
      */
     public Mono<VoiceConnection> getVoiceConnection() {
         return getGuild()
