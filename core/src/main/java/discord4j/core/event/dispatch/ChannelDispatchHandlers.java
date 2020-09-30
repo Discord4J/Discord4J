@@ -43,6 +43,7 @@ class ChannelDispatchHandlers {
 
         switch (type) {
             case GUILD_TEXT: return textChannelCreate(context);
+            case DM: return privateChannelCreate(context);
             case GUILD_VOICE: return voiceChannelCreate(context);
             case GROUP_DM:
                 throw new UnsupportedOperationException("Received channel_create for group on a bot account!");
@@ -63,6 +64,13 @@ class ChannelDispatchHandlers {
 
         return addChannelToGuild(context.getStateHolder().getGuildStore(), channel)
                 .then(saveChannel);
+    }
+
+    private static Mono<PrivateChannelCreateEvent> privateChannelCreate(DispatchContext<ChannelCreate> context) {
+        GatewayDiscordClient gateway = context.getGateway();
+        ChannelData channel = context.getDispatch().channel();
+
+        return Mono.just(new PrivateChannelCreateEvent(gateway, context.getShardInfo(), new PrivateChannel(gateway, channel)));
     }
 
     private static Mono<VoiceChannelCreateEvent> voiceChannelCreate(DispatchContext<ChannelCreate> context) {
