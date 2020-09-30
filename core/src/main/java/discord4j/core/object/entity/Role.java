@@ -186,7 +186,7 @@ public final class Role implements Entity {
      * @return The permissions assigned to this role.
      */
     public PermissionSet getPermissions() {
-        return PermissionSet.of(Long.parseLong(data.permissions()));
+        return PermissionSet.of(data.permissions());
     }
 
     /**
