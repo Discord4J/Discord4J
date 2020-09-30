@@ -22,6 +22,7 @@ import discord4j.discordjson.json.gateway.StatusUpdate;
 import discord4j.discordjson.possible.Possible;
 
 import java.time.Instant;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -49,7 +50,7 @@ public final class Presence {
     public static StatusUpdate online() {
         return StatusUpdate.builder()
                 .status(Status.ONLINE.getValue())
-                .game(Optional.empty())
+                .activities(Optional.empty())
                 .afk(false)
                 .since(Optional.empty())
                 .build();
@@ -72,7 +73,7 @@ public final class Presence {
     public static StatusUpdate online(ActivityUpdateRequest activity) {
         return StatusUpdate.builder()
                 .status(Status.ONLINE.getValue())
-                .game(activity)
+                .activities(Collections.singleton(activity))
                 .afk(false)
                 .since(Optional.empty())
                 .build();
@@ -86,7 +87,7 @@ public final class Presence {
     public static StatusUpdate doNotDisturb() {
         return StatusUpdate.builder()
                 .status(Status.DO_NOT_DISTURB.getValue())
-                .game(Optional.empty())
+                .activities(Optional.empty())
                 .afk(false)
                 .since(Optional.empty())
                 .build();
@@ -109,7 +110,7 @@ public final class Presence {
     public static StatusUpdate doNotDisturb(ActivityUpdateRequest activity) {
         return StatusUpdate.builder()
                 .status(Status.DO_NOT_DISTURB.getValue())
-                .game(activity)
+                .activities(Collections.singleton(activity))
                 .afk(false)
                 .since(Optional.empty())
                 .build();
@@ -123,7 +124,7 @@ public final class Presence {
     public static StatusUpdate idle() {
         return StatusUpdate.builder()
                 .status(Status.IDLE.getValue())
-                .game(Optional.empty())
+                .activities(Optional.empty())
                 .afk(true)
                 .since(Instant.now().toEpochMilli())
                 .build();
@@ -146,7 +147,7 @@ public final class Presence {
     public static StatusUpdate idle(ActivityUpdateRequest activity) {
         return StatusUpdate.builder()
                 .status(Status.IDLE.getValue())
-                .game(activity)
+                .activities(Collections.singleton(activity))
                 .afk(true)
                 .since(Instant.now().toEpochMilli())
                 .build();
@@ -160,7 +161,7 @@ public final class Presence {
     public static StatusUpdate invisible() {
         return StatusUpdate.builder()
                 .status(Status.INVISIBLE.getValue())
-                .game(Optional.empty())
+                .activities(Optional.empty())
                 .afk(false)
                 .since(Optional.empty())
                 .build();
@@ -222,11 +223,12 @@ public final class Presence {
     public StatusUpdate asStatusUpdate() {
         return StatusUpdate.builder()
                 .status(data.status())
-                .game(data.activities().stream().findFirst()
+                .activities(data.activities().stream()
                         .map(activity -> ActivityUpdateRequest.builder()
                                 .from(activity)
                                 .url(Possible.flatOpt(activity.url()))
-                                .build()))
+                                .build())
+                        .collect(Collectors.toList()))
                 .afk(data.status().equals(Status.IDLE.getValue()))
                 .since(data.status().equals(Status.IDLE.getValue()) ?
                         Optional.of(Instant.now().toEpochMilli()) : Optional.empty())
