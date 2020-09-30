@@ -182,8 +182,8 @@ public final class VoiceChannel extends BaseCategorizableChannel {
      */
     public Mono<VoiceConnection> getVoiceConnection() {
         return getGuild()
-            .flatMap(Guild::getVoiceConnection)
-            .filterWhen(voiceConnection -> voiceConnection.getChannelId().map(channelId -> channelId.equals(getId())));
+                .flatMap(Guild::getVoiceConnection)
+                .filterWhen(voiceConnection -> voiceConnection.getChannelId().map(channelId -> channelId.equals(getId())));
     }
 
     @Override
