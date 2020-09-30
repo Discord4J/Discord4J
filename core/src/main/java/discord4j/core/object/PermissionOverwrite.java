@@ -116,23 +116,23 @@ public class PermissionOverwrite {
     public enum Type {
 
         /** Unknown type. */
-        UNKNOWN("UNKNOWN"),
+        UNKNOWN(-1),
 
         /** The {@link Role} entity. */
-        ROLE("role"),
+        ROLE(0),
 
         /** The {@link Member} entity. */
-        MEMBER("member");
+        MEMBER(1);
 
         /** The underlying value as represented by Discord. */
-        private final String value;
+        private final int value;
 
         /**
          * Constructs a {@code PermissionOverwrite.Type}.
          *
          * @param value The underlying value as represented by Discord.
          */
-        Type(final String value) {
+        Type(final int value) {
             this.value = value;
         }
 
@@ -141,7 +141,7 @@ public class PermissionOverwrite {
          *
          * @return The underlying value as represented by Discord.
          */
-        public String getValue() {
+        public int getValue() {
             return value;
         }
 
@@ -152,10 +152,10 @@ public class PermissionOverwrite {
          * @param value The underlying value as represented by Discord.
          * @return The type of permission overwrite.
          */
-        public static Type of(final String value) {
+        public static Type of(final int value) {
             switch (value) {
-                case "role": return ROLE;
-                case "member": return MEMBER;
+                case 0: return ROLE;
+                case 1: return MEMBER;
                 default: return UNKNOWN;
             }
         }
