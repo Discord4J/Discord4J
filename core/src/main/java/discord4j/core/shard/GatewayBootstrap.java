@@ -36,12 +36,10 @@ import discord4j.core.state.StateHolder;
 import discord4j.core.state.StateView;
 import discord4j.discordjson.json.ActivityUpdateRequest;
 import discord4j.discordjson.json.MessageData;
-import discord4j.discordjson.json.gateway.Dispatch;
 import discord4j.discordjson.json.gateway.StatusUpdate;
 import discord4j.discordjson.possible.Possible;
 import discord4j.gateway.*;
 import discord4j.gateway.intent.IntentSet;
-import discord4j.gateway.json.ShardAwareDispatch;
 import discord4j.gateway.limiter.PayloadTransformer;
 import discord4j.gateway.limiter.RateLimitTransformer;
 import discord4j.gateway.payload.JacksonPayloadReader;
@@ -49,6 +47,7 @@ import discord4j.gateway.payload.JacksonPayloadWriter;
 import discord4j.gateway.payload.PayloadReader;
 import discord4j.gateway.payload.PayloadWriter;
 import discord4j.gateway.retry.GatewayStateChange;
+import discord4j.gateway.state.DispatchStoreLayer;
 import discord4j.rest.util.Multimap;
 import discord4j.rest.util.RouteUtils;
 import discord4j.store.api.Store;
@@ -118,6 +117,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
     private ShardCoordinator shardCoordinator = null;
     private EventDispatcher eventDispatcher = null;
     private StoreService storeService = null;
+    private discord4j.store.api.wip.Store store = null;
     private InvalidationStrategy invalidationStrategy = null;
     private MemberRequestFilter memberRequestFilter = MemberRequestFilter.withLargeGuilds();
     private Function<ShardInfo, StatusUpdate> initialPresence = shard -> null;
@@ -268,6 +268,17 @@ public class GatewayBootstrap<O extends GatewayOptions> {
      */
     public GatewayBootstrap<O> setStoreService(@Nullable StoreService storeService) {
         this.storeService = storeService;
+        return this;
+    }
+
+    /**
+     * Set a custom {@link discord4j.store.api.wip.Store} to cache Gateway updates.
+     *
+     * @param store an externally managed {@link discord4j.store.api.wip.Store} to receive Gateway updates
+     * @return this builder
+     */
+    public GatewayBootstrap<O> setStore(@Nullable discord4j.store.api.wip.Store store) {
+        this.store = store;
         return this;
     }
 
@@ -739,30 +750,22 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                             identify, gatewayObserver, limiter, maxMissedHeartbeatAck);
                     GatewayClient gatewayClient = clientFactory.apply(this.optionsModifier.apply(options));
                     clientGroup.add(shard.getIndex(), gatewayClient);
+                    DispatchStoreLayer storeLayer = DispatchStoreLayer.create(store, shard);
 
                     // wire gateway events to EventDispatcher
                     Disposable.Composite forCleanup = Disposables.composite();
                     forCleanup.add(gatewayClient.dispatch()
                             .takeUntilOther(closeProcessor)
                             .checkpoint("Read payload from gateway")
-                            .flatMap(dispatch -> {
-                                ShardInfo info;
-                                Dispatch actual;
-                                if (dispatch instanceof ShardAwareDispatch) {
-                                    ShardAwareDispatch shardDispatch = (ShardAwareDispatch) dispatch;
-                                    info = ShardInfo.create(shardDispatch.getShardIndex(),
-                                            shardDispatch.getShardCount());
-                                    actual = shardDispatch.getDispatch();
-                                } else {
-                                    info = shard;
-                                    actual = dispatch;
-                                }
-                                return dispatchMapper.handle(DispatchContext.of(actual, gateway, stateHolder, info))
-                                        .subscriberContext(c -> c.put(LogUtil.KEY_SHARD_ID, info.getIndex()))
-                                        .onErrorResume(error -> {
-                                            log.error(format(ctx, "Error dispatching event"), error);
-                                            return Mono.empty();
-                                        });
+                            .flatMap(storeLayer::store)
+                            .flatMap(stateAwareDispatch -> {
+                                DispatchContext<?, ?> context = DispatchContext.of(stateAwareDispatch, gateway);
+                                return dispatchMapper.handle(context)
+                                    .subscriberContext(c -> c.put(LogUtil.KEY_SHARD_ID, context.getShardInfo().getIndex()))
+                                    .onErrorResume(error -> {
+                                        log.error(format(ctx, "Error dispatching event"), error);
+                                        return Mono.empty();
+                                    });
                             })
                             .doOnNext(eventDispatcher::publish)
                             .subscribe(null,
@@ -774,9 +777,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                     forCleanup.add(gatewayClient.dispatch()
                             .ofType(GatewayStateChange.class)
                             .takeUntilOther(closeProcessor)
-                            .map(dispatch -> DispatchContext.of(dispatch, gateway, stateHolder, shard))
-                            .flatMap(context -> {
-                                GatewayStateChange event = context.getDispatch();
+                            .flatMap(event -> {
                                 SessionInfo session = null;
                                 switch (event.getState()) {
                                     case CONNECTED:

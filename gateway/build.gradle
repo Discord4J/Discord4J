@@ -3,6 +3,8 @@ dependencies {
 
     api "io.projectreactor.addons:reactor-extra"
 
+    api "$storesArtifact:$jdkstores_version"
+
     testImplementation "org.junit.jupiter:junit-jupiter-engine:$junit_version"
     testImplementation "ch.qos.logback:logback-classic:$logback_version"
 }

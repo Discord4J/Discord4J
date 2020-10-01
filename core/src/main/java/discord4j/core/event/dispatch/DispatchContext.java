@@ -18,8 +18,10 @@
 package discord4j.core.event.dispatch;
 
 import discord4j.core.GatewayDiscordClient;
-import discord4j.core.state.StateHolder;
 import discord4j.gateway.ShardInfo;
+import discord4j.gateway.state.StateAwareDispatch;
+
+import java.util.Optional;
 
 /**
  * Represents gateway dispatch data enriched with context for processing through a
@@ -27,38 +29,34 @@ import discord4j.gateway.ShardInfo;
  *
  * @param <D> The type of the payload.
  */
-public class DispatchContext<D> {
+public class DispatchContext<D, S> {
 
-    private final D dispatch;
+    private final StateAwareDispatch<D, S> stateAwareDispatch;
     private final GatewayDiscordClient gateway;
-    private final StateHolder stateHolder;
-    private final ShardInfo shardInfo;
 
-    public static <D> DispatchContext<D> of(D dispatch, GatewayDiscordClient gateway,
-                                            StateHolder stateHolder, ShardInfo shardInfo) {
-        return new DispatchContext<>(dispatch, gateway, stateHolder, shardInfo);
+    public static <D, S> DispatchContext<D, S> of(StateAwareDispatch<D, S> stateAwareDispatch,
+                                                                   GatewayDiscordClient gateway) {
+        return new DispatchContext<>(stateAwareDispatch, gateway);
     }
 
-    private DispatchContext(D dispatch, GatewayDiscordClient gateway, StateHolder stateHolder, ShardInfo shardInfo) {
-        this.dispatch = dispatch;
+    private DispatchContext(StateAwareDispatch<D, S> stateAwareDispatch, GatewayDiscordClient gateway) {
+        this.stateAwareDispatch = stateAwareDispatch;
         this.gateway = gateway;
-        this.stateHolder = stateHolder;
-        this.shardInfo = shardInfo;
-    }
-
-    public D getDispatch() {
-        return dispatch;
     }
 
     public GatewayDiscordClient getGateway() {
         return gateway;
     }
 
-    public StateHolder getStateHolder() {
-        return stateHolder;
+    public D getDispatch() {
+        return stateAwareDispatch.getDispatch();
     }
 
     public ShardInfo getShardInfo() {
-        return shardInfo;
+        return stateAwareDispatch.getShardInfo();
+    }
+
+    public Optional<S> getOldState() {
+        return stateAwareDispatch.getOldState();
     }
 }
