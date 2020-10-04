@@ -18,10 +18,13 @@
 package discord4j.core.shard;
 
 import discord4j.discordjson.json.gateway.Dispatch;
+import discord4j.discordjson.json.gateway.RequestGuildMembers;
 import discord4j.gateway.GatewayClient;
 import discord4j.gateway.GatewayConnection;
 import discord4j.gateway.json.GatewayPayload;
 import discord4j.gateway.json.ShardGatewayPayload;
+import discord4j.store.api.wip.Store;
+import discord4j.store.api.wip.action.write.gateway.RequestMembersAction;
 import io.netty.buffer.ByteBuf;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
@@ -36,6 +39,12 @@ import java.util.function.Function;
 class SingleGatewayClientGroup implements GatewayClientGroupManager {
 
     private final AtomicReference<GatewayClient> client = new AtomicReference<>();
+
+    private final Store store;
+
+    SingleGatewayClientGroup(Store store) {
+        this.store = store;
+    }
 
     @Override
     public void add(int key, GatewayClient gatewayClient) {
@@ -86,7 +95,14 @@ class SingleGatewayClientGroup implements GatewayClientGroupManager {
     public Mono<Void> unicast(ShardGatewayPayload<?> payload) {
         return Mono.defer(() -> Mono.justOrEmpty(instance())
                 .switchIfEmpty(Mono.error(new IllegalStateException("Missing gateway client"))))
-                .flatMap(client -> client.send(Mono.just(payload)));
+                .flatMap(client -> client.send(Mono.just(payload)))
+                .then(Mono.defer(() -> {
+                    if (payload.getData() instanceof RequestGuildMembers) {
+                        return store.execute(new RequestMembersAction(payload.getShardIndex(),
+                                (RequestGuildMembers) payload.getData()));
+                    }
+                    return Mono.empty();
+                }));
     }
 
     @Override

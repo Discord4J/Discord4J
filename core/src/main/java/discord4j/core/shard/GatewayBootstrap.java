@@ -32,10 +32,7 @@ import discord4j.core.event.dispatch.DispatchEventMapper;
 import discord4j.core.event.domain.Event;
 import discord4j.core.object.presence.Presence;
 import discord4j.core.retriever.EntityRetrievalStrategy;
-import discord4j.core.state.StateHolder;
-import discord4j.core.state.StateView;
 import discord4j.discordjson.json.ActivityUpdateRequest;
-import discord4j.discordjson.json.MessageData;
 import discord4j.discordjson.json.gateway.StatusUpdate;
 import discord4j.discordjson.possible.Possible;
 import discord4j.gateway.*;
@@ -50,12 +47,9 @@ import discord4j.gateway.retry.GatewayStateChange;
 import discord4j.gateway.state.DispatchStoreLayer;
 import discord4j.rest.util.Multimap;
 import discord4j.rest.util.RouteUtils;
-import discord4j.store.api.Store;
-import discord4j.store.api.primitive.ForwardingStoreService;
 import discord4j.store.api.service.StoreService;
-import discord4j.store.api.service.StoreServiceLoader;
-import discord4j.store.api.util.StoreContext;
-import discord4j.store.jdk.JdkStoreService;
+import discord4j.store.api.wip.Store;
+import discord4j.store.api.wip.noop.NoOpStore;
 import discord4j.voice.DefaultVoiceConnectionFactory;
 import discord4j.voice.VoiceConnection;
 import discord4j.voice.VoiceConnectionFactory;
@@ -74,7 +68,8 @@ import reactor.util.context.Context;
 import reactor.util.retry.Retry;
 
 import java.time.Duration;
-import java.util.*;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Function;
 
 import static discord4j.common.LogUtil.format;
@@ -90,7 +85,7 @@ import static reactor.function.TupleUtils.function;
  *     {@link #setSharding(ShardingStrategy)} method.</li>
  *     <li>Setting the initial status of the bot depending on the shard, through
  *     {@link #setInitialStatus(Function)}</li>
- *     <li>Customize the entity cache using {@link #setStoreService(StoreService)}</li>
+ *     <li>Customize the entity cache using {@link #setStore(Store)}</li>
  * </ul>
  * <p>
  * One of the following methods must be subscribed to in order to begin establishing Discord Gateway connections:
@@ -116,9 +111,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
     private Boolean awaitConnections = null;
     private ShardCoordinator shardCoordinator = null;
     private EventDispatcher eventDispatcher = null;
-    private StoreService storeService = null;
-    private discord4j.store.api.wip.Store store = null;
-    private InvalidationStrategy invalidationStrategy = null;
+    private Store store = null;
     private MemberRequestFilter memberRequestFilter = MemberRequestFilter.withLargeGuilds();
     private Function<ShardInfo, StatusUpdate> initialPresence = shard -> null;
     private Function<ShardInfo, SessionInfo> resumeOptions = shard -> null;
@@ -162,8 +155,6 @@ public class GatewayBootstrap<O extends GatewayOptions> {
         this.awaitConnections = source.awaitConnections;
         this.shardCoordinator = source.shardCoordinator;
         this.eventDispatcher = source.eventDispatcher;
-        this.storeService = source.storeService;
-        this.invalidationStrategy = source.invalidationStrategy;
         this.memberRequestFilter = source.memberRequestFilter;
         this.initialPresence = source.initialPresence;
         this.resumeOptions = source.resumeOptions;
@@ -260,48 +251,13 @@ public class GatewayBootstrap<O extends GatewayOptions> {
     }
 
     /**
-     * Set a custom {@link StoreService}, an abstract factory to create {@link Store} instances, to cache Gateway
-     * updates. Defaults to using {@link JdkStoreService} unless another factory of higher priority is discovered.
+     * Set a custom {@link Store} to cache Gateway updates.
      *
-     * @param storeService an externally managed {@link StoreService} to receive Gateway updates
+     * @param store an externally managed {@link Store} to receive Gateway updates
      * @return this builder
      */
-    public GatewayBootstrap<O> setStoreService(@Nullable StoreService storeService) {
-        this.storeService = storeService;
-        return this;
-    }
-
-    /**
-     * Set a custom {@link discord4j.store.api.wip.Store} to cache Gateway updates.
-     *
-     * @param store an externally managed {@link discord4j.store.api.wip.Store} to receive Gateway updates
-     * @return this builder
-     */
-    public GatewayBootstrap<O> setStore(@Nullable discord4j.store.api.wip.Store store) {
+    public GatewayBootstrap<O> setStore(@Nullable Store store) {
         this.store = store;
-        return this;
-    }
-
-    /**
-     * Set the {@link InvalidationStrategy} this shard group should use on shard session termination. Discord Gateway
-     * sends real-time updates that are cached by Discord4J. When a Gateway session is terminated, any update beyond
-     * that point is lost and therefore the cache, represented by the {@link Store} abstraction, is outdated. Reacting
-     * to this event is called "invalidation" and can be configured through this method.
-     * <p>
-     * Defaults to using {@link InvalidationStrategy#disable()} unless you are under a single shard setup, where
-     * {@link InvalidationStrategy#identity()} is used. Common possible options are:
-     * <ul>
-     *     <li>Using an in-memory registry through {@link InvalidationStrategy#withJdkRegistry()}</li>
-     *     <li>For a custom registry use {@link InvalidationStrategy#withCustomRegistry(KeyStoreRegistry)}</li>
-     *     <li>To disable this feature use {@link InvalidationStrategy#disable()}</li>
-     *     <li>If this group only contains one shard, use {@link InvalidationStrategy#identity()}</li>
-     * </ul>
-     *
-     * @param invalidationStrategy an {@link InvalidationStrategy} to apply to this shard group
-     * @return this builder
-     */
-    public GatewayBootstrap<O> setInvalidationStrategy(InvalidationStrategy invalidationStrategy) {
-        this.invalidationStrategy = Objects.requireNonNull(invalidationStrategy, "invalidationStrategy");
         return this;
     }
 
@@ -632,26 +588,21 @@ public class GatewayBootstrap<O extends GatewayOptions> {
         return Mono.fromCallable(() -> new GatewayBootstrap<>(this, this.optionsModifier))
                 .zipWhen(b -> b.shardingStrategy.getShardCount(b.client))
                 .flatMap(function((b, count) -> {
-                    InvalidationStrategy invalidationStrategy = b.initInvalidationStrategy();
-                    Map<String, Object> hints = new LinkedHashMap<>();
-                    hints.put("messageClass", MessageData.class);
-                    StateHolder stateHolder = new StateHolder(b.initStoreService(invalidationStrategy),
-                            new StoreContext(hints), b.intents);
-                    StateView stateView = new StateView(stateHolder);
+                    Store store = b.initStore();
                     EventDispatcher eventDispatcher =
                             b.initEventDispatcher(b.client.getCoreResources().getReactorResources());
                     GatewayReactorResources gatewayReactorResources = b.initGatewayReactorResources();
                     ShardCoordinator shardCoordinator = b.initShardCoordinator(gatewayReactorResources);
 
                     VoiceReactorResources voiceReactorResources = b.initVoiceReactorResources();
-                    GatewayResources resources = new GatewayResources(stateView, eventDispatcher, shardCoordinator,
+                    GatewayResources resources = new GatewayResources(store, eventDispatcher, shardCoordinator,
                             b.memberRequestFilter, gatewayReactorResources, b.initVoiceReactorResources(),
                             b.initReconnectOptions(voiceReactorResources), b.intents);
                     MonoProcessor<Void> closeProcessor = MonoProcessor.create();
                     EntityRetrievalStrategy entityRetrievalStrategy = b.initEntityRetrievalStrategy();
                     DispatchEventMapper dispatchMapper = b.initDispatchEventMapper();
 
-                    GatewayClientGroupManager clientGroup = b.shardingStrategy.getGroupManager(count);
+                    GatewayClientGroupManager clientGroup = b.shardingStrategy.getGroupManager(count, store);
                     GatewayDiscordClient gateway = new GatewayDiscordClient(b.client, resources, closeProcessor,
                             clientGroup, b.voiceConnectionFactory, entityRetrievalStrategy);
                     Mono<Void> destroySequence = Mono.deferWithContext(ctx -> b.destroyHandler.apply(gateway)
@@ -662,8 +613,8 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                     Flux<ShardInfo> connections = b.shardingStrategy.getShards(count)
                             .groupBy(shard -> shard.getIndex() % b.shardingStrategy.getMaxConcurrency())
                             .flatMap(group -> group.concatMap(shard -> acquireConnection(b, shard, clientFactory,
-                                    gateway, shardCoordinator, stateHolder, eventDispatcher, clientGroup,
-                                    closeProcessor, dispatchMapper, invalidationStrategy,
+                                    gateway, shardCoordinator, store, eventDispatcher, clientGroup,
+                                    closeProcessor, dispatchMapper,
                                     destroySequence.subscriberContext(buildContext(gateway, shard)))));
 
                     if (b.awaitConnections == null ? count == 1 : b.awaitConnections) {
@@ -725,12 +676,11 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                                               Function<O, GatewayClient> clientFactory,
                                               GatewayDiscordClient gateway,
                                               ShardCoordinator shardCoordinator,
-                                              StateHolder stateHolder,
+                                              Store store,
                                               EventDispatcher eventDispatcher,
                                               GatewayClientGroupManager clientGroup,
                                               MonoProcessor<Void> closeProcessor,
                                               DispatchEventMapper dispatchMapper,
-                                              InvalidationStrategy invalidationStrategy,
                                               Mono<Void> destroySequence) {
         return Mono.deferWithContext(ctx ->
                 Mono.<ShardInfo>create(sink -> {
@@ -750,14 +700,14 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                             identify, gatewayObserver, limiter, maxMissedHeartbeatAck);
                     GatewayClient gatewayClient = clientFactory.apply(this.optionsModifier.apply(options));
                     clientGroup.add(shard.getIndex(), gatewayClient);
-                    DispatchStoreLayer storeLayer = DispatchStoreLayer.create(store, shard);
+                    DispatchStoreLayer dispatchStoreLayer = DispatchStoreLayer.create(store, shard);
 
                     // wire gateway events to EventDispatcher
                     Disposable.Composite forCleanup = Disposables.composite();
                     forCleanup.add(gatewayClient.dispatch()
                             .takeUntilOther(closeProcessor)
                             .checkpoint("Read payload from gateway")
-                            .flatMap(storeLayer::store)
+                            .flatMap(dispatchStoreLayer::store)
                             .flatMap(stateAwareDispatch -> {
                                 DispatchContext<?, ?> context = DispatchContext.of(stateAwareDispatch, gateway);
                                 return dispatchMapper.handle(context)
@@ -800,7 +750,6 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                                                 });
                                     case RETRY_FAILED:
                                         log.debug(format(ctx, "Invalidating stores for shard"));
-                                        return invalidationStrategy.invalidate(shard, stateHolder);
                                 }
                                 return Mono.empty();
                             })
@@ -900,27 +849,6 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                 new RateLimitTransformer(1, Duration.ofSeconds(6), reactorResources.getTimerTaskScheduler()));
     }
 
-    private StoreService initStoreService(InvalidationStrategy invalidationStrategy) {
-        if (storeService == null) {
-            Map<Class<? extends StoreService>, Integer> priority = new HashMap<>();
-            // We want almost minimum priority, so that jdk can beat no-op, but most implementations will beat jdk
-            priority.put(JdkStoreService.class, Integer.MAX_VALUE - 1);
-            StoreServiceLoader storeServiceLoader = new StoreServiceLoader(priority);
-            storeService = storeServiceLoader.getStoreService();
-            if (storeService instanceof ForwardingStoreService) {
-                ForwardingStoreService forwarding = (ForwardingStoreService) storeService;
-                StoreService delegate = forwarding.getOriginal();
-                if (!(delegate instanceof JdkStoreService)) {
-                    log.info("Found StoreService: {}", delegate);
-                }
-            } else {
-                log.info("Found StoreService: {}", storeService);
-            }
-        }
-        return invalidationStrategy.adaptStoreService(storeService.hasLongObjStores() ?
-                storeService : new ForwardingStoreService(storeService));
-    }
-
     private EntityRetrievalStrategy initEntityRetrievalStrategy() {
         if (entityRetrievalStrategy != null) {
             return entityRetrievalStrategy;
@@ -935,11 +863,11 @@ public class GatewayBootstrap<O extends GatewayOptions> {
         return DispatchEventMapper.emitEvents();
     }
 
-    private InvalidationStrategy initInvalidationStrategy() {
-        if (invalidationStrategy != null) {
-            return invalidationStrategy;
+    private Store initStore() {
+        if (store != null) {
+            return store;
         }
-        return InvalidationStrategy.disable();
+        return NoOpStore.create(); // TODO replace with actual default impl
     }
 
     private Multimap<String, Object> getGatewayParameters() {
@@ -969,7 +897,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
     public static Function<GatewayDiscordClient, Mono<Void>> shutdownDestroyHandler() {
         return gateway -> {
             gateway.getEventDispatcher().shutdown();
-            return gateway.getGatewayResources().getStateView().getStoreService().dispose();
+            return Mono.empty();
         };
     }
 

@@ -23,11 +23,9 @@ import discord4j.common.JacksonResources;
 import discord4j.core.event.domain.guild.GuildEvent;
 import discord4j.core.event.domain.lifecycle.GatewayLifecycleEvent;
 import discord4j.core.event.domain.lifecycle.ReadyEvent;
-import discord4j.core.state.StateView;
-import discord4j.discordjson.json.MessageData;
-import discord4j.store.api.mapping.MappingStoreService;
-import discord4j.store.api.noop.NoOpStoreService;
-import discord4j.store.jdk.JdkStoreService;
+import discord4j.store.api.wip.Store;
+import discord4j.store.api.wip.action.read.CountAction;
+import discord4j.store.api.wip.action.read.CountAction.CountableEntity;
 import org.reflections.Reflections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,9 +52,9 @@ public class ExampleStore {
                 .setJacksonResources(jackson)
                 .build()
                 .gateway()
-                .setStoreService(MappingStoreService.create()
-                        .setMapping(new NoOpStoreService(), MessageData.class)
-                        .setFallback(new JdkStoreService()))
+//                .setStoreService(MappingStoreService.create()
+//                        .setMapping(new NoOpStoreService(), MessageData.class)
+//                        .setFallback(new JdkStoreService()))
                 .withGateway(gateway -> {
                     log.info("Start!");
 
@@ -88,11 +86,11 @@ public class ExampleStore {
                 .route(routes -> routes
                         .get("/counts",
                                 (req, res) -> {
-                                    StateView stores = gateway.getGatewayResources().getStateView();
+                                    Store store = gateway.getGatewayResources().getStore();
                                     Mono<String> result = Flux.merge(
-                                            Mono.just("users").zipWith(stores.getUserStore().count()),
-                                            Mono.just("guilds").zipWith(stores.getGuildStore().count()),
-                                            Mono.just("messages").zipWith(stores.getMessageStore().count()))
+                                            Mono.just("users").zipWith(store.execute(new CountAction(CountableEntity.USERS))),
+                                            Mono.just("guilds").zipWith(store.execute(new CountAction(CountableEntity.GUILDS))),
+                                            Mono.just("messages").zipWith(store.execute(new CountAction(CountableEntity.MESSAGES))))
                                             .collectMap(Tuple2::getT1, Tuple2::getT2)
                                             .map(map -> {
                                                 try {

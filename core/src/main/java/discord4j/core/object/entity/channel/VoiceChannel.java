@@ -26,7 +26,7 @@ import discord4j.discordjson.json.ChannelData;
 import discord4j.discordjson.json.gateway.VoiceStateUpdate;
 import discord4j.gateway.GatewayClientGroup;
 import discord4j.gateway.json.ShardGatewayPayload;
-import discord4j.store.api.util.LongLongTuple2;
+import discord4j.store.api.wip.action.read.GetChannelVoiceStatesAction;
 import discord4j.voice.VoiceConnection;
 import discord4j.voice.VoiceConnectionRegistry;
 import reactor.core.publisher.Flux;
@@ -91,10 +91,9 @@ public final class VoiceChannel extends BaseCategorizableChannel {
      * error is received, it is emitted through the {@code Flux}.
      */
     public Flux<VoiceState> getVoiceStates() {
-        return getClient().getGatewayResources().getStateView().getVoiceStateStore()
-                .findInRange(LongLongTuple2.of(getGuildId().asLong(), Long.MIN_VALUE),
-                        LongLongTuple2.of(getGuildId().asLong(), Long.MAX_VALUE))
-                .filter(data -> data.channelId().map(getId().asString()::equals).orElse(false))
+        return getClient().getGatewayResources().getStore()
+                .execute(new GetChannelVoiceStatesAction(getId().asLong()))
+                .flatMapMany(Flux::fromIterable)
                 .map(data -> new VoiceState(getClient(), data));
     }
 

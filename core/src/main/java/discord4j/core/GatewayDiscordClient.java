@@ -47,6 +47,7 @@ import discord4j.gateway.json.GatewayPayload;
 import discord4j.gateway.json.ShardGatewayPayload;
 import discord4j.rest.RestClient;
 import discord4j.rest.RestResources;
+import discord4j.store.api.wip.action.read.GetCachedUsersAction;
 import discord4j.voice.LocalVoiceConnectionRegistry;
 import discord4j.voice.VoiceConnection;
 import discord4j.voice.VoiceConnectionFactory;
@@ -246,9 +247,9 @@ public class GatewayDiscordClient implements EntityRetriever {
      * error is received, it is emitted through the {@code Flux}.
      */
     public Flux<User> getUsers() {
-        return gatewayResources.getStateView().getUserStore()
-                .values()
-                .map(bean -> new User(this, bean));
+        return gatewayResources.getStore().execute(new GetCachedUsersAction())
+                .flatMapMany(Flux::fromIterable)
+                .map(data -> new User(this, data));
     }
 
     /**

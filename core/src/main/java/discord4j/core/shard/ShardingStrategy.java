@@ -22,6 +22,7 @@ import discord4j.discordjson.possible.Possible;
 import discord4j.gateway.GatewayClient;
 import discord4j.gateway.ShardInfo;
 import discord4j.rest.RestClient;
+import discord4j.store.api.wip.Store;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -54,7 +55,7 @@ public interface ShardingStrategy {
      * @param shardCount the total number of shards
      * @return a {@link GatewayClientGroupManager} used by this strategy
      */
-    GatewayClientGroupManager getGroupManager(int shardCount);
+    GatewayClientGroupManager getGroupManager(int shardCount, Store store);
 
     /**
      * Return the number of shards that can be identified concurrently. Must be 1 unless your application is authorized
@@ -83,8 +84,8 @@ public interface ShardingStrategy {
             }
 
             @Override
-            public GatewayClientGroupManager getGroupManager(int shardCount) {
-                return new ShardingGatewayClientGroup(shardCount);
+            public GatewayClientGroupManager getGroupManager(int shardCount, Store store) {
+                return new ShardingGatewayClientGroup(shardCount, store);
             }
 
             @Override
@@ -109,8 +110,8 @@ public interface ShardingStrategy {
             }
 
             @Override
-            public GatewayClientGroupManager getGroupManager(int shardCount) {
-                return new ShardingGatewayClientGroup(shardCount);
+            public GatewayClientGroupManager getGroupManager(int shardCount, Store store) {
+                return new ShardingGatewayClientGroup(shardCount, store);
             }
 
             @Override
@@ -135,8 +136,8 @@ public interface ShardingStrategy {
             }
 
             @Override
-            public GatewayClientGroupManager getGroupManager(int shardCount) {
-                return new SingleGatewayClientGroup();
+            public GatewayClientGroupManager getGroupManager(int shardCount, Store store) {
+                return new SingleGatewayClientGroup(store);
             }
 
             @Override

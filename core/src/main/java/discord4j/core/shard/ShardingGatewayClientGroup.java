@@ -17,9 +17,12 @@
 
 package discord4j.core.shard;
 
+import discord4j.discordjson.json.gateway.RequestGuildMembers;
 import discord4j.gateway.GatewayClient;
 import discord4j.gateway.json.GatewayPayload;
 import discord4j.gateway.json.ShardGatewayPayload;
+import discord4j.store.api.wip.Store;
+import discord4j.store.api.wip.action.write.gateway.RequestMembersAction;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -32,9 +35,11 @@ class ShardingGatewayClientGroup implements GatewayClientGroupManager {
 
     private final Map<Integer, GatewayClient> map = new ConcurrentHashMap<>();
     private final int shardCount;
+    private final Store store;
 
-    ShardingGatewayClientGroup(int shardCount) {
+    ShardingGatewayClientGroup(int shardCount, Store store) {
         this.shardCount = shardCount;
+        this.store = store;
     }
 
     @Override
@@ -59,15 +64,32 @@ class ShardingGatewayClientGroup implements GatewayClientGroupManager {
 
     @Override
     public Mono<Void> multicast(GatewayPayload<?> payload) {
-        return Flux.fromIterable(map.values())
-                .flatMap(client -> client.send(Mono.just(payload)))
+        return Flux.fromIterable(map.entrySet())
+                .flatMap(entry -> {
+                    int shardIndex = entry.getKey();
+                    GatewayClient client = entry.getValue();
+                    return client.send(Mono.just(payload))
+                        .then(Mono.defer(() -> {
+                            if (payload.getData() instanceof RequestGuildMembers) {
+                                return store.execute(new RequestMembersAction(shardIndex,
+                                        (RequestGuildMembers) payload.getData()));
+                            }
+                            return Mono.empty();
+                        }));
+                })
                 .then();
     }
 
     public Mono<Void> unicast(ShardGatewayPayload<?> payload) {
         return Mono.justOrEmpty(find(payload.getShardIndex()))
                 .flatMap(client -> client.send(Mono.just(payload)))
-                .then();
+                .then(Mono.defer(() -> {
+                    if (payload.getData() instanceof RequestGuildMembers) {
+                        return store.execute(new RequestMembersAction(payload.getShardIndex(),
+                            (RequestGuildMembers) payload.getData()));
+                    }
+                    return Mono.empty();
+                }));
     }
 
     @Override

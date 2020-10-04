@@ -20,6 +20,7 @@ package discord4j.core.shard;
 import discord4j.gateway.GatewayClient;
 import discord4j.gateway.ShardInfo;
 import discord4j.rest.RestClient;
+import discord4j.store.api.wip.Store;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -63,8 +64,8 @@ public class DefaultShardingStrategy implements ShardingStrategy {
     }
 
     @Override
-    public GatewayClientGroupManager getGroupManager(int count) {
-        return new ShardingGatewayClientGroup(count);
+    public GatewayClientGroupManager getGroupManager(int count, Store store) {
+        return new ShardingGatewayClientGroup(count, store);
     }
 
     @Override

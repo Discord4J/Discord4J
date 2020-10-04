@@ -21,21 +21,21 @@ import jdk.internal.jline.internal.Nullable;
 
 import java.util.Optional;
 
-public class StateAwareDispatch<D, S> {
+public class StatefulDispatch<D, S> {
 
     private final ShardInfo shardInfo;
     private final D dispatch;
     private final S oldState;
 
-    private StateAwareDispatch(ShardInfo shardInfo, D dispatch, S oldState) {
+    private StatefulDispatch(ShardInfo shardInfo, D dispatch, S oldState) {
         this.shardInfo = shardInfo;
         this.dispatch = dispatch;
         this.oldState = oldState;
     }
 
-    public static <D, S> StateAwareDispatch<D, S> of(ShardInfo shardInfo, D dispatch,
-                                                                      @Nullable S oldState) {
-        return new StateAwareDispatch<>(shardInfo, dispatch, oldState);
+    public static <D, S> StatefulDispatch<D, S> of(ShardInfo shardInfo, D dispatch,
+                                                   @Nullable S oldState) {
+        return new StatefulDispatch<>(shardInfo, dispatch, oldState);
     }
 
     public ShardInfo getShardInfo() {
@@ -52,7 +52,7 @@ public class StateAwareDispatch<D, S> {
 
     @Override
     public String toString() {
-        return "StateAwareDispatch{" +
+        return "StatefulDispatch{" +
             "shardInfo=" + shardInfo +
             ", dispatch=" + dispatch +
             ", oldState=" + oldState +

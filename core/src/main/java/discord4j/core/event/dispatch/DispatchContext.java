@@ -19,7 +19,7 @@ package discord4j.core.event.dispatch;
 
 import discord4j.core.GatewayDiscordClient;
 import discord4j.gateway.ShardInfo;
-import discord4j.gateway.state.StateAwareDispatch;
+import discord4j.gateway.state.StatefulDispatch;
 
 import java.util.Optional;
 
@@ -31,16 +31,16 @@ import java.util.Optional;
  */
 public class DispatchContext<D, S> {
 
-    private final StateAwareDispatch<D, S> stateAwareDispatch;
+    private final StatefulDispatch<D, S> statefulDispatch;
     private final GatewayDiscordClient gateway;
 
-    public static <D, S> DispatchContext<D, S> of(StateAwareDispatch<D, S> stateAwareDispatch,
-                                                                   GatewayDiscordClient gateway) {
-        return new DispatchContext<>(stateAwareDispatch, gateway);
+    public static <D, S> DispatchContext<D, S> of(StatefulDispatch<D, S> statefulDispatch,
+                                                  GatewayDiscordClient gateway) {
+        return new DispatchContext<>(statefulDispatch, gateway);
     }
 
-    private DispatchContext(StateAwareDispatch<D, S> stateAwareDispatch, GatewayDiscordClient gateway) {
-        this.stateAwareDispatch = stateAwareDispatch;
+    private DispatchContext(StatefulDispatch<D, S> statefulDispatch, GatewayDiscordClient gateway) {
+        this.statefulDispatch = statefulDispatch;
         this.gateway = gateway;
     }
 
@@ -49,14 +49,14 @@ public class DispatchContext<D, S> {
     }
 
     public D getDispatch() {
-        return stateAwareDispatch.getDispatch();
+        return statefulDispatch.getDispatch();
     }
 
     public ShardInfo getShardInfo() {
-        return stateAwareDispatch.getShardInfo();
+        return statefulDispatch.getShardInfo();
     }
 
     public Optional<S> getOldState() {
-        return stateAwareDispatch.getOldState();
+        return statefulDispatch.getOldState();
     }
 }
