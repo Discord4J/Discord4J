@@ -86,7 +86,7 @@ plugins {
 
 // Relocating a Package
 shadowJar {
-   relocate 'io.netty', 'shaded.io.netty'
+   relocate 'io.netty', 'com.discord4j.shaded.io.netty'
 }
 ```
 

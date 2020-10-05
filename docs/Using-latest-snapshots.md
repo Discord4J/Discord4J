@@ -6,6 +6,7 @@ To work with SNAPSHOTs, you only need to add the required repository and then se
 ```groovy
 repositories {
   maven { url 'https://oss.sonatype.org/content/repositories/snapshots' }
+  maven { url 'https://repo.spring.io/milestone' }
   mavenCentral()
 }
 
@@ -23,6 +24,10 @@ dependencies {
         <snapshots>
             <enabled>true</enabled>
         </snapshots>
+    </repository>
+    <repository>
+        <id>repo.spring.io-milestone</id>
+        <url>https://repo.spring.io/milestone</url>
     </repository>
 </repositories>
 
