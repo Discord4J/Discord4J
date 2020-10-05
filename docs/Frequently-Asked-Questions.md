@@ -62,7 +62,7 @@ Use [maven-shade-plugin](https://rmannibucau.metawerx.net/post/mavens-shade-plug
         <relocations>
           <relocation>
             <pattern>io.netty</pattern>
-            <shadedPattern>shaded.io.netty</shadedPattern>
+            <shadedPattern>com.discord4j.shaded.io.netty</shadedPattern>
           </relocation>
         </relocations>
       </configuration>
@@ -86,7 +86,7 @@ plugins {
 
 // Relocating a Package
 shadowJar {
-   relocate 'io.netty', 'shaded.io.netty'
+   relocate 'io.netty', 'com.discord4j.shaded.io.netty'
 }
 ```
 

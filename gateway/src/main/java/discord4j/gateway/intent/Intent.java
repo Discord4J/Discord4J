@@ -95,7 +95,6 @@ public enum Intent {
 
     /**
      * Events which will be received by subscribing to DIRECT_MESSAGES
-     * - CHANNEL_CREATE
      * - MESSAGE_CREATE
      * - MESSAGE_UPDATE
      * - MESSAGE_DELETE

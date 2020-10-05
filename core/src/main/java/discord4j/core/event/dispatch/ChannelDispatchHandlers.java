@@ -37,13 +37,13 @@ class ChannelDispatchHandlers {
 
     static Mono<? extends Event> channelCreate(DispatchContext<ChannelCreate, Void> context) {
         Channel.Type type = Channel.Type.of(context.getDispatch().channel().type());
+
         GatewayDiscordClient gateway = context.getGateway();
         ChannelData channel = context.getDispatch().channel();
 
         return Mono.fromCallable(() -> {
             switch (type) {
                 case GUILD_TEXT: return new TextChannelCreateEvent(gateway, context.getShardInfo(), new TextChannel(gateway, channel));
-                case DM: return new PrivateChannelCreateEvent(gateway, context.getShardInfo(), new PrivateChannel(gateway, channel));
                 case GUILD_VOICE: return new VoiceChannelCreateEvent(gateway, context.getShardInfo(), new VoiceChannel(gateway, channel));
                 case GROUP_DM:
                     throw new UnsupportedOperationException("Received channel_create for group on a bot account!");
