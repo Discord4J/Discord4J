@@ -38,6 +38,7 @@ import discord4j.discordjson.possible.Possible;
 import discord4j.rest.util.Image;
 import discord4j.rest.util.PaginationUtil;
 import discord4j.store.api.util.LongLongTuple2;
+import discord4j.voice.VoiceConnection;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
@@ -1368,6 +1369,15 @@ public final class Guild implements Entity {
                         sink.complete();
                     }
                 });
+    }
+
+    /**
+     * Returns the current voice connection registered for this guild.
+     *
+     * @return A {@link Mono} of {@link VoiceConnection} for this guild if present, or empty otherwise.
+     */
+    public Mono<VoiceConnection> getVoiceConnection() {
+        return gateway.getVoiceConnectionRegistry().getVoiceConnection(getId());
     }
 
     @Override
