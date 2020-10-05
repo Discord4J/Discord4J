@@ -26,7 +26,7 @@ import discord4j.discordjson.json.ChannelData;
 import discord4j.discordjson.json.gateway.VoiceStateUpdate;
 import discord4j.gateway.GatewayClientGroup;
 import discord4j.gateway.json.ShardGatewayPayload;
-import discord4j.store.api.wip.action.read.GetChannelVoiceStatesAction;
+import discord4j.store.action.read.GetChannelVoiceStatesAction;
 import discord4j.voice.VoiceConnection;
 import discord4j.voice.VoiceConnectionRegistry;
 import reactor.core.publisher.Flux;
