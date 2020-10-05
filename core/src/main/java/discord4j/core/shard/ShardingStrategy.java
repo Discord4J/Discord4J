@@ -55,7 +55,7 @@ public interface ShardingStrategy {
      * @param shardCount the total number of shards
      * @return a {@link GatewayClientGroupManager} used by this strategy
      */
-    GatewayClientGroupManager getGroupManager(int shardCount, Store store);
+    GatewayClientGroupManager getGroupManager(int shardCount);
 
     /**
      * Return the number of shards that can be identified concurrently. Must be 1 unless your application is authorized
@@ -84,8 +84,8 @@ public interface ShardingStrategy {
             }
 
             @Override
-            public GatewayClientGroupManager getGroupManager(int shardCount, Store store) {
-                return new ShardingGatewayClientGroup(shardCount, store);
+            public GatewayClientGroupManager getGroupManager(int shardCount) {
+                return new ShardingGatewayClientGroup(shardCount);
             }
 
             @Override
@@ -110,8 +110,8 @@ public interface ShardingStrategy {
             }
 
             @Override
-            public GatewayClientGroupManager getGroupManager(int shardCount, Store store) {
-                return new ShardingGatewayClientGroup(shardCount, store);
+            public GatewayClientGroupManager getGroupManager(int shardCount) {
+                return new ShardingGatewayClientGroup(shardCount);
             }
 
             @Override
@@ -136,8 +136,8 @@ public interface ShardingStrategy {
             }
 
             @Override
-            public GatewayClientGroupManager getGroupManager(int shardCount, Store store) {
-                return new SingleGatewayClientGroup(store);
+            public GatewayClientGroupManager getGroupManager(int shardCount) {
+                return new SingleGatewayClientGroup();
             }
 
             @Override

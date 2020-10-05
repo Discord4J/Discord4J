@@ -18,11 +18,11 @@ package discord4j.gateway.state;
 
 import discord4j.discordjson.json.gateway.*;
 import discord4j.gateway.ShardInfo;
-import discord4j.gateway.retry.GatewayHardReconnect;
 import discord4j.gateway.retry.GatewayStateChange;
 import discord4j.store.api.wip.Store;
 import discord4j.store.api.wip.action.StoreAction;
 import discord4j.store.api.wip.action.write.gateway.*;
+import discord4j.store.api.wip.action.write.gateway.InvalidateShardAction.Cause;
 import reactor.core.publisher.Mono;
 
 import java.util.HashMap;
@@ -62,8 +62,6 @@ public class DispatchStoreLayer {
         putAction(Ready.class, ReadyAction::new);
         putAction(UserUpdate.class, UserUpdateAction::new);
         putAction(VoiceStateUpdateDispatch.class, VoiceStateUpdateDispatchAction::new);
-        putAction(GatewayHardReconnect.class, (shardIndex, dispatch) -> new InvalidateShardAction(shardIndex,
-                InvalidateShardAction.Cause.HARD_RECONNECT));
     }
 
     private final Store store;
@@ -82,13 +80,18 @@ public class DispatchStoreLayer {
 
     public Mono<StatefulDispatch<?, ?>> store(Dispatch dispatch) {
         Objects.requireNonNull(dispatch);
-
         return Mono.justOrEmpty(STORE_ACTION_MAP.get(dispatch.getClass()))
                 .map(actionFactory -> {
-                    // Special treatment for logout
-                    if (dispatch instanceof GatewayStateChange
-                            && ((GatewayStateChange) dispatch).getState() == GatewayStateChange.State.DISCONNECTED) {
-                        return new InvalidateShardAction(shardInfo.getIndex(), InvalidateShardAction.Cause.LOGOUT);
+                    // Special treatment for shard invalidation
+                    if (dispatch instanceof GatewayStateChange) {
+                        GatewayStateChange gatewayStateChange = (GatewayStateChange) dispatch;
+                        switch (gatewayStateChange.getState()) {
+                            case DISCONNECTED:
+                                return new InvalidateShardAction(shardInfo.getIndex(), Cause.LOGOUT);
+                            case SESSION_INVALIDATED:
+                                return new InvalidateShardAction(shardInfo.getIndex(), Cause.HARD_RECONNECT);
+                            default: break;
+                        }
                     }
                     return actionFactory.apply(shardInfo.getIndex(), dispatch);
                 })

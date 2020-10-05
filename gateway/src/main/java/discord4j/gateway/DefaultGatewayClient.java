@@ -331,7 +331,7 @@ public class DefaultGatewayClient implements GatewayClient {
                         notifyObserver(GatewayObserver.RETRY_FAILED);
                     }
                     if (retry.nextState() == GatewayConnection.State.RECONNECTING) {
-                        dispatchSink.next(GatewayHardReconnect.create());
+                        dispatchSink.next(GatewayStateChange.sessionInvalidated());
                     }
                 });
     }

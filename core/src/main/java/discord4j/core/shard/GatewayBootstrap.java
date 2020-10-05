@@ -602,7 +602,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                     EntityRetrievalStrategy entityRetrievalStrategy = b.initEntityRetrievalStrategy();
                     DispatchEventMapper dispatchMapper = b.initDispatchEventMapper();
 
-                    GatewayClientGroupManager clientGroup = b.shardingStrategy.getGroupManager(count, store);
+                    GatewayClientGroupManager clientGroup = b.shardingStrategy.getGroupManager(count);
                     GatewayDiscordClient gateway = new GatewayDiscordClient(b.client, resources, closeProcessor,
                             clientGroup, b.voiceConnectionFactory, entityRetrievalStrategy);
                     Mono<Void> destroySequence = Mono.deferWithContext(ctx -> b.destroyHandler.apply(gateway)
