@@ -182,13 +182,9 @@ public class DispatchHandlers implements DispatchEventMapper {
     private static PresenceData createPresence(PresenceUpdate update) {
         return PresenceData.builder()
                 .user(update.user())
-                .roles(update.roles())
-                .game(update.game())
                 .status(update.status())
                 .activities(update.activities())
                 .clientStatus(update.clientStatus())
-                .premiumSince(update.premiumSince())
-                .nick(update.nick())
                 .build();
     }
 
