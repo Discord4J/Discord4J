@@ -16,6 +16,7 @@
  */
 package discord4j.core.object.presence;
 
+import discord4j.discordjson.json.ActivityData;
 import discord4j.discordjson.json.ActivityUpdateRequest;
 import discord4j.discordjson.json.PresenceData;
 import discord4j.discordjson.json.gateway.StatusUpdate;
@@ -73,7 +74,10 @@ public final class Presence {
     public static StatusUpdate online(ActivityUpdateRequest activity) {
         return StatusUpdate.builder()
                 .status(Status.ONLINE.getValue())
-                .activities(Collections.singleton(activity))
+                .activities(Collections.singletonList(ActivityData.builder()
+                        .from(activity)
+                        .url(Possible.of(activity.url()))
+                        .build()))
                 .afk(false)
                 .since(Optional.empty())
                 .build();
@@ -110,7 +114,10 @@ public final class Presence {
     public static StatusUpdate doNotDisturb(ActivityUpdateRequest activity) {
         return StatusUpdate.builder()
                 .status(Status.DO_NOT_DISTURB.getValue())
-                .activities(Collections.singleton(activity))
+                .activities(Collections.singletonList(ActivityData.builder()
+                        .from(activity)
+                        .url(Possible.of(activity.url()))
+                        .build()))
                 .afk(false)
                 .since(Optional.empty())
                 .build();
@@ -147,7 +154,10 @@ public final class Presence {
     public static StatusUpdate idle(ActivityUpdateRequest activity) {
         return StatusUpdate.builder()
                 .status(Status.IDLE.getValue())
-                .activities(Collections.singleton(activity))
+                .activities(Collections.singletonList(ActivityData.builder()
+                        .from(activity)
+                        .url(Possible.of(activity.url()))
+                        .build()))
                 .afk(true)
                 .since(Instant.now().toEpochMilli())
                 .build();
@@ -223,12 +233,7 @@ public final class Presence {
     public StatusUpdate asStatusUpdate() {
         return StatusUpdate.builder()
                 .status(data.status())
-                .activities(data.activities().stream()
-                        .map(activity -> ActivityUpdateRequest.builder()
-                                .from(activity)
-                                .url(Possible.flatOpt(activity.url()))
-                                .build())
-                        .collect(Collectors.toList()))
+                .activities(data.activities())
                 .afk(data.status().equals(Status.IDLE.getValue()))
                 .since(data.status().equals(Status.IDLE.getValue()) ?
                         Optional.of(Instant.now().toEpochMilli()) : Optional.empty())

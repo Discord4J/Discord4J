@@ -141,7 +141,7 @@ class BaseGuildChannel extends BaseChannel implements GuildChannel {
         PermissionsEditRequest request = PermissionsEditRequest.builder()
                 .allow(allow.getRawValue())
                 .deny(deny.getRawValue())
-                .type("member")
+                .type(PermissionOverwrite.Type.MEMBER.getValue())
                 .build();
 
         return getClient().getRestClient().getChannelService()
@@ -155,7 +155,7 @@ class BaseGuildChannel extends BaseChannel implements GuildChannel {
         PermissionsEditRequest request = PermissionsEditRequest.builder()
                 .allow(allow.getRawValue())
                 .deny(deny.getRawValue())
-                .type("role")
+                .type(PermissionOverwrite.Type.ROLE.getValue())
                 .build();
 
         return getClient().getRestClient().getChannelService()

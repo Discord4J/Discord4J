@@ -208,7 +208,7 @@ public class ChannelServiceTest {
         PermissionsEditRequest req = PermissionsEditRequest.builder()
                 .allow(0)
                 .deny(0)
-                .type("member")
+                .type(1)
                 .build();
         channelService.editChannelPermissions(modifyChannel, permanentOverwrite, req, null).block();
     }
