@@ -26,7 +26,12 @@ import discord4j.gateway.ShardInfo;
  * This event is dispatched by Discord.
  *
  * @see <a href="https://discord.com/developers/docs/topics/gateway#channel-create">Channel Create</a>
+ *
+ * @deprecated This event will no longer be dispatched by Discord in
+ * <a href="https://github.com/discord/discord-api-docs/blob/master/docs/Change_Log.md#api-and-gateway-v8">v8</a> and
+ * thus, will no longer be present in 3.2.
  */
+@Deprecated
 public class PrivateChannelCreateEvent extends ChannelEvent {
 
     private final PrivateChannel channel;
