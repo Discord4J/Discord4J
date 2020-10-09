@@ -1,14 +1,11 @@
-package discord4j.common.store;
+package discord4j.common.store.layout;
 
-import discord4j.common.store.layout.DataAccessor;
-import discord4j.common.store.layout.GatewayDataUpdater;
+import discord4j.common.store.StoreAction;
 import discord4j.common.store.layout.action.gateway.*;
 import discord4j.common.store.layout.action.read.*;
 import reactor.core.publisher.Mono;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -24,13 +21,15 @@ public class ActionMapper {
         return new ActionMapper(new HashMap<>());
     }
 
-    static ActionMapper aggregate(ActionMapper... mappers) {
+    public static ActionMapper aggregate(ActionMapper... mappers) {
+        Objects.requireNonNull(mappers);
         return new ActionMapper(Arrays.stream(mappers)
                 .flatMap(mapper -> mapper.mappings.entrySet().stream())
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue))); // throws ISE if duplicates
     }
 
-    static ActionMapper fromDataAccessor(DataAccessor dataAccessor) {
+    public static ActionMapper fromDataAccessor(DataAccessor dataAccessor) {
+        Objects.requireNonNull(dataAccessor);
         return create()
                 .map(CountAction.class, dataAccessor::count)
                 .map(GetChannelByIdAction.class, dataAccessor::getChannelById)
@@ -53,7 +52,8 @@ public class ActionMapper {
                 .map(GetVoiceStateByIdAction.class, dataAccessor::getVoiceStateById);
     }
 
-    static ActionMapper fromGatewayDataUpdater(GatewayDataUpdater gatewayDataUpdater) {
+    public static ActionMapper fromGatewayDataUpdater(GatewayDataUpdater gatewayDataUpdater) {
+        Objects.requireNonNull(gatewayDataUpdater);
         return create()
                 .map(ChannelCreateAction.class, gatewayDataUpdater::onChannelCreate)
                 .map(ChannelDeleteAction.class, gatewayDataUpdater::onChannelDelete)
@@ -96,11 +96,16 @@ public class ActionMapper {
     @SuppressWarnings("unchecked")
     public <R, S extends StoreAction<R>> ActionMapper map(Class<S> actionType,
                                                           Function<? super S, ? extends Mono<R>> handler) {
+        Objects.requireNonNull(actionType);
+        Objects.requireNonNull(handler);
         mappings.put(actionType, action -> handler.apply((S) action));
         return this;
     }
 
-    Function<StoreAction<?>, ? extends Mono<?>> get(Object obj) {
-        return mappings.get(obj);
+    @SuppressWarnings("unchecked")
+    public <R> Optional<Function<StoreAction<R>, ? extends Mono<R>>> findHandlerForAction(StoreAction<R> action) {
+        Objects.requireNonNull(action);
+        return Optional.ofNullable(mappings.get(action.getClass()))
+                .map(handler -> a -> (Mono<R>) handler.apply(a));
     }
 }
