@@ -16,13 +16,13 @@
  */
 package discord4j.gateway.state;
 
+import discord4j.common.store.Store;
+import discord4j.common.store.StoreAction;
+import discord4j.common.store.layout.action.gateway.*;
+import discord4j.common.store.layout.action.gateway.InvalidateShardAction.Cause;
 import discord4j.discordjson.json.gateway.*;
 import discord4j.gateway.ShardInfo;
 import discord4j.gateway.retry.GatewayStateChange;
-import discord4j.store.action.gateway.*;
-import discord4j.store.action.gateway.InvalidateShardAction.Cause;
-import discord4j.store.api.wip.Store;
-import discord4j.store.api.wip.StoreAction;
 import reactor.core.publisher.Mono;
 
 import java.util.HashMap;

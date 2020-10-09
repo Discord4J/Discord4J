@@ -22,7 +22,6 @@ import discord4j.discordjson.possible.Possible;
 import discord4j.gateway.GatewayClient;
 import discord4j.gateway.ShardInfo;
 import discord4j.rest.RestClient;
-import discord4j.store.api.wip.Store;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 

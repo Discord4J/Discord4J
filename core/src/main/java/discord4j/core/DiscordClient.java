@@ -16,12 +16,12 @@
  */
 package discord4j.core;
 
+import discord4j.common.store.Store;
 import discord4j.core.event.EventDispatcher;
 import discord4j.core.shard.GatewayBootstrap;
 import discord4j.gateway.GatewayOptions;
 import discord4j.rest.RestClient;
 import discord4j.rest.request.RouterOptions;
-import discord4j.store.api.service.StoreService;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
 
@@ -82,7 +82,7 @@ public final class DiscordClient extends RestClient {
     /**
      * Login the client to the gateway, using the recommended amount of shards, locally coordinated. The derived
      * {@link GatewayDiscordClient} is capable of managing these shards and providing a single
-     * {@link EventDispatcher} to publish Gateway updates and {@link StoreService} for entity caching.
+     * {@link EventDispatcher} to publish Gateway updates and {@link Store} for entity caching.
      * <p>
      * To further configure the Gateway connections, such as initial presence, sharding and caching options, see
      * {@link #gateway()}.
@@ -120,7 +120,7 @@ public final class DiscordClient extends RestClient {
     /**
      * Start bootstrapping a connection to the real-time Discord Gateway. The resulting builder can be configured to
      * create a {@link GatewayDiscordClient} which groups all connecting shards providing a single
-     * {@link EventDispatcher} to publish Gateway updates and {@link StoreService} for entity caching.
+     * {@link EventDispatcher} to publish Gateway updates and {@link Store} for entity caching.
      * <p>
      * The following are some of the features configured by this builder:
      * <ul>

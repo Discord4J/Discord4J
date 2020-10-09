@@ -16,6 +16,7 @@
  */
 package discord4j.core.object.entity.channel;
 
+import discord4j.common.store.layout.action.read.GetChannelVoiceStatesAction;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.VoiceState;
@@ -27,7 +28,6 @@ import discord4j.discordjson.json.ChannelData;
 import discord4j.discordjson.json.gateway.VoiceStateUpdate;
 import discord4j.gateway.GatewayClientGroup;
 import discord4j.gateway.json.ShardGatewayPayload;
-import discord4j.store.action.read.GetChannelVoiceStatesAction;
 import discord4j.voice.VoiceConnection;
 import discord4j.voice.VoiceConnectionRegistry;
 import reactor.core.publisher.Flux;

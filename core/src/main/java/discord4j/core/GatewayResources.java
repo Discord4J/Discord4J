@@ -18,6 +18,7 @@
 package discord4j.core;
 
 import discord4j.common.retry.ReconnectOptions;
+import discord4j.common.store.Store;
 import discord4j.core.event.EventDispatcher;
 import discord4j.core.event.domain.Event;
 import discord4j.core.shard.MemberRequestFilter;
@@ -26,7 +27,6 @@ import discord4j.discordjson.possible.Possible;
 import discord4j.gateway.GatewayClient;
 import discord4j.gateway.GatewayReactorResources;
 import discord4j.gateway.intent.IntentSet;
-import discord4j.store.api.wip.Store;
 import discord4j.voice.VoiceReactorResources;
 
 /**

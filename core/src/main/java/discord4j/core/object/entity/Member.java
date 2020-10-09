@@ -16,6 +16,8 @@
  */
 package discord4j.core.object.entity;
 
+import discord4j.common.store.layout.action.read.GetPresenceByIdAction;
+import discord4j.common.store.layout.action.read.GetVoiceStateByIdAction;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.VoiceState;
@@ -29,8 +31,6 @@ import discord4j.discordjson.json.MemberData;
 import discord4j.discordjson.possible.Possible;
 import discord4j.rest.util.Color;
 import discord4j.rest.util.PermissionSet;
-import discord4j.store.action.read.GetPresenceByIdAction;
-import discord4j.store.action.read.GetVoiceStateByIdAction;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.math.MathFlux;

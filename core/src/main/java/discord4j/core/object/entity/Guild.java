@@ -16,6 +16,8 @@
  */
 package discord4j.core.object.entity;
 
+import discord4j.common.store.layout.action.read.GetGuildPresencesAction;
+import discord4j.common.store.layout.action.read.GetGuildVoiceStatesAction;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.Ban;
@@ -37,8 +39,6 @@ import discord4j.discordjson.json.NicknameModifyData;
 import discord4j.discordjson.possible.Possible;
 import discord4j.rest.util.Image;
 import discord4j.rest.util.PaginationUtil;
-import discord4j.store.action.read.GetGuildPresencesAction;
-import discord4j.store.action.read.GetGuildVoiceStatesAction;
 import discord4j.voice.VoiceConnection;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;

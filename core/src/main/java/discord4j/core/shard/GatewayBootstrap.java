@@ -21,6 +21,8 @@ import discord4j.common.LogUtil;
 import discord4j.common.ReactorResources;
 import discord4j.common.annotations.Experimental;
 import discord4j.common.retry.ReconnectOptions;
+import discord4j.common.store.Store;
+import discord4j.common.store.noop.NoOpStore;
 import discord4j.core.CoreResources;
 import discord4j.core.DiscordClient;
 import discord4j.core.GatewayDiscordClient;
@@ -47,9 +49,6 @@ import discord4j.gateway.retry.GatewayStateChange;
 import discord4j.gateway.state.DispatchStoreLayer;
 import discord4j.rest.util.Multimap;
 import discord4j.rest.util.RouteUtils;
-import discord4j.store.api.service.StoreService;
-import discord4j.store.api.wip.Store;
-import discord4j.store.api.wip.noop.NoOpStore;
 import discord4j.voice.DefaultVoiceConnectionFactory;
 import discord4j.voice.VoiceConnection;
 import discord4j.voice.VoiceConnectionFactory;
@@ -279,7 +278,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
      * Set a custom {@link Function handler} that generate a destroy sequence to be run once all joining shards have
      * disconnected, after all internal resources have been released. The destroy procedure is applied asynchronously
      * and errors are logged and swallowed. Defaults to {@link GatewayBootstrap#shutdownDestroyHandler()} that will
-     * release the set {@link EventDispatcher} and {@link StoreService}.
+     * release the set {@link EventDispatcher}.
      *
      * @param destroyHandler the {@link Function} supplying a {@link Mono} to reset state
      * @return this builder
@@ -889,8 +888,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
 
 
     /**
-     * Destroy handler that calls {@link EventDispatcher#shutdown()} followed by {@link StoreService#dispose()}
-     * asynchronously.
+     * Destroy handler that calls {@link EventDispatcher#shutdown()} asynchronously.
      *
      * @return a shutdown destroy handler
      */

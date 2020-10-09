@@ -25,7 +25,6 @@ ext {
     // Dependencies
     reactor_bom_version = '2020.0.0-RC1'
     jackson_version = '2.11.2'
-    jdkstores_version = "$storesVersion".toString()
 
     // Test dependencies
     junit_version = '5.6.2'
@@ -59,7 +58,6 @@ allprojects {
     }
 
     repositories {
-        mavenLocal()
         mavenCentral()
         if (!isRelease || isJitpack) {
             maven { url 'https://oss.sonatype.org/content/repositories/snapshots' }
@@ -212,14 +210,6 @@ def buildDocsUrl(String project) {
     } else {
         def docVersion = isRelease ? "$version" : "3.0"
         return "https://www.javadoc.io/page/com.discord4j/$project/$docVersion/" as String
-    }
-}
-
-def buildStoresDocsUrl(String project, boolean offline) {
-    if (isJitpack || offline) {
-        return "https://javadoc.jitpack.io/com/discord4j/stores/$project/$storesVersion/javadoc/" as String
-    } else {
-        return "https://www.javadoc.io/page/com.discord4j/$project/$storesVersion/" as String
     }
 }
 
