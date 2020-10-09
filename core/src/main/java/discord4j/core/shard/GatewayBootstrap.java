@@ -22,7 +22,6 @@ import discord4j.common.ReactorResources;
 import discord4j.common.annotations.Experimental;
 import discord4j.common.retry.ReconnectOptions;
 import discord4j.common.store.Store;
-import discord4j.common.store.noop.NoOpStore;
 import discord4j.core.CoreResources;
 import discord4j.core.DiscordClient;
 import discord4j.core.GatewayDiscordClient;
@@ -866,7 +865,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
         if (store != null) {
             return store;
         }
-        return NoOpStore.create(); // TODO replace with actual default impl
+        return Store.noOp(); // TODO replace with actual default layout
     }
 
     private Multimap<String, Object> getGatewayParameters() {

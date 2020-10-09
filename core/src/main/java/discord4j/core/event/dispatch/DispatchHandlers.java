@@ -16,6 +16,7 @@
  */
 package discord4j.core.event.dispatch;
 
+import discord4j.common.store.util.PresenceAndUserData;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.*;
@@ -30,7 +31,6 @@ import discord4j.discordjson.json.UserData;
 import discord4j.discordjson.json.VoiceStateData;
 import discord4j.discordjson.json.gateway.*;
 import discord4j.gateway.retry.GatewayStateChange;
-import discord4j.store.api.wip.util.PresenceAndUserData;
 import reactor.core.publisher.Mono;
 import reactor.util.Logger;
 import reactor.util.Loggers;

@@ -8,5 +8,7 @@ public interface StoreLayout {
 
     GatewayDataUpdater getGatewayDataUpdater();
 
-    ActionMapper getCustomActionMapper();
+    default ActionMapper getCustomActionMapper() {
+        return ActionMapper.create();
+    }
 }

@@ -19,7 +19,7 @@ package discord4j.core.event.dispatch;
 
 import discord4j.common.annotations.Experimental;
 import discord4j.core.event.domain.Event;
-import discord4j.store.api.Store;
+import discord4j.common.store.Store;
 import reactor.core.publisher.Mono;
 
 /**

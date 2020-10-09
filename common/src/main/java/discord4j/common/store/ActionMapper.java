@@ -85,18 +85,18 @@ public class ActionMapper {
     }
 
     /**
-     * Maps a specific action type to a dataAccessor function to execute.
+     * Maps a specific action type to a handler function to execute.
      *
-     * @param actionType   the type of the action
-     * @param dataAccessor the dataAccessor to execute when an action of the specified type is received
-     * @param <R>          the return type of the action
-     * @param <S>          the type of the action itself
+     * @param actionType the type of the action
+     * @param handler    the handler to execute when an action of the specified type is received
+     * @param <R>        the return type of the action
+     * @param <S>        the type of the action itself
      * @return this {@link ActionMapper} enriched with the added mapping
      */
     @SuppressWarnings("unchecked")
     public <R, S extends StoreAction<R>> ActionMapper map(Class<S> actionType,
-                                                          Function<? super S, ? extends Mono<R>> dataAccessor) {
-        mappings.put(actionType, action -> dataAccessor.apply((S) action));
+                                                          Function<? super S, ? extends Mono<R>> handler) {
+        mappings.put(actionType, action -> handler.apply((S) action));
         return this;
     }
 
