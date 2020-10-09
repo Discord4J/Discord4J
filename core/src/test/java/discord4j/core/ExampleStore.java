@@ -21,8 +21,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import discord4j.common.JacksonResources;
 import discord4j.common.store.Store;
-import discord4j.common.store.layout.action.read.CountAction;
-import discord4j.common.store.layout.action.read.CountAction.CountableEntity;
+import discord4j.common.store.action.read.CountTotalAction;
+import discord4j.common.store.action.read.CountTotalAction.CountableEntity;
 import discord4j.core.event.domain.guild.GuildEvent;
 import discord4j.core.event.domain.lifecycle.GatewayLifecycleEvent;
 import discord4j.core.event.domain.lifecycle.ReadyEvent;
@@ -88,9 +88,9 @@ public class ExampleStore {
                                 (req, res) -> {
                                     Store store = gateway.getGatewayResources().getStore();
                                     Mono<String> result = Flux.merge(
-                                            Mono.just("users").zipWith(store.execute(new CountAction(CountableEntity.USERS))),
-                                            Mono.just("guilds").zipWith(store.execute(new CountAction(CountableEntity.GUILDS))),
-                                            Mono.just("messages").zipWith(store.execute(new CountAction(CountableEntity.MESSAGES))))
+                                            Mono.just("users").zipWith(store.execute(new CountTotalAction(CountableEntity.USERS))),
+                                            Mono.just("guilds").zipWith(store.execute(new CountTotalAction(CountableEntity.GUILDS))),
+                                            Mono.just("messages").zipWith(store.execute(new CountTotalAction(CountableEntity.MESSAGES))))
                                             .collectMap(Tuple2::getT1, Tuple2::getT2)
                                             .map(map -> {
                                                 try {

@@ -1,6 +1,5 @@
 package discord4j.common.store.layout;
 
-import discord4j.common.store.layout.action.read.*;
 import discord4j.common.store.util.PossiblyIncompleteList;
 import discord4j.discordjson.json.*;
 import reactor.core.publisher.Mono;
@@ -8,42 +7,74 @@ import reactor.core.publisher.Mono;
 import java.util.List;
 
 public interface DataAccessor {
-    
-    Mono<Long> count(CountAction action);
 
-    Mono<ChannelData> getChannelById(GetChannelByIdAction action);
+    Mono<Long> countChannels();
 
-    Mono<PossiblyIncompleteList<VoiceStateData>> getChannelVoiceStates(GetChannelVoiceStatesAction action);
+    Mono<Long> countChannelsInGuild(long guildId);
 
-    Mono<GuildData> getGuildById(GetGuildByIdAction action);
+    Mono<Long> countEmojis();
 
-    Mono<PossiblyIncompleteList<ChannelData>> getGuildChannels(GetGuildChannelsAction action);
+    Mono<Long> countEmojisInGuild(long guildId);
 
-    Mono<EmojiData> getGuildEmojiById(GetGuildEmojiByIdAction action);
+    Mono<Long> countGuilds();
 
-    Mono<PossiblyIncompleteList<EmojiData>> getGuildEmojis(GetGuildEmojisAction action);
+    Mono<Long> countMembers();
 
-    Mono<PossiblyIncompleteList<MemberData>> getGuildMembers(GetGuildMembersAction action);
+    Mono<Long> countMembersInGuild(long guildId);
 
-    Mono<PossiblyIncompleteList<PresenceData>> getGuildPresences(GetGuildPresencesAction action);
+    Mono<Long> countMessages();
 
-    Mono<PossiblyIncompleteList<RoleData>> getGuildRoles(GetGuildRolesAction action);
+    Mono<Long> countMessagesInChannel(long channelId);
 
-    Mono<PossiblyIncompleteList<GuildData>> getGuilds(GetGuildsAction action);
+    Mono<Long> countPresences();
 
-    Mono<PossiblyIncompleteList<VoiceStateData>> getGuildVoiceStates(GetGuildVoiceStatesAction action);
+    Mono<Long> countPresencesInGuild(long guildId);
 
-    Mono<MemberData> getMemberById(GetMemberByIdAction action);
+    Mono<Long> countRoles();
 
-    Mono<MessageData> getMessageById(GetMessageByIdAction action);
+    Mono<Long> countRolesInGuild(long guildId);
 
-    Mono<PresenceData> getPresenceById(GetPresenceByIdAction action);
+    Mono<Long> countUsers();
 
-    Mono<RoleData> getRoleById(GetRoleByIdAction action);
+    Mono<Long> countVoiceStates();
 
-    Mono<UserData> getUserById(GetUserByIdAction action);
+    Mono<Long> countVoiceStatesInGuild(long guildId);
 
-    Mono<List<UserData>> getUsers(GetUsersAction action);
+    Mono<Long> countVoiceStatesInChannel(long channelId);
 
-    Mono<VoiceStateData> getVoiceStateById(GetVoiceStateByIdAction action);
+    Mono<ChannelData> getChannelById(long channelId);
+
+    Mono<PossiblyIncompleteList<VoiceStateData>> getChannelVoiceStates(long channelId);
+
+    Mono<GuildData> getGuildById(long guildId);
+
+    Mono<PossiblyIncompleteList<ChannelData>> getGuildChannels(long guildId);
+
+    Mono<EmojiData> getGuildEmojiById(long guildId, long emojiId);
+
+    Mono<PossiblyIncompleteList<EmojiData>> getGuildEmojis(long guildId);
+
+    Mono<PossiblyIncompleteList<MemberData>> getGuildMembers(long guildId);
+
+    Mono<PossiblyIncompleteList<PresenceData>> getGuildPresences(long guildId);
+
+    Mono<PossiblyIncompleteList<RoleData>> getGuildRoles(long guildId);
+
+    Mono<PossiblyIncompleteList<GuildData>> getGuilds();
+
+    Mono<PossiblyIncompleteList<VoiceStateData>> getGuildVoiceStates(long guildId);
+
+    Mono<MemberData> getMemberById(long guildId, long userId);
+
+    Mono<MessageData> getMessageById(long channelId, long messageId);
+
+    Mono<PresenceData> getPresenceById(long guildId, long userId);
+
+    Mono<RoleData> getRoleById(long guildId, long roleId);
+
+    Mono<UserData> getUserById(long userId);
+
+    Mono<List<UserData>> getUsers();
+
+    Mono<VoiceStateData> getVoiceStateById(long guildId, long userId);
 }

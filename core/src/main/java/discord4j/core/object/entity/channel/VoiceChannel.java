@@ -16,7 +16,7 @@
  */
 package discord4j.core.object.entity.channel;
 
-import discord4j.common.store.layout.action.read.GetChannelVoiceStatesAction;
+import discord4j.common.store.action.read.GetChannelVoiceStatesAction;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.VoiceState;

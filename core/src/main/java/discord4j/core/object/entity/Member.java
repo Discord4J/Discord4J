@@ -16,8 +16,8 @@
  */
 package discord4j.core.object.entity;
 
-import discord4j.common.store.layout.action.read.GetPresenceByIdAction;
-import discord4j.common.store.layout.action.read.GetVoiceStateByIdAction;
+import discord4j.common.store.action.read.GetPresenceByIdAction;
+import discord4j.common.store.action.read.GetVoiceStateByIdAction;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.VoiceState;

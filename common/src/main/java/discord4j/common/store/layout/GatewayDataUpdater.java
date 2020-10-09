@@ -1,65 +1,65 @@
 package discord4j.common.store.layout;
 
-import discord4j.common.store.layout.action.gateway.*;
 import discord4j.common.store.util.PresenceAndUserData;
 import discord4j.discordjson.json.*;
+import discord4j.discordjson.json.gateway.*;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
 
 public interface GatewayDataUpdater {
 
-    Mono<Void> onChannelCreate(ChannelCreateAction action);
+    Mono<Void> onChannelCreate(int shardIndex, ChannelCreate dispatch);
 
-    Mono<ChannelData> onChannelDelete(ChannelDeleteAction action);
+    Mono<ChannelData> onChannelDelete(int shardIndex, ChannelDelete dispatch);
 
-    Mono<ChannelData> onChannelUpdate(ChannelUpdateAction action);
+    Mono<ChannelData> onChannelUpdate(int shardIndex, ChannelUpdate dispatch);
 
-    Mono<Void> onGuildCreate(GuildCreateAction action);
+    Mono<Void> onGuildCreate(int shardIndex, GuildCreate dispatch);
 
-    Mono<GuildData> onGuildDelete(GuildDeleteAction action);
+    Mono<GuildData> onGuildDelete(int shardIndex, GuildDelete dispatch);
 
-    Mono<List<EmojiData>> onGuildEmojisUpdate(GuildEmojisUpdateAction action);
+    Mono<List<EmojiData>> onGuildEmojisUpdate(int shardIndex, GuildEmojisUpdate dispatch);
 
-    Mono<Void> onGuildMemberAdd(GuildMemberAddAction action);
+    Mono<Void> onGuildMemberAdd(int shardIndex, GuildMemberAdd dispatch);
 
-    Mono<MemberData> onGuildMemberRemove(GuildMemberRemoveAction action);
+    Mono<MemberData> onGuildMemberRemove(int shardIndex, GuildMemberRemove dispatch);
 
-    Mono<Void> onGuildMembersChunk(GuildMembersChunkAction action);
+    Mono<Void> onGuildMembersChunk(int shardIndex, GuildMembersChunk dispatch);
 
-    Mono<MemberData> onGuildMemberUpdate(GuildMemberUpdateAction action);
+    Mono<MemberData> onGuildMemberUpdate(int shardIndex, GuildMemberUpdate dispatch);
 
-    Mono<Void> onGuildRoleCreate(GuildRoleCreateAction action);
+    Mono<Void> onGuildRoleCreate(int shardIndex, GuildRoleCreate dispatch);
 
-    Mono<RoleData> onGuildRoleDelete(GuildRoleDeleteAction action);
+    Mono<RoleData> onGuildRoleDelete(int shardIndex, GuildRoleDelete dispatch);
 
-    Mono<RoleData> onGuildRoleUpdate(GuildRoleUpdateAction action);
+    Mono<RoleData> onGuildRoleUpdate(int shardIndex, GuildRoleUpdate dispatch);
 
-    Mono<GuildData> onGuildUpdate(GuildUpdateAction action);
+    Mono<GuildData> onGuildUpdate(int shardIndex, GuildUpdate dispatch);
 
-    Mono<Void> onInvalidateShard(InvalidateShardAction action);
+    Mono<Void> onInvalidateShard(int shardIndex, InvalidationCause cause);
 
-    Mono<Void> onMessageCreate(MessageCreateAction action);
+    Mono<Void> onMessageCreate(int shardIndex, MessageCreate dispatch);
 
-    Mono<MessageData> onMessageDelete(MessageDeleteAction action);
+    Mono<MessageData> onMessageDelete(int shardIndex, MessageDelete dispatch);
 
-    Mono<List<MessageData>> onMessageDeleteBulk(MessageDeleteBulkAction action);
+    Mono<List<MessageData>> onMessageDeleteBulk(int shardIndex, MessageDeleteBulk dispatch);
 
-    Mono<Void> onMessageReactionAdd(MessageReactionAddAction action);
+    Mono<Void> onMessageReactionAdd(int shardIndex, MessageReactionAdd dispatch);
 
-    Mono<Void> onMessageReactionRemove(MessageReactionRemoveAction action);
+    Mono<Void> onMessageReactionRemove(int shardIndex, MessageReactionRemove dispatch);
 
-    Mono<Void> onMessageReactionRemoveAll(MessageReactionRemoveAllAction action);
+    Mono<Void> onMessageReactionRemoveAll(int shardIndex, MessageReactionRemoveAll dispatch);
 
-    Mono<Void> onMessageReactionRemoveEmoji(MessageReactionRemoveEmojiAction action);
+    Mono<Void> onMessageReactionRemoveEmoji(int shardIndex, MessageReactionRemoveEmoji dispatch);
 
-    Mono<MessageData> onMessageUpdate(MessageUpdateAction action);
+    Mono<MessageData> onMessageUpdate(int shardIndex, MessageUpdate dispatch);
 
-    Mono<PresenceAndUserData> onPresenceUpdate(PresenceUpdateAction action);
+    Mono<PresenceAndUserData> onPresenceUpdate(int shardIndex, PresenceUpdate dispatch);
 
-    Mono<Void> onReady(ReadyAction action);
+    Mono<Void> onReady(int shardIndex, Ready dispatch);
 
-    Mono<UserData> onUserUpdate(UserUpdateAction action);
+    Mono<UserData> onUserUpdate(int shardIndex, UserUpdate dispatch);
 
-    Mono<VoiceStateData> onVoiceStateUpdateDispatch(VoiceStateUpdateDispatchAction action);
+    Mono<VoiceStateData> onVoiceStateUpdateDispatch(int shardIndex, VoiceStateUpdateDispatch dispatch);
 }

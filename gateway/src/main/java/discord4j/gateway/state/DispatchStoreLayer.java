@@ -17,9 +17,9 @@
 package discord4j.gateway.state;
 
 import discord4j.common.store.Store;
-import discord4j.common.store.StoreAction;
-import discord4j.common.store.layout.action.gateway.*;
-import discord4j.common.store.layout.action.gateway.InvalidateShardAction.Cause;
+import discord4j.common.store.layout.StoreAction;
+import discord4j.common.store.layout.InvalidationCause;
+import discord4j.common.store.action.gateway.*;
 import discord4j.discordjson.json.gateway.*;
 import discord4j.gateway.ShardInfo;
 import discord4j.gateway.retry.GatewayStateChange;
@@ -87,9 +87,9 @@ public class DispatchStoreLayer {
                         GatewayStateChange gatewayStateChange = (GatewayStateChange) dispatch;
                         switch (gatewayStateChange.getState()) {
                             case DISCONNECTED:
-                                return new InvalidateShardAction(shardInfo.getIndex(), Cause.LOGOUT);
+                                return new InvalidateShardAction(shardInfo.getIndex(), InvalidationCause.LOGOUT);
                             case SESSION_INVALIDATED:
-                                return new InvalidateShardAction(shardInfo.getIndex(), Cause.HARD_RECONNECT);
+                                return new InvalidateShardAction(shardInfo.getIndex(), InvalidationCause.HARD_RECONNECT);
                             default: break;
                         }
                     }

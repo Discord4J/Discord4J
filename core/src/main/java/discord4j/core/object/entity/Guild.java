@@ -16,8 +16,8 @@
  */
 package discord4j.core.object.entity;
 
-import discord4j.common.store.layout.action.read.GetGuildPresencesAction;
-import discord4j.common.store.layout.action.read.GetGuildVoiceStatesAction;
+import discord4j.common.store.action.read.GetGuildPresencesAction;
+import discord4j.common.store.action.read.GetGuildVoiceStatesAction;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.Ban;

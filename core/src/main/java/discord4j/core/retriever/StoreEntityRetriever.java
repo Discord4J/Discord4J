@@ -17,7 +17,7 @@
 package discord4j.core.retriever;
 
 import discord4j.common.store.Store;
-import discord4j.common.store.layout.action.read.*;
+import discord4j.common.store.action.read.*;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.*;

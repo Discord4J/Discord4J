@@ -21,7 +21,7 @@ package discord4j.core;
 import discord4j.common.JacksonResources;
 import discord4j.common.LogUtil;
 import discord4j.common.ReactorResources;
-import discord4j.common.store.layout.action.read.GetUsersAction;
+import discord4j.common.store.action.read.GetUsersAction;
 import discord4j.common.util.Snowflake;
 import discord4j.core.event.EventDispatcher;
 import discord4j.core.event.domain.Event;
