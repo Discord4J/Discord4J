@@ -739,9 +739,8 @@ public final class Guild implements Entity {
      * received, it is emitted through the {@code Flux}.
      */
     public Flux<VoiceState> getVoiceStates() {
-        return gateway.getGatewayResources().getStore()
-                .execute(new GetGuildVoiceStatesAction(getId().asLong()))
-                .flatMapMany(Flux::fromIterable)
+        return Flux.from(gateway.getGatewayResources().getStore()
+                .execute(new GetGuildVoiceStatesAction(getId().asLong())))
                 .map(data -> new VoiceState(gateway, data));
     }
 
@@ -874,9 +873,8 @@ public final class Guild implements Entity {
      * received, it is emitted through the {@code Flux}.
      */
     public Flux<Presence> getPresences() {
-        return gateway.getGatewayResources().getStore()
-                .execute(new GetGuildPresencesAction(getId().asLong()))
-                .flatMapMany(Flux::fromIterable)
+        return Flux.from(gateway.getGatewayResources().getStore()
+                .execute(new GetGuildPresencesAction(getId().asLong(), false)))
                 .map(Presence::new);
     }
 

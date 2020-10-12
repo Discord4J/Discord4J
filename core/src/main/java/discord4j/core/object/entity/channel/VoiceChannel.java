@@ -92,9 +92,8 @@ public final class VoiceChannel extends BaseCategorizableChannel {
      * error is received, it is emitted through the {@code Flux}.
      */
     public Flux<VoiceState> getVoiceStates() {
-        return getClient().getGatewayResources().getStore()
-                .execute(new GetChannelVoiceStatesAction(getId().asLong()))
-                .flatMapMany(Flux::fromIterable)
+        return Flux.from(getClient().getGatewayResources().getStore()
+                .execute(new GetChannelVoiceStatesAction(getId().asLong())))
                 .map(data -> new VoiceState(getClient(), data));
     }
 

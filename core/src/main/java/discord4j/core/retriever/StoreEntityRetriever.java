@@ -41,25 +41,25 @@ public class StoreEntityRetriever implements EntityRetriever {
 
     @Override
     public Mono<Channel> getChannelById(Snowflake channelId) {
-        return store.execute(new GetChannelByIdAction(channelId.asLong()))
+        return Mono.from(store.execute(new GetChannelByIdAction(channelId.asLong())))
                 .map(data -> EntityUtil.getChannel(gateway, data));
     }
 
     @Override
     public Mono<Guild> getGuildById(Snowflake guildId) {
-        return store.execute(new GetGuildByIdAction(guildId.asLong()))
+        return Mono.from(store.execute(new GetGuildByIdAction(guildId.asLong())))
                 .map(data -> new Guild(gateway, data));
     }
 
     @Override
     public Mono<GuildEmoji> getGuildEmojiById(Snowflake guildId, Snowflake emojiId) {
-        return store.execute(new GetGuildEmojiByIdAction(guildId.asLong(), emojiId.asLong()))
+        return Mono.from(store.execute(new GetGuildEmojiByIdAction(guildId.asLong(), emojiId.asLong())))
                 .map(data -> new GuildEmoji(gateway, data, guildId.asLong()));
     }
 
     @Override
     public Mono<Member> getMemberById(Snowflake guildId, Snowflake userId) {
-        return store.execute(new GetMemberByIdAction(guildId.asLong(), userId.asLong()))
+        return Mono.from(store.execute(new GetMemberByIdAction(guildId.asLong(), userId.asLong())))
                 .map(data -> new Member(gateway, data, guildId.asLong()))
                 .switchIfEmpty(gateway.requestMembers(guildId, Collections.singleton(userId))
                         .filter(member -> member.getId().equals(userId))
@@ -68,26 +68,25 @@ public class StoreEntityRetriever implements EntityRetriever {
 
     @Override
     public Mono<Message> getMessageById(Snowflake channelId, Snowflake messageId) {
-        return store.execute(new GetMessageByIdAction(channelId.asLong(), messageId.asLong()))
+        return Mono.from(store.execute(new GetMessageByIdAction(channelId.asLong(), messageId.asLong())))
                 .map(data -> new Message(gateway, data));
     }
 
     @Override
     public Mono<Role> getRoleById(Snowflake guildId, Snowflake roleId) {
-        return store.execute(new GetRoleByIdAction(guildId.asLong(), roleId.asLong()))
+        return Mono.from(store.execute(new GetRoleByIdAction(guildId.asLong(), roleId.asLong())))
                 .map(data -> new Role(gateway, data, guildId.asLong()));
     }
 
     @Override
     public Mono<User> getUserById(Snowflake userId) {
-        return store.execute(new GetUserByIdAction(userId.asLong()))
+        return Mono.from(store.execute(new GetUserByIdAction(userId.asLong())))
                 .map(data -> new User(gateway, data));
     }
 
     @Override
     public Flux<Guild> getGuilds() {
-        return store.execute(new GetGuildsAction())
-                .flatMapMany(Flux::fromIterable)
+        return Flux.from(store.execute(new GetGuildsAction(false)))
                 .map(data -> new Guild(gateway, data));
     }
 
@@ -98,35 +97,27 @@ public class StoreEntityRetriever implements EntityRetriever {
 
     @Override
     public Flux<Member> getGuildMembers(Snowflake guildId) {
-        return store.execute(new GetGuildMembersAction(guildId.asLong()))
-                .flatMapMany(list -> {
-                    if (list.isComplete()) {
-                        return Flux.fromIterable(list)
-                                .map(data -> new Member(gateway, data, guildId.asLong()));
-                    }
-                    return gateway.requestMembers(guildId);
-                });
+        return Flux.from(store.execute(new GetGuildMembersAction(guildId.asLong(), true)))
+                .map(data -> new Member(gateway, data, guildId.asLong()))
+                .switchIfEmpty(Flux.defer(() -> gateway.requestMembers(guildId)));
     }
 
     @Override
     public Flux<GuildChannel> getGuildChannels(Snowflake guildId) {
-        return store.execute(new GetGuildChannelsAction(guildId.asLong()))
-                .flatMapMany(Flux::fromIterable)
+        return Flux.from(store.execute(new GetGuildChannelsAction(guildId.asLong(), false)))
                 .map(channelData -> EntityUtil.getChannel(gateway, channelData))
                 .cast(GuildChannel.class);
     }
 
     @Override
     public Flux<Role> getGuildRoles(Snowflake guildId) {
-        return store.execute(new GetGuildRolesAction(guildId.asLong()))
-                .flatMapMany(Flux::fromIterable)
+        return Flux.from(store.execute(new GetGuildRolesAction(guildId.asLong(), false)))
                 .map(roleData -> new Role(gateway, roleData, guildId.asLong()));
     }
 
     @Override
     public Flux<GuildEmoji> getGuildEmojis(Snowflake guildId) {
-        return store.execute(new GetGuildEmojisAction(guildId.asLong()))
-                .flatMapMany(Flux::fromIterable)
+        return Flux.from(store.execute(new GetGuildEmojisAction(guildId.asLong(), false)))
                 .map(emojiData -> new GuildEmoji(gateway, emojiData, guildId.asLong()));
     }
 }

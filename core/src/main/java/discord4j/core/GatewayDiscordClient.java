@@ -247,8 +247,7 @@ public class GatewayDiscordClient implements EntityRetriever {
      * error is received, it is emitted through the {@code Flux}.
      */
     public Flux<User> getUsers() {
-        return gatewayResources.getStore().execute(new GetUsersAction())
-                .flatMapMany(Flux::fromIterable)
+        return Flux.from(gatewayResources.getStore().execute(new GetUsersAction()))
                 .map(data -> new User(this, data));
     }
 

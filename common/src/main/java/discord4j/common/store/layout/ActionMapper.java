@@ -1,6 +1,6 @@
 package discord4j.common.store.layout;
 
-import reactor.core.publisher.Mono;
+import org.reactivestreams.Publisher;
 
 import java.util.*;
 import java.util.function.Function;
@@ -8,9 +8,9 @@ import java.util.stream.Collectors;
 
 public class ActionMapper {
 
-    private final Map<Class<? extends StoreAction<?>>, Function<StoreAction<?>, ? extends Mono<?>>> mappings;
+    private final Map<Class<? extends StoreAction<?>>, Function<StoreAction<?>, ? extends Publisher<?>>> mappings;
 
-    private ActionMapper(Map<Class<? extends StoreAction<?>>, Function<StoreAction<?>, ? extends Mono<?>>> mappings) {
+    private ActionMapper(Map<Class<? extends StoreAction<?>>, Function<StoreAction<?>, ? extends Publisher<?>>> mappings) {
         this.mappings = mappings;
     }
 
@@ -36,7 +36,7 @@ public class ActionMapper {
      */
     @SuppressWarnings("unchecked")
     public <R, S extends StoreAction<R>> ActionMapper map(Class<S> actionType,
-                                                          Function<? super S, ? extends Mono<R>> handler) {
+                                                          Function<? super S, ? extends Publisher<R>> handler) {
         Objects.requireNonNull(actionType);
         Objects.requireNonNull(handler);
         mappings.put(actionType, action -> handler.apply((S) action));
@@ -44,9 +44,9 @@ public class ActionMapper {
     }
 
     @SuppressWarnings("unchecked")
-    public <R> Optional<Function<StoreAction<R>, ? extends Mono<R>>> findHandlerForAction(StoreAction<R> action) {
+    public <R> Optional<Function<StoreAction<R>, ? extends Publisher<R>>> findHandlerForAction(StoreAction<R> action) {
         Objects.requireNonNull(action);
         return Optional.ofNullable(mappings.get(action.getClass()))
-                .map(handler -> a -> (Mono<R>) handler.apply(a));
+                .map(handler -> a -> (Publisher<R>) handler.apply(a));
     }
 }

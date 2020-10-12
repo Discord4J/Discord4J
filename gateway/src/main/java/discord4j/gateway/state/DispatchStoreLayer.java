@@ -95,8 +95,9 @@ public class DispatchStoreLayer {
                     }
                     return actionFactory.apply(shardInfo.getIndex(), dispatch);
                 })
-                .flatMap(store::execute)
-                .map(oldState -> StatefulDispatch.of(shardInfo, dispatch, oldState));
+                .flatMap(action -> Mono.from(store.execute(action)))
+                .<StatefulDispatch<?, ?>>map(oldState -> StatefulDispatch.of(shardInfo, dispatch, oldState))
+                .defaultIfEmpty(StatefulDispatch.of(shardInfo, dispatch, null));
     }
 
     @SuppressWarnings("unchecked")

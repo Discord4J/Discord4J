@@ -1,9 +1,8 @@
 package discord4j.common.store.action.read;
 
-import discord4j.common.store.util.PossiblyIncompleteList;
 import discord4j.discordjson.json.VoiceStateData;
 
-public class GetGuildVoiceStatesAction implements ReadAction<PossiblyIncompleteList<VoiceStateData>> {
+public class GetGuildVoiceStatesAction implements ReadAction<VoiceStateData> {
 
     private final long guildId;
 

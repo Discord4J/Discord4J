@@ -1,9 +1,10 @@
 package discord4j.common.store;
 
-import discord4j.common.store.layout.*;
 import discord4j.common.store.action.gateway.*;
 import discord4j.common.store.action.read.*;
-import reactor.core.publisher.Mono;
+import discord4j.common.store.layout.*;
+import org.reactivestreams.Publisher;
+import reactor.core.publisher.Flux;
 
 import java.util.Objects;
 
@@ -86,17 +87,21 @@ public final class Store {
                     }
                 })
                 .map(GetChannelByIdAction.class, action -> dataAccessor.getChannelById(action.getChannelId()))
-                .map(GetChannelVoiceStatesAction.class, action -> dataAccessor
-                        .getChannelVoiceStates(action.getChannelId()))
+                .map(GetChannelVoiceStatesAction.class, action -> dataAccessor.getChannelVoiceStates(action.getChannelId()))
                 .map(GetGuildByIdAction.class, action -> dataAccessor.getGuildById(action.getGuildId()))
-                .map(GetGuildChannelsAction.class, action -> dataAccessor.getGuildChannels(action.getGuildId()))
+                .map(GetGuildChannelsAction.class, action -> dataAccessor
+                        .getGuildChannels(action.getGuildId(), action.requireComplete()))
                 .map(GetGuildEmojiByIdAction.class, action -> dataAccessor
                         .getGuildEmojiById(action.getGuildId(), action.getEmojiId()))
-                .map(GetGuildEmojisAction.class, action -> dataAccessor.getGuildEmojis(action.getGuildId()))
-                .map(GetGuildMembersAction.class, action -> dataAccessor.getGuildMembers(action.getGuildId()))
-                .map(GetGuildPresencesAction.class, action -> dataAccessor.getGuildPresences(action.getGuildId()))
-                .map(GetGuildRolesAction.class, action -> dataAccessor.getGuildRoles(action.getGuildId()))
-                .map(GetGuildsAction.class, action -> dataAccessor.getGuilds())
+                .map(GetGuildEmojisAction.class, action -> dataAccessor
+                        .getGuildEmojis(action.getGuildId(), action.requireComplete()))
+                .map(GetGuildMembersAction.class, action -> dataAccessor
+                        .getGuildMembers(action.getGuildId(), action.requireComplete()))
+                .map(GetGuildPresencesAction.class, action -> dataAccessor
+                        .getGuildPresences(action.getGuildId(), action.requireComplete()))
+                .map(GetGuildRolesAction.class, action -> dataAccessor
+                        .getGuildRoles(action.getGuildId(), action.requireComplete()))
+                .map(GetGuildsAction.class, action -> dataAccessor.getGuilds(action.requireComplete()))
                 .map(GetGuildVoiceStatesAction.class, action -> dataAccessor.getGuildVoiceStates(action.getGuildId()))
                 .map(GetMemberByIdAction.class, action -> dataAccessor
                         .getMemberById(action.getGuildId(), action.getUserId()))
@@ -177,12 +182,13 @@ public final class Store {
      * and no custom mapping was defined for it, it will return empty.
      *
      * @param action the action to execute
-     * @param <R>    the return type of the action
-     * @return a {@link Mono} where, upon successful completion, emits the result produced by the execution of the
-     * action, if any. If an error is received, it is emitted through the {@link Mono}.
+     * @param <R>    the type of data returned by the action
+     * @return a {@link Publisher} where, upon successful completion, emits the result(s) produced by the execution of
+     * the action, if any. If an error is received, it is emitted through the {@link Publisher}.
      */
-    public <R> Mono<R> execute(StoreAction<R> action) {
-        return Mono.justOrEmpty(actionMapper.findHandlerForAction(action))
-                .flatMap(h -> h.apply(action));
+    public <R> Publisher<R> execute(StoreAction<R> action) {
+        return actionMapper.findHandlerForAction(action)
+                .<Publisher<R>>map(h -> h.apply(action))
+                .orElse(Flux.empty());
     }
 }

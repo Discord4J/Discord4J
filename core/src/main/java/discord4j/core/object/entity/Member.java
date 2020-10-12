@@ -234,8 +234,8 @@ public final class Member extends User {
      * for this guild. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<VoiceState> getVoiceState() {
-        return getClient().getGatewayResources().getStore()
-                .execute(new GetVoiceStateByIdAction(getGuildId().asLong(), getId().asLong()))
+        return Mono.from(getClient().getGatewayResources().getStore()
+                .execute(new GetVoiceStateByIdAction(getGuildId().asLong(), getId().asLong())))
                 .map(bean -> new VoiceState(getClient(), bean));
     }
 
@@ -246,8 +246,8 @@ public final class Member extends User {
      * this guild. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Presence> getPresence() {
-        return getClient().getGatewayResources().getStore()
-                .execute(new GetPresenceByIdAction(getGuildId().asLong(), getId().asLong()))
+        return Mono.from(getClient().getGatewayResources().getStore()
+                .execute(new GetPresenceByIdAction(getGuildId().asLong(), getId().asLong())))
                 .map(Presence::new);
     }
 

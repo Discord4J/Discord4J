@@ -1,10 +1,8 @@
 package discord4j.common.store.layout;
 
-import discord4j.common.store.util.PossiblyIncompleteList;
 import discord4j.discordjson.json.*;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
-import java.util.List;
 
 public interface DataAccessor {
 
@@ -44,25 +42,25 @@ public interface DataAccessor {
 
     Mono<ChannelData> getChannelById(long channelId);
 
-    Mono<PossiblyIncompleteList<VoiceStateData>> getChannelVoiceStates(long channelId);
+    Flux<VoiceStateData> getChannelVoiceStates(long channelId);
 
     Mono<GuildData> getGuildById(long guildId);
 
-    Mono<PossiblyIncompleteList<ChannelData>> getGuildChannels(long guildId);
+    Flux<ChannelData> getGuildChannels(long guildId, boolean requireComplete);
 
     Mono<EmojiData> getGuildEmojiById(long guildId, long emojiId);
 
-    Mono<PossiblyIncompleteList<EmojiData>> getGuildEmojis(long guildId);
+    Flux<EmojiData> getGuildEmojis(long guildId, boolean requireComplete);
 
-    Mono<PossiblyIncompleteList<MemberData>> getGuildMembers(long guildId);
+    Flux<MemberData> getGuildMembers(long guildId, boolean requireComplete);
 
-    Mono<PossiblyIncompleteList<PresenceData>> getGuildPresences(long guildId);
+    Flux<PresenceData> getGuildPresences(long guildId, boolean requireComplete);
 
-    Mono<PossiblyIncompleteList<RoleData>> getGuildRoles(long guildId);
+    Flux<RoleData> getGuildRoles(long guildId, boolean requireComplete);
 
-    Mono<PossiblyIncompleteList<GuildData>> getGuilds();
+    Flux<GuildData> getGuilds(boolean requireComplete);
 
-    Mono<PossiblyIncompleteList<VoiceStateData>> getGuildVoiceStates(long guildId);
+    Flux<VoiceStateData> getGuildVoiceStates(long guildId);
 
     Mono<MemberData> getMemberById(long guildId, long userId);
 
@@ -74,7 +72,7 @@ public interface DataAccessor {
 
     Mono<UserData> getUserById(long userId);
 
-    Mono<List<UserData>> getUsers();
+    Flux<UserData> getUsers();
 
     Mono<VoiceStateData> getVoiceStateById(long guildId, long userId);
 }

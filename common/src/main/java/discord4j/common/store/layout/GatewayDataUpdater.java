@@ -3,9 +3,8 @@ package discord4j.common.store.layout;
 import discord4j.common.store.util.PresenceAndUserData;
 import discord4j.discordjson.json.*;
 import discord4j.discordjson.json.gateway.*;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
-import java.util.List;
 
 public interface GatewayDataUpdater {
 
@@ -19,7 +18,7 @@ public interface GatewayDataUpdater {
 
     Mono<GuildData> onGuildDelete(int shardIndex, GuildDelete dispatch);
 
-    Mono<List<EmojiData>> onGuildEmojisUpdate(int shardIndex, GuildEmojisUpdate dispatch);
+    Flux<EmojiData> onGuildEmojisUpdate(int shardIndex, GuildEmojisUpdate dispatch);
 
     Mono<Void> onGuildMemberAdd(int shardIndex, GuildMemberAdd dispatch);
 
@@ -43,7 +42,7 @@ public interface GatewayDataUpdater {
 
     Mono<MessageData> onMessageDelete(int shardIndex, MessageDelete dispatch);
 
-    Mono<List<MessageData>> onMessageDeleteBulk(int shardIndex, MessageDeleteBulk dispatch);
+    Flux<MessageData> onMessageDeleteBulk(int shardIndex, MessageDeleteBulk dispatch);
 
     Mono<Void> onMessageReactionAdd(int shardIndex, MessageReactionAdd dispatch);
 

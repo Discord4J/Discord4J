@@ -88,9 +88,9 @@ public class ExampleStore {
                                 (req, res) -> {
                                     Store store = gateway.getGatewayResources().getStore();
                                     Mono<String> result = Flux.merge(
-                                            Mono.just("users").zipWith(store.execute(new CountTotalAction(CountableEntity.USERS))),
-                                            Mono.just("guilds").zipWith(store.execute(new CountTotalAction(CountableEntity.GUILDS))),
-                                            Mono.just("messages").zipWith(store.execute(new CountTotalAction(CountableEntity.MESSAGES))))
+                                            Mono.just("users").zipWith(Mono.from(store.execute(new CountTotalAction(CountableEntity.USERS)))),
+                                            Mono.just("guilds").zipWith(Mono.from(store.execute(new CountTotalAction(CountableEntity.GUILDS)))),
+                                            Mono.just("messages").zipWith(Mono.from(store.execute(new CountTotalAction(CountableEntity.MESSAGES)))))
                                             .collectMap(Tuple2::getT1, Tuple2::getT2)
                                             .map(map -> {
                                                 try {
