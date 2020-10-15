@@ -1629,10 +1629,10 @@ public final class Guild implements Entity {
         /** Must be registered on Discord for longer than 5 minutes. */
         MEDIUM(2),
 
-        /** (╯°□°）╯︵ ┻━┻ - Must be a member of the server for longer than 10 minutes. */
+        /** Must be a member of the server for longer than 10 minutes. */
         HIGH(3),
 
-        /** ┻━┻ミヽ(ಠ益ಠ)ﾉ彡┻━┻ - Must have a verified phone number. */
+        /** Must have a verified phone number. */
         VERY_HIGH(4);
 
         /** The underlying value as represented by Discord. */
