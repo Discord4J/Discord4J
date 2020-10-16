@@ -21,6 +21,7 @@ package discord4j.core;
 import discord4j.common.JacksonResources;
 import discord4j.common.LogUtil;
 import discord4j.common.ReactorResources;
+import discord4j.common.store.action.gateway.GatewayActions;
 import discord4j.common.store.action.read.ReadActions;
 import discord4j.common.util.Snowflake;
 import discord4j.core.event.EventDispatcher;
@@ -562,7 +563,15 @@ public class GatewayDiscordClient implements EntityRetriever {
                                 .from(request)
                                 .nonce(nonce)
                                 .build(), shardId)))
-                .thenMany(Flux.defer(incomingMembers));
+                .thenMany(Flux.defer(incomingMembers))
+                .doOnComplete(() -> {
+                    if (request.query().toOptional().map(String::isEmpty).orElse(false) && request.limit() == 0) {
+                        Mono.from(gatewayResources.getStore()
+                                .execute(GatewayActions.completeGuildMembers(guildId.asLong())))
+                                .subscribe(null, t -> log.warn("completeGuildMembers action failed for guild {}",
+                                        guildId.asString()));
+                    }
+                });
     }
 
     /**

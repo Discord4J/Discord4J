@@ -99,9 +99,9 @@ public class StoreEntityRetriever implements EntityRetriever {
 
     @Override
     public Flux<Member> getGuildMembers(Snowflake guildId) {
-        return Flux.from(store.execute(ReadActions.getMembersInGuild(guildId.asLong())))
+        return Flux.from(store.execute(ReadActions.getExactMembersInGuild(guildId.asLong())))
                 .map(data -> new Member(gateway, data, guildId.asLong()))
-                .switchIfEmpty(Flux.defer(() -> gateway.requestMembers(guildId)));
+                .onErrorResume(ExactResultNotAvailableException.class, e -> gateway.requestMembers(guildId));
     }
 
     @Override
