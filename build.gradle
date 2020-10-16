@@ -23,7 +23,7 @@ ext {
     }
 
     // Dependencies
-    reactor_bom_version = '2020.0.0-RC1'
+    reactor_bom_version = '2020.0.0-RC2'
     jackson_version = '2.11.2'
     jdkstores_version = "$storesVersion".toString()
 
