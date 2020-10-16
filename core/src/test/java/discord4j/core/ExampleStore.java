@@ -21,8 +21,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import discord4j.common.JacksonResources;
 import discord4j.common.store.Store;
-import discord4j.common.store.action.read.CountTotalAction;
-import discord4j.common.store.action.read.CountTotalAction.CountableEntity;
 import discord4j.core.event.domain.guild.GuildEvent;
 import discord4j.core.event.domain.lifecycle.GatewayLifecycleEvent;
 import discord4j.core.event.domain.lifecycle.ReadyEvent;
@@ -39,6 +37,8 @@ import reactor.util.function.Tuple2;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
+
+import static discord4j.common.store.action.read.ReadActions.*;
 
 public class ExampleStore {
 
@@ -88,9 +88,9 @@ public class ExampleStore {
                                 (req, res) -> {
                                     Store store = gateway.getGatewayResources().getStore();
                                     Mono<String> result = Flux.merge(
-                                            Mono.just("users").zipWith(Mono.from(store.execute(new CountTotalAction(CountableEntity.USERS)))),
-                                            Mono.just("guilds").zipWith(Mono.from(store.execute(new CountTotalAction(CountableEntity.GUILDS)))),
-                                            Mono.just("messages").zipWith(Mono.from(store.execute(new CountTotalAction(CountableEntity.MESSAGES)))))
+                                            Mono.just("users").zipWith(Mono.from(store.execute(countChannels()))),
+                                            Mono.just("guilds").zipWith(Mono.from(store.execute(countGuilds()))),
+                                            Mono.just("messages").zipWith(Mono.from(store.execute(countMessages()))))
                                             .collectMap(Tuple2::getT1, Tuple2::getT2)
                                             .map(map -> {
                                                 try {

@@ -16,7 +16,7 @@
  */
 package discord4j.core.object.entity.channel;
 
-import discord4j.common.store.action.read.GetChannelVoiceStatesAction;
+import discord4j.common.store.action.read.ReadActions;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.VoiceState;
@@ -93,7 +93,7 @@ public final class VoiceChannel extends BaseCategorizableChannel {
      */
     public Flux<VoiceState> getVoiceStates() {
         return Flux.from(getClient().getGatewayResources().getStore()
-                .execute(new GetChannelVoiceStatesAction(getId().asLong())))
+                .execute(ReadActions.getVoiceStatesInChannel(getId().asLong())))
                 .map(data -> new VoiceState(getClient(), data));
     }
 

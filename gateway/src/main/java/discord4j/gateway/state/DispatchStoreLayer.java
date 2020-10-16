@@ -17,9 +17,9 @@
 package discord4j.gateway.state;
 
 import discord4j.common.store.Store;
-import discord4j.common.store.layout.StoreAction;
-import discord4j.common.store.layout.InvalidationCause;
-import discord4j.common.store.action.gateway.*;
+import discord4j.common.store.action.gateway.GatewayActions;
+import discord4j.common.store.api.StoreAction;
+import discord4j.common.store.api.object.InvalidationCause;
 import discord4j.discordjson.json.gateway.*;
 import discord4j.gateway.ShardInfo;
 import discord4j.gateway.retry.GatewayStateChange;
@@ -36,32 +36,32 @@ public class DispatchStoreLayer {
 
     static {
         STORE_ACTION_MAP = new HashMap<>();
-        putAction(ChannelCreate.class, ChannelCreateAction::new);
-        putAction(ChannelDelete.class, ChannelDeleteAction::new);
-        putAction(ChannelUpdate.class, ChannelUpdateAction::new);
-        putAction(GuildCreate.class, GuildCreateAction::new);
-        putAction(GuildDelete.class, GuildDeleteAction::new);
-        putAction(GuildEmojisUpdate.class, GuildEmojisUpdateAction::new);
-        putAction(GuildMemberAdd.class, GuildMemberAddAction::new);
-        putAction(GuildMemberRemove.class, GuildMemberRemoveAction::new);
-        putAction(GuildMembersChunk.class, GuildMembersChunkAction::new);
-        putAction(GuildMemberUpdate.class, GuildMemberUpdateAction::new);
-        putAction(GuildRoleCreate.class, GuildRoleCreateAction::new);
-        putAction(GuildRoleDelete.class, GuildRoleDeleteAction::new);
-        putAction(GuildRoleUpdate.class, GuildRoleUpdateAction::new);
-        putAction(GuildUpdate.class, GuildUpdateAction::new);
-        putAction(MessageCreate.class, MessageCreateAction::new);
-        putAction(MessageDelete.class, MessageDeleteAction::new);
-        putAction(MessageDeleteBulk.class, MessageDeleteBulkAction::new);
-        putAction(MessageReactionAdd.class, MessageReactionAddAction::new);
-        putAction(MessageReactionRemove.class, MessageReactionRemoveAction::new);
-        putAction(MessageReactionRemoveAll.class, MessageReactionRemoveAllAction::new);
-        putAction(MessageReactionRemoveEmoji.class, MessageReactionRemoveEmojiAction::new);
-        putAction(MessageUpdate.class, MessageUpdateAction::new);
-        putAction(PresenceUpdate.class, PresenceUpdateAction::new);
-        putAction(Ready.class, ReadyAction::new);
-        putAction(UserUpdate.class, UserUpdateAction::new);
-        putAction(VoiceStateUpdateDispatch.class, VoiceStateUpdateDispatchAction::new);
+        putAction(ChannelCreate.class, GatewayActions::channelCreate);
+        putAction(ChannelDelete.class, GatewayActions::channelDelete);
+        putAction(ChannelUpdate.class, GatewayActions::channelUpdate);
+        putAction(GuildCreate.class, GatewayActions::guildCreate);
+        putAction(GuildDelete.class, GatewayActions::guildDelete);
+        putAction(GuildEmojisUpdate.class, GatewayActions::guildEmojisUpdate);
+        putAction(GuildMemberAdd.class, GatewayActions::guildMemberAdd);
+        putAction(GuildMemberRemove.class, GatewayActions::guildMemberRemove);
+        putAction(GuildMembersChunk.class, GatewayActions::guildMembersChunk);
+        putAction(GuildMemberUpdate.class, GatewayActions::guildMemberUpdate);
+        putAction(GuildRoleCreate.class, GatewayActions::guildRoleCreate);
+        putAction(GuildRoleDelete.class, GatewayActions::guildRoleDelete);
+        putAction(GuildRoleUpdate.class, GatewayActions::guildRoleUpdate);
+        putAction(GuildUpdate.class, GatewayActions::guildUpdate);
+        putAction(MessageCreate.class, GatewayActions::messageCreate);
+        putAction(MessageDelete.class, GatewayActions::messageDelete);
+        putAction(MessageDeleteBulk.class, GatewayActions::messageDeleteBulk);
+        putAction(MessageReactionAdd.class, GatewayActions::messageReactionAdd);
+        putAction(MessageReactionRemove.class, GatewayActions::messageReactionRemove);
+        putAction(MessageReactionRemoveAll.class, GatewayActions::messageReactionRemoveAll);
+        putAction(MessageReactionRemoveEmoji.class, GatewayActions::messageReactionRemoveEmoji);
+        putAction(MessageUpdate.class, GatewayActions::messageUpdate);
+        putAction(PresenceUpdate.class, GatewayActions::presenceUpdate);
+        putAction(Ready.class, GatewayActions::ready);
+        putAction(UserUpdate.class, GatewayActions::userUpdate);
+        putAction(VoiceStateUpdateDispatch.class, GatewayActions::voiceStateUpdateDispatch);
     }
 
     private final Store store;
@@ -78,6 +78,12 @@ public class DispatchStoreLayer {
         return new DispatchStoreLayer(store, shardInfo);
     }
 
+    @SuppressWarnings("unchecked")
+    private static <D extends Dispatch> void putAction(Class<D> clazz,
+                                                       BiFunction<Integer, D, StoreAction<?>> actionFactory) {
+        STORE_ACTION_MAP.put(clazz, (shard, dispatch) -> actionFactory.apply(shard, (D) dispatch));
+    }
+
     public Mono<StatefulDispatch<?, ?>> store(Dispatch dispatch) {
         Objects.requireNonNull(dispatch);
         return Mono.justOrEmpty(STORE_ACTION_MAP.get(dispatch.getClass()))
@@ -87,10 +93,13 @@ public class DispatchStoreLayer {
                         GatewayStateChange gatewayStateChange = (GatewayStateChange) dispatch;
                         switch (gatewayStateChange.getState()) {
                             case DISCONNECTED:
-                                return new InvalidateShardAction(shardInfo.getIndex(), InvalidationCause.LOGOUT);
+                                return GatewayActions.invalidateShard(shardInfo.getIndex(),
+                                        InvalidationCause.LOGOUT);
                             case SESSION_INVALIDATED:
-                                return new InvalidateShardAction(shardInfo.getIndex(), InvalidationCause.HARD_RECONNECT);
-                            default: break;
+                                return GatewayActions.invalidateShard(shardInfo.getIndex(),
+                                        InvalidationCause.HARD_RECONNECT);
+                            default:
+                                break;
                         }
                     }
                     return actionFactory.apply(shardInfo.getIndex(), dispatch);
@@ -98,11 +107,5 @@ public class DispatchStoreLayer {
                 .flatMap(action -> Mono.from(store.execute(action)))
                 .<StatefulDispatch<?, ?>>map(oldState -> StatefulDispatch.of(shardInfo, dispatch, oldState))
                 .defaultIfEmpty(StatefulDispatch.of(shardInfo, dispatch, null));
-    }
-
-    @SuppressWarnings("unchecked")
-    private static <D extends Dispatch> void putAction(Class<D> clazz,
-                                                       BiFunction<Integer, D, StoreAction<?>> actionFactory) {
-        STORE_ACTION_MAP.put(clazz, (shard, dispatch) -> actionFactory.apply(shard, (D) dispatch));
     }
 }

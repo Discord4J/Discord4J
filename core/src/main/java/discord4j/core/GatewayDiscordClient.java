@@ -21,7 +21,7 @@ package discord4j.core;
 import discord4j.common.JacksonResources;
 import discord4j.common.LogUtil;
 import discord4j.common.ReactorResources;
-import discord4j.common.store.action.read.GetUsersAction;
+import discord4j.common.store.action.read.ReadActions;
 import discord4j.common.util.Snowflake;
 import discord4j.core.event.EventDispatcher;
 import discord4j.core.event.domain.Event;
@@ -247,7 +247,7 @@ public class GatewayDiscordClient implements EntityRetriever {
      * error is received, it is emitted through the {@code Flux}.
      */
     public Flux<User> getUsers() {
-        return Flux.from(gatewayResources.getStore().execute(new GetUsersAction()))
+        return Flux.from(gatewayResources.getStore().execute(ReadActions.getUsers()))
                 .map(data -> new User(this, data));
     }
 

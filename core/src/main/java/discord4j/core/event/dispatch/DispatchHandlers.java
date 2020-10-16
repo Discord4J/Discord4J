@@ -16,7 +16,7 @@
  */
 package discord4j.core.event.dispatch;
 
-import discord4j.common.store.util.PresenceAndUserData;
+import discord4j.common.store.api.object.PresenceAndUserData;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.*;

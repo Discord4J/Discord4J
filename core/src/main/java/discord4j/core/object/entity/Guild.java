@@ -16,8 +16,7 @@
  */
 package discord4j.core.object.entity;
 
-import discord4j.common.store.action.read.GetGuildPresencesAction;
-import discord4j.common.store.action.read.GetGuildVoiceStatesAction;
+import discord4j.common.store.action.read.ReadActions;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.Ban;
@@ -740,7 +739,7 @@ public final class Guild implements Entity {
      */
     public Flux<VoiceState> getVoiceStates() {
         return Flux.from(gateway.getGatewayResources().getStore()
-                .execute(new GetGuildVoiceStatesAction(getId().asLong())))
+                .execute(ReadActions.getVoiceStatesInChannel(getId().asLong())))
                 .map(data -> new VoiceState(gateway, data));
     }
 
@@ -874,7 +873,7 @@ public final class Guild implements Entity {
      */
     public Flux<Presence> getPresences() {
         return Flux.from(gateway.getGatewayResources().getStore()
-                .execute(new GetGuildPresencesAction(getId().asLong(), false)))
+                .execute(ReadActions.getPresencesInGuild(getId().asLong())))
                 .map(Presence::new);
     }
 
