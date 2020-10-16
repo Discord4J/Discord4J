@@ -38,6 +38,7 @@ public class CountTotalAction implements StoreAction<Long> {
     CountTotalAction(CountableEntity entity) {
         this.entity = entity;
     }
+
     public CountableEntity getEntity() {
         return entity;
     }
