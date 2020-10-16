@@ -16,6 +16,7 @@
  */
 package discord4j.core.object.entity;
 
+import discord4j.common.store.action.read.ReadActions;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.VoiceState;
@@ -43,9 +44,6 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-
-import static discord4j.common.store.action.read.ReadActions.getPresenceById;
-import static discord4j.common.store.action.read.ReadActions.getVoiceStateById;
 
 /**
  * A Discord guild member.
@@ -236,7 +234,7 @@ public final class Member extends User {
      */
     public Mono<VoiceState> getVoiceState() {
         return Mono.from(getClient().getGatewayResources().getStore()
-                .execute(getVoiceStateById(getGuildId().asLong(), getId().asLong())))
+                .execute(ReadActions.getVoiceStateById(getGuildId().asLong(), getId().asLong())))
                 .map(bean -> new VoiceState(getClient(), bean));
     }
 
@@ -248,7 +246,7 @@ public final class Member extends User {
      */
     public Mono<Presence> getPresence() {
         return Mono.from(getClient().getGatewayResources().getStore()
-                .execute(getPresenceById(getGuildId().asLong(), getId().asLong())))
+                .execute(ReadActions.getPresenceById(getGuildId().asLong(), getId().asLong())))
                 .map(Presence::new);
     }
 
