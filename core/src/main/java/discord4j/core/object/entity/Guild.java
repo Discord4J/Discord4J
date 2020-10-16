@@ -311,10 +311,10 @@ public final class Guild implements Entity {
     }
 
     /**
-     * Gets the preferred locale of a "PUBLIC" guild used in server discovery and notices from Discord; defaults to
+     * Gets the preferred locale of a Community guild used in server discovery and notices from Discord; defaults to
      * "en-US".
      *
-     * @return The preferred locale of a "PUBLIC" guild used in server discovery and notices from Discord; defaults
+     * @return The preferred locale of a Community guild used in server discovery and notices from Discord; defaults
      * to "en-US".
      */
     public Locale getPreferredLocale() {
@@ -596,18 +596,18 @@ public final class Guild implements Entity {
     }
 
     /**
-     * Gets the id of the channel where "PUBLIC" guilds display rules and/or guidelines, if present.
+     * Gets the id of the channel where Community guilds display rules and/or guidelines, if present.
      *
-     * @return The id of the channel where "PUBLIC" guilds display rules and/or guidelines, if present.
+     * @return The id of the channel where Community guilds display rules and/or guidelines, if present.
      */
     public Optional<Snowflake> getRulesChannelId() {
         return data.rulesChannelId().map(Snowflake::of);
     }
 
     /**
-     * Requests to retrieve the channel where "PUBLIC" guilds display rules and/or guidelines, if present.
+     * Requests to retrieve the channel where Community guilds display rules and/or guidelines, if present.
      *
-     * @return A {@link Mono} where, upon successful completion, emits the {@link TextChannel channel} where "PUBLIC"
+     * @return A {@link Mono} where, upon successful completion, emits the {@link TextChannel channel} where Community
      * guilds display rules and/or guidelines, if present. If an error is received, it is emitted through the {@code
      * Mono}.
      */
@@ -616,11 +616,11 @@ public final class Guild implements Entity {
     }
 
     /**
-     * Requests to retrieve the channel where "PUBLIC" guilds display rules and/or guidelines, if present, using
+     * Requests to retrieve the channel where Community guilds display rules and/or guidelines, if present, using
      * the given retrieval strategy.
      *
      * @param retrievalStrategy the strategy to use to get the rules channel
-     * @return A {@link Mono} where, upon successful completion, emits the {@link TextChannel channel} where "PUBLIC"
+     * @return A {@link Mono} where, upon successful completion, emits the {@link TextChannel channel} where Community
      * guilds
      * display rules and/or guidelines, if present. If an error is received, it is emitted through the {@code Mono}.
      */
@@ -631,10 +631,10 @@ public final class Guild implements Entity {
     }
 
     /**
-     * Gets the id of the channel where admins and moderators of "PUBLIC" guilds receive notices from Discord, if
+     * Gets the id of the channel where admins and moderators of Community guilds receive notices from Discord, if
      * present.
      *
-     * @return The id of the channel where admins and moderators of "PUBLIC" guilds receive notices from Discord, if
+     * @return The id of the channel where admins and moderators of Community guilds receive notices from Discord, if
      * present.
      */
     public Optional<Snowflake> getPublicUpdatesChannelId() {
@@ -642,28 +642,26 @@ public final class Guild implements Entity {
     }
 
     /**
-     * Requests to retrieve the channel where admins and moderators of "PUBLIC" guilds receive notices from Discord,
+     * Requests to retrieve the channel where admins and moderators of Community guilds receive notices from Discord,
      * if present.
      *
      * @return A {@link Mono} where, upon successful completion, emits the {@link TextChannel channel} where admins
-     * and moderators of
-     * "PUBLIC" guilds receive notices from Discord, if present. If an error is received, it is emitted through the
-     * {@code Mono}.
+     * and moderators of Community guilds receive notices from Discord, if present. If an error is received, it is
+     * emitted through the {@code Mono}.
      */
     public Mono<TextChannel> getPublicUpdatesChannel() {
         return Mono.justOrEmpty(getPublicUpdatesChannelId()).flatMap(gateway::getChannelById).cast(TextChannel.class);
     }
 
     /**
-     * Requests to retrieve the channel where admins and moderators of "PUBLIC" guilds receive notices from Discord,
+     * Requests to retrieve the channel where admins and moderators of Community guilds receive notices from Discord,
      * if present,
      * using the given retrieval strategy.
      *
      * @param retrievalStrategy the strategy to use to get the rules channel
      * @return A {@link Mono} where, upon successful completion, emits the {@link TextChannel channel} where admins
-     * and moderators
-     * of "PUBLIC" guilds receive notices from Discord, if present. If an error is received, it is emitted through
-     * the {@code Mono}.
+     * and moderators of Community guilds receive notices from Discord, if present. If an error is received, it is
+     * emitted through the {@code Mono}.
      */
     public Mono<TextChannel> getPublicUpdatesChannel(EntityRetrievalStrategy retrievalStrategy) {
         return Mono.justOrEmpty(getPublicUpdatesChannelId())
@@ -1593,10 +1591,10 @@ public final class Guild implements Entity {
         /** Must be registered on Discord for longer than 5 minutes. */
         MEDIUM(2),
 
-        /** (╯°□°）╯︵ ┻━┻ - Must be a member of the server for longer than 10 minutes. */
+        /** Must be a member of the server for longer than 10 minutes. */
         HIGH(3),
 
-        /** ┻━┻ミヽ(ಠ益ಠ)ﾉ彡┻━┻ - Must have a verified phone number. */
+        /** Must have a verified phone number. */
         VERY_HIGH(4);
 
         /** The underlying value as represented by Discord. */
