@@ -300,12 +300,11 @@ public class GatewayActions {
     /**
      * Creates an action to execute when a {@link Ready} is received from the gateway.
      *
-     * @param shardIndex the index of the shard where the dispatch comes from
-     * @param dispatch   the dispatch data coming from Discord gateway
+     * @param dispatch the dispatch data coming from Discord gateway
      * @return a new {@link ReadyAction}
      */
-    public static ReadyAction ready(int shardIndex, Ready dispatch) {
-        return new ReadyAction(shardIndex, dispatch);
+    public static ReadyAction ready(Ready dispatch) {
+        return new ReadyAction(dispatch);
     }
 
     /**

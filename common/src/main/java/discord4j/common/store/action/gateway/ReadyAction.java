@@ -17,14 +17,14 @@
 
 package discord4j.common.store.action.gateway;
 
+import discord4j.common.store.api.StoreAction;
 import discord4j.discordjson.json.gateway.Ready;
 
-public class ReadyAction extends ShardAwareAction<Void> {
+public class ReadyAction implements StoreAction<Void> {
 
     private final Ready ready;
 
-    ReadyAction(int shardIndex, Ready ready) {
-        super(shardIndex);
+    ReadyAction(Ready ready) {
         this.ready = ready;
     }
 

@@ -226,8 +226,7 @@ public final class Store {
                         .onMessageUpdate(action.getShardIndex(), action.getMessageUpdate()))
                 .map(PresenceUpdateAction.class, action -> gatewayDataUpdater
                         .onPresenceUpdate(action.getShardIndex(), action.getPresenceUpdate()))
-                .map(ReadyAction.class, action -> gatewayDataUpdater
-                        .onReady(action.getShardIndex(), action.getReady()))
+                .map(ReadyAction.class, action -> gatewayDataUpdater.onReady(action.getReady()))
                 .map(UserUpdateAction.class, action -> gatewayDataUpdater
                         .onUserUpdate(action.getShardIndex(), action.getUserUpdate()))
                 .map(VoiceStateUpdateDispatchAction.class, action -> gatewayDataUpdater

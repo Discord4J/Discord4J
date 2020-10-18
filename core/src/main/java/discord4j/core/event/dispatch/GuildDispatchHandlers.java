@@ -27,7 +27,6 @@ import discord4j.core.object.entity.*;
 import discord4j.discordjson.json.*;
 import discord4j.discordjson.json.gateway.*;
 import discord4j.discordjson.possible.Possible;
-import discord4j.gateway.json.ShardGatewayPayload;
 import reactor.core.Disposable;
 import reactor.core.publisher.Mono;
 import reactor.util.Logger;
@@ -95,14 +94,9 @@ class GuildDispatchHandlers {
                     .filterWhen(context.getGateway().getGatewayResources().getMemberRequestFilter()::apply)
                     .flatMap(data -> {
                         log.debug(format(ctx, "Requesting members for guild {}"), createData.id());
-                        int shardId = context.getShardInfo().getIndex();
-                        return context.getGateway().getGatewayClientGroup().unicast(
-                                ShardGatewayPayload.requestGuildMembers(
-                                        RequestGuildMembers.builder()
-                                                .guildId(data.id())
-                                                .query(Possible.of(""))
-                                                .limit(0)
-                                                .build(), shardId));
+                        return context.getGateway()
+                                .requestMembers(Snowflake.of(data.id()))
+                                .then();
                     })
                     .subscribe(null, t -> log.warn(format(ctx, "Member request errored for {}"), createData.id(), t));
             sink.onCancel(memberChunkTask);

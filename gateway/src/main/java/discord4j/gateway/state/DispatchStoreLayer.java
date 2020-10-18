@@ -60,7 +60,7 @@ public class DispatchStoreLayer {
         putAction(MessageReactionRemoveEmoji.class, GatewayActions::messageReactionRemoveEmoji);
         putAction(MessageUpdate.class, GatewayActions::messageUpdate);
         putAction(PresenceUpdate.class, GatewayActions::presenceUpdate);
-        putAction(Ready.class, GatewayActions::ready);
+        putAction(Ready.class, (shard, dispatch) -> GatewayActions.ready(dispatch));
         putAction(UserUpdate.class, GatewayActions::userUpdate);
         putAction(VoiceStateUpdateDispatch.class, GatewayActions::voiceStateUpdateDispatch);
     }

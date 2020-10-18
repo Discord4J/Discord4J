@@ -20,7 +20,9 @@ package discord4j.common.store.action.gateway;
 import discord4j.discordjson.json.EmojiData;
 import discord4j.discordjson.json.gateway.GuildEmojisUpdate;
 
-public class GuildEmojisUpdateAction extends ShardAwareAction<EmojiData> {
+import java.util.Set;
+
+public class GuildEmojisUpdateAction extends ShardAwareAction<Set<EmojiData>> {
 
     private final GuildEmojisUpdate guildEmojisUpdate;
 

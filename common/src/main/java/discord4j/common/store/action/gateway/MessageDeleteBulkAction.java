@@ -20,7 +20,9 @@ package discord4j.common.store.action.gateway;
 import discord4j.discordjson.json.MessageData;
 import discord4j.discordjson.json.gateway.MessageDeleteBulk;
 
-public class MessageDeleteBulkAction extends ShardAwareAction<MessageData> {
+import java.util.Set;
+
+public class MessageDeleteBulkAction extends ShardAwareAction<Set<MessageData>> {
 
     private final MessageDeleteBulk messageDeleteBulk;
 

@@ -21,8 +21,9 @@ import discord4j.common.store.api.object.InvalidationCause;
 import discord4j.common.store.api.object.PresenceAndUserData;
 import discord4j.discordjson.json.*;
 import discord4j.discordjson.json.gateway.*;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.util.Set;
 
 /**
  * Defines methods to handle update operations in response to events received from the Discord gateway.
@@ -92,10 +93,10 @@ public interface GatewayDataUpdater {
      *
      * @param shardIndex the index of the shard where the dispatch comes from
      * @param dispatch   the dispatch data coming from Discord gateway
-     * @return a {@link Flux} completing when the operation is done, optionally returning the old state of the
-     * collection of {@link EmojiData} before the update
+     * @return a {@link Mono} completing when the operation is done, optionally returning the old state of the
+     * set of {@link EmojiData} before the update
      */
-    Flux<EmojiData> onGuildEmojisUpdate(int shardIndex, GuildEmojisUpdate dispatch);
+    Mono<Set<EmojiData>> onGuildEmojisUpdate(int shardIndex, GuildEmojisUpdate dispatch);
 
     /**
      * Updates the internal state of the store according to the given {@link GuildMemberAdd} gateway dispatch. This
@@ -229,10 +230,10 @@ public interface GatewayDataUpdater {
      *
      * @param shardIndex the index of the shard where the dispatch comes from
      * @param dispatch   the dispatch data coming from Discord gateway
-     * @return a {@link Flux} completing when the operation is done, optionally returning the old state of the
-     * collection of {@link MessageData} before the deletion
+     * @return a {@link Mono} completing when the operation is done, optionally returning the old state of the
+     * set of {@link MessageData} before the deletion
      */
-    Flux<MessageData> onMessageDeleteBulk(int shardIndex, MessageDeleteBulk dispatch);
+    Mono<Set<MessageData>> onMessageDeleteBulk(int shardIndex, MessageDeleteBulk dispatch);
 
     /**
      * Updates the internal state of the store according to the given {@link MessageReactionAdd} gateway dispatch.
@@ -306,11 +307,10 @@ public interface GatewayDataUpdater {
      * typically perform an insert operation on the {@link UserData} that represents the self-user, and allocate the
      * resources needed to receive further events happening on this shard index.
      *
-     * @param shardIndex the index of the shard where the dispatch comes from
-     * @param dispatch   the dispatch data coming from Discord gateway
+     * @param dispatch the dispatch data coming from Discord gateway
      * @return a {@link Mono} completing when the operation is done
      */
-    Mono<Void> onReady(int shardIndex, Ready dispatch);
+    Mono<Void> onReady(Ready dispatch);
 
     /**
      * Updates the internal state of the store according to the given {@link UserUpdate} gateway dispatch. This will
