@@ -22,6 +22,8 @@ import discord4j.common.ReactorResources;
 import discord4j.common.annotations.Experimental;
 import discord4j.common.retry.ReconnectOptions;
 import discord4j.common.store.Store;
+import discord4j.common.store.action.gateway.GatewayActions;
+import discord4j.common.util.Snowflake;
 import discord4j.core.CoreResources;
 import discord4j.core.DiscordClient;
 import discord4j.core.GatewayDiscordClient;
@@ -34,6 +36,7 @@ import discord4j.core.event.domain.Event;
 import discord4j.core.object.presence.Presence;
 import discord4j.core.retriever.EntityRetrievalStrategy;
 import discord4j.discordjson.json.ActivityUpdateRequest;
+import discord4j.discordjson.json.gateway.GuildMembersChunk;
 import discord4j.discordjson.json.gateway.StatusUpdate;
 import discord4j.discordjson.possible.Possible;
 import discord4j.gateway.*;
@@ -46,6 +49,7 @@ import discord4j.gateway.payload.PayloadReader;
 import discord4j.gateway.payload.PayloadWriter;
 import discord4j.gateway.retry.GatewayStateChange;
 import discord4j.gateway.state.DispatchStoreLayer;
+import discord4j.gateway.state.StatefulDispatch;
 import discord4j.rest.util.Multimap;
 import discord4j.rest.util.RouteUtils;
 import discord4j.voice.DefaultVoiceConnectionFactory;
@@ -68,6 +72,8 @@ import reactor.util.retry.Retry;
 import java.time.Duration;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
 import static discord4j.common.LogUtil.format;
@@ -599,10 +605,11 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                     MonoProcessor<Void> closeProcessor = MonoProcessor.create();
                     EntityRetrievalStrategy entityRetrievalStrategy = b.initEntityRetrievalStrategy();
                     DispatchEventMapper dispatchMapper = b.initDispatchEventMapper();
+                    Set<String> completingChunkNonces = ConcurrentHashMap.newKeySet();
 
                     GatewayClientGroupManager clientGroup = b.shardingStrategy.getGroupManager(count);
                     GatewayDiscordClient gateway = new GatewayDiscordClient(b.client, resources, closeProcessor,
-                            clientGroup, b.voiceConnectionFactory, entityRetrievalStrategy);
+                            clientGroup, b.voiceConnectionFactory, entityRetrievalStrategy, completingChunkNonces);
                     Mono<Void> destroySequence = Mono.deferWithContext(ctx -> b.destroyHandler.apply(gateway)
                             .doFinally(s -> log.info(format(ctx, "All shards disconnected"))))
                             .doOnTerminate(closeProcessor::onComplete)
@@ -612,7 +619,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                             .groupBy(shard -> shard.getIndex() % b.shardingStrategy.getMaxConcurrency())
                             .flatMap(group -> group.concatMap(shard -> acquireConnection(b, shard, clientFactory,
                                     gateway, shardCoordinator, store, eventDispatcher, clientGroup,
-                                    closeProcessor, dispatchMapper,
+                                    closeProcessor, dispatchMapper, completingChunkNonces,
                                     destroySequence.subscriberContext(buildContext(gateway, shard)))));
 
                     if (b.awaitConnections == null ? count == 1 : b.awaitConnections) {
@@ -679,6 +686,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                                               GatewayClientGroupManager clientGroup,
                                               MonoProcessor<Void> closeProcessor,
                                               DispatchEventMapper dispatchMapper,
+                                              Set<String> completingChunkNonces,
                                               Mono<Void> destroySequence) {
         return Mono.deferWithContext(ctx ->
                 Mono.<ShardInfo>create(sink -> {
@@ -706,8 +714,25 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                             .takeUntilOther(closeProcessor)
                             .checkpoint("Read payload from gateway")
                             .flatMap(dispatchStoreLayer::store)
-                            .flatMap(stateAwareDispatch -> {
-                                DispatchContext<?, ?> context = DispatchContext.of(stateAwareDispatch, gateway);
+                            .checkpoint("Write gateway update to the store")
+                            .flatMap(statefulDispatch -> {
+                                if (!(statefulDispatch.getDispatch() instanceof GuildMembersChunk)) {
+                                    return Mono.just(statefulDispatch);
+                                }
+                                GuildMembersChunk chunk = (GuildMembersChunk) statefulDispatch.getDispatch();
+                                return Mono.justOrEmpty(chunk.nonce().toOptional())
+                                        .filter(nonce -> chunk.chunkIndex() + 1 == chunk.chunkCount()
+                                                && completingChunkNonces.remove(nonce))
+                                        .flatMap(nonce -> Mono.from(store.execute(GatewayActions
+                                                .completeGuildMembers(Snowflake.asLong(chunk.guildId())))))
+                                        .<StatefulDispatch<?, ?>>thenReturn(statefulDispatch)
+                                        .onErrorResume(t -> {
+                                            log.warn(format(ctx, "Error sending completeGuildMembers to the store"), t);
+                                            return Mono.just(statefulDispatch);
+                                        });
+                            })
+                            .flatMap(statefulDispatch -> {
+                                DispatchContext<?, ?> context = DispatchContext.of(statefulDispatch, gateway);
                                 return dispatchMapper.handle(context)
                                     .subscriberContext(c -> c.put(LogUtil.KEY_SHARD_ID, context.getShardInfo().getIndex()))
                                     .onErrorResume(error -> {

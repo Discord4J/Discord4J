@@ -22,6 +22,7 @@ import discord4j.common.store.api.StoreAction;
 import discord4j.common.store.api.object.InvalidationCause;
 import discord4j.discordjson.json.gateway.*;
 import discord4j.gateway.ShardInfo;
+import discord4j.gateway.json.ShardAwareDispatch;
 import discord4j.gateway.retry.GatewayStateChange;
 import reactor.core.publisher.Mono;
 
@@ -86,6 +87,13 @@ public class DispatchStoreLayer {
 
     public Mono<StatefulDispatch<?, ?>> store(Dispatch dispatch) {
         Objects.requireNonNull(dispatch);
+        ShardInfo shardInfo;
+        if (dispatch instanceof ShardAwareDispatch) {
+            ShardAwareDispatch shardAwareDispatch = (ShardAwareDispatch) dispatch;
+            shardInfo = ShardInfo.create(shardAwareDispatch.getShardIndex(), shardAwareDispatch.getShardCount());
+        } else {
+            shardInfo = this.shardInfo;
+        }
         return Mono.justOrEmpty(STORE_ACTION_MAP.get(dispatch.getClass()))
                 .map(actionFactory -> {
                     // Special treatment for shard invalidation

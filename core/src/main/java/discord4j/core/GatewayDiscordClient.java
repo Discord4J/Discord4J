@@ -21,7 +21,6 @@ package discord4j.core;
 import discord4j.common.JacksonResources;
 import discord4j.common.LogUtil;
 import discord4j.common.ReactorResources;
-import discord4j.common.store.action.gateway.GatewayActions;
 import discord4j.common.store.action.read.ReadActions;
 import discord4j.common.util.Snowflake;
 import discord4j.core.event.EventDispatcher;
@@ -94,11 +93,13 @@ public class GatewayDiscordClient implements EntityRetriever {
     private final VoiceConnectionFactory voiceConnectionFactory;
     private final VoiceConnectionRegistry voiceConnectionRegistry;
     private final EntityRetriever entityRetriever;
+    private final Set<String> completingChunkNonces;
 
     public GatewayDiscordClient(DiscordClient discordClient, GatewayResources gatewayResources,
                                 MonoProcessor<Void> closeProcessor, GatewayClientGroup gatewayClientGroup,
                                 VoiceConnectionFactory voiceConnectionFactory,
-                                EntityRetrievalStrategy entityRetrievalStrategy) {
+                                EntityRetrievalStrategy entityRetrievalStrategy,
+                                Set<String> completingChunkNonces) {
         this.discordClient = discordClient;
         this.gatewayResources = gatewayResources;
         this.closeProcessor = closeProcessor;
@@ -106,6 +107,7 @@ public class GatewayDiscordClient implements EntityRetriever {
         this.voiceConnectionFactory = voiceConnectionFactory;
         this.voiceConnectionRegistry = new LocalVoiceConnectionRegistry();
         this.entityRetriever = entityRetrievalStrategy.apply(this);
+        this.completingChunkNonces = completingChunkNonces;
     }
 
     /**
@@ -562,16 +564,14 @@ public class GatewayDiscordClient implements EntityRetriever {
                         RequestGuildMembers.builder()
                                 .from(request)
                                 .nonce(nonce)
-                                .build(), shardId)))
-                .thenMany(Flux.defer(incomingMembers))
-                .doOnComplete(() -> {
-                    if (request.query().toOptional().map(String::isEmpty).orElse(false) && request.limit() == 0) {
-                        Mono.from(gatewayResources.getStore()
-                                .execute(GatewayActions.completeGuildMembers(guildId.asLong())))
-                                .subscribe(null, t -> log.warn("completeGuildMembers action failed for guild {}",
-                                        guildId.asString()));
-                    }
-                });
+                                .build(), shardId))
+                        .then(Mono.fromRunnable(() -> {
+                            if (request.query().toOptional().map(String::isEmpty).orElse(false)
+                                    && request.limit() == 0) {
+                                completingChunkNonces.add(nonce);
+                            }
+                        })))
+                .thenMany(Flux.defer(incomingMembers));
     }
 
     /**

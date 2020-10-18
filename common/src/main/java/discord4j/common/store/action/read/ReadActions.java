@@ -28,6 +28,10 @@ import discord4j.common.store.api.object.ExactResultNotAvailableException;
  */
 public class ReadActions {
 
+    private ReadActions() {
+        throw new AssertionError();
+    }
+
     /**
      * Creates an action to count the number of channels present in a store.
      *
