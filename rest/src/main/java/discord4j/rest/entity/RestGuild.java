@@ -258,6 +258,10 @@ public class RestGuild {
         return restClient.getGuildService().getGuildIntegrations(id);
     }
 
+    public Flux<IntegrationData> getIntegrations(boolean includeApplications) {
+        return restClient.getGuildService().getGuildIntegrations(id, includeApplications);
+    }
+
     public Mono<Void> createIntegration(IntegrationCreateRequest request) {
         return restClient.getGuildService().createGuildIntegration(id, request);
     }
