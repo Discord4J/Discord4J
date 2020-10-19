@@ -23,6 +23,7 @@ import discord4j.common.annotations.Experimental;
 import discord4j.common.retry.ReconnectOptions;
 import discord4j.common.store.Store;
 import discord4j.common.store.action.gateway.GatewayActions;
+import discord4j.common.store.legacy.LegacyStoreLayout;
 import discord4j.common.util.Snowflake;
 import discord4j.core.CoreResources;
 import discord4j.core.DiscordClient;
@@ -52,6 +53,7 @@ import discord4j.gateway.state.DispatchStoreLayer;
 import discord4j.gateway.state.StatefulDispatch;
 import discord4j.rest.util.Multimap;
 import discord4j.rest.util.RouteUtils;
+import discord4j.store.jdk.JdkStoreService;
 import discord4j.voice.DefaultVoiceConnectionFactory;
 import discord4j.voice.VoiceConnection;
 import discord4j.voice.VoiceConnectionFactory;
@@ -892,7 +894,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
         if (store != null) {
             return store;
         }
-        return Store.noOp(); // TODO replace with actual default layout
+        return Store.fromLayout(LegacyStoreLayout.of(new JdkStoreService()));
     }
 
     private Multimap<String, Object> getGatewayParameters() {

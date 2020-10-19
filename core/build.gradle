@@ -3,6 +3,8 @@ dependencies {
     api project(':gateway')
     api project(':voice')
 
+    api "com.discord4j:stores-jdk:$storesVersion"
+
     testImplementation "org.junit.jupiter:junit-jupiter-engine:$junit_version"
     testImplementation "org.mockito:mockito-core:$mockito_version"
     testImplementation "ch.qos.logback:logback-classic:$logback_version"

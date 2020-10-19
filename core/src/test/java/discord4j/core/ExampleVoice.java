@@ -17,15 +17,22 @@
 
 package discord4j.core;
 
+import discord4j.common.store.Store;
+import discord4j.common.store.legacy.LegacyStoreLayout;
 import discord4j.core.support.BotSupport;
 import discord4j.core.support.ExtraBotSupport;
 import discord4j.core.support.VoiceSupport;
+import discord4j.store.jdk.JdkStoreService;
 import reactor.core.publisher.Mono;
 
 public class ExampleVoice {
 
     public static void main(String[] args) {
-        GatewayDiscordClient client = DiscordClient.create(System.getenv("token")).login().block();
+        GatewayDiscordClient client = DiscordClient.create(System.getenv("token"))
+                .gateway()
+                .setStore(Store.fromLayout(LegacyStoreLayout.of(new JdkStoreService())))
+                .login()
+                .block();
         Mono.when(
                 BotSupport.create(client).eventHandlers(),
                 ExtraBotSupport.create(client).eventHandlers(),

@@ -3,6 +3,8 @@ package discord4j.core.support;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.LoggerContext;
 import discord4j.common.ReactorResources;
+import discord4j.common.store.Store;
+import discord4j.common.store.action.read.ReadActions;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.message.MessageCreateEvent;
@@ -58,6 +60,7 @@ public class ExtraBotSupport {
         eventHandlers.add(new UserInfo());
         eventHandlers.add(new ReactionRemove());
         eventHandlers.add(new LeaveGuild());
+        eventHandlers.add(new StoreStatus());
 
         return client.on(MessageCreateEvent.class,
                 event -> ownerId.filter(
@@ -296,6 +299,31 @@ public class ExtraBotSupport {
             if (message.getContent().startsWith("!leave ")) {
                 String[] tokens = message.getContent().split(" ");
                 return event.getClient().getGuildById(Snowflake.of(tokens[1])).flatMap(Guild::leave);
+            }
+            return Mono.empty();
+        }
+    }
+
+    public static class StoreStatus extends EventHandler {
+
+        @Override
+        public Mono<Void> onMessageCreate(MessageCreateEvent event) {
+            Message message = event.getMessage();
+            if (message.getContent().startsWith("!store")) {
+                Store store = event.getClient().getGatewayResources().getStore();
+                return event.getMessage().getChannel()
+                        .flatMap(ch -> ch.createEmbed(spec -> {
+                            spec.addField("Channels", "" + Mono.from(store.execute(ReadActions.countChannels())).block(), true);
+                            spec.addField("Emojis", "" + Mono.from(store.execute(ReadActions.countEmojis())).block(), true);
+                            spec.addField("Guilds", "" + Mono.from(store.execute(ReadActions.countGuilds())).block(), true);
+                            spec.addField("Members", "" + Mono.from(store.execute(ReadActions.countMembers())).block(), true);
+                            spec.addField("Messages", "" + Mono.from(store.execute(ReadActions.countMessages())).block(), true);
+                            spec.addField("Presences", "" + Mono.from(store.execute(ReadActions.countPresences())).block(), true);
+                            spec.addField("Roles", "" + Mono.from(store.execute(ReadActions.countRoles())).block(), true);
+                            spec.addField("Users", "" + Mono.from(store.execute(ReadActions.countUsers())).block(), true);
+                            spec.addField("VoiceStates", "" + Mono.from(store.execute(ReadActions.countVoiceStates())).block(), true);
+                        }))
+                        .then();
             }
             return Mono.empty();
         }
