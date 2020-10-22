@@ -93,7 +93,7 @@ public final class VoiceChannel extends BaseCategorizableChannel {
      */
     public Flux<VoiceState> getVoiceStates() {
         return Flux.from(getClient().getGatewayResources().getStore()
-                .execute(ReadActions.getVoiceStatesInChannel(getId().asLong())))
+                .execute(ReadActions.getVoiceStatesInChannel(getGuildId().asLong(), getId().asLong())))
                 .map(data -> new VoiceState(getClient(), data));
     }
 

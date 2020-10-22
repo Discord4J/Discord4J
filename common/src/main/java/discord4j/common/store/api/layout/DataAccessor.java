@@ -158,10 +158,11 @@ public interface DataAccessor {
     /**
      * Counts the number of voice states present in the store for the given channel ID.
      *
+     * @param guildId the guild ID
      * @param channelId the channel ID
      * @return A {@link Mono} emitting the voice state count
      */
-    Mono<Long> countVoiceStatesInChannel(long channelId);
+    Mono<Long> countVoiceStatesInChannel(long guildId, long channelId);
 
     /**
      * Retrieves data for all channels present in the store.
@@ -354,12 +355,13 @@ public interface DataAccessor {
     Flux<VoiceStateData> getVoiceStates();
 
     /**
-     * Retrieves data for all voice states present in the store for the given channel ID.
+     * Retrieves data for all voice states present in the store for the given guild ID and channel ID.
      *
+     * @param guildId the guild ID
      * @param channelId the channel ID
      * @return A {@link Flux} emitting the voice states, or empty if none is present
      */
-    Flux<VoiceStateData> getVoiceStatesInChannel(long channelId);
+    Flux<VoiceStateData> getVoiceStatesInChannel(long guildId, long channelId);
 
     /**
      * Retrieves data for all voice states present in the store for the given guild ID.

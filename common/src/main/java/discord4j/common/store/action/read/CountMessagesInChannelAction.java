@@ -18,20 +18,13 @@
 package discord4j.common.store.action.read;
 
 import discord4j.common.store.api.StoreAction;
-import discord4j.discordjson.json.VoiceStateData;
 
-public class GetVoiceStatesInChannelAction implements StoreAction<VoiceStateData> {
+public class CountMessagesInChannelAction implements StoreAction<Long> {
 
-    private final long guildId;
     private final long channelId;
 
-    GetVoiceStatesInChannelAction(long guildId, long channelId) {
-        this.guildId = guildId;
+    CountMessagesInChannelAction(long channelId) {
         this.channelId = channelId;
-    }
-
-    public long getGuildId() {
-        return guildId;
     }
 
     public long getChannelId() {

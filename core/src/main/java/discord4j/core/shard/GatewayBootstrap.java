@@ -159,6 +159,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
         this.awaitConnections = source.awaitConnections;
         this.shardCoordinator = source.shardCoordinator;
         this.eventDispatcher = source.eventDispatcher;
+        this.store = source.store;
         this.memberRequestFilter = source.memberRequestFilter;
         this.initialPresence = source.initialPresence;
         this.resumeOptions = source.resumeOptions;

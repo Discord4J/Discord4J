@@ -17,7 +17,6 @@
 
 package discord4j.common.store.action.read;
 
-import discord4j.common.store.action.read.CountInChannelAction.InChannelEntity;
 import discord4j.common.store.action.read.CountInGuildAction.InGuildEntity;
 import discord4j.common.store.action.read.CountTotalAction.CountableEntity;
 import discord4j.common.store.api.StoreAction;
@@ -123,10 +122,10 @@ public class ReadActions {
      * Creates an action to count the number of messages present in a store for the given channel ID.
      *
      * @param channelId the channel ID
-     * @return a new {@link CountInChannelAction}
+     * @return a new {@link CountMessagesInChannelAction}
      */
-    public static CountInChannelAction countMessagesInChannel(long channelId) {
-        return new CountInChannelAction(InChannelEntity.MESSAGES, channelId);
+    public static CountMessagesInChannelAction countMessagesInChannel(long channelId) {
+        return new CountMessagesInChannelAction(channelId);
     }
 
     /**
@@ -196,13 +195,14 @@ public class ReadActions {
     }
 
     /**
-     * Creates an action to count the number of voice states present in a store for the given channel ID.
+     * Creates an action to count the number of voice states present in a store for the given guild ID and channel ID.
      *
+     * @param guildId the guild ID
      * @param channelId the channel ID
-     * @return a new {@link CountInChannelAction}
+     * @return a new {@link CountMessagesInChannelAction}
      */
-    public static CountInChannelAction countVoiceStatesInChannel(long channelId) {
-        return new CountInChannelAction(InChannelEntity.VOICE_STATES, channelId);
+    public static CountVoiceStatesInChannelAction countVoiceStatesInChannel(long guildId, long channelId) {
+        return new CountVoiceStatesInChannelAction(guildId, channelId);
     }
 
     /**
@@ -444,13 +444,14 @@ public class ReadActions {
     }
 
     /**
-     * Creates an action to retrieve data for all voice states present in a store for the given channel ID.
+     * Creates an action to retrieve data for all voice states present in a store for the given guild ID and channel ID.
      *
+     * @param guildId the guild ID
      * @param channelId the channel ID
      * @return a new {@link GetVoiceStatesInChannelAction}
      */
-    public static GetVoiceStatesInChannelAction getVoiceStatesInChannel(long channelId) {
-        return new GetVoiceStatesInChannelAction(channelId);
+    public static GetVoiceStatesInChannelAction getVoiceStatesInChannel(long guildId, long channelId) {
+        return new GetVoiceStatesInChannelAction(guildId, channelId);
     }
 
     /**

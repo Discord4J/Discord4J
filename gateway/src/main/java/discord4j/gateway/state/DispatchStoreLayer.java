@@ -24,6 +24,7 @@ import discord4j.discordjson.json.gateway.*;
 import discord4j.gateway.ShardInfo;
 import discord4j.gateway.json.ShardAwareDispatch;
 import discord4j.gateway.retry.GatewayStateChange;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.HashMap;
@@ -94,7 +95,11 @@ public class DispatchStoreLayer {
         } else {
             shardInfo = this.shardInfo;
         }
-        return Mono.justOrEmpty(STORE_ACTION_MAP.get(dispatch.getClass()))
+        return Flux.fromStream(STORE_ACTION_MAP.entrySet().stream()
+                        .filter(entry -> entry.getKey().isInstance(dispatch))
+                        .map(Map.Entry::getValue))
+                .singleOrEmpty()
+                .onErrorMap(IndexOutOfBoundsException.class, AssertionError::new)
                 .map(actionFactory -> {
                     // Special treatment for shard invalidation
                     if (dispatch instanceof GatewayStateChange) {

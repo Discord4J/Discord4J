@@ -15,26 +15,24 @@
  * along with Discord4J. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package discord4j.common.store.action.read;
+package discord4j.common.store.impl;
 
-import discord4j.common.store.api.StoreAction;
-import discord4j.discordjson.json.VoiceStateData;
+import java.util.Collection;
+import java.util.function.Function;
 
-public class GetVoiceStatesInChannelAction implements StoreAction<VoiceStateData> {
+class IdentityStorage<T> extends Storage<T, T> {
 
-    private final long guildId;
-    private final long channelId;
-
-    GetVoiceStatesInChannelAction(long guildId, long channelId) {
-        this.guildId = guildId;
-        this.channelId = channelId;
+    IdentityStorage(Function<T, Long> idGetter) {
+        super(idGetter, Function.identity(), Function.identity(), (a, b) -> b);
     }
 
-    public long getGuildId() {
-        return guildId;
+    @Override
+    T nodeForId(long id) {
+        throw new UnsupportedOperationException("Use find instead");
     }
 
-    public long getChannelId() {
-        return channelId;
+    @Override
+    Collection<T> nodes() {
+        throw new UnsupportedOperationException("Use findAll instead");
     }
 }

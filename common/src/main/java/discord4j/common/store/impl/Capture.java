@@ -15,26 +15,17 @@
  * along with Discord4J. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package discord4j.common.store.action.read;
+package discord4j.common.store.impl;
 
-import discord4j.common.store.api.StoreAction;
-import discord4j.discordjson.json.VoiceStateData;
+class Capture<T> {
 
-public class GetVoiceStatesInChannelAction implements StoreAction<VoiceStateData> {
+    private T captured;
 
-    private final long guildId;
-    private final long channelId;
-
-    GetVoiceStatesInChannelAction(long guildId, long channelId) {
-        this.guildId = guildId;
-        this.channelId = channelId;
+    void capture(T t) {
+        captured = t;
     }
 
-    public long getGuildId() {
-        return guildId;
-    }
-
-    public long getChannelId() {
-        return channelId;
+    T get() {
+        return captured;
     }
 }

@@ -21,17 +21,21 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import discord4j.common.JacksonResources;
 import discord4j.common.store.Store;
+import discord4j.common.store.impl.LocalStoreLayout;
 import discord4j.core.event.domain.guild.GuildEvent;
 import discord4j.core.event.domain.lifecycle.GatewayLifecycleEvent;
 import discord4j.core.event.domain.lifecycle.ReadyEvent;
+import discord4j.core.shard.MemberRequestFilter;
+import discord4j.gateway.intent.Intent;
+import discord4j.gateway.intent.IntentSet;
 import org.reflections.Reflections;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import reactor.core.Exceptions;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.netty.DisposableServer;
 import reactor.netty.http.server.HttpServer;
+import reactor.util.Logger;
+import reactor.util.Loggers;
 import reactor.util.function.Tuple2;
 
 import java.util.Map;
@@ -42,7 +46,7 @@ import static discord4j.common.store.action.read.ReadActions.*;
 
 public class ExampleStore {
 
-    private static final Logger log = LoggerFactory.getLogger(ExampleStore.class);
+    private static final Logger log = Loggers.getLogger(ExampleStore.class);
     private static final Reflections reflections = new Reflections(GuildEvent.class);
 
     public static void main(String[] args) {
@@ -55,6 +59,9 @@ public class ExampleStore {
 //                .setStoreService(MappingStoreService.create()
 //                        .setMapping(new NoOpStoreService(), MessageData.class)
 //                        .setFallback(new JdkStoreService()))
+                .setStore(Store.fromLayout(new LocalStoreLayout()))
+                .setMemberRequestFilter(MemberRequestFilter.all())
+                .setEnabledIntents(IntentSet.nonPrivileged().or(IntentSet.of(Intent.GUILD_MEMBERS)))
                 .withGateway(gateway -> {
                     log.info("Start!");
 
@@ -88,7 +95,8 @@ public class ExampleStore {
                                 (req, res) -> {
                                     Store store = gateway.getGatewayResources().getStore();
                                     Mono<String> result = Flux.merge(
-                                            Mono.just("users").zipWith(Mono.from(store.execute(countChannels()))),
+                                            Mono.just("users").zipWith(Mono.from(store.execute(countUsers()))),
+                                            Mono.just("members").zipWith(Mono.from(store.execute(countMembers()))),
                                             Mono.just("guilds").zipWith(Mono.from(store.execute(countGuilds()))),
                                             Mono.just("messages").zipWith(Mono.from(store.execute(countMessages()))))
                                             .collectMap(Tuple2::getT1, Tuple2::getT2)
@@ -112,6 +120,10 @@ public class ExampleStore {
                                                 .then()
                                                 .onErrorResume(t -> res.status(500).send()))
                         )
+                        .get("/gc", (req, res) -> res.addHeader("content-type", "text/plain")
+                                .chunkedTransfer(false)
+                                .sendString(Mono.fromRunnable(System::gc)
+                                        .then(Mono.just("gc was executed"))))
                 )
                 .bind()
                 .doOnNext(facade -> {

@@ -19,23 +19,18 @@ package discord4j.common.store.action.read;
 
 import discord4j.common.store.api.StoreAction;
 
-public class CountInChannelAction implements StoreAction<Long> {
+public class CountVoiceStatesInChannelAction implements StoreAction<Long> {
 
-    public enum InChannelEntity {
-        MESSAGES,
-        VOICE_STATES
-    }
-
-    private final InChannelEntity entity;
+    private final long guildId;
     private final long channelId;
 
-    CountInChannelAction(InChannelEntity entity, long channelId) {
-        this.entity = entity;
+    CountVoiceStatesInChannelAction(long guildId, long channelId) {
+        this.guildId = guildId;
         this.channelId = channelId;
     }
 
-    public InChannelEntity getEntity() {
-        return entity;
+    public long getGuildId() {
+        return guildId;
     }
 
     public long getChannelId() {

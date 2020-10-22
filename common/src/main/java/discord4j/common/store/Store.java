@@ -81,16 +81,10 @@ public final class Store {
     private static ActionMapper dataAccessorToMapper(DataAccessor dataAccessor) {
         Objects.requireNonNull(dataAccessor);
         return ActionMapper.builder()
-                .map(CountInChannelAction.class, action -> {
-                    switch (action.getEntity()) {
-                        case MESSAGES:
-                            return dataAccessor.countMessagesInChannel(action.getChannelId());
-                        case VOICE_STATES:
-                            return dataAccessor.countVoiceStatesInChannel(action.getChannelId());
-                        default:
-                            throw new AssertionError();
-                    }
-                })
+                .map(CountMessagesInChannelAction.class, action -> dataAccessor
+                        .countMessagesInChannel(action.getChannelId()))
+                .map(CountVoiceStatesInChannelAction.class, action -> dataAccessor
+                        .countVoiceStatesInChannel(action.getGuildId(), action.getChannelId()))
                 .map(CountInGuildAction.class, action -> {
                     switch (action.getEntity()) {
                         case CHANNELS:
@@ -167,7 +161,7 @@ public final class Store {
                 .map(GetUserByIdAction.class, action -> dataAccessor.getUserById(action.getUserId()))
                 .map(GetVoiceStatesAction.class, action -> dataAccessor.getVoiceStates())
                 .map(GetVoiceStatesInChannelAction.class, action -> dataAccessor
-                        .getVoiceStatesInChannel(action.getChannelId()))
+                        .getVoiceStatesInChannel(action.getGuildId(), action.getChannelId()))
                 .map(GetVoiceStatesInGuildAction.class, action -> dataAccessor
                         .getVoiceStatesInGuild(action.getGuildId()))
                 .map(GetVoiceStateByIdAction.class, action -> dataAccessor

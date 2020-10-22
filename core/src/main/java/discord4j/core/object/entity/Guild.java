@@ -737,7 +737,7 @@ public final class Guild implements Entity {
      */
     public Flux<VoiceState> getVoiceStates() {
         return Flux.from(gateway.getGatewayResources().getStore()
-                .execute(ReadActions.getVoiceStatesInChannel(getId().asLong())))
+                .execute(ReadActions.getVoiceStatesInGuild(getId().asLong())))
                 .map(data -> new VoiceState(gateway, data));
     }
 

@@ -32,7 +32,8 @@ public interface GatewayDataUpdater {
 
     /**
      * Updates the internal state of the store according to the given {@link ChannelCreate} gateway dispatch. This
-     * will typically perform an insert operation on the related {@link ChannelData}.
+     * will typically perform an insert operation on the related {@link ChannelData}, and add the ID to the list
+     * returned by {@link GuildData#channels()} if applicable.
      *
      * @param shardIndex the index of the shard where the dispatch comes from
      * @param dispatch   the dispatch data coming from Discord gateway
@@ -42,7 +43,8 @@ public interface GatewayDataUpdater {
 
     /**
      * Updates the internal state of the store according to the given {@link ChannelDelete} gateway dispatch. This
-     * will typically perform a delete operation on a related {@link ChannelData} that is already present in the store.
+     * will typically perform a delete operation on a related {@link ChannelData} that is already present in the
+     * store, and remove the ID from the list returned by {@link GuildData#channels()} if applicable.
      *
      * @param shardIndex the index of the shard where the dispatch comes from
      * @param dispatch   the dispatch data coming from Discord gateway
@@ -314,7 +316,7 @@ public interface GatewayDataUpdater {
 
     /**
      * Updates the internal state of the store according to the given {@link UserUpdate} gateway dispatch. This will
-     * typically perform an update operation on the {@link UserData} that represents the self-user.
+     * typically perform an update operation on a related {@link UserData} that is already present in the store.
      *
      * @param shardIndex the index of the shard where the dispatch comes from
      * @param dispatch   the dispatch data coming from Discord gateway
