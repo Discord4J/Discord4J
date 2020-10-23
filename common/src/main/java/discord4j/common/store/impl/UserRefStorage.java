@@ -22,6 +22,7 @@ import discord4j.discordjson.json.UserData;
 import reactor.util.annotation.Nullable;
 
 import java.util.Collection;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiFunction;
@@ -69,7 +70,7 @@ class UserRefStorage<T> extends IdentityStorage<T> {
             }
             return oldData;
         });
-        return captureOldImmutable.get();
+        return Objects.requireNonNull(captureOldImmutable.get());
     }
 
     @Override

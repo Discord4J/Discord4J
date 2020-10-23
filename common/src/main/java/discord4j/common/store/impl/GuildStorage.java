@@ -42,7 +42,7 @@ class GuildStorage extends Storage<GuildNode, GuildData> {
 
     @Override
     Optional<GuildData> delete(long id) {
-        channelStorage.cache.invalidateAll(findOrCreateNode(id).getChannelIds());
+        findNode(id).ifPresent(node -> channelStorage.cache.invalidateAll(node.getChannelIds()));
         return super.delete(id);
     }
 
