@@ -33,14 +33,12 @@ class GuildNode {
     /**
      * Store roles for this specific guild
      */
-    private final IdentityStorage<RoleData> roleStorage = new IdentityStorage<>(
-            data -> LocalStoreLayout.toLongId(data.id()));
+    private final IdentityStorage<RoleData> roleStorage;
 
     /**
      * Store emojis for this specific guild
      */
-    private final IdentityStorage<EmojiData> emojiStorage = new IdentityStorage<>(
-            data -> LocalStoreLayout.toLongId(data.id().orElse("0")));
+    private final IdentityStorage<EmojiData> emojiStorage;
 
     /**
      * Store members for this specific guild, referencing a UserData from the user storage
@@ -55,23 +53,33 @@ class GuildNode {
     /**
      * Store voice states for this specific guild
      */
-    private final IdentityStorage<VoiceStateData> voiceStateStorage = new IdentityStorage<>(
-            data -> LocalStoreLayout.toLongId(data.userId()));
+    private final IdentityStorage<VoiceStateData> voiceStateStorage;
 
     private final Set<Long> channelIds = ConcurrentHashMap.newKeySet();
 
     private volatile GuildData data;
     private volatile boolean memberListComplete;
 
-    GuildNode(GuildData guildData, WeakStorage<AtomicReference<UserData>> userStorage) {
+    GuildNode(GuildData guildData, IdentityStorage<AtomicReference<UserData>> userStorage,
+              CaffeineRegistry caffeineRegistry) {
         this.data = guildData;
+        this.roleStorage = new IdentityStorage<>(caffeineRegistry.getRoleCaffeine(),
+                data -> LocalStoreLayout.toLongId(data.id()));
+        this.emojiStorage = new IdentityStorage<>(caffeineRegistry.getEmojiCaffeine(),
+                data -> data.id().map(LocalStoreLayout::toLongId).orElseThrow(AssertionError::new));
         this.memberStorage = new UserRefStorage<>(
+                caffeineRegistry.getMemberCaffeine().removalListener((k, v, reason) -> {
+                    if (reason.wasEvicted()) {
+                        memberListComplete = false;
+                    }
+                }),
                 data -> LocalStoreLayout.toLongId(data.user().id()),
                 (newMember, oldUser) -> newMember.user(),
                 MemberDataWithUserRef::new,
                 ImmutableMemberData::copyOf,
                 userStorage);
         this.presenceStorage = new UserRefStorage<>(
+                caffeineRegistry.getPresenceCaffeine(),
                 data -> LocalStoreLayout.toLongId(data.user().id()),
                 (newPresence, oldUser) -> {
                     if (oldUser == null) return null;
@@ -88,6 +96,8 @@ class GuildNode {
                 PresenceDataWithUserRef::new,
                 ImmutablePresenceData::copyOf,
                 userStorage);
+        this.voiceStateStorage = new IdentityStorage<>(caffeineRegistry.getVoiceStateCaffeine(),
+                data -> LocalStoreLayout.toLongId(data.userId()));
     }
 
     @Nullable GuildData getData() {

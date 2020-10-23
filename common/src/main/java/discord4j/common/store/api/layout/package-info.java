@@ -15,19 +15,7 @@
  * along with Discord4J. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package discord4j.common.store.impl;
+@NonNullApi
+package discord4j.common.store.api.layout;
 
-import reactor.util.annotation.Nullable;
-
-class Capture<T> {
-
-    private T captured;
-
-    void capture(T t) {
-        captured = t;
-    }
-
-    @Nullable T get() {
-        return captured;
-    }
-}
+import reactor.util.annotation.NonNullApi;

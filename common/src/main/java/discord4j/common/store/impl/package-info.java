@@ -15,32 +15,7 @@
  * along with Discord4J. If not, see <http://www.gnu.org/licenses/>.
  */
 
+@NonNullApi
 package discord4j.common.store.impl;
 
-import com.github.benmanes.caffeine.cache.Caffeine;
-
-import java.util.Collection;
-import java.util.Optional;
-import java.util.function.Function;
-
-class IdentityStorage<T> extends Storage<T, T> {
-
-    IdentityStorage(Caffeine<Object, Object> caffeine, Function<T, Long> idGetter) {
-        super(caffeine, idGetter, Function.identity(), Function.identity(), (a, b) -> b);
-    }
-
-    @Override
-    T findOrCreateNode(long id) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    Optional<T> findNode(long id) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    Collection<T> nodes() {
-        throw new UnsupportedOperationException();
-    }
-}
+import reactor.util.annotation.NonNullApi;

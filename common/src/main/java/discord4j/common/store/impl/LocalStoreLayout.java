@@ -40,25 +40,39 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
     /**
      * Weakly store users so that they can be automatically garbage collected if no member or presence reference them
      */
-    private final WeakStorage<AtomicReference<UserData>> userStorage = new WeakStorage<>(
-            data -> toLongId(data.get().id()));
+    private final IdentityStorage<AtomicReference<UserData>> userStorage;
 
     /**
      * Store channels and nested entities (messages)
      */
-    private final Storage<ChannelNode, ChannelData> channelStorage = new Storage<>(
-            data -> toLongId(data.id()),
-            ChannelNode::new,
-            ChannelNode::getData,
-            ChannelNode::setData);
+    private final Storage<ChannelNode, ChannelData> channelStorage;
 
     /**
      * Store guilds and nested entities (members, roles, emojis, presences, voice states)
      */
-    private final GuildStorage guildStorage = new GuildStorage(channelStorage, userStorage);
+    private final GuildStorage guildStorage;
 
     private final AtomicReference<AtomicReference<UserData>> selfUser = new AtomicReference<>();
     private final AtomicInteger shardCount = new AtomicInteger();
+
+    private LocalStoreLayout(CaffeineRegistry caffeineRegistry) {
+        this.userStorage = new IdentityStorage<>(caffeineRegistry.getUserCaffeine(), data -> toLongId(data.get().id()));
+        this.channelStorage = new Storage<>(
+                caffeineRegistry.getChannelCaffeine(),
+                data -> toLongId(data.id()),
+                data -> new ChannelNode(data, caffeineRegistry),
+                ChannelNode::getData,
+                ChannelNode::setData);
+        this.guildStorage = new GuildStorage(caffeineRegistry, channelStorage, userStorage);
+    }
+
+    public static LocalStoreLayout create() {
+        return create(CaffeineRegistry.builder().build());
+    }
+
+    public static LocalStoreLayout create(CaffeineRegistry caffeineRegistry) {
+        return new LocalStoreLayout(caffeineRegistry);
+    }
 
     @Override
     public Mono<Long> countChannels() {
@@ -67,7 +81,9 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
 
     @Override
     public Mono<Long> countChannelsInGuild(long guildId) {
-        return getChannelsInGuild(guildId).count();
+        return Mono.justOrEmpty(guildStorage.findNode(guildId))
+                .map(node -> (long) node.getChannelIds().size())
+                .defaultIfEmpty(0L);
     }
 
     @Override
@@ -79,7 +95,9 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
 
     @Override
     public Mono<Long> countEmojisInGuild(long guildId) {
-        return Mono.just(guildStorage.nodeForId(guildId).getEmojiStorage().count());
+        return Mono.justOrEmpty(guildStorage.findNode(guildId))
+                .map(node -> node.getEmojiStorage().count())
+                .defaultIfEmpty(0L);
     }
 
     @Override
@@ -96,12 +114,14 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
 
     @Override
     public Mono<Long> countMembersInGuild(long guildId) {
-        return Mono.just(guildStorage.nodeForId(guildId).getMemberStorage().count());
+        return Mono.justOrEmpty(guildStorage.findNode(guildId))
+                .map(node -> node.getMemberStorage().count())
+                .defaultIfEmpty(0L);
     }
 
     @Override
     public Mono<Long> countExactMembersInGuild(long guildId) {
-        return Mono.just(guildStorage.nodeForId(guildId))
+        return Mono.justOrEmpty(guildStorage.findNode(guildId))
                 .filter(GuildNode::isMemberListComplete)
                 .switchIfEmpty(Mono.error(ExactResultNotAvailableException::new))
                 .map(node -> node.getMemberStorage().count());
@@ -116,7 +136,9 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
 
     @Override
     public Mono<Long> countMessagesInChannel(long channelId) {
-        return Mono.just(channelStorage.nodeForId(channelId).getMessageStorage().count());
+        return Mono.justOrEmpty(channelStorage.findNode(channelId))
+                .map(node -> node.getMessageStorage().count())
+                .defaultIfEmpty(0L);
     }
 
     @Override
@@ -128,7 +150,9 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
 
     @Override
     public Mono<Long> countPresencesInGuild(long guildId) {
-        return Mono.just(guildStorage.nodeForId(guildId).getPresenceStorage().count());
+        return Mono.justOrEmpty(guildStorage.findNode(guildId))
+                .map(node -> node.getPresenceStorage().count())
+                .defaultIfEmpty(0L);
     }
 
     @Override
@@ -140,7 +164,9 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
 
     @Override
     public Mono<Long> countRolesInGuild(long guildId) {
-        return Mono.just(guildStorage.nodeForId(guildId).getRoleStorage().count());
+        return Mono.justOrEmpty(guildStorage.findNode(guildId))
+                .map(node -> node.getRoleStorage().count())
+                .defaultIfEmpty(0L);
     }
 
     @Override
@@ -157,7 +183,9 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
 
     @Override
     public Mono<Long> countVoiceStatesInGuild(long guildId) {
-        return Mono.just(guildStorage.nodeForId(guildId).getVoiceStateStorage().count());
+        return Mono.justOrEmpty(guildStorage.findNode(guildId))
+                .map(node -> node.getVoiceStateStorage().count())
+                .defaultIfEmpty(0L);
     }
 
     @Override
@@ -172,9 +200,8 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
 
     @Override
     public Flux<ChannelData> getChannelsInGuild(long guildId) {
-        return Mono.justOrEmpty(guildStorage.find(guildId))
-                .flatMapIterable(GuildData::channels)
-                .map(LocalStoreLayout::toLongId)
+        return Mono.justOrEmpty(guildStorage.findNode(guildId))
+                .flatMapIterable(GuildNode::getChannelIds)
                 .flatMap(id -> Mono.justOrEmpty(channelStorage.find(id)));
     }
 
@@ -191,12 +218,15 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
 
     @Override
     public Flux<EmojiData> getEmojisInGuild(long guildId) {
-        return Flux.fromIterable(guildStorage.nodeForId(guildId).getEmojiStorage().findAll());
+        return Mono.justOrEmpty(guildStorage.findNode(guildId))
+                .flatMapIterable(node -> node.getEmojiStorage().findAll());
     }
 
     @Override
     public Mono<EmojiData> getEmojiById(long guildId, long emojiId) {
-        return Mono.justOrEmpty(guildStorage.nodeForId(guildId).getEmojiStorage().find(emojiId));
+        return Mono.justOrEmpty(guildStorage.findNode(guildId))
+                .map(node -> node.getEmojiStorage().find(emojiId))
+                .flatMap(Mono::justOrEmpty);
     }
 
     @Override
@@ -217,12 +247,13 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
 
     @Override
     public Flux<MemberData> getMembersInGuild(long guildId) {
-        return Flux.fromIterable(guildStorage.nodeForId(guildId).getMemberStorage().findAll());
+        return Mono.justOrEmpty(guildStorage.findNode(guildId))
+                .flatMapIterable(node -> node.getMemberStorage().findAll());
     }
 
     @Override
     public Flux<MemberData> getExactMembersInGuild(long guildId) {
-        return Mono.just(guildStorage.nodeForId(guildId))
+        return Mono.justOrEmpty(guildStorage.findNode(guildId))
                 .filter(GuildNode::isMemberListComplete)
                 .switchIfEmpty(Mono.error(ExactResultNotAvailableException::new))
                 .flatMapIterable(node -> node.getMemberStorage().findAll());
@@ -230,7 +261,9 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
 
     @Override
     public Mono<MemberData> getMemberById(long guildId, long userId) {
-        return Mono.justOrEmpty(guildStorage.nodeForId(guildId).getMemberStorage().find(userId));
+        return Mono.justOrEmpty(guildStorage.findNode(guildId))
+                .map(node -> node.getMemberStorage().find(userId))
+                .flatMap(Mono::justOrEmpty);
     }
 
     @Override
@@ -241,12 +274,15 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
 
     @Override
     public Flux<MessageData> getMessagesInChannel(long channelId) {
-        return Flux.fromIterable(channelStorage.nodeForId(channelId).getMessageStorage().findAll());
+        return Mono.justOrEmpty(channelStorage.findNode(channelId))
+                .flatMapIterable(node -> node.getMessageStorage().findAll());
     }
 
     @Override
     public Mono<MessageData> getMessageById(long channelId, long messageId) {
-        return Mono.justOrEmpty(channelStorage.nodeForId(channelId).getMessageStorage().find(messageId));
+        return Mono.justOrEmpty(channelStorage.findNode(channelId))
+                .map(node -> node.getMessageStorage().find(messageId))
+                .flatMap(Mono::justOrEmpty);
     }
 
     @Override
@@ -257,12 +293,15 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
 
     @Override
     public Flux<PresenceData> getPresencesInGuild(long guildId) {
-        return Flux.fromIterable(guildStorage.nodeForId(guildId).getPresenceStorage().findAll());
+        return Mono.justOrEmpty(guildStorage.findNode(guildId))
+                .flatMapIterable(node -> node.getPresenceStorage().findAll());
     }
 
     @Override
     public Mono<PresenceData> getPresenceById(long guildId, long userId) {
-        return Mono.justOrEmpty(guildStorage.nodeForId(guildId).getPresenceStorage().find(userId));
+        return Mono.justOrEmpty(guildStorage.findNode(guildId))
+                .map(node -> node.getPresenceStorage().find(userId))
+                .flatMap(Mono::justOrEmpty);
     }
 
     @Override
@@ -273,12 +312,15 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
 
     @Override
     public Flux<RoleData> getRolesInGuild(long guildId) {
-        return Flux.fromIterable(guildStorage.nodeForId(guildId).getRoleStorage().findAll());
+        return Mono.justOrEmpty(guildStorage.findNode(guildId))
+                .flatMapIterable(node -> node.getRoleStorage().findAll());
     }
 
     @Override
     public Mono<RoleData> getRoleById(long guildId, long roleId) {
-        return Mono.justOrEmpty(guildStorage.nodeForId(guildId).getRoleStorage().find(roleId));
+        return Mono.justOrEmpty(guildStorage.findNode(guildId))
+                .map(node -> node.getRoleStorage().find(roleId))
+                .flatMap(Mono::justOrEmpty);
     }
 
     @Override
@@ -305,49 +347,47 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
 
     @Override
     public Flux<VoiceStateData> getVoiceStatesInGuild(long guildId) {
-        return Flux.fromIterable(guildStorage.nodeForId(guildId).getVoiceStateStorage().findAll());
+        return Mono.justOrEmpty(guildStorage.findNode(guildId))
+                .flatMapIterable(node -> node.getVoiceStateStorage().findAll());
     }
 
     @Override
     public Mono<VoiceStateData> getVoiceStateById(long guildId, long userId) {
-        return Mono.justOrEmpty(guildStorage.nodeForId(guildId).getVoiceStateStorage().find(userId));
+        return Mono.justOrEmpty(guildStorage.findNode(guildId))
+                .map(node -> node.getVoiceStateStorage().find(userId))
+                .flatMap(Mono::justOrEmpty);
     }
 
     @Override
     public Mono<Void> onChannelCreate(int shardIndex, ChannelCreate dispatch) {
-        return Mono.fromRunnable(() -> {
-            ChannelData data = dispatch.channel();
-            channelStorage.insert(data);
-            data.guildId().toOptional()
-                    .map(LocalStoreLayout::toLongId)
-                    .ifPresent(guildId -> {
-                        guildStorage.nodeForId(guildId).getChannelIds().add(toLongId(data.id()));
-                        guildStorage.updateIfPresent(guildId, existing -> GuildData.builder()
-                                .from(existing)
-                                .addChannel(data.id())
-                                .build());
-                    });
-        });
+        ChannelData data = dispatch.channel();
+        return Mono.fromRunnable(() -> data.guildId().toOptional()
+                .map(LocalStoreLayout::toLongId)
+                .ifPresent(guildId -> {
+                    channelStorage.insert(data);
+                    guildStorage.findOrCreateNode(guildId).getChannelIds().add(toLongId(data.id()));
+                    guildStorage.updateIfPresent(guildId, existing -> GuildData.builder()
+                            .from(existing)
+                            .addChannel(data.id())
+                            .build());
+                }));
     }
 
     @Override
     public Mono<ChannelData> onChannelDelete(int shardIndex, ChannelDelete dispatch) {
-        return Mono.fromCallable(() -> {
-            ChannelData data = dispatch.channel();
-            channelStorage.delete(toLongId(data.id()));
-            data.guildId().toOptional()
-                    .map(LocalStoreLayout::toLongId)
-                    .ifPresent(guildId -> {
-                        guildStorage.nodeForId(guildId).getChannelIds().remove(toLongId(data.id()));
-                        guildStorage.updateIfPresent(guildId, existing -> GuildData.builder()
-                                    .from(existing)
-                                    .channels(existing.channels().stream()
-                                            .filter(id -> !id.equals(data.id()))
-                                            .collect(Collectors.toList()))
-                                    .build());
-                    });
-            return data;
-        });
+        ChannelData data = dispatch.channel();
+        return Mono.fromRunnable(() -> data.guildId().toOptional()
+                .map(LocalStoreLayout::toLongId)
+                .ifPresent(guildId -> {
+                    channelStorage.delete(toLongId(data.id()));
+                    guildStorage.findOrCreateNode(guildId).getChannelIds().remove(toLongId(data.id()));
+                    guildStorage.updateIfPresent(guildId, existing -> GuildData.builder()
+                                .from(existing)
+                                .channels(existing.channels().stream()
+                                        .filter(id -> !id.equals(data.id()))
+                                        .collect(Collectors.toList()))
+                                .build());
+                })).thenReturn(data);
     }
 
     @Override
@@ -359,7 +399,6 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
     @Override
     public Mono<Void> onGuildCreate(int shardIndex, GuildCreate dispatch) {
         return Mono.fromRunnable(() -> {
-            System.out.println(dispatch);
             GuildCreateData createData = dispatch.guild();
             List<RoleData> roles = createData.roles();
             List<EmojiData> emojis = createData.emojis();
@@ -377,7 +416,7 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
                     .members(members.stream().map(data -> data.user().id()).distinct().collect(Collectors.toList()))
                     .channels(channels.stream().map(ChannelData::id).collect(Collectors.toList()))
                     .build();
-            GuildNode node = guildStorage.nodeForId(toLongId(guild.id()));
+            GuildNode node = guildStorage.findOrCreateNode(toLongId(guild.id()));
             node.setData(guild);
             roles.forEach(node.getRoleStorage()::insert);
             emojis.forEach(node.getEmojiStorage()::insert);
@@ -400,9 +439,9 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
     public Mono<Set<EmojiData>> onGuildEmojisUpdate(int shardIndex, GuildEmojisUpdate dispatch) {
         return Mono.fromCallable(() -> {
             long guildId = toLongId(dispatch.guildId());
-            IdentityStorage<EmojiData> emojiStorage = guildStorage.nodeForId(guildId).getEmojiStorage();
-            Set<EmojiData> old = new HashSet<>(emojiStorage.map.values());
-            emojiStorage.map.clear();
+            IdentityStorage<EmojiData> emojiStorage = guildStorage.findOrCreateNode(guildId).getEmojiStorage();
+            Set<EmojiData> old = new HashSet<>(emojiStorage.cache.asMap().values());
+            emojiStorage.cache.invalidateAll();
             dispatch.emojis().forEach(emojiStorage::insert);
             guildStorage.updateIfPresent(guildId, existing -> GuildData.builder()
                     .from(existing)
@@ -425,7 +464,7 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
     public Mono<MemberData> onGuildMemberRemove(int shardIndex, GuildMemberRemove dispatch) {
         return Mono.fromCallable(() -> {
             long guildId = toLongId(dispatch.guildId());
-            MemberData old = guildStorage.nodeForId(guildId).getMemberStorage()
+            MemberData old = guildStorage.findOrCreateNode(guildId).getMemberStorage()
                     .delete(toLongId(dispatch.user().id()))
                     .orElse(null);
             guildStorage.updateIfPresent(guildId, existing -> GuildData.builder()
@@ -446,7 +485,7 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
 
     @Override
     public Mono<MemberData> onGuildMemberUpdate(int shardIndex, GuildMemberUpdate dispatch) {
-        return Mono.justOrEmpty(guildStorage.nodeForId(toLongId(dispatch.guildId())).getMemberStorage()
+        return Mono.justOrEmpty(guildStorage.findOrCreateNode(toLongId(dispatch.guildId())).getMemberStorage()
                 .updateIfPresent(toLongId(dispatch.user().id()), existing -> MemberData.builder()
                         .from(existing)
                         .nick(dispatch.nick())
@@ -459,7 +498,7 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
     public Mono<Void> onGuildRoleCreate(int shardIndex, GuildRoleCreate dispatch) {
         return Mono.fromRunnable(() -> {
             long guildId = toLongId(dispatch.guildId());
-            guildStorage.nodeForId(guildId).getRoleStorage().insert(dispatch.role());
+            guildStorage.findOrCreateNode(guildId).getRoleStorage().insert(dispatch.role());
             guildStorage.updateIfPresent(guildId, existing -> GuildData.builder()
                     .from(existing)
                     .addRole(dispatch.role().id())
@@ -472,15 +511,16 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
         return Mono.fromCallable(() -> {
             long guildId = toLongId(dispatch.guildId());
             long roleId = toLongId(dispatch.roleId());
-            RoleData old = guildStorage.nodeForId(guildId).getRoleStorage().delete(roleId).orElse(null);
+            RoleData old = guildStorage.findOrCreateNode(guildId).getRoleStorage().delete(roleId).orElse(null);
             guildStorage.updateIfPresent(guildId, existing -> GuildData.builder()
                     .from(existing)
                     .roles(existing.roles().stream()
                             .filter(id -> !id.equals(dispatch.roleId()))
                             .collect(Collectors.toList()))
                     .build());
-            UserRefStorage<MemberData> memberStorage = guildStorage.nodeForId(guildId).getMemberStorage();
-            memberStorage.map.forEach((memberId, __) -> memberStorage
+            UserRefStorage<MemberData> memberStorage = guildStorage.findOrCreateNode(guildId).getMemberStorage();
+            Set<Long> membersToUpdate = new HashSet<>(memberStorage.cache.asMap().keySet());
+            membersToUpdate.forEach(memberId -> memberStorage
                     .updateIfPresent(memberId, existing -> MemberData.builder()
                             .from(existing)
                             .roles(existing.roles().stream()
@@ -493,7 +533,7 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
 
     @Override
     public Mono<RoleData> onGuildRoleUpdate(int shardIndex, GuildRoleUpdate dispatch) {
-        return Mono.justOrEmpty(guildStorage.nodeForId(toLongId(dispatch.guildId())).getRoleStorage()
+        return Mono.justOrEmpty(guildStorage.findOrCreateNode(toLongId(dispatch.guildId())).getRoleStorage()
                 .update(toLongId(dispatch.role().id()), existing -> dispatch.role()));
     }
 
@@ -528,7 +568,7 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
         return Mono.fromRunnable(() -> {
             MessageData data = dispatch.message();
             long channelId = toLongId(data.channelId());
-            channelStorage.nodeForId(channelId).getMessageStorage().insert(data);
+            channelStorage.findOrCreateNode(channelId).getMessageStorage().insert(data);
             channelStorage.updateIfPresent(channelId, existing -> ChannelData.builder()
                     .from(existing)
                     .lastMessageId(data.id())
@@ -538,7 +578,7 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
 
     @Override
     public Mono<MessageData> onMessageDelete(int shardIndex, MessageDelete dispatch) {
-        return Mono.justOrEmpty(channelStorage.nodeForId(toLongId(dispatch.channelId())).getMessageStorage()
+        return Mono.justOrEmpty(channelStorage.findOrCreateNode(toLongId(dispatch.channelId())).getMessageStorage()
                 .delete(toLongId(dispatch.id())));
     }
 
@@ -546,14 +586,14 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
     public Mono<Set<MessageData>> onMessageDeleteBulk(int shardIndex, MessageDeleteBulk dispatch) {
         return Flux.fromIterable(dispatch.ids())
                 .map(LocalStoreLayout::toLongId)
-                .map(channelStorage.nodeForId(toLongId(dispatch.channelId())).getMessageStorage()::delete)
+                .map(channelStorage.findOrCreateNode(toLongId(dispatch.channelId())).getMessageStorage()::delete)
                 .flatMap(Mono::justOrEmpty)
                 .collect(Collectors.toSet());
     }
 
     @Override
     public Mono<Void> onMessageReactionAdd(int shardIndex, MessageReactionAdd dispatch) {
-        return Mono.fromRunnable(() -> channelStorage.nodeForId(toLongId(dispatch.channelId())).getMessageStorage()
+        return Mono.fromRunnable(() -> channelStorage.findOrCreateNode(toLongId(dispatch.channelId())).getMessageStorage()
                 .updateIfPresent(toLongId(dispatch.messageId()), existing -> {
                     boolean me = Objects.equals(dispatch.userId(), selfUser.get().get().id());
                     ImmutableMessageData.Builder newMessageBuilder = MessageData.builder().from(existing);
@@ -596,7 +636,7 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
 
     @Override
     public Mono<Void> onMessageReactionRemove(int shardIndex, MessageReactionRemove dispatch) {
-        return Mono.fromRunnable(() -> channelStorage.nodeForId(toLongId(dispatch.channelId())).getMessageStorage()
+        return Mono.fromRunnable(() -> channelStorage.findOrCreateNode(toLongId(dispatch.channelId())).getMessageStorage()
                 .updateIfPresent(toLongId(dispatch.messageId()), existing -> {
                     if (existing.reactions().isAbsent()) {
                         return existing;
@@ -630,7 +670,7 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
 
     @Override
     public Mono<Void> onMessageReactionRemoveAll(int shardIndex, MessageReactionRemoveAll dispatch) {
-        return Mono.fromRunnable(() -> channelStorage.nodeForId(toLongId(dispatch.channelId())).getMessageStorage()
+        return Mono.fromRunnable(() -> channelStorage.findOrCreateNode(toLongId(dispatch.channelId())).getMessageStorage()
                 .updateIfPresent(toLongId(dispatch.messageId()), existing -> MessageData.builder()
                         .from(existing)
                         .reactions(Possible.absent())
@@ -639,7 +679,7 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
 
     @Override
     public Mono<Void> onMessageReactionRemoveEmoji(int shardIndex, MessageReactionRemoveEmoji dispatch) {
-        return Mono.fromRunnable(() -> channelStorage.nodeForId(toLongId(dispatch.channelId())).getMessageStorage()
+        return Mono.fromRunnable(() -> channelStorage.findOrCreateNode(toLongId(dispatch.channelId())).getMessageStorage()
                 .updateIfPresent(toLongId(dispatch.messageId()), existing -> {
                     if (existing.reactions().isAbsent()) {
                         return existing;
@@ -662,7 +702,7 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
     @Override
     public Mono<MessageData> onMessageUpdate(int shardIndex, MessageUpdate dispatch) {
         PartialMessageData messageData = dispatch.message();
-        return Mono.justOrEmpty(channelStorage.nodeForId(toLongId(messageData.channelId())).getMessageStorage()
+        return Mono.justOrEmpty(channelStorage.findOrCreateNode(toLongId(messageData.channelId())).getMessageStorage()
                 .updateIfPresent(toLongId(messageData.id()), existing -> MessageData.builder()
                         .from(existing)
                         .content(messageData.content().toOptional()
@@ -681,7 +721,7 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
         return Mono.fromCallable(() -> {
             PartialUserData userData = dispatch.user();
             UserData oldUser = userStorage.find(toLongId(userData.id())).map(AtomicReference::get).orElse(null);
-            PresenceData oldPresence = guildStorage.nodeForId(toLongId(dispatch.guildId())).getPresenceStorage()
+            PresenceData oldPresence = guildStorage.findOrCreateNode(toLongId(dispatch.guildId())).getPresenceStorage()
                     .update(toLongId(userData.id()), existing -> createPresence(dispatch))
                     .orElse(null);
             if (oldUser == null && oldPresence == null) {
@@ -721,16 +761,16 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
         return Mono.justOrEmpty(data.guildId().toOptional())
                 .map(LocalStoreLayout::toLongId)
                 .map(guildId -> data.channelId().isPresent()
-                        ? guildStorage.nodeForId(guildId).getVoiceStateStorage()
+                        ? guildStorage.findOrCreateNode(guildId).getVoiceStateStorage()
                                 .update(toLongId(data.userId()), existing -> data)
-                        : guildStorage.nodeForId(guildId).getVoiceStateStorage()
+                        : guildStorage.findOrCreateNode(guildId).getVoiceStateStorage()
                                 .delete(toLongId(data.userId())))
                 .flatMap(Mono::justOrEmpty);
     }
 
     @Override
     public Mono<Void> onGuildMembersCompletion(long guildId) {
-        return Mono.fromRunnable(guildStorage.nodeForId(guildId)::completeMemberList);
+        return Mono.fromRunnable(guildStorage.findOrCreateNode(guildId)::completeMemberList);
     }
 
     @Override
@@ -748,7 +788,7 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
     }
 
     private void addMember(long guildId, MemberData member) {
-        guildStorage.nodeForId(guildId).getMemberStorage().insert(member);
+        guildStorage.findOrCreateNode(guildId).getMemberStorage().insert(member);
         guildStorage.updateIfPresent(guildId, guildData -> GuildData.builder()
                 .from(guildData)
                 .addMember(member.user().id())

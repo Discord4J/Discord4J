@@ -22,16 +22,19 @@ import discord4j.discordjson.json.GuildData;
 import discord4j.discordjson.json.UserData;
 
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
 class GuildStorage extends Storage<GuildNode, GuildData> {
 
     private final Storage<ChannelNode, ChannelData> channelStorage;
 
-    GuildStorage(Storage<ChannelNode, ChannelData> channelStorage,
-                 WeakStorage<AtomicReference<UserData>> userStorage) {
-        super(data -> LocalStoreLayout.toLongId(data.id()),
-                data -> new GuildNode(data, userStorage),
+    GuildStorage(CaffeineRegistry caffeineRegistry, Storage<ChannelNode, ChannelData> channelStorage,
+                 IdentityStorage<AtomicReference<UserData>> userStorage) {
+        super(caffeineRegistry.getGuildCaffeine(),
+                data -> LocalStoreLayout.toLongId(data.id()),
+                data -> new GuildNode(data, userStorage, caffeineRegistry),
                 GuildNode::getData,
                 GuildNode::setData);
         this.channelStorage = channelStorage;
@@ -39,11 +42,14 @@ class GuildStorage extends Storage<GuildNode, GuildData> {
 
     @Override
     Optional<GuildData> delete(long id) {
-        channelStorage.map.keySet().removeAll(nodeForId(id).getChannelIds());
+        channelStorage.cache.invalidateAll(findOrCreateNode(id).getChannelIds());
         return super.delete(id);
     }
 
     void invalidateShard(int shardIndex, int shardCount) {
-        map.keySet().removeIf(guildId -> ((guildId >> 22) % shardCount) == shardIndex);
+        Set<Long> toRemove = cache.asMap().keySet().stream()
+                .filter(guildId -> ((guildId >> 22) % shardCount) == shardIndex)
+                .collect(Collectors.toSet());
+        toRemove.forEach(this::delete);
     }
 }

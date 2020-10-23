@@ -26,13 +26,14 @@ class ChannelNode {
     /**
      * Store messages for this specific channel
      */
-    private final WeakStorage<MessageData> messageStorage = new WeakStorage<>(
-            data -> LocalStoreLayout.toLongId(data.id()));
+    private final IdentityStorage<MessageData> messageStorage;
 
     private volatile ChannelData data;
 
-    ChannelNode(ChannelData data) {
-        this.data = data;
+    ChannelNode(ChannelData channelData, CaffeineRegistry caffeineRegistry) {
+        this.data = channelData;
+        this.messageStorage = new IdentityStorage<>(caffeineRegistry.getMessageCaffeine(),
+                data -> LocalStoreLayout.toLongId(data.id()));
     }
 
     @Nullable ChannelData getData() {
@@ -44,7 +45,7 @@ class ChannelNode {
         return this;
     }
 
-    WeakStorage<MessageData> getMessageStorage() {
+    IdentityStorage<MessageData> getMessageStorage() {
         return messageStorage;
     }
 }

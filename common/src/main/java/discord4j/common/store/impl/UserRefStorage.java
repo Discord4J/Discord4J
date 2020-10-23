@@ -17,6 +17,7 @@
 
 package discord4j.common.store.impl;
 
+import com.github.benmanes.caffeine.cache.Caffeine;
 import discord4j.discordjson.json.UserData;
 import reactor.util.annotation.Nullable;
 
@@ -30,15 +31,16 @@ import java.util.stream.Collectors;
 
 class UserRefStorage<T> extends IdentityStorage<T> {
 
-    private final WeakStorage<AtomicReference<UserData>> userStorage;
+    private final IdentityStorage<AtomicReference<UserData>> userStorage;
     private final BiFunction<T, UserData, UserData> userUpdater;
     private final BiFunction<T, AtomicReference<UserData>, T> userRefDataAdapter;
     private final UnaryOperator<T> toImmutable;
 
-    UserRefStorage(Function<T, Long> idGetter, BiFunction<T, UserData, UserData> userUpdater,
+    UserRefStorage(Caffeine<Object, Object> caffeine, Function<T, Long> idGetter,
+                   BiFunction<T, UserData, UserData> userUpdater,
                    BiFunction<T, AtomicReference<UserData>, T> userRefDataAdapter, UnaryOperator<T> toImmutable,
-                   WeakStorage<AtomicReference<UserData>> userStorage) {
-        super(idGetter);
+                   IdentityStorage<AtomicReference<UserData>> userStorage) {
+        super(caffeine, idGetter);
         this.userStorage = userStorage;
         this.userUpdater = userUpdater;
         this.userRefDataAdapter = userRefDataAdapter;

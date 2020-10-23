@@ -59,7 +59,7 @@ public class ExampleStore {
 //                .setStoreService(MappingStoreService.create()
 //                        .setMapping(new NoOpStoreService(), MessageData.class)
 //                        .setFallback(new JdkStoreService()))
-                .setStore(Store.fromLayout(new LocalStoreLayout()))
+                .setStore(Store.fromLayout(LocalStoreLayout.create()))
                 .setMemberRequestFilter(MemberRequestFilter.all())
                 .setEnabledIntents(IntentSet.nonPrivileged().or(IntentSet.of(Intent.GUILD_MEMBERS)))
                 .withGateway(gateway -> {

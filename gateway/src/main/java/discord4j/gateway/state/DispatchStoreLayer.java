@@ -33,6 +33,12 @@ import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Predicate;
 
+/**
+ * A {@link DispatchStoreLayer} allows to intercept any {@link Dispatch} instance and execute the appropriate
+ * {@link StoreAction} on a given {@link Store}. An instance of {@link DispatchStoreLayer} is specific to one shard,
+ * in case of sharded connection to the gateway, a separate {@link DispatchStoreLayer} should be created for each of
+ * them. It is completely independent to the gateway client itself, its use is completely optional.
+ */
 public class DispatchStoreLayer {
 
     private static final Set<DispatchToAction> DISPATCH_TO_ACTION = new HashSet<>();
@@ -65,10 +71,10 @@ public class DispatchStoreLayer {
         add(UserUpdate.class::isInstance, GatewayActions::userUpdate);
         add(VoiceStateUpdateDispatch.class::isInstance, GatewayActions::voiceStateUpdateDispatch);
         add(dispatch -> dispatch instanceof GatewayStateChange
-                && ((GatewayStateChange) dispatch).getState() == GatewayStateChange.State.DISCONNECTED,
+                        && ((GatewayStateChange) dispatch).getState() == GatewayStateChange.State.DISCONNECTED,
                 (shard, dispatch) -> GatewayActions.invalidateShard(shard, InvalidationCause.LOGOUT));
         add(dispatch -> dispatch instanceof GatewayStateChange
-                && ((GatewayStateChange) dispatch).getState() == GatewayStateChange.State.SESSION_INVALIDATED,
+                        && ((GatewayStateChange) dispatch).getState() == GatewayStateChange.State.SESSION_INVALIDATED,
                 (shard, dispatch) -> GatewayActions.invalidateShard(shard, InvalidationCause.HARD_RECONNECT));
     }
 
@@ -80,6 +86,13 @@ public class DispatchStoreLayer {
         this.shardInfo = shardInfo;
     }
 
+    /**
+     * Creates a new {@link DispatchStoreLayer} operating on the given store and shard.
+     *
+     * @param store     the store to execute actions on
+     * @param shardInfo the shard info where dispatches are received from
+     * @return a new {@link DispatchStoreLayer}
+     */
     public static DispatchStoreLayer create(Store store, ShardInfo shardInfo) {
         Objects.requireNonNull(store);
         Objects.requireNonNull(shardInfo);
@@ -93,6 +106,18 @@ public class DispatchStoreLayer {
                 (shard, dispatch) -> actionFactory.apply(shard, (D) dispatch)));
     }
 
+    /**
+     * Executes a store action depending on the type of the given dispatch. The dispatch given in argument is assumed
+     * to come from the same shard as given when creating this {@link DispatchStoreLayer}. The shard info will be
+     * overriden if an instance of {@link ShardAwareDispatch} is provided. The result of the store action, which
+     * represents the old state of the data affected when applicable, is returned along with the dispatch itself in a
+     * {@link StatefulDispatch} which can be processed downstream.
+     *
+     * @param dispatch the dispatch to produce the store action for
+     * @return a {@link Mono} where, upon successful completion, emits the {@link StatefulDispatch} holding the
+     * result of the store action execution, if any. If an error is received, it is emitted through the
+     * {@link Mono}.
+     */
     public Mono<StatefulDispatch<?, ?>> store(Dispatch dispatch) {
         Objects.requireNonNull(dispatch);
         ShardInfo shardInfo;
@@ -106,8 +131,8 @@ public class DispatchStoreLayer {
             actualDispatch = dispatch;
         }
         return Flux.fromStream(DISPATCH_TO_ACTION.stream()
-                        .filter(entry -> entry.predicate.test(actualDispatch))
-                        .map(entry -> entry.actionFactory))
+                .filter(entry -> entry.predicate.test(actualDispatch))
+                .map(entry -> entry.actionFactory))
                 .singleOrEmpty()
                 .onErrorMap(IndexOutOfBoundsException.class, AssertionError::new)
                 .map(actionFactory -> actionFactory.apply(shardInfo.getIndex(), actualDispatch))
@@ -115,14 +140,14 @@ public class DispatchStoreLayer {
                 .<StatefulDispatch<?, ?>>map(oldState -> StatefulDispatch.of(shardInfo, actualDispatch, oldState))
                 .defaultIfEmpty(StatefulDispatch.of(shardInfo, actualDispatch, null));
     }
-    
+
     private static class DispatchToAction {
-        
+
         private final Predicate<? super Dispatch> predicate;
         private final BiFunction<Integer, Dispatch, StoreAction<?>> actionFactory;
 
         private DispatchToAction(Predicate<? super Dispatch> predicate,
-                                BiFunction<Integer, Dispatch, StoreAction<?>> actionFactory) {
+                                 BiFunction<Integer, Dispatch, StoreAction<?>> actionFactory) {
             this.predicate = predicate;
             this.actionFactory = actionFactory;
         }
