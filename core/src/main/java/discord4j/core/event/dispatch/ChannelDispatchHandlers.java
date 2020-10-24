@@ -92,7 +92,7 @@ class ChannelDispatchHandlers {
     static Mono<? extends Event> channelUpdate(DispatchContext<ChannelUpdate, ChannelData> context) {
         Channel.Type type = Channel.Type.of(context.getDispatch().channel().type());
         GatewayDiscordClient gateway = context.getGateway();
-        ChannelData channel = context.getDispatch().channel()
+        ChannelData channel = context.getDispatch().channel();
         Optional<ChannelData> oldData = context.getOldState();
 
         return Mono.fromCallable(() -> {
