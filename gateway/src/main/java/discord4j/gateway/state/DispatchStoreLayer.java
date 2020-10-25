@@ -118,8 +118,8 @@ public class DispatchStoreLayer {
      *
      * @param dispatch the dispatch to produce the store action for
      * @return a {@link Mono} where, upon successful completion, emits the {@link StatefulDispatch} holding the
-     * result of the store action execution, if any. If an error is received, it is emitted through the
-     * {@link Mono}.
+     * result of the store action execution, if any. If an error occurs during store execution, the error is dropped
+     * and logged, and a {@link StatefulDispatch} with empty old state is returned.
      */
     public Mono<StatefulDispatch<?, ?>> store(Dispatch dispatch) {
         Objects.requireNonNull(dispatch);
