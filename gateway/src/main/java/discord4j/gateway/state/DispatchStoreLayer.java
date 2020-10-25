@@ -26,6 +26,8 @@ import discord4j.gateway.json.ShardAwareDispatch;
 import discord4j.gateway.retry.GatewayStateChange;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.util.Logger;
+import reactor.util.Loggers;
 
 import java.util.HashSet;
 import java.util.Objects;
@@ -41,6 +43,7 @@ import java.util.function.Predicate;
  */
 public class DispatchStoreLayer {
 
+    private static final Logger log = Loggers.getLogger(DispatchStoreLayer.class);
     private static final Set<DispatchToAction> DISPATCH_TO_ACTION = new HashSet<>();
 
     static {
@@ -138,6 +141,8 @@ public class DispatchStoreLayer {
                 .map(actionFactory -> actionFactory.apply(shardInfo.getIndex(), actualDispatch))
                 .flatMap(action -> Mono.from(store.execute(action)))
                 .<StatefulDispatch<?, ?>>map(oldState -> StatefulDispatch.of(shardInfo, actualDispatch, oldState))
+                .onErrorResume(t -> Mono.fromRunnable(
+                        () -> log.error("Error when executing store action on dispatch " + dispatch, t)))
                 .defaultIfEmpty(StatefulDispatch.of(shardInfo, actualDispatch, null));
     }
 
