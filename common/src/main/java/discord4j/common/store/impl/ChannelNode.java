@@ -30,9 +30,9 @@ class ChannelNode {
 
     private volatile ChannelData data;
 
-    ChannelNode(ChannelData channelData, CaffeineRegistry caffeineRegistry) {
+    ChannelNode(ChannelData channelData, StorageBackend messageBackend) {
         this.data = channelData;
-        this.messageStorage = new IdentityStorage<>(caffeineRegistry.getMessageCaffeine(),
+        this.messageStorage = new IdentityStorage<>(messageBackend,
                 data -> LocalStoreLayout.toLongId(data.id()));
     }
 

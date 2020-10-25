@@ -17,28 +17,26 @@
 
 package discord4j.common.store.impl;
 
-import java.util.Collection;
-import java.util.Optional;
-import java.util.function.Function;
+import com.github.benmanes.caffeine.cache.Caffeine;
 
-class IdentityStorage<T> extends Storage<T, T> {
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.function.UnaryOperator;
 
-    IdentityStorage(StorageBackend backend, Function<T, Long> idGetter) {
-        super(backend, idGetter, Function.identity(), Function.identity(), (a, b) -> b);
+public interface StorageBackend {
+
+    <K, V> ConcurrentMap<K, V> newMap();
+
+    static StorageBackend concurrentHashMap() {
+        return ConcurrentHashMap::new;
     }
 
-    @Override
-    T findOrCreateNode(long id) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    Optional<T> findNode(long id) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    Collection<T> nodes() {
-        throw new UnsupportedOperationException();
+    static StorageBackend caffeine(UnaryOperator<Caffeine<Object, Object>> caffeineConsumer) {
+        return new StorageBackend() {
+            @Override
+            public <K, V> ConcurrentMap<K, V> newMap() {
+                return caffeineConsumer.apply(Caffeine.newBuilder()).<K, V>build().asMap();
+            }
+        };
     }
 }

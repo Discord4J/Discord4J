@@ -30,11 +30,11 @@ class GuildStorage extends Storage<GuildNode, GuildData> {
 
     private final Storage<ChannelNode, ChannelData> channelStorage;
 
-    GuildStorage(CaffeineRegistry caffeineRegistry, Storage<ChannelNode, ChannelData> channelStorage,
+    GuildStorage(Storage<ChannelNode, ChannelData> channelStorage,
                  IdentityStorage<AtomicReference<UserData>> userStorage) {
-        super(caffeineRegistry.getGuildCaffeine(),
+        super(StorageBackend.concurrentHashMap(),
                 data -> LocalStoreLayout.toLongId(data.id()),
-                data -> new GuildNode(data, userStorage, caffeineRegistry),
+                data -> new GuildNode(data, userStorage),
                 GuildNode::getData,
                 GuildNode::setData);
         this.channelStorage = channelStorage;
@@ -42,12 +42,12 @@ class GuildStorage extends Storage<GuildNode, GuildData> {
 
     @Override
     Optional<GuildData> delete(long id) {
-        findNode(id).ifPresent(node -> channelStorage.cache.invalidateAll(node.getChannelIds()));
+        findNode(id).ifPresent(node -> channelStorage.map.keySet().removeAll(node.getChannelIds()));
         return super.delete(id);
     }
 
     void invalidateShard(int shardIndex, int shardCount) {
-        Set<Long> toRemove = cache.asMap().keySet().stream()
+        Set<Long> toRemove = map.keySet().stream()
                 .filter(guildId -> ((guildId >> 22) % shardCount) == shardIndex)
                 .collect(Collectors.toSet());
         toRemove.forEach(this::delete);

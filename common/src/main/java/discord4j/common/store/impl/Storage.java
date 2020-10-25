@@ -17,12 +17,10 @@
 
 package discord4j.common.store.impl;
 
-import com.github.benmanes.caffeine.cache.Cache;
-import com.github.benmanes.caffeine.cache.Caffeine;
-
 import java.util.Collection;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentMap;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
@@ -30,16 +28,16 @@ import java.util.stream.Collectors;
 
 class Storage<N, T> {
 
-    final Cache<Long, N> cache;
+    final ConcurrentMap<Long, N> map;
     final Function<T, Long> idGetter;
     private final Function<T, N> wrapFunc;
     private final Function<N, T> unwrapFunc;
     private final BiFunction<N, T, N> rewrapFunc;
 
-    Storage(Caffeine<Object, Object> caffeine, Function<T, Long> idGetter, Function<T, N> wrapFunc,
+    Storage(StorageBackend backend, Function<T, Long> idGetter, Function<T, N> wrapFunc,
             Function<N, T> unwrapFunc,
             BiFunction<N, T, N> rewrapFunc) {
-        this.cache = caffeine.build();
+        this.map = backend.newMap();
         this.idGetter = idGetter;
         this.wrapFunc = wrapFunc;
         this.unwrapFunc = unwrapFunc;
@@ -47,30 +45,30 @@ class Storage<N, T> {
     }
 
     N findOrCreateNode(long id) {
-        return cache.asMap().computeIfAbsent(id, k -> wrapFunc.apply(null));
+        return map.computeIfAbsent(id, k -> wrapFunc.apply(null));
     }
 
     Optional<N> findNode(long id) {
-        return Optional.ofNullable(cache.getIfPresent(id));
+        return Optional.ofNullable(map.get(id));
     }
 
     Collection<N> nodes() {
-        return cache.asMap().values();
+        return map.values();
     }
 
     Optional<T> find(long id) {
-        return Optional.ofNullable(cache.getIfPresent(id)).map(unwrapFunc);
+        return Optional.ofNullable(map.get(id)).map(unwrapFunc);
     }
 
     Collection<T> findAll() {
-        return cache.asMap().values().stream()
+        return map.values().stream()
                 .map(unwrapFunc)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
     }
 
     long count() {
-        return cache.asMap().values().stream()
+        return map.values().stream()
                 .map(unwrapFunc)
                 .filter(Objects::nonNull)
                 .count();
@@ -82,7 +80,7 @@ class Storage<N, T> {
 
     Optional<T> update(long id, UnaryOperator<T> updateFunction) {
         Capture<T> captureOld = new Capture<>();
-        cache.asMap().compute(id, (k, v) -> {
+        map.compute(id, (k, v) -> {
             if (v == null) {
                 return wrapFunc.apply(updateFunction.apply(null));
             }
@@ -98,6 +96,6 @@ class Storage<N, T> {
     }
 
     Optional<T> delete(long id) {
-        return Optional.ofNullable(cache.asMap().remove(id)).map(unwrapFunc);
+        return Optional.ofNullable(map.remove(id)).map(unwrapFunc);
     }
 }

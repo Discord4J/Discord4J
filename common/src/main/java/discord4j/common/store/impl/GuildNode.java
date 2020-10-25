@@ -60,26 +60,21 @@ class GuildNode {
     private volatile GuildData data;
     private volatile boolean memberListComplete;
 
-    GuildNode(GuildData guildData, IdentityStorage<AtomicReference<UserData>> userStorage,
-              CaffeineRegistry caffeineRegistry) {
+    GuildNode(GuildData guildData, IdentityStorage<AtomicReference<UserData>> userStorage) {
         this.data = guildData;
-        this.roleStorage = new IdentityStorage<>(caffeineRegistry.getRoleCaffeine(),
+        this.roleStorage = new IdentityStorage<>(StorageBackend.concurrentHashMap(),
                 data -> LocalStoreLayout.toLongId(data.id()));
-        this.emojiStorage = new IdentityStorage<>(caffeineRegistry.getEmojiCaffeine(),
+        this.emojiStorage = new IdentityStorage<>(StorageBackend.concurrentHashMap(),
                 data -> data.id().map(LocalStoreLayout::toLongId).orElseThrow(AssertionError::new));
         this.memberStorage = new UserRefStorage<>(
-                caffeineRegistry.getMemberCaffeine().removalListener((k, v, reason) -> {
-                    if (reason.wasEvicted()) {
-                        memberListComplete = false;
-                    }
-                }),
+                StorageBackend.concurrentHashMap(),
                 data -> LocalStoreLayout.toLongId(data.user().id()),
                 (newMember, oldUser) -> newMember.user(),
                 MemberDataWithUserRef::new,
                 ImmutableMemberData::copyOf,
                 userStorage);
         this.presenceStorage = new UserRefStorage<>(
-                caffeineRegistry.getPresenceCaffeine(),
+                StorageBackend.concurrentHashMap(),
                 data -> LocalStoreLayout.toLongId(data.user().id()),
                 (newPresence, oldUser) -> {
                     if (oldUser == null) return null;
@@ -96,7 +91,7 @@ class GuildNode {
                 PresenceDataWithUserRef::new,
                 ImmutablePresenceData::copyOf,
                 userStorage);
-        this.voiceStateStorage = new IdentityStorage<>(caffeineRegistry.getVoiceStateCaffeine(),
+        this.voiceStateStorage = new IdentityStorage<>(StorageBackend.concurrentHashMap(),
                 data -> LocalStoreLayout.toLongId(data.userId()));
     }
 

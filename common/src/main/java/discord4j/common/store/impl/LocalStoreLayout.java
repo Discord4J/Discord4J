@@ -17,6 +17,7 @@
 
 package discord4j.common.store.impl;
 
+import com.github.benmanes.caffeine.cache.Caffeine;
 import discord4j.common.store.api.layout.DataAccessor;
 import discord4j.common.store.api.layout.GatewayDataUpdater;
 import discord4j.common.store.api.layout.StoreLayout;
@@ -31,16 +32,19 @@ import reactor.core.publisher.Mono;
 import reactor.math.MathFlux;
 
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataUpdater {
 
+    private final StorageConfig storageConfig;
+
     /**
      * Weakly store users so that they can be automatically garbage collected if no member or presence reference them
      */
-    private final IdentityStorage<AtomicReference<UserData>> userStorage;
+    private final IdentityStorage<AtomicReference<UserData>> userStorage = new IdentityStorage<>(
+            StorageBackend.caffeine(Caffeine::weakValues),
+            data -> toLongId(data.get().id()));
 
     /**
      * Store channels and nested entities (messages)
@@ -52,26 +56,28 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
      */
     private final GuildStorage guildStorage;
 
-    private final AtomicReference<AtomicReference<UserData>> selfUser = new AtomicReference<>();
-    private final AtomicInteger shardCount = new AtomicInteger();
+    // Updated on onReady and onShardInvalidation
+    private final Set<Integer> shardsConnected = new HashSet<>();
+    private volatile AtomicReference<UserData> selfUser;
+    private volatile int shardCount;
 
-    private LocalStoreLayout(CaffeineRegistry caffeineRegistry) {
-        this.userStorage = new IdentityStorage<>(caffeineRegistry.getUserCaffeine(), data -> toLongId(data.get().id()));
+    private LocalStoreLayout(StorageConfig storageConfig) {
+        this.storageConfig = storageConfig;
         this.channelStorage = new Storage<>(
-                caffeineRegistry.getChannelCaffeine(),
+                StorageBackend.concurrentHashMap(),
                 data -> toLongId(data.id()),
-                data -> new ChannelNode(data, caffeineRegistry),
+                data -> new ChannelNode(data, storageConfig.getMessageBackend()),
                 ChannelNode::getData,
                 ChannelNode::setData);
-        this.guildStorage = new GuildStorage(caffeineRegistry, channelStorage, userStorage);
+        this.guildStorage = new GuildStorage(channelStorage, userStorage);
     }
 
     public static LocalStoreLayout create() {
-        return create(CaffeineRegistry.builder().build());
+        return create(StorageConfig.builder().build());
     }
 
-    public static LocalStoreLayout create(CaffeineRegistry caffeineRegistry) {
-        return new LocalStoreLayout(caffeineRegistry);
+    public static LocalStoreLayout create(StorageConfig storageConfig) {
+        return new LocalStoreLayout(storageConfig);
     }
 
     @Override
@@ -440,8 +446,8 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
         return Mono.fromCallable(() -> {
             long guildId = toLongId(dispatch.guildId());
             IdentityStorage<EmojiData> emojiStorage = guildStorage.findOrCreateNode(guildId).getEmojiStorage();
-            Set<EmojiData> old = new HashSet<>(emojiStorage.cache.asMap().values());
-            emojiStorage.cache.invalidateAll();
+            Set<EmojiData> old = new HashSet<>(emojiStorage.map.values());
+            emojiStorage.map.clear();
             dispatch.emojis().forEach(emojiStorage::insert);
             guildStorage.updateIfPresent(guildId, existing -> GuildData.builder()
                     .from(existing)
@@ -519,7 +525,7 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
                             .collect(Collectors.toList()))
                     .build());
             UserRefStorage<MemberData> memberStorage = guildStorage.findOrCreateNode(guildId).getMemberStorage();
-            Set<Long> membersToUpdate = new HashSet<>(memberStorage.cache.asMap().keySet());
+            Set<Long> membersToUpdate = new HashSet<>(memberStorage.map.keySet());
             membersToUpdate.forEach(memberId -> memberStorage
                     .updateIfPresent(memberId, existing -> MemberData.builder()
                             .from(existing)
@@ -556,9 +562,14 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
     @Override
     public Mono<Void> onShardInvalidation(int shardIndex, InvalidationCause cause) {
         return Mono.fromRunnable(() -> {
-            guildStorage.invalidateShard(shardIndex, shardCount.get());
-            if (guildStorage.count() == 0) {
-                shardCount.set(0);
+            synchronized (shardsConnected) {
+                shardsConnected.remove(shardIndex);
+                if (storageConfig.getInvalidationFilter().contains(cause)) {
+                    guildStorage.invalidateShard(shardIndex, shardCount);
+                }
+                if (shardsConnected.isEmpty()) {
+                    shardCount = 0;
+                }
             }
         });
     }
@@ -595,7 +606,7 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
     public Mono<Void> onMessageReactionAdd(int shardIndex, MessageReactionAdd dispatch) {
         return Mono.fromRunnable(() -> channelStorage.findOrCreateNode(toLongId(dispatch.channelId())).getMessageStorage()
                 .updateIfPresent(toLongId(dispatch.messageId()), existing -> {
-                    boolean me = Objects.equals(dispatch.userId(), selfUser.get().get().id());
+                    boolean me = Objects.equals(dispatch.userId(), selfUser.get().id());
                     ImmutableMessageData.Builder newMessageBuilder = MessageData.builder().from(existing);
 
                     if (existing.reactions().isAbsent()) {
@@ -641,7 +652,7 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
                     if (existing.reactions().isAbsent()) {
                         return existing;
                     }
-                    boolean me = Objects.equals(dispatch.userId(), selfUser.get().get().id());
+                    boolean me = Objects.equals(dispatch.userId(), selfUser.get().id());
                     ImmutableMessageData.Builder newMessageBuilder = MessageData.builder().from(existing);
 
                     List<ReactionData> reactions = existing.reactions().get();
@@ -734,13 +745,17 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
     @Override
     public Mono<Void> onReady(Ready dispatch) {
         return Mono.fromRunnable(() -> {
-            AtomicReference<UserData> ref = new AtomicReference<>(dispatch.user());
-            if (selfUser.compareAndSet(null, ref)) {
-                userStorage.insert(ref);
+            int[] shardInfo = dispatch.shard().toOptional().orElseGet(() -> new int[] {0, 1});
+            synchronized (shardsConnected) {
+                if (selfUser != null) {
+                    selfUser = new AtomicReference<>(dispatch.user());
+                    userStorage.insert(selfUser);
+                }
+                if (shardCount == 0) {
+                    shardCount = shardInfo[1];
+                }
+                shardsConnected.add(shardInfo[0]);
             }
-            shardCount.compareAndSet(0, dispatch.shard().toOptional()
-                    .map(shard -> shard[1])
-                    .orElse(1));
         });
     }
 
