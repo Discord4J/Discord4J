@@ -19,7 +19,7 @@ package discord4j.common.store.impl;
 
 
 import discord4j.common.store.api.object.InvalidationCause;
-import jdk.internal.jline.internal.Nullable;
+import reactor.util.annotation.Nullable;
 
 import java.time.Duration;
 import java.util.EnumSet;
