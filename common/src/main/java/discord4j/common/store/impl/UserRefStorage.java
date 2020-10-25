@@ -63,6 +63,9 @@ class UserRefStorage<T> extends IdentityStorage<T> {
         super.update(id, oldData -> {
             captureOldImmutable.capture(Optional.ofNullable(oldData).map(toImmutable));
             T newData = updateFunction.apply(oldData);
+            if (newData == null) {
+                return null;
+            }
             AtomicReference<UserData> ref = updateAndGetUserRef(id, newData);
             if (ref != null) {
                 return userRefDataAdapter.apply(newData, ref);

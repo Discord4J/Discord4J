@@ -82,11 +82,13 @@ class Storage<N, T> {
         Capture<T> captureOld = new Capture<>();
         map.compute(id, (k, v) -> {
             if (v == null) {
-                return wrapFunc.apply(updateFunction.apply(null));
+                T newData = updateFunction.apply(null);
+                return newData != null ? wrapFunc.apply(newData) : null;
             }
-            T old = unwrapFunc.apply(v);
-            captureOld.capture(old);
-            return rewrapFunc.apply(v, updateFunction.apply(old));
+            T oldData = unwrapFunc.apply(v);
+            T newData = updateFunction.apply(oldData);
+            captureOld.capture(oldData);
+            return newData != null ? rewrapFunc.apply(v, newData) : null;
         });
         return Optional.ofNullable(captureOld.get());
     }
