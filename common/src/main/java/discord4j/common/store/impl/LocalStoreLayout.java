@@ -747,7 +747,7 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
         return Mono.fromRunnable(() -> {
             int[] shardInfo = dispatch.shard().toOptional().orElseGet(() -> new int[] {0, 1});
             synchronized (shardsConnected) {
-                if (selfUser != null) {
+                if (selfUser == null) {
                     selfUser = new AtomicReference<>(dispatch.user());
                     userStorage.insert(selfUser);
                 }
