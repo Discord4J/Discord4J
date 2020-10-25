@@ -23,20 +23,35 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.function.UnaryOperator;
 
+/**
+ * Factory for a ConcurrentMap backing the different storages. You may use one of the static methods of this
+ * interface to get instances.
+ */
 public interface StorageBackend {
 
-    <K, V> ConcurrentMap<K, V> newMap();
-
+    /**
+     * Represents a {@link ConcurrentHashMap} backend.
+     *
+     * @return a {@link StorageBackend}
+     */
     static StorageBackend concurrentHashMap() {
         return ConcurrentHashMap::new;
     }
 
-    static StorageBackend caffeine(UnaryOperator<Caffeine<Object, Object>> caffeineConsumer) {
+    /**
+     * Represents a {@link Caffeine} backend with the given configuration.
+     *
+     * @param caffeineBuilder a transformer for a {@link Caffeine} builder
+     * @return a {@link StorageBackend}
+     */
+    static StorageBackend caffeine(UnaryOperator<Caffeine<Object, Object>> caffeineBuilder) {
         return new StorageBackend() {
             @Override
             public <K, V> ConcurrentMap<K, V> newMap() {
-                return caffeineConsumer.apply(Caffeine.newBuilder()).<K, V>build().asMap();
+                return caffeineBuilder.apply(Caffeine.newBuilder()).<K, V>build().asMap();
             }
         };
     }
+
+    <K, V> ConcurrentMap<K, V> newMap();
 }
