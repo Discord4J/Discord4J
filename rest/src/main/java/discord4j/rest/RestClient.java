@@ -35,6 +35,7 @@ import java.util.function.Function;
  */
 public class RestClient {
 
+    private final RestResources restResources;
     private final ApplicationService applicationService;
     private final AuditLogService auditLogService;
     private final ChannelService channelService;
@@ -70,9 +71,11 @@ public class RestClient {
     /**
      * Create a new {@link RestClient} using the given {@link Router} as connector to perform requests.
      *
-     * @param router a connector to perform requests
+     * @param restResources a set of REST API resources required to operate this client
      */
-    protected RestClient(final Router router) {
+    protected RestClient(final RestResources restResources) {
+        this.restResources = restResources;
+        Router router = restResources.getRouter();
         this.applicationService = new ApplicationService(router);
         this.auditLogService = new AuditLogService(router);
         this.channelService = new ChannelService(router);
@@ -83,6 +86,15 @@ public class RestClient {
         this.userService = new UserService(router);
         this.voiceService = new VoiceService(router);
         this.webhookService = new WebhookService(router);
+    }
+
+    /**
+     * Obtain the {@link RestResources} associated with this {@link RestClient}.
+     *
+     * @return the current {@link RestResources} for this client
+     */
+    public RestResources getRestResources() {
+        return restResources;
     }
 
     /**

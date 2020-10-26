@@ -78,6 +78,9 @@ class BaseMessageChannel extends BaseChannel implements MessageChannel {
         return Mono.defer(
                 () -> {
                     MessageCreateSpec mutatedSpec = new MessageCreateSpec();
+                    getClient().getRestClient().getRestResources()
+                            .getAllowedMentions()
+                            .ifPresent(mutatedSpec::setAllowedMentions);
                     spec.accept(mutatedSpec);
                     return getRestChannel().createMessage(mutatedSpec.asRequest());
                 })
