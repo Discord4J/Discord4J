@@ -21,6 +21,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import discord4j.common.JacksonResources;
 import discord4j.common.store.Store;
+import discord4j.common.store.impl.LocalStoreLayout;
 import discord4j.core.event.domain.guild.GuildEvent;
 import discord4j.core.event.domain.lifecycle.GatewayLifecycleEvent;
 import discord4j.core.event.domain.lifecycle.ReadyEvent;
@@ -58,7 +59,7 @@ public class ExampleStore {
 //                .setStoreService(MappingStoreService.create()
 //                        .setMapping(new NoOpStoreService(), MessageData.class)
 //                        .setFallback(new JdkStoreService()))
-//                .setStore(Store.fromLayout(LocalStoreLayout.create()))
+                .setStore(Store.fromLayout(LocalStoreLayout.create()))
                 .setMemberRequestFilter(MemberRequestFilter.all())
                 .setEnabledIntents(IntentSet.nonPrivileged().or(IntentSet.of(Intent.GUILD_MEMBERS)))
                 .withGateway(gateway -> {
