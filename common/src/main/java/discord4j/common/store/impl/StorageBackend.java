@@ -18,6 +18,8 @@
 package discord4j.common.store.impl;
 
 import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.cache.RemovalListener;
+import reactor.util.annotation.Nullable;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -35,7 +37,12 @@ public interface StorageBackend {
      * @return a {@link StorageBackend}
      */
     static StorageBackend concurrentHashMap() {
-        return ConcurrentHashMap::new;
+        return new StorageBackend() {
+            @Override
+            public <K, V> ConcurrentMap<K, V> newMap(@Nullable RemovalListener<K, V> removalListener) {
+                return new ConcurrentHashMap<>();
+            }
+        };
     }
 
     /**
@@ -47,11 +54,19 @@ public interface StorageBackend {
     static StorageBackend caffeine(UnaryOperator<Caffeine<Object, Object>> caffeineBuilder) {
         return new StorageBackend() {
             @Override
-            public <K, V> ConcurrentMap<K, V> newMap() {
-                return caffeineBuilder.apply(Caffeine.newBuilder()).<K, V>build().asMap();
+            public <K, V> ConcurrentMap<K, V> newMap(@Nullable RemovalListener<K, V> removalListener) {
+                Caffeine<Object, Object> configured = caffeineBuilder.apply(Caffeine.newBuilder());
+                if (removalListener != null) {
+                    return configured.removalListener(removalListener).build().asMap();
+                }
+                return configured.<K, V>build().asMap();
             }
         };
     }
 
-    <K, V> ConcurrentMap<K, V> newMap();
+    default <K, V> ConcurrentMap<K, V> newMap() {
+        return newMap(null);
+    }
+
+    <K, V> ConcurrentMap<K, V> newMap(@Nullable RemovalListener<K, V> removalListener);
 }

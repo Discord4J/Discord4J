@@ -50,7 +50,7 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
     private final ConcurrentMap<Long, EmojiData> emojis = new ConcurrentHashMap<>();
     private final ConcurrentMap<Long, StoredGuildData> guilds = new ConcurrentHashMap<>();
     private final ConcurrentMap<Long2, StoredMemberData> members = new ConcurrentHashMap<>();
-    private final ConcurrentMap<Long, StoredMessageData> messages;
+    private final ConcurrentMap<Long2, StoredMessageData> messages;
     private final ConcurrentMap<Long2, StoredPresenceData> presences = new ConcurrentHashMap<>();
     private final ConcurrentMap<Long, RoleData> roles = new ConcurrentHashMap<>();
     private final ConcurrentMap<Long, AtomicReference<UserData>> users =
@@ -62,7 +62,11 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
     private volatile int shardCount;
 
     private LocalStoreLayout(StorageConfig config) {
-        this.messages = config.getMessageBackend().newMap();
+        this.messages = config.getMessageBackend().newMap((k, v, reason) -> {
+            if (k != null && reason.wasEvicted()) {
+                ifNonNullDo(contentByChannel.get(k.a), content -> content.messageIds.remove(k));
+            }
+        });
         this.config = config;
     }
 
@@ -268,7 +272,7 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
 
     @Override
     public Mono<MessageData> getMessageById(long channelId, long messageId) {
-        return Mono.justOrEmpty(messages.get(messageId)).map(ImmutableMessageData::copyOf);
+        return Mono.justOrEmpty(messages.get(new Long2(channelId, messageId))).map(ImmutableMessageData::copyOf);
     }
 
     @Override
@@ -508,12 +512,11 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
     @Override
     public Mono<Void> onMessageCreate(int shardIndex, MessageCreate dispatch) {
         MessageData message = dispatch.message();
-        long messageId = toLongId(message.id());
-        long channelId = toLongId(message.channelId());
+        Long2 id = new Long2(toLongId(message.channelId()), toLongId(message.id()));
         return Mono.fromRunnable(() -> {
-            ifNonNullDo(channels.get(channelId), channel -> channel.setLastMessageId(messageId));
-            computeChannelContent(channelId).messageIds.add(messageId);
-            messages.put(messageId, new StoredMessageData(message));
+            ifNonNullDo(channels.get(id.a), channel -> channel.setLastMessageId(id.b));
+            computeChannelContent(id.a).messageIds.add(id);
+            messages.put(id, new StoredMessageData(message));
         });
     }
 
@@ -536,32 +539,42 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
     @Override
     public Mono<Void> onMessageReactionAdd(int shardIndex, MessageReactionAdd dispatch) {
         boolean me = Objects.equals(dispatch.userId(), selfUser.get().id());
-        return Mono.fromRunnable(() -> ifNonNullDo(messages.get(toLongId(dispatch.messageId())),
+        long channelId = toLongId(dispatch.channelId());
+        long messageId = toLongId(dispatch.messageId());
+        return Mono.fromRunnable(() -> ifNonNullDo(messages.get(new Long2(channelId, messageId)),
                 message -> message.addReaction(dispatch.emoji(), me)));
     }
 
     @Override
     public Mono<Void> onMessageReactionRemove(int shardIndex, MessageReactionRemove dispatch) {
         boolean me = Objects.equals(dispatch.userId(), selfUser.get().id());
-        return Mono.fromRunnable(() -> ifNonNullDo(messages.get(toLongId(dispatch.messageId())),
+        long channelId = toLongId(dispatch.channelId());
+        long messageId = toLongId(dispatch.messageId());
+        return Mono.fromRunnable(() -> ifNonNullDo(messages.get(new Long2(channelId, messageId)),
                 message -> message.removeReaction(dispatch.emoji(), me)));
     }
 
     @Override
     public Mono<Void> onMessageReactionRemoveAll(int shardIndex, MessageReactionRemoveAll dispatch) {
-        return Mono.fromRunnable(() -> ifNonNullDo(messages.get(toLongId(dispatch.messageId())),
+        long channelId = toLongId(dispatch.channelId());
+        long messageId = toLongId(dispatch.messageId());
+        return Mono.fromRunnable(() -> ifNonNullDo(messages.get(new Long2(channelId, messageId)),
                 StoredMessageData::removeAllReactions));
     }
 
     @Override
     public Mono<Void> onMessageReactionRemoveEmoji(int shardIndex, MessageReactionRemoveEmoji dispatch) {
-        return Mono.fromRunnable(() -> ifNonNullDo(messages.get(toLongId(dispatch.messageId())),
+        long channelId = toLongId(dispatch.channelId());
+        long messageId = toLongId(dispatch.messageId());
+        return Mono.fromRunnable(() -> ifNonNullDo(messages.get(new Long2(channelId, messageId)),
                 message -> message.removeReactionEmoji(dispatch.emoji())));
     }
 
     @Override
     public Mono<MessageData> onMessageUpdate(int shardIndex, MessageUpdate dispatch) {
-        return Mono.fromCallable(() -> ifNonNullMap(messages.get(toLongId(dispatch.message().id())), message -> {
+        long channelId = toLongId(dispatch.message().channelId());
+        long messageId = toLongId(dispatch.message().id());
+        return Mono.fromCallable(() -> ifNonNullMap(messages.get(new Long2(channelId, messageId)), message -> {
             MessageData old = ImmutableMessageData.copyOf(message);
             message.update(dispatch.message());
             return old;
@@ -693,8 +706,9 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
     }
 
     private @Nullable MessageData deleteMessage(long channelId, long messageId) {
-        computeChannelContent(channelId).messageIds.remove(messageId);
-        return ifNonNullMap(messages.remove(messageId), ImmutableMessageData::copyOf);
+        Long2 id = new Long2(channelId, messageId);
+        computeChannelContent(channelId).messageIds.remove(id);
+        return ifNonNullMap(messages.remove(id), ImmutableMessageData::copyOf);
     }
 
     private @Nullable <T> AtomicReference<UserData> computeUserRef(long userId, T newData,
@@ -770,7 +784,7 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
     private class ChannelContent {
 
         private final long channelId;
-        private final Set<Long> messageIds = Collections.synchronizedSet(new HashSet<>());
+        private final Set<Long2> messageIds = Collections.synchronizedSet(new HashSet<>());
         private final Set<Long2> voiceStateIds = Collections.synchronizedSet(new HashSet<>());
 
         public ChannelContent(long channelId) {
