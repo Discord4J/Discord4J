@@ -25,11 +25,13 @@ import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.Set;
 
+import static discord4j.common.store.impl.ImplUtils.*;
+
 /**
- * GuildData with mutable role/emoji/member/channel ID set
+ * Guild data with snowflakes stored as long, and with mutable role/emoji/member/channel ID set.
  */
-@SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-public class StoredGuildData implements GuildData {
+@SuppressWarnings("deprecation")
+class StoredGuildData {
 
     private final Set<Long> roles;
     private final Set<Long> emojis;
@@ -37,325 +39,197 @@ public class StoredGuildData implements GuildData {
     private final Set<Long> channels;
     private final String joinedAt;
     private final boolean large;
-    private final Possible<Boolean> unavailable;
+    private final boolean unavailable_value;
+    private final boolean unavailable_absent;
     private final int memberCount;
-    private final String ownerId;
+    private final long ownerId;
     private final String region;
     private final int afkTimeout;
     private final int defaultMessageNotifications;
     private final int explicitContentFilter;
     private final int mfaLevel;
     private final int premiumTier;
-    private final Optional<String> preferredLocale;
-    private final String id;
+    private final String preferredLocale;
+    private final long id;
     private final String name;
-    private final Optional<String> icon;
-    private final Optional<String> splash;
-    private final Optional<String> discoverySplash;
-    private final Possible<Boolean> owner;
-    private final Possible<Long> permissions;
-    private final Optional<String> afkChannelId;
-    private final Possible<Boolean> embedEnabled;
-    private final Possible<Optional<String>> embedChannelId;
+    private final String icon;
+    private final String splash;
+    private final String discoverySplash;
+    private final boolean owner_value;
+    private final boolean owner_absent;
+    private final long permissions_value;
+    private final boolean permissions_absent;
+    private final String afkChannelId;
+    private final boolean embedEnabled_value;
+    private final boolean embedEnabled_absent;
+    private final String embedChannelId_value;
+    private final boolean embedChannelId_absent;
     private final List<String> features;
-    private final Optional<String> applicationId;
-    private final Possible<Boolean> widgetEnabled;
-    private final Possible<Optional<String>> widgetChannelId;
-    private final Optional<String> systemChannelId;
-    private final OptionalInt systemChannelFlags;
-    private final Optional<String> rulesChannelId;
-    private final Possible<Optional<Integer>> maxPresences;
-    private final Possible<Integer> maxMembers;
-    private final Optional<String> vanityUrlCode;
-    private final Optional<String> description;
-    private final Optional<String> banner;
-    private final Possible<Optional<Integer>> premiumSubscriptionCount;
-    private final Optional<String> publicUpdatesChannelId;
-    private final Possible<Integer> maxVideoChannelUsers;
-    private final Possible<Integer> approximateMemberCount;
-    private final Possible<Integer> approximatePresenceCount;
+    private final long applicationId;
+    private final boolean applicationId_null;
+    private final boolean widgetEnabled_value;
+    private final boolean widgetEnabled_absent;
+    private final long widgetChannelId_value;
+    private final boolean widgetChannelId_absent;
+    private final long systemChannelId;
+    private final boolean systemChannelId_null;
+    private final int systemChannelFlags;
+    private final boolean systemChannelFlags_null;
+    private final long rulesChannelId;
+    private final boolean rulesChannelId_null;
+    private final int maxPresences_value;
+    private final boolean maxPresences_value_null;
+    private final boolean maxPresences_absent;
+    private final int maxMembers_value;
+    private final boolean maxMembers_absent;
+    private final String vanityUrlCode;
+    private final String description;
+    private final String banner;
+    private final int premiumSubscriptionCount_value;
+    private final boolean premiumSubscriptionCount_value_null;
+    private final boolean premiumSubscriptionCount_absent;
+    private final long publicUpdatesChannelId;
+    private final boolean publicUpdatesChannelId_null;
+    private final int maxVideoChannelUsers_value;
+    private final boolean maxVideoChannelUsers_absent;
+    private final int approximateMemberCount_value;
+    private final boolean approximateMemberCount_absent;
+    private final int approximatePresenceCount_value;
+    private final boolean approximatePresenceCount_absent;
     private final int verificationLevel;
     
     StoredGuildData(GuildData original) {
-        this.roles = ImplUtils.toLongIdSet(original.roles());
-        this.emojis = ImplUtils.toLongIdSet(original.emojis());
-        this.members = ImplUtils.toLongIdSet(original.members());
-        this.channels = ImplUtils.toLongIdSet(original.channels());
+        this.roles = toLongIdSet(original.roles());
+        this.emojis = toLongIdSet(original.emojis());
+        this.members = toLongIdSet(original.members());
+        this.channels = toLongIdSet(original.channels());
         this.joinedAt = original.joinedAt();
         this.large = original.large();
-        this.unavailable = original.unavailable();
+        this.unavailable_value = original.unavailable().toOptional().orElse(false);
+        this.unavailable_absent = original.unavailable().isAbsent();
         this.memberCount = original.memberCount();
-        this.ownerId = original.ownerId();
+        this.ownerId = toLongId(original.ownerId());
         this.region = original.region();
         this.afkTimeout = original.afkTimeout();
         this.defaultMessageNotifications = original.defaultMessageNotifications();
         this.explicitContentFilter = original.explicitContentFilter();
         this.mfaLevel = original.mfaLevel();
         this.premiumTier = original.premiumTier();
-        this.preferredLocale = original.preferredLocale();
-        this.id = original.id();
+        this.preferredLocale = original.preferredLocale().orElse(null);
+        this.id = toLongId(original.id());
         this.name = original.name();
-        this.icon = original.icon();
-        this.splash = original.splash();
-        this.discoverySplash = original.discoverySplash();
-        this.owner = original.owner();
-        this.permissions = original.permissions();
-        this.afkChannelId = original.afkChannelId();
-        this.embedEnabled = original.embedEnabled();
-        this.embedChannelId = original.embedChannelId();
+        this.icon = original.icon().orElse(null);
+        this.splash = original.splash().orElse(null);
+        this.discoverySplash = original.discoverySplash().orElse(null);
+        this.owner_value = original.owner().toOptional().orElse(false);
+        this.owner_absent = original.owner().isAbsent();
+        this.permissions_value = original.permissions().toOptional().orElse(-1L);
+        this.permissions_absent = original.permissions().isAbsent();
+        this.afkChannelId = original.afkChannelId().orElse(null);
+        this.embedEnabled_value = original.embedEnabled().toOptional().orElse(false);
+        this.embedEnabled_absent = original.embedEnabled().isAbsent();
+        this.embedChannelId_value = Possible.flatOpt(original.embedChannelId()).orElse(null);
+        this.embedChannelId_absent = original.embedChannelId().isAbsent();
         this.features = original.features();
-        this.applicationId = original.applicationId();
-        this.widgetEnabled = original.widgetEnabled();
-        this.widgetChannelId = original.widgetChannelId();
-        this.systemChannelId = original.systemChannelId();
-        this.systemChannelFlags = original.systemChannelFlags();
-        this.rulesChannelId = original.rulesChannelId();
-        this.maxPresences = original.maxPresences();
-        this.maxMembers = original.maxMembers();
-        this.vanityUrlCode = original.vanityUrlCode();
-        this.description = original.description();
-        this.banner = original.banner();
-        this.premiumSubscriptionCount = original.premiumSubscriptionCount();
-        this.publicUpdatesChannelId = original.publicUpdatesChannelId();
-        this.maxVideoChannelUsers = original.maxVideoChannelUsers();
-        this.approximateMemberCount = original.approximateMemberCount();
-        this.approximatePresenceCount = original.approximatePresenceCount();
+        this.applicationId = original.applicationId().map(ImplUtils::toLongId).orElse(-1L);
+        this.applicationId_null = !original.applicationId().map(ImplUtils::toLongId).isPresent();
+        this.widgetEnabled_value = original.widgetEnabled().toOptional().orElse(false);
+        this.widgetEnabled_absent = original.widgetEnabled().isAbsent();
+        this.widgetChannelId_value = idFromPossibleOptionalString(original.widgetChannelId()).orElse(-1L);
+        this.widgetChannelId_absent = original.widgetChannelId().isAbsent();
+        this.systemChannelId = original.systemChannelId().map(ImplUtils::toLongId).orElse(-1L);
+        this.systemChannelId_null = !original.systemChannelId().map(ImplUtils::toLongId).isPresent();
+        this.systemChannelFlags = original.systemChannelFlags().isPresent() ?
+                original.systemChannelFlags().getAsInt() : -1;
+        this.systemChannelFlags_null = !original.systemChannelFlags().isPresent();
+        this.rulesChannelId = original.rulesChannelId().map(ImplUtils::toLongId).orElse(-1L);
+        this.rulesChannelId_null = !original.rulesChannelId().map(ImplUtils::toLongId).isPresent();
+        this.maxPresences_value = Possible.flatOpt(original.maxPresences()).orElse(-1);
+        this.maxPresences_value_null = !Possible.flatOpt(original.maxPresences()).isPresent();
+        this.maxPresences_absent = original.maxPresences().isAbsent();
+        this.maxMembers_value = original.maxMembers().toOptional().orElse(-1);
+        this.maxMembers_absent = original.maxMembers().isAbsent();
+        this.vanityUrlCode = original.vanityUrlCode().orElse(null);
+        this.description = original.description().orElse(null);
+        this.banner = original.banner().orElse(null);
+        this.premiumSubscriptionCount_value = Possible.flatOpt(original.premiumSubscriptionCount()).orElse(-1);
+        this.premiumSubscriptionCount_value_null = !Possible.flatOpt(original.premiumSubscriptionCount()).isPresent();
+        this.premiumSubscriptionCount_absent = original.premiumSubscriptionCount().isAbsent();
+        this.publicUpdatesChannelId = original.publicUpdatesChannelId().map(ImplUtils::toLongId).orElse(-1L);
+        this.publicUpdatesChannelId_null = !original.publicUpdatesChannelId().map(ImplUtils::toLongId).isPresent();
+        this.maxVideoChannelUsers_value = original.maxVideoChannelUsers().toOptional().orElse(-1);
+        this.maxVideoChannelUsers_absent = original.maxVideoChannelUsers().isAbsent();
+        this.approximateMemberCount_value = original.approximateMemberCount().toOptional().orElse(-1);
+        this.approximateMemberCount_absent = original.approximateMemberCount().isAbsent();
+        this.approximatePresenceCount_value = original.approximatePresenceCount().toOptional().orElse(-1);
+        this.approximatePresenceCount_absent = original.approximatePresenceCount().isAbsent();
         this.verificationLevel = original.verificationLevel();
     }
 
-    @Override
-    public List<String> roles() {
-        return ImplUtils.toStringIdList(roles);
+    GuildData toImmutable() {
+        return GuildData.builder()
+                .roles(toStringIdList(roles))
+                .emojis(toStringIdList(emojis))
+                .members(toStringIdList(members))
+                .channels(toStringIdList(channels))
+                .joinedAt(joinedAt)
+                .large(large)
+                .unavailable(toPossible(unavailable_value, unavailable_absent))
+                .memberCount(memberCount)
+                .ownerId("" + ownerId)
+                .region(region)
+                .afkTimeout(afkTimeout)
+                .defaultMessageNotifications(defaultMessageNotifications)
+                .explicitContentFilter(explicitContentFilter)
+                .mfaLevel(mfaLevel)
+                .premiumTier(premiumTier)
+                .preferredLocale(Optional.ofNullable(preferredLocale))
+                .id("" + id)
+                .name(name)
+                .icon(Optional.ofNullable(icon))
+                .splash(Optional.ofNullable(splash))
+                .discoverySplash(Optional.ofNullable(discoverySplash))
+                .owner(toPossible(owner_value, owner_absent))
+                .permissions(toPossible(permissions_value, permissions_absent))
+                .afkChannelId(Optional.ofNullable(afkChannelId))
+                .embedEnabled(toPossible(embedEnabled_value, embedEnabled_absent))
+                .embedChannelId(toPossibleOptional(embedChannelId_value, embedChannelId_absent))
+                .features(features)
+                .applicationId(Optional.ofNullable(applicationId_null ? null : applicationId).map(String::valueOf))
+                .widgetEnabled(toPossible(widgetEnabled_value, widgetEnabled_absent))
+                .widgetChannelId(toPossibleOptionalStringId(widgetChannelId_value, widgetChannelId_absent))
+                .systemChannelId(Optional.ofNullable(systemChannelId_null ? null : systemChannelId).map(String::valueOf))
+                .systemChannelFlags(systemChannelFlags_null ? OptionalInt.empty() : OptionalInt.of(systemChannelFlags))
+                .rulesChannelId(Optional.ofNullable(rulesChannelId_null ? null :rulesChannelId).map(String::valueOf))
+                .maxPresences(toPossibleOptional(maxPresences_value, maxPresences_absent, maxPresences_value_null))
+                .maxMembers(toPossible(maxMembers_value, maxMembers_absent))
+                .vanityUrlCode(Optional.ofNullable(vanityUrlCode))
+                .description(Optional.ofNullable(description))
+                .banner(Optional.ofNullable(banner))
+                .premiumSubscriptionCount(toPossibleOptional(premiumSubscriptionCount_value,
+                        premiumSubscriptionCount_absent, premiumSubscriptionCount_value_null))
+                .publicUpdatesChannelId(Optional.ofNullable(publicUpdatesChannelId_null ? null :
+                        publicUpdatesChannelId).map(String::valueOf))
+                .maxVideoChannelUsers(toPossible(maxVideoChannelUsers_value, maxVideoChannelUsers_absent))
+                .approximateMemberCount(toPossible(approximateMemberCount_value, approximateMemberCount_absent))
+                .approximatePresenceCount(toPossible(approximatePresenceCount_value, approximatePresenceCount_absent))
+                .verificationLevel(verificationLevel)
+                .build();
     }
 
-    @Override
-    public List<String> emojis() {
-        return ImplUtils.toStringIdList(emojis);
-    }
-
-    @Override
-    public List<String> members() {
-        return ImplUtils.toStringIdList(members);
-    }
-
-    @Override
-    public List<String> channels() {
-        return ImplUtils.toStringIdList(channels);
-    }
-
-    public Set<Long> roleIdSet() {
+    Set<Long> roleIdSet() {
         return roles;
     }
 
-    public Set<Long> emojiIdSet() {
+    Set<Long> emojiIdSet() {
         return emojis;
     }
 
-    public Set<Long> memberIdSet() {
+    Set<Long> memberIdSet() {
         return members;
     }
 
-    public Set<Long> channelIdSet() {
+    Set<Long> channelIdSet() {
         return channels;
-    }
-
-    @Override
-    public String joinedAt() {
-        return joinedAt;
-    }
-
-    @Override
-    public boolean large() {
-        return large;
-    }
-
-    @Override
-    public Possible<Boolean> unavailable() {
-        return unavailable;
-    }
-
-    @Override
-    public int memberCount() {
-        return memberCount;
-    }
-
-    @Override
-    public String ownerId() {
-        return ownerId;
-    }
-
-    @Override
-    public String region() {
-        return region;
-    }
-
-    @Override
-    public int afkTimeout() {
-        return afkTimeout;
-    }
-
-    @Override
-    public int defaultMessageNotifications() {
-        return defaultMessageNotifications;
-    }
-
-    @Override
-    public int explicitContentFilter() {
-        return explicitContentFilter;
-    }
-
-    @Override
-    public int mfaLevel() {
-        return mfaLevel;
-    }
-
-    @Override
-    public int premiumTier() {
-        return premiumTier;
-    }
-
-    @Override
-    public Optional<String> preferredLocale() {
-        return preferredLocale;
-    }
-
-    @Override
-    public String id() {
-        return id;
-    }
-
-    @Override
-    public String name() {
-        return name;
-    }
-
-    @Override
-    public Optional<String> icon() {
-        return icon;
-    }
-
-    @Override
-    public Optional<String> splash() {
-        return splash;
-    }
-
-    @Override
-    public Optional<String> discoverySplash() {
-        return discoverySplash;
-    }
-
-    @Override
-    public Possible<Boolean> owner() {
-        return owner;
-    }
-
-    @Override
-    public Possible<Long> permissions() {
-        return permissions;
-    }
-
-    @Override
-    public Optional<String> afkChannelId() {
-        return afkChannelId;
-    }
-
-    @Override
-    public Possible<Boolean> embedEnabled() {
-        return embedEnabled;
-    }
-
-    @Override
-    public Possible<Optional<String>> embedChannelId() {
-        return embedChannelId;
-    }
-
-    @Override
-    public List<String> features() {
-        return features;
-    }
-
-    @Override
-    public Optional<String> applicationId() {
-        return applicationId;
-    }
-
-    @Override
-    public Possible<Boolean> widgetEnabled() {
-        return widgetEnabled;
-    }
-
-    @Override
-    public Possible<Optional<String>> widgetChannelId() {
-        return widgetChannelId;
-    }
-
-    @Override
-    public Optional<String> systemChannelId() {
-        return systemChannelId;
-    }
-
-    @Override
-    public OptionalInt systemChannelFlags() {
-        return systemChannelFlags;
-    }
-
-    @Override
-    public Optional<String> rulesChannelId() {
-        return rulesChannelId;
-    }
-
-    @Override
-    public Possible<Optional<Integer>> maxPresences() {
-        return maxPresences;
-    }
-
-    @Override
-    public Possible<Integer> maxMembers() {
-        return maxMembers;
-    }
-
-    @Override
-    public Optional<String> vanityUrlCode() {
-        return vanityUrlCode;
-    }
-
-    @Override
-    public Optional<String> description() {
-        return description;
-    }
-
-    @Override
-    public Optional<String> banner() {
-        return banner;
-    }
-
-    @Override
-    public Possible<Optional<Integer>> premiumSubscriptionCount() {
-        return premiumSubscriptionCount;
-    }
-
-    @Override
-    public Optional<String> publicUpdatesChannelId() {
-        return publicUpdatesChannelId;
-    }
-
-    @Override
-    public Possible<Integer> maxVideoChannelUsers() {
-        return maxVideoChannelUsers;
-    }
-
-    @Override
-    public Possible<Integer> approximateMemberCount() {
-        return approximateMemberCount;
-    }
-
-    @Override
-    public Possible<Integer> approximatePresenceCount() {
-        return approximatePresenceCount;
-    }
-
-    @Override
-    public int verificationLevel() {
-        return verificationLevel;
     }
 }

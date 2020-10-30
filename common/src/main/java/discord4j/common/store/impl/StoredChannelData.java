@@ -25,150 +25,118 @@ import discord4j.discordjson.possible.Possible;
 import java.util.List;
 import java.util.Optional;
 
+import static discord4j.common.store.impl.ImplUtils.*;
+
 /**
- * ChannelData with mutable lastMessageId
+ * Channel data with snowflakes stored as long, and with mutable lastMessageId.
  */
-class StoredChannelData implements ChannelData {
-    
-    private final String id;
+class StoredChannelData {
+
+    private final long id;
     private final int type;
-    private final Possible<String> guildId;
-    private final Possible<Integer> position;
-    private final Possible<List<OverwriteData>> permissionOverwrites;
-    private final Possible<String> name;
-    private final Possible<Optional<String>> topic;
-    private final Possible<Boolean> nsfw;
+    private final long guildId_value;
+    private final boolean guildId_absent;
+    private final int position_value;
+    private final boolean position_absent;
+    private final List<OverwriteData> permissionOverwrites_value;
+    private final boolean permissionOverwrites_absent;
+    private final String name_value;
+    private final boolean name_absent;
+    private final String topic_value;
+    private final boolean topic_absent;
+    private final boolean nsfw_value;
+    private final boolean nsfw_absent;
+    private final int bitrate_value;
+    private final boolean bitrate_absent;
+    private final int userLimit_value;
+    private final boolean userLimit_absent;
+    private final int rateLimitPerUser_value;
+    private final boolean rateLimitPerUser_absent;
+    private final List<UserData> recipients_value;
+    private final boolean recipients_absent;
+    private final String icon_value;
+    private final boolean icon_absent;
+    private final long ownerId_value;
+    private final boolean ownerId_absent;
+    private final long applicationId_value;
+    private final boolean applicationId_absent;
+    private final long parentId_value;
+    private final boolean parentId_absent;
+    private final String lastPinTimestamp_value;
+    private final boolean lastPinTimestamp_absent;
     private volatile long lastMessageId; // -1 = absent, 0 = null
-    private final Possible<Integer> bitrate;
-    private final Possible<Integer> userLimit;
-    private final Possible<Integer> rateLimitPerUser;
-    private final Possible<List<UserData>> recipients;
-    private final Possible<Optional<String>> icon;
-    private final Possible<String> ownerId;
-    private final Possible<String> applicationId;
-    private final Possible<Optional<String>> parentId;
-    private final Possible<Optional<String>> lastPinTimestamp;
     
     StoredChannelData(ChannelData original) {
-        this.id = original.id();
+        this.id = toLongId(original.id());
         this.type = original.type();
-        this.guildId = original.guildId();
-        this.position = original.position();
-        this.permissionOverwrites = original.permissionOverwrites();
-        this.name = original.name();
-        this.topic = original.topic();
-        this.nsfw = original.nsfw();
+        this.guildId_value = idFromPossibleString(original.guildId()).orElse(-1L);
+        this.guildId_absent = original.guildId().isAbsent();
+        this.position_value = original.position().toOptional().orElse(-1);
+        this.position_absent = original.position().isAbsent();
+        this.permissionOverwrites_value = original.permissionOverwrites().toOptional().orElse(null);
+        this.permissionOverwrites_absent = original.permissionOverwrites().isAbsent();
+        this.name_value = original.name().toOptional().orElse(null);
+        this.name_absent = original.name().isAbsent();
+        this.topic_value = Possible.flatOpt(original.topic()).orElse(null);
+        this.topic_absent = original.topic().isAbsent();
+        this.nsfw_value = original.nsfw().toOptional().orElse(false);
+        this.nsfw_absent = original.nsfw().isAbsent();
+        this.bitrate_value = original.bitrate().toOptional().orElse(-1);
+        this.bitrate_absent = original.bitrate().isAbsent();
+        this.userLimit_value = original.userLimit().toOptional().orElse(-1);
+        this.userLimit_absent = original.userLimit().isAbsent();
+        this.rateLimitPerUser_value = original.rateLimitPerUser().toOptional().orElse(-1);
+        this.rateLimitPerUser_absent = original.rateLimitPerUser().isAbsent();
+        this.recipients_value = original.recipients().toOptional().orElse(null);
+        this.recipients_absent = original.recipients().isAbsent();
+        this.icon_value = Possible.flatOpt(original.icon()).orElse(null);
+        this.icon_absent = original.icon().isAbsent();
+        this.ownerId_value = idFromPossibleString(original.ownerId()).orElse(-1L);
+        this.ownerId_absent = original.ownerId().isAbsent();
+        this.applicationId_value = idFromPossibleString(original.applicationId()).orElse(-1L);
+        this.applicationId_absent = original.applicationId().isAbsent();
+        this.parentId_value = idFromPossibleOptionalString(original.parentId()).orElse(-1L);
+        this.parentId_absent = original.parentId().isAbsent();
+        this.lastPinTimestamp_value = Possible.flatOpt(original.lastPinTimestamp()).orElse(null);
+        this.lastPinTimestamp_absent = original.lastPinTimestamp().isAbsent();
         this.lastMessageId = original.lastMessageId().isAbsent() ? -1L :
                 original.lastMessageId().get().map(ImplUtils::toLongId).orElse(0L);
-        this.bitrate = original.bitrate();
-        this.userLimit = original.userLimit();
-        this.rateLimitPerUser = original.rateLimitPerUser();
-        this.recipients = original.recipients();
-        this.icon = original.icon();
-        this.ownerId = original.ownerId();
-        this.applicationId = original.applicationId();
-        this.parentId = original.parentId();
-        this.lastPinTimestamp = original.lastPinTimestamp();
     }
 
     void setLastMessageId(long lastMessageId) {
         this.lastMessageId = lastMessageId;
     }
-    
-    @Override
-    public String id() {
-        return id;
-    }
 
-    @Override
-    public int type() {
-        return type;
-    }
-
-    @Override
-    public Possible<String> guildId() {
-        return guildId;
-    }
-
-    @Override
-    public Possible<Integer> position() {
-        return position;
-    }
-
-    @Override
-    public Possible<List<OverwriteData>> permissionOverwrites() {
-        return permissionOverwrites;
-    }
-
-    @Override
-    public Possible<String> name() {
-        return name;
-    }
-
-    @Override
-    public Possible<Optional<String>> topic() {
-        return topic;
-    }
-
-    @Override
-    public Possible<Boolean> nsfw() {
-        return nsfw;
-    }
-
-    @Override
-    public Possible<Optional<String>> lastMessageId() {
+    ChannelData toImmutable() {
+        long lastMessageId = this.lastMessageId;
+        Possible<Optional<String>> immutableLastMessageId;
         if (lastMessageId == -1) {
-            return Possible.absent();
+            immutableLastMessageId = Possible.absent();
         } else if (lastMessageId == 0) {
-            return Possible.of(Optional.empty());
+            immutableLastMessageId = Possible.of(Optional.empty());
         } else {
-            return Possible.of(Optional.of("" + lastMessageId));
+            immutableLastMessageId = Possible.of(Optional.of("" + lastMessageId));
         }
-    }
-
-    @Override
-    public Possible<Integer> bitrate() {
-        return bitrate;
-    }
-
-    @Override
-    public Possible<Integer> userLimit() {
-        return userLimit;
-    }
-
-    @Override
-    public Possible<Integer> rateLimitPerUser() {
-        return rateLimitPerUser;
-    }
-
-    @Override
-    public Possible<List<UserData>> recipients() {
-        return recipients;
-    }
-
-    @Override
-    public Possible<Optional<String>> icon() {
-        return icon;
-    }
-
-    @Override
-    public Possible<String> ownerId() {
-        return ownerId;
-    }
-
-    @Override
-    public Possible<String> applicationId() {
-        return applicationId;
-    }
-
-    @Override
-    public Possible<Optional<String>> parentId() {
-        return parentId;
-    }
-
-    @Override
-    public Possible<Optional<String>> lastPinTimestamp() {
-        return lastPinTimestamp;
+        return ChannelData.builder()
+                .id("" + id)
+                .type(type)
+                .guildId(toPossibleStringId(guildId_value, guildId_absent))
+                .position(toPossible(position_value, position_absent))
+                .permissionOverwrites(toPossible(permissionOverwrites_value, permissionOverwrites_absent))
+                .name(toPossible(name_value, name_absent))
+                .topic(toPossibleOptional(topic_value, topic_absent))
+                .nsfw(toPossible(nsfw_value, nsfw_absent))
+                .lastMessageId(immutableLastMessageId)
+                .bitrate(toPossible(bitrate_value, bitrate_absent))
+                .userLimit(toPossible(userLimit_value, userLimit_absent))
+                .rateLimitPerUser(toPossible(rateLimitPerUser_value, rateLimitPerUser_absent))
+                .recipients(toPossible(recipients_value, recipients_absent))
+                .icon(toPossibleOptional(icon_value, icon_absent))
+                .ownerId(toPossibleStringId(ownerId_value, ownerId_absent))
+                .applicationId(toPossibleStringId(applicationId_value, applicationId_absent))
+                .parentId(toPossibleOptionalStringId(parentId_value, parentId_absent))
+                .lastPinTimestamp(toPossibleOptional(lastPinTimestamp_value, lastPinTimestamp_absent))
+                .build();
     }
 
 }

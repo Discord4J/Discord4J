@@ -26,51 +26,40 @@ import java.util.concurrent.atomic.AtomicReference;
 /**
  * PresenceData with a UserData taken from an existing reference.
  */
-class StoredPresenceData implements PresenceData {
+class StoredPresenceData {
 
-    private final AtomicReference<UserData> ref;
+    private final AtomicReference<StoredUserData> ref;
     private final String status;
     private final List<ActivityData> activities;
     private final ClientStatusData clientStatus;
 
-    StoredPresenceData(PresenceData original, AtomicReference<UserData> ref) {
+    StoredPresenceData(PresenceData original, AtomicReference<StoredUserData> ref) {
         this.ref = ref;
         this.status = original.status();
         this.activities = original.activities();
         this.clientStatus = original.clientStatus();
     }
 
-    @Override
-    public PartialUserData user() {
-        UserData userData = ref.get();
-        return PartialUserData.builder()
-                .username(userData.username())
-                .discriminator(userData.discriminator())
-                .avatar(Possible.of(userData.avatar()))
-                .bot(userData.bot())
-                .system(userData.system())
-                .mfaEnabled(userData.mfaEnabled())
-                .locale(userData.locale())
-                .verified(userData.verified())
-                .email(Possible.flatOpt(userData.email()).map(Possible::of).orElse(Possible.absent()))
-                .flags(userData.flags())
-                .premiumType(userData.premiumType())
-                .publicFlags(userData.publicFlags())
+    PresenceData toImmutable() {
+        UserData userData = ref.get().toImmutable();
+        return PresenceData.builder()
+                .user(PartialUserData.builder()
+                        .username(userData.username())
+                        .discriminator(userData.discriminator())
+                        .avatar(Possible.of(userData.avatar()))
+                        .bot(userData.bot())
+                        .system(userData.system())
+                        .mfaEnabled(userData.mfaEnabled())
+                        .locale(userData.locale())
+                        .verified(userData.verified())
+                        .email(Possible.flatOpt(userData.email()).map(Possible::of).orElse(Possible.absent()))
+                        .flags(userData.flags())
+                        .premiumType(userData.premiumType())
+                        .publicFlags(userData.publicFlags())
+                        .build())
+                .status(status)
+                .activities(activities)
+                .clientStatus(clientStatus)
                 .build();
-    }
-
-    @Override
-    public String status() {
-        return status;
-    }
-
-    @Override
-    public List<ActivityData> activities() {
-        return activities;
-    }
-
-    @Override
-    public ClientStatusData clientStatus() {
-        return clientStatus;
     }
 }

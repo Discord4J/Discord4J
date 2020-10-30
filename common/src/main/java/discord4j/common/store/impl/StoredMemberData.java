@@ -18,113 +18,86 @@
 package discord4j.common.store.impl;
 
 import discord4j.discordjson.json.MemberData;
-import discord4j.discordjson.json.UserData;
+import discord4j.discordjson.json.PartialMemberData;
 import discord4j.discordjson.json.gateway.GuildMemberUpdate;
 import discord4j.discordjson.possible.Possible;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
+
+import static discord4j.common.store.impl.ImplUtils.*;
 
 /**
- * MemberData with atomically mutable GuildMemberUpdate fields, mutable role ID set, and UserData taken from an
- * existing reference.
+ * Member data with snowflakes stored as long, with mutable role ID set, and with user data taken from an existing
+ * reference.
  */
-@SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-public class StoredMemberData implements MemberData {
+class StoredMemberData {
 
-    private static final AtomicReferenceFieldUpdater<StoredMemberData, MemberUpdateFields> UPDATER =
-            AtomicReferenceFieldUpdater.newUpdater(StoredMemberData.class, MemberUpdateFields.class,
-                    "memberUpdateFields");
-
-    private final AtomicReference<UserData> user;
+    private final AtomicReference<StoredUserData> user;
+    private final String nick_value;
+    private final boolean nick_absent;
+    private final Set<Long> roles;
     private final String joinedAt;
-    private final Optional<String> hoistedRole;
+    private final String premiumSince_value;
+    private final boolean premiumSince_absent;
+    private final String hoistedRole;
     private final boolean deaf;
     private final boolean mute;
-    private volatile MemberUpdateFields memberUpdateFields;
 
-    StoredMemberData(MemberData original, AtomicReference<UserData> user) {
+    StoredMemberData(MemberData original, AtomicReference<StoredUserData> user) {
         this.user = user;
+        this.nick_value = Possible.flatOpt(original.nick()).orElse(null);
+        this.nick_absent = original.nick().isAbsent();
+        this.roles = toLongIdSet(original.roles());
         this.joinedAt = original.joinedAt();
-        this.hoistedRole = original.hoistedRole();
+        this.premiumSince_value = Possible.flatOpt(original.premiumSince()).orElse(null);
+        this.premiumSince_absent = original.premiumSince().isAbsent();
+        this.hoistedRole = original.hoistedRole().orElse(null);
         this.deaf = original.deaf();
         this.mute = original.mute();
-        this.memberUpdateFields = new MemberUpdateFields(original);
     }
 
-    void update(GuildMemberUpdate update) {
-        for (;;) {
-            MemberUpdateFields current = memberUpdateFields;
-            if (!UPDATER.compareAndSet(this, current, new MemberUpdateFields(update))) {
-                continue;
-            }
-            user.set(update.user()); // Not part of the atomic operation, user is updated independently
-            return;
-        }
-    }
-
-    @Override
-    public UserData user() {
-        return user.get();
-    }
-
-    @Override
-    public Possible<Optional<String>> nick() {
-        return memberUpdateFields.nick;
-    }
-
-    @Override
-    public List<String> roles() {
-        return ImplUtils.toStringIdList(memberUpdateFields.roles);
+    StoredMemberData(StoredMemberData current, GuildMemberUpdate update) {
+        this.user = current.user;
+        user.set(new StoredUserData(update.user()));
+        this.nick_value = Possible.flatOpt(update.nick()).orElse(null);
+        this.nick_absent = update.nick().isAbsent();
+        this.roles = toLongIdSet(update.roles());
+        this.joinedAt = current.joinedAt;
+        this.premiumSince_value = Possible.flatOpt(update.premiumSince()).orElse(null);
+        this.premiumSince_absent = update.premiumSince().isAbsent();
+        this.hoistedRole = current.hoistedRole;
+        this.deaf = current.deaf;
+        this.mute = current.mute;
     }
 
     Set<Long> roleIdSet() {
-        return memberUpdateFields.roles;
+        return roles;
     }
 
-    @Override
-    public String joinedAt() {
-        return joinedAt;
+    MemberData toImmutable() {
+        return MemberData.builder()
+                .user(user.get().toImmutable())
+                .nick(toPossibleOptional(nick_value, nick_absent))
+                .roles(toStringIdList(roles))
+                .joinedAt(joinedAt)
+                .premiumSince(toPossibleOptional(premiumSince_value, premiumSince_absent))
+                .hoistedRole(Optional.ofNullable(hoistedRole))
+                .deaf(deaf)
+                .mute(mute)
+                .build();
     }
 
-    @Override
-    public Possible<Optional<String>> premiumSince() {
-        return memberUpdateFields.premiumSince;
-    }
-
-    @Override
-    public Optional<String> hoistedRole() {
-        return hoistedRole;
-    }
-
-    @Override
-    public boolean deaf() {
-        return deaf;
-    }
-
-    @Override
-    public boolean mute() {
-        return mute;
-    }
-
-    private static class MemberUpdateFields {
-        private final Possible<Optional<String>> nick;
-        private final Set<Long> roles;
-        private final Possible<Optional<String>> premiumSince;
-
-        private MemberUpdateFields(MemberData original) {
-            this.nick = original.nick();
-            this.roles = ImplUtils.toLongIdSet(original.roles());
-            this.premiumSince = original.premiumSince();
-        }
-
-        private MemberUpdateFields(GuildMemberUpdate update) {
-            this.nick = update.nick();
-            this.roles = ImplUtils.toLongIdSet(update.roles());
-            this.premiumSince = update.premiumSince();
-        }
+    PartialMemberData toPartialImmutable() {
+        return PartialMemberData.builder()
+                .nick(toPossibleOptional(nick_value, nick_absent))
+                .roles(toStringIdList(roles))
+                .joinedAt(joinedAt)
+                .premiumSince(toPossibleOptional(premiumSince_value, premiumSince_absent))
+                .hoistedRole(Optional.ofNullable(hoistedRole))
+                .deaf(deaf)
+                .mute(mute)
+                .build();
     }
 }

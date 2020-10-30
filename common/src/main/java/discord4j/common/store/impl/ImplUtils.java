@@ -20,18 +20,49 @@ package discord4j.common.store.impl;
 import discord4j.discordjson.json.*;
 import discord4j.discordjson.json.gateway.PresenceUpdate;
 import discord4j.discordjson.possible.Possible;
+import reactor.core.publisher.Flux;
 import reactor.util.annotation.Nullable;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentMap;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
 class ImplUtils {
 
     static long toLongId(String id) {
         return Long.parseUnsignedLong(id);
+    }
+
+    static Optional<Long> idFromPossibleString(Possible<String> id) {
+        return id.toOptional().map(ImplUtils::toLongId);
+    }
+
+    static Optional<Long> idFromPossibleOptionalString(Possible<Optional<String>> id) {
+        return Possible.flatOpt(id).map(ImplUtils::toLongId);
+    }
+
+    static <T> Possible<T> toPossible(@Nullable T value, boolean isAbsent) {
+        return isAbsent ? Possible.absent() : Possible.of(Objects.requireNonNull(value));
+    }
+
+    static <T> Possible<Optional<T>> toPossibleOptional(@Nullable T value, boolean isAbsent) {
+        return toPossibleOptional(value, isAbsent, false);
+    }
+
+    static <T> Possible<Optional<T>> toPossibleOptional(@Nullable T value, boolean isAbsent, boolean forceNull) {
+        return isAbsent ? Possible.absent() : Possible.of(forceNull ? Optional.empty() : Optional.ofNullable(value));
+    }
+
+    static Possible<String> toPossibleStringId(@Nullable Long id, boolean isAbsent) {
+        return isAbsent ? Possible.absent() : Possible.of("" + Objects.requireNonNull(id));
+    }
+
+    static Possible<Optional<String>> toPossibleOptionalStringId(@Nullable Long id, boolean isAbsent) {
+        return isAbsent ? Possible.absent() : Possible.of(Optional.ofNullable(id).map(String::valueOf));
     }
 
     static Set<Long> toLongIdSet(List<String> list) {
@@ -78,20 +109,56 @@ class ImplUtils {
                 .build();
     }
 
-    static UserData userFromMember(MemberData newMember, @Nullable UserData oldUser) {
-        return newMember.user();
+    static StoredUserData userFromMember(MemberData newMember, @Nullable StoredUserData oldUser) {
+        return new StoredUserData(newMember.user());
     }
 
-    static @Nullable UserData userFromPresence(PresenceData newPresence, @Nullable UserData oldUser) {
+    static StoredUserData userFromMessage(MessageData newMessage, @Nullable StoredUserData oldUser) {
+        return new StoredUserData(newMessage.author());
+    }
+
+    static StoredUserData userFromEmoji(EmojiData newEmoji, @Nullable StoredUserData oldUser) {
+        return new StoredUserData(newEmoji.user().get()); // this method is never called if absent
+    }
+
+    static @Nullable StoredUserData userFromPresence(PresenceData newPresence, @Nullable StoredUserData oldUser) {
         if (oldUser == null) return null;
         PartialUserData partialUserData = newPresence.user();
-        return UserData.builder()
-                .from(oldUser)
+        UserData oldUserImmutable = oldUser.toImmutable();
+        return new StoredUserData(UserData.builder()
+                .from(oldUserImmutable)
                 .username(partialUserData.username().toOptional()
-                        .orElse(oldUser.username()))
+                        .orElse(oldUserImmutable.username()))
                 .discriminator(partialUserData.discriminator().toOptional()
-                        .orElse(oldUser.discriminator()))
-                .avatar(or(Possible.flatOpt(partialUserData.avatar()), oldUser::avatar))
-                .build();
+                        .orElse(oldUserImmutable.discriminator()))
+                .avatar(or(Possible.flatOpt(partialUserData.avatar()), oldUserImmutable::avatar))
+                .build());
     }
+
+    static @Nullable <K, V> V atomicGetAndReplace(ConcurrentMap<K, V> map, K key,
+                                                  UnaryOperator<V> replaceFunction) {
+        for (;;) {
+            V oldV = map.get(key);
+            if (oldV == null) {
+                return null;
+            }
+            V newV = replaceFunction.apply(oldV);
+            if (!map.replace(key, oldV, newV)) {
+                continue;
+            }
+            return oldV;
+        }
+    }
+
+    static <T> Flux<T> fluxFromSynchronizedIterable(Iterable<? extends T> iterable) {
+        return Flux.create(sink -> {
+           synchronized (iterable) {
+               for (T element : iterable) {
+                   sink.next(element);
+               }
+           }
+           sink.complete();
+        });
+    }
+
 }
