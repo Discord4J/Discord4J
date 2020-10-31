@@ -61,12 +61,13 @@ class StoredMemberData {
     StoredMemberData(StoredMemberData current, GuildMemberUpdate update) {
         this.user = current.user;
         user.set(new StoredUserData(update.user()));
-        this.nick_value = Possible.flatOpt(update.nick()).orElse(null);
-        this.nick_absent = update.nick().isAbsent();
+        this.nick_value = Possible.flatOpt(update.nick()).orElse(update.nick().isAbsent() ? current.nick_value : null);
+        this.nick_absent = current.nick_absent && update.nick().isAbsent();
         this.roles = toLongIdSet(update.roles());
         this.joinedAt = current.joinedAt;
-        this.premiumSince_value = Possible.flatOpt(update.premiumSince()).orElse(null);
-        this.premiumSince_absent = update.premiumSince().isAbsent();
+        this.premiumSince_value = Possible.flatOpt(update.premiumSince())
+                .orElse(update.premiumSince().isAbsent() ? current.premiumSince_value : null);
+        this.premiumSince_absent = current.premiumSince_absent && update.premiumSince().isAbsent();
         this.hoistedRole = current.hoistedRole;
         this.deaf = current.deaf;
         this.mute = current.mute;

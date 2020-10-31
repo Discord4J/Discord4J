@@ -17,6 +17,7 @@
 
 package discord4j.common.store.impl;
 
+import discord4j.discordjson.json.PartialUserData;
 import discord4j.discordjson.json.UserData;
 import discord4j.discordjson.possible.Possible;
 
@@ -24,6 +25,9 @@ import java.util.Optional;
 
 import static discord4j.common.store.impl.ImplUtils.*;
 
+/**
+ * User data with snowflakes stored as long.
+ */
 class StoredUserData {
     private final long id;
     private final String username;
@@ -93,6 +97,23 @@ class StoredUserData {
                 .locale(toPossible(locale_value, locale_absent))
                 .verified(toPossible(verified_value, verified_absent))
                 .email(toPossibleOptional(email_value, email_absent))
+                .flags(toPossible(flags_value, flags_absent))
+                .premiumType(toPossible(premiumType_value, premiumType_absent))
+                .publicFlags(toPossible(publicFlags_value, publicFlags_absent))
+                .build();
+    }
+
+    PartialUserData toPartialImmutable() {
+        return PartialUserData.builder()
+                .username(username)
+                .discriminator("" + discriminator)
+                .avatar(Possible.of(Optional.ofNullable(avatar)))
+                .bot(toPossible(bot_value, bot_absent))
+                .system(toPossible(system_value, system_absent))
+                .mfaEnabled(toPossible(mfaEnabled_value, mfaEnabled_absent))
+                .locale(toPossible(locale_value, locale_absent))
+                .verified(toPossible(verified_value, verified_absent))
+                .email(email_absent || email_value == null ? Possible.absent() : Possible.of(email_value))
                 .flags(toPossible(flags_value, flags_absent))
                 .premiumType(toPossible(premiumType_value, premiumType_absent))
                 .publicFlags(toPossible(publicFlags_value, publicFlags_absent))

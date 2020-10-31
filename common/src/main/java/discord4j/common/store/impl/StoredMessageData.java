@@ -34,7 +34,8 @@ import java.util.stream.Collectors;
 import static discord4j.common.store.impl.ImplUtils.*;
 
 /**
- * Message data with snowflakes stored as long, and with atomically mutable reactions.
+ * Message data with snowflakes stored as long, with atomically mutable reactions, and with author data taken from an
+ * existing user reference.
  */
 class StoredMessageData {
     @SuppressWarnings("rawtypes")
@@ -107,15 +108,15 @@ class StoredMessageData {
         this.reactions = original.reactions().isAbsent()
                 ? null
                 : original.reactions().get().stream()
-                .map(StoredReactionData::new)
-                .collect(Collectors.toConcurrentMap(r -> new EmojiKey(r.emoji), Function.identity()));
+                        .map(StoredReactionData::new)
+                        .collect(Collectors.toConcurrentMap(r -> new EmojiKey(r.emoji), Function.identity()));
     }
 
     StoredMessageData(StoredMessageData current, PartialMessageData update) {
         this.id = current.id;
         this.channelId = toLongId(update.channelId());
-        this.guildId_value = idFromPossibleString(update.guildId()).orElse(-1L);
-        this.guildId_absent = update.guildId().isAbsent();
+        this.guildId_value = idFromPossibleString(update.guildId()).orElse(current.guildId_value);
+        this.guildId_absent = current.guildId_absent && update.guildId().isAbsent();
         this.author = current.author;
         this.content = update.content().toOptional().orElse(current.content);
         this.timestamp = update.timestamp().toOptional().orElse(current.timestamp);
@@ -124,29 +125,29 @@ class StoredMessageData {
         this.mentionEveryone = update.mentionEveryone().toOptional().orElse(current.mentionEveryone);
         this.mentions = update.mentions();
         this.mentionRoles = update.mentionRoles();
-        this.mentionChannels_value = update.mentionChannels().toOptional().orElse(null);
-        this.mentionChannels_absent = update.mentionChannels().isAbsent();
+        this.mentionChannels_value = update.mentionChannels().toOptional().orElse(current.mentionChannels_value);
+        this.mentionChannels_absent = current.mentionChannels_absent && update.mentionChannels().isAbsent();
         this.attachments = update.attachments();
         this.embeds = update.embeds();
-        this.nonce_value = update.nonce().toOptional().orElse(null);
-        this.nonce_absent = update.nonce().isAbsent();
+        this.nonce_value = update.nonce().toOptional().orElse(current.nonce_value);
+        this.nonce_absent = current.nonce_absent && update.nonce().isAbsent();
         this.pinned = update.pinned().toOptional().orElse(current.pinned);
-        this.webhookId_value = idFromPossibleString(update.webhookId()).orElse(-1L);
-        this.webhookId_absent = update.webhookId().isAbsent();
+        this.webhookId_value = idFromPossibleString(update.webhookId()).orElse(current.webhookId_value);
+        this.webhookId_absent = current.webhookId_absent && update.webhookId().isAbsent();
         this.type = update.type().toOptional().orElse(current.type);
-        this.activity_value = update.activity().toOptional().orElse(null);
-        this.activity_absent = update.activity().isAbsent();
-        this.application_value = update.application().toOptional().orElse(null);
-        this.application_absent = update.application().isAbsent();
-        this.messageReference_value = update.messageReference().toOptional().orElse(null);
-        this.messageReference_absent = update.messageReference().isAbsent();
-        this.flags_value = update.flags().toOptional().orElse(-1);
-        this.flags_absent = update.flags().isAbsent();
+        this.activity_value = update.activity().toOptional().orElse(current.activity_value);
+        this.activity_absent = current.activity_absent && update.activity().isAbsent();
+        this.application_value = update.application().toOptional().orElse(current.application_value);
+        this.application_absent = current.application_absent && update.application().isAbsent();
+        this.messageReference_value = update.messageReference().toOptional().orElse(current.messageReference_value);
+        this.messageReference_absent = current.messageReference_absent && update.messageReference().isAbsent();
+        this.flags_value = update.flags().toOptional().orElse(current.flags_value);
+        this.flags_absent = current.flags_absent && update.flags().isAbsent();
         this.reactions = update.reactions().isAbsent()
                 ? current.reactions
                 : update.reactions().get().stream()
-                .map(StoredReactionData::new)
-                .collect(Collectors.toConcurrentMap(r -> new EmojiKey(r.emoji), Function.identity()));
+                        .map(StoredReactionData::new)
+                        .collect(Collectors.toConcurrentMap(r -> new EmojiKey(r.emoji), Function.identity()));
     }
 
     long id() {
@@ -208,6 +209,7 @@ class StoredMessageData {
     }
 
     MessageData toImmutable(@Nullable StoredMemberData member) {
+        ConcurrentMap<EmojiKey, StoredReactionData> reactions = this.reactions;
         return MessageData.builder()
                 .id("" + id)
                 .channelId("" + channelId)

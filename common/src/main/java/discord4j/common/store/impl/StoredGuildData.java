@@ -166,6 +166,22 @@ class StoredGuildData {
         this.verificationLevel = original.verificationLevel();
     }
 
+    Set<Long> roleIdSet() {
+        return roles;
+    }
+
+    Set<Long> emojiIdSet() {
+        return emojis;
+    }
+
+    Set<Long> memberIdSet() {
+        return members;
+    }
+
+    Set<Long> channelIdSet() {
+        return channels;
+    }
+
     GuildData toImmutable() {
         return GuildData.builder()
                 .roles(toStringIdList(roles))
@@ -215,21 +231,5 @@ class StoredGuildData {
                 .approximatePresenceCount(toPossible(approximatePresenceCount_value, approximatePresenceCount_absent))
                 .verificationLevel(verificationLevel)
                 .build();
-    }
-
-    Set<Long> roleIdSet() {
-        return roles;
-    }
-
-    Set<Long> emojiIdSet() {
-        return emojis;
-    }
-
-    Set<Long> memberIdSet() {
-        return members;
-    }
-
-    Set<Long> channelIdSet() {
-        return channels;
     }
 }

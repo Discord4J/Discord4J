@@ -25,6 +25,9 @@ import java.util.Optional;
 
 import static discord4j.common.store.impl.ImplUtils.*;
 
+/**
+ * Voice state data with snowflakes stored as long.
+ */
 class StoredVoiceStateData {
     private final long guildId_value;
     private final boolean guildId_absent;

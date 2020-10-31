@@ -17,14 +17,16 @@
 
 package discord4j.common.store.impl;
 
-import discord4j.discordjson.json.*;
-import discord4j.discordjson.possible.Possible;
+import discord4j.discordjson.json.ActivityData;
+import discord4j.discordjson.json.ClientStatusData;
+import discord4j.discordjson.json.PartialUserData;
+import discord4j.discordjson.json.PresenceData;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
- * PresenceData with a UserData taken from an existing reference.
+ * Presence data with user data taken from an existing reference.
  */
 class StoredPresenceData {
 
@@ -41,22 +43,9 @@ class StoredPresenceData {
     }
 
     PresenceData toImmutable() {
-        UserData userData = ref.get().toImmutable();
+        PartialUserData partialUser = ref.get().toPartialImmutable();
         return PresenceData.builder()
-                .user(PartialUserData.builder()
-                        .username(userData.username())
-                        .discriminator(userData.discriminator())
-                        .avatar(Possible.of(userData.avatar()))
-                        .bot(userData.bot())
-                        .system(userData.system())
-                        .mfaEnabled(userData.mfaEnabled())
-                        .locale(userData.locale())
-                        .verified(userData.verified())
-                        .email(Possible.flatOpt(userData.email()).map(Possible::of).orElse(Possible.absent()))
-                        .flags(userData.flags())
-                        .premiumType(userData.premiumType())
-                        .publicFlags(userData.publicFlags())
-                        .build())
+                .user(partialUser)
                 .status(status)
                 .activities(activities)
                 .clientStatus(clientStatus)

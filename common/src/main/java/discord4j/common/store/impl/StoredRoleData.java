@@ -21,6 +21,9 @@ import discord4j.discordjson.json.RoleData;
 
 import static discord4j.common.store.impl.ImplUtils.toLongId;
 
+/**
+ * Role data with snowflakes stored as long.
+ */
 class StoredRoleData {
 
     private final long id;

@@ -404,7 +404,8 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
 
     @Override
     public Mono<Void> onChannelCreate(int shardIndex, ChannelCreate dispatch) {
-        return Mono.fromRunnable(() -> saveChannel(dispatch.channel()));
+        return Mono.fromRunnable(() -> dispatch.channel().guildId().toOptional()
+                .ifPresent(guildId -> saveChannel(toLongId(guildId), dispatch.channel())));
     }
 
     @Override
@@ -425,7 +426,9 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
 
     @Override
     public Mono<ChannelData> onChannelUpdate(int shardIndex, ChannelUpdate dispatch) {
-        return Mono.fromCallable(() -> saveChannel(dispatch.channel()));
+        return Mono.fromCallable(() -> dispatch.channel().guildId().toOptional()
+                .map(guildId -> saveChannel(toLongId(guildId), dispatch.channel()))
+                .orElse(null));
     }
 
     @Override
@@ -458,7 +461,7 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
                                     roles.forEach(role -> saveRole(guildId, role));
                                     emojis.forEach(emoji -> saveEmoji(guildId, emoji));
                                     members.forEach(member -> saveMember(guildId, member));
-                                    channels.forEach(this::saveChannel);
+                                    channels.forEach(channel -> saveChannel(guildId, channel));
                                     presences.forEach(presence -> savePresence(guildId, presence));
                                     voiceStates.forEach(voiceState -> saveOrRemoveVoiceState(guildId, voiceState));
                                 }
@@ -734,20 +737,15 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
         return contentByChannel.computeIfAbsent(channelId, ChannelContent::new);
     }
 
-    private @Nullable ChannelData saveChannel(ChannelData channel) {
-        return channel.guildId().toOptional()
-                .map(ImplUtils::toLongId)
-                .map(guildId -> {
-                    long channelId = toLongId(channel.id());
-                    GuildContent guildContent = computeGuildContent(guildId);
-                    synchronized (guildContent.channelIds) {
-                        guildContent.channelIds.add(channelId);
-                        ifNonNullDo(guilds.get(guildId), guild -> guild.channelIdSet().add(channelId));
-                        return ifNonNullMap(channels.put(channelId, new StoredChannelData(channel)),
-                                StoredChannelData::toImmutable);
-                    }
-                })
-                .orElse(null);
+    private @Nullable ChannelData saveChannel(long guildId, ChannelData channel) {
+        long channelId = toLongId(channel.id());
+        GuildContent guildContent = computeGuildContent(guildId);
+        synchronized (guildContent.channelIds) {
+            guildContent.channelIds.add(channelId);
+            ifNonNullDo(guilds.get(guildId), guild -> guild.channelIdSet().add(channelId));
+            return ifNonNullMap(channels.put(channelId, new StoredChannelData(channel)),
+                    StoredChannelData::toImmutable);
+        }
     }
 
     private @Nullable RoleData saveRole(long guildId, RoleData role) {
