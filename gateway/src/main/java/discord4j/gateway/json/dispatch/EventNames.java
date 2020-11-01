@@ -58,4 +58,8 @@ public abstract class EventNames {
     // Ignored
     public static final String PRESENCES_REPLACE = "PRESENCES_REPLACE";
     public static final String GIFT_CODE_UPDATE = "GIFT_CODE_UPDATE";
+    public static final String INTEGRATION_CREATE = "INTEGRATION_CREATE";
+    public static final String INTEGRATION_UPDATE = "INTEGRATION_UPDATE";
+    public static final String INTEGRATION_DELETE = "INTEGRATION_DELETE";
+
 }
