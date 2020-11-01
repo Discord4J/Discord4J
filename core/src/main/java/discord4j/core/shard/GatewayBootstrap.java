@@ -23,6 +23,7 @@ import discord4j.common.annotations.Experimental;
 import discord4j.common.retry.ReconnectOptions;
 import discord4j.common.store.Store;
 import discord4j.common.store.action.gateway.GatewayActions;
+import discord4j.common.store.impl.LocalStoreLayout;
 import discord4j.common.util.Snowflake;
 import discord4j.core.CoreResources;
 import discord4j.core.DiscordClient;
@@ -892,7 +893,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
         if (store != null) {
             return store;
         }
-        return Store.noOp(); // TODO replace with actual default layout
+        return Store.fromLayout(LocalStoreLayout.create());
     }
 
     private Multimap<String, Object> getGatewayParameters() {

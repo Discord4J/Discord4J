@@ -32,6 +32,20 @@ import java.util.function.UnaryOperator;
 public interface StorageBackend {
 
     /**
+     * Represents a backend that doesn't store anything.
+     *
+     * @return a {@link StorageBackend}
+     */
+    static StorageBackend noOp() {
+        return new StorageBackend() {
+            @Override
+            public <K, V> ConcurrentMap<K, V> newMap(@Nullable RemovalListener<K, V> removalListener) {
+                return new NoOpMap<>();
+            }
+        };
+    }
+
+    /**
      * Represents a {@link ConcurrentHashMap} backend.
      *
      * @return a {@link StorageBackend}

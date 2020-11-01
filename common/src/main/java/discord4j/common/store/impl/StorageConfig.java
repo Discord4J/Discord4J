@@ -21,7 +21,6 @@ package discord4j.common.store.impl;
 import discord4j.common.store.api.object.InvalidationCause;
 import reactor.util.annotation.Nullable;
 
-import java.time.Duration;
 import java.util.EnumSet;
 
 /**
@@ -47,9 +46,7 @@ public class StorageConfig {
     }
 
     private static StorageBackend defaultMessageBackend() {
-        return StorageBackend.caffeine(builder -> builder
-                .expireAfterAccess(Duration.ofDays(14))
-                .maximumSize(100L));
+        return StorageBackend.caffeine(builder -> builder.maximumSize(1000L));
     }
 
     private static EnumSet<InvalidationCause> defaultInvalidationFilter() {
@@ -84,7 +81,7 @@ public class StorageConfig {
 
         /**
          * Sets the {@link StorageBackend} to use for message caching. By default it uses a backend based on Caffeine
-         * that keeps only the 100 last messages of each channel that are less than 2 weeks old.
+         * that keeps only the last 1000 messages.
          *
          * @param messageBackend the {@link StorageBackend}, or null to use default
          * @return this builder
@@ -97,7 +94,8 @@ public class StorageConfig {
         /**
          * Sets the filter represented as a subset of {@link InvalidationCause} to apply when a shard is invalidated.
          * Only the causes included in the set will trigger cleanup of data related to the shard that's being
-         * invalidated.
+         * invalidated. By default no filter is applied and data will be cleared on shard invalidation regardless of
+         * the reason ({@code EnumSet.allOf(InvalidationCause.class)})
          *
          * @param invalidationFilter the filter as an {@link EnumSet}, or null to use default
          * @return this builder
