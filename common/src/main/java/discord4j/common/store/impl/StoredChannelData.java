@@ -19,16 +19,18 @@ package discord4j.common.store.impl;
 
 import discord4j.discordjson.json.ChannelData;
 import discord4j.discordjson.json.OverwriteData;
-import discord4j.discordjson.json.UserData;
 import discord4j.discordjson.possible.Possible;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
 import static discord4j.common.store.impl.ImplUtils.*;
 
 /**
- * Channel data with snowflakes stored as long, and with mutable lastMessageId.
+ * Channel data with snowflakes stored as long, with mutable lastMessageId, and with recipients taken from existing
+ * user references.
  */
 class StoredChannelData {
 
@@ -52,7 +54,7 @@ class StoredChannelData {
     private final boolean userLimit_absent;
     private final int rateLimitPerUser_value;
     private final boolean rateLimitPerUser_absent;
-    private final List<UserData> recipients_value;
+    private final List<AtomicReference<StoredUserData>> recipients_value;
     private final boolean recipients_absent;
     private final String icon_value;
     private final boolean icon_absent;
@@ -66,7 +68,7 @@ class StoredChannelData {
     private final boolean lastPinTimestamp_absent;
     private volatile long lastMessageId; // -1 = absent, 0 = null
     
-    StoredChannelData(ChannelData original) {
+    StoredChannelData(ChannelData original, List<AtomicReference<StoredUserData>> recipients) {
         this.id = toLongId(original.id());
         this.type = original.type();
         this.guildId_value = idFromPossibleString(original.guildId()).orElse(-1L);
@@ -87,7 +89,7 @@ class StoredChannelData {
         this.userLimit_absent = original.userLimit().isAbsent();
         this.rateLimitPerUser_value = original.rateLimitPerUser().toOptional().orElse(-1);
         this.rateLimitPerUser_absent = original.rateLimitPerUser().isAbsent();
-        this.recipients_value = original.recipients().toOptional().orElse(null);
+        this.recipients_value = original.recipients().isAbsent() ? null : recipients;
         this.recipients_absent = original.recipients().isAbsent();
         this.icon_value = Possible.flatOpt(original.icon()).orElse(null);
         this.icon_absent = original.icon().isAbsent();
@@ -130,7 +132,9 @@ class StoredChannelData {
                 .bitrate(toPossible(bitrate_value, bitrate_absent))
                 .userLimit(toPossible(userLimit_value, userLimit_absent))
                 .rateLimitPerUser(toPossible(rateLimitPerUser_value, rateLimitPerUser_absent))
-                .recipients(toPossible(recipients_value, recipients_absent))
+                .recipients(toPossible(ifNonNullMap(recipients_value, list -> list.stream()
+                        .map(ref -> ref.get().toImmutable())
+                        .collect(Collectors.toList())), recipients_absent))
                 .icon(toPossibleOptional(icon_value, icon_absent))
                 .ownerId(toPossibleStringId(ownerId_value, ownerId_absent))
                 .applicationId(toPossibleStringId(applicationId_value, applicationId_absent))

@@ -24,7 +24,7 @@ import reactor.util.annotation.Nullable;
 import java.util.EnumSet;
 
 /**
- * Holds the storage configuration for each type of entity cache.
+ * Holds the storage configuration for a {@link LocalStoreLayout}.
  */
 public class StorageConfig {
 
