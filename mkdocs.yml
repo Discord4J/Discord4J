@@ -11,6 +11,7 @@ nav:
     - 'Frequently Asked Questions': 'Frequently-Asked-Questions.md'
     - 'Migrating from v2.x to v3.1': 'Migrating-from-v2.x-to-v3.1.md'
     - 'Migrating from v3.0 to v3.1': 'Migrating-from-v3.0-to-v3.1.md'
+    - 'Versions': 'Versions.md'
   - 'Exploring the API':
     - 'Specs': 'Specs.md'
     - 'What''s new in v3.1': 'What''s-new-in-v3.1.md'
