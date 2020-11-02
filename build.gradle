@@ -232,7 +232,7 @@ release {
 }
 
 task updateReadme {
-    if (isRelease && !version.contains('M') && version.contains('RC')) {
+    if (isRelease && !version.contains('M') && !version.contains('RC')) {
         doLast {
             copy {
                 from '.github/README_TEMPLATE.md'
