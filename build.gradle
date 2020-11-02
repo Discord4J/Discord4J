@@ -209,7 +209,7 @@ def buildDocsUrl(String project) {
         def docVersion = System.getenv('GIT_COMMIT')
         return "https://javadoc.jitpack.io/com/discord4j/discord4j/$project/$docVersion/javadoc/" as String
     } else {
-        def docVersion = isRelease ? "$version" : "3.0"
+        def docVersion = isRelease ? "$version" : "3.1"
         return "https://www.javadoc.io/page/com.discord4j/$project/$docVersion/" as String
     }
 }
@@ -232,12 +232,14 @@ release {
 }
 
 task updateReadme {
-    doLast {
-        copy {
-            from '.github/README_TEMPLATE.md'
-            into '.'
-            rename { 'README.md' }
-            expand version: version
+    if (isRelease && !version.contains('M') && version.contains('RC')) {
+        doLast {
+            copy {
+                from '.github/README_TEMPLATE.md'
+                into '.'
+                rename { 'README.md' }
+                expand version: version
+            }
         }
     }
 }
