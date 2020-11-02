@@ -90,6 +90,7 @@ public class DefaultGatewayClient implements GatewayClient {
     private final PayloadTransformer identifyLimiter;
     private final ResettableInterval heartbeat;
     private final int maxMissedHeartbeatAck;
+    private final boolean unpooled;
 
     // reactive pipelines
     private final EmitterProcessor<ByteBuf> receiver = EmitterProcessor.create(false);
@@ -133,6 +134,7 @@ public class DefaultGatewayClient implements GatewayClient {
         this.observer = options.getInitialObserver();
         this.identifyLimiter = Objects.requireNonNull(options.getIdentifyLimiter());
         this.maxMissedHeartbeatAck = Math.max(0, options.getMaxMissedHeartbeatAck());
+        this.unpooled = options.isUnpooled();
         // TODO: consider exposing OverflowStrategy to GatewayOptions
         this.receiverSink = receiver.sink(FluxSink.OverflowStrategy.BUFFER);
         this.senderSink = sender.sink(FluxSink.OverflowStrategy.ERROR);
@@ -203,7 +205,7 @@ public class DefaultGatewayClient implements GatewayClient {
                             .then();
 
                     // Subscribe the receiver to process and transform the inbound payloads into Dispatch events
-                    Mono<Void> receiverFuture = receiver.map(ByteBuf::retain)
+                    Mono<Void> receiverFuture = receiver.map(buf -> unpooled ? buf : buf.retain())
                             .doOnNext(buf -> logPayload(receiverLog, context, buf))
                             .flatMap(payloadReader::read)
                             .doOnDiscard(ByteBuf.class, DefaultGatewayClient::safeRelease)

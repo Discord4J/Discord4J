@@ -210,6 +210,15 @@ public final class Webhook implements Entity {
     }
 
     /**
+     * Gets the bot/OAuth2 application ID that created this webhook.
+     *
+     * @return The bot/OAuth2 application ID that created this webhook.
+     */
+    public Optional<Snowflake> getApplicationId() {
+        return data.applicationId().map(Snowflake::of);
+    }
+
+    /**
      * Requests to delete this webhook. Requires the MANAGE_WEBHOOKS permission.
      *
      * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the webhook has been deleted.

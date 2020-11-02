@@ -59,6 +59,7 @@ public class GatewayWebsocketHandler {
     private final Flux<ByteBuf> outbound;
     private final MonoProcessor<DisconnectBehavior> sessionClose;
     private final Context context;
+    private final boolean unpooled;
 
     /**
      * Create a new handler with the given data pipelines.
@@ -68,10 +69,16 @@ public class GatewayWebsocketHandler {
      * @param context the Reactor {@link Context} that owns this handler, to enrich logging
      */
     public GatewayWebsocketHandler(FluxSink<ByteBuf> inbound, Flux<ByteBuf> outbound, Context context) {
+        this(inbound, outbound, context, false);
+    }
+
+    public GatewayWebsocketHandler(FluxSink<ByteBuf> inbound, Flux<ByteBuf> outbound, Context context,
+                                   boolean unpooled) {
         this.inbound = inbound;
         this.outbound = outbound;
         this.sessionClose = MonoProcessor.create();
         this.context = context;
+        this.unpooled = unpooled;
     }
 
     /**
@@ -121,7 +128,7 @@ public class GatewayWebsocketHandler {
                 .map(WebSocketFrame::content)
                 .transformDeferred(decompressor::completeMessages)
                 .doOnNext(inbound::next)
-                .doOnNext(GatewayWebsocketHandler::safeRelease)
+                .doOnNext(this::safeRelease)
                 .then();
 
         return Mono.zip(outboundEvents, inboundEvents)
@@ -160,8 +167,8 @@ public class GatewayWebsocketHandler {
         close(DisconnectBehavior.retryAbruptly(error));
     }
 
-    private static void safeRelease(ByteBuf buf) {
-        if (buf.refCnt() > 0) {
+    private void safeRelease(ByteBuf buf) {
+        if (!unpooled && buf.refCnt() > 0) {
             try {
                 buf.release();
             } catch (IllegalReferenceCountException e) {

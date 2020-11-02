@@ -199,8 +199,9 @@ public class GatewayBootstrap<O extends GatewayOptions> {
 
     /**
      * Set the sharding method to use while building a {@link GatewayDiscordClient}. Defaults to creating all shards
-     * given by the recommended amount from Discord. Built-in factories like {@link ShardingStrategy#fixed(int)} to use
-     * a predefined number of shards, or customize the strategy using {@link ShardingStrategy#builder()}.
+     * given by the recommended amount from Discord, which is equivalent to {@link ShardingStrategy#recommended()}.
+     * Built-in factories like {@link ShardingStrategy#fixed(int)} to use a predefined number of shards, or customize
+     * the strategy using {@link ShardingStrategy#builder()}.
      * <p>
      * For example, it is possible to define the {@code shardCount} parameter independently from the number of shards
      * to create and connect to Gateway by using:
@@ -539,7 +540,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
     /**
      * Set the maximum number of missed heartbeat acknowledge payloads each connection to Gateway will allow before
      * triggering an automatic reconnect. A missed acknowledge is counted if a client does not receive a heartbeat
-     * ACK between its attempts at sending heartbeats.
+     * ACK between its attempts at sending heartbeats. Defaults to 1.
      *
      * @param maxMissedHeartbeatAck a non-negative number representing the maximum number of allowed
      * @return this builder

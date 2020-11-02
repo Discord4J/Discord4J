@@ -253,6 +253,14 @@ public class GuildService extends RestService {
 
     public Flux<IntegrationData> getGuildIntegrations(long guildId) {
         return Routes.GUILD_INTEGRATIONS_GET.newRequest(guildId)
+            .exchange(getRouter())
+            .bodyToMono(IntegrationData[].class)
+            .flatMapMany(Flux::fromArray);
+    }
+
+    public Flux<IntegrationData> getGuildIntegrations(long guildId, boolean includeApplications) {
+        return Routes.GUILD_INTEGRATIONS_GET.newRequest(guildId)
+                .query("include_applications", includeApplications)
                 .exchange(getRouter())
                 .bodyToMono(IntegrationData[].class)
                 .flatMapMany(Flux::fromArray);

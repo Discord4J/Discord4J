@@ -16,10 +16,7 @@
  */
 package discord4j.gateway;
 
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufAllocator;
-import io.netty.buffer.ByteBufUtil;
-import io.netty.buffer.CompositeByteBuf;
+import io.netty.buffer.*;
 import reactor.core.Exceptions;
 import reactor.core.publisher.Flux;
 
@@ -40,9 +37,15 @@ public class ZlibDecompressor {
 
     private final ByteBufAllocator allocator;
     private final Inflater context = new Inflater();
+    private final boolean unpooled;
 
     public ZlibDecompressor(ByteBufAllocator allocator) {
+        this(allocator, false);
+    }
+
+    public ZlibDecompressor(ByteBufAllocator allocator, boolean unpooled) {
         this.allocator = allocator;
+        this.unpooled = unpooled;
     }
 
     public Flux<ByteBuf> completeMessages(Flux<ByteBuf> payloads) {
@@ -62,7 +65,8 @@ public class ZlibDecompressor {
                     ByteArrayOutputStream out = new ByteArrayOutputStream();
                     try (InflaterOutputStream inflater = new InflaterOutputStream(out, context)) {
                         inflater.write(ByteBufUtil.getBytes(buf, buf.readerIndex(), buf.readableBytes(), false));
-                        return allocator.buffer().writeBytes(out.toByteArray()).asReadOnly();
+                        ByteBuf outBuffer = unpooled ? Unpooled.buffer() : allocator.buffer();
+                        return outBuffer.writeBytes(out.toByteArray()).asReadOnly();
                     } catch (IOException e) {
                         throw Exceptions.propagate(e);
                     }

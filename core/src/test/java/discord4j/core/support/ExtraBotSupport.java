@@ -57,6 +57,7 @@ public class ExtraBotSupport {
         eventHandlers.add(new Reactor());
         eventHandlers.add(new UserInfo());
         eventHandlers.add(new ReactionRemove());
+        eventHandlers.add(new LeaveGuild());
 
         return client.on(MessageCreateEvent.class,
                 event -> ownerId.filter(
@@ -282,6 +283,19 @@ public class ExtraBotSupport {
                 String[] tokens = message.getContent().split(" ");
                 return event.getClient().getMessageById(Snowflake.of(tokens[1]), Snowflake.of(tokens[2]))
                         .flatMap(m -> m.removeReactions(ReactionEmoji.unicode("✅")));
+            }
+            return Mono.empty();
+        }
+    }
+
+    public static class LeaveGuild extends EventHandler {
+
+        @Override
+        public Mono<Void> onMessageCreate(MessageCreateEvent event) {
+            Message message = event.getMessage();
+            if (message.getContent().startsWith("!leave ")) {
+                String[] tokens = message.getContent().split(" ");
+                return event.getClient().getGuildById(Snowflake.of(tokens[1])).flatMap(Guild::leave);
             }
             return Mono.empty();
         }

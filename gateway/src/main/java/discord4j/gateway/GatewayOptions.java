@@ -38,11 +38,20 @@ public class GatewayOptions {
     private final GatewayObserver initialObserver;
     private final PayloadTransformer identifyLimiter;
     private final int maxMissedHeartbeatAck;
+    private final boolean unpooled;
 
     public GatewayOptions(String token, GatewayReactorResources reactorResources, PayloadReader payloadReader,
                           PayloadWriter payloadWriter, ReconnectOptions reconnectOptions,
                           IdentifyOptions identifyOptions, GatewayObserver initialObserver,
                           PayloadTransformer identifyLimiter, int maxMissedHeartbeatAck) {
+        this(token, reactorResources, payloadReader, payloadWriter, reconnectOptions, identifyOptions, initialObserver,
+                identifyLimiter, maxMissedHeartbeatAck, false);
+    }
+
+    public GatewayOptions(String token, GatewayReactorResources reactorResources, PayloadReader payloadReader,
+                          PayloadWriter payloadWriter, ReconnectOptions reconnectOptions,
+                          IdentifyOptions identifyOptions, GatewayObserver initialObserver,
+                          PayloadTransformer identifyLimiter, int maxMissedHeartbeatAck, boolean unpooled) {
         this.token = Objects.requireNonNull(token, "token");
         this.reactorResources = Objects.requireNonNull(reactorResources, "reactorResources");
         this.payloadReader = Objects.requireNonNull(payloadReader, "payloadReader");
@@ -52,6 +61,7 @@ public class GatewayOptions {
         this.initialObserver = Objects.requireNonNull(initialObserver, "initialObserver");
         this.identifyLimiter = Objects.requireNonNull(identifyLimiter, "identifyLimiter");
         this.maxMissedHeartbeatAck = maxMissedHeartbeatAck;
+        this.unpooled = unpooled;
     }
 
     public String getToken() {
@@ -88,5 +98,9 @@ public class GatewayOptions {
 
     public int getMaxMissedHeartbeatAck() {
         return maxMissedHeartbeatAck;
+    }
+
+    public boolean isUnpooled() {
+        return unpooled;
     }
 }
