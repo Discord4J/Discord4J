@@ -19,7 +19,7 @@ package discord4j.core.event.dispatch;
 
 import discord4j.common.annotations.Experimental;
 import discord4j.core.event.domain.Event;
-import discord4j.store.api.Store;
+import discord4j.common.store.Store;
 import reactor.core.publisher.Mono;
 
 /**
@@ -38,7 +38,7 @@ public interface DispatchEventMapper {
      * @return a {@link Mono} of {@link Event} mapped from the given {@link DispatchContext} object, or empty if no
      * Event is produced. If an error occurs during processing, it is emitted through the {@code Mono}.
      */
-    <D, E extends Event> Mono<E> handle(DispatchContext<D> context);
+    <D, S, E extends Event> Mono<E> handle(DispatchContext<D, S> context);
 
     /**
      * Create a {@link DispatchEventMapper} that processes updates and records them into the right {@link Store},
@@ -60,7 +60,7 @@ public interface DispatchEventMapper {
         DispatchHandlers handlers = new DispatchHandlers();
         return new DispatchEventMapper() {
             @Override
-            public <D, E extends Event> Mono<E> handle(DispatchContext<D> context) {
+            public <D, S, E extends Event> Mono<E> handle(DispatchContext<D, S> context) {
                 // TODO improve DispatchHandlers to avoid creating Event objects to then discard here
                 return handlers.handle(context).then(Mono.empty());
             }
@@ -75,7 +75,7 @@ public interface DispatchEventMapper {
     static DispatchEventMapper noOp() {
         return new DispatchEventMapper() {
             @Override
-            public <D, E extends Event> Mono<E> handle(DispatchContext<D> context) {
+            public <D, S, E extends Event> Mono<E> handle(DispatchContext<D, S> context) {
                 return Mono.empty();
             }
         };

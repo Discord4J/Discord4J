@@ -21,6 +21,7 @@ package discord4j.core;
 import discord4j.common.JacksonResources;
 import discord4j.common.LogUtil;
 import discord4j.common.ReactorResources;
+import discord4j.common.store.action.read.ReadActions;
 import discord4j.common.util.Snowflake;
 import discord4j.core.event.EventDispatcher;
 import discord4j.core.event.domain.Event;
@@ -92,11 +93,13 @@ public class GatewayDiscordClient implements EntityRetriever {
     private final VoiceConnectionFactory voiceConnectionFactory;
     private final VoiceConnectionRegistry voiceConnectionRegistry;
     private final EntityRetriever entityRetriever;
+    private final Set<String> completingChunkNonces;
 
     public GatewayDiscordClient(DiscordClient discordClient, GatewayResources gatewayResources,
                                 MonoProcessor<Void> closeProcessor, GatewayClientGroup gatewayClientGroup,
                                 VoiceConnectionFactory voiceConnectionFactory,
-                                EntityRetrievalStrategy entityRetrievalStrategy) {
+                                EntityRetrievalStrategy entityRetrievalStrategy,
+                                Set<String> completingChunkNonces) {
         this.discordClient = discordClient;
         this.gatewayResources = gatewayResources;
         this.closeProcessor = closeProcessor;
@@ -104,6 +107,7 @@ public class GatewayDiscordClient implements EntityRetriever {
         this.voiceConnectionFactory = voiceConnectionFactory;
         this.voiceConnectionRegistry = new LocalVoiceConnectionRegistry();
         this.entityRetriever = entityRetrievalStrategy.apply(this);
+        this.completingChunkNonces = completingChunkNonces;
     }
 
     /**
@@ -246,9 +250,8 @@ public class GatewayDiscordClient implements EntityRetriever {
      * error is received, it is emitted through the {@code Flux}.
      */
     public Flux<User> getUsers() {
-        return gatewayResources.getStateView().getUserStore()
-                .values()
-                .map(bean -> new User(this, bean));
+        return Flux.from(gatewayResources.getStore().execute(ReadActions.getUsers()))
+                .map(data -> new User(this, data));
     }
 
     /**
@@ -561,7 +564,13 @@ public class GatewayDiscordClient implements EntityRetriever {
                         RequestGuildMembers.builder()
                                 .from(request)
                                 .nonce(nonce)
-                                .build(), shardId)))
+                                .build(), shardId))
+                        .then(Mono.fromRunnable(() -> {
+                            if (request.query().toOptional().map(String::isEmpty).orElse(false)
+                                    && request.limit() == 0) {
+                                completingChunkNonces.add(nonce);
+                            }
+                        })))
                 .thenMany(Flux.defer(incomingMembers));
     }
 

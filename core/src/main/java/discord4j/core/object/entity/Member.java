@@ -16,6 +16,7 @@
  */
 package discord4j.core.object.entity;
 
+import discord4j.common.store.action.read.ReadActions;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.VoiceState;
@@ -29,7 +30,6 @@ import discord4j.discordjson.json.MemberData;
 import discord4j.discordjson.possible.Possible;
 import discord4j.rest.util.Color;
 import discord4j.rest.util.PermissionSet;
-import discord4j.store.api.util.LongLongTuple2;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.math.MathFlux;
@@ -233,8 +233,8 @@ public final class Member extends User {
      * for this guild. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<VoiceState> getVoiceState() {
-        return getClient().getGatewayResources().getStateView().getVoiceStateStore()
-                .find(LongLongTuple2.of(getGuildId().asLong(), getId().asLong()))
+        return Mono.from(getClient().getGatewayResources().getStore()
+                .execute(ReadActions.getVoiceStateById(getGuildId().asLong(), getId().asLong())))
                 .map(bean -> new VoiceState(getClient(), bean));
     }
 
@@ -245,8 +245,8 @@ public final class Member extends User {
      * this guild. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Presence> getPresence() {
-        return getClient().getGatewayResources().getStateView().getPresenceStore()
-                .find(LongLongTuple2.of(getGuildId().asLong(), getId().asLong()))
+        return Mono.from(getClient().getGatewayResources().getStore()
+                .execute(ReadActions.getPresenceById(getGuildId().asLong(), getId().asLong())))
                 .map(Presence::new);
     }
 

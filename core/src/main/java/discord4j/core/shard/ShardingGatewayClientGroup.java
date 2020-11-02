@@ -60,6 +60,7 @@ class ShardingGatewayClientGroup implements GatewayClientGroupManager {
     @Override
     public Mono<Void> multicast(GatewayPayload<?> payload) {
         return Flux.fromIterable(map.values())
+            
                 .flatMap(client -> client.send(Mono.just(payload)))
                 .then();
     }

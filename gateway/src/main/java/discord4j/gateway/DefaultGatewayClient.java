@@ -30,10 +30,7 @@ import discord4j.gateway.json.GatewayPayload;
 import discord4j.gateway.limiter.PayloadTransformer;
 import discord4j.gateway.payload.PayloadReader;
 import discord4j.gateway.payload.PayloadWriter;
-import discord4j.gateway.retry.GatewayException;
-import discord4j.gateway.retry.GatewayRetrySpec;
-import discord4j.gateway.retry.GatewayStateChange;
-import discord4j.gateway.retry.ReconnectException;
+import discord4j.gateway.retry.*;
 import io.netty.buffer.ByteBuf;
 import io.netty.util.IllegalReferenceCountException;
 import org.reactivestreams.Publisher;
@@ -334,6 +331,9 @@ public class DefaultGatewayClient implements GatewayClient {
                     } else {
                         dispatchSink.next(GatewayStateChange.retryFailed(attempt - 1, backoff));
                         notifyObserver(GatewayObserver.RETRY_FAILED);
+                    }
+                    if (retry.nextState() == GatewayConnection.State.RECONNECTING) {
+                        dispatchSink.next(GatewayStateChange.sessionInvalidated());
                     }
                 });
     }

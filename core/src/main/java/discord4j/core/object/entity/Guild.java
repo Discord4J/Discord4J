@@ -16,6 +16,7 @@
  */
 package discord4j.core.object.entity;
 
+import discord4j.common.store.action.read.ReadActions;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.Ban;
@@ -37,7 +38,6 @@ import discord4j.discordjson.json.NicknameModifyData;
 import discord4j.discordjson.possible.Possible;
 import discord4j.rest.util.Image;
 import discord4j.rest.util.PaginationUtil;
-import discord4j.store.api.util.LongLongTuple2;
 import discord4j.voice.VoiceConnection;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -736,9 +736,8 @@ public final class Guild implements Entity {
      * received, it is emitted through the {@code Flux}.
      */
     public Flux<VoiceState> getVoiceStates() {
-        return gateway.getGatewayResources().getStateView().getVoiceStateStore()
-                .findInRange(LongLongTuple2.of(getId().asLong(), Long.MIN_VALUE),
-                        LongLongTuple2.of(getId().asLong(), Long.MAX_VALUE))
+        return Flux.from(gateway.getGatewayResources().getStore()
+                .execute(ReadActions.getVoiceStatesInGuild(getId().asLong())))
                 .map(data -> new VoiceState(gateway, data));
     }
 
@@ -871,9 +870,8 @@ public final class Guild implements Entity {
      * received, it is emitted through the {@code Flux}.
      */
     public Flux<Presence> getPresences() {
-        return gateway.getGatewayResources().getStateView().getPresenceStore()
-                .findInRange(LongLongTuple2.of(getId().asLong(), Long.MIN_VALUE),
-                        LongLongTuple2.of(getId().asLong(), Long.MAX_VALUE))
+        return Flux.from(gateway.getGatewayResources().getStore()
+                .execute(ReadActions.getPresencesInGuild(getId().asLong())))
                 .map(Presence::new);
     }
 

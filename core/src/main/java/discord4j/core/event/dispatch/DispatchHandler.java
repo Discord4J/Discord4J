@@ -24,10 +24,11 @@ import reactor.core.publisher.Mono;
  * Handler for the gateway Dispatch events.
  *
  * @param <D> the inbound Dispatch type
+ * @param <S> the old state type
  * @param <E> the outbound Event type
  */
 @FunctionalInterface
-public interface DispatchHandler<D, E extends Event> {
+public interface DispatchHandler<D, S, E extends Event> {
 
     /**
      * Operates and transforms a Dispatch event with its context, from gateway to user-friendly Events, so it may be
@@ -38,5 +39,5 @@ public interface DispatchHandler<D, E extends Event> {
      * @param context the dispatch context
      * @return a Flux of Events that are derived from the given dispatch context
      */
-    Mono<E> handle(DispatchContext<D> context);
+    Mono<E> handle(DispatchContext<D, S> context);
 }

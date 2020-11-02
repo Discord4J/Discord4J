@@ -16,33 +16,30 @@
  */
 package discord4j.core.event.dispatch;
 
+import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.message.*;
 import discord4j.core.object.Embed;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.reaction.ReactionEmoji;
-import discord4j.core.util.ListUtil;
-import discord4j.discordjson.json.*;
+import discord4j.discordjson.json.MemberData;
+import discord4j.discordjson.json.MessageData;
+import discord4j.discordjson.json.PartialMessageData;
 import discord4j.discordjson.json.gateway.*;
-import discord4j.discordjson.possible.Possible;
-import discord4j.common.util.Snowflake;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 class MessageDispatchHandlers {
 
-    static Mono<MessageCreateEvent> messageCreate(DispatchContext<MessageCreate> context) {
+    static Mono<MessageCreateEvent> messageCreate(DispatchContext<MessageCreate, Void> context) {
         GatewayDiscordClient gateway = context.getGateway();
         MessageData message = context.getDispatch().message();
-        long messageId = Snowflake.asLong(message.id());
-        long channelId = Snowflake.asLong(message.channelId());
 
         Optional<Member> maybeMember = context.getDispatch().message().guildId().toOptional()
                 .map(Snowflake::asLong)
@@ -61,27 +58,14 @@ class MessageDispatchHandlers {
                                 .user(message.author())
                                 .build(), guildId)));
 
-        Mono<Void> saveMessage = context.getStateHolder().getMessageStore()
-                .save(messageId, message);
-
-        Mono<Void> editLastMessageId = context.getStateHolder().getChannelStore()
-                .find(channelId)
-                .map(channel -> ChannelData.builder()
-                        .from(channel)
-                        .lastMessageId(message.id())
-                        .build())
-                .flatMap(channelBean -> context.getStateHolder().getChannelStore().save(channelId, channelBean));
-
-        return saveMessage
-                .and(editLastMessageId)
-                .thenReturn(new MessageCreateEvent(gateway, context.getShardInfo(), new Message(gateway, message),
+        return Mono.just(new MessageCreateEvent(gateway, context.getShardInfo(), new Message(gateway, message),
                         context.getDispatch().message().guildId().toOptional()
                                 .map(Snowflake::asLong)
                                 .orElse(null),
                         maybeMember.orElse(null)));
     }
 
-    static Mono<MessageDeleteEvent> messageDelete(DispatchContext<MessageDelete> context) {
+    static Mono<MessageDeleteEvent> messageDelete(DispatchContext<MessageDelete, MessageData> context) {
         GatewayDiscordClient gateway = context.getGateway();
         long messageId = Snowflake.asLong(context.getDispatch().id());
         long channelId = Snowflake.asLong(context.getDispatch().channelId());
@@ -90,17 +74,15 @@ class MessageDispatchHandlers {
             .map(Snowflake::asLong)
             .orElse(null);
 
-        Mono<Void> deleteMessage = context.getStateHolder().getMessageStore().delete(messageId);
+        Message oldMessage = context.getOldState()
+                .map(data -> new Message(gateway, data))
+                .orElse(null);
 
-        return context.getStateHolder().getMessageStore()
-                .find(messageId)
-                .flatMap(deleteMessage::thenReturn)
-                .map(messageBean -> new MessageDeleteEvent(gateway, context.getShardInfo(), messageId, channelId, guildId,
-                        new Message(gateway, messageBean)))
-                .defaultIfEmpty(new MessageDeleteEvent(gateway, context.getShardInfo(), messageId, channelId, guildId, null));
+        return Mono.just(new MessageDeleteEvent(gateway, context.getShardInfo(), messageId, channelId, guildId,
+                oldMessage));
     }
 
-    static Mono<MessageBulkDeleteEvent> messageDeleteBulk(DispatchContext<MessageDeleteBulk> context) {
+    static Mono<MessageBulkDeleteEvent> messageDeleteBulk(DispatchContext<MessageDeleteBulk, Set<MessageData>> context) {
         GatewayDiscordClient gateway = context.getGateway();
         List<Long> messageIds = context.getDispatch().ids().stream()
                 .map(Snowflake::asLong)
@@ -108,21 +90,17 @@ class MessageDispatchHandlers {
         long channelId = Snowflake.asLong(context.getDispatch().channelId());
         long guildId = Snowflake.asLong(context.getDispatch().guildId().get()); // always present
 
-        Mono<Void> deleteMessages = context.getStateHolder().getMessageStore()
-                .delete(Flux.fromIterable(messageIds));
+        Set<Message> deletedMessages = context.getOldState()
+                .map(oldState -> oldState.stream()
+                        .map(data -> new Message(gateway, data))
+                        .collect(Collectors.toSet()))
+                .orElse(Collections.emptySet());
 
-        return Flux.fromIterable(messageIds)
-                .flatMap(context.getStateHolder().getMessageStore()::find)
-                .map(messageBean -> new Message(gateway, messageBean))
-                .collect(Collectors.toSet())
-                .flatMap(deleteMessages::thenReturn)
-                .map(messages -> new MessageBulkDeleteEvent(gateway, context.getShardInfo(), messageIds, channelId,
-                        guildId, messages))
-                .defaultIfEmpty(new MessageBulkDeleteEvent(gateway, context.getShardInfo(), messageIds, channelId,
-                        guildId, Collections.emptySet()));
+        return Mono.just(new MessageBulkDeleteEvent(gateway, context.getShardInfo(), messageIds, channelId,
+                        guildId, deletedMessages));
     }
 
-    static Mono<ReactionAddEvent> messageReactionAdd(DispatchContext<MessageReactionAdd> context) {
+    static Mono<ReactionAddEvent> messageReactionAdd(DispatchContext<MessageReactionAdd, Void> context) {
         GatewayDiscordClient gateway = context.getGateway();
         long userId = Snowflake.asLong(context.getDispatch().userId());
         long channelId = Snowflake.asLong(context.getDispatch().channelId());
@@ -133,56 +111,6 @@ class MessageDispatchHandlers {
                 .orElse(null);
 
         MemberData memberData = context.getDispatch().member().toOptional().orElse(null);
-
-        Mono<Void> addToMessage = context.getStateHolder().getMessageStore()
-                .find(messageId)
-                .map(oldMessage -> {
-                    boolean me = Objects.equals(userId, gateway.getSelfId().asLong());
-                    ImmutableMessageData.Builder newMessageBuilder = MessageData.builder().from(oldMessage);
-
-                    if (oldMessage.reactions().isAbsent()) {
-                        newMessageBuilder.addReaction(ReactionData.builder()
-                                .count(1)
-                                .me(me)
-                                .emoji(context.getDispatch().emoji())
-                                .build());
-                    } else {
-                        List<ReactionData> reactions = oldMessage.reactions().get();
-                        int i;
-                        for (i = 0; i < reactions.size(); i++) {
-                            ReactionData r = reactions.get(i);
-                            // (non-null id && matching id) OR (null id && matching name)
-                            boolean emojiHasId = context.getDispatch().emoji().id().isPresent();
-                            if ((emojiHasId && context.getDispatch().emoji().id().equals(r.emoji().id()))
-                                    || (!emojiHasId && context.getDispatch().emoji().name().equals(r.emoji().name()))) {
-                                break;
-                            }
-                        }
-
-                        if (i < reactions.size()) {
-                            // message already has this reaction: bump 1
-                            ReactionData oldExisting = reactions.get(i);
-                            ReactionData newExisting = ReactionData.builder()
-                                    .from(oldExisting)
-                                    .me(oldExisting.me() || me)
-                                    .count(oldExisting.count() + 1)
-                                    .build();
-                            newMessageBuilder.reactions(ListUtil.replace(reactions,
-                                    oldExisting, newExisting));
-                        } else {
-                            // message doesn't have this reaction: create
-                            ReactionData reaction = ReactionData.builder()
-                                    .emoji(context.getDispatch().emoji())
-                                    .me(me)
-                                    .count(1)
-                                    .build();
-                            newMessageBuilder.reactions(ListUtil.add(reactions, reaction));
-                        }
-                    }
-
-                    return newMessageBuilder.build();
-                })
-                .flatMap(message -> context.getStateHolder().getMessageStore().save(messageId, message));
 
         Long emojiId = context.getDispatch().emoji().id()
                 .map(Snowflake::asLong)
@@ -196,11 +124,11 @@ class MessageDispatchHandlers {
         @SuppressWarnings("ConstantConditions")
         Member member = memberData != null ? new Member(gateway, memberData, guildId) : null;
 
-        return addToMessage.thenReturn(new ReactionAddEvent(gateway, context.getShardInfo(), userId, channelId,
+        return Mono.just(new ReactionAddEvent(gateway, context.getShardInfo(), userId, channelId,
                 messageId, guildId, emoji, member));
     }
 
-    static Mono<ReactionRemoveEvent> messageReactionRemove(DispatchContext<MessageReactionRemove> context) {
+    static Mono<ReactionRemoveEvent> messageReactionRemove(DispatchContext<MessageReactionRemove, Void> context) {
         GatewayDiscordClient gateway = context.getGateway();
         long userId = Snowflake.asLong(context.getDispatch().userId());
         long channelId = Snowflake.asLong(context.getDispatch().channelId());
@@ -210,44 +138,6 @@ class MessageDispatchHandlers {
                 .map(Snowflake::asLong)
                 .orElse(null);
 
-        Mono<Void> removeFromMessage = context.getStateHolder().getMessageStore()
-                .find(messageId)
-                .filter(message -> !message.reactions().isAbsent())
-                .map(oldMessage -> {
-                    boolean me = Objects.equals(userId, gateway.getSelfId().asLong());
-                    ImmutableMessageData.Builder newMessageBuilder = MessageData.builder().from(oldMessage);
-
-                    List<ReactionData> reactions = oldMessage.reactions().get();
-                    int i;
-                    // filter covers getReactions() null case
-                    for (i = 0; i < reactions.size(); i++) {
-                        ReactionData r = reactions.get(i);
-                        // (non-null id && matching id) OR (null id && matching name)
-                        boolean emojiHasId = context.getDispatch().emoji().id().isPresent();
-                        if ((emojiHasId && context.getDispatch().emoji().id().equals(r.emoji().id()))
-                                || (!emojiHasId && context.getDispatch().emoji().name().equals(r.emoji().name()))) {
-                            break;
-                        }
-                    }
-
-                    if (i < reactions.size()) {
-                        ReactionData existing = reactions.get(i);
-                        if (existing.count() - 1 == 0) {
-                            newMessageBuilder.reactions(ListUtil.remove(reactions,
-                                    reaction -> reaction.equals(existing)));
-                        } else {
-                            ReactionData newExisting = ReactionData.builder()
-                                    .from(existing)
-                                    .count(existing.count() - 1)
-                                    .me(!me && existing.me())
-                                    .build();
-                            newMessageBuilder.reactions(ListUtil.replace(reactions, existing, newExisting));
-                        }
-                    }
-                    return newMessageBuilder.build();
-                })
-                .flatMap(message -> context.getStateHolder().getMessageStore().save(messageId, message));
-
         Long emojiId = context.getDispatch().emoji().id()
                 .map(Snowflake::asLong)
                 .orElse(null);
@@ -257,11 +147,11 @@ class MessageDispatchHandlers {
                 .toOptional()
                 .orElse(false);
         ReactionEmoji emoji = ReactionEmoji.of(emojiId, emojiName, emojiAnimated);
-        return removeFromMessage.thenReturn(new ReactionRemoveEvent(gateway, context.getShardInfo(), userId,
+        return Mono.just(new ReactionRemoveEvent(gateway, context.getShardInfo(), userId,
                 channelId, messageId, guildId, emoji));
     }
 
-    static Mono<ReactionRemoveEmojiEvent> messageReactionRemoveEmoji(DispatchContext<MessageReactionRemoveEmoji> context) {
+    static Mono<ReactionRemoveEmojiEvent> messageReactionRemoveEmoji(DispatchContext<MessageReactionRemoveEmoji, Void> context) {
         GatewayDiscordClient gateway = context.getGateway();
         long channelId = Snowflake.asLong(context.getDispatch().channelId());
         long messageId = Snowflake.asLong(context.getDispatch().messageId());
@@ -269,34 +159,6 @@ class MessageDispatchHandlers {
                 .toOptional()
                 .map(Snowflake::asLong)
                 .orElse(null);
-
-        Mono<Void> removeFromMessage = context.getStateHolder().getMessageStore()
-                .find(messageId)
-                .filter(message -> !message.reactions().isAbsent())
-                .map(oldMessage -> {
-                    ImmutableMessageData.Builder newMessageBuilder = MessageData.builder().from(oldMessage);
-
-                    List<ReactionData> reactions = oldMessage.reactions().get();
-                    int i;
-                    // filter covers getReactions() null case
-                    for (i = 0; i < reactions.size(); i++) {
-                        ReactionData r = reactions.get(i);
-                        // (non-null id && matching id) OR (null id && matching name)
-                        boolean emojiHasId = context.getDispatch().emoji().id().isPresent();
-                        if ((emojiHasId && context.getDispatch().emoji().id().equals(r.emoji().id()))
-                                || (!emojiHasId && context.getDispatch().emoji().name().equals(r.emoji().name()))) {
-                            break;
-                        }
-                    }
-
-                    if (i < reactions.size()) {
-                        ReactionData existing = reactions.get(i);
-                        newMessageBuilder.reactions(ListUtil.remove(reactions,
-                                reaction -> reaction.equals(existing)));
-                    }
-                    return newMessageBuilder.build();
-                })
-                .flatMap(message -> context.getStateHolder().getMessageStore().save(messageId, message));
 
         Long emojiId = context.getDispatch().emoji().id()
                 .map(Snowflake::asLong)
@@ -307,11 +169,11 @@ class MessageDispatchHandlers {
                 .toOptional()
                 .orElse(false);
         ReactionEmoji emoji = ReactionEmoji.of(emojiId, emojiName, emojiAnimated);
-        return removeFromMessage.thenReturn(new ReactionRemoveEmojiEvent(gateway, context.getShardInfo(), channelId,
+        return Mono.just(new ReactionRemoveEmojiEvent(gateway, context.getShardInfo(), channelId,
                 messageId, guildId, emoji));
     }
 
-    static Mono<ReactionRemoveAllEvent> messageReactionRemoveAll(DispatchContext<MessageReactionRemoveAll> context) {
+    static Mono<ReactionRemoveAllEvent> messageReactionRemoveAll(DispatchContext<MessageReactionRemoveAll, Void> context) {
         GatewayDiscordClient gateway = context.getGateway();
         long channelId = Snowflake.asLong(context.getDispatch().channelId());
         long messageId = Snowflake.asLong(context.getDispatch().messageId());
@@ -320,19 +182,11 @@ class MessageDispatchHandlers {
                 .map(Snowflake::asLong)
                 .orElse(null);
 
-        Mono<Void> removeAllFromMessage = context.getStateHolder().getMessageStore()
-                .find(messageId)
-                .map(message -> MessageData.builder()
-                        .from(message)
-                        .reactions(Possible.absent())
-                        .build())
-                .flatMap(message -> context.getStateHolder().getMessageStore().save(messageId, message));
-
-        return removeAllFromMessage.thenReturn(new ReactionRemoveAllEvent(gateway, context.getShardInfo(), channelId,
+        return Mono.just(new ReactionRemoveAllEvent(gateway, context.getShardInfo(), channelId,
                 messageId, guildId));
     }
 
-    static Mono<MessageUpdateEvent> messageUpdate(DispatchContext<MessageUpdate> context) {
+    static Mono<MessageUpdateEvent> messageUpdate(DispatchContext<MessageUpdate, MessageData> context) {
         GatewayDiscordClient gateway = context.getGateway();
         PartialMessageData messageData = context.getDispatch().message();
 
@@ -349,44 +203,12 @@ class MessageDispatchHandlers {
                 .map(embedData -> new Embed(gateway, embedData))
                 .collect(Collectors.toList());
 
-        Mono<MessageUpdateEvent> update = context.getStateHolder().getMessageStore()
-                .find(messageId)
-                .flatMap(oldMessageData -> {
-                    // updating the content and embed of the bean in the store
-                    Message oldMessage = new Message(gateway, oldMessageData);
+        Message oldMessage = context.getOldState()
+            .map(data -> new Message(gateway, data))
+            .orElse(null);
 
-                    boolean contentChanged = !messageData.content().isAbsent() &&
-                            !Objects.equals(oldMessageData.content(), messageData.content().get());
-                    boolean embedsChanged = !Objects.equals(oldMessageData.embeds(), messageData.embeds());
-
-                    MessageData newMessageData = MessageData.builder()
-                            .from(oldMessageData)
-                            .content(messageData.content().toOptional()
-                                    .orElse(oldMessageData.content()))
-                            .embeds(messageData.embeds())
-                            .mentions(messageData.mentions())
-                            .mentionRoles(messageData.mentionRoles())
-                            .mentionEveryone(messageData.mentionEveryone().toOptional()
-                                    .orElse(oldMessageData.mentionEveryone()))
-                            .editedTimestamp(messageData.editedTimestamp())
-                            .build();
-
-                    MessageUpdateEvent event = new MessageUpdateEvent(gateway, context.getShardInfo(), messageId,
-                            channelId, guildId, oldMessage, contentChanged, currentContent, embedsChanged, embedList);
-
-                    return context.getStateHolder().getMessageStore()
-                            .save(messageId, newMessageData)
-                            .thenReturn(event);
-                });
-
-        MessageUpdateEvent event = new MessageUpdateEvent(gateway, context.getShardInfo(), messageId, channelId,
-                guildId, null, !messageData.content().isAbsent(),
-                currentContent, !messageData.embeds().isEmpty(), embedList);
-
-        return update.defaultIfEmpty(event);
-    }
-
-    static <T> Possible<T> newPossibleIfPresent(Possible<T> oldPossible, Possible<T> newPossible) {
-        return newPossible.isAbsent() ? oldPossible : newPossible;
+        return Mono.just(new MessageUpdateEvent(gateway, context.getShardInfo(), messageId, channelId,
+                guildId, oldMessage, !messageData.content().isAbsent(),
+                currentContent, !messageData.embeds().isEmpty(), embedList));
     }
 }
