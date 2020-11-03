@@ -23,8 +23,6 @@ import discord4j.discordjson.possible.Possible;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
 
 import static discord4j.common.store.impl.ImplUtils.*;
 
@@ -36,8 +34,7 @@ class StoredChannelData {
 
     private final long id;
     private final int type;
-    private final long guildId_value;
-    private final boolean guildId_absent;
+    private final long guildId;
     private final int position_value;
     private final boolean position_absent;
     private final List<OverwriteData> permissionOverwrites_value;
@@ -54,25 +51,16 @@ class StoredChannelData {
     private final boolean userLimit_absent;
     private final int rateLimitPerUser_value;
     private final boolean rateLimitPerUser_absent;
-    private final List<AtomicReference<StoredUserData>> recipients_value;
-    private final boolean recipients_absent;
-    private final String icon_value;
-    private final boolean icon_absent;
-    private final long ownerId_value;
-    private final boolean ownerId_absent;
-    private final long applicationId_value;
-    private final boolean applicationId_absent;
     private final long parentId_value;
     private final boolean parentId_absent;
     private final String lastPinTimestamp_value;
     private final boolean lastPinTimestamp_absent;
     private volatile long lastMessageId; // -1 = absent, 0 = null
     
-    StoredChannelData(ChannelData original, List<AtomicReference<StoredUserData>> recipients) {
+    StoredChannelData(ChannelData original, long guildId) {
         this.id = toLongId(original.id());
         this.type = original.type();
-        this.guildId_value = idFromPossibleString(original.guildId()).orElse(-1L);
-        this.guildId_absent = original.guildId().isAbsent();
+        this.guildId = guildId;
         this.position_value = original.position().toOptional().orElse(-1);
         this.position_absent = original.position().isAbsent();
         this.permissionOverwrites_value = original.permissionOverwrites().toOptional().orElse(null);
@@ -89,14 +77,6 @@ class StoredChannelData {
         this.userLimit_absent = original.userLimit().isAbsent();
         this.rateLimitPerUser_value = original.rateLimitPerUser().toOptional().orElse(-1);
         this.rateLimitPerUser_absent = original.rateLimitPerUser().isAbsent();
-        this.recipients_value = original.recipients().isAbsent() ? null : recipients;
-        this.recipients_absent = original.recipients().isAbsent();
-        this.icon_value = Possible.flatOpt(original.icon()).orElse(null);
-        this.icon_absent = original.icon().isAbsent();
-        this.ownerId_value = idFromPossibleString(original.ownerId()).orElse(-1L);
-        this.ownerId_absent = original.ownerId().isAbsent();
-        this.applicationId_value = idFromPossibleString(original.applicationId()).orElse(-1L);
-        this.applicationId_absent = original.applicationId().isAbsent();
         this.parentId_value = idFromPossibleOptionalString(original.parentId()).orElse(-1L);
         this.parentId_absent = original.parentId().isAbsent();
         this.lastPinTimestamp_value = Possible.flatOpt(original.lastPinTimestamp()).orElse(null);
@@ -122,7 +102,7 @@ class StoredChannelData {
         return ChannelData.builder()
                 .id("" + id)
                 .type(type)
-                .guildId(toPossibleStringId(guildId_value, guildId_absent))
+                .guildId(Possible.of("" + guildId))
                 .position(toPossible(position_value, position_absent))
                 .permissionOverwrites(toPossible(permissionOverwrites_value, permissionOverwrites_absent))
                 .name(toPossible(name_value, name_absent))
@@ -132,12 +112,10 @@ class StoredChannelData {
                 .bitrate(toPossible(bitrate_value, bitrate_absent))
                 .userLimit(toPossible(userLimit_value, userLimit_absent))
                 .rateLimitPerUser(toPossible(rateLimitPerUser_value, rateLimitPerUser_absent))
-                .recipients(toPossible(ifNonNullMap(recipients_value, list -> list.stream()
-                        .map(ref -> ref.get().toImmutable())
-                        .collect(Collectors.toList())), recipients_absent))
-                .icon(toPossibleOptional(icon_value, icon_absent))
-                .ownerId(toPossibleStringId(ownerId_value, ownerId_absent))
-                .applicationId(toPossibleStringId(applicationId_value, applicationId_absent))
+                .recipients(Possible.absent())
+                .icon(Possible.absent())
+                .ownerId(Possible.absent())
+                .applicationId(Possible.absent())
                 .parentId(toPossibleOptionalStringId(parentId_value, parentId_absent))
                 .lastPinTimestamp(toPossibleOptional(lastPinTimestamp_value, lastPinTimestamp_absent))
                 .build();

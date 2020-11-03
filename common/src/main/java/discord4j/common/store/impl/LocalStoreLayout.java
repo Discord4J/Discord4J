@@ -743,14 +743,7 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
         synchronized (guildContent.channelIds) {
             guildContent.channelIds.add(channelId);
             ifNonNullDo(guilds.get(guildId), guild -> guild.channelIdSet().add(channelId));
-            List<AtomicReference<StoredUserData>> recipients = channel.recipients().toOptional()
-                    .map(list -> list.stream()
-                            .map(user -> computeUserRef(toLongId(user.id()), user,
-                                    (newUser, oldUser) -> new StoredUserData(newUser)))
-                            .map(Objects::requireNonNull)
-                            .collect(Collectors.toList()))
-                    .orElse(Collections.emptyList());
-            return ifNonNullMap(channels.put(channelId, new StoredChannelData(channel, recipients)),
+            return ifNonNullMap(channels.put(channelId, new StoredChannelData(channel, guildId)),
                     StoredChannelData::toImmutable);
         }
     }
