@@ -18,15 +18,15 @@
 package discord4j.rest.request;
 
 import reactor.core.publisher.MonoProcessor;
-import reactor.util.context.Context;
+import reactor.util.context.ContextView;
 
 class RequestCorrelation<T> {
 
     private final DiscordWebRequest request;
     private final MonoProcessor<T> response;
-    private final Context context;
+    private final ContextView context;
 
-    RequestCorrelation(DiscordWebRequest request, MonoProcessor<T> response, Context context) {
+    RequestCorrelation(DiscordWebRequest request, MonoProcessor<T> response, ContextView context) {
         this.request = request;
         this.response = response;
         this.context = context;
@@ -40,7 +40,7 @@ class RequestCorrelation<T> {
         return response;
     }
 
-    public Context getContext() {
+    public ContextView getContext() {
         return context;
     }
 }

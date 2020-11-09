@@ -34,7 +34,7 @@ import reactor.netty.http.websocket.WebsocketInbound;
 import reactor.netty.http.websocket.WebsocketOutbound;
 import reactor.util.Logger;
 import reactor.util.Loggers;
-import reactor.util.context.Context;
+import reactor.util.context.ContextView;
 import reactor.util.function.Tuple2;
 
 import static discord4j.common.LogUtil.format;
@@ -58,7 +58,7 @@ public class GatewayWebsocketHandler {
     private final FluxSink<ByteBuf> inbound;
     private final Flux<ByteBuf> outbound;
     private final MonoProcessor<DisconnectBehavior> sessionClose;
-    private final Context context;
+    private final ContextView context;
     private final boolean unpooled;
 
     /**
@@ -66,13 +66,13 @@ public class GatewayWebsocketHandler {
      *
      * @param inbound the {@link FluxSink} of {@link ByteBuf} to process inbound payloads
      * @param outbound the {@link Flux} of {@link ByteBuf} to process outbound payloads
-     * @param context the Reactor {@link Context} that owns this handler, to enrich logging
+     * @param context the Reactor {@link ContextView} that owns this handler, to enrich logging
      */
-    public GatewayWebsocketHandler(FluxSink<ByteBuf> inbound, Flux<ByteBuf> outbound, Context context) {
+    public GatewayWebsocketHandler(FluxSink<ByteBuf> inbound, Flux<ByteBuf> outbound, ContextView context) {
         this(inbound, outbound, context, false);
     }
 
-    public GatewayWebsocketHandler(FluxSink<ByteBuf> inbound, Flux<ByteBuf> outbound, Context context,
+    public GatewayWebsocketHandler(FluxSink<ByteBuf> inbound, Flux<ByteBuf> outbound, ContextView context,
                                    boolean unpooled) {
         this.inbound = inbound;
         this.outbound = outbound;

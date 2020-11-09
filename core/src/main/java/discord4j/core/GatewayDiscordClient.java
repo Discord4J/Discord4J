@@ -451,7 +451,7 @@ public class GatewayDiscordClient implements EntityRetriever {
      */
     public <E extends Event> Flux<E> on(Class<E> eventClass) {
         return getEventDispatcher().on(eventClass)
-                .subscriberContext(ctx -> ctx.put(LogUtil.KEY_GATEWAY_ID, Integer.toHexString(hashCode())));
+                .contextWrite(ctx -> ctx.put(LogUtil.KEY_GATEWAY_ID, Integer.toHexString(hashCode())));
     }
 
     /**

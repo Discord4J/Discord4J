@@ -56,7 +56,7 @@ public class DefaultRouter implements Router {
 
     @Override
     public DiscordWebResponse exchange(DiscordWebRequest request) {
-        return new DiscordWebResponse(Mono.deferWithContext(
+        return new DiscordWebResponse(Mono.deferContextual(
                 ctx -> {
                     RequestStream stream = getStream(request);
                     MonoProcessor<ClientResponse> callback = MonoProcessor.create();

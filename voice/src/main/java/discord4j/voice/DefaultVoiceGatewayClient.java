@@ -45,6 +45,7 @@ import reactor.netty.http.client.WebsocketClientSpec;
 import reactor.util.Logger;
 import reactor.util.Loggers;
 import reactor.util.context.Context;
+import reactor.util.context.ContextView;
 import reactor.util.retry.Retry;
 import reactor.util.retry.RetrySpec;
 
@@ -107,7 +108,7 @@ public class DefaultVoiceGatewayClient {
 
     private volatile int ssrc;
     private volatile MonoProcessor<CloseStatus> disconnectNotifier;
-    private volatile Context currentContext;
+    private volatile ContextView currentContext;
     private volatile VoiceWebsocketHandler sessionHandler;
 
     public DefaultVoiceGatewayClient(VoiceGatewayOptions options) {
@@ -151,7 +152,7 @@ public class DefaultVoiceGatewayClient {
     public Mono<VoiceConnection> start(VoiceServerOptions voiceServerOptions, String session) {
         return Mono.create(sink -> sink.onRequest(d -> {
             Disposable connect = connect(voiceServerOptions, session, sink)
-                    .subscriberContext(sink.currentContext())
+                    .contextWrite(sink.currentContext())
                     .subscribe(null,
                             t -> log.debug(format(sink.currentContext(), "Voice gateway error: {}"), t.toString()),
                             () -> log.debug(format(sink.currentContext(), "Voice gateway completed")));
@@ -161,7 +162,7 @@ public class DefaultVoiceGatewayClient {
 
     private Mono<Void> connect(VoiceServerOptions vso, String sessionId,
                                MonoSink<VoiceConnection> voiceConnectionSink) {
-        return Mono.deferWithContext(
+        return Mono.deferContextual(
                 context -> {
                     serverOptions.compareAndSet(null, vso);
                     session.compareAndSet(null, sessionId);
@@ -206,7 +207,7 @@ public class DefaultVoiceGatewayClient {
                                             .zipWith(voiceSocket.performIpDiscovery(ready.getData().getSsrc()))
                                             .timeout(ipDiscoveryTimeout)
                                             .retryWhen(ipDiscoveryRetrySpec)
-                                            .subscriberContext(context)
+                                            .contextWrite(context)
                                             .onErrorMap(t -> new VoiceGatewayException(context,
                                                     "UDP socket setup error", t))
                                             .subscribe(TupleUtils.consumer((connection, address) -> {
@@ -271,7 +272,7 @@ public class DefaultVoiceGatewayClient {
                                     .build())
                             .uri(serverOptions.get().getEndpoint() + "?v=4")
                             .handle((in, out) -> onOpen.then(sessionHandler.handle(in, out)))
-                            .subscriberContext(LogUtil.clearContext())
+                            .contextWrite(LogUtil.clearContext())
                             .flatMap(t2 -> handleClose(t2.getT1(), t2.getT2()))
                             .then();
 
@@ -281,7 +282,7 @@ public class DefaultVoiceGatewayClient {
                             .doOnCancel(() -> sessionHandler.close())
                             .then();
                 })
-                .subscriberContext(ctx -> ctx.put(LogUtil.KEY_GUILD_ID, guildId.asString()))
+                .contextWrite(ctx -> ctx.put(LogUtil.KEY_GUILD_ID, guildId.asString()))
                 .retryWhen(retryFactory())
                 .then(Mono.defer(() -> disconnectNotifier.then()))
                 .doOnSubscribe(s -> {
@@ -291,7 +292,7 @@ public class DefaultVoiceGatewayClient {
                 });
     }
 
-    private ConnectionObserver getObserver(Context context) {
+    private ConnectionObserver getObserver(ContextView context) {
         return (connection, newState) -> log.debug(format(context, "{} {}"), newState, connection);
     }
 
@@ -333,7 +334,7 @@ public class DefaultVoiceGatewayClient {
             }
 
             @Override
-            public Mono<Void> reconnect(Function<Context, Throwable> errorCause) {
+            public Mono<Void> reconnect(Function<ContextView, Throwable> errorCause) {
                 return onConnectOrDisconnect()
                         .flatMap(s -> s.equals(State.CONNECTED) ?
                                 Mono.fromRunnable(() -> sessionHandler.close(
@@ -360,7 +361,7 @@ public class DefaultVoiceGatewayClient {
         });
     }
 
-    private void logPayload(Logger logger, Context context, ByteBuf buf) {
+    private void logPayload(Logger logger, ContextView context, ByteBuf buf) {
         logger.trace(format(context, buf.toString(StandardCharsets.UTF_8)
                 .replaceAll("(\"token\": ?\")([A-Za-z0-9._-]*)(\")", "$1hunter2$3")));
     }
@@ -376,7 +377,7 @@ public class DefaultVoiceGatewayClient {
                 });
     }
 
-    private Context getContextFromException(Throwable t) {
+    private ContextView getContextFromException(Throwable t) {
         if (t instanceof CloseException) {
             return ((CloseException) t).getContext();
         }
@@ -387,7 +388,7 @@ public class DefaultVoiceGatewayClient {
     }
 
     private Mono<CloseStatus> handleClose(DisconnectBehavior sourceBehavior, CloseStatus closeStatus) {
-        return Mono.deferWithContext(ctx -> {
+        return Mono.deferContextual(ctx -> {
             DisconnectBehavior behavior;
             if (VoiceGatewayRetrySpec.NON_RETRYABLE_STATUS_CODES.contains(closeStatus.getCode())) {
                 // non-retryable close codes are non-transient errors therefore stopping is the only choice

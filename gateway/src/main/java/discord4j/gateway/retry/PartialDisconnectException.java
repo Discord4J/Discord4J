@@ -17,11 +17,11 @@
 
 package discord4j.gateway.retry;
 
-import reactor.util.context.Context;
+import reactor.util.context.ContextView;
 
 public class PartialDisconnectException extends GatewayException {
 
-    public PartialDisconnectException(Context context) {
+    public PartialDisconnectException(ContextView context) {
         super(context);
     }
 }

@@ -119,16 +119,16 @@ class RequestStream {
                 HttpClientResponse httpResponse = response.getHttpResponse();
                 if (log.isDebugEnabled()) {
                     Instant requestTimestamp =
-                            Instant.ofEpochMilli(httpResponse.currentContext().get(DiscordWebClient.KEY_REQUEST_TIMESTAMP));
+                            Instant.ofEpochMilli(httpResponse.currentContextView().get(DiscordWebClient.KEY_REQUEST_TIMESTAMP));
                     Duration responseTime = Duration.between(requestTimestamp, Instant.now());
-                    LogUtil.traceDebug(log, trace -> format(httpResponse.currentContext(),
+                    LogUtil.traceDebug(log, trace -> format(httpResponse.currentContextView(),
                             "Read " + httpResponse.status() + " in " + responseTime + (!trace ? "" :
                                     " with headers: " + httpResponse.responseHeaders())));
                 }
                 Duration nextReset = strategy.apply(httpResponse);
                 if (!nextReset.isZero()) {
                     if (log.isDebugEnabled()) {
-                        log.debug(format(httpResponse.currentContext(), "Delaying next request by {}"), nextReset);
+                        log.debug(format(httpResponse.currentContextView(), "Delaying next request by {}"), nextReset);
                     }
                     sleepTime = nextReset;
                 }
@@ -138,7 +138,7 @@ class RequestStream {
                     long retryAfter = Long.parseLong(httpResponse.responseHeaders().get("Retry-After"));
                     Duration fixedBackoff = Duration.ofSeconds(retryAfter);
                     action = globalRateLimiter.rateLimitFor(fixedBackoff)
-                            .doOnTerminate(() -> log.debug(format(httpResponse.currentContext(),
+                            .doOnTerminate(() -> log.debug(format(httpResponse.currentContextView(),
                                     "Globally rate limited for {}"), fixedBackoff));
                 }
                 if (httpResponse.status().code() >= 400) {
@@ -165,12 +165,12 @@ class RequestStream {
             }
 
             Mono.just(clientRequest)
-                    .doOnEach(s -> log.trace(format(s.getContext(), ">> {}"), s))
+                    .doOnEach(s -> log.trace(format(s.getContextView(), ">> {}"), s))
                     .flatMap(req -> globalRateLimiter.withLimiter(httpClient.exchange(req)
                             .flatMap(responseFunction))
                             .next())
-                    .doOnEach(s -> log.trace(format(s.getContext(), "<< {}"), s))
-                    .subscriberContext(ctx -> ctx.putAll(correlation.getContext())
+                    .doOnEach(s -> log.trace(format(s.getContextView(), "<< {}"), s))
+                    .contextWrite(ctx -> ctx.putAll(correlation.getContext())
                             .put(LogUtil.KEY_REQUEST_ID, clientRequest.getId())
                             .put(LogUtil.KEY_BUCKET_ID, id.toString()))
                     .retryWhen(Retry.withThrowable(rateLimitRetryOperator::apply))

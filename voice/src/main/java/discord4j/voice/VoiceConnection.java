@@ -3,7 +3,7 @@ package discord4j.voice;
 import discord4j.common.util.Snowflake;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.util.context.Context;
+import reactor.util.context.ContextView;
 
 import java.util.function.Function;
 
@@ -86,7 +86,7 @@ public interface VoiceConnection {
      * @return a {@link Mono} that, upon subscription, attempts to reconnect to the voice gateway, maintaining the same
      * parameters currently associated to this instance
      */
-    default Mono<Void> reconnect(Function<Context, Throwable> errorCause) {
+    default Mono<Void> reconnect(Function<ContextView, Throwable> errorCause) {
         return reconnect();
     }
 

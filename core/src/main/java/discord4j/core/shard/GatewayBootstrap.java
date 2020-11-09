@@ -614,7 +614,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                     GatewayClientGroupManager clientGroup = b.shardingStrategy.getGroupManager(count);
                     GatewayDiscordClient gateway = new GatewayDiscordClient(b.client, resources, closeProcessor,
                             clientGroup, b.voiceConnectionFactory, entityRetrievalStrategy, completingChunkNonces);
-                    Mono<Void> destroySequence = Mono.deferWithContext(ctx -> b.destroyHandler.apply(gateway)
+                    Mono<Void> destroySequence = Mono.deferContextual(ctx -> b.destroyHandler.apply(gateway)
                             .doFinally(s -> log.info(format(ctx, "All shards disconnected"))))
                             .doOnTerminate(closeProcessor::onComplete)
                             .cache();
@@ -624,7 +624,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                             .flatMap(group -> group.concatMap(shard -> acquireConnection(b, shard, clientFactory,
                                     gateway, shardCoordinator, store, eventDispatcher, clientGroup,
                                     closeProcessor, dispatchMapper, completingChunkNonces,
-                                    destroySequence.subscriberContext(buildContext(gateway, shard)))));
+                                    destroySequence.contextWrite(buildContext(gateway, shard)))));
 
                     if (b.awaitConnections == null ? count == 1 : b.awaitConnections) {
                         if (b.dispatcherFunction != null) {
@@ -692,7 +692,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                                               DispatchEventMapper dispatchMapper,
                                               Set<String> completingChunkNonces,
                                               Mono<Void> destroySequence) {
-        return Mono.deferWithContext(ctx ->
+        return Mono.deferContextual(ctx ->
                 Mono.<ShardInfo>create(sink -> {
                     StatusUpdate initial = Optional.ofNullable(b.initialPresence.apply(shard)).orElse(null);
                     IdentifyOptions identify = IdentifyOptions.builder(shard)
@@ -738,11 +738,12 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                             .flatMap(statefulDispatch -> {
                                 DispatchContext<?, ?> context = DispatchContext.of(statefulDispatch, gateway);
                                 return dispatchMapper.handle(context)
-                                    .subscriberContext(c -> c.put(LogUtil.KEY_SHARD_ID, context.getShardInfo().getIndex()))
-                                    .onErrorResume(error -> {
-                                        log.error(format(ctx, "Error dispatching event"), error);
-                                        return Mono.empty();
-                                    });
+                                        .contextWrite(c -> c.put(LogUtil.KEY_SHARD_ID,
+                                                context.getShardInfo().getIndex()))
+                                        .onErrorResume(error -> {
+                                            log.error(format(ctx, "Error dispatching event"), error);
+                                            return Mono.empty();
+                                        });
                             })
                             .doOnNext(eventDispatcher::publish)
                             .subscribe(null,
@@ -780,7 +781,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                                 }
                                 return Mono.empty();
                             })
-                            .subscriberContext(buildContext(gateway, shard))
+                            .contextWrite(buildContext(gateway, shard))
                             .subscribe(null,
                                     t -> log.error(format(ctx, "Lifecycle listener terminated with an error"), t),
                                     () -> log.debug(format(ctx, "Lifecycle listener completed"))));
@@ -798,14 +799,14 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                                 sink.success(); // no-op if we completed it before
                                 closeProcessor.onComplete();
                             })
-                            .subscriberContext(buildContext(gateway, shard))
+                            .contextWrite(buildContext(gateway, shard))
                             .subscribe(null,
                                     t -> log.debug(format(ctx, "Gateway terminated with an error: {}"), t.toString()),
                                     () -> log.debug(format(ctx, "Gateway completed"))));
 
                     sink.onCancel(forCleanup);
                 }))
-                .subscriberContext(buildContext(gateway, shard));
+                .contextWrite(buildContext(gateway, shard));
     }
 
     private Function<Context, Context> buildContext(GatewayDiscordClient gateway, ShardInfo shard) {

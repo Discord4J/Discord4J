@@ -73,7 +73,7 @@ public class LocalShardCoordinator implements ShardCoordinator {
 
     @Override
     public Mono<Void> publishConnected(ShardInfo shardInfo) {
-        return Mono.deferWithContext(ctx -> {
+        return Mono.deferContextual(ctx -> {
             boolean isNew = shards.add(shardInfo.getIndex());
             if (isNew) {
                 log.info(format(ctx, "Shard connected"));
@@ -84,7 +84,7 @@ public class LocalShardCoordinator implements ShardCoordinator {
 
     @Override
     public Mono<Void> publishDisconnected(ShardInfo shardInfo, SessionInfo sessionInfo) {
-        return Mono.deferWithContext(ctx -> {
+        return Mono.deferContextual(ctx -> {
             boolean wasRemoved = shards.remove(shardInfo.getIndex());
             if (wasRemoved) {
                 log.info(format(ctx, "Shard disconnected"));

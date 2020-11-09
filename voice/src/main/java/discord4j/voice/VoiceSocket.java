@@ -28,7 +28,7 @@ import reactor.netty.ConnectionObserver;
 import reactor.netty.udp.UdpClient;
 import reactor.util.Logger;
 import reactor.util.Loggers;
-import reactor.util.context.Context;
+import reactor.util.context.ContextView;
 
 import java.io.ByteArrayOutputStream;
 import java.net.InetSocketAddress;
@@ -60,7 +60,7 @@ public class VoiceSocket {
     }
 
     Mono<Connection> setup(String address, int port) {
-        return Mono.deferWithContext(
+        return Mono.deferContextual(
                 context -> udpClient.host(address).port(port)
                         .observe(getObserver(context))
                         .doOnConnected(c -> log.debug(format(context, "Connected to {}"), c.address()))
@@ -82,11 +82,11 @@ public class VoiceSocket {
                         .connect());
     }
 
-    private ConnectionObserver getObserver(Context context) {
+    private ConnectionObserver getObserver(ContextView context) {
         return (connection, newState) -> log.debug(format(context, "{} {}"), newState, connection);
     }
 
-    private void logPayload(Logger logger, Context context, ByteBuf buf) {
+    private void logPayload(Logger logger, ContextView context, ByteBuf buf) {
         logger.trace(format(context, ByteBufUtil.hexDump(buf)));
     }
 

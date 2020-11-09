@@ -30,7 +30,10 @@ import discord4j.gateway.json.GatewayPayload;
 import discord4j.gateway.limiter.PayloadTransformer;
 import discord4j.gateway.payload.PayloadReader;
 import discord4j.gateway.payload.PayloadWriter;
-import discord4j.gateway.retry.*;
+import discord4j.gateway.retry.GatewayException;
+import discord4j.gateway.retry.GatewayRetrySpec;
+import discord4j.gateway.retry.GatewayStateChange;
+import discord4j.gateway.retry.ReconnectException;
 import io.netty.buffer.ByteBuf;
 import io.netty.util.IllegalReferenceCountException;
 import org.reactivestreams.Publisher;
@@ -40,6 +43,7 @@ import reactor.netty.http.client.WebsocketClientSpec;
 import reactor.util.Logger;
 import reactor.util.Loggers;
 import reactor.util.context.Context;
+import reactor.util.context.ContextView;
 import reactor.util.retry.Retry;
 
 import java.nio.charset.StandardCharsets;
@@ -153,7 +157,7 @@ public class DefaultGatewayClient implements GatewayClient {
 
     @Override
     public Mono<Void> execute(String gatewayUrl) {
-        return Mono.deferWithContext(
+        return Mono.deferContextual(
                 context -> {
                     disconnectNotifier = MonoProcessor.create();
                     lastAck.set(0);
@@ -258,7 +262,7 @@ public class DefaultGatewayClient implements GatewayClient {
                                     .build())
                             .uri(gatewayUrl)
                             .handle(sessionHandler::handle)
-                            .subscriberContext(LogUtil.clearContext())
+                            .contextWrite(LogUtil.clearContext())
                             .flatMap(t2 -> handleClose(t2.getT1(), t2.getT2()))
                             .then();
 
@@ -278,7 +282,7 @@ public class DefaultGatewayClient implements GatewayClient {
                             .doOnCancel(() -> sessionHandler.close())
                             .then();
                 })
-                .subscriberContext(ctx -> ctx.put(LogUtil.KEY_SHARD_ID, identifyOptions.getShardInfo().getIndex()))
+                .contextWrite(ctx -> ctx.put(LogUtil.KEY_SHARD_ID, identifyOptions.getShardInfo().getIndex()))
                 .retryWhen(retryFactory())
                 .then(Mono.defer(() -> disconnectNotifier.then()))
                 .doOnSubscribe(s -> {
@@ -295,7 +299,7 @@ public class DefaultGatewayClient implements GatewayClient {
         return "DiscordBot(" + url + ", " + version + ")";
     }
 
-    private void logPayload(Logger logger, Context context, ByteBuf buf) {
+    private void logPayload(Logger logger, ContextView context, ByteBuf buf) {
         logger.trace(format(context, buf.toString(StandardCharsets.UTF_8)
                 .replaceAll("(\"token\": ?\")([A-Za-z0-9._-]*)(\")", "$1hunter2$3")));
     }
@@ -338,7 +342,7 @@ public class DefaultGatewayClient implements GatewayClient {
                 });
     }
 
-    private Context getContextFromException(Throwable t) {
+    private ContextView getContextFromException(Throwable t) {
         if (t instanceof CloseException) {
             return ((CloseException) t).getContext();
         }
@@ -349,7 +353,7 @@ public class DefaultGatewayClient implements GatewayClient {
     }
 
     private Mono<CloseStatus> handleClose(DisconnectBehavior sourceBehavior, CloseStatus closeStatus) {
-        return Mono.deferWithContext(ctx -> {
+        return Mono.deferContextual(ctx -> {
             DisconnectBehavior behavior;
             if (GatewayRetrySpec.NON_RETRYABLE_STATUS_CODES.contains(closeStatus.getCode())) {
                 // non-retryable close codes are non-transient errors therefore stopping is the only choice
@@ -395,7 +399,7 @@ public class DefaultGatewayClient implements GatewayClient {
         });
     }
 
-    private ConnectionObserver getObserver(Context context) {
+    private ConnectionObserver getObserver(ContextView context) {
         return (connection, newState) -> {
             log.debug(format(context, "{} {}"), newState, connection);
             notifyObserver(newState);

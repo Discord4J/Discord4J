@@ -114,8 +114,8 @@ public class DiscordWebClient {
      * @return a {@link Mono} with the response in the form of {@link ClientResponse}
      */
     public Mono<ClientResponse> exchange(ClientRequest request) {
-        return Mono.subscriberContext()
-                .flatMap(ctx -> {
+        return Mono.deferContextual(
+                ctx -> {
                     HttpHeaders requestHeaders = buildHttpHeaders(request);
                     String contentType = requestHeaders.get(HttpHeaderNames.CONTENT_TYPE);
                     HttpClient.RequestSender sender = httpClient
@@ -135,7 +135,7 @@ public class DiscordWebClient {
                 .flatMap(receiver -> receiver.responseConnection((response, connection) ->
                         Mono.just(new ClientResponse(response, connection.inbound(),
                                 exchangeStrategies, request, responseFunctions))).next())
-                .subscriberContext(ctx -> ctx.put(KEY_REQUEST_TIMESTAMP, Instant.now().toEpochMilli()));
+                .contextWrite(ctx -> ctx.put(KEY_REQUEST_TIMESTAMP, Instant.now().toEpochMilli()));
     }
 
     private <R> HttpHeaders buildHttpHeaders(ClientRequest request) {

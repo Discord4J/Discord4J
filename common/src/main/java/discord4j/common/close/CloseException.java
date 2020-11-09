@@ -18,7 +18,7 @@
 package discord4j.common.close;
 
 import reactor.util.annotation.Nullable;
-import reactor.util.context.Context;
+import reactor.util.context.ContextView;
 
 import java.util.Optional;
 
@@ -31,15 +31,15 @@ import java.util.Optional;
 public class CloseException extends RuntimeException {
 
     private final CloseStatus closeStatus;
-    private final Context context;
+    private final ContextView context;
 
     /**
      * Create a {@link CloseException} with the given status and Reactor context.
      *
      * @param closeStatus the {@link CloseStatus} representing this exception
-     * @param context a {@link Context} instance representing metadata related to this exception
+     * @param context a {@link ContextView} instance representing metadata related to this exception
      */
-    public CloseException(CloseStatus closeStatus, Context context) {
+    public CloseException(CloseStatus closeStatus, ContextView context) {
         this(closeStatus, context, null);
     }
 
@@ -47,10 +47,10 @@ public class CloseException extends RuntimeException {
      * Create a {@link CloseException} with the given status, Reactor context and cause.
      *
      * @param closeStatus the {@link CloseStatus} representing this exception
-     * @param context a {@link Context} instance providing metadata related to this exception
+     * @param context a {@link ContextView} instance providing metadata related to this exception
      * @param cause the cause for this exception
      */
-    public CloseException(CloseStatus closeStatus, Context context, @Nullable Throwable cause) {
+    public CloseException(CloseStatus closeStatus, ContextView context, @Nullable Throwable cause) {
         super(cause);
         this.closeStatus = closeStatus;
         this.context = context;
@@ -84,11 +84,11 @@ public class CloseException extends RuntimeException {
     }
 
     /**
-     * Return the Reactor {@link Context} providing metadata about this exception.
+     * Return the Reactor {@link ContextView} providing metadata about this exception.
      *
      * @return a Reactor context instance
      */
-    public Context getContext() {
+    public ContextView getContext() {
         return context;
     }
 

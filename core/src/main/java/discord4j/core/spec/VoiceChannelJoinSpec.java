@@ -241,10 +241,10 @@ public class VoiceChannelJoinSpec implements Spec<Mono<VoiceConnection>> {
                                     .thenReturn(vc))
                             .doOnEach(signal -> {
                                 if (signal.isOnSubscribe()) {
-                                    log.debug(format(signal.getContext(), "Creating voice connection"));
+                                    log.debug(format(signal.getContextView(), "Creating voice connection"));
                                 }
                             })
-                            .subscriberContext(ctx ->
+                            .contextWrite(ctx ->
                                     ctx.put(LogUtil.KEY_GATEWAY_ID, Integer.toHexString(gateway.hashCode()))
                                             .put(LogUtil.KEY_SHARD_ID, shardId)
                                             .put(LogUtil.KEY_GUILD_ID, guildId.asLong()));

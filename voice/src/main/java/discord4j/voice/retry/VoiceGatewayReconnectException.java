@@ -17,11 +17,11 @@
 
 package discord4j.voice.retry;
 
-import reactor.util.context.Context;
+import reactor.util.context.ContextView;
 
 public class VoiceGatewayReconnectException extends VoiceGatewayException {
 
-    public VoiceGatewayReconnectException(Context context) {
+    public VoiceGatewayReconnectException(ContextView context) {
         super(context);
     }
 }
