@@ -118,7 +118,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
     private ShardCoordinator shardCoordinator = null;
     private EventDispatcher eventDispatcher = null;
     private Store store = null;
-    private MemberRequestFilter memberRequestFilter = MemberRequestFilter.withLargeGuilds();
+    private MemberRequestFilter memberRequestFilter = null;
     private Function<ShardInfo, StatusUpdate> initialPresence = shard -> null;
     private Function<ShardInfo, SessionInfo> resumeOptions = shard -> null;
     private IntentSet intents = IntentSet.nonPrivileged();
@@ -604,7 +604,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
 
                     VoiceReactorResources voiceReactorResources = b.initVoiceReactorResources();
                     GatewayResources resources = new GatewayResources(store, eventDispatcher, shardCoordinator,
-                            b.memberRequestFilter, gatewayReactorResources, b.initVoiceReactorResources(),
+                            b.initMemberRequestFilter(b.intents), gatewayReactorResources, b.initVoiceReactorResources(),
                             b.initReconnectOptions(voiceReactorResources), b.intents);
                     MonoProcessor<Void> closeProcessor = MonoProcessor.create();
                     EntityRetrievalStrategy entityRetrievalStrategy = b.initEntityRetrievalStrategy();
@@ -895,6 +895,16 @@ public class GatewayBootstrap<O extends GatewayOptions> {
             return store;
         }
         return Store.fromLayout(LegacyStoreLayout.of(new JdkStoreService()));
+    }
+
+    private MemberRequestFilter initMemberRequestFilter(IntentSet intents) {
+        if (memberRequestFilter != null) {
+            return memberRequestFilter;
+        } else if (intents.contains(Intent.GUILD_MEMBERS)) {
+            return MemberRequestFilter.withLargeGuilds();
+        } else {
+            return MemberRequestFilter.none();
+        }
     }
 
     private Multimap<String, Object> getGatewayParameters() {
