@@ -39,8 +39,8 @@ import discord4j.core.retriever.EntityRetrievalStrategy;
 import discord4j.discordjson.json.ActivityUpdateRequest;
 import discord4j.discordjson.json.gateway.GuildMembersChunk;
 import discord4j.discordjson.json.gateway.StatusUpdate;
-import discord4j.discordjson.possible.Possible;
 import discord4j.gateway.*;
+import discord4j.gateway.intent.Intent;
 import discord4j.gateway.intent.IntentSet;
 import discord4j.gateway.limiter.PayloadTransformer;
 import discord4j.gateway.limiter.RateLimitTransformer;
@@ -121,7 +121,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
     private MemberRequestFilter memberRequestFilter = MemberRequestFilter.withLargeGuilds();
     private Function<ShardInfo, StatusUpdate> initialPresence = shard -> null;
     private Function<ShardInfo, SessionInfo> resumeOptions = shard -> null;
-    private Possible<IntentSet> intents = Possible.of(IntentSet.nonPrivileged());
+    private IntentSet intents = IntentSet.nonPrivileged();
     private Boolean guildSubscriptions = null;
     private Function<GatewayDiscordClient, Mono<Void>> destroyHandler = shutdownDestroyHandler();
     private PayloadReader payloadReader = null;
@@ -363,7 +363,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
      * @return this builder
      */
     public GatewayBootstrap<O> setEnabledIntents(IntentSet intents) {
-        this.intents = Possible.of(intents);
+        this.intents = Objects.requireNonNull(intents);
         return this;
     }
 
@@ -376,7 +376,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
      * @return this builder
      */
     public GatewayBootstrap<O> setDisabledIntents(IntentSet intents) {
-        this.intents = Possible.of(IntentSet.all().andNot(intents));
+        this.intents = IntentSet.all().andNot(Objects.requireNonNull(intents));
         return this;
     }
 
@@ -697,7 +697,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                     StatusUpdate initial = Optional.ofNullable(b.initialPresence.apply(shard)).orElse(null);
                     IdentifyOptions identify = IdentifyOptions.builder(shard)
                             .initialStatus(initial)
-                            .intents(b.intents.toOptional().orElse(null))
+                            .intents(b.intents)
                             .guildSubscriptions(b.guildSubscriptions)
                             .resumeSession(b.resumeOptions.apply(shard))
                             .build();

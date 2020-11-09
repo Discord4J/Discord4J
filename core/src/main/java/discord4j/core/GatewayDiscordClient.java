@@ -42,6 +42,7 @@ import discord4j.discordjson.json.*;
 import discord4j.discordjson.json.gateway.GuildMembersChunk;
 import discord4j.discordjson.json.gateway.RequestGuildMembers;
 import discord4j.discordjson.json.gateway.StatusUpdate;
+import discord4j.discordjson.possible.Possible;
 import discord4j.gateway.GatewayClient;
 import discord4j.gateway.GatewayClientGroup;
 import discord4j.gateway.json.GatewayPayload;
@@ -540,7 +541,7 @@ public class GatewayDiscordClient implements EntityRetriever {
      */
     public Flux<Member> requestMembers(RequestGuildMembers request) {
         try {
-            ValidationUtil.validateRequestGuildMembers(request, gatewayResources.getIntents());
+            ValidationUtil.validateRequestGuildMembers(request, Possible.of(gatewayResources.getIntents()));
         } catch (Throwable t) {
             return Flux.error(t);
         }
