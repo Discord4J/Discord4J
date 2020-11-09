@@ -91,6 +91,8 @@ public class DispatchHandlers implements DispatchEventMapper {
         addHandler(InviteDelete.class, DispatchHandlers::inviteDelete);
 
         addHandler(GatewayStateChange.class, LifecycleDispatchHandlers::gatewayStateChanged);
+
+        addHandler(UnavailableGuildCreate.class, context -> Mono.empty());
     }
 
     private static <D, E extends Event> void addHandler(Class<D> dispatchType,

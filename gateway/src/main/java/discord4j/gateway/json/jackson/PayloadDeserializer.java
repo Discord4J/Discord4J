@@ -97,6 +97,14 @@ public class PayloadDeserializer extends StdDeserializer<GatewayPayload<?>> {
         Integer s = payload.get(S_FIELD).isNull() ? null : payload.get(S_FIELD).intValue();
 
         Class<? extends PayloadData> payloadType = getPayloadType(op, t);
+        if (payloadType == GuildCreate.class) {
+            JsonNode d = payload.get(D_FIELD);
+            JsonNode unavailable = d.get("unavailable");
+            if (unavailable != null && unavailable.asBoolean()) {
+                PayloadData data = p.getCodec().treeToValue(d, UnavailableGuildCreate.class);
+                return new GatewayPayload(Opcode.forRaw(op), data, s, t);
+            }
+        }
         PayloadData data = payloadType == null ? null : p.getCodec().treeToValue(payload.get(D_FIELD), payloadType);
 
         return new GatewayPayload(Opcode.forRaw(op), data, s, t);
