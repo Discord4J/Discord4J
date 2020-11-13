@@ -128,9 +128,9 @@ public class MemberUpdateEvent extends GuildEvent {
     }
 
     /**
-     * Requests to receive the list of {@link Role roles} that the {@link Member} is currently assigned.
+     * Requests to receive the list of {@link Role} roles that the {@link Member} is currently assigned.
      *
-     * @return A {@link Flux} emitting the roles that the {@link Member} is assigned.
+     * @return A {@link Flux} emitting the {@link Role} roles that the {@link Member} is assigned.
      */
     public Flux<Role> getCurrentRoles() {
         return getClient().getGuildRoles(getGuildId())
