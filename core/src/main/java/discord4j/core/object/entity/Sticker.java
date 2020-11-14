@@ -62,7 +62,7 @@ public final class Sticker implements Entity {
      * @return The list of tags for the sticker.
      */
     public List<String> getTags() {
-        return data.tags().map(str -> str.split(",")).orElse(Collections.emptyList());
+        return data.tags().map(str -> str.split(", ")).orElse(Collections.emptyList());
     }
 
     /**
