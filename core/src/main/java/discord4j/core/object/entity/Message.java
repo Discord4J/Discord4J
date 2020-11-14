@@ -31,6 +31,7 @@ import discord4j.core.util.EntityUtil;
 import discord4j.discordjson.json.MessageData;
 import discord4j.discordjson.json.SuppressEmbedsRequest;
 import discord4j.discordjson.json.UserData;
+import discord4j.discordjson.possible.Possible;
 import discord4j.rest.entity.RestChannel;
 import discord4j.rest.entity.RestMessage;
 import discord4j.rest.util.PaginationUtil;
@@ -432,6 +433,17 @@ public final class Message implements Entity {
      */
     public Type getType() {
         return Type.of(data.type());
+    }
+
+    /**
+     * Gets the stickers sent with the message.
+     *
+     * @return The stickers sent with the message.
+     */
+    public List<Sticker> getStickers() {
+        return Possible.flatOpt(data.stickers())
+            .map(list -> list.map(data -> new Sticker(gateway, data)))
+            .orElse(Collections.emptyList());
     }
 
     /**
