@@ -62,7 +62,7 @@ public final class Sticker implements Entity {
      */
     public List<String> getTags() {
         return data.tags().toOptional()
-            .map(str -> str.split(", "))
+            .map(tags -> tags.split(", "))
             .map(Arrays::asList)
             .orElse(Collections.emptyList());
     }
