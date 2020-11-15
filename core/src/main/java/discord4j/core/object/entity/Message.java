@@ -441,7 +441,7 @@ public final class Message implements Entity {
      * @return The stickers sent with the message.
      */
     public List<Sticker> getStickers() {
-        return Possible.flatOpt(data.stickers())
+        return data.stickers().toOptional()
             .map(list -> list.map(data -> new Sticker(gateway, data)))
             .orElse(Collections.emptyList());
     }
