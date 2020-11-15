@@ -442,8 +442,10 @@ public final class Message implements Entity {
      */
     public List<Sticker> getStickers() {
         return data.stickers().toOptional()
-            .map(list -> list.map(data -> new Sticker(gateway, data)))
-            .orElse(Collections.emptyList());
+            .orElse(Collections.emptyList())
+            .stream()
+            .map(data -> new Sticker(gateway, data))
+            .collect(Collectors.toList());
     }
 
     /**

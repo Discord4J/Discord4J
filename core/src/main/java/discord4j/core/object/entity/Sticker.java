@@ -2,10 +2,9 @@ package discord4j.core.object.entity;
 
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
+import discord4j.discordjson.json.StickerData;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 public final class Sticker implements Entity {
 
@@ -62,7 +61,10 @@ public final class Sticker implements Entity {
      * @return The list of tags for the sticker.
      */
     public List<String> getTags() {
-        return data.tags().map(str -> str.split(", ")).orElse(Collections.emptyList());
+        return data.tags().toOptional()
+            .map(str -> str.split(", "))
+            .map(Arrays::asList)
+            .orElse(Collections.emptyList());
     }
 
     /**
