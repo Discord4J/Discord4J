@@ -14,7 +14,7 @@ import java.util.*;
  * {@code IntentSet} may have unpredictable results and should be avoided.
  * The {@code equals} method should be used for comparisons.
  *
- * @see <a href="https://discord.com/developers/docs/topics/intents">Discord Intents</a>
+ * @see <a href="https://discord.com/developers/docs/topics/gateway#gateway-intents">Discord Intents</a>
  */
 public final class IntentSet extends AbstractSet<Intent> {
 
@@ -62,6 +62,7 @@ public final class IntentSet extends AbstractSet<Intent> {
      * Returns a {@code IntentSet} containing non-privileged intents.
      *
      * @return A {@code IntentSet} containing non-privileged intents.
+     * @see <a href="https://discord.com/developers/docs/topics/gateway#privileged-intents">Privileged Intents</a>
      */
     public static IntentSet nonPrivileged() {
         return NON_PRIVILEGED;

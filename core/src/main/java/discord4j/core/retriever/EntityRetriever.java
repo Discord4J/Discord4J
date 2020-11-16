@@ -63,7 +63,8 @@ public interface EntityRetriever {
     Mono<GuildEmoji> getGuildEmojiById(Snowflake guildId, Snowflake emojiId);
 
     /**
-     * Requests to retrieve the member represented by the supplied IDs.
+     * Requests to retrieve the member represented by the supplied IDs. Depending on the implementation, it is possible
+     * to lazily request member entities from the Gateway, or the REST API.
      *
      * @param guildId The ID of the guild.
      * @param userId  The ID of the user.
