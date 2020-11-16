@@ -32,7 +32,7 @@ import java.util.function.Function;
  * <ul>
  *     <li>{@link #all()} to use a filter requesting ALL members on startup</li>
  *     <li>{@link #none()} to disable this feature</li>
- *     <li>{@link #withLargeGuilds()} ()} to only request from large guilds (default)</li>
+ *     <li>{@link #withLargeGuilds()} to only request from large guilds (default)</li>
  *     <li>{@link #withGuilds(Snowflake...)} to request from specific guilds</li>
  * </ul>
  */

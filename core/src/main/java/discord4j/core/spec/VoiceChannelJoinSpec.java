@@ -25,6 +25,7 @@ import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.channel.VoiceChannel;
 import discord4j.discordjson.json.gateway.VoiceStateUpdate;
 import discord4j.gateway.GatewayClientGroup;
+import discord4j.gateway.intent.Intent;
 import discord4j.gateway.json.ShardGatewayPayload;
 import discord4j.rest.util.Permission;
 import discord4j.voice.*;
@@ -191,6 +192,11 @@ public class VoiceChannelJoinSpec implements Spec<Mono<VoiceConnection>> {
 
     @Override
     public Mono<VoiceConnection> asRequest() {
+        if (!gateway.getGatewayResources().getIntents().contains(Intent.GUILD_VOICE_STATES)) {
+            return Mono.error(new IllegalArgumentException(
+                    "GUILD_VOICE_STATES intent is required to establish a voice connection"));
+        }
+
         final Snowflake guildId = voiceChannel.getGuildId();
         final Snowflake channelId = voiceChannel.getId();
         final GatewayClientGroup clientGroup = voiceChannel.getClient().getGatewayClientGroup();

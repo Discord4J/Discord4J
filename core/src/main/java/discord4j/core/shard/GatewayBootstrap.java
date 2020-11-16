@@ -34,6 +34,8 @@ import discord4j.core.event.ReplayingEventDispatcher;
 import discord4j.core.event.dispatch.DispatchContext;
 import discord4j.core.event.dispatch.DispatchEventMapper;
 import discord4j.core.event.domain.Event;
+import discord4j.core.object.entity.Guild;
+import discord4j.core.object.entity.Member;
 import discord4j.core.object.presence.Presence;
 import discord4j.core.retriever.EntityRetrievalStrategy;
 import discord4j.discordjson.json.ActivityUpdateRequest;
@@ -356,8 +358,24 @@ public class GatewayBootstrap<O extends GatewayOptions> {
     }
 
     /**
-     * Set the intents to subscribe from the gateway for this shard.
-     * Intents will not be used, when this method is not called.
+     * Set the intents to subscribe from the gateway for this shard. Using this method is mutually exclusive from
+     * {@link #setDisabledIntents(IntentSet)}. Defaults to {@link IntentSet#nonPrivileged()}.
+     * <p>
+     * When using intents, make sure you understand their effect on your bot, to avoid issues specially when working
+     * around members. Depend on {@link GatewayDiscordClient#requestMembers(Snowflake, Set)} and
+     * {@link Guild#requestMembers(Set)} to fetch members directly. Methods that return {@link Member} can lazily fetch
+     * entities from the Gateway if missing, according to the configured
+     * {@link #setEntityRetrievalStrategy(EntityRetrievalStrategy)}.
+     * <p>
+     * <strong>Fetching guild members:</strong> if you don't enable {@link Intent#GUILD_MEMBERS} you will not be
+     * able to request the entire list of members in a guild.
+     * <p>
+     * <strong>Fetching guild presences:</strong> if you don't enable {@link Intent#GUILD_PRESENCES} you will not
+     * receive user activity and status information. In addition, you will not receive the initial guild member list,
+     * which includes all members for small guilds and online members + members without roles for larger guilds.
+     * <p>
+     * <strong>Establishing voice connections:</strong> if you don't enable {@link Intent#GUILD_VOICE_STATES} you will
+     * not be able to connect to a voice channel.
      *
      * @param intents set of intents to subscribe
      * @return this builder
@@ -368,10 +386,25 @@ public class GatewayBootstrap<O extends GatewayOptions> {
     }
 
     /**
-     * Set the intents which should not be subscribed from the gateway for this shard.
-     * This method computes by {@code IntentSet.all()} - the provided intents
-     * Intents will not be used, when this method is not called.
-     *
+     * Set the intents which should not be subscribed from the gateway for this shard. This method computes by
+     * {@link IntentSet#all()} minus the provided intents. Using this method is mutually exclusive from
+     * {@link #setEnabledIntents(IntentSet)}.
+     * <p>
+     * When using intents, make sure you understand their effect on your bot, to avoid issues specially when working
+     * around members. Depend on {@link GatewayDiscordClient#requestMembers(Snowflake, Set)} and
+     * {@link Guild#requestMembers(Set)} to fetch members directly. Methods that return {@link Member} can lazily fetch
+     * entities from the Gateway if missing, according to the configured
+     * {@link #setEntityRetrievalStrategy(EntityRetrievalStrategy)}.
+     * <p>
+     * <strong>Fetching guild members:</strong> if you disable {@link Intent#GUILD_MEMBERS} you will not be
+     * able to request the entire list of members in a guild.
+     * <p>
+     * <strong>Fetching guild presences:</strong> if you disable {@link Intent#GUILD_PRESENCES} you will not
+     * receive user activity and status information. In addition, you will not receive the initial guild member list,
+     * which includes all members for small guilds and online members + members without roles for larger guilds.
+     * <p>
+     * <strong>Establishing voice connections:</strong> if you disable {@link Intent#GUILD_VOICE_STATES} you will
+     * not be able to connect to a voice channel.
      * @param intents set of intents which should not be subscribed
      * @return this builder
      */
@@ -386,6 +419,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
      * @param guildSubscriptions whether to enable or disable guild subscriptions
      * @return this builder
      * @see <a href="https://discord.com/developers/docs/topics/gateway#guild-subscriptions">Guild Subscriptions</a>
+     * @deprecated Discord recommends you migrate to Gateway Intents as they supersede this setting
      */
     public GatewayBootstrap<O> setGuildSubscriptions(boolean guildSubscriptions) {
         this.guildSubscriptions = guildSubscriptions;
@@ -488,7 +522,8 @@ public class GatewayBootstrap<O extends GatewayOptions> {
     }
 
     /**
-     * Customize the {@link EntityRetrievalStrategy} to use by default in order to retrieve Discord entities.
+     * Customize the {@link EntityRetrievalStrategy} to use by default in order to retrieve Discord entities. Defaults
+     * to {@link EntityRetrievalStrategy#STORE_FALLBACK_REST}.
      *
      * @param entityRetrievalStrategy a strategy to use to retrieve entities
      * @return this builder

@@ -773,6 +773,19 @@ public final class Guild implements Entity {
     }
 
     /**
+     * Return a set of {@link Member members} from this guild using the current Gateway connection.
+     * This method performs a check to validate whether the given guild's data can be obtained from this
+     * {@link GatewayDiscordClient}.
+     *
+     * @param userIds the {@link Snowflake} set of users to request
+     * @return a {@link Flux} of {@link Member} for the given {@link Guild}. If an error occurs, it is emitted through
+     * the {@link Flux}.
+     */
+    public Flux<Member> requestMembers(Set<Snowflake> userIds) {
+        return gateway.requestMembers(getId(), userIds);
+    }
+
+    /**
      * Requests to retrieve the member as represented by the supplied ID.
      *
      * @param id The ID of the member.
