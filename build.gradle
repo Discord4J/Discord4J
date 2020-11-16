@@ -3,7 +3,7 @@ plugins {
     id 'maven-publish'
     id 'signing'
     id 'com.gorylenko.gradle-git-properties' version '2.2.4' apply false
-    id 'com.github.ben-manes.versions' version '0.33.0'
+    id 'com.github.ben-manes.versions' version '0.36.0'
     id 'net.researchgate.release' version '2.8.1'
 }
 
@@ -23,7 +23,7 @@ ext {
     }
 
     // Dependencies
-    reactor_bom_version = 'Dysprosium-SR13'
+    reactor_bom_version = 'Dysprosium-SR14'
     jackson_version = '2.11.2'
     jdkstores_version = "$storesVersion".toString()
 
@@ -32,7 +32,7 @@ ext {
     mockito_version = '3.3.3'
     logback_version = '1.2.3'
     reflections_version = '0.9.12'
-    lavaplayer_version = '1.3.55'
+    lavaplayer_version = '1.3.60'
 
     isJitpack = "true" == System.getenv("JITPACK")
     isRelease = !version.toString().endsWith('-SNAPSHOT')
@@ -70,7 +70,7 @@ allprojects {
     }
 
     configurations.all {
-        resolutionStrategy.cacheChangingModulesFor 600, 'seconds'
+        resolutionStrategy.cacheChangingModulesFor 60, 'seconds'
     }
 
     tasks.withType(Javadoc) {
