@@ -37,11 +37,7 @@ import discord4j.core.shard.GatewayBootstrap;
 import discord4j.core.spec.GuildCreateSpec;
 import discord4j.core.spec.UserEditSpec;
 import discord4j.core.util.ValidationUtil;
-import discord4j.discordjson.json.ActivityUpdateRequest;
-import discord4j.discordjson.json.EmojiData;
-import discord4j.discordjson.json.GuildData;
-import discord4j.discordjson.json.GuildUpdateData;
-import discord4j.discordjson.json.RoleData;
+import discord4j.discordjson.json.*;
 import discord4j.discordjson.json.gateway.GuildMembersChunk;
 import discord4j.discordjson.json.gateway.RequestGuildMembers;
 import discord4j.discordjson.json.gateway.StatusUpdate;
@@ -62,15 +58,19 @@ import reactor.core.publisher.MonoProcessor;
 import reactor.util.Logger;
 import reactor.util.Loggers;
 
+import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+
+import static discord4j.common.LogUtil.format;
 
 /**
  * An aggregation of all dependencies Discord4J requires to operate with the Discord Gateway, REST API and Voice
@@ -505,19 +505,27 @@ public class GatewayDiscordClient implements EntityRetriever {
      * the {@link Flux}.
      */
     public Flux<Member> requestMembers(Snowflake guildId, Set<Snowflake> userIds) {
-        return requestMembers(RequestGuildMembers.builder()
-                .guildId(guildId.asString())
-                .userIds(userIds.stream().map(Snowflake::asString).collect(Collectors.toList()))
-                .limit(0)
-                .build());
+        return Flux.fromIterable(userIds)
+                .map(Snowflake::asString)
+                .buffer(100)
+                .concatMap(userIdBuffer -> requestMembers(RequestGuildMembers.builder()
+                        .guildId(guildId.asString())
+                        .userIds(userIdBuffer)
+                        .limit(0)
+                        .build()));
     }
 
     /**
      * Submit a {@link RequestGuildMembers} payload using the current Gateway connection and wait for its completion,
      * delivering {@link Member} elements asynchronously through a {@link Flux}. This method performs a check to
      * validate whether the given guild's data can be obtained from this {@link GatewayDiscordClient}.
+     * <p>
+     * A timeout given by is used to fail this request if the operation is unable to complete due to disallowed or
+     * disabled members intent. This is particularly relevant when requesting a complete member list. If the timeout is
+     * triggered, a {@link TimeoutException} is forwarded through the {@link Flux}.
      *
      * @param request the member request to submit. Create one using {@link RequestGuildMembers#builder()}.
+     * {@link Flux#timeout(Duration)}
      * @return a {@link Flux} of {@link Member} for the given {@link Guild}. If an error occurs, it is emitted through
      * the {@link Flux}.
      */
@@ -542,13 +550,18 @@ public class GatewayDiscordClient implements EntityRetriever {
                                 .map(data -> new Member(this, data, guildId.asLong()))
                                 .collect(Collectors.toList())))
                 .orElseThrow(() -> new IllegalStateException("Unable to find gateway client"));
-        return getGuildById(guildId) // check if this operation is valid otherwise request+waiting will hang
+        Duration timeout = gatewayResources.getMemberRequestTimeout();
+        return Flux.deferWithContext(ctx -> getGuildById(guildId)
                 .then(gatewayClientGroup.unicast(ShardGatewayPayload.requestGuildMembers(
                         RequestGuildMembers.builder()
                                 .from(request)
                                 .nonce(nonce)
                                 .build(), shardId)))
-                .thenMany(Flux.defer(incomingMembers));
+                .thenMany(Flux.defer(incomingMembers))
+                .transform(flux -> ValidationUtil.isRequestingEntireList(request) ? flux.timeout(timeout) : flux)
+                .doOnComplete(() -> log.debug(format(ctx, "Member request completed: {}"), request))
+                .doOnError(TimeoutException.class,
+                        t -> log.warn(format(ctx, "Member request timed out: {}"), request)));
     }
 
     /**

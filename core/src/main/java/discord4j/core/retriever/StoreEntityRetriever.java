@@ -16,6 +16,7 @@
  */
 package discord4j.core.retriever;
 
+import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.*;
 import discord4j.core.object.entity.channel.Channel;
@@ -23,12 +24,12 @@ import discord4j.core.object.entity.channel.GuildChannel;
 import discord4j.core.state.StateView;
 import discord4j.core.util.EntityUtil;
 import discord4j.gateway.intent.Intent;
-import discord4j.common.util.Snowflake;
 import discord4j.store.api.util.LongLongTuple2;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.Collections;
+import java.util.concurrent.TimeoutException;
 
 public class StoreEntityRetriever implements EntityRetriever {
 
@@ -114,7 +115,8 @@ public class StoreEntityRetriever implements EntityRetriever {
                         .flatMap(memberId -> stateView.getMemberStore()
                                 .find(LongLongTuple2.of(guildId.asLong(), Snowflake.asLong(memberId))))
                         .map(member -> new Member(gateway, member, guildId.asLong())))
-                .switchIfEmpty(gateway.requestMembers(guildId));
+                .switchIfEmpty(gateway.requestMembers(guildId))
+                .onErrorResume(TimeoutException.class, t -> Mono.empty());
     }
 
     @Override

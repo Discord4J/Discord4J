@@ -31,6 +31,8 @@ import discord4j.gateway.intent.IntentSet;
 import discord4j.store.api.Store;
 import discord4j.voice.VoiceReactorResources;
 
+import java.time.Duration;
+
 /**
  * A set of dependencies required to build and coordinate multiple {@link GatewayClient} instances.
  */
@@ -44,6 +46,7 @@ public class GatewayResources {
     private final VoiceReactorResources voiceReactorResources;
     private final ReconnectOptions voiceReconnectOptions;
     private final Possible<IntentSet> intents;
+    private final Duration memberRequestTimeout;
 
     /**
      * Create a new {@link GatewayResources} with the given parameters.
@@ -55,12 +58,18 @@ public class GatewayResources {
      * @param gatewayReactorResources a custom set of Reactor resources targeting Gateway operations
      * @param voiceReactorResources a set of Reactor resources targeting Voice Gateway operations
      * @param voiceReconnectOptions a reconnection policy for Voice Gateway connections
+     * @param intents an optional set of events to subscribe when connecting to the Gateway
+     * @param memberRequestTimeout a {@link Duration} to limit the time member list requests take
      */
-    public GatewayResources(StateView stateView, EventDispatcher eventDispatcher,
-                            ShardCoordinator shardCoordinator, MemberRequestFilter memberRequestFilter,
+    public GatewayResources(StateView stateView,
+                            EventDispatcher eventDispatcher,
+                            ShardCoordinator shardCoordinator,
+                            MemberRequestFilter memberRequestFilter,
                             GatewayReactorResources gatewayReactorResources,
                             VoiceReactorResources voiceReactorResources,
-                            ReconnectOptions voiceReconnectOptions, Possible<IntentSet> intents) {
+                            ReconnectOptions voiceReconnectOptions,
+                            Possible<IntentSet> intents,
+                            Duration memberRequestTimeout) {
         this.stateView = stateView;
         this.eventDispatcher = eventDispatcher;
         this.shardCoordinator = shardCoordinator;
@@ -69,6 +78,7 @@ public class GatewayResources {
         this.voiceReactorResources = voiceReactorResources;
         this.voiceReconnectOptions = voiceReconnectOptions;
         this.intents = intents;
+        this.memberRequestTimeout = memberRequestTimeout;
     }
 
     /**
@@ -145,5 +155,19 @@ public class GatewayResources {
      */
     public ReconnectOptions getVoiceReconnectOptions() {
         return voiceReconnectOptions;
+    }
+
+    /**
+     * Return a {@link Duration} to be used when the target client requests a complete list of guild members through
+     * the Gateway. Such requests might never be fulfilled if Gateway Intents are not used and privileged guild
+     * members intent is not enabled in the developer panel.
+     *
+     * @return the default timeout to be applied on complete member list requests
+     * @deprecated to be removed in v3.2, as Gateway Intents are mandatory and client-side validations can be
+     * reliably performed
+     */
+    @Deprecated
+    public Duration getMemberRequestTimeout() {
+        return memberRequestTimeout;
     }
 }

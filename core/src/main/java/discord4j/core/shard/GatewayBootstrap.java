@@ -141,6 +141,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
     private DispatchEventMapper dispatchEventMapper = null;
     private int maxMissedHeartbeatAck = 1;
     private Function<EventDispatcher, Publisher<?>> dispatcherFunction;
+    private Duration memberRequestTimeout = Duration.ofSeconds(10);
 
     /**
      * Create a default {@link GatewayBootstrap} based off the given {@link DiscordClient} that provides an instance
@@ -186,6 +187,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
         this.dispatchEventMapper = source.dispatchEventMapper;
         this.maxMissedHeartbeatAck = source.maxMissedHeartbeatAck;
         this.dispatcherFunction = source.dispatcherFunction;
+        this.memberRequestTimeout = source.memberRequestTimeout;
     }
 
     /**
@@ -604,6 +606,22 @@ public class GatewayBootstrap<O extends GatewayOptions> {
     }
 
     /**
+     * Set a {@link Duration} to apply a timeout on Gateway member list requests. Defaults to 10 seconds and it is
+     * useful to detect scenarios when no intents are used but the guild members privileged intent is not enabled in the
+     * bot developer portal.
+     *
+     * @param memberRequestTimeout the maximum {@link Duration} allowed between response member chunks
+     * @return this builder
+     * @deprecated for removal in v3.2, as Gateway Intents become mandatory there is no need to apply a forced timeout
+     * on a request as invalid ones will be rejected upon subscription.
+     */
+    @Deprecated
+    public GatewayBootstrap<O> setMemberRequestTimeout(Duration memberRequestTimeout) {
+        this.memberRequestTimeout = Objects.requireNonNull(memberRequestTimeout);
+        return this;
+    }
+
+    /**
      * Set an initial subscriber to the bootstrapped {@link EventDispatcher} to gain access to early startup events. The
      * subscriber is derived from the given {@link Function} which returns a {@link Publisher} that is subscribed early
      * in the Gateway connection process.
@@ -689,7 +707,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                     VoiceReactorResources voiceReactorResources = b.initVoiceReactorResources();
                     GatewayResources resources = new GatewayResources(stateView, eventDispatcher, shardCoordinator,
                             b.memberRequestFilter, gatewayReactorResources, b.initVoiceReactorResources(),
-                            b.initReconnectOptions(voiceReactorResources), b.intents);
+                            b.initReconnectOptions(voiceReactorResources), b.intents, b.memberRequestTimeout);
                     MonoProcessor<Void> closeProcessor = MonoProcessor.create();
                     EntityRetrievalStrategy entityRetrievalStrategy = b.initEntityRetrievalStrategy();
                     DispatchEventMapper dispatchMapper = b.initDispatchEventMapper();
