@@ -33,7 +33,10 @@ import reactor.core.publisher.Mono;
  *     <li>Perform shard invalidation using a JDK registry using {@link #withJdkRegistry()}</li>
  *     <li>Perform shard invalidation using a custom registry using {@link #withCustomRegistry(KeyStoreRegistry)}</li>
  * </ul>
+ *
+ * @deprecated to be removed and superseded by new Store abstraction under v3.2
  */
+@Deprecated
 public interface InvalidationStrategy {
 
     /**

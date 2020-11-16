@@ -258,6 +258,7 @@ public class GuildService extends RestService {
             .flatMapMany(Flux::fromArray);
     }
 
+    @Deprecated
     public Flux<IntegrationData> getGuildIntegrations(long guildId, boolean includeApplications) {
         return Routes.GUILD_INTEGRATIONS_GET.newRequest(guildId)
                 .query("include_applications", includeApplications)

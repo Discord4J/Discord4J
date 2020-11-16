@@ -258,6 +258,7 @@ public class RestGuild {
         return restClient.getGuildService().getGuildIntegrations(id);
     }
 
+    @Deprecated
     public Flux<IntegrationData> getIntegrations(boolean includeApplications) {
         return restClient.getGuildService().getGuildIntegrations(id, includeApplications);
     }

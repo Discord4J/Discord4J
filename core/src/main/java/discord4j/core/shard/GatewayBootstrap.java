@@ -293,7 +293,9 @@ public class GatewayBootstrap<O extends GatewayOptions> {
      *
      * @param invalidationStrategy an {@link InvalidationStrategy} to apply to this shard group
      * @return this builder
+     * @deprecated to be removed and superseded by new Store abstraction under v3.2
      */
+    @Deprecated
     public GatewayBootstrap<O> setInvalidationStrategy(InvalidationStrategy invalidationStrategy) {
         this.invalidationStrategy = Objects.requireNonNull(invalidationStrategy, "invalidationStrategy");
         return this;
