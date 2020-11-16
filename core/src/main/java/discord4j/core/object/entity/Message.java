@@ -435,6 +435,19 @@ public final class Message implements Entity {
     }
 
     /**
+     * Gets the stickers sent with the message.
+     *
+     * @return The stickers sent with the message.
+     */
+    public List<Sticker> getStickers() {
+        return data.stickers().toOptional()
+            .orElse(Collections.emptyList())
+            .stream()
+            .map(data -> new Sticker(gateway, data))
+            .collect(Collectors.toList());
+    }
+
+    /**
      * Requests to edit this message.
      *
      * @param spec A {@link Consumer} that provides a "blank" {@link MessageEditSpec} to be operated on.
