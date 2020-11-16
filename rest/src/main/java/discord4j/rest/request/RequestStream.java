@@ -79,7 +79,7 @@ class RequestStream {
      * 500, 502, 503 and 504). The delay is calculated using exponential backoff with jitter.
      */
     private reactor.retry.Retry<?> serverErrorRetryFactory() {
-        return reactor.retry.Retry.onlyIf(ClientException.isRetryContextStatusCode(500, 502, 503, 504))
+        return reactor.retry.Retry.onlyIf(ClientException.isRetryContextStatusCode(500, 502, 503, 504, 520))
                 .withBackoffScheduler(timedTaskScheduler)
                 .exponentialBackoffWithJitter(Duration.ofSeconds(2), Duration.ofSeconds(30))
                 .doOnRetry(ctx -> {
