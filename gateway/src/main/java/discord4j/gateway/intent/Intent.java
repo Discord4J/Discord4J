@@ -125,10 +125,10 @@ public enum Intent {
     /**
      * Events which will be received by subscribing to DIRECT_MESSAGES
      * <ul>
-     *     <li>CHANNEL_CREATE</li>
      *     <li>MESSAGE_CREATE</li>
      *     <li>MESSAGE_UPDATE</li>
      *     <li>MESSAGE_DELETE</li>
+     *     <li>CHANNEL_PINS_UPDATE</li>
      * </ul>
      */
     DIRECT_MESSAGES(12),
