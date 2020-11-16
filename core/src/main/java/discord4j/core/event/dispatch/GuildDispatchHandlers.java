@@ -188,10 +188,10 @@ class GuildDispatchHandlers {
         long guildId = Snowflake.asLong(context.getDispatch().guildId());
         long memberId = Snowflake.asLong(context.getDispatch().user().id());
 
-        List<Long> currentRoles = context.getDispatch().roles()
+        Set<Long> currentRoleIds = context.getDispatch().roles()
                 .stream()
                 .map(Snowflake::asLong)
-                .collect(Collectors.toList());
+                .collect(Collectors.toSet());
         String currentNick = Possible.flatOpt(context.getDispatch().nick()).orElse(null);
         String currentJoinedAt = context.getDispatch().joinedAt();
         String currentPremiumSince = Possible.flatOpt(context.getDispatch().premiumSince()).orElse(null);
@@ -200,7 +200,7 @@ class GuildDispatchHandlers {
                 .orElse(null);
 
         return Mono.just(new MemberUpdateEvent(gateway, context.getShardInfo(), guildId, memberId, oldMember,
-                currentRoles, currentNick, currentJoinedAt, currentPremiumSince));
+                currentRoleIds, currentNick, currentJoinedAt, currentPremiumSince));
     }
 
     static Mono<RoleCreateEvent> guildRoleCreate(DispatchContext<GuildRoleCreate, Void> context) {
