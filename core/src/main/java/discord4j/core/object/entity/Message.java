@@ -29,6 +29,7 @@ import discord4j.core.retriever.EntityRetrievalStrategy;
 import discord4j.core.spec.MessageEditSpec;
 import discord4j.core.util.EntityUtil;
 import discord4j.discordjson.json.MessageData;
+import discord4j.discordjson.json.StickerData;
 import discord4j.discordjson.json.SuppressEmbedsRequest;
 import discord4j.discordjson.json.UserData;
 import discord4j.rest.entity.RestChannel;
@@ -432,6 +433,19 @@ public final class Message implements Entity {
      */
     public Type getType() {
         return Type.of(data.type());
+    }
+
+    /**
+     * Gets the stickers sent with the message.
+     *
+     * @return The stickers sent with the message.
+     */
+    public List<Sticker> getStickers() {
+        return data.stickers().toOptional()
+            .orElse(Collections.emptyList())
+            .stream()
+            .map(data -> new Sticker(gateway, data))
+            .collect(Collectors.toList());
     }
 
     /**
