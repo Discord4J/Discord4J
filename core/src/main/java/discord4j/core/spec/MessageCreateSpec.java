@@ -128,16 +128,23 @@ public class MessageCreateSpec implements Spec<MultipartRequest> {
 
     /**
      * Adds an allowed mentions object to the message spec.
-     * @param allowedMentions the allowed mentions to add.
-     * @return this spec.
+     *
+     * @param allowedMentions The allowed mentions to add.
+     * @return This spec.
      */
     public MessageCreateSpec setAllowedMentions(AllowedMentions allowedMentions) {
         this.allowedMentionsData = allowedMentions.toData();
         return this;
     }
 
-    public MessageCreateSpec setMessageReference(MessageReferenceData messageReference) {
-        this.messageReference = messageReference;
+    /**
+     * Adds a message reply to the message spec.
+     *
+     * @param spec The message reply to add.
+     * @return This spec.
+     */
+    public MessageCreateSpec setMessageReference(MessageReferenceSpec spec) {
+        this.messageReferenceData = spec.asRequest();
         return this;
     }
 
