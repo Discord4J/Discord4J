@@ -4,6 +4,11 @@ import discord4j.common.util.Snowflake;
 import discord4j.discordjson.json.ImmutableMessageReferenceData;
 import discord4j.discordjson.json.MessageReferenceData;
 
+/**
+ * Spec used to created a message reference, used to reply to messages.
+ *
+ * @see <a href="https://discord.com/developers/docs/resources/channel#message-object-message-reference-structure">Message Reference</a>
+ */
 public class MessageReferenceSpec implements Spec<MessageReferenceData> {
 
     private final ImmutableMessageReferenceData.Builder requestBuilder = MessageReferenceData.builder();
@@ -22,7 +27,7 @@ public class MessageReferenceSpec implements Spec<MessageReferenceData> {
     /**
      * Sets the ID of the originating message's channel.
      *
-     * @param channelId id of the originating message's channel
+     * @param channelId The ID of the originating message's channel.
      * @return This spec.
      */
     public MessageReferenceSpec setChannelId(Snowflake channelId) {
