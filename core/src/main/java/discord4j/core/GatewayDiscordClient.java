@@ -57,6 +57,7 @@ import reactor.core.publisher.Mono;
 import reactor.core.publisher.MonoProcessor;
 import reactor.util.Logger;
 import reactor.util.Loggers;
+import reactor.util.context.Context;
 
 import java.time.Duration;
 import java.time.ZonedDateTime;
@@ -470,11 +471,14 @@ public class GatewayDiscordClient implements EntityRetriever {
     public <E extends Event, T> Flux<T> on(Class<E> eventClass, Function<E, Publisher<T>> mapper) {
         return on(eventClass)
                 .flatMap(event -> Flux.defer(() -> mapper.apply(event))
+                        .subscriberContext(ctx -> ctx.put(LogUtil.KEY_SHARD_ID, event.getShardInfo().getIndex()))
                         .onErrorResume(t -> {
-                            log.warn("Error while handling {} in shard [{}]", eventClass.getSimpleName(),
-                                    event.getShardInfo().format(), t);
+                            log.warn(format(Context.of(LogUtil.KEY_GATEWAY_ID, Integer.toHexString(hashCode()),
+                                    LogUtil.KEY_SHARD_ID, event.getShardInfo().getIndex()), "Error while handling {}"),
+                                    eventClass.getSimpleName(), t);
                             return Mono.empty();
-                        }));
+                        }))
+                .subscriberContext(ctx -> ctx.put(LogUtil.KEY_GATEWAY_ID, Integer.toHexString(hashCode())));
     }
 
     /**
