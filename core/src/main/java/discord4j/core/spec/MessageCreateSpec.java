@@ -143,8 +143,10 @@ public class MessageCreateSpec implements Spec<MultipartRequest> {
      * @param spec The message reply to add.
      * @return This spec.
      */
-    public MessageCreateSpec setMessageReference(MessageReferenceSpec spec) {
-        this.messageReferenceData = spec.asRequest();
+    public MessageCreateSpec setMessageReference(Consumer<? super MessageReferenceSpec> spec) {
+        final MessageReferenceSpec mutatedSpec = new MessageReferenceSpec();
+        spec.accept(mutatedSpec);
+        messageReferenceData = mutatedSpec.asRequest();
         return this;
     }
 
