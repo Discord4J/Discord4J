@@ -133,19 +133,20 @@ public class MessageCreateSpec implements Spec<MultipartRequest> {
      * @return This spec.
      */
     public MessageCreateSpec setAllowedMentions(AllowedMentions allowedMentions) {
-        this.allowedMentionsData = allowedMentions.toData();
+        allowedMentionsData = allowedMentions.toData();
         return this;
     }
 
     /**
-     * Adds a message reply to the message spec.
+     * Adds a message ID to reply to. This requires the `VIEW MESSAGE HISTORY` permission, and the referenced
+     * message must exist and cannot be a system message.
      *
-     * @param spec The message reply to add.
+     * @param messageId The ID of the message to reply to.
      * @return This spec.
      */
-    public MessageCreateSpec setMessageReference(Consumer<? super MessageReferenceSpec> spec) {
+    public MessageCreateSpec setMessageReference(Snowflake messageId) {
         final MessageReferenceSpec mutatedSpec = new MessageReferenceSpec();
-        spec.accept(mutatedSpec);
+        mutatedSpec.setMessageId(messageId);
         messageReferenceData = mutatedSpec.asRequest();
         return this;
     }
