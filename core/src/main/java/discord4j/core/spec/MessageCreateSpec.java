@@ -17,13 +17,12 @@
 package discord4j.core.spec;
 
 import discord4j.core.object.Embed;
+import discord4j.core.object.MessageReference;
 import discord4j.core.object.entity.Attachment;
 import discord4j.core.object.entity.Message;
+import discord4j.discordjson.json.*;
 import discord4j.rest.util.AllowedMentions;
 import discord4j.core.object.entity.channel.MessageChannel;
-import discord4j.discordjson.json.AllowedMentionsData;
-import discord4j.discordjson.json.EmbedData;
-import discord4j.discordjson.json.MessageCreateRequest;
 import discord4j.discordjson.possible.Possible;
 import discord4j.rest.util.MultipartRequest;
 import discord4j.common.util.Snowflake;
@@ -53,6 +52,7 @@ public class MessageCreateSpec implements Spec<MultipartRequest> {
     private EmbedData embed;
     private List<Tuple2<String, InputStream>> files;
     private AllowedMentionsData allowedMentionsData;
+    private MessageReferenceData messageReferenceData;
 
     /**
      * Sets the created {@link Message} contents, up to 2000 characters.
@@ -136,6 +136,11 @@ public class MessageCreateSpec implements Spec<MultipartRequest> {
         return this;
     }
 
+    public MessageCreateSpec setMessageReference(MessageReferenceData messageReference) {
+        this.messageReference = messageReference;
+        return this;
+    }
+
     @Override
     public MultipartRequest asRequest() {
         MessageCreateRequest json = MessageCreateRequest.builder()
@@ -144,6 +149,7 @@ public class MessageCreateSpec implements Spec<MultipartRequest> {
                 .tts(tts)
                 .embed(embed == null ? Possible.absent() : Possible.of(embed))
                 .allowedMentions(allowedMentionsData == null ? Possible.absent() : Possible.of(allowedMentionsData))
+                .messageReference(messageReferenceData == null ? Possible.absent() : Possible.of(messageReferenceData))
                 .build();
         return new MultipartRequest(json, files == null ? Collections.emptyList() : files);
     }

@@ -47,18 +47,20 @@ public class AllowedMentions {
      * @return A builder class for allowed mentions
      */
     public static AllowedMentions.Builder builder(final AllowedMentions template) {
-        return new Builder(template.parse, template.userIds, template.roleIds);
+        return new Builder(template.parse, template.userIds, template.roleIds, template.repliedUser);
     }
 
     private final Possible<Set<Type>> parse;
     private final Possible<Set<Snowflake>> userIds;
     private final Possible<Set<Snowflake>> roleIds;
+    private final Possible<Boolean> repliedUser;
 
     private AllowedMentions(final Possible<Set<AllowedMentions.Type>> parse, final Possible<Set<Snowflake>> userIds,
-                            final Possible<Set<Snowflake>> roleIds) {
+                            final Possible<Set<Snowflake>> roleIds, final Possible<Boolean> repliedUser) {
         this.parse = parse;
         this.userIds = userIds;
         this.roleIds = roleIds;
+        this.repliedUser = repliedUser;
     }
 
     private <T, U> List<T> mapSetToList(final Set<U> list, final Function<? super U, ? extends T> mapper) {
@@ -86,6 +88,9 @@ public class AllowedMentions {
         if (parse.isAbsent() && userIds.isAbsent() && roleIds.isAbsent()) {
             builder.parse(Collections.emptyList()); // this empty list is required to work
         }
+        if(!repliedUser.isAbsent()) {
+            builder.repliedUser(repliedUser.get());
+        }
         return builder.build();
     }
 
@@ -94,9 +99,11 @@ public class AllowedMentions {
         private Possible<Set<AllowedMentions.Type>> parse;
         private Possible<Set<Snowflake>> userIds;
         private Possible<Set<Snowflake>> roleIds;
+        private Possible<Boolean> repliedUser;
 
         private Builder() {
             this(
+                    Possible.absent(),
                     Possible.absent(),
                     Possible.absent(),
                     Possible.absent()
@@ -104,10 +111,11 @@ public class AllowedMentions {
         }
 
         private Builder(final Possible<Set<Type>> parse, final Possible<Set<Snowflake>> userIds,
-                        final Possible<Set<Snowflake>> roleIds) {
+                        final Possible<Set<Snowflake>> roleIds, final Possible<Boolean> repliedUser) {
             this.parse = parse;
             this.userIds = userIds;
             this.roleIds = roleIds;
+            this.repliedUser = repliedUser;
         }
 
         /**
@@ -195,12 +203,23 @@ public class AllowedMentions {
         }
 
         /**
+         * Set whether to mention the author of the message being replied to (default false)
+         *
+         * @param repliedUser whether to mention the author of the message being replied to.
+         * @return this builder
+         */
+        public Builder repliedUser(final boolean repliedUser) {
+            this.repliedUser = Possible.of(repliedUser);
+            return this;
+        }
+
+        /**
          * Build the {@link AllowedMentions} object
          *
          * @return the allowed mentions object
          */
         public AllowedMentions build() {
-            return new AllowedMentions(parse, userIds, roleIds);
+            return new AllowedMentions(parse, userIds, roleIds, repliedUser);
         }
     }
 
