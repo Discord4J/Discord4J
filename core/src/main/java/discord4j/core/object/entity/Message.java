@@ -375,9 +375,9 @@ public final class Message implements Entity {
     }
 
     /**
-     * Returns the @link MessageReference} sent with crossposted messages and replies, if present.
+     * Returns the {@link MessageReference} sent with crossposted messages and replies, if present.
      *
-     * @return The @link MessageReference} sent with crossposted messages and replies, if present.
+     * @return The {@link MessageReference} sent with crossposted messages and replies, if present.
      */
     public Optional<MessageReference> getMessageReference() {
         return data.messageReference().toOptional()
