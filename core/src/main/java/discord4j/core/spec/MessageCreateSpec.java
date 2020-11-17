@@ -145,9 +145,9 @@ public class MessageCreateSpec implements Spec<MultipartRequest> {
      * @return This spec.
      */
     public MessageCreateSpec setMessageReference(Snowflake messageId) {
-        final MessageReferenceSpec mutatedSpec = new MessageReferenceSpec();
-        mutatedSpec.setMessageId(messageId);
-        messageReferenceData = mutatedSpec.asRequest();
+        final MessageReferenceSpec spec = new MessageReferenceSpec();
+        spec.setMessageId(messageId);
+        messageReferenceData = spec.asRequest();
         return this;
     }
 

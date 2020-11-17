@@ -5,7 +5,7 @@ import discord4j.discordjson.json.ImmutableMessageReferenceData;
 import discord4j.discordjson.json.MessageReferenceData;
 
 /**
- * Spec used to created a message reference, used to reply to messages.
+ * Spec used to create a message reference.
  *
  * @see <a href="https://discord.com/developers/docs/resources/channel#message-object-message-reference-structure">Message Reference</a>
  */
@@ -36,7 +36,7 @@ public class MessageReferenceSpec implements Spec<MessageReferenceData> {
     }
 
     /**
-     * Sets the ID of the originating message's guild;
+     * Sets the ID of the originating message's guild.
      *
      * @param guildId The ID of the originating message's guild.
      * @return This spec.
