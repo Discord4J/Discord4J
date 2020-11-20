@@ -203,7 +203,7 @@ public class AllowedMentions {
         }
 
         /**
-         * Set whether to mention the author of the message being replied to (default true).
+         * Set whether to mention the author of the message being replied to.
          *
          * @param repliedUser whether to mention the author of the message being replied to.
          * @return this builder
