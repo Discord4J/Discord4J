@@ -784,7 +784,7 @@ public final class Message implements Entity {
         GUILD_DISCOVERY_REQUALIFIED(15),
 
         /** A message created with a reply */
-        REPLY(19);
+        REPLY(0);
 
         /**
          * The underlying value as represented by Discord.

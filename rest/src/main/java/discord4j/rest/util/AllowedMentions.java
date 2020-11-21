@@ -88,7 +88,7 @@ public class AllowedMentions {
         if (parse.isAbsent() && userIds.isAbsent() && roleIds.isAbsent()) {
             builder.parse(Collections.emptyList()); // this empty list is required to work
         }
-        if(!repliedUser.isAbsent()) {
+        if (!repliedUser.isAbsent()) {
             builder.repliedUser(repliedUser.get());
         }
         return builder.build();

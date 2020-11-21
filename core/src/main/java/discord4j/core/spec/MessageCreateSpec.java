@@ -138,7 +138,7 @@ public class MessageCreateSpec implements Spec<MultipartRequest> {
     }
 
     /**
-     * Adds a message ID to reply to. This requires the `VIEW MESSAGE HISTORY` permission, and the referenced
+     * Adds a message ID to reply to. This requires the `READ_MESSAGE_HISTORY` permission, and the referenced
      * message must exist and cannot be a system message.
      *
      * @param messageId The ID of the message to reply to.
