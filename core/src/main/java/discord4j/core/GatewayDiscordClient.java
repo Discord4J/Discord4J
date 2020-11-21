@@ -59,6 +59,7 @@ import reactor.core.publisher.Mono;
 import reactor.core.publisher.MonoProcessor;
 import reactor.util.Logger;
 import reactor.util.Loggers;
+import reactor.util.context.Context;
 
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -69,6 +70,8 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+
+import static discord4j.common.LogUtil.format;
 
 /**
  * An aggregation of all dependencies Discord4J requires to operate with the Discord Gateway, REST API and Voice
@@ -488,11 +491,14 @@ public class GatewayDiscordClient implements EntityRetriever {
     public <E extends Event, T> Flux<T> on(Class<E> eventClass, Function<E, Publisher<T>> mapper) {
         return on(eventClass)
                 .flatMap(event -> Flux.defer(() -> mapper.apply(event))
+                        .contextWrite(ctx -> ctx.put(LogUtil.KEY_SHARD_ID, event.getShardInfo().getIndex()))
                         .onErrorResume(t -> {
-                            log.warn("Error while handling {} in shard [{}]", eventClass.getSimpleName(),
-                                    event.getShardInfo().format(), t);
+                            log.warn(format(Context.of(LogUtil.KEY_GATEWAY_ID, Integer.toHexString(hashCode()),
+                                    LogUtil.KEY_SHARD_ID, event.getShardInfo().getIndex()), "Error while handling {}"),
+                                    eventClass.getSimpleName(), t);
                             return Mono.empty();
-                        }));
+                        }))
+                .contextWrite(ctx -> ctx.put(LogUtil.KEY_GATEWAY_ID, Integer.toHexString(hashCode())));
     }
 
     /**
@@ -523,11 +529,14 @@ public class GatewayDiscordClient implements EntityRetriever {
      * the {@link Flux}.
      */
     public Flux<Member> requestMembers(Snowflake guildId, Set<Snowflake> userIds) {
-        return requestMembers(RequestGuildMembers.builder()
-                .guildId(guildId.asString())
-                .userIds(userIds.stream().map(Snowflake::asString).collect(Collectors.toList()))
-                .limit(0)
-                .build());
+        return Flux.fromIterable(userIds)
+                .map(Snowflake::asString)
+                .buffer(100)
+                .concatMap(userIdBuffer -> requestMembers(RequestGuildMembers.builder()
+                        .guildId(guildId.asString())
+                        .userIds(userIdBuffer)
+                        .limit(0)
+                        .build()));
     }
 
     /**
@@ -541,6 +550,7 @@ public class GatewayDiscordClient implements EntityRetriever {
      */
     public Flux<Member> requestMembers(RequestGuildMembers request) {
         try {
+            // client-side validation is required to avoid indefinitely waiting for a response
             ValidationUtil.validateRequestGuildMembers(request, Possible.of(gatewayResources.getIntents()));
         } catch (Throwable t) {
             return Flux.error(t);
@@ -560,7 +570,7 @@ public class GatewayDiscordClient implements EntityRetriever {
                                 .map(data -> new Member(this, data, guildId.asLong()))
                                 .collect(Collectors.toList())))
                 .orElseThrow(() -> new IllegalStateException("Unable to find gateway client"));
-        return getGuildById(guildId) // check if this operation is valid otherwise request+waiting will hang
+        return Flux.deferContextual(ctx -> getGuildById(guildId)
                 .then(gatewayClientGroup.unicast(ShardGatewayPayload.requestGuildMembers(
                         RequestGuildMembers.builder()
                                 .from(request)
@@ -572,7 +582,8 @@ public class GatewayDiscordClient implements EntityRetriever {
                                 completingChunkNonces.add(nonce);
                             }
                         })))
-                .thenMany(Flux.defer(incomingMembers));
+                .thenMany(Flux.defer(incomingMembers))
+                .doOnComplete(() -> log.debug(format(ctx, "Member request completed: {}"), request)));
     }
 
     /**

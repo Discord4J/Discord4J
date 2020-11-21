@@ -52,6 +52,7 @@ public class GatewayResources {
      * @param gatewayReactorResources a custom set of Reactor resources targeting Gateway operations
      * @param voiceReactorResources a set of Reactor resources targeting Voice Gateway operations
      * @param voiceReconnectOptions a reconnection policy for Voice Gateway connections
+     * @param intents a set of events to subscribe when connecting to the Gateway
      */
     public GatewayResources(Store store, EventDispatcher eventDispatcher,
                             ShardCoordinator shardCoordinator, MemberRequestFilter memberRequestFilter,
