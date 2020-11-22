@@ -30,7 +30,6 @@ import discord4j.core.DiscordClient;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.GatewayResources;
 import discord4j.core.event.EventDispatcher;
-import discord4j.core.event.ReplayingEventDispatcher;
 import discord4j.core.event.dispatch.DispatchContext;
 import discord4j.core.event.dispatch.DispatchEventMapper;
 import discord4j.core.event.domain.Event;
@@ -649,8 +648,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                 .zipWhen(b -> b.shardingStrategy.getShardCount(b.client))
                 .flatMap(function((b, count) -> {
                     Store store = b.initStore();
-                    EventDispatcher eventDispatcher =
-                            b.initEventDispatcher(b.client.getCoreResources().getReactorResources());
+                    EventDispatcher eventDispatcher = b.initEventDispatcher();
                     GatewayReactorResources gatewayReactorResources = b.initGatewayReactorResources();
                     ShardCoordinator shardCoordinator = b.initShardCoordinator(gatewayReactorResources);
 
@@ -925,13 +923,11 @@ public class GatewayBootstrap<O extends GatewayOptions> {
         return voiceReactorResources.apply(client.getCoreResources().getReactorResources());
     }
 
-    private EventDispatcher initEventDispatcher(ReactorResources reactorResources) {
+    private EventDispatcher initEventDispatcher() {
         if (eventDispatcher != null) {
             return eventDispatcher;
         }
-        return ReplayingEventDispatcher.builder()
-                .timedTaskScheduler(reactorResources.getTimerTaskScheduler())
-                .build();
+        return EventDispatcher.buffering();
     }
 
     private ShardCoordinator initShardCoordinator(ReactorResources reactorResources) {
