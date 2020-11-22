@@ -72,6 +72,7 @@ import reactor.core.Disposables;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.MonoProcessor;
+import reactor.core.publisher.MonoSink;
 import reactor.util.Logger;
 import reactor.util.Loggers;
 import reactor.util.annotation.Nullable;
@@ -80,7 +81,9 @@ import reactor.util.retry.Retry;
 
 import java.time.Duration;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import static discord4j.common.LogUtil.format;
 import static reactor.function.TupleUtils.function;
@@ -406,15 +409,20 @@ public class GatewayBootstrap<O extends GatewayOptions> {
      * entities from the Gateway if missing, according to the configured
      * {@link #setEntityRetrievalStrategy(EntityRetrievalStrategy)}.
      * <p>
-     * <strong>Fetching guild members:</strong> if you don't enable {@link Intent#GUILD_MEMBERS} you will not be
-     * able to request the entire list of members in a guild.
+     * Members can also be requested eagerly on startup, using {@link #setMemberRequestFilter(MemberRequestFilter)},
+     * either for select guilds or all of them, provided you are able to request the entire list of members in a guild.
      * <p>
-     * <strong>Fetching guild presences:</strong> if you don't enable {@link Intent#GUILD_PRESENCES} you will not
-     * receive user activity and status information. In addition, you will not receive the initial guild member list,
-     * which includes all members for small guilds and online members + members without roles for larger guilds.
-     * <p>
-     * <strong>Establishing voice connections:</strong> if you don't enable {@link Intent#GUILD_VOICE_STATES} you will
-     * not be able to connect to a voice channel.
+     * The following scenarios are affected by this feature:
+     * <ul>
+     *     <li><strong>Fetching guild members:</strong> if you don't enable {@link Intent#GUILD_MEMBERS} you will not
+     *     be able to request the entire list of members in a guild.</li>
+     *     <li><strong>Fetching guild presences:</strong> if you don't enable {@link Intent#GUILD_PRESENCES} you will
+     *     not receive user activity and status information. In addition, you will not receive the initial guild
+     *     member list, which includes all members for small guilds and online members + members without roles for
+     *     larger guilds.</li>
+     *     <li><strong>Establishing voice connections:</strong> if you don't enable {@link Intent#GUILD_VOICE_STATES}
+     *     you will not be able to connect to a voice channel.</li>
+     * </ul>
      *
      * @param intents set of intents to subscribe
      * @return this builder
@@ -442,15 +450,21 @@ public class GatewayBootstrap<O extends GatewayOptions> {
      * entities from the Gateway if missing, according to the configured
      * {@link #setEntityRetrievalStrategy(EntityRetrievalStrategy)}.
      * <p>
-     * <strong>Fetching guild members:</strong> if you disable {@link Intent#GUILD_MEMBERS} you will not be
-     * able to request the entire list of members in a guild.
+     * Members can also be requested eagerly on startup, using {@link #setMemberRequestFilter(MemberRequestFilter)},
+     * either for select guilds or all of them, provided you are able to request the entire list of members in a guild.
      * <p>
-     * <strong>Fetching guild presences:</strong> if you disable {@link Intent#GUILD_PRESENCES} you will not
-     * receive user activity and status information. In addition, you will not receive the initial guild member list,
-     * which includes all members for small guilds and online members + members without roles for larger guilds.
-     * <p>
-     * <strong>Establishing voice connections:</strong> if you disable {@link Intent#GUILD_VOICE_STATES} you will
-     * not be able to connect to a voice channel.
+     * The following scenarios are affected by this feature:
+     * <ul>
+     *     <li><strong>Fetching guild members:</strong> if you disable {@link Intent#GUILD_MEMBERS} you will not
+     *     be able to request the entire list of members in a guild.</li>
+     *     <li><strong>Fetching guild presences:</strong> if you disable {@link Intent#GUILD_PRESENCES} you will
+     *     not receive user activity and status information. In addition, you will not receive the initial guild
+     *     member list, which includes all members for small guilds and online members + members without roles for
+     *     larger guilds.</li>
+     *     <li><strong>Establishing voice connections:</strong> if you disable {@link Intent#GUILD_VOICE_STATES}
+     *     you will not be able to connect to a voice channel.</li>
+     * </ul>
+     *
      * @param intents set of intents which should not be subscribed
      * @return this builder
      */
@@ -625,6 +639,9 @@ public class GatewayBootstrap<O extends GatewayOptions> {
      * Set an initial subscriber to the bootstrapped {@link EventDispatcher} to gain access to early startup events. The
      * subscriber is derived from the given {@link Function} which returns a {@link Publisher} that is subscribed early
      * in the Gateway connection process.
+     * <p>
+     * Errors emitted from the given {@code dispatcherFunction} will instruct a logout procedure to disconnect from the
+     * Gateway.
      *
      * @param dispatcherFunction an {@link EventDispatcher} mapper that derives an asynchronous listener
      * @return this builder
@@ -709,6 +726,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                             b.memberRequestFilter, gatewayReactorResources, b.initVoiceReactorResources(),
                             b.initReconnectOptions(voiceReactorResources), b.intents, b.memberRequestTimeout);
                     MonoProcessor<Void> closeProcessor = MonoProcessor.create();
+                    AtomicReference<Throwable> dispatcherFunctionError = new AtomicReference<>();
                     EntityRetrievalStrategy entityRetrievalStrategy = b.initEntityRetrievalStrategy();
                     DispatchEventMapper dispatchMapper = b.initDispatchEventMapper();
 
@@ -716,8 +734,15 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                     GatewayDiscordClient gateway = new GatewayDiscordClient(b.client, resources, closeProcessor,
                             clientGroup, b.voiceConnectionFactory, entityRetrievalStrategy);
                     Mono<Void> destroySequence = Mono.deferWithContext(ctx -> b.destroyHandler.apply(gateway)
-                            .doFinally(s -> log.info(format(ctx, "All shards disconnected"))))
-                            .doOnTerminate(closeProcessor::onComplete)
+                            .doFinally(s -> {
+                                log.info(format(ctx, "All shards disconnected"));
+                                Throwable t = dispatcherFunctionError.get();
+                                if (t != null) {
+                                    closeProcessor.onError(t);
+                                } else {
+                                    closeProcessor.onComplete();
+                                }
+                            }))
                             .cache();
 
                     Flux<ShardInfo> connections = b.shardingStrategy.getShards(count)
@@ -727,14 +752,34 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                                     closeProcessor, dispatchMapper, invalidationStrategy,
                                     destroySequence.subscriberContext(buildContext(gateway, shard)))));
 
+                    Supplier<Mono<Void>> withEventDispatcherFunction = () ->
+                            Flux.from(b.dispatcherFunction.apply(eventDispatcher))
+                                    .then()
+                                    .subscribeOn(gatewayReactorResources.getBlockingTaskScheduler())
+                                    .onErrorResume(t -> {
+                                        log.warn("Error in specified withEventDispatcher function. " +
+                                                "Handle this error to avoid terminating this connection.", t);
+                                        dispatcherFunctionError.set(t);
+                                        return gateway.logout();
+                                    });
+
+                    Function<MonoSink<GatewayDiscordClient>, Flux<ShardInfo>> onFirstConnection =
+                            sink -> connections.switchOnFirst((first, flux) -> {
+                                if (first.hasValue()) {
+                                    sink.success(gateway);
+                                } else if (first.hasError()) {
+                                    sink.error(Objects.requireNonNull(first.getThrowable()));
+                                }
+                                return flux;
+                            });
+
                     if (b.awaitConnections == null ? count == 1 : b.awaitConnections) {
                         if (b.dispatcherFunction != null) {
                             return Mono.create(sink -> {
                                 Disposable.Composite cleanup = Disposables.composite();
-                                // subscribe to the dispatcher function, log but ignore errors
-                                cleanup.add(Flux.from(b.dispatcherFunction.apply(eventDispatcher))
-                                        .subscribeOn(gatewayReactorResources.getBlockingTaskScheduler())
-                                        .subscribe(null, t -> log.warn("Error in dispatcher function", t)));
+                                // subscribe to the dispatcher function
+                                cleanup.add(withEventDispatcherFunction.get()
+                                        .subscribe(null, t -> log.warn("Error terminating Gateway connection", t)));
                                 // tie the connections Flux completion to the completion/error of this MonoSink
                                 cleanup.add(connections.then(Mono.just(gateway))
                                         .subscribe(sink::success, sink::error));
@@ -747,36 +792,20 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                         if (b.dispatcherFunction != null) {
                             return Mono.create(sink -> {
                                 Disposable.Composite cleanup = Disposables.composite();
-                                // subscribe to the dispatcher function, log but ignore errors
-                                cleanup.add(Flux.from(b.dispatcherFunction.apply(eventDispatcher))
-                                        .subscribeOn(gatewayReactorResources.getBlockingTaskScheduler())
-                                        .subscribe(null, t -> log.warn("Error in dispatcher function", t)));
+                                // subscribe to the dispatcher function
+                                cleanup.add(withEventDispatcherFunction.get()
+                                        .subscribe(null, t -> log.warn("Error terminating Gateway connection", t)));
                                 // tie the connections Flux first signal to the completion/error of this MonoSink
-                                cleanup.add(connections.switchOnFirst(
-                                        (first, flux) -> {
-                                            if (first.hasValue()) {
-                                                sink.success(gateway);
-                                            } else if (first.hasError()) {
-                                                sink.error(Objects.requireNonNull(first.getThrowable()));
-                                            }
-                                            return flux;
-                                        })
+                                cleanup.add(onFirstConnection.apply(sink)
                                         .subscribe(null, t -> log.warn("Error in connections function", t)));
                                 sink.onCancel(cleanup);
                             });
                         }
                         return Mono.create(sink ->
                                 // tie the connections Flux first signal to the completion/error of this MonoSink
-                                sink.onCancel(connections.switchOnFirst(
-                                        (first, flux) -> {
-                                            if (first.hasValue()) {
-                                                sink.success(gateway);
-                                            } else if (first.hasError()) {
-                                                sink.error(Objects.requireNonNull(first.getThrowable()));
-                                            }
-                                            return flux;
-                                        })
-                                        .subscribe(null, t -> log.warn("Error in connections function", t))));
+                                sink.onCancel(onFirstConnection.apply(sink)
+                                        .subscribe(null, t -> log.warn("Error in connections function", t)))
+                        );
                     }
                 }));
     }
