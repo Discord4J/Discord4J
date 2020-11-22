@@ -12,9 +12,19 @@ The recommended way to get Discord4J is to use a build automation tool like [Mav
 * [Eclipse / Maven](http://www.vogella.com/tutorials/EclipseMaven/article.html)
 * [Eclipse / Gradle](http://www.vogella.com/tutorials/EclipseGradle/article.html)
 
-#### Replace VERSION below with one of these
+#### Versions
+
+| Discord4J                                                   | Support          | Gateway/API | Intents                           |
+|-------------------------------------------------------------|------------------|-------------|-----------------------------------|
+| [v3.2.x](https://github.com/Discord4J/Discord4J/tree/master)| In development   | v8          | Mandatory, non-privileged default |
+| [v3.1.x](https://github.com/Discord4J/Discord4J/tree/3.1.x) | Current          | v6          | Optional, no intent default       |
+| [v3.0.x](https://github.com/Discord4J/Discord4J/tree/3.0.x) | Maintenance only | v6          | No intents support                |
+
+Replace VERSION below with one of these:
+
+* Latest version from v3.2.x: [![Maven Central](https://img.shields.io/maven-central/v/com.discord4j/discord4j-core/3.2.svg?style=flat-square)](https://search.maven.org/artifact/com.discord4j/discord4j-core)
+* Latest version from v3.1.x: [![Maven Central](https://img.shields.io/maven-central/v/com.discord4j/discord4j-core/3.1.svg?style=flat-square)](https://search.maven.org/artifact/com.discord4j/discord4j-core)
 * Latest version from v3.0.x: [![Maven Central](https://img.shields.io/maven-central/v/com.discord4j/discord4j-core/3.0.svg?style=flat-square)](https://search.maven.org/artifact/com.discord4j/discord4j-core)
-* Latest version from v3.1.x: [![Maven Central](https://img.shields.io/maven-central/v/com.discord4j/discord4j-core.svg?style=flat-square)](https://search.maven.org/artifact/com.discord4j/discord4j-core)
 
 ### Maven
 ```xml
