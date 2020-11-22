@@ -24,6 +24,8 @@ import discord4j.common.ReactorResources;
 import discord4j.common.store.action.read.ReadActions;
 import discord4j.common.util.Snowflake;
 import discord4j.core.event.EventDispatcher;
+import discord4j.core.event.EventSubscriberAdapter;
+import discord4j.core.event.ReactiveEventAdapter;
 import discord4j.core.event.domain.Event;
 import discord4j.core.object.Invite;
 import discord4j.core.object.Region;
@@ -59,7 +61,6 @@ import reactor.core.publisher.Mono;
 import reactor.core.publisher.MonoProcessor;
 import reactor.util.Logger;
 import reactor.util.Loggers;
-import reactor.util.context.Context;
 
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -424,7 +425,8 @@ public class GatewayDiscordClient implements EntityRetriever {
     }
 
     /**
-     * Retrieves a {@link Flux} with elements of the given {@link Event} type.
+     * Retrieves a {@link Flux} with elements of the given {@link Event} type. This {@link Flux} has to be subscribed to
+     * in order to start processing.
      * <p>
      * <strong>Note: </strong> Errors occurring while processing events will terminate your sequence. If you wish to use
      * a version capable of handling errors for you, use {@link #on(Class, Function)}. See
@@ -458,22 +460,21 @@ public class GatewayDiscordClient implements EntityRetriever {
     }
 
     /**
-     * Retrieves a {@link Flux} with elements of the given {@link Event} type, processing them through a given
-     * {@link Function}. Errors occurring within the mapper will be logged and discarded, preventing the termination of
-     * the "infinite" event sequence.
+     * Retrieves a {@link Flux} with elements of the given {@link Event} type, to be processed through a given
+     * {@link Function} upon subscription. Errors occurring within the mapper will be logged and discarded, preventing
+     * the termination of the "infinite" event sequence.
      * <p>
      * There are multiple ways of using this event handling method, for example:
      * <pre>
-     * client.on(MessageCreateEvent.class, event -> {
+     * client.on(MessageCreateEvent.class, event -&gt; {
      *         // myCodeThatMightThrow should return a Reactor type (Mono or Flux)
      *         return myCodeThatMightThrow(event);
      *     })
      *     .subscribe();
      *
-     * client.on(MessageCreateEvent.class, event -> {
-     *         // myCodeThatMightThrow *can* be blocking
-     *         myCodeThatMightThrow(event);
-     *         return Mono.empty(); // but we have to return a Reactor type
+     * client.on(MessageCreateEvent.class, event -&gt; {
+     *         // myCodeThatMightThrow *can* be blocking, so wrap it in a Reactor type
+     *         return Mono.fromRunnable(() -&gt; myCodeThatMightThrow(event));
      *     })
      *     .subscribe();
      * </pre>
@@ -489,15 +490,47 @@ public class GatewayDiscordClient implements EntityRetriever {
      * @return a new {@link Flux} with the type resulting from the given event mapper
      */
     public <E extends Event, T> Flux<T> on(Class<E> eventClass, Function<E, Publisher<T>> mapper) {
-        return on(eventClass)
-                .flatMap(event -> Flux.defer(() -> mapper.apply(event))
-                        .contextWrite(ctx -> ctx.put(LogUtil.KEY_SHARD_ID, event.getShardInfo().getIndex()))
-                        .onErrorResume(t -> {
-                            log.warn(format(Context.of(LogUtil.KEY_GATEWAY_ID, Integer.toHexString(hashCode()),
-                                    LogUtil.KEY_SHARD_ID, event.getShardInfo().getIndex()), "Error while handling {}"),
-                                    eventClass.getSimpleName(), t);
-                            return Mono.empty();
-                        }))
+        return getEventDispatcher().on(eventClass, mapper)
+                .contextWrite(ctx -> ctx.put(LogUtil.KEY_GATEWAY_ID, Integer.toHexString(hashCode())));
+    }
+
+    /**
+     * Applies a given {@code adapter} to all events from this dispatcher. Errors occurring within the mapper will be
+     * logged and discarded, preventing the termination of the "infinite" event sequence. This variant allows you to
+     * have a single subscriber to this dispatcher, which is useful to collect all startup events.
+     * <p>
+     * A standard approach to this method is to subclass {@link ReactiveEventAdapter}, overriding the methods you want
+     * to listen for. Each method requires a {@code Mono<Void>} return and all errors will be logged and discarded. If
+     * you want to use a synchronous variant check {@link #on(EventSubscriberAdapter)}.
+     * <p>
+     * Continuing the chain will require your own error handling strategy.
+     * Check the docs for {@link #on(Class)} for more details.
+     *
+     * @param adapter an adapter meant to be subclassed with its appropriate methods overridden
+     * @return a new {@link Flux} with the type resulting from the given event mapper
+     */
+    public Flux<Event> on(ReactiveEventAdapter adapter) {
+        return getEventDispatcher().on(adapter)
+                .contextWrite(ctx -> ctx.put(LogUtil.KEY_GATEWAY_ID, Integer.toHexString(hashCode())));
+    }
+
+    /**
+     * Applies a given {@code adapter} to all events from this dispatcher. Errors occurring within the mapper will be
+     * logged and discarded, preventing the termination of the "infinite" event sequence. This variant allows you to
+     * have a single subscriber to this dispatcher, which is useful to collect all startup events.
+     * <p>
+     * A standard approach to this method is to subclass {@link EventSubscriberAdapter}, overriding the methods you want
+     * to listen for. Each method requires a {@code void} return and all errors will be logged and discarded. If
+     * you want to use a reactive variant check {@link #on(ReactiveEventAdapter)}.
+     * <p>
+     * Continuing the chain will require your own error handling strategy.
+     * Check the docs for {@link #on(Class)} for more details.
+     *
+     * @param adapter an adapter meant to be subclassed with its appropriate methods overridden
+     * @return a new {@link Flux} with the type resulting from the given event mapper
+     */
+    public Flux<Event> on(EventSubscriberAdapter adapter) {
+        return getEventDispatcher().on(adapter)
                 .contextWrite(ctx -> ctx.put(LogUtil.KEY_GATEWAY_ID, Integer.toHexString(hashCode())));
     }
 
