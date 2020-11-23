@@ -23,7 +23,6 @@ import discord4j.common.LogUtil;
 import discord4j.common.ReactorResources;
 import discord4j.common.util.Snowflake;
 import discord4j.core.event.EventDispatcher;
-import discord4j.core.event.EventSubscriberAdapter;
 import discord4j.core.event.ReactiveEventAdapter;
 import discord4j.core.event.domain.Event;
 import discord4j.core.object.Invite;
@@ -406,7 +405,7 @@ public class GatewayDiscordClient implements EntityRetriever {
 
     /**
      * Retrieves a {@link Flux} with elements of the given {@link Event} type. This {@link Flux} has to be subscribed to
-     * in order to start processing.
+     * in order to start processing. See {@link Event} class for the list of possible event classes.
      * <p>
      * <strong>Note: </strong> Errors occurring while processing events will terminate your sequence. If you wish to use
      * a version capable of handling errors for you, use {@link #on(Class, Function)}. See
@@ -442,7 +441,7 @@ public class GatewayDiscordClient implements EntityRetriever {
     /**
      * Retrieves a {@link Flux} with elements of the given {@link Event} type, to be processed through a given
      * {@link Function} upon subscription. Errors occurring within the mapper will be logged and discarded, preventing
-     * the termination of the "infinite" event sequence.
+     * the termination of the "infinite" event sequence. See {@link Event} class for the list of possible event classes.
      * <p>
      * There are multiple ways of using this event handling method, for example:
      * <pre>
@@ -480,8 +479,29 @@ public class GatewayDiscordClient implements EntityRetriever {
      * have a single subscriber to this dispatcher, which is useful to collect all startup events.
      * <p>
      * A standard approach to this method is to subclass {@link ReactiveEventAdapter}, overriding the methods you want
-     * to listen for. Each method requires a {@code Mono<Void>} return and all errors will be logged and discarded. If
-     * you want to use a synchronous variant check {@link #on(EventSubscriberAdapter)}.
+     * to listen for:
+     * <pre>
+     * client.on(new ReactiveEventAdapter() {
+     *
+     *     public Publisher&lt;?&gt; onReady(ReadyEvent event) {
+     *         return Mono.fromRunnable(() -&gt;
+     *                 System.out.println("Connected as " + event.getSelf().getTag()));
+     *     }
+     *
+     *     public Publisher&lt;?&gt; onMessageCreate(MessageCreateEvent event) {
+     *         if (event.getMessage().getContent().equals("!ping")) {
+     *             return event.getMessage().getChannel()
+     *                     .flatMap(channel -&gt; channel.createMessage("Pong!"));
+     *         }
+     *         return Mono.empty();
+     *     }
+     *
+     * }).subscribe(); // nothing happens until you subscribe
+     * </pre>
+     * <p>
+     * Each method requires a {@link Publisher} return like {@link Mono} or {@link Flux} and all errors
+     * will be logged and discarded. To use a synchronous implementation you can wrap your code with
+     * {@link Mono#fromRunnable(Runnable)}.
      * <p>
      * Continuing the chain will require your own error handling strategy.
      * Check the docs for {@link #on(Class)} for more details.
@@ -490,26 +510,6 @@ public class GatewayDiscordClient implements EntityRetriever {
      * @return a new {@link Flux} with the type resulting from the given event mapper
      */
     public Flux<Event> on(ReactiveEventAdapter adapter) {
-        return getEventDispatcher().on(adapter)
-                .subscriberContext(ctx -> ctx.put(LogUtil.KEY_GATEWAY_ID, Integer.toHexString(hashCode())));
-    }
-
-    /**
-     * Applies a given {@code adapter} to all events from this dispatcher. Errors occurring within the mapper will be
-     * logged and discarded, preventing the termination of the "infinite" event sequence. This variant allows you to
-     * have a single subscriber to this dispatcher, which is useful to collect all startup events.
-     * <p>
-     * A standard approach to this method is to subclass {@link EventSubscriberAdapter}, overriding the methods you want
-     * to listen for. Each method requires a {@code void} return and all errors will be logged and discarded. If
-     * you want to use a reactive variant check {@link #on(ReactiveEventAdapter)}.
-     * <p>
-     * Continuing the chain will require your own error handling strategy.
-     * Check the docs for {@link #on(Class)} for more details.
-     *
-     * @param adapter an adapter meant to be subclassed with its appropriate methods overridden
-     * @return a new {@link Flux} with the type resulting from the given event mapper
-     */
-    public Flux<Event> on(EventSubscriberAdapter adapter) {
         return getEventDispatcher().on(adapter)
                 .subscriberContext(ctx -> ctx.put(LogUtil.KEY_GATEWAY_ID, Integer.toHexString(hashCode())));
     }
