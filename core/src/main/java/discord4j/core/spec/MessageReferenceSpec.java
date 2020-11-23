@@ -20,7 +20,7 @@ public class MessageReferenceSpec implements Spec<MessageReferenceData> {
      * @return This spec.
      */
     public MessageReferenceSpec setMessageId(Snowflake messageId) {
-        requestBuilder.guildId(messageId.asString());
+        requestBuilder.messageId(messageId.asString());
         return this;
     }
 
@@ -31,7 +31,7 @@ public class MessageReferenceSpec implements Spec<MessageReferenceData> {
      * @return This spec.
      */
     public MessageReferenceSpec setChannelId(Snowflake channelId) {
-        requestBuilder.guildId(channelId.asString());
+        requestBuilder.channelId(channelId.asString());
         return this;
     }
 
