@@ -60,7 +60,7 @@ public interface EventDispatcher {
 
     /**
      * Retrieves a {@link Flux} with elements of the given {@link Event} type. This {@link Flux} has to be subscribed to
-     * in order to start processing.
+     * in order to start processing. See {@link Event} class for the list of possible event classes.
      * <p>
      * <strong>Note: </strong> Errors occurring while processing events will terminate your sequence. If you wish to use
      * a version capable of handling errors for you, use {@link #on(Class, Function)}. See
@@ -93,7 +93,7 @@ public interface EventDispatcher {
     /**
      * Retrieves a {@link Flux} with elements of the given {@link Event} type, to be processed through a given
      * {@link Function} upon subscription. Errors occurring within the mapper will be logged and discarded, preventing
-     * the termination of the "infinite" event sequence.
+     * the termination of the "infinite" event sequence. See {@link Event} class for the list of possible event classes.
      * <p>
      * There are multiple ways of using this event handling method, for example:
      * <pre>
@@ -137,8 +137,29 @@ public interface EventDispatcher {
      * have a single subscriber to this dispatcher, which is useful to collect all startup events.
      * <p>
      * A standard approach to this method is to subclass {@link ReactiveEventAdapter}, overriding the methods you want
-     * to listen for. Each method requires a {@code Mono<Void>} return and all errors will be logged and discarded. If
-     * you want to use a synchronous variant check {@link #on(EventSubscriberAdapter)}.
+     * to listen for:
+     * <pre>
+     * client.on(new ReactiveEventAdapter() {
+     *
+     *     public Publisher&lt;?&gt; onReady(ReadyEvent event) {
+     *         return Mono.fromRunnable(() -&gt;
+     *                 System.out.println("Connected as " + event.getSelf().getTag()));
+     *     }
+     *
+     *     public Publisher&lt;?&gt; onMessageCreate(MessageCreateEvent event) {
+     *         if (event.getMessage().getContent().equals("!ping")) {
+     *             return event.getMessage().getChannel()
+     *                     .flatMap(channel -&gt; channel.createMessage("Pong!"));
+     *         }
+     *         return Mono.empty();
+     *     }
+     *
+     * }).subscribe(); // nothing happens until you subscribe
+     * </pre>
+     * <p>
+     * Each method requires a {@link Publisher} return like {@link Mono} or {@link Flux} and all errors
+     * will be logged and discarded. To use a synchronous implementation you can wrap your code with
+     * {@link Mono#fromRunnable(Runnable)}.
      * <p>
      * Continuing the chain will require your own error handling strategy.
      * Check the docs for {@link #on(Class)} for more details.
@@ -148,41 +169,14 @@ public interface EventDispatcher {
      */
     default Flux<Event> on(ReactiveEventAdapter adapter) {
         return on(Event.class)
-                .flatMap(event -> Mono.defer(() -> adapter.hookOnEvent(event))
+                .flatMap(event -> Flux.defer(() -> adapter.hookOnEvent(event))
                         .contextWrite(ctx -> ctx.put(LogUtil.KEY_SHARD_ID, event.getShardInfo().getIndex()))
                         .onErrorResume(t -> {
                             log.warn(format(Context.of(LogUtil.KEY_SHARD_ID, event.getShardInfo().getIndex()),
                                     "Error while handling {}"), event.getClass().getSimpleName(), t);
                             return Mono.empty();
                         })
-                        .thenReturn(event));
-    }
-
-    /**
-     * Applies a given {@code adapter} to all events from this dispatcher. Errors occurring within the mapper will be
-     * logged and discarded, preventing the termination of the "infinite" event sequence. This variant allows you to
-     * have a single subscriber to this dispatcher, which is useful to collect all startup events.
-     * <p>
-     * A standard approach to this method is to subclass {@link EventSubscriberAdapter}, overriding the methods you want
-     * to listen for. Each method requires a {@code void} return and all errors will be logged and discarded. If
-     * you want to use a reactive variant check {@link #on(ReactiveEventAdapter)}.
-     * <p>
-     * Continuing the chain will require your own error handling strategy.
-     * Check the docs for {@link #on(Class)} for more details.
-     *
-     * @param adapter an adapter meant to be subclassed with its appropriate methods overridden
-     * @return a new {@link Flux} with the type resulting from the given event mapper
-     */
-    default Flux<Event> on(EventSubscriberAdapter adapter) {
-        return on(Event.class)
-                .flatMap(event -> Mono.fromRunnable(() -> adapter.hookOnEvent(event))
-                        .contextWrite(ctx -> ctx.put(LogUtil.KEY_SHARD_ID, event.getShardInfo().getIndex()))
-                        .onErrorResume(t -> {
-                            log.warn(format(Context.of(LogUtil.KEY_SHARD_ID, event.getShardInfo().getIndex()),
-                                    "Error while handling {}"), event.getClass().getSimpleName(), t);
-                            return Mono.empty();
-                        })
-                        .thenReturn(event));
+                        .then(Mono.just(event)));
     }
 
     /**
@@ -214,8 +208,7 @@ public interface EventDispatcher {
     /**
      * Create an {@link EventDispatcher} that will buffer incoming events to retain all startup events as each
      * shard connects at the cost of increased memory usage and potential {@link OutOfMemoryError} if events are not
-     * consumed. Since this factory uses {@link EmitterProcessor}, it will only produce previously buffered events to
-     * the first subscriber.
+     * consumed. Startup events collected before the first subscription are only forwarded to that subscriber.
      *
      * @return a buffering {@link EventDispatcher} backed by an {@link EmitterProcessor}
      */
@@ -225,8 +218,8 @@ public interface EventDispatcher {
 
     /**
      * Create an {@link EventDispatcher} that will buffer incoming events up to the given {@code bufferSize} elements,
-     * where subsequent events will be dropped in favor of retaining the earliest ones. Since this factory uses
-     * {@link EmitterProcessor}, it will only produce previously buffered events to the first subscriber.
+     * where subsequent events will be dropped in favor of retaining the earliest ones. Startup events collected
+     * before the first subscription are only forwarded to that subscriber.
      *
      * @param bufferSize the number of events to keep in the backlog
      * @return an {@link EventDispatcher} keeping the earliest events backed by an {@link EmitterProcessor}
@@ -240,8 +233,8 @@ public interface EventDispatcher {
 
     /**
      * Create an {@link EventDispatcher} that will buffer incoming events up to the given {@code bufferSize} elements,
-     * where earliest events will be dropped in favor of retaining the latest ones. Since this factory uses
-     * {@link EmitterProcessor}, it will only produce previously buffered events to the first subscriber.
+     * where earliest events will be dropped in favor of retaining the latest ones. Startup events collected before
+     * the first subscription are only forwarded to that subscriber.
      *
      * @param bufferSize the number of events to keep in the backlog
      * @return an {@link EventDispatcher} keeping the latest events backed by an {@link EmitterProcessor}
