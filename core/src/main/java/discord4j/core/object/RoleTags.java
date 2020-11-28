@@ -2,6 +2,7 @@ package discord4j.core.object;
 
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
+import discord4j.discordjson.json.RoleTagsData;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -33,7 +34,7 @@ public class RoleTags implements DiscordObject {
      * @return The id of the bot this role belongs to, if present.
      */
     public Optional<Snowflake> getBotId() {
-        return data.botId().toOptional();
+        return data.botId().toOptional().map(Snowflake::of);
     }
 
     /**
@@ -42,7 +43,7 @@ public class RoleTags implements DiscordObject {
      * @return The id of the integration this role belongs to, if present.
      */
     public Optional<Snowflake> getIntegrationId() {
-        return data.integrationId().toOptional();
+        return data.integrationId().toOptional().map(Snowflake::of);
     }
 
     /**
