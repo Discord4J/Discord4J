@@ -296,4 +296,10 @@ public class GuildService extends RestService {
                 .exchange(getRouter())
                 .bodyToMono(GuildWidgetData.class);
     }
+
+    public Mono<GuildPreviewData> getGuildPreview(long guildId) {
+        return Routes.GUILD_PREVIEW_GET.newRequest(guildId)
+            .exchange(getRouter())
+            .bodyToMono(GuildPreviewData.class);
+    }
 }

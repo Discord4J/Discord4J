@@ -296,4 +296,8 @@ public class RestGuild {
     public Flux<WebhookData> getWebhooks() {
         return restClient.getWebhookService().getGuildWebhooks(id);
     }
+
+    public Mono<GuildPreviewData> getPreview() {
+        return restClient.getGuildService().getGuildPreview(id);
+    }
 }

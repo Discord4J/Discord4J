@@ -716,6 +716,14 @@ public abstract class Routes {
      */
     public static final Route GUILD_WIDGET_MODIFY = Route.patch("/guilds/{guild.id}/widget");
 
+    /**
+     * Returns the guild preview object. If the user is not in the guild, then the guild must be Discoverable.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/guild#get-guild-preview">
+     *     https://discord.com/developers/docs/resources/guild#get-guild-preview</a>
+     */
+    public static final Route GUILD_PREVIEW_GET = Route.get("/guilds/{guild.id}/preview");
+
     /////////////////////////////////////////////
     ////////////// Invite Resource //////////////
     /////////////////////////////////////////////
