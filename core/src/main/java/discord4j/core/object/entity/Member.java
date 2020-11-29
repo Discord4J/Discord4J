@@ -27,6 +27,8 @@ import discord4j.core.spec.GuildMemberEditSpec;
 import discord4j.core.util.OrderUtil;
 import discord4j.core.util.PermissionUtil;
 import discord4j.discordjson.json.MemberData;
+import discord4j.discordjson.json.gateway.ImmutableRequestGuildMembers;
+import discord4j.discordjson.json.gateway.RequestGuildMembers;
 import discord4j.discordjson.possible.Possible;
 import discord4j.rest.util.Color;
 import discord4j.rest.util.PermissionSet;
@@ -240,11 +242,31 @@ public final class Member extends User {
 
     /**
      * Requests to retrieve the presence for this user for this guild.
+     * {@code Intent.GUILD_PRESENCES} is required to get the presence of the bot, otherwise the emitted {@code Mono}
+     * will always be empty.
      *
      * @return A {@link Mono} where, upon successful completion, emits a {@link Presence presence} for this user for
      * this guild. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Presence> getPresence() {
+        // Fix https://github.com/Discord4J/Discord4J/issues/475
+        if (getClient().getSelfId().equals(getId())) {
+            return Mono.defer(() -> {
+                final ImmutableRequestGuildMembers request = RequestGuildMembers.builder()
+                        .guildId(getGuildId().asString())
+                        .addUserId(getId().asString())
+                        .presences(true)
+                        .limit(1)
+                        .build();
+
+                return getClient().requestMembers(request)
+                        .singleOrEmpty()
+                        .flatMap(Member::getPresence)
+                        // IllegalArgumentException can be thrown during request validation if intents are not matching the request
+                        .onErrorResume(IllegalArgumentException.class, err -> Mono.empty());
+            });
+        }
+
         return Mono.from(getClient().getGatewayResources().getStore()
                 .execute(ReadActions.getPresenceById(getGuildId().asLong(), getId().asLong())))
                 .map(Presence::new);
