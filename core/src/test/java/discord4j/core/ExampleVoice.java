@@ -17,19 +17,43 @@
 
 package discord4j.core;
 
-import discord4j.core.support.BotSupport;
-import discord4j.core.support.ExtraBotSupport;
+import discord4j.common.util.Snowflake;
+import discord4j.core.command.CommandListener;
+import discord4j.core.support.Commands;
 import discord4j.core.support.VoiceSupport;
+import discord4j.core.support.AddRandomReaction;
+import discord4j.discordjson.json.ApplicationInfoData;
 import reactor.core.publisher.Mono;
+
+import static discord4j.core.support.Commands.isAuthor;
 
 public class ExampleVoice {
 
     public static void main(String[] args) {
-        GatewayDiscordClient client = DiscordClient.create(System.getenv("token")).login().block();
-        Mono.when(
-                BotSupport.create(client).eventHandlers(),
-                ExtraBotSupport.create(client).eventHandlers(),
-                VoiceSupport.create(client).eventHandlers())
+        GatewayDiscordClient client = DiscordClient.create(System.getenv("token"))
+                .login()
                 .block();
+
+        Mono<Long> ownerId = client.rest().getApplicationInfo()
+                .map(ApplicationInfoData::owner)
+                .map(user -> Snowflake.asLong(user.id()))
+                .cache();
+
+        CommandListener listener = CommandListener.createWithPrefix("!!")
+                .filter(req -> isAuthor(ownerId, req))
+                .on("echo", Commands::echo)
+                .on("exit", (req, res) -> res.getClient().logout())
+                .on("status", Commands::status)
+                .on("requestMembers", Commands::requestMembers)
+                .on("getMembers", Commands::getMembers)
+                .on("addRole", Commands::addRole)
+                .on("changeAvatar", Commands::changeAvatar)
+                .on("changeLogLevel", Commands::logLevelChange)
+                .on("react", new AddRandomReaction())
+                .on("userinfo", Commands::userInfo)
+                .on("reactionRemove", Commands::reactionRemove)
+                .on("leaveGuild", Commands::leaveGuild);
+
+        Mono.when(client.on(listener), VoiceSupport.create(client).eventHandlers()).block();
     }
 }

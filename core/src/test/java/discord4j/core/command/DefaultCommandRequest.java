@@ -15,22 +15,35 @@
  * along with Discord4J. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package discord4j.core;
+package discord4j.core.command;
 
-import discord4j.core.command.CommandListener;
-import discord4j.core.support.Commands;
+import discord4j.core.event.domain.message.MessageCreateEvent;
 
-public class ExampleLogin {
+public class DefaultCommandRequest implements CommandRequest {
 
-    public static void main(String[] args) {
-        GatewayDiscordClient client = DiscordClient.create(System.getenv("token"))
-                .login()
-                .block();
+    private final MessageCreateEvent event;
+    private final String command;
+    private final String parameters;
 
-        client.on(CommandListener.createWithPrefix("!!")
-                .on("echo", Commands::echo)
-                .on("exit", (req, res) -> res.getClient().logout())
-                .on("status", Commands::status))
-                .blockLast();
+    public DefaultCommandRequest(MessageCreateEvent event, String command, String parameters) {
+        this.event = event;
+        this.command = command;
+        this.parameters = parameters;
     }
+
+    @Override
+    public MessageCreateEvent event() {
+        return event;
+    }
+
+    @Override
+    public String command() {
+        return command;
+    }
+
+    @Override
+    public String parameters() {
+        return parameters;
+    }
+
 }

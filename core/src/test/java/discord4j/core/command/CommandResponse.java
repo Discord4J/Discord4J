@@ -15,22 +15,20 @@
  * along with Discord4J. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package discord4j.core;
+package discord4j.core.command;
 
-import discord4j.core.command.CommandListener;
-import discord4j.core.support.Commands;
+import discord4j.core.GatewayDiscordClient;
+import discord4j.core.object.entity.channel.MessageChannel;
+import discord4j.core.object.entity.channel.PrivateChannel;
+import reactor.core.publisher.Mono;
 
-public class ExampleLogin {
+public interface CommandResponse {
 
-    public static void main(String[] args) {
-        GatewayDiscordClient client = DiscordClient.create(System.getenv("token"))
-                .login()
-                .block();
+    GatewayDiscordClient getClient();
 
-        client.on(CommandListener.createWithPrefix("!!")
-                .on("echo", Commands::echo)
-                .on("exit", (req, res) -> res.getClient().logout())
-                .on("status", Commands::status))
-                .blockLast();
-    }
+    Mono<MessageChannel> getReplyChannel();
+
+    Mono<PrivateChannel> getPrivateChannel();
+
+    // TODO: add error(...) methods for common error handling
 }

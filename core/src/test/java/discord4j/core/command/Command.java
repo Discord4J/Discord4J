@@ -15,22 +15,11 @@
  * along with Discord4J. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package discord4j.core;
+package discord4j.core.command;
 
-import discord4j.core.command.CommandListener;
-import discord4j.core.support.Commands;
+import org.reactivestreams.Publisher;
 
-public class ExampleLogin {
+import java.util.function.BiFunction;
 
-    public static void main(String[] args) {
-        GatewayDiscordClient client = DiscordClient.create(System.getenv("token"))
-                .login()
-                .block();
-
-        client.on(CommandListener.createWithPrefix("!!")
-                .on("echo", Commands::echo)
-                .on("exit", (req, res) -> res.getClient().logout())
-                .on("status", Commands::status))
-                .blockLast();
-    }
+public interface Command extends BiFunction<CommandRequest, CommandResponse, Publisher<Void>> {
 }
