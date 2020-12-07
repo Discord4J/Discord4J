@@ -15,22 +15,25 @@
  * along with Discord4J. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package discord4j.core;
+package discord4j.core.command;
 
-import discord4j.core.command.CommandListener;
-import discord4j.core.support.Commands;
+import discord4j.core.object.entity.channel.MessageChannel;
+import discord4j.core.spec.EmbedCreateSpec;
+import discord4j.core.spec.MessageCreateSpec;
+import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Scheduler;
 
-public class ExampleLogin {
+import java.util.function.Consumer;
 
-    public static void main(String[] args) {
-        GatewayDiscordClient client = DiscordClient.create(System.getenv("token"))
-                .login()
-                .block();
+public interface CommandResponse {
 
-        client.on(CommandListener.createWithPrefix("!!")
-                .on("echo", Commands::echo)
-                .on("exit", (req, res) -> req.getClient().logout())
-                .on("status", Commands::status))
-                .blockLast();
-    }
+    CommandResponse withDirectMessage();
+
+    CommandResponse withReplyChannel(Mono<MessageChannel> channelSource);
+
+    CommandResponse withScheduler(Scheduler scheduler);
+
+    Mono<Void> sendMessage(Consumer<? super MessageCreateSpec> spec);
+
+    Mono<Void> sendEmbed(Consumer<? super EmbedCreateSpec> spec);
 }
