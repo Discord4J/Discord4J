@@ -63,10 +63,7 @@ import io.netty.buffer.ByteBuf;
 import org.reactivestreams.Publisher;
 import reactor.core.Disposable;
 import reactor.core.Disposables;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-import reactor.core.publisher.MonoProcessor;
-import reactor.core.publisher.MonoSink;
+import reactor.core.publisher.*;
 import reactor.util.Logger;
 import reactor.util.Loggers;
 import reactor.util.annotation.Nullable;
@@ -657,23 +654,23 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                             b.initMemberRequestFilter(b.intents), gatewayReactorResources,
                             b.initVoiceReactorResources(),
                             b.initReconnectOptions(voiceReactorResources), b.intents);
-                    MonoProcessor<Void> closeProcessor = MonoProcessor.create();
+                    Sinks.Empty<Void> onCloseSink = Sinks.empty();
                     AtomicReference<Throwable> dispatcherFunctionError = new AtomicReference<>();
                     EntityRetrievalStrategy entityRetrievalStrategy = b.initEntityRetrievalStrategy();
                     DispatchEventMapper dispatchMapper = b.initDispatchEventMapper();
                     Set<String> completingChunkNonces = ConcurrentHashMap.newKeySet();
 
                     GatewayClientGroupManager clientGroup = b.shardingStrategy.getGroupManager(count);
-                    GatewayDiscordClient gateway = new GatewayDiscordClient(b.client, resources, closeProcessor,
+                    GatewayDiscordClient gateway = new GatewayDiscordClient(b.client, resources, onCloseSink.asMono(),
                             clientGroup, b.voiceConnectionFactory, entityRetrievalStrategy, completingChunkNonces);
                     Mono<Void> destroySequence = Mono.deferContextual(ctx -> b.destroyHandler.apply(gateway)
                             .doFinally(s -> {
                                 log.info(format(ctx, "All shards disconnected"));
                                 Throwable t = dispatcherFunctionError.get();
                                 if (t != null) {
-                                    closeProcessor.onError(t);
+                                    onCloseSink.emitError(t, Sinks.EmitFailureHandler.FAIL_FAST);
                                 } else {
-                                    closeProcessor.onComplete();
+                                    onCloseSink.emitEmpty(Sinks.EmitFailureHandler.FAIL_FAST);
                                 }
                             }))
                             .cache();
@@ -682,7 +679,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                             .groupBy(shard -> shard.getIndex() % b.shardingStrategy.getMaxConcurrency())
                             .flatMap(group -> group.concatMap(shard -> acquireConnection(b, shard, clientFactory,
                                     gateway, shardCoordinator, store, eventDispatcher, clientGroup,
-                                    closeProcessor, dispatchMapper, completingChunkNonces,
+                                    onCloseSink, dispatchMapper, completingChunkNonces,
                                     destroySequence.contextWrite(buildContext(gateway, shard)))));
 
                     Supplier<Mono<Void>> withEventDispatcherFunction = () ->
@@ -751,7 +748,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                                               Store store,
                                               EventDispatcher eventDispatcher,
                                               GatewayClientGroupManager clientGroup,
-                                              MonoProcessor<Void> closeProcessor,
+                                              Sinks.Empty<Void> onCloseSink,
                                               DispatchEventMapper dispatchMapper,
                                               Set<String> completingChunkNonces,
                                               Mono<Void> destroySequence) {
@@ -778,7 +775,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                     // wire gateway events to EventDispatcher
                     Disposable.Composite forCleanup = Disposables.composite();
                     forCleanup.add(gatewayClient.dispatch()
-                            .takeUntilOther(closeProcessor)
+                            .takeUntilOther(onCloseSink.asMono())
                             .checkpoint("Read payload from gateway")
                             .flatMap(dispatchStoreLayer::store)
                             .checkpoint("Write gateway update to the store")
@@ -817,7 +814,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                     // TODO: migrate to GatewayClient::stateEvents
                     forCleanup.add(gatewayClient.dispatch()
                             .ofType(GatewayStateChange.class)
-                            .takeUntilOther(closeProcessor)
+                            .takeUntilOther(onCloseSink.asMono())
                             .flatMap(event -> {
                                 SessionInfo session = null;
                                 switch (event.getState()) {
@@ -860,7 +857,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                             .doOnError(sink::error) // only useful for startup errors
                             .doFinally(__ -> {
                                 sink.success(); // no-op if we completed it before
-                                closeProcessor.onComplete();
+                                onCloseSink.emitEmpty(Sinks.EmitFailureHandler.FAIL_FAST);
                             })
                             .contextWrite(buildContext(gateway, shard))
                             .subscribe(null,

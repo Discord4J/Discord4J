@@ -57,7 +57,6 @@ import discord4j.voice.VoiceConnectionRegistry;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.core.publisher.MonoProcessor;
 import reactor.util.Logger;
 import reactor.util.Loggers;
 
@@ -92,7 +91,7 @@ public class GatewayDiscordClient implements EntityRetriever {
 
     private final DiscordClient discordClient;
     private final GatewayResources gatewayResources;
-    private final MonoProcessor<Void> closeProcessor;
+    private final Mono<Void> onDisconnect;
     private final GatewayClientGroup gatewayClientGroup;
     private final VoiceConnectionFactory voiceConnectionFactory;
     private final VoiceConnectionRegistry voiceConnectionRegistry;
@@ -100,13 +99,13 @@ public class GatewayDiscordClient implements EntityRetriever {
     private final Set<String> completingChunkNonces;
 
     public GatewayDiscordClient(DiscordClient discordClient, GatewayResources gatewayResources,
-                                MonoProcessor<Void> closeProcessor, GatewayClientGroup gatewayClientGroup,
+                                Mono<Void> onDisconnect, GatewayClientGroup gatewayClientGroup,
                                 VoiceConnectionFactory voiceConnectionFactory,
                                 EntityRetrievalStrategy entityRetrievalStrategy,
                                 Set<String> completingChunkNonces) {
         this.discordClient = discordClient;
         this.gatewayResources = gatewayResources;
-        this.closeProcessor = closeProcessor;
+        this.onDisconnect = onDisconnect;
         this.gatewayClientGroup = gatewayClientGroup;
         this.voiceConnectionFactory = voiceConnectionFactory;
         this.voiceConnectionRegistry = new LocalVoiceConnectionRegistry();
@@ -420,7 +419,7 @@ public class GatewayDiscordClient implements EntityRetriever {
      * disconnected.
      */
     public Mono<Void> onDisconnect() {
-        return closeProcessor;
+        return onDisconnect;
     }
 
     /**
@@ -594,7 +593,7 @@ public class GatewayDiscordClient implements EntityRetriever {
         Supplier<Flux<Member>> incomingMembers = () -> gatewayClientGroup.find(shardId)
                 .map(gatewayClient -> gatewayClient.dispatch()
                         .ofType(GuildMembersChunk.class)
-                        .takeUntilOther(closeProcessor)
+                        .takeUntilOther(onDisconnect)
                         .filter(chunk -> chunk.nonce().toOptional()
                                 .map(s -> s.equals(nonce))
                                 .orElse(false))
