@@ -26,10 +26,7 @@ import io.netty.handler.codec.http.websocketx.CloseWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import io.netty.util.IllegalReferenceCountException;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.FluxSink;
-import reactor.core.publisher.Mono;
-import reactor.core.publisher.MonoProcessor;
+import reactor.core.publisher.*;
 import reactor.netty.http.websocket.WebsocketInbound;
 import reactor.netty.http.websocket.WebsocketOutbound;
 import reactor.util.Logger;
@@ -37,7 +34,11 @@ import reactor.util.Loggers;
 import reactor.util.context.ContextView;
 import reactor.util.function.Tuple2;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.locks.LockSupport;
+
 import static discord4j.common.LogUtil.format;
+import static reactor.core.publisher.Sinks.EmitFailureHandler.FAIL_FAST;
 
 /**
  * Represents a WebSocket handler specialized for Discord gateway operations.
@@ -55,28 +56,29 @@ public class GatewayWebsocketHandler {
 
     private static final Logger log = Loggers.getLogger(GatewayWebsocketHandler.class);
 
-    private final FluxSink<ByteBuf> inbound;
+    private final Sinks.Many<ByteBuf> inbound;
     private final Flux<ByteBuf> outbound;
-    private final MonoProcessor<DisconnectBehavior> sessionClose;
+    private final Sinks.One<DisconnectBehavior> sessionClose;
     private final ContextView context;
     private final boolean unpooled;
+    private final AtomicBoolean warnOnRetry = new AtomicBoolean(true);
 
     /**
      * Create a new handler with the given data pipelines.
      *
-     * @param inbound the {@link FluxSink} of {@link ByteBuf} to process inbound payloads
+     * @param inbound the {@link Sinks.Many} of {@link ByteBuf} to process inbound payloads
      * @param outbound the {@link Flux} of {@link ByteBuf} to process outbound payloads
      * @param context the Reactor {@link ContextView} that owns this handler, to enrich logging
      */
-    public GatewayWebsocketHandler(FluxSink<ByteBuf> inbound, Flux<ByteBuf> outbound, ContextView context) {
+    public GatewayWebsocketHandler(Sinks.Many<ByteBuf> inbound, Flux<ByteBuf> outbound, ContextView context) {
         this(inbound, outbound, context, false);
     }
 
-    public GatewayWebsocketHandler(FluxSink<ByteBuf> inbound, Flux<ByteBuf> outbound, ContextView context,
+    public GatewayWebsocketHandler(Sinks.Many<ByteBuf> inbound, Flux<ByteBuf> outbound, ContextView context,
                                    boolean unpooled) {
         this.inbound = inbound;
         this.outbound = outbound;
-        this.sessionClose = MonoProcessor.create();
+        this.sessionClose = Sinks.one();
         this.context = context;
         this.unpooled = unpooled;
     }
@@ -96,7 +98,7 @@ public class GatewayWebsocketHandler {
     public Mono<Tuple2<DisconnectBehavior, CloseStatus>> handle(WebsocketInbound in, WebsocketOutbound out) {
         ZlibDecompressor decompressor = new ZlibDecompressor(out.alloc());
 
-        Mono<CloseWebSocketFrame> outboundClose = sessionClose
+        Mono<CloseWebSocketFrame> outboundClose = sessionClose.asMono()
                 .doOnNext(behavior -> log.debug(format(context, "Closing session with behavior: {}"), behavior))
                 .flatMap(behavior -> {
                     switch (behavior.getAction()) {
@@ -127,14 +129,47 @@ public class GatewayWebsocketHandler {
                 .receiveFrames()
                 .map(WebSocketFrame::content)
                 .transformDeferred(decompressor::completeMessages)
-                .doOnNext(inbound::next)
+                .doOnNext(this::emitInbound)
                 .doOnNext(this::safeRelease)
                 .then();
 
         return Mono.zip(outboundEvents, inboundEvents)
                 .doOnError(this::error)
                 .onErrorResume(t -> t.getCause() instanceof GatewayException, t -> Mono.empty())
-                .then(Mono.zip(sessionClose, inboundClose.defaultIfEmpty(CloseStatus.ABNORMAL_CLOSE)));
+                .then(Mono.zip(sessionClose.asMono(), inboundClose.defaultIfEmpty(CloseStatus.ABNORMAL_CLOSE)));
+    }
+
+    private void emitInbound(ByteBuf value) {
+        for (; ; ) {
+            Sinks.EmitResult emission = inbound.tryEmitNext(value);
+            if (emission.isSuccess()) {
+                warnOnRetry.compareAndSet(false, true);
+                return;
+            }
+
+            switch (emission) {
+                case FAIL_ZERO_SUBSCRIBER:
+                    return;
+                case FAIL_OVERFLOW:
+                    if (warnOnRetry.compareAndSet(true, false)) {
+                        log.warn(format(context, "Retrying inbound payload emission due to overflow"));
+                    }
+                    LockSupport.parkNanos(10);
+                    continue;
+                case FAIL_CANCELLED:
+                case FAIL_TERMINATED:
+                    safeRelease(value);
+                    return;
+                case FAIL_NON_SERIALIZED:
+                    if (warnOnRetry.compareAndSet(true, false)) {
+                        log.warn(format(context, "Retrying inbound payload emission"));
+                    }
+                    continue;
+                default:
+                    safeRelease(value);
+                    throw new Sinks.EmissionException(emission, "Unknown emitResult value");
+            }
+        }
     }
 
     /**
@@ -151,7 +186,7 @@ public class GatewayWebsocketHandler {
      * @param behavior the {@link DisconnectBehavior} to follow after the close sequence starts
      */
     public void close(DisconnectBehavior behavior) {
-        sessionClose.onNext(behavior);
+        sessionClose.emitValue(behavior, FAIL_FAST);
     }
 
     /**
