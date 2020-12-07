@@ -52,10 +52,9 @@ public class Commands {
 
     public static Mono<Void> echo(CommandRequest request, CommandResponse response) {
         Message message = request.getMessage();
-        String content = message.getContent();
         return message.getRestChannel().createMessage(
                 MessageCreateRequest.builder()
-                        .content("<@" + message.getUserData().id() + "> " + content.substring("!echo ".length()))
+                        .content("<@" + message.getUserData().id() + "> " + request.parameters())
                         .build())
                 .flatMap(data -> request.getClient().rest().restMessage(data)
                         .createReaction("✅"))
@@ -65,35 +64,33 @@ public class Commands {
     public static Mono<Void> status(CommandRequest request, CommandResponse response) {
         String params = request.parameters();
         if (params.equalsIgnoreCase("online")) {
-            return response.getClient().updatePresence(Presence.online());
+            return request.getClient().updatePresence(Presence.online());
         } else if (params.equalsIgnoreCase("dnd")) {
-            return response.getClient().updatePresence(Presence.doNotDisturb());
+            return request.getClient().updatePresence(Presence.doNotDisturb());
         } else if (params.equalsIgnoreCase("idle")) {
-            return response.getClient().updatePresence(Presence.idle());
+            return request.getClient().updatePresence(Presence.idle());
         } else if (params.equalsIgnoreCase("invisible")) {
-            return response.getClient().updatePresence(Presence.invisible());
+            return request.getClient().updatePresence(Presence.invisible());
         } else {
             // showing you can block too
-            return request.getMessage().getChannel()
-                    .publishOn(Schedulers.boundedElastic())
-                    .flatMap(channel -> channel.createEmbed(spec -> {
-                        spec.setThumbnail(response.getClient().getSelf()
+            return response.withScheduler(Schedulers.boundedElastic())
+                    .sendEmbed(spec -> {
+                        spec.setThumbnail(request.getClient().getSelf()
                                 .blockOptional()
                                 .orElseThrow(RuntimeException::new)
                                 .getAvatarUrl());
-                        spec.addField("Servers", response.getClient().getGuilds().count()
+                        spec.addField("Servers", request.getClient().getGuilds().count()
                                 .blockOptional()
                                 .orElse(-1L)
                                 .toString(), false);
-                    }))
-                    .then();
+                    });
         }
     }
 
     public static Mono<Void> requestMembers(CommandRequest request, CommandResponse response) {
         Message message = request.getMessage();
         String guildId = request.parameters();
-        return response.getClient().requestMembers(Snowflake.of(guildId))
+        return request.getClient().requestMembers(Snowflake.of(guildId))
                 .doOnNext(member -> log.info("{}", member))
                 .then(message.getRestChannel().createMessage(
                         MessageCreateRequest.builder()
@@ -104,7 +101,7 @@ public class Commands {
 
     public static Mono<Void> getMembers(CommandRequest request, CommandResponse response) {
         String guildId = request.parameters();
-        return response.getClient().getGuildById(Snowflake.of(guildId))
+        return request.getClient().getGuildById(Snowflake.of(guildId))
                 .flatMapMany(Guild::getMembers)
                 .doOnNext(member -> log.info("{}", member.getTag()))
                 .then();
@@ -157,7 +154,7 @@ public class Commands {
                     .get()
                     .uri(attachment.getUrl())
                     .responseSingle((res, mono) -> mono.asByteArray())
-                    .flatMap(input -> response.getClient()
+                    .flatMap(input -> request.getClient()
                             .edit(spec -> spec.setAvatar(Image.ofRaw(input, Image.Format.PNG))))
                     .then();
         }
@@ -187,27 +184,24 @@ public class Commands {
         String params = request.parameters();
         return message.getClient().getUserById(Snowflake.of(params))
                 .flatMap(user -> message.getChannel()
-                        .flatMap(channel -> channel.createMessage(msg ->
-                                msg.setEmbed(embed -> embed
-                                        .addField("Name", user.getUsername(), false)
-                                        .addField("Avatar URL", user.getAvatarUrl(), false)
-                                        .setImage(user.getAvatarUrl()))
-                        )))
+                        .flatMap(channel -> channel.createEmbed(embed -> embed
+                                .addField("Name", user.getUsername(), false)
+                                .addField("Avatar URL", user.getAvatarUrl(), false)
+                                .setImage(user.getAvatarUrl()))))
                 .switchIfEmpty(Mono.just("Not found")
                         .flatMap(reason -> message.getChannel()
-                                .flatMap(channel -> channel.createMessage(reason)))
-                )
+                                .flatMap(channel -> channel.createMessage(reason))))
                 .then();
     }
 
     public static Mono<Void> reactionRemove(CommandRequest request, CommandResponse response) {
         String[] tokens = request.parameters().split(" ");
-        return response.getClient().getMessageById(Snowflake.of(tokens[0]), Snowflake.of(tokens[1]))
+        return request.getClient().getMessageById(Snowflake.of(tokens[0]), Snowflake.of(tokens[1]))
                 .flatMap(m -> m.removeReactions(ReactionEmoji.unicode("✅")));
     }
 
     public static Mono<Void> leaveGuild(CommandRequest request, CommandResponse response) {
         String params = request.parameters();
-        return response.getClient().getGuildById(Snowflake.of(params)).flatMap(Guild::leave);
+        return request.getClient().getGuildById(Snowflake.of(params)).flatMap(Guild::leave);
     }
 }

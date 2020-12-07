@@ -24,10 +24,10 @@ import discord4j.core.object.entity.User;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.util.function.Tuples;
 
 import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -36,17 +36,15 @@ public class CommandListener extends ReactiveEventAdapter {
 
     private final Function<MessageCreateEvent, Publisher<String>> prefixFunction;
     private final Function<? super CommandRequest, Mono<Boolean>> filter;
-    private final CopyOnWriteArrayList<CommandHandler> handlers = new CopyOnWriteArrayList<>();
+    private final CopyOnWriteArrayList<CommandHandler> handlers;
+    private final CopyOnWriteArrayList<BiFunction<? super CommandRequest, Throwable, Publisher<?>>> errorHandlers;
 
     CommandListener(Function<MessageCreateEvent, Publisher<String>> prefixFunction,
                     Function<? super CommandRequest, Mono<Boolean>> filter) {
         this.prefixFunction = prefixFunction;
         this.filter = filter;
-    }
-
-    CommandListener(CommandListener source) {
-        this.prefixFunction = source.prefixFunction;
-        this.filter = source.filter;
+        this.handlers = new CopyOnWriteArrayList<>();
+        this.errorHandlers = new CopyOnWriteArrayList<>();
     }
 
     public static CommandListener create() {
@@ -93,18 +91,18 @@ public class CommandListener extends ReactiveEventAdapter {
                         int endIndex = (trimmed.indexOf(' ') < 0) ? trimmed.length() : trimmed.indexOf(' ');
                         String commandName = trimmed.substring(0, endIndex);
                         String remaining = trimmed.substring(commandName.length()).trim();
-                        return Tuples.of(
-                                new DefaultCommandRequest(event, commandName, remaining),
-                                new DefaultCommandResponse(event)
-                        );
+                        return new CommandOperations(event, commandName, remaining);
                     })
-                    .filterWhen(exchange -> filter.apply(exchange.getT1()))
-                    .flatMap(exchange -> handlers.stream()
-                            .filter(handler -> handler.test(exchange.getT1()))
-                            .map(handler -> handler.apply(exchange.getT1(), exchange.getT2()))
-                            .findFirst()
-                            .orElse(Mono.empty()));
-            // TODO: use CommandResponse to manage event lifecycle
+                    .filterWhen(filter)
+                    .flatMap(ops -> applyCommand(ops, ops));
         }
+    }
+
+    private Mono<Void> applyCommand(CommandRequest req, CommandResponse res) {
+        return Mono.from(handlers.stream()
+                .filter(handler -> handler.test(req))
+                .findFirst()
+                .orElse(CommandHandler.NOOP_HANDLER)
+                .apply(req, res));
     }
 }

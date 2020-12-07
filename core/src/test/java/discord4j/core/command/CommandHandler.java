@@ -18,6 +18,7 @@
 package discord4j.core.command;
 
 import org.reactivestreams.Publisher;
+import reactor.core.publisher.Mono;
 
 import java.util.Objects;
 import java.util.function.BiFunction;
@@ -45,4 +46,6 @@ class CommandHandler implements BiFunction<CommandRequest, CommandResponse, Publ
     public boolean test(CommandRequest request) {
         return condition.test(request);
     }
+
+    static CommandHandler NOOP_HANDLER = new CommandHandler(req -> false, (req, res) -> Mono.empty());
 }

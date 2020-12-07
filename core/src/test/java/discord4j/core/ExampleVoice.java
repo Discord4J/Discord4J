@@ -19,15 +19,19 @@ package discord4j.core;
 
 import discord4j.common.util.Snowflake;
 import discord4j.core.command.CommandListener;
+import discord4j.core.support.AddRandomReaction;
 import discord4j.core.support.Commands;
 import discord4j.core.support.VoiceSupport;
-import discord4j.core.support.AddRandomReaction;
 import discord4j.discordjson.json.ApplicationInfoData;
 import reactor.core.publisher.Mono;
+import reactor.util.Logger;
+import reactor.util.Loggers;
 
 import static discord4j.core.support.Commands.isAuthor;
 
 public class ExampleVoice {
+
+    private static final Logger log = Loggers.getLogger(ExampleVoice.class);
 
     public static void main(String[] args) {
         GatewayDiscordClient client = DiscordClient.create(System.getenv("token"))
@@ -42,7 +46,7 @@ public class ExampleVoice {
         CommandListener listener = CommandListener.createWithPrefix("!!")
                 .filter(req -> isAuthor(ownerId, req))
                 .on("echo", Commands::echo)
-                .on("exit", (req, res) -> res.getClient().logout())
+                .on("exit", (req, res) -> req.getClient().logout())
                 .on("status", Commands::status)
                 .on("requestMembers", Commands::requestMembers)
                 .on("getMembers", Commands::getMembers)
