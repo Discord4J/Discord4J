@@ -29,8 +29,9 @@ public interface RequestQueue<T> {
      * Pushes a new request to the queue.
      *
      * @param request the request to push.
+     * @return {@code true} if the request was submitted successfully, {@code false} otherwise
      */
-    void push(T request);
+    boolean push(T request);
 
     /**
      * Exposes a Flux that continuously emits requests available in queue.

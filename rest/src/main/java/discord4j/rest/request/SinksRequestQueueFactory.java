@@ -16,40 +16,42 @@
  */
 package discord4j.rest.request;
 
+import discord4j.common.sinks.EmissionStrategy;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.FluxProcessor;
-import reactor.core.publisher.FluxSink;
+import reactor.core.publisher.Sinks;
+import reactor.util.Logger;
+import reactor.util.Loggers;
 
-import java.util.function.Supplier;
+import java.util.function.Function;
 
-class ProcessorRequestQueueFactory implements RequestQueueFactory {
+class SinksRequestQueueFactory implements RequestQueueFactory {
 
-    private final Supplier<FluxProcessor<Object, Object>> processorSupplier;
-    private final FluxSink.OverflowStrategy overflowStrategy;
+    private static final Logger log = Loggers.getLogger(SinksRequestQueueFactory.class);
 
-    ProcessorRequestQueueFactory(Supplier<FluxProcessor<Object, Object>> processorSupplier,
-                                 FluxSink.OverflowStrategy overflowStrategy) {
-        this.processorSupplier = processorSupplier;
-        this.overflowStrategy = overflowStrategy;
+    private final Function<Sinks.ManySpec, Sinks.Many<Object>> requestSinkFactory;
+    private final EmissionStrategy emissionStrategy;
+
+    SinksRequestQueueFactory(Function<Sinks.ManySpec, Sinks.Many<Object>> requestSinkFactory,
+                             EmissionStrategy emissionStrategy) {
+        this.requestSinkFactory = requestSinkFactory;
+        this.emissionStrategy = emissionStrategy;
     }
 
     @Override
     public <T> RequestQueue<T> create() {
         return new RequestQueue<T>() {
 
-            private final FluxProcessor<Object, Object> processor = processorSupplier.get();
-            private final FluxSink<Object> sink = processor.sink(FluxSink.OverflowStrategy.BUFFER);
+            private final Sinks.Many<Object> sink = requestSinkFactory.apply(Sinks.many());
 
             @Override
             public boolean push(T request) {
-                sink.next(request);
-                return true; // rejection happens on the requests() side via onDiscard handler
+                return emissionStrategy.emitNext(sink, request);
             }
 
             @SuppressWarnings("unchecked")
             @Override
             public Flux<T> requests() {
-                return (Flux<T>) Flux.create(sink -> processor.subscribe(sink::next), overflowStrategy);
+                return (Flux<T>) sink.asFlux();
             }
         };
     }

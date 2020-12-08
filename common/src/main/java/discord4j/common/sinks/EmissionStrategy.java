@@ -22,20 +22,56 @@ import reactor.core.publisher.Sinks;
 
 import java.time.Duration;
 
+/**
+ * A strategy to handle emission failures to a {@link Sinks.Many} instance.
+ */
 @Experimental
 public interface EmissionStrategy {
 
+    /**
+     * Create an {@link EmissionStrategy} that will retry overflowing emissions until a given {@code duration} and
+     * <strong>drop</strong> values upon timeout.
+     *
+     * @param duration the {@link Duration} to wait until elements are dropped
+     * @return a strategy with a drop on timeout behavior
+     */
     static TimeoutEmissionStrategy timeoutDrop(Duration duration) {
         return new TimeoutEmissionStrategy(Duration.ofMillis(10).toNanos(), duration.toNanos(), false);
     }
 
+    /**
+     * Create an {@link EmissionStrategy} that will retry overflowing emissions until a given {@code duration} and
+     * <strong>error</strong> values upon timeout.
+     *
+     * @param duration the {@link Duration} to wait until elements are dropped
+     * @return a strategy with an error on timeout behavior
+     */
     static TimeoutEmissionStrategy timeoutError(Duration duration) {
         return new TimeoutEmissionStrategy(Duration.ofMillis(10).toNanos(), duration.toNanos(), true);
     }
 
+    /**
+     * Create an {@link EmissionStrategy} that will indefinitely park emissions on overflow scenarios until it
+     * resolves, the emitter is cancelled or the sink is terminated.
+     *
+     * @param duration the {@link Duration} indicating how long to disable the emitting thread
+     * @return a strategy that awaits emissions on overflowing sinks
+     */
     static EmissionStrategy park(Duration duration) {
         return new TimeoutEmissionStrategy(duration.toNanos(), 0L, false);
     }
 
+    /**
+     * Try emitting a given {@code element} to the specified {@code sink}, respecting the semantics of
+     * {@link Sinks.Many#tryEmitNext(Object)} and the failure handling of
+     * {@link Sinks.Many#emitNext(Object, Sinks.EmitFailureHandler)}. Returns whether the emission was successful.
+     * Implementations can throw unchecked exceptions like {@link Sinks.EmissionException} or perform side-effects
+     * like waiting to determine a result.
+     *
+     * @param sink the target sink where this emission is attempted
+     * @param element the element pushed to the sink
+     * @param <T> the type associated with the sink and element
+     * @return the result of the emission, {@code true} if the element was pushed to the sink, {@code false} otherwise
+     */
     <T> boolean emitNext(Sinks.Many<T> sink, T element);
 }

@@ -25,8 +25,8 @@ import discord4j.rest.response.ResponseFunction;
 import org.reactivestreams.Subscription;
 import reactor.core.publisher.BaseSubscriber;
 import reactor.core.publisher.Mono;
-import reactor.core.publisher.MonoProcessor;
 import reactor.core.publisher.SignalType;
+import reactor.core.publisher.Sinks;
 import reactor.core.scheduler.Scheduler;
 import reactor.netty.http.client.HttpClientResponse;
 import reactor.util.Logger;
@@ -39,6 +39,7 @@ import java.util.List;
 import java.util.function.Function;
 
 import static discord4j.common.LogUtil.format;
+import static reactor.core.publisher.Sinks.EmitFailureHandler.FAIL_FAST;
 
 /**
  * A stream of {@link DiscordWebRequest DiscordRequests}. Any number of items may be {@link #push(RequestCorrelation)}
@@ -79,7 +80,8 @@ class RequestStream {
      * 500, 502, 503 and 504). The delay is calculated using exponential backoff with jitter.
      */
     private reactor.util.retry.Retry serverErrorRetryFactory() {
-        return Retry.withThrowable(reactor.retry.Retry.onlyIf(ClientException.isRetryContextStatusCode(500, 502, 503, 504, 520))
+        return Retry.withThrowable(reactor.retry.Retry.onlyIf(ClientException.isRetryContextStatusCode(500, 502, 503,
+                504, 520))
                 .withBackoffScheduler(timedTaskScheduler)
                 .exponentialBackoffWithJitter(Duration.ofSeconds(2), Duration.ofSeconds(30))
                 .doOnRetry(ctx -> {
@@ -90,8 +92,8 @@ class RequestStream {
                 }));
     }
 
-    void push(RequestCorrelation<ClientResponse> request) {
-        requestQueue.push(request);
+    boolean push(RequestCorrelation<ClientResponse> request) {
+        return requestQueue.push(request);
     }
 
     void start() {
@@ -101,7 +103,8 @@ class RequestStream {
     }
 
     private void onDiscard(RequestCorrelation<?> requestCorrelation) {
-        requestCorrelation.getResponse().onError(new DiscardedRequestException(requestCorrelation.getRequest()));
+        requestCorrelation.getResponse()
+                .emitError(new DiscardedRequestException(requestCorrelation.getRequest()), FAIL_FAST);
     }
 
     /**
@@ -158,7 +161,7 @@ class RequestStream {
         protected void hookOnNext(RequestCorrelation<ClientResponse> correlation) {
             DiscordWebRequest request = correlation.getRequest();
             ClientRequest clientRequest = new ClientRequest(request);
-            MonoProcessor<ClientResponse> callback = correlation.getResponse();
+            Sinks.One<ClientResponse> callback = correlation.getResponse();
 
             if (log.isDebugEnabled()) {
                 log.debug("[B:{}, R:{}] {}", id.toString(), clientRequest.getId(), clientRequest.getDescription());
@@ -178,8 +181,13 @@ class RequestStream {
                     .retryWhen(serverErrorRetryFactory())
                     .doFinally(this::next)
                     .checkpoint("Request to " + clientRequest.getDescription() + " [RequestStream]")
-                    .subscribeWith(callback)
-                    .subscribe(null, t -> log.trace("Error while processing {}: {}", request, t));
+                    .subscribe(
+                            response -> callback.emitValue(response, FAIL_FAST),
+                            t -> {
+                                log.trace("Error while processing {}: {}", request, t);
+                                callback.emitError(t, FAIL_FAST);
+                            },
+                            () -> callback.emitEmpty(FAIL_FAST));
         }
 
         private Function<Mono<ClientResponse>, Mono<ClientResponse>> getResponseTransformers(DiscordWebRequest discordRequest) {

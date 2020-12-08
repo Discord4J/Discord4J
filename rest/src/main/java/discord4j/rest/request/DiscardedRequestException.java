@@ -20,9 +20,15 @@ package discord4j.rest.request;
  * Thrown when a REST request is discarded because of a queue overflow.
  */
 public class DiscardedRequestException extends RuntimeException {
-    private static final long serialVersionUID = 304693810623154812L;
+
+    private final DiscordWebRequest request;
 
     public DiscardedRequestException(DiscordWebRequest request) {
-        super("Request discarded due to backpressure: " + request);
+        super("Request discarded due to backpressure: " + request.getDescription());
+        this.request = request;
+    }
+
+    public DiscordWebRequest getRequest() {
+        return request;
     }
 }

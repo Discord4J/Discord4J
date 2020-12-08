@@ -15,24 +15,10 @@
  * along with Discord4J. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package discord4j.core;
+/**
+ * Supporting classes for operating with Reactor Sinks API.
+ */
+@NonNullApi
+package discord4j.common.sinks;
 
-import discord4j.core.command.CommandListener;
-import discord4j.core.support.AddRandomReaction;
-import discord4j.core.support.Commands;
-
-public class ExampleLogin {
-
-    public static void main(String[] args) {
-        GatewayDiscordClient client = DiscordClient.create(System.getenv("token"))
-                .login()
-                .block();
-
-        client.on(CommandListener.createWithPrefix("!!")
-                .on("echo", Commands::echo)
-                .on("exit", (req, res) -> req.getClient().logout())
-                .on("status", Commands::status)
-                .on("react", new AddRandomReaction()))
-                .blockLast();
-    }
-}
+import reactor.util.annotation.NonNullApi;
