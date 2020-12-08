@@ -18,6 +18,7 @@ package discord4j.gateway;
 
 import discord4j.common.close.CloseStatus;
 import discord4j.common.close.DisconnectBehavior;
+import discord4j.common.sinks.EmissionStrategy;
 import discord4j.gateway.retry.GatewayException;
 import discord4j.gateway.retry.PartialDisconnectException;
 import discord4j.gateway.retry.ReconnectException;
@@ -26,7 +27,10 @@ import io.netty.handler.codec.http.websocketx.CloseWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import io.netty.util.IllegalReferenceCountException;
-import reactor.core.publisher.*;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.FluxSink;
+import reactor.core.publisher.Mono;
+import reactor.core.publisher.Sinks;
 import reactor.netty.http.websocket.WebsocketInbound;
 import reactor.netty.http.websocket.WebsocketOutbound;
 import reactor.util.Logger;
@@ -34,8 +38,8 @@ import reactor.util.Loggers;
 import reactor.util.context.ContextView;
 import reactor.util.function.Tuple2;
 
+import java.time.Duration;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.locks.LockSupport;
 
 import static discord4j.common.LogUtil.format;
 import static reactor.core.publisher.Sinks.EmitFailureHandler.FAIL_FAST;
@@ -62,6 +66,7 @@ public class GatewayWebsocketHandler {
     private final ContextView context;
     private final boolean unpooled;
     private final AtomicBoolean warnOnRetry = new AtomicBoolean(true);
+    private final EmissionStrategy emissionStrategy;
 
     /**
      * Create a new handler with the given data pipelines.
@@ -81,6 +86,7 @@ public class GatewayWebsocketHandler {
         this.sessionClose = Sinks.one();
         this.context = context;
         this.unpooled = unpooled;
+        this.emissionStrategy = EmissionStrategy.park(Duration.ofNanos(10));
     }
 
     /**
@@ -140,35 +146,8 @@ public class GatewayWebsocketHandler {
     }
 
     private void emitInbound(ByteBuf value) {
-        for (; ; ) {
-            Sinks.EmitResult emission = inbound.tryEmitNext(value);
-            if (emission.isSuccess()) {
-                warnOnRetry.compareAndSet(false, true);
-                return;
-            }
-
-            switch (emission) {
-                case FAIL_ZERO_SUBSCRIBER:
-                    return;
-                case FAIL_OVERFLOW:
-                    if (warnOnRetry.compareAndSet(true, false)) {
-                        log.warn(format(context, "Retrying inbound payload emission due to overflow"));
-                    }
-                    LockSupport.parkNanos(10);
-                    continue;
-                case FAIL_CANCELLED:
-                case FAIL_TERMINATED:
-                    safeRelease(value);
-                    return;
-                case FAIL_NON_SERIALIZED:
-                    if (warnOnRetry.compareAndSet(true, false)) {
-                        log.warn(format(context, "Retrying inbound payload emission"));
-                    }
-                    continue;
-                default:
-                    safeRelease(value);
-                    throw new Sinks.EmissionException(emission, "Unknown emitResult value");
-            }
+        if (!emissionStrategy.emitNext(inbound, value)) {
+            safeRelease(value);
         }
     }
 
