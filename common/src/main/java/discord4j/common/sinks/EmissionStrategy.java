@@ -74,4 +74,30 @@ public interface EmissionStrategy {
      * @return the result of the emission, {@code true} if the element was pushed to the sink, {@code false} otherwise
      */
     <T> boolean emitNext(Sinks.Many<T> sink, T element);
+
+    /**
+     * Try to terminate the given {@code sink} successfully, respecting the semantics of
+     * {@link Sinks.Many#tryEmitComplete()} and the failure handling of
+     * {@link Sinks.Many#emitComplete(Sinks.EmitFailureHandler)}. Returns whether the emission was successful.
+     * Implementations can throw unchecked exceptions like {@link Sinks.EmissionException} or perform side-effects
+     * like waiting to determine a result.
+     *
+     * @param sink the target sink where this emission is attempted
+     * @param <T> the type associated with the sink and element
+     * @return the result of the emission, {@code true} if the sink was terminated successfully, {@code false} otherwise
+     */
+    <T> boolean emitComplete(Sinks.Many<T> sink);
+
+    /**
+     * Try to fail the given {@code sink}, respecting the semantics of {@link Sinks.Many#tryEmitError(Throwable)} and
+     * the failure handling of {@link Sinks.Many#emitError(Throwable, Sinks.EmitFailureHandler)}. Returns whether the
+     * emission was successful. Implementations can throw unchecked exceptions like {@link Sinks.EmissionException}
+     * or perform side-effects like waiting to determine a result.
+     *
+     * @param sink the target sink where this emission is attempted
+     * @param error the exception to signal, non-null
+     * @param <T> the type associated with the sink and element
+     * @return the result of the emission, {@code true} if the failure was correctly emitted, {@code false} otherwise
+     */
+    <T> boolean emitError(Sinks.Many<T> sink, Throwable error);
 }

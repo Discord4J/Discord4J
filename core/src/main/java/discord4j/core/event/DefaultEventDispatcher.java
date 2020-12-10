@@ -115,9 +115,12 @@ public class DefaultEventDispatcher implements EventDispatcher {
 
         @Override
         public SinksEventDispatcher.Builder eventSink(Function<Sinks.ManySpec, Sinks.Many<Event>> eventSinkFactory) {
-            return new SinksEventDispatcher.Builder()
-                    .eventSink(eventSinkFactory)
-                    .eventScheduler(eventScheduler);
+            SinksEventDispatcher.Builder builder = new SinksEventDispatcher.Builder()
+                    .eventSink(Objects.requireNonNull(eventSinkFactory));
+            if (eventScheduler != null) {
+                builder.eventScheduler(eventScheduler);
+            }
+            return builder;
         }
 
         @Override

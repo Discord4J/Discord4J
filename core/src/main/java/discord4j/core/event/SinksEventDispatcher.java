@@ -18,21 +18,20 @@
 package discord4j.core.event;
 
 import discord4j.common.LogUtil;
+import discord4j.common.annotations.Experimental;
+import discord4j.common.sinks.EmissionStrategy;
 import discord4j.core.event.domain.Event;
 import org.reactivestreams.Subscription;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Operators;
-import reactor.core.publisher.SignalType;
 import reactor.core.publisher.Sinks;
 import reactor.core.scheduler.Scheduler;
 import reactor.util.Logger;
 import reactor.util.Loggers;
 import reactor.util.concurrent.Queues;
-import reactor.util.context.Context;
 
+import java.time.Duration;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.concurrent.locks.LockSupport;
 import java.util.function.Function;
 
 import static discord4j.common.LogUtil.format;
@@ -42,29 +41,35 @@ import static discord4j.common.LogUtil.format;
  * <p>
  * The underlying sink and thread affinity for event publishing can be configured at construction time.
  */
-public class SinksEventDispatcher implements EventDispatcher, Sinks.EmitFailureHandler {
+@Experimental
+public class SinksEventDispatcher implements EventDispatcher {
 
     private static final Logger log = Loggers.getLogger(SinksEventDispatcher.class);
 
-    private final Sinks.Many<Event> eventSink;
+    private final Sinks.Many<Event> events;
+    private final EmissionStrategy emissionStrategy;
     private final Scheduler eventScheduler;
 
     /**
      * Creates a new event dispatcher using the given event sink factory and threading model.
      *
      * @param eventSinkFactory the custom sink factory for events
+     * @param emissionStrategy a strategy to handle emission failures
      * @param eventScheduler a {@link Scheduler} to ensure a certain thread model on each published signal
      */
     public SinksEventDispatcher(Function<Sinks.ManySpec, Sinks.Many<Event>> eventSinkFactory,
+                                EmissionStrategy emissionStrategy,
                                 Scheduler eventScheduler) {
-        this.eventSink = eventSinkFactory.apply(Sinks.many());
+        this.events = eventSinkFactory.apply(Sinks.many());
+        this.emissionStrategy = emissionStrategy;
         this.eventScheduler = eventScheduler;
     }
 
     @Override
     public <E extends Event> Flux<E> on(Class<E> eventClass) {
         AtomicReference<Subscription> subscription = new AtomicReference<>();
-        return eventSink.asFlux().publishOn(eventScheduler)
+        return events.asFlux()
+                .publishOn(eventScheduler)
                 .ofType(eventClass)
                 .<E>handle((event, sink) -> {
                     if (log.isTraceEnabled()) {
@@ -90,42 +95,12 @@ public class SinksEventDispatcher implements EventDispatcher, Sinks.EmitFailureH
 
     @Override
     public void publish(Event event) {
-        Sinks.EmitResult result = eventSink.tryEmitNext(event);
-
-        if (result.isSuccess()) {
-            return;
-        }
-
-        switch (result) {
-            case FAIL_ZERO_SUBSCRIBER:
-                return;
-            case FAIL_OVERFLOW:
-            case FAIL_CANCELLED:
-                Operators.onDiscard(event, Context.empty());
-                return;
-            case FAIL_TERMINATED:
-                Operators.onNextDropped(event, Context.empty());
-                return;
-            case FAIL_NON_SERIALIZED:
-                throw new Sinks.EmissionException(result,
-                        "Spec. Rule 1.3 - onSubscribe, onNext, onError and onComplete signaled to a Subscriber MUST " +
-                                "be signaled serially."
-                );
-        }
+        emissionStrategy.emitNext(events, event);
     }
 
     @Override
     public void shutdown() {
-        eventSink.emitComplete(this);
-    }
-
-    @Override
-    public boolean onEmitFailure(SignalType signalType, Sinks.EmitResult result) {
-        if (result == Sinks.EmitResult.FAIL_OVERFLOW) {
-            LockSupport.parkNanos(10);
-            return true;
-        }
-        return false;
+        emissionStrategy.emitComplete(events);
     }
 
     /**
@@ -134,6 +109,7 @@ public class SinksEventDispatcher implements EventDispatcher, Sinks.EmitFailureH
     public static class Builder {
 
         protected Function<Sinks.ManySpec, Sinks.Many<Event>> eventSinkFactory;
+        protected EmissionStrategy emissionStrategy;
         protected Scheduler eventScheduler;
 
         protected Builder() {
@@ -148,6 +124,19 @@ public class SinksEventDispatcher implements EventDispatcher, Sinks.EmitFailureH
          */
         public Builder eventSink(Function<Sinks.ManySpec, Sinks.Many<Event>> eventSinkFactory) {
             this.eventSinkFactory = Objects.requireNonNull(eventSinkFactory);
+            return this;
+        }
+
+        /**
+         * Set the {@link EmissionStrategy} to apply when event publishing fails, which can be useful to handle
+         * overflowing, non-serialized or terminal scenarios through the means of retrying, parking threads or throwing
+         * an exception back to the emitter. Defaults to a timeout-then-drop strategy after 10 seconds.
+         *
+         * @param emissionStrategy the emission failure handling strategy
+         * @return this builder
+         */
+        public Builder emissionStrategy(EmissionStrategy emissionStrategy) {
+            this.emissionStrategy = Objects.requireNonNull(emissionStrategy);
             return this;
         }
 
@@ -167,10 +156,13 @@ public class SinksEventDispatcher implements EventDispatcher, Sinks.EmitFailureH
             if (eventSinkFactory == null) {
                 eventSinkFactory = spec -> spec.multicast().onBackpressureBuffer(Queues.SMALL_BUFFER_SIZE, false);
             }
+            if (emissionStrategy == null) {
+                emissionStrategy = EmissionStrategy.timeoutDrop(Duration.ofSeconds(10));
+            }
             if (eventScheduler == null) {
                 eventScheduler = DEFAULT_EVENT_SCHEDULER.get();
             }
-            return new SinksEventDispatcher(eventSinkFactory, eventScheduler);
+            return new SinksEventDispatcher(eventSinkFactory, emissionStrategy, eventScheduler);
         }
 
     }
