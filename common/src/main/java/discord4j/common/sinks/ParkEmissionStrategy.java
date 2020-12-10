@@ -18,43 +18,23 @@
 package discord4j.common.sinks;
 
 import reactor.core.publisher.Sinks;
-import reactor.util.Logger;
-import reactor.util.Loggers;
 
 import java.util.concurrent.locks.LockSupport;
 
-class TimeoutEmissionStrategy implements EmissionStrategy {
-
-    private static final Logger log = Loggers.getLogger(TimeoutEmissionStrategy.class);
+class ParkEmissionStrategy implements EmissionStrategy {
 
     private final long parkNanos;
-    private final long timeoutNanos;
-    private final boolean errorOnTimeout;
 
-    TimeoutEmissionStrategy(long parkNanos, long timeoutNanos, boolean errorOnTimeout) {
+    ParkEmissionStrategy(long parkNanos) {
         this.parkNanos = parkNanos;
-        this.timeoutNanos = timeoutNanos;
-        this.errorOnTimeout = errorOnTimeout;
     }
 
     @Override
     public <T> boolean emitNext(Sinks.Many<T> sink, T element) {
-        long remaining = 0;
-        if (timeoutNanos > 0) {
-            remaining = timeoutNanos;
-        }
         for (;;) {
             Sinks.EmitResult emission = sink.tryEmitNext(element);
             if (emission.isSuccess()) {
                 return true;
-            }
-            remaining -= parkNanos;
-            if (timeoutNanos >= 0 && remaining <= 0) {
-                log.debug("Emission timed out at {}: {}", sink.name(), element.toString());
-                if (errorOnTimeout) {
-                    throw new Sinks.EmissionException(emission, "Emission timed out");
-                }
-                return false;
             }
             switch (emission) {
                 case FAIL_ZERO_SUBSCRIBER:
@@ -62,10 +42,8 @@ class TimeoutEmissionStrategy implements EmissionStrategy {
                 case FAIL_TERMINATED:
                     return false;
                 case FAIL_NON_SERIALIZED:
-                    LockSupport.parkNanos(parkNanos);
                     continue;
                 case FAIL_OVERFLOW:
-                    log.trace("Emission overflowing at {}: {}", sink.name(), element.toString());
                     LockSupport.parkNanos(parkNanos);
                     continue;
                 default:

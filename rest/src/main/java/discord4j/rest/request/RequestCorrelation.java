@@ -43,4 +43,13 @@ class RequestCorrelation<T> {
     public ContextView getContext() {
         return context;
     }
+
+    @Override
+    public String toString() {
+        return "RequestCorrelation{" +
+                "request=" + request.getDescription() +
+                ", response=" + response +
+                ", context=" + context +
+                '}';
+    }
 }

@@ -39,7 +39,6 @@ import reactor.util.context.ContextView;
 import reactor.util.function.Tuple2;
 
 import java.time.Duration;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import static discord4j.common.LogUtil.format;
 import static reactor.core.publisher.Sinks.EmitFailureHandler.FAIL_FAST;
@@ -65,7 +64,6 @@ public class GatewayWebsocketHandler {
     private final Sinks.One<DisconnectBehavior> sessionClose;
     private final ContextView context;
     private final boolean unpooled;
-    private final AtomicBoolean warnOnRetry = new AtomicBoolean(true);
     private final EmissionStrategy emissionStrategy;
 
     /**

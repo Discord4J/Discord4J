@@ -29,8 +29,8 @@ import java.time.Duration;
 public interface EmissionStrategy {
 
     /**
-     * Create an {@link EmissionStrategy} that will retry overflowing emissions until a given {@code duration} and
-     * <strong>drop</strong> values upon timeout.
+     * Create an {@link EmissionStrategy} that will retry overflowing and non-serialized emissions until a given
+     * {@code duration} and <strong>drop</strong> values upon timeout.
      *
      * @param duration the {@link Duration} to wait until elements are dropped
      * @return a strategy with a drop on timeout behavior
@@ -40,8 +40,8 @@ public interface EmissionStrategy {
     }
 
     /**
-     * Create an {@link EmissionStrategy} that will retry overflowing emissions until a given {@code duration} and
-     * <strong>error</strong> values upon timeout.
+     * Create an {@link EmissionStrategy} that will retry overflowing and non-serialized emissions until a given
+     * {@code duration} and <strong>error</strong> values upon timeout.
      *
      * @param duration the {@link Duration} to wait until elements are dropped
      * @return a strategy with an error on timeout behavior
@@ -51,14 +51,14 @@ public interface EmissionStrategy {
     }
 
     /**
-     * Create an {@link EmissionStrategy} that will indefinitely park emissions on overflow scenarios until it
-     * resolves, the emitter is cancelled or the sink is terminated.
+     * Create an {@link EmissionStrategy} that will indefinitely park emissions on overflow or non-serialized
+     * scenarios until it resolves, the emitter is cancelled or the sink is terminated.
      *
      * @param duration the {@link Duration} indicating how long to disable the emitting thread
      * @return a strategy that awaits emissions on overflowing sinks
      */
     static EmissionStrategy park(Duration duration) {
-        return new TimeoutEmissionStrategy(duration.toNanos(), 0L, false);
+        return new ParkEmissionStrategy(duration.toNanos());
     }
 
     /**
