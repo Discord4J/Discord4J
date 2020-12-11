@@ -54,7 +54,7 @@ public interface EmissionStrategy {
      * Create an {@link EmissionStrategy} that will indefinitely park emissions on overflow or non-serialized
      * scenarios until it resolves, the emitter is cancelled or the sink is terminated.
      *
-     * @param duration the {@link Duration} indicating how long to disable the emitting thread
+     * @param duration the {@link Duration} indicating how long to disable the emitting thread after each failed attempt
      * @return a strategy that awaits emissions on overflowing sinks
      */
     static EmissionStrategy park(Duration duration) {

@@ -70,8 +70,8 @@ public interface RequestQueueFactory {
     }
 
     /**
-     * Returns a factory of {@link RequestQueue} with default parameters capable of buffering requests in an
-     * unbounded way.
+     * Returns a factory of {@link RequestQueue} with default parameters capable of buffering requests up to a
+     * reasonable capacity, then applying a delay on overflowing requests.
      *
      * @return a {@link RequestQueueFactory} backed by a multicasting {@link Sinks.Many} with capacity given by
      * {@link Queues#SMALL_BUFFER_SIZE} and a parking {@link EmissionStrategy}.

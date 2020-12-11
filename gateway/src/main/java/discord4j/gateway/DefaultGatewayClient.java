@@ -162,7 +162,7 @@ public class DefaultGatewayClient implements GatewayClient {
         this.identifyLimiter = Objects.requireNonNull(options.getIdentifyLimiter());
         this.maxMissedHeartbeatAck = Math.max(0, options.getMaxMissedHeartbeatAck());
         this.unpooled = options.isUnpooled();
-        this.emissionStrategy = EmissionStrategy.timeoutDrop(Duration.ofSeconds(5));
+        this.emissionStrategy = options.getEmissionStrategy();
 
         addHandler(Opcode.DISPATCH, this::handleDispatch);
         addHandler(Opcode.HEARTBEAT, this::handleHeartbeat);
@@ -601,7 +601,6 @@ public class DefaultGatewayClient implements GatewayClient {
 
     @Override
     public Mono<Void> sendBuffer(Publisher<ByteBuf> publisher) {
-        // TODO: verify this implementation regarding dropped elements
         return Flux.from(publisher).doOnNext(buf -> emissionStrategy.emitNext(sender, buf)).then();
     }
 
