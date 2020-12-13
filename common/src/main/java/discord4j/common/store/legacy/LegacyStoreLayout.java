@@ -315,15 +315,15 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
 
     @Override
     public Mono<Void> onChannelCreate(int shardIndex, ChannelCreate dispatch) {
-        switch (dispatch.channel().type()) {
-            case 1:
-            case 3:
-            case 5:
-            case 6:
-            case 7: return saveChannel(dispatch);
-            case 2: return Mono.empty(); // DM channels are not stored
-            case 4:
-                throw new UnsupportedOperationException("Received channel_create for group on a bot account!");
+        Type type = Type.of(dispatch.channel().type());
+        switch (type) {
+            case GUILD_TEXT:
+            case GUILD_VOICE:
+            case GUILD_CATEGORY:
+            case GUILD_NEWS:
+            case GUILD_STORE: return saveChannel(dispatch);
+            case DM:
+            case GROUP_DM: return Mono.empty();
             default: throw new AssertionError();
         }
     }
@@ -347,16 +347,15 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
 
     @Override
     public Mono<ChannelData> onChannelDelete(int shardIndex, ChannelDelete dispatch) {
-        switch (dispatch.channel().type()) {
-            case 1:
-            case 3:
-            case 5:
-            case 6:
-            case 7: return deleteChannel(dispatch);
-            case 2: return Mono.empty(); // DM channels are not stored
-            case 4:
-                throw new UnsupportedOperationException("Received channel_delete for a group on a bot " +
-                        "account!");
+        Type type = Type.of(dispatch.channel().type());
+        switch (type) {
+            case GUILD_TEXT:
+            case GUILD_VOICE:
+            case GUILD_CATEGORY:
+            case GUILD_NEWS:
+            case GUILD_STORE: return deleteChannel(dispatch);
+            case DM:
+            case GROUP_DM: return Mono.empty();
             default: throw new AssertionError();
         }
     }
@@ -380,19 +379,50 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
 
     @Override
     public Mono<ChannelData> onChannelUpdate(int shardIndex, ChannelUpdate dispatch) {
-        switch (dispatch.channel().type()) {
-            case 1:
-            case 3:
-            case 5:
-            case 6:
-            case 7: return updateChannel(dispatch);
-            case 2:
-                //throw new UnsupportedOperationException("Received channel_update for a DM on a bot account!");
-            case 4:
-                //throw new UnsupportedOperationException("Received channel_update for a group on a bot
-                // account!");
-                return Mono.empty();
-            default: throw new AssertionError("Unknown channel type for update: " + dispatch.channel().type());
+        Type type = Type.of(dispatch.channel().type());
+        switch (type) {
+            case GUILD_TEXT:
+            case GUILD_VOICE:
+            case GUILD_CATEGORY:
+            case GUILD_NEWS:
+            case GUILD_STORE: return updateChannel(dispatch);
+            case DM:
+            case GROUP_DM: return Mono.empty();
+            default: throw new AssertionError();
+        }
+    }
+
+    private enum Type {
+        UNKNOWN(-1),
+        GUILD_TEXT(0),
+        DM(1),
+        GUILD_VOICE(2),
+        GROUP_DM(3),
+        GUILD_CATEGORY(4),
+        GUILD_NEWS(5),
+        GUILD_STORE(6);
+
+        private final int value;
+
+        Type(final int value) {
+            this.value = value;
+        }
+
+        public int getValue() {
+            return value;
+        }
+
+        public static Type of(final int value) {
+            switch (value) {
+                case 0: return GUILD_TEXT;
+                case 1: return DM;
+                case 2: return GUILD_VOICE;
+                case 3: return GROUP_DM;
+                case 4: return GUILD_CATEGORY;
+                case 5: return GUILD_NEWS;
+                case 6: return GUILD_STORE;
+                default: return UNKNOWN;
+            }
         }
     }
 
@@ -711,14 +741,6 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
     public Mono<MemberData> onGuildMemberUpdate(int shardIndex, GuildMemberUpdate dispatch) {
         long guildId = Snowflake.asLong(dispatch.guildId());
         long memberId = Snowflake.asLong(dispatch.user().id());
-
-        List<Long> currentRoles = dispatch.roles()
-                .stream()
-                .map(Snowflake::asLong)
-                .collect(Collectors.toList());
-        String currentNick = Possible.flatOpt(dispatch.nick()).orElse(null);
-        String currentJoinedAt = dispatch.joinedAt();
-        String currentPremiumSince = Possible.flatOpt(dispatch.premiumSince()).orElse(null);
 
         LongLongTuple2 key = LongLongTuple2.of(guildId, memberId);
 
