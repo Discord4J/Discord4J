@@ -318,12 +318,10 @@ public class DefaultGatewayClient implements GatewayClient {
                             .doOnError(t -> {
                                 if (t instanceof ReconnectException) {
                                     log.info(format(context, "{}"), t.getMessage());
+                                } else if (t instanceof CloseException || t instanceof GatewayException) {
+                                    log.warn(format(context, "{}"), t.toString());
                                 } else {
-                                    if (log.isTraceEnabled()) {
-                                        log.error(format(context, "Gateway client error"), t);
-                                    } else {
-                                        log.error(format(context, "{}"), t.toString());
-                                    }
+                                    log.error(format(context, "Gateway client error"), t);
                                 }
                             })
                             .doOnTerminate(heartbeatEmitter::stop)
