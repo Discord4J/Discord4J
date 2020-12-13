@@ -17,6 +17,7 @@
 
 package discord4j.common.operator;
 
+import discord4j.common.sinks.EmissionStrategy;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.*;
 import reactor.core.scheduler.Scheduler;
@@ -46,6 +47,7 @@ public class RateLimitOperator<T> implements Function<Publisher<T>, Publisher<T>
     private final Scheduler delayScheduler;
     private final Sinks.Many<Integer> tokenSink;
     private final Scheduler tokenPublishScheduler;
+    private final EmissionStrategy emissionStrategy;
 
     public RateLimitOperator(int capacity, Duration refillPeriod, Scheduler delayScheduler) {
         this(capacity, refillPeriod, delayScheduler, DEFAULT_PUBLISH_SCHEDULER.get());
@@ -57,6 +59,7 @@ public class RateLimitOperator<T> implements Function<Publisher<T>, Publisher<T>
         this.delayScheduler = delayScheduler;
         this.tokenSink = Sinks.many().replay().latestOrDefault(capacity);
         this.tokenPublishScheduler = publishScheduler;
+        this.emissionStrategy = EmissionStrategy.park(Duration.ofNanos(10));
     }
 
     private String id() {
@@ -84,7 +87,7 @@ public class RateLimitOperator<T> implements Function<Publisher<T>, Publisher<T>
         if (log.isTraceEnabled()) {
             log.trace("[{}] Acquired a token, {} tokens remaining", id(), token);
         }
-        tokenSink.emitNext(token, Sinks.EmitFailureHandler.FAIL_FAST);
+        emissionStrategy.emitNext(tokenSink, token);
     }
 
     private void release() {
@@ -92,7 +95,7 @@ public class RateLimitOperator<T> implements Function<Publisher<T>, Publisher<T>
         if (log.isTraceEnabled()) {
             log.trace("[{}] Released a token, {} tokens remaining", id(), token);
         }
-        tokenSink.emitNext(token, Sinks.EmitFailureHandler.FAIL_FAST);
+        emissionStrategy.emitNext(tokenSink, token);
     }
 
     private Flux<Integer> availableTokens() {
