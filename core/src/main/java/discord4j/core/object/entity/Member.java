@@ -278,7 +278,7 @@ public final class Member extends User {
       * @return Whether the member has passed the guild's Membership Screening requirements.
      */
     public boolean isPending() {
-        return data.pending();
+        return data.pending().toOptional().orElse(false);
     }
 
     /**
