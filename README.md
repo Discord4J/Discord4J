@@ -381,11 +381,12 @@ Finally, we need to connect to the voice channel. After connecting you are given
 
 ```java
 final VoiceChannel channel = ...
-final AudioProvider provider = GuildAudioManager.of(channel.getGuildId()).getProvider();
+final GuildAudioManager manager = GuildAudioManager.of(channel.getGuildId());
+final AudioProvider provider = manager.getProvider();
 final VoiceConnection connection = channel.join(spec -> spec.setProvider(provider)).block();
 
 // In the AudioLoadResultHandler, add AudioTrack instances to the AudioTrackScheduler (and send notifications to users)
-PLAYER_MANAGER.loadItem("https://www.youtube.com/watch?v=dQw4w9WgXcQ", new AudioLoadResultHandler() { /* overrides */ })
+PLAYER_MANAGER.loadItemOrdered(manager, "https://www.youtube.com/watch?v=dQw4w9WgXcQ", new AudioLoadResultHandler() { /* overrides */ })
 ```
 
 ### ❌ Disconnecting from a Voice Channel Automatically
