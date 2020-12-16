@@ -16,10 +16,12 @@
  */
 package discord4j.rest.http;
 
-import discord4j.discordjson.json.MessageCreateRequest;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import discord4j.discordjson.json.MessageCreateRequest;
+import discord4j.discordjson.json.WebhookExecuteRequest;
 import discord4j.rest.util.MultipartRequest;
+import discord4j.rest.util.WebhookMultipartRequest;
 import reactor.core.Exceptions;
 import reactor.core.publisher.Mono;
 import reactor.netty.http.client.HttpClient;
@@ -34,31 +36,34 @@ import java.util.List;
 
 /**
  * Write to a request from a {@code Consumer<HttpClientRequest.Form>} using reactor-netty's {@link
- * reactor.netty.http.client.HttpClient.RequestSender#sendForm(java.util.function.BiConsumer)}.
+ * HttpClient.RequestSender#sendForm(java.util.function.BiConsumer)}.
+ *
+ * Note: This is a hold-over class to backport webhook execute functionality from 3.2.x
  *
  * @see HttpClientForm
  */
-public class MultipartWriterStrategy implements WriterStrategy<MultipartRequest> {
+@Deprecated
+public class WebhookMultipartWriterStrategy implements WriterStrategy<WebhookMultipartRequest> {
 
-    private static final Logger log = Loggers.getLogger(MultipartWriterStrategy.class);
+    private static final Logger log = Loggers.getLogger(WebhookMultipartWriterStrategy.class);
 
     private final ObjectMapper objectMapper;
 
-    public MultipartWriterStrategy(ObjectMapper objectMapper) {
+    public WebhookMultipartWriterStrategy(ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
     }
 
     @Override
     public boolean canWrite(@Nullable Class<?> type, @Nullable String contentType) {
-        return contentType != null && contentType.equals("multipart/form-data") && type == null || type == MultipartRequest.class;
+        return contentType != null && contentType.equals("multipart/form-data") && type == null || type == WebhookMultipartRequest.class;
     }
 
     @Override
-    public Mono<HttpClient.ResponseReceiver<?>> write(HttpClient.RequestSender send, @Nullable MultipartRequest body) {
+    public Mono<HttpClient.ResponseReceiver<?>> write(HttpClient.RequestSender send, @Nullable WebhookMultipartRequest body) {
         if (body == null) {
             return Mono.empty(); // or .error() ?
         }
-        final MessageCreateRequest createRequest = body.getCreateRequest();
+        final WebhookExecuteRequest executeRequest = body.getExecuteRequest();
         final List<Tuple2<String, InputStream>> files = body.getFiles();
         return Mono.fromCallable(() -> send.sendForm((request, form) -> {
             form.multipart(true);
@@ -70,9 +75,9 @@ public class MultipartWriterStrategy implements WriterStrategy<MultipartRequest>
                 }
             }
 
-            if (createRequest != null) {
+            if (executeRequest != null) {
                 try {
-                    String payload = objectMapper.writeValueAsString(createRequest);
+                    String payload = objectMapper.writeValueAsString(executeRequest);
                     if (log.isTraceEnabled()) {
                         log.trace("{}", payload);
                     }
