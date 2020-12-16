@@ -16,9 +16,7 @@
  */
 package discord4j.rest.service;
 
-import discord4j.discordjson.json.WebhookCreateRequest;
-import discord4j.discordjson.json.WebhookData;
-import discord4j.discordjson.json.WebhookModifyRequest;
+import discord4j.discordjson.json.*;
 import discord4j.rest.request.Router;
 import discord4j.rest.route.Routes;
 import reactor.core.publisher.Flux;
@@ -72,5 +70,18 @@ public class WebhookService extends RestService {
                 .optionalHeader("X-Audit-Log-Reason", reason)
                 .exchange(getRouter())
                 .bodyToMono(Void.class);
+    }
+
+    public Mono<MessageData> modifyWebhookMessage(long webhookId, String webhookToken, long messageId, WebhookMessageEditRequest request) {
+        return Routes.WEBHOOK_MESSAGE_EDIT.newRequest(webhookId, webhookToken, messageId)
+            .body(request)
+            .exchange(getRouter())
+            .bodyToMono(MessageData.class);
+    }
+
+    public Mono<Void> deleteWebhookMessage(long webhookId, String webhookToken, long messageId) {
+        return Routes.WEBHOOK_MESSAGE_DELETE.newRequest(webhookId, webhookToken, messageId)
+            .exchange(getRouter())
+            .bodyToMono(Void.class);
     }
 }
