@@ -40,56 +40,56 @@ public class ApplicationService extends RestService {
                 .bodyToMono(ApplicationInfoData.class);
     }
 
-    public Flux<ApplicationCommandData> getGlobalApplicationCommands(Snowflake applicationId) {
-        return Routes.GLOBAL_APPLICATION_COMMANDS_GET.newRequest(applicationId.asString())
+    public Flux<ApplicationCommandData> getGlobalApplicationCommands(long applicationId) {
+        return Routes.GLOBAL_APPLICATION_COMMANDS_GET.newRequest(applicationId)
             .exchange(getRouter())
             .bodyToMono(ApplicationCommandData[].class)
             .flatMapMany(Flux::fromArray);
     }
 
-    public Mono<ApplicationCommandData> createGlobalApplicationCommand(Snowflake applicationId, ApplicationCommandRequest request) {
-        return Routes.GLOBAL_APPLICATION_COMMANDS_CREATE.newRequest(applicationId.asString())
+    public Mono<ApplicationCommandData> createGlobalApplicationCommand(long applicationId, ApplicationCommandRequest request) {
+        return Routes.GLOBAL_APPLICATION_COMMANDS_CREATE.newRequest(applicationId)
             .body(request)
             .exchange(getRouter())
             .bodyToMono(ApplicationCommandData.class);
     }
 
-    public Mono<ApplicationCommandData> modifyGlobalApplicationCommand(Snowflake applicationId, Snowflake commandId, ApplicationCommandRequest request) {
-        return Routes.GLOBAL_APPLICATION_COMMAND_MODIFY.newRequest(applicationId.asString(), commandId.asString())
+    public Mono<ApplicationCommandData> modifyGlobalApplicationCommand(long applicationId, long commandId, ApplicationCommandRequest request) {
+        return Routes.GLOBAL_APPLICATION_COMMAND_MODIFY.newRequest(applicationId, commandId)
             .body(request)
             .exchange(getRouter())
             .bodyToMono(ApplicationCommandData.class);
     }
 
-    public Mono<Void> deleteGlobalApplicationCommand(Snowflake applicationId, Snowflake commandId) {
-        return Routes.GLOBAL_APPLICATION_COMMAND_DELETE.newRequest(applicationId.asString(), commandId.asString())
+    public Mono<Void> deleteGlobalApplicationCommand(long applicationId, long commandId) {
+        return Routes.GLOBAL_APPLICATION_COMMAND_DELETE.newRequest(applicationId, commandId)
             .exchange(getRouter())
             .bodyToMono(Void.class);
     }
 
-    public Flux<ApplicationCommandData> getGuildApplicationCommands(Snowflake applicationId, Snowflake guildId) {
-        return Routes.GUILD_APPLICATION_COMMANDS_GET.newRequest(applicationId.asString(), guildId.asString())
+    public Flux<ApplicationCommandData> getGuildApplicationCommands(long applicationId, long guildId) {
+        return Routes.GUILD_APPLICATION_COMMANDS_GET.newRequest(applicationId, guildId)
             .exchange(getRouter())
             .bodyToMono(ApplicationCommandData[].class)
             .flatMapMany(Flux::fromArray);
     }
 
-    public Mono<ApplicationCommandData> createGuildApplicationCommand(Snowflake applicationId, Snowflake guildId, ApplicationCommandRequest request) {
-        return Routes.GUILD_APPLICATION_COMMANDS_CREATE.newRequest(applicationId.asString(), guildId.asString())
+    public Mono<ApplicationCommandData> createGuildApplicationCommand(long applicationId, long guildId, ApplicationCommandRequest request) {
+        return Routes.GUILD_APPLICATION_COMMANDS_CREATE.newRequest(applicationId, guildId)
             .body(request)
             .exchange(getRouter())
             .bodyToMono(ApplicationCommandData.class);
     }
 
-    public Mono<ApplicationCommandData> modifyGuildApplicationCommand(Snowflake applicationId, Snowflake guildId, Snowflake commandId, ApplicationCommandRequest request) {
-        return Routes.GUILD_APPLICATION_COMMAND_MODIFY.newRequest(applicationId.asString(), guildId.asString(), commandId.asString())
+    public Mono<ApplicationCommandData> modifyGuildApplicationCommand(long applicationId, long guildId, long commandId, ApplicationCommandRequest request) {
+        return Routes.GUILD_APPLICATION_COMMAND_MODIFY.newRequest(applicationId, guildId, commandId)
             .body(request)
             .exchange(getRouter())
             .bodyToMono(ApplicationCommandData.class);
     }
 
-    public Mono<Void> deleteGuildApplicationCommand(Snowflake applicationId, Snowflake guildId, Snowflake commandId) {
-        return Routes.GUILD_APPLICATION_COMMAND_DELETE.newRequest(applicationId.asString(), guildId.asString(), commandId.asString())
+    public Mono<Void> deleteGuildApplicationCommand(long applicationId, long guildId, long commandId) {
+        return Routes.GUILD_APPLICATION_COMMAND_DELETE.newRequest(applicationId, guildId, commandId)
             .exchange(getRouter())
             .bodyToMono(Void.class);
     }
