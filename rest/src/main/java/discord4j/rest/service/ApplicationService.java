@@ -16,10 +16,17 @@
  */
 package discord4j.rest.service;
 
+import discord4j.common.util.Snowflake;
+import discord4j.discordjson.json.ApplicationCommandData;
+import discord4j.discordjson.json.ApplicationCommandRequest;
 import discord4j.discordjson.json.ApplicationInfoData;
+import discord4j.discordjson.json.UserGuildData;
 import discord4j.rest.request.Router;
 import discord4j.rest.route.Routes;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.util.List;
 
 public class ApplicationService extends RestService {
 
@@ -31,5 +38,59 @@ public class ApplicationService extends RestService {
         return Routes.APPLICATION_INFO_GET.newRequest()
                 .exchange(getRouter())
                 .bodyToMono(ApplicationInfoData.class);
+    }
+
+    public Flux<ApplicationCommandData> getGlobalApplicationCommands(Snowflake applicationId) {
+        return Routes.GLOBAL_APPLICATION_COMMANDS_GET.newRequest(applicationId.asString())
+            .exchange(getRouter())
+            .bodyToMono(ApplicationCommandData[].class)
+            .flatMapMany(Flux::fromArray);
+    }
+
+    public Mono<ApplicationCommandData> createGlobalApplicationCommand(Snowflake applicationId, ApplicationCommandRequest request) {
+        return Routes.GLOBAL_APPLICATION_COMMANDS_CREATE.newRequest(applicationId.asString())
+            .body(request)
+            .exchange(getRouter())
+            .bodyToMono(ApplicationCommandData.class);
+    }
+
+    public Mono<ApplicationCommandData> modifyGlobalApplicationCommand(Snowflake applicationId, Snowflake commandId, ApplicationCommandRequest request) {
+        return Routes.GLOBAL_APPLICATION_COMMAND_MODIFY.newRequest(applicationId.asString(), commandId.asString())
+            .body(request)
+            .exchange(getRouter())
+            .bodyToMono(ApplicationCommandData.class);
+    }
+
+    public Mono<Void> deleteGlobalApplicationCommand(Snowflake applicationId, Snowflake commandId) {
+        return Routes.GLOBAL_APPLICATION_COMMAND_DELETE.newRequest(applicationId.asString(), commandId.asString())
+            .exchange(getRouter())
+            .bodyToMono(Void.class);
+    }
+
+    public Flux<ApplicationCommandData> getGuildApplicationCommands(Snowflake applicationId, Snowflake guildId) {
+        return Routes.GUILD_APPLICATION_COMMANDS_GET.newRequest(applicationId.asString(), guildId.asString())
+            .exchange(getRouter())
+            .bodyToMono(ApplicationCommandData[].class)
+            .flatMapMany(Flux::fromArray);
+    }
+
+    public Mono<ApplicationCommandData> createGuildApplicationCommand(Snowflake applicationId, Snowflake guildId, ApplicationCommandRequest request) {
+        return Routes.GUILD_APPLICATION_COMMANDS_CREATE.newRequest(applicationId.asString(), guildId.asString())
+            .body(request)
+            .exchange(getRouter())
+            .bodyToMono(ApplicationCommandData.class);
+    }
+
+    public Mono<ApplicationCommandData> modifyGuildApplicationCommand(Snowflake applicationId, Snowflake guildId, Snowflake commandId, ApplicationCommandRequest request) {
+        return Routes.GUILD_APPLICATION_COMMAND_MODIFY.newRequest(applicationId.asString(), guildId.asString(), commandId.asString())
+            .body(request)
+            .exchange(getRouter())
+            .bodyToMono(ApplicationCommandData.class);
+    }
+
+    public Mono<Void> deleteGuildApplicationCommand(Snowflake applicationId, Snowflake guildId, Snowflake commandId) {
+        return Routes.GUILD_APPLICATION_COMMAND_DELETE.newRequest(applicationId.asString(), guildId.asString(), commandId.asString())
+            .exchange(getRouter())
+            .bodyToMono(Void.class);
     }
 }
