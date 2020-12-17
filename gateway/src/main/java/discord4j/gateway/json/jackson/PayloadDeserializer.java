@@ -16,6 +16,7 @@
  */
 package discord4j.gateway.json.jackson;
 
+import discord4j.discordjson.json.InteractionData;
 import discord4j.discordjson.json.gateway.*;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
@@ -75,6 +76,10 @@ public class PayloadDeserializer extends StdDeserializer<GatewayPayload<?>> {
         dispatchTypes.put(EventNames.WEBHOOKS_UPDATE, WebhooksUpdate.class);
         dispatchTypes.put(EventNames.INVITE_CREATE, InviteCreate.class);
         dispatchTypes.put(EventNames.INVITE_DELETE, InviteDelete.class);
+        dispatchTypes.put(EventNames.APPLICATION_COMMAND_CREATE, ApplicationCommandCreate.class);
+        dispatchTypes.put(EventNames.APPLICATION_COMMAND_UPDATE, ApplicationCommandUpdate.class);
+        dispatchTypes.put(EventNames.APPLICATION_COMMAND_DELETE, ApplicationCommandDelete.class);
+        dispatchTypes.put(EventNames.INTERACTION_CREATE, InteractionData.class);
 
         // Ignored
         dispatchTypes.put(EventNames.PRESENCES_REPLACE, null);

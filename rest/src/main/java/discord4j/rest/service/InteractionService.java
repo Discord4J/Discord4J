@@ -29,8 +29,8 @@ public class InteractionService extends RestService {
         super(router);
     }
 
-    public Mono<JsonNode> createInteractionResponse(Snowflake interactionId, String interactionToken, InteractionResponseData response) {
-        return Routes.INTERACTION_RESPONSE_CREATE.newRequest(interactionId.asString(), interactionToken)
+    public Mono<JsonNode> createInteractionResponse(long interactionId, String interactionToken, InteractionResponseData response) {
+        return Routes.INTERACTION_RESPONSE_CREATE.newRequest(interactionId, interactionToken)
             .body(response)
             .exchange(getRouter())
             .bodyToMono(JsonNode.class);
