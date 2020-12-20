@@ -276,7 +276,7 @@ public class Activity {
         return Possible.flatOpt(data.emoji())
                 .map(emoji -> {
                     // TODO FIXME
-                    String sid = emoji.id().toOptional().map(Id::getValue).orElse(null);
+                    String sid = emoji.id().toOptional().map(Id::asString).orElse(null);
                     Long id = sid == null ? null : Snowflake.asLong(sid);
                     return ReactionEmoji.of(id, emoji.name(),
                             emoji.animated().toOptional().orElse(false));

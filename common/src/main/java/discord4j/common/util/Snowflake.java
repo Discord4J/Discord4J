@@ -82,7 +82,7 @@ public final class Snowflake implements Comparable<Snowflake> {
      * @return A constructed {@code Snowflake} with the given ID
      */
     public static Snowflake of(final Id id) {
-        return new Snowflake(id.longValue());
+        return new Snowflake(id.asLong());
     }
 
     /**
@@ -97,13 +97,13 @@ public final class Snowflake implements Comparable<Snowflake> {
     }
 
     /**
-     * Constructs a {@code Snowflake} represented as a {@code long} utilizing a discord-json ID.
+     * Constructs a {@code Snowflake} represented as a {@code long} utilizing a discord-json {@link Id}.
      *
      * @param id The ID to construct a {@code Snowflake}. Must be non-null.
      * @return A constructed {@code Snowflake} with the ID.
      */
     public static long asLong(final Id id) {
-        return id.longValue();
+        return id.asLong();
     }
 
     /**

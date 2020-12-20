@@ -161,7 +161,7 @@ class GuildDispatchHandlers {
                         return context.getGateway().getGatewayClientGroup().unicast(
                                 ShardGatewayPayload.requestGuildMembers(
                                         RequestGuildMembers.builder()
-                                                .guildId(data.id().getValue())
+                                                .guildId(data.id().asString())
                                                 .query(Possible.of(""))
                                                 .limit(0)
                                                 .build(), shardId));
