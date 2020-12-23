@@ -273,6 +273,15 @@ public final class Member extends User {
     }
 
     /**
+     * Gets whether the user has not yet passed the guild's Membership Screening requirements.
+     *
+      * @return Whether the user has not yet passed the guild's Membership Screening requirements.
+     */
+    public boolean isPending() {
+        return data.pending().toOptional().orElse(false);
+    }
+
+    /**
      * Requests to kick this member.
      *
      * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the member was kicked. If an
