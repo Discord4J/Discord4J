@@ -166,6 +166,7 @@ public class DefaultGatewayClient implements GatewayClient {
                     MonoProcessor<Void> ping = MonoProcessor.create();
 
                     // Setup the sending logic from multiple sources into one merged Flux
+                    Mono<Void> onConnected = state.filter(s -> s == GatewayConnection.State.CONNECTED).next().then();
                     Flux<ByteBuf> heartbeatFlux =
                             heartbeats.flatMap(payload -> Flux.from(payloadWriter.write(payload)));
                     Flux<ByteBuf> identifyFlux = outbound.filter(payload -> Opcode.IDENTIFY.equals(payload.getOp()))
@@ -173,13 +174,15 @@ public class DefaultGatewayClient implements GatewayClient {
                             .flatMap(payload -> Flux.from(payloadWriter.write(payload)))
                             .transform(identifyLimiter);
                     Flux<ByteBuf> payloadFlux = outbound.filter(payload -> !Opcode.IDENTIFY.equals(payload.getOp()))
+                            .delayUntil(payload -> Opcode.RESUME.equals(payload.getOp()) ? Mono.empty() : onConnected)
                             .flatMap(payload -> Flux.from(payloadWriter.write(payload)))
                             .transform(buf -> Flux.merge(buf, sender))
                             .transform(new RateLimitOperator<>(outboundLimiterCapacity(), Duration.ofSeconds(60),
                                     reactorResources.getTimerTaskScheduler(),
                                     reactorResources.getPayloadSenderScheduler()));
                     Flux<ByteBuf> outFlux = Flux.merge(heartbeatFlux, identifyFlux, payloadFlux)
-                            .doOnNext(buf -> logPayload(senderLog, context, buf));
+                            .doOnNext(buf -> logPayload(senderLog, context, buf))
+                            .doOnDiscard(ByteBuf.class, DefaultGatewayClient::safeRelease);
 
                     sessionHandler = new GatewayWebsocketHandler(receiverSink, outFlux, context);
 
@@ -301,6 +304,14 @@ public class DefaultGatewayClient implements GatewayClient {
     private void logPayload(Logger logger, Context context, ByteBuf buf) {
         logger.trace(format(context, buf.toString(StandardCharsets.UTF_8)
                 .replaceAll("(\"token\": ?\")([A-Za-z0-9._-]*)(\")", "$1hunter2$3")));
+    }
+
+    private static boolean isInitialPayload(GatewayPayload<?> payload) {
+        return Opcode.IDENTIFY.equals(payload.getOp()) || Opcode.RESUME.equals(payload.getOp());
+    }
+
+    private static boolean isNotInitialPayload(GatewayPayload<?> payload) {
+        return !isInitialPayload(payload);
     }
 
     private static boolean isReadyOrResumed(Dispatch d) {
