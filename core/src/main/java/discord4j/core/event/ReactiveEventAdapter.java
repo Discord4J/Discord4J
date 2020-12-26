@@ -658,6 +658,12 @@ public abstract class ReactiveEventAdapter {
         return Mono.empty();
     }
 
+    // ================= Interactions events ================= //
+
+    public Publisher<?> onInteractionCreate(InteractionCreateEvent event) {
+        return Mono.empty();
+    }
+
     public final Publisher<?> hookOnEvent(Event event) {
         // @formatter:off
         if (event instanceof ReadyEvent) return onReady((ReadyEvent) event);
@@ -714,6 +720,7 @@ public abstract class ReactiveEventAdapter {
         else if (event instanceof DisconnectEvent) return onDisconnect((DisconnectEvent) event);
         else if (event instanceof ReconnectStartEvent) return onReconnectStart((ReconnectStartEvent) event);
         else if (event instanceof ReconnectFailEvent) return onReconnectFail((ReconnectFailEvent) event);
+        else if (event instanceof InteractionCreateEvent) return onInteractionCreate((InteractionCreateEvent) event);
         // @formatter:on
 
         return Mono.empty();

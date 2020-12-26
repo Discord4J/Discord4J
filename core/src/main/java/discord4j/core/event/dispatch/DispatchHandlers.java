@@ -16,6 +16,7 @@
  */
 package discord4j.core.event.dispatch;
 
+import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.*;
 import discord4j.core.event.domain.channel.TypingStartEvent;
@@ -30,7 +31,6 @@ import discord4j.discordjson.json.VoiceStateData;
 import discord4j.discordjson.json.gateway.*;
 import discord4j.discordjson.possible.Possible;
 import discord4j.gateway.retry.GatewayStateChange;
-import discord4j.common.util.Snowflake;
 import discord4j.store.api.util.LongLongTuple2;
 import reactor.core.publisher.Mono;
 import reactor.util.Logger;
@@ -89,6 +89,7 @@ public class DispatchHandlers implements DispatchEventMapper {
         addHandler(WebhooksUpdate.class, DispatchHandlers::webhooksUpdate);
         addHandler(InviteCreate.class, DispatchHandlers::inviteCreate);
         addHandler(InviteDelete.class, DispatchHandlers::inviteDelete);
+        addHandler(InteractionCreate.class, DispatchHandlers::interactionCreate);
 
         addHandler(GatewayStateChange.class, LifecycleDispatchHandlers::gatewayStateChanged);
 
@@ -288,5 +289,10 @@ public class DispatchHandlers implements DispatchEventMapper {
         String code = context.getDispatch().code();
 
         return Mono.just(new InviteDeleteEvent(context.getGateway(), context.getShardInfo(), guildId, channelId, code));
+    }
+
+    private static Mono<InteractionCreateEvent> interactionCreate(DispatchContext<InteractionCreate> context) {
+        return Mono.just(new InteractionCreateEvent(context.getGateway(), context.getShardInfo(),
+                context.getDispatch().interaction()));
     }
 }
