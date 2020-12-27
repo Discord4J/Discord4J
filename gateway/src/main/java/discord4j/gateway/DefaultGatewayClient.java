@@ -170,17 +170,19 @@ public class DefaultGatewayClient implements GatewayClient {
                     Flux<ByteBuf> heartbeatFlux =
                             heartbeats.flatMap(payload -> Flux.from(payloadWriter.write(payload)));
                     Flux<ByteBuf> identifyFlux = outbound.filter(payload -> Opcode.IDENTIFY.equals(payload.getOp()))
-                            .delayUntil(payload -> ping)
+                            .delayUntil(__ -> ping)
                             .flatMap(payload -> Flux.from(payloadWriter.write(payload)))
                             .transform(identifyLimiter);
-                    Flux<ByteBuf> payloadFlux = outbound.filter(payload -> !Opcode.IDENTIFY.equals(payload.getOp()))
-                            .delayUntil(payload -> Opcode.RESUME.equals(payload.getOp()) ? Mono.empty() : onConnected)
+                    Flux<ByteBuf> resumeFlux = outbound.filter(payload -> Opcode.RESUME.equals(payload.getOp()))
+                            .flatMap(payload -> Flux.from(payloadWriter.write(payload)));
+                    Flux<ByteBuf> payloadFlux = outbound.filter(DefaultGatewayClient::isNotStartupPayload)
+                            .delayUntil(__ -> onConnected)
                             .flatMap(payload -> Flux.from(payloadWriter.write(payload)))
                             .transform(buf -> Flux.merge(buf, sender))
                             .transform(new RateLimitOperator<>(outboundLimiterCapacity(), Duration.ofSeconds(60),
                                     reactorResources.getTimerTaskScheduler(),
                                     reactorResources.getPayloadSenderScheduler()));
-                    Flux<ByteBuf> outFlux = Flux.merge(heartbeatFlux, identifyFlux, payloadFlux)
+                    Flux<ByteBuf> outFlux = Flux.merge(heartbeatFlux, identifyFlux, resumeFlux, payloadFlux)
                             .doOnNext(buf -> logPayload(senderLog, context, buf))
                             .doOnDiscard(ByteBuf.class, DefaultGatewayClient::safeRelease);
 
@@ -306,12 +308,8 @@ public class DefaultGatewayClient implements GatewayClient {
                 .replaceAll("(\"token\": ?\")([A-Za-z0-9._-]*)(\")", "$1hunter2$3")));
     }
 
-    private static boolean isInitialPayload(GatewayPayload<?> payload) {
-        return Opcode.IDENTIFY.equals(payload.getOp()) || Opcode.RESUME.equals(payload.getOp());
-    }
-
-    private static boolean isNotInitialPayload(GatewayPayload<?> payload) {
-        return !isInitialPayload(payload);
+    private static boolean isNotStartupPayload(GatewayPayload<?> payload) {
+        return !Opcode.IDENTIFY.equals(payload.getOp()) && !Opcode.RESUME.equals(payload.getOp());
     }
 
     private static boolean isReadyOrResumed(Dispatch d) {
