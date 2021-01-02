@@ -16,14 +16,17 @@
  */
 package discord4j.rest.service;
 
-import discord4j.discordjson.json.WebhookCreateRequest;
-import discord4j.discordjson.json.WebhookData;
-import discord4j.discordjson.json.WebhookModifyRequest;
+import discord4j.discordjson.json.*;
+import discord4j.rest.request.DiscordWebResponse;
 import discord4j.rest.request.Router;
 import discord4j.rest.route.Routes;
+import discord4j.rest.util.MultipartRequest;
+import discord4j.rest.util.WebhookMultipartRequest;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
+
+import java.util.Objects;
 
 public class WebhookService extends RestService {
 
@@ -72,5 +75,45 @@ public class WebhookService extends RestService {
                 .optionalHeader("X-Audit-Log-Reason", reason)
                 .exchange(getRouter())
                 .bodyToMono(Void.class);
+    }
+
+
+    /**
+     * Executes the specified webhook.
+     *
+     * This method has been backported from 3.2.x
+     *
+     * @param wait true if you want to return message data and errors for the webhook.
+     * @return If wait is true, a mono that contains the message information of the execution or an
+     * error if the webhook is unsuccessful. If wait is false, the mono completes as soon as the request
+     * is finished sending, and DOES NOT result in an error if the message is not saved.
+     */
+    @Deprecated
+    public Mono<MessageData> executeWebhook(long webhookId, String token, boolean wait, WebhookMultipartRequest request) {
+        DiscordWebResponse response = Routes.WEBHOOK_EXECUTE
+            .newRequest(webhookId, token)
+            .query("wait", wait)
+            .header("content-type", request.getFiles().isEmpty() ? "application/json" : "multipart/form-data")
+            .body(Objects.requireNonNull(request.getFiles().isEmpty() ? request.getExecuteRequest() : request))
+            .exchange(getRouter());
+
+        if (wait) {
+            return response.bodyToMono(MessageData.class);
+        } else {
+            return response.bodyToMono(Void.class).cast(MessageData.class);
+        }
+    }
+
+    public Mono<MessageData> modifyWebhookMessage(long webhookId, String webhookToken, long messageId, WebhookMessageEditRequest request) {
+        return Routes.WEBHOOK_MESSAGE_EDIT.newRequest(webhookId, webhookToken, messageId)
+            .body(request)
+            .exchange(getRouter())
+            .bodyToMono(MessageData.class);
+    }
+
+    public Mono<Void> deleteWebhookMessage(long webhookId, String webhookToken, long messageId) {
+        return Routes.WEBHOOK_MESSAGE_DELETE.newRequest(webhookId, webhookToken, messageId)
+            .exchange(getRouter())
+            .bodyToMono(Void.class);
     }
 }
