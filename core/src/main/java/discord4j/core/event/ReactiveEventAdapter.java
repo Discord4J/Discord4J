@@ -664,7 +664,20 @@ public abstract class ReactiveEventAdapter {
         return Mono.empty();
     }
 
-    public final Publisher<?> hookOnEvent(Event event) {
+
+    // ================= Core methods ================= //
+
+    /**
+     * Create a composite {@link ReactiveEventAdapter} from multiple adapters.
+     *
+     * @param adapters an array of adapters to combine
+     * @return a composite adapter
+     */
+    public static ReactiveEventAdapter from(ReactiveEventAdapter... adapters) {
+        return new CompositeReactiveEventAdapter(adapters);
+    }
+
+    public Publisher<?> hookOnEvent(Event event) {
         // @formatter:off
         if (event instanceof ReadyEvent) return onReady((ReadyEvent) event);
         else if (event instanceof ResumeEvent) return onResume((ResumeEvent) event);
@@ -724,5 +737,19 @@ public abstract class ReactiveEventAdapter {
         // @formatter:on
 
         return Mono.empty();
+    }
+
+    private static class CompositeReactiveEventAdapter extends ReactiveEventAdapter {
+
+        private final ReactiveEventAdapter[] adapters;
+
+        public CompositeReactiveEventAdapter(ReactiveEventAdapter... adapters) {
+            this.adapters = adapters;
+        }
+
+        @Override
+        public Publisher<?> hookOnEvent(Event event) {
+            return Flux.fromArray(adapters).flatMap(it -> it.hookOnEvent(event));
+        }
     }
 }
