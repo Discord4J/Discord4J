@@ -67,9 +67,9 @@ public class RestGuild {
      * @return a {@link Mono} where, upon successful completion, emits the {@link GuildUpdateData} belonging to this
      * entity. If an error is received, it is emitted through the {@code Mono}.
      */
-    public Mono<GuildUpdateData> getData() {
+    public Mono<GuildUpdateData> getData(@Nullable Boolean withCounts) {
         Map<String, Object> queryParams = new HashMap<>();
-        queryParams.put("with_counts", false);
+        Optional.ofNullable(withCounts).ifPresent(value -> queryParams.put("with_counts", value));
         return restClient.getGuildService().getGuild(id, queryParams);
     }
 
