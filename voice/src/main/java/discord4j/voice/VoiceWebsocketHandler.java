@@ -111,12 +111,9 @@ public class VoiceWebsocketHandler {
                 .map(status -> new CloseStatus(status.code(), status.reasonText()))
                 .doOnNext(status -> {
                     log.debug(format(context, "Received close status: {}"), status);
-                    if (status.getCode() == 4014) {
-                        close(DisconnectBehavior.stop(new VoiceGatewayException(context, "Disconnected")));
-                    } else {
-                        close(DisconnectBehavior.retryAbruptly(
-                                new VoiceGatewayException(context, "Inbound close status")));
-                    }
+                    // TODO: discord uses code 4014 for both resumable and non-resumable disconnects
+                    // we optimistically issue a retry. might encounter a 4006 if invalid
+                    close(DisconnectBehavior.retryAbruptly(new VoiceGatewayException(context, "Inbound close status")));
                 });
 
         Mono<Void> outboundEvents = out.sendObject(Flux.merge(outboundClose, outbound.map(TextWebSocketFrame::new)))

@@ -210,22 +210,28 @@ public class DefaultGatewayClient implements GatewayClient {
                     Sinks.Empty<Void> ping = Sinks.empty();
 
                     // Setup the sending logic from multiple sources into one merged Flux
+                    Mono<Void> onConnected = state.asFlux().filter(s -> s == GatewayConnection.State.CONNECTED).next().then();
                     Flux<ByteBuf> heartbeatFlux = heartbeats.asFlux()
                             .flatMap(payload -> Flux.from(payloadWriter.write(payload)));
                     Flux<ByteBuf> identifyFlux = outbound.asFlux()
                             .filter(payload -> Opcode.IDENTIFY.equals(payload.getOp()))
-                            .delayUntil(payload -> ping.asMono())
+                            .delayUntil(__ -> ping.asMono())
                             .flatMap(payload -> Flux.from(payloadWriter.write(payload)))
                             .transform(identifyLimiter);
+                    Flux<ByteBuf> resumeFlux = outbound.asFlux()
+                            .filter(payload -> Opcode.RESUME.equals(payload.getOp()))
+                            .flatMap(payload -> Flux.from(payloadWriter.write(payload)));
                     Flux<ByteBuf> payloadFlux = outbound.asFlux()
-                            .filter(payload -> !Opcode.IDENTIFY.equals(payload.getOp()))
+                            .filter(DefaultGatewayClient::isNotStartupPayload)
+                            .delayUntil(__ -> onConnected)
                             .flatMap(payload -> Flux.from(payloadWriter.write(payload)))
                             .transform(buf -> Flux.merge(buf, sender.asFlux()))
                             .transform(new RateLimitOperator<>(outboundLimiterCapacity(), Duration.ofSeconds(60),
                                     reactorResources.getTimerTaskScheduler(),
                                     reactorResources.getPayloadSenderScheduler()));
-                    Flux<ByteBuf> outFlux = Flux.merge(heartbeatFlux, identifyFlux, payloadFlux)
-                            .doOnNext(buf -> logPayload(senderLog, context, buf));
+                    Flux<ByteBuf> outFlux = Flux.merge(heartbeatFlux, identifyFlux, resumeFlux, payloadFlux)
+                            .doOnNext(buf -> logPayload(senderLog, context, buf))
+                            .doOnDiscard(ByteBuf.class, DefaultGatewayClient::safeRelease);
 
                     sessionHandler = new GatewayWebsocketHandler(receiver, outFlux, context);
 
@@ -348,6 +354,10 @@ public class DefaultGatewayClient implements GatewayClient {
     private void logPayload(Logger logger, ContextView context, ByteBuf buf) {
         logger.trace(format(context, buf.toString(StandardCharsets.UTF_8)
                 .replaceAll("(\"token\": ?\")([A-Za-z0-9._-]*)(\")", "$1hunter2$3")));
+    }
+
+    private static boolean isNotStartupPayload(GatewayPayload<?> payload) {
+        return !Opcode.IDENTIFY.equals(payload.getOp()) && !Opcode.RESUME.equals(payload.getOp());
     }
 
     private static boolean isReadyOrResumed(Dispatch d) {
