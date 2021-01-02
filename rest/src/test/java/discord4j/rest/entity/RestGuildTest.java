@@ -10,9 +10,7 @@ public class RestGuildTest {
         RestClient restClient = RestClient.create(System.getenv("token"));
         System.out.println(restClient.getRestResources().getJacksonResources().toString());
         RestGuild restGuild = restClient.getGuildById(Snowflake.of(System.getenv("guildId")));
-        Mono<GuildUpdateData> updateDataMono =  restGuild.getData(true); // Get data with possibility of requesting with query parameter "with_count"
+        Mono<GuildUpdateData> updateDataMono =  restGuild.getData();
         GuildUpdateData updateData = updateDataMono.block();
-        System.out.println(updateData.approximateMemberCount().get()); // Will just work if getData(withCounts == true)
-        System.out.println(updateData.approximatePresenceCount().get()); // Will just work if getData(withCounts == true)
     }
 }
