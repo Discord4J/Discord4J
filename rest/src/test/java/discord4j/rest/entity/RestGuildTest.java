@@ -10,7 +10,7 @@ public class RestGuildTest {
         RestClient restClient = RestClient.create(System.getenv("token"));
         System.out.println(restClient.getRestResources().getJacksonResources().toString());
         RestGuild restGuild = restClient.getGuildById(Snowflake.of(System.getenv("guildId")));
-        Mono<GuildUpdateData> updateDataMono =  restGuild.getData();
+        Mono<GuildUpdateData> updateDataMono =  restGuild.getData(true);
         GuildUpdateData updateData = updateDataMono.block();
     }
 }
