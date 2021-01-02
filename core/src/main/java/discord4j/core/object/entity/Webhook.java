@@ -260,7 +260,7 @@ public final class Webhook implements Entity {
      * Requests to edit this webhook. Requires the MANAGE_WEBHOOKS permission.
      *
      * @param spec A {@link Consumer} that provides a "blank" {@link WebhookEditSpec} to be operated on.
-     * @return A {@link Mono} where, upon successful completion, emits the edited {@link Guild}. If an error is
+     * @return A {@link Mono} where, upon successful completion, emits the edited {@link Webhook}. If an error is
      * received, it is emitted through the {@code Mono}.
      */
     public Mono<Webhook> edit(final Consumer<? super WebhookEditSpec> spec) {
@@ -279,7 +279,7 @@ public final class Webhook implements Entity {
      * Does not require the MANAGE_WEBHOOKS permission.
      *
      * @param spec A {@link Consumer} that provides a "blank" {@link WebhookEditSpec} to be operated on.
-     * @return A {@link Mono} where, upon successful completion, emits the edited {@link Guild}. If an error is
+     * @return A {@link Mono} where, upon successful completion, emits the edited {@link Webhook}. If an error is
      * received, it is emitted through the {@code Mono}.
      */
     public Mono<Webhook> editWithToken(final Consumer<? super WebhookEditWithTokenSpec> spec) {
