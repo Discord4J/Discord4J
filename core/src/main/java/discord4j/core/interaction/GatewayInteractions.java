@@ -23,10 +23,11 @@ import discord4j.core.event.domain.InteractionCreateEvent;
 import discord4j.core.event.domain.lifecycle.ReadyEvent;
 import discord4j.discordjson.json.InteractionResponseData;
 import discord4j.rest.interaction.ApplicationCommandHandler;
+import discord4j.rest.interaction.InteractionOperations;
 import discord4j.rest.interaction.InteractionResponseSource;
 import discord4j.rest.interaction.Interactions;
-import discord4j.rest.interaction.InteractionOperations;
 import org.reactivestreams.Publisher;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.MonoProcessor;
 
@@ -62,6 +63,6 @@ public class GatewayInteractions extends ReactiveEventAdapter {
 
         return event.getClient().rest().getInteractionService()
                 .createInteractionResponse(id, token, responseData)
-                .then(Mono.from(source.followup(ops)));
+                .thenMany(Flux.from(source.followup(ops)));
     }
 }

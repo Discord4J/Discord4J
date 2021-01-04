@@ -146,7 +146,7 @@ public class Interactions {
                                 .chunkedTransfer(false)
                                 .sendString(Mono.fromCallable(() -> mapper.writeValueAsString(responseSource.response())))
                                 .then()
-                                .doFinally(s -> Mono.from(responseSource.followup(ops))
+                                .doFinally(s -> Flux.from(responseSource.followup(ops))
                                         .subscribeOn(restClient.getRestResources().getReactorResources()
                                                 .getBlockingTaskScheduler())
                                         .subscribe(null,
