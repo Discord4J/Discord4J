@@ -784,7 +784,7 @@ public abstract class Routes {
      * @see <a href="https://discord.com/developers/docs/resources/template#get-template">
      *         https://discord.com/developers/docs/resources/template#get-template</a>
      */
-    public static final Route TEMPLATE_GET = Route.get("/guilds/templates/{template.code}");
+    public static final Route GUILD_TEMPLATE_GET = Route.get("/guilds/templates/{template.code}");
 
     /**
      * Create a new guild from template. Returns a guild object on success. Fires a Guild Create Gateway event.
