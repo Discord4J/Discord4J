@@ -999,6 +999,24 @@ public final class Guild implements Entity {
     }
 
     /**
+     * Requests to create an template.
+     *
+     * @param spec A {@link Consumer} that provides a "blank" {@link GuildTemplateCreateSpec} to be operated on.
+     * @return A {@link Mono} where, upon successful completion, emits the created {@link Template}. If an error is
+     * received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Template> createTemplate(final Consumer<? super GuildTemplateCreateSpec> spec) {
+        return Mono.defer(
+            () -> {
+                GuildTemplateCreateSpec mutatedSpec = new GuildTemplateCreateSpec();
+                spec.accept(mutatedSpec);
+                return gateway.getRestClient().getTemplateService()
+                    .createTemplate(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason());
+            })
+            .map(data -> new Template(gateway, data));
+    }
+
+    /**
      * Requests to create a role.
      *
      * @param spec A {@link Consumer} that provides a "blank" {@link RoleCreateSpec} to be operated on.

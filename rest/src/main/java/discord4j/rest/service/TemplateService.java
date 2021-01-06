@@ -19,7 +19,7 @@ public class TemplateService extends RestService {
             .bodyToMono(TemplateData.class);
     }
 
-    public Mono<GuildData> createGuild(long templateCode, TemplateCreateGuildRequest request, @Nullable String reason) {
+    public Mono<GuildData> createGuild(String templateCode, TemplateCreateGuildRequest request, @Nullable String reason) {
         return Routes.TEMPLATE_GUILD_CREATE.newRequest(templateCode)
             .body(request)
             .optionalHeader("X-Audit-Log-Reason", reason)

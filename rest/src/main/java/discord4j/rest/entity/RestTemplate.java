@@ -47,7 +47,7 @@ public class RestTemplate {
      *
      * @return a guild object
      */
-    public Mono<GuildData> createGuild(long templateCode, TemplateCreateGuildRequest request, @Nullable String reason) {
+    public Mono<GuildData> createGuild(String templateCode, TemplateCreateGuildRequest request, @Nullable String reason) {
         return restClient.getTemplateService().createGuild(templateCode, request, reason);
     }
 

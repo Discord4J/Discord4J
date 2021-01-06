@@ -2,10 +2,14 @@ package discord4j.core.object;
 
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
+import discord4j.core.object.entity.Guild;
+import discord4j.core.spec.GuildTemplateEditSpec;
+import discord4j.core.spec.TemplateCreateGuildSpec;
 import discord4j.discordjson.json.TemplateData;
 import reactor.core.publisher.Mono;
 
 import java.util.Objects;
+import java.util.function.Consumer;
 
 public class Template implements DiscordObject {
 
@@ -32,7 +36,7 @@ public class Template implements DiscordObject {
 
     @Override
     public GatewayDiscordClient getClient() {
-        return gateway;
+        return this.gateway;
     }
 
     /**
@@ -54,6 +58,47 @@ public class Template implements DiscordObject {
     }
 
     /**
+     * Creates a new guild from a template. Fires Guild Create Gateway event.
+     *
+     * @return the guild object
+     */
+    public final Mono<Guild> createGuild(final Consumer<? super TemplateCreateGuildSpec> spec) {
+        return Mono.defer(() -> {
+            TemplateCreateGuildSpec mutatedSpec = new TemplateCreateGuildSpec();
+            spec.accept(mutatedSpec);
+            return gateway.getRestClient().getTemplateService().createGuild(getCode(), mutatedSpec.asRequest(), mutatedSpec.getReason());
+        }).map(data -> new Guild(gateway, data));
+    }
+
+    /**
+     * Requests to sync the current template with the guild.
+     */
+    public final Mono<Void> sync(long guildId) {
+        return gateway.getRestClient().getTemplateService()
+            .syncTemplate(guildId, getCode())
+            .then();
+    }
+
+    public final Mono<Void> sync() {
+        return this.sync(this.getGuildId());
+    }
+
+    /**
+     * Requests to edit this guild template.
+     *
+     * @param spec A {@link Consumer} that provides a "blank" {@link GuildTemplateEditSpec} to be operated on.
+     * @return A {@link Mono} where, upon successful completion, emits the edited {@link Template}. If an error is
+     * received, it is emitted through the {@code Mono}.
+     */
+    public final Mono<Template> edit(final Consumer<? super GuildTemplateEditSpec> spec) {
+        return Mono.defer(() -> {
+            GuildTemplateEditSpec mutatedSpec = new GuildTemplateEditSpec();
+            spec.accept(mutatedSpec);
+            return gateway.getRestClient().getTemplateService().modifyTemplate(getGuildId(), getCode(), mutatedSpec.asRequest(), mutatedSpec.getReason());
+        }).map(data -> new Template(gateway, data));
+    }
+
+    /**
      * Requests to delete this template while optionally specifying a reason.
      *
      * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the template has been deleted.
@@ -64,5 +109,4 @@ public class Template implements DiscordObject {
             .deleteTemplate(guildId.asLong(), getCode())
             .then();
     }
-
 }
