@@ -3,8 +3,10 @@ package discord4j.core.object;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.Guild;
+import discord4j.core.object.entity.User;
 import discord4j.core.spec.GuildTemplateEditSpec;
 import discord4j.core.spec.TemplateCreateGuildSpec;
+import discord4j.discordjson.json.SerializedSourceGuildData;
 import discord4j.discordjson.json.TemplateData;
 import reactor.core.publisher.Mono;
 
@@ -19,7 +21,7 @@ public class Template implements DiscordObject {
     /** The raw data as represented by Discord. */
     private final TemplateData data;
 
-    /** The ID of the guild this role is associated to. */
+    /** The ID of the guild this template is associated to. */
     private final long guildId;
 
     /**
@@ -55,6 +57,78 @@ public class Template implements DiscordObject {
      */
     public final long getGuildId() {
         return guildId;
+    }
+
+    /**
+     * Gets the name of the template.
+     *
+     * @return The template name.
+     */
+    public final String getName() {
+        return data.name();
+    }
+
+    /**
+     * Gets the description of the template.
+     *
+     * @return The template description.
+     */
+    public final String getDescription() {
+        return data.description().orElse("");
+    }
+
+    /**
+     * Gets the amount of times the template has been used.
+     *
+     * @return The template usage count.
+     */
+    public final int getUsageCount() {
+        return data.usageCount();
+    }
+
+    /**
+     * Gets the id of the creator of this template.
+     *
+     * @return The creator id.
+     */
+    public final String getCreatorId() {
+        return data.creatorId();
+    }
+
+    /**
+     * Gets the creator of this template.
+     *
+     * @return The creator.
+     */
+    public final User getCreator() {
+        return new User(gateway, data.creator());
+    }
+
+    /**
+     * Gets the timestamp the template was created.
+     *
+     * @return The timestamp.
+     */
+    public final String getCreatedAt() {
+        return data.createdAt();
+    }
+
+    /**
+     * Gets the timestamp the template was updated.
+     *
+     * @return The timestamp.
+     */
+    public final String getUpdatedAt() {
+        return data.updatedAt();
+    }
+
+    /**
+     * Gets the guild snapshot of the template.
+     *
+     * @return The guild snapshot.
+     */
+    public final SerializedSourceGuildData getSourceGuild() {
+        return data.serializedSourceGuild();
     }
 
     /**
