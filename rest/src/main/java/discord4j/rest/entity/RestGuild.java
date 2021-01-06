@@ -335,4 +335,9 @@ public class RestGuild {
     public Mono<GuildPreviewData> getPreview() {
         return restClient.getGuildService().getGuildPreview(id);
     }
+
+    public Flux<TemplateData> getTemplates() {
+        return restClient.getTemplateService().getTemplates(id);
+    }
+
 }

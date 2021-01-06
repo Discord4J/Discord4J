@@ -802,7 +802,7 @@ public abstract class Routes {
      * @see <a href="https://discord.com/developers/docs/resources/template#get-guild-templates">
      *         https://discord.com/developers/docs/resources/template#get-guild-templates</a>
      */
-    public static final Route TEMPLATE_LIST_GET = Route.get("/guilds/{guild.id}/templates");
+    public static final Route GUILD_TEMPLATE_LIST_GET = Route.get("/guilds/{guild.id}/templates");
 
     /**
      * Creates a template for the guild. Requires the MANAGE_GUILD permission. Returns the created template object on success.
@@ -810,7 +810,7 @@ public abstract class Routes {
      * @see <a href="https://discord.com/developers/docs/resources/template#create-guild-template">
      *         https://discord.com/developers/docs/resources/template#create-guild-template</a>
      */
-    public static final Route TEMPLATE_CREATE = Route.post("/guilds/{guild.id}/templates");
+    public static final Route GUILD_TEMPLATE_CREATE = Route.post("/guilds/{guild.id}/templates");
 
     /**
      * Syncs the template to the guild's current state. Requires the MANAGE_GUILD permission. Returns the template object on success.
@@ -818,7 +818,7 @@ public abstract class Routes {
      * @see <a href="https://discord.com/developers/docs/resources/template#sync-guild-template">
      *         https://discord.com/developers/docs/resources/template#sync-guild-template</a>
      */
-    public static final Route TEMPLATE_SYNC = Route.put("/guilds/{guild.id}/templates/{template.code}");
+    public static final Route GUILD_TEMPLATE_SYNC = Route.put("/guilds/{guild.id}/templates/{template.code}");
 
     /**
      * Modifies the template's metadata. Requires the MANAGE_GUILD permission. Returns the template object on success.
@@ -826,7 +826,7 @@ public abstract class Routes {
      * @see <a href="https://discord.com/developers/docs/resources/template#modify-guild-template">
      *         https://discord.com/developers/docs/resources/template#modify-guild-template</a>
      */
-    public static final Route TEMPLATE_MODIFY = Route.patch("/guilds/{guild.id}/templates/{template.code}");
+    public static final Route GUILD_TEMPLATE_MODIFY = Route.patch("/guilds/{guild.id}/templates/{template.code}");
 
     /**
      * Deletes the template. Requires the MANAGE_GUILD permission. Returns the deleted template object on success.
@@ -834,7 +834,7 @@ public abstract class Routes {
      * @see <a href="https://discord.com/developers/docs/resources/template#delete-guild-template">
      *         https://discord.com/developers/docs/resources/template#delete-guild-template</a>
      */
-    public static final Route TEMPLATE_DELETE = Route.delete("/guilds/{guild.id}/templates/{template.code}");
+    public static final Route GUILD_TEMPLATE_DELETE = Route.delete("/guilds/{guild.id}/templates/{template.code}");
 
     ///////////////////////////////////////////
     ////////////// User Resource //////////////
