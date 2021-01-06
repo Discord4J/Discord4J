@@ -5,6 +5,7 @@ import discord4j.discordjson.json.TemplateData;
 import discord4j.rest.request.Router;
 import discord4j.rest.route.Routes;
 import reactor.core.publisher.Mono;
+import reactor.util.annotation.Nullable;
 
 public class TemplateService extends RestService {
 
@@ -18,10 +19,10 @@ public class TemplateService extends RestService {
             .bodyToMono(TemplateData.class);
     }
 
-    public Mono<GuildUpdateData> createGuildFromTemplate(TemplateData request) {
-        return Routes.TEMPLATE_GUILD_CREATE.newRequest()
-            .body(request)
+    public Mono<TemplateData> deleteTemplate(String templateCode, @Nullable String reason) {
+        return Routes.TEMPLATE_DELETE.newRequest(reason)
+            .optionalHeader("X-Audit-Log-Reason", reason)
             .exchange(getRouter())
-            .bodyToMono(GuildUpdateData.class);
+            .bodyToMono(TemplateData.class);
     }
 }
