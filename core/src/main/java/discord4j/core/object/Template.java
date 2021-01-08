@@ -11,6 +11,7 @@ import discord4j.discordjson.json.TemplateData;
 import reactor.core.publisher.Mono;
 
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 public class Template implements DiscordObject {
@@ -73,8 +74,8 @@ public class Template implements DiscordObject {
      *
      * @return The template description.
      */
-    public final String getDescription() {
-        return data.description().orElse("");
+    public final Optional<String> getDescription() {
+        return data.description();
     }
 
     /**
@@ -137,11 +138,13 @@ public class Template implements DiscordObject {
      * @return the guild object
      */
     public final Mono<Guild> createGuild(final Consumer<? super TemplateCreateGuildSpec> spec) {
-        return Mono.defer(() -> {
-            TemplateCreateGuildSpec mutatedSpec = new TemplateCreateGuildSpec();
-            spec.accept(mutatedSpec);
-            return gateway.getRestClient().getTemplateService().createGuild(getCode(), mutatedSpec.asRequest(), mutatedSpec.getReason());
-        }).map(data -> new Guild(gateway, data));
+        return Mono.defer(
+            () -> {
+                TemplateCreateGuildSpec mutatedSpec = new TemplateCreateGuildSpec();
+                spec.accept(mutatedSpec);
+                return gateway.getRestClient().getTemplateService().createGuild(getCode(), mutatedSpec.asRequest(), mutatedSpec.getReason());
+            })
+            .map(data -> new Guild(gateway, data));
     }
 
     /**
@@ -165,11 +168,13 @@ public class Template implements DiscordObject {
      * received, it is emitted through the {@code Mono}.
      */
     public final Mono<Template> edit(final Consumer<? super GuildTemplateEditSpec> spec) {
-        return Mono.defer(() -> {
-            GuildTemplateEditSpec mutatedSpec = new GuildTemplateEditSpec();
-            spec.accept(mutatedSpec);
-            return gateway.getRestClient().getTemplateService().modifyTemplate(getGuildId(), getCode(), mutatedSpec.asRequest(), mutatedSpec.getReason());
-        }).map(data -> new Template(gateway, data));
+        return Mono.defer(
+            () -> {
+                GuildTemplateEditSpec mutatedSpec = new GuildTemplateEditSpec();
+                spec.accept(mutatedSpec);
+                return gateway.getRestClient().getTemplateService().modifyTemplate(getGuildId(), getCode(), mutatedSpec.asRequest(), mutatedSpec.getReason());
+            })
+            .map(data -> new Template(gateway, data));
     }
 
     /**
