@@ -182,7 +182,7 @@ public class MessageCreateSpec implements Spec<MultipartRequest>, Appendable {
         contentBuilder
             .append("```");
         if (language != null) {
-            contentBuilder.append("\n").append(language);
+            contentBuilder.append(language);
         }
         contentBuilder
             .append("\n")
