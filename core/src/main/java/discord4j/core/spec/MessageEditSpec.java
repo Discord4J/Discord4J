@@ -24,6 +24,7 @@ import discord4j.discordjson.possible.Possible;
 import discord4j.rest.util.AllowedMentions;
 import reactor.util.annotation.Nullable;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -33,12 +34,19 @@ import java.util.function.Consumer;
  *
  * @see <a href="https://discord.com/developers/docs/resources/channel#edit-message">Edit Message</a>
  */
-public class MessageEditSpec implements Spec<MessageEditRequest> {
+public class MessageEditSpec implements Spec<MessageEditRequest>, Appendable {
 
-    private Possible<Optional<String>> content = Possible.absent();
+    private final StringBuilder contentBuilder = new StringBuilder();
     private Possible<Optional<EmbedData>> embed = Possible.absent();
     private Possible<Optional<AllowedMentionsData>> allowedMentions = Possible.absent();
     private Possible<Integer> flags = Possible.absent();
+
+    // Constants
+    public final static byte MARKDOWN_ITALIC = 0;
+    public final static byte MARKDOWN_BOLD = 1;
+    public final static byte MARKDOWN_STRIKETHROUGH = 2;
+    public final static byte MARKDOWN_UNDERLINE = 3;
+    public final static byte MARKDOWN_CODELINE = 4;
 
     /**
      * Sets the new contents for the edited {@link Message}.
@@ -47,7 +55,132 @@ public class MessageEditSpec implements Spec<MessageEditRequest> {
      * @return This spec.
      */
     public MessageEditSpec setContent(@Nullable String content) {
-        this.content = Possible.of(Optional.ofNullable(content));
+        this.contentBuilder.setLength(0);
+        this.contentBuilder.append(content);
+        return this;
+    }
+
+    /**
+     * Gets the specs contents.
+     *
+     * @return Current contents of this spec.
+     */
+    public String getContent() {
+        return contentBuilder.toString();
+    }
+
+    /**
+     * Resets this specs contents.
+     *
+     * @return This spec.
+     */
+    public MessageEditSpec resetContent() {
+        this.contentBuilder.setLength(0);
+        return this;
+    }
+
+    /**
+     * Adds a code block without a language to this spec.
+     *
+     * @param content Content of the code block.
+     * @return This spec.
+     */
+    public MessageEditSpec appendCodeBlock(String content) {
+        return appendCodeBlock(content, null);
+    }
+
+    /**
+     * Adds a code block to this spec.
+     *
+     * @param content  The content of the code block.
+     * @param language The language of the code block. (If null, no languages.)
+     * @return This spec.
+     */
+    public MessageEditSpec appendCodeBlock(String content, @Nullable String language) {
+        contentBuilder
+            .append("```");
+        if (language != null) {
+            contentBuilder.append(language);
+        }
+        contentBuilder
+            .append("\n")
+            .append(content)
+            .append("\n")
+            .append("```\n");
+        return this;
+    }
+
+    /**
+     * Gets the content builder of this spec.
+     * <b>Not recommended! Try to use {@link #getContent} and {@link #setContent} instead!</b>
+     *
+     * @return Content builder of this spec.
+     */
+    public StringBuilder getContentBuilder() {
+        return contentBuilder;
+    }
+
+    /**
+     * Adds formatted text to this spec.
+     * @param content The content to be formatted and added.
+     * @param formats {@link #MARKDOWN_ITALIC}, {@link #MARKDOWN_BOLD}, {@link #MARKDOWN_UNDERLINE} or {@link #MARKDOWN_CODELINE}
+     * @return This spec.
+     */
+    public MessageEditSpec appendFormatted(String content, byte... formats) {
+        ArrayList<String> tags = new ArrayList<>();
+        for (byte format : formats) {
+            String tag = getMarkdownTag(format);
+            if (tag == null) {
+                throw new IllegalArgumentException("Invalid markdown format!");
+            }
+            tags.add(tag);
+        }
+        tags.forEach(contentBuilder::append);
+        contentBuilder.append(content);
+        tags.forEach(contentBuilder::append);
+        return this;
+    }
+
+    /**
+     * Resets the embed.
+     *
+     * @return This spec.
+     */
+    public MessageEditSpec resetEmbed() {
+        setEmbed(null);
+        return this;
+    }
+
+    /**
+     * Resets allowed mentions.
+     *
+     * @return This spec.
+     */
+    public MessageEditSpec resetAllowedMentions() {
+        setAllowedMentions(null);
+        return this;
+    }
+
+    /**
+     * Resets this spec.
+     *
+     * @return This spec.
+     */
+    public MessageEditSpec reset() {
+        return this
+            .resetAllowedMentions()
+            .resetContent()
+            .resetEmbed()
+            .resetFlags();
+    }
+
+    /**
+     * Resets this specs files.
+     *
+     * @return This spec.
+     */
+    public MessageEditSpec resetFlags() {
+        flags = Possible.absent();
         return this;
     }
 
@@ -96,10 +229,46 @@ public class MessageEditSpec implements Spec<MessageEditRequest> {
     @Override
     public MessageEditRequest asRequest() {
         return MessageEditRequest.builder()
-                .content(content)
+                .content(contentBuilder.length() == 0 ? Possible.of(Optional.empty()) : Possible.of(Optional.of(contentBuilder.toString())))
                 .embed(embed)
                 .allowedMentions(allowedMentions)
                 .flags(flags)
                 .build();
+    }
+
+    @Override
+    public Appendable append(CharSequence csq) {
+        contentBuilder.append(csq);
+        return this;
+    }
+
+    @Override
+    public Appendable append(CharSequence csq, int start, int end) {
+        contentBuilder.append(csq, start, end);
+        return this;
+    }
+
+    @Override
+    public Appendable append(char c) {
+        contentBuilder.append(c);
+        return this;
+    }
+
+    @Nullable
+    private String getMarkdownTag(byte format) {
+        switch(format) {
+            case MARKDOWN_ITALIC:
+                return "*";
+            case MARKDOWN_BOLD:
+                return "**";
+            case MARKDOWN_UNDERLINE:
+                return "__";
+            case MARKDOWN_STRIKETHROUGH:
+                return "~~";
+            case MARKDOWN_CODELINE:
+                return "`";
+            default:
+                return null;
+        }
     }
 }

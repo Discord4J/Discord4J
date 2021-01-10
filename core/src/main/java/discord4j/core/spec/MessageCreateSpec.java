@@ -57,6 +57,7 @@ public class MessageCreateSpec implements Spec<MultipartRequest>, Appendable {
     private MessageReferenceData messageReferenceData;
 
 
+    // Constants
     public final static byte MARKDOWN_ITALIC = 0;
     public final static byte MARKDOWN_BOLD = 1;
     public final static byte MARKDOWN_STRIKETHROUGH = 2;
@@ -86,7 +87,7 @@ public class MessageCreateSpec implements Spec<MultipartRequest>, Appendable {
 
 
     /**
-     * Resets the specs contents.
+     * Resets this specs contents.
      *
      * @return This spec.
      */
