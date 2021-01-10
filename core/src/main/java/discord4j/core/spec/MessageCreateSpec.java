@@ -33,6 +33,7 @@ import reactor.util.annotation.Nullable;
 import reactor.util.function.Tuple2;
 import reactor.util.function.Tuples;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -45,10 +46,9 @@ import java.util.function.Consumer;
  *
  * @see <a href="https://discord.com/developers/docs/resources/channel#create-message">Create Message</a>
  */
-public class MessageCreateSpec implements Spec<MultipartRequest> {
+public class MessageCreateSpec implements Spec<MultipartRequest>, Appendable {
 
-    @Nullable
-    private String content;
+    private final StringBuilder contentBuilder = new StringBuilder();
     @Nullable
     private String nonce;
     private boolean tts;
@@ -57,16 +57,94 @@ public class MessageCreateSpec implements Spec<MultipartRequest> {
     private AllowedMentionsData allowedMentionsData;
     private MessageReferenceData messageReferenceData;
 
+
+    public final static byte MARKDOWN_ITALIC = 0;
+    public final static byte MARKDOWN_BOLD = 1;
+    public final static byte MARKDOWN_STRIKETHROUGH = 2;
+    public final static byte MARKDOWN_UNDERLINE = 3;
+    public final static byte MARKDOWN_CODELINE = 4;
+
     /**
-     * Sets the created {@link Message} contents, up to 2000 characters.
+     * Sets the specs contents, up to 2000 characters.
      *
      * @param content The message contents.
      * @return This spec.
      */
     public MessageCreateSpec setContent(String content) {
-        this.content = content;
+        this.contentBuilder.setLength(0);
+        this.contentBuilder.append(content);
         return this;
     }
+
+    /**
+     * Gets the specs contents.
+     *
+     * @return Current contents of this spec.
+     */
+    public String getContent() {
+        return contentBuilder.toString();
+    }
+
+
+    /**
+     * Resets the specs contents.
+     *
+     * @return This spec.
+     */
+    public MessageCreateSpec resetContent() {
+        this.contentBuilder.setLength(0);
+        return this;
+    }
+
+    /**
+     * Adds formatted text to this spec.
+     * @param content The content to be formatted and added.
+     * @param formats {@link #MARKDOWN_ITALIC}, {@link #MARKDOWN_BOLD}, {@link #MARKDOWN_UNDERLINE} or {@link #MARKDOWN_CODELINE}
+     * @return This spec.
+     */
+    public MessageCreateSpec appendFormatted(String content, byte... formats) {
+        for (byte format : formats) {
+            String tag = getMarkdownTag(format);
+            if (tag == null) {
+                throw new IllegalArgumentException("Invalid markdown format!");
+            }
+            contentBuilder.append(tag).append(content).append(tag);
+        }
+        return this;
+    }
+
+
+    /**
+     * Adds a code block to this spec.
+     *
+     * @param content  The content of the code block.
+     * @param language The language of the code block. (If null, no languages.)
+     * @return This spec.
+     */
+    public MessageCreateSpec appendCodeBlock(String content, @Nullable String language) {
+        contentBuilder
+            .append("```");
+        if (language != null) {
+            contentBuilder.append("\n").append(language);
+        }
+        contentBuilder
+            .append("\n")
+            .append(content)
+            .append("\n")
+            .append("```\n");
+        return this;
+    }
+
+    /**
+     * Adds a code block without a language to this spec.
+     *
+     * @param content Content of the code block.
+     * @return This spec.
+     */
+    public MessageCreateSpec appendCodeBlock(String content) {
+        return appendCodeBlock(content, null);
+    }
+
 
     /**
      * Sets a nonce that can be used for optimistic message sending.
@@ -107,7 +185,7 @@ public class MessageCreateSpec implements Spec<MultipartRequest> {
      * Adds a file as attachment to the created {@link Message}.
      *
      * @param fileName The filename used in the file being sent.
-     * @param file The file contents.
+     * @param file     The file contents.
      * @return This spec.
      */
     public MessageCreateSpec addFile(String fileName, InputStream file) {
@@ -118,11 +196,12 @@ public class MessageCreateSpec implements Spec<MultipartRequest> {
         return this;
     }
 
+
     /**
      * Adds a spoiler file as attachment to the created {@link Message}.
      *
      * @param fileName The filename used in the file being sent.
-     * @param file The file contents.
+     * @param file     The file contents.
      * @return This spec.
      */
     public MessageCreateSpec addFileSpoiler(String fileName, InputStream file) {
@@ -142,6 +221,16 @@ public class MessageCreateSpec implements Spec<MultipartRequest> {
     }
 
     /**
+     * Gets the content builder of this spec.
+     * <b>Not recommended! Try to use {@link #getContent} and {@link #setContent} instead!</b>
+     *
+     * @return Content builder of this spec.
+     */
+    public StringBuilder getContentBuilder() {
+        return contentBuilder;
+    }
+
+    /**
      * Adds a message ID to reply to. This requires the {@link Permission#READ_MESSAGE_HISTORY} permission, and the
      * referenced message must exist and cannot be a system message.
      *
@@ -158,13 +247,50 @@ public class MessageCreateSpec implements Spec<MultipartRequest> {
     @Override
     public MultipartRequest asRequest() {
         MessageCreateRequest json = MessageCreateRequest.builder()
-                .content(content == null ? Possible.absent() : Possible.of(content))
-                .nonce(nonce == null ? Possible.absent() : Possible.of(nonce))
-                .tts(tts)
-                .embed(embed == null ? Possible.absent() : Possible.of(embed))
-                .allowedMentions(allowedMentionsData == null ? Possible.absent() : Possible.of(allowedMentionsData))
-                .messageReference(messageReferenceData == null ? Possible.absent() : Possible.of(messageReferenceData))
-                .build();
+            .content(contentBuilder.length() == 0 ? Possible.absent() : Possible.of(contentBuilder.toString()))
+            .nonce(nonce == null ? Possible.absent() : Possible.of(nonce))
+            .tts(tts)
+            .embed(embed == null ? Possible.absent() : Possible.of(embed))
+            .allowedMentions(allowedMentionsData == null ? Possible.absent() : Possible.of(allowedMentionsData))
+            .messageReference(messageReferenceData == null ? Possible.absent() : Possible.of(messageReferenceData))
+            .build();
         return new MultipartRequest(json, files == null ? Collections.emptyList() : files);
+    }
+
+    @Nullable
+    private String getMarkdownTag(byte format) {
+        switch(format) {
+            case MARKDOWN_ITALIC:
+                return "*";
+            case MARKDOWN_BOLD:
+                return "**";
+            case MARKDOWN_UNDERLINE:
+                return "__";
+            case MARKDOWN_STRIKETHROUGH:
+                return "~~";
+            case MARKDOWN_CODELINE:
+                return "`";
+            default:
+                return null;
+        }
+    }
+
+
+    @Override
+    public Appendable append(CharSequence csq) {
+        contentBuilder.append(csq);
+        return this;
+    }
+
+    @Override
+    public Appendable append(CharSequence csq, int start, int end) {
+        contentBuilder.append(csq, start, end);
+        return this;
+    }
+
+    @Override
+    public Appendable append(char c) throws IOException {
+        contentBuilder.append(c);
+        return this;
     }
 }
