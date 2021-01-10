@@ -96,19 +96,77 @@ public class MessageCreateSpec implements Spec<MultipartRequest>, Appendable {
     }
 
     /**
+     * Resets the embed.
+     *
+     * @return This spec.
+     */
+    public MessageCreateSpec resetEmbed() {
+        embed = null;
+        return this;
+    }
+
+    /**
+     * Resets the files.
+     *
+     * @return This spec.
+     */
+    public MessageCreateSpec resetFiles() {
+        files = null;
+        return this;
+    }
+
+    /**
+     * Resets allowed mentions.
+     *
+     * @return This spec.
+     */
+    public MessageCreateSpec resetAllowedMentions() {
+        allowedMentionsData = null;
+        return this;
+    }
+
+    /**
+     * Resets this spec.
+     *
+     * @return This spec.
+     */
+    public MessageCreateSpec reset() {
+        return this
+            .resetAllowedMentions()
+            .resetContent()
+            .resetEmbed()
+            .resetFiles()
+            .resetMessageReference();
+    }
+
+    /**
+     * Resets the message reference.
+     *
+     * @return This spec.
+     */
+    public MessageCreateSpec resetMessageReference() {
+        messageReferenceData = null;
+        return this;
+    }
+
+    /**
      * Adds formatted text to this spec.
      * @param content The content to be formatted and added.
      * @param formats {@link #MARKDOWN_ITALIC}, {@link #MARKDOWN_BOLD}, {@link #MARKDOWN_UNDERLINE} or {@link #MARKDOWN_CODELINE}
      * @return This spec.
      */
     public MessageCreateSpec appendFormatted(String content, byte... formats) {
+        ArrayList<String> tags = new ArrayList<>();
         for (byte format : formats) {
             String tag = getMarkdownTag(format);
             if (tag == null) {
                 throw new IllegalArgumentException("Invalid markdown format!");
             }
-            contentBuilder.append(tag).append(content).append(tag);
+            tags.add(tag);
         }
+        tags.forEach(contentBuilder::append);
+        contentBuilder.append(content);
+        tags.forEach(contentBuilder::append);
         return this;
     }
 
