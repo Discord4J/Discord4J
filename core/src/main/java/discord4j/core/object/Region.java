@@ -51,6 +51,15 @@ public final class Region implements DiscordObject {
     }
 
     /**
+     * Gets the data of the region.
+     *
+     * @return The data of the region.
+     */
+    public RegionData getData() {
+        return data;
+    }
+
+    /**
      * Gets the unique ID for the region.
      *
      * @return The unique ID for the region.

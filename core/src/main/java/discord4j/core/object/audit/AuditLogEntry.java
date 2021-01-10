@@ -40,6 +40,15 @@ public class AuditLogEntry implements Entity {
     }
 
     /**
+     * Gets the data of the audit log entry.
+     *
+     * @return The data of the audit log entry.
+     */
+    public AuditLogEntryData getData() {
+        return data;
+    }
+
+    /**
      * Gets the id of the affected entity (webhook, user, role, etc.), if present.
      *
      * @return The id of the affected entity (webhook, user, role, etc.), if present.

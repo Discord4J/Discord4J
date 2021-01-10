@@ -63,6 +63,15 @@ public final class ApplicationInfo implements Entity {
     }
 
     /**
+     * Gets the data of the app.
+     *
+     * @return The data of the app.
+     */
+    public ApplicationInfoData getData() {
+        return data;
+    }
+
+    /**
      * Gets the name of the app.
      *
      * @return The name of the app.
