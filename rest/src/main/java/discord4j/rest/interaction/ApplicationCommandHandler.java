@@ -17,10 +17,28 @@
 
 package discord4j.rest.interaction;
 
+import discord4j.common.annotations.Experimental;
 import discord4j.discordjson.json.ApplicationCommandInteractionData;
 
+/**
+ * Represents an application command that can be tested against incoming interactions and to build a response sequence.
+ */
+@Experimental
 public interface ApplicationCommandHandler {
 
+    /**
+     * Match whether the incoming interaction can be handled by this command.
+     *
+     * @param acid the incoming interaction data
+     * @return {@code true} if this command can handle this interaction, {@code false} otherwise
+     */
     boolean test(ApplicationCommandInteractionData acid);
+
+    /**
+     * Return the actual component responsible for maintaining interaction responses.
+     *
+     * @param interaction the interaction this command is handling
+     * @return a source for responses around the given interaction
+     */
     InteractionResponseSource createResponseSource(Interaction interaction);
 }

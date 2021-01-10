@@ -17,12 +17,34 @@
 
 package discord4j.rest.interaction;
 
+import discord4j.common.annotations.Experimental;
 import discord4j.discordjson.json.InteractionResponseData;
 import org.reactivestreams.Publisher;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
+import java.time.Duration;
+
+/**
+ * Represents the essential components of an interaction response: a way of acknowledging the interaction token and an
+ * asynchronous process to work with it for its duration.
+ */
+@Experimental
 public interface InteractionResponseSource {
 
+    /**
+     * Return the response to be sent to Discord on interaction create.
+     *
+     * @return the raw data to build an initial interaction response
+     */
     InteractionResponseData response();
 
+    /**
+     * Return a reactive sequence to work with an interaction token after an initial response has been sent.
+     *
+     * @param response a handler with all common actions to derive the asynchronous followup sequence
+     * @return a publisher, like a {@link Mono} or {@link Flux} to be subscribed for the duration of the interaction
+     * token, after which will be cancelled through {@link Flux#take(Duration)} semantics.
+     */
     Publisher<?> followup(InteractionResponse response);
 }

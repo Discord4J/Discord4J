@@ -30,13 +30,16 @@ import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.MonoProcessor;
+import reactor.core.scheduler.Scheduler;
+
+import java.time.Duration;
 
 public class GatewayInteractions extends ReactiveEventAdapter {
 
     private final Interactions interactions;
     private final MonoProcessor<Long> appId = MonoProcessor.create();
 
-    public GatewayInteractions(Interactions interactions) {
+    GatewayInteractions(Interactions interactions) {
         this.interactions = interactions;
     }
 
@@ -60,9 +63,12 @@ public class GatewayInteractions extends ReactiveEventAdapter {
         InteractionResponseData responseData = source.response();
         long id = Snowflake.asLong(event.getData().id());
         String token = event.getData().token();
+        Scheduler timedScheduler = event.getClient().getGatewayResources().getGatewayReactorResources()
+                .getTimerTaskScheduler();
 
         return event.getClient().rest().getInteractionService()
                 .createInteractionResponse(id, token, responseData)
-                .thenMany(Flux.from(source.followup(ops)));
+                .thenMany(Flux.from(source.followup(ops)))
+                .take(Duration.ofMinutes(15), timedScheduler);
     }
 }
