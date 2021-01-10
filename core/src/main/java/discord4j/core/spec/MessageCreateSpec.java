@@ -289,7 +289,7 @@ public class MessageCreateSpec implements Spec<MultipartRequest>, Appendable {
     }
 
     @Override
-    public Appendable append(char c) throws IOException {
+    public Appendable append(char c) {
         contentBuilder.append(c);
         return this;
     }
