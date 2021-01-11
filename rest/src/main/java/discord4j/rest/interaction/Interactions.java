@@ -68,8 +68,8 @@ public class Interactions {
 
     private static final Logger log = Loggers.getLogger(Interactions.class);
 
-    private final List<ApplicationCommandHandler> commandHandlers;
-    private final List<ApplicationCommandRequestDefinition> commandCreateRequests;
+    private final List<ApplicationCommandDefinition> commands;
+    private final List<ApplicationCommandRequestDefinition> createRequests;
 
     /**
      * Create a new builder to work with Discord Interactions feature.
@@ -81,21 +81,20 @@ public class Interactions {
     }
 
     Interactions() {
-        this.commandHandlers = new CopyOnWriteArrayList<>();
-        this.commandCreateRequests = new CopyOnWriteArrayList<>();
+        this.commands = new CopyOnWriteArrayList<>();
+        this.createRequests = new CopyOnWriteArrayList<>();
     }
 
     /**
      * Add an application command handler that will match a command by the given Snowflake {@code id}.
      *
      * @param id a command id to match
-     * @param commandHandler an interaction handler
+     * @param action an interaction handler
      * @return this object
      */
     public Interactions onCommand(Snowflake id,
-                                  Function<Interaction, InteractionHandler> commandHandler) {
-        commandHandlers.add(new RequestApplicationCommandHandler(
-                acid -> acid.id().equals(id.asString()), commandHandler));
+                                  Function<Interaction, InteractionHandler> action) {
+        commands.add(new RequestApplicationCommandDefinition(acid -> acid.id().equals(id.asString()), action));
         return this;
     }
 
@@ -103,13 +102,12 @@ public class Interactions {
      * Add an application command handler that will match a command by the given {@code name}.
      *
      * @param name a command name to match
-     * @param commandHandler an interaction handler
+     * @param action an interaction handler
      * @return this object
      */
     public Interactions onCommand(String name,
-                                  Function<Interaction, InteractionHandler> commandHandler) {
-        commandHandlers.add(new RequestApplicationCommandHandler(
-                acid -> acid.name().equals(name), commandHandler));
+                                  Function<Interaction, InteractionHandler> action) {
+        commands.add(new RequestApplicationCommandDefinition(acid -> acid.name().equals(name), action));
         return this;
     }
 
@@ -119,15 +117,14 @@ public class Interactions {
      *
      * @param createRequest a command definition
      * @param guildId a guild ID to supply when creating a command
-     * @param commandHandler an interaction handler
+     * @param action an interaction handler
      * @return this object
      */
     public Interactions onGuildCommand(ApplicationCommandRequest createRequest,
                                        Snowflake guildId,
-                                       Function<Interaction, InteractionHandler> commandHandler) {
-        commandHandlers.add(new RequestApplicationCommandHandler(
-                acid -> acid.name().equals(createRequest.name()), commandHandler));
-        commandCreateRequests.add(new GuildApplicationCommandRequest(createRequest, guildId));
+                                       Function<Interaction, InteractionHandler> action) {
+        commands.add(new RequestApplicationCommandDefinition(acid -> acid.name().equals(createRequest.name()), action));
+        createRequests.add(new GuildApplicationCommandRequest(createRequest, guildId));
         return this;
     }
 
@@ -136,14 +133,13 @@ public class Interactions {
      * {@link #createCommands(RestClient)} this command will be created globally.
      *
      * @param createRequest a command definition
-     * @param commandHandler an interaction handler
+     * @param action an interaction handler
      * @return this object
      */
     public Interactions onGlobalCommand(ApplicationCommandRequest createRequest,
-                                        Function<Interaction, InteractionHandler> commandHandler) {
-        commandHandlers.add(new RequestApplicationCommandHandler(
-                acid -> acid.name().equals(createRequest.name()), commandHandler));
-        commandCreateRequests.add(new GlobalApplicationCommandRequest(createRequest));
+                                        Function<Interaction, InteractionHandler> action) {
+        commands.add(new RequestApplicationCommandDefinition(acid -> acid.name().equals(createRequest.name()), action));
+        createRequests.add(new GlobalApplicationCommandRequest(createRequest));
         return this;
     }
 
@@ -157,7 +153,7 @@ public class Interactions {
     public Mono<Void> createCommands(RestClient restClient) {
         Mono<Long> appIdMono = restClient.getApplicationId();
 
-        return Flux.fromIterable(commandCreateRequests)
+        return Flux.fromIterable(createRequests)
                 .zipWith(appIdMono.repeat())
                 .flatMap(function((req, appId) -> {
                     if (req instanceof GuildApplicationCommandRequest) {
@@ -182,12 +178,12 @@ public class Interactions {
      * @param interactionData an object containing all information related to a single interaction
      * @return the detected handler, or if found nothing, a handler that does nothing.
      */
-    public ApplicationCommandHandler findHandler(InteractionData interactionData) {
+    public ApplicationCommandDefinition findHandler(InteractionData interactionData) {
         return interactionData.data().toOptional()
-                .flatMap(acid -> commandHandlers.stream()
+                .flatMap(acid -> commands.stream()
                         .filter(it -> it.test(acid))
                         .findFirst())
-                .orElse(NOOP_HANDLER);
+                .orElse(NOOP_DEF);
     }
 
     /**
@@ -219,11 +215,8 @@ public class Interactions {
                         // Fetching the app ID this way works because we only support bots for now
                         Mono<Long> appIdMono = restClient.getApplicationId();
 
-                        ApplicationCommandHandler handler = findHandler(interactionData);
-
-                        InteractionOperations ops = new InteractionOperations(
-                                restClient, interactionData, appIdMono);
-                        InteractionResponseSource responseSource = handler.createResponseSource(ops);
+                        InteractionOperations ops = new InteractionOperations(restClient, interactionData, appIdMono);
+                        InteractionHandler handler = findHandler(interactionData).createResponseHandler(ops);
 
                         Scheduler timedScheduler = restClient.getRestResources().getReactorResources()
                                 .getTimerTaskScheduler();
@@ -232,9 +225,9 @@ public class Interactions {
 
                         return serverResponse.addHeader("content-type", "application/json")
                                 .chunkedTransfer(false)
-                                .sendString(Mono.fromCallable(() -> mapper.writeValueAsString(responseSource.response())))
+                                .sendString(Mono.fromCallable(() -> mapper.writeValueAsString(handler.response())))
                                 .then()
-                                .doFinally(s -> Flux.from(responseSource.followup(ops))
+                                .doFinally(s -> Flux.from(handler.onInteractionResponse(ops))
                                         .take(Duration.ofMinutes(15), timedScheduler)
                                         .subscribeOn(blockScheduler)
                                         .subscribe(null,
@@ -293,15 +286,15 @@ public class Interactions {
         }
     }
 
-    static class RequestApplicationCommandHandler implements ApplicationCommandHandler {
+    static class RequestApplicationCommandDefinition implements ApplicationCommandDefinition {
 
         private final Predicate<ApplicationCommandInteractionData> matcher;
-        private final Function<Interaction, InteractionHandler> handler;
+        private final Function<Interaction, InteractionHandler> action;
 
-        public RequestApplicationCommandHandler(Predicate<ApplicationCommandInteractionData> matcher,
-                                                Function<Interaction, InteractionHandler> handler) {
+        public RequestApplicationCommandDefinition(Predicate<ApplicationCommandInteractionData> matcher,
+                                                   Function<Interaction, InteractionHandler> action) {
             this.matcher = matcher;
-            this.handler = handler;
+            this.action = action;
         }
 
         @Override
@@ -309,44 +302,27 @@ public class Interactions {
             return matcher.test(acid);
         }
 
-        public InteractionResponseSource createResponseSource(Interaction interaction) {
-            return new HandlerInteractionResponseSource(handler.apply(interaction));
+        public InteractionHandler createResponseHandler(Interaction interaction) {
+            return action.apply(interaction);
         }
     }
 
-    static class HandlerInteractionResponseSource implements InteractionResponseSource {
-
-        private final InteractionHandler handler;
-
-        public HandlerInteractionResponseSource(InteractionHandler handler) {this.handler = handler;}
-
-        @Override
-        public InteractionResponseData response() {
-            return handler.response();
-        }
-
-        @Override
-        public Publisher<?> followup(InteractionResponse response) {
-            return handler.onInteractionResponse(response);
-        }
-    }
-
-    static ApplicationCommandHandler NOOP_HANDLER = new ApplicationCommandHandler() {
+    static ApplicationCommandDefinition NOOP_DEF = new ApplicationCommandDefinition() {
         @Override
         public boolean test(ApplicationCommandInteractionData acid) {
             return true;
         }
 
         @Override
-        public InteractionResponseSource createResponseSource(Interaction interaction) {
-            return new InteractionResponseSource() {
+        public InteractionHandler createResponseHandler(Interaction interaction) {
+            return new InteractionHandler() {
                 @Override
                 public InteractionResponseData response() {
                     return interaction.acknowledge().response();
                 }
 
                 @Override
-                public Publisher<?> followup(InteractionResponse response) {
+                public Publisher<?> onInteractionResponse(InteractionResponse response) {
                     return Mono.empty();
                 }
             };

@@ -70,6 +70,13 @@ public interface Interaction {
     MemberData getMemberData();
 
     /**
+     * Return this interaction member.
+     *
+     * @return an object with methods to operate on this interaction member
+     */
+    InteractionMember getInteractionMember();
+
+    /**
      * Return the raw application command interaction data from this interaction.
      *
      * @return an application command interaction data object

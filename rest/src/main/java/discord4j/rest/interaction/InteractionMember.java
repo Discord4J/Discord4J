@@ -17,5 +17,59 @@
 
 package discord4j.rest.interaction;
 
+import discord4j.common.util.Snowflake;
+import discord4j.discordjson.json.MemberData;
+import discord4j.rest.entity.RestMember;
+import discord4j.rest.entity.RestRole;
+import discord4j.rest.util.PermissionSet;
+
+import java.util.Set;
+
+/**
+ * A member that initiated a specific interaction.
+ */
 public interface InteractionMember {
+
+    /**
+     * Return the raw member data that created this interaction.
+     *
+     * @return a member data object
+     */
+    MemberData getMemberData();
+
+    /**
+     * Return the guild ID where this interaction was created.
+     *
+     * @return this interaction Snowflake guild ID
+     */
+    Snowflake getGuildId();
+
+    /**
+     * Return the user ID who created this interaction.
+     *
+     * @return this interaction Snowflake user ID
+     */
+    Snowflake getUserId();
+
+    /**
+     * Return the role set for this interaction member.
+     *
+     * @return the set of {@link RestRole} belonging to this member
+     */
+    Set<RestRole> getRoles();
+
+    /**
+     * Return the effective permission set for this interaction member.
+     *
+     * @return a {@link PermissionSet} for this member
+     */
+    PermissionSet getPermissions();
+
+    /**
+     * Return a REST operations handler for this interaction member. Can be followed by {@link RestMember#guild()} or
+     * {@link RestMember#user()} to access their guild or associated user REST entity.
+     *
+     * @return a {@link RestMember} facade to operate on this member at the REST API level
+     */
+    RestMember asRestMember();
 }

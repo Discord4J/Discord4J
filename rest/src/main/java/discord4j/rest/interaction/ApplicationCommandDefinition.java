@@ -24,7 +24,7 @@ import discord4j.discordjson.json.ApplicationCommandInteractionData;
  * Represents an application command that can be tested against incoming interactions and to build a response sequence.
  */
 @Experimental
-public interface ApplicationCommandHandler {
+public interface ApplicationCommandDefinition {
 
     /**
      * Match whether the incoming interaction can be handled by this command.
@@ -40,5 +40,5 @@ public interface ApplicationCommandHandler {
      * @param interaction the interaction this command is handling
      * @return a source for responses around the given interaction
      */
-    InteractionResponseSource createResponseSource(Interaction interaction);
+    InteractionHandler createResponseHandler(Interaction interaction);
 }

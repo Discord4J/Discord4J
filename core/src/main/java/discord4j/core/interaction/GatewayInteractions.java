@@ -18,13 +18,13 @@
 package discord4j.core.interaction;
 
 import discord4j.common.util.Snowflake;
+import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.ReactiveEventAdapter;
 import discord4j.core.event.domain.InteractionCreateEvent;
 import discord4j.core.event.domain.lifecycle.ReadyEvent;
 import discord4j.discordjson.json.InteractionResponseData;
-import discord4j.rest.interaction.ApplicationCommandHandler;
+import discord4j.rest.interaction.InteractionHandler;
 import discord4j.rest.interaction.InteractionOperations;
-import discord4j.rest.interaction.InteractionResponseSource;
 import discord4j.rest.interaction.Interactions;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
@@ -34,6 +34,11 @@ import reactor.core.scheduler.Scheduler;
 
 import java.time.Duration;
 
+/**
+ * A gateway event listener that processes {@link InteractionCreateEvent} instances using the given
+ * {@link Interactions} object. This should be applied to a {@link GatewayDiscordClient#on(ReactiveEventAdapter)}
+ * subscription.
+ */
 public class GatewayInteractions extends ReactiveEventAdapter {
 
     private final Interactions interactions;
@@ -43,6 +48,12 @@ public class GatewayInteractions extends ReactiveEventAdapter {
         this.interactions = interactions;
     }
 
+    /**
+     * Create a new {@link GatewayInteractions} that will process interactions coming from the gateway as events.
+     *
+     * @param interactions the interactions configurer
+     * @return a new listener for gateway interactions
+     */
     public static GatewayInteractions create(Interactions interactions) {
         return new GatewayInteractions(interactions);
     }
@@ -56,11 +67,11 @@ public class GatewayInteractions extends ReactiveEventAdapter {
 
     @Override
     public Publisher<?> onInteractionCreate(InteractionCreateEvent event) {
-        ApplicationCommandHandler handler = interactions.findHandler(event.getData());
-
-        InteractionOperations ops = new InteractionOperations(event.getClient().rest(), event.getData(), appId);
-        InteractionResponseSource source = handler.createResponseSource(ops);
-        InteractionResponseData responseData = source.response();
+        Mono<Long> applicationId = appId.timeout(Duration.ofMillis(1))
+                .onErrorResume(t -> event.getClient().rest().getApplicationId());
+        InteractionOperations ops = new InteractionOperations(event.getClient().rest(), event.getData(), applicationId);
+        InteractionHandler handler = interactions.findHandler(event.getData()).createResponseHandler(ops);
+        InteractionResponseData responseData = handler.response();
         long id = Snowflake.asLong(event.getData().id());
         String token = event.getData().token();
         Scheduler timedScheduler = event.getClient().getGatewayResources().getGatewayReactorResources()
@@ -68,7 +79,7 @@ public class GatewayInteractions extends ReactiveEventAdapter {
 
         return event.getClient().rest().getInteractionService()
                 .createInteractionResponse(id, token, responseData)
-                .thenMany(Flux.from(source.followup(ops)))
+                .thenMany(Flux.from(handler.onInteractionResponse(ops)))
                 .take(Duration.ofMinutes(15), timedScheduler);
     }
 }

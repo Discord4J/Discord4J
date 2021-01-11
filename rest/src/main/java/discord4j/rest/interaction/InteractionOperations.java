@@ -21,15 +21,21 @@ import discord4j.common.annotations.Experimental;
 import discord4j.common.util.Snowflake;
 import discord4j.discordjson.json.*;
 import discord4j.rest.RestClient;
+import discord4j.rest.entity.RestMember;
+import discord4j.rest.entity.RestRole;
 import discord4j.rest.util.InteractionResponseType;
+import discord4j.rest.util.PermissionSet;
 import discord4j.rest.util.WebhookMultipartRequest;
 import reactor.core.publisher.Mono;
+
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * A default implementation for REST-based interaction handling and response.
  */
 @Experimental
-public class InteractionOperations implements Interaction, InteractionResponse {
+public class InteractionOperations implements Interaction, InteractionResponse, InteractionMember {
 
     private final RestClient restClient;
     private final InteractionData interactionData;
@@ -76,6 +82,11 @@ public class InteractionOperations implements Interaction, InteractionResponse {
     @Override
     public ApplicationCommandInteractionData getCommandInteractionData() {
         return interactionData.data().get();
+    }
+
+    @Override
+    public InteractionMember getInteractionMember() {
+        return this;
     }
 
     @Override
@@ -143,5 +154,27 @@ public class InteractionOperations implements Interaction, InteractionResponse {
     public Mono<MessageData> editFollowupMessage(long messageId, WebhookMessageEditRequest request, boolean wait) {
         return applicationId.flatMap(id -> restClient.getWebhookService()
                 .modifyWebhookMessage(id, interactionData.token(), String.valueOf(messageId), request));
+    }
+
+    @Override
+    public Snowflake getUserId() {
+        return Snowflake.of(getMemberData().user().id());
+    }
+
+    @Override
+    public Set<RestRole> getRoles() {
+        return getMemberData().roles().stream()
+                .map(id -> RestRole.create(restClient, getGuildId(), Snowflake.of(id)))
+                .collect(Collectors.toSet());
+    }
+
+    @Override
+    public PermissionSet getPermissions() {
+        return PermissionSet.of(Long.parseLong(getMemberData().permissions().get()));
+    }
+
+    @Override
+    public RestMember asRestMember() {
+        return RestMember.create(restClient, getGuildId(), getUserId());
     }
 }
