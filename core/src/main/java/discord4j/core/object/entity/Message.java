@@ -59,6 +59,12 @@ public final class Message implements Entity {
     public static final int MAX_CONTENT_LENGTH = 2000;
 
     /**
+     * The maximum amount of characters that can be present when combining all title, description, field.name,
+     * field.value, footer.text, and author.name fields of all embeds for this message.
+     * */
+    public static final int MAX_TOTAL_EMBEDS_CHARACTER_LENGTH = 6000;
+
+    /**
      * The gateway associated to this object.
      */
     private final GatewayDiscordClient gateway;
