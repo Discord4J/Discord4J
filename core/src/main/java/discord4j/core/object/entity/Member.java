@@ -259,9 +259,12 @@ public final class Member extends User {
                     .limit(1)
                     .build();
 
-                return getClient().requestMembers(request)
+                return getClient().requestMemberChunks(request)
                     .singleOrEmpty()
-                    .flatMap(Member::getPresence)
+                    .flatMap(chunk -> Mono.justOrEmpty(chunk.presences().toOptional())
+                            .flatMapIterable(list -> list)
+                            .next()
+                            .map(Presence::new))
                     // IllegalArgumentException can be thrown during request validation if intents are not matching the request
                     .onErrorResume(IllegalArgumentException.class, err -> Mono.empty());
             });
