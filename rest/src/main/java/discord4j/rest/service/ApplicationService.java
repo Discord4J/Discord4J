@@ -54,6 +54,12 @@ public class ApplicationService extends RestService {
             .bodyToMono(ApplicationCommandData.class);
     }
 
+    public Mono<ApplicationCommandData> getGlobalApplicationCommand(long applicationId, long commandId) {
+        return Routes.GLOBAL_APPLICATION_COMMAND_GET.newRequest(applicationId, commandId)
+            .exchange(getRouter())
+            .bodyToMono(ApplicationCommandData.class);
+    }
+
     public Mono<ApplicationCommandData> modifyGlobalApplicationCommand(long applicationId, long commandId, ApplicationCommandRequest request) {
         return Routes.GLOBAL_APPLICATION_COMMAND_MODIFY.newRequest(applicationId, commandId)
             .body(request)
@@ -77,6 +83,12 @@ public class ApplicationService extends RestService {
     public Mono<ApplicationCommandData> createGuildApplicationCommand(long applicationId, long guildId, ApplicationCommandRequest request) {
         return Routes.GUILD_APPLICATION_COMMANDS_CREATE.newRequest(applicationId, guildId)
             .body(request)
+            .exchange(getRouter())
+            .bodyToMono(ApplicationCommandData.class);
+    }
+
+    public Mono<ApplicationCommandData> getGuildApplicationCommand(long applicationId, long guildId, long commandId) {
+        return Routes.GUILD_APPLICATION_COMMAND_GET.newRequest(applicationId, guildId, commandId)
             .exchange(getRouter())
             .bodyToMono(ApplicationCommandData.class);
     }
