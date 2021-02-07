@@ -54,6 +54,10 @@ public abstract class EventNames {
     public static final String WEBHOOKS_UPDATE = "WEBHOOKS_UPDATE";
     public static final String INVITE_CREATE = "INVITE_CREATE";
     public static final String INVITE_DELETE = "INVITE_DELETE";
+    public static final String APPLICATION_COMMAND_CREATE = "APPLICATION_COMMAND_CREATE";
+    public static final String APPLICATION_COMMAND_UPDATE = "APPLICATION_COMMAND_UPDATE";
+    public static final String APPLICATION_COMMAND_DELETE = "APPLICATION_COMMAND_DELETE";
+    public static final String INTERACTION_CREATE = "INTERACTION_CREATE";
 
     // Ignored
     public static final String PRESENCES_REPLACE = "PRESENCES_REPLACE";

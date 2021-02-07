@@ -84,6 +84,7 @@ public class DispatchHandlers implements DispatchEventMapper {
         addHandler(WebhooksUpdate.class, DispatchHandlers::webhooksUpdate);
         addHandler(InviteCreate.class, DispatchHandlers::inviteCreate);
         addHandler(InviteDelete.class, DispatchHandlers::inviteDelete);
+        addHandler(InteractionCreate.class, DispatchHandlers::interactionCreate);
 
         addHandler(GatewayStateChange.class, LifecycleDispatchHandlers::gatewayStateChanged);
 
@@ -91,7 +92,7 @@ public class DispatchHandlers implements DispatchEventMapper {
     }
 
     private static <D, S, E extends Event> void addHandler(Class<D> dispatchType,
-                                                        DispatchHandler<D, S, E> dispatchHandler) {
+                                                           DispatchHandler<D, S, E> dispatchHandler) {
         handlerMap.put(dispatchType, dispatchHandler);
     }
 
@@ -102,6 +103,7 @@ public class DispatchHandlers implements DispatchEventMapper {
      *
      * @param context the DispatchContext used with this Dispatch object
      * @param <D> the Dispatch type
+     * @param <S> the old state type, if applicable
      * @param <E> the resulting Event type
      * @return an Event mapped from the given Dispatch object, or null if no Event is produced.
      */
@@ -224,5 +226,10 @@ public class DispatchHandlers implements DispatchEventMapper {
         String code = context.getDispatch().code();
 
         return Mono.just(new InviteDeleteEvent(context.getGateway(), context.getShardInfo(), guildId, channelId, code));
+    }
+
+    private static Mono<InteractionCreateEvent> interactionCreate(DispatchContext<InteractionCreate, Void> context) {
+        return Mono.just(new InteractionCreateEvent(context.getGateway(), context.getShardInfo(),
+                context.getDispatch().interaction()));
     }
 }
