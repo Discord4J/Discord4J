@@ -39,10 +39,17 @@ public class GuildService extends RestService {
                 .bodyToMono(GuildUpdateData.class);
     }
 
+    public Mono<GuildUpdateData> getGuild(long guildId, Map<String, Object> queryParams) {
+        return Routes.GUILD_GET.newRequest(guildId)
+            .query(queryParams)
+            .exchange(getRouter())
+            .bodyToMono(GuildUpdateData.class);
+    }
+
     public Mono<GuildUpdateData> getGuild(long guildId) {
         return Routes.GUILD_GET.newRequest(guildId)
-                .exchange(getRouter())
-                .bodyToMono(GuildUpdateData.class);
+            .exchange(getRouter())
+            .bodyToMono(GuildUpdateData.class);
     }
 
     public Mono<GuildUpdateData> modifyGuild(long guildId, GuildModifyRequest request, @Nullable String reason) {

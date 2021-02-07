@@ -64,11 +64,25 @@ public class RestGuild {
     /**
      * Retrieve this guild's data upon subscription.
      *
+     * @param withCounts when true, will return approximate member and presence counts for the guild too.
+     * otherwise approximate member and presence counts will be null in {@link GuildUpdateData}.
+     * @return a {@link Mono} where, upon successful completion, emits the {@link GuildUpdateData} belonging to this
+     * entity. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<GuildUpdateData> getData(@Nullable Boolean withCounts) {
+        Map<String, Object> queryParams = new HashMap<>();
+        Optional.ofNullable(withCounts).ifPresent(value -> queryParams.put("with_counts", value));
+        return restClient.getGuildService().getGuild(id, queryParams);
+    }
+
+    /**
+     * Retrieve this guild's data upon subscription.
+     *
      * @return a {@link Mono} where, upon successful completion, emits the {@link GuildUpdateData} belonging to this
      * entity. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<GuildUpdateData> getData() {
-        return restClient.getGuildService().getGuild(id);
+        return getData(true);
     }
 
     /**
