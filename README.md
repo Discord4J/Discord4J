@@ -37,7 +37,7 @@ public final class ExampleBot {
 ## 🔗 Quick Links
 
 * [Javadocs](https://www.javadoc.io/doc/com.discord4j/discord4j-core)
-* [Wiki](https://github.com/Discord4J/Discord4J/wiki)
+* [Documentation](https://docs.discord4j.com)
 * [Discord](https://discord.gg/NxGAeCY)
 
 ## 💎 Benefits
@@ -101,7 +101,7 @@ libraryDependencies ++= Seq(
 
 ## 🔀 Discord4J Versions
 
-Discord4J 3.1.x introduces performance and API enhancements, a plethora of new features, and dependency upgrades. A [Migration Guide](https://github.com/Discord4J/Discord4J/wiki/Migrating-from-v3.0-to-v3.1) is provided to aide users and ensure a smooth and readily available transition.
+Discord4J 3.1.x introduces performance and API enhancements, a plethora of new features, and dependency upgrades. A [Migration Guide](https://docs.discord4j.com/migrating-from-v3-0-to-v3-1) is provided to aide users and ensure a smooth and readily available transition.
 
 | Discord4J                                                   | Support          | Gateway/API | Intents                           |
 |-------------------------------------------------------------|------------------|-------------|-----------------------------------|
@@ -152,7 +152,7 @@ public final class ExampleBot {
 }
 ```
 
-Discord4J also provides several methods to aide in better reactive chain compositions, such as `GatewayDiscordClient#withGateway` and `EventDispatcher#on` with an [error handling](https://github.com/Discord4J/Discord4J/wiki/Error-Handling) overload.
+Discord4J also provides several methods to aide in better reactive chain compositions, such as `GatewayDiscordClient#withGateway` and `EventDispatcher#on` with an [error handling](https://docs.discord4j.com/error-handling) overload.
 
 ```java
 final String token = args[0];

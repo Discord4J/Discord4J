@@ -581,6 +581,28 @@ public class GatewayDiscordClient implements EntityRetriever {
      * the {@link Flux}.
      */
     public Flux<Member> requestMembers(RequestGuildMembers request) {
+        Snowflake guildId = Snowflake.of(request.guildId());
+        return requestMemberChunks(request)
+                .flatMapIterable(chunk -> chunk.members().stream()
+                        .map(data -> new Member(this, data, guildId.asLong()))
+                        .collect(Collectors.toList()));
+    }
+
+    /**
+     * Submit a {@link RequestGuildMembers} payload using the current Gateway connection and wait for its completion,
+     * delivering raw {@link GuildMembersChunk} elements asynchronously through a {@link Flux}. This method performs a
+     * check to validate whether the given guild's data can be obtained from this {@link GatewayDiscordClient}.
+     * <p>
+     * A timeout given by is used to fail this request if the operation is unable to complete due to disallowed or
+     * disabled members intent. This is particularly relevant when requesting a complete member list. If the timeout is
+     * triggered, a {@link TimeoutException} is forwarded through the {@link Flux}.
+     *
+     * @param request the member request to submit. Create one using {@link RequestGuildMembers#builder()}.
+     * {@link Flux#timeout(Duration)}
+     * @return a {@link Flux} of {@link GuildMembersChunk} for the given {@link Guild}. If an error occurs, it is
+     * emitted through the {@link Flux}.
+     */
+    public Flux<GuildMembersChunk> requestMemberChunks(RequestGuildMembers request) {
         try {
             // client-side validation is required to avoid indefinitely waiting for a response
             ValidationUtil.validateRequestGuildMembers(request, Possible.of(gatewayResources.getIntents()));
@@ -590,17 +612,14 @@ public class GatewayDiscordClient implements EntityRetriever {
         Snowflake guildId = Snowflake.of(request.guildId());
         int shardId = gatewayClientGroup.computeShardIndex(guildId);
         String nonce = String.valueOf(System.nanoTime());
-        Supplier<Flux<Member>> incomingMembers = () -> gatewayClientGroup.find(shardId)
+        Supplier<Flux<GuildMembersChunk>> incomingMembers = () -> gatewayClientGroup.find(shardId)
                 .map(gatewayClient -> gatewayClient.dispatch()
                         .ofType(GuildMembersChunk.class)
                         .takeUntilOther(onDisconnect)
                         .filter(chunk -> chunk.nonce().toOptional()
                                 .map(s -> s.equals(nonce))
                                 .orElse(false))
-                        .takeUntil(chunk -> chunk.chunkIndex() + 1 == chunk.chunkCount())
-                        .flatMapIterable(chunk -> chunk.members().stream()
-                                .map(data -> new Member(this, data, guildId.asLong()))
-                                .collect(Collectors.toList())))
+                        .takeUntil(chunk -> chunk.chunkIndex() + 1 == chunk.chunkCount()))
                 .orElseThrow(() -> new IllegalStateException("Unable to find gateway client"));
         return Flux.deferContextual(ctx -> getGuildById(guildId)
                 .then(gatewayClientGroup.unicast(ShardGatewayPayload.requestGuildMembers(
