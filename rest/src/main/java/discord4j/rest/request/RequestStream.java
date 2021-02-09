@@ -23,10 +23,7 @@ import discord4j.rest.http.client.ClientResponse;
 import discord4j.rest.http.client.DiscordWebClient;
 import discord4j.rest.response.ResponseFunction;
 import org.reactivestreams.Subscription;
-import reactor.core.publisher.BaseSubscriber;
-import reactor.core.publisher.Mono;
-import reactor.core.publisher.SignalType;
-import reactor.core.publisher.Sinks;
+import reactor.core.publisher.*;
 import reactor.core.scheduler.Scheduler;
 import reactor.netty.http.client.HttpClientResponse;
 import reactor.util.Logger;
@@ -163,16 +160,11 @@ class RequestStream {
             ClientRequest clientRequest = new ClientRequest(request);
             Sinks.One<ClientResponse> callback = correlation.getResponse();
 
-            if (log.isDebugEnabled()) {
-                log.debug("[B:{}, R:{}] {}", id.toString(), clientRequest.getId(), clientRequest.getDescription());
-            }
-
             Mono.just(clientRequest)
-                    .doOnEach(s -> log.trace(format(s.getContextView(), ">> {}"), s))
-                    .flatMap(req -> globalRateLimiter.withLimiter(httpClient.exchange(req)
-                            .flatMap(responseFunction))
-                            .next())
-                    .doOnEach(s -> log.trace(format(s.getContextView(), "<< {}"), s))
+                    .flatMap(req -> Mono.deferContextual(ctx -> {
+                        LogUtil.traceDebug(log, trace -> format(ctx, trace ? req.toString() : req.getDescription()));
+                        return globalRateLimiter.withLimiter(httpClient.exchange(req).flatMap(responseFunction)).next();
+                    }))
                     .contextWrite(ctx -> ctx.putAll(correlation.getContext())
                             .put(LogUtil.KEY_REQUEST_ID, clientRequest.getId())
                             .put(LogUtil.KEY_BUCKET_ID, id.toString()))
