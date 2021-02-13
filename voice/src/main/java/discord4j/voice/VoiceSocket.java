@@ -20,6 +20,8 @@ import discord4j.common.sinks.EmissionStrategy;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
+import io.netty.channel.Channel;
+import io.netty.channel.socket.DatagramChannel;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.Sinks;
@@ -33,6 +35,7 @@ import reactor.util.context.ContextView;
 
 import java.io.ByteArrayOutputStream;
 import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 
@@ -71,8 +74,8 @@ public class VoiceSocket {
         return Mono.deferContextual(
                 context -> udpClient.host(address).port(port)
                         .observe(getObserver(context))
-                        .doOnConnected(c -> log.debug(format(context, "Connected to {}"), c.address()))
-                        .doOnDisconnected(c -> log.debug(format(context, "Disconnected from {}"), c.address()))
+                        .doOnConnected(c -> log.debug(format(context, "Connected to {}"), address(c)))
+                        .doOnDisconnected(c -> log.debug(format(context, "Disconnected from {}"), address(c)))
                         .handle((in, out) -> {
                             Mono<Void> inboundThen = in.receive().retain()
                                     .doOnNext(buf -> logPayload(receiverLog, context, buf))
@@ -88,6 +91,15 @@ public class VoiceSocket {
                             return Mono.zip(inboundThen, outboundThen).then();
                         })
                         .connect());
+    }
+
+    private SocketAddress address(Connection connection) {
+        Channel c = connection.channel();
+        if (c instanceof DatagramChannel) {
+            SocketAddress a = c.remoteAddress();
+            return a != null ? a : c.localAddress();
+        }
+        return c.remoteAddress();
     }
 
     private ConnectionObserver getObserver(ContextView context) {
