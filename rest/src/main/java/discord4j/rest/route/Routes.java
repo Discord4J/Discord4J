@@ -506,8 +506,8 @@ public abstract class Routes {
     public static final Route GUILD_MEMBER_ADD = Route.put("/guilds/{guild.id}/members/{user.id}");
 
     /**
-     * Modify attributes of a guild member. Returns a 204 empty response on success. Fires a Guild Member Update
-     * Gateway event.
+     * Modify attributes of a guild member. Returns a 200 OK with the guild member on success. Fires a Guild Member
+     * Update Gateway event.
      *
      * @see <a href="https://discord.com/developers/docs/resources/guild#modify-guild-member">
      * https://discord.com/developers/docs/resources/guild#modify-guild-member</a>
