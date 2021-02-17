@@ -54,7 +54,7 @@ public class ExampleRestCommand {
 
         Interactions interactions = Interactions.create()
                 .onGuildCommand(randomCommand, Snowflake.of(208023865127862272L),
-                        interaction -> interaction.acknowledge(true)
+                        interaction -> interaction.acknowledge()
                                 .withFollowup(it -> it.createFollowupMessage(
                                         result(random, interaction.getCommandInteractionData()))));
 
