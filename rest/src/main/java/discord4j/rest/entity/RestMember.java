@@ -102,8 +102,8 @@ public class RestMember {
     public Mono<RoleData> getHighestRole() {
         return getData().map(MemberData::roles)
                 .flatMap(roles -> MathFlux.max(Flux.fromIterable(roles)
-                            .map(id -> restClient.getRoleById(Snowflake.of(guildId), Snowflake.of(id)))
-                            .flatMap(RestRole::getData),
+                                .map(id -> restClient.getRoleById(Snowflake.of(guildId), Snowflake.of(id)))
+                                .flatMap(RestRole::getData),
                         OrderUtil.ROLE_ORDER));
     }
 
@@ -176,12 +176,12 @@ public class RestMember {
                 .transform(OrderUtil::orderRoles)
                 .collectList()
                 .flatMap(guildRoles -> { // Get the sorted list of guild roles
-                        Mono<List<Snowflake>> thisRoleIds = this.getData()
-                        .map(MemberData::roles)
-                        .flatMapMany(Flux::fromIterable)
-                        .map(Snowflake::of)
-                        .collectList()
-                        .cache();
+                    Mono<List<Snowflake>> thisRoleIds = this.getData()
+                            .map(MemberData::roles)
+                            .flatMapMany(Flux::fromIterable)
+                            .map(Snowflake::of)
+                            .collectList()
+                            .cache();
 
                     // Get the position of this member's highest role by finding the maximum element in guildRoles which
                     // the member has and then finding its index in the sorted list of guild roles (the role's actual
@@ -189,10 +189,10 @@ public class RestMember {
                     // role which is always at position 0.
                     Mono<Integer> thisHighestRolePos = thisRoleIds.map(thisRoles ->
                             guildRoles.stream()
-                            .filter(role -> thisRoles.contains(Snowflake.of(role.id())))
-                            .max(OrderUtil.ROLE_ORDER)
-                            .map(guildRoles::indexOf)
-                            .orElse(0));
+                                    .filter(role -> thisRoles.contains(Snowflake.of(role.id())))
+                                    .max(OrderUtil.ROLE_ORDER)
+                                    .map(guildRoles::indexOf)
+                                    .orElse(0));
 
                     int otherHighestPos = guildRoles.stream()
                             .filter(role -> otherRoles.contains(Snowflake.of(role.id())))
