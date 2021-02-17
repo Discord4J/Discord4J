@@ -17,10 +17,10 @@
 package discord4j.core.object;
 
 import discord4j.core.GatewayDiscordClient;
+import discord4j.core.object.entity.Message;
 import discord4j.discordjson.json.*;
 import discord4j.discordjson.possible.Possible;
 import discord4j.rest.util.Color;
-import reactor.util.annotation.Nullable;
 
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
@@ -45,6 +45,15 @@ public final class Embed implements DiscordObject {
 
     /** The maximum amount of fields that can be appended to an embed. */
     public static final int MAX_FIELDS = 25;
+
+    /**
+     * The maximum amount of total characters that can be present in an embed.
+     *
+     * @deprecated this limit applies across all embeds of a message instead of a single one. Use
+     * {@link Message#MAX_TOTAL_EMBEDS_CHARACTER_LENGTH} instead
+     */
+    @Deprecated
+    public static final int MAX_CHARACTER_LENGTH = 6000;
 
     /** The gateway associated to this object. */
     private final GatewayDiscordClient gateway;
