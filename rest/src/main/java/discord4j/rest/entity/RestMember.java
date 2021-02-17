@@ -17,9 +17,6 @@
 
 package discord4j.rest.entity;
 
-import java.util.Collection;
-import java.util.List;
-
 import discord4j.common.util.Snowflake;
 import discord4j.discordjson.json.GuildUpdateData;
 import discord4j.discordjson.json.MemberData;
@@ -29,6 +26,9 @@ import discord4j.rest.util.OrderUtil;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.math.MathFlux;
+
+import java.util.Collection;
+import java.util.List;
 
 /**
  * Represents a user (bot or normal) that is member of a specific guild.
@@ -87,7 +87,7 @@ public class RestMember {
      */
     public Mono<MemberData> getData() {
         return restClient.getGuildService()
-            .getGuildMember(guildId, id);
+                .getGuildMember(guildId, id);
     }
 
     /**
@@ -100,12 +100,11 @@ public class RestMember {
      * an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<RoleData> getHighestRole() {
-        return getData()
-            .map(MemberData::roles)
-            .flatMap(roles -> MathFlux.max(Flux.fromIterable(roles)
-                    .map(id -> restClient.getRoleById(Snowflake.of(guildId), Snowflake.of(id)))
-                    .flatMap(RestRole::getData),
-                OrderUtil.ROLE_ORDER));
+        return getData().map(MemberData::roles)
+                .flatMap(roles -> MathFlux.max(Flux.fromIterable(roles)
+                            .map(id -> restClient.getRoleById(Snowflake.of(guildId), Snowflake.of(id)))
+                            .flatMap(RestRole::getData),
+                        OrderUtil.ROLE_ORDER));
     }
 
     /**
@@ -128,22 +127,22 @@ public class RestMember {
         }
 
         return guild().getData().map(GuildUpdateData::ownerId)
-            .flatMap(ownerId -> {
-                // The owner of the guild is higher in the role hierarchy than everyone
-                if (ownerId.equals(String.valueOf(id))) {
-                    return Mono.just(true);
-                }
+                .flatMap(ownerId -> {
+                    // The owner of the guild is higher in the role hierarchy than everyone
+                    if (ownerId.equals(String.valueOf(id))) {
+                        return Mono.just(true);
+                    }
 
-                if (ownerId.equals(String.valueOf(otherMember.id))) {
-                    return Mono.just(false);
-                }
+                    if (ownerId.equals(String.valueOf(otherMember.id))) {
+                        return Mono.just(false);
+                    }
 
-                return otherMember.getData()
-                    .flatMapMany(data -> Flux.fromIterable(data.roles()))
-                    .map(Snowflake::of)
-                    .collectList()
-                    .flatMap(this::hasHigherRoles);
-            });
+                    return otherMember.getData()
+                            .flatMapMany(data -> Flux.fromIterable(data.roles()))
+                            .map(Snowflake::of)
+                            .collectList()
+                            .flatMap(this::hasHigherRoles);
+                });
     }
 
     /**
@@ -174,34 +173,34 @@ public class RestMember {
      */
     public Mono<Boolean> hasHigherRoles(Collection<Snowflake> otherRoles) {
         return guild().getRoles()
-            .transform(OrderUtil::orderRoles)
-            .collectList()
-            .flatMap(guildRoles -> { // Get the sorted list of guild roles
-                Mono<List<Snowflake>> thisRoleIds = this.getData()
-                    .map(MemberData::roles)
-                    .flatMapMany(Flux::fromIterable)
-                    .map(Snowflake::of)
-                    .collectList()
-                    .cache();
+                .transform(OrderUtil::orderRoles)
+                .collectList()
+                .flatMap(guildRoles -> { // Get the sorted list of guild roles
+                        Mono<List<Snowflake>> thisRoleIds = this.getData()
+                        .map(MemberData::roles)
+                        .flatMapMany(Flux::fromIterable)
+                        .map(Snowflake::of)
+                        .collectList()
+                        .cache();
 
-                // Get the position of this member's highest role by finding the maximum element in guildRoles which
-                // the member has and then finding its index in the sorted list of guild roles (the role's actual
-                // position). The @everyone role is not included, so if we end up with empty, that is their only
-                // role which is always at position 0.
-                Mono<Integer> thisHighestRolePos = thisRoleIds.map(thisRoles ->
-                    guildRoles.stream()
-                        .filter(role -> thisRoles.contains(Snowflake.of(role.id())))
-                        .max(OrderUtil.ROLE_ORDER)
-                        .map(guildRoles::indexOf)
-                        .orElse(0));
+                    // Get the position of this member's highest role by finding the maximum element in guildRoles which
+                    // the member has and then finding its index in the sorted list of guild roles (the role's actual
+                    // position). The @everyone role is not included, so if we end up with empty, that is their only
+                    // role which is always at position 0.
+                    Mono<Integer> thisHighestRolePos = thisRoleIds.map(thisRoles ->
+                            guildRoles.stream()
+                            .filter(role -> thisRoles.contains(Snowflake.of(role.id())))
+                            .max(OrderUtil.ROLE_ORDER)
+                            .map(guildRoles::indexOf)
+                            .orElse(0));
 
-                int otherHighestPos = guildRoles.stream()
-                    .filter(role -> otherRoles.contains(Snowflake.of(role.id())))
-                    .max(OrderUtil.ROLE_ORDER)
-                    .map(guildRoles::indexOf)
-                    .orElse(0);
+                    int otherHighestPos = guildRoles.stream()
+                            .filter(role -> otherRoles.contains(Snowflake.of(role.id())))
+                            .max(OrderUtil.ROLE_ORDER)
+                            .map(guildRoles::indexOf)
+                            .orElse(0);
 
-                return thisHighestRolePos.map(thisPos -> thisPos > otherHighestPos);
-            });
+                    return thisHighestRolePos.map(thisPos -> thisPos > otherHighestPos);
+                });
     }
 }

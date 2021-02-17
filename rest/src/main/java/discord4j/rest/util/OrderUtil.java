@@ -17,13 +17,12 @@
 
 package discord4j.rest.util;
 
-import java.util.Comparator;
-
-import javax.management.relation.Role;
-
 import discord4j.common.util.Snowflake;
 import discord4j.discordjson.json.RoleData;
 import reactor.core.publisher.Flux;
+
+import java.util.Comparator;
+import javax.management.relation.Role;
 
 /**
  * A utility class for the sorting of {@link  discord4j.rest.entity.RestRole}.
@@ -40,7 +39,7 @@ public class OrderUtil {
      * {@link discord4j.common.util.Snowflake IDs}.
      */
     public static final Comparator<RoleData> ROLE_ORDER =
-        Comparator.comparing(RoleData::position).thenComparing(OrderUtil::idFromRoleData);
+            Comparator.comparing(RoleData::position).thenComparing(OrderUtil::idFromRoleData);
 
     /**
      * Sorts {@link RoleData roles} according to visual ordering in Discord. Roles at the bottom of the list are first.
