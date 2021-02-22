@@ -16,6 +16,7 @@
  */
 package discord4j.core.util;
 
+import discord4j.common.util.Snowflake;
 import discord4j.discordjson.json.AuditEntryInfoData;
 import discord4j.discordjson.json.AuditLogChangeData;
 import discord4j.core.object.audit.AuditLogChange;
@@ -43,16 +44,16 @@ public class AuditLogUtil {
             map.put(OptionKey.MEMBERS_REMOVED.getField(), options.membersRemoved().get());
         }
         if (!options.channelId().isAbsent()) {
-            map.put(OptionKey.CHANNEL_ID.getField(), options.channelId().get());
+            map.put(OptionKey.CHANNEL_ID.getField(), Snowflake.of(options.channelId().get()));
         }
         if (!options.messageId().isAbsent()) {
-            map.put(OptionKey.MESSAGE_ID.getField(), options.messageId().get());
+            map.put(OptionKey.MESSAGE_ID.getField(), Snowflake.of(options.messageId().get()));
         }
         if (!options.count().isAbsent()) {
-            map.put(OptionKey.COUNT.getField(), options.count().get());
+            map.put(OptionKey.COUNT.getField(), Integer.parseInt(options.count().get()));
         }
         if (!options.id().isAbsent()) {
-            map.put(OptionKey.ID.getField(), options.id().get());
+            map.put(OptionKey.ID.getField(), Snowflake.of(options.id().get()));
         }
         if (!options.type().isAbsent()) {
             map.put(OptionKey.TYPE.getField(), options.type().get());
