@@ -38,28 +38,28 @@ public class AuditLogUtil {
     public static Map<String, ?> createOptionMap(AuditEntryInfoData options) {
         HashMap<String, Object> map = new HashMap<>();
         if (!options.deleteMemberDays().isAbsent()) {
-            map.put(OptionKey.DELETE_MEMBER_DAYS.getField(), options.deleteMemberDays().get());
+            map.put(OptionKey.DELETE_MEMBER_DAYS.getField(), OptionKey.DELETE_MEMBER_DAYS.parseValue(options.deleteMemberDays().get()));
         }
         if (!options.membersRemoved().isAbsent()) {
-            map.put(OptionKey.MEMBERS_REMOVED.getField(), options.membersRemoved().get());
+            map.put(OptionKey.MEMBERS_REMOVED.getField(), OptionKey.MEMBERS_REMOVED.parseValue(options.membersRemoved().get()));
         }
         if (!options.channelId().isAbsent()) {
-            map.put(OptionKey.CHANNEL_ID.getField(), Snowflake.of(options.channelId().get()));
+            map.put(OptionKey.CHANNEL_ID.getField(), OptionKey.CHANNEL_ID.parseValue(options.channelId().get()));
         }
         if (!options.messageId().isAbsent()) {
-            map.put(OptionKey.MESSAGE_ID.getField(), Snowflake.of(options.messageId().get()));
+            map.put(OptionKey.MESSAGE_ID.getField(), OptionKey.MESSAGE_ID.parseValue(options.messageId().get()));
         }
         if (!options.count().isAbsent()) {
-            map.put(OptionKey.COUNT.getField(), Integer.parseInt(options.count().get()));
+            map.put(OptionKey.COUNT.getField(), OptionKey.COUNT.parseValue(options.count().get()));
         }
         if (!options.id().isAbsent()) {
-            map.put(OptionKey.ID.getField(), Snowflake.of(options.id().get()));
+            map.put(OptionKey.ID.getField(), OptionKey.ID.parseValue(options.id().get()));
         }
         if (!options.type().isAbsent()) {
-            map.put(OptionKey.TYPE.getField(), options.type().get());
+            map.put(OptionKey.TYPE.getField(), OptionKey.TYPE.parseValue(options.type().get()));
         }
         if (!options.roleName().isAbsent()) {
-            map.put(OptionKey.ROLE_NAME.getField(), options.roleName().get());
+            map.put(OptionKey.ROLE_NAME.getField(), OptionKey.ROLE_NAME.parseValue(options.roleName().get()));
         }
         return map;
     }
