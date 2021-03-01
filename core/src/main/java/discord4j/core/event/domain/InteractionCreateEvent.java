@@ -19,6 +19,9 @@ package discord4j.core.event.domain;
 
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
+import discord4j.core.object.command.ApplicationCommandInteraction;
+import discord4j.core.object.command.Interaction;
+import discord4j.core.object.entity.Member;
 import discord4j.discordjson.json.*;
 import discord4j.gateway.ShardInfo;
 import discord4j.rest.RestClient;
@@ -41,8 +44,8 @@ public class InteractionCreateEvent extends Event {
         this.operations = new InteractionOperations(restClient, data, restClient.getApplicationId());
     }
 
-    public InteractionData getData() {
-        return data;
+    public Interaction getInteraction() {
+        return new Interaction(getClient(), data);
     }
 
     public Snowflake getId() {
@@ -57,20 +60,20 @@ public class InteractionCreateEvent extends Event {
         return operations.getChannelId();
     }
 
-    public MemberData getMemberData() {
-        return operations.getMemberData();
+    public Member getMember() {
+        return new Member(getClient(), operations.getMemberData(), getGuildId().asLong());
     }
 
-    public ApplicationCommandInteractionData getCommandInteractionData() {
-        return operations.getCommandInteractionData();
+    public ApplicationCommandInteraction getCommandInteraction() {
+        return new ApplicationCommandInteraction(getClient(), operations.getCommandInteractionData());
     }
 
     public Snowflake getCommandId() {
-        return Snowflake.of(getCommandInteractionData().id());
+        return Snowflake.of(operations.getCommandInteractionData().id());
     }
 
     public String getCommandName() {
-        return getCommandInteractionData().name();
+        return operations.getCommandInteractionData().name();
     }
 
     private Mono<Void> createInteractionResponse(InteractionResponseData responseData) {

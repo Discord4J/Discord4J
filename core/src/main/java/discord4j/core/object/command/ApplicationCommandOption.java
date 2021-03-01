@@ -2,7 +2,6 @@ package discord4j.core.object.command;
 
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.DiscordObject;
-import discord4j.core.object.Embed;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
 
 import java.util.*;
@@ -15,6 +14,11 @@ import java.util.stream.Collectors;
  *     Application Command Option Object</a>
  */
 public class ApplicationCommandOption implements DiscordObject {
+
+    /** The maximum amount of characters that can be in an application command option name. */
+    public static final int MAX_NAME_LENGTH = 32;
+    /** The maximum amount of characters that can be in an application command option description. */
+    public static final int MAX_DESCRIPTION_LENGTH = 100;
 
     /** The gateway associated to this object. */
     private final GatewayDiscordClient gateway;
