@@ -35,7 +35,7 @@ public final class Region implements DiscordObject {
     private final RegionData data;
 
     /**
-     * Constructs a {@code Region} with an associated ServiceMediator and Discord data.
+     * Constructs a {@code Region} with an associated {@link GatewayDiscordClient} and Discord data.
      *
      * @param gateway The {@link GatewayDiscordClient} associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.

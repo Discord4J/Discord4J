@@ -31,8 +31,6 @@ import reactor.util.Loggers;
 
 public class InteractionCreateEvent extends Event {
 
-    private static final Logger log = Loggers.getLogger(InteractionCreateEvent.class);
-
     private final InteractionData data;
     private final InteractionOperations operations;
 

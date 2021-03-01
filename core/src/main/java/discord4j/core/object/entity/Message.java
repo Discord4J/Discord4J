@@ -75,7 +75,7 @@ public final class Message implements Entity {
     private final RestMessage rest;
 
     /**
-     * Constructs a {@code Message} with an associated ServiceMediator and Discord data.
+     * Constructs a {@code Message} with an associated {@link GatewayDiscordClient} and Discord data.
      *
      * @param gateway The {@link GatewayDiscordClient} associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
@@ -817,40 +817,7 @@ public final class Message implements Entity {
          * @return The type of message.
          */
         public static Type of(final int value) {
-            switch (value) {
-                case 0:
-                    return DEFAULT;
-                case 1:
-                    return RECIPIENT_ADD;
-                case 2:
-                    return RECIPIENT_REMOVE;
-                case 3:
-                    return CALL;
-                case 4:
-                    return CHANNEL_NAME_CHANGE;
-                case 5:
-                    return CHANNEL_ICON_CHANGE;
-                case 6:
-                    return CHANNEL_PINNED_MESSAGE;
-                case 7:
-                    return GUILD_MEMBER_JOIN;
-                case 8:
-                    return USER_PREMIUM_GUILD_SUBSCRIPTION;
-                case 9:
-                    return USER_PREMIUM_GUILD_SUBSCRIPTION_TIER_1;
-                case 10:
-                    return USER_PREMIUM_GUILD_SUBSCRIPTION_TIER_2;
-                case 11:
-                    return USER_PREMIUM_GUILD_SUBSCRIPTION_TIER_3;
-                case 12:
-                    return CHANNEL_FOLLOW_ADD;
-                case 14:
-                    return GUILD_DISCOVERY_DISQUALIFIED;
-                case 15:
-                    return GUILD_DISCOVERY_REQUALIFIED;
-                default:
-                    return UNKNOWN;
-            }
+            return Arrays.stream(values()).filter(type -> type.getValue() == value).findFirst().orElse(UNKNOWN);
         }
     }
 

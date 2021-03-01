@@ -28,6 +28,7 @@ import discord4j.discordjson.json.UserData;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
 
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.OptionalInt;
@@ -46,7 +47,7 @@ public class Invite implements DiscordObject {
     private final InviteData data;
 
     /**
-     * Constructs a {@code Invite} with an associated ServiceMediator and Discord data.
+     * Constructs a {@code Invite} with an associated {@link GatewayDiscordClient} and Discord data.
      *
      * @param gateway The {@link GatewayDiscordClient} associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
@@ -308,10 +309,7 @@ public class Invite implements DiscordObject {
          * @return The type of target user.
          */
         public static Type of(final int value) {
-            switch (value) {
-                case 1: return STREAM;
-                default: return UNKNOWN;
-            }
+            return Arrays.stream(values()).filter(type -> type.getValue() == value).findFirst().orElse(UNKNOWN);
         }
 
     }

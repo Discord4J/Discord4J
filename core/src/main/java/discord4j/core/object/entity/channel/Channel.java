@@ -21,6 +21,8 @@ import discord4j.rest.entity.RestChannel;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
 
+import java.util.Arrays;
+
 /**
  * A Discord channel.
  *
@@ -124,16 +126,7 @@ public interface Channel extends Entity {
          * @return The type of channel.
          */
         public static Type of(final int value) {
-            switch (value) {
-                case 0: return GUILD_TEXT;
-                case 1: return DM;
-                case 2: return GUILD_VOICE;
-                case 3: return GROUP_DM;
-                case 4: return GUILD_CATEGORY;
-                case 5: return GUILD_NEWS;
-                case 6: return GUILD_STORE;
-                default: return UNKNOWN;
-            }
+            return Arrays.stream(values()).filter(type -> type.getValue() == value).findFirst().orElse(UNKNOWN);
         }
     }
 }

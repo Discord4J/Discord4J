@@ -24,10 +24,7 @@ import reactor.util.annotation.Nullable;
 
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -56,7 +53,7 @@ public final class Embed implements DiscordObject {
     private final EmbedData data;
 
     /**
-     * Constructs an {@code Embed} with an associated ServiceMediator and Discord data.
+     * Constructs an {@code Embed} with an associated {@link GatewayDiscordClient} and Discord data.
      *
      * @param gateway The {@link GatewayDiscordClient} associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
@@ -241,13 +238,7 @@ public final class Embed implements DiscordObject {
          * @return The type of embed.
          */
         public static Embed.Type of(final String value) {
-            switch (value) {
-                case "image": return IMAGE;
-                case "link": return LINK;
-                case "rich": return RICH;
-                case "video": return VIDEO;
-                default: return UNKNOWN;
-            }
+            return Arrays.stream(values()).filter(type -> type.getValue().equals(value)).findFirst().orElse(UNKNOWN);
         }
     }
 

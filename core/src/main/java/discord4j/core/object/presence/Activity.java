@@ -352,15 +352,7 @@ public class Activity {
          * @return The type of activity.
          */
         public static Type of(final int value) {
-            switch (value) {
-                case 0: return PLAYING;
-                case 1: return STREAMING;
-                case 2: return LISTENING;
-                case 3: return WATCHING;
-                case 4: return CUSTOM;
-                case 5: return COMPETING;
-                default: return UNKNOWN;
-            }
+            return Arrays.stream(values()).filter(type -> type.getValue() == value).findFirst().orElse(UNKNOWN);
         }
     }
 

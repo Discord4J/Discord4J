@@ -21,6 +21,7 @@ import discord4j.core.object.entity.Role;
 import discord4j.rest.util.PermissionSet;
 import discord4j.common.util.Snowflake;
 
+import java.util.Arrays;
 import java.util.Optional;
 
 public class PermissionOverwrite {
@@ -153,11 +154,7 @@ public class PermissionOverwrite {
          * @return The type of permission overwrite.
          */
         public static Type of(final String value) {
-            switch (value) {
-                case "role": return ROLE;
-                case "member": return MEMBER;
-                default: return UNKNOWN;
-            }
+            return Arrays.stream(values()).filter(type -> type.getValue().equals(value)).findFirst().orElse(UNKNOWN);
         }
     }
 
