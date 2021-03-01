@@ -16,9 +16,9 @@
  */
 package discord4j.core.object.entity.channel;
 
+import discord4j.common.util.Snowflake;
 import discord4j.core.object.ExtendedInvite;
 import discord4j.core.retriever.EntityRetrievalStrategy;
-import discord4j.common.util.Snowflake;
 import discord4j.core.spec.InviteCreateSpec;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;

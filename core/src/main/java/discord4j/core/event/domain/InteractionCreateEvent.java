@@ -22,15 +22,15 @@ import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.command.ApplicationCommandInteraction;
 import discord4j.core.object.command.Interaction;
 import discord4j.core.object.entity.Member;
-import discord4j.discordjson.json.*;
+import discord4j.discordjson.json.InteractionApplicationCommandCallbackData;
+import discord4j.discordjson.json.InteractionData;
+import discord4j.discordjson.json.InteractionResponseData;
 import discord4j.gateway.ShardInfo;
 import discord4j.rest.RestClient;
 import discord4j.rest.interaction.InteractionOperations;
 import discord4j.rest.interaction.InteractionResponse;
 import discord4j.rest.util.InteractionResponseType;
 import reactor.core.publisher.Mono;
-import reactor.util.Logger;
-import reactor.util.Loggers;
 
 public class InteractionCreateEvent extends Event {
 

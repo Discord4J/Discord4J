@@ -21,7 +21,6 @@ import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.*;
 import discord4j.core.event.domain.channel.TypingStartEvent;
 import discord4j.core.object.VoiceState;
-import discord4j.core.object.command.ApplicationCommand;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.presence.Presence;

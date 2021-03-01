@@ -16,8 +16,8 @@
  */
 package discord4j.core.object;
 
-import discord4j.discordjson.json.RegionData;
 import discord4j.core.GatewayDiscordClient;
+import discord4j.discordjson.json.RegionData;
 
 import java.util.Objects;
 

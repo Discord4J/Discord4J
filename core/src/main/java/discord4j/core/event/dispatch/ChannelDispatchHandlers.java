@@ -16,6 +16,7 @@
  */
 package discord4j.core.event.dispatch;
 
+import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.Event;
 import discord4j.core.event.domain.channel.*;
@@ -29,7 +30,6 @@ import discord4j.discordjson.json.gateway.ChannelDelete;
 import discord4j.discordjson.json.gateway.ChannelPinsUpdate;
 import discord4j.discordjson.json.gateway.ChannelUpdate;
 import discord4j.discordjson.possible.Possible;
-import discord4j.common.util.Snowflake;
 import discord4j.store.api.primitive.LongObjStore;
 import reactor.core.publisher.Mono;
 

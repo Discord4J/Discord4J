@@ -16,6 +16,7 @@
  */
 package discord4j.core.object.entity.channel;
 
+import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.ExtendedInvite;
 import discord4j.core.object.ExtendedPermissionOverwrite;
@@ -33,7 +34,6 @@ import discord4j.discordjson.json.ChannelData;
 import discord4j.discordjson.possible.Possible;
 import discord4j.rest.util.Permission;
 import discord4j.rest.util.PermissionSet;
-import discord4j.common.util.Snowflake;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;

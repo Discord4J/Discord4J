@@ -29,7 +29,6 @@ import discord4j.core.retriever.EntityRetrievalStrategy;
 import discord4j.core.spec.MessageEditSpec;
 import discord4j.core.util.EntityUtil;
 import discord4j.discordjson.json.MessageData;
-import discord4j.discordjson.json.StickerData;
 import discord4j.discordjson.json.SuppressEmbedsRequest;
 import discord4j.discordjson.json.UserData;
 import discord4j.discordjson.possible.Possible;

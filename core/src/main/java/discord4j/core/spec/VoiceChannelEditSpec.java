@@ -16,6 +16,7 @@
  */
 package discord4j.core.spec;
 
+import discord4j.common.util.Snowflake;
 import discord4j.core.object.PermissionOverwrite;
 import discord4j.core.object.entity.channel.Category;
 import discord4j.core.object.entity.channel.VoiceChannel;
@@ -24,7 +25,6 @@ import discord4j.discordjson.json.ImmutableChannelModifyRequest;
 import discord4j.discordjson.json.OverwriteData;
 import discord4j.discordjson.possible.Possible;
 import discord4j.rest.util.Permission;
-import discord4j.common.util.Snowflake;
 import reactor.util.annotation.Nullable;
 
 import java.util.List;

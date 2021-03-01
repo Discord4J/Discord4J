@@ -16,12 +16,12 @@
  */
 package discord4j.core.object;
 
+import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.CategorizableChannel;
 import discord4j.core.retriever.EntityRetrievalStrategy;
-import discord4j.common.util.Snowflake;
 import discord4j.discordjson.json.InviteData;
 import discord4j.discordjson.json.PartialGuildData;
 import discord4j.discordjson.json.UserData;

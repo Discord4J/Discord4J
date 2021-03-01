@@ -16,10 +16,10 @@
  */
 package discord4j.core.object;
 
+import discord4j.common.util.Snowflake;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Role;
 import discord4j.rest.util.PermissionSet;
-import discord4j.common.util.Snowflake;
 
 import java.util.Arrays;
 import java.util.Optional;

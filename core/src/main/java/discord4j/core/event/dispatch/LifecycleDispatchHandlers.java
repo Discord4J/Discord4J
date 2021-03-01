@@ -16,6 +16,7 @@
  */
 package discord4j.core.event.dispatch;
 
+import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.lifecycle.*;
 import discord4j.core.object.entity.User;
@@ -24,7 +25,6 @@ import discord4j.discordjson.json.gateway.Ready;
 import discord4j.discordjson.json.gateway.Resumed;
 import discord4j.gateway.retry.ClosingStateChange;
 import discord4j.gateway.retry.GatewayStateChange;
-import discord4j.common.util.Snowflake;
 import reactor.core.publisher.Mono;
 
 import java.util.Set;

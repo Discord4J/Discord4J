@@ -3,7 +3,6 @@ package discord4j.core.object.command;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.DiscordObject;
 import discord4j.discordjson.json.ApplicationCommandOptionChoiceData;
-import discord4j.discordjson.json.ApplicationCommandOptionData;
 
 import java.util.Objects;
 

@@ -16,13 +16,13 @@
  */
 package discord4j.core.spec;
 
+import discord4j.common.util.Snowflake;
 import discord4j.core.object.Region;
 import discord4j.core.object.entity.Guild;
 import discord4j.discordjson.json.GuildModifyRequest;
 import discord4j.discordjson.json.ImmutableGuildModifyRequest;
 import discord4j.discordjson.possible.Possible;
 import discord4j.rest.util.Image;
-import discord4j.common.util.Snowflake;
 import reactor.util.annotation.Nullable;
 
 import java.util.Optional;

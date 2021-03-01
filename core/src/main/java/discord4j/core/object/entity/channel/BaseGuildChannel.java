@@ -16,6 +16,7 @@
  */
 package discord4j.core.object.entity.channel;
 
+import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.ExtendedPermissionOverwrite;
 import discord4j.core.object.PermissionOverwrite;
@@ -27,7 +28,6 @@ import discord4j.core.util.PermissionUtil;
 import discord4j.discordjson.json.ChannelData;
 import discord4j.discordjson.json.PermissionsEditRequest;
 import discord4j.rest.util.PermissionSet;
-import discord4j.common.util.Snowflake;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
 

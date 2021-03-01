@@ -16,6 +16,7 @@
  */
 package discord4j.core.event.domain;
 
+import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Member;
@@ -24,7 +25,6 @@ import discord4j.core.object.presence.Presence;
 import discord4j.discordjson.json.PartialUserData;
 import discord4j.discordjson.possible.Possible;
 import discord4j.gateway.ShardInfo;
-import discord4j.common.util.Snowflake;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
 

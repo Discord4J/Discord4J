@@ -16,8 +16,8 @@
  */
 package discord4j.core.object.entity;
 
-import discord4j.core.object.DiscordObject;
 import discord4j.common.util.Snowflake;
+import discord4j.core.object.DiscordObject;
 
 /** An uniquely identifiable object by {@link Snowflake}. */
 public interface Entity extends DiscordObject {
