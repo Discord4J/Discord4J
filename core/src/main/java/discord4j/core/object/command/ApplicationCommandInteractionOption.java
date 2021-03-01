@@ -1,11 +1,14 @@
 package discord4j.core.object.command;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.DiscordObject;
 import discord4j.core.object.entity.Role;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.Channel;
 import discord4j.discordjson.json.ApplicationCommandInteractionOptionData;
+import discord4j.discordjson.json.RoleData;
 
 import java.util.Collections;
 import java.util.List;
@@ -91,6 +94,7 @@ public class ApplicationCommandInteractionOption implements DiscordObject {
     }
 
     public Optional<Role> asRole() {
+        final ObjectMapper objectmapper = getClient().getCoreResources().getJacksonResources().getObjectMapper();
         // TODO
         throw new RuntimeException("Not implemented");
     }

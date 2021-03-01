@@ -21,7 +21,9 @@ import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.command.ApplicationCommandInteraction;
 import discord4j.core.object.command.Interaction;
+import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Member;
+import discord4j.core.object.entity.channel.TextChannel;
 import discord4j.discordjson.json.InteractionApplicationCommandCallbackData;
 import discord4j.discordjson.json.InteractionData;
 import discord4j.discordjson.json.InteractionResponseData;
@@ -44,6 +46,10 @@ public class InteractionCreateEvent extends Event {
         this.operations = new InteractionOperations(restClient, data, restClient.getApplicationId());
     }
 
+    public InteractionData getData() {
+        return data;
+    }
+
     public Interaction getInteraction() {
         return new Interaction(getClient(), data);
     }
@@ -56,8 +62,16 @@ public class InteractionCreateEvent extends Event {
         return operations.getGuildId();
     }
 
+    public Mono<Guild> getGuild() {
+        return getClient().getGuildById(getGuildId());
+    }
+
     public Snowflake getChannelId() {
         return operations.getChannelId();
+    }
+
+    public Mono<TextChannel> getChannel() {
+        return getClient().getChannelById(getChannelId()).cast(TextChannel.class);
     }
 
     public Member getMember() {

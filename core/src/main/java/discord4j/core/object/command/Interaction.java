@@ -68,7 +68,7 @@ public class Interaction implements DiscordObject {
      * @return The guild id it was sent from, if invoked in a guild.
      */
     public Optional<Snowflake> getGuildId() {
-        return data.guildId().toOptional().map(Snowflake::of);
+        return Optional.of(data.guildId()).map(Snowflake::of);
     }
 
     /**
@@ -86,7 +86,7 @@ public class Interaction implements DiscordObject {
      * @return The channel id it was sent from, if invoked in a guild.
      */
     public Optional<Snowflake> getChannelId() {
-        return data.channelId().toOptional().map(Snowflake::of);
+        return Optional.of(data.channelId()).map(Snowflake::of);
     }
 
     /**
@@ -104,7 +104,7 @@ public class Interaction implements DiscordObject {
      * @return The invoking member, if invoked in a guild.
      */
     public Optional<Member> getMember() {
-        return data.member().toOptional()
+        return Optional.of(data.member())
             .map(data -> new Member(gateway, data, getGuildId().get().asLong()));
     }
 
@@ -112,11 +112,11 @@ public class Interaction implements DiscordObject {
      * Gets the invoking user, if invoked in a DM.
      *
      * @return The invoking user, if invoked in a DM.
-     */
     public Optional<User> getUser() {
-        return data.user().toOptional()
+        return Optional.of(data.user())
             .map(data -> new User(gateway, data));
     }
+     */
 
     @Override
     public GatewayDiscordClient getClient() {
