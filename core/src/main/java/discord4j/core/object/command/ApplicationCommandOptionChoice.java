@@ -50,13 +50,17 @@ public class ApplicationCommandOptionChoice implements DiscordObject {
     }
 
     /**
-     * Gets the value of this choice as an int.
+     * Gets the value of this choice as a long.
      *
-     * @return The value of this choice as an int.
+     * @return The value of this choice as a long.
      */
-    public int asInt() {
-        // TODO: Exceptions handling
-        return Integer.parseInt(data.value());
+    public long asLong() {
+        try {
+            return Long.parseLong(data.value());
+        } catch(NumberFormatException err) {
+            // TODO
+            throw new IllegalArgumentException("Choice '" + getName() + "' is not a long.");
+        }
     }
 
     @Override

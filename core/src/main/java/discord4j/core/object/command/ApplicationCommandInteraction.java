@@ -3,7 +3,12 @@ package discord4j.core.object.command;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.DiscordObject;
+import discord4j.core.object.entity.Role;
+import discord4j.core.object.entity.User;
+import discord4j.core.object.entity.channel.Channel;
+import discord4j.core.object.entity.channel.TextChannel;
 import discord4j.discordjson.json.ApplicationCommandInteractionData;
+import reactor.util.annotation.Nullable;
 
 import java.util.Collections;
 import java.util.List;
@@ -25,15 +30,20 @@ public class ApplicationCommandInteraction implements DiscordObject {
     /** The raw data as represented by Discord. */
     private final ApplicationCommandInteractionData data;
 
+    @Nullable
+    private final String guildId;
+
     /**
      * Constructs an {@code ApplicationCommandInteraction} with an associated {@link GatewayDiscordClient} and Discord data.
      *
      * @param gateway The {@link GatewayDiscordClient} associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
      */
-    public ApplicationCommandInteraction(final GatewayDiscordClient gateway, final ApplicationCommandInteractionData data) {
+    public ApplicationCommandInteraction(final GatewayDiscordClient gateway, final ApplicationCommandInteractionData data,
+                                         @Nullable final String guildId) {
         this.gateway = Objects.requireNonNull(gateway);
         this.data = Objects.requireNonNull(data);
+        this.guildId = guildId;
     }
 
     /**
@@ -61,7 +71,7 @@ public class ApplicationCommandInteraction implements DiscordObject {
      */
     public List<ApplicationCommandInteractionOption> getOptions() {
         return data.options().toOptional().orElse(Collections.emptyList()).stream()
-            .map(data -> new ApplicationCommandInteractionOption(gateway, data))
+            .map(data -> new ApplicationCommandInteractionOption(gateway, data, guildId))
             .collect(Collectors.toList());
     }
 
@@ -73,6 +83,34 @@ public class ApplicationCommandInteraction implements DiscordObject {
      */
     public Optional<ApplicationCommandInteractionOption> getOption(final String name) {
         return getOptions().stream().filter(option -> option.getName().equals(name)).findFirst();
+    }
+
+    public Optional<ApplicationCommand> getOptionAsSubCommand(final String name) {
+        return getOption(name).flatMap(ApplicationCommandInteractionOption::asSubCommand);
+    }
+
+    public Optional<String> getOptionAsString(final String name) {
+        return getOption(name).flatMap(ApplicationCommandInteractionOption::asString);
+    }
+
+    public Optional<Long> getOptionAsLong(final String name) {
+        return getOption(name).flatMap(ApplicationCommandInteractionOption::asLong);
+    }
+
+    public Optional<Boolean> getOptionAsBoolean(final String name) {
+        return getOption(name).flatMap(ApplicationCommandInteractionOption::asBoolean);
+    }
+
+    public Optional<User> getOptionAsUser(final String name) {
+        return getOption(name).flatMap(ApplicationCommandInteractionOption::asUser);
+    }
+
+    public Optional<Role> getOptionAsRole(final String name) {
+        return getOption(name).flatMap(ApplicationCommandInteractionOption::asRole);
+    }
+
+    public Optional<TextChannel> getOptionAsChannel(final String name) {
+        return getOption(name).flatMap(ApplicationCommandInteractionOption::asChannel);
     }
 
     @Override

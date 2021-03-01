@@ -58,7 +58,8 @@ public class Interaction implements DiscordObject {
      * @return The command data payload, if present.
      */
     public Optional<ApplicationCommandInteraction> getApplicationCommandInteraction() {
-        return data.data().toOptional().map(data -> new ApplicationCommandInteraction(gateway, data));
+        return data.data().toOptional()
+            .map(interactionData -> new ApplicationCommandInteraction(gateway, interactionData, data.guildId()));
     }
 
     /**

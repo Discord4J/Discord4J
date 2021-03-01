@@ -79,7 +79,7 @@ public class InteractionCreateEvent extends Event {
     }
 
     public ApplicationCommandInteraction getCommandInteraction() {
-        return new ApplicationCommandInteraction(getClient(), operations.getCommandInteractionData());
+        return new ApplicationCommandInteraction(getClient(), operations.getCommandInteractionData(), data.guildId());
     }
 
     public Snowflake getCommandId() {

@@ -1,12 +1,14 @@
 package discord4j.core.object.command;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.DiscordObject;
 import discord4j.core.object.entity.Role;
 import discord4j.core.object.entity.User;
-import discord4j.core.object.entity.channel.Channel;
-import discord4j.discordjson.json.ApplicationCommandInteractionOptionData;
+import discord4j.core.object.entity.channel.TextChannel;
+import discord4j.discordjson.json.*;
+import reactor.util.annotation.Nullable;
 
 import java.util.Collections;
 import java.util.List;
@@ -28,15 +30,20 @@ public class ApplicationCommandInteractionOption implements DiscordObject {
     /** The raw data as represented by Discord. */
     private final ApplicationCommandInteractionOptionData data;
 
+    @Nullable
+    private final String guildId;
+
     /**
      * Constructs an {@code ApplicationCommandInteractionOption} with an associated {@link GatewayDiscordClient} and Discord data.
      *
      * @param gateway The {@link GatewayDiscordClient} associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
      */
-    public ApplicationCommandInteractionOption(final GatewayDiscordClient gateway, final ApplicationCommandInteractionOptionData data) {
+    public ApplicationCommandInteractionOption(final GatewayDiscordClient gateway, final ApplicationCommandInteractionOptionData data,
+                                               @Nullable final String guildId) {
         this.gateway = Objects.requireNonNull(gateway);
         this.data = Objects.requireNonNull(data);
+        this.guildId = guildId;
     }
 
     /**
@@ -58,16 +65,18 @@ public class ApplicationCommandInteractionOption implements DiscordObject {
     }
 
     public Optional<ApplicationCommand> asSubCommand() {
-        // TODO
-        throw new RuntimeException("Not implemented");
+        final ObjectMapper objectmapper = getClient().getCoreResources().getJacksonResources().getObjectMapper();
+        return data.value().toOptional()
+            .map(json -> {
+                try {
+                    return objectmapper.readValue(json, ApplicationCommandData.class);
+                } catch (JsonProcessingException e) {
+                    // TODO
+                    throw new RuntimeException(e);
+                }
+            })
+            .map(applicationData -> new ApplicationCommand(gateway, applicationData));
     }
-
-    /*
-    public Optional<ApplicationCommandGroup> asSubCommandGroup() {
-        // TODO
-        throw new RuntimeException("Not implemented");
-    }
-     */
 
     public Optional<String> asString() {
         return data.value().toOptional();
@@ -82,19 +91,45 @@ public class ApplicationCommandInteractionOption implements DiscordObject {
     }
 
     public Optional<User> asUser() {
-        // TODO
-        throw new RuntimeException("Not implemented");
+        final ObjectMapper objectmapper = getClient().getCoreResources().getJacksonResources().getObjectMapper();
+        return data.value().toOptional()
+            .map(json -> {
+                try {
+                    return objectmapper.readValue(json, UserData.class);
+                } catch (JsonProcessingException e) {
+                    // TODO
+                    throw new RuntimeException(e);
+                }
+            })
+            .map(userData -> new User(gateway, userData));
     }
 
-    public Optional<Channel> asChannel() {
-        // TODO
-        throw new RuntimeException("Not implemented");
+    public Optional<TextChannel> asChannel() {
+        final ObjectMapper objectmapper = getClient().getCoreResources().getJacksonResources().getObjectMapper();
+        return data.value().toOptional()
+            .map(json -> {
+                try {
+                    return objectmapper.readValue(json, ChannelData.class);
+                } catch (JsonProcessingException e) {
+                    // TODO
+                    throw new RuntimeException(e);
+                }
+            })
+            .map(channelData -> new TextChannel(gateway, channelData));
     }
 
     public Optional<Role> asRole() {
         final ObjectMapper objectmapper = getClient().getCoreResources().getJacksonResources().getObjectMapper();
-        // TODO
-        throw new RuntimeException("Not implemented");
+        return data.value().toOptional()
+            .map(json -> {
+                try {
+                    return objectmapper.readValue(json, RoleData.class);
+                } catch (JsonProcessingException e) {
+                    // TODO
+                    throw new RuntimeException(e);
+                }
+            })
+            .map(roleData -> new Role(gateway, roleData, Long.parseLong(guildId)));
     }
 
     /**
@@ -104,7 +139,7 @@ public class ApplicationCommandInteractionOption implements DiscordObject {
      */
     public List<ApplicationCommandInteractionOption> getOptions() {
         return data.options().toOptional().orElse(Collections.emptyList()).stream()
-            .map(data -> new ApplicationCommandInteractionOption(gateway, data))
+            .map(data -> new ApplicationCommandInteractionOption(gateway, data, guildId))
             .collect(Collectors.toList());
     }
 
