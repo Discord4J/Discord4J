@@ -1326,7 +1326,7 @@ public final class Guild implements Entity {
 
         final ToLongFunction<AuditLogData> getLastEntryId = response -> {
             final List<AuditLogEntryData> entries = response.auditLogEntries();
-            return (entries.size() == 0) ? Long.MAX_VALUE :
+            return (entries.isEmpty()) ? Long.MAX_VALUE :
                     Snowflake.asLong(entries.get(entries.size() - 1).id());
         };
 

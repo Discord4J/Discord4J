@@ -5,7 +5,6 @@ import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.DiscordObject;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Member;
-import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.TextChannel;
 import discord4j.discordjson.json.InteractionData;
 import reactor.core.publisher.Mono;
