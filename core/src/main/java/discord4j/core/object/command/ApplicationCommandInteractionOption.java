@@ -65,6 +65,15 @@ public class ApplicationCommandInteractionOption implements DiscordObject {
     }
 
     /**
+     * Gets the type of this option.
+     *
+     * @return The type of this option.
+     */
+    public ApplicationCommandOption.Type getType() {
+        return ApplicationCommandOption.Type.of(data.type());
+    }
+
+    /**
      * Gets the options of this option, present if this option is a group or subcommand.
      *
      * @return The options of this option, present if this option is a group or subcommand.
@@ -73,6 +82,18 @@ public class ApplicationCommandInteractionOption implements DiscordObject {
         return data.options().toOptional().orElse(Collections.emptyList()).stream()
             .map(data -> new ApplicationCommandInteractionOption(gateway, data, guildId))
             .collect(Collectors.toList());
+    }
+
+    /**
+     * Gets the option of this option corresponding to the provided name, if present.
+     *
+     * @param name The name of the option.
+     * @return The option of this option corresponding to the provided name, if present.
+     */
+    public Optional<ApplicationCommandInteractionOption> getOption(final String name) {
+        return getOptions().stream()
+            .filter(data -> data.getName().equals(name))
+            .findFirst();
     }
 
     @Override
