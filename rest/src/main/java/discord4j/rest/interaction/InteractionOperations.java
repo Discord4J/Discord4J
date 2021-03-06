@@ -28,6 +28,7 @@ import discord4j.rest.util.PermissionSet;
 import discord4j.rest.util.WebhookMultipartRequest;
 import reactor.core.publisher.Mono;
 
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -65,18 +66,23 @@ public class InteractionOperations implements Interaction, InteractionResponse, 
     }
 
     @Override
-    public Snowflake getGuildId() {
-        return Snowflake.of(interactionData.guildId());
+    public Optional<Snowflake> getGuildId() {
+        return interactionData.guildId().toOptional().map(Snowflake::of);
     }
 
     @Override
-    public Snowflake getChannelId() {
-        return Snowflake.of(interactionData.channelId());
+    public Optional<Snowflake> getChannelId() {
+        return interactionData.channelId().toOptional().map(Snowflake::of);
     }
 
     @Override
-    public MemberData getMemberData() {
-        return interactionData.member();
+    public Optional<MemberData> getMemberData() {
+        return interactionData.member().toOptional();
+    }
+
+    @Override
+    public Optional<UserData> getUserData() {
+        return interactionData.user().toOptional();
     }
 
     @Override

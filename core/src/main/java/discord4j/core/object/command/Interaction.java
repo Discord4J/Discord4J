@@ -5,6 +5,7 @@ import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.DiscordObject;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Member;
+import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.TextChannel;
 import discord4j.discordjson.json.InteractionData;
 import reactor.core.publisher.Mono;
@@ -59,7 +60,8 @@ public class Interaction implements DiscordObject {
      */
     public Optional<ApplicationCommandInteraction> getApplicationCommandInteraction() {
         return data.data().toOptional()
-            .map(interactionData -> new ApplicationCommandInteraction(gateway, interactionData, data.guildId()));
+                .map(interactionData -> new ApplicationCommandInteraction(gateway, interactionData,
+                        getGuildId().map(Snowflake::asLong).orElse(null)));
     }
 
     /**
@@ -68,7 +70,7 @@ public class Interaction implements DiscordObject {
      * @return The guild id it was sent from, if invoked in a guild.
      */
     public Optional<Snowflake> getGuildId() {
-        return Optional.of(data.guildId()).map(Snowflake::of);
+        return data.guildId().toOptional().map(Snowflake::of);
     }
 
     /**
@@ -86,7 +88,7 @@ public class Interaction implements DiscordObject {
      * @return The channel id it was sent from, if invoked in a guild.
      */
     public Optional<Snowflake> getChannelId() {
-        return Optional.of(data.channelId()).map(Snowflake::of);
+        return data.channelId().toOptional().map(Snowflake::of);
     }
 
     /**
@@ -104,19 +106,19 @@ public class Interaction implements DiscordObject {
      * @return The invoking member, if invoked in a guild.
      */
     public Optional<Member> getMember() {
-        return Optional.of(data.member())
-            .map(data -> new Member(gateway, data, getGuildId().get().asLong()));
+        return data.member().toOptional()
+                .map(data -> new Member(gateway, data, getGuildId().get().asLong()));
     }
 
     /**
      * Gets the invoking user, if invoked in a DM.
      *
      * @return The invoking user, if invoked in a DM.
-    public Optional<User> getUser() {
-        return Optional.of(data.user())
-            .map(data -> new User(gateway, data));
-    }
      */
+    public Optional<User> getUser() {
+        return data.user().toOptional()
+                .map(data -> new User(gateway, data));
+    }
 
     @Override
     public GatewayDiscordClient getClient() {
@@ -152,7 +154,8 @@ public class Interaction implements DiscordObject {
         }
 
         /**
-         * Gets the type of interaction. It is guaranteed that invoking {@link #getValue()} from the returned enum will equal
+         * Gets the type of interaction. It is guaranteed that invoking {@link #getValue()} from the returned enum
+         * will equal
          * ({@link #equals(Object)}) the supplied {@code value}.
          *
          * @param value The underlying value as represented by Discord.

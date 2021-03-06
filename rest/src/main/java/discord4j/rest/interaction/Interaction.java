@@ -19,10 +19,9 @@ package discord4j.rest.interaction;
 
 import discord4j.common.annotations.Experimental;
 import discord4j.common.util.Snowflake;
-import discord4j.discordjson.json.ApplicationCommandInteractionData;
-import discord4j.discordjson.json.InteractionApplicationCommandCallbackData;
-import discord4j.discordjson.json.InteractionData;
-import discord4j.discordjson.json.MemberData;
+import discord4j.discordjson.json.*;
+
+import java.util.Optional;
 
 /**
  * A single interaction coming from Discord. An application command can be reacted upon through this class by first
@@ -49,25 +48,32 @@ public interface Interaction {
     Snowflake getId();
 
     /**
-     * Return the guild ID where this interaction was created.
+     * Return the guild ID where this interaction was created, if invoked in a guild.
      *
-     * @return this interaction Snowflake guild ID
+     * @return this interaction Snowflake guild ID, if invoked in a guild.
      */
-    Snowflake getGuildId();
+    Optional<Snowflake> getGuildId();
 
     /**
-     * Return the channel ID where this interaction was created.
+     * Return the channel ID where this interaction was created, if invoked in a guild.
      *
-     * @return this interaction Snowflake channel ID
+     * @return this interaction Snowflake channel ID, if invoked in a guild.
      */
-    Snowflake getChannelId();
+    Optional<Snowflake> getChannelId();
 
     /**
-     * Return the raw member data that created this interaction.
+     * Return the raw member data that created this interaction, if invoked in a guild.
      *
-     * @return a member data object
+     * @return a member data object, if invoked in a guild.
      */
-    MemberData getMemberData();
+    Optional<MemberData> getMemberData();
+
+    /**
+     * Return the raw user data that created this interaction, if invoked in a DM.
+     *
+     * @return a user data object, if invoked in a DM.
+     */
+    Optional<UserData> getUserData();
 
     /**
      * Return this interaction member.
