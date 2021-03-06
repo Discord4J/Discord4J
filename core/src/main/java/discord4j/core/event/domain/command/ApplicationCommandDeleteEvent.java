@@ -14,7 +14,8 @@ import java.util.Optional;
  * Dispatched when an application command relevant to the current user is deleted.
  * This event is dispatched by Discord.
  *
- * @see <a href="https://discord.com/developers/docs/topics/gateway#application-command-delete">Application Command Delete</a>
+ * @see
+ * <a href="https://discord.com/developers/docs/topics/gateway#application-command-delete">Application Command Delete</a>
  */
 public class ApplicationCommandDeleteEvent extends ApplicationCommandEvent {
 

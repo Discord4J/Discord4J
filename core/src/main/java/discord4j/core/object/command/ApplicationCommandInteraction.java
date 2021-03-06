@@ -3,10 +3,6 @@ package discord4j.core.object.command;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.DiscordObject;
-import discord4j.core.object.entity.Role;
-import discord4j.core.object.entity.User;
-import discord4j.core.object.entity.channel.Channel;
-import discord4j.core.object.entity.channel.TextChannel;
 import discord4j.discordjson.json.ApplicationCommandInteractionData;
 import reactor.util.annotation.Nullable;
 
@@ -19,8 +15,9 @@ import java.util.stream.Collectors;
 /**
  * A Discord application command interaction.
  *
- * @see <a href="https://discord.com/developers/docs/interactions/slash-commands#interaction-applicationcommandinteractiondata">
- *     Application Command Interaction Object</a>
+ * @see
+ * <a href="https://discord.com/developers/docs/interactions/slash-commands#interaction-applicationcommandinteractiondata">
+ * Application Command Interaction Object</a>
  */
 public class ApplicationCommandInteraction implements DiscordObject {
 
@@ -34,12 +31,14 @@ public class ApplicationCommandInteraction implements DiscordObject {
     private final Long guildId;
 
     /**
-     * Constructs an {@code ApplicationCommandInteraction} with an associated {@link GatewayDiscordClient} and Discord data.
+     * Constructs an {@code ApplicationCommandInteraction} with an associated {@link GatewayDiscordClient} and
+     * Discord data.
      *
      * @param gateway The {@link GatewayDiscordClient} associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
      */
-    public ApplicationCommandInteraction(final GatewayDiscordClient gateway, final ApplicationCommandInteractionData data,
+    public ApplicationCommandInteraction(final GatewayDiscordClient gateway,
+                                         final ApplicationCommandInteractionData data,
                                          @Nullable final Long guildId) {
         this.gateway = Objects.requireNonNull(gateway);
         this.data = Objects.requireNonNull(data);
@@ -71,8 +70,8 @@ public class ApplicationCommandInteraction implements DiscordObject {
      */
     public List<ApplicationCommandInteractionOption> getOptions() {
         return data.options().toOptional().orElse(Collections.emptyList()).stream()
-            .map(data -> new ApplicationCommandInteractionOption(gateway, data, guildId))
-            .collect(Collectors.toList());
+                .map(data -> new ApplicationCommandInteractionOption(gateway, data, guildId))
+                .collect(Collectors.toList());
     }
 
     /**

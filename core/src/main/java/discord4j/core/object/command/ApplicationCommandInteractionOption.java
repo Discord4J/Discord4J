@@ -1,14 +1,9 @@
 package discord4j.core.object.command;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.DiscordObject;
-import discord4j.core.object.entity.Role;
-import discord4j.core.object.entity.User;
-import discord4j.core.object.entity.channel.TextChannel;
-import discord4j.discordjson.json.*;
+import discord4j.discordjson.json.ApplicationCommandInteractionOptionData;
 import reactor.util.annotation.Nullable;
 
 import java.util.Collections;
@@ -20,8 +15,9 @@ import java.util.stream.Collectors;
 /**
  * A Discord application command interaction.
  *
- * @see <a href="https://discord.com/developers/docs/interactions/slash-commands#interaction-applicationcommandinteractiondata">
- *     Application Command Interaction Object</a>
+ * @see
+ * <a href="https://discord.com/developers/docs/interactions/slash-commands#interaction-applicationcommandinteractiondata">
+ * Application Command Interaction Object</a>
  */
 public class ApplicationCommandInteractionOption implements DiscordObject {
 
@@ -35,12 +31,14 @@ public class ApplicationCommandInteractionOption implements DiscordObject {
     private final Long guildId;
 
     /**
-     * Constructs an {@code ApplicationCommandInteractionOption} with an associated {@link GatewayDiscordClient} and Discord data.
+     * Constructs an {@code ApplicationCommandInteractionOption} with an associated {@link GatewayDiscordClient} and
+     * Discord data.
      *
      * @param gateway The {@link GatewayDiscordClient} associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
      */
-    public ApplicationCommandInteractionOption(final GatewayDiscordClient gateway, final ApplicationCommandInteractionOptionData data,
+    public ApplicationCommandInteractionOption(final GatewayDiscordClient gateway,
+                                               final ApplicationCommandInteractionOptionData data,
                                                @Nullable final Long guildId) {
         this.gateway = Objects.requireNonNull(gateway);
         this.data = Objects.requireNonNull(data);
@@ -68,13 +66,14 @@ public class ApplicationCommandInteractionOption implements DiscordObject {
     /**
      * Gets the value of this option as a boolean, present if this option is not a group or subcommand.
      *
-     * @throws IllegalArgumentException if the type is not boolean
      * @return The value of this option as a boolean, present if this option is not a group or subcommand.
+     * @throws IllegalArgumentException if the type is not boolean
      */
     public Optional<Boolean> getValueAsBoolean() {
-        if(getType() != ApplicationCommandOption.Type.BOOLEAN)
+        if (getType() != ApplicationCommandOption.Type.BOOLEAN) {
             // TODO
             throw new IllegalArgumentException("Option value cannot be converted as boolean");
+        }
 
         return getValueAsString().map(Boolean::parseBoolean);
     }
@@ -82,13 +81,14 @@ public class ApplicationCommandInteractionOption implements DiscordObject {
     /**
      * Gets the value of this option as a long, present if this option is not a group or subcommand.
      *
-     * @throws IllegalArgumentException if the type is not integer
      * @return The value of this option as a long, present if this option is not a group or subcommand.
+     * @throws IllegalArgumentException if the type is not integer
      */
     public Optional<Long> getValueAsLong() {
-        if(getType() != ApplicationCommandOption.Type.INTEGER)
+        if (getType() != ApplicationCommandOption.Type.INTEGER) {
             // TODO
             throw new IllegalArgumentException("Option value cannot be converted as long");
+        }
 
         return getValueAsString().map(Long::parseLong);
     }
@@ -96,15 +96,16 @@ public class ApplicationCommandInteractionOption implements DiscordObject {
     /**
      * Gets the value of this option as a {@link Snowflake}, present if this option is not a group or subcommand.
      *
-     * @throws IllegalArgumentException if the type is not user, channel or role
      * @return The value of this option as a {@link Snowflake}, present if this option is not a group or subcommand.
+     * @throws IllegalArgumentException if the type is not user, channel or role
      */
     public Optional<Snowflake> getValueAsSnowflake() {
-        if(getType() != ApplicationCommandOption.Type.USER
-            && getType() != ApplicationCommandOption.Type.ROLE
-            && getType() != ApplicationCommandOption.Type.CHANNEL)
+        if (getType() != ApplicationCommandOption.Type.USER
+                && getType() != ApplicationCommandOption.Type.ROLE
+                && getType() != ApplicationCommandOption.Type.CHANNEL) {
             // TODO
             throw new IllegalArgumentException("Option value cannot be converted as snowflake");
+        }
 
         return getValueAsString().map(Snowflake::of);
     }
@@ -125,8 +126,8 @@ public class ApplicationCommandInteractionOption implements DiscordObject {
      */
     public List<ApplicationCommandInteractionOption> getOptions() {
         return data.options().toOptional().orElse(Collections.emptyList()).stream()
-            .map(data -> new ApplicationCommandInteractionOption(gateway, data, guildId))
-            .collect(Collectors.toList());
+                .map(data -> new ApplicationCommandInteractionOption(gateway, data, guildId))
+                .collect(Collectors.toList());
     }
 
     /**
@@ -137,8 +138,8 @@ public class ApplicationCommandInteractionOption implements DiscordObject {
      */
     public Optional<ApplicationCommandInteractionOption> getOption(final String name) {
         return getOptions().stream()
-            .filter(data -> data.getName().equals(name))
-            .findFirst();
+                .filter(data -> data.getName().equals(name))
+                .findFirst();
     }
 
     @Override

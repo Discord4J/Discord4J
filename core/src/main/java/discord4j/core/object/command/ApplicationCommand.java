@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
  * A Discord application command.
  *
  * @see <a href="https://discord.com/developers/docs/interactions/slash-commands#applicationcommand">
- *     Application Command Object</a>
+ * Application Command Object</a>
  */
 public class ApplicationCommand implements DiscordObject {
 
@@ -84,8 +84,8 @@ public class ApplicationCommand implements DiscordObject {
      */
     public List<ApplicationCommandOption> getOptions() {
         return data.options().toOptional().orElse(Collections.emptyList()).stream()
-            .map(data -> new ApplicationCommandOption(gateway, data))
-            .collect(Collectors.toList());
+                .map(data -> new ApplicationCommandOption(gateway, data))
+                .collect(Collectors.toList());
     }
 
     /**
@@ -96,8 +96,8 @@ public class ApplicationCommand implements DiscordObject {
      */
     public Optional<ApplicationCommandOption> getOption(final String name) {
         return getOptions().stream()
-            .filter(option -> option.getName().equals(name))
-            .findFirst();
+                .filter(option -> option.getName().equals(name))
+                .findFirst();
     }
 
     @Override

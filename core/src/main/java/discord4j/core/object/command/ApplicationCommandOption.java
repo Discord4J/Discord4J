@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
  * A Discord application command option.
  *
  * @see <a href="https://discord.com/developers/docs/interactions/slash-commands#applicationcommandoption">
- *     Application Command Option Object</a>
+ * Application Command Option Object</a>
  */
 public class ApplicationCommandOption implements DiscordObject {
 
@@ -80,9 +80,9 @@ public class ApplicationCommandOption implements DiscordObject {
      */
     public List<ApplicationCommandOptionChoice> getChoices() {
         return data.choices().toOptional().orElse(Collections.emptyList())
-            .stream()
-            .map(data -> new ApplicationCommandOptionChoice(gateway, data))
-            .collect(Collectors.toList());
+                .stream()
+                .map(data -> new ApplicationCommandOptionChoice(gateway, data))
+                .collect(Collectors.toList());
     }
 
     /**
@@ -93,8 +93,8 @@ public class ApplicationCommandOption implements DiscordObject {
      */
     public Optional<ApplicationCommandOptionChoice> getChoice(final String name) {
         return getChoices().stream()
-            .filter(choice -> choice.getName().equals(name))
-            .findFirst();
+                .filter(choice -> choice.getName().equals(name))
+                .findFirst();
     }
 
     /**
@@ -104,9 +104,9 @@ public class ApplicationCommandOption implements DiscordObject {
      */
     public List<ApplicationCommandOption> getOptions() {
         return data.options().toOptional().orElse(Collections.emptyList())
-            .stream()
-            .map(data -> new ApplicationCommandOption(gateway, data))
-            .collect(Collectors.toList());
+                .stream()
+                .map(data -> new ApplicationCommandOption(gateway, data))
+                .collect(Collectors.toList());
     }
 
     /**
@@ -117,8 +117,8 @@ public class ApplicationCommandOption implements DiscordObject {
      */
     public Optional<ApplicationCommandOption> getOption(final String name) {
         return getOptions().stream()
-            .filter(option -> option.getName().equals(name))
-            .findFirst();
+                .filter(option -> option.getName().equals(name))
+                .findFirst();
     }
 
     @Override
