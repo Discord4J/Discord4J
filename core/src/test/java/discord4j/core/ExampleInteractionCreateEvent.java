@@ -80,7 +80,7 @@ public class ExampleInteractionCreateEvent {
 
     private static String result(Random random, ApplicationCommandInteraction acid) {
         long digits = acid.getOption("digits")
-            .flatMap(ApplicationCommandInteractionOption::asLong)
+            .flatMap(ApplicationCommandInteractionOption::getValueAsLong)
             .orElse(1L);
         StringBuilder result = new StringBuilder();
         for (int i = 0; i < Math.max(1, Math.min(20, digits)); i++) {

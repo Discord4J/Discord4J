@@ -2,6 +2,7 @@ package discord4j.core.object.command;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.DiscordObject;
 import discord4j.core.object.entity.Role;
@@ -56,12 +57,56 @@ public class ApplicationCommandInteractionOption implements DiscordObject {
     }
 
     /**
-     * Gets the value of this option, present if this option is not a group or subcommand.
+     * Gets the value of this option as a string, present if this option is not a group or subcommand.
      *
-     * @return The value of this option, present if this option is not a group or subcommand.
+     * @return The value of this option as a string, present if this option is not a group or subcommand.
      */
-    public Optional<String> getValue() {
+    public Optional<String> getValueAsString() {
         return data.value().toOptional();
+    }
+
+    /**
+     * Gets the value of this option as a boolean, present if this option is not a group or subcommand.
+     *
+     * @throws IllegalArgumentException if the type is not boolean
+     * @return The value of this option as a boolean, present if this option is not a group or subcommand.
+     */
+    public Optional<Boolean> getValueAsBoolean() {
+        if(getType() != ApplicationCommandOption.Type.BOOLEAN)
+            // TODO
+            throw new IllegalArgumentException("Option value cannot be converted as boolean");
+
+        return getValueAsString().map(Boolean::parseBoolean);
+    }
+
+    /**
+     * Gets the value of this option as a long, present if this option is not a group or subcommand.
+     *
+     * @throws IllegalArgumentException if the type is not integer
+     * @return The value of this option as a long, present if this option is not a group or subcommand.
+     */
+    public Optional<Long> getValueAsLong() {
+        if(getType() != ApplicationCommandOption.Type.INTEGER)
+            // TODO
+            throw new IllegalArgumentException("Option value cannot be converted as long");
+
+        return getValueAsString().map(Long::parseLong);
+    }
+
+    /**
+     * Gets the value of this option as a {@link Snowflake}, present if this option is not a group or subcommand.
+     *
+     * @throws IllegalArgumentException if the type is not user, channel or role
+     * @return The value of this option as a {@link Snowflake}, present if this option is not a group or subcommand.
+     */
+    public Optional<Snowflake> getValueAsSnowflake() {
+        if(getType() != ApplicationCommandOption.Type.USER
+            && getType() != ApplicationCommandOption.Type.ROLE
+            && getType() != ApplicationCommandOption.Type.CHANNEL)
+            // TODO
+            throw new IllegalArgumentException("Option value cannot be converted as snowflake");
+
+        return getValueAsString().map(Snowflake::of);
     }
 
     /**

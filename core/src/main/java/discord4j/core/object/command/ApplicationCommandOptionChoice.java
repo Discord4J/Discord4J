@@ -14,6 +14,11 @@ import java.util.Objects;
  */
 public class ApplicationCommandOptionChoice implements DiscordObject {
 
+    /** The maximum amount of characters that can be in an application command option choice name. */
+    public static final int MAX_NAME_LENGTH = 100;
+    /** The maximum amount of characters that can be in an application command option choice value. */
+    public static final int MAX_VALUE_LENGTH = 100;
+
     /** The gateway associated to this object. */
     private final GatewayDiscordClient gateway;
 
