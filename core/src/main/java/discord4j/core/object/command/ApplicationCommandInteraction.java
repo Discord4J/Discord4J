@@ -85,34 +85,6 @@ public class ApplicationCommandInteraction implements DiscordObject {
         return getOptions().stream().filter(option -> option.getName().equals(name)).findFirst();
     }
 
-    public Optional<ApplicationCommand> getOptionAsSubCommand(final String name) {
-        return getOption(name).flatMap(ApplicationCommandInteractionOption::asSubCommand);
-    }
-
-    public Optional<String> getOptionAsString(final String name) {
-        return getOption(name).flatMap(ApplicationCommandInteractionOption::asString);
-    }
-
-    public Optional<Long> getOptionAsLong(final String name) {
-        return getOption(name).flatMap(ApplicationCommandInteractionOption::asLong);
-    }
-
-    public Optional<Boolean> getOptionAsBoolean(final String name) {
-        return getOption(name).flatMap(ApplicationCommandInteractionOption::asBoolean);
-    }
-
-    public Optional<User> getOptionAsUser(final String name) {
-        return getOption(name).flatMap(ApplicationCommandInteractionOption::asUser);
-    }
-
-    public Optional<Role> getOptionAsRole(final String name) {
-        return getOption(name).flatMap(ApplicationCommandInteractionOption::asRole);
-    }
-
-    public Optional<TextChannel> getOptionAsChannel(final String name) {
-        return getOption(name).flatMap(ApplicationCommandInteractionOption::asChannel);
-    }
-
     @Override
     public GatewayDiscordClient getClient() {
         return gateway;
