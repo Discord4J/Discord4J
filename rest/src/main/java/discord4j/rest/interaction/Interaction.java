@@ -84,7 +84,7 @@ public interface Interaction {
     ApplicationCommandInteractionData getCommandInteractionData();
 
     /**
-     * Build an interaction handler that will acknowledge this request, displaying the source.
+     * Build an interaction handler that will acknowledge this request, displaying a loading state.
      *
      * @return a followup handler to continue processing this interaction asynchronously, until the interaction token
      * bound to this interaction expires after 15 minutes.
@@ -92,8 +92,7 @@ public interface Interaction {
     FollowupInteractionHandler acknowledge();
 
     /**
-     * Build an interaction handler that will produce a text reply to the interaction member, displaying
-     * the source message.
+     * Build an interaction handler that will produce a text reply to the interaction member.
      *
      * @param content the content to be sent as reply
      * @return a followup handler to continue processing this interaction asynchronously, until the interaction token
@@ -103,7 +102,7 @@ public interface Interaction {
 
     /**
      * Build an interaction handler that will produce a reply using the contents of the supplied callback data to the
-     * interaction member, displaying the source message.
+     * interaction member.
      *
      * @param callbackData the data used to produce a reply message
      * @return a followup handler to continue processing this interaction asynchronously, until the interaction token
