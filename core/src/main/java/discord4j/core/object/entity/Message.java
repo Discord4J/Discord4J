@@ -654,7 +654,10 @@ public final class Message implements Entity {
         SOURCE_MESSAGE_DELETED(3),
 
         /** This message came from the urgent message system. */
-        URGENT(4);
+        URGENT(4),
+
+        /** This message is an ephemeral interaction response. */
+        EPHEMERAL(6);
 
         /**
          * The underlying value as represented by Discord.

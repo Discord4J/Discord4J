@@ -23,6 +23,7 @@ import discord4j.core.object.command.ApplicationCommandInteraction;
 import discord4j.core.object.command.Interaction;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Member;
+import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.User;
 import discord4j.discordjson.json.InteractionApplicationCommandCallbackData;
 import discord4j.discordjson.json.InteractionData;
@@ -117,6 +118,13 @@ public class InteractionCreateEvent extends Event {
 
     public Mono<Void> reply(String content) {
         return reply(InteractionApplicationCommandCallbackData.builder().content(content).build());
+    }
+
+    public Mono<Void> replyEphemeral(String content) {
+        return reply(InteractionApplicationCommandCallbackData.builder()
+                .content(content)
+                .flags(Message.Flag.EPHEMERAL.getFlag())
+                .build());
     }
 
     public Mono<Void> reply(InteractionApplicationCommandCallbackData callbackData) {
