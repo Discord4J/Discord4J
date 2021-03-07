@@ -17,9 +17,9 @@
 
 package discord4j.rest.entity;
 
+import discord4j.common.util.Snowflake;
 import discord4j.discordjson.json.MemberData;
 import discord4j.rest.RestClient;
-import discord4j.common.util.Snowflake;
 import reactor.core.publisher.Mono;
 
 /**

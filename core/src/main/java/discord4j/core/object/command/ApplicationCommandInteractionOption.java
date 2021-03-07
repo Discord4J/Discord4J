@@ -1,14 +1,9 @@
 package discord4j.core.object.command;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.DiscordObject;
-import discord4j.core.object.entity.Role;
-import discord4j.core.object.entity.User;
-import discord4j.core.object.entity.channel.TextChannel;
-import discord4j.discordjson.json.*;
+import discord4j.discordjson.json.ApplicationCommandInteractionOptionData;
 import reactor.util.annotation.Nullable;
 
 import java.util.Collections;

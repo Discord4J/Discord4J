@@ -16,10 +16,10 @@
  */
 package discord4j.rest.service;
 
+import discord4j.common.util.Snowflake;
 import discord4j.discordjson.json.*;
 import discord4j.rest.RestTests;
 import discord4j.rest.util.MultipartRequest;
-import discord4j.common.util.Snowflake;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;

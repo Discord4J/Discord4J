@@ -17,8 +17,8 @@
 package discord4j.common;
 
 import org.junit.jupiter.api.Test;
-import reactor.test.StepVerifier;
 import reactor.core.scheduler.Schedulers;
+import reactor.test.StepVerifier;
 
 import java.time.Duration;
 
