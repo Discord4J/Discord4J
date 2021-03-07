@@ -32,7 +32,7 @@ public class ApplicationCommandInteractionOption implements DiscordObject {
     private final ApplicationCommandInteractionOptionData data;
 
     @Nullable
-    private final String guildId;
+    private final Long guildId;
 
     /**
      * Constructs an {@code ApplicationCommandInteractionOption} with an associated {@link GatewayDiscordClient} and Discord data.
@@ -41,7 +41,7 @@ public class ApplicationCommandInteractionOption implements DiscordObject {
      * @param data The raw data as represented by Discord, must be non-null.
      */
     public ApplicationCommandInteractionOption(final GatewayDiscordClient gateway, final ApplicationCommandInteractionOptionData data,
-                                               @Nullable final String guildId) {
+                                               @Nullable final Long guildId) {
         this.gateway = Objects.requireNonNull(gateway);
         this.data = Objects.requireNonNull(data);
         this.guildId = guildId;

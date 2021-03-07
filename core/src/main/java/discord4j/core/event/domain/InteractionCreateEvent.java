@@ -24,9 +24,7 @@ import discord4j.core.object.command.Interaction;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.channel.TextChannel;
-import discord4j.discordjson.json.InteractionApplicationCommandCallbackData;
-import discord4j.discordjson.json.InteractionData;
-import discord4j.discordjson.json.InteractionResponseData;
+import discord4j.discordjson.json.*;
 import discord4j.gateway.ShardInfo;
 import discord4j.rest.RestClient;
 import discord4j.rest.interaction.InteractionOperations;
@@ -64,16 +62,32 @@ public class InteractionCreateEvent extends Event {
         return Snowflake.of(data.channelId().get());
     }
 
+    // TODO: Mono<? extends ?> getChannel()
+
     public Optional<Snowflake> getGuildId() {
         return data.guildId().toOptional().map(Snowflake::of);
+    }
+
+    public Mono<Guild> getGuild() {
+        return Mono.justOrEmpty(getGuildId()).flatMap(getClient()::getGuildById);
     }
 
     public Optional<MemberData> getMemberData() {
         return data.member().toOptional();
     }
 
+    public Optional<Member> getMember() {
+        return data.member().toOptional()
+                .map(data -> new Member(getClient(), data, getGuildId().get().asLong()));
+    }
+
     public ApplicationCommandInteractionData getCommandInteractionData() {
         return data.data().get();
+    }
+
+    public ApplicationCommandInteraction getCommandInteraction() {
+        return new ApplicationCommandInteraction(getClient(), data.data().get(),
+                getGuildId().map(Snowflake::asLong).orElse(null));
     }
 
     public Snowflake getCommandId() {

@@ -59,7 +59,8 @@ public class Interaction implements DiscordObject {
      */
     public Optional<ApplicationCommandInteraction> getApplicationCommandInteraction() {
         return data.data().toOptional()
-            .map(interactionData -> new ApplicationCommandInteraction(gateway, interactionData, data.guildId()));
+            .map(interactionData -> new ApplicationCommandInteraction(gateway, interactionData,
+                    getGuildId().map(Snowflake::asLong).orElse(null)));
     }
 
     /**
@@ -68,7 +69,7 @@ public class Interaction implements DiscordObject {
      * @return The guild id it was sent from, if invoked in a guild.
      */
     public Optional<Snowflake> getGuildId() {
-        return Optional.of(data.guildId()).map(Snowflake::of);
+        return data.guildId().toOptional().map(Snowflake::of);
     }
 
     /**
@@ -86,7 +87,7 @@ public class Interaction implements DiscordObject {
      * @return The channel id it was sent from, if invoked in a guild.
      */
     public Optional<Snowflake> getChannelId() {
-        return Optional.of(data.channelId()).map(Snowflake::of);
+        return data.channelId().toOptional().map(Snowflake::of);
     }
 
     /**
@@ -104,7 +105,7 @@ public class Interaction implements DiscordObject {
      * @return The invoking member, if invoked in a guild.
      */
     public Optional<Member> getMember() {
-        return Optional.of(data.member())
+        return data.member().toOptional()
             .map(data -> new Member(gateway, data, getGuildId().get().asLong()));
     }
 
