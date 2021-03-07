@@ -12,13 +12,21 @@ public enum InteractionResponseType {
      */
     PONG(1),
     /**
-     * Respond to an interaction with a message
+     * ACK a command without sending a message, eating the user's input
+     */
+    ACKNOWLEDGE(2),
+    /**
+     * respond with a message, eating the user's input
+     */
+    CHANNEL_MESSAGE(3),
+    /**
+     * respond with a message, showing the user's input
      */
     CHANNEL_MESSAGE_WITH_SOURCE(4),
     /**
-     * ACK an interaction and send a response later, the user sees a loading state
+     * ACK a command without sending a message, showing the user's input
      */
-    DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE(5);
+    ACKNOWLEDGE_WITH_SOURCE(5);
 
     /**
      * The underlying value as represented by Discord.

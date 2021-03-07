@@ -99,21 +99,33 @@ public final class InteractionOperations implements RestInteraction, Interaction
     @Override
     public FollowupInteractionHandler acknowledge() {
         InteractionResponseData responseData = InteractionResponseData.builder()
-                .type(InteractionResponseType.DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE.getValue())
+                .type(InteractionResponseType.ACKNOWLEDGE.getValue())
                 .data(InteractionApplicationCommandCallbackData.builder().build())
                 .build();
         return new FollowupInteractionHandler(responseData, __ -> Mono.empty());
     }
 
     @Override
-    public FollowupInteractionHandler reply(String content) {
-        return reply(InteractionApplicationCommandCallbackData.builder().content(content).build());
+    public FollowupInteractionHandler acknowledge(boolean withSource) {
+        InteractionResponseData responseData = InteractionResponseData.builder()
+                .type(withSource ? InteractionResponseType.ACKNOWLEDGE_WITH_SOURCE.getValue() :
+                        InteractionResponseType.ACKNOWLEDGE.getValue())
+                .data(InteractionApplicationCommandCallbackData.builder().build())
+                .build();
+        return new FollowupInteractionHandler(responseData, __ -> Mono.empty());
     }
 
     @Override
-    public FollowupInteractionHandler reply(InteractionApplicationCommandCallbackData callbackData) {
+    public FollowupInteractionHandler reply(String content, boolean withSource) {
+        return reply(InteractionApplicationCommandCallbackData.builder().content(content).build(), withSource);
+    }
+
+    @Override
+    public FollowupInteractionHandler reply(InteractionApplicationCommandCallbackData callbackData,
+                                            boolean withSource) {
         InteractionResponseData responseData = InteractionResponseData.builder()
-                .type(InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE.getValue())
+                .type(withSource ? InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE.getValue() :
+                        InteractionResponseType.CHANNEL_MESSAGE.getValue())
                 .data(callbackData)
                 .build();
         return new FollowupInteractionHandler(responseData, __ -> Mono.empty());
