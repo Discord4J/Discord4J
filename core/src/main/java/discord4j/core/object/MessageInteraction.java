@@ -4,7 +4,6 @@ import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.User;
 import discord4j.discordjson.json.MessageInteractionData;
-import discord4j.rest.interaction.Interaction;
 
 import java.util.Objects;
 
@@ -12,7 +11,7 @@ import java.util.Objects;
  * A Discord Message Interaction.
  *
  * @see <a href="https://discord.com/developers/docs/interactions/slash-commands#messageinteraction">
- *     Message Interaction Object</a>
+ * Message Interaction Object</a>
  */
 public class MessageInteraction implements DiscordObject {
 
@@ -42,14 +41,14 @@ public class MessageInteraction implements DiscordObject {
         return Snowflake.of(data.id());
     }
 
-    /**
+    /** TODO
      * Gets the type of interaction.
      *
      * @return The type of interaction
+     *   public Interaction.Type getType() {
+     *      return Interaction.Type.of(data.type());
+     *  }
      */
-    public Interaction.Type getType() {
-        return Interaction.Type.of(data.type());
-    }
 
     /**
      * Gets the name of the {@link ApplicationCommand}.
