@@ -28,6 +28,7 @@ import discord4j.core.object.entity.User;
 import discord4j.discordjson.json.InteractionApplicationCommandCallbackData;
 import discord4j.discordjson.json.InteractionData;
 import discord4j.discordjson.json.InteractionResponseData;
+import discord4j.discordjson.json.UserData;
 import discord4j.gateway.ShardInfo;
 import discord4j.rest.RestClient;
 import discord4j.rest.interaction.InteractionOperations;
@@ -82,9 +83,9 @@ public class InteractionCreateEvent extends Event {
                 .map(data -> new Member(getClient(), data, getGuildId().get().asLong()));
     }
 
-    public Optional<User> getUser() {
-        return data.user().toOptional()
-                .map(data -> new User(getClient(), data));
+    public User getUser() {
+        UserData userData = data.member().isAbsent() ? data.user().get() : data.member().get().user();
+        return new User(getClient(), userData);
     }
 
     public ApplicationCommandInteraction getCommandInteraction() {
