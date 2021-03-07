@@ -79,16 +79,6 @@ public interface RestInteraction {
     FollowupInteractionHandler reply(String content);
 
     /**
-     * Build an interaction handler that will produce an ephemeral text reply to the interaction member, only the
-     * invoking user will see it.
-     *
-     * @param content the content to be sent as ephemeral reply
-     * @return a followup handler to continue processing this interaction asynchronously, until the interaction token
-     * bound to this interaction expires after 15 minutes.
-     */
-    FollowupInteractionHandler replyEphemeral(String content);
-
-    /**
      * Build an interaction handler that will produce a reply using the contents of the supplied callback data to the
      * interaction member.
      *

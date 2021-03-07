@@ -26,6 +26,8 @@ import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.TextChannel;
+import discord4j.core.spec.InteractionApplicationCommandCallbackSpec;
+import discord4j.core.spec.MessageCreateSpec;
 import discord4j.discordjson.json.InteractionApplicationCommandCallbackData;
 import discord4j.discordjson.json.InteractionData;
 import discord4j.discordjson.json.InteractionResponseData;
@@ -38,6 +40,7 @@ import discord4j.rest.util.InteractionResponseType;
 import reactor.core.publisher.Mono;
 
 import java.util.Optional;
+import java.util.function.Consumer;
 
 public class InteractionCreateEvent extends Event {
 
@@ -122,22 +125,27 @@ public class InteractionCreateEvent extends Event {
                 .build());
     }
 
-    public Mono<Void> reply(String content) {
-        return reply(InteractionApplicationCommandCallbackData.builder().content(content).build());
+    public Mono<Void> reply(final String content) {
+        return reply(spec -> spec.setContent(content));
     }
 
-    public Mono<Void> replyEphemeral(String content) {
-        return reply(InteractionApplicationCommandCallbackData.builder()
-                .content(content)
-                .flags(Message.Flag.EPHEMERAL.getFlag())
-                .build());
+    public Mono<Void> replyEphemeral(final String content) {
+        return reply(spec -> spec.setContent(content).setEphemeral(true));
     }
 
-    public Mono<Void> reply(InteractionApplicationCommandCallbackData callbackData) {
-        return createInteractionResponse(InteractionResponseData.builder()
-                .type(InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE.getValue())
-                .data(callbackData)
-                .build());
+    public Mono<Void> reply(final Consumer<? super InteractionApplicationCommandCallbackSpec> spec) {
+        return Mono.defer(
+                () -> {
+                    InteractionApplicationCommandCallbackSpec mutatedSpec = new InteractionApplicationCommandCallbackSpec();
+                    getClient().getRestClient().getRestResources()
+                            .getAllowedMentions()
+                            .ifPresent(mutatedSpec::setAllowedMentions);
+                    spec.accept(mutatedSpec);
+                    return createInteractionResponse(InteractionResponseData.builder()
+                            .type(InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE.getValue())
+                            .data(mutatedSpec.asRequest())
+                            .build());
+                });
     }
 
     public InteractionResponse getInteractionResponse() {

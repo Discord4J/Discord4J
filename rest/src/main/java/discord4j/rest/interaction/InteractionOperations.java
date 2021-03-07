@@ -111,14 +111,6 @@ public final class InteractionOperations implements RestInteraction, Interaction
     }
 
     @Override
-    public FollowupInteractionHandler replyEphemeral(String content) {
-        return reply(InteractionApplicationCommandCallbackData.builder()
-                .content(content)
-                .flags(64)
-                .build());
-    }
-
-    @Override
     public FollowupInteractionHandler reply(InteractionApplicationCommandCallbackData callbackData) {
         InteractionResponseData responseData = InteractionResponseData.builder()
                 .type(InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE.getValue())
