@@ -88,28 +88,18 @@ public class InteractionCreateEvent extends Event {
 
     public Mono<Void> acknowledge() {
         return createInteractionResponse(InteractionResponseData.builder()
-                .type(InteractionResponseType.ACKNOWLEDGE.getValue())
+                .type(InteractionResponseType.DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE.getValue())
                 .data(InteractionApplicationCommandCallbackData.builder().build())
                 .build());
     }
 
-    public Mono<Void> acknowledge(boolean withSource) {
-        return createInteractionResponse(InteractionResponseData.builder()
-                .type(withSource ? InteractionResponseType.ACKNOWLEDGE_WITH_SOURCE.getValue() :
-                        InteractionResponseType.ACKNOWLEDGE.getValue())
-                .data(InteractionApplicationCommandCallbackData.builder().build())
-                .build());
-
+    public Mono<Void> reply(String content) {
+        return reply(InteractionApplicationCommandCallbackData.builder().content(content).build());
     }
 
-    public Mono<Void> reply(String content, boolean withSource) {
-        return reply(InteractionApplicationCommandCallbackData.builder().content(content).build(), withSource);
-    }
-
-    public Mono<Void> reply(InteractionApplicationCommandCallbackData callbackData, boolean withSource) {
+    public Mono<Void> reply(InteractionApplicationCommandCallbackData callbackData) {
         return createInteractionResponse(InteractionResponseData.builder()
-                .type(withSource ? InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE.getValue() :
-                        InteractionResponseType.CHANNEL_MESSAGE.getValue())
+                .type(InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE.getValue())
                 .data(callbackData)
                 .build());
     }
