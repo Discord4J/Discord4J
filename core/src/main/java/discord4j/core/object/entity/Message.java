@@ -460,16 +460,6 @@ public final class Message implements Entity {
     }
 
     /**
-     * Gets the interaction data, if the message is a response to an {@link discord4j.rest.interaction.Interaction}.
-     *
-     * @return The interaction data, if the message is a response to an {@link discord4j.rest.interaction.Interaction}.
-     */
-    public Optional<MessageInteraction> getInteraction() {
-        return data.interaction().toOptional()
-            .map(data -> new MessageInteraction(gateway, data));
-    }
-
-    /**
      * Requests to edit this message.
      *
      * @param spec A {@link Consumer} that provides a "blank" {@link MessageEditSpec} to be operated on.
