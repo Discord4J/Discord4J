@@ -29,6 +29,8 @@ import reactor.core.publisher.Mono;
 import reactor.util.Logger;
 import reactor.util.Loggers;
 
+import java.util.Optional;
+
 public class InteractionCreateEvent extends Event {
 
     private static final Logger log = Loggers.getLogger(InteractionCreateEvent.class);
@@ -48,23 +50,23 @@ public class InteractionCreateEvent extends Event {
     }
 
     public Snowflake getId() {
-        return operations.getId();
-    }
-
-    public Snowflake getGuildId() {
-        return operations.getGuildId();
+        return Snowflake.of(data.id());
     }
 
     public Snowflake getChannelId() {
-        return operations.getChannelId();
+        return Snowflake.of(data.channelId().get());
     }
 
-    public MemberData getMemberData() {
-        return operations.getMemberData();
+    public Optional<Snowflake> getGuildId() {
+        return data.guildId().toOptional().map(Snowflake::of);
+    }
+
+    public Optional<MemberData> getMemberData() {
+        return data.member().toOptional();
     }
 
     public ApplicationCommandInteractionData getCommandInteractionData() {
-        return operations.getCommandInteractionData();
+        return data.data().get();
     }
 
     public Snowflake getCommandId() {
