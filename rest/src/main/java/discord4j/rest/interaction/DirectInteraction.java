@@ -18,27 +18,21 @@
 package discord4j.rest.interaction;
 
 import discord4j.common.annotations.Experimental;
-import discord4j.discordjson.json.ApplicationCommandInteractionData;
+import discord4j.discordjson.json.UserData;
 
 /**
- * Represents an application command that can be tested against incoming interactions and to build a response sequence.
+ * An {@link RestInteraction} originated from a DM channel, available for global commands and users that share a guild
+ * with a bot associated with this application. Allows access to the interaction user.
+ *
+ * @see Interactions
  */
 @Experimental
-public interface ApplicationCommandDefinition {
+public interface DirectInteraction extends RestInteraction {
 
     /**
-     * Match whether the incoming interaction can be handled by this command.
+     * Return the raw user data that created this interaction.
      *
-     * @param acid the incoming interaction data
-     * @return {@code true} if this command can handle this interaction, {@code false} otherwise
+     * @return a user data object
      */
-    boolean test(ApplicationCommandInteractionData acid);
-
-    /**
-     * Return the actual component responsible for maintaining interaction responses.
-     *
-     * @param interaction the interaction this command is handling
-     * @return a source for responses around the given interaction
-     */
-    InteractionHandler createResponseHandler(RestInteraction interaction);
+    UserData getUserData();
 }
