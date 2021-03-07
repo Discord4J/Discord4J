@@ -72,17 +72,9 @@ public class InteractionCreateEvent extends Event {
         return Mono.justOrEmpty(getGuildId()).flatMap(getClient()::getGuildById);
     }
 
-    public Optional<MemberData> getMemberData() {
-        return data.member().toOptional();
-    }
-
     public Optional<Member> getMember() {
         return data.member().toOptional()
                 .map(data -> new Member(getClient(), data, getGuildId().get().asLong()));
-    }
-
-    public ApplicationCommandInteractionData getCommandInteractionData() {
-        return data.data().get();
     }
 
     public ApplicationCommandInteraction getCommandInteraction() {

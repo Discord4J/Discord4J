@@ -20,6 +20,7 @@ import discord4j.common.annotations.Experimental;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.Embed;
+import discord4j.core.object.MessageInteraction;
 import discord4j.core.object.MessageReference;
 import discord4j.core.object.entity.channel.GuildChannel;
 import discord4j.core.object.entity.channel.MessageChannel;
@@ -456,6 +457,16 @@ public final class Message implements Entity {
     public Optional<Message> getReferencedMessage() {
         return Possible.flatOpt(data.referencedMessage())
             .map(data -> new Message(gateway, data));
+    }
+
+    /**
+     * Gets the interaction data, if the message is a response to an {@link discord4j.rest.interaction.Interactions}.
+     *
+     * @return The interaction data, if the message is a response to an {@link discord4j.rest.interaction.Interactions}.
+     */
+    public Optional<MessageInteraction> getInteraction() {
+        return data.interaction().toOptional()
+                .map(data -> new MessageInteraction(gateway, data));
     }
 
     /**
