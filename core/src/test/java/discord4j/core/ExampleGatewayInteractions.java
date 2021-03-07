@@ -57,14 +57,14 @@ public class ExampleGatewayInteractions {
 
         Interactions interactions = Interactions.create()
                 .onGuildCommand(randomCommand, Snowflake.of(208023865127862272L),
-                        interaction -> interaction.acknowledge(true)
+                        interaction -> interaction.acknowledge()
                                 .withFollowup(it -> it.createFollowupMessage(
                                         result(random, interaction.getCommandInteractionData()))))
                 .onGlobalCommand(pingCommand,
                         createHandler()
-                                .guild(interaction -> interaction.acknowledge(true)
+                                .guild(interaction -> interaction.acknowledge()
                                         .withFollowup(it -> it.createFollowupMessage("Pong!")))
-                                .direct(interaction -> interaction.reply("Direct Pong!", false))
+                                .direct(interaction -> interaction.reply("Direct Pong!"))
                                 .build());
 
         interactions.createCommands(client.getRestClient()).block();
