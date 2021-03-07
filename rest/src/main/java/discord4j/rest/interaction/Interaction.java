@@ -19,10 +19,9 @@ package discord4j.rest.interaction;
 
 import discord4j.common.annotations.Experimental;
 import discord4j.common.util.Snowflake;
+import discord4j.discordjson.json.*;
 
-import discord4j.discordjson.json.ApplicationCommandInteractionData;
-import discord4j.discordjson.json.InteractionApplicationCommandCallbackData;
-import discord4j.discordjson.json.InteractionData;
+import java.util.Optional;
 
 /**
  * A single interaction coming from Discord. An application command can be reacted upon through this class by first
@@ -32,7 +31,7 @@ import discord4j.discordjson.json.InteractionData;
  * @see Interactions
  */
 @Experimental
-public interface RestInteraction {
+public interface Interaction {
 
     /**
      * Return the raw data for this interaction.
@@ -49,11 +48,39 @@ public interface RestInteraction {
     Snowflake getId();
 
     /**
-     * Return the channel ID where this interaction was created.
+     * Return the guild ID where this interaction was created, if invoked in a guild.
+     *
+     * @return this interaction Snowflake guild ID, if invoked in a guild.
+     */
+    Optional<Snowflake> getGuildId();
+
+    /**
+     * Return the channel ID where this interaction was created, if invoked in a guild.
+     *
+     * @return this interaction Snowflake channel ID, if invoked in a guild.
+     */
+    Optional<Snowflake> getChannelId();
+
+    /**
+     * Return the raw member data that created this interaction, if invoked in a guild.
      *
      * @return a member data object, if invoked in a guild.
      */
     Optional<MemberData> getMemberData();
+
+    /**
+     * Return the raw user data that created this interaction, if invoked in a DM.
+     *
+     * @return a user data object, if invoked in a DM.
+     */
+    Optional<UserData> getUserData();
+
+    /**
+     * Return this interaction member.
+     *
+     * @return an object with methods to operate on this interaction member
+     */
+    InteractionMember getInteractionMember();
 
     /**
      * Return the raw application command interaction data from this interaction.

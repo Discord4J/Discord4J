@@ -40,5 +40,5 @@ public interface ApplicationCommandDefinition {
      * @param interaction the interaction this command is handling
      * @return a source for responses around the given interaction
      */
-    InteractionHandler createResponseHandler(RestInteraction interaction);
+    InteractionHandler createResponseHandler(Interaction interaction);
 }

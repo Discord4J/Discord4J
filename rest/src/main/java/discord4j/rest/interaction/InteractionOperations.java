@@ -21,21 +21,26 @@ import discord4j.common.annotations.Experimental;
 import discord4j.common.util.Snowflake;
 import discord4j.discordjson.json.*;
 import discord4j.rest.RestClient;
+import discord4j.rest.entity.RestMember;
+import discord4j.rest.entity.RestRole;
 import discord4j.rest.util.InteractionResponseType;
+import discord4j.rest.util.PermissionSet;
 import discord4j.rest.util.WebhookMultipartRequest;
 import reactor.core.publisher.Mono;
+
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * A default implementation for REST-based interaction handling and response.
  */
 @Experimental
-public final class InteractionOperations implements RestInteraction, InteractionResponse,
-        GuildInteraction, DirectInteraction {
+public class InteractionOperations implements Interaction, InteractionResponse, InteractionMember {
 
     private final RestClient restClient;
     private final InteractionData interactionData;
     private final Mono<Long> applicationId;
-    private final InteractionMemberOperations memberOperations;
 
     /**
      * Create an interaction operations object with the given parameters.
@@ -48,32 +53,7 @@ public final class InteractionOperations implements RestInteraction, Interaction
         this.restClient = restClient;
         this.interactionData = interactionData;
         this.applicationId = applicationId;
-        this.memberOperations = new InteractionMemberOperations(restClient, interactionData);
     }
-
-    /////////////////////////////////////////////////////////////////
-    // GuildInteraction
-
-    @Override
-    public Snowflake getGuildId() {
-        return Snowflake.of(interactionData.guildId().get());
-    }
-
-    @Override
-    public InteractionMember getInteractionMember() {
-        return memberOperations;
-    }
-
-    /////////////////////////////////////////////////////////////////
-    // DirectInteraction
-
-    @Override
-    public UserData getUserData() {
-        return interactionData.user().get();
-    }
-
-    /////////////////////////////////////////////////////////////////
-    // Interaction
 
     @Override
     public InteractionData getData() {
@@ -86,14 +66,33 @@ public final class InteractionOperations implements RestInteraction, Interaction
     }
 
     @Override
-    public Snowflake getChannelId() {
-        // TODO: will need a different handling if this starts being absent
-        return Snowflake.of(interactionData.channelId().get());
+    public Optional<Snowflake> getGuildId() {
+        return interactionData.guildId().toOptional().map(Snowflake::of);
+    }
+
+    @Override
+    public Optional<Snowflake> getChannelId() {
+        return interactionData.channelId().toOptional().map(Snowflake::of);
+    }
+
+    @Override
+    public Optional<MemberData> getMemberData() {
+        return interactionData.member().toOptional();
+    }
+
+    @Override
+    public Optional<UserData> getUserData() {
+        return interactionData.user().toOptional();
     }
 
     @Override
     public ApplicationCommandInteractionData getCommandInteractionData() {
         return interactionData.data().get();
+    }
+
+    @Override
+    public InteractionMember getInteractionMember() {
+        return this;
     }
 
     @Override
@@ -131,9 +130,6 @@ public final class InteractionOperations implements RestInteraction, Interaction
         return new FollowupInteractionHandler(responseData, __ -> Mono.empty());
     }
 
-    /////////////////////////////////////////////////////////////////
-    // InteractionResponse
-
     @Override
     public Mono<MessageData> editInitialResponse(WebhookMessageEditRequest request) {
         return applicationId.flatMap(id -> restClient.getWebhookService()
@@ -164,5 +160,27 @@ public final class InteractionOperations implements RestInteraction, Interaction
     public Mono<MessageData> editFollowupMessage(long messageId, WebhookMessageEditRequest request, boolean wait) {
         return applicationId.flatMap(id -> restClient.getWebhookService()
                 .modifyWebhookMessage(id, interactionData.token(), String.valueOf(messageId), request));
+    }
+
+    @Override
+    public Snowflake getUserId() {
+        return Snowflake.of(getMemberData().user().id());
+    }
+
+    @Override
+    public Set<RestRole> getRoles() {
+        return getMemberData().roles().stream()
+                .map(id -> RestRole.create(restClient, getGuildId(), Snowflake.of(id)))
+                .collect(Collectors.toSet());
+    }
+
+    @Override
+    public PermissionSet getPermissions() {
+        return PermissionSet.of(Long.parseLong(getMemberData().permissions().get()));
+    }
+
+    @Override
+    public RestMember asRestMember() {
+        return RestMember.create(restClient, getGuildId(), getUserId());
     }
 }

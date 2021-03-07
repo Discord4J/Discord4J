@@ -34,8 +34,6 @@ import discord4j.rest.interaction.InteractionResponse;
 import discord4j.rest.util.InteractionResponseType;
 import reactor.core.publisher.Mono;
 
-import java.util.Optional;
-
 public class InteractionCreateEvent extends Event {
 
     private final InteractionData data;
@@ -57,23 +55,31 @@ public class InteractionCreateEvent extends Event {
     }
 
     public Snowflake getId() {
-        return Snowflake.of(data.id());
+        return operations.getId();
+    }
+
+    public Snowflake getGuildId() {
+        return operations.getGuildId();
+    }
+
+    public Mono<Guild> getGuild() {
+        return getClient().getGuildById(getGuildId());
     }
 
     public Snowflake getChannelId() {
-        return Snowflake.of(data.channelId().get());
+        return operations.getChannelId();
     }
 
-    public Optional<Snowflake> getGuildId() {
-        return data.guildId().toOptional().map(Snowflake::of);
+    public Mono<TextChannel> getChannel() {
+        return getClient().getChannelById(getChannelId()).cast(TextChannel.class);
     }
 
-    public Optional<MemberData> getMemberData() {
-        return data.member().toOptional();
+    public Member getMember() {
+        return new Member(getClient(), operations.getMemberData(), getGuildId().asLong());
     }
 
-    public ApplicationCommandInteractionData getCommandInteractionData() {
-        return data.data().get();
+    public ApplicationCommandInteraction getCommandInteraction() {
+        return new ApplicationCommandInteraction(getClient(), operations.getCommandInteractionData(), data.guildId());
     }
 
     public Snowflake getCommandId() {

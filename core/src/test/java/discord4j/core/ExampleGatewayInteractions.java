@@ -28,8 +28,6 @@ import discord4j.rest.util.ApplicationCommandOptionType;
 import java.util.Collections;
 import java.util.Random;
 
-import static discord4j.rest.interaction.Interactions.createHandler;
-
 public class ExampleGatewayInteractions {
 
     public static void main(String[] args) {
@@ -48,24 +46,13 @@ public class ExampleGatewayInteractions {
                         .build())
                 .build();
 
-        ApplicationCommandRequest pingCommand = ApplicationCommandRequest.builder()
-                .name("ping")
-                .description("Get a pong!")
-                .build();
-
         Random random = new Random();
 
         Interactions interactions = Interactions.create()
                 .onGuildCommand(randomCommand, Snowflake.of(208023865127862272L),
                         interaction -> interaction.acknowledge(true)
                                 .withFollowup(it -> it.createFollowupMessage(
-                                        result(random, interaction.getCommandInteractionData()))))
-                .onGlobalCommand(pingCommand,
-                        createHandler()
-                                .guild(interaction -> interaction.acknowledge(true)
-                                        .withFollowup(it -> it.createFollowupMessage("Pong!")))
-                                .direct(interaction -> interaction.reply("Direct Pong!", false))
-                                .build());
+                                        result(random, interaction.getCommandInteractionData()))));
 
         interactions.createCommands(client.getRestClient()).block();
 

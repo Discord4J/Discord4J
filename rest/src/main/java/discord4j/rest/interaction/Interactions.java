@@ -56,8 +56,7 @@ import static reactor.function.TupleUtils.function;
  * be run when an interaction for that application command is received. Commands are created or updated by using
  * {@link #createCommands(RestClient)}.
  * <p>
- * Once an {@link RestInteraction} is received, you need to submit a response to Discord within 3 seconds. You can do
- * that
+ * Once an {@link Interaction} is received, you need to submit a response to Discord within 3 seconds. You can do that
  * by calling one of the {@code acknowledge} or {@code reply} methods under it, that will allow you to work with a
  * followup response handler. Currently this allows you to delete or modify the initial response, while also adding new
  * messages as followup.
@@ -94,7 +93,7 @@ public class Interactions {
      * @return this object
      */
     public Interactions onCommand(Snowflake id,
-                                  Function<RestInteraction, InteractionHandler> action) {
+                                  Function<Interaction, InteractionHandler> action) {
         commands.add(new RequestApplicationCommandDefinition(acid -> acid.id().equals(id.asString()), action));
         return this;
     }
@@ -107,7 +106,7 @@ public class Interactions {
      * @return this object
      */
     public Interactions onCommand(String name,
-                                  Function<RestInteraction, InteractionHandler> action) {
+                                  Function<Interaction, InteractionHandler> action) {
         commands.add(new RequestApplicationCommandDefinition(acid -> acid.name().equals(name), action));
         return this;
     }
@@ -123,8 +122,8 @@ public class Interactions {
      */
     public Interactions onGuildCommand(ApplicationCommandRequest createRequest,
                                        Snowflake guildId,
-                                       Function<GuildInteraction, InteractionHandler> action) {
-        commands.add(new GuildApplicationCommandDefinition(acid -> acid.name().equals(createRequest.name()), action));
+                                       Function<Interaction, InteractionHandler> action) {
+        commands.add(new RequestApplicationCommandDefinition(acid -> acid.name().equals(createRequest.name()), action));
         createRequests.add(new GuildApplicationCommandRequest(createRequest, guildId));
         return this;
     }
@@ -132,17 +131,13 @@ public class Interactions {
     /**
      * Use an application command definition to also add a handler associated with it. If you call
      * {@link #createCommands(RestClient)} this command will be created globally.
-     * <p>
-     * Global commands can be invoked through a guild or through DMs. You can customize each source behavior using
-     * {@link Interactions#createHandler} builder. Leaving a source without a handler will cause an "interaction failed"
-     * built-in message as user's reply.
      *
      * @param createRequest a command definition
      * @param action an interaction handler
      * @return this object
      */
     public Interactions onGlobalCommand(ApplicationCommandRequest createRequest,
-                                        Function<RestInteraction, InteractionHandler> action) {
+                                        Function<Interaction, InteractionHandler> action) {
         commands.add(new RequestApplicationCommandDefinition(acid -> acid.name().equals(createRequest.name()), action));
         createRequests.add(new GlobalApplicationCommandRequest(createRequest));
         return this;
@@ -245,45 +240,6 @@ public class Interactions {
     }
 
     /**
-     * Create an interaction handler that only accepts guild interactions, giving you access to methods specific to
-     * {@link GuildInteraction} instances. To create an interaction handler capable of also handling direct messages,
-     * see {@link #createHandler()}.
-     *
-     * @param handlerFunction a mapper to derive an {@link InteractionHandler} from a {@link GuildInteraction}
-     * @return an interaction handling function, to be used in methods like
-     * {@link #onGlobalCommand(ApplicationCommandRequest, Function)}
-     */
-    public static Function<RestInteraction, InteractionHandler> guild(Function<GuildInteraction, InteractionHandler> handlerFunction) {
-        return new InteractionHandlerSpec(handlerFunction, it -> NOOP_HANDLER_FUNCTION.apply(it)).build();
-    }
-
-    /**
-     * Create an interaction handler that only accepts direct message interactions, giving you access to methods
-     * specific to {@link DirectInteraction} instances. To create an interaction handler capable of also handling
-     * guild messages, see {@link #createHandler()}.
-     *
-     * @param handlerFunction a mapper to derive an {@link InteractionHandler} from a {@link DirectInteraction}
-     * @return an interaction handling function, to be used in methods like
-     * {@link #onGlobalCommand(ApplicationCommandRequest, Function)}
-     */
-    public static Function<RestInteraction, InteractionHandler> direct(Function<DirectInteraction,
-            InteractionHandler> handlerFunction) {
-        return new InteractionHandlerSpec(it -> NOOP_HANDLER_FUNCTION.apply(it), handlerFunction).build();
-    }
-
-    /**
-     * Start building a new interaction handling function, in order to combine guild and direct message handling. Finish
-     * the mapper function by calling {@link InteractionHandlerSpec#build()}. By default this handler does nothing and
-     * methods like {@link InteractionHandlerSpec#guild(Function)} or {@link InteractionHandlerSpec#direct(Function)}
-     * need to be called to add behavior.
-     *
-     * @return a new interaction handler builder
-     */
-    public static InteractionHandlerSpec createHandler() {
-        return new InteractionHandlerSpec(it -> NOOP_HANDLER_FUNCTION.apply(it), it -> NOOP_HANDLER_FUNCTION.apply(it));
-    }
-
-    /**
      * An alias for a Reactor Netty server route.
      */
     public interface ReactorNettyServerHandler extends
@@ -333,10 +289,10 @@ public class Interactions {
     static class RequestApplicationCommandDefinition implements ApplicationCommandDefinition {
 
         private final Predicate<ApplicationCommandInteractionData> matcher;
-        private final Function<RestInteraction, InteractionHandler> action;
+        private final Function<Interaction, InteractionHandler> action;
 
         public RequestApplicationCommandDefinition(Predicate<ApplicationCommandInteractionData> matcher,
-                                                   Function<RestInteraction, InteractionHandler> action) {
+                                                   Function<Interaction, InteractionHandler> action) {
             this.matcher = matcher;
             this.action = action;
         }
@@ -346,29 +302,8 @@ public class Interactions {
             return matcher.test(acid);
         }
 
-        public InteractionHandler createResponseHandler(RestInteraction interaction) {
+        public InteractionHandler createResponseHandler(Interaction interaction) {
             return action.apply(interaction);
-        }
-    }
-
-    static class GuildApplicationCommandDefinition implements ApplicationCommandDefinition {
-
-        private final Predicate<ApplicationCommandInteractionData> matcher;
-        private final Function<GuildInteraction, InteractionHandler> action;
-
-        public GuildApplicationCommandDefinition(Predicate<ApplicationCommandInteractionData> matcher,
-                                                 Function<GuildInteraction, InteractionHandler> action) {
-            this.matcher = matcher;
-            this.action = action;
-        }
-
-        @Override
-        public boolean test(ApplicationCommandInteractionData acid) {
-            return matcher.test(acid);
-        }
-
-        public InteractionHandler createResponseHandler(RestInteraction interaction) {
-            return action.apply((GuildInteraction) interaction);
         }
     }
 
@@ -379,20 +314,18 @@ public class Interactions {
         }
 
         @Override
-        public InteractionHandler createResponseHandler(RestInteraction interaction) {
-            return NOOP_HANDLER_FUNCTION.apply(interaction);
-        }
-    };
+        public InteractionHandler createResponseHandler(Interaction interaction) {
+            return new InteractionHandler() {
+                @Override
+                public InteractionResponseData response() {
+                    return interaction.acknowledge().response();
+                }
 
-    static Function<RestInteraction, InteractionHandler> NOOP_HANDLER_FUNCTION = it -> new InteractionHandler() {
-        @Override
-        public InteractionResponseData response() {
-            return it.acknowledge().response();
-        }
-
-        @Override
-        public Publisher<?> onInteractionResponse(InteractionResponse response) {
-            return Mono.empty();
+                @Override
+                public Publisher<?> onInteractionResponse(InteractionResponse response) {
+                    return Mono.empty();
+                }
+            };
         }
     };
 }
