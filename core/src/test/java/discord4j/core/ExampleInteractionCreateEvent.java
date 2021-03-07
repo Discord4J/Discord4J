@@ -21,6 +21,7 @@ import discord4j.core.event.ReactiveEventAdapter;
 import discord4j.core.event.domain.InteractionCreateEvent;
 import discord4j.core.object.command.ApplicationCommandInteraction;
 import discord4j.core.object.command.ApplicationCommandInteractionOption;
+import discord4j.core.object.command.ApplicationCommandInteractionOptionValue;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
 import discord4j.rest.RestClient;
@@ -80,7 +81,8 @@ public class ExampleInteractionCreateEvent {
 
     private static String result(Random random, ApplicationCommandInteraction acid) {
         long digits = acid.getOption("digits")
-            .flatMap(ApplicationCommandInteractionOption::getValueAsLong)
+            .flatMap(ApplicationCommandInteractionOption::getValue)
+                .map(ApplicationCommandInteractionOptionValue::asLong)
             .orElse(1L);
         StringBuilder result = new StringBuilder();
         for (int i = 0; i < Math.max(1, Math.min(20, digits)); i++) {
