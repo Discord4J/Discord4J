@@ -18,27 +18,27 @@
 package discord4j.rest.interaction;
 
 import discord4j.common.annotations.Experimental;
-import discord4j.discordjson.json.ApplicationCommandInteractionData;
+import discord4j.common.util.Snowflake;
 
 /**
- * Represents an application command that can be tested against incoming interactions and to build a response sequence.
+ * An {@link RestInteraction} originated from a guild, giving access to specific guild ID and interaction member data.
+ *
+ * @see Interactions
  */
 @Experimental
-public interface ApplicationCommandDefinition {
+public interface GuildInteraction extends RestInteraction {
 
     /**
-     * Match whether the incoming interaction can be handled by this command.
+     * Return the guild ID where this interaction was created.
      *
-     * @param acid the incoming interaction data
-     * @return {@code true} if this command can handle this interaction, {@code false} otherwise
+     * @return this interaction Snowflake guild ID
      */
-    boolean test(ApplicationCommandInteractionData acid);
+    Snowflake getGuildId();
 
     /**
-     * Return the actual component responsible for maintaining interaction responses.
+     * Return this interaction member.
      *
-     * @param interaction the interaction this command is handling
-     * @return a source for responses around the given interaction
+     * @return an object with methods to operate on this interaction member
      */
-    InteractionHandler createResponseHandler(RestInteraction interaction);
+    InteractionMember getInteractionMember();
 }
