@@ -25,6 +25,7 @@ import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.User;
+import discord4j.core.object.entity.channel.TextChannel;
 import discord4j.discordjson.json.InteractionApplicationCommandCallbackData;
 import discord4j.discordjson.json.InteractionData;
 import discord4j.discordjson.json.InteractionResponseData;
@@ -76,6 +77,10 @@ public class InteractionCreateEvent extends Event {
 
     public Snowflake getChannelId() {
         return Snowflake.of(data.channelId().get());
+    }
+
+    public Mono<TextChannel> getChannel() {
+        return getClient().getChannelById(getChannelId()).cast(TextChannel.class);
     }
 
     public Optional<Member> getMember() {
