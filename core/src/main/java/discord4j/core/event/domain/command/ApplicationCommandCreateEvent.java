@@ -15,7 +15,8 @@ import java.util.Optional;
  * Dispatched when an application command relevant to the current user is created.
  * This event is dispatched by Discord.
  *
- * @see <a href="https://discord.com/developers/docs/topics/gateway#application-command-create">Application Command Create</a>
+ * @see
+ * <a href="https://discord.com/developers/docs/topics/gateway#application-command-create">Application Command Create</a>
  */
 public class ApplicationCommandCreateEvent extends Event {
 

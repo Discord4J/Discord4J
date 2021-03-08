@@ -10,7 +10,7 @@ import java.util.Objects;
  * A Discord application command option choice.
  *
  * @see <a href="https://discord.com/developers/docs/interactions/slash-commands#applicationcommandoptionchoice">
- *     Application Command Option Choice Object</a>
+ * Application Command Option Choice Object</a>
  */
 public class ApplicationCommandOptionChoice implements DiscordObject {
 
@@ -26,12 +26,14 @@ public class ApplicationCommandOptionChoice implements DiscordObject {
     private final ApplicationCommandOptionChoiceData data;
 
     /**
-     * Constructs an {@code ApplicationCommandOptionChoice} with an associated {@link GatewayDiscordClient} and Discord data.
+     * Constructs an {@code ApplicationCommandOptionChoice} with an associated {@link GatewayDiscordClient} and
+     * Discord data.
      *
      * @param gateway The {@link GatewayDiscordClient} associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
      */
-    public ApplicationCommandOptionChoice(final GatewayDiscordClient gateway, final ApplicationCommandOptionChoiceData data) {
+    public ApplicationCommandOptionChoice(final GatewayDiscordClient gateway,
+                                          final ApplicationCommandOptionChoiceData data) {
         this.gateway = Objects.requireNonNull(gateway);
         this.data = Objects.requireNonNull(data);
     }
@@ -62,7 +64,7 @@ public class ApplicationCommandOptionChoice implements DiscordObject {
     public long asLong() {
         try {
             return Long.parseLong(data.value());
-        } catch(NumberFormatException err) {
+        } catch (NumberFormatException err) {
             // TODO
             throw new IllegalArgumentException("Choice value cannot be converted to long");
         }

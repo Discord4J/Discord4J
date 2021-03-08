@@ -20,13 +20,10 @@ import discord4j.core.object.entity.Message;
 import discord4j.discordjson.json.AllowedMentionsData;
 import discord4j.discordjson.json.EmbedData;
 import discord4j.discordjson.json.InteractionApplicationCommandCallbackData;
-import discord4j.discordjson.json.MessageReferenceData;
 import discord4j.discordjson.possible.Possible;
 import discord4j.rest.util.AllowedMentions;
 import reactor.util.annotation.Nullable;
-import reactor.util.function.Tuple2;
 
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;

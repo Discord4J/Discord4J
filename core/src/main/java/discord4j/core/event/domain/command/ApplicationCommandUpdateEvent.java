@@ -14,7 +14,8 @@ import java.util.Optional;
  * Dispatched when an application command relevant to the current user is updated.
  * This event is dispatched by Discord.
  *
- * @see <a href="https://discord.com/developers/docs/topics/gateway#application-command-update">Application Command Update</a>
+ * @see
+ * <a href="https://discord.com/developers/docs/topics/gateway#application-command-update">Application Command Update</a>
  */
 public class ApplicationCommandUpdateEvent extends ApplicationCommandEvent {
 
@@ -22,7 +23,8 @@ public class ApplicationCommandUpdateEvent extends ApplicationCommandEvent {
     @Nullable
     private final Long guildId;
 
-    public ApplicationCommandUpdateEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, ApplicationCommand command, @Nullable Long guildId) {
+    public ApplicationCommandUpdateEvent(GatewayDiscordClient gateway, ShardInfo shardInfo,
+                                         ApplicationCommand command, @Nullable Long guildId) {
         super(gateway, shardInfo);
         this.command = command;
         this.guildId = guildId;
