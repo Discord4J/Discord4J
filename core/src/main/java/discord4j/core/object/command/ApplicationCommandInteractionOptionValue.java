@@ -79,7 +79,7 @@ public class ApplicationCommandInteractionOptionValue implements DiscordObject {
     }
 
     public Mono<Channel> asChannel() {
-        if (type != ApplicationCommandOption.Type.ROLE.getValue()) {
+        if (type != ApplicationCommandOption.Type.CHANNEL.getValue()) {
             throw new IllegalArgumentException("Option value cannot be converted as channel");
         }
 
