@@ -72,7 +72,7 @@ public class ExampleInteractionCreateEvent {
                 if (event.getCommandName().equals("random")) {
                     return event.acknowledge()
                             .then(event.getInteractionResponse().createFollowupMessage(result(random,
-                                    event.getCommandInteraction())));
+                                    event.getInteraction().getCommandInteraction())));
                 }
                 return Mono.empty();
             }
@@ -81,9 +81,9 @@ public class ExampleInteractionCreateEvent {
 
     private static String result(Random random, ApplicationCommandInteraction acid) {
         long digits = acid.getOption("digits")
-            .flatMap(ApplicationCommandInteractionOption::getValue)
+                .flatMap(ApplicationCommandInteractionOption::getValue)
                 .map(ApplicationCommandInteractionOptionValue::asLong)
-            .orElse(1L);
+                .orElse(1L);
         StringBuilder result = new StringBuilder();
         for (int i = 0; i < Math.max(1, Math.min(20, digits)); i++) {
             result.append(random.nextInt(10));

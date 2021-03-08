@@ -34,6 +34,10 @@ public class Interaction implements DiscordObject {
         this.data = Objects.requireNonNull(data);
     }
 
+    public InteractionData getData() {
+        return data;
+    }
+
     /**
      * Gets the id of the interaction.
      *
@@ -116,6 +120,15 @@ public class Interaction implements DiscordObject {
     public User getUser() {
         UserData userData = data.member().isAbsent() ? data.user().get() : data.member().get().user();
         return new User(getClient(), userData);
+    }
+
+    /**
+     * Gets the continuation token for responding to the interaction.
+     *
+     * @return The continuation token for responding to the interaction.
+     */
+    public String getToken() {
+        return data.token();
     }
 
     @Override

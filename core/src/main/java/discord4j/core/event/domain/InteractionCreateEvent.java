@@ -42,101 +42,18 @@ import java.util.function.Consumer;
 
 public class InteractionCreateEvent extends Event {
 
-    private final InteractionData data;
+    private final Interaction interaction;
     private final InteractionOperations operations;
 
-    public InteractionCreateEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, InteractionData data) {
+    public InteractionCreateEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, Interaction interaction) {
         super(gateway, shardInfo);
-        this.data = data;
+        this.interaction = interaction;
         RestClient restClient = getClient().rest();
-        this.operations = new InteractionOperations(restClient, data, restClient.getApplicationId());
-    }
-
-    public InteractionData getData() {
-        return data;
+        this.operations = new InteractionOperations(restClient, interaction.getData(), restClient.getApplicationId());
     }
 
     public Interaction getInteraction() {
-        return new Interaction(getClient(), data);
-    }
-
-    /**
-     * Gets the id of the interaction.
-     *
-     * @return The id of the interaction.
-     */
-    public Snowflake getId() {
-        return Snowflake.of(data.id());
-    }
-
-    /**
-     * Gets the type of interaction.
-     *
-     * @return The type of interaction.
-     */
-    public Interaction.Type getType() {
-        return Interaction.Type.of(data.type());
-    }
-
-    /**
-     * Gets the guild id it was sent from, if invoked in a guild.
-     *
-     * @return The guild id it was sent from, if invoked in a guild.
-     */
-    public Optional<Snowflake> getGuildId() {
-        return data.guildId().toOptional().map(Snowflake::of);
-    }
-
-    /**
-     * Gets the guild it was sent from, if invoked in a guild.
-     *
-     * @return The guild it was sent from, if invoked in a guild.
-     */
-    public Mono<Guild> getGuild() {
-        return Mono.justOrEmpty(getGuildId()).flatMap(getClient()::getGuildById);
-    }
-
-    /**
-     * Gets the channel id it was sent from.
-     *
-     * @return The channel id it was sent from.
-     */
-    public Snowflake getChannelId() {
-        return Snowflake.of(data.channelId().get());
-    }
-
-    public Mono<TextChannel> getChannel() {
-        return getClient().getChannelById(getChannelId()).cast(TextChannel.class);
-    }
-
-    /**
-     * Gets the invoking member, if invoked in a guild.
-     *
-     * @return The invoking member, if invoked in a guild.
-     */
-    public Optional<Member> getMember() {
-        return data.member().toOptional()
-                .map(data -> new Member(getClient(), data, getGuildId().get().asLong()));
-    }
-
-    /**
-     * Gets the invoking user.
-     *
-     * @return The invoking user.
-     */
-    public User getUser() {
-        UserData userData = data.member().isAbsent() ? data.user().get() : data.member().get().user();
-        return new User(getClient(), userData);
-    }
-
-    /**
-     * Gets the command data payload.
-     *
-     * @return The command data payload.
-     */
-    public ApplicationCommandInteraction getCommandInteraction() {
-        return new ApplicationCommandInteraction(getClient(), data.data().get(),
-                getGuildId().map(Snowflake::asLong).orElse(null));
+        return interaction;
     }
 
     public Snowflake getCommandId() {
@@ -148,8 +65,8 @@ public class InteractionCreateEvent extends Event {
     }
 
     private Mono<Void> createInteractionResponse(InteractionResponseData responseData) {
-        long id = Snowflake.asLong(data.id());
-        String token = data.token();
+        long id = interaction.getId().asLong();
+        String token = interaction.getToken();
 
         return getClient().rest().getInteractionService()
                 .createInteractionResponse(id, token, responseData)
