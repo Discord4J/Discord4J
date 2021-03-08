@@ -99,7 +99,7 @@ public class Interaction implements DiscordObject {
      * @return The channel it was sent from.
      */
     public Mono<TextChannel> getChannel() {
-        return Mono.justOrEmpty(getChannelId()).map(gateway::getChannelById).cast(TextChannel.class);
+        return gateway.getChannelById(getChannelId()).cast(TextChannel.class);
     }
 
     /**
@@ -113,9 +113,9 @@ public class Interaction implements DiscordObject {
     }
 
     /**
-     * Gets the invoking user, if invoked in a DM.
+     * Gets the invoking user.
      *
-     * @return The invoking user, if invoked in a DM.
+     * @return The invoking user.
      */
     public User getUser() {
         UserData userData = data.member().isAbsent() ? data.user().get() : data.member().get().user();
