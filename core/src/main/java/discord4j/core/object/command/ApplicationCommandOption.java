@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
  * A Discord application command option.
  *
  * @see <a href="https://discord.com/developers/docs/interactions/slash-commands#applicationcommandoption">
- *     Application Command Option Object</a>
+ * Application Command Option Object</a>
  */
 public class ApplicationCommandOption implements DiscordObject {
 
@@ -80,9 +80,9 @@ public class ApplicationCommandOption implements DiscordObject {
      */
     public List<ApplicationCommandOptionChoice> getChoices() {
         return data.choices().toOptional().orElse(Collections.emptyList())
-            .stream()
-            .map(data -> new ApplicationCommandOptionChoice(gateway, data))
-            .collect(Collectors.toList());
+                .stream()
+                .map(data -> new ApplicationCommandOptionChoice(gateway, data))
+                .collect(Collectors.toList());
     }
 
     /**
@@ -93,32 +93,34 @@ public class ApplicationCommandOption implements DiscordObject {
      */
     public Optional<ApplicationCommandOptionChoice> getChoice(final String name) {
         return getChoices().stream()
-            .filter(choice -> choice.getName().equals(name))
-            .findFirst();
+                .filter(choice -> choice.getName().equals(name))
+                .findFirst();
     }
 
     /**
-     * Gets the options of this option, if the option is a subcommand or subcommand group type.
+     * Gets the options, if the option is a subcommand or subcommand group type.
      *
-     * @return The options of this option, if the option is a subcommand or subcommand group type.
+     * @return The options, if the option is a subcommand or subcommand group type.
      */
     public List<ApplicationCommandOption> getOptions() {
         return data.options().toOptional().orElse(Collections.emptyList())
-            .stream()
-            .map(data -> new ApplicationCommandOption(gateway, data))
-            .collect(Collectors.toList());
+                .stream()
+                .map(data -> new ApplicationCommandOption(gateway, data))
+                .collect(Collectors.toList());
     }
 
     /**
-     * Gets the option of this option corresponding to the provided name, if present.
+     * Gets the option corresponding to the provided name, if present and if this option is a subcommand or
+     * subcommand group type.
      *
      * @param name The name of the option.
-     * @return The option of this option corresponding to the provided name, if present.
+     * @return The option corresponding to the provided name, if present and if this option is a subcommand or
+     * subcommand group type.
      */
     public Optional<ApplicationCommandOption> getOption(final String name) {
         return getOptions().stream()
-            .filter(option -> option.getName().equals(name))
-            .findFirst();
+                .filter(option -> option.getName().equals(name))
+                .findFirst();
     }
 
     @Override

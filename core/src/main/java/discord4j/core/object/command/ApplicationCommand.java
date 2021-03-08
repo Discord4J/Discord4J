@@ -89,10 +89,10 @@ public class ApplicationCommand implements DiscordObject {
     }
 
     /**
-     * Gets the option of the command corresponding to the provided name, if present.
+     * Gets the option corresponding to the provided name, if present.
      *
      * @param name The name of the option.
-     * @return The option of the command corresponding to the provided name, if present.
+     * @return The option corresponding to the provided name, if present.
      */
     public Optional<ApplicationCommandOption> getOption(final String name) {
         return getOptions().stream()

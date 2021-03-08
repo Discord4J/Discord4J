@@ -72,13 +72,15 @@ public class ApplicationCommandInteraction implements DiscordObject {
     }
 
     /**
-     * Gets the option of the invoked command corresponding to the provided name, if present.
+     * Gets the option corresponding to the provided name, if present.
      *
      * @param name The name of the option.
-     * @return The option of the invoked command corresponding to the provided name, if present.
+     * @return The option corresponding to the provided name, if present.
      */
     public Optional<ApplicationCommandInteractionOption> getOption(final String name) {
-        return getOptions().stream().filter(option -> option.getName().equals(name)).findFirst();
+        return getOptions().stream()
+                .filter(option -> option.getName().equals(name))
+                .findFirst();
     }
 
     @Override

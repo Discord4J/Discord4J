@@ -69,9 +69,9 @@ public class ApplicationCommandInteractionOption implements DiscordObject {
     }
 
     /**
-     * Gets the options of this option, present if this option is a group or subcommand.
+     * Gets the options, present if this option is a group or subcommand.
      *
-     * @return The options of this option, present if this option is a group or subcommand.
+     * @return The options, present if this option is a group or subcommand.
      */
     public List<ApplicationCommandInteractionOption> getOptions() {
         return data.options().toOptional().orElse(Collections.emptyList()).stream()
@@ -80,10 +80,10 @@ public class ApplicationCommandInteractionOption implements DiscordObject {
     }
 
     /**
-     * Gets the option of this option corresponding to the provided name, if present.
+     * Gets the option corresponding to the provided name, if present.
      *
      * @param name The name of the option.
-     * @return The option of this option corresponding to the provided name, if present.
+     * @return The option corresponding to the provided name, if present.
      */
     public Optional<ApplicationCommandInteractionOption> getOption(final String name) {
         return getOptions().stream()
