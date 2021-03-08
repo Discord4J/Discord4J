@@ -5,8 +5,10 @@ import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.DiscordObject;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Member;
+import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.TextChannel;
 import discord4j.discordjson.json.InteractionData;
+import discord4j.discordjson.json.UserData;
 import reactor.core.publisher.Mono;
 
 import java.util.Arrays;
@@ -51,16 +53,13 @@ public class Interaction implements DiscordObject {
     }
 
     /**
-     * Gets the command data payload, if present.
-     * Note: This is always present on ApplicationCommand interaction types. It is optional for future-proofing
-     * against new interaction types.
+     * Gets the command data payload.
      *
-     * @return The command data payload, if present.
+     * @return The command data payload.
      */
-    public Optional<ApplicationCommandInteraction> getApplicationCommandInteraction() {
-        return data.data().toOptional()
-            .map(interactionData -> new ApplicationCommandInteraction(gateway, interactionData,
-                    getGuildId().map(Snowflake::asLong).orElse(null)));
+    public ApplicationCommandInteraction getCommandInteraction() {
+        return new ApplicationCommandInteraction(getClient(), data.data().get(),
+                getGuildId().map(Snowflake::asLong).orElse(null));
     }
 
     /**
@@ -82,18 +81,18 @@ public class Interaction implements DiscordObject {
     }
 
     /**
-     * Gets the channel id it was sent from, if invoked in a guild.
+     * Gets the channel id it was sent from.
      *
-     * @return The channel id it was sent from, if invoked in a guild.
+     * @return The channel id it was sent from.
      */
-    public Optional<Snowflake> getChannelId() {
-        return data.channelId().toOptional().map(Snowflake::of);
+    public Snowflake getChannelId() {
+        return Snowflake.of(data.channelId().get());
     }
 
     /**
-     * Gets the channel it was sent from, if invoked in a guild.
+     * Gets the channel it was sent from.
      *
-     * @return The channel it was sent from, if invoked in a guild.
+     * @return The channel it was sent from.
      */
     public Mono<TextChannel> getChannel() {
         return Mono.justOrEmpty(getChannelId()).map(gateway::getChannelById).cast(TextChannel.class);
@@ -106,18 +105,18 @@ public class Interaction implements DiscordObject {
      */
     public Optional<Member> getMember() {
         return data.member().toOptional()
-            .map(data -> new Member(gateway, data, getGuildId().get().asLong()));
+                .map(data -> new Member(gateway, data, getGuildId().get().asLong()));
     }
 
     /**
      * Gets the invoking user, if invoked in a DM.
      *
      * @return The invoking user, if invoked in a DM.
-    public Optional<User> getUser() {
-        return Optional.of(data.user())
-            .map(data -> new User(gateway, data));
-    }
      */
+    public User getUser() {
+        UserData userData = data.member().isAbsent() ? data.user().get() : data.member().get().user();
+        return new User(getClient(), userData);
+    }
 
     @Override
     public GatewayDiscordClient getClient() {
@@ -153,8 +152,8 @@ public class Interaction implements DiscordObject {
         }
 
         /**
-         * Gets the type of interaction. It is guaranteed that invoking {@link #getValue()} from the returned enum will equal
-         * ({@link #equals(Object)}) the supplied {@code value}.
+         * Gets the type of interaction. It is guaranteed that invoking {@link #getValue()} from the returned enum
+         * will equal ({@link #equals(Object)}) the supplied {@code value}.
          *
          * @param value The underlying value as represented by Discord.
          * @return The type of interaction.

@@ -23,11 +23,9 @@ import discord4j.core.object.command.ApplicationCommandInteraction;
 import discord4j.core.object.command.Interaction;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Member;
-import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.TextChannel;
 import discord4j.core.spec.InteractionApplicationCommandCallbackSpec;
-import discord4j.core.spec.MessageCreateSpec;
 import discord4j.discordjson.json.InteractionApplicationCommandCallbackData;
 import discord4j.discordjson.json.InteractionData;
 import discord4j.discordjson.json.InteractionResponseData;
@@ -62,22 +60,47 @@ public class InteractionCreateEvent extends Event {
         return new Interaction(getClient(), data);
     }
 
+    /**
+     * Gets the id of the interaction.
+     *
+     * @return The id of the interaction.
+     */
     public Snowflake getId() {
         return Snowflake.of(data.id());
     }
 
+    /**
+     * Gets the type of interaction.
+     *
+     * @return The type of interaction.
+     */
     public Interaction.Type getType() {
         return Interaction.Type.of(data.type());
     }
 
+    /**
+     * Gets the guild id it was sent from, if invoked in a guild.
+     *
+     * @return The guild id it was sent from, if invoked in a guild.
+     */
     public Optional<Snowflake> getGuildId() {
         return data.guildId().toOptional().map(Snowflake::of);
     }
 
+    /**
+     * Gets the guild it was sent from, if invoked in a guild.
+     *
+     * @return The guild it was sent from, if invoked in a guild.
+     */
     public Mono<Guild> getGuild() {
         return Mono.justOrEmpty(getGuildId()).flatMap(getClient()::getGuildById);
     }
 
+    /**
+     * Gets the channel id it was sent from.
+     *
+     * @return The channel id it was sent from.
+     */
     public Snowflake getChannelId() {
         return Snowflake.of(data.channelId().get());
     }
@@ -86,16 +109,31 @@ public class InteractionCreateEvent extends Event {
         return getClient().getChannelById(getChannelId()).cast(TextChannel.class);
     }
 
+    /**
+     * Gets the invoking member, if invoked in a guild.
+     *
+     * @return The invoking member, if invoked in a guild.
+     */
     public Optional<Member> getMember() {
         return data.member().toOptional()
                 .map(data -> new Member(getClient(), data, getGuildId().get().asLong()));
     }
 
+    /**
+     * Gets the invoking user.
+     *
+     * @return The invoking user.
+     */
     public User getUser() {
         UserData userData = data.member().isAbsent() ? data.user().get() : data.member().get().user();
         return new User(getClient(), userData);
     }
 
+    /**
+     * Gets the command data payload.
+     *
+     * @return The command data payload.
+     */
     public ApplicationCommandInteraction getCommandInteraction() {
         return new ApplicationCommandInteraction(getClient(), data.data().get(),
                 getGuildId().map(Snowflake::asLong).orElse(null));
@@ -136,7 +174,8 @@ public class InteractionCreateEvent extends Event {
     public Mono<Void> reply(final Consumer<? super InteractionApplicationCommandCallbackSpec> spec) {
         return Mono.defer(
                 () -> {
-                    InteractionApplicationCommandCallbackSpec mutatedSpec = new InteractionApplicationCommandCallbackSpec();
+                    InteractionApplicationCommandCallbackSpec mutatedSpec =
+                            new InteractionApplicationCommandCallbackSpec();
                     getClient().getRestClient().getRestResources()
                             .getAllowedMentions()
                             .ifPresent(mutatedSpec::setAllowedMentions);
