@@ -240,33 +240,22 @@ public final class Message implements Entity {
      * @return The IDs of the users specifically mentioned in this message.
      */
     public Set<Snowflake> getUserMentionIds() {
-        // TODO FIXME we throw away member data here
         return data.mentions().stream()
                 .map(UserData::id)
                 .map(Snowflake::of)
-                .collect(Collectors.toSet());
+                .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
     /**
-     * Requests to retrieve the users specifically mentioned in this message.
+     * Gets the users specifically mentioned in this message.
      *
-     * @return A {@link Flux} that continually emits {@link User users} specifically mentioned in this message. If an
-     * error is received, it is emitted through the {@code Flux}.
+     * @return The users specifically mentioned in this message.
      */
-    public Flux<User> getUserMentions() {
-        return Flux.fromIterable(getUserMentionIds()).flatMap(gateway::getUserById);
-    }
-
-    /**
-     * Requests to retrieve the users specifically mentioned in this message, using the given retrieval strategy.
-     *
-     * @param retrievalStrategy the strategy to use to get the users
-     * @return A {@link Flux} that continually emits {@link User users} specifically mentioned in this message. If an
-     * error is received, it is emitted through the {@code Flux}.
-     */
-    public Flux<User> getUserMentions(EntityRetrievalStrategy retrievalStrategy) {
-        return Flux.fromIterable(getUserMentionIds())
-                .flatMap(id -> gateway.withRetrievalStrategy(retrievalStrategy).getUserById(id));
+    public Set<User> getUserMentions() {
+        // TODO FIXME we throw away member data here
+        return data.mentions().stream()
+                .map(data -> new User(gateway, data))
+                .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
     /**
@@ -277,7 +266,7 @@ public final class Message implements Entity {
     public Set<Snowflake> getRoleMentionIds() {
         return data.mentionRoles().stream()
                 .map(Snowflake::of)
-                .collect(Collectors.toSet());
+                .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
     /**
@@ -337,7 +326,9 @@ public final class Message implements Entity {
      */
     public Set<Reaction> getReactions() {
         return data.reactions().toOptional()
-                .map(reactions -> reactions.stream().map(data -> new Reaction(gateway, data)).collect(Collectors.toSet()))
+                .map(reactions -> reactions.stream()
+                        .map(data -> new Reaction(gateway, data))
+                        .collect(Collectors.toCollection(LinkedHashSet::new)))
                 .orElse(Collections.emptySet());
 
     }
