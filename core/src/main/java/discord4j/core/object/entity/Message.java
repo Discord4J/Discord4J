@@ -237,7 +237,7 @@ public final class Message implements Entity {
         return data.mentions().stream()
                 .map(UserData::id)
                 .map(Snowflake::of)
-                .collect(Collectors.toSet());
+                .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
     /**
@@ -270,7 +270,7 @@ public final class Message implements Entity {
     public Set<Snowflake> getRoleMentionIds() {
         return data.mentionRoles().stream()
                 .map(Snowflake::of)
-                .collect(Collectors.toSet());
+                .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
     /**
@@ -330,7 +330,9 @@ public final class Message implements Entity {
      */
     public Set<Reaction> getReactions() {
         return data.reactions().toOptional()
-                .map(reactions -> reactions.stream().map(data -> new Reaction(gateway, data)).collect(Collectors.toSet()))
+                .map(reactions -> reactions.stream()
+                        .map(data -> new Reaction(gateway, data))
+                        .collect(Collectors.toCollection(LinkedHashSet::new)))
                 .orElse(Collections.emptySet());
 
     }
