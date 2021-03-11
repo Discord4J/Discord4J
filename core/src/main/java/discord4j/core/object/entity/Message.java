@@ -329,7 +329,7 @@ public final class Message implements Entity {
                 .map(reactions -> reactions.stream()
                         .map(data -> new Reaction(gateway, data))
                         .collect(Collectors.toCollection(LinkedHashSet::new)))
-                .orElse(Collections.emptySet());
+                .orElse(new LinkedHashSet<>());
 
     }
 
