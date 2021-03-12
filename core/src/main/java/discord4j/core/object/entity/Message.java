@@ -228,18 +228,16 @@ public final class Message implements Entity {
     }
 
     /**
-     * Gets the IDs of the users specifically mentioned in this message, without duplication and with the same
-     * order as in the message.
+     * Gets the IDs of the users specifically mentioned in this message, with the same order as in the message.
      *
-     * @return The IDs of the users specifically mentioned in this message, without duplication and with the same
-     * order as in the message.
+     * @return The IDs of the users specifically mentioned in this message, the same order as in the message.
      */
-    public List<Snowflake> getUserMentionIds() {
+    public Set<Snowflake> getUserMentionIds() {
         // TODO FIXME we throw away member data here
         return data.mentions().stream()
                 .map(UserData::id)
                 .map(Snowflake::of)
-                .collect(Collectors.toCollection(LinkedList::new));
+                .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
     /**
@@ -265,16 +263,14 @@ public final class Message implements Entity {
     }
 
     /**
-     * Gets the IDs of the roles specifically mentioned in this message, without duplication and with the same
-     * order as in the message.
+     * Gets the IDs of the roles specifically mentioned in this message, with the same order as in the message.
      *
-     * @return The IDs of the roles specifically mentioned in this message, without duplication and with the same
-     * order as in the message.
+     * @return The IDs of the roles specifically mentioned in this message, with the same order as in the message.
      */
-    public List<Snowflake> getRoleMentionIds() {
+    public Set<Snowflake> getRoleMentionIds() {
         return data.mentionRoles().stream()
                 .map(Snowflake::of)
-                .collect(Collectors.toCollection(LinkedList::new));
+                .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
     /**
@@ -332,12 +328,12 @@ public final class Message implements Entity {
      *
      * @return The reactions to this message, the order is the same as in the message.
      */
-    public List<Reaction> getReactions() {
+    public Set<Reaction> getReactions() {
         return data.reactions().toOptional()
                 .map(reactions -> reactions.stream()
                         .map(data -> new Reaction(gateway, data))
-                        .collect(Collectors.toCollection(LinkedList::new)))
-                .orElse(new LinkedList<>());
+                        .collect(Collectors.toCollection(LinkedHashSet::new)))
+                .orElse(new LinkedHashSet<>());
 
     }
 
