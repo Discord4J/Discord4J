@@ -15,6 +15,11 @@ import java.util.Arrays;
 import java.util.Objects;
 import java.util.Optional;
 
+/**
+ * A Discord interaction.
+ *
+ * @see <a href="https://discord.com/developers/docs/interactions/slash-commands#interaction">Interaction Object</a>
+ */
 public class Interaction implements DiscordObject {
 
     /** The gateway associated to this object. */
@@ -113,9 +118,9 @@ public class Interaction implements DiscordObject {
     }
 
     /**
-     * Gets the invoking user.
+     * Gets the invoking user. The user data is extracted from the member if invoked in a guild.
      *
-     * @return The invoking user.
+     * @return The invoking user. The user data is extracted from the member if invoked in a guild.
      */
     public User getUser() {
         UserData userData = data.member().isAbsent() ? data.user().get() : data.member().get().user();

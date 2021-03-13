@@ -65,7 +65,6 @@ public class ApplicationCommandOptionChoice implements DiscordObject {
         try {
             return Long.parseLong(data.value());
         } catch (NumberFormatException err) {
-            // TODO
             throw new IllegalArgumentException("Choice value cannot be converted to long");
         }
     }

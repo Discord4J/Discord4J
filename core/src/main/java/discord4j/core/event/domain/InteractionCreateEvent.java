@@ -40,6 +40,13 @@ import reactor.core.publisher.Mono;
 import java.util.Optional;
 import java.util.function.Consumer;
 
+/**
+ * Dispatched when a user in a guild uses a Slash Command.
+ * <p>
+ * This event is dispatched by Discord.
+ *
+ * @see <a href="https://discord.com/developers/docs/topics/gateway#interaction-create">Interaction Create</a>
+ */
 public class InteractionCreateEvent extends Event {
 
     private final Interaction interaction;
@@ -52,14 +59,29 @@ public class InteractionCreateEvent extends Event {
         this.operations = new InteractionOperations(restClient, interaction.getData(), restClient.getApplicationId());
     }
 
+    /**
+     * Gets the {@link discord4j.core.object.command.Interaction} associated with the event.
+     *
+     * @return The {@link discord4j.core.object.command.Interaction} associated with the event.
+     */
     public Interaction getInteraction() {
         return interaction;
     }
 
+    /**
+     * Gets the id of the invoked command.
+     *
+     * @return The id of the invoked command.
+     */
     public Snowflake getCommandId() {
         return Snowflake.of(operations.getCommandInteractionData().id());
     }
 
+    /**
+     * Gets the name of the invoked command.
+     *
+     * @return The name of the invoked command.
+     */
     public String getCommandName() {
         return operations.getCommandInteractionData().name();
     }
@@ -73,6 +95,13 @@ public class InteractionCreateEvent extends Event {
                 .then();
     }
 
+    /**
+     * Acknowledges the interaction indicating a response will be edited later. The user sees a loading state
+     *
+     * @return A {@link Mono} where, upon successful completion, emits nothing; acknowledging the interaction
+     * and indicating a response will be edited later. The user sees a loading state. If an error is received, it
+     * is emitted through the {@code Mono}.
+     */
     public Mono<Void> acknowledge() {
         return createInteractionResponse(InteractionResponseData.builder()
                 .type(InteractionResponseType.DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE.getValue())
@@ -80,14 +109,45 @@ public class InteractionCreateEvent extends Event {
                 .build());
     }
 
+    /**
+     * Requests to respond to the interaction with only
+     * {@link InteractionApplicationCommandCallbackSpec#setContent(String) content}.
+     *
+     * @param content A string message to populate the message with.
+     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the interaction response has
+     * been sent. If an error is received, it is emitted through the {@code Mono}.
+     *
+     * @see InteractionApplicationCommandCallbackSpec#setContent(String)
+     */
     public Mono<Void> reply(final String content) {
         return reply(spec -> spec.setContent(content));
     }
 
+    /**
+     * Requests to respond to the interaction with only
+     * {@link InteractionApplicationCommandCallbackSpec#setContent(String) content} and
+     * {@link InteractionApplicationCommandCallbackSpec#setEphemeral(boolean) ephemeral set to true}. Only the invoking
+     * user can see it.
+     *
+     * @param content A string message to populate the message with.
+     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the ephemeral interaction
+     * response has been sent. If an error is received, it is emitted through the {@code Mono}.
+     *
+     * @see InteractionApplicationCommandCallbackSpec#setContent(String)
+     * @see InteractionApplicationCommandCallbackSpec#setEphemeral(boolean)
+     */
     public Mono<Void> replyEphemeral(final String content) {
         return reply(spec -> spec.setContent(content).setEphemeral(true));
     }
 
+    /**
+     * Requests to respond to the interaction with a message.
+     *
+     * @param spec A {@link Consumer} that provides a "blank" {@link InteractionApplicationCommandCallbackSpec} to be
+     * operated on.
+     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the interaction response has
+     * been sent. If an error is received, it is emitted through the {@code Mono}.
+     */
     public Mono<Void> reply(final Consumer<? super InteractionApplicationCommandCallbackSpec> spec) {
         return Mono.defer(
                 () -> {
@@ -104,6 +164,11 @@ public class InteractionCreateEvent extends Event {
                 });
     }
 
+    /**
+     * Gets a handler for common operations related to an interaction followup response associated with this event.
+     *
+     * @return A handler for common operations related to an interaction followup response associated with this event.
+     */
     public InteractionResponse getInteractionResponse() {
         return operations;
     }

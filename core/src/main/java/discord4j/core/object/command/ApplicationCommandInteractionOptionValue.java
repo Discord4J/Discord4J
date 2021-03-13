@@ -64,7 +64,7 @@ public class ApplicationCommandInteractionOptionValue implements DiscordObject {
 
     public Mono<User> asUser() {
         if (type != ApplicationCommandOption.Type.USER.getValue()) {
-            throw new IllegalArgumentException("Option value cannot be converted as user");
+            return Mono.error(new IllegalArgumentException("Option value cannot be converted as user"));
         }
 
         return getClient().getUserById(asSnowflake());
@@ -72,7 +72,7 @@ public class ApplicationCommandInteractionOptionValue implements DiscordObject {
 
     public Mono<Role> asRole() {
         if (type != ApplicationCommandOption.Type.ROLE.getValue()) {
-            throw new IllegalArgumentException("Option value cannot be converted as role");
+            return Mono.error(new IllegalArgumentException("Option value cannot be converted as role"));
         }
 
         return getClient().getRoleById(Snowflake.of(guildId), asSnowflake());
@@ -80,7 +80,7 @@ public class ApplicationCommandInteractionOptionValue implements DiscordObject {
 
     public Mono<Channel> asChannel() {
         if (type != ApplicationCommandOption.Type.CHANNEL.getValue()) {
-            throw new IllegalArgumentException("Option value cannot be converted as channel");
+            return Mono.error(new IllegalArgumentException("Option value cannot be converted as channel"));
         }
 
         return getClient().getChannelById(asSnowflake());
