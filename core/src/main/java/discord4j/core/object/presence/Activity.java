@@ -75,6 +75,15 @@ public class Activity {
     }
 
     /**
+     * Gets the data of the activity.
+     *
+     * @return The data of the activity.
+     */
+    public ActivityData getData() {
+        return data;
+    }
+
+    /**
      * Gets the type for this activity.
      *
      * @return The type for this activity.

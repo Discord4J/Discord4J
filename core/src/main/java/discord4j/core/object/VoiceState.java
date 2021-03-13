@@ -59,6 +59,15 @@ public final class VoiceState implements DiscordObject {
     }
 
     /**
+     * Gets the data of the voice state.
+     *
+     * @return The data of the voice state.
+     */
+    public VoiceStateData getData() {
+        return data;
+    }
+
+    /**
      * Gets the guild ID this voice state is for.
      *
      * @return The guild ID this voice state is for.
