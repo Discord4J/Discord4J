@@ -19,17 +19,10 @@ package discord4j.core.event.domain;
 
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
-import discord4j.core.object.command.ApplicationCommandInteraction;
 import discord4j.core.object.command.Interaction;
-import discord4j.core.object.entity.Guild;
-import discord4j.core.object.entity.Member;
-import discord4j.core.object.entity.User;
-import discord4j.core.object.entity.channel.TextChannel;
 import discord4j.core.spec.InteractionApplicationCommandCallbackSpec;
 import discord4j.discordjson.json.InteractionApplicationCommandCallbackData;
-import discord4j.discordjson.json.InteractionData;
 import discord4j.discordjson.json.InteractionResponseData;
-import discord4j.discordjson.json.UserData;
 import discord4j.gateway.ShardInfo;
 import discord4j.rest.RestClient;
 import discord4j.rest.interaction.InteractionOperations;
@@ -37,7 +30,6 @@ import discord4j.rest.interaction.InteractionResponse;
 import discord4j.rest.util.InteractionResponseType;
 import reactor.core.publisher.Mono;
 
-import java.util.Optional;
 import java.util.function.Consumer;
 
 /**
