@@ -230,7 +230,7 @@ public final class Message implements Entity {
     /**
      * Gets the IDs of the users specifically mentioned in this message, with the same order as in the message.
      *
-     * @return The IDs of the users specifically mentioned in this message, the same order as in the message.
+     * @return The IDs of the users specifically mentioned in this message, with the same order as in the message.
      */
     public Set<Snowflake> getUserMentionIds() {
         // TODO FIXME we throw away member data here
@@ -580,8 +580,7 @@ public final class Message implements Entity {
      * 'MANAGE_MESSAGES' permission, for all other messages, to be present for the current user.
      *
      * @return A {@link Mono} where, upon successful completion, emits the published {@link Message} in the guilds.
-     * If an error is
-     * received, it is emitted through the {@code Mono}.
+     * If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Message> publish() {
         return gateway.getRestClient().getChannelService()
