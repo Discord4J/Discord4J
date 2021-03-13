@@ -103,6 +103,15 @@ public final class Message implements Entity {
     }
 
     /**
+     * Gets the data of the message.
+     *
+     * @return The data of the message.
+     */
+    public MessageData getData() {
+        return data;
+    }
+
+    /**
      * @return A {@link RestMessage} handle to execute REST API operations on this entity.
      */
     public RestMessage getRestMessage() {

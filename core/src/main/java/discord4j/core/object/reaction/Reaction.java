@@ -52,6 +52,15 @@ public final class Reaction implements DiscordObject  {
     }
 
     /**
+     * Gets the data of the reaction.
+     *
+     * @return The data of the reaction.
+     */
+    public ReactionData getData() {
+        return data;
+    }
+
+    /**
      * Gets the number of people who reacted with this reaction's emoji.
      *
      * @return The number of people who reacted with this reaction's emoji.

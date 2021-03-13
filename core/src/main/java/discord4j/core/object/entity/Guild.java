@@ -102,6 +102,15 @@ public final class Guild implements Entity {
     }
 
     /**
+     * Gets the data of the guild.
+     *
+     * @return The data of the guild.
+     */
+    public GuildData getData() {
+        return data;
+    }
+
+    /**
      * Gets the guild name.
      *
      * @return The guild name.
