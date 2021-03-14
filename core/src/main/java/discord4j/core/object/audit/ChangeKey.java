@@ -68,8 +68,8 @@ public final class ChangeKey<T> {
     /** Change in whose messages are scanned and deleted for explicit content in the server */
     public static final ChangeKey<Guild.ContentFilterLevel> CONTENT_FILTER_LEVEL = changeKey("explicit_content_filter");
     /** Default message notification level changed */
-    public static final ChangeKey<Guild.NotificationLevel> NOTIFICATION_LEVEL = changeKey(
-            "default_message_notifications");
+    public static final ChangeKey<Guild.NotificationLevel> NOTIFICATION_LEVEL =
+            changeKey("default_message_notifications");
     /** Invite vanity url changed */
     public static final ChangeKey<String> VANITY_URL = changeKey("vanity_url_code");
     /** New role added */
