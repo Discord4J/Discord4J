@@ -16,12 +16,12 @@
  */
 package discord4j.core.util;
 
-import discord4j.common.util.Snowflake;
 import discord4j.core.object.entity.Role;
 import discord4j.core.object.entity.channel.CategorizableChannel;
 import discord4j.core.object.entity.channel.Category;
 import discord4j.core.object.entity.channel.GuildChannel;
 import discord4j.core.object.entity.channel.VoiceChannel;
+import discord4j.common.util.Snowflake;
 import reactor.core.publisher.Flux;
 
 import java.util.*;

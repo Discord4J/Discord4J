@@ -16,10 +16,10 @@
  */
 package discord4j.core.util;
 
-import discord4j.common.util.Snowflake;
 import discord4j.core.object.PermissionOverwrite;
 import discord4j.rest.util.Permission;
 import discord4j.rest.util.PermissionSet;
+import discord4j.common.util.Snowflake;
 import reactor.util.annotation.Nullable;
 
 import java.util.ArrayList;

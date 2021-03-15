@@ -16,7 +16,6 @@
  */
 package discord4j.core.object;
 
-import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Member;
@@ -24,6 +23,7 @@ import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.VoiceChannel;
 import discord4j.core.retriever.EntityRetrievalStrategy;
 import discord4j.discordjson.json.VoiceStateData;
+import discord4j.common.util.Snowflake;
 import reactor.core.publisher.Mono;
 
 import java.util.Objects;

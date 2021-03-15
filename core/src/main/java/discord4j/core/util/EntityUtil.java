@@ -16,12 +16,12 @@
  */
 package discord4j.core.util;
 
-import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.Entity;
 import discord4j.core.object.entity.channel.*;
 import discord4j.core.object.reaction.ReactionEmoji;
 import discord4j.discordjson.json.ChannelData;
+import discord4j.common.util.Snowflake;
 import reactor.util.annotation.Nullable;
 
 /** An utility class for entity processing. */

@@ -16,11 +16,11 @@
  */
 package discord4j.core.event.domain.channel;
 
-import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.MessageChannel;
+import discord4j.common.util.Snowflake;
 import discord4j.gateway.ShardInfo;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
@@ -97,7 +97,7 @@ public class PinsUpdateEvent extends ChannelEvent {
     /**
      * Gets the ISO8601 timestamp of when the last pinned {@link discord4j.core.object.entity.Message} w
      * as pinned, if present. This is NOT the timestamp of when the {@code Message} was created.
-     *
+     * 
      * @return The timestamp of the when the last pinned {@link discord4j.core.object.entity.Message} was pinned,
      * if present.
      */

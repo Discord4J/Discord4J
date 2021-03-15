@@ -16,7 +16,6 @@
  */
 package discord4j.core.event.dispatch;
 
-import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.message.*;
 import discord4j.core.object.Embed;
@@ -27,6 +26,7 @@ import discord4j.core.util.ListUtil;
 import discord4j.discordjson.json.*;
 import discord4j.discordjson.json.gateway.*;
 import discord4j.discordjson.possible.Possible;
+import discord4j.common.util.Snowflake;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
