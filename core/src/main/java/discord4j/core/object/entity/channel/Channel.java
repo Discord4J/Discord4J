@@ -21,8 +21,6 @@ import discord4j.rest.entity.RestChannel;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
 
-import java.util.Arrays;
-
 /**
  * A Discord channel.
  *

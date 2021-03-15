@@ -6,6 +6,7 @@ import discord4j.core.object.DiscordObject;
 import discord4j.core.object.entity.Role;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.channel.Channel;
+import discord4j.rest.util.ApplicationCommandOptionType;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
 
@@ -32,30 +33,30 @@ public class ApplicationCommandInteractionOptionValue implements DiscordObject {
     }
 
     public String asString() {
-        if (type != ApplicationCommandOption.Type.STRING.getValue()) {
+        if (type != ApplicationCommandOptionType.STRING.getValue()) {
             throw new IllegalArgumentException("Option value cannot be converted as string");
         }
         return value;
     }
 
     public boolean asBoolean() {
-        if (type != ApplicationCommandOption.Type.BOOLEAN.getValue()) {
+        if (type != ApplicationCommandOptionType.BOOLEAN.getValue()) {
             throw new IllegalArgumentException("Option value cannot be converted as boolean");
         }
         return Boolean.parseBoolean(value);
     }
 
     public long asLong() {
-        if (type != ApplicationCommandOption.Type.INTEGER.getValue()) {
+        if (type != ApplicationCommandOptionType.INTEGER.getValue()) {
             throw new IllegalArgumentException("Option value cannot be converted as long");
         }
         return Long.parseLong(value);
     }
 
     public Snowflake asSnowflake() {
-        if (type != ApplicationCommandOption.Type.USER.getValue()
-                && type != ApplicationCommandOption.Type.ROLE.getValue()
-                && type != ApplicationCommandOption.Type.CHANNEL.getValue()) {
+        if (type != ApplicationCommandOptionType.USER.getValue()
+                && type != ApplicationCommandOptionType.ROLE.getValue()
+                && type != ApplicationCommandOptionType.CHANNEL.getValue()) {
             throw new IllegalArgumentException("Option value cannot be converted as snowflake");
         }
 
@@ -63,7 +64,7 @@ public class ApplicationCommandInteractionOptionValue implements DiscordObject {
     }
 
     public Mono<User> asUser() {
-        if (type != ApplicationCommandOption.Type.USER.getValue()) {
+        if (type != ApplicationCommandOptionType.USER.getValue()) {
             return Mono.error(new IllegalArgumentException("Option value cannot be converted as user"));
         }
 
@@ -71,7 +72,7 @@ public class ApplicationCommandInteractionOptionValue implements DiscordObject {
     }
 
     public Mono<Role> asRole() {
-        if (type != ApplicationCommandOption.Type.ROLE.getValue()) {
+        if (type != ApplicationCommandOptionType.ROLE.getValue()) {
             return Mono.error(new IllegalArgumentException("Option value cannot be converted as role"));
         }
 
@@ -79,7 +80,7 @@ public class ApplicationCommandInteractionOptionValue implements DiscordObject {
     }
 
     public Mono<Channel> asChannel() {
-        if (type != ApplicationCommandOption.Type.CHANNEL.getValue()) {
+        if (type != ApplicationCommandOptionType.CHANNEL.getValue()) {
             return Mono.error(new IllegalArgumentException("Option value cannot be converted as channel"));
         }
 

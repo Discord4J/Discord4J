@@ -1,7 +1,5 @@
 package discord4j.rest.util;
 
-import java.util.Arrays;
-
 public enum InteractionResponseType {
     /**
      * Unknown type

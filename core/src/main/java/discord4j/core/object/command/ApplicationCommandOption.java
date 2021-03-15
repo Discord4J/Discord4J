@@ -3,6 +3,7 @@ package discord4j.core.object.command;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.DiscordObject;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
+import discord4j.rest.util.ApplicationCommandOptionType;
 
 import java.util.Collections;
 import java.util.List;
@@ -45,8 +46,8 @@ public class ApplicationCommandOption implements DiscordObject {
      *
      * @return The type of the option.
      */
-    public Type getType() {
-        return Type.of(data.type());
+    public ApplicationCommandOptionType getType() {
+        return ApplicationCommandOptionType.of(data.type());
     }
 
     /**
@@ -131,49 +132,4 @@ public class ApplicationCommandOption implements DiscordObject {
         return gateway;
     }
 
-    /** Represents the various types of options. */
-    public enum Type {
-
-        UNKNOWN(-1),
-        SUB_COMMAND(1),
-        SUB_COMMAND_GROUP(2),
-        STRING(3),
-        INTEGER(4),
-        BOOLEAN(5),
-        USER(6),
-        CHANNEL(7),
-        ROLE(8);
-
-        /** The underlying value as represented by Discord. */
-        private final int value;
-
-        /**
-         * Constructs an {@code ApplicationCommandOption.Type}.
-         *
-         * @param value The underlying value as represented by Discord.
-         */
-        Type(final int value) {
-            this.value = value;
-        }
-
-        /**
-         * Gets the underlying value as represented by Discord.
-         *
-         * @return The underlying value as represented by Discord.
-         */
-        public int getValue() {
-            return value;
-        }
-
-        /**
-         * Gets the type of option. It is guaranteed that invoking {@link #getValue()} from the returned enum will equal
-         * ({@link #equals(Object)}) the supplied {@code value}.
-         *
-         * @param value The underlying value as represented by Discord.
-         * @return The type of option.
-         */
-        public static ApplicationCommandOption.Type of(final int value) {
-            return Arrays.stream(values()).filter(type -> type.getValue() == value).findFirst().orElse(UNKNOWN);
-        }
-    }
 }
