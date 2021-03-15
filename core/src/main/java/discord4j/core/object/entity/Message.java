@@ -61,7 +61,7 @@ public final class Message implements Entity {
     /**
      * The maximum amount of characters that can be present when combining all title, description, field.name,
      * field.value, footer.text, and author.name fields of all embeds for this message.
-     * */
+     */
     public static final int MAX_TOTAL_EMBEDS_CHARACTER_LENGTH = 6000;
 
     /**
@@ -244,49 +244,44 @@ public final class Message implements Entity {
     }
 
     /**
-     * Gets the IDs of the users specifically mentioned in this message.
+     * Gets the IDs of the users specifically mentioned in this message, without duplication and with the same order
+     * as in the message.
      *
-     * @return The IDs of the users specifically mentioned in this message.
+     * @return The IDs of the users specifically mentioned in this message, without duplication and with the same order
+     * as in the message.
      */
-    public Set<Snowflake> getUserMentionIds() {
-        // TODO FIXME we throw away member data here
+    public List<Snowflake> getUserMentionIds() {
         return data.mentions().stream()
                 .map(UserData::id)
                 .map(Snowflake::of)
-                .collect(Collectors.toSet());
+                .collect(Collectors.toList());
     }
 
     /**
-     * Requests to retrieve the users specifically mentioned in this message.
+     * Gets the users specifically mentioned in this message, without duplication and with the same order
+     * as in the message.
      *
-     * @return A {@link Flux} that continually emits {@link User users} specifically mentioned in this message. If an
-     * error is received, it is emitted through the {@code Flux}.
+     * @return The users specifically mentioned in this message, without duplication and with the same order
+     * as in the message.
      */
-    public Flux<User> getUserMentions() {
-        return Flux.fromIterable(getUserMentionIds()).flatMap(gateway::getUserById);
+    public List<User> getUserMentions() {
+        // TODO FIXME we throw away member data here
+        return data.mentions().stream()
+                .map(data -> new User(gateway, data))
+                .collect(Collectors.toList());
     }
 
     /**
-     * Requests to retrieve the users specifically mentioned in this message, using the given retrieval strategy.
+     * Gets the IDs of the roles specifically mentioned in this message, without duplication and with the same order
+     * as in the message.
      *
-     * @param retrievalStrategy the strategy to use to get the users
-     * @return A {@link Flux} that continually emits {@link User users} specifically mentioned in this message. If an
-     * error is received, it is emitted through the {@code Flux}.
+     * @return The IDs of the roles specifically mentioned in this message, without duplication and with the same order
+     * as in the message.
      */
-    public Flux<User> getUserMentions(EntityRetrievalStrategy retrievalStrategy) {
-        return Flux.fromIterable(getUserMentionIds())
-                .flatMap(id -> gateway.withRetrievalStrategy(retrievalStrategy).getUserById(id));
-    }
-
-    /**
-     * Gets the IDs of the roles specifically mentioned in this message.
-     *
-     * @return The IDs of the roles specifically mentioned in this message.
-     */
-    public Set<Snowflake> getRoleMentionIds() {
+    public List<Snowflake> getRoleMentionIds() {
         return data.mentionRoles().stream()
                 .map(Snowflake::of)
-                .collect(Collectors.toSet());
+                .collect(Collectors.toList());
     }
 
     /**
@@ -340,14 +335,16 @@ public final class Message implements Entity {
     }
 
     /**
-     * Gets the reactions to this message.
+     * Gets the reactions to this message, the order is the same as in the message.
      *
-     * @return The reactions to this message.
+     * @return The reactions to this message, the order is the same as in the message.
      */
-    public Set<Reaction> getReactions() {
+    public List<Reaction> getReactions() {
         return data.reactions().toOptional()
-                .map(reactions -> reactions.stream().map(data -> new Reaction(gateway, data)).collect(Collectors.toSet()))
-                .orElse(Collections.emptySet());
+                .map(reactions -> reactions.stream()
+                        .map(data -> new Reaction(gateway, data))
+                        .collect(Collectors.toList()))
+                .orElse(Collections.emptyList());
 
     }
 
@@ -457,10 +454,10 @@ public final class Message implements Entity {
      */
     public List<Sticker> getStickers() {
         return data.stickers().toOptional()
-            .orElse(Collections.emptyList())
-            .stream()
-            .map(data -> new Sticker(gateway, data))
-            .collect(Collectors.toList());
+                .orElse(Collections.emptyList())
+                .stream()
+                .map(data -> new Sticker(gateway, data))
+                .collect(Collectors.toList());
     }
 
     /**
@@ -470,7 +467,7 @@ public final class Message implements Entity {
      */
     public Optional<Message> getReferencedMessage() {
         return Possible.flatOpt(data.referencedMessage())
-            .map(data -> new Message(gateway, data));
+                .map(data -> new Message(gateway, data));
     }
 
     /**
@@ -613,15 +610,17 @@ public final class Message implements Entity {
 
     /**
      * Requests to publish (crosspost) this message if the {@code channel} is of type 'news'.
-     * Requires 'SEND_MESSAGES' permission if the current user sent the message, or additionally the 'MANAGE_MESSAGES' permission, for all other messages, to be present for the current user.
+     * Requires 'SEND_MESSAGES' permission if the current user sent the message, or additionally the
+     * 'MANAGE_MESSAGES' permission, for all other messages, to be present for the current user.
      *
-     * @return A {@link Mono} where, upon successful completion, emits the published {@link Message} in the guilds. If an error is
+     * @return A {@link Mono} where, upon successful completion, emits the published {@link Message} in the guilds.
+     * If an error is
      * received, it is emitted through the {@code Mono}.
      */
     public Mono<Message> publish() {
         return gateway.getRestClient().getChannelService()
-            .publishMessage(getChannelId().asLong(), getId().asLong())
-            .map(data -> new Message(gateway, data));
+                .publishMessage(getChannelId().asLong(), getId().asLong())
+                .map(data -> new Message(gateway, data));
     }
 
     @Override
