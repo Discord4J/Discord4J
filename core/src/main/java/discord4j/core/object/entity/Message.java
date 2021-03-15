@@ -245,7 +245,7 @@ public final class Message implements Entity {
         return data.mentions().stream()
                 .map(UserData::id)
                 .map(Snowflake::of)
-                .collect(Collectors.toCollection(LinkedList::new));
+                .collect(Collectors.toList());
     }
 
     /**
@@ -259,7 +259,7 @@ public final class Message implements Entity {
         // TODO FIXME we throw away member data here
         return data.mentions().stream()
                 .map(data -> new User(gateway, data))
-                .collect(Collectors.toCollection(LinkedList::new));
+                .collect(Collectors.toList());
     }
 
     /**
@@ -272,7 +272,7 @@ public final class Message implements Entity {
     public List<Snowflake> getRoleMentionIds() {
         return data.mentionRoles().stream()
                 .map(Snowflake::of)
-                .collect(Collectors.toCollection(LinkedList::new));
+                .collect(Collectors.toList());
     }
 
     /**
@@ -334,8 +334,8 @@ public final class Message implements Entity {
         return data.reactions().toOptional()
                 .map(reactions -> reactions.stream()
                         .map(data -> new Reaction(gateway, data))
-                        .collect(Collectors.toCollection(LinkedList::new)))
-                .orElse(new LinkedList<>());
+                        .collect(Collectors.toList()))
+                .orElse(Collections.emptyList());
 
     }
 
