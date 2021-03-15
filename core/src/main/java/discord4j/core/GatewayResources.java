@@ -96,6 +96,8 @@ public class GatewayResources {
      * {@link StateHolder} which is the mediator for the underlying {@link Store} instances for each cached entity.
      *
      * @return the {@link StateView} tied to this {@link GatewayResources}
+     * @deprecated v3.2.0 will introduce a new way of working with stores, see
+     * <a href="https://github.com/Discord4J/Discord4J/pull/788">this pull request</a> for details
      */
     public StateView getStateView() {
         return stateView;
