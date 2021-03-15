@@ -23,7 +23,7 @@ import discord4j.core.object.entity.Role;
 import discord4j.core.object.entity.channel.Channel;
 import discord4j.rest.util.PermissionSet;
 
-import java.awt.Color;
+import java.awt.*;
 import java.util.Set;
 
 /**
