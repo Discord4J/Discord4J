@@ -37,7 +37,6 @@ import reactor.util.function.Tuple2;
 import reactor.util.function.Tuples;
 
 import java.util.*;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayDataUpdater {
@@ -749,9 +748,12 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
                 .flatMap(oldMember -> {
                     MemberData newMember = MemberData.builder()
                             .from(oldMember)
-                            .nick(dispatch.nick())
                             .roles(dispatch.roles())
+                            .user(dispatch.user())
+                            .nick(dispatch.nick())
+                            .joinedAt(dispatch.joinedAt())
                             .premiumSince(dispatch.premiumSince())
+                            .pending(dispatch.pending())
                             .build();
 
                     return stateHolder.getMemberStore().save(key, newMember).thenReturn(oldMember);
@@ -1110,7 +1112,8 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
                                     .orElse(oldUserData.username()))
                             .discriminator(userData.discriminator().toOptional()
                                     .orElse(oldUserData.discriminator()))
-                            .avatar(or(Possible.flatOpt(userData.avatar()), oldUserData::avatar))
+                            .avatar(userData.avatar().isAbsent() ? oldUserData.avatar() :
+                                    Possible.flatOpt(userData.avatar()))
                             .build();
 
                     return stateHolder.getUserStore().save(userId, newUserData).thenReturn(oldUserData);
@@ -1120,18 +1123,6 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
 
         return Mono.zip(savePresence, saveUser,
                 (p, u) -> PresenceAndUserData.of(p.orElse(null), u.orElse(null)));
-    }
-
-    // JDK 9
-    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-    private <T> Optional<T> or(Optional<T> first, Supplier<Optional<T>> supplier) {
-        Objects.requireNonNull(supplier);
-        if (first.isPresent()) {
-            return first;
-        } else {
-            Optional<T> r = supplier.get();
-            return Objects.requireNonNull(r);
-        }
     }
 
     @Override
