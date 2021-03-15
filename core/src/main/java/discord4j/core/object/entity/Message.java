@@ -29,7 +29,6 @@ import discord4j.core.retriever.EntityRetrievalStrategy;
 import discord4j.core.spec.MessageEditSpec;
 import discord4j.core.util.EntityUtil;
 import discord4j.discordjson.json.MessageData;
-import discord4j.discordjson.json.StickerData;
 import discord4j.discordjson.json.SuppressEmbedsRequest;
 import discord4j.discordjson.json.UserData;
 import discord4j.discordjson.possible.Possible;
@@ -256,6 +255,7 @@ public final class Message implements Entity {
      *
      * @return A {@link Flux} that continually emits {@link User users} specifically mentioned in this message. If an
      * error is received, it is emitted through the {@code Flux}.
+     * @deprecated this method will have its return type changed to List in v3.2.0
      */
     public Flux<User> getUserMentions() {
         return Flux.fromIterable(getUserMentionIds()).flatMap(gateway::getUserById);
@@ -267,6 +267,7 @@ public final class Message implements Entity {
      * @param retrievalStrategy the strategy to use to get the users
      * @return A {@link Flux} that continually emits {@link User users} specifically mentioned in this message. If an
      * error is received, it is emitted through the {@code Flux}.
+     * @deprecated for removal in v3.2.0, as entity retrieval is not used for user mentions anymore
      */
     public Flux<User> getUserMentions(EntityRetrievalStrategy retrievalStrategy) {
         return Flux.fromIterable(getUserMentionIds())
