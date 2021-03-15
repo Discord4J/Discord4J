@@ -16,17 +16,13 @@
  */
 package discord4j.rest.service;
 
-import discord4j.common.util.Snowflake;
 import discord4j.discordjson.json.ApplicationCommandData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
 import discord4j.discordjson.json.ApplicationInfoData;
-import discord4j.discordjson.json.UserGuildData;
 import discord4j.rest.request.Router;
 import discord4j.rest.route.Routes;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
-import java.util.List;
 
 public class ApplicationService extends RestService {
 

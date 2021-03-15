@@ -19,7 +19,9 @@ package discord4j.core;
 
 import discord4j.core.event.ReactiveEventAdapter;
 import discord4j.core.event.domain.InteractionCreateEvent;
-import discord4j.discordjson.json.ApplicationCommandInteractionData;
+import discord4j.core.object.command.ApplicationCommandInteraction;
+import discord4j.core.object.command.ApplicationCommandInteractionOption;
+import discord4j.core.object.command.ApplicationCommandInteractionOptionValue;
 import discord4j.discordjson.json.ApplicationCommandOptionData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
 import discord4j.rest.RestClient;
@@ -29,7 +31,6 @@ import reactor.core.publisher.Mono;
 import reactor.util.Logger;
 import reactor.util.Loggers;
 
-import java.util.Collections;
 import java.util.Random;
 
 public class ExampleInteractionCreateEvent {
@@ -71,22 +72,17 @@ public class ExampleInteractionCreateEvent {
                 if (event.getCommandName().equals("random")) {
                     return event.acknowledge()
                             .then(event.getInteractionResponse().createFollowupMessage(result(random,
-                                    event.getCommandInteractionData())));
+                                    event.getInteraction().getCommandInteraction())));
                 }
                 return Mono.empty();
             }
         }).blockLast();
     }
 
-    private static String result(Random random, ApplicationCommandInteractionData acid) {
-        long digits = acid.options()
-                .toOptional()
-                .orElse(Collections.emptyList())
-                .stream()
-                .filter(option -> option.name().equals("digits"))
-                .map(option -> option.value().toOptional()
-                        .map(Long::parseLong).orElse(1L))
-                .findFirst()
+    private static String result(Random random, ApplicationCommandInteraction acid) {
+        long digits = acid.getOption("digits")
+                .flatMap(ApplicationCommandInteractionOption::getValue)
+                .map(ApplicationCommandInteractionOptionValue::asLong)
                 .orElse(1L);
         StringBuilder result = new StringBuilder();
         for (int i = 0; i < Math.max(1, Math.min(20, digits)); i++) {

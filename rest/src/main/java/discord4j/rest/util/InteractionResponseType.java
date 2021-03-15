@@ -1,7 +1,5 @@
 package discord4j.rest.util;
 
-import java.util.Arrays;
-
 public enum InteractionResponseType {
     /**
      * Unknown type
@@ -51,6 +49,11 @@ public enum InteractionResponseType {
      * @return The type of response.
      */
     public static InteractionResponseType of(final int value) {
-        return Arrays.stream(values()).filter(type -> type.getValue() == value).findFirst().orElse(UNKNOWN);
+        switch (value) {
+            case 1: return PONG;
+            case 4: return CHANNEL_MESSAGE_WITH_SOURCE;
+            case 5: return DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE;
+            default: return UNKNOWN;
+        }
     }
 }

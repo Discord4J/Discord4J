@@ -17,7 +17,6 @@
 package discord4j.rest.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import discord4j.common.util.Snowflake;
 import discord4j.discordjson.json.InteractionResponseData;
 import discord4j.rest.request.Router;
 import discord4j.rest.route.Routes;

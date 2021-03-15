@@ -39,7 +39,7 @@ class BaseChannel implements Channel {
     private final RestChannel rest;
 
     /**
-     * Constructs a {@code BaseChannel} with an associated ServiceMediator and Discord data.
+     * Constructs a {@code BaseChannel} with an associated {@link GatewayDiscordClient} and Discord data.
      *
      * @param gateway The {@link GatewayDiscordClient} associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.

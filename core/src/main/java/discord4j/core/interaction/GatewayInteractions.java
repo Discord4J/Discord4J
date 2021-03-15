@@ -22,6 +22,7 @@ import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.ReactiveEventAdapter;
 import discord4j.core.event.domain.InteractionCreateEvent;
 import discord4j.core.event.domain.lifecycle.ReadyEvent;
+import discord4j.discordjson.json.InteractionData;
 import discord4j.discordjson.json.InteractionResponseData;
 import discord4j.rest.interaction.InteractionHandler;
 import discord4j.rest.interaction.InteractionOperations;
@@ -69,11 +70,12 @@ public class GatewayInteractions extends ReactiveEventAdapter {
     public Publisher<?> onInteractionCreate(InteractionCreateEvent event) {
         Mono<Long> applicationId = appId.timeout(Duration.ofMillis(1))
                 .onErrorResume(t -> event.getClient().rest().getApplicationId());
-        InteractionOperations ops = new InteractionOperations(event.getClient().rest(), event.getData(), applicationId);
-        InteractionHandler handler = interactions.findHandler(event.getData()).createResponseHandler(ops);
+        InteractionData interactionData = event.getInteraction().getData();
+        InteractionOperations ops = new InteractionOperations(event.getClient().rest(), interactionData, applicationId);
+        InteractionHandler handler = interactions.findHandler(interactionData).createResponseHandler(ops);
         InteractionResponseData responseData = handler.response();
-        long id = Snowflake.asLong(event.getData().id());
-        String token = event.getData().token();
+        long id = Snowflake.asLong(interactionData.id());
+        String token = interactionData.token();
         Scheduler timedScheduler = event.getClient().getGatewayResources().getGatewayReactorResources()
                 .getTimerTaskScheduler();
 
