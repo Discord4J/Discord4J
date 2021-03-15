@@ -20,7 +20,8 @@ class ApplicationCommandDispatchHandlers {
         Long guildId = Long.parseLong(context.getDispatch().guildId());
         ApplicationCommandData command = context.getDispatch().command();
 
-        return Mono.just(new ApplicationCommandCreateEvent(gateway, shardInfo, new ApplicationCommand(gateway, command), guildId));
+        return Mono.just(new ApplicationCommandCreateEvent(gateway, shardInfo,
+                new ApplicationCommand(gateway, command), guildId));
     }
 
     static Mono<ApplicationCommandUpdateEvent> applicationCommandUpdate(DispatchContext<ApplicationCommandUpdate> context) {
@@ -29,7 +30,8 @@ class ApplicationCommandDispatchHandlers {
         Long guildId = Long.parseLong(context.getDispatch().guildId());
         ApplicationCommandData command = context.getDispatch().command();
 
-        return Mono.just(new ApplicationCommandUpdateEvent(gateway, shardInfo, new ApplicationCommand(gateway, command), guildId));
+        return Mono.just(new ApplicationCommandUpdateEvent(gateway, shardInfo,
+                new ApplicationCommand(gateway, command), guildId));
     }
 
     static Mono<ApplicationCommandDeleteEvent> applicationCommandDelete(DispatchContext<ApplicationCommandDelete> context) {
@@ -38,7 +40,8 @@ class ApplicationCommandDispatchHandlers {
         Long guildId = Long.parseLong(context.getDispatch().guildId());
         ApplicationCommandData command = context.getDispatch().command();
 
-        return Mono.just(new ApplicationCommandDeleteEvent(gateway, shardInfo, new ApplicationCommand(gateway, command), guildId));
+        return Mono.just(new ApplicationCommandDeleteEvent(gateway, shardInfo,
+                new ApplicationCommand(gateway, command), guildId));
     }
 
 }
