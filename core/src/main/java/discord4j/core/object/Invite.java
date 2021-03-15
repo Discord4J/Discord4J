@@ -309,7 +309,10 @@ public class Invite implements DiscordObject {
          * @return The type of target user.
          */
         public static Type of(final int value) {
-            return Arrays.stream(values()).filter(type -> type.getValue() == value).findFirst().orElse(UNKNOWN);
+            switch (value) {
+                case 1: return STREAM;
+                default: return UNKNOWN;
+            }
         }
 
     }

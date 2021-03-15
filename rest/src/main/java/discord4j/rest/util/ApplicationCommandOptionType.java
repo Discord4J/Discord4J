@@ -1,7 +1,5 @@
 package discord4j.rest.util;
 
-import java.util.Arrays;
-
 public enum ApplicationCommandOptionType {
     UNKNOWN(-1),
     SUB_COMMAND(1),
@@ -44,6 +42,16 @@ public enum ApplicationCommandOptionType {
      * @return The type of option.
      */
     public static ApplicationCommandOptionType of(final int value) {
-        return Arrays.stream(values()).filter(type -> type.getValue() == value).findFirst().orElse(UNKNOWN);
+        switch (value) {
+            case 1: return SUB_COMMAND;
+            case 2: return SUB_COMMAND_GROUP;
+            case 3: return STRING;
+            case 4: return INTEGER;
+            case 5: return BOOLEAN;
+            case 6: return USER;
+            case 7: return CHANNEL;
+            case 8: return ROLE;
+            default: return UNKNOWN;
+        }
     }
 }

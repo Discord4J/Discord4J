@@ -30,7 +30,6 @@ import discord4j.core.retriever.EntityRetrievalStrategy;
 import discord4j.core.spec.MessageEditSpec;
 import discord4j.core.util.EntityUtil;
 import discord4j.discordjson.json.MessageData;
-import discord4j.discordjson.json.StickerData;
 import discord4j.discordjson.json.SuppressEmbedsRequest;
 import discord4j.discordjson.json.UserData;
 import discord4j.discordjson.possible.Possible;
@@ -831,7 +830,24 @@ public final class Message implements Entity {
          * @return The type of message.
          */
         public static Type of(final int value) {
-            return Arrays.stream(values()).filter(type -> type.getValue() == value).findFirst().orElse(UNKNOWN);
+            switch (value) {
+                case 0: return DEFAULT;
+                case 1: return RECIPIENT_ADD;
+                case 2: return RECIPIENT_REMOVE;
+                case 3: return CALL;
+                case 4: return CHANNEL_NAME_CHANGE;
+                case 5: return CHANNEL_ICON_CHANGE;
+                case 6: return CHANNEL_PINNED_MESSAGE;
+                case 7: return GUILD_MEMBER_JOIN;
+                case 8: return USER_PREMIUM_GUILD_SUBSCRIPTION;
+                case 9: return USER_PREMIUM_GUILD_SUBSCRIPTION_TIER_1;
+                case 10: return USER_PREMIUM_GUILD_SUBSCRIPTION_TIER_2;
+                case 11: return USER_PREMIUM_GUILD_SUBSCRIPTION_TIER_3;
+                case 12: return CHANNEL_FOLLOW_ADD;
+                case 14: return GUILD_DISCOVERY_DISQUALIFIED;
+                case 15: return GUILD_DISCOVERY_REQUALIFIED;
+                default: return UNKNOWN;
+            }
         }
     }
 

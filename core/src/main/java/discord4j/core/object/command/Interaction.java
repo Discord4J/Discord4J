@@ -11,7 +11,6 @@ import discord4j.discordjson.json.InteractionData;
 import discord4j.discordjson.json.UserData;
 import reactor.core.publisher.Mono;
 
-import java.util.Arrays;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -177,7 +176,11 @@ public class Interaction implements DiscordObject {
          * @return The type of interaction.
          */
         public static Interaction.Type of(final int value) {
-            return Arrays.stream(values()).filter(type -> type.getValue() == value).findFirst().orElse(UNKNOWN);
+            switch (value) {
+                case 1: return PING;
+                case 2: return APPLICATION_COMMAND;
+                default: return UNKNOWN;
+            }
         }
     }
 }

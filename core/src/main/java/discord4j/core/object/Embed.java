@@ -238,7 +238,13 @@ public final class Embed implements DiscordObject {
          * @return The type of embed.
          */
         public static Embed.Type of(final String value) {
-            return Arrays.stream(values()).filter(type -> type.getValue().equals(value)).findFirst().orElse(UNKNOWN);
+            switch (value) {
+                case "image": return IMAGE;
+                case "link": return LINK;
+                case "rich": return RICH;
+                case "video": return VIDEO;
+                default: return UNKNOWN;
+            }
         }
     }
 
