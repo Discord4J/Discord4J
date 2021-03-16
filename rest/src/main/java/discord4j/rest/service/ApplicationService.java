@@ -24,6 +24,8 @@ import discord4j.rest.route.Routes;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.List;
+
 public class ApplicationService extends RestService {
 
     public ApplicationService(Router router) {
@@ -48,6 +50,14 @@ public class ApplicationService extends RestService {
             .body(request)
             .exchange(getRouter())
             .bodyToMono(ApplicationCommandData.class);
+    }
+
+    public Flux<ApplicationCommandData> batchUpdateGlobalApplicationCommand(long applicationId, List<ApplicationCommandRequest> requests) {
+        return Routes.GLOBAL_APPLICATION_COMMANDS_BATCH_UPDATE.newRequest(applicationId)
+                .body(requests)
+                .exchange(getRouter())
+                .bodyToMono(ApplicationCommandData[].class)
+                .flatMapMany(Flux::fromArray);
     }
 
     public Mono<ApplicationCommandData> getGlobalApplicationCommand(long applicationId, long commandId) {
@@ -81,6 +91,14 @@ public class ApplicationService extends RestService {
             .body(request)
             .exchange(getRouter())
             .bodyToMono(ApplicationCommandData.class);
+    }
+
+    public Flux<ApplicationCommandData> batchUpdateGuildApplicationCommand(long applicationId, long guildId, List<ApplicationCommandRequest> requests) {
+        return Routes.GUILD_APPLICATION_COMMANDS_BATCH_UPDATE.newRequest(applicationId, guildId)
+                .body(requests)
+                .exchange(getRouter())
+                .bodyToMono(ApplicationCommandData[].class)
+                .flatMapMany(Flux::fromArray);
     }
 
     public Mono<ApplicationCommandData> getGuildApplicationCommand(long applicationId, long guildId, long commandId) {
