@@ -52,8 +52,8 @@ public class ApplicationService extends RestService {
             .bodyToMono(ApplicationCommandData.class);
     }
 
-    public Flux<ApplicationCommandData> batchUpdateGlobalApplicationCommand(long applicationId, List<ApplicationCommandRequest> requests) {
-        return Routes.GLOBAL_APPLICATION_COMMANDS_BATCH_UPDATE.newRequest(applicationId)
+    public Flux<ApplicationCommandData> bulkOverwriteGlobalApplicationCommand(long applicationId, List<ApplicationCommandRequest> requests) {
+        return Routes.GLOBAL_APPLICATION_COMMANDS_BULK_OVERWRITE.newRequest(applicationId)
                 .body(requests)
                 .exchange(getRouter())
                 .bodyToMono(ApplicationCommandData[].class)
@@ -93,8 +93,8 @@ public class ApplicationService extends RestService {
             .bodyToMono(ApplicationCommandData.class);
     }
 
-    public Flux<ApplicationCommandData> batchUpdateGuildApplicationCommand(long applicationId, long guildId, List<ApplicationCommandRequest> requests) {
-        return Routes.GUILD_APPLICATION_COMMANDS_BATCH_UPDATE.newRequest(applicationId, guildId)
+    public Flux<ApplicationCommandData> bulkOverwriteGuildApplicationCommand(long applicationId, long guildId, List<ApplicationCommandRequest> requests) {
+        return Routes.GUILD_APPLICATION_COMMANDS_BULK_OVERWRITE.newRequest(applicationId, guildId)
                 .body(requests)
                 .exchange(getRouter())
                 .bodyToMono(ApplicationCommandData[].class)

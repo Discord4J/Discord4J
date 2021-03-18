@@ -992,7 +992,7 @@ public abstract class Routes {
 
     public static final Route GLOBAL_APPLICATION_COMMANDS_CREATE = Route.post("/applications/{application.id}/commands");
 
-    public static final Route GLOBAL_APPLICATION_COMMANDS_BATCH_UPDATE = Route.put("/applications/{application.id}/commands");
+    public static final Route GLOBAL_APPLICATION_COMMANDS_BULK_OVERWRITE = Route.put("/applications/{application.id}/commands");
 
     public static final Route GLOBAL_APPLICATION_COMMAND_GET = Route.get("/applications/{application.id}/commands/{command.id}");
 
@@ -1004,7 +1004,7 @@ public abstract class Routes {
 
     public static final Route GUILD_APPLICATION_COMMANDS_CREATE = Route.post("/applications/{application.id}/guilds/{guild.id}/commands");
 
-    public static final Route GUILD_APPLICATION_COMMANDS_BATCH_UPDATE = Route.put("/applications/{application.id}/guilds/{guild.id}/commands");
+    public static final Route GUILD_APPLICATION_COMMANDS_BULK_OVERWRITE = Route.put("/applications/{application.id}/guilds/{guild.id}/commands");
 
     public static final Route GUILD_APPLICATION_COMMAND_GET = Route.get("/applications/{application.id}/guilds/{guild.id}/commands/{command.id}");
 
