@@ -675,12 +675,13 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                             }))
                             .cache();
 
-                    Flux<ShardInfo> connections = b.shardingStrategy.getShards(count)
-                            .groupBy(shard -> shard.getIndex() % b.shardingStrategy.getMaxConcurrency())
-                            .flatMap(group -> group.concatMap(shard -> acquireConnection(b, shard, clientFactory,
-                                    gateway, shardCoordinator, store, eventDispatcher, clientGroup,
-                                    onCloseSink, dispatchMapper, completingChunkNonces,
-                                    destroySequence.contextWrite(buildContext(gateway, shard)))));
+                    Flux<ShardInfo> connections = b.shardingStrategy.getMaxConcurrency(b.client)
+                            .flatMapMany(maxConcurrency -> b.shardingStrategy.getShards(count)
+                                .groupBy(shard -> shard.getIndex() % maxConcurrency)
+                                .flatMap(group -> group.concatMap(shard -> acquireConnection(b, shard, clientFactory,
+                                        gateway, shardCoordinator, store, eventDispatcher, clientGroup,
+                                        onCloseSink, dispatchMapper, completingChunkNonces,
+                                        destroySequence.contextWrite(buildContext(gateway, shard)), maxConcurrency))));
 
                     Supplier<Mono<Void>> withEventDispatcherFunction = () ->
                             Flux.from(b.dispatcherFunction.apply(eventDispatcher))
@@ -751,7 +752,8 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                                               Sinks.Empty<Void> onCloseSink,
                                               DispatchEventMapper dispatchMapper,
                                               Set<String> completingChunkNonces,
-                                              Mono<Void> destroySequence) {
+                                              Mono<Void> destroySequence,
+                                              int maxConcurrency) {
         return Mono.deferContextual(ctx ->
                 Mono.<ShardInfo>create(sink -> {
                     StatusUpdate initial = Optional.ofNullable(b.initialPresence.apply(shard)).orElse(null);
@@ -761,8 +763,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                             .guildSubscriptions(b.guildSubscriptions)
                             .resumeSession(b.resumeOptions.apply(shard))
                             .build();
-                    PayloadTransformer limiter = shardCoordinator.getIdentifyLimiter(shard,
-                            b.shardingStrategy.getMaxConcurrency());
+                    PayloadTransformer limiter = shardCoordinator.getIdentifyLimiter(shard, maxConcurrency);
                     GatewayReactorResources resources = gateway.getGatewayResources().getGatewayReactorResources();
                     ReconnectOptions reconnectOptions = initReconnectOptions(resources);
                     GatewayOptions options = new GatewayOptions(client.getCoreResources().getToken(),

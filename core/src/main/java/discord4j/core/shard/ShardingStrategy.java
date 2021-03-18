@@ -18,6 +18,7 @@
 package discord4j.core.shard;
 
 import discord4j.discordjson.json.GatewayData;
+import discord4j.discordjson.json.SessionStartLimitData;
 import discord4j.discordjson.possible.Possible;
 import discord4j.gateway.GatewayClient;
 import discord4j.gateway.ShardInfo;
@@ -63,12 +64,27 @@ public interface ShardingStrategy {
      * @return a value determining the sharding factor this strategy has
      * @see <a href="https://discord.com/developers/docs/topics/gateway#sharding-for-very-large-bots">
      * Sharding for very large bots</a>
+     * @deprecated use {@link #getMaxConcurrency(RestClient)} instead
      */
+    @Deprecated
     int getMaxConcurrency();
 
     /**
-     * Sharding strategy that retrieves the recommended shard count and creates as many {@link GatewayClient}
-     * instances as indexes given by that count.
+     * Return the number of shards that can be identified concurrently. Must be 1 unless your application is authorized
+     * to use the large bot sharding system.
+     *
+     * @param restClient a handle to consume REST API resources, typically to retrieve the recommended concurrency
+     * @return a value determining the sharding factor this strategy has
+     * @see <a href="https://discord.com/developers/docs/topics/gateway#sharding-for-very-large-bots">
+     * Sharding for very large bots</a>
+     */
+    default Mono<Integer> getMaxConcurrency(RestClient restClient) {
+        return Mono.just(getMaxConcurrency());
+    }
+
+    /**
+     * Sharding strategy that retrieves the recommended shard count and concurrency, and creates as many
+     * {@link GatewayClient} instances as indexes given by that count.
      *
      * @return a recommended {@link ShardingStrategy}
      */
@@ -90,6 +106,18 @@ public interface ShardingStrategy {
             @Override
             public int getMaxConcurrency() {
                 return 1;
+            }
+
+            @Override
+            public Mono<Integer> getMaxConcurrency(RestClient restClient) {
+                return restClient.getGatewayService().getGatewayBot()
+                    .map(GatewayData::sessionStartLimit)
+                    .map(sessionStartLimit -> sessionStartLimit.toOptional()
+                        .map(SessionStartLimitData::maxConcurrency)
+                        .flatMap(Possible::toOptional)
+                        .orElseGet(this::getMaxConcurrency)
+                    );
+
             }
         };
     }
