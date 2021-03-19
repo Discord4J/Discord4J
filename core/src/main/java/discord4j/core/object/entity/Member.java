@@ -534,28 +534,11 @@ public final class Member extends User {
      * }
      * </pre>
      *
-<<<<<<< HEAD
-     * @param spec A {@link Consumer} that provides a "blank" {@link GuildMemberEditSpec} to be operated on.
-     * @return A {@link Mono} where, upon successful completion, emits the modified {@link Member}. If an error is
-     * received, it is emitted through the {@code Mono}.
-     */
-    public Mono<Member> edit(final Consumer<? super GuildMemberEditSpec> spec) {
-        return Mono.defer(
-                () -> {
-                    GuildMemberEditSpec mutatedSpec = new GuildMemberEditSpec();
-                    spec.accept(mutatedSpec);
-                    return getClient().getRestClient().getGuildService()
-                            .modifyGuildMember(getGuildId().asLong(), getId().asLong(), mutatedSpec.asRequest(),
-                                    mutatedSpec.getReason())
-                            .map(data -> new Member(getClient(), data, guildId));
-                });
-=======
      * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the member has been edited.
      * If an error is received, it is emitted through the {@code Mono}.
      */
     public GuildMemberEditMono edit() {
         return new GuildMemberEditMono(getClient(), guildId, getId().asLong());
->>>>>>> Add GuildMemberEditMono
     }
 
     @Override

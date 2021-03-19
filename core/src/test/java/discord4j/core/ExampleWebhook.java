@@ -85,8 +85,8 @@ public class ExampleWebhook {
 
 
         gateway.getChannelById(webhookChannel)
-                .flatMap(channel -> ((TextChannel) channel).createWebhook(webhook ->
-                        webhook.setReason("testing").setName("A webhook for testing")))
+                .flatMap(channel -> ((TextChannel) channel).createWebhook()
+                    .withReason("testing").withName("A webhook for testing"))
                 .flatMap(hook -> hook.executeAndWait(spec ->
                         spec.setContent("you can execute webhooks after you create them.")
                 ).thenReturn(hook))

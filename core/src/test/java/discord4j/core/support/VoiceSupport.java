@@ -64,7 +64,6 @@ public class VoiceSupport {
         AudioPlayer player = playerManager.createPlayer();
         AudioProvider provider = new LavaplayerAudioProvider(player);
 
-<<<<<<< HEAD
         List<EventHandler> eventHandlers = new ArrayList<>();
         eventHandlers.add(new Join(provider));
         eventHandlers.add(new Leave(client));
@@ -72,54 +71,6 @@ public class VoiceSupport {
         eventHandlers.add(new Resume(client));
         eventHandlers.add(new Play(playerManager, player));
         eventHandlers.add(new Stop(player));
-=======
-        Mono<Void> join = client.getEventDispatcher().on(MessageCreateEvent.class)
-                .filter(e -> e.getMessage().getContent().equals("!join"))
-                .doOnNext(e -> log.info("Received voice join request"))
-                .flatMap(e -> Mono.justOrEmpty(e.getMember())
-                        .flatMap(Member::getVoiceState)
-                        .flatMap(VoiceState::getChannel)
-                        .flatMap(channel -> channel.join().withProvider(provider))
-                        .doFinally(s -> log.info("Finalized join request after {}", s))
-                        .onErrorResume(t -> {
-                            log.error("Failed to join voice channel", t);
-                            return Mono.empty();
-                        }))
-                .then();
-
-        Mono<Void> leave = client.getEventDispatcher().on(MessageCreateEvent.class)
-                .filter(e -> e.getMessage().getContent().equals("!leave"))
-                .doOnNext(e -> log.info("Received voice leave request"))
-                .flatMap(e -> Mono.justOrEmpty(e.getMember())
-                        .flatMap(Member::getVoiceState)
-                        .flatMap(vs -> client.getVoiceConnectionRegistry()
-                                .getVoiceConnection(vs.getGuildId())
-                                .doOnSuccess(vc -> {
-                                    if (vc == null) {
-                                        log.info("No voice connection to leave!");
-                                    }
-                                }))
-                        .flatMap(VoiceConnection::disconnect))
-                .then();
-
-        Mono<Void> reconnect = client.getEventDispatcher().on(MessageCreateEvent.class)
-                .filter(e -> e.getMessage().getContent().equals("!vcretry"))
-                .flatMap(e -> Mono.justOrEmpty(e.getMember())
-                        .flatMap(Member::getVoiceState)
-                        .flatMap(vs -> client.getVoiceConnectionRegistry()
-                                .getVoiceConnection(vs.getGuildId()))
-                        .flatMap(VoiceConnection::reconnect)
-                        .doFinally(s -> log.info("Reconnect event handle complete")))
-                .then();
-
-        Mono<Void> play = client.getEventDispatcher().on(MessageCreateEvent.class)
-                .filter(e -> e.getMessage().getContent().startsWith("!play "))
-                .flatMap(e -> Mono.justOrEmpty(e.getMessage().getContent())
-                        .map(content -> Arrays.asList(content.split(" ")))
-                        .doOnNext(command -> playerManager.loadItem(command.get(1),
-                                new MyAudioLoadResultHandler(player))))
-                .then();
->>>>>>> Add VoiceChannelJoinMono
 
         return client.on(MessageCreateEvent.class,
                 event -> ownerId.filter(
@@ -199,7 +150,7 @@ public class VoiceSupport {
                 return Mono.justOrEmpty(event.getMember())
                         .flatMap(Member::getVoiceState)
                         .flatMap(VoiceState::getChannel)
-                        .flatMap(channel -> channel.join(spec -> spec.setProvider(provider)))
+                        .flatMap(channel -> channel.join().withProvider(provider))
                         .retryWhen(Retry.backoff(2, Duration.ofSeconds(2)))
                         .doFinally(s -> log.info("Finalized join request after {}", s))
                         .onErrorResume(t -> {

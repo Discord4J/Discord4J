@@ -18,11 +18,8 @@ package discord4j.core.object.entity;
 
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.retriever.EntityRetrievalStrategy;
-<<<<<<< HEAD
 import discord4j.discordjson.json.UserData;
-=======
 import discord4j.core.spec.GuildEmojiEditMono;
->>>>>>> Add GuildEmojiEditMono
 import discord4j.rest.util.Image;
 import discord4j.common.util.Snowflake;
 import discord4j.core.util.EntityUtil;

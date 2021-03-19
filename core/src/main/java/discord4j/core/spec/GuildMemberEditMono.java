@@ -4,6 +4,7 @@ import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.discordjson.json.GuildMemberModifyRequest;
 import discord4j.discordjson.json.ImmutableGuildMemberModifyRequest;
+import discord4j.discordjson.json.MemberData;
 import discord4j.discordjson.possible.Possible;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
@@ -15,7 +16,7 @@ import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
-public final class GuildMemberEditMono extends AuditableRequest<Void, ImmutableGuildMemberModifyRequest.Builder, GuildMemberEditMono> {
+public final class GuildMemberEditMono extends AuditableRequest<MemberData, ImmutableGuildMemberModifyRequest.Builder, GuildMemberEditMono> {
 
     private final GatewayDiscordClient gateway;
     private final long guildId;
@@ -68,7 +69,7 @@ public final class GuildMemberEditMono extends AuditableRequest<Void, ImmutableG
     }
 
     @Override
-    Mono<Void> getRequest() {
+    Mono<MemberData> getRequest() {
         return gateway.getRestClient().getGuildService()
                 .modifyGuildMember(guildId, memberId, requestBuilder.get().build(), reason);
     }

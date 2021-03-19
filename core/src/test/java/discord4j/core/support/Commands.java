@@ -155,7 +155,7 @@ public class Commands {
                     .uri(attachment.getUrl())
                     .responseSingle((res, mono) -> mono.asByteArray())
                     .flatMap(input -> request.getClient()
-                            .edit(spec -> spec.setAvatar(Image.ofRaw(input, Image.Format.PNG))))
+                            .edit().withAvatar(Image.ofRaw(input, Image.Format.PNG)))
                     .then();
         }
         return Mono.empty();
