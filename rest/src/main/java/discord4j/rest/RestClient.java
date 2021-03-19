@@ -185,6 +185,16 @@ public class RestClient {
     }
 
     /**
+     * Requests to retrieve the bot member from the guild of the supplied ID
+     *
+     * @param guildId the ID of the guild.
+     * @return A {@link RestMember} of the bot user as represented by the supplied ID.
+     */
+    public RestMember selfRestMember(Snowflake guildId) {
+        return RestMember.create(this, guildId, restResources.getSelfId());
+    }
+
+    /**
      * Requests to retrieve the message represented by the supplied IDs.
      *
      * @param channelId The ID of the channel.
@@ -310,6 +320,17 @@ public class RestClient {
      */
     public Mono<UserData> getSelf() {
         return userService.getCurrentUser();
+    }
+
+    /**
+     * Requests to retrieve the bot user, represented as a member of the guild of the supplied ID
+     *
+     * @param guildId The ID of the guild
+     * @return a {@link Mono} where, upon successful completion, emits the bot {@link MemberData member}. If an error is
+     *         received, it is emitted through the {@code Mono}.
+     */
+    public Mono<MemberData> getSelfMember(Snowflake guildId) {
+        return guildService.getGuildMember(guildId.asLong(), restResources.getSelfId().asLong());
     }
 
     /**
