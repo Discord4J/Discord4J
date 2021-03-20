@@ -29,7 +29,6 @@ import discord4j.core.retriever.EntityRetrievalStrategy;
 import discord4j.core.spec.MessageEditSpec;
 import discord4j.core.util.EntityUtil;
 import discord4j.discordjson.json.MessageData;
-import discord4j.discordjson.json.StickerData;
 import discord4j.discordjson.json.SuppressEmbedsRequest;
 import discord4j.discordjson.json.UserData;
 import discord4j.discordjson.possible.Possible;
@@ -95,6 +94,15 @@ public final class Message implements Entity {
     @Override
     public Snowflake getId() {
         return Snowflake.of(data.id());
+    }
+
+    /**
+     * Gets the data of the message.
+     *
+     * @return The data of the message.
+     */
+    public MessageData getData() {
+        return data;
     }
 
     /**
@@ -230,16 +238,16 @@ public final class Message implements Entity {
     }
 
     /**
-     * Gets the IDs of the users specifically mentioned in this message.
+     * Gets the IDs of the users specifically mentioned in this message, with the same order as in the message.
      *
-     * @return The IDs of the users specifically mentioned in this message.
+     * @return The IDs of the users specifically mentioned in this message, with the same order as in the message.
      */
     public Set<Snowflake> getUserMentionIds() {
         // TODO FIXME we throw away member data here
         return data.mentions().stream()
                 .map(UserData::id)
                 .map(Snowflake::of)
-                .collect(Collectors.toSet());
+                .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
     /**
@@ -247,6 +255,7 @@ public final class Message implements Entity {
      *
      * @return A {@link Flux} that continually emits {@link User users} specifically mentioned in this message. If an
      * error is received, it is emitted through the {@code Flux}.
+     * @deprecated this method will have its return type changed to List in v3.2.0
      */
     public Flux<User> getUserMentions() {
         return Flux.fromIterable(getUserMentionIds()).flatMap(gateway::getUserById);
@@ -258,6 +267,7 @@ public final class Message implements Entity {
      * @param retrievalStrategy the strategy to use to get the users
      * @return A {@link Flux} that continually emits {@link User users} specifically mentioned in this message. If an
      * error is received, it is emitted through the {@code Flux}.
+     * @deprecated for removal in v3.2.0, as entity retrieval is not used for user mentions anymore
      */
     public Flux<User> getUserMentions(EntityRetrievalStrategy retrievalStrategy) {
         return Flux.fromIterable(getUserMentionIds())
@@ -265,14 +275,14 @@ public final class Message implements Entity {
     }
 
     /**
-     * Gets the IDs of the roles specifically mentioned in this message.
+     * Gets the IDs of the roles specifically mentioned in this message, with the same order as in the message.
      *
-     * @return The IDs of the roles specifically mentioned in this message.
+     * @return The IDs of the roles specifically mentioned in this message, with the same order as in the message.
      */
     public Set<Snowflake> getRoleMentionIds() {
         return data.mentionRoles().stream()
                 .map(Snowflake::of)
-                .collect(Collectors.toSet());
+                .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
     /**
@@ -326,14 +336,16 @@ public final class Message implements Entity {
     }
 
     /**
-     * Gets the reactions to this message.
+     * Gets the reactions to this message, the order is the same as in the message.
      *
-     * @return The reactions to this message.
+     * @return The reactions to this message, the order is the same as in the message.
      */
     public Set<Reaction> getReactions() {
         return data.reactions().toOptional()
-                .map(reactions -> reactions.stream().map(data -> new Reaction(gateway, data)).collect(Collectors.toSet()))
-                .orElse(Collections.emptySet());
+                .map(reactions -> reactions.stream()
+                        .map(data -> new Reaction(gateway, data))
+                        .collect(Collectors.toCollection(LinkedHashSet::new)))
+                .orElse(new LinkedHashSet<>());
 
     }
 
@@ -599,15 +611,16 @@ public final class Message implements Entity {
 
     /**
      * Requests to publish (crosspost) this message if the {@code channel} is of type 'news'.
-     * Requires 'SEND_MESSAGES' permission if the current user sent the message, or additionally the 'MANAGE_MESSAGES' permission, for all other messages, to be present for the current user.
+     * Requires 'SEND_MESSAGES' permission if the current user sent the message, or additionally the
+     * 'MANAGE_MESSAGES' permission, for all other messages, to be present for the current user.
      *
-     * @return A {@link Mono} where, upon successful completion, emits the published {@link Message} in the guilds. If an error is
-     * received, it is emitted through the {@code Mono}.
+     * @return A {@link Mono} where, upon successful completion, emits the published {@link Message} in the guilds.
+     * If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Message> publish() {
         return gateway.getRestClient().getChannelService()
-            .publishMessage(getChannelId().asLong(), getId().asLong())
-            .map(data -> new Message(gateway, data));
+                .publishMessage(getChannelId().asLong(), getId().asLong())
+                .map(data -> new Message(gateway, data));
     }
 
     @Override

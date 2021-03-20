@@ -48,8 +48,7 @@ class LifecycleDispatchHandlers {
                 .save(userId, userData);
 
         return saveUser
-                .thenReturn(new ReadyEvent(gateway, context.getShardInfo(), dispatch.v(), self, guilds,
-                        dispatch.sessionId(), dispatch.trace()));
+                .thenReturn(new ReadyEvent(gateway, context.getShardInfo(), dispatch, self, guilds));
     }
 
     static Mono<ResumeEvent> resumed(DispatchContext<Resumed> context) {

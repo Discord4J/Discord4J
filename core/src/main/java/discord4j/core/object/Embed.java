@@ -72,6 +72,15 @@ public final class Embed implements DiscordObject {
     }
 
     /**
+     * Gets the data of the embed.
+     *
+     * @return The data of the embed.
+     */
+    public EmbedData getData() {
+        return data;
+    }
+
+    /**
      * Gets the title of the embed, if present.
      *
      * @return The title of the embed, if present.
@@ -279,6 +288,15 @@ public final class Embed implements DiscordObject {
         }
 
         /**
+         * Gets the data of the footer.
+         *
+         * @return The data of the footer.
+         */
+        public EmbedFooterData getData() {
+            return data;
+        }
+
+        /**
          * Gets the footer text.
          *
          * @return The footer text.
@@ -330,6 +348,15 @@ public final class Embed implements DiscordObject {
          */
         public Embed getEmbed() {
             return Embed.this;
+        }
+
+        /**
+         * Gets the data of the image.
+         *
+         * @return The data of the image.
+         */
+        public EmbedImageData getData() {
+            return data;
         }
 
         /**
@@ -398,6 +425,15 @@ public final class Embed implements DiscordObject {
         }
 
         /**
+         * Gets the data of the thumbnail.
+         *
+         * @return The data of the thumbnail.
+         */
+        public EmbedThumbnailData getData() {
+            return data;
+        }
+
+        /**
          * Gets the source URL of the thumbnail (only supports http(s) and attachments).
          *
          * @return The source URL of the thumbnail (only supports http(s) and attachments).
@@ -463,6 +499,15 @@ public final class Embed implements DiscordObject {
         }
 
         /**
+         * Gets the data of the video.
+         *
+         * @return The data of the video.
+         */
+        public EmbedVideoData getData() {
+            return data;
+        }
+
+        /**
          * Gets the source URL of the video.
          *
          * @return The source URL of the video.
@@ -518,6 +563,15 @@ public final class Embed implements DiscordObject {
         }
 
         /**
+         * Gets the data of the provider.
+         *
+         * @return The data of the provider.
+         */
+        public EmbedProviderData getData() {
+            return data;
+        }
+
+        /**
          * Gets the name of the provider.
          *
          * @return The name of the provider.
@@ -562,6 +616,15 @@ public final class Embed implements DiscordObject {
          */
         public Embed getEmbed() {
             return Embed.this;
+        }
+
+        /**
+         * Gets the data of the author.
+         *
+         * @return The data of the author.
+         */
+        public EmbedAuthorData getData() {
+            return data;
         }
 
         /**
@@ -633,6 +696,15 @@ public final class Embed implements DiscordObject {
          */
         public Embed getEmbed() {
             return Embed.this;
+        }
+
+        /**
+         * Gets the data of the field.
+         *
+         * @return The data of the field.
+         */
+        public EmbedFieldData getData() {
+            return data;
         }
 
         /**

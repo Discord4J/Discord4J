@@ -53,6 +53,15 @@ public final class Ban implements DiscordObject {
     }
 
     /**
+     * Gets the data of the ban.
+     *
+     * @return The data of the ban.
+     */
+    public BanData getData() {
+        return data;
+    }
+
+    /**
      * Gets the reason for the ban.
      *
      * @return The reason for the ban.

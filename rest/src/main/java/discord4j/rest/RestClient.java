@@ -42,6 +42,7 @@ public class RestClient {
     private final EmojiService emojiService;
     private final GatewayService gatewayService;
     private final GuildService guildService;
+    private final InteractionService interactionService;
     private final InviteService inviteService;
     private final UserService userService;
     private final VoiceService voiceService;
@@ -82,6 +83,7 @@ public class RestClient {
         this.emojiService = new EmojiService(router);
         this.gatewayService = new GatewayService(router);
         this.guildService = new GuildService(router);
+        this.interactionService = new InteractionService(router);
         this.inviteService = new InviteService(router);
         this.userService = new UserService(router);
         this.voiceService = new VoiceService(router);
@@ -401,6 +403,14 @@ public class RestClient {
      */
     public GuildService getGuildService() {
         return guildService;
+    }
+
+    /**
+     * Access a low-level representation of the API endpoints for the Interaction resource.
+     * @return a handle to perform low-level requests to the API
+     */
+    public InteractionService getInteractionService() {
+        return interactionService;
     }
 
     /**

@@ -65,6 +65,15 @@ public final class Webhook implements Entity {
     }
 
     /**
+     * Gets the data of the webhook.
+     *
+     * @return The data of the webhook.
+     */
+    public WebhookData getData() {
+        return data;
+    }
+
+    /**
      * Gets the ID of the guild this webhook is associated to.
      *
      * @return The ID of the guild this webhook is associated to.

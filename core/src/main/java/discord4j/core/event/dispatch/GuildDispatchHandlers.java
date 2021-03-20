@@ -464,11 +464,15 @@ class GuildDispatchHandlers {
                 .flatMap(oldMember -> {
                     Member old = new Member(gateway, oldMember, guildId);
 
+                    GuildMemberUpdate dispatch = context.getDispatch();
                     MemberData newMember = MemberData.builder()
                             .from(oldMember)
-                            .nick(context.getDispatch().nick())
-                            .roles(context.getDispatch().roles().stream().map(Id::of).collect(Collectors.toList()))
-                            .premiumSince(context.getDispatch().premiumSince())
+                            .roles(dispatch.roles().stream().map(Id::of).collect(Collectors.toList()))
+                            .user(dispatch.user())
+                            .nick(dispatch.nick())
+                            .joinedAt(dispatch.joinedAt())
+                            .premiumSince(dispatch.premiumSince())
+                            .pending(dispatch.pending())
                             .build();
 
                     return context.getStateHolder().getMemberStore()

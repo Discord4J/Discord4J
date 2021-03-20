@@ -31,7 +31,7 @@ import reactor.util.annotation.Nullable;
 import java.util.Optional;
 
 /**
- * Dispatched when a user's presence changes.
+ * Dispatched when a user's presence changes. This includes username, discriminator, and avatar changes.
  * <p>
  * The old presence may not be present if presences are not stored.
  * <p>

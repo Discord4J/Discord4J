@@ -51,6 +51,7 @@ public interface ExchangeStrategies {
     static ExchangeStrategies jackson(ObjectMapper mapper) {
         List<WriterStrategy<?>> writerStrategies = new ArrayList<>();
         writerStrategies.add(new MultipartWriterStrategy(mapper));
+        writerStrategies.add(new WebhookMultipartWriterStrategy(mapper));
         writerStrategies.add(new JacksonWriterStrategy(mapper));
         writerStrategies.add(new EmptyWriterStrategy());
         List<ReaderStrategy<?>> readerStrategies = new ArrayList<>();
