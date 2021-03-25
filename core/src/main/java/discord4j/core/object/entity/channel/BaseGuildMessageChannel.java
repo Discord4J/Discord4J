@@ -106,6 +106,11 @@ class BaseGuildMessageChannel extends BaseChannel implements GuildMessageChannel
     }
 
     @Override
+    public Mono<PermissionSet> getEffectivePermissions(Member member) {
+        return guildChannel.getEffectivePermissions(member);
+    }
+
+    @Override
     public String getName() {
         return guildChannel.getName();
     }
