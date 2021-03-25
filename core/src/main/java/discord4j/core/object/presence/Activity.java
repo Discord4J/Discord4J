@@ -16,12 +16,13 @@
  */
 package discord4j.core.object.presence;
 
+import discord4j.common.util.Snowflake;
 import discord4j.core.object.reaction.ReactionEmoji;
 import discord4j.core.util.EntityUtil;
+import discord4j.discordjson.Id;
 import discord4j.discordjson.json.ActivityData;
 import discord4j.discordjson.json.ActivityUpdateRequest;
 import discord4j.discordjson.possible.Possible;
-import discord4j.common.util.Snowflake;
 
 import java.time.Instant;
 import java.util.Arrays;
@@ -284,7 +285,7 @@ public class Activity {
         return Possible.flatOpt(data.emoji())
                 .map(emoji -> {
                     // TODO FIXME
-                    String sid = emoji.id().toOptional().orElse(null);
+                    String sid = emoji.id().toOptional().map(Id::asString).orElse(null);
                     Long id = sid == null ? null : Snowflake.asLong(sid);
                     return ReactionEmoji.of(id, emoji.name(),
                             emoji.animated().toOptional().orElse(false));

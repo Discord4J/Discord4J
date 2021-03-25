@@ -95,7 +95,7 @@ class GuildDispatchHandlers {
                     .flatMap(data -> {
                         log.debug(format(ctx, "Requesting members for guild {}"), createData.id());
                         return context.getGateway()
-                                .requestMembers(Snowflake.of(data.id()))
+                                .requestMembers(Snowflake.of(data.id().asString()))
                                 .then();
                     })
                     .subscribe(null, t -> log.warn(format(ctx, "Member request errored for {}"), createData.id(), t));
