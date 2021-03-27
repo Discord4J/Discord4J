@@ -1,5 +1,6 @@
 package discord4j.core.object.command;
 
+import discord4j.common.annotations.Experimental;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.DiscordObject;
@@ -19,6 +20,7 @@ import java.util.Optional;
  *
  * @see <a href="https://discord.com/developers/docs/interactions/slash-commands#interaction">Interaction Object</a>
  */
+@Experimental
 public class Interaction implements DiscordObject {
 
     /** The gateway associated to this object. */

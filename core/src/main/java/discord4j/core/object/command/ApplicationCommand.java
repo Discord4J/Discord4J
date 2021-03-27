@@ -1,5 +1,6 @@
 package discord4j.core.object.command;
 
+import discord4j.common.annotations.Experimental;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.DiscordObject;
@@ -17,6 +18,7 @@ import java.util.stream.Collectors;
  * @see <a href="https://discord.com/developers/docs/interactions/slash-commands#applicationcommand">
  * Application Command Object</a>
  */
+@Experimental
 public class ApplicationCommand implements DiscordObject {
 
     /** The maximum amount of characters that can be in an application command name. */

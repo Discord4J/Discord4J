@@ -17,19 +17,20 @@
 
 package discord4j.core.event.domain;
 
+import discord4j.common.annotations.Experimental;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.command.Interaction;
 import discord4j.core.spec.InteractionApplicationCommandCallbackSpec;
-import discord4j.discordjson.json.InteractionApplicationCommandCallbackData;
-import discord4j.discordjson.json.InteractionResponseData;
+import discord4j.discordjson.json.*;
 import discord4j.gateway.ShardInfo;
 import discord4j.rest.RestClient;
-import discord4j.rest.interaction.InteractionOperations;
 import discord4j.rest.interaction.InteractionResponse;
 import discord4j.rest.util.InteractionResponseType;
+import discord4j.rest.util.WebhookMultipartRequest;
 import reactor.core.publisher.Mono;
 
+import java.time.Duration;
 import java.util.function.Consumer;
 
 /**
@@ -39,16 +40,16 @@ import java.util.function.Consumer;
  *
  * @see <a href="https://discord.com/developers/docs/topics/gateway#interaction-create">Interaction Create</a>
  */
+@Experimental
 public class InteractionCreateEvent extends Event {
 
     private final Interaction interaction;
-    private final InteractionOperations operations;
+    private final EventInteractionResponse response;
 
     public InteractionCreateEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, Interaction interaction) {
         super(gateway, shardInfo);
         this.interaction = interaction;
-        RestClient restClient = getClient().rest();
-        this.operations = new InteractionOperations(restClient, interaction.getData(), restClient.getApplicationId());
+        this.response = new EventInteractionResponse(getClient().rest(), interaction.getData());
     }
 
     /**
@@ -60,13 +61,17 @@ public class InteractionCreateEvent extends Event {
         return interaction;
     }
 
+    private ApplicationCommandInteractionData getCommandInteractionData() {
+        return interaction.getData().data().get();
+    }
+
     /**
      * Gets the id of the invoked command.
      *
      * @return The id of the invoked command.
      */
     public Snowflake getCommandId() {
-        return Snowflake.of(operations.getCommandInteractionData().id());
+        return Snowflake.of(getCommandInteractionData().id());
     }
 
     /**
@@ -75,7 +80,7 @@ public class InteractionCreateEvent extends Event {
      * @return The name of the invoked command.
      */
     public String getCommandName() {
-        return operations.getCommandInteractionData().name();
+        return getCommandInteractionData().name();
     }
 
     private Mono<Void> createInteractionResponse(InteractionResponseData responseData) {
@@ -162,6 +167,52 @@ public class InteractionCreateEvent extends Event {
      * @return A handler for common operations related to an interaction followup response associated with this event.
      */
     public InteractionResponse getInteractionResponse() {
-        return operations;
+        return response;
+    }
+
+    static class EventInteractionResponse implements InteractionResponse {
+
+        private final RestClient restClient;
+        private final InteractionData interactionData;
+        private final Mono<Long> applicationId;
+
+        EventInteractionResponse(RestClient restClient, InteractionData interactionData) {
+            this.restClient = restClient;
+            this.interactionData = interactionData;
+            this.applicationId = restClient.getApplicationId()
+                    .cache(__ -> Duration.ofMillis(Long.MAX_VALUE), e -> Duration.ZERO, () -> Duration.ZERO);
+        }
+
+        @Override
+        public Mono<MessageData> editInitialResponse(WebhookMessageEditRequest request) {
+            return applicationId.flatMap(id -> restClient.getWebhookService()
+                    .modifyWebhookMessage(id, interactionData.token(), "@original", request));
+        }
+
+        @Override
+        public Mono<Void> deleteInitialResponse() {
+            return applicationId.flatMap(id -> restClient.getWebhookService()
+                    .deleteWebhookMessage(id, interactionData.token(), "@original"));
+        }
+
+        @Override
+        public Mono<MessageData> createFollowupMessage(String content) {
+            WebhookExecuteRequest body = WebhookExecuteRequest.builder().content(content).build();
+            WebhookMultipartRequest request = new WebhookMultipartRequest(body);
+            return applicationId.flatMap(id -> restClient.getWebhookService()
+                    .executeWebhook(id, interactionData.token(), true, request));
+        }
+
+        @Override
+        public Mono<MessageData> createFollowupMessage(WebhookMultipartRequest request, boolean wait) {
+            return applicationId.flatMap(id -> restClient.getWebhookService()
+                    .executeWebhook(id, interactionData.token(), wait, request));
+        }
+
+        @Override
+        public Mono<MessageData> editFollowupMessage(long messageId, WebhookMessageEditRequest request, boolean wait) {
+            return applicationId.flatMap(id -> restClient.getWebhookService()
+                    .modifyWebhookMessage(id, interactionData.token(), String.valueOf(messageId), request));
+        }
     }
 }

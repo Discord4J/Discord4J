@@ -17,7 +17,6 @@
 
 package discord4j.rest.interaction;
 
-import discord4j.common.annotations.Experimental;
 import discord4j.common.util.Snowflake;
 import discord4j.discordjson.json.*;
 import discord4j.rest.RestClient;
@@ -25,26 +24,14 @@ import discord4j.rest.util.InteractionResponseType;
 import discord4j.rest.util.WebhookMultipartRequest;
 import reactor.core.publisher.Mono;
 
-/**
- * A default implementation for REST-based interaction handling and response.
- */
-@Experimental
-public final class InteractionOperations implements RestInteraction, InteractionResponse,
-        GuildInteraction, DirectInteraction {
+class InteractionOperations implements RestInteraction, InteractionResponse, GuildInteraction, DirectInteraction {
 
     private final RestClient restClient;
     private final InteractionData interactionData;
     private final Mono<Long> applicationId;
     private final InteractionMemberOperations memberOperations;
 
-    /**
-     * Create an interaction operations object with the given parameters.
-     *
-     * @param restClient a REST client for interacting with Discord
-     * @param interactionData the data representing the incoming interaction
-     * @param applicationId a {@link Mono} supplier for the application ID
-     */
-    public InteractionOperations(RestClient restClient, InteractionData interactionData, Mono<Long> applicationId) {
+    InteractionOperations(RestClient restClient, InteractionData interactionData, Mono<Long> applicationId) {
         this.restClient = restClient;
         this.interactionData = interactionData;
         this.applicationId = applicationId;

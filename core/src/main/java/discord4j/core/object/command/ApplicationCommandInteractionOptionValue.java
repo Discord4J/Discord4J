@@ -1,5 +1,6 @@
 package discord4j.core.object.command;
 
+import discord4j.common.annotations.Experimental;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.DiscordObject;
@@ -10,6 +11,7 @@ import discord4j.rest.util.ApplicationCommandOptionType;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
 
+@Experimental
 public class ApplicationCommandInteractionOptionValue implements DiscordObject {
 
     /** The gateway associated to this object. */

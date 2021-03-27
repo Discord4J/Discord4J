@@ -1,5 +1,6 @@
 package discord4j.core.object.command;
 
+import discord4j.common.annotations.Experimental;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.DiscordObject;
 import discord4j.discordjson.json.ApplicationCommandOptionChoiceData;
@@ -12,6 +13,7 @@ import java.util.Objects;
  * @see <a href="https://discord.com/developers/docs/interactions/slash-commands#applicationcommandoptionchoice">
  * Application Command Option Choice Object</a>
  */
+@Experimental
 public class ApplicationCommandOptionChoice implements DiscordObject {
 
     /** The maximum amount of characters that can be in an application command option choice name. */

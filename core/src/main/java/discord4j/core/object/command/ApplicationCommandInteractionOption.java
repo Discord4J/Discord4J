@@ -1,5 +1,6 @@
 package discord4j.core.object.command;
 
+import discord4j.common.annotations.Experimental;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.DiscordObject;
 import discord4j.discordjson.json.ApplicationCommandInteractionOptionData;
@@ -19,6 +20,7 @@ import java.util.stream.Collectors;
  * <a href="https://discord.com/developers/docs/interactions/slash-commands#interaction-applicationcommandinteractiondata">
  * Application Command Interaction Object</a>
  */
+@Experimental
 public class ApplicationCommandInteractionOption implements DiscordObject {
 
     /** The gateway associated to this object. */
