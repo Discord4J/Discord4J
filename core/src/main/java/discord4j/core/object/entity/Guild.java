@@ -81,7 +81,7 @@ public final class Guild implements Entity {
     private final GuildData data;
 
     /**
-     * Constructs an {@code Guild} with an associated ServiceMediator and Discord data.
+     * Constructs an {@code Guild} with an associated {@link GatewayDiscordClient} and Discord data.
      *
      * @param gateway The {@link GatewayDiscordClient} associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
@@ -1299,7 +1299,7 @@ public final class Guild implements Entity {
 
         final ToLongFunction<AuditLogData> getLastEntryId = response -> {
             final List<AuditLogEntryData> entries = response.auditLogEntries();
-            return (entries.size() == 0) ? Long.MAX_VALUE :
+            return (entries.isEmpty()) ? Long.MAX_VALUE :
                     Snowflake.asLong(entries.get(entries.size() - 1).id());
         };
 

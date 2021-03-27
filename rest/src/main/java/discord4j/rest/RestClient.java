@@ -26,6 +26,7 @@ import discord4j.rest.util.PaginationUtil;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.Duration;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -47,6 +48,7 @@ public class RestClient {
     private final UserService userService;
     private final VoiceService voiceService;
     private final WebhookService webhookService;
+    private final Mono<Long> applicationIdMono;
 
     /**
      * Create a {@link RestClient} with default options, using the given token for authentication.
@@ -88,6 +90,10 @@ public class RestClient {
         this.userService = new UserService(router);
         this.voiceService = new VoiceService(router);
         this.webhookService = new WebhookService(router);
+
+        this.applicationIdMono = getApplicationInfo()
+                .map(app -> Snowflake.asLong(app.id()))
+                .cache(__ -> Duration.ofMillis(Long.MAX_VALUE), __ -> Duration.ZERO, () -> Duration.ZERO);
     }
 
     /**
@@ -473,5 +479,9 @@ public class RestClient {
      */
     public WebhookService getWebhookService() {
         return webhookService;
+    }
+
+    public Mono<Long> getApplicationId() {
+        return applicationIdMono;
     }
 }
