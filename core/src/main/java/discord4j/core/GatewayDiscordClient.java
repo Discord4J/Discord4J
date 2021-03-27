@@ -28,6 +28,7 @@ import discord4j.core.event.ReactiveEventAdapter;
 import discord4j.core.event.domain.Event;
 import discord4j.core.object.Invite;
 import discord4j.core.object.Region;
+import discord4j.core.object.clientpresence.ClientPresence;
 import discord4j.core.object.entity.*;
 import discord4j.core.object.entity.channel.Channel;
 import discord4j.core.object.entity.channel.GuildChannel;
@@ -314,59 +315,25 @@ public class GatewayDiscordClient implements EntityRetriever {
     }
 
     /**
-     * Update the bot's {@link Presence} (client status) for every shard in this shard group.
-     * <p>
-     * Factories exist to build an {@link StatusUpdate} object to update the bot's status:
-     * <ul>
-     *     <li>{@link Presence#online()} and {@link Presence#online(ActivityUpdateRequest)}</li>
-     *     <li>{@link Presence#idle()} and {@link Presence#idle(ActivityUpdateRequest)}</li>
-     *     <li>{@link Presence#doNotDisturb()} and {@link Presence#doNotDisturb(ActivityUpdateRequest)}</li>
-     *     <li>{@link Presence#invisible()}</li>
-     * </ul>
-     * <p>
-     * Factories exist to build an {@link ActivityUpdateRequest} object for {@link StatusUpdate}:
-     * <ul>
-     *     <li>{@link Activity#listening(String)}</li>
-     *     <li>{@link Activity#playing(String)}</li>
-     *     <li>{@link Activity#streaming(String, String)}</li>
-     *     <li>{@link Activity#watching(String)}</li>
-     *     <li>{@link Activity#competing(String)}</li>
-     * </ul>
+     * Update the bot's {@link ClientPresence} (client status) for every shard in this shard group.
      *
-     * @param statusUpdate The updated client status.
+     * @param clientPresence The updated client status.
      * @return A {@link Mono} that signals completion upon successful update. If an error is received, it is emitted
      * through the {@code Mono}.
      */
-    public Mono<Void> updatePresence(final StatusUpdate statusUpdate) {
-        return gatewayClientGroup.multicast(GatewayPayload.statusUpdate(statusUpdate));
+    public Mono<Void> updatePresence(final ClientPresence clientPresence) {
+        return gatewayClientGroup.multicast(GatewayPayload.statusUpdate(clientPresence.getStatusUpdate()));
     }
 
     /**
      * Update the bot's {@link Presence} (status) for the given shard index, provided it belongs in this shard group.
-     * <p>
-     * Factories exist to build an {@link StatusUpdate} object to update the bot's status:
-     * <ul>
-     *     <li>{@link Presence#online()} and {@link Presence#online(ActivityUpdateRequest)}</li>
-     *     <li>{@link Presence#idle()} and {@link Presence#idle(ActivityUpdateRequest)}</li>
-     *     <li>{@link Presence#doNotDisturb()} and {@link Presence#doNotDisturb(ActivityUpdateRequest)}</li>
-     *     <li>{@link Presence#invisible()}</li>
-     * </ul>
-     * <p>
-     * Factories exist to build an {@link ActivityUpdateRequest} object for {@link StatusUpdate}:
-     * <ul>
-     *     <li>{@link Activity#listening(String)}</li>
-     *     <li>{@link Activity#playing(String)}</li>
-     *     <li>{@link Activity#streaming(String, String)}</li>
-     *     <li>{@link Activity#watching(String)}</li>
-     *     <li>{@link Activity#competing(String)}</li>
-     * </ul>
      *
-     * @param statusUpdate The updated client presence.
+     * @param clientPresence The updated client presence.
      * @return A {@link Mono} that signals completion upon successful update. If an error is received, it is emitted
      * through the {@code Mono}.
      */
-    public Mono<Void> updatePresence(final StatusUpdate statusUpdate, final int shardId) {
-        return gatewayClientGroup.unicast(ShardGatewayPayload.statusUpdate(statusUpdate, shardId));
+    public Mono<Void> updatePresence(final ClientPresence clientPresence, final int shardId) {
+        return gatewayClientGroup.unicast(ShardGatewayPayload.statusUpdate(clientPresence.getStatusUpdate(), shardId));
     }
 
     /**

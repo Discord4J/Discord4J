@@ -23,9 +23,9 @@ import discord4j.common.ReactorResources;
 import discord4j.common.util.Snowflake;
 import discord4j.core.command.CommandRequest;
 import discord4j.core.command.CommandResponse;
+import discord4j.core.object.clientpresence.ClientPresence;
 import discord4j.core.object.entity.*;
 import discord4j.core.object.entity.channel.TextChannel;
-import discord4j.core.object.presence.Presence;
 import discord4j.core.object.reaction.ReactionEmoji;
 import discord4j.discordjson.json.MessageCreateRequest;
 import discord4j.rest.util.Image;
@@ -64,13 +64,13 @@ public class Commands {
     public static Mono<Void> status(CommandRequest request, CommandResponse response) {
         String params = request.parameters();
         if (params.equalsIgnoreCase("online")) {
-            return request.getClient().updatePresence(Presence.online());
+            return request.getClient().updatePresence(ClientPresence.online());
         } else if (params.equalsIgnoreCase("dnd")) {
-            return request.getClient().updatePresence(Presence.doNotDisturb());
+            return request.getClient().updatePresence(ClientPresence.doNotDisturb());
         } else if (params.equalsIgnoreCase("idle")) {
-            return request.getClient().updatePresence(Presence.idle());
+            return request.getClient().updatePresence(ClientPresence.idle());
         } else if (params.equalsIgnoreCase("invisible")) {
-            return request.getClient().updatePresence(Presence.invisible());
+            return request.getClient().updatePresence(ClientPresence.invisible());
         } else {
             // showing you can block too
             return response.withScheduler(Schedulers.boundedElastic())

@@ -33,42 +33,6 @@ import java.util.stream.Collectors;
 
 public class Activity {
 
-    public static ActivityUpdateRequest playing(String name) {
-        return ActivityUpdateRequest.builder()
-                .name(name)
-                .type(Type.PLAYING.getValue())
-                .build();
-    }
-
-    public static ActivityUpdateRequest streaming(String name, String url) {
-        return ActivityUpdateRequest.builder()
-                .name(name)
-                .type(Type.STREAMING.getValue())
-                .url(url)
-                .build();
-    }
-
-    public static ActivityUpdateRequest listening(String name) {
-        return ActivityUpdateRequest.builder()
-                .name(name)
-                .type(Type.LISTENING.getValue())
-                .build();
-    }
-
-    public static ActivityUpdateRequest watching(String name) {
-        return ActivityUpdateRequest.builder()
-                .name(name)
-                .type(Type.WATCHING.getValue())
-                .build();
-    }
-
-    public static ActivityUpdateRequest competing(String name) {
-        return ActivityUpdateRequest.builder()
-            .name(name)
-            .type(Type.COMPETING.getValue())
-            .build();
-    }
-
     private final ActivityData data;
 
     Activity(final ActivityData data) {

@@ -33,6 +33,7 @@ import discord4j.core.event.EventDispatcher;
 import discord4j.core.event.dispatch.DispatchContext;
 import discord4j.core.event.dispatch.DispatchEventMapper;
 import discord4j.core.event.domain.Event;
+import discord4j.core.object.clientpresence.ClientPresence;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.presence.Presence;
@@ -120,7 +121,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
     private EventDispatcher eventDispatcher = null;
     private Store store = null;
     private MemberRequestFilter memberRequestFilter = null;
-    private Function<ShardInfo, StatusUpdate> initialPresence = shard -> null;
+    private Function<ShardInfo, ClientPresence> initialPresence = shard -> null;
     private Function<ShardInfo, SessionInfo> resumeOptions = shard -> null;
     private IntentSet intents = IntentSet.nonPrivileged();
     private Boolean guildSubscriptions = null;
@@ -299,45 +300,27 @@ public class GatewayBootstrap<O extends GatewayOptions> {
     }
 
     /**
-     * Set a {@link Function} to determine the {@link StatusUpdate} that each joining shard should use when identifying
+     * Set a {@link Function} to determine the {@link ClientPresence} that each joining shard should use when identifying
      * to the Gateway. Defaults to no status given.
-     * <p>
-     * {@link StatusUpdate} instances can be built through factories in {@link Presence}:
-     * <ul>
-     *     <li>{@link Presence#online()} and {@link Presence#online(ActivityUpdateRequest)}</li>
-     *     <li>{@link Presence#idle()} and {@link Presence#idle(ActivityUpdateRequest)}</li>
-     *     <li>{@link Presence#doNotDisturb()} and {@link Presence#doNotDisturb(ActivityUpdateRequest)}</li>
-     *     <li>{@link Presence#invisible()}</li>
-     * </ul>
      *
-     * @param initialPresence a {@link Function} that supplies {@link StatusUpdate} instances from a given
-     * {@link ShardInfo}
+     * @param initialPresence a {@link Function} that supplies {@link ClientPresence} instances from a given {@link ShardInfo}
      * @return this builder
      * @deprecated use {@link #setInitialStatus(Function)}
      */
     @Deprecated
-    public GatewayBootstrap<O> setInitialPresence(Function<ShardInfo, StatusUpdate> initialPresence) {
+    public GatewayBootstrap<O> setInitialPresence(Function<ShardInfo, ClientPresence> initialPresence) {
         this.initialPresence = Objects.requireNonNull(initialPresence, "initialPresence");
         return this;
     }
 
     /**
-     * Set a {@link Function} to determine the {@link StatusUpdate} that each joining shard should use when identifying
+     * Set a {@link Function} to determine the {@link ClientPresence} that each joining shard should use when identifying
      * to the Gateway. Defaults to no status given.
-     * <p>
-     * {@link StatusUpdate} instances can be built through factories in {@link Presence}:
-     * <ul>
-     *     <li>{@link Presence#online()} and {@link Presence#online(ActivityUpdateRequest)}</li>
-     *     <li>{@link Presence#idle()} and {@link Presence#idle(ActivityUpdateRequest)}</li>
-     *     <li>{@link Presence#doNotDisturb()} and {@link Presence#doNotDisturb(ActivityUpdateRequest)}</li>
-     *     <li>{@link Presence#invisible()}</li>
-     * </ul>
      *
-     * @param initialStatus a {@link Function} that supplies {@link StatusUpdate} instances from a given
-     * {@link ShardInfo}
+     * @param initialStatus a {@link Function} that supplies {@link ClientPresence} instances from a given {@link ShardInfo}
      * @return this builder
      */
-    public GatewayBootstrap<O> setInitialStatus(Function<ShardInfo, StatusUpdate> initialStatus) {
+    public GatewayBootstrap<O> setInitialStatus(Function<ShardInfo, ClientPresence> initialStatus) {
         this.initialPresence = Objects.requireNonNull(initialStatus, "initialStatus");
         return this;
     }
@@ -756,7 +739,9 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                                               int maxConcurrency) {
         return Mono.deferContextual(ctx ->
                 Mono.<ShardInfo>create(sink -> {
-                    StatusUpdate initial = Optional.ofNullable(b.initialPresence.apply(shard)).orElse(null);
+                    StatusUpdate initial = Optional.ofNullable(b.initialPresence.apply(shard))
+                            .map(ClientPresence::getStatusUpdate)
+                            .orElse(null);
                     IdentifyOptions identify = IdentifyOptions.builder(shard)
                             .initialStatus(initial)
                             .intents(b.intents)
