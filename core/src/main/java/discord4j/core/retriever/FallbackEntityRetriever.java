@@ -84,6 +84,11 @@ public class FallbackEntityRetriever implements EntityRetriever {
     }
 
     @Override
+    public Mono<Member> getSelfMember(Snowflake guildId) {
+        return first.getSelfMember(guildId).switchIfEmpty(fallback.getSelfMember(guildId));
+    }
+
+    @Override
     public Flux<Member> getGuildMembers(Snowflake guildId) {
         return first.getGuildMembers(guildId).switchIfEmpty(fallback.getGuildMembers(guildId));
     }
