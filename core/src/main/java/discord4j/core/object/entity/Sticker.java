@@ -29,6 +29,15 @@ public final class Sticker implements Entity {
     }
 
     /**
+     * Gets the data of the sticker.
+     *
+     * @return The data of the sticker.
+     */
+    public StickerData getData() {
+        return data;
+    }
+
+    /**
      * Gets the ID of the pack the sticker is from.
      *
      * @return The ID of the pack the sticker is from.

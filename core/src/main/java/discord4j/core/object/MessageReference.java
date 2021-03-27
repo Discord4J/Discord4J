@@ -34,6 +34,15 @@ public class MessageReference implements DiscordObject {
         this.data = Objects.requireNonNull(data);
     }
 
+    /**
+     * Gets the data of the message reference.
+     *
+     * @return The data of the message reference.
+     */
+    public MessageReferenceData getData() {
+        return data;
+    }
+
     public Snowflake getChannelId() {
         return Snowflake.of(data.channelId().toOptional().orElseThrow(IllegalStateException::new));
     }

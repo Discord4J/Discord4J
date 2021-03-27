@@ -81,6 +81,15 @@ public final class Member extends User {
     }
 
     /**
+     * Gets the data of the member.
+     *
+     * @return The data of the member.
+     */
+    public MemberData getMemberData() {
+        return data;
+    }
+
+    /**
      * Gets the user's guild roles' IDs.
      *
      * @return The user's guild roles' IDs.

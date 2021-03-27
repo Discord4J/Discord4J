@@ -42,9 +42,7 @@ import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
-import java.util.function.Supplier;
 
 /**
  * Registry for {@link Dispatch} to {@link Event} mapping operations.
@@ -152,7 +150,8 @@ public class DispatchHandlers implements DispatchEventMapper {
                                     .orElse(oldUserData.username()))
                             .discriminator(userData.discriminator().toOptional()
                                     .orElse(oldUserData.discriminator()))
-                            .avatar(or(Possible.flatOpt(userData.avatar()), oldUserData::avatar))
+                            .avatar(userData.avatar().isAbsent() ? oldUserData.avatar() :
+                                    Possible.flatOpt(userData.avatar()))
                             .build();
 
                     return Tuples.of(oldUserData, newUserData);
@@ -172,18 +171,6 @@ public class DispatchHandlers implements DispatchEventMapper {
                                 oldUser.orElse(null), userData, current, new Presence(old)))
                         .switchIfEmpty(saveNew.thenReturn(new PresenceUpdateEvent(gateway, context.getShardInfo(),
                                 guildId, oldUser.orElse(null), userData, current, null))));
-    }
-
-    // JDK 9
-    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-    private static <T> Optional<T> or(Optional<T> first, Supplier<Optional<T>> supplier) {
-        Objects.requireNonNull(supplier);
-        if (first.isPresent()) {
-            return first;
-        } else {
-            Optional<T> r = supplier.get();
-            return Objects.requireNonNull(r);
-        }
     }
 
     private static PresenceData createPresence(PresenceUpdate update) {

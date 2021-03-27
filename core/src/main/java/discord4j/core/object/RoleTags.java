@@ -29,6 +29,15 @@ public class RoleTags implements DiscordObject {
     }
 
     /**
+     * Gets the data of the role tags.
+     *
+     * @return The data of the role tags.
+     */
+    public RoleTagsData getData() {
+        return data;
+    }
+
+    /**
      * Gets the id of the bot this role belongs to, if present.
      *
      * @return The id of the bot this role belongs to, if present.

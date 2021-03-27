@@ -16,6 +16,7 @@
  */
 package discord4j.common.util;
 
+import discord4j.discordjson.Id;
 import reactor.util.annotation.Nullable;
 
 import java.math.BigInteger;
@@ -75,6 +76,16 @@ public final class Snowflake implements Comparable<Snowflake> {
     }
 
     /**
+     * Constructs a {@code Snowflake} utilizing a discord-json {@link Id}.
+     *
+     * @param id The ID to construct a {@code Snowflake}
+     * @return A constructed {@code Snowflake} with the given ID
+     */
+    public static Snowflake of(final Id id) {
+        return new Snowflake(id.asLong());
+    }
+
+    /**
      * Constructs a {@code Snowflake} represented as a {@code long} utilizing an <i>unsigned</i> ID.
      *
      * @param id The <i>unsigned</i> ID to construct a {@code Snowflake}. Must be non-null.
@@ -83,6 +94,16 @@ public final class Snowflake implements Comparable<Snowflake> {
      */
     public static long asLong(final String id) {
         return Long.parseUnsignedLong(id);
+    }
+
+    /**
+     * Constructs a {@code Snowflake} represented as a {@code long} utilizing a discord-json {@link Id}.
+     *
+     * @param id The ID to construct a {@code Snowflake}. Must be non-null.
+     * @return A constructed {@code Snowflake} with the ID.
+     */
+    public static long asLong(final Id id) {
+        return id.asLong();
     }
 
     /**

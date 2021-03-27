@@ -83,6 +83,15 @@ public final class GuildEmoji implements Entity {
     }
 
     /**
+     * Gets the data of the emoji.
+     *
+     * @return The data of the emoji.
+     */
+    public EmojiData getData() {
+        return data;
+    }
+
+    /**
      * Gets the emoji name.
      *
      * @return The emoji name.

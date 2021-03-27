@@ -71,6 +71,15 @@ public class User implements Entity {
     }
 
     /**
+     * Gets the data of the user.
+     *
+     * @return The data of the user.
+     */
+    public UserData getUserData() {
+        return data;
+    }
+
+    /**
      * Gets the user's username, not unique across the platform.
      *
      * @return The user's username, not unique across the platform.

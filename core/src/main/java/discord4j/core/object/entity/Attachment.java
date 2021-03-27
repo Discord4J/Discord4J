@@ -63,6 +63,15 @@ public final class Attachment implements Entity {
     }
 
     /**
+     * Gets the data of the attachment.
+     *
+     * @return The data of the attachment.
+     */
+    public AttachmentData getData() {
+        return data;
+    }
+
+    /**
      * Gets the name of the file attached.
      *
      * @return The name of the file attached.

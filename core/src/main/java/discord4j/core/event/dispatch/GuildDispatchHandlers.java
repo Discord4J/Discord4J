@@ -27,6 +27,7 @@ import discord4j.core.object.entity.*;
 import discord4j.core.object.presence.Status;
 import discord4j.core.state.StateHolder;
 import discord4j.core.util.ListUtil;
+import discord4j.discordjson.Id;
 import discord4j.discordjson.json.*;
 import discord4j.discordjson.json.gateway.*;
 import discord4j.discordjson.possible.Possible;
@@ -160,7 +161,7 @@ class GuildDispatchHandlers {
                         return context.getGateway().getGatewayClientGroup().unicast(
                                 ShardGatewayPayload.requestGuildMembers(
                                         RequestGuildMembers.builder()
-                                                .guildId(data.id())
+                                                .guildId(data.id().asString())
                                                 .query(Possible.of(""))
                                                 .limit(0)
                                                 .build(), shardId));
@@ -183,7 +184,7 @@ class GuildDispatchHandlers {
                 .thenReturn(new GuildCreateEvent(gateway, context.getShardInfo(), new Guild(gateway, guild)));
     }
 
-    private static VoiceStateData wrapVoiceState(VoiceStateData voiceState, String guildId) {
+    private static VoiceStateData wrapVoiceState(VoiceStateData voiceState, Id guildId) {
         return VoiceStateData.builder()
                 .from(voiceState)
                 .guildId(guildId)
@@ -463,11 +464,15 @@ class GuildDispatchHandlers {
                 .flatMap(oldMember -> {
                     Member old = new Member(gateway, oldMember, guildId);
 
+                    GuildMemberUpdate dispatch = context.getDispatch();
                     MemberData newMember = MemberData.builder()
                             .from(oldMember)
-                            .nick(context.getDispatch().nick())
-                            .roles(context.getDispatch().roles())
-                            .premiumSince(context.getDispatch().premiumSince())
+                            .roles(dispatch.roles().stream().map(Id::of).collect(Collectors.toList()))
+                            .user(dispatch.user())
+                            .nick(dispatch.nick())
+                            .joinedAt(dispatch.joinedAt())
+                            .premiumSince(dispatch.premiumSince())
+                            .pending(dispatch.pending())
                             .build();
 
                     return context.getStateHolder().getMemberStore()
@@ -490,7 +495,7 @@ class GuildDispatchHandlers {
                 .find(guildId)
                 .map(guild -> GuildData.builder()
                         .from(guild)
-                        .addRoles(role.id())
+                        .addRole(role.id())
                         .build())
                 .flatMap(guild -> context.getStateHolder().getGuildStore().save(guildId, guild))
                 .doOnSubscribe(s -> log.trace(format(c, "GuildRoleCreate doOnSubscribe {}"), guildId))
