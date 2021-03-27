@@ -324,7 +324,7 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
             case GUILD_STORE: return saveChannel(dispatch);
             case DM:
             case GROUP_DM: return Mono.empty();
-            default: throw new AssertionError();
+            default: throw new AssertionError("Unhandled channel type " + dispatch.channel().type());
         }
     }
 
@@ -356,7 +356,7 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
             case GUILD_STORE: return deleteChannel(dispatch);
             case DM:
             case GROUP_DM: return Mono.empty();
-            default: throw new AssertionError();
+            default: throw new AssertionError("Unhandled channel type " + dispatch.channel().type());
         }
     }
 
@@ -388,7 +388,7 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
             case GUILD_STORE: return updateChannel(dispatch);
             case DM:
             case GROUP_DM: return Mono.empty();
-            default: throw new AssertionError();
+            default: throw new AssertionError("Unhandled channel type " + dispatch.channel().type());
         }
     }
 
