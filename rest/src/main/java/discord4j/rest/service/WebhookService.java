@@ -20,7 +20,6 @@ import discord4j.discordjson.json.*;
 import discord4j.rest.request.DiscordWebResponse;
 import discord4j.rest.request.Router;
 import discord4j.rest.route.Routes;
-import discord4j.rest.util.MultipartRequest;
 import discord4j.rest.util.WebhookMultipartRequest;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -104,14 +103,14 @@ public class WebhookService extends RestService {
         }
     }
 
-    public Mono<MessageData> modifyWebhookMessage(long webhookId, String webhookToken, long messageId, WebhookMessageEditRequest request) {
+    public Mono<MessageData> modifyWebhookMessage(long webhookId, String webhookToken, String messageId, WebhookMessageEditRequest request) {
         return Routes.WEBHOOK_MESSAGE_EDIT.newRequest(webhookId, webhookToken, messageId)
             .body(request)
             .exchange(getRouter())
             .bodyToMono(MessageData.class);
     }
 
-    public Mono<Void> deleteWebhookMessage(long webhookId, String webhookToken, long messageId) {
+    public Mono<Void> deleteWebhookMessage(long webhookId, String webhookToken, String messageId) {
         return Routes.WEBHOOK_MESSAGE_DELETE.newRequest(webhookId, webhookToken, messageId)
             .exchange(getRouter())
             .bodyToMono(Void.class);

@@ -39,7 +39,7 @@ import java.util.function.Consumer;
 public final class VoiceChannel extends BaseCategorizableChannel {
 
     /**
-     * Constructs an {@code VoiceChannel} with an associated ServiceMediator and Discord data.
+     * Constructs an {@code VoiceChannel} with an associated {@link GatewayDiscordClient} and Discord data.
      *
      * @param gateway The {@link GatewayDiscordClient} associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.

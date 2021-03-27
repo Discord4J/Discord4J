@@ -16,7 +16,7 @@
     <logger name="discord4j.rest.http.client.DiscordWebClient" level="INFO"/>
     <logger name="discord4j.rest.request" level="DEBUG"/>
     <!--<logger name="discord4j.rest.http" level="TRACE"/>-->
-    <logger name="discord4j.core.event.dispatch" level="TRACE"/>
+<!--    <logger name="discord4j.core.event.dispatch" level="TRACE"/>-->
 
     <turboFilter class="discord4j.core.logback.GatewayEventFilter">
         <Logger>discord4j.gateway.protocol.receiver</Logger>
