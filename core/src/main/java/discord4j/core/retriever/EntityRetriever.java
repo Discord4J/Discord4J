@@ -16,17 +16,11 @@
  */
 package discord4j.core.retriever;
 
-import discord4j.core.object.Template;
-import discord4j.core.object.entity.Guild;
-import discord4j.core.object.entity.GuildEmoji;
-import discord4j.core.object.entity.Member;
-import discord4j.core.object.entity.Message;
-import discord4j.core.object.entity.Role;
-import discord4j.core.object.entity.User;
+import discord4j.common.util.Snowflake;
+import discord4j.core.object.entity.*;
 import discord4j.core.object.entity.channel.Channel;
 import discord4j.core.object.entity.channel.GuildChannel;
 import discord4j.core.util.OrderUtil;
-import discord4j.common.util.Snowflake;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -104,15 +98,6 @@ public interface EntityRetriever {
     Mono<User> getUserById(Snowflake userId);
 
     /**
-     * Requests to retrieve the template represented by the supplied code.
-     *
-     * @param templateCode The code of the template.
-     * * @return A {@link Mono} where, upon successful completion, emits the {@link Template} as represented by the supplied
-     * * ID. If an error is received, it is emitted through the {@code Mono}.
-     */
-    Mono<Template> getTemplateByCode(String templateCode);
-
-    /**
      * Requests to retrieve the guilds the current client is in.
      *
      * @return A {@link Flux} that continually emits the {@link Guild guilds} that the current client is in. If an error
@@ -167,12 +152,4 @@ public interface EntityRetriever {
      * it is emitted through the {@code Flux}.
      */
     Flux<GuildEmoji> getGuildEmojis(Snowflake guildId);
-
-    /**
-     * Requests to retrieve the guild's templates.
-     *
-     * @return A {@link Flux} that continually emits the guild's {@link Template templates}. If an error is received,
-     * it is emitted through the {@code Flux}.
-     */
-    Flux<Template> getGuildTemplates(Snowflake guildId);
 }

@@ -251,6 +251,31 @@ public class GatewayDiscordClient implements EntityRetriever {
     }
 
     /**
+     * Requests to retrieve the guild's templates.
+     *
+     * @return A {@link Flux} that continually emits the guild's {@link Template templates}. If an error is received,
+     * it is emitted through the {@code Flux}.
+     */
+    public Flux<Template> getGuildTemplates(Snowflake guildId) {
+        return getRestClient().getTemplateService()
+                .getTemplates(guildId.asLong())
+                .map(data -> new Template(this, data));
+    }
+
+    /**
+     * Requests to retrieve the template represented by the supplied code.
+     *
+     * @param templateCode The code of the template.
+     * * @return A {@link Mono} where, upon successful completion, emits the {@link Template} as represented by the supplied
+     * * ID. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Template> getTemplateByCode(String templateCode) {
+        return getRestClient().getTemplateService()
+                .getTemplate(templateCode)
+                .map(data -> new Template(this, data));
+    }
+
+    /**
      * Gets the bot user's ID.
      *
      * @return The bot user's ID.
@@ -667,11 +692,6 @@ public class GatewayDiscordClient implements EntityRetriever {
     }
 
     @Override
-    public Mono<Template> getTemplateByCode(String templateCode) {
-        return entityRetriever.getTemplateByCode(templateCode);
-    }
-
-    @Override
     public Flux<Guild> getGuilds() {
         return entityRetriever.getGuilds();
     }
@@ -701,8 +721,4 @@ public class GatewayDiscordClient implements EntityRetriever {
         return entityRetriever.getGuildEmojis(guildId);
     }
 
-    @Override
-    public Flux<Template> getGuildTemplates(Snowflake guildId) {
-        return entityRetriever.getGuildTemplates(guildId);
-    }
 }

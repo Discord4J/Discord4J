@@ -16,8 +16,8 @@
  */
 package discord4j.core.retriever;
 
+import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
-import discord4j.core.object.Template;
 import discord4j.core.object.entity.*;
 import discord4j.core.object.entity.channel.Channel;
 import discord4j.core.object.entity.channel.GuildChannel;
@@ -25,7 +25,6 @@ import discord4j.core.util.EntityUtil;
 import discord4j.discordjson.json.*;
 import discord4j.rest.RestClient;
 import discord4j.rest.util.PaginationUtil;
-import discord4j.common.util.Snowflake;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -98,13 +97,6 @@ public class RestEntityRetriever implements EntityRetriever {
     }
 
     @Override
-    public Mono<Template> getTemplateByCode(String templateCode) {
-        return rest.getTemplateService()
-            .getTemplate(templateCode)
-            .map(data -> new Template(gateway, data));
-    }
-
-    @Override
     public Flux<Guild> getGuilds() {
         final Function<Map<String, Object>, Flux<UserGuildData>> makeRequest = params ->
                 rest.getUserService().getCurrentUserGuilds(params);
@@ -149,13 +141,6 @@ public class RestEntityRetriever implements EntityRetriever {
         return rest.getEmojiService()
                 .getGuildEmojis(guildId.asLong())
                 .map(data -> new GuildEmoji(gateway, data, guildId.asLong()));
-    }
-
-    @Override
-    public Flux<Template> getGuildTemplates(Snowflake guildId) {
-        return rest.getTemplateService()
-            .getTemplates(guildId.asLong())
-            .map(data -> new Template(gateway, data));
     }
 
     private GuildData toGuildData(GuildUpdateData guild) {

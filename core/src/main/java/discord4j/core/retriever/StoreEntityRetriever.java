@@ -18,7 +18,6 @@ package discord4j.core.retriever;
 
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
-import discord4j.core.object.Template;
 import discord4j.core.object.entity.*;
 import discord4j.core.object.entity.channel.Channel;
 import discord4j.core.object.entity.channel.GuildChannel;
@@ -95,20 +94,8 @@ public class StoreEntityRetriever implements EntityRetriever {
     }
 
     @Override
-    public Mono<Template> getTemplateByCode(String code) {
-        return stateView.getTemplateStore()
-            .find(code)
-            .map(data -> new Template(gateway, data));
-    }
-
-    @Override
     public Flux<Guild> getGuilds() {
         return stateView.getGuildStore().values().map(data -> new Guild(gateway, data));
-    }
-
-    @Override
-    public Flux<Template> getGuildTemplates(Snowflake guildId) {
-        return stateView.getTemplateStore().values().map(data -> new Template(gateway, data));
     }
 
     @Override

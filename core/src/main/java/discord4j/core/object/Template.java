@@ -26,7 +26,7 @@ public class Template implements DiscordObject {
     private final long guildId;
 
     /**
-     * Constructs a {@code Template} with an associated ServiceMediator and Discord data.
+     * Constructs a {@code Template} with an associated Discord client and data.
      *
      * @param gateway The {@link GatewayDiscordClient} associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
@@ -40,6 +40,15 @@ public class Template implements DiscordObject {
     @Override
     public GatewayDiscordClient getClient() {
         return this.gateway;
+    }
+
+    /**
+     * Returns this object underlying raw data structure.
+     *
+     * @return an immutable data representation of this object
+     */
+    public TemplateData getData() {
+        return data;
     }
 
     /**
@@ -148,16 +157,12 @@ public class Template implements DiscordObject {
     }
 
     /**
-     * Requests to sync the current template with the guild.
+     * Requests to sync this template with the guild's current state.
      */
-    public final Mono<Void> sync(long guildId) {
+    public final Mono<Template> sync() {
         return gateway.getRestClient().getTemplateService()
-            .syncTemplate(guildId, getCode())
-            .then();
-    }
-
-    public final Mono<Void> sync() {
-        return this.sync(this.getGuildId());
+                .syncTemplate(guildId, getCode())
+                .map(data -> new Template(gateway, data));
     }
 
     /**
