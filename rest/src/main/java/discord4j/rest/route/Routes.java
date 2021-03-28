@@ -754,6 +754,68 @@ public abstract class Routes {
      */
     public static final Route INVITE_ACCEPT = Route.post("/invites/{invite.code}");
 
+    /////////////////////////////////////////////
+    ////////////// Template Resource ////////////
+    /////////////////////////////////////////////
+
+    /**
+     * Get a template. Returns a template object for the given code on success.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/template#get-template">
+     *         https://discord.com/developers/docs/resources/template#get-template</a>
+     */
+    public static final Route GUILD_TEMPLATE_GET = Route.get("/guilds/templates/{template.code}");
+
+    /**
+     * Create a new guild from template. Returns a guild object on success. Fires a Guild Create Gateway event.
+     *
+     * By default this endpoint can be used only by bots in less than 10 guilds.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/template#create-guild-from-template">
+     *         https://discord.com/developers/docs/resources/template#create-guild-from-template</a>
+     */
+    public static final Route TEMPLATE_GUILD_CREATE = Route.post("/guilds/templates/{template.code}");
+
+    /**
+     * Returns an array of template objects. Requires the MANAGE_GUILD permission. Returns an array of template objects.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/template#get-guild-templates">
+     *         https://discord.com/developers/docs/resources/template#get-guild-templates</a>
+     */
+    public static final Route GUILD_TEMPLATE_LIST_GET = Route.get("/guilds/{guild.id}/templates");
+
+    /**
+     * Creates a template for the guild. Requires the MANAGE_GUILD permission. Returns the created template object on success.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/template#create-guild-template">
+     *         https://discord.com/developers/docs/resources/template#create-guild-template</a>
+     */
+    public static final Route GUILD_TEMPLATE_CREATE = Route.post("/guilds/{guild.id}/templates");
+
+    /**
+     * Syncs the template to the guild's current state. Requires the MANAGE_GUILD permission. Returns the template object on success.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/template#sync-guild-template">
+     *         https://discord.com/developers/docs/resources/template#sync-guild-template</a>
+     */
+    public static final Route GUILD_TEMPLATE_SYNC = Route.put("/guilds/{guild.id}/templates/{template.code}");
+
+    /**
+     * Modifies the template's metadata. Requires the MANAGE_GUILD permission. Returns the template object on success.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/template#modify-guild-template">
+     *         https://discord.com/developers/docs/resources/template#modify-guild-template</a>
+     */
+    public static final Route GUILD_TEMPLATE_MODIFY = Route.patch("/guilds/{guild.id}/templates/{template.code}");
+
+    /**
+     * Deletes the template. Requires the MANAGE_GUILD permission. Returns the deleted template object on success.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/template#delete-guild-template">
+     *         https://discord.com/developers/docs/resources/template#delete-guild-template</a>
+     */
+    public static final Route GUILD_TEMPLATE_DELETE = Route.delete("/guilds/{guild.id}/templates/{template.code}");
+
     ///////////////////////////////////////////
     ////////////// User Resource //////////////
     ///////////////////////////////////////////

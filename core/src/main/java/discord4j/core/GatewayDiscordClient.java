@@ -28,6 +28,7 @@ import discord4j.core.event.ReactiveEventAdapter;
 import discord4j.core.event.domain.Event;
 import discord4j.core.object.Invite;
 import discord4j.core.object.Region;
+import discord4j.core.object.GuildTemplate;
 import discord4j.core.object.entity.*;
 import discord4j.core.object.entity.channel.Channel;
 import discord4j.core.object.entity.channel.GuildChannel;
@@ -268,6 +269,19 @@ public class GatewayDiscordClient implements EntityRetriever {
     public Flux<Region> getRegions() {
         return getRestClient().getVoiceService().getVoiceRegions()
                 .map(data -> new Region(this, data));
+    }
+
+    /**
+     * Requests to retrieve the template represented by the supplied code.
+     *
+     * @param templateCode The code of the template.
+     * @return A {@link Mono} where, upon successful completion, emits the {@link GuildTemplate} as represented by the
+     * supplied code. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<GuildTemplate> getTemplateByCode(String templateCode) {
+        return getRestClient().getTemplateService()
+                .getTemplate(templateCode)
+                .map(data -> new GuildTemplate(this, data));
     }
 
     /**

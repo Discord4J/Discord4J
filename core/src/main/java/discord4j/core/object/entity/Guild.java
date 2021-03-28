@@ -19,10 +19,7 @@ package discord4j.core.object.entity;
 import discord4j.common.store.action.read.ReadActions;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
-import discord4j.core.object.Ban;
-import discord4j.core.object.ExtendedInvite;
-import discord4j.core.object.Region;
-import discord4j.core.object.VoiceState;
+import discord4j.core.object.*;
 import discord4j.core.object.audit.AuditLogEntry;
 import discord4j.core.object.entity.channel.*;
 import discord4j.core.object.presence.Presence;
@@ -975,6 +972,24 @@ public final class Guild implements Entity {
     }
 
     /**
+     * Requests to create a template based on this guild.
+     *
+     * @param spec A {@link Consumer} that provides a "blank" {@link GuildTemplateCreateSpec} to be operated on.
+     * @return A {@link Mono} where, upon subscription, emits the created {@link GuildTemplate} on success. If an error
+     * is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<GuildTemplate> createTemplate(final Consumer<? super GuildTemplateCreateSpec> spec) {
+        return Mono.defer(
+            () -> {
+                GuildTemplateCreateSpec mutatedSpec = new GuildTemplateCreateSpec();
+                spec.accept(mutatedSpec);
+                return gateway.getRestClient().getTemplateService()
+                        .createTemplate(getId().asLong(), mutatedSpec.asRequest());
+            })
+            .map(data -> new GuildTemplate(gateway, data));
+    }
+
+    /**
      * Requests to create a role.
      *
      * @param spec A {@link Consumer} that provides a "blank" {@link RoleCreateSpec} to be operated on.
@@ -1330,6 +1345,18 @@ public final class Guild implements Entity {
         return gateway.getRestClient().getGuildService()
                 .getGuildInvites(getId().asLong())
                 .map(data -> new ExtendedInvite(gateway, data));
+    }
+
+    /**
+     * Requests to retrieve the templates of the guild.
+     *
+     * @return A {@link Flux} that continually emits the {@link GuildTemplate templates} of the guild. If an error is
+     * received, it is emitted through the {@code Flux}.
+     */
+    public Flux<GuildTemplate> getTemplates() {
+        return gateway.getRestClient().getTemplateService()
+            .getTemplates(getId().asLong())
+            .map(data -> new GuildTemplate(gateway, data));
     }
 
     /**
