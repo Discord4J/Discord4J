@@ -27,7 +27,7 @@ import discord4j.core.event.ReactiveEventAdapter;
 import discord4j.core.event.domain.Event;
 import discord4j.core.object.Invite;
 import discord4j.core.object.Region;
-import discord4j.core.object.Template;
+import discord4j.core.object.GuildTemplate;
 import discord4j.core.object.entity.*;
 import discord4j.core.object.entity.channel.Channel;
 import discord4j.core.object.entity.channel.GuildChannel;
@@ -253,26 +253,26 @@ public class GatewayDiscordClient implements EntityRetriever {
     /**
      * Requests to retrieve the guild's templates.
      *
-     * @return A {@link Flux} that continually emits the guild's {@link Template templates}. If an error is received,
+     * @return A {@link Flux} that continually emits the guild's {@link discord4j.core.object.GuildTemplate templates}. If an error is received,
      * it is emitted through the {@code Flux}.
      */
-    public Flux<Template> getGuildTemplates(Snowflake guildId) {
+    public Flux<GuildTemplate> getGuildTemplates(Snowflake guildId) {
         return getRestClient().getTemplateService()
                 .getTemplates(guildId.asLong())
-                .map(data -> new Template(this, data));
+                .map(data -> new GuildTemplate(this, data));
     }
 
     /**
      * Requests to retrieve the template represented by the supplied code.
      *
      * @param templateCode The code of the template.
-     * * @return A {@link Mono} where, upon successful completion, emits the {@link Template} as represented by the supplied
+     * * @return A {@link Mono} where, upon successful completion, emits the {@link discord4j.core.object.GuildTemplate} as represented by the supplied
      * * ID. If an error is received, it is emitted through the {@code Mono}.
      */
-    public Mono<Template> getTemplateByCode(String templateCode) {
+    public Mono<GuildTemplate> getTemplateByCode(String templateCode) {
         return getRestClient().getTemplateService()
                 .getTemplate(templateCode)
-                .map(data -> new Template(this, data));
+                .map(data -> new GuildTemplate(this, data));
     }
 
     /**

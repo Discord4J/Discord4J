@@ -89,8 +89,8 @@ public class StoreEntityRetriever implements EntityRetriever {
     @Override
     public Mono<User> getUserById(Snowflake userId) {
         return stateView.getUserStore()
-            .find(userId.asLong())
-            .map(data -> new User(gateway, data));
+                .find(userId.asLong())
+                .map(data -> new User(gateway, data));
     }
 
     @Override

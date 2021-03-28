@@ -1,3 +1,19 @@
+/*
+ * This file is part of Discord4J.
+ *
+ * Discord4J is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Discord4J is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package discord4j.core.object;
 
 import discord4j.common.util.Snowflake;
@@ -16,7 +32,12 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
 
-public class Template implements DiscordObject {
+/**
+ * A Discord Guild Template.
+ *
+ * @see <a href="https://discord.com/developers/docs/resources/template">Template Resource</a>
+ */
+public final class GuildTemplate implements DiscordObject {
 
     /** The gateway associated to this object. */
     private final GatewayDiscordClient gateway;
@@ -33,7 +54,7 @@ public class Template implements DiscordObject {
      * @param gateway The {@link GatewayDiscordClient} associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
      */
-    public Template(final GatewayDiscordClient gateway, final TemplateData data) {
+    public GuildTemplate(final GatewayDiscordClient gateway, final TemplateData data) {
         this.gateway = Objects.requireNonNull(gateway);
         this.data = Objects.requireNonNull(data);
         this.guildId = Snowflake.asLong(data.sourceGuildId());
@@ -58,7 +79,7 @@ public class Template implements DiscordObject {
      *
      * @return the template code (unique ID)
      */
-    public final String getCode() {
+    public String getCode() {
         return data.code();
     }
 
@@ -67,7 +88,7 @@ public class Template implements DiscordObject {
      *
      * @return the guild id
      */
-    public final Snowflake getGuildId() {
+    public Snowflake getGuildId() {
         return Snowflake.of(guildId);
     }
 
@@ -76,7 +97,7 @@ public class Template implements DiscordObject {
      *
      * @return The template name
      */
-    public final String getName() {
+    public String getName() {
         return data.name();
     }
 
@@ -85,7 +106,7 @@ public class Template implements DiscordObject {
      *
      * @return the template description
      */
-    public final Optional<String> getDescription() {
+    public Optional<String> getDescription() {
         return data.description();
     }
 
@@ -94,7 +115,7 @@ public class Template implements DiscordObject {
      *
      * @return the template usage count
      */
-    public final int getUsageCount() {
+    public int getUsageCount() {
         return data.usageCount();
     }
 
@@ -103,7 +124,7 @@ public class Template implements DiscordObject {
      *
      * @return the creator id
      */
-    public final Snowflake getCreatorId() {
+    public Snowflake getCreatorId() {
         return Snowflake.of(data.creatorId());
     }
 
@@ -112,7 +133,7 @@ public class Template implements DiscordObject {
      *
      * @return the creator
      */
-    public final User getCreator() {
+    public User getCreator() {
         return new User(gateway, data.creator());
     }
 
@@ -121,7 +142,7 @@ public class Template implements DiscordObject {
      *
      * @return a timestamp when template was last updated
      */
-    public final Instant getCreatedAt() {
+    public Instant getCreatedAt() {
         return DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(data.createdAt(), Instant::from);
     }
 
@@ -130,7 +151,7 @@ public class Template implements DiscordObject {
      *
      * @return a timestamp when template was last updated
      */
-    public final Instant getUpdatedAt() {
+    public Instant getUpdatedAt() {
         return DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(data.updatedAt(), Instant::from);
     }
 
@@ -139,7 +160,7 @@ public class Template implements DiscordObject {
      *
      * @return The guild snapshot.
      */
-    public final SerializedSourceGuildData getSourceGuild() {
+    public SerializedSourceGuildData getSourceGuild() {
         return data.serializedSourceGuild();
     }
 
@@ -148,13 +169,13 @@ public class Template implements DiscordObject {
      *
      * @return the guild object
      */
-    public final Mono<Guild> createGuild(final Consumer<? super TemplateCreateGuildSpec> spec) {
+    public Mono<Guild> createGuild(final Consumer<? super TemplateCreateGuildSpec> spec) {
         return Mono.defer(
                 () -> {
                     TemplateCreateGuildSpec mutatedSpec = new TemplateCreateGuildSpec();
                     spec.accept(mutatedSpec);
-                    return gateway.getRestClient().getTemplateService().createGuild(getCode(),
-                            mutatedSpec.asRequest(), mutatedSpec.getReason());
+                    return gateway.getRestClient().getTemplateService()
+                            .createGuild(getCode(), mutatedSpec.asRequest());
                 })
                 .map(data -> new Guild(gateway, data));
     }
@@ -165,50 +186,39 @@ public class Template implements DiscordObject {
      * @return a {@link Mono} that, upon subscription, syncs a guild with this template. If an error is received, it
      * will be emitted through the Mono.
      */
-    public final Mono<Template> sync() {
-        return sync(guildId);
-    }
-
-    /**
-     * Requests to sync this template with the given guild.
-     *
-     * @param guildId the guild to fetch current state for the template
-     * @return a {@link Mono} that, upon subscription, syncs a guild with this template. If an error is received, it
-     * will be emitted through the Mono.
-     */
-    public final Mono<Template> sync(long guildId) {
+    public Mono<GuildTemplate> sync() {
         return gateway.getRestClient().getTemplateService()
                 .syncTemplate(guildId, getCode())
-                .map(data -> new Template(gateway, data));
+                .map(data -> new GuildTemplate(gateway, data));
     }
 
     /**
      * Requests to edit this guild template.
      *
      * @param spec A {@link Consumer} that provides a "blank" {@link GuildTemplateEditSpec} to be operated on.
-     * @return A {@link Mono} where, upon successful completion, emits the edited {@link Template}. If an error is
+     * @return A {@link Mono} where, upon successful completion, emits the edited {@link GuildTemplate}. If an error is
      * received, it is emitted through the {@code Mono}.
      */
-    public final Mono<Template> edit(final Consumer<? super GuildTemplateEditSpec> spec) {
+    public Mono<GuildTemplate> edit(final Consumer<? super GuildTemplateEditSpec> spec) {
         return Mono.defer(
                 () -> {
                     GuildTemplateEditSpec mutatedSpec = new GuildTemplateEditSpec();
                     spec.accept(mutatedSpec);
-                    return gateway.getRestClient().getTemplateService().modifyTemplate(guildId, getCode(),
-                            mutatedSpec.asRequest(), mutatedSpec.getReason());
+                    return gateway.getRestClient().getTemplateService()
+                            .modifyTemplate(guildId, getCode(), mutatedSpec.asRequest());
                 })
-                .map(data -> new Template(gateway, data));
+                .map(data -> new GuildTemplate(gateway, data));
     }
 
     /**
-     * Requests to delete this template while optionally specifying a reason.
+     * Requests to delete this template.
      *
      * @return A {@link Mono} where, upon successful completion, emits the deleted template. If an error is received,
      * it is emitted through the {@code Mono}.
      */
-    public final Mono<Template> delete(Snowflake guildId) {
+    public Mono<GuildTemplate> delete() {
         return gateway.getRestClient().getTemplateService()
-                .deleteTemplate(guildId.asLong(), getCode())
-                .map(data -> new Template(gateway, data));
+                .deleteTemplate(guildId, getCode())
+                .map(data -> new GuildTemplate(gateway, data));
     }
 }

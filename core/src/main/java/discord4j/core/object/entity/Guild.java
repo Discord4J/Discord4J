@@ -1008,21 +1008,21 @@ public final class Guild implements Entity {
     }
 
     /**
-     * Requests to create an template. A guild can only have a single template.
+     * Requests to create a template based on this guild. A guild can only have a single template.
      *
      * @param spec A {@link Consumer} that provides a "blank" {@link GuildTemplateCreateSpec} to be operated on.
-     * @return A {@link Mono} where, upon subscription, emits the created {@link Template} on success. If an error is
+     * @return A {@link Mono} where, upon subscription, emits the created {@link GuildTemplate} on success. If an error is
      * received, it is emitted through the {@code Mono}.
      */
-    public Mono<Template> createTemplate(final Consumer<? super GuildTemplateCreateSpec> spec) {
+    public Mono<GuildTemplate> createTemplate(final Consumer<? super GuildTemplateCreateSpec> spec) {
         return Mono.defer(
             () -> {
                 GuildTemplateCreateSpec mutatedSpec = new GuildTemplateCreateSpec();
                 spec.accept(mutatedSpec);
                 return gateway.getRestClient().getTemplateService()
-                    .createTemplate(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason());
+                        .createTemplate(getId().asLong(), mutatedSpec.asRequest());
             })
-            .map(data -> new Template(gateway, data));
+            .map(data -> new GuildTemplate(gateway, data));
     }
 
     /**
@@ -1384,15 +1384,15 @@ public final class Guild implements Entity {
     }
 
     /**
-     * Requests to retrieve the invites of the guild.
+     * Requests to retrieve the templates of the guild.
      *
-     * @return A {@link Flux} that continually emits the {@link ExtendedInvite invites} of the guild. If an error is
+     * @return A {@link Flux} that continually emits the {@link GuildTemplate templates} of the guild. If an error is
      * received, it is emitted through the {@code Flux}.
      */
-    public Flux<Template> getTemplates() {
+    public Flux<GuildTemplate> getTemplates() {
         return gateway.getRestClient().getTemplateService()
             .getTemplates(getId().asLong())
-            .map(data -> new Template(gateway, data));
+            .map(data -> new GuildTemplate(gateway, data));
     }
 
     /**
