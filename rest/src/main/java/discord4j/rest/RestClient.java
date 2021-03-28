@@ -444,7 +444,7 @@ public class RestClient {
 
     /**
      * Access a low-level representation of the API endpoints for the Template resource. It is recommended you use
-     * methods like {@link #getTemplate(String)}, or {@link discord4j.rest.entity.RestGuildTemplate#create(RestClient, String)}.
+     * methods like {@link #getTemplate(String)}, or {@link RestGuildTemplate#create(RestClient, String)}.
      *
      * @return a handle to perform low-level requests to the API
      */

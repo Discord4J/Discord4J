@@ -251,23 +251,11 @@ public class GatewayDiscordClient implements EntityRetriever {
     }
 
     /**
-     * Requests to retrieve the guild's templates.
-     *
-     * @return A {@link Flux} that continually emits the guild's {@link discord4j.core.object.GuildTemplate templates}. If an error is received,
-     * it is emitted through the {@code Flux}.
-     */
-    public Flux<GuildTemplate> getGuildTemplates(Snowflake guildId) {
-        return getRestClient().getTemplateService()
-                .getTemplates(guildId.asLong())
-                .map(data -> new GuildTemplate(this, data));
-    }
-
-    /**
      * Requests to retrieve the template represented by the supplied code.
      *
      * @param templateCode The code of the template.
-     * * @return A {@link Mono} where, upon successful completion, emits the {@link discord4j.core.object.GuildTemplate} as represented by the supplied
-     * * ID. If an error is received, it is emitted through the {@code Mono}.
+     * @return A {@link Mono} where, upon successful completion, emits the {@link GuildTemplate} as represented by the
+     * supplied code. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<GuildTemplate> getTemplateByCode(String templateCode) {
         return getRestClient().getTemplateService()

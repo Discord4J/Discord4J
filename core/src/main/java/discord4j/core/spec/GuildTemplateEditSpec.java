@@ -21,13 +21,18 @@ import discord4j.discordjson.possible.Possible;
 
 import java.util.Optional;
 
+/**
+ * Spec to edit a guild template.
+ *
+ * @see discord4j.core.object.GuildTemplate#edit(java.util.function.Consumer)
+ */
 public class GuildTemplateEditSpec implements Spec<TemplateModifyRequest> {
 
     private Possible<String> name = Possible.absent();
     private Possible<Optional<String>> description = Possible.absent();
 
     /**
-     * Sets the name for the modified {@link discord4j.core.object.GuildTemplate}.
+     * Sets the name of the template.
      *
      * @param name The name for the template.
      * @return This spec.
@@ -38,7 +43,7 @@ public class GuildTemplateEditSpec implements Spec<TemplateModifyRequest> {
     }
 
     /**
-     * Sets the description for the modified {@link discord4j.core.object.GuildTemplate}.
+     * Sets the description of the template.
      *
      * @param description The description for the template.
      * @return This spec.

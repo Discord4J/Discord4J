@@ -18,31 +18,37 @@ package discord4j.core.spec;
 
 import discord4j.discordjson.json.TemplateCreateGuildRequest;
 import discord4j.discordjson.possible.Possible;
+import discord4j.rest.util.Image;
 
-public class TemplateCreateGuildSpec implements Spec<TemplateCreateGuildRequest> {
+/**
+ * Spec used to create a guild from a template.
+ *
+ * @see discord4j.core.object.GuildTemplate#createGuild(java.util.function.Consumer)
+ */
+public class GuildCreateFromTemplateSpec implements Spec<TemplateCreateGuildRequest> {
 
     private String name = null;
     private Possible<String> icon = Possible.absent();
 
     /**
-     * Sets the name for the modified {@link discord4j.core.object.GuildTemplate}.
+     * Sets the name for the created guild.
      *
-     * @param name The name for the template.
+     * @param name The name of the guild.
      * @return This spec.
      */
-    public TemplateCreateGuildSpec setName(String name) {
+    public GuildCreateFromTemplateSpec setName(String name) {
         this.name = name;
         return this;
     }
 
     /**
-     * Sets the icon for the modified {@link discord4j.core.object.GuildTemplate}.
+     * Sets the icon for the created guild.
      *
-     * @param icon The icon for the template.
+     * @param icon The icon of the guild.
      * @return This spec.
      */
-    public TemplateCreateGuildSpec setIcon(String icon) {
-        this.icon = Possible.of(icon);
+    public GuildCreateFromTemplateSpec setIcon(Image icon) {
+        this.icon = Possible.of(icon.getDataUri());
         return this;
     }
 

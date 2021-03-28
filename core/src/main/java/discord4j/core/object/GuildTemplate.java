@@ -21,7 +21,7 @@ import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.User;
 import discord4j.core.spec.GuildTemplateEditSpec;
-import discord4j.core.spec.TemplateCreateGuildSpec;
+import discord4j.core.spec.GuildCreateFromTemplateSpec;
 import discord4j.discordjson.json.SerializedSourceGuildData;
 import discord4j.discordjson.json.TemplateData;
 import reactor.core.publisher.Mono;
@@ -49,7 +49,7 @@ public final class GuildTemplate implements DiscordObject {
     private final long guildId;
 
     /**
-     * Constructs a {@code Template} with an associated Discord client and data.
+     * Constructs a {@code GuildTemplate} with an associated {@link GatewayDiscordClient} and Discord data.
      *
      * @param gateway The {@link GatewayDiscordClient} associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
@@ -66,90 +66,90 @@ public final class GuildTemplate implements DiscordObject {
     }
 
     /**
-     * Returns this object underlying raw data structure.
+     * Gets the data of the template.
      *
-     * @return an immutable data representation of this object
+     * @return The data of the template.
      */
     public TemplateData getData() {
         return data;
     }
 
     /**
-     * Returns the template code (unique ID).
+     * Gets the template code (unique ID).
      *
-     * @return the template code (unique ID)
+     * @return The template code (unique ID).
      */
     public String getCode() {
         return data.code();
     }
 
     /**
-     * Returns the source guild ID.
+     * Gets the ID of the guild this template is associated with.
      *
-     * @return the guild id
+     * @return The source guild ID.
      */
     public Snowflake getGuildId() {
         return Snowflake.of(guildId);
     }
 
     /**
-     * Returns the name of the template.
+     * Gets the name of the template.
      *
-     * @return The template name
+     * @return The template name.
      */
     public String getName() {
         return data.name();
     }
 
     /**
-     * Returns the description of the template.
+     * Gets the description of the template, if present.
      *
-     * @return the template description
+     * @return The template description.
      */
     public Optional<String> getDescription() {
         return data.description();
     }
 
     /**
-     * Returns the amount of times the template has been used.
+     * Gets the number of times the template has been used.
      *
-     * @return the template usage count
+     * @return The number of times the template has been used.
      */
     public int getUsageCount() {
         return data.usageCount();
     }
 
     /**
-     * Returns the id of the creator of this template.
+     * Gets the ID of the user who created the template.
      *
-     * @return the creator id
+     * @return The ID of the user who created the template.
      */
     public Snowflake getCreatorId() {
         return Snowflake.of(data.creatorId());
     }
 
     /**
-     * Returns the creator of this template.
+     * Gets the user who created the template.
      *
-     * @return the creator
+     * @return The user who created the template.
      */
     public User getCreator() {
         return new User(gateway, data.creator());
     }
 
     /**
-     * Returns an {@link Instant} when this template was created.
+     * Gets when the template was created.
      *
-     * @return a timestamp when template was last updated
+     * @return When the template was created.
      */
     public Instant getCreatedAt() {
         return DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(data.createdAt(), Instant::from);
     }
 
     /**
-     * Returns an {@link Instant} when this template was last updated.
+     * Gets when the template was last updated.
      *
-     * @return a timestamp when template was last updated
+     * @return When the template was last updated.
      */
     public Instant getUpdatedAt() {
         return DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(data.updatedAt(), Instant::from);
@@ -165,14 +165,16 @@ public final class GuildTemplate implements DiscordObject {
     }
 
     /**
-     * Creates a new guild from a template. Fires Guild Create Gateway event.
+     * Requests to create a new guild from this template.
      *
-     * @return the guild object
+     * @param spec A {@link Consumer} that provides a "blank" {@link GuildTemplateEditSpec} to be operated on.
+     * @return A {@link Mono} where, upon successful completion, emits the {@link Guild created guild}. If an error is
+     * received, it is emitted through the {@code Mono}.
      */
-    public Mono<Guild> createGuild(final Consumer<? super TemplateCreateGuildSpec> spec) {
+    public Mono<Guild> createGuild(final Consumer<? super GuildCreateFromTemplateSpec> spec) {
         return Mono.defer(
                 () -> {
-                    TemplateCreateGuildSpec mutatedSpec = new TemplateCreateGuildSpec();
+                    GuildCreateFromTemplateSpec mutatedSpec = new GuildCreateFromTemplateSpec();
                     spec.accept(mutatedSpec);
                     return gateway.getRestClient().getTemplateService()
                             .createGuild(getCode(), mutatedSpec.asRequest());
@@ -183,7 +185,7 @@ public final class GuildTemplate implements DiscordObject {
     /**
      * Requests to sync this template with the guild's current state.
      *
-     * @return a {@link Mono} that, upon subscription, syncs a guild with this template. If an error is received, it
+     * @return a {@link Mono} that, upon subscription, syncs a template with its guild. If an error is received, it
      * will be emitted through the Mono.
      */
     public Mono<GuildTemplate> sync() {

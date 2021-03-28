@@ -1008,11 +1008,11 @@ public final class Guild implements Entity {
     }
 
     /**
-     * Requests to create a template based on this guild. A guild can only have a single template.
+     * Requests to create a template based on this guild.
      *
      * @param spec A {@link Consumer} that provides a "blank" {@link GuildTemplateCreateSpec} to be operated on.
-     * @return A {@link Mono} where, upon subscription, emits the created {@link GuildTemplate} on success. If an error is
-     * received, it is emitted through the {@code Mono}.
+     * @return A {@link Mono} where, upon subscription, emits the created {@link GuildTemplate} on success. If an error
+     * is received, it is emitted through the {@code Mono}.
      */
     public Mono<GuildTemplate> createTemplate(final Consumer<? super GuildTemplateCreateSpec> spec) {
         return Mono.defer(
