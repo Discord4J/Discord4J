@@ -18,10 +18,7 @@ package discord4j.core.object.entity;
 
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
-import discord4j.core.object.Ban;
-import discord4j.core.object.ExtendedInvite;
-import discord4j.core.object.Region;
-import discord4j.core.object.VoiceState;
+import discord4j.core.object.*;
 import discord4j.core.object.audit.AuditLogEntry;
 import discord4j.core.object.entity.channel.*;
 import discord4j.core.object.presence.Presence;
@@ -1011,6 +1008,24 @@ public final class Guild implements Entity {
     }
 
     /**
+     * Requests to create an template.
+     *
+     * @param spec A {@link Consumer} that provides a "blank" {@link GuildTemplateCreateSpec} to be operated on.
+     * @return A {@link Mono} where, upon successful completion, emits the created {@link Template}. If an error is
+     * received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Template> createTemplate(final Consumer<? super GuildTemplateCreateSpec> spec) {
+        return Mono.defer(
+            () -> {
+                GuildTemplateCreateSpec mutatedSpec = new GuildTemplateCreateSpec();
+                spec.accept(mutatedSpec);
+                return gateway.getRestClient().getTemplateService()
+                    .createTemplate(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason());
+            })
+            .map(data -> new Template(gateway, data));
+    }
+
+    /**
      * Requests to create a role.
      *
      * @param spec A {@link Consumer} that provides a "blank" {@link RoleCreateSpec} to be operated on.
@@ -1366,6 +1381,18 @@ public final class Guild implements Entity {
         return gateway.getRestClient().getGuildService()
                 .getGuildInvites(getId().asLong())
                 .map(data -> new ExtendedInvite(gateway, data));
+    }
+
+    /**
+     * Requests to retrieve the invites of the guild.
+     *
+     * @return A {@link Flux} that continually emits the {@link ExtendedInvite invites} of the guild. If an error is
+     * received, it is emitted through the {@code Flux}.
+     */
+    public Flux<Template> getTemplates() {
+        return gateway.getRestClient().getTemplateService()
+            .getTemplates(getId().asLong())
+            .map(data -> new Template(gateway, data));
     }
 
     /**

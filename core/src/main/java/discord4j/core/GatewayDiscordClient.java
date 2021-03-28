@@ -27,6 +27,7 @@ import discord4j.core.event.ReactiveEventAdapter;
 import discord4j.core.event.domain.Event;
 import discord4j.core.object.Invite;
 import discord4j.core.object.Region;
+import discord4j.core.object.Template;
 import discord4j.core.object.entity.*;
 import discord4j.core.object.entity.channel.Channel;
 import discord4j.core.object.entity.channel.GuildChannel;
@@ -666,6 +667,11 @@ public class GatewayDiscordClient implements EntityRetriever {
     }
 
     @Override
+    public Mono<Template> getTemplateByCode(String templateCode) {
+        return entityRetriever.getTemplateByCode(templateCode);
+    }
+
+    @Override
     public Flux<Guild> getGuilds() {
         return entityRetriever.getGuilds();
     }
@@ -693,5 +699,10 @@ public class GatewayDiscordClient implements EntityRetriever {
     @Override
     public Flux<GuildEmoji> getGuildEmojis(Snowflake guildId) {
         return entityRetriever.getGuildEmojis(guildId);
+    }
+
+    @Override
+    public Flux<Template> getGuildTemplates(Snowflake guildId) {
+        return entityRetriever.getGuildTemplates(guildId);
     }
 }

@@ -16,6 +16,7 @@
  */
 package discord4j.core.retriever;
 
+import discord4j.core.object.Template;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.GuildEmoji;
 import discord4j.core.object.entity.Member;
@@ -74,6 +75,11 @@ public class FallbackEntityRetriever implements EntityRetriever {
     }
 
     @Override
+    public Mono<Template> getTemplateByCode(String templateCode) {
+        return first.getTemplateByCode(templateCode).switchIfEmpty(fallback.getTemplateByCode(templateCode));
+    }
+
+    @Override
     public Flux<Guild> getGuilds() {
         return first.getGuilds().switchIfEmpty(fallback.getGuilds());
     }
@@ -101,5 +107,10 @@ public class FallbackEntityRetriever implements EntityRetriever {
     @Override
     public Flux<GuildEmoji> getGuildEmojis(Snowflake guildId) {
         return first.getGuildEmojis(guildId).switchIfEmpty(fallback.getGuildEmojis(guildId));
+    }
+
+    @Override
+    public Flux<Template> getGuildTemplates(Snowflake guildId) {
+        return first.getGuildTemplates(guildId).switchIfEmpty(fallback.getGuildTemplates(guildId));
     }
 }

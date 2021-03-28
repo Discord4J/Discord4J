@@ -45,6 +45,7 @@ public class RestClient {
     private final GuildService guildService;
     private final InteractionService interactionService;
     private final InviteService inviteService;
+    private final TemplateService templateService;
     private final UserService userService;
     private final VoiceService voiceService;
     private final WebhookService webhookService;
@@ -87,6 +88,7 @@ public class RestClient {
         this.guildService = new GuildService(router);
         this.interactionService = new InteractionService(router);
         this.inviteService = new InviteService(router);
+        this.templateService = new TemplateService(router);
         this.userService = new UserService(router);
         this.voiceService = new VoiceService(router);
         this.webhookService = new WebhookService(router);
@@ -341,6 +343,17 @@ public class RestClient {
     }
 
     /**
+     * Requests to retrieve an template.
+     *
+     * @param templateCode The code for the template (e.g. "hgM48av5Q69A").
+     * @return A {@link Mono} where, upon successful completion, emits the {@link TemplateData} as represented by the
+     * supplied template code. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<TemplateData> getTemplate(final String templateCode) {
+        return templateService.getTemplate(templateCode);
+    }
+
+    /**
      * Requests to edit this client (i.e., modify the current bot user).
      *
      * @param request A {@link UserModifyRequest} as request body.
@@ -427,6 +440,16 @@ public class RestClient {
      */
     public InviteService getInviteService() {
         return inviteService;
+    }
+
+    /**
+     * Access a low-level representation of the API endpoints for the Template resource. It is recommended you use
+     * methods like {@link #getTemplate(String)}, or {@link RestTemplate#create(RestClient, String)}.
+     *
+     * @return a handle to perform low-level requests to the API
+     */
+    public TemplateService getTemplateService() {
+        return templateService;
     }
 
     /**

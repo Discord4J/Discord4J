@@ -82,6 +82,10 @@ public final class StateView {
         return new LongObjStoreView<>(stateHolder.getUserStore());
     }
 
+    public StoreView<String, TemplateData> getTemplateStore() {
+        return new StoreView<>(stateHolder.getTemplateStore());
+    }
+
     public StoreView<LongLongTuple2, VoiceStateData> getVoiceStateStore() {
         return new StoreView<>(stateHolder.getVoiceStateStore());
     }

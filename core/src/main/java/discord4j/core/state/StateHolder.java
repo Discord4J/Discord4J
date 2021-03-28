@@ -63,6 +63,7 @@ public final class StateHolder {
     private final Store<LongLongTuple2, PresenceData> presenceStore;
     private final LongObjStore<RoleData> roleStore;
     private final LongObjStore<UserData> userStore;
+    private final Store<String, TemplateData> templateStore;
     private final Store<LongLongTuple2, VoiceStateData> voiceStateStore;
 
     public StateHolder(final StoreService service, final StoreContext context, final Possible<IntentSet> intentSet) {
@@ -105,6 +106,9 @@ public final class StateHolder {
 
         userStore = service.provideLongObjStore(UserData.class);
         log.debug("User storage        : {}", userStore);
+
+        templateStore = service.provideGenericStore(String.class, TemplateData.class);
+        log.debug("Template storage        : {}", templateStore);
 
         if (intents.map(set -> !set.contains(Intent.GUILD_VOICE_STATES)).orElse(false)) {
             voiceStateStore = new NoOpStore<>();
@@ -151,6 +155,10 @@ public final class StateHolder {
         return userStore;
     }
 
+    public Store<String, TemplateData> getTemplateStore() {
+        return templateStore;
+    }
+
     public Store<LongLongTuple2, VoiceStateData> getVoiceStateStore() {
         return voiceStateStore;
     }
@@ -164,6 +172,7 @@ public final class StateHolder {
                 .and(presenceStore.invalidate())
                 .and(roleStore.invalidate())
                 .and(userStore.invalidate())
+                .and(templateStore.invalidate())
                 .and(voiceStateStore.invalidate());
     }
 }
