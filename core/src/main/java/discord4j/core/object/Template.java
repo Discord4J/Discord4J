@@ -157,12 +157,26 @@ public class Template implements DiscordObject {
     }
 
     /**
-     * Requests to sync this template with the guild's current state.
+     * Requests to sync this template with the given guild.
+     *
+     * @param guildId the guild to fetch current state for the template
+     * @return a {@link Mono} that, upon subscription, syncs a guild with this template. If an error is received, it
+     * will be emitted through the Mono.
      */
-    public final Mono<Template> sync() {
+    public final Mono<Template> sync(long guildId) {
         return gateway.getRestClient().getTemplateService()
                 .syncTemplate(guildId, getCode())
                 .map(data -> new Template(gateway, data));
+    }
+
+    /**
+     * Requests to sync this template with the guild's current state.
+     *
+     * @return a {@link Mono} that, upon subscription, syncs a guild with this template. If an error is received, it
+     * will be emitted through the Mono.
+     */
+    public final Mono<Template> sync() {
+        return sync(guildId);
     }
 
     /**
