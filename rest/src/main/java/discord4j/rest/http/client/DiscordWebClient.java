@@ -26,7 +26,9 @@ import io.netty.handler.codec.http.DefaultHttpHeaders;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpHeaders;
 import reactor.core.publisher.Mono;
+import reactor.netty.ConnectionObserver;
 import reactor.netty.http.client.HttpClient;
+import reactor.netty.http.client.HttpClientRequest;
 import reactor.util.Logger;
 import reactor.util.Loggers;
 import reactor.util.annotation.Nullable;
@@ -72,10 +74,25 @@ public class DiscordWebClient {
         defaultHeaders.add(HttpHeaderNames.AUTHORIZATION, authorizationScheme + " " + token);
         defaultHeaders.add(HttpHeaderNames.USER_AGENT, "DiscordBot(" + url + ", " + version + ")");
 
-        this.httpClient = httpClient;
+        this.httpClient = configureHttpClient(httpClient.baseUrl(Routes.BASE_URL));
         this.defaultHeaders = defaultHeaders;
         this.exchangeStrategies = exchangeStrategies;
         this.responseFunctions = responseFunctions;
+    }
+
+    private HttpClient configureHttpClient(HttpClient httpClient) {
+        if (log.isTraceEnabled()) {
+            return httpClient.observe((connection, state) -> {
+                if (connection instanceof ConnectionObserver) {
+                    ConnectionObserver observer = (ConnectionObserver) connection;
+                    log.trace(format(observer.currentContext(), "{} {}"), state, connection);
+                } else if (connection instanceof HttpClientRequest) {
+                    HttpClientRequest httpClientRequest = (HttpClientRequest) connection;
+                    log.trace(format(httpClientRequest.currentContextView(), "{} {}"), state, connection);
+                }
+            });
+        }
+        return httpClient;
     }
 
     /**
@@ -114,14 +131,11 @@ public class DiscordWebClient {
      * @return a {@link Mono} with the response in the form of {@link ClientResponse}
      */
     public Mono<ClientResponse> exchange(ClientRequest request) {
-        return Mono.deferContextual(
-                ctx -> {
+        return Mono.defer(
+                () -> {
                     HttpHeaders requestHeaders = buildHttpHeaders(request);
                     String contentType = requestHeaders.get(HttpHeaderNames.CONTENT_TYPE);
-                    HttpClient.RequestSender sender = httpClient
-                            .baseUrl(Routes.BASE_URL)
-                            .observe((connection, newState) -> log.trace(format(ctx, "{} {}"), newState, connection))
-                            .headers(headers -> headers.setAll(requestHeaders))
+                    HttpClient.RequestSender sender = httpClient.headers(headers -> headers.setAll(requestHeaders))
                             .request(request.getMethod())
                             .uri(request.getUrl());
                     Object body = request.getBody();
