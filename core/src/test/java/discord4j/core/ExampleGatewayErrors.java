@@ -18,7 +18,7 @@
 package discord4j.core;
 
 import discord4j.core.event.domain.lifecycle.ReadyEvent;
-import discord4j.core.object.clientpresence.ClientPresence;
+import discord4j.core.object.presence.ClientPresence;
 import discord4j.gateway.intent.IntentSet;
 import reactor.util.Logger;
 import reactor.util.Loggers;

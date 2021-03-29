@@ -23,7 +23,7 @@ import discord4j.common.ReactorResources;
 import discord4j.common.util.Snowflake;
 import discord4j.core.command.CommandRequest;
 import discord4j.core.command.CommandResponse;
-import discord4j.core.object.clientpresence.ClientPresence;
+import discord4j.core.object.presence.ClientPresence;
 import discord4j.core.object.entity.*;
 import discord4j.core.object.entity.channel.TextChannel;
 import discord4j.core.object.reaction.ReactionEmoji;

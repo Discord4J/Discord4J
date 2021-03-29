@@ -16,27 +16,19 @@
  */
 package discord4j.core.object.presence;
 
-import discord4j.discordjson.json.ActivityUpdateRequest;
 import discord4j.discordjson.json.PresenceData;
-import discord4j.discordjson.json.gateway.StatusUpdate;
-import discord4j.discordjson.possible.Possible;
 
-import java.time.Instant;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
- * Presence is the current state of a user on a guild.
+ * Presence is the current state of a user on a guild, received from Discord.
  * <p>
- * Factories exist to build an {@link StatusUpdate} object to update the bot's status:
- * <ul>
- *     <li>{@link Presence#online()} and {@link Presence#online(ActivityUpdateRequest)}</li>
- *     <li>{@link Presence#idle()} and {@link Presence#idle(ActivityUpdateRequest)}</li>
- *     <li>{@link Presence#doNotDisturb()} and {@link Presence#doNotDisturb(ActivityUpdateRequest)}</li>
- *     <li>{@link Presence#invisible()}</li>
- * </ul>
+ * This is as opposed to {@link ClientPresence} which is <i>sent to</i> Discord.
+ * <p>
+ * A presence includes a user's {@link Activity activities} and their current {@link Status status} on a given
+ * {@link Status.Platform platform}.
  *
  * @see <a href="https://discord.com/developers/docs/topics/gateway#presence">Presence</a>
  */
@@ -88,28 +80,6 @@ public final class Presence {
      */
     public List<Activity> getActivities() {
         return data.activities().stream().map(Activity::new).collect(Collectors.toList());
-    }
-
-    /**
-     * Convert a received {@link Presence} into a {@link StatusUpdate} that can be used for sending an update.
-     *
-     * @return a {@link StatusUpdate} with the contents of the current {@link Presence} data.
-     */
-    public StatusUpdate asStatusUpdate() {
-        return StatusUpdate.builder()
-                .status(data.status())
-                .activities(data.activities()
-                        .stream()
-                        .<ActivityUpdateRequest>map(activity ->  ActivityUpdateRequest.builder()
-                                .from(activity)
-                                .url(Possible.flatOpt(activity.url()))
-                                .build())
-                        .map(Collections::singletonList)
-                        .findFirst())
-                .afk(data.status().equals(Status.IDLE.getValue()))
-                .since(data.status().equals(Status.IDLE.getValue()) ?
-                        Optional.of(Instant.now().toEpochMilli()) : Optional.empty())
-                .build();
     }
 
     @Override
