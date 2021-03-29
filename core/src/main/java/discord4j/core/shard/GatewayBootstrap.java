@@ -372,6 +372,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
      * @return this builder
      * @deprecated use {@link #setInitialPresence(Function)}
      */
+    @Deprecated
     public GatewayBootstrap<O> setInitialStatus(Function<ShardInfo, StatusUpdate> initialStatus) {
         this.initialPresence = Objects.requireNonNull(initialStatus, "initialStatus");
         return this;
