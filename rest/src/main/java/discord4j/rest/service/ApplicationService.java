@@ -119,4 +119,28 @@ public class ApplicationService extends RestService {
             .exchange(getRouter())
             .bodyToMono(Void.class);
     }
+
+    public Flux<ApplicationCommandPermissionsData> getGuildApplicationCommandPermissions(long applicationId, long guildId) {
+        return Routes.GUILD_APPLICATION_COMMAND_PERMISSIONS_GET.newRequest(applicationId, guildId)
+                .exchange(getRouter())
+                .bodyToMono(ApplicationCommandPermissionsData[].class)
+                .flatMapMany(Flux::fromArray);
+    }
+
+    public Flux<ApplicationCommandPermissionsData> getApplicationCommandPermissions(long applicationId, long guildId, long commandId) {
+        return Routes.APPLICATION_COMMAND_PERMISSIONS_GET.newRequest(applicationId, guildId, commandId)
+                .exchange(getRouter())
+                .bodyToMono(ApplicationCommandPermissionsData[].class)
+                .flatMapMany(Flux::fromArray);
+    }
+
+    public Flux<ApplicationCommandPermissionsData> modifyApplicationCommandPermissions(long applicationId, long guildId,
+                                                                                         long commandId,
+                                                                                         List<ApplicationCommandPermissionsData> permissions) {
+        return Routes.APPLICATION_COMMAND_PERMISSIONS_MODIFY.newRequest(applicationId, guildId, commandId)
+                .body(permissions)
+                .exchange(getRouter())
+                .bodyToMono(ApplicationCommandPermissionsData[].class)
+                .flatMapMany(Flux::fromArray);
+    }
 }
