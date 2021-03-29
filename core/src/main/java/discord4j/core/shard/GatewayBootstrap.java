@@ -303,9 +303,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
      *
      * @param initialPresence a {@link Function} that supplies {@link ClientPresence} instances from a given {@link ShardInfo}
      * @return this builder
-     * @deprecated use {@link #setInitialStatus(Function)}
      */
-    @Deprecated
     public GatewayBootstrap<O> setInitialPresence(Function<ShardInfo, ClientPresence> initialPresence) {
         this.initialPresence = Objects.requireNonNull(initialPresence, "initialPresence");
         return this;
@@ -317,7 +315,9 @@ public class GatewayBootstrap<O extends GatewayOptions> {
      *
      * @param initialStatus a {@link Function} that supplies {@link ClientPresence} instances from a given {@link ShardInfo}
      * @return this builder
+     * @deprecated use {@link #setInitialPresence(Function)}
      */
+    @Deprecated
     public GatewayBootstrap<O> setInitialStatus(Function<ShardInfo, ClientPresence> initialStatus) {
         this.initialPresence = Objects.requireNonNull(initialStatus, "initialStatus");
         return this;
