@@ -17,6 +17,7 @@
 package discord4j.rest.service;
 
 import discord4j.discordjson.json.ApplicationCommandData;
+import discord4j.discordjson.json.ApplicationCommandPermissionsData;
 import discord4j.discordjson.json.ApplicationCommandRequest;
 import discord4j.discordjson.json.ApplicationInfoData;
 import discord4j.rest.request.Router;
