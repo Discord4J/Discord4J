@@ -1,7 +1,5 @@
 package discord4j.rest.util;
 
-import java.util.Arrays;
-
 public enum InteractionResponseType {
     /**
      * Unknown type
@@ -12,21 +10,13 @@ public enum InteractionResponseType {
      */
     PONG(1),
     /**
-     * ACK a command without sending a message, eating the user's input
-     */
-    ACKNOWLEDGE(2),
-    /**
-     * respond with a message, eating the user's input
-     */
-    CHANNEL_MESSAGE(3),
-    /**
-     * respond with a message, showing the user's input
+     * Respond to an interaction with a message
      */
     CHANNEL_MESSAGE_WITH_SOURCE(4),
     /**
-     * ACK a command without sending a message, showing the user's input
+     * ACK an interaction and send a response later, the user sees a loading state
      */
-    ACKNOWLEDGE_WITH_SOURCE(5);
+    DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE(5);
 
     /**
      * The underlying value as represented by Discord.
@@ -59,6 +49,11 @@ public enum InteractionResponseType {
      * @return The type of response.
      */
     public static InteractionResponseType of(final int value) {
-        return Arrays.stream(values()).filter(type -> type.getValue() == value).findFirst().orElse(UNKNOWN);
+        switch (value) {
+            case 1: return PONG;
+            case 4: return CHANNEL_MESSAGE_WITH_SOURCE;
+            case 5: return DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE;
+            default: return UNKNOWN;
+        }
     }
 }

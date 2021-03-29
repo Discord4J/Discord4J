@@ -42,7 +42,7 @@ public final class ApplicationInfo implements Entity {
     private final ApplicationInfoData data;
 
     /**
-     * Constructs a {@code ApplicationInfo} with an associated ServiceMediator and Discord data.
+     * Constructs a {@code ApplicationInfo} with an associated {@link GatewayDiscordClient} and Discord data.
      *
      * @param gateway The {@link GatewayDiscordClient} associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.

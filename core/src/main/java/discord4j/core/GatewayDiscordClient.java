@@ -53,12 +53,14 @@ import discord4j.voice.LocalVoiceConnectionRegistry;
 import discord4j.voice.VoiceConnection;
 import discord4j.voice.VoiceConnectionFactory;
 import discord4j.voice.VoiceConnectionRegistry;
+import io.netty.handler.timeout.TimeoutException;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.Logger;
 import reactor.util.Loggers;
 
+import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
@@ -655,6 +657,11 @@ public class GatewayDiscordClient implements EntityRetriever {
     @Override
     public Mono<User> getSelf() {
         return entityRetriever.getSelf();
+    }
+
+    @Override
+    public Mono<Member> getSelfMember(Snowflake guildId) {
+        return entityRetriever.getSelfMember(guildId);
     }
 
     @Override

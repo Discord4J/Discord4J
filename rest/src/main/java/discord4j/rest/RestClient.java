@@ -26,6 +26,7 @@ import discord4j.rest.util.PaginationUtil;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.Duration;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -47,6 +48,7 @@ public class RestClient {
     private final UserService userService;
     private final VoiceService voiceService;
     private final WebhookService webhookService;
+    private final Mono<Long> applicationIdMono;
 
     /**
      * Create a {@link RestClient} with default options, using the given token for authentication.
@@ -88,6 +90,10 @@ public class RestClient {
         this.userService = new UserService(router);
         this.voiceService = new VoiceService(router);
         this.webhookService = new WebhookService(router);
+
+        this.applicationIdMono = getApplicationInfo()
+                .map(app -> Snowflake.asLong(app.id()))
+                .cache(__ -> Duration.ofMillis(Long.MAX_VALUE), __ -> Duration.ZERO, () -> Duration.ZERO);
     }
 
     /**
@@ -182,6 +188,16 @@ public class RestClient {
      */
     public RestMember restMember(Snowflake guildId, MemberData data) {
         return RestMember.create(this, guildId, Snowflake.of(data.user().id()));
+    }
+
+    /**
+     * Requests to retrieve the bot member from the guild of the supplied ID
+     *
+     * @param guildId the ID of the guild.
+     * @return A {@link RestMember} of the bot user as represented by the supplied ID.
+     */
+    public RestMember selfRestMember(Snowflake guildId) {
+        return RestMember.create(this, guildId, restResources.getSelfId());
     }
 
     /**
@@ -310,6 +326,17 @@ public class RestClient {
      */
     public Mono<UserData> getSelf() {
         return userService.getCurrentUser();
+    }
+
+    /**
+     * Requests to retrieve the bot user, represented as a member of the guild of the supplied ID
+     *
+     * @param guildId The ID of the guild
+     * @return a {@link Mono} where, upon successful completion, emits the bot {@link MemberData member}. If an error is
+     *         received, it is emitted through the {@code Mono}.
+     */
+    public Mono<MemberData> getSelfMember(Snowflake guildId) {
+        return guildService.getGuildMember(guildId.asLong(), restResources.getSelfId().asLong());
     }
 
     /**
@@ -452,5 +479,9 @@ public class RestClient {
      */
     public WebhookService getWebhookService() {
         return webhookService;
+    }
+
+    public Mono<Long> getApplicationId() {
+        return applicationIdMono;
     }
 }

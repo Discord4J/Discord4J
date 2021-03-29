@@ -36,7 +36,7 @@ public final class Reaction implements DiscordObject  {
     private final ReactionData data;
 
     /**
-     * Constructs a {@code Reaction} with an associated ServiceMediator and Discord data.
+     * Constructs a {@code Reaction} with an associated {@link GatewayDiscordClient} and Discord data.
      *
      * @param gateway The {@link GatewayDiscordClient} associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.

@@ -22,6 +22,7 @@ import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.*;
 import discord4j.core.event.domain.channel.TypingStartEvent;
 import discord4j.core.object.VoiceState;
+import discord4j.core.object.command.Interaction;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.presence.Presence;
@@ -85,6 +86,9 @@ public class DispatchHandlers implements DispatchEventMapper {
         addHandler(InviteCreate.class, DispatchHandlers::inviteCreate);
         addHandler(InviteDelete.class, DispatchHandlers::inviteDelete);
         addHandler(InteractionCreate.class, DispatchHandlers::interactionCreate);
+        addHandler(ApplicationCommandCreate.class, ApplicationCommandDispatchHandlers::applicationCommandCreate);
+        addHandler(ApplicationCommandUpdate.class, ApplicationCommandDispatchHandlers::applicationCommandUpdate);
+        addHandler(ApplicationCommandDelete.class, ApplicationCommandDispatchHandlers::applicationCommandDelete);
 
         addHandler(GatewayStateChange.class, LifecycleDispatchHandlers::gatewayStateChanged);
 
@@ -229,7 +233,8 @@ public class DispatchHandlers implements DispatchEventMapper {
     }
 
     private static Mono<InteractionCreateEvent> interactionCreate(DispatchContext<InteractionCreate, Void> context) {
-        return Mono.just(new InteractionCreateEvent(context.getGateway(), context.getShardInfo(),
-                context.getDispatch().interaction()));
+        GatewayDiscordClient gateway = context.getGateway();
+        Interaction interaction = new Interaction(gateway, context.getDispatch().interaction());
+        return Mono.just(new InteractionCreateEvent(gateway, context.getShardInfo(), interaction));
     }
 }

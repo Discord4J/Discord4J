@@ -20,6 +20,7 @@ import discord4j.common.annotations.Experimental;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.Embed;
+import discord4j.core.object.MessageInteraction;
 import discord4j.core.object.MessageReference;
 import discord4j.core.object.entity.channel.GuildChannel;
 import discord4j.core.object.entity.channel.MessageChannel;
@@ -80,7 +81,7 @@ public final class Message implements Entity {
     private final RestMessage rest;
 
     /**
-     * Constructs a {@code Message} with an associated ServiceMediator and Discord data.
+     * Constructs a {@code Message} with an associated {@link GatewayDiscordClient} and Discord data.
      *
      * @param gateway The {@link GatewayDiscordClient} associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
@@ -471,6 +472,16 @@ public final class Message implements Entity {
     }
 
     /**
+     * Gets the interaction data, if the message is a response to an {@link discord4j.rest.interaction.Interactions}.
+     *
+     * @return The interaction data, if the message is a response to an {@link discord4j.rest.interaction.Interactions}.
+     */
+    public Optional<MessageInteraction> getInteraction() {
+        return data.interaction().toOptional()
+                .map(data -> new MessageInteraction(gateway, data));
+    }
+
+    /**
      * Requests to edit this message.
      *
      * @param spec A {@link Consumer} that provides a "blank" {@link MessageEditSpec} to be operated on.
@@ -656,7 +667,10 @@ public final class Message implements Entity {
         SOURCE_MESSAGE_DELETED(3),
 
         /** This message came from the urgent message system. */
-        URGENT(4);
+        URGENT(4),
+
+        /** This message is an ephemeral interaction response. */
+        EPHEMERAL(6);
 
         /**
          * The underlying value as represented by Discord.
@@ -830,38 +844,22 @@ public final class Message implements Entity {
          */
         public static Type of(final int value) {
             switch (value) {
-                case 0:
-                    return DEFAULT;
-                case 1:
-                    return RECIPIENT_ADD;
-                case 2:
-                    return RECIPIENT_REMOVE;
-                case 3:
-                    return CALL;
-                case 4:
-                    return CHANNEL_NAME_CHANGE;
-                case 5:
-                    return CHANNEL_ICON_CHANGE;
-                case 6:
-                    return CHANNEL_PINNED_MESSAGE;
-                case 7:
-                    return GUILD_MEMBER_JOIN;
-                case 8:
-                    return USER_PREMIUM_GUILD_SUBSCRIPTION;
-                case 9:
-                    return USER_PREMIUM_GUILD_SUBSCRIPTION_TIER_1;
-                case 10:
-                    return USER_PREMIUM_GUILD_SUBSCRIPTION_TIER_2;
-                case 11:
-                    return USER_PREMIUM_GUILD_SUBSCRIPTION_TIER_3;
-                case 12:
-                    return CHANNEL_FOLLOW_ADD;
-                case 14:
-                    return GUILD_DISCOVERY_DISQUALIFIED;
-                case 15:
-                    return GUILD_DISCOVERY_REQUALIFIED;
-                default:
-                    return UNKNOWN;
+                case 0: return DEFAULT;
+                case 1: return RECIPIENT_ADD;
+                case 2: return RECIPIENT_REMOVE;
+                case 3: return CALL;
+                case 4: return CHANNEL_NAME_CHANGE;
+                case 5: return CHANNEL_ICON_CHANGE;
+                case 6: return CHANNEL_PINNED_MESSAGE;
+                case 7: return GUILD_MEMBER_JOIN;
+                case 8: return USER_PREMIUM_GUILD_SUBSCRIPTION;
+                case 9: return USER_PREMIUM_GUILD_SUBSCRIPTION_TIER_1;
+                case 10: return USER_PREMIUM_GUILD_SUBSCRIPTION_TIER_2;
+                case 11: return USER_PREMIUM_GUILD_SUBSCRIPTION_TIER_3;
+                case 12: return CHANNEL_FOLLOW_ADD;
+                case 14: return GUILD_DISCOVERY_DISQUALIFIED;
+                case 15: return GUILD_DISCOVERY_REQUALIFIED;
+                default: return UNKNOWN;
             }
         }
     }

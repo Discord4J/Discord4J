@@ -28,7 +28,7 @@ import java.util.function.Consumer;
 public final class StoreChannel extends BaseCategorizableChannel {
 
     /**
-     * Constructs an {@code StoreChannel} with an associated ServiceMediator and Discord data.
+     * Constructs an {@code StoreChannel} with an associated {@link GatewayDiscordClient} and Discord data.
      *
      * @param gateway The {@link GatewayDiscordClient} associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.

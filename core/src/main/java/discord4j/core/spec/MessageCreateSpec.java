@@ -165,6 +165,6 @@ public class MessageCreateSpec implements Spec<MultipartRequest<MessageCreateReq
                 .allowedMentions(allowedMentionsData == null ? Possible.absent() : Possible.of(allowedMentionsData))
                 .messageReference(messageReferenceData == null ? Possible.absent() : Possible.of(messageReferenceData))
                 .build();
-        return new MultipartRequest<>(json, files == null ? Collections.emptyList() : files);
+        return MultipartRequest.ofRequestAndFiles(json, files == null ? Collections.emptyList() : files);
     }
 }

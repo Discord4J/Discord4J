@@ -24,6 +24,8 @@ import discord4j.rest.route.Routes;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.List;
+
 public class ApplicationService extends RestService {
 
     public ApplicationService(Router router) {
@@ -46,6 +48,20 @@ public class ApplicationService extends RestService {
     public Mono<ApplicationCommandData> createGlobalApplicationCommand(long applicationId, ApplicationCommandRequest request) {
         return Routes.GLOBAL_APPLICATION_COMMANDS_CREATE.newRequest(applicationId)
             .body(request)
+            .exchange(getRouter())
+            .bodyToMono(ApplicationCommandData.class);
+    }
+
+    public Flux<ApplicationCommandData> bulkOverwriteGlobalApplicationCommand(long applicationId, List<ApplicationCommandRequest> requests) {
+        return Routes.GLOBAL_APPLICATION_COMMANDS_BULK_OVERWRITE.newRequest(applicationId)
+                .body(requests)
+                .exchange(getRouter())
+                .bodyToMono(ApplicationCommandData[].class)
+                .flatMapMany(Flux::fromArray);
+    }
+
+    public Mono<ApplicationCommandData> getGlobalApplicationCommand(long applicationId, long commandId) {
+        return Routes.GLOBAL_APPLICATION_COMMAND_GET.newRequest(applicationId, commandId)
             .exchange(getRouter())
             .bodyToMono(ApplicationCommandData.class);
     }
@@ -73,6 +89,20 @@ public class ApplicationService extends RestService {
     public Mono<ApplicationCommandData> createGuildApplicationCommand(long applicationId, long guildId, ApplicationCommandRequest request) {
         return Routes.GUILD_APPLICATION_COMMANDS_CREATE.newRequest(applicationId, guildId)
             .body(request)
+            .exchange(getRouter())
+            .bodyToMono(ApplicationCommandData.class);
+    }
+
+    public Flux<ApplicationCommandData> bulkOverwriteGuildApplicationCommand(long applicationId, long guildId, List<ApplicationCommandRequest> requests) {
+        return Routes.GUILD_APPLICATION_COMMANDS_BULK_OVERWRITE.newRequest(applicationId, guildId)
+                .body(requests)
+                .exchange(getRouter())
+                .bodyToMono(ApplicationCommandData[].class)
+                .flatMapMany(Flux::fromArray);
+    }
+
+    public Mono<ApplicationCommandData> getGuildApplicationCommand(long applicationId, long guildId, long commandId) {
+        return Routes.GUILD_APPLICATION_COMMAND_GET.newRequest(applicationId, guildId, commandId)
             .exchange(getRouter())
             .bodyToMono(ApplicationCommandData.class);
     }

@@ -46,7 +46,7 @@ public class Invite implements DiscordObject {
     private final InviteData data;
 
     /**
-     * Constructs a {@code Invite} with an associated ServiceMediator and Discord data.
+     * Constructs a {@code Invite} with an associated {@link GatewayDiscordClient} and Discord data.
      *
      * @param gateway The {@link GatewayDiscordClient} associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.

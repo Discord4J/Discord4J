@@ -174,7 +174,7 @@ public class RestChannel {
      * @see <a href="https://discord.com/developers/docs/resources/channel#create-message">Create Message</a>
      */
     public Mono<MessageData> createMessage(MessageCreateRequest request) {
-        return restClient.getChannelService().createMessage(id, new MultipartRequest<>(request));
+        return restClient.getChannelService().createMessage(id, MultipartRequest.ofRequest(request));
     }
 
     /**

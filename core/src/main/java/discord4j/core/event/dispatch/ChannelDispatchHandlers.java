@@ -50,7 +50,7 @@ class ChannelDispatchHandlers {
                 case GUILD_CATEGORY: return new CategoryCreateEvent(gateway, context.getShardInfo(), new Category(gateway, channel));
                 case GUILD_NEWS: return new NewsChannelCreateEvent(gateway, context.getShardInfo(), new NewsChannel(gateway, channel));
                 case GUILD_STORE: return new StoreChannelCreateEvent(gateway, context.getShardInfo(), new StoreChannel(gateway, channel));
-                default: throw new AssertionError();
+                default: throw new AssertionError("Unhandled channel type " + context.getDispatch().channel().type());
             }
         });
     }
@@ -70,7 +70,7 @@ class ChannelDispatchHandlers {
                 case GUILD_CATEGORY: return new CategoryDeleteEvent(gateway, context.getShardInfo(), new Category(gateway, channel));
                 case GUILD_NEWS: return new NewsChannelDeleteEvent(gateway, context.getShardInfo(), new NewsChannel(gateway, channel));
                 case GUILD_STORE: return new StoreChannelDeleteEvent(gateway, context.getShardInfo(), new StoreChannel(gateway, channel));
-                default: throw new AssertionError();
+                default: throw new AssertionError("Unhandled channel type " + context.getDispatch().channel().type());
             }
         });
     }
@@ -116,7 +116,7 @@ class ChannelDispatchHandlers {
                 case GUILD_STORE: return new StoreChannelUpdateEvent(gateway, context.getShardInfo(),
                         new StoreChannel(gateway, channel),
                         oldData.map(old -> new StoreChannel(gateway, old)).orElse(null));
-                default: throw new AssertionError();
+                default: throw new AssertionError("Unhandled channel type " + context.getDispatch().channel().type());
             }
         });
     }
@@ -125,7 +125,7 @@ class ChannelDispatchHandlers {
         switch (Channel.Type.of(channel.type())) {
             case GUILD_NEWS: return new NewsChannel(gateway, channel);
             case GUILD_TEXT: return new TextChannel(gateway, channel);
-            default: throw new AssertionError();
+            default: throw new AssertionError("Unhandled channel type " + channel.type());
         }
     }
 }
