@@ -129,11 +129,11 @@ public class RestMember {
         return guild().getData().map(GuildUpdateData::ownerId)
                 .flatMap(ownerId -> {
                     // The owner of the guild is higher in the role hierarchy than everyone
-                    if (ownerId.equals(String.valueOf(id))) {
+                    if (ownerId.asLong() == id) {
                         return Mono.just(true);
                     }
 
-                    if (ownerId.equals(String.valueOf(otherMember.id))) {
+                    if (ownerId.asLong() == otherMember.id) {
                         return Mono.just(false);
                     }
 
