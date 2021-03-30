@@ -23,6 +23,7 @@ import discord4j.core.object.entity.Guild;
 import discord4j.core.spec.VoiceChannelEditSpec;
 import discord4j.core.spec.VoiceChannelJoinSpec;
 import discord4j.core.util.EntityUtil;
+import discord4j.discordjson.Id;
 import discord4j.discordjson.json.ChannelData;
 import discord4j.discordjson.json.gateway.VoiceStateUpdate;
 import discord4j.gateway.GatewayClientGroup;
@@ -95,7 +96,7 @@ public final class VoiceChannel extends BaseCategorizableChannel {
         return getClient().getGatewayResources().getStateView().getVoiceStateStore()
                 .findInRange(LongLongTuple2.of(getGuildId().asLong(), Long.MIN_VALUE),
                         LongLongTuple2.of(getGuildId().asLong(), Long.MAX_VALUE))
-                .filter(data -> data.channelId().map(getId().asString()::equals).orElse(false))
+                .filter(data -> data.channelId().map(Id::asString).map(getId().asString()::equals).orElse(false))
                 .map(data -> new VoiceState(getClient(), data));
     }
 
