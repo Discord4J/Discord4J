@@ -20,12 +20,19 @@ import discord4j.common.util.Snowflake;
 
 import java.util.function.Function;
 
+/**
+ * A key to be used in {@link AuditLogEntry#getOption(OptionKey)}.
+ *
+ * @param <T> The type of the optional data.
+ *
+ * @see <a href="https://discord.com/developers/docs/resources/audit-log#audit-log-entry-object-optional-audit-entry-info">Optional Audit Entry Info</a>
+ */
 public class OptionKey<T> {
 
     /** Number of days after which inactive members were kicked. */
-    public static final OptionKey<String> DELETE_MEMBER_DAYS = optionKey("delete_member_days", Function.identity());
+    public static final OptionKey<Integer> DELETE_MEMBER_DAYS = optionKey("delete_member_days", Integer::parseInt);
     /** Number of members removed by the prune. */
-    public static final OptionKey<String> MEMBERS_REMOVED = optionKey("members_removed", Function.identity());
+    public static final OptionKey<Integer> MEMBERS_REMOVED = optionKey("members_removed", Integer::parseInt);
     /** Channel in which the entities were targeted. */
     public static final OptionKey<Snowflake> CHANNEL_ID = optionKey("channel_id", Snowflake::of);
     /** Id of the message that was targeted. */

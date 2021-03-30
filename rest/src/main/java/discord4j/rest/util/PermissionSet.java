@@ -74,6 +74,10 @@ public final class PermissionSet extends AbstractSet<Permission> {
         return new PermissionSet(rawValue);
     }
 
+    public static PermissionSet of(final String rawValue) {
+        return new PermissionSet(Long.parseUnsignedLong(rawValue));
+    }
+
     /**
      * Returns a {@code PermissionSet} containing all the supplied permissions.
      *

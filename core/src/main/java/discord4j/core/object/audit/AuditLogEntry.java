@@ -16,11 +16,12 @@
  */
 package discord4j.core.object.audit;
 
+import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.Entity;
+import discord4j.core.object.entity.User;
 import discord4j.core.util.AuditLogUtil;
 import discord4j.discordjson.json.AuditLogEntryData;
-import discord4j.common.util.Snowflake;
 
 import java.util.Optional;
 
@@ -32,10 +33,13 @@ public class AuditLogEntry implements Entity {
     /** The gateway associated to this object. */
     private final GatewayDiscordClient gateway;
 
+    private final AuditLogPart auditLogPart;
+
     private final AuditLogEntryData data;
 
-    public AuditLogEntry(final GatewayDiscordClient gateway, final AuditLogEntryData data) {
+    public AuditLogEntry(final GatewayDiscordClient gateway, final AuditLogPart auditLogPart, final AuditLogEntryData data) {
         this.gateway = gateway;
+        this.auditLogPart = auditLogPart;
         this.data = data;
     }
 
@@ -78,6 +82,11 @@ public class AuditLogEntry implements Entity {
         return data.userId().map(Snowflake::of);
     }
 
+    public User getResponsibleUser() {
+        return auditLogPart.getUserById(getResponsibleUserId())
+                .orElseThrow(() -> new AssertionError("Audit log users does not contain responsible user ID."));
+    }
+
     /**
      * Gets the reason for the change, if present.
      *
@@ -106,25 +115,28 @@ public class AuditLogEntry implements Entity {
     public <T> Optional<AuditLogChange<T>> getChange(ChangeKey<T> changeKey) {
         return data.changes().toOptional()
                 .map(list -> list.stream().collect(AuditLogUtil.changeCollector()))
-                .map(map -> map.get(changeKey.getName()))
-                .map(AuditLogEntry::cast);
-    }
+                .flatMap(map -> Optional.ofNullable(map.get(changeKey.getName())))
+                .map(changeData -> {
+                    T oldValue = changeData.oldValue().toOptional()
+                            .map(v -> changeKey.parseValue(this, v))
+                            .orElse(null);
 
-    @SuppressWarnings("unchecked")
-    private static <T> AuditLogChange<T> cast(AuditLogChange<?> strategy) {
-        return (AuditLogChange<T>) strategy;
+                    T newValue = changeData.oldValue().toOptional()
+                            .map(v -> changeKey.parseValue(this, v))
+                            .orElse(null);
+
+                    return new AuditLogChange<>(oldValue, newValue);
+                });
     }
 
     public <T> Optional<T> getOption(OptionKey<T> optionKey) {
         return data.options().toOptional()
                 .map(AuditLogUtil::createOptionMap)
-                .map(map -> map.get(optionKey.getField()))
-                .map(AuditLogEntry::cast);
+                .map(map -> optionKey.parseValue(map.get(optionKey.getField())));
     }
 
-    @SuppressWarnings("unchecked")
-    private static <T> T cast(Object value) {
-        return (T) value;
+    public AuditLogPart getParent() {
+        return auditLogPart;
     }
 
     @Override
