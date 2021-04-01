@@ -55,6 +55,24 @@ public class RestMessage {
         return new RestMessage(restClient, channelId, id);
     }
 
+    /**
+     * Returns the ID of the channel this message belongs to.
+     *
+     * @return The ID of the channel this message belongs to
+     */
+    public long getChannelId() {
+        return channelId;
+    }
+
+    /**
+     * Returns the ID of this message.
+     *
+     * @return The ID of this message
+     */
+    public long getId() {
+        return id;
+    }
+
     public RestChannel channel() {
         return RestChannel.create(restClient, channelId);
     }

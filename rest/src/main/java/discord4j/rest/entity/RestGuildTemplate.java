@@ -45,6 +45,15 @@ public class RestGuildTemplate {
     }
 
     /**
+     * Gets the code of this template.
+     *
+     * @return The code of this template
+     */
+    public String getCode() {
+        return code;
+    }
+
+    /**
      * Retrieve this template's data upon subscription.
      *
      * @return a template object

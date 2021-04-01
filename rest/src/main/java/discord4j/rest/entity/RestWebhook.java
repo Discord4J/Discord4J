@@ -54,6 +54,15 @@ public class RestWebhook {
     }
 
     /**
+     * Returns the ID of this webhook.
+     *
+     * @return The ID of this webhook
+     */
+    public long getId() {
+        return id;
+    }
+
+    /**
      * Retrieve this webhook's data upon subscription.
      *
      * @return a {@link Mono} where, upon successful completion, emits the {@link WebhookData} belonging to this entity.

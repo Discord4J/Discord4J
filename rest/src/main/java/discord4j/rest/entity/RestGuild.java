@@ -62,6 +62,15 @@ public class RestGuild {
     }
 
     /**
+     * Returns the ID of this guild.
+     *
+     * @return The ID of this guild
+     */
+    public long getId() {
+        return id;
+    }
+
+    /**
      * Retrieve this guild's data upon subscription.
      *
      * @param withCounts when true, will return approximate member and presence counts for the guild too.
