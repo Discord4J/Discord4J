@@ -55,6 +55,24 @@ public class RestMessage {
         return new RestMessage(restClient, channelId, id);
     }
 
+    /**
+     * Returns the ID of the channel this message belongs to.
+     *
+     * @return The ID of the channel this message belongs to
+     */
+    public Snowflake getChannelId() {
+        return Snowflake.of(channelId);
+    }
+
+    /**
+     * Returns the ID of this message.
+     *
+     * @return The ID of this message
+     */
+    public Snowflake getId() {
+        return Snowflake.of(id);
+    }
+
     public RestChannel channel() {
         return RestChannel.create(restClient, channelId);
     }

@@ -54,6 +54,15 @@ public class RestUser {
     }
 
     /**
+     * Returns the ID of this user.
+     *
+     * @return The ID of this user
+     */
+    public Snowflake getId() {
+        return Snowflake.of(id);
+    }
+
+    /**
      * Retrieve this user's data upon subscription.
      *
      * @return a {@link Mono} where, upon successful completion, emits the {@link UserData} belonging to this user.
