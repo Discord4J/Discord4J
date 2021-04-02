@@ -58,8 +58,8 @@ public class RestWebhook {
      *
      * @return The ID of this webhook
      */
-    public long getId() {
-        return id;
+    public Snowflake getId() {
+        return Snowflake.of(id);
     }
 
     /**

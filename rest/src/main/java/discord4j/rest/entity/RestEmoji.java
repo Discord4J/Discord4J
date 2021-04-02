@@ -61,8 +61,8 @@ public class RestEmoji {
      *
      * @return The ID of the the guild this emoji belongs to.
      */
-    public long getGuildId() {
-        return guildId;
+    public Snowflake getGuildId() {
+        return Snowflake.of(guildId);
     }
 
     /**
@@ -70,8 +70,8 @@ public class RestEmoji {
      *
      * @return The ID of this emoji
      */
-    public long getId() {
-        return id;
+    public Snowflake getId() {
+        return Snowflake.of(id);
     }
 
     /**

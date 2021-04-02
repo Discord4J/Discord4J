@@ -68,8 +68,8 @@ public class RestChannel {
      *
      * @return The ID of this channel
      */
-    public long getId() {
-        return id;
+    public Snowflake getId() {
+        return Snowflake.of(id);
     }
 
     /**

@@ -58,8 +58,8 @@ public class RestUser {
      *
      * @return The ID of this user
      */
-    public long getId() {
-        return id;
+    public Snowflake getId() {
+        return Snowflake.of(id);
     }
 
     /**

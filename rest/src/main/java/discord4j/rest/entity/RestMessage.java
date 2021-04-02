@@ -60,8 +60,8 @@ public class RestMessage {
      *
      * @return The ID of the channel this message belongs to
      */
-    public long getChannelId() {
-        return channelId;
+    public Snowflake getChannelId() {
+        return Snowflake.of(channelId);
     }
 
     /**
@@ -69,8 +69,8 @@ public class RestMessage {
      *
      * @return The ID of this message
      */
-    public long getId() {
-        return id;
+    public Snowflake getId() {
+        return Snowflake.of(id);
     }
 
     public RestChannel channel() {

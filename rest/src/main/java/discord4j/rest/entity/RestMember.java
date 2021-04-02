@@ -58,8 +58,8 @@ public class RestMember {
      *
      * @return The ID of the the guild this member belongs to.
      */
-    public long getGuildId() {
-        return guildId;
+    public Snowflake getGuildId() {
+        return Snowflake.of(guildId);
     }
 
     /**
@@ -67,8 +67,8 @@ public class RestMember {
      *
      * @return The ID of this member
      */
-    public long getId() {
-        return id;
+    public Snowflake getId() {
+        return Snowflake.of(id);
     }
 
     public RestGuild guild() {

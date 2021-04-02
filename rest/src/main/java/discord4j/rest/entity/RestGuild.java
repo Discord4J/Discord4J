@@ -66,8 +66,8 @@ public class RestGuild {
      *
      * @return The ID of this guild
      */
-    public long getId() {
-        return id;
+    public Snowflake getId() {
+        return Snowflake.of(id);
     }
 
     /**
