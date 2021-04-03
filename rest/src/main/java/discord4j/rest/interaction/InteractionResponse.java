@@ -83,4 +83,13 @@ public interface InteractionResponse {
      * it is emitted through the {@code Mono}.
      */
     Mono<MessageData> editFollowupMessage(long messageId, WebhookMessageEditRequest request, boolean wait);
+
+    /**
+     * Delete a followup message created under this interaction.
+     *
+     * @param messageId the message ID to be deleted. You can convert IDs using {@link Snowflake} methods.
+     * @return a {@link Mono} where, upon successful message deletion, returns a completion signal. If an error is
+     * received, it is emitted through the {@code Mono}.
+     */
+    Mono<Void> deleteFollowupMessage(long messageId);
 }

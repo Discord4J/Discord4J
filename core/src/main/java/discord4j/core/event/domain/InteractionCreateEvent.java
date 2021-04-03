@@ -88,8 +88,7 @@ public class InteractionCreateEvent extends Event {
         String token = interaction.getToken();
 
         return getClient().rest().getInteractionService()
-                .createInteractionResponse(id, token, responseData)
-                .then();
+                .createInteractionResponse(id, token, responseData);
     }
 
     /**
@@ -212,6 +211,12 @@ public class InteractionCreateEvent extends Event {
         public Mono<MessageData> editFollowupMessage(long messageId, WebhookMessageEditRequest request, boolean wait) {
             return applicationId.flatMap(id -> restClient.getWebhookService()
                     .modifyWebhookMessage(id, interactionData.token(), String.valueOf(messageId), request));
+        }
+
+        @Override
+        public Mono<Void> deleteFollowupMessage(long messageId) {
+            return applicationId.flatMap(id -> restClient.getWebhookService()
+                    .deleteWebhookMessage(id, interactionData.token(), String.valueOf(messageId)));
         }
     }
 }
