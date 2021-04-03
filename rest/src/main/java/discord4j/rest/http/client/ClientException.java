@@ -25,7 +25,6 @@ import io.netty.handler.codec.http.HttpResponseStatus;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
 import reactor.netty.http.client.HttpClientResponse;
-import reactor.retry.Backoff;
 import reactor.retry.RetryContext;
 import reactor.util.annotation.Nullable;
 import reactor.util.retry.Retry;
@@ -71,8 +70,7 @@ import java.util.function.Predicate;
 public class ClientException extends RuntimeException {
 
     private final ClientRequest request;
-    private final HttpResponseStatus status;
-    private final HttpHeaders headers;
+    private final HttpClientResponse response;
     private final ErrorResponse errorResponse;
 
     /**
@@ -86,8 +84,7 @@ public class ClientException extends RuntimeException {
         super(request.getMethod().toString() + " " + request.getUrl() + " returned " + response.status().toString() +
                 (errorResponse != null ? " with response " + errorResponse.getFields() : ""));
         this.request = request;
-        this.status = response.status();
-        this.headers = response.responseHeaders();
+        this.response = response;
         this.errorResponse = errorResponse;
     }
 
@@ -101,13 +98,22 @@ public class ClientException extends RuntimeException {
     }
 
     /**
+     * Return the {@link HttpClientResponse} encapsulating a low-level Discord API response.
+     *
+     * @return the low-level response that caused this exception
+     */
+    public HttpClientResponse getResponse() {
+        return response;
+    }
+
+    /**
      * Return the {@link HttpResponseStatus} with information related to the HTTP error. The actual status code can be
      * obtained through {@link HttpResponseStatus#code()}.
      *
      * @return the HTTP error associated to this exception
      */
     public HttpResponseStatus getStatus() {
-        return status;
+        return getResponse().status();
     }
 
     /**
@@ -117,7 +123,7 @@ public class ClientException extends RuntimeException {
      * @return the HTTP response headers
      */
     public HttpHeaders getHeaders() {
-        return headers;
+        return getResponse().responseHeaders();
     }
 
     /**
@@ -218,8 +224,6 @@ public class ClientException extends RuntimeException {
      * @return a transformation function that retries error sequences
      */
     public static <T> Function<Mono<T>, Publisher<T>> retryOnceOnStatus(int code) {
-        return mono -> mono.retryWhen(Retry.withThrowable(reactor.retry.Retry.onlyIf(isRetryContextStatusCode(code))
-                .backoff(Backoff.fixed(Duration.ofSeconds(1)))
-                .retryOnce()));
+        return mono -> mono.retryWhen(Retry.backoff(1, Duration.ofSeconds(1)).filter(isStatusCode(code)));
     }
 }

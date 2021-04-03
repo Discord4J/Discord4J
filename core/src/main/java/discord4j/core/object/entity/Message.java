@@ -60,6 +60,12 @@ public final class Message implements Entity {
     public static final int MAX_CONTENT_LENGTH = 2000;
 
     /**
+     * The maximum amount of characters that can be present when combining all title, description, field.name,
+     * field.value, footer.text, and author.name fields of all embeds for this message.
+     */
+    public static final int MAX_TOTAL_EMBEDS_CHARACTER_LENGTH = 6000;
+
+    /**
      * The gateway associated to this object.
      */
     private final GatewayDiscordClient gateway;
@@ -239,51 +245,44 @@ public final class Message implements Entity {
     }
 
     /**
-     * Gets the IDs of the users specifically mentioned in this message, with the same order as in the message.
+     * Gets the IDs of the users specifically mentioned in this message, without duplication and with the same order
+     * as in the message.
      *
-     * @return The IDs of the users specifically mentioned in this message, with the same order as in the message.
+     * @return The IDs of the users specifically mentioned in this message, without duplication and with the same order
+     * as in the message.
      */
-    public Set<Snowflake> getUserMentionIds() {
-        // TODO FIXME we throw away member data here
+    public List<Snowflake> getUserMentionIds() {
         return data.mentions().stream()
                 .map(UserData::id)
                 .map(Snowflake::of)
-                .collect(Collectors.toCollection(LinkedHashSet::new));
+                .collect(Collectors.toList());
     }
 
     /**
-     * Requests to retrieve the users specifically mentioned in this message.
+     * Gets the users specifically mentioned in this message, without duplication and with the same order
+     * as in the message.
      *
-     * @return A {@link Flux} that continually emits {@link User users} specifically mentioned in this message. If an
-     * error is received, it is emitted through the {@code Flux}.
-     * @deprecated this method will have its return type changed to List in v3.2.0
+     * @return The users specifically mentioned in this message, without duplication and with the same order
+     * as in the message.
      */
-    public Flux<User> getUserMentions() {
-        return Flux.fromIterable(getUserMentionIds()).flatMap(gateway::getUserById);
+    public List<User> getUserMentions() {
+        // TODO FIXME we throw away member data here
+        return data.mentions().stream()
+                .map(data -> new User(gateway, data))
+                .collect(Collectors.toList());
     }
 
     /**
-     * Requests to retrieve the users specifically mentioned in this message, using the given retrieval strategy.
+     * Gets the IDs of the roles specifically mentioned in this message, without duplication and with the same order
+     * as in the message.
      *
-     * @param retrievalStrategy the strategy to use to get the users
-     * @return A {@link Flux} that continually emits {@link User users} specifically mentioned in this message. If an
-     * error is received, it is emitted through the {@code Flux}.
-     * @deprecated for removal in v3.2.0, as entity retrieval is not used for user mentions anymore
+     * @return The IDs of the roles specifically mentioned in this message, without duplication and with the same order
+     * as in the message.
      */
-    public Flux<User> getUserMentions(EntityRetrievalStrategy retrievalStrategy) {
-        return Flux.fromIterable(getUserMentionIds())
-                .flatMap(id -> gateway.withRetrievalStrategy(retrievalStrategy).getUserById(id));
-    }
-
-    /**
-     * Gets the IDs of the roles specifically mentioned in this message, with the same order as in the message.
-     *
-     * @return The IDs of the roles specifically mentioned in this message, with the same order as in the message.
-     */
-    public Set<Snowflake> getRoleMentionIds() {
+    public List<Snowflake> getRoleMentionIds() {
         return data.mentionRoles().stream()
                 .map(Snowflake::of)
-                .collect(Collectors.toCollection(LinkedHashSet::new));
+                .collect(Collectors.toList());
     }
 
     /**
@@ -341,12 +340,12 @@ public final class Message implements Entity {
      *
      * @return The reactions to this message, the order is the same as in the message.
      */
-    public Set<Reaction> getReactions() {
+    public List<Reaction> getReactions() {
         return data.reactions().toOptional()
                 .map(reactions -> reactions.stream()
                         .map(data -> new Reaction(gateway, data))
-                        .collect(Collectors.toCollection(LinkedHashSet::new)))
-                .orElse(new LinkedHashSet<>());
+                        .collect(Collectors.toList()))
+                .orElse(Collections.emptyList());
 
     }
 
@@ -456,10 +455,10 @@ public final class Message implements Entity {
      */
     public List<Sticker> getStickers() {
         return data.stickers().toOptional()
-            .orElse(Collections.emptyList())
-            .stream()
-            .map(data -> new Sticker(gateway, data))
-            .collect(Collectors.toList());
+                .orElse(Collections.emptyList())
+                .stream()
+                .map(data -> new Sticker(gateway, data))
+                .collect(Collectors.toList());
     }
 
     /**
@@ -469,7 +468,7 @@ public final class Message implements Entity {
      */
     public Optional<Message> getReferencedMessage() {
         return Possible.flatOpt(data.referencedMessage())
-            .map(data -> new Message(gateway, data));
+                .map(data -> new Message(gateway, data));
     }
 
     /**
@@ -649,19 +648,13 @@ public final class Message implements Entity {
      */
     public enum Flag {
 
-        /**
-         * This message has been published to subscribed channels (via Channel Following).
-         */
+        /** This message has been published to subscribed channels (via Channel Following). */
         CROSSPOSTED(0),
 
-        /**
-         * This message originated from a message in another channel (via Channel Following).
-         */
+        /** This message originated from a message in another channel (via Channel Following). */
         IS_CROSSPOST(1),
 
-        /**
-         * Do not include any embeds when serializing this message.
-         */
+        /** Do not include any embeds when serializing this message. */
         SUPPRESS_EMBEDS(2),
 
         /** The source message for this crosspost has been deleted (via Channel Following). */
@@ -671,7 +664,10 @@ public final class Message implements Entity {
         URGENT(4),
 
         /** This message is an ephemeral interaction response. */
-        EPHEMERAL(6);
+        EPHEMERAL(6),
+
+        /** This message is an Interaction Response and the bot is "thinking". */
+        LOADING(7);
 
         /**
          * The underlying value as represented by Discord.
@@ -811,7 +807,7 @@ public final class Message implements Entity {
         GUILD_DISCOVERY_REQUALIFIED(15),
 
         /** A message created with a reply */
-        REPLY(0);
+        REPLY(19);
 
         /**
          * The underlying value as represented by Discord.

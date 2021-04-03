@@ -20,8 +20,9 @@ package discord4j.rest.interaction;
 import discord4j.common.annotations.Experimental;
 import discord4j.common.util.Snowflake;
 import discord4j.discordjson.json.MessageData;
+import discord4j.discordjson.json.WebhookExecuteRequest;
 import discord4j.discordjson.json.WebhookMessageEditRequest;
-import discord4j.rest.util.WebhookMultipartRequest;
+import discord4j.rest.util.MultipartRequest;
 import reactor.core.publisher.Mono;
 
 /**
@@ -68,7 +69,7 @@ public interface InteractionResponse {
      * @return a {@link Mono} where, upon successful completion, emits the sent message. If an error is received,
      * it is emitted through the {@code Mono}.
      */
-    Mono<MessageData> createFollowupMessage(WebhookMultipartRequest request, boolean wait);
+    Mono<MessageData> createFollowupMessage(MultipartRequest<WebhookExecuteRequest> request, boolean wait);
 
     /**
      * Modify the given message by ID using the provided request. This uses a webhook tied to the interaction ID and

@@ -18,36 +18,57 @@
 package discord4j.rest.util;
 
 import discord4j.discordjson.json.MessageCreateRequest;
+import discord4j.discordjson.json.MessageSendRequestBase;
 import reactor.util.annotation.Nullable;
 import reactor.util.function.Tuple2;
 import reactor.util.function.Tuples;
 
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class MultipartRequest {
+public class MultipartRequest<T extends MessageSendRequestBase> {
 
-    private final MessageCreateRequest createRequest;
+    private final T jsonPayload;
     private final List<Tuple2<String, InputStream>> files;
 
-    public MultipartRequest(MessageCreateRequest createRequest) {
-        this(createRequest, Collections.emptyList());
+    private MultipartRequest(T jsonPayload, List<Tuple2<String, InputStream>> files) {
+        this.jsonPayload = jsonPayload;
+        this.files = Collections.unmodifiableList(files);
     }
 
-    public MultipartRequest(MessageCreateRequest createRequest, String fileName, InputStream file) {
-        this(createRequest, Collections.singletonList(Tuples.of(fileName, file)));
+    public static <T extends MessageSendRequestBase> MultipartRequest<T> ofRequest(T body) {
+        return new MultipartRequest<>(body, Collections.emptyList());
     }
 
-    public MultipartRequest(MessageCreateRequest createRequest, List<Tuple2<String, InputStream>> files) {
-        this.createRequest = createRequest;
-        this.files = files;
+    public static <T extends MessageSendRequestBase> MultipartRequest<T> ofRequestAndFiles(T body, List<Tuple2<String, InputStream>> files) {
+        return new MultipartRequest<>(body, files);
+    }
+
+    public MultipartRequest<T> addFile(String fileName, InputStream file) {
+        List<Tuple2<String, InputStream>> list = new ArrayList<>(this.files);
+        list.add(Tuples.of(fileName, file));
+        return new MultipartRequest<>(this.jsonPayload, Collections.unmodifiableList(list));
+    }
+
+    public MultipartRequest<T> addFiles(List<Tuple2<String, InputStream>> filesList) {
+        List<Tuple2<String, InputStream>> list = new ArrayList<>(this.files);
+        list.addAll(filesList);
+        return new MultipartRequest<>(this.jsonPayload, Collections.unmodifiableList(list));
+    }
+
+    /**
+     * @deprecated Use {@link #getJsonPayload()} instead.
+     */
+    @Deprecated
+    @Nullable
+    public MessageCreateRequest getCreateRequest() {
+        return (MessageCreateRequest) jsonPayload;
     }
 
     @Nullable
-    public MessageCreateRequest getCreateRequest() {
-        return createRequest;
-    }
+    public T getJsonPayload() { return jsonPayload; }
 
     public List<Tuple2<String, InputStream>> getFiles() {
         return files;

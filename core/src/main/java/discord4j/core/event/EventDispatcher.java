@@ -123,7 +123,7 @@ public interface EventDispatcher {
     default <E extends Event, T> Flux<T> on(Class<E> eventClass, Function<E, Publisher<T>> mapper) {
         return on(eventClass)
                 .flatMap(event -> Flux.defer(() -> mapper.apply(event))
-                        .subscriberContext(ctx -> ctx.put(LogUtil.KEY_SHARD_ID, event.getShardInfo().getIndex()))
+                        .contextWrite(ctx -> ctx.put(LogUtil.KEY_SHARD_ID, event.getShardInfo().getIndex()))
                         .onErrorResume(t -> {
                             log.warn(format(Context.of(LogUtil.KEY_SHARD_ID, event.getShardInfo().getIndex()),
                                     "Error while handling {}"), eventClass.getSimpleName(), t);
@@ -170,7 +170,7 @@ public interface EventDispatcher {
     default Flux<Event> on(ReactiveEventAdapter adapter) {
         return on(Event.class)
                 .flatMap(event -> Flux.defer(() -> adapter.hookOnEvent(event))
-                        .subscriberContext(ctx -> ctx.put(LogUtil.KEY_SHARD_ID, event.getShardInfo().getIndex()))
+                        .contextWrite(ctx -> ctx.put(LogUtil.KEY_SHARD_ID, event.getShardInfo().getIndex()))
                         .onErrorResume(t -> {
                             log.warn(format(Context.of(LogUtil.KEY_SHARD_ID, event.getShardInfo().getIndex()),
                                     "Error while handling {}"), event.getClass().getSimpleName(), t);
@@ -222,12 +222,11 @@ public interface EventDispatcher {
      * before the first subscription are only forwarded to that subscriber.
      *
      * @param bufferSize the number of events to keep in the backlog
-     * @return an {@link EventDispatcher} keeping the earliest events backed by an {@link EmitterProcessor}
+     * @return an {@link EventDispatcher} keeping the earliest events up to {@code bufferSize}
      */
     static EventDispatcher withEarliestEvents(int bufferSize) {
         return builder()
-                .eventProcessor(EmitterProcessor.create(bufferSize, false))
-                .overflowStrategy(FluxSink.OverflowStrategy.DROP)
+                .eventSink(spec -> spec.multicast().onBackpressureBuffer(bufferSize, false))
                 .build();
     }
 
@@ -238,6 +237,8 @@ public interface EventDispatcher {
      *
      * @param bufferSize the number of events to keep in the backlog
      * @return an {@link EventDispatcher} keeping the latest events backed by an {@link EmitterProcessor}
+     * @deprecated due to Processor API being deprecated, we recommend moving to {@link #replayingWithSize(int)} for a
+     * dispatcher that is able to retain a given number of latest events
      */
     static EventDispatcher withLatestEvents(int bufferSize) {
         return builder()
@@ -270,33 +271,38 @@ public interface EventDispatcher {
      * elements as the backlog contains.
      *
      * @param maxAge the maximum age of the contained items
-     * @return an {@link EventDispatcher} backed by a {@link ReplayProcessor} with a time-bounded backlog
-     * @see ReplayProcessor#createTimeout(Duration)
+     * @return an {@link EventDispatcher} that will replay elements up to {@code maxAge} duration to late subscribers
      */
     static EventDispatcher replayingWithTimeout(Duration maxAge) {
-        return new DefaultEventDispatcher(
-                ReplayProcessor.createTimeout(maxAge),
-                FluxSink.OverflowStrategy.IGNORE,
-                DEFAULT_EVENT_SCHEDULER.get());
+        return builder()
+                .eventSink(spec -> spec.replay().limit(maxAge))
+                .build();
     }
 
     /**
-     * Create an {@link EventDispatcher} that will replays up to {@code historySize} elements to late subscribers.
+     * Create an {@link EventDispatcher} that will replay up to {@code historySize} elements to late subscribers.
      * Be aware that using this type of dispatcher with operators such as {@link Flux#retry()} or
      * {@link Flux#repeat()} that re-subscribe to the dispatcher will observe the same elements as the backlog contains.
      *
      * @param historySize the backlog size or maximum items retained for replay
-     * @return an {@link EventDispatcher} backed by a {@link ReplayProcessor} with a customized backlog size
-     * @see ReplayProcessor#create(int)
+     * @return an {@link EventDispatcher} that will replay up to {@code historySize} elements to late subscribers
      */
     static EventDispatcher replayingWithSize(int historySize) {
-        return new DefaultEventDispatcher(
-                ReplayProcessor.create(historySize),
-                FluxSink.OverflowStrategy.IGNORE,
-                DEFAULT_EVENT_SCHEDULER.get());
+        return builder()
+                .eventSink(spec -> spec.replay().limit(historySize))
+                .build();
     }
 
     interface Builder {
+
+        /**
+         * Set the underlying {@link Sinks.Many} the dispatcher will use to queue and distribute events. Defaults
+         * to using a multicast buffering sink.
+         *
+         * @param eventSinkFactory the custom sink factory for events
+         * @return this builder
+         */
+        SinksEventDispatcher.Builder eventSink(Function<Sinks.ManySpec, Sinks.Many<Event>> eventSinkFactory);
 
         /**
          * Set the underlying {@link FluxProcessor} the dispatcher will use to queue and distribute events. Defaults
@@ -309,7 +315,10 @@ public interface EventDispatcher {
          *
          * @param eventProcessor the custom processor for events
          * @return this builder
+         * @deprecated due to the Processor API being deprecated, we recommend using {@link #eventSink(Function)}
+         * moving forward
          */
+        @Deprecated
         DefaultEventDispatcher.Builder eventProcessor(FluxProcessor<Event, Event> eventProcessor);
 
         /**
@@ -323,7 +332,10 @@ public interface EventDispatcher {
          *
          * @param overflowStrategy the custom backpressure strategy
          * @return this builder
+         * @deprecated due to the Processor API being deprecated, we recommend using {@link #eventSink(Function)}
+         * moving forward
          */
+        @Deprecated
         DefaultEventDispatcher.Builder overflowStrategy(FluxSink.OverflowStrategy overflowStrategy);
 
         /**

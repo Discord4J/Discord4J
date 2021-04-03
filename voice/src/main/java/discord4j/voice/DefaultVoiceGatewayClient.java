@@ -27,6 +27,7 @@ import discord4j.common.close.CloseStatus;
 import discord4j.common.close.DisconnectBehavior;
 import discord4j.common.retry.ReconnectContext;
 import discord4j.common.retry.ReconnectOptions;
+import discord4j.common.sinks.EmissionStrategy;
 import discord4j.common.util.Snowflake;
 import discord4j.voice.json.*;
 import discord4j.voice.retry.VoiceGatewayException;
@@ -44,7 +45,9 @@ import reactor.netty.ConnectionObserver;
 import reactor.netty.http.client.WebsocketClientSpec;
 import reactor.util.Logger;
 import reactor.util.Loggers;
+import reactor.util.concurrent.Queues;
 import reactor.util.context.Context;
+import reactor.util.context.ContextView;
 import reactor.util.retry.Retry;
 import reactor.util.retry.RetrySpec;
 
@@ -57,6 +60,7 @@ import java.util.function.Function;
 
 import static discord4j.common.LogUtil.format;
 import static io.netty.handler.codec.http.HttpHeaderNames.USER_AGENT;
+import static reactor.core.publisher.Sinks.EmitFailureHandler.FAIL_FAST;
 
 /**
  * A default implementation for client that is able to connect to Discord Voice Gateway and establish a
@@ -69,14 +73,6 @@ public class DefaultVoiceGatewayClient {
     private static final Logger log = Loggers.getLogger(DefaultVoiceGatewayClient.class);
     private static final Logger senderLog = Loggers.getLogger("discord4j.voice.protocol.sender");
     private static final Logger receiverLog = Loggers.getLogger("discord4j.voice.protocol.receiver");
-
-    // reactive pipelines
-    private final EmitterProcessor<ByteBuf> receiver = EmitterProcessor.create(false);
-    private final EmitterProcessor<VoiceGatewayPayload<?>> outbound = EmitterProcessor.create(false);
-    private final EmitterProcessor<VoiceGatewayEvent> events = EmitterProcessor.create(false);
-    private final FluxSink<ByteBuf> receiverSink;
-    private final FluxSink<VoiceGatewayPayload<?>> outboundSink;
-    private final FluxSink<VoiceGatewayEvent> eventSink;
 
     private final Snowflake guildId;
     private final Snowflake selfId;
@@ -97,17 +93,35 @@ public class DefaultVoiceGatewayClient {
 
     private final VoiceSocket voiceSocket;
     private final ResettableInterval heartbeat;
-    private final Disposable.Swap cleanup = Disposables.swap();
+    private final Disposable.Swap cleanup;
+    private final EmissionStrategy emissionStrategy;
 
-    private final ReplayProcessor<VoiceConnection.State> state;
-    private final FluxSink<VoiceConnection.State> stateChanges;
+    /**
+     * Payloads coming from the websocket.
+     */
+    private final Sinks.Many<ByteBuf> receiver;
+
+    /**
+     * Outbound voice gateway events.
+     */
+    private final Sinks.Many<VoiceGatewayPayload<?>> outbound;
+
+    /**
+     * Inbound voice gateway events from {@code receiver} that are pushed to consumers.
+     */
+    private final Sinks.Many<VoiceGatewayEvent> events;
+
+    /**
+     * Internal connection state changes are reflected as emissions to this sink.
+     */
+    private final Sinks.Many<VoiceConnection.State> state;
 
     private final AtomicReference<VoiceServerOptions> serverOptions = new AtomicReference<>();
     private final AtomicReference<String> session = new AtomicReference<>();
 
     private volatile int ssrc;
-    private volatile MonoProcessor<CloseStatus> disconnectNotifier;
-    private volatile Context currentContext;
+    private volatile Sinks.One<CloseStatus> disconnectNotifier;
+    private volatile ContextView currentContext;
     private volatile VoiceWebsocketHandler sessionHandler;
 
     public DefaultVoiceGatewayClient(VoiceGatewayOptions options) {
@@ -139,19 +153,23 @@ public class DefaultVoiceGatewayClient {
 
         this.voiceSocket = new VoiceSocket(reactorResources.getUdpClient());
         this.heartbeat = new ResettableInterval(reactorResources.getTimerTaskScheduler());
+        this.cleanup = Disposables.swap();
+        this.emissionStrategy = EmissionStrategy.timeoutDrop(Duration.ofSeconds(5));
 
-        this.state = ReplayProcessor.cacheLastOrDefault(VoiceConnection.State.CONNECTING);
-        this.stateChanges = state.sink(FluxSink.OverflowStrategy.LATEST);
+        this.receiver = newEmitterSink();
+        this.outbound = newEmitterSink();
+        this.events = newEmitterSink();
+        this.state = Sinks.many().replay().latestOrDefault(VoiceConnection.State.CONNECTING);
+    }
 
-        this.receiverSink = receiver.sink(FluxSink.OverflowStrategy.BUFFER);
-        this.outboundSink = outbound.sink(FluxSink.OverflowStrategy.ERROR);
-        this.eventSink = events.sink(FluxSink.OverflowStrategy.LATEST);
+    private static <T> Sinks.Many<T> newEmitterSink() {
+        return Sinks.many().multicast().onBackpressureBuffer(Queues.SMALL_BUFFER_SIZE, false);
     }
 
     public Mono<VoiceConnection> start(VoiceServerOptions voiceServerOptions, String session) {
         return Mono.create(sink -> sink.onRequest(d -> {
             Disposable connect = connect(voiceServerOptions, session, sink)
-                    .subscriberContext(sink.currentContext())
+                    .contextWrite(sink.currentContext())
                     .subscribe(null,
                             t -> log.debug(format(sink.currentContext(), "Voice gateway error: {}"), t.toString()),
                             () -> log.debug(format(sink.currentContext(), "Voice gateway completed")));
@@ -161,35 +179,38 @@ public class DefaultVoiceGatewayClient {
 
     private Mono<Void> connect(VoiceServerOptions vso, String sessionId,
                                MonoSink<VoiceConnection> voiceConnectionSink) {
-        return Mono.deferWithContext(
+        return Mono.deferContextual(
                 context -> {
                     serverOptions.compareAndSet(null, vso);
                     session.compareAndSet(null, sessionId);
-                    disconnectNotifier = MonoProcessor.create();
+                    disconnectNotifier = Sinks.one();
                     currentContext = context;
 
-                    Flux<ByteBuf> outFlux = outbound.flatMap(payloadWriter)
+                    Flux<ByteBuf> outFlux = outbound.asFlux()
+                            .flatMap(payloadWriter)
                             .doOnNext(buf -> logPayload(senderLog, context, buf));
 
-                    sessionHandler = new VoiceWebsocketHandler(receiverSink, outFlux, context);
+                    sessionHandler = new VoiceWebsocketHandler(receiver, outFlux, context);
 
-                    Mono<?> onOpen = state.next()
+                    Mono<?> onOpen = state.asFlux()
+                            .next()
                             .doOnNext(s -> {
                                 if (s == VoiceConnection.State.RESUMING) {
                                     log.info(format(context, "Attempting to resume"));
-                                    outboundSink.next(new Resume(guildId.asString(), session.get(),
+                                    emissionStrategy.emitNext(outbound, new Resume(guildId.asString(), session.get(),
                                             serverOptions.get().getToken()));
                                 } else {
-                                    stateChanges.next(VoiceConnection.State.CONNECTING);
+                                    state.emitNext(VoiceConnection.State.CONNECTING, FAIL_FAST);
                                     log.info(format(context, "Identifying"));
-                                    outboundSink.next(new Identify(guildId.asString(), selfId.asString(), session.get(),
-                                            serverOptions.get().getToken()));
+                                    emissionStrategy.emitNext(outbound, new Identify(guildId.asString(),
+                                            selfId.asString(), session.get(), serverOptions.get().getToken()));
                                 }
                             });
 
                     Disposable.Composite innerCleanup = Disposables.composite();
 
-                    Mono<Void> receiverFuture = receiver.doOnNext(buf -> logPayload(receiverLog, context, buf))
+                    Mono<Void> receiverFuture = receiver.asFlux()
+                            .doOnNext(buf -> logPayload(receiverLog, context, buf))
                             .flatMap(payloadReader)
                             .doOnNext(payload -> {
                                 if (payload instanceof Hello) {
@@ -206,16 +227,16 @@ public class DefaultVoiceGatewayClient {
                                             .zipWith(voiceSocket.performIpDiscovery(ready.getData().getSsrc()))
                                             .timeout(ipDiscoveryTimeout)
                                             .retryWhen(ipDiscoveryRetrySpec)
-                                            .subscriberContext(context)
+                                            .contextWrite(context)
                                             .onErrorMap(t -> new VoiceGatewayException(context,
                                                     "UDP socket setup error", t))
                                             .subscribe(TupleUtils.consumer((connection, address) -> {
                                                         innerCleanup.add(connection);
                                                         String hostName = address.getHostName();
                                                         int port = address.getPort();
-                                                        outboundSink.next(new SelectProtocol(VoiceSocket.PROTOCOL,
-                                                                hostName,
-                                                                port, VoiceSocket.ENCRYPTION_MODE));
+                                                        emissionStrategy.emitNext(outbound,
+                                                                new SelectProtocol(VoiceSocket.PROTOCOL, hostName,
+                                                                        port, VoiceSocket.ENCRYPTION_MODE));
                                                     }),
                                                     t -> {
                                                         voiceConnectionSink.error(t);
@@ -224,14 +245,14 @@ public class DefaultVoiceGatewayClient {
                                                     () -> log.debug(format(context, "Voice socket setup complete"))));
                                 } else if (payload instanceof SessionDescription) {
                                     log.info(format(context, "Receiving events"));
-                                    stateChanges.next(VoiceConnection.State.CONNECTED);
+                                    state.emitNext(VoiceConnection.State.CONNECTED, FAIL_FAST);
                                     reconnectContext.reset();
                                     SessionDescription sessionDescription = (SessionDescription) payload;
                                     byte[] secretKey = sessionDescription.getData().getSecretKey();
                                     TweetNaclFast.SecretBox boxer = new TweetNaclFast.SecretBox(secretKey);
                                     PacketTransformer transformer = new PacketTransformer(ssrc, boxer);
-                                    Consumer<Boolean> speakingSender = speaking ->
-                                            outboundSink.next(new SentSpeaking(speaking, 0, ssrc));
+                                    Consumer<Boolean> speakingSender = speaking -> emissionStrategy.emitNext(
+                                            outbound, new SentSpeaking(speaking, 0, ssrc));
                                     innerCleanup.add(() -> log.debug(format(context, "Disposing voice tasks")));
                                     innerCleanup.add(sendTaskFactory.create(reactorResources.getSendTaskScheduler(),
                                             speakingSender, voiceSocket::send, audioProvider, transformer));
@@ -251,16 +272,16 @@ public class DefaultVoiceGatewayClient {
                                     voiceConnectionSink.success(acquireConnection());
                                 } else if (payload instanceof Resumed) {
                                     log.info(format(context, "Resumed"));
-                                    stateChanges.next(VoiceConnection.State.CONNECTED);
+                                    state.emitNext(VoiceConnection.State.CONNECTED, FAIL_FAST);
                                     reconnectContext.reset();
                                 }
-                                eventSink.next((VoiceGatewayEvent) payload);
+                                emissionStrategy.emitNext(events, (VoiceGatewayEvent) payload);
                             })
                             .then();
 
                     Mono<Void> heartbeatHandler = heartbeat.ticks()
                             .map(Heartbeat::new)
-                            .doOnNext(outboundSink::next)
+                            .doOnNext(tick -> emissionStrategy.emitNext(outbound, tick))
                             .then();
 
                     Mono<Void> httpFuture = reactorResources.getHttpClient()
@@ -271,7 +292,7 @@ public class DefaultVoiceGatewayClient {
                                     .build())
                             .uri(serverOptions.get().getEndpoint() + "?v=4")
                             .handle((in, out) -> onOpen.then(sessionHandler.handle(in, out)))
-                            .subscriberContext(LogUtil.clearContext())
+                            .contextWrite(LogUtil.clearContext())
                             .flatMap(t2 -> handleClose(t2.getT1(), t2.getT2()))
                             .then();
 
@@ -281,9 +302,9 @@ public class DefaultVoiceGatewayClient {
                             .doOnCancel(() -> sessionHandler.close())
                             .then();
                 })
-                .subscriberContext(ctx -> ctx.put(LogUtil.KEY_GUILD_ID, guildId.asString()))
+                .contextWrite(ctx -> ctx.put(LogUtil.KEY_GUILD_ID, guildId.asString()))
                 .retryWhen(retryFactory())
-                .then(Mono.defer(() -> disconnectNotifier.then()))
+                .then(Mono.defer(() -> disconnectNotifier.asMono().then()))
                 .doOnSubscribe(s -> {
                     if (disconnectNotifier != null) {
                         throw new IllegalStateException("connect can only be subscribed once");
@@ -291,7 +312,7 @@ public class DefaultVoiceGatewayClient {
                 });
     }
 
-    private ConnectionObserver getObserver(Context context) {
+    private ConnectionObserver getObserver(ContextView context) {
         return (connection, newState) -> log.debug(format(context, "{} {}"), newState, connection);
     }
 
@@ -301,12 +322,12 @@ public class DefaultVoiceGatewayClient {
 
             @Override
             public Flux<VoiceGatewayEvent> events() {
-                return events;
+                return events.asFlux();
             }
 
             @Override
             public Flux<State> stateEvents() {
-                return state;
+                return state.asFlux();
             }
 
             @Override
@@ -333,7 +354,7 @@ public class DefaultVoiceGatewayClient {
             }
 
             @Override
-            public Mono<Void> reconnect(Function<Context, Throwable> errorCause) {
+            public Mono<Void> reconnect(Function<ContextView, Throwable> errorCause) {
                 return onConnectOrDisconnect()
                         .flatMap(s -> s.equals(State.CONNECTED) ?
                                 Mono.fromRunnable(() -> sessionHandler.close(
@@ -353,14 +374,12 @@ public class DefaultVoiceGatewayClient {
             if (sessionHandler == null || disconnectNotifier == null) {
                 return Mono.error(new IllegalStateException("Gateway client is not active!"));
             }
-            if (!disconnectNotifier.isTerminated()) {
-                sessionHandler.close(DisconnectBehavior.stop(null));
-            }
-            return disconnectNotifier.then();
+            sessionHandler.close(DisconnectBehavior.stop(null));
+            return disconnectNotifier.asMono().then();
         });
     }
 
-    private void logPayload(Logger logger, Context context, ByteBuf buf) {
+    private void logPayload(Logger logger, ContextView context, ByteBuf buf) {
         logger.trace(format(context, buf.toString(StandardCharsets.UTF_8)
                 .replaceAll("(\"token\": ?\")([A-Za-z0-9._-]*)(\")", "$1hunter2$3")));
     }
@@ -368,7 +387,7 @@ public class DefaultVoiceGatewayClient {
     private Retry retryFactory() {
         return VoiceGatewayRetrySpec.create(reconnectOptions, reconnectContext)
                 .doBeforeRetry(retry -> {
-                    stateChanges.next(retry.nextState());
+                    state.emitNext(retry.nextState(), FAIL_FAST);
                     long attempt = retry.iteration();
                     Duration backoff = retry.nextBackoff();
                     log.debug(format(getContextFromException(retry.failure()),
@@ -376,7 +395,7 @@ public class DefaultVoiceGatewayClient {
                 });
     }
 
-    private Context getContextFromException(Throwable t) {
+    private ContextView getContextFromException(Throwable t) {
         if (t instanceof CloseException) {
             return ((CloseException) t).getContext();
         }
@@ -387,7 +406,7 @@ public class DefaultVoiceGatewayClient {
     }
 
     private Mono<CloseStatus> handleClose(DisconnectBehavior sourceBehavior, CloseStatus closeStatus) {
-        return Mono.deferWithContext(ctx -> {
+        return Mono.deferContextual(ctx -> {
             DisconnectBehavior behavior;
             if (VoiceGatewayRetrySpec.NON_RETRYABLE_STATUS_CODES.contains(closeStatus.getCode())) {
                 // non-retryable close codes are non-transient errors therefore stopping is the only choice
@@ -408,8 +427,8 @@ public class DefaultVoiceGatewayClient {
                     if (behavior.getCause() != null) {
                         return Mono.just(new CloseException(closeStatus, ctx, behavior.getCause()))
                                 .flatMap(ex -> {
-                                    stateChanges.next(VoiceConnection.State.DISCONNECTED);
-                                    disconnectNotifier.onError(ex);
+                                    state.emitNext(VoiceConnection.State.DISCONNECTED, FAIL_FAST);
+                                    disconnectNotifier.emitError(ex, FAIL_FAST);
                                     Mono<CloseStatus> thenMono = closeStatus.getCode() == 4014 ?
                                             Mono.just(closeStatus) : Mono.error(ex);
                                     return disconnectTask.onDisconnect(guildId).then(thenMono);
@@ -417,8 +436,8 @@ public class DefaultVoiceGatewayClient {
                     }
                     return Mono.just(closeStatus)
                             .flatMap(status -> {
-                                stateChanges.next(VoiceConnection.State.DISCONNECTED);
-                                disconnectNotifier.onNext(closeStatus);
+                                state.emitNext(VoiceConnection.State.DISCONNECTED, FAIL_FAST);
+                                disconnectNotifier.emitValue(closeStatus, FAIL_FAST);
                                 return disconnectTask.onDisconnect(guildId).thenReturn(closeStatus);
                             });
                 case RETRY_ABRUPTLY:

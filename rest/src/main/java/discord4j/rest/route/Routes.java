@@ -31,7 +31,7 @@ public abstract class Routes {
      * @see <a href="https://discord.com/developers/docs/reference#base-url">
      * https://discord.com/developers/docs/reference#base-url</a>
      */
-    public static final String BASE_URL = "https://discord.com/api/v6";
+    public static final String BASE_URL = "https://discord.com/api/v8";
 
     //////////////////////////////////////////////
     ////////////// Gateway Resource //////////////
@@ -250,7 +250,8 @@ public abstract class Routes {
     /**
      * Crosspost a Message into all guilds what follow the news channel indicated. This endpoint requires the
      * 'DISCOVERY' feature to be present for the guild and requires the 'SEND_MESSAGES' permission, if the current user
-     * sent the message, or additionally the 'MANAGE_MESSAGES' permission, for all other messages, to be present for the current user.
+     * sent the message, or additionally the 'MANAGE_MESSAGES' permission, for all other messages, to be present for
+     * the current user.
      * <p>
      * Returns a 204 empty response on success.
      *
@@ -497,8 +498,8 @@ public abstract class Routes {
     public static final Route GUILD_MEMBER_ADD = Route.put("/guilds/{guild.id}/members/{user.id}");
 
     /**
-     * Modify attributes of a guild member. Returns a 204 empty response on success. Fires a Guild Member Update
-     * Gateway event.
+     * Modify attributes of a guild member. Returns a 200 OK with the guild member on success. Fires a Guild Member
+     * Update Gateway event.
      *
      * @see <a href="https://discord.com/developers/docs/resources/guild#modify-guild-member">
      * https://discord.com/developers/docs/resources/guild#modify-guild-member</a>
@@ -700,33 +701,12 @@ public abstract class Routes {
     public static final Route GUILD_INTEGRATION_SYNC = Route.post("/guilds/{guild.id}/integrations/{integration.id}/sync");
 
     /**
-     * Returns the guild embed object. Requires the 'MANAGE_GUILD' permission.
-     *
-     * @see <a href="https://discord.com/developers/docs/resources/guild#get-guild-embed">
-     * https://discord.com/developers/docs/resources/guild#get-guild-embed</a>
-     * @deprecated Use {@code Routes.GUILD_WIDGET_GET} instead.
-     */
-    @Deprecated
-    public static final Route GUILD_EMBED_GET = Route.get("/guilds/{guild.id}/embed");
-
-    /**
      * Returns the guild widget object. Requires the 'MANAGE_GUILD' permission.
      *
      * @see <a href="https://discord.com/developers/docs/resources/guild#get-guild-widget">
      * https://discord.com/developers/docs/resources/guild#get-guild-widget</a>
      */
     public static final Route GUILD_WIDGET_GET = Route.get("/guilds/{guild.id}/widget");
-
-    /**
-     * Modify a guild embed object for the guild. All attributes may be passed in with JSON and modified. Requires the
-     * 'MANAGE_GUILD' permission. Returns the updated guild embed object.
-     *
-     * @see <a href="https://discord.com/developers/docs/resources/guild#modify-guild-embed">
-     * https://discord.com/developers/docs/resources/guild#modify-guild-embed</a>
-     * @deprecated Use {@code Routes.GUILD_WIDGET_MODIFY} instead.
-     */
-    @Deprecated
-    public static final Route GUILD_EMBED_MODIFY = Route.patch("/guilds/{guild.id}/embed");
 
     /**
      * Modify a guild widget object for the guild. All attributes may be passed in with JSON and modified. Requires the

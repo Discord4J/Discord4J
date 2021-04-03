@@ -20,6 +20,7 @@ package discord4j.common;
 import reactor.util.Logger;
 import reactor.util.annotation.Nullable;
 import reactor.util.context.Context;
+import reactor.util.context.ContextView;
 
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -37,14 +38,14 @@ public class LogUtil {
     public static final String KEY_GUILD_ID = "discord4j.guild";
 
     /**
-     * Format a message by unwrapping certain {@link Context} values as metadata, and if they exist, prepend them to
+     * Format a message by unwrapping certain {@link ContextView} values as metadata, and if they exist, prepend them to
      * the given message.
      *
      * @param context a Reactor context to enrich the logging message
      * @param msg the logging message
      * @return a formatted log message
      */
-    public static String format(Context context, String msg) {
+    public static String format(ContextView context, String msg) {
         String header = Stream.of(
                 context.getOrEmpty(KEY_BUCKET_ID).map(id -> "B:" + id),
                 context.getOrEmpty(KEY_REQUEST_ID).map(id -> "R:" + id),

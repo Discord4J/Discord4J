@@ -16,155 +16,23 @@
  */
 package discord4j.core.object.presence;
 
-import discord4j.discordjson.json.ActivityUpdateRequest;
 import discord4j.discordjson.json.PresenceData;
-import discord4j.discordjson.json.gateway.StatusUpdate;
-import discord4j.discordjson.possible.Possible;
 
-import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
- * Presence is the current state of a user on a guild.
+ * Presence is the current state of a user on a guild, received from Discord.
  * <p>
- * Factories exist to build an {@link StatusUpdate} object to update the bot's status:
- * <ul>
- *     <li>{@link Presence#online()} and {@link Presence#online(ActivityUpdateRequest)}</li>
- *     <li>{@link Presence#idle()} and {@link Presence#idle(ActivityUpdateRequest)}</li>
- *     <li>{@link Presence#doNotDisturb()} and {@link Presence#doNotDisturb(ActivityUpdateRequest)}</li>
- *     <li>{@link Presence#invisible()}</li>
- * </ul>
+ * This is as opposed to {@link ClientPresence} which is <i>sent to</i> Discord.
+ * <p>
+ * A presence includes a user's {@link Activity activities} and their current {@link Status status} on a given
+ * {@link Status.Platform platform}.
  *
  * @see <a href="https://discord.com/developers/docs/topics/gateway#presence">Presence</a>
  */
 public final class Presence {
-
-    /**
-     * Create a status update to display an online status.
-     *
-     * @return a {@link StatusUpdate} for the ONLINE status
-     */
-    public static StatusUpdate online() {
-        return StatusUpdate.builder()
-                .status(Status.ONLINE.getValue())
-                .game(Optional.empty())
-                .afk(false)
-                .since(Optional.empty())
-                .build();
-    }
-
-    /**
-     * Create a status update to display an online status along with a custom activity.
-     * <p>
-     * Factories exist to build an {@link ActivityUpdateRequest} object for {@link StatusUpdate}:
-     * <ul>
-     *     <li>{@link Activity#listening(String)}</li>
-     *     <li>{@link Activity#playing(String)}</li>
-     *     <li>{@link Activity#streaming(String, String)}</li>
-     *     <li>{@link Activity#watching(String)}</li>
-     *     <li>{@link Activity#competing(String)}</li>
-     * </ul>
-     *
-     * @return a {@link StatusUpdate} for the ONLINE status
-     */
-    public static StatusUpdate online(ActivityUpdateRequest activity) {
-        return StatusUpdate.builder()
-                .status(Status.ONLINE.getValue())
-                .game(activity)
-                .afk(false)
-                .since(Optional.empty())
-                .build();
-    }
-
-    /**
-     * Create a status update to display a do-not-disturb status.
-     *
-     * @return a {@link StatusUpdate} for the DO_NOT_DISTURB status
-     */
-    public static StatusUpdate doNotDisturb() {
-        return StatusUpdate.builder()
-                .status(Status.DO_NOT_DISTURB.getValue())
-                .game(Optional.empty())
-                .afk(false)
-                .since(Optional.empty())
-                .build();
-    }
-
-    /**
-     * Create a status update to display a do-not-disturb status along with a custom activity.
-     * <p>
-     * Factories exist to build an {@link ActivityUpdateRequest} object for {@link StatusUpdate}:
-     * <ul>
-     *     <li>{@link Activity#listening(String)}</li>
-     *     <li>{@link Activity#playing(String)}</li>
-     *     <li>{@link Activity#streaming(String, String)}</li>
-     *     <li>{@link Activity#watching(String)}</li>
-     *     <li>{@link Activity#competing(String)}</li>
-     * </ul>
-     *
-     * @return a {@link StatusUpdate} for the DO_NOT_DISTURB status
-     */
-    public static StatusUpdate doNotDisturb(ActivityUpdateRequest activity) {
-        return StatusUpdate.builder()
-                .status(Status.DO_NOT_DISTURB.getValue())
-                .game(activity)
-                .afk(false)
-                .since(Optional.empty())
-                .build();
-    }
-
-    /**
-     * Create a status update to display an idle status.
-     *
-     * @return a {@link StatusUpdate} for the IDLE status
-     */
-    public static StatusUpdate idle() {
-        return StatusUpdate.builder()
-                .status(Status.IDLE.getValue())
-                .game(Optional.empty())
-                .afk(true)
-                .since(Instant.now().toEpochMilli())
-                .build();
-    }
-
-    /**
-     * Create a status update to display an idle status along with a custom activity.
-     * <p>
-     * Factories exist to build an {@link ActivityUpdateRequest} object for {@link StatusUpdate}:
-     * <ul>
-     *     <li>{@link Activity#listening(String)}</li>
-     *     <li>{@link Activity#playing(String)}</li>
-     *     <li>{@link Activity#streaming(String, String)}</li>
-     *     <li>{@link Activity#watching(String)}</li>
-     *     <li>{@link Activity#competing(String)}</li>
-     * </ul>
-     *
-     * @return a {@link StatusUpdate} for the IDLE status
-     */
-    public static StatusUpdate idle(ActivityUpdateRequest activity) {
-        return StatusUpdate.builder()
-                .status(Status.IDLE.getValue())
-                .game(activity)
-                .afk(true)
-                .since(Instant.now().toEpochMilli())
-                .build();
-    }
-
-    /**
-     * Create a status update to display an invisible status.
-     *
-     * @return a {@link StatusUpdate} for the INVISIBLE status
-     */
-    public static StatusUpdate invisible() {
-        return StatusUpdate.builder()
-                .status(Status.INVISIBLE.getValue())
-                .game(Optional.empty())
-                .afk(false)
-                .since(Optional.empty())
-                .build();
-    }
 
     private final PresenceData data;
 
@@ -192,7 +60,7 @@ public final class Presence {
             case DESKTOP: return data.clientStatus().desktop().toOptional().map(Status::of);
             case MOBILE: return data.clientStatus().mobile().toOptional().map(Status::of);
             case WEB: return data.clientStatus().web().toOptional().map(Status::of);
-            default: throw new AssertionError();
+            default: throw new AssertionError("Unhandled platform " + platform);
         }
     }
 
@@ -212,25 +80,6 @@ public final class Presence {
      */
     public List<Activity> getActivities() {
         return data.activities().stream().map(Activity::new).collect(Collectors.toList());
-    }
-
-    /**
-     * Convert a received {@link Presence} into a {@link StatusUpdate} that can be used for sending an update.
-     *
-     * @return a {@link StatusUpdate} with the contents of the current {@link Presence} data.
-     */
-    public StatusUpdate asStatusUpdate() {
-        return StatusUpdate.builder()
-                .status(data.status())
-                .game(data.activities().stream().findFirst()
-                        .map(activity -> ActivityUpdateRequest.builder()
-                                .from(activity)
-                                .url(Possible.flatOpt(activity.url()))
-                                .build()))
-                .afk(data.status().equals(Status.IDLE.getValue()))
-                .since(data.status().equals(Status.IDLE.getValue()) ?
-                        Optional.of(Instant.now().toEpochMilli()) : Optional.empty())
-                .build();
     }
 
     @Override

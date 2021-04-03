@@ -166,6 +166,22 @@ public class EmbedCreateSpec implements Spec<EmbedData> {
         return this;
     }
 
+    /**
+     * Populate the spec from an existing embed.
+     * This will override all previously set values including fields!
+     *
+     * @param embedData The embed to populate this spec from.
+     * @return This spec.
+     */
+    public EmbedCreateSpec from(EmbedData embedData) {
+        requestBuilder.from(embedData);
+        this.fields.clear();
+        this.fields.addAll(embedData.fields()
+            .toOptional()
+            .orElseGet(ArrayList::new));
+        return this;
+    }
+
     @Override
     public EmbedData asRequest() {
         requestBuilder.fields(this.fields);

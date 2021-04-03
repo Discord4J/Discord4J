@@ -16,26 +16,28 @@
  */
 package discord4j.voice;
 
+import discord4j.common.sinks.EmissionStrategy;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.channel.socket.DatagramChannel;
-import reactor.core.publisher.EmitterProcessor;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.FluxSink;
 import reactor.core.publisher.Mono;
+import reactor.core.publisher.Sinks;
 import reactor.netty.Connection;
 import reactor.netty.ConnectionObserver;
 import reactor.netty.udp.UdpClient;
 import reactor.util.Logger;
 import reactor.util.Loggers;
-import reactor.util.context.Context;
+import reactor.util.concurrent.Queues;
+import reactor.util.context.ContextView;
 
 import java.io.ByteArrayOutputStream;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 
 import static discord4j.common.LogUtil.format;
 
@@ -52,18 +54,24 @@ public class VoiceSocket {
     static final String ENCRYPTION_MODE = "xsalsa20_poly1305";
     private static final int DISCOVERY_PACKET_LENGTH = 70;
 
-    private final EmitterProcessor<ByteBuf> inbound = EmitterProcessor.create(false);
-    private final EmitterProcessor<ByteBuf> outbound = EmitterProcessor.create(false);
-
-    private final FluxSink<ByteBuf> inboundSink = inbound.sink(FluxSink.OverflowStrategy.LATEST);
     private final UdpClient udpClient;
+    private final Sinks.Many<ByteBuf> inbound;
+    private final Sinks.Many<ByteBuf> outbound;
+    private final EmissionStrategy emissionStrategy;
 
     public VoiceSocket(UdpClient udpClient) {
         this.udpClient = udpClient;
+        this.inbound = newEmitterSink();
+        this.outbound = newEmitterSink();
+        this.emissionStrategy = EmissionStrategy.timeoutDrop(Duration.ofSeconds(5));
+    }
+
+    private static <T> Sinks.Many<T> newEmitterSink() {
+        return Sinks.many().multicast().onBackpressureBuffer(Queues.SMALL_BUFFER_SIZE, false);
     }
 
     Mono<Connection> setup(String address, int port) {
-        return Mono.deferWithContext(
+        return Mono.deferContextual(
                 context -> udpClient.host(address).port(port)
                         .observe(getObserver(context))
                         .doOnConnected(c -> log.debug(format(context, "Connected to {}"), address(c)))
@@ -71,10 +79,10 @@ public class VoiceSocket {
                         .handle((in, out) -> {
                             Mono<Void> inboundThen = in.receive().retain()
                                     .doOnNext(buf -> logPayload(receiverLog, context, buf))
-                                    .doOnNext(this.inboundSink::next)
+                                    .doOnNext(buf -> emissionStrategy.emitNext(inbound, buf))
                                     .then();
 
-                            Mono<Void> outboundThen = out.send(outbound
+                            Mono<Void> outboundThen = out.send(outbound.asFlux()
                                     .doOnNext(buf -> logPayload(senderLog, context, buf)))
                                     .then();
 
@@ -94,11 +102,11 @@ public class VoiceSocket {
         return c.remoteAddress();
     }
 
-    private ConnectionObserver getObserver(Context context) {
+    private ConnectionObserver getObserver(ContextView context) {
         return (connection, newState) -> log.debug(format(context, "{} {}"), newState, connection);
     }
 
-    private void logPayload(Logger logger, Context context, ByteBuf buf) {
+    private void logPayload(Logger logger, ContextView context, ByteBuf buf) {
         logger.trace(format(context, ByteBufUtil.hexDump(buf)));
     }
 
@@ -109,10 +117,11 @@ public class VoiceSocket {
                     .writeInt(ssrc)
                     .writeZero(DISCOVERY_PACKET_LENGTH - Integer.BYTES);
 
-            outbound.onNext(discoveryPacket);
+            emissionStrategy.emitNext(outbound, discoveryPacket);
         });
 
-        Mono<InetSocketAddress> parseResponse = inbound.next()
+        Mono<InetSocketAddress> parseResponse = inbound.asFlux()
+                .next()
                 .map(buf -> {
                     // undocumented: discord replies with the ssrc first, THEN the IP address
                     String address = getNullTerminatedString(buf, Integer.BYTES);
@@ -125,11 +134,11 @@ public class VoiceSocket {
     }
 
     void send(ByteBuf data) {
-        outbound.onNext(data);
+        emissionStrategy.emitNext(outbound, data);
     }
 
     Flux<ByteBuf> getInbound() {
-        return inbound;
+        return inbound.asFlux();
     }
 
     private static String getNullTerminatedString(ByteBuf buffer, int offset) {

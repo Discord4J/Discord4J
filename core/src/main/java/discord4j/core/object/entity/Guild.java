@@ -16,6 +16,7 @@
  */
 package discord4j.core.object.entity;
 
+import discord4j.common.store.action.read.ReadActions;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.*;
@@ -34,7 +35,6 @@ import discord4j.discordjson.json.NicknameModifyData;
 import discord4j.discordjson.possible.Possible;
 import discord4j.rest.util.Image;
 import discord4j.rest.util.PaginationUtil;
-import discord4j.store.api.util.LongLongTuple2;
 import discord4j.voice.VoiceConnection;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -294,40 +294,6 @@ public final class Guild implements Entity {
      */
     public int getAfkTimeout() {
         return data.afkTimeout();
-    }
-
-    /**
-     * Gets the ID of the embedded channel, if present.
-     *
-     * @return The ID of the embedded channel, if present.
-     * @deprecated Use {@code Guild#getWidgetChannelId} instead. For removal in v3.2
-     */
-    @Deprecated
-    public Optional<Snowflake> getEmbedChannelId() {
-        return getWidgetChannelId();
-    }
-
-    /**
-     * Requests to retrieve the embedded channel, if present.
-     *
-     * @return A {@link Mono} where, upon successful completion, emits the embedded {@link GuildChannel channel}, if
-     * present. If an error is received, it is emitted through the {@code Mono}.
-     */
-    public Mono<GuildChannel> getEmbedChannel() {
-        return Mono.justOrEmpty(getEmbedChannelId()).flatMap(gateway::getChannelById).cast(GuildChannel.class);
-    }
-
-    /**
-     * Requests to retrieve the embedded channel, if present, using the given retrieval strategy.
-     *
-     * @param retrievalStrategy the strategy to use to get the embedded channel
-     * @return A {@link Mono} where, upon successful completion, emits the embedded {@link GuildChannel channel}, if
-     * present. If an error is received, it is emitted through the {@code Mono}.
-     */
-    public Mono<GuildChannel> getEmbedChannel(EntityRetrievalStrategy retrievalStrategy) {
-        return Mono.justOrEmpty(getEmbedChannelId())
-                .flatMap(id -> gateway.withRetrievalStrategy(retrievalStrategy).getChannelById(id))
-                .cast(GuildChannel.class);
     }
 
     /**
@@ -776,9 +742,8 @@ public final class Guild implements Entity {
      * received, it is emitted through the {@code Flux}.
      */
     public Flux<VoiceState> getVoiceStates() {
-        return gateway.getGatewayResources().getStateView().getVoiceStateStore()
-                .findInRange(LongLongTuple2.of(getId().asLong(), Long.MIN_VALUE),
-                        LongLongTuple2.of(getId().asLong(), Long.MAX_VALUE))
+        return Flux.from(gateway.getGatewayResources().getStore()
+                .execute(ReadActions.getVoiceStatesInGuild(getId().asLong())))
                 .map(data -> new VoiceState(gateway, data));
     }
 
@@ -924,9 +889,8 @@ public final class Guild implements Entity {
      * received, it is emitted through the {@code Flux}.
      */
     public Flux<Presence> getPresences() {
-        return gateway.getGatewayResources().getStateView().getPresenceStore()
-                .findInRange(LongLongTuple2.of(getId().asLong(), Long.MIN_VALUE),
-                        LongLongTuple2.of(getId().asLong(), Long.MAX_VALUE))
+        return Flux.from(gateway.getGatewayResources().getStore()
+                .execute(ReadActions.getPresencesInGuild(getId().asLong())))
                 .map(Presence::new);
     }
 
@@ -1360,7 +1324,7 @@ public final class Guild implements Entity {
     }
 
     /**
-     * Requests to retrieve the webhooks of the guild.
+     * Requests to retrieve the webhooks of the guild. Requires the MANAGE_WEBHOOKS permission.
      *
      * @return A {@link Flux} that continually emits the {@link Webhook webhooks} of the guild. If an error is
      * received, it is emitted through the {@code Flux}.

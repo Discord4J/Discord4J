@@ -501,19 +501,6 @@ public abstract class ReactiveEventAdapter {
     }
 
     /**
-     * Invoked when a DM channel is created.
-     *
-     * @param event the event instance
-     * @return a {@link Publisher} that completes when this listener has done processing the event, for example,
-     * returning any {@link Mono}, {@link Flux} or synchronous code using {@link Mono#fromRunnable(Runnable)}.
-     * @deprecated event scheduled for removal in v3.2 after being deprecated by Discord in Gateway v8.
-     */
-    @Deprecated
-    public Publisher<?> onPrivateChannelCreate(PrivateChannelCreateEvent event) {
-        return Mono.empty();
-    }
-
-    /**
      * Invoked when a user has started typing a message.
      *
      * @param event the event instance
@@ -757,7 +744,6 @@ public abstract class ReactiveEventAdapter {
         else if (event instanceof StoreChannelCreateEvent) return onStoreChannelCreate((StoreChannelCreateEvent) event);
         else if (event instanceof StoreChannelDeleteEvent) return onStoreChannelDelete((StoreChannelDeleteEvent) event);
         else if (event instanceof StoreChannelUpdateEvent) return onStoreChannelUpdate((StoreChannelUpdateEvent) event);
-        else if (event instanceof PrivateChannelCreateEvent) return onPrivateChannelCreate((PrivateChannelCreateEvent) event);
         else if (event instanceof TypingStartEvent) return onTypingStart((TypingStartEvent) event);
         else if (event instanceof PinsUpdateEvent) return onPinsUpdate((PinsUpdateEvent) event);
         else if (event instanceof RoleCreateEvent) return onRoleCreate((RoleCreateEvent) event);

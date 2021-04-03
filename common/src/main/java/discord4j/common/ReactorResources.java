@@ -174,6 +174,6 @@ public class ReactorResources {
      * @return an {@link HttpClient} configured with custom resources
      */
     public static HttpClient newHttpClient(ConnectionProvider provider, LoopResources resources) {
-        return HttpClient.create(provider).tcpConfiguration(tcpClient -> tcpClient.runOn(resources));
+        return HttpClient.create(provider).runOn(resources);
     }
 }

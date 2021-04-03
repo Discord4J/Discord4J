@@ -26,7 +26,6 @@ import discord4j.core.object.entity.channel.VoiceChannel;
 import discord4j.discordjson.json.gateway.VoiceStateUpdate;
 import discord4j.gateway.GatewayClientGroup;
 import discord4j.gateway.intent.Intent;
-import discord4j.gateway.intent.IntentSet;
 import discord4j.gateway.json.ShardGatewayPayload;
 import discord4j.rest.util.Permission;
 import discord4j.voice.*;
@@ -193,8 +192,7 @@ public class VoiceChannelJoinSpec implements Spec<Mono<VoiceConnection>> {
 
     @Override
     public Mono<VoiceConnection> asRequest() {
-        if (!gateway.getGatewayResources().getIntents().toOptional().orElse(IntentSet.all())
-                .contains(Intent.GUILD_VOICE_STATES)) {
+        if (!gateway.getGatewayResources().getIntents().contains(Intent.GUILD_VOICE_STATES)) {
             return Mono.error(new IllegalArgumentException(
                     "GUILD_VOICE_STATES intent is required to establish a voice connection"));
         }
@@ -249,10 +247,10 @@ public class VoiceChannelJoinSpec implements Spec<Mono<VoiceConnection>> {
                                     .thenReturn(vc))
                             .doOnEach(signal -> {
                                 if (signal.isOnSubscribe()) {
-                                    log.debug(format(signal.getContext(), "Creating voice connection"));
+                                    log.debug(format(signal.getContextView(), "Creating voice connection"));
                                 }
                             })
-                            .subscriberContext(ctx ->
+                            .contextWrite(ctx ->
                                     ctx.put(LogUtil.KEY_GATEWAY_ID, Integer.toHexString(gateway.hashCode()))
                                             .put(LogUtil.KEY_SHARD_ID, shardId)
                                             .put(LogUtil.KEY_GUILD_ID, guildId.asLong()));

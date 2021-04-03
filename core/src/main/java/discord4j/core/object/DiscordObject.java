@@ -16,9 +16,9 @@
  */
 package discord4j.core.object;
 
+import discord4j.common.store.Store;
 import discord4j.core.DiscordClient;
 import discord4j.core.GatewayDiscordClient;
-import discord4j.store.api.Store;
 
 /** An object characterized by the Discord platform. */
 public interface DiscordObject {

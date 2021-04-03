@@ -14,7 +14,7 @@ import reactor.core.publisher.Mono;
 
 class ApplicationCommandDispatchHandlers {
 
-    static Mono<ApplicationCommandCreateEvent> applicationCommandCreate(DispatchContext<ApplicationCommandCreate> context) {
+    static Mono<ApplicationCommandCreateEvent> applicationCommandCreate(DispatchContext<ApplicationCommandCreate, Void> context) {
         GatewayDiscordClient gateway = context.getGateway();
         ShardInfo shardInfo = context.getShardInfo();
         Long guildId = Long.parseLong(context.getDispatch().guildId());
@@ -24,7 +24,7 @@ class ApplicationCommandDispatchHandlers {
                 new ApplicationCommand(gateway, command), guildId));
     }
 
-    static Mono<ApplicationCommandUpdateEvent> applicationCommandUpdate(DispatchContext<ApplicationCommandUpdate> context) {
+    static Mono<ApplicationCommandUpdateEvent> applicationCommandUpdate(DispatchContext<ApplicationCommandUpdate, Void> context) {
         GatewayDiscordClient gateway = context.getGateway();
         ShardInfo shardInfo = context.getShardInfo();
         Long guildId = Long.parseLong(context.getDispatch().guildId());
@@ -34,7 +34,7 @@ class ApplicationCommandDispatchHandlers {
                 new ApplicationCommand(gateway, command), guildId));
     }
 
-    static Mono<ApplicationCommandDeleteEvent> applicationCommandDelete(DispatchContext<ApplicationCommandDelete> context) {
+    static Mono<ApplicationCommandDeleteEvent> applicationCommandDelete(DispatchContext<ApplicationCommandDelete, Void> context) {
         GatewayDiscordClient gateway = context.getGateway();
         ShardInfo shardInfo = context.getShardInfo();
         Long guildId = Long.parseLong(context.getDispatch().guildId());

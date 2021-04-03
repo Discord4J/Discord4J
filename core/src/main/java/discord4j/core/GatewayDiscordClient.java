@@ -21,17 +21,18 @@ package discord4j.core;
 import discord4j.common.JacksonResources;
 import discord4j.common.LogUtil;
 import discord4j.common.ReactorResources;
+import discord4j.common.store.action.read.ReadActions;
 import discord4j.common.util.Snowflake;
 import discord4j.core.event.EventDispatcher;
 import discord4j.core.event.ReactiveEventAdapter;
 import discord4j.core.event.domain.Event;
 import discord4j.core.object.Invite;
 import discord4j.core.object.Region;
+import discord4j.core.object.presence.ClientPresence;
 import discord4j.core.object.GuildTemplate;
 import discord4j.core.object.entity.*;
 import discord4j.core.object.entity.channel.Channel;
 import discord4j.core.object.entity.channel.GuildChannel;
-import discord4j.core.object.presence.Activity;
 import discord4j.core.object.presence.Presence;
 import discord4j.core.retriever.EntityRetrievalStrategy;
 import discord4j.core.retriever.EntityRetriever;
@@ -42,7 +43,7 @@ import discord4j.core.util.ValidationUtil;
 import discord4j.discordjson.json.*;
 import discord4j.discordjson.json.gateway.GuildMembersChunk;
 import discord4j.discordjson.json.gateway.RequestGuildMembers;
-import discord4j.discordjson.json.gateway.StatusUpdate;
+import discord4j.discordjson.possible.Possible;
 import discord4j.gateway.GatewayClient;
 import discord4j.gateway.GatewayClientGroup;
 import discord4j.gateway.json.GatewayPayload;
@@ -53,10 +54,10 @@ import discord4j.voice.LocalVoiceConnectionRegistry;
 import discord4j.voice.VoiceConnection;
 import discord4j.voice.VoiceConnectionFactory;
 import discord4j.voice.VoiceConnectionRegistry;
+import io.netty.handler.timeout.TimeoutException;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.core.publisher.MonoProcessor;
 import reactor.util.Logger;
 import reactor.util.Loggers;
 
@@ -66,7 +67,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -93,23 +93,26 @@ public class GatewayDiscordClient implements EntityRetriever {
 
     private final DiscordClient discordClient;
     private final GatewayResources gatewayResources;
-    private final MonoProcessor<Void> closeProcessor;
+    private final Mono<Void> onDisconnect;
     private final GatewayClientGroup gatewayClientGroup;
     private final VoiceConnectionFactory voiceConnectionFactory;
     private final VoiceConnectionRegistry voiceConnectionRegistry;
     private final EntityRetriever entityRetriever;
+    private final Set<String> completingChunkNonces;
 
     public GatewayDiscordClient(DiscordClient discordClient, GatewayResources gatewayResources,
-                                MonoProcessor<Void> closeProcessor, GatewayClientGroup gatewayClientGroup,
+                                Mono<Void> onDisconnect, GatewayClientGroup gatewayClientGroup,
                                 VoiceConnectionFactory voiceConnectionFactory,
-                                EntityRetrievalStrategy entityRetrievalStrategy) {
+                                EntityRetrievalStrategy entityRetrievalStrategy,
+                                Set<String> completingChunkNonces) {
         this.discordClient = discordClient;
         this.gatewayResources = gatewayResources;
-        this.closeProcessor = closeProcessor;
+        this.onDisconnect = onDisconnect;
         this.gatewayClientGroup = gatewayClientGroup;
         this.voiceConnectionFactory = voiceConnectionFactory;
         this.voiceConnectionRegistry = new LocalVoiceConnectionRegistry();
         this.entityRetriever = entityRetrievalStrategy.apply(this);
+        this.completingChunkNonces = completingChunkNonces;
     }
 
     /**
@@ -203,7 +206,8 @@ public class GatewayDiscordClient implements EntityRetriever {
     }
 
     /**
-     * Requests to retrieve the webhook represented by the supplied ID.
+     * Requests to retrieve the webhook represented by the supplied ID. The bot must have the MANAGE_WEBHOOKS
+     * permission in the webhook's channel.
      *
      * @param webhookId The ID of the webhook.
      * @return A {@link Mono} where, upon successful completion, emits the {@link Webhook} as represented by the
@@ -214,6 +218,23 @@ public class GatewayDiscordClient implements EntityRetriever {
                 .getWebhook(webhookId.asLong())
                 .map(data -> new Webhook(this, data));
     }
+
+    /**
+     * Requests to retrieve the webhook represented by the supplied ID and token. Doesn't
+     * return the user who created the webhook object. Doesn't require the bot to have the MANAGE_WEBHOOKS permission.
+     *
+     * @param webhookId The ID of the webhook.
+     * @param token The authentication token of the webhook.
+     * @return A {@link Mono} where, upon successful completion, emits the {@link Webhook} as represented by the
+     * supplied ID without the user field and with the token field. If an error is received,
+     * it is emitted through the {@code Mono}.
+     */
+    public Mono<Webhook> getWebhookByIdWithToken(final Snowflake webhookId, final String token) {
+        return getRestClient().getWebhookService()
+                .getWebhookWithToken(webhookId.asLong(), token)
+                .map(data -> new Webhook(this, data));
+    }
+
 
     /**
      * Requests to retrieve the application info.
@@ -234,9 +255,8 @@ public class GatewayDiscordClient implements EntityRetriever {
      * error is received, it is emitted through the {@code Flux}.
      */
     public Flux<User> getUsers() {
-        return gatewayResources.getStateView().getUserStore()
-                .values()
-                .map(bean -> new User(this, bean));
+        return Flux.from(gatewayResources.getStore().execute(ReadActions.getUsers()))
+                .map(data -> new User(this, data));
     }
 
     /**
@@ -309,59 +329,25 @@ public class GatewayDiscordClient implements EntityRetriever {
     }
 
     /**
-     * Update the bot's {@link Presence} (client status) for every shard in this shard group.
-     * <p>
-     * Factories exist to build an {@link StatusUpdate} object to update the bot's status:
-     * <ul>
-     *     <li>{@link Presence#online()} and {@link Presence#online(ActivityUpdateRequest)}</li>
-     *     <li>{@link Presence#idle()} and {@link Presence#idle(ActivityUpdateRequest)}</li>
-     *     <li>{@link Presence#doNotDisturb()} and {@link Presence#doNotDisturb(ActivityUpdateRequest)}</li>
-     *     <li>{@link Presence#invisible()}</li>
-     * </ul>
-     * <p>
-     * Factories exist to build an {@link ActivityUpdateRequest} object for {@link StatusUpdate}:
-     * <ul>
-     *     <li>{@link Activity#listening(String)}</li>
-     *     <li>{@link Activity#playing(String)}</li>
-     *     <li>{@link Activity#streaming(String, String)}</li>
-     *     <li>{@link Activity#watching(String)}</li>
-     *     <li>{@link Activity#competing(String)}</li>
-     * </ul>
+     * Update the bot's {@link ClientPresence} (client status) for every shard in this shard group.
      *
-     * @param statusUpdate The updated client status.
+     * @param clientPresence The updated client status.
      * @return A {@link Mono} that signals completion upon successful update. If an error is received, it is emitted
      * through the {@code Mono}.
      */
-    public Mono<Void> updatePresence(final StatusUpdate statusUpdate) {
-        return gatewayClientGroup.multicast(GatewayPayload.statusUpdate(statusUpdate));
+    public Mono<Void> updatePresence(final ClientPresence clientPresence) {
+        return gatewayClientGroup.multicast(GatewayPayload.statusUpdate(clientPresence.getStatusUpdate()));
     }
 
     /**
      * Update the bot's {@link Presence} (status) for the given shard index, provided it belongs in this shard group.
-     * <p>
-     * Factories exist to build an {@link StatusUpdate} object to update the bot's status:
-     * <ul>
-     *     <li>{@link Presence#online()} and {@link Presence#online(ActivityUpdateRequest)}</li>
-     *     <li>{@link Presence#idle()} and {@link Presence#idle(ActivityUpdateRequest)}</li>
-     *     <li>{@link Presence#doNotDisturb()} and {@link Presence#doNotDisturb(ActivityUpdateRequest)}</li>
-     *     <li>{@link Presence#invisible()}</li>
-     * </ul>
-     * <p>
-     * Factories exist to build an {@link ActivityUpdateRequest} object for {@link StatusUpdate}:
-     * <ul>
-     *     <li>{@link Activity#listening(String)}</li>
-     *     <li>{@link Activity#playing(String)}</li>
-     *     <li>{@link Activity#streaming(String, String)}</li>
-     *     <li>{@link Activity#watching(String)}</li>
-     *     <li>{@link Activity#competing(String)}</li>
-     * </ul>
      *
-     * @param statusUpdate The updated client presence.
+     * @param clientPresence The updated client presence.
      * @return A {@link Mono} that signals completion upon successful update. If an error is received, it is emitted
      * through the {@code Mono}.
      */
-    public Mono<Void> updatePresence(final StatusUpdate statusUpdate, final int shardId) {
-        return gatewayClientGroup.unicast(ShardGatewayPayload.statusUpdate(statusUpdate, shardId));
+    public Mono<Void> updatePresence(final ClientPresence clientPresence, final int shardId) {
+        return gatewayClientGroup.unicast(ShardGatewayPayload.statusUpdate(clientPresence.getStatusUpdate(), shardId));
     }
 
     /**
@@ -414,7 +400,7 @@ public class GatewayDiscordClient implements EntityRetriever {
      * disconnected.
      */
     public Mono<Void> onDisconnect() {
-        return closeProcessor;
+        return onDisconnect;
     }
 
     /**
@@ -449,7 +435,7 @@ public class GatewayDiscordClient implements EntityRetriever {
      */
     public <E extends Event> Flux<E> on(Class<E> eventClass) {
         return getEventDispatcher().on(eventClass)
-                .subscriberContext(ctx -> ctx.put(LogUtil.KEY_GATEWAY_ID, Integer.toHexString(hashCode())));
+                .contextWrite(ctx -> ctx.put(LogUtil.KEY_GATEWAY_ID, Integer.toHexString(hashCode())));
     }
 
     /**
@@ -484,7 +470,7 @@ public class GatewayDiscordClient implements EntityRetriever {
      */
     public <E extends Event, T> Flux<T> on(Class<E> eventClass, Function<E, Publisher<T>> mapper) {
         return getEventDispatcher().on(eventClass, mapper)
-                .subscriberContext(ctx -> ctx.put(LogUtil.KEY_GATEWAY_ID, Integer.toHexString(hashCode())));
+                .contextWrite(ctx -> ctx.put(LogUtil.KEY_GATEWAY_ID, Integer.toHexString(hashCode())));
     }
 
     /**
@@ -525,7 +511,7 @@ public class GatewayDiscordClient implements EntityRetriever {
      */
     public Flux<Event> on(ReactiveEventAdapter adapter) {
         return getEventDispatcher().on(adapter)
-                .subscriberContext(ctx -> ctx.put(LogUtil.KEY_GATEWAY_ID, Integer.toHexString(hashCode())));
+                .contextWrite(ctx -> ctx.put(LogUtil.KEY_GATEWAY_ID, Integer.toHexString(hashCode())));
     }
 
     /**
@@ -570,13 +556,8 @@ public class GatewayDiscordClient implements EntityRetriever {
      * Submit a {@link RequestGuildMembers} payload using the current Gateway connection and wait for its completion,
      * delivering {@link Member} elements asynchronously through a {@link Flux}. This method performs a check to
      * validate whether the given guild's data can be obtained from this {@link GatewayDiscordClient}.
-     * <p>
-     * A timeout given by is used to fail this request if the operation is unable to complete due to disallowed or
-     * disabled members intent. This is particularly relevant when requesting a complete member list. If the timeout is
-     * triggered, a {@link TimeoutException} is forwarded through the {@link Flux}.
      *
      * @param request the member request to submit. Create one using {@link RequestGuildMembers#builder()}.
-     * {@link Flux#timeout(Duration)}
      * @return a {@link Flux} of {@link Member} for the given {@link Guild}. If an error occurs, it is emitted through
      * the {@link Flux}.
      */
@@ -604,7 +585,8 @@ public class GatewayDiscordClient implements EntityRetriever {
      */
     public Flux<GuildMembersChunk> requestMemberChunks(RequestGuildMembers request) {
         try {
-            ValidationUtil.validateRequestGuildMembers(request, gatewayResources.getIntents());
+            // client-side validation is required to avoid indefinitely waiting for a response
+            ValidationUtil.validateRequestGuildMembers(request, Possible.of(gatewayResources.getIntents()));
         } catch (Throwable t) {
             return Flux.error(t);
         }
@@ -614,24 +596,26 @@ public class GatewayDiscordClient implements EntityRetriever {
         Supplier<Flux<GuildMembersChunk>> incomingMembers = () -> gatewayClientGroup.find(shardId)
                 .map(gatewayClient -> gatewayClient.dispatch()
                         .ofType(GuildMembersChunk.class)
-                        .takeUntilOther(closeProcessor)
+                        .takeUntilOther(onDisconnect)
                         .filter(chunk -> chunk.nonce().toOptional()
                                 .map(s -> s.equals(nonce))
                                 .orElse(false))
                         .takeUntil(chunk -> chunk.chunkIndex() + 1 == chunk.chunkCount()))
                 .orElseThrow(() -> new IllegalStateException("Unable to find gateway client"));
-        Duration timeout = gatewayResources.getMemberRequestTimeout();
-        return Flux.deferWithContext(ctx -> getGuildById(guildId)
+        return Flux.deferContextual(ctx -> getGuildById(guildId)
                 .then(gatewayClientGroup.unicast(ShardGatewayPayload.requestGuildMembers(
                         RequestGuildMembers.builder()
                                 .from(request)
                                 .nonce(nonce)
-                                .build(), shardId)))
+                                .build(), shardId))
+                        .then(Mono.fromRunnable(() -> {
+                            if (request.query().toOptional().map(String::isEmpty).orElse(false)
+                                    && request.limit() == 0) {
+                                completingChunkNonces.add(nonce);
+                            }
+                        })))
                 .thenMany(Flux.defer(incomingMembers))
-                .transform(flux -> ValidationUtil.isRequestingEntireList(request) ? flux.timeout(timeout) : flux)
-                .doOnComplete(() -> log.debug(format(ctx, "Member request completed: {}"), request))
-                .doOnError(TimeoutException.class,
-                        t -> log.warn(format(ctx, "Member request timed out: {}"), request)));
+                .doOnComplete(() -> log.debug(format(ctx, "Member request completed: {}"), request)));
     }
 
     /**
@@ -687,6 +671,11 @@ public class GatewayDiscordClient implements EntityRetriever {
     @Override
     public Mono<User> getSelf() {
         return entityRetriever.getSelf();
+    }
+
+    @Override
+    public Mono<Member> getSelfMember(Snowflake guildId) {
+        return entityRetriever.getSelfMember(guildId);
     }
 
     @Override

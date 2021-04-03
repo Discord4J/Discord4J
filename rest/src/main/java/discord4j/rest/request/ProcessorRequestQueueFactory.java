@@ -41,8 +41,9 @@ class ProcessorRequestQueueFactory implements RequestQueueFactory {
             private final FluxSink<Object> sink = processor.sink(FluxSink.OverflowStrategy.BUFFER);
 
             @Override
-            public void push(T request) {
+            public boolean push(T request) {
                 sink.next(request);
+                return true; // rejection happens on the requests() side via onDiscard handler
             }
 
             @SuppressWarnings("unchecked")

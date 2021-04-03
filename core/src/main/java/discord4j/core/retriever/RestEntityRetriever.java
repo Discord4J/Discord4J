@@ -113,6 +113,11 @@ public class RestEntityRetriever implements EntityRetriever {
     }
 
     @Override
+    public Mono<Member> getSelfMember(Snowflake guildId) {
+        return rest.getSelfMember(guildId).map(data -> new Member(gateway,data, guildId.asLong()));
+    }
+
+    @Override
     public Flux<Member> getGuildMembers(Snowflake guildId) {
         Function<Map<String, Object>, Flux<MemberData>> doRequest = params ->
                 rest.getGuildService().getGuildMembers(guildId.asLong(), params);

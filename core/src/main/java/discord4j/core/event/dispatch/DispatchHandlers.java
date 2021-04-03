@@ -16,6 +16,7 @@
  */
 package discord4j.core.event.dispatch;
 
+import discord4j.common.store.api.object.PresenceAndUserData;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.*;
@@ -30,26 +31,22 @@ import discord4j.discordjson.json.PresenceData;
 import discord4j.discordjson.json.UserData;
 import discord4j.discordjson.json.VoiceStateData;
 import discord4j.discordjson.json.gateway.*;
-import discord4j.discordjson.possible.Possible;
 import discord4j.gateway.retry.GatewayStateChange;
-import discord4j.store.api.util.LongLongTuple2;
 import reactor.core.publisher.Mono;
 import reactor.util.Logger;
 import reactor.util.Loggers;
-import reactor.util.function.Tuples;
 
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 /**
  * Registry for {@link Dispatch} to {@link Event} mapping operations.
  */
 public class DispatchHandlers implements DispatchEventMapper {
 
-    private static final Map<Class<?>, DispatchHandler<?, ?>> handlerMap = new HashMap<>();
+    private static final Map<Class<?>, DispatchHandler<?, ?, ?>> handlerMap = new HashMap<>();
 
     static {
         addHandler(ChannelCreate.class, ChannelDispatchHandlers::channelCreate);
@@ -98,8 +95,8 @@ public class DispatchHandlers implements DispatchEventMapper {
         addHandler(UnavailableGuildCreate.class, context -> Mono.empty());
     }
 
-    private static <D, E extends Event> void addHandler(Class<D> dispatchType,
-                                                        DispatchHandler<D, E> dispatchHandler) {
+    private static <D, S, E extends Event> void addHandler(Class<D> dispatchType,
+                                                           DispatchHandler<D, S, E> dispatchHandler) {
         handlerMap.put(dispatchType, dispatchHandler);
     }
 
@@ -110,12 +107,13 @@ public class DispatchHandlers implements DispatchEventMapper {
      *
      * @param context the DispatchContext used with this Dispatch object
      * @param <D> the Dispatch type
+     * @param <S> the old state type, if applicable
      * @param <E> the resulting Event type
      * @return an Event mapped from the given Dispatch object, or null if no Event is produced.
      */
     @SuppressWarnings("unchecked")
-    public <D, E extends Event> Mono<E> handle(DispatchContext<D> context) {
-        DispatchHandler<D, E> handler = (DispatchHandler<D, E>) handlerMap.entrySet()
+    public <D, S, E extends Event> Mono<E> handle(DispatchContext<D, S> context) {
+        DispatchHandler<D, S, E> handler = (DispatchHandler<D, S, E>) handlerMap.entrySet()
                 .stream()
                 .filter(entry -> entry.getKey().isAssignableFrom(context.getDispatch().getClass()))
                 .map(Map.Entry::getValue)
@@ -129,64 +127,35 @@ public class DispatchHandlers implements DispatchEventMapper {
                 .checkpoint("Dispatch handled for " + context.getDispatch().getClass());
     }
 
-    private static Mono<PresenceUpdateEvent> presenceUpdate(DispatchContext<PresenceUpdate> context) {
+    private static Mono<PresenceUpdateEvent> presenceUpdate(DispatchContext<PresenceUpdate, PresenceAndUserData> context) {
         GatewayDiscordClient gateway = context.getGateway();
 
         long guildId = Snowflake.asLong(context.getDispatch().guildId());
         PartialUserData userData = context.getDispatch().user();
-        long userId = Snowflake.asLong(userData.id());
-        LongLongTuple2 key = LongLongTuple2.of(guildId, userId);
         PresenceData presenceData = createPresence(context.getDispatch());
         Presence current = new Presence(presenceData);
+        Presence oldPresence = context.getOldState()
+                .flatMap(PresenceAndUserData::getPresenceData)
+                .map(Presence::new)
+                .orElse(null);
+        User oldUser = context.getOldState()
+                .flatMap(PresenceAndUserData::getUserData)
+                .map(old -> new User(gateway, old))
+                .orElse(null);
 
-        Mono<Void> saveNew = context.getStateHolder().getPresenceStore().save(key, presenceData);
-
-        Mono<Optional<User>> saveUser = context.getStateHolder().getUserStore()
-                .find(userId)
-                .map(oldUserData -> {
-                    UserData newUserData = UserData.builder()
-                            .from(oldUserData)
-                            .username(userData.username().toOptional()
-                                    .orElse(oldUserData.username()))
-                            .discriminator(userData.discriminator().toOptional()
-                                    .orElse(oldUserData.discriminator()))
-                            .avatar(userData.avatar().isAbsent() ? oldUserData.avatar() :
-                                    Possible.flatOpt(userData.avatar()))
-                            .build();
-
-                    return Tuples.of(oldUserData, newUserData);
-                })
-                .flatMap(tuple -> context.getStateHolder().getUserStore()
-                        .save(userId, tuple.getT2())
-                        .thenReturn(tuple.getT1()))
-                .map(userBean -> new User(gateway, userBean))
-                .map(Optional::of)
-                .defaultIfEmpty(Optional.empty());
-
-        return saveUser.flatMap(oldUser ->
-                context.getStateHolder().getPresenceStore()
-                        .find(key)
-                        .flatMap(saveNew::thenReturn)
-                        .map(old -> new PresenceUpdateEvent(gateway, context.getShardInfo(), guildId,
-                                oldUser.orElse(null), userData, current, new Presence(old)))
-                        .switchIfEmpty(saveNew.thenReturn(new PresenceUpdateEvent(gateway, context.getShardInfo(),
-                                guildId, oldUser.orElse(null), userData, current, null))));
+        return Mono.just(new PresenceUpdateEvent(gateway, context.getShardInfo(), guildId, oldUser, userData, current, oldPresence));
     }
 
     private static PresenceData createPresence(PresenceUpdate update) {
         return PresenceData.builder()
                 .user(update.user())
-                .roles(update.roles())
-                .game(update.game())
                 .status(update.status())
                 .activities(update.activities())
                 .clientStatus(update.clientStatus())
-                .premiumSince(update.premiumSince())
-                .nick(update.nick())
                 .build();
     }
 
-    private static Mono<TypingStartEvent> typingStart(DispatchContext<TypingStart> context) {
+    private static Mono<TypingStartEvent> typingStart(DispatchContext<TypingStart, Void> context) {
         long channelId = Snowflake.asLong(context.getDispatch().channelId());
         Long guildId = context.getDispatch().guildId().toOptional().map(Snowflake::asLong).orElse(null);
         long userId = Snowflake.asLong(context.getDispatch().userId());
@@ -201,22 +170,16 @@ public class DispatchHandlers implements DispatchEventMapper {
                 userId, startTime, member));
     }
 
-    private static Mono<UserUpdateEvent> userUpdate(DispatchContext<UserUpdate> context) {
+    private static Mono<UserUpdateEvent> userUpdate(DispatchContext<UserUpdate, UserData> context) {
         GatewayDiscordClient gateway = context.getGateway();
         UserData userData = context.getDispatch().user();
-        long userId = Snowflake.asLong(userData.id());
         User current = new User(gateway, userData);
 
-        Mono<Void> saveNew = context.getStateHolder().getUserStore().save(userId, userData);
-
-        return context.getStateHolder().getUserStore()
-                .find(userId)
-                .flatMap(saveNew::thenReturn)
-                .map(old -> new UserUpdateEvent(gateway, context.getShardInfo(), current, new User(gateway, old)))
-                .switchIfEmpty(saveNew.thenReturn(new UserUpdateEvent(gateway, context.getShardInfo(), current, null)));
+        return Mono.just(new UserUpdateEvent(gateway, context.getShardInfo(), current, context.getOldState()
+                                .map(old -> new User(gateway, old)).orElse(null)));
     }
 
-    private static Mono<Event> voiceServerUpdate(DispatchContext<VoiceServerUpdate> context) {
+    private static Mono<Event> voiceServerUpdate(DispatchContext<VoiceServerUpdate, Void> context) {
         String token = context.getDispatch().token();
         long guildId = Snowflake.asLong(context.getDispatch().guildId());
         String endpoint = context.getDispatch().endpoint();
@@ -225,37 +188,24 @@ public class DispatchHandlers implements DispatchEventMapper {
                 endpoint));
     }
 
-    private static Mono<VoiceStateUpdateEvent> voiceStateUpdateDispatch(DispatchContext<VoiceStateUpdateDispatch> context) {
+    private static Mono<VoiceStateUpdateEvent> voiceStateUpdateDispatch(DispatchContext<VoiceStateUpdateDispatch, VoiceStateData> context) {
         GatewayDiscordClient gateway = context.getGateway();
         VoiceStateData voiceStateData = context.getDispatch().voiceState();
 
-        long guildId = Snowflake.asLong(voiceStateData.guildId().get());
-        long userId = Snowflake.asLong(voiceStateData.userId());
-
-        LongLongTuple2 key = LongLongTuple2.of(guildId, userId);
         VoiceState current = new VoiceState(gateway, voiceStateData);
 
-        Mono<Void> saveNewOrRemove = voiceStateData.channelId().isPresent()
-                ? context.getStateHolder().getVoiceStateStore().save(key, voiceStateData)
-                : context.getStateHolder().getVoiceStateStore().delete(key);
-
-        return context.getStateHolder().getVoiceStateStore()
-                .find(key)
-                .flatMap(saveNewOrRemove::thenReturn)
-                .map(old -> new VoiceStateUpdateEvent(gateway, context.getShardInfo(), current,
-                        new VoiceState(gateway, old)))
-                .switchIfEmpty(saveNewOrRemove.thenReturn(
-                        new VoiceStateUpdateEvent(gateway, context.getShardInfo(), current, null)));
+        return Mono.just(new VoiceStateUpdateEvent(gateway, context.getShardInfo(), current, context.getOldState()
+                                .map(old -> new VoiceState(gateway, old)).orElse(null)));
     }
 
-    private static Mono<Event> webhooksUpdate(DispatchContext<WebhooksUpdate> context) {
+    private static Mono<Event> webhooksUpdate(DispatchContext<WebhooksUpdate, Void> context) {
         long guildId = Snowflake.asLong(context.getDispatch().guildId());
         long channelId = Snowflake.asLong(context.getDispatch().channelId());
 
         return Mono.just(new WebhooksUpdateEvent(context.getGateway(), context.getShardInfo(), guildId, channelId));
     }
 
-    private static Mono<InviteCreateEvent> inviteCreate(DispatchContext<InviteCreate> context) {
+    private static Mono<InviteCreateEvent> inviteCreate(DispatchContext<InviteCreate, Void> context) {
         long guildId = Snowflake.asLong(context.getDispatch().guildId());
         long channelId = Snowflake.asLong(context.getDispatch().channelId());
         String code = context.getDispatch().code();
@@ -274,7 +224,7 @@ public class DispatchHandlers implements DispatchEventMapper {
                 current, createdAt, uses, maxUses, maxAge, temporary));
     }
 
-    private static Mono<InviteDeleteEvent> inviteDelete(DispatchContext<InviteDelete> context) {
+    private static Mono<InviteDeleteEvent> inviteDelete(DispatchContext<InviteDelete, Void> context) {
         long guildId = Snowflake.asLong(context.getDispatch().guildId());
         long channelId = Snowflake.asLong(context.getDispatch().channelId());
         String code = context.getDispatch().code();
@@ -282,7 +232,7 @@ public class DispatchHandlers implements DispatchEventMapper {
         return Mono.just(new InviteDeleteEvent(context.getGateway(), context.getShardInfo(), guildId, channelId, code));
     }
 
-    private static Mono<InteractionCreateEvent> interactionCreate(DispatchContext<InteractionCreate> context) {
+    private static Mono<InteractionCreateEvent> interactionCreate(DispatchContext<InteractionCreate, Void> context) {
         GatewayDiscordClient gateway = context.getGateway();
         Interaction interaction = new Interaction(gateway, context.getDispatch().interaction());
         return Mono.just(new InteractionCreateEvent(gateway, context.getShardInfo(), interaction));

@@ -27,7 +27,7 @@ import discord4j.gateway.ShardInfo;
 import discord4j.rest.RestClient;
 import discord4j.rest.interaction.InteractionResponse;
 import discord4j.rest.util.InteractionResponseType;
-import discord4j.rest.util.WebhookMultipartRequest;
+import discord4j.rest.util.MultipartRequest;
 import reactor.core.publisher.Mono;
 
 import java.time.Duration;
@@ -198,13 +198,12 @@ public class InteractionCreateEvent extends Event {
         @Override
         public Mono<MessageData> createFollowupMessage(String content) {
             WebhookExecuteRequest body = WebhookExecuteRequest.builder().content(content).build();
-            WebhookMultipartRequest request = new WebhookMultipartRequest(body);
             return applicationId.flatMap(id -> restClient.getWebhookService()
-                    .executeWebhook(id, interactionData.token(), true, request));
+                    .executeWebhook(id, interactionData.token(), true, MultipartRequest.ofRequest(body)));
         }
 
         @Override
-        public Mono<MessageData> createFollowupMessage(WebhookMultipartRequest request, boolean wait) {
+        public Mono<MessageData> createFollowupMessage(MultipartRequest<WebhookExecuteRequest> request, boolean wait) {
             return applicationId.flatMap(id -> restClient.getWebhookService()
                     .executeWebhook(id, interactionData.token(), wait, request));
         }

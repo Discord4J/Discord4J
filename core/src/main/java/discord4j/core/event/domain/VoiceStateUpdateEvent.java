@@ -85,7 +85,7 @@ public class VoiceStateUpdateEvent extends Event {
     /**
      * Gets whether this event is a voice channel move event.
      *
-     * @return {code true} if this is a voice channel move event, {@code false} otherwise.
+     * @return {@code true} if this is a voice channel move event, {@code false} otherwise.
      */
     public boolean isMoveEvent() {
         if(old == null) {

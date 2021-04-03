@@ -45,7 +45,7 @@ import java.util.function.Consumer;
  *
  * @see <a href="https://discord.com/developers/docs/resources/channel#create-message">Create Message</a>
  */
-public class MessageCreateSpec implements Spec<MultipartRequest> {
+public class MessageCreateSpec implements Spec<MultipartRequest<MessageCreateRequest>> {
 
     @Nullable
     private String content;
@@ -156,7 +156,7 @@ public class MessageCreateSpec implements Spec<MultipartRequest> {
     }
 
     @Override
-    public MultipartRequest asRequest() {
+    public MultipartRequest<MessageCreateRequest> asRequest() {
         MessageCreateRequest json = MessageCreateRequest.builder()
                 .content(content == null ? Possible.absent() : Possible.of(content))
                 .nonce(nonce == null ? Possible.absent() : Possible.of(nonce))
@@ -165,6 +165,6 @@ public class MessageCreateSpec implements Spec<MultipartRequest> {
                 .allowedMentions(allowedMentionsData == null ? Possible.absent() : Possible.of(allowedMentionsData))
                 .messageReference(messageReferenceData == null ? Possible.absent() : Possible.of(messageReferenceData))
                 .build();
-        return new MultipartRequest(json, files == null ? Collections.emptyList() : files);
+        return MultipartRequest.ofRequestAndFiles(json, files == null ? Collections.emptyList() : files);
     }
 }

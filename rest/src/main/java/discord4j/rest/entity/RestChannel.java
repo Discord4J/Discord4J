@@ -183,7 +183,7 @@ public class RestChannel {
      * @see <a href="https://discord.com/developers/docs/resources/channel#create-message">Create Message</a>
      */
     public Mono<MessageData> createMessage(MessageCreateRequest request) {
-        return restClient.getChannelService().createMessage(id, new MultipartRequest(request));
+        return restClient.getChannelService().createMessage(id, MultipartRequest.ofRequest(request));
     }
 
     /**
@@ -195,7 +195,7 @@ public class RestChannel {
      * error is received, it is emitted through the {@code Mono}.
      * @see <a href="https://discord.com/developers/docs/resources/channel#create-message">Create Message</a>
      */
-    public Mono<MessageData> createMessage(MultipartRequest request) {
+    public Mono<MessageData> createMessage(MultipartRequest<MessageCreateRequest> request) {
         // TODO: improve API to create MultipartRequest objects
         return restClient.getChannelService().createMessage(id, request);
     }
