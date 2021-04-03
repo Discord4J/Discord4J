@@ -88,8 +88,7 @@ public class InteractionCreateEvent extends Event {
         String token = interaction.getToken();
 
         return getClient().rest().getInteractionService()
-                .createInteractionResponse(id, token, responseData)
-                .then();
+                .createInteractionResponse(id, token, responseData);
     }
 
     /**
