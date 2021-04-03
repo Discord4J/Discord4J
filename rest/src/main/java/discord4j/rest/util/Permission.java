@@ -50,6 +50,9 @@ public enum Permission {
     /** Allows for using priority speaker in a voice channel. */
     PRIORITY_SPEAKER(0x00000100, false),
 
+    /** Allows for Stream in voice channel. */
+    STREAM(0x00000200, false),
+
     /** Allows guild members to view a channel, which includes reading messages in text channels. */
     VIEW_CHANNEL(0x00000400, false),
 
@@ -116,8 +119,11 @@ public enum Permission {
     /** Allows management and editing of emojis. */
     MANAGE_EMOJIS(0x40000000, true),
 
-    /** Allows for Stream in voice channel. */
-    STREAM(0x00000200, false);
+    /**
+     * Allows for requesting to speak in stage channels. (This permission is under active development and may
+     * be changed or removed.)
+     */
+    REQUEST_TO_SPEAK(0x100000000L, false);
 
     /** Whether MFA is required. */
     private final boolean mfa;

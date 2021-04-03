@@ -925,6 +925,16 @@ public abstract class Routes {
      */
     public static final Route VOICE_REGION_LIST = Route.get("/voice/regions");
 
+    /**
+     * TODO: Documentation
+     */
+    public static final Route SELF_VOICE_STATE_MODIFY = Route.patch("/guilds/{guild.id}/voice-states/@me");
+
+    /**
+     * TODO: Documentation
+     */
+    public static final Route OTHERS_VOICE_STATE_MODIFY = Route.patch("/guilds/{guild.id}/voice-states/{user.id}");
+
     //////////////////////////////////////////////
     ////////////// Webhook Resource //////////////
     //////////////////////////////////////////////

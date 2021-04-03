@@ -20,6 +20,9 @@ import discord4j.discordjson.json.RegionData;
 import discord4j.rest.request.Router;
 import discord4j.rest.route.Routes;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import discord4j.discordjson.json.UpdateSelfVoiceStateRequest;
+import discord4j.discordjson.json.UpdateOthersVoiceStateRequest;
 
 public class VoiceService extends RestService {
 
@@ -32,5 +35,19 @@ public class VoiceService extends RestService {
                 .exchange(getRouter())
                 .bodyToMono(RegionData[].class)
                 .flatMapMany(Flux::fromArray);
+    }
+
+    public Mono<Void> modifySelfVoiceState(long guildId, UpdateSelfVoiceStateRequest request) {
+        return Routes.SELF_VOICE_STATE_MODIFY.newRequest(guildId)
+            .body(request)
+            .exchange(getRouter())
+            .bodyToMono(Void.class);
+    }
+
+    public Mono<Void> modifyOthersVoiceState(long guildId, long userId, UpdateOthersVoiceStateRequest request) {
+        return Routes.OTHERS_VOICE_STATE_MODIFY.newRequest(guildId, userId)
+            .body(request)
+            .exchange(getRouter())
+            .bodyToMono(Void.class);
     }
 }
