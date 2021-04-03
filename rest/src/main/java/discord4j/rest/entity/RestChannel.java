@@ -64,6 +64,15 @@ public class RestChannel {
     }
 
     /**
+     * Returns the ID of this channel.
+     *
+     * @return The ID of this channel
+     */
+    public Snowflake getId() {
+        return Snowflake.of(id);
+    }
+
+    /**
      * Retrieve this channel's data upon subscription.
      *
      * @return a {@link Mono} where, upon successful completion, emits the {@link ChannelData} belonging to this

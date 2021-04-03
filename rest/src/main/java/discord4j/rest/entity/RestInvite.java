@@ -46,6 +46,15 @@ public class RestInvite {
         return new RestInvite(restClient, code);
     }
 
+    /**
+     * Gets the invite code.
+     *
+     * @return The invite code
+     */
+    public String getCode() {
+        return code;
+    }
+
     public Mono<InviteData> getData() {
         return restClient.getInviteService().getInvite(code);
     }

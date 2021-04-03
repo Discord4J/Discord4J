@@ -62,6 +62,24 @@ public class RestMember {
     }
 
     /**
+     * Returns the ID of the guild this member belongs to.
+     *
+     * @return The ID of the the guild this member belongs to.
+     */
+    public Snowflake getGuildId() {
+        return Snowflake.of(guildId);
+    }
+
+    /**
+     * Returns the ID of this member.
+     *
+     * @return The ID of this member
+     */
+    public Snowflake getId() {
+        return Snowflake.of(id);
+    }
+
+    /**
      * Create a {@link RestGuild} with data from this Member. This method does not perform any API request.
      *
      * @return a {@code RestGuild} represented by the data from this Member
