@@ -865,6 +865,10 @@ public final class Message implements Entity {
                 case 12: return CHANNEL_FOLLOW_ADD;
                 case 14: return GUILD_DISCOVERY_DISQUALIFIED;
                 case 15: return GUILD_DISCOVERY_REQUALIFIED;
+                case 16: return GUILD_DISCOVERY_GRACE_PERIOD_INITIAL_WARNING;
+                case 17: return GUILD_DISCOVERY_GRACE_PERIOD_FINAL_WARNING;
+                case 19: return REPLY;
+                case 20: return APPLICATION_COMMAND;
                 default: return UNKNOWN;
             }
         }
