@@ -140,4 +140,10 @@ class InteractionOperations implements RestInteraction, InteractionResponse, Gui
         return applicationId.flatMap(id -> restClient.getWebhookService()
                 .modifyWebhookMessage(id, interactionData.token(), String.valueOf(messageId), request));
     }
+
+    @Override
+    public Mono<Void> deleteFollowupMessage(long messageId) {
+        return applicationId.flatMap(id -> restClient.getWebhookService()
+                .deleteWebhookMessage(id, interactionData.token(), String.valueOf(messageId)));
+    }
 }
