@@ -809,8 +809,14 @@ public final class Message implements Entity {
         /** A message created when the Guild is requalified for Discovery Feature **/
         GUILD_DISCOVERY_REQUALIFIED(15),
 
+        GUILD_DISCOVERY_GRACE_PERIOD_INITIAL_WARNING(16),
+
+        GUILD_DISCOVERY_GRACE_PERIOD_FINAL_WARNING(17),
+
         /** A message created with a reply */
-        REPLY(19);
+        REPLY(19),
+
+        APPLICATION_COMMAND(20);
 
         /**
          * The underlying value as represented by Discord.
