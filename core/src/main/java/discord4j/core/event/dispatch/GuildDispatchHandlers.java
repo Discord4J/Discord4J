@@ -456,6 +456,7 @@ class GuildDispatchHandlers {
         String currentNick = Possible.flatOpt(context.getDispatch().nick()).orElse(null);
         String currentJoinedAt = context.getDispatch().joinedAt();
         String currentPremiumSince = Possible.flatOpt(context.getDispatch().premiumSince()).orElse(null);
+        Boolean currentPending = context.getDispatch().pending().toOptional().orElse(null);
 
         LongLongTuple2 key = LongLongTuple2.of(guildId, memberId);
 
@@ -478,11 +479,11 @@ class GuildDispatchHandlers {
                     return context.getStateHolder().getMemberStore()
                             .save(key, newMember)
                             .thenReturn(new MemberUpdateEvent(gateway, context.getShardInfo(), guildId, memberId, old,
-                                    currentRoles, currentNick, currentJoinedAt, currentPremiumSince));
+                                    currentRoles, currentNick, currentJoinedAt, currentPremiumSince, currentPending));
                 });
 
         return update.defaultIfEmpty(new MemberUpdateEvent(gateway, context.getShardInfo(), guildId, memberId, null,
-                currentRoles, currentNick, currentJoinedAt, currentPremiumSince));
+                currentRoles, currentNick, currentJoinedAt, currentPremiumSince, currentPending));
     }
 
     static Mono<RoleCreateEvent> guildRoleCreate(DispatchContext<GuildRoleCreate> context) {
