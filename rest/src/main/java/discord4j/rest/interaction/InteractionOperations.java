@@ -93,8 +93,29 @@ class InteractionOperations implements RestInteraction, InteractionResponse, Gui
     }
 
     @Override
+    public FollowupInteractionHandler acknowledgeEphemeral() {
+        InteractionResponseData responseData = InteractionResponseData.builder()
+                .type(InteractionResponseType.DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE.getValue())
+                .data(InteractionApplicationCommandCallbackData.builder()
+                        .flags(6)
+                        .build())
+                .build();
+        return new FollowupInteractionHandler(responseData, __ -> Mono.empty());
+    }
+
+    @Override
     public FollowupInteractionHandler reply(String content) {
-        return reply(InteractionApplicationCommandCallbackData.builder().content(content).build());
+        return reply(InteractionApplicationCommandCallbackData.builder()
+                .content(content)
+                .build());
+    }
+
+    @Override
+    public FollowupInteractionHandler replyEphemeral(String content) {
+        return reply(InteractionApplicationCommandCallbackData.builder()
+                .content(content)
+                .flags(6)
+                .build());
     }
 
     @Override

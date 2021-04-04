@@ -21,6 +21,7 @@ import discord4j.common.annotations.Experimental;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.command.Interaction;
+import discord4j.core.object.entity.Message;
 import discord4j.core.spec.InteractionApplicationCommandCallbackSpec;
 import discord4j.discordjson.json.*;
 import discord4j.gateway.ShardInfo;
@@ -92,7 +93,9 @@ public class InteractionCreateEvent extends Event {
     }
 
     /**
-     * Acknowledges the interaction indicating a response will be edited later. The user sees a loading state
+     * Acknowledges the interaction indicating a response will be edited later. The user sees a loading state, visible
+     * to all participants in the invoking channel. For a "only you can see this" response, see
+     * {@link #acknowledgeEphemeral()}, or to include a message, {@link #replyEphemeral(String)}
      *
      * @return A {@link Mono} where, upon successful completion, emits nothing; acknowledging the interaction
      * and indicating a response will be edited later. The user sees a loading state. If an error is received, it
@@ -106,13 +109,28 @@ public class InteractionCreateEvent extends Event {
     }
 
     /**
+     * Acknowledges the interaction indicating a response will be edited later. Only the invoking user sees a loading
+     * state.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits nothing, acknowledging the interaction
+     * and indicating a response will be edited later. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Void> acknowledgeEphemeral() {
+        return createInteractionResponse(InteractionResponseData.builder()
+                .type(InteractionResponseType.DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE.getValue())
+                .data(InteractionApplicationCommandCallbackData.builder()
+                        .flags(Message.Flag.EPHEMERAL.getFlag())
+                        .build())
+                .build());
+    }
+
+    /**
      * Requests to respond to the interaction with only
      * {@link InteractionApplicationCommandCallbackSpec#setContent(String) content}.
      *
      * @param content A string message to populate the message with.
-     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the interaction response has
+     * @return A {@link Mono} where, upon successful completion, emits nothing, indicating the interaction response has
      * been sent. If an error is received, it is emitted through the {@code Mono}.
-     *
      * @see InteractionApplicationCommandCallbackSpec#setContent(String)
      */
     public Mono<Void> reply(final String content) {
@@ -128,7 +146,6 @@ public class InteractionCreateEvent extends Event {
      * @param content A string message to populate the message with.
      * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the ephemeral interaction
      * response has been sent. If an error is received, it is emitted through the {@code Mono}.
-     *
      * @see InteractionApplicationCommandCallbackSpec#setContent(String)
      * @see InteractionApplicationCommandCallbackSpec#setEphemeral(boolean)
      */
