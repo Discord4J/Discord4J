@@ -16,6 +16,8 @@
  */
 package discord4j.rest.util;
 
+import discord4j.common.annotations.Experimental;
+
 /**
  * Permissions are a way to limit and grant certain abilities to users.
  *
@@ -120,9 +122,9 @@ public enum Permission {
     MANAGE_EMOJIS(0x40000000, true),
 
     /**
-     * Allows for requesting to speak in stage channels. (This permission is under active development and may
-     * be changed or removed.)
+     * Allows for requesting to speak in stage channels.
      */
+    @Experimental
     REQUEST_TO_SPEAK(0x100000000L, false);
 
     /** Whether MFA is required. */
