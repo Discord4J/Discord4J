@@ -262,7 +262,7 @@ public final class VoiceState implements DiscordObject {
      *
      * @return The time at which the user requested to speak, if present.
      */
-    public Optional<Instant> requestedToSpeakAt() {
+    public Optional<Instant> getRequestedToSpeakAt() {
         return data.requestToSpeakTimestamp()
                 .map(timestamp -> DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(timestamp, Instant::from));
     }
