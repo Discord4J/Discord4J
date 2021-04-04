@@ -163,7 +163,7 @@ public class MemberUpdateEvent extends GuildEvent {
      *
      * @return Whether the user has currently not yet passed the guild's Membership Screening requirements.
      */
-    public boolean getCurrentPending() {
+    public boolean isCurrentPending() {
         return Optional.ofNullable(currentPending).orElse(false);
     }
 
