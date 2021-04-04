@@ -26,6 +26,8 @@ import discord4j.discordjson.json.VoiceStateData;
 import discord4j.common.util.Snowflake;
 import reactor.core.publisher.Mono;
 
+import java.time.Instant;
+import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -253,6 +255,16 @@ public final class VoiceState implements DiscordObject {
      */
     public boolean isSuppressed() {
         return data.suppress();
+    }
+
+    /**
+     * Gets the time at which the user requested to speak, if present.
+     *
+     * @return The time at which the user requested to speak, if present.
+     */
+    public Optional<Instant> requestedToSpeakAt() {
+        return data.requestToSpeakTimestamp()
+                .map(timestamp -> DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(timestamp, Instant::from));
     }
 
     @Override
