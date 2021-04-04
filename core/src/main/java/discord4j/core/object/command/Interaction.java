@@ -54,6 +54,15 @@ public class Interaction implements DiscordObject {
     }
 
     /**
+     * Gets the id of the application this interaction is for.
+     *
+     * @return The id of the application this interaction is for.
+     */
+    public Snowflake getApplicationId() {
+        return Snowflake.of(data.applicationId());
+    }
+
+    /**
      * Gets the type of interaction.
      *
      * @return The type of interaction.
