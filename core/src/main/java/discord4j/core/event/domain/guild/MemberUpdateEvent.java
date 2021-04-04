@@ -177,6 +177,7 @@ public class MemberUpdateEvent extends GuildEvent {
                 ", currentNickname='" + currentNickname + '\'' +
                 ", currentJoinedAt='" + currentJoinedAt + '\'' +
                 ", currentPremiumSince='" + currentPremiumSince + '\'' +
+                ", currentPending='" + currentPending + '\'' +
                 '}';
     }
 }
