@@ -53,10 +53,13 @@ public class MemberUpdateEvent extends GuildEvent {
     private final String currentJoinedAt;
     @Nullable
     private final String currentPremiumSince;
+    @Nullable
+    private final Boolean currentPending;
 
     public MemberUpdateEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, long guildId, long memberId,
                              @Nullable Member old, Set<Long> currentRoleIds, @Nullable String currentNickname,
-                             String currentJoinedAt, @Nullable String currentPremiumSince) {
+                             String currentJoinedAt, @Nullable String currentPremiumSince,
+                             @Nullable Boolean currentPending) {
         super(gateway, shardInfo);
 
         this.guildId = guildId;
@@ -66,6 +69,7 @@ public class MemberUpdateEvent extends GuildEvent {
         this.currentNickname = currentNickname;
         this.currentJoinedAt = currentJoinedAt;
         this.currentPremiumSince = currentPremiumSince;
+        this.currentPending = currentPending;
     }
 
     /**
@@ -165,6 +169,15 @@ public class MemberUpdateEvent extends GuildEvent {
             .map(timestamp -> DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(timestamp, Instant::from));
     }
 
+    /**
+     * Gets whether the user has currently not yet passed the guild's Membership Screening requirements.
+     *
+     * @return Whether the user has currently not yet passed the guild's Membership Screening requirements.
+     */
+    public boolean isCurrentPending() {
+        return Optional.ofNullable(currentPending).orElse(false);
+    }
+
     @Override
     public String toString() {
         return "MemberUpdateEvent{" +
@@ -175,6 +188,7 @@ public class MemberUpdateEvent extends GuildEvent {
                 ", currentNickname='" + currentNickname + '\'' +
                 ", currentJoinedAt='" + currentJoinedAt + '\'' +
                 ", currentPremiumSince='" + currentPremiumSince + '\'' +
+                ", currentPending='" + currentPending + '\'' +
                 '}';
     }
 }
