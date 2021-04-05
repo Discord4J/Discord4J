@@ -30,13 +30,13 @@ class InteractionOperations implements RestInteraction, InteractionResponse, Gui
 
     private final RestClient restClient;
     private final InteractionData interactionData;
-    private final Mono<Long> applicationId;
+    private final long applicationId;
     private final InteractionMemberOperations memberOperations;
 
-    InteractionOperations(RestClient restClient, InteractionData interactionData, Mono<Long> applicationId) {
+    InteractionOperations(RestClient restClient, InteractionData interactionData) {
         this.restClient = restClient;
         this.interactionData = interactionData;
-        this.applicationId = applicationId;
+        this.applicationId = Snowflake.asLong(interactionData.applicationId());
         this.memberOperations = new InteractionMemberOperations(restClient, interactionData);
     }
 
@@ -99,7 +99,7 @@ class InteractionOperations implements RestInteraction, InteractionResponse, Gui
         InteractionResponseData responseData = InteractionResponseData.builder()
                 .type(InteractionResponseType.DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE.getValue())
                 .data(InteractionApplicationCommandCallbackData.builder()
-                        .flags(6)
+                        .flags(1 << 6)
                         .build())
                 .build();
         return new FollowupInteractionHandler(responseData, __ -> Mono.empty());
@@ -134,39 +134,39 @@ class InteractionOperations implements RestInteraction, InteractionResponse, Gui
 
     @Override
     public Mono<MessageData> editInitialResponse(WebhookMessageEditRequest request) {
-        return applicationId.flatMap(id -> restClient.getWebhookService()
-                .modifyWebhookMessage(id, interactionData.token(), "@original", request));
+        return restClient.getWebhookService()
+                .modifyWebhookMessage(applicationId, interactionData.token(), "@original", request);
     }
 
     @Override
     public Mono<Void> deleteInitialResponse() {
-        return applicationId.flatMap(id -> restClient.getWebhookService()
-                .deleteWebhookMessage(id, interactionData.token(), "@original"));
+        return restClient.getWebhookService()
+                .deleteWebhookMessage(applicationId, interactionData.token(), "@original");
     }
 
     @Override
     public Mono<MessageData> createFollowupMessage(String content) {
         WebhookExecuteRequest body = WebhookExecuteRequest.builder().content(content).build();
-        return applicationId.flatMap(id -> restClient.getWebhookService()
-                .executeWebhook(id, interactionData.token(), true,
-                        MultipartRequest.ofRequestAndFiles(body, Collections.emptyList())));
+        return restClient.getWebhookService()
+                .executeWebhook(applicationId, interactionData.token(), true,
+                        MultipartRequest.ofRequestAndFiles(body, Collections.emptyList()));
     }
 
     @Override
     public Mono<MessageData> createFollowupMessage(MultipartRequest<WebhookExecuteRequest> request, boolean wait) {
-        return applicationId.flatMap(id -> restClient.getWebhookService()
-                .executeWebhook(id, interactionData.token(), wait, request));
+        return restClient.getWebhookService()
+                .executeWebhook(applicationId, interactionData.token(), wait, request);
     }
 
     @Override
     public Mono<MessageData> editFollowupMessage(long messageId, WebhookMessageEditRequest request, boolean wait) {
-        return applicationId.flatMap(id -> restClient.getWebhookService()
-                .modifyWebhookMessage(id, interactionData.token(), String.valueOf(messageId), request));
+        return restClient.getWebhookService()
+                .modifyWebhookMessage(applicationId, interactionData.token(), String.valueOf(messageId), request);
     }
 
     @Override
     public Mono<Void> deleteFollowupMessage(long messageId) {
-        return applicationId.flatMap(id -> restClient.getWebhookService()
-                .deleteWebhookMessage(id, interactionData.token(), String.valueOf(messageId)));
+        return restClient.getWebhookService()
+                .deleteWebhookMessage(applicationId, interactionData.token(), String.valueOf(messageId));
     }
 }
