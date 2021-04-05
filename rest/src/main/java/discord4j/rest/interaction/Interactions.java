@@ -217,10 +217,7 @@ public class Interactions {
                                 .then();
                     } else if (type == 2) {
                         InteractionData interactionData = mapper.convertValue(node, InteractionData.class);
-                        // Fetching the app ID this way works because we only support bots for now
-                        Mono<Long> appIdMono = restClient.getApplicationId();
-
-                        InteractionOperations ops = new InteractionOperations(restClient, interactionData, appIdMono);
+                        InteractionOperations ops = new InteractionOperations(restClient, interactionData);
                         InteractionHandler handler = findHandler(interactionData).createResponseHandler(ops);
 
                         Scheduler timedScheduler = restClient.getRestResources().getReactorResources()
@@ -291,9 +288,7 @@ public class Interactions {
     }
 
     interface ApplicationCommandRequestDefinition {
-
         ApplicationCommandRequest getRequest();
-
     }
 
     static class GuildApplicationCommandRequest implements ApplicationCommandRequestDefinition {

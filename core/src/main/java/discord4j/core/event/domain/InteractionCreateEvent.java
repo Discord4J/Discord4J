@@ -31,7 +31,6 @@ import discord4j.rest.util.InteractionResponseType;
 import discord4j.rest.util.WebhookMultipartRequest;
 import reactor.core.publisher.Mono;
 
-import java.time.Duration;
 import java.util.function.Consumer;
 
 /**
@@ -190,51 +189,50 @@ public class InteractionCreateEvent extends Event {
 
         private final RestClient restClient;
         private final InteractionData interactionData;
-        private final Mono<Long> applicationId;
+        private final long applicationId;
 
         EventInteractionResponse(RestClient restClient, InteractionData interactionData) {
             this.restClient = restClient;
             this.interactionData = interactionData;
-            this.applicationId = restClient.getApplicationId()
-                    .cache(__ -> Duration.ofMillis(Long.MAX_VALUE), e -> Duration.ZERO, () -> Duration.ZERO);
+            this.applicationId = Snowflake.asLong(interactionData.applicationId());
         }
 
         @Override
         public Mono<MessageData> editInitialResponse(WebhookMessageEditRequest request) {
-            return applicationId.flatMap(id -> restClient.getWebhookService()
-                    .modifyWebhookMessage(id, interactionData.token(), "@original", request));
+            return restClient.getWebhookService()
+                    .modifyWebhookMessage(applicationId, interactionData.token(), "@original", request);
         }
 
         @Override
         public Mono<Void> deleteInitialResponse() {
-            return applicationId.flatMap(id -> restClient.getWebhookService()
-                    .deleteWebhookMessage(id, interactionData.token(), "@original"));
+            return restClient.getWebhookService()
+                    .deleteWebhookMessage(applicationId, interactionData.token(), "@original");
         }
 
         @Override
         public Mono<MessageData> createFollowupMessage(String content) {
             WebhookExecuteRequest body = WebhookExecuteRequest.builder().content(content).build();
             WebhookMultipartRequest request = new WebhookMultipartRequest(body);
-            return applicationId.flatMap(id -> restClient.getWebhookService()
-                    .executeWebhook(id, interactionData.token(), true, request));
+            return restClient.getWebhookService()
+                    .executeWebhook(applicationId, interactionData.token(), true, request);
         }
 
         @Override
         public Mono<MessageData> createFollowupMessage(WebhookMultipartRequest request, boolean wait) {
-            return applicationId.flatMap(id -> restClient.getWebhookService()
-                    .executeWebhook(id, interactionData.token(), wait, request));
+            return restClient.getWebhookService()
+                    .executeWebhook(applicationId, interactionData.token(), wait, request);
         }
 
         @Override
         public Mono<MessageData> editFollowupMessage(long messageId, WebhookMessageEditRequest request, boolean wait) {
-            return applicationId.flatMap(id -> restClient.getWebhookService()
-                    .modifyWebhookMessage(id, interactionData.token(), String.valueOf(messageId), request));
+            return restClient.getWebhookService()
+                    .modifyWebhookMessage(applicationId, interactionData.token(), String.valueOf(messageId), request);
         }
 
         @Override
         public Mono<Void> deleteFollowupMessage(long messageId) {
-            return applicationId.flatMap(id -> restClient.getWebhookService()
-                    .deleteWebhookMessage(id, interactionData.token(), String.valueOf(messageId)));
+            return restClient.getWebhookService()
+                    .deleteWebhookMessage(applicationId, interactionData.token(), String.valueOf(messageId));
         }
     }
 }
