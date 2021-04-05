@@ -44,7 +44,9 @@ class ChannelDispatchHandlers {
         return Mono.fromCallable(() -> {
             switch (type) {
                 case GUILD_TEXT: return new TextChannelCreateEvent(gateway, context.getShardInfo(), new TextChannel(gateway, channel));
-                case GUILD_VOICE: return new VoiceChannelCreateEvent(gateway, context.getShardInfo(), new VoiceChannel(gateway, channel));
+                case GUILD_VOICE:
+                case GUILD_STAGE_VOICE:
+                    return new VoiceChannelCreateEvent(gateway, context.getShardInfo(), new VoiceChannel(gateway, channel));
                 case GROUP_DM:
                     throw new UnsupportedOperationException("Received channel_create for group on a bot account!");
                 case GUILD_CATEGORY: return new CategoryCreateEvent(gateway, context.getShardInfo(), new Category(gateway, channel));
@@ -64,7 +66,9 @@ class ChannelDispatchHandlers {
             switch (type) {
                 case GUILD_TEXT: return new TextChannelDeleteEvent(gateway, context.getShardInfo(), new TextChannel(gateway, channel));
                 case DM: return new PrivateChannelDeleteEvent(gateway, context.getShardInfo(), new PrivateChannel(gateway, channel));
-                case GUILD_VOICE: return new VoiceChannelDeleteEvent(gateway, context.getShardInfo(), new VoiceChannel(gateway, channel));
+                case GUILD_VOICE:
+                case GUILD_STAGE_VOICE:
+                    return new VoiceChannelDeleteEvent(gateway, context.getShardInfo(), new VoiceChannel(gateway, channel));
                 case GROUP_DM:
                     throw new UnsupportedOperationException("Received channel_delete for a group on a bot account!");
                 case GUILD_CATEGORY: return new CategoryDeleteEvent(gateway, context.getShardInfo(), new Category(gateway, channel));
@@ -102,9 +106,11 @@ class ChannelDispatchHandlers {
                         oldData.map(old -> new TextChannel(gateway, old)).orElse(null));
                 case DM:
                     throw new UnsupportedOperationException("Received channel_update for a DM on a bot account!");
-                case GUILD_VOICE: return new VoiceChannelUpdateEvent(gateway, context.getShardInfo(),
-                        new VoiceChannel(gateway, channel),
-                        oldData.map(old -> new VoiceChannel(gateway, old)).orElse(null));
+                case GUILD_VOICE:
+                case GUILD_STAGE_VOICE:
+                    return new VoiceChannelUpdateEvent(gateway, context.getShardInfo(),
+                            new VoiceChannel(gateway, channel),
+                            oldData.map(old -> new VoiceChannel(gateway, old)).orElse(null));
                 case GROUP_DM:
                     throw new UnsupportedOperationException("Received channel_update for a group on a bot account!");
                 case GUILD_CATEGORY: return new CategoryUpdateEvent(gateway, context.getShardInfo(),
