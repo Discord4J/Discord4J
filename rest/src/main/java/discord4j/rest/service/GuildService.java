@@ -103,6 +103,14 @@ public class GuildService extends RestService {
                 .flatMapMany(Flux::fromArray);
     }
 
+    public Flux<MemberData> searchGuildMembers(long guildId, SearchGuildMembersRequest request) {
+        return Routes.SEARCH_GUILD_MEMBERS_GET.newRequest(guildId)
+            .query(request)
+            .exchange(getRouter())
+            .bodyToMono(MemberData[].class)
+            .flatMapMany(Flux::fromArray);
+    }
+
     public Mono<MemberData> addGuildMember(long guildId, long userId, GuildMemberAddRequest request) {
         return Routes.GUILD_MEMBER_ADD.newRequest(guildId, userId)
                 .body(request)
