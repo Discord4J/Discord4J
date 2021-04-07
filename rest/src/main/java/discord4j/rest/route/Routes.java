@@ -1080,6 +1080,8 @@ public abstract class Routes {
 
     public static final Route APPLICATION_COMMAND_PERMISSIONS_MODIFY = Route.put("/applications/{application.id}/guilds/{guild.id}/commands/{command.id}/permissions");
 
+    public static final Route APPLICATION_COMMAND_PERMISSIONS_BULK_MODIFY = Route.put("/applications/{application.id}/guilds/{guild.id}/commands/permissions");
+
     ///////////////////////////////////////////
     ////////// Interaction Resource ///////////
     ///////////////////////////////////////////
