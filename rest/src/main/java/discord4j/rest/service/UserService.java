@@ -64,13 +64,6 @@ public class UserService extends RestService {
                 .bodyToMono(Void.class);
     }
 
-    public Flux<ChannelData> getUserDMs() {
-        return Routes.USER_DMS_GET.newRequest()
-                .exchange(getRouter())
-                .bodyToMono(ChannelData[].class)
-                .flatMapMany(Flux::fromArray);
-    }
-
     public Mono<ChannelData> createDM(DMCreateRequest request) {
         return Routes.USER_DM_CREATE.newRequest()
                 .body(request)
