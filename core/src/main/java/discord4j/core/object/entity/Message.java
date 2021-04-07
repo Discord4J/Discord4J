@@ -813,7 +813,9 @@ public final class Message implements Entity {
         /** A message created with a reply */
         REPLY(19),
 
-        APPLICATION_COMMAND(20);
+        APPLICATION_COMMAND(20),
+
+        GUILD_INVITE_REMINDER(22);
 
         /**
          * The underlying value as represented by Discord.
@@ -866,6 +868,7 @@ public final class Message implements Entity {
                 case 17: return GUILD_DISCOVERY_GRACE_PERIOD_FINAL_WARNING;
                 case 19: return REPLY;
                 case 20: return APPLICATION_COMMAND;
+                case 22: return GUILD_INVITE_REMINDER;
                 default: return UNKNOWN;
             }
         }
