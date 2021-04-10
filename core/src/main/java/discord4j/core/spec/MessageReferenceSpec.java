@@ -63,6 +63,19 @@ public class MessageReferenceSpec implements Spec<MessageReferenceData> {
         return this;
     }
 
+    /**
+     * Sets to error if the referenced message doesn't exist instead of sending as a normal (non-reply) message,
+     * default true.
+     *
+     * @param failIfNotExists Whether to error if the referenced message doesn't exist instead of sending as a normal
+     *                        (non-reply) message.
+     * @return This spec.
+     */
+    public MessageReferenceSpec setFailIfNotExists(boolean failIfNotExists) {
+        requestBuilder.failIfNotExists(failIfNotExists);
+        return this;
+    }
+
     @Override
     public MessageReferenceData asRequest() {
         return requestBuilder.build();
