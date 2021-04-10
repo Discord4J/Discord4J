@@ -24,7 +24,7 @@ import discord4j.core.object.DiscordObject;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.User;
-import discord4j.core.object.entity.channel.TextChannel;
+import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.discordjson.json.InteractionData;
 import discord4j.discordjson.json.UserData;
 import reactor.core.publisher.Mono;
@@ -130,8 +130,8 @@ public class Interaction implements DiscordObject {
      *
      * @return The channel it was sent from.
      */
-    public Mono<TextChannel> getChannel() {
-        return gateway.getChannelById(getChannelId()).cast(TextChannel.class);
+    public Mono<MessageChannel> getChannel() {
+        return gateway.getChannelById(getChannelId()).cast(MessageChannel.class);
     }
 
     /**
