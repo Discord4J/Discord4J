@@ -111,7 +111,7 @@ public class InviteCreateSpec implements AuditSpec<InviteCreateRequest> {
     /**
      * Sets the id of the embedded application to open for this invite, required if `target_type` is 2, the
      * application must have the `EMBEDDED` flag.
-     * 
+     *
      * @param targetApplicationId The id of the embedded application to open for this invite.
      * @return This spec.
      */
