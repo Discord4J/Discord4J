@@ -63,9 +63,19 @@ public class AuditLogEntry implements Entity {
      * Gets the user who made the changes.
      *
      * @return The user who made the changes.
+     * @deprecated Use {@link AuditLogEntry#getUserId}
      */
     public Snowflake getResponsibleUserId() {
-        return Snowflake.of(data.userId());
+        return getUserId().orElse(null);
+    }
+
+    /**
+     * Gets the user who made the changes, if present.
+     *
+     * @return The user who made the changes, if present.
+     */
+    public Optional<Snowflake> getUserId() {
+        return data.userId().map(Snowflake::of);
     }
 
     /**
