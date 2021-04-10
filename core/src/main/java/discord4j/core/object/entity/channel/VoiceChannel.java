@@ -18,6 +18,7 @@ package discord4j.core.object.entity.channel;
 
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
+import discord4j.core.object.Embed;
 import discord4j.core.object.VoiceState;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.spec.VoiceChannelEditSpec;
@@ -26,6 +27,7 @@ import discord4j.core.util.EntityUtil;
 import discord4j.discordjson.Id;
 import discord4j.discordjson.json.ChannelData;
 import discord4j.discordjson.json.gateway.VoiceStateUpdate;
+import discord4j.discordjson.possible.Possible;
 import discord4j.gateway.GatewayClientGroup;
 import discord4j.gateway.json.ShardGatewayPayload;
 import discord4j.store.api.util.LongLongTuple2;
@@ -34,6 +36,7 @@ import discord4j.voice.VoiceConnectionRegistry;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.Optional;
 import java.util.function.Consumer;
 
 /** A Discord voice channel. */
@@ -65,6 +68,24 @@ public final class VoiceChannel extends BaseCategorizableChannel {
      */
     public int getUserLimit() {
         return getData().userLimit().toOptional().orElseThrow(IllegalStateException::new);
+    }
+
+    /**
+     * Gets the voice region id for the voice channel, automatic if not present.
+     *
+     * @return The voice region id for the voice channel, automatic if not present.
+     */
+    public Optional<String> getRtcRegion() {
+        return Possible.flatOpt(getData().rtcRegion());
+    }
+
+    /**
+     * Gets the camera video quality mode of the voice channel.
+     *
+     * @return The camera video quality mode of the voice channel.
+     */
+    public Mode getVideoQualityMode() {
+        return getData().videoQualityMode().toOptional().map(Mode::of).orElse(Mode.AUTO);
     }
 
     /**
@@ -191,5 +212,54 @@ public final class VoiceChannel extends BaseCategorizableChannel {
     @Override
     public String toString() {
         return "VoiceChannel{} " + super.toString();
+    }
+
+    /** Represents the various video quality modes. */
+    public enum Mode {
+
+        /** Unknown type. */
+        UNKNOWN(-1),
+
+        /** Discord chooses the quality for optimal performance. */
+        AUTO(1),
+
+        /** 720p */
+        FULL(2);
+
+        /** The underlying value as represented by Discord. */
+        private final int value;
+
+        /**
+         * Constructs an {@code Embed.Type}.
+         *
+         * @param value The underlying value as represented by Discord.
+         */
+        Mode(final int value) {
+            this.value = value;
+        }
+
+        /**
+         * Gets the underlying value as represented by Discord.
+         *
+         * @return The underlying value as represented by Discord.
+         */
+        public int getValue() {
+            return value;
+        }
+
+        /**
+         * Gets the video quality mode. It is guaranteed that invoking {@link #getValue()} from the returned enum will equal
+         * ({@link #equals(Object)}) the supplied {@code value}.
+         *
+         * @param value The underlying value as represented by Discord.
+         * @return The the video quality mode.
+         */
+        public static VoiceChannel.Mode of(final int value) {
+            switch (value) {
+                case 1: return AUTO;
+                case 2: return FULL;
+                default: return UNKNOWN;
+            }
+        }
     }
 }
