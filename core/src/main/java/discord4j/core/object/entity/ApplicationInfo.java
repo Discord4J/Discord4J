@@ -160,6 +160,24 @@ public final class ApplicationInfo implements Entity {
         return gateway.withRetrievalStrategy(retrievalStrategy).getUserById(getOwnerId());
     }
 
+    /**
+     * Gets the url of the app's terms of service, if present.
+     *
+     * @return The url of the app's terms of service, if present.
+     */
+    public Optional<String> getTermsOfServiceUrl() {
+        return data.termsOfServiceUrl().toOptional();
+    }
+
+    /**
+     * Gets the url of the app's privacy policy, if present.
+     *
+     * @return The url of the app's privacy policy, if present.
+     */
+    public Optional<String> getPrivacyPolicyUrl() {
+        return data.privacyPolicyUrl().toOptional();
+    }
+
     @Override
     public boolean equals(@Nullable final Object obj) {
         return EntityUtil.equals(this, obj);
