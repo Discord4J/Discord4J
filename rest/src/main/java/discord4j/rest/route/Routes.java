@@ -903,6 +903,7 @@ public abstract class Routes {
      * @see <a href="https://discord.com/developers/docs/resources/user#get-user-dms">
      * https://discord.com/developers/docs/resources/user#get-user-dms</a>
      */
+    @Deprecated
     public static final Route USER_DMS_GET = Route.get("/users/@me/channels");
 
     /**
