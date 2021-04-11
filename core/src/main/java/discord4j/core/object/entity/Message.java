@@ -492,6 +492,9 @@ public final class Message implements Entity {
         return Mono.defer(
                 () -> {
                     MessageEditSpec mutatedSpec = new MessageEditSpec();
+                    getClient().getRestClient().getRestResources()
+                        .getAllowedMentions()
+                        .ifPresent(mutatedSpec::setAllowedMentions);
                     spec.accept(mutatedSpec);
                     return gateway.getRestClient().getChannelService()
                             .editMessage(getChannelId().asLong(), getId().asLong(), mutatedSpec.asRequest());
