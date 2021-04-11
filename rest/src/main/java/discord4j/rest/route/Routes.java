@@ -886,14 +886,6 @@ public abstract class Routes {
     public static final Route GUILD_LEAVE = Route.delete("/users/@me/guilds/{guild.id}");
 
     /**
-     * Returns a list of DM channel objects.
-     *
-     * @see <a href="https://discord.com/developers/docs/resources/user#get-user-dms">
-     * https://discord.com/developers/docs/resources/user#get-user-dms</a>
-     */
-    public static final Route USER_DMS_GET = Route.get("/users/@me/channels");
-
-    /**
      * Create a new DM channel with a user. Returns a DM channel object.
      *
      * @see <a href="https://discord.com/developers/docs/resources/user#create-dm">
