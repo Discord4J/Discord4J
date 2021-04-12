@@ -93,7 +93,10 @@ public interface Channel extends Entity {
         GUILD_NEWS(5),
 
         /** Represents a {@link StoreChannel}. */
-        GUILD_STORE(6);
+        GUILD_STORE(6),
+
+        /** Represents a {@link VoiceChannel} for hosting events with an audience. */
+        GUILD_STAGE_VOICE(13);
 
         /** The underlying value as represented by Discord. */
         private final int value;
@@ -132,6 +135,7 @@ public interface Channel extends Entity {
                 case 4: return GUILD_CATEGORY;
                 case 5: return GUILD_NEWS;
                 case 6: return GUILD_STORE;
+                case 13: return GUILD_STAGE_VOICE;
                 default: return UNKNOWN;
             }
         }

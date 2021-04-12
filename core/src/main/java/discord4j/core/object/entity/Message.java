@@ -493,6 +493,9 @@ public final class Message implements Entity {
         return Mono.defer(
                 () -> {
                     MessageEditSpec mutatedSpec = new MessageEditSpec();
+                    getClient().getRestClient().getRestResources()
+                        .getAllowedMentions()
+                        .ifPresent(mutatedSpec::setAllowedMentions);
                     spec.accept(mutatedSpec);
                     return gateway.getRestClient().getChannelService()
                             .editMessage(getChannelId().asLong(), getId().asLong(), mutatedSpec.asRequest());
@@ -649,19 +652,13 @@ public final class Message implements Entity {
      */
     public enum Flag {
 
-        /**
-         * This message has been published to subscribed channels (via Channel Following).
-         */
+        /** This message has been published to subscribed channels (via Channel Following). */
         CROSSPOSTED(0),
 
-        /**
-         * This message originated from a message in another channel (via Channel Following).
-         */
+        /** This message originated from a message in another channel (via Channel Following). */
         IS_CROSSPOST(1),
 
-        /**
-         * Do not include any embeds when serializing this message.
-         */
+        /** Do not include any embeds when serializing this message. */
         SUPPRESS_EMBEDS(2),
 
         /** The source message for this crosspost has been deleted (via Channel Following). */
@@ -671,7 +668,10 @@ public final class Message implements Entity {
         URGENT(4),
 
         /** This message is an ephemeral interaction response. */
-        EPHEMERAL(6);
+        EPHEMERAL(6),
+
+        /** This message is an Interaction Response and the bot is "thinking". */
+        LOADING(7);
 
         /**
          * The underlying value as represented by Discord.
@@ -810,8 +810,14 @@ public final class Message implements Entity {
         /** A message created when the Guild is requalified for Discovery Feature **/
         GUILD_DISCOVERY_REQUALIFIED(15),
 
+        GUILD_DISCOVERY_GRACE_PERIOD_INITIAL_WARNING(16),
+
+        GUILD_DISCOVERY_GRACE_PERIOD_FINAL_WARNING(17),
+
         /** A message created with a reply */
-        REPLY(0);
+        REPLY(0),
+
+        APPLICATION_COMMAND(0);
 
         /**
          * The underlying value as represented by Discord.
@@ -860,6 +866,8 @@ public final class Message implements Entity {
                 case 12: return CHANNEL_FOLLOW_ADD;
                 case 14: return GUILD_DISCOVERY_DISQUALIFIED;
                 case 15: return GUILD_DISCOVERY_REQUALIFIED;
+                case 16: return GUILD_DISCOVERY_GRACE_PERIOD_INITIAL_WARNING;
+                case 17: return GUILD_DISCOVERY_GRACE_PERIOD_FINAL_WARNING;
                 default: return UNKNOWN;
             }
         }

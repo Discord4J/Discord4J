@@ -487,6 +487,14 @@ public abstract class Routes {
     public static final Route GUILD_MEMBERS_LIST = Route.get("/guilds/{guild.id}/members");
 
     /**
+     * Returns a list of guild member objects whose username or nickname starts with a provided string.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/guild#search-guild-members">
+     * https://discord.com/developers/docs/resources/guild#search-guild-members</a>
+     */
+    public static final Route SEARCH_GUILD_MEMBERS_GET = Route.get("/guilds/{guild.id}/members/search");
+
+    /**
      * Adds a user to the guild, provided you have a valid oauth2 access token for the user with the guilds.join scope.
      * Returns a 201 Created with the guild member as the body. Fires a Guild Member Add Gateway event. Requires the
      * bot to have the CREATE_INSTANT_INVITE permission.
@@ -745,6 +753,22 @@ public abstract class Routes {
      */
     public static final Route GUILD_PREVIEW_GET = Route.get("/guilds/{guild.id}/preview");
 
+    /**
+     * Updates the current user's voice state.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/guild#update-self-voice-state">
+     * https://discord.com/developers/docs/resources/guild#update-self-voice-state</a>
+     */
+    public static final Route SELF_VOICE_STATE_MODIFY = Route.patch("/guilds/{guild.id}/voice-states/@me");
+
+    /**
+     * Updates another user's voice state.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/guild#update-others-voice-state">
+     * https://discord.com/developers/docs/resources/guild#update-others-voice-state</a>
+     */
+    public static final Route OTHERS_VOICE_STATE_MODIFY = Route.patch("/guilds/{guild.id}/voice-states/{user.id}");
+
     /////////////////////////////////////////////
     ////////////// Invite Resource //////////////
     /////////////////////////////////////////////
@@ -887,6 +911,7 @@ public abstract class Routes {
      * @see <a href="https://discord.com/developers/docs/resources/user#get-user-dms">
      * https://discord.com/developers/docs/resources/user#get-user-dms</a>
      */
+    @Deprecated
     public static final Route USER_DMS_GET = Route.get("/users/@me/channels");
 
     /**

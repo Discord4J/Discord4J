@@ -57,6 +57,24 @@ public class RestRole {
     }
 
     /**
+     * Returns the ID of the guild this role belongs to.
+     *
+     * @return The ID of the the guild this role belongs to.
+     */
+    public Snowflake getGuildId() {
+        return Snowflake.of(guildId);
+    }
+
+    /**
+     * Returns the ID of this role.
+     *
+     * @return The ID of this role
+     */
+    public Snowflake getId() {
+        return Snowflake.of(id);
+    }
+
+    /**
      * Return the guild tied to this role as a REST operations handle.
      *
      * @return the parent guild for this role

@@ -64,6 +64,7 @@ public class UserService extends RestService {
                 .bodyToMono(Void.class);
     }
 
+    @Deprecated
     public Flux<ChannelData> getUserDMs() {
         return Routes.USER_DMS_GET.newRequest()
                 .exchange(getRouter())

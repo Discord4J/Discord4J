@@ -36,6 +36,8 @@ public class LocalVoiceSendTask implements Disposable {
     private final PacketTransformer transformer;
     private final Disposable task;
     private final AtomicBoolean speaking = new AtomicBoolean();
+    private final AtomicBoolean sentSilence = new AtomicBoolean();
+    private final byte[] silence = new byte[]{(byte) 0xF8, (byte) 0xFF, (byte) 0xFE};
 
     public LocalVoiceSendTask(Scheduler scheduler, Consumer<Boolean> speakingSender, Consumer<ByteBuf> voiceSender,
                               AudioProvider provider, PacketTransformer transformer) {
@@ -73,6 +75,8 @@ public class LocalVoiceSendTask implements Disposable {
             voiceSender.accept(packet);
         } else if (speaking.compareAndSet(true, false)) {
             changeSpeaking(false);
+        } else if (sentSilence.compareAndSet(false, true)) {
+            voiceSender.accept(Unpooled.wrappedBuffer(transformer.nextSend(silence)));
         }
     }
 

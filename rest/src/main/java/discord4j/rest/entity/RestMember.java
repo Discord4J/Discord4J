@@ -53,6 +53,24 @@ public class RestMember {
         return new RestMember(restClient, guildId, id);
     }
 
+    /**
+     * Returns the ID of the guild this member belongs to.
+     *
+     * @return The ID of the the guild this member belongs to.
+     */
+    public Snowflake getGuildId() {
+        return Snowflake.of(guildId);
+    }
+
+    /**
+     * Returns the ID of this member.
+     *
+     * @return The ID of this member
+     */
+    public Snowflake getId() {
+        return Snowflake.of(id);
+    }
+
     public RestGuild guild() {
         return RestGuild.create(restClient, guildId);
     }
