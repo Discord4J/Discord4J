@@ -348,14 +348,14 @@ public class GuildService extends RestService {
             .bodyToMono(GuildPreviewData.class);
     }
 
-    public Mono<Void> modifySelfVoiceState(long guildId, UpdateSelfVoiceStateRequest request) {
+    public Mono<Void> modifySelfVoiceState(long guildId, UpdateCurrentUserVoiceStateRequest request) {
         return Routes.SELF_VOICE_STATE_MODIFY.newRequest(guildId)
             .body(request)
             .exchange(getRouter())
             .bodyToMono(Void.class);
     }
 
-    public Mono<Void> modifyOthersVoiceState(long guildId, long userId, UpdateOthersVoiceStateRequest request) {
+    public Mono<Void> modifyOthersVoiceState(long guildId, long userId, UpdateUserVoiceStateRequest request) {
         return Routes.OTHERS_VOICE_STATE_MODIFY.newRequest(guildId, userId)
             .body(request)
             .exchange(getRouter())
