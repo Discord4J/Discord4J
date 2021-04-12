@@ -345,7 +345,7 @@ public final class Guild implements Entity {
      * @return The number of boosts this server currently has, if present.
      */
     public OptionalInt getPremiumSubscriptionCount() {
-        return Possible.flatOpt(data.premiumSubscriptionCount())
+        return data.premiumSubscriptionCount().toOptional()
                 .map(OptionalInt::of)
                 .orElse(OptionalInt.empty());
     }
@@ -358,7 +358,7 @@ public final class Guild implements Entity {
      * to "en-US".
      */
     public Locale getPreferredLocale() {
-        return new Locale.Builder().setLanguageTag(data.preferredLocale().orElse("en-US")).build();
+        return new Locale.Builder().setLanguageTag(data.preferredLocale()).build();
     }
 
     /**
