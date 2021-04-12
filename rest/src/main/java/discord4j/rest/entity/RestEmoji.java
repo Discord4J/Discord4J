@@ -57,6 +57,24 @@ public class RestEmoji {
     }
 
     /**
+     * Returns the ID of the guild this emoji belongs to.
+     *
+     * @return The ID of the the guild this emoji belongs to.
+     */
+    public Snowflake getGuildId() {
+        return Snowflake.of(guildId);
+    }
+
+    /**
+     * Returns the ID of this emoji.
+     *
+     * @return The ID of this emoji
+     */
+    public Snowflake getId() {
+        return Snowflake.of(id);
+    }
+
+    /**
      * Return this emoji's parent {@link RestGuild}. This method does not perform any API request.
      *
      * @return the parent {@code RestGuild} of this guild emoji.

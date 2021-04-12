@@ -745,6 +745,22 @@ public abstract class Routes {
      */
     public static final Route GUILD_PREVIEW_GET = Route.get("/guilds/{guild.id}/preview");
 
+    /**
+     * Updates the current user's voice state.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/guild#update-self-voice-state">
+     * https://discord.com/developers/docs/resources/guild#update-self-voice-state</a>
+     */
+    public static final Route SELF_VOICE_STATE_MODIFY = Route.patch("/guilds/{guild.id}/voice-states/@me");
+
+    /**
+     * Updates another user's voice state.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/guild#update-others-voice-state">
+     * https://discord.com/developers/docs/resources/guild#update-others-voice-state</a>
+     */
+    public static final Route OTHERS_VOICE_STATE_MODIFY = Route.patch("/guilds/{guild.id}/voice-states/{user.id}");
+
     /////////////////////////////////////////////
     ////////////// Invite Resource //////////////
     /////////////////////////////////////////////

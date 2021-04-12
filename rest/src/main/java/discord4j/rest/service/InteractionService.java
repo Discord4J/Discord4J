@@ -16,7 +16,6 @@
  */
 package discord4j.rest.service;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import discord4j.discordjson.json.InteractionResponseData;
 import discord4j.rest.request.Router;
 import discord4j.rest.route.Routes;
@@ -28,10 +27,10 @@ public class InteractionService extends RestService {
         super(router);
     }
 
-    public Mono<JsonNode> createInteractionResponse(long interactionId, String interactionToken, InteractionResponseData response) {
+    public Mono<Void> createInteractionResponse(long interactionId, String interactionToken, InteractionResponseData response) {
         return Routes.INTERACTION_RESPONSE_CREATE.newRequest(interactionId, interactionToken)
             .body(response)
             .exchange(getRouter())
-            .bodyToMono(JsonNode.class);
+            .bodyToMono(Void.class);
     }
 }

@@ -44,7 +44,9 @@ class ChannelDispatchHandlers {
         switch (type) {
             case GUILD_TEXT: return textChannelCreate(context);
             case DM: return privateChannelCreate(context);
-            case GUILD_VOICE: return voiceChannelCreate(context);
+            case GUILD_VOICE:
+            case GUILD_STAGE_VOICE:
+                return voiceChannelCreate(context);
             case GROUP_DM:
                 throw new UnsupportedOperationException("Received channel_create for group on a bot account!");
             case GUILD_CATEGORY: return categoryCreate(context);
@@ -136,7 +138,9 @@ class ChannelDispatchHandlers {
         switch (type) {
             case GUILD_TEXT: return textChannelDelete(context);
             case DM: return privateChannelDelete(context);
-            case GUILD_VOICE: return voiceChannelDelete(context);
+            case GUILD_VOICE:
+            case GUILD_STAGE_VOICE:
+                return voiceChannelDelete(context);
             case GROUP_DM:
                 throw new UnsupportedOperationException("Received channel_delete for a group on a bot account!");
             case GUILD_CATEGORY: return categoryDelete(context);
@@ -249,7 +253,9 @@ class ChannelDispatchHandlers {
             case GUILD_TEXT: return textChannelUpdate(context);
             case DM:
                 throw new UnsupportedOperationException("Received channel_update for a DM on a bot account!");
-            case GUILD_VOICE: return voiceChannelUpdate(context);
+            case GUILD_VOICE:
+            case GUILD_STAGE_VOICE:
+                return voiceChannelUpdate(context);
             case GROUP_DM:
                 throw new UnsupportedOperationException("Received channel_update for a group on a bot account!");
             case GUILD_CATEGORY: return categoryUpdate(context);

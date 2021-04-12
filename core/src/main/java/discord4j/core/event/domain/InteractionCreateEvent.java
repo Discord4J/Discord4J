@@ -21,6 +21,7 @@ import discord4j.common.annotations.Experimental;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.command.Interaction;
+import discord4j.core.object.entity.Message;
 import discord4j.core.spec.InteractionApplicationCommandCallbackSpec;
 import discord4j.discordjson.json.*;
 import discord4j.gateway.ShardInfo;
@@ -30,7 +31,6 @@ import discord4j.rest.util.InteractionResponseType;
 import discord4j.rest.util.WebhookMultipartRequest;
 import reactor.core.publisher.Mono;
 
-import java.time.Duration;
 import java.util.function.Consumer;
 
 /**
@@ -88,12 +88,13 @@ public class InteractionCreateEvent extends Event {
         String token = interaction.getToken();
 
         return getClient().rest().getInteractionService()
-                .createInteractionResponse(id, token, responseData)
-                .then();
+                .createInteractionResponse(id, token, responseData);
     }
 
     /**
-     * Acknowledges the interaction indicating a response will be edited later. The user sees a loading state
+     * Acknowledges the interaction indicating a response will be edited later. The user sees a loading state, visible
+     * to all participants in the invoking channel. For a "only you can see this" response, see
+     * {@link #acknowledgeEphemeral()}, or to include a message, {@link #replyEphemeral(String)}
      *
      * @return A {@link Mono} where, upon successful completion, emits nothing; acknowledging the interaction
      * and indicating a response will be edited later. The user sees a loading state. If an error is received, it
@@ -107,13 +108,28 @@ public class InteractionCreateEvent extends Event {
     }
 
     /**
+     * Acknowledges the interaction indicating a response will be edited later. Only the invoking user sees a loading
+     * state.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits nothing, acknowledging the interaction
+     * and indicating a response will be edited later. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Void> acknowledgeEphemeral() {
+        return createInteractionResponse(InteractionResponseData.builder()
+                .type(InteractionResponseType.DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE.getValue())
+                .data(InteractionApplicationCommandCallbackData.builder()
+                        .flags(Message.Flag.EPHEMERAL.getFlag())
+                        .build())
+                .build());
+    }
+
+    /**
      * Requests to respond to the interaction with only
      * {@link InteractionApplicationCommandCallbackSpec#setContent(String) content}.
      *
      * @param content A string message to populate the message with.
-     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the interaction response has
+     * @return A {@link Mono} where, upon successful completion, emits nothing, indicating the interaction response has
      * been sent. If an error is received, it is emitted through the {@code Mono}.
-     *
      * @see InteractionApplicationCommandCallbackSpec#setContent(String)
      */
     public Mono<Void> reply(final String content) {
@@ -129,7 +145,6 @@ public class InteractionCreateEvent extends Event {
      * @param content A string message to populate the message with.
      * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the ephemeral interaction
      * response has been sent. If an error is received, it is emitted through the {@code Mono}.
-     *
      * @see InteractionApplicationCommandCallbackSpec#setContent(String)
      * @see InteractionApplicationCommandCallbackSpec#setEphemeral(boolean)
      */
@@ -174,45 +189,50 @@ public class InteractionCreateEvent extends Event {
 
         private final RestClient restClient;
         private final InteractionData interactionData;
-        private final Mono<Long> applicationId;
+        private final long applicationId;
 
         EventInteractionResponse(RestClient restClient, InteractionData interactionData) {
             this.restClient = restClient;
             this.interactionData = interactionData;
-            this.applicationId = restClient.getApplicationId()
-                    .cache(__ -> Duration.ofMillis(Long.MAX_VALUE), e -> Duration.ZERO, () -> Duration.ZERO);
+            this.applicationId = Snowflake.asLong(interactionData.applicationId());
         }
 
         @Override
         public Mono<MessageData> editInitialResponse(WebhookMessageEditRequest request) {
-            return applicationId.flatMap(id -> restClient.getWebhookService()
-                    .modifyWebhookMessage(id, interactionData.token(), "@original", request));
+            return restClient.getWebhookService()
+                    .modifyWebhookMessage(applicationId, interactionData.token(), "@original", request);
         }
 
         @Override
         public Mono<Void> deleteInitialResponse() {
-            return applicationId.flatMap(id -> restClient.getWebhookService()
-                    .deleteWebhookMessage(id, interactionData.token(), "@original"));
+            return restClient.getWebhookService()
+                    .deleteWebhookMessage(applicationId, interactionData.token(), "@original");
         }
 
         @Override
         public Mono<MessageData> createFollowupMessage(String content) {
             WebhookExecuteRequest body = WebhookExecuteRequest.builder().content(content).build();
             WebhookMultipartRequest request = new WebhookMultipartRequest(body);
-            return applicationId.flatMap(id -> restClient.getWebhookService()
-                    .executeWebhook(id, interactionData.token(), true, request));
+            return restClient.getWebhookService()
+                    .executeWebhook(applicationId, interactionData.token(), true, request);
         }
 
         @Override
         public Mono<MessageData> createFollowupMessage(WebhookMultipartRequest request, boolean wait) {
-            return applicationId.flatMap(id -> restClient.getWebhookService()
-                    .executeWebhook(id, interactionData.token(), wait, request));
+            return restClient.getWebhookService()
+                    .executeWebhook(applicationId, interactionData.token(), wait, request);
         }
 
         @Override
         public Mono<MessageData> editFollowupMessage(long messageId, WebhookMessageEditRequest request, boolean wait) {
-            return applicationId.flatMap(id -> restClient.getWebhookService()
-                    .modifyWebhookMessage(id, interactionData.token(), String.valueOf(messageId), request));
+            return restClient.getWebhookService()
+                    .modifyWebhookMessage(applicationId, interactionData.token(), String.valueOf(messageId), request);
+        }
+
+        @Override
+        public Mono<Void> deleteFollowupMessage(long messageId) {
+            return restClient.getWebhookService()
+                    .deleteWebhookMessage(applicationId, interactionData.token(), String.valueOf(messageId));
         }
     }
 }
