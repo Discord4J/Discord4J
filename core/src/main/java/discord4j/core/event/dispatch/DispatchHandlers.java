@@ -300,17 +300,13 @@ public class DispatchHandlers implements DispatchEventMapper {
         long id = Snowflake.asLong(context.getDispatch().id());
         Long applicationId = context.getDispatch().applicationId().toOptional().map(Snowflake::asLong).orElse(null);
 
-        // TODO: Cache?
-
         return Mono.just(new IntegrationDeleteEvent(context.getGateway(), context.getShardInfo(), id, guildId,
                 applicationId));
     }
 
     private static Mono<IntegrationUpdateEvent> integrationUpdate(DispatchContext<IntegrationUpdate> context) {
         long guildId = Snowflake.asLong(context.getDispatch().guildId());
-        Integration integration = new Integration(context.getGateway(), context.getDispatch().integration());
-
-        // TODO: Cache?
+        Integration integration = new Integration(context.getGateway(), context.getDispatch().integration(), guildId);
 
         return Mono.just(new IntegrationUpdateEvent(context.getGateway(), context.getShardInfo(), guildId,
                 integration));
@@ -318,9 +314,7 @@ public class DispatchHandlers implements DispatchEventMapper {
 
     private static Mono<IntegrationCreateEvent> integrationCreate(DispatchContext<IntegrationCreate> context) {
         long guildId = Snowflake.asLong(context.getDispatch().guildId());
-        Integration integration = new Integration(context.getGateway(), context.getDispatch().integration());
-
-        // TODO: Cache?
+        Integration integration = new Integration(context.getGateway(), context.getDispatch().integration(), guildId);
 
         return Mono.just(new IntegrationCreateEvent(context.getGateway(), context.getShardInfo(), guildId, integration));
     }

@@ -18,11 +18,17 @@ package discord4j.core.object.entity;
 
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
+import discord4j.core.object.IntegrationAccount;
+import discord4j.core.retriever.EntityRetrievalStrategy;
 import discord4j.core.util.EntityUtil;
 import discord4j.discordjson.json.IntegrationData;
+import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
 
+import java.time.Instant;
+import java.time.format.DateTimeFormatter;
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * A Discord integration.
@@ -37,15 +43,20 @@ public class Integration implements Entity {
     /** The raw data as represented by Discord. */
     private final IntegrationData data;
 
+    /** The ID of the guild this integration is associated to. */
+    private final long guildId;
+
     /**
      * Constructs an {@code Integration} with an associated {@link GatewayDiscordClient} and Discord data.
      *
      * @param gateway The {@link GatewayDiscordClient} associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
+     * @param guildId The ID of the guild this integration is associated to.
      */
-    public Integration(final GatewayDiscordClient gateway, final IntegrationData data) {
+    public Integration(final GatewayDiscordClient gateway, final IntegrationData data, final long guildId) {
         this.gateway = Objects.requireNonNull(gateway);
         this.data = Objects.requireNonNull(data);
+        this.guildId = guildId;
     }
 
     @Override
@@ -59,6 +70,15 @@ public class Integration implements Entity {
     }
 
     /**
+     * Gets the ID of the guild this integration is associated to.
+     *
+     * @return The ID of the guild this integration is associated to.
+     */
+    public Snowflake getGuildId() {
+        return Snowflake.of(guildId);
+    }
+
+    /**
      * Gets the data of the integration.
      *
      * @return The data of the integration.
@@ -67,7 +87,156 @@ public class Integration implements Entity {
         return data;
     }
 
-    /* TODO: Implements getter */
+    /**
+     * Gets the integration name.
+     *
+     * @return The integration name.
+     */
+    public String getName() {
+        return data.name();
+    }
+
+    /**
+     * Gets the integration type (twitch, youtube, or discord).
+     *
+     * @return The integration type (twitch, youtube, or discord).
+     */
+    public String getType() {
+        return data.type();
+    }
+
+    /**
+     * Gets whether the integration is enabled.
+     *
+     * @return Whether the integration is enabled.
+     */
+    public boolean isEnabled() {
+        return data.enabled();
+    }
+
+    /**
+     * Gets whether the integration is syncing.
+     *
+     * @return Whether the integration is syncing.
+     */
+    public boolean isSyncing() {
+        return data.syncing().toOptional().orElse(false);
+    }
+
+    /**
+     * Gets the id that this integration uses for "subscribers".
+     *
+     * @return The id that this integration uses for "subscribers".
+     */
+    public Optional<Snowflake> getSubscriberRoleId() {
+        return data.roleId().toOptional().map(Snowflake::of);
+    }
+
+    /**
+     * Requests to retrieve the role that this integration uses for "subscribers".
+     *
+     * @return A {@link Mono} where, upon successful completion, emits the {@link Role role} that this integration uses
+     * for "subscribers". If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Role> getSubscriberRole() {
+        return Mono.justOrEmpty(getSubscriberRoleId())
+                .flatMap(id -> gateway.getRoleById(getGuildId(), id));
+    }
+
+    /**
+     * Requests to retrieve the role that this integration uses for "subscribers", using the given retrieval strategy.
+     *
+     * @param retrievalStrategy the strategy to use to get the role
+     * @return A {@link Mono} where, upon successful completion, emits the {@link Role role} that this integration uses
+     * for "subscribers". If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Role> getSubscriberRole(EntityRetrievalStrategy retrievalStrategy) {
+        return Mono.justOrEmpty(getSubscriberRoleId())
+                .flatMap(id -> gateway.withRetrievalStrategy(retrievalStrategy).getRoleById(getGuildId(), id));
+    }
+
+    /**
+     * Gets whether emoticons should be synced for this integration (twitch only currently).
+     *
+     * @return Whether emoticons should be synced for this integration (twitch only currently).
+     */
+    public boolean isEnableEmoticons() {
+        return data.enableEmoticons().toOptional().orElse(false);
+    }
+
+    /**
+     * Gets the behavior of expiring subscribers, if present.
+     *
+     * @return The behavior of expiring subscribers, if present.
+     */
+    public Optional<ExpireBehavior> getExpireBehavior() {
+        return data.expireBehavior().toOptional().map(ExpireBehavior::of);
+    }
+
+    /**
+     * Gets the grace period (in days) before expiring subscribers, if present.
+     *
+     * @return The grace period (in days) before expiring subscribers, if present.
+     */
+    public Optional<Integer> getExpireGracePeriod() {
+        return data.expireGracePeriod().toOptional();
+    }
+
+    /**
+     * Gets the user for this integration, if present.
+     *
+     * @return The user for this integration, if present.
+     */
+    public Optional<User> getUser() {
+        return data.user().toOptional().map(data -> new User(gateway, data));
+    }
+
+    /**
+     * Gets the integration account information.
+     *
+     * @return The integration account information.
+     */
+    public IntegrationAccount getAccount() {
+        return new IntegrationAccount(gateway, data.account());
+    }
+
+    /**
+     * Gets	when this integration was last synced, if present.
+     *
+     * @return When this integration was last synced, if present.
+     */
+    public Optional<Instant> getSyncedAt() {
+        return data.syncedAt().toOptional()
+                .map(timestamp -> DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(timestamp, Instant::from));
+    }
+
+    /**
+     * Gets how many subscribers this integration has, if present.
+     *
+     * @return How many subscribers this integration has, if present.
+     */
+    public Optional<Integer> getSubscriberCount() {
+        return data.subscriberCount().toOptional();
+    }
+
+    /**
+     * Gets whether integration has been revoked.
+     *
+     * @return Whether integration has been revoked.
+     */
+    public boolean isRevoked() {
+        return data.revoked().toOptional().orElse(false);
+    }
+
+    /**
+     * Gets the bot/OAuth2 application for discord integrations, if present.
+     *
+     * @return The bot/OAuth2 application for discord integrations, if present.
+     */
+    public Optional<IntegrationApplication> getApplication() {
+        return data.application().toOptional()
+                .map(data -> new IntegrationApplication(gateway, data));
+    }
 
     @Override
     public boolean equals(@Nullable final Object obj) {
@@ -82,8 +251,57 @@ public class Integration implements Entity {
     @Override
     public String toString() {
         return "Integration{" +
-            "data=" + data +
-            '}';
+                "data=" + data +
+                '}';
+    }
+
+    /** Represents the various integration expire behaviors. */
+    public enum ExpireBehavior {
+
+        /** Unknown. */
+        UNKNOWN(-1),
+
+        /** Remove role. */
+        REMOVE_ROLE(0),
+
+        /** Kick. */
+        KICK(1);
+
+        /** The underlying value as represented by Discord. */
+        private final int value;
+
+        /**
+         * Constructs an {@code Integration.ExpireBehavior}.
+         *
+         * @param value The underlying value as represented by Discord.
+         */
+        ExpireBehavior(final int value) {
+            this.value = value;
+        }
+
+        /**
+         * Gets the underlying value as represented by Discord.
+         *
+         * @return The underlying value as represented by Discord.
+         */
+        public int getValue() {
+            return value;
+        }
+
+        /**
+         * Gets the integration expire behaviors. It is guaranteed that invoking {@link #getValue()} from the returned
+         * enum will equal ({@link #equals(Object)}) the supplied {@code value}.
+         *
+         * @param value The underlying value as represented by Discord.
+         * @return The integration expire behaviors.
+         */
+        public static Integration.ExpireBehavior of(final int value) {
+            switch (value) {
+                case 0: return REMOVE_ROLE;
+                case 1: return KICK;
+                default: return UNKNOWN;
+            }
+        }
     }
 
 }
