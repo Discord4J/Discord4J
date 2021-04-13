@@ -1096,13 +1096,13 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
                 .clientStatus(dispatch.clientStatus())
                 .build();
 
+        Mono<Void> saveNew = stateHolder.getPresenceStore().save(key, presenceData);
+
         Mono<Optional<PresenceData>> savePresence = stateHolder.getPresenceStore()
                 .find(key)
-                .flatMap(oldPresenceData -> stateHolder.getPresenceStore()
-                        .save(key, presenceData)
-                        .thenReturn(oldPresenceData))
+                .flatMap(saveNew::thenReturn)
                 .map(Optional::of)
-                .defaultIfEmpty(Optional.empty());
+                .switchIfEmpty(saveNew.thenReturn(Optional.empty()));
 
         Mono<Optional<UserData>> saveUser = stateHolder.getUserStore()
                 .find(userId)
