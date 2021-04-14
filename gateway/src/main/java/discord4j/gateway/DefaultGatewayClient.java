@@ -449,7 +449,6 @@ public class DefaultGatewayClient implements GatewayClient {
                 .largeThreshold(identifyOptions.getLargeThreshold())
                 .shard(identifyOptions.getShardInfo().asArray())
                 .presence(identifyOptions.getInitialStatus().map(Possible::of).orElse(Possible.absent()))
-                .guildSubscriptions(identifyOptions.getGuildSubscriptions().map(Possible::of).orElse(Possible.absent()))
                 .build();
         log.debug(format(currentContext, "Identifying to Gateway"), sequence.get());
         emissionStrategy.emitNext(outbound, GatewayPayload.identify(identify));

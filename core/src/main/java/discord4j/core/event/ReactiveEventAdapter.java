@@ -23,6 +23,9 @@ import discord4j.core.event.domain.command.ApplicationCommandCreateEvent;
 import discord4j.core.event.domain.command.ApplicationCommandDeleteEvent;
 import discord4j.core.event.domain.command.ApplicationCommandUpdateEvent;
 import discord4j.core.event.domain.guild.*;
+import discord4j.core.event.domain.integration.IntegrationCreateEvent;
+import discord4j.core.event.domain.integration.IntegrationDeleteEvent;
+import discord4j.core.event.domain.integration.IntegrationUpdateEvent;
 import discord4j.core.event.domain.lifecycle.*;
 import discord4j.core.event.domain.message.*;
 import discord4j.core.event.domain.role.RoleCreateEvent;
@@ -692,6 +695,40 @@ public abstract class ReactiveEventAdapter {
         return Mono.empty();
     }
 
+    // ================= Integration related events ================= //
+
+    /**
+     * Invoked when an integration has been created.
+     *
+     * @param event the event instance
+     * @return a {@link Publisher} that completes when this listener has done processing the event, for example,
+     * returning any {@link Mono}, {@link Flux} or synchronous code using {@link Mono#fromRunnable(Runnable)}.
+     */
+    public Publisher<?> onIntegrationCreate(IntegrationCreateEvent event) {
+        return Mono.empty();
+    }
+
+    /**
+     * Invoked when an integration has been updated.
+     *
+     * @param event the event instance
+     * @return a {@link Publisher} that completes when this listener has done processing the event, for example,
+     * returning any {@link Mono}, {@link Flux} or synchronous code using {@link Mono#fromRunnable(Runnable)}.
+     */
+    public Publisher<?> onIntegrationUpdate(IntegrationUpdateEvent event) {
+        return Mono.empty();
+    }
+
+    /**
+     * Invoked when an integration has been deleted.
+     *
+     * @param event the event instance
+     * @return a {@link Publisher} that completes when this listener has done processing the event, for example,
+     * returning any {@link Mono}, {@link Flux} or synchronous code using {@link Mono#fromRunnable(Runnable)}.
+     */
+    public Publisher<?> onIntegrationDelete(IntegrationDeleteEvent event) {
+        return Mono.empty();
+    }
 
     // ================= Core methods ================= //
 
@@ -764,6 +801,9 @@ public abstract class ReactiveEventAdapter {
         else if (event instanceof ApplicationCommandCreateEvent) return onApplicationCommandCreate((ApplicationCommandCreateEvent) event);
         else if (event instanceof ApplicationCommandUpdateEvent) return onApplicationCommandUpdate((ApplicationCommandUpdateEvent) event);
         else if (event instanceof ApplicationCommandDeleteEvent) return onApplicationCommandDelete((ApplicationCommandDeleteEvent) event);
+        else if (event instanceof IntegrationCreateEvent) return onIntegrationCreate((IntegrationCreateEvent) event);
+        else if (event instanceof IntegrationUpdateEvent) return onIntegrationUpdate((IntegrationUpdateEvent) event);
+        else if (event instanceof IntegrationDeleteEvent) return onIntegrationDelete((IntegrationDeleteEvent) event);
         // @formatter:on
 
         return Mono.empty();

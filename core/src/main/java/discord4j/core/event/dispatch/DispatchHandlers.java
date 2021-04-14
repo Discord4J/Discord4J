@@ -21,8 +21,12 @@ import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.*;
 import discord4j.core.event.domain.channel.TypingStartEvent;
+import discord4j.core.event.domain.integration.IntegrationCreateEvent;
+import discord4j.core.event.domain.integration.IntegrationDeleteEvent;
+import discord4j.core.event.domain.integration.IntegrationUpdateEvent;
 import discord4j.core.object.VoiceState;
 import discord4j.core.object.command.Interaction;
+import discord4j.core.object.entity.Integration;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.presence.Presence;
@@ -89,6 +93,9 @@ public class DispatchHandlers implements DispatchEventMapper {
         addHandler(ApplicationCommandCreate.class, ApplicationCommandDispatchHandlers::applicationCommandCreate);
         addHandler(ApplicationCommandUpdate.class, ApplicationCommandDispatchHandlers::applicationCommandUpdate);
         addHandler(ApplicationCommandDelete.class, ApplicationCommandDispatchHandlers::applicationCommandDelete);
+        addHandler(IntegrationCreate.class, DispatchHandlers::integrationCreate);
+        addHandler(IntegrationUpdate.class, DispatchHandlers::integrationUpdate);
+        addHandler(IntegrationDelete.class, DispatchHandlers::integrationDelete);
 
         addHandler(GatewayStateChange.class, LifecycleDispatchHandlers::gatewayStateChanged);
 
@@ -236,5 +243,29 @@ public class DispatchHandlers implements DispatchEventMapper {
         GatewayDiscordClient gateway = context.getGateway();
         Interaction interaction = new Interaction(gateway, context.getDispatch().interaction());
         return Mono.just(new InteractionCreateEvent(gateway, context.getShardInfo(), interaction));
+    }
+
+    private static Mono<IntegrationDeleteEvent> integrationDelete(DispatchContext<IntegrationDelete, Void> context) {
+        long guildId = Snowflake.asLong(context.getDispatch().guildId());
+        long id = Snowflake.asLong(context.getDispatch().id());
+        Long applicationId = context.getDispatch().applicationId().toOptional().map(Snowflake::asLong).orElse(null);
+
+        return Mono.just(new IntegrationDeleteEvent(context.getGateway(), context.getShardInfo(), id, guildId,
+                applicationId));
+    }
+
+    private static Mono<IntegrationUpdateEvent> integrationUpdate(DispatchContext<IntegrationUpdate, Void> context) {
+        long guildId = Snowflake.asLong(context.getDispatch().guildId());
+        Integration integration = new Integration(context.getGateway(), context.getDispatch().integration(), guildId);
+
+        return Mono.just(new IntegrationUpdateEvent(context.getGateway(), context.getShardInfo(), guildId,
+                integration));
+    }
+
+    private static Mono<IntegrationCreateEvent> integrationCreate(DispatchContext<IntegrationCreate, Void> context) {
+        long guildId = Snowflake.asLong(context.getDispatch().guildId());
+        Integration integration = new Integration(context.getGateway(), context.getDispatch().integration(), guildId);
+
+        return Mono.just(new IntegrationCreateEvent(context.getGateway(), context.getShardInfo(), guildId, integration));
     }
 }
