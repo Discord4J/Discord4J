@@ -16,8 +16,13 @@
  */
 package discord4j.core.spec;
 
+import discord4j.common.util.Snowflake;
 import discord4j.core.object.Invite;
+import discord4j.discordjson.json.ImmutableInviteCreateRequest;
+import discord4j.discordjson.json.ImmutableMessageReferenceData;
 import discord4j.discordjson.json.InviteCreateRequest;
+import discord4j.discordjson.json.MessageReferenceData;
+import discord4j.discordjson.possible.Possible;
 import reactor.util.annotation.Nullable;
 
 /**
@@ -28,10 +33,8 @@ import reactor.util.annotation.Nullable;
  */
 public class InviteCreateSpec implements AuditSpec<InviteCreateRequest> {
 
-    private int maxAge;
-    private int maxUses;
-    private boolean temporary;
-    private boolean unique;
+    private final ImmutableInviteCreateRequest.Builder requestBuilder = InviteCreateRequest.builder();
+    @Nullable
     private String reason;
 
     /**
@@ -42,7 +45,7 @@ public class InviteCreateSpec implements AuditSpec<InviteCreateRequest> {
      * @return This spec.
      */
     public InviteCreateSpec setMaxAge(int maxAge) {
-        this.maxAge = maxAge;
+        requestBuilder.maxAge(maxAge);
         return this;
     }
 
@@ -54,7 +57,7 @@ public class InviteCreateSpec implements AuditSpec<InviteCreateRequest> {
      * @return This spec.
      */
     public InviteCreateSpec setMaxUses(int maxUses) {
-        this.maxUses = maxUses;
+        requestBuilder.maxUses(maxUses);
         return this;
     }
 
@@ -66,7 +69,7 @@ public class InviteCreateSpec implements AuditSpec<InviteCreateRequest> {
      * @return This spec.
      */
     public InviteCreateSpec setTemporary(boolean temporary) {
-        this.temporary = temporary;
+        requestBuilder.temporary(temporary);
         return this;
     }
 
@@ -78,7 +81,42 @@ public class InviteCreateSpec implements AuditSpec<InviteCreateRequest> {
      * @return This spec.
      */
     public InviteCreateSpec setUnique(boolean unique) {
-        this.unique = unique;
+        requestBuilder.unique(unique);
+        return this;
+    }
+
+    /**
+     * Sets the type of target for this voice channel invite.
+     *
+     * @param targetType The type of target for this voice channel invite.
+     * @return This spec.
+     */
+    public InviteCreateSpec setTargetType(Invite.Type targetType) {
+        requestBuilder.targetType(targetType.getValue());
+        return this;
+    }
+
+    /**
+     * Sets the id of the user whose stream to display for this invite, required if `target_type` is 1,
+     * the user must be streaming in the channel.
+     *
+     * @param targetUserId The id of the user whose stream to display for this invite.
+     * @return This spec.
+     */
+    public InviteCreateSpec setTargetUserId(Snowflake targetUserId) {
+        requestBuilder.targetUserId(targetUserId.asString());
+        return this;
+    }
+
+    /**
+     * Sets the id of the embedded application to open for this invite, required if `target_type` is 2, the
+     * application must have the `EMBEDDED` flag.
+     *
+     * @param targetApplicationId The id of the embedded application to open for this invite.
+     * @return This spec.
+     */
+    public InviteCreateSpec setTargetApplicationId(Snowflake targetApplicationId) {
+        requestBuilder.targetApplicationId(targetApplicationId.asString());
         return this;
     }
 
@@ -96,11 +134,6 @@ public class InviteCreateSpec implements AuditSpec<InviteCreateRequest> {
 
     @Override
     public InviteCreateRequest asRequest() {
-        return InviteCreateRequest.builder()
-                .maxAge(maxAge)
-                .maxUses(maxUses)
-                .temporary(temporary)
-                .unique(unique)
-                .build();
+        return requestBuilder.build();
     }
 }

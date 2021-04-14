@@ -20,10 +20,14 @@ import discord4j.discordjson.json.AttachmentData;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.common.util.Snowflake;
 import discord4j.core.util.EntityUtil;
+import discord4j.discordjson.possible.Possible;
 import reactor.util.annotation.Nullable;
 
 import java.util.Objects;
+import java.util.Optional;
 import java.util.OptionalInt;
+import java.util.function.Function;
+import java.util.stream.Stream;
 
 /**
  * A Discord attachment.
@@ -113,7 +117,9 @@ public final class Attachment implements Entity {
      * @return The height of the file, if present.
      */
     public OptionalInt getHeight() {
-        return data.height();
+        return Possible.flatOpt(data.height())
+            .map(OptionalInt::of)
+            .orElse(OptionalInt.empty());
     }
 
     /**
@@ -122,7 +128,9 @@ public final class Attachment implements Entity {
      * @return The width of the file, if present.
      */
     public OptionalInt getWidth() {
-        return data.width();
+        return Possible.flatOpt(data.width())
+            .map(OptionalInt::of)
+            .orElse(OptionalInt.empty());
     }
 
     /**
@@ -132,6 +140,15 @@ public final class Attachment implements Entity {
      */
     public boolean isSpoiler() {
         return getFilename().startsWith(SPOILER_PREFIX);
+    }
+
+    /**
+     * Gets the attachment's media type, if present.
+     *
+     * @return The attachment's media type, if present.
+     */
+    public Optional<String> getContentType() {
+        return data.contentType().toOptional();
     }
 
     @Override

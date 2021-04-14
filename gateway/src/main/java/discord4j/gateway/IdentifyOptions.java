@@ -144,7 +144,9 @@ public class IdentifyOptions {
          * @param guildSubscriptions {@code true} if enabling this feature, {@code false} to disable it, or {@code
          * null} if this attribute should be ignored when authenticating
          * @return this builder
+         * @deprecated for removal in 3.2.0, migrate to Gateway Intents feature
          */
+        @Deprecated
         public Builder guildSubscriptions(@Nullable Boolean guildSubscriptions) {
             this.guildSubscriptions = guildSubscriptions;
             return this;
@@ -244,7 +246,9 @@ public class IdentifyOptions {
      * Retrieve whether to enable presence and typing events when identifying.
      *
      * @return {@code true} if guild subscriptions should be enabled, {@code false} otherwise
+     * @deprecated for removal in 3.2.0, migrate to Gateway Intents feature
      */
+    @Deprecated
     public Optional<Boolean> getGuildSubscriptions() {
         return Optional.ofNullable(guildSubscriptions);
     }

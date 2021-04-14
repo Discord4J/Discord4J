@@ -479,8 +479,9 @@ public class GatewayBootstrap<O extends GatewayOptions> {
      * @param guildSubscriptions whether to enable or disable guild subscriptions
      * @return this builder
      * @see <a href="https://discord.com/developers/docs/topics/gateway#guild-subscriptions">Guild Subscriptions</a>
-     * @deprecated Discord recommends you migrate to Gateway Intents as they supersede this setting
+     * @deprecated for removal in 3.2.0, migrate to Gateway Intents feature
      */
+    @Deprecated
     public GatewayBootstrap<O> setGuildSubscriptions(boolean guildSubscriptions) {
         this.guildSubscriptions = guildSubscriptions;
         return this;
