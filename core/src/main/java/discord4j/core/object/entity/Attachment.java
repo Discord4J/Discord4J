@@ -142,6 +142,15 @@ public final class Attachment implements Entity {
         return getFilename().startsWith(SPOILER_PREFIX);
     }
 
+    /**
+     * Gets the attachment's media type, if present.
+     *
+     * @return The attachment's media type, if present.
+     */
+    public Optional<String> getContentType() {
+        return data.contentType().toOptional();
+    }
+
     @Override
     public boolean equals(@Nullable final Object obj) {
         return EntityUtil.equals(this, obj);
