@@ -227,7 +227,7 @@ public final class VoiceChannel extends BaseCategorizableChannel {
         private final int value;
 
         /**
-         * Constructs an {@code Embed.Type}.
+         * Constructs a {@code VoiceChannel.Mode}.
          *
          * @param value The underlying value as represented by Discord.
          */
