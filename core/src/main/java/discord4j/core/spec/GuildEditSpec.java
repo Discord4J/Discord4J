@@ -25,7 +25,10 @@ import discord4j.rest.util.Image;
 import discord4j.common.util.Snowflake;
 import reactor.util.annotation.Nullable;
 
+import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * A spec used to selectively modify properties from a {@link Guild}.
@@ -55,8 +58,8 @@ public class GuildEditSpec implements AuditSpec<GuildModifyRequest> {
      * @param region The voice region for the guild.
      * @return This spec.
      */
-    public GuildEditSpec setRegion(Region region) {
-        requestBuilder.region(region.getId());
+    public GuildEditSpec setRegion(@Nullable Region region) {
+        requestBuilder.region(Possible.of(Optional.ofNullable(region).map(Region::getId)));
         return this;
     }
 
@@ -79,6 +82,17 @@ public class GuildEditSpec implements AuditSpec<GuildModifyRequest> {
      */
     public GuildEditSpec setDefaultMessageNotificationsLevel(Guild.NotificationLevel notificationsLevel) {
         requestBuilder.defaultMessageNotifications(notificationsLevel.getValue());
+        return this;
+    }
+
+    /**
+     * Sets the explicit content filter level for the modified {@link Guild}.
+     *
+     * @param level The explicit content filter level for the guild.
+     * @return This spec.
+     */
+    public GuildEditSpec setExplicitContentFilter(Guild.ContentFilterLevel level) {
+        requestBuilder.explicitContentFilter(level.getValue());
         return this;
     }
 
@@ -127,9 +141,9 @@ public class GuildEditSpec implements AuditSpec<GuildModifyRequest> {
     }
 
     /**
-     * Sets the splash image to display for the modified {@link Guild}. Used in VIP guilds.
+     * Sets the image for the guild splash (when the server has the INVITE_SPLASH feature).
      *
-     * @param splash The image for the guild.
+     * @param splash The image for the guild splash.
      * @return This spec.
      */
     public GuildEditSpec setSplash(@Nullable Image splash) {
@@ -138,13 +152,108 @@ public class GuildEditSpec implements AuditSpec<GuildModifyRequest> {
     }
 
     /**
-     * Sets the banner image to display for the modified {@link Guild}. Used in VERIFIED guilds.
+     * Sets the image for the guild discovery splash (when the server has the DISCOVERABLE feature).
      *
-     * @param banner The image for the guild.
+     * @param discoverySplash The image for the guild discovery splash.
+     * @return This spec.
+     */
+    public GuildEditSpec setDiscoverySplash(@Nullable Image discoverySplash) {
+        requestBuilder.splash(Possible.of(Optional.ofNullable(discoverySplash).map(Image::getDataUri)));
+        return this;
+    }
+
+    /**
+     * Sets the image for the guild banner (when the server has the BANNER feature).
+     *
+     * @param banner The image for the guild banner.
      * @return This spec.
      */
     public GuildEditSpec setBanner(@Nullable Image banner) {
         requestBuilder.banner(Possible.of(Optional.ofNullable(banner).map(Image::getDataUri)));
+        return this;
+    }
+
+    /**
+     * Sets the id of the channel where guild notices such as welcome messages and boost events are posted.
+     *
+     * @param systemChannelId The id of the channel where guild notices such as welcome messages and boost events
+     *                        are posted.
+     * @return This spec.
+     */
+    public GuildEditSpec setSystemChannelId(@Nullable Snowflake systemChannelId) {
+        requestBuilder.systemChannelId(Possible.of(Optional.ofNullable(systemChannelId).map(Snowflake::asString)));
+        return this;
+    }
+
+    /**
+     * Sets the system channel flags.
+     *
+     * @param flag The system channel flags.
+     * @return This spec.
+     */
+    public GuildEditSpec setSystemChannelFlags(Guild.SystemChannelFlag flag) {
+        requestBuilder.systemChannelFlags(flag.getValue());
+        return this;
+    }
+
+    /**
+     * Sets the id of the channel where Community guilds display rules and/or guidelines.
+     *
+     * @param rulesChannelId The id of the channel where Community guilds display rules and/or guidelines.
+     * @return This spec.
+     */
+    public GuildEditSpec setRulesChannelId(@Nullable Snowflake rulesChannelId) {
+        requestBuilder.rulesChannelId(Possible.of(Optional.ofNullable(rulesChannelId).map(Snowflake::asString)));
+        return this;
+    }
+
+    /**
+     * Sets the id of the channel where admins and moderators of Community guilds receive notices from Discord.
+     *
+     * @param publicUpdatesChannelId The id of the channel where admins and moderators of Community guilds receive
+     *                               notices from Discord.
+     * @return This spec.
+     */
+    public GuildEditSpec setPublicUpdatesChannelId(@Nullable Snowflake publicUpdatesChannelId) {
+        requestBuilder.publicUpdatesChannelId(Possible.of(Optional.ofNullable(publicUpdatesChannelId)
+            .map(Snowflake::asString)));
+        return this;
+    }
+
+    /**
+     * Sets the preferred locale of a Community guild used in server discovery and notices from Discord;
+     * defaults to "en-US".
+     *
+     * @param preferredLocale The preferred locale of a Community guild used in server discovery and notices from Discord.
+     * @return This spec.
+     */
+    public GuildEditSpec setPreferredLocale(@Nullable Locale preferredLocale) {
+        requestBuilder.preferredLocale(Possible.of(Optional.ofNullable(preferredLocale).map(Locale::toLanguageTag)));
+        return this;
+    }
+
+    /**
+     * Sets the enabled guild features.
+     * <br>
+     * You can see the available
+     * <a href="https://discord.com/developers/docs/resources/guild#guild-object-guild-features">guild features</a>
+     *
+     * @param features Enabled guild features.
+     * @return This spec.
+     */
+    public GuildEditSpec setFeatures(Set<String> features) {
+        requestBuilder.features(features);
+        return this;
+    }
+
+    /**
+     * Sets the description for the guild, if the guild is discoverable.
+     *
+     * @param description The description for the guild.
+     * @return This spec.
+     */
+    public GuildEditSpec setDescription(@Nullable String description) {
+        requestBuilder.description(description);
         return this;
     }
 
