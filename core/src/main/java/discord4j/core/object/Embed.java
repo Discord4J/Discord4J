@@ -521,6 +521,16 @@ public final class Embed implements DiscordObject {
         }
 
         /**
+         * Gets a proxied URL of the video.
+         *
+         * @return A proxied URL of the video.
+         */
+        @Nullable
+        public String getProxyUrl() {
+            return data.proxyUrl().toOptional().orElse(null);
+        }
+
+        /**
          * Gets the height of the video.
          *
          * @return The height of the video.
