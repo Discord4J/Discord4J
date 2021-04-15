@@ -17,6 +17,9 @@
 package discord4j.core.object.presence;
 
 import discord4j.discordjson.json.ActivityUpdateRequest;
+import reactor.util.annotation.Nullable;
+
+import java.util.Optional;
 
 /**
  * Activity data that can be sent to Discord.
@@ -28,38 +31,30 @@ import discord4j.discordjson.json.ActivityUpdateRequest;
 public class ClientActivity {
 
     public static ClientActivity playing(String name) {
-        return new ClientActivity(ActivityUpdateRequest.builder()
-                .name(name)
-                .type(Activity.Type.PLAYING.getValue())
-                .build());
+        return of(Activity.Type.PLAYING, name, null);
     }
 
     public static ClientActivity streaming(String name, String url) {
-        return new ClientActivity(ActivityUpdateRequest.builder()
-                .name(name)
-                .type(Activity.Type.STREAMING.getValue())
-                .url(url)
-                .build());
+        return of(Activity.Type.STREAMING, name, url);
     }
 
     public static ClientActivity listening(String name) {
-        return new ClientActivity(ActivityUpdateRequest.builder()
-                .name(name)
-                .type(Activity.Type.LISTENING.getValue())
-                .build());
+        return of(Activity.Type.LISTENING, name, null);
     }
 
     public static ClientActivity watching(String name) {
-        return new ClientActivity(ActivityUpdateRequest.builder()
-                .name(name)
-                .type(Activity.Type.WATCHING.getValue())
-                .build());
+        return of(Activity.Type.WATCHING, name, null);
     }
 
     public static ClientActivity competing(String name) {
+        return of(Activity.Type.COMPETING, name, null);
+    }
+
+    public static ClientActivity of(Activity.Type type, String name, @Nullable String url) {
         return new ClientActivity(ActivityUpdateRequest.builder()
+                .type(type.getValue())
                 .name(name)
-                .type(Activity.Type.COMPETING.getValue())
+                .url(Optional.ofNullable(url))
                 .build());
     }
 
