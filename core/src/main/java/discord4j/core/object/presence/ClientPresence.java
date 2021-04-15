@@ -16,10 +16,13 @@
  */
 package discord4j.core.object.presence;
 
+import discord4j.discordjson.json.ActivityUpdateRequest;
 import discord4j.discordjson.json.gateway.StatusUpdate;
+import reactor.util.annotation.Nullable;
 
 import java.time.Instant;
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -36,65 +39,43 @@ import java.util.function.Function;
 public class ClientPresence {
 
     public static ClientPresence online() {
-        return new ClientPresence(StatusUpdate.builder()
-                .status(Status.ONLINE.getValue())
-                .activities(Optional.empty())
-                .afk(false)
-                .since(Optional.empty())
-                .build());
+        return of(Status.ONLINE, null);
     }
 
     public static ClientPresence online(ClientActivity activity) {
-        return new ClientPresence(StatusUpdate.builder()
-                .status(Status.ONLINE.getValue())
-                .activities(Collections.singletonList(activity.getActivityUpdateRequest()))
-                .afk(false)
-                .since(Optional.empty())
-                .build());
+        return of(Status.ONLINE, activity);
     }
 
     public static ClientPresence doNotDisturb() {
-        return new ClientPresence(StatusUpdate.builder()
-                .status(Status.DO_NOT_DISTURB.getValue())
-                .activities(Optional.empty())
-                .afk(false)
-                .since(Optional.empty())
-                .build());
+        return of(Status.DO_NOT_DISTURB, null);
     }
 
     public static ClientPresence doNotDisturb(ClientActivity activity) {
-        return new ClientPresence(StatusUpdate.builder()
-                .status(Status.DO_NOT_DISTURB.getValue())
-                .activities(Collections.singletonList(activity.getActivityUpdateRequest()))
-                .afk(false)
-                .since(Optional.empty())
-                .build());
+        return of(Status.DO_NOT_DISTURB, activity);
     }
 
     public static ClientPresence idle() {
-        return new ClientPresence(StatusUpdate.builder()
-                .status(Status.IDLE.getValue())
-                .activities(Optional.empty())
-                .afk(true)
-                .since(Instant.now().toEpochMilli())
-                .build());
+        return of(Status.IDLE, null);
     }
 
     public static ClientPresence idle(ClientActivity activity) {
-        return new ClientPresence(StatusUpdate.builder()
-                .status(Status.IDLE.getValue())
-                .activities(Collections.singletonList(activity.getActivityUpdateRequest()))
-                .afk(true)
-                .since(Instant.now().toEpochMilli())
-                .build());
+        return of(Status.INVISIBLE, activity);
     }
 
     public static ClientPresence invisible() {
+        return of(Status.INVISIBLE, null);
+    }
+
+    public static ClientPresence of(Status status, @Nullable ClientActivity activity) {
+        Optional<List<ActivityUpdateRequest>> activities = Optional.ofNullable(activity)
+                .map(ClientActivity::getActivityUpdateRequest)
+                .map(Collections::singletonList);
+
         return new ClientPresence(StatusUpdate.builder()
-                .status(Status.INVISIBLE.getValue())
-                .activities(Optional.empty())
-                .afk(false)
-                .since(Optional.empty())
+                .status(status.getValue())
+                .activities(activities)
+                .afk(false) // doesn't do anything
+                .since(0) // doesn't do anything
                 .build());
     }
 
