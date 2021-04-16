@@ -139,9 +139,9 @@ public class ApplicationService extends RestService {
 
     public Mono<Void> modifyApplicationCommandPermissions(long applicationId, long guildId,
                                                           long commandId,
-                                                          List<ApplicationCommandPermissionsData> permissions) {
+                                                          ApplicationCommandPermissionsRequest request) {
         return Routes.APPLICATION_COMMAND_PERMISSIONS_MODIFY.newRequest(applicationId, guildId, commandId)
-                .body(permissions)
+                .body(request)
                 .exchange(getRouter())
                 .bodyToMono(Void.class);
     }
