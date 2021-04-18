@@ -17,25 +17,28 @@
 package discord4j.core.object.audit;
 
 import discord4j.common.util.Snowflake;
+import discord4j.discordjson.json.AuditLogPartialRoleData;
 
 import java.util.Objects;
 
+/**
+ * A partial role with only an ID and a name. This is returned by Discord in an {@link AuditLogChange} for
+ * {@link ChangeKey#ROLES_ADD} and {@link ChangeKey#ROLES_REMOVE}.
+ */
 public final class AuditLogRole {
 
-    private final long id;
-    private final String name;
+    private final AuditLogPartialRoleData data;
 
-    public AuditLogRole(long id, String name) {
-        this.id = id;
-        this.name = name;
+    public AuditLogRole(AuditLogPartialRoleData data) {
+        this.data = data;
     }
 
     public Snowflake getId() {
-        return Snowflake.of(id);
+        return Snowflake.of(data.id());
     }
 
     public String getName() {
-        return name;
+        return data.name();
     }
 
     @Override
@@ -47,19 +50,18 @@ public final class AuditLogRole {
             return false;
         }
         AuditLogRole that = (AuditLogRole) o;
-        return id == that.id && Objects.equals(name, that.name);
+        return Objects.equals(data, that.data);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name);
+        return Objects.hash(data);
     }
 
     @Override
     public String toString() {
         return "AuditLogRole{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
+                "data=" + data +
                 '}';
     }
 }

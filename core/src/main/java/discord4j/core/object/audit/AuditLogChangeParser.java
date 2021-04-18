@@ -21,18 +21,24 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.ExtendedPermissionOverwrite;
+import discord4j.discordjson.json.AuditLogPartialRoleData;
 import discord4j.discordjson.json.OverwriteData;
 import discord4j.rest.util.PermissionSet;
 
 import java.io.IOException;
-import java.util.HashSet;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
-public interface AuditLogChangeParser<T> extends BiFunction<AuditLogEntry, JsonNode, T> {
+/**
+ * A function used by each {@link ChangeKey} to parse the {@link JsonNode} held by a
+ * {@link discord4j.discordjson.json.AuditLogChangeData} to a higher-level type.
+ *
+ * @param <T> The type the parser produces
+ */
+interface AuditLogChangeParser<T> extends BiFunction<AuditLogEntry, JsonNode, T> {
 
     AuditLogChangeParser<String> STRING_PARSER = (entry, node) -> node.asText();
 
@@ -45,11 +51,16 @@ public interface AuditLogChangeParser<T> extends BiFunction<AuditLogEntry, JsonN
     AuditLogChangeParser<PermissionSet> PERMISSION_SET_PARSER = (entry, node) -> PermissionSet.of(node.asText());
 
     AuditLogChangeParser<Set<AuditLogRole>> AUDIT_LOG_ROLES_PARSER = (entry, node) -> {
-        Set<AuditLogRole> roles = new HashSet<>();
-        for (JsonNode obj : node) {
-            roles.add(new AuditLogRole(Snowflake.asLong(obj.get("id").asText()), obj.get("name").asText()));
+        try {
+            ObjectMapper mapper = entry.getClient().getCoreResources().getJacksonResources().getObjectMapper();
+            List<AuditLogPartialRoleData> roles = mapper.readerForListOf(AuditLogPartialRoleData.class).readValue(node);
+
+            return roles.stream()
+                    .map(AuditLogRole::new)
+                    .collect(Collectors.toSet());
+        } catch (IOException e) {
+            throw new RuntimeException("Could not parse audit log roles");
         }
-        return roles;
     };
 
     AuditLogChangeParser<Set<ExtendedPermissionOverwrite>> OVERWRITES_PARSER = (entry, node) -> {

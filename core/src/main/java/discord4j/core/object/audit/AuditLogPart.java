@@ -22,18 +22,20 @@ import discord4j.core.object.entity.User;
 import discord4j.core.object.entity.Webhook;
 import discord4j.discordjson.json.AuditLogData;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * A part of a guild's audit logs. This holds all of the webhooks, users, and audit log entries for a portion of
+ * a guild's audit log.
+ */
 public class AuditLogPart {
 
     private final long guildId;
 
-    private final List<Webhook> webhooks;
+    private final Set<Webhook> webhooks;
 
-    private final List<User> users;
+    private final Set<User> users;
 
     private final List<AuditLogEntry> entries;
 
@@ -42,62 +44,100 @@ public class AuditLogPart {
 
         this.webhooks = data.webhooks().stream()
                 .map(webhookData -> new Webhook(gateway, webhookData))
-                .collect(Collectors.toList());
+                .collect(Collectors.toSet());
 
         this.users = data.users().stream()
                 .map(userData -> new User(gateway, userData))
-                .collect(Collectors.toList());
+                .collect(Collectors.toSet());
 
         this.entries = data.auditLogEntries()
                 .stream().map(auditLogEntryData -> new AuditLogEntry(gateway, this, auditLogEntryData))
                 .collect(Collectors.toList());
     }
 
-    private AuditLogPart(long guildId, List<Webhook> webhooks, List<User> users, List<AuditLogEntry> entries) {
+    private AuditLogPart(long guildId, Set<Webhook> webhooks, Set<User> users, List<AuditLogEntry> entries) {
         this.guildId = guildId;
         this.webhooks = webhooks;
         this.users = users;
         this.entries = entries;
     }
 
-    public List<Webhook> getWebhooks() {
+    /**
+     * Get the webhooks that are involved in the entries of this portion of the audit log.
+     *
+     * @return The webhooks that are involved in the entries of this portion of the audit log.
+     */
+    public Set<Webhook> getWebhooks() {
         return webhooks;
     }
 
-    public List<User> getUsers() {
+    /**
+     * Get the users that are involved in the entries of this portion of the audit log.
+     *
+     * @return The users that are involved in the entries of this portion of the audit log.
+     */
+    public Set<User> getUsers() {
         return users;
     }
 
+    /**
+     * Gets the entries in this portion of the audit log.
+     *
+     * @return The entries in this portion of the audit log.
+     */
     public List<AuditLogEntry> getEntries() {
         return entries;
     }
 
+    /**
+     * Gets a webhook involved in the entries of this portion of the audit log by ID.
+     *
+     * @param webhookId The ID of the webhook.
+     * @return The webhook with the given ID, if present.
+     */
     public Optional<Webhook> getWebhookById(Snowflake webhookId) {
         return webhooks.stream()
                 .filter(webhook -> webhook.getId().equals(webhookId))
                 .findFirst();
     }
 
+    /**
+     * Gets a user involved in the entries of this portion of the audit log by ID.
+     *
+     * @param userId The ID of the user.
+     * @return The user with the given ID, if present.
+     */
     public Optional<User> getUserById(Snowflake userId) {
         return users.stream()
                 .filter(user -> user.getId().equals(userId))
                 .findFirst();
     }
 
+    /**
+     * Gets the ID of the guild associated with this audit log.
+     *
+     * @return The ID of the guild associated with this audit log.
+     */
     public Snowflake getGuildId() {
         return Snowflake.of(guildId);
     }
 
+    /**
+     * Combines this portion of the audit log with another portion.
+     *
+     * @param other The other portion to combine with.
+     * @return A new {@link AuditLogPart} that contains all of the webhooks, users, and entries from both parts.
+     */
     public AuditLogPart combine(AuditLogPart other) {
         if (other.guildId != this.guildId) {
             throw new IllegalArgumentException("Cannot combine audit log parts from two different guilds.");
         }
 
-        List<Webhook> combinedWebhooks = new ArrayList<>(this.webhooks.size() + other.webhooks.size());
+        Set<Webhook> combinedWebhooks = new HashSet<>(this.webhooks.size() + other.webhooks.size());
         combinedWebhooks.addAll(this.webhooks);
         combinedWebhooks.addAll(other.webhooks);
 
-        List<User> combinedUsers = new ArrayList<>(this.users.size() + other.users.size());
+        Set<User> combinedUsers = new HashSet<>(this.users.size() + other.users.size());
         combinedUsers.addAll(this.users);
         combinedUsers.addAll(other.users);
 

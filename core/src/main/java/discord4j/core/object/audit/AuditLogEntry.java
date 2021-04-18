@@ -23,8 +23,24 @@ import discord4j.core.object.entity.User;
 import discord4j.core.util.AuditLogUtil;
 import discord4j.discordjson.json.AuditLogEntryData;
 
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
+/**
+ * A single action recorded by an {@link AuditLogPart}.
+ * <p>
+ * Use {@link #getActionType()} to determine what kind of action occurred, and then {@link #getChange(ChangeKey)} to
+ * get information about what changed. For example,
+ * <pre>
+ * {@code
+ * if (entry.getActionType() == CHANNEL_UPDATE) {
+ *     entry.getChange(ChangeKey.NAME)
+ *         .flatMap(AuditLogChange::getCurrentValue)
+ *         .ifPresent(newName -> System.out.println("The channel's new name is " + newName));
+ * }
+ * }
+ * </pre>
+ */
 public class AuditLogEntry implements Entity {
 
     /** The maximum amount of characters that can be in an audit log reason. */
@@ -33,11 +49,14 @@ public class AuditLogEntry implements Entity {
     /** The gateway associated to this object. */
     private final GatewayDiscordClient gateway;
 
+    /** The audit log part this entry belongs to. */
     private final AuditLogPart auditLogPart;
 
+    /** The raw data as represented by Discord. */
     private final AuditLogEntryData data;
 
-    public AuditLogEntry(final GatewayDiscordClient gateway, final AuditLogPart auditLogPart, final AuditLogEntryData data) {
+    AuditLogEntry(final GatewayDiscordClient gateway, final AuditLogPart auditLogPart,
+                  final AuditLogEntryData data) {
         this.gateway = gateway;
         this.auditLogPart = auditLogPart;
         this.data = data;
@@ -59,18 +78,17 @@ public class AuditLogEntry implements Entity {
      */
     public Optional<Snowflake> getTargetId() {
         return data.targetId()
-            .filter(it -> !it.equals("0"))
-            .map(Snowflake::of);
+                .filter(it -> !it.equals("0"))
+                .map(Snowflake::of);
     }
 
     /**
-     * Gets the user who made the changes.
+     * Gets the ID of the user who made the changes, if present.
      *
-     * @return The user who made the changes.
-     * @deprecated Use {@link AuditLogEntry#getUserId}
+     * @return The ID of the user who made the changes, if present.
      */
-    public Snowflake getResponsibleUserId() {
-        return getUserId().orElse(null);
+    public Optional<Snowflake> getResponsibleUserId() {
+        return data.userId().map(Snowflake::of);
     }
 
     /**
@@ -78,13 +96,10 @@ public class AuditLogEntry implements Entity {
      *
      * @return The user who made the changes, if present.
      */
-    public Optional<Snowflake> getUserId() {
-        return data.userId().map(Snowflake::of);
-    }
-
-    public User getResponsibleUser() {
-        return auditLogPart.getUserById(getResponsibleUserId())
-                .orElseThrow(() -> new AssertionError("Audit log users does not contain responsible user ID."));
+    public Optional<User> getResponsibleUser() {
+        return getResponsibleUserId()
+                .map(id -> auditLogPart.getUserById(id)
+                        .orElseThrow(() -> new NoSuchElementException("Audit log users does not contain responsible user ID.")));
     }
 
     /**
@@ -106,11 +121,11 @@ public class AuditLogEntry implements Entity {
     }
 
     /**
-     * Gets the changes made to the target id, if present.
+     * Gets a change that was recorded by this entry. The possible changes correspond to each {@link ChangeKey}.
      *
      * @param changeKey The audit log change key.
      * @param <T> The type of the audit log change key.
-     * @return The changes made to the target id, if present.
+     * @return The change made to the target, if present.
      */
     public <T> Optional<AuditLogChange<T>> getChange(ChangeKey<T> changeKey) {
         return data.changes().toOptional()
@@ -129,12 +144,25 @@ public class AuditLogEntry implements Entity {
                 });
     }
 
+    /**
+     * Gets one of the optional extra pieces of information recorded by an audit log entry. The possible options
+     * correspond to each {@link OptionKey}.
+     *
+     * @param optionKey The option key.
+     * @param <T> The type of the option key.
+     * @return The option, if present.
+     */
     public <T> Optional<T> getOption(OptionKey<T> optionKey) {
         return data.options().toOptional()
                 .map(AuditLogUtil::createOptionMap)
                 .map(map -> optionKey.parseValue(map.get(optionKey.getField())));
     }
 
+    /**
+     * Gets the {@link AuditLogPart audit log part} that this entry belongs to.
+     *
+     * @return The audit log part that this entry belongs to.
+     */
     public AuditLogPart getParent() {
         return auditLogPart;
     }
