@@ -36,8 +36,7 @@ public final class PermissionSet extends AbstractSet<Permission> {
 
     private static final long ALL_RAW = Arrays.stream(Permission.values())
         .mapToLong(Permission::getValue)
-        .reduce((a, b) -> a | b)
-        .orElseThrow(AssertionError::new);
+        .reduce(0, (a, b) -> a | b);
     private static final long NONE_RAW = 0;
 
     /** Common instance for {@code all()}. */

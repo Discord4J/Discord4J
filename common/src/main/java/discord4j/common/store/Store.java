@@ -102,7 +102,7 @@ public final class Store {
                         case VOICE_STATES:
                             return dataAccessor.countVoiceStatesInGuild(action.getGuildId());
                         default:
-                            throw new AssertionError("Unhandled entity " + action.getEntity());
+                            throw new IllegalArgumentException("Unhandled entity " + action.getEntity());
                     }
                 })
                 .map(CountTotalAction.class, action -> {
@@ -126,7 +126,7 @@ public final class Store {
                         case VOICE_STATES:
                             return dataAccessor.countVoiceStates();
                         default:
-                            throw new AssertionError("Unhandled entity " + action.getEntity());
+                            throw new IllegalArgumentException("Unhandled entity " + action.getEntity());
                     }
                 })
                 .map(GetChannelsAction.class, action -> dataAccessor.getChannels())

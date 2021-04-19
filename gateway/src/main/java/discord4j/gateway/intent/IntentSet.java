@@ -37,8 +37,7 @@ public final class IntentSet extends AbstractSet<Intent> {
 
     private static final long ALL_RAW = Arrays.stream(Intent.values())
             .mapToLong(Intent::getValue)
-            .reduce((a, b) -> a | b)
-            .orElseThrow(AssertionError::new);
+            .reduce(0, (a, b) -> a | b);
     private static final long NONE_RAW = 0;
 
     /**
