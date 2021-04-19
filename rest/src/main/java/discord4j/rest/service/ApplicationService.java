@@ -16,9 +16,7 @@
  */
 package discord4j.rest.service;
 
-import discord4j.discordjson.json.ApplicationCommandData;
-import discord4j.discordjson.json.ApplicationCommandRequest;
-import discord4j.discordjson.json.ApplicationInfoData;
+import discord4j.discordjson.json.*;
 import discord4j.rest.request.Router;
 import discord4j.rest.route.Routes;
 import reactor.core.publisher.Flux;
@@ -66,7 +64,8 @@ public class ApplicationService extends RestService {
             .bodyToMono(ApplicationCommandData.class);
     }
 
-    public Mono<ApplicationCommandData> modifyGlobalApplicationCommand(long applicationId, long commandId, ApplicationCommandRequest request) {
+    public Mono<ApplicationCommandData> modifyGlobalApplicationCommand(long applicationId, long commandId,
+                                                                       ApplicationCommandRequest request) {
         return Routes.GLOBAL_APPLICATION_COMMAND_MODIFY.newRequest(applicationId, commandId)
             .body(request)
             .exchange(getRouter())
@@ -86,14 +85,16 @@ public class ApplicationService extends RestService {
             .flatMapMany(Flux::fromArray);
     }
 
-    public Mono<ApplicationCommandData> createGuildApplicationCommand(long applicationId, long guildId, ApplicationCommandRequest request) {
+    public Mono<ApplicationCommandData> createGuildApplicationCommand(long applicationId, long guildId,
+                                                                      ApplicationCommandRequest request) {
         return Routes.GUILD_APPLICATION_COMMANDS_CREATE.newRequest(applicationId, guildId)
             .body(request)
             .exchange(getRouter())
             .bodyToMono(ApplicationCommandData.class);
     }
 
-    public Flux<ApplicationCommandData> bulkOverwriteGuildApplicationCommand(long applicationId, long guildId, List<ApplicationCommandRequest> requests) {
+    public Flux<ApplicationCommandData> bulkOverwriteGuildApplicationCommand(long applicationId, long guildId,
+                                                                             List<ApplicationCommandRequest> requests) {
         return Routes.GUILD_APPLICATION_COMMANDS_BULK_OVERWRITE.newRequest(applicationId, guildId)
                 .body(requests)
                 .exchange(getRouter())
@@ -107,7 +108,8 @@ public class ApplicationService extends RestService {
             .bodyToMono(ApplicationCommandData.class);
     }
 
-    public Mono<ApplicationCommandData> modifyGuildApplicationCommand(long applicationId, long guildId, long commandId, ApplicationCommandRequest request) {
+    public Mono<ApplicationCommandData> modifyGuildApplicationCommand(long applicationId, long guildId, long commandId,
+                                                                      ApplicationCommandRequest request) {
         return Routes.GUILD_APPLICATION_COMMAND_MODIFY.newRequest(applicationId, guildId, commandId)
             .body(request)
             .exchange(getRouter())
@@ -116,6 +118,38 @@ public class ApplicationService extends RestService {
 
     public Mono<Void> deleteGuildApplicationCommand(long applicationId, long guildId, long commandId) {
         return Routes.GUILD_APPLICATION_COMMAND_DELETE.newRequest(applicationId, guildId, commandId)
+            .exchange(getRouter())
+            .bodyToMono(Void.class);
+    }
+
+    public Flux<GuildApplicationCommandPermissionsData> getGuildApplicationCommandPermissions(long applicationId,
+                                                                                              long guildId) {
+        return Routes.GUILD_APPLICATION_COMMAND_PERMISSIONS_GET.newRequest(applicationId, guildId)
+                .exchange(getRouter())
+                .bodyToMono(GuildApplicationCommandPermissionsData[].class)
+                .flatMapMany(Flux::fromArray);
+    }
+
+    public Mono<GuildApplicationCommandPermissionsData> getApplicationCommandPermissions(long applicationId, long guildId,
+                                                                                         long commandId) {
+        return Routes.APPLICATION_COMMAND_PERMISSIONS_GET.newRequest(applicationId, guildId, commandId)
+                .exchange(getRouter())
+                .bodyToMono(GuildApplicationCommandPermissionsData.class);
+    }
+
+    public Mono<Void> modifyApplicationCommandPermissions(long applicationId, long guildId,
+                                                          long commandId,
+                                                          ApplicationCommandPermissionsRequest request) {
+        return Routes.APPLICATION_COMMAND_PERMISSIONS_MODIFY.newRequest(applicationId, guildId, commandId)
+                .body(request)
+                .exchange(getRouter())
+                .bodyToMono(Void.class);
+    }
+
+    public Mono<Void> bulkModifyApplicationCommandPermissions(long applicationId, long guildId,
+                                                              List<PartialGuildApplicationCommandPermissionsData> permissions) {
+        return Routes.APPLICATION_COMMAND_PERMISSIONS_BULK_MODIFY.newRequest(applicationId, guildId)
+            .body(permissions)
             .exchange(getRouter())
             .bodyToMono(Void.class);
     }
