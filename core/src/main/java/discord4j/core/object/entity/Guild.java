@@ -20,7 +20,7 @@ import discord4j.common.store.action.read.ReadActions;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.*;
-import discord4j.core.object.audit.AuditLogEntry;
+import discord4j.core.object.audit.AuditLogPart;
 import discord4j.core.object.entity.channel.*;
 import discord4j.core.object.presence.Presence;
 import discord4j.core.retriever.EntityRetrievalStrategy;
@@ -1287,22 +1287,40 @@ public final class Guild implements Entity {
 
     /**
      * Requests to retrieve the audit log for this guild.
+     * <p>
+     * The audit log parts can be {@link AuditLogPart#combine(AuditLogPart) combined} for easier querying. For example,
+     * <pre>
+     * {@code
+     * guild.getAuditLog()
+     *     .take(10)
+     *     .reduce(AuditLogPart::combine)
+     * }
+     * </pre>
      *
-     * @return A {@link Flux} that continually emits entries for this guild's audit log. If an error is received, it is
-     * emitted through the {@code Flux}.
+     * @return A {@link Flux} that continually parts of this guild's audit log. If an error is received, it is emitted
+     * through the {@code Flux}.
      */
-    public Flux<AuditLogEntry> getAuditLog() {
+    public Flux<AuditLogPart> getAuditLog() {
         return getAuditLog(ignored -> {});
     }
 
     /**
      * Requests to retrieve the audit log for this guild.
+     * <p>
+     * The audit log parts can be {@link AuditLogPart#combine(AuditLogPart) combined} for easier querying. For example,
+     * <pre>
+     * {@code
+     * guild.getAuditLog()
+     *     .take(10)
+     *     .reduce(AuditLogPart::combine)
+     * }
+     * </pre>
      *
      * @param spec A {@link Consumer} that provides a "blank" {@link AuditLogQuerySpec} to be operated on.
-     * @return A {@link Flux} that continually emits entries for this guild's audit log. If an error is received, it is
-     * emitted through the {@code Flux}.
+     * @return A {@link Flux} that continually parts of this guild's audit log. If an error is received, it is emitted
+     * through the {@code Flux}.
      */
-    public Flux<AuditLogEntry> getAuditLog(final Consumer<? super AuditLogQuerySpec> spec) {
+    public Flux<AuditLogPart> getAuditLog(final Consumer<? super AuditLogQuerySpec> spec) {
         final Function<Map<String, Object>, Flux<AuditLogData>> makeRequest = params -> {
             final AuditLogQuerySpec mutatedSpec = new AuditLogQuerySpec();
             spec.accept(mutatedSpec);
@@ -1319,8 +1337,7 @@ public final class Guild implements Entity {
         };
 
         return PaginationUtil.paginateBefore(makeRequest, getLastEntryId, Long.MAX_VALUE, 100)
-                .flatMap(log -> Flux.fromIterable(log.auditLogEntries())
-                        .map(data -> new AuditLogEntry(gateway, data)));
+                .map(data -> new AuditLogPart(getId().asLong(), gateway, data));
     }
 
     /**

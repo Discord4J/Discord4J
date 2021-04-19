@@ -75,6 +75,17 @@ public final class PermissionSet extends AbstractSet<Permission> {
     }
 
     /**
+     * Returns a {@code PermissionSet} containing all the permissions represented by the <i>raw value</i>.
+     *
+     * @param rawValue A bit-wise OR evaluation of multiple values returned by {@link Permission#getValue()}, as a
+     * string.
+     * @return A {@code PermissionSet} containing all the permissions represented by the <i>raw value</i>.
+     */
+    public static PermissionSet of(final String rawValue) {
+        return new PermissionSet(Long.parseUnsignedLong(rawValue));
+    }
+
+    /**
      * Returns a {@code PermissionSet} containing all the supplied permissions.
      *
      * @param permissions The permissions to add to the {@code PermissionSet}.
