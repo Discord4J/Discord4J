@@ -60,7 +60,8 @@ public final class Presence {
             case DESKTOP: return data.clientStatus().desktop().toOptional().map(Status::of);
             case MOBILE: return data.clientStatus().mobile().toOptional().map(Status::of);
             case WEB: return data.clientStatus().web().toOptional().map(Status::of);
-            default: throw new AssertionError("Unhandled platform " + platform);
+            // TODO: Remove in Java 12+. The switch is exhaustive assuming Platform is not compiled separately.
+            default: throw new IllegalArgumentException("Unhandled platform " + platform);
         }
     }
 
