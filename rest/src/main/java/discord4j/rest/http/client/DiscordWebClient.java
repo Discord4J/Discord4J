@@ -21,7 +21,6 @@ import discord4j.common.GitProperties;
 import discord4j.rest.http.ExchangeStrategies;
 import discord4j.rest.http.WriterStrategy;
 import discord4j.rest.response.ResponseFunction;
-import discord4j.rest.route.Routes;
 import io.netty.handler.codec.http.DefaultHttpHeaders;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpHeaders;
@@ -64,7 +63,7 @@ public class DiscordWebClient {
      */
     public DiscordWebClient(HttpClient httpClient, ExchangeStrategies exchangeStrategies,
                             String authorizationScheme, String token,
-                            List<ResponseFunction> responseFunctions) {
+                            List<ResponseFunction> responseFunctions, String discordBaseUrl) {
         final Properties properties = GitProperties.getProperties();
         final String version = properties.getProperty(GitProperties.APPLICATION_VERSION, "3");
         final String url = properties.getProperty(GitProperties.APPLICATION_URL, "https://discord4j.com");
@@ -74,7 +73,7 @@ public class DiscordWebClient {
         defaultHeaders.add(HttpHeaderNames.AUTHORIZATION, authorizationScheme + " " + token);
         defaultHeaders.add(HttpHeaderNames.USER_AGENT, "DiscordBot(" + url + ", " + version + ")");
 
-        this.httpClient = configureHttpClient(httpClient.baseUrl(Routes.BASE_URL));
+        this.httpClient = configureHttpClient(httpClient.baseUrl(discordBaseUrl));
         this.defaultHeaders = defaultHeaders;
         this.exchangeStrategies = exchangeStrategies;
         this.responseFunctions = responseFunctions;
