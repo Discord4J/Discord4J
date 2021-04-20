@@ -65,7 +65,7 @@ public abstract class ReactionEmoji {
      * A full list of emoji can be found <a href="https://unicode.org/emoji/charts/full-emoji-list.html">here</a>.
      * <p>
      * This method does <i>not</i> accept the "U+" notation for codepoints. For that, use
-     * {@link #unicodeCodepoints(String...)}.
+     * {@link #codepoints(String...)}.
      *
      * @param raw The raw unicode string for the emoji.
      * @return A reaction emoji using the given information.
@@ -79,16 +79,16 @@ public abstract class ReactionEmoji {
      * <p>
      * The argument(s) to this method should use the "U+" notation for codepoints. For example,
      * <pre>
-     * ReactionEmoji.unicodeCodepoints("U+2764") // "heart"
-     * ReactionEmoji.unicodeCodepoints("U+1F600") // "grinning face"
-     * ReactionEmoji.unicodeCodepoints("U+1F468", "U+200D", "U+1F9B0") // "man: red hair"
+     * ReactionEmoji.codepoints("U+2764") // "heart"
+     * ReactionEmoji.codepoints("U+1F600") // "grinning face"
+     * ReactionEmoji.codepoints("U+1F468", "U+200D", "U+1F9B0") // "man: red hair"
      * </pre>
      * A full list of emoji can be found <a href="https://unicode.org/emoji/charts/full-emoji-list.html">here</a>.
      *
      * @param codepoints The codepoints that make up the emoji.
      * @return A reaction emoji using the given information.
      */
-    public static Unicode unicodeCodepoints(String... codepoints) {
+    public static Unicode codepoints(String... codepoints) {
         String combined = Arrays.stream(codepoints)
                 .map(c -> Integer.parseInt(c.substring(2), 16))
                 .reduce(new StringBuilder(), StringBuilder::appendCodePoint, StringBuilder::append)
