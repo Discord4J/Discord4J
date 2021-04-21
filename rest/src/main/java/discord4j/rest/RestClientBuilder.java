@@ -24,6 +24,7 @@ import discord4j.rest.http.ExchangeStrategies;
 import discord4j.rest.request.*;
 import discord4j.rest.response.ResponseFunction;
 import discord4j.rest.route.Route;
+import discord4j.rest.route.Routes;
 import discord4j.rest.util.AllowedMentions;
 import reactor.netty.http.client.HttpClient;
 import reactor.util.annotation.Nullable;
@@ -249,7 +250,7 @@ public class RestClientBuilder<C, O extends RouterOptions> {
 
     private O buildOptions(ReactorResources reactor, JacksonResources jackson) {
         RouterOptions options = new RouterOptions(token, reactor, initExchangeStrategies(jackson),
-                responseTransformers, initGlobalRateLimiter(reactor), initRequestQueueFactory());
+                responseTransformers, initGlobalRateLimiter(reactor), initRequestQueueFactory(), Routes.BASE_URL);
         return this.optionsModifier.apply(options);
     }
 
