@@ -217,9 +217,9 @@ public class InteractionCreateEvent extends Event {
         }
 
         @Override
-        public Mono<MessageData> createFollowupMessage(MultipartRequest<WebhookExecuteRequest> request, boolean wait) {
+        public Mono<MessageData> createFollowupMessage(MultipartRequest<WebhookExecuteRequest> request) {
             return restClient.getWebhookService()
-                    .executeWebhook(applicationId, interactionData.token(), wait, request);
+                    .executeWebhook(applicationId, interactionData.token(), true, request);
         }
 
         @Override
