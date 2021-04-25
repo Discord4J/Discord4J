@@ -110,7 +110,8 @@ public final class Sticker implements Entity {
     /**
      * The format of a sticker.
      *
-     * @see <a href="TODO">Sticker Formats</a>
+     * @see <a href="https://discord.com/developers/docs/resources/channel#message-object-message-sticker-format-types">
+     *     Sticker Formats</a>
      */
     public enum Format {
 

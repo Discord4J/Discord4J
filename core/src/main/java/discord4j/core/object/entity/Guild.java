@@ -736,6 +736,15 @@ public final class Guild implements Entity {
     }
 
     /**
+     * Gets whether this guild is designated as NSFW.
+     *
+     * @return Whether this guild is designated as NSFW.
+     */
+    public boolean isNsfw() {
+        return data.nsfw().toOptional().orElse(false);
+    }
+
+    /**
      * Requests to retrieve the voice states of the guild.
      *
      * @return A {@link Flux} that continually emits the {@link VoiceState voice states} of the guild. If an error is
