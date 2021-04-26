@@ -71,6 +71,7 @@ public class UserService extends RestService {
                 .bodyToMono(ChannelData.class);
     }
 
+    @Deprecated
     public Mono<ChannelData> createGroupDM(GroupDMCreateRequest request) {
         return Routes.GROUP_DM_CREATE.newRequest()
                 .body(request)
