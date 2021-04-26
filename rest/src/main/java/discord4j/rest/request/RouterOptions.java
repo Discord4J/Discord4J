@@ -18,8 +18,10 @@
 package discord4j.rest.request;
 
 import discord4j.common.ReactorResources;
+import discord4j.common.util.Token;
 import discord4j.rest.http.ExchangeStrategies;
 import discord4j.rest.response.ResponseFunction;
+import reactor.core.publisher.Mono;
 
 import java.util.List;
 import java.util.Objects;
@@ -29,7 +31,8 @@ import java.util.Objects;
  */
 public class RouterOptions {
 
-    private final String token;
+    private final Mono<Token> token;
+    private final AuthorizationScheme authorizationScheme;
     private final ReactorResources reactorResources;
     private final ExchangeStrategies exchangeStrategies;
     private final List<ResponseFunction> responseTransformers;
@@ -37,10 +40,12 @@ public class RouterOptions {
     private final RequestQueueFactory requestQueueFactory;
     private final String discordBaseUrl;
 
-    public RouterOptions(String token, ReactorResources reactorResources, ExchangeStrategies exchangeStrategies,
-                         List<ResponseFunction> responseTransformers, GlobalRateLimiter globalRateLimiter,
-                         RequestQueueFactory requestQueueFactory, String discordBaseUrl) {
+    public RouterOptions(Mono<Token> token, AuthorizationScheme authorizationScheme, ReactorResources reactorResources,
+                         ExchangeStrategies exchangeStrategies, List<ResponseFunction> responseTransformers,
+                         GlobalRateLimiter globalRateLimiter, RequestQueueFactory requestQueueFactory,
+                         String discordBaseUrl) {
         this.token = Objects.requireNonNull(token, "token");
+        this.authorizationScheme = Objects.requireNonNull(authorizationScheme, "authorizationScheme");
         this.reactorResources = Objects.requireNonNull(reactorResources, "reactorResources");
         this.exchangeStrategies = Objects.requireNonNull(exchangeStrategies, "exchangeStrategies");
         this.responseTransformers = Objects.requireNonNull(responseTransformers, "responseTransformers");
@@ -54,8 +59,17 @@ public class RouterOptions {
      *
      * @return the configured token
      */
-    public String getToken() {
+    public Mono<Token> getToken() {
         return token;
+    }
+
+    /**
+     * Returns the currently configured authorization scheme to use with the authorization header.
+     *
+     * @return the configured authorization scheme
+     */
+    public AuthorizationScheme getAuthorizationScheme() {
+        return authorizationScheme;
     }
 
     /**
