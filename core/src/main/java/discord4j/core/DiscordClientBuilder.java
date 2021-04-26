@@ -17,20 +17,24 @@
 package discord4j.core;
 
 import discord4j.common.GitProperties;
+import discord4j.common.util.Token;
 import discord4j.rest.RestClientBuilder;
+import discord4j.rest.RestClientBuilder.Resources;
 import discord4j.rest.request.DefaultRouter;
 import discord4j.rest.request.Router;
 import discord4j.rest.request.RouterOptions;
+import reactor.core.publisher.Mono;
 import reactor.util.Logger;
 import reactor.util.Loggers;
 
 import java.util.Properties;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 /**
  * Builder suited for creating a {@link DiscordClient}. To acquire an instance, see {@link #create(String)}.
  */
-public final class DiscordClientBuilder<C, O extends RouterOptions> extends RestClientBuilder<C, O> {
+public final class DiscordClientBuilder<C extends DiscordClient, R extends Resources, O extends RouterOptions, B extends DiscordClientBuilder<C, R, O, B>> extends RestClientBuilder<C, R, O, B> {
 
     private static final Logger log = Loggers.getLogger(DiscordClientBuilder.class);
 
@@ -39,10 +43,10 @@ public final class DiscordClientBuilder<C, O extends RouterOptions> extends Rest
      *
      * @param token the bot token used to authenticate to Discord
      */
-    public static DiscordClientBuilder<DiscordClient, RouterOptions> create(String token) {
-        Function<Config, DiscordClient> clientFactory = config -> {
-            CoreResources coreResources = new CoreResources(config.getToken(), config.getReactorResources(),
-                    config.getJacksonResources(), config.getRouter(), config.getAllowedMentions().orElse(null));
+    public static <B extends DiscordClientBuilder<DiscordClient, Resources, RouterOptions, B>> DiscordClientBuilder<DiscordClient, Resources, RouterOptions, B> create(String token) {
+        Function<Resources, DiscordClient> clientFactory = resources -> {
+            CoreResources coreResources = new CoreResources(resources.getToken(), resources.getReactorResources(),
+                    resources.getJacksonResources(), resources.getRouter(), resources.getAllowedMentions().orElse(null));
             Properties properties = GitProperties.getProperties();
             String url = properties.getProperty(GitProperties.APPLICATION_URL, "https://discord4j.com");
             String name = properties.getProperty(GitProperties.APPLICATION_NAME, "Discord4J");
@@ -51,16 +55,15 @@ public final class DiscordClientBuilder<C, O extends RouterOptions> extends Rest
             log.info("{} {} ({})", name, gitDescribe, url);
             return new DiscordClient(coreResources);
         };
-        return new DiscordClientBuilder<>(token, clientFactory, Function.identity());
+        return new DiscordClientBuilder<>(__ -> Mono.just(Token.of(token)), (__, resources) -> resources, clientFactory,
+                Function.identity());
     }
 
-    DiscordClientBuilder(String token, Function<Config, C> allocator, Function<RouterOptions, O> optionsModifier) {
-        super(token, allocator, optionsModifier);
-    }
-
-    DiscordClientBuilder(DiscordClientBuilder<?, ?> source, Function<Config, C> allocator,
+    DiscordClientBuilder(Function<B, Mono<Token>> tokenFactory,
+                         BiFunction<B, Resources, R> resourcesModifier,
+                         Function<R, C> allocator,
                          Function<RouterOptions, O> optionsModifier) {
-        super(source, allocator, optionsModifier);
+        super(tokenFactory, optionsModifier, resourcesModifier, allocator);
     }
 
     /**

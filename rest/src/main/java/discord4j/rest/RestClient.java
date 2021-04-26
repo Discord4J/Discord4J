@@ -18,6 +18,7 @@ package discord4j.rest;
 
 import discord4j.common.util.Snowflake;
 import discord4j.discordjson.json.*;
+import discord4j.rest.RestClientBuilder.Resources;
 import discord4j.rest.entity.*;
 import discord4j.rest.request.Router;
 import discord4j.rest.request.RouterOptions;
@@ -68,7 +69,7 @@ public class RestClient {
      * @param token the bot token used for authentication
      * @return a {@link RestClientBuilder}
      */
-    public static RestClientBuilder<RestClient, RouterOptions> restBuilder(String token) {
+    public static <B extends RestClientBuilder<RestClient, Resources, RouterOptions, B>> RestClientBuilder<RestClient, Resources, RouterOptions, B> restBuilder(String token) {
         return RestClientBuilder.createRest(token);
     }
 
@@ -193,13 +194,13 @@ public class RestClient {
     }
 
     /**
-     * Requests to retrieve the bot member from the guild of the supplied ID
+     * Requests to retrieve the current user as a member of the guild of the supplied ID
      *
      * @param guildId the ID of the guild.
-     * @return A {@link RestMember} of the bot user as represented by the supplied ID.
+     * @return A {@link RestMember} of the current user as represented by the supplied ID.
      */
-    public RestMember selfRestMember(Snowflake guildId) {
-        return RestMember.create(this, guildId, restResources.getSelfId());
+    public Mono<RestMember> selfRestMember(Snowflake guildId) {
+        return restResources.getSelfId().map(selfId -> RestMember.create(this, guildId, selfId));
     }
 
     /**
@@ -321,9 +322,9 @@ public class RestClient {
     }
 
     /**
-     * Requests to retrieve the bot user.
+     * Requests to retrieve the current user.
      *
-     * @return A {@link Mono} where, upon successful completion, emits the bot {@link UserData user}. If an error is
+     * @return A {@link Mono} where, upon successful completion, emits the current {@link UserData user}. If an error is
      * received, it is emitted through the {@code Mono}.
      */
     public Mono<UserData> getSelf() {
@@ -331,14 +332,14 @@ public class RestClient {
     }
 
     /**
-     * Requests to retrieve the bot user, represented as a member of the guild of the supplied ID
+     * Requests to retrieve the current user, represented as a member of the guild of the supplied ID
      *
      * @param guildId The ID of the guild
-     * @return a {@link Mono} where, upon successful completion, emits the bot {@link MemberData member}. If an error is
+     * @return a {@link Mono} where, upon successful completion, emits the current {@link MemberData member}. If an error is
      *         received, it is emitted through the {@code Mono}.
      */
     public Mono<MemberData> getSelfMember(Snowflake guildId) {
-        return guildService.getGuildMember(guildId.asLong(), restResources.getSelfId().asLong());
+        return restResources.getSelfId().flatMap(selfId -> guildService.getGuildMember(guildId.asLong(), selfId.asLong()));
     }
 
     /**
@@ -375,7 +376,7 @@ public class RestClient {
     }
 
     /**
-     * Requests to edit this client (i.e., modify the current bot user).
+     * Requests to edit this client (i.e., modify the current user).
      *
      * @param request A {@link UserModifyRequest} as request body.
      * @return A {@link Mono} where, upon successful completion, emits the edited {@link UserData}. If an error is
