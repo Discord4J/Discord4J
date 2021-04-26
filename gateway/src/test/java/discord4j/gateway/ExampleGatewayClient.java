@@ -21,6 +21,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import discord4j.common.JacksonResources;
 import discord4j.common.ReactorResources;
 import discord4j.common.retry.ReconnectOptions;
+import discord4j.common.util.Token;
 import discord4j.gateway.intent.IntentSet;
 import discord4j.gateway.payload.JacksonPayloadReader;
 import discord4j.gateway.payload.JacksonPayloadWriter;
@@ -53,7 +54,7 @@ public class ExampleGatewayClient {
                 .build();
 
         GatewayOptions gatewayOptions = new GatewayOptions(
-                System.getenv("token"),
+                Mono.just(Token.of(System.getenv("token"))),
                 gatewayReactorResources,
                 payloadReader,
                 payloadWriter,

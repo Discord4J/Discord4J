@@ -20,9 +20,11 @@ package discord4j.rest;
 import discord4j.common.JacksonResources;
 import discord4j.common.ReactorResources;
 import discord4j.common.util.Snowflake;
+import discord4j.common.util.Token;
 import discord4j.common.util.TokenUtil;
 import discord4j.rest.request.Router;
 import discord4j.rest.util.AllowedMentions;
+import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
 
 import java.util.Optional;
@@ -32,39 +34,39 @@ import java.util.Optional;
  */
 public class RestResources {
 
-    private final String token;
+    private final Mono<Token> token;
     private final ReactorResources reactorResources;
     private final JacksonResources jacksonResources;
     private final Router router;
-    private final long selfId;
+    private final Mono<Long> selfId;
     @Nullable
     private final AllowedMentions allowedMentions;
 
     /**
      * Create a {@link RestResources} instance with the given resources.
      *
-     * @param token the bot token used to authenticate requests
+     * @param token the token used to authenticate requests
      * @param reactorResources Reactor resources to establish connections and schedule tasks
      * @param jacksonResources Jackson data-binding resources to map objects
      * @param router a connector to perform requests against Discord API
      * @param allowedMentions a configuration object to limit mentions creating notifications on message sending
      */
-    public RestResources(String token, ReactorResources reactorResources, JacksonResources jacksonResources,
+    public RestResources(Mono<Token> token, ReactorResources reactorResources, JacksonResources jacksonResources,
                          Router router, @Nullable AllowedMentions allowedMentions) {
         this.token = token;
         this.reactorResources = reactorResources;
         this.jacksonResources = jacksonResources;
         this.router = router;
-        this.selfId = TokenUtil.getSelfId(token);
+        this.selfId = token.map(TokenUtil::getSelfId);
         this.allowedMentions = allowedMentions;
     }
 
     /**
-     * Return the bot token used to authenticate requests.
+     * Return the token used to authenticate requests.
      *
-     * @return the bot token
+     * @return the token
      */
-    public String getToken() {
+    public Mono<Token> getToken() {
         return token;
     }
 
@@ -96,12 +98,12 @@ public class RestResources {
     }
 
     /**
-     * Gets the bot user's ID.
+     * Gets the current user's ID.
      *
-     * @return The bot user's ID.
+     * @return The current user's ID.
      */
-    public Snowflake getSelfId() {
-        return Snowflake.of(selfId);
+    public Mono<Snowflake> getSelfId() {
+        return selfId.map(Snowflake::of);
     }
 
     /**

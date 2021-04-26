@@ -26,6 +26,7 @@ import discord4j.common.operator.RateLimitOperator;
 import discord4j.common.retry.ReconnectContext;
 import discord4j.common.retry.ReconnectOptions;
 import discord4j.common.sinks.EmissionStrategy;
+import discord4j.common.util.Token;
 import discord4j.discordjson.json.gateway.*;
 import discord4j.discordjson.possible.Possible;
 import discord4j.gateway.json.GatewayPayload;
@@ -91,7 +92,7 @@ public class DefaultGatewayClient implements GatewayClient {
     private final ReconnectOptions reconnectOptions;
     private final ReconnectContext reconnectContext;
     private final IdentifyOptions identifyOptions;
-    private final String token;
+    private final Mono<Token> token;
     private final GatewayObserver observer;
     private final PayloadTransformer identifyLimiter;
     private final ResettableInterval heartbeatEmitter;
@@ -407,14 +408,15 @@ public class DefaultGatewayClient implements GatewayClient {
     }
 
     private Mono<Void> handleInvalidSession(GatewayPayload<InvalidSession> payload) {
-        if (payload.getData().resumable()) {
-            emissionStrategy.emitNext(outbound,
-                    GatewayPayload.resume(ImmutableResume.of(token, sessionId.get(), sequence.get())));
-        } else {
+        if (!payload.getData().resumable()) {
             sessionHandler.error(new InvalidSessionException(currentContext,
                     "Reconnecting due to non-resumable session invalidation"));
+            return Mono.empty();
         }
-        return Mono.empty();
+        return token.map(Token::asString)
+                .doOnNext(token -> emissionStrategy.emitNext(outbound,
+                        GatewayPayload.resume(ImmutableResume.of(token, sessionId.get(), sequence.get()))))
+                .then();
     }
 
     private Mono<Void> handleHello(GatewayPayload<Hello> payload) {
@@ -422,36 +424,42 @@ public class DefaultGatewayClient implements GatewayClient {
         heartbeatEmitter.start(Duration.ZERO, interval);
         return state.asFlux()
                 .next()
-                .doOnNext(state -> {
+                .flatMap(state -> {
                     if (state == GatewayConnection.State.START_RESUMING || state == GatewayConnection.State.RESUMING) {
-                        doResume(payload);
-                    } else {
-                        doIdentify(payload);
+                        return doResume(payload);
                     }
+                    return doIdentify(payload);
                 })
                 .then();
     }
 
-    private void doResume(GatewayPayload<Hello> payload) {
-        log.debug(format(currentContext, "Resuming Gateway session from {}"), sequence.get());
-        emissionStrategy.emitNext(outbound,
-                GatewayPayload.resume(ImmutableResume.of(token, sessionId.get(), sequence.get())));
+    private Mono<Void> doResume(GatewayPayload<Hello> payload) {
+        return token.map(Token::asString)
+                .doOnNext(token -> {
+                    log.debug(format(currentContext, "Resuming Gateway session from {}"), sequence.get());
+                    emissionStrategy.emitNext(outbound,
+                            GatewayPayload.resume(ImmutableResume.of(token, sessionId.get(), sequence.get())));
+                })
+                .then();
     }
 
-    private void doIdentify(GatewayPayload<Hello> payload) {
-        IdentifyProperties props = ImmutableIdentifyProperties.of(System.getProperty("os.name"), "Discord4J",
-                "Discord4J");
-        Identify identify = Identify.builder()
-                .token(token)
-                .intents(identifyOptions.getIntents().map(set -> Possible.of(set.getRawValue())).orElse(Possible.absent()))
-                .properties(props)
-                .compress(false)
-                .largeThreshold(identifyOptions.getLargeThreshold())
-                .shard(identifyOptions.getShardInfo().asArray())
-                .presence(identifyOptions.getInitialStatus().map(Possible::of).orElse(Possible.absent()))
-                .build();
-        log.debug(format(currentContext, "Identifying to Gateway"), sequence.get());
-        emissionStrategy.emitNext(outbound, GatewayPayload.identify(identify));
+    private Mono<Void> doIdentify(GatewayPayload<Hello> payload) {
+        IdentifyProperties props = ImmutableIdentifyProperties.of(System.getProperty("os.name"), "Discord4J", "Discord4J");
+        return token.map(Token::asString)
+                .doOnNext(token -> {
+                    Identify identify = Identify.builder()
+                            .token(token)
+                            .intents(identifyOptions.getIntents().map(set -> Possible.of(set.getRawValue())).orElse(Possible.absent()))
+                            .properties(props)
+                            .compress(false)
+                            .largeThreshold(identifyOptions.getLargeThreshold())
+                            .shard(identifyOptions.getShardInfo().asArray())
+                            .presence(identifyOptions.getInitialStatus().map(Possible::of).orElse(Possible.absent()))
+                            .build();
+                    log.debug(format(currentContext, "Identifying to Gateway"), sequence.get());
+                    emissionStrategy.emitNext(outbound, GatewayPayload.identify(identify));
+                })
+                .then();
     }
 
     private Mono<Void> handleHeartbeatAck(GatewayPayload<?> context) {

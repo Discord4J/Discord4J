@@ -288,7 +288,7 @@ public class GatewayDiscordClient implements EntityRetriever {
      *
      * @return The bot user's ID.
      */
-    public Snowflake getSelfId() {
+    public Mono<Snowflake> getSelfId() {
         return getCoreResources().getSelfId();
     }
 

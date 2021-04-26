@@ -75,7 +75,7 @@ public class DefaultVoiceGatewayClient {
     private static final Logger receiverLog = Loggers.getLogger("discord4j.voice.protocol.receiver");
 
     private final Snowflake guildId;
-    private final Snowflake selfId;
+    private final Mono<Snowflake> selfId;
     private final Function<VoiceGatewayPayload<?>, Mono<ByteBuf>> payloadWriter;
     private final Function<ByteBuf, Mono<? super VoiceGatewayPayload<?>>> payloadReader;
     private final VoiceReactorResources reactorResources;
@@ -192,20 +192,20 @@ public class DefaultVoiceGatewayClient {
 
                     sessionHandler = new VoiceWebsocketHandler(receiver, outFlux, context);
 
-                    Mono<?> onOpen = state.asFlux()
-                            .next()
-                            .doOnNext(s -> {
-                                if (s == VoiceConnection.State.RESUMING) {
-                                    log.info(format(context, "Attempting to resume"));
-                                    emissionStrategy.emitNext(outbound, new Resume(guildId.asString(), session.get(),
-                                            serverOptions.get().getToken()));
-                                } else {
-                                    state.emitNext(VoiceConnection.State.CONNECTING, FAIL_FAST);
-                                    log.info(format(context, "Identifying"));
-                                    emissionStrategy.emitNext(outbound, new Identify(guildId.asString(),
-                                            selfId.asString(), session.get(), serverOptions.get().getToken()));
-                                }
-                            });
+                Mono<?> onOpen = state.asFlux()
+                        .next()
+                        .flatMap(s -> {
+                            if (s == VoiceConnection.State.RESUMING) {
+                                log.info(format(context, "Attempting to resume"));
+                                emissionStrategy.emitNext(outbound, new Resume(guildId.asString(), session.get(),
+                                        serverOptions.get().getToken()));
+                                return Mono.empty();
+                            }
+                            state.emitNext(VoiceConnection.State.CONNECTING, FAIL_FAST);
+                            log.info(format(context, "Identifying"));
+                            return selfId.map(Snowflake::asString).doOnNext(id -> emissionStrategy.emitNext(outbound,
+                                    new Identify(guildId.asString(), id, session.get(), serverOptions.get().getToken())));
+                        });
 
                     Disposable.Composite innerCleanup = Disposables.composite();
 

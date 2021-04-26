@@ -19,9 +19,11 @@ package discord4j.core;
 
 import discord4j.common.JacksonResources;
 import discord4j.common.ReactorResources;
+import discord4j.common.util.Token;
 import discord4j.rest.RestResources;
 import discord4j.rest.request.Router;
 import discord4j.rest.util.AllowedMentions;
+import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
 
 /**
@@ -39,7 +41,7 @@ public class CoreResources extends RestResources {
      * @param router a connector to perform requests against Discord API
      * @param allowedMentions a configuration object to limit mentions creating notifications on message sending
      */
-    public CoreResources(String token, ReactorResources reactorResources, JacksonResources jacksonResources,
+    public CoreResources(Mono<Token> token, ReactorResources reactorResources, JacksonResources jacksonResources,
                          Router router, @Nullable AllowedMentions allowedMentions) {
         super(token, reactorResources, jacksonResources, router, allowedMentions);
     }
