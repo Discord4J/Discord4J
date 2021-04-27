@@ -18,17 +18,14 @@
 package discord4j.core;
 
 import discord4j.common.retry.ReconnectOptions;
+import discord4j.common.store.Store;
 import discord4j.core.event.EventDispatcher;
 import discord4j.core.event.domain.Event;
 import discord4j.core.shard.MemberRequestFilter;
 import discord4j.core.shard.ShardCoordinator;
-import discord4j.core.state.StateHolder;
-import discord4j.core.state.StateView;
-import discord4j.discordjson.possible.Possible;
 import discord4j.gateway.GatewayClient;
 import discord4j.gateway.GatewayReactorResources;
 import discord4j.gateway.intent.IntentSet;
-import discord4j.store.api.Store;
 import discord4j.voice.VoiceReactorResources;
 
 /**
@@ -36,32 +33,33 @@ import discord4j.voice.VoiceReactorResources;
  */
 public class GatewayResources {
 
-    private final StateView stateView;
+    private final Store store;
     private final EventDispatcher eventDispatcher;
     private final ShardCoordinator shardCoordinator;
     private final MemberRequestFilter memberRequestFilter;
     private final GatewayReactorResources gatewayReactorResources;
     private final VoiceReactorResources voiceReactorResources;
     private final ReconnectOptions voiceReconnectOptions;
-    private final Possible<IntentSet> intents;
+    private final IntentSet intents;
 
     /**
      * Create a new {@link GatewayResources} with the given parameters.
      *
-     * @param stateView a read-only facade for an entity cache based off {@link StateHolder}
+     * @param store an entity cache
      * @param eventDispatcher an event bus dedicated to distribute {@link Event} instances
      * @param shardCoordinator a middleware component to coordinate multiple shard-connecting efforts
      * @param memberRequestFilter a strategy to determine whether guild members should be requested
      * @param gatewayReactorResources a custom set of Reactor resources targeting Gateway operations
      * @param voiceReactorResources a set of Reactor resources targeting Voice Gateway operations
      * @param voiceReconnectOptions a reconnection policy for Voice Gateway connections
+     * @param intents a set of events to subscribe when connecting to the Gateway
      */
-    public GatewayResources(StateView stateView, EventDispatcher eventDispatcher,
+    public GatewayResources(Store store, EventDispatcher eventDispatcher,
                             ShardCoordinator shardCoordinator, MemberRequestFilter memberRequestFilter,
                             GatewayReactorResources gatewayReactorResources,
                             VoiceReactorResources voiceReactorResources,
-                            ReconnectOptions voiceReconnectOptions, Possible<IntentSet> intents) {
-        this.stateView = stateView;
+                            ReconnectOptions voiceReconnectOptions, IntentSet intents) {
+        this.store = store;
         this.eventDispatcher = eventDispatcher;
         this.shardCoordinator = shardCoordinator;
         this.memberRequestFilter = memberRequestFilter;
@@ -76,19 +74,17 @@ public class GatewayResources {
      *
      * @return The {@link IntentSet} tied to this {@link GatewayResources}
      */
-    public Possible<IntentSet> getIntents() {
+    public IntentSet getIntents() {
         return intents;
     }
 
     /**
-     * Repository aggregate view of all caching related operations. Discord Gateway mandates its clients to cache its
-     * updates through events coming from the real-time websocket. The {@link StateView} is a read-only facade for
-     * {@link StateHolder} which is the mediator for the underlying {@link Store} instances for each cached entity.
+     * Returns the {@link Store} used to cache data during gateway sessions.
      *
-     * @return the {@link StateView} tied to this {@link GatewayResources}
+     * @return the {@link Store} instance
      */
-    public StateView getStateView() {
-        return stateView;
+    public Store getStore() {
+        return store;
     }
 
     /**

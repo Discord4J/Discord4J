@@ -55,7 +55,7 @@ public class User implements Entity {
     private final UserData data;
 
     /**
-     * Constructs an {@code User} with an associated ServiceMediator and Discord data.
+     * Constructs an {@code User} with an associated {@link GatewayDiscordClient} and Discord data.
      *
      * @param gateway The {@link GatewayDiscordClient} associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
@@ -68,6 +68,15 @@ public class User implements Entity {
     @Override
     public final GatewayDiscordClient getClient() {
         return gateway;
+    }
+
+    /**
+     * Gets the data of the user.
+     *
+     * @return The data of the user.
+     */
+    public UserData getUserData() {
+        return data;
     }
 
     /**

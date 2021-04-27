@@ -25,6 +25,8 @@ import discord4j.core.spec.WebhookEditWithTokenSpec;
 import discord4j.core.spec.WebhookExecuteSpec;
 import discord4j.core.util.EntityUtil;
 import discord4j.discordjson.json.WebhookData;
+import discord4j.discordjson.json.WebhookPartialChannelData;
+import discord4j.discordjson.json.WebhookPartialGuildData;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
 
@@ -46,7 +48,7 @@ public final class Webhook implements Entity {
     private final WebhookData data;
 
     /**
-     * Constructs a {@code Webhook} with an associated ServiceMediator and Discord data.
+     * Constructs a {@code Webhook} with an associated {@link GatewayDiscordClient} and Discord data.
      *
      * @param gateway The {@link GatewayDiscordClient} associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
@@ -66,47 +68,22 @@ public final class Webhook implements Entity {
         return Snowflake.of(data.id());
     }
 
-    public enum Type {
-        UNKNOWN(-1),
-        /**
-         * Incoming Webhooks can post messages to channels with a generated token
-         */
-        INCOMING(1),
-        /**
-         * Channel Follower Webhooks are internal webhooks used with Channel Following
-         * to post new messages into channels
-         */
-        CHANNEL_FOLLOWER(2);
-
-        private final int value;
-
-        Type(int value) {
-            this.value = value;
-        }
-
-        public int getValue() {
-            return value;
-        }
-
-        public static Type fromValue(int value) {
-            switch (value) {
-                case 1:
-                    return Type.INCOMING;
-                case 2:
-                    return Type.CHANNEL_FOLLOWER;
-                default:
-                    return Type.UNKNOWN;
-            }
-        }
+    /**
+     * Gets the data of the webhook.
+     *
+     * @return The data of the webhook.
+     */
+    public WebhookData getData() {
+        return data;
     }
 
     /**
-     * Gets the type of this webhook.
+     * Gets the type of the webhook.
      *
-     * @return The type of this webhook.
+     * @return The type of the webhook.
      */
     public Type getType() {
-        return Type.fromValue(data.type());
+        return Type.of(data.type());
     }
 
     /**
@@ -210,6 +187,55 @@ public final class Webhook implements Entity {
     }
 
     /**
+     * Gets the bot/OAuth2 application ID that created this webhook.
+     *
+     * @return The bot/OAuth2 application ID that created this webhook.
+     */
+    public Optional<Snowflake> getApplicationId() {
+        return data.applicationId().map(Snowflake::of);
+    }
+
+    /**
+     * Gets the guild id of the channel that this webhook is following (returned for Channel Follower Webhooks),
+     * if present.
+     *
+     * @return The guild id of the channel that this webhook is following (returned for Channel Follower Webhooks),
+     * if present.
+     */
+    public Optional<Snowflake> getSourceGuildId() {
+        return data.sourceGuild().toOptional().map(WebhookPartialGuildData::id).map(Snowflake::of);
+    }
+
+    /**
+     * Gets the guild name of the channel that this webhook is following (returned for Channel Follower Webhooks),
+     * if present.
+     *
+     * @return The guild name of the channel that this webhook is following (returned for Channel Follower Webhooks),
+     * if present.
+     */
+    public Optional<String> getSourceGuildName() {
+        return data.sourceGuild().toOptional().map(WebhookPartialGuildData::name);
+    }
+
+    /**
+     * Gets the id of the channel that this webhook is following (returned for Channel Follower Webhooks), if present.
+     *
+     * @return The id of the channel that this webhook is following (returned for Channel Follower Webhooks), if present.
+     */
+    public Optional<Snowflake> getSourceChannelId() {
+        return data.sourceChannel().toOptional().map(WebhookPartialChannelData::id).map(Snowflake::of);
+    }
+
+    /**
+     * Gets the name of the channel that this webhook is following (returned for Channel Follower Webhooks), if present.
+     *
+     * @return The name of the channel that this webhook is following (returned for Channel Follower Webhooks), if present.
+     */
+    public Optional<String> getSourceChannelName() {
+        return data.sourceChannel().toOptional().map(WebhookPartialChannelData::name);
+    }
+
+    /**
      * Requests to delete this webhook. Requires the MANAGE_WEBHOOKS permission.
      *
      * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the webhook has been deleted.
@@ -251,7 +277,7 @@ public final class Webhook implements Entity {
      * Requests to edit this webhook. Requires the MANAGE_WEBHOOKS permission.
      *
      * @param spec A {@link Consumer} that provides a "blank" {@link WebhookEditSpec} to be operated on.
-     * @return A {@link Mono} where, upon successful completion, emits the edited {@link Guild}. If an error is
+     * @return A {@link Mono} where, upon successful completion, emits the edited {@link Webhook}. If an error is
      * received, it is emitted through the {@code Mono}.
      */
     public Mono<Webhook> edit(final Consumer<? super WebhookEditSpec> spec) {
@@ -270,7 +296,7 @@ public final class Webhook implements Entity {
      * Does not require the MANAGE_WEBHOOKS permission.
      *
      * @param spec A {@link Consumer} that provides a "blank" {@link WebhookEditSpec} to be operated on.
-     * @return A {@link Mono} where, upon successful completion, emits the edited {@link Guild}. If an error is
+     * @return A {@link Mono} where, upon successful completion, emits the edited {@link Webhook}. If an error is
      * received, it is emitted through the {@code Mono}.
      */
     public Mono<Webhook> editWithToken(final Consumer<? super WebhookEditWithTokenSpec> spec) {
@@ -349,5 +375,64 @@ public final class Webhook implements Entity {
         return "Webhook{" +
                 "data=" + data +
                 '}';
+    }
+
+    /**
+     * Represents the various types of webhooks.
+     */
+    public enum Type {
+        /**
+         * Unknown type.
+         */
+        UNKNOWN(-1),
+
+        /**
+         * Incoming Webhooks can post messages to channels with a generated token.
+         */
+        INCOMING(1),
+
+        /**
+         * Channel Follower Webhooks are internal webhooks used with Channel Following to post new messages
+         * into channels.
+         */
+        CHANNEL_FOLLOWER(2);
+
+        /**
+         * The underlying value as represented by Discord.
+         */
+        private final int value;
+
+        /**
+         * Constructs a {@code Webhook.Type}.
+         *
+         * @param value The underlying value as represented by Discord.
+         */
+        Type(final int value) {
+            this.value = value;
+        }
+
+        /**
+         * Gets the underlying value as represented by Discord.
+         *
+         * @return The underlying value as represented by Discord.
+         */
+        public int getValue() {
+            return value;
+        }
+
+        /**
+         * Gets the type of webhook. It is guaranteed that invoking {@link #getValue()} from the returned enum will be
+         * equal ({@code ==}) to the supplied {@code value}.
+         *
+         * @param value The underlying value as represented by Discord.
+         * @return The type of webhook.
+         */
+        public static Webhook.Type of(final int value) {
+            switch (value) {
+                case 1: return INCOMING;
+                case 2: return CHANNEL_FOLLOWER;
+                default: return UNKNOWN;
+            }
+        }
     }
 }

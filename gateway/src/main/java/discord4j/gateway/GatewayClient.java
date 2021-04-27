@@ -17,14 +17,15 @@
 
 package discord4j.gateway;
 
+import discord4j.common.close.CloseStatus;
 import discord4j.discordjson.json.gateway.Dispatch;
 import discord4j.gateway.json.GatewayPayload;
 import discord4j.gateway.retry.PartialDisconnectException;
 import io.netty.buffer.ByteBuf;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.FluxSink;
 import reactor.core.publisher.Mono;
+import reactor.core.publisher.Sinks;
 
 import java.time.Duration;
 import java.util.function.Function;
@@ -58,9 +59,9 @@ public interface GatewayClient {
      * execution {@link Mono} will complete with a {@link PartialDisconnectException} you can
      * use to perform additional behavior or reconnect.
      * @return a {@link Mono} deferring completion until the disconnection has completed. If this client closed due
-     * to an error it is emitted through the Mono.
+     * to an error it is emitted through the Mono. If available, a {@link CloseStatus} will be present.
      */
-    Mono<Void> close(boolean allowResume);
+    Mono<CloseStatus> close(boolean allowResume);
 
     /**
      * Obtains the {@link Flux} of {@link Dispatch} events inbound from the gateway connection made by this client.
@@ -95,11 +96,12 @@ public interface GatewayClient {
     <T> Flux<T> receiver(Function<ByteBuf, Publisher<? extends T>> mapper);
 
     /**
-     * Retrieves a new {@link FluxSink} to safely produce outbound values using {@link FluxSink#next(Object)}.
+     * Retrieves a new {@link Sinks.Many} to safely produce outbound values using
+     * {@link Sinks.Many#tryEmitNext(Object)} or {@link Sinks.Many#emitNext(Object, Sinks.EmitFailureHandler)}.
      *
-     * @return a serializing {@link FluxSink}
+     * @return a serializing {@link Sinks.Many}
      */
-    FluxSink<GatewayPayload<?>> sender();
+    Sinks.Many<GatewayPayload<?>> sender();
 
     /**
      * Sends a sequence of {@link GatewayPayload payloads} through this {@link GatewayClient} and returns a
@@ -110,7 +112,7 @@ public interface GatewayClient {
      */
     default Mono<Void> send(Publisher<? extends GatewayPayload<?>> publisher) {
         return Flux.from(publisher)
-                .doOnNext(payload -> sender().next(payload))
+                .doOnNext(payload -> sender().emitNext(payload, Sinks.EmitFailureHandler.FAIL_FAST))
                 .then();
     }
 

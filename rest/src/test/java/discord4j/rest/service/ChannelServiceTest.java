@@ -86,7 +86,7 @@ public class ChannelServiceTest {
         MessageCreateRequest req = MessageCreateRequest.builder()
                 .content("Hello world")
                 .build();
-        channelService.createMessage(permanentChannel, new MultipartRequest<>(req)).block();
+        channelService.createMessage(permanentChannel, MultipartRequest.ofRequest(req)).block();
     }
 
     @Test
@@ -99,9 +99,8 @@ public class ChannelServiceTest {
                 throw new NullPointerException();
             }
             byte[] bytes = readAllBytes(inputStream);
-            MultipartRequest<MessageCreateRequest> request = new MultipartRequest<>(
-                    req, "fileTest.txt", new ByteArrayInputStream(bytes)
-            );
+            MultipartRequest<MessageCreateRequest> request = MultipartRequest.ofRequest(req)
+                    .addFile("fileTest.txt", new ByteArrayInputStream(bytes));
             channelService.createMessage(permanentChannel, request).block();
         }
     }
@@ -122,7 +121,7 @@ public class ChannelServiceTest {
             List<Tuple2<String, InputStream>> files = Arrays.asList(Tuples.of("file0.txt", in0),
                     Tuples.of("file1.txt", in1));
 
-            MultipartRequest<MessageCreateRequest> request = new MultipartRequest<>(req, files);
+            MultipartRequest<MessageCreateRequest> request = MultipartRequest.ofRequestAndFiles(req, files);
             channelService.createMessage(permanentChannel, request).block();
         }
     }
@@ -193,7 +192,7 @@ public class ChannelServiceTest {
         MessageCreateRequest req = MessageCreateRequest.builder()
                 .content("Going to delete this!")
                 .build();
-        MessageData response = channelService.createMessage(permanentChannel, new MultipartRequest<>(req)).block();
+        MessageData response = channelService.createMessage(permanentChannel, MultipartRequest.ofRequest(req)).block();
         channelService.deleteMessage(permanentChannel, Snowflake.asLong(response.id()), "This is just a " +
                 "test!").block();
     }
@@ -208,7 +207,7 @@ public class ChannelServiceTest {
         PermissionsEditRequest req = PermissionsEditRequest.builder()
                 .allow(0)
                 .deny(0)
-                .type("member")
+                .type(1)
                 .build();
         channelService.editChannelPermissions(modifyChannel, permanentOverwrite, req, null).block();
     }

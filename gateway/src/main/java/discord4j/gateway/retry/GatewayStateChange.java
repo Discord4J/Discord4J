@@ -27,7 +27,8 @@ import java.time.Duration;
 public class GatewayStateChange implements Dispatch {
 
     public enum State {
-        CONNECTED, DISCONNECTED, DISCONNECTED_RESUME, RETRY_STARTED, RETRY_RESUME_STARTED, RETRY_SUCCEEDED, RETRY_FAILED
+        CONNECTED, DISCONNECTED, DISCONNECTED_RESUME, RETRY_STARTED, RETRY_RESUME_STARTED, RETRY_SUCCEEDED,
+        RETRY_FAILED, SESSION_INVALIDATED
     }
 
     public static GatewayStateChange connected() {
@@ -56,6 +57,10 @@ public class GatewayStateChange implements Dispatch {
 
     public static GatewayStateChange retryFailed(long currentAttempt, Duration nextAttemptBackoff) {
         return new GatewayStateChange(State.RETRY_FAILED, currentAttempt, nextAttemptBackoff);
+    }
+
+    public static GatewayStateChange sessionInvalidated() {
+        return new GatewayStateChange(State.SESSION_INVALIDATED, 0, null);
     }
 
     private final State state;

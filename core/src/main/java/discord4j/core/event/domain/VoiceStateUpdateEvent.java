@@ -64,6 +64,36 @@ public class VoiceStateUpdateEvent extends Event {
         return Optional.ofNullable(old);
     }
 
+    /**
+     * Gets whether this event is a voice channel join event.
+     *
+     * @return {@code true} if this is a voice channel join event, {@code false} otherwise.
+     */
+    public boolean isJoinEvent() {
+        return current.getChannelId().isPresent() && old == null;
+    }
+
+    /**
+     * Gets whether this event is a voice channel leave event.
+     *
+     * @return {@code true} if this is a voice channel leave event, {@code false} otherwise.
+     */
+    public boolean isLeaveEvent() {
+        return !current.getChannelId().isPresent() && old != null;
+    }
+
+    /**
+     * Gets whether this event is a voice channel move event.
+     *
+     * @return {@code true} if this is a voice channel move event, {@code false} otherwise.
+     */
+    public boolean isMoveEvent() {
+        if(old == null) {
+            return false;
+        }
+        return !current.getChannelId().flatMap(current -> old.getChannelId().map(current::equals)).orElse(true);
+    }
+
     @Override
     public String toString() {
         return "VoiceStateUpdateEvent{" +

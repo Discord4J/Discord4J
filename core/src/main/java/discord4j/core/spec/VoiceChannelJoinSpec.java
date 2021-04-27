@@ -25,6 +25,7 @@ import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.channel.VoiceChannel;
 import discord4j.discordjson.json.gateway.VoiceStateUpdate;
 import discord4j.gateway.GatewayClientGroup;
+import discord4j.gateway.intent.Intent;
 import discord4j.gateway.json.ShardGatewayPayload;
 import discord4j.rest.util.Permission;
 import discord4j.voice.*;
@@ -191,6 +192,11 @@ public class VoiceChannelJoinSpec implements Spec<Mono<VoiceConnection>> {
 
     @Override
     public Mono<VoiceConnection> asRequest() {
+        if (!gateway.getGatewayResources().getIntents().contains(Intent.GUILD_VOICE_STATES)) {
+            return Mono.error(new IllegalArgumentException(
+                    "GUILD_VOICE_STATES intent is required to establish a voice connection"));
+        }
+
         final Snowflake guildId = voiceChannel.getGuildId();
         final Snowflake channelId = voiceChannel.getId();
         final GatewayClientGroup clientGroup = voiceChannel.getClient().getGatewayClientGroup();
@@ -214,7 +220,7 @@ public class VoiceChannelJoinSpec implements Spec<Mono<VoiceConnection>> {
         final VoiceStateUpdateTask stateUpdateTask = id -> onVoiceStateUpdates(gateway, id)
                 .map(stateUpdateEvent -> stateUpdateEvent.getCurrent().getSessionId());
         final VoiceChannelRetrieveTask channelRetrieveTask = () -> gateway
-                .getMemberById(voiceChannel.getGuildId(), gateway.getSelfId())
+                .getSelfMember(voiceChannel.getGuildId())
                 .flatMap(Member::getVoiceState)
                 .flatMap(voiceState -> Mono.justOrEmpty(voiceState.getChannelId()));
 
@@ -241,10 +247,10 @@ public class VoiceChannelJoinSpec implements Spec<Mono<VoiceConnection>> {
                                     .thenReturn(vc))
                             .doOnEach(signal -> {
                                 if (signal.isOnSubscribe()) {
-                                    log.debug(format(signal.getContext(), "Creating voice connection"));
+                                    log.debug(format(signal.getContextView(), "Creating voice connection"));
                                 }
                             })
-                            .subscriberContext(ctx ->
+                            .contextWrite(ctx ->
                                     ctx.put(LogUtil.KEY_GATEWAY_ID, Integer.toHexString(gateway.hashCode()))
                                             .put(LogUtil.KEY_SHARD_ID, shardId)
                                             .put(LogUtil.KEY_GUILD_ID, guildId.asLong()));

@@ -24,7 +24,7 @@ import reactor.util.annotation.Nullable;
 import java.util.Optional;
 
 /**
- * Dispatched when a user is updated.
+ * Dispatched when the bot's user is updated. {@link PresenceUpdateEvent} is dispatched for users the bot is receiving.
  * <p>
  * This event is dispatched by Discord.
  *

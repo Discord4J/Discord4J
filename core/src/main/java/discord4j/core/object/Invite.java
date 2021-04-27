@@ -46,7 +46,7 @@ public class Invite implements DiscordObject {
     private final InviteData data;
 
     /**
-     * Constructs a {@code Invite} with an associated ServiceMediator and Discord data.
+     * Constructs a {@code Invite} with an associated {@link GatewayDiscordClient} and Discord data.
      *
      * @param gateway The {@link GatewayDiscordClient} associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
@@ -208,18 +208,29 @@ public class Invite implements DiscordObject {
      * Gets the type of target user for this invite, if present.
      *
      * @return The type of target user for this invite, if present.
+     * @deprecated Use {@link Invite#getTargetType()}
      */
+    @Deprecated
     public final Optional<Type> getTargetUserType() {
-        return data.targetUserType().toOptional()
+        return getTargetType();
+    }
+
+    /**
+     * Gets the type of target for this voice channel invite, if present.
+     *
+     * @return The type of target for this voice channel invite, if present.
+     */
+    public final Optional<Type> getTargetType() {
+        return data.targetType().toOptional()
             .map(Type::of);
     }
 
     /**
-     * Gets an approximate count of online members (only present when the target user is set) of the guild this invite
-     * is associated to, if present.
+     * Gets an approximate count of online members, returned from the {@link discord4j.rest.route.Routes#INVITE_GET}
+     * endpoint when {@code with_counts} is true.
      *
-     * @return An approximate count of online members (only present when the target user is set) of the guild this
-     * invite is associated to, if present.
+     * @return An approximate count of online members, returned from the {@link discord4j.rest.route.Routes#INVITE_GET}
+     * endpoint when {@code with_counts} is true.
      */
     public final OptionalInt getApproximatePresenceCount() {
         return data.approximatePresenceCount().toOptional()
@@ -228,9 +239,11 @@ public class Invite implements DiscordObject {
     }
 
     /**
-     * Gets approximate count of total members of the guild this invite is associated to, if present.
+     * Gets an approximate count of total members, returned from the {@link discord4j.rest.route.Routes#INVITE_GET}
+     * endpoint when {@code with_counts} is true.
      *
-     * @return An approximate count of total members of the guild this invite is associated to, if present.
+     * @return An approximate count of total members, returned from the {@link discord4j.rest.route.Routes#INVITE_GET}
+     * endpoint when {@code with_counts} is true.
      */
     public final OptionalInt getApproximateMemberCount() {
         return data.approximateMemberCount().toOptional()
@@ -277,7 +290,10 @@ public class Invite implements DiscordObject {
         UNKNOWN(-1),
 
         /** Stream. */
-        STREAM(1);
+        STREAM(1),
+
+        /** Embedded application. */
+        EMBEDDED_APPLICATION(2);
 
         /** The underlying value as represented by Discord. */
         private final int value;
@@ -310,6 +326,7 @@ public class Invite implements DiscordObject {
         public static Type of(final int value) {
             switch (value) {
                 case 1: return STREAM;
+                case 2: return EMBEDDED_APPLICATION;
                 default: return UNKNOWN;
             }
         }

@@ -2,6 +2,10 @@ name: Java CI
 
 on:
   push:
+    paths:
+      - '**.gradle'
+      - '**.properties'
+      - '**/src/**'
     branches:
       - 'master'
       - '3.0.x'
@@ -9,6 +13,10 @@ on:
     tags-ignore:
       - '*.*'
   pull_request:
+    paths:
+      - '**.gradle'
+      - '**.properties'
+      - '**/src/**'
     types: [opened, synchronize, reopened]
 
 jobs:

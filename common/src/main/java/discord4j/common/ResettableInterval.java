@@ -18,24 +18,26 @@ package discord4j.common;
 
 import reactor.core.Disposable;
 import reactor.core.Disposables;
-import reactor.core.publisher.EmitterProcessor;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.FluxSink;
+import reactor.core.publisher.SignalType;
+import reactor.core.publisher.Sinks;
 import reactor.core.scheduler.Scheduler;
+import reactor.util.concurrent.Queues;
 
 import java.time.Duration;
+import java.util.concurrent.locks.LockSupport;
 
 /**
  * Emit ticks at a constant rate specified at {@link #start(Duration, Duration)} and will continue until
  * {@link #stop()} is called or {@link #start(Duration, Duration)} is re-invoked, resetting the previous emitter.
  * The ticks are available from the {@link #ticks()} method.
  */
-public class ResettableInterval {
+public class ResettableInterval implements Sinks.EmitFailureHandler {
 
     private final Scheduler scheduler;
     private final Disposable.Swap task;
-    private final EmitterProcessor<Long> backing = EmitterProcessor.create(false);
-    private final FluxSink<Long> backingSink = backing.sink(FluxSink.OverflowStrategy.LATEST);
+    private final Sinks.Many<Long> sink = Sinks.many().multicast()
+            .onBackpressureBuffer(Queues.SMALL_BUFFER_SIZE, false);
 
     /**
      * Create a {@link ResettableInterval} that emits ticks on the given {@link Scheduler} upon calling
@@ -56,7 +58,8 @@ public class ResettableInterval {
      * @see Flux#interval(Duration, Duration, Scheduler)
      */
     public void start(Duration delay, Duration period) {
-        this.task.update(Flux.interval(delay, period, scheduler).subscribe(backingSink::next));
+        this.task.update(Flux.interval(delay, period, scheduler)
+                .subscribe(tick -> sink.emitNext(tick, this)));
     }
 
     /**
@@ -74,6 +77,23 @@ public class ResettableInterval {
      * @return a {@link Flux} of increasing values since the last {@link #start(Duration, Duration)} call
      */
     public Flux<Long> ticks() {
-        return backing;
+        return sink.asFlux();
+    }
+
+    @Override
+    public boolean onEmitFailure(SignalType signalType, Sinks.EmitResult result) {
+        if (task.get() == null) {
+            return false;
+        }
+
+        switch (result) {
+            case FAIL_NON_SERIALIZED:
+                return true;
+            case FAIL_OVERFLOW:
+                LockSupport.parkNanos(10);
+                return true;
+            default:
+                return false;
+        }
     }
 }

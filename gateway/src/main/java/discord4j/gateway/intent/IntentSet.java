@@ -1,3 +1,20 @@
+/*
+ * This file is part of Discord4J.
+ *
+ * Discord4J is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Discord4J is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with Discord4J. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package discord4j.gateway.intent;
 
 import reactor.util.annotation.Nullable;
@@ -14,14 +31,13 @@ import java.util.*;
  * {@code IntentSet} may have unpredictable results and should be avoided.
  * The {@code equals} method should be used for comparisons.
  *
- * @see <a href="https://discord.com/developers/docs/topics/intents">Discord Intents</a>
+ * @see <a href="https://discord.com/developers/docs/topics/gateway#gateway-intents">Discord Intents</a>
  */
 public final class IntentSet extends AbstractSet<Intent> {
 
     private static final long ALL_RAW = Arrays.stream(Intent.values())
             .mapToLong(Intent::getValue)
-            .reduce((a, b) -> a | b)
-            .orElseThrow(AssertionError::new);
+            .reduce(0, (a, b) -> a | b);
     private static final long NONE_RAW = 0;
 
     /**
@@ -62,6 +78,7 @@ public final class IntentSet extends AbstractSet<Intent> {
      * Returns a {@code IntentSet} containing non-privileged intents.
      *
      * @return A {@code IntentSet} containing non-privileged intents.
+     * @see <a href="https://discord.com/developers/docs/topics/gateway#privileged-intents">Privileged Intents</a>
      */
     public static IntentSet nonPrivileged() {
         return NON_PRIVILEGED;

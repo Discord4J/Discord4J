@@ -79,11 +79,6 @@ public class UserServiceTest {
     }
 
     @Test
-    public void testGetUserDMs() {
-        userService.getUserDMs().then().block();
-    }
-
-    @Test
     public void testCreateDM() {
         DMCreateRequest req = DMCreateRequest.builder().recipientId(Snowflake.asString(user)).build();
         userService.createDM(req).block();

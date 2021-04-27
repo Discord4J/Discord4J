@@ -4,7 +4,7 @@
 
 [![Support Server Invite](https://img.shields.io/discord/208023865127862272.svg?color=7289da&label=Discord4J&logo=discord&style=flat-square)](https://discord.gg/NxGAeCY)
 [![Maven Central](https://img.shields.io/maven-central/v/com.discord4j/discord4j-core/3.1.svg?style=flat-square)](https://search.maven.org/artifact/com.discord4j/discord4j-core)
-[![Javadocs](https://www.javadoc.io/badge/com.discord4j/discord4j-core.svg?color=blue&style=flat-square)](https://www.javadoc.io/doc/com.discord4j/discord4j-core)
+[![Javadocs](https://javadoc.io/badge2/com.discord4j/discord4j-core/$version/javadoc.svg?color=blue&style=flat-square)](https://javadoc.io/doc/com.discord4j/discord4j-core/$version)
 [![GitHub Workflow Status (branch)](https://img.shields.io/github/workflow/status/Discord4J/Discord4J/Java%20CI/master?logo=github&style=flat-square)](https://github.com/Discord4J/Discord4J/actions)
 
 Discord4J is a fast, powerful, unopinionated, reactive library to enable quick and easy development of Discord bots for Java, Kotlin, and other JVM languages using the official [Discord Bot API](https://discord.com/developers/docs/intro).
@@ -37,7 +37,7 @@ public final class ExampleBot {
 ## 🔗 Quick Links
 
 * [Javadocs](https://www.javadoc.io/doc/com.discord4j/discord4j-core)
-* [Wiki](https://github.com/Discord4J/Discord4J/wiki)
+* [Documentation](https://docs.discord4j.com)
 * [Discord](https://discord.gg/NxGAeCY)
 
 ## 💎 Benefits
@@ -99,11 +99,17 @@ libraryDependencies ++= Seq(
 )
 ```
 
-## 🔀 Discord4J 3.0.x
+## 🔀 Discord4J Versions
 
-Discord4J 3.1.x introduces performance and API enhancements, a plethora of new features, and dependency upgrades. A [Migration Guide](https://github.com/Discord4J/Discord4J/wiki/Migrating-from-v3.0-to-v3.1) is provided to aide users and ensure a smooth and readily available transition.
+Discord4J 3.1.x introduces performance and API enhancements, a plethora of new features, and dependency upgrades. A [Migration Guide](https://docs.discord4j.com/migrating-from-v3-0-to-v3-1) is provided to aide users and ensure a smooth and readily available transition.
 
-Discord4J 3.0.x installation instructions and examples can be found on the [3.0.x branch](https://github.com/Discord4J/Discord4J/tree/3.0.x).
+| Discord4J                                                   | Support          | Gateway/API | Intents                           |
+|-------------------------------------------------------------|------------------|-------------|-----------------------------------|
+| [v3.2.x](https://github.com/Discord4J/Discord4J/tree/master)| In development   | v8          | Mandatory, non-privileged default |
+| [v3.1.x](https://github.com/Discord4J/Discord4J/tree/3.1.x) | Current          | v6          | Optional, no intent default       |
+| [v3.0.x](https://github.com/Discord4J/Discord4J/tree/3.0.x) | Maintenance only | v6          | No intents support                |
+
+See [this wiki page](https://github.com/Discord4J/Discord4J/wiki/Versions) for more details about compatibility.
 
 ## 🎉 Sponsors
 
@@ -146,7 +152,7 @@ public final class ExampleBot {
 }
 ```
 
-Discord4J also provides several methods to aide in better reactive chain compositions, such as `GatewayDiscordClient#withGateway` and `EventDispatcher#on` with an [error handling](https://github.com/Discord4J/Discord4J/wiki/Error-Handling) overload.
+Discord4J also provides several methods to aide in better reactive chain compositions, such as `GatewayDiscordClient#withGateway` and `EventDispatcher#on` with an [error handling](https://docs.discord4j.com/error-handling) overload.
 
 ```java
 final String token = args[0];

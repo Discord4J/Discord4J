@@ -42,7 +42,7 @@ public final class ApplicationInfo implements Entity {
     private final ApplicationInfoData data;
 
     /**
-     * Constructs a {@code ApplicationInfo} with an associated ServiceMediator and Discord data.
+     * Constructs a {@code ApplicationInfo} with an associated {@link GatewayDiscordClient} and Discord data.
      *
      * @param gateway The {@link GatewayDiscordClient} associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
@@ -60,6 +60,15 @@ public final class ApplicationInfo implements Entity {
     @Override
     public Snowflake getId() {
         return Snowflake.of(data.id());
+    }
+
+    /**
+     * Gets the data of the app.
+     *
+     * @return The data of the app.
+     */
+    public ApplicationInfoData getData() {
+        return data;
     }
 
     /**
@@ -149,6 +158,24 @@ public final class ApplicationInfo implements Entity {
      */
     public Mono<User> getOwner(EntityRetrievalStrategy retrievalStrategy) {
         return gateway.withRetrievalStrategy(retrievalStrategy).getUserById(getOwnerId());
+    }
+
+    /**
+     * Gets the url of the app's terms of service, if present.
+     *
+     * @return The url of the app's terms of service, if present.
+     */
+    public Optional<String> getTermsOfServiceUrl() {
+        return data.termsOfServiceUrl().toOptional();
+    }
+
+    /**
+     * Gets the url of the app's privacy policy, if present.
+     *
+     * @return The url of the app's privacy policy, if present.
+     */
+    public Optional<String> getPrivacyPolicyUrl() {
+        return data.privacyPolicyUrl().toOptional();
     }
 
     @Override

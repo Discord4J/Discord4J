@@ -2,8 +2,8 @@ plugins {
     id 'java-library'
     id 'maven-publish'
     id 'signing'
-    id 'com.gorylenko.gradle-git-properties' version '2.2.3' apply false
-    id 'com.github.ben-manes.versions' version '0.33.0'
+    id 'com.gorylenko.gradle-git-properties' version '2.2.4' apply false
+    id 'com.github.ben-manes.versions' version '0.38.0'
     id 'net.researchgate.release' version '2.8.1'
 }
 
@@ -23,16 +23,16 @@ ext {
     }
 
     // Dependencies
-    reactor_bom_version = '2020.0.0-RC1'
-    jackson_version = '2.11.2'
-    jdkstores_version = "$storesVersion".toString()
+    reactor_bom_version = '2020.0.5'
+    jackson_version = '2.12.2'
+    caffeine_version = '2.8.8'
 
     // Test dependencies
-    junit_version = '5.6.2'
-    mockito_version = '3.3.3'
+    junit_version = '5.7.1'
+    mockito_version = '3.8.0'
     logback_version = '1.2.3'
     reflections_version = '0.9.12'
-    lavaplayer_version = '1.3.50'
+    lavaplayer_version = '1.3.73'
 
     isJitpack = "true" == System.getenv("JITPACK")
     isRelease = !version.toString().endsWith('-SNAPSHOT')
@@ -70,7 +70,7 @@ allprojects {
     }
 
     configurations.all {
-        resolutionStrategy.cacheChangingModulesFor 600, 'seconds'
+        resolutionStrategy.cacheChangingModulesFor 60, 'seconds'
     }
 
     tasks.withType(Javadoc) {
@@ -209,16 +209,8 @@ def buildDocsUrl(String project) {
         def docVersion = System.getenv('GIT_COMMIT')
         return "https://javadoc.jitpack.io/com/discord4j/discord4j/$project/$docVersion/javadoc/" as String
     } else {
-        def docVersion = isRelease ? "$version" : "3.0"
+        def docVersion = isRelease ? "$version" : "3.1"
         return "https://www.javadoc.io/page/com.discord4j/$project/$docVersion/" as String
-    }
-}
-
-def buildStoresDocsUrl(String project, boolean offline) {
-    if (isJitpack || offline) {
-        return "https://javadoc.jitpack.io/com/discord4j/stores/$project/$storesVersion/javadoc/" as String
-    } else {
-        return "https://www.javadoc.io/page/com.discord4j/$project/$storesVersion/" as String
     }
 }
 
@@ -232,12 +224,14 @@ release {
 }
 
 task updateReadme {
-    doLast {
-        copy {
-            from '.github/README_TEMPLATE.md'
-            into '.'
-            rename { 'README.md' }
-            expand version: version
+    if (isRelease && !version.contains('M') && !version.contains('RC')) {
+        doLast {
+            copy {
+                from '.github/README_TEMPLATE.md'
+                into '.'
+                rename { 'README.md' }
+                expand version: version
+            }
         }
     }
 }

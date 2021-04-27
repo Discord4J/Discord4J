@@ -16,13 +16,11 @@
  */
 package discord4j.core.object.entity;
 
+import discord4j.common.store.action.read.ReadActions;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
-import discord4j.core.object.Ban;
-import discord4j.core.object.ExtendedInvite;
-import discord4j.core.object.Region;
-import discord4j.core.object.VoiceState;
-import discord4j.core.object.audit.AuditLogEntry;
+import discord4j.core.object.*;
+import discord4j.core.object.audit.AuditLogPart;
 import discord4j.core.object.entity.channel.*;
 import discord4j.core.object.presence.Presence;
 import discord4j.core.retriever.EntityRetrievalStrategy;
@@ -37,7 +35,6 @@ import discord4j.discordjson.json.NicknameModifyData;
 import discord4j.discordjson.possible.Possible;
 import discord4j.rest.util.Image;
 import discord4j.rest.util.PaginationUtil;
-import discord4j.store.api.util.LongLongTuple2;
 import discord4j.voice.VoiceConnection;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -81,7 +78,7 @@ public final class Guild implements Entity {
     private final GuildData data;
 
     /**
-     * Constructs an {@code Guild} with an associated ServiceMediator and Discord data.
+     * Constructs a {@code Guild} with an associated {@link GatewayDiscordClient} and Discord data.
      *
      * @param gateway The {@link GatewayDiscordClient} associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
@@ -99,6 +96,15 @@ public final class Guild implements Entity {
     @Override
     public Snowflake getId() {
         return Snowflake.of(data.id());
+    }
+
+    /**
+     * Gets the data of the guild.
+     *
+     * @return The data of the guild.
+     */
+    public GuildData getData() {
+        return data;
     }
 
     /**
@@ -291,40 +297,6 @@ public final class Guild implements Entity {
     }
 
     /**
-     * Gets the ID of the embedded channel, if present.
-     *
-     * @return The ID of the embedded channel, if present.
-     * @deprecated Use {@code Guild#getWidgetChannelId} instead. For removal in v3.2
-     */
-    @Deprecated
-    public Optional<Snowflake> getEmbedChannelId() {
-        return getWidgetChannelId();
-    }
-
-    /**
-     * Requests to retrieve the embedded channel, if present.
-     *
-     * @return A {@link Mono} where, upon successful completion, emits the embedded {@link GuildChannel channel}, if
-     * present. If an error is received, it is emitted through the {@code Mono}.
-     */
-    public Mono<GuildChannel> getEmbedChannel() {
-        return Mono.justOrEmpty(getEmbedChannelId()).flatMap(gateway::getChannelById).cast(GuildChannel.class);
-    }
-
-    /**
-     * Requests to retrieve the embedded channel, if present, using the given retrieval strategy.
-     *
-     * @param retrievalStrategy the strategy to use to get the embedded channel
-     * @return A {@link Mono} where, upon successful completion, emits the embedded {@link GuildChannel channel}, if
-     * present. If an error is received, it is emitted through the {@code Mono}.
-     */
-    public Mono<GuildChannel> getEmbedChannel(EntityRetrievalStrategy retrievalStrategy) {
-        return Mono.justOrEmpty(getEmbedChannelId())
-                .flatMap(id -> gateway.withRetrievalStrategy(retrievalStrategy).getChannelById(id))
-                .cast(GuildChannel.class);
-    }
-
-    /**
      * Gets the Premium Tier (Server Boost level) for the guild.
      *
      * @return The Premium Tier (Server Boost level) for the guild.
@@ -339,20 +311,20 @@ public final class Guild implements Entity {
      * @return The number of boosts this server currently has, if present.
      */
     public OptionalInt getPremiumSubscriptionCount() {
-        return Possible.flatOpt(data.premiumSubscriptionCount())
+        return data.premiumSubscriptionCount().toOptional()
                 .map(OptionalInt::of)
                 .orElse(OptionalInt.empty());
     }
 
     /**
-     * Gets the preferred locale of a "PUBLIC" guild used in server discovery and notices from Discord; defaults to
+     * Gets the preferred locale of a Community guild used in server discovery and notices from Discord; defaults to
      * "en-US".
      *
-     * @return The preferred locale of a "PUBLIC" guild used in server discovery and notices from Discord; defaults
+     * @return The preferred locale of a Community guild used in server discovery and notices from Discord; defaults
      * to "en-US".
      */
     public Locale getPreferredLocale() {
-        return new Locale.Builder().setLanguageTag(data.preferredLocale().orElse("en-US")).build();
+        return new Locale.Builder().setLanguageTag(data.preferredLocale()).build();
     }
 
     /**
@@ -630,18 +602,18 @@ public final class Guild implements Entity {
     }
 
     /**
-     * Gets the id of the channel where "PUBLIC" guilds display rules and/or guidelines, if present.
+     * Gets the id of the channel where Community guilds display rules and/or guidelines, if present.
      *
-     * @return The id of the channel where "PUBLIC" guilds display rules and/or guidelines, if present.
+     * @return The id of the channel where Community guilds display rules and/or guidelines, if present.
      */
     public Optional<Snowflake> getRulesChannelId() {
         return data.rulesChannelId().map(Snowflake::of);
     }
 
     /**
-     * Requests to retrieve the channel where "PUBLIC" guilds display rules and/or guidelines, if present.
+     * Requests to retrieve the channel where Community guilds display rules and/or guidelines, if present.
      *
-     * @return A {@link Mono} where, upon successful completion, emits the {@link TextChannel channel} where "PUBLIC"
+     * @return A {@link Mono} where, upon successful completion, emits the {@link TextChannel channel} where Community
      * guilds display rules and/or guidelines, if present. If an error is received, it is emitted through the {@code
      * Mono}.
      */
@@ -650,11 +622,11 @@ public final class Guild implements Entity {
     }
 
     /**
-     * Requests to retrieve the channel where "PUBLIC" guilds display rules and/or guidelines, if present, using
+     * Requests to retrieve the channel where Community guilds display rules and/or guidelines, if present, using
      * the given retrieval strategy.
      *
      * @param retrievalStrategy the strategy to use to get the rules channel
-     * @return A {@link Mono} where, upon successful completion, emits the {@link TextChannel channel} where "PUBLIC"
+     * @return A {@link Mono} where, upon successful completion, emits the {@link TextChannel channel} where Community
      * guilds
      * display rules and/or guidelines, if present. If an error is received, it is emitted through the {@code Mono}.
      */
@@ -665,10 +637,10 @@ public final class Guild implements Entity {
     }
 
     /**
-     * Gets the id of the channel where admins and moderators of "PUBLIC" guilds receive notices from Discord, if
+     * Gets the id of the channel where admins and moderators of Community guilds receive notices from Discord, if
      * present.
      *
-     * @return The id of the channel where admins and moderators of "PUBLIC" guilds receive notices from Discord, if
+     * @return The id of the channel where admins and moderators of Community guilds receive notices from Discord, if
      * present.
      */
     public Optional<Snowflake> getPublicUpdatesChannelId() {
@@ -676,28 +648,26 @@ public final class Guild implements Entity {
     }
 
     /**
-     * Requests to retrieve the channel where admins and moderators of "PUBLIC" guilds receive notices from Discord,
+     * Requests to retrieve the channel where admins and moderators of Community guilds receive notices from Discord,
      * if present.
      *
      * @return A {@link Mono} where, upon successful completion, emits the {@link TextChannel channel} where admins
-     * and moderators of
-     * "PUBLIC" guilds receive notices from Discord, if present. If an error is received, it is emitted through the
-     * {@code Mono}.
+     * and moderators of Community guilds receive notices from Discord, if present. If an error is received, it is
+     * emitted through the {@code Mono}.
      */
     public Mono<TextChannel> getPublicUpdatesChannel() {
         return Mono.justOrEmpty(getPublicUpdatesChannelId()).flatMap(gateway::getChannelById).cast(TextChannel.class);
     }
 
     /**
-     * Requests to retrieve the channel where admins and moderators of "PUBLIC" guilds receive notices from Discord,
+     * Requests to retrieve the channel where admins and moderators of Community guilds receive notices from Discord,
      * if present,
      * using the given retrieval strategy.
      *
      * @param retrievalStrategy the strategy to use to get the rules channel
      * @return A {@link Mono} where, upon successful completion, emits the {@link TextChannel channel} where admins
-     * and moderators
-     * of "PUBLIC" guilds receive notices from Discord, if present. If an error is received, it is emitted through
-     * the {@code Mono}.
+     * and moderators of Community guilds receive notices from Discord, if present. If an error is received, it is
+     * emitted through the {@code Mono}.
      */
     public Mono<TextChannel> getPublicUpdatesChannel(EntityRetrievalStrategy retrievalStrategy) {
         return Mono.justOrEmpty(getPublicUpdatesChannelId())
@@ -766,15 +736,23 @@ public final class Guild implements Entity {
     }
 
     /**
+     * Gets whether this guild is designated as NSFW.
+     *
+     * @return Whether this guild is designated as NSFW.
+     */
+    public boolean isNsfw() {
+        return data.nsfw().toOptional().orElse(false);
+    }
+
+    /**
      * Requests to retrieve the voice states of the guild.
      *
      * @return A {@link Flux} that continually emits the {@link VoiceState voice states} of the guild. If an error is
      * received, it is emitted through the {@code Flux}.
      */
     public Flux<VoiceState> getVoiceStates() {
-        return gateway.getGatewayResources().getStateView().getVoiceStateStore()
-                .findInRange(LongLongTuple2.of(getId().asLong(), Long.MIN_VALUE),
-                        LongLongTuple2.of(getId().asLong(), Long.MAX_VALUE))
+        return Flux.from(gateway.getGatewayResources().getStore()
+                .execute(ReadActions.getVoiceStatesInGuild(getId().asLong())))
                 .map(data -> new VoiceState(gateway, data));
     }
 
@@ -810,6 +788,19 @@ public final class Guild implements Entity {
     }
 
     /**
+     * Return a set of {@link Member members} from this guild using the current Gateway connection.
+     * This method performs a check to validate whether the given guild's data can be obtained from this
+     * {@link GatewayDiscordClient}.
+     *
+     * @param userIds the {@link Snowflake} set of users to request
+     * @return a {@link Flux} of {@link Member} for the given {@link Guild}. If an error occurs, it is emitted through
+     * the {@link Flux}.
+     */
+    public Flux<Member> requestMembers(Set<Snowflake> userIds) {
+        return gateway.requestMembers(getId(), userIds);
+    }
+
+    /**
      * Requests to retrieve the member as represented by the supplied ID.
      *
      * @param id The ID of the member.
@@ -839,7 +830,7 @@ public final class Guild implements Entity {
      * user's ID. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Member> getSelfMember() {
-        return this.getMemberById(gateway.getSelfId());
+        return gateway.getSelfId().flatMap(this::getMemberById);
     }
 
     /**
@@ -907,9 +898,8 @@ public final class Guild implements Entity {
      * received, it is emitted through the {@code Flux}.
      */
     public Flux<Presence> getPresences() {
-        return gateway.getGatewayResources().getStateView().getPresenceStore()
-                .findInRange(LongLongTuple2.of(getId().asLong(), Long.MIN_VALUE),
-                        LongLongTuple2.of(getId().asLong(), Long.MAX_VALUE))
+        return Flux.from(gateway.getGatewayResources().getStore()
+                .execute(ReadActions.getPresencesInGuild(getId().asLong())))
                 .map(Presence::new);
     }
 
@@ -988,6 +978,24 @@ public final class Guild implements Entity {
                             .createGuildEmoji(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason());
                 })
                 .map(data -> new GuildEmoji(gateway, data, getId().asLong()));
+    }
+
+    /**
+     * Requests to create a template based on this guild.
+     *
+     * @param spec A {@link Consumer} that provides a "blank" {@link GuildTemplateCreateSpec} to be operated on.
+     * @return A {@link Mono} where, upon subscription, emits the created {@link GuildTemplate} on success. If an error
+     * is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<GuildTemplate> createTemplate(final Consumer<? super GuildTemplateCreateSpec> spec) {
+        return Mono.defer(
+            () -> {
+                GuildTemplateCreateSpec mutatedSpec = new GuildTemplateCreateSpec();
+                spec.accept(mutatedSpec);
+                return gateway.getRestClient().getTemplateService()
+                        .createTemplate(getId().asLong(), mutatedSpec.asRequest());
+            })
+            .map(data -> new GuildTemplate(gateway, data));
     }
 
     /**
@@ -1288,22 +1296,40 @@ public final class Guild implements Entity {
 
     /**
      * Requests to retrieve the audit log for this guild.
+     * <p>
+     * The audit log parts can be {@link AuditLogPart#combine(AuditLogPart) combined} for easier querying. For example,
+     * <pre>
+     * {@code
+     * guild.getAuditLog()
+     *     .take(10)
+     *     .reduce(AuditLogPart::combine)
+     * }
+     * </pre>
      *
-     * @return A {@link Flux} that continually emits entries for this guild's audit log. If an error is received, it is
-     * emitted through the {@code Flux}.
+     * @return A {@link Flux} that continually parts of this guild's audit log. If an error is received, it is emitted
+     * through the {@code Flux}.
      */
-    public Flux<AuditLogEntry> getAuditLog() {
+    public Flux<AuditLogPart> getAuditLog() {
         return getAuditLog(ignored -> {});
     }
 
     /**
      * Requests to retrieve the audit log for this guild.
+     * <p>
+     * The audit log parts can be {@link AuditLogPart#combine(AuditLogPart) combined} for easier querying. For example,
+     * <pre>
+     * {@code
+     * guild.getAuditLog()
+     *     .take(10)
+     *     .reduce(AuditLogPart::combine)
+     * }
+     * </pre>
      *
      * @param spec A {@link Consumer} that provides a "blank" {@link AuditLogQuerySpec} to be operated on.
-     * @return A {@link Flux} that continually emits entries for this guild's audit log. If an error is received, it is
-     * emitted through the {@code Flux}.
+     * @return A {@link Flux} that continually parts of this guild's audit log. If an error is received, it is emitted
+     * through the {@code Flux}.
      */
-    public Flux<AuditLogEntry> getAuditLog(final Consumer<? super AuditLogQuerySpec> spec) {
+    public Flux<AuditLogPart> getAuditLog(final Consumer<? super AuditLogQuerySpec> spec) {
         final Function<Map<String, Object>, Flux<AuditLogData>> makeRequest = params -> {
             final AuditLogQuerySpec mutatedSpec = new AuditLogQuerySpec();
             spec.accept(mutatedSpec);
@@ -1315,13 +1341,12 @@ public final class Guild implements Entity {
 
         final ToLongFunction<AuditLogData> getLastEntryId = response -> {
             final List<AuditLogEntryData> entries = response.auditLogEntries();
-            return (entries.size() == 0) ? Long.MAX_VALUE :
+            return (entries.isEmpty()) ? Long.MAX_VALUE :
                     Snowflake.asLong(entries.get(entries.size() - 1).id());
         };
 
         return PaginationUtil.paginateBefore(makeRequest, getLastEntryId, Long.MAX_VALUE, 100)
-                .flatMap(log -> Flux.fromIterable(log.auditLogEntries())
-                        .map(data -> new AuditLogEntry(gateway, data)));
+                .map(data -> new AuditLogPart(getId().asLong(), gateway, data));
     }
 
     /**
@@ -1346,6 +1371,18 @@ public final class Guild implements Entity {
         return gateway.getRestClient().getGuildService()
                 .getGuildInvites(getId().asLong())
                 .map(data -> new ExtendedInvite(gateway, data));
+    }
+
+    /**
+     * Requests to retrieve the templates of the guild.
+     *
+     * @return A {@link Flux} that continually emits the {@link GuildTemplate templates} of the guild. If an error is
+     * received, it is emitted through the {@code Flux}.
+     */
+    public Flux<GuildTemplate> getTemplates() {
+        return gateway.getRestClient().getTemplateService()
+            .getTemplates(getId().asLong())
+            .map(data -> new GuildTemplate(gateway, data));
     }
 
     /**
@@ -1629,10 +1666,10 @@ public final class Guild implements Entity {
         /** Must be registered on Discord for longer than 5 minutes. */
         MEDIUM(2),
 
-        /** (╯°□°）╯︵ ┻━┻ - Must be a member of the server for longer than 10 minutes. */
+        /** Must be a member of the server for longer than 10 minutes. */
         HIGH(3),
 
-        /** ┻━┻ミヽ(ಠ益ಠ)ﾉ彡┻━┻ - Must have a verified phone number. */
+        /** Must have a verified phone number. */
         VERY_HIGH(4);
 
         /** The underlying value as represented by Discord. */
@@ -1678,11 +1715,14 @@ public final class Guild implements Entity {
     /** Describes system channel flags. */
     public enum SystemChannelFlag {
 
-        /** Member join notifications are suppressed. */
+        /** Suppress member join notifications. */
         SUPPRESS_JOIN_NOTIFICATIONS(0),
 
-        /** Server boost notifications are suppressed. */
-        SUPPRESS_PREMIUM_SUBSCRIPTIONS(1);
+        /** Suppress server boost notifications. */
+        SUPPRESS_PREMIUM_SUBSCRIPTIONS(1),
+
+        /** Suppress server setup tips. */
+        SUPPRESS_GUILD_REMINDER_NOTIFICATIONS(2);
 
         /** The underlying value as represented by Discord. */
         private final int value;

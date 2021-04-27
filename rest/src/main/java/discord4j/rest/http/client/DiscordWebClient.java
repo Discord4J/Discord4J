@@ -18,15 +18,18 @@
 package discord4j.rest.http.client;
 
 import discord4j.common.GitProperties;
+import discord4j.common.util.Token;
 import discord4j.rest.http.ExchangeStrategies;
 import discord4j.rest.http.WriterStrategy;
+import discord4j.rest.request.AuthorizationScheme;
 import discord4j.rest.response.ResponseFunction;
-import discord4j.rest.route.Routes;
 import io.netty.handler.codec.http.DefaultHttpHeaders;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpHeaders;
 import reactor.core.publisher.Mono;
+import reactor.netty.ConnectionObserver;
 import reactor.netty.http.client.HttpClient;
+import reactor.netty.http.client.HttpClientRequest;
 import reactor.util.Logger;
 import reactor.util.Loggers;
 import reactor.util.annotation.Nullable;
@@ -34,6 +37,7 @@ import reactor.util.annotation.Nullable;
 import java.time.Instant;
 import java.util.List;
 import java.util.Properties;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static discord4j.common.LogUtil.format;
 
@@ -46,8 +50,9 @@ public class DiscordWebClient {
 
     public static final String KEY_REQUEST_TIMESTAMP = "discord4j.request.timestamp";
 
+    private final AtomicReference<Mono<? extends Token>> token;
     private final HttpClient httpClient;
-    private final HttpHeaders defaultHeaders;
+    private final Mono<HttpHeaders> defaultHeaders;
     private final ExchangeStrategies exchangeStrategies;
     private final List<ResponseFunction> responseFunctions;
 
@@ -56,27 +61,47 @@ public class DiscordWebClient {
      *
      * @param httpClient a Reactor Netty HTTP client
      * @param exchangeStrategies a strategy to transform requests and responses
-     * @param authorizationScheme scheme to use with the authorization header, like "Bot" or "Bearer"
+     * @param authorizationScheme scheme to use with the authorization header
      * @param token a Discord token for API authorization
      * @param responseFunctions a list of {@link ResponseFunction} transformations
      */
     public DiscordWebClient(HttpClient httpClient, ExchangeStrategies exchangeStrategies,
-                            String authorizationScheme, String token,
-                            List<ResponseFunction> responseFunctions) {
+                            AuthorizationScheme authorizationScheme, Mono<Token> token,
+                            List<ResponseFunction> responseFunctions, String discordBaseUrl) {
         final Properties properties = GitProperties.getProperties();
         final String version = properties.getProperty(GitProperties.APPLICATION_VERSION, "3");
         final String url = properties.getProperty(GitProperties.APPLICATION_URL, "https://discord4j.com");
 
         final HttpHeaders defaultHeaders = new DefaultHttpHeaders();
         defaultHeaders.add(HttpHeaderNames.CONTENT_TYPE, "application/json");
-        defaultHeaders.add(HttpHeaderNames.AUTHORIZATION, authorizationScheme + " " + token);
         defaultHeaders.add(HttpHeaderNames.USER_AGENT, "DiscordBot(" + url + ", " + version + ")");
-        defaultHeaders.add("X-RateLimit-Precision", "millisecond");
 
-        this.httpClient = httpClient;
-        this.defaultHeaders = defaultHeaders;
+        token = token.switchIfEmpty(Mono.just(Token.of("")));
+        this.token = new AtomicReference<>(token);
+        this.httpClient = configureHttpClient(httpClient.baseUrl(discordBaseUrl));
+        this.defaultHeaders = token.map(bearerToken -> {
+            if (authorizationScheme != AuthorizationScheme.NONE) {
+                defaultHeaders.add(HttpHeaderNames.AUTHORIZATION, authorizationScheme.getValue() + ' ' + bearerToken.asString());
+            }
+            return defaultHeaders;
+        });
         this.exchangeStrategies = exchangeStrategies;
         this.responseFunctions = responseFunctions;
+    }
+
+    private HttpClient configureHttpClient(HttpClient httpClient) {
+        if (log.isTraceEnabled()) {
+            return httpClient.observe((connection, state) -> {
+                if (connection instanceof ConnectionObserver) {
+                    ConnectionObserver observer = (ConnectionObserver) connection;
+                    log.trace(format(observer.currentContext(), "{} {}"), state, connection);
+                } else if (connection instanceof HttpClientRequest) {
+                    HttpClientRequest httpClientRequest = (HttpClientRequest) connection;
+                    log.trace(format(httpClientRequest.currentContextView(), "{} {}"), state, connection);
+                }
+            });
+        }
+        return httpClient;
     }
 
     /**
@@ -93,7 +118,7 @@ public class DiscordWebClient {
      *
      * @return the {@link HttpHeaders} used by this {@link DiscordWebClient} in every request
      */
-    public HttpHeaders getDefaultHeaders() {
+    public Mono<HttpHeaders> getDefaultHeaders() {
         return defaultHeaders;
     }
 
@@ -115,36 +140,49 @@ public class DiscordWebClient {
      * @return a {@link Mono} with the response in the form of {@link ClientResponse}
      */
     public Mono<ClientResponse> exchange(ClientRequest request) {
-        return Mono.subscriberContext()
-                .flatMap(ctx -> {
-                    HttpHeaders requestHeaders = buildHttpHeaders(request);
-                    String contentType = requestHeaders.get(HttpHeaderNames.CONTENT_TYPE);
-                    HttpClient.RequestSender sender = httpClient
-                            .baseUrl(Routes.BASE_URL)
-                            .observe((connection, newState) -> log.trace(format(ctx, "{} {}"), newState, connection))
-                            .headers(headers -> headers.setAll(requestHeaders))
-                            .request(request.getMethod())
-                            .uri(request.getUrl());
-                    Object body = request.getBody();
+        return Mono.defer(
+                () -> {
+                    Mono<HttpHeaders> requestHeaders = buildHttpHeaders(request);
+                    Mono<String> contentTypeMono = requestHeaders.map(headers -> {
+                    String contentType = headers.get(HttpHeaderNames.CONTENT_TYPE);
+                    return contentType != null ? contentType : "";
+                });
+                Mono<HttpClient.RequestSender> sender = requestHeaders.map(reqHeaders -> httpClient.headers(headers ->
+                        headers.setAll(reqHeaders)).request(request.getMethod()).uri(request.getUrl()));
+                Object body = request.getBody();
+
+                return contentTypeMono.zipWith(sender).flatMap(t2 -> {
+                    String contentType = t2.getT1();
                     return exchangeStrategies.writers().stream()
-                            .filter(s -> s.canWrite(body != null ? body.getClass() : null, contentType))
+                            .filter(s -> s.canWrite(body != null ? body.getClass() : null, !contentType.isEmpty() ? contentType : null))
                             .findFirst()
                             .map(DiscordWebClient::cast)
-                            .map(writer -> writer.write(sender, body))
+                            .map(writer -> writer.write(t2.getT2(), body))
                             .orElseGet(() -> Mono.error(noWriterException(body, contentType)));
-                })
-                .flatMap(receiver -> receiver.responseConnection((response, connection) ->
-                        Mono.just(new ClientResponse(response, connection.inbound(),
-                                exchangeStrategies, request, responseFunctions))).next())
-                .subscriberContext(ctx -> ctx.put(KEY_REQUEST_TIMESTAMP, Instant.now().toEpochMilli()));
+                });
+            })
+            .flatMap(receiver -> receiver.responseConnection((response, connection) ->
+                    Mono.just(new ClientResponse(response, connection.inbound(),
+                            exchangeStrategies, request, responseFunctions))).next())
+            .contextWrite(ctx -> ctx.put(KEY_REQUEST_TIMESTAMP, Instant.now().toEpochMilli()));
     }
 
-    private <R> HttpHeaders buildHttpHeaders(ClientRequest request) {
-        HttpHeaders headers = new DefaultHttpHeaders().add(defaultHeaders).setAll(request.getHeaders());
-        if (request.getBody() == null) {
-            headers.remove(HttpHeaderNames.CONTENT_TYPE);
-        }
-        return headers;
+    private Mono<HttpHeaders> buildHttpHeaders(ClientRequest request) {
+        return defaultHeaders.zipWith(token.get()).flatMap(t2 -> {
+            Token token = t2.getT2();
+
+            HttpHeaders requestHeaders = new DefaultHttpHeaders().add(t2.getT1()).setAll(request.getHeaders());
+            if (request.getBody() == null) {
+                requestHeaders.remove(HttpHeaderNames.CONTENT_TYPE);
+            }
+            if (token.hasExpired()) {
+                Mono<? extends Token> refreshedTokenMono = token.refresh();
+                this.token.set(refreshedTokenMono);
+                return refreshedTokenMono.map(refreshedToken -> requestHeaders.set(HttpHeaderNames.AUTHORIZATION,
+                        AuthorizationScheme.BEARER.getValue() + ' ' + refreshedToken.asString())).map(__ -> requestHeaders);
+            }
+            return Mono.just(requestHeaders);
+        });
     }
 
     @SuppressWarnings("unchecked")

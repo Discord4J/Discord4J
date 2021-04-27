@@ -62,13 +62,36 @@ public class RestGuild {
     }
 
     /**
+     * Returns the ID of this guild.
+     *
+     * @return The ID of this guild
+     */
+    public Snowflake getId() {
+        return Snowflake.of(id);
+    }
+
+    /**
+     * Retrieve this guild's data upon subscription.
+     *
+     * @param withCounts when true, will return approximate member and presence counts for the guild too.
+     * otherwise approximate member and presence counts will be null in {@link GuildUpdateData}.
+     * @return a {@link Mono} where, upon successful completion, emits the {@link GuildUpdateData} belonging to this
+     * entity. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<GuildUpdateData> getData(@Nullable Boolean withCounts) {
+        Map<String, Object> queryParams = new HashMap<>();
+        Optional.ofNullable(withCounts).ifPresent(value -> queryParams.put("with_counts", value));
+        return restClient.getGuildService().getGuild(id, queryParams);
+    }
+
+    /**
      * Retrieve this guild's data upon subscription.
      *
      * @return a {@link Mono} where, upon successful completion, emits the {@link GuildUpdateData} belonging to this
      * entity. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<GuildUpdateData> getData() {
-        return restClient.getGuildService().getGuild(id);
+        return getData(true);
     }
 
     /**
@@ -166,6 +189,10 @@ public class RestGuild {
         Function<Map<String, Object>, Flux<MemberData>> doRequest =
                 params -> restClient.getGuildService().getGuildMembers(id, params);
         return PaginationUtil.paginateAfter(doRequest, data -> Snowflake.asLong(data.user().id()), 0, 100);
+    }
+
+    public Flux<MemberData> searchMembers(Map<String, Object> queryParams) {
+        return restClient.getGuildService().searchGuildMembers(id, queryParams);
     }
 
     public Mono<MemberData> addMember(Snowflake userId, GuildMemberAddRequest request) {
@@ -274,22 +301,6 @@ public class RestGuild {
         return restClient.getGuildService().syncGuildIntegration(id, integrationId.asLong());
     }
 
-    /**
-     * @deprecated Use {RestGuild#getWidget} instead.
-     */
-    @Deprecated
-    public Mono<GuildEmbedData> getEmbed() {
-        return restClient.getGuildService().getGuildEmbed(id);
-    }
-
-    /**
-     * @deprecated Use {RestGuild#modifyWidget} instead.
-     */
-    @Deprecated
-    public Mono<GuildEmbedData> modifyEmbed(GuildEmbedModifyRequest request) {
-        return restClient.getGuildService().modifyGuildEmbed(id, request);
-    }
-
     public Mono<GuildWidgetData> getWidget() {
         return restClient.getGuildService().getGuildWidget(id);
     }
@@ -312,4 +323,13 @@ public class RestGuild {
     public Flux<WebhookData> getWebhooks() {
         return restClient.getWebhookService().getGuildWebhooks(id);
     }
+
+    public Mono<GuildPreviewData> getPreview() {
+        return restClient.getGuildService().getGuildPreview(id);
+    }
+
+    public Flux<TemplateData> getTemplates() {
+        return restClient.getTemplateService().getTemplates(id);
+    }
+
 }

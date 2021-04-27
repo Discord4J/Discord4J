@@ -19,69 +19,97 @@ package discord4j.rest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import discord4j.common.JacksonResources;
 import discord4j.common.ReactorResources;
+import discord4j.common.sinks.EmissionStrategy;
+import discord4j.common.util.Token;
+import discord4j.rest.RestClientBuilder.Resources;
 import discord4j.rest.http.ExchangeStrategies;
 import discord4j.rest.request.*;
 import discord4j.rest.response.ResponseFunction;
 import discord4j.rest.route.Route;
-import reactor.core.publisher.EmitterProcessor;
-import reactor.core.publisher.FluxSink;
+import discord4j.rest.route.Routes;
+import discord4j.rest.util.AllowedMentions;
+import reactor.core.publisher.Mono;
 import reactor.netty.http.client.HttpClient;
+import reactor.util.annotation.Nullable;
 
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
+import java.util.function.BiFunction;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 /**
  * Builder suited for creating a {@link RestClient}. To acquire an instance, see {@link #createRest(String)}.
  */
-public class RestClientBuilder<C, O extends RouterOptions> {
+public class RestClientBuilder<C extends RestClient, R extends Resources, O extends RouterOptions, B extends RestClientBuilder<C, R, O, B>> {
 
-    protected final Function<Config, C> clientFactory;
+    protected final Function<B, Mono<Token>> tokenFactory;
     protected final Function<RouterOptions, O> optionsModifier;
+    protected final BiFunction<B, Resources, R> resourcesModifier;
+    protected final Function<R, C> clientFactory;
 
-    protected String token;
+    protected AuthorizationScheme authorizationScheme;
     protected ReactorResources reactorResources;
     protected JacksonResources jacksonResources;
     protected ExchangeStrategies exchangeStrategies;
     protected List<ResponseFunction> responseTransformers = new ArrayList<>();
     protected GlobalRateLimiter globalRateLimiter;
     protected RequestQueueFactory requestQueueFactory;
+    @Nullable
+    protected AllowedMentions allowedMentions;
 
     /**
      * Initialize a new builder with the given token.
      *
      * @param token the bot token used to authenticate to Discord
      */
-    public static RestClientBuilder<RestClient, RouterOptions> createRest(String token) {
-        Function<Config, RestClient> clientFactory = config -> new RestClient(config.getRouter());
-        return new RestClientBuilder<>(token, clientFactory, Function.identity());
+    public static <B extends RestClientBuilder<RestClient, Resources, RouterOptions, B>> RestClientBuilder<RestClient, Resources, RouterOptions, B> createRest(String token) {
+        Function<Resources, RestClient> clientFactory = resources -> {
+            RestResources restResources = new RestResources(resources.getToken(), resources.getReactorResources(),
+                    resources.getJacksonResources(), resources.getRouter(), resources.getAllowedMentions().orElse(null));
+            return new RestClient(restResources);
+        };
+        return new RestClientBuilder<>(__ -> Mono.just(Token.of(token)), Function.identity(), (__, resources) -> resources,
+                clientFactory);
     }
 
-    protected RestClientBuilder(String token,
-                                Function<Config, C> clientFactory,
-                                Function<RouterOptions, O> optionsModifier) {
-        this.token = Objects.requireNonNull(token, "token");
+    protected RestClientBuilder(Function<B, Mono<Token>> tokenFactory,
+                                Function<RouterOptions, O> optionsModifier,
+                                BiFunction<B, Resources, R> resourcesModifier,
+                                Function<R, C> clientFactory) {
+        this.tokenFactory = Objects.requireNonNull(tokenFactory, "tokenFactory");
+        this.resourcesModifier = Objects.requireNonNull(resourcesModifier, "resourcesModifier");
         this.clientFactory = Objects.requireNonNull(clientFactory, "clientFactory");
         this.optionsModifier = Objects.requireNonNull(optionsModifier, "optionsModifier");
     }
 
-    protected RestClientBuilder(RestClientBuilder<?, ?> source,
-                                Function<Config, C> clientFactory,
+    protected RestClientBuilder(RestClientBuilder<?, ?, ?, ?> source,
+                                Function<B, Mono<Token>> tokenFactory,
+                                BiFunction<B, Resources, R> resourcesModifier,
+                                Function<R, C> clientFactory,
                                 Function<RouterOptions, O> optionsModifier) {
+        this.tokenFactory = tokenFactory;
+        this.resourcesModifier = resourcesModifier;
         this.clientFactory = clientFactory;
         this.optionsModifier = optionsModifier;
 
-        this.token = source.token;
         this.reactorResources = source.reactorResources;
         this.jacksonResources = source.jacksonResources;
         this.exchangeStrategies = source.exchangeStrategies;
         this.responseTransformers = source.responseTransformers;
         this.globalRateLimiter = source.globalRateLimiter;
         this.requestQueueFactory = source.requestQueueFactory;
+    }
+
+    @SuppressWarnings("unchecked")
+    protected B getThis() {
+        return (B) this;
+    }
+
+    protected <R2 extends R, B2 extends RestClientBuilder<C, R2, O, B2>> RestClientBuilder<C, R2, O, B2> setExtraResources(Function<R, R2> resourcesModifier) {
+        BiFunction<B2, Resources, R2> newResourcesModifier = (builder, resources) ->
+                builder.resourcesModifier.andThen(resourcesModifier).apply(builder, resources);
+        return new RestClientBuilder<>(this, builder -> builder.tokenFactory.apply(builder), newResourcesModifier,
+                clientFactory.compose(resourcesModifier), optionsModifier);
     }
 
     /**
@@ -93,19 +121,11 @@ public class RestClientBuilder<C, O extends RouterOptions> {
      * @param <O2> new type for the options
      * @return a new {@link RestClientBuilder} that will now work with the new options type.
      */
-    public <O2 extends RouterOptions> RestClientBuilder<C, O2> setExtraOptions(Function<? super O, O2> optionsModifier) {
-        return new RestClientBuilder<>(this, this.clientFactory, this.optionsModifier.andThen(optionsModifier));
-    }
-
-    /**
-     * Change the token stored in this builder.
-     *
-     * @param token the new bot token
-     * @return this builder
-     */
-    public RestClientBuilder<C, O> setToken(final String token) {
-        this.token = Objects.requireNonNull(token, "token");
-        return this;
+    public <O2 extends O, B2 extends RestClientBuilder<C, R, O2, B2>> RestClientBuilder<C, R, O2, B2> setExtraOptions(Function<O, O2> optionsModifier) {
+        BiFunction<B2, Resources, R> newResourcesModifier = (builder, resources) ->
+                builder.resourcesModifier.apply(builder, resources);
+        return new RestClientBuilder<>(this, builder -> builder.tokenFactory.apply(builder), newResourcesModifier,
+                clientFactory, this.optionsModifier.andThen(optionsModifier));
     }
 
     /**
@@ -115,9 +135,9 @@ public class RestClientBuilder<C, O extends RouterOptions> {
      * @param reactorResources the new resource provider used for rest and gateway operations
      * @return this builder
      */
-    public RestClientBuilder<C, O> setReactorResources(ReactorResources reactorResources) {
+    public B setReactorResources(ReactorResources reactorResources) {
         this.reactorResources = reactorResources;
-        return this;
+        return getThis();
     }
 
     /**
@@ -127,9 +147,9 @@ public class RestClientBuilder<C, O extends RouterOptions> {
      * @param jacksonResources the new resource provider for serialization and deserialization
      * @return this builder
      */
-    public RestClientBuilder<C, O> setJacksonResources(JacksonResources jacksonResources) {
+    public B setJacksonResources(JacksonResources jacksonResources) {
         this.jacksonResources = jacksonResources;
-        return this;
+        return getThis();
     }
 
     /**
@@ -140,9 +160,9 @@ public class RestClientBuilder<C, O extends RouterOptions> {
      * @param exchangeStrategies the HTTP exchange strategies to use
      * @return this builder
      */
-    public RestClientBuilder<C, O> setExchangeStrategies(ExchangeStrategies exchangeStrategies) {
+    public B setExchangeStrategies(ExchangeStrategies exchangeStrategies) {
         this.exchangeStrategies = Objects.requireNonNull(exchangeStrategies, "exchangeStrategies");
-        return this;
+        return getThis();
     }
 
     /**
@@ -168,9 +188,9 @@ public class RestClientBuilder<C, O extends RouterOptions> {
      * @param responseFunction the {@link ResponseFunction} to transform the responses from matching requests.
      * @return this builder
      */
-    public RestClientBuilder<C, O> onClientResponse(ResponseFunction responseFunction) {
+    public B onClientResponse(ResponseFunction responseFunction) {
         responseTransformers.add(responseFunction);
-        return this;
+        return getThis();
     }
 
     /**
@@ -183,26 +203,38 @@ public class RestClientBuilder<C, O extends RouterOptions> {
      * @return this builder
      * @see GlobalRateLimiter
      */
-    public RestClientBuilder<C, O> setGlobalRateLimiter(GlobalRateLimiter globalRateLimiter) {
+    public B setGlobalRateLimiter(GlobalRateLimiter globalRateLimiter) {
         this.globalRateLimiter = globalRateLimiter;
-        return this;
+        return getThis();
     }
 
     /**
      * Sets the {@link RequestQueueFactory} that will provide {@link RequestQueue} instances for the router.
      *
      * <p>
-     * If not set, it will use a {@link RequestQueueFactory} providing request queues backed by an
-     * {@link EmitterProcessor} with buffering overflow strategy.
+     * If not set, it will use a {@link RequestQueueFactory} providing request queues backed by a sink with
+     * reasonable buffering capacity, delaying overflowing requests.
      * </p>
      *
      * @param requestQueueFactory the factory that will provide {@link RequestQueue} instances for the router
      * @return this builder
-     * @see RequestQueueFactory#backedByProcessor(Supplier, FluxSink.OverflowStrategy)
+     * @see RequestQueueFactory#createFromSink(Function, EmissionStrategy)
      */
-    public RestClientBuilder<C, O> setRequestQueueFactory(RequestQueueFactory requestQueueFactory) {
+    public B setRequestQueueFactory(RequestQueueFactory requestQueueFactory) {
         this.requestQueueFactory = requestQueueFactory;
-        return this;
+        return getThis();
+    }
+
+    /**
+     * Sets the {@link AllowedMentions} object that can limit the mentioned target entities that are notified upon
+     * message created by this client.
+     *
+     * @param allowedMentions the options for limiting message mentions. See {@link AllowedMentions#builder()}.
+     * @return this builder
+     */
+    public B setDefaultAllowedMentions(final AllowedMentions allowedMentions) {
+        this.allowedMentions = allowedMentions;
+        return getThis();
     }
 
     /**
@@ -223,80 +255,87 @@ public class RestClientBuilder<C, O extends RouterOptions> {
      * @return a configured {@link RestClient} based on this builder parameters
      */
     public C build(Function<O, Router> routerFactory) {
+        Mono<Token> token = tokenFactory.apply(getThis());
         ReactorResources reactor = initReactorResources();
         JacksonResources jackson = initJacksonResources();
-        O options = buildOptions(reactor, jackson);
+        O options = buildOptions(token, reactor, jackson);
         Router router = routerFactory.apply(options);
-        Config config = new Config(token, reactor, jackson, initExchangeStrategies(jackson),
-                Collections.unmodifiableList(responseTransformers), globalRateLimiter, router);
-        return clientFactory.apply(config);
+        R resources = buildResources(token, reactor, jackson, router);
+        return clientFactory.apply(resources);
     }
 
-    private O buildOptions(ReactorResources reactor, JacksonResources jackson) {
-        RouterOptions options = new RouterOptions(token, reactor, initExchangeStrategies(jackson),
-                responseTransformers, initGlobalRateLimiter(reactor), initRequestQueueFactory());
-        return this.optionsModifier.apply(options);
+    protected O buildOptions(Mono<Token> token, ReactorResources reactor, JacksonResources jackson) {
+        RouterOptions options = new RouterOptions(token, initAuthorizationScheme(), reactor,
+                initExchangeStrategies(jackson), responseTransformers, initGlobalRateLimiter(reactor),
+                initRequestQueueFactory(), Routes.BASE_URL);
+        return optionsModifier.apply(options);
     }
 
-    private ReactorResources initReactorResources() {
-        if (reactorResources != null) {
-            return reactorResources;
-        }
-        return new ReactorResources();
+    protected R buildResources(Mono<Token> token, ReactorResources reactor, JacksonResources jackson, Router router) {
+        Resources resources = new Resources(token, authorizationScheme, reactor, jackson, exchangeStrategies,
+                Collections.unmodifiableList(responseTransformers), globalRateLimiter, router, allowedMentions);
+        return resourcesModifier.apply(getThis(), resources);
     }
 
-    private JacksonResources initJacksonResources() {
-        if (jacksonResources != null) {
-            return jacksonResources;
-        }
-        return JacksonResources.create();
+    protected ReactorResources initReactorResources() {
+        return reactorResources != null ? reactorResources : new ReactorResources();
     }
 
-    private ExchangeStrategies initExchangeStrategies(JacksonResources jacksonResources) {
-        if (exchangeStrategies != null) {
-            return exchangeStrategies;
-        }
-        return ExchangeStrategies.jackson(jacksonResources.getObjectMapper());
+    protected JacksonResources initJacksonResources() {
+        return jacksonResources != null ? jacksonResources : JacksonResources.create();
     }
 
-    private GlobalRateLimiter initGlobalRateLimiter(ReactorResources reactorResources) {
-        if (globalRateLimiter != null) {
-            return globalRateLimiter;
-        }
-        return BucketGlobalRateLimiter.create(50, Duration.ofSeconds(1), reactorResources.getTimerTaskScheduler());
+    protected AuthorizationScheme initAuthorizationScheme() {
+        return authorizationScheme != null ? authorizationScheme : AuthorizationScheme.BOT;
     }
 
-    private RequestQueueFactory initRequestQueueFactory() {
-        if (requestQueueFactory != null) {
-            return requestQueueFactory;
-        }
-        return RequestQueueFactory.buffering();
+    protected ExchangeStrategies initExchangeStrategies(JacksonResources jacksonResources) {
+        return exchangeStrategies != null ? exchangeStrategies :
+                ExchangeStrategies.jackson(jacksonResources.getObjectMapper());
     }
 
-    protected static class Config {
+    protected GlobalRateLimiter initGlobalRateLimiter(ReactorResources reactorResources) {
+        return globalRateLimiter != null ? globalRateLimiter :
+                BucketGlobalRateLimiter.create(50, Duration.ofSeconds(1), reactorResources.getTimerTaskScheduler());
+    }
 
-        private final String token;
+    protected RequestQueueFactory initRequestQueueFactory() {
+        return requestQueueFactory != null ? requestQueueFactory : RequestQueueFactory.buffering();
+    }
+
+    public static class Resources {
+
+        private final Mono<Token> token;
+        private final AuthorizationScheme authorizationScheme;
         private final ReactorResources reactorResources;
         private final JacksonResources jacksonResources;
         private final ExchangeStrategies exchangeStrategies;
         private final List<ResponseFunction> responseTransformers;
         private final GlobalRateLimiter globalRateLimiter;
         private final Router router;
+        private final AllowedMentions allowedMentions;
 
-        public Config(String token, ReactorResources reactorResources, JacksonResources jacksonResources,
-                      ExchangeStrategies exchangeStrategies, List<ResponseFunction> responseTransformers,
-                      GlobalRateLimiter globalRateLimiter, Router router) {
+        public Resources(Mono<Token> token, AuthorizationScheme authorizationScheme, ReactorResources reactorResources,
+                         JacksonResources jacksonResources, ExchangeStrategies exchangeStrategies,
+                         List<ResponseFunction> responseTransformers, GlobalRateLimiter globalRateLimiter, Router router,
+                         @Nullable AllowedMentions allowedMentions) {
             this.token = token;
+            this.authorizationScheme = authorizationScheme;
             this.reactorResources = reactorResources;
             this.jacksonResources = jacksonResources;
             this.exchangeStrategies = exchangeStrategies;
             this.responseTransformers = responseTransformers;
             this.globalRateLimiter = globalRateLimiter;
             this.router = router;
+            this.allowedMentions = allowedMentions;
         }
 
-        public String getToken() {
+        public Mono<Token> getToken() {
             return token;
+        }
+
+        public AuthorizationScheme getAuthorizationScheme() {
+            return authorizationScheme;
         }
 
         public ReactorResources getReactorResources() {
@@ -321,6 +360,10 @@ public class RestClientBuilder<C, O extends RouterOptions> {
 
         public Router getRouter() {
             return router;
+        }
+
+        public Optional<AllowedMentions> getAllowedMentions() {
+            return Optional.ofNullable(allowedMentions);
         }
     }
 }

@@ -20,12 +20,14 @@ import discord4j.common.ReactorResources;
 import discord4j.rest.http.client.ClientResponse;
 import discord4j.rest.http.client.DiscordWebClient;
 import reactor.core.publisher.Mono;
-import reactor.core.publisher.MonoProcessor;
+import reactor.core.publisher.Sinks;
 import reactor.util.Logger;
 import reactor.util.Loggers;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
+import static reactor.core.publisher.Sinks.EmitFailureHandler.FAIL_FAST;
 
 /**
  * Facilitates the routing of {@link DiscordWebRequest} instances to the proper {@link RequestStream} according to
@@ -50,18 +52,20 @@ public class DefaultRouter implements Router {
         this.routerOptions = routerOptions;
         this.reactorResources = routerOptions.getReactorResources();
         this.httpClient = new DiscordWebClient(reactorResources.getHttpClient(),
-                routerOptions.getExchangeStrategies(), "Bot", routerOptions.getToken(),
-                routerOptions.getResponseTransformers());
+                routerOptions.getExchangeStrategies(), routerOptions.getAuthorizationScheme(), routerOptions.getToken(),
+                routerOptions.getResponseTransformers(), routerOptions.getDiscordBaseUrl());
     }
 
     @Override
     public DiscordWebResponse exchange(DiscordWebRequest request) {
-        return new DiscordWebResponse(Mono.deferWithContext(
+        return new DiscordWebResponse(Mono.deferContextual(
                 ctx -> {
                     RequestStream stream = getStream(request);
-                    MonoProcessor<ClientResponse> callback = MonoProcessor.create();
-                    stream.push(new RequestCorrelation<>(request, callback, ctx));
-                    return callback;
+                    Sinks.One<ClientResponse> callback = Sinks.one();
+                    if (!stream.push(new RequestCorrelation<>(request, callback, ctx))) {
+                        callback.emitError(new DiscardedRequestException(request), FAIL_FAST);
+                    }
+                    return callback.asMono();
                 })
                 .checkpoint("Request to " + request.getDescription() + " [DefaultRouter]"), reactorResources);
     }

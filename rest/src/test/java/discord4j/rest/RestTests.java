@@ -19,8 +19,11 @@ package discord4j.rest;
 
 import discord4j.common.JacksonResources;
 import discord4j.common.ReactorResources;
+import discord4j.common.util.Token;
 import discord4j.rest.http.ExchangeStrategies;
 import discord4j.rest.request.*;
+import discord4j.rest.route.Routes;
+import reactor.core.publisher.Mono;
 
 import java.util.Collections;
 import java.util.Objects;
@@ -37,8 +40,9 @@ public abstract class RestTests {
     }
 
     private static Router createDefaultRouter(String token) {
-        return new DefaultRouter(new RouterOptions(token, ReactorResources.create(),
-                ExchangeStrategies.jackson(JacksonResources.create().getObjectMapper()),
-                Collections.emptyList(), BucketGlobalRateLimiter.create(), RequestQueueFactory.buffering()));
+        return new DefaultRouter(new RouterOptions(Mono.just(Token.of(token)), AuthorizationScheme.BOT,
+                ReactorResources.create(), ExchangeStrategies.jackson(JacksonResources.create().getObjectMapper()),
+                Collections.emptyList(), BucketGlobalRateLimiter.create(), RequestQueueFactory.buffering(),
+                Routes.BASE_URL));
     }
 }

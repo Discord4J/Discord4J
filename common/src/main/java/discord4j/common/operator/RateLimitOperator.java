@@ -17,11 +17,9 @@
 
 package discord4j.common.operator;
 
+import discord4j.common.sinks.EmissionStrategy;
 import org.reactivestreams.Publisher;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.FluxSink;
-import reactor.core.publisher.Mono;
-import reactor.core.publisher.ReplayProcessor;
+import reactor.core.publisher.*;
 import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
 import reactor.util.Logger;
@@ -47,9 +45,9 @@ public class RateLimitOperator<T> implements Function<Publisher<T>, Publisher<T>
     private final AtomicInteger tokens;
     private final Duration refillPeriod;
     private final Scheduler delayScheduler;
-    private final ReplayProcessor<Integer> tokenChanged;
-    private final FluxSink<Integer> tokenChangedSink;
+    private final Sinks.Many<Integer> tokenSink;
     private final Scheduler tokenPublishScheduler;
+    private final EmissionStrategy emissionStrategy;
 
     public RateLimitOperator(int capacity, Duration refillPeriod, Scheduler delayScheduler) {
         this(capacity, refillPeriod, delayScheduler, DEFAULT_PUBLISH_SCHEDULER.get());
@@ -59,9 +57,9 @@ public class RateLimitOperator<T> implements Function<Publisher<T>, Publisher<T>
         this.tokens = new AtomicInteger(capacity);
         this.refillPeriod = refillPeriod;
         this.delayScheduler = delayScheduler;
-        this.tokenChanged = ReplayProcessor.cacheLastOrDefault(capacity);
-        this.tokenChangedSink = tokenChanged.sink(FluxSink.OverflowStrategy.LATEST);
+        this.tokenSink = Sinks.many().replay().latestOrDefault(capacity);
         this.tokenPublishScheduler = publishScheduler;
+        this.emissionStrategy = EmissionStrategy.park(Duration.ofNanos(10));
     }
 
     private String id() {
@@ -89,7 +87,7 @@ public class RateLimitOperator<T> implements Function<Publisher<T>, Publisher<T>
         if (log.isTraceEnabled()) {
             log.trace("[{}] Acquired a token, {} tokens remaining", id(), token);
         }
-        tokenChangedSink.next(token);
+        emissionStrategy.emitNext(tokenSink, token);
     }
 
     private void release() {
@@ -97,10 +95,10 @@ public class RateLimitOperator<T> implements Function<Publisher<T>, Publisher<T>
         if (log.isTraceEnabled()) {
             log.trace("[{}] Released a token, {} tokens remaining", id(), token);
         }
-        tokenChangedSink.next(token);
+        emissionStrategy.emitNext(tokenSink, token);
     }
 
     private Flux<Integer> availableTokens() {
-        return tokenChanged.publishOn(tokenPublishScheduler).filter(__ -> tokens.get() > 0);
+        return tokenSink.asFlux().publishOn(tokenPublishScheduler).filter(__ -> tokens.get() > 0);
     }
 }

@@ -18,6 +18,7 @@ package discord4j.rest;
 
 import discord4j.common.util.Snowflake;
 import discord4j.discordjson.json.*;
+import discord4j.rest.RestClientBuilder.Resources;
 import discord4j.rest.entity.*;
 import discord4j.rest.request.Router;
 import discord4j.rest.request.RouterOptions;
@@ -26,6 +27,7 @@ import discord4j.rest.util.PaginationUtil;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.Duration;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -35,16 +37,20 @@ import java.util.function.Function;
  */
 public class RestClient {
 
+    private final RestResources restResources;
     private final ApplicationService applicationService;
     private final AuditLogService auditLogService;
     private final ChannelService channelService;
     private final EmojiService emojiService;
     private final GatewayService gatewayService;
     private final GuildService guildService;
+    private final InteractionService interactionService;
     private final InviteService inviteService;
+    private final TemplateService templateService;
     private final UserService userService;
     private final VoiceService voiceService;
     private final WebhookService webhookService;
+    private final Mono<Long> applicationIdMono;
 
     /**
      * Create a {@link RestClient} with default options, using the given token for authentication.
@@ -63,26 +69,43 @@ public class RestClient {
      * @param token the bot token used for authentication
      * @return a {@link RestClientBuilder}
      */
-    public static RestClientBuilder<RestClient, RouterOptions> restBuilder(String token) {
+    public static <B extends RestClientBuilder<RestClient, Resources, RouterOptions, B>> RestClientBuilder<RestClient, Resources, RouterOptions, B> restBuilder(String token) {
         return RestClientBuilder.createRest(token);
     }
 
     /**
      * Create a new {@link RestClient} using the given {@link Router} as connector to perform requests.
      *
-     * @param router a connector to perform requests
+     * @param restResources a set of REST API resources required to operate this client
      */
-    protected RestClient(final Router router) {
+    protected RestClient(final RestResources restResources) {
+        this.restResources = restResources;
+        Router router = restResources.getRouter();
         this.applicationService = new ApplicationService(router);
         this.auditLogService = new AuditLogService(router);
         this.channelService = new ChannelService(router);
         this.emojiService = new EmojiService(router);
         this.gatewayService = new GatewayService(router);
         this.guildService = new GuildService(router);
+        this.interactionService = new InteractionService(router);
         this.inviteService = new InviteService(router);
+        this.templateService = new TemplateService(router);
         this.userService = new UserService(router);
         this.voiceService = new VoiceService(router);
         this.webhookService = new WebhookService(router);
+
+        this.applicationIdMono = getApplicationInfo()
+                .map(app -> Snowflake.asLong(app.id()))
+                .cache(__ -> Duration.ofMillis(Long.MAX_VALUE), __ -> Duration.ZERO, () -> Duration.ZERO);
+    }
+
+    /**
+     * Obtain the {@link RestResources} associated with this {@link RestClient}.
+     *
+     * @return the current {@link RestResources} for this client
+     */
+    public RestResources getRestResources() {
+        return restResources;
     }
 
     /**
@@ -168,6 +191,16 @@ public class RestClient {
      */
     public RestMember restMember(Snowflake guildId, MemberData data) {
         return RestMember.create(this, guildId, Snowflake.of(data.user().id()));
+    }
+
+    /**
+     * Requests to retrieve the current user as a member of the guild of the supplied ID
+     *
+     * @param guildId the ID of the guild.
+     * @return A {@link RestMember} of the current user as represented by the supplied ID.
+     */
+    public Mono<RestMember> selfRestMember(Snowflake guildId) {
+        return restResources.getSelfId().map(selfId -> RestMember.create(this, guildId, selfId));
     }
 
     /**
@@ -289,13 +322,24 @@ public class RestClient {
     }
 
     /**
-     * Requests to retrieve the bot user.
+     * Requests to retrieve the current user.
      *
-     * @return A {@link Mono} where, upon successful completion, emits the bot {@link UserData user}. If an error is
+     * @return A {@link Mono} where, upon successful completion, emits the current {@link UserData user}. If an error is
      * received, it is emitted through the {@code Mono}.
      */
     public Mono<UserData> getSelf() {
         return userService.getCurrentUser();
+    }
+
+    /**
+     * Requests to retrieve the current user, represented as a member of the guild of the supplied ID
+     *
+     * @param guildId The ID of the guild
+     * @return a {@link Mono} where, upon successful completion, emits the current {@link MemberData member}. If an error is
+     *         received, it is emitted through the {@code Mono}.
+     */
+    public Mono<MemberData> getSelfMember(Snowflake guildId) {
+        return restResources.getSelfId().flatMap(selfId -> guildService.getGuildMember(guildId.asLong(), selfId.asLong()));
     }
 
     /**
@@ -321,7 +365,18 @@ public class RestClient {
     }
 
     /**
-     * Requests to edit this client (i.e., modify the current bot user).
+     * Requests to retrieve an template.
+     *
+     * @param templateCode The code for the template (e.g. "hgM48av5Q69A").
+     * @return A {@link Mono} where, upon successful completion, emits the {@link TemplateData} as represented by the
+     * supplied template code. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<TemplateData> getTemplate(final String templateCode) {
+        return templateService.getTemplate(templateCode);
+    }
+
+    /**
+     * Requests to edit this client (i.e., modify the current user).
      *
      * @param request A {@link UserModifyRequest} as request body.
      * @return A {@link Mono} where, upon successful completion, emits the edited {@link UserData}. If an error is
@@ -392,6 +447,14 @@ public class RestClient {
     }
 
     /**
+     * Access a low-level representation of the API endpoints for the Interaction resource.
+     * @return a handle to perform low-level requests to the API
+     */
+    public InteractionService getInteractionService() {
+        return interactionService;
+    }
+
+    /**
      * Access a low-level representation of the API endpoints for the Invite resource. It is recommended you use
      * methods like {@link #getInvite(String)}, or {@link RestInvite#create(RestClient, String)}.
      *
@@ -399,6 +462,16 @@ public class RestClient {
      */
     public InviteService getInviteService() {
         return inviteService;
+    }
+
+    /**
+     * Access a low-level representation of the API endpoints for the Template resource. It is recommended you use
+     * methods like {@link #getTemplate(String)}, or {@link RestGuildTemplate#create(RestClient, String)}.
+     *
+     * @return a handle to perform low-level requests to the API
+     */
+    public TemplateService getTemplateService() {
+        return templateService;
     }
 
     /**
@@ -430,5 +503,9 @@ public class RestClient {
      */
     public WebhookService getWebhookService() {
         return webhookService;
+    }
+
+    public Mono<Long> getApplicationId() {
+        return applicationIdMono;
     }
 }

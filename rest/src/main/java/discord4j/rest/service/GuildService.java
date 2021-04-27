@@ -39,10 +39,17 @@ public class GuildService extends RestService {
                 .bodyToMono(GuildUpdateData.class);
     }
 
+    public Mono<GuildUpdateData> getGuild(long guildId, Map<String, Object> queryParams) {
+        return Routes.GUILD_GET.newRequest(guildId)
+            .query(queryParams)
+            .exchange(getRouter())
+            .bodyToMono(GuildUpdateData.class);
+    }
+
     public Mono<GuildUpdateData> getGuild(long guildId) {
         return Routes.GUILD_GET.newRequest(guildId)
-                .exchange(getRouter())
-                .bodyToMono(GuildUpdateData.class);
+            .exchange(getRouter())
+            .bodyToMono(GuildUpdateData.class);
     }
 
     public Mono<GuildUpdateData> modifyGuild(long guildId, GuildModifyRequest request, @Nullable String reason) {
@@ -94,6 +101,14 @@ public class GuildService extends RestService {
                 .exchange(getRouter())
                 .bodyToMono(MemberData[].class)
                 .flatMapMany(Flux::fromArray);
+    }
+
+    public Flux<MemberData> searchGuildMembers(long guildId, Map<String, Object> queryParams) {
+        return Routes.SEARCH_GUILD_MEMBERS_GET.newRequest(guildId)
+            .query(queryParams)
+            .exchange(getRouter())
+            .bodyToMono(MemberData[].class)
+            .flatMapMany(Flux::fromArray);
     }
 
     public Mono<MemberData> addGuildMember(long guildId, long userId, GuildMemberAddRequest request) {
@@ -253,9 +268,9 @@ public class GuildService extends RestService {
 
     public Flux<IntegrationData> getGuildIntegrations(long guildId) {
         return Routes.GUILD_INTEGRATIONS_GET.newRequest(guildId)
-                .exchange(getRouter())
-                .bodyToMono(IntegrationData[].class)
-                .flatMapMany(Flux::fromArray);
+            .exchange(getRouter())
+            .bodyToMono(IntegrationData[].class)
+            .flatMapMany(Flux::fromArray);
     }
 
     public Mono<Void> createGuildIntegration(long guildId, IntegrationCreateRequest request) {
@@ -284,31 +299,10 @@ public class GuildService extends RestService {
                 .bodyToMono(Void.class);
     }
 
-    /**
-     * @deprecated Use {@code GuildService#getGuildWidget} instead.
-     */
-    @Deprecated
-    public Mono<GuildEmbedData> getGuildEmbed(long guildId) {
-        return Routes.GUILD_EMBED_GET.newRequest(guildId)
-                .exchange(getRouter())
-                .bodyToMono(GuildEmbedData.class);
-    }
-
     public Mono<GuildWidgetData> getGuildWidget(long guildId) {
         return Routes.GUILD_WIDGET_GET.newRequest(guildId)
                 .exchange(getRouter())
                 .bodyToMono(GuildWidgetData.class);
-    }
-
-    /**
-     * @deprecated Use {@code GuildService#modifyGuildEmbed} instead.
-     */
-    @Deprecated
-    public Mono<GuildEmbedData> modifyGuildEmbed(long guildId, GuildEmbedModifyRequest request) {
-        return Routes.GUILD_EMBED_MODIFY.newRequest(guildId)
-                .body(request)
-                .exchange(getRouter())
-                .bodyToMono(GuildEmbedData.class);
     }
 
     public Mono<GuildWidgetData> modifyGuildWidget(long guildId, GuildWidgetModifyRequest request) {
@@ -317,4 +311,25 @@ public class GuildService extends RestService {
                 .exchange(getRouter())
                 .bodyToMono(GuildWidgetData.class);
     }
+
+    public Mono<GuildPreviewData> getGuildPreview(long guildId) {
+        return Routes.GUILD_PREVIEW_GET.newRequest(guildId)
+            .exchange(getRouter())
+            .bodyToMono(GuildPreviewData.class);
+    }
+
+    public Mono<Void> modifySelfVoiceState(long guildId, UpdateCurrentUserVoiceStateRequest request) {
+        return Routes.SELF_VOICE_STATE_MODIFY.newRequest(guildId)
+            .body(request)
+            .exchange(getRouter())
+            .bodyToMono(Void.class);
+    }
+
+    public Mono<Void> modifyOthersVoiceState(long guildId, long userId, UpdateUserVoiceStateRequest request) {
+        return Routes.OTHERS_VOICE_STATE_MODIFY.newRequest(guildId, userId)
+            .body(request)
+            .exchange(getRouter())
+            .bodyToMono(Void.class);
+    }
+
 }

@@ -67,7 +67,7 @@ public enum ActionType {
      * @param value The underlying value as represented by Discord.
      * @return The type of action.
      */
-    public static ActionType of(int value) {
+    public static ActionType of(final int value) {
         switch (value) {
             case 1: return GUILD_UPDATE;
             case 10: return CHANNEL_CREATE;
@@ -116,7 +116,7 @@ public enum ActionType {
      *
      * @param value The underlying value as represented by Discord.
      */
-    ActionType(int value) {
+    ActionType(final int value) {
         this.value = value;
     }
 
