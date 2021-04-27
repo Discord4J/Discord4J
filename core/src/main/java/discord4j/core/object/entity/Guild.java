@@ -836,8 +836,7 @@ public final class Guild implements Entity {
     }
 
     /**
-     * Returns a list of {@link Member members} whose username or nickname starts with the provided username using the
-     * current Gateway connection.
+     * Returns a list of {@link Member members} whose username or nickname starts with the provided username.
      *
      * @param username the string to match username(s) and nickname(s) against.
      * @param limit the max number of members to return.
