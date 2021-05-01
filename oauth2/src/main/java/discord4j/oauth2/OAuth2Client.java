@@ -102,7 +102,7 @@ public class OAuth2Client extends RestClient {
     }
 
     public final Mono<Long> getApplicationId() {
-        return Mono.just(clientId).cache(__ -> Duration.ofMillis(Long.MAX_VALUE), __ -> Duration.ZERO, () -> Duration.ZERO);
+        return Mono.just(clientId);
     }
 
     /**
