@@ -22,9 +22,6 @@ javadoc {
     options.linksOffline rootProject.buildDocsUrl('discord4j-rest'), project(':rest').javadoc.destinationDir.toURI() as String
     options.linksOffline rootProject.buildDocsUrl('discord4j-gateway'), project(':gateway').javadoc.destinationDir.toURI() as String
     options.linksOffline rootProject.buildDocsUrl('discord4j-voice'), project(':voice').javadoc.destinationDir.toURI() as String
-
-    options.linksOffline rootProject.buildStoresDocsUrl('stores-api', false), rootProject.buildStoresDocsUrl('stores-api', true)
-    options.linksOffline rootProject.buildStoresDocsUrl('stores-jdk', false), rootProject.buildStoresDocsUrl('stores-jdk', true)
 }
 
 jar {

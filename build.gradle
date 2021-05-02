@@ -206,21 +206,8 @@ subprojects {
 }
 
 def buildDocsUrl(String project) {
-    if (isJitpack) {
-        def docVersion = System.getenv('GIT_COMMIT')
-        return "https://javadoc.jitpack.io/com/discord4j/discord4j/$project/$docVersion/javadoc/" as String
-    } else {
-        def docVersion = isRelease ? "$version" : "3.0"
-        return "https://www.javadoc.io/page/com.discord4j/$project/$docVersion/" as String
-    }
-}
-
-def buildStoresDocsUrl(String project, boolean offline) {
-    if (isJitpack || offline) {
-        return "https://javadoc.jitpack.io/com/discord4j/stores/$project/$storesVersion/javadoc/" as String
-    } else {
-        return "https://www.javadoc.io/page/com.discord4j/$project/$storesVersion/" as String
-    }
+    def docVersion = isRelease ? "$version" : "3.1"
+    return "https://javadoc.io/doc/com.discord4j/$project/$docVersion/" as String
 }
 
 release {
