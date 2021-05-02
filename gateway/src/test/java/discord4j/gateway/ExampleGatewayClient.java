@@ -54,7 +54,7 @@ public class ExampleGatewayClient {
                 .build();
 
         GatewayOptions gatewayOptions = new GatewayOptions(
-                Mono.just(Token.of(System.getenv("token"))),
+                Token.of(System.getenv("token")),
                 gatewayReactorResources,
                 payloadReader,
                 payloadWriter,

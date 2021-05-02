@@ -735,7 +735,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                     PayloadTransformer limiter = shardCoordinator.getIdentifyLimiter(shard, maxConcurrency);
                     GatewayReactorResources resources = gateway.getGatewayResources().getGatewayReactorResources();
                     ReconnectOptions reconnectOptions = initReconnectOptions(resources);
-                    GatewayOptions options = new GatewayOptions(client.getCoreResources().getToken(),
+                    GatewayOptions options = new GatewayOptions(client.getCoreResources().getBotToken(),
                             resources, initPayloadReader(), initPayloadWriter(), reconnectOptions,
                             identify, gatewayObserver, limiter, maxMissedHeartbeatAck);
                     GatewayClient gatewayClient = clientFactory.apply(this.optionsModifier.apply(options));

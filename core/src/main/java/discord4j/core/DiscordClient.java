@@ -17,11 +17,11 @@
 package discord4j.core;
 
 import discord4j.common.store.Store;
+import discord4j.core.DiscordClientBuilder.Resources;
 import discord4j.core.event.EventDispatcher;
 import discord4j.core.shard.GatewayBootstrap;
 import discord4j.gateway.GatewayOptions;
 import discord4j.rest.RestClient;
-import discord4j.rest.RestClientBuilder.Resources;
 import discord4j.rest.request.RouterOptions;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;

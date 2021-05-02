@@ -23,7 +23,6 @@ import discord4j.common.util.Token;
 import discord4j.gateway.limiter.PayloadTransformer;
 import discord4j.gateway.payload.PayloadReader;
 import discord4j.gateway.payload.PayloadWriter;
-import reactor.core.publisher.Mono;
 
 import java.time.Duration;
 import java.util.Objects;
@@ -33,7 +32,7 @@ import java.util.Objects;
  */
 public class GatewayOptions {
 
-    private final Mono<Token> token;
+    private final Token token;
     private final GatewayReactorResources reactorResources;
     private final PayloadReader payloadReader;
     private final PayloadWriter payloadWriter;
@@ -45,7 +44,7 @@ public class GatewayOptions {
     private final boolean unpooled;
     private final EmissionStrategy emissionStrategy;
 
-    public GatewayOptions(Mono<Token> token, GatewayReactorResources reactorResources, PayloadReader payloadReader,
+    public GatewayOptions(Token token, GatewayReactorResources reactorResources, PayloadReader payloadReader,
                           PayloadWriter payloadWriter, ReconnectOptions reconnectOptions,
                           IdentifyOptions identifyOptions, GatewayObserver initialObserver,
                           PayloadTransformer identifyLimiter, int maxMissedHeartbeatAck) {
@@ -53,7 +52,7 @@ public class GatewayOptions {
                 identifyLimiter, maxMissedHeartbeatAck, false, EmissionStrategy.park(Duration.ofMillis(10)));
     }
 
-    public GatewayOptions(Mono<Token> token, GatewayReactorResources reactorResources, PayloadReader payloadReader,
+    public GatewayOptions(Token token, GatewayReactorResources reactorResources, PayloadReader payloadReader,
                           PayloadWriter payloadWriter, ReconnectOptions reconnectOptions,
                           IdentifyOptions identifyOptions, GatewayObserver initialObserver,
                           PayloadTransformer identifyLimiter, int maxMissedHeartbeatAck, boolean unpooled,
@@ -71,7 +70,7 @@ public class GatewayOptions {
         this.emissionStrategy = Objects.requireNonNull(emissionStrategy, "emissionStrategy");
     }
 
-    public Mono<Token> getToken() {
+    public Token getToken() {
         return token;
     }
 
