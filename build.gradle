@@ -23,7 +23,7 @@ ext {
     }
 
     // Dependencies
-    reactor_bom_version = 'Dysprosium-SR18'
+    reactor_bom_version = 'Dysprosium-SR19'
     jackson_version = '2.11.4'
     jdkstores_version = "$storesVersion".toString()
 
