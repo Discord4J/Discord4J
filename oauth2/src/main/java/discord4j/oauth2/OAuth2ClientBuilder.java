@@ -21,10 +21,10 @@ import discord4j.common.JacksonResources;
 import discord4j.common.ReactorResources;
 import discord4j.common.util.Token;
 import discord4j.discordjson.json.AccessTokenData;
+import discord4j.discordjson.json.AuthorizationCodeGrantRequest;
+import discord4j.discordjson.json.ClientCredentialsGrantRequest;
 import discord4j.oauth2.OAuth2ClientBuilder.Resources;
 import discord4j.oauth2.object.AccessToken;
-import discord4j.oauth2.request.AuthorizationCodeGrantRequest;
-import discord4j.oauth2.request.ClientCredentialsGrantRequest;
 import discord4j.oauth2.service.OAuth2Service;
 import discord4j.oauth2.spec.AuthorizationCodeGrantSpec;
 import discord4j.oauth2.spec.ClientCredentialsGrantSpec;
@@ -131,7 +131,6 @@ public class OAuth2ClientBuilder<C extends OAuth2Client, R extends Resources, O 
         Function<B, Mono<Token>> tokenFactory = builder ->
                 Mono.just(new AccessToken(builder.service, builder.clientId, builder.clientSecret, data));
         return new OAuth2ClientBuilder<>(tokenFactory, Function.identity(), getResourcesModifier(), getClientFactory());
-
     }
 
     protected OAuth2ClientBuilder(Function<B, Mono<Token>> tokenFactory,

@@ -18,11 +18,11 @@
 package discord4j.oauth2.service;
 
 import discord4j.discordjson.json.AccessTokenData;
+import discord4j.discordjson.json.AuthorizationCodeGrantRequest;
 import discord4j.discordjson.json.AuthorizationInfoData;
-import discord4j.oauth2.request.AuthorizationCodeGrantRequest;
-import discord4j.oauth2.request.ClientCredentialsGrantRequest;
-import discord4j.oauth2.request.TokenRefreshRequest;
-import discord4j.oauth2.request.TokenRevokeRequest;
+import discord4j.discordjson.json.ClientCredentialsGrantRequest;
+import discord4j.discordjson.json.TokenRefreshRequest;
+import discord4j.discordjson.json.TokenRevokeRequest;
 import discord4j.rest.request.Router;
 import discord4j.rest.route.Routes;
 import discord4j.rest.service.RestService;

@@ -18,7 +18,7 @@
 package discord4j.oauth2.spec;
 
 import discord4j.core.spec.Spec;
-import discord4j.oauth2.request.TokenRevokeRequest;
+import discord4j.discordjson.json.TokenRevokeRequest;
 
 /** Spec used to revoke a token. */
 public class TokenRevokeSpec implements Spec<TokenRevokeRequest> {

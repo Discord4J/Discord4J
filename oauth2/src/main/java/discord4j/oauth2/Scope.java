@@ -94,11 +94,7 @@ public enum Scope {
     /** Allows using slash commands in user's selected guild. **/
     APPLICATIONS_COMMANDS("applications.commands", false),
 
-    /**
-     * Allows updating slash commands using an {@link AccessToken} exchanged via a client credentials grant.
-     *
-     * @see GrantType#CLIENT_CREDENTIALS
-     **/
+    /** Allows updating slash commands using an {@link AccessToken} exchanged via a client credentials grant. **/
     APPLICATIONS_COMMANDS_UPDATE("applications.commands.update", false);
 
     private final String value;

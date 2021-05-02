@@ -18,7 +18,7 @@
 package discord4j.oauth2.spec;
 
 import discord4j.core.spec.Spec;
-import discord4j.oauth2.request.TokenRefreshRequest;
+import discord4j.discordjson.json.TokenRefreshRequest;
 
 /**
  * Spec used to refresh a token.

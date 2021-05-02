@@ -18,8 +18,8 @@
 package discord4j.oauth2.spec;
 
 import discord4j.core.spec.Spec;
+import discord4j.discordjson.json.ClientCredentialsGrantRequest;
 import discord4j.oauth2.Scope;
-import discord4j.oauth2.request.ClientCredentialsGrantRequest;
 
 /**
  * Spec used to exchange Discord application credentials for the access token of the application owner.

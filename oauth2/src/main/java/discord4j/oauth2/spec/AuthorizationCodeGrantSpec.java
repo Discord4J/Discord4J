@@ -18,7 +18,7 @@
 package discord4j.oauth2.spec;
 
 import discord4j.core.spec.Spec;
-import discord4j.oauth2.request.AuthorizationCodeGrantRequest;
+import discord4j.discordjson.json.AuthorizationCodeGrantRequest;
 
 /**
  * Spec used to exchange an authorization code for an access token.
