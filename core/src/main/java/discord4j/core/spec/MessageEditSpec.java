@@ -38,7 +38,7 @@ public class MessageEditSpec implements Spec<MessageEditRequest> {
     private Possible<Optional<String>> content = Possible.absent();
     private Possible<Optional<EmbedData>> embed = Possible.absent();
     private Possible<Optional<AllowedMentionsData>> allowedMentions = Possible.absent();
-    private Possible<Integer> flags = Possible.absent();
+    private Possible<Optional<Integer>> flags = Possible.absent();
 
     /**
      * Sets the new contents for the edited {@link Message}.
@@ -86,10 +86,14 @@ public class MessageEditSpec implements Spec<MessageEditRequest> {
      * @param flags An array of {@link Message.Flag} to set on the edited message.
      * @return This spec.
      */
-    public MessageEditSpec setFlags(Message.Flag... flags) {
-        this.flags = Possible.of(Arrays.stream(flags)
-                .mapToInt(Message.Flag::getValue)
-                .reduce(0, (left, right) -> left | right));
+    public MessageEditSpec setFlags(@Nullable Message.Flag... flags) {
+        if (flags != null) {
+            this.flags = Possible.of(Optional.of(Arrays.stream(flags)
+                    .mapToInt(Message.Flag::getValue)
+                    .reduce(0, (left, right) -> left | right)));
+        } else {
+            this.flags = Possible.of(Optional.empty());
+        }
         return this;
     }
 
