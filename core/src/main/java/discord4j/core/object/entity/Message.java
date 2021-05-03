@@ -171,7 +171,8 @@ public final class Message implements Entity {
      * @return The author of this message, if present.
      */
     public Optional<User> getAuthor() {
-        return data.webhookId().isAbsent() ? Optional.of(new User(gateway, data.author())) : Optional.empty();
+        return data.webhookId().isAbsent() || !data.interaction().isAbsent() ?
+                Optional.of(new User(gateway, data.author())) : Optional.empty();
     }
 
     /**
