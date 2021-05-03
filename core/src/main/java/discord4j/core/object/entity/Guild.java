@@ -836,6 +836,23 @@ public final class Guild implements Entity {
     }
 
     /**
+     * Returns a list of {@link Member members} whose username or nickname starts with the provided username.
+     *
+     * @param username the string to match username(s) and nickname(s) against.
+     * @param limit the max number of members to return.
+     * @return a {@link Flux} of {@link Member} whose username or nickname starts with the provided username. If an
+     * error occurs, it is emitted through the {@link Flux}.
+     */
+    public Flux<Member> searchMembers(String username, int limit) {
+        Map<String, Object> queryParams = new HashMap<>(2);
+        queryParams.put("query", username);
+        queryParams.put("limit", limit);
+        return gateway.getRestClient().getGuildService()
+                .searchGuildMembers(data.id().asLong(), queryParams)
+                .map(memberData -> new Member(gateway, memberData, data.id().asLong()));
+    }
+
+    /**
      * Requests to retrieve the member as represented by the supplied ID.
      *
      * @param id The ID of the member.
