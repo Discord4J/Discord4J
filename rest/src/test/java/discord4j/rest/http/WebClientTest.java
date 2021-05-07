@@ -68,8 +68,8 @@ public class WebClientTest {
     public void shouldErrorWithClientExceptionOnHtmlBadRequest() {
         ExchangeStrategies strategies = ExchangeStrategies.jackson(JacksonResources.create().getObjectMapper());
         Route badRequestRoute = Route.get("http://0.0.0.0:" + port + "/html/bad-request");
-        Router router = new DefaultRouter(new RouterOptions("", ReactorResources.create(), strategies,
-                Collections.emptyList(),
+        Router router = new DefaultRouter(new RouterOptions(Mono.empty(), AuthorizationScheme.NONE,
+                ReactorResources.create(), strategies, Collections.emptyList(),
                 BucketGlobalRateLimiter.create(), RequestQueueFactory.buffering(), Routes.BASE_URL));
         StepVerifier.create(router.exchange(new DiscordWebRequest(badRequestRoute))
                 .bodyToMono(String.class))

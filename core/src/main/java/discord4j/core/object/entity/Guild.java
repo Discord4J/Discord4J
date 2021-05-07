@@ -847,7 +847,7 @@ public final class Guild implements Entity {
      * user's ID. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Member> getSelfMember() {
-        return this.getMemberById(gateway.getSelfId());
+        return getMemberById(gateway.getSelfId());
     }
 
     /**

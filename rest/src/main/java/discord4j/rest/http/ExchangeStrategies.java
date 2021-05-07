@@ -53,6 +53,7 @@ public interface ExchangeStrategies {
         writerStrategies.add(new MultipartWriterStrategy(mapper));
         writerStrategies.add(new JacksonWriterStrategy(mapper));
         writerStrategies.add(new EmptyWriterStrategy());
+        writerStrategies.add(new FormUrlEncodedWriterStrategy());
         List<ReaderStrategy<?>> readerStrategies = new ArrayList<>();
         readerStrategies.add(new JacksonReaderStrategy<>(mapper));
         readerStrategies.add(new EmptyReaderStrategy());

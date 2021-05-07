@@ -17,32 +17,54 @@
 package discord4j.core;
 
 import discord4j.common.GitProperties;
+import discord4j.common.JacksonResources;
+import discord4j.common.ReactorResources;
+import discord4j.common.util.Token;
+import discord4j.core.DiscordClientBuilder.Resources;
 import discord4j.rest.RestClientBuilder;
+import discord4j.rest.http.ExchangeStrategies;
+import discord4j.rest.request.AuthorizationScheme;
 import discord4j.rest.request.DefaultRouter;
+import discord4j.rest.request.GlobalRateLimiter;
 import discord4j.rest.request.Router;
 import discord4j.rest.request.RouterOptions;
+import discord4j.rest.response.ResponseFunction;
+import discord4j.rest.util.AllowedMentions;
+import reactor.core.publisher.Mono;
 import reactor.util.Logger;
 import reactor.util.Loggers;
+import reactor.util.annotation.Nullable;
 
+import java.util.List;
 import java.util.Properties;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 /**
  * Builder suited for creating a {@link DiscordClient}. To acquire an instance, see {@link #create(String)}.
  */
-public final class DiscordClientBuilder<C, O extends RouterOptions> extends RestClientBuilder<C, O> {
+public final class DiscordClientBuilder<C extends DiscordClient, R extends Resources, O extends RouterOptions, B extends DiscordClientBuilder<C, R, O, B>> extends RestClientBuilder<C, R, O, B> {
 
     private static final Logger log = Loggers.getLogger(DiscordClientBuilder.class);
+
+    protected final Token token;
+
+    private static <B extends DiscordClientBuilder<DiscordClient, Resources, RouterOptions, B>> BiFunction<B, RestClientBuilder.Resources, Resources> getResourcesModifier() {
+        return (builder, resources) -> new Resources(builder.token, resources.getAuthorizationScheme(),
+                resources.getReactorResources(), resources.getJacksonResources(), resources.getExchangeStrategies(),
+                resources.getResponseTransformers(), resources.getGlobalRateLimiter(), resources.getRouter(),
+                resources.getAllowedMentions().orElse(null));
+    }
 
     /**
      * Initialize a new builder with the given token.
      *
      * @param token the bot token used to authenticate to Discord
      */
-    public static DiscordClientBuilder<DiscordClient, RouterOptions> create(String token) {
-        Function<Config, DiscordClient> clientFactory = config -> {
-            CoreResources coreResources = new CoreResources(config.getToken(), config.getReactorResources(),
-                    config.getJacksonResources(), config.getRouter(), config.getAllowedMentions().orElse(null));
+    public static <B extends DiscordClientBuilder<DiscordClient, Resources, RouterOptions, B>> DiscordClientBuilder<DiscordClient, Resources, RouterOptions, B> create(String token) {
+        Function<Resources, DiscordClient> clientFactory = resources -> {
+            CoreResources coreResources = new CoreResources(resources.getBotToken(), resources.getReactorResources(),
+                    resources.getJacksonResources(), resources.getRouter(), resources.getAllowedMentions().orElse(null));
             Properties properties = GitProperties.getProperties();
             String url = properties.getProperty(GitProperties.APPLICATION_URL, "https://discord4j.com");
             String name = properties.getProperty(GitProperties.APPLICATION_NAME, "Discord4J");
@@ -51,16 +73,18 @@ public final class DiscordClientBuilder<C, O extends RouterOptions> extends Rest
             log.info("{} {} ({})", name, gitDescribe, url);
             return new DiscordClient(coreResources);
         };
-        return new DiscordClientBuilder<>(token, clientFactory, Function.identity());
+        Token botToken = Token.of(token);
+        Function<B, Mono<Token>> tokenFactory = builder -> Mono.just(botToken);
+        return new DiscordClientBuilder<>(botToken, tokenFactory, getResourcesModifier(), clientFactory, Function.identity());
     }
 
-    DiscordClientBuilder(String token, Function<Config, C> allocator, Function<RouterOptions, O> optionsModifier) {
-        super(token, allocator, optionsModifier);
-    }
-
-    DiscordClientBuilder(DiscordClientBuilder<?, ?> source, Function<Config, C> allocator,
+    DiscordClientBuilder(Token token,
+                         Function<B, Mono<Token>> tokenFactory,
+                         BiFunction<B, RestClientBuilder.Resources, R> resourcesModifier,
+                         Function<R, C> allocator,
                          Function<RouterOptions, O> optionsModifier) {
-        super(source, allocator, optionsModifier);
+        super(tokenFactory, optionsModifier, resourcesModifier, allocator);
+        this.token = token;
     }
 
     /**
@@ -83,5 +107,23 @@ public final class DiscordClientBuilder<C, O extends RouterOptions> extends Rest
      */
     public C build(Function<O, Router> routerFactory) {
         return super.build(routerFactory);
+    }
+
+    public static class Resources extends RestClientBuilder.Resources {
+
+        private final Token token;
+
+        public Resources(Token token, AuthorizationScheme authorizationScheme, ReactorResources reactorResources,
+                         JacksonResources jacksonResources, ExchangeStrategies exchangeStrategies,
+                         List<ResponseFunction> responseTransformers, GlobalRateLimiter globalRateLimiter,
+                         Router router, @Nullable AllowedMentions allowedMentions) {
+            super(Mono.just(token), authorizationScheme, reactorResources, jacksonResources, exchangeStrategies,
+                    responseTransformers, globalRateLimiter, router, allowedMentions);
+            this.token = token;
+        }
+
+        public Token getBotToken() {
+            return token;
+        }
     }
 }

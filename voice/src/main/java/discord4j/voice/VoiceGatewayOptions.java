@@ -20,6 +20,7 @@ package discord4j.voice;
 import discord4j.common.JacksonResources;
 import discord4j.common.retry.ReconnectOptions;
 import discord4j.common.util.Snowflake;
+import reactor.core.publisher.Mono;
 import reactor.util.retry.RetrySpec;
 
 import java.time.Duration;

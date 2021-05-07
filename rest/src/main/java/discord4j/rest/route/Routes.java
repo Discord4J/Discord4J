@@ -776,6 +776,7 @@ public abstract class Routes {
      * @see <a href="https://discord.com/developers/docs/resources/invite#accept-invite">
      * https://discord.com/developers/docs/resources/invite#accept-invite</a>
      */
+    @Deprecated
     public static final Route INVITE_ACCEPT = Route.post("/invites/{invite.code}");
 
     /////////////////////////////////////////////
@@ -899,6 +900,7 @@ public abstract class Routes {
      * @see <a href="https://discord.com/developers/docs/resources/user#create-group-dm">
      * https://discord.com/developers/docs/resources/user#create-group-dm</a>
      */
+    @Deprecated
     public static final Route GROUP_DM_CREATE = Route.post("/users/@me/channels");
 
     /**
@@ -1083,4 +1085,14 @@ public abstract class Routes {
     ///////////////////////////////////////////
 
     public static final Route INTERACTION_RESPONSE_CREATE = Route.post("/interactions/{interaction.id}/{interaction.token}/callback");
+
+    ///////////////////////////////////////////
+    ///////////// OAuth2 Resource /////////////
+    ///////////////////////////////////////////
+
+    public static final Route TOKEN = Route.post("/oauth2/token");
+
+    public static final Route TOKEN_REVOKE = Route.post("/oauth2/token/revoke");
+
+    public static final Route AUTHORIZATION_INFO_GET = Route.get("/oauth2/@me");
 }

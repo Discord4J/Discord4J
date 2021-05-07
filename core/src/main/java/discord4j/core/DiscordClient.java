@@ -17,6 +17,7 @@
 package discord4j.core;
 
 import discord4j.common.store.Store;
+import discord4j.core.DiscordClientBuilder.Resources;
 import discord4j.core.event.EventDispatcher;
 import discord4j.core.shard.GatewayBootstrap;
 import discord4j.gateway.GatewayOptions;
@@ -56,7 +57,7 @@ public final class DiscordClient extends RestClient {
      * @return a {@link DiscordClient} configured with the default options
      */
     public static DiscordClient create(String token) {
-        return DiscordClientBuilder.create(token).build();
+        return builder(token).build();
     }
 
     /**
@@ -66,7 +67,7 @@ public final class DiscordClient extends RestClient {
      * @param token the bot token used for authentication
      * @return a {@link DiscordClientBuilder}
      */
-    public static DiscordClientBuilder<DiscordClient, RouterOptions> builder(String token) {
+    public static <B extends DiscordClientBuilder<DiscordClient, Resources, RouterOptions, B>> DiscordClientBuilder<DiscordClient, Resources, RouterOptions, B> builder(String token) {
         return DiscordClientBuilder.create(token);
     }
 

@@ -192,20 +192,20 @@ public class DefaultVoiceGatewayClient {
 
                     sessionHandler = new VoiceWebsocketHandler(receiver, outFlux, context);
 
-                    Mono<?> onOpen = state.asFlux()
-                            .next()
-                            .doOnNext(s -> {
-                                if (s == VoiceConnection.State.RESUMING) {
-                                    log.info(format(context, "Attempting to resume"));
-                                    emissionStrategy.emitNext(outbound, new Resume(guildId.asString(), session.get(),
-                                            serverOptions.get().getToken()));
-                                } else {
-                                    state.emitNext(VoiceConnection.State.CONNECTING, FAIL_FAST);
-                                    log.info(format(context, "Identifying"));
-                                    emissionStrategy.emitNext(outbound, new Identify(guildId.asString(),
-                                            selfId.asString(), session.get(), serverOptions.get().getToken()));
-                                }
-                            });
+                Mono<?> onOpen = state.asFlux()
+                        .next()
+                        .doOnNext(s -> {
+                            if (s == VoiceConnection.State.RESUMING) {
+                                log.info(format(context, "Attempting to resume"));
+                                emissionStrategy.emitNext(outbound, new Resume(guildId.asString(), session.get(),
+                                    serverOptions.get().getToken()));
+                            } else {
+                                state.emitNext(VoiceConnection.State.CONNECTING, FAIL_FAST);
+                                log.info(format(context, "Identifying"));
+                                emissionStrategy.emitNext(outbound, new Identify(guildId.asString(),
+                                    selfId.asString(), session.get(), serverOptions.get().getToken()));
+                            }
+                        });
 
                     Disposable.Composite innerCleanup = Disposables.composite();
 

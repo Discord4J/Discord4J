@@ -220,7 +220,7 @@ public class VoiceChannelJoinSpec implements Spec<Mono<VoiceConnection>> {
         final VoiceStateUpdateTask stateUpdateTask = id -> onVoiceStateUpdates(gateway, id)
                 .map(stateUpdateEvent -> stateUpdateEvent.getCurrent().getSessionId());
         final VoiceChannelRetrieveTask channelRetrieveTask = () -> gateway
-                .getMemberById(voiceChannel.getGuildId(), gateway.getSelfId())
+                .getSelfMember(voiceChannel.getGuildId())
                 .flatMap(Member::getVoiceState)
                 .flatMap(voiceState -> Mono.justOrEmpty(voiceState.getChannelId()));
 
