@@ -19,7 +19,6 @@ package discord4j.gateway;
 
 import discord4j.common.retry.ReconnectOptions;
 import discord4j.common.sinks.EmissionStrategy;
-import discord4j.common.util.Token;
 import discord4j.gateway.limiter.PayloadTransformer;
 import discord4j.gateway.payload.PayloadReader;
 import discord4j.gateway.payload.PayloadWriter;
@@ -32,7 +31,7 @@ import java.util.Objects;
  */
 public class GatewayOptions {
 
-    private final Token token;
+    private final String token;
     private final GatewayReactorResources reactorResources;
     private final PayloadReader payloadReader;
     private final PayloadWriter payloadWriter;
@@ -44,7 +43,7 @@ public class GatewayOptions {
     private final boolean unpooled;
     private final EmissionStrategy emissionStrategy;
 
-    public GatewayOptions(Token token, GatewayReactorResources reactorResources, PayloadReader payloadReader,
+    public GatewayOptions(String token, GatewayReactorResources reactorResources, PayloadReader payloadReader,
                           PayloadWriter payloadWriter, ReconnectOptions reconnectOptions,
                           IdentifyOptions identifyOptions, GatewayObserver initialObserver,
                           PayloadTransformer identifyLimiter, int maxMissedHeartbeatAck) {
@@ -52,7 +51,7 @@ public class GatewayOptions {
                 identifyLimiter, maxMissedHeartbeatAck, false, EmissionStrategy.park(Duration.ofMillis(10)));
     }
 
-    public GatewayOptions(Token token, GatewayReactorResources reactorResources, PayloadReader payloadReader,
+    public GatewayOptions(String token, GatewayReactorResources reactorResources, PayloadReader payloadReader,
                           PayloadWriter payloadWriter, ReconnectOptions reconnectOptions,
                           IdentifyOptions identifyOptions, GatewayObserver initialObserver,
                           PayloadTransformer identifyLimiter, int maxMissedHeartbeatAck, boolean unpooled,
@@ -70,7 +69,7 @@ public class GatewayOptions {
         this.emissionStrategy = Objects.requireNonNull(emissionStrategy, "emissionStrategy");
     }
 
-    public Token getToken() {
+    public String getToken() {
         return token;
     }
 

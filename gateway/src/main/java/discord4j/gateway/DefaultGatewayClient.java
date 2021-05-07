@@ -26,7 +26,6 @@ import discord4j.common.operator.RateLimitOperator;
 import discord4j.common.retry.ReconnectContext;
 import discord4j.common.retry.ReconnectOptions;
 import discord4j.common.sinks.EmissionStrategy;
-import discord4j.common.util.Token;
 import discord4j.discordjson.json.gateway.*;
 import discord4j.discordjson.possible.Possible;
 import discord4j.gateway.json.GatewayPayload;
@@ -92,7 +91,7 @@ public class DefaultGatewayClient implements GatewayClient {
     private final ReconnectOptions reconnectOptions;
     private final ReconnectContext reconnectContext;
     private final IdentifyOptions identifyOptions;
-    private final Token token;
+    private final String token;
     private final GatewayObserver observer;
     private final PayloadTransformer identifyLimiter;
     private final ResettableInterval heartbeatEmitter;
@@ -410,7 +409,7 @@ public class DefaultGatewayClient implements GatewayClient {
     private Mono<Void> handleInvalidSession(GatewayPayload<InvalidSession> payload) {
         if (payload.getData().resumable()) {
             emissionStrategy.emitNext(outbound,
-                    GatewayPayload.resume(ImmutableResume.of(token.asString(), sessionId.get(), sequence.get())));
+                    GatewayPayload.resume(ImmutableResume.of(token, sessionId.get(), sequence.get())));
         } else {
             sessionHandler.error(new InvalidSessionException(currentContext,
                     "Reconnecting due to non-resumable session invalidation"));
@@ -436,14 +435,14 @@ public class DefaultGatewayClient implements GatewayClient {
     private void doResume(GatewayPayload<Hello> payload) {
         log.debug(format(currentContext, "Resuming Gateway session from {}"), sequence.get());
         emissionStrategy.emitNext(outbound,
-                GatewayPayload.resume(ImmutableResume.of(token.asString(), sessionId.get(), sequence.get())));
+                GatewayPayload.resume(ImmutableResume.of(token, sessionId.get(), sequence.get())));
     }
 
     private void doIdentify(GatewayPayload<Hello> payload) {
         IdentifyProperties props = ImmutableIdentifyProperties.of(System.getProperty("os.name"), "Discord4J",
                 "Discord4J");
         Identify identify = Identify.builder()
-                .token(token.asString())
+                .token(token)
                 .intents(identifyOptions.getIntents().map(set -> Possible.of(set.getRawValue())).orElse(Possible.absent()))
                 .properties(props)
                 .compress(false)

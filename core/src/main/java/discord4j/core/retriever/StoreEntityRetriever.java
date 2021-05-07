@@ -94,12 +94,12 @@ public class StoreEntityRetriever implements EntityRetriever {
 
     @Override
     public Mono<User> getSelf() {
-        return gateway.getSelfId().flatMap(this::getUserById);
+        return getUserById(gateway.getSelfId());
     }
 
     @Override
     public Mono<Member> getSelfMember(Snowflake guildId) {
-        return gateway.getSelfId().flatMap(selfId -> getMemberById(guildId, selfId));
+        return getMemberById(guildId, gateway.getSelfId());
     }
 
     @Override

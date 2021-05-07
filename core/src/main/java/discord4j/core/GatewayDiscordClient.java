@@ -23,6 +23,7 @@ import discord4j.common.LogUtil;
 import discord4j.common.ReactorResources;
 import discord4j.common.store.action.read.ReadActions;
 import discord4j.common.util.Snowflake;
+import discord4j.common.util.TokenUtil;
 import discord4j.core.event.EventDispatcher;
 import discord4j.core.event.ReactiveEventAdapter;
 import discord4j.core.event.domain.Event;
@@ -288,8 +289,8 @@ public class GatewayDiscordClient implements EntityRetriever {
      *
      * @return The bot user's ID.
      */
-    public Mono<Snowflake> getSelfId() {
-        return getCoreResources().getSelfId();
+    public Snowflake getSelfId() {
+        return Snowflake.of(TokenUtil.getSelfId(getCoreResources().getBotToken()));
     }
 
     /**

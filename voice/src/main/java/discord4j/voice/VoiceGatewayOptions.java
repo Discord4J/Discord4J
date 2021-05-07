@@ -31,7 +31,7 @@ import java.time.Duration;
 public class VoiceGatewayOptions {
 
     private final Snowflake guildId;
-    private final Mono<Snowflake> selfId;
+    private final Snowflake selfId;
     private final String session;
     private final VoiceServerOptions voiceServerOptions;
     private final JacksonResources jacksonResources;
@@ -48,7 +48,7 @@ public class VoiceGatewayOptions {
     private final Duration ipDiscoveryTimeout;
     private final RetrySpec ipDiscoveryRetrySpec;
 
-    public VoiceGatewayOptions(Snowflake guildId, Mono<Snowflake> selfId, String session, VoiceServerOptions voiceServerOptions,
+    public VoiceGatewayOptions(Snowflake guildId, Snowflake selfId, String session, VoiceServerOptions voiceServerOptions,
                                JacksonResources jacksonResources, VoiceReactorResources reactorResources,
                                ReconnectOptions reconnectOptions, AudioProvider audioProvider,
                                AudioReceiver audioReceiver,
@@ -79,7 +79,7 @@ public class VoiceGatewayOptions {
         return guildId;
     }
 
-    public Mono<Snowflake> getSelfId() {
+    public Snowflake getSelfId() {
         return selfId;
     }
 
