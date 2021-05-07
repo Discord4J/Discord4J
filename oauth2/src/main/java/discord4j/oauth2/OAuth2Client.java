@@ -121,13 +121,15 @@ public class OAuth2Client extends RestClient {
      * @return An {@link AccessToken} produced from the modified spec.
      */
     public final Mono<AccessToken> getToken(final Consumer<? super AuthorizationCodeGrantSpec> spec) {
-        AuthorizationCodeGrantSpec mutatedSpec = new AuthorizationCodeGrantSpec();
-        spec.accept(mutatedSpec);
-        return oAuth2Service.exchangeAuthorizationCode(mutatedSpec
-                .setClientId(clientId)
-                .setClientSecret(clientSecret)
-                .asRequest())
-                .map(data -> new AccessToken(this, data));
+        return Mono.defer(
+                () -> {
+                    AuthorizationCodeGrantSpec mutatedSpec = new AuthorizationCodeGrantSpec();
+                    spec.accept(mutatedSpec);
+                    return oAuth2Service.exchangeAuthorizationCode(mutatedSpec
+                        .setClientId(clientId)
+                        .setClientSecret(clientSecret)
+                        .asRequest());
+                }).map(data -> new AccessToken(this, data));
     }
 
     /**
@@ -138,12 +140,15 @@ public class OAuth2Client extends RestClient {
      * @return An {@link AccessToken} produced from the modified spec.
      */
     public final Mono<AccessToken> getApplicationOwnerToken(final Consumer<? super ClientCredentialsGrantSpec> spec) {
-        ClientCredentialsGrantSpec mutatedSpec = new ClientCredentialsGrantSpec();
-        spec.accept(mutatedSpec);
-        return oAuth2Service.exchangeClientCredentials(mutatedSpec
-                .setClientId(clientId)
-                .setClientSecret(clientSecret)
-                .asRequest())
+        return Mono.defer(
+                () -> {
+                    ClientCredentialsGrantSpec mutatedSpec = new ClientCredentialsGrantSpec();
+                    spec.accept(mutatedSpec);
+                    return oAuth2Service.exchangeClientCredentials(mutatedSpec
+                        .setClientId(clientId)
+                        .setClientSecret(clientSecret)
+                        .asRequest());
+                })
                 .map(data -> new AccessToken(this, data));
     }
 }
