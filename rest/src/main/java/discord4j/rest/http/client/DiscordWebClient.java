@@ -144,11 +144,11 @@ public class DiscordWebClient {
                 () -> {
                     Mono<HttpHeaders> requestHeaders = buildHttpHeaders(request);
                     Mono<String> contentTypeMono = requestHeaders.map(headers -> {
-                    String contentType = headers.get(HttpHeaderNames.CONTENT_TYPE);
-                    return contentType != null ? contentType : "";
+                        String contentType = headers.get(HttpHeaderNames.CONTENT_TYPE);
+                        return contentType != null ? contentType : "";
                 });
-                Mono<HttpClient.RequestSender> sender = requestHeaders.map(reqHeaders -> httpClient.headers(headers ->
-                        headers.setAll(reqHeaders)).request(request.getMethod()).uri(request.getUrl()));
+                Mono<HttpClient.RequestSender> sender = requestHeaders.map(reqHeaders ->
+                        httpClient.headers(headers -> headers.setAll(reqHeaders)).request(request.getMethod()).uri(request.getUrl()));
                 Object body = request.getBody();
 
                 return contentTypeMono.zipWith(sender).flatMap(t2 -> {
@@ -179,7 +179,7 @@ public class DiscordWebClient {
                 Mono<? extends Token> refreshedTokenMono = token.refresh();
                 this.token.set(refreshedTokenMono);
                 return refreshedTokenMono.map(refreshedToken -> requestHeaders.set(HttpHeaderNames.AUTHORIZATION,
-                        AuthorizationScheme.BEARER.getValue() + ' ' + refreshedToken.asString())).map(__ -> requestHeaders);
+                        AuthorizationScheme.BEARER.getValue() + ' ' + refreshedToken.asString()));
             }
             return Mono.just(requestHeaders);
         });
