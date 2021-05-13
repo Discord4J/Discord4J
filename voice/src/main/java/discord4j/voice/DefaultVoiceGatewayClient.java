@@ -200,7 +200,7 @@ public class DefaultVoiceGatewayClient {
                                     emissionStrategy.emitNext(outbound, new Resume(guildId.asString(), session.get(),
                                             serverOptions.get().getToken()));
                                 } else {
-                                    state.emitNext(VoiceConnection.State.CONNECTING, FAIL_FAST);
+                                    emissionStrategy.emitNext(state, VoiceConnection.State.CONNECTING);
                                     log.info(format(context, "Identifying"));
                                     emissionStrategy.emitNext(outbound, new Identify(guildId.asString(),
                                             selfId.asString(), session.get(), serverOptions.get().getToken()));
@@ -245,7 +245,7 @@ public class DefaultVoiceGatewayClient {
                                                     () -> log.debug(format(context, "Voice socket setup complete"))));
                                 } else if (payload instanceof SessionDescription) {
                                     log.info(format(context, "Receiving events"));
-                                    state.emitNext(VoiceConnection.State.CONNECTED, FAIL_FAST);
+                                    emissionStrategy.emitNext(state, VoiceConnection.State.CONNECTED);
                                     reconnectContext.reset();
                                     SessionDescription sessionDescription = (SessionDescription) payload;
                                     byte[] secretKey = sessionDescription.getData().getSecretKey();
@@ -272,7 +272,7 @@ public class DefaultVoiceGatewayClient {
                                     voiceConnectionSink.success(acquireConnection());
                                 } else if (payload instanceof Resumed) {
                                     log.info(format(context, "Resumed"));
-                                    state.emitNext(VoiceConnection.State.CONNECTED, FAIL_FAST);
+                                    emissionStrategy.emitNext(state, VoiceConnection.State.CONNECTED);
                                     reconnectContext.reset();
                                 }
                                 emissionStrategy.emitNext(events, (VoiceGatewayEvent) payload);
@@ -387,7 +387,7 @@ public class DefaultVoiceGatewayClient {
     private Retry retryFactory() {
         return VoiceGatewayRetrySpec.create(reconnectOptions, reconnectContext)
                 .doBeforeRetry(retry -> {
-                    state.emitNext(retry.nextState(), FAIL_FAST);
+                    emissionStrategy.emitNext(state, retry.nextState());
                     long attempt = retry.iteration();
                     Duration backoff = retry.nextBackoff();
                     log.debug(format(getContextFromException(retry.failure()),
@@ -427,7 +427,7 @@ public class DefaultVoiceGatewayClient {
                     if (behavior.getCause() != null) {
                         return Mono.just(new CloseException(closeStatus, ctx, behavior.getCause()))
                                 .flatMap(ex -> {
-                                    state.emitNext(VoiceConnection.State.DISCONNECTED, FAIL_FAST);
+                                    emissionStrategy.emitNext(state, VoiceConnection.State.DISCONNECTED);
                                     disconnectNotifier.emitError(ex, FAIL_FAST);
                                     Mono<CloseStatus> thenMono = closeStatus.getCode() == 4014 ?
                                             Mono.just(closeStatus) : Mono.error(ex);
@@ -436,7 +436,7 @@ public class DefaultVoiceGatewayClient {
                     }
                     return Mono.just(closeStatus)
                             .flatMap(status -> {
-                                state.emitNext(VoiceConnection.State.DISCONNECTED, FAIL_FAST);
+                                emissionStrategy.emitNext(state, VoiceConnection.State.DISCONNECTED);
                                 disconnectNotifier.emitValue(closeStatus, FAIL_FAST);
                                 return disconnectTask.onDisconnect(guildId).thenReturn(closeStatus);
                             });
