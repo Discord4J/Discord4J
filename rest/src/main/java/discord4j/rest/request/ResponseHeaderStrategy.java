@@ -29,8 +29,8 @@ public class ResponseHeaderStrategy implements RateLimitStrategy {
         HttpHeaders headers = response.responseHeaders();
         int remaining = headers.getInt("X-RateLimit-Remaining", -1);
         if (remaining == 0) {
-            long resetAt = (long) (Double.parseDouble(headers.get("X-RateLimit-Reset-After")) * 1000);
-            return Duration.ofMillis(resetAt);
+            long resetAfter = (long) (Double.parseDouble(headers.get("X-RateLimit-Reset-After")) * 1000);
+            return Duration.ofMillis(resetAfter);
         }
         return Duration.ZERO;
     }

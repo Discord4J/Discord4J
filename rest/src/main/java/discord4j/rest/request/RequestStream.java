@@ -23,7 +23,10 @@ import discord4j.rest.http.client.ClientResponse;
 import discord4j.rest.http.client.DiscordWebClient;
 import discord4j.rest.response.ResponseFunction;
 import org.reactivestreams.Subscription;
-import reactor.core.publisher.*;
+import reactor.core.publisher.BaseSubscriber;
+import reactor.core.publisher.Mono;
+import reactor.core.publisher.SignalType;
+import reactor.core.publisher.Sinks;
 import reactor.core.scheduler.Scheduler;
 import reactor.netty.http.client.HttpClientResponse;
 import reactor.util.Logger;
@@ -57,7 +60,7 @@ class RequestStream {
     private final Scheduler timedTaskScheduler;
     private final List<ResponseFunction> responseFunctions;
     private final DiscordWebClient httpClient;
-    private final RateLimitStrategy rateLimitStrategy;
+    private final RequestSubscriber requestSubscriber;
     private final RateLimitRetryOperator rateLimitRetryOperator;
 
     RequestStream(BucketKey id, RouterOptions routerOptions, DiscordWebClient httpClient,
@@ -68,7 +71,7 @@ class RequestStream {
         this.timedTaskScheduler = routerOptions.getReactorResources().getTimerTaskScheduler();
         this.responseFunctions = routerOptions.getResponseTransformers();
         this.httpClient = httpClient;
-        this.rateLimitStrategy = rateLimitStrategy;
+        this.requestSubscriber = new RequestSubscriber(rateLimitStrategy);
         this.rateLimitRetryOperator = new RateLimitRetryOperator(timedTaskScheduler);
     }
 
@@ -96,7 +99,14 @@ class RequestStream {
     void start() {
         requestQueue.requests()
                 .doOnDiscard(RequestCorrelation.class, this::onDiscard)
-                .subscribe(new RequestSubscriber(rateLimitStrategy));
+                .subscribe(requestSubscriber);
+    }
+
+    /**
+     * If we exhausted ratelimits, this holds the point-in-time when the ratelimits will reset again.
+     */
+    Instant getResetAt() {
+        return requestSubscriber.getResetAt();
     }
 
     private void onDiscard(RequestCorrelation<?> requestCorrelation) {
@@ -111,8 +121,12 @@ class RequestStream {
      */
     private class RequestSubscriber extends BaseSubscriber<RequestCorrelation<ClientResponse>> {
 
-        private volatile Duration sleepTime = Duration.ZERO;
+        private volatile Instant resetAt = Instant.EPOCH;
         private final Function<ClientResponse, Mono<ClientResponse>> responseFunction;
+
+        public Instant getResetAt() {
+            return resetAt;
+        }
 
         public RequestSubscriber(RateLimitStrategy strategy) {
             this.responseFunction = response -> {
@@ -125,12 +139,12 @@ class RequestStream {
                             "Read " + httpResponse.status() + " in " + responseTime + (!trace ? "" :
                                     " with headers: " + httpResponse.responseHeaders())));
                 }
-                Duration nextReset = strategy.apply(httpResponse);
-                if (!nextReset.isZero()) {
+                Duration resetAfter = strategy.apply(httpResponse);
+                if (!resetAfter.isZero()) {
                     if (log.isDebugEnabled()) {
-                        log.debug(format(httpResponse.currentContextView(), "Delaying next request by {}"), nextReset);
+                        log.debug(format(httpResponse.currentContextView(), "Delaying next request by {}"), resetAfter);
                     }
-                    sleepTime = nextReset;
+                    resetAt = Instant.now().plus(resetAfter);
                 }
                 boolean global = Boolean.parseBoolean(httpResponse.responseHeaders().get("X-RateLimit-Global"));
                 Mono<Void> action = Mono.empty();
@@ -192,12 +206,12 @@ class RequestStream {
         }
 
         private void next(SignalType signal) {
-            Mono<Long> timer = sleepTime.isZero() ? Mono.just(0L) : Mono.delay(sleepTime, timedTaskScheduler);
+            Duration wait = Duration.between(Instant.now(), resetAt);
+            Mono<Long> timer = wait.isNegative() || wait.isZero() ? Mono.just(0L) : Mono.delay(wait, timedTaskScheduler);
             timer.subscribe(l -> {
                 if (log.isDebugEnabled()) {
                     log.debug("[B:{}] Ready to consume next request after {}", id.toString(), signal);
                 }
-                sleepTime = Duration.ZERO;
                 request(1);
             }, t -> log.error("[B:{}] Error while scheduling next request", id.toString(), t));
         }
