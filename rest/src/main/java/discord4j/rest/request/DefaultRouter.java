@@ -24,8 +24,12 @@ import reactor.core.publisher.Sinks;
 import reactor.util.Logger;
 import reactor.util.Loggers;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static reactor.core.publisher.Sinks.EmitFailureHandler.FAIL_FAST;
 
@@ -37,12 +41,15 @@ public class DefaultRouter implements Router {
 
     private static final Logger log = Loggers.getLogger(DefaultRouter.class);
     private static final ResponseHeaderStrategy HEADER_STRATEGY = new ResponseHeaderStrategy();
+    private static final Duration HOUSE_KEEPING_PERIOD = Duration.ofSeconds(30);
 
     private final ReactorResources reactorResources;
     private final DiscordWebClient httpClient;
     private final Map<BucketKey, RequestStream> streamMap = new ConcurrentHashMap<>();
     private final RouterOptions routerOptions;
 
+    private final AtomicBoolean housekeeping = new AtomicBoolean(false);
+    private final AtomicReference<Instant> lastHousekeepingTime = new AtomicReference<>(Instant.EPOCH);
     /**
      * Create a Discord API bucket-aware {@link Router} configured with the given options.
      *
@@ -71,6 +78,7 @@ public class DefaultRouter implements Router {
     }
 
     private RequestStream getStream(DiscordWebRequest request) {
+        housekeepIfNecessary();
         return streamMap.computeIfAbsent(BucketKey.of(request),
                 k -> {
                     if (log.isTraceEnabled()) {
@@ -81,5 +89,32 @@ public class DefaultRouter implements Router {
                     stream.start();
                     return stream;
                 });
+    }
+
+    private void housekeepIfNecessary() {
+        Instant lastTime = lastHousekeepingTime.get();
+        Instant now = Instant.now();
+        if (lastTime.plus(HOUSE_KEEPING_PERIOD).isAfter(now)) {
+            return;
+        }
+
+        boolean alreadyTaken = housekeeping.getAndSet(true);
+        if (alreadyTaken) {
+            return;
+        }
+
+        try {
+            housekeep(now);
+        } finally {
+            lastHousekeepingTime.set(Instant.now());
+            housekeeping.set(false);
+        }
+    }
+
+    private void housekeep(Instant now) {
+        streamMap.entrySet().removeIf(entry -> {
+            RequestStream stream = entry.getValue();
+            return stream.getResetAt().isBefore(now) && stream.countRequestsInFlight() < 1;
+        });
     }
 }

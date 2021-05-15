@@ -36,6 +36,7 @@ import reactor.util.retry.Retry;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
 
 import static discord4j.common.LogUtil.format;
@@ -62,6 +63,7 @@ class RequestStream {
     private final DiscordWebClient httpClient;
     private final RequestSubscriber requestSubscriber;
     private final RateLimitRetryOperator rateLimitRetryOperator;
+    private final AtomicLong requestsInFlight = new AtomicLong(0);
 
     RequestStream(BucketKey id, RouterOptions routerOptions, DiscordWebClient httpClient,
                   RateLimitStrategy rateLimitStrategy) {
@@ -71,7 +73,7 @@ class RequestStream {
         this.timedTaskScheduler = routerOptions.getReactorResources().getTimerTaskScheduler();
         this.responseFunctions = routerOptions.getResponseTransformers();
         this.httpClient = httpClient;
-        this.requestSubscriber = new RequestSubscriber(rateLimitStrategy);
+        this.requestSubscriber = new RequestSubscriber(rateLimitStrategy, requestsInFlight::decrementAndGet);
         this.rateLimitRetryOperator = new RateLimitRetryOperator(timedTaskScheduler);
     }
 
@@ -93,7 +95,11 @@ class RequestStream {
     }
 
     boolean push(RequestCorrelation<ClientResponse> request) {
-        return requestQueue.push(request);
+        boolean accepted = requestQueue.push(request);
+        if (accepted) {
+            requestsInFlight.incrementAndGet();
+        }
+        return accepted;
     }
 
     void start() {
@@ -109,7 +115,15 @@ class RequestStream {
         return requestSubscriber.getResetAt();
     }
 
+    /**
+     * @return the sum of requests still in the queue, as well as any potential request being processed or waiting for ratelimits to reset
+     */
+    long countRequestsInFlight() {
+        return requestsInFlight.get();
+    }
+
     private void onDiscard(RequestCorrelation<?> requestCorrelation) {
+        requestsInFlight.decrementAndGet();
         requestCorrelation.getResponse()
                 .emitError(new DiscardedRequestException(requestCorrelation.getRequest()), FAIL_FAST);
     }
@@ -123,12 +137,14 @@ class RequestStream {
 
         private volatile Instant resetAt = Instant.EPOCH;
         private final Function<ClientResponse, Mono<ClientResponse>> responseFunction;
+        private final Runnable processedCallback;
 
         public Instant getResetAt() {
             return resetAt;
         }
 
-        public RequestSubscriber(RateLimitStrategy strategy) {
+        public RequestSubscriber(RateLimitStrategy strategy, Runnable processedCallback) {
+            this.processedCallback = processedCallback;
             this.responseFunction = response -> {
                 HttpClientResponse httpResponse = response.getHttpResponse();
                 if (log.isDebugEnabled()) {
@@ -208,12 +224,14 @@ class RequestStream {
         private void next(SignalType signal) {
             Duration wait = Duration.between(Instant.now(), resetAt);
             Mono<Long> timer = wait.isNegative() || wait.isZero() ? Mono.just(0L) : Mono.delay(wait, timedTaskScheduler);
-            timer.subscribe(l -> {
-                if (log.isDebugEnabled()) {
-                    log.debug("[B:{}] Ready to consume next request after {}", id.toString(), signal);
-                }
-                request(1);
-            }, t -> log.error("[B:{}] Error while scheduling next request", id.toString(), t));
+            timer
+                .doFinally(__ -> processedCallback.run())
+                .subscribe(l -> {
+                    if (log.isDebugEnabled()) {
+                        log.debug("[B:{}] Ready to consume next request after {}", id.toString(), signal);
+                    }
+                    request(1);
+                }, t -> log.error("[B:{}] Error while scheduling next request", id.toString(), t));
         }
     }
 }
