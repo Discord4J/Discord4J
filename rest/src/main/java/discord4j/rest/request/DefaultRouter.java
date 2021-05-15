@@ -48,8 +48,9 @@ public class DefaultRouter implements Router {
     private final Map<BucketKey, RequestStream> streamMap = new ConcurrentHashMap<>();
     private final RouterOptions routerOptions;
 
-    private final AtomicBoolean housekeeping = new AtomicBoolean(false);
+    private final AtomicBoolean someoneIsHousekeeping = new AtomicBoolean(false);
     private final AtomicReference<Instant> lastHousekeepingTime = new AtomicReference<>(Instant.EPOCH);
+
     /**
      * Create a Discord API bucket-aware {@link Router} configured with the given options.
      *
@@ -67,28 +68,29 @@ public class DefaultRouter implements Router {
     public DiscordWebResponse exchange(DiscordWebRequest request) {
         return new DiscordWebResponse(Mono.deferContextual(
                 ctx -> {
-                    RequestStream stream = getStream(request);
                     Sinks.One<ClientResponse> callback = Sinks.one();
-                    if (!stream.push(new RequestCorrelation<>(request, callback, ctx))) {
-                        callback.emitError(new DiscardedRequestException(request), FAIL_FAST);
-                    }
+                    housekeepIfNecessary();
+                    BucketKey bucketKey = BucketKey.of(request);
+                    streamMap.compute(bucketKey, (key, value) -> {
+                        RequestStream stream = value != null ? value : createStream(key, request);
+                        if (!stream.push(new RequestCorrelation<>(request, callback, ctx))) {
+                            callback.emitError(new DiscardedRequestException(request), FAIL_FAST);
+                        }
+                        return stream;
+                    });
                     return callback.asMono();
                 })
                 .checkpoint("Request to " + request.getDescription() + " [DefaultRouter]"), reactorResources);
     }
 
-    private RequestStream getStream(DiscordWebRequest request) {
-        housekeepIfNecessary();
-        return streamMap.computeIfAbsent(BucketKey.of(request),
-                k -> {
-                    if (log.isTraceEnabled()) {
-                        log.trace("Creating RequestStream with key {} for request: {} -> {}",
-                                k, request.getRoute().getUriTemplate(), request.getCompleteUri());
-                    }
-                    RequestStream stream = new RequestStream(k, routerOptions, httpClient, HEADER_STRATEGY);
-                    stream.start();
-                    return stream;
-                });
+    private RequestStream createStream(BucketKey bucketKey, DiscordWebRequest request) {
+        if (log.isTraceEnabled()) {
+            log.trace("Creating RequestStream with key {} for request: {} -> {}",
+                bucketKey, request.getRoute().getUriTemplate(), request.getCompleteUri());
+        }
+        RequestStream stream = new RequestStream(bucketKey, routerOptions, httpClient, HEADER_STRATEGY);
+        stream.start();
+        return stream;
     }
 
     private void housekeepIfNecessary() {
@@ -98,23 +100,34 @@ public class DefaultRouter implements Router {
             return;
         }
 
-        boolean alreadyTaken = housekeeping.getAndSet(true);
-        if (alreadyTaken) {
+        tryHousekeep(now);
+    }
+
+    private void tryHousekeep(Instant now) {
+        boolean isTaken = someoneIsHousekeeping.getAndSet(true);
+        if (isTaken) {
             return;
         }
 
         try {
-            housekeep(now);
+            doHousekeep(now);
         } finally {
             lastHousekeepingTime.set(Instant.now());
-            housekeeping.set(false);
+            someoneIsHousekeeping.set(false);
         }
     }
 
-    private void housekeep(Instant now) {
-        streamMap.entrySet().removeIf(entry -> {
-            RequestStream stream = entry.getValue();
-            return stream.getResetAt().isBefore(now) && stream.countRequestsInFlight() < 1;
-        });
+    private void doHousekeep(Instant now) {
+        streamMap.keySet().forEach(key ->
+            streamMap.compute(key, (bucketKey , stream) -> {
+                if (stream == null) {
+                    return null;
+                }
+                if (stream.getResetAt().isBefore(now) && stream.countRequestsInFlight() < 1) {
+                    return null;
+                }
+                return stream;
+            })
+        );
     }
 }
