@@ -75,6 +75,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.locks.LockSupport;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -636,9 +637,9 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                                 log.info(format(ctx, "All shards disconnected"));
                                 Throwable t = dispatcherFunctionError.get();
                                 if (t != null) {
-                                    onCloseSink.emitError(t, Sinks.EmitFailureHandler.FAIL_FAST);
+                                    onCloseSink.emitError(t, OPTIMISTIC);
                                 } else {
-                                    onCloseSink.emitEmpty(Sinks.EmitFailureHandler.FAIL_FAST);
+                                    onCloseSink.emitEmpty(OPTIMISTIC);
                                 }
                             }))
                             .cache();
@@ -827,7 +828,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                             .doOnError(sink::error) // only useful for startup errors
                             .doFinally(__ -> {
                                 sink.success(); // no-op if we completed it before
-                                onCloseSink.emitEmpty(Sinks.EmitFailureHandler.FAIL_FAST);
+                                onCloseSink.emitEmpty(OPTIMISTIC);
                             })
                             .contextWrite(buildContext(gateway, shard))
                             .subscribe(null,
@@ -974,5 +975,13 @@ public class GatewayBootstrap<O extends GatewayOptions> {
     public static VoiceConnectionFactory defaultVoiceConnectionFactory() {
         return new DefaultVoiceConnectionFactory();
     }
+
+    private static final Sinks.EmitFailureHandler OPTIMISTIC = (signalType, emitResult) -> {
+        if (emitResult == Sinks.EmitResult.FAIL_NON_SERIALIZED) {
+            LockSupport.parkNanos(10);
+            return true;
+        }
+        return false;
+    };
 
 }
