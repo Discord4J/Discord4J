@@ -173,7 +173,7 @@ public final class ApplicationInfo implements Entity {
     /**
      * Requests to retrieve the owner of the application, using the given retrieval strategy.
      *
-     * @param retrievalStrategy the strategy to use to get the owner
+     * @param retrievalStrategy The strategy to use to get the owner.
      * @return A {@link Mono} where, upon successful completion, emits the {@link User owner} of the application. If an
      * error is received, it is emitted through the {@code Mono}.
      */
@@ -184,7 +184,7 @@ public final class ApplicationInfo implements Entity {
     /**
      * Gets the members of the application team, if the application belongs to a team.
      *
-     * @return the members of the application's team, if the application belongs to a team.
+     * @return The members of the application's team, if the application belongs to a team.
      */
     public Optional<ApplicationTeam> getTeam() {
         return data.team().map(data -> new ApplicationTeam(gateway, data));
