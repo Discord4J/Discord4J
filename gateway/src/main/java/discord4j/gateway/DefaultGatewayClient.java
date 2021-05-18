@@ -352,8 +352,10 @@ public class DefaultGatewayClient implements GatewayClient {
     }
 
     private void logPayload(Logger logger, ContextView context, ByteBuf buf) {
-        logger.trace(format(context, buf.toString(StandardCharsets.UTF_8)
-                .replaceAll("(\"token\": ?\")([A-Za-z0-9._-]*)(\")", "$1hunter2$3")));
+        if (logger.isTraceEnabled()) {
+            logger.trace(format(context, buf.toString(StandardCharsets.UTF_8)
+                    .replaceAll("(\"token\": ?\")([A-Za-z0-9._-]*)(\")", "$1hunter2$3")));
+        }
     }
 
     private static boolean isNotStartupPayload(GatewayPayload<?> payload) {
