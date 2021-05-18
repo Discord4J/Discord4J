@@ -41,7 +41,6 @@ import reactor.core.Disposable;
 import reactor.core.Disposables;
 import reactor.core.publisher.*;
 import reactor.function.TupleUtils;
-import reactor.netty.ConnectionObserver;
 import reactor.netty.http.client.WebsocketClientSpec;
 import reactor.util.Logger;
 import reactor.util.Loggers;
@@ -286,7 +285,6 @@ public class DefaultVoiceGatewayClient {
 
                     Mono<Void> httpFuture = reactorResources.getHttpClient()
                             .headers(headers -> headers.add(USER_AGENT, "DiscordBot(https://discord4j.com, 3)"))
-                            .observe(getObserver(context))
                             .websocket(WebsocketClientSpec.builder()
                                     .maxFramePayloadLength(Integer.MAX_VALUE)
                                     .build())
@@ -310,10 +308,6 @@ public class DefaultVoiceGatewayClient {
                         throw new IllegalStateException("connect can only be subscribed once");
                     }
                 });
-    }
-
-    private ConnectionObserver getObserver(ContextView context) {
-        return (connection, newState) -> log.debug(format(context, "{} {}"), newState, connection);
     }
 
     private VoiceConnection acquireConnection() {
