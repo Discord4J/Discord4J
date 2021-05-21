@@ -58,6 +58,13 @@ public abstract class EventNames {
     public static final String APPLICATION_COMMAND_UPDATE = "APPLICATION_COMMAND_UPDATE";
     public static final String APPLICATION_COMMAND_DELETE = "APPLICATION_COMMAND_DELETE";
     public static final String INTERACTION_CREATE = "INTERACTION_CREATE";
+    public static final String THREAD_CREATE = "THREAD_CREATE";
+    public static final String THREAD_UPDATE = "THREAD_UPDATE";
+    public static final String THREAD_DELETE = "THREAD_DELETE";
+    public static final String THREAD_LIST_SYNC = "THREAD_LIST_SYNC";
+    public static final String THREAD_MEMBER_UPDATE = "THREAD_MEMBER_UPDATE";
+    public static final String THREAD_MEMBERS_UPDATE = "THREAD_MEMBERS_UPDATE";
+
 
     // Ignored
     public static final String PRESENCES_REPLACE = "PRESENCES_REPLACE";

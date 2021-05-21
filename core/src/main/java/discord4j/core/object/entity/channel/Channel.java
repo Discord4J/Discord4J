@@ -95,6 +95,12 @@ public interface Channel extends Entity {
         /** Represents a {@link StoreChannel}. */
         GUILD_STORE(6),
 
+        GUILD_NEWS_THREAD(10),
+
+        GUILD_PUBLIC_THREAD(11),
+
+        GUILD_PRIVATE_THREAD(12),
+
         /** Represents a {@link VoiceChannel} for hosting events with an audience. */
         GUILD_STAGE_VOICE(13);
 
@@ -135,6 +141,9 @@ public interface Channel extends Entity {
                 case 4: return GUILD_CATEGORY;
                 case 5: return GUILD_NEWS;
                 case 6: return GUILD_STORE;
+                case 10: return GUILD_NEWS_THREAD;
+                case 11: return GUILD_PUBLIC_THREAD;
+                case 12: return GUILD_PRIVATE_THREAD;
                 case 13: return GUILD_STAGE_VOICE;
                 default: return UNKNOWN;
             }
