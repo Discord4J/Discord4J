@@ -26,10 +26,13 @@ import discord4j.core.util.ImageUtil;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
 
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
-/** Represents the Current (typically) Application Information. */
+/**
+ * Represents the Current (typically) Application Information.
+ *
+ * @see <a href="https://discord.com/developers/docs/resources/application">Application Resource</a>
+ */
 public final class ApplicationInfo implements Entity {
 
     /** The path for application icon image URLs. */
@@ -103,9 +106,9 @@ public final class ApplicationInfo implements Entity {
     }
 
     /**
-     * Gets the description of the app, if present.
+     * Gets the description of the app.
      *
-     * @return The description of the app, if present.
+     * @return The description of the app.
      */
     public String getDescription() {
         return data.description();
@@ -131,6 +134,24 @@ public final class ApplicationInfo implements Entity {
     }
 
     /**
+     * Gets the url of the app's terms of service, if present.
+     *
+     * @return The url of the app's terms of service, if present.
+     */
+    public Optional<String> getTermsOfServiceUrl() {
+        return data.termsOfServiceUrl().toOptional();
+    }
+
+    /**
+     * Gets the url of the app's privacy policy, if present.
+     *
+     * @return The url of the app's privacy policy, if present.
+     */
+    public Optional<String> getPrivacyPolicyUrl() {
+        return data.privacyPolicyUrl().toOptional();
+    }
+
+    /**
      * Gets the ID of the owner of the application.
      *
      * @return The ID of the owner of the application.
@@ -152,7 +173,7 @@ public final class ApplicationInfo implements Entity {
     /**
      * Requests to retrieve the owner of the application, using the given retrieval strategy.
      *
-     * @param retrievalStrategy the strategy to use to get the owner
+     * @param retrievalStrategy The strategy to use to get the owner.
      * @return A {@link Mono} where, upon successful completion, emits the {@link User owner} of the application. If an
      * error is received, it is emitted through the {@code Mono}.
      */
@@ -161,21 +182,12 @@ public final class ApplicationInfo implements Entity {
     }
 
     /**
-     * Gets the url of the app's terms of service, if present.
+     * Gets the members of the application team, if the application belongs to a team.
      *
-     * @return The url of the app's terms of service, if present.
+     * @return The members of the application's team, if the application belongs to a team.
      */
-    public Optional<String> getTermsOfServiceUrl() {
-        return data.termsOfServiceUrl().toOptional();
-    }
-
-    /**
-     * Gets the url of the app's privacy policy, if present.
-     *
-     * @return The url of the app's privacy policy, if present.
-     */
-    public Optional<String> getPrivacyPolicyUrl() {
-        return data.privacyPolicyUrl().toOptional();
+    public Optional<ApplicationTeam> getTeam() {
+        return data.team().map(data -> new ApplicationTeam(gateway, data));
     }
 
     @Override
