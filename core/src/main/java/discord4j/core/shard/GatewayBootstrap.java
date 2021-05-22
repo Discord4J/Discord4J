@@ -33,9 +33,9 @@ import discord4j.core.event.EventDispatcher;
 import discord4j.core.event.dispatch.DispatchContext;
 import discord4j.core.event.dispatch.DispatchEventMapper;
 import discord4j.core.event.domain.Event;
-import discord4j.core.object.presence.ClientPresence;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Member;
+import discord4j.core.object.presence.ClientPresence;
 import discord4j.core.retriever.EntityRetrievalStrategy;
 import discord4j.discordjson.json.MessageData;
 import discord4j.discordjson.json.gateway.GuildMembersChunk;
@@ -64,7 +64,11 @@ import io.netty.buffer.ByteBuf;
 import org.reactivestreams.Publisher;
 import reactor.core.Disposable;
 import reactor.core.Disposables;
-import reactor.core.publisher.*;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import reactor.core.publisher.MonoSink;
+import reactor.core.publisher.Sinks;
+import reactor.netty.resources.ConnectionProvider;
 import reactor.util.Logger;
 import reactor.util.Loggers;
 import reactor.util.annotation.Nullable;
@@ -615,7 +619,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                 .flatMap(function((b, count) -> {
                     Store store = b.initStore();
                     EventDispatcher eventDispatcher = b.initEventDispatcher();
-                    GatewayReactorResources gatewayReactorResources = b.initGatewayReactorResources();
+                    GatewayReactorResources gatewayReactorResources = b.initGatewayReactorResources(count);
                     ShardCoordinator shardCoordinator = b.initShardCoordinator(gatewayReactorResources);
 
                     VoiceReactorResources voiceReactorResources = b.initVoiceReactorResources();
@@ -877,9 +881,13 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                 .build();
     }
 
-    private GatewayReactorResources initGatewayReactorResources() {
+    private GatewayReactorResources initGatewayReactorResources(int count) {
         if (gatewayReactorResources == null) {
-            gatewayReactorResources = GatewayReactorResources::new;
+            int maxConnections = Math.max(ConnectionProvider.DEFAULT_POOL_MAX_CONNECTIONS, count);
+            gatewayReactorResources = res -> GatewayReactorResources.builder(res)
+                    .httpClient(ReactorResources.newHttpClient(
+                            ConnectionProvider.create("d4j-gateway", maxConnections)))
+                    .build();
         }
         return gatewayReactorResources.apply(client.getCoreResources().getReactorResources());
     }
