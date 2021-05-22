@@ -321,7 +321,8 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
             case GUILD_VOICE:
             case GUILD_CATEGORY:
             case GUILD_NEWS:
-            case GUILD_STORE: return saveChannel(dispatch);
+            case GUILD_STORE:
+            case GUILD_STAGE_VOICE: return saveChannel(dispatch);
             case DM:
             case GROUP_DM: return Mono.empty();
             default: throw new IllegalArgumentException("Unhandled channel type " + dispatch.channel().type());
@@ -353,7 +354,8 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
             case GUILD_VOICE:
             case GUILD_CATEGORY:
             case GUILD_NEWS:
-            case GUILD_STORE: return deleteChannel(dispatch);
+            case GUILD_STORE:
+            case GUILD_STAGE_VOICE: return deleteChannel(dispatch);
             case DM:
             case GROUP_DM: return Mono.empty();
             default: throw new IllegalArgumentException("Unhandled channel type " + dispatch.channel().type());
@@ -385,7 +387,8 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
             case GUILD_VOICE:
             case GUILD_CATEGORY:
             case GUILD_NEWS:
-            case GUILD_STORE: return updateChannel(dispatch);
+            case GUILD_STORE:
+            case GUILD_STAGE_VOICE: return updateChannel(dispatch);
             case DM:
             case GROUP_DM: return Mono.empty();
             default: throw new IllegalArgumentException("Unhandled channel type " + dispatch.channel().type());
@@ -400,7 +403,8 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
         GROUP_DM(3),
         GUILD_CATEGORY(4),
         GUILD_NEWS(5),
-        GUILD_STORE(6);
+        GUILD_STORE(6),
+        GUILD_STAGE_VOICE(13);
 
         private final int value;
 
@@ -421,6 +425,7 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
                 case 4: return GUILD_CATEGORY;
                 case 5: return GUILD_NEWS;
                 case 6: return GUILD_STORE;
+                case 13: return GUILD_STAGE_VOICE;
                 default: return UNKNOWN;
             }
         }
