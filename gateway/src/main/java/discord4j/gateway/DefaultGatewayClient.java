@@ -102,6 +102,8 @@ public class DefaultGatewayClient implements GatewayClient {
 
     private final Map<Opcode<?>, PayloadHandler<?>> handlerMap = new HashMap<>();
 
+    private final HttpClient httpClient;
+
     /**
      * Payloads coming from the websocket.
      */
@@ -172,6 +174,7 @@ public class DefaultGatewayClient implements GatewayClient {
         addHandler(Opcode.HELLO, this::handleHello);
         addHandler(Opcode.HEARTBEAT_ACK, this::handleHeartbeatAck);
 
+        this.httpClient = initHttpClient();
         this.receiver = newEmitterSink();
         this.sender = newEmitterSink();
         this.dispatch = newEmitterSink();
@@ -309,7 +312,7 @@ public class DefaultGatewayClient implements GatewayClient {
                             .doOnNext(tick -> emissionStrategy.emitNext(heartbeats, tick))
                             .then();
 
-                    Mono<Void> httpFuture = getHttpClient()
+                    Mono<Void> httpFuture = httpClient
                             .websocket(WebsocketClientSpec.builder()
                                     .maxFramePayloadLength(Integer.MAX_VALUE)
                                     .build())
@@ -343,7 +346,7 @@ public class DefaultGatewayClient implements GatewayClient {
                 });
     }
 
-    private HttpClient getHttpClient() {
+    private HttpClient initHttpClient() {
         HttpClient client = reactorResources.getHttpClient()
                 .headers(headers -> headers.add(USER_AGENT, initUserAgent()));
         if (observer == GatewayObserver.NOOP_LISTENER) {
@@ -423,6 +426,7 @@ public class DefaultGatewayClient implements GatewayClient {
     }
 
     private Mono<Void> handleInvalidSession(GatewayPayload<InvalidSession> payload) {
+        //noinspection ConstantConditions
         if (payload.getData().resumable()) {
             emissionStrategy.emitNext(outbound,
                     GatewayPayload.resume(ImmutableResume.of(token, sessionId.get(), sequence.get())));
@@ -434,6 +438,7 @@ public class DefaultGatewayClient implements GatewayClient {
     }
 
     private Mono<Void> handleHello(GatewayPayload<Hello> payload) {
+        //noinspection ConstantConditions
         Duration interval = Duration.ofMillis(payload.getData().heartbeatInterval());
         heartbeatEmitter.start(Duration.ZERO, interval);
         return state.asFlux()

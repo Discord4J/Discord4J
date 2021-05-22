@@ -41,6 +41,7 @@ import reactor.core.Disposable;
 import reactor.core.Disposables;
 import reactor.core.publisher.*;
 import reactor.function.TupleUtils;
+import reactor.netty.http.client.HttpClient;
 import reactor.netty.http.client.WebsocketClientSpec;
 import reactor.util.Logger;
 import reactor.util.Loggers;
@@ -81,6 +82,7 @@ public class DefaultVoiceGatewayClient {
     private final ReconnectOptions reconnectOptions;
     private final ReconnectContext reconnectContext;
     private final AudioProvider audioProvider;
+    @SuppressWarnings("deprecation")
     private final AudioReceiver audioReceiver;
     private final VoiceSendTaskFactory sendTaskFactory;
     private final VoiceReceiveTaskFactory receiveTaskFactory;
@@ -90,6 +92,7 @@ public class DefaultVoiceGatewayClient {
     private final Duration ipDiscoveryTimeout;
     private final RetrySpec ipDiscoveryRetrySpec;
 
+    private final HttpClient httpClient;
     private final VoiceSocket voiceSocket;
     private final ResettableInterval heartbeat;
     private final Disposable.Swap cleanup;
@@ -150,6 +153,8 @@ public class DefaultVoiceGatewayClient {
         this.ipDiscoveryTimeout = Objects.requireNonNull(options.getIpDiscoveryTimeout());
         this.ipDiscoveryRetrySpec = Objects.requireNonNull(options.getIpDiscoveryRetrySpec());
 
+        this.httpClient = reactorResources.getHttpClient()
+                .headers(headers -> headers.add(USER_AGENT, "DiscordBot(https://discord4j.com, 3)"));
         this.voiceSocket = new VoiceSocket(reactorResources.getUdpClient());
         this.heartbeat = new ResettableInterval(reactorResources.getTimerTaskScheduler());
         this.cleanup = Disposables.swap();
@@ -283,8 +288,7 @@ public class DefaultVoiceGatewayClient {
                             .doOnNext(tick -> emissionStrategy.emitNext(outbound, tick))
                             .then();
 
-                    Mono<Void> httpFuture = reactorResources.getHttpClient()
-                            .headers(headers -> headers.add(USER_AGENT, "DiscordBot(https://discord4j.com, 3)"))
+                    Mono<Void> httpFuture = httpClient
                             .websocket(WebsocketClientSpec.builder()
                                     .maxFramePayloadLength(Integer.MAX_VALUE)
                                     .build())
