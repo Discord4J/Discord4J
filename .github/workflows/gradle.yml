@@ -6,6 +6,7 @@ on:
       - '**.gradle'
       - '**.properties'
       - '**/src/**'
+      - '.github/workflows/**'
     branches:
       - 'master'
       - '3.0.x'
