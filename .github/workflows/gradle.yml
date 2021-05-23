@@ -6,6 +6,7 @@ on:
       - '**.gradle'
       - '**.properties'
       - '**/src/**'
+      - '.github/workflows/**'
     branches:
       - 'master'
       - '3.0.x'
@@ -60,7 +61,7 @@ jobs:
       - name: Set up JDK
         uses: actions/setup-java@v1
         with:
-          java-version: 8
+          java-version: 11
       - name: Publish with Gradle
         run: ./gradlew -x test publish
         env:
