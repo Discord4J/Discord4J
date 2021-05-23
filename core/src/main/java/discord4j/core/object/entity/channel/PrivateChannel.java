@@ -16,16 +16,13 @@
  */
 package discord4j.core.object.entity.channel;
 
-import discord4j.discordjson.json.ChannelData;
-import discord4j.discordjson.json.UserData;
+import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.User;
-import discord4j.core.retriever.EntityRetrievalStrategy;
-import discord4j.common.util.Snowflake;
-import reactor.core.publisher.Flux;
+import discord4j.discordjson.json.ChannelData;
+import discord4j.discordjson.json.UserData;
 
 import java.util.Collections;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
