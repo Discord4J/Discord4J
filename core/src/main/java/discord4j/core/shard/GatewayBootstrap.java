@@ -797,6 +797,9 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                                     case RETRY_SUCCEEDED:
                                         // TODO: ensure this sink is only pushed to once and avoid dropping signals
                                         return shardCoordinator.publishConnected(shard)
+                                                .publishOn(gateway.getGatewayResources()
+                                                        .getGatewayReactorResources()
+                                                        .getBlockingTaskScheduler())
                                                 .doFinally(__ -> sink.success(shard));
                                     case DISCONNECTED_RESUME:
                                         session = SessionInfo.create(gatewayClient.getSessionId(),
