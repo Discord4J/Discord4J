@@ -16,12 +16,12 @@
  */
 package discord4j.core.object.entity.channel;
 
-import discord4j.discordjson.json.ChannelData;
-import discord4j.discordjson.json.UserData;
+import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.User;
 import discord4j.core.retriever.EntityRetrievalStrategy;
-import discord4j.common.util.Snowflake;
+import discord4j.discordjson.json.ChannelData;
+import discord4j.discordjson.json.UserData;
 import reactor.core.publisher.Flux;
 
 import java.util.Collections;
@@ -60,7 +60,10 @@ public final class PrivateChannel extends BaseMessageChannel {
      *
      * @return A {@link Flux} that continually emits the {@link User recipients} for this private channel. If an error
      * is received, it is emitted through the {@code Flux}.
+     * @deprecated this method will return {@link Set} in v3.2.0, as the recipient Users can be accessed directly. see
+     * <a href="https://github.com/Discord4J/Discord4J/pull/898">this pull request</a> for details
      */
+    @Deprecated
     public Flux<User> getRecipients() {
         return Flux.fromIterable(getRecipientIds()).flatMap(getClient()::getUserById);
     }
@@ -71,7 +74,10 @@ public final class PrivateChannel extends BaseMessageChannel {
      * @param retrievalStrategy the strategy to use to get the recipients
      * @return A {@link Flux} that continually emits the {@link User recipients} for this private channel. If an error
      * is received, it is emitted through the {@code Flux}.
+     * @deprecated this method will be removed in v3.2.0, as the recipient Users can be accessed directly. see
+     * <a href="https://github.com/Discord4J/Discord4J/pull/898">this pull request</a> for details
      */
+    @Deprecated
     public Flux<User> getRecipients(EntityRetrievalStrategy retrievalStrategy) {
         return Flux.fromIterable(getRecipientIds())
                 .flatMap(id -> getClient().withRetrievalStrategy(retrievalStrategy).getUserById(id));
