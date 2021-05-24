@@ -1,0 +1,106 @@
+/*
+ * This file is part of Discord4J.
+ *
+ * Discord4J is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Discord4J is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with Discord4J. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+package discord4j.core.spec;
+
+import discord4j.core.object.entity.Message;
+import discord4j.core.object.entity.Webhook;
+import discord4j.discordjson.json.WebhookExecuteRequest;
+import discord4j.rest.util.AllowedMentions;
+import discord4j.rest.util.MultipartRequest;
+import org.immutables.value.Value;
+import reactor.core.CoreSubscriber;
+import reactor.core.publisher.Mono;
+import reactor.util.annotation.Nullable;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static discord4j.core.spec.InternalSpecUtils.mapNullable;
+import static discord4j.core.spec.InternalSpecUtils.toPossible;
+
+@SpecStyle
+@Value.Immutable(singleton = true)
+interface WebhookExecuteSpecGenerator extends Spec<MultipartRequest<WebhookExecuteRequest>> {
+
+    @Nullable
+    String content();
+
+    @Nullable
+    String username();
+
+    @Nullable
+    String avatarUrl();
+
+    @Value.Default
+    default boolean tts() {
+        return false;
+    }
+
+    @Value.Default
+    default List<MessageCreateFields.File> files() {
+        return Collections.emptyList();
+    }
+
+    @Value.Default
+    default List<MessageCreateFields.FileSpoiler> fileSpoilers() {
+        return Collections.emptyList();
+    }
+
+    @Value.Default
+    default List<EmbedCreateSpec> embeds() {
+        return Collections.emptyList();
+    }
+
+    @Nullable
+    AllowedMentions allowedMentions();
+
+    @Override
+    default MultipartRequest<WebhookExecuteRequest> asRequest() {
+        WebhookExecuteRequest request = WebhookExecuteRequest.builder()
+                .content(toPossible(content()))
+                .username(toPossible(username()))
+                .avatarUrl(toPossible(avatarUrl()))
+                .tts(tts())
+                .embeds(embeds().stream().map(EmbedCreateSpec::asRequest).collect(Collectors.toList()))
+                .allowedMentions(toPossible(mapNullable(allowedMentions(), AllowedMentions::toData)))
+                .build();
+        return MultipartRequest.ofRequestAndFiles(request, Stream.concat(files().stream(), fileSpoilers().stream())
+                .map(MessageCreateFields.File::asRequest)
+                .collect(Collectors.toList()));
+    }
+}
+
+@SuppressWarnings("immutables:subtype")
+@SpecStyle
+@Value.Immutable(builder = false)
+abstract class WebhookExecuteMonoGenerator extends Mono<Message> implements WebhookExecuteSpecGenerator {
+    
+    abstract boolean waitForMessage();
+
+    abstract Webhook webhook();
+
+    @Override
+    public void subscribe(CoreSubscriber<? super Message> actual) {
+        webhook().execute(waitForMessage(), WebhookExecuteSpec.copyOf(this)).subscribe(actual);
+    }
+
+    @Override
+    public abstract String toString();
+}

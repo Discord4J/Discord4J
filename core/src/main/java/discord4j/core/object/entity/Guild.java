@@ -1053,20 +1053,29 @@ public final class Guild implements Entity {
     }
 
     /**
+     * Requests to create a category. Properties specifying how to create the category can be set via the {@code
+     * withXxx} methods of the returned {@link CategoryCreateMono}.
+     *
+     * @param name the name of the category to create
+     * @return A {@link CategoryCreateMono} where, upon successful completion, emits the created {@link Category}. If an
+     * error is  received, it is emitted through the {@code CategoryCreateMono}.
+     */
+    public CategoryCreateMono createCategory(String name) {
+        return CategoryCreateMono.of(name, this);
+    }
+
+    /**
      * Requests to create a category.
      *
-     * @param spec A {@link Consumer} that provides a "blank" {@link CategoryCreateSpec} to be operated on.
+     * @param spec an immutable object that specifies how to create the category
      * @return A {@link Mono} where, upon successful completion, emits the created {@link Category}. If an error is
      * received, it is emitted through the {@code Mono}.
      */
-    public Mono<Category> createCategory(final Consumer<? super CategoryCreateSpec> spec) {
+    public Mono<Category> createCategory(CategoryCreateSpec spec) {
+        Objects.requireNonNull(spec);
         return Mono.defer(
-                () -> {
-                    CategoryCreateSpec mutatedSpec = new CategoryCreateSpec();
-                    spec.accept(mutatedSpec);
-                    return gateway.getRestClient().getGuildService()
-                            .createGuildChannel(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason());
-                })
+                () -> gateway.getRestClient().getGuildService()
+                        .createGuildChannel(getId().asLong(), spec.asRequest(), spec.reason()))
                 .map(data -> EntityUtil.getChannel(gateway, data))
                 .cast(Category.class);
     }
@@ -1170,22 +1179,30 @@ public final class Guild implements Entity {
     }
 
     /**
+     * Requests to ban the specified user. Properties specifying how to ban the user can be set via the {@code withXxx}
+     * methods of the returned {@link GuildBanQueryMono}.
+     *
+     * @param userId The ID of the user to ban.
+     * @return A {@link GuildBanQueryMono} where, upon successful completion, emits nothing; indicating the specified
+     * user was banned. If an error is received, it is emitted through the {@code GuildBanQueryMono}.
+     */
+    public GuildBanQueryMono ban(final Snowflake userId) {
+        return GuildBanQueryMono.of(userId, this);
+    }
+
+    /**
      * Requests to ban the specified user.
      *
      * @param userId The ID of the user to ban.
-     * @param spec A {@link Consumer} that provides a "blank" {@link BanQuerySpec} to be operated on.
+     * @param spec   an immutable object that specifies how to ban the user
      * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the specified user was
      * banned. If an error is received, it is emitted through the {@code Mono}.
      */
-    public Mono<Void> ban(final Snowflake userId, final Consumer<? super BanQuerySpec> spec) {
+    public Mono<Void> ban(final Snowflake userId, BanQuerySpec spec) {
+        Objects.requireNonNull(spec);
         return Mono.defer(
-                () -> {
-                    BanQuerySpec mutatedSpec = new BanQuerySpec();
-                    spec.accept(mutatedSpec);
-                    return gateway.getRestClient().getGuildService()
-                            .createGuildBan(getId().asLong(), userId.asLong(), mutatedSpec.asRequest(),
-                                    mutatedSpec.getReason());
-                });
+                () -> gateway.getRestClient().getGuildService()
+                        .createGuildBan(getId().asLong(), userId.asLong(), spec.asRequest(), spec.reason()));
     }
 
     /**
@@ -1312,7 +1329,8 @@ public final class Guild implements Entity {
     }
 
     /**
-     * Requests to retrieve the audit log for this guild.
+     * Requests to retrieve the audit log for this guild. Properties specifying how to query audit log can be set via
+     * {@code withXxx} methods of the returned {@link AuditLogQueryFlux}.
      * <p>
      * The audit log parts can be {@link AuditLogPart#combine(AuditLogPart) combined} for easier querying. For example,
      * <pre>
@@ -1323,11 +1341,12 @@ public final class Guild implements Entity {
      * }
      * </pre>
      *
-     * @return A {@link Flux} that continually parts of this guild's audit log. If an error is received, it is emitted
+     * @return A {@link AuditLogQueryFlux} that continually emits parts of this guild's audit log. If an error is
+     * received, it is emitted
      * through the {@code Flux}.
      */
-    public Flux<AuditLogPart> getAuditLog() {
-        return getAuditLog(ignored -> {});
+    public AuditLogQueryFlux getAuditLog() {
+        return AuditLogQueryFlux.of(this);
     }
 
     /**
@@ -1342,15 +1361,14 @@ public final class Guild implements Entity {
      * }
      * </pre>
      *
-     * @param spec A {@link Consumer} that provides a "blank" {@link AuditLogQuerySpec} to be operated on.
-     * @return A {@link Flux} that continually parts of this guild's audit log. If an error is received, it is emitted
-     * through the {@code Flux}.
+     * @param spec an immutable object that specifies how to query audit log
+     * @return A {@link Flux} that continually emits parts of this guild's audit log. If an error is received, it is
+     * emitted through the {@code Flux}.
      */
-    public Flux<AuditLogPart> getAuditLog(final Consumer<? super AuditLogQuerySpec> spec) {
+    public Flux<AuditLogPart> getAuditLog(AuditLogQuerySpec spec) {
+        Objects.requireNonNull(spec);
         final Function<Map<String, Object>, Flux<AuditLogData>> makeRequest = params -> {
-            final AuditLogQuerySpec mutatedSpec = new AuditLogQuerySpec();
-            spec.accept(mutatedSpec);
-            params.putAll(mutatedSpec.asRequest());
+            params.putAll(spec.asRequest());
             return gateway.getRestClient().getAuditLogService()
                     .getAuditLog(getId().asLong(), params)
                     .flux();

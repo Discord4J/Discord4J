@@ -8,24 +8,28 @@
  *
  * Discord4J is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public License
- * along with Discord4J.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Discord4J. If not, see <http://www.gnu.org/licenses/>.
  */
+
 package discord4j.core.spec;
 
-import reactor.util.annotation.Nullable;
+import org.immutables.value.Value;
 
-/** A spec which can optionally have a reason in the audit logs when built. */
-public interface AuditSpec<T> extends Spec<T> {
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-    /**
-     * Returns the current audit log reason set on the spec.
-     *
-     * @return The current audit log reason.
-     */
-    @Nullable
-    String reason();
+@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.CLASS)
+@Value.Style(
+        visibility = Value.Style.ImplementationVisibility.PACKAGE,
+        allParameters = true,
+        depluralize = true
+)
+public @interface InlineFieldStyle {
 }

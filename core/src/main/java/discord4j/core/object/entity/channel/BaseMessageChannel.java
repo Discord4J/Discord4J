@@ -34,8 +34,8 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
-import java.util.function.Consumer;
 import java.util.function.Function;
 
 /** An internal implementation of {@link MessageChannel} designed to streamline inheritance. */
@@ -74,15 +74,16 @@ class BaseMessageChannel extends BaseChannel implements MessageChannel {
     }
 
     @Override
-    public final Mono<Message> createMessage(final Consumer<? super MessageCreateSpec> spec) {
+    public Mono<Message> createMessage(MessageCreateSpec spec) {
+        Objects.requireNonNull(spec);
         return Mono.defer(
                 () -> {
-                    MessageCreateSpec mutatedSpec = new MessageCreateSpec();
-                    getClient().getRestClient().getRestResources()
+                    MessageCreateSpec actualSpec = getClient().getRestClient()
+                            .getRestResources()
                             .getAllowedMentions()
-                            .ifPresent(mutatedSpec::setAllowedMentions);
-                    spec.accept(mutatedSpec);
-                    return getRestChannel().createMessage(mutatedSpec.asRequest());
+                            .map(spec::withAllowedMentions)
+                            .orElse(spec);
+                    return getRestChannel().createMessage(actualSpec.asRequest());
                 })
                 .map(data -> new Message(getClient(), data));
     }

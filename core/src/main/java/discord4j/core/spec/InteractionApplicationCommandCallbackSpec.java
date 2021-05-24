@@ -24,9 +24,7 @@ import discord4j.discordjson.possible.Possible;
 import discord4j.rest.util.AllowedMentions;
 import reactor.util.annotation.Nullable;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
 
 public class InteractionApplicationCommandCallbackSpec implements Spec<InteractionApplicationCommandCallbackData> {
 
@@ -52,6 +50,7 @@ public class InteractionApplicationCommandCallbackSpec implements Spec<Interacti
         return this;
     }
 
+    /*
     public InteractionApplicationCommandCallbackSpec addEmbed(Consumer<? super EmbedCreateSpec> spec) {
         if (embeds == null) {
             embeds = new ArrayList<>(1); // most common case is only 1 embed per message
@@ -60,7 +59,7 @@ public class InteractionApplicationCommandCallbackSpec implements Spec<Interacti
         spec.accept(mutatedSpec);
         embeds.add(mutatedSpec.asRequest());
         return this;
-    }
+    }*/
 
     public InteractionApplicationCommandCallbackSpec setAllowedMentions(@Nullable AllowedMentions allowedMentions) {
         allowedMentionsData = allowedMentions != null ? allowedMentions.toData() : null;

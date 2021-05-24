@@ -24,6 +24,7 @@ import discord4j.core.object.presence.Presence;
 import discord4j.core.retriever.EntityRetrievalStrategy;
 import discord4j.core.spec.BanQuerySpec;
 import discord4j.core.spec.GuildMemberEditSpec;
+import discord4j.core.spec.MemberBanQueryMono;
 import discord4j.core.util.OrderUtil;
 import discord4j.core.util.PermissionUtil;
 import discord4j.discordjson.json.MemberData;
@@ -316,21 +317,27 @@ public final class Member extends User {
     }
 
     /**
+     * Requests to ban this user. Properties specifying how to ban this user can be set via the {@code withXxx} methods
+     * of the returned {@link MemberBanQueryMono}.
+     *
+     * @return A {@link MemberBanQueryMono} where, upon successful completion, emits nothing; indicating the specified
+     * user was banned. If an error is received, it is emitted through the {@code MemberBanQueryMono}.
+     */
+    public MemberBanQueryMono ban() {
+        return MemberBanQueryMono.of(this);
+    }
+
+    /**
      * Requests to ban this user.
      *
-     * @param spec A {@link Consumer} that provides a "blank" {@link BanQuerySpec} to be operated on.
+     * @param spec an immutable object that specifies how to ban this user
      * @return A {@link Mono} where, upon successful completion, emits nothing; indicating this user was banned. If an
      * error is received, it is emitted through the {@code Mono}.
      */
-    public Mono<Void> ban(final Consumer<? super BanQuerySpec> spec) {
+    public Mono<Void> ban(BanQuerySpec spec) {
         return Mono.defer(
-                () -> {
-                    BanQuerySpec mutatedSpec = new BanQuerySpec();
-                    spec.accept(mutatedSpec);
-                    return getClient().getRestClient().getGuildService()
-                            .createGuildBan(getGuildId().asLong(), getId().asLong(), mutatedSpec.asRequest(),
-                                    mutatedSpec.getReason());
-                });
+                () -> getClient().getRestClient().getGuildService()
+                        .createGuildBan(getGuildId().asLong(), getId().asLong(), spec.asRequest(), spec.reason()));
     }
 
     /**

@@ -27,8 +27,8 @@ import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.Webhook;
 import discord4j.core.retriever.EntityRetrievalStrategy;
 import discord4j.core.spec.InviteCreateSpec;
-import discord4j.core.spec.MessageCreateSpec;
 import discord4j.core.spec.WebhookCreateSpec;
+import discord4j.core.spec.MessageCreateSpec;
 import discord4j.discordjson.json.BulkDeleteRequest;
 import discord4j.discordjson.json.ChannelData;
 import discord4j.discordjson.possible.Possible;
@@ -157,7 +157,7 @@ class BaseGuildMessageChannel extends BaseChannel implements GuildMessageChannel
     }
 
     @Override
-    public Mono<Message> createMessage(final Consumer<? super MessageCreateSpec> spec) {
+    public Mono<Message> createMessage(MessageCreateSpec spec) {
         return messageChannel.createMessage(spec);
     }
 

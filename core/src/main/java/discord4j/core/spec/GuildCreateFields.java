@@ -15,23 +15,29 @@
  * along with Discord4J. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package discord4j.core.command;
+package discord4j.core.spec;
 
-import discord4j.core.object.entity.channel.MessageChannel;
-import discord4j.core.spec.EmbedCreateSpec;
-import discord4j.core.spec.MessageCreateSpec;
-import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Scheduler;
+import discord4j.core.object.entity.channel.Channel;
+import discord4j.discordjson.json.PartialChannelCreateRequest;
+import org.immutables.value.Value;
 
-public interface CommandResponse {
+@InlineFieldStyle
+@Value.Enclosing
+public final class GuildCreateFields {
 
-    CommandResponse withDirectMessage();
+    @Value.Immutable
+    public interface PartialChannel extends Spec<PartialChannelCreateRequest> {
 
-    CommandResponse withReplyChannel(Mono<MessageChannel> channelSource);
+        String name();
 
-    CommandResponse withScheduler(Scheduler scheduler);
+        Channel.Type type();
 
-    Mono<Void> sendMessage(MessageCreateSpec spec);
-
-    Mono<Void> sendEmbed(EmbedCreateSpec spec);
+        @Override
+        default PartialChannelCreateRequest asRequest() {
+            return PartialChannelCreateRequest.builder()
+                    .name(name())
+                    .type(type().getValue())
+                    .build();
+        }
+    }
 }

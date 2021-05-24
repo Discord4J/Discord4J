@@ -27,6 +27,7 @@ import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.core.object.reaction.Reaction;
 import discord4j.core.object.reaction.ReactionEmoji;
 import discord4j.core.retriever.EntityRetrievalStrategy;
+import discord4j.core.spec.MessageEditMono;
 import discord4j.core.spec.MessageEditSpec;
 import discord4j.core.util.EntityUtil;
 import discord4j.discordjson.json.MessageData;
@@ -43,7 +44,6 @@ import reactor.util.annotation.Nullable;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -485,22 +485,34 @@ public final class Message implements Entity {
     /**
      * Requests to edit this message.
      *
-     * @param spec A {@link Consumer} that provides a "blank" {@link MessageEditSpec} to be operated on.
+     * @param spec an immutable object that specifies how to edit the message
      * @return A {@link Mono} where, upon successful completion, emits the edited {@link Message}. If an error is
      * received, it is emitted through the {@code Mono}.
      */
-    public Mono<Message> edit(final Consumer<? super MessageEditSpec> spec) {
+    public Mono<Message> edit(MessageEditSpec spec) {
+        Objects.requireNonNull(spec);
         return Mono.defer(
                 () -> {
-                    MessageEditSpec mutatedSpec = new MessageEditSpec();
-                    getClient().getRestClient().getRestResources()
-                        .getAllowedMentions()
-                        .ifPresent(mutatedSpec::setAllowedMentions);
-                    spec.accept(mutatedSpec);
+                    MessageEditSpec actualSpec = getClient().getRestClient().getRestResources()
+                            .getAllowedMentions()
+                            .map(spec::withAllowedMentions)
+                            .orElse(spec);
                     return gateway.getRestClient().getChannelService()
-                            .editMessage(getChannelId().asLong(), getId().asLong(), mutatedSpec.asRequest());
+                            .editMessage(getChannelId().asLong(), getId().asLong(), actualSpec.asRequest());
                 })
                 .map(data -> new Message(gateway, data));
+    }
+
+    /**
+     * Requests to edit this message. Properties specifying how to edit this message can be set via the {@code
+     * withXxx} methods of the returned {@link MessageEditMono}.
+     *
+     * @return A {@link MessageEditMono} where, upon successful completion, emits the edited {@link Message}. If an
+     * error is received, it is emitted through the {@code MessageEditMono}.
+     * @see #edit(MessageEditSpec)
+     */
+    public MessageEditMono edit() {
+        return MessageEditMono.of(this);
     }
 
     /**

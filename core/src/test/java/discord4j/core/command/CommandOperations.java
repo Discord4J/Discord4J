@@ -27,7 +27,6 @@ import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
 
-import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 class CommandOperations implements CommandRequest, CommandResponse {
@@ -97,7 +96,7 @@ class CommandOperations implements CommandRequest, CommandResponse {
     }
 
     @Override
-    public Mono<Void> sendMessage(Consumer<? super MessageCreateSpec> spec) {
+    public Mono<Void> sendMessage(MessageCreateSpec spec) {
         return replyChannel.get()
                 .publishOn(replyScheduler)
                 .flatMap(channel -> channel.createMessage(spec))
@@ -105,7 +104,7 @@ class CommandOperations implements CommandRequest, CommandResponse {
     }
 
     @Override
-    public Mono<Void> sendEmbed(Consumer<? super EmbedCreateSpec> spec) {
+    public Mono<Void> sendEmbed(EmbedCreateSpec spec) {
         return replyChannel.get()
                 .publishOn(replyScheduler)
                 .flatMap(channel -> channel.createEmbed(spec))

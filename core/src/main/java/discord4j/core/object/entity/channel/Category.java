@@ -19,13 +19,12 @@ package discord4j.core.object.entity.channel;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.retriever.EntityRetrievalStrategy;
+import discord4j.core.spec.CategoryEditMono;
 import discord4j.core.spec.CategoryEditSpec;
 import discord4j.core.util.EntityUtil;
 import discord4j.discordjson.json.ChannelData;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
-import java.util.function.Consumer;
 
 /** A Discord category. */
 public final class Category extends BaseGuildChannel {
@@ -67,20 +66,27 @@ public final class Category extends BaseGuildChannel {
     }
 
     /**
+     * Requests to edit this category. Properties specifying how to edit this category can be set via the {@code
+     * withXxx} methods of the returned {@link CategoryEditMono}.
+     *
+     * @return A {@link CategoryEditMono} where, upon successful completion, emits the edited {@link Category}. If an
+     * error is received, it is emitted through the {@code CategoryEditMono}.
+     */
+    public CategoryEditMono edit() {
+        return CategoryEditMono.of(this);
+    }
+
+    /**
      * Requests to edit this category.
      *
-     * @param spec A {@link Consumer} that provides a "blank" {@link CategoryEditSpec} to be operated on.
+     * @param spec an immutable object specifying how to edit this category
      * @return A {@link Mono} where, upon successful completion, emits the edited {@link Category}. If an error is
      * received, it is emitted through the {@code Mono}.
      */
-    public Mono<Category> edit(final Consumer<? super CategoryEditSpec> spec) {
+    public Mono<Category> edit(CategoryEditSpec spec) {
         return Mono.defer(
-                () -> {
-                    CategoryEditSpec mutatedSpec = new CategoryEditSpec();
-                    spec.accept(mutatedSpec);
-                    return getClient().getRestClient().getChannelService()
-                            .modifyChannel(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason());
-                })
+                () -> getClient().getRestClient().getChannelService()
+                        .modifyChannel(getId().asLong(), spec.asRequest(), spec.reason()))
                 .map(data -> EntityUtil.getChannel(getClient(), data))
                 .cast(Category.class);
     }

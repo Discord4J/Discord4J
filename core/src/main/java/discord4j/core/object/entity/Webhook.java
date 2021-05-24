@@ -22,6 +22,7 @@ import discord4j.core.object.entity.channel.GuildMessageChannel;
 import discord4j.core.retriever.EntityRetrievalStrategy;
 import discord4j.core.spec.WebhookEditSpec;
 import discord4j.core.spec.WebhookEditWithTokenSpec;
+import discord4j.core.spec.WebhookExecuteMono;
 import discord4j.core.spec.WebhookExecuteSpec;
 import discord4j.core.util.EntityUtil;
 import discord4j.discordjson.json.WebhookData;
@@ -41,17 +42,21 @@ import java.util.function.Consumer;
  */
 public final class Webhook implements Entity {
 
-    /** The gateway associated to this object. */
+    /**
+     * The gateway associated to this object.
+     */
     private final GatewayDiscordClient gateway;
 
-    /** The raw data as represented by Discord. */
+    /**
+     * The raw data as represented by Discord.
+     */
     private final WebhookData data;
 
     /**
      * Constructs a {@code Webhook} with an associated {@link GatewayDiscordClient} and Discord data.
      *
      * @param gateway The {@link GatewayDiscordClient} associated to this object, must be non-null.
-     * @param data The raw data as represented by Discord, must be non-null.
+     * @param data    The raw data as represented by Discord, must be non-null.
      */
     public Webhook(final GatewayDiscordClient gateway, final WebhookData data) {
         this.gateway = Objects.requireNonNull(gateway);
@@ -149,11 +154,10 @@ public final class Webhook implements Entity {
     }
 
     /**
-     * Requests to retrieve the user this webhook was created by, if present.
-     * Returns no creator if the webhook was retrieved using a token.
+     * Requests to retrieve the user this webhook was created by, if present. Returns no creator if the webhook was
+     * retrieved using a token.
      *
-     * @return An {@link Optional} with the {@link User user} this webhook was created
-     * by, if present.
+     * @return An {@link Optional} with the {@link User user} this webhook was created by, if present.
      */
     public Optional<User> getCreator() {
         return data.user().toOptional().map(userData -> new User(gateway, userData));
@@ -196,22 +200,22 @@ public final class Webhook implements Entity {
     }
 
     /**
-     * Gets the guild id of the channel that this webhook is following (returned for Channel Follower Webhooks),
-     * if present.
+     * Gets the guild id of the channel that this webhook is following (returned for Channel Follower Webhooks), if
+     * present.
      *
-     * @return The guild id of the channel that this webhook is following (returned for Channel Follower Webhooks),
-     * if present.
+     * @return The guild id of the channel that this webhook is following (returned for Channel Follower Webhooks), if
+     * present.
      */
     public Optional<Snowflake> getSourceGuildId() {
         return data.sourceGuild().toOptional().map(WebhookPartialGuildData::id).map(Snowflake::of);
     }
 
     /**
-     * Gets the guild name of the channel that this webhook is following (returned for Channel Follower Webhooks),
-     * if present.
+     * Gets the guild name of the channel that this webhook is following (returned for Channel Follower Webhooks), if
+     * present.
      *
-     * @return The guild name of the channel that this webhook is following (returned for Channel Follower Webhooks),
-     * if present.
+     * @return The guild name of the channel that this webhook is following (returned for Channel Follower Webhooks), if
+     * present.
      */
     public Optional<String> getSourceGuildName() {
         return data.sourceGuild().toOptional().map(WebhookPartialGuildData::name);
@@ -220,16 +224,19 @@ public final class Webhook implements Entity {
     /**
      * Gets the id of the channel that this webhook is following (returned for Channel Follower Webhooks), if present.
      *
-     * @return The id of the channel that this webhook is following (returned for Channel Follower Webhooks), if present.
+     * @return The id of the channel that this webhook is following (returned for Channel Follower Webhooks), if
+     * present.
      */
     public Optional<Snowflake> getSourceChannelId() {
         return data.sourceChannel().toOptional().map(WebhookPartialChannelData::id).map(Snowflake::of);
     }
 
     /**
-     * Gets the name of the channel that this webhook is following (returned for Channel Follower Webhooks), if present.
+     * Gets the name of the channel that this webhook is following (returned for Channel Follower Webhooks), if
+     * present.
      *
-     * @return The name of the channel that this webhook is following (returned for Channel Follower Webhooks), if present.
+     * @return The name of the channel that this webhook is following (returned for Channel Follower Webhooks), if
+     * present.
      */
     public Optional<String> getSourceChannelName() {
         return data.sourceChannel().toOptional().map(WebhookPartialChannelData::name);
@@ -292,8 +299,7 @@ public final class Webhook implements Entity {
     }
 
     /**
-     * Requests to edit this webhook.
-     * Does not require the MANAGE_WEBHOOKS permission.
+     * Requests to edit this webhook. Does not require the MANAGE_WEBHOOKS permission.
      *
      * @param spec A {@link Consumer} that provides a "blank" {@link WebhookEditSpec} to be operated on.
      * @return A {@link Mono} where, upon successful completion, emits the edited {@link Webhook}. If an error is
@@ -314,36 +320,47 @@ public final class Webhook implements Entity {
     }
 
     /**
+     * Executes this webhook. Properties specifying how to execute this webhook, including whether to wait for
+     * confirmation that the message was created, can be set via the {@code withXxx} methods of the returned {@link
+     * WebhookExecuteMono}.
+     *
+     * @return A {@link WebhookExecuteMono} where, upon successful webhook execution, emits a Message if {@code
+     * withWaitForMessage(true)}. If the message fails to save, an error is emitted through the {@code
+     * WebhookExecuteMono} only if {@code withWaitForMessage(true)}.
+     */
+    public WebhookExecuteMono execute() {
+        return WebhookExecuteMono.of(false,this);
+    }
+
+    /**
      * Executes this webhook without waiting for a confirmation that a message was created.
      *
-     * @param spec A {@link Consumer} that provides a "blank" {@link WebhookExecuteSpec} to be operated on.
-     * @return A {@link Mono} where, upon successful webhook execution, completes. If the message fails to save,
-     * an error IS NOT emitted through the {@code Mono}.
+     * @param spec an immutable object that specifies how to execute this webhook
+     * @return A {@link Mono} where, upon successful webhook execution, completes. If the message fails to save, an
+     * error IS NOT emitted through the {@code Mono}.
      */
-    public Mono<Void> execute(final Consumer<? super WebhookExecuteSpec> spec) {
+    public Mono<Void> execute(WebhookExecuteSpec spec) {
         return execute(false, spec).cast(Void.class);
     }
 
     /**
      * Executes this webhook.
      *
-     * @param wait True to specify to wait for server confirmation that the message was saved or
-     * there was an error saving the message.
-     * @param spec A {@link java.util.function.Consumer} that provides a "blank"
-     * {@link discord4j.core.spec.WebhookExecuteSpec} to be operated on.
-     * @return A {@link Mono} where, upon successful webhook execution, emits a Message if {@code wait = true}.
-     * If the message fails to save, an error is emitted through the {@code Mono} only if {@code wait = true}.
+     * @param wait True to specify to wait for server confirmation that the message was saved or there was an error
+     *             saving the message.
+     * @param spec an immutable object that specifies how to execute this webhook
+     * @return A {@link Mono} where, upon successful webhook execution, emits a Message if {@code wait = true}. If the
+     * message fails to save, an error is emitted through the {@code Mono} only if {@code wait = true}.
      */
-    public Mono<Message> execute(boolean wait, final Consumer<? super WebhookExecuteSpec> spec) {
+    public Mono<Message> execute(boolean wait, WebhookExecuteSpec spec) {
+        Objects.requireNonNull(spec);
         return Mono.defer(
                 () -> {
                     if (!getToken().isPresent()) {
                         throw new IllegalArgumentException("Can't execute webhook.");
                     }
-                    WebhookExecuteSpec mutatedSpec = new WebhookExecuteSpec();
-                    spec.accept(mutatedSpec);
                     return gateway.getRestClient().getWebhookService()
-                            .executeWebhook(getId().asLong(), getToken().get(), wait, mutatedSpec.asRequest())
+                            .executeWebhook(getId().asLong(), getToken().get(), wait, spec.asRequest())
                             .map(data -> new Message(gateway, data));
                 }
         );
@@ -352,11 +369,11 @@ public final class Webhook implements Entity {
     /**
      * Executes this webhook and waits for server confirmation for the message to save.
      *
-     * @param spec A {@link Consumer} that provides a "blank" {@link WebhookExecuteSpec} to be operated on.
-     * @return A {@link Mono} where, upon successful webhook execution, emits a Message.
-     * If the message fails to save, an error is emitted through the {@code Mono}.
+     * @param spec an immutable object that specifies how to execute this webhook
+     * @return A {@link Mono} where, upon successful webhook execution, emits a Message. If the message fails to save,
+     * an error is emitted through the {@code Mono}.
      */
-    public Mono<Message> executeAndWait(final Consumer<? super WebhookExecuteSpec> spec) {
+    public Mono<Message> executeAndWait(WebhookExecuteSpec spec) {
         return execute(true, spec);
     }
 
@@ -392,8 +409,8 @@ public final class Webhook implements Entity {
         INCOMING(1),
 
         /**
-         * Channel Follower Webhooks are internal webhooks used with Channel Following to post new messages
-         * into channels.
+         * Channel Follower Webhooks are internal webhooks used with Channel Following to post new messages into
+         * channels.
          */
         CHANNEL_FOLLOWER(2);
 
@@ -412,15 +429,6 @@ public final class Webhook implements Entity {
         }
 
         /**
-         * Gets the underlying value as represented by Discord.
-         *
-         * @return The underlying value as represented by Discord.
-         */
-        public int getValue() {
-            return value;
-        }
-
-        /**
          * Gets the type of webhook. It is guaranteed that invoking {@link #getValue()} from the returned enum will be
          * equal ({@code ==}) to the supplied {@code value}.
          *
@@ -429,10 +437,22 @@ public final class Webhook implements Entity {
          */
         public static Webhook.Type of(final int value) {
             switch (value) {
-                case 1: return INCOMING;
-                case 2: return CHANNEL_FOLLOWER;
-                default: return UNKNOWN;
+                case 1:
+                    return INCOMING;
+                case 2:
+                    return CHANNEL_FOLLOWER;
+                default:
+                    return UNKNOWN;
             }
+        }
+
+        /**
+         * Gets the underlying value as represented by Discord.
+         *
+         * @return The underlying value as represented by Discord.
+         */
+        public int getValue() {
+            return value;
         }
     }
 }
