@@ -5,7 +5,7 @@ In order to maintain the high-quality standards of the project, we have a few ru
 
 
 ## Issues
-The issue tracker is **not** meant for support. Ask in our [Discord server](https://discord.gg/NxGAeCY) instead.
+The issue tracker is **not** meant for support. Ask in our [Discord server](https://discord.gg/d4j) instead.
 
 Make sure to select and follow the appropriate issue template.
 
@@ -25,7 +25,7 @@ A few things to remember when opening a pull request:
 * Use descriptive commit messages.
 * Follow the template!
 
-If you're unsure of whether a change is welcome, feel free to ask first in our [Discord server](https://discord.gg/NxGAeCY).
+If you're unsure of whether a change is welcome, feel free to ask first in our [Discord server](https://discord.gg/d4j).
 
 ### Style Requirements
 * Make sure your IDE is respecting the [.editorconfig](../.editorconfig)
@@ -33,4 +33,4 @@ If you're unsure of whether a change is welcome, feel free to ask first in our [
 * JavaDocs should be edited appropriately for your changes.
 * All new files should have the same LGPL 3 boilerplate header found in existing files.
 
-Finally, thanks again for contributing to Discord4J. When your changes are accepted, make sure to ask about the Contributor role in our [Discord server](https://discord.gg/NxGAeCY).
+Finally, thanks again for contributing to Discord4J. When your changes are accepted, make sure to ask about the Contributor role in our [Discord server](https://discord.gg/d4j).

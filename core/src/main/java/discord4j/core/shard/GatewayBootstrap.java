@@ -33,10 +33,11 @@ import discord4j.core.event.EventDispatcher;
 import discord4j.core.event.dispatch.DispatchContext;
 import discord4j.core.event.dispatch.DispatchEventMapper;
 import discord4j.core.event.domain.Event;
-import discord4j.core.object.presence.ClientPresence;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Member;
+import discord4j.core.object.presence.ClientPresence;
 import discord4j.core.retriever.EntityRetrievalStrategy;
+import discord4j.discordjson.json.MessageData;
 import discord4j.discordjson.json.gateway.GuildMembersChunk;
 import discord4j.discordjson.json.gateway.StatusUpdate;
 import discord4j.gateway.*;
@@ -53,6 +54,7 @@ import discord4j.gateway.state.DispatchStoreLayer;
 import discord4j.gateway.state.StatefulDispatch;
 import discord4j.rest.util.Multimap;
 import discord4j.rest.util.RouteUtils;
+import discord4j.store.api.util.StoreContext;
 import discord4j.store.jdk.JdkStoreService;
 import discord4j.voice.DefaultVoiceConnectionFactory;
 import discord4j.voice.VoiceConnection;
@@ -62,7 +64,11 @@ import io.netty.buffer.ByteBuf;
 import org.reactivestreams.Publisher;
 import reactor.core.Disposable;
 import reactor.core.Disposables;
-import reactor.core.publisher.*;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import reactor.core.publisher.MonoSink;
+import reactor.core.publisher.Sinks;
+import reactor.netty.resources.ConnectionProvider;
 import reactor.util.Logger;
 import reactor.util.Loggers;
 import reactor.util.annotation.Nullable;
@@ -70,9 +76,7 @@ import reactor.util.context.Context;
 import reactor.util.retry.Retry;
 
 import java.time.Duration;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.LockSupport;
@@ -615,7 +619,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                 .flatMap(function((b, count) -> {
                     Store store = b.initStore();
                     EventDispatcher eventDispatcher = b.initEventDispatcher();
-                    GatewayReactorResources gatewayReactorResources = b.initGatewayReactorResources();
+                    GatewayReactorResources gatewayReactorResources = b.initGatewayReactorResources(count);
                     ShardCoordinator shardCoordinator = b.initShardCoordinator(gatewayReactorResources);
 
                     VoiceReactorResources voiceReactorResources = b.initVoiceReactorResources();
@@ -793,6 +797,9 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                                     case RETRY_SUCCEEDED:
                                         // TODO: ensure this sink is only pushed to once and avoid dropping signals
                                         return shardCoordinator.publishConnected(shard)
+                                                .publishOn(gateway.getGatewayResources()
+                                                        .getGatewayReactorResources()
+                                                        .getBlockingTaskScheduler())
                                                 .doFinally(__ -> sink.success(shard));
                                     case DISCONNECTED_RESUME:
                                         session = SessionInfo.create(gatewayClient.getSessionId(),
@@ -877,9 +884,13 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                 .build();
     }
 
-    private GatewayReactorResources initGatewayReactorResources() {
+    private GatewayReactorResources initGatewayReactorResources(int count) {
         if (gatewayReactorResources == null) {
-            gatewayReactorResources = GatewayReactorResources::new;
+            int maxConnections = Math.max(ConnectionProvider.DEFAULT_POOL_MAX_CONNECTIONS, count);
+            gatewayReactorResources = res -> GatewayReactorResources.builder(res)
+                    .httpClient(ReactorResources.newHttpClient(
+                            ConnectionProvider.create("d4j-gateway", maxConnections)))
+                    .build();
         }
         return gatewayReactorResources.apply(client.getCoreResources().getReactorResources());
     }
@@ -924,7 +935,10 @@ public class GatewayBootstrap<O extends GatewayOptions> {
         if (store != null) {
             return store;
         }
-        return Store.fromLayout(LegacyStoreLayout.of(new JdkStoreService()));
+        Map<String, Object> hints = Collections.singletonMap("messageClass", MessageData.class);
+        JdkStoreService storeService = new JdkStoreService();
+        storeService.init(new StoreContext(hints));
+        return Store.fromLayout(LegacyStoreLayout.of(storeService));
     }
 
     private MemberRequestFilter initMemberRequestFilter(IntentSet intents) {
