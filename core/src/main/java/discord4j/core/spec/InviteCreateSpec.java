@@ -19,10 +19,7 @@ package discord4j.core.spec;
 import discord4j.common.util.Snowflake;
 import discord4j.core.object.Invite;
 import discord4j.discordjson.json.ImmutableInviteCreateRequest;
-import discord4j.discordjson.json.ImmutableMessageReferenceData;
 import discord4j.discordjson.json.InviteCreateRequest;
-import discord4j.discordjson.json.MessageReferenceData;
-import discord4j.discordjson.possible.Possible;
 import reactor.util.annotation.Nullable;
 
 /**
@@ -31,7 +28,7 @@ import reactor.util.annotation.Nullable;
  * @see
  * <a href="https://discord.com/developers/docs/resources/channel#create-channel-invite">Create Channel Invite</a>
  */
-public class InviteCreateSpec implements AuditSpec<InviteCreateRequest> {
+public class InviteCreateSpec implements Spec<InviteCreateRequest> {
 
     private final ImmutableInviteCreateRequest.Builder requestBuilder = InviteCreateRequest.builder();
     @Nullable
@@ -120,13 +117,11 @@ public class InviteCreateSpec implements AuditSpec<InviteCreateRequest> {
         return this;
     }
 
-    @Override
     public InviteCreateSpec setReason(@Nullable final String reason) {
         this.reason = reason;
         return this;
     }
 
-    @Override
     @Nullable
     public String getReason() {
         return reason;

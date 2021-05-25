@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
  *
  * @see <a href="https://discord.com/developers/docs/resources/guild#modify-guild-member">Modify Guild Member</a>
  */
-public class GuildMemberEditSpec implements AuditSpec<GuildMemberModifyRequest> {
+public class GuildMemberEditSpec implements Spec<GuildMemberModifyRequest> {
 
     private final ImmutableGuildMemberModifyRequest.Builder builder = GuildMemberModifyRequest.builder();
     @Nullable
@@ -102,13 +102,11 @@ public class GuildMemberEditSpec implements AuditSpec<GuildMemberModifyRequest> 
         return this;
     }
 
-    @Override
     public GuildMemberEditSpec setReason(@Nullable final String reason) {
         this.reason = reason;
         return this;
     }
 
-    @Override
     @Nullable
     public String getReason() {
         return reason;

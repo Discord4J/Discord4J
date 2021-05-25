@@ -31,7 +31,7 @@ import java.util.stream.Collectors;
  *
  * @see <a href="https://discord.com/developers/docs/resources/emoji#create-guild-emoji">Create Guild Emoji</a>
  */
-public class GuildEmojiCreateSpec implements AuditSpec<GuildEmojiCreateRequest> {
+public class GuildEmojiCreateSpec implements Spec<GuildEmojiCreateRequest> {
 
     private String name;
     private String image;
@@ -72,13 +72,11 @@ public class GuildEmojiCreateSpec implements AuditSpec<GuildEmojiCreateRequest> 
         return this;
     }
 
-    @Override
     public GuildEmojiCreateSpec setReason(@Nullable final String reason) {
         this.reason = reason;
         return this;
     }
 
-    @Override
     @Nullable
     public String getReason() {
         return reason;

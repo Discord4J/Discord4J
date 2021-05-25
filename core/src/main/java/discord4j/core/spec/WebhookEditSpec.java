@@ -28,7 +28,7 @@ import reactor.util.annotation.Nullable;
  *
  * @see <a href="https://discord.com/developers/docs/resources/webhook#modify-webhook">Modify Webhook</a>
  */
-public class WebhookEditSpec implements AuditSpec<WebhookModifyRequest> {
+public class WebhookEditSpec implements Spec<WebhookModifyRequest> {
 
     private Possible<String> name = Possible.absent();
     private Possible<String> avatar = Possible.absent();
@@ -69,14 +69,12 @@ public class WebhookEditSpec implements AuditSpec<WebhookModifyRequest> {
         return this;
     }
 
-    @Override
     public WebhookEditSpec setReason(final String reason) {
         this.reason = reason;
         return this;
     }
 
     @Nullable
-    @Override
     public String getReason() {
         return reason;
     }

@@ -16,16 +16,15 @@
  */
 package discord4j.core.spec;
 
+import discord4j.common.util.Snowflake;
 import discord4j.core.object.Region;
 import discord4j.core.object.entity.Guild;
 import discord4j.discordjson.json.GuildModifyRequest;
 import discord4j.discordjson.json.ImmutableGuildModifyRequest;
 import discord4j.discordjson.possible.Possible;
 import discord4j.rest.util.Image;
-import discord4j.common.util.Snowflake;
 import reactor.util.annotation.Nullable;
 
-import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
@@ -35,7 +34,7 @@ import java.util.Set;
  *
  * @see <a href="https://discord.com/developers/docs/resources/guild#modify-guild">Modify Guild</a>
  */
-public class GuildEditSpec implements AuditSpec<GuildModifyRequest> {
+public class GuildEditSpec implements Spec<GuildModifyRequest> {
 
     private final ImmutableGuildModifyRequest.Builder requestBuilder = GuildModifyRequest.builder();
     @Nullable
@@ -257,13 +256,11 @@ public class GuildEditSpec implements AuditSpec<GuildModifyRequest> {
         return this;
     }
 
-    @Override
     public GuildEditSpec setReason(@Nullable final String reason) {
         this.reason = reason;
         return this;
     }
 
-    @Override
     @Nullable
     public String getReason() {
         return reason;

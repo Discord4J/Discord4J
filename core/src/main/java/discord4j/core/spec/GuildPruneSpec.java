@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
  *
  * @see <a href="https://discord.com/developers/docs/resources/guild#begin-guild-prune">Begin Guild Prune</a>
  */
-public class GuildPruneSpec implements AuditSpec<Multimap<String, Object>> {
+public class GuildPruneSpec implements Spec<Multimap<String, Object>> {
 
     private final Multimap<String, Object> map = new Multimap<>();
     @Nullable
@@ -84,13 +84,11 @@ public class GuildPruneSpec implements AuditSpec<Multimap<String, Object>> {
         return this;
     }
 
-    @Override
     public GuildPruneSpec setReason(String reason) {
         this.reason = reason;
         return this;
     }
 
-    @Override
     public String getReason() {
         return reason;
     }

@@ -35,7 +35,7 @@ import java.util.stream.Collectors;
  *
  * @see <a href="https://discord.com/developers/docs/resources/guild#create-guild-channel">Create Guild Channel</a>
  */
-public class NewsChannelCreateSpec implements AuditSpec<ChannelCreateRequest> {
+public class NewsChannelCreateSpec implements Spec<ChannelCreateRequest> {
 
     private final ImmutableChannelCreateRequest.Builder requestBuilder = ChannelCreateRequest.builder()
             .type(Channel.Type.GUILD_NEWS.getValue());
@@ -117,13 +117,11 @@ public class NewsChannelCreateSpec implements AuditSpec<ChannelCreateRequest> {
         return this;
     }
 
-    @Override
     public NewsChannelCreateSpec setReason(@Nullable final String reason) {
         this.reason = reason;
         return this;
     }
 
-    @Override
     @Nullable
     public String getReason() {
         return reason;

@@ -37,7 +37,7 @@ import java.util.stream.Collectors;
  *
  * @see <a href="https://discord.com/developers/docs/resources/channel#modify-channel">Modify Channel</a>
  */
-public class VoiceChannelEditSpec implements AuditSpec<ChannelModifyRequest> {
+public class VoiceChannelEditSpec implements Spec<ChannelModifyRequest> {
 
     private final ImmutableChannelModifyRequest.Builder requestBuilder = ChannelModifyRequest.builder();
     @Nullable
@@ -146,13 +146,11 @@ public class VoiceChannelEditSpec implements AuditSpec<ChannelModifyRequest> {
         return this;
     }
 
-    @Override
     public VoiceChannelEditSpec setReason(@Nullable final String reason) {
         this.reason = reason;
         return this;
     }
 
-    @Override
     @Nullable
     public String getReason() {
         return reason;

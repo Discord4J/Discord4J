@@ -29,7 +29,7 @@ import reactor.util.annotation.Nullable;
  *
  * @see <a href="https://discord.com/developers/docs/resources/guild#modify-guild-role">Modify Guild Role</a>
  */
-public class RoleEditSpec implements AuditSpec<RoleModifyRequest> {
+public class RoleEditSpec implements Spec<RoleModifyRequest> {
 
     private final ImmutableRoleModifyRequest.Builder requestBuilder = RoleModifyRequest.builder();
     @Nullable
@@ -90,13 +90,11 @@ public class RoleEditSpec implements AuditSpec<RoleModifyRequest> {
         return this;
     }
 
-    @Override
     public RoleEditSpec setReason(@Nullable final String reason) {
         this.reason = reason;
         return this;
     }
 
-    @Override
     @Nullable
     public String getReason() {
         return reason;

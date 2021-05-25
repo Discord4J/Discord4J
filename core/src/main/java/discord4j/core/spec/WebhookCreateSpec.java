@@ -28,7 +28,7 @@ import java.util.Optional;
  *
  * @see <a href="https://discord.com/developers/docs/resources/webhook#create-webhook">Create Webhook</a>
  */
-public class WebhookCreateSpec implements AuditSpec<WebhookCreateRequest> {
+public class WebhookCreateSpec implements Spec<WebhookCreateRequest> {
 
     private String name;
     @Nullable
@@ -58,14 +58,12 @@ public class WebhookCreateSpec implements AuditSpec<WebhookCreateRequest> {
         return this;
     }
 
-    @Override
     public WebhookCreateSpec setReason(@Nullable final String reason) {
         this.reason = reason;
         return this;
     }
 
     @Nullable
-    @Override
     public String getReason() {
         return reason;
     }

@@ -31,7 +31,7 @@ import java.util.stream.Collectors;
  *
  * @see <a href="https://discord.com/developers/docs/resources/emoji#modify-guild-emoji">Modify Guild Emoji</a>
  */
-public class GuildEmojiEditSpec implements AuditSpec<GuildEmojiModifyRequest> {
+public class GuildEmojiEditSpec implements Spec<GuildEmojiModifyRequest> {
 
     private Possible<String> name = Possible.absent();
     private Possible<List<String>> roles = Possible.absent();
@@ -60,13 +60,11 @@ public class GuildEmojiEditSpec implements AuditSpec<GuildEmojiModifyRequest> {
         return this;
     }
 
-    @Override
     public GuildEmojiEditSpec setReason(@Nullable final String reason) {
         this.reason = reason;
         return this;
     }
 
-    @Override
     @Nullable
     public String getReason() {
         return reason;

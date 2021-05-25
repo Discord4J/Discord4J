@@ -33,7 +33,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /** A spec used to configure and create a {@link VoiceChannel}. */
-public class VoiceChannelCreateSpec implements AuditSpec<ChannelCreateRequest> {
+public class VoiceChannelCreateSpec implements Spec<ChannelCreateRequest> {
 
     private final ImmutableChannelCreateRequest.Builder requestBuilder = ChannelCreateRequest.builder()
             .type(Channel.Type.GUILD_VOICE.getValue());
@@ -122,13 +122,11 @@ public class VoiceChannelCreateSpec implements AuditSpec<ChannelCreateRequest> {
         return this;
     }
 
-    @Override
     public VoiceChannelCreateSpec setReason(@Nullable final String reason) {
         this.reason = reason;
         return this;
     }
 
-    @Override
     @Nullable
     public String getReason() {
         return reason;

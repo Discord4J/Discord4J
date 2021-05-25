@@ -55,6 +55,12 @@ final class InternalSpecUtils {
     static <T, R> R mapNullable(@Nullable T value, Function<? super T, ? extends R> mapper) {
         return value != null ? mapper.apply(value) : null;
     }
+
+    @Nullable
+    static <T, R> Possible<R> mapPossible(@Nullable Possible<T> value, Function<? super T, ? extends R> mapper) {
+        return mapNullable(value, possible -> possible.isAbsent() ? Possible.absent() :
+                Possible.of(mapper.apply(possible.get())));
+    }
     
     static void putIfNotNull(Map<String, Object> map, String key, @Nullable Object value) {
         if (value != null) {
@@ -62,12 +68,8 @@ final class InternalSpecUtils {
         }
     }
 
-    @SuppressWarnings("OptionalAssignedToNull")
-    @Nullable
-    static <T> Optional<T> removable(@Nullable T value, boolean remove) {
-        if (value == null && !remove) {
-            return null;
-        }
-        return Optional.ofNullable(value).filter(__ -> !remove);
+    static <T> Possible<Optional<T>> toPossibleOptional(@Nullable Possible<T> value) {
+        return value == null ? Possible.of(Optional.empty()) :
+                value.isAbsent() ? Possible.absent() : Possible.of(Optional.of(value.get()));
     }
 }

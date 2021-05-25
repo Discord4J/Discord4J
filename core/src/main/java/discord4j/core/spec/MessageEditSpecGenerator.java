@@ -21,6 +21,7 @@ import discord4j.core.object.entity.Message;
 import discord4j.discordjson.json.AllowedMentionsData;
 import discord4j.discordjson.json.EmbedData;
 import discord4j.discordjson.json.MessageEditRequest;
+import discord4j.discordjson.possible.Possible;
 import discord4j.rest.util.AllowedMentions;
 import org.immutables.value.Value;
 import reactor.core.CoreSubscriber;
@@ -35,50 +36,42 @@ import static discord4j.core.spec.InternalSpecUtils.*;
 @Value.Immutable(singleton = true)
 interface MessageEditSpecGenerator extends Spec<MessageEditRequest> {
 
-    @Nullable
-    String content();
-
     @Value.Default
-    default boolean removeContent() {
-        return false;
+    @Nullable
+    default Possible<String> content() {
+        return Possible.absent();
     }
 
-    @Nullable
-    EmbedCreateSpec embed();
-
     @Value.Default
-    default boolean removeEmbed() {
-        return false;
+    @Nullable
+    default Possible<EmbedCreateSpec> embed() {
+        return Possible.absent();
     }
 
-    @Nullable
-    AllowedMentions allowedMentions();
-
     @Value.Default
-    default boolean removeAllowedMentions() {
-        return false;
+    @Nullable
+    default Possible<AllowedMentions> allowedMentions() {
+        return Possible.absent();
     }
 
-    @Nullable
-    List<Message.Flag> flags();
-
     @Value.Default
-    default boolean removeFlags() {
-        return false;
+    @Nullable
+    default Possible<List<Message.Flag>> flags() {
+        return Possible.absent();
     }
 
     @Override
     default MessageEditRequest asRequest() {
-        EmbedData embed = mapNullable(embed(), EmbedCreateSpec::asRequest);
-        AllowedMentionsData allowedMentions = mapNullable(allowedMentions(), AllowedMentions::toData);
-        Integer flags = mapNullable(flags(), f -> f.stream()
+        Possible<EmbedData> embed = mapPossible(embed(), EmbedCreateSpec::asRequest);
+        Possible<AllowedMentionsData> allowedMentions = mapPossible(allowedMentions(), AllowedMentions::toData);
+        Possible<Integer> flags = mapPossible(flags(), f -> f.stream()
                 .mapToInt(Message.Flag::getValue)
                 .reduce(0, (left, right) -> left | right));
         return MessageEditRequest.builder()
-                .content(toPossible(removable(content(), removeContent())))
-                .embed(toPossible(removable(embed, removeEmbed())))
-                .allowedMentions(toPossible(removable(allowedMentions, removeAllowedMentions())))
-                .flags(toPossible(removable(flags, removeFlags())))
+                .content(toPossibleOptional(content()))
+                .embed(toPossibleOptional(embed))
+                .allowedMentions(toPossibleOptional(allowedMentions))
+                .flags(toPossibleOptional(flags))
                 .build();
     }
 }
