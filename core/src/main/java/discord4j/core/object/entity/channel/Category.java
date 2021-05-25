@@ -26,6 +26,8 @@ import discord4j.discordjson.json.ChannelData;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.Objects;
+
 /** A Discord category. */
 public final class Category extends BaseGuildChannel {
 
@@ -84,6 +86,7 @@ public final class Category extends BaseGuildChannel {
      * received, it is emitted through the {@code Mono}.
      */
     public Mono<Category> edit(CategoryEditSpec spec) {
+        Objects.requireNonNull(spec);
         return Mono.defer(
                 () -> getClient().getRestClient().getChannelService()
                         .modifyChannel(getId().asLong(), spec.asRequest(), spec.reason()))

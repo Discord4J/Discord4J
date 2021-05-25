@@ -959,20 +959,27 @@ public final class Guild implements Entity {
     }
 
     /**
+     * Requests to edit this guild. Properties specifying how to edit this guild can be set via the {@code withXxx}
+     * methods of the returned {@link GuildEditMono}.
+     *
+     * @return A {@link GuildEditMono} where, upon successful completion, emits the edited {@link Guild}. If an error is
+     * received, it is emitted through the {@code GuildEditMono}.
+     */
+    public GuildEditMono edit() {
+        return GuildEditMono.of(this);
+    }
+
+    /**
      * Requests to edit this guild.
      *
-     * @param spec A {@link Consumer} that provides a "blank" {@link GuildEditSpec} to be operated on.
+     * @param spec an immutable object that specifies how to edit this guild
      * @return A {@link Mono} where, upon successful completion, emits the edited {@link Guild}. If an error is
      * received, it is emitted through the {@code Mono}.
      */
-    public Mono<Guild> edit(final Consumer<? super GuildEditSpec> spec) {
+    public Mono<Guild> edit(GuildEditSpec spec) {
         return Mono.defer(
-                () -> {
-                    GuildEditSpec mutatedSpec = new GuildEditSpec();
-                    spec.accept(mutatedSpec);
-                    return gateway.getRestClient().getGuildService()
-                            .modifyGuild(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason());
-                })
+                () -> gateway.getRestClient().getGuildService()
+                        .modifyGuild(getId().asLong(), spec.asRequest(), spec.reason()))
                 .map(data -> new Guild(gateway, GuildData.builder()
                         .from(this.data)
                         .from(data)
@@ -980,20 +987,29 @@ public final class Guild implements Entity {
     }
 
     /**
+     * Requests to create an emoji. Properties specifying how to create an emoji can be set via the {@code withXxx}
+     * methods of the returned GuildEmojiCreateMono.
+     *
+     * @param name  the name of the emoji to create
+     * @param image the image of the emoji to create
+     * @return A {@link GuildEmojiCreateMono} where, upon successful completion, emits the created {@link GuildEmoji}.
+     * If an error is received, it is emitted through the {@code GuildEmojiCreateMono}.
+     */
+    public GuildEmojiCreateMono createEmoji(String name, Image image) {
+        return GuildEmojiCreateMono.of(name, image, this);
+    }
+
+    /**
      * Requests to create an emoji.
      *
-     * @param spec A {@link Consumer} that provides a "blank" {@link GuildEmojiCreateSpec} to be operated on.
+     * @param spec an immutable object that specifies how to create an emoji
      * @return A {@link Mono} where, upon successful completion, emits the created {@link GuildEmoji}. If an error is
      * received, it is emitted through the {@code Mono}.
      */
-    public Mono<GuildEmoji> createEmoji(final Consumer<? super GuildEmojiCreateSpec> spec) {
+    public Mono<GuildEmoji> createEmoji(GuildEmojiCreateSpec spec) {
         return Mono.defer(
-                () -> {
-                    GuildEmojiCreateSpec mutatedSpec = new GuildEmojiCreateSpec();
-                    spec.accept(mutatedSpec);
-                    return gateway.getRestClient().getEmojiService()
-                            .createGuildEmoji(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason());
-                })
+                () -> gateway.getRestClient().getEmojiService()
+                        .createGuildEmoji(getId().asLong(), spec.asRequest(), spec.reason()))
                 .map(data -> new GuildEmoji(gateway, data, getId().asLong()));
     }
 

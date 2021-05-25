@@ -25,6 +25,10 @@ import org.immutables.value.Value;
 @Value.Enclosing
 public final class GuildCreateFields {
 
+    private GuildCreateFields() {
+        throw new AssertionError();
+    }
+
     @Value.Immutable
     public interface PartialChannel extends Spec<PartialChannelCreateRequest> {
 

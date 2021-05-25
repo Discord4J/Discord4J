@@ -185,6 +185,7 @@ public final class GuildTemplate implements DiscordObject {
      * received, it is emitted through the {@code Mono}.
      */
     public Mono<Guild> createGuild(GuildCreateFromTemplateSpec spec) {
+        Objects.requireNonNull(spec);
         return Mono.defer(() -> gateway.getRestClient().getTemplateService().createGuild(getCode(), spec.asRequest()))
                 .map(data -> new Guild(gateway, data));
     }

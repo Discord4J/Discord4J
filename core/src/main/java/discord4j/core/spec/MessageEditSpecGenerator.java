@@ -18,8 +18,6 @@
 package discord4j.core.spec;
 
 import discord4j.core.object.entity.Message;
-import discord4j.discordjson.json.AllowedMentionsData;
-import discord4j.discordjson.json.EmbedData;
 import discord4j.discordjson.json.MessageEditRequest;
 import discord4j.discordjson.possible.Possible;
 import discord4j.rest.util.AllowedMentions;
@@ -30,7 +28,7 @@ import reactor.util.annotation.Nullable;
 
 import java.util.List;
 
-import static discord4j.core.spec.InternalSpecUtils.*;
+import static discord4j.core.spec.InternalSpecUtils.toPossibleOptional;
 
 @SpecStyle
 @Value.Immutable(singleton = true)
@@ -62,16 +60,13 @@ interface MessageEditSpecGenerator extends Spec<MessageEditRequest> {
 
     @Override
     default MessageEditRequest asRequest() {
-        Possible<EmbedData> embed = mapPossible(embed(), EmbedCreateSpec::asRequest);
-        Possible<AllowedMentionsData> allowedMentions = mapPossible(allowedMentions(), AllowedMentions::toData);
-        Possible<Integer> flags = mapPossible(flags(), f -> f.stream()
-                .mapToInt(Message.Flag::getValue)
-                .reduce(0, (left, right) -> left | right));
         return MessageEditRequest.builder()
                 .content(toPossibleOptional(content()))
-                .embed(toPossibleOptional(embed))
-                .allowedMentions(toPossibleOptional(allowedMentions))
-                .flags(toPossibleOptional(flags))
+                .embed(toPossibleOptional(embed(), EmbedCreateSpec::asRequest))
+                .allowedMentions(toPossibleOptional(allowedMentions(), AllowedMentions::toData))
+                .flags(toPossibleOptional(flags(), f -> f.stream()
+                        .mapToInt(Message.Flag::getValue)
+                        .reduce(0, (left, right) -> left | right)))
                 .build();
     }
 }
