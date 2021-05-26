@@ -23,6 +23,7 @@ import discord4j.core.object.VoiceState;
 import discord4j.core.object.presence.Presence;
 import discord4j.core.retriever.EntityRetrievalStrategy;
 import discord4j.core.spec.BanQuerySpec;
+import discord4j.core.spec.GuildMemberEditMono;
 import discord4j.core.spec.GuildMemberEditSpec;
 import discord4j.core.spec.MemberBanQueryMono;
 import discord4j.core.util.OrderUtil;
@@ -44,7 +45,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -528,22 +528,28 @@ public final class Member extends User {
     }
 
     /**
+     * Requests to edit this member. Properties specifying how to edit this member can be set via the {@code withXxx}
+     * methods of the returned {@link GuildMemberEditMono}.
+     *
+     * @return A {@link GuildMemberEditMono} where, upon successful completion, emits the modified {@link Member}. If an
+     * error is received, it is emitted through the {@code GuildMemberEditMono}.
+     */
+    public GuildMemberEditMono edit() {
+        return GuildMemberEditMono.of(this);
+    }
+
+    /**
      * Requests to edit this member.
      *
-     * @param spec A {@link Consumer} that provides a "blank" {@link GuildMemberEditSpec} to be operated on.
+     * @param spec an immutable object that specifies how to edit this member
      * @return A {@link Mono} where, upon successful completion, emits the modified {@link Member}. If an error is
      * received, it is emitted through the {@code Mono}.
      */
-    public Mono<Member> edit(final Consumer<? super GuildMemberEditSpec> spec) {
+    public Mono<Member> edit(GuildMemberEditSpec spec) {
         return Mono.defer(
-                () -> {
-                    GuildMemberEditSpec mutatedSpec = new GuildMemberEditSpec();
-                    spec.accept(mutatedSpec);
-                    return getClient().getRestClient().getGuildService()
-                            .modifyGuildMember(getGuildId().asLong(), getId().asLong(), mutatedSpec.asRequest(),
-                                    mutatedSpec.getReason())
-                            .map(data -> new Member(getClient(), data, guildId));
-                });
+                () -> getClient().getRestClient().getGuildService()
+                        .modifyGuildMember(getGuildId().asLong(), getId().asLong(), spec.asRequest(), spec.reason())
+                        .map(data -> new Member(getClient(), data, guildId)));
     }
 
     @Override

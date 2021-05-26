@@ -16,23 +16,23 @@
  */
 package discord4j.core.object.entity;
 
+import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.retriever.EntityRetrievalStrategy;
-import discord4j.discordjson.json.UserData;
-import discord4j.rest.util.Image;
-import discord4j.common.util.Snowflake;
+import discord4j.core.spec.GuildEmojiEditMono;
 import discord4j.core.spec.GuildEmojiEditSpec;
 import discord4j.core.util.EntityUtil;
 import discord4j.core.util.ImageUtil;
 import discord4j.core.util.OrderUtil;
 import discord4j.discordjson.json.EmojiData;
+import discord4j.discordjson.json.UserData;
+import discord4j.rest.util.Image;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
 
 import java.util.Objects;
 import java.util.Set;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static discord4j.rest.util.Image.Format.GIF;
@@ -228,20 +228,28 @@ public final class GuildEmoji implements Entity {
     }
 
     /**
+     * Requests to edit this guild emoji. Properties specifying how to edit this emoji can be set via the {@code
+     * withXxx} methods of the returned {@link GuildEmojiEditMono}.
+     *
+     * @return A {@link GuildEmojiEditMono} where, upon successful completion, emits the edited {@link GuildEmoji}. If
+     * an error is received, it is emitted through the {@code GuildEmojiEditMono}.
+     */
+    public GuildEmojiEditMono edit() {
+        return GuildEmojiEditMono.of(this);
+    }
+
+    /**
      * Requests to edit this guild emoji.
      *
-     * @param spec A {@link Consumer} that provides a "blank" {@link GuildEmojiEditSpec} to be operated on.
+     * @param spec an immutable object that specifies how to edit this emoji
      * @return A {@link Mono} where, upon successful completion, emits the edited {@link GuildEmoji}. If an error is
      * received, it is emitted through the {@code Mono}.
      */
-    public Mono<GuildEmoji> edit(final Consumer<? super GuildEmojiEditSpec> spec) {
+    public Mono<GuildEmoji> edit(GuildEmojiEditSpec spec) {
         return Mono.defer(
-                () -> {
-                    GuildEmojiEditSpec mutatedSpec = new GuildEmojiEditSpec();
-                    spec.accept(mutatedSpec);
-                    return gateway.getRestClient().getEmojiService()
-                            .modifyGuildEmoji(getGuildId().asLong(), getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason());
-                })
+                () -> gateway.getRestClient().getEmojiService()
+                        .modifyGuildEmoji(getGuildId().asLong(), getId().asLong(), spec.asRequest(),
+                                spec.reason()))
                 .map(data -> new GuildEmoji(gateway, data, getGuildId().asLong()));
     }
 

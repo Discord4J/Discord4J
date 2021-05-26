@@ -17,8 +17,10 @@
 package discord4j.core.spec;
 
 import discord4j.discordjson.possible.Possible;
+import discord4j.rest.util.Multimap;
 import reactor.util.annotation.Nullable;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
@@ -41,6 +43,18 @@ final class InternalSpecUtils {
     static void putIfNotNull(Map<String, Object> map, String key, @Nullable Object value) {
         if (value != null) {
             map.put(key, value);
+        }
+    }
+
+    static void setIfNotNull(Multimap<String, Object> map, String key, @Nullable Object value) {
+        if (value != null) {
+            map.set(key, value);
+        }
+    }
+
+    static void addAllIfNotNull(Multimap<String, Object> map, String key, @Nullable List<Object> values) {
+        if (values != null) {
+            map.addAll(key, values);
         }
     }
 

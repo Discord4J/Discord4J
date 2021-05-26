@@ -988,7 +988,7 @@ public final class Guild implements Entity {
 
     /**
      * Requests to create an emoji. Properties specifying how to create an emoji can be set via the {@code withXxx}
-     * methods of the returned GuildEmojiCreateMono.
+     * methods of the returned {@link GuildEmojiCreateMono}.
      *
      * @param name  the name of the emoji to create
      * @param image the image of the emoji to create
@@ -1002,7 +1002,7 @@ public final class Guild implements Entity {
     /**
      * Requests to create an emoji.
      *
-     * @param spec an immutable object that specifies how to create an emoji
+     * @param spec an immutable object that specifies how to create the emoji
      * @return A {@link Mono} where, upon successful completion, emits the created {@link GuildEmoji}. If an error is
      * received, it is emitted through the {@code Mono}.
      */
@@ -1247,90 +1247,63 @@ public final class Guild implements Entity {
 
     /**
      * Requests to retrieve the number of users that will be pruned. Users are pruned if they have not been seen within
-     * the past specified amount of days <i>and</i> are not assigned to any roles for this guild.
+     * the past specified amount of days. Included roles can be set via the
+     * {@link GuildPruneCountMono#withRoles(Snowflake...)}
+     * method of the returned {@link GuildPruneCountMono}.
      *
      * @param days The number of days since an user must have been seen to avoid being kicked.
-     * @return A {@link Mono} where, upon successful completion, emits the number of users that will be pruned. If an
-     * error is received, it is emitted through the {@code Mono}.
+     * @return A {@link GuildPruneCountMono} where, upon successful completion, emits the number of users that will be
+     * pruned. If an error is received, it is emitted through the {@code GuildPruneCountMono}.
      */
-    public Mono<Integer> getPruneCount(final int days) {
-        final Map<String, Object> queryParams = new HashMap<>(1);
-        queryParams.put("days", days);
-
-        return gateway.getRestClient().getGuildService()
-                .getGuildPruneCount(getId().asLong(), queryParams)
-                .flatMap(data -> Mono.justOrEmpty(data.pruned()));
+    public GuildPruneCountMono getPruneCount(final int days) {
+        return GuildPruneCountMono.of(days, this);
     }
 
     /**
      * Requests to retrieve the number of users that will be pruned. Users are pruned if they have not been seen within
-     * the past specified amount of days, with roles optionally included in the prune count if specified through
-     * {@link GuildPruneCountSpec#addRole(Snowflake)} or {@link GuildPruneCountSpec#addRoles(Collection)}.
+     * the past specified amount of days, with roles optionally included in the prune count if specified through {@link
+     * GuildPruneCountSpec#roles()}.
      *
-     * @param spec A {@link Consumer} that provides a "blank" {@link GuildPruneCountSpec} to be operated on.
+     * @param spec an immutable object that specifies how to get prune count
      * @return A {@link Mono} where, upon successful completion, emits the number of users that will be pruned. If an
      * error is received, it is emitted through the {@code Mono}.
      */
-    public Mono<Integer> getPruneCount(final Consumer<? super GuildPruneCountSpec> spec) {
+    public Mono<Integer> getPruneCount(GuildPruneCountSpec spec) {
         return Mono.defer(
-                () -> {
-                    GuildPruneCountSpec mutatedSpec = new GuildPruneCountSpec();
-                    spec.accept(mutatedSpec);
-                    return gateway.getRestClient().getGuildService()
-                            .getGuildPruneCount(getId().asLong(), mutatedSpec.asRequest())
-                            .flatMap(data -> Mono.justOrEmpty(data.pruned()));
-                });
+                () -> gateway.getRestClient().getGuildService()
+                        .getGuildPruneCount(getId().asLong(), spec.asRequest())
+                        .flatMap(data -> Mono.justOrEmpty(data.pruned())));
     }
 
     /**
-     * Requests to prune users. Users are pruned if they have not been seen within the past specified amount of days
-     * <i>and</i> are not assigned to any roles for this guild.
+     * Requests to prune users. Users are pruned if they have not been seen within the past specified amount of days.
+     * Included roles can be set via the {@link GuildPruneMono#withRoles(Snowflake...)} method of the returned {@link
+     * GuildPruneMono}.
      *
      * @param days The number of days since an user must have been seen to avoid being kicked.
-     * @return A {@link Mono} where, upon successful completion, emits the number of users who were pruned. If an error
-     * is received, it is emitted through the {@code Mono}.
+     * @return A {@link Mono} where, upon successful completion, may emit the number of users who were pruned if {@link
+     * GuildPruneMono#withComputePruneCount(Boolean)} is {@code true} (default), otherwise it would emit an empty {@code
+     * Mono}. If an error is received, it is emitted through the {@code Mono}.
      */
-    public Mono<Integer> prune(final int days) {
-        return prune(days, null);
-    }
-
-    /**
-     * Requests to prune users while optionally specifying a reason. Users are pruned if they have not been seen within
-     * the past specified amount of days <i>and</i> are not assigned to any roles for this guild.
-     *
-     * @param days The number of days since an user must have been seen to avoid being kicked.
-     * @param reason The reason, if present.
-     * @return A {@link Mono} where, upon successful completion, emits the number of users who were pruned. If an error
-     * is received, it is emitted through the {@code Mono}.
-     */
-    public Mono<Integer> prune(final int days, @Nullable final String reason) {
-        final Map<String, Object> queryParams = new HashMap<>(1);
-        queryParams.put("days", days);
-
-        return gateway.getRestClient().getGuildService()
-                .beginGuildPrune(getId().asLong(), queryParams, reason)
-                .flatMap(data -> Mono.justOrEmpty(data.pruned()));
+    public GuildPruneMono prune(final int days) {
+        return GuildPruneMono.of(days, this);
     }
 
     /**
      * Requests to prune users while customizing parameters. Users are pruned if they have not been seen within
      * the past specified amount of days, with roles optionally included in the prune request if specified through
-     * {@link GuildPruneSpec#addRole(Snowflake)} or {@link GuildPruneSpec#addRoles(Collection)}.
+     * {@link GuildPruneSpec#roles()}.
      *
-     * @param spec A {@link Consumer} that provides a "blank" {@link GuildPruneSpec} to be operated on.
+     * @param spec an immutable object that specifies how to prune users of this guild
      * @return A {@link Mono} where, upon successful completion, may emit the number of users who were pruned if
-     * {@link GuildPruneSpec#setComputePruneCount(boolean)} is {@code true} (default), otherwise it would emit an
+     * {@link GuildPruneSpec#computePruneCount()} is {@code true} (default), otherwise it would emit an
      * empty {@code Mono}. If an error is received, it is emitted through the {@code Mono}.
      */
-    public Mono<Integer> prune(final Consumer<? super GuildPruneSpec> spec) {
+    public Mono<Integer> prune(GuildPruneSpec spec) {
         return Mono.defer(
-                () -> {
-                    GuildPruneSpec mutatedSpec = new GuildPruneSpec();
-                    spec.accept(mutatedSpec);
-                    return gateway.getRestClient().getGuildService()
-                            .beginGuildPrune(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason())
-                            .flatMap(data -> Mono.justOrEmpty(data.pruned()));
-                });
+                () -> gateway.getRestClient().getGuildService()
+                        .beginGuildPrune(getId().asLong(), spec.asRequest(), spec.reason())
+                        .flatMap(data -> Mono.justOrEmpty(data.pruned())));
     }
 
     /**
