@@ -19,6 +19,7 @@ package discord4j.core.object.entity.channel;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.Embed;
+import discord4j.core.object.Region;
 import discord4j.core.object.VoiceState;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.spec.VoiceChannelEditSpec;
@@ -75,8 +76,19 @@ public final class VoiceChannel extends BaseCategorizableChannel {
      *
      * @return The voice region id for the voice channel, automatic if not present.
      */
-    public Optional<String> getRtcRegion() {
-        return Possible.flatOpt(getData().rtcRegion());
+    public Optional<Region.Id> getRtcRegion() {
+        return Possible.flatOpt(getData().rtcRegion()).map(Region.Id::of);
+    }
+
+    /**
+     * Requests to retrieve the voice region for the voice channel.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits the voice {@link Region region} for the guild. If
+     * an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Region> getRegion() {
+        return getClient().getRegions().filter(response -> getRtcRegion().map(Region.Id::getValue)
+                .map(response.getId()::equals).orElse(false)).single();
     }
 
     /**

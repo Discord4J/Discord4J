@@ -229,8 +229,8 @@ public final class Guild implements Entity {
      *
      * @return The voice region ID for the guild.
      */
-    public String getRegionId() {
-        return data.region();
+    public Region.Id getRegionId() {
+        return Region.Id.of(data.region());
     }
 
     /**
@@ -240,7 +240,7 @@ public final class Guild implements Entity {
      * an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Region> getRegion() {
-        return getRegions().filter(response -> response.getId().equals(getRegionId())).single();
+        return getRegions().filter(response -> response.getId().equals(getRegionId().getValue())).single();
     }
 
     /**

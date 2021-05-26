@@ -65,11 +65,11 @@ public class GuildCreateSpec implements Spec<GuildCreateRequest> {
     /**
      * Sets the voice region for the created {@link Guild}.
      *
-     * @param region The voice region for the guild.
+     * @param regionId The voice region for the guild.
      * @return This spec.
      */
-    public GuildCreateSpec setRegion(Region region) {
-        this.region = region.getId();
+    public GuildCreateSpec setRegion(Region.Id regionId) {
+        this.region = regionId.getValue();
         return this;
     }
 
