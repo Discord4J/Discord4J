@@ -105,22 +105,6 @@ public final class Region implements DiscordObject {
         return data.deprecated();
     }
 
-    /**
-     * Gets if this is a custom voice region.
-     *
-     * @return {@code true} if this is a custom voice region, {@code false} otherwise.
-     */
-    public boolean isCustom() {
-        return data.custom();
-    }
-
-    @Override
-    public String toString() {
-        return "Region{" +
-                "data=" + data +
-                '}';
-    }
-
     /** Represents the different non-deprecated voice region ids. */
     public enum Id {
 
