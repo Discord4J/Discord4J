@@ -9,6 +9,8 @@ dependencies {
     compileOnly "$immutables_group:builder:$immutables_version"
     annotationProcessor "$immutables_group:value:$immutables_version"
 
+    compileOnly "com.discord4j:discord-json-encoding:$discordJsonVersion"
+
     if (JavaVersion.current().isJava8()) {
         compileOnly "com.google.code.findbugs:annotations:3.0.1"
         testCompileOnly "com.google.code.findbugs:annotations:3.0.1"

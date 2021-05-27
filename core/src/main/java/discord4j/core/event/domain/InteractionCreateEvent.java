@@ -22,6 +22,7 @@ import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.command.Interaction;
 import discord4j.core.object.entity.Message;
+import discord4j.core.spec.InteractionApplicationCommandCallbackMono;
 import discord4j.core.spec.InteractionApplicationCommandCallbackSpec;
 import discord4j.discordjson.json.*;
 import discord4j.gateway.ShardInfo;
@@ -31,7 +32,7 @@ import discord4j.rest.util.InteractionResponseType;
 import discord4j.rest.util.MultipartRequest;
 import reactor.core.publisher.Mono;
 
-import java.util.function.Consumer;
+import java.util.Objects;
 
 /**
  * Dispatched when a user in a guild uses a Slash Command.
@@ -93,12 +94,12 @@ public class InteractionCreateEvent extends Event {
 
     /**
      * Acknowledges the interaction indicating a response will be edited later. The user sees a loading state, visible
-     * to all participants in the invoking channel. For a "only you can see this" response, see
-     * {@link #acknowledgeEphemeral()}, or to include a message, {@link #replyEphemeral(String)}
+     * to all participants in the invoking channel. For a "only you can see this" response, see {@link
+     * #acknowledgeEphemeral()}, or to include a message, {@link #reply(String) reply(String).withEphemeral(true)}
      *
-     * @return A {@link Mono} where, upon successful completion, emits nothing; acknowledging the interaction
-     * and indicating a response will be edited later. The user sees a loading state. If an error is received, it
-     * is emitted through the {@code Mono}.
+     * @return A {@link Mono} where, upon successful completion, emits nothing; acknowledging the interaction and
+     * indicating a response will be edited later. The user sees a loading state. If an error is received, it is emitted
+     * through the {@code Mono}.
      */
     public Mono<Void> acknowledge() {
         return createInteractionResponse(InteractionResponseData.builder()
@@ -124,54 +125,51 @@ public class InteractionCreateEvent extends Event {
     }
 
     /**
-     * Requests to respond to the interaction with only
-     * {@link InteractionApplicationCommandCallbackSpec#setContent(String) content}.
+     * Requests to respond to the interaction with a message. Properties specifying how to build the reply message to
+     * the interaction can be set via the {@code withXxx} methods of the returned {@link
+     * InteractionApplicationCommandCallbackMono}.
      *
-     * @param content A string message to populate the message with.
-     * @return A {@link Mono} where, upon successful completion, emits nothing, indicating the interaction response has
-     * been sent. If an error is received, it is emitted through the {@code Mono}.
-     * @see InteractionApplicationCommandCallbackSpec#setContent(String)
+     * @return A {@link InteractionApplicationCommandCallbackMono} where, upon successful completion, emits nothing;
+     * indicating the interaction response has been sent. If an error is received, it is emitted through the {@code
+     * InteractionApplicationCommandCallbackMono}.
      */
-    public Mono<Void> reply(final String content) {
-        return reply(spec -> spec.setContent(content));
+    public InteractionApplicationCommandCallbackMono reply() {
+        return InteractionApplicationCommandCallbackMono.of(this);
     }
 
     /**
-     * Requests to respond to the interaction with only
-     * {@link InteractionApplicationCommandCallbackSpec#setContent(String) content} and
-     * {@link InteractionApplicationCommandCallbackSpec#setEphemeral(boolean) ephemeral set to true}. Only the invoking
-     * user can see it.
+     * Requests to respond to the interaction with a message initialized with the specified content. Properties
+     * specifying how to build the reply message to the interaction can be set via the {@code withXxx} methods of the
+     * returned {@link InteractionApplicationCommandCallbackMono}.
      *
-     * @param content A string message to populate the message with.
-     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the ephemeral interaction
-     * response has been sent. If an error is received, it is emitted through the {@code Mono}.
-     * @see InteractionApplicationCommandCallbackSpec#setContent(String)
-     * @see InteractionApplicationCommandCallbackSpec#setEphemeral(boolean)
+     * @param content a string to populate the message with
+     * @return A {@link InteractionApplicationCommandCallbackMono} where, upon successful completion, emits nothing;
+     * indicating the interaction response has been sent. If an error is received, it is emitted through the {@code
+     * InteractionApplicationCommandCallbackMono}.
      */
-    public Mono<Void> replyEphemeral(final String content) {
-        return reply(spec -> spec.setContent(content).setEphemeral(true));
+    public InteractionApplicationCommandCallbackMono reply(final String content) {
+        return reply().withContent(content);
     }
 
     /**
      * Requests to respond to the interaction with a message.
      *
-     * @param spec A {@link Consumer} that provides a "blank" {@link InteractionApplicationCommandCallbackSpec} to be
-     * operated on.
+     * @param spec an immutable object that specifies how to build the reply message to the interaction
      * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the interaction response has
      * been sent. If an error is received, it is emitted through the {@code Mono}.
      */
-    public Mono<Void> reply(final Consumer<? super InteractionApplicationCommandCallbackSpec> spec) {
+    public Mono<Void> reply(InteractionApplicationCommandCallbackSpec spec) {
+        Objects.requireNonNull(spec);
         return Mono.defer(
                 () -> {
-                    InteractionApplicationCommandCallbackSpec mutatedSpec =
-                            new InteractionApplicationCommandCallbackSpec();
-                    getClient().getRestClient().getRestResources()
+                    InteractionApplicationCommandCallbackSpec actualSpec = getClient().getRestClient()
+                            .getRestResources()
                             .getAllowedMentions()
-                            .ifPresent(mutatedSpec::setAllowedMentions);
-                    spec.accept(mutatedSpec);
+                            .map(spec::withAllowedMentions)
+                            .orElse(spec);
                     return createInteractionResponse(InteractionResponseData.builder()
                             .type(InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE.getValue())
-                            .data(mutatedSpec.asRequest())
+                            .data(actualSpec.asRequest())
                             .build());
                 });
     }

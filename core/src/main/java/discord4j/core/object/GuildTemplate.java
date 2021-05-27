@@ -22,6 +22,7 @@ import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.User;
 import discord4j.core.spec.GuildCreateFromTemplateMono;
 import discord4j.core.spec.GuildCreateFromTemplateSpec;
+import discord4j.core.spec.GuildTemplateEditMono;
 import discord4j.core.spec.GuildTemplateEditSpec;
 import discord4j.discordjson.json.SerializedSourceGuildData;
 import discord4j.discordjson.json.TemplateData;
@@ -31,7 +32,6 @@ import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.function.Consumer;
 
 /**
  * A Discord Guild Template.
@@ -203,20 +203,27 @@ public final class GuildTemplate implements DiscordObject {
     }
 
     /**
+     * Requests to edit this guild template. Properties specifying how to edit this template can be set via the {@code
+     * withXxx} methods of the returned {@link GuildTemplateEditMono}.
+     *
+     * @return A {@link GuildTemplateEditMono} where, upon successful completion, emits the edited {@link
+     * GuildTemplate}. If an error is received, it is emitted through the {@code GuildTemplateEditMono}.
+     */
+    public GuildTemplateEditMono edit() {
+        return GuildTemplateEditMono.of(this);
+    }
+
+    /**
      * Requests to edit this guild template.
      *
-     * @param spec A {@link Consumer} that provides a "blank" {@link GuildTemplateEditSpec} to be operated on.
+     * @param spec an immutable object that specifies how to edit this template
      * @return A {@link Mono} where, upon successful completion, emits the edited {@link GuildTemplate}. If an error is
      * received, it is emitted through the {@code Mono}.
      */
-    public Mono<GuildTemplate> edit(final Consumer<? super GuildTemplateEditSpec> spec) {
+    public Mono<GuildTemplate> edit(GuildTemplateEditSpec spec) {
+        Objects.requireNonNull(spec);
         return Mono.defer(
-                () -> {
-                    GuildTemplateEditSpec mutatedSpec = new GuildTemplateEditSpec();
-                    spec.accept(mutatedSpec);
-                    return gateway.getRestClient().getTemplateService()
-                            .modifyTemplate(guildId, getCode(), mutatedSpec.asRequest());
-                })
+                () -> gateway.getRestClient().getTemplateService().modifyTemplate(guildId, getCode(), spec.asRequest()))
                 .map(data -> new GuildTemplate(gateway, data));
     }
 

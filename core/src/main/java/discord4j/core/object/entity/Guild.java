@@ -977,6 +977,7 @@ public final class Guild implements Entity {
      * received, it is emitted through the {@code Mono}.
      */
     public Mono<Guild> edit(GuildEditSpec spec) {
+        Objects.requireNonNull(spec);
         return Mono.defer(
                 () -> gateway.getRestClient().getGuildService()
                         .modifyGuild(getId().asLong(), spec.asRequest(), spec.reason()))
@@ -1007,6 +1008,7 @@ public final class Guild implements Entity {
      * received, it is emitted through the {@code Mono}.
      */
     public Mono<GuildEmoji> createEmoji(GuildEmojiCreateSpec spec) {
+        Objects.requireNonNull(spec);
         return Mono.defer(
                 () -> gateway.getRestClient().getEmojiService()
                         .createGuildEmoji(getId().asLong(), spec.asRequest(), spec.reason()))
@@ -1014,21 +1016,29 @@ public final class Guild implements Entity {
     }
 
     /**
-     * Requests to create a template based on this guild.
+     * Requests to create a template based on this guild. A description for this template can be set via the {@link
+     * GuildTemplateCreateMono#withDescription(String)} of the returned {@link GuildTemplateCreateMono}.
      *
-     * @param spec A {@link Consumer} that provides a "blank" {@link GuildTemplateCreateSpec} to be operated on.
+     * @param name the name of the template to create
      * @return A {@link Mono} where, upon subscription, emits the created {@link GuildTemplate} on success. If an error
      * is received, it is emitted through the {@code Mono}.
      */
-    public Mono<GuildTemplate> createTemplate(final Consumer<? super GuildTemplateCreateSpec> spec) {
+    public GuildTemplateCreateMono createTemplate(String name) {
+        return GuildTemplateCreateMono.of(name, this);
+    }
+
+    /**
+     * Requests to create a template based on this guild.
+     *
+     * @param spec an immutable object that specifies how to create a template for this guild
+     * @return A {@link Mono} where, upon subscription, emits the created {@link GuildTemplate} on success. If an error
+     * is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<GuildTemplate> createTemplate(GuildTemplateCreateSpec spec) {
+        Objects.requireNonNull(spec);
         return Mono.defer(
-            () -> {
-                GuildTemplateCreateSpec mutatedSpec = new GuildTemplateCreateSpec();
-                spec.accept(mutatedSpec);
-                return gateway.getRestClient().getTemplateService()
-                        .createTemplate(getId().asLong(), mutatedSpec.asRequest());
-            })
-            .map(data -> new GuildTemplate(gateway, data));
+                () -> gateway.getRestClient().getTemplateService().createTemplate(getId().asLong(), spec.asRequest()))
+                .map(data -> new GuildTemplate(gateway, data));
     }
 
     /**
@@ -1269,6 +1279,7 @@ public final class Guild implements Entity {
      * error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Integer> getPruneCount(GuildPruneCountSpec spec) {
+        Objects.requireNonNull(spec);
         return Mono.defer(
                 () -> gateway.getRestClient().getGuildService()
                         .getGuildPruneCount(getId().asLong(), spec.asRequest())
@@ -1300,6 +1311,7 @@ public final class Guild implements Entity {
      * empty {@code Mono}. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Integer> prune(GuildPruneSpec spec) {
+        Objects.requireNonNull(spec);
         return Mono.defer(
                 () -> gateway.getRestClient().getGuildService()
                         .beginGuildPrune(getId().asLong(), spec.asRequest(), spec.reason())
