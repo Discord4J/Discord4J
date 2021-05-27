@@ -18,6 +18,8 @@ package discord4j.core.spec;
 
 import discord4j.common.util.Snowflake;
 import discord4j.core.object.Embed;
+import discord4j.core.object.component.ActionRow;
+import discord4j.core.object.component.MessageComponent;
 import discord4j.core.object.entity.Attachment;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.MessageChannel;
@@ -35,9 +37,11 @@ import reactor.util.function.Tuples;
 
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 /**
  * Spec used to create {@link Message Messages} to {@link MessageChannel MessageChannels}. Clients using this spec must
@@ -56,6 +60,7 @@ public class MessageCreateSpec implements Spec<MultipartRequest<MessageCreateReq
     private List<Tuple2<String, InputStream>> files;
     private AllowedMentionsData allowedMentionsData;
     private MessageReferenceData messageReferenceData;
+    private List<ActionRow> actionRows;
 
     /**
      * Sets the created {@link Message} contents, up to 2000 characters.
@@ -155,6 +160,15 @@ public class MessageCreateSpec implements Spec<MultipartRequest<MessageCreateReq
         return this;
     }
 
+    public MessageCreateSpec setActionRows(List<ActionRow> actionRows) {
+        this.actionRows = actionRows;
+        return this;
+    }
+
+    public MessageCreateSpec setActionRows(ActionRow... actionRows) {
+        return setActionRows(Arrays.asList(actionRows));
+    }
+
     @Override
     public MultipartRequest<MessageCreateRequest> asRequest() {
         MessageCreateRequest json = MessageCreateRequest.builder()
@@ -164,6 +178,7 @@ public class MessageCreateSpec implements Spec<MultipartRequest<MessageCreateReq
                 .embed(embed == null ? Possible.absent() : Possible.of(embed))
                 .allowedMentions(allowedMentionsData == null ? Possible.absent() : Possible.of(allowedMentionsData))
                 .messageReference(messageReferenceData == null ? Possible.absent() : Possible.of(messageReferenceData))
+                .components(actionRows.stream().map(ActionRow::getData).collect(Collectors.toList()))
                 .build();
         return MultipartRequest.ofRequestAndFiles(json, files == null ? Collections.emptyList() : files);
     }

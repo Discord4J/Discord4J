@@ -17,6 +17,7 @@
 package discord4j.core.object.reaction;
 
 import discord4j.core.object.entity.GuildEmoji;
+import discord4j.discordjson.json.EmojiData;
 import discord4j.discordjson.json.ReactionData;
 import discord4j.common.util.Snowflake;
 import reactor.util.annotation.Nullable;
@@ -116,12 +117,16 @@ public abstract class ReactionEmoji {
      * @return a reaction emoji using the given information.
      */
     public static ReactionEmoji of(ReactionData data) {
-        if (data.emoji().id().isPresent()) {
-            return custom(Snowflake.of(data.emoji().id().get()),
-                    data.emoji().name().orElseThrow(IllegalArgumentException::new),
-                    data.emoji().animated().toOptional().orElse(false));
+        return of(data.emoji());
+    }
+
+    public static ReactionEmoji of(EmojiData data) {
+        if (data.id().isPresent()) {
+            return custom(Snowflake.of(data.id().get()),
+                    data.name().orElseThrow(IllegalArgumentException::new),
+                    data.animated().toOptional().orElse(false));
         }
-        return unicode(data.emoji().name().orElseThrow(IllegalArgumentException::new));
+        return unicode(data.name().orElseThrow(IllegalArgumentException::new));
     }
 
     /**
