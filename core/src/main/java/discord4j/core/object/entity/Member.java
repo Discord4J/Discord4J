@@ -161,12 +161,15 @@ public final class Member extends User {
     }
 
     /**
-     * Gets when the user joined the guild.
+     * Gets when the user joined the guild, if present. Can be {@code null} if it's a lurking stage channel member.
      *
-     * @return When the user joined the guild.
+     * @return When the user joined the guild, if present.
      */
+    @Nullable
     public Instant getJoinTime() {
-        return DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(data.joinedAt(), Instant::from);
+        return data.joinedAt()
+                .map(it -> DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(it, Instant::from))
+                .orElse(null);
     }
 
     /**

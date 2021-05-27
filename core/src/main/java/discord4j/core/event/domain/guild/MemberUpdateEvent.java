@@ -49,6 +49,7 @@ public class MemberUpdateEvent extends GuildEvent {
     private final List<Long> currentRoles;
     @Nullable
     private final String currentNickname;
+    @Nullable
     private final String currentJoinedAt;
     @Nullable
     private final String currentPremiumSince;
@@ -57,7 +58,7 @@ public class MemberUpdateEvent extends GuildEvent {
 
     public MemberUpdateEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, long guildId, long memberId,
                              @Nullable Member old, List<Long> currentRoles, @Nullable String currentNickname,
-                             String currentJoinedAt, @Nullable String currentPremiumSince,
+                             @Nullable String currentJoinedAt, @Nullable String currentPremiumSince,
                              @Nullable Boolean currentPending) {
         super(gateway, shardInfo);
 
@@ -140,11 +141,17 @@ public class MemberUpdateEvent extends GuildEvent {
     }
 
     /**
-     * Gets the current join time of the {@link Member} involved in this event.
+     * Gets the current join time of the {@link Member} involved in this event. Can be {@code null} if this event is
+     * caused by a lurking stage channel member.
      *
-     * @return The current join time of the {@link Member} involved in this event.
+     * @return The current join time of the {@link Member} involved in this event if present, {@code null} otherwise.
      */
+    @Nullable
     public Instant getJoinTime() {
+        // TODO: temporarily return null. change to Optional return for 3.2
+        if (currentJoinedAt == null) {
+            return null;
+        }
         return DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(currentJoinedAt, Instant::from);
     }
 
