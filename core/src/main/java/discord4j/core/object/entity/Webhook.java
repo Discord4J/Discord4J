@@ -97,7 +97,7 @@ public final class Webhook implements Entity {
      * @return The ID of the guild this webhook is associated to.
      */
     public Snowflake getGuildId() {
-        return Snowflake.of(data.guildId().get()); // TODO FIXME: really Possible?
+        return Snowflake.of(data.guildId().get().get()); // TODO FIXME: really Possible?
     }
 
     /**
@@ -127,7 +127,7 @@ public final class Webhook implements Entity {
      * @return The ID of the channel this webhook is associated to.
      */
     public Snowflake getChannelId() {
-        return Snowflake.of(data.channelId());
+        return Snowflake.of(data.channelId().get());
     }
 
     /**

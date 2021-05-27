@@ -18,6 +18,7 @@ package discord4j.core.spec;
 
 import discord4j.core.object.entity.Webhook;
 import discord4j.discordjson.json.WebhookCreateRequest;
+import discord4j.discordjson.possible.Possible;
 import discord4j.rest.util.Image;
 import reactor.util.annotation.Nullable;
 
@@ -72,7 +73,7 @@ public class WebhookCreateSpec implements Spec<WebhookCreateRequest> {
     public WebhookCreateRequest asRequest() {
         return WebhookCreateRequest.builder()
                 .name(name)
-                .avatar(Optional.ofNullable(avatar))
+                .avatar(Possible.of(Optional.ofNullable(avatar)))
                 .build();
     }
 }
