@@ -21,6 +21,7 @@ import discord4j.common.annotations.Experimental;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.command.Interaction;
+import discord4j.core.object.component.MessageComponent;
 import discord4j.core.object.entity.Message;
 import discord4j.core.spec.InteractionApplicationCommandCallbackSpec;
 import discord4j.discordjson.json.*;
@@ -31,8 +32,11 @@ import discord4j.rest.util.InteractionResponseType;
 import discord4j.rest.util.WebhookMultipartRequest;
 import reactor.core.publisher.Mono;
 
+import java.util.Optional;
 import java.util.function.Consumer;
 
+// TODO: update docs
+// TODO: maybe do some subtyping here? ButtonInteractionEvent, SlashCommandEvent. Not 1:1, but much nicer
 /**
  * Dispatched when a user in a guild uses a Slash Command.
  * <p>
@@ -70,8 +74,8 @@ public class InteractionCreateEvent extends Event {
      *
      * @return The id of the invoked command.
      */
-    public Snowflake getCommandId() {
-        return Snowflake.of(getCommandInteractionData().id());
+    public Optional<Snowflake> getCommandId() {
+        return getCommandInteractionData().id().toOptional().map(Snowflake::of);
     }
 
     /**
@@ -79,8 +83,16 @@ public class InteractionCreateEvent extends Event {
      *
      * @return The name of the invoked command.
      */
-    public String getCommandName() {
-        return getCommandInteractionData().name();
+    public Optional<String> getCommandName() {
+        return getCommandInteractionData().name().toOptional();
+    }
+
+    public Optional<String> getCustomId() {
+        return getCommandInteractionData().customId().toOptional();
+    }
+
+    public Optional<MessageComponent.Type> getComponentType() {
+        return getCommandInteractionData().componentType().toOptional().map(MessageComponent.Type::of);
     }
 
     private Mono<Void> createInteractionResponse(InteractionResponseData responseData) {

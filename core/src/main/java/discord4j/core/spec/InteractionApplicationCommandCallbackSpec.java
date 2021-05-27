@@ -37,6 +37,7 @@ public class InteractionApplicationCommandCallbackSpec implements Spec<Interacti
     private AllowedMentionsData allowedMentionsData;
     private int flags;
 
+
     public InteractionApplicationCommandCallbackSpec setContent(String content) {
         this.content = content;
         return this;
