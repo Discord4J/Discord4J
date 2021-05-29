@@ -20,6 +20,7 @@ import discord4j.core.object.Region;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.channel.Channel;
 import discord4j.discordjson.json.GuildCreateRequest;
+import discord4j.discordjson.json.ImmutableGuildCreateRequest;
 import discord4j.discordjson.json.PartialChannelCreateRequest;
 import discord4j.discordjson.json.RoleCreateRequest;
 import discord4j.rest.util.Image;
@@ -32,24 +33,18 @@ import java.util.function.Consumer;
 /**
  * A spec used to configure and create a {@link Guild}. <b>This can only be used for bots in less than 10 guilds.</b>
  * <p>
- * This spec also has some limitations to it. The name, region, verification level, and default message notification
- * level are all required to be able to properly build the spec. The first role added, either from
- * {@link #addEveryoneRole} or {@link #addRole}, will automatically be set as the default @everyone role. Each
- * subsequent call to {@link #addEveryoneRole} will not override the first role but shift all other roles down.
+ * This spec also has some limitations to it.
+ *  - The first role added, either from {@link #addEveryoneRole} or {@link #addRole}, will automatically be set as the
+ *  default @everyone role. Each subsequent call to {@link #addEveryoneRole} will not override the first role but shift
+ *  all other roles down.
+ *  - When using the channels parameter, the position field is ignored, and none of the default channels are created.
  *
  * @see <a href="https://discord.com/developers/docs/resources/guild#create-guild">Create Guild</a>
  */
 public class GuildCreateSpec implements Spec<GuildCreateRequest> {
 
-    private String name;
-    private String region;
-    @Nullable
-    private String icon;
-    private int verificationLevel;
-    private int defaultMessageNotificationLevel;
-    private int explicitContentFilter;
+    private final ImmutableGuildCreateRequest.Builder builder = GuildCreateRequest.builder();
     private final List<RoleCreateRequest> roles = new ArrayList<>();
-    private final List<PartialChannelCreateRequest> channels = new ArrayList<>();
 
     /**
      * Sets the name for the created {@link Guild}.
@@ -58,18 +53,29 @@ public class GuildCreateSpec implements Spec<GuildCreateRequest> {
      * @return This spec.
      */
     public GuildCreateSpec setName(String name) {
-        this.name = name;
+        builder.name(name);
         return this;
     }
 
     /**
-     * Sets the voice region for the created {@link Guild}.
+     * Sets the voice region id for the created {@link Guild}.
      *
-     * @param regionId The voice region for the guild.
+     * @param regionId The voice region id for the guild.
      * @return This spec.
      */
     public GuildCreateSpec setRegion(Region.Id regionId) {
-        this.region = regionId.getValue();
+        builder.region(regionId.getValue());
+        return this;
+    }
+
+    /**
+     * Sets the voice region id for the created {@link Guild}, automatic if null.
+     *
+     * @param regionId The voice region id for the guild, automatic if null.
+     * @return This spec.
+     */
+    public GuildCreateSpec setRegion(@Nullable String regionId) {
+        builder.region(regionId);
         return this;
     }
 
@@ -80,7 +86,7 @@ public class GuildCreateSpec implements Spec<GuildCreateRequest> {
      * @return This spec.
      */
     public GuildCreateSpec setIcon(@Nullable Image icon) {
-        this.icon = (icon == null) ? null : icon.getDataUri();
+        builder.icon(icon == null ? null : icon.getDataUri());
         return this;
     }
 
@@ -91,7 +97,7 @@ public class GuildCreateSpec implements Spec<GuildCreateRequest> {
      * @return This spec.
      */
     public GuildCreateSpec setVerificationLevel(Guild.VerificationLevel verificationLevel) {
-        this.verificationLevel = verificationLevel.getValue();
+        builder.verificationLevel(verificationLevel.getValue());
         return this;
     }
 
@@ -102,7 +108,7 @@ public class GuildCreateSpec implements Spec<GuildCreateRequest> {
      * @return This spec.
      */
     public GuildCreateSpec setDefaultMessageNotificationLevel(Guild.NotificationLevel notificationLevel) {
-        this.defaultMessageNotificationLevel = notificationLevel.getValue();
+        builder.defaultMessageNotifications(notificationLevel.getValue());
         return this;
     }
 
@@ -113,7 +119,7 @@ public class GuildCreateSpec implements Spec<GuildCreateRequest> {
      * @return This spec.
      */
     public GuildCreateSpec setExplicitContentFilter(Guild.ContentFilterLevel explicitContentFilter) {
-        this.explicitContentFilter = explicitContentFilter.getValue();
+        builder.explicitContentFilter(explicitContentFilter.getValue());
         return this;
     }
 
@@ -155,7 +161,7 @@ public class GuildCreateSpec implements Spec<GuildCreateRequest> {
      * @return This spec.
      */
     public GuildCreateSpec addChannel(String name, Channel.Type type) {
-        channels.add(PartialChannelCreateRequest.builder()
+        builder.addChannel(PartialChannelCreateRequest.builder()
                 .name(name)
                 .type(type.getValue())
                 .build());
@@ -164,15 +170,7 @@ public class GuildCreateSpec implements Spec<GuildCreateRequest> {
 
     @Override
     public GuildCreateRequest asRequest() {
-        return GuildCreateRequest.builder()
-                .name(name)
-                .region(region)
-                .icon(icon)
-                .verificationLevel(verificationLevel)
-                .defaultMessageNotifications(defaultMessageNotificationLevel)
-                .explicitContentFilter(explicitContentFilter)
-                .roles(roles)
-                .channels(channels)
-                .build();
+        builder.roles(roles);
+        return builder.build();
     }
 }
