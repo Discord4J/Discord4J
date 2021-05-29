@@ -32,6 +32,10 @@ public final class GuildCreateFields {
     @Value.Immutable
     public interface PartialChannel extends Spec<PartialChannelCreateRequest> {
 
+        static PartialChannel of(String name, Channel.Type type) {
+            return ImmutableGuildCreateFields.PartialChannel.of(name, type);
+        }
+
         String name();
 
         Channel.Type type();

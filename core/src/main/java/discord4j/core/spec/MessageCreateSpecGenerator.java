@@ -56,38 +56,34 @@ import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.discordjson.json.MessageCreateRequest;
 import discord4j.discordjson.json.MessageReferenceData;
+import discord4j.discordjson.possible.Possible;
 import discord4j.rest.util.AllowedMentions;
 import discord4j.rest.util.MultipartRequest;
 import org.immutables.value.Value;
 import reactor.core.CoreSubscriber;
 import reactor.core.publisher.Mono;
-import reactor.util.annotation.Nullable;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static discord4j.core.spec.InternalSpecUtils.mapNullable;
-import static discord4j.core.spec.InternalSpecUtils.toPossible;
+import static discord4j.core.spec.InternalSpecUtils.mapPossible;
 
 @SpecStyle
 @Value.Immutable(singleton = true)
 interface MessageCreateSpecGenerator extends Spec<MultipartRequest<MessageCreateRequest>> {
 
-    @Nullable
-    String content();
+    Possible<String> content();
 
-    @Nullable
-    String nonce();
+    Possible<String> nonce();
 
     @Value.Default
     default boolean tts() {
         return false;
     }
 
-    @Nullable
-    EmbedCreateSpec embed();
+    Possible<EmbedCreateSpec> embed();
 
     @Value.Default
     default List<MessageCreateFields.File> files() {
@@ -99,24 +95,22 @@ interface MessageCreateSpecGenerator extends Spec<MultipartRequest<MessageCreate
         return Collections.emptyList();
     }
 
-    @Nullable
-    AllowedMentions allowedMentions();
+    Possible<AllowedMentions> allowedMentions();
 
-    @Nullable
-    Snowflake messageReference();
+    Possible<Snowflake> messageReference();
 
     @Override
     default MultipartRequest<MessageCreateRequest> asRequest() {
         MessageCreateRequest json = MessageCreateRequest.builder()
-                .content(toPossible(content()))
-                .nonce(toPossible(nonce()))
+                .content(content())
+                .nonce(nonce())
                 .tts(tts())
-                .embed(toPossible(mapNullable(embed(), EmbedCreateSpecGenerator::asRequest)))
-                .allowedMentions(toPossible(mapNullable(allowedMentions(), AllowedMentions::toData)))
-                .messageReference(toPossible(mapNullable(messageReference(),
+                .embed(mapPossible(embed(), EmbedCreateSpecGenerator::asRequest))
+                .allowedMentions(mapPossible(allowedMentions(), AllowedMentions::toData))
+                .messageReference(mapPossible(messageReference(),
                         ref -> MessageReferenceData.builder()
                                 .messageId(ref.asString())
-                                .build())))
+                                .build()))
                 .build();
         return MultipartRequest.ofRequestAndFiles(json, Stream.concat(files().stream(), fileSpoilers().stream())
                 .map(MessageCreateFields.File::asRequest)

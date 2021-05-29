@@ -20,13 +20,12 @@ package discord4j.core.spec;
 import discord4j.core.object.GuildTemplate;
 import discord4j.core.object.entity.Guild;
 import discord4j.discordjson.json.TemplateCreateRequest;
+import discord4j.discordjson.possible.Possible;
 import org.immutables.value.Value;
 import reactor.core.CoreSubscriber;
 import reactor.core.publisher.Mono;
-import reactor.util.annotation.Nullable;
 
-import static discord4j.core.spec.InternalSpecUtils.toPossible;
-import static discord4j.core.spec.InternalSpecUtils.toPossibleOptional;
+import java.util.Optional;
 
 @SpecStyle
 @Value.Immutable
@@ -34,14 +33,13 @@ interface GuildTemplateCreateSpecGenerator extends Spec<TemplateCreateRequest> {
 
     String name();
 
-    @Nullable
-    String description();
+    Possible<Optional<String>> description();
 
     @Override
     default TemplateCreateRequest asRequest() {
         return TemplateCreateRequest.builder()
                 .name(name())
-                .description(toPossibleOptional(toPossible(description())))
+                .description(description())
                 .build();
     }
 }

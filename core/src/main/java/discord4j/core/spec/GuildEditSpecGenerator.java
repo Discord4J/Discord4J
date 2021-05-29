@@ -26,126 +26,80 @@ import discord4j.rest.util.Image;
 import org.immutables.value.Value;
 import reactor.core.CoreSubscriber;
 import reactor.core.publisher.Mono;
-import reactor.util.annotation.Nullable;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
-import java.util.Set;
+import java.util.Optional;
 
-import static discord4j.core.spec.InternalSpecUtils.*;
+import static discord4j.core.spec.InternalSpecUtils.mapPossible;
+import static discord4j.core.spec.InternalSpecUtils.mapPossibleOptional;
 
 @SpecStyle
 @Value.Immutable(singleton = true)
 interface GuildEditSpecGenerator extends AuditSpec<GuildModifyRequest> {
-    
-    @Nullable
-    String name();
-    
-    @Nullable
-    default Possible<Region> region() {
-        return Possible.absent();
-    }
-    
-    @Nullable
-    default Possible<Guild.VerificationLevel> verificationLevel() {
-        return Possible.absent();
-    }
-    
-    @Nullable
-    default Possible<Guild.NotificationLevel> defaultMessageNotificationsLevel() {
-        return Possible.absent();
-    }
 
-    @Nullable
-    default Possible<Guild.ContentFilterLevel> explicitContentFilter() {
-        return Possible.absent();
-    }
+    Possible<String> name();
     
-    @Nullable
-    default Possible<Snowflake> afkChannelId() {
-        return Possible.absent();
-    }
+    Possible<Optional<Region>> region();
     
-    @Nullable
-    Integer afkTimeout();
+    Possible<Optional<Guild.VerificationLevel>> verificationLevel();
     
-    @Nullable
-    default Possible<Image> icon() {
-        return Possible.absent();
-    }
+    Possible<Optional<Guild.NotificationLevel>> defaultMessageNotificationsLevel();
+
+    Possible<Optional<Guild.ContentFilterLevel>> explicitContentFilter();
     
-    @Nullable
-    Snowflake ownerId();
+    Possible<Optional<Snowflake>> afkChannelId();
+
+    Possible<Integer> afkTimeout();
     
-    @Nullable
-    default Possible<Image> splash() {
-        return Possible.absent();
-    }
+    Possible<Optional<Image>> icon();
+
+    Possible<Snowflake> ownerId();
     
-    @Nullable
-    default Possible<Image> discoverySplash() {
-        return Possible.absent();
-    }
+    Possible<Optional<Image>> splash();
     
-    @Nullable
-    default Possible<Image> banner() {
-        return Possible.absent();
-    }
+    Possible<Optional<Image>> discoverySplash();
     
-    @Nullable
-    default Possible<Snowflake> systemChannelId() {
-        return Possible.absent();
-    }
+    Possible<Optional<Image>> banner();
     
-    @Nullable
-    Guild.SystemChannelFlag systemChannelFlags();
+    Possible<Optional<Snowflake>> systemChannelId();
     
-    @Nullable
-    default Possible<Snowflake> rulesChannelId() {
-        return Possible.absent();
-    }
+    Possible<Guild.SystemChannelFlag> systemChannelFlags();
     
-    @Nullable
-    default Possible<Snowflake> publicUpdatesChannelId() {
-        return Possible.absent();
-    }
+    Possible<Optional<Snowflake>> rulesChannelId();
     
-    @Nullable
-    default Possible<Locale> preferredLocale() {
-        return Possible.absent();
-    }
+    Possible<Optional<Snowflake>> publicUpdatesChannelId();
     
-    @Nullable
-    Set<String> features();
+    Possible<Optional<Locale>> preferredLocale();
     
-    @Nullable
-    default Possible<String> description() {
-        return Possible.absent();
-    }
+    Possible<List<String>> features();
+    
+    Possible<Optional<String>> description();
 
     @Override
     default GuildModifyRequest asRequest() {
         return GuildModifyRequest.builder()
-                .name(toPossible(name()))
-                .region(toPossibleOptional(region(), Region::getId))
-                .verificationLevel(toPossibleOptional(verificationLevel(), Guild.VerificationLevel::getValue))
-                .defaultMessageNotifications(toPossibleOptional(defaultMessageNotificationsLevel(),
+                .name(name())
+                .region(mapPossibleOptional(region(), Region::getId))
+                .verificationLevel(mapPossibleOptional(verificationLevel(), Guild.VerificationLevel::getValue))
+                .defaultMessageNotifications(mapPossibleOptional(defaultMessageNotificationsLevel(),
                         Guild.NotificationLevel::getValue))
-                .explicitContentFilter(toPossibleOptional(explicitContentFilter(), Guild.ContentFilterLevel::getValue))
-                .afkChannelId(toPossibleOptional(afkChannelId(), Snowflake::asString))
-                .afkTimeout(toPossible(afkTimeout()))
-                .icon(toPossibleOptional(icon(), Image::getDataUri))
-                .ownerId(toPossible(mapNullable(ownerId(), Snowflake::asString)))
-                .splash(toPossibleOptional(splash(), Image::getDataUri))
-                .discoverySplash(toPossibleOptional(discoverySplash(), Image::getDataUri))
-                .banner(toPossibleOptional(banner(), Image::getDataUri))
-                .systemChannelId(toPossibleOptional(systemChannelId(), Snowflake::asString))
-                .systemChannelFlags(toPossible(mapNullable(systemChannelFlags(), Guild.SystemChannelFlag::getValue)))
-                .rulesChannelId(toPossibleOptional(rulesChannelId(), Snowflake::asString))
-                .publicUpdatesChannelId(toPossibleOptional(publicUpdatesChannelId(), Snowflake::asString))
-                .preferredLocale(toPossibleOptional(preferredLocale(), Locale::toLanguageTag))
-                .features(toPossible(mapNullable(features(), ArrayList::new)))
-                .description(toPossibleOptional(description()))
+                .explicitContentFilter(mapPossibleOptional(explicitContentFilter(), Guild.ContentFilterLevel::getValue))
+                .afkChannelId(mapPossibleOptional(afkChannelId(), Snowflake::asString))
+                .afkTimeout(afkTimeout())
+                .icon(mapPossibleOptional(icon(), Image::getDataUri))
+                .ownerId(mapPossible(ownerId(), Snowflake::asString))
+                .splash(mapPossibleOptional(splash(), Image::getDataUri))
+                .discoverySplash(mapPossibleOptional(discoverySplash(), Image::getDataUri))
+                .banner(mapPossibleOptional(banner(), Image::getDataUri))
+                .systemChannelId(mapPossibleOptional(systemChannelId(), Snowflake::asString))
+                .systemChannelFlags(mapPossible(systemChannelFlags(), Guild.SystemChannelFlag::getValue))
+                .rulesChannelId(mapPossibleOptional(rulesChannelId(), Snowflake::asString))
+                .publicUpdatesChannelId(mapPossibleOptional(publicUpdatesChannelId(), Snowflake::asString))
+                .preferredLocale(mapPossibleOptional(preferredLocale(), Locale::toLanguageTag))
+                .features(mapPossible(features(), ArrayList::new))
+                .description(description())
                 .build();
     }
 }

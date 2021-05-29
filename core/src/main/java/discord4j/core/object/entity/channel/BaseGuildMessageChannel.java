@@ -212,7 +212,7 @@ class BaseGuildMessageChannel extends BaseChannel implements GuildMessageChannel
     }
 
     @Override
-    public Mono<ExtendedInvite> createInvite(final Consumer<? super InviteCreateSpec> spec) {
+    public Mono<ExtendedInvite> createInvite(InviteCreateSpec spec) {
         return categorizableChannel.createInvite(spec);
     }
 

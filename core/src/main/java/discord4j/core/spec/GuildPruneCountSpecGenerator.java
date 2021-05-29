@@ -62,4 +62,7 @@ abstract class GuildPruneCountMonoGenerator extends Mono<Integer> implements Gui
     public void subscribe(CoreSubscriber<? super Integer> actual) {
         guild().getPruneCount(GuildPruneCountSpec.copyOf(this)).subscribe(actual);
     }
+
+    @Override
+    public abstract String toString();
 }

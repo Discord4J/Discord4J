@@ -24,45 +24,36 @@ import discord4j.discordjson.possible.Possible;
 import org.immutables.value.Value;
 import reactor.core.CoreSubscriber;
 import reactor.core.publisher.Mono;
-import reactor.util.annotation.Nullable;
 
-import java.util.Set;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
-import static discord4j.core.spec.InternalSpecUtils.toPossible;
-import static discord4j.core.spec.InternalSpecUtils.toPossibleOptional;
+import static discord4j.core.spec.InternalSpecUtils.mapPossible;
+import static discord4j.core.spec.InternalSpecUtils.mapPossibleOptional;
 
 @SpecStyle
 @Value.Immutable(singleton = true)
 interface GuildMemberEditSpecGenerator extends AuditSpec<GuildMemberModifyRequest> {
 
-    @Value.Default
-    @Nullable
-    default Possible<Snowflake> newVoiceChannel() {
-        return Possible.absent();
-    }
-    
-    @Nullable
-    Boolean mute();
-    
-    @Nullable
-    Boolean deafen();
+    Possible<Optional<Snowflake>> newVoiceChannel();
 
-    @Value.Default
-    @Nullable
-    default Possible<String> nickname() {
-        return Possible.absent();
-    }
-    
-    @Nullable
-    Set<Snowflake> roles();
+    Possible<Boolean> mute();
+
+    Possible<Boolean> deafen();
+
+    Possible<Optional<String>> nickname();
+
+    Possible<List<Snowflake>> roles();
 
     @Override
     default GuildMemberModifyRequest asRequest() {
         return GuildMemberModifyRequest.builder()
-                .channelId(toPossibleOptional(newVoiceChannel(), Snowflake::asString))
-                .mute(toPossible(mute()))
-                .deaf(toPossible(deafen()))
-                .nick(toPossibleOptional(nickname()))
+                .channelId(mapPossibleOptional(newVoiceChannel(), Snowflake::asString))
+                .mute(mute())
+                .deaf(deafen())
+                .nick(nickname())
+                .roles(mapPossible(roles(), r -> r.stream().map(Snowflake::asString).collect(Collectors.toList())))
                 .build();
     }
 }

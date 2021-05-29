@@ -24,47 +24,31 @@ import discord4j.rest.util.AllowedMentions;
 import org.immutables.value.Value;
 import reactor.core.CoreSubscriber;
 import reactor.core.publisher.Mono;
-import reactor.util.annotation.Nullable;
 
 import java.util.List;
+import java.util.Optional;
 
-import static discord4j.core.spec.InternalSpecUtils.toPossibleOptional;
+import static discord4j.core.spec.InternalSpecUtils.mapPossibleOptional;
 
 @SpecStyle
 @Value.Immutable(singleton = true)
 interface MessageEditSpecGenerator extends Spec<MessageEditRequest> {
 
-    @Value.Default
-    @Nullable
-    default Possible<String> content() {
-        return Possible.absent();
-    }
+    Possible<Optional<String>> content();
 
-    @Value.Default
-    @Nullable
-    default Possible<EmbedCreateSpec> embed() {
-        return Possible.absent();
-    }
+    Possible<Optional<EmbedCreateSpec>> embed();
 
-    @Value.Default
-    @Nullable
-    default Possible<AllowedMentions> allowedMentions() {
-        return Possible.absent();
-    }
+    Possible<Optional<AllowedMentions>> allowedMentions();
 
-    @Value.Default
-    @Nullable
-    default Possible<List<Message.Flag>> flags() {
-        return Possible.absent();
-    }
+    Possible<Optional<List<Message.Flag>>> flags();
 
     @Override
     default MessageEditRequest asRequest() {
         return MessageEditRequest.builder()
-                .content(toPossibleOptional(content()))
-                .embed(toPossibleOptional(embed(), EmbedCreateSpec::asRequest))
-                .allowedMentions(toPossibleOptional(allowedMentions(), AllowedMentions::toData))
-                .flags(toPossibleOptional(flags(), f -> f.stream()
+                .content(content())
+                .embed(mapPossibleOptional(embed(), EmbedCreateSpec::asRequest))
+                .allowedMentions(mapPossibleOptional(allowedMentions(), AllowedMentions::toData))
+                .flags(mapPossibleOptional(flags(), f -> f.stream()
                         .mapToInt(Message.Flag::getValue)
                         .reduce(0, (left, right) -> left | right)))
                 .build();

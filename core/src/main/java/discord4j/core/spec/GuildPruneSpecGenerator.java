@@ -66,4 +66,7 @@ abstract class GuildPruneMonoGenerator extends Mono<Integer> implements GuildPru
     public void subscribe(CoreSubscriber<? super Integer> actual) {
         guild().prune(GuildPruneSpec.copyOf(this)).subscribe(actual);
     }
+
+    @Override
+    public abstract String toString();
 }

@@ -17,10 +17,12 @@
 
 package discord4j.core.spec;
 
-import discord4j.discordjson.json.*;
+import discord4j.discordjson.json.EmbedData;
+import discord4j.discordjson.json.EmbedImageData;
+import discord4j.discordjson.json.EmbedThumbnailData;
+import discord4j.discordjson.possible.Possible;
 import discord4j.rest.util.Color;
 import org.immutables.value.Value;
-import reactor.util.annotation.Nullable;
 
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
@@ -28,38 +30,29 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static discord4j.core.spec.InternalSpecUtils.*;
+import static discord4j.core.spec.InternalSpecUtils.mapPossible;
 
 @SpecStyle
 @Value.Immutable(singleton = true)
 interface EmbedCreateSpecGenerator extends Spec<EmbedData> {
 
-    @Nullable
-    String title();
+    Possible<String> title();
 
-    @Nullable
-    String description();
+    Possible<String> description();
 
-    @Nullable
-    String url();
+    Possible<String> url();
 
-    @Nullable
-    Instant timestamp();
+    Possible<Instant> timestamp();
 
-    @Nullable
-    Color color();
+    Possible<Color> color();
 
-    @Nullable
-    EmbedCreateFields.Footer footer();
+    Possible<EmbedCreateFields.Footer> footer();
 
-    @Nullable
-    String image();
+    Possible<String> image();
 
-    @Nullable
-    String thumbnail();
+    Possible<String> thumbnail();
 
-    @Nullable
-    EmbedCreateFields.Author author();
+    Possible<EmbedCreateFields.Author> author();
 
     @Value.Default
     default List<EmbedCreateFields.Field> fields() {
@@ -69,15 +62,15 @@ interface EmbedCreateSpecGenerator extends Spec<EmbedData> {
     @Override
     default EmbedData asRequest() {
         return EmbedData.builder()
-                .title(toPossible(title()))
-                .description(toPossible(description()))
-                .url(toPossible(url()))
-                .timestamp(toPossible(mapNullable(timestamp(), DateTimeFormatter.ISO_INSTANT::format)))
-                .color(toPossible(mapNullable(color(), Color::getRGB)))
-                .footer(toPossible(mapNullable(footer(), EmbedCreateFields.Footer::asRequest)))
-                .image(toPossible(mapNullable(image(), url -> EmbedImageData.builder().url(url).build())))
-                .thumbnail(toPossible(mapNullable(thumbnail(), url -> EmbedThumbnailData.builder().url(url).build())))
-                .author(toPossible(mapNullable(author(), EmbedCreateFields.Author::asRequest)))
+                .title(title())
+                .description(description())
+                .url(url())
+                .timestamp(mapPossible(timestamp(), DateTimeFormatter.ISO_INSTANT::format))
+                .color(mapPossible(color(), Color::getRGB))
+                .footer(mapPossible(footer(), EmbedCreateFields.Footer::asRequest))
+                .image(mapPossible(image(), url -> EmbedImageData.builder().url(url).build()))
+                .thumbnail(mapPossible(thumbnail(), url -> EmbedThumbnailData.builder().url(url).build()))
+                .author(mapPossible(author(), EmbedCreateFields.Author::asRequest))
                 .fields(fields().stream().map(EmbedCreateFields.Field::asRequest).collect(Collectors.toList()))
                 .build();
     }

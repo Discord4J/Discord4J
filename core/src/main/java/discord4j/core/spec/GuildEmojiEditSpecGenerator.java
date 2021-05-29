@@ -20,34 +20,29 @@ package discord4j.core.spec;
 import discord4j.common.util.Snowflake;
 import discord4j.core.object.entity.GuildEmoji;
 import discord4j.discordjson.json.GuildEmojiModifyRequest;
+import discord4j.discordjson.possible.Possible;
 import org.immutables.value.Value;
 import reactor.core.CoreSubscriber;
 import reactor.core.publisher.Mono;
-import reactor.util.annotation.Nullable;
 
-import java.util.Set;
+import java.util.List;
 import java.util.stream.Collectors;
 
-import static discord4j.core.spec.InternalSpecUtils.mapNullable;
-import static discord4j.core.spec.InternalSpecUtils.toPossible;
+import static discord4j.core.spec.InternalSpecUtils.mapPossible;
 
 @SpecStyle
 @Value.Immutable(singleton = true)
 interface GuildEmojiEditSpecGenerator extends AuditSpec<GuildEmojiModifyRequest> {
 
-    @Nullable
-    String name();
+    Possible<String> name();
 
-    @Nullable
-    Set<Snowflake> roles();
+    Possible<List<Snowflake>> roles();
 
     @Override
     default GuildEmojiModifyRequest asRequest() {
         return GuildEmojiModifyRequest.builder()
-                .name(toPossible(name()))
-                .roles(toPossible(mapNullable(roles(), r -> r.stream()
-                        .map(Snowflake::asString)
-                        .collect(Collectors.toList()))))
+                .name(name())
+                .roles(mapPossible(roles(), r -> r.stream().map(Snowflake::asString).collect(Collectors.toList())))
                 .build();
     }
 }

@@ -20,24 +20,23 @@ package discord4j.core.spec;
 import discord4j.core.event.domain.InteractionCreateEvent;
 import discord4j.core.object.entity.Message;
 import discord4j.discordjson.json.InteractionApplicationCommandCallbackData;
+import discord4j.discordjson.possible.Possible;
 import discord4j.rest.util.AllowedMentions;
 import org.immutables.value.Value;
 import reactor.core.CoreSubscriber;
 import reactor.core.publisher.Mono;
-import reactor.util.annotation.Nullable;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static discord4j.core.spec.InternalSpecUtils.*;
+import static discord4j.core.spec.InternalSpecUtils.mapPossible;
 
 @SpecStyle
 @Value.Immutable(singleton = true)
 interface InteractionApplicationCommandCallbackSpecGenerator extends Spec<InteractionApplicationCommandCallbackData> {
 
-    @Nullable
-    String content();
+    Possible<String> content();
 
     @Value.Default
     default boolean tts() {
@@ -54,17 +53,16 @@ interface InteractionApplicationCommandCallbackSpecGenerator extends Spec<Intera
         return Collections.emptyList();
     }
 
-    @Nullable
-    AllowedMentions allowedMentions();
+    Possible<AllowedMentions> allowedMentions();
 
     @Override
     default InteractionApplicationCommandCallbackData asRequest() {
         return InteractionApplicationCommandCallbackData.builder()
-                .content(toPossible(content()))
+                .content(content())
                 .tts(tts())
                 .flags(ephemeral() ? Message.Flag.EPHEMERAL.getValue() : 0)
                 .embeds(embeds().stream().map(EmbedCreateSpec::asRequest).collect(Collectors.toList()))
-                .allowedMentions(toPossible(mapNullable(allowedMentions(), AllowedMentions::toData)))
+                .allowedMentions(mapPossible(allowedMentions(), AllowedMentions::toData))
                 .build();
     }
 }

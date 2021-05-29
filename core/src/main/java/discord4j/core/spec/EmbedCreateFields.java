@@ -20,10 +20,11 @@ package discord4j.core.spec;
 import discord4j.discordjson.json.EmbedAuthorData;
 import discord4j.discordjson.json.EmbedFieldData;
 import discord4j.discordjson.json.EmbedFooterData;
+import discord4j.discordjson.possible.Possible;
 import org.immutables.value.Value;
 import reactor.util.annotation.Nullable;
 
-import static discord4j.core.spec.InternalSpecUtils.toPossible;
+import static discord4j.core.spec.InternalSpecUtils.*;
 
 @InlineFieldStyle
 @Value.Enclosing
@@ -37,19 +38,18 @@ public final class EmbedCreateFields {
     public interface Footer extends Spec<EmbedFooterData> {
 
         static Footer of(String text, @Nullable String iconUrl) {
-            return ImmutableEmbedCreateFields.Footer.of(text, iconUrl);
+            return ImmutableEmbedCreateFields.Footer.of(text, toPossible(iconUrl));
         }
 
         String text();
 
-        @Nullable
-        String iconUrl();
+        Possible<String> iconUrl();
 
         @Override
         default EmbedFooterData asRequest() {
             return EmbedFooterData.builder()
                     .text(text())
-                    .iconUrl(toPossible(iconUrl()))
+                    .iconUrl(iconUrl())
                     .build();
         }
     }
@@ -58,23 +58,21 @@ public final class EmbedCreateFields {
     public interface Author extends Spec<EmbedAuthorData> {
 
         static Author of(String name, @Nullable String url, @Nullable String iconUrl) {
-            return ImmutableEmbedCreateFields.Author.of(name, url, iconUrl);
+            return ImmutableEmbedCreateFields.Author.of(name, toPossible(url), toPossible(iconUrl));
         }
 
         String name();
 
-        @Nullable
-        String url();
+        Possible<String> url();
 
-        @Nullable
-        String iconUrl();
+        Possible<String> iconUrl();
 
         @Override
         default EmbedAuthorData asRequest() {
             return EmbedAuthorData.builder()
                     .name(name())
-                    .url(toPossible(url()))
-                    .iconUrl(toPossible(iconUrl()))
+                    .url(url())
+                    .iconUrl(iconUrl())
                     .build();
         }
     }

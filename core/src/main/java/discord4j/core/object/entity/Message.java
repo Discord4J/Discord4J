@@ -495,7 +495,7 @@ public final class Message implements Entity {
                 () -> {
                     MessageEditSpec actualSpec = getClient().getRestClient().getRestResources()
                             .getAllowedMentions()
-                            .map(allowedMentions -> spec.withAllowedMentions(Possible.of(allowedMentions)))
+                            .map(spec::withAllowedMentions)
                             .orElse(spec);
                     return gateway.getRestClient().getChannelService()
                             .editMessage(getChannelId().asLong(), getId().asLong(), actualSpec.asRequest());

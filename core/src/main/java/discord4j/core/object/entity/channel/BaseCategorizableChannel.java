@@ -54,14 +54,10 @@ class BaseCategorizableChannel extends BaseGuildChannel implements Categorizable
     }
 
     @Override
-    public Mono<ExtendedInvite> createInvite(Consumer<? super InviteCreateSpec> spec) {
+    public Mono<ExtendedInvite> createInvite(InviteCreateSpec spec) {
         return Mono.defer(
-                () -> {
-                    InviteCreateSpec mutatedSpec = new InviteCreateSpec();
-                    spec.accept(mutatedSpec);
-                    return getClient().getRestClient().getChannelService()
-                            .createChannelInvite(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason());
-                })
+                () -> getClient().getRestClient().getChannelService()
+                        .createChannelInvite(getId().asLong(), spec.asRequest(), spec.reason()))
                 .map(data -> new ExtendedInvite(getClient(), data));
     }
 

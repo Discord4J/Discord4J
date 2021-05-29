@@ -21,43 +21,39 @@ import discord4j.core.object.PermissionOverwrite;
 import discord4j.core.object.entity.channel.Category;
 import discord4j.discordjson.json.ChannelModifyRequest;
 import discord4j.discordjson.json.OverwriteData;
+import discord4j.discordjson.possible.Possible;
 import org.immutables.value.Value;
 import reactor.core.CoreSubscriber;
 import reactor.core.publisher.Mono;
-import reactor.util.annotation.Nullable;
 
-import java.util.Set;
+import java.util.List;
 import java.util.stream.Collectors;
 
-import static discord4j.core.spec.InternalSpecUtils.mapNullable;
-import static discord4j.core.spec.InternalSpecUtils.toPossible;
+import static discord4j.core.spec.InternalSpecUtils.*;
 
 @SpecStyle
 @Value.Immutable(singleton = true)
 interface CategoryEditSpecGenerator extends AuditSpec<ChannelModifyRequest> {
 
-    @Nullable
-    String name();
+    Possible<String> name();
 
-    @Nullable
-    Integer position();
+    Possible<Integer> position();
 
-    @Nullable
-    Set<PermissionOverwrite> permissionOverwrites();
+    Possible<List<PermissionOverwrite>> permissionOverwrites();
 
     @Override
     default ChannelModifyRequest asRequest() {
         return ChannelModifyRequest.builder()
-                .name(toPossible(name()))
-                .position(toPossible(position()))
-                .permissionOverwrites(toPossible(mapNullable(permissionOverwrites(), po -> po.stream()
+                .name(name())
+                .position(position())
+                .permissionOverwrites(mapPossible(permissionOverwrites(), po -> po.stream()
                         .map(o -> OverwriteData.builder()
                                 .id(o.getTargetId().asString())
                                 .type(o.getType().getValue())
                                 .allow(o.getAllowed().getRawValue())
                                 .deny(o.getDenied().getRawValue())
                                 .build())
-                        .collect(Collectors.toList()))))
+                        .collect(Collectors.toList())))
                 .build();
     }
 }

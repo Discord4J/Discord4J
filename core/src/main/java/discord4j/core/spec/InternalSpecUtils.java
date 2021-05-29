@@ -32,7 +32,7 @@ final class InternalSpecUtils {
     }
 
     static <T> Possible<T> toPossible(@Nullable T value) {
-        return value != null ? Possible.of(value) : Possible.absent();
+        return value == null ? Possible.absent() : Possible.of(value);
     }
 
     @Nullable
@@ -58,13 +58,12 @@ final class InternalSpecUtils {
         }
     }
 
-    static <T> Possible<Optional<T>> toPossibleOptional(@Nullable Possible<T> value) {
-        return toPossibleOptional(value, Function.identity());
+    static <T, R> Possible<R> mapPossible(Possible<T> value, Function<? super T, ? extends R> mapper) {
+        return value.isAbsent() ? Possible.absent() : Possible.of(mapper.apply(value.get()));
     }
 
-    static <T, R> Possible<Optional<R>> toPossibleOptional(@Nullable Possible<T> value,
+    static <T, R> Possible<Optional<R>> mapPossibleOptional(Possible<Optional<T>> value,
                                                            Function<? super T, ? extends R> mapper) {
-        return value == null ? Possible.of(Optional.empty()) :
-                value.isAbsent() ? Possible.absent() : Possible.of(Optional.of(value.get()).map(mapper));
+        return value.isAbsent() ? Possible.absent() : Possible.of(value.get().map(mapper));
     }
 }

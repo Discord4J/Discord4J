@@ -23,29 +23,22 @@ import discord4j.discordjson.possible.Possible;
 import org.immutables.value.Value;
 import reactor.core.CoreSubscriber;
 import reactor.core.publisher.Mono;
-import reactor.util.annotation.Nullable;
 
-import static discord4j.core.spec.InternalSpecUtils.toPossible;
-import static discord4j.core.spec.InternalSpecUtils.toPossibleOptional;
+import java.util.Optional;
 
 @SpecStyle
 @Value.Immutable(singleton = true)
 interface GuildTemplateEditSpecGenerator extends Spec<TemplateModifyRequest> {
 
-    @Nullable
-    String name();
+    Possible<String> name();
 
-    @Value.Default
-    @Nullable
-    default Possible<String> description() {
-        return Possible.absent();
-    }
+    Possible<Optional<String>> description();
 
     @Override
     default TemplateModifyRequest asRequest() {
         return TemplateModifyRequest.builder()
-                .name(toPossible(name()))
-                .description(toPossibleOptional(description()))
+                .name(name())
+                .description(description())
                 .build();
     }
 }

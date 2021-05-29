@@ -20,33 +20,29 @@ package discord4j.core.spec;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.Webhook;
 import discord4j.discordjson.json.WebhookExecuteRequest;
+import discord4j.discordjson.possible.Possible;
 import discord4j.rest.util.AllowedMentions;
 import discord4j.rest.util.MultipartRequest;
 import org.immutables.value.Value;
 import reactor.core.CoreSubscriber;
 import reactor.core.publisher.Mono;
-import reactor.util.annotation.Nullable;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static discord4j.core.spec.InternalSpecUtils.mapNullable;
-import static discord4j.core.spec.InternalSpecUtils.toPossible;
+import static discord4j.core.spec.InternalSpecUtils.mapPossible;
 
 @SpecStyle
 @Value.Immutable(singleton = true)
 interface WebhookExecuteSpecGenerator extends Spec<MultipartRequest<WebhookExecuteRequest>> {
 
-    @Nullable
-    String content();
+    Possible<String> content();
 
-    @Nullable
-    String username();
+    Possible<String> username();
 
-    @Nullable
-    String avatarUrl();
+    Possible<String> avatarUrl();
 
     @Value.Default
     default boolean tts() {
@@ -68,18 +64,17 @@ interface WebhookExecuteSpecGenerator extends Spec<MultipartRequest<WebhookExecu
         return Collections.emptyList();
     }
 
-    @Nullable
-    AllowedMentions allowedMentions();
+    Possible<AllowedMentions> allowedMentions();
 
     @Override
     default MultipartRequest<WebhookExecuteRequest> asRequest() {
         WebhookExecuteRequest request = WebhookExecuteRequest.builder()
-                .content(toPossible(content()))
-                .username(toPossible(username()))
-                .avatarUrl(toPossible(avatarUrl()))
+                .content(content())
+                .username(username())
+                .avatarUrl(avatarUrl())
                 .tts(tts())
                 .embeds(embeds().stream().map(EmbedCreateSpec::asRequest).collect(Collectors.toList()))
-                .allowedMentions(toPossible(mapNullable(allowedMentions(), AllowedMentions::toData)))
+                .allowedMentions(mapPossible(allowedMentions(), AllowedMentions::toData))
                 .build();
         return MultipartRequest.ofRequestAndFiles(request, Stream.concat(files().stream(), fileSpoilers().stream())
                 .map(MessageCreateFields.File::asRequest)
@@ -91,7 +86,7 @@ interface WebhookExecuteSpecGenerator extends Spec<MultipartRequest<WebhookExecu
 @SpecStyle
 @Value.Immutable(builder = false)
 abstract class WebhookExecuteMonoGenerator extends Mono<Message> implements WebhookExecuteSpecGenerator {
-    
+
     abstract boolean waitForMessage();
 
     abstract Webhook webhook();
