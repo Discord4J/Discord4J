@@ -19,7 +19,6 @@ package discord4j.core.spec;
 import discord4j.common.util.Snowflake;
 import discord4j.core.object.Embed;
 import discord4j.core.object.component.ActionRow;
-import discord4j.core.object.component.MessageComponent;
 import discord4j.core.object.entity.Attachment;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.MessageChannel;
@@ -178,7 +177,8 @@ public class MessageCreateSpec implements Spec<MultipartRequest<MessageCreateReq
                 .embed(embed == null ? Possible.absent() : Possible.of(embed))
                 .allowedMentions(allowedMentionsData == null ? Possible.absent() : Possible.of(allowedMentionsData))
                 .messageReference(messageReferenceData == null ? Possible.absent() : Possible.of(messageReferenceData))
-                .components(actionRows.stream().map(ActionRow::getData).collect(Collectors.toList()))
+                .components(actionRows == null ? Possible.absent() :
+                        Possible.of(actionRows.stream().map(ActionRow::getData).collect(Collectors.toList())))
                 .build();
         return MultipartRequest.ofRequestAndFiles(json, files == null ? Collections.emptyList() : files);
     }
