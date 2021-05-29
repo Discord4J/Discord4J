@@ -18,6 +18,7 @@ package discord4j.core.object;
 
 import discord4j.discordjson.json.RegionData;
 import discord4j.core.GatewayDiscordClient;
+import reactor.util.annotation.Nullable;
 
 import java.util.Objects;
 
@@ -120,10 +121,12 @@ public final class Region implements DiscordObject {
                 '}';
     }
 
-    /** Represents the different region ids. */
+    /** Represents the different non-deprecated voice region ids. */
     public enum Id {
 
         UNKNOWN(null),
+
+        AUTOMATIC(null),
 
         US_WEST("us-west"),
 
@@ -179,7 +182,11 @@ public final class Region implements DiscordObject {
          * @param value The underlying value as represented by Discord.
          * @return The region id.
          */
-        public static Region.Id of(final String value) {
+        public static Region.Id of(@Nullable final String value) {
+            if(value == null) {
+                return AUTOMATIC;
+            }
+
             switch (value) {
                 case "us-west": return US_WEST;
                 case "us-east": return US_EAST;
