@@ -52,13 +52,24 @@ public class GuildEditSpec implements AuditSpec<GuildModifyRequest> {
     }
 
     /**
-     * Sets the voice region for the modified {@link Guild}.
+     * Sets the voice region for the modified {@link Guild}, automatic if null.
      *
-     * @param regionId The voice region for the guild.
+     * @param regionId The voice region for the guild, automatic if null.
      * @return This spec.
      */
     public GuildEditSpec setRegion(@Nullable Region.Id regionId) {
         requestBuilder.region(Possible.of(Optional.ofNullable(regionId).map(Region.Id::getValue)));
+        return this;
+    }
+
+    /**
+     * Sets the voice region for the modified {@link Guild}, automatic if null.
+     *
+     * @param regionId The voice region for the guild, automatic if null.
+     * @return This spec.
+     */
+    public GuildEditSpec setRegion(@Nullable String regionId) {
+        requestBuilder.region(Possible.of(Optional.ofNullable(regionId)));
         return this;
     }
 
