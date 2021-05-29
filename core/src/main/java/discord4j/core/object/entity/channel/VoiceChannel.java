@@ -72,23 +72,12 @@ public final class VoiceChannel extends BaseCategorizableChannel {
     }
 
     /**
-     * Gets the voice region id for the voice channel, automatic if not present.
+     * Gets the voice region id for the voice channel.
      *
-     * @return The voice region id for the voice channel, automatic if not present.
+     * @return The voice region id for the voice channel.
      */
-    public Optional<Region.Id> getRtcRegion() {
-        return Possible.flatOpt(getData().rtcRegion()).map(Region.Id::of);
-    }
-
-    /**
-     * Requests to retrieve the voice region for the voice channel.
-     *
-     * @return A {@link Mono} where, upon successful completion, emits the voice {@link Region region} for the guild. If
-     * an error is received, it is emitted through the {@code Mono}.
-     */
-    public Mono<Region> getRegion() {
-        return getClient().getRegions().filter(response -> getRtcRegion().map(Region.Id::getValue)
-                .map(response.getId()::equals).orElse(false)).single();
+    public Region.Id getRtcRegion() {
+        return Possible.flatOpt(getData().rtcRegion()).map(Region.Id::of).orElse(Region.Id.AUTOMATIC);
     }
 
     /**

@@ -228,7 +228,9 @@ public final class Guild implements Entity {
      * Gets the voice region ID for the guild.
      *
      * @return The voice region ID for the guild.
+     * @deprecated Voice region are now specific to voice channels. Use {@code VoiceChannel#getRtcRegion} instead.
      */
+    @Deprecated
     public Region.Id getRegionId() {
         return Region.Id.of(data.region());
     }
@@ -238,7 +240,9 @@ public final class Guild implements Entity {
      *
      * @return A {@link Mono} where, upon successful completion, emits the voice {@link Region region} for the guild. If
      * an error is received, it is emitted through the {@code Mono}.
+     * @deprecated Voice regions are now specific to voice channels. Use {@code VoiceChannel#getRtcRegion} instead.
      */
+    @Deprecated
     public Mono<Region> getRegion() {
         return getRegions().filter(response -> response.getId().equals(getRegionId().getValue())).single();
     }
