@@ -20,10 +20,7 @@ import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.channel.GuildMessageChannel;
 import discord4j.core.retriever.EntityRetrievalStrategy;
-import discord4j.core.spec.WebhookEditSpec;
-import discord4j.core.spec.WebhookEditWithTokenSpec;
-import discord4j.core.spec.WebhookExecuteMono;
-import discord4j.core.spec.WebhookExecuteSpec;
+import discord4j.core.spec.*;
 import discord4j.core.util.EntityUtil;
 import discord4j.discordjson.json.WebhookData;
 import discord4j.discordjson.json.WebhookPartialChannelData;
@@ -33,7 +30,6 @@ import reactor.util.annotation.Nullable;
 
 import java.util.Objects;
 import java.util.Optional;
-import java.util.function.Consumer;
 
 /**
  * A Discord webhook.
@@ -281,41 +277,53 @@ public final class Webhook implements Entity {
     }
 
     /**
+     * Requests to edit this webhook. Properties specifying how to edit this webhook can be set via the {@code withXxx}
+     * methods of the returned {@link WebhookEditMono}. Requires the MANAGE_WEBHOOKS permission.
+     *
+     * @return A {@link WebhookEditMono} where, upon successful completion, emits the edited {@link Webhook}. If an
+     * error is received, it is emitted through the {@code WebhookEditMono}.
+     */
+    public WebhookEditMono edit() {
+        return WebhookEditMono.of(this);
+    }
+
+    /**
      * Requests to edit this webhook. Requires the MANAGE_WEBHOOKS permission.
      *
-     * @param spec A {@link Consumer} that provides a "blank" {@link WebhookEditSpec} to be operated on.
+     * @param spec an immutable object that specifies how to edit this webhook
      * @return A {@link Mono} where, upon successful completion, emits the edited {@link Webhook}. If an error is
      * received, it is emitted through the {@code Mono}.
      */
-    public Mono<Webhook> edit(final Consumer<? super WebhookEditSpec> spec) {
+    public Mono<Webhook> edit(WebhookEditSpec spec) {
         return Mono.defer(
-                () -> {
-                    WebhookEditSpec mutatedSpec = new WebhookEditSpec();
-                    spec.accept(mutatedSpec);
-                    return gateway.getRestClient().getWebhookService()
-                            .modifyWebhook(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason());
-                })
+                () -> gateway.getRestClient().getWebhookService()
+                        .modifyWebhook(getId().asLong(), spec.asRequest(), spec.reason()))
                 .map(data -> new Webhook(gateway, data));
+    }
+
+    /**
+     * Requests to edit this webhook. Properties specifying how to edit this webhook can be set via the {@code withXxx}
+     * methods of the returned {@link WebhookEditWithTokenMono}. Does not require the MANAGE_WEBHOOKS permission.
+     *
+     * @return A {@link WebhookEditWithTokenMono} where, upon successful completion, emits the edited {@link Webhook}.
+     * If an error is received, it is emitted through the {@code WebhookEditWithTokenMono}.
+     */
+    public WebhookEditWithTokenMono editWithToken() {
+        return WebhookEditWithTokenMono.of(this);
     }
 
     /**
      * Requests to edit this webhook. Does not require the MANAGE_WEBHOOKS permission.
      *
-     * @param spec A {@link Consumer} that provides a "blank" {@link WebhookEditSpec} to be operated on.
+     * @param spec an immutable object that specifies how to edit this webhook
      * @return A {@link Mono} where, upon successful completion, emits the edited {@link Webhook}. If an error is
      * received, it is emitted through the {@code Mono}.
      */
-    public Mono<Webhook> editWithToken(final Consumer<? super WebhookEditWithTokenSpec> spec) {
+    public Mono<Webhook> editWithToken(WebhookEditWithTokenSpec spec) {
         return Mono.defer(
-                () -> {
-                    if (!getToken().isPresent()) {
-                        throw new IllegalStateException("Can't edit webhook.");
-                    }
-                    WebhookEditWithTokenSpec mutatedSpec = new WebhookEditWithTokenSpec();
-                    spec.accept(mutatedSpec);
-                    return gateway.getRestClient().getWebhookService()
-                            .modifyWebhookWithToken(getId().asLong(), getToken().get(), mutatedSpec.asRequest());
-                })
+                () -> gateway.getRestClient().getWebhookService()
+                        .modifyWebhookWithToken(getId().asLong(), getToken()
+                                .orElseThrow(() -> new IllegalStateException("Can't edit webhook.")), spec.asRequest()))
                 .map(data -> new Webhook(gateway, data));
     }
 

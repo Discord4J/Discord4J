@@ -30,7 +30,6 @@ import java.util.Map;
 
 import static discord4j.core.spec.InternalSpecUtils.putIfNotNull;
 
-@SpecStyle
 @Value.Immutable(singleton = true)
 interface BanQuerySpecGenerator extends AuditSpec<Map<String, Object>> {
 
@@ -47,7 +46,6 @@ interface BanQuerySpecGenerator extends AuditSpec<Map<String, Object>> {
 }
 
 @SuppressWarnings("immutables:subtype")
-@SpecStyle
 @Value.Immutable(builder = false)
 abstract class GuildBanQueryMonoGenerator extends Mono<Void> implements BanQuerySpecGenerator {
 
@@ -65,7 +63,6 @@ abstract class GuildBanQueryMonoGenerator extends Mono<Void> implements BanQuery
 }
 
 @SuppressWarnings("immutables:subtype")
-@SpecStyle
 @Value.Immutable(builder = false)
 abstract class MemberBanQueryMonoGenerator extends Mono<Void> implements BanQuerySpecGenerator {
 

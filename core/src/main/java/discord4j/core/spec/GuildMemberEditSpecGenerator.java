@@ -32,7 +32,6 @@ import java.util.stream.Collectors;
 import static discord4j.core.spec.InternalSpecUtils.mapPossible;
 import static discord4j.core.spec.InternalSpecUtils.mapPossibleOptional;
 
-@SpecStyle
 @Value.Immutable(singleton = true)
 interface GuildMemberEditSpecGenerator extends AuditSpec<GuildMemberModifyRequest> {
 
@@ -59,7 +58,6 @@ interface GuildMemberEditSpecGenerator extends AuditSpec<GuildMemberModifyReques
 }
 
 @SuppressWarnings("immutables:subtype")
-@SpecStyle
 @Value.Immutable(builder = false)
 abstract class GuildMemberEditMonoGenerator extends Mono<Member> implements GuildMemberEditSpecGenerator {
 

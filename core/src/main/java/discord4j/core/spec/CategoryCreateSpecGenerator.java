@@ -31,7 +31,6 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@SpecStyle
 @Value.Immutable
 interface CategoryCreateSpecGenerator extends AuditSpec<ChannelCreateRequest> {
 
@@ -62,7 +61,6 @@ interface CategoryCreateSpecGenerator extends AuditSpec<ChannelCreateRequest> {
 }
 
 @SuppressWarnings("immutables:subtype")
-@SpecStyle
 @Value.Immutable(builder = false)
 abstract class CategoryCreateMonoGenerator extends Mono<Category> implements CategoryCreateSpecGenerator {
 

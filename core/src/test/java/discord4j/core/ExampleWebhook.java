@@ -80,15 +80,14 @@ public class ExampleWebhook {
                 .flatMap(webhook -> webhook.execute()
                         .withContent("A webhook can create several embeds.")
                         .withEmbeds(IntStream.range(0, 10)
-                                .mapToObj(i -> EmbedCreateSpec.builder()
-                                        .description("I can create a lot of embeds at once too. #" + (i + 1))
-                                        .build())
+                                .mapToObj(i -> EmbedCreateSpec.create()
+                                        .withDescription("I can create a lot of embeds at once too. #" + (i + 1)))
                                 .toArray(EmbedCreateSpec[]::new)))
                 .block();
 
         gateway.getChannelById(webhookChannel)
-                .flatMap(channel -> ((TextChannel) channel).createWebhook(webhook ->
-                        webhook.setReason("testing").setName("A webhook for testing")))
+                .flatMap(channel -> ((TextChannel) channel).createWebhook("A webhook for testing")
+                        .withReason("testing"))
                 .flatMap(hook -> hook.execute()
                         .withWaitForMessage(true)
                         .withContent("you can execute webhooks after you create them.")

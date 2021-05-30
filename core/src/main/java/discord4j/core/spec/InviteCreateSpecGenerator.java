@@ -29,7 +29,6 @@ import reactor.core.publisher.Mono;
 
 import static discord4j.core.spec.InternalSpecUtils.mapPossible;
 
-@SpecStyle
 @Value.Immutable(singleton = true)
 interface InviteCreateSpecGenerator extends AuditSpec<InviteCreateRequest> {
 
@@ -62,7 +61,6 @@ interface InviteCreateSpecGenerator extends AuditSpec<InviteCreateRequest> {
 }
 
 @SuppressWarnings("immutables:subtype")
-@SpecStyle
 @Value.Immutable(builder = false)
 abstract class InviteCreateMonoGenerator extends Mono<ExtendedInvite> implements InviteCreateSpecGenerator {
 

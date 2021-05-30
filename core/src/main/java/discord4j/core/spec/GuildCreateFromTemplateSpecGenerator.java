@@ -28,7 +28,6 @@ import reactor.core.publisher.Mono;
 
 import static discord4j.core.spec.InternalSpecUtils.*;
 
-@SpecStyle
 @Value.Immutable
 interface GuildCreateFromTemplateSpecGenerator extends Spec<TemplateCreateGuildRequest> {
 
@@ -46,7 +45,6 @@ interface GuildCreateFromTemplateSpecGenerator extends Spec<TemplateCreateGuildR
 }
 
 @SuppressWarnings("immutables:subtype")
-@SpecStyle
 @Value.Immutable(builder = false)
 abstract class GuildCreateFromTemplateMonoGenerator extends Mono<Guild>
         implements GuildCreateFromTemplateSpecGenerator {

@@ -34,7 +34,6 @@ import java.util.stream.Stream;
 
 import static discord4j.core.spec.InternalSpecUtils.mapPossible;
 
-@SpecStyle
 @Value.Immutable(singleton = true)
 interface WebhookExecuteSpecGenerator extends Spec<MultipartRequest<WebhookExecuteRequest>> {
 
@@ -83,7 +82,6 @@ interface WebhookExecuteSpecGenerator extends Spec<MultipartRequest<WebhookExecu
 }
 
 @SuppressWarnings("immutables:subtype")
-@SpecStyle
 @Value.Immutable(builder = false)
 abstract class WebhookExecuteMonoGenerator extends Mono<Message> implements WebhookExecuteSpecGenerator {
 

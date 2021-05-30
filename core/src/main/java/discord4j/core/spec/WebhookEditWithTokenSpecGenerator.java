@@ -17,46 +17,41 @@
 
 package discord4j.core.spec;
 
-import discord4j.core.object.PermissionOverwrite;
-import discord4j.core.object.entity.channel.Category;
-import discord4j.discordjson.json.ChannelModifyRequest;
+import discord4j.core.object.entity.Webhook;
+import discord4j.discordjson.json.WebhookModifyWithTokenRequest;
 import discord4j.discordjson.possible.Possible;
+import discord4j.rest.util.Image;
 import org.immutables.value.Value;
 import reactor.core.CoreSubscriber;
 import reactor.core.publisher.Mono;
 
-import java.util.List;
-
-import static discord4j.core.spec.InternalSpecUtils.mapPossibleOverwrites;
+import static discord4j.core.spec.InternalSpecUtils.mapPossible;
 
 @Value.Immutable(singleton = true)
-interface CategoryEditSpecGenerator extends AuditSpec<ChannelModifyRequest> {
+interface WebhookEditWithTokenSpecGenerator extends AuditSpec<WebhookModifyWithTokenRequest> {
 
     Possible<String> name();
 
-    Possible<Integer> position();
-
-    Possible<List<PermissionOverwrite>> permissionOverwrites();
+    Possible<Image> avatar();
 
     @Override
-    default ChannelModifyRequest asRequest() {
-        return ChannelModifyRequest.builder()
+    default WebhookModifyWithTokenRequest asRequest() {
+        return WebhookModifyWithTokenRequest.builder()
                 .name(name())
-                .position(position())
-                .permissionOverwrites(mapPossibleOverwrites(permissionOverwrites()))
+                .avatar(mapPossible(avatar(), Image::getDataUri))
                 .build();
     }
 }
 
 @SuppressWarnings("immutables:subtype")
 @Value.Immutable(builder = false)
-abstract class CategoryEditMonoGenerator extends Mono<Category> implements CategoryEditSpecGenerator {
+abstract class WebhookEditWithTokenMonoGenerator extends Mono<Webhook> implements WebhookEditWithTokenSpecGenerator {
 
-    abstract Category category();
+    abstract Webhook webhook();
 
     @Override
-    public void subscribe(CoreSubscriber<? super Category> actual) {
-        category().edit(CategoryEditSpec.copyOf(this)).subscribe(actual);
+    public void subscribe(CoreSubscriber<? super Webhook> actual) {
+        webhook().editWithToken(WebhookEditWithTokenSpec.copyOf(this)).subscribe(actual);
     }
 
     @Override

@@ -36,7 +36,6 @@ import java.util.stream.Collectors;
 
 import static discord4j.core.spec.InternalSpecUtils.mapNullable;
 
-@SpecStyle
 @Value.Immutable
 interface GuildCreateSpecGenerator extends Spec<GuildCreateRequest> {
 
@@ -101,7 +100,6 @@ interface GuildCreateSpecGenerator extends Spec<GuildCreateRequest> {
 }
 
 @SuppressWarnings("immutables:subtype")
-@SpecStyle
 @Value.Immutable(builder = false)
 abstract class GuildCreateMonoGenerator extends Mono<Guild> implements GuildCreateSpecGenerator {
 

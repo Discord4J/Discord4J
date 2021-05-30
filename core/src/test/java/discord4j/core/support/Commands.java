@@ -23,9 +23,9 @@ import discord4j.common.ReactorResources;
 import discord4j.common.util.Snowflake;
 import discord4j.core.command.CommandRequest;
 import discord4j.core.command.CommandResponse;
-import discord4j.core.object.presence.ClientPresence;
 import discord4j.core.object.entity.*;
 import discord4j.core.object.entity.channel.TextChannel;
+import discord4j.core.object.presence.ClientPresence;
 import discord4j.core.object.reaction.ReactionEmoji;
 import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.discordjson.json.MessageCreateRequest;
@@ -155,8 +155,7 @@ public class Commands {
                     .get()
                     .uri(attachment.getUrl())
                     .responseSingle((res, mono) -> mono.asByteArray())
-                    .flatMap(input -> request.getClient()
-                            .edit(spec -> spec.setAvatar(Image.ofRaw(input, Image.Format.PNG))))
+                    .flatMap(input -> request.getClient().edit().withAvatar(Image.ofRaw(input, Image.Format.PNG)))
                     .then();
         }
         return Mono.empty();

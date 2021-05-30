@@ -70,7 +70,6 @@ import java.util.stream.Stream;
 
 import static discord4j.core.spec.InternalSpecUtils.mapPossible;
 
-@SpecStyle
 @Value.Immutable(singleton = true)
 interface MessageCreateSpecGenerator extends Spec<MultipartRequest<MessageCreateRequest>> {
 
@@ -105,7 +104,7 @@ interface MessageCreateSpecGenerator extends Spec<MultipartRequest<MessageCreate
                 .content(content())
                 .nonce(nonce())
                 .tts(tts())
-                .embed(mapPossible(embed(), EmbedCreateSpecGenerator::asRequest))
+                .embed(mapPossible(embed(), EmbedCreateSpec::asRequest))
                 .allowedMentions(mapPossible(allowedMentions(), AllowedMentions::toData))
                 .messageReference(mapPossible(messageReference(),
                         ref -> MessageReferenceData.builder()
@@ -119,7 +118,6 @@ interface MessageCreateSpecGenerator extends Spec<MultipartRequest<MessageCreate
 }
 
 @SuppressWarnings("immutables:subtype")
-@SpecStyle
 @Value.Immutable(builder = false)
 abstract class MessageCreateMonoGenerator extends Mono<Message> implements MessageCreateSpecGenerator {
 

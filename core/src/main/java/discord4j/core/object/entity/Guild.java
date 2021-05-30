@@ -44,7 +44,6 @@ import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.*;
-import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.ToLongFunction;
 import java.util.stream.Collectors;
@@ -1042,38 +1041,55 @@ public final class Guild implements Entity {
     }
 
     /**
+     * Requests to create a role. Properties specifying how to create the role can be set via the {@code withXxx}
+     * methods of the returned {@link RoleCreateMono}.
+     *
+     * @return A {@link RoleCreateMono} where, upon successful completion, emits the created {@link Role}. If an error
+     * is received, it is emitted through the {@code RoleCreateMono}.
+     */
+    public RoleCreateMono createRole() {
+        return RoleCreateMono.of(this);
+    }
+
+    /**
      * Requests to create a role.
      *
-     * @param spec A {@link Consumer} that provides a "blank" {@link RoleCreateSpec} to be operated on.
+     * @param spec an immutable object that specifies how to create the role
      * @return A {@link Mono} where, upon successful completion, emits the created {@link Role}. If an error is
      * received, it is emitted through the {@code Mono}.
      */
-    public Mono<Role> createRole(final Consumer<? super RoleCreateSpec> spec) {
+    public Mono<Role> createRole(RoleCreateSpec spec) {
+        Objects.requireNonNull(spec);
         return Mono.defer(
-                () -> {
-                    RoleCreateSpec mutatedSpec = new RoleCreateSpec();
-                    spec.accept(mutatedSpec);
-                    return gateway.getRestClient().getGuildService()
-                            .createGuildRole(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason());
-                })
+                () -> gateway.getRestClient().getGuildService()
+                        .createGuildRole(getId().asLong(), spec.asRequest(), spec.reason()))
                 .map(data -> new Role(gateway, data, getId().asLong()));
+    }
+
+    /**
+     * Requests to create a news channel. Properties specifying how to create the news channel can be set via the {@code
+     * withXxx} methods of the returned {@link NewsChannelCreateMono}.
+     *
+     * @param name the name of the news channel to create
+     * @return A {@link NewsChannelCreateMono} where, upon successful completion, emits the created {@link NewsChannel}.
+     * If an error is received, it is emitted through the {@code NewsChannelCreateMono}.
+     */
+    public NewsChannelCreateMono createNewsChannel(String name) {
+        return NewsChannelCreateMono.of(name, this);
     }
 
     /**
      * Requests to create a news channel.
      *
-     * @param spec A {@link Consumer} that provides a "blank" {@link NewsChannelCreateSpec} to be operated on.
+     * @param spec an immutable object that specifies how to create the news channel
      * @return A {@link Mono} where, upon successful completion, emits the created {@link NewsChannel}. If an error is
      * received, it is emitted through the {@code Mono}.
      */
-    public Mono<NewsChannel> createNewsChannel(final Consumer<? super NewsChannelCreateSpec> spec) {
+    public Mono<NewsChannel> createNewsChannel(NewsChannelCreateSpec spec) {
+        Objects.requireNonNull(spec);
         return Mono.defer(
-                () -> {
-                    NewsChannelCreateSpec mutatedSpec = new NewsChannelCreateSpec();
-                    spec.accept(mutatedSpec);
-                    return gateway.getRestClient().getGuildService()
-                            .createGuildChannel(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason());
-                })
+                () -> gateway.getRestClient().getGuildService()
+                        .createGuildChannel(getId().asLong(), spec.asRequest(), spec.reason()))
                 .map(data -> EntityUtil.getChannel(gateway, data))
                 .cast(NewsChannel.class);
     }
@@ -1107,39 +1123,55 @@ public final class Guild implements Entity {
     }
 
     /**
+     * Requests to create a text channel. Properties specifying how to create the text channel can be set via the {@code
+     * withXxx} methods of the returned {@link TextChannelCreateMono}.
+     *
+     * @param name the name of the text channel to create
+     * @return A {@link TextChannelCreateMono} where, upon successful completion, emits the created {@link TextChannel}.
+     * If an error is received, it is emitted through the {@code TextChannelCreateMono}.
+     */
+    public TextChannelCreateMono createTextChannel(String name) {
+        return TextChannelCreateMono.of(name, this);
+    }
+
+    /**
      * Requests to create a text channel.
      *
-     * @param spec A {@link Consumer} that provides a "blank" {@link TextChannelCreateSpec} to be operated on.
+     * @param spec an immutable object that specifies how to create the text channel
      * @return A {@link Mono} where, upon successful completion, emits the created {@link TextChannel}. If an error is
      * received, it is emitted through the {@code Mono}.
      */
-    public Mono<TextChannel> createTextChannel(final Consumer<? super TextChannelCreateSpec> spec) {
+    public Mono<TextChannel> createTextChannel(TextChannelCreateSpec spec) {
         return Mono.defer(
-                () -> {
-                    TextChannelCreateSpec mutatedSpec = new TextChannelCreateSpec();
-                    spec.accept(mutatedSpec);
-                    return gateway.getRestClient().getGuildService()
-                            .createGuildChannel(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason());
-                })
+                () -> gateway.getRestClient().getGuildService()
+                        .createGuildChannel(getId().asLong(), spec.asRequest(), spec.reason()))
                 .map(data -> EntityUtil.getChannel(gateway, data))
                 .cast(TextChannel.class);
     }
 
     /**
+     * Requests to create a voice channel. Properties specifying how to create the voice channel can be set via the
+     * {@code withXxx} methods of the returned {@link VoiceChannelCreateMono}.
+     *
+     * @param name the name of the voice channel to create
+     * @return A {@link VoiceChannelCreateMono} where, upon successful completion, emits the created {@link
+     * VoiceChannel}. If an error is received, it is emitted through the {@code VoiceChannelCreateMono}.
+     */
+    public VoiceChannelCreateMono createVoiceChannel(String name) {
+        return VoiceChannelCreateMono.of(name, this);
+    }
+
+    /**
      * Requests to create a voice channel.
      *
-     * @param spec A {@link Consumer} that provides a "blank" {@link VoiceChannelCreateSpec} to be operated on.
+     * @param spec an immutable object that specifies how to create the voice channel
      * @return A {@link Mono} where, upon successful completion, emits the created {@link VoiceChannel}. If an error is
      * received, it is emitted through the {@code Mono}.
      */
-    public Mono<VoiceChannel> createVoiceChannel(final Consumer<? super VoiceChannelCreateSpec> spec) {
+    public Mono<VoiceChannel> createVoiceChannel(VoiceChannelCreateSpec spec) {
         return Mono.defer(
-                () -> {
-                    VoiceChannelCreateSpec mutatedSpec = new VoiceChannelCreateSpec();
-                    spec.accept(mutatedSpec);
-                    return gateway.getRestClient().getGuildService()
-                            .createGuildChannel(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason());
-                })
+                () -> gateway.getRestClient().getGuildService()
+                        .createGuildChannel(getId().asLong(), spec.asRequest(), spec.reason()))
                 .map(data -> EntityUtil.getChannel(gateway, data))
                 .cast(VoiceChannel.class);
     }

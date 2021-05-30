@@ -19,6 +19,7 @@
  */
 @NonNullApi
 @MetaEncodingEnabled
+@SpecStyle
 package discord4j.core.spec;
 
 import discord4j.discordjson.MetaEncodingEnabled;

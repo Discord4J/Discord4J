@@ -16,9 +16,11 @@
  */
 package discord4j.core.object.entity;
 
+import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.RoleTags;
 import discord4j.core.retriever.EntityRetrievalStrategy;
+import discord4j.core.spec.RoleEditMono;
 import discord4j.core.spec.RoleEditSpec;
 import discord4j.core.util.EntityUtil;
 import discord4j.core.util.OrderUtil;
@@ -26,14 +28,12 @@ import discord4j.discordjson.json.RoleData;
 import discord4j.rest.entity.RestRole;
 import discord4j.rest.util.Color;
 import discord4j.rest.util.PermissionSet;
-import discord4j.common.util.Snowflake;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
 
 import java.util.Objects;
 import java.util.Optional;
-import java.util.function.Consumer;
 
 /**
  * A Discord role.
@@ -282,20 +282,26 @@ public final class Role implements Entity {
     }
 
     /**
+     * Requests to edit this role. Properties specifying how to edit this role can be set via the {@code withXxx}
+     * methods of the returned {@link RoleEditMono}.
+     *
+     * @return A {@link RoleEditMono} where, upon successful completion, emits the edited {@link Role}. If an error is
+     * received, it is emitted through the {@code RoleEditMono}.
+     */
+    public RoleEditMono edit() {
+        return RoleEditMono.of(this);
+    }
+
+    /**
      * Requests to edit this role.
      *
-     * @param spec A {@link Consumer} that provides a "blank" {@link RoleEditSpec} to be operated on.
+     * @param spec an immutable object that specifies how to edit this role
      * @return A {@link Mono} where, upon successful completion, emits the edited {@link Role}. If an error is received,
      * it is emitted through the {@code Mono}.
      */
-    public Mono<Role> edit(final Consumer<? super RoleEditSpec> spec) {
-        return Mono.defer(
-                () -> {
-                    RoleEditSpec mutatedSpec = new RoleEditSpec();
-                    spec.accept(mutatedSpec);
-                    return rest.edit(mutatedSpec.asRequest(), mutatedSpec.getReason())
-                            .map(bean -> new Role(gateway, bean, getGuildId().asLong()));
-                });
+    public Mono<Role> edit(RoleEditSpec spec) {
+        return Mono.defer(() -> rest.edit(spec.asRequest(), spec.reason())
+                .map(bean -> new Role(gateway, bean, getGuildId().asLong())));
     }
 
     /**

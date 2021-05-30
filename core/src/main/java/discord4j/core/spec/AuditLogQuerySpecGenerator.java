@@ -33,7 +33,6 @@ import java.util.Map;
 import static discord4j.core.spec.InternalSpecUtils.mapNullable;
 import static discord4j.core.spec.InternalSpecUtils.putIfNotNull;
 
-@SpecStyle
 @Value.Immutable(singleton = true)
 interface AuditLogQuerySpecGenerator extends Spec<Map<String, Object>> {
     
@@ -61,7 +60,6 @@ interface AuditLogQuerySpecGenerator extends Spec<Map<String, Object>> {
 }
 
 @SuppressWarnings("immutables:subtype")
-@SpecStyle
 @Value.Immutable(builder = false)
 abstract class AuditLogQueryFluxGenerator extends Flux<AuditLogPart> implements AuditLogQuerySpecGenerator {
 

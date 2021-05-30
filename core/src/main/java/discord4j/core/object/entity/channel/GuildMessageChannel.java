@@ -16,18 +16,18 @@
  */
 package discord4j.core.object.entity.channel;
 
+import discord4j.common.util.Snowflake;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.Webhook;
+import discord4j.core.spec.WebhookCreateMono;
 import discord4j.core.spec.WebhookCreateSpec;
-import discord4j.common.util.Snowflake;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.Optional;
-import java.util.function.Consumer;
 
 public interface GuildMessageChannel extends CategorizableChannel, MessageChannel {
 
@@ -85,13 +85,24 @@ public interface GuildMessageChannel extends CategorizableChannel, MessageChanne
     Flux<Message> bulkDeleteMessages(Publisher<Message> messages);
 
     /**
+     * Requests to create a webhook. Properties specifying how to create the webhook can be set via the {@code withXxx}
+     * methods of the returned {@link WebhookCreateMono}.
+     *
+     * @return A {@link Mono} where, upon successful completion, emits the created {@link Webhook}. If an error is
+     * received, it is emitted through the {@code Mono}.
+     */
+    default WebhookCreateMono createWebhook(String name) {
+        return WebhookCreateMono.of(name, this);
+    }
+
+    /**
      * Requests to create a webhook.
      *
-     * @param spec A {@link Consumer} that provides a "blank" {@link WebhookCreateSpec} to be operated on.
-     * @return A {@link Mono} where, upon successful completion, emits the created {@link Webhook}. If an error
-     * is received, it is emitted through the {@code Mono}.
+     * @param spec an immutable object that specifies how to create the webhook
+     * @return A {@link Mono} where, upon successful completion, emits the created {@link Webhook}. If an error is
+     * received, it is emitted through the {@code Mono}.
      */
-    Mono<Webhook> createWebhook(final Consumer<? super WebhookCreateSpec> spec);
+    Mono<Webhook> createWebhook(WebhookCreateSpec spec);
 
     /**
      * Requests to retrieve the webhooks of the channel.

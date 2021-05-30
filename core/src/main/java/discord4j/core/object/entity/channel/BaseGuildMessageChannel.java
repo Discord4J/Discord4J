@@ -27,8 +27,8 @@ import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.Webhook;
 import discord4j.core.retriever.EntityRetrievalStrategy;
 import discord4j.core.spec.InviteCreateSpec;
-import discord4j.core.spec.WebhookCreateSpec;
 import discord4j.core.spec.MessageCreateSpec;
+import discord4j.core.spec.WebhookCreateSpec;
 import discord4j.discordjson.json.BulkDeleteRequest;
 import discord4j.discordjson.json.ChannelData;
 import discord4j.discordjson.possible.Possible;
@@ -42,7 +42,6 @@ import reactor.util.annotation.Nullable;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 /** An internal implementation of {@link GuildMessageChannel} designed to streamline inheritance. */
@@ -281,19 +280,15 @@ class BaseGuildMessageChannel extends BaseChannel implements GuildMessageChannel
     /**
      * Requests to create a webhook. Requires the MANAGE_WEBHOOKS permission.
      *
-     * @param spec A {@link Consumer} that provides a "blank" {@link WebhookCreateSpec} to be operated on.
+     * @param spec an immutable object that specifies how to create the webhook
      * @return A {@link Mono} where, upon successful completion, emits the created {@link Webhook}. If an error
      * is received, it is emitted through the {@code Mono}.
      */
     @Override
-    public Mono<Webhook> createWebhook(final Consumer<? super WebhookCreateSpec> spec) {
+    public Mono<Webhook> createWebhook(WebhookCreateSpec spec) {
         return Mono.defer(
-                () -> {
-                    WebhookCreateSpec mutatedSpec = new WebhookCreateSpec();
-                    spec.accept(mutatedSpec);
-                    return getClient().getRestClient().getWebhookService()
-                            .createWebhook(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason());
-                })
+                () -> getClient().getRestClient().getWebhookService()
+                        .createWebhook(getId().asLong(), spec.asRequest(), spec.reason()))
                 .map(data -> new Webhook(getClient(), data));
     }
 

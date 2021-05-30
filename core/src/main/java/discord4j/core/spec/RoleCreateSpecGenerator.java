@@ -17,46 +17,52 @@
 
 package discord4j.core.spec;
 
-import discord4j.core.object.PermissionOverwrite;
-import discord4j.core.object.entity.channel.Category;
-import discord4j.discordjson.json.ChannelModifyRequest;
+import discord4j.core.object.entity.Guild;
+import discord4j.core.object.entity.Role;
+import discord4j.discordjson.json.RoleCreateRequest;
 import discord4j.discordjson.possible.Possible;
+import discord4j.rest.util.Color;
+import discord4j.rest.util.PermissionSet;
 import org.immutables.value.Value;
 import reactor.core.CoreSubscriber;
 import reactor.core.publisher.Mono;
 
-import java.util.List;
-
-import static discord4j.core.spec.InternalSpecUtils.mapPossibleOverwrites;
+import static discord4j.core.spec.InternalSpecUtils.mapPossible;
 
 @Value.Immutable(singleton = true)
-interface CategoryEditSpecGenerator extends AuditSpec<ChannelModifyRequest> {
+interface RoleCreateSpecGenerator extends AuditSpec<RoleCreateRequest> {
 
     Possible<String> name();
 
-    Possible<Integer> position();
+    Possible<PermissionSet> permissions();
 
-    Possible<List<PermissionOverwrite>> permissionOverwrites();
+    Possible<Color> color();
+
+    Possible<Boolean> hoist();
+
+    Possible<Boolean> mentionable();
 
     @Override
-    default ChannelModifyRequest asRequest() {
-        return ChannelModifyRequest.builder()
+    default RoleCreateRequest asRequest() {
+        return RoleCreateRequest.builder()
                 .name(name())
-                .position(position())
-                .permissionOverwrites(mapPossibleOverwrites(permissionOverwrites()))
+                .permissions(mapPossible(permissions(), PermissionSet::getRawValue))
+                .color(mapPossible(color(), Color::getRGB))
+                .hoist(hoist())
+                .mentionable(mentionable())
                 .build();
     }
 }
 
 @SuppressWarnings("immutables:subtype")
 @Value.Immutable(builder = false)
-abstract class CategoryEditMonoGenerator extends Mono<Category> implements CategoryEditSpecGenerator {
+abstract class RoleCreateMonoGenerator extends Mono<Role> implements RoleCreateSpecGenerator {
 
-    abstract Category category();
+    abstract Guild guild();
 
     @Override
-    public void subscribe(CoreSubscriber<? super Category> actual) {
-        category().edit(CategoryEditSpec.copyOf(this)).subscribe(actual);
+    public void subscribe(CoreSubscriber<? super Role> actual) {
+        guild().createRole(RoleCreateSpec.copyOf(this)).subscribe(actual);
     }
 
     @Override

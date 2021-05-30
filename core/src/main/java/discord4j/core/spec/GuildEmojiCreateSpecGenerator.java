@@ -30,7 +30,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@SpecStyle
 @Value.Immutable
 interface GuildEmojiCreateSpecGenerator extends AuditSpec<GuildEmojiCreateRequest> {
 
@@ -54,7 +53,6 @@ interface GuildEmojiCreateSpecGenerator extends AuditSpec<GuildEmojiCreateReques
 }
 
 @SuppressWarnings("immutables:subtype")
-@SpecStyle
 @Value.Immutable(builder = false)
 abstract class GuildEmojiCreateMonoGenerator extends Mono<GuildEmoji> implements GuildEmojiCreateSpecGenerator {
 

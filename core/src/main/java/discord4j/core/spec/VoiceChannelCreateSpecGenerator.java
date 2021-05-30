@@ -17,9 +17,12 @@
 
 package discord4j.core.spec;
 
+import discord4j.common.util.Snowflake;
 import discord4j.core.object.PermissionOverwrite;
-import discord4j.core.object.entity.channel.Category;
-import discord4j.discordjson.json.ChannelModifyRequest;
+import discord4j.core.object.entity.Guild;
+import discord4j.core.object.entity.channel.Channel;
+import discord4j.core.object.entity.channel.VoiceChannel;
+import discord4j.discordjson.json.ChannelCreateRequest;
 import discord4j.discordjson.possible.Possible;
 import org.immutables.value.Value;
 import reactor.core.CoreSubscriber;
@@ -27,36 +30,47 @@ import reactor.core.publisher.Mono;
 
 import java.util.List;
 
+import static discord4j.core.spec.InternalSpecUtils.mapPossible;
 import static discord4j.core.spec.InternalSpecUtils.mapPossibleOverwrites;
 
-@Value.Immutable(singleton = true)
-interface CategoryEditSpecGenerator extends AuditSpec<ChannelModifyRequest> {
+@Value.Immutable
+interface VoiceChannelCreateSpecGenerator extends AuditSpec<ChannelCreateRequest> {
 
-    Possible<String> name();
+    String name();
+
+    Possible<Integer> bitrate();
+
+    Possible<Integer> userLimit();
 
     Possible<Integer> position();
 
     Possible<List<PermissionOverwrite>> permissionOverwrites();
 
+    Possible<Snowflake> parentId();
+
     @Override
-    default ChannelModifyRequest asRequest() {
-        return ChannelModifyRequest.builder()
+    default ChannelCreateRequest asRequest() {
+        return ChannelCreateRequest.builder()
+                .type(Channel.Type.GUILD_NEWS.getValue())
                 .name(name())
+                .bitrate(bitrate())
+                .userLimit(userLimit())
                 .position(position())
                 .permissionOverwrites(mapPossibleOverwrites(permissionOverwrites()))
+                .parentId(mapPossible(parentId(), Snowflake::asString))
                 .build();
     }
 }
 
 @SuppressWarnings("immutables:subtype")
 @Value.Immutable(builder = false)
-abstract class CategoryEditMonoGenerator extends Mono<Category> implements CategoryEditSpecGenerator {
+abstract class VoiceChannelCreateMonoGenerator extends Mono<VoiceChannel> implements VoiceChannelCreateSpecGenerator {
 
-    abstract Category category();
+    abstract Guild guild();
 
     @Override
-    public void subscribe(CoreSubscriber<? super Category> actual) {
-        category().edit(CategoryEditSpec.copyOf(this)).subscribe(actual);
+    public void subscribe(CoreSubscriber<? super VoiceChannel> actual) {
+        guild().createVoiceChannel(VoiceChannelCreateSpec.copyOf(this)).subscribe(actual);
     }
 
     @Override

@@ -17,46 +17,45 @@
 
 package discord4j.core.spec;
 
-import discord4j.core.object.PermissionOverwrite;
-import discord4j.core.object.entity.channel.Category;
-import discord4j.discordjson.json.ChannelModifyRequest;
+import discord4j.common.util.Snowflake;
+import discord4j.core.object.entity.Webhook;
+import discord4j.discordjson.json.WebhookModifyRequest;
 import discord4j.discordjson.possible.Possible;
+import discord4j.rest.util.Image;
 import org.immutables.value.Value;
 import reactor.core.CoreSubscriber;
 import reactor.core.publisher.Mono;
 
-import java.util.List;
-
-import static discord4j.core.spec.InternalSpecUtils.mapPossibleOverwrites;
+import static discord4j.core.spec.InternalSpecUtils.mapPossible;
 
 @Value.Immutable(singleton = true)
-interface CategoryEditSpecGenerator extends AuditSpec<ChannelModifyRequest> {
+interface WebhookEditSpecGenerator extends AuditSpec<WebhookModifyRequest> {
 
     Possible<String> name();
 
-    Possible<Integer> position();
+    Possible<Image> avatar();
 
-    Possible<List<PermissionOverwrite>> permissionOverwrites();
+    Possible<Snowflake> channelId();
 
     @Override
-    default ChannelModifyRequest asRequest() {
-        return ChannelModifyRequest.builder()
+    default WebhookModifyRequest asRequest() {
+        return WebhookModifyRequest.builder()
                 .name(name())
-                .position(position())
-                .permissionOverwrites(mapPossibleOverwrites(permissionOverwrites()))
+                .avatar(mapPossible(avatar(), Image::getDataUri))
+                .channelId(mapPossible(channelId(), Snowflake::asString))
                 .build();
     }
 }
 
 @SuppressWarnings("immutables:subtype")
 @Value.Immutable(builder = false)
-abstract class CategoryEditMonoGenerator extends Mono<Category> implements CategoryEditSpecGenerator {
+abstract class WebhookEditMonoGenerator extends Mono<Webhook> implements WebhookEditSpecGenerator {
 
-    abstract Category category();
+    abstract Webhook webhook();
 
     @Override
-    public void subscribe(CoreSubscriber<? super Category> actual) {
-        category().edit(CategoryEditSpec.copyOf(this)).subscribe(actual);
+    public void subscribe(CoreSubscriber<? super Webhook> actual) {
+        webhook().edit(WebhookEditSpec.copyOf(this)).subscribe(actual);
     }
 
     @Override

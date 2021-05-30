@@ -30,7 +30,6 @@ import java.util.Optional;
 
 import static discord4j.core.spec.InternalSpecUtils.mapPossibleOptional;
 
-@SpecStyle
 @Value.Immutable(singleton = true)
 interface MessageEditSpecGenerator extends Spec<MessageEditRequest> {
 
@@ -56,7 +55,6 @@ interface MessageEditSpecGenerator extends Spec<MessageEditRequest> {
 }
 
 @SuppressWarnings("immutables:subtype")
-@SpecStyle
 @Value.Immutable(builder = false)
 abstract class MessageEditMonoGenerator extends Mono<Message> implements MessageEditSpecGenerator {
 

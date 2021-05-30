@@ -26,7 +26,6 @@ import reactor.core.publisher.Mono;
 
 import java.util.Optional;
 
-@SpecStyle
 @Value.Immutable(singleton = true)
 interface GuildTemplateEditSpecGenerator extends Spec<TemplateModifyRequest> {
 
@@ -44,7 +43,6 @@ interface GuildTemplateEditSpecGenerator extends Spec<TemplateModifyRequest> {
 }
 
 @SuppressWarnings("immutables:subtype")
-@SpecStyle
 @Value.Immutable(builder = false)
 abstract class GuildTemplateEditMonoGenerator extends Mono<GuildTemplate> implements GuildTemplateEditSpecGenerator {
 

@@ -31,7 +31,6 @@ import java.util.stream.Collectors;
 
 import static discord4j.core.spec.InternalSpecUtils.*;
 
-@SpecStyle
 @Value.Immutable
 interface GuildPruneSpecGenerator extends AuditSpec<Multimap<String, Object>> {
 
@@ -56,7 +55,6 @@ interface GuildPruneSpecGenerator extends AuditSpec<Multimap<String, Object>> {
 }
 
 @SuppressWarnings("immutables:subtype")
-@SpecStyle
 @Value.Immutable(builder = false)
 abstract class GuildPruneMonoGenerator extends Mono<Integer> implements GuildPruneSpecGenerator {
 

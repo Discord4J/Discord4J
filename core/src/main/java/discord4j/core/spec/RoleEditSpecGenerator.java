@@ -17,46 +17,51 @@
 
 package discord4j.core.spec;
 
-import discord4j.core.object.PermissionOverwrite;
-import discord4j.core.object.entity.channel.Category;
-import discord4j.discordjson.json.ChannelModifyRequest;
+import discord4j.core.object.entity.Role;
+import discord4j.discordjson.json.RoleModifyRequest;
 import discord4j.discordjson.possible.Possible;
+import discord4j.rest.util.Color;
+import discord4j.rest.util.PermissionSet;
 import org.immutables.value.Value;
 import reactor.core.CoreSubscriber;
 import reactor.core.publisher.Mono;
 
-import java.util.List;
-
-import static discord4j.core.spec.InternalSpecUtils.mapPossibleOverwrites;
+import static discord4j.core.spec.InternalSpecUtils.mapPossible;
 
 @Value.Immutable(singleton = true)
-interface CategoryEditSpecGenerator extends AuditSpec<ChannelModifyRequest> {
+interface RoleEditSpecGenerator extends AuditSpec<RoleModifyRequest> {
 
     Possible<String> name();
 
-    Possible<Integer> position();
+    Possible<PermissionSet> permissions();
 
-    Possible<List<PermissionOverwrite>> permissionOverwrites();
+    Possible<Color> color();
+
+    Possible<Boolean> hoist();
+
+    Possible<Boolean> mentionable();
 
     @Override
-    default ChannelModifyRequest asRequest() {
-        return ChannelModifyRequest.builder()
+    default RoleModifyRequest asRequest() {
+        return RoleModifyRequest.builder()
                 .name(name())
-                .position(position())
-                .permissionOverwrites(mapPossibleOverwrites(permissionOverwrites()))
+                .permissions(mapPossible(permissions(), PermissionSet::getRawValue))
+                .color(mapPossible(color(), Color::getRGB))
+                .hoist(hoist())
+                .mentionable(mentionable())
                 .build();
     }
 }
 
 @SuppressWarnings("immutables:subtype")
 @Value.Immutable(builder = false)
-abstract class CategoryEditMonoGenerator extends Mono<Category> implements CategoryEditSpecGenerator {
+abstract class RoleEditMonoGenerator extends Mono<Role> implements RoleEditSpecGenerator {
 
-    abstract Category category();
+    abstract Role role();
 
     @Override
-    public void subscribe(CoreSubscriber<? super Category> actual) {
-        category().edit(CategoryEditSpec.copyOf(this)).subscribe(actual);
+    public void subscribe(CoreSubscriber<? super Role> actual) {
+        role().edit(RoleEditSpec.copyOf(this)).subscribe(actual);
     }
 
     @Override

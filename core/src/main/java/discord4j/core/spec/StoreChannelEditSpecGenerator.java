@@ -17,8 +17,9 @@
 
 package discord4j.core.spec;
 
+import discord4j.common.util.Snowflake;
 import discord4j.core.object.PermissionOverwrite;
-import discord4j.core.object.entity.channel.Category;
+import discord4j.core.object.entity.channel.StoreChannel;
 import discord4j.discordjson.json.ChannelModifyRequest;
 import discord4j.discordjson.possible.Possible;
 import org.immutables.value.Value;
@@ -26,11 +27,13 @@ import reactor.core.CoreSubscriber;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
+import java.util.Optional;
 
+import static discord4j.core.spec.InternalSpecUtils.mapPossibleOptional;
 import static discord4j.core.spec.InternalSpecUtils.mapPossibleOverwrites;
 
 @Value.Immutable(singleton = true)
-interface CategoryEditSpecGenerator extends AuditSpec<ChannelModifyRequest> {
+interface StoreChannelEditSpecGenerator extends AuditSpec<ChannelModifyRequest> {
 
     Possible<String> name();
 
@@ -38,25 +41,28 @@ interface CategoryEditSpecGenerator extends AuditSpec<ChannelModifyRequest> {
 
     Possible<List<PermissionOverwrite>> permissionOverwrites();
 
+    Possible<Optional<Snowflake>> parentId();
+
     @Override
     default ChannelModifyRequest asRequest() {
         return ChannelModifyRequest.builder()
                 .name(name())
                 .position(position())
                 .permissionOverwrites(mapPossibleOverwrites(permissionOverwrites()))
+                .parentId(mapPossibleOptional(parentId(), Snowflake::asString))
                 .build();
     }
 }
 
 @SuppressWarnings("immutables:subtype")
 @Value.Immutable(builder = false)
-abstract class CategoryEditMonoGenerator extends Mono<Category> implements CategoryEditSpecGenerator {
+abstract class StoreChannelEditMonoGenerator extends Mono<StoreChannel> implements StoreChannelEditSpecGenerator {
 
-    abstract Category category();
+    abstract StoreChannel channel();
 
     @Override
-    public void subscribe(CoreSubscriber<? super Category> actual) {
-        category().edit(CategoryEditSpec.copyOf(this)).subscribe(actual);
+    public void subscribe(CoreSubscriber<? super StoreChannel> actual) {
+        channel().edit(StoreChannelEditSpec.copyOf(this)).subscribe(actual);
     }
 
     @Override

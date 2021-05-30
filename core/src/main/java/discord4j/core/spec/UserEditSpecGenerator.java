@@ -17,46 +17,42 @@
 
 package discord4j.core.spec;
 
-import discord4j.core.object.PermissionOverwrite;
-import discord4j.core.object.entity.channel.Category;
-import discord4j.discordjson.json.ChannelModifyRequest;
+import discord4j.core.GatewayDiscordClient;
+import discord4j.core.object.entity.User;
+import discord4j.discordjson.json.UserModifyRequest;
 import discord4j.discordjson.possible.Possible;
+import discord4j.rest.util.Image;
 import org.immutables.value.Value;
 import reactor.core.CoreSubscriber;
 import reactor.core.publisher.Mono;
 
-import java.util.List;
-
-import static discord4j.core.spec.InternalSpecUtils.mapPossibleOverwrites;
+import static discord4j.core.spec.InternalSpecUtils.mapPossible;
 
 @Value.Immutable(singleton = true)
-interface CategoryEditSpecGenerator extends AuditSpec<ChannelModifyRequest> {
+interface UserEditSpecGenerator extends Spec<UserModifyRequest> {
 
-    Possible<String> name();
+    Possible<String> username();
 
-    Possible<Integer> position();
-
-    Possible<List<PermissionOverwrite>> permissionOverwrites();
+    Possible<Image> avatar();
 
     @Override
-    default ChannelModifyRequest asRequest() {
-        return ChannelModifyRequest.builder()
-                .name(name())
-                .position(position())
-                .permissionOverwrites(mapPossibleOverwrites(permissionOverwrites()))
+    default UserModifyRequest asRequest() {
+        return UserModifyRequest.builder()
+                .username(username())
+                .avatar(mapPossible(avatar(), Image::getDataUri))
                 .build();
     }
 }
 
 @SuppressWarnings("immutables:subtype")
 @Value.Immutable(builder = false)
-abstract class CategoryEditMonoGenerator extends Mono<Category> implements CategoryEditSpecGenerator {
+abstract class UserEditMonoGenerator extends Mono<User> implements UserEditSpecGenerator {
 
-    abstract Category category();
+    abstract GatewayDiscordClient gateway();
 
     @Override
-    public void subscribe(CoreSubscriber<? super Category> actual) {
-        category().edit(CategoryEditSpec.copyOf(this)).subscribe(actual);
+    public void subscribe(CoreSubscriber<? super User> actual) {
+        gateway().edit(UserEditSpec.copyOf(this)).subscribe(actual);
     }
 
     @Override

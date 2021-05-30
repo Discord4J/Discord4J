@@ -32,7 +32,6 @@ import java.util.stream.Collectors;
 
 import static discord4j.core.spec.InternalSpecUtils.mapPossible;
 
-@SpecStyle
 @Value.Immutable(singleton = true)
 interface EmbedCreateSpecGenerator extends Spec<EmbedData> {
 

@@ -17,8 +17,9 @@
 
 package discord4j.core.spec;
 
+import discord4j.common.util.Snowflake;
 import discord4j.core.object.PermissionOverwrite;
-import discord4j.core.object.entity.channel.Category;
+import discord4j.core.object.entity.channel.VoiceChannel;
 import discord4j.discordjson.json.ChannelModifyRequest;
 import discord4j.discordjson.possible.Possible;
 import org.immutables.value.Value;
@@ -26,37 +27,53 @@ import reactor.core.CoreSubscriber;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
+import java.util.Optional;
 
-import static discord4j.core.spec.InternalSpecUtils.mapPossibleOverwrites;
+import static discord4j.core.spec.InternalSpecUtils.*;
 
 @Value.Immutable(singleton = true)
-interface CategoryEditSpecGenerator extends AuditSpec<ChannelModifyRequest> {
+interface VoiceChannelEditSpecGenerator extends AuditSpec<ChannelModifyRequest> {
 
     Possible<String> name();
+
+    Possible<Integer> bitrate();
+
+    Possible<Integer> userLimit();
 
     Possible<Integer> position();
 
     Possible<List<PermissionOverwrite>> permissionOverwrites();
 
+    Possible<Optional<Snowflake>> parentId();
+
+    Possible<Optional<String>> rtcRegion();
+
+    Possible<Optional<VoiceChannel.Mode>> videoQualityMode();
+
     @Override
     default ChannelModifyRequest asRequest() {
         return ChannelModifyRequest.builder()
                 .name(name())
+                .bitrate(bitrate())
+                .userLimit(userLimit())
                 .position(position())
                 .permissionOverwrites(mapPossibleOverwrites(permissionOverwrites()))
+                .parentId(mapPossibleOptional(parentId(), Snowflake::asString))
+                .rtcRegion(rtcRegion())
+                .videoQualityMode(mapPossibleOptional(videoQualityMode(), VoiceChannel.Mode::getValue))
                 .build();
     }
 }
 
 @SuppressWarnings("immutables:subtype")
 @Value.Immutable(builder = false)
-abstract class CategoryEditMonoGenerator extends Mono<Category> implements CategoryEditSpecGenerator {
+abstract class VoiceChannelEditMonoGenerator extends Mono<VoiceChannel> implements VoiceChannelEditSpecGenerator {
 
-    abstract Category category();
+    abstract VoiceChannel channel();
 
     @Override
-    public void subscribe(CoreSubscriber<? super Category> actual) {
-        category().edit(CategoryEditSpec.copyOf(this)).subscribe(actual);
+    public void subscribe(CoreSubscriber<? super VoiceChannel> actual) {
+        channel().edit(VoiceChannelEditSpec.copyOf(this)).subscribe(actual);
     }
 
     @Override

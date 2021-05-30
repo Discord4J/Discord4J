@@ -30,7 +30,6 @@ import java.util.stream.Collectors;
 
 import static discord4j.core.spec.InternalSpecUtils.mapPossible;
 
-@SpecStyle
 @Value.Immutable(singleton = true)
 interface GuildEmojiEditSpecGenerator extends AuditSpec<GuildEmojiModifyRequest> {
 
@@ -48,7 +47,6 @@ interface GuildEmojiEditSpecGenerator extends AuditSpec<GuildEmojiModifyRequest>
 }
 
 @SuppressWarnings("immutables:subtype")
-@SpecStyle
 @Value.Immutable(builder = false)
 abstract class GuildEmojiEditMonoGenerator extends Mono<GuildEmoji> implements GuildEmojiEditSpecGenerator {
 

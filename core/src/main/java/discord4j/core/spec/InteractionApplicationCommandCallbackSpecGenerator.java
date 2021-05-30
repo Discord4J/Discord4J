@@ -32,7 +32,6 @@ import java.util.stream.Collectors;
 
 import static discord4j.core.spec.InternalSpecUtils.mapPossible;
 
-@SpecStyle
 @Value.Immutable(singleton = true)
 interface InteractionApplicationCommandCallbackSpecGenerator extends Spec<InteractionApplicationCommandCallbackData> {
 
@@ -68,7 +67,6 @@ interface InteractionApplicationCommandCallbackSpecGenerator extends Spec<Intera
 }
 
 @SuppressWarnings("immutables:subtype")
-@SpecStyle
 @Value.Immutable(builder = false)
 abstract class InteractionApplicationCommandCallbackMonoGenerator extends Mono<Void>
         implements InteractionApplicationCommandCallbackSpecGenerator {
