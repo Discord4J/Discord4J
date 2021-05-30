@@ -70,6 +70,7 @@ import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
@@ -312,11 +313,12 @@ public class GatewayDiscordClient implements EntityRetriever {
     /**
      * Requests to create a guild.
      *
-     * @param spec an immutable object that specified how to create the guild
+     * @param spec an immutable object that specifies how to create the guild
      * @return A {@link Mono} where, upon successful completion, emits the created {@link Guild}. If an error is
      * received, it is emitted through the {@code Mono}.
      */
     public Mono<Guild> createGuild(GuildCreateSpec spec) {
+        Objects.requireNonNull(spec);
         return Mono.defer(() -> getRestClient().getGuildService().createGuild(spec.asRequest()))
                 .map(data -> new Guild(this, toGuildData(data)));
     }
@@ -394,6 +396,7 @@ public class GatewayDiscordClient implements EntityRetriever {
      * it is emitted through the {@code Mono}.
      */
     public Mono<User> edit(UserEditSpec spec) {
+        Objects.requireNonNull(spec);
         return Mono.defer(() -> getRestClient().getUserService().modifyCurrentUser(spec.asRequest()))
                 .map(data -> new User(this, data));
     }

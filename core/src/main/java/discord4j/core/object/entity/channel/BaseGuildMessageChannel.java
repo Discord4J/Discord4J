@@ -286,6 +286,7 @@ class BaseGuildMessageChannel extends BaseChannel implements GuildMessageChannel
      */
     @Override
     public Mono<Webhook> createWebhook(WebhookCreateSpec spec) {
+        Objects.requireNonNull(spec);
         return Mono.defer(
                 () -> getClient().getRestClient().getWebhookService()
                         .createWebhook(getId().asLong(), spec.asRequest(), spec.reason()))

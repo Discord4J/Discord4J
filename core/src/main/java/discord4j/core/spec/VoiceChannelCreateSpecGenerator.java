@@ -51,7 +51,7 @@ interface VoiceChannelCreateSpecGenerator extends AuditSpec<ChannelCreateRequest
     @Override
     default ChannelCreateRequest asRequest() {
         return ChannelCreateRequest.builder()
-                .type(Channel.Type.GUILD_NEWS.getValue())
+                .type(Channel.Type.GUILD_VOICE.getValue())
                 .name(name())
                 .bitrate(bitrate())
                 .userLimit(userLimit())

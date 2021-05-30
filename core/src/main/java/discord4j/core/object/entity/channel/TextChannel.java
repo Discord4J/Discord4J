@@ -23,6 +23,8 @@ import discord4j.core.util.EntityUtil;
 import discord4j.discordjson.json.ChannelData;
 import reactor.core.publisher.Mono;
 
+import java.util.Objects;
+
 /**
  * A Discord text channel.
  */
@@ -78,6 +80,7 @@ public final class TextChannel extends BaseGuildMessageChannel {
      * received, it is emitted through the {@code Mono}.
      */
     public Mono<TextChannel> edit(TextChannelEditSpec spec) {
+        Objects.requireNonNull(spec);
         return Mono.defer(
                 () -> getClient().getRestClient().getChannelService()
                         .modifyChannel(getId().asLong(), spec.asRequest(), spec.reason()))

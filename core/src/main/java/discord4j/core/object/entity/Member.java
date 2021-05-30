@@ -335,6 +335,7 @@ public final class Member extends User {
      * error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Void> ban(BanQuerySpec spec) {
+        Objects.requireNonNull(spec);
         return Mono.defer(
                 () -> getClient().getRestClient().getGuildService()
                         .createGuildBan(getGuildId().asLong(), getId().asLong(), spec.asRequest(), spec.reason()));
@@ -546,6 +547,7 @@ public final class Member extends User {
      * received, it is emitted through the {@code Mono}.
      */
     public Mono<Member> edit(GuildMemberEditSpec spec) {
+        Objects.requireNonNull(spec);
         return Mono.defer(
                 () -> getClient().getRestClient().getGuildService()
                         .modifyGuildMember(getGuildId().asLong(), getId().asLong(), spec.asRequest(), spec.reason())

@@ -77,10 +77,7 @@ interface MessageCreateSpecGenerator extends Spec<MultipartRequest<MessageCreate
 
     Possible<String> nonce();
 
-    @Value.Default
-    default boolean tts() {
-        return false;
-    }
+    Possible<Boolean> tts();
 
     Possible<EmbedCreateSpec> embed();
 

@@ -300,6 +300,7 @@ public final class Role implements Entity {
      * it is emitted through the {@code Mono}.
      */
     public Mono<Role> edit(RoleEditSpec spec) {
+        Objects.requireNonNull(spec);
         return Mono.defer(() -> rest.edit(spec.asRequest(), spec.reason())
                 .map(bean -> new Role(gateway, bean, getGuildId().asLong())));
     }

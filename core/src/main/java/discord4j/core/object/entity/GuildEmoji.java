@@ -246,6 +246,7 @@ public final class GuildEmoji implements Entity {
      * received, it is emitted through the {@code Mono}.
      */
     public Mono<GuildEmoji> edit(GuildEmojiEditSpec spec) {
+        Objects.requireNonNull(spec);
         return Mono.defer(
                 () -> gateway.getRestClient().getEmojiService()
                         .modifyGuildEmoji(getGuildId().asLong(), getId().asLong(), spec.asRequest(),

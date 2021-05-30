@@ -295,6 +295,7 @@ public final class Webhook implements Entity {
      * received, it is emitted through the {@code Mono}.
      */
     public Mono<Webhook> edit(WebhookEditSpec spec) {
+        Objects.requireNonNull(spec);
         return Mono.defer(
                 () -> gateway.getRestClient().getWebhookService()
                         .modifyWebhook(getId().asLong(), spec.asRequest(), spec.reason()))
@@ -320,10 +321,10 @@ public final class Webhook implements Entity {
      * received, it is emitted through the {@code Mono}.
      */
     public Mono<Webhook> editWithToken(WebhookEditWithTokenSpec spec) {
+        Objects.requireNonNull(spec);
         return Mono.defer(
-                () -> gateway.getRestClient().getWebhookService()
-                        .modifyWebhookWithToken(getId().asLong(), getToken()
-                                .orElseThrow(() -> new IllegalStateException("Can't edit webhook.")), spec.asRequest()))
+                () -> gateway.getRestClient().getWebhookService().modifyWebhookWithToken(getId().asLong(), getToken()
+                        .orElseThrow(() -> new IllegalStateException("Can't edit webhook.")), spec.asRequest()))
                 .map(data -> new Webhook(gateway, data));
     }
 

@@ -47,11 +47,33 @@ import static discord4j.common.LogUtil.format;
 @Value.Immutable(singleton = true)
 interface VoiceChannelJoinSpecGenerator extends Spec<Function<VoiceChannel, Mono<VoiceConnection>>> {
 
-    /** Default maximum amount of time in seconds to wait before the connection to the voice channel times out. */
+    /**
+     * Default maximum amount of time in seconds to wait before the connection to the voice channel times out.
+     */
     int DEFAULT_TIMEOUT = 10;
 
-    /** Default maximum amount of time in seconds to wait before a single IP discovery attempt times out. */
+    /**
+     * Default maximum amount of time in seconds to wait before a single IP discovery attempt times out.
+     */
     int DEFAULT_DISCOVERY_TIMEOUT = 5;
+
+    static Flux<VoiceStateUpdateEvent> onVoiceStateUpdates(GatewayDiscordClient gateway, Snowflake guildId) {
+        return gateway.getEventDispatcher()
+                .on(VoiceStateUpdateEvent.class)
+                .filter(vsu -> {
+                    final Snowflake vsuUser = vsu.getCurrent().getUserId();
+                    final Snowflake vsuGuild = vsu.getCurrent().getGuildId();
+                    // this update is for the bot (current) user in this guild
+                    return vsuUser.equals(gateway.getSelfId()) && vsuGuild.equals(guildId);
+                });
+    }
+
+    static Mono<VoiceServerUpdateEvent> onVoiceServerUpdate(GatewayDiscordClient gateway, Snowflake guildId) {
+        return gateway.getEventDispatcher()
+                .on(VoiceServerUpdateEvent.class)
+                .filter(vsu -> vsu.getGuildId().equals(guildId) && vsu.getEndpoint() != null)
+                .next();
+    }
 
     @Value.Default
     default Duration timeout() {
@@ -180,24 +202,6 @@ interface VoiceChannelJoinSpecGenerator extends Spec<Function<VoiceChannel, Mono
                     .flatMap(existing -> sendVoiceStateUpdate.then(waitForVoiceStateUpdate).thenReturn(existing))
                     .switchIfEmpty(newConnection);
         };
-    }
-
-    static Flux<VoiceStateUpdateEvent> onVoiceStateUpdates(GatewayDiscordClient gateway, Snowflake guildId) {
-        return gateway.getEventDispatcher()
-                .on(VoiceStateUpdateEvent.class)
-                .filter(vsu -> {
-                    final Snowflake vsuUser = vsu.getCurrent().getUserId();
-                    final Snowflake vsuGuild = vsu.getCurrent().getGuildId();
-                    // this update is for the bot (current) user in this guild
-                    return vsuUser.equals(gateway.getSelfId()) && vsuGuild.equals(guildId);
-                });
-    }
-
-    static Mono<VoiceServerUpdateEvent> onVoiceServerUpdate(GatewayDiscordClient gateway, Snowflake guildId) {
-        return gateway.getEventDispatcher()
-                .on(VoiceServerUpdateEvent.class)
-                .filter(vsu -> vsu.getGuildId().equals(guildId) && vsu.getEndpoint() != null)
-                .next();
     }
 }
 

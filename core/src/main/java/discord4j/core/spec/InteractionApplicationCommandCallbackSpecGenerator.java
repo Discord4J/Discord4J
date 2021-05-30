@@ -26,7 +26,6 @@ import org.immutables.value.Value;
 import reactor.core.CoreSubscriber;
 import reactor.core.publisher.Mono;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -37,20 +36,11 @@ interface InteractionApplicationCommandCallbackSpecGenerator extends Spec<Intera
 
     Possible<String> content();
 
-    @Value.Default
-    default boolean tts() {
-        return false;
-    }
+    Possible<Boolean> tts();
 
-    @Value.Default
-    default boolean ephemeral() {
-        return false;
-    }
+    Possible<Boolean> ephemeral();
 
-    @Value.Default
-    default List<EmbedCreateSpec> embeds() {
-        return Collections.emptyList();
-    }
+    Possible<List<EmbedCreateSpec>> embeds();
 
     Possible<AllowedMentions> allowedMentions();
 
@@ -59,8 +49,10 @@ interface InteractionApplicationCommandCallbackSpecGenerator extends Spec<Intera
         return InteractionApplicationCommandCallbackData.builder()
                 .content(content())
                 .tts(tts())
-                .flags(ephemeral() ? Message.Flag.EPHEMERAL.getValue() : 0)
-                .embeds(embeds().stream().map(EmbedCreateSpec::asRequest).collect(Collectors.toList()))
+                .flags(mapPossible(ephemeral(), eph -> eph ? Message.Flag.EPHEMERAL.getValue() : 0))
+                .embeds(mapPossible(embeds(), embeds -> embeds.stream()
+                        .map(EmbedCreateSpec::asRequest)
+                        .collect(Collectors.toList())))
                 .allowedMentions(mapPossible(allowedMentions(), AllowedMentions::toData))
                 .build();
     }

@@ -26,6 +26,8 @@ import discord4j.discordjson.json.ChannelData;
 import discord4j.discordjson.json.NewsChannelFollowRequest;
 import reactor.core.publisher.Mono;
 
+import java.util.Objects;
+
 /** A Discord news channel. */
 public final class NewsChannel extends BaseGuildMessageChannel {
 
@@ -58,6 +60,7 @@ public final class NewsChannel extends BaseGuildMessageChannel {
      * received, it is emitted through the {@code Mono}.
      */
     public Mono<NewsChannel> edit(NewsChannelEditSpec spec) {
+        Objects.requireNonNull(spec);
         return Mono.defer(
                 () -> getClient().getRestClient().getChannelService()
                         .modifyChannel(getId().asLong(), spec.asRequest(), spec.reason()))

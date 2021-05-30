@@ -23,6 +23,7 @@ import discord4j.discordjson.json.EmbedThumbnailData;
 import discord4j.discordjson.possible.Possible;
 import discord4j.rest.util.Color;
 import org.immutables.value.Value;
+import reactor.util.annotation.Nullable;
 
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
@@ -31,6 +32,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static discord4j.core.spec.InternalSpecUtils.mapPossible;
+import static discord4j.core.spec.InternalSpecUtils.toPossible;
 
 @Value.Immutable(singleton = true)
 interface EmbedCreateSpecGenerator extends Spec<EmbedData> {
@@ -45,13 +47,15 @@ interface EmbedCreateSpecGenerator extends Spec<EmbedData> {
 
     Possible<Color> color();
 
-    Possible<EmbedCreateFields.Footer> footer();
+    @Nullable // deepImmutablesDetection doesn't work for Possible types
+    EmbedCreateFields.Footer footer();
 
     Possible<String> image();
 
     Possible<String> thumbnail();
 
-    Possible<EmbedCreateFields.Author> author();
+    @Nullable
+    EmbedCreateFields.Author author();
 
     @Value.Default
     default List<EmbedCreateFields.Field> fields() {
@@ -66,10 +70,10 @@ interface EmbedCreateSpecGenerator extends Spec<EmbedData> {
                 .url(url())
                 .timestamp(mapPossible(timestamp(), DateTimeFormatter.ISO_INSTANT::format))
                 .color(mapPossible(color(), Color::getRGB))
-                .footer(mapPossible(footer(), EmbedCreateFields.Footer::asRequest))
+                .footer(mapPossible(toPossible(footer()), EmbedCreateFields.Footer::asRequest))
                 .image(mapPossible(image(), url -> EmbedImageData.builder().url(url).build()))
                 .thumbnail(mapPossible(thumbnail(), url -> EmbedThumbnailData.builder().url(url).build()))
-                .author(mapPossible(author(), EmbedCreateFields.Author::asRequest))
+                .author(mapPossible(toPossible(author()), EmbedCreateFields.Author::asRequest))
                 .fields(fields().stream().map(EmbedCreateFields.Field::asRequest).collect(Collectors.toList()))
                 .build();
     }

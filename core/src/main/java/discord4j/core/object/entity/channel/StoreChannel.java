@@ -23,6 +23,8 @@ import discord4j.core.util.EntityUtil;
 import discord4j.discordjson.json.ChannelData;
 import reactor.core.publisher.Mono;
 
+import java.util.Objects;
+
 /** A Discord store channel. */
 public final class StoreChannel extends BaseCategorizableChannel {
 
@@ -55,6 +57,7 @@ public final class StoreChannel extends BaseCategorizableChannel {
      * received, it is emitted through the {@code Mono}.
      */
     public Mono<StoreChannel> edit(StoreChannelEditSpec spec) {
+        Objects.requireNonNull(spec);
         return Mono.defer(
                 () -> getClient().getRestClient().getChannelService()
                         .modifyChannel(getId().asLong(), spec.asRequest(), spec.reason()))

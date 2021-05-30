@@ -1142,6 +1142,7 @@ public final class Guild implements Entity {
      * received, it is emitted through the {@code Mono}.
      */
     public Mono<TextChannel> createTextChannel(TextChannelCreateSpec spec) {
+        Objects.requireNonNull(spec);
         return Mono.defer(
                 () -> gateway.getRestClient().getGuildService()
                         .createGuildChannel(getId().asLong(), spec.asRequest(), spec.reason()))
@@ -1169,6 +1170,7 @@ public final class Guild implements Entity {
      * received, it is emitted through the {@code Mono}.
      */
     public Mono<VoiceChannel> createVoiceChannel(VoiceChannelCreateSpec spec) {
+        Objects.requireNonNull(spec);
         return Mono.defer(
                 () -> gateway.getRestClient().getGuildService()
                         .createGuildChannel(getId().asLong(), spec.asRequest(), spec.reason()))

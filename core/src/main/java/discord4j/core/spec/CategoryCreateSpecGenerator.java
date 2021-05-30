@@ -21,15 +21,14 @@ import discord4j.core.object.PermissionOverwrite;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.channel.Category;
 import discord4j.discordjson.json.ChannelCreateRequest;
-import discord4j.discordjson.json.OverwriteData;
 import discord4j.discordjson.possible.Possible;
 import org.immutables.value.Value;
 import reactor.core.CoreSubscriber;
 import reactor.core.publisher.Mono;
 
-import java.util.Collections;
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.List;
+
+import static discord4j.core.spec.InternalSpecUtils.*;
 
 @Value.Immutable
 interface CategoryCreateSpecGenerator extends AuditSpec<ChannelCreateRequest> {
@@ -38,24 +37,14 @@ interface CategoryCreateSpecGenerator extends AuditSpec<ChannelCreateRequest> {
 
     Possible<Integer> position();
 
-    @Value.Default
-    default Set<PermissionOverwrite> permissionOverwrites() {
-        return Collections.emptySet();
-    }
+    Possible<List<PermissionOverwrite>> permissionOverwrites();
 
     @Override
     default ChannelCreateRequest asRequest() {
         return ChannelCreateRequest.builder()
                 .name(name())
                 .position(position())
-                .permissionOverwrites(permissionOverwrites().stream()
-                        .map(o -> OverwriteData.builder()
-                                .id(o.getTargetId().asString())
-                                .type(o.getType().getValue())
-                                .allow(o.getAllowed().getRawValue())
-                                .deny(o.getDenied().getRawValue())
-                                .build())
-                        .collect(Collectors.toList()))
+                .permissionOverwrites(mapPossibleOverwrites(permissionOverwrites()))
                 .build();
     }
 }

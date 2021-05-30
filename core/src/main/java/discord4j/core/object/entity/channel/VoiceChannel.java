@@ -36,6 +36,7 @@ import discord4j.voice.VoiceConnectionRegistry;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
 
@@ -107,6 +108,7 @@ public final class VoiceChannel extends BaseCategorizableChannel {
      * received, it is emitted through the {@code Mono}.
      */
     public Mono<VoiceChannel> edit(VoiceChannelEditSpec spec) {
+        Objects.requireNonNull(spec);
         return Mono.defer(
                 () -> getClient().getRestClient().getChannelService()
                         .modifyChannel(getId().asLong(), spec.asRequest(), spec.reason()))
@@ -154,6 +156,7 @@ public final class VoiceChannel extends BaseCategorizableChannel {
      * connection to the channel has been established. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<VoiceConnection> join(VoiceChannelJoinSpec spec) {
+        Objects.requireNonNull(spec);
         return Mono.defer(() -> spec.asRequest().apply(this));
     }
 
