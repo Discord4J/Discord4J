@@ -21,6 +21,7 @@ import discord4j.core.GatewayDiscordClient;
 import discord4j.core.retriever.EntityRetrievalStrategy;
 import discord4j.core.spec.GuildEmojiEditMono;
 import discord4j.core.spec.GuildEmojiEditSpec;
+import discord4j.core.spec.legacy.LegacyGuildEmojiEditSpec;
 import discord4j.core.util.EntityUtil;
 import discord4j.core.util.ImageUtil;
 import discord4j.core.util.OrderUtil;
@@ -33,6 +34,7 @@ import reactor.util.annotation.Nullable;
 
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static discord4j.rest.util.Image.Format.GIF;
@@ -225,6 +227,28 @@ public final class GuildEmoji implements Entity {
      */
     public Mono<Guild> getGuild(EntityRetrievalStrategy retrievalStrategy) {
         return gateway.withRetrievalStrategy(retrievalStrategy).getGuildById(getGuildId());
+    }
+
+    /**
+     * Requests to edit this guild emoji.
+     *
+     * @param spec A {@link Consumer} that provides a "blank" {@link LegacyGuildEmojiEditSpec} to be operated on.
+     * @return A {@link Mono} where, upon successful completion, emits the edited {@link GuildEmoji}. If an error is
+     * received, it is emitted through the {@code Mono}.
+     * @deprecated use {@link #edit(GuildEmojiEditSpec)} or {@link #edit()} which offer an immutable approach to build
+     * specs
+     */
+    @Deprecated
+    public Mono<GuildEmoji> edit(final Consumer<? super LegacyGuildEmojiEditSpec> spec) {
+        return Mono.defer(
+                () -> {
+                    LegacyGuildEmojiEditSpec mutatedSpec = new LegacyGuildEmojiEditSpec();
+                    spec.accept(mutatedSpec);
+                    return gateway.getRestClient().getEmojiService()
+                            .modifyGuildEmoji(getGuildId().asLong(), getId().asLong(), mutatedSpec.asRequest(),
+                                    mutatedSpec.getReason());
+                })
+                .map(data -> new GuildEmoji(gateway, data, getGuildId().asLong()));
     }
 
     /**

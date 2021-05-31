@@ -25,6 +25,7 @@ import discord4j.core.object.entity.channel.*;
 import discord4j.core.object.presence.Presence;
 import discord4j.core.retriever.EntityRetrievalStrategy;
 import discord4j.core.spec.*;
+import discord4j.core.spec.legacy.*;
 import discord4j.core.util.EntityUtil;
 import discord4j.core.util.ImageUtil;
 import discord4j.core.util.OrderUtil;
@@ -44,6 +45,7 @@ import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.ToLongFunction;
 import java.util.stream.Collectors;
@@ -958,6 +960,29 @@ public final class Guild implements Entity {
     }
 
     /**
+     * Requests to edit this guild.
+     *
+     * @param spec A {@link Consumer} that provides a "blank" {@link LegacyGuildEditSpec} to be operated on.
+     * @return A {@link Mono} where, upon successful completion, emits the edited {@link Guild}. If an error is
+     * received, it is emitted through the {@code Mono}.
+     * @deprecated use {@link #edit(GuildEditSpec)} or {@link #edit()} which offer an immutable approach to build specs
+     */
+    @Deprecated
+    public Mono<Guild> edit(final Consumer<? super LegacyGuildEditSpec> spec) {
+        return Mono.defer(
+                () -> {
+                    LegacyGuildEditSpec mutatedSpec = new LegacyGuildEditSpec();
+                    spec.accept(mutatedSpec);
+                    return gateway.getRestClient().getGuildService()
+                            .modifyGuild(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason());
+                })
+                .map(data -> new Guild(gateway, GuildData.builder()
+                        .from(this.data)
+                        .from(data)
+                        .build()));
+    }
+
+    /**
      * Requests to edit this guild. Properties specifying how to edit this guild can be set via the {@code withXxx}
      * methods of the returned {@link GuildEditMono}.
      *
@@ -984,6 +1009,27 @@ public final class Guild implements Entity {
                         .from(this.data)
                         .from(data)
                         .build()));
+    }
+
+    /**
+     * Requests to create an emoji.
+     *
+     * @param spec A {@link Consumer} that provides a "blank" {@link LegacyGuildEmojiCreateSpec} to be operated on.
+     * @return A {@link Mono} where, upon successful completion, emits the created {@link GuildEmoji}. If an error is
+     * received, it is emitted through the {@code Mono}.
+     * @deprecated use {@link #createEmoji(GuildEmojiCreateSpec)} or {@link #createEmoji(String, Image)} which offer an
+     * immutable approach to build specs
+     */
+    @Deprecated
+    public Mono<GuildEmoji> createEmoji(final Consumer<? super LegacyGuildEmojiCreateSpec> spec) {
+        return Mono.defer(
+                () -> {
+                    LegacyGuildEmojiCreateSpec mutatedSpec = new LegacyGuildEmojiCreateSpec();
+                    spec.accept(mutatedSpec);
+                    return gateway.getRestClient().getEmojiService()
+                            .createGuildEmoji(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason());
+                })
+                .map(data -> new GuildEmoji(gateway, data, getId().asLong()));
     }
 
     /**
@@ -1015,8 +1061,29 @@ public final class Guild implements Entity {
     }
 
     /**
+     * Requests to create a template based on this guild.
+     *
+     * @param spec A {@link Consumer} that provides a "blank" {@link LegacyGuildTemplateCreateSpec} to be operated on.
+     * @return A {@link Mono} where, upon subscription, emits the created {@link GuildTemplate} on success. If an error
+     * is received, it is emitted through the {@code Mono}.
+     * @deprecated use {@link #createTemplate(GuildTemplateCreateSpec)} or {@link #createTemplate(String)} which offer
+     * an immutable approach to build specs
+     */
+    @Deprecated
+    public Mono<GuildTemplate> createTemplate(final Consumer<? super LegacyGuildTemplateCreateSpec> spec) {
+        return Mono.defer(
+                () -> {
+                    LegacyGuildTemplateCreateSpec mutatedSpec = new LegacyGuildTemplateCreateSpec();
+                    spec.accept(mutatedSpec);
+                    return gateway.getRestClient().getTemplateService()
+                            .createTemplate(getId().asLong(), mutatedSpec.asRequest());
+                })
+                .map(data -> new GuildTemplate(gateway, data));
+    }
+
+    /**
      * Requests to create a template based on this guild. A description for this template can be set via the {@link
-     * GuildTemplateCreateMono#withDescription(String)} of the returned {@link GuildTemplateCreateMono}.
+     * GuildTemplateCreateMono#withDescriptionOrNull(String)} method of the returned {@link GuildTemplateCreateMono}.
      *
      * @param name the name of the template to create
      * @return A {@link Mono} where, upon subscription, emits the created {@link GuildTemplate} on success. If an error
@@ -1038,6 +1105,27 @@ public final class Guild implements Entity {
         return Mono.defer(
                 () -> gateway.getRestClient().getTemplateService().createTemplate(getId().asLong(), spec.asRequest()))
                 .map(data -> new GuildTemplate(gateway, data));
+    }
+
+    /**
+     * Requests to create a role.
+     *
+     * @param spec A {@link Consumer} that provides a "blank" {@link LegacyRoleCreateSpec} to be operated on.
+     * @return A {@link Mono} where, upon successful completion, emits the created {@link Role}. If an error is
+     * received, it is emitted through the {@code Mono}.
+     * @deprecated use {@link #createRole(RoleCreateSpec)} or {@link #createRole()} which offer an immutable approach to
+     * build specs
+     */
+    @Deprecated
+    public Mono<Role> createRole(final Consumer<? super LegacyRoleCreateSpec> spec) {
+        return Mono.defer(
+                () -> {
+                    LegacyRoleCreateSpec mutatedSpec = new LegacyRoleCreateSpec();
+                    spec.accept(mutatedSpec);
+                    return gateway.getRestClient().getGuildService()
+                            .createGuildRole(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason());
+                })
+                .map(data -> new Role(gateway, data, getId().asLong()));
     }
 
     /**
@@ -1064,6 +1152,28 @@ public final class Guild implements Entity {
                 () -> gateway.getRestClient().getGuildService()
                         .createGuildRole(getId().asLong(), spec.asRequest(), spec.reason()))
                 .map(data -> new Role(gateway, data, getId().asLong()));
+    }
+
+    /**
+     * Requests to create a news channel.
+     *
+     * @param spec A {@link Consumer} that provides a "blank" {@link LegacyNewsChannelCreateSpec} to be operated on.
+     * @return A {@link Mono} where, upon successful completion, emits the created {@link NewsChannel}. If an error is
+     * received, it is emitted through the {@code Mono}.
+     * @deprecated use {@link #createNewsChannel(NewsChannelCreateSpec)} or {@link #createNewsChannel(String)} which
+     * offer an immutable approach to build specs
+     */
+    @Deprecated
+    public Mono<NewsChannel> createNewsChannel(final Consumer<? super LegacyNewsChannelCreateSpec> spec) {
+        return Mono.defer(
+                () -> {
+                    LegacyNewsChannelCreateSpec mutatedSpec = new LegacyNewsChannelCreateSpec();
+                    spec.accept(mutatedSpec);
+                    return gateway.getRestClient().getGuildService()
+                            .createGuildChannel(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason());
+                })
+                .map(data -> EntityUtil.getChannel(gateway, data))
+                .cast(NewsChannel.class);
     }
 
     /**
@@ -1095,6 +1205,28 @@ public final class Guild implements Entity {
     }
 
     /**
+     * Requests to create a category.
+     *
+     * @param spec A {@link Consumer} that provides a "blank" {@link LegacyCategoryCreateSpec} to be operated on.
+     * @return A {@link Mono} where, upon successful completion, emits the created {@link Category}. If an error is
+     * received, it is emitted through the {@code Mono}.
+     * @deprecated use {@link #createCategory(CategoryCreateSpec)} or {@link #createCategory(String)} which offer an
+     * immutable approach to build specs
+     */
+    @Deprecated
+    public Mono<Category> createCategory(final Consumer<? super LegacyCategoryCreateSpec> spec) {
+        return Mono.defer(
+                () -> {
+                    LegacyCategoryCreateSpec mutatedSpec = new LegacyCategoryCreateSpec();
+                    spec.accept(mutatedSpec);
+                    return gateway.getRestClient().getGuildService()
+                            .createGuildChannel(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason());
+                })
+                .map(data -> EntityUtil.getChannel(gateway, data))
+                .cast(Category.class);
+    }
+
+    /**
      * Requests to create a category. Properties specifying how to create the category can be set via the {@code
      * withXxx} methods of the returned {@link CategoryCreateMono}.
      *
@@ -1123,6 +1255,28 @@ public final class Guild implements Entity {
     }
 
     /**
+     * Requests to create a text channel.
+     *
+     * @param spec A {@link Consumer} that provides a "blank" {@link LegacyTextChannelCreateSpec} to be operated on.
+     * @return A {@link Mono} where, upon successful completion, emits the created {@link TextChannel}. If an error is
+     * received, it is emitted through the {@code Mono}.
+     * @deprecated use {@link #createTextChannel(TextChannelCreateSpec)} or {@link #createTextChannel(String)} which
+     * offer an immutable approach to build specs
+     */
+    @Deprecated
+    public Mono<TextChannel> createTextChannel(final Consumer<? super LegacyTextChannelCreateSpec> spec) {
+        return Mono.defer(
+                () -> {
+                    LegacyTextChannelCreateSpec mutatedSpec = new LegacyTextChannelCreateSpec();
+                    spec.accept(mutatedSpec);
+                    return gateway.getRestClient().getGuildService()
+                            .createGuildChannel(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason());
+                })
+                .map(data -> EntityUtil.getChannel(gateway, data))
+                .cast(TextChannel.class);
+    }
+
+    /**
      * Requests to create a text channel. Properties specifying how to create the text channel can be set via the {@code
      * withXxx} methods of the returned {@link TextChannelCreateMono}.
      *
@@ -1148,6 +1302,28 @@ public final class Guild implements Entity {
                         .createGuildChannel(getId().asLong(), spec.asRequest(), spec.reason()))
                 .map(data -> EntityUtil.getChannel(gateway, data))
                 .cast(TextChannel.class);
+    }
+
+    /**
+     * Requests to create a voice channel.
+     *
+     * @param spec A {@link Consumer} that provides a "blank" {@link LegacyVoiceChannelCreateSpec} to be operated on.
+     * @return A {@link Mono} where, upon successful completion, emits the created {@link VoiceChannel}. If an error is
+     * received, it is emitted through the {@code Mono}.
+     * @deprecated use {@link #createVoiceChannel(VoiceChannelCreateSpec)} or {@link #createVoiceChannel(String)} which
+     * offer an immutable approach to build specs
+     */
+    @Deprecated
+    public Mono<VoiceChannel> createVoiceChannel(final Consumer<? super LegacyVoiceChannelCreateSpec> spec) {
+        return Mono.defer(
+                () -> {
+                    LegacyVoiceChannelCreateSpec mutatedSpec = new LegacyVoiceChannelCreateSpec();
+                    spec.accept(mutatedSpec);
+                    return gateway.getRestClient().getGuildService()
+                            .createGuildChannel(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason());
+                })
+                .map(data -> EntityUtil.getChannel(gateway, data))
+                .cast(VoiceChannel.class);
     }
 
     /**
@@ -1239,6 +1415,28 @@ public final class Guild implements Entity {
     }
 
     /**
+     * Requests to ban the specified user.
+     *
+     * @param userId The ID of the user to ban.
+     * @param spec   A {@link Consumer} that provides a "blank" {@link LegacyBanQuerySpec} to be operated on.
+     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the specified user was
+     * banned. If an error is received, it is emitted through the {@code Mono}.
+     * @deprecated use {@link #ban(Snowflake, BanQuerySpec)} or {@link #ban(Snowflake)} which offer an immutable
+     * approach to build specs
+     */
+    @Deprecated
+    public Mono<Void> ban(final Snowflake userId, final Consumer<? super LegacyBanQuerySpec> spec) {
+        return Mono.defer(
+                () -> {
+                    LegacyBanQuerySpec mutatedSpec = new LegacyBanQuerySpec();
+                    spec.accept(mutatedSpec);
+                    return gateway.getRestClient().getGuildService()
+                            .createGuildBan(getId().asLong(), userId.asLong(), mutatedSpec.asRequest(),
+                                    mutatedSpec.getReason());
+                });
+    }
+
+    /**
      * Requests to ban the specified user. Properties specifying how to ban the user can be set via the {@code withXxx}
      * methods of the returned {@link GuildBanQueryMono}.
      *
@@ -1291,6 +1489,29 @@ public final class Guild implements Entity {
 
     /**
      * Requests to retrieve the number of users that will be pruned. Users are pruned if they have not been seen within
+     * the past specified amount of days, with roles optionally included in the prune count if specified through {@link
+     * LegacyGuildPruneCountSpec#addRole(Snowflake)} or {@link LegacyGuildPruneCountSpec#addRoles(Collection)}.
+     *
+     * @param spec A {@link Consumer} that provides a "blank" {@link GuildPruneCountSpec} to be operated on.
+     * @return A {@link Mono} where, upon successful completion, emits the number of users that will be pruned. If an
+     * error is received, it is emitted through the {@code Mono}.
+     * @deprecated use {@link #getPruneCount(GuildPruneCountSpec)} or {@link #getPruneCount(int)} which offer an
+     * immutable approach to build specs
+     */
+    @Deprecated
+    public Mono<Integer> getPruneCount(final Consumer<? super LegacyGuildPruneCountSpec> spec) {
+        return Mono.defer(
+                () -> {
+                    LegacyGuildPruneCountSpec mutatedSpec = new LegacyGuildPruneCountSpec();
+                    spec.accept(mutatedSpec);
+                    return gateway.getRestClient().getGuildService()
+                            .getGuildPruneCount(getId().asLong(), mutatedSpec.asRequest())
+                            .flatMap(data -> Mono.justOrEmpty(data.pruned()));
+                });
+    }
+
+    /**
+     * Requests to retrieve the number of users that will be pruned. Users are pruned if they have not been seen within
      * the past specified amount of days. Included roles can be set via the
      * {@link GuildPruneCountMono#withRoles(Snowflake...)}
      * method of the returned {@link GuildPruneCountMono}.
@@ -1318,6 +1539,30 @@ public final class Guild implements Entity {
                 () -> gateway.getRestClient().getGuildService()
                         .getGuildPruneCount(getId().asLong(), spec.asRequest())
                         .flatMap(data -> Mono.justOrEmpty(data.pruned())));
+    }
+
+    /**
+     * Requests to prune users while customizing parameters. Users are pruned if they have not been seen within the past
+     * specified amount of days, with roles optionally included in the prune request if specified through {@link
+     * LegacyGuildPruneSpec#addRole(Snowflake)} or {@link LegacyGuildPruneSpec#addRoles(Collection)}.
+     *
+     * @param spec A {@link Consumer} that provides a "blank" {@link LegacyGuildPruneSpec} to be operated on.
+     * @return A {@link Mono} where, upon successful completion, may emit the number of users who were pruned if {@link
+     * LegacyGuildPruneSpec#setComputePruneCount(boolean)} is {@code true} (default), otherwise it would emit an empty
+     * {@code Mono}. If an error is received, it is emitted through the {@code Mono}.
+     * @deprecated use {@link #prune(GuildPruneSpec)} or {@link #prune(int)} which offer an immutable approach to build
+     * specs
+     */
+    @Deprecated
+    public Mono<Integer> prune(final Consumer<? super LegacyGuildPruneSpec> spec) {
+        return Mono.defer(
+                () -> {
+                    LegacyGuildPruneSpec mutatedSpec = new LegacyGuildPruneSpec();
+                    spec.accept(mutatedSpec);
+                    return gateway.getRestClient().getGuildService()
+                            .beginGuildPrune(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason())
+                            .flatMap(data -> Mono.justOrEmpty(data.pruned()));
+                });
     }
 
     /**
@@ -1361,6 +1606,43 @@ public final class Guild implements Entity {
     public Mono<Void> leave() {
         return gateway.getRestClient().getUserService()
                 .leaveGuild(getId().asLong());
+    }
+
+    /**
+     * Requests to retrieve the audit log for this guild.
+     * <p>
+     * The audit log parts can be {@link AuditLogPart#combine(AuditLogPart) combined} for easier querying. For example,
+     * <pre>
+     * {@code
+     * guild.getAuditLog()
+     *     .take(10)
+     *     .reduce(AuditLogPart::combine)
+     * }
+     * </pre>
+     *
+     * @param spec A {@link Consumer} that provides a "blank" {@link LegacyAuditLogQuerySpec} to be operated on.
+     * @return A {@link Flux} that continually parts of this guild's audit log. If an error is received, it is emitted
+     * through the {@code Flux}.
+     * @deprecated use {@link #getAuditLog(AuditLogQuerySpec)} or {@link #getAuditLog()} which offer an immutable
+     * approach to build specs
+     */
+    @Deprecated
+    public Flux<AuditLogPart> getAuditLog(final Consumer<? super LegacyAuditLogQuerySpec> spec) {
+        final Function<Map<String, Object>, Flux<AuditLogData>> makeRequest = params -> {
+            final LegacyAuditLogQuerySpec mutatedSpec = new LegacyAuditLogQuerySpec();
+            spec.accept(mutatedSpec);
+            params.putAll(mutatedSpec.asRequest());
+            return gateway.getRestClient().getAuditLogService()
+                    .getAuditLog(getId().asLong(), params)
+                    .flux();
+        };
+        final ToLongFunction<AuditLogData> getLastEntryId = response -> {
+            final List<AuditLogEntryData> entries = response.auditLogEntries();
+            return (entries.isEmpty()) ? Long.MAX_VALUE :
+                    Snowflake.asLong(entries.get(entries.size() - 1).id());
+        };
+        return PaginationUtil.paginateBefore(makeRequest, getLastEntryId, Long.MAX_VALUE, 100)
+                .map(data -> new AuditLogPart(getId().asLong(), gateway, data));
     }
 
     /**

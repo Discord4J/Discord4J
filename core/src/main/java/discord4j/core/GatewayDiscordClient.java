@@ -41,6 +41,8 @@ import discord4j.core.spec.GuildCreateMono;
 import discord4j.core.spec.GuildCreateSpec;
 import discord4j.core.spec.UserEditMono;
 import discord4j.core.spec.UserEditSpec;
+import discord4j.core.spec.legacy.LegacyGuildCreateSpec;
+import discord4j.core.spec.legacy.LegacyUserEditSpec;
 import discord4j.core.util.ValidationUtil;
 import discord4j.discordjson.json.EmojiData;
 import discord4j.discordjson.json.GuildData;
@@ -73,6 +75,7 @@ import java.util.Collections;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -298,6 +301,26 @@ public class GatewayDiscordClient implements EntityRetriever {
     }
 
     /**
+     * Requests to create a guild.
+     *
+     * @param spec A {@link Consumer} that provides a "blank" {@link LegacyGuildCreateSpec} to be operated on.
+     * @return A {@link Mono} where, upon successful completion, emits the created {@link Guild}. If an error is
+     * received, it is emitted through the {@code Mono}.
+     * @deprecated use {@link #createGuild(GuildCreateSpec)} or {@link #createGuild(String, Region)} which offer an
+     * immutable approach to build specs
+     */
+    @Deprecated
+    public Mono<Guild> createGuild(final Consumer<? super LegacyGuildCreateSpec> spec) {
+        return Mono.defer(
+                () -> {
+                    LegacyGuildCreateSpec mutatedSpec = new LegacyGuildCreateSpec();
+                    spec.accept(mutatedSpec);
+                    return getRestClient().getGuildService().createGuild(mutatedSpec.asRequest());
+                })
+                .map(data -> new Guild(this, toGuildData(data)));
+    }
+
+    /**
      * Requests to create a guild. Properties specifying how to create the guild can be set via the {@code withXxx}
      * methods of the returned {@link GuildCreateMono}.
      *
@@ -375,6 +398,25 @@ public class GatewayDiscordClient implements EntityRetriever {
         return getRestClient().getInviteService()
                 .getInvite(inviteCode)
                 .map(data -> new Invite(this, data));
+    }
+
+    /**
+     * Requests to edit this client (i.e., modify the current bot user).
+     *
+     * @param spec A {@link Consumer} that provides a "blank" {@link LegacyUserEditSpec} to be operated on.
+     * @return A {@link Mono} where, upon successful completion, emits the edited {@link User}. If an error is received,
+     * it is emitted through the {@code Mono}.
+     * @deprecated use {@link #edit(UserEditSpec)} or {@link #edit()} which offer an immutable approach to build specs
+     */
+    @Deprecated
+    public Mono<User> edit(final Consumer<? super LegacyUserEditSpec> spec) {
+        return Mono.defer(
+                () -> {
+                    LegacyUserEditSpec mutatedSpec = new LegacyUserEditSpec();
+                    spec.accept(mutatedSpec);
+                    return getRestClient().getUserService().modifyCurrentUser(mutatedSpec.asRequest());
+                })
+                .map(data -> new User(this, data));
     }
 
     /**

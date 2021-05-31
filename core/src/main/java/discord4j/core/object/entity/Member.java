@@ -26,6 +26,8 @@ import discord4j.core.spec.BanQuerySpec;
 import discord4j.core.spec.GuildMemberEditMono;
 import discord4j.core.spec.GuildMemberEditSpec;
 import discord4j.core.spec.MemberBanQueryMono;
+import discord4j.core.spec.legacy.LegacyBanQuerySpec;
+import discord4j.core.spec.legacy.LegacyGuildMemberEditSpec;
 import discord4j.core.util.OrderUtil;
 import discord4j.core.util.PermissionUtil;
 import discord4j.discordjson.json.MemberData;
@@ -45,6 +47,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -317,6 +320,26 @@ public final class Member extends User {
     }
 
     /**
+     * Requests to ban this user.
+     *
+     * @param spec A {@link Consumer} that provides a "blank" {@link LegacyBanQuerySpec} to be operated on.
+     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating this user was banned. If an
+     * error is received, it is emitted through the {@code Mono}.
+     * @deprecated use {@link #ban(BanQuerySpec)} or {@link #ban()} which offer an immutable approach to build specs
+     */
+    @Deprecated
+    public Mono<Void> ban(final Consumer<? super LegacyBanQuerySpec> spec) {
+        return Mono.defer(
+                () -> {
+                    LegacyBanQuerySpec mutatedSpec = new LegacyBanQuerySpec();
+                    spec.accept(mutatedSpec);
+                    return getClient().getRestClient().getGuildService()
+                            .createGuildBan(getGuildId().asLong(), getId().asLong(), mutatedSpec.asRequest(),
+                                    mutatedSpec.getReason());
+                });
+    }
+
+    /**
      * Requests to ban this user. Properties specifying how to ban this user can be set via the {@code withXxx} methods
      * of the returned {@link MemberBanQueryMono}.
      *
@@ -526,6 +549,28 @@ public final class Member extends User {
         return MathFlux.max(rolesWithColor, OrderUtil.ROLE_ORDER)
                 .map(Role::getColor)
                 .defaultIfEmpty(Role.DEFAULT_COLOR);
+    }
+
+    /**
+     * Requests to edit this member.
+     *
+     * @param spec A {@link Consumer} that provides a "blank" {@link LegacyGuildMemberEditSpec} to be operated on.
+     * @return A {@link Mono} where, upon successful completion, emits the modified {@link Member}. If an error is
+     * received, it is emitted through the {@code Mono}.
+     * @deprecated use {@link #edit(GuildMemberEditSpec)} or {@link #edit()} which offer an immutable approach to build
+     * specs
+     */
+    @Deprecated
+    public Mono<Member> edit(final Consumer<? super LegacyGuildMemberEditSpec> spec) {
+        return Mono.defer(
+                () -> {
+                    LegacyGuildMemberEditSpec mutatedSpec = new LegacyGuildMemberEditSpec();
+                    spec.accept(mutatedSpec);
+                    return getClient().getRestClient().getGuildService()
+                            .modifyGuildMember(getGuildId().asLong(), getId().asLong(), mutatedSpec.asRequest(),
+                                    mutatedSpec.getReason())
+                            .map(data -> new Member(getClient(), data, guildId));
+                });
     }
 
     /**

@@ -21,6 +21,9 @@ import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.channel.GuildMessageChannel;
 import discord4j.core.retriever.EntityRetrievalStrategy;
 import discord4j.core.spec.*;
+import discord4j.core.spec.legacy.LegacyWebhookEditSpec;
+import discord4j.core.spec.legacy.LegacyWebhookEditWithTokenSpec;
+import discord4j.core.spec.legacy.LegacyWebhookExecuteSpec;
 import discord4j.core.util.EntityUtil;
 import discord4j.discordjson.json.WebhookData;
 import discord4j.discordjson.json.WebhookPartialChannelData;
@@ -30,6 +33,7 @@ import reactor.util.annotation.Nullable;
 
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 /**
  * A Discord webhook.
@@ -277,6 +281,27 @@ public final class Webhook implements Entity {
     }
 
     /**
+     * Requests to edit this webhook. Requires the MANAGE_WEBHOOKS permission.
+     *
+     * @param spec A {@link Consumer} that provides a "blank" {@link LegacyWebhookEditSpec} to be operated on.
+     * @return A {@link Mono} where, upon successful completion, emits the edited {@link Webhook}. If an error is
+     * received, it is emitted through the {@code Mono}.
+     * @deprecated use {@link #edit(WebhookEditSpec)} or {@link #edit()} which offer an immutable approach to build
+     * specs
+     */
+    @Deprecated
+    public Mono<Webhook> edit(final Consumer<? super LegacyWebhookEditSpec> spec) {
+        return Mono.defer(
+                () -> {
+                    LegacyWebhookEditSpec mutatedSpec = new LegacyWebhookEditSpec();
+                    spec.accept(mutatedSpec);
+                    return gateway.getRestClient().getWebhookService()
+                            .modifyWebhook(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason());
+                })
+                .map(data -> new Webhook(gateway, data));
+    }
+
+    /**
      * Requests to edit this webhook. Properties specifying how to edit this webhook can be set via the {@code withXxx}
      * methods of the returned {@link WebhookEditMono}. Requires the MANAGE_WEBHOOKS permission.
      *
@@ -299,6 +324,30 @@ public final class Webhook implements Entity {
         return Mono.defer(
                 () -> gateway.getRestClient().getWebhookService()
                         .modifyWebhook(getId().asLong(), spec.asRequest(), spec.reason()))
+                .map(data -> new Webhook(gateway, data));
+    }
+
+    /**
+     * Requests to edit this webhook. Does not require the MANAGE_WEBHOOKS permission.
+     *
+     * @param spec A {@link Consumer} that provides a "blank" {@link LegacyWebhookEditWithTokenSpec} to be operated on.
+     * @return A {@link Mono} where, upon successful completion, emits the edited {@link Webhook}. If an error is
+     * received, it is emitted through the {@code Mono}.
+     * @deprecated use {@link #editWithToken(WebhookEditWithTokenSpec)} or {@link #editWithToken()} which offer an
+     * immutable approach to build specs
+     */
+    @Deprecated
+    public Mono<Webhook> editWithToken(final Consumer<? super LegacyWebhookEditWithTokenSpec> spec) {
+        return Mono.defer(
+                () -> {
+                    if (!getToken().isPresent()) {
+                        throw new IllegalStateException("Can't edit webhook.");
+                    }
+                    LegacyWebhookEditWithTokenSpec mutatedSpec = new LegacyWebhookEditWithTokenSpec();
+                    spec.accept(mutatedSpec);
+                    return gateway.getRestClient().getWebhookService()
+                            .modifyWebhookWithToken(getId().asLong(), getToken().get(), mutatedSpec.asRequest());
+                })
                 .map(data -> new Webhook(gateway, data));
     }
 
@@ -326,6 +375,20 @@ public final class Webhook implements Entity {
                 () -> gateway.getRestClient().getWebhookService().modifyWebhookWithToken(getId().asLong(), getToken()
                         .orElseThrow(() -> new IllegalStateException("Can't edit webhook.")), spec.asRequest()))
                 .map(data -> new Webhook(gateway, data));
+    }
+
+    /**
+     * Executes this webhook without waiting for a confirmation that a message was created.
+     *
+     * @param spec A {@link Consumer} that provides a "blank" {@link LegacyWebhookExecuteSpec} to be operated on.
+     * @return A {@link Mono} where, upon successful webhook execution, completes. If the message fails to save, an
+     * error IS NOT emitted through the {@code Mono}.
+     * @deprecated use {@link #execute(WebhookExecuteSpec)} or {@link #execute()} which offer an immutable approach to
+     * build specs
+     */
+    @Deprecated
+    public Mono<Void> execute(final Consumer<? super LegacyWebhookExecuteSpec> spec) {
+        return execute(false, spec).cast(Void.class);
     }
 
     /**
@@ -357,6 +420,32 @@ public final class Webhook implements Entity {
      *
      * @param wait True to specify to wait for server confirmation that the message was saved or there was an error
      *             saving the message.
+     * @param spec A {@link Consumer} that provides a "blank" {@link LegacyWebhookExecuteSpec} to be operated on.
+     * @return A {@link Mono} where, upon successful webhook execution, emits a Message if {@code wait = true}. If the
+     * message fails to save, an error is emitted through the {@code Mono} only if {@code wait = true}.
+     * @deprecated use {@link #execute(boolean, WebhookExecuteSpec)} which offers an immutable approach to build specs
+     */
+    @Deprecated
+    public Mono<Message> execute(boolean wait, final Consumer<? super LegacyWebhookExecuteSpec> spec) {
+        return Mono.defer(
+                () -> {
+                    if (!getToken().isPresent()) {
+                        throw new IllegalArgumentException("Can't execute webhook.");
+                    }
+                    LegacyWebhookExecuteSpec mutatedSpec = new LegacyWebhookExecuteSpec();
+                    spec.accept(mutatedSpec);
+                    return gateway.getRestClient().getWebhookService()
+                            .executeWebhook(getId().asLong(), getToken().get(), wait, mutatedSpec.asRequest())
+                            .map(data -> new Message(gateway, data));
+                }
+        );
+    }
+
+    /**
+     * Executes this webhook.
+     *
+     * @param wait True to specify to wait for server confirmation that the message was saved or there was an error
+     *             saving the message.
      * @param spec an immutable object that specifies how to execute this webhook
      * @return A {@link Mono} where, upon successful webhook execution, emits a Message if {@code wait = true}. If the
      * message fails to save, an error is emitted through the {@code Mono} only if {@code wait = true}.
@@ -373,6 +462,19 @@ public final class Webhook implements Entity {
                             .map(data -> new Message(gateway, data));
                 }
         );
+    }
+
+    /**
+     * Executes this webhook and waits for server confirmation for the message to save.
+     *
+     * @param spec A {@link Consumer} that provides a "blank" {@link LegacyWebhookExecuteSpec} to be operated on.
+     * @return A {@link Mono} where, upon successful webhook execution, emits a Message. If the message fails to save,
+     * an error is emitted through the {@code Mono}.
+     * @deprecated use {@link #executeAndWait(WebhookExecuteSpec)} which offers an immutable approach to build specs
+     */
+    @Deprecated
+    public Mono<Message> executeAndWait(final Consumer<? super LegacyWebhookExecuteSpec> spec) {
+        return execute(true, spec);
     }
 
     /**

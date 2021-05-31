@@ -25,6 +25,8 @@ import discord4j.core.spec.VoiceChannelEditMono;
 import discord4j.core.spec.VoiceChannelEditSpec;
 import discord4j.core.spec.VoiceChannelJoinMono;
 import discord4j.core.spec.VoiceChannelJoinSpec;
+import discord4j.core.spec.legacy.LegacyVoiceChannelEditSpec;
+import discord4j.core.spec.legacy.LegacyVoiceChannelJoinSpec;
 import discord4j.core.util.EntityUtil;
 import discord4j.discordjson.json.ChannelData;
 import discord4j.discordjson.json.gateway.VoiceStateUpdate;
@@ -90,6 +92,28 @@ public final class VoiceChannel extends BaseCategorizableChannel {
     }
 
     /**
+     * Requests to edit a voice channel.
+     *
+     * @param spec A {@link Consumer} that provides a "blank" {@link LegacyVoiceChannelEditSpec} to be operated on.
+     * @return A {@link Mono} where, upon successful completion, emits the edited {@link VoiceChannel}. If an error is
+     * received, it is emitted through the {@code Mono}.
+     * @deprecated use {@link #edit(VoiceChannelEditSpec)} or {@link #edit()} which offer an immutable approach to build
+     * specs
+     */
+    @Deprecated
+    public Mono<VoiceChannel> edit(final Consumer<? super LegacyVoiceChannelEditSpec> spec) {
+        return Mono.defer(
+                () -> {
+                    LegacyVoiceChannelEditSpec mutatedSpec = new LegacyVoiceChannelEditSpec();
+                    spec.accept(mutatedSpec);
+                    return getClient().getRestClient().getChannelService()
+                            .modifyChannel(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason());
+                })
+                .map(data -> EntityUtil.getChannel(getClient(), data))
+                .cast(VoiceChannel.class);
+    }
+
+    /**
      * Requests to edit this voice channel. Properties specifying how to edit this voice channel can be set via the
      * {@code withXxx} methods of the returned {@link VoiceChannelEditMono}.
      *
@@ -126,6 +150,29 @@ public final class VoiceChannel extends BaseCategorizableChannel {
         return Flux.from(getClient().getGatewayResources().getStore()
                 .execute(ReadActions.getVoiceStatesInChannel(getGuildId().asLong(), getId().asLong())))
                 .map(data -> new VoiceState(getClient(), data));
+    }
+
+    /**
+     * Request to join this voice channel upon subscription. The resulting {@link VoiceConnection} will be available to
+     * you from the {@code Mono} but also through a {@link VoiceConnectionRegistry} and can be obtained through {@link
+     * GatewayDiscordClient#getVoiceConnectionRegistry()}. Additionally, the resulting {@code VoiceConnection} can be
+     * retrieved from the associated guild through {@link Guild#getVoiceConnection()} and through {@link
+     * #getVoiceConnection()}.
+     *
+     * @param spec A {@link Consumer} that provides a "blank" {@link LegacyVoiceChannelJoinSpec} to be operated on.
+     * @return A {@link Mono} where, upon successful completion, emits a {@link VoiceConnection}, indicating a
+     * connection to the channel has been established. If an error is received, it is emitted through the {@code Mono}.
+     * @deprecated use {@link #join(VoiceChannelJoinSpec)} or {@link #join()} which offer an immutable approach to build
+     * specs
+     */
+    @Deprecated
+    public Mono<VoiceConnection> join(final Consumer<? super LegacyVoiceChannelJoinSpec> spec) {
+        return Mono.defer(() -> {
+            final LegacyVoiceChannelJoinSpec mutatedSpec = new LegacyVoiceChannelJoinSpec(getClient(), this);
+            spec.accept(mutatedSpec);
+
+            return mutatedSpec.asRequest();
+        });
     }
 
     /**
@@ -185,7 +232,7 @@ public final class VoiceChannel extends BaseCategorizableChannel {
      * Sends a leave request to the gateway
      * <p>
      * This method does not replace {@link VoiceConnection#disconnect()} when the channel was joined by using
-     * {@link VoiceChannel#join(Consumer)}
+     * {@link VoiceChannel#join(VoiceChannelJoinSpec)}
      *
      * @return An empty mono which completes when the payload was sent to the gateway
      */

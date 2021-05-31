@@ -21,12 +21,14 @@ import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.FollowedChannel;
 import discord4j.core.spec.NewsChannelEditMono;
 import discord4j.core.spec.NewsChannelEditSpec;
+import discord4j.core.spec.legacy.LegacyNewsChannelEditSpec;
 import discord4j.core.util.EntityUtil;
 import discord4j.discordjson.json.ChannelData;
 import discord4j.discordjson.json.NewsChannelFollowRequest;
 import reactor.core.publisher.Mono;
 
 import java.util.Objects;
+import java.util.function.Consumer;
 
 /** A Discord news channel. */
 public final class NewsChannel extends BaseGuildMessageChannel {
@@ -39,6 +41,28 @@ public final class NewsChannel extends BaseGuildMessageChannel {
      */
     public NewsChannel(GatewayDiscordClient gateway, ChannelData data) {
         super(gateway, data);
+    }
+
+    /**
+     * Requests to edit this news channel.
+     *
+     * @param spec A {@link Consumer} that provides a "blank" {@link LegacyNewsChannelEditSpec} to be operated on.
+     * @return A {@link Mono} where, upon successful completion, emits the edited {@link NewsChannel}. If an error is
+     * received, it is emitted through the {@code Mono}.
+     * @deprecated use {@link #edit(NewsChannelEditSpec)} or {@link #edit()} which offer an immutable approach to build
+     * specs
+     */
+    @Deprecated
+    public Mono<NewsChannel> edit(final Consumer<? super LegacyNewsChannelEditSpec> spec) {
+        return Mono.defer(
+                () -> {
+                    LegacyNewsChannelEditSpec mutatedSpec = new LegacyNewsChannelEditSpec();
+                    spec.accept(mutatedSpec);
+                    return getClient().getRestClient().getChannelService()
+                            .modifyChannel(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason());
+                })
+                .map(data -> EntityUtil.getChannel(getClient(), data))
+                .cast(NewsChannel.class);
     }
 
     /**

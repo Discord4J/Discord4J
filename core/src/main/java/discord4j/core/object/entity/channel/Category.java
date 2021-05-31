@@ -21,12 +21,14 @@ import discord4j.core.object.entity.Guild;
 import discord4j.core.retriever.EntityRetrievalStrategy;
 import discord4j.core.spec.CategoryEditMono;
 import discord4j.core.spec.CategoryEditSpec;
+import discord4j.core.spec.legacy.LegacyCategoryEditSpec;
 import discord4j.core.util.EntityUtil;
 import discord4j.discordjson.json.ChannelData;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.Objects;
+import java.util.function.Consumer;
 
 /** A Discord category. */
 public final class Category extends BaseGuildChannel {
@@ -65,6 +67,28 @@ public final class Category extends BaseGuildChannel {
                 .flatMapMany(guild -> guild.getChannels(retrievalStrategy))
                 .ofType(CategorizableChannel.class)
                 .filter(channel -> channel.getCategoryId().map(getId()::equals).orElse(false));
+    }
+
+    /**
+     * Requests to edit this category.
+     *
+     * @param spec A {@link Consumer} that provides a "blank" {@link LegacyCategoryEditSpec} to be operated on.
+     * @return A {@link Mono} where, upon successful completion, emits the edited {@link Category}. If an error is
+     * received, it is emitted through the {@code Mono}.
+     * @deprecated use {@link #edit(CategoryEditSpec)}  or {@link #edit()} which offer an immutable approach to build
+     * specs
+     */
+    @Deprecated
+    public Mono<Category> edit(final Consumer<? super LegacyCategoryEditSpec> spec) {
+        return Mono.defer(
+                () -> {
+                    LegacyCategoryEditSpec mutatedSpec = new LegacyCategoryEditSpec();
+                    spec.accept(mutatedSpec);
+                    return getClient().getRestClient().getChannelService()
+                            .modifyChannel(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason());
+                })
+                .map(data -> EntityUtil.getChannel(getClient(), data))
+                .cast(Category.class);
     }
 
     /**

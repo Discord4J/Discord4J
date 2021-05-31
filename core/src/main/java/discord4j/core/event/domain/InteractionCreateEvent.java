@@ -24,6 +24,7 @@ import discord4j.core.object.command.Interaction;
 import discord4j.core.object.entity.Message;
 import discord4j.core.spec.InteractionApplicationCommandCallbackMono;
 import discord4j.core.spec.InteractionApplicationCommandCallbackSpec;
+import discord4j.core.spec.legacy.LegacyInteractionApplicationCommandCallbackSpec;
 import discord4j.discordjson.json.*;
 import discord4j.gateway.ShardInfo;
 import discord4j.rest.RestClient;
@@ -33,6 +34,7 @@ import discord4j.rest.util.MultipartRequest;
 import reactor.core.publisher.Mono;
 
 import java.util.Objects;
+import java.util.function.Consumer;
 
 /**
  * Dispatched when a user in a guild uses a Slash Command.
@@ -122,6 +124,33 @@ public class InteractionCreateEvent extends Event {
                         .flags(Message.Flag.EPHEMERAL.getFlag())
                         .build())
                 .build());
+    }
+
+    /**
+     * Requests to respond to the interaction with a message.
+     *
+     * @param spec A {@link Consumer} that provides a "blank" {@link LegacyInteractionApplicationCommandCallbackSpec} to
+     *             be operated on.
+     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the interaction response has
+     * been sent. If an error is received, it is emitted through the {@code Mono}.
+     * @deprecated use {@link #reply(InteractionApplicationCommandCallbackSpec)}, {@link #reply(String)} or {@link
+     * #reply()} which offer an immutable approach to build specs
+     */
+    @Deprecated
+    public Mono<Void> reply(final Consumer<? super LegacyInteractionApplicationCommandCallbackSpec> spec) {
+        return Mono.defer(
+                () -> {
+                    LegacyInteractionApplicationCommandCallbackSpec mutatedSpec =
+                            new LegacyInteractionApplicationCommandCallbackSpec();
+                    getClient().getRestClient().getRestResources()
+                            .getAllowedMentions()
+                            .ifPresent(mutatedSpec::setAllowedMentions);
+                    spec.accept(mutatedSpec);
+                    return createInteractionResponse(InteractionResponseData.builder()
+                            .type(InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE.getValue())
+                            .data(mutatedSpec.asRequest())
+                            .build());
+                });
     }
 
     /**

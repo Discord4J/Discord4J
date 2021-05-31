@@ -19,11 +19,13 @@ package discord4j.core.object.entity.channel;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.spec.StoreChannelEditMono;
 import discord4j.core.spec.StoreChannelEditSpec;
+import discord4j.core.spec.legacy.LegacyStoreChannelEditSpec;
 import discord4j.core.util.EntityUtil;
 import discord4j.discordjson.json.ChannelData;
 import reactor.core.publisher.Mono;
 
 import java.util.Objects;
+import java.util.function.Consumer;
 
 /** A Discord store channel. */
 public final class StoreChannel extends BaseCategorizableChannel {
@@ -36,6 +38,28 @@ public final class StoreChannel extends BaseCategorizableChannel {
      */
     public StoreChannel(GatewayDiscordClient gateway, ChannelData data) {
         super(gateway, data);
+    }
+
+    /**
+     * Requests to edit this store channel.
+     *
+     * @param spec A {@link Consumer} that provides a "blank" {@link LegacyStoreChannelEditSpec} to be operated on.
+     * @return A {@link Mono} where, upon successful completion, emits the edited {@link StoreChannel}. If an error is
+     * received, it is emitted through the {@code Mono}.
+     * @deprecated use {@link #edit(StoreChannelEditSpec)} or {@link #edit()} which offer an immutable approach to build
+     * specs
+     */
+    @Deprecated
+    public Mono<StoreChannel> edit(final Consumer<? super LegacyStoreChannelEditSpec> spec) {
+        return Mono.defer(
+                () -> {
+                    LegacyStoreChannelEditSpec mutatedSpec = new LegacyStoreChannelEditSpec();
+                    spec.accept(mutatedSpec);
+                    return getClient().getRestClient().getChannelService()
+                            .modifyChannel(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason());
+                })
+                .map(data -> EntityUtil.getChannel(getClient(), data))
+                .cast(StoreChannel.class);
     }
 
     /**

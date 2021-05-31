@@ -29,6 +29,7 @@ import discord4j.core.object.reaction.ReactionEmoji;
 import discord4j.core.retriever.EntityRetrievalStrategy;
 import discord4j.core.spec.MessageEditMono;
 import discord4j.core.spec.MessageEditSpec;
+import discord4j.core.spec.legacy.LegacyMessageEditSpec;
 import discord4j.core.util.EntityUtil;
 import discord4j.discordjson.json.MessageData;
 import discord4j.discordjson.json.SuppressEmbedsRequest;
@@ -44,6 +45,7 @@ import reactor.util.annotation.Nullable;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -480,6 +482,30 @@ public final class Message implements Entity {
     public Optional<MessageInteraction> getInteraction() {
         return data.interaction().toOptional()
                 .map(data -> new MessageInteraction(gateway, data));
+    }
+
+    /**
+     * Requests to edit this message.
+     *
+     * @param spec A {@link Consumer} that provides a "blank" {@link LegacyMessageEditSpec} to be operated on.
+     * @return A {@link Mono} where, upon successful completion, emits the edited {@link Message}. If an error is
+     * received, it is emitted through the {@code Mono}.
+     * @deprecated use {@link #edit(MessageEditSpec)}  or {@link #edit()} which offer an immutable approach to build
+     * specs
+     */
+    @Deprecated
+    public Mono<Message> edit(final Consumer<? super LegacyMessageEditSpec> spec) {
+        return Mono.defer(
+                () -> {
+                    LegacyMessageEditSpec mutatedSpec = new LegacyMessageEditSpec();
+                    getClient().getRestClient().getRestResources()
+                            .getAllowedMentions()
+                            .ifPresent(mutatedSpec::setAllowedMentions);
+                    spec.accept(mutatedSpec);
+                    return gateway.getRestClient().getChannelService()
+                            .editMessage(getChannelId().asLong(), getId().asLong(), mutatedSpec.asRequest());
+                })
+                .map(data -> new Message(gateway, data));
     }
 
     /**

@@ -23,11 +23,13 @@ import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.Webhook;
 import discord4j.core.spec.WebhookCreateMono;
 import discord4j.core.spec.WebhookCreateSpec;
+import discord4j.core.spec.legacy.LegacyWebhookCreateSpec;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.Optional;
+import java.util.function.Consumer;
 
 public interface GuildMessageChannel extends CategorizableChannel, MessageChannel {
 
@@ -83,6 +85,18 @@ public interface GuildMessageChannel extends CategorizableChannel, MessageChanne
      * {@code Flux}.
      */
     Flux<Message> bulkDeleteMessages(Publisher<Message> messages);
+
+    /**
+     * Requests to create a webhook.
+     *
+     * @param spec A {@link Consumer} that provides a "blank" {@link LegacyWebhookCreateSpec} to be operated on.
+     * @return A {@link Mono} where, upon successful completion, emits the created {@link Webhook}. If an error is
+     * received, it is emitted through the {@code Mono}.
+     * @deprecated use {@link #createWebhook(WebhookCreateSpec)} or {@link #createWebhook(String)} which offer an
+     * immutable approach to build specs
+     */
+    @Deprecated
+    Mono<Webhook> createWebhook(final Consumer<? super LegacyWebhookCreateSpec> spec);
 
     /**
      * Requests to create a webhook. Properties specifying how to create the webhook can be set via the {@code withXxx}

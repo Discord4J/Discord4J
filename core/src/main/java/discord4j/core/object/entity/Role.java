@@ -22,6 +22,7 @@ import discord4j.core.object.RoleTags;
 import discord4j.core.retriever.EntityRetrievalStrategy;
 import discord4j.core.spec.RoleEditMono;
 import discord4j.core.spec.RoleEditSpec;
+import discord4j.core.spec.legacy.LegacyRoleEditSpec;
 import discord4j.core.util.EntityUtil;
 import discord4j.core.util.OrderUtil;
 import discord4j.discordjson.json.RoleData;
@@ -34,6 +35,7 @@ import reactor.util.annotation.Nullable;
 
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 /**
  * A Discord role.
@@ -279,6 +281,25 @@ public final class Role implements Entity {
     @Override
     public Snowflake getId() {
         return Snowflake.of(data.id());
+    }
+
+    /**
+     * Requests to edit this role.
+     *
+     * @param spec A {@link Consumer} that provides a "blank" {@link LegacyRoleEditSpec} to be operated on.
+     * @return A {@link Mono} where, upon successful completion, emits the edited {@link Role}. If an error is received,
+     * it is emitted through the {@code Mono}.
+     * @deprecated use {@link #edit(RoleEditSpec)} or {@link #edit()} which offer an immutable approach to build specs
+     */
+    @Deprecated
+    public Mono<Role> edit(final Consumer<? super LegacyRoleEditSpec> spec) {
+        return Mono.defer(
+                () -> {
+                    LegacyRoleEditSpec mutatedSpec = new LegacyRoleEditSpec();
+                    spec.accept(mutatedSpec);
+                    return rest.edit(mutatedSpec.asRequest(), mutatedSpec.getReason())
+                            .map(bean -> new Role(gateway, bean, getGuildId().asLong()));
+                });
     }
 
     /**

@@ -21,6 +21,7 @@ import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.Message;
 import discord4j.core.retriever.EntityRetrievalStrategy;
 import discord4j.core.spec.MessageCreateSpec;
+import discord4j.core.spec.legacy.LegacyMessageCreateSpec;
 import discord4j.discordjson.json.ChannelData;
 import discord4j.discordjson.json.MessageData;
 import discord4j.discordjson.possible.Possible;
@@ -36,6 +37,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 /** An internal implementation of {@link MessageChannel} designed to streamline inheritance. */
@@ -71,6 +73,20 @@ class BaseMessageChannel extends BaseChannel implements MessageChannel {
     public final Optional<Instant> getLastPinTimestamp() {
         return Possible.flatOpt(getData().lastPinTimestamp())
                 .map(timestamp -> DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(timestamp, Instant::from));
+    }
+
+    @Override
+    public final Mono<Message> createMessage(final Consumer<? super LegacyMessageCreateSpec> spec) {
+        return Mono.defer(
+                () -> {
+                    LegacyMessageCreateSpec mutatedSpec = new LegacyMessageCreateSpec();
+                    getClient().getRestClient().getRestResources()
+                            .getAllowedMentions()
+                            .ifPresent(mutatedSpec::setAllowedMentions);
+                    spec.accept(mutatedSpec);
+                    return getRestChannel().createMessage(mutatedSpec.asRequest());
+                })
+                .map(data -> new Message(getClient(), data));
     }
 
     @Override

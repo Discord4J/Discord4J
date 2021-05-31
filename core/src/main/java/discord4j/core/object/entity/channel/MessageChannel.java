@@ -22,12 +22,14 @@ import discord4j.core.retriever.EntityRetrievalStrategy;
 import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.core.spec.MessageCreateMono;
 import discord4j.core.spec.MessageCreateSpec;
+import discord4j.core.spec.legacy.LegacyMessageCreateSpec;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.Instant;
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 /**
@@ -65,6 +67,18 @@ public interface MessageChannel extends Channel {
      * @return When the last pinned message was pinned, if present.
      */
     Optional<Instant> getLastPinTimestamp();
+
+    /**
+     * Requests to create a message.
+     *
+     * @param spec A {@link Consumer} that provides a "blank" {@link LegacyMessageCreateSpec} to be operated on.
+     * @return A {@link Mono} where, upon successful completion, emits the created {@link Message}. If an error is
+     * received, it is emitted through the {@code Mono}.
+     * @deprecated use {@link #createMessage(MessageCreateSpec)} or {@link #createMessage(String)} which offer an
+     * immutable approach to build specs
+     */
+    @Deprecated
+    Mono<Message> createMessage(Consumer<? super LegacyMessageCreateSpec> spec);
 
     /**
      * Requests to create a message.

@@ -21,10 +21,12 @@ import discord4j.core.object.ExtendedInvite;
 import discord4j.core.retriever.EntityRetrievalStrategy;
 import discord4j.core.spec.InviteCreateMono;
 import discord4j.core.spec.InviteCreateSpec;
+import discord4j.core.spec.legacy.LegacyInviteCreateSpec;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.Optional;
+import java.util.function.Consumer;
 
 /** A Discord channel which can be categorized into a {@link Category}. These channels can also have invites. */
 public interface CategorizableChannel extends GuildChannel {
@@ -52,6 +54,18 @@ public interface CategorizableChannel extends GuildChannel {
      * present. If an error is received, it is emitted through the {@code Mono}.
      */
     Mono<Category> getCategory(EntityRetrievalStrategy retrievalStrategy);
+
+    /**
+     * Requests to create an invite.
+     *
+     * @param spec A {@link Consumer} that provides a "blank" {@link LegacyInviteCreateSpec} to be operated on.
+     * @return A {@link Mono} where, upon successful completion, emits the created {@link ExtendedInvite}. If an error
+     * is received, it is emitted through the {@code Mono}.
+     * @deprecated use {@link #createInvite(InviteCreateSpec)} or {@link #createInvite()} which offer an immutable
+     * approach to build specs
+     */
+    @Deprecated
+    Mono<ExtendedInvite> createInvite(final Consumer<? super LegacyInviteCreateSpec> spec);
 
     /**
      * Requests to create an invite. Properties specifying how to create the invite can be set via the {@code withXxx }
