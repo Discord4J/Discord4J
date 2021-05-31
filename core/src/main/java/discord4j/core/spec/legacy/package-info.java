@@ -18,6 +18,7 @@
  * {@link discord4j.core.spec.legacy.LegacySpec} contract and implementations to build requests to Discord.
  */
 @NonNullApi
+@Deprecated
 package discord4j.core.spec.legacy;
 
 import reactor.util.annotation.NonNullApi;

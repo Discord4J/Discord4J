@@ -131,7 +131,7 @@ public class LegacyVoiceChannelEditSpec implements LegacyAuditSpec<ChannelModify
      * @return This spec.
      */
     public LegacyVoiceChannelEditSpec setRtcRegion(@Nullable String rtcRegion) {
-        requestBuilder.rtcRegion(rtcRegion);
+        requestBuilder.rtcRegionOrNull(rtcRegion);
         return this;
     }
 
@@ -142,7 +142,7 @@ public class LegacyVoiceChannelEditSpec implements LegacyAuditSpec<ChannelModify
      * @return This spec.
      */
     public LegacyVoiceChannelEditSpec setVideoQualityMode(VoiceChannel.Mode videoQualityMode) {
-        requestBuilder.videoQualityMode(videoQualityMode.getValue());
+        requestBuilder.videoQualityModeOrNull(videoQualityMode.getValue());
         return this;
     }
 

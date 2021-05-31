@@ -82,11 +82,7 @@ public class LegacyGuildMemberEditSpec implements LegacyAuditSpec<GuildMemberMod
      * @return This spec.
      */
     public LegacyGuildMemberEditSpec setNickname(@Nullable String nickname) {
-        if (nickname != null) {
-            builder.nick(nickname);
-        } else {
-            builder.nick(Possible.absent());
-        }
+        builder.nickOrNull(nickname);
         return this;
     }
 

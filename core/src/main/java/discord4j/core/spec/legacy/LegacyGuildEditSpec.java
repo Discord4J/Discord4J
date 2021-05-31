@@ -69,7 +69,7 @@ public class LegacyGuildEditSpec implements LegacyAuditSpec<GuildModifyRequest> 
      * @return This spec.
      */
     public LegacyGuildEditSpec setVerificationLevel(Guild.VerificationLevel verificationLevel) {
-        requestBuilder.verificationLevel(verificationLevel.getValue());
+        requestBuilder.verificationLevelOrNull(verificationLevel.getValue());
         return this;
     }
 
@@ -80,7 +80,7 @@ public class LegacyGuildEditSpec implements LegacyAuditSpec<GuildModifyRequest> 
      * @return This spec.
      */
     public LegacyGuildEditSpec setDefaultMessageNotificationsLevel(Guild.NotificationLevel notificationsLevel) {
-        requestBuilder.defaultMessageNotifications(notificationsLevel.getValue());
+        requestBuilder.defaultMessageNotificationsOrNull(notificationsLevel.getValue());
         return this;
     }
 
@@ -91,7 +91,7 @@ public class LegacyGuildEditSpec implements LegacyAuditSpec<GuildModifyRequest> 
      * @return This spec.
      */
     public LegacyGuildEditSpec setExplicitContentFilter(Guild.ContentFilterLevel level) {
-        requestBuilder.explicitContentFilter(level.getValue());
+        requestBuilder.explicitContentFilterOrNull(level.getValue());
         return this;
     }
 
@@ -252,7 +252,7 @@ public class LegacyGuildEditSpec implements LegacyAuditSpec<GuildModifyRequest> 
      * @return This spec.
      */
     public LegacyGuildEditSpec setDescription(@Nullable String description) {
-        requestBuilder.description(description);
+        requestBuilder.descriptionOrNull(description);
         return this;
     }
 

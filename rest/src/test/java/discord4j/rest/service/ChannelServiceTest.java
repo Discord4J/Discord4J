@@ -182,7 +182,7 @@ public class ChannelServiceTest {
     @Test
     public void testEditMessage() {
         MessageEditRequest req = MessageEditRequest.builder()
-                .content("This is a message I can edit.")
+                .contentOrNull("This is a message I can edit.")
                 .build();
         channelService.editMessage(permanentChannel, editMessage, req).block();
     }
