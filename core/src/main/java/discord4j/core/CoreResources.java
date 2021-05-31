@@ -21,6 +21,8 @@ import discord4j.common.JacksonResources;
 import discord4j.common.ReactorResources;
 import discord4j.rest.RestResources;
 import discord4j.rest.request.Router;
+import discord4j.rest.util.AllowedMentions;
+import reactor.util.annotation.Nullable;
 
 /**
  * A set of resources required to build {@link DiscordClient} instances and are used for core Discord4J operations
@@ -35,9 +37,10 @@ public class CoreResources extends RestResources {
      * @param reactorResources Reactor resources to establish connections and schedule tasks
      * @param jacksonResources Jackson data-binding resources to map objects
      * @param router a connector to perform requests against Discord API
+     * @param allowedMentions a configuration object to limit mentions creating notifications on message sending
      */
     public CoreResources(String token, ReactorResources reactorResources, JacksonResources jacksonResources,
-                         Router router) {
-        super(token, reactorResources, jacksonResources, router);
+                         Router router, @Nullable AllowedMentions allowedMentions) {
+        super(token, reactorResources, jacksonResources, router, allowedMentions);
     }
 }

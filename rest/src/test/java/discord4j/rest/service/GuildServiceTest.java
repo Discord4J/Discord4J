@@ -253,4 +253,9 @@ public class GuildServiceTest {
     public void testModifyGuildEmbed() {
         // TODO
     }
+
+    @Test
+    public void testGetGuildPreview() {
+        // TODO
+    }
 }

@@ -16,11 +16,15 @@
  */
 package discord4j.core.event.domain.guild;
 
+import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Member;
-import discord4j.common.util.Snowflake;
+import discord4j.core.shard.GatewayBootstrap;
+import discord4j.core.shard.MemberRequestFilter;
 import discord4j.gateway.ShardInfo;
+import discord4j.gateway.intent.Intent;
+import discord4j.gateway.intent.IntentSet;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
 
@@ -31,7 +35,9 @@ import java.util.Set;
 /**
  * Dispatched as members are streamed to the client from Discord.
  * <p>
- * By default, all members in all connected guilds are requested on startup.
+ * By default, all members in large connected guilds are requested on startup, but this behavior can be configured using
+ * {@link GatewayBootstrap#setMemberRequestFilter(MemberRequestFilter)} and ultimately depending on your {@link Intent}
+ * configuration at {@link GatewayBootstrap#setEnabledIntents(IntentSet)}.
  * <p>
  * This event is dispatched by Discord.
  *

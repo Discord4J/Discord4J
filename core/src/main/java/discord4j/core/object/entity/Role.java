@@ -17,6 +17,7 @@
 package discord4j.core.object.entity;
 
 import discord4j.core.GatewayDiscordClient;
+import discord4j.core.object.RoleTags;
 import discord4j.core.retriever.EntityRetrievalStrategy;
 import discord4j.core.spec.RoleEditSpec;
 import discord4j.core.util.EntityUtil;
@@ -31,6 +32,7 @@ import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
 
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 /**
@@ -72,6 +74,15 @@ public final class Role implements Entity {
     @Override
     public GatewayDiscordClient getClient() {
         return gateway;
+    }
+
+    /**
+     * Gets the data of the role.
+     *
+     * @return The data of the role.
+     */
+    public RoleData getData() {
+        return data;
     }
 
     /**
@@ -254,6 +265,15 @@ public final class Role implements Entity {
      */
     public String getMention() {
         return "<@&" + getId().asString() + ">";
+    }
+
+    /**
+     * Gets the tags this role has, if present.
+     *
+     * @return The tags this role has, if present.
+     */
+    public Optional<RoleTags> getTags() {
+        return data.tags().toOptional().map(data -> new RoleTags(gateway, data));
     }
 
     @Override

@@ -124,6 +124,28 @@ public class VoiceChannelEditSpec implements AuditSpec<ChannelModifyRequest> {
         return this;
     }
 
+    /**
+     * Sets the channel voice region id, automatic if null.
+     *
+     * @param rtcRegion The channel voice region id, automatic if null.
+     * @return This spec.
+     */
+    public VoiceChannelEditSpec setRtcRegion(@Nullable String rtcRegion) {
+        requestBuilder.rtcRegion(rtcRegion);
+        return this;
+    }
+
+    /**
+     * Sets the camera video quality mode of the voice channel.
+     *
+     * @param videoQualityMode The camera video quality mode of the voice channel.
+     * @return This spec.
+     */
+    public VoiceChannelEditSpec setVideoQualityMode(VoiceChannel.Mode videoQualityMode) {
+        requestBuilder.videoQualityMode(videoQualityMode.getValue());
+        return this;
+    }
+
     @Override
     public VoiceChannelEditSpec setReason(@Nullable final String reason) {
         this.reason = reason;

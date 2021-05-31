@@ -19,21 +19,19 @@ package discord4j.rest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import discord4j.common.JacksonResources;
 import discord4j.common.ReactorResources;
+import discord4j.common.sinks.EmissionStrategy;
 import discord4j.rest.http.ExchangeStrategies;
 import discord4j.rest.request.*;
 import discord4j.rest.response.ResponseFunction;
 import discord4j.rest.route.Route;
-import reactor.core.publisher.EmitterProcessor;
-import reactor.core.publisher.FluxSink;
+import discord4j.rest.route.Routes;
+import discord4j.rest.util.AllowedMentions;
 import reactor.netty.http.client.HttpClient;
+import reactor.util.annotation.Nullable;
 
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 /**
  * Builder suited for creating a {@link RestClient}. To acquire an instance, see {@link #createRest(String)}.
@@ -50,6 +48,8 @@ public class RestClientBuilder<C, O extends RouterOptions> {
     protected List<ResponseFunction> responseTransformers = new ArrayList<>();
     protected GlobalRateLimiter globalRateLimiter;
     protected RequestQueueFactory requestQueueFactory;
+    @Nullable
+    protected AllowedMentions allowedMentions;
 
     /**
      * Initialize a new builder with the given token.
@@ -57,7 +57,11 @@ public class RestClientBuilder<C, O extends RouterOptions> {
      * @param token the bot token used to authenticate to Discord
      */
     public static RestClientBuilder<RestClient, RouterOptions> createRest(String token) {
-        Function<Config, RestClient> clientFactory = config -> new RestClient(config.getRouter());
+        Function<Config, RestClient> clientFactory = config -> {
+            RestResources restResources = new RestResources(config.getToken(), config.getReactorResources(),
+                    config.getJacksonResources(), config.getRouter(), config.getAllowedMentions().orElse(null));
+            return new RestClient(restResources);
+        };
         return new RestClientBuilder<>(token, clientFactory, Function.identity());
     }
 
@@ -192,16 +196,28 @@ public class RestClientBuilder<C, O extends RouterOptions> {
      * Sets the {@link RequestQueueFactory} that will provide {@link RequestQueue} instances for the router.
      *
      * <p>
-     * If not set, it will use a {@link RequestQueueFactory} providing request queues backed by an
-     * {@link EmitterProcessor} with buffering overflow strategy.
+     * If not set, it will use a {@link RequestQueueFactory} providing request queues backed by a sink with
+     * reasonable buffering capacity, delaying overflowing requests.
      * </p>
      *
      * @param requestQueueFactory the factory that will provide {@link RequestQueue} instances for the router
      * @return this builder
-     * @see RequestQueueFactory#backedByProcessor(Supplier, FluxSink.OverflowStrategy)
+     * @see RequestQueueFactory#createFromSink(Function, EmissionStrategy)
      */
     public RestClientBuilder<C, O> setRequestQueueFactory(RequestQueueFactory requestQueueFactory) {
         this.requestQueueFactory = requestQueueFactory;
+        return this;
+    }
+
+    /**
+     * Sets the {@link AllowedMentions} object that can limit the mentioned target entities that are notified upon
+     * message created by this client.
+     *
+     * @param allowedMentions the options for limiting message mentions. See {@link AllowedMentions#builder()}.
+     * @return this builder
+     */
+    public RestClientBuilder<C, O> setDefaultAllowedMentions(final AllowedMentions allowedMentions) {
+        this.allowedMentions = allowedMentions;
         return this;
     }
 
@@ -228,13 +244,13 @@ public class RestClientBuilder<C, O extends RouterOptions> {
         O options = buildOptions(reactor, jackson);
         Router router = routerFactory.apply(options);
         Config config = new Config(token, reactor, jackson, initExchangeStrategies(jackson),
-                Collections.unmodifiableList(responseTransformers), globalRateLimiter, router);
+                Collections.unmodifiableList(responseTransformers), globalRateLimiter, router, allowedMentions);
         return clientFactory.apply(config);
     }
 
     private O buildOptions(ReactorResources reactor, JacksonResources jackson) {
         RouterOptions options = new RouterOptions(token, reactor, initExchangeStrategies(jackson),
-                responseTransformers, initGlobalRateLimiter(reactor), initRequestQueueFactory());
+                responseTransformers, initGlobalRateLimiter(reactor), initRequestQueueFactory(), Routes.BASE_URL);
         return this.optionsModifier.apply(options);
     }
 
@@ -282,10 +298,11 @@ public class RestClientBuilder<C, O extends RouterOptions> {
         private final List<ResponseFunction> responseTransformers;
         private final GlobalRateLimiter globalRateLimiter;
         private final Router router;
+        private final AllowedMentions allowedMentions;
 
         public Config(String token, ReactorResources reactorResources, JacksonResources jacksonResources,
                       ExchangeStrategies exchangeStrategies, List<ResponseFunction> responseTransformers,
-                      GlobalRateLimiter globalRateLimiter, Router router) {
+                      GlobalRateLimiter globalRateLimiter, Router router, @Nullable AllowedMentions allowedMentions) {
             this.token = token;
             this.reactorResources = reactorResources;
             this.jacksonResources = jacksonResources;
@@ -293,6 +310,7 @@ public class RestClientBuilder<C, O extends RouterOptions> {
             this.responseTransformers = responseTransformers;
             this.globalRateLimiter = globalRateLimiter;
             this.router = router;
+            this.allowedMentions = allowedMentions;
         }
 
         public String getToken() {
@@ -321,6 +339,10 @@ public class RestClientBuilder<C, O extends RouterOptions> {
 
         public Router getRouter() {
             return router;
+        }
+
+        public Optional<AllowedMentions> getAllowedMentions() {
+            return Optional.ofNullable(allowedMentions);
         }
     }
 }

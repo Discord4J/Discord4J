@@ -27,7 +27,8 @@ import java.util.Optional;
  * Represents gateway dispatch data enriched with context for processing through a
  * {@link DispatchHandler} defined under {@link DispatchHandlers}.
  *
- * @param <D> The type of the payload.
+ * @param <D> the type of the payload
+ * @param <S> the type of the old state
  */
 public class DispatchContext<D, S> {
 

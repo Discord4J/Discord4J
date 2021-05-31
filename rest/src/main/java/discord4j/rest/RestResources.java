@@ -20,8 +20,12 @@ package discord4j.rest;
 import discord4j.common.JacksonResources;
 import discord4j.common.ReactorResources;
 import discord4j.common.util.Snowflake;
-import discord4j.rest.request.Router;
 import discord4j.common.util.TokenUtil;
+import discord4j.rest.request.Router;
+import discord4j.rest.util.AllowedMentions;
+import reactor.util.annotation.Nullable;
+
+import java.util.Optional;
 
 /**
  * A set of resources required for key Discord4J features like entity manipulation and API communication.
@@ -33,6 +37,8 @@ public class RestResources {
     private final JacksonResources jacksonResources;
     private final Router router;
     private final long selfId;
+    @Nullable
+    private final AllowedMentions allowedMentions;
 
     /**
      * Create a {@link RestResources} instance with the given resources.
@@ -41,14 +47,16 @@ public class RestResources {
      * @param reactorResources Reactor resources to establish connections and schedule tasks
      * @param jacksonResources Jackson data-binding resources to map objects
      * @param router a connector to perform requests against Discord API
+     * @param allowedMentions a configuration object to limit mentions creating notifications on message sending
      */
     public RestResources(String token, ReactorResources reactorResources, JacksonResources jacksonResources,
-                         Router router) {
+                         Router router, @Nullable AllowedMentions allowedMentions) {
         this.token = token;
         this.reactorResources = reactorResources;
         this.jacksonResources = jacksonResources;
         this.router = router;
         this.selfId = TokenUtil.getSelfId(token);
+        this.allowedMentions = allowedMentions;
     }
 
     /**
@@ -94,5 +102,14 @@ public class RestResources {
      */
     public Snowflake getSelfId() {
         return Snowflake.of(selfId);
+    }
+
+    /**
+     * Return the configured {@link AllowedMentions}, if present.
+     *
+     * @return the configured allowed mentions setting or empty Optional if none was configured
+     */
+    public Optional<AllowedMentions> getAllowedMentions() {
+        return Optional.ofNullable(allowedMentions);
     }
 }

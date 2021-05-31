@@ -42,7 +42,7 @@ import java.util.function.Function;
 class BaseMessageChannel extends BaseChannel implements MessageChannel {
 
     /**
-     * Constructs an {@code BaseMessageChannel} with an associated ServiceMediator and Discord data.
+     * Constructs an {@code BaseMessageChannel} with an associated {@link GatewayDiscordClient} and Discord data.
      *
      * @param gateway The {@link GatewayDiscordClient} associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
@@ -78,6 +78,9 @@ class BaseMessageChannel extends BaseChannel implements MessageChannel {
         return Mono.defer(
                 () -> {
                     MessageCreateSpec mutatedSpec = new MessageCreateSpec();
+                    getClient().getRestClient().getRestResources()
+                            .getAllowedMentions()
+                            .ifPresent(mutatedSpec::setAllowedMentions);
                     spec.accept(mutatedSpec);
                     return getRestChannel().createMessage(mutatedSpec.asRequest());
                 })

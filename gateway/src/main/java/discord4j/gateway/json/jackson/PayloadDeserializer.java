@@ -16,13 +16,13 @@
  */
 package discord4j.gateway.json.jackson;
 
-import discord4j.discordjson.json.gateway.*;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
+import discord4j.discordjson.json.gateway.*;
 import discord4j.gateway.json.GatewayPayload;
-import discord4j.gateway.json.dispatch.*;
+import discord4j.gateway.json.dispatch.EventNames;
 import reactor.util.annotation.Nullable;
 
 import java.io.IOException;
@@ -75,6 +75,10 @@ public class PayloadDeserializer extends StdDeserializer<GatewayPayload<?>> {
         dispatchTypes.put(EventNames.WEBHOOKS_UPDATE, WebhooksUpdate.class);
         dispatchTypes.put(EventNames.INVITE_CREATE, InviteCreate.class);
         dispatchTypes.put(EventNames.INVITE_DELETE, InviteDelete.class);
+        dispatchTypes.put(EventNames.APPLICATION_COMMAND_CREATE, ApplicationCommandCreate.class);
+        dispatchTypes.put(EventNames.APPLICATION_COMMAND_UPDATE, ApplicationCommandUpdate.class);
+        dispatchTypes.put(EventNames.APPLICATION_COMMAND_DELETE, ApplicationCommandDelete.class);
+        dispatchTypes.put(EventNames.INTERACTION_CREATE, InteractionCreate.class);
 
         // Ignored
         dispatchTypes.put(EventNames.PRESENCES_REPLACE, null);
@@ -97,6 +101,14 @@ public class PayloadDeserializer extends StdDeserializer<GatewayPayload<?>> {
         Integer s = payload.get(S_FIELD).isNull() ? null : payload.get(S_FIELD).intValue();
 
         Class<? extends PayloadData> payloadType = getPayloadType(op, t);
+        if (payloadType == GuildCreate.class) {
+            JsonNode d = payload.get(D_FIELD);
+            JsonNode unavailable = d.get("unavailable");
+            if (unavailable != null && unavailable.asBoolean()) {
+                PayloadData data = p.getCodec().treeToValue(d, UnavailableGuildCreate.class);
+                return new GatewayPayload(Opcode.forRaw(op), data, s, t);
+            }
+        }
         PayloadData data = payloadType == null ? null : p.getCodec().treeToValue(payload.get(D_FIELD), payloadType);
 
         return new GatewayPayload(Opcode.forRaw(op), data, s, t);

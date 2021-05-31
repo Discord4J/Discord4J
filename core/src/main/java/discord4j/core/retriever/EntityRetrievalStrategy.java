@@ -26,7 +26,8 @@ import java.util.function.Function;
  * <p>
  * This class pre-defines some factories according to its main modes of operations:
  * <ul>
- *     <li>{@link EntityRetrievalStrategy#STORE} to <strong>exclusively</strong> fetch data from the state cache.</li>
+ *     <li>{@link EntityRetrievalStrategy#STORE} to <strong>exclusively</strong> fetch data from the Gateway state
+ *     cache.</li>
  *     <li>{@link EntityRetrievalStrategy#REST} to fetch data directly from the REST API.</li>
  *     <li>{@link EntityRetrievalStrategy#STORE_FALLBACK_REST} to attempt fetching from the state cache, and if not
  *     successful, fetch from REST. This the default mode.</li>
@@ -36,9 +37,9 @@ import java.util.function.Function;
 public interface EntityRetrievalStrategy extends Function<GatewayDiscordClient, EntityRetriever> {
 
     /**
-     * Strategy that consists of retrieving entities from stores. Avoids making REST API requests in case the object
-     * is not present in the cache. If you want to perform actions when a requested entity is missing, use operators
-     * such as {@link Mono#switchIfEmpty(Mono)}.
+     * Strategy that consists of retrieving entities from the Gateway state cache. Avoids making REST API requests in
+     * case the object is not present in the cache. If you want to perform actions when a requested entity is
+     * missing, use operators such as {@link Mono#switchIfEmpty(Mono)}.
      * <p>
      * Note that using this strategy can have some unintended consequences like being unable to fetch some entities not
      * cached by the gateway, for example, private channels. If that is your use case, locally apply a method like

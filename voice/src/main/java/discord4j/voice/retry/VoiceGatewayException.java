@@ -17,27 +17,27 @@
 
 package discord4j.voice.retry;
 
-import reactor.util.context.Context;
+import reactor.util.context.ContextView;
 
 public class VoiceGatewayException extends RuntimeException {
 
-    private final Context context;
+    private final ContextView context;
 
-    public VoiceGatewayException(Context context) {
+    public VoiceGatewayException(ContextView context) {
         this.context = context;
     }
 
-    public VoiceGatewayException(Context context, String message) {
+    public VoiceGatewayException(ContextView context, String message) {
         super(message);
         this.context = context;
     }
 
-    public VoiceGatewayException(Context context, String message, Throwable cause) {
+    public VoiceGatewayException(ContextView context, String message, Throwable cause) {
         super(message, cause);
         this.context = context;
     }
 
-    public Context getContext() {
+    public ContextView getContext() {
         return context;
     }
 

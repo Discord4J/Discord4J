@@ -17,16 +17,23 @@
 
 package discord4j.core.event;
 
+import discord4j.common.LogUtil;
 import discord4j.core.event.domain.Event;
 import discord4j.core.event.domain.guild.GuildCreateEvent;
 import discord4j.core.event.domain.lifecycle.GatewayLifecycleEvent;
+import org.reactivestreams.Publisher;
 import reactor.core.publisher.*;
 import reactor.core.scheduler.Scheduler;
 import reactor.scheduler.forkjoin.ForkJoinPoolScheduler;
+import reactor.util.Logger;
+import reactor.util.Loggers;
+import reactor.util.context.Context;
 
 import java.time.Duration;
 import java.util.function.Function;
 import java.util.function.Supplier;
+
+import static discord4j.common.LogUtil.format;
 
 /**
  * Distributes events to subscribers. {@link Event} instances can be published over this class and dispatched to all
@@ -48,12 +55,15 @@ import java.util.function.Supplier;
  */
 public interface EventDispatcher {
 
+    Logger log = Loggers.getLogger(EventDispatcher.class);
     Supplier<Scheduler> DEFAULT_EVENT_SCHEDULER = () -> ForkJoinPoolScheduler.create("d4j-events");
 
     /**
-     * Retrieves a {@link Flux} with elements of the given {@link Event} type.
+     * Retrieves a {@link Flux} with elements of the given {@link Event} type. This {@link Flux} has to be subscribed to
+     * in order to start processing. See {@link Event} class for the list of possible event classes.
      * <p>
-     * <strong>Note: </strong> Errors occurring while processing events will terminate your sequence. See
+     * <strong>Note: </strong> Errors occurring while processing events will terminate your sequence. If you wish to use
+     * a version capable of handling errors for you, use {@link #on(Class, Function)}. See
      * <a href="https://github.com/reactive-streams/reactive-streams-jvm#1.7">Reactive Streams Spec</a>
      * explaining this behavior.
      * <p>
@@ -79,6 +89,95 @@ public interface EventDispatcher {
      * @return a new {@link Flux} with the requested events
      */
     <E extends Event> Flux<E> on(Class<E> eventClass);
+
+    /**
+     * Retrieves a {@link Flux} with elements of the given {@link Event} type, to be processed through a given
+     * {@link Function} upon subscription. Errors occurring within the mapper will be logged and discarded, preventing
+     * the termination of the "infinite" event sequence. See {@link Event} class for the list of possible event classes.
+     * <p>
+     * There are multiple ways of using this event handling method, for example:
+     * <pre>
+     * client.on(MessageCreateEvent.class, event -&gt; {
+     *         // myCodeThatMightThrow should return a Reactor type (Mono or Flux)
+     *         return myCodeThatMightThrow(event);
+     *     })
+     *     .subscribe();
+     *
+     * client.on(MessageCreateEvent.class, event -&gt; {
+     *         // myCodeThatMightThrow *can* be blocking, so wrap it in a Reactor type
+     *         return Mono.fromRunnable(() -&gt; myCodeThatMightThrow(event));
+     *     })
+     *     .subscribe();
+     * </pre>
+     * <p>
+     * Continuing the chain after {@code on(class, event -> ...)} will require your own error handling strategy.
+     * Check the docs for {@link #on(Class)} for more details.
+     *
+     * @param eventClass the event class to obtain events from
+     * @param mapper an event mapping function called on each event. If you do not wish to perform further operations
+     * you can return {@code Mono.empty()}.
+     * @param <E> the type of the event class
+     * @param <T> the type of the event mapper function
+     * @return a new {@link Flux} with the type resulting from the given event mapper
+     */
+    default <E extends Event, T> Flux<T> on(Class<E> eventClass, Function<E, Publisher<T>> mapper) {
+        return on(eventClass)
+                .flatMap(event -> Flux.defer(() -> mapper.apply(event))
+                        .contextWrite(ctx -> ctx.put(LogUtil.KEY_SHARD_ID, event.getShardInfo().getIndex()))
+                        .onErrorResume(t -> {
+                            log.warn(format(Context.of(LogUtil.KEY_SHARD_ID, event.getShardInfo().getIndex()),
+                                    "Error while handling {}"), eventClass.getSimpleName(), t);
+                            return Mono.empty();
+                        }));
+    }
+
+    /**
+     * Applies a given {@code adapter} to all events from this dispatcher. Errors occurring within the mapper will be
+     * logged and discarded, preventing the termination of the "infinite" event sequence. This variant allows you to
+     * have a single subscriber to this dispatcher, which is useful to collect all startup events.
+     * <p>
+     * A standard approach to this method is to subclass {@link ReactiveEventAdapter}, overriding the methods you want
+     * to listen for:
+     * <pre>
+     * client.on(new ReactiveEventAdapter() {
+     *
+     *     public Publisher&lt;?&gt; onReady(ReadyEvent event) {
+     *         return Mono.fromRunnable(() -&gt;
+     *                 System.out.println("Connected as " + event.getSelf().getTag()));
+     *     }
+     *
+     *     public Publisher&lt;?&gt; onMessageCreate(MessageCreateEvent event) {
+     *         if (event.getMessage().getContent().equals("!ping")) {
+     *             return event.getMessage().getChannel()
+     *                     .flatMap(channel -&gt; channel.createMessage("Pong!"));
+     *         }
+     *         return Mono.empty();
+     *     }
+     *
+     * }).subscribe(); // nothing happens until you subscribe
+     * </pre>
+     * <p>
+     * Each method requires a {@link Publisher} return like {@link Mono} or {@link Flux} and all errors
+     * will be logged and discarded. To use a synchronous implementation you can wrap your code with
+     * {@link Mono#fromRunnable(Runnable)}.
+     * <p>
+     * Continuing the chain will require your own error handling strategy.
+     * Check the docs for {@link #on(Class)} for more details.
+     *
+     * @param adapter an adapter meant to be subclassed with its appropriate methods overridden
+     * @return a new {@link Flux} with the type resulting from the given event mapper
+     */
+    default Flux<Event> on(ReactiveEventAdapter adapter) {
+        return on(Event.class)
+                .flatMap(event -> Flux.defer(() -> adapter.hookOnEvent(event))
+                        .contextWrite(ctx -> ctx.put(LogUtil.KEY_SHARD_ID, event.getShardInfo().getIndex()))
+                        .onErrorResume(t -> {
+                            log.warn(format(Context.of(LogUtil.KEY_SHARD_ID, event.getShardInfo().getIndex()),
+                                    "Error while handling {}"), event.getClass().getSimpleName(), t);
+                            return Mono.empty();
+                        })
+                        .then(Mono.just(event)));
+    }
 
     /**
      * Publishes an {@link Event} to the dispatcher. Might throw an unchecked exception if the dispatcher can't
@@ -109,8 +208,7 @@ public interface EventDispatcher {
     /**
      * Create an {@link EventDispatcher} that will buffer incoming events to retain all startup events as each
      * shard connects at the cost of increased memory usage and potential {@link OutOfMemoryError} if events are not
-     * consumed. Since this factory uses {@link EmitterProcessor}, it will only produce previously buffered events to
-     * the first subscriber.
+     * consumed. Startup events collected before the first subscription are only forwarded to that subscriber.
      *
      * @return a buffering {@link EventDispatcher} backed by an {@link EmitterProcessor}
      */
@@ -120,26 +218,27 @@ public interface EventDispatcher {
 
     /**
      * Create an {@link EventDispatcher} that will buffer incoming events up to the given {@code bufferSize} elements,
-     * where subsequent events will be dropped in favor of retaining the earliest ones. Since this factory uses
-     * {@link EmitterProcessor}, it will only produce previously buffered events to the first subscriber.
+     * where subsequent events will be dropped in favor of retaining the earliest ones. Startup events collected
+     * before the first subscription are only forwarded to that subscriber.
      *
      * @param bufferSize the number of events to keep in the backlog
-     * @return an {@link EventDispatcher} keeping the earliest events backed by an {@link EmitterProcessor}
+     * @return an {@link EventDispatcher} keeping the earliest events up to {@code bufferSize}
      */
     static EventDispatcher withEarliestEvents(int bufferSize) {
         return builder()
-                .eventProcessor(EmitterProcessor.create(bufferSize, false))
-                .overflowStrategy(FluxSink.OverflowStrategy.DROP)
+                .eventSink(spec -> spec.multicast().onBackpressureBuffer(bufferSize, false))
                 .build();
     }
 
     /**
      * Create an {@link EventDispatcher} that will buffer incoming events up to the given {@code bufferSize} elements,
-     * where earliest events will be dropped in favor of retaining the latest ones. Since this factory uses
-     * {@link EmitterProcessor}, it will only produce previously buffered events to the first subscriber.
+     * where earliest events will be dropped in favor of retaining the latest ones. Startup events collected before
+     * the first subscription are only forwarded to that subscriber.
      *
      * @param bufferSize the number of events to keep in the backlog
      * @return an {@link EventDispatcher} keeping the latest events backed by an {@link EmitterProcessor}
+     * @deprecated due to Processor API being deprecated, we recommend moving to {@link #replayingWithSize(int)} for a
+     * dispatcher that is able to retain a given number of latest events
      */
     static EventDispatcher withLatestEvents(int bufferSize) {
         return builder()
@@ -172,33 +271,38 @@ public interface EventDispatcher {
      * elements as the backlog contains.
      *
      * @param maxAge the maximum age of the contained items
-     * @return an {@link EventDispatcher} backed by a {@link ReplayProcessor} with a time-bounded backlog
-     * @see ReplayProcessor#createTimeout(Duration)
+     * @return an {@link EventDispatcher} that will replay elements up to {@code maxAge} duration to late subscribers
      */
     static EventDispatcher replayingWithTimeout(Duration maxAge) {
-        return new DefaultEventDispatcher(
-                ReplayProcessor.createTimeout(maxAge),
-                FluxSink.OverflowStrategy.IGNORE,
-                DEFAULT_EVENT_SCHEDULER.get());
+        return builder()
+                .eventSink(spec -> spec.replay().limit(maxAge))
+                .build();
     }
 
     /**
-     * Create an {@link EventDispatcher} that will replays up to {@code historySize} elements to late subscribers.
+     * Create an {@link EventDispatcher} that will replay up to {@code historySize} elements to late subscribers.
      * Be aware that using this type of dispatcher with operators such as {@link Flux#retry()} or
      * {@link Flux#repeat()} that re-subscribe to the dispatcher will observe the same elements as the backlog contains.
      *
      * @param historySize the backlog size or maximum items retained for replay
-     * @return an {@link EventDispatcher} backed by a {@link ReplayProcessor} with a customized backlog size
-     * @see ReplayProcessor#create(int)
+     * @return an {@link EventDispatcher} that will replay up to {@code historySize} elements to late subscribers
      */
     static EventDispatcher replayingWithSize(int historySize) {
-        return new DefaultEventDispatcher(
-                ReplayProcessor.create(historySize),
-                FluxSink.OverflowStrategy.IGNORE,
-                DEFAULT_EVENT_SCHEDULER.get());
+        return builder()
+                .eventSink(spec -> spec.replay().limit(historySize))
+                .build();
     }
 
     interface Builder {
+
+        /**
+         * Set the underlying {@link Sinks.Many} the dispatcher will use to queue and distribute events. Defaults
+         * to using a multicast buffering sink.
+         *
+         * @param eventSinkFactory the custom sink factory for events
+         * @return this builder
+         */
+        SinksEventDispatcher.Builder eventSink(Function<Sinks.ManySpec, Sinks.Many<Event>> eventSinkFactory);
 
         /**
          * Set the underlying {@link FluxProcessor} the dispatcher will use to queue and distribute events. Defaults
@@ -211,7 +315,10 @@ public interface EventDispatcher {
          *
          * @param eventProcessor the custom processor for events
          * @return this builder
+         * @deprecated due to the Processor API being deprecated, we recommend using {@link #eventSink(Function)}
+         * moving forward
          */
+        @Deprecated
         DefaultEventDispatcher.Builder eventProcessor(FluxProcessor<Event, Event> eventProcessor);
 
         /**
@@ -225,7 +332,10 @@ public interface EventDispatcher {
          *
          * @param overflowStrategy the custom backpressure strategy
          * @return this builder
+         * @deprecated due to the Processor API being deprecated, we recommend using {@link #eventSink(Function)}
+         * moving forward
          */
+        @Deprecated
         DefaultEventDispatcher.Builder overflowStrategy(FluxSink.OverflowStrategy overflowStrategy);
 
         /**

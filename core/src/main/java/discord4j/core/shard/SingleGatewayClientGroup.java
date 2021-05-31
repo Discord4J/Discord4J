@@ -17,6 +17,7 @@
 
 package discord4j.core.shard;
 
+import discord4j.common.close.CloseStatus;
 import discord4j.discordjson.json.gateway.Dispatch;
 import discord4j.gateway.GatewayClient;
 import discord4j.gateway.GatewayConnection;
@@ -25,13 +26,15 @@ import discord4j.gateway.json.ShardGatewayPayload;
 import io.netty.buffer.ByteBuf;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.FluxSink;
 import reactor.core.publisher.Mono;
+import reactor.core.publisher.Sinks;
 
 import java.time.Duration;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
+
+import static reactor.core.publisher.Sinks.EmitFailureHandler.FAIL_FAST;
 
 class SingleGatewayClientGroup implements GatewayClientGroupManager {
 
@@ -92,7 +95,7 @@ class SingleGatewayClientGroup implements GatewayClientGroupManager {
     @Override
     public Mono<Void> logout() {
         return Mono.defer(() -> Mono.justOrEmpty(instance()))
-                .flatMap(client -> client.close(false));
+                .flatMap(client -> client.close(false).then());
     }
 
     private static class RoutableGatewayClient implements GatewayClient {
@@ -111,7 +114,7 @@ class SingleGatewayClientGroup implements GatewayClientGroupManager {
         }
 
         @Override
-        public Mono<Void> close(boolean allowResume) {
+        public Mono<CloseStatus> close(boolean allowResume) {
             return client.close(allowResume);
         }
 
@@ -133,12 +136,12 @@ class SingleGatewayClientGroup implements GatewayClientGroupManager {
         @Override
         public Mono<Void> send(Publisher<? extends GatewayPayload<?>> publisher) {
             return Flux.from(publisher)
-                    .doOnNext(payload -> sender().next(makeShardAware(payload, shardIndex)))
+                    .doOnNext(payload -> sender().emitNext(makeShardAware(payload, shardIndex), FAIL_FAST))
                     .then();
         }
 
         @Override
-        public FluxSink<GatewayPayload<?>> sender() {
+        public Sinks.Many<GatewayPayload<?>> sender() {
             return client.sender();
         }
 

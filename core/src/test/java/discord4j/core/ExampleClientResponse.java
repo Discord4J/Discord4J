@@ -17,12 +17,11 @@
 
 package discord4j.core;
 
-import discord4j.core.support.BotSupport;
-import discord4j.core.support.ExtraBotSupport;
+import discord4j.core.command.CommandListener;
+import discord4j.core.support.Commands;
 import discord4j.rest.request.RouteMatcher;
 import discord4j.rest.response.ResponseFunction;
 import discord4j.rest.route.Routes;
-import reactor.core.publisher.Mono;
 
 /**
  * An example bot showcasing how to implement global handlers against some API responses. See
@@ -37,9 +36,9 @@ public class ExampleClientResponse {
                 // bad requests (400) while adding reactions will be suppressed
                 .onClientResponse(ResponseFunction.emptyOnErrorStatus(RouteMatcher.route(Routes.REACTION_CREATE), 400))
                 .build()
-                .withGateway(client -> Mono.when(
-                        BotSupport.create(client).eventHandlers(),
-                        ExtraBotSupport.create(client).eventHandlers()
-                ));
+                .withGateway(client -> client.on(CommandListener.createWithPrefix("!!")
+                        .on("echo", Commands::echo)
+                        .on("exit", (req, res) -> req.getClient().logout())
+                        .on("status", Commands::status)));
     }
 }

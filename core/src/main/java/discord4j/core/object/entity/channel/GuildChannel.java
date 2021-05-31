@@ -16,13 +16,14 @@
  */
 package discord4j.core.object.entity.channel;
 
+import discord4j.common.util.Snowflake;
 import discord4j.core.object.ExtendedPermissionOverwrite;
 import discord4j.core.object.PermissionOverwrite;
 import discord4j.core.object.entity.Guild;
+import discord4j.core.object.entity.Member;
 import discord4j.core.retriever.EntityRetrievalStrategy;
-import discord4j.rest.util.PermissionSet;
-import discord4j.common.util.Snowflake;
 import discord4j.core.util.OrderUtil;
+import discord4j.rest.util.PermissionSet;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
@@ -86,6 +87,14 @@ public interface GuildChannel extends Channel {
      * @return The permissions for the given member.
      */
     Mono<PermissionSet> getEffectivePermissions(Snowflake memberId);
+
+    /**
+     * Gets the permissions for the given member, taking into account permission overwrites in this channel.
+     *
+     * @param member The member to get permissions for.
+     * @return The permissions for the given member.
+     */
+    Mono<PermissionSet> getEffectivePermissions(Member member);
 
     /**
      * Gets the name of the channel.

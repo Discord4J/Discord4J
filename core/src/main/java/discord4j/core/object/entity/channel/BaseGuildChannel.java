@@ -16,6 +16,7 @@
  */
 package discord4j.core.object.entity.channel;
 
+import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.ExtendedPermissionOverwrite;
 import discord4j.core.object.PermissionOverwrite;
@@ -27,7 +28,6 @@ import discord4j.core.util.PermissionUtil;
 import discord4j.discordjson.json.ChannelData;
 import discord4j.discordjson.json.PermissionsEditRequest;
 import discord4j.rest.util.PermissionSet;
-import discord4j.common.util.Snowflake;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
 
@@ -42,7 +42,7 @@ import java.util.stream.Stream;
 class BaseGuildChannel extends BaseChannel implements GuildChannel {
 
     /**
-     * Constructs an {@code BaseGuildChannel} with an associated ServiceMediator and Discord data.
+     * Constructs an {@code BaseGuildChannel} with an associated {@link GatewayDiscordClient} and Discord data.
      *
      * @param gateway The {@link GatewayDiscordClient} associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
@@ -97,10 +97,13 @@ class BaseGuildChannel extends BaseChannel implements GuildChannel {
 
     @Override
     public Mono<PermissionSet> getEffectivePermissions(Snowflake memberId) {
-        Mono<Member> getMember = getClient().getMemberById(getGuildId(), memberId);
-        Mono<PermissionSet> getBasePerms = getMember.flatMap(Member::getBasePermissions);
+        return getClient().getMemberById(getGuildId(), memberId)
+            .flatMap(this::getEffectivePermissions);
+    }
 
-        return Mono.zip(getMember, getBasePerms, (member, basePerms) -> {
+    @Override
+    public Mono<PermissionSet> getEffectivePermissions(Member member) {
+        return member.getBasePermissions().map(basePerms -> {
             PermissionOverwrite everyoneOverwrite = getOverwriteForRole(getGuildId()).orElse(null);
 
             List<PermissionOverwrite> roleOverwrites = member.getRoleIds().stream()

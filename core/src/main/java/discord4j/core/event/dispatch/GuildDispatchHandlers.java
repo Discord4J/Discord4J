@@ -95,7 +95,7 @@ class GuildDispatchHandlers {
                     .flatMap(data -> {
                         log.debug(format(ctx, "Requesting members for guild {}"), createData.id());
                         return context.getGateway()
-                                .requestMembers(Snowflake.of(data.id()))
+                                .requestMembers(Snowflake.of(data.id().asString()))
                                 .then();
                     })
                     .subscribe(null, t -> log.warn(format(ctx, "Member request errored for {}"), createData.id(), t));
@@ -188,19 +188,20 @@ class GuildDispatchHandlers {
         long guildId = Snowflake.asLong(context.getDispatch().guildId());
         long memberId = Snowflake.asLong(context.getDispatch().user().id());
 
-        List<Long> currentRoles = context.getDispatch().roles()
+        Set<Long> currentRoleIds = context.getDispatch().roles()
                 .stream()
                 .map(Snowflake::asLong)
-                .collect(Collectors.toList());
+                .collect(Collectors.toSet());
         String currentNick = Possible.flatOpt(context.getDispatch().nick()).orElse(null);
-        String currentJoinedAt = context.getDispatch().joinedAt();
+        String currentJoinedAt = context.getDispatch().joinedAt().orElse(null);
         String currentPremiumSince = Possible.flatOpt(context.getDispatch().premiumSince()).orElse(null);
+        Boolean currentPending = context.getDispatch().pending().toOptional().orElse(null);
         Member oldMember = context.getOldState()
                 .map(data -> new Member(gateway, data, guildId))
                 .orElse(null);
 
         return Mono.just(new MemberUpdateEvent(gateway, context.getShardInfo(), guildId, memberId, oldMember,
-                currentRoles, currentNick, currentJoinedAt, currentPremiumSince));
+                currentRoleIds, currentNick, currentJoinedAt, currentPremiumSince, currentPending));
     }
 
     static Mono<RoleCreateEvent> guildRoleCreate(DispatchContext<GuildRoleCreate, Void> context) {

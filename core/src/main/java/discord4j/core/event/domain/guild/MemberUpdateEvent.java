@@ -20,13 +20,14 @@ import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Member;
 import discord4j.common.util.Snowflake;
+import discord4j.core.object.entity.Role;
 import discord4j.gateway.ShardInfo;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.annotation.Nullable;
 
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -46,25 +47,30 @@ public class MemberUpdateEvent extends GuildEvent {
     @Nullable
     private final Member old;
 
-    private final List<Long> currentRoles;
+    private final Set<Long> currentRoleIds;
     @Nullable
     private final String currentNickname;
+    @Nullable
     private final String currentJoinedAt;
     @Nullable
     private final String currentPremiumSince;
+    @Nullable
+    private final Boolean currentPending;
 
     public MemberUpdateEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, long guildId, long memberId,
-                             @Nullable Member old, List<Long> currentRoles, @Nullable String currentNickname,
-                             String currentJoinedAt, @Nullable String currentPremiumSince) {
+                             @Nullable Member old, Set<Long> currentRoleIds, @Nullable String currentNickname,
+                             @Nullable String currentJoinedAt, @Nullable String currentPremiumSince,
+                             @Nullable Boolean currentPending) {
         super(gateway, shardInfo);
 
         this.guildId = guildId;
         this.memberId = memberId;
         this.old = old;
-        this.currentRoles = currentRoles;
+        this.currentRoleIds = currentRoleIds;
         this.currentNickname = currentNickname;
         this.currentJoinedAt = currentJoinedAt;
         this.currentPremiumSince = currentPremiumSince;
+        this.currentPending = currentPending;
     }
 
     /**
@@ -120,10 +126,20 @@ public class MemberUpdateEvent extends GuildEvent {
      *
      * @return The IDs of the roles the {@link Member} is assigned.
      */
-    public Set<Snowflake> getCurrentRoles() {
-        return currentRoles.stream()
+    public Set<Snowflake> getCurrentRoleIds() {
+        return currentRoleIds.stream()
                 .map(Snowflake::of)
                 .collect(Collectors.toSet());
+    }
+
+    /**
+     * Requests to receive the list of {@link Role} roles that the {@link Member} is currently assigned.
+     *
+     * @return A {@link Flux} emitting the {@link Role} roles that the {@link Member} is assigned.
+     */
+    public Flux<Role> getCurrentRoles() {
+        return getClient().getGuildRoles(getGuildId())
+                .filter(role -> currentRoleIds.contains(role.getId().asLong()));
     }
 
     /**
@@ -136,12 +152,14 @@ public class MemberUpdateEvent extends GuildEvent {
     }
 
     /**
-     * Gets the current join time of the {@link Member} involved in this event.
+     * Gets the current join time of the {@link Member} involved in this event, if present. It is typically absent if
+     * this event is caused by a lurking stage channel member.
      *
-     * @return The current join time of the {@link Member} involved in this event.
+     * @return The current join time of the {@link Member} involved in this event, if present.
      */
-    public Instant getJoinTime() {
-        return DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(currentJoinedAt, Instant::from);
+    public Optional<Instant> getJoinTime() {
+        return Optional.ofNullable(currentJoinedAt)
+                .map(it -> DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(it, Instant::from));
     }
 
     /**
@@ -154,16 +172,26 @@ public class MemberUpdateEvent extends GuildEvent {
             .map(timestamp -> DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(timestamp, Instant::from));
     }
 
+    /**
+     * Gets whether the user has currently not yet passed the guild's Membership Screening requirements.
+     *
+     * @return Whether the user has currently not yet passed the guild's Membership Screening requirements.
+     */
+    public boolean isCurrentPending() {
+        return Optional.ofNullable(currentPending).orElse(false);
+    }
+
     @Override
     public String toString() {
         return "MemberUpdateEvent{" +
                 "guildId=" + guildId +
                 ", memberId=" + memberId +
                 ", old=" + old +
-                ", currentRoles=" + currentRoles +
+                ", currentRoleIds=" + currentRoleIds +
                 ", currentNickname='" + currentNickname + '\'' +
                 ", currentJoinedAt='" + currentJoinedAt + '\'' +
                 ", currentPremiumSince='" + currentPremiumSince + '\'' +
+                ", currentPending='" + currentPending + '\'' +
                 '}';
     }
 }

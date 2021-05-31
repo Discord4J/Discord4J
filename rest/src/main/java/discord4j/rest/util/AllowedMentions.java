@@ -17,10 +17,10 @@
 
 package discord4j.rest.util;
 
+import discord4j.common.util.Snowflake;
 import discord4j.discordjson.json.AllowedMentionsData;
 import discord4j.discordjson.json.ImmutableAllowedMentionsData;
 import discord4j.discordjson.possible.Possible;
-import discord4j.common.util.Snowflake;
 
 import java.util.*;
 import java.util.function.Function;
@@ -28,11 +28,14 @@ import java.util.function.Function;
 /**
  * A class for holding the allowed_mentions object with an built-in factory for default values.
  * Also this class wraps the {@link AllowedMentionsData} JSON to a Discord4J class.
+ *
+ * @see <a href="https://discord.com/developers/docs/resources/channel#allowed-mentions-object">Reference</a>
  */
 public class AllowedMentions {
 
     /**
-     * Crates a builder for this {@link AllowedMentions} class
+     * Create a builder for this {@link AllowedMentions} class. Building this object without any configuration is
+     * equivalent to suppressing all mentions.
      *
      * @return A builder class for allowed mentions
      */
@@ -41,24 +44,44 @@ public class AllowedMentions {
     }
 
     /**
-     * Copy an existing {@link AllowedMentions} object to a new builder
+     * Copy an existing {@link AllowedMentions} object to a new builder.
      *
      * @param template the allowed mentions object to copy
      * @return A builder class for allowed mentions
      */
     public static AllowedMentions.Builder builder(final AllowedMentions template) {
-        return new Builder(template.parse, template.userIds, template.roleIds);
+        return new Builder(template.parse, template.userIds, template.roleIds, template.repliedUser);
+    }
+
+    /**
+     * Create an {@link AllowedMentions} object that will suppress all mentions.
+     *
+     * @return A suppressing allowed mentions
+     */
+    public static AllowedMentions suppressAll() {
+        return builder().build();
+    }
+
+    /**
+     * Create an {@link AllowedMentions} object that will suppress @everyone and @here mentions.
+     *
+     * @return A suppressing allowed mentions
+     */
+    public static AllowedMentions suppressEveryone() {
+        return builder().parseType(Type.USER, Type.ROLE).build();
     }
 
     private final Possible<Set<Type>> parse;
     private final Possible<Set<Snowflake>> userIds;
     private final Possible<Set<Snowflake>> roleIds;
+    private final Possible<Boolean> repliedUser;
 
     private AllowedMentions(final Possible<Set<AllowedMentions.Type>> parse, final Possible<Set<Snowflake>> userIds,
-                            final Possible<Set<Snowflake>> roleIds) {
+                            final Possible<Set<Snowflake>> roleIds, final Possible<Boolean> repliedUser) {
         this.parse = parse;
         this.userIds = userIds;
         this.roleIds = roleIds;
+        this.repliedUser = repliedUser;
     }
 
     private <T, U> List<T> mapSetToList(final Set<U> list, final Function<? super U, ? extends T> mapper) {
@@ -68,7 +91,16 @@ public class AllowedMentions {
     }
 
     /**
-     * Maps this {@link AllowedMentions} object to a {@link AllowedMentionsData} JSON
+     * Copy this {@link AllowedMentions} object to a new builder.
+     *
+     * @return A builder class for allowed mentions
+     */
+    public AllowedMentions.Builder mutate() {
+        return new Builder(parse, userIds, roleIds, repliedUser);
+    }
+
+    /**
+     * Map this {@link AllowedMentions} object to a {@link AllowedMentionsData} JSON
      *
      * @return JSON object
      */
@@ -86,17 +118,27 @@ public class AllowedMentions {
         if (parse.isAbsent() && userIds.isAbsent() && roleIds.isAbsent()) {
             builder.parse(Collections.emptyList()); // this empty list is required to work
         }
+        if (!repliedUser.isAbsent()) {
+            builder.repliedUser(repliedUser.get());
+        }
         return builder.build();
     }
 
+    /**
+     * A builder for creating {@link AllowedMentions} objects.
+     *
+     * @see <a href="https://discord.com/developers/docs/resources/channel#allowed-mentions-object">Reference</a>
+     */
     public static class Builder {
 
         private Possible<Set<AllowedMentions.Type>> parse;
         private Possible<Set<Snowflake>> userIds;
         private Possible<Set<Snowflake>> roleIds;
+        private Possible<Boolean> repliedUser;
 
         private Builder() {
             this(
+                    Possible.absent(),
                     Possible.absent(),
                     Possible.absent(),
                     Possible.absent()
@@ -104,14 +146,15 @@ public class AllowedMentions {
         }
 
         private Builder(final Possible<Set<Type>> parse, final Possible<Set<Snowflake>> userIds,
-                        final Possible<Set<Snowflake>> roleIds) {
+                        final Possible<Set<Snowflake>> roleIds, final Possible<Boolean> repliedUser) {
             this.parse = parse;
             this.userIds = userIds;
             this.roleIds = roleIds;
+            this.repliedUser = repliedUser;
         }
 
         /**
-         * Add a type to the parsed types list
+         * Add a type to the allowed parsed types list.
          *
          * @param type the type to parse
          * @return this builder
@@ -125,7 +168,7 @@ public class AllowedMentions {
         }
 
         /**
-         * Add a user to the allowed users list
+         * Add a user to the allowed users list.
          *
          * @param userId the user to allow
          * @return this builder
@@ -139,7 +182,7 @@ public class AllowedMentions {
         }
 
         /**
-         * Add a role to the allowed roles list
+         * Add a role to the allowed roles list.
          *
          * @param roleId the role to allow
          * @return this builder
@@ -153,7 +196,7 @@ public class AllowedMentions {
         }
 
         /**
-         * Add types to the parsed types list
+         * Add types to the allowed parsed types list.
          *
          * @param type the types to parse
          * @return this builder
@@ -167,7 +210,7 @@ public class AllowedMentions {
         }
 
         /**
-         * Add users to the allowed users list
+         * Add users to the allowed users list.
          *
          * @param userId the users to allow
          * @return this builder
@@ -181,7 +224,7 @@ public class AllowedMentions {
         }
 
         /**
-         * Add roles to the allowed roles list
+         * Add roles to the allowed roles list.
          *
          * @param roleId the roles to allow
          * @return this builder
@@ -195,18 +238,42 @@ public class AllowedMentions {
         }
 
         /**
+         * Set whether to mention the author of the message being replied to.
+         *
+         * @param repliedUser whether to mention the author of the message being replied to.
+         * @return this builder
+         */
+        public Builder repliedUser(final boolean repliedUser) {
+            this.repliedUser = Possible.of(repliedUser);
+            return this;
+        }
+
+        /**
          * Build the {@link AllowedMentions} object
          *
          * @return the allowed mentions object
          */
         public AllowedMentions build() {
-            return new AllowedMentions(parse, userIds, roleIds);
+            return new AllowedMentions(parse, userIds, roleIds, repliedUser);
         }
     }
 
+    /**
+     * An allowed mentions type, grouped into role mentions, user mentions and everyone mentions (includes @everyone
+     * and @here).
+     */
     public enum Type {
+        /**
+         * Control role mentions.
+         */
         ROLE("roles"),
+        /**
+         * Control user mentions.
+         */
         USER("users"),
+        /**
+         * Control @everyone and @here mentions.
+         */
         EVERYONE_AND_HERE("everyone");
 
         private final String raw;

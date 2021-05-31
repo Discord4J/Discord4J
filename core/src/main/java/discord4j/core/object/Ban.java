@@ -37,7 +37,7 @@ public final class Ban implements DiscordObject {
     private final BanData data;
 
     /**
-     * Constructs a {@code Ban} with an associated ServiceMediator and Discord data.
+     * Constructs a {@code Ban} with an associated {@link GatewayDiscordClient} and Discord data.
      *
      * @param gateway The {@link GatewayDiscordClient} associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
@@ -50,6 +50,15 @@ public final class Ban implements DiscordObject {
     @Override
     public GatewayDiscordClient getClient() {
         return gateway;
+    }
+
+    /**
+     * Gets the data of the ban.
+     *
+     * @return The data of the ban.
+     */
+    public BanData getData() {
+        return data;
     }
 
     /**

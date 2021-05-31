@@ -17,9 +17,11 @@
 package discord4j.core.spec;
 
 import discord4j.core.object.entity.Message;
+import discord4j.discordjson.json.AllowedMentionsData;
 import discord4j.discordjson.json.EmbedData;
 import discord4j.discordjson.json.MessageEditRequest;
 import discord4j.discordjson.possible.Possible;
+import discord4j.rest.util.AllowedMentions;
 import reactor.util.annotation.Nullable;
 
 import java.util.Arrays;
@@ -35,7 +37,8 @@ public class MessageEditSpec implements Spec<MessageEditRequest> {
 
     private Possible<Optional<String>> content = Possible.absent();
     private Possible<Optional<EmbedData>> embed = Possible.absent();
-    private Possible<Integer> flags = Possible.absent();
+    private Possible<Optional<AllowedMentionsData>> allowedMentions = Possible.absent();
+    private Possible<Optional<Integer>> flags = Possible.absent();
 
     /**
      * Sets the new contents for the edited {@link Message}.
@@ -67,15 +70,30 @@ public class MessageEditSpec implements Spec<MessageEditRequest> {
     }
 
     /**
-     * Set the flags for the edited {@link Message}.
+     * Sets the new allowed mentions for the edited {@link Message}.
      *
-     * @param flags an array of {@link Message.Flag} to set on the edited message.
-     * @return this spec
+     * @param allowedMentions This message allowed mentions.
+     * @return This spec.
      */
-    public MessageEditSpec setFlags(Message.Flag... flags) {
-        this.flags = Possible.of(Arrays.stream(flags)
-                .mapToInt(Message.Flag::getValue)
-                .reduce(0, (left, right) -> left | right));
+    public MessageEditSpec setAllowedMentions(@Nullable AllowedMentions allowedMentions) {
+        this.allowedMentions = Possible.of(Optional.ofNullable(allowedMentions).map(AllowedMentions::toData));
+        return this;
+    }
+
+    /**
+     * Sets the flags for the edited {@link Message}.
+     *
+     * @param flags An array of {@link Message.Flag} to set on the edited message.
+     * @return This spec.
+     */
+    public MessageEditSpec setFlags(@Nullable Message.Flag... flags) {
+        if (flags != null) {
+            this.flags = Possible.of(Optional.of(Arrays.stream(flags)
+                    .mapToInt(Message.Flag::getValue)
+                    .reduce(0, (left, right) -> left | right)));
+        } else {
+            this.flags = Possible.of(Optional.empty());
+        }
         return this;
     }
 
@@ -84,6 +102,7 @@ public class MessageEditSpec implements Spec<MessageEditRequest> {
         return MessageEditRequest.builder()
                 .content(content)
                 .embed(embed)
+                .allowedMentions(allowedMentions)
                 .flags(flags)
                 .build();
     }

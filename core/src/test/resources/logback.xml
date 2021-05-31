@@ -7,16 +7,16 @@
     <logger name="reactor.retry" level="INFO"/>
 
     <logger name="discord4j.core" level="DEBUG"/>
-    <logger name="discord4j.gateway.protocol.sender" level="TRACE"/>
-    <logger name="discord4j.gateway.protocol.receiver" level="TRACE"/>
-    <logger name="discord4j.voice.protocol.sender" level="TRACE"/>
-    <logger name="discord4j.voice.protocol.receiver" level="TRACE"/>
+<!--    <logger name="discord4j.gateway.protocol.sender" level="TRACE"/>-->
+<!--    <logger name="discord4j.gateway.protocol.receiver" level="TRACE"/>-->
+<!--    <logger name="discord4j.voice.protocol.sender" level="TRACE"/>-->
+<!--    <logger name="discord4j.voice.protocol.receiver" level="TRACE"/>-->
 <!--    <logger name="discord4j.voice.protocol.udp.sender" level="TRACE"/>-->
-    <logger name="discord4j.voice.protocol.udp.receiver" level="TRACE"/>
+<!--    <logger name="discord4j.voice.protocol.udp.receiver" level="TRACE"/>-->
     <logger name="discord4j.rest.http.client.DiscordWebClient" level="INFO"/>
     <logger name="discord4j.rest.request" level="DEBUG"/>
     <!--<logger name="discord4j.rest.http" level="TRACE"/>-->
-    <logger name="discord4j.core.event.dispatch" level="TRACE"/>
+<!--    <logger name="discord4j.core.event.dispatch" level="TRACE"/>-->
 
     <turboFilter class="discord4j.core.logback.GatewayEventFilter">
         <Logger>discord4j.gateway.protocol.receiver</Logger>

@@ -17,11 +17,11 @@
 
 package discord4j.voice.retry;
 
-import reactor.util.context.Context;
+import reactor.util.context.ContextView;
 
 public class VoiceGatewayResumeException extends VoiceGatewayException {
 
-    public VoiceGatewayResumeException(Context context) {
+    public VoiceGatewayResumeException(ContextView context) {
         super(context);
     }
 }

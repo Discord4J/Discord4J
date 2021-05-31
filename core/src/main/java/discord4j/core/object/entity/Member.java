@@ -27,6 +27,8 @@ import discord4j.core.spec.GuildMemberEditSpec;
 import discord4j.core.util.OrderUtil;
 import discord4j.core.util.PermissionUtil;
 import discord4j.discordjson.json.MemberData;
+import discord4j.discordjson.json.gateway.ImmutableRequestGuildMembers;
+import discord4j.discordjson.json.gateway.RequestGuildMembers;
 import discord4j.discordjson.possible.Possible;
 import discord4j.rest.util.Color;
 import discord4j.rest.util.PermissionSet;
@@ -59,7 +61,7 @@ public final class Member extends User {
     private final long guildId;
 
     /**
-     * Constructs a {@code Member} with an associated ServiceMediator and Discord data.
+     * Constructs a {@code Member} with an associated {@link GatewayDiscordClient} and Discord data.
      *
      * @param gateway The {@link GatewayDiscordClient} associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
@@ -76,6 +78,15 @@ public final class Member extends User {
         return Mono.just(this)
                 .filter(member -> member.getGuildId().equals(guildId))
                 .switchIfEmpty(super.asMember(guildId));
+    }
+
+    /**
+     * Gets the data of the member.
+     *
+     * @return The data of the member.
+     */
+    public MemberData getMemberData() {
+        return data;
     }
 
     /**
@@ -150,12 +161,12 @@ public final class Member extends User {
     }
 
     /**
-     * Gets when the user joined the guild.
+     * Gets when the user joined the guild, if present. Can be absent if it's a lurking stage channel member.
      *
-     * @return When the user joined the guild.
+     * @return When the user joined the guild, if present.
      */
-    public Instant getJoinTime() {
-        return DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(data.joinedAt(), Instant::from);
+    public Optional<Instant> getJoinTime() {
+        return data.joinedAt().map(it -> DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(it, Instant::from));
     }
 
     /**
@@ -240,14 +251,46 @@ public final class Member extends User {
 
     /**
      * Requests to retrieve the presence for this user for this guild.
+     * {@code Intent.GUILD_PRESENCES} is required to get the presence of the bot, otherwise the emitted {@code Mono}
+     * will always be empty.
      *
      * @return A {@link Mono} where, upon successful completion, emits a {@link Presence presence} for this user for
      * this guild. If an error is received, it is emitted through the {@code Mono}.
      */
     public Mono<Presence> getPresence() {
+        // Fix https://github.com/Discord4J/Discord4J/issues/475
+        if (getClient().getSelfId().equals(getId())) {
+            return Mono.defer(() -> {
+                final ImmutableRequestGuildMembers request = RequestGuildMembers.builder()
+                        .guildId(getGuildId().asString())
+                        .addUserId(getId().asString())
+                        .presences(true)
+                        .limit(1)
+                        .build();
+
+                return getClient().requestMemberChunks(request)
+                    .singleOrEmpty()
+                    .flatMap(chunk -> Mono.justOrEmpty(chunk.presences().toOptional())
+                            .flatMapIterable(list -> list)
+                            .next()
+                            .map(Presence::new))
+                    // IllegalArgumentException can be thrown during request validation if intents are not matching the request
+                    .onErrorResume(IllegalArgumentException.class, err -> Mono.empty());
+            });
+        }
+
         return Mono.from(getClient().getGatewayResources().getStore()
                 .execute(ReadActions.getPresenceById(getGuildId().asLong(), getId().asLong())))
                 .map(Presence::new);
+    }
+
+    /**
+     * Gets whether the user has not yet passed the guild's Membership Screening requirements.
+     *
+      * @return Whether the user has not yet passed the guild's Membership Screening requirements.
+     */
+    public boolean isPending() {
+        return data.pending().toOptional().orElse(false);
     }
 
     /**

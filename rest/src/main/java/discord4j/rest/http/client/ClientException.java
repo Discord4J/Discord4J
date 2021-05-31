@@ -70,8 +70,7 @@ import java.util.function.Predicate;
 public class ClientException extends RuntimeException {
 
     private final ClientRequest request;
-    private final HttpResponseStatus status;
-    private final HttpHeaders headers;
+    private final HttpClientResponse response;
     private final ErrorResponse errorResponse;
 
     /**
@@ -85,8 +84,7 @@ public class ClientException extends RuntimeException {
         super(request.getMethod().toString() + " " + request.getUrl() + " returned " + response.status().toString() +
                 (errorResponse != null ? " with response " + errorResponse.getFields() : ""));
         this.request = request;
-        this.status = response.status();
-        this.headers = response.responseHeaders();
+        this.response = response;
         this.errorResponse = errorResponse;
     }
 
@@ -100,13 +98,22 @@ public class ClientException extends RuntimeException {
     }
 
     /**
+     * Return the {@link HttpClientResponse} encapsulating a low-level Discord API response.
+     *
+     * @return the low-level response that caused this exception
+     */
+    public HttpClientResponse getResponse() {
+        return response;
+    }
+
+    /**
      * Return the {@link HttpResponseStatus} with information related to the HTTP error. The actual status code can be
      * obtained through {@link HttpResponseStatus#code()}.
      *
      * @return the HTTP error associated to this exception
      */
     public HttpResponseStatus getStatus() {
-        return status;
+        return getResponse().status();
     }
 
     /**
@@ -116,7 +123,7 @@ public class ClientException extends RuntimeException {
      * @return the HTTP response headers
      */
     public HttpHeaders getHeaders() {
-        return headers;
+        return getResponse().responseHeaders();
     }
 
     /**

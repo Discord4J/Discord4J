@@ -20,10 +20,7 @@ package discord4j.core.event;
 import discord4j.common.LogUtil;
 import discord4j.core.event.domain.Event;
 import org.reactivestreams.Subscription;
-import reactor.core.publisher.EmitterProcessor;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.FluxProcessor;
-import reactor.core.publisher.FluxSink;
+import reactor.core.publisher.*;
 import reactor.core.scheduler.Scheduler;
 import reactor.util.Logger;
 import reactor.util.Loggers;
@@ -31,6 +28,7 @@ import reactor.util.concurrent.Queues;
 
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
 
 import static discord4j.common.LogUtil.format;
 
@@ -113,6 +111,16 @@ public class DefaultEventDispatcher implements EventDispatcher {
         protected Scheduler eventScheduler;
 
         protected Builder() {
+        }
+
+        @Override
+        public SinksEventDispatcher.Builder eventSink(Function<Sinks.ManySpec, Sinks.Many<Event>> eventSinkFactory) {
+            SinksEventDispatcher.Builder builder = new SinksEventDispatcher.Builder()
+                    .eventSink(Objects.requireNonNull(eventSinkFactory));
+            if (eventScheduler != null) {
+                builder.eventScheduler(eventScheduler);
+            }
+            return builder;
         }
 
         @Override

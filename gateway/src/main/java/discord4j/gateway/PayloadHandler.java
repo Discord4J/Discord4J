@@ -17,6 +17,7 @@
 package discord4j.gateway;
 
 import discord4j.discordjson.json.gateway.PayloadData;
+import discord4j.gateway.json.GatewayPayload;
 import reactor.core.publisher.Mono;
 
 /**
@@ -32,5 +33,5 @@ public interface PayloadHandler<T extends PayloadData> {
      *
      * @param context the payload's gateway context
      */
-    Mono<Void> handle(PayloadContext<T> context);
+    Mono<Void> handle(GatewayPayload<T> context);
 }

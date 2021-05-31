@@ -84,7 +84,7 @@ public class RestEntityRetriever implements EntityRetriever {
     public Mono<Role> getRoleById(Snowflake guildId, Snowflake roleId) {
         return rest.getGuildService()
                 .getGuildRoles(guildId.asLong())
-                .filter(response -> response.id().equals(roleId.asString()))
+                .filter(response -> response.id().asString().equals(roleId.asString()))
                 .singleOrEmpty()
                 .map(data -> new Role(gateway, data, guildId.asLong()));
     }
@@ -110,6 +110,11 @@ public class RestEntityRetriever implements EntityRetriever {
     @Override
     public Mono<User> getSelf() {
         return rest.getUserService().getCurrentUser().map(data -> new User(gateway, data));
+    }
+
+    @Override
+    public Mono<Member> getSelfMember(Snowflake guildId) {
+        return rest.getSelfMember(guildId).map(data -> new Member(gateway,data, guildId.asLong()));
     }
 
     @Override

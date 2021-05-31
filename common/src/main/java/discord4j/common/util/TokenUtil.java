@@ -28,8 +28,13 @@ public final class TokenUtil {
      * @return The bot user's ID.
      */
     public static long getSelfId(String token) {
-        return Long.parseLong(new String(Base64.getDecoder()
-                .decode(token.split("\\.")[0]), StandardCharsets.UTF_8));
+        try {
+            return Long.parseLong(new String(Base64.getDecoder()
+                    .decode(token.split("\\.")[0]), StandardCharsets.UTF_8));
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Invalid token, make sure you're using the token from the " +
+                    "developer portal Bot section and not the application client secret or public key.", e);
+        }
     }
 
 }

@@ -23,7 +23,6 @@ import discord4j.core.event.EventDispatcher;
 import discord4j.core.event.domain.Event;
 import discord4j.core.shard.MemberRequestFilter;
 import discord4j.core.shard.ShardCoordinator;
-import discord4j.discordjson.possible.Possible;
 import discord4j.gateway.GatewayClient;
 import discord4j.gateway.GatewayReactorResources;
 import discord4j.gateway.intent.IntentSet;
@@ -41,7 +40,7 @@ public class GatewayResources {
     private final GatewayReactorResources gatewayReactorResources;
     private final VoiceReactorResources voiceReactorResources;
     private final ReconnectOptions voiceReconnectOptions;
-    private final Possible<IntentSet> intents;
+    private final IntentSet intents;
 
     /**
      * Create a new {@link GatewayResources} with the given parameters.
@@ -53,12 +52,13 @@ public class GatewayResources {
      * @param gatewayReactorResources a custom set of Reactor resources targeting Gateway operations
      * @param voiceReactorResources a set of Reactor resources targeting Voice Gateway operations
      * @param voiceReconnectOptions a reconnection policy for Voice Gateway connections
+     * @param intents a set of events to subscribe when connecting to the Gateway
      */
     public GatewayResources(Store store, EventDispatcher eventDispatcher,
                             ShardCoordinator shardCoordinator, MemberRequestFilter memberRequestFilter,
                             GatewayReactorResources gatewayReactorResources,
                             VoiceReactorResources voiceReactorResources,
-                            ReconnectOptions voiceReconnectOptions, Possible<IntentSet> intents) {
+                            ReconnectOptions voiceReconnectOptions, IntentSet intents) {
         this.store = store;
         this.eventDispatcher = eventDispatcher;
         this.shardCoordinator = shardCoordinator;
@@ -74,7 +74,7 @@ public class GatewayResources {
      *
      * @return The {@link IntentSet} tied to this {@link GatewayResources}
      */
-    public Possible<IntentSet> getIntents() {
+    public IntentSet getIntents() {
         return intents;
     }
 

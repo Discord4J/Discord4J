@@ -2,7 +2,7 @@
 
 <a href="https://discord4j.com"><img align="right" src="https://raw.githubusercontent.com/Discord4J/discord4j-web/master/public/logo.svg?sanitize=true" width=27%></a>
 
-[![Support Server Invite](https://img.shields.io/discord/208023865127862272.svg?color=7289da&label=Discord4J&logo=discord&style=flat-square)](https://discord.gg/NxGAeCY)
+[![Support Server Invite](https://img.shields.io/discord/208023865127862272.svg?color=7289da&label=Discord4J&logo=discord&style=flat-square)](https://discord.gg/d4j)
 [![Maven Central](https://img.shields.io/maven-central/v/com.discord4j/discord4j-core/3.1.svg?style=flat-square)](https://search.maven.org/artifact/com.discord4j/discord4j-core)
 [![Javadocs](https://javadoc.io/badge2/com.discord4j/discord4j-core/$version/javadoc.svg?color=blue&style=flat-square)](https://javadoc.io/doc/com.discord4j/discord4j-core/$version)
 [![GitHub Workflow Status (branch)](https://img.shields.io/github/workflow/status/Discord4J/Discord4J/Java%20CI/master?logo=github&style=flat-square)](https://github.com/Discord4J/Discord4J/actions)
@@ -37,8 +37,8 @@ public final class ExampleBot {
 ## 🔗 Quick Links
 
 * [Javadocs](https://www.javadoc.io/doc/com.discord4j/discord4j-core)
-* [Wiki](https://github.com/Discord4J/Discord4J/wiki)
-* [Discord](https://discord.gg/NxGAeCY)
+* [Documentation](https://docs.discord4j.com)
+* [Discord](https://discord.gg/d4j)
 
 ## 💎 Benefits
 
@@ -50,7 +50,7 @@ public final class ExampleBot {
 
 * ⚔️ **Powerful** - Discord4J can be used to develop any bot, big or small. We offer many tools for developing large-scale bots from [custom distribution frameworks](https://github.com/Discord4J/connect), [off-heap caching](https://github.com/Discord4J/Stores/tree/master/redis), and its interaction with Reactor allows complete integration with frameworks such as Spring and Micronaut.
 
-* 🏫 **Community** - We pride ourselves on our inclusive community and are willing to help whenever challenges arise; or if you just want to chat! We offer help ranging from Discord4J specific problems, to general programming and web development help, and even Reactor-specific questions. Be sure to visit us on our [Discord server](https://discord.gg/NxGAeCY)!
+* 🏫 **Community** - We pride ourselves on our inclusive community and are willing to help whenever challenges arise; or if you just want to chat! We offer help ranging from Discord4J specific problems, to general programming and web development help, and even Reactor-specific questions. Be sure to visit us on our [Discord server](https://discord.gg/d4j)!
 
 ## 📦 Installation
 
@@ -101,7 +101,7 @@ libraryDependencies ++= Seq(
 
 ## 🔀 Discord4J Versions
 
-Discord4J 3.1.x introduces performance and API enhancements, a plethora of new features, and dependency upgrades. A [Migration Guide](https://github.com/Discord4J/Discord4J/wiki/Migrating-from-v3.0-to-v3.1) is provided to aide users and ensure a smooth and readily available transition.
+Discord4J 3.1.x introduces performance and API enhancements, a plethora of new features, and dependency upgrades. A [Migration Guide](https://docs.discord4j.com/migrating-from-v3-0-to-v3-1) is provided to aide users and ensure a smooth and readily available transition.
 
 | Discord4J                                                   | Support          | Gateway/API | Intents                           |
 |-------------------------------------------------------------|------------------|-------------|-----------------------------------|
@@ -152,7 +152,7 @@ public final class ExampleBot {
 }
 ```
 
-Discord4J also provides several methods to aide in better reactive chain compositions, such as `GatewayDiscordClient#withGateway` and `EventDispatcher#on` with an [error handling](https://github.com/Discord4J/Discord4J/wiki/Error-Handling) overload.
+Discord4J also provides several methods to aide in better reactive chain compositions, such as `GatewayDiscordClient#withGateway` and `EventDispatcher#on` with an [error handling](https://docs.discord4j.com/error-handling) overload.
 
 ```java
 final String token = args[0];

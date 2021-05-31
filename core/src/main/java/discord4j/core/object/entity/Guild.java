@@ -19,11 +19,8 @@ package discord4j.core.object.entity;
 import discord4j.common.store.action.read.ReadActions;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
-import discord4j.core.object.Ban;
-import discord4j.core.object.ExtendedInvite;
-import discord4j.core.object.Region;
-import discord4j.core.object.VoiceState;
-import discord4j.core.object.audit.AuditLogEntry;
+import discord4j.core.object.*;
+import discord4j.core.object.audit.AuditLogPart;
 import discord4j.core.object.entity.channel.*;
 import discord4j.core.object.presence.Presence;
 import discord4j.core.retriever.EntityRetrievalStrategy;
@@ -81,7 +78,7 @@ public final class Guild implements Entity {
     private final GuildData data;
 
     /**
-     * Constructs an {@code Guild} with an associated ServiceMediator and Discord data.
+     * Constructs a {@code Guild} with an associated {@link GatewayDiscordClient} and Discord data.
      *
      * @param gateway The {@link GatewayDiscordClient} associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
@@ -99,6 +96,15 @@ public final class Guild implements Entity {
     @Override
     public Snowflake getId() {
         return Snowflake.of(data.id());
+    }
+
+    /**
+     * Gets the data of the guild.
+     *
+     * @return The data of the guild.
+     */
+    public GuildData getData() {
+        return data;
     }
 
     /**
@@ -305,7 +311,7 @@ public final class Guild implements Entity {
      * @return The number of boosts this server currently has, if present.
      */
     public OptionalInt getPremiumSubscriptionCount() {
-        return Possible.flatOpt(data.premiumSubscriptionCount())
+        return data.premiumSubscriptionCount().toOptional()
                 .map(OptionalInt::of)
                 .orElse(OptionalInt.empty());
     }
@@ -318,7 +324,7 @@ public final class Guild implements Entity {
      * to "en-US".
      */
     public Locale getPreferredLocale() {
-        return new Locale.Builder().setLanguageTag(data.preferredLocale().orElse("en-US")).build();
+        return new Locale.Builder().setLanguageTag(data.preferredLocale()).build();
     }
 
     /**
@@ -730,6 +736,15 @@ public final class Guild implements Entity {
     }
 
     /**
+     * Gets whether this guild is designated as NSFW.
+     *
+     * @return Whether this guild is designated as NSFW.
+     */
+    public boolean isNsfw() {
+        return data.nsfw().toOptional().orElse(false);
+    }
+
+    /**
      * Requests to retrieve the voice states of the guild.
      *
      * @return A {@link Flux} that continually emits the {@link VoiceState voice states} of the guild. If an error is
@@ -770,6 +785,36 @@ public final class Guild implements Entity {
      */
     public Flux<Member> requestMembers() {
         return gateway.requestMembers(getId());
+    }
+
+    /**
+     * Return a set of {@link Member members} from this guild using the current Gateway connection.
+     * This method performs a check to validate whether the given guild's data can be obtained from this
+     * {@link GatewayDiscordClient}.
+     *
+     * @param userIds the {@link Snowflake} set of users to request
+     * @return a {@link Flux} of {@link Member} for the given {@link Guild}. If an error occurs, it is emitted through
+     * the {@link Flux}.
+     */
+    public Flux<Member> requestMembers(Set<Snowflake> userIds) {
+        return gateway.requestMembers(getId(), userIds);
+    }
+
+    /**
+     * Returns a list of {@link Member members} whose username or nickname starts with the provided username.
+     *
+     * @param username the string to match username(s) and nickname(s) against.
+     * @param limit the max number of members to return.
+     * @return a {@link Flux} of {@link Member} whose username or nickname starts with the provided username. If an
+     * error occurs, it is emitted through the {@link Flux}.
+     */
+    public Flux<Member> searchMembers(String username, int limit) {
+        Map<String, Object> queryParams = new HashMap<>(2);
+        queryParams.put("query", username);
+        queryParams.put("limit", limit);
+        return gateway.getRestClient().getGuildService()
+                .searchGuildMembers(data.id().asLong(), queryParams)
+                .map(memberData -> new Member(gateway, memberData, data.id().asLong()));
     }
 
     /**
@@ -950,6 +995,24 @@ public final class Guild implements Entity {
                             .createGuildEmoji(getId().asLong(), mutatedSpec.asRequest(), mutatedSpec.getReason());
                 })
                 .map(data -> new GuildEmoji(gateway, data, getId().asLong()));
+    }
+
+    /**
+     * Requests to create a template based on this guild.
+     *
+     * @param spec A {@link Consumer} that provides a "blank" {@link GuildTemplateCreateSpec} to be operated on.
+     * @return A {@link Mono} where, upon subscription, emits the created {@link GuildTemplate} on success. If an error
+     * is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<GuildTemplate> createTemplate(final Consumer<? super GuildTemplateCreateSpec> spec) {
+        return Mono.defer(
+            () -> {
+                GuildTemplateCreateSpec mutatedSpec = new GuildTemplateCreateSpec();
+                spec.accept(mutatedSpec);
+                return gateway.getRestClient().getTemplateService()
+                        .createTemplate(getId().asLong(), mutatedSpec.asRequest());
+            })
+            .map(data -> new GuildTemplate(gateway, data));
     }
 
     /**
@@ -1250,22 +1313,40 @@ public final class Guild implements Entity {
 
     /**
      * Requests to retrieve the audit log for this guild.
+     * <p>
+     * The audit log parts can be {@link AuditLogPart#combine(AuditLogPart) combined} for easier querying. For example,
+     * <pre>
+     * {@code
+     * guild.getAuditLog()
+     *     .take(10)
+     *     .reduce(AuditLogPart::combine)
+     * }
+     * </pre>
      *
-     * @return A {@link Flux} that continually emits entries for this guild's audit log. If an error is received, it is
-     * emitted through the {@code Flux}.
+     * @return A {@link Flux} that continually parts of this guild's audit log. If an error is received, it is emitted
+     * through the {@code Flux}.
      */
-    public Flux<AuditLogEntry> getAuditLog() {
+    public Flux<AuditLogPart> getAuditLog() {
         return getAuditLog(ignored -> {});
     }
 
     /**
      * Requests to retrieve the audit log for this guild.
+     * <p>
+     * The audit log parts can be {@link AuditLogPart#combine(AuditLogPart) combined} for easier querying. For example,
+     * <pre>
+     * {@code
+     * guild.getAuditLog()
+     *     .take(10)
+     *     .reduce(AuditLogPart::combine)
+     * }
+     * </pre>
      *
      * @param spec A {@link Consumer} that provides a "blank" {@link AuditLogQuerySpec} to be operated on.
-     * @return A {@link Flux} that continually emits entries for this guild's audit log. If an error is received, it is
-     * emitted through the {@code Flux}.
+     * @return A {@link Flux} that continually parts of this guild's audit log. If an error is received, it is emitted
+     * through the {@code Flux}.
      */
-    public Flux<AuditLogEntry> getAuditLog(final Consumer<? super AuditLogQuerySpec> spec) {
+    public Flux<AuditLogPart> getAuditLog(final Consumer<? super AuditLogQuerySpec> spec) {
         final Function<Map<String, Object>, Flux<AuditLogData>> makeRequest = params -> {
             final AuditLogQuerySpec mutatedSpec = new AuditLogQuerySpec();
             spec.accept(mutatedSpec);
@@ -1277,13 +1358,12 @@ public final class Guild implements Entity {
 
         final ToLongFunction<AuditLogData> getLastEntryId = response -> {
             final List<AuditLogEntryData> entries = response.auditLogEntries();
-            return (entries.size() == 0) ? Long.MAX_VALUE :
+            return (entries.isEmpty()) ? Long.MAX_VALUE :
                     Snowflake.asLong(entries.get(entries.size() - 1).id());
         };
 
         return PaginationUtil.paginateBefore(makeRequest, getLastEntryId, Long.MAX_VALUE, 100)
-                .flatMap(log -> Flux.fromIterable(log.auditLogEntries())
-                        .map(data -> new AuditLogEntry(gateway, data)));
+                .map(data -> new AuditLogPart(getId().asLong(), gateway, data));
     }
 
     /**
@@ -1308,6 +1388,18 @@ public final class Guild implements Entity {
         return gateway.getRestClient().getGuildService()
                 .getGuildInvites(getId().asLong())
                 .map(data -> new ExtendedInvite(gateway, data));
+    }
+
+    /**
+     * Requests to retrieve the templates of the guild.
+     *
+     * @return A {@link Flux} that continually emits the {@link GuildTemplate templates} of the guild. If an error is
+     * received, it is emitted through the {@code Flux}.
+     */
+    public Flux<GuildTemplate> getTemplates() {
+        return gateway.getRestClient().getTemplateService()
+            .getTemplates(getId().asLong())
+            .map(data -> new GuildTemplate(gateway, data));
     }
 
     /**
@@ -1640,11 +1732,14 @@ public final class Guild implements Entity {
     /** Describes system channel flags. */
     public enum SystemChannelFlag {
 
-        /** Member join notifications are suppressed. */
+        /** Suppress member join notifications. */
         SUPPRESS_JOIN_NOTIFICATIONS(0),
 
-        /** Server boost notifications are suppressed. */
-        SUPPRESS_PREMIUM_SUBSCRIPTIONS(1);
+        /** Suppress server boost notifications. */
+        SUPPRESS_PREMIUM_SUBSCRIPTIONS(1),
+
+        /** Suppress server setup tips. */
+        SUPPRESS_GUILD_REMINDER_NOTIFICATIONS(2);
 
         /** The underlying value as represented by Discord. */
         private final int value;

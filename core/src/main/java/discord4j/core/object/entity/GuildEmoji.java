@@ -58,7 +58,7 @@ public final class GuildEmoji implements Entity {
     private final long guildId;
 
     /**
-     * Constructs a {@code GuildEmoji} with an associated ServiceMediator and Discord data.
+     * Constructs a {@code GuildEmoji} with an associated {@link GatewayDiscordClient} and Discord data.
      *
      * @param gateway The {@link GatewayDiscordClient} associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
@@ -80,6 +80,15 @@ public final class GuildEmoji implements Entity {
         return data.id()
                 .map(Snowflake::of)
                 .orElseThrow(IllegalStateException::new); // this should be safe for guild emojis
+    }
+
+    /**
+     * Gets the data of the emoji.
+     *
+     * @return The data of the emoji.
+     */
+    public EmojiData getData() {
+        return data;
     }
 
     /**

@@ -20,13 +20,15 @@ import discord4j.common.util.Snowflake;
 import discord4j.core.object.Embed;
 import discord4j.core.object.entity.Attachment;
 import discord4j.core.object.entity.Message;
-import discord4j.rest.util.AllowedMentions;
 import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.discordjson.json.AllowedMentionsData;
 import discord4j.discordjson.json.EmbedData;
 import discord4j.discordjson.json.MessageCreateRequest;
+import discord4j.discordjson.json.MessageReferenceData;
 import discord4j.discordjson.possible.Possible;
+import discord4j.rest.util.AllowedMentions;
 import discord4j.rest.util.MultipartRequest;
+import discord4j.rest.util.Permission;
 import reactor.util.annotation.Nullable;
 import reactor.util.function.Tuple2;
 import reactor.util.function.Tuples;
@@ -53,6 +55,7 @@ public class MessageCreateSpec implements Spec<MultipartRequest<MessageCreateReq
     private EmbedData embed;
     private List<Tuple2<String, InputStream>> files;
     private AllowedMentionsData allowedMentionsData;
+    private MessageReferenceData messageReferenceData;
 
     /**
      * Sets the created {@link Message} contents, up to 2000 characters.
@@ -127,12 +130,28 @@ public class MessageCreateSpec implements Spec<MultipartRequest<MessageCreateReq
     }
 
     /**
-     * Adds an allowed mentions object to the message spec.
-     * @param allowedMentions the allowed mentions to add.
-     * @return this spec.
+     * Sets an allowed mentions object to the message spec. Can be {@code null} to reset a configuration added by
+     * default.
+     *
+     * @param allowedMentions The allowed mentions to add.
+     * @return This spec.
      */
-    public MessageCreateSpec setAllowedMentions(AllowedMentions allowedMentions) {
-        this.allowedMentionsData = allowedMentions.toData();
+    public MessageCreateSpec setAllowedMentions(@Nullable AllowedMentions allowedMentions) {
+        allowedMentionsData = allowedMentions != null ? allowedMentions.toData() : null;
+        return this;
+    }
+
+    /**
+     * Adds a message ID to reply to. This requires the {@link Permission#READ_MESSAGE_HISTORY} permission, and the
+     * referenced message must exist and cannot be a system message.
+     *
+     * @param messageId The ID of the message to reply to.
+     * @return This spec.
+     */
+    public MessageCreateSpec setMessageReference(Snowflake messageId) {
+        final MessageReferenceSpec spec = new MessageReferenceSpec();
+        spec.setMessageId(messageId);
+        messageReferenceData = spec.asRequest();
         return this;
     }
 
@@ -144,7 +163,8 @@ public class MessageCreateSpec implements Spec<MultipartRequest<MessageCreateReq
                 .tts(tts)
                 .embed(embed == null ? Possible.absent() : Possible.of(embed))
                 .allowedMentions(allowedMentionsData == null ? Possible.absent() : Possible.of(allowedMentionsData))
+                .messageReference(messageReferenceData == null ? Possible.absent() : Possible.of(messageReferenceData))
                 .build();
-        return new MultipartRequest<>(json, files == null ? Collections.emptyList() : files);
+        return MultipartRequest.ofRequestAndFiles(json, files == null ? Collections.emptyList() : files);
     }
 }

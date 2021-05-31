@@ -45,7 +45,7 @@ public final class DiscordClient extends RestClient {
      * @param coreResources The {@link CoreResources} associated to this object.
      */
     DiscordClient(CoreResources coreResources) {
-        super(coreResources.getRouter());
+        super(coreResources);
         this.coreResources = coreResources;
     }
 
