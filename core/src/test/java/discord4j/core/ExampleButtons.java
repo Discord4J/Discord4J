@@ -1,8 +1,8 @@
 package discord4j.core;
 
 import discord4j.common.util.Snowflake;
-import discord4j.core.event.domain.InteractionCreateEvent;
 import discord4j.core.event.domain.guild.GuildCreateEvent;
+import discord4j.core.event.domain.interaction.ButtonInteractEvent;
 import discord4j.core.object.component.ActionRow;
 import discord4j.core.object.component.Buttons;
 import discord4j.core.object.entity.Message;
@@ -69,7 +69,7 @@ public class ExampleButtons {
                     return sendMessage
                             .map(Message::getId)
                             .flatMapMany(buttonMessageId ->
-                                    gw.on(InteractionCreateEvent.class, event ->
+                                    gw.on(ButtonInteractEvent.class, event ->
                                             Mono.justOrEmpty(event.getInteraction().getMessage())
                                                 .map(Message::getId)
                                                 .filter(buttonMessageId::equals)
