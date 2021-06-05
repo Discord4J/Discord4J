@@ -10,127 +10,67 @@ import reactor.util.annotation.Nullable;
 public abstract class Buttons {
 
     public static Button primary(String customId, String label) {
-        return of(Button.Style.PRIMARY, label, null, customId, null, false);
+        return of(Button.Style.PRIMARY, label, null, customId, null);
     }
 
     public static Button primary(String customId, ReactionEmoji emoji) {
-        return of(Button.Style.PRIMARY, null, emoji, customId, null, false);
+        return of(Button.Style.PRIMARY, null, emoji, customId, null);
     }
 
     public static Button primary(String customId, ReactionEmoji emoji, String label) {
-        return of(Button.Style.PRIMARY, label, emoji, customId, null, false);
-    }
-
-    public static Button primaryDisabled(String customId, String label) {
-        return of(Button.Style.PRIMARY, label, null, customId, null, true);
-    }
-
-    public static Button primaryDisabled(String customId, ReactionEmoji emoji) {
-        return of(Button.Style.PRIMARY, null, emoji, customId, null, true);
-    }
-
-    public static Button primaryDisabled(String customId, ReactionEmoji emoji, String label) {
-        return of(Button.Style.PRIMARY, label, emoji, customId, null, true);
+        return of(Button.Style.PRIMARY, label, emoji, customId, null);
     }
 
     public static Button secondary(String customId, String label) {
-        return of(Button.Style.SECONDARY, label, null, customId, null, false);
+        return of(Button.Style.SECONDARY, label, null, customId, null);
     }
 
     public static Button secondary(String customId, ReactionEmoji emoji) {
-        return of(Button.Style.SECONDARY, null, emoji, customId, null, false);
+        return of(Button.Style.SECONDARY, null, emoji, customId, null);
     }
 
     public static Button secondary(String customId, ReactionEmoji emoji, String label) {
-        return of(Button.Style.SECONDARY, label, emoji, customId, null, false);
-    }
-
-    public static Button secondaryDisabled(String customId, String label) {
-        return of(Button.Style.SECONDARY, label, null, customId, null, true);
-    }
-
-    public static Button secondaryDisabled(String customId, ReactionEmoji emoji) {
-        return of(Button.Style.SECONDARY, null, emoji, customId, null, true);
-    }
-
-    public static Button secondaryDisabled(String customId, ReactionEmoji emoji, String label) {
-        return of(Button.Style.SECONDARY, label, emoji, customId, null, true);
+        return of(Button.Style.SECONDARY, label, emoji, customId, null);
     }
 
     public static Button success(String customId, String label) {
-        return of(Button.Style.SUCCESS, label, null, customId, null, false);
+        return of(Button.Style.SUCCESS, label, null, customId, null);
     }
 
     public static Button success(String customId, ReactionEmoji emoji) {
-        return of(Button.Style.SUCCESS, null, emoji, customId, null, false);
+        return of(Button.Style.SUCCESS, null, emoji, customId, null);
     }
 
     public static Button success(String customId, ReactionEmoji emoji, String label) {
-        return of(Button.Style.SUCCESS, label, emoji, customId, null, false);
-    }
-
-    public static Button successDisabled(String customId, String label) {
-        return of(Button.Style.SUCCESS, label, null, customId, null, true);
-    }
-
-    public static Button successDisabled(String customId, ReactionEmoji emoji) {
-        return of(Button.Style.SUCCESS, null, emoji, customId, null, true);
-    }
-
-    public static Button successDisabled(String customId, ReactionEmoji emoji, String label) {
-        return of(Button.Style.SUCCESS, label, emoji, customId, null, true);
+        return of(Button.Style.SUCCESS, label, emoji, customId, null);
     }
 
     public static Button danger(String customId, String label) {
-        return of(Button.Style.DANGER, label, null, customId, null, false);
+        return of(Button.Style.DANGER, label, null, customId, null);
     }
 
     public static Button danger(String customId, ReactionEmoji emoji) {
-        return of(Button.Style.DANGER, null, emoji, customId, null, false);
+        return of(Button.Style.DANGER, null, emoji, customId, null);
     }
 
     public static Button danger(String customId, ReactionEmoji emoji, String label) {
-        return of(Button.Style.DANGER, label, emoji, customId, null, false);
-    }
-
-    public static Button dangerDisabled(String customId, String label) {
-        return of(Button.Style.DANGER, label, null, customId, null, true);
-    }
-
-    public static Button dangerDisabled(String customId, ReactionEmoji emoji) {
-        return of(Button.Style.DANGER, null, emoji, customId, null, true);
-    }
-
-    public static Button dangerDisabled(String customId, ReactionEmoji emoji, String label) {
-        return of(Button.Style.DANGER, label, emoji, customId, null, true);
+        return of(Button.Style.DANGER, label, emoji, customId, null);
     }
 
     public static Button link(String url, String label) {
-        return of(Button.Style.LINK, label, null, null, url, false);
+        return of(Button.Style.LINK, label, null, null, url);
     }
 
     public static Button link(String url, ReactionEmoji emoji) {
-        return of(Button.Style.LINK, null, emoji, null, url, false);
+        return of(Button.Style.LINK, null, emoji, null, url);
     }
 
     public static Button link(String url, ReactionEmoji emoji, String label) {
-        return of(Button.Style.LINK, label, emoji, null, url, false);
-    }
-
-    public static Button linkDisabled(String url, String label) {
-        return of(Button.Style.LINK, label, null, null, url, true);
-    }
-
-    public static Button linkDisabled(String url, ReactionEmoji emoji) {
-        return of(Button.Style.LINK, null, emoji, null, url, true);
-    }
-
-    public static Button linkDisabled(String url, ReactionEmoji emoji, String label) {
-        return of(Button.Style.LINK, label, emoji, null, url, true);
+        return of(Button.Style.LINK, label, emoji, null, url);
     }
 
     // TODO ugly
-    public static Button of(Button.Style style, @Nullable String label, @Nullable ReactionEmoji emoji, @Nullable String customId, @Nullable String url, boolean disabled) {
+    public static Button of(Button.Style style, @Nullable String label, @Nullable ReactionEmoji emoji, @Nullable String customId, @Nullable String url) {
         ImmutableComponentData.Builder builder = ComponentData.builder()
                 .type(MessageComponent.Type.BUTTON.getValue())
                 .style(style.getValue());
@@ -152,8 +92,6 @@ public abstract class Buttons {
         if (customId != null) builder.customId(customId);
 
         if (url != null) builder.url(url);
-
-        builder.disabled(disabled);
 
         return new Button(builder.build());
     }

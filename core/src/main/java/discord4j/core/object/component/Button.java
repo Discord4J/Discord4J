@@ -56,6 +56,10 @@ public class Button implements MessageComponent {
         return data.disabled().toOptional().orElse(false);
     }
 
+    public Button disabled() {
+        return new Button(ComponentData.builder().from(data).disabled(true).build());
+    }
+
     @Override
     public Type getType() {
         return Type.BUTTON;
