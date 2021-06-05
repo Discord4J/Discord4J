@@ -29,7 +29,6 @@ import java.time.Instant;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
 
 import static reactor.core.publisher.Sinks.EmitFailureHandler.FAIL_FAST;
 
@@ -48,8 +47,8 @@ public class DefaultRouter implements Router {
     private final Map<BucketKey, RequestStream> streamMap = new ConcurrentHashMap<>();
     private final RouterOptions routerOptions;
 
-    private final AtomicBoolean someoneIsHousekeeping = new AtomicBoolean(false);
-    private final AtomicReference<Instant> lastHousekeepingTime = new AtomicReference<>(Instant.EPOCH);
+    private final AtomicBoolean isHousekeeping = new AtomicBoolean(false);
+    private volatile Instant lastHousekeepingTime = Instant.EPOCH;
 
     /**
      * Create a Discord API bucket-aware {@link Router} configured with the given options.
@@ -94,9 +93,8 @@ public class DefaultRouter implements Router {
     }
 
     private void housekeepIfNecessary() {
-        Instant lastTime = lastHousekeepingTime.get();
         Instant now = Instant.now();
-        if (lastTime.plus(HOUSE_KEEPING_PERIOD).isAfter(now)) {
+        if (lastHousekeepingTime.plus(HOUSE_KEEPING_PERIOD).isAfter(now)) {
             return;
         }
 
@@ -104,16 +102,13 @@ public class DefaultRouter implements Router {
     }
 
     private void tryHousekeep(Instant now) {
-        boolean isTaken = someoneIsHousekeeping.getAndSet(true);
-        if (isTaken) {
-            return;
-        }
-
-        try {
-            doHousekeep(now);
-        } finally {
-            lastHousekeepingTime.set(Instant.now());
-            someoneIsHousekeeping.set(false);
+        if (isHousekeeping.compareAndSet(false, true)) {
+            try {
+                doHousekeep(now);
+            } finally {
+                lastHousekeepingTime = Instant.now();
+                isHousekeeping.set(false);
+            }
         }
     }
 
