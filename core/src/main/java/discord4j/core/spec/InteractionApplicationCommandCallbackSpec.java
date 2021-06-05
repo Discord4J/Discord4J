@@ -16,6 +16,8 @@
  */
 package discord4j.core.spec;
 
+import discord4j.core.object.component.ActionRow;
+import discord4j.core.object.component.MessageComponent;
 import discord4j.core.object.entity.Message;
 import discord4j.discordjson.json.AllowedMentionsData;
 import discord4j.discordjson.json.EmbedData;
@@ -25,8 +27,10 @@ import discord4j.rest.util.AllowedMentions;
 import reactor.util.annotation.Nullable;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 public class InteractionApplicationCommandCallbackSpec implements Spec<InteractionApplicationCommandCallbackData> {
 
@@ -36,7 +40,7 @@ public class InteractionApplicationCommandCallbackSpec implements Spec<Interacti
     private List<EmbedData> embeds;
     private AllowedMentionsData allowedMentionsData;
     private int flags;
-
+    private List<ActionRow> actionRows;
 
     public InteractionApplicationCommandCallbackSpec setContent(String content) {
         this.content = content;
@@ -68,6 +72,15 @@ public class InteractionApplicationCommandCallbackSpec implements Spec<Interacti
         return this;
     }
 
+    public InteractionApplicationCommandCallbackSpec setActionRows(List<ActionRow> actionRows) {
+        this.actionRows = actionRows;
+        return this;
+    }
+
+    public InteractionApplicationCommandCallbackSpec setActionRows(ActionRow... actionRows) {
+        return setActionRows(Arrays.asList(actionRows));
+    }
+
     @Override
     public InteractionApplicationCommandCallbackData asRequest() {
         return InteractionApplicationCommandCallbackData.builder()
@@ -76,6 +89,8 @@ public class InteractionApplicationCommandCallbackSpec implements Spec<Interacti
                 .flags(flags == 0 ? Possible.absent() : Possible.of(flags))
                 .embeds(embeds == null ? Possible.absent() : Possible.of(embeds))
                 .allowedMentions(allowedMentionsData == null ? Possible.absent() : Possible.of(allowedMentionsData))
+//                .components(actionRows == null ? Possible.absent() : TODO: need discord-json snapshot
+//                        Possible.of(actionRows.stream().map(ActionRow::getData).collect(Collectors.toList())))
                 .build();
     }
 }

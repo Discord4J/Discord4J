@@ -24,7 +24,7 @@ import discord4j.rest.util.InteractionResponseType;
 import discord4j.rest.util.WebhookMultipartRequest;
 import reactor.core.publisher.Mono;
 
-class InteractionOperations implements RestInteraction, InteractionResponse, GuildInteraction, DirectInteraction {
+class InteractionOperations implements RestInteraction, FollowupHandler, GuildInteraction, DirectInteraction {
 
     private final RestClient restClient;
     private final InteractionData interactionData;

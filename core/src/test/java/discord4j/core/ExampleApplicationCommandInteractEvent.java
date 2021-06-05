@@ -18,7 +18,7 @@
 package discord4j.core;
 
 import discord4j.core.event.ReactiveEventAdapter;
-import discord4j.core.event.domain.interaction.ApplicationCommandInteractEvent;
+import discord4j.core.event.domain.interaction.SlashCommandEvent;
 import discord4j.core.object.command.ApplicationCommandInteraction;
 import discord4j.core.object.command.ApplicationCommandInteractionOption;
 import discord4j.core.object.command.ApplicationCommandInteractionOptionValue;
@@ -71,11 +71,10 @@ public class ExampleApplicationCommandInteractEvent {
             private final Random random = new Random();
 
             @Override
-            public Publisher<?> onApplicationCommandInteract(ApplicationCommandInteractEvent event) {
+            public Publisher<?> onSlashCommand(SlashCommandEvent event) {
                 if (event.getCommandName().equals("random")) {
-                    return event.acknowledge()
-                            .then(event.getInteractionResponse().createFollowupMessage(result(random,
-                                    event.getCommandInteraction().get())));
+                    String result = result(random, event.getInteraction().getCommandInteraction().get());
+                    return event.reply(result);
                 }
                 return Mono.empty();
             }

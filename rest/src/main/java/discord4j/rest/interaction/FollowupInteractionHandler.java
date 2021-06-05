@@ -31,10 +31,10 @@ import java.util.function.Function;
 public class FollowupInteractionHandler implements InteractionHandler {
 
     private final InteractionResponseData responseData;
-    private final Function<InteractionResponse, Publisher<?>> followupHandler;
+    private final Function<FollowupHandler, Publisher<?>> followupHandler;
 
     FollowupInteractionHandler(InteractionResponseData responseData,
-                               Function<InteractionResponse, Publisher<?>> followupHandler) {
+                               Function<FollowupHandler, Publisher<?>> followupHandler) {
         this.responseData = responseData;
         this.followupHandler = followupHandler;
     }
@@ -45,7 +45,7 @@ public class FollowupInteractionHandler implements InteractionHandler {
     }
 
     @Override
-    public Publisher<?> onInteractionResponse(InteractionResponse response) {
+    public Publisher<?> onInteractionResponse(FollowupHandler response) {
         return followupHandler.apply(response);
     }
 
@@ -57,7 +57,7 @@ public class FollowupInteractionHandler implements InteractionHandler {
      * @param followupHandler the function to retrieve a sequence from an interaction, for followup actions
      * @return this handler with the included followup actions
      */
-    public InteractionHandler withFollowup(Function<InteractionResponse, Publisher<?>> followupHandler) {
+    public InteractionHandler withFollowup(Function<FollowupHandler, Publisher<?>> followupHandler) {
         return new FollowupInteractionHandler(responseData, followupHandler);
     }
 }

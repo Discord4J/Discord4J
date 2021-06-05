@@ -45,5 +45,5 @@ public interface InteractionHandler {
      * @return a publisher, like a {@link Mono} or {@link Flux} to be subscribed for the duration of the interaction
      * token, after which will be cancelled through {@link Flux#take(Duration)} semantics.
      */
-    Publisher<?> onInteractionResponse(InteractionResponse response);
+    Publisher<?> onInteractionResponse(FollowupHandler response);
 }

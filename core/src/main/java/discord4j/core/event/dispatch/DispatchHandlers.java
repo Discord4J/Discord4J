@@ -23,7 +23,7 @@ import discord4j.core.event.domain.channel.TypingStartEvent;
 import discord4j.core.event.domain.integration.IntegrationCreateEvent;
 import discord4j.core.event.domain.integration.IntegrationDeleteEvent;
 import discord4j.core.event.domain.integration.IntegrationUpdateEvent;
-import discord4j.core.event.domain.interaction.ApplicationCommandInteractEvent;
+import discord4j.core.event.domain.interaction.SlashCommandEvent;
 import discord4j.core.event.domain.interaction.ButtonInteractEvent;
 import discord4j.core.event.domain.interaction.InteractionCreateEvent;
 import discord4j.core.object.VoiceState;
@@ -299,7 +299,7 @@ public class DispatchHandlers implements DispatchEventMapper {
         Interaction interaction = new Interaction(gateway, context.getDispatch().interaction());
         switch (interaction.getType()) {
             case APPLICATION_COMMAND:
-                return Mono.just(new ApplicationCommandInteractEvent(gateway, context.getShardInfo(), interaction));
+                return Mono.just(new SlashCommandEvent(gateway, context.getShardInfo(), interaction));
             case MESSAGE_COMPONENT:
                 MessageComponent.Type type = interaction.getCommandInteraction()
                         .flatMap(ApplicationCommandInteraction::getComponentType).get();

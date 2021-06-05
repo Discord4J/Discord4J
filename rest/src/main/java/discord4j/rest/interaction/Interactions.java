@@ -386,7 +386,7 @@ public class Interactions {
         }
 
         @Override
-        public Publisher<?> onInteractionResponse(InteractionResponse response) {
+        public Publisher<?> onInteractionResponse(FollowupHandler response) {
             return Mono.empty();
         }
     };

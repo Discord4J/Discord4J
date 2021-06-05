@@ -89,7 +89,7 @@ public class Interaction implements DiscordObject {
         return Type.of(data.type());
     }
 
-    // TODO: docs
+    // TODO: docs... why does Discord call this ApplicationCommandInteractionData when it applies to components too??
     /**
      * Gets the command data payload.
      *

@@ -1,33 +1,48 @@
+/*
+ * This file is part of Discord4J.
+ *
+ * Discord4J is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Discord4J is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with Discord4J. If not, see <http://www.gnu.org/licenses/>.
+ */
 package discord4j.core.event.domain.interaction;
 
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.Event;
-import discord4j.core.object.command.ApplicationCommandInteraction;
 import discord4j.core.object.command.Interaction;
-import discord4j.core.object.component.MessageComponent;
 import discord4j.core.object.entity.Message;
 import discord4j.core.spec.InteractionApplicationCommandCallbackSpec;
 import discord4j.discordjson.json.*;
+import discord4j.discordjson.possible.Possible;
 import discord4j.gateway.ShardInfo;
 import discord4j.rest.RestClient;
-import discord4j.rest.interaction.InteractionResponse;
+import discord4j.rest.interaction.FollowupHandler;
 import discord4j.rest.util.InteractionResponseType;
 import discord4j.rest.util.WebhookMultipartRequest;
 import reactor.core.publisher.Mono;
+import reactor.util.annotation.Nullable;
 
-import java.util.Optional;
 import java.util.function.Consumer;
 
 public class InteractionCreateEvent extends Event {
 
     private final Interaction interaction;
-    private final EventInteractionResponse response;
+    private final EventFollowupHandler followupHandler;
 
     public InteractionCreateEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, Interaction interaction) {
         super(gateway, shardInfo);
         this.interaction = interaction;
-        this.response = new EventInteractionResponse(getClient().rest(), interaction.getData());
+        this.followupHandler = new EventFollowupHandler(getClient().rest(), interaction.getData());
     }
 
     /**
@@ -39,40 +54,17 @@ public class InteractionCreateEvent extends Event {
         return interaction;
     }
 
-    public Optional<String> getCustomId() {
-        return getCommandInteraction().flatMap(ApplicationCommandInteraction::getCustomId);
-    }
-
-    public Optional<ApplicationCommandInteraction> getCommandInteraction() {
-        return interaction.getCommandInteraction();
-    }
-
-    public Optional<MessageComponent.Type> getComponentType() {
-        return getCommandInteraction().flatMap(ApplicationCommandInteraction::getComponentType);
-    }
-
     /**
      * Acknowledges the interaction indicating a response will be edited later. The user sees a loading state, visible
      * to all participants in the invoking channel. For a "only you can see this" response, see
-     * {@link #acknowledgeEphemeral()}, or to include a message, {@link #replyEphemeral(String)}
+     * {@link #deferResponseEphemeral()}, or to include a message, {@link #replyEphemeral(String)}
      *
      * @return A {@link Mono} where, upon successful completion, emits nothing; acknowledging the interaction
      * and indicating a response will be edited later. The user sees a loading state. If an error is received, it
      * is emitted through the {@code Mono}.
      */
-    public Mono<Void> acknowledge() {
-        return createInteractionResponse(InteractionResponseData.builder()
-                .type(InteractionResponseType.DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE.getValue())
-                .data(InteractionApplicationCommandCallbackData.builder().build())
-                .build());
-    }
-
-    private Mono<Void> createInteractionResponse(InteractionResponseData responseData) {
-        long id = interaction.getId().asLong();
-        String token = interaction.getToken();
-
-        return getClient().rest().getInteractionService()
-                .createInteractionResponse(id, token, responseData);
+    public Mono<FollowupHandler> deferResponse() {
+        return respond(InteractionResponseType.DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE, null);
     }
 
     /**
@@ -82,13 +74,13 @@ public class InteractionCreateEvent extends Event {
      * @return A {@link Mono} where, upon successful completion, emits nothing, acknowledging the interaction
      * and indicating a response will be edited later. If an error is received, it is emitted through the {@code Mono}.
      */
-    public Mono<Void> acknowledgeEphemeral() {
-        return createInteractionResponse(InteractionResponseData.builder()
-                .type(InteractionResponseType.DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE.getValue())
-                .data(InteractionApplicationCommandCallbackData.builder()
-                        .flags(Message.Flag.EPHEMERAL.getFlag())
-                        .build())
-                .build());
+    // TODO: with new specs, this could be acknowledge().ephemeral() instead
+    public Mono<FollowupHandler> deferResponseEphemeral() {
+        InteractionApplicationCommandCallbackData data = InteractionApplicationCommandCallbackData.builder()
+                .flags(Message.Flag.EPHEMERAL.getFlag())
+                .build();
+
+        return respond(InteractionResponseType.DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE, data);
     }
 
     /**
@@ -100,7 +92,7 @@ public class InteractionCreateEvent extends Event {
      * been sent. If an error is received, it is emitted through the {@code Mono}.
      * @see InteractionApplicationCommandCallbackSpec#setContent(String)
      */
-    public Mono<Void> reply(final String content) {
+    public Mono<FollowupHandler> reply(final String content) {
         return reply(spec -> spec.setContent(content));
     }
 
@@ -112,20 +104,22 @@ public class InteractionCreateEvent extends Event {
      * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the interaction response has
      * been sent. If an error is received, it is emitted through the {@code Mono}.
      */
-    public Mono<Void> reply(final Consumer<? super InteractionApplicationCommandCallbackSpec> spec) {
+    public Mono<FollowupHandler> reply(final Consumer<? super InteractionApplicationCommandCallbackSpec> spec) {
         return Mono.defer(
                 () -> {
                     InteractionApplicationCommandCallbackSpec mutatedSpec =
                             new InteractionApplicationCommandCallbackSpec();
+
                     getClient().getRestClient().getRestResources()
                             .getAllowedMentions()
                             .ifPresent(mutatedSpec::setAllowedMentions);
+
                     spec.accept(mutatedSpec);
-                    return createInteractionResponse(InteractionResponseData.builder()
-                            .type(InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE.getValue())
-                            .data(mutatedSpec.asRequest())
-                            .build());
-                });
+
+                    return respond(InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE, mutatedSpec.asRequest());
+                })
+                .thenReturn(followupHandler);
+
     }
 
     /**
@@ -140,26 +134,34 @@ public class InteractionCreateEvent extends Event {
      * @see InteractionApplicationCommandCallbackSpec#setContent(String)
      * @see InteractionApplicationCommandCallbackSpec#setEphemeral(boolean)
      */
-    public Mono<Void> replyEphemeral(final String content) {
+    // TODO: with new specs, this could be reply().ephemeral() instead
+    public Mono<FollowupHandler> replyEphemeral(final String content) {
         return reply(spec -> spec.setContent(content).setEphemeral(true));
     }
 
-    /**
-     * Gets a handler for common operations related to an interaction followup response associated with this event.
-     *
-     * @return A handler for common operations related to an interaction followup response associated with this event.
-     */
-    public InteractionResponse getInteractionResponse() {
-        return response;
+    private Mono<FollowupHandler> respond(InteractionResponseData responseData) {
+        long id = interaction.getId().asLong();
+        String token = interaction.getToken();
+
+        return getClient().rest().getInteractionService()
+                .createInteractionResponse(id, token, responseData)
+                .thenReturn(followupHandler);
     }
 
-    static class EventInteractionResponse implements InteractionResponse {
+    protected Mono<FollowupHandler> respond(InteractionResponseType responseType, @Nullable InteractionApplicationCommandCallbackData data) {
+        return respond(InteractionResponseData.builder()
+                .type(responseType.getValue())
+                .data(data == null ? Possible.absent() : Possible.of(data))
+                .build());
+    }
+
+    static class EventFollowupHandler implements FollowupHandler {
 
         private final RestClient restClient;
         private final InteractionData interactionData;
         private final long applicationId;
 
-        EventInteractionResponse(RestClient restClient, InteractionData interactionData) {
+        EventFollowupHandler(RestClient restClient, InteractionData interactionData) {
             this.restClient = restClient;
             this.interactionData = interactionData;
             this.applicationId = Snowflake.asLong(interactionData.applicationId());

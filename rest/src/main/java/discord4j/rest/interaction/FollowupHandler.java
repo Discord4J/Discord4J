@@ -28,7 +28,7 @@ import reactor.core.publisher.Mono;
  * A handler for common operations related to an interaction followup response.
  */
 @Experimental
-public interface InteractionResponse {
+public interface FollowupHandler {
 
     /**
      * Return a {@link Mono} that upon subscription, will modify the initial response sent when accepting this
