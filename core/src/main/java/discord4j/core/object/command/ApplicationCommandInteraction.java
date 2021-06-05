@@ -21,7 +21,6 @@ import discord4j.common.annotations.Experimental;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.DiscordObject;
-import discord4j.core.object.component.Button;
 import discord4j.core.object.component.MessageComponent;
 import discord4j.discordjson.json.ApplicationCommandInteractionData;
 import reactor.util.annotation.Nullable;

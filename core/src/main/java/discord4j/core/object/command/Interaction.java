@@ -95,9 +95,9 @@ public class Interaction implements DiscordObject {
      *
      * @return The command data payload.
      */
-    public ApplicationCommandInteraction getCommandInteraction() {
-        return new ApplicationCommandInteraction(getClient(), data.data().get(),
-                getGuildId().map(Snowflake::asLong).orElse(null));
+    public Optional<ApplicationCommandInteraction> getCommandInteraction() {
+        return data.data().toOptional().map(data -> new ApplicationCommandInteraction(getClient(), data,
+                getGuildId().map(Snowflake::asLong).orElse(null)));
     }
 
     /**
