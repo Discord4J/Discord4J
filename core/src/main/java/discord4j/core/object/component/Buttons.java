@@ -77,17 +77,7 @@ public abstract class Buttons {
 
         if (label != null) builder.label(label);
 
-        if (emoji instanceof ReactionEmoji.Custom) {
-            ReactionEmoji.Custom custom = (ReactionEmoji.Custom) emoji;
-            builder.emoji(EmojiData.builder()
-                    .id(custom.getId().asLong())
-                    .name(custom.getName())
-                    .animated(custom.isAnimated())
-                    .build());
-        } else if (emoji instanceof ReactionEmoji.Unicode) {
-            ReactionEmoji.Unicode unicode = (ReactionEmoji.Unicode) emoji;
-            builder.emoji(EmojiData.builder().name(unicode.getRaw()).build());
-        }
+        if (emoji != null) builder.emoji(emoji.getData());
 
         if (customId != null) builder.customId(customId);
 

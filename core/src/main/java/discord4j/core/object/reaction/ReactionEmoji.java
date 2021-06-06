@@ -147,6 +147,8 @@ public abstract class ReactionEmoji {
         return this instanceof Unicode ? Optional.of((Unicode) this) : Optional.empty();
     }
 
+    public abstract EmojiData getData();
+
     public static final class Custom extends ReactionEmoji {
 
         private final long id;
@@ -187,6 +189,15 @@ public abstract class ReactionEmoji {
         }
 
         @Override
+        public EmojiData getData() {
+            return EmojiData.builder()
+                    .id(id)
+                    .name(name)
+                    .animated(isAnimated)
+                    .build();
+        }
+
+        @Override
         public String toString() {
             return "ReactionEmoji.Custom{" +
                     "id=" + id +
@@ -223,6 +234,13 @@ public abstract class ReactionEmoji {
 
         public String getRaw() {
             return raw;
+        }
+
+        @Override
+        public EmojiData getData() {
+            return EmojiData.builder()
+                    .name(raw)
+                    .build();
         }
 
         @Override
