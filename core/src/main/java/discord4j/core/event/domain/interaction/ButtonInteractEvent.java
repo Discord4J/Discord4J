@@ -42,7 +42,10 @@ public class ButtonInteractEvent extends InteractionCreateEvent {
     public String getCustomId() {
         return getInteraction().getCommandInteraction() // yes, this is getCommandInteraction for buttons... thanks Discord
                 .flatMap(ApplicationCommandInteraction::getCustomId)
-                .orElseThrow(IllegalStateException::new); // TODO: docs actually say this is optional... but why?
+                // note: custom_id is not guaranteed to present on buttons in general because of link buttons,
+                // but it is guaranteed to be present here, because we received an interaction for it
+                // (which doesn't happen for link buttons)
+                .orElseThrow(IllegalStateException::new);
     }
 
     // TODO: is this the right spec? needs rename
