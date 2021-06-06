@@ -89,8 +89,8 @@ public class InteractionApplicationCommandCallbackSpec implements Spec<Interacti
                 .flags(flags == 0 ? Possible.absent() : Possible.of(flags))
                 .embeds(embeds == null ? Possible.absent() : Possible.of(embeds))
                 .allowedMentions(allowedMentionsData == null ? Possible.absent() : Possible.of(allowedMentionsData))
-//                .components(actionRows == null ? Possible.absent() : TODO: need discord-json snapshot
-//                        Possible.of(actionRows.stream().map(ActionRow::getData).collect(Collectors.toList())))
+                .components(actionRows == null ? Possible.absent() :
+                        Possible.of(actionRows.stream().map(ActionRow::getData).collect(Collectors.toList())))
                 .build();
     }
 }
