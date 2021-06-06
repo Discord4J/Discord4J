@@ -29,7 +29,7 @@ import reactor.core.publisher.Mono;
 
 import java.util.function.Consumer;
 
-public abstract class ComponentInteractEvent extends InteractionCreateEvent {
+public class ComponentInteractEvent extends InteractionCreateEvent {
 
     public ComponentInteractEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, Interaction interaction) {
         super(gateway, shardInfo, interaction);
