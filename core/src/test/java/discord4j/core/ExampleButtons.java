@@ -73,7 +73,7 @@ public class ExampleButtons {
                                             Mono.justOrEmpty(event.getInteraction().getMessage())
                                                 .map(Message::getId)
                                                 .filter(buttonMessageId::equals)
-                                                .then(event.reply(event.getCustomId()))
+                                                .then(event.edit(spec -> spec.setContent(event.getCustomId())))
                                         )
                             )
                             .then();

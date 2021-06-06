@@ -21,6 +21,7 @@ import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.command.ApplicationCommandInteraction;
 import discord4j.core.object.command.Interaction;
 import discord4j.core.object.entity.Message;
+import discord4j.core.spec.InteractionApplicationCommandCallbackSpec;
 import discord4j.discordjson.json.InteractionApplicationCommandCallbackData;
 import discord4j.discordjson.json.InteractionResponseData;
 import discord4j.discordjson.json.WebhookMessageEditRequest;
@@ -44,14 +45,23 @@ public class ButtonInteractEvent extends InteractionCreateEvent {
                 .orElseThrow(IllegalStateException::new); // should always be present for buttons
     }
 
-    /* TODO: not sure what type to use here
-    public Mono<FollowupHandler> edit(Consumer<? super ...> spec) {
+    // TODO: is this the right spec? needs rename
+    public Mono<FollowupHandler> edit(Consumer<? super InteractionApplicationCommandCallbackSpec> spec) {
         return Mono.defer(
                 () -> {
+                    InteractionApplicationCommandCallbackSpec mutatedSpec =
+                            new InteractionApplicationCommandCallbackSpec();
 
+                    getClient().getRestClient().getRestResources()
+                            .getAllowedMentions()
+                            .ifPresent(mutatedSpec::setAllowedMentions);
+
+                    spec.accept(mutatedSpec);
+
+                    return respond(InteractionResponseType.UPDATE_MESSAGE, mutatedSpec.asRequest());
                 })
+                .thenReturn(followupHandler);
     }
-    */
 
     @Override
     public Mono<FollowupHandler> deferResponse() {

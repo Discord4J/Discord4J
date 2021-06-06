@@ -37,7 +37,7 @@ import java.util.function.Consumer;
 public class InteractionCreateEvent extends Event {
 
     private final Interaction interaction;
-    private final EventFollowupHandler followupHandler;
+    protected final EventFollowupHandler followupHandler;
 
     public InteractionCreateEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, Interaction interaction) {
         super(gateway, shardInfo);
