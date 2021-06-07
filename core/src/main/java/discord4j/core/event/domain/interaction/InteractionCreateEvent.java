@@ -26,7 +26,7 @@ import discord4j.discordjson.json.*;
 import discord4j.discordjson.possible.Possible;
 import discord4j.gateway.ShardInfo;
 import discord4j.rest.RestClient;
-import discord4j.rest.interaction.FollowupHandler;
+import discord4j.rest.interaction.InteractionResponse;
 import discord4j.rest.util.InteractionResponseType;
 import discord4j.rest.util.WebhookMultipartRequest;
 import reactor.core.publisher.Mono;
@@ -37,12 +37,12 @@ import java.util.function.Consumer;
 public class InteractionCreateEvent extends Event {
 
     private final Interaction interaction;
-    protected final EventFollowupHandler followupHandler;
+    protected final EventInteractionResponse followupHandler;
 
     public InteractionCreateEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, Interaction interaction) {
         super(gateway, shardInfo);
         this.interaction = interaction;
-        this.followupHandler = new EventFollowupHandler(getClient().rest(), interaction.getData());
+        this.followupHandler = new EventInteractionResponse(getClient().rest(), interaction.getData());
     }
 
     /**
@@ -63,7 +63,7 @@ public class InteractionCreateEvent extends Event {
      * and indicating a response will be edited later. The user sees a loading state. If an error is received, it
      * is emitted through the {@code Mono}.
      */
-    public Mono<FollowupHandler> acknowledge() {
+    public Mono<InteractionResponse> acknowledge() {
         return respond(InteractionResponseType.DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE, null);
     }
 
@@ -75,7 +75,7 @@ public class InteractionCreateEvent extends Event {
      * and indicating a response will be edited later. If an error is received, it is emitted through the {@code Mono}.
      */
     // TODO: with new specs, this could be acknowledge().ephemeral() instead
-    public Mono<FollowupHandler> acknowledgeEphemeral() {
+    public Mono<InteractionResponse> acknowledgeEphemeral() {
         InteractionApplicationCommandCallbackData data = InteractionApplicationCommandCallbackData.builder()
                 .flags(Message.Flag.EPHEMERAL.getFlag())
                 .build();
@@ -92,7 +92,7 @@ public class InteractionCreateEvent extends Event {
      * been sent. If an error is received, it is emitted through the {@code Mono}.
      * @see InteractionApplicationCommandCallbackSpec#setContent(String)
      */
-    public Mono<FollowupHandler> reply(final String content) {
+    public Mono<InteractionResponse> reply(final String content) {
         return reply(spec -> spec.setContent(content));
     }
 
@@ -104,7 +104,7 @@ public class InteractionCreateEvent extends Event {
      * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the interaction response has
      * been sent. If an error is received, it is emitted through the {@code Mono}.
      */
-    public Mono<FollowupHandler> reply(final Consumer<? super InteractionApplicationCommandCallbackSpec> spec) {
+    public Mono<InteractionResponse> reply(final Consumer<? super InteractionApplicationCommandCallbackSpec> spec) {
         return Mono.defer(
                 () -> {
                     InteractionApplicationCommandCallbackSpec mutatedSpec =
@@ -135,11 +135,11 @@ public class InteractionCreateEvent extends Event {
      * @see InteractionApplicationCommandCallbackSpec#setEphemeral(boolean)
      */
     // TODO: with new specs, this could be reply().ephemeral() instead
-    public Mono<FollowupHandler> replyEphemeral(final String content) {
+    public Mono<InteractionResponse> replyEphemeral(final String content) {
         return reply(spec -> spec.setContent(content).setEphemeral(true));
     }
 
-    private Mono<FollowupHandler> respond(InteractionResponseData responseData) {
+    private Mono<InteractionResponse> respond(InteractionResponseData responseData) {
         long id = interaction.getId().asLong();
         String token = interaction.getToken();
 
@@ -148,20 +148,20 @@ public class InteractionCreateEvent extends Event {
                 .thenReturn(followupHandler);
     }
 
-    protected Mono<FollowupHandler> respond(InteractionResponseType responseType, @Nullable InteractionApplicationCommandCallbackData data) {
+    protected Mono<InteractionResponse> respond(InteractionResponseType responseType, @Nullable InteractionApplicationCommandCallbackData data) {
         return respond(InteractionResponseData.builder()
                 .type(responseType.getValue())
                 .data(data == null ? Possible.absent() : Possible.of(data))
                 .build());
     }
 
-    static class EventFollowupHandler implements FollowupHandler {
+    static class EventInteractionResponse implements InteractionResponse {
 
         private final RestClient restClient;
         private final InteractionData interactionData;
         private final long applicationId;
 
-        EventFollowupHandler(RestClient restClient, InteractionData interactionData) {
+        EventInteractionResponse(RestClient restClient, InteractionData interactionData) {
             this.restClient = restClient;
             this.interactionData = interactionData;
             this.applicationId = Snowflake.asLong(interactionData.applicationId());

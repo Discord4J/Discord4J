@@ -23,7 +23,7 @@ import discord4j.core.object.entity.Message;
 import discord4j.core.spec.InteractionApplicationCommandCallbackSpec;
 import discord4j.discordjson.json.InteractionApplicationCommandCallbackData;
 import discord4j.gateway.ShardInfo;
-import discord4j.rest.interaction.FollowupHandler;
+import discord4j.rest.interaction.InteractionResponse;
 import discord4j.rest.util.InteractionResponseType;
 import reactor.core.publisher.Mono;
 
@@ -44,7 +44,7 @@ public class ComponentInteractEvent extends InteractionCreateEvent {
                 .orElseThrow(IllegalStateException::new);
     }
 
-    public Mono<FollowupHandler> edit(Consumer<? super InteractionApplicationCommandCallbackSpec> spec) {
+    public Mono<InteractionResponse> edit(Consumer<? super InteractionApplicationCommandCallbackSpec> spec) {
         return Mono.defer(
                 () -> {
                     InteractionApplicationCommandCallbackSpec mutatedSpec =
@@ -62,12 +62,12 @@ public class ComponentInteractEvent extends InteractionCreateEvent {
     }
 
     @Override
-    public Mono<FollowupHandler> acknowledge() {
+    public Mono<InteractionResponse> acknowledge() {
         return respond(InteractionResponseType.DEFERRED_UPDATE_MESSAGE, null);
     }
 
     @Override
-    public Mono<FollowupHandler> acknowledgeEphemeral() {
+    public Mono<InteractionResponse> acknowledgeEphemeral() {
         InteractionApplicationCommandCallbackData data = InteractionApplicationCommandCallbackData.builder()
                 .flags(Message.Flag.EPHEMERAL.getFlag())
                 .build();
