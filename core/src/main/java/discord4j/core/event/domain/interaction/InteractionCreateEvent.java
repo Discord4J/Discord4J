@@ -37,12 +37,12 @@ import java.util.function.Consumer;
 public class InteractionCreateEvent extends Event {
 
     private final Interaction interaction;
-    protected final EventInteractionResponse followupHandler;
+    protected final EventInteractionResponse response;
 
     public InteractionCreateEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, Interaction interaction) {
         super(gateway, shardInfo);
         this.interaction = interaction;
-        this.followupHandler = new EventInteractionResponse(getClient().rest(), interaction.getData());
+        this.response = new EventInteractionResponse(getClient().rest(), interaction.getData());
     }
 
     /**
@@ -118,7 +118,7 @@ public class InteractionCreateEvent extends Event {
 
                     return respond(InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE, mutatedSpec.asRequest());
                 })
-                .thenReturn(followupHandler);
+                .thenReturn(response);
 
     }
 
@@ -139,20 +139,18 @@ public class InteractionCreateEvent extends Event {
         return reply(spec -> spec.setContent(content).setEphemeral(true));
     }
 
-    private Mono<InteractionResponse> respond(InteractionResponseData responseData) {
+    protected Mono<InteractionResponse> respond(InteractionResponseType responseType, @Nullable InteractionApplicationCommandCallbackData data) {
+        InteractionResponseData responseData = InteractionResponseData.builder()
+                .type(responseType.getValue())
+                .data(data == null ? Possible.absent() : Possible.of(data))
+                .build();
+
         long id = interaction.getId().asLong();
         String token = interaction.getToken();
 
         return getClient().rest().getInteractionService()
                 .createInteractionResponse(id, token, responseData)
-                .thenReturn(followupHandler);
-    }
-
-    protected Mono<InteractionResponse> respond(InteractionResponseType responseType, @Nullable InteractionApplicationCommandCallbackData data) {
-        return respond(InteractionResponseData.builder()
-                .type(responseType.getValue())
-                .data(data == null ? Possible.absent() : Possible.of(data))
-                .build());
+                .thenReturn(response);
     }
 
     static class EventInteractionResponse implements InteractionResponse {

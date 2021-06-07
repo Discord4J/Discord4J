@@ -58,7 +58,7 @@ public class ComponentInteractEvent extends InteractionCreateEvent {
 
                     return respond(InteractionResponseType.UPDATE_MESSAGE, mutatedSpec.asRequest());
                 })
-                .thenReturn(followupHandler);
+                .thenReturn(response);
     }
 
     @Override

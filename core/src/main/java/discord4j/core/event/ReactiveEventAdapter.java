@@ -712,11 +712,11 @@ public abstract class ReactiveEventAdapter {
         return Mono.empty();
     }
 
-    public Publisher<?> onComponentInteract(ComponentInteractEvent event) {
+    public Publisher<?> onSlashCommand(SlashCommandEvent event) {
         return Mono.empty();
     }
 
-    public Publisher<?> onSlashCommand(SlashCommandEvent event) {
+    public Publisher<?> onComponentInteract(ComponentInteractEvent event) {
         return Mono.empty();
     }
 
