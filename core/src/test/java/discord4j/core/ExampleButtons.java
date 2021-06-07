@@ -42,7 +42,7 @@ public class ExampleButtons {
                             .ofType(TextChannel.class)
                             .flatMap(channel -> channel.createMessage(msg -> {
                                 msg.setContent("Click some buttons!");
-                                msg.setActionRows(
+                                msg.setComponents(
                                         ActionRow.of(
                                                 //              ID,  label
                                                 Button.primary("1", "1"),

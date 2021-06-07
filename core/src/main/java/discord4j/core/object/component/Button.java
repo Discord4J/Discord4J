@@ -23,7 +23,7 @@ import reactor.util.annotation.Nullable;
 
 import java.util.Optional;
 
-public class Button implements MessageComponent {
+public class Button extends ActionComponent {
 
     public static Button primary(String customId, String label) {
         return of(Button.Style.PRIMARY, customId, null, label, null);
@@ -105,51 +105,39 @@ public class Button implements MessageComponent {
         return new Button(builder.build());
     }
 
-    private final ComponentData data;
-
-    Button(ComponentData data) {
-        this.data = data;
+    public Button(ComponentData data) {
+        super(data);
     }
 
     public Style getStyle() {
-        return data.style().toOptional()
+        return getData().style().toOptional()
                 .map(Style::of)
                 .orElseThrow(IllegalStateException::new); // style should always be present on buttons
     }
 
     public Optional<String> getLabel() {
-        return data.label().toOptional();
+        return getData().label().toOptional();
     }
 
     public Optional<ReactionEmoji> getEmoji() {
-        return data.emoji().toOptional()
+        return getData().emoji().toOptional()
                 .map(ReactionEmoji::of);
     }
 
     public Optional<String> getCustomId() {
-        return data.customId().toOptional();
+        return getData().customId().toOptional();
     }
 
     public Optional<String> getUrl() {
-        return data.url().toOptional();
+        return getData().url().toOptional();
     }
 
     public boolean isDisabled() {
-        return data.disabled().toOptional().orElse(false);
+        return getData().disabled().toOptional().orElse(false);
     }
 
     public Button disabled() {
-        return new Button(ComponentData.builder().from(data).disabled(true).build());
-    }
-
-    @Override
-    public Type getType() {
-        return Type.BUTTON;
-    }
-
-    @Override
-    public ComponentData getData() {
-        return data;
+        return new Button(ComponentData.builder().from(getData()).disabled(true).build());
     }
 
     enum Style {

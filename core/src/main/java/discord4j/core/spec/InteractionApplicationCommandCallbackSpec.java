@@ -17,7 +17,7 @@
 package discord4j.core.spec;
 
 import discord4j.common.annotations.Experimental;
-import discord4j.core.object.component.ActionRow;
+import discord4j.core.object.component.LayoutComponent;
 import discord4j.core.object.entity.Message;
 import discord4j.discordjson.json.AllowedMentionsData;
 import discord4j.discordjson.json.EmbedData;
@@ -42,7 +42,7 @@ public class InteractionApplicationCommandCallbackSpec implements Spec<Interacti
     private List<EmbedData> embeds;
     private AllowedMentionsData allowedMentionsData;
     private int flags;
-    private List<ActionRow> actionRows;
+    private List<LayoutComponent> components;
 
     public InteractionApplicationCommandCallbackSpec setContent(String content) {
         this.content = content;
@@ -74,13 +74,13 @@ public class InteractionApplicationCommandCallbackSpec implements Spec<Interacti
         return this;
     }
 
-    public InteractionApplicationCommandCallbackSpec setActionRows(List<ActionRow> actionRows) {
-        this.actionRows = actionRows;
-        return this;
+    public InteractionApplicationCommandCallbackSpec setComponents(LayoutComponent... components) {
+        return setComponents(Arrays.asList(components));
     }
 
-    public InteractionApplicationCommandCallbackSpec setActionRows(ActionRow... actionRows) {
-        return setActionRows(Arrays.asList(actionRows));
+    public InteractionApplicationCommandCallbackSpec setComponents(List<LayoutComponent> components) {
+        this.components = components;
+        return this;
     }
 
     @Override
@@ -91,8 +91,8 @@ public class InteractionApplicationCommandCallbackSpec implements Spec<Interacti
                 .flags(flags == 0 ? Possible.absent() : Possible.of(flags))
                 .embeds(embeds == null ? Possible.absent() : Possible.of(embeds))
                 .allowedMentions(allowedMentionsData == null ? Possible.absent() : Possible.of(allowedMentionsData))
-                .components(actionRows == null ? Possible.absent() :
-                        Possible.of(actionRows.stream().map(ActionRow::getData).collect(Collectors.toList())))
+                .components(components == null ? Possible.absent() :
+                        Possible.of(components.stream().map(LayoutComponent::getData).collect(Collectors.toList())))
                 .build();
     }
 }

@@ -18,24 +18,9 @@ package discord4j.core.object.component;
 
 import discord4j.discordjson.json.ComponentData;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
+public abstract class ActionComponent extends MessageComponent {
 
-public class ActionRow extends LayoutComponent {
-
-    public static ActionRow of(MessageComponent... components) {
-        return of(Arrays.asList(components));
-    }
-
-    public static ActionRow of(List<MessageComponent> components) {
-        return new ActionRow(ComponentData.builder()
-                .type(Type.ACTION_ROW.getValue())
-                .components(components.stream().map(MessageComponent::getData).collect(Collectors.toList()))
-                .build());
-    }
-
-    public ActionRow(ComponentData data) {
+    public ActionComponent(ComponentData data) {
         super(data);
     }
 }

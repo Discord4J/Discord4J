@@ -18,13 +18,23 @@ package discord4j.core.object.component;
 
 import discord4j.discordjson.json.ComponentData;
 
-public interface MessageComponent {
+public class MessageComponent {
 
-    Type getType();
+    private final ComponentData data;
 
-    ComponentData getData();
+    public MessageComponent(ComponentData data) {
+        this.data = data;
+    }
 
-    enum Type {
+    public ComponentData getData() {
+        return data;
+    }
+
+    public Type getType() {
+        return Type.of(data.type());
+    }
+
+    public enum Type {
         UNKNOWN(-1),
         ACTION_ROW(1),
         BUTTON(2);
