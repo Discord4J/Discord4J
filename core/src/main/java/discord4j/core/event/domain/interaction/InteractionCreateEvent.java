@@ -57,13 +57,13 @@ public class InteractionCreateEvent extends Event {
     /**
      * Acknowledges the interaction indicating a response will be edited later. The user sees a loading state, visible
      * to all participants in the invoking channel. For a "only you can see this" response, see
-     * {@link #deferResponseEphemeral()}, or to include a message, {@link #replyEphemeral(String)}
+     * {@link #acknowledgeEphemeral()}, or to include a message, {@link #replyEphemeral(String)}
      *
      * @return A {@link Mono} where, upon successful completion, emits nothing; acknowledging the interaction
      * and indicating a response will be edited later. The user sees a loading state. If an error is received, it
      * is emitted through the {@code Mono}.
      */
-    public Mono<FollowupHandler> deferResponse() {
+    public Mono<FollowupHandler> acknowledge() {
         return respond(InteractionResponseType.DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE, null);
     }
 
@@ -75,7 +75,7 @@ public class InteractionCreateEvent extends Event {
      * and indicating a response will be edited later. If an error is received, it is emitted through the {@code Mono}.
      */
     // TODO: with new specs, this could be acknowledge().ephemeral() instead
-    public Mono<FollowupHandler> deferResponseEphemeral() {
+    public Mono<FollowupHandler> acknowledgeEphemeral() {
         InteractionApplicationCommandCallbackData data = InteractionApplicationCommandCallbackData.builder()
                 .flags(Message.Flag.EPHEMERAL.getFlag())
                 .build();

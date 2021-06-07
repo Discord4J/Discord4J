@@ -63,12 +63,12 @@ public class ComponentInteractEvent extends InteractionCreateEvent {
     }
 
     @Override
-    public Mono<FollowupHandler> deferResponse() {
+    public Mono<FollowupHandler> acknowledge() {
         return respond(InteractionResponseType.DEFERRED_UPDATE_MESSAGE, null);
     }
 
     @Override
-    public Mono<FollowupHandler> deferResponseEphemeral() {
+    public Mono<FollowupHandler> acknowledgeEphemeral() {
         InteractionApplicationCommandCallbackData data = InteractionApplicationCommandCallbackData.builder()
                 .flags(Message.Flag.EPHEMERAL.getFlag())
                 .build();
