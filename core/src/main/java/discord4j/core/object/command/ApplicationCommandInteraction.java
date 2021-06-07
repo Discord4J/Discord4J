@@ -31,6 +31,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+// TODO: Discord is probably going to rename this.
 /**
  * A Discord application command interaction.
  *

@@ -18,19 +18,8 @@ package discord4j.core.event.domain.interaction;
 
 import discord4j.common.annotations.Experimental;
 import discord4j.core.GatewayDiscordClient;
-import discord4j.core.object.command.ApplicationCommandInteraction;
 import discord4j.core.object.command.Interaction;
-import discord4j.core.object.entity.Message;
-import discord4j.core.spec.InteractionApplicationCommandCallbackSpec;
-import discord4j.discordjson.json.InteractionApplicationCommandCallbackData;
-import discord4j.discordjson.json.InteractionResponseData;
-import discord4j.discordjson.json.WebhookMessageEditRequest;
 import discord4j.gateway.ShardInfo;
-import discord4j.rest.interaction.FollowupHandler;
-import discord4j.rest.util.InteractionResponseType;
-import reactor.core.publisher.Mono;
-
-import java.util.function.Consumer;
 
 @Experimental
 public class ButtonInteractEvent extends ComponentInteractEvent {

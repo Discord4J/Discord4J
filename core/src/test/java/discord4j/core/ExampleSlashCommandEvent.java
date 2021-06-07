@@ -17,6 +17,7 @@
 
 package discord4j.core;
 
+import discord4j.common.util.Snowflake;
 import discord4j.core.event.ReactiveEventAdapter;
 import discord4j.core.event.domain.interaction.SlashCommandEvent;
 import discord4j.core.object.command.ApplicationCommandInteraction;
@@ -33,9 +34,9 @@ import reactor.util.Loggers;
 
 import java.util.Random;
 
-public class ExampleApplicationCommandInteractEvent {
+public class ExampleSlashCommandEvent {
 
-    private static final Logger log = Loggers.getLogger(ExampleApplicationCommandInteractEvent.class);
+    private static final Logger log = Loggers.getLogger(ExampleSlashCommandEvent.class);
 
     private static final String token = System.getenv("token");
     private static final String guildId = System.getenv("guildId");
@@ -61,7 +62,7 @@ public class ExampleApplicationCommandInteractEvent {
         long applicationId = restClient.getApplicationId().block();
 
         restClient.getApplicationService()
-                .createGuildApplicationCommand(applicationId, Long.parseLong(guildId), randomCommand)
+                .createGuildApplicationCommand(applicationId, Snowflake.asLong(guildId), randomCommand)
                 .doOnError(e -> log.warn("Unable to create guild command", e))
                 .onErrorResume(e -> Mono.empty())
                 .block();

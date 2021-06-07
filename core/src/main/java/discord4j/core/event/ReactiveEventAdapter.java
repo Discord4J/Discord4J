@@ -26,6 +26,7 @@ import discord4j.core.event.domain.guild.*;
 import discord4j.core.event.domain.integration.IntegrationCreateEvent;
 import discord4j.core.event.domain.integration.IntegrationDeleteEvent;
 import discord4j.core.event.domain.integration.IntegrationUpdateEvent;
+import discord4j.core.event.domain.interaction.ComponentInteractEvent;
 import discord4j.core.event.domain.interaction.SlashCommandEvent;
 import discord4j.core.event.domain.interaction.ButtonInteractEvent;
 import discord4j.core.event.domain.interaction.InteractionCreateEvent;
@@ -711,6 +712,10 @@ public abstract class ReactiveEventAdapter {
         return Mono.empty();
     }
 
+    public Publisher<?> onComponentInteract(ComponentInteractEvent event) {
+        return Mono.empty();
+    }
+
     public Publisher<?> onSlashCommand(SlashCommandEvent event) {
         return Mono.empty();
     }
@@ -824,6 +829,7 @@ public abstract class ReactiveEventAdapter {
         else if (event instanceof ReconnectFailEvent) return onReconnectFail((ReconnectFailEvent) event);
         else if (event instanceof SlashCommandEvent) return onSlashCommand((SlashCommandEvent) event);
         else if (event instanceof ButtonInteractEvent) return onButtonInteract((ButtonInteractEvent) event);
+        else if (event instanceof ComponentInteractEvent) return onComponentInteract((ComponentInteractEvent) event);
         else if (event instanceof InteractionCreateEvent) return onInteractionCreate((InteractionCreateEvent) event);
         else if (event instanceof ApplicationCommandCreateEvent) return onApplicationCommandCreate((ApplicationCommandCreateEvent) event);
         else if (event instanceof ApplicationCommandUpdateEvent) return onApplicationCommandUpdate((ApplicationCommandUpdateEvent) event);

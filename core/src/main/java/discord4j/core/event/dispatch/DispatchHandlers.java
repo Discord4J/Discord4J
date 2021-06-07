@@ -307,6 +307,8 @@ public class DispatchHandlers implements DispatchEventMapper {
                         .flatMap(ApplicationCommandInteraction::getComponentType)
                         .orElseThrow(IllegalStateException::new); // component type must be present
 
+                // there will be more soon :)
+                //noinspection SwitchStatementWithTooFewBranches
                 switch (type) {
                     case BUTTON:
                         return Mono.just(new ButtonInteractEvent(gateway, context.getShardInfo(), interaction));

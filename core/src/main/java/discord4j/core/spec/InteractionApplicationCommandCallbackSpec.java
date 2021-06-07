@@ -16,8 +16,8 @@
  */
 package discord4j.core.spec;
 
+import discord4j.common.annotations.Experimental;
 import discord4j.core.object.component.ActionRow;
-import discord4j.core.object.component.MessageComponent;
 import discord4j.core.object.entity.Message;
 import discord4j.discordjson.json.AllowedMentionsData;
 import discord4j.discordjson.json.EmbedData;
@@ -32,6 +32,8 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+// TODO: Discord is probably going to rename this.
+@Experimental
 public class InteractionApplicationCommandCallbackSpec implements Spec<InteractionApplicationCommandCallbackData> {
 
     @Nullable
