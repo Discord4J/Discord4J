@@ -18,10 +18,92 @@ package discord4j.core.object.component;
 
 import discord4j.core.object.reaction.ReactionEmoji;
 import discord4j.discordjson.json.ComponentData;
+import discord4j.discordjson.json.ImmutableComponentData;
+import reactor.util.annotation.Nullable;
 
 import java.util.Optional;
 
 public class Button implements MessageComponent {
+
+    public static Button primary(String customId, String label) {
+        return of(Button.Style.PRIMARY, customId, null, label, null);
+    }
+
+    public static Button primary(String customId, ReactionEmoji emoji) {
+        return of(Button.Style.PRIMARY, customId, emoji, null, null);
+    }
+
+    public static Button primary(String customId, ReactionEmoji emoji, String label) {
+        return of(Button.Style.PRIMARY, customId, emoji, label, null);
+    }
+
+    public static Button secondary(String customId, String label) {
+        return of(Button.Style.SECONDARY, customId, null, label, null);
+    }
+
+    public static Button secondary(String customId, ReactionEmoji emoji) {
+        return of(Button.Style.SECONDARY, customId, emoji, null, null);
+    }
+
+    public static Button secondary(String customId, ReactionEmoji emoji, String label) {
+        return of(Button.Style.SECONDARY, customId, emoji, label, null);
+    }
+
+    public static Button success(String customId, String label) {
+        return of(Button.Style.SUCCESS, customId, null, label, null);
+    }
+
+    public static Button success(String customId, ReactionEmoji emoji) {
+        return of(Button.Style.SUCCESS, customId, emoji, null, null);
+    }
+
+    public static Button success(String customId, ReactionEmoji emoji, String label) {
+        return of(Button.Style.SUCCESS, customId, emoji, label, null);
+    }
+
+    public static Button danger(String customId, String label) {
+        return of(Button.Style.DANGER, customId, null, label, null);
+    }
+
+    public static Button danger(String customId, ReactionEmoji emoji) {
+        return of(Button.Style.DANGER, customId, emoji, null, null);
+    }
+
+    public static Button danger(String customId, ReactionEmoji emoji, String label) {
+        return of(Button.Style.DANGER, customId, emoji, label, null);
+    }
+
+    public static Button link(String url, String label) {
+        return of(Button.Style.LINK, null, null, label, url);
+    }
+
+    public static Button link(String url, ReactionEmoji emoji) {
+        return of(Button.Style.LINK, null, emoji, null, url);
+    }
+
+    public static Button link(String url, ReactionEmoji emoji, String label) {
+        return of(Button.Style.LINK, null, emoji, label, url);
+    }
+
+    public static Button of(Style style, @Nullable String customId, @Nullable ReactionEmoji emoji, @Nullable String label, @Nullable String url) {
+        ImmutableComponentData.Builder builder = ComponentData.builder()
+                .type(MessageComponent.Type.BUTTON.getValue())
+                .style(style.getValue());
+
+        if (customId != null)
+            builder.customId(customId);
+
+        if (emoji != null)
+            builder.emoji(emoji.getData());
+
+        if (label != null)
+            builder.label(label);
+
+        if (url != null)
+            builder.url(url);
+
+        return new Button(builder.build());
+    }
 
     private final ComponentData data;
 
