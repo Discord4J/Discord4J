@@ -720,7 +720,7 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
         GuildContent guildContent = computeGuildContent(guildId);
         guildContent.channelIds.add(channelId);
         guilds.computeIfPresent(guildId, (k, guild) -> guild.withChannels(add(guild.channels(), Id.of(channelId))));
-        return channels.put(channelId, ImmutableChannelData.copyOf(channel));
+        return channels.put(channelId, ImmutableChannelData.copyOf(channel).withGuildId(guildId));
     }
 
     private @Nullable RoleData saveRole(long guildId, RoleData role) {
@@ -796,8 +796,11 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
                     .withMember(Possible.absent()));
         } else {
             guildContent.voiceStateIds.remove(voiceStateId);
-            computeChannelContent(voiceState.channelId().get().asLong()).voiceStateIds.remove(voiceStateId);
-            return voiceStates.remove(voiceStateId);
+            VoiceStateData old = voiceStates.remove(voiceStateId);
+            if (old != null && old.channelId().isPresent()) {
+                computeChannelContent(old.channelId().get().asLong()).voiceStateIds.remove(voiceStateId);
+            }
+            return old;
         }
     }
 
