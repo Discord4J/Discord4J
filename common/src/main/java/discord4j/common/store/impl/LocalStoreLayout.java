@@ -485,7 +485,9 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
         return Mono.fromCallable(() -> ifNonNullMap(
                 members.computeIfPresent(id, (k, old) -> {
                     AtomicReference<ImmutableUserData> ref = old.userRef();
-                    ref.set(ImmutableUserData.copyOf(dispatch.user()));
+                    if (ref != null) {
+                        ref.set(ImmutableUserData.copyOf(dispatch.user()));
+                    }
                     return new WithUser<>(ImmutableMemberData.builder()
                             .from(old.get())
                             .nick(dispatch.nick())
@@ -559,7 +561,6 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
             channelContent.messageIds.add(id);
             AtomicReference<ImmutableUserData> userRef = computeUserRef(id.b, message,
                     (m, old) -> ImmutableUserData.copyOf(m.author()));
-            //noinspection ConstantConditions
             messages.put(id, new WithUser<>(message.withAuthor(EmptyUser.INSTANCE), userRef,
                     ImmutableMessageData::withAuthor));
         });
@@ -737,7 +738,6 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
             AtomicReference<ImmutableUserData> userRef = ifNonNullMap(
                     emoji.user().toOptional().map(user -> user.id().asLong()).orElse(null),
                     userId -> computeUserRef(userId, emoji, (e, u) -> ImmutableUserData.copyOf(e.user().get())));
-            //noinspection ConstantConditions
             emojis.put(emojiId, new WithUser<>(ImmutableEmojiData.copyOf(emoji).withUser(Possible.absent()), userRef,
                     (e, u) -> e.withUser(Possible.of(u))));
         });
@@ -750,7 +750,6 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
         guilds.computeIfPresent(guildId, (k, guild) -> guild.withMembers(add(guild.members(), Id.of(memberId.b))));
         AtomicReference<ImmutableUserData> userRef = computeUserRef(memberId.b, member,
                 (m, u) -> ImmutableUserData.copyOf(m.user()));
-        //noinspection ConstantConditions
         members.put(memberId, new WithUser<>(ImmutableMemberData.copyOf(member).withUser(EmptyUser.INSTANCE), userRef,
                 ImmutableMemberData::withUser));
     }

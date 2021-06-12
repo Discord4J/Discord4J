@@ -18,6 +18,7 @@
 package discord4j.common.store.impl;
 
 import discord4j.discordjson.json.ImmutableUserData;
+import reactor.util.annotation.Nullable;
 
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiFunction;
@@ -29,7 +30,7 @@ class WithUser<T> {
     private final AtomicReference<ImmutableUserData> ref;
     private final BiFunction<T, ImmutableUserData, T> setter;
 
-    public WithUser(T value, AtomicReference<ImmutableUserData> ref,
+    public WithUser(T value, @Nullable AtomicReference<ImmutableUserData> ref,
                     BiFunction<T, ImmutableUserData, T> setter) {
         this.value = value;
         this.ref = ref;
@@ -37,9 +38,10 @@ class WithUser<T> {
     }
 
     T get() {
-        return setter.apply(value, ref.get());
+        return ref == null ? value : setter.apply(value, ref.get());
     }
 
+    @Nullable
     AtomicReference<ImmutableUserData> userRef() {
         return ref;
     }
