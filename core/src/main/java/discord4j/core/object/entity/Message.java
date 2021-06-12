@@ -483,7 +483,7 @@ public final class Message implements Entity {
         return data.interaction().toOptional()
                 .map(data -> new MessageInteraction(gateway, data));
     }
-    
+
     public List<MessageComponent> getComponents() {
         return data.components().toOptional()
                 .map(components -> components.stream()

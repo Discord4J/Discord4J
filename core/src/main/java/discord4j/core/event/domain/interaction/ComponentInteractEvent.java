@@ -19,32 +19,52 @@ package discord4j.core.event.domain.interaction;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.command.ApplicationCommandInteraction;
 import discord4j.core.object.command.Interaction;
+import discord4j.core.object.component.Button;
+import discord4j.core.object.component.MessageComponent;
 import discord4j.core.object.entity.Message;
 import discord4j.core.spec.InteractionApplicationCommandCallbackSpec;
 import discord4j.discordjson.json.InteractionApplicationCommandCallbackData;
 import discord4j.gateway.ShardInfo;
-import discord4j.rest.interaction.InteractionResponse;
 import discord4j.rest.util.InteractionResponseType;
 import reactor.core.publisher.Mono;
 
 import java.util.function.Consumer;
 
+/**
+ * Dispatched when a user interacts with a {@link MessageComponent} the bot has sent.
+ * <p>
+ * This is not directly dispatched by Discord, but is a utility specialization of {@link InteractionCreateEvent}.
+ */
 public class ComponentInteractEvent extends InteractionCreateEvent {
 
     public ComponentInteractEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, Interaction interaction) {
         super(gateway, shardInfo, interaction);
     }
 
+    /**
+     * Gets the developer-defined custom id associated with the component.
+     *
+     * @return The component's custom id.
+     * @see Button#getCustomId()
+     */
     public String getCustomId() {
         return getInteraction().getCommandInteraction()
                 .flatMap(ApplicationCommandInteraction::getCustomId)
-                // note: custom_id is not guaranteed to present on buttons in general because of link buttons,
+                // note: custom_id is not guaranteed to present on components in general (e.g., link buttons),
                 // but it is guaranteed to be present here, because we received an interaction_create for it
-                // (which doesn't happen for link buttons)
+                // (which doesn't happen for components without custom_id)
                 .orElseThrow(IllegalStateException::new);
     }
 
-    public Mono<InteractionResponse> edit(Consumer<? super InteractionApplicationCommandCallbackSpec> spec) {
+    /**
+     * Requests to respond to the interaction by immediately editing the message the button is on.
+     *
+     * @param spec A {@link Consumer} that provides a "blank" {@link InteractionApplicationCommandCallbackSpec} to be
+     * operated on.
+     * @return A {@link Mono} where, upon successful completion, emits nothing; indicating the interaction response has
+     * been sent. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<Void> edit(Consumer<? super InteractionApplicationCommandCallbackSpec> spec) {
         return Mono.defer(
                 () -> {
                     InteractionApplicationCommandCallbackSpec mutatedSpec =
@@ -56,22 +76,21 @@ public class ComponentInteractEvent extends InteractionCreateEvent {
 
                     spec.accept(mutatedSpec);
 
-                    return respond(InteractionResponseType.UPDATE_MESSAGE, mutatedSpec.asRequest());
-                })
-                .thenReturn(response);
+                    return createInteractionResponse(InteractionResponseType.UPDATE_MESSAGE, mutatedSpec.asRequest());
+                });
     }
 
     @Override
-    public Mono<InteractionResponse> acknowledge() {
-        return respond(InteractionResponseType.DEFERRED_UPDATE_MESSAGE, null);
+    public Mono<Void> acknowledge() {
+        return createInteractionResponse(InteractionResponseType.DEFERRED_UPDATE_MESSAGE, null);
     }
 
     @Override
-    public Mono<InteractionResponse> acknowledgeEphemeral() {
+    public Mono<Void> acknowledgeEphemeral() {
         InteractionApplicationCommandCallbackData data = InteractionApplicationCommandCallbackData.builder()
                 .flags(Message.Flag.EPHEMERAL.getFlag())
                 .build();
 
-        return respond(InteractionResponseType.DEFERRED_UPDATE_MESSAGE, data);
+        return createInteractionResponse(InteractionResponseType.DEFERRED_UPDATE_MESSAGE, data);
     }
 }

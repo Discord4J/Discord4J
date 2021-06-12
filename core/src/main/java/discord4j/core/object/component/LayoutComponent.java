@@ -16,11 +16,28 @@
  */
 package discord4j.core.object.component;
 
+import discord4j.common.annotations.Experimental;
 import discord4j.discordjson.json.ComponentData;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
+/**
+ * A message component that determines how components are laid out in a message and has {@link ActionComponent}
+ * children.
+ */
+@Experimental
 public abstract class LayoutComponent extends MessageComponent {
 
     public LayoutComponent(ComponentData data) {
         super(data);
+    }
+
+    public List<MessageComponent> getChildren() {
+        return getData().components().toOptional()
+                .map(components -> components.stream()
+                        .map(MessageComponent::fromData)
+                        .collect(Collectors.toList()))
+                .orElseThrow(IllegalStateException::new); // components should always be present on a layout component
     }
 }

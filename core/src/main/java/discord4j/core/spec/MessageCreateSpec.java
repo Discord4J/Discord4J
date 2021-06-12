@@ -159,10 +159,22 @@ public class MessageCreateSpec implements Spec<MultipartRequest> {
         return this;
     }
 
+    /**
+     * Sets the components of the message.
+     *
+     * @param components The message components.
+     * @return This spec.
+     */
     public MessageCreateSpec setComponents(LayoutComponent... components) {
         return setComponents(Arrays.asList(components));
     }
 
+    /**
+     * Sets the components of the message.
+     *
+     * @param components The message components.
+     * @return This spec.
+     */
     public MessageCreateSpec setComponents(List<LayoutComponent> components) {
         this.components = components;
         return this;

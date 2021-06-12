@@ -31,7 +31,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-// TODO: Discord is probably going to rename this.
+// TODO: Discord is probably going to rename this. Redo docs then.
 /**
  * A Discord application command interaction.
  *
@@ -84,10 +84,20 @@ public class ApplicationCommandInteraction implements DiscordObject {
         return data.name().toOptional();
     }
 
+    /**
+     * Gets the developer-defined custom id of the component.
+     *
+     * @return The custom id of the component.
+     */
     public Optional<String> getCustomId() {
         return data.customId().toOptional();
     }
 
+    /**
+     * Gets the type of the component.
+     *
+     * @return The type of the component.
+     */
     public Optional<MessageComponent.Type> getComponentType() {
         return data.componentType().toOptional().map(MessageComponent.Type::of);
     }

@@ -19,8 +19,14 @@ package discord4j.core.event.domain.interaction;
 import discord4j.common.annotations.Experimental;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.command.Interaction;
+import discord4j.core.object.component.Button;
 import discord4j.gateway.ShardInfo;
 
+/**
+ * Dispatched when a user interacts with a {@link Button} the bot has sent.
+ * <p>
+ * This is not directly dispatched by Discord, but is a utility specialization of {@link InteractionCreateEvent}.
+ */
 @Experimental
 public class ButtonInteractEvent extends ComponentInteractEvent {
 
