@@ -20,9 +20,17 @@ import discord4j.discordjson.json.ComponentData;
 
 public class MessageComponent {
 
+    public static MessageComponent fromData(ComponentData data) {
+        switch (Type.of(data.type())) {
+            case ACTION_ROW: return new ActionRow(data);
+            case BUTTON: return new Button(data);
+            default: return new MessageComponent(data);
+        }
+    }
+
     private final ComponentData data;
 
-    public MessageComponent(ComponentData data) {
+    MessageComponent(ComponentData data) {
         this.data = data;
     }
 
