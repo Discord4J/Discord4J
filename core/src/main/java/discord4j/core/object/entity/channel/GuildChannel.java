@@ -33,6 +33,7 @@ import java.util.Set;
 
 /** A Discord channel associated to a {@link Guild}. */
 public interface GuildChannel extends Channel {
+
     /**
      * Gets the ID of the guild this channel is associated to.
      *
@@ -62,6 +63,7 @@ public interface GuildChannel extends Channel {
      *
      * @return The permission overwrites for this channel.
      */
+    @Deprecated
     Set<ExtendedPermissionOverwrite> getPermissionOverwrites();
 
     /**
@@ -70,6 +72,7 @@ public interface GuildChannel extends Channel {
      * @param memberId The ID of the member to get the overwrite for.
      * @return The permission overwrite targeting the given member.
      */
+    @Deprecated
     Optional<ExtendedPermissionOverwrite> getOverwriteForMember(Snowflake memberId);
 
     /**
@@ -78,6 +81,7 @@ public interface GuildChannel extends Channel {
      * @param roleId The ID of the role to get the overwrite for.
      * @return The permission overwrite targeting the given role.
      */
+    @Deprecated
     Optional<ExtendedPermissionOverwrite> getOverwriteForRole(Snowflake roleId);
 
     /**
@@ -86,6 +90,7 @@ public interface GuildChannel extends Channel {
      * @param memberId The ID of the member to get permissions for.
      * @return The permissions for the given member.
      */
+    @Deprecated
     Mono<PermissionSet> getEffectivePermissions(Snowflake memberId);
 
     /**
@@ -94,6 +99,7 @@ public interface GuildChannel extends Channel {
      * @param member The member to get permissions for.
      * @return The permissions for the given member.
      */
+    @Deprecated
     Mono<PermissionSet> getEffectivePermissions(Member member);
 
     /**
@@ -109,6 +115,7 @@ public interface GuildChannel extends Channel {
      *
      * @return The raw position of the channel.
      */
+    @Deprecated
     int getRawPosition();
 
     /**
@@ -136,6 +143,7 @@ public interface GuildChannel extends Channel {
      * @return A {@link Mono} where, upon successful completion, emits the position of the channel. If an error is
      * received, it is emitted through the {@code Mono}.
      */
+    @Deprecated
     Mono<Integer> getPosition();
 
     /**
@@ -147,6 +155,7 @@ public interface GuildChannel extends Channel {
      * @return A {@link Mono} where, upon successful completion, emits nothing; If an error is received, it is emitted
      * through the {@code Mono}.
      */
+    @Deprecated
     default Mono<Void> addMemberOverwrite(final Snowflake memberId, final PermissionOverwrite overwrite) {
         return addMemberOverwrite(memberId, overwrite, null);
     }
@@ -161,6 +170,7 @@ public interface GuildChannel extends Channel {
      * @return A {@link Mono} where, upon successful completion, emits nothing; If an error is received, it is emitted
      * through the {@code Mono}.
      */
+    @Deprecated
     Mono<Void> addMemberOverwrite(Snowflake memberId, PermissionOverwrite overwrite, @Nullable String reason);
 
     /**
@@ -172,6 +182,7 @@ public interface GuildChannel extends Channel {
      * @return A {@link Mono} where, upon successful completion, emits nothing; If an error is received, it is emitted
      * through the {@code Mono}.
      */
+    @Deprecated
     default Mono<Void> addRoleOverwrite(final Snowflake roleId, final PermissionOverwrite overwrite) {
         return addRoleOverwrite(roleId, overwrite, null);
     }
@@ -186,5 +197,6 @@ public interface GuildChannel extends Channel {
      * @return A {@link Mono} where, upon successful completion, emits nothing; If an error is received, it is emitted
      * through the {@code Mono}.
      */
+    @Deprecated
     Mono<Void> addRoleOverwrite(Snowflake roleId, PermissionOverwrite overwrite, @Nullable String reason);
 }

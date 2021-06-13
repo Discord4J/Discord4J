@@ -29,7 +29,7 @@ import reactor.core.publisher.Mono;
 import java.util.Optional;
 import java.util.function.Consumer;
 
-class BaseCategorizableChannel extends BaseGuildChannel implements CategorizableChannel {
+class BaseCategorizableChannel extends BaseGuildChannelNotAThread implements CategorizableChannel {
 
     BaseCategorizableChannel(GatewayDiscordClient gateway, ChannelData data) {
         super(gateway, data);

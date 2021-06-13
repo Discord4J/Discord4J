@@ -28,7 +28,7 @@ import reactor.core.publisher.Mono;
 import java.util.function.Consumer;
 
 /** A Discord category. */
-public final class Category extends BaseGuildChannel {
+public final class Category extends BaseGuildChannelNotAThread {
 
     /**
      * Constructs an {@code Category} with an associated {@link GatewayDiscordClient} and Discord data.

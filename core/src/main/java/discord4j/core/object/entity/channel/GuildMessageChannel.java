@@ -16,10 +16,13 @@
  */
 package discord4j.core.object.entity.channel;
 
+import discord4j.core.object.ExtendedInvite;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.Webhook;
+import discord4j.core.retriever.EntityRetrievalStrategy;
+import discord4j.core.spec.InviteCreateSpec;
 import discord4j.core.spec.WebhookCreateSpec;
 import discord4j.common.util.Snowflake;
 import org.reactivestreams.Publisher;
@@ -36,6 +39,7 @@ public interface GuildMessageChannel extends CategorizableChannel, MessageChanne
      *
      * @return The channel topic, if present.
      */
+    @Deprecated
     Optional<String> getTopic();
 
     /**
@@ -91,6 +95,7 @@ public interface GuildMessageChannel extends CategorizableChannel, MessageChanne
      * @return A {@link Mono} where, upon successful completion, emits the created {@link Webhook}. If an error
      * is received, it is emitted through the {@code Mono}.
      */
+    @Deprecated
     Mono<Webhook> createWebhook(final Consumer<? super WebhookCreateSpec> spec);
 
     /**
@@ -99,6 +104,7 @@ public interface GuildMessageChannel extends CategorizableChannel, MessageChanne
      * @return A {@link Flux} that continually emits the {@link Webhook webhooks} of the channel. If an error is
      * received, it is emitted through the {@code Flux}.
      */
+    @Deprecated
     Flux<Webhook> getWebhooks();
 
     /**
@@ -108,4 +114,24 @@ public interface GuildMessageChannel extends CategorizableChannel, MessageChanne
      * view this channel {@link discord4j.rest.util.Permission#VIEW_CHANNEL}
      */
     Flux<Member> getMembers();
+
+    @Override
+    @Deprecated
+    Optional<Snowflake> getCategoryId();
+
+    @Override
+    @Deprecated
+    Mono<Category> getCategory();
+
+    @Override
+    @Deprecated
+    Mono<Category> getCategory(EntityRetrievalStrategy retrievalStrategy);
+
+    @Override
+    @Deprecated
+    Mono<ExtendedInvite> createInvite(final Consumer<? super InviteCreateSpec> spec);
+
+    @Override
+    @Deprecated
+    Flux<ExtendedInvite> getInvites();
 }
