@@ -119,6 +119,10 @@ public class DefaultRouter implements Router {
                     return null;
                 }
                 if (stream.getResetAt().isBefore(now) && stream.countRequestsInFlight() < 1) {
+                    if (log.isTraceEnabled()) {
+                        log.trace("Evicting RequestStream with bucket ID {}", bucketKey);
+                    }
+                    stream.stop();
                     return null;
                 }
                 return stream;
