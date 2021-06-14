@@ -210,7 +210,6 @@ class RequestStream {
                     .retryWhen(serverErrorRetryFactory())
                     .doFinally(this::next)
                     .checkpoint("Request to " + clientRequest.getDescription() + " [RequestStream]")
-                    .takeUntilOther(stopCallback.asMono())
                     .subscribe(
                             response -> callback.emitValue(response, FAIL_FAST),
                             t -> {
@@ -244,7 +243,7 @@ class RequestStream {
 
         @Override
         protected void hookOnComplete() {
-            log.debug("[B:{}] RequestStream completed");
+            log.debug("[B:{}] RequestStream completed", id.toString());
         }
     }
 }
