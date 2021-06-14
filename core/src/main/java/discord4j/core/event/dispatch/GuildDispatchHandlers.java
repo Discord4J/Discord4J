@@ -193,7 +193,7 @@ class GuildDispatchHandlers {
                 .map(Snowflake::asLong)
                 .collect(Collectors.toSet());
         String currentNick = Possible.flatOpt(context.getDispatch().nick()).orElse(null);
-        String currentJoinedAt = context.getDispatch().joinedAt();
+        String currentJoinedAt = context.getDispatch().joinedAt().orElse(null);
         String currentPremiumSince = Possible.flatOpt(context.getDispatch().premiumSince()).orElse(null);
         Boolean currentPending = context.getDispatch().pending().toOptional().orElse(null);
         Member oldMember = context.getOldState()

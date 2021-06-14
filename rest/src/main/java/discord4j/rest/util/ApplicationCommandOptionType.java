@@ -17,6 +17,10 @@
 
 package discord4j.rest.util;
 
+/**
+ * @see <a href="https://discord.com/developers/docs/interactions/slash-commands#applicationcommandoptiontype">
+ * Application Command Option Type</a>
+ */
 public enum ApplicationCommandOptionType {
     UNKNOWN(-1),
     SUB_COMMAND(1),
@@ -26,7 +30,8 @@ public enum ApplicationCommandOptionType {
     BOOLEAN(5),
     USER(6),
     CHANNEL(7),
-    ROLE(8);
+    ROLE(8),
+    MENTIONABLE(9);
 
     /**
      * The underlying value as represented by Discord.
@@ -52,7 +57,8 @@ public enum ApplicationCommandOptionType {
     }
 
     /**
-     * Gets the type of an application command option. It is guaranteed that invoking {@link #getValue()} from the returned enum will
+     * Gets the type of an application command option. It is guaranteed that invoking {@link #getValue()} from the
+     * returned enum will
      * equal ({@code ==}) the supplied {@code value}.
      *
      * @param value The underlying value as represented by Discord.
@@ -68,6 +74,7 @@ public enum ApplicationCommandOptionType {
             case 6: return USER;
             case 7: return CHANNEL;
             case 8: return ROLE;
+            case 9: return MENTIONABLE;
             default: return UNKNOWN;
         }
     }
