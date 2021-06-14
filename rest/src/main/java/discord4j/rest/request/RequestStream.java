@@ -64,6 +64,7 @@ class RequestStream {
     private final RequestSubscriber requestSubscriber;
     private final RateLimitRetryOperator rateLimitRetryOperator;
     private final AtomicLong requestsInFlight = new AtomicLong(0);
+    private final Sinks.Empty<?> stopCallback = Sinks.empty();
 
     RequestStream(BucketKey id, RouterOptions routerOptions, DiscordWebClient httpClient,
                   RateLimitStrategy rateLimitStrategy) {
@@ -95,9 +96,10 @@ class RequestStream {
     }
 
     boolean push(RequestCorrelation<ClientResponse> request) {
+        requestsInFlight.incrementAndGet();
         boolean accepted = requestQueue.push(request);
-        if (accepted) {
-            requestsInFlight.incrementAndGet();
+        if (!accepted) {
+            requestsInFlight.decrementAndGet();
         }
         return accepted;
     }
@@ -105,7 +107,12 @@ class RequestStream {
     void start() {
         requestQueue.requests()
                 .doOnDiscard(RequestCorrelation.class, this::onDiscard)
+                .takeUntilOther(stopCallback.asMono())
                 .subscribe(requestSubscriber);
+    }
+
+    void stop() {
+        stopCallback.emitEmpty(FAIL_FAST);
     }
 
     /**
@@ -203,6 +210,7 @@ class RequestStream {
                     .retryWhen(serverErrorRetryFactory())
                     .doFinally(this::next)
                     .checkpoint("Request to " + clientRequest.getDescription() + " [RequestStream]")
+                    .takeUntilOther(stopCallback.asMono())
                     .subscribe(
                             response -> callback.emitValue(response, FAIL_FAST),
                             t -> {
@@ -232,6 +240,11 @@ class RequestStream {
                     }
                     request(1);
                 }, t -> log.error("[B:{}] Error while scheduling next request", id.toString(), t));
+        }
+
+        @Override
+        protected void hookOnComplete() {
+            log.debug("[B:{}] RequestStream completed");
         }
     }
 }
