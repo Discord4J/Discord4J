@@ -211,7 +211,7 @@ public class InteractionCreateEvent extends Event {
 
         @Override
         public Mono<MessageData> createFollowupMessage(String content) {
-            WebhookExecuteRequest body = WebhookExecuteRequest.builder().content(content).build();
+            FollowupMessageRequest body = FollowupMessageRequest.builder().content(content).build();
             return restClient.getWebhookService()
                     .executeWebhook(applicationId, interactionData.token(), true, MultipartRequest.ofRequest(body));
         }
@@ -220,6 +220,26 @@ public class InteractionCreateEvent extends Event {
         public Mono<MessageData> createFollowupMessage(MultipartRequest<WebhookExecuteRequest> request) {
             return restClient.getWebhookService()
                     .executeWebhook(applicationId, interactionData.token(), true, request);
+        }
+
+        @Override
+        public Mono<MessageData> createFollowupMessageEphemeral(String content) {
+            FollowupMessageRequest body = FollowupMessageRequest.builder()
+                    .content(content)
+                    .flags(Message.Flag.EPHEMERAL.getFlag())
+                    .build();
+            return restClient.getWebhookService()
+                    .executeWebhook(applicationId, interactionData.token(), true, MultipartRequest.ofRequest(body));
+        }
+
+        @Override
+        public Mono<MessageData> createFollowupMessageEphemeral(MultipartRequest<WebhookExecuteRequest> request) {
+            FollowupMessageRequest newBody = FollowupMessageRequest.builder()
+                    .from(request.getJsonPayload())
+                    .flags(Message.Flag.EPHEMERAL.getFlag())
+                    .build();
+            return restClient.getWebhookService()
+                    .executeWebhook(applicationId, interactionData.token(), true, MultipartRequest.ofRequest(newBody));
         }
 
         @Override
