@@ -144,7 +144,7 @@ class InteractionOperations implements RestInteraction, InteractionResponse, Gui
 
     @Override
     public Mono<MessageData> createFollowupMessage(String content) {
-        WebhookExecuteRequest body = WebhookExecuteRequest.builder().content(content).build();
+        FollowupMessageRequest body = FollowupMessageRequest.builder().content(content).build();
         WebhookMultipartRequest request = new WebhookMultipartRequest(body);
         return restClient.getWebhookService()
                 .executeWebhook(applicationId, interactionData.token(), true, request);
@@ -154,6 +154,29 @@ class InteractionOperations implements RestInteraction, InteractionResponse, Gui
     public Mono<MessageData> createFollowupMessage(WebhookMultipartRequest request) {
         return restClient.getWebhookService()
                 .executeWebhook(applicationId, interactionData.token(), true, request);
+    }
+
+    @Override
+    public Mono<MessageData> createFollowupMessageEphemeral(String content) {
+        FollowupMessageRequest body = FollowupMessageRequest.builder()
+                .content(content)
+                .flags(1 << 6)
+                .build();
+        WebhookMultipartRequest request = new WebhookMultipartRequest(body);
+        return restClient.getWebhookService()
+                .executeWebhook(applicationId, interactionData.token(), true, request);
+    }
+
+    @Override
+    public Mono<MessageData> createFollowupMessageEphemeral(WebhookMultipartRequest request) {
+        FollowupMessageRequest newBody = FollowupMessageRequest.builder()
+                .from(request.getExecuteRequest())
+                .flags(1 << 6)
+                .build();
+        WebhookMultipartRequest newRequest = new WebhookMultipartRequest(newBody, request.getFiles());
+
+        return restClient.getWebhookService()
+                .executeWebhook(applicationId, interactionData.token(), true, newRequest);
     }
 
     @Override
