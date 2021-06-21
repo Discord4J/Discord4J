@@ -16,8 +16,6 @@
  */
 package discord4j.common.util;
 
-import reactor.util.annotation.NonNull;
-
 import java.time.Instant;
 
 /**
@@ -37,7 +35,6 @@ public final class Timestamp {
      * @param style the style used to tell Discord how the timestamp should be formatted.
      * @return The markdown representation of the {@code Instant} as a String.
      */
-    @NonNull
     public static String of(Instant instant, String style) {
         return "<t:" + instant.getEpochSecond() + ":" + style + ">";
     }
@@ -49,7 +46,6 @@ public final class Timestamp {
      * @param instant the {@code Instant} to construct a timestamp with.
      * @return The markdown representation of the {@code Instant} as a String.
      */
-    @NonNull
     public static String of(Instant instant) {
         return "<t:" + instant.getEpochSecond() + ">";
     }
@@ -61,7 +57,6 @@ public final class Timestamp {
      * @param instant the {@code Instant} to construct a timestamp with.
      * @return The markdown representation of the {@code Instant} as a String.
      */
-    @NonNull
     public static String shortTime(Instant instant) {
         return of(instant, "t");
     }
@@ -73,7 +68,6 @@ public final class Timestamp {
      * @param instant the {@code Instant} to construct a timestamp with.
      * @return The markdown representation of the {@code Instant} as a String.
      */
-    @NonNull
     public static String longTime(Instant instant) {
         return of(instant, "T");
     }
@@ -85,7 +79,6 @@ public final class Timestamp {
      * @param instant the {@code Instant} to construct a timestamp with.
      * @return The markdown representation of the {@code Instant} as a String.
      */
-    @NonNull
     public static String shortDate(Instant instant) {
         return of(instant, "d");
     }
@@ -97,7 +90,6 @@ public final class Timestamp {
      * @param instant the {@code Instant} to construct a timestamp with.
      * @return The markdown representation of the {@code Instant} as a String.
      */
-    @NonNull
     public static String longDate(Instant instant) {
         return of(instant, "D");
     }
@@ -109,7 +101,6 @@ public final class Timestamp {
      * @param instant the {@code Instant} to construct a timestamp with.
      * @return The markdown representation of the {@code Instant} as a String.
      */
-    @NonNull
     public static String shortDateTime(Instant instant) {
         return of(instant);
     }
@@ -121,7 +112,6 @@ public final class Timestamp {
      * @param instant the {@code Instant} to construct a timestamp with.
      * @return The markdown representation of the {@code Instant} as a String.
      */
-    @NonNull
     public static String longDateTime(Instant instant) {
         return of(instant, "F");
     }
@@ -133,7 +123,6 @@ public final class Timestamp {
      * @param instant the {@code Instant} to construct a timestamp with.
      * @return The markdown representation of the {@code Instant} as a String.
      */
-    @NonNull
     public static String relativeTime(Instant instant) {
         return of(instant, "R");
     }
