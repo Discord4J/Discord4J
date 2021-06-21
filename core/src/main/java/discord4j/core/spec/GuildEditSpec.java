@@ -25,7 +25,6 @@ import discord4j.rest.util.Image;
 import discord4j.common.util.Snowflake;
 import reactor.util.annotation.Nullable;
 
-import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
@@ -55,11 +54,22 @@ public class GuildEditSpec implements AuditSpec<GuildModifyRequest> {
     /**
      * Sets the voice region for the modified {@link Guild}.
      *
-     * @param region The voice region for the guild.
+     * @param regionId The voice region for the guild.
      * @return This spec.
      */
-    public GuildEditSpec setRegion(@Nullable Region region) {
-        requestBuilder.region(Possible.of(Optional.ofNullable(region).map(Region::getId)));
+    public GuildEditSpec setRegion(Region.Id regionId) {
+        requestBuilder.region(Possible.of(Optional.of(regionId).map(Region.Id::getValue)));
+        return this;
+    }
+
+    /**
+     * Sets the voice region for the modified {@link Guild}, automatic if null.
+     *
+     * @param regionId The voice region for the guild, automatic if null.
+     * @return This spec.
+     */
+    public GuildEditSpec setRegion(@Nullable String regionId) {
+        requestBuilder.region(Possible.of(Optional.ofNullable(regionId)));
         return this;
     }
 
