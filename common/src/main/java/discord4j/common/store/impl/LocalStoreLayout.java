@@ -482,21 +482,23 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
         long guildId = dispatch.guildId().asLong();
         long userId = dispatch.user().id().asLong();
         Long2 id = new Long2(guildId, userId);
-        return Mono.fromCallable(() -> ifNonNullMap(
-                members.computeIfPresent(id, (k, old) -> {
-                    AtomicReference<ImmutableUserData> ref = old.userRef();
-                    if (ref != null) {
-                        ref.set(ImmutableUserData.copyOf(dispatch.user()));
-                    }
-                    return new WithUser<>(ImmutableMemberData.builder()
-                            .from(old.get())
-                            .nick(dispatch.nick())
-                            .roles(dispatch.roles().stream().map(Id::of).collect(Collectors.toList()))
-                            .joinedAt(dispatch.joinedAt())
-                            .premiumSince(dispatch.premiumSince())
-                            .build(), ref, ImmutableMemberData::withUser);
-                }),
-                WithUser::get));
+        return Mono.fromCallable(() -> {
+            MemberData oldData = ifNonNullMap(members.get(id), WithUser::get);
+            members.computeIfPresent(id, (k, old) -> {
+                AtomicReference<ImmutableUserData> ref = old.userRef();
+                if (ref != null) {
+                    ref.set(ImmutableUserData.copyOf(dispatch.user()));
+                }
+                return new WithUser<>(ImmutableMemberData.builder()
+                        .from(old.get())
+                        .nick(dispatch.nick())
+                        .roles(dispatch.roles().stream().map(Id::of).collect(Collectors.toList()))
+                        .joinedAt(dispatch.joinedAt())
+                        .premiumSince(dispatch.premiumSince())
+                        .build(), ref, ImmutableMemberData::withUser);
+            });
+            return oldData;
+        });
     }
 
     @Override
@@ -526,11 +528,14 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
     @Override
     public Mono<GuildData> onGuildUpdate(int shardIndex, GuildUpdate dispatch) {
         long guildId = dispatch.guild().id().asLong();
-        return Mono.fromCallable(() ->
-                guilds.computeIfPresent(guildId, (k, oldGuild) -> GuildData.builder()
-                        .from(oldGuild)
-                        .from(dispatch.guild())
-                        .build()));
+        return Mono.fromCallable(() -> {
+            GuildData old = guilds.get(guildId);
+            guilds.computeIfPresent(guildId, (k, oldGuild) -> GuildData.builder()
+                    .from(oldGuild)
+                    .from(dispatch.guild())
+                    .build());
+            return old;
+        });
     }
 
     @Override
@@ -625,33 +630,36 @@ public class LocalStoreLayout implements StoreLayout, DataAccessor, GatewayDataU
         long channelId = edited.channelId().asLong();
         long messageId = edited.id().asLong();
         Long2 id = new Long2(channelId, messageId);
-        return Mono.fromCallable(() -> messages.computeIfPresent(id, (k, message) ->
-                message.update(m -> ImmutableMessageData.builder()
-                        .from(m)
-                        .channelId(edited.channelId())
-                        .guildId(edited.guildId())
-                        .content(edited.contentOrElse(m.content()))
-                        .timestamp(edited.timestampOrElse(m.timestamp()))
-                        .editedTimestamp(edited.editedTimestamp())
-                        .tts(edited.ttsOrElse(m.tts()))
-                        .mentionEveryone(edited.mentionEveryoneOrElse(m.mentionEveryone()))
-                        .mentions(edited.mentions())
-                        .mentionRoles(edited.mentionRoles())
-                        .mentionChannels(edited.mentionChannels())
-                        .attachments(edited.attachments())
-                        .embeds(edited.embeds())
-                        .nonce(edited.nonceOrElse(m.nonce()))
-                        .pinned(edited.pinnedOrElse(m.pinned()))
-                        .webhookId(edited.isWebhookIdPresent() ? edited.webhookId() : m.webhookId())
-                        .type(edited.typeOrElse(m.type()))
-                        .activity(edited.isActivityPresent() ? edited.activity() : m.activity())
-                        .application(edited.isApplicationPresent() ? edited.application() : m.application())
-                        .messageReference(edited.isMessageReferencePresent()
-                                ? edited.messageReference() : m.messageReference())
-                        .flags(edited.isFlagsPresent() ? edited.flags() : m.flags())
-                        .reactions(edited.isReactionsPresent() ? edited.reactions() : m.reactions())
-                        .build())))
-                .map(WithUser::get);
+        return Mono.fromCallable(() -> {
+            MessageData old = ifNonNullMap(messages.get(id), WithUser::get);
+            messages.computeIfPresent(id, (k, message) ->
+                    message.update(m -> ImmutableMessageData.builder()
+                            .from(m)
+                            .channelId(edited.channelId())
+                            .guildId(edited.guildId())
+                            .content(edited.contentOrElse(m.content()))
+                            .timestamp(edited.timestampOrElse(m.timestamp()))
+                            .editedTimestamp(edited.editedTimestamp())
+                            .tts(edited.ttsOrElse(m.tts()))
+                            .mentionEveryone(edited.mentionEveryoneOrElse(m.mentionEveryone()))
+                            .mentions(edited.mentions())
+                            .mentionRoles(edited.mentionRoles())
+                            .mentionChannels(edited.mentionChannels())
+                            .attachments(edited.attachments())
+                            .embeds(edited.embeds())
+                            .nonce(edited.nonceOrElse(m.nonce()))
+                            .pinned(edited.pinnedOrElse(m.pinned()))
+                            .webhookId(edited.isWebhookIdPresent() ? edited.webhookId() : m.webhookId())
+                            .type(edited.typeOrElse(m.type()))
+                            .activity(edited.isActivityPresent() ? edited.activity() : m.activity())
+                            .application(edited.isApplicationPresent() ? edited.application() : m.application())
+                            .messageReference(edited.isMessageReferencePresent()
+                                    ? edited.messageReference() : m.messageReference())
+                            .flags(edited.isFlagsPresent() ? edited.flags() : m.flags())
+                            .reactions(edited.isReactionsPresent() ? edited.reactions() : m.reactions())
+                            .build()));
+            return old;
+        });
     }
 
     @Override
