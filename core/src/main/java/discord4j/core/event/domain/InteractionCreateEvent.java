@@ -71,7 +71,7 @@ public class InteractionCreateEvent extends Event {
      * @return The id of the invoked command.
      */
     public Snowflake getCommandId() {
-        return Snowflake.of(getCommandInteractionData().id());
+        return Snowflake.of(getCommandInteractionData().id().toOptional().orElseThrow(IllegalStateException::new));
     }
 
     /**
@@ -80,7 +80,7 @@ public class InteractionCreateEvent extends Event {
      * @return The name of the invoked command.
      */
     public String getCommandName() {
-        return getCommandInteractionData().name();
+        return getCommandInteractionData().name().toOptional().orElseThrow(IllegalStateException::new);
     }
 
     private Mono<Void> createInteractionResponse(InteractionResponseData responseData) {
