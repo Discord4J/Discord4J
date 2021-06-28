@@ -120,6 +120,12 @@ public abstract class ReactionEmoji {
         return of(data.emoji());
     }
 
+    /**
+     * Constructs a {@code ReactionEmoji} from a {@link EmojiData} representation.
+     *
+     * @param data the {@link EmojiData} wrapper.
+     * @return a reaction emoji using the given information.
+     */
     public static ReactionEmoji of(EmojiData data) {
         if (data.id().isPresent()) {
             return custom(Snowflake.of(data.id().get()),
@@ -146,6 +152,13 @@ public abstract class ReactionEmoji {
     public Optional<Unicode> asUnicodeEmoji() {
         return this instanceof Unicode ? Optional.of((Unicode) this) : Optional.empty();
     }
+
+    /**
+     * Converts this {@code ReactionEmoji} to a {@link EmojiData}.
+     *
+     * @return An {@link EmojiData} for this emoji.
+     */
+    public abstract EmojiData asEmojiData();
 
     public static final class Custom extends ReactionEmoji {
 
@@ -187,6 +200,15 @@ public abstract class ReactionEmoji {
         }
 
         @Override
+        public EmojiData asEmojiData() {
+            return EmojiData.builder()
+                    .id(id)
+                    .name(name)
+                    .animated(isAnimated)
+                    .build();
+        }
+
+        @Override
         public String toString() {
             return "ReactionEmoji.Custom{" +
                     "id=" + id +
@@ -223,6 +245,13 @@ public abstract class ReactionEmoji {
 
         public String getRaw() {
             return raw;
+        }
+
+        @Override
+        public EmojiData asEmojiData() {
+            return EmojiData.builder()
+                    .name(raw)
+                    .build();
         }
 
         @Override

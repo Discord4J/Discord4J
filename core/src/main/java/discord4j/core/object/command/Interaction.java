@@ -89,15 +89,14 @@ public class Interaction implements DiscordObject {
         return Type.of(data.type());
     }
 
-    // TODO: docs
     /**
      * Gets the command data payload.
      *
      * @return The command data payload.
      */
-    public ApplicationCommandInteraction getCommandInteraction() {
-        return new ApplicationCommandInteraction(getClient(), data.data().get(),
-                getGuildId().map(Snowflake::asLong).orElse(null));
+    public Optional<ApplicationCommandInteraction> getCommandInteraction() {
+        return data.data().toOptional().map(data -> new ApplicationCommandInteraction(getClient(), data,
+                getGuildId().map(Snowflake::asLong).orElse(null)));
     }
 
     /**
@@ -165,6 +164,13 @@ public class Interaction implements DiscordObject {
         return data.token();
     }
 
+    /**
+     * Gets the message associated with the interaction.
+     * <p>
+     * This is only present for component interactions.
+     *
+     * @return The message associated with the interaction.
+     */
     public Optional<Message> getMessage() {
         return data.message().toOptional()
                 .map(data -> new Message(gateway, data));

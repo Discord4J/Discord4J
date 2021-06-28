@@ -18,7 +18,7 @@ package discord4j.core.spec;
 
 import discord4j.common.util.Snowflake;
 import discord4j.core.object.Embed;
-import discord4j.core.object.component.ActionRow;
+import discord4j.core.object.component.LayoutComponent;
 import discord4j.core.object.entity.Attachment;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.MessageChannel;
@@ -59,7 +59,7 @@ public class MessageCreateSpec implements Spec<MultipartRequest<MessageCreateReq
     private List<Tuple2<String, InputStream>> files;
     private AllowedMentionsData allowedMentionsData;
     private MessageReferenceData messageReferenceData;
-    private List<ActionRow> actionRows;
+    private List<LayoutComponent> components;
 
     /**
      * Sets the created {@link Message} contents, up to 2000 characters.
@@ -159,13 +159,25 @@ public class MessageCreateSpec implements Spec<MultipartRequest<MessageCreateReq
         return this;
     }
 
-    public MessageCreateSpec setActionRows(List<ActionRow> actionRows) {
-        this.actionRows = actionRows;
-        return this;
+    /**
+     * Sets the components of the message.
+     *
+     * @param components The message components.
+     * @return This spec.
+     */
+    public MessageCreateSpec setComponents(LayoutComponent... components) {
+        return setComponents(Arrays.asList(components));
     }
 
-    public MessageCreateSpec setActionRows(ActionRow... actionRows) {
-        return setActionRows(Arrays.asList(actionRows));
+    /**
+     * Sets the components of the message.
+     *
+     * @param components The message components.
+     * @return This spec.
+     */
+    public MessageCreateSpec setComponents(List<LayoutComponent> components) {
+        this.components = components;
+        return this;
     }
 
     @Override
@@ -177,8 +189,8 @@ public class MessageCreateSpec implements Spec<MultipartRequest<MessageCreateReq
                 .embed(embed == null ? Possible.absent() : Possible.of(embed))
                 .allowedMentions(allowedMentionsData == null ? Possible.absent() : Possible.of(allowedMentionsData))
                 .messageReference(messageReferenceData == null ? Possible.absent() : Possible.of(messageReferenceData))
-                .components(actionRows == null ? Possible.absent() :
-                        Possible.of(actionRows.stream().map(ActionRow::getData).collect(Collectors.toList())))
+                .components(components == null ? Possible.absent() :
+                        Possible.of(components.stream().map(LayoutComponent::getData).collect(Collectors.toList())))
                 .build();
         return MultipartRequest.ofRequestAndFiles(json, files == null ? Collections.emptyList() : files);
     }

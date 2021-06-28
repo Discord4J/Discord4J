@@ -18,13 +18,54 @@ package discord4j.core.object.component;
 
 import discord4j.discordjson.json.ComponentData;
 
-public interface MessageComponent {
+/**
+ * A Discord message component.
+ *
+ * @see <a href="https://discord.com/developers/docs/interactions/message-components#message-components">Message Components</a>
+ */
+public class MessageComponent {
 
-    Type getType();
+    /**
+     * Constructs a {@code MessageComponent} from raw data.
+     * <p>
+     * The correct subtype will be chosen based on the component's {@link Type}.
+     *
+     * @param data The raw component data.
+     * @return A component with the given data.
+     */
+    public static MessageComponent fromData(ComponentData data) {
+        switch (Type.of(data.type())) {
+            case ACTION_ROW: return new ActionRow(data);
+            case BUTTON: return new Button(data);
+            default: return new MessageComponent(data);
+        }
+    }
 
-    ComponentData getData();
+    private final ComponentData data;
 
-    enum Type {
+    MessageComponent(ComponentData data) {
+        this.data = data;
+    }
+
+    /**
+     * Gets the data of the component.
+     *
+     * @return The data of the component.
+     */
+    public ComponentData getData() {
+        return data;
+    }
+
+    /**
+     * Gets the type of the component.
+     *
+     * @return The type of the component.
+     */
+    public Type getType() {
+        return Type.of(data.type());
+    }
+
+    public enum Type {
         UNKNOWN(-1),
         ACTION_ROW(1),
         BUTTON(2);

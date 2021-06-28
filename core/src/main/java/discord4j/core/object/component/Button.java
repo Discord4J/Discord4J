@@ -18,55 +18,284 @@ package discord4j.core.object.component;
 
 import discord4j.core.object.reaction.ReactionEmoji;
 import discord4j.discordjson.json.ComponentData;
+import discord4j.discordjson.json.ImmutableComponentData;
+import reactor.util.annotation.Nullable;
 
 import java.util.Optional;
 
-public class Button implements MessageComponent {
+/**
+ * A message button.
+ *
+ * @see <a href="https://discord.com/developers/docs/interactions/message-components#buttons">Buttons</a>
+ */
+public class Button extends ActionComponent {
 
-    private final ComponentData data;
-
-    Button(ComponentData data) {
-        this.data = data;
+    /**
+     * Creates a {@link Button.Style#PRIMARY primary} button.
+     *
+     * @param customId A developer-defined identifier for the button.
+     * @param label The text that appears on the button.
+     * @return A button with the given data.
+     */
+    public static Button primary(String customId, String label) {
+        return of(Button.Style.PRIMARY, customId, null, label, null);
     }
 
+    /**
+     * Creates a {@link Button.Style#PRIMARY primary} button.
+     *
+     * @param customId A developer-defined identifier for the button.
+     * @param emoji The emoji that appears on the button.
+     * @return A button with the given data.
+     */
+    public static Button primary(String customId, ReactionEmoji emoji) {
+        return of(Button.Style.PRIMARY, customId, emoji, null, null);
+    }
+
+    /**
+     * Creates a {@link Button.Style#PRIMARY primary} button.
+     *
+     * @param customId A developer-defined identifier for the button.
+     * @param emoji The emoji that appears on the button.
+     * @param label The text that appears on the button.
+     * @return A button with the given data.
+     */
+    public static Button primary(String customId, ReactionEmoji emoji, String label) {
+        return of(Button.Style.PRIMARY, customId, emoji, label, null);
+    }
+
+    /**
+     * Creates a {@link Button.Style#SECONDARY secondary} button.
+     *
+     * @param customId A developer-defined identifier for the button.
+     * @param label The text that appears on the button.
+     * @return A button with the given data.
+     */
+    public static Button secondary(String customId, String label) {
+        return of(Button.Style.SECONDARY, customId, null, label, null);
+    }
+
+    /**
+     * Creates a {@link Button.Style#SECONDARY secondary} button.
+     *
+     * @param customId A developer-defined identifier for the button.
+     * @param emoji The emoji that appears on the button.
+     * @return A button with the given data.
+     */
+    public static Button secondary(String customId, ReactionEmoji emoji) {
+        return of(Button.Style.SECONDARY, customId, emoji, null, null);
+    }
+
+    /**
+     * Creates a {@link Button.Style#SECONDARY secondary} button.
+     *
+     * @param customId A developer-defined identifier for the button.
+     * @param emoji The emoji that appears on the button.
+     * @param label The text that appears on the button.
+     * @return A button with the given data.
+     */
+    public static Button secondary(String customId, ReactionEmoji emoji, String label) {
+        return of(Button.Style.SECONDARY, customId, emoji, label, null);
+    }
+
+    /**
+     * Creates a {@link Button.Style#SUCCESS success} button.
+     *
+     * @param customId A developer-defined identifier for the button.
+     * @param label The text that appears on the button.
+     * @return A button with the given data.
+     */
+    public static Button success(String customId, String label) {
+        return of(Button.Style.SUCCESS, customId, null, label, null);
+    }
+
+    /**
+     * Creates a {@link Button.Style#SUCCESS success} button.
+     *
+     * @param customId A developer-defined identifier for the button.
+     * @param emoji The emoji that appears on the button.
+     * @return A button with the given data.
+     */
+    public static Button success(String customId, ReactionEmoji emoji) {
+        return of(Button.Style.SUCCESS, customId, emoji, null, null);
+    }
+
+    /**
+     * Creates a {@link Button.Style#SUCCESS success} button.
+     *
+     * @param customId A developer-defined identifier for the button.
+     * @param emoji The emoji that appears on the button.
+     * @param label The text that appears on the button.
+     * @return A button with the given data.
+     */
+    public static Button success(String customId, ReactionEmoji emoji, String label) {
+        return of(Button.Style.SUCCESS, customId, emoji, label, null);
+    }
+
+    /**
+     * Creates a {@link Button.Style#DANGER danger} button.
+     *
+     * @param customId A developer-defined identifier for the button.
+     * @param label The text that appears on the button.
+     * @return A button with the given data.
+     */
+    public static Button danger(String customId, String label) {
+        return of(Button.Style.DANGER, customId, null, label, null);
+    }
+
+    /**
+     * Creates a {@link Button.Style#DANGER danger} button.
+     *
+     * @param customId A developer-defined identifier for the button.
+     * @param emoji The emoji that appears on the button.
+     * @return A button with the given data.
+     */
+    public static Button danger(String customId, ReactionEmoji emoji) {
+        return of(Button.Style.DANGER, customId, emoji, null, null);
+    }
+
+    /**
+     * Creates a {@link Button.Style#DANGER danger} button.
+     *
+     * @param customId A developer-defined identifier for the button.
+     * @param emoji The emoji that appears on the button.
+     * @param label The text that appears on the button.
+     * @return A button with the given data.
+     */
+    public static Button danger(String customId, ReactionEmoji emoji, String label) {
+        return of(Button.Style.DANGER, customId, emoji, label, null);
+    }
+
+    /**
+     * Creates a {@link Button.Style#LINK link} button.
+     *
+     * @param url The url to navigate to when clicked.
+     * @param label The text that appears on the button.
+     * @return A button with the given data.
+     */
+    public static Button link(String url, String label) {
+        return of(Button.Style.LINK, null, null, label, url);
+    }
+
+    /**
+     * Creates a {@link Button.Style#LINK link} button.
+     *
+     * @param url The url to navigate to when clicked.
+     * @param emoji The emoji that appears on the button.
+     * @return A button with the given data.
+     */
+    public static Button link(String url, ReactionEmoji emoji) {
+        return of(Button.Style.LINK, null, emoji, null, url);
+    }
+
+    /**
+     * Creates a {@link Button.Style#LINK link} button.
+     *
+     * @param url The url to navigate to when clicked.
+     * @param emoji The emoji that appears on the button.
+     * @param label The text that appears on the button.
+     * @return A button with the given data.
+     */
+    public static Button link(String url, ReactionEmoji emoji, String label) {
+        return of(Button.Style.LINK, null, emoji, label, url);
+    }
+
+    private static Button of(Style style, @Nullable String customId, @Nullable ReactionEmoji emoji, @Nullable String label, @Nullable String url) {
+        ImmutableComponentData.Builder builder = ComponentData.builder()
+                .type(MessageComponent.Type.BUTTON.getValue())
+                .style(style.getValue());
+
+        if (customId != null)
+            builder.customId(customId);
+
+        if (emoji != null)
+            builder.emoji(emoji.asEmojiData());
+
+        if (label != null)
+            builder.label(label);
+
+        if (url != null)
+            builder.url(url);
+
+        return new Button(builder.build());
+    }
+
+    Button(ComponentData data) {
+        super(data);
+    }
+
+    /**
+     * Gets the button's style.
+     *
+     * @return The button's style.
+     */
     public Style getStyle() {
-        return data.style().toOptional()
+        return getData().style().toOptional()
                 .map(Style::of)
                 .orElseThrow(IllegalStateException::new); // style should always be present on buttons
     }
 
+    /**
+     * Gets button's label.
+     *
+     * @return The button's label.
+     */
     public Optional<String> getLabel() {
-        return data.label().toOptional();
+        return getData().label().toOptional();
     }
 
+    /**
+     * Gets the button's emoji.
+     *
+     * @return The button's emoji.
+     */
     public Optional<ReactionEmoji> getEmoji() {
-        return data.emoji().toOptional()
+        return getData().emoji().toOptional()
                 .map(ReactionEmoji::of);
     }
 
+    /**
+     * Gets the button's custom id.
+     *
+     * @return The button's custom id.
+     */
     public Optional<String> getCustomId() {
-        return data.customId().toOptional();
+        return getData().customId().toOptional();
     }
 
+    /**
+     * Gets the button's url.
+     *
+     * @return The button's url.
+     */
     public Optional<String> getUrl() {
-        return data.url().toOptional();
+        return getData().url().toOptional();
     }
 
+    /**
+     * Gets whether button is disabled.
+     *
+     * @return Whether the button is disabled.
+     */
     public boolean isDisabled() {
-        return data.disabled().toOptional().orElse(false);
+        return getData().disabled().toOptional().orElse(false);
     }
 
-    @Override
-    public Type getType() {
-        return Type.BUTTON;
+    /**
+     * Creates a new button with the same data as this one, but disabled.
+     *
+     * @return A new disabled button with the same data as this one.
+     */
+    public Button disabled() {
+        return new Button(ComponentData.builder().from(getData()).disabled(true).build());
     }
 
-    @Override
-    public ComponentData getData() {
-        return data;
-    }
-
-    enum Style {
+    /**
+     * A button's style is what determines its color and whether it has a custom id or a url.
+     *
+     * @see <a href="https://discord.com/developers/docs/interactions/message-components#buttons-button-styles">Button Styles</a>
+     */
+    public enum Style {
         UNKNOWN(-1),
         PRIMARY(1),
         SECONDARY(2),

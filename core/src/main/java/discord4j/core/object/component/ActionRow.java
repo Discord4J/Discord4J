@@ -22,36 +22,37 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class ActionRow implements MessageComponent {
+/**
+ * A row of {@link ActionComponent action components}.
+ *
+ * @see <a href="https://discord.com/developers/docs/interactions/message-components#actionrow">ActionRow</a>
+ */
+public class ActionRow extends LayoutComponent {
 
-    private final List<MessageComponent> components;
-
-    public static ActionRow of(MessageComponent... components) {
+    /**
+     * Creates an {@code ActionRow} with the given components.
+     *
+     * @param components The child components of the row.
+     * @return An {@code ActionRow} containing the given components.
+     */
+    public static ActionRow of(ActionComponent... components) {
         return of(Arrays.asList(components));
     }
 
-    public static ActionRow of(List<MessageComponent> components) {
-        return new ActionRow(components);
-    }
-
-    private ActionRow(List<MessageComponent> components) {
-        this.components = components;
-    }
-
-    public List<MessageComponent> getComponents() {
-        return components;
-    }
-
-    @Override
-    public Type getType() {
-        return Type.ACTION_ROW;
-    }
-
-    @Override
-    public ComponentData getData() {
-        return ComponentData.builder()
+    /**
+     * Creates an {@code ActionRow} with the given components.
+     *
+     * @param components The child components of the row.
+     * @return An {@code ActionRow} containing the given components.
+     */
+    public static ActionRow of(List<? extends ActionComponent> components) {
+        return new ActionRow(ComponentData.builder()
                 .type(Type.ACTION_ROW.getValue())
                 .components(components.stream().map(MessageComponent::getData).collect(Collectors.toList()))
-                .build();
+                .build());
+    }
+
+    ActionRow(ComponentData data) {
+        super(data);
     }
 }
