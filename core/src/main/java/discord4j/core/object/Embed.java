@@ -41,7 +41,7 @@ public final class Embed implements DiscordObject {
     public static final int MAX_TITLE_LENGTH = 256;
 
     /** The maximum amount of characters that can be in an embed description. */
-    public static final int MAX_DESCRIPTION_LENGTH = 2048;
+    public static final int MAX_DESCRIPTION_LENGTH = 4096;
 
     /** The maximum amount of fields that can be appended to an embed. */
     public static final int MAX_FIELDS = 25;
