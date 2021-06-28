@@ -16,15 +16,16 @@
  */
 package discord4j.core.spec;
 
+import discord4j.common.util.Snowflake;
 import discord4j.core.object.Region;
 import discord4j.core.object.entity.Guild;
 import discord4j.discordjson.json.GuildModifyRequest;
 import discord4j.discordjson.json.ImmutableGuildModifyRequest;
 import discord4j.discordjson.possible.Possible;
 import discord4j.rest.util.Image;
-import discord4j.common.util.Snowflake;
 import reactor.util.annotation.Nullable;
 
+import java.util.Arrays;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
@@ -200,9 +201,28 @@ public class GuildEditSpec implements AuditSpec<GuildModifyRequest> {
      *
      * @param flag The system channel flags.
      * @return This spec.
+     * @deprecated use {@link #setSystemChannelFlags(Guild.SystemChannelFlag...)}
      */
-    public GuildEditSpec setSystemChannelFlags(Guild.SystemChannelFlag flag) {
-        requestBuilder.systemChannelFlags(flag.getValue());
+    @Deprecated
+    public GuildEditSpec setSystemChannelFlags(@Nullable Guild.SystemChannelFlag flag) {
+        requestBuilder.systemChannelFlags(flag == null ? Possible.absent() : Possible.of(flag.getValue()));
+        return this;
+    }
+
+    /**
+     * Sets the system channel flags.
+     *
+     * @param flags The system channel flags.
+     * @return This spec.
+     */
+    public GuildEditSpec setSystemChannelFlags(@Nullable Guild.SystemChannelFlag... flags) {
+        if (flags != null) {
+            requestBuilder.systemChannelFlags(Possible.of(Arrays.stream(flags)
+                    .mapToInt(Guild.SystemChannelFlag::getValue)
+                    .reduce(0, (left, right) -> left | right)));
+        } else {
+            requestBuilder.systemChannelFlags(Possible.absent());
+        }
         return this;
     }
 

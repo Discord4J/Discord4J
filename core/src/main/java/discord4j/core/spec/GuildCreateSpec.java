@@ -16,17 +16,21 @@
  */
 package discord4j.core.spec;
 
+import discord4j.common.util.Snowflake;
 import discord4j.core.object.Region;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.channel.Channel;
+import discord4j.discordjson.Id;
 import discord4j.discordjson.json.GuildCreateRequest;
 import discord4j.discordjson.json.ImmutableGuildCreateRequest;
 import discord4j.discordjson.json.PartialChannelCreateRequest;
 import discord4j.discordjson.json.RoleCreateRequest;
+import discord4j.discordjson.possible.Possible;
 import discord4j.rest.util.Image;
 import reactor.util.annotation.Nullable;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -75,7 +79,7 @@ public class GuildCreateSpec implements Spec<GuildCreateRequest> {
      * @return This spec.
      */
     public GuildCreateSpec setRegion(@Nullable String regionId) {
-        builder.region(regionId);
+        builder.region(regionId == null ? Possible.absent() : Possible.of(regionId));
         return this;
     }
 
@@ -86,7 +90,7 @@ public class GuildCreateSpec implements Spec<GuildCreateRequest> {
      * @return This spec.
      */
     public GuildCreateSpec setIcon(@Nullable Image icon) {
-        builder.icon(icon == null ? null : icon.getDataUri());
+        builder.icon(icon == null ? Possible.absent() : Possible.of(icon.getDataUri()));
         return this;
     }
 
@@ -96,8 +100,9 @@ public class GuildCreateSpec implements Spec<GuildCreateRequest> {
      * @param verificationLevel The verification level for the guild.
      * @return This spec.
      */
-    public GuildCreateSpec setVerificationLevel(Guild.VerificationLevel verificationLevel) {
-        builder.verificationLevel(verificationLevel.getValue());
+    public GuildCreateSpec setVerificationLevel(@Nullable Guild.VerificationLevel verificationLevel) {
+        builder.verificationLevel(verificationLevel == null ?
+                Possible.absent() : Possible.of(verificationLevel.getValue()));
         return this;
     }
 
@@ -107,8 +112,9 @@ public class GuildCreateSpec implements Spec<GuildCreateRequest> {
      * @param notificationLevel The default notification level for the guild.
      * @return This spec.
      */
-    public GuildCreateSpec setDefaultMessageNotificationLevel(Guild.NotificationLevel notificationLevel) {
-        builder.defaultMessageNotifications(notificationLevel.getValue());
+    public GuildCreateSpec setDefaultMessageNotificationLevel(@Nullable Guild.NotificationLevel notificationLevel) {
+        builder.defaultMessageNotifications(notificationLevel == null ?
+                Possible.absent() : Possible.of(notificationLevel.getValue()));
         return this;
     }
 
@@ -118,8 +124,9 @@ public class GuildCreateSpec implements Spec<GuildCreateRequest> {
      * @param explicitContentFilter The explicit content filter level for the guild.
      * @return This spec.
      */
-    public GuildCreateSpec setExplicitContentFilter(Guild.ContentFilterLevel explicitContentFilter) {
-        builder.explicitContentFilter(explicitContentFilter.getValue());
+    public GuildCreateSpec setExplicitContentFilter(@Nullable Guild.ContentFilterLevel explicitContentFilter) {
+        builder.explicitContentFilter(explicitContentFilter == null ?
+                Possible.absent() : Possible.of(explicitContentFilter.getValue()));
         return this;
     }
 
@@ -165,6 +172,57 @@ public class GuildCreateSpec implements Spec<GuildCreateRequest> {
                 .name(name)
                 .type(type.getValue())
                 .build());
+        return this;
+    }
+
+    /**
+     * Sets the ID of the AFK channel for the created {@link Guild}.
+     *
+     * @param id id for afk channel
+     * @return This spec.
+     */
+    public GuildCreateSpec setAfkChannelId(@Nullable Snowflake id) {
+        builder.afkChannelId(id == null ? Possible.absent() : Possible.of(Id.of(id.asLong())));
+        return this;
+    }
+
+    /**
+     * Sets the AFK timeout, in seconds, for the created {@link Guild}.
+     *
+     * @param afkTimeout The AFK timeout, in seconds.
+     * @return This spec.
+     */
+    public GuildCreateSpec setAfkTimeout(@Nullable Integer afkTimeout) {
+        builder.afkTimeout(afkTimeout == null ? Possible.absent() : Possible.of(afkTimeout));
+        return this;
+    }
+
+    /**
+     * Sets the id of the channel where guild notices such as welcome messages and boost events are posted for the
+     * created {@link Guild}.
+     *
+     * @param id The id of the channel where guild notices such as welcome messages and boost events are posted.
+     * @return This spec.
+     */
+    public GuildCreateSpec setSystemChannelId(@Nullable Snowflake id) {
+        builder.systemChannelId(id == null ? Possible.absent() : Possible.of(Id.of(id.asLong())));
+        return this;
+    }
+
+    /**
+     * Sets the system channel flags for the created {@link Guild}.
+     *
+     * @param flags The system channel flags.
+     * @return This spec.
+     */
+    public GuildCreateSpec setSystemChannelFlags(@Nullable Guild.SystemChannelFlag... flags) {
+        if (flags != null) {
+            builder.systemChannelFlags(Possible.of(Arrays.stream(flags)
+                    .mapToInt(Guild.SystemChannelFlag::getValue)
+                    .reduce(0, (left, right) -> left | right)));
+        } else {
+            builder.systemChannelFlags(Possible.absent());
+        }
         return this;
     }
 

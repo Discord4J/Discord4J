@@ -70,7 +70,7 @@ public class ApplicationCommandInteraction implements DiscordObject {
      * @return The id of the invoked command.
      */
     public Snowflake getId() {
-        return Snowflake.of(data.id());
+        return Snowflake.of(data.id().toOptional().orElseThrow(IllegalStateException::new));
     }
 
     /**
@@ -79,7 +79,7 @@ public class ApplicationCommandInteraction implements DiscordObject {
      * @return The name of the invoked command.
      */
     public String getName() {
-        return data.name();
+        return data.name().toOptional().orElseThrow(IllegalStateException::new);
     }
 
     /**
