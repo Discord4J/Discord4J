@@ -289,6 +289,16 @@ public class Button extends ActionComponent {
     public Button disabled() {
         return new Button(ComponentData.builder().from(getData()).disabled(true).build());
     }
+    
+    /**
+     * Creates a new button with the same data as this one, but depending on the value param it may be disabled or not.
+     *
+     * @return A new possibly disabled button with the same data as this one.
+     * @param value True if the button should be disabled otherwise False.  
+     */
+    public Button disabled(boolean value) {
+        return new Button(ComponentData.builder().from(getData()).disabled(value).build());
+    }
 
     /**
      * A button's style is what determines its color and whether it has a custom id or a url.
