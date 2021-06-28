@@ -293,8 +293,8 @@ public class Button extends ActionComponent {
     /**
      * Creates a new button with the same data as this one, but depending on the value param it may be disabled or not.
      *
-     * @return A new possibly disabled button with the same data as this one.
      * @param value True if the button should be disabled otherwise False.  
+     * @return A new possibly disabled button with the same data as this one.
      */
     public Button disabled(boolean value) {
         return new Button(ComponentData.builder().from(getData()).disabled(value).build());
