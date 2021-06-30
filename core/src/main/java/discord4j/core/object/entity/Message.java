@@ -22,6 +22,7 @@ import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.Embed;
 import discord4j.core.object.MessageInteraction;
 import discord4j.core.object.MessageReference;
+import discord4j.core.object.component.MessageComponent;
 import discord4j.core.object.entity.channel.GuildChannel;
 import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.core.object.reaction.Reaction;
@@ -481,6 +482,14 @@ public final class Message implements Entity {
     public Optional<MessageInteraction> getInteraction() {
         return data.interaction().toOptional()
                 .map(data -> new MessageInteraction(gateway, data));
+    }
+
+    public List<MessageComponent> getComponents() {
+        return data.components().toOptional()
+                .map(components -> components.stream()
+                    .map(MessageComponent::fromData)
+                    .collect(Collectors.toList()))
+                .orElse(Collections.emptyList());
     }
 
     /**
