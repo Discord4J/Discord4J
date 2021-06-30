@@ -70,6 +70,26 @@ public interface InteractionResponse {
     Mono<MessageData> createFollowupMessage(MultipartRequest<WebhookExecuteRequest> request);
 
     /**
+     * Create a new ephemeral followup message with the given content. This uses a webhook tied to the interaction ID
+     * and token.
+     *
+     * @param content the text content included in the followup
+     * @return a {@link Mono} where, upon successful completion, emits the sent message. If an error is received,
+     * it is emitted through the {@code Mono}.
+     */
+    Mono<MessageData> createFollowupMessageEphemeral(String content);
+
+    /**
+     * Create a new ephemeral followup message using the provided request. This uses a webhook tied to the interaction
+     * ID and token.
+     *
+     * @param request the message request to be sent as followup
+     * @return a {@link Mono} where, upon successful completion, emits the sent message. If an error is received,
+     * it is emitted through the {@code Mono}.
+     */
+    Mono<MessageData> createFollowupMessageEphemeral(MultipartRequest<WebhookExecuteRequest> request);
+
+    /**
      * Modify the given message by ID using the provided request. This uses a webhook tied to the interaction ID and
      * token.
      *

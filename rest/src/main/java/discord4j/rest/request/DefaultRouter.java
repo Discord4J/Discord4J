@@ -24,8 +24,11 @@ import reactor.core.publisher.Sinks;
 import reactor.util.Logger;
 import reactor.util.Loggers;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static reactor.core.publisher.Sinks.EmitFailureHandler.FAIL_FAST;
 
@@ -37,11 +40,15 @@ public class DefaultRouter implements Router {
 
     private static final Logger log = Loggers.getLogger(DefaultRouter.class);
     private static final ResponseHeaderStrategy HEADER_STRATEGY = new ResponseHeaderStrategy();
+    private static final Duration HOUSE_KEEPING_PERIOD = Duration.ofSeconds(30);
 
     private final ReactorResources reactorResources;
     private final DiscordWebClient httpClient;
     private final Map<BucketKey, RequestStream> streamMap = new ConcurrentHashMap<>();
     private final RouterOptions routerOptions;
+
+    private final AtomicBoolean isHousekeeping = new AtomicBoolean(false);
+    private volatile Instant lastHousekeepingTime = Instant.EPOCH;
 
     /**
      * Create a Discord API bucket-aware {@link Router} configured with the given options.
@@ -60,26 +67,66 @@ public class DefaultRouter implements Router {
     public DiscordWebResponse exchange(DiscordWebRequest request) {
         return new DiscordWebResponse(Mono.deferContextual(
                 ctx -> {
-                    RequestStream stream = getStream(request);
                     Sinks.One<ClientResponse> callback = Sinks.one();
-                    if (!stream.push(new RequestCorrelation<>(request, callback, ctx))) {
-                        callback.emitError(new DiscardedRequestException(request), FAIL_FAST);
-                    }
+                    housekeepIfNecessary();
+                    BucketKey bucketKey = BucketKey.of(request);
+                    streamMap.compute(bucketKey, (key, value) -> {
+                        RequestStream stream = value != null ? value : createStream(key, request);
+                        if (!stream.push(new RequestCorrelation<>(request, callback, ctx))) {
+                            callback.emitError(new DiscardedRequestException(request), FAIL_FAST);
+                        }
+                        return stream;
+                    });
                     return callback.asMono();
                 })
                 .checkpoint("Request to " + request.getDescription() + " [DefaultRouter]"), reactorResources);
     }
 
-    private RequestStream getStream(DiscordWebRequest request) {
-        return streamMap.computeIfAbsent(BucketKey.of(request),
-                k -> {
+    private RequestStream createStream(BucketKey bucketKey, DiscordWebRequest request) {
+        if (log.isTraceEnabled()) {
+            log.trace("Creating RequestStream with key {} for request: {} -> {}",
+                bucketKey, request.getRoute().getUriTemplate(), request.getCompleteUri());
+        }
+        RequestStream stream = new RequestStream(bucketKey, routerOptions, httpClient, HEADER_STRATEGY);
+        stream.start();
+        return stream;
+    }
+
+    private void housekeepIfNecessary() {
+        Instant now = Instant.now();
+        if (lastHousekeepingTime.plus(HOUSE_KEEPING_PERIOD).isAfter(now)) {
+            return;
+        }
+
+        tryHousekeep(now);
+    }
+
+    private void tryHousekeep(Instant now) {
+        if (isHousekeeping.compareAndSet(false, true)) {
+            try {
+                doHousekeep(now);
+            } finally {
+                lastHousekeepingTime = Instant.now();
+                isHousekeeping.set(false);
+            }
+        }
+    }
+
+    private void doHousekeep(Instant now) {
+        streamMap.keySet().forEach(key ->
+            streamMap.compute(key, (bucketKey , stream) -> {
+                if (stream == null) {
+                    return null;
+                }
+                if (stream.getResetAt().isBefore(now) && stream.countRequestsInFlight() < 1) {
                     if (log.isTraceEnabled()) {
-                        log.trace("Creating RequestStream with key {} for request: {} -> {}",
-                                k, request.getRoute().getUriTemplate(), request.getCompleteUri());
+                        log.trace("Evicting RequestStream with bucket ID {}", bucketKey);
                     }
-                    RequestStream stream = new RequestStream(k, routerOptions, httpClient, HEADER_STRATEGY);
-                    stream.start();
-                    return stream;
-                });
+                    stream.stop();
+                    return null;
+                }
+                return stream;
+            })
+        );
     }
 }

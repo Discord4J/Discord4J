@@ -23,7 +23,10 @@ import discord4j.rest.http.client.ClientResponse;
 import discord4j.rest.http.client.DiscordWebClient;
 import discord4j.rest.response.ResponseFunction;
 import org.reactivestreams.Subscription;
-import reactor.core.publisher.*;
+import reactor.core.publisher.BaseSubscriber;
+import reactor.core.publisher.Mono;
+import reactor.core.publisher.SignalType;
+import reactor.core.publisher.Sinks;
 import reactor.core.scheduler.Scheduler;
 import reactor.netty.http.client.HttpClientResponse;
 import reactor.util.Logger;
@@ -33,6 +36,7 @@ import reactor.util.retry.Retry;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
 
 import static discord4j.common.LogUtil.format;
@@ -57,8 +61,10 @@ class RequestStream {
     private final Scheduler timedTaskScheduler;
     private final List<ResponseFunction> responseFunctions;
     private final DiscordWebClient httpClient;
-    private final RateLimitStrategy rateLimitStrategy;
+    private final RequestSubscriber requestSubscriber;
     private final RateLimitRetryOperator rateLimitRetryOperator;
+    private final AtomicLong requestsInFlight = new AtomicLong(0);
+    private final Sinks.Empty<?> stopCallback = Sinks.empty();
 
     RequestStream(BucketKey id, RouterOptions routerOptions, DiscordWebClient httpClient,
                   RateLimitStrategy rateLimitStrategy) {
@@ -68,7 +74,7 @@ class RequestStream {
         this.timedTaskScheduler = routerOptions.getReactorResources().getTimerTaskScheduler();
         this.responseFunctions = routerOptions.getResponseTransformers();
         this.httpClient = httpClient;
-        this.rateLimitStrategy = rateLimitStrategy;
+        this.requestSubscriber = new RequestSubscriber(rateLimitStrategy, requestsInFlight::decrementAndGet);
         this.rateLimitRetryOperator = new RateLimitRetryOperator(timedTaskScheduler);
     }
 
@@ -90,16 +96,41 @@ class RequestStream {
     }
 
     boolean push(RequestCorrelation<ClientResponse> request) {
-        return requestQueue.push(request);
+        requestsInFlight.incrementAndGet();
+        boolean accepted = requestQueue.push(request);
+        if (!accepted) {
+            requestsInFlight.decrementAndGet();
+        }
+        return accepted;
     }
 
     void start() {
         requestQueue.requests()
                 .doOnDiscard(RequestCorrelation.class, this::onDiscard)
-                .subscribe(new RequestSubscriber(rateLimitStrategy));
+                .takeUntilOther(stopCallback.asMono())
+                .subscribe(requestSubscriber);
+    }
+
+    void stop() {
+        stopCallback.emitEmpty(FAIL_FAST);
+    }
+
+    /**
+     * If we exhausted ratelimits, this holds the point-in-time when the ratelimits will reset again.
+     */
+    Instant getResetAt() {
+        return requestSubscriber.getResetAt();
+    }
+
+    /**
+     * @return the sum of requests still in the queue, as well as any potential request being processed or waiting for ratelimits to reset
+     */
+    long countRequestsInFlight() {
+        return requestsInFlight.get();
     }
 
     private void onDiscard(RequestCorrelation<?> requestCorrelation) {
+        requestsInFlight.decrementAndGet();
         requestCorrelation.getResponse()
                 .emitError(new DiscardedRequestException(requestCorrelation.getRequest()), FAIL_FAST);
     }
@@ -111,10 +142,16 @@ class RequestStream {
      */
     private class RequestSubscriber extends BaseSubscriber<RequestCorrelation<ClientResponse>> {
 
-        private volatile Duration sleepTime = Duration.ZERO;
+        private volatile Instant resetAt = Instant.EPOCH;
         private final Function<ClientResponse, Mono<ClientResponse>> responseFunction;
+        private final Runnable processedCallback;
 
-        public RequestSubscriber(RateLimitStrategy strategy) {
+        public Instant getResetAt() {
+            return resetAt;
+        }
+
+        public RequestSubscriber(RateLimitStrategy strategy, Runnable processedCallback) {
+            this.processedCallback = processedCallback;
             this.responseFunction = response -> {
                 HttpClientResponse httpResponse = response.getHttpResponse();
                 if (log.isDebugEnabled()) {
@@ -125,12 +162,12 @@ class RequestStream {
                             "Read " + httpResponse.status() + " in " + responseTime + (!trace ? "" :
                                     " with headers: " + httpResponse.responseHeaders())));
                 }
-                Duration nextReset = strategy.apply(httpResponse);
-                if (!nextReset.isZero()) {
+                Duration resetAfter = strategy.apply(httpResponse);
+                if (!resetAfter.isZero()) {
                     if (log.isDebugEnabled()) {
-                        log.debug(format(httpResponse.currentContextView(), "Delaying next request by {}"), nextReset);
+                        log.debug(format(httpResponse.currentContextView(), "Delaying next request by {}"), resetAfter);
                     }
-                    sleepTime = nextReset;
+                    resetAt = Instant.now().plus(resetAfter);
                 }
                 boolean global = Boolean.parseBoolean(httpResponse.responseHeaders().get("X-RateLimit-Global"));
                 Mono<Void> action = Mono.empty();
@@ -192,14 +229,21 @@ class RequestStream {
         }
 
         private void next(SignalType signal) {
-            Mono<Long> timer = sleepTime.isZero() ? Mono.just(0L) : Mono.delay(sleepTime, timedTaskScheduler);
-            timer.subscribe(l -> {
-                if (log.isDebugEnabled()) {
-                    log.debug("[B:{}] Ready to consume next request after {}", id.toString(), signal);
-                }
-                sleepTime = Duration.ZERO;
-                request(1);
-            }, t -> log.error("[B:{}] Error while scheduling next request", id.toString(), t));
+            Duration wait = Duration.between(Instant.now(), resetAt);
+            Mono<Long> timer = wait.isNegative() || wait.isZero() ? Mono.just(0L) : Mono.delay(wait, timedTaskScheduler);
+            timer
+                .doFinally(__ -> processedCallback.run())
+                .subscribe(l -> {
+                    if (log.isDebugEnabled()) {
+                        log.debug("[B:{}] Ready to consume next request after {}", id.toString(), signal);
+                    }
+                    request(1);
+                }, t -> log.error("[B:{}] Error while scheduling next request", id.toString(), t));
+        }
+
+        @Override
+        protected void hookOnComplete() {
+            log.debug("[B:{}] RequestStream completed", id.toString());
         }
     }
 }

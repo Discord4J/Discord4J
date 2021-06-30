@@ -14,24 +14,10 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J. If not, see <http://www.gnu.org/licenses/>.
  */
+/**
+ * Common classes and utilities used across modules.
+ */
+@NonNullApi
+package discord4j.common.util;
 
-package discord4j.rest.request;
-
-import io.netty.handler.codec.http.HttpHeaders;
-import reactor.netty.http.client.HttpClientResponse;
-
-import java.time.Duration;
-
-public class ResponseHeaderStrategy implements RateLimitStrategy {
-
-    @Override
-    public Duration apply(HttpClientResponse response) {
-        HttpHeaders headers = response.responseHeaders();
-        int remaining = headers.getInt("X-RateLimit-Remaining", -1);
-        if (remaining == 0) {
-            long resetAfter = (long) (Double.parseDouble(headers.get("X-RateLimit-Reset-After")) * 1000);
-            return Duration.ofMillis(resetAfter);
-        }
-        return Duration.ZERO;
-    }
-}
+import reactor.util.annotation.NonNullApi;

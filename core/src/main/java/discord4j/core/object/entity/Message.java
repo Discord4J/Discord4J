@@ -316,14 +316,14 @@ public final class Message implements Entity {
     }
 
     /**
-     * Gets any attached files.
+     * Gets any attached files, with the same order as in the message.
      *
-     * @return Any attached files.
+     * @return Any attached files, with the same order as in the message.
      */
-    public Set<Attachment> getAttachments() {
+    public List<Attachment> getAttachments() {
         return data.attachments().stream()
                 .map(data -> new Attachment(gateway, data))
-                .collect(Collectors.toSet());
+                .collect(Collectors.toList());
     }
 
     /**
