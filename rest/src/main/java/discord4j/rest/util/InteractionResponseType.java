@@ -33,7 +33,17 @@ public enum InteractionResponseType {
     /**
      * ACK an interaction and send a response later, the user sees a loading state
      */
-    DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE(5);
+    DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE(5),
+
+    /**
+     * For components, ACK an interaction and edit the original message later; the user does not see a loading state
+     */
+    DEFERRED_UPDATE_MESSAGE(6),
+
+    /**
+     * For components, edit the message the component was attached to
+     */
+    UPDATE_MESSAGE(7);
 
     /**
      * The underlying value as represented by Discord.
@@ -70,6 +80,8 @@ public enum InteractionResponseType {
             case 1: return PONG;
             case 4: return CHANNEL_MESSAGE_WITH_SOURCE;
             case 5: return DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE;
+            case 6: return DEFERRED_UPDATE_MESSAGE;
+            case 7: return UPDATE_MESSAGE;
             default: return UNKNOWN;
         }
     }

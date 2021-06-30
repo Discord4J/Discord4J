@@ -18,6 +18,7 @@ package discord4j.core.spec;
 
 import discord4j.common.util.Snowflake;
 import discord4j.core.object.Embed;
+import discord4j.core.object.component.LayoutComponent;
 import discord4j.core.object.entity.Attachment;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.channel.MessageChannel;
@@ -35,9 +36,11 @@ import reactor.util.function.Tuples;
 
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 /**
  * Spec used to create {@link Message Messages} to {@link MessageChannel MessageChannels}. Clients using this spec must
@@ -56,6 +59,7 @@ public class MessageCreateSpec implements Spec<MultipartRequest<MessageCreateReq
     private List<Tuple2<String, InputStream>> files;
     private AllowedMentionsData allowedMentionsData;
     private MessageReferenceData messageReferenceData;
+    private List<LayoutComponent> components;
 
     /**
      * Sets the created {@link Message} contents, up to 2000 characters.
@@ -155,6 +159,27 @@ public class MessageCreateSpec implements Spec<MultipartRequest<MessageCreateReq
         return this;
     }
 
+    /**
+     * Sets the components of the message.
+     *
+     * @param components The message components.
+     * @return This spec.
+     */
+    public MessageCreateSpec setComponents(LayoutComponent... components) {
+        return setComponents(Arrays.asList(components));
+    }
+
+    /**
+     * Sets the components of the message.
+     *
+     * @param components The message components.
+     * @return This spec.
+     */
+    public MessageCreateSpec setComponents(List<LayoutComponent> components) {
+        this.components = components;
+        return this;
+    }
+
     @Override
     public MultipartRequest<MessageCreateRequest> asRequest() {
         MessageCreateRequest json = MessageCreateRequest.builder()
@@ -164,6 +189,8 @@ public class MessageCreateSpec implements Spec<MultipartRequest<MessageCreateReq
                 .embed(embed == null ? Possible.absent() : Possible.of(embed))
                 .allowedMentions(allowedMentionsData == null ? Possible.absent() : Possible.of(allowedMentionsData))
                 .messageReference(messageReferenceData == null ? Possible.absent() : Possible.of(messageReferenceData))
+                .components(components == null ? Possible.absent() :
+                        Possible.of(components.stream().map(LayoutComponent::getData).collect(Collectors.toList())))
                 .build();
         return MultipartRequest.ofRequestAndFiles(json, files == null ? Collections.emptyList() : files);
     }
