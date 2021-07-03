@@ -17,8 +17,9 @@
 
 package discord4j.core;
 
+import discord4j.common.util.Snowflake;
 import discord4j.core.event.ReactiveEventAdapter;
-import discord4j.core.event.domain.InteractionCreateEvent;
+import discord4j.core.event.domain.interaction.SlashCommandEvent;
 import discord4j.core.object.command.ApplicationCommandInteraction;
 import discord4j.core.object.command.ApplicationCommandInteractionOption;
 import discord4j.core.object.command.ApplicationCommandInteractionOptionValue;
@@ -33,12 +34,15 @@ import reactor.util.Loggers;
 
 import java.util.Random;
 
-public class ExampleInteractionCreateEvent {
+public class ExampleSlashCommandEvent {
 
-    private static final Logger log = Loggers.getLogger(ExampleInteractionCreateEvent.class);
+    private static final Logger log = Loggers.getLogger(ExampleSlashCommandEvent.class);
+
+    private static final String token = System.getenv("token");
+    private static final String guildId = System.getenv("guildId");
 
     public static void main(String[] args) {
-        GatewayDiscordClient client = DiscordClient.create(System.getenv("token"))
+        GatewayDiscordClient client = DiscordClient.create(token)
                 .login()
                 .block();
 
@@ -58,7 +62,7 @@ public class ExampleInteractionCreateEvent {
         long applicationId = restClient.getApplicationId().block();
 
         restClient.getApplicationService()
-                .createGuildApplicationCommand(applicationId, 208023865127862272L, randomCommand)
+                .createGuildApplicationCommand(applicationId, Snowflake.asLong(guildId), randomCommand)
                 .doOnError(e -> log.warn("Unable to create guild command", e))
                 .onErrorResume(e -> Mono.empty())
                 .block();
@@ -68,11 +72,10 @@ public class ExampleInteractionCreateEvent {
             private final Random random = new Random();
 
             @Override
-            public Publisher<?> onInteractionCreate(InteractionCreateEvent event) {
+            public Publisher<?> onSlashCommand(SlashCommandEvent event) {
                 if (event.getCommandName().equals("random")) {
-                    return event.acknowledge()
-                            .then(event.getInteractionResponse().createFollowupMessage(result(random,
-                                    event.getInteraction().getCommandInteraction())));
+                    String result = result(random, event.getInteraction().getCommandInteraction().get());
+                    return event.reply(result);
                 }
                 return Mono.empty();
             }

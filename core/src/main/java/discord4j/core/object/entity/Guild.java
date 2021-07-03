@@ -229,9 +229,11 @@ public final class Guild implements Entity {
      * Gets the voice region ID for the guild.
      *
      * @return The voice region ID for the guild.
+     * @deprecated Voice region are now specific to voice channels. Use {@code VoiceChannel#getRtcRegion} instead.
      */
-    public String getRegionId() {
-        return data.region();
+    @Deprecated
+    public Region.Id getRegionId() {
+        return Region.Id.of(data.region());
     }
 
     /**
@@ -239,9 +241,11 @@ public final class Guild implements Entity {
      *
      * @return A {@link Mono} where, upon successful completion, emits the voice {@link Region region} for the guild. If
      * an error is received, it is emitted through the {@code Mono}.
+     * @deprecated Voice regions are now specific to voice channels. Use {@code VoiceChannel#getRtcRegion} instead.
      */
+    @Deprecated
     public Mono<Region> getRegion() {
-        return getRegions().filter(response -> response.getId().equals(getRegionId())).single();
+        return getRegions().filter(response -> response.getId().equals(getRegionId().getValue())).single();
     }
 
     /**
@@ -740,9 +744,20 @@ public final class Guild implements Entity {
      * Gets whether this guild is designated as NSFW.
      *
      * @return Whether this guild is designated as NSFW.
+     * @deprecated Use {@code getNsfwLevel()} instead
      */
+    @Deprecated
     public boolean isNsfw() {
         return data.nsfw().toOptional().orElse(false);
+    }
+
+    /**
+     * Gets the guild NSFW level.
+     *
+     * @return The guild NSFW level.
+     */
+    public Guild.NsfwLevel getNsfwLevel() {
+        return NsfwLevel.of(data.nsfwLevel());
     }
 
     /**
@@ -2124,6 +2139,57 @@ public final class Guild implements Entity {
                 }
             }
             return flags;
+        }
+    }
+
+    public enum NsfwLevel {
+
+        UNKNOWN(-1),
+
+        DEFAULT(0),
+
+        EXPLICIT(1),
+
+        SAFE(2),
+
+        AGE_RESTRICTED(3);
+
+        /** The underlying value as represented by Discord. */
+        private final int value;
+
+        /**
+         * Constructs a {@code Guild.NsfwLevel}.
+         *
+         * @param value The underlying value as represented by Discord.
+         */
+        NsfwLevel(final int value) {
+            this.value = value;
+        }
+
+        /**
+         * Gets the underlying value as represented by Discord.
+         *
+         * @return The underlying value as represented by Discord.
+         */
+        public int getValue() {
+            return value;
+        }
+
+        /**
+         * Gets the NSFW level of the guild. It is guaranteed that invoking {@link #getValue()} from the
+         * returned enum will equal ({@code ==}) the supplied {@code value}.
+         *
+         * @param value The underlying value as represented by Discord.
+         * @return The NSFW level of the guild.
+         */
+        public static NsfwLevel of(final int value) {
+            switch (value) {
+                case 0: return DEFAULT;
+                case 1: return EXPLICIT;
+                case 2: return SAFE;
+                case 3: return AGE_RESTRICTED;
+                default: return UNKNOWN;
+            }
         }
     }
 

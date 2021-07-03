@@ -19,6 +19,8 @@ package discord4j.core.object.entity.channel;
 import discord4j.common.store.action.read.ReadActions;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
+import discord4j.core.object.Embed;
+import discord4j.core.object.Region;
 import discord4j.core.object.VoiceState;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.spec.VoiceChannelEditMono;
@@ -74,12 +76,12 @@ public final class VoiceChannel extends BaseCategorizableChannel {
     }
 
     /**
-     * Gets the voice region id for the voice channel, automatic if not present.
+     * Gets the voice region id for the voice channel.
      *
-     * @return The voice region id for the voice channel, automatic if not present.
+     * @return The voice region id for the voice channel.
      */
-    public Optional<String> getRtcRegion() {
-        return Possible.flatOpt(getData().rtcRegion());
+    public Region.Id getRtcRegion() {
+        return Possible.flatOpt(getData().rtcRegion()).map(Region.Id::of).orElse(Region.Id.AUTOMATIC);
     }
 
     /**

@@ -14,30 +14,32 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J. If not, see <http://www.gnu.org/licenses/>.
  */
-
-package discord4j.core.event.domain;
+package discord4j.core.event.domain.interaction;
 
 import discord4j.common.annotations.Experimental;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
+import discord4j.core.event.domain.Event;
 import discord4j.core.object.command.Interaction;
 import discord4j.core.object.entity.Message;
 import discord4j.core.spec.InteractionApplicationCommandCallbackMono;
 import discord4j.core.spec.InteractionApplicationCommandCallbackSpec;
 import discord4j.core.spec.legacy.LegacyInteractionApplicationCommandCallbackSpec;
 import discord4j.discordjson.json.*;
+import discord4j.discordjson.possible.Possible;
 import discord4j.gateway.ShardInfo;
 import discord4j.rest.RestClient;
 import discord4j.rest.interaction.InteractionResponse;
 import discord4j.rest.util.InteractionResponseType;
 import discord4j.rest.util.MultipartRequest;
 import reactor.core.publisher.Mono;
+import reactor.util.annotation.Nullable;
 
 import java.util.Objects;
 import java.util.function.Consumer;
 
 /**
- * Dispatched when a user in a guild uses a Slash Command.
+ * Dispatched when a user in a guild uses a Slash Command or clicks a Button.
  * <p>
  * This event is dispatched by Discord.
  *
@@ -64,29 +66,12 @@ public class InteractionCreateEvent extends Event {
         return interaction;
     }
 
-    private ApplicationCommandInteractionData getCommandInteractionData() {
-        return interaction.getData().data().get();
-    }
+    protected Mono<Void> createInteractionResponse(InteractionResponseType responseType, @Nullable InteractionApplicationCommandCallbackData data) {
+        InteractionResponseData responseData = InteractionResponseData.builder()
+                .type(responseType.getValue())
+                .data(data == null ? Possible.absent() : Possible.of(data))
+                .build();
 
-    /**
-     * Gets the id of the invoked command.
-     *
-     * @return The id of the invoked command.
-     */
-    public Snowflake getCommandId() {
-        return Snowflake.of(getCommandInteractionData().id());
-    }
-
-    /**
-     * Gets the name of the invoked command.
-     *
-     * @return The name of the invoked command.
-     */
-    public String getCommandName() {
-        return getCommandInteractionData().name();
-    }
-
-    private Mono<Void> createInteractionResponse(InteractionResponseData responseData) {
         long id = interaction.getId().asLong();
         String token = interaction.getToken();
 
@@ -104,10 +89,7 @@ public class InteractionCreateEvent extends Event {
      * through the {@code Mono}.
      */
     public Mono<Void> acknowledge() {
-        return createInteractionResponse(InteractionResponseData.builder()
-                .type(InteractionResponseType.DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE.getValue())
-                .data(InteractionApplicationCommandCallbackData.builder().build())
-                .build());
+        return createInteractionResponse(InteractionResponseType.DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE, null);
     }
 
     /**
@@ -117,13 +99,13 @@ public class InteractionCreateEvent extends Event {
      * @return A {@link Mono} where, upon successful completion, emits nothing, acknowledging the interaction
      * and indicating a response will be edited later. If an error is received, it is emitted through the {@code Mono}.
      */
+    // TODO: with new specs, this could be acknowledge().ephemeral() instead
     public Mono<Void> acknowledgeEphemeral() {
-        return createInteractionResponse(InteractionResponseData.builder()
-                .type(InteractionResponseType.DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE.getValue())
-                .data(InteractionApplicationCommandCallbackData.builder()
-                        .flags(Message.Flag.EPHEMERAL.getFlag())
-                        .build())
-                .build());
+        InteractionApplicationCommandCallbackData data = InteractionApplicationCommandCallbackData.builder()
+                .flags(Message.Flag.EPHEMERAL.getFlag())
+                .build();
+
+        return createInteractionResponse(InteractionResponseType.DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE, data);
     }
 
     /**
@@ -142,14 +124,14 @@ public class InteractionCreateEvent extends Event {
                 () -> {
                     LegacyInteractionApplicationCommandCallbackSpec mutatedSpec =
                             new LegacyInteractionApplicationCommandCallbackSpec();
+
                     getClient().getRestClient().getRestResources()
                             .getAllowedMentions()
                             .ifPresent(mutatedSpec::setAllowedMentions);
+
                     spec.accept(mutatedSpec);
-                    return createInteractionResponse(InteractionResponseData.builder()
-                            .type(InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE.getValue())
-                            .data(mutatedSpec.asRequest())
-                            .build());
+
+                    return createInteractionResponse(InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE, mutatedSpec.asRequest());
                 });
     }
 
@@ -196,10 +178,8 @@ public class InteractionCreateEvent extends Event {
                             .getAllowedMentions()
                             .map(spec::withAllowedMentions)
                             .orElse(spec);
-                    return createInteractionResponse(InteractionResponseData.builder()
-                            .type(InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE.getValue())
-                            .data(actualSpec.asRequest())
-                            .build());
+
+                    return createInteractionResponse(InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE, actualSpec.asRequest());
                 });
     }
 
@@ -238,7 +218,7 @@ public class InteractionCreateEvent extends Event {
 
         @Override
         public Mono<MessageData> createFollowupMessage(String content) {
-            WebhookExecuteRequest body = WebhookExecuteRequest.builder().content(content).build();
+            FollowupMessageRequest body = FollowupMessageRequest.builder().content(content).build();
             return restClient.getWebhookService()
                     .executeWebhook(applicationId, interactionData.token(), true, MultipartRequest.ofRequest(body));
         }
@@ -247,6 +227,26 @@ public class InteractionCreateEvent extends Event {
         public Mono<MessageData> createFollowupMessage(MultipartRequest<WebhookExecuteRequest> request) {
             return restClient.getWebhookService()
                     .executeWebhook(applicationId, interactionData.token(), true, request);
+        }
+
+        @Override
+        public Mono<MessageData> createFollowupMessageEphemeral(String content) {
+            FollowupMessageRequest body = FollowupMessageRequest.builder()
+                    .content(content)
+                    .flags(Message.Flag.EPHEMERAL.getFlag())
+                    .build();
+            return restClient.getWebhookService()
+                    .executeWebhook(applicationId, interactionData.token(), true, MultipartRequest.ofRequest(body));
+        }
+
+        @Override
+        public Mono<MessageData> createFollowupMessageEphemeral(MultipartRequest<WebhookExecuteRequest> request) {
+            FollowupMessageRequest newBody = FollowupMessageRequest.builder()
+                    .from(request.getJsonPayload())
+                    .flags(Message.Flag.EPHEMERAL.getFlag())
+                    .build();
+            return restClient.getWebhookService()
+                    .executeWebhook(applicationId, interactionData.token(), true, MultipartRequest.ofRequest(newBody));
         }
 
         @Override

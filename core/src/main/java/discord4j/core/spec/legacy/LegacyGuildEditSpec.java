@@ -25,6 +25,7 @@ import discord4j.discordjson.possible.Possible;
 import discord4j.rest.util.Image;
 import reactor.util.annotation.Nullable;
 
+import java.util.Arrays;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
@@ -54,11 +55,22 @@ public class LegacyGuildEditSpec implements LegacyAuditSpec<GuildModifyRequest> 
     /**
      * Sets the voice region for the modified {@link Guild}.
      *
-     * @param region The voice region for the guild.
+     * @param regionId The voice region for the guild.
      * @return This spec.
      */
-    public LegacyGuildEditSpec setRegion(@Nullable Region region) {
-        requestBuilder.region(Possible.of(Optional.ofNullable(region).map(Region::getId)));
+    public LegacyGuildEditSpec setRegion(Region.Id regionId) {
+        requestBuilder.region(Possible.of(Optional.of(regionId).map(Region.Id::getValue)));
+        return this;
+    }
+
+    /**
+     * Sets the voice region for the modified {@link Guild}, automatic if null.
+     *
+     * @param regionId The voice region for the guild, automatic if null.
+     * @return This spec.
+     */
+    public LegacyGuildEditSpec setRegion(@Nullable String regionId) {
+        requestBuilder.region(Possible.of(Optional.ofNullable(regionId)));
         return this;
     }
 
@@ -189,9 +201,28 @@ public class LegacyGuildEditSpec implements LegacyAuditSpec<GuildModifyRequest> 
      *
      * @param flag The system channel flags.
      * @return This spec.
+     * @deprecated use {@link #setSystemChannelFlags(Guild.SystemChannelFlag...)}
      */
-    public LegacyGuildEditSpec setSystemChannelFlags(Guild.SystemChannelFlag flag) {
-        requestBuilder.systemChannelFlags(flag.getValue());
+    @Deprecated
+    public LegacyGuildEditSpec setSystemChannelFlags(@Nullable Guild.SystemChannelFlag flag) {
+        requestBuilder.systemChannelFlags(flag == null ? Possible.absent() : Possible.of(flag.getValue()));
+        return this;
+    }
+
+    /**
+     * Sets the system channel flags.
+     *
+     * @param flags The system channel flags.
+     * @return This spec.
+     */
+    public LegacyGuildEditSpec setSystemChannelFlags(@Nullable Guild.SystemChannelFlag... flags) {
+        if (flags != null) {
+            requestBuilder.systemChannelFlags(Possible.of(Arrays.stream(flags)
+                    .mapToInt(Guild.SystemChannelFlag::getValue)
+                    .reduce(0, (left, right) -> left | right)));
+        } else {
+            requestBuilder.systemChannelFlags(Possible.absent());
+        }
         return this;
     }
 

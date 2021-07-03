@@ -16,6 +16,8 @@
  */
 package discord4j.core.spec.legacy;
 
+import discord4j.common.annotations.Experimental;
+import discord4j.core.object.component.LayoutComponent;
 import discord4j.core.object.entity.Message;
 import discord4j.discordjson.json.AllowedMentionsData;
 import discord4j.discordjson.json.EmbedData;
@@ -25,9 +27,13 @@ import discord4j.rest.util.AllowedMentions;
 import reactor.util.annotation.Nullable;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
+// TODO: Discord is probably going to rename this.
+@Experimental
 public class LegacyInteractionApplicationCommandCallbackSpec implements LegacySpec<InteractionApplicationCommandCallbackData> {
 
     @Nullable
@@ -36,6 +42,7 @@ public class LegacyInteractionApplicationCommandCallbackSpec implements LegacySp
     private List<EmbedData> embeds;
     private AllowedMentionsData allowedMentionsData;
     private int flags;
+    private List<LayoutComponent> components;
 
     public LegacyInteractionApplicationCommandCallbackSpec setContent(String content) {
         this.content = content;
@@ -67,6 +74,15 @@ public class LegacyInteractionApplicationCommandCallbackSpec implements LegacySp
         return this;
     }
 
+    public LegacyInteractionApplicationCommandCallbackSpec setComponents(LayoutComponent... components) {
+        return setComponents(Arrays.asList(components));
+    }
+
+    public LegacyInteractionApplicationCommandCallbackSpec setComponents(List<LayoutComponent> components) {
+        this.components = components;
+        return this;
+    }
+
     @Override
     public InteractionApplicationCommandCallbackData asRequest() {
         return InteractionApplicationCommandCallbackData.builder()
@@ -75,6 +91,8 @@ public class LegacyInteractionApplicationCommandCallbackSpec implements LegacySp
                 .flags(flags == 0 ? Possible.absent() : Possible.of(flags))
                 .embeds(embeds == null ? Possible.absent() : Possible.of(embeds))
                 .allowedMentions(allowedMentionsData == null ? Possible.absent() : Possible.of(allowedMentionsData))
+                .components(components == null ? Possible.absent() :
+                        Possible.of(components.stream().map(LayoutComponent::getData).collect(Collectors.toList())))
                 .build();
     }
 }

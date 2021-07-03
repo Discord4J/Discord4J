@@ -21,6 +21,7 @@ import discord4j.common.annotations.Experimental;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.DiscordObject;
+import discord4j.core.object.component.MessageComponent;
 import discord4j.discordjson.json.ApplicationCommandInteractionData;
 import reactor.util.annotation.Nullable;
 
@@ -30,6 +31,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+// TODO: Discord is probably going to rename this. Redo docs then.
 /**
  * A Discord application command interaction.
  *
@@ -69,8 +71,8 @@ public class ApplicationCommandInteraction implements DiscordObject {
      *
      * @return The id of the invoked command.
      */
-    public Snowflake getId() {
-        return Snowflake.of(data.id());
+    public Optional<Snowflake> getId() {
+        return data.id().toOptional().map(Snowflake::of);
     }
 
     /**
@@ -78,8 +80,26 @@ public class ApplicationCommandInteraction implements DiscordObject {
      *
      * @return The name of the invoked command.
      */
-    public String getName() {
-        return data.name();
+    public Optional<String> getName() {
+        return data.name().toOptional();
+    }
+
+    /**
+     * Gets the developer-defined custom id of the component.
+     *
+     * @return The custom id of the component.
+     */
+    public Optional<String> getCustomId() {
+        return data.customId().toOptional();
+    }
+
+    /**
+     * Gets the type of the component.
+     *
+     * @return The type of the component.
+     */
+    public Optional<MessageComponent.Type> getComponentType() {
+        return data.componentType().toOptional().map(MessageComponent.Type::of);
     }
 
     /**

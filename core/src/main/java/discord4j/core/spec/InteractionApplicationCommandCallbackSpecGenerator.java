@@ -17,7 +17,7 @@
 
 package discord4j.core.spec;
 
-import discord4j.core.event.domain.InteractionCreateEvent;
+import discord4j.core.event.domain.interaction.InteractionCreateEvent;
 import discord4j.core.object.entity.Message;
 import discord4j.discordjson.json.InteractionApplicationCommandCallbackData;
 import discord4j.discordjson.possible.Possible;
