@@ -37,6 +37,7 @@ public class MessageComponent {
         switch (Type.of(data.type())) {
             case ACTION_ROW: return new ActionRow(data);
             case BUTTON: return new Button(data);
+            case SELECT_MENU: return new SelectMenu(data);
             default: return new MessageComponent(data);
         }
     }
@@ -68,7 +69,8 @@ public class MessageComponent {
     public enum Type {
         UNKNOWN(-1),
         ACTION_ROW(1),
-        BUTTON(2);
+        BUTTON(2),
+        SELECT_MENU(3);
 
         private final int value;
 
@@ -84,6 +86,7 @@ public class MessageComponent {
             switch (value) {
                 case 1: return ACTION_ROW;
                 case 2: return BUTTON;
+                case 3: return SELECT_MENU;
                 default: return UNKNOWN;
             }
         }
