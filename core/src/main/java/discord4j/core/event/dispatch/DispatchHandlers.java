@@ -316,6 +316,7 @@ public class DispatchHandlers implements DispatchEventMapper {
             default:
                 return Mono.just(new InteractionCreateEvent(gateway, context.getShardInfo(), interaction));
         }
+
     }
 
     private static Mono<IntegrationDeleteEvent> integrationDelete(DispatchContext<IntegrationDelete> context) {
