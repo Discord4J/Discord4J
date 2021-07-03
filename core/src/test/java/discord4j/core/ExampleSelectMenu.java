@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J. If not, see <http://www.gnu.org/licenses/>.
  */
-package discord4j.core.interaction;
+package discord4j.core;
 
 import discord4j.common.util.Snowflake;
 import discord4j.core.DiscordClient;
