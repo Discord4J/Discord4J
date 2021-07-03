@@ -87,10 +87,8 @@ public class SelectMenu extends ActionComponent {
      *
      * @return The minimum number of options that must be chosen.
      */
-    public OptionalInt getMinValues() {
-        return getData().minValues().toOptional()
-                .map(OptionalInt::of)
-                .orElse(OptionalInt.empty());
+    public int getMinValues() {
+        return getData().minValues().toOptional().orElse(1);
     }
 
     /**
@@ -98,10 +96,8 @@ public class SelectMenu extends ActionComponent {
      *
      * @return The maximum number of options that must be chosen.
      */
-    public OptionalInt getMaxValues() {
-        return getData().maxValues().toOptional()
-                .map(OptionalInt::of)
-                .orElse(OptionalInt.empty());
+    public int getMaxValues() {
+        return getData().maxValues().toOptional().orElse(1);
     }
 
     /**
@@ -264,6 +260,16 @@ public class SelectMenu extends ActionComponent {
          */
         public Option withEmoji(ReactionEmoji emoji) {
             return new Option(SelectOptionData.builder().from(data).emoji(emoji.asEmojiData()).build());
+        }
+
+        /**
+         * Creates a new possibly-default option with the same data as this one.
+         *
+         * @param isDefault Whether the option should be default.
+         * @return A new option with the given default state.
+         */
+        public Option withDefault(boolean isDefault) {
+            return new Option(SelectOptionData.builder().from(data).isDefault(isDefault).build());
         }
     }
 }
