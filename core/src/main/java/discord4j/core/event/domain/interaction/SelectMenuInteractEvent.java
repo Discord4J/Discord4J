@@ -20,10 +20,16 @@ import discord4j.common.annotations.Experimental;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.object.command.ApplicationCommandInteraction;
 import discord4j.core.object.command.Interaction;
+import discord4j.core.object.component.SelectMenu;
 import discord4j.gateway.ShardInfo;
 
 import java.util.List;
 
+/**
+ * Dispatched when a user interacts with a {@link SelectMenu} the bot has sent.
+ * <p>
+ * This is not directly dispatched by Discord, but is a utility specialization of {@link InteractionCreateEvent}.
+ */
 @Experimental
 public class SelectMenuInteractEvent extends ComponentInteractEvent {
 
@@ -31,6 +37,12 @@ public class SelectMenuInteractEvent extends ComponentInteractEvent {
         super(gateway, shardInfo, interaction);
     }
 
+    /**
+     * Get the values selected in the menu.
+     *
+     * @return The values selected in the menu.
+     * @see SelectMenu.Option#getValue()
+     */
     public List<String> getValues() {
         return getInteraction().getCommandInteraction()
                 .flatMap(ApplicationCommandInteraction::getValues)
