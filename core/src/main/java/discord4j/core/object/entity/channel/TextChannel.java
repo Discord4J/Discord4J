@@ -27,7 +27,7 @@ import java.util.function.Consumer;
 /**
  * A Discord text channel.
  */
-public final class TextChannel extends BaseGuildMessageChannel {
+public final class TextChannel extends BaseTextOrNewsChannel {
 
     /**
      * Constructs an {@code TextChannel} with an associated {@link GatewayDiscordClient} and Discord data.

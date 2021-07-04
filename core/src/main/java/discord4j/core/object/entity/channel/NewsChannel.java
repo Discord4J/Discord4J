@@ -28,7 +28,7 @@ import reactor.core.publisher.Mono;
 import java.util.function.Consumer;
 
 /** A Discord news channel. */
-public final class NewsChannel extends BaseGuildMessageChannel {
+public final class NewsChannel extends BaseTextOrNewsChannel {
 
     /**
      * Constructs an {@code NewsChannel} with an associated {@link GatewayDiscordClient} and Discord data.
