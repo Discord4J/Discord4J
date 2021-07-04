@@ -16,8 +16,10 @@
  */
 package discord4j.core.spec;
 
+import discord4j.core.object.component.LayoutComponent;
 import discord4j.core.object.entity.Message;
 import discord4j.discordjson.json.AllowedMentionsData;
+import discord4j.discordjson.json.ComponentData;
 import discord4j.discordjson.json.EmbedData;
 import discord4j.discordjson.json.MessageEditRequest;
 import discord4j.discordjson.possible.Possible;
@@ -25,8 +27,10 @@ import discord4j.rest.util.AllowedMentions;
 import reactor.util.annotation.Nullable;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 /**
  * Spec used to edit {@link Message} entities this client has sent before.
@@ -39,6 +43,7 @@ public class MessageEditSpec implements Spec<MessageEditRequest> {
     private Possible<Optional<EmbedData>> embed = Possible.absent();
     private Possible<Optional<AllowedMentionsData>> allowedMentions = Possible.absent();
     private Possible<Optional<Integer>> flags = Possible.absent();
+    private Possible<Optional<List<ComponentData>>> components = Possible.absent();
 
     /**
      * Sets the new contents for the edited {@link Message}.
@@ -97,6 +102,27 @@ public class MessageEditSpec implements Spec<MessageEditRequest> {
         return this;
     }
 
+    /**
+     * Sets the components of the message.
+     *
+     * @param components The message components.
+     * @return This spec.
+     */
+    public MessageEditSpec setComponents(LayoutComponent... components) {
+        return setComponents(Arrays.asList(components));
+    }
+
+    /**
+     * Sets the components of the message.
+     *
+     * @param components The message components.
+     * @return This spec.
+     */
+    public MessageEditSpec setComponents(List<LayoutComponent> components) {
+        this.components = Possible.of(Optional.of(components.stream().map(LayoutComponent::getData).collect(Collectors.toList())));
+        return this;
+    }
+
     @Override
     public MessageEditRequest asRequest() {
         return MessageEditRequest.builder()
@@ -104,6 +130,7 @@ public class MessageEditSpec implements Spec<MessageEditRequest> {
                 .embed(embed)
                 .allowedMentions(allowedMentions)
                 .flags(flags)
+                .components(components)
                 .build();
     }
 }
