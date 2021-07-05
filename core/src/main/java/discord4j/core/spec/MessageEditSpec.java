@@ -24,8 +24,7 @@ import discord4j.discordjson.possible.Possible;
 import discord4j.rest.util.AllowedMentions;
 import reactor.util.annotation.Nullable;
 
-import java.util.Arrays;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Consumer;
 
 /**
@@ -36,7 +35,7 @@ import java.util.function.Consumer;
 public class MessageEditSpec implements Spec<MessageEditRequest> {
 
     private Possible<Optional<String>> content = Possible.absent();
-    private Possible<Optional<EmbedData>> embed = Possible.absent();
+    private Possible<Optional<List<EmbedData>>> embeds = Possible.absent();
     private Possible<Optional<AllowedMentionsData>> allowedMentions = Possible.absent();
     private Possible<Optional<Integer>> flags = Possible.absent();
 
@@ -56,16 +55,52 @@ public class MessageEditSpec implements Spec<MessageEditRequest> {
      *
      * @param spec An {@link EmbedCreateSpec} consumer used to attach rich content when creating a message.
      * @return This spec.
+     * @deprecated Use {@link #addEmbed(Consumer)} or {@link #removeEmbeds()}
      */
+    @Deprecated
     public MessageEditSpec setEmbed(@Nullable Consumer<? super EmbedCreateSpec> spec) {
         if (spec != null) {
             final EmbedCreateSpec mutatedSpec = new EmbedCreateSpec();
             spec.accept(mutatedSpec);
-            this.embed = Possible.of(Optional.of(mutatedSpec.asRequest()));
+            this.embeds = Possible.of(Optional.of(Collections.singletonList(mutatedSpec.asRequest())));
         } else {
-            this.embed = Possible.of(Optional.empty());
+            this.embeds = Possible.of(Optional.empty());
         }
 
+        return this;
+    }
+
+    /**
+     * Adds an embed to the edit request.
+     * <p>
+     * <b>Warning:</b> This method does <i>not</i> add an embed to the embeds already existing on the message. That is,
+     * if a message has embeds A and B, editing it with {@code addEmbed(C)} will result in the message having <i>only</i>
+     * embed C. To actually add embed C to the message, all embeds must be sent
+     * (i.e., do {@code addEmbed(A).addEmbed(B).addEmbed(C)}.
+     *
+     * @param spec An {@link EmbedCreateSpec} consumer used to attach rich content when creating a message.
+     * @return This spec.
+     */
+    public MessageEditSpec addEmbed(Consumer<? super EmbedCreateSpec> spec) {
+        final EmbedCreateSpec mutatedSpec = new EmbedCreateSpec();
+        spec.accept(mutatedSpec);
+
+        // if the Possible or the Optional is empty
+        if (this.embeds.isAbsent() || !this.embeds.get().isPresent()) {
+            this.embeds = Possible.of(Optional.of(new ArrayList<>(1)));
+        }
+
+        this.embeds.get().get().add(mutatedSpec.asRequest());
+        return this;
+    }
+
+    /**
+     * Removes all of the embeds on the message.
+     *
+     * @return This spec.
+     */
+    public MessageEditSpec removeEmbeds() {
+        this.embeds = Possible.of(Optional.empty());
         return this;
     }
 
@@ -101,7 +136,7 @@ public class MessageEditSpec implements Spec<MessageEditRequest> {
     public MessageEditRequest asRequest() {
         return MessageEditRequest.builder()
                 .content(content)
-                .embed(embed)
+                .embeds(embeds)
                 .allowedMentions(allowedMentions)
                 .flags(flags)
                 .build();
