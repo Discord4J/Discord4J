@@ -24,10 +24,7 @@ import discord4j.core.event.domain.channel.TypingStartEvent;
 import discord4j.core.event.domain.integration.IntegrationCreateEvent;
 import discord4j.core.event.domain.integration.IntegrationDeleteEvent;
 import discord4j.core.event.domain.integration.IntegrationUpdateEvent;
-import discord4j.core.event.domain.interaction.ComponentInteractEvent;
-import discord4j.core.event.domain.interaction.SlashCommandEvent;
-import discord4j.core.event.domain.interaction.ButtonInteractEvent;
-import discord4j.core.event.domain.interaction.InteractionCreateEvent;
+import discord4j.core.event.domain.interaction.*;
 import discord4j.core.object.VoiceState;
 import discord4j.core.object.command.ApplicationCommandInteraction;
 import discord4j.core.object.command.Interaction;
@@ -257,11 +254,11 @@ public class DispatchHandlers implements DispatchEventMapper {
                         .flatMap(ApplicationCommandInteraction::getComponentType)
                         .orElseThrow(IllegalStateException::new); // component type must be present
 
-                // there will be more soon :)
-                //noinspection SwitchStatementWithTooFewBranches
                 switch (type) {
                     case BUTTON:
                         return Mono.just(new ButtonInteractEvent(gateway, context.getShardInfo(), interaction));
+                    case SELECT_MENU:
+                        return Mono.just(new SelectMenuInteractEvent(gateway, context.getShardInfo(), interaction));
                     default:
                         return Mono.just(new ComponentInteractEvent(gateway, context.getShardInfo(), interaction));
                 }
