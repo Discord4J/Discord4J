@@ -26,10 +26,7 @@ import discord4j.core.event.domain.guild.*;
 import discord4j.core.event.domain.integration.IntegrationCreateEvent;
 import discord4j.core.event.domain.integration.IntegrationDeleteEvent;
 import discord4j.core.event.domain.integration.IntegrationUpdateEvent;
-import discord4j.core.event.domain.interaction.ComponentInteractEvent;
-import discord4j.core.event.domain.interaction.SlashCommandEvent;
-import discord4j.core.event.domain.interaction.ButtonInteractEvent;
-import discord4j.core.event.domain.interaction.InteractionCreateEvent;
+import discord4j.core.event.domain.interaction.*;
 import discord4j.core.event.domain.lifecycle.*;
 import discord4j.core.event.domain.message.*;
 import discord4j.core.event.domain.role.RoleCreateEvent;
@@ -724,6 +721,10 @@ public abstract class ReactiveEventAdapter {
         return Mono.empty();
     }
 
+    public Publisher<?> onSelectMenuInteract(SelectMenuInteractEvent event) {
+        return Mono.empty();
+    }
+
     // ================= Integration related events ================= //
 
     /**
@@ -829,6 +830,7 @@ public abstract class ReactiveEventAdapter {
         else if (event instanceof ReconnectFailEvent) return onReconnectFail((ReconnectFailEvent) event);
         else if (event instanceof SlashCommandEvent) return onSlashCommand((SlashCommandEvent) event);
         else if (event instanceof ButtonInteractEvent) return onButtonInteract((ButtonInteractEvent) event);
+        else if (event instanceof SelectMenuInteractEvent) return onSelectMenuInteract((SelectMenuInteractEvent) event);
         else if (event instanceof ComponentInteractEvent) return onComponentInteract((ComponentInteractEvent) event);
         else if (event instanceof InteractionCreateEvent) return onInteractionCreate((InteractionCreateEvent) event);
         else if (event instanceof ApplicationCommandCreateEvent) return onApplicationCommandCreate((ApplicationCommandCreateEvent) event);
