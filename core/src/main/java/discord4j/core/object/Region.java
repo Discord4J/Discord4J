@@ -162,7 +162,7 @@ public final class Region implements DiscordObject {
          *
          * @param value The underlying value as represented by Discord.
          */
-        Id(final String value) {
+        Id(@Nullable final String value) {
             this.value = value;
         }
 
@@ -171,6 +171,7 @@ public final class Region implements DiscordObject {
          *
          * @return The underlying value as represented by Discord.
          */
+        @Nullable
         public String getValue() {
             return value;
         }

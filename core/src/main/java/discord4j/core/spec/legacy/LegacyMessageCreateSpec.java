@@ -55,7 +55,7 @@ public class LegacyMessageCreateSpec implements LegacySpec<MultipartRequest<Mess
     @Nullable
     private String nonce;
     private boolean tts;
-    private EmbedData embed;
+    private List<EmbedData> embeds;
     private List<Tuple2<String, InputStream>> files;
     private AllowedMentionsData allowedMentionsData;
     private MessageReferenceData messageReferenceData;
@@ -96,14 +96,36 @@ public class LegacyMessageCreateSpec implements LegacySpec<MultipartRequest<Mess
 
     /**
      * Sets rich content to the created {@link Message} in the form of an {@link Embed} object.
+     * <p>
+     * This method overrides any embeds added by {@link #addEmbed(Consumer)}.
+     *
+     * @param spec An {@link LegacyEmbedCreateSpec} consumer used to attach rich content when creating a message.
+     * @return This spec.
+     * @deprecated Use {@link #addEmbed(Consumer)}.
+     */
+    @Deprecated
+    public LegacyMessageCreateSpec setEmbed(Consumer<? super LegacyEmbedCreateSpec> spec) {
+        final LegacyEmbedCreateSpec mutatedSpec = new LegacyEmbedCreateSpec();
+        spec.accept(mutatedSpec);
+        embeds = Collections.singletonList(mutatedSpec.asRequest());
+        return this;
+    }
+
+    /**
+     * Adds an embed to the message.
+     * <p>
+     * A message may have up to 10 embeds.
      *
      * @param spec An {@link LegacyEmbedCreateSpec} consumer used to attach rich content when creating a message.
      * @return This spec.
      */
-    public LegacyMessageCreateSpec setEmbed(Consumer<? super LegacyEmbedCreateSpec> spec) {
+    public LegacyMessageCreateSpec addEmbed(Consumer<? super LegacyEmbedCreateSpec> spec) {
         final LegacyEmbedCreateSpec mutatedSpec = new LegacyEmbedCreateSpec();
         spec.accept(mutatedSpec);
-        embed = mutatedSpec.asRequest();
+        if (embeds == null) {
+            embeds = new ArrayList<>(1); // most common case is only 1 embed per message
+        }
+        embeds.add(mutatedSpec.asRequest());
         return this;
     }
 
@@ -186,7 +208,7 @@ public class LegacyMessageCreateSpec implements LegacySpec<MultipartRequest<Mess
                 .content(content == null ? Possible.absent() : Possible.of(content))
                 .nonce(nonce == null ? Possible.absent() : Possible.of(nonce))
                 .tts(tts)
-                .embed(embed == null ? Possible.absent() : Possible.of(embed))
+                .embeds(embeds == null ? Possible.absent() : Possible.of(embeds))
                 .allowedMentions(allowedMentionsData == null ? Possible.absent() : Possible.of(allowedMentionsData))
                 .messageReference(messageReferenceData == null ? Possible.absent() : Possible.of(messageReferenceData))
                 .components(components == null ? Possible.absent() :

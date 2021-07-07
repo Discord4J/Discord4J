@@ -60,6 +60,16 @@ public class ComponentInteractEvent extends InteractionCreateEvent {
     }
 
     /**
+     * Gets the message the component is on.
+     *
+     * @return The message the component is on.
+     */
+    public Message getMessage() {
+        return getInteraction().getMessage()
+                .orElseThrow(IllegalStateException::new); // components are always on messages
+    }
+
+    /**
      * Requests to respond to the interaction by immediately editing the message the button is on.
      *
      * @param spec A {@link Consumer} that provides a "blank" {@link InteractionApplicationCommandCallbackSpec} to be
