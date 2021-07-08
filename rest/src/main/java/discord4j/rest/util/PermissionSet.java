@@ -36,8 +36,7 @@ public final class PermissionSet extends AbstractSet<Permission> {
 
     private static final long ALL_RAW = Arrays.stream(Permission.values())
         .mapToLong(Permission::getValue)
-        .reduce((a, b) -> a | b)
-        .orElseThrow(AssertionError::new);
+        .reduce(0, (a, b) -> a | b);
     private static final long NONE_RAW = 0;
 
     /** Common instance for {@code all()}. */
@@ -72,6 +71,17 @@ public final class PermissionSet extends AbstractSet<Permission> {
      */
     public static PermissionSet of(final long rawValue) {
         return new PermissionSet(rawValue);
+    }
+
+    /**
+     * Returns a {@code PermissionSet} containing all the permissions represented by the <i>raw value</i>.
+     *
+     * @param rawValue A bit-wise OR evaluation of multiple values returned by {@link Permission#getValue()}, as a
+     * string.
+     * @return A {@code PermissionSet} containing all the permissions represented by the <i>raw value</i>.
+     */
+    public static PermissionSet of(final String rawValue) {
+        return new PermissionSet(Long.parseUnsignedLong(rawValue));
     }
 
     /**

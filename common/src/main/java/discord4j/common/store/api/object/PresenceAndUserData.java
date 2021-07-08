@@ -32,7 +32,7 @@ public class PresenceAndUserData {
     private final PresenceData presenceData;
     private final UserData userData;
 
-    private PresenceAndUserData(PresenceData presenceData, UserData userData) {
+    private PresenceAndUserData(@Nullable PresenceData presenceData, @Nullable UserData userData) {
         this.presenceData = presenceData;
         this.userData = userData;
     }

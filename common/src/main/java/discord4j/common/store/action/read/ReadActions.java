@@ -28,7 +28,7 @@ import discord4j.common.store.api.object.ExactResultNotAvailableException;
 public class ReadActions {
 
     private ReadActions() {
-        throw new AssertionError();
+        throw new AssertionError("No discord4j.common.store.action.read.ReadActions instances for you!");
     }
 
     /**

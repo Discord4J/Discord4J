@@ -45,7 +45,7 @@ public final class EntityUtil {
     }
 
     /**
-     * An utility that converts some instance of {@code ChannelBean} to its associated {@code Channel}
+     * An utility that converts some instance of {@code ChannelData} to its associated {@code Channel}
      * {@link Channel.Type type}. That is to say, {@code data.getType() == Channel#getType().getValue()}.
      *
      * @param gateway The {@link GatewayDiscordClient} associated to this object, must be non-null.
@@ -56,7 +56,9 @@ public final class EntityUtil {
         switch (Channel.Type.of(data.type())) {
             case GUILD_TEXT: return new TextChannel(gateway, data);
             case DM: return new PrivateChannel(gateway, data);
-            case GUILD_VOICE: return new VoiceChannel(gateway, data);
+            case GUILD_VOICE:
+            case GUILD_STAGE_VOICE:
+                return new VoiceChannel(gateway, data);
             case GUILD_CATEGORY: return new Category(gateway, data);
             case GUILD_NEWS: return new NewsChannel(gateway, data);
             case GUILD_STORE: return new StoreChannel(gateway, data);

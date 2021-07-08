@@ -77,6 +77,15 @@ public final class Role implements Entity {
     }
 
     /**
+     * Gets the data of the role.
+     *
+     * @return The data of the role.
+     */
+    public RoleData getData() {
+        return data;
+    }
+
+    /**
      * Gets the sorting position of the role.
      *
      * @return The sorting position of the role.

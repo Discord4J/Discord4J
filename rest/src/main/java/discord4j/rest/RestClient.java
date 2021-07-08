@@ -26,6 +26,7 @@ import discord4j.rest.util.PaginationUtil;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.Duration;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -44,9 +45,11 @@ public class RestClient {
     private final GuildService guildService;
     private final InteractionService interactionService;
     private final InviteService inviteService;
+    private final TemplateService templateService;
     private final UserService userService;
     private final VoiceService voiceService;
     private final WebhookService webhookService;
+    private final Mono<Long> applicationIdMono;
 
     /**
      * Create a {@link RestClient} with default options, using the given token for authentication.
@@ -85,9 +88,14 @@ public class RestClient {
         this.guildService = new GuildService(router);
         this.interactionService = new InteractionService(router);
         this.inviteService = new InviteService(router);
+        this.templateService = new TemplateService(router);
         this.userService = new UserService(router);
         this.voiceService = new VoiceService(router);
         this.webhookService = new WebhookService(router);
+
+        this.applicationIdMono = getApplicationInfo()
+                .map(app -> Snowflake.asLong(app.id()))
+                .cache(__ -> Duration.ofMillis(Long.MAX_VALUE), __ -> Duration.ZERO, () -> Duration.ZERO);
     }
 
     /**
@@ -182,6 +190,16 @@ public class RestClient {
      */
     public RestMember restMember(Snowflake guildId, MemberData data) {
         return RestMember.create(this, guildId, Snowflake.of(data.user().id()));
+    }
+
+    /**
+     * Requests to retrieve the bot member from the guild of the supplied ID
+     *
+     * @param guildId the ID of the guild.
+     * @return A {@link RestMember} of the bot user as represented by the supplied ID.
+     */
+    public RestMember selfRestMember(Snowflake guildId) {
+        return RestMember.create(this, guildId, restResources.getSelfId());
     }
 
     /**
@@ -313,6 +331,17 @@ public class RestClient {
     }
 
     /**
+     * Requests to retrieve the bot user, represented as a member of the guild of the supplied ID
+     *
+     * @param guildId The ID of the guild
+     * @return a {@link Mono} where, upon successful completion, emits the bot {@link MemberData member}. If an error is
+     *         received, it is emitted through the {@code Mono}.
+     */
+    public Mono<MemberData> getSelfMember(Snowflake guildId) {
+        return guildService.getGuildMember(guildId.asLong(), restResources.getSelfId().asLong());
+    }
+
+    /**
      * Requests to create a guild.
      *
      * @param request A {@link GuildCreateRequest} as request body.
@@ -332,6 +361,17 @@ public class RestClient {
      */
     public Mono<InviteData> getInvite(final String inviteCode) {
         return inviteService.getInvite(inviteCode);
+    }
+
+    /**
+     * Requests to retrieve an template.
+     *
+     * @param templateCode The code for the template (e.g. "hgM48av5Q69A").
+     * @return A {@link Mono} where, upon successful completion, emits the {@link TemplateData} as represented by the
+     * supplied template code. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<TemplateData> getTemplate(final String templateCode) {
+        return templateService.getTemplate(templateCode);
     }
 
     /**
@@ -424,6 +464,16 @@ public class RestClient {
     }
 
     /**
+     * Access a low-level representation of the API endpoints for the Template resource. It is recommended you use
+     * methods like {@link #getTemplate(String)}, or {@link RestGuildTemplate#create(RestClient, String)}.
+     *
+     * @return a handle to perform low-level requests to the API
+     */
+    public TemplateService getTemplateService() {
+        return templateService;
+    }
+
+    /**
      * Access a low-level representation of the API endpoints for the User resource. It is recommended you use
      * methods like {@link #getUserById(Snowflake)}, {@link #restUser(UserData)} or
      * {@link RestUser#create(RestClient, Snowflake)}.
@@ -452,5 +502,9 @@ public class RestClient {
      */
     public WebhookService getWebhookService() {
         return webhookService;
+    }
+
+    public Mono<Long> getApplicationId() {
+        return applicationIdMono;
     }
 }

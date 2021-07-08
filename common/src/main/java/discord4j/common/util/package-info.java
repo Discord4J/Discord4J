@@ -14,23 +14,10 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with Discord4J. If not, see <http://www.gnu.org/licenses/>.
  */
+/**
+ * Common classes and utilities used across modules.
+ */
+@NonNullApi
+package discord4j.common.util;
 
-package discord4j.core.event.domain;
-
-import discord4j.core.GatewayDiscordClient;
-import discord4j.discordjson.json.InteractionData;
-import discord4j.gateway.ShardInfo;
-
-public class InteractionCreateEvent extends Event {
-
-    private final InteractionData data;
-
-    public InteractionCreateEvent(GatewayDiscordClient gateway, ShardInfo shardInfo, InteractionData data) {
-        super(gateway, shardInfo);
-        this.data = data;
-    }
-
-    public InteractionData getData() {
-        return data;
-    }
-}
+import reactor.util.annotation.NonNullApi;

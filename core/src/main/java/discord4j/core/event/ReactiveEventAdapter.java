@@ -19,7 +19,14 @@ package discord4j.core.event;
 
 import discord4j.core.event.domain.*;
 import discord4j.core.event.domain.channel.*;
+import discord4j.core.event.domain.command.ApplicationCommandCreateEvent;
+import discord4j.core.event.domain.command.ApplicationCommandDeleteEvent;
+import discord4j.core.event.domain.command.ApplicationCommandUpdateEvent;
 import discord4j.core.event.domain.guild.*;
+import discord4j.core.event.domain.integration.IntegrationCreateEvent;
+import discord4j.core.event.domain.integration.IntegrationDeleteEvent;
+import discord4j.core.event.domain.integration.IntegrationUpdateEvent;
+import discord4j.core.event.domain.interaction.*;
 import discord4j.core.event.domain.lifecycle.*;
 import discord4j.core.event.domain.message.*;
 import discord4j.core.event.domain.role.RoleCreateEvent;
@@ -153,6 +160,44 @@ public abstract class ReactiveEventAdapter {
      * returning any {@link Mono}, {@link Flux} or synchronous code using {@link Mono#fromRunnable(Runnable)}.
      */
     public Publisher<?> onReactionRemoveAll(ReactionRemoveAllEvent event) {
+        return Mono.empty();
+    }
+
+    // ========== Application Command related events ========== //
+
+    /**
+     * Invoked when an application command relevant to the current user is created. Guild ID might be missing
+     * if this event fires for a DM channel.
+     *
+     * @param event the event instance
+     * @return a {@link Publisher} that completes when this listener has done processing the event, for example,
+     * returning any {@link Mono}, {@link Flux} or synchronous code using {@link Mono#fromRunnable(Runnable)}.
+     */
+    public Publisher<?> onApplicationCommandCreate(ApplicationCommandCreateEvent event) {
+        return Mono.empty();
+    }
+
+    /**
+     * Invoked when an application command relevant to the current user is updated. Guild ID might be missing
+     * if this event fires for a DM channel.
+     *
+     * @param event the event instance
+     * @return a {@link Publisher} that completes when this listener has done processing the event, for example,
+     * returning any {@link Mono}, {@link Flux} or synchronous code using {@link Mono#fromRunnable(Runnable)}.
+     */
+    public Publisher<?> onApplicationCommandUpdate(ApplicationCommandUpdateEvent event) {
+        return Mono.empty();
+    }
+
+    /**
+     * Invoked when an application command relevant to the current user is deleted. Guild ID might be missing
+     * if this event fires for a DM channel.
+     *
+     * @param event the event instance
+     * @return a {@link Publisher} that completes when this listener has done processing the event, for example,
+     * returning any {@link Mono}, {@link Flux} or synchronous code using {@link Mono#fromRunnable(Runnable)}.
+     */
+    public Publisher<?> onApplicationCommandDelete(ApplicationCommandDeleteEvent event) {
         return Mono.empty();
     }
 
@@ -651,6 +696,56 @@ public abstract class ReactiveEventAdapter {
         return Mono.empty();
     }
 
+    public Publisher<?> onSlashCommand(SlashCommandEvent event) {
+        return Mono.empty();
+    }
+
+    public Publisher<?> onComponentInteract(ComponentInteractEvent event) {
+        return Mono.empty();
+    }
+
+    public Publisher<?> onButtonInteract(ButtonInteractEvent event) {
+        return Mono.empty();
+    }
+
+    public Publisher<?> onSelectMenuInteract(SelectMenuInteractEvent event) {
+        return Mono.empty();
+    }
+
+    // ================= Integration related events ================= //
+
+    /**
+     * Invoked when an integration has been created.
+     *
+     * @param event the event instance
+     * @return a {@link Publisher} that completes when this listener has done processing the event, for example,
+     * returning any {@link Mono}, {@link Flux} or synchronous code using {@link Mono#fromRunnable(Runnable)}.
+     */
+    public Publisher<?> onIntegrationCreate(IntegrationCreateEvent event) {
+        return Mono.empty();
+    }
+
+    /**
+     * Invoked when an integration has been updated.
+     *
+     * @param event the event instance
+     * @return a {@link Publisher} that completes when this listener has done processing the event, for example,
+     * returning any {@link Mono}, {@link Flux} or synchronous code using {@link Mono#fromRunnable(Runnable)}.
+     */
+    public Publisher<?> onIntegrationUpdate(IntegrationUpdateEvent event) {
+        return Mono.empty();
+    }
+
+    /**
+     * Invoked when an integration has been deleted.
+     *
+     * @param event the event instance
+     * @return a {@link Publisher} that completes when this listener has done processing the event, for example,
+     * returning any {@link Mono}, {@link Flux} or synchronous code using {@link Mono#fromRunnable(Runnable)}.
+     */
+    public Publisher<?> onIntegrationDelete(IntegrationDeleteEvent event) {
+        return Mono.empty();
+    }
 
     // ================= Core methods ================= //
 
@@ -719,7 +814,17 @@ public abstract class ReactiveEventAdapter {
         else if (event instanceof DisconnectEvent) return onDisconnect((DisconnectEvent) event);
         else if (event instanceof ReconnectStartEvent) return onReconnectStart((ReconnectStartEvent) event);
         else if (event instanceof ReconnectFailEvent) return onReconnectFail((ReconnectFailEvent) event);
+        else if (event instanceof SlashCommandEvent) return onSlashCommand((SlashCommandEvent) event);
+        else if (event instanceof ButtonInteractEvent) return onButtonInteract((ButtonInteractEvent) event);
+        else if (event instanceof SelectMenuInteractEvent) return onSelectMenuInteract((SelectMenuInteractEvent) event);
+        else if (event instanceof ComponentInteractEvent) return onComponentInteract((ComponentInteractEvent) event);
         else if (event instanceof InteractionCreateEvent) return onInteractionCreate((InteractionCreateEvent) event);
+        else if (event instanceof ApplicationCommandCreateEvent) return onApplicationCommandCreate((ApplicationCommandCreateEvent) event);
+        else if (event instanceof ApplicationCommandUpdateEvent) return onApplicationCommandUpdate((ApplicationCommandUpdateEvent) event);
+        else if (event instanceof ApplicationCommandDeleteEvent) return onApplicationCommandDelete((ApplicationCommandDeleteEvent) event);
+        else if (event instanceof IntegrationCreateEvent) return onIntegrationCreate((IntegrationCreateEvent) event);
+        else if (event instanceof IntegrationUpdateEvent) return onIntegrationUpdate((IntegrationUpdateEvent) event);
+        else if (event instanceof IntegrationDeleteEvent) return onIntegrationDelete((IntegrationDeleteEvent) event);
         // @formatter:on
 
         return Mono.empty();

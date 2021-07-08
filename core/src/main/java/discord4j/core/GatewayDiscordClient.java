@@ -28,10 +28,11 @@ import discord4j.core.event.ReactiveEventAdapter;
 import discord4j.core.event.domain.Event;
 import discord4j.core.object.Invite;
 import discord4j.core.object.Region;
+import discord4j.core.object.presence.ClientPresence;
+import discord4j.core.object.GuildTemplate;
 import discord4j.core.object.entity.*;
 import discord4j.core.object.entity.channel.Channel;
 import discord4j.core.object.entity.channel.GuildChannel;
-import discord4j.core.object.presence.Activity;
 import discord4j.core.object.presence.Presence;
 import discord4j.core.retriever.EntityRetrievalStrategy;
 import discord4j.core.retriever.EntityRetriever;
@@ -42,7 +43,6 @@ import discord4j.core.util.ValidationUtil;
 import discord4j.discordjson.json.*;
 import discord4j.discordjson.json.gateway.GuildMembersChunk;
 import discord4j.discordjson.json.gateway.RequestGuildMembers;
-import discord4j.discordjson.json.gateway.StatusUpdate;
 import discord4j.discordjson.possible.Possible;
 import discord4j.gateway.GatewayClient;
 import discord4j.gateway.GatewayClientGroup;
@@ -54,12 +54,14 @@ import discord4j.voice.LocalVoiceConnectionRegistry;
 import discord4j.voice.VoiceConnection;
 import discord4j.voice.VoiceConnectionFactory;
 import discord4j.voice.VoiceConnectionRegistry;
+import io.netty.handler.timeout.TimeoutException;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.Logger;
 import reactor.util.Loggers;
 
+import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
@@ -269,6 +271,19 @@ public class GatewayDiscordClient implements EntityRetriever {
     }
 
     /**
+     * Requests to retrieve the template represented by the supplied code.
+     *
+     * @param templateCode The code of the template.
+     * @return A {@link Mono} where, upon successful completion, emits the {@link GuildTemplate} as represented by the
+     * supplied code. If an error is received, it is emitted through the {@code Mono}.
+     */
+    public Mono<GuildTemplate> getTemplateByCode(String templateCode) {
+        return getRestClient().getTemplateService()
+                .getTemplate(templateCode)
+                .map(data -> new GuildTemplate(this, data));
+    }
+
+    /**
      * Gets the bot user's ID.
      *
      * @return The bot user's ID.
@@ -314,59 +329,25 @@ public class GatewayDiscordClient implements EntityRetriever {
     }
 
     /**
-     * Update the bot's {@link Presence} (client status) for every shard in this shard group.
-     * <p>
-     * Factories exist to build an {@link StatusUpdate} object to update the bot's status:
-     * <ul>
-     *     <li>{@link Presence#online()} and {@link Presence#online(ActivityUpdateRequest)}</li>
-     *     <li>{@link Presence#idle()} and {@link Presence#idle(ActivityUpdateRequest)}</li>
-     *     <li>{@link Presence#doNotDisturb()} and {@link Presence#doNotDisturb(ActivityUpdateRequest)}</li>
-     *     <li>{@link Presence#invisible()}</li>
-     * </ul>
-     * <p>
-     * Factories exist to build an {@link ActivityUpdateRequest} object for {@link StatusUpdate}:
-     * <ul>
-     *     <li>{@link Activity#listening(String)}</li>
-     *     <li>{@link Activity#playing(String)}</li>
-     *     <li>{@link Activity#streaming(String, String)}</li>
-     *     <li>{@link Activity#watching(String)}</li>
-     *     <li>{@link Activity#competing(String)}</li>
-     * </ul>
+     * Update the bot's {@link ClientPresence} (client status) for every shard in this shard group.
      *
-     * @param statusUpdate The updated client status.
+     * @param clientPresence The updated client status.
      * @return A {@link Mono} that signals completion upon successful update. If an error is received, it is emitted
      * through the {@code Mono}.
      */
-    public Mono<Void> updatePresence(final StatusUpdate statusUpdate) {
-        return gatewayClientGroup.multicast(GatewayPayload.statusUpdate(statusUpdate));
+    public Mono<Void> updatePresence(final ClientPresence clientPresence) {
+        return gatewayClientGroup.multicast(GatewayPayload.statusUpdate(clientPresence.getStatusUpdate()));
     }
 
     /**
      * Update the bot's {@link Presence} (status) for the given shard index, provided it belongs in this shard group.
-     * <p>
-     * Factories exist to build an {@link StatusUpdate} object to update the bot's status:
-     * <ul>
-     *     <li>{@link Presence#online()} and {@link Presence#online(ActivityUpdateRequest)}</li>
-     *     <li>{@link Presence#idle()} and {@link Presence#idle(ActivityUpdateRequest)}</li>
-     *     <li>{@link Presence#doNotDisturb()} and {@link Presence#doNotDisturb(ActivityUpdateRequest)}</li>
-     *     <li>{@link Presence#invisible()}</li>
-     * </ul>
-     * <p>
-     * Factories exist to build an {@link ActivityUpdateRequest} object for {@link StatusUpdate}:
-     * <ul>
-     *     <li>{@link Activity#listening(String)}</li>
-     *     <li>{@link Activity#playing(String)}</li>
-     *     <li>{@link Activity#streaming(String, String)}</li>
-     *     <li>{@link Activity#watching(String)}</li>
-     *     <li>{@link Activity#competing(String)}</li>
-     * </ul>
      *
-     * @param statusUpdate The updated client presence.
+     * @param clientPresence The updated client presence.
      * @return A {@link Mono} that signals completion upon successful update. If an error is received, it is emitted
      * through the {@code Mono}.
      */
-    public Mono<Void> updatePresence(final StatusUpdate statusUpdate, final int shardId) {
-        return gatewayClientGroup.unicast(ShardGatewayPayload.statusUpdate(statusUpdate, shardId));
+    public Mono<Void> updatePresence(final ClientPresence clientPresence, final int shardId) {
+        return gatewayClientGroup.unicast(ShardGatewayPayload.statusUpdate(clientPresence.getStatusUpdate(), shardId));
     }
 
     /**
@@ -690,6 +671,11 @@ public class GatewayDiscordClient implements EntityRetriever {
     @Override
     public Mono<User> getSelf() {
         return entityRetriever.getSelf();
+    }
+
+    @Override
+    public Mono<Member> getSelfMember(Snowflake guildId) {
+        return entityRetriever.getSelfMember(guildId);
     }
 
     @Override

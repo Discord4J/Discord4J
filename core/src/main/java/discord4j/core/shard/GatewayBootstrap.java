@@ -35,9 +35,9 @@ import discord4j.core.event.dispatch.DispatchEventMapper;
 import discord4j.core.event.domain.Event;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Member;
-import discord4j.core.object.presence.Presence;
+import discord4j.core.object.presence.ClientPresence;
 import discord4j.core.retriever.EntityRetrievalStrategy;
-import discord4j.discordjson.json.ActivityUpdateRequest;
+import discord4j.discordjson.json.MessageData;
 import discord4j.discordjson.json.gateway.GuildMembersChunk;
 import discord4j.discordjson.json.gateway.StatusUpdate;
 import discord4j.gateway.*;
@@ -54,6 +54,7 @@ import discord4j.gateway.state.DispatchStoreLayer;
 import discord4j.gateway.state.StatefulDispatch;
 import discord4j.rest.util.Multimap;
 import discord4j.rest.util.RouteUtils;
+import discord4j.store.api.util.StoreContext;
 import discord4j.store.jdk.JdkStoreService;
 import discord4j.voice.DefaultVoiceConnectionFactory;
 import discord4j.voice.VoiceConnection;
@@ -63,7 +64,11 @@ import io.netty.buffer.ByteBuf;
 import org.reactivestreams.Publisher;
 import reactor.core.Disposable;
 import reactor.core.Disposables;
-import reactor.core.publisher.*;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import reactor.core.publisher.MonoSink;
+import reactor.core.publisher.Sinks;
+import reactor.netty.resources.ConnectionProvider;
 import reactor.util.Logger;
 import reactor.util.Loggers;
 import reactor.util.annotation.Nullable;
@@ -71,11 +76,10 @@ import reactor.util.context.Context;
 import reactor.util.retry.Retry;
 
 import java.time.Duration;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.locks.LockSupport;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -120,7 +124,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
     private EventDispatcher eventDispatcher = null;
     private Store store = null;
     private MemberRequestFilter memberRequestFilter = null;
-    private Function<ShardInfo, StatusUpdate> initialPresence = shard -> null;
+    private Function<ShardInfo, ClientPresence> initialPresence = shard -> null;
     private Function<ShardInfo, SessionInfo> resumeOptions = shard -> null;
     private IntentSet intents = IntentSet.nonPrivileged();
     private Boolean guildSubscriptions = null;
@@ -299,45 +303,27 @@ public class GatewayBootstrap<O extends GatewayOptions> {
     }
 
     /**
-     * Set a {@link Function} to determine the {@link StatusUpdate} that each joining shard should use when identifying
+     * Set a {@link Function} to determine the {@link ClientPresence} that each joining shard should use when identifying
      * to the Gateway. Defaults to no status given.
-     * <p>
-     * {@link StatusUpdate} instances can be built through factories in {@link Presence}:
-     * <ul>
-     *     <li>{@link Presence#online()} and {@link Presence#online(ActivityUpdateRequest)}</li>
-     *     <li>{@link Presence#idle()} and {@link Presence#idle(ActivityUpdateRequest)}</li>
-     *     <li>{@link Presence#doNotDisturb()} and {@link Presence#doNotDisturb(ActivityUpdateRequest)}</li>
-     *     <li>{@link Presence#invisible()}</li>
-     * </ul>
      *
-     * @param initialPresence a {@link Function} that supplies {@link StatusUpdate} instances from a given
-     * {@link ShardInfo}
+     * @param initialPresence a {@link Function} that supplies {@link ClientPresence} instances from a given {@link ShardInfo}
      * @return this builder
-     * @deprecated use {@link #setInitialStatus(Function)}
      */
-    @Deprecated
-    public GatewayBootstrap<O> setInitialPresence(Function<ShardInfo, StatusUpdate> initialPresence) {
+    public GatewayBootstrap<O> setInitialPresence(Function<ShardInfo, ClientPresence> initialPresence) {
         this.initialPresence = Objects.requireNonNull(initialPresence, "initialPresence");
         return this;
     }
 
     /**
-     * Set a {@link Function} to determine the {@link StatusUpdate} that each joining shard should use when identifying
+     * Set a {@link Function} to determine the {@link ClientPresence} that each joining shard should use when identifying
      * to the Gateway. Defaults to no status given.
-     * <p>
-     * {@link StatusUpdate} instances can be built through factories in {@link Presence}:
-     * <ul>
-     *     <li>{@link Presence#online()} and {@link Presence#online(ActivityUpdateRequest)}</li>
-     *     <li>{@link Presence#idle()} and {@link Presence#idle(ActivityUpdateRequest)}</li>
-     *     <li>{@link Presence#doNotDisturb()} and {@link Presence#doNotDisturb(ActivityUpdateRequest)}</li>
-     *     <li>{@link Presence#invisible()}</li>
-     * </ul>
      *
-     * @param initialStatus a {@link Function} that supplies {@link StatusUpdate} instances from a given
-     * {@link ShardInfo}
+     * @param initialStatus a {@link Function} that supplies {@link ClientPresence} instances from a given {@link ShardInfo}
      * @return this builder
+     * @deprecated use {@link #setInitialPresence(Function)}
      */
-    public GatewayBootstrap<O> setInitialStatus(Function<ShardInfo, StatusUpdate> initialStatus) {
+    @Deprecated
+    public GatewayBootstrap<O> setInitialStatus(Function<ShardInfo, ClientPresence> initialStatus) {
         this.initialPresence = Objects.requireNonNull(initialStatus, "initialStatus");
         return this;
     }
@@ -420,19 +406,6 @@ public class GatewayBootstrap<O extends GatewayOptions> {
      */
     public GatewayBootstrap<O> setDisabledIntents(IntentSet intents) {
         this.intents = IntentSet.all().andNot(Objects.requireNonNull(intents));
-        return this;
-    }
-
-    /**
-     * Set if this shard group will subscribe to presence and typing events. Defaults to {@code true}.
-     *
-     * @param guildSubscriptions whether to enable or disable guild subscriptions
-     * @return this builder
-     * @see <a href="https://discord.com/developers/docs/topics/gateway#guild-subscriptions">Guild Subscriptions</a>
-     * @deprecated Discord recommends you migrate to Gateway Intents as they supersede this setting
-     */
-    public GatewayBootstrap<O> setGuildSubscriptions(boolean guildSubscriptions) {
-        this.guildSubscriptions = guildSubscriptions;
         return this;
     }
 
@@ -646,7 +619,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                 .flatMap(function((b, count) -> {
                     Store store = b.initStore();
                     EventDispatcher eventDispatcher = b.initEventDispatcher();
-                    GatewayReactorResources gatewayReactorResources = b.initGatewayReactorResources();
+                    GatewayReactorResources gatewayReactorResources = b.initGatewayReactorResources(count);
                     ShardCoordinator shardCoordinator = b.initShardCoordinator(gatewayReactorResources);
 
                     VoiceReactorResources voiceReactorResources = b.initVoiceReactorResources();
@@ -668,19 +641,20 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                                 log.info(format(ctx, "All shards disconnected"));
                                 Throwable t = dispatcherFunctionError.get();
                                 if (t != null) {
-                                    onCloseSink.emitError(t, Sinks.EmitFailureHandler.FAIL_FAST);
+                                    onCloseSink.emitError(t, OPTIMISTIC);
                                 } else {
-                                    onCloseSink.emitEmpty(Sinks.EmitFailureHandler.FAIL_FAST);
+                                    onCloseSink.emitEmpty(OPTIMISTIC);
                                 }
                             }))
                             .cache();
 
-                    Flux<ShardInfo> connections = b.shardingStrategy.getShards(count)
-                            .groupBy(shard -> shard.getIndex() % b.shardingStrategy.getMaxConcurrency())
-                            .flatMap(group -> group.concatMap(shard -> acquireConnection(b, shard, clientFactory,
-                                    gateway, shardCoordinator, store, eventDispatcher, clientGroup,
-                                    onCloseSink, dispatchMapper, completingChunkNonces,
-                                    destroySequence.contextWrite(buildContext(gateway, shard)))));
+                    Flux<ShardInfo> connections = b.shardingStrategy.getMaxConcurrency(b.client)
+                            .flatMapMany(maxConcurrency -> b.shardingStrategy.getShards(count)
+                                .groupBy(shard -> shard.getIndex() % maxConcurrency)
+                                .flatMap(group -> group.concatMap(shard -> acquireConnection(b, shard, clientFactory,
+                                        gateway, shardCoordinator, store, eventDispatcher, clientGroup,
+                                        onCloseSink, dispatchMapper, completingChunkNonces,
+                                        destroySequence.contextWrite(buildContext(gateway, shard)), maxConcurrency))));
 
                     Supplier<Mono<Void>> withEventDispatcherFunction = () ->
                             Flux.from(b.dispatcherFunction.apply(eventDispatcher))
@@ -751,18 +725,19 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                                               Sinks.Empty<Void> onCloseSink,
                                               DispatchEventMapper dispatchMapper,
                                               Set<String> completingChunkNonces,
-                                              Mono<Void> destroySequence) {
+                                              Mono<Void> destroySequence,
+                                              int maxConcurrency) {
         return Mono.deferContextual(ctx ->
                 Mono.<ShardInfo>create(sink -> {
-                    StatusUpdate initial = Optional.ofNullable(b.initialPresence.apply(shard)).orElse(null);
+                    StatusUpdate initial = Optional.ofNullable(b.initialPresence.apply(shard))
+                            .map(ClientPresence::getStatusUpdate)
+                            .orElse(null);
                     IdentifyOptions identify = IdentifyOptions.builder(shard)
                             .initialStatus(initial)
                             .intents(b.intents)
-                            .guildSubscriptions(b.guildSubscriptions)
                             .resumeSession(b.resumeOptions.apply(shard))
                             .build();
-                    PayloadTransformer limiter = shardCoordinator.getIdentifyLimiter(shard,
-                            b.shardingStrategy.getMaxConcurrency());
+                    PayloadTransformer limiter = shardCoordinator.getIdentifyLimiter(shard, maxConcurrency);
                     GatewayReactorResources resources = gateway.getGatewayResources().getGatewayReactorResources();
                     ReconnectOptions reconnectOptions = initReconnectOptions(resources);
                     GatewayOptions options = new GatewayOptions(client.getCoreResources().getToken(),
@@ -822,6 +797,9 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                                     case RETRY_SUCCEEDED:
                                         // TODO: ensure this sink is only pushed to once and avoid dropping signals
                                         return shardCoordinator.publishConnected(shard)
+                                                .publishOn(gateway.getGatewayResources()
+                                                        .getGatewayReactorResources()
+                                                        .getBlockingTaskScheduler())
                                                 .doFinally(__ -> sink.success(shard));
                                     case DISCONNECTED_RESUME:
                                         session = SessionInfo.create(gatewayClient.getSessionId(),
@@ -857,7 +835,7 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                             .doOnError(sink::error) // only useful for startup errors
                             .doFinally(__ -> {
                                 sink.success(); // no-op if we completed it before
-                                onCloseSink.emitEmpty(Sinks.EmitFailureHandler.FAIL_FAST);
+                                onCloseSink.emitEmpty(OPTIMISTIC);
                             })
                             .contextWrite(buildContext(gateway, shard))
                             .subscribe(null,
@@ -906,9 +884,13 @@ public class GatewayBootstrap<O extends GatewayOptions> {
                 .build();
     }
 
-    private GatewayReactorResources initGatewayReactorResources() {
+    private GatewayReactorResources initGatewayReactorResources(int count) {
         if (gatewayReactorResources == null) {
-            gatewayReactorResources = GatewayReactorResources::new;
+            int maxConnections = Math.max(ConnectionProvider.DEFAULT_POOL_MAX_CONNECTIONS, count);
+            gatewayReactorResources = res -> GatewayReactorResources.builder(res)
+                    .httpClient(ReactorResources.newHttpClient(
+                            ConnectionProvider.create("d4j-gateway", maxConnections)))
+                    .build();
         }
         return gatewayReactorResources.apply(client.getCoreResources().getReactorResources());
     }
@@ -953,7 +935,10 @@ public class GatewayBootstrap<O extends GatewayOptions> {
         if (store != null) {
             return store;
         }
-        return Store.fromLayout(LegacyStoreLayout.of(new JdkStoreService()));
+        Map<String, Object> hints = Collections.singletonMap("messageClass", MessageData.class);
+        JdkStoreService storeService = new JdkStoreService();
+        storeService.init(new StoreContext(hints));
+        return Store.fromLayout(LegacyStoreLayout.of(storeService));
     }
 
     private MemberRequestFilter initMemberRequestFilter(IntentSet intents) {
@@ -1004,5 +989,13 @@ public class GatewayBootstrap<O extends GatewayOptions> {
     public static VoiceConnectionFactory defaultVoiceConnectionFactory() {
         return new DefaultVoiceConnectionFactory();
     }
+
+    private static final Sinks.EmitFailureHandler OPTIMISTIC = (signalType, emitResult) -> {
+        if (emitResult == Sinks.EmitResult.FAIL_NON_SERIALIZED) {
+            LockSupport.parkNanos(10);
+            return true;
+        }
+        return false;
+    };
 
 }

@@ -146,7 +146,7 @@ public class WebhookExecuteSpec implements Spec<MultipartRequest<WebhookExecuteR
 
     @Override
     public MultipartRequest<WebhookExecuteRequest> asRequest() {
-        return new MultipartRequest<>(
+        return MultipartRequest.ofRequestAndFiles(
                 WebhookExecuteRequest
                         .builder()
                         .content(content)

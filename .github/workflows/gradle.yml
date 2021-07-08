@@ -6,6 +6,7 @@ on:
       - '**.gradle'
       - '**.properties'
       - '**/src/**'
+      - '.github/workflows/**'
     branches:
       - 'master'
       - '3.0.x'
@@ -23,6 +24,7 @@ jobs:
   build:
     name: Build for JDK ${{ matrix.java }}
     runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'push' || github.event.pull_request.head.repo.full_name != 'Discord4J/Discord4J' }}
     strategy:
       matrix:
         java: [ 8, 11 ]
@@ -60,7 +62,7 @@ jobs:
       - name: Set up JDK
         uses: actions/setup-java@v1
         with:
-          java-version: 8
+          java-version: 11
       - name: Publish with Gradle
         run: ./gradlew -x test publish
         env:

@@ -17,10 +17,12 @@
 package discord4j.core.object.reaction;
 
 import discord4j.core.object.entity.GuildEmoji;
+import discord4j.discordjson.json.EmojiData;
 import discord4j.discordjson.json.ReactionData;
 import discord4j.common.util.Snowflake;
 import reactor.util.annotation.Nullable;
 
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -54,12 +56,46 @@ public abstract class ReactionEmoji {
 
     /**
      * Constructs a {@code ReactionEmoji} for a unicode emoji.
+     * <p>
+     * The string argument to this method should be the exact UTF-16 encoded string of the desired emoji. For example,
+     * <pre>
+     * ReactionEmoji.unicode("&#92;u2764") // "heart"
+     * ReactionEmoji.unicode("&#92;uD83D&#92;uDE00") // "grinning face"
+     * ReactionEmoji.unicode("&#92;uD83D&#92;uDC68&#92;u200D&#92;uD83E&#92;uDDB0") // "man: red hair"
+     * </pre>
+     * A full list of emoji can be found <a href="https://unicode.org/emoji/charts/full-emoji-list.html">here</a>.
+     * <p>
+     * This method does <i>not</i> accept the "U+" notation for codepoints. For that, use
+     * {@link #codepoints(String...)}.
      *
      * @param raw The raw unicode string for the emoji.
      * @return A reaction emoji using the given information.
      */
     public static Unicode unicode(String raw) {
         return new Unicode(raw);
+    }
+
+    /**
+     * Constructs a {@code ReactionEmoji} for a unicode emoji.
+     * <p>
+     * The argument(s) to this method should use the "U+" notation for codepoints. For example,
+     * <pre>
+     * ReactionEmoji.codepoints("U+2764") // "heart"
+     * ReactionEmoji.codepoints("U+1F600") // "grinning face"
+     * ReactionEmoji.codepoints("U+1F468", "U+200D", "U+1F9B0") // "man: red hair"
+     * </pre>
+     * A full list of emoji can be found <a href="https://unicode.org/emoji/charts/full-emoji-list.html">here</a>.
+     *
+     * @param codepoints The codepoints that make up the emoji.
+     * @return A reaction emoji using the given information.
+     */
+    public static Unicode codepoints(String... codepoints) {
+        String combined = Arrays.stream(codepoints)
+                .map(c -> Integer.parseInt(c.substring(2), 16))
+                .reduce(new StringBuilder(), StringBuilder::appendCodePoint, StringBuilder::append)
+                .toString();
+
+        return unicode(combined);
     }
 
     /**
@@ -81,12 +117,22 @@ public abstract class ReactionEmoji {
      * @return a reaction emoji using the given information.
      */
     public static ReactionEmoji of(ReactionData data) {
-        if (data.emoji().id().isPresent()) {
-            return custom(Snowflake.of(data.emoji().id().get()),
-                    data.emoji().name().orElseThrow(IllegalArgumentException::new),
-                    data.emoji().animated().toOptional().orElse(false));
+        return of(data.emoji());
+    }
+
+    /**
+     * Constructs a {@code ReactionEmoji} from a {@link EmojiData} representation.
+     *
+     * @param data the {@link EmojiData} wrapper.
+     * @return a reaction emoji using the given information.
+     */
+    public static ReactionEmoji of(EmojiData data) {
+        if (data.id().isPresent()) {
+            return custom(Snowflake.of(data.id().get()),
+                    data.name().orElseThrow(IllegalArgumentException::new),
+                    data.animated().toOptional().orElse(false));
         }
-        return unicode(data.emoji().name().orElseThrow(IllegalArgumentException::new));
+        return unicode(data.name().orElseThrow(IllegalArgumentException::new));
     }
 
     /**
@@ -106,6 +152,13 @@ public abstract class ReactionEmoji {
     public Optional<Unicode> asUnicodeEmoji() {
         return this instanceof Unicode ? Optional.of((Unicode) this) : Optional.empty();
     }
+
+    /**
+     * Converts this {@code ReactionEmoji} to a {@link EmojiData}.
+     *
+     * @return An {@link EmojiData} for this emoji.
+     */
+    public abstract EmojiData asEmojiData();
 
     public static final class Custom extends ReactionEmoji {
 
@@ -147,6 +200,15 @@ public abstract class ReactionEmoji {
         }
 
         @Override
+        public EmojiData asEmojiData() {
+            return EmojiData.builder()
+                    .id(id)
+                    .name(name)
+                    .animated(isAnimated)
+                    .build();
+        }
+
+        @Override
         public String toString() {
             return "ReactionEmoji.Custom{" +
                     "id=" + id +
@@ -183,6 +245,13 @@ public abstract class ReactionEmoji {
 
         public String getRaw() {
             return raw;
+        }
+
+        @Override
+        public EmojiData asEmojiData() {
+            return EmojiData.builder()
+                    .name(raw)
+                    .build();
         }
 
         @Override

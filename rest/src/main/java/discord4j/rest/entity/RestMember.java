@@ -62,6 +62,24 @@ public class RestMember {
     }
 
     /**
+     * Returns the ID of the guild this member belongs to.
+     *
+     * @return The ID of the the guild this member belongs to.
+     */
+    public Snowflake getGuildId() {
+        return Snowflake.of(guildId);
+    }
+
+    /**
+     * Returns the ID of this member.
+     *
+     * @return The ID of this member
+     */
+    public Snowflake getId() {
+        return Snowflake.of(id);
+    }
+
+    /**
      * Create a {@link RestGuild} with data from this Member. This method does not perform any API request.
      *
      * @return a {@code RestGuild} represented by the data from this Member
@@ -129,11 +147,11 @@ public class RestMember {
         return guild().getData().map(GuildUpdateData::ownerId)
                 .flatMap(ownerId -> {
                     // The owner of the guild is higher in the role hierarchy than everyone
-                    if (ownerId.equals(String.valueOf(id))) {
+                    if (ownerId.asLong() == id) {
                         return Mono.just(true);
                     }
 
-                    if (ownerId.equals(String.valueOf(otherMember.id))) {
+                    if (ownerId.asLong() == otherMember.id) {
                         return Mono.just(false);
                     }
 

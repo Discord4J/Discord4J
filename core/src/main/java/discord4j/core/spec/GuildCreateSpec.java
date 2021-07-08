@@ -16,40 +16,39 @@
  */
 package discord4j.core.spec;
 
+import discord4j.common.util.Snowflake;
 import discord4j.core.object.Region;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.channel.Channel;
+import discord4j.discordjson.Id;
 import discord4j.discordjson.json.GuildCreateRequest;
+import discord4j.discordjson.json.ImmutableGuildCreateRequest;
 import discord4j.discordjson.json.PartialChannelCreateRequest;
 import discord4j.discordjson.json.RoleCreateRequest;
+import discord4j.discordjson.possible.Possible;
 import discord4j.rest.util.Image;
 import reactor.util.annotation.Nullable;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 
 /**
  * A spec used to configure and create a {@link Guild}. <b>This can only be used for bots in less than 10 guilds.</b>
  * <p>
- * This spec also has some limitations to it. The name, region, verification level, and default message notification
- * level are all required to be able to properly build the spec. The first role added, either from
- * {@link #addEveryoneRole} or {@link #addRole}, will automatically be set as the default @everyone role. Each
- * subsequent call to {@link #addEveryoneRole} will not override the first role but shift all other roles down.
+ * This spec also has some limitations to it.
+ *  - The first role added, either from {@link #addEveryoneRole} or {@link #addRole}, will automatically be set as the
+ *  default @everyone role. Each subsequent call to {@link #addEveryoneRole} will not override the first role but shift
+ *  all other roles down.
+ *  - When using the channels parameter, the position field is ignored, and none of the default channels are created.
  *
  * @see <a href="https://discord.com/developers/docs/resources/guild#create-guild">Create Guild</a>
  */
 public class GuildCreateSpec implements Spec<GuildCreateRequest> {
 
-    private String name;
-    private String region;
-    @Nullable
-    private String icon;
-    private int verificationLevel;
-    private int defaultMessageNotificationLevel;
-    private int explicitContentFilter;
+    private final ImmutableGuildCreateRequest.Builder builder = GuildCreateRequest.builder();
     private final List<RoleCreateRequest> roles = new ArrayList<>();
-    private final List<PartialChannelCreateRequest> channels = new ArrayList<>();
 
     /**
      * Sets the name for the created {@link Guild}.
@@ -58,18 +57,29 @@ public class GuildCreateSpec implements Spec<GuildCreateRequest> {
      * @return This spec.
      */
     public GuildCreateSpec setName(String name) {
-        this.name = name;
+        builder.name(name);
         return this;
     }
 
     /**
-     * Sets the voice region for the created {@link Guild}.
+     * Sets the voice region id for the created {@link Guild}.
      *
-     * @param region The voice region for the guild.
+     * @param regionId The voice region id for the guild.
      * @return This spec.
      */
-    public GuildCreateSpec setRegion(Region region) {
-        this.region = region.getId();
+    public GuildCreateSpec setRegion(Region.Id regionId) {
+        builder.region(regionId.getValue());
+        return this;
+    }
+
+    /**
+     * Sets the voice region id for the created {@link Guild}, automatic if null.
+     *
+     * @param regionId The voice region id for the guild, automatic if null.
+     * @return This spec.
+     */
+    public GuildCreateSpec setRegion(@Nullable String regionId) {
+        builder.region(regionId == null ? Possible.absent() : Possible.of(regionId));
         return this;
     }
 
@@ -80,7 +90,7 @@ public class GuildCreateSpec implements Spec<GuildCreateRequest> {
      * @return This spec.
      */
     public GuildCreateSpec setIcon(@Nullable Image icon) {
-        this.icon = (icon == null) ? null : icon.getDataUri();
+        builder.icon(icon == null ? Possible.absent() : Possible.of(icon.getDataUri()));
         return this;
     }
 
@@ -90,8 +100,9 @@ public class GuildCreateSpec implements Spec<GuildCreateRequest> {
      * @param verificationLevel The verification level for the guild.
      * @return This spec.
      */
-    public GuildCreateSpec setVerificationLevel(Guild.VerificationLevel verificationLevel) {
-        this.verificationLevel = verificationLevel.getValue();
+    public GuildCreateSpec setVerificationLevel(@Nullable Guild.VerificationLevel verificationLevel) {
+        builder.verificationLevel(verificationLevel == null ?
+                Possible.absent() : Possible.of(verificationLevel.getValue()));
         return this;
     }
 
@@ -101,8 +112,9 @@ public class GuildCreateSpec implements Spec<GuildCreateRequest> {
      * @param notificationLevel The default notification level for the guild.
      * @return This spec.
      */
-    public GuildCreateSpec setDefaultMessageNotificationLevel(Guild.NotificationLevel notificationLevel) {
-        this.defaultMessageNotificationLevel = notificationLevel.getValue();
+    public GuildCreateSpec setDefaultMessageNotificationLevel(@Nullable Guild.NotificationLevel notificationLevel) {
+        builder.defaultMessageNotifications(notificationLevel == null ?
+                Possible.absent() : Possible.of(notificationLevel.getValue()));
         return this;
     }
 
@@ -112,8 +124,9 @@ public class GuildCreateSpec implements Spec<GuildCreateRequest> {
      * @param explicitContentFilter The explicit content filter level for the guild.
      * @return This spec.
      */
-    public GuildCreateSpec setExplicitContentFilter(Guild.ContentFilterLevel explicitContentFilter) {
-        this.explicitContentFilter = explicitContentFilter.getValue();
+    public GuildCreateSpec setExplicitContentFilter(@Nullable Guild.ContentFilterLevel explicitContentFilter) {
+        builder.explicitContentFilter(explicitContentFilter == null ?
+                Possible.absent() : Possible.of(explicitContentFilter.getValue()));
         return this;
     }
 
@@ -155,24 +168,67 @@ public class GuildCreateSpec implements Spec<GuildCreateRequest> {
      * @return This spec.
      */
     public GuildCreateSpec addChannel(String name, Channel.Type type) {
-        channels.add(PartialChannelCreateRequest.builder()
+        builder.addChannel(PartialChannelCreateRequest.builder()
                 .name(name)
                 .type(type.getValue())
                 .build());
         return this;
     }
 
+    /**
+     * Sets the ID of the AFK channel for the created {@link Guild}.
+     *
+     * @param id id for afk channel
+     * @return This spec.
+     */
+    public GuildCreateSpec setAfkChannelId(@Nullable Snowflake id) {
+        builder.afkChannelId(id == null ? Possible.absent() : Possible.of(Id.of(id.asLong())));
+        return this;
+    }
+
+    /**
+     * Sets the AFK timeout, in seconds, for the created {@link Guild}.
+     *
+     * @param afkTimeout The AFK timeout, in seconds.
+     * @return This spec.
+     */
+    public GuildCreateSpec setAfkTimeout(@Nullable Integer afkTimeout) {
+        builder.afkTimeout(afkTimeout == null ? Possible.absent() : Possible.of(afkTimeout));
+        return this;
+    }
+
+    /**
+     * Sets the id of the channel where guild notices such as welcome messages and boost events are posted for the
+     * created {@link Guild}.
+     *
+     * @param id The id of the channel where guild notices such as welcome messages and boost events are posted.
+     * @return This spec.
+     */
+    public GuildCreateSpec setSystemChannelId(@Nullable Snowflake id) {
+        builder.systemChannelId(id == null ? Possible.absent() : Possible.of(Id.of(id.asLong())));
+        return this;
+    }
+
+    /**
+     * Sets the system channel flags for the created {@link Guild}.
+     *
+     * @param flags The system channel flags.
+     * @return This spec.
+     */
+    public GuildCreateSpec setSystemChannelFlags(@Nullable Guild.SystemChannelFlag... flags) {
+        if (flags != null) {
+            builder.systemChannelFlags(Possible.of(Arrays.stream(flags)
+                    .mapToInt(Guild.SystemChannelFlag::getValue)
+                    .reduce(0, (left, right) -> left | right)));
+        } else {
+            builder.systemChannelFlags(Possible.absent());
+        }
+        return this;
+    }
+
     @Override
     public GuildCreateRequest asRequest() {
-        return GuildCreateRequest.builder()
-                .name(name)
-                .region(region)
-                .icon(icon)
-                .verificationLevel(verificationLevel)
-                .defaultMessageNotifications(defaultMessageNotificationLevel)
-                .explicitContentFilter(explicitContentFilter)
-                .roles(roles)
-                .channels(channels)
-                .build();
+        builder.roles(roles);
+        return builder.build();
     }
 }

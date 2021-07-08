@@ -95,7 +95,7 @@ class GuildDispatchHandlers {
                     .flatMap(data -> {
                         log.debug(format(ctx, "Requesting members for guild {}"), createData.id());
                         return context.getGateway()
-                                .requestMembers(Snowflake.of(data.id()))
+                                .requestMembers(Snowflake.of(data.id().asString()))
                                 .then();
                     })
                     .subscribe(null, t -> log.warn(format(ctx, "Member request errored for {}"), createData.id(), t));
@@ -193,14 +193,15 @@ class GuildDispatchHandlers {
                 .map(Snowflake::asLong)
                 .collect(Collectors.toSet());
         String currentNick = Possible.flatOpt(context.getDispatch().nick()).orElse(null);
-        String currentJoinedAt = context.getDispatch().joinedAt();
+        String currentJoinedAt = context.getDispatch().joinedAt().orElse(null);
         String currentPremiumSince = Possible.flatOpt(context.getDispatch().premiumSince()).orElse(null);
+        Boolean currentPending = context.getDispatch().pending().toOptional().orElse(null);
         Member oldMember = context.getOldState()
                 .map(data -> new Member(gateway, data, guildId))
                 .orElse(null);
 
         return Mono.just(new MemberUpdateEvent(gateway, context.getShardInfo(), guildId, memberId, oldMember,
-                currentRoleIds, currentNick, currentJoinedAt, currentPremiumSince));
+                currentRoleIds, currentNick, currentJoinedAt, currentPremiumSince, currentPending));
     }
 
     static Mono<RoleCreateEvent> guildRoleCreate(DispatchContext<GuildRoleCreate, Void> context) {

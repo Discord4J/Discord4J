@@ -2,9 +2,9 @@
 
 <a href="https://discord4j.com"><img align="right" src="https://raw.githubusercontent.com/Discord4J/discord4j-web/master/public/logo.svg?sanitize=true" width=27%></a>
 
-[![Support Server Invite](https://img.shields.io/discord/208023865127862272.svg?color=7289da&label=Discord4J&logo=discord&style=flat-square)](https://discord.gg/NxGAeCY)
+[![Support Server Invite](https://img.shields.io/discord/208023865127862272.svg?color=7289da&label=Discord4J&logo=discord&style=flat-square)](https://discord.gg/d4j)
 [![Maven Central](https://img.shields.io/maven-central/v/com.discord4j/discord4j-core/3.1.svg?style=flat-square)](https://search.maven.org/artifact/com.discord4j/discord4j-core)
-[![Javadocs](https://javadoc.io/badge2/com.discord4j/discord4j-core/3.1.3/javadoc.svg?color=blue&style=flat-square)](https://javadoc.io/doc/com.discord4j/discord4j-core/3.1.3)
+[![Javadocs](https://javadoc.io/badge2/com.discord4j/discord4j-core/3.1.6/javadoc.svg?color=blue&style=flat-square)](https://javadoc.io/doc/com.discord4j/discord4j-core/3.1.6)
 [![GitHub Workflow Status (branch)](https://img.shields.io/github/workflow/status/Discord4J/Discord4J/Java%20CI/master?logo=github&style=flat-square)](https://github.com/Discord4J/Discord4J/actions)
 
 Discord4J is a fast, powerful, unopinionated, reactive library to enable quick and easy development of Discord bots for Java, Kotlin, and other JVM languages using the official [Discord Bot API](https://discord.com/developers/docs/intro).
@@ -38,7 +38,7 @@ public final class ExampleBot {
 
 * [Javadocs](https://www.javadoc.io/doc/com.discord4j/discord4j-core)
 * [Documentation](https://docs.discord4j.com)
-* [Discord](https://discord.gg/NxGAeCY)
+* [Discord](https://discord.gg/d4j)
 
 ## 💎 Benefits
 
@@ -50,7 +50,7 @@ public final class ExampleBot {
 
 * ⚔️ **Powerful** - Discord4J can be used to develop any bot, big or small. We offer many tools for developing large-scale bots from [custom distribution frameworks](https://github.com/Discord4J/connect), [off-heap caching](https://github.com/Discord4J/Stores/tree/master/redis), and its interaction with Reactor allows complete integration with frameworks such as Spring and Micronaut.
 
-* 🏫 **Community** - We pride ourselves on our inclusive community and are willing to help whenever challenges arise; or if you just want to chat! We offer help ranging from Discord4J specific problems, to general programming and web development help, and even Reactor-specific questions. Be sure to visit us on our [Discord server](https://discord.gg/NxGAeCY)!
+* 🏫 **Community** - We pride ourselves on our inclusive community and are willing to help whenever challenges arise; or if you just want to chat! We offer help ranging from Discord4J specific problems, to general programming and web development help, and even Reactor-specific questions. Be sure to visit us on our [Discord server](https://discord.gg/d4j)!
 
 ## 📦 Installation
 
@@ -66,7 +66,7 @@ repositories {
 }
 
 dependencies {
-  implementation 'com.discord4j:discord4j-core:3.1.3'
+  implementation 'com.discord4j:discord4j-core:3.1.6'
 }
 ```
 
@@ -77,7 +77,7 @@ repositories {
 }
 
 dependencies {
-  implementation("com.discord4j:discord4j-core:3.1.3")
+  implementation("com.discord4j:discord4j-core:3.1.6")
 }
 ```
 
@@ -87,7 +87,7 @@ dependencies {
   <dependency>
     <groupId>com.discord4j</groupId>
     <artifactId>discord4j-core</artifactId>
-    <version>3.1.3</version>
+    <version>3.1.6</version>
   </dependency>
 </dependencies>
 ```
@@ -95,7 +95,7 @@ dependencies {
 ### SBT
 ```scala
 libraryDependencies ++= Seq(
-  "com.discord4j" % "discord4j-core" % "3.1.3"
+  "com.discord4j" % "discord4j-core" % "3.1.6"
 )
 ```
 

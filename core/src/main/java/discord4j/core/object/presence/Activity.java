@@ -16,12 +16,13 @@
  */
 package discord4j.core.object.presence;
 
+import discord4j.common.util.Snowflake;
 import discord4j.core.object.reaction.ReactionEmoji;
 import discord4j.core.util.EntityUtil;
+import discord4j.discordjson.Id;
 import discord4j.discordjson.json.ActivityData;
 import discord4j.discordjson.json.ActivityUpdateRequest;
 import discord4j.discordjson.possible.Possible;
-import discord4j.common.util.Snowflake;
 
 import java.time.Instant;
 import java.util.Arrays;
@@ -32,46 +33,19 @@ import java.util.stream.Collectors;
 
 public class Activity {
 
-    public static ActivityUpdateRequest playing(String name) {
-        return ActivityUpdateRequest.builder()
-                .name(name)
-                .type(Type.PLAYING.getValue())
-                .build();
-    }
-
-    public static ActivityUpdateRequest streaming(String name, String url) {
-        return ActivityUpdateRequest.builder()
-                .name(name)
-                .type(Type.STREAMING.getValue())
-                .url(url)
-                .build();
-    }
-
-    public static ActivityUpdateRequest listening(String name) {
-        return ActivityUpdateRequest.builder()
-                .name(name)
-                .type(Type.LISTENING.getValue())
-                .build();
-    }
-
-    public static ActivityUpdateRequest watching(String name) {
-        return ActivityUpdateRequest.builder()
-                .name(name)
-                .type(Type.WATCHING.getValue())
-                .build();
-    }
-
-    public static ActivityUpdateRequest competing(String name) {
-        return ActivityUpdateRequest.builder()
-            .name(name)
-            .type(Type.COMPETING.getValue())
-            .build();
-    }
-
     private final ActivityData data;
 
     Activity(final ActivityData data) {
         this.data = data;
+    }
+
+    /**
+     * Gets the data of the activity.
+     *
+     * @return The data of the activity.
+     */
+    public ActivityData getData() {
+        return data;
     }
 
     /**
@@ -275,7 +249,7 @@ public class Activity {
         return Possible.flatOpt(data.emoji())
                 .map(emoji -> {
                     // TODO FIXME
-                    String sid = emoji.id().toOptional().orElse(null);
+                    String sid = emoji.id().toOptional().map(Id::asString).orElse(null);
                     Long id = sid == null ? null : Snowflake.asLong(sid);
                     return ReactionEmoji.of(id, emoji.name(),
                             emoji.animated().toOptional().orElse(false));

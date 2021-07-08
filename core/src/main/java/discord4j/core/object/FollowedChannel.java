@@ -52,6 +52,15 @@ public class FollowedChannel implements DiscordObject {
     }
 
     /**
+     * Gets the data of the channel that has been followed.
+     *
+     * @return The data of the channel that has been followed.
+     */
+    public FollowedChannelData getData() {
+        return data;
+    }
+
+    /**
      * Returns the ID of the news channel that has been followed.
      *
      * @return the news channel ID

@@ -58,7 +58,7 @@ class BaseGuildMessageChannel extends BaseChannel implements GuildMessageChannel
     private final BaseCategorizableChannel categorizableChannel;
 
     /**
-     * Constructs an {@code BaseGuildMessageChannel} with an associated ServiceMediator and Discord data.
+     * Constructs an {@code BaseGuildMessageChannel} with an associated {@link GatewayDiscordClient} and Discord data.
      *
      * @param gateway The {@link GatewayDiscordClient} associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
@@ -103,6 +103,11 @@ class BaseGuildMessageChannel extends BaseChannel implements GuildMessageChannel
     @Override
     public Mono<PermissionSet> getEffectivePermissions(Snowflake memberId) {
         return guildChannel.getEffectivePermissions(memberId);
+    }
+
+    @Override
+    public Mono<PermissionSet> getEffectivePermissions(Member member) {
+        return guildChannel.getEffectivePermissions(member);
     }
 
     @Override

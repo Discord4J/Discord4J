@@ -23,6 +23,7 @@ import discord4j.common.store.api.layout.StoreLayout;
 import discord4j.common.store.api.object.InvalidationCause;
 import discord4j.common.store.api.object.PresenceAndUserData;
 import discord4j.common.util.Snowflake;
+import discord4j.discordjson.Id;
 import discord4j.discordjson.json.*;
 import discord4j.discordjson.json.gateway.*;
 import discord4j.discordjson.possible.Possible;
@@ -37,7 +38,6 @@ import reactor.util.function.Tuple2;
 import reactor.util.function.Tuples;
 
 import java.util.*;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayDataUpdater {
@@ -321,10 +321,11 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
             case GUILD_VOICE:
             case GUILD_CATEGORY:
             case GUILD_NEWS:
-            case GUILD_STORE: return saveChannel(dispatch);
+            case GUILD_STORE:
+            case GUILD_STAGE_VOICE: return saveChannel(dispatch);
             case DM:
             case GROUP_DM: return Mono.empty();
-            default: throw new AssertionError();
+            default: throw new IllegalArgumentException("Unhandled channel type " + dispatch.channel().type());
         }
     }
 
@@ -353,10 +354,11 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
             case GUILD_VOICE:
             case GUILD_CATEGORY:
             case GUILD_NEWS:
-            case GUILD_STORE: return deleteChannel(dispatch);
+            case GUILD_STORE:
+            case GUILD_STAGE_VOICE: return deleteChannel(dispatch);
             case DM:
             case GROUP_DM: return Mono.empty();
-            default: throw new AssertionError();
+            default: throw new IllegalArgumentException("Unhandled channel type " + dispatch.channel().type());
         }
     }
 
@@ -385,10 +387,11 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
             case GUILD_VOICE:
             case GUILD_CATEGORY:
             case GUILD_NEWS:
-            case GUILD_STORE: return updateChannel(dispatch);
+            case GUILD_STORE:
+            case GUILD_STAGE_VOICE: return updateChannel(dispatch);
             case DM:
             case GROUP_DM: return Mono.empty();
-            default: throw new AssertionError();
+            default: throw new IllegalArgumentException("Unhandled channel type " + dispatch.channel().type());
         }
     }
 
@@ -400,7 +403,8 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
         GROUP_DM(3),
         GUILD_CATEGORY(4),
         GUILD_NEWS(5),
-        GUILD_STORE(6);
+        GUILD_STORE(6),
+        GUILD_STAGE_VOICE(13);
 
         private final int value;
 
@@ -421,6 +425,7 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
                 case 4: return GUILD_CATEGORY;
                 case 5: return GUILD_NEWS;
                 case 6: return GUILD_STORE;
+                case 13: return GUILD_STAGE_VOICE;
                 default: return UNKNOWN;
             }
         }
@@ -749,9 +754,12 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
                 .flatMap(oldMember -> {
                     MemberData newMember = MemberData.builder()
                             .from(oldMember)
+                            .roles(dispatch.roles().stream().map(Id::of).collect(Collectors.toList()))
+                            .user(dispatch.user())
                             .nick(dispatch.nick())
-                            .roles(dispatch.roles())
+                            .joinedAt(dispatch.joinedAt())
                             .premiumSince(dispatch.premiumSince())
+                            .pending(dispatch.pending())
                             .build();
 
                     return stateHolder.getMemberStore().save(key, newMember).thenReturn(oldMember);
@@ -767,7 +775,7 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
                 .find(guildId)
                 .map(guild -> GuildData.builder()
                         .from(guild)
-                        .addRoles(role.id())
+                        .addRole(role.id())
                         .build())
                 .flatMap(guild -> stateHolder.getGuildStore().save(guildId, guild))
                 .doOnSubscribe(s -> log.trace("GuildRoleCreate doOnSubscribe {}", guildId))
@@ -1093,13 +1101,13 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
                 .clientStatus(dispatch.clientStatus())
                 .build();
 
+        Mono<Void> saveNew = stateHolder.getPresenceStore().save(key, presenceData);
+
         Mono<Optional<PresenceData>> savePresence = stateHolder.getPresenceStore()
                 .find(key)
-                .flatMap(oldPresenceData -> stateHolder.getPresenceStore()
-                        .save(key, presenceData)
-                        .thenReturn(oldPresenceData))
+                .flatMap(saveNew::thenReturn)
                 .map(Optional::of)
-                .defaultIfEmpty(Optional.empty());
+                .switchIfEmpty(saveNew.thenReturn(Optional.empty()));
 
         Mono<Optional<UserData>> saveUser = stateHolder.getUserStore()
                 .find(userId)
@@ -1110,7 +1118,8 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
                                     .orElse(oldUserData.username()))
                             .discriminator(userData.discriminator().toOptional()
                                     .orElse(oldUserData.discriminator()))
-                            .avatar(or(Possible.flatOpt(userData.avatar()), oldUserData::avatar))
+                            .avatar(userData.avatar().isAbsent() ? oldUserData.avatar() :
+                                    Possible.flatOpt(userData.avatar()))
                             .build();
 
                     return stateHolder.getUserStore().save(userId, newUserData).thenReturn(oldUserData);
@@ -1120,18 +1129,6 @@ public class LegacyStoreLayout implements StoreLayout, DataAccessor, GatewayData
 
         return Mono.zip(savePresence, saveUser,
                 (p, u) -> PresenceAndUserData.of(p.orElse(null), u.orElse(null)));
-    }
-
-    // JDK 9
-    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-    private <T> Optional<T> or(Optional<T> first, Supplier<Optional<T>> supplier) {
-        Objects.requireNonNull(supplier);
-        if (first.isPresent()) {
-            return first;
-        } else {
-            Optional<T> r = supplier.get();
-            return Objects.requireNonNull(r);
-        }
     }
 
     @Override

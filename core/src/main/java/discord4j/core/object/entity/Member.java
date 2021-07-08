@@ -61,7 +61,7 @@ public final class Member extends User {
     private final long guildId;
 
     /**
-     * Constructs a {@code Member} with an associated ServiceMediator and Discord data.
+     * Constructs a {@code Member} with an associated {@link GatewayDiscordClient} and Discord data.
      *
      * @param gateway The {@link GatewayDiscordClient} associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
@@ -78,6 +78,15 @@ public final class Member extends User {
         return Mono.just(this)
                 .filter(member -> member.getGuildId().equals(guildId))
                 .switchIfEmpty(super.asMember(guildId));
+    }
+
+    /**
+     * Gets the data of the member.
+     *
+     * @return The data of the member.
+     */
+    public MemberData getMemberData() {
+        return data;
     }
 
     /**
@@ -152,12 +161,12 @@ public final class Member extends User {
     }
 
     /**
-     * Gets when the user joined the guild.
+     * Gets when the user joined the guild, if present. Can be absent if it's a lurking stage channel member.
      *
-     * @return When the user joined the guild.
+     * @return When the user joined the guild, if present.
      */
-    public Instant getJoinTime() {
-        return DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(data.joinedAt(), Instant::from);
+    public Optional<Instant> getJoinTime() {
+        return data.joinedAt().map(it -> DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(it, Instant::from));
     }
 
     /**

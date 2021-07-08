@@ -26,6 +26,8 @@ import discord4j.discordjson.json.VoiceStateData;
 import discord4j.common.util.Snowflake;
 import reactor.core.publisher.Mono;
 
+import java.time.Instant;
+import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -43,7 +45,7 @@ public final class VoiceState implements DiscordObject {
     private final VoiceStateData data;
 
     /**
-     * Constructs a {@code VoiceState} with an associated ServiceMediator and Discord data.
+     * Constructs a {@code VoiceState} with an associated {@link GatewayDiscordClient} and Discord data.
      *
      * @param gateway The {@link GatewayDiscordClient} associated to this object, must be non-null.
      * @param data The raw data as represented by Discord, must be non-null.
@@ -56,6 +58,15 @@ public final class VoiceState implements DiscordObject {
     @Override
     public GatewayDiscordClient getClient() {
         return gateway;
+    }
+
+    /**
+     * Gets the data of the voice state.
+     *
+     * @return The data of the voice state.
+     */
+    public VoiceStateData getData() {
+        return data;
     }
 
     /**
@@ -244,6 +255,16 @@ public final class VoiceState implements DiscordObject {
      */
     public boolean isSuppressed() {
         return data.suppress();
+    }
+
+    /**
+     * Gets the time at which the user requested to speak, if present.
+     *
+     * @return The time at which the user requested to speak, if present.
+     */
+    public Optional<Instant> getRequestedToSpeakAt() {
+        return data.requestToSpeakTimestamp()
+                .map(timestamp -> DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(timestamp, Instant::from));
     }
 
     @Override
